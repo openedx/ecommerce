@@ -2,7 +2,6 @@ import ddt
 import httpretty
 import mock
 from oscar.core.loading import get_model
-
 from requests import Timeout
 from slumber.exceptions import HttpNotFoundError, SlumberBaseException
 

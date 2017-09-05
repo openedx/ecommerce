@@ -17,8 +17,12 @@ from oscar.test import factories
 
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.extensions.payment.exceptions import (
-    DuplicateReferenceNumber, InvalidCybersourceDecision, InvalidSignatureError,
-    PartialAuthorizationError, PCIViolation, ProcessorMisconfiguredError
+    DuplicateReferenceNumber,
+    InvalidCybersourceDecision,
+    InvalidSignatureError,
+    PartialAuthorizationError,
+    PCIViolation,
+    ProcessorMisconfiguredError
 )
 from ecommerce.extensions.payment.models import PaymentProcessorResponse
 from ecommerce.extensions.payment.processors.cybersource import Cybersource

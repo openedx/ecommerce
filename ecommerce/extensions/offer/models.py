@@ -7,7 +7,10 @@ from django.core.cache import cache
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from oscar.apps.offer.abstract_models import (
-    AbstractBenefit, AbstractCondition, AbstractConditionalOffer, AbstractRange
+    AbstractBenefit,
+    AbstractCondition,
+    AbstractConditionalOffer,
+    AbstractRange
 )
 from requests.exceptions import ConnectionError, Timeout
 from slumber.exceptions import SlumberBaseException

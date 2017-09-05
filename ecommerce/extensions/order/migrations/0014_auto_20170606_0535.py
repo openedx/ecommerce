@@ -3,6 +3,7 @@
 from __future__ import unicode_literals
 
 from django.db import migrations
+
 from ecommerce.extensions.order.constants import ORDER_LIST_VIEW_SWITCH
 
 

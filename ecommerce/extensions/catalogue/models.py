@@ -6,7 +6,9 @@ from oscar.apps.catalogue.abstract_models import AbstractProduct, AbstractProduc
 from simple_history.models import HistoricalRecords
 
 from ecommerce.core.constants import (
-    COUPON_PRODUCT_CLASS_NAME, ENROLLMENT_CODE_PRODUCT_CLASS_NAME, SEAT_PRODUCT_CLASS_NAME
+    COUPON_PRODUCT_CLASS_NAME,
+    ENROLLMENT_CODE_PRODUCT_CLASS_NAME,
+    SEAT_PRODUCT_CLASS_NAME
 )
 from ecommerce.core.utils import log_message_and_raise_validation_error
 

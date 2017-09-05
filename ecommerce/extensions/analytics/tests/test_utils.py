@@ -7,7 +7,10 @@ from oscar.test import factories
 
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.extensions.analytics.utils import (
-    parse_tracking_context, prepare_analytics_data, track_segment_event, translate_basket_line_for_segment
+    parse_tracking_context,
+    prepare_analytics_data,
+    track_segment_event,
+    translate_basket_line_for_segment
 )
 from ecommerce.extensions.basket.tests.mixins import BasketMixin
 from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin

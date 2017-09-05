@@ -7,8 +7,13 @@ from mock import patch
 
 from ecommerce.tests.testcases import TestCase
 from ecommerce.theming.helpers import (
-    Theme, get_all_theme_template_dirs, get_current_site_theme, get_current_theme, get_theme_base_dir,
-    get_theme_base_dirs, get_themes
+    Theme,
+    get_all_theme_template_dirs,
+    get_current_site_theme,
+    get_current_theme,
+    get_theme_base_dir,
+    get_theme_base_dirs,
+    get_themes
 )
 from ecommerce.theming.test_utils import with_comprehensive_theme
 

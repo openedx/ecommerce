@@ -10,7 +10,10 @@ from ecommerce.core.tests import toggle_switch
 from ecommerce.coupons.tests.mixins import DiscoveryMockMixin
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.courses.utils import (
-    get_certificate_type_display_value, get_course_catalogs, get_course_info_from_catalog, mode_for_seat
+    get_certificate_type_display_value,
+    get_course_catalogs,
+    get_course_info_from_catalog,
+    mode_for_seat
 )
 from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
 from ecommerce.tests.testcases import TestCase

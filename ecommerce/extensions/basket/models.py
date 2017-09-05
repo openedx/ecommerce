@@ -5,7 +5,6 @@ from oscar.core.loading import get_class
 
 from ecommerce.extensions.analytics.utils import track_segment_event, translate_basket_line_for_segment
 
-
 OrderNumberGenerator = get_class('order.utils', 'OrderNumberGenerator')
 Selector = get_class('partner.strategy', 'Selector')
 

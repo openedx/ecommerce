@@ -12,7 +12,10 @@ from oscar.core.loading import get_class, get_model
 from simple_history.models import HistoricalRecords
 
 from ecommerce.core.constants import (
-    ENROLLMENT_CODE_PRODUCT_CLASS_NAME, ENROLLMENT_CODE_SEAT_TYPES, ENROLLMENT_CODE_SWITCH, SEAT_PRODUCT_CLASS_NAME
+    ENROLLMENT_CODE_PRODUCT_CLASS_NAME,
+    ENROLLMENT_CODE_SEAT_TYPES,
+    ENROLLMENT_CODE_SWITCH,
+    SEAT_PRODUCT_CLASS_NAME
 )
 from ecommerce.courses.publishers import LMSPublisher
 from ecommerce.extensions.catalogue.utils import generate_sku

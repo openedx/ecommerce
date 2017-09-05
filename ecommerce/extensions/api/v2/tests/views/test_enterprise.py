@@ -2,7 +2,6 @@ from __future__ import unicode_literals
 
 import httpretty
 import mock
-
 from django.core.urlresolvers import reverse
 
 from ecommerce.enterprise.tests.mixins import EnterpriseServiceMockMixin

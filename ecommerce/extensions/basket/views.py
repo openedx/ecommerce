@@ -23,7 +23,9 @@ from ecommerce.courses.utils import get_certificate_type_display_value, get_cour
 from ecommerce.enterprise.entitlements import get_enterprise_code_redemption_redirect
 from ecommerce.enterprise.utils import CONSENT_FAILED_PARAM, get_enterprise_customer_from_voucher
 from ecommerce.extensions.analytics.utils import (
-    prepare_analytics_data, track_segment_event, translate_basket_line_for_segment
+    prepare_analytics_data,
+    track_segment_event,
+    translate_basket_line_for_segment
 )
 from ecommerce.extensions.basket.utils import add_utm_params_to_url, get_basket_switch_data, prepare_basket
 from ecommerce.extensions.offer.utils import format_benefit_value, render_email_confirmation_if_required
