@@ -127,7 +127,7 @@ class ProgramCourseRunSeatsConditionTests(ProgramTestMixin, TestCase):
             self.assertTrue(self.condition.is_satisfied(offer, basket))
 
     @ddt.data(HttpNotFoundError, SlumberBaseException, Timeout)
-    def test_is_satisfied_with_exception(self, value):
+    def test_is_satisfied_with_exception_for_programs(self, value):
         """ The method should return False if there is an exception when trying to get program details. """
         offer = factories.ProgramOfferFactory(condition=self.condition)
         basket = factories.BasketFactory(site=self.site, owner=factories.UserFactory())
@@ -136,6 +136,26 @@ class ProgramCourseRunSeatsConditionTests(ProgramTestMixin, TestCase):
         with mock.patch('ecommerce.programs.conditions.get_program',
                         side_effect=value):
             self.assertFalse(self.condition.is_satisfied(offer, basket))
+
+    @httpretty.activate
+    def test_is_satisfied_with_exception_for_enrollments(self):
+        """ The method should return True despite having an error at the enrollment check, given 1 course run seat
+        corresponding to each course in the program. """
+        offer = factories.ProgramOfferFactory(condition=self.condition)
+        basket = factories.BasketFactory(site=self.site, owner=factories.UserFactory())
+        program = self.mock_program_detail_endpoint(
+            self.condition.program_uuid,
+            self.site_configuration.discovery_api_url
+        )
+
+        for course in program['courses']:
+            course_run = Course.objects.get(id=course['course_runs'][0]['key'])
+            for seat in course_run.seat_products:
+                if seat.attr.id_verification_required:
+                    basket.add_product(seat)
+
+        self.mock_enrollment_api(basket.owner.username, response_code=400)
+        self.assertTrue(self.condition.is_satisfied(offer, basket))
 
     def test_is_satisfied_free_basket(self):
         """ Ensure the basket returns False if the basket total is zero. """

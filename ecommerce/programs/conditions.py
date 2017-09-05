@@ -3,11 +3,11 @@ from __future__ import unicode_literals
 import logging
 import operator
 
-import requests
 from django.conf import settings
 from django.core.cache import cache
 from oscar.apps.offer import utils as oscar_utils
 from oscar.core.loading import get_model
+from requests.exceptions import ConnectionError, Timeout
 from slumber.exceptions import HttpNotFoundError, SlumberBaseException
 
 from ecommerce.core.utils import get_cache_key
@@ -62,7 +62,7 @@ class ProgramCourseRunSeatsCondition(Condition):
         basket_skus = set([line.stockrecord.partner_sku for line in basket.all_lines()])
         try:
             program = get_program(self.program_uuid, basket.site.siteconfiguration)
-        except (HttpNotFoundError, SlumberBaseException, requests.Timeout):
+        except (HttpNotFoundError, SlumberBaseException, Timeout):
             return False
 
         if program:
@@ -70,6 +70,7 @@ class ProgramCourseRunSeatsCondition(Condition):
         else:
             return False
 
+        enrollments = []
         if basket.site.siteconfiguration.enable_partial_program:
             api_resource = 'enrollments'
             cache_key = get_cache_key(
@@ -77,14 +78,16 @@ class ProgramCourseRunSeatsCondition(Condition):
                 resource=api_resource,
                 username=basket.owner.username,
             )
-            enrollments = cache.get(cache_key)
+            enrollments = cache.get(cache_key, [])
             if not enrollments:
                 api = basket.site.siteconfiguration.enrollment_api_client
                 user = basket.owner.username
-                enrollments = api.enrollment.get(user=user)
-                cache.set(cache_key, enrollments, settings.ENROLLMENT_API_CACHE_TIMEOUT)
-        else:
-            enrollments = []
+                try:
+                    enrollments = api.enrollment.get(user=user)
+                except (ConnectionError, SlumberBaseException, Timeout) as exc:
+                    logger.error('Failed to retrieve enrollments: %s', str(exc))
+                else:
+                    cache.set(cache_key, enrollments, settings.ENROLLMENT_API_CACHE_TIMEOUT)
 
         for course in program['courses']:
             # If the user is already enrolled in a course, we do not need to check their basket for it

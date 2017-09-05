@@ -63,7 +63,7 @@ class ProgramTestMixin(DiscoveryTestMixin):
         )
         return data
 
-    def mock_enrollment_api(self, username, enrollments=[]):  # pylint: disable=dangerous-default-value
+    def mock_enrollment_api(self, username, enrollments=None, response_code=200):
         """ Mocks enrollment retrieval from LMS
         Returns:
             list: Mocked enrollment data
@@ -72,7 +72,8 @@ class ProgramTestMixin(DiscoveryTestMixin):
         httpretty.register_uri(
             method=httpretty.GET,
             uri='{}?user={}'.format(get_lms_enrollment_api_url(), username),
-            body=json.dumps(enrollments),
+            body=json.dumps([] if enrollments is None else enrollments),
+            status=response_code,
             content_type='application/json'
         )
         return enrollments
