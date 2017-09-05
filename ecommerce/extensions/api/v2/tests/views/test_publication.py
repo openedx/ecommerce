@@ -10,7 +10,10 @@ from freezegun import freeze_time
 from oscar.core.loading import get_model
 
 from ecommerce.core.constants import (
-    ENROLLMENT_CODE_PRODUCT_CLASS_NAME, ENROLLMENT_CODE_SWITCH, ISO_8601_FORMAT, SEAT_PRODUCT_CLASS_NAME
+    ENROLLMENT_CODE_PRODUCT_CLASS_NAME,
+    ENROLLMENT_CODE_SWITCH,
+    ISO_8601_FORMAT,
+    SEAT_PRODUCT_CLASS_NAME
 )
 from ecommerce.core.tests import toggle_switch
 from ecommerce.courses.models import Course

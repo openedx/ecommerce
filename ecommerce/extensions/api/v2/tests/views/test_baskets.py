@@ -24,9 +24,12 @@ from ecommerce.extensions.api.v2.tests.views import JSON_CONTENT_TYPE, OrderDeta
 from ecommerce.extensions.api.v2.views.baskets import BasketCreateView
 from ecommerce.extensions.payment import exceptions as payment_exceptions
 from ecommerce.extensions.payment.processors.cybersource import Cybersource
-from ecommerce.extensions.test.factories import (PercentageDiscountBenefitWithoutRangeFactory,
-                                                 ProgramCourseRunSeatsConditionFactory,
-                                                 ProgramOfferFactory, prepare_voucher)
+from ecommerce.extensions.test.factories import (
+    PercentageDiscountBenefitWithoutRangeFactory,
+    ProgramCourseRunSeatsConditionFactory,
+    ProgramOfferFactory,
+    prepare_voucher
+)
 from ecommerce.programs.tests.mixins import ProgramTestMixin
 from ecommerce.tests.factories import ProductFactory
 from ecommerce.tests.mixins import BasketCreationMixin, ThrottlingMixin

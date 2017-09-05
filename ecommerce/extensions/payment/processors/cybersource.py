@@ -21,8 +21,12 @@ from ecommerce.core.url_utils import get_ecommerce_url
 from ecommerce.extensions.checkout.utils import get_receipt_page_url
 from ecommerce.extensions.payment.constants import APPLE_PAY_CYBERSOURCE_CARD_TYPE_MAP, CYBERSOURCE_CARD_TYPE_MAP
 from ecommerce.extensions.payment.exceptions import (
-    DuplicateReferenceNumber, InvalidCybersourceDecision, InvalidSignatureError, PartialAuthorizationError,
-    PCIViolation, ProcessorMisconfiguredError
+    DuplicateReferenceNumber,
+    InvalidCybersourceDecision,
+    InvalidSignatureError,
+    PartialAuthorizationError,
+    PCIViolation,
+    ProcessorMisconfiguredError
 )
 from ecommerce.extensions.payment.helpers import sign
 from ecommerce.extensions.payment.processors import BaseClientSidePaymentProcessor, HandledProcessorResponse

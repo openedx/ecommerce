@@ -22,12 +22,14 @@ from ecommerce.extensions.fulfillment.modules import CouponFulfillmentModule
 from ecommerce.extensions.fulfillment.status import LINE
 from ecommerce.extensions.test.factories import create_order, prepare_voucher
 from ecommerce.extensions.voucher.utils import (
-    create_vouchers, generate_coupon_report, get_voucher_and_products_from_code,
-    get_voucher_discount_info, update_voucher_offer
+    create_vouchers,
+    generate_coupon_report,
+    get_voucher_and_products_from_code,
+    get_voucher_discount_info,
+    update_voucher_offer
 )
 from ecommerce.tests.mixins import LmsApiMockMixin
 from ecommerce.tests.testcases import TestCase
-
 
 Basket = get_model('basket', 'Basket')
 Benefit = get_model('offer', 'Benefit')

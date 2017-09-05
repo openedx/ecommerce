@@ -17,7 +17,8 @@ from ecommerce.coupons.tests.mixins import CouponMixin, DiscoveryMockMixin
 from ecommerce.coupons.views import voucher_is_valid
 from ecommerce.enterprise.tests.mixins import EnterpriseServiceMockMixin
 from ecommerce.enterprise.utils import (
-    get_enterprise_course_consent_url, get_enterprise_customer_data_sharing_consent_token
+    get_enterprise_course_consent_url,
+    get_enterprise_customer_data_sharing_consent_token
 )
 from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin

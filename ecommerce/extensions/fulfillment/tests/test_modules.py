@@ -13,16 +13,23 @@ from oscar.test.newfactories import BasketFactory, UserFactory
 from requests.exceptions import ConnectionError, Timeout
 from testfixtures import LogCapture
 
-from ecommerce.core.constants import (COUPON_PRODUCT_CLASS_NAME, ENROLLMENT_CODE_PRODUCT_CLASS_NAME,
-                                      ENROLLMENT_CODE_SWITCH, SEAT_PRODUCT_CLASS_NAME)
+from ecommerce.core.constants import (
+    COUPON_PRODUCT_CLASS_NAME,
+    ENROLLMENT_CODE_PRODUCT_CLASS_NAME,
+    ENROLLMENT_CODE_SWITCH,
+    SEAT_PRODUCT_CLASS_NAME
+)
 from ecommerce.core.tests import toggle_switch
 from ecommerce.core.url_utils import get_lms_enrollment_api_url
 from ecommerce.coupons.tests.mixins import CouponMixin
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.courses.utils import mode_for_seat
 from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
-from ecommerce.extensions.fulfillment.modules import (CouponFulfillmentModule, EnrollmentCodeFulfillmentModule,
-                                                      EnrollmentFulfillmentModule)
+from ecommerce.extensions.fulfillment.modules import (
+    CouponFulfillmentModule,
+    EnrollmentCodeFulfillmentModule,
+    EnrollmentFulfillmentModule
+)
 from ecommerce.extensions.fulfillment.status import LINE
 from ecommerce.extensions.fulfillment.tests.mixins import FulfillmentTestMixin
 from ecommerce.extensions.test.factories import create_order

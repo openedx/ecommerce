@@ -11,7 +11,9 @@ from ecommerce.core.tests import toggle_switch
 from ecommerce.coupons.tests.mixins import CouponMixin, DiscoveryMockMixin
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.enterprise.entitlements import (
-    get_course_entitlements_for_learner, get_course_vouchers_for_learner, get_entitlement_voucher,
+    get_course_entitlements_for_learner,
+    get_course_vouchers_for_learner,
+    get_entitlement_voucher,
     is_course_in_enterprise_catalog
 )
 from ecommerce.enterprise.tests.mixins import EnterpriseServiceMockMixin

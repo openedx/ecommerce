@@ -9,7 +9,10 @@ from path import Path
 
 from ecommerce.theming.helpers import get_themes
 from ecommerce.theming.management.commands.update_assets import (
-    SYSTEM_SASS_PATHS, Command, compile_sass, get_sass_directories
+    SYSTEM_SASS_PATHS,
+    Command,
+    compile_sass,
+    get_sass_directories
 )
 
 
