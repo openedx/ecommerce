@@ -117,6 +117,7 @@ class EdxOrderPlacementMixin(OrderPlacementMixin):
         the context of an exception handler.
         """
         with transaction.atomic():
+
             order = self.place_order(
                 order_number=order_number,
                 user=user,
@@ -126,6 +127,7 @@ class EdxOrderPlacementMixin(OrderPlacementMixin):
                 shipping_charge=shipping_charge,
                 order_total=order_total,
                 billing_address=billing_address,
+                request=request,
                 **kwargs
             )
 

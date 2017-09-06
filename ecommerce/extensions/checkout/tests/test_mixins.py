@@ -5,7 +5,7 @@ import mock
 from django.core import mail
 from django.test import RequestFactory
 from oscar.core.loading import get_class, get_model
-from oscar.test.newfactories import ProductFactory, UserFactory
+from oscar.test.factories import ProductFactory, UserFactory
 from testfixtures import LogCapture
 from waffle.models import Sample
 

@@ -451,12 +451,7 @@ class VoucherAddView(BaseVoucherAddView):  # pylint: disable=function-redefined
             if discount['voucher'] and discount['voucher'] == voucher:
                 found_discount = True
                 break
-        if not found_discount:
-            messages.warning(
-                self.request,
-                _('Your basket does not qualify for a coupon code discount.'))
-            self.request.basket.vouchers.remove(voucher)
-        else:
+        if found_discount:
             messages.info(
                 self.request,
                 _("Coupon code '{code}' added to basket.").format(code=code)

@@ -211,6 +211,7 @@ TEMPLATES = [
 
 # MIDDLEWARE CONFIGURATION
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#middleware-classes
+# END MIDDLEWARE CONFIGURATION
 MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.locale.LocaleMiddleware',
@@ -232,7 +233,6 @@ MIDDLEWARE_CLASSES = (
     'ecommerce.theming.middleware.CurrentSiteThemeMiddleware',
     'ecommerce.theming.middleware.ThemePreviewMiddleware',
 )
-# END MIDDLEWARE CONFIGURATION
 
 
 # URL CONFIGURATION
@@ -268,6 +268,7 @@ DJANGO_APPS = [
     'django.contrib.sessions',
     'django.contrib.sites',
     'django.contrib.staticfiles',
+    'django.contrib.redirects',
     'widget_tweaks',
     'compressor',
     'rest_framework',

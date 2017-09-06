@@ -5,7 +5,7 @@ import mock
 from django.core import mail
 from oscar.core.loading import get_class, get_model
 from oscar.test import factories
-from oscar.test.newfactories import BasketFactory
+from oscar.test.factories import BasketFactory
 from testfixtures import LogCapture
 
 from ecommerce.core.constants import ENROLLMENT_CODE_PRODUCT_CLASS_NAME, ENROLLMENT_CODE_SWITCH
@@ -20,7 +20,7 @@ from ecommerce.programs.tests.mixins import ProgramTestMixin
 from ecommerce.tests.factories import ProductFactory
 from ecommerce.tests.testcases import TestCase
 
-Applicator = get_class('offer.utils', 'Applicator')
+Applicator = get_class('offer.applicator', 'Applicator')
 BasketAttribute = get_model('basket', 'BasketAttribute')
 BasketAttributeType = get_model('basket', 'BasketAttributeType')
 Benefit = get_model('offer', 'Benefit')

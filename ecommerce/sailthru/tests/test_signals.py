@@ -3,7 +3,7 @@ import logging
 
 from mock import patch
 from oscar.core.loading import get_model
-from oscar.test.newfactories import BasketFactory, UserFactory
+from oscar.test.factories import BasketFactory, UserFactory
 
 from ecommerce.core.tests import toggle_switch
 from ecommerce.coupons.tests.mixins import CouponMixin

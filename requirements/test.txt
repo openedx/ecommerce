@@ -5,6 +5,7 @@ coverage==4.3.4
 ddt==1.1.1
 diff-cover==0.9.6
 django-nose==1.4.4
+django-webtest==1.9.2
 factory-boy==2.8.1
 freezegun==0.3.7
 httpretty==0.8.14

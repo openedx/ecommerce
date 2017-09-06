@@ -9,7 +9,6 @@ import mock
 from django.test import override_settings
 from oscar.core.loading import get_class, get_model
 from oscar.test import factories
-from oscar.test.newfactories import BasketFactory, UserFactory
 from requests.exceptions import ConnectionError, Timeout
 from testfixtures import LogCapture
 
@@ -41,7 +40,7 @@ from ecommerce.tests.testcases import TestCase
 JSON = 'application/json'
 LOGGER_NAME = 'ecommerce.extensions.analytics.utils'
 
-Applicator = get_class('offer.utils', 'Applicator')
+Applicator = get_class('offer.applicator', 'Applicator')
 Benefit = get_model('offer', 'Benefit')
 Catalog = get_model('catalogue', 'Catalog')
 Product = get_model('catalogue', 'Product')
@@ -63,12 +62,12 @@ class EnrollmentFulfillmentModuleTests(ProgramTestMixin, DiscoveryTestMixin, Ful
     def setUp(self):
         super(EnrollmentFulfillmentModuleTests, self).setUp()
 
-        self.user = UserFactory()
+        self.user = factories.UserFactory()
         self.course = CourseFactory(id=self.course_id, name='Demo Course', site=self.site)
 
         self.seat = self.course.create_or_update_seat(self.certificate_type, False, 100, self.partner, self.provider)
 
-        basket = BasketFactory(owner=self.user, site=self.site)
+        basket = factories.BasketFactory(owner=self.user, site=self.site)
         basket.add_product(self.seat, 1)
         self.order = create_order(number=1, basket=basket, user=self.user)
 
@@ -86,7 +85,7 @@ class EnrollmentFulfillmentModuleTests(ProgramTestMixin, DiscoveryTestMixin, Ful
         self.provider = provider
         self.seat = self.course.create_or_update_seat(self.certificate_type, False, 100, self.partner, self.provider)
 
-        basket = BasketFactory(owner=self.user, site=self.site)
+        basket = factories.BasketFactory(owner=self.user, site=self.site)
         basket.add_product(self.seat, 1)
         self.order = create_order(number=2, basket=basket, user=self.user)
 
@@ -403,7 +402,7 @@ class EnrollmentFulfillmentModuleTests(ProgramTestMixin, DiscoveryTestMixin, Ful
         }
 
         # Create a dummy user and attach the tracking_context
-        user = UserFactory()
+        user = factories.UserFactory()
         user.tracking_context = {'lms_user_id': '1', 'lms_client_id': '123.123', 'lms_ip': '11.22.33.44'}
 
         # Now call the enrollment api to send POST request to LMS and verify
@@ -451,8 +450,8 @@ class CouponFulfillmentModuleTest(CouponMixin, FulfillmentTestMixin, TestCase):
     def setUp(self):
         super(CouponFulfillmentModuleTest, self).setUp()
         coupon = self.create_coupon()
-        user = UserFactory()
-        basket = BasketFactory(owner=user, site=self.site)
+        user = factories.UserFactory()
+        basket = factories.BasketFactory(owner=user, site=self.site)
         basket.add_product(coupon, 1)
         self.order = create_order(number=1, basket=basket, user=user)
 
@@ -490,8 +489,8 @@ class EnrollmentCodeFulfillmentModuleTests(DiscoveryTestMixin, TestCase):
         course = CourseFactory()
         course.create_or_update_seat('verified', True, 50, self.partner, create_enrollment_code=True)
         enrollment_code = Product.objects.get(product_class__name=ENROLLMENT_CODE_PRODUCT_CLASS_NAME)
-        user = UserFactory()
-        basket = BasketFactory(owner=user, site=self.site)
+        user = factories.UserFactory()
+        basket = factories.BasketFactory(owner=user, site=self.site)
         basket.add_product(enrollment_code, self.QUANTITY)
         self.order = create_order(number=1, basket=basket, user=user)
 
