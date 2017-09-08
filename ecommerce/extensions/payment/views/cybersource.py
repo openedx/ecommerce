@@ -43,6 +43,7 @@ NoShippingRequired = get_class('shipping.methods', 'NoShippingRequired')
 Order = get_model('order', 'Order')
 OrderNumberGenerator = get_class('order.utils', 'OrderNumberGenerator')
 OrderTotalCalculator = get_class('checkout.calculators', 'OrderTotalCalculator')
+PaymentProcessorResponse = get_model('payment', 'PaymentProcessorResponse')
 
 
 class CyberSourceProcessorMixin(object):
@@ -294,12 +295,21 @@ class CybersourceNotificationMixin(CyberSourceProcessorMixin, OrderCreationMixin
                 )
                 raise
             except DuplicateReferenceNumber:
-                logger.info(
-                    'Received CyberSource payment notification for basket [%d] which is associated '
-                    'with existing order [%s]. No payment was collected, and no new order will be created.',
-                    basket.id,
-                    order_number
-                )
+                if Order.objects.filter(number=order_number).exists() or PaymentProcessorResponse.objects.filter(
+                        basket=basket).exclude(transaction_id__isnull=True).exclude(transaction_id='').exists():
+                    logger.info(
+                        'Received CyberSource payment notification for basket [%d] which is associated '
+                        'with existing order [%s] or had an existing valid payment notification. '
+                        'No payment was collected, and no new order will be created.',
+                        basket.id,
+                        order_number
+                    )
+                else:
+                    logger.info(
+                        'Received duplicate CyberSource payment notification for basket [%d] which is not associated '
+                        'with any existing order (Missing Order Issue)',
+                        basket.id,
+                    )
                 raise
             except PaymentError:
                 logger.exception(
