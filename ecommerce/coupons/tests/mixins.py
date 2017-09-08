@@ -396,6 +396,7 @@ class CouponMixin(object):
             title=title,
             voucher_type=voucher_type,
             program_uuid=program_uuid,
+            site=self.site
         )
 
         request = RequestFactory()

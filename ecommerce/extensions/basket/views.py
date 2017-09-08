@@ -417,6 +417,15 @@ class VoucherAddView(BaseVoucherAddView):  # pylint: disable=function-redefined
             messages.error(self.request, message)
             return
 
+        # Do not allow coupons for one site to be used on another site
+        request_site = self.request.site
+        voucher_site = voucher.offers.first().site
+        if request_site and voucher_site and request_site != voucher_site:
+            messages.error(
+                self.request,
+                _("Coupon code '{code}' is not valid for this basket.").format(code=code))
+            return
+
         # Do not allow single course run coupons used on bundles.
         if self.request.basket.num_lines > 1 and not voucher.offers.first().condition.program_uuid:
             messages.error(

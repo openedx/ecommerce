@@ -300,7 +300,7 @@ def generate_coupon_report(coupon_vouchers):
 
 def _get_or_create_offer(
         product_range, benefit_type, benefit_value, coupon_id=None,
-        max_uses=None, offer_number=None, email_domains=None, program_uuid=None
+        max_uses=None, offer_number=None, email_domains=None, program_uuid=None, site=None
 ):
     """
     Return an offer for a catalog with condition and benefit.
@@ -320,6 +320,7 @@ def _get_or_create_offer(
         email_domains (str): a comma-separated string of email domains allowed to apply
                             this offer
         program_uuid (str): the Program UUID
+        site (site): Site for which the Coupon is created. Defaults to None.
 
     Returns:
         Offer
@@ -371,7 +372,8 @@ def _get_or_create_offer(
         condition=offer_condition,
         benefit=offer_benefit,
         max_global_applications=max_uses,
-        email_domains=email_domains
+        email_domains=email_domains,
+        site=site
     )
 
     return offer
@@ -474,6 +476,7 @@ def create_vouchers(
         email_domains=None,
         course_catalog=None,
         program_uuid=None,
+        site=None,
 ):
     """
     Create vouchers.
@@ -498,6 +501,7 @@ def create_vouchers(
         voucher_type (str): Type of voucher.
         _range (Range): Product range. Defaults to None.
         program_uuid (str): Program UUID. Defaults to None.
+        site (site): Site for which the Coupon is created. Defaults to None.
 
     Returns:
         List[Voucher]
@@ -563,7 +567,8 @@ def create_vouchers(
             coupon_id=coupon.id,
             offer_number=num,
             email_domains=email_domains,
-            program_uuid=program_uuid
+            program_uuid=program_uuid,
+            site=site
         )
         offers.append(offer)
 
