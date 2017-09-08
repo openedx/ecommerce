@@ -113,6 +113,7 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
                         title=cleaned_voucher_data['title'],
                         voucher_type=cleaned_voucher_data['voucher_type'],
                         program_uuid=cleaned_voucher_data['program_uuid'],
+                        site=self.request.site
                     )
                 except (KeyError, IntegrityError) as error:
                     logger.exception('Coupon creation failed!')

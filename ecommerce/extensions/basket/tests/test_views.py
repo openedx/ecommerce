@@ -37,7 +37,7 @@ from ecommerce.extensions.payment.constants import CLIENT_SIDE_CHECKOUT_FLAG_NAM
 from ecommerce.extensions.payment.forms import PaymentForm
 from ecommerce.extensions.payment.tests.processors import DummyProcessor
 from ecommerce.extensions.test.factories import create_order, prepare_voucher
-from ecommerce.tests.factories import ProductFactory, StockRecordFactory
+from ecommerce.tests.factories import ProductFactory, SiteFactory, StockRecordFactory
 from ecommerce.tests.mixins import ApiMockMixin, LmsApiMockMixin
 from ecommerce.tests.testcases import TestCase
 
@@ -813,6 +813,23 @@ class VoucherAddViewTests(LmsApiMockMixin, TestCase):
         order = factories.OrderFactory()
         VoucherApplication.objects.create(voucher=voucher, user=self.user, order=order)
         self.assert_form_valid_message("Coupon code '{code}' has already been redeemed.".format(code=COUPON_CODE))
+
+    def test_voucher_valid_without_site(self):
+        """ Verify coupon works when the sites on the coupon and request are the same. """
+        self.mock_access_token_response()
+        self.mock_account_api(self.request, self.user.username, data={'is_active': True})
+        __, product = prepare_voucher(code=COUPON_CODE, site=self.request.site)
+        self.basket.add_product(product)
+        self.assert_form_valid_message("Coupon code '{code}' added to basket.".format(code=COUPON_CODE))
+
+    def test_voucher_not_valid_for_other_site(self):
+        """ Verify correct error message is returned when coupon is applied against on the wrong site. """
+        site2 = SiteFactory()
+        self.mock_access_token_response()
+        self.mock_account_api(self.request, self.user.username, data={'is_active': True})
+        voucher, product = prepare_voucher(code=COUPON_CODE, site=site2)
+        self.basket.add_product(product)
+        self.assert_form_valid_message("Coupon code '{code}' is not valid for this basket.".format(code=voucher.code))
 
     def test_voucher_not_valid_for_bundle(self):
         """ Verify correct error message is returned when voucher is used against a bundle. """

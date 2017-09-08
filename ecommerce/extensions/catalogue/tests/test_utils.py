@@ -134,6 +134,7 @@ class CouponCreationTests(CouponMixin, TestCase):
             title=title,
             voucher_type=Voucher.ONCE_PER_CUSTOMER,
             program_uuid=None,
+            site=self.site
         )
 
     def test_custom_code_integrity_error(self):
