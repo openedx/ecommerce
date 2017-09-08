@@ -630,6 +630,55 @@ class CybersourceNotificationTestsMixin(CybersourceMixin):
 
         self.assertRedirects(response, expected_redirect, fetch_redirect_response=False)
 
+    @mock.patch('ecommerce.extensions.payment.models.PaymentProcessorResponse.objects')
+    @mock.patch('ecommerce.extensions.order.models.Order.objects')
+    @ddt.data(True, False)
+    def test_handle_processor_response_duplicate_reference_number_logs(self, mock_value, mock_order, mock_response):
+        """
+        Verify that DuplicateReferenceNumber Exception is handled with proper logs.
+        """
+        mock_response.filter.return_value = mock_response
+        mock_response.exclude.return_value = mock_response
+        mock_response.exists.return_value = mock_value
+        mock_order.filter.return_value = mock_order
+        mock_order.exists.return_value = mock_value
+
+        logger_name = 'ecommerce.extensions.payment.views.cybersource'
+        notification = self.generate_notification(self.basket, decision='ERROR', reason_code='104')
+        notification.update({
+            'decision': 'ERROR',
+            'reason_code': '104',
+        })
+        notification['signature'] = self.generate_signature(self.processor.secret_key, notification)
+        if mock_value:
+            msg = (
+                'Received CyberSource payment notification for basket [{}] which is associated '
+                'with existing order [{}] or had an existing valid payment notification. '
+                'No payment was collected, and no new order will be created.'
+            ).format(self.basket.id, self.basket.order_number)
+        else:
+            msg = (
+                'Received duplicate CyberSource payment notification for basket [{}] which is not associated '
+                'with any existing order (Missing Order Issue)'
+            ).format(self.basket.id)
+
+        with LogCapture(logger_name) as cybersource_logger:
+            self.client.post(self.path, notification)
+            cybersource_logger.check(
+                (
+                    logger_name,
+                    'INFO',
+                    ('Received CyberSource payment notification for transaction [{}], associated with basket '
+                     '[{}].').format(notification.get('transaction_id'), self.basket.id)
+
+                ),
+                (
+                    logger_name,
+                    'INFO',
+                    msg,
+                )
+            )
+
 
 class PaypalMixin(object):
     """Mixin with helper methods for mocking PayPal API responses."""
