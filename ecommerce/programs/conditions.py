@@ -84,10 +84,9 @@ class ProgramCourseRunSeatsCondition(Condition):
                 user = basket.owner.username
                 try:
                     enrollments = api.enrollment.get(user=user)
+                    cache.set(cache_key, enrollments, settings.ENROLLMENT_API_CACHE_TIMEOUT)
                 except (ConnectionError, SlumberBaseException, Timeout) as exc:
                     logger.error('Failed to retrieve enrollments: %s', str(exc))
-                else:
-                    cache.set(cache_key, enrollments, settings.ENROLLMENT_API_CACHE_TIMEOUT)
 
         for course in program['courses']:
             # If the user is already enrolled in a course, we do not need to check their basket for it
