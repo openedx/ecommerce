@@ -324,6 +324,16 @@ class Range(AbstractRange):
 
 
 class Condition(AbstractCondition):
+    enterprise_customer_uuid = models.UUIDField(
+        null=True,
+        blank=True,
+        verbose_name=_('EnterpriseCustomer UUID')
+    )
+    enterprise_customer_catalog_uuid = models.UUIDField(
+        null=True,
+        blank=True,
+        verbose_name=_('EnterpriseCustomerCatalog UUID')
+    )
     program_uuid = models.UUIDField(null=True, blank=True, verbose_name=_('Program UUID'))
 
 

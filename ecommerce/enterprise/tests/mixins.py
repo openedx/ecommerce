@@ -174,9 +174,12 @@ class EnterpriseServiceMockMixin(object):
                     },
                     'data_sharing_consent': [
                         {
-                            'user': 1,
-                            'state': 'enabled' if consent_provided else 'disabled',
-                            'enabled': consent_provided
+                            'username': 'verified',
+                            'enterprise_customer_uuid': enterprise_customer_uuid,
+                            'exists': consent_provided,
+                            'course_id': 'course-v1:FooX+FooX+Demo_Course',
+                            'consent_provided': consent_provided,
+                            'consent_required': consent_enabled
                         }
                     ]
                 }

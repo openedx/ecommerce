@@ -1,10 +1,18 @@
 """
 Methods for fetching enterprise API data.
 """
+import logging
+from urllib import urlencode
+
 from django.conf import settings
 from django.core.cache import cache
+from requests.exceptions import ConnectionError, Timeout
+from slumber.exceptions import SlumberHttpBaseException
 
 from ecommerce.core.utils import get_cache_key
+
+
+logger = logging.getLogger(__name__)
 
 
 def fetch_enterprise_learner_entitlements(site, learner_id):
@@ -152,3 +160,44 @@ def fetch_enterprise_learner_data(site, user):
         cache.set(cache_key, response, settings.ENTERPRISE_API_CACHE_TIMEOUT)
 
     return response
+
+
+def catalog_contains_course_runs(site, course_run_ids, enterprise_customer_uuid, enterprise_customer_catalog_uuid=None):
+    """
+    Determine if course runs are associated with the EnterpriseCustomer.
+    """
+    query_params = {'course_run_ids': course_run_ids}
+    api_resource_name = 'enterprise_catalogs'
+    api_resource_id = enterprise_customer_uuid
+    if enterprise_customer_catalog_uuid:
+        api_resource_name = 'enterprise-customer'
+        api_resource_id = enterprise_customer_catalog_uuid
+
+    cache_key = get_cache_key(
+        site_domain=site.domain,
+        resource='{resource}-{resource_id}-contains_content'.format(
+            resource=api_resource_name,
+            resource_id=api_resource_id,
+        ),
+        query_params=urlencode(query_params, True)
+    )
+
+    contains_content = cache.get(cache_key)
+    if contains_content is None:
+        api = site.siteconfiguration.enterprise_api_client
+        endpoint = getattr(api, api_resource_name)(api_resource_id)
+        try:
+            contains_content = endpoint.contains_content.get(**query_params)['contains_content']
+            cache.set(cache_key, contains_content, settings.ENTERPRISE_API_CACHE_TIMEOUT)
+        except (ConnectionError, KeyError, SlumberHttpBaseException, Timeout):
+            logger.exception(
+                'Failed to check if course_runs [%s] exist in '
+                'EnterpriseCustomerCatalog [%s]'
+                'for EnterpriseCustomer [%s].',
+                course_run_ids=course_run_ids,
+                enterprise_customer_catalog_uuid=enterprise_customer_catalog_uuid,
+                enterprise_customer_uuid=enterprise_customer_uuid,
+            )
+            contains_content = False
+
+    return contains_content
