@@ -4,6 +4,7 @@ import logging
 
 import requests
 import six
+import waffle
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
@@ -207,10 +208,15 @@ class CybersourceNotificationMixin(CyberSourceProcessorMixin, OrderCreationMixin
         return super(CybersourceNotificationMixin, self).dispatch(request, *args, **kwargs)
 
     def _get_billing_address(self, cybersource_response):
+        field = 'req_bill_to_address_line1'
+        # Address line 1 is optional if flag is enabled
+        line1 = (cybersource_response.get(field, '')
+                 if waffle.switch_is_active('optional_location_fields')
+                 else cybersource_response[field])
         return BillingAddress(
             first_name=cybersource_response['req_bill_to_forename'],
             last_name=cybersource_response['req_bill_to_surname'],
-            line1=cybersource_response['req_bill_to_address_line1'],
+            line1=line1,
 
             # Address line 2 is optional
             line2=cybersource_response.get('req_bill_to_address_line2', ''),

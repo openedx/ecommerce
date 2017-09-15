@@ -75,15 +75,20 @@ define([
 
         function cardHolderInfoValidation(event) {
             var requiredFields = [
-                'input[name=first_name]',
-                'input[name=last_name]',
-                'input[name=address_line1]',
-                'input[name=city]',
-                'select[name=country]'
-            ];
-
-            if (['US', 'CA'].indexOf($('select[name=country]').val()) > -1) {
-                requiredFields.push('select[name=state]');
+                    'input[name=first_name]',
+                    'input[name=last_name]',
+                    'input[name=city]',
+                    'select[name=country]'
+                ],
+                experiments = window.experimentVariables || {};
+            // Only require address and state if we are not in the hide location fields variation of this experiment
+            // https://openedx.atlassian.net/browse/LEARNER-2355
+            if (!(experiments && experiments.hide_location_fields)) {
+                requiredFields.push('input[name=address_line1]');
+                if (['US', 'CA'].indexOf($('select[name=country]').val()) > -1) {
+                    requiredFields.push('select[name=state]');
+                    requiredFields.push('input[name=postal_code]');
+                }
             }
 
             _.each(requiredFields, function(field) {
@@ -348,14 +353,18 @@ define([
                             Saskatchewan: 'SK',
                             Yukon: 'YT'
                         }
-                    };
+                    },
+                    experiments = window.experimentVariables || {},
+                    selectorRequired = 'aria-required="true" required',
+                    stateSelector = '<select name="state" class="select form-control" id="id_state"';
 
                 if (country === 'US' || country === 'CA') {
                     $($inputDiv).empty();
-                    $($inputDiv).append(
-                        '<select name="state" class="select form-control" id="id_state"' +
-                        'aria-required="true" required></select>'
-                    );
+                    // Only require state if we are not in the hide location fields variation of this experiment
+                    // https://openedx.atlassian.net/browse/LEARNER-2355
+                    stateSelector += !(experiments && experiments.hide_location_fields) ? selectorRequired : '';
+                    stateSelector += '></select>';
+                    $($inputDiv).append(stateSelector);
                     $('#id_state').append($('<option>', {value: '', text: gettext('<Choose state/province>')}));
                     $('#div_id_state').find('label').text(gettext('State/Province (required)'));
 
