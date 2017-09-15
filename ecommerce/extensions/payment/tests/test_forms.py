@@ -2,6 +2,7 @@ from __future__ import unicode_literals
 
 import ddt
 import pycountry
+from waffle.models import Switch
 
 from ecommerce.extensions.payment.forms import PaymentForm
 from ecommerce.extensions.test.factories import create_basket
@@ -91,6 +92,37 @@ class PaymentFormTests(TestCase):
 
         invalid_postal_code = ''.join(['a' for __ in range(0, 11)])
         self.assert_form_not_valid(country='IN', postal_code=invalid_postal_code)
+
+    # Temporarily add this test for codecov for the feature flag added for this test
+    # https://openedx.atlassian.net/browse/LEARNER-2355
+    # This code will be removed after this test is done
+    def test_state_validation_with_optional_location_fields(self):
+        """ Verify the state field is limited to 2 characters when the country is set to the U.S. or Canada. """
+        switch, __ = Switch.objects.get_or_create(name='optional_location_fields')
+        switch.active = True
+        switch.save()
+        self.assert_form_valid(country='US', state='CA')
+        self.assert_form_not_valid(country='US', state='ZZ')
+        self.assert_form_valid(country='US', state=None)
+        self.assert_form_valid(country='US', state=None, address_line1=None)
+        switch.active = False
+        switch.save()
+        self.assert_form_not_valid(country='US', state=None)
+        self.assert_form_not_valid(country='US', state='CA', address_line1=None)
+
+    # Temporarily add this test for codecov for the feature flag added for this test
+    # https://openedx.atlassian.net/browse/LEARNER-2355
+    # This code will be removed after this test is done
+    def test_postal_code_validation_optional_location_fields(self):
+        """ Verify the postal code is limited to 9 characters when the country is set to the U.S. or Canada. """
+        switch, __ = Switch.objects.get_or_create(name='optional_location_fields')
+        switch.active = True
+        switch.save()
+        self.assert_form_valid(country='US', state='CA', postal_code='90210')
+        self.assert_form_valid(country='US', state='CA', postal_code='902102938')
+        self.assert_form_not_valid(country='US', state='CA', postal_code='1234567890')
+        switch.active = False
+        switch.save()
 
     def test_countries_sorting(self):
         """ Verify the country choices are sorted by country name. """

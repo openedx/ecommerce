@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 import logging
 
 import pycountry
+import waffle
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import HTML, Div, Layout
 from django import forms
@@ -93,7 +94,7 @@ class PaymentForm(forms.Form):
     basket = forms.ModelChoiceField(queryset=Basket.objects.all(), widget=forms.HiddenInput(), required=False)
     first_name = forms.CharField(max_length=60, label=_('First Name'))
     last_name = forms.CharField(max_length=60, label=_('Last Name'))
-    address_line1 = forms.CharField(max_length=60, label=_('Address'))
+    address_line1 = forms.CharField(max_length=60, label=_('Address'), required=False)
     address_line2 = forms.CharField(max_length=29, required=False, label=_('Suite/Apartment Number'))
     city = forms.CharField(max_length=32, label=_('City'))
     # max_length for state field is set to default 60, if it needs to be changed,
@@ -109,29 +110,44 @@ class PaymentForm(forms.Form):
         country = cleaned_data.get('country')
         if country in ('US', 'CA'):
             state = cleaned_data.get('state')
+            address_line1 = cleaned_data.get('address_line1')
+
+            # Add a flag for the below code that requires state while running this test
+            # https://openedx.atlassian.net/browse/LEARNER-2355
+            # State will still be required client side for users not in the hide location fields variation
 
             # Ensure that a valid 2-character state/province code is specified.
-            if not state:
-                raise ValidationError({'state': _('This field is required.')})
+            if not waffle.switch_is_active('optional_location_fields'):
+                if not state:
+                    raise ValidationError({'state': _('This field is required.')})
+                if not address_line1:
+                    raise ValidationError({'address_line1': _('This field is required.')})
 
-            code = '{country}-{state}'.format(country=country, state=state)
+            if state:
+                code = '{country}-{state}'.format(country=country, state=state)
 
-            try:
-                # TODO: Remove the if statement once https://bitbucket.org/flyingcircus/pycountry/issues/13394/
-                # is fixed.
-                if not pycountry.subdivisions.get(code=code):
-                    raise KeyError
-            except KeyError:
-                msg = _('{state} is not a valid state/province in {country}.').format(state=state, country=country)
-                logger.debug(msg)
-                raise ValidationError({'state': msg})
+                try:
+                    # TODO: Remove the if statement once https://bitbucket.org/flyingcircus/pycountry/issues/13394/
+                    # is fixed.
+                    if not pycountry.subdivisions.get(code=code):
+                        raise KeyError
+                except KeyError:
+                    msg = _('{state} is not a valid state/province in {country}.').format(state=state, country=country)
+                    logger.debug(msg)
+                    raise ValidationError({'state': msg})
 
             # Ensure the postal code is present, and limited to 9 characters
             postal_code = cleaned_data.get('postal_code')
-            if not postal_code:
-                raise ValidationError({'postal_code': _('This field is required.')})
 
-            if len(postal_code) > 9:
+            # Add a flag for the below code that requires postal code while running this test
+            # https://openedx.atlassian.net/browse/LEARNER-2355
+            # I could require it client side, but am not because it is not currently marked as required for the user
+
+            if not waffle.switch_is_active('optional_location_fields'):
+                if not postal_code:
+                    raise ValidationError({'postal_code': _('This field is required.')})
+
+            if postal_code and len(postal_code) > 9:
                 raise ValidationError(
                     {'postal_code': _(
                         'Postal codes for the U.S. and Canada are limited to nine (9) characters.')})
