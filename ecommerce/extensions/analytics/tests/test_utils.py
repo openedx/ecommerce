@@ -1,12 +1,15 @@
 import json
 
+import ddt
 import mock
 from analytics import Client
 from django.contrib.auth.models import AnonymousUser
+from django.test.client import RequestFactory
 from oscar.test import factories
 
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.extensions.analytics.utils import (
+    get_google_analytics_client_id,
     parse_tracking_context,
     prepare_analytics_data,
     track_segment_event,
@@ -18,6 +21,7 @@ from ecommerce.extensions.test.factories import create_basket
 from ecommerce.tests.testcases import TestCase
 
 
+@ddt.ddt
 class UtilsTest(DiscoveryTestMixin, BasketMixin, TestCase):
     """ Tests for the analytics utils. """
 
@@ -72,23 +76,33 @@ class UtilsTest(DiscoveryTestMixin, BasketMixin, TestCase):
             self.assertEqual(track_segment_event(self.site, self.create_user(), 'foo', {}), (False, msg))
             mock_debug.assert_called_with(msg)
 
-    def test_track_segment_event(self):
+    @ddt.data('1033501218.1368477899', None)
+    def test_track_segment_event(self, ga_client_id):
         """ The function should fire an event to Segment if the site is properly configured. """
         properties = {'key': 'value'}
         self.site_configuration.segment_key = 'fake-key'
         self.site_configuration.save()
-        user = self.create_user()
+        user = self.create_user(
+            tracking_context={
+                'lms_user_id': 'foo',
+                'lms_client_id': 'bar',
+                'lms_ip': '18.0.0.1',
+            }
+        )
         user_tracking_id, lms_client_id, lms_ip = parse_tracking_context(user)
         context = {
             'ip': lms_ip,
             'Google Analytics': {
-                'clientId': lms_client_id
+                'clientId': ga_client_id if ga_client_id else lms_client_id
             }
         }
         event = 'foo'
 
         with mock.patch.object(Client, 'track') as mock_track:
-            track_segment_event(self.site, user, event, properties)
+            if ga_client_id:
+                track_segment_event(self.site, user, event, properties, ga_client_id=ga_client_id)
+            else:
+                track_segment_event(self.site, user, event, properties)
             mock_track.assert_called_once_with(user_tracking_id, event, properties, context=context)
 
     def test_translate_basket_line_for_segment(self):
@@ -129,3 +143,16 @@ class UtilsTest(DiscoveryTestMixin, BasketMixin, TestCase):
         course.delete()
         expected['name'] = seat.title
         self.assertEqual(translate_basket_line_for_segment(line), expected)
+
+    def test_get_google_analytics_client_id(self):
+        """ Test that method return's the GA clientId. """
+        client_id = '1033501218.1368477899'
+        request_factory = RequestFactory()
+        request_factory.cookies['_ga'] = 'GA1.2.{}'.format(client_id)
+        request = request_factory.get('/')
+
+        expected_client_id = get_google_analytics_client_id(None)
+        self.assertIsNone(expected_client_id)
+
+        expected_client_id = get_google_analytics_client_id(request)
+        self.assertEqual(client_id, expected_client_id)
