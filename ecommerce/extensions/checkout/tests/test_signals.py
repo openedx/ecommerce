@@ -3,6 +3,7 @@ import json
 import httpretty
 import mock
 from django.core import mail
+from django.test.client import RequestFactory
 from oscar.core.loading import get_class, get_model
 from oscar.test import factories
 from oscar.test.newfactories import BasketFactory
@@ -35,6 +36,10 @@ LOGGER_NAME = 'ecommerce.extensions.checkout.signals'
 class SignalTests(ProgramTestMixin, CouponMixin, TestCase):
     def setUp(self):
         super(SignalTests, self).setUp()
+        self.ga_client_id = '1033501218.1368477899'
+        request_factory = RequestFactory()
+        request_factory.cookies['_ga'] = 'GA1.2.{}'.format(self.ga_client_id)
+        self.request = request_factory.get('/')
         self.user = self.create_user()
         self.request.user = self.user
         toggle_switch('ENABLE_NOTIFICATIONS', True)
@@ -173,16 +178,20 @@ class SignalTests(ProgramTestMixin, CouponMixin, TestCase):
 
         with mock.patch('ecommerce.extensions.checkout.signals.track_segment_event') as mock_track:
             order = self.prepare_order('verified')
-            track_completed_order(None, order)
+            track_completed_order(None, order, request=self.request)
             properties = self._generate_event_properties(order)
-            mock_track.assert_called_once_with(order.site, order.user, 'Order Completed', properties)
+            mock_track.assert_called_once_with(
+                order.site, order.user, 'Order Completed', properties, ga_client_id=self.ga_client_id
+            )
 
             # We should be able to fire events even if the product is not related to a course.
             mock_track.reset_mock()
             order = create_order()
-            track_completed_order(None, order)
+            track_completed_order(None, order, request=self.request)
             properties = self._generate_event_properties(order)
-            mock_track.assert_called_once_with(order.site, order.user, 'Order Completed', properties)
+            mock_track.assert_called_once_with(
+                order.site, order.user, 'Order Completed', properties, ga_client_id=self.ga_client_id
+            )
 
     @mock.patch('ecommerce.extensions.checkout.signals.track_segment_event')
     def test_track_bundle_order(self, mock_track):
@@ -197,17 +206,21 @@ class SignalTests(ProgramTestMixin, CouponMixin, TestCase):
         # Tracks a full bundle order
         with mock.patch('ecommerce.extensions.checkout.signals.get_program',
                         mock.Mock(return_value=self.mock_get_program_data(True))):
-            track_completed_order(None, order)
+            track_completed_order(None, order, request=self.request)
             properties = self._generate_event_properties(order, bundle_id='test_bundle', fullBundle=True)
-            mock_track.assert_called_once_with(order.site, order.user, 'Order Completed', properties)
+            mock_track.assert_called_once_with(
+                order.site, order.user, 'Order Completed', properties, ga_client_id=self.ga_client_id
+            )
 
         # Tracks a partial bundle order
         with mock.patch('ecommerce.extensions.checkout.signals.get_program',
                         mock.Mock(return_value=self.mock_get_program_data(False))):
             mock_track.reset_mock()
-            track_completed_order(None, order)
+            track_completed_order(None, order, request=self.request)
             properties = self._generate_event_properties(order, bundle_id='test_bundle')
-            mock_track.assert_called_once_with(order.site, order.user, 'Order Completed', properties)
+            mock_track.assert_called_once_with(
+                order.site, order.user, 'Order Completed', properties, ga_client_id=self.ga_client_id
+            )
 
     def test_track_completed_discounted_order_with_voucher(self):
         """ An event including coupon information should be sent to Segment"""
@@ -224,9 +237,11 @@ class SignalTests(ProgramTestMixin, CouponMixin, TestCase):
             Applicator().apply(basket, user=basket.owner, request=self.request)
 
             order = factories.create_order(basket=basket, user=self.user)
-            track_completed_order(None, order)
+            track_completed_order(None, order, request=self.request)
             properties = self._generate_event_properties(order, voucher)
-            mock_track.assert_called_once_with(order.site, order.user, 'Order Completed', properties)
+            mock_track.assert_called_once_with(
+                order.site, order.user, 'Order Completed', properties, ga_client_id=self.ga_client_id
+            )
 
     def test_track_completed_discounted_order_with_voucher_with_offer(self):
         with mock.patch('ecommerce.extensions.checkout.signals.track_segment_event') as mock_track:
@@ -248,9 +263,11 @@ class SignalTests(ProgramTestMixin, CouponMixin, TestCase):
             Applicator().apply(basket, user=basket.owner, request=self.request)
 
             order = factories.create_order(basket=basket, user=self.user)
-            track_completed_order(None, order)
+            track_completed_order(None, order, request=self.request)
             properties = self._generate_event_properties(order, voucher)
-            mock_track.assert_called_once_with(order.site, order.user, 'Order Completed', properties)
+            mock_track.assert_called_once_with(
+                order.site, order.user, 'Order Completed', properties, ga_client_id=self.ga_client_id
+            )
 
     def test_track_completed_discounted_order_with_offer(self):
         """ An event including a discount but no coupon should be sent to Segment"""
@@ -270,9 +287,11 @@ class SignalTests(ProgramTestMixin, CouponMixin, TestCase):
             Applicator().apply_offers(basket, [site_offer])
 
             order = factories.create_order(basket=basket, user=self.user)
-            track_completed_order(None, order)
+            track_completed_order(None, order, request=self.request)
             properties = self._generate_event_properties(order)
-            mock_track.assert_called_once_with(order.site, order.user, 'Order Completed', properties)
+            mock_track.assert_called_once_with(
+                order.site, order.user, 'Order Completed', properties, ga_client_id=self.ga_client_id
+            )
 
     def test_track_completed_coupon_order(self):
         """ Make sure we do not send GA events for Coupon orders """

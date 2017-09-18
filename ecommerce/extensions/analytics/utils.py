@@ -118,7 +118,7 @@ def prepare_analytics_data(user, segment_key):
     return json.dumps(data)
 
 
-def track_segment_event(site, user, event, properties):
+def track_segment_event(site, user, event, properties, ga_client_id=None):
     """ Fire a tracking event via Segment.
 
     Args:
@@ -126,12 +126,12 @@ def track_segment_event(site, user, event, properties):
         user (User): User to which the event should be associated.
         event (str): Event name.
         properties (dict): Event properties.
+        ga_client_id (str): Google Analytics clientId.
 
     Returns:
         (success, msg): Tuple indicating the success of enqueuing the event on the message queue.
             This can be safely ignored unless needed for debugging purposes.
     """
-
     site_configuration = site.siteconfiguration
     if not site_configuration.segment_key:
         msg = 'Event [{event}] was NOT fired because no Segment key is set for site configuration [{site_id}]'
@@ -143,7 +143,7 @@ def track_segment_event(site, user, event, properties):
     context = {
         'ip': lms_ip,
         'Google Analytics': {
-            'clientId': lms_client_id
+            'clientId': ga_client_id if ga_client_id else lms_client_id
         }
     }
     return site.siteconfiguration.segment_client.track(user_tracking_id, event, properties, context=context)
@@ -171,3 +171,17 @@ def translate_basket_line_for_segment(line):
         'quantity': line.quantity,
         'category': line.product.get_product_class().name,
     }
+
+
+def get_google_analytics_client_id(request):
+    """Get google analytics client ID from request cookies."""
+    if not request:
+        return None
+
+    # Google Analytics uses the clientId to keep track of unique visitors. A GA cookie looks like
+    # this: _ga=GA1.2.1033501218.1368477899 and the clientId is this part: 1033501218.1368477899
+    google_analytics_cookie = request.COOKIES.get('_ga')
+    if google_analytics_cookie:
+        return '.'.join(google_analytics_cookie.split('.')[2:])
+
+    return None
