@@ -6,6 +6,7 @@ from django.conf.urls import include, url
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.shortcuts import redirect
+from django.utils.translation import ugettext_lazy as _
 from django.views.defaults import page_not_found, server_error
 from django.views.generic import TemplateView
 from django.views.i18n import JavaScriptCatalog
@@ -36,6 +37,8 @@ def handler403(_):
 
 
 admin.autodiscover()
+admin.site.site_header = _('E-Commerce Service Administration')
+admin.site.site_title = admin.site.site_header
 
 # NOTE 1: Add our logout override first to ensure it is registered by Django as the actual logout view.
 # NOTE 2: These same patterns are used for rest_framework's browseable API authentication links.
