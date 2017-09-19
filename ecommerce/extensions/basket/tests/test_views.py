@@ -9,13 +9,14 @@ import pytz
 from django.conf import settings
 from django.contrib.messages import get_messages
 from django.core.cache import cache
+from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
 from django.test import override_settings
 from factory.fuzzy import FuzzyText
 from oscar.apps.basket.forms import BasketVoucherForm
 from oscar.core.loading import get_class, get_model
-from oscar.test import newfactories as factories
+from oscar.test import factories
 from oscar.test.utils import RequestFactory
 from requests.exceptions import ConnectionError, Timeout
 from slumber.exceptions import SlumberBaseException
@@ -41,7 +42,7 @@ from ecommerce.tests.factories import ProductFactory, SiteFactory, StockRecordFa
 from ecommerce.tests.mixins import ApiMockMixin, LmsApiMockMixin
 from ecommerce.tests.testcases import TestCase
 
-Applicator = get_class('offer.utils', 'Applicator')
+Applicator = get_class('offer.applicator', 'Applicator')
 Basket = get_model('basket', 'Basket')
 Benefit = get_model('offer', 'Benefit')
 Catalog = get_model('catalogue', 'Catalog')
@@ -800,9 +801,8 @@ class VoucherAddViewTests(LmsApiMockMixin, TestCase):
         """ Verify correct error message is returned when voucher has no discount. """
         self.mock_access_token_response()
         self.mock_account_api(self.request, self.user.username, data={'is_active': True})
-        __, product = prepare_voucher(code=COUPON_CODE, benefit_value=0)
-        self.basket.add_product(product)
-        self.assert_form_valid_message("Your basket does not qualify for a coupon code discount.")
+        with self.assertRaises(ValidationError):
+            prepare_voucher(code=COUPON_CODE, benefit_value=0)
 
     def test_voucher_used_error_msg(self):
         """ Verify correct error message is returned when voucher has been used (Single use). """
@@ -835,7 +835,7 @@ class VoucherAddViewTests(LmsApiMockMixin, TestCase):
         """ Verify correct error message is returned when voucher is used against a bundle. """
         self.mock_access_token_response()
         self.mock_account_api(self.request, self.user.username, data={'is_active': True})
-        voucher, product = prepare_voucher(code=COUPON_CODE, benefit_value=0)
+        voucher, product = prepare_voucher(code=COUPON_CODE, benefit_value=10)
         new_product = factories.ProductFactory(categories=[], stockrecords__partner__short_code='second')
         self.basket.add_product(product)
         self.basket.add_product(new_product)
@@ -978,5 +978,5 @@ class VoucherRemoveViewTests(TestCase):
         self.assertEqual(response.status_code, 302)
 
         actual = list(get_messages(request))[-1].message
-        expected = "No coupon found with id '{}'".format(pk)
+        expected = "No voucher found with id '{}'".format(pk)
         self.assertEqual(actual, expected)

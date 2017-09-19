@@ -1,7 +1,7 @@
 import ddt
 from django.test import override_settings
 from oscar.core.loading import get_model
-from oscar.test.newfactories import UserFactory
+from oscar.test.factories import UserFactory
 
 from ecommerce.extensions.fulfillment.status import ORDER
 from ecommerce.extensions.refund.api import create_refunds, find_orders_associated_with_course

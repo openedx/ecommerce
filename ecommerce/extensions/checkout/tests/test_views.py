@@ -6,7 +6,7 @@ import httpretty
 from django.conf import settings
 from django.core.urlresolvers import reverse
 from oscar.core.loading import get_model
-from oscar.test import newfactories as factories
+from oscar.test.factories import BasketFactory, ProductFactory, SourceFactory
 
 from ecommerce.coupons.tests.mixins import DiscoveryMockMixin
 from ecommerce.extensions.checkout.exceptions import BasketNotFreeError
@@ -30,8 +30,8 @@ class FreeCheckoutViewTests(TestCase):
 
     def prepare_basket(self, price):
         """ Helper function that creates a basket and adds a product with set price to it. """
-        basket = factories.BasketFactory(owner=self.user, site=self.site)
-        basket.add_product(factories.ProductFactory(stockrecords__price_excl_tax=price), 1)
+        basket = BasketFactory(owner=self.user, site=self.site)
+        basket.add_product(ProductFactory(stockrecords__price_excl_tax=price), 1)
         self.assertEqual(basket.lines.count(), 1)
         self.assertEqual(basket.total_incl_tax, Decimal(price))
 
@@ -218,7 +218,7 @@ class ReceiptResponseViewTests(DiscoveryMockMixin, LmsApiMockMixin, RefundTestMi
         when the credit card wasn't used to purchase a product.
         """
         order = self.create_order()
-        source = factories.SourceFactory(order=order)
+        source = SourceFactory(order=order)
         payment_method = ReceiptResponseView().get_payment_method(order)
         self.assertEqual(payment_method, source.source_type.name)
 
@@ -228,7 +228,7 @@ class ReceiptResponseViewTests(DiscoveryMockMixin, LmsApiMockMixin, RefundTestMi
         when a Credit card was used to purchase a product.
         """
         order = self.create_order()
-        source = factories.SourceFactory(order=order, card_type='Dummy Card', label='Test')
+        source = SourceFactory(order=order, card_type='Dummy Card', label='Test')
         payment_method = ReceiptResponseView().get_payment_method(order)
         self.assertEqual(payment_method, '{} {}'.format(source.card_type, source.label))
 

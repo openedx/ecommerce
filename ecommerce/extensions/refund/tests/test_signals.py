@@ -1,5 +1,5 @@
 from mock import patch
-from oscar.test.newfactories import UserFactory
+from oscar.test.factories import UserFactory
 
 from ecommerce.core.models import SegmentClient
 from ecommerce.extensions.refund.api import create_refunds

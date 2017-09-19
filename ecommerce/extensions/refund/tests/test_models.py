@@ -8,7 +8,7 @@ import mock
 from django.conf import settings
 from oscar.apps.payment.exceptions import PaymentError
 from oscar.core.loading import get_class, get_model
-from oscar.test.newfactories import UserFactory
+from oscar.test.factories import UserFactory
 from testfixtures import LogCapture
 
 from ecommerce.core.constants import SEAT_PRODUCT_CLASS_NAME
