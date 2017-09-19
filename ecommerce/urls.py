@@ -14,6 +14,7 @@ from django.views.i18n import JavaScriptCatalog
 from ecommerce.core import views as core_views
 from ecommerce.core.url_utils import get_lms_dashboard_url
 from ecommerce.core.views import LogoutView
+from ecommerce.extensions.api.views import SwaggerSchemaView
 from ecommerce.extensions.payment.views.cybersource import ApplePayMerchantDomainAssociationView
 from ecommerce.extensions.urls import urlpatterns as extensions_patterns
 
@@ -53,7 +54,7 @@ urlpatterns = AUTH_URLS + WELL_KNOWN_URLS + [
     url(r'^admin/', include(admin.site.urls)),
     url(r'^auto_auth/$', core_views.AutoAuth.as_view(), name='auto_auth'),
     url(r'^api-auth/', include(AUTH_URLS, namespace='rest_framework')),
-    url(r'^api-docs/', include('rest_framework_swagger.urls')),
+    url(r'^api-docs/', SwaggerSchemaView.as_view(), name='api_docs'),
     url(r'^courses/', include('ecommerce.courses.urls', namespace='courses')),
     url(r'^credit/', include('ecommerce.credit.urls', namespace='credit')),
     url(r'^coupons/', include('ecommerce.coupons.urls', namespace='coupons')),

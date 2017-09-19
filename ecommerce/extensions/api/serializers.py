@@ -278,6 +278,7 @@ class RefundSerializer(serializers.ModelSerializer):
 
     class Meta(object):
         model = Refund
+        fields = '__all__'
 
 
 class CourseSerializer(serializers.HyperlinkedModelSerializer):
@@ -708,6 +709,7 @@ class CheckoutSerializer(serializers.Serializer):  # pylint: disable=abstract-me
 class InvoiceSerializer(serializers.ModelSerializer):
     class Meta(object):
         model = Invoice
+        fields = '__all__'
 
 
 class ProviderSerializer(serializers.Serializer):  # pylint: disable=abstract-method

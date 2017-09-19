@@ -6,12 +6,12 @@ django_extensions==1.9.0
 django-filter==1.0.4
 django-libsass==0.5
 django-oscar==1.4
-django-rest-swagger[reST]==0.3.10
+django-rest-swagger==2.1.2
 django-simple-history==1.8.2
 django-solo==1.1.2
 django-threadlocals==0.8
 django-waffle==0.12.0
-djangorestframework==3.3.3
+djangorestframework==3.6.4
 djangorestframework-jwt==1.11.0
 drf-extensions==0.3.1
 edx-auth-backends==1.1.2
