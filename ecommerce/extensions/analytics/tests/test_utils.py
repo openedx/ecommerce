@@ -51,18 +51,18 @@ class UtilsTest(DiscoveryTestMixin, BasketMixin, TestCase):
     def test_parse_tracking_context(self):
         """ The method should parse the tracking context on the User object. """
         tracking_context = {
+            'ga_client_id': 'test-client-id',
             'lms_user_id': 'foo',
-            'lms_client_id': 'bar',
             'lms_ip': '18.0.0.1',
         }
         user = self.create_user(tracking_context=tracking_context)
-        expected = (tracking_context['lms_user_id'], tracking_context['lms_client_id'], tracking_context['lms_ip'])
+        expected = (tracking_context['lms_user_id'], tracking_context['ga_client_id'], tracking_context['lms_ip'])
         self.assertEqual(parse_tracking_context(user), expected)
 
         # If no LMS user ID is provided, we should create one based on the E-Commerce ID
         del tracking_context['lms_user_id']
         user = self.create_user(tracking_context=tracking_context)
-        expected = ('ecommerce-{}'.format(user.id), tracking_context['lms_client_id'], tracking_context['lms_ip'])
+        expected = ('ecommerce-{}'.format(user.id), tracking_context['ga_client_id'], tracking_context['lms_ip'])
         self.assertEqual(parse_tracking_context(user), expected)
 
     def test_track_segment_event_without_segment_key(self):
@@ -76,33 +76,29 @@ class UtilsTest(DiscoveryTestMixin, BasketMixin, TestCase):
             self.assertEqual(track_segment_event(self.site, self.create_user(), 'foo', {}), (False, msg))
             mock_debug.assert_called_with(msg)
 
-    @ddt.data('1033501218.1368477899', None)
-    def test_track_segment_event(self, ga_client_id):
+    def test_track_segment_event(self):
         """ The function should fire an event to Segment if the site is properly configured. """
         properties = {'key': 'value'}
         self.site_configuration.segment_key = 'fake-key'
         self.site_configuration.save()
         user = self.create_user(
             tracking_context={
+                'ga_client_id': 'test-client-id',
                 'lms_user_id': 'foo',
-                'lms_client_id': 'bar',
                 'lms_ip': '18.0.0.1',
             }
         )
-        user_tracking_id, lms_client_id, lms_ip = parse_tracking_context(user)
+        user_tracking_id, ga_client_id, lms_ip = parse_tracking_context(user)
         context = {
             'ip': lms_ip,
             'Google Analytics': {
-                'clientId': ga_client_id if ga_client_id else lms_client_id
+                'clientId': ga_client_id
             }
         }
         event = 'foo'
 
         with mock.patch.object(Client, 'track') as mock_track:
-            if ga_client_id:
-                track_segment_event(self.site, user, event, properties, ga_client_id=ga_client_id)
-            else:
-                track_segment_event(self.site, user, event, properties)
+            track_segment_event(self.site, user, event, properties)
             mock_track.assert_called_once_with(user_tracking_id, event, properties, context=context)
 
     def test_translate_basket_line_for_segment(self):
@@ -146,13 +142,13 @@ class UtilsTest(DiscoveryTestMixin, BasketMixin, TestCase):
 
     def test_get_google_analytics_client_id(self):
         """ Test that method return's the GA clientId. """
-        client_id = '1033501218.1368477899'
-        request_factory = RequestFactory()
-        request_factory.cookies['_ga'] = 'GA1.2.{}'.format(client_id)
-        request = request_factory.get('/')
-
         expected_client_id = get_google_analytics_client_id(None)
         self.assertIsNone(expected_client_id)
 
+        ga_client_id = 'test-client-id'
+        request_factory = RequestFactory()
+        request_factory.cookies['_ga'] = 'GA1.2.{}'.format(ga_client_id)
+        request = request_factory.get('/')
+
         expected_client_id = get_google_analytics_client_id(request)
-        self.assertEqual(client_id, expected_client_id)
+        self.assertEqual(ga_client_id, expected_client_id)

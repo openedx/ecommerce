@@ -27,7 +27,7 @@ class RefundTrackingTests(RefundTestMixin, TestCase):
         expected_context = {
             'ip': tracking_context.get('lms_ip'),
             'Google Analytics': {
-                'clientId': tracking_context.get('lms_client_id')
+                'clientId': tracking_context.get('ga_client_id')
             }
         }
         self.assertEqual(kwargs['context'], expected_context)
@@ -44,7 +44,7 @@ class RefundTrackingTests(RefundTestMixin, TestCase):
 
     def test_successful_refund_tracking(self, mock_track):
         """Verify that a successfully placed refund is tracked when Segment is enabled."""
-        tracking_context = {'lms_user_id': 'test-user-id', 'lms_client_id': 'test-client-id', 'lms_ip': '127.0.0.1'}
+        tracking_context = {'ga_client_id': 'test-client-id', 'lms_user_id': 'test-user-id', 'lms_ip': '127.0.0.1'}
         self.refund.user.tracking_context = tracking_context
         self.refund.user.save()
         self.approve(self.refund)

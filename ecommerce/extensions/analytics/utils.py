@@ -14,7 +14,7 @@ def parse_tracking_context(user):
         user (User): An instance of the User model.
 
     Returns:
-        Tuple of strings: user_tracking_id, lms_client_id, lms_ip
+        Tuple of strings: user_tracking_id, ga_client_id, lms_ip
     """
     tracking_context = user.tracking_context or {}
 
@@ -26,10 +26,10 @@ def parse_tracking_context(user):
         # at some point.
         user_tracking_id = 'ecommerce-{}'.format(user.id)
 
-    lms_client_id = tracking_context.get('lms_client_id')
     lms_ip = tracking_context.get('lms_ip')
+    ga_client_id = tracking_context.get('ga_client_id')
 
-    return user_tracking_id, lms_client_id, lms_ip
+    return user_tracking_id, ga_client_id, lms_ip
 
 
 def silence_exceptions(msg):
@@ -118,7 +118,7 @@ def prepare_analytics_data(user, segment_key):
     return json.dumps(data)
 
 
-def track_segment_event(site, user, event, properties, ga_client_id=None):
+def track_segment_event(site, user, event, properties):
     """ Fire a tracking event via Segment.
 
     Args:
@@ -126,7 +126,6 @@ def track_segment_event(site, user, event, properties, ga_client_id=None):
         user (User): User to which the event should be associated.
         event (str): Event name.
         properties (dict): Event properties.
-        ga_client_id (str): Google Analytics clientId.
 
     Returns:
         (success, msg): Tuple indicating the success of enqueuing the event on the message queue.
@@ -139,11 +138,11 @@ def track_segment_event(site, user, event, properties, ga_client_id=None):
         logger.debug(msg)
         return False, msg
 
-    user_tracking_id, lms_client_id, lms_ip = parse_tracking_context(user)
+    user_tracking_id, ga_client_id, lms_ip = parse_tracking_context(user)
     context = {
         'ip': lms_ip,
         'Google Analytics': {
-            'clientId': ga_client_id if ga_client_id else lms_client_id
+            'clientId': ga_client_id
         }
     }
     return site.siteconfiguration.segment_client.track(user_tracking_id, event, properties, context=context)

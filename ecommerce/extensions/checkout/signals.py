@@ -5,11 +5,7 @@ from django.dispatch import receiver
 from oscar.core.loading import get_class, get_model
 
 from ecommerce.courses.utils import mode_for_seat
-from ecommerce.extensions.analytics.utils import (
-    get_google_analytics_client_id,
-    silence_exceptions,
-    track_segment_event
-)
+from ecommerce.extensions.analytics.utils import silence_exceptions, track_segment_event
 from ecommerce.extensions.checkout.utils import get_credit_provider_details, get_receipt_page_url
 from ecommerce.notifications.notifications import send_notification
 from ecommerce.programs.utils import get_program
@@ -83,9 +79,7 @@ def track_completed_order(sender, order=None, **kwargs):  # pylint: disable=unus
     except BasketAttribute.DoesNotExist:
         logger.info('There is no program or bundle associated with order number %s', order.number)
 
-    ga_client_id = get_google_analytics_client_id(kwargs.get('request'))
-
-    track_segment_event(order.site, order.user, 'Order Completed', properties, ga_client_id=ga_client_id)
+    track_segment_event(order.site, order.user, 'Order Completed', properties)
 
 
 @receiver(post_checkout, dispatch_uid='send_completed_order_email')
