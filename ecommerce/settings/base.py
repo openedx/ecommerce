@@ -224,6 +224,7 @@ MIDDLEWARE_CLASSES = (
     'waffle.middleware.WaffleMiddleware',
     # NOTE: The overridden BasketMiddleware relies on request.site. This middleware
     # MUST appear AFTER CurrentSiteMiddleware.
+    'ecommerce.extensions.analytics.middleware.TrackingMiddleware',
     'ecommerce.extensions.basket.middleware.BasketMiddleware',
     'django.contrib.flatpages.middleware.FlatpageFallbackMiddleware',
     'social_django.middleware.SocialAuthExceptionMiddleware',

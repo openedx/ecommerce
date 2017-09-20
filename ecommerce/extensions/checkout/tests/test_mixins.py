@@ -114,7 +114,7 @@ class EdxOrderPlacementMixinTests(BusinessIntelligenceMixin, PaymentEventsMixin,
         Ensure that tracking events are fired with correct content when order
         placement event handling is invoked.
         """
-        tracking_context = {'lms_user_id': 'test-user-id', 'lms_client_id': 'test-client-id', 'lms_ip': '127.0.0.1'}
+        tracking_context = {'ga_client_id': 'test-client-id', 'lms_user_id': 'test-user-id', 'lms_ip': '127.0.0.1'}
         self.user.tracking_context = tracking_context
         self.user.save()
 
@@ -127,7 +127,7 @@ class EdxOrderPlacementMixinTests(BusinessIntelligenceMixin, PaymentEventsMixin,
                 mock_track,
                 self.order,
                 tracking_context['lms_user_id'],
-                tracking_context['lms_client_id'],
+                tracking_context['ga_client_id'],
                 tracking_context['lms_ip'],
                 self.order.number,
                 self.order.currency,
@@ -272,16 +272,20 @@ class EdxOrderPlacementMixinTests(BusinessIntelligenceMixin, PaymentEventsMixin,
         """
         Verify the "Payment Info Entered" Segment event is fired after payment info is validated
         """
+        tracking_context = {'ga_client_id': 'test-client-id', 'lms_user_id': 'test-user-id', 'lms_ip': '127.0.0.1'}
+        self.user.tracking_context = tracking_context
+        self.user.save()
+
         basket = create_basket(owner=self.user, site=self.site)
 
         mixin = EdxOrderPlacementMixin()
         mixin.payment_processor = DummyProcessor(self.site)
 
-        user_tracking_id, lms_client_id, lms_ip = parse_tracking_context(self.user)
+        user_tracking_id, ga_client_id, lms_ip = parse_tracking_context(self.user)
         context = {
             'ip': lms_ip,
             'Google Analytics': {
-                'clientId': lms_client_id
+                'clientId': ga_client_id
             }
         }
 

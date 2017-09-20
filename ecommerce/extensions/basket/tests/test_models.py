@@ -123,11 +123,11 @@ class BasketTests(CatalogMixin, BasketMixin, TestCase):
         basket.add_product(seat)
 
         properties = translate_basket_line_for_segment(basket.lines.first())
-        user_tracking_id, lms_client_id, lms_ip = parse_tracking_context(basket.owner)
+        user_tracking_id, ga_client_id, lms_ip = parse_tracking_context(basket.owner)
         context = {
             'ip': lms_ip,
             'Google Analytics': {
-                'clientId': lms_client_id
+                'clientId': ga_client_id
             }
         }
 

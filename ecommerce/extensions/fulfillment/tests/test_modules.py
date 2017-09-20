@@ -64,6 +64,10 @@ class EnrollmentFulfillmentModuleTests(ProgramTestMixin, DiscoveryTestMixin, Ful
         super(EnrollmentFulfillmentModuleTests, self).setUp()
 
         self.user = UserFactory()
+        self.user.tracking_context = {
+            'ga_client_id': 'test-client-id', 'lms_user_id': 'test-user-id', 'lms_ip': '127.0.0.1'
+        }
+        self.user.save()
         self.course = CourseFactory(id=self.course_id, name='Demo Course', site=self.site)
 
         self.seat = self.course.create_or_update_seat(self.certificate_type, False, 100, self.partner, self.provider)
@@ -123,11 +127,9 @@ class EnrollmentFulfillmentModuleTests(ProgramTestMixin, DiscoveryTestMixin, Ful
         self.assertEqual(1, len(supported_lines))
 
     @httpretty.activate
-    @mock.patch('ecommerce.extensions.fulfillment.modules.parse_tracking_context')
-    def test_enrollment_module_fulfill(self, parse_tracking_context):
+    def test_enrollment_module_fulfill(self):
         """Happy path test to ensure we can properly fulfill enrollments."""
         httpretty.register_uri(httpretty.POST, get_lms_enrollment_api_url(), status=200, body='{}', content_type=JSON)
-        parse_tracking_context.return_value = ('user_123', 'GA-123456789', '11.22.33.44')
         # Attempt to enroll.
         with LogCapture(LOGGER_NAME) as l:
             EnrollmentFulfillmentModule().fulfill_product(self.order, list(self.order.lines.all()))
@@ -173,23 +175,21 @@ class EnrollmentFulfillmentModuleTests(ProgramTestMixin, DiscoveryTestMixin, Ful
         }
 
         expected_headers = {
-            'X-Edx-Ga-Client-Id': 'GA-123456789',
-            'X-Forwarded-For': '11.22.33.44',
+            'X-Edx-Ga-Client-Id': self.user.tracking_context['ga_client_id'],
+            'X-Forwarded-For': self.user.tracking_context['lms_ip'],
         }
 
         self.assertDictContainsSubset(expected_headers, actual_headers)
         self.assertEqual(expected_body, actual_body)
 
     @httpretty.activate
-    @mock.patch('ecommerce.extensions.fulfillment.modules.parse_tracking_context')
-    def test_enrollment_module_fulfill_order_with_discount_no_voucher(self, parse_tracking_context):
+    def test_enrollment_module_fulfill_order_with_discount_no_voucher(self):
         """
         Test that components of the Fulfillment Module which trigger on the presence of a voucher do
         not cause failures in cases where a discount does not have a voucher included
         (such as with a Conditional Offer)
         """
         httpretty.register_uri(httpretty.POST, get_lms_enrollment_api_url(), status=200, body='{}', content_type=JSON)
-        parse_tracking_context.return_value = ('user_123', 'GA-123456789', '11.22.33.44')
         self.create_seat_and_order(certificate_type='credit', provider='MIT')
         self.order.discounts.create()
         __, lines = EnrollmentFulfillmentModule().fulfill_product(self.order, list(self.order.lines.all()))
@@ -231,11 +231,9 @@ class EnrollmentFulfillmentModuleTests(ProgramTestMixin, DiscoveryTestMixin, Ful
         self.assertEqual(LINE.FULFILLMENT_SERVER_ERROR, self.order.lines.all()[0].status)
 
     @httpretty.activate
-    @mock.patch('ecommerce.extensions.fulfillment.modules.parse_tracking_context')
-    def test_revoke_product(self, parse_tracking_context):
+    def test_revoke_product(self):
         """ The method should call the Enrollment API to un-enroll the student, and return True. """
         httpretty.register_uri(httpretty.POST, get_lms_enrollment_api_url(), status=200, body='{}', content_type=JSON)
-        parse_tracking_context.return_value = ('user_123', 'GA-123456789', '11.22.33.44')
         line = self.order.lines.first()
 
         with LogCapture(LOGGER_NAME) as l:
@@ -271,8 +269,8 @@ class EnrollmentFulfillmentModuleTests(ProgramTestMixin, DiscoveryTestMixin, Ful
         }
 
         expected_headers = {
-            'X-Edx-Ga-Client-Id': 'GA-123456789',
-            'X-Forwarded-For': '11.22.33.44',
+            'X-Edx-Ga-Client-Id': self.user.tracking_context['ga_client_id'],
+            'X-Forwarded-For': self.user.tracking_context['lms_ip'],
         }
 
         self.assertDictContainsSubset(expected_headers, actual_headers)
@@ -402,10 +400,6 @@ class EnrollmentFulfillmentModuleTests(ProgramTestMixin, DiscoveryTestMixin, Ful
             'enrollment_attributes': []
         }
 
-        # Create a dummy user and attach the tracking_context
-        user = UserFactory()
-        user.tracking_context = {'lms_user_id': '1', 'lms_client_id': '123.123', 'lms_ip': '11.22.33.44'}
-
         # Now call the enrollment api to send POST request to LMS and verify
         # that the header of the request being sent contains the analytics
         # header 'x-edx-ga-client-id'.
@@ -413,12 +407,12 @@ class EnrollmentFulfillmentModuleTests(ProgramTestMixin, DiscoveryTestMixin, Ful
         # not available for ecommerce tests.
         try:
             # pylint: disable=protected-access
-            EnrollmentFulfillmentModule()._post_to_enrollment_api(data=data, user=user)
+            EnrollmentFulfillmentModule()._post_to_enrollment_api(data=data, user=self.user)
         except ConnectionError as exp:
             # Check that the enrollment request object has the analytics header
             # 'x-edx-ga-client-id' and 'x-forwarded-for'.
-            self.assertEqual(exp.request.headers.get('x-edx-ga-client-id'), '123.123')
-            self.assertEqual(exp.request.headers.get('x-forwarded-for'), '11.22.33.44')
+            self.assertEqual(exp.request.headers.get('x-edx-ga-client-id'), self.user.tracking_context['ga_client_id'])
+            self.assertEqual(exp.request.headers.get('x-forwarded-for'), self.user.tracking_context['lms_ip'])
 
     def test_voucher_usage(self):
         """
@@ -428,13 +422,11 @@ class EnrollmentFulfillmentModuleTests(ProgramTestMixin, DiscoveryTestMixin, Ful
         self.assertEqual(self.order.basket.total_excl_tax, 0.00)
 
     @httpretty.activate
-    @mock.patch('ecommerce.extensions.fulfillment.modules.parse_tracking_context')
-    def test_voucher_usage_with_program(self, parse_tracking_context):
+    def test_voucher_usage_with_program(self):
         """
         Test that using a voucher with a program basket results in a fulfilled order.
         """
         httpretty.register_uri(httpretty.POST, get_lms_enrollment_api_url(), status=200, body='{}', content_type=JSON)
-        parse_tracking_context.return_value = ('user_123', 'GA-123456789', '11.22.33.44')
         self.create_seat_and_order(certificate_type='credit', provider='MIT')
         program_uuid = uuid.uuid4()
         self.mock_program_detail_endpoint(program_uuid, self.site_configuration.discovery_api_url)
