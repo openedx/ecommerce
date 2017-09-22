@@ -15,6 +15,7 @@ from ecommerce.extensions.refund.status import REFUND, REFUND_LINE
 from ecommerce.extensions.refund.tests.factories import RefundFactory
 from ecommerce.extensions.test.factories import create_order
 
+DisableMultipleRefund = get_model('refund', 'DisableMultipleRefund')
 post_refund = get_class('refund.signals', 'post_refund')
 Refund = get_model('refund', 'Refund')
 Source = get_model('payment', 'Source')
@@ -36,6 +37,7 @@ class RefundTestMixin(DiscoveryTestMixin):
             self.partner,
             credit_provider='HGW'
         )
+        DisableMultipleRefund.objects.create(enabled=False)
 
     def create_order(self, user=None, credit=False, multiple_lines=False, free=False, status=ORDER.COMPLETE):
         user = user or self.user
@@ -94,3 +96,8 @@ class RefundTestMixin(DiscoveryTestMixin):
                 self.assertEqual(receiver.call_count, 0)
                 self.assertTrue(refund.approve())
                 self.assertEqual(receiver.call_count, 1)
+
+    def tearDown(self):
+        """Remove all values of DisableMultipleRefund after tests"""
+        super(RefundTestMixin, self).tearDown()
+        DisableMultipleRefund.objects.all().delete()

@@ -1,17 +1,14 @@
 from __future__ import unicode_literals
 
 import logging
+from datetime import datetime
 
 from django.conf import settings
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
-from django_extensions.db.models import TimeStampedModel
-from ecommerce_worker.sailthru.v1.tasks import send_course_refund_email
-from oscar.apps.payment.exceptions import PaymentError
-from oscar.core.loading import get_class, get_model
-from oscar.core.utils import get_default_currency
-from simple_history.models import HistoricalRecords
 
+from config_models.models import ConfigurationModel
+from django_extensions.db.models import TimeStampedModel
 from ecommerce.core.constants import SEAT_PRODUCT_CLASS_NAME
 from ecommerce.extensions.analytics.utils import audit_log
 from ecommerce.extensions.checkout.utils import format_currency, get_receipt_page_url
@@ -20,6 +17,11 @@ from ecommerce.extensions.order.constants import PaymentEventTypeName
 from ecommerce.extensions.payment.helpers import get_processor_class_by_name
 from ecommerce.extensions.refund.exceptions import InvalidStatus
 from ecommerce.extensions.refund.status import REFUND, REFUND_LINE
+from ecommerce_worker.sailthru.v1.tasks import send_course_refund_email
+from oscar.apps.payment.exceptions import PaymentError
+from oscar.core.loading import get_class, get_model
+from oscar.core.utils import get_default_currency
+from simple_history.models import HistoricalRecords
 
 logger = logging.getLogger(__name__)
 
@@ -233,6 +235,10 @@ class Refund(StatusMixin, TimeStampedModel):
             self.set_status(REFUND.REVOCATION_ERROR)
 
     def approve(self, revoke_fulfillment=True, notify_purchaser=True):
+        if not self._can_issue_refund():
+            logger.info('Can not Issue Refund [%d], Multiple Refunds disabled for days [%d].', self.id,
+                        DisableMultipleRefund.current().duration)
+            return False
         if self.status == REFUND.COMPLETE:
             logger.info('Refund [%d] has already been completed. No additional action is required to approve.', self.id)
             return True
@@ -287,6 +293,17 @@ class Refund(StatusMixin, TimeStampedModel):
 
         return result
 
+    def _can_issue_refund(self):
+        """ Disable the multiple refund for one day if already exists a payment event"""
+        disable_refund = DisableMultipleRefund.current()
+        if disable_refund.enabled:
+            return not (PaymentEvent.objects.filter(
+                order=self.order,
+                date_created__range=[datetime.timedelta(days=disable_refund.duration), datetime.datetime.now()],
+                event_type__name=PaymentEventTypeName.REFUNDED,
+            ).exists())
+        return True
+
 
 class RefundLine(StatusMixin, TimeStampedModel):
     """A refund line, used to represent the state of a single item as part of a larger Refund."""
@@ -315,3 +332,17 @@ class RefundLine(StatusMixin, TimeStampedModel):
     def deny(self):
         self.set_status(REFUND_LINE.DENIED)
         return True
+
+
+class DisableMultipleRefund(ConfigurationModel):
+    """ When the flag is active disable Multiple Refund for specified duration of time"""
+
+    class Meta(ConfigurationModel.Meta):
+        app_label = "refund"
+
+    duration = models.PositiveIntegerField(
+        default=1,
+        help_text="Number of Days you want to disable Multiple Refund.",
+        null=True,
+    )
+    changed_by = models.ForeignKey('core.User', verbose_name=_('User'))
