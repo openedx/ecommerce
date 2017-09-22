@@ -35,9 +35,6 @@ class EnterpriseServiceMockMixin(object):
             },
             'enable_data_sharing_consent': True,
             'enforce_data_sharing_consent': 'at_login',
-            'enterprise_customer_users': [
-                1
-            ],
             'branding_configuration': {
                 'enterprise_customer': 'cf246b88-d5f6-4908-a522-fc307e0b0c59',
                 'logo': 'https://open.edx.org/sites/all/themes/edx_open/logo.png'
@@ -86,9 +83,6 @@ class EnterpriseServiceMockMixin(object):
             },
             'enable_data_sharing_consent': consent_enabled,
             'enforce_data_sharing_consent': 'at_login',
-            'enterprise_customer_users': [
-                1
-            ],
             'branding_configuration': {
                 'enterprise_customer': 'cf246b88-d5f6-4908-a522-fc307e0b0c59',
                 'logo': 'https://open.edx.org/sites/all/themes/edx_open/logo.png'
@@ -157,9 +151,6 @@ class EnterpriseServiceMockMixin(object):
                         },
                         'enable_data_sharing_consent': consent_enabled,
                         'enforce_data_sharing_consent': 'at_login',
-                        'enterprise_customer_users': [
-                            1
-                        ],
                         'branding_configuration': {
                             'enterprise_customer': enterprise_customer_uuid,
                             'logo': 'https://open.edx.org/sites/all/themes/edx_open/logo.png'
