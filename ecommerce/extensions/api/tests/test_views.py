@@ -4,9 +4,35 @@ from django.core.exceptions import PermissionDenied
 from django.test import RequestFactory, TestCase
 from django.urls import reverse
 from oscar.test.factories import UserFactory
+from rest_framework.test import APITestCase
 
 from ecommerce.extensions.api.views import api_docs_permission_denied_handler
+from ecommerce.tests.mixins import SiteMixin, UserMixin
 
+
+class TestApiDocs(SiteMixin, UserMixin, APITestCase):
+    """
+    Regression tests introduced following LEARNER-1590.
+    """
+    path = reverse('api_docs')
+
+    def test_api_docs(self):
+        """
+        Verify that the API docs are available to authenticated clients.
+        """
+        user = self.create_user()
+        self.client.login(username=user.username, password=self.password)
+
+        response = self.client.get(self.path)
+        assert response.status_code == 200
+
+    def test_api_docs_redirect(self):
+        """
+        Verify that unauthenticated clients are redirected.
+        """
+        response = self.client.get(self.path)
+
+        assert response.status_code == 302
 
 @ddt.ddt
 class ApiDocsPermissionDeniedHandlerTests(TestCase):
