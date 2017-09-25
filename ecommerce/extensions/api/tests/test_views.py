@@ -10,7 +10,7 @@ from ecommerce.extensions.api.views import api_docs_permission_denied_handler
 from ecommerce.tests.mixins import SiteMixin, UserMixin
 
 
-class TestApiDocs(SiteMixin, UserMixin, APITestCase):
+class TestApiDocs(UserMixin, SiteMixin, APITestCase):
     """
     Regression tests introduced following LEARNER-1590.
     """
