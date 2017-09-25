@@ -34,6 +34,7 @@ class TestApiDocs(SiteMixin, UserMixin, APITestCase):
 
         assert response.status_code == 302
 
+
 @ddt.ddt
 class ApiDocsPermissionDeniedHandlerTests(TestCase):
     def setUp(self):
