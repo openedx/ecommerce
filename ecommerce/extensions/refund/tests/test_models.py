@@ -24,6 +24,7 @@ from ecommerce.extensions.refund.tests.mixins import RefundTestMixin
 from ecommerce.extensions.test.factories import create_basket, create_order
 from ecommerce.tests.testcases import TestCase
 
+DisableMultipleRefund = get_model('refund', 'DisableMultipleRefund')
 PaymentEventType = get_model('order', 'PaymentEventType')
 post_refund = get_class('refund.signals', 'post_refund')
 Refund = get_model('refund', 'Refund')
@@ -426,6 +427,26 @@ class RefundTests(RefundTestMixin, StatusTestsMixin, TestCase):
             (REFUND_MODEL_LOGGER_NAME, 'WARNING', msg)
         )
         self.assertFalse(mock_task.called)
+
+    @mock.patch('ecommerce.extensions.order.models.PaymentEvent.objects')
+    def test_disable_multiple_refund(self, mock_payment_event):
+        """ Verify functionality of DisableMultipleRefund Configuration"""
+        mock_payment_event.filter.return_value = mock_payment_event
+        mock_payment_event.exists.return_value = True
+        refund = self.create_refund()
+        disable_refund = DisableMultipleRefund.objects.create(enabled=True, duration=1)
+        with LogCapture(LOGGER_NAME) as l:
+            refund.approve()
+            l.check(
+                (
+                    LOGGER_NAME,
+                    'INFO',
+                    'Can not Issue Refund [{}], Multiple Refunds disabled for days [{}].'.format(
+                        refund.id,
+                        disable_refund.duration,
+                    )
+                )
+            )
 
 
 class RefundLineTests(StatusTestsMixin, TestCase):

@@ -1,6 +1,7 @@
 analytics-python==1.2.7
 django==1.10.7
 django-compressor==2.2
+django-config-models==0.1.8
 django-crispy-forms==1.6.1
 django_extensions==1.9.0
 django-filter==1.0.4
