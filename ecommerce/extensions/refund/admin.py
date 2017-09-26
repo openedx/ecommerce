@@ -1,6 +1,9 @@
 from django.contrib import admin
+
+from config_models.admin import ConfigurationModelAdmin
 from oscar.core.loading import get_model
 
+DisableMultipleRefund = get_model('refund', 'DisableMultipleRefund')
 Refund = get_model('refund', 'Refund')
 RefundLine = get_model('refund', 'RefundLine')
 
@@ -21,3 +24,6 @@ class RefundAdmin(admin.ModelAdmin):
     fields = ('order', 'user', 'status', 'total_credit_excl_tax', 'currency', 'created', 'modified',)
     readonly_fields = ('order', 'user', 'total_credit_excl_tax', 'currency', 'created', 'modified',)
     inlines = (RefundLineInline,)
+
+
+admin.site.register(DisableMultipleRefund, ConfigurationModelAdmin)
