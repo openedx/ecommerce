@@ -1,6 +1,5 @@
-from django.contrib import admin
-
 from config_models.admin import ConfigurationModelAdmin
+from django.contrib import admin
 from oscar.core.loading import get_model
 
 DisableMultipleRefund = get_model('refund', 'DisableMultipleRefund')
