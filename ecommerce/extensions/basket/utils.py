@@ -70,6 +70,7 @@ def prepare_basket(request, products, voucher=None):
             attribute_type=BasketAttributeType.objects.get(name=BUNDLE),
             defaults={'value_text': bundle}
         )
+        basket.clear_vouchers()
     else:
         BasketAttribute.objects.filter(basket=basket, attribute_type__name=BUNDLE).delete()
 
