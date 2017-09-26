@@ -16,6 +16,9 @@ USER_LIST_VIEW_SWITCH = 'enable_user_list_view'
 # Coupon constant
 COUPON_PRODUCT_CLASS_NAME = 'Coupon'
 
+# Course ENtitlement contrant
+COURSE_ENTITLEMENT_CLASS_NAME = 'Course Entitlement'
+
 # Enrollment Code constants
 ENROLLMENT_CODE_PRODUCT_CLASS_NAME = 'Enrollment Code'
 ENROLLMENT_CODE_SWITCH = 'create_enrollment_codes'

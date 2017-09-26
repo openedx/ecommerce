@@ -156,6 +156,12 @@ def generate_sku(product, partner):
             getattr(product.attr, 'credit_provider', ''),
             str(partner.id)
         ))
+    elif product.is_course_entitlement_product:
+        _hash = ' '.join((
+            getattr(product.attr, 'certificate_type', ''),
+            product.attr.course_key,
+            str(partner.id)
+        ))
     else:
         raise Exception('Unexpected product class')
 

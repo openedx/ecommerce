@@ -1,0 +1,71 @@
+# -*- coding: utf-8 -*-
+from __future__ import unicode_literals
+
+from django.db import migrations, models
+from oscar.core.loading import get_model
+from oscar.core.utils import slugify
+
+from ecommerce.core.constants import COURSE_ENTITLEMENT_CLASS_NAME
+
+Category = get_model("catalogue", "Category")
+ProductAttribute = get_model("catalogue", "ProductAttribute")
+ProductClass = get_model("catalogue", "ProductClass")
+
+
+def create_product_class(apps, schema_editor):
+    """
+
+
+    """
+
+    # Create a new product class for course entitlement
+    course_entitlement = ProductClass.objects.create(
+        track_stock=False,
+        requires_shipping=False,
+        name=COURSE_ENTITLEMENT_CLASS_NAME,
+        slug=slugify(COURSE_ENTITLEMENT_CLASS_NAME)
+    )
+
+    # Create product attributes for course seat products
+    ProductAttribute.objects.create(
+        product_class=course_entitlement,
+        name="course_key",
+        code="course_key",
+        type="text",
+        required=True
+    )
+    ProductAttribute.objects.create(
+        product_class=course_entitlement,
+        name="certificate_type",
+        code="certificate_type",
+        type="text",
+        required=False
+    )
+
+    # Create a category for course entitlements
+    Category.objects.create(
+        description="All course entitlements",
+        slug="course_entitlements",
+        depth=1,
+        path="003",
+        image="",
+        name="Course Entitlements"
+    )
+
+
+def remove_product_class(apps, schema_editor):
+    """ Reverse function. """
+    Category.objects.filter(slug='course_entitlements').delete()
+    ProductClass.objects.filter(name=COURSE_ENTITLEMENT_CLASS_NAME).delete()
+
+
+class Migration(migrations.Migration):
+
+    dependencies = [
+        ('catalogue', '0001_initial'),
+        ('catalogue', '0024_fix_enrollment_code_slug')
+    ]
+
+    operations = [
+        migrations.RunPython(create_product_class, remove_product_class),
+    ]

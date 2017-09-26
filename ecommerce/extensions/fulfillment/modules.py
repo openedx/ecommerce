@@ -11,12 +11,14 @@ import logging
 import requests
 from django.conf import settings
 from django.core.urlresolvers import reverse
+from django.utils.timezone import now, timedelta
+from edx_rest_api_client.client import EdxRestApiClient
 from oscar.core.loading import get_model
 from requests.exceptions import ConnectionError, Timeout  # pylint: disable=ungrouped-imports
 from rest_framework import status
 
-from ecommerce.core.constants import ENROLLMENT_CODE_PRODUCT_CLASS_NAME
-from ecommerce.core.url_utils import get_lms_enrollment_api_url
+from ecommerce.core.constants import COURSE_ENTITLEMENT_CLASS_NAME, ENROLLMENT_CODE_PRODUCT_CLASS_NAME
+from ecommerce.core.url_utils import get_lms_enrollment_api_url, get_lms_entitlement_api_url
 from ecommerce.courses.models import Course
 from ecommerce.courses.utils import mode_for_seat
 from ecommerce.enterprise.utils import get_or_create_enterprise_customer_user
@@ -507,3 +509,141 @@ class EnrollmentCodeFulfillmentModule(BaseFulfillmentModule):
             },
             site=order.site
         )
+
+
+class CourseEntitlementFulfillmentModule(BaseFulfillmentModule):
+    """ Fulfillment Module for enrolling students after a product purchase.
+
+    Allows the entitlement of a student via purchase of a 'Course Entitlement'.
+    """
+
+    def _post_to_entitlement_api(self, data, user, site):
+        entitlement_api_client = EdxRestApiClient(
+            get_lms_entitlement_api_url(),
+            jwt=site.siteconfiguration.access_token
+        )
+
+        return entitlement_api_client.entitlement.put(data)
+
+    def supports_line(self, line):
+        return line.product.is_course_entitlement_product
+
+    def get_supported_lines(self, lines):
+        """ Return a list of lines that can be fulfilled through enrollment.
+
+        Checks each line to determine if it is a "Course Entitlement". Entitlements are fulfilled by granting students
+        an entitlement in a course, which is the sole functionality of this module.
+
+        Args:
+            lines (List of Lines): Order Lines, associated with purchased products in an Order.
+
+        Returns:
+            A supported list of unmodified lines associated with "Course ENtitlement" products.
+        """
+        return [line for line in lines if self.supports_line(line)]
+
+    def fulfill_product(self, order, lines):
+        """ Fulfills the purchase of a 'Course Entitlement' by enrolling the associated student.
+
+        Uses the order and the lines to determine which courses to enroll a student in, and with certain
+        certificate types. May result in an error if the Entitlement API cannot be reached, or if there is
+        additional business logic errors when trying to enroll the student.
+
+        Args:
+            order (Order): The Order associated with the lines to be fulfilled. The user associated with the order
+                is presumed to be the student to enroll in a course.
+            lines (List of Lines): Order Lines, associated with purchased products in an Order. These should only
+                be "Course Entitlement" products.
+
+        Returns:
+            The original set of lines, with new statuses set based on the success or failure of fulfillment.
+
+        """
+        logger.info("Attempting to fulfill 'Course Entitlement' product types for order [%s]", order.number)
+
+        for line in lines:
+            try:
+                mode = mode_for_seat(line.product)
+                course_key = line.product.attr.course_key
+            except AttributeError:
+                logger.error("Supported Entitlement Product does not have required attributes, [certificate_type, course_key]")
+                line.set_status(LINE.FULFILLMENT_CONFIGURATION_ERROR)
+                continue
+
+            data = {
+                'user': order.user.username,
+                'is_active': True,
+                'mode': mode,
+                'expiration_date': '{}'.format(now() + timedelta(days=365)),
+                'course_entitlement_details': {
+                    'course_id': course_key
+                },
+                'entitlement_attributes': [
+                    {
+                        'namespace': 'order',
+                        'name': 'order_number',
+                        'value': order.number
+                    }
+                ]
+            }
+
+            try:
+                # Post to the Entitlement API.
+                response = self._post_to_entitlement_api(data, user=order.user, site=order.site)
+
+                line.set_status(LINE.COMPLETE)
+
+                audit_log(
+                    'line_fulfilled',
+                    order_line_id=line.id,
+                    order_number=order.number,
+                    product_class=line.product.get_product_class().name,
+                    course_id=course_key,
+                    mode=mode,
+                    user_id=order.user.id,
+                )
+            except ConnectionError:
+                logger.error(
+                    "Unable to fulfill line [%d] of order [%s] due to a network problem", line.id, order.number
+                )
+                line.set_status(LINE.FULFILLMENT_NETWORK_ERROR)
+            except Timeout:
+                logger.error(
+                    "Unable to fulfill line [%d] of order [%s] due to a request time out", line.id, order.number
+                )
+                line.set_status(LINE.FULFILLMENT_TIMEOUT_ERROR)
+        logger.info("Finished fulfilling 'Course Entitlement' product types for order [%s]", order.number)
+        return order, lines
+
+    def revoke_line(self, line):
+        try:
+            logger.info('Attempting to revoke fulfillment of Line [%d]...', line.id)
+
+            mode = mode_for_seat(line.product)
+            course_key = line.product.attr.course_key
+            data = {
+                'user': line.order.user.username,
+                'is_active': False,
+                'mode': mode,
+                'course_entitlement_details': {
+                    'course_id': course_key,
+                },
+            }
+
+            response = self._post_to_entitlement_api(data, user=line.order.user, site=line.order.site)
+
+            audit_log(
+                'line_revoked',
+                order_line_id=line.id,
+                order_number=line.order.number,
+                product_class=line.product.get_product_class().name,
+                course_id=course_key,
+                certificate_type=getattr(line.product.attr, 'certificate_type', ''),
+                user_id=line.order.user.id
+            )
+
+            return True
+        except Exception:  # pylint: disable=broad-except
+            logger.exception('Failed to revoke fulfillment of Line [%d].', line.id)
+
+        return False
