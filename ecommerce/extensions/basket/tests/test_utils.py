@@ -376,6 +376,19 @@ class BasketUtilsTests(DiscoveryTestMixin, TestCase):
         bundle_id = BasketAttribute.objects.get(basket=basket, attribute_type__name=BUNDLE).value_text
         self.assertEqual(bundle_id, 'test_bundle')
 
+    def test_prepare_basket_with_bundle_voucher(self):
+        """
+        Test prepare_basket clears vouchers for a bundle
+        """
+        product = ProductFactory()
+        voucher = VoucherFactory(code='FIRST')
+        request = self.request
+        basket = prepare_basket(request, [product], voucher)
+        self.assertTrue(basket.vouchers.all())
+        request.GET = {'bundle': 'test_bundle'}
+        basket = prepare_basket(request, [product])
+        self.assertFalse(basket.vouchers.all())
+
     def test_prepare_basket_attribute_delete(self):
         """
         Test prepare_basket removes the bundle attribute for a basket when a user is purchasing a single course
