@@ -1,4 +1,5 @@
 analytics-python==1.2.7
+coreapi==2.3.1
 django==1.10.7
 django-compressor==2.2
 django-crispy-forms==1.6.1
@@ -6,12 +7,11 @@ django_extensions==1.9.0
 django-filter==1.0.4
 django-libsass==0.5
 django-oscar==1.4
-django-rest-swagger[reST]==0.3.10
 django-simple-history==1.8.2
 django-solo==1.1.2
 django-threadlocals==0.8
 django-waffle==0.12.0
-djangorestframework==3.3.3
+djangorestframework==3.6.4
 djangorestframework-jwt==1.11.0
 drf-extensions==0.3.1
 edx-auth-backends==1.1.2
@@ -23,11 +23,13 @@ edx-opaque-keys==0.3.1
 edx-rest-api-client==1.7.1
 jsonfield==1.0.3
 libsass==0.9.2
+markdown==2.6.9
 ndg-httpsclient==0.4.2
 path.py==7.2
 paypalrestsdk==1.11.5
 premailer==2.9.2
 pycountry==17.1.8
+pygments==2.2.0
 python-dateutil==2.4.2
 pytz==2016.10
 requests==2.18.1

@@ -18,7 +18,7 @@ class StockRecordViewSet(viewsets.ModelViewSet):
     def get_serializer_class(self):
         serializer_class = self.serializer_class
 
-        if self.request.method == 'PUT':
+        if self.request and self.request.method == 'PUT':
             serializer_class = serializers.PartialStockRecordSerializerForUpdate
 
         return serializer_class
