@@ -286,6 +286,6 @@ class VoucherViewSet(NonDestroyableModelViewSet):
             'credit_provider_price': credit_provider_price,
             'seat_type': product.attr.certificate_type,
             'stockrecords': serializers.StockRecordSerializer(stock_record).data,
-            'title': course.name,
+            'title': course_info.get('title', course.name),
             'voucher_end_date': voucher.end_datetime
         }
