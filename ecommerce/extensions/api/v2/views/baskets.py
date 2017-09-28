@@ -45,6 +45,9 @@ class BasketCreateView(EdxOrderPlacementMixin, generics.CreateAPIView):
     """
     permission_classes = (IsAuthenticated,)
 
+    def get_serializer(self):
+        pass
+
     # Disable atomicity for the view. Otherwise, we'd be unable to commit to the database
     # until the request had concluded; Django will refuse to commit when an atomic() block
     # is active, since that would break atomicity. Without an order present in the database

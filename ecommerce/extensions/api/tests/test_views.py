@@ -3,6 +3,7 @@ from django.contrib.auth.models import AnonymousUser
 from django.core.exceptions import PermissionDenied
 from django.test import RequestFactory, TestCase
 from django.urls import reverse
+from mock import Mock, patch
 from oscar.test.factories import UserFactory
 from rest_framework.test import APITestCase
 
@@ -26,9 +27,10 @@ class TestApiDocs(UserMixin, SiteMixin, APITestCase):
         response = self.client.get(self.path)
         assert response.status_code == 200
 
+    @patch('rest_framework_swagger.views.SchemaGenerator.get_schema', Mock(return_value=None))
     def test_api_docs_redirect(self):
         """
-        Verify that unauthenticated clients are redirected.
+        Verify that user is redirected to login page if schema is None.
         """
         response = self.client.get(self.path)
 
