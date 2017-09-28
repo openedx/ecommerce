@@ -36,6 +36,9 @@ class RefundCreateView(generics.CreateAPIView):
     """
     permission_classes = (IsAuthenticated, CanActForUser)
 
+    def get_serializer(self):
+        pass
+
     def create(self, request, *args, **kwargs):
         """ Creates refunds, if eligible orders exist. """
         course_id = request.data.get('course_id')

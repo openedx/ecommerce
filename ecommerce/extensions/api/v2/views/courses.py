@@ -73,7 +73,7 @@ class CourseViewSet(NonDestroyableModelViewSet):
 
     def get_serializer_context(self):
         context = super(CourseViewSet, self).get_serializer_context()
-        context['include_products'] = bool(self.request.GET.get('include_products', False))
+        context['include_products'] = bool(self.request.GET.get('include_products', False)) if self.request else False
         return context
 
     @detail_route(methods=['post'])

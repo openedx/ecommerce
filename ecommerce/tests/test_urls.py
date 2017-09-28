@@ -17,3 +17,12 @@ class TestUrls(TestCase):
         # Test client can't fetch external URLs, so fetch_redirect_response is set to
         # False to avoid loading the final page
         self.assertRedirects(response, get_lms_dashboard_url(), fetch_redirect_response=False)
+
+    def test_api_docs(self):
+        """
+        Verify that the API docs render.
+        """
+        path = reverse('api-docs:docs-index')
+        response = self.client.get(path)
+
+        assert response.status_code == 200

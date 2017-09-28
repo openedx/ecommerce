@@ -10,6 +10,7 @@ from django.utils.translation import ugettext_lazy as _
 from django.views.defaults import page_not_found, server_error
 from django.views.generic import TemplateView
 from django.views.i18n import JavaScriptCatalog
+from rest_framework.documentation import include_docs_urls
 
 from ecommerce.core import views as core_views
 from ecommerce.core.url_utils import get_lms_dashboard_url
@@ -53,7 +54,7 @@ urlpatterns = AUTH_URLS + WELL_KNOWN_URLS + [
     url(r'^admin/', include(admin.site.urls)),
     url(r'^auto_auth/$', core_views.AutoAuth.as_view(), name='auto_auth'),
     url(r'^api-auth/', include(AUTH_URLS, namespace='rest_framework')),
-    url(r'^api-docs/', include('rest_framework_swagger.urls')),
+    url(r'^api-docs/', include_docs_urls(title='Ecommerce API')),
     url(r'^courses/', include('ecommerce.courses.urls', namespace='courses')),
     url(r'^credit/', include('ecommerce.credit.urls', namespace='credit')),
     url(r'^coupons/', include('ecommerce.coupons.urls', namespace='coupons')),
