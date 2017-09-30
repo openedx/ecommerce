@@ -271,10 +271,14 @@ def get_enterprise_course_consent_url(
     )
     request_params = {
         'course_id': course_id,
-        'enterprise_id': enterprise_customer_uuid,
-        'enrollment_deferred': True,
+        'enterprise_customer_uuid': enterprise_customer_uuid,
+        'defer_creation': True,
         'next': callback_url,
         'failure_url': failure_url,
+        # TODO: Erase these 2 keys when edx-platform/ecommerce are both deployed to be using
+        # 'enterprise_customer_uuid' and 'defer_creation' rather than these.
+        'enterprise_id': enterprise_customer_uuid,
+        'enrollment_deferred': True,
     }
     redirect_url = '{base}?{params}'.format(
         base=site.siteconfiguration.enterprise_grant_data_sharing_url,
@@ -290,9 +294,9 @@ def get_enterprise_customer_data_sharing_consent_token(access_token, course_id, 
     """
     consent_token_hmac = hmac.new(
         str(access_token),
-        '{course_id}_{enterprise_uuid}'.format(
+        '{course_id}_{enterprise_customer_uuid}'.format(
             course_id=course_id,
-            enterprise_uuid=enterprise_customer_uuid,
+            enterprise_customer_uuid=enterprise_customer_uuid,
         ),
         digestmod=hashlib.sha256,
     )
