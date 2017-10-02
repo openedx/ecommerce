@@ -32,6 +32,7 @@ node_modules/
 ecommerce/static/bower_components/
 ecommerce/static/build/
 npm-debug.log
+package-lock.json
 
 # Unit test / coverage reports
 coverage/
