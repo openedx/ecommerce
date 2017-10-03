@@ -1,7 +1,6 @@
 import uuid
 
 import httpretty
-from django.conf import settings
 from django.core.urlresolvers import reverse
 from oscar.core.loading import get_model
 
@@ -10,43 +9,10 @@ from ecommerce.programs.benefits import PercentageDiscountBenefitWithoutRange
 from ecommerce.programs.constants import BENEFIT_PROXY_CLASS_MAP
 from ecommerce.programs.custom import class_path
 from ecommerce.programs.tests.mixins import ProgramTestMixin
-from ecommerce.tests.testcases import CacheMixin, TestCase
+from ecommerce.tests.testcases import TestCase, ViewTestMixin
 
 Benefit = get_model('offer', 'Benefit')
 ConditionalOffer = get_model('offer', 'ConditionalOffer')
-
-
-class ViewTestMixin(CacheMixin):
-    path = None
-
-    def setUp(self):
-        super(ViewTestMixin, self).setUp()
-        user = self.create_user(is_staff=True)
-        self.client.login(username=user.username, password=self.password)
-
-    def assert_get_response_status(self, status_code):
-        """ Asserts the HTTP status of a GET responses matches the expected status. """
-        response = self.client.get(self.path)
-        self.assertEqual(response.status_code, status_code)
-        return response
-
-    def test_login_required(self):
-        """ Users are required to login before accessing the view. """
-        self.client.logout()
-        response = self.assert_get_response_status(302)
-        self.assertIn(settings.LOGIN_URL, response.url)
-
-    def test_staff_only(self):
-        """ The view should only be accessible to staff. """
-        self.client.logout()
-
-        user = self.create_user(is_staff=False)
-        self.client.login(username=user.username, password=self.password)
-        self.assert_get_response_status(404)
-
-        user.is_staff = True
-        user.save()
-        self.assert_get_response_status(200)
 
 
 class ProgramOfferListViewTests(ProgramTestMixin, ViewTestMixin, TestCase):

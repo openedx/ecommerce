@@ -11,7 +11,6 @@ from slumber.exceptions import SlumberHttpBaseException
 
 from ecommerce.core.utils import get_cache_key
 
-
 logger = logging.getLogger(__name__)
 
 

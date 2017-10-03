@@ -70,7 +70,7 @@ class EnterpriseCustomerCondition(SingleItemConsumptionConditionMixin, Condition
             return False
 
         enterprise_customer = learner_data['enterprise_customer']
-        if self.enterprise_customer_uuid != enterprise_customer['uuid']:
+        if self.enterprise_customer['id'] != enterprise_customer['uuid']:
             # Learner is not linked to the EnterpriseCustomer associated with this condition.
             return False
 
@@ -89,7 +89,7 @@ class EnterpriseCustomerCondition(SingleItemConsumptionConditionMixin, Condition
 
             course_run_ids.append(course.id)
 
-        if not catalog_contains_course_runs(basket.site, course_run_ids, self.enterprise_customer_uuid,
+        if not catalog_contains_course_runs(basket.site, course_run_ids, self.enterprise_customer['id'],
                                             enterprise_customer_catalog_uuid=self.enterprise_customer_catalog_uuid):
             # Basket contains course runs that do not exist in the EnterpriseCustomerCatalogs
             # associated with the EnterpriseCustomer.
