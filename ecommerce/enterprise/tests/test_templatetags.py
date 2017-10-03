@@ -2,6 +2,7 @@ import httpretty
 import mock
 from django.conf import settings
 from django.template import Context, Template
+from oscar.core.loading import get_model
 
 from ecommerce.core.tests import toggle_switch
 from ecommerce.coupons.tests.mixins import CouponMixin
@@ -9,6 +10,7 @@ from ecommerce.enterprise.exceptions import EnterpriseDoesNotExist
 from ecommerce.enterprise.tests.mixins import EnterpriseServiceMockMixin
 from ecommerce.tests.testcases import TestCase
 
+Benefit = get_model('offer', 'Benefit')
 TEST_ENTERPRISE_CUSTOMER_UUID = 'cf246b88-d5f6-4908-a522-fc307e0b0c59'
 
 

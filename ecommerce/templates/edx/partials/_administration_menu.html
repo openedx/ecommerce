@@ -7,5 +7,8 @@
     <a {% if admin == "program_offers" %}class="selected"{% endif %} href="{% url 'programs:offers:list' %}">
       {% trans "Program Offers" %}
     </a>
+    <a {% if admin == "enterprise_offers" %}class="selected"{% endif %} href="{% url 'enterprise:offers:list' %}">
+      {% trans "Enterprise Offers" %}
+    </a>
   </div>
 </nav>

@@ -67,6 +67,7 @@ class EnterpriseServiceMockMixin(object):
         }
 
         enterprise_customer_api_response_json = json.dumps(enterprise_customer_api_response)
+        self.mock_access_token_response()
         httpretty.register_uri(
             method=httpretty.GET,
             uri=self.ENTERPRISE_CUSTOMER_URL,
@@ -74,12 +75,12 @@ class EnterpriseServiceMockMixin(object):
             content_type='application/json'
         )
 
-    def mock_specific_enterprise_customer_api(self, uuid, name='TestShib', contact_email='', consent_enabled=True):
+    def mock_specific_enterprise_customer_api(self, uuid, name='BigEnterprise', contact_email='', consent_enabled=True):
         """
         Helper function to register the enterprise customer API endpoint.
         """
         enterprise_customer_api_response = {
-            'uuid': uuid,
+            'uuid': str(uuid),
             'name': name,
             'catalog': 0,
             'active': True,
@@ -103,6 +104,7 @@ class EnterpriseServiceMockMixin(object):
         }
         enterprise_customer_api_response_json = json.dumps(enterprise_customer_api_response)
 
+        self.mock_access_token_response()
         httpretty.register_uri(
             method=httpretty.GET,
             uri='{}{}/'.format(self.ENTERPRISE_CUSTOMER_URL, uuid),
@@ -119,6 +121,7 @@ class EnterpriseServiceMockMixin(object):
         }
         enterprise_customer_api_response_json = json.dumps(enterprise_customer_api_response)
 
+        self.mock_access_token_response()
         httpretty.register_uri(
             method=httpretty.GET,
             uri='{}{}/'.format(self.ENTERPRISE_CUSTOMER_URL, uuid),
@@ -149,7 +152,7 @@ class EnterpriseServiceMockMixin(object):
                     'id': learner_id,
                     'enterprise_customer': {
                         'uuid': enterprise_customer_uuid,
-                        'name': 'TestShib',
+                        'name': 'BigEnterprise',
                         'catalog': catalog_id,
                         'active': True,
                         'site': {
@@ -197,6 +200,7 @@ class EnterpriseServiceMockMixin(object):
         }
         enterprise_learner_api_response_json = json.dumps(enterprise_learner_api_response)
 
+        self.mock_access_token_response()
         httpretty.register_uri(
             method=httpretty.GET,
             uri=self.ENTERPRISE_LEARNER_URL,
@@ -214,6 +218,7 @@ class EnterpriseServiceMockMixin(object):
         }
         enterprise_learner_api_response_json = json.dumps(enterprise_learner_api_response)
 
+        self.mock_access_token_response()
         httpretty.register_uri(
             method=httpretty.POST,
             uri=self.ENTERPRISE_LEARNER_URL,
@@ -237,6 +242,7 @@ class EnterpriseServiceMockMixin(object):
         }
         enterprise_learner_api_response_json = json.dumps(enterprise_learner_api_response)
 
+        self.mock_access_token_response()
         httpretty.register_uri(
             method=httpretty.GET,
             uri=self.ENTERPRISE_LEARNER_URL,
@@ -258,7 +264,7 @@ class EnterpriseServiceMockMixin(object):
                     'invalid-unexpected-key': {
                         'enterprise_customer': {
                             'uuid': 'cf246b88-d5f6-4908-a522-fc307e0b0c59',
-                            'name': 'TestShib',
+                            'name': 'BigEnterprise',
                             'catalog': 1,
                             'active': True,
                             'site': {
@@ -281,6 +287,7 @@ class EnterpriseServiceMockMixin(object):
         }
         enterprise_learner_api_response_json = json.dumps(enterprise_learner_api_response)
 
+        self.mock_access_token_response()
         httpretty.register_uri(
             method=httpretty.GET,
             uri=self.ENTERPRISE_LEARNER_URL,
@@ -302,7 +309,7 @@ class EnterpriseServiceMockMixin(object):
                 {
                     'enterprise_customer': {
                         'uuid': 'cf246b88-d5f6-4908-a522-fc307e0b0c59',
-                        'name': 'TestShib',
+                        'name': 'BigEnterprise',
                         'catalog': 1,
                         'active': True,
                         'site': {
@@ -324,6 +331,7 @@ class EnterpriseServiceMockMixin(object):
         }
         enterprise_learner_api_response_json = json.dumps(enterprise_learner_api_response)
 
+        self.mock_access_token_response()
         httpretty.register_uri(
             method=httpretty.GET,
             uri=self.ENTERPRISE_LEARNER_URL,
@@ -347,6 +355,7 @@ class EnterpriseServiceMockMixin(object):
         Helper function to register enterprise learner API endpoint for a
         failure.
         """
+        self.mock_access_token_response()
         httpretty.register_uri(
             method=httpretty.GET,
             uri=self.ENTERPRISE_LEARNER_URL,
@@ -357,6 +366,7 @@ class EnterpriseServiceMockMixin(object):
         """
         Helper function to return 500 error while accessing learner entitlements api endpoint.
         """
+        self.mock_access_token_response()
         httpretty.register_uri(
             method=httpretty.GET,
             uri='{base_url}{learner_id}/entitlements/'.format(
@@ -381,6 +391,7 @@ class EnterpriseServiceMockMixin(object):
         }
         learner_entitlements_json = json.dumps(enterprise_learner_entitlements_api_response)
 
+        self.mock_access_token_response()
         httpretty.register_uri(
             method=httpretty.GET,
             uri='{base_url}{learner_id}/entitlements/'.format(
@@ -426,6 +437,7 @@ class EnterpriseServiceMockMixin(object):
         }
         enterprise_enrollment_api_response_json = json.dumps(enterprise_enrollment_api_response)
 
+        self.mock_access_token_response()
         httpretty.register_uri(
             method=httpretty.GET,
             uri=self.ENTERPRISE_COURSE_ENROLLMENT_URL,
@@ -452,6 +464,8 @@ class EnterpriseServiceMockMixin(object):
             'consent_required': required,
             'exists': exists,
         }
+
+        self.mock_access_token_response()
         httpretty.register_uri(
             method=method,
             uri=self.site.siteconfiguration.build_lms_url('/consent/api/v1/data_sharing_consent'),
