@@ -50,7 +50,7 @@ class EnterpriseOfferForm(forms.ModelForm):
                 'benefit_value': instance.benefit.value,
             })
         super(EnterpriseOfferForm, self).__init__(data, files, auto_id, prefix, initial, error_class, label_suffix,
-                                               empty_permitted, instance)
+                                                  empty_permitted, instance)
 
         date_ui_class = {'class': 'add-pikaday'}
         self.fields['start_datetime'].widget.attrs.update(date_ui_class)
