@@ -11,7 +11,6 @@ from slumber.exceptions import SlumberHttpBaseException
 
 from ecommerce.core.utils import get_cache_key
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -88,7 +87,7 @@ def fetch_enterprise_learner_data(site, user):
                     {
                         "enterprise_customer": {
                             "uuid": "cf246b88-d5f6-4908-a522-fc307e0b0c59",
-                            "name": "TestShib",
+                            "name": "BigEnterprise",
                             "catalog": 2,
                             "active": true,
                             "site": {

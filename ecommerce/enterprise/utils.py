@@ -13,7 +13,8 @@ from django.core.urlresolvers import reverse
 from django.utils.translation import ugettext as _
 from edx_rest_api_client.client import EdxRestApiClient
 from oscar.core.loading import get_model
-from slumber.exceptions import HttpNotFoundError
+from requests.exceptions import ConnectionError, Timeout
+from slumber.exceptions import SlumberHttpBaseException
 
 from ecommerce.core.utils import traverse_pagination
 from ecommerce.enterprise.exceptions import EnterpriseDoesNotExist
@@ -62,7 +63,7 @@ def get_enterprise_customer(site, uuid):
 
     try:
         response = client.get()
-    except HttpNotFoundError:
+    except (ConnectionError, SlumberHttpBaseException, Timeout):
         return None
     return {
         'name': response['name'],

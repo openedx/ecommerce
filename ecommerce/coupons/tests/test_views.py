@@ -268,10 +268,10 @@ class CouponOfferViewTests(ApiMockMixin, CouponMixin, DiscoveryTestMixin, Enterp
         )
 
     @ddt.data(
-        ('', 'If you have concerns about sharing your data, please contact your administrator at TestShib.'),
+        ('', 'If you have concerns about sharing your data, please contact your administrator at BigEnterprise.'),
         (
             'contact@example.com',
-            'If you have concerns about sharing your data, please contact your administrator at TestShib at '
+            'If you have concerns about sharing your data, please contact your administrator at BigEnterprise at '
             'contact@example.com.',
         ),
     )
@@ -282,7 +282,6 @@ class CouponOfferViewTests(ApiMockMixin, CouponMixin, DiscoveryTestMixin, Enterp
         self.mock_access_token_response()
         self.mock_specific_enterprise_customer_api(
             ENTERPRISE_CUSTOMER,
-            name='TestShib',
             contact_email=contact_email
         )
         base_url = self.prepare_url_for_credit_seat(enterprise_customer=ENTERPRISE_CUSTOMER)
@@ -551,7 +550,7 @@ class CouponRedeemViewTests(CouponMixin, DiscoveryTestMixin, LmsApiMockMixin, En
     @httpretty.activate
     def test_enterprise_customer_successful_redemption_message(self):
         """ Verify the info message appears on successful redemption. """
-        expected_message = '<i class="fa fa-info-circle"></i> A discount has been applied, courtesy of TestShib.'
+        expected_message = '<i class="fa fa-info-circle"></i> A discount has been applied, courtesy of BigEnterprise.'
 
         # Setting benefit value to a low amount to ensure the basket is not free,
         # and calls to the checkout page do not redirect away from the checkout page.

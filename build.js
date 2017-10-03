@@ -41,11 +41,11 @@
             exclude: ['js/common']
         },
         {
-            name: 'js/pages/program_offer_list_page',
+            name: 'js/pages/offer_list_page',
             exclude: ['js/common']
         },
         {
-            name: 'js/pages/program_offer_form_page',
+            name: 'js/pages/offer_form_page',
             exclude: ['js/common']
         },
         {
