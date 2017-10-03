@@ -1,6 +1,7 @@
 from django import template
 
 from ecommerce.enterprise import utils
+from ecommerce.enterprise.constants import BENEFIT_PROXY_CLASS_MAP
 from ecommerce.enterprise.exceptions import EnterpriseDoesNotExist
 
 register = template.Library()
@@ -23,3 +24,14 @@ def enterprise_customer_for_voucher(context, voucher):
         return utils.get_enterprise_customer_from_voucher(request.site, voucher)
     except EnterpriseDoesNotExist:
         return None
+
+
+@register.filter
+def benefit_type(benefit):
+    # TODO: Refactor to consolidate with `ecommerce.programs.templatetags.programs.benefit_type`.
+    _type = benefit.type
+
+    if not _type:
+        _type = BENEFIT_PROXY_CLASS_MAP[benefit.proxy_class]
+
+    return _type

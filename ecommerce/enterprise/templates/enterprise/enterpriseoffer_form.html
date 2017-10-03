@@ -5,11 +5,11 @@
 
 {% block title %}
   {% if editing %}
-    {% blocktrans trimmed with program_title=program.title %}
-      Edit Program Offer: {{ program_title }}
+    {% blocktrans trimmed with enterprise_customer_name=enterprise_customer.name %}
+      Edit Enterprise Offer: {{ enterprise_customer_name }}
     {% endblocktrans %}
   {% else %}
-    {% trans "Create Program Offer" %}
+    {% trans "Create Enterprise Offer" %}
   {% endif %}
 {% endblock %}
 
@@ -25,10 +25,10 @@
 {% block content %}
   <div class="container">
     <ol class="breadcrumb">
-      <li><a href="{% url 'programs:offers:list' %}">{% trans "Program Offers" %}</a></li>
+      <li><a href="{% url 'enterprise:offers:list' %}">{% trans "Enterprise Offers" %}</a></li>
 
       {% if editing %}
-        <li>{{ program.title }}</li>
+        <li>{{ enterprise_customer.name }}</li>
         <li>{% trans "Edit" %}</li>
       {% else %}
         <li>{% trans "Create" %}</li>
@@ -40,9 +40,9 @@
     <div class="page-header">
       <h1 class="hd-1 emphasized">
         {% if editing %}
-          {% trans "Edit Program Offer" %}
+          {% trans "Edit Enterprise Offer" %}
         {% else %}
-          {% trans "Create Program Offer" %}
+          {% trans "Create Enterprise Offer" %}
         {% endif %}
       </h1>
     </div>
@@ -55,9 +55,9 @@
         <input type="submit" class="btn btn-primary" value="{% if editing %}
             {% trans "Save Changes" %}
           {% else %}
-            {% trans "Create Program Offer" %}
+            {% trans "Create Enterprise Offer" %}
           {% endif %}">
-        <a class="btn btn-default" href="{% url 'programs:offers:list' %}">{% trans "Cancel" %}</a>
+        <a class="btn btn-default" href="{% url 'enterprise:offers:list' %}">{% trans "Cancel" %}</a>
       </div>
 
     </form>
@@ -69,7 +69,7 @@
     <div class="container">
       <div class="row">
         <div class="col-xs-12 text-right">
-          <em>{% blocktrans %}{{ platform_name }} Program Offer Administration Tool{% endblocktrans %}</em>
+          <em>{% blocktrans %}{{ platform_name }} Enterprise Offer Administration Tool{% endblocktrans %}</em>
         </div>
       </div>
     </div>

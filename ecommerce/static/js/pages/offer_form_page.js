@@ -6,7 +6,7 @@ require([
         'use strict';
 
         $(function() {
-            $('#programOfferForm').find('.add-pikaday').each(function() {
+            $('#offerForm').find('.add-pikaday').each(function() {
                 new Pikaday({
                     field: this,
                     format: 'YYYY-MM-DD HH:mm:ss',

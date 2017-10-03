@@ -7,6 +7,8 @@ from oscar.test.factories import ConditionalOfferFactory as BaseConditionalOffer
 from oscar.test.factories import VoucherFactory as BaseVoucherFactory
 from oscar.test.factories import *  # pylint:disable=wildcard-import,unused-wildcard-import
 
+from ecommerce.enterprise.offer.benefits import EnterprisePercentageDiscountBenefit
+from ecommerce.enterprise.offer.conditions import EnterpriseCustomerCondition
 from ecommerce.programs.benefits import AbsoluteDiscountBenefitWithoutRange, PercentageDiscountBenefitWithoutRange
 from ecommerce.programs.conditions import ProgramCourseRunSeatsCondition
 from ecommerce.programs.custom import class_path
@@ -153,6 +155,40 @@ class ProgramCourseRunSeatsConditionFactory(ConditionFactory):
 class ProgramOfferFactory(ConditionalOfferFactory):
     benefit = factory.SubFactory(PercentageDiscountBenefitWithoutRangeFactory)
     condition = factory.SubFactory(ProgramCourseRunSeatsConditionFactory)
+    max_basket_applications = 1
+    offer_type = ConditionalOffer.SITE
+    status = ConditionalOffer.OPEN
+
+
+class EnterprisePercentageDiscountBenefitFactory(BenefitFactory):
+    range = None
+    type = ''
+    value = 10
+    proxy_class = class_path(EnterprisePercentageDiscountBenefit)
+
+
+class EnterpriseCustomerConditionFactory(ConditionFactory):
+    range = None
+    type = ''
+    value = None
+    # The customer's expected to be a dictionary.
+    enterprise_customer = {
+        'name': factory.Faker('company'),
+        'uuid': factory.LazyFunction(uuid.uuid4),
+        'enable_data_sharing_consent': True,
+        'enforce_data_sharing_consent': True,
+        'contact_email': factory.LazyAttribute(lambda o: '%s@example.org' % o.username),
+    }
+    enterprise_customer_catalog_uuid = factory.LazyFunction(uuid.uuid4)
+    proxy_class = class_path(EnterpriseCustomerCondition)
+
+    class Meta(object):
+        model = EnterpriseCustomerCondition
+
+
+class EnterpriseOfferFactory(ConditionalOfferFactory):
+    benefit = factory.SubFactory(EnterprisePercentageDiscountBenefitFactory)
+    condition = factory.SubFactory(EnterpriseCustomerConditionFactory)
     max_basket_applications = 1
     offer_type = ConditionalOffer.SITE
     status = ConditionalOffer.OPEN

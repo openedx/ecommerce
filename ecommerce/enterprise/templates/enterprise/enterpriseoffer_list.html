@@ -1,9 +1,9 @@
 {% extends 'edx/base.html' %}
 {% load i18n %}
-{% load programs %}
+{% load enterprise %}
 {% load staticfiles %}
 
-{% block title %}{% trans "Program Offers" %}{% endblock %}
+{% block title %}{% trans "Enterprise Offers" %}{% endblock %}
 
 {% block navbar %}
   {% include "edx/partials/_staff_navbar.html" %}
@@ -14,20 +14,21 @@
   <div class="container">
     <div class="page-header">
       <h1 class="hd-1 emphasized">
-        {% trans "Program Offers" %}
+        {% trans "Enterprise Offers" %}
         <div class="pull-right">
-          <a href="{% url 'programs:offers:new' %}"
-             class="btn btn-primary btn-small">{% trans "Create Program Offer" %}</a>
+          <a href="{% url 'enterprise:offers:new' %}"
+             class="btn btn-primary btn-small">{% trans "Create Enterprise Offer" %}</a>
         </div>
       </h1>
     </div>
 
     <table id="offerTable" class="copy copy-base table table-striped table-bordered" cellspacing="0">
-      <caption class="sr-only">{% trans "Current program offers" %}</caption>
+      <caption class="sr-only">{% trans "Current enterprise offers" %}</caption>
       <thead>
       <tr>
-        <th>{% trans 'Program Title' %}</th>
-        <th>{% trans 'Program UUID' %}</th>
+        <th>{% trans 'Enterprise Customer Name' %}</th>
+        <th>{% trans 'Enterprise Customer UUID' %}</th>
+        <th>{% trans 'Enterprise Customer Catalog UUID' %}</th>
         <th>{% trans 'Type' %}</th>
         <th>{% trans 'Value' %}</th>
         <th>{% trans 'Start' %}</th>
@@ -37,8 +38,9 @@
       <tbody>
       {% for offer in object_list %}
         <tr>
-          <td><a href="{% url 'programs:offers:edit' pk=offer.pk %}">{{ offer.program.title }}</a></td>
-          <td>{{ offer.program.uuid }}</td>
+          <td><a href="{% url 'enterprise:offers:edit' pk=offer.pk %}">{{ offer.enterprise_customer.name }}</a></td>
+          <td>{{ offer.enterprise_customer.uuid }}</td>
+          <td>{{ offer.condition.enterprise_customer_catalog_uuid }}</td>
           <td>{{ offer.benefit|benefit_type|capfirst }}</td>
           <td>{{ offer.benefit.value }}</td>
           <td>{{ offer.start_datetime|default_if_none:'--' }}</td>
@@ -55,7 +57,7 @@
     <div class="container">
       <div class="row">
         <div class="col-xs-12 text-right">
-          <em>{% blocktrans %}{{ platform_name }} Program Offer Administration Tool{% endblocktrans %}</em>
+          <em>{% blocktrans %}{{ platform_name }} Enterprise Offer Administration Tool{% endblocktrans %}</em>
         </div>
       </div>
     </div>

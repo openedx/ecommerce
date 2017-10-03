@@ -6,7 +6,7 @@ require([
         'use strict';
 
         $(function() {
-            $('#programOfferTable').DataTable({
+            $('#offerTable').DataTable({
                 paging: true
             });
         });

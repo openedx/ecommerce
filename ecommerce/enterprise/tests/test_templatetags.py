@@ -1,14 +1,24 @@
+import ddt
 import httpretty
 import mock
 from django.conf import settings
 from django.template import Context, Template
+from oscar.core.loading import get_model
+from oscar.test.factories import BenefitFactory
 
 from ecommerce.core.tests import toggle_switch
 from ecommerce.coupons.tests.mixins import CouponMixin
 from ecommerce.enterprise.exceptions import EnterpriseDoesNotExist
+from ecommerce.enterprise.offer.benefits import (
+    AbsoluteDiscountBenefitWithoutRange,
+    EnterprisePercentageDiscountBenefit
+)
+from ecommerce.enterprise.templatetags.enterprise import benefit_type
 from ecommerce.enterprise.tests.mixins import EnterpriseServiceMockMixin
+from ecommerce.programs.custom import class_path
 from ecommerce.tests.testcases import TestCase
 
+Benefit = get_model('offer', 'Benefit')
 TEST_ENTERPRISE_CUSTOMER_UUID = 'cf246b88-d5f6-4908-a522-fc307e0b0c59'
 
 
@@ -89,3 +99,14 @@ class EnterpriseTemplateTagsTests(EnterpriseServiceMockMixin, CouponMixin, TestC
         )
         result = template.render(Context({'voucher': None, 'request': self.request}))
         self.assertEqual(result, '')
+
+    @ddt.data(
+        ({'type': Benefit.PERCENTAGE}, Benefit.PERCENTAGE),
+        ({'type': Benefit.FIXED}, Benefit.FIXED),
+        ({'type': '', 'proxy_class': class_path(EnterprisePercentageDiscountBenefit)}, Benefit.PERCENTAGE),
+        ({'type': '', 'proxy_class': class_path(AbsoluteDiscountBenefitWithoutRange)}, Benefit.FIXED),
+    )
+    @ddt.unpack
+    def test_benefit_type(self, factory_kwargs, expected):
+        benefit = BenefitFactory(**factory_kwargs)
+        self.assertEqual(benefit_type(benefit), expected)
