@@ -18,7 +18,10 @@ class ProgramOfferTests(ProgramTestMixin, TestCase):
     @httpretty.activate
     def test_offer(self):
         # Our offer is for 100%, so all lines should end up with a price of 0.
-        offer = factories.ProgramOfferFactory(benefit=factories.PercentageDiscountBenefitWithoutRangeFactory(value=100))
+        offer = factories.ProgramOfferFactory(
+            site=self.site,
+            benefit=factories.PercentageDiscountBenefitWithoutRangeFactory(value=100)
+        )
         basket = factories.BasketFactory(site=self.site, owner=self.create_user())
 
         program_uuid = offer.condition.program_uuid
