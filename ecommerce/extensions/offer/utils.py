@@ -57,14 +57,8 @@ def format_benefit_value(benefit):
     Returns:
         benefit_value (str): String value containing formatted benefit value and type.
     """
-
-    # TODO: Find a better way to format benefit value so we can remove this import.
-    # Techdebt ticket: LEARNER-1317
-    # Import is here because of a circular dependency.
-    from ecommerce.programs.constants import BENEFIT_PROXY_CLASS_MAP
-
     benefit_value = _remove_exponent_and_trailing_zeros(Decimal(str(benefit.value)))
-    benefit_type = benefit.type or BENEFIT_PROXY_CLASS_MAP[benefit.proxy_class]
+    benefit_type = benefit.type or getattr(benefit.proxy(), 'benefit_class_type', None)
 
     if benefit_type == Benefit.PERCENTAGE:
         benefit_value = _('{benefit_value}%'.format(benefit_value=benefit_value))

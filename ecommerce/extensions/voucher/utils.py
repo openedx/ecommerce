@@ -22,7 +22,7 @@ from ecommerce.extensions.api import exceptions
 from ecommerce.extensions.offer.utils import get_discount_percentage, get_discount_value
 from ecommerce.invoice.models import Invoice
 from ecommerce.programs.conditions import ProgramCourseRunSeatsCondition
-from ecommerce.programs.constants import BENEFIT_MAP, BENEFIT_PROXY_CLASS_MAP
+from ecommerce.programs.constants import BENEFIT_MAP
 from ecommerce.programs.custom import class_path, create_condition
 
 logger = logging.getLogger(__name__)
@@ -130,7 +130,7 @@ def _get_info_for_coupon_report(coupon, voucher):
         discount_data = get_voucher_discount_info(benefit, seat_stockrecord.price_excl_tax)
         coupon_type, discount_percentage, discount_amount = _get_discount_info(discount_data)
     else:
-        benefit_type = benefit.type or BENEFIT_PROXY_CLASS_MAP[benefit.proxy_class]
+        benefit_type = benefit.type or getattr(benefit.proxy(), 'benefit_class_type', None)
 
         if benefit_type == Benefit.PERCENTAGE:
             coupon_type = _('Discount') if benefit.value < 100 else _('Enrollment')
