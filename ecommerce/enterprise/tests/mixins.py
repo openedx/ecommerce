@@ -1,9 +1,15 @@
 import copy
 import json
+from urllib import urlencode
 from uuid import uuid4
 
 import httpretty
+import requests
 from django.conf import settings
+
+
+def raise_timeout(request, uri, headers):  # pylint: disable=unused-argument
+    raise requests.Timeout('Connection timed out.')
 
 
 class EnterpriseServiceMockMixin(object):
@@ -128,7 +134,8 @@ class EnterpriseServiceMockMixin(object):
             learner_id=1,
             enterprise_customer_uuid='cf246b88-d5f6-4908-a522-fc307e0b0c59',
             consent_enabled=True,
-            consent_provided=True
+            consent_provided=True,
+            course_run_id='course-v1:edX DemoX Demo_Course'
     ):
         """
         Helper function to register enterprise learner API endpoint.
@@ -179,7 +186,7 @@ class EnterpriseServiceMockMixin(object):
                             "exists": True,
                             "consent_provided": consent_provided,
                             "consent_required": consent_enabled and not consent_provided,
-                            "course_id": "course-v1:edX DemoX Demo_Course",
+                            "course_id": course_run_id,
                         }
                     ]
                 }
@@ -322,6 +329,17 @@ class EnterpriseServiceMockMixin(object):
             uri=self.ENTERPRISE_LEARNER_URL,
             body=enterprise_learner_api_response_json,
             content_type='application/json'
+        )
+
+    def mock_enterprise_learner_api_raise_exception(self):
+        """
+        Helper function to register enterprise learner API endpoint and raise an exception.
+        """
+        self.mock_access_token_response()
+        httpretty.register_uri(
+            method=httpretty.GET,
+            uri=self.ENTERPRISE_LEARNER_URL,
+            body=raise_timeout
         )
 
     def mock_enterprise_learner_api_for_failure(self):
@@ -468,3 +486,31 @@ class EnterpriseServiceMockMixin(object):
             granted=False,
             required=False,
         )
+
+    def mock_catalog_contains_course_runs(self, course_run_ids, enterprise_customer_uuid,
+                                          enterprise_customer_catalog_uuid=None, contains_content=True,
+                                          raise_exception=False):
+        self.mock_access_token_response()
+        query_params = urlencode({'course_run_ids': course_run_ids}, True)
+        body = raise_timeout if raise_exception else json.dumps({'contains_content_items': contains_content})
+        httpretty.register_uri(
+            method=httpretty.GET,
+            uri='{}enterprise-customer/{}/contains_content_items/?{}'.format(
+                self.site.siteconfiguration.enterprise_api_url,
+                enterprise_customer_uuid,
+                query_params
+            ),
+            body=body,
+            content_type='application/json'
+        )
+        if enterprise_customer_catalog_uuid:
+            httpretty.register_uri(
+                method=httpretty.GET,
+                uri='{}enterprise_catalogs/{}/contains_content_items/?{}'.format(
+                    self.site.siteconfiguration.enterprise_api_url,
+                    enterprise_customer_catalog_uuid,
+                    query_params
+                ),
+                body=body,
+                content_type='application/json'
+            )

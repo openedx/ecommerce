@@ -170,7 +170,7 @@
             padding-top: 20px;
             margin-bottom: 1.25rem;
 
-            p.voucher {
+            p.offer, p.voucher {
                 @include float(left);
 
                 margin: 0 20px;

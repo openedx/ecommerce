@@ -23,6 +23,22 @@ class BenefitWithoutRangeMixin(object):
         return sorted(line_tuples, key=operator.itemgetter(0))
 
 
+class ConditionWithoutRangeMixin(object):
+    """ Mixin for Conditions without an attached range.
+
+    The range is only used for the name and description. We would prefer not
+    to deal with ranges since we rely on the condition to fully determine if
+    a conditional offer is applicable to a basket.
+    """
+    def can_apply_condition(self, line):
+        """
+        Determines whether the condition can be applied to a given basket line.
+        """
+        if not line.stockrecord_id:
+            return False
+        return line.product.get_is_discountable()
+
+
 class AbsoluteBenefitMixin(object):
     """ Mixin for fixed-amount Benefits. """
     benefit_class_type = Benefit.FIXED
