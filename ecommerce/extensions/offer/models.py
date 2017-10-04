@@ -324,6 +324,23 @@ class Range(AbstractRange):
 
 
 class Condition(AbstractCondition):
+    enterprise_customer_uuid = models.UUIDField(
+        null=True,
+        blank=True,
+        verbose_name=_('EnterpriseCustomer UUID')
+    )
+    # De-normalizing the EnterpriseCustomer name for optimization purposes.
+    enterprise_customer_name = models.CharField(
+        max_length=255,
+        null=True,
+        blank=True,
+        verbose_name=_('EnterpriseCustomer Name')
+    )
+    enterprise_customer_catalog_uuid = models.UUIDField(
+        null=True,
+        blank=True,
+        verbose_name=_('EnterpriseCustomerCatalog UUID')
+    )
     program_uuid = models.UUIDField(null=True, blank=True, verbose_name=_('Program UUID'))
 
 

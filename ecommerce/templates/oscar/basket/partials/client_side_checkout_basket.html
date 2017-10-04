@@ -1,6 +1,7 @@
 {% load i18n %}
 {% load currency_filters %}
 {% load crispy_forms_tags %}
+{% load offer_tags %}
 {% load widget_tweaks %}
 {% load staticfiles %}
 
@@ -52,6 +53,21 @@
                 <span class="price">-{{basket.total_discount|currency:basket.currency}}</span>
             </div>
         {% endif %}
+        <div id="offer-information" class="row">
+            {% block offers %}
+                <div class="offers">
+                    {% for offer_id, offer in basket.applied_offers.items %}
+                        {% if offer.condition.enterprise_customer_name %}
+                            <p class="offer">
+                                {% blocktrans with enterprise_customer_name=offer.condition.enterprise_customer_name benefit=offer.benefit|benefit_discount %}
+                                    {{ benefit }} discount provided by {{ enterprise_customer_name }}.
+                                {% endblocktrans %}
+                            </p>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            {% endblock offers %}
+        </div>
         <div id="voucher-information" class="row">
             {% if show_voucher_form %}
                 {% block vouchers %}

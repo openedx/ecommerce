@@ -3,6 +3,7 @@ from django.template import Context, Template
 from oscar.core.loading import get_model
 from oscar.test.factories import BenefitFactory
 
+from ecommerce.enterprise.benefits import EnterpriseAbsoluteDiscountBenefit, EnterprisePercentageDiscountBenefit
 from ecommerce.extensions.offer.templatetags.offer_tags import benefit_type
 from ecommerce.programs.benefits import AbsoluteDiscountBenefitWithoutRange, PercentageDiscountBenefitWithoutRange
 from ecommerce.programs.custom import class_path
@@ -27,6 +28,8 @@ class OfferTests(TestCase):
         ({'type': ''}, None),
         ({'type': '', 'proxy_class': class_path(PercentageDiscountBenefitWithoutRange)}, Benefit.PERCENTAGE),
         ({'type': '', 'proxy_class': class_path(AbsoluteDiscountBenefitWithoutRange)}, Benefit.FIXED),
+        ({'type': '', 'proxy_class': class_path(EnterprisePercentageDiscountBenefit)}, Benefit.PERCENTAGE),
+        ({'type': '', 'proxy_class': class_path(EnterpriseAbsoluteDiscountBenefit)}, Benefit.FIXED),
     )
     @ddt.unpack
     def test_benefit_type(self, factory_kwargs, expected):

@@ -7,6 +7,8 @@ from oscar.test.factories import ConditionalOfferFactory as BaseConditionalOffer
 from oscar.test.factories import VoucherFactory as BaseVoucherFactory
 from oscar.test.factories import *  # pylint:disable=wildcard-import,unused-wildcard-import
 
+from ecommerce.enterprise.benefits import EnterpriseAbsoluteDiscountBenefit, EnterprisePercentageDiscountBenefit
+from ecommerce.enterprise.conditions import EnterpriseCustomerCondition
 from ecommerce.programs.benefits import AbsoluteDiscountBenefitWithoutRange, PercentageDiscountBenefitWithoutRange
 from ecommerce.programs.conditions import ProgramCourseRunSeatsCondition
 from ecommerce.programs.custom import class_path
@@ -155,4 +157,40 @@ class ProgramOfferFactory(ConditionalOfferFactory):
     condition = factory.SubFactory(ProgramCourseRunSeatsConditionFactory)
     max_basket_applications = 1
     offer_type = ConditionalOffer.SITE
+    status = ConditionalOffer.OPEN
+
+
+class EnterpriseAbsoluteDiscountBenefitFactory(BenefitFactory):
+    range = None
+    type = ''
+    value = 10
+    proxy_class = class_path(EnterpriseAbsoluteDiscountBenefit)
+
+
+class EnterprisePercentageDiscountBenefitFactory(BenefitFactory):
+    range = None
+    type = ''
+    value = 10
+    proxy_class = class_path(EnterprisePercentageDiscountBenefit)
+
+
+class EnterpriseCustomerConditionFactory(ConditionFactory):
+    range = None
+    type = ''
+    value = None
+    enterprise_customer_uuid = factory.LazyFunction(uuid.uuid4)
+    enterprise_customer_name = factory.Faker('word')
+    enterprise_customer_catalog_uuid = factory.LazyFunction(uuid.uuid4)
+    proxy_class = class_path(EnterpriseCustomerCondition)
+
+    class Meta(object):
+        model = EnterpriseCustomerCondition
+
+
+class EnterpriseOfferFactory(ConditionalOfferFactory):
+    benefit = factory.SubFactory(EnterprisePercentageDiscountBenefitFactory)
+    condition = factory.SubFactory(EnterpriseCustomerConditionFactory)
+    max_basket_applications = 1
+    offer_type = ConditionalOffer.SITE
+    priority = 10
     status = ConditionalOffer.OPEN
