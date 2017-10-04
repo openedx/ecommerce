@@ -21,3 +21,13 @@ def benefit_discount(benefit):
         str: String value containing formatted benefit value and type.
     """
     return format_benefit_value(benefit)
+
+
+@register.filter(name='benefit_type')
+def benefit_type(benefit):
+    _type = benefit.type
+
+    if not _type:
+        _type = getattr(benefit.proxy(), 'benefit_class_type', None)
+
+    return _type

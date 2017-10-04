@@ -5,7 +5,7 @@ import httpretty
 from oscar.core.loading import get_model
 
 from ecommerce.extensions.test import factories
-from ecommerce.programs.constants import BENEFIT_MAP, BENEFIT_PROXY_CLASS_MAP
+from ecommerce.programs.constants import BENEFIT_MAP
 from ecommerce.programs.custom import class_path
 from ecommerce.programs.forms import ProgramOfferForm
 from ecommerce.programs.tests.mixins import ProgramTestMixin
@@ -48,7 +48,7 @@ class ProgramOfferFormTests(ProgramTestMixin, TestCase):
         program_offer = factories.ProgramOfferFactory()
         form = ProgramOfferForm(instance=program_offer)
         self.assertEqual(form['program_uuid'].value(), program_offer.condition.program_uuid.hex)
-        self.assertEqual(form['benefit_type'].value(), BENEFIT_PROXY_CLASS_MAP[program_offer.benefit.proxy_class])
+        self.assertEqual(form['benefit_type'].value(), program_offer.benefit.proxy().benefit_class_type)
         self.assertEqual(form['benefit_value'].value(), program_offer.benefit.value)
 
     def test_clean_percentage(self):

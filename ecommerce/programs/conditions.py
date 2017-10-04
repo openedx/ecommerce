@@ -11,13 +11,15 @@ from requests.exceptions import ConnectionError, Timeout
 from slumber.exceptions import HttpNotFoundError, SlumberBaseException
 
 from ecommerce.core.utils import get_cache_key
+from ecommerce.extensions.offer.decorators import check_condition_applicability
+from ecommerce.extensions.offer.mixins import SingleItemConsumptionConditionMixin
 from ecommerce.programs.utils import get_program
 
 Condition = get_model('offer', 'Condition')
 logger = logging.getLogger(__name__)
 
 
-class ProgramCourseRunSeatsCondition(Condition):
+class ProgramCourseRunSeatsCondition(SingleItemConsumptionConditionMixin, Condition):
     class Meta(object):
         app_label = 'programs'
         proxy = True
@@ -41,6 +43,7 @@ class ProgramCourseRunSeatsCondition(Condition):
 
         return program_course_run_skus
 
+    @check_condition_applicability()
     def is_satisfied(self, offer, basket):  # pylint: disable=unused-argument
         """
         Determines if a user is eligible for a program offer based on products in their basket
@@ -52,12 +55,6 @@ class ProgramCourseRunSeatsCondition(Condition):
         Returns:
             bool
         """
-
-        if basket.is_empty:
-            return False
-
-        if basket.total_incl_tax == 0:
-            return False
 
         basket_skus = set([line.stockrecord.partner_sku for line in basket.all_lines()])
         try:
@@ -141,18 +138,3 @@ class ProgramCourseRunSeatsCondition(Condition):
             line_tuples.append((price, line))
 
         return sorted(line_tuples, reverse=most_expensive_first, key=operator.itemgetter(0))
-
-    def consume_items(self, offer, basket, affected_lines):  # pylint: disable=unused-argument
-        """ Marks items within the basket lines as consumed so they can't be reused in other offers.
-
-        This offer will consume only 1 unit of quantity for each affected line.
-
-        Args:
-            offer (AbstractConditionalOffer)
-            basket (AbstractBasket)
-            affected_lines (tuple[]): The lines that have been affected by the discount.
-                This should be list of tuples (line, discount, qty)
-        """
-        for line, __, __ in affected_lines:
-            quantity_to_consume = min(line.quantity_without_discount, 1)
-            line.consume(quantity_to_consume)
