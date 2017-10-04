@@ -7,7 +7,6 @@ from oscar.core.loading import get_model
 
 from ecommerce.extensions.test import factories
 from ecommerce.programs.benefits import PercentageDiscountBenefitWithoutRange
-from ecommerce.programs.constants import BENEFIT_PROXY_CLASS_MAP
 from ecommerce.programs.custom import class_path
 from ecommerce.programs.tests.mixins import ProgramTestMixin
 from ecommerce.tests.testcases import CacheMixin, TestCase
@@ -137,7 +136,7 @@ class ProgramOfferUpdateViewTests(ProgramTestMixin, ViewTestMixin, TestCase):
         """ The program offer should be updated. """
         data = {
             'program_uuid': self.program_offer.condition.program_uuid,
-            'benefit_type': BENEFIT_PROXY_CLASS_MAP[self.program_offer.benefit.proxy_class],
+            'benefit_type': self.program_offer.benefit.proxy().benefit_class_type,
             'benefit_value': self.program_offer.benefit.value,
         }
         response = self.client.post(self.path, data, follow=False)

@@ -8,7 +8,7 @@ from slumber.exceptions import HttpNotFoundError, SlumberBaseException
 from ecommerce.courses.models import Course
 from ecommerce.extensions.test import factories
 from ecommerce.programs.tests.mixins import ProgramTestMixin
-from ecommerce.tests.factories import ProductFactory
+from ecommerce.tests.factories import ProductFactory, SiteConfigurationFactory
 from ecommerce.tests.testcases import TestCase
 
 Product = get_model('catalogue', 'Product')
@@ -33,7 +33,7 @@ class ProgramCourseRunSeatsConditionTests(ProgramTestMixin, TestCase):
     def test_is_satisfied_no_enrollments(self):
         """ The method should return True if the basket contains one course run seat corresponding to each
         course in the program. """
-        offer = factories.ProgramOfferFactory(condition=self.condition)
+        offer = factories.ProgramOfferFactory(site=self.site, condition=self.condition)
         basket = factories.BasketFactory(site=self.site, owner=factories.UserFactory())
         program = self.mock_program_detail_endpoint(
             self.condition.program_uuid, self.site_configuration.discovery_api_url
@@ -85,7 +85,7 @@ class ProgramCourseRunSeatsConditionTests(ProgramTestMixin, TestCase):
     def test_is_satisfied_with_enrollments(self):
         """ The condition should be satisfied if one valid course run from each course is in either the
         basket or the user's enrolled courses and the site has enabled partial program offers. """
-        offer = factories.ProgramOfferFactory(condition=self.condition)
+        offer = factories.ProgramOfferFactory(site=self.site, condition=self.condition)
         basket = factories.BasketFactory(site=self.site, owner=factories.UserFactory())
         program = self.mock_program_detail_endpoint(
             self.condition.program_uuid, self.site_configuration.discovery_api_url
@@ -129,7 +129,7 @@ class ProgramCourseRunSeatsConditionTests(ProgramTestMixin, TestCase):
     @ddt.data(HttpNotFoundError, SlumberBaseException, Timeout)
     def test_is_satisfied_with_exception_for_programs(self, value):
         """ The method should return False if there is an exception when trying to get program details. """
-        offer = factories.ProgramOfferFactory(condition=self.condition)
+        offer = factories.ProgramOfferFactory(site=self.site, condition=self.condition)
         basket = factories.BasketFactory(site=self.site, owner=factories.UserFactory())
         basket.add_product(self.test_product)
 
@@ -141,7 +141,7 @@ class ProgramCourseRunSeatsConditionTests(ProgramTestMixin, TestCase):
     def test_is_satisfied_with_exception_for_enrollments(self):
         """ The method should return True despite having an error at the enrollment check, given 1 course run seat
         corresponding to each course in the program. """
-        offer = factories.ProgramOfferFactory(condition=self.condition)
+        offer = factories.ProgramOfferFactory(site=self.site, condition=self.condition)
         basket = factories.BasketFactory(site=self.site, owner=factories.UserFactory())
         program = self.mock_program_detail_endpoint(
             self.condition.program_uuid,
@@ -159,16 +159,23 @@ class ProgramCourseRunSeatsConditionTests(ProgramTestMixin, TestCase):
 
     def test_is_satisfied_free_basket(self):
         """ Ensure the basket returns False if the basket total is zero. """
-        offer = factories.ProgramOfferFactory(condition=self.condition)
+        offer = factories.ProgramOfferFactory(site=self.site, condition=self.condition)
         basket = factories.BasketFactory(site=self.site, owner=factories.UserFactory())
         test_product = factories.ProductFactory(stockrecords__price_excl_tax=0,
                                                 stockrecords__partner__short_code='test')
         basket.add_product(test_product)
         self.assertFalse(self.condition.is_satisfied(offer, basket))
 
+    def test_is_satisfied_site_mismatch(self):
+        """ Ensure the condition returns False if the offer site does not match the basket site. """
+        offer = factories.ProgramOfferFactory(site=SiteConfigurationFactory().site, condition=self.condition)
+        basket = factories.BasketFactory(site=self.site, owner=factories.UserFactory())
+        basket.add_product(self.test_product)
+        self.assertFalse(self.condition.is_satisfied(offer, basket))
+
     def test_is_satisfied_program_retrieval_failure(self):
         """ The method should return False if no program is retrieved """
-        offer = factories.ProgramOfferFactory(condition=self.condition)
+        offer = factories.ProgramOfferFactory(site=self.site, condition=self.condition)
         basket = factories.BasketFactory(site=self.site, owner=factories.UserFactory())
         basket.add_product(self.test_product)
         self.condition.program_uuid = None
