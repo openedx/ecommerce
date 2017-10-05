@@ -17,7 +17,7 @@ from oscar.core.loading import get_model
 from requests.exceptions import ConnectionError, Timeout  # pylint: disable=ungrouped-imports
 from rest_framework import status
 
-from ecommerce.core.constants import COURSE_ENTITLEMENT_CLASS_NAME, ENROLLMENT_CODE_PRODUCT_CLASS_NAME
+from ecommerce.core.constants import ENROLLMENT_CODE_PRODUCT_CLASS_NAME
 from ecommerce.core.url_utils import get_lms_enrollment_api_url, get_lms_entitlement_api_url
 from ecommerce.courses.models import Course
 from ecommerce.courses.utils import mode_for_seat
@@ -517,7 +517,7 @@ class CourseEntitlementFulfillmentModule(BaseFulfillmentModule):
     Allows the entitlement of a student via purchase of a 'Course Entitlement'.
     """
 
-    def _post_to_entitlement_api(self, data, user, site):
+    def _post_to_entitlement_api(self, data, site):
         entitlement_api_client = EdxRestApiClient(
             get_lms_entitlement_api_url(),
             jwt=site.siteconfiguration.access_token
@@ -589,7 +589,7 @@ class CourseEntitlementFulfillmentModule(BaseFulfillmentModule):
 
             try:
                 # Post to the Entitlement API.
-                response = self._post_to_entitlement_api(data, user=order.user, site=order.site)
+                self._post_to_entitlement_api(data, site=order.site)
 
                 line.set_status(LINE.COMPLETE)
 
@@ -630,7 +630,7 @@ class CourseEntitlementFulfillmentModule(BaseFulfillmentModule):
                 },
             }
 
-            response = self._post_to_entitlement_api(data, user=line.order.user, site=line.order.site)
+            self._post_to_entitlement_api(data, site=line.order.site)
 
             audit_log(
                 'line_revoked',

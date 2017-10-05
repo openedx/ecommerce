@@ -21,7 +21,6 @@ StockRecord = get_model('partner', 'StockRecord')
 
 def create_parent_course_entitlement(name, course_id):
     """ Create the parent course entitlement product if it does not already exist. """
-    product_class = ProductClass.objects.get(name=COURSE_ENTITLEMENT_CLASS_NAME)
     parent, created = Product.objects.get_or_create(
         structure=Product.PARENT,
         product_class=ProductClass.objects.get(name=COURSE_ENTITLEMENT_CLASS_NAME),
