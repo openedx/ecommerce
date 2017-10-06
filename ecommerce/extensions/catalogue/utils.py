@@ -140,22 +140,22 @@ def generate_sku(product, partner):
     if product.is_coupon_product:
         _hash = ' '.join((
             unicode(product.id),
-            str(partner.id)
-        ))
+            unicode(partner.id)
+        )).encode('utf-8')
     elif product.is_enrollment_code_product:
         _hash = ' '.join((
             getattr(product.attr, 'course_key', ''),
             getattr(product.attr, 'seat_type', ''),
             unicode(partner.id)
-        ))
+        )).encode('utf-8')
     elif product.is_seat_product:
         _hash = ' '.join((
             getattr(product.attr, 'certificate_type', ''),
-            product.attr.course_key,
+            unicode(product.attr.course_key),
             unicode(product.attr.id_verification_required),
             getattr(product.attr, 'credit_provider', ''),
-            str(partner.id)
-        ))
+            unicode(partner.id)
+        )).encode('utf-8')
     else:
         raise Exception('Unexpected product class')
 

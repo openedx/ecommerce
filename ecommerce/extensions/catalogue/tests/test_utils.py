@@ -2,6 +2,7 @@
 from __future__ import unicode_literals
 
 from hashlib import md5
+import ddt
 
 from django.db.utils import IntegrityError
 from oscar.core.loading import get_model
@@ -22,6 +23,7 @@ Voucher = get_model('voucher', 'Voucher')
 COURSE_ID = 'sku/test_course/course'
 
 
+@ddt.ddt
 class UtilsTests(DiscoveryTestMixin, TestCase):
     course_id = 'sku/test_course/course'
 
@@ -42,14 +44,14 @@ class UtilsTests(DiscoveryTestMixin, TestCase):
         with self.assertRaises(Exception):
             generate_sku(product, self.partner)
 
-    def test_generate_sku_for_course_seat(self):
+    @ddt.data('sku/test/course', 'course-v1:UNCórdobaX+CS001x+3T2017')
+    def test_generate_sku_for_course_seat(self, course_id):
         """Verify the method generates a SKU for a course seat."""
-        course_id = 'sku/test/course'
         course = CourseFactory(id=course_id, name='Test Course', site=self.site)
-        certificate_type = 'honor'
+        certificate_type = 'audit'
         product = course.create_or_update_seat(certificate_type, False, 0, self.partner)
 
-        _hash = '{} {} {} {} {}'.format(certificate_type, course_id, 'False', '', self.partner.id)
+        _hash = '{} {} {} {} {}'.format(certificate_type, course_id, 'False', '', self.partner.id).encode('utf-8')
         _hash = md5(_hash.lower()).hexdigest()[-7:]
         # verify that generated sku has partner 'short_code' as prefix
         expected = _hash.upper()
