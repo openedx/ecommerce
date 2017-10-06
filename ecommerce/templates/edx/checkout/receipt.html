@@ -15,6 +15,7 @@
 
 {% block javascript %}
   <script src="{% static 'js/apps/order_receipt_app.js' %}"></script>
+  {% include 'edx/checkout/_receipt_js_extras.html' %}
 {% endblock javascript %}
 
 {% block navbar %}
