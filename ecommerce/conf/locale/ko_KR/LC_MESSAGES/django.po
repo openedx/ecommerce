@@ -5,7 +5,7 @@
 # Translators:
 # kmooc <shevious@gmail.com>, 2015
 # Jong-Dae Park <jdpark7@gmail.com>, 2015
-# Lee, Sang Eun <sl4557a@gmail.com>, 2015
+# 이상은 <sl4557a@gmail.com>, 2015
 msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
