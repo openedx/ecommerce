@@ -225,6 +225,8 @@ class Course(models.Model):
         seat.title = self.get_course_seat_name(certificate_type, id_verification_required)
         seat.expires = expires
 
+        seat.save()
+
         # If a ProductAttribute is saved with a value of None or the empty string, the ProductAttribute is deleted.
         # As a consequence, Seats derived from a migrated "audit" mode do not have a certificate_type attribute.
         seat.attr.certificate_type = certificate_type
@@ -241,7 +243,7 @@ class Course(models.Model):
         if credit_hours:
             seat.attr.credit_hours = credit_hours
 
-        seat.save()
+        seat.attr.save()
 
         try:
             stock_record = StockRecord.objects.get(product=seat, partner=partner)

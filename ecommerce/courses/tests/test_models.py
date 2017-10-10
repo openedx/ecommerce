@@ -189,6 +189,44 @@ class CourseTests(DiscoveryTestMixin, TestCase):
         # Expected seat total, with one being the parent seat product.
         self.assertEqual(course.products.count(), len(credit_data) + 1)
 
+    def test_update_credit_seat(self):
+        """
+        Tests that model's seat update method updates the seat and attribute values
+        """
+        course = CourseFactory()
+        credit_provider = 'MIT'
+        credit_hours = 2
+        certificate_type = 'credit'
+        id_verification_required = True
+        price = 10
+        course.create_or_update_seat(
+            certificate_type,
+            id_verification_required,
+            price,
+            self.partner,
+            credit_provider=credit_provider,
+            credit_hours=credit_hours
+        )
+        credit_hours = 4
+        price = 100
+        credit_seat = course.create_or_update_seat(
+            certificate_type,
+            id_verification_required,
+            price,
+            self.partner,
+            credit_provider=credit_provider,
+            credit_hours=credit_hours
+        )
+        self.assert_course_seat_valid(
+            credit_seat,
+            course,
+            certificate_type,
+            id_verification_required,
+            price,
+            credit_provider=credit_provider,
+            credit_hours=credit_hours
+        )
+
     def test_collision_avoidance(self):
         """
         Sanity check verifying that course IDs which produced collisions due to a
