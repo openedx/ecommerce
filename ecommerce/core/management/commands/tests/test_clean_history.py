@@ -49,6 +49,8 @@ class CleanHistoryTests(TestCase):
         self.assertEqual(Order.history.filter(history_date__lte=cutoff_date).count(), initial_count)
 
         QuerySet.delete = counter(QuerySet.delete)
-        call_command('clean_history', '--cutoff_date={}'.format(cutoff_date.strftime('%Y-%m-%d')), batch_size=1)
+        call_command(
+            'clean_history', '--cutoff_date={}'.format(cutoff_date.strftime('%Y-%m-%d')), batch_size=1, sleep_time=1
+        )
         self.assertEqual(QuerySet.delete.invocations, initial_count)
         self.assertEqual(Order.history.filter(history_date__lte=cutoff_date).count(), 0)

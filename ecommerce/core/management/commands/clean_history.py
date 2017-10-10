@@ -1,6 +1,7 @@
 from __future__ import unicode_literals
 
 import logging
+import time
 
 from dateutil.parser import parse
 from django.core.management.base import BaseCommand, CommandError
@@ -38,10 +39,17 @@ class Command(BaseCommand):
                             default=1000,
                             help='Maximum number of database rows to delete per query. '
                                  'This helps avoid locking the database when deleting large amounts of data.')
+        parser.add_argument('--sleep_time',
+                            action='store',
+                            dest='sleep_time',
+                            type=int,
+                            default=10,
+                            help='Sleep time between deletion of batches')
 
     def handle(self, *args, **options):
         cutoff_date = options['cutoff_date']
         batch_size = options['batch_size']
+        sleep_time = options['sleep_time']
 
         try:
             cutoff_date = parse(cutoff_date)
@@ -65,5 +73,6 @@ class Command(BaseCommand):
                 history_batch = qs.values_list('id', flat=True)
                 with transaction.atomic():
                     model.history.filter(pk__in=list(history_batch)).delete()
+                    time.sleep(sleep_time)
 
                 qs = model.history.filter(history_date__lte=cutoff_date)[:batch_size]
