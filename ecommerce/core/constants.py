@@ -21,6 +21,9 @@ ENROLLMENT_CODE_PRODUCT_CLASS_NAME = 'Enrollment Code'
 ENROLLMENT_CODE_SWITCH = 'create_enrollment_codes'
 ENROLLMENT_CODE_SEAT_TYPES = ['verified', 'professional', 'no-id-professional']
 
+# Course Entitlement constant
+COURSE_ENTITLEMENT_PRODUCT_CLASS_NAME = 'Course Entitlement'
+
 # Discovery Service constants
 DEFAULT_CATALOG_PAGE_SIZE = 100
 
