@@ -70,9 +70,14 @@ class Command(BaseCommand):
 
             qs = qs[:batch_size]
             while qs.exists():
-                history_batch = qs.values_list('id', flat=True)
-                with transaction.atomic():
-                    model.history.filter(pk__in=list(history_batch)).delete()
-                    time.sleep(sleep_time)
+                history_batch = list(qs.values_list('id', flat=True))
 
+                with transaction.atomic():
+                    model.history.filter(pk__in=history_batch).delete()
+                    logger.info(
+                        'Deleted instances of %s with PKs between %d and %d',
+                        model.__name__, history_batch[0], history_batch[-1]
+                    )
+
+                time.sleep(sleep_time)
                 qs = model.history.filter(history_date__lte=cutoff_date)[:batch_size]
