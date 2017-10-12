@@ -1,5 +1,5 @@
 import waffle
-from django.contrib import admin
+from django.contrib import admin, messages
 from django.contrib.auth.admin import UserAdmin
 from django.utils.translation import ugettext_lazy as _
 
@@ -25,13 +25,17 @@ class EcommerceUserAdmin(UserAdmin):
     )
     show_full_result_count = False
 
-    def changelist_view(self, request, extra_context=None):
+    def get_queryset(self, request):
         if not waffle.switch_is_active(USER_LIST_VIEW_SWITCH):
-            self.change_list_template = 'admin/disable_change_list.html'
-        else:
-            self.change_list_template = None
+            # Translators: "Waffle" is the name of a third-party library. It should not be translated
+            msg = _('User administration has been disabled due to the load on the database. '
+                    'This functionality can be restored by activating the {switch_name} Waffle switch. '
+                    'Be careful when re-activating this switch!').format(switch_name=USER_LIST_VIEW_SWITCH)
 
-        return super(EcommerceUserAdmin, self).changelist_view(request, extra_context)
+            self.message_user(request, msg, level=messages.WARNING)
+            return User.objects.none()
+
+        return super(EcommerceUserAdmin, self).get_queryset(request)
 
 
 @admin.register(BusinessClient)
