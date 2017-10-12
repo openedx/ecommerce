@@ -41,11 +41,9 @@ def create_product_class(apps, schema_editor):
     )
 
     # Create a category for course entitlements
-    Category.objects.create(
+    Category.add_root(
         description="All course entitlements",
         slug="course_entitlements",
-        depth=1,
-        path="0003",
         image="",
         name="Course Entitlements"
     )
