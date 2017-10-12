@@ -15,18 +15,21 @@ from testfixtures import LogCapture
 
 from ecommerce.core.constants import (
     COUPON_PRODUCT_CLASS_NAME,
+    COURSE_ENTITLEMENT_PRODUCT_CLASS_NAME,
     ENROLLMENT_CODE_PRODUCT_CLASS_NAME,
     ENROLLMENT_CODE_SWITCH,
     SEAT_PRODUCT_CLASS_NAME
 )
 from ecommerce.core.tests import toggle_switch
-from ecommerce.core.url_utils import get_lms_enrollment_api_url
+from ecommerce.core.url_utils import get_lms_enrollment_api_url, get_lms_entitlement_api_url
 from ecommerce.coupons.tests.mixins import CouponMixin
 from ecommerce.courses.tests.factories import CourseFactory
-from ecommerce.courses.utils import mode_for_seat
+from ecommerce.courses.utils import mode_for_product
+from ecommerce.entitlements.utils import create_or_update_course_entitlement
 from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
 from ecommerce.extensions.fulfillment.modules import (
     CouponFulfillmentModule,
+    CourseEntitlementFulfillmentModule,
     EnrollmentCodeFulfillmentModule,
     EnrollmentFulfillmentModule
 )
@@ -44,6 +47,7 @@ LOGGER_NAME = 'ecommerce.extensions.analytics.utils'
 Applicator = get_class('offer.utils', 'Applicator')
 Benefit = get_model('offer', 'Benefit')
 Catalog = get_model('catalogue', 'Catalog')
+Option = get_model('catalogue', 'Option')
 Product = get_model('catalogue', 'Product')
 ProductAttribute = get_model('catalogue', 'ProductAttribute')
 ProductClass = get_model('catalogue', 'ProductClass')
@@ -143,7 +147,7 @@ class EnrollmentFulfillmentModuleTests(ProgramTestMixin, DiscoveryTestMixin, Ful
                     'order_number="{}", product_class="{}", user_id="{}"'.format(
                         line.product.attr.course_key,
                         None,
-                        mode_for_seat(line.product),
+                        mode_for_product(line.product),
                         line.id,
                         line.order.number,
                         line.product.get_product_class().name,
@@ -351,7 +355,7 @@ class EnrollmentFulfillmentModuleTests(ProgramTestMixin, DiscoveryTestMixin, Ful
                     'order_number="{}", product_class="{}", user_id="{}"'.format(
                         line.product.attr.course_key,
                         line.product.attr.credit_provider,
-                        mode_for_seat(line.product),
+                        mode_for_product(line.product),
                         line.id,
                         line.order.number,
                         line.product.get_product_class().name,
@@ -517,3 +521,157 @@ class EnrollmentCodeFulfillmentModuleTests(DiscoveryTestMixin, TestCase):
         line = self.order.lines.first()
         with self.assertRaises(NotImplementedError):
             EnrollmentCodeFulfillmentModule().revoke_line(line)
+
+
+class EntitlementFulfillmentModuleTests(FulfillmentTestMixin, TestCase):
+    """ Test Course Entitlement Fulfillment """
+
+    def setUp(self):
+        super(EntitlementFulfillmentModuleTests, self).setUp()
+        self.user = UserFactory()
+        self.course_entitlement = create_or_update_course_entitlement(
+            'verified', 100, self.partner, '111-222-333-444', 'Course Entitlement')
+        basket = BasketFactory(owner=self.user, site=self.site)
+        basket.add_product(self.course_entitlement, 1)
+        self.entitlement_option = Option.objects.get(name='Course Entitlement')
+        self.order = create_order(number=1, basket=basket, user=self.user)
+        self.logger_name = 'ecommerce.extensions.fulfillment.modules'
+        self.return_data = {
+            "results": [
+                {
+                    "username": "honor",
+                    "course_uuid": "3b3123b8-d34b-44d8-9bbb-a12676e97123",
+                    "uuid": "111-222-333",
+                    "mode": "verified",
+                    "expired_at": "None"
+                }
+            ]
+        }
+
+    def test_entitlement_supported_line(self):
+        """ Test that support_line returns True for Course Entitlement lines. """
+        line = self.order.lines.first()
+        supports_line = CourseEntitlementFulfillmentModule().supports_line(line)
+        self.assertTrue(supports_line)
+
+        order = create_order()
+        unsupported_line = order.lines.first()
+        supports_line = CourseEntitlementFulfillmentModule().supports_line(unsupported_line)
+        self.assertFalse(supports_line)
+
+    def test_get_entitlement_supported_lines(self):
+        """ Test that Course Entitlement products lines are returned. """
+        lines = self.order.lines.all()
+        supported_lines = CourseEntitlementFulfillmentModule().get_supported_lines(lines)
+        self.assertListEqual(supported_lines, list(lines))
+
+    @httpretty.activate
+    def test_entitlement_module_fulfill(self):
+        """ Test to ensure we can properly fulfill course entitlements. """
+
+        self.mock_access_token_response()
+        httpretty.register_uri(httpretty.POST, get_lms_entitlement_api_url() +
+                               'entitlements/', status=200, body=json.dumps(self.return_data),
+                               content_type='application/json')
+
+        # Attempt to fulfill entitlement.
+        with LogCapture(LOGGER_NAME) as l:
+            CourseEntitlementFulfillmentModule().fulfill_product(self.order, list(self.order.lines.all()))
+
+            line = self.order.lines.get()
+            l.check(
+                (
+                    LOGGER_NAME,
+                    'INFO',
+                    'line_fulfilled: UUID="{}", mode="{}", order_line_id="{}", '
+                    'order_number="{}", product_class="{}", user_id="{}"'.format(
+                        line.product.attr.UUID,
+                        mode_for_product(line.product),
+                        line.id,
+                        line.order.number,
+                        line.product.get_product_class().name,
+                        line.order.user.id,
+                    )
+                )
+            )
+
+            course_entitlement_uuid = line.attributes.get(option=self.entitlement_option).value
+            self.assertEqual(course_entitlement_uuid, '111-222-333')
+            self.assertEqual(LINE.COMPLETE, line.status)
+
+    @httpretty.activate
+    def test_entitlement_module_revoke(self):
+        """ Test to revoke a Course Entitlement. """
+        self.mock_access_token_response()
+        httpretty.register_uri(httpretty.POST, get_lms_entitlement_api_url() +
+                               'entitlements/', status=200, body=json.dumps(self.return_data),
+                               content_type='application/json')
+
+        httpretty.register_uri(httpretty.DELETE, get_lms_entitlement_api_url() +
+                               'entitlements/111-222-333/', status=200, body={}, content_type='application/json')
+
+        line = self.order.lines.first()
+
+        # Fulfill order first to ensure we have all the line attributes set
+        CourseEntitlementFulfillmentModule().fulfill_product(self.order, list(self.order.lines.all()))
+
+        with LogCapture(LOGGER_NAME) as l:
+            self.assertTrue(CourseEntitlementFulfillmentModule().revoke_line(line))
+
+            l.check(
+                (
+                    LOGGER_NAME,
+                    'INFO',
+                    'line_revoked: UUID="{}", certificate_type="{}", order_line_id="{}", order_number="{}", '
+                    'product_class="{}", user_id="{}"'.format(
+                        line.product.attr.UUID,
+                        getattr(line.product.attr, 'certificate_type', ''),
+                        line.id,
+                        line.order.number,
+                        line.product.get_product_class().name,
+                        line.order.user.id
+                    )
+                )
+            )
+
+    @httpretty.activate
+    def test_entitlement_module_revoke_error(self):
+        """ Test to handle an error when revoking a Course Entitlement. """
+        self.mock_access_token_response()
+
+        httpretty.register_uri(httpretty.DELETE, get_lms_entitlement_api_url() +
+                               'entitlements/111-222-333/', status=500, body={}, content_type='application/json')
+
+        line = self.order.lines.first()
+
+        self.assertFalse(CourseEntitlementFulfillmentModule().revoke_line(line))
+
+    @httpretty.activate
+    def test_entitlement_module_fulfill_connection_error(self):
+        """Test Course Entitlement Fulfillment with exception when posting to LMS."""
+
+        self.mock_access_token_response()
+        httpretty.register_uri(httpretty.POST, get_lms_entitlement_api_url() +
+                               'entitlements/', status=408, body={}, content_type='application/json')
+        logger_name = 'ecommerce.extensions.fulfillment.modules'
+
+        line = self.order.lines.first()
+
+        with LogCapture(logger_name) as l:
+            CourseEntitlementFulfillmentModule().fulfill_product(self.order, list(self.order.lines.all()))
+            self.assertEqual(LINE.FULFILLMENT_SERVER_ERROR, self.order.lines.all()[0].status)
+            l.check(
+                (logger_name, 'INFO', 'Attempting to fulfill "Course Entitlement" product types for order [{}]'.
+                 format(self.order.number)),
+                (logger_name, 'ERROR', 'Unable to fulfill line [{}] of order [{}]'.
+                 format(line.id, self.order.number)),
+                (logger_name, 'INFO', 'Finished fulfilling "Course Entitlement" product types for order [{}]'.
+                 format(self.order.number))
+            )
+
+    def test_entitlement_module_fulfill_bad_attributes(self):
+        """ Test the Entitlement Fulfillment Module fails when the product does not have proper attributes. """
+        ProductAttribute.objects.get(product_class__name=COURSE_ENTITLEMENT_PRODUCT_CLASS_NAME,
+                                     code='UUID').delete()
+        CourseEntitlementFulfillmentModule().fulfill_product(self.order, list(self.order.lines.all()))
+        self.assertEqual(LINE.FULFILLMENT_CONFIGURATION_ERROR, self.order.lines.all()[0].status)

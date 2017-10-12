@@ -8,7 +8,7 @@ from edx_rest_api_client.exceptions import SlumberHttpBaseException
 from oscar.core.loading import get_model
 
 from ecommerce.core.constants import ENROLLMENT_CODE_SEAT_TYPES
-from ecommerce.courses.utils import mode_for_seat
+from ecommerce.courses.utils import mode_for_product
 
 logger = logging.getLogger(__name__)
 Product = get_model('catalogue', 'Product')
@@ -36,7 +36,7 @@ class LMSPublisher(object):
                 bulk_sku = enrollment_code.stockrecords.first().partner_sku
 
         return {
-            'name': mode_for_seat(seat),
+            'name': mode_for_product(seat),
             'currency': stock_record.price_currency,
             'price': int(stock_record.price_excl_tax),
             'sku': stock_record.partner_sku,

@@ -10,7 +10,7 @@ from django.db import transaction
 from django.utils.translation import ugettext_lazy as _
 from oscar.core.loading import get_class, get_model
 
-from ecommerce.courses.utils import mode_for_seat
+from ecommerce.courses.utils import mode_for_product
 from ecommerce.extensions.order.exceptions import AlreadyPlacedOrderException
 from ecommerce.extensions.order.utils import UserAlreadyPlacedOrder
 from ecommerce.extensions.payment.utils import embargo_check
@@ -99,7 +99,7 @@ def prepare_basket(request, products, voucher=None):
             logger.warning(
                 'User [%s] attempted to repurchase the [%s] seat of course [%s]',
                 request.user.username,
-                mode_for_seat(product),
+                mode_for_product(product),
                 product.course_id
             )
     if already_purchased_products and basket.is_empty:

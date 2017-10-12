@@ -5,7 +5,7 @@ import httpretty
 
 from ecommerce.core.url_utils import get_lms_enrollment_api_url
 from ecommerce.courses.tests.factories import CourseFactory
-from ecommerce.courses.utils import mode_for_seat
+from ecommerce.courses.utils import mode_for_product
 from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
 
 
@@ -32,7 +32,7 @@ class ProgramTestMixin(DiscoveryTestMixin):
                     course_runs.append({
                         'key': course_run.id,
                         'seats': [{
-                            'type': mode_for_seat(seat),
+                            'type': mode_for_product(seat),
                             'sku': seat.stockrecords.get(partner=self.partner).partner_sku,
                         } for seat in course_run.seat_products]
                     })
