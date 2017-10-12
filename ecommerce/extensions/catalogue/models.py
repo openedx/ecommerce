@@ -7,6 +7,7 @@ from simple_history.models import HistoricalRecords
 
 from ecommerce.core.constants import (
     COUPON_PRODUCT_CLASS_NAME,
+    COURSE_ENTITLEMENT_PRODUCT_CLASS_NAME,
     ENROLLMENT_CODE_PRODUCT_CLASS_NAME,
     SEAT_PRODUCT_CLASS_NAME
 )
@@ -29,6 +30,10 @@ class Product(AbstractProduct):
     @property
     def is_enrollment_code_product(self):
         return self.get_product_class().name == ENROLLMENT_CODE_PRODUCT_CLASS_NAME
+
+    @property
+    def is_course_entitlement_product(self):
+        return self.get_product_class().name == COURSE_ENTITLEMENT_PRODUCT_CLASS_NAME
 
     @property
     def is_coupon_product(self):

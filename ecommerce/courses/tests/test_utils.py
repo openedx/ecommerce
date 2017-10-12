@@ -13,7 +13,7 @@ from ecommerce.courses.utils import (
     get_certificate_type_display_value,
     get_course_catalogs,
     get_course_info_from_catalog,
-    mode_for_seat
+    mode_for_product
 )
 from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
 from ecommerce.tests.testcases import TestCase
@@ -33,15 +33,15 @@ class UtilsTests(DiscoveryTestMixin, DiscoveryMockMixin, TestCase):
         ('professional', False, 'no-id-professional'),
         ('no-id-professional', False, 'no-id-professional'),
     )
-    def test_mode_for_seat(self, certificate_type, id_verification_required, mode):
+    def test_mode_for_product(self, certificate_type, id_verification_required, mode):
         """ Verify the correct enrollment mode is returned for a given seat. """
         course = CourseFactory(id='edx/Demo_Course/DemoX', site=self.site)
         toggle_switch(ENROLLMENT_CODE_SWITCH, True)
         seat = course.create_or_update_seat(certificate_type, id_verification_required, 10.00, self.partner)
-        self.assertEqual(mode_for_seat(seat), mode)
+        self.assertEqual(mode_for_product(seat), mode)
         enrollment_code = course.enrollment_code_product
         if enrollment_code:  # We should only have enrollment codes for allowed types
-            self.assertEqual(mode_for_seat(enrollment_code), mode)
+            self.assertEqual(mode_for_product(enrollment_code), mode)
 
     def test_get_course_info_from_catalog(self):
         """ Check to see if course info gets cached """

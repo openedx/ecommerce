@@ -6,7 +6,7 @@ from ecommerce_worker.sailthru.v1.tasks import update_course_enrollment
 from oscar.core.loading import get_class, get_model
 
 from ecommerce.core.url_utils import get_lms_url
-from ecommerce.courses.utils import mode_for_seat
+from ecommerce.courses.utils import mode_for_product
 from ecommerce.extensions.analytics.utils import silence_exceptions
 
 logger = logging.getLogger(__name__)
@@ -68,7 +68,7 @@ def process_checkout_complete(sender, order=None, user=None, request=None,  # py
 
             # Tell Sailthru that the purchase is complete asynchronously
             update_course_enrollment.delay(order.user.email, _build_course_url(course_id),
-                                           False, mode_for_seat(product),
+                                           False, mode_for_product(product),
                                            unit_cost=price, course_id=course_id, currency=order.currency,
                                            site_code=site_configuration.partner.short_code, message_id=message_id,
                                            sku=sku)
@@ -113,7 +113,7 @@ def process_basket_addition(sender, product=None, user=None, request=None, baske
         # later if the purchase is not completed.  Abandoned cart support is only for purchases, not
         # for free enrolls
         if price and not is_multi_product_basket:
-            update_course_enrollment.delay(user.email, _build_course_url(course_id), True, mode_for_seat(product),
+            update_course_enrollment.delay(user.email, _build_course_url(course_id), True, mode_for_product(product),
                                            unit_cost=price, course_id=course_id, currency=currency,
                                            site_code=site_configuration.partner.short_code, message_id=message_id)
 

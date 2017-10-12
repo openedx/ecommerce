@@ -11,14 +11,15 @@ import logging
 import requests
 from django.conf import settings
 from django.core.urlresolvers import reverse
+from edx_rest_api_client.client import EdxRestApiClient
 from oscar.core.loading import get_model
 from requests.exceptions import ConnectionError, Timeout  # pylint: disable=ungrouped-imports
 from rest_framework import status
 
 from ecommerce.core.constants import ENROLLMENT_CODE_PRODUCT_CLASS_NAME
-from ecommerce.core.url_utils import get_lms_enrollment_api_url
+from ecommerce.core.url_utils import get_lms_enrollment_api_url, get_lms_entitlement_api_url
 from ecommerce.courses.models import Course
-from ecommerce.courses.utils import mode_for_seat
+from ecommerce.courses.utils import mode_for_product
 from ecommerce.enterprise.utils import get_or_create_enterprise_customer_user
 from ecommerce.extensions.analytics.utils import audit_log, parse_tracking_context
 from ecommerce.extensions.checkout.utils import get_receipt_page_url
@@ -28,6 +29,7 @@ from ecommerce.extensions.voucher.utils import create_vouchers
 from ecommerce.notifications.notifications import send_notification
 
 Benefit = get_model('offer', 'Benefit')
+Option = get_model('catalogue', 'Option')
 Product = get_model('catalogue', 'Product')
 Range = get_model('offer', 'Range')
 Voucher = get_model('voucher', 'Voucher')
@@ -208,7 +210,7 @@ class EnrollmentFulfillmentModule(BaseFulfillmentModule):
 
         for line in lines:
             try:
-                mode = mode_for_seat(line.product)
+                mode = mode_for_product(line.product)
                 course_key = line.product.attr.course_key
             except AttributeError:
                 logger.error("Supported Seat Product does not have required attributes, [certificate_type, course_key]")
@@ -292,7 +294,7 @@ class EnrollmentFulfillmentModule(BaseFulfillmentModule):
         try:
             logger.info('Attempting to revoke fulfillment of Line [%d]...', line.id)
 
-            mode = mode_for_seat(line.product)
+            mode = mode_for_product(line.product)
             course_key = line.product.attr.course_key
             data = {
                 'user': line.order.user.username,
@@ -507,3 +509,123 @@ class EnrollmentCodeFulfillmentModule(BaseFulfillmentModule):
             },
             site=order.site
         )
+
+
+class CourseEntitlementFulfillmentModule(BaseFulfillmentModule):
+    """ Fulfillment Module for granting students an entitlement.
+    Allows the entitlement of a student via purchase of a 'Course Entitlement'.
+    """
+
+    def supports_line(self, line):
+        return line.product.is_course_entitlement_product
+
+    def get_supported_lines(self, lines):
+        """ Return a list of lines that can be fulfilled.
+        Checks each line to determine if it is a "Course Entitlement". Entitlements are fulfilled by granting students
+        an entitlement in a course, which is the sole functionality of this module.
+        Args:
+            lines (List of Lines): Order Lines, associated with purchased products in an Order.
+        Returns:
+            A supported list of unmodified lines associated with "Course ENtitlement" products.
+        """
+        return [line for line in lines if self.supports_line(line)]
+
+    def fulfill_product(self, order, lines):
+        """ Fulfills the purchase of a 'Course Entitlement'.
+        Uses the order and the lines to determine which courses to grant an entitlement for, and with certain
+        certificate types. May result in an error if the Entitlement API cannot be reached, or if there is
+        additional business logic errors when trying grant the entitlement.
+        Args:
+            order (Order): The Order associated with the lines to be fulfilled. The user associated with the order
+                is presumed to be the student to grant an entitlement.
+            lines (List of Lines): Order Lines, associated with purchased products in an Order. These should only
+                be "Course Entitlement" products.
+        Returns:
+            The original set of lines, with new statuses set based on the success or failure of fulfillment.
+        """
+        logger.info('Attempting to fulfill "Course Entitlement" product types for order [%s]', order.number)
+
+        for line in lines:
+            try:
+                mode = mode_for_product(line.product)
+                UUID = line.product.attr.UUID
+            except AttributeError:
+                logger.error('Entitlement Product does not have required attributes, [certificate_type, UUID]')
+                line.set_status(LINE.FULFILLMENT_CONFIGURATION_ERROR)
+                continue
+
+            data = {
+                'username': order.user.username,
+                'course_uuid': UUID,
+                'mode': mode,
+                'order_number': order.number,
+            }
+
+            try:
+                entitlement_option = Option.objects.get(code='course_entitlement')
+
+                entitlement_api_client = EdxRestApiClient(
+                    get_lms_entitlement_api_url(),
+                    jwt=order.site.siteconfiguration.access_token
+                )
+
+                # POST to the Entitlement API.
+                response = entitlement_api_client.entitlements.post(data)
+                results = response['results']
+                line.attributes.create(option=entitlement_option, value=results[0]['uuid'])
+                line.set_status(LINE.COMPLETE)
+
+                audit_log(
+                    'line_fulfilled',
+                    order_line_id=line.id,
+                    order_number=order.number,
+                    product_class=line.product.get_product_class().name,
+                    UUID=UUID,
+                    mode=mode,
+                    user_id=order.user.id,
+                )
+            except (Timeout, ConnectionError):
+                logger.exception(
+                    'Unable to fulfill line [%d] of order [%s] due to a network problem', line.id, order.number
+                )
+                line.set_status(LINE.FULFILLMENT_NETWORK_ERROR)
+            except Exception:  # pylint: disable=broad-except
+                logger.exception(
+                    'Unable to fulfill line [%d] of order [%s]', line.id, order.number
+                )
+                line.set_status(LINE.FULFILLMENT_SERVER_ERROR)
+
+        logger.info('Finished fulfilling "Course Entitlement" product types for order [%s]', order.number)
+        return order, lines
+
+    def revoke_line(self, line):
+        try:
+            logger.info('Attempting to revoke fulfillment of Line [%d]...', line.id)
+
+            UUID = line.product.attr.UUID
+            entitlement_option = Option.objects.get(code='course_entitlement')
+            course_entitlement_uuid = line.attributes.get(option=entitlement_option).value
+
+            entitlement_api_client = EdxRestApiClient(
+                get_lms_entitlement_api_url(),
+                jwt=line.order.site.siteconfiguration.access_token
+            )
+
+            # DELETE to the Entitlement API.
+            entitlement_api_client.entitlements(course_entitlement_uuid).delete()
+
+            audit_log(
+                'line_revoked',
+                order_line_id=line.id,
+                order_number=line.order.number,
+                product_class=line.product.get_product_class().name,
+                UUID=UUID,
+                certificate_type=getattr(line.product.attr, 'certificate_type', ''),
+                user_id=line.order.user.id
+            )
+
+            return True
+        except Exception:  # pylint: disable=broad-except
+            logger.exception('Failed to revoke fulfillment of Line [%d].', line.id)
+
+        return False

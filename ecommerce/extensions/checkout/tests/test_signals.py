@@ -12,7 +12,7 @@ from ecommerce.core.constants import ENROLLMENT_CODE_PRODUCT_CLASS_NAME, ENROLLM
 from ecommerce.core.tests import toggle_switch
 from ecommerce.coupons.tests.mixins import CouponMixin
 from ecommerce.courses.tests.factories import CourseFactory
-from ecommerce.courses.utils import mode_for_seat
+from ecommerce.courses.utils import mode_for_product
 from ecommerce.extensions.checkout.signals import send_course_purchase_email, track_completed_order
 from ecommerce.extensions.checkout.utils import get_receipt_page_url
 from ecommerce.extensions.test.factories import create_order, prepare_voucher
@@ -141,7 +141,7 @@ class SignalTests(ProgramTestMixin, CouponMixin, TestCase):
             'products': [
                 {
                     'id': line.partner_sku,
-                    'sku': mode_for_seat(line.product),
+                    'sku': mode_for_product(line.product),
                     'name': line.product.course.id if line.product.course else line.product.title,
                     'price': str(line.line_price_excl_tax),
                     'quantity': line.quantity,

@@ -2,7 +2,7 @@ import json
 import logging
 from functools import wraps
 
-from ecommerce.courses.utils import mode_for_seat
+from ecommerce.courses.utils import mode_for_product
 
 logger = logging.getLogger(__name__)
 
@@ -164,7 +164,7 @@ def translate_basket_line_for_segment(line):
         # SKU. Marketing is aware that this approach will not scale once we start selling
         # products other than courses, and will need to change in the future.
         'product_id': line.stockrecord.partner_sku,
-        'sku': mode_for_seat(line.product),
+        'sku': mode_for_product(line.product),
         'name': course.id if course else line.product.title,
         'price': str(line.line_price_excl_tax),
         'quantity': line.quantity,

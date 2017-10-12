@@ -21,7 +21,7 @@ from social_django.models import UserSocialAuth
 from threadlocals.threadlocals import set_thread_variable
 
 from ecommerce.core.url_utils import get_lms_url
-from ecommerce.courses.utils import mode_for_seat
+from ecommerce.courses.utils import mode_for_product
 from ecommerce.extensions.fulfillment.signals import SHIPPING_EVENT_NAME
 from ecommerce.tests.factories import SiteConfigurationFactory
 
@@ -237,7 +237,7 @@ class BusinessIntelligenceMixin(object):
                 self.assertEqual(line.product.course.id, tracked_product['name'])
                 self.assertEqual(str(line.line_price_excl_tax), tracked_product['price'])
                 self.assertEqual(line.quantity, tracked_product['quantity'])
-                self.assertEqual(mode_for_seat(line.product), tracked_product['sku'])
+                self.assertEqual(mode_for_product(line.product), tracked_product['sku'])
                 self.assertEqual(line.product.get_product_class().name, tracked_product['category'])
         else:
             # Payload validation is currently limited to order and refund events

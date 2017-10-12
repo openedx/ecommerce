@@ -7,7 +7,7 @@ from django.utils.translation import ugettext_lazy as _
 from ecommerce.core.utils import traverse_pagination
 
 
-def mode_for_seat(product):
+def mode_for_product(product):
     """
     Returns the enrollment mode (aka course mode) for the specified product.
     If the specified product does not include a 'certificate_type' attribute it is likely the
