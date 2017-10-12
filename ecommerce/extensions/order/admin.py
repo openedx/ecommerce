@@ -1,4 +1,6 @@
 import waffle
+from django.contrib import messages
+from django.utils.translation import ugettext_lazy as _
 from oscar.apps.order.admin import *  # noqa pylint: disable=wildcard-import,unused-wildcard-import
 
 from ecommerce.extensions.order.constants import ORDER_LIST_VIEW_SWITCH
@@ -22,17 +24,18 @@ class OrderAdminExtended(OrderAdmin):
     show_full_result_count = False
 
     def get_queryset(self, request):
+        if not waffle.switch_is_active(ORDER_LIST_VIEW_SWITCH):
+            # Translators: "Waffle" is the name of a third-party library. It should not be translated
+            msg = _('Order administration has been disabled due to the load on the database. '
+                    'This functionality can be restored by activating the {switch_name} Waffle switch. '
+                    'Be careful when re-activating this switch!').format(switch_name=ORDER_LIST_VIEW_SWITCH)
+
+            self.message_user(request, msg, level=messages.WARNING)
+            return Order.objects.none()
+
         queryset = super(OrderAdminExtended, self).get_queryset(request)
         queryset = queryset.select_related('site', 'user', 'basket', )
         return queryset
-
-    def changelist_view(self, request, extra_context=None):
-        if not waffle.switch_is_active(ORDER_LIST_VIEW_SWITCH):
-            self.change_list_template = 'admin/disable_change_list.html'
-        else:
-            self.change_list_template = None
-
-        return super(OrderAdminExtended, self).changelist_view(request, extra_context)
 
 
 @admin.register(Line)

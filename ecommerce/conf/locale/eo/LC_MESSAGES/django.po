@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-07-31 15:54+0000\n"
+"POT-Creation-Date: 2017-10-12 17:45+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -28,6 +28,24 @@ msgstr "Pérmïssïöns Ⱡ'σяєм ιρѕυм ∂σłσя #"
 #: ecommerce/core/admin.py
 msgid "Important dates"
 msgstr "Ìmpörtänt dätés Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт α#"
+
+#. Translators: "Waffle" is the name of a third-party library. It should not
+#. be translated
+#: ecommerce/core/admin.py ecommerce/extensions/order/admin.py
+#, python-brace-format
+msgid ""
+"User administration has been disabled due to the load on the database. This "
+"functionality can be restored by activating the {switch_name} Waffle switch."
+" Be careful when re-activating this switch!"
+msgstr ""
+"Ûsér ädmïnïsträtïön häs ßéén dïsäßléd düé tö thé löäd ön thé dätäßäsé. Thïs "
+"fünçtïönälïtý çän ßé réstöréd ßý äçtïvätïng thé {switch_name} Wäfflé swïtçh."
+" Bé çäréfül whén ré-äçtïvätïng thïs swïtçh! Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
+"¢σηѕє¢тєтυя α∂ιριѕι¢ιηg єłιт, ѕє∂ ∂σ єιυѕмσ∂ тємρσя ιη¢ι∂ι∂υηт υт łαвσяє єт "
+"∂σłσяє мαgηα αłιqυα. υт єηιм α∂ мιηιм νєηιαм, qυιѕ ησѕтяυ∂ єχєя¢ιтαтιση "
+"υłłαм¢σ łαвσяιѕ ηιѕι υт αłιqυιρ єχ єα ¢σммσ∂σ ¢σηѕєqυαт. ∂υιѕ αυтє ιяυяє "
+"∂σłσя ιη яєρяєнєη∂єяιт ιη νσłυρтαтє νєłιт єѕѕє ¢ιłłυм ∂σłσяє єυ ƒυgιαт ηυłłα"
+" ραяιαтυя. єχ¢єρтєυя ѕιηт σ¢¢αє¢αт ¢υρι∂αтαт ηση ρяσι∂єηт#"
 
 #: ecommerce/core/models.py
 msgid "LMS base url for custom site/microsite"
@@ -230,10 +248,24 @@ msgid "Enable Apple Pay"
 msgstr "Énäßlé Àpplé Päý Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αм#"
 
 #: ecommerce/core/models.py
+msgid "Enable Partial Program Offer"
+msgstr "Énäßlé Pärtïäl Prögräm Öffér Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢#"
+
+#: ecommerce/core/models.py
+msgid ""
+"Enable the application of program offers to remaining unenrolled or "
+"unverified courses"
+msgstr ""
+"Énäßlé thé äpplïçätïön öf prögräm öfférs tö rémäïnïng ünénrölléd ör "
+"ünvérïfïéd çöürsés Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢#"
+
+#: ecommerce/core/models.py
 msgid "Full Name"
 msgstr "Füll Nämé Ⱡ'σяєм ιρѕυм ∂σł#"
 
 #: ecommerce/core/models.py ecommerce/extensions/basket/models.py
+#: ecommerce/templates/oscar/dashboard/offers/offer_detail.html
+#: ecommerce/templates/oscar/dashboard/offers/summary.html
 msgid "Name"
 msgstr "Nämé Ⱡ'σяєм ι#"
 
@@ -329,8 +361,16 @@ msgstr ""
 "À dïsçöünt häs ßéén äpplïéd, çöürtésý öf {enterprise_customer_name}. Ⱡ'σяєм "
 "ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя #"
 
+#: ecommerce/coupons/views.py
+msgid "This coupon code is not valid for this course. Try a different course."
+msgstr ""
+"Thïs çöüpön çödé ïs nöt välïd för thïs çöürsé. Trý ä dïfférént çöürsé. "
+"Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя #"
+
 #: ecommerce/courses/models.py ecommerce/extensions/basket/models.py
-#: ecommerce/extensions/payment/models.py
+#: ecommerce/extensions/offer/models.py ecommerce/extensions/payment/models.py
+#: ecommerce/templates/oscar/dashboard/offers/offer_detail.html
+#: ecommerce/templates/oscar/dashboard/offers/summary.html
 msgid "Site"
 msgstr "Sïté Ⱡ'σяєм ι#"
 
@@ -645,6 +685,13 @@ msgstr ""
 "Çöüpön çödé '{code}' häs älréädý ßéén rédééméd. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт,"
 " ¢σηѕє¢тєтυя #"
 
+#: ecommerce/extensions/basket/views.py ecommerce/extensions/basket/views.py
+#, python-brace-format
+msgid "Coupon code '{code}' is not valid for this basket."
+msgstr ""
+"Çöüpön çödé '{code}' ïs nöt välïd för thïs ßäskét. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт "
+"αмєт, ¢σηѕє¢тєтυя α#"
+
 #: ecommerce/extensions/basket/views.py
 msgid "Your basket does not qualify for a coupon code discount."
 msgstr ""
@@ -743,9 +790,9 @@ msgstr ""
 "Fäïléd tö rétrïévé énröllmént dätä. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєт#"
 
 #: ecommerce/extensions/offer/models.py
-msgid "Course catalog id from the Discovery Service."
+msgid "Course Catalog ID from the Discovery Service."
 msgstr ""
-"Çöürsé çätälög ïd fröm thé Dïsçövérý Sérvïçé. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
+"Çöürsé Çätälög ÌD fröm thé Dïsçövérý Sérvïçé. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
 "¢σηѕє¢тєтυя #"
 
 #: ecommerce/extensions/offer/models.py
@@ -858,6 +905,7 @@ msgid "Country"
 msgstr "Çöüntrý Ⱡ'σяєм ιρѕυм #"
 
 #: ecommerce/extensions/payment/forms.py ecommerce/extensions/payment/forms.py
+#: ecommerce/extensions/payment/forms.py
 msgid "This field is required."
 msgstr "Thïs fïéld ïs réqüïréd. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σ#"
 
@@ -1254,6 +1302,14 @@ msgstr "Prögräm Öfférs Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт#"
 #: ecommerce/programs/templates/programs/programoffer_form.html
 #: ecommerce/templates/oscar/dashboard/catalogue/product_row_actions.html
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html
+#: ecommerce/templates/oscar/dashboard/offers/offer_detail.html
+#: ecommerce/templates/oscar/dashboard/offers/offer_detail.html
+#: ecommerce/templates/oscar/dashboard/offers/offer_detail.html
+#: ecommerce/templates/oscar/dashboard/offers/offer_detail.html
+#: ecommerce/templates/oscar/dashboard/offers/summary.html
+#: ecommerce/templates/oscar/dashboard/offers/summary.html
+#: ecommerce/templates/oscar/dashboard/offers/summary.html
+#: ecommerce/templates/oscar/dashboard/offers/summary.html
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html
 msgid "Edit"
 msgstr "Édït Ⱡ'σяєм ι#"
@@ -1349,6 +1405,7 @@ msgstr "ÛTM Çréätéd Àt Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт#"
 #: ecommerce/settings/_oscar.py
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html
 #: ecommerce/templates/oscar/dashboard/index.html
+#: ecommerce/templates/oscar/dashboard/offers/offer_detail.html
 #: ecommerce/templates/oscar/dashboard/orders/line_detail.html
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html
 #: ecommerce/templates/oscar/dashboard/orders/order_list.html
@@ -1425,6 +1482,7 @@ msgid "Stock alert requests"
 msgstr "Stöçk älért réqüésts Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, #"
 
 #: ecommerce/settings/_oscar.py ecommerce/settings/_oscar.py
+#: ecommerce/templates/oscar/dashboard/offers/offer_detail.html
 msgid "Offers"
 msgstr "Öfférs Ⱡ'σяєм ιρѕυ#"
 
@@ -1447,12 +1505,6 @@ msgstr "Spänïsh Ⱡ'σяєм ιρѕυм #"
 #: ecommerce/settings/base.py
 msgid "Spanish (Latin American)"
 msgstr "Spänïsh (Lätïn Àmérïçän) Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢ση#"
-
-#: ecommerce/templates/admin/disable_change_list.html
-msgid "List view is temporarily disabled due to large number of records."
-msgstr ""
-"Lïst vïéw ïs témpörärïlý dïsäßléd düé tö lärgé nümßér öf réçörds. Ⱡ'σяєм "
-"ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя α#"
 
 #: ecommerce/templates/base.html
 msgid "Build"
@@ -1899,6 +1951,8 @@ msgid "Order Information"
 msgstr "Ördér Ìnförmätïön Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмє#"
 
 #: ecommerce/templates/edx/checkout/receipt.html
+#: ecommerce/templates/oscar/dashboard/offers/offer_detail.html
+#: ecommerce/templates/oscar/dashboard/offers/summary.html
 msgid "Description"
 msgstr "Désçrïptïön Ⱡ'σяєм ιρѕυм ∂σłσя #"
 
@@ -2863,6 +2917,112 @@ msgstr "Tötäl prödüçts Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт#"
 msgid "Active Vouchers"
 msgstr "Àçtïvé Vöüçhérs Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт α#"
 
+#: ecommerce/templates/oscar/dashboard/offers/offer_detail.html
+#, python-format
+msgid ""
+"\n"
+"        %(name)s | Offers\n"
+"    "
+msgstr ""
+"\n"
+"        %(name)s | Öfférs\n"
+"     Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕ#"
+
+#: ecommerce/templates/oscar/dashboard/offers/offer_detail.html
+msgid "Reinstating..."
+msgstr "Réïnstätïng... Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт#"
+
+#: ecommerce/templates/oscar/dashboard/offers/offer_detail.html
+msgid "Reinstate offer"
+msgstr "Réïnstäté öffér Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт α#"
+
+#: ecommerce/templates/oscar/dashboard/offers/offer_detail.html
+msgid "Suspending..."
+msgstr "Süspéndïng... Ⱡ'σяєм ιρѕυм ∂σłσя ѕι#"
+
+#: ecommerce/templates/oscar/dashboard/offers/offer_detail.html
+msgid "Suspend offer"
+msgstr "Süspénd öffér Ⱡ'σяєм ιρѕυм ∂σłσя ѕι#"
+
+#: ecommerce/templates/oscar/dashboard/offers/offer_detail.html
+msgid "Delete offer"
+msgstr "Délété öffér Ⱡ'σяєм ιρѕυм ∂σłσя ѕ#"
+
+#: ecommerce/templates/oscar/dashboard/offers/offer_detail.html
+msgid "Offer currently available"
+msgstr "Öffér çürréntlý äväïläßlé Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕ#"
+
+#: ecommerce/templates/oscar/dashboard/offers/offer_detail.html
+msgid "Offer not available due to restrictions!"
+msgstr ""
+"Öffér nöt äväïläßlé düé tö réstrïçtïöns! Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
+"¢σηѕє¢тєтυя#"
+
+#: ecommerce/templates/oscar/dashboard/offers/offer_detail.html
+msgid "Total cost:"
+msgstr "Tötäl çöst: Ⱡ'σяєм ιρѕυм ∂σłσя #"
+
+#: ecommerce/templates/oscar/dashboard/offers/offer_detail.html
+msgid "Number of orders:"
+msgstr "Nümßér öf ördérs: Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмє#"
+
+#: ecommerce/templates/oscar/dashboard/offers/offer_detail.html
+msgid "Number of uses:"
+msgstr "Nümßér öf üsés: Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт α#"
+
+#: ecommerce/templates/oscar/dashboard/offers/offer_detail.html
+msgid "Date created:"
+msgstr "Däté çréätéd: Ⱡ'σяєм ιρѕυм ∂σłσя ѕι#"
+
+#: ecommerce/templates/oscar/dashboard/offers/offer_detail.html
+msgid "Offer details"
+msgstr "Öffér détäïls Ⱡ'σяєм ιρѕυм ∂σłσя ѕι#"
+
+#: ecommerce/templates/oscar/dashboard/offers/offer_detail.html
+#: ecommerce/templates/oscar/dashboard/offers/summary.html
+msgid "Incentive"
+msgstr "Ìnçéntïvé Ⱡ'σяєм ιρѕυм ∂σł#"
+
+#: ecommerce/templates/oscar/dashboard/offers/offer_detail.html
+#: ecommerce/templates/oscar/dashboard/offers/summary.html
+msgid "Condition"
+msgstr "Çöndïtïön Ⱡ'σяєм ιρѕυм ∂σł#"
+
+#: ecommerce/templates/oscar/dashboard/offers/offer_detail.html
+#: ecommerce/templates/oscar/dashboard/offers/summary.html
+msgid "Restrictions"
+msgstr "Réstrïçtïöns Ⱡ'σяєм ιρѕυм ∂σłσя ѕ#"
+
+#: ecommerce/templates/oscar/dashboard/offers/offer_detail.html
+msgid "Export to CSV"
+msgstr "Éxpört tö ÇSV Ⱡ'σяєм ιρѕυм ∂σłσя ѕι#"
+
+#: ecommerce/templates/oscar/dashboard/offers/offer_detail.html
+msgid "Orders that used this offer"
+msgstr "Ördérs thät üséd thïs öffér Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє#"
+
+#: ecommerce/templates/oscar/dashboard/offers/offer_detail.html
+#: ecommerce/templates/oscar/dashboard/orders/order_list.html
+msgid "Order number"
+msgstr "Ördér nümßér Ⱡ'σяєм ιρѕυм ∂σłσя ѕ#"
+
+#: ecommerce/templates/oscar/dashboard/offers/offer_detail.html
+msgid "Order date"
+msgstr "Ördér däté Ⱡ'σяєм ιρѕυм ∂σłσ#"
+
+#: ecommerce/templates/oscar/dashboard/offers/offer_detail.html
+#: ecommerce/templates/oscar/dashboard/orders/order_detail.html
+msgid "Order total"
+msgstr "Ördér tötäl Ⱡ'σяєм ιρѕυм ∂σłσя #"
+
+#: ecommerce/templates/oscar/dashboard/offers/offer_detail.html
+msgid "Cost"
+msgstr "Çöst Ⱡ'σяєм ι#"
+
+#: ecommerce/templates/oscar/dashboard/offers/summary.html
+msgid "Offer summary"
+msgstr "Öffér sümmärý Ⱡ'σяєм ιρѕυм ∂σłσя ѕι#"
+
 #: ecommerce/templates/oscar/dashboard/orders/line_detail.html
 #, python-format
 msgid ""
@@ -3133,10 +3293,6 @@ msgid "Shipping total"
 msgstr "Shïppïng tötäl Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт#"
 
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html
-msgid "Order total"
-msgstr "Ördér tötäl Ⱡ'σяєм ιρѕυм ∂σłσя #"
-
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html
 msgid "With selected lines"
 msgstr "Wïth séléçtéd lïnés Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт,#"
 
@@ -3354,10 +3510,6 @@ msgstr ""
 #: ecommerce/templates/oscar/dashboard/orders/order_list.html
 msgid "Download"
 msgstr "Döwnlöäd Ⱡ'σяєм ιρѕυм ∂#"
-
-#: ecommerce/templates/oscar/dashboard/orders/order_list.html
-msgid "Order number"
-msgstr "Ördér nümßér Ⱡ'σяєм ιρѕυм ∂σłσя ѕ#"
 
 #: ecommerce/templates/oscar/dashboard/orders/order_list.html
 msgid "Total inc tax"
@@ -3626,3 +3778,8 @@ msgid "This customer has not written any reviews yet."
 msgstr ""
 "Thïs çüstömér häs nöt wrïttén äný révïéws ýét. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
 "¢σηѕє¢тєтυя α#"
+
+#: ecommerce/urls.py
+msgid "E-Commerce Service Administration"
+msgstr ""
+"É-Çömmérçé Sérvïçé Àdmïnïsträtïön Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тє#"

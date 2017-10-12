@@ -1,3 +1,4 @@
+from django.contrib import messages
 from django.core.urlresolvers import reverse
 from oscar.test.factories import UserFactory
 
@@ -20,11 +21,16 @@ class UserAdminTests(TestCase):
         toggle_switch(USER_LIST_VIEW_SWITCH, True)
         response = self.client.get(self.user_page_url)
         self.assertEqual(response.status_code, 200)
-        self.assertNotContains(response, 'List view is temporarily disabled due to large number of records.')
 
     def test_changelist_view_disable_switch(self):
         """ Overridden template will load on the list page, if the switch is disabled. """
         toggle_switch(USER_LIST_VIEW_SWITCH, False)
         response = self.client.get(self.user_page_url)
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, 'List view is temporarily disabled due to large number of records.')
+        msg = 'User administration has been disabled due to the load on the database. ' \
+              'This functionality can be restored by activating the {switch_name} Waffle switch. ' \
+              'Be careful when re-activating this switch!'.format(switch_name=USER_LIST_VIEW_SWITCH)
+        self.assertEqual(response.status_code, 200)
+        message = list(response.context['messages'])[0]
+        self.assertEqual(message.level, messages.WARNING)
+        self.assertEqual(message.message, msg)
