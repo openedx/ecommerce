@@ -63,21 +63,34 @@ class Command(BaseCommand):
         )
 
         for model in models:
-            qs = model.history.filter(history_date__lte=cutoff_date)
+            qs = model.history.filter(history_date__lte=cutoff_date).order_by('-pk')
 
             message = 'Cleaning {} rows from {} table'.format(qs.count(), model.__name__)
             logger.info(message)
 
-            qs = qs[:batch_size]
-            while qs.exists():
-                history_batch = list(qs.values_list('id', flat=True))
+            try:
+                # use Primary keys sorting to make sure unique batching as
+                # filtering batch does not work for huge data
+                max_pk = qs[0].pk
+                batch_start = qs.reverse()[0].pk
+                batch_stop = batch_start + batch_size
+            except IndexError:
+                continue
+
+            logger.info(message)
+
+            while batch_start <= max_pk:
+                queryset = model.history.filter(pk__gte=batch_start, pk__lt=batch_stop)
 
                 with transaction.atomic():
-                    model.history.filter(pk__in=history_batch).delete()
+                    queryset.delete()
                     logger.info(
                         'Deleted instances of %s with PKs between %d and %d',
-                        model.__name__, history_batch[0], history_batch[-1]
+                        model.__name__, batch_start, batch_stop
                     )
 
-                time.sleep(sleep_time)
-                qs = model.history.filter(history_date__lte=cutoff_date)[:batch_size]
+                if batch_stop < max_pk:
+                    time.sleep(sleep_time)
+
+                batch_start = batch_stop
+                batch_stop += batch_size
