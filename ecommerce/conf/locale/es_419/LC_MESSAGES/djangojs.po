@@ -13,7 +13,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-07-18 11:14-0400\n"
+"POT-Creation-Date: 2017-10-12 20:55+0000\n"
 "PO-Revision-Date: 2017-09-23 21:22+0000\n"
 "Last-Translator: Juan Camilo Montoya Franco <juan.montoya@edunext.co>\n"
 "Language-Team: Spanish (Latin America) (http://www.transifex.com/open-edx/edx-platform/language/es_419/)\n"
@@ -168,43 +168,43 @@ msgstr "Por favor seleccione un proveedor de crédito válido."
 msgid "All credit seats must designate a number of credit hours."
 msgstr "Todos los asientos de crédito deben designar un número de horas de crédito."
 
-#: ecommerce/static/js/pages/basket_page.js:29
+#: ecommerce/static/js/pages/basket_page.js:25
 msgid "Problem occurred during checkout. Please contact support"
 msgstr "Hubo un problema con la transacción de pago. Por favor contacte al equipo de soporte técnico."
 
-#: ecommerce/static/js/pages/basket_page.js:96
+#: ecommerce/static/js/pages/basket_page.js:97
 msgid "This field is required"
 msgstr "Este campo es requerido"
 
-#: ecommerce/static/js/pages/basket_page.js:131
+#: ecommerce/static/js/pages/basket_page.js:132
 msgid "Invalid card number"
 msgstr "Número de tarjeta invalido"
 
-#: ecommerce/static/js/pages/basket_page.js:133
+#: ecommerce/static/js/pages/basket_page.js:134
 msgid "Unsupported card type"
 msgstr "Tipo de tarjeta no soportado"
 
-#: ecommerce/static/js/pages/basket_page.js:135
+#: ecommerce/static/js/pages/basket_page.js:136
 msgid "Invalid security number"
 msgstr "Número de seguridad invalido"
 
-#: ecommerce/static/js/pages/basket_page.js:140
+#: ecommerce/static/js/pages/basket_page.js:141
 msgid "Invalid month"
 msgstr "Mes invalido"
 
-#: ecommerce/static/js/pages/basket_page.js:142
+#: ecommerce/static/js/pages/basket_page.js:143
 msgid "Invalid year"
 msgstr "Año invalido"
 
-#: ecommerce/static/js/pages/basket_page.js:144
+#: ecommerce/static/js/pages/basket_page.js:145
 msgid "Card expired"
 msgstr "Tarjeta vencida"
 
-#: ecommerce/static/js/pages/basket_page.js:363
+#: ecommerce/static/js/pages/basket_page.js:368
 msgid "<Choose state/province>"
 msgstr "<Choose state/province>"
 
-#: ecommerce/static/js/pages/basket_page.js:364
+#: ecommerce/static/js/pages/basket_page.js:369
 msgid "State/Province (required)"
 msgstr "Estado/Provincia (requerido)"
 
@@ -244,19 +244,19 @@ msgstr "Cursos"
 msgid "Redeem"
 msgstr "Canjear"
 
-#: ecommerce/static/js/pages/receipt_page.js:25
+#: ecommerce/static/js/pages/receipt_page.js:21
 msgid ""
 "Caution! Using the back button on this page may cause you to be charged "
 "again."
 msgstr "Cuidado! Usar el botón de atrás en esta página podrías causarte que seas cargado de nuevo."
 
 #. Translators: Do not translate "Apple Pay".
-#: ecommerce/static/js/payment_processors/cybersource.js:211
+#: ecommerce/static/js/payment_processors/cybersource.js:218
 msgid ""
 "Apple Pay is not available at this time. Please try another payment method."
 msgstr "Apple Pay no está disponible en estos momentos. Por favor intente con otro método de pago."
 
-#: ecommerce/static/js/payment_processors/cybersource.js:242
+#: ecommerce/static/js/payment_processors/cybersource.js:249
 msgid ""
 "An error occurred while processing your payment. You have NOT been charged. "
 "Please try again, or select another payment method."

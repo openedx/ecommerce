@@ -14,8 +14,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-07-31 15:54+0000\n"
-"PO-Revision-Date: 2017-09-23 22:12+0000\n"
+"POT-Creation-Date: 2017-10-12 20:55+0000\n"
+"PO-Revision-Date: 2017-10-13 08:57+0000\n"
 "Last-Translator: Ned Batchelder <ned@edx.org>\n"
 "Language-Team: Swahili (Kenya) (http://www.transifex.com/open-edx/edx-platform/language/sw_KE/)\n"
 "MIME-Version: 1.0\n"
@@ -36,169 +36,179 @@ msgstr "Idhini"
 msgid "Important dates"
 msgstr "Tarehe muhimu"
 
-#: ecommerce/core/models.py:41
+#. Translators: "Waffle" is the name of a third-party library. It should not
+#. be translated
+#: ecommerce/core/admin.py:31
+#, python-brace-format
+msgid ""
+"User administration has been disabled due to the load on the database. This "
+"functionality can be restored by activating the {switch_name} Waffle switch."
+" Be careful when re-activating this switch!"
+msgstr ""
+
+#: ecommerce/core/models.py:40
 msgid "LMS base url for custom site/microsite"
 msgstr "LMS msingi wa url kwa desturi ya tovuti/tovuti ndogo"
 
-#: ecommerce/core/models.py:42
+#: ecommerce/core/models.py:41
 msgid "Root URL of this site's LMS (e.g. https://courses.stage.edx.org)"
 msgstr "Mzizi wa URL kwa LMS katika tovuti hii (e.g https://courses.stage.edx.org)"
 
-#: ecommerce/core/models.py:47
+#: ecommerce/core/models.py:46
 msgid "Path to custom site theme"
 msgstr "Njia kufikia lengo la desturi ya tovuti"
 
-#: ecommerce/core/models.py:54
+#: ecommerce/core/models.py:53
 msgid "Payment processors"
 msgstr "Watayarishaji malipo"
 
-#: ecommerce/core/models.py:55
+#: ecommerce/core/models.py:54
 msgid "Comma-separated list of processor names: 'cybersource,paypal'"
 msgstr "Orodha ya majina ya wachakataji iliyotenganishwa na alama ya koma: 'cybersource,paypal'"
 
-#: ecommerce/core/models.py:61
+#: ecommerce/core/models.py:60
 msgid "Client-side payment processor"
 msgstr "Mthibitishaji wa malipo ya mteja"
 
-#: ecommerce/core/models.py:62
+#: ecommerce/core/models.py:61
 msgid "Processor that will be used for client-side payments"
 msgstr "Kithibitisho kitakachotumika kwa ajili ya malipo ya mteja"
 
-#: ecommerce/core/models.py:68
+#: ecommerce/core/models.py:67
 msgid "OAuth settings"
 msgstr "Mitegesho ya OAuth "
 
-#: ecommerce/core/models.py:69
+#: ecommerce/core/models.py:68
 msgid "JSON string containing OAuth backend settings."
 msgstr "Sentensi ya JSON yenye mitegesho ya OAuth."
 
-#: ecommerce/core/models.py:75
+#: ecommerce/core/models.py:74
 msgid "Segment key"
 msgstr "Namba za siri"
 
-#: ecommerce/core/models.py:76
+#: ecommerce/core/models.py:75
 msgid "Segment write/API key."
 msgstr "Sehemu ya kuweka namba za siri/namba za siri za API."
 
-#: ecommerce/core/models.py:82
+#: ecommerce/core/models.py:81
 msgid "From email"
 msgstr "Kutoka kwenye barua pepe"
 
-#: ecommerce/core/models.py:83
+#: ecommerce/core/models.py:82
 msgid "Address from which emails are sent."
 msgstr "Anwani inayotumiwa kutuma barua pepe."
 
-#: ecommerce/core/models.py:89
+#: ecommerce/core/models.py:88
 msgid "Enable enrollment codes"
 msgstr "Wezesha vificho vya 'usajili'"
 
-#: ecommerce/core/models.py:90
+#: ecommerce/core/models.py:89
 msgid "Enable the creation of enrollment codes."
 msgstr "Wezewsha uundaji wa vificho vya 'usajili'."
 
-#: ecommerce/core/models.py:95
+#: ecommerce/core/models.py:94
 msgid "Payment support email"
 msgstr "'Barua pepe' ya usaidizi wa malipo"
 
-#: ecommerce/core/models.py:96
+#: ecommerce/core/models.py:95
 msgid "Contact email for payment support issues."
 msgstr "Anwani ya 'barua pepe' kwa ajili ya mawasiliano ya msaada."
 
-#: ecommerce/core/models.py:102
+#: ecommerce/core/models.py:101
 msgid "Payment support url"
 msgstr "Anwani ya msaada wa malipo"
 
-#: ecommerce/core/models.py:103
+#: ecommerce/core/models.py:102
 msgid "URL for payment support issues."
 msgstr "Anwani ya masuala ya msaada wa malipo."
 
-#: ecommerce/core/models.py:108
+#: ecommerce/core/models.py:107
 msgid "UTM Cookie Name"
 msgstr "Jina la Kumbukumbu za Mtandaoni za UTM"
 
-#: ecommerce/core/models.py:109
+#: ecommerce/core/models.py:108
 msgid "Name of cookie storing UTM data."
 msgstr "Jina la eneo lenye kuhifadhi taarifa za UTM."
 
-#: ecommerce/core/models.py:115
+#: ecommerce/core/models.py:114
 msgid "Affiliate Cookie Name"
 msgstr ""
 
-#: ecommerce/core/models.py:116
+#: ecommerce/core/models.py:115
 msgid "Name of cookie storing affiliate data."
 msgstr ""
 
-#: ecommerce/core/models.py:122
+#: ecommerce/core/models.py:121
 msgid "Send refund email notification"
 msgstr "Tuma taarifa ya barua pepe ya marejesho"
 
-#: ecommerce/core/models.py:127
+#: ecommerce/core/models.py:126
 msgid "Enable SDN check"
 msgstr "Wezesha uingiaji wa SDN"
 
-#: ecommerce/core/models.py:128
+#: ecommerce/core/models.py:127
 msgid "Enable SDN check at checkout."
 msgstr "Wezesha uingiaji na utokaji wa SDN."
 
-#: ecommerce/core/models.py:132
+#: ecommerce/core/models.py:131
 msgid "US Treasury SDN API URL"
 msgstr "URL ya API SDN ya Hazina ya Marekani"
 
-#: ecommerce/core/models.py:137
+#: ecommerce/core/models.py:136
 msgid "US Treasury SDN API key"
 msgstr "Namba ya API SDN ya Hazina ya Marekani"
 
-#: ecommerce/core/models.py:142
+#: ecommerce/core/models.py:141
 msgid "SDN lists"
 msgstr "orodha za SDN"
 
-#: ecommerce/core/models.py:143
+#: ecommerce/core/models.py:142
 msgid "A comma-separated list of Treasury OFAC lists to check against."
 msgstr "Orodha ya kukaguliwa ya Hazina ya OFAC."
 
-#: ecommerce/core/models.py:148
+#: ecommerce/core/models.py:147
 msgid "Require Account Activation"
 msgstr "Inahitaji Uamshaji Akaunti"
 
-#: ecommerce/core/models.py:149
+#: ecommerce/core/models.py:148
 msgid ""
 "Require users to activate their account before allowing them to redeem a "
 "coupon."
 msgstr "Inahitaji watumiaji waamshe akaunti zao kabla ya kuruhusiwa kukomboa kuponi."
 
-#: ecommerce/core/models.py:153
+#: ecommerce/core/models.py:152
 msgid "Optimizely snippet source URL"
 msgstr ""
 
-#: ecommerce/core/models.py:154
+#: ecommerce/core/models.py:153
 msgid "This script will be loaded on every page."
 msgstr "Maandishi haya yatatokea kwenye kila ukurasa."
 
-#: ecommerce/core/models.py:159 ecommerce/extensions/partner/models.py:14
+#: ecommerce/core/models.py:158 ecommerce/extensions/partner/models.py:14
 msgid "Enable Sailthru Reporting"
 msgstr "Wezesha Utoaji taarifa wa Sailthru"
 
-#: ecommerce/core/models.py:160
+#: ecommerce/core/models.py:159
 msgid "Determines if purchases should be reported to Sailthru."
 msgstr "Huamua ikiwa manunuzi yataelezwa kwenye Sailthru."
 
-#: ecommerce/core/models.py:164
+#: ecommerce/core/models.py:163
 msgid "Base Cookie Domain"
 msgstr ""
 
-#: ecommerce/core/models.py:165
+#: ecommerce/core/models.py:164
 msgid "Base cookie domain used to share cookies across services."
 msgstr ""
 
-#: ecommerce/core/models.py:171
+#: ecommerce/core/models.py:170
 msgid "Enable embargo check"
 msgstr "Wezesha uratibu wa vikwazo"
 
-#: ecommerce/core/models.py:172
+#: ecommerce/core/models.py:171
 msgid "Enable embargo check at checkout."
 msgstr ""
 
-#: ecommerce/core/models.py:176
+#: ecommerce/core/models.py:175
 msgid "Discovery API URL"
 msgstr ""
 
@@ -207,93 +217,112 @@ msgstr ""
 msgid "Enable Apple Pay"
 msgstr ""
 
-#: ecommerce/core/models.py:430
+#: ecommerce/core/models.py:185
+msgid "Enable Partial Program Offer"
+msgstr ""
+
+#: ecommerce/core/models.py:186
+msgid ""
+"Enable the application of program offers to remaining unenrolled or "
+"unverified courses"
+msgstr ""
+
+#: ecommerce/core/models.py:441
 msgid "Full Name"
 msgstr "Jina Kamili"
 
-#: ecommerce/core/models.py:575 ecommerce/extensions/basket/models.py:95
+#: ecommerce/core/models.py:586 ecommerce/extensions/basket/models.py:94
+#: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:56
+#: ecommerce/templates/oscar/dashboard/offers/summary.html:10
 msgid "Name"
 msgstr "Jina"
 
-#: ecommerce/coupons/views.py:67 ecommerce/coupons/views.py:116
+#: ecommerce/coupons/views.py:68 ecommerce/coupons/views.py:117
 msgid "Coupon does not exist."
 msgstr "'Kuponi' haipo."
 
-#: ecommerce/coupons/views.py:72
+#: ecommerce/coupons/views.py:73
 msgid "This coupon code is not yet valid."
 msgstr "Namba ya kuponi hii si halali."
 
-#: ecommerce/coupons/views.py:74
+#: ecommerce/coupons/views.py:75
 msgid "This coupon code has expired."
 msgstr "Namba ya kuponi hii imepitwa na muda."
 
-#: ecommerce/coupons/views.py:86
+#: ecommerce/coupons/views.py:87
 #, python-brace-format
 msgid "Product [{product}] not available for purchase."
 msgstr "Bidhaa [{product}] haipatikani kwa ununuzi."
 
-#: ecommerce/coupons/views.py:91
+#: ecommerce/coupons/views.py:92
 msgid "This coupon code is no longer available."
 msgstr "'Kificho cha kuponi' hii hakipo."
 
-#: ecommerce/coupons/views.py:111
+#: ecommerce/coupons/views.py:112
 msgid "This coupon code is invalid."
 msgstr "Kificho cha kuponi hii sio halali"
 
-#: ecommerce/coupons/views.py:118
+#: ecommerce/coupons/views.py:119
 msgid "The voucher is not applicable to your current basket."
 msgstr "Vocha haitumiki kwenye awamu yako ya sasa ya masomo."
 
-#: ecommerce/coupons/views.py:128
+#: ecommerce/coupons/views.py:129
 msgid "Welcome to edX"
 msgstr "Karibu kwenye edX"
 
-#: ecommerce/coupons/views.py:129
+#: ecommerce/coupons/views.py:130
 msgid ""
 "Please choose from the courses selected by your organization to start "
 "learning."
 msgstr "Tafadhali chagua kozi kutoka kwenye zile zilizoteuliwa na taasisi yako ili uanze mafunzo."
 
-#: ecommerce/coupons/views.py:158
+#: ecommerce/coupons/views.py:160
 msgid "Code not provided."
 msgstr "Kificho hakijatolewa"
 
-#: ecommerce/coupons/views.py:160
+#: ecommerce/coupons/views.py:162
 msgid "SKU not provided."
 msgstr "SKU haijatolewa."
 
-#: ecommerce/coupons/views.py:171
+#: ecommerce/coupons/views.py:173
 msgid "The product does not exist."
 msgstr "Bidhaa haipo"
 
-#: ecommerce/coupons/views.py:179
+#: ecommerce/coupons/views.py:181
 msgid "You are not eligible to use this coupon."
 msgstr "Hustahiki kutumia kuponi 'hii'."
 
-#: ecommerce/coupons/views.py:194
+#: ecommerce/coupons/views.py:196
 msgid "Couldn't find a matching Enterprise Customer for this coupon."
 msgstr "Haikuweza kupata Mteja anaelingana na kuponi hii."
 
-#: ecommerce/coupons/views.py:216
+#: ecommerce/coupons/views.py:218
 msgid "Invalid data sharing consent token provided."
 msgstr "Namba batili ya kupeana taarifa imetolewa."
 
-#: ecommerce/coupons/views.py:235 ecommerce/extensions/basket/views.py:89
+#: ecommerce/coupons/views.py:237 ecommerce/extensions/basket/views.py:91
 #, python-brace-format
 msgid "You have already purchased {course} seat."
 msgstr "Tayari umeshanunua {course} nafasi ya kozi."
 
-#: ecommerce/coupons/views.py:247
+#: ecommerce/coupons/views.py:250
 #, python-brace-format
 msgid "A discount has been applied, courtesy of {enterprise_customer_name}."
 msgstr "Ombi la punguzo limewasilishwa, kwa ajili ya {enterprise_customer_name}."
 
-#: ecommerce/courses/models.py:31 ecommerce/extensions/basket/models.py:15
+#: ecommerce/coupons/views.py:258
+msgid "This coupon code is not valid for this course. Try a different course."
+msgstr ""
+
+#: ecommerce/courses/models.py:34 ecommerce/extensions/basket/models.py:14
+#: ecommerce/extensions/offer/models.py:42
 #: ecommerce/extensions/payment/models.py:58
+#: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:65
+#: ecommerce/templates/oscar/dashboard/offers/summary.html:14
 msgid "Site"
 msgstr "Tovuti"
 
-#: ecommerce/courses/models.py:37
+#: ecommerce/courses/models.py:40
 msgid ""
 "Last date/time on which verification for this product can be submitted."
 msgstr "Tarehe ya mwisho kutuma uhakiki wa bidhaa hii. "
@@ -391,20 +420,20 @@ msgstr "Hatukuweza kupata moja ya bidhaa unazotafuta."
 msgid "One of the products you're trying to order is unavailable."
 msgstr "Moja ya bidhaa unayojaribu kuagiza haipatikani."
 
-#: ecommerce/extensions/api/serializers.py:344
+#: ecommerce/extensions/api/serializers.py:345
 #, python-brace-format
 msgid "Invalid product class [{product_class}] requested."
 msgstr "Daraja la bidhaa zisizo halali [{product_class}] limeombwa."
 
-#: ecommerce/extensions/api/serializers.py:350
+#: ecommerce/extensions/api/serializers.py:351
 msgid "Products must indicate whether ID verification is required."
 msgstr "Bidhaa lazima zioneshe kama Kitambulisho cha uhakiki kinahitajika."
 
-#: ecommerce/extensions/api/serializers.py:354
+#: ecommerce/extensions/api/serializers.py:355
 msgid "Products must have a price."
 msgstr "Bidhaa lazima ziwe na bei."
 
-#: ecommerce/extensions/api/serializers.py:383
+#: ecommerce/extensions/api/serializers.py:384
 #, python-brace-format
 msgid ""
 "Course [{course_id}] was not published to LMS because the switch "
@@ -412,76 +441,76 @@ msgid ""
 " been saved."
 msgstr "Kozi [{course_id}] haikuchapishwa kwenye LMS kwasababu kibonye cha [publish_course_modes_to_Ims] kimezuiwa. Kuepuka SKUs hewa, ujumbe haujahifadhiwa."
 
-#: ecommerce/extensions/api/serializers.py:596
+#: ecommerce/extensions/api/serializers.py:597
 msgid "Enrollment code"
 msgstr "Kificho cha 'usajili'"
 
-#: ecommerce/extensions/api/serializers.py:597
+#: ecommerce/extensions/api/serializers.py:598
 msgid "Discount code"
 msgstr "Kificho cha 'punguzo'"
 
-#: ecommerce/extensions/api/serializers.py:611
+#: ecommerce/extensions/api/serializers.py:612
 msgid "ACTIVE"
 msgstr "HAI"
 
-#: ecommerce/extensions/api/serializers.py:611
+#: ecommerce/extensions/api/serializers.py:612
 msgid "INACTIVE"
 msgstr "HAIPO HAI"
 
-#: ecommerce/extensions/api/v2/views/baskets.py:356
+#: ecommerce/extensions/api/v2/views/baskets.py:363
 #: ecommerce/extensions/basket/views.py:110
 msgid "No SKUs provided."
 msgstr "Hakuna SKUs zilizotolewa."
 
-#: ecommerce/extensions/api/v2/views/baskets.py:366
+#: ecommerce/extensions/api/v2/views/baskets.py:373
 #: ecommerce/extensions/basket/views.py:114
 #, python-brace-format
 msgid "Products with SKU(s) [{skus}] do not exist."
 msgstr "Bidhaa zenye SKU(s) [{skus}] hazipo."
 
-#: ecommerce/extensions/basket/models.py:84
+#: ecommerce/extensions/basket/models.py:83
 #, python-brace-format
 msgid "{id} - {status} basket (owner: {owner}, lines: {num_lines})"
 msgstr "{id} - {status} kapu (owner:{owner}, mistari:{num_lines})"
 
-#: ecommerce/extensions/basket/models.py:107
+#: ecommerce/extensions/basket/models.py:106
 #: ecommerce/extensions/payment/models.py:18
 #: ecommerce/templates/oscar/basket/basket.html:8
 msgid "Basket"
 msgstr "Kapu"
 
-#: ecommerce/extensions/basket/models.py:109
+#: ecommerce/extensions/basket/models.py:108
 msgid "Attribute Type"
 msgstr "Aina Ya Sifa"
 
-#: ecommerce/extensions/basket/models.py:111
+#: ecommerce/extensions/basket/models.py:110
 msgid "Text Attribute"
 msgstr "Sifa ya Maandishi"
 
-#: ecommerce/extensions/basket/utils.py:67
+#: ecommerce/extensions/basket/utils.py:81
 msgid ""
 "Due to export controls, we cannot allow you to access this course at this "
 "time."
 msgstr "Kulingana na usimamizi wa utumaji taarifa, hatuwezi kukuruhusu kuipata kozi hii muda huu."
 
-#: ecommerce/extensions/basket/utils.py:110
+#: ecommerce/extensions/basket/utils.py:125
 msgid "Click here to just purchase an enrollment for yourself"
 msgstr "Bofya hapa ununue usajili wako"
 
-#: ecommerce/extensions/basket/utils.py:113
+#: ecommerce/extensions/basket/utils.py:128
 msgid "Click here to purchase multiple seats in this course"
 msgstr "Bofya hapa kununua nafasi nyingi kwenye kozi hii"
 
-#: ecommerce/extensions/basket/views.py:56
+#: ecommerce/extensions/basket/views.py:58
 msgid "No SKU provided."
 msgstr "Hakuna SKU zilizotolewa."
 
-#: ecommerce/extensions/basket/views.py:63
+#: ecommerce/extensions/basket/views.py:65
 #, python-brace-format
 msgid "SKU [{sku}] does not exist."
 msgstr "SKU [{sku}] hazipo."
 
-#: ecommerce/extensions/basket/views.py:81
+#: ecommerce/extensions/basket/views.py:83
 #, python-brace-format
 msgid "Product [{product}] not available to buy."
 msgstr "Bidhaa [{product}] hazipo kwa ajili ya ununuzi."
@@ -490,67 +519,73 @@ msgstr "Bidhaa [{product}] hazipo kwa ajili ya ununuzi."
 msgid "You have already purchased these products"
 msgstr "Tayari umeshanunua bidhaa hizi"
 
-#: ecommerce/extensions/basket/views.py:238
+#: ecommerce/extensions/basket/views.py:236
 msgid ""
 "You will be automatically enrolled in the verified track of the course upon "
 "completing your order."
 msgstr "Utasajiliwa moja kwa moja kwenye kundi la kozi lililohakikiwa baada ya kukamilisha maelekezo yako."
 
-#: ecommerce/extensions/basket/views.py:242
+#: ecommerce/extensions/basket/views.py:240
 msgid "You will receive your credit upon completing your order."
 msgstr "Utapokea mkopo wako baada ya kukamilisha maelekezo yako."
 
-#: ecommerce/extensions/basket/views.py:245
+#: ecommerce/extensions/basket/views.py:243
 msgid ""
 "You will be automatically enrolled in the course upon completing your order."
 msgstr "Utaandikishwa moja kwa moja kwenye kozi baada ya kukamilisha kanuni muhimu."
 
-#: ecommerce/extensions/basket/views.py:251
+#: ecommerce/extensions/basket/views.py:249
 #, python-brace-format
 msgid ""
 "You will receive an email at {user_email} with your enrollment code(s)."
 msgstr "Utapokea barua pepe kwenye {user_email} pamoja na namba yako ya usajili( )."
 
-#: ecommerce/extensions/basket/views.py:352
+#: ecommerce/extensions/basket/views.py:350
 #, python-brace-format
 msgid "Could not apply the code '{code}'; it requires data sharing consent."
 msgstr "Haikuweza kutumia namba '{code}'; inahitaji idhini ya kupeana taarifa."
 
-#: ecommerce/extensions/basket/views.py:404
+#: ecommerce/extensions/basket/views.py:402
 #, python-brace-format
 msgid "Coupon code '{code}' has expired."
 msgstr "Namba ya kuponi '{code}' imepitwa na muda wake."
 
-#: ecommerce/extensions/basket/views.py:411
+#: ecommerce/extensions/basket/views.py:409
 #, python-brace-format
 msgid "Coupon code '{code}' is not active."
 msgstr "Namba ya kuponi '{code}' haijaamshwa."
 
-#: ecommerce/extensions/basket/views.py:418
+#: ecommerce/extensions/basket/views.py:416
 #, python-brace-format
 msgid "Coupon code '{code}' has already been redeemed."
 msgstr "Namba ya kuponi '{code}' tayari imerejeshwa."
 
-#: ecommerce/extensions/basket/views.py:444
+#: ecommerce/extensions/basket/views.py:426
+#: ecommerce/extensions/basket/views.py:433
+#, python-brace-format
+msgid "Coupon code '{code}' is not valid for this basket."
+msgstr ""
+
+#: ecommerce/extensions/basket/views.py:457
 msgid "Your basket does not qualify for a coupon code discount."
 msgstr "Hazina yako ya manunuzi haina namba ya kuponi ya punguzo."
 
-#: ecommerce/extensions/basket/views.py:449
+#: ecommerce/extensions/basket/views.py:462
 #, python-brace-format
 msgid "Coupon code '{code}' added to basket."
 msgstr "Namba ya kuponi '{code}' imewekwa kwenye hazina ya manunuzi."
 
-#: ecommerce/extensions/basket/views.py:459
+#: ecommerce/extensions/basket/views.py:472
 #, python-brace-format
 msgid "You have already added coupon code '{code}' to your basket."
 msgstr "Tayari umeshaweka namba ya kuponi '{code}' kwenye hazina yako ya manunuzi mtandaoni."
 
-#: ecommerce/extensions/basket/views.py:467
+#: ecommerce/extensions/basket/views.py:480
 #, python-brace-format
 msgid "Coupon code '{code}' does not exist."
 msgstr "Namba ya kuponi '{code}' haipo."
 
-#: ecommerce/extensions/catalogue/models.py:19
+#: ecommerce/extensions/catalogue/models.py:21
 msgid "Last date/time on which this product can be purchased."
 msgstr "Muda/tarehe ya mwisho ambayo bidhaa inaweza kununuliwa. "
 
@@ -614,16 +649,16 @@ msgstr "Hali "
 msgid "Failed to retrieve enrollment data."
 msgstr "Imeshindikana kupata taarifa za uandikishaji.."
 
-#: ecommerce/extensions/offer/models.py:183
-msgid "Course catalog id from the Discovery Service."
+#: ecommerce/extensions/offer/models.py:189
+msgid "Course Catalog ID from the Discovery Service."
 msgstr ""
 
-#: ecommerce/extensions/offer/models.py:188
+#: ecommerce/extensions/offer/models.py:194
 msgid "UUID for an EnterpriseCustomer from the Enterprise Service."
 msgstr "UUID kwa ajili ya Mteja kutoka kwa Mtoa Huduma."
 
-#: ecommerce/extensions/offer/models.py:321
-#: ecommerce/extensions/voucher/utils.py:221 ecommerce/programs/forms.py:18
+#: ecommerce/extensions/offer/models.py:327
+#: ecommerce/extensions/voucher/utils.py:221 ecommerce/programs/forms.py:19
 #: ecommerce/programs/templates/programs/programoffer_list.html:30
 msgid "Program UUID"
 msgstr "Tengeneza programu ya UUID"
@@ -637,6 +672,16 @@ msgstr "{benefit_value}%"
 #, python-brace-format
 msgid "${benefit_value}"
 msgstr "${benefit_value}"
+
+#. Translators: "Waffle" is the name of a third-party library. It should not
+#. be translated
+#: ecommerce/extensions/order/admin.py:29
+#, python-brace-format
+msgid ""
+"Order administration has been disabled due to the load on the database. This"
+" functionality can be restored by activating the {switch_name} Waffle "
+"switch. Be careful when re-activating this switch!"
+msgstr ""
 
 #: ecommerce/extensions/order/models.py:24
 #: ecommerce/extensions/payment/models.py:16
@@ -653,7 +698,7 @@ msgstr "Bofya 'Save and continue Editing' kuongeza taarifa za mali."
 msgid "Partner"
 msgstr "Mbia"
 
-#: ecommerce/extensions/partner/models.py:20 ecommerce/settings/_oscar.py:214
+#: ecommerce/extensions/partner/models.py:20 ecommerce/settings/_oscar.py:215
 msgid "Partners"
 msgstr "Wabia"
 
@@ -677,62 +722,63 @@ msgstr "Visa"
 msgid "We don't support the payment option you selected."
 msgstr "Hatuungi mkono chaguo la malipo ulilochagua."
 
-#: ecommerce/extensions/payment/forms.py:25
+#: ecommerce/extensions/payment/forms.py:26
 msgid "Choose country"
 msgstr "Chagua nchi"
 
 #. Translators: This is a string added next to the name of the required
 #. fields on the payment form. For example, the first name field is
 #. required, so this would read "First name (required)".
-#: ecommerce/extensions/payment/forms.py:90
+#: ecommerce/extensions/payment/forms.py:91
 #, python-brace-format
 msgid "{label} (required)"
 msgstr "{label} (inahitajika)"
 
-#: ecommerce/extensions/payment/forms.py:94
+#: ecommerce/extensions/payment/forms.py:95
 msgid "First Name"
 msgstr "Jina la Kwanza"
 
-#: ecommerce/extensions/payment/forms.py:95
+#: ecommerce/extensions/payment/forms.py:96
 msgid "Last Name"
 msgstr "Jina la Mwisho"
 
-#: ecommerce/extensions/payment/forms.py:96
+#: ecommerce/extensions/payment/forms.py:97
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:510
 msgid "Address"
 msgstr "Anwani "
 
-#: ecommerce/extensions/payment/forms.py:97
+#: ecommerce/extensions/payment/forms.py:98
 msgid "Suite/Apartment Number"
 msgstr "Namba ya Chumba/Ghorofa"
 
-#: ecommerce/extensions/payment/forms.py:98
+#: ecommerce/extensions/payment/forms.py:99
 msgid "City"
 msgstr "Jiji"
 
-#: ecommerce/extensions/payment/forms.py:101
+#: ecommerce/extensions/payment/forms.py:102
 msgid "State/Province"
 msgstr "Jimbo/Mkoa"
 
-#: ecommerce/extensions/payment/forms.py:102
+#: ecommerce/extensions/payment/forms.py:103
 msgid "Zip/Postal Code"
 msgstr "Namba ya Mkoa au Anwani ya Posta"
 
-#: ecommerce/extensions/payment/forms.py:103
+#: ecommerce/extensions/payment/forms.py:104
 msgid "Country"
 msgstr "Nchi"
 
-#: ecommerce/extensions/payment/forms.py:115
-#: ecommerce/extensions/payment/forms.py:132
+#: ecommerce/extensions/payment/forms.py:122
+#: ecommerce/extensions/payment/forms.py:124
+#: ecommerce/extensions/payment/forms.py:148
 msgid "This field is required."
 msgstr "Hii sehemu inatakiwa kujazwa. "
 
-#: ecommerce/extensions/payment/forms.py:125
+#: ecommerce/extensions/payment/forms.py:135
 #, python-brace-format
 msgid "{state} is not a valid state/province in {country}."
 msgstr "{state} sio nchi/jimbo halali kwenye {country}."
 
-#: ecommerce/extensions/payment/forms.py:137
+#: ecommerce/extensions/payment/forms.py:153
 msgid ""
 "Postal codes for the U.S. and Canada are limited to nine (9) characters."
 msgstr "Namba za simu za Amerika na Kanada hazizidi tarakimu (9)."
@@ -763,18 +809,18 @@ msgstr "Idadi juhudi za majaribio ya kusimamisha shughuli za mtumiaji Paypal  (m
 msgid "..."
 msgstr "..."
 
-#: ecommerce/extensions/payment/views/cybersource.py:135
+#: ecommerce/extensions/payment/views/cybersource.py:137
 msgid ""
 "There was a problem retrieving your basket. Refresh the page to try again."
 msgstr "Kulikuwa na tatizo katika kupata ujazo wako. Onesha upya ukurusa kujaribu tena."
 
-#: ecommerce/extensions/payment/views/cybersource.py:156
+#: ecommerce/extensions/payment/views/cybersource.py:158
 msgid ""
 "Your basket may have been modified or already purchased. Refresh the page to"
 " try again."
 msgstr "Ujazo wako umerekebishwa au tayari umeshanunuliwa. Onesha upya ukurasa ujaribu tena."
 
-#: ecommerce/extensions/payment/views/cybersource.py:347
+#: ecommerce/extensions/payment/views/cybersource.py:363
 #, python-brace-format
 msgid ""
 "An error occurred while processing your payment. You have not been charged. "
@@ -825,14 +871,14 @@ msgstr "Mstari wa Mkopo (bila kodi)"
 msgid "Quantity"
 msgstr "Idadi"
 
-#: ecommerce/extensions/voucher/tests/test_utils.py:173
+#: ecommerce/extensions/voucher/tests/test_utils.py:176
 #: ecommerce/extensions/voucher/utils.py:69
 #: ecommerce/extensions/voucher/utils.py:273
 msgid "Redeemed"
 msgstr "Imerejeshwa"
 
-#: ecommerce/extensions/voucher/tests/test_utils.py:319
-#: ecommerce/extensions/voucher/tests/test_utils.py:324
+#: ecommerce/extensions/voucher/tests/test_utils.py:322
+#: ecommerce/extensions/voucher/tests/test_utils.py:327
 #: ecommerce/extensions/voucher/utils.py:88
 #: ecommerce/extensions/voucher/utils.py:132
 #: ecommerce/templates/edx/checkout/receipt.html:103
@@ -842,22 +888,22 @@ msgstr "Imerejeshwa"
 msgid "Discount"
 msgstr "\"Punguzo\""
 
-#: ecommerce/extensions/voucher/tests/test_utils.py:319
-#: ecommerce/extensions/voucher/tests/test_utils.py:324
+#: ecommerce/extensions/voucher/tests/test_utils.py:322
+#: ecommerce/extensions/voucher/tests/test_utils.py:327
 #: ecommerce/extensions/voucher/utils.py:88
 #: ecommerce/extensions/voucher/utils.py:132
 msgid "Enrollment"
 msgstr "Usajili"
 
-#: ecommerce/extensions/voucher/tests/test_utils.py:320
-#: ecommerce/extensions/voucher/tests/test_utils.py:328
+#: ecommerce/extensions/voucher/tests/test_utils.py:323
+#: ecommerce/extensions/voucher/tests/test_utils.py:331
 #: ecommerce/extensions/voucher/utils.py:89
 #: ecommerce/extensions/voucher/utils.py:136
 #, python-brace-format
 msgid "{percentage} %"
 msgstr "{percentage} %"
 
-#: ecommerce/extensions/voucher/tests/test_utils.py:454
+#: ecommerce/extensions/voucher/tests/test_utils.py:457
 #: ecommerce/extensions/voucher/utils.py:71
 msgid "Inactive"
 msgstr "Haiko katika matumizi"
@@ -976,7 +1022,7 @@ msgstr "Tarehe ya mwisho kutumia 'kuponi'"
 msgid "Email Domains"
 msgstr ""
 
-#: ecommerce/extensions/voucher/utils.py:531
+#: ecommerce/extensions/voucher/utils.py:535
 #, python-brace-format
 msgid "Range for coupon [{coupon_id}]"
 msgstr "Tofauti ya kuponi [{coupon_id}]"
@@ -1033,39 +1079,39 @@ msgstr "{value} punguzo la bei ya awali ya programu"
 msgid "Absolute"
 msgstr "Haibadiliki"
 
-#: ecommerce/programs/forms.py:19
+#: ecommerce/programs/forms.py:20
 msgid "Discount Type"
 msgstr "Aina ya Punguzo la bei"
 
-#: ecommerce/programs/forms.py:21
+#: ecommerce/programs/forms.py:22
 msgid "Discount Value"
 msgstr "Thamani ya Punguzo la bei"
 
-#: ecommerce/programs/forms.py:31
+#: ecommerce/programs/forms.py:32
 msgid "Start Date"
 msgstr "Tarehe ya Kuanza"
 
-#: ecommerce/programs/forms.py:32
+#: ecommerce/programs/forms.py:33
 msgid "End Date"
 msgstr "Tarehe ya Kumaliza"
 
-#: ecommerce/programs/forms.py:66
+#: ecommerce/programs/forms.py:67
 msgid "An offer already exists for this program."
 msgstr "Ofa kwa ajili ya kozi hii tayari ipo."
 
-#: ecommerce/programs/forms.py:69
+#: ecommerce/programs/forms.py:70
 msgid "Percentage discounts cannot be greater than 100%."
 msgstr "Asilimia ya punguzo la bei haiwezi kuwa kubwa kuliko 100%."
 
-#: ecommerce/programs/forms.py:72
+#: ecommerce/programs/forms.py:73
 msgid "A start date must be specified when specifying an end date."
 msgstr "Tarehe ya kuanza lazima ibainishwe wakati wa kubainisha tarehe ya kumaliza."
 
-#: ecommerce/programs/forms.py:75
+#: ecommerce/programs/forms.py:76
 msgid "The start date must occur before the end date."
 msgstr "Tarehe ya kuanza lazima iwe mwanzo kabla ya tarehe ya kumaliza."
 
-#: ecommerce/programs/forms.py:85
+#: ecommerce/programs/forms.py:86
 #, python-brace-format
 msgid "Discount for the {program_title} {program_type} Program"
 msgstr "Punguzo la bei kwa Programu ya {program_title} {program_type}"
@@ -1092,6 +1138,14 @@ msgstr "Ofa za Programu"
 #: ecommerce/programs/templates/programs/programoffer_form.html:32
 #: ecommerce/templates/oscar/dashboard/catalogue/product_row_actions.html:11
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:266
+#: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:58
+#: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:71
+#: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:76
+#: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:87
+#: ecommerce/templates/oscar/dashboard/offers/summary.html:9
+#: ecommerce/templates/oscar/dashboard/offers/summary.html:19
+#: ecommerce/templates/oscar/dashboard/offers/summary.html:25
+#: ecommerce/templates/oscar/dashboard/offers/summary.html:30
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:693
 msgid "Edit"
 msgstr "Hariri"
@@ -1146,11 +1200,11 @@ msgstr "Anza"
 msgid "End"
 msgstr "Mwisho"
 
-#: ecommerce/programs/views.py:49
+#: ecommerce/programs/views.py:36
 msgid "Program offer updated!"
 msgstr "Pendekezo la Programu limesasishwa"
 
-#: ecommerce/programs/views.py:72
+#: ecommerce/programs/views.py:59
 msgid "Program offer created!"
 msgstr "Pendekezo la Programu limetayarishwa"
 
@@ -1182,9 +1236,10 @@ msgstr " Maudhui ya UTM "
 msgid "UTM Created At"
 msgstr "UTM Iliyoundwa Katika"
 
-#: ecommerce/settings/_oscar.py:171
+#: ecommerce/settings/_oscar.py:172
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:17
 #: ecommerce/templates/oscar/dashboard/index.html:22
+#: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:14
 #: ecommerce/templates/oscar/dashboard/orders/line_detail.html:13
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:29
 #: ecommerce/templates/oscar/dashboard/orders/order_list.html:30
@@ -1194,38 +1249,38 @@ msgstr "UTM Iliyoundwa Katika"
 msgid "Dashboard"
 msgstr "Dashibodi"
 
-#: ecommerce/settings/_oscar.py:176
+#: ecommerce/settings/_oscar.py:177
 msgid "Catalogue"
 msgstr "Katalogi"
 
-#: ecommerce/settings/_oscar.py:180
+#: ecommerce/settings/_oscar.py:181
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:11
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:20
 msgid "Products"
 msgstr "Bidhaa"
 
-#: ecommerce/settings/_oscar.py:184
+#: ecommerce/settings/_oscar.py:185
 msgid "Product Types"
 msgstr "Aina za bidhaa"
 
-#: ecommerce/settings/_oscar.py:188
+#: ecommerce/settings/_oscar.py:189
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:73
 msgid "Categories"
 msgstr "Makundi"
 
-#: ecommerce/settings/_oscar.py:192
+#: ecommerce/settings/_oscar.py:193
 msgid "Ranges"
 msgstr "Nafasi"
 
-#: ecommerce/settings/_oscar.py:196
+#: ecommerce/settings/_oscar.py:197
 msgid "Low stock alerts"
 msgstr "Tahadhari za upungufu wa mali"
 
-#: ecommerce/settings/_oscar.py:202
+#: ecommerce/settings/_oscar.py:203
 msgid "Fulfillment"
 msgstr "Tekelezo"
 
-#: ecommerce/settings/_oscar.py:206
+#: ecommerce/settings/_oscar.py:207
 #: ecommerce/templates/oscar/dashboard/index.html:33
 #: ecommerce/templates/oscar/dashboard/orders/line_detail.html:16
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:32
@@ -1237,11 +1292,11 @@ msgstr "Tekelezo"
 msgid "Orders"
 msgstr "Maagizi /Amri"
 
-#: ecommerce/settings/_oscar.py:210
+#: ecommerce/settings/_oscar.py:211
 msgid "Statistics"
 msgstr "Takwimu"
 
-#: ecommerce/settings/_oscar.py:218
+#: ecommerce/settings/_oscar.py:219
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:107
 #: ecommerce/templates/oscar/dashboard/partials/refund_table.html:5
 #: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html:32
@@ -1252,42 +1307,39 @@ msgstr "Takwimu"
 msgid "Refunds"
 msgstr "Marejesho ya fedha zilizolipwa"
 
-#: ecommerce/settings/_oscar.py:224 ecommerce/settings/_oscar.py:228
+#: ecommerce/settings/_oscar.py:225 ecommerce/settings/_oscar.py:229
 #: ecommerce/templates/oscar/dashboard/users/detail.html:23
 msgid "Customers"
 msgstr "Wateja"
 
-#: ecommerce/settings/_oscar.py:232
+#: ecommerce/settings/_oscar.py:233
 msgid "Stock alert requests"
 msgstr "Tahadhari ya uhitaji wa mali"
 
-#: ecommerce/settings/_oscar.py:238 ecommerce/settings/_oscar.py:242
+#: ecommerce/settings/_oscar.py:239 ecommerce/settings/_oscar.py:243
+#: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:17
 msgid "Offers"
 msgstr "Ahadi"
 
-#: ecommerce/settings/_oscar.py:246
+#: ecommerce/settings/_oscar.py:247
 msgid "Vouchers"
 msgstr "Vocha"
 
-#: ecommerce/settings/_oscar.py:252
+#: ecommerce/settings/_oscar.py:253
 msgid "Reports"
 msgstr "Ripoti"
 
-#: ecommerce/settings/base.py:85
+#: ecommerce/settings/base.py:84
 msgid "English"
 msgstr "Kiingereza"
 
-#: ecommerce/settings/base.py:86
+#: ecommerce/settings/base.py:85
 msgid "Spanish"
 msgstr "Kihispania"
 
-#: ecommerce/settings/base.py:87
+#: ecommerce/settings/base.py:86
 msgid "Spanish (Latin American)"
 msgstr "Kihispania (Amerika ya Kati na Kusini)"
-
-#: ecommerce/templates/admin/disable_change_list.html:5
-msgid "List view is temporarily disabled due to large number of records."
-msgstr "Mwonekano wa orodha umesitishwa kwa muda kutokana na idadi kubwa ya kumbukumbu."
 
 #: ecommerce/templates/base.html:10
 msgid "Build"
@@ -1634,6 +1686,8 @@ msgid "Order Information"
 msgstr "Taarifa za Agizo"
 
 #: ecommerce/templates/edx/checkout/receipt.html:74
+#: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:61
+#: ecommerce/templates/oscar/dashboard/offers/summary.html:12
 msgid "Description"
 msgstr "Maelezo"
 
@@ -2439,6 +2493,107 @@ msgstr "Jumla ya bidhaa"
 msgid "Active Vouchers"
 msgstr ""
 
+#: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:6
+#, python-format
+msgid ""
+"\n"
+"        %(name)s | Offers\n"
+"    "
+msgstr ""
+
+#: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:27
+msgid "Reinstating..."
+msgstr ""
+
+#: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:27
+msgid "Reinstate offer"
+msgstr ""
+
+#: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:28
+msgid "Suspending..."
+msgstr ""
+
+#: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:28
+msgid "Suspend offer"
+msgstr ""
+
+#: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:29
+msgid "Delete offer"
+msgstr ""
+
+#: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:40
+msgid "Offer currently available"
+msgstr ""
+
+#: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:41
+msgid "Offer not available due to restrictions!"
+msgstr ""
+
+#: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:43
+msgid "Total cost:"
+msgstr ""
+
+#: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:44
+msgid "Number of orders:"
+msgstr ""
+
+#: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:45
+msgid "Number of uses:"
+msgstr ""
+
+#: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:50
+msgid "Date created:"
+msgstr ""
+
+#: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:51
+msgid "Offer details"
+msgstr ""
+
+#: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:69
+#: ecommerce/templates/oscar/dashboard/offers/summary.html:20
+msgid "Incentive"
+msgstr ""
+
+#: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:74
+#: ecommerce/templates/oscar/dashboard/offers/summary.html:26
+msgid "Condition"
+msgstr ""
+
+#: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:79
+#: ecommerce/templates/oscar/dashboard/offers/summary.html:31
+msgid "Restrictions"
+msgstr ""
+
+#: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:94
+msgid "Export to CSV"
+msgstr ""
+
+#: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:95
+msgid "Orders that used this offer"
+msgstr ""
+
+#: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:99
+#: ecommerce/templates/oscar/dashboard/orders/order_list.html:68
+msgid "Order number"
+msgstr "Namba ya uagizaji"
+
+#: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:100
+msgid "Order date"
+msgstr ""
+
+#: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:101
+#: ecommerce/templates/oscar/dashboard/orders/order_detail.html:292
+msgid "Order total"
+msgstr "Jumla ya 'Maagizo'"
+
+#: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:102
+msgid "Cost"
+msgstr ""
+
+#: ecommerce/templates/oscar/dashboard/offers/summary.html:4
+msgid "Offer summary"
+msgstr ""
+
 #: ecommerce/templates/oscar/dashboard/orders/line_detail.html:5
 #, python-format
 msgid ""
@@ -2699,10 +2854,6 @@ msgstr "Jumla ya Gharama za usafirishaji wa majini (pamoja na punguzo)"
 msgid "Shipping total"
 msgstr "Jumla ya gharama za usafirishaji wa majini"
 
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html:292
-msgid "Order total"
-msgstr "Jumla ya 'Maagizo'"
-
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:309
 msgid "With selected lines"
 msgstr "Pamoja na mistari iliyochaguliwa"
@@ -2909,10 +3060,6 @@ msgstr "Pakua kwa mtandao uagizaji uliochaguliwa kama CSV"
 #: ecommerce/templates/oscar/dashboard/orders/order_list.html:60
 msgid "Download"
 msgstr "Pakua"
-
-#: ecommerce/templates/oscar/dashboard/orders/order_list.html:68
-msgid "Order number"
-msgstr "Namba ya uagizaji"
 
 #: ecommerce/templates/oscar/dashboard/orders/order_list.html:69
 msgid "Total inc tax"
@@ -3169,3 +3316,7 @@ msgstr "Tarehe ilipobuniwa"
 #: ecommerce/templates/oscar/dashboard/users/detail.html:234
 msgid "This customer has not written any reviews yet."
 msgstr "Mteja huyu bado hajaandika marudio yoyote kiukaguzi. "
+
+#: ecommerce/urls.py:41
+msgid "E-Commerce Service Administration"
+msgstr ""
