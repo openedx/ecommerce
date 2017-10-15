@@ -16,7 +16,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-07-18 11:14-0400\n"
+"POT-Creation-Date: 2017-10-12 20:55+0000\n"
 "PO-Revision-Date: 2017-09-23 22:12+0000\n"
 "Last-Translator: Ned Batchelder <ned@edx.org>\n"
 "Language-Team: Swahili (Kenya) (http://www.transifex.com/open-edx/edx-platform/language/sw_KE/)\n"
@@ -171,43 +171,43 @@ msgstr "Tafadhali chagua njia halali za malipo. "
 msgid "All credit seats must designate a number of credit hours."
 msgstr "Nafasi zote za kutunukiwa lazima ziteuliwe na idadi ya muda wa kutunukiwa."
 
-#: ecommerce/static/js/pages/basket_page.js:29
+#: ecommerce/static/js/pages/basket_page.js:25
 msgid "Problem occurred during checkout. Please contact support"
 msgstr "Tatizo limetokea wakati wa kuondoka. Tafadhali wasiliana na 'kitengo cha msaada'"
 
-#: ecommerce/static/js/pages/basket_page.js:96
+#: ecommerce/static/js/pages/basket_page.js:97
 msgid "This field is required"
 msgstr "'Sehemu' hii inahitaji kujazwa"
 
-#: ecommerce/static/js/pages/basket_page.js:131
+#: ecommerce/static/js/pages/basket_page.js:132
 msgid "Invalid card number"
 msgstr "Namba batili ya kadi"
 
-#: ecommerce/static/js/pages/basket_page.js:133
+#: ecommerce/static/js/pages/basket_page.js:134
 msgid "Unsupported card type"
 msgstr "Aina ya kadi haikubaliki"
 
-#: ecommerce/static/js/pages/basket_page.js:135
+#: ecommerce/static/js/pages/basket_page.js:136
 msgid "Invalid security number"
 msgstr "Namba batili ya usalama"
 
-#: ecommerce/static/js/pages/basket_page.js:140
+#: ecommerce/static/js/pages/basket_page.js:141
 msgid "Invalid month"
 msgstr "Mwezi batili"
 
-#: ecommerce/static/js/pages/basket_page.js:142
+#: ecommerce/static/js/pages/basket_page.js:143
 msgid "Invalid year"
 msgstr "Mwaka batili"
 
-#: ecommerce/static/js/pages/basket_page.js:144
+#: ecommerce/static/js/pages/basket_page.js:145
 msgid "Card expired"
 msgstr "Kadi imeisha muda wake"
 
-#: ecommerce/static/js/pages/basket_page.js:363
+#: ecommerce/static/js/pages/basket_page.js:368
 msgid "<Choose state/province>"
 msgstr "<Choose state/province>"
 
-#: ecommerce/static/js/pages/basket_page.js:364
+#: ecommerce/static/js/pages/basket_page.js:369
 msgid "State/Province (required)"
 msgstr "Jimbo/Nchi (zinahitajika)"
 
@@ -247,19 +247,19 @@ msgstr "Kozi"
 msgid "Redeem"
 msgstr "Komboa"
 
-#: ecommerce/static/js/pages/receipt_page.js:25
+#: ecommerce/static/js/pages/receipt_page.js:21
 msgid ""
 "Caution! Using the back button on this page may cause you to be charged "
 "again."
 msgstr ""
 
 #. Translators: Do not translate "Apple Pay".
-#: ecommerce/static/js/payment_processors/cybersource.js:211
+#: ecommerce/static/js/payment_processors/cybersource.js:218
 msgid ""
 "Apple Pay is not available at this time. Please try another payment method."
 msgstr ""
 
-#: ecommerce/static/js/payment_processors/cybersource.js:242
+#: ecommerce/static/js/payment_processors/cybersource.js:249
 msgid ""
 "An error occurred while processing your payment. You have NOT been charged. "
 "Please try again, or select another payment method."
