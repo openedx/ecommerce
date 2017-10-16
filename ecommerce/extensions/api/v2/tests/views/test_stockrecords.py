@@ -39,7 +39,7 @@ class StockRecordViewSetTests(ProductSerializerMixin, DiscoveryTestMixin, Thrott
         self.assertEqual(StockRecord.objects.count(), 4)
 
         results = [self.serialize_stockrecord(stockrecord) for stockrecord in
-                   self.product.stockrecords.all()]
+                   self.product.stockrecords.all().order_by('id')]
         expected = {'count': 2, 'next': None, 'previous': None, 'results': results}
         self.assertDictEqual(json.loads(response.content), expected)
 
