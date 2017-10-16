@@ -419,6 +419,22 @@ class UtilTests(CouponMixin, DiscoveryMockMixin, DiscoveryTestMixin, LmsApiMockM
         self.assertNotIn('Course Seat Types', field_names)
         self.assertNotIn('Redeemed For Course ID', field_names)
 
+    def test_report_with_no_coupon_history(self):
+        self.setup_coupons_for_report()
+        self.coupon.history.all().delete()
+        client = UserFactory()
+        basket = Basket.get_basket(client, self.site)
+        basket.add_product(self.coupon)
+
+        vouchers = self.coupon_vouchers.first().vouchers.all()
+        self.use_voucher('TESTORDER1', vouchers[1], self.user)
+
+        self.mock_course_api_response(course=self.course)
+        _, rows = generate_coupon_report(self.coupon_vouchers)
+        first_row = rows.pop(0)
+        self.assertEqual(first_row.get('Created By'), 'N/A')
+        self.assertEqual(first_row.get('Create Date'), 'N/A')
+
     def test_report_for_dynamic_coupon_with_fixed_benefit_type(self):
         """ Verify the coupon report contains correct data for coupon with fixed benefit type. """
         dynamic_coupon = self.create_coupon(

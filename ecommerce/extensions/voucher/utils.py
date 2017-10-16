@@ -94,8 +94,12 @@ def _get_discount_info(discount_data):
 
 
 def _get_info_for_coupon_report(coupon, voucher):
+    author = 'N/A'
+    created_date = 'N/A'
     history = coupon.history.first()
-    author = history.history_user.full_name
+    if history:
+        author = history.history_user.full_name
+        created_date = history.history_date.strftime("%b %d, %y")
     category_name = ProductCategory.objects.get(product=coupon).category.name
 
     try:
@@ -146,7 +150,7 @@ def _get_info_for_coupon_report(coupon, voucher):
         'Coupon Start Date': voucher.start_datetime.strftime("%b %d, %y"),
         'Coupon Type': coupon_type,
         'Created By': author,
-        'Create Date': history.history_date.strftime("%b %d, %y"),
+        'Create Date': created_date,
         'Discount Percentage': discount_percentage,
         'Discount Amount': discount_amount,
         'Email Domains': offer.email_domains,

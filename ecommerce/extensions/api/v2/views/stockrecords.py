@@ -13,7 +13,7 @@ class StockRecordViewSet(viewsets.ModelViewSet):
     serializer_class = serializers.StockRecordSerializer
 
     def get_queryset(self):
-        return StockRecord.objects.filter(partner=self.request.site.siteconfiguration.partner)
+        return StockRecord.objects.filter(partner=self.request.site.siteconfiguration.partner).order_by('id')
 
     def get_serializer_class(self):
         serializer_class = self.serializer_class
