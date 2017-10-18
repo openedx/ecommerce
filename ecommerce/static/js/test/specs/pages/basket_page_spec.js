@@ -257,6 +257,36 @@ define([
                     expect($helpbutton.attr('aria-haspopup')).toEqual('true');
                     expect($helpbutton.attr('aria-expanded')).toEqual('false');
                 });
+
+                describe('Credit card detection occurs on local currency exception', function() {
+                    it('should call #detectCreditCard on #addPriceDisclaimer exception', function() {
+                        var cardNumberSelector = '#card-number',
+                            $cardNumber = $(cardNumberSelector),
+                            cardValue = 4111111111111111;
+
+                        spyOn(BasketPage, 'detectCreditCard');
+                        spyOn(BasketPage, 'addPriceDisclaimer').and.throwError('test price disclaimer error');
+
+                        BasketPage.onReady();
+                        $cardNumber.val(cardValue).trigger('input');
+
+                        expect(BasketPage.detectCreditCard).toHaveBeenCalled();
+                    });
+                    it('should call #detectCreditCard on #translateToLocalPrices exception', function() {
+                        var cardNumberSelector = '#card-number',
+                            $cardNumber = $(cardNumberSelector),
+                            cardValue = 4111111111111111;
+
+                        spyOn(BasketPage, 'detectCreditCard');
+                        spyOn(BasketPage, 'translateToLocalPrices')
+                            .and.throwError('test local price translation error');
+
+                        BasketPage.onReady();
+                        $cardNumber.val(cardValue).trigger('input');
+
+                        expect(BasketPage.detectCreditCard).toHaveBeenCalled();
+                    });
+                });
             });
 
             describe('clientSideCheckoutValidation', function() {
@@ -592,51 +622,102 @@ define([
                     expect(BasketPage.formatToLocalPrice).toHaveBeenCalledWith('12.34');
                     expect(BasketPage.formatToLocalPrice).toHaveBeenCalledWith('56.78');
                 });
+
+                it('should not replace text without USD values', function() {
+                    var messageWithoutUSDValue = 'This caused a bug';
+                    spyOn(BasketPage, 'formatToLocalPrice');
+                    expect(messageWithoutUSDValue).toEqual(BasketPage.generateLocalPriceText(messageWithoutUSDValue));
+                    expect(BasketPage.formatToLocalPrice).not.toHaveBeenCalled();
+                });
             });
 
-            describe('translateElementToLocalPrices', function() {
-                it('should replace price when local price text does not match price text', function() {
+            describe('replaceElementText', function() {
+                it('should replace text when text does not match', function() {
                     var $element = $('<div />');
-                    spyOn(BasketPage, 'generateLocalPriceText').and.callFake(function(priceText) {
-                        return 'localprice' + priceText;
-                    });
-                    spyOn($element, 'text').and.returnValue('foobar');
+                    $element.text('foobar');
 
-                    BasketPage.translateElementToLocalPrices($element);
+                    BasketPage.replaceElementText($element, 'baz');
 
-                    expect($element.text.calls.count()).toEqual(2);
-                    expect($element.text).toHaveBeenCalledWith('localpricefoobar');
+                    expect($element.text()).toEqual('baz');
                 });
 
                 it('should replace not replace price when local price text matches', function() {
-                    var $element = $('<div />'),
-                        priceText = 'someprice';
-                    spyOn(BasketPage, 'generateLocalPriceText').and.returnValue(priceText);
-                    spyOn($element, 'text').and.returnValue(priceText);
+                    var $element = $('<div />');
+                    $element.text('foobar');
 
-                    BasketPage.translateElementToLocalPrices($element);
+                    BasketPage.replaceElementText($element, 'foobar');
 
-                    expect($element.text.calls.count()).toEqual(1);
-                    expect($element.text).not.toHaveBeenCalledWith(priceText);
+                    expect($element.text()).toEqual('foobar');
                 });
             });
 
             describe('translateToLocalPrices', function() {
                 it('should replace prices', function() {
-                    spyOn(BasketPage, 'translateElementToLocalPrices');
+                    var localPriceTextPrefix = 'foobar',
+                        priceValues = [
+                            '$123.45',
+                            '$56.78',
+                            '$9.10'
+                        ];
+                    spyOn(BasketPage, 'generateLocalPriceText').and.callFake(function(usdPriceText) {
+                        return localPriceTextPrefix + usdPriceText;
+                    });
 
                     BasketPage.translateToLocalPrices();
 
                     // 3 .price elements + 3 .voucher elements
-                    expect(BasketPage.translateElementToLocalPrices.calls.count()).toEqual(6);
+                    expect(BasketPage.generateLocalPriceText.calls.count()).toEqual(6);
 
-                    // check to make sure the method was called
-                    $('.price').each(function() {
-                        expect(BasketPage.translateElementToLocalPrices).toHaveBeenCalledWith($(this));
+                    // check to make sure the method was called and conversion occurred
+                    $('.price').each(function(index, element) {
+                        expect(BasketPage.generateLocalPriceText)
+                            .toHaveBeenCalledWith(priceValues[index]);
+                        expect($(element).text()).toEqual(localPriceTextPrefix + priceValues[index]);
                     });
-                    $('.voucher').each(function() {
-                        expect(BasketPage.translateElementToLocalPrices).toHaveBeenCalledWith($(this));
+                    $('.voucher').each(function(index, element) {
+                        expect(BasketPage.generateLocalPriceText)
+                            .toHaveBeenCalledWith(priceValues[index]);
+                        expect($(element).text()).toEqual(localPriceTextPrefix + priceValues[index]);
                     });
+                });
+
+                it('should not replace prices if generate local price text throws', function() {
+                    var counter = 0,
+                        maxCounterValue = 3,
+                        localPriceText = 'foobarbaz',
+                        priceValues = [
+                            '$123.45',
+                            '$56.78',
+                            '$9.10'
+                        ];
+
+                    spyOn(BasketPage, 'generateLocalPriceText').and.callFake(function() {
+                        if (counter >= maxCounterValue) {
+                            throw new Error('Test Error');
+                        }
+
+                        counter += 1;
+
+                        return localPriceText;
+                    });
+
+                    try {
+                        BasketPage.translateToLocalPrices();
+                    } catch (e) {
+                        // Should error while iterating through elements
+                        expect(BasketPage.generateLocalPriceText.calls.count()).toEqual(maxCounterValue + 1);
+
+                        // check to make sure element values were not changed
+                        $('.price').each(function(index, element) {
+                            expect(priceValues[index]).not.toEqual(localPriceText);
+                            expect(priceValues[index]).toEqual($(element).text());
+                        });
+
+                        $('.voucher').each(function(index, element) {
+                            expect(priceValues[index]).not.toEqual(localPriceText);
+                            expect(priceValues[index]).toEqual($(element).text());
+                        });
+                    }
                 });
             });
 
