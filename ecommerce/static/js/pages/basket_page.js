@@ -259,38 +259,59 @@ define([
             },
 
             generateLocalPriceText: function(usdPriceText) {
-                var localPriceText = usdPriceText;
-                // Matches on all $ab.cd strings
-                usdPriceText.match(/\$[0-9]+\.[0-9]+/g).forEach(function(value) {
-                    localPriceText = localPriceText.replace(value, BasketPage.formatToLocalPrice(value.substring(1)));
-                });
+                var localPriceText = usdPriceText,
+                    // Matches on all $ab.cd strings
+                    usdPriceMatches = usdPriceText.match(/\$[0-9]+\.[0-9]+/g);
+
+                // If matches exist translate
+                if (usdPriceMatches) {
+                    usdPriceMatches.forEach(function(value) {
+                        localPriceText = localPriceText
+                            .replace(value, BasketPage.formatToLocalPrice(value.substring(1)));
+                    });
+                }
+
                 return localPriceText;
             },
 
-            translateElementToLocalPrices: function(element) {
-                var priceText = element.text(),
-                    localPriceText = BasketPage.generateLocalPriceText(priceText);
-                if (priceText !== localPriceText) {
-                    element.text(localPriceText);
+            replaceElementText: function(element, text) {
+                if (element.text() !== text) {
+                    element.text(text);
                 }
             },
 
             translateToLocalPrices: function() {
-                $('.price').each(function() {
-                    BasketPage.translateElementToLocalPrices($(this));
+                var translatedItemPrices = [],
+                    translatedVoucherPrices = [],
+                    $prices = $('.price'),
+                    $vouchers = $('.voucher');
+
+                // Generate all local price text values
+                $prices.each(function() {
+                    translatedItemPrices.push(BasketPage.generateLocalPriceText($(this).text()));
                 });
 
-                $('.voucher').each(function() {
-                    BasketPage.translateElementToLocalPrices($(this));
+                $vouchers.each(function() {
+                    translatedVoucherPrices.push(BasketPage.generateLocalPriceText($(this).text()));
                 });
+
+                // Replace local price text values
+                if ($prices.length === translatedItemPrices.length
+                    && $vouchers.length === translatedVoucherPrices.length) {
+                    $prices.each(function(index, element) {
+                        BasketPage.replaceElementText($(element), translatedItemPrices[index]);
+                    });
+
+                    $vouchers.each(function(index, element) {
+                        BasketPage.replaceElementText($(element), translatedVoucherPrices[index]);
+                    });
+                }
             },
 
             onReady: function() {
                 var $paymentButtons = $('.payment-buttons'),
                     basketId = $paymentButtons.data('basket-id');
 
-                BasketPage.addPriceDisclaimer();
-                BasketPage.translateToLocalPrices();
                 Utils.toogleMobileMenuClickEvent();
 
                 $(document).keyup(function(e) {
@@ -499,6 +520,12 @@ define([
                         $btn.prev('disabled', true);
                     }
                 });
+
+                try {
+                    // local currency translation
+                    BasketPage.addPriceDisclaimer();
+                    BasketPage.translateToLocalPrices();
+                } catch (e) {} // eslint-disable-line no-empty
             }
         };
 
