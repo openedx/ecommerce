@@ -61,18 +61,28 @@ class Cybersource(BaseClientSidePaymentProcessor):
         self.soap_api_url = configuration['soap_api_url']
         self.merchant_id = configuration['merchant_id']
         self.transaction_key = configuration['transaction_key']
-        self.profile_id = configuration['profile_id']
-        self.access_key = configuration['access_key']
-        self.secret_key = configuration['secret_key']
-        self.payment_page_url = configuration['payment_page_url']
         self.send_level_2_3_details = configuration.get('send_level_2_3_details', True)
         self.language_code = settings.LANGUAGE_CODE
+
+        # Secure Acceptance parameters
+        # NOTE: Silent Order POST is the preferred method of checkout as it allows us to completely control
+        # the checkout UX. Secure Acceptance, on the other hand, redirects the purchaser to a page controlled
+        # by CyberSource.
+        self.profile_id = configuration.get('profile_id')
+        self.access_key = configuration.get('access_key')
+        self.secret_key = configuration.get('secret_key')
+        self.payment_page_url = configuration.get('payment_page_url')
 
         # Silent Order POST parameters
         self.sop_profile_id = configuration.get('sop_profile_id')
         self.sop_access_key = configuration.get('sop_access_key')
         self.sop_secret_key = configuration.get('sop_secret_key')
         self.sop_payment_page_url = configuration.get('sop_payment_page_url')
+
+        sa_configured = all((self.access_key, self.payment_page_url, self.profile_id, self.secret_key))
+        sop_configured = all([self.sop_access_key, self.sop_payment_page_url, self.sop_profile_id, self.sop_secret_key])
+        assert sop_configured or sa_configured, \
+            'CyberSource processor must be configured for Silent Order POST and/or Secure Acceptance'
 
         # Apple Pay configuration
         self.apple_pay_enabled = self.site.siteconfiguration.enable_apple_pay

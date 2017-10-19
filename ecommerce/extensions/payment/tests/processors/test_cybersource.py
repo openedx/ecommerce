@@ -85,6 +85,21 @@ class CybersourceTests(CybersourceMixin, PaymentProcessorTestCaseMixin, TestCase
         # If this raises an exception, the value is not a valid UUID4.
         UUID(actual['transaction_uuid'], version=4)
 
+    def test_init_without_config(self):
+        partner_short_code = self.site.siteconfiguration.partner.short_code
+
+        payment_processor_config = copy.deepcopy(settings.PAYMENT_PROCESSOR_CONFIG)
+        for key in ('sop_access_key', 'sop_payment_page_url', 'sop_profile_id', 'sop_secret_key', 'access_key',
+                    'payment_page_url', 'profile_id', 'secret_key'):
+            del payment_processor_config[partner_short_code][self.processor_name][key]
+
+        with override_settings(PAYMENT_PROCESSOR_CONFIG=payment_processor_config):
+            with self.assertRaisesMessage(
+                AssertionError,
+                'CyberSource processor must be configured for Silent Order POST and/or Secure Acceptance'
+            ):
+                self.processor_class(self.site)
+
     def test_get_transaction_parameters(self):
         """ Verify the processor returns the appropriate parameters required to complete a transaction. """
         # NOTE (CCB): Make a deepcopy of the settings so that we can modify them without affecting the real settings.
