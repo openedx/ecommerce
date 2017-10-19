@@ -26,6 +26,7 @@ from ecommerce.extensions.payment.processors.invoice import InvoicePayment
 from ecommerce.extensions.voucher.models import CouponVouchers
 from ecommerce.extensions.voucher.utils import update_voucher_offer
 from ecommerce.invoice.models import Invoice
+from ecommerce.programs.constants import BENEFIT_PROXY_CLASS_MAP
 
 Basket = get_model('basket', 'Basket')
 Benefit = get_model('offer', 'Benefit')
@@ -430,9 +431,7 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
         new_offer = update_voucher_offer(
             offer=voucher_offer,
             benefit_value=benefit_value or voucher_offer.benefit.value,
-            benefit_type=voucher_offer.benefit.type or getattr(
-                voucher_offer.benefit.proxy(), 'benefit_class_type', None
-            ),
+            benefit_type=voucher_offer.benefit.type or BENEFIT_PROXY_CLASS_MAP[voucher_offer.benefit.proxy_class],
             coupon=coupon,
             max_uses=voucher_offer.max_global_applications,
             program_uuid=program_uuid

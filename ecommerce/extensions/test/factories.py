@@ -21,7 +21,7 @@ Voucher = get_model('voucher', 'Voucher')
 OrderNumberGenerator = get_class('order.utils', 'OrderNumberGenerator')
 
 
-def create_basket(owner=None, site=None, empty=False, price='10.00'):  # pylint:disable=function-redefined
+def create_basket(owner=None, site=None, empty=False):  # pylint:disable=function-redefined
     if site is None:
         site = SiteConfigurationFactory().site
     if owner is None:
@@ -30,7 +30,7 @@ def create_basket(owner=None, site=None, empty=False, price='10.00'):  # pylint:
     basket.strategy = Default()
     if not empty:
         product = create_product()
-        create_stockrecord(product, num_in_stock=2, price_excl_tax=D(price))
+        create_stockrecord(product, num_in_stock=2, price_excl_tax=D('10.00'))
         basket.add_product(product)
     return basket
 

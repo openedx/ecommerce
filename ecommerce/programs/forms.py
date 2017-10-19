@@ -6,7 +6,7 @@ from oscar.core.loading import get_model
 
 from ecommerce.programs.api import ProgramsApiClient
 from ecommerce.programs.conditions import ProgramCourseRunSeatsCondition
-from ecommerce.programs.constants import BENEFIT_MAP, BENEFIT_TYPE_CHOICES
+from ecommerce.programs.constants import BENEFIT_MAP, BENEFIT_PROXY_CLASS_MAP, BENEFIT_TYPE_CHOICES
 from ecommerce.programs.custom import class_path, create_condition
 
 Benefit = get_model('offer', 'Benefit')
@@ -40,7 +40,7 @@ class ProgramOfferForm(forms.ModelForm):
         if instance:
             initial.update({
                 'program_uuid': instance.condition.program_uuid,
-                'benefit_type': instance.benefit.proxy().benefit_class_type,
+                'benefit_type': BENEFIT_PROXY_CLASS_MAP[instance.benefit.proxy_class],
                 'benefit_value': instance.benefit.value,
             })
         super(ProgramOfferForm, self).__init__(data, files, auto_id, prefix, initial, error_class, label_suffix,
