@@ -492,7 +492,7 @@ define([
                     $errorMessagesDiv = $('#messages');
                     BasketPage.onFail();
                     expect($errorMessagesDiv.text()).toEqual(
-                        'Problem occurred during checkout. Please contact support.'
+                        'Problem occurred during checkout. Please contact support'
                     );
                 });
             });
@@ -552,124 +552,6 @@ define([
                         .appendTo('body');
                     AnalyticsUtils.analyticsSetUp();
                     expect(window.analytics.page).toHaveBeenCalled();
-                });
-            });
-
-            describe('formatToLocalPrice', function() {
-                var EDX_PRICE_LOCATION_COOKIE_NAME = 'edx-price-l10n',
-                    USD_VALUE = 100.25,
-                    EXPECTED_USD_PRICE = '$100.25',
-                    COOKIE_VALUES = {countryCode: 'FOO', rate: 2, code: 'BAR', symbol: 'BAZ'};
-
-                beforeEach(function() {
-                    Cookies.remove(EDX_PRICE_LOCATION_COOKIE_NAME);
-                });
-
-                afterAll(function() {
-                    Cookies.remove(EDX_PRICE_LOCATION_COOKIE_NAME);
-                });
-
-                it('should return USD price when cookie does not exist', function() {
-                    expect(BasketPage.formatToLocalPrice(USD_VALUE)).toEqual(EXPECTED_USD_PRICE);
-                });
-
-                it('should return USD price when country code is USA', function() {
-                    Cookies.set(EDX_PRICE_LOCATION_COOKIE_NAME, {countryCode: 'USA'});
-                    expect(BasketPage.formatToLocalPrice(USD_VALUE)).toEqual(EXPECTED_USD_PRICE);
-                });
-
-                it('should return formatted USD when non-US cookie exists', function() {
-                    Cookies.set(EDX_PRICE_LOCATION_COOKIE_NAME, COOKIE_VALUES);
-                    expect(BasketPage.formatToLocalPrice(USD_VALUE)).toEqual('BAZ201 BAR *');
-                });
-            });
-
-            describe('generateLocalPriceText', function() {
-                it('should replace USD values', function() {
-                    spyOn(BasketPage, 'formatToLocalPrice').and.returnValue('foo');
-                    expect('Replace foo and foo with foo')
-                        .toEqual(BasketPage.generateLocalPriceText('Replace $12.34 and $56.78 with foo'));
-                    expect(BasketPage.formatToLocalPrice).toHaveBeenCalledWith('12.34');
-                    expect(BasketPage.formatToLocalPrice).toHaveBeenCalledWith('56.78');
-                });
-            });
-
-            describe('translateElementToLocalPrices', function() {
-                it('should replace price when local price text does not match price text', function() {
-                    var $element = $('<div />');
-                    spyOn(BasketPage, 'generateLocalPriceText').and.callFake(function(priceText) {
-                        return 'localprice' + priceText;
-                    });
-                    spyOn($element, 'text').and.returnValue('foobar');
-
-                    BasketPage.translateElementToLocalPrices($element);
-
-                    expect($element.text.calls.count()).toEqual(2);
-                    expect($element.text).toHaveBeenCalledWith('localpricefoobar');
-                });
-
-                it('should replace not replace price when local price text matches', function() {
-                    var $element = $('<div />'),
-                        priceText = 'someprice';
-                    spyOn(BasketPage, 'generateLocalPriceText').and.returnValue(priceText);
-                    spyOn($element, 'text').and.returnValue(priceText);
-
-                    BasketPage.translateElementToLocalPrices($element);
-
-                    expect($element.text.calls.count()).toEqual(1);
-                    expect($element.text).not.toHaveBeenCalledWith(priceText);
-                });
-            });
-
-            describe('translateToLocalPrices', function() {
-                it('should replace prices', function() {
-                    spyOn(BasketPage, 'translateElementToLocalPrices');
-
-                    BasketPage.translateToLocalPrices();
-
-                    // 3 .price elements + 3 .voucher elements
-                    expect(BasketPage.translateElementToLocalPrices.calls.count()).toEqual(6);
-
-                    // check to make sure the method was called
-                    $('.price').each(function() {
-                        expect(BasketPage.translateElementToLocalPrices).toHaveBeenCalledWith($(this));
-                    });
-                    $('.voucher').each(function() {
-                        expect(BasketPage.translateElementToLocalPrices).toHaveBeenCalledWith($(this));
-                    });
-                });
-            });
-
-            describe('addPriceDisclaimer', function() {
-                var EDX_PRICE_LOCATION_COOKIE_NAME = 'edx-price-l10n';
-                var COOKIE_VALUES = {countryCode: 'FOO', rate: 2, code: 'BAR', symbol: 'BAZ'};
-
-                beforeEach(function() {
-                    Cookies.remove(EDX_PRICE_LOCATION_COOKIE_NAME);
-                });
-
-                afterAll(function() {
-                    Cookies.remove(EDX_PRICE_LOCATION_COOKIE_NAME);
-                });
-
-                it('should not add disclaimer when cookie does not exist', function() {
-                    BasketPage.addPriceDisclaimer();
-                    expect(0).toEqual($('.price-disclaimer').length);
-                });
-
-                it('should return USD price when country code is USA', function() {
-                    Cookies.set(EDX_PRICE_LOCATION_COOKIE_NAME, {countryCode: 'USA'});
-                    BasketPage.addPriceDisclaimer();
-                    expect($('.price-disclaimer').length).toEqual(0);
-                });
-
-                it('should return formatted USD when non-US cookie exists', function() {
-                    Cookies.set(EDX_PRICE_LOCATION_COOKIE_NAME, COOKIE_VALUES);
-                    BasketPage.addPriceDisclaimer();
-
-                    // eslint-disable-next-line max-len
-                    expect('* This total contains an approximate conversion. You will be charged $9.10 USD.')
-                        .toEqual($('.price-disclaimer').text());
                 });
             });
         });
