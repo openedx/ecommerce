@@ -29,10 +29,6 @@
         {% block stylesheets %}
         {% endblock %}
     {% endcompress %}
-
-    {% if optimizely_snippet_src %}
-      <script src="{{ optimizely_snippet_src }}"></script>
-    {% endif %}
 </head>
 <body>
 {% block skip_link %}
@@ -67,6 +63,10 @@
      Note: django-compressor does not recognize the data-main attribute. Load the main script separately.
     <script src="{% static 'js/common.js' %}"></script>
 {% endcompress %}
+
+{% if optimizely_snippet_src %}
+  <script src="{{ optimizely_snippet_src }}"></script>
+{% endif %}
 
 {% compress js %}
     {# Note: This block is purposely separated from the one above so that browsers cache the common JS instead of
