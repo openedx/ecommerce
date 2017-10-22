@@ -464,7 +464,7 @@ class VoucherAddView(BaseVoucherAddView):  # pylint: disable=function-redefined
 
     def form_valid(self, form):
         code = form.cleaned_data['code']
-        if not self.request.basket.id:
+        if self.request.basket.is_empty:
             return redirect_to_referrer(self.request, 'basket:summary')
         if self.request.basket.contains_voucher(code):
             messages.error(
