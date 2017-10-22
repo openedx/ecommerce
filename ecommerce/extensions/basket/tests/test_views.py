@@ -769,12 +769,14 @@ class VoucherAddViewTests(LmsApiMockMixin, TestCase):
 
     def test_no_voucher_error_msg(self):
         """ Verify correct error message is returned when voucher can't be found. """
+        self.basket.add_product(ProductFactory())
         self.assert_form_valid_message("Coupon code '{code}' does not exist.".format(code=COUPON_CODE))
 
     def test_voucher_already_in_basket_error_msg(self):
         """ Verify correct error message is returned when voucher already in basket. """
-        voucher = factories.VoucherFactory(code=COUPON_CODE)
+        voucher, product = prepare_voucher(code=COUPON_CODE)
         self.basket.vouchers.add(voucher)
+        self.basket.add_product(product)
         self.assert_form_valid_message(
             "You have already added coupon code '{code}' to your basket.".format(code=COUPON_CODE))
 
