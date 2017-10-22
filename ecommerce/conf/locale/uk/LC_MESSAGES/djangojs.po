@@ -5,6 +5,7 @@
 # Translators:
 # Alina Kozoriz <alinakozoriz@gmail.com>, 2015
 # Irene Korotkova <irca.gav@gmail.com>, 2017
+# Natalia Vynogradenko <tannaha@gmail.com>, 2017
 # Olga Filipova <olga.filipova@feedzai.com>, 2016
 # Ксенія Воронова <ksenya.voronova@gmail.com>, 2016
 # Yana Lovyagina <yana.lovyagina@raccoongang.com>, 2016
@@ -13,7 +14,7 @@ msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2017-10-12 20:55+0000\n"
-"PO-Revision-Date: 2017-10-14 11:44+0000\n"
+"PO-Revision-Date: 2017-10-22 19:42+0000\n"
 "Last-Translator: Irene Korotkova <irca.gav@gmail.com>\n"
 "Language-Team: Ukrainian (http://www.transifex.com/open-edx/edx-platform/language/uk/)\n"
 "MIME-Version: 1.0\n"
@@ -73,7 +74,7 @@ msgstr ""
 
 #: ecommerce/static/js/models/course_model.js:60
 msgid "You must choose if an honor seat should be created."
-msgstr ""
+msgstr "Необхідно вибрати, щоб було створено почесне місце"
 
 #: ecommerce/static/js/models/course_model.js:77
 msgid "The verification deadline must occur AFTER the upgrade deadline."
@@ -103,7 +104,7 @@ msgstr ""
 
 #: ecommerce/static/js/models/course_model.js:98
 msgid "Include Honor Seat"
-msgstr ""
+msgstr "Включити почесне місце"
 
 #: ecommerce/static/js/models/course_seats/course_seat.js:28
 msgid "All course seats must have a price."
@@ -120,7 +121,7 @@ msgstr ""
 #: ecommerce/static/js/models/course_seats/course_seat.js:84
 #: ecommerce/static/js/views/course_form_view.js:60
 msgid "Verified"
-msgstr ""
+msgstr "Перевірений"
 
 #: ecommerce/static/js/models/course_seats/course_seat.js:86
 #: ecommerce/static/js/views/course_form_view.js:71
@@ -129,15 +130,15 @@ msgstr ""
 
 #: ecommerce/static/js/models/course_seats/course_seat.js:89
 msgid "Professional"
-msgstr ""
+msgstr "Професійний"
 
 #: ecommerce/static/js/models/course_seats/course_seat.js:91
 msgid "Honor"
-msgstr ""
+msgstr "Честь"
 
 #: ecommerce/static/js/models/course_seats/course_seat.js:93
 msgid "Audit"
-msgstr ""
+msgstr "Безкоштовне прослуховування"
 
 #: ecommerce/static/js/models/course_seats/course_seat.js:101
 msgid "Verified Certificate"
@@ -145,11 +146,11 @@ msgstr ""
 
 #: ecommerce/static/js/models/course_seats/course_seat.js:105
 msgid "Professional Certificate"
-msgstr ""
+msgstr "Професійний сертифікат"
 
 #: ecommerce/static/js/models/course_seats/course_seat.js:108
 msgid "Honor Certificate"
-msgstr ""
+msgstr "Сертифікат Кодексу Честі"
 
 #: ecommerce/static/js/models/course_seats/course_seat.js:111
 msgid "No Certificate"
@@ -225,11 +226,11 @@ msgstr ""
 
 #: ecommerce/static/js/pages/course_create_page.js:12
 msgid "Create New Course"
-msgstr ""
+msgstr "Створити новий курс"
 
 #: ecommerce/static/js/pages/course_detail_page.js:13
 msgid "View Course"
-msgstr ""
+msgstr "Переглянути курс"
 
 #: ecommerce/static/js/pages/course_edit_page.js:13
 msgid "Edit Course"
@@ -237,7 +238,7 @@ msgstr ""
 
 #: ecommerce/static/js/pages/course_list_page.js:12
 msgid "Courses"
-msgstr ""
+msgstr "Курси"
 
 #: ecommerce/static/js/pages/offer_page.js:14
 msgid "Redeem"
@@ -366,7 +367,7 @@ msgstr ""
 
 #: ecommerce/static/js/views/course_form_view.js:65
 msgid "Professional Education"
-msgstr ""
+msgstr "Професійна освіта"
 
 #: ecommerce/static/js/views/course_form_view.js:66
 msgid ""

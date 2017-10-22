@@ -5,14 +5,15 @@
 # Translators:
 # Denis <prohibiti@gmail.com>, 2015
 # Irene Korotkova <irca.gav@gmail.com>, 2017
+# Natalia Vynogradenko <tannaha@gmail.com>, 2017
 # Zoriana Zaiats, 2015
 msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2017-10-12 20:55+0000\n"
-"PO-Revision-Date: 2017-10-14 11:44+0000\n"
-"Last-Translator: Ned Batchelder <ned@edx.org>\n"
+"PO-Revision-Date: 2017-10-22 19:42+0000\n"
+"Last-Translator: Irene Korotkova <irca.gav@gmail.com>\n"
 "Language-Team: Ukrainian (http://www.transifex.com/open-edx/edx-platform/language/uk/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -330,7 +331,7 @@ msgstr ""
 
 #: ecommerce/courses/utils.py:79
 msgid "Audit"
-msgstr ""
+msgstr "Безкоштовне прослуховування"
 
 #: ecommerce/courses/utils.py:80
 msgid "Credit"
@@ -338,11 +339,11 @@ msgstr ""
 
 #: ecommerce/courses/utils.py:81
 msgid "Honor"
-msgstr ""
+msgstr "Честь"
 
 #: ecommerce/courses/utils.py:82
 msgid "Professional"
-msgstr ""
+msgstr "Професійний"
 
 #: ecommerce/courses/utils.py:83
 msgid "Verified"
@@ -948,7 +949,7 @@ msgstr ""
 
 #: ecommerce/extensions/voucher/utils.py:224
 msgid "Organization"
-msgstr ""
+msgstr "Організація"
 
 #: ecommerce/extensions/voucher/utils.py:225
 msgid "Client"
@@ -1243,7 +1244,7 @@ msgstr ""
 #: ecommerce/templates/oscar/dashboard/refunds/refund_list.html:30
 #: ecommerce/templates/oscar/dashboard/users/detail.html:20
 msgid "Dashboard"
-msgstr ""
+msgstr "Панель управління"
 
 #: ecommerce/settings/_oscar.py:177
 msgid "Catalogue"
@@ -1327,7 +1328,7 @@ msgstr ""
 
 #: ecommerce/settings/base.py:84
 msgid "English"
-msgstr ""
+msgstr "Англійська"
 
 #: ecommerce/settings/base.py:85
 msgid "Spanish"
@@ -1395,7 +1396,7 @@ msgstr ""
 #: ecommerce/templates/courses/course_app.html:5
 #: ecommerce/templates/edx/partials/_administration_menu.html:5
 msgid "Courses"
-msgstr ""
+msgstr "Курси"
 
 #: ecommerce/templates/courses/course_app.html:28
 #, python-format
@@ -1860,7 +1861,7 @@ msgstr ""
 
 #: ecommerce/templates/edx/credit/checkout.html:113
 msgid "Questions?"
-msgstr ""
+msgstr "Є питання?"
 
 #: ecommerce/templates/edx/credit/checkout.html:116
 #, python-format
@@ -1905,7 +1906,7 @@ msgstr ""
 
 #: ecommerce/templates/edx/partials/_base_navbar.html:25
 msgid "Dashboard for:"
-msgstr ""
+msgstr "Панель управління для:"
 
 #: ecommerce/templates/edx/partials/_base_navbar.html:32
 msgid "Toggle Dropdown"
@@ -2125,7 +2126,7 @@ msgstr ""
 
 #: ecommerce/templates/oscar/basket/partials/hosted_checkout_basket.html:184
 msgid "Have questions?"
-msgstr ""
+msgstr "Є питання?"
 
 #: ecommerce/templates/oscar/basket/partials/hosted_checkout_basket.html:185
 msgid "Please read our FAQs to view common questions about our certificates."
@@ -2973,7 +2974,7 @@ msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:521
 msgid "Phone"
-msgstr ""
+msgstr "Номер телефону"
 
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:525
 msgid "Instructions"
@@ -3035,7 +3036,7 @@ msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:681
 msgid "Admin"
-msgstr ""
+msgstr "Адміністратор"
 
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:706
 msgid "No notes available."
@@ -3070,7 +3071,7 @@ msgstr ""
 #: ecommerce/templates/oscar/dashboard/refunds/refund_list.html:78
 #: ecommerce/templates/oscar/dashboard/refunds/refund_list.html:85
 msgid "Deleted"
-msgstr ""
+msgstr "Видалено"
 
 #: ecommerce/templates/oscar/dashboard/orders/order_list.html:149
 msgid "No orders found."
@@ -3207,7 +3208,7 @@ msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/users/detail.html:36
 msgid "General"
-msgstr ""
+msgstr "Загальне"
 
 #: ecommerce/templates/oscar/dashboard/users/detail.html:54
 msgid "Yes,No"
