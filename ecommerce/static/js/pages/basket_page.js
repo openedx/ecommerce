@@ -236,10 +236,14 @@ define([
                 });
             },
 
+            isValidLocalCurrencyCookie: function(cookie) {
+                return !!cookie && !!cookie.countryCode && !!cookie.symbol && !!cookie.rate && !!cookie.code;
+            },
+
             addPriceDisclaimer: function() {
                 var price = $('#basket-total').find('> .price').text(),
                     countryData = Cookies.getJSON('edx-price-l10n');
-                if (countryData && countryData.countryCode !== 'USA') {
+                if (BasketPage.isValidLocalCurrencyCookie(countryData) && countryData.countryCode !== 'USA') {
                     $('<span>').attr('class', 'price-disclaimer')
                         .text('* This total contains an approximate conversion. You will be charged ' + price + ' USD.')
                         .appendTo('div[aria-labelledby="order-details-region"]');
@@ -250,7 +254,7 @@ define([
                 var countryData = Cookies.getJSON('edx-price-l10n');
 
                 // Default to USD when the exchange rate cookie doesn't exist
-                if (countryData && countryData.countryCode !== 'USA') {
+                if (BasketPage.isValidLocalCurrencyCookie(countryData) && countryData.countryCode !== 'USA') {
                     return countryData.symbol + Math.round(priceInUsd * countryData.rate) + ' '
                         + countryData.code + ' *';
                 } else {
