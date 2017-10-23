@@ -733,7 +733,8 @@ define([
                     Cookies.remove(EDX_PRICE_LOCATION_COOKIE_NAME);
                 });
 
-                it('should not add disclaimer when cookie does not exist', function() {
+                it('should not add disclaimer when cookie is Invalid', function() {
+                    spyOn(BasketPage, 'isValidLocalCurrencyCookie').and.returnValue(false);
                     BasketPage.addPriceDisclaimer();
                     expect(0).toEqual($('.price-disclaimer').length);
                 });
@@ -751,6 +752,43 @@ define([
                     // eslint-disable-next-line max-len
                     expect('* This total contains an approximate conversion. You will be charged $9.10 USD.')
                         .toEqual($('.price-disclaimer').text());
+                });
+            });
+
+            describe('isValidLocalCurrencyCookie', function() {
+                var COOKIE_VALUES = {countryCode: 'FOO', rate: 2, code: 'BAR', symbol: 'BAZ'};
+
+                it('should be invalid if undefined', function() {
+                    expect(BasketPage.isValidLocalCurrencyCookie(undefined)).toBe(false);
+                });
+
+                it('should be invalid if no country code exists', function() {
+                    var cookie = _.clone(COOKIE_VALUES);
+                    delete cookie.countryCode;
+                    expect(BasketPage.isValidLocalCurrencyCookie(cookie)).toBe(false);
+                });
+
+                it('should be invalid if no symbol exists', function() {
+                    var cookie = _.clone(COOKIE_VALUES);
+                    delete cookie.symbol;
+                    expect(BasketPage.isValidLocalCurrencyCookie(cookie)).toBe(false);
+                });
+
+                it('should be invalid if no rate exists', function() {
+                    var cookie = _.clone(COOKIE_VALUES);
+                    delete cookie.rate;
+                    expect(BasketPage.isValidLocalCurrencyCookie(cookie)).toBe(false);
+                });
+
+                it('should be invalid if no code exists', function() {
+                    var cookie = _.clone(COOKIE_VALUES);
+                    delete cookie.code;
+                    expect(BasketPage.isValidLocalCurrencyCookie(cookie)).toBe(false);
+                });
+
+                it('should be valid if cookie exists and all necessary fields exist', function() {
+                    var cookie = _.clone(COOKIE_VALUES);
+                    expect(BasketPage.isValidLocalCurrencyCookie(cookie)).toBe(true);
                 });
             });
         });
