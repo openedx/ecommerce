@@ -131,7 +131,7 @@ class LMSPublisher(object):
             data = json.loads(response)
             if isinstance(data, basestring):
                 message = data
-            elif isinstance(data, dict) and len(data) > 0:
+            elif isinstance(data, dict) and data:
                 message = data.values()[0]
             if isinstance(message, list):
                 message = message[0]
@@ -140,5 +140,5 @@ class LMSPublisher(object):
 
         if message:
             return ' '.join([default_error_message, message])
-        else:
-            return default_error_message
+
+        return default_error_message

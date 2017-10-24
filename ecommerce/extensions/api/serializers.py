@@ -142,13 +142,13 @@ class ProductAttributeValueSerializer(serializers.ModelSerializer):
     def get_code(self, instance):
         return instance.attribute.code
 
-    def get_value(self, obj):
-        if obj.attribute.name == 'Coupon vouchers':
+    def get_value(self, dictionary):
+        if dictionary.attribute.name == 'Coupon vouchers':
             request = self.context.get('request')
-            vouchers = obj.value.vouchers.all()
+            vouchers = dictionary.value.vouchers.all()
             serializer = VoucherSerializer(vouchers, many=True, context={'request': request})
             return serializer.data
-        return obj.value
+        return dictionary.value
 
     class Meta(object):
         model = ProductAttributeValue
@@ -367,7 +367,7 @@ class AtomicPublicationSerializer(serializers.Serializer):  # pylint: disable=ab
 
         return self.partner
 
-    def save(self):
+    def save(self, **kwargs):
         """Save and publish Course and associated products."
 
         Returns:

@@ -5,6 +5,7 @@ import logging
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import PermissionDenied
 from django.core.urlresolvers import reverse
 from django.http import Http404, HttpResponse, HttpResponseRedirect
@@ -261,12 +262,8 @@ class CouponRedeemView(EdxOrderPlacementMixin, View):
         return HttpResponseRedirect(reverse('basket:summary'))
 
 
-class EnrollmentCodeCsvView(View):
+class EnrollmentCodeCsvView(LoginRequiredMixin, View):
     """ Download enrollment code CSV file view. """
-
-    @method_decorator(login_required)
-    def dispatch(self, *args, **kwargs):
-        return super(EnrollmentCodeCsvView, self).dispatch(*args, **kwargs)
 
     def get(self, request, number):
         """

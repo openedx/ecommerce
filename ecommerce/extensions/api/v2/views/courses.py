@@ -46,7 +46,7 @@ class CourseViewSet(NonDestroyableModelViewSet):
               paramType: query
               multiple: false
         """
-        return super(CourseViewSet, self).list(request, *args, **kwargs)
+        return super(CourseViewSet, self).list(request, *args, **kwargs)  # pylint: disable=useless-super-delegation
 
     def create(self, request, *args, **kwargs):
         course = Course.objects.create(

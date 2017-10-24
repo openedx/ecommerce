@@ -45,7 +45,7 @@ class BasketCreateView(EdxOrderPlacementMixin, generics.CreateAPIView):
     """
     permission_classes = (IsAuthenticated,)
 
-    def get_serializer(self):
+    def get_serializer(self, *args, **kwargs):
         pass
 
     # Disable atomicity for the view. Otherwise, we'd be unable to commit to the database

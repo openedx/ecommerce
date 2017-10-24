@@ -22,7 +22,7 @@ class IsOffersOrIsAuthenticatedAndStaff(permissions.BasePermission):
 
     def has_permission(self, request, view):
         user = request.user
-        return (user.is_authenticated() and user.is_staff) or view.action == 'offers'
+        return (user.is_authenticated() and user.is_staff) or (view.action == 'offers')
 
 
 class IsStaffOrOwner(permissions.BasePermission):

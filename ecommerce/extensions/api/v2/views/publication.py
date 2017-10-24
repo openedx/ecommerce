@@ -38,7 +38,7 @@ class AtomicPublicationView(generics.CreateAPIView, generics.UpdateAPIView):
             created, failure, message = serializer.save()
             if failure:
                 return Response({'error': message}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-            else:
-                content = serializer.data
-                content['message'] = message if message else None
-                return Response(content, status=status.HTTP_201_CREATED if created else status.HTTP_200_OK)
+
+            content = serializer.data
+            content['message'] = message if message else None
+            return Response(content, status=status.HTTP_201_CREATED if created else status.HTTP_200_OK)
