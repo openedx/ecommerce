@@ -617,10 +617,23 @@ define([
             describe('generateLocalPriceText', function() {
                 it('should replace USD values', function() {
                     spyOn(BasketPage, 'formatToLocalPrice').and.returnValue('foo');
-                    expect('Replace foo and foo with foo')
-                        .toEqual(BasketPage.generateLocalPriceText('Replace $12.34 and $56.78 with foo'));
+                    expect('foo')
+                        .toEqual(BasketPage.generateLocalPriceText('USD12.34'));
                     expect(BasketPage.formatToLocalPrice).toHaveBeenCalledWith('12.34');
-                    expect(BasketPage.formatToLocalPrice).toHaveBeenCalledWith('56.78');
+                });
+
+                it('should replace $ values', function() {
+                    spyOn(BasketPage, 'formatToLocalPrice').and.returnValue('foo');
+                    expect('foo')
+                        .toEqual(BasketPage.generateLocalPriceText('$12.34'));
+                    expect(BasketPage.formatToLocalPrice).toHaveBeenCalledWith('12.34');
+                });
+
+                it('should replace negative values', function() {
+                    spyOn(BasketPage, 'formatToLocalPrice').and.returnValue('foo');
+                    expect('foo')
+                        .toEqual(BasketPage.generateLocalPriceText('-$12.34'));
+                    expect(BasketPage.formatToLocalPrice).toHaveBeenCalledWith('-12.34');
                 });
 
                 it('should not replace text without USD values', function() {

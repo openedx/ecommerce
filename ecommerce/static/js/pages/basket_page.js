@@ -243,6 +243,10 @@ define([
             addPriceDisclaimer: function() {
                 var price = $('#basket-total').find('> .price').text(),
                     countryData = Cookies.getJSON('edx-price-l10n');
+
+                // when the price value has a USD prefix, replace it with a $
+                price = price.replace('USD', '$');
+
                 if (BasketPage.isValidLocalCurrencyCookie(countryData) && countryData.countryCode !== 'USA') {
                     $('<span>').attr('class', 'price-disclaimer')
                         .text('* This total contains an approximate conversion. You will be charged ' + price + ' USD.')
@@ -263,19 +267,16 @@ define([
             },
 
             generateLocalPriceText: function(usdPriceText) {
-                var localPriceText = usdPriceText,
-                    // Matches on all $ab.cd strings
-                    usdPriceMatches = usdPriceText.match(/\$[0-9]+\.[0-9]+/g);
+                var localPriceText = usdPriceText;
 
-                // If matches exist translate
-                if (usdPriceMatches) {
-                    usdPriceMatches.forEach(function(value) {
-                        localPriceText = localPriceText
-                            .replace(value, BasketPage.formatToLocalPrice(value.substring(1)));
-                    });
+                // Assumes price value is in USDab.cd or $ab.cd format with optional sign
+                localPriceText = localPriceText.replace(/\$|USD/, '');
+
+                if ($.isNumeric(localPriceText)) {
+                    return BasketPage.formatToLocalPrice(localPriceText);
                 }
 
-                return localPriceText;
+                return usdPriceText;
             },
 
             replaceElementText: function(element, text) {
@@ -302,6 +303,9 @@ define([
                 // Replace local price text values
                 if ($prices.length === translatedItemPrices.length
                     && $vouchers.length === translatedVoucherPrices.length) {
+                    // Add price disclaimer after all translated values have been calculated
+                    BasketPage.addPriceDisclaimer();
+
                     $prices.each(function(index, element) {
                         BasketPage.replaceElementText($(element), translatedItemPrices[index]);
                     });
@@ -527,7 +531,6 @@ define([
 
                 try {
                     // local currency translation
-                    BasketPage.addPriceDisclaimer();
                     BasketPage.translateToLocalPrices();
                 } catch (e) {} // eslint-disable-line no-empty
             }
