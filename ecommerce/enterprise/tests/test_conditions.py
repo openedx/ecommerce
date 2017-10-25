@@ -119,18 +119,6 @@ class EnterpriseCustomerConditionTests(EnterpriseServiceMockMixin, DiscoveryTest
         self.assertFalse(self.condition.is_satisfied(offer, basket))
 
     @httpretty.activate
-    def test_is_satisfied_consent_not_granted(self):
-        """ Ensure the condition returns false if consent has not been granted for the given course run. """
-        offer = factories.EnterpriseOfferFactory(site=self.site, condition=self.condition)
-        basket = factories.BasketFactory(site=self.site, owner=self.user)
-        basket.add_product(self.course_run.seat_products[0])
-        self.mock_enterprise_learner_api(
-            learner_id=self.user.id,
-            enterprise_customer_uuid=str(self.condition.enterprise_customer_uuid),
-        )
-        self.assertFalse(self.condition.is_satisfied(offer, basket))
-
-    @httpretty.activate
     def test_is_satisfied_course_run_not_in_catalog(self):
         """ Ensure the condition returns false if the course run is not in the Enterprise catalog. """
         offer = factories.EnterpriseOfferFactory(site=self.site, condition=self.condition)
