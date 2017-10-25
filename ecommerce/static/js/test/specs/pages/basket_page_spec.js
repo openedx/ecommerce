@@ -631,9 +631,9 @@ define([
 
                 it('should replace negative values', function() {
                     spyOn(BasketPage, 'formatToLocalPrice').and.returnValue('foo');
-                    expect('foo')
+                    expect('-foo')
                         .toEqual(BasketPage.generateLocalPriceText('-$12.34'));
-                    expect(BasketPage.formatToLocalPrice).toHaveBeenCalledWith('-12.34');
+                    expect(BasketPage.formatToLocalPrice).toHaveBeenCalledWith('12.34');
                 });
 
                 it('should not replace text without USD values', function() {

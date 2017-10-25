@@ -242,14 +242,16 @@ define([
 
             addPriceDisclaimer: function() {
                 var price = $('#basket-total').find('> .price').text(),
-                    countryData = Cookies.getJSON('edx-price-l10n');
+                    countryData = Cookies.getJSON('edx-price-l10n'),
+                    disclaimerPrefix;
 
                 // when the price value has a USD prefix, replace it with a $
                 price = price.replace('USD', '$');
+                disclaimerPrefix = '* This total contains an approximate conversion. You will be charged ';
 
                 if (BasketPage.isValidLocalCurrencyCookie(countryData) && countryData.countryCode !== 'USA') {
                     $('<span>').attr('class', 'price-disclaimer')
-                        .text('* This total contains an approximate conversion. You will be charged ' + price + ' USD.')
+                        .text(gettext(disclaimerPrefix) + price + ' USD.')
                         .appendTo('div[aria-labelledby="order-details-region"]');
                 }
             },
@@ -267,16 +269,27 @@ define([
             },
 
             generateLocalPriceText: function(usdPriceText) {
-                var localPriceText = usdPriceText;
-
                 // Assumes price value is in USDab.cd or $ab.cd format with optional sign
-                localPriceText = localPriceText.replace(/\$|USD/, '');
+                var localPriceText = usdPriceText,
+                    prefixMatch = localPriceText.match(/(\$|USD)[0-9]+\.[0-9]+/),
+                    entireMatch,
+                    groupMatch,
+                    startIndex,
+                    priceValue;
 
-                if ($.isNumeric(localPriceText)) {
-                    return BasketPage.formatToLocalPrice(localPriceText);
+                if (prefixMatch) {
+                    entireMatch = prefixMatch[0];
+                    groupMatch = prefixMatch[1];
+                    startIndex = prefixMatch.index;
+                    priceValue = localPriceText.substring(startIndex + groupMatch.length);
+
+                    if ($.isNumeric(priceValue)) {
+                        localPriceText = localPriceText
+                            .replace(entireMatch, BasketPage.formatToLocalPrice(priceValue));
+                    }
                 }
 
-                return usdPriceText;
+                return localPriceText;
             },
 
             replaceElementText: function(element, text) {
