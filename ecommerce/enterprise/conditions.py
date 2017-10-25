@@ -24,24 +24,11 @@ class EnterpriseCustomerCondition(ConditionWithoutRangeMixin, SingleItemConsumpt
     def name(self):
         return "Basket contains a seat from {}'s catalog".format(self.enterprise_customer_name)
 
-    def _get_course_runs_with_consent(self, data_sharing_consent_records):
-        """
-        Return the course run IDs for which the learner has consented to share data.
-
-        Arguments:
-            data_sharing_consent_records (list of dict): The learner's existing data sharing consent records.
-
-        Returns:
-            list of strings: The list of course run IDs for which the learner has given data sharing consent.
-        """
-        return [record['course_id'] for record in data_sharing_consent_records if record['consent_provided']]
-
     @check_condition_applicability([ENTERPRISE_OFFERS_SWITCH])
     def is_satisfied(self, offer, basket):  # pylint: disable=unused-argument
         """
         Determines if a user is eligible for an enterprise customer offer
-        based on their association with the enterprise customer and whether
-        or not they have consented to sharing data with the enterprise customer.
+        based on their association with the enterprise customer.
 
         Args:
             basket (Basket): Contains information about order line items, the current site,
@@ -67,16 +54,11 @@ class EnterpriseCustomerCondition(ConditionWithoutRangeMixin, SingleItemConsumpt
             # Learner is not linked to the EnterpriseCustomer associated with this condition.
             return False
 
-        course_runs_with_consent = self._get_course_runs_with_consent(learner_data['data_sharing_consent_records'])
         course_run_ids = []
         for line in basket.all_lines():
             course = line.product.course
             if not course:
                 # Basket contains products not related to a course_run.
-                return False
-
-            if enterprise_customer['enable_data_sharing_consent'] and course.id not in course_runs_with_consent:
-                # Basket contains course_runs for which the learner has not given consent to share data.
                 return False
 
             course_run_ids.append(course.id)
