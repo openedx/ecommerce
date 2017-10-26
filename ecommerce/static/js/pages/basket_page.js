@@ -261,7 +261,7 @@ define([
 
                 // Default to USD when the exchange rate cookie doesn't exist
                 if (BasketPage.isValidLocalCurrencyCookie(countryData) && countryData.countryCode !== 'USA') {
-                    return countryData.symbol + Math.round(priceInUsd * countryData.rate) + ' '
+                    return countryData.symbol + Math.round(priceInUsd * countryData.rate).toLocaleString() + ' '
                         + countryData.code + ' *';
                 } else {
                     return prefix + priceInUsd;
@@ -269,9 +269,9 @@ define([
             },
 
             generateLocalPriceText: function(usdPriceText) {
-                // Assumes price value is in USDab.cd or $ab.cd format with optional sign
+                // Assumes price value is prefixed by $ or USD with optional sign
                 var localPriceText = usdPriceText,
-                    prefixMatch = localPriceText.match(/(\$|USD)[0-9]+\.[0-9]+/),
+                    prefixMatch = localPriceText.match(/(\$|USD).*/),
                     entireMatch,
                     groupMatch,
                     startIndex,
@@ -283,10 +283,8 @@ define([
                     startIndex = prefixMatch.index;
                     priceValue = localPriceText.substring(startIndex + groupMatch.length);
 
-                    if ($.isNumeric(priceValue)) {
-                        localPriceText = localPriceText
-                            .replace(entireMatch, BasketPage.formatToLocalPrice(groupMatch, priceValue));
-                    }
+                    localPriceText = localPriceText
+                        .replace(entireMatch, BasketPage.formatToLocalPrice(groupMatch, priceValue));
                 }
 
                 return localPriceText;
