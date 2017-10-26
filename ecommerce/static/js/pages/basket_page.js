@@ -256,7 +256,7 @@ define([
                 }
             },
 
-            formatToLocalPrice: function(priceInUsd) {
+            formatToLocalPrice: function(prefix, priceInUsd) {
                 var countryData = Cookies.getJSON('edx-price-l10n');
 
                 // Default to USD when the exchange rate cookie doesn't exist
@@ -264,7 +264,7 @@ define([
                     return countryData.symbol + Math.round(priceInUsd * countryData.rate) + ' '
                         + countryData.code + ' *';
                 } else {
-                    return '$' + priceInUsd;
+                    return prefix + priceInUsd;
                 }
             },
 
@@ -285,7 +285,7 @@ define([
 
                     if ($.isNumeric(priceValue)) {
                         localPriceText = localPriceText
-                            .replace(entireMatch, BasketPage.formatToLocalPrice(priceValue));
+                            .replace(entireMatch, BasketPage.formatToLocalPrice(groupMatch, priceValue));
                     }
                 }
 
