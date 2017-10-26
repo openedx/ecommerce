@@ -588,7 +588,8 @@ define([
             describe('formatToLocalPrice', function() {
                 var EDX_PRICE_LOCATION_COOKIE_NAME = 'edx-price-l10n',
                     USD_VALUE = 100.25,
-                    EXPECTED_USD_PRICE = '$100.25',
+                    PREFIX = 'PREFIX',
+                    EXPECTED_USD_PRICE = '100.25',
                     COOKIE_VALUES = {countryCode: 'FOO', rate: 2, code: 'BAR', symbol: 'BAZ'};
 
                 beforeEach(function() {
@@ -599,41 +600,38 @@ define([
                     Cookies.remove(EDX_PRICE_LOCATION_COOKIE_NAME);
                 });
 
-                it('should return USD price when cookie does not exist', function() {
-                    expect(BasketPage.formatToLocalPrice(USD_VALUE)).toEqual(EXPECTED_USD_PRICE);
+                it('should return prefixed price when cookie does not exist', function() {
+                    expect(BasketPage.formatToLocalPrice(PREFIX, USD_VALUE)).toEqual(PREFIX + EXPECTED_USD_PRICE);
                 });
 
-                it('should return USD price when country code is USA', function() {
+                it('should return prefixed price when country code is USA', function() {
                     Cookies.set(EDX_PRICE_LOCATION_COOKIE_NAME, {countryCode: 'USA'});
-                    expect(BasketPage.formatToLocalPrice(USD_VALUE)).toEqual(EXPECTED_USD_PRICE);
+                    expect(BasketPage.formatToLocalPrice(PREFIX, USD_VALUE)).toEqual(PREFIX + EXPECTED_USD_PRICE);
                 });
 
-                it('should return formatted USD when non-US cookie exists', function() {
+                it('should return formatted local price value when non-US cookie exists', function() {
                     Cookies.set(EDX_PRICE_LOCATION_COOKIE_NAME, COOKIE_VALUES);
-                    expect(BasketPage.formatToLocalPrice(USD_VALUE)).toEqual('BAZ201 BAR *');
+                    expect(BasketPage.formatToLocalPrice(PREFIX, USD_VALUE)).toEqual('BAZ201 BAR *');
                 });
             });
 
             describe('generateLocalPriceText', function() {
                 it('should replace USD values', function() {
                     spyOn(BasketPage, 'formatToLocalPrice').and.returnValue('foo');
-                    expect('foo')
-                        .toEqual(BasketPage.generateLocalPriceText('USD12.34'));
-                    expect(BasketPage.formatToLocalPrice).toHaveBeenCalledWith('12.34');
+                    expect('foo').toEqual(BasketPage.generateLocalPriceText('USD12.34'));
+                    expect(BasketPage.formatToLocalPrice).toHaveBeenCalledWith('USD', '12.34');
                 });
 
                 it('should replace $ values', function() {
                     spyOn(BasketPage, 'formatToLocalPrice').and.returnValue('foo');
-                    expect('foo')
-                        .toEqual(BasketPage.generateLocalPriceText('$12.34'));
-                    expect(BasketPage.formatToLocalPrice).toHaveBeenCalledWith('12.34');
+                    expect('foo').toEqual(BasketPage.generateLocalPriceText('$12.34'));
+                    expect(BasketPage.formatToLocalPrice).toHaveBeenCalledWith('$', '12.34');
                 });
 
                 it('should replace negative values', function() {
                     spyOn(BasketPage, 'formatToLocalPrice').and.returnValue('foo');
-                    expect('-foo')
-                        .toEqual(BasketPage.generateLocalPriceText('-$12.34'));
-                    expect(BasketPage.formatToLocalPrice).toHaveBeenCalledWith('12.34');
+                    expect('-foo').toEqual(BasketPage.generateLocalPriceText('-$12.34'));
+                    expect(BasketPage.formatToLocalPrice).toHaveBeenCalledWith('$', '12.34');
                 });
 
                 it('should not replace text without USD values', function() {
