@@ -20,6 +20,7 @@ from ecommerce.extensions.api import exceptions
 from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
 from ecommerce.extensions.fulfillment.modules import CouponFulfillmentModule
 from ecommerce.extensions.fulfillment.status import LINE
+from ecommerce.extensions.offer.models import OFFER_PRIORITY_VOUCHER
 from ecommerce.extensions.test.factories import create_order, prepare_voucher
 from ecommerce.extensions.voucher.utils import (
     create_vouchers,
@@ -199,6 +200,7 @@ class UtilTests(CouponMixin, DiscoveryMockMixin, DiscoveryTestMixin, LmsApiMockM
         self.assertEqual(voucher_offer.benefit.value, 100.00)
         self.assertEqual(voucher_offer.benefit.range.catalog, self.catalog)
         self.assertEqual(voucher_offer.email_domains, email_domains)
+        self.assertEqual(voucher_offer.priority, OFFER_PRIORITY_VOUCHER)
         self.assertEqual(len(coupon_voucher.vouchers.all()), 11)
         self.assertEqual(voucher.end_datetime, self.data['end_datetime'])
         self.assertEqual(voucher.start_datetime, self.data['start_datetime'])

@@ -7,6 +7,7 @@ from oscar.core.loading import get_model
 from ecommerce.enterprise.constants import BENEFIT_MAP
 from ecommerce.enterprise.forms import EnterpriseOfferForm
 from ecommerce.enterprise.tests.mixins import EnterpriseServiceMockMixin
+from ecommerce.extensions.offer.models import OFFER_PRIORITY_ENTERPRISE
 from ecommerce.extensions.test import factories
 from ecommerce.programs.custom import class_path
 from ecommerce.tests.testcases import TestCase
@@ -36,6 +37,7 @@ class EnterpriseOfferFormTests(EnterpriseServiceMockMixin, TestCase):
         self.assertEqual(offer.status, ConditionalOffer.OPEN)
         self.assertEqual(offer.max_basket_applications, 1)
         self.assertEqual(offer.site, self.site)
+        self.assertEqual(offer.priority, OFFER_PRIORITY_ENTERPRISE)
         self.assertEqual(offer.condition.enterprise_customer_uuid, enterprise_customer_uuid)
         self.assertEqual(offer.condition.enterprise_customer_name, enterprise_customer_name)
         self.assertEqual(offer.condition.enterprise_customer_catalog_uuid, enterprise_customer_catalog_uuid)

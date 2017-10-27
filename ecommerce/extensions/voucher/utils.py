@@ -19,6 +19,7 @@ from oscar.templatetags.currency_filters import currency
 from ecommerce.core.url_utils import get_ecommerce_url
 from ecommerce.core.utils import log_message_and_raise_validation_error
 from ecommerce.extensions.api import exceptions
+from ecommerce.extensions.offer.models import OFFER_PRIORITY_VOUCHER
 from ecommerce.extensions.offer.utils import get_discount_percentage, get_discount_value
 from ecommerce.invoice.models import Invoice
 from ecommerce.programs.conditions import ProgramCourseRunSeatsCondition
@@ -377,7 +378,8 @@ def _get_or_create_offer(
         benefit=offer_benefit,
         max_global_applications=max_uses,
         email_domains=email_domains,
-        site=site
+        site=site,
+        priority=OFFER_PRIORITY_VOUCHER,
     )
 
     return offer

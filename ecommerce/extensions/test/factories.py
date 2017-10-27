@@ -9,6 +9,7 @@ from oscar.test.factories import *  # pylint:disable=wildcard-import,unused-wild
 
 from ecommerce.enterprise.benefits import EnterpriseAbsoluteDiscountBenefit, EnterprisePercentageDiscountBenefit
 from ecommerce.enterprise.conditions import EnterpriseCustomerCondition
+from ecommerce.extensions.offer.models import OFFER_PRIORITY_VOUCHER
 from ecommerce.programs.benefits import AbsoluteDiscountBenefitWithoutRange, PercentageDiscountBenefitWithoutRange
 from ecommerce.programs.conditions import ProgramCourseRunSeatsCondition
 from ecommerce.programs.custom import class_path
@@ -104,7 +105,8 @@ def prepare_voucher(code='COUPONTEST', _range=None, start_datetime=None, end_dat
             benefit=benefit,
             condition=condition,
             max_global_applications=max_usage,
-            email_domains=email_domains
+            email_domains=email_domains,
+            priority=OFFER_PRIORITY_VOUCHER
         )
     else:
         offer = ConditionalOfferFactory(
@@ -112,7 +114,8 @@ def prepare_voucher(code='COUPONTEST', _range=None, start_datetime=None, end_dat
             benefit=benefit,
             condition=condition,
             email_domains=email_domains,
-            site=site
+            site=site,
+            priority=OFFER_PRIORITY_VOUCHER
         )
     voucher.offers.add(offer)
     return voucher, product
