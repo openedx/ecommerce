@@ -587,9 +587,9 @@ define([
 
             describe('formatToLocalPrice', function() {
                 var EDX_PRICE_LOCATION_COOKIE_NAME = 'edx-price-l10n',
-                    USD_VALUE = 100.25,
+                    USD_VALUE = '1,234.56',
+                    ANOTHER_USD_VALUE = '123.45',
                     PREFIX = 'PREFIX',
-                    EXPECTED_USD_PRICE = '100.25',
                     COOKIE_VALUES = {countryCode: 'FOO', rate: 2, code: 'BAR', symbol: 'BAZ'};
 
                 beforeEach(function() {
@@ -601,17 +601,27 @@ define([
                 });
 
                 it('should return prefixed price when cookie does not exist', function() {
-                    expect(BasketPage.formatToLocalPrice(PREFIX, USD_VALUE)).toEqual(PREFIX + EXPECTED_USD_PRICE);
+                    expect(BasketPage.formatToLocalPrice(PREFIX, USD_VALUE)).toEqual(PREFIX + USD_VALUE);
                 });
 
                 it('should return prefixed price when country code is USA', function() {
                     Cookies.set(EDX_PRICE_LOCATION_COOKIE_NAME, {countryCode: 'USA'});
-                    expect(BasketPage.formatToLocalPrice(PREFIX, USD_VALUE)).toEqual(PREFIX + EXPECTED_USD_PRICE);
+                    expect(BasketPage.formatToLocalPrice(PREFIX, USD_VALUE)).toEqual(PREFIX + USD_VALUE);
+                });
+
+                it('should return prefixed price when country code is USA', function() {
+                    Cookies.set(EDX_PRICE_LOCATION_COOKIE_NAME, {countryCode: 'USA'});
+                    expect(BasketPage.formatToLocalPrice(PREFIX, USD_VALUE)).toEqual(PREFIX + USD_VALUE);
                 });
 
                 it('should return formatted local price value when non-US cookie exists', function() {
                     Cookies.set(EDX_PRICE_LOCATION_COOKIE_NAME, COOKIE_VALUES);
-                    expect(BasketPage.formatToLocalPrice(PREFIX, USD_VALUE)).toEqual('BAZ201 BAR *');
+                    expect(BasketPage.formatToLocalPrice(PREFIX, USD_VALUE)).toEqual('BAZ2,469 BAR *');
+                });
+
+                it('should return non-comma separated local price value when non-US cookie exists', function() {
+                    Cookies.set(EDX_PRICE_LOCATION_COOKIE_NAME, COOKIE_VALUES);
+                    expect(BasketPage.formatToLocalPrice(PREFIX, ANOTHER_USD_VALUE)).toEqual('BAZ247 BAR *');
                 });
             });
 
