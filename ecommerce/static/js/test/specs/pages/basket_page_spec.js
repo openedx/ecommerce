@@ -636,8 +636,14 @@ define([
 
                 it('should replace commaseparated values', function() {
                     spyOn(BasketPage, 'formatToLocalPrice').and.returnValue('foo');
-                    expect('-foo').toEqual(BasketPage.generateLocalPriceText('-$1,234'));
-                    expect(BasketPage.formatToLocalPrice).toHaveBeenCalledWith('$', '1,234');
+                    expect('-foo').toEqual(BasketPage.generateLocalPriceText('-$1,234.56'));
+                    expect(BasketPage.formatToLocalPrice).toHaveBeenCalledWith('$', '1,234.56');
+                });
+
+                it('should only replace currency value', function() {
+                    spyOn(BasketPage, 'formatToLocalPrice').and.returnValue('foo');
+                    expect('baz -foo bar').toEqual(BasketPage.generateLocalPriceText('baz -$1,234.56 bar'));
+                    expect(BasketPage.formatToLocalPrice).toHaveBeenCalledWith('$', '1,234.56');
                 });
 
                 it('should not replace text without USD values', function() {
