@@ -8,6 +8,7 @@ from oscar.core.loading import get_model
 from ecommerce.enterprise.conditions import EnterpriseCustomerCondition
 from ecommerce.enterprise.constants import BENEFIT_MAP, BENEFIT_TYPE_CHOICES
 from ecommerce.enterprise.utils import get_enterprise_customer
+from ecommerce.extensions.offer.models import OFFER_PRIORITY_ENTERPRISE
 from ecommerce.programs.custom import class_path, create_condition
 
 Benefit = get_model('offer', 'Benefit')
@@ -101,7 +102,7 @@ class EnterpriseOfferForm(forms.ModelForm):
         self.instance.offer_type = ConditionalOffer.SITE
         self.instance.max_basket_applications = 1
         self.instance.site = site
-        self.instance.priority = 10  # This will ensure that Enterprise Offers are applied before Program Offers.
+        self.instance.priority = OFFER_PRIORITY_ENTERPRISE
 
         if commit:
             benefit = getattr(self.instance, 'benefit', Benefit())
