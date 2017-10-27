@@ -257,11 +257,14 @@ define([
             },
 
             formatToLocalPrice: function(prefix, priceInUsd) {
-                var countryData = Cookies.getJSON('edx-price-l10n');
+                var countryData = Cookies.getJSON('edx-price-l10n'),
+                    parsedPriceInUsd;
 
                 // Default to USD when the exchange rate cookie doesn't exist
                 if (BasketPage.isValidLocalCurrencyCookie(countryData) && countryData.countryCode !== 'USA') {
-                    return countryData.symbol + Math.round(priceInUsd * countryData.rate).toLocaleString() + ' '
+                    // assumes all formatted prices have a comma every three places
+                    parsedPriceInUsd = parseFloat(priceInUsd.replace(',', ''));
+                    return countryData.symbol + Math.round(parsedPriceInUsd * countryData.rate).toLocaleString() + ' '
                         + countryData.code + ' *';
                 } else {
                     return prefix + priceInUsd;
