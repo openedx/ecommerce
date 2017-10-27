@@ -634,12 +634,6 @@ define([
                     expect(BasketPage.formatToLocalPrice).toHaveBeenCalledWith('$', '12.34');
                 });
 
-                it('should replace commaseparated values', function() {
-                    spyOn(BasketPage, 'formatToLocalPrice').and.returnValue('foo');
-                    expect('-foo').toEqual(BasketPage.generateLocalPriceText('-$1,234'));
-                    expect(BasketPage.formatToLocalPrice).toHaveBeenCalledWith('$', '1,234');
-                });
-
                 it('should not replace text without USD values', function() {
                     var messageWithoutUSDValue = 'This caused a bug';
                     spyOn(BasketPage, 'formatToLocalPrice');
