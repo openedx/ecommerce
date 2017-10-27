@@ -269,9 +269,9 @@ define([
             },
 
             generateLocalPriceText: function(usdPriceText) {
-                // Assumes price value is prefixed by $ or USD with optional sign
+                // Assumes price value is prefixed by $ or USD with optional sign followed by optional string
                 var localPriceText = usdPriceText,
-                    prefixMatch = localPriceText.match(/(\$|USD).*/),
+                    prefixMatch = localPriceText.match(/(\$|USD)?(([1-9][0-9]{0,2}(,[0-9]{3})*)|[0-9]+)?\.[0-9]{1,2}/),
                     entireMatch,
                     groupMatch,
                     startIndex,
@@ -281,7 +281,8 @@ define([
                     entireMatch = prefixMatch[0];
                     groupMatch = prefixMatch[1];
                     startIndex = prefixMatch.index;
-                    priceValue = localPriceText.substring(startIndex + groupMatch.length);
+                    priceValue = localPriceText
+                      .substring(startIndex + groupMatch.length, startIndex + entireMatch.length);
 
                     localPriceText = localPriceText
                         .replace(entireMatch, BasketPage.formatToLocalPrice(groupMatch, priceValue));
