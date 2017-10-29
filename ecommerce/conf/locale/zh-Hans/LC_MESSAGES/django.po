@@ -3,45 +3,31 @@
 # This file is distributed under the same license as the PACKAGE package.
 # 
 # Translators:
-# Ahmed Jazzar <ajazzar@qrf.org>, 2015
-# Ahmed Jazzar <ajazzar@qrf.org>, 2016
-# Anthony Mangano <amangano@edx.org>, 2017
-# AR C2 <e2f458fd4s512@outlook.com>, 2016
-# cblackburn <cblackburn@edx.org>, 2016
-# e2f_ar r3 <e2f_ar_r3@outlook.com>, 2016-2017
-# e2f_ar t3 <e2f_ar_t3@outlook.com>, 2016
-# may <may@qordoba.com>, 2015
-# Nabeel El-Dughailib <nabeel@qordoba.com>, 2015
-# Omar Al-Ithawi <oithawi@qrf.org>, 2016
-# Sahbi BG <sahbi.g@gmail.com>, 2017
-# Sahbi BG <sahbi.g@gmail.com>, 2017
-# shefaa abu jabel <shefaa.aj@gmail.com>, 2016-2017
-# Soha Assali <soha+transifex@qordoba.com>, 2015-2016
 msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2017-10-12 20:55+0000\n"
-"PO-Revision-Date: 2017-10-25 08:21+0000\n"
-"Last-Translator: Sahbi BG <sahbi.g@gmail.com>\n"
-"Language-Team: Arabic (http://www.transifex.com/open-edx/edx-platform/language/ar/)\n"
+"PO-Revision-Date: 2015-06-18 01:39+0000\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: Chinese Simplified (http://www.transifex.com/open-edx/edx-platform/language/zh-Hans/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Language: ar\n"
-"Plural-Forms: nplurals=6; plural=n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 && n%100<=10 ? 3 : n%100>=11 && n%100<=99 ? 4 : 5;\n"
+"Language: zh-Hans\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
 
 #: ecommerce/core/admin.py:21
 msgid "Personal info"
-msgstr "المعلومات الشخصية"
+msgstr ""
 
 #: ecommerce/core/admin.py:22
 msgid "Permissions"
-msgstr "الصلاحيات"
+msgstr ""
 
 #: ecommerce/core/admin.py:24
 msgid "Important dates"
-msgstr "تواريخ مهمّة"
+msgstr ""
 
 #. Translators: "Waffle" is the name of a third-party library. It should not
 #. be translated
@@ -55,95 +41,95 @@ msgstr ""
 
 #: ecommerce/core/models.py:40
 msgid "LMS base url for custom site/microsite"
-msgstr "رابط قاعدة نظام إدارة التعلّم ’LMS‘ للموقع الخاص/الموقع المخصّص"
+msgstr ""
 
 #: ecommerce/core/models.py:41
 msgid "Root URL of this site's LMS (e.g. https://courses.stage.edx.org)"
-msgstr "رابط الجذر لموقع نظام إدارة التعلّم هذا (مثال https://courses.stage.edx.org)"
+msgstr ""
 
 #: ecommerce/core/models.py:46
 msgid "Path to custom site theme"
-msgstr "مسار سمة الموقع المخصّصة"
+msgstr ""
 
 #: ecommerce/core/models.py:53
 msgid "Payment processors"
-msgstr "معالجات الدفعات"
+msgstr ""
 
 #: ecommerce/core/models.py:54
 msgid "Comma-separated list of processor names: 'cybersource,paypal'"
-msgstr "قائمة، مفصولة بفواصل، باسماء المعالجات: 'cybersource,paypal'"
+msgstr ""
 
 #: ecommerce/core/models.py:60
 msgid "Client-side payment processor"
-msgstr "معالج الدفع من جانب العميل"
+msgstr ""
 
 #: ecommerce/core/models.py:61
 msgid "Processor that will be used for client-side payments"
-msgstr "المعالج الذي سيستخدم لعمليات الدفع من جانب العميل"
+msgstr ""
 
 #: ecommerce/core/models.py:67
 msgid "OAuth settings"
-msgstr "إعدادات OAuth"
+msgstr ""
 
 #: ecommerce/core/models.py:68
 msgid "JSON string containing OAuth backend settings."
-msgstr "نص JSON يحتوي على إعدادات مكان خلفية OAuth"
+msgstr ""
 
 #: ecommerce/core/models.py:74
 msgid "Segment key"
-msgstr "مفتاح القسم"
+msgstr ""
 
 #: ecommerce/core/models.py:75
 msgid "Segment write/API key."
-msgstr "كتابة القسم/مفتاح API."
+msgstr ""
 
 #: ecommerce/core/models.py:81
 msgid "From email"
-msgstr "من البريد الإلكتروني"
+msgstr ""
 
 #: ecommerce/core/models.py:82
 msgid "Address from which emails are sent."
-msgstr "العنوان الذي أُرسلت منه رسائل البريد الإلكتروني."
+msgstr ""
 
 #: ecommerce/core/models.py:88
 msgid "Enable enrollment codes"
-msgstr "تمكين رموز التسجيل"
+msgstr ""
 
 #: ecommerce/core/models.py:89
 msgid "Enable the creation of enrollment codes."
-msgstr "تمكين إنشاء رموز التسجيل."
+msgstr ""
 
 #: ecommerce/core/models.py:94
 msgid "Payment support email"
-msgstr "رسالة بريد إلكتروني لدعم عملية الدفع"
+msgstr ""
 
 #: ecommerce/core/models.py:95
 msgid "Contact email for payment support issues."
-msgstr "البريد الإلكتروني لجهة الاتصال لمشكلات دعم عملية الدفع."
+msgstr ""
 
 #: ecommerce/core/models.py:101
 msgid "Payment support url"
-msgstr "عنوان url لدعم عملية الدفع"
+msgstr ""
 
 #: ecommerce/core/models.py:102
 msgid "URL for payment support issues."
-msgstr "عنوان URL للمشاكل في دعم عملية الدفع."
+msgstr ""
 
 #: ecommerce/core/models.py:107
 msgid "UTM Cookie Name"
-msgstr "اسم ملف تعريف ارتباط UTM"
+msgstr ""
 
 #: ecommerce/core/models.py:108
 msgid "Name of cookie storing UTM data."
-msgstr "بيانات تخزين اسم ملف تعريف ارتباط UTM"
+msgstr ""
 
 #: ecommerce/core/models.py:114
 msgid "Affiliate Cookie Name"
-msgstr "اسم ملف تعريف ارتباط UTM التابع"
+msgstr ""
 
 #: ecommerce/core/models.py:115
 msgid "Name of cookie storing affiliate data."
-msgstr "بيانات تخزين اسم ملف تعريف الارتباط التابع"
+msgstr ""
 
 #: ecommerce/core/models.py:121
 msgid "Send refund email notification"
@@ -193,7 +179,7 @@ msgstr ""
 
 #: ecommerce/core/models.py:158 ecommerce/extensions/partner/models.py:14
 msgid "Enable Sailthru Reporting"
-msgstr "تمكين تقارير Sailthru"
+msgstr ""
 
 #: ecommerce/core/models.py:159
 msgid "Determines if purchases should be reported to Sailthru."
@@ -236,13 +222,13 @@ msgstr ""
 
 #: ecommerce/core/models.py:441
 msgid "Full Name"
-msgstr "الاسم الكامل"
+msgstr ""
 
 #: ecommerce/core/models.py:586 ecommerce/extensions/basket/models.py:94
 #: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:56
 #: ecommerce/templates/oscar/dashboard/offers/summary.html:10
 msgid "Name"
-msgstr "الاسم"
+msgstr ""
 
 #: ecommerce/coupons/views.py:68 ecommerce/coupons/views.py:117
 msgid "Coupon does not exist."
@@ -250,28 +236,28 @@ msgstr ""
 
 #: ecommerce/coupons/views.py:73
 msgid "This coupon code is not yet valid."
-msgstr "رمز القسيمة غير صالح إلى الآن."
+msgstr ""
 
 #: ecommerce/coupons/views.py:75
 msgid "This coupon code has expired."
-msgstr "انتهت صلاحية رمز القسيمة."
+msgstr ""
 
 #: ecommerce/coupons/views.py:87
 #, python-brace-format
 msgid "Product [{product}] not available for purchase."
-msgstr "المنتج [{product}] غير متوفّر للشراء."
+msgstr ""
 
 #: ecommerce/coupons/views.py:92
 msgid "This coupon code is no longer available."
-msgstr "رمز القسيمة لم يعد متاحًا."
+msgstr ""
 
 #: ecommerce/coupons/views.py:112
 msgid "This coupon code is invalid."
-msgstr "رمز القسيمة غير صحيح"
+msgstr ""
 
 #: ecommerce/coupons/views.py:119
 msgid "The voucher is not applicable to your current basket."
-msgstr "القيمة غير سارية على سلّتك الحالية."
+msgstr ""
 
 #: ecommerce/coupons/views.py:129
 msgid "Welcome to edX"
@@ -285,19 +271,19 @@ msgstr ""
 
 #: ecommerce/coupons/views.py:160
 msgid "Code not provided."
-msgstr "الرمز غير متوفر."
+msgstr ""
 
 #: ecommerce/coupons/views.py:162
 msgid "SKU not provided."
-msgstr "وحدة إدارة المخزون غير متوفرة."
+msgstr ""
 
 #: ecommerce/coupons/views.py:173
 msgid "The product does not exist."
-msgstr "المنتج غير موجود."
+msgstr ""
 
 #: ecommerce/coupons/views.py:181
 msgid "You are not eligible to use this coupon."
-msgstr "أنت غير مؤهل لاستخدام هذه القسيمة."
+msgstr ""
 
 #: ecommerce/coupons/views.py:196
 msgid "Couldn't find a matching Enterprise Customer for this coupon."
@@ -327,43 +313,43 @@ msgstr ""
 #: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:65
 #: ecommerce/templates/oscar/dashboard/offers/summary.html:14
 msgid "Site"
-msgstr "الموقع"
+msgstr ""
 
 #: ecommerce/courses/models.py:40
 msgid ""
 "Last date/time on which verification for this product can be submitted."
-msgstr "آخر تاريخ/توقيت يمكن تقديم توثيق لهذا المنتج فيه."
+msgstr ""
 
 #: ecommerce/courses/publishers.py:61
 #, python-brace-format
 msgid "Failed to publish commerce data for {course_id} to LMS."
-msgstr "فشلت عملية نشر البيانات التجارية للمساق {course_id} إلى نظام إدارة التعلّم ’LMS‘"
+msgstr ""
 
 #: ecommerce/courses/utils.py:79
 msgid "Audit"
-msgstr "مستمع"
+msgstr ""
 
 #: ecommerce/courses/utils.py:80
 msgid "Credit"
-msgstr "نقاط"
+msgstr ""
 
 #: ecommerce/courses/utils.py:81
 msgid "Honor"
-msgstr "فخري"
+msgstr ""
 
 #: ecommerce/courses/utils.py:82
 msgid "Professional"
-msgstr "مهني"
+msgstr ""
 
 #: ecommerce/courses/utils.py:83
 msgid "Verified"
-msgstr "موثق"
+msgstr ""
 
 #: ecommerce/credit/views.py:42
 msgid ""
 "An error has occurred. We could not confirm that you are eligible for course"
 " credit. Try the transaction again."
-msgstr "نأسف لحدوث خطأ. تعذّر التأكد من أهليتك للحصول على ساعة معتمدة للمساق. يُرجى إعادة محاولة إجراء العمليّة مرّة أخرى."
+msgstr ""
 
 #: ecommerce/credit/views.py:63
 #, python-brace-format
@@ -378,7 +364,7 @@ msgstr ""
 msgid ""
 "An error has occurred. We could not confirm that the institution you "
 "selected offers this course credit. Try the transaction again."
-msgstr "حدث خطأ. لم نتمكّن من التأكّد من أن المؤسسة التعليمية التي اخترتها تقدّم مساقًا معتمدًا. حاول تنفيذ العمليّة من جديد."
+msgstr ""
 
 #: ecommerce/enterprise/utils.py:108
 #, python-brace-format
@@ -411,34 +397,34 @@ msgstr ""
 
 #: ecommerce/extensions/api/exceptions.py:7
 msgid "You can't check out with an empty basket."
-msgstr "لا يمكنك إتمام عملية البيع بسلّة فارغة."
+msgstr ""
 
 #: ecommerce/extensions/api/exceptions.py:10
 msgid ""
 "We couldn't locate the identification code necessary to find one of your "
 "products."
-msgstr "نأسف لتعذّر استكشاف رمز التعريف الضروري لإيجاد أحد منتجاتك."
+msgstr ""
 
 #: ecommerce/extensions/api/exceptions.py:13
 msgid "We couldn't find one of the products you're looking for."
-msgstr "عذراً، لم نتمكّن من إيجاد أحد المنتجات التي تبحث عنها."
+msgstr ""
 
 #: ecommerce/extensions/api/exceptions.py:16
 msgid "One of the products you're trying to order is unavailable."
-msgstr "أحد المنتجات التي تحاول طلبها غير متوفّرة."
+msgstr ""
 
 #: ecommerce/extensions/api/serializers.py:345
 #, python-brace-format
 msgid "Invalid product class [{product_class}] requested."
-msgstr "جرى طلب فئة منتجات [{product_class}] غير صالحة"
+msgstr ""
 
 #: ecommerce/extensions/api/serializers.py:351
 msgid "Products must indicate whether ID verification is required."
-msgstr "يجب أن تحدّد المنتجات فيما إذا كان توثيق الرقم التعريفي مطلوبًا "
+msgstr ""
 
 #: ecommerce/extensions/api/serializers.py:355
 msgid "Products must have a price."
-msgstr "يجب أن يكون للمنتجات سعر"
+msgstr ""
 
 #: ecommerce/extensions/api/serializers.py:384
 #, python-brace-format
@@ -446,23 +432,23 @@ msgid ""
 "Course [{course_id}] was not published to LMS because the switch "
 "[publish_course_modes_to_lms] is disabled. To avoid ghost SKUs, data has not"
 " been saved."
-msgstr "لم يُنشر المساق [{course_id}] إلى نظام إدارة التعلّم ’LMS‘ نظرًا لإلغاء تفعيل التبديل [publish_course_modes_to_lms]. لم يجري حفظ البيانات لتفادي كودات التخزين التعريفية الزائفة."
+msgstr ""
 
 #: ecommerce/extensions/api/serializers.py:597
 msgid "Enrollment code"
-msgstr "رمز التسجيل"
+msgstr ""
 
 #: ecommerce/extensions/api/serializers.py:598
 msgid "Discount code"
-msgstr "رمز الخصم"
+msgstr ""
 
 #: ecommerce/extensions/api/serializers.py:612
 msgid "ACTIVE"
-msgstr "فعّال"
+msgstr ""
 
 #: ecommerce/extensions/api/serializers.py:612
 msgid "INACTIVE"
-msgstr "غير نشط"
+msgstr ""
 
 #: ecommerce/extensions/api/v2/views/baskets.py:363
 #: ecommerce/extensions/basket/views.py:110
@@ -478,21 +464,21 @@ msgstr ""
 #: ecommerce/extensions/basket/models.py:83
 #, python-brace-format
 msgid "{id} - {status} basket (owner: {owner}, lines: {num_lines})"
-msgstr "السلّة {id} - {status} (المالك: {owner}، الأسطر: {num_lines})"
+msgstr ""
 
 #: ecommerce/extensions/basket/models.py:106
 #: ecommerce/extensions/payment/models.py:18
 #: ecommerce/templates/oscar/basket/basket.html:8
 msgid "Basket"
-msgstr "السلّة"
+msgstr ""
 
 #: ecommerce/extensions/basket/models.py:108
 msgid "Attribute Type"
-msgstr "نوع الخاصية"
+msgstr ""
 
 #: ecommerce/extensions/basket/models.py:110
 msgid "Text Attribute"
-msgstr "خاصية النص"
+msgstr ""
 
 #: ecommerce/extensions/basket/utils.py:81
 msgid ""
@@ -502,25 +488,25 @@ msgstr ""
 
 #: ecommerce/extensions/basket/utils.py:125
 msgid "Click here to just purchase an enrollment for yourself"
-msgstr "انقر هنا لشراء التسجيل لنفسك"
+msgstr ""
 
 #: ecommerce/extensions/basket/utils.py:128
 msgid "Click here to purchase multiple seats in this course"
-msgstr "انقر هنا لشراء عدّة مقاعد في هذه الدورة التدريبية"
+msgstr ""
 
 #: ecommerce/extensions/basket/views.py:58
 msgid "No SKU provided."
-msgstr "لا تتوفر وحدة إدارة المخزون."
+msgstr ""
 
 #: ecommerce/extensions/basket/views.py:65
 #, python-brace-format
 msgid "SKU [{sku}] does not exist."
-msgstr "وحدة إدارة المخزون [{sku}] غير موجودة."
+msgstr ""
 
 #: ecommerce/extensions/basket/views.py:83
 #, python-brace-format
 msgid "Product [{product}] not available to buy."
-msgstr "المنتج [{product}] غير متوفر لشرائه."
+msgstr ""
 
 #: ecommerce/extensions/basket/views.py:134
 msgid "You have already purchased these products"
@@ -539,13 +525,13 @@ msgstr ""
 #: ecommerce/extensions/basket/views.py:243
 msgid ""
 "You will be automatically enrolled in the course upon completing your order."
-msgstr "سيتم تسجيلك تلقائياً في الدورة عند استكمال طلبك."
+msgstr ""
 
 #: ecommerce/extensions/basket/views.py:249
 #, python-brace-format
 msgid ""
 "You will receive an email at {user_email} with your enrollment code(s)."
-msgstr "سوف تتلقى رسالة الكترونية على {user_email} التي تشمل رمو(ز) التجسيل الخاصة بك."
+msgstr ""
 
 #: ecommerce/extensions/basket/views.py:350
 #, python-brace-format
@@ -555,7 +541,7 @@ msgstr ""
 #: ecommerce/extensions/basket/views.py:402
 #, python-brace-format
 msgid "Coupon code '{code}' has expired."
-msgstr "انتهت صلاحية القسيمة رمز '{code}'."
+msgstr ""
 
 #: ecommerce/extensions/basket/views.py:409
 #, python-brace-format
@@ -565,7 +551,7 @@ msgstr ""
 #: ecommerce/extensions/basket/views.py:416
 #, python-brace-format
 msgid "Coupon code '{code}' has already been redeemed."
-msgstr "تم استرداد القسيمة رمز '{code}' بالفعل."
+msgstr ""
 
 #: ecommerce/extensions/basket/views.py:426
 #: ecommerce/extensions/basket/views.py:433
@@ -575,26 +561,26 @@ msgstr ""
 
 #: ecommerce/extensions/basket/views.py:457
 msgid "Your basket does not qualify for a coupon code discount."
-msgstr "سلتك غير مؤهلة لخصم من رموز القسائم."
+msgstr ""
 
 #: ecommerce/extensions/basket/views.py:462
 #, python-brace-format
 msgid "Coupon code '{code}' added to basket."
-msgstr "تمت إضافة القسيمة رمز '{code}' إلى السلة."
+msgstr ""
 
 #: ecommerce/extensions/basket/views.py:472
 #, python-brace-format
 msgid "You have already added coupon code '{code}' to your basket."
-msgstr "لقد أضفت بالفعل رمز القسيمة '{code}' إلى سلتك."
+msgstr ""
 
 #: ecommerce/extensions/basket/views.py:480
 #, python-brace-format
 msgid "Coupon code '{code}' does not exist."
-msgstr "القسيمة رمز '{code}' غير موجودة."
+msgstr ""
 
 #: ecommerce/extensions/catalogue/models.py:21
 msgid "Last date/time on which this product can be purchased."
-msgstr "آخر تاريخ/توقيت يمكن شراء هذا المنتج فيه "
+msgstr ""
 
 #: ecommerce/extensions/dashboard/forms.py:7
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:48
@@ -603,37 +589,37 @@ msgstr "آخر تاريخ/توقيت يمكن شراء هذا المنتج في�
 #: ecommerce/templates/oscar/dashboard/refunds/refund_list.html:59
 #: ecommerce/templates/oscar/dashboard/users/detail.html:40
 msgid "Username"
-msgstr "اسم المستخدم"
+msgstr ""
 
 #: ecommerce/extensions/dashboard/forms.py:8
 #: ecommerce/templates/oscar/dashboard/orders/order_list.html:73
 #: ecommerce/templates/oscar/dashboard/refunds/refund_list.html:60
 #: ecommerce/templates/oscar/dashboard/users/detail.html:48
 msgid "Email"
-msgstr "البريد الإلكتروني"
+msgstr ""
 
 #: ecommerce/extensions/dashboard/orders/views.py:72
 #, python-brace-format
 msgid ""
 "{link_start}Refund #{refund_id}{link_end} created! Click "
 "{link_start}here{link_end} to view it."
-msgstr "أُنشِئَت عملية {link_start}استرداد المبلغ #{refund_id}{link_end}! يُرجى النقر {link_start}هنا{link_end} لاستعراض بيانات العملية."
+msgstr ""
 
 #: ecommerce/extensions/dashboard/orders/views.py:76
 msgid ""
 "A refund cannot be created for these lines. They may have already been "
 "refunded."
-msgstr "لا يمكن إنشاء عملية استرداد المبلغ لهذه الخطوط، ربما تكون المبالغ قد استُردَّت في وقتٍ سابق."
+msgstr ""
 
 #: ecommerce/extensions/dashboard/refunds/config.py:8
 msgid "Refunds Dashboard"
-msgstr "لوحة استرداد المبلغ"
+msgstr ""
 
 #: ecommerce/extensions/dashboard/refunds/forms.py:13
 #: ecommerce/templates/oscar/dashboard/partials/refund_table.html:9
 #: ecommerce/templates/oscar/dashboard/refunds/refund_list.html:55
 msgid "Refund ID"
-msgstr "رقم تعريف استرداد المبالغ"
+msgstr ""
 
 #: ecommerce/extensions/dashboard/refunds/forms.py:14
 #: ecommerce/extensions/refund/models.py:73
@@ -650,11 +636,11 @@ msgstr "رقم تعريف استرداد المبالغ"
 #: ecommerce/templates/oscar/dashboard/refunds/refund_list.html:58
 #: ecommerce/templates/oscar/dashboard/users/detail.html:142
 msgid "Status"
-msgstr "الحالة"
+msgstr ""
 
 #: ecommerce/extensions/dashboard/users/views.py:47
 msgid "Failed to retrieve enrollment data."
-msgstr "عذرًا، لقد فشلنا في استرجاع بيانات التسجيل."
+msgstr ""
 
 #: ecommerce/extensions/offer/models.py:189
 msgid "Course Catalog ID from the Discovery Service."
@@ -678,7 +664,7 @@ msgstr ""
 #: ecommerce/extensions/offer/utils.py:73
 #, python-brace-format
 msgid "${benefit_value}"
-msgstr "${benefit_value}"
+msgstr ""
 
 #. Translators: "Waffle" is the name of a third-party library. It should not
 #. be translated
@@ -693,41 +679,41 @@ msgstr ""
 #: ecommerce/extensions/order/models.py:24
 #: ecommerce/extensions/payment/models.py:16
 msgid "Payment Processor"
-msgstr "معالج الدفعات"
+msgstr ""
 
 #: ecommerce/extensions/partner/admin.py:27
 msgid "Click 'Save and Continue Editing' to add stock records"
-msgstr "انقر على ’حفظ ومتابعة التحرير‘ لإضافة سجّلات المخزون"
+msgstr ""
 
 #: ecommerce/extensions/partner/models.py:19
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:191
 #: ecommerce/templates/oscar/dashboard/orders/line_detail.html:73
 msgid "Partner"
-msgstr "الشريك"
+msgstr ""
 
 #: ecommerce/extensions/partner/models.py:20 ecommerce/settings/_oscar.py:215
 msgid "Partners"
-msgstr "الشركاء"
+msgstr ""
 
 #: ecommerce/extensions/payment/constants.py:9
 msgid "American Express"
-msgstr "American Express"
+msgstr ""
 
 #: ecommerce/extensions/payment/constants.py:14
 msgid "Discover"
-msgstr "استكشف"
+msgstr ""
 
 #: ecommerce/extensions/payment/constants.py:19
 msgid "MasterCard"
-msgstr "MasterCard"
+msgstr ""
 
 #: ecommerce/extensions/payment/constants.py:24
 msgid "Visa"
-msgstr "Visa"
+msgstr ""
 
 #: ecommerce/extensions/payment/exceptions.py:8
 msgid "We don't support the payment option you selected."
-msgstr "عذرًا، لا ندعم خيار الدفع الذي اخترته."
+msgstr ""
 
 #: ecommerce/extensions/payment/forms.py:26
 msgid "Choose country"
@@ -743,70 +729,70 @@ msgstr ""
 
 #: ecommerce/extensions/payment/forms.py:95
 msgid "First Name"
-msgstr "الاسم الأول"
+msgstr ""
 
 #: ecommerce/extensions/payment/forms.py:96
 msgid "Last Name"
-msgstr "الاسم الأخير"
+msgstr ""
 
 #: ecommerce/extensions/payment/forms.py:97
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:510
 msgid "Address"
-msgstr "العنوان"
+msgstr ""
 
 #: ecommerce/extensions/payment/forms.py:98
 msgid "Suite/Apartment Number"
-msgstr "رقم الجناح/الشقة"
+msgstr ""
 
 #: ecommerce/extensions/payment/forms.py:99
 msgid "City"
-msgstr "المدينة"
+msgstr ""
 
 #: ecommerce/extensions/payment/forms.py:102
 msgid "State/Province"
-msgstr "الولاية/المقاطعة"
+msgstr ""
 
 #: ecommerce/extensions/payment/forms.py:103
 msgid "Zip/Postal Code"
-msgstr "الرمز البريدي"
+msgstr ""
 
 #: ecommerce/extensions/payment/forms.py:104
 msgid "Country"
-msgstr "البلد"
+msgstr ""
 
 #: ecommerce/extensions/payment/forms.py:122
 #: ecommerce/extensions/payment/forms.py:124
 #: ecommerce/extensions/payment/forms.py:148
 msgid "This field is required."
-msgstr "هذا الحقل مطلوب."
+msgstr ""
 
 #: ecommerce/extensions/payment/forms.py:135
 #, python-brace-format
 msgid "{state} is not a valid state/province in {country}."
-msgstr "{state} ليست ولاية/محافظة صالحة في {country}."
+msgstr ""
 
 #: ecommerce/extensions/payment/forms.py:153
 msgid ""
 "Postal codes for the U.S. and Canada are limited to nine (9) characters."
-msgstr "تحدد الرموز البريدية للولايات المتحدة وكندا بعدد تسعة (9) أحرف."
+msgstr ""
 
 #: ecommerce/extensions/payment/models.py:17
 msgid "Transaction ID"
-msgstr "رقم تعريف العملية"
+msgstr ""
 
 #: ecommerce/extensions/payment/models.py:26
 msgid "Payment Processor Response"
-msgstr "رد معالج الدفعات"
+msgstr ""
 
 #: ecommerce/extensions/payment/models.py:27
 msgid "Payment Processor Responses"
-msgstr "ردود معالج الدفعات"
+msgstr ""
 
 #: ecommerce/extensions/payment/models.py:44
 msgid ""
 "Number of times to retry failing Paypal client actions (e.g., payment "
 "creation, payment execution)"
-msgstr "عدد مرات إعادة محاولة إجراءات دفع Paypal  غير الناحجة من جانب العميل (مثل إنشاء عملية دفع، تنفيذ عملية دفع)"
+msgstr ""
 
 #. Translators: This is a string placed in the middle of a truncated string
 #. to indicate that truncation has occurred. For example, if a title may only
@@ -814,18 +800,18 @@ msgstr "عدد مرات إعادة محاولة إجراءات دفع Paypal  غ
 #. truncated to "A Ve...itle".
 #: ecommerce/extensions/payment/utils.py:44
 msgid "..."
-msgstr "..."
+msgstr ""
 
 #: ecommerce/extensions/payment/views/cybersource.py:137
 msgid ""
 "There was a problem retrieving your basket. Refresh the page to try again."
-msgstr "عذراً، حدثت مشكلة في عملية استعادة سلتك. الرجاء تحديث الصفحة لإعادة المحاولة. "
+msgstr ""
 
 #: ecommerce/extensions/payment/views/cybersource.py:158
 msgid ""
 "Your basket may have been modified or already purchased. Refresh the page to"
 " try again."
-msgstr "قد يكون قد تم تعديل سلتك أو انتهت عملية الشراء بالفعل. الرجاء تحديث الصفحة لإعادة المحاولة. "
+msgstr ""
 
 #: ecommerce/extensions/payment/views/cybersource.py:363
 #, python-brace-format
@@ -837,33 +823,33 @@ msgstr ""
 
 #: ecommerce/extensions/refund/models.py:68
 msgid "Order"
-msgstr "الطلبية"
+msgstr ""
 
 #: ecommerce/extensions/refund/models.py:69
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:678
 msgid "User"
-msgstr "المستخدم"
+msgstr ""
 
 #: ecommerce/extensions/refund/models.py:70
 msgid "Total Credit (excl. tax)"
-msgstr "الرصيد الإجمالي (باستثناء الضريبة)"
+msgstr ""
 
 #: ecommerce/extensions/refund/models.py:71
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:198
 msgid "Currency"
-msgstr "العملة"
+msgstr ""
 
 #: ecommerce/extensions/refund/models.py:294
 msgid "Refund"
-msgstr "استرداد المبلغ"
+msgstr ""
 
 #: ecommerce/extensions/refund/models.py:297
 msgid "Order Line"
-msgstr "خط الطلبية"
+msgstr ""
 
 #: ecommerce/extensions/refund/models.py:299
 msgid "Line Credit (excl. tax)"
-msgstr "رصيد الخط (باستثناء الضريبة)"
+msgstr ""
 
 #: ecommerce/extensions/refund/models.py:300
 #: ecommerce/templates/edx/checkout/receipt.html:73
@@ -876,13 +862,13 @@ msgstr "رصيد الخط (باستثناء الضريبة)"
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:138
 #: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html:104
 msgid "Quantity"
-msgstr "الكمّية"
+msgstr ""
 
 #: ecommerce/extensions/voucher/tests/test_utils.py:176
 #: ecommerce/extensions/voucher/utils.py:69
 #: ecommerce/extensions/voucher/utils.py:273
 msgid "Redeemed"
-msgstr "تم الاسترداد"
+msgstr ""
 
 #: ecommerce/extensions/voucher/tests/test_utils.py:322
 #: ecommerce/extensions/voucher/tests/test_utils.py:327
@@ -893,14 +879,14 @@ msgstr "تم الاسترداد"
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:217
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:261
 msgid "Discount"
-msgstr "الخصومات"
+msgstr ""
 
 #: ecommerce/extensions/voucher/tests/test_utils.py:322
 #: ecommerce/extensions/voucher/tests/test_utils.py:327
 #: ecommerce/extensions/voucher/utils.py:88
 #: ecommerce/extensions/voucher/utils.py:132
 msgid "Enrollment"
-msgstr "تسجيل "
+msgstr ""
 
 #: ecommerce/extensions/voucher/tests/test_utils.py:323
 #: ecommerce/extensions/voucher/tests/test_utils.py:331
@@ -908,102 +894,102 @@ msgstr "تسجيل "
 #: ecommerce/extensions/voucher/utils.py:136
 #, python-brace-format
 msgid "{percentage} %"
-msgstr "النسبة {percentage} %"
+msgstr ""
 
 #: ecommerce/extensions/voucher/tests/test_utils.py:457
 #: ecommerce/extensions/voucher/utils.py:71
 msgid "Inactive"
-msgstr "غير نشط"
+msgstr ""
 
 #: ecommerce/extensions/voucher/utils.py:69
 #: ecommerce/templates/oscar/dashboard/users/detail.html:52
 msgid "Active"
-msgstr "فعّال"
+msgstr ""
 
 #: ecommerce/extensions/voucher/utils.py:214
 msgid "Code"
-msgstr "الرمز"
+msgstr ""
 
 #: ecommerce/extensions/voucher/utils.py:215
 msgid "Coupon Name"
-msgstr "اسم القسيمة"
+msgstr ""
 
 #: ecommerce/extensions/voucher/utils.py:216
 msgid "Maximum Coupon Usage"
-msgstr "أقصى استخدام للقسيمة"
+msgstr ""
 
 #: ecommerce/extensions/voucher/utils.py:217
 msgid "Redemption Count"
-msgstr "عدد عمليات الاسترداد"
+msgstr ""
 
 #: ecommerce/extensions/voucher/utils.py:218
 msgid "Coupon Type"
-msgstr "نوع القسيمة"
+msgstr ""
 
 #: ecommerce/extensions/voucher/utils.py:219
 msgid "URL"
-msgstr "الرابط"
+msgstr ""
 
 #: ecommerce/extensions/voucher/utils.py:220
 #: ecommerce/templates/oscar/dashboard/partials/enrollment_table.html:8
 msgid "Course ID"
-msgstr "رقم تعريف المساق "
+msgstr ""
 
 #: ecommerce/extensions/voucher/utils.py:222
 msgid "Catalog Query"
-msgstr "استفسار عن كتالوج"
+msgstr ""
 
 #: ecommerce/extensions/voucher/utils.py:223
 msgid "Course Seat Types"
-msgstr "أنواع المقاعد في الدورة التدريبية"
+msgstr ""
 
 #: ecommerce/extensions/voucher/utils.py:224
 msgid "Organization"
-msgstr "مؤسسة"
+msgstr ""
 
 #: ecommerce/extensions/voucher/utils.py:225
 msgid "Client"
-msgstr "عميل"
+msgstr ""
 
 #: ecommerce/extensions/voucher/utils.py:226
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:124
 msgid "Category"
-msgstr "فئة"
+msgstr ""
 
 #: ecommerce/extensions/voucher/utils.py:227
 msgid "Note"
-msgstr "ملاحظة"
+msgstr ""
 
 #: ecommerce/extensions/voucher/utils.py:228
 #: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:46
 #: ecommerce/templates/oscar/basket/partials/hosted_checkout_basket.html:62
 msgid "Price"
-msgstr "سعر"
+msgstr ""
 
 #: ecommerce/extensions/voucher/utils.py:229
 msgid "Invoiced Amount"
-msgstr "مبلغ الفاتورة"
+msgstr ""
 
 #: ecommerce/extensions/voucher/utils.py:230
 msgid "Discount Percentage"
-msgstr "نسبة الحسم"
+msgstr ""
 
 #: ecommerce/extensions/voucher/utils.py:231
 msgid "Discount Amount"
-msgstr "مبلغ الخصم"
+msgstr ""
 
 #: ecommerce/extensions/voucher/utils.py:233
 #: ecommerce/templates/oscar/dashboard/users/detail.html:138
 msgid "Order Number"
-msgstr "رقم الطلبية"
+msgstr ""
 
 #: ecommerce/extensions/voucher/utils.py:234
 msgid "Redeemed By Username"
-msgstr "تم الاسترداد باسم المستخدم"
+msgstr ""
 
 #: ecommerce/extensions/voucher/utils.py:235
 msgid "Redeemed For Course ID"
-msgstr "تم الاسترداد بمعرّف الدورة التدريبية"
+msgstr ""
 
 #: ecommerce/extensions/voucher/utils.py:236
 msgid "Redeemed For Course IDs"
@@ -1011,66 +997,66 @@ msgstr ""
 
 #: ecommerce/extensions/voucher/utils.py:237
 msgid "Created By"
-msgstr "جهة الإنشاء"
+msgstr ""
 
 #: ecommerce/extensions/voucher/utils.py:238
 msgid "Create Date"
-msgstr "تاريخ الإنشاء"
+msgstr ""
 
 #: ecommerce/extensions/voucher/utils.py:239
 msgid "Coupon Start Date"
-msgstr "تاريخ بدء الدورة التدريبية"
+msgstr ""
 
 #: ecommerce/extensions/voucher/utils.py:240
 msgid "Coupon Expiry Date"
-msgstr "تاريخ انتهاء الدورة التدريبية"
+msgstr ""
 
 #: ecommerce/extensions/voucher/utils.py:241
 msgid "Email Domains"
-msgstr "مجالات البريد الإلكتروني"
+msgstr ""
 
 #: ecommerce/extensions/voucher/utils.py:535
 #, python-brace-format
 msgid "Range for coupon [{coupon_id}]"
-msgstr "نطاق القسيمة [{coupon_id}]"
+msgstr ""
 
 #: ecommerce/extensions/voucher/views.py:29
 #, python-brace-format
 msgid "Coupon Report for {coupon_name}"
-msgstr "تقرير القسائم من أجل {coupon_name}"
+msgstr ""
 
 #: ecommerce/extensions/voucher/views.py:38
 msgid ""
 "Failed to find a matching stock record for coupon, report download canceled."
-msgstr "فشلت عملية العثور على سجلات الاملائمة لمخزون القسائم، وتم إلغاء تنزيل التقرير."
+msgstr ""
 
 #: ecommerce/invoice/models.py:11
 msgid "Not Paid"
-msgstr "غير مدفوع"
+msgstr ""
 
 #: ecommerce/invoice/models.py:12
 msgid "Paid"
-msgstr "مدفوع"
+msgstr ""
 
 #: ecommerce/invoice/models.py:16
 msgid "Prepaid"
-msgstr "مدفوع مسبقًا"
+msgstr ""
 
 #: ecommerce/invoice/models.py:17
 msgid "Postpaid"
-msgstr "مدفوع لاحقًا"
+msgstr ""
 
 #: ecommerce/invoice/models.py:18
 msgid "Not applicable"
-msgstr "غير قابل للتطبيق"
+msgstr ""
 
 #: ecommerce/invoice/models.py:22 ecommerce/programs/constants.py:18
 msgid "Percentage"
-msgstr "النسبة"
+msgstr ""
 
 #: ecommerce/invoice/models.py:23
 msgid "Fixed"
-msgstr "ثابت"
+msgstr ""
 
 #: ecommerce/programs/benefits.py:33
 #, python-brace-format
@@ -1155,7 +1141,7 @@ msgstr ""
 #: ecommerce/templates/oscar/dashboard/offers/summary.html:30
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:693
 msgid "Edit"
-msgstr "تعديل"
+msgstr ""
 
 #: ecommerce/programs/templates/programs/programoffer_form.html:34
 msgid "Create"
@@ -1173,7 +1159,7 @@ msgstr ""
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:321
 #: ecommerce/templates/oscar/dashboard/partials/refund_action_modal.html:20
 msgid "Cancel"
-msgstr "إلغاء"
+msgstr ""
 
 #: ecommerce/programs/templates/programs/programoffer_form.html:72
 #: ecommerce/programs/templates/programs/programoffer_list.html:58
@@ -1193,7 +1179,7 @@ msgstr ""
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:627
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:679
 msgid "Type"
-msgstr "النوع"
+msgstr ""
 
 #: ecommerce/programs/templates/programs/programoffer_list.html:32
 msgid "Value"
@@ -1217,31 +1203,31 @@ msgstr ""
 
 #: ecommerce/referrals/models.py:26
 msgid "Affiliate ID"
-msgstr "معرّف الجامعة التابعة"
+msgstr ""
 
 #: ecommerce/referrals/models.py:27
 msgid "UTM Source"
-msgstr "مصدر UTM"
+msgstr ""
 
 #: ecommerce/referrals/models.py:28
 msgid "UTM Medium"
-msgstr "وسيط UTM"
+msgstr ""
 
 #: ecommerce/referrals/models.py:29
 msgid "UTM Campaign"
-msgstr "حملة UTM"
+msgstr ""
 
 #: ecommerce/referrals/models.py:30
 msgid "UTM Term"
-msgstr "مدة UTM"
+msgstr ""
 
 #: ecommerce/referrals/models.py:31
 msgid "UTM Content"
-msgstr "محتوى UTM"
+msgstr ""
 
 #: ecommerce/referrals/models.py:32
 msgid "UTM Created At"
-msgstr "تم إنشاء UTM في"
+msgstr ""
 
 #: ecommerce/settings/_oscar.py:172
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:17
@@ -1254,38 +1240,38 @@ msgstr "تم إنشاء UTM في"
 #: ecommerce/templates/oscar/dashboard/refunds/refund_list.html:30
 #: ecommerce/templates/oscar/dashboard/users/detail.html:20
 msgid "Dashboard"
-msgstr "لوحة المعلومات"
+msgstr ""
 
 #: ecommerce/settings/_oscar.py:177
 msgid "Catalogue"
-msgstr "الكتالوج"
+msgstr ""
 
 #: ecommerce/settings/_oscar.py:181
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:11
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:20
 msgid "Products"
-msgstr "المنتجات"
+msgstr ""
 
 #: ecommerce/settings/_oscar.py:185
 msgid "Product Types"
-msgstr "أنواع المنتج"
+msgstr ""
 
 #: ecommerce/settings/_oscar.py:189
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:73
 msgid "Categories"
-msgstr "الفئات"
+msgstr ""
 
 #: ecommerce/settings/_oscar.py:193
 msgid "Ranges"
-msgstr "المجالات"
+msgstr ""
 
 #: ecommerce/settings/_oscar.py:197
 msgid "Low stock alerts"
-msgstr "تنبيهات قلّة المخزون"
+msgstr ""
 
 #: ecommerce/settings/_oscar.py:203
 msgid "Fulfillment"
-msgstr "الإنجاز"
+msgstr ""
 
 #: ecommerce/settings/_oscar.py:207
 #: ecommerce/templates/oscar/dashboard/index.html:33
@@ -1297,11 +1283,11 @@ msgstr "الإنجاز"
 #: ecommerce/templates/oscar/dashboard/users/detail.html:120
 #: ecommerce/templates/oscar/dashboard/users/detail.html:134
 msgid "Orders"
-msgstr "الطلبيات"
+msgstr ""
 
 #: ecommerce/settings/_oscar.py:211
 msgid "Statistics"
-msgstr "الإحصائيات"
+msgstr ""
 
 #: ecommerce/settings/_oscar.py:219
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:107
@@ -1312,29 +1298,29 @@ msgstr "الإحصائيات"
 #: ecommerce/templates/oscar/dashboard/refunds/refund_list.html:38
 #: ecommerce/templates/oscar/dashboard/users/detail.html:121
 msgid "Refunds"
-msgstr "استرداد المبالغ"
+msgstr ""
 
 #: ecommerce/settings/_oscar.py:225 ecommerce/settings/_oscar.py:229
 #: ecommerce/templates/oscar/dashboard/users/detail.html:23
 msgid "Customers"
-msgstr "العملاء"
+msgstr ""
 
 #: ecommerce/settings/_oscar.py:233
 msgid "Stock alert requests"
-msgstr "طلبات تنبيه بالنسبة للمخزون"
+msgstr ""
 
 #: ecommerce/settings/_oscar.py:239 ecommerce/settings/_oscar.py:243
 #: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:17
 msgid "Offers"
-msgstr "عروض"
+msgstr ""
 
 #: ecommerce/settings/_oscar.py:247
 msgid "Vouchers"
-msgstr "القسائم"
+msgstr ""
 
 #: ecommerce/settings/_oscar.py:253
 msgid "Reports"
-msgstr "التقارير"
+msgstr ""
 
 #: ecommerce/settings/base.py:84
 msgid "English"
@@ -1360,21 +1346,21 @@ msgstr ""
 #: ecommerce/templates/coupons/offer.html:5
 #: ecommerce/templates/edx/email_confirmation_required.html:4
 msgid "Redeem"
-msgstr "استرداد الخصم"
+msgstr ""
 
 #: ecommerce/templates/coupons/coupon_app.html:5
 msgid "Coupon Codes"
-msgstr "رموز القسائم"
+msgstr ""
 
 #: ecommerce/templates/coupons/offer.html:18
 msgid ""
 "Earn a verified certificate in one of our popular courses to advance your "
 "career, showcase your accomplishments or enhance your college application."
-msgstr "احصل على شهادة موثَّقة في إحدى دوراتنا التدريبية الشائعة لتطوير حياتك المهنية، واعرض إنجازاتك أو عزِّز من طلبك الجامعي."
+msgstr ""
 
 #: ecommerce/templates/coupons/offer.html:22
 msgid "Why buy a verified certificate?"
-msgstr "لماذا الحصول على شهادة موثّقة؟"
+msgstr ""
 
 #: ecommerce/templates/coupons/offer.html:27
 msgid ""
@@ -1383,58 +1369,58 @@ msgid ""
 "university's logo, as well as signatures from faculty members involved with "
 "the course. There is also a URL that can be used to verify the authenticity "
 "of the certificate."
-msgstr "شهادة موثَّقة (رقمية) تؤكد إنهاء المستخدم للدورة التدريبة في تاريخ محدد. وتتضمن الشهادة شعار edX وشعار الجامعة، فضلاً عن توقيعات من أعضاء الكلية المشاركين في الدورة التدريبية. ويوجد أيضًا رابط URL يُمكن استخدامه للتحقق من صحة الشهادة."
+msgstr ""
 
 #: ecommerce/templates/coupons/offer.html:30
 msgid ""
 "A verified certificate demonstrates to future employers that you've mastered"
 " the course material."
-msgstr "تبيّن الشهادة الموثَّقة لأصحاب العمل في المستقبل أنك قد اتقنت المادة العلمية للدورة التدريبية."
+msgstr ""
 
 #: ecommerce/templates/coupons/offer.html:32
 msgid ""
 "The certificate is officially signed and stamped by the institution that "
 "offers the course."
-msgstr "هذه الرسالة موقَّعة ومختومة رسميًا من المؤسسة التي تقدِّم الدورة التدريبية."
+msgstr ""
 
 #: ecommerce/templates/coupons/offer.html:34
 msgid ""
 "You're twelve times more likely to complete the course if you're working "
 "toward a verified certificate."
-msgstr "من المحتمل أن تُكمِل الدورة التدريبية بنسبة تصل إلى اثنتي عشرة مرة إذا كنت تسعى للحصول على شهادةٍ موثَّقة."
+msgstr ""
 
 #: ecommerce/templates/courses/course_app.html:5
 #: ecommerce/templates/edx/partials/_administration_menu.html:5
 msgid "Courses"
-msgstr "المساقات"
+msgstr ""
 
 #: ecommerce/templates/courses/course_app.html:28
 #, python-format
 msgid "%(platform_name)s Course Administration Tool"
-msgstr "أداة إدارة المساق الخاص بـ %(platform_name)s"
+msgstr ""
 
 #: ecommerce/templates/courses/menu_options.html:8
 msgid "Student Dashboard"
-msgstr "لوحة معلومات الطالب"
+msgstr ""
 
 #: ecommerce/templates/courses/menu_options.html:11
 msgid "Course Admin Tool"
-msgstr "أداة مشرف المساق"
+msgstr ""
 
 #: ecommerce/templates/courses/menu_options.html:14
 msgid "E-Commerce Dashboard"
-msgstr "لوحة معلومات التجارة الإلكترونية"
+msgstr ""
 
 #: ecommerce/templates/customer/email_base.html:178
 #, python-format
 msgid "Copyright © %(year)s %(platform_name)s. All rights reserved."
-msgstr "جميع حقوق النشر والطبع محفوظة للمنصّة %(platform_name)s © %(year)s"
+msgstr ""
 
 #: ecommerce/templates/customer/emails/commtype_course_purchased_body.html:9
 #: ecommerce/templates/customer/emails/commtype_course_purchased_body.txt:4
 #, python-format
 msgid "Hi %(full_name)s,"
-msgstr "مرحبًا %(full_name)s،"
+msgstr ""
 
 #: ecommerce/templates/customer/emails/commtype_course_purchased_body.html:11
 #: ecommerce/templates/customer/emails/commtype_course_purchased_body.txt:6
@@ -1443,7 +1429,7 @@ msgid ""
 "Thank you for purchasing %(course_title)s. The charge below will appear on "
 "your next credit or debit card statement with a company name of "
 "%(platform_name)s."
-msgstr "نشكرك للاشتراك وسداد قيمة المساقات %(course_title)s. ستظهر التعرفة المبيّنة أدناه مرفقةً باسم المنصّة  %(platform_name)s ضمن البيان التفصيلي القادم لبطائة الدائن/المدين خاصتّك."
+msgstr ""
 
 #: ecommerce/templates/customer/emails/commtype_course_purchased_body.html:13
 #: ecommerce/templates/customer/emails/commtype_course_purchased_body.txt:8
@@ -1451,7 +1437,7 @@ msgstr "نشكرك للاشتراك وسداد قيمة المساقات %(cours
 msgid ""
 "You can access your course and complete your verification (if required) on "
 "your %(platform_name)s dashboard. "
-msgstr "يمكنك الوصول إلى مساقك وإتمام عملية التوثيق (إذا كان مطلوبًا) باستخدام لوحة معلومات منصّة  %(platform_name)s الخاصّة بك."
+msgstr ""
 
 #: ecommerce/templates/customer/emails/commtype_course_purchased_body.html:14
 #: ecommerce/templates/customer/emails/commtype_course_purchased_body.txt:9
@@ -1459,53 +1445,53 @@ msgstr "يمكنك الوصول إلى مساقك وإتمام عملية الت
 msgid ""
 "To explore other great courses, visit the %(platform_name)s website. More "
 "courses are added every day!"
-msgstr "يُمكنك زيارة موقع %(platform_name)s لاستكشاف العديد من المساقات الرائعة الأخرى حيث تُضاف مساقات جديدة كل يوم."
+msgstr ""
 
 #: ecommerce/templates/customer/emails/commtype_course_purchased_body.html:16
 #: ecommerce/templates/customer/emails/commtype_course_purchased_body.txt:11
 msgid "Thank you. We hope you enjoy the course!"
-msgstr "نشكر مشاركتك ونأمل أن تستمتع بالمساق!"
+msgstr ""
 
 #: ecommerce/templates/customer/emails/commtype_course_purchased_body.html:17
 #, python-format
 msgid "%(platform_name)s team "
-msgstr "فريق %(platform_name)s"
+msgstr ""
 
 #: ecommerce/templates/customer/emails/commtype_course_purchased_body.html:27
 #, python-format
 msgid ""
 "You are receiving this email because you purchased a seat in the "
 "%(platform_name)s course %(course_title)s."
-msgstr "وصلتك رسالة البريد الالكتروني هذه نتيجة شرائك لمقعد في مساق %(course_title)s الذي تقدّمه %(platform_name)s."
+msgstr ""
 
 #: ecommerce/templates/customer/emails/commtype_course_purchased_body.txt:2
 msgid "Receipt Confirmation for: "
-msgstr "إقرار استلام من أجل:"
+msgstr ""
 
 #: ecommerce/templates/customer/emails/commtype_course_purchased_body.txt:13
 #, python-format
 msgid "%(platform_name)s team"
-msgstr "فريق %(platform_name)s"
+msgstr ""
 
 #: ecommerce/templates/customer/emails/commtype_course_purchased_body.txt:15
 msgid "The edX team"
-msgstr "فريق edX"
+msgstr ""
 
 #: ecommerce/templates/customer/emails/commtype_course_purchased_subject.txt:2
 msgid "Order Placed"
-msgstr "جرى وضع الطلب قيد التنفيذ."
+msgstr ""
 
 #: ecommerce/templates/customer/emails/commtype_credit_receipt_body.html:13
 msgid "Payment Confirmation"
-msgstr "تأكيد سداد دفعة"
+msgstr ""
 
 #: ecommerce/templates/customer/emails/commtype_credit_receipt_body.html:27
 msgid "Payment confirmation for:"
-msgstr "تأكيد سداد دفعة لـصالح:"
+msgstr ""
 
 #: ecommerce/templates/customer/emails/commtype_credit_receipt_body.html:43
 msgid "View Payment Information"
-msgstr "عرض معلومات الدفع"
+msgstr ""
 
 #: ecommerce/templates/customer/emails/commtype_credit_receipt_body.html:55
 #: ecommerce/templates/customer/emails/commtype_credit_receipt_body.txt:4
@@ -1513,7 +1499,7 @@ msgstr "عرض معلومات الدفع"
 #: ecommerce/templates/customer/emails/commtype_order_with_csv_body.txt:4
 #, python-format
 msgid "Dear %(full_name)s,"
-msgstr "مرحباً %(full_name)s،"
+msgstr ""
 
 #: ecommerce/templates/customer/emails/commtype_credit_receipt_body.html:59
 #, python-format
@@ -1521,7 +1507,7 @@ msgid ""
 "\n"
 "                            Thank you for purchasing %(credit_hours)s credit hours from %(credit_provider)s for %(course_title)s. A charge will appear on your credit or debit card statement with a company name of \"%(platform_name)s\".\n"
 "                        "
-msgstr "\nنشكرك لاشتراكك وسداد قيمة الساعات %(credit_hours)s المعتمدة المقدّمة من قبل  %(credit_provider)s للمساق %(course_title)s. ستظهر التعرفة المبيّنة أدناه مرفقةً باسم المنصّة %(platform_name)s، ضمن البيان التفصيلي القادم لبطاقة الدائن/ المدين خاصّتك."
+msgstr ""
 
 #: ecommerce/templates/customer/emails/commtype_credit_receipt_body.html:65
 #: ecommerce/templates/customer/emails/commtype_credit_receipt_body.txt:8
@@ -1531,7 +1517,7 @@ msgid ""
 "%(credit_provider)s website. For a link to request credit from "
 "%(credit_provider)s, or to see the status of your credit request, go to your"
 " %(platform_name)s dashboard."
-msgstr "للحصول على ساعة معتمدة لمساقك، يجب أن تطلب ساعة معتمدة من خلال موقع %(credit_provider)s الإلكتروني أيضًا. للحصول على رابط لطلب ساعة معتمدة من %(credit_provider)s، أو لمعرفة حالة طلب الساعة المعتمدة الذي قدّمته، قم بزيارة لوحة المعلومات الرئيسية الخاصة بك من المنصّة %(platform_name)s."
+msgstr ""
 
 #: ecommerce/templates/customer/emails/commtype_credit_receipt_body.html:69
 #: ecommerce/templates/customer/emails/commtype_credit_receipt_body.txt:10
@@ -1539,18 +1525,18 @@ msgstr "للحصول على ساعة معتمدة لمساقك، يجب أن ت�
 msgid ""
 "To explore other credit-eligible courses, visit the %(platform_name)s "
 "website. We add new courses frequently!"
-msgstr "يُمكنك زيارة موقع %(platform_name)s الإلكتروني للاطلاع على مساقات أخرى تستوجب حضور المادّة المعتمدة. نحن نضيف مساقات جديدة باستمرار!"
+msgstr ""
 
 #: ecommerce/templates/customer/emails/commtype_credit_receipt_body.html:72
 #: ecommerce/templates/customer/emails/commtype_credit_receipt_body.txt:15
 msgid "Thank you. We hope you enjoyed your course!"
-msgstr "نشكر مشاركتك ونأمل أن تستمتع بالمساق!"
+msgstr ""
 
 #: ecommerce/templates/customer/emails/commtype_credit_receipt_body.html:73
 #: ecommerce/templates/customer/emails/commtype_credit_receipt_body.txt:16
 #, python-format
 msgid "The %(platform_name)s team"
-msgstr "فريق %(platform_name)s"
+msgstr ""
 
 #: ecommerce/templates/customer/emails/commtype_credit_receipt_body.html:85
 #, python-format
@@ -1558,11 +1544,11 @@ msgid ""
 "\n"
 "                            You received this message because you purchased credit hours for %(course_title)s, an %(platform_name)s course.\n"
 "                        "
-msgstr "\nلقد تلقيت هذه الرسالة لأنك قد اشتريت ساعات معتمدة لمساق %(course_title)s، وهو مساق مقدّم من المنصّة %(platform_name)s."
+msgstr ""
 
 #: ecommerce/templates/customer/emails/commtype_credit_receipt_body.txt:2
 msgid "Payment confirmation for: "
-msgstr "تأكيد سداد دفعة لصالح:"
+msgstr ""
 
 #: ecommerce/templates/customer/emails/commtype_credit_receipt_body.txt:6
 #, python-format
@@ -1570,34 +1556,34 @@ msgid ""
 "Thank you for purchasing %(credit_hours)s credit hours from "
 "%(credit_provider)s for %(course_title)s. A charge will appear on your "
 "credit or debit card statement with a company name of \"%(platform_name)s\"."
-msgstr "نشكرك لاشتراكك وسداد قيمة الساعات %(credit_hours)s المعتمدة المقدّمة من قبل %(credit_provider)s لمادة المساق %(course_title)s. ستظهر التعرفة المبيّنة أدناه مرفقةً باسم المنصّة %(platform_name)s، ضمن البيان التفصيلي لبطاقة الدائن/ المدين خاصّتك."
+msgstr ""
 
 #: ecommerce/templates/customer/emails/commtype_credit_receipt_body.txt:12
 msgid "To view your payment information, visit the following website."
-msgstr "لعرض معلومات سداد الدفعة، يُرجى زيارة الموقع الإلكتروني التالي."
+msgstr ""
 
 #: ecommerce/templates/customer/emails/commtype_credit_receipt_body.txt:18
 #, python-format
 msgid ""
 "You received this message because you purchased credit hours for "
 "%(course_title)s, an %(platform_name)s course."
-msgstr "لقد وصلتك هذه الرسالة لأنك قد اشتريت ساعات معتمدة لمساق %(course_title)s، وهو مساق مقدّم من المنصّة %(platform_name)s."
+msgstr ""
 
 #: ecommerce/templates/customer/emails/commtype_credit_receipt_subject.txt:2
 msgid "Order Receipt"
-msgstr "إيصال الطلب"
+msgstr ""
 
 #: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html:13
 msgid "Order Confirmation"
-msgstr "تأكيد الطلب"
+msgstr ""
 
 #: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html:27
 msgid "Order confirmation for"
-msgstr "تأكيد الطلب لصالح:"
+msgstr ""
 
 #: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html:43
 msgid "View Order Information"
-msgstr "عرض معلومات الطلب"
+msgstr ""
 
 #: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html:55
 #, python-format
@@ -1605,29 +1591,29 @@ msgid ""
 "Thank you for purchasing access to %(course_name)s.\n"
 "                    Please click <a href=\"%(download_csv_link)s\">HERE</a> to download a CSV file with the enrollment codes for this course.\n"
 "                    Once you have the codes you can distribute them to your team. "
-msgstr "شكرًا لشرائك حق الدخول إلى %(course_name)s.\n                    يُرجى النقر فوق <a href=\"%(download_csv_link)s\">هنا</a> لتنزيل ملف CSV مع رموز التسجيل لهذه الدورة. وبمجرد أن يكون لديك الرموز، يمكنك توزيعها على فريقك."
+msgstr ""
 
 #: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html:58
 #, python-format
 msgid "To view your payment information, please visit %(receipt_page_url)s."
-msgstr "لعرض معلومات سداد الدفعة، يُرجى زيارة %(receipt_page_url)s."
+msgstr ""
 
 #: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html:59
 #: ecommerce/templates/customer/emails/commtype_order_with_csv_body.txt:8
 #, python-format
 msgid "To explore other courses, please visit %(lms_url)s."
-msgstr "لاستكشاف الدورات التدريبية الأخرى، يُرجى زيارة %(lms_url)s."
+msgstr ""
 
 #: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html:60
 #: ecommerce/templates/customer/emails/commtype_order_with_csv_body.txt:10
 msgid "Thank you,"
-msgstr "شكراً لك،"
+msgstr ""
 
 #: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html:61
 #: ecommerce/templates/customer/emails/commtype_order_with_csv_body.txt:11
 #, python-format
 msgid "The %(partner_name)s team"
-msgstr "فريق %(partner_name)s"
+msgstr ""
 
 #: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html:72
 #: ecommerce/templates/customer/emails/commtype_order_with_csv_body.txt:13
@@ -1636,11 +1622,11 @@ msgid ""
 "You received this message because you purchased enrollment codes for "
 "%(course_name)s on %(lms_url)s. If you have any questions, please visit "
 "%(contact_url)s."
-msgstr "لقد وصلتك هذه الرسالة لأنك قد اشتريت رموز التسجيل لأجل %(course_name)s على %(lms_url)s. إذا كان لديك أي أسئلة، فيُرجى زيارة %(contact_url)s."
+msgstr ""
 
 #: ecommerce/templates/customer/emails/commtype_order_with_csv_body.txt:2
 msgid "Order confirmation for: "
-msgstr "تأكيد الطلب لصالح:"
+msgstr ""
 
 #: ecommerce/templates/customer/emails/commtype_order_with_csv_body.txt:6
 #, python-format
@@ -1648,16 +1634,16 @@ msgid ""
 "Thank you for purchasing access to %(course_name)s. Please go to "
 "%(download_csv_link)s to download a CSV file with the enrollment codes for "
 "this course. Once you have the codes you can distribute them to your team. "
-msgstr "شكرًا لشرائك الدخول إلى %(course_name)s. يُرجى الذهاب إلى %(download_csv_link)s لتنزيل ملف CSV مع رموز التسجيل لهذه الدورة. وبمجرد أن يكون لديك الرموز، يمكنك توزيعها على فريقك."
+msgstr ""
 
 #: ecommerce/templates/customer/emails/commtype_order_with_csv_subject.txt:2
 #, python-format
 msgid "%(partner_name)s: Order Confirmation: [%(order_number)s]"
-msgstr "%(partner_name)s: تأكيد الطلب: [%(order_number)s]"
+msgstr ""
 
 #: ecommerce/templates/edx/base_menu.html:7
 msgid "Sign Out"
-msgstr "تسجيل الخروج"
+msgstr ""
 
 #: ecommerce/templates/edx/checkout/receipt.html:11
 #, python-format
@@ -1666,7 +1652,7 @@ msgstr ""
 
 #: ecommerce/templates/edx/checkout/receipt.html:30
 msgid "Thank you for your order!"
-msgstr "شكراً لطلبك!"
+msgstr ""
 
 #: ecommerce/templates/edx/checkout/receipt.html:39
 #, python-format
@@ -1678,43 +1664,43 @@ msgstr ""
 
 #: ecommerce/templates/edx/checkout/receipt.html:57
 msgid "Order Number:"
-msgstr "رقم الطلب:"
+msgstr ""
 
 #: ecommerce/templates/edx/checkout/receipt.html:60
 msgid "Payment Method:"
-msgstr "طريقة الدفع:"
+msgstr ""
 
 #: ecommerce/templates/edx/checkout/receipt.html:63
 msgid "Order Date:"
-msgstr "تاريخ الطلب:"
+msgstr ""
 
 #: ecommerce/templates/edx/checkout/receipt.html:69
 msgid "Order Information"
-msgstr "تفاصيل الطلب:"
+msgstr ""
 
 #: ecommerce/templates/edx/checkout/receipt.html:74
 #: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:61
 #: ecommerce/templates/oscar/dashboard/offers/summary.html:12
 msgid "Description"
-msgstr "الوصف"
+msgstr ""
 
 #: ecommerce/templates/edx/checkout/receipt.html:75
 #: ecommerce/templates/oscar/basket/partials/hosted_checkout_basket.html:38
 msgid "Item Price"
-msgstr "سعر العنصر"
+msgstr ""
 
 #: ecommerce/templates/edx/checkout/receipt.html:79
 #: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html:180
 msgid "Quantity:"
-msgstr "الكمّية:"
+msgstr ""
 
 #: ecommerce/templates/edx/checkout/receipt.html:81
 msgid "Description:"
-msgstr "وصف:"
+msgstr ""
 
 #: ecommerce/templates/edx/checkout/receipt.html:88
 msgid "Item Price:"
-msgstr "سعر الغرض:"
+msgstr ""
 
 #: ecommerce/templates/edx/checkout/receipt.html:94
 msgid "Subtotal"
@@ -1736,7 +1722,7 @@ msgstr ""
 
 #: ecommerce/templates/edx/checkout/receipt.html:146
 msgid "Get Your Course Credit"
-msgstr "أحصل على نقاط دورتك"
+msgstr ""
 
 #: ecommerce/templates/edx/checkout/receipt.html:148
 #, python-format
@@ -1749,22 +1735,22 @@ msgstr ""
 
 #: ecommerce/templates/edx/checkout/receipt.html:164
 msgid "Go to Dashboard"
-msgstr "الانتقال إلى اللوحة الرئيسية"
+msgstr ""
 
 #: ecommerce/templates/edx/checkout/receipt_not_found.html:6
 msgid "Order Not Found"
-msgstr "الطلب غير موجود"
+msgstr ""
 
 #: ecommerce/templates/edx/checkout/receipt_not_found.html:18
 #, python-format
 msgid " %(error_summary)s "
-msgstr "%(error_summary)s"
+msgstr ""
 
 #: ecommerce/templates/edx/checkout/receipt_not_found.html:22
 msgid ""
 "The specified order could not be located. Please ensure that the URL is "
 "correct, and try again."
-msgstr "لا يمكن العثور على الطلب المحدد. الرجاء التأكد من أن عنوان الموقع صحيح، وحاول مرة أخرى."
+msgstr ""
 
 #: ecommerce/templates/edx/checkout/receipt_not_found.html:31
 #, python-format
@@ -1773,19 +1759,19 @@ msgid ""
 "                You may also view your previous orders on the %(link_start)sAccount Settings%(link_end)s\n"
 "                page.\n"
 "              "
-msgstr "\nيمكنك أيضاً عرض طلباتك السابقة في صفحة %(link_start)sإعدادت الحساب%(link_end)s "
+msgstr ""
 
 #: ecommerce/templates/edx/credit/_provider_detail.html:8
 msgid "Select"
-msgstr "اختيار"
+msgstr ""
 
 #: ecommerce/templates/edx/credit/_provider_detail.html:16
 msgid "Credits: "
-msgstr "الساعات المعتمدة:"
+msgstr ""
 
 #: ecommerce/templates/edx/credit/_provider_detail.html:17
 msgid "Price: "
-msgstr "السعر:"
+msgstr ""
 
 #: ecommerce/templates/edx/credit/_provider_detail.html:26
 #, python-format
@@ -1793,7 +1779,7 @@ msgid ""
 "\n"
 "                    Learn more about %(display_name)s credit?\n"
 "                "
-msgstr "\nأتودّ معرفة المزيد عن ساعات %(display_name)s المعتمدة؟\n                "
+msgstr ""
 
 #: ecommerce/templates/edx/credit/_provider_detail.html:44
 #, python-format
@@ -1801,12 +1787,12 @@ msgid ""
 "\n"
 "                    Credit available until %(date)s\n"
 "                "
-msgstr "\nتتوفر الساعة المعتمدة لغاية %(date)s."
+msgstr ""
 
 #: ecommerce/templates/edx/credit/checkout.html:8
 #, python-format
 msgid "Purchase Credit for %(course_name)s"
-msgstr "اشتري ساعة معتمدة من أجل %(course_name)s"
+msgstr ""
 
 #: ecommerce/templates/edx/credit/checkout.html:25
 #, python-format
@@ -1814,7 +1800,7 @@ msgid ""
 "\n"
 "                                Purchase Credit for %(course_name)s\n"
 "                            "
-msgstr "\nاشتري ساعة معتمدة من أجل %(course_name)s"
+msgstr ""
 
 #: ecommerce/templates/edx/credit/checkout.html:30
 #, python-format
@@ -1824,54 +1810,54 @@ msgid ""
 "                        You must purchase your credit before %(date)s.\n"
 "                        Select one of the following institutions to purchase your credit.\n"
 "                    "
-msgstr "\nتهانينا! أنت مؤهّل لشراء ساعة مساق أكاديمي معتمدة لهذا المساق.\nيجب أن تشتري ساعة مساقك المعتمدة قبل %(date)s.\nاختر أحد المؤسسات التعليمية التالية لشراء مادتك المعتمدة."
+msgstr ""
 
 #: ecommerce/templates/edx/credit/checkout.html:46
 msgid "Price:"
-msgstr "السعر:"
+msgstr ""
 
 #: ecommerce/templates/edx/credit/checkout.html:50
 msgid "Discount:"
-msgstr "الخصم:"
+msgstr ""
 
 #: ecommerce/templates/edx/credit/checkout.html:55
 #: ecommerce/templates/oscar/basket/partials/hosted_checkout_basket.html:122
 msgid "Total:"
-msgstr "الإجمالي:"
+msgstr ""
 
 #: ecommerce/templates/edx/credit/checkout.html:84
 msgid "You deserve it."
-msgstr "أنت تستحقها."
+msgstr ""
 
 #: ecommerce/templates/edx/credit/checkout.html:87
 msgid ""
 "The hard work is over - you passed the course! Now get the credit you "
 "deserve to start or complete a degree."
-msgstr "انتهى الجزء المتعب - لقد أنهيت المساق بنجاح! والآن يمكنك الحصول على اعتماد المقرّر الذي تستحق للبدء أو إتمام الدرجة التي تعمل لنيلها."
+msgstr ""
 
 #: ecommerce/templates/edx/credit/checkout.html:93
 msgid "It's affordable."
-msgstr " إنه في متناول اليد."
+msgstr ""
 
 #: ecommerce/templates/edx/credit/checkout.html:96
 msgid ""
 "The credit offered through edX generally costs less than the same credit at "
 "most institutions."
-msgstr "بشكل عام، تقل تكلفة الساعة المعتمدة المتاحة من خلال منصّة edX عن تكلفة الساعة ذاتها في معظم المؤسّسات التعليمية."
+msgstr ""
 
 #: ecommerce/templates/edx/credit/checkout.html:102
 msgid "It opens doors."
-msgstr "ستفتح لك أبوابًا."
+msgstr ""
 
 #: ecommerce/templates/edx/credit/checkout.html:105
 msgid ""
 "Many of today's most in-demand jobs require a college degree. Start your "
 "path to success!"
-msgstr "يتطلّب العديد من أكثر الوظائف طلبًا حيازة مؤهلٍ جامعي. ابدأ مشوارك نحو النجاح!"
+msgstr ""
 
 #: ecommerce/templates/edx/credit/checkout.html:113
 msgid "Questions?"
-msgstr "ألديك أسئلة؟"
+msgstr ""
 
 #: ecommerce/templates/edx/credit/checkout.html:116
 #, python-format
@@ -1879,7 +1865,7 @@ msgid ""
 "\n"
 "                    Please read %(link_start)sour FAQs to view common questions about our certificates.%(link_end)s\n"
 "                "
-msgstr "\nيُرجى قراءة %(link_start)s الأسئلة المتكررة الخاصة بموقعنا للاطلاع على الأسئلة الشائعة حول شهاداتنا %(link_end)s"
+msgstr ""
 
 #: ecommerce/templates/edx/email_confirmation_required.html:16
 msgid "You are enrolling in: "
@@ -1904,28 +1890,28 @@ msgstr ""
 
 #: ecommerce/templates/edx/error.html:16
 msgid "If you need assistance, contact edX support."
-msgstr "يُرجى التواصل مع فريق دعم edX في حال احتجت للمساعدة"
+msgstr ""
 
 #: ecommerce/templates/edx/partials/_administration_menu.html:6
 msgid "Coupons"
-msgstr "القسائم"
+msgstr ""
 
 #: ecommerce/templates/edx/partials/_base_navbar.html:10
 msgid "Toggle navigation"
-msgstr "تبديل طريقة التصفّح"
+msgstr ""
 
 #: ecommerce/templates/edx/partials/_base_navbar.html:25
 msgid "Dashboard for:"
-msgstr "لوحة المعلومات لـ:"
+msgstr ""
 
 #: ecommerce/templates/edx/partials/_base_navbar.html:32
 msgid "Toggle Dropdown"
-msgstr "آلية تفعيل القائمة المنسدلة"
+msgstr ""
 
 #: ecommerce/templates/edx/partials/_base_navbar.html:40
 #: ecommerce/templates/edx/partials/_base_navbar.html:41
 msgid "Login"
-msgstr "تسجيل الدخول"
+msgstr ""
 
 #: ecommerce/templates/edx/partials/_staff_navbar.html:9
 msgid "E-Commerce Course Administration"
@@ -1941,7 +1927,7 @@ msgstr ""
 
 #: ecommerce/templates/oscar/basket/basket.html:37
 msgid "Your basket is empty"
-msgstr "سلتك فارغة"
+msgstr ""
 
 #: ecommerce/templates/oscar/basket/basket.html:46
 #, python-format
@@ -1954,11 +1940,11 @@ msgstr ""
 
 #: ecommerce/templates/oscar/basket/partials/add_voucher_form.html:11
 msgid "Applying..."
-msgstr "جارٍ التقديم..."
+msgstr ""
 
 #: ecommerce/templates/oscar/basket/partials/add_voucher_form.html:16
 msgid "Apply"
-msgstr "تقديم طلب"
+msgstr ""
 
 #: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:15
 msgid "in your cart"
@@ -1971,13 +1957,13 @@ msgstr ""
 #: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:35
 #: ecommerce/templates/oscar/basket/partials/hosted_checkout_basket.html:56
 msgid "Updating..."
-msgstr "جارٍ التحديث..."
+msgstr ""
 
 #: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:35
 #: ecommerce/templates/oscar/basket/partials/hosted_checkout_basket.html:56
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:516
 msgid "Update"
-msgstr "تحديث"
+msgstr ""
 
 #: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:44
 msgid "summary"
@@ -1985,7 +1971,7 @@ msgstr ""
 
 #: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:51
 msgid "Discounts applied"
-msgstr "الخصم الذي تم تطبيقه"
+msgstr ""
 
 #: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:62
 #, python-format
@@ -1993,11 +1979,11 @@ msgid ""
 "\n"
 "                                        Coupon %(voucher_code)s applied for %(total_benefit)s off\n"
 "                                    "
-msgstr "\nرمز القسيمة %(voucher_code)s التي تم استخدامها %(total_benefit)s ل"
+msgstr ""
 
 #: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:67
 msgid "Remove coupon"
-msgstr "ازالة القسيمة"
+msgstr ""
 
 #: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:76
 msgid "Add coupon code"
@@ -2009,7 +1995,7 @@ msgstr ""
 
 #: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:85
 msgid "TOTAL"
-msgstr "إجمالي"
+msgstr ""
 
 #: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:91
 msgid "order details"
@@ -2021,11 +2007,11 @@ msgstr ""
 
 #: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:108
 msgid "Pay with a Credit Card"
-msgstr "الدفع بواسطة بطاقة ائتمان"
+msgstr ""
 
 #: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:119
 msgid "Pay with PayPal"
-msgstr "الدفع بواسطة  PayPal"
+msgstr ""
 
 #: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:128
 msgid "Pay with Apple Pay"
@@ -2045,12 +2031,12 @@ msgstr ""
 
 #: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:156
 msgid "Card Number (required)"
-msgstr "رقم البطاقة (مطلوب)"
+msgstr ""
 
 #: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:156
 #: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:165
 msgid "Secure"
-msgstr "آمن"
+msgstr ""
 
 #: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:159
 msgid "Credit card icon"
@@ -2058,7 +2044,7 @@ msgstr ""
 
 #: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:164
 msgid "Security Code (required)"
-msgstr "رمز الأمان (مطلوب)"
+msgstr ""
 
 #: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:168
 msgid "Help with CVV"
@@ -2072,7 +2058,7 @@ msgstr ""
 
 #: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:178
 msgid "Expiration (required)"
-msgstr "انتهاء الصلاحية (مطلوب)"
+msgstr ""
 
 #: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:182
 msgid "Month"
@@ -2086,11 +2072,11 @@ msgstr ""
 #: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:219
 #: ecommerce/templates/oscar/basket/partials/hosted_checkout_basket.html:147
 msgid "Place Order"
-msgstr "وضع الطلب"
+msgstr ""
 
 #: ecommerce/templates/oscar/basket/partials/hosted_checkout_basket.html:22
 msgid "Earn a valuable certificate to showcase the skills you learn in"
-msgstr "احصل على شهادة قيّمة لعرض المهارات التي تعلّمتها في"
+msgstr ""
 
 #: ecommerce/templates/oscar/basket/partials/hosted_checkout_basket.html:68
 #, python-format
@@ -2098,7 +2084,7 @@ msgid ""
 "\n"
 "                                            %(benefit_value)s off\n"
 "                                        "
-msgstr "\n%(benefit_value)s ل"
+msgstr ""
 
 #: ecommerce/templates/oscar/basket/partials/hosted_checkout_basket.html:95
 #, python-format
@@ -2106,41 +2092,41 @@ msgid ""
 "\n"
 "                                        Coupon code %(voucher_code)s applied\n"
 "                                    "
-msgstr "\nرمز القسيمة %(voucher_code)s التي تم استخدامها"
+msgstr ""
 
 #: ecommerce/templates/oscar/basket/partials/hosted_checkout_basket.html:111
 msgid "Apply a coupon code"
-msgstr "تقديم رمز القسيمة"
+msgstr ""
 
 #: ecommerce/templates/oscar/basket/partials/hosted_checkout_basket.html:159
 msgid "Checkout"
-msgstr "الدفع"
+msgstr ""
 
 #. Translators: Do NOT translate the name PayPal.
 #: ecommerce/templates/oscar/basket/partials/hosted_checkout_basket.html:162
 msgid "Checkout with PayPal"
-msgstr "الدفع بواسطة PayPal"
+msgstr ""
 
 #: ecommerce/templates/oscar/basket/partials/hosted_checkout_basket.html:176
 msgid ""
 "<strong>Note:</strong> To earn a verified certificate, you must verify your "
 "identity with a <strong>webcam</strong> and a <strong>government-issued "
 "photo ID</strong>. "
-msgstr "<strong>ملاحظة:</strong> للحصول على شهادة موثقة، عليك أن تصادق على هويتك عبر  <strong>كاميرا الويب </strong> و <strong> وبطاقة هوية مع صورة الصادرة عن جهة حكومية</strong>."
+msgstr ""
 
 #: ecommerce/templates/oscar/basket/partials/hosted_checkout_basket.html:178
 msgid ""
 "<strong>Note:</strong> To complete your enrollment, select Checkout or "
 "Checkout with PayPal."
-msgstr "<strong>ملاحظة:</strong> من أجل اكمال التسجيل، اختر الدفع أو الدفع عبر PayPal."
+msgstr ""
 
 #: ecommerce/templates/oscar/basket/partials/hosted_checkout_basket.html:184
 msgid "Have questions?"
-msgstr "هل لديك أسئلة؟ "
+msgstr ""
 
 #: ecommerce/templates/oscar/basket/partials/hosted_checkout_basket.html:185
 msgid "Please read our FAQs to view common questions about our certificates."
-msgstr "يُرجى قراءة الأسئلة المتداولة لعرض الأسئلة الشائعة التي تخص شهاداتنا."
+msgstr ""
 
 #: ecommerce/templates/oscar/basket/partials/seat_type.html:5
 #, python-format
@@ -2152,7 +2138,7 @@ msgstr ""
 
 #: ecommerce/templates/oscar/checkout/_verification_data.html:4
 msgid "Verify Your Identity"
-msgstr "تأكيد هويتك"
+msgstr ""
 
 #: ecommerce/templates/oscar/checkout/_verification_data.html:6
 msgid ""
@@ -2163,16 +2149,16 @@ msgstr ""
 
 #: ecommerce/templates/oscar/checkout/_verification_data.html:21
 msgid "Verify Now"
-msgstr "التأكيد الآن"
+msgstr ""
 
 #: ecommerce/templates/oscar/checkout/_verification_data.html:30
 msgid "Go to my dashboard and verify later"
-msgstr "الذهاب إلى لوحة التحكم والتحقق في وقت لاحق"
+msgstr ""
 
 #: ecommerce/templates/oscar/checkout/cancel_checkout.html:6
 #: ecommerce/templates/oscar/checkout/cancel_checkout.html:15
 msgid "Checkout Cancelled"
-msgstr "أُلغي الدفع"
+msgstr ""
 
 #: ecommerce/templates/oscar/checkout/cancel_checkout.html:17
 #, python-format
@@ -2181,12 +2167,12 @@ msgid ""
 "            Your transaction has been cancelled. If you feel an error has occurred, contact %(start_link)s\n"
 "            %(payment_support_email)s%(end_link)s.\n"
 "            "
-msgstr "\n            لقد أُلغيت عمليتك. إذا كنت تشعر أن خطأ ما قد حدث، فيُرجى التواصل عن طريق %(start_link)s\n            %(payment_support_email)s%(end_link)s.\n            "
+msgstr ""
 
 #: ecommerce/templates/oscar/checkout/error.html:6
 #: ecommerce/templates/oscar/checkout/error.html:17
 msgid "Checkout Error"
-msgstr "خطأ أثناء عملية الدفع"
+msgstr ""
 
 #: ecommerce/templates/oscar/checkout/error.html:18
 msgid "An error has occurred with your payment."
@@ -2208,7 +2194,7 @@ msgstr ""
 #: ecommerce/templates/oscar/checkout/payment_error.html:6
 #: ecommerce/templates/oscar/checkout/payment_error.html:15
 msgid "Payment Failed"
-msgstr "عملية الدفع فشلت"
+msgstr ""
 
 #: ecommerce/templates/oscar/checkout/payment_error.html:17
 msgid ""
@@ -2257,26 +2243,26 @@ msgstr ""
 #: ecommerce/templates/oscar/dashboard/refunds/refund_list.html:62
 #: ecommerce/templates/oscar/dashboard/users/detail.html:99
 msgid "Actions"
-msgstr "الإجراءات"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/catalogue/category_row_actions.html:12
 msgid "Edit category"
-msgstr "تحرير الفئة"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/catalogue/category_row_actions.html:17
 msgid "Add child category"
-msgstr "إضافة فئة الطفل"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/catalogue/category_row_actions.html:22
 msgid "Edit children"
-msgstr "تحرير فئة الأطفال"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/catalogue/category_row_actions.html:27
 #: ecommerce/templates/oscar/dashboard/catalogue/product_row_actions.html:14
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:269
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:698
 msgid "Delete"
-msgstr "حذف"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/catalogue/messages/product_saved.html:10
 #, python-format
@@ -2284,7 +2270,7 @@ msgid ""
 "\n"
 "                    Created product variant '%(name)s'.\n"
 "                "
-msgstr "\n                    تم إنشاء متغيّر جديد '%(name)s'.\n                "
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/catalogue/messages/product_saved.html:14
 #, python-format
@@ -2292,7 +2278,7 @@ msgid ""
 "\n"
 "                    Created variant of '%(parent_name)s'.\n"
 "                "
-msgstr "\n                    تم إنشاء متغيّر '%(parent_name)s'.\n                "
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/catalogue/messages/product_saved.html:20
 #, python-format
@@ -2300,7 +2286,7 @@ msgid ""
 "\n"
 "                    Updated product variant '%(name)s'.\n"
 "                "
-msgstr "\n                    تم تحديث متغيّر المنتج '%(name)s'.\n                "
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/catalogue/messages/product_saved.html:24
 #, python-format
@@ -2308,7 +2294,7 @@ msgid ""
 "\n"
 "                    Updated a variant of '%(parent_name)s'.\n"
 "                "
-msgstr "\n                    تم إنشاء متغيّر لـ '%(parent_name)s'.\n                "
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/catalogue/messages/product_saved.html:33
 #, python-format
@@ -2316,7 +2302,7 @@ msgid ""
 "\n"
 "                Created product '%(name)s'.\n"
 "            "
-msgstr "\n                تم إنشاء منتج '%(name)s'.\n            "
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/catalogue/messages/product_saved.html:37
 #, python-format
@@ -2324,11 +2310,11 @@ msgid ""
 "\n"
 "                Updated product '%(name)s'.\n"
 "            "
-msgstr "\n                تم تحديث منتج '%(name)s'.\n            "
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/catalogue/messages/product_saved.html:48
 msgid "Edit again"
-msgstr "تحرير مرة أخرى"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:44
 #, python-format
@@ -2337,168 +2323,168 @@ msgid ""
 "                            You are currently editing a product variant of\n"
 "                            <a href=\"%(parent_url)s\">%(title)s</a>.\n"
 "                        "
-msgstr "\n                            أنت الآن تحرِّر متغيّر منتج لـ\n                            <a href=\"%(parent_url)s\">%(title)s</a>.\n                        "
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:59
 msgid "Sections"
-msgstr "أقسام"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:71
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:101
 #: ecommerce/templates/oscar/dashboard/orders/line_detail.html:33
 msgid "Product details"
-msgstr "تفاصيل المنتج"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:76
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:144
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:255
 msgid "Attributes"
-msgstr "الخصائص"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:79
 msgid "Images"
-msgstr "صور"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:82
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:186
 msgid "Stock and pricing"
-msgstr "المخزون والأسعار"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:85
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:246
 msgid "Variants"
-msgstr "المتغيّرات"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:88
 msgid "Upselling"
-msgstr "رفع المبيعات"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:146
 msgid "Product Type:"
-msgstr "نوع المنتج:"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:167
 msgid "Upload, change or remove images"
-msgstr "تحميل الصور أو تغييرها أو حذفها"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:192
 msgid "SKU"
-msgstr "وحدة إدارة المخزون"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:194
 msgid "Num in stock"
-msgstr "العدد في المخزون"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:195
 msgid "Num allocated"
-msgstr "العدد المخصَّص"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:196
 msgid "Low stock threshold"
-msgstr "حدّ قلة المخزون"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:199
 msgid "Cost price"
-msgstr "سعر التكلفة"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:200
 msgid "Price (excl tax)"
-msgstr "السعر (باستثناء الضريبة)"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:201
 msgid "Retail price"
-msgstr "سعر التجزئة"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:202
 msgid "Delete?"
-msgstr "حذف؟"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:247
 msgid "Adding..."
-msgstr "جارٍ الإضافة..."
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:249
 msgid "Add variant"
-msgstr "إضافة متغيّر"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:254
 msgid "Title"
-msgstr "عنوان"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:256
 msgid "Stock records"
-msgstr "سجلات المخزون"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:278
 msgid "This product does not have any variants."
-msgstr "لا يحتوي هذا المنتج على أي متغيّرات."
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:280
 msgid "One can't add variants to this product at this point."
-msgstr "لا يمكن لأحد إضافة متغيّرات إلى هذا المنتج في هذا الوقت."
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:282
 msgid "This is likely because this product still has stock records."
-msgstr "هذا محتمل لأن هذا المنتج لا يزال في سجلات المخزون."
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:298
 msgid "Recommended products"
-msgstr "المنتجات الموصى بها"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:323
 msgid "or"
-msgstr "أو"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:325
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:329
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:332
 msgid "Saving..."
-msgstr "جاري الحفظ..."
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:326
 msgid "Save and add another variant"
-msgstr "حفظ متغيّر آخر وإضافته"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:330
 msgid "Save and continue editing"
-msgstr "حفظ والاستمرار في التحرير"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:333
 msgid "Save"
-msgstr "حفظ"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/index.html:27
 msgid "Store Statistics (Last 24 Hours)"
-msgstr "احصائيات المتجر (آخر 24 ساعة)"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/index.html:34
 msgid "New Customers"
-msgstr "العملاء الجدد"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/index.html:35
 #: ecommerce/templates/oscar/dashboard/index.html:41
 msgid "Revenue"
-msgstr "إيرادات"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/index.html:36
 msgid "Average order cost"
-msgstr "متوسط تكلفة الطلب"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/index.html:37
 msgid "Average (paid) order cost"
-msgstr "متوسط تكلفة الطلب (المدفوعة)"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/index.html:67
 msgid "Products and vouchers"
-msgstr "المنتجات والقسائم"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/index.html:69
 msgid "Total products"
-msgstr "إجمالي المنتجات"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/index.html:73
 msgid "Active Vouchers"
-msgstr "القسائم النشطة"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:6
 #, python-format
@@ -2582,7 +2568,7 @@ msgstr ""
 #: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:99
 #: ecommerce/templates/oscar/dashboard/orders/order_list.html:68
 msgid "Order number"
-msgstr "رقم الطلبية"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:100
 msgid "Order date"
@@ -2591,7 +2577,7 @@ msgstr ""
 #: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:101
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:292
 msgid "Order total"
-msgstr "إجمالي الطلبية"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:102
 msgid "Cost"
@@ -2607,77 +2593,77 @@ msgid ""
 "\n"
 "        Order %(number)s - Line #%(id)s\n"
 "    "
-msgstr "\n        الطلب %(number)s - الخط #%(id)s\n    "
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/orders/line_detail.html:21
 #, python-format
 msgid "Line #%(id)s"
-msgstr "الخط #%(id)s"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/orders/line_detail.html:26
 #, python-format
 msgid "Order #%(number)s - Line #%(id)s"
-msgstr "الطلب #%(number)s - الخط #%(id)s"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/orders/line_detail.html:37
 msgctxt "Product title"
 msgid "Title"
-msgstr "العنوان"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/orders/line_detail.html:43
 msgid "Product Type"
-msgstr "نوع المنتج"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/orders/line_detail.html:46
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:140
 #: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html:106
 msgid "UPC"
-msgstr "الرمز العالمي للمنتج"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/orders/line_detail.html:53
 msgid "Product Options"
-msgstr "خيارات المنتج"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/orders/line_detail.html:66
 msgid "Partner details"
-msgstr "تفاصيل الشريك"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/orders/line_detail.html:76
 msgid "Partner SKU"
-msgstr "وحدة إدارة المخزون للشريك"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/orders/line_detail.html:82
 msgid "Shipping details"
-msgstr "تفاصيل الشحن"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/orders/line_detail.html:86
 msgid "Partner reference number"
-msgstr "الرقم المرجعي للشريك"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/orders/line_detail.html:89
 msgid "Partner notes"
-msgstr "ملاحظات الشريك"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/orders/line_detail.html:92
 msgid "Estimate dispatch date"
-msgstr "التاريخ التقديري للشحن"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/orders/line_detail.html:101
 msgid "Shipping status"
-msgstr "حالة الشحن"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/orders/line_detail.html:106
 msgid "State"
-msgstr "الحالة"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/orders/line_detail.html:118
 #: ecommerce/templates/oscar/dashboard/orders/line_detail.html:149
 msgid "No shipping events have occurred."
-msgstr "لم تحدث عمليات شحن"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/orders/line_detail.html:126
 msgid "Shipping events"
-msgstr "عمليات الشحن"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/orders/line_detail.html:131
 #: ecommerce/templates/oscar/dashboard/orders/line_detail.html:162
@@ -2685,7 +2671,7 @@ msgstr "عمليات الشحن"
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:450
 #: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html:164
 msgid "Event"
-msgstr "العملية"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/orders/line_detail.html:133
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:406
@@ -2694,7 +2680,7 @@ msgstr "العملية"
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:593
 #: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html:168
 msgid "Reference"
-msgstr "الرقم المرجعي"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/orders/line_detail.html:134
 #: ecommerce/templates/oscar/dashboard/orders/line_detail.html:164
@@ -2704,130 +2690,130 @@ msgstr "الرقم المرجعي"
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:677
 #: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html:163
 msgid "Date"
-msgstr "التاريخ"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/orders/line_detail.html:157
 msgid "Payment events"
-msgstr "عمليات الدفع"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/orders/line_detail.html:178
 msgid "No payment events have occurred."
-msgstr "لم تحدث عمليات شحن."
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:10
 #, python-format
 msgid "Order %(number)s"
-msgstr "الطلبية %(number)s"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:39
 #, python-format
 msgid "Order #%(number)s"
-msgstr "الطلبية #%(number)s"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:45
 #: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html:45
 msgid "Customer Information"
-msgstr "معلومات العميل"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:49
 #: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html:49
 #: ecommerce/templates/oscar/dashboard/users/detail.html:44
 msgid "Full name"
-msgstr "الاسم الكامل"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:50
 #: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html:50
 msgid "Email address"
-msgstr "عنوان البريد الإلكتروني"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:59
 #: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html:59
 msgid "Customer has deleted their account."
-msgstr "حذف العميل حسابه"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:67
 msgid "Order information"
-msgstr "معلومات الطلبية"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:69
 msgid "Order Total"
-msgstr "إجمالي الطلبية"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:70
 #: ecommerce/templates/oscar/dashboard/orders/order_list.html:74
 msgid "Date of purchase"
-msgstr "تاريخ الشراء"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:71
 msgid "Time of purchase"
-msgstr "وقت الشراء"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:85
 #: ecommerce/templates/oscar/dashboard/orders/order_list.html:108
 msgid "Retry Fulfillment"
-msgstr "إعادة محاولة الإنجاز"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:96
 msgid "Order Details"
-msgstr "تفاصيل الطلبية"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:104
 msgid "Order contents"
-msgstr "محتويات الطلبية"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:110
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:489
 msgid "Shipping"
-msgstr "الشحن"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:113
 msgid "Payment"
-msgstr "الدفع"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:116
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:621
 msgid "Discounts"
-msgstr "الخصومات"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:119
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:671
 msgid "Notes"
-msgstr "ملاحظات"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:127
 msgid "Items ordered"
-msgstr "العناصر المطلوبة"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:137
 msgid "Line ID"
-msgstr "الرقم التعريفي للخط"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:139
 #: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html:105
 msgid "Product"
-msgstr "المنتَج"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:142
 #: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html:108
 msgid "Supplier"
-msgstr "المزود"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:143
 #: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html:109
 msgid "Supplier SKU"
-msgstr "وحدة إدارة المخزون التابعة للمزوِّد"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:144
 msgid "Est. dispatch date"
-msgstr "التاريخ التقديري للشحن"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:145
 msgid "Price excl tax (before discounts)"
-msgstr "السعر باستثناء الضريبة (قبل الخصومات)"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:146
 msgid "Price inc tax (before discounts)"
-msgstr "السعر متضمّنًا الضريبة (قبل الخصومات)"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:188
 #: ecommerce/templates/oscar/dashboard/orders/order_list.html:105
@@ -2835,98 +2821,98 @@ msgstr "السعر متضمّنًا الضريبة (قبل الخصومات)"
 #: ecommerce/templates/oscar/dashboard/refunds/refund_list.html:90
 #: ecommerce/templates/oscar/dashboard/users/detail.html:155
 msgid "View"
-msgstr "استعراض"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:206
 msgid "Basket total (excl. discounts)"
-msgstr "إجمالي السلّة (باستثناء الخصومات)"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:227
 msgid "Basket total (inc. discounts)"
-msgstr "إجمالي السلّة (مع الخصومات)"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:237
 msgid "Basket total"
-msgstr "إجمالي السلّة"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:250
 msgid "Shipping total (excl. discounts)"
-msgstr "إجمالي الشحنة (باستثناء الخصومات)"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:271
 msgid "Shipping total (inc. discounts)"
-msgstr "إجمالي الشحنة (مع الخصومات)"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:281
 msgid "Shipping total"
-msgstr "إجمالي الشحنة"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:309
 msgid "With selected lines"
-msgstr "مع الخطوط المختارة"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:315
 msgid "Change line status to"
-msgstr "تغيير وضع الخط إلى"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:319
 #: ecommerce/templates/oscar/dashboard/orders/order_list.html:125
 msgid "choose new status"
-msgstr "اختيار حالة جديدة"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:331
 msgid "Create shipping event"
-msgstr "إنشاء عملية شحن"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:335
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:354
 msgid "choose event type"
-msgstr "اختيار نوع العملية"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:342
 msgid "with reference"
-msgstr "مع رقم مرجعي"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:350
 msgid "Create payment event"
-msgstr "إنشاء عملية دفع"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:361
 msgid "with amount"
-msgstr "بمبلغ"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:369
 msgid "Create refund"
-msgstr "إنشاء عملية استرداد المبلغ"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:373
 msgid "Go!"
-msgstr "ابدأ!"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:382
 #: ecommerce/templates/oscar/dashboard/orders/order_list.html:119
 msgid "Change order status"
-msgstr "غيِّر وضع الطلبية"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:386
 #: ecommerce/templates/oscar/dashboard/orders/order_list.html:134
 msgid "Change status"
-msgstr "غيِّر الوضع"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:388
 #: ecommerce/templates/oscar/dashboard/orders/order_list.html:136
 msgid "This order can't have its status changed."
-msgstr "لا يمكن تغيير وضع هذه الطلبية."
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:396
 msgid "Shipping Events"
-msgstr "عمليات الشحن"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:405
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:452
 #: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html:166
 msgid "Lines"
-msgstr "الخطوط"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:418
 #, python-format
@@ -2934,395 +2920,395 @@ msgid ""
 "\n"
 "                                              %(title)s (quantity %(event_qty)s/%(total_qty)s)\n"
 "                                            "
-msgstr "\n%(title)s (الكمية %(event_qty)s/%(total_qty)s)"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:432
 msgid "No shipping events."
-msgstr "لا توجد عمليات شحن"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:442
 #: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html:155
 msgid "Payment Events"
-msgstr "عمليات الدفع"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:451
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:592
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:632
 #: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html:165
 msgid "Amount"
-msgstr "القيمة"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:465
 #: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html:180
 msgid "Product:"
-msgstr "المنتَج:"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:465
 msgid "quantity"
-msgstr "الكمّية"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:477
 #: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html:192
 msgid "No payment events."
-msgstr "لا توجد عمليات دفع."
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:494
 msgid "Method name"
-msgstr "اسم الطريقة"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:498
 msgid "Method code"
-msgstr "رمز الطريقة"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:502
 msgid "Charge (incl tax)"
-msgstr "الرسم (متضمّنًا الضريبة)"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:506
 msgid "Charge (excl tax)"
-msgstr "الرسم (باستثناء الضريبة)"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:521
 msgid "Phone"
-msgstr "الهاتف"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:525
 msgid "Instructions"
-msgstr "التعليمات"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:538
 msgid "Billing address"
-msgstr "عنوان الفوترة"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:549
 msgid "Payment sources"
-msgstr "مصادر الدفع"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:555
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:591
 msgid "Source"
-msgstr "المصدر"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:556
 msgid "Allocation"
-msgstr "التوزيع"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:557
 msgid "Amount debited"
-msgstr "القيمة المَدينة"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:558
 msgid "Amount refunded"
-msgstr "القيمة المستردَّة"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:577
 msgid "No payment sources found for this order."
-msgstr "لم توجد أي مصادر دفع لهذه الطلبية."
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:586
 msgid "Transactions"
-msgstr "التعاملات"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:628
 msgid "Voucher"
-msgstr "القسيمة"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:629
 msgid "Offer name"
-msgstr "اسم العرض"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:630
 msgid "Frequency"
-msgstr "التواتر"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:631
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:680
 msgid "Message"
-msgstr "الرسالة"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:659
 msgid "No discounts were applied to this order."
-msgstr "لم تُطبَّق أي خصومات على هذه الطلبية."
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:681
 msgid "Admin"
-msgstr "المشرِف"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:706
 msgid "No notes available."
-msgstr "لا توجد ملاحظات"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:717
 msgid "Save note"
-msgstr "حفظ الملاحظات"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:718
 msgid "Notes are only editable for 5 minutes after being saved."
-msgstr "لا يمكن تعديل الملاحظات إلّا في غون 5 دقائق بعد حفظها."
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/orders/order_list.html:58
 msgid "Download selected orders as a CSV"
-msgstr "تنزيل الطلبيات المختارة بصيغة CSV"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/orders/order_list.html:60
 msgid "Download"
-msgstr "تنزيل"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/orders/order_list.html:69
 msgid "Total inc tax"
-msgstr "المجموع متضمّنًا الضريبة"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/orders/order_list.html:70
 msgid "Number of items"
-msgstr "عدد المواد"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/orders/order_list.html:92
 #: ecommerce/templates/oscar/dashboard/orders/order_list.html:99
 #: ecommerce/templates/oscar/dashboard/refunds/refund_list.html:78
 #: ecommerce/templates/oscar/dashboard/refunds/refund_list.html:85
 msgid "Deleted"
-msgstr "جرى الحذف"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/orders/order_list.html:149
 msgid "No orders found."
-msgstr "لم توجد أي طلبيات."
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/partials/enrollment_table.html:4
 #: ecommerce/templates/oscar/dashboard/users/detail.html:123
 msgid "Enrollments"
-msgstr "عمليات التسجيل "
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/partials/enrollment_table.html:9
 msgid "Mode"
-msgstr "الوضعية"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/partials/enrollment_table.html:10
 msgid "Active?"
-msgstr "فعّال؟"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/partials/enrollment_table.html:21
 msgid "No enrollments found."
-msgstr "عذرًا، لم نجد عمليات تسجيل!"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/partials/refund_action_modal.html:8
 msgid "Confirm Refund Processing"
-msgstr "تأكيد معالجة  عملية استرداد المبلغ"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/partials/refund_action_modal.html:11
 msgid ""
 "Are you sure you want to issue a full refund and revoke student's "
 "enrollment?"
-msgstr "هل أنت متأكّد من رغبتك في تنفيذ عملية استرداد المبلغ بأكمله وإلغاء تسجيل الطالب؟"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/partials/refund_action_modal.html:14
 msgid ""
 "Are you sure you want to issue a full refund without revoking student's "
 "enrollment?"
-msgstr "هل أنت متأكّد من رغبتك في تنفيذ عملية استرداد المبلغ بأكمله من دون إلغاء تسجيل الطالب؟"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/partials/refund_action_modal.html:17
 msgid "Are you sure you want to deny this refund request?"
-msgstr "هل أنت متأكّد من رغبتك في رفض طلب استرداد المبلغ هذا؟"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/partials/refund_action_modal.html:21
 msgid "Confirm"
-msgstr "تأكيد"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/partials/refund_buttons.html:5
 msgid "Approve Credit and Revoke"
-msgstr "الموافقة على المادة الدراسية والإلغاء"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/partials/refund_buttons.html:8
 msgid "Approve Credit Only"
-msgstr "الموافقة على المادة الدراسية فقط"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/partials/refund_buttons.html:14
 msgid "Deny"
-msgstr "رفض"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/partials/refund_table.html:10
 #: ecommerce/templates/oscar/dashboard/refunds/refund_list.html:57
 msgid "Number of Items"
-msgstr "عدد المواد"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/partials/refund_table.html:11
 #: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html:69
 #: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html:144
 #: ecommerce/templates/oscar/dashboard/refunds/refund_list.html:56
 msgid "Total Credit"
-msgstr "إجمالي الرصيد"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/partials/refund_table.html:12
 #: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html:70
 #: ecommerce/templates/oscar/dashboard/refunds/refund_list.html:61
 msgid "Created"
-msgstr "تمّ الإنشاء"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/partials/refund_table.html:31
 #: ecommerce/templates/oscar/dashboard/refunds/refund_list.html:104
 msgid "No refunds found."
-msgstr "لم توجد أي عمليات استرداد مبالغ."
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/partials/search_form.html:4
 #: ecommerce/templates/oscar/dashboard/partials/search_form.html:25
 #: ecommerce/templates/oscar/dashboard/partials/search_form.html:45
 msgid "Search"
-msgstr "البحث"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/partials/search_form.html:26
 #: ecommerce/templates/oscar/dashboard/partials/search_form.html:34
 msgid "Advanced Search"
-msgstr "بحث متقدّم"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/partials/search_form.html:44
 msgid "Close"
-msgstr "إغلاق"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/partials/search_form.html:45
 msgid "Searching..."
-msgstr "جاري البحث..."
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html:10
 #: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html:39
 #, python-format
 msgid "Refund #%(id)s"
-msgstr "الاسترداد #%(id)s"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html:67
 msgid "Refund Overview"
-msgstr "نظرة عامة على عملية استرداد المبلغ"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html:72
 msgid "Associated Order"
-msgstr "الطلبية ذات الصلة"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html:93
 msgid "Refund Items"
-msgstr "المواد المطلوب استرداد مبالغها"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html:102
 msgid "Refund Line ID"
-msgstr "رقم تعريف خط استرداد المبلغ"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html:103
 msgid "Associated Order Line"
-msgstr "خط الطلبية ذات الصلة"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html:110
 msgid "Credit (excl. tax)"
-msgstr "الرصيد (من دون ضريبة)"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html:167
 msgid "Processor"
-msgstr "المعالِج"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/users/detail.html:36
 msgid "General"
-msgstr "عام"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/users/detail.html:54
 msgid "Yes,No"
-msgstr "نعم، كلا"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/users/detail.html:58
 msgid "Superuser"
-msgstr "مستخدم رائع"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/users/detail.html:59
 #: ecommerce/templates/oscar/dashboard/users/detail.html:63
 msgid "True,False"
-msgstr "صح، خطأ"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/users/detail.html:62
 msgid "Staff"
-msgstr "الطاقم"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/users/detail.html:66
 msgid "Last login"
-msgstr "آخر تسجيل للدخول"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/users/detail.html:70
 msgid "Date joined"
-msgstr "تاريخ الانضمام"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/users/detail.html:76
 msgid "Products viewed"
-msgstr "المنتجات التي جرى استعراضها"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/users/detail.html:80
 msgid "Number of orders"
-msgstr "عدد الطلبيات"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/users/detail.html:84
 msgid "Number of ordered items"
-msgstr "عدد المواد المطلوبة"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/users/detail.html:88
 msgid "Total spent"
-msgstr "إجمالي الإنفاق"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/users/detail.html:94
 msgid "Reviews written"
-msgstr "التقييمات المكتوبة"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/users/detail.html:107
 msgid "Send password reset email"
-msgstr "أرسل بريد إلكتروني بتعليمات تغيير كلمة المرور"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/users/detail.html:125
 #: ecommerce/templates/oscar/dashboard/users/detail.html:186
 msgid "Addresses"
-msgstr "العناوين"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/users/detail.html:126
 #: ecommerce/templates/oscar/dashboard/users/detail.html:214
 msgid "Reviews"
-msgstr "المراجعات"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/users/detail.html:139
 msgid "Num items"
-msgstr "عدد المواد"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/users/detail.html:140
 msgid "Total value"
-msgstr "القيمة الإجمالية"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/users/detail.html:141
 msgid "Date placed"
-msgstr "تاريخ وضع الطلبية"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/users/detail.html:160
 msgid "This customer has not placed any orders yet."
-msgstr "لم يقدِّم هذا العميل أي طلبية بعد."
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/users/detail.html:205
 msgid "This customer has not saved any addresses."
-msgstr "لم يحفظ هذا العميل أي عناوين بعد."
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/users/detail.html:217
 msgid "Product ID"
-msgstr "الرقم التعريفي للمنتَج"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/users/detail.html:218
 msgid "Score"
-msgstr "النتيجة"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/users/detail.html:219
 msgctxt "Product review title"
 msgid "Title"
-msgstr "اللقب"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/users/detail.html:220
 msgid "Body"
-msgstr "محتوى الصفحة"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/users/detail.html:221
 msgid "Date created"
-msgstr "تاريخ الإنشاء"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/users/detail.html:234
 msgid "This customer has not written any reviews yet."
-msgstr "لم يكتب هذا العميل أي مراجعات بعد."
+msgstr ""
 
 #: ecommerce/urls.py:41
 msgid "E-Commerce Service Administration"
