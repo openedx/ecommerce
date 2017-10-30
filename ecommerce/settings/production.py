@@ -1,4 +1,5 @@
 """Production settings and globals."""
+import codecs
 from os import environ
 from urlparse import urljoin
 
@@ -46,7 +47,7 @@ ALLOWED_HOSTS = ['*']
 DICT_UPDATE_KEYS = ('JWT_AUTH',)
 
 CONFIG_FILE = get_env_setting('ECOMMERCE_CFG')
-with open(CONFIG_FILE, encoding='utf-8') as f:
+with codecs.open(CONFIG_FILE, encoding='utf-8') as f:
     config_from_yaml = yaml.load(f)
 
     # Remove the items that should be used to update dicts, and apply them separately rather
