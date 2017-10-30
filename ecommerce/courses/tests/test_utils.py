@@ -3,6 +3,7 @@ import hashlib
 import ddt
 import httpretty
 from django.core.cache import cache
+from opaque_keys.edx.keys import CourseKey
 from requests.exceptions import ConnectionError
 
 from ecommerce.core.constants import ENROLLMENT_CODE_SWITCH
@@ -15,6 +16,7 @@ from ecommerce.courses.utils import (
     get_course_info_from_catalog,
     mode_for_product
 )
+from ecommerce.entitlements.utils import create_or_update_course_entitlement
 from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
 from ecommerce.tests.testcases import TestCase
 
@@ -43,22 +45,36 @@ class UtilsTests(DiscoveryTestMixin, DiscoveryMockMixin, TestCase):
         if enrollment_code:  # We should only have enrollment codes for allowed types
             self.assertEqual(mode_for_product(enrollment_code), mode)
 
-    def test_get_course_info_from_catalog(self):
+    @ddt.data(
+        True, False
+    )
+    def test_get_course_run_info_from_catalog(self, course_run):
         """ Check to see if course info gets cached """
         self.mock_access_token_response()
-        course = CourseFactory()
-        self.mock_course_run_detail_endpoint(
-            course, discovery_api_url=self.site_configuration.discovery_api_url
-        )
+        if course_run:
+            course = CourseFactory()
+            product = course.create_or_update_seat('verified', None, 100, self.site.siteconfiguration.partner)
+            key = CourseKey.from_string(product.attr.course_key)
+            self.mock_course_run_detail_endpoint(
+                course, discovery_api_url=self.site_configuration.discovery_api_url
+            )
+        else:
+            product = create_or_update_course_entitlement(
+                'verified', 100, self.partner, 'foo-bar', 'Foo Bar Entitlement')
+            key = product.attr.UUID
+            self.mock_course_detail_endpoint(product, discovery_api_url=self.site_configuration.discovery_api_url)
 
-        cache_key = 'courses_api_detail_{}{}'.format(course.id, self.site.siteconfiguration.partner.short_code)
+        cache_key = 'courses_api_detail_{}{}'.format(key, self.site.siteconfiguration.partner.short_code)
         cache_key = hashlib.md5(cache_key).hexdigest()
         cached_course = cache.get(cache_key)
         self.assertIsNone(cached_course)
 
-        response = get_course_info_from_catalog(self.request.site, course)
+        response = get_course_info_from_catalog(self.request.site, product)
 
-        self.assertEqual(response['title'], course.name)
+        if course_run:
+            self.assertEqual(response['title'], course.name)
+        else:
+            self.assertEqual(response['title'], product.title)
 
         cached_course = cache.get(cache_key)
         self.assertEqual(cached_course, response)

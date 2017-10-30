@@ -238,7 +238,7 @@ class VoucherViewSet(NonDestroyableModelViewSet):
             course_id = product.course_id
             course = get_object_or_404(Course, id=course_id)
             stock_record = get_object_or_404(StockRecord, product__id=product.id)
-            course_info = get_course_info_from_catalog(request.site, course_id)
+            course_info = get_course_info_from_catalog(request.site, product)
 
             if course_info:
                 offers.append(self.get_course_offer_data(
