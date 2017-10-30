@@ -141,12 +141,12 @@ class BasketSummaryView(BasketView):
     Display basket contents and checkout/payment options.
     """
 
-    def _determine_seat_type(self, product):
+    def _determine_product_type(self, product):
         """
         Return the seat type based on the product class
         """
         seat_type = None
-        if product.is_seat_product:
+        if product.is_seat_product or product.is_course_entitlement_product:
             seat_type = get_certificate_type_display_value(product.attr.certificate_type)
         elif product.is_enrollment_code_product:
             seat_type = get_certificate_type_display_value(product.attr.seat_type)
@@ -169,7 +169,10 @@ class BasketSummaryView(BasketView):
         Returns:
             Dictionary containing course name, course key, course image URL and description.
         """
-        course_key = CourseKey.from_string(product.attr.course_key)
+        if product.is_seat_product:
+            course_key = CourseKey.from_string(product.attr.course_key)
+        else:
+            course_key = None
         course_name = None
         image_url = None
         short_description = None
@@ -177,7 +180,7 @@ class BasketSummaryView(BasketView):
         course_end = None
 
         try:
-            course = get_course_info_from_catalog(self.request.site, course_key)
+            course = get_course_info_from_catalog(self.request.site, product)
             try:
                 image_url = course['image']['src']
             except (KeyError, TypeError):
@@ -224,7 +227,7 @@ class BasketSummaryView(BasketView):
         switch_link_text = partner_sku = order_details_msg = None
 
         for line in lines:
-            if line.product.is_seat_product:
+            if line.product.is_seat_product or line.product.is_course_entitlement_product:
                 line_data = self._get_course_data(line.product)
                 certificate_type = line.product.attr.certificate_type
 
@@ -270,7 +273,7 @@ class BasketSummaryView(BasketView):
                 'benefit_value': benefit_value,
                 'enrollment_code': line.product.is_enrollment_code_product,
                 'line': line,
-                'seat_type': self._determine_seat_type(line.product),
+                'seat_type': self._determine_product_type(line.product),
             })
             lines_data.append(line_data)
 

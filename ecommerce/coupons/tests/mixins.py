@@ -55,6 +55,31 @@ class DiscoveryMockMixin(object):
             content_type='application/json'
         )
 
+    def mock_course_detail_endpoint(self, course, discovery_api_url, course_info=None):
+        """ Mocks the course detail endpoint on the Discovery API. """
+        if not course_info:
+            course_info = {
+                "course": "edX+DemoX",
+                "uuid": course.attr.UUID,
+                "title": course.title,
+                "short_description": 'Foo',
+                "image": {
+                    "src": "/path/to/image.jpg",
+                },
+            }
+
+        course_info_json = json.dumps(course_info)
+        course_url = '{}courses/{}/'.format(
+            discovery_api_url,
+            course.attr.UUID,
+        )
+
+        httpretty.register_uri(
+            httpretty.GET, course_url,
+            body=course_info_json,
+            content_type='application/json'
+        )
+
     def mock_catalog_detail_endpoint(
             self, discovery_api_url, catalog_id=1, expected_query="*:*", expected_status='200'
     ):

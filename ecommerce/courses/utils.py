@@ -4,6 +4,8 @@ from django.conf import settings
 from django.core.cache import cache
 from django.utils.translation import ugettext_lazy as _
 
+from opaque_keys.edx.keys import CourseKey
+
 from ecommerce.core.utils import traverse_pagination
 
 
@@ -22,17 +24,25 @@ def mode_for_product(product):
     return mode
 
 
-def get_course_info_from_catalog(site, course_key):
-    """ Get course information from Discovery Service and cache """
+def get_course_info_from_catalog(site, product):
+    """ Get course or course_run information from Discovery Service and cache """
+    if product.is_course_entitlement_product:
+        key = product.attr.UUID
+    else:
+        key = CourseKey.from_string(product.attr.course_key)
+
     api = site.siteconfiguration.discovery_api_client
     partner_short_code = site.siteconfiguration.partner.short_code
-    cache_key = 'courses_api_detail_{}{}'.format(course_key, partner_short_code)
+    cache_key = 'courses_api_detail_{}{}'.format(key, partner_short_code)
     cache_key = hashlib.md5(cache_key).hexdigest()
-    course_run = cache.get(cache_key)
-    if not course_run:  # pragma: no cover
-        course_run = api.course_runs(course_key).get(partner=partner_short_code)
-        cache.set(cache_key, course_run, settings.COURSES_API_CACHE_TIMEOUT)
-    return course_run
+    course = cache.get(cache_key)
+    if not course:  # pragma: no cover
+        if product.is_course_entitlement_product:
+            course = api.courses(key).get()
+        else:
+            course = api.course_runs(key).get(partner=partner_short_code)
+        cache.set(cache_key, course, settings.COURSES_API_CACHE_TIMEOUT)
+    return course
 
 
 def get_course_catalogs(site, resource_id=None):

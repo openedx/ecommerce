@@ -150,7 +150,8 @@ class UserAlreadyPlacedOrder(object):
         orders_lines = OrderLine.objects.filter(product=product, order__user=user)
         if orders_lines:
             for order_line in orders_lines:
-                if not UserAlreadyPlacedOrder.is_order_line_refunded(order_line):
+                if (not UserAlreadyPlacedOrder.is_order_line_refunded(order_line) and
+                        not order_line.product.is_course_entitlement_product):
                     return True
 
         return False
