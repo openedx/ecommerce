@@ -15,7 +15,7 @@ from rest_framework.documentation import include_docs_urls
 from ecommerce.core import views as core_views
 from ecommerce.core.url_utils import get_lms_dashboard_url
 from ecommerce.core.views import LogoutView
-from ecommerce.extensions.payment.views.cybersource import ApplePayMerchantDomainAssociationView
+from ecommerce.extensions.payment.views.apple_pay import ApplePayMerchantDomainAssociationView
 from ecommerce.extensions.urls import urlpatterns as extensions_patterns
 
 

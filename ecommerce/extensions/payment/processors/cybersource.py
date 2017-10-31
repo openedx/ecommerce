@@ -29,7 +29,11 @@ from ecommerce.extensions.payment.exceptions import (
     ProcessorMisconfiguredError
 )
 from ecommerce.extensions.payment.helpers import sign
-from ecommerce.extensions.payment.processors import BaseClientSidePaymentProcessor, HandledProcessorResponse
+from ecommerce.extensions.payment.processors import (
+    ApplePayMixin,
+    BaseClientSidePaymentProcessor,
+    HandledProcessorResponse
+)
 from ecommerce.extensions.payment.utils import clean_field_value
 
 logger = logging.getLogger(__name__)
@@ -37,13 +41,14 @@ logger = logging.getLogger(__name__)
 OrderNumberGenerator = get_class('order.utils', 'OrderNumberGenerator')
 
 
-class Cybersource(BaseClientSidePaymentProcessor):
+class Cybersource(ApplePayMixin, BaseClientSidePaymentProcessor):
     """
     CyberSource Secure Acceptance Web/Mobile (February 2015)
 
     For reference, see
     http://apps.cybersource.com/library/documentation/dev_guides/Secure_Acceptance_WM/Secure_Acceptance_WM.pdf.
     """
+
     NAME = 'cybersource'
     PCI_FIELDS = ('card_cvn', 'card_expiry_date', 'card_number', 'card_type',)
 
@@ -87,8 +92,6 @@ class Cybersource(BaseClientSidePaymentProcessor):
         # Apple Pay configuration
         self.apple_pay_enabled = self.site.siteconfiguration.enable_apple_pay
         self.apple_pay_merchant_identifier = configuration.get('apple_pay_merchant_identifier', '')
-        self.apple_pay_merchant_id_domain_association = configuration.get(
-            'apple_pay_merchant_id_domain_association', '').strip()
         self.apple_pay_merchant_id_certificate_path = configuration.get('apple_pay_merchant_id_certificate_path', '')
         self.apple_pay_country_code = configuration.get('apple_pay_country_code', '')
 
