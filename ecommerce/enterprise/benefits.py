@@ -16,7 +16,9 @@ class EnterprisePercentageDiscountBenefit(BenefitWithoutRangeMixin, PercentageBe
 
     @property
     def name(self):
-        return _('{value}% enterprise discount').format(value=self.value)
+        # NOTE: We are not using str.format() because gettext incorrectly parses the string,
+        # resulting in translation compilation errors.
+        return _('%d%% enterprise discount') % self.value
 
 
 class EnterpriseAbsoluteDiscountBenefit(BenefitWithoutRangeMixin, AbsoluteBenefitMixin, AbsoluteDiscountBenefit):
