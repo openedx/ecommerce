@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-10-12 20:55+0000\n"
+"POT-Creation-Date: 2017-10-30 22:36-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -441,6 +441,181 @@ msgstr ""
 "Àn érrör häs öççürréd. Wé çöüld nöt çönfïrm thät thé ïnstïtütïön ýöü "
 "séléçtéd öfférs thïs çöürsé çrédït. Trý thé tränsäçtïön ägäïn. Ⱡ#"
 
+#: ecommerce/enterprise/benefits.py
+#, python-format
+msgid "%d%% enterprise discount"
+msgstr "%d%% éntérprïsé dïsçöünt Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕ#"
+
+#: ecommerce/enterprise/benefits.py
+#, python-brace-format
+msgid "{value} fixed-price enterprise discount"
+msgstr ""
+"{value} fïxéd-prïçé éntérprïsé dïsçöünt Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
+"¢σηѕє¢тєт#"
+
+#: ecommerce/enterprise/constants.py ecommerce/invoice/models.py
+#: ecommerce/programs/constants.py
+msgid "Percentage"
+msgstr "Pérçéntägé Ⱡ'σяєм ιρѕυм ∂σłσ#"
+
+#: ecommerce/enterprise/constants.py ecommerce/programs/constants.py
+msgid "Absolute"
+msgstr "Àßsölüté Ⱡ'σяєм ιρѕυм ∂#"
+
+#: ecommerce/enterprise/forms.py
+#: ecommerce/enterprise/templates/enterprise/enterpriseoffer_list.html
+msgid "Enterprise Customer UUID"
+msgstr "Éntérprïsé Çüstömér ÛÛÌD Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢ση#"
+
+#: ecommerce/enterprise/forms.py
+#: ecommerce/enterprise/templates/enterprise/enterpriseoffer_list.html
+msgid "Enterprise Customer Catalog UUID"
+msgstr ""
+"Éntérprïsé Çüstömér Çätälög ÛÛÌD Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тє#"
+
+#: ecommerce/enterprise/forms.py ecommerce/programs/forms.py
+msgid "Discount Type"
+msgstr "Dïsçöünt Týpé Ⱡ'σяєм ιρѕυм ∂σłσя ѕι#"
+
+#: ecommerce/enterprise/forms.py ecommerce/programs/forms.py
+msgid "Discount Value"
+msgstr "Dïsçöünt Välüé Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт#"
+
+#: ecommerce/enterprise/forms.py ecommerce/programs/forms.py
+msgid "Start Date"
+msgstr "Stärt Däté Ⱡ'σяєм ιρѕυм ∂σłσ#"
+
+#: ecommerce/enterprise/forms.py ecommerce/programs/forms.py
+msgid "End Date"
+msgstr "Énd Däté Ⱡ'σяєм ιρѕυм ∂#"
+
+#: ecommerce/enterprise/forms.py
+msgid "An offer already exists for this Enterprise & Catalog combination."
+msgstr ""
+"Àn öffér älréädý éxïsts för thïs Éntérprïsé & Çätälög çömßïnätïön. Ⱡ'σяєм "
+"ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя #"
+
+#: ecommerce/enterprise/forms.py ecommerce/programs/forms.py
+msgid "Percentage discounts cannot be greater than 100%."
+msgstr ""
+"Pérçéntägé dïsçöünts çännöt ßé gréätér thän 100%. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт "
+"αмєт, ¢σηѕє¢тєтυя α#"
+
+#: ecommerce/enterprise/forms.py ecommerce/programs/forms.py
+msgid "A start date must be specified when specifying an end date."
+msgstr ""
+"À stärt däté müst ßé spéçïfïéd whén spéçïfýïng än énd däté. Ⱡ'σяєм ιρѕυм "
+"∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя α#"
+
+#: ecommerce/enterprise/forms.py ecommerce/programs/forms.py
+msgid "The start date must occur before the end date."
+msgstr ""
+"Thé stärt däté müst öççür ßéföré thé énd däté. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
+"¢σηѕє¢тєтυя α#"
+
+#: ecommerce/enterprise/forms.py
+#, python-brace-format
+msgid "Discount provided by {enterprise_customer_name}."
+msgstr ""
+"Dïsçöünt prövïdéd ßý {enterprise_customer_name}. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт "
+"αмєт, ¢σηѕ#"
+
+#: ecommerce/enterprise/templates/enterprise/enterpriseoffer_form.html
+#, python-format
+msgid "Edit Enterprise Offer: %(enterprise_customer_name)s"
+msgstr ""
+"Édït Éntérprïsé Öffér: %(enterprise_customer_name)s Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт "
+"αмєт, ¢σηѕ#"
+
+#: ecommerce/enterprise/templates/enterprise/enterpriseoffer_form.html
+#: ecommerce/enterprise/templates/enterprise/enterpriseoffer_form.html
+#: ecommerce/enterprise/templates/enterprise/enterpriseoffer_form.html
+#: ecommerce/enterprise/templates/enterprise/enterpriseoffer_list.html
+msgid "Create Enterprise Offer"
+msgstr "Çréäté Éntérprïsé Öffér Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σ#"
+
+#: ecommerce/enterprise/templates/enterprise/enterpriseoffer_form.html
+#: ecommerce/enterprise/templates/enterprise/enterpriseoffer_list.html
+#: ecommerce/enterprise/templates/enterprise/enterpriseoffer_list.html
+#: ecommerce/templates/edx/partials/_administration_menu.html
+msgid "Enterprise Offers"
+msgstr "Éntérprïsé Öfférs Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмє#"
+
+#: ecommerce/enterprise/templates/enterprise/enterpriseoffer_form.html
+#: ecommerce/programs/templates/programs/programoffer_form.html
+#: ecommerce/templates/oscar/dashboard/catalogue/product_row_actions.html
+#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html
+#: ecommerce/templates/oscar/dashboard/offers/offer_detail.html
+#: ecommerce/templates/oscar/dashboard/offers/offer_detail.html
+#: ecommerce/templates/oscar/dashboard/offers/offer_detail.html
+#: ecommerce/templates/oscar/dashboard/offers/offer_detail.html
+#: ecommerce/templates/oscar/dashboard/offers/summary.html
+#: ecommerce/templates/oscar/dashboard/offers/summary.html
+#: ecommerce/templates/oscar/dashboard/offers/summary.html
+#: ecommerce/templates/oscar/dashboard/offers/summary.html
+#: ecommerce/templates/oscar/dashboard/orders/order_detail.html
+msgid "Edit"
+msgstr "Édït Ⱡ'σяєм ι#"
+
+#: ecommerce/enterprise/templates/enterprise/enterpriseoffer_form.html
+#: ecommerce/programs/templates/programs/programoffer_form.html
+msgid "Create"
+msgstr "Çréäté Ⱡ'σяєм ιρѕυ#"
+
+#: ecommerce/enterprise/templates/enterprise/enterpriseoffer_form.html
+msgid "Edit Enterprise Offer"
+msgstr "Édït Éntérprïsé Öffér Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, #"
+
+#: ecommerce/enterprise/templates/enterprise/enterpriseoffer_form.html
+#: ecommerce/programs/templates/programs/programoffer_form.html
+msgid "Save Changes"
+msgstr "Sävé Çhängés Ⱡ'σяєм ιρѕυм ∂σłσя ѕ#"
+
+#: ecommerce/enterprise/templates/enterprise/enterpriseoffer_form.html
+#: ecommerce/programs/templates/programs/programoffer_form.html
+#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html
+#: ecommerce/templates/oscar/dashboard/partials/refund_action_modal.html
+msgid "Cancel"
+msgstr "Çänçél Ⱡ'σяєм ιρѕυ#"
+
+#: ecommerce/enterprise/templates/enterprise/enterpriseoffer_form.html
+#: ecommerce/enterprise/templates/enterprise/enterpriseoffer_list.html
+#, python-format
+msgid "%(platform_name)s Enterprise Offer Administration Tool"
+msgstr ""
+"%(platform_name)s Éntérprïsé Öffér Àdmïnïsträtïön Tööl Ⱡ'σяєм ιρѕυм ∂σłσя "
+"ѕιт αмєт, ¢σηѕє¢тєтυя#"
+
+#: ecommerce/enterprise/templates/enterprise/enterpriseoffer_list.html
+msgid "Current enterprise offers"
+msgstr "Çürrént éntérprïsé öfférs Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕ#"
+
+#: ecommerce/enterprise/templates/enterprise/enterpriseoffer_list.html
+msgid "Enterprise Customer Name"
+msgstr "Éntérprïsé Çüstömér Nämé Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢ση#"
+
+#: ecommerce/enterprise/templates/enterprise/enterpriseoffer_list.html
+#: ecommerce/programs/templates/programs/programoffer_list.html
+#: ecommerce/templates/oscar/dashboard/orders/order_detail.html
+#: ecommerce/templates/oscar/dashboard/orders/order_detail.html
+msgid "Type"
+msgstr "Týpé Ⱡ'σяєм ι#"
+
+#: ecommerce/enterprise/templates/enterprise/enterpriseoffer_list.html
+#: ecommerce/programs/templates/programs/programoffer_list.html
+msgid "Value"
+msgstr "Välüé Ⱡ'σяєм ιρѕ#"
+
+#: ecommerce/enterprise/templates/enterprise/enterpriseoffer_list.html
+#: ecommerce/programs/templates/programs/programoffer_list.html
+msgid "Start"
+msgstr "Stärt Ⱡ'σяєм ιρѕ#"
+
+#: ecommerce/enterprise/templates/enterprise/enterpriseoffer_list.html
+#: ecommerce/programs/templates/programs/programoffer_list.html
+msgid "End"
+msgstr "Énd Ⱡ'σяєм#"
+
 #: ecommerce/enterprise/utils.py
 #, python-brace-format
 msgid "SKU {sku} does not exist."
@@ -478,6 +653,14 @@ msgid "Enrollment in {course_name} was not complete."
 msgstr ""
 "Énröllmént ïn {course_name} wäs nöt çömplété. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
 "¢σηѕє¢тєт#"
+
+#: ecommerce/enterprise/views.py
+msgid "Enterprise offer updated!"
+msgstr "Éntérprïsé öffér üpdätéd! Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕ#"
+
+#: ecommerce/enterprise/views.py
+msgid "Enterprise offer created!"
+msgstr "Éntérprïsé öffér çréätéd! Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕ#"
 
 #: ecommerce/extensions/api/exceptions.py
 msgid "You can't check out with an empty basket."
@@ -800,6 +983,18 @@ msgid "UUID for an EnterpriseCustomer from the Enterprise Service."
 msgstr ""
 "ÛÛÌD för än ÉntérprïséÇüstömér fröm thé Éntérprïsé Sérvïçé. Ⱡ'σяєм ιρѕυм "
 "∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя α#"
+
+#: ecommerce/extensions/offer/models.py
+msgid "EnterpriseCustomer UUID"
+msgstr "ÉntérprïséÇüstömér ÛÛÌD Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σ#"
+
+#: ecommerce/extensions/offer/models.py
+msgid "EnterpriseCustomer Name"
+msgstr "ÉntérprïséÇüstömér Nämé Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σ#"
+
+#: ecommerce/extensions/offer/models.py
+msgid "EnterpriseCustomerCatalog UUID"
+msgstr "ÉntérprïséÇüstömérÇätälög ÛÛÌD Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢т#"
 
 #: ecommerce/extensions/offer/models.py ecommerce/extensions/voucher/utils.py
 #: ecommerce/programs/forms.py
@@ -1227,10 +1422,6 @@ msgstr "Pöstpäïd Ⱡ'σяєм ιρѕυм ∂#"
 msgid "Not applicable"
 msgstr "Nöt äpplïçäßlé Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт#"
 
-#: ecommerce/invoice/models.py ecommerce/programs/constants.py
-msgid "Percentage"
-msgstr "Pérçéntägé Ⱡ'σяєм ιρѕυм ∂σłσ#"
-
 #: ecommerce/invoice/models.py
 msgid "Fixed"
 msgstr "Fïxéd Ⱡ'σяєм ιρѕ#"
@@ -1246,49 +1437,11 @@ msgid "{value} fixed-price program discount"
 msgstr ""
 "{value} fïxéd-prïçé prögräm dïsçöünt Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тє#"
 
-#: ecommerce/programs/constants.py
-msgid "Absolute"
-msgstr "Àßsölüté Ⱡ'σяєм ιρѕυм ∂#"
-
-#: ecommerce/programs/forms.py
-msgid "Discount Type"
-msgstr "Dïsçöünt Týpé Ⱡ'σяєм ιρѕυм ∂σłσя ѕι#"
-
-#: ecommerce/programs/forms.py
-msgid "Discount Value"
-msgstr "Dïsçöünt Välüé Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт#"
-
-#: ecommerce/programs/forms.py
-msgid "Start Date"
-msgstr "Stärt Däté Ⱡ'σяєм ιρѕυм ∂σłσ#"
-
-#: ecommerce/programs/forms.py
-msgid "End Date"
-msgstr "Énd Däté Ⱡ'σяєм ιρѕυм ∂#"
-
 #: ecommerce/programs/forms.py
 msgid "An offer already exists for this program."
 msgstr ""
 "Àn öffér älréädý éxïsts för thïs prögräm. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
 "¢σηѕє¢тєтυя #"
-
-#: ecommerce/programs/forms.py
-msgid "Percentage discounts cannot be greater than 100%."
-msgstr ""
-"Pérçéntägé dïsçöünts çännöt ßé gréätér thän 100%. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт "
-"αмєт, ¢σηѕє¢тєтυя α#"
-
-#: ecommerce/programs/forms.py
-msgid "A start date must be specified when specifying an end date."
-msgstr ""
-"À stärt däté müst ßé spéçïfïéd whén spéçïfýïng än énd däté. Ⱡ'σяєм ιρѕυм "
-"∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя α#"
-
-#: ecommerce/programs/forms.py
-msgid "The start date must occur before the end date."
-msgstr ""
-"Thé stärt däté müst öççür ßéföré thé énd däté. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
-"¢σηѕє¢тєтυя α#"
 
 #: ecommerce/programs/forms.py
 #, python-brace-format
@@ -1318,37 +1471,8 @@ msgid "Program Offers"
 msgstr "Prögräm Öfférs Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт#"
 
 #: ecommerce/programs/templates/programs/programoffer_form.html
-#: ecommerce/templates/oscar/dashboard/catalogue/product_row_actions.html
-#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html
-#: ecommerce/templates/oscar/dashboard/offers/offer_detail.html
-#: ecommerce/templates/oscar/dashboard/offers/offer_detail.html
-#: ecommerce/templates/oscar/dashboard/offers/offer_detail.html
-#: ecommerce/templates/oscar/dashboard/offers/offer_detail.html
-#: ecommerce/templates/oscar/dashboard/offers/summary.html
-#: ecommerce/templates/oscar/dashboard/offers/summary.html
-#: ecommerce/templates/oscar/dashboard/offers/summary.html
-#: ecommerce/templates/oscar/dashboard/offers/summary.html
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html
-msgid "Edit"
-msgstr "Édït Ⱡ'σяєм ι#"
-
-#: ecommerce/programs/templates/programs/programoffer_form.html
-msgid "Create"
-msgstr "Çréäté Ⱡ'σяєм ιρѕυ#"
-
-#: ecommerce/programs/templates/programs/programoffer_form.html
 msgid "Edit Program Offer"
 msgstr "Édït Prögräm Öffér Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт#"
-
-#: ecommerce/programs/templates/programs/programoffer_form.html
-msgid "Save Changes"
-msgstr "Sävé Çhängés Ⱡ'σяєм ιρѕυм ∂σłσя ѕ#"
-
-#: ecommerce/programs/templates/programs/programoffer_form.html
-#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html
-#: ecommerce/templates/oscar/dashboard/partials/refund_action_modal.html
-msgid "Cancel"
-msgstr "Çänçél Ⱡ'σяєм ιρѕυ#"
 
 #: ecommerce/programs/templates/programs/programoffer_form.html
 #: ecommerce/programs/templates/programs/programoffer_list.html
@@ -1365,24 +1489,6 @@ msgstr "Çürrént prögräm öfférs Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт
 #: ecommerce/programs/templates/programs/programoffer_list.html
 msgid "Program Title"
 msgstr "Prögräm Tïtlé Ⱡ'σяєм ιρѕυм ∂σłσя ѕι#"
-
-#: ecommerce/programs/templates/programs/programoffer_list.html
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html
-msgid "Type"
-msgstr "Týpé Ⱡ'σяєм ι#"
-
-#: ecommerce/programs/templates/programs/programoffer_list.html
-msgid "Value"
-msgstr "Välüé Ⱡ'σяєм ιρѕ#"
-
-#: ecommerce/programs/templates/programs/programoffer_list.html
-msgid "Start"
-msgstr "Stärt Ⱡ'σяєм ιρѕ#"
-
-#: ecommerce/programs/templates/programs/programoffer_list.html
-msgid "End"
-msgstr "Énd Ⱡ'σяєм#"
 
 #: ecommerce/programs/views.py
 msgid "Program offer updated!"
@@ -2315,6 +2421,17 @@ msgstr "sümmärý Ⱡ'σяєм ιρѕυм #"
 #: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html
 msgid "Discounts applied"
 msgstr "Dïsçöünts äpplïéd Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмє#"
+
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html
+#, python-format
+msgid ""
+"\n"
+"                                    %(benefit)s discount provided by %(enterprise_customer_name)s.\n"
+"                                "
+msgstr ""
+"\n"
+"                                    %(benefit)s dïsçöünt prövïdéd ßý %(enterprise_customer_name)s.\n"
+"                                 Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт#"
 
 #: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html
 #, python-format
