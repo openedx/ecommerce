@@ -37,6 +37,5 @@ information, see :ref:`Additional Ecommerce Features`.
 
 .. TODO
 ..   - Oscar Dashboard
-..   - Payment processors
 ..   - API
 ..   - Course Administration Tool

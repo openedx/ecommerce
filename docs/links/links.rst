@@ -96,8 +96,6 @@
 
 .. _GitHub Help: https://help.github.com/articles/set-up-git
 
-.. _edx-documentation: https://github.com/edx/edx-documentation
-
 .. _PyEnv: https://github.com/yyuu/pyenv
 
 .. _example CSS file for drag and drop problems: https://github.com/edx-solutions/xblock-drag-and-drop-v2/blob/master/drag_and_drop_v2/public/themes/apros.css
@@ -384,9 +382,7 @@
 .. _edX101: https://www.edx.org/course/overview-creating-edx-course-edx-edx101#.VIIJbWTF_yM
 
 
-.. _Sphinx: http://sphinx-doc.org/
 .. _GitHub Flow: https://github.com/blog/1557-github-flow-in-the-browser
-.. _RST: http://docutils.sourceforge.net/rst.html
 
 .. _edX Insights: https://insights.edx.org
 
