@@ -254,29 +254,6 @@ class CybersourceInterstitialViewTests(CybersourceNotificationTestsMixin, TestCa
             self.assertRedirects(response, self.get_full_url(path=reverse('payment_error')), status_code=302)
 
 
-class ApplePayMerchantDomainAssociationViewTests(LoginMixin, TestCase):
-    url = reverse('apple_pay_domain_association')
-
-    def assert_response_matches(self, response, expected_status_code, expected_content):
-        self.assertEqual(response.status_code, expected_status_code)
-        self.assertEqual(response.content, expected_content)
-        self.assertEqual(response['Content-Type'], 'text/plain')
-
-    def test_get(self):
-        """ The view should return the the merchant domain association verification data. """
-        response = self.client.get(self.url)
-        self.assert_response_matches(response, 200, settings.PAYMENT_PROCESSOR_CONFIG['edx']['cybersource'][
-            'apple_pay_merchant_id_domain_association'])
-
-    def test_get_with_configuration_error(self):
-        """ The view should return HTTP 501 if Apple Pay is not properly configured. """
-        settings.PAYMENT_PROCESSOR_CONFIG['edx']['cybersource'][
-            'apple_pay_merchant_id_domain_association'] = ''
-        response = self.client.get(self.url)
-        content = 'Apple Pay is not configured for [{}].'.format(self.site.domain)
-        self.assert_response_matches(response, 501, content)
-
-
 @ddt.ddt
 class ApplePayStartSessionViewTests(LoginMixin, TestCase):
     url = reverse('cybersource:apple_pay:start_session')

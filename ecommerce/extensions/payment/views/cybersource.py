@@ -10,7 +10,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.urlresolvers import reverse
 from django.db import transaction
-from django.http import HttpResponse, JsonResponse
+from django.http import JsonResponse
 from django.shortcuts import redirect
 from django.utils.decorators import method_decorator
 from django.utils.functional import cached_property
@@ -388,20 +388,6 @@ class CybersourceInterstitialView(CybersourceNotificationMixin, View):
         )
 
         return redirect(receipt_page_url)
-
-
-class ApplePayMerchantDomainAssociationView(CyberSourceProcessorMixin, View):
-    def get(self, request, *args, **kwargs):  # pylint: disable=unused-argument
-        content = self.payment_processor.apple_pay_merchant_id_domain_association
-        status_code = 200
-
-        if not content:
-            content = 'Apple Pay is not configured for [{}].'.format(request.site.domain)
-            # 501 Not Implemented -- https://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.5.2
-            status_code = 501
-            logger.warning(content)
-
-        return HttpResponse(content, content_type='text/plain', status=status_code)
 
 
 class ApplePayStartSessionView(CyberSourceProcessorMixin, APIView):

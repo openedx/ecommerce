@@ -5,6 +5,7 @@ from collections import namedtuple
 
 import waffle
 from django.conf import settings
+from django.utils.functional import cached_property
 from oscar.core.loading import get_model
 
 PaymentProcessorResponse = get_model('payment', 'PaymentProcessorResponse')
@@ -146,3 +147,15 @@ class BaseClientSidePaymentProcessor(BasePaymentProcessor):  # pylint: disable=a
             str
         """
         return 'payment/{}.html'.format(self.NAME)
+
+
+class ApplePayMixin(object):
+    @cached_property
+    def apple_pay_merchant_id_domain_association(self):
+        """ Returns the Apple Pay merchant domain association contents that will be served at
+        /.well-known/apple-developer-merchantid-domain-association.
+
+        Returns:
+            str
+        """
+        return (self.configuration.get('apple_pay_merchant_id_domain_association') or '').strip()
