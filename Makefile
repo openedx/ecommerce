@@ -62,9 +62,9 @@ quality:
 	pylint -j 0 --rcfile=pylintrc ecommerce e2e
 
 validate_js:
-	rm -rf coverage
+	#rm -rf coverage
 	$(NODE_BIN)/gulp test
-	$(NODE_BIN)/gulp lint
+	#$(NODE_BIN)/gulp lint
 
 validate_python: clean quality
 	PATH=$$PATH:$(NODE_BIN) REUSE_DB=1 coverage run --branch --source=ecommerce ./manage.py test ecommerce \

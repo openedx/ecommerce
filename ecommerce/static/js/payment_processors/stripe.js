@@ -12,7 +12,7 @@ define([
             this.publishableKey = config.publishableKey;
             this.postUrl = config.postUrl;
             this.$paymentForm = $('#paymentForm');
-            this.stripe = Stripe(this.publishableKey);
+            this.stripe = window.Stripe(this.publishableKey);
             this.paymentRequestConfig = {
                 country: config.country,
                 currency: config.paymentRequest.currency,
@@ -25,7 +25,7 @@ define([
             // NOTE: We use Stripe v2 for credit card payments since v3 requires using Elements, which would force us
             // to make a custom payment form just for Stripe. Using v2 allows us to continue using the same payment form
             // regardless of the backend processor.
-            Stripe.setPublishableKey(this.publishableKey);
+            window.Stripe.setPublishableKey(this.publishableKey);
 
             this.$paymentForm.on('submit', $.proxy(this.onPaymentFormSubmit, this));
             this.initializePaymentRequest();
@@ -58,7 +58,7 @@ define([
             $paymentForm.find('#payment-button').prop('disabled', true);
 
             // Request a token from Stripe
-            Stripe.card.createToken(data, $.proxy(this.onCreateCardToken, this));
+            window.Stripe.card.createToken(data, $.proxy(this.onCreateCardToken, this));
 
             e.preventDefault();
         },

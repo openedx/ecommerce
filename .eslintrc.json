@@ -13,7 +13,6 @@
         "gettext": true,
         "loadFixtures": true,
         "spyOnEvent": true,
-        "ApplePaySession": true,
-        "Stripe": true
+        "ApplePaySession": true
     }
 }
