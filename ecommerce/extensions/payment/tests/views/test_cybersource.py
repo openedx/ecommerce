@@ -93,7 +93,10 @@ class CybersourceSubmitViewTests(CybersourceMixin, TestCase):
     def _assert_basket_error(self, basket_id, error_msg):
         response = self.client.post(self.path, self._generate_data(basket_id))
         self.assertEqual(response.status_code, 400)
-        expected = {'error': error_msg}
+        expected = {
+            'error': error_msg,
+            'field_errors': {'basket': error_msg}
+        }
         self.assertDictEqual(json.loads(response.content), expected)
 
     def test_missing_basket(self):
@@ -112,7 +115,7 @@ class CybersourceSubmitViewTests(CybersourceMixin, TestCase):
     def test_invalid_basket_status(self, status):
         """ Verify the view returns an HTTP 400 status if the basket is in an invalid state. """
         basket = factories.BasketFactory(owner=self.user, status=status)
-        error_msg = 'Your basket may have been modified or already purchased. Refresh the page to try again.'
+        error_msg = 'There was a problem retrieving your basket. Refresh the page to try again.'
         self._assert_basket_error(basket.id, error_msg)
 
     @freeze_time('2016-01-01')

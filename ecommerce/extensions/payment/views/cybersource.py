@@ -6,7 +6,6 @@ import requests
 import six
 import waffle
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.urlresolvers import reverse
 from django.db import transaction
@@ -17,7 +16,7 @@ from django.utils.functional import cached_property
 from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext as _
 from django.views.decorators.csrf import csrf_exempt
-from django.views.generic import FormView, View
+from django.views.generic import View
 from oscar.apps.partner import strategy
 from oscar.apps.payment.exceptions import GatewayError, PaymentError, TransactionDeclined, UserCancelled
 from oscar.core.loading import get_class, get_model
@@ -30,9 +29,9 @@ from ecommerce.extensions.api.serializers import OrderSerializer
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
 from ecommerce.extensions.checkout.utils import get_receipt_page_url
 from ecommerce.extensions.payment.exceptions import DuplicateReferenceNumber, InvalidBasketError, InvalidSignatureError
-from ecommerce.extensions.payment.forms import PaymentForm
 from ecommerce.extensions.payment.processors.cybersource import Cybersource
 from ecommerce.extensions.payment.utils import clean_field_value
+from ecommerce.extensions.payment.views import BasePaymentSubmitView
 
 logger = logging.getLogger(__name__)
 
@@ -84,7 +83,7 @@ class OrderCreationMixin(EdxOrderPlacementMixin):
             raise
 
 
-class CybersourceSubmitView(FormView):
+class CybersourceSubmitView(BasePaymentSubmitView):
     """ Starts CyberSource payment process.
 
     This view is intended to be called asynchronously by the payment form. The view expects POST data containing a
@@ -100,66 +99,12 @@ class CybersourceSubmitView(FormView):
         'first_name': 'bill_to_forename',
         'last_name': 'bill_to_surname',
     }
-    form_class = PaymentForm
-    http_method_names = ['post', 'options']
-
-    @method_decorator(login_required)
-    def dispatch(self, request, *args, **kwargs):
-        logger.info(
-            'CyberSource submit view called for basket [%d]. It is in the [%s] state.',
-            request.basket.id,
-            request.basket.status
-        )
-
-        return super(CybersourceSubmitView, self).dispatch(request, *args, **kwargs)
-
-    def get_form_kwargs(self):
-        kwargs = super(CybersourceSubmitView, self).get_form_kwargs()
-        kwargs['user'] = self.request.user
-        return kwargs
-
-    def _basket_error_response(self, error_msg):
-        data = {
-            'error': error_msg,
-        }
-        return JsonResponse(data, status=400)
-
-    def form_invalid(self, form):
-        logger.info(
-            'Invalid payment form submitted for basket [%d].',
-            self.request.basket.id
-        )
-
-        errors = {field: error[0] for field, error in form.errors.iteritems()}
-        logger.debug(errors)
-
-        if errors.get('basket'):
-            error_msg = _('There was a problem retrieving your basket. Refresh the page to try again.')
-            return self._basket_error_response(error_msg)
-
-        return JsonResponse({'field_errors': errors}, status=400)
 
     def form_valid(self, form):
         data = form.cleaned_data
         basket = data['basket']
         request = self.request
         user = request.user
-
-        logger.info(
-            'Valid payment form submitted for basket [%d].',
-            basket.id
-        )
-
-        # Ensure we aren't attempting to purchase a basket that has already been purchased, frozen,
-        # or merged with another basket.
-        if basket.status != Basket.OPEN:
-            logger.error('Basket %d must be in the "Open" state. It is currently in the "%s" state.',
-                         basket.id, basket.status)
-            error_msg = _('Your basket may have been modified or already purchased. Refresh the page to try again.')
-            return self._basket_error_response(error_msg)
-
-        basket.strategy = request.strategy
-        Applicator().apply(basket, user, self.request)
 
         # Add extra parameters for Silent Order POST
         extra_parameters = {

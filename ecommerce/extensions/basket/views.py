@@ -305,7 +305,10 @@ class BasketSummaryView(BasketView):
                 'enable_client_side_checkout': True,
                 'months': range(1, 13),
                 'payment_form': PaymentForm(
-                    user=self.request.user, initial={'basket': self.request.basket}, label_suffix=''
+                    user=self.request.user,
+                    request=self.request,
+                    initial={'basket': self.request.basket},
+                    label_suffix=''
                 ),
                 'paypal_enabled': 'paypal' in (p.NAME for p in payment_processors),
                 # Assumption is that the credit card duration is 15 years

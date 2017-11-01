@@ -33,7 +33,7 @@ class PaymentFormTests(TestCase):
 
     def _assert_form_validity(self, is_valid, **kwargs):
         data = self._generate_data(**kwargs)
-        self.assertEqual(PaymentForm(user=self.user, data=data).is_valid(), is_valid)
+        self.assertEqual(PaymentForm(user=self.user, data=data, request=self.request).is_valid(), is_valid)
 
     def assert_form_valid(self, **kwargs):
         self._assert_form_validity(True, **kwargs)
@@ -61,7 +61,7 @@ class PaymentFormTests(TestCase):
 
         data = self._generate_data(country=country)
         data.pop('state', None)
-        self.assertFalse(PaymentForm(user=self.user, data=data).is_valid())
+        self.assertFalse(PaymentForm(user=self.user, data=data, request=self.request).is_valid())
 
     def test_state_validation_outside_north_america(self):
         """ Verify the state field is limited to 60 characters when the country is NOT set to the U.S. or Canada. """
@@ -127,7 +127,7 @@ class PaymentFormTests(TestCase):
     def test_countries_sorting(self):
         """ Verify the country choices are sorted by country name. """
         data = self._generate_data()
-        form = PaymentForm(user=self.user, data=data)
+        form = PaymentForm(user=self.user, data=data, request=self.request)
         expected = sorted([(country.alpha_2, country.name) for country in pycountry.countries], key=lambda x: x[1])
         actual = list(form.fields['country'].choices)
         actual.pop(0)   # Remove the "Choose country" placeholder
