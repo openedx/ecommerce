@@ -4,7 +4,6 @@ import uuid
 from calendar import timegm
 
 import httpretty
-import mock
 from django.contrib.auth import get_user_model
 from django.core.urlresolvers import reverse
 from django.test import override_settings
@@ -25,8 +24,7 @@ class CurrentSiteDjangoStrategyTests(TestCase):
         super(CurrentSiteDjangoStrategyTests, self).setUp()
         self.strategy = CurrentSiteDjangoStrategy(DjangoStorage, self.request)
 
-    @mock.patch('ecommerce.social_auth.strategies.logger')
-    def test_get_setting_from_siteconfiguration(self, mock_logger):
+    def test_get_setting_from_siteconfiguration(self):
         """Test that a setting can be retrieved from the site configuration."""
         setting_name = 'SOCIAL_AUTH_EDX_OIDC_KEY'
         expected = str(uuid.uuid4())
@@ -34,11 +32,8 @@ class CurrentSiteDjangoStrategyTests(TestCase):
         self.site.siteconfiguration.save()
 
         self.assertEqual(self.strategy.get_setting(setting_name), expected)
-        mock_logger.info.assert_called_once_with(
-            'Retrieved setting [%s] for site [%d] from SiteConfiguration', setting_name, self.site.id)
 
-    @mock.patch('ecommerce.social_auth.strategies.logger')
-    def test_get_setting_from_django_settings(self, mock_logger):
+    def test_get_setting_from_django_settings(self):
         """Test that a setting can be retrieved from django settings if it doesn't exist in site configuration."""
         setting_name = 'SOCIAL_AUTH_EDX_OIDC_SECRET'
         expected = str(uuid.uuid4())
@@ -49,9 +44,6 @@ class CurrentSiteDjangoStrategyTests(TestCase):
 
         with override_settings(**{setting_name: expected}):
             self.assertEqual(self.strategy.get_setting(setting_name), expected)
-
-        mock_logger.info.assert_called_once_with(
-            'Retrieved setting [%s] for site [%d] from settings', setting_name, self.site.id)
 
     def test_get_setting_raises_exception_on_missing_setting(self):
         """Test that a setting that does not exist raises exception."""
