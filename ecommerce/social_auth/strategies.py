@@ -1,4 +1,8 @@
+import logging
+
 from auth_backends.strategies import EdxDjangoStrategy
+
+logger = logging.getLogger(__name__)
 
 
 class CurrentSiteDjangoStrategy(EdxDjangoStrategy):
@@ -8,10 +12,15 @@ class CurrentSiteDjangoStrategy(EdxDjangoStrategy):
     """
 
     def get_setting(self, name):
-        # Check the request's associated SiteConfiguration for the setting
-        value = self.request.site.siteconfiguration.oauth_settings.get(name)
+        site = self.request.site
 
-        if not value:
+        # Check the request's associated SiteConfiguration for the setting
+        value = site.siteconfiguration.oauth_settings.get(name)
+
+        if value:
+            logger.info('Retrieved setting [%s] for site [%d] from SiteConfiguration', name, site.id)
+        else:
             value = super(CurrentSiteDjangoStrategy, self).get_setting(name)
+            logger.info('Retrieved setting [%s] for site [%d] from settings', name, site.id)
 
         return value
