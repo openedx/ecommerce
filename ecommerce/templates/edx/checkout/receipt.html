@@ -80,7 +80,7 @@
                 <dd class="quantity">{{ line.quantity }}</dd>
                 <dt class="course-description sr">{% trans "Description:" %}</dt>
                 <dd class="course-description">
-                  <span>{{ line.description }}</span>
+                  <span>{{ line.title }}</span>
                   {% if line.product.course %}
                     <p>{{ line.product.course.id|course_organization }}</p>
                   {% endif %}

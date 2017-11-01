@@ -537,15 +537,11 @@ class EntitlementFulfillmentModuleTests(FulfillmentTestMixin, TestCase):
         self.order = create_order(number=1, basket=basket, user=self.user)
         self.logger_name = 'ecommerce.extensions.fulfillment.modules'
         self.return_data = {
-            "results": [
-                {
-                    "username": "honor",
-                    "course_uuid": "3b3123b8-d34b-44d8-9bbb-a12676e97123",
-                    "uuid": "111-222-333",
-                    "mode": "verified",
-                    "expired_at": "None"
-                }
-            ]
+            "user": "honor",
+            "course_uuid": "3b3123b8-d34b-44d8-9bbb-a12676e97123",
+            "uuid": "111-222-333",
+            "mode": "verified",
+            "expired_at": "None"
         }
 
     def test_entitlement_supported_line(self):

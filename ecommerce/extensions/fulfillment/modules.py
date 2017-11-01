@@ -555,7 +555,7 @@ class CourseEntitlementFulfillmentModule(BaseFulfillmentModule):
                 continue
 
             data = {
-                'username': order.user.username,
+                'user': order.user.username,
                 'course_uuid': UUID,
                 'mode': mode,
                 'order_number': order.number,
@@ -571,8 +571,7 @@ class CourseEntitlementFulfillmentModule(BaseFulfillmentModule):
 
                 # POST to the Entitlement API.
                 response = entitlement_api_client.entitlements.post(data)
-                results = response['results']
-                line.attributes.create(option=entitlement_option, value=results[0]['uuid'])
+                line.attributes.create(option=entitlement_option, value=response['uuid'])
                 line.set_status(LINE.COMPLETE)
 
                 audit_log(
