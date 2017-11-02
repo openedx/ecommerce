@@ -28,6 +28,7 @@ from ecommerce.core.tests import toggle_switch
 from ecommerce.core.url_utils import get_lms_url
 from ecommerce.coupons.tests.mixins import CouponMixin, DiscoveryMockMixin
 from ecommerce.courses.tests.factories import CourseFactory
+from ecommerce.entitlements.utils import create_or_update_course_entitlement
 from ecommerce.extensions.analytics.utils import translate_basket_line_for_segment
 from ecommerce.extensions.basket.utils import get_basket_switch_data
 from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
@@ -648,6 +649,14 @@ class BasketSummaryViewTests(DiscoveryTestMixin, DiscoveryMockMixin, LmsApiMockM
         )
         self.assert_order_details_in_context(seat)
         self.assert_order_details_in_context(enrollment_code)
+
+    def test_order_details_entitlement_msg(self):
+        """Verify the order details message is displayed for course entitlements."""
+
+        product = create_or_update_course_entitlement(
+            'verified', 100, self.partner, 'foo-bar', 'Foo Bar Entitlement')
+
+        self.assert_order_details_in_context(product)
 
     @override_flag(CLIENT_SIDE_CHECKOUT_FLAG_NAME, active=True)
     @override_settings(PAYMENT_PROCESSORS=['ecommerce.extensions.payment.tests.processors.DummyProcessor'])
