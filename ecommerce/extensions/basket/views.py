@@ -234,17 +234,22 @@ class BasketSummaryView(BasketView):
                 if getattr(line.product.attr, 'id_verification_required', False) and certificate_type != 'credit':
                     display_verification_message = True
 
-                if certificate_type == 'verified':
+                if line.product.is_course_entitlement_product:
                     order_details_msg = _(
-                        'You will be automatically enrolled in the verified track'
-                        ' of the course upon completing your order.'
+                        'After you complete your order you will be able to select course dates from your dashboard.'
                     )
-                elif certificate_type == 'credit':
-                    order_details_msg = _('You will receive your credit upon completing your order.')
                 else:
-                    order_details_msg = _(
-                        'You will be automatically enrolled in the course upon completing your order.'
-                    )
+                    if certificate_type == 'verified':
+                        order_details_msg = _(
+                            'After you complete your order you will be automatically enrolled'
+                            'in the verified track of the course.'
+                        )
+                    elif certificate_type == 'credit':
+                        order_details_msg = _('After you complete your order you will receive credit for your course.')
+                    else:
+                        order_details_msg = _(
+                            'After you complete your order you will be automatically enrolled in the course.'
+                        )
             elif line.product.is_enrollment_code_product:
                 line_data = self._get_course_data(line.product)
                 show_voucher_form = False
