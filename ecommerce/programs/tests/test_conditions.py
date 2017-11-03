@@ -5,6 +5,7 @@ from oscar.core.loading import get_model
 from requests import Timeout
 from slumber.exceptions import HttpNotFoundError, SlumberBaseException
 
+from ecommerce.core.constants import COURSE_ENTITLEMENT_PRODUCT_CLASS_NAME
 from ecommerce.courses.models import Course
 from ecommerce.extensions.test import factories
 from ecommerce.programs.tests.mixins import ProgramTestMixin
@@ -12,6 +13,7 @@ from ecommerce.tests.factories import ProductFactory, SiteConfigurationFactory
 from ecommerce.tests.testcases import TestCase
 
 Product = get_model('catalogue', 'Product')
+ProductClass = get_model('catalogue', 'ProductClass')
 LOGGER_NAME = 'ecommerce.programs.conditions'
 
 
@@ -51,7 +53,7 @@ class ProgramCourseRunSeatsConditionTests(ProgramTestMixin, TestCase):
                 else:
                     audit_seats.append(seat)
 
-        self.mock_enrollment_api(basket.owner.username)
+        self.mock_user_data(basket.owner.username)
         # Empty baskets should never be satisfied
         basket.flush()
         self.assertTrue(basket.is_empty)
@@ -101,7 +103,7 @@ class ProgramCourseRunSeatsConditionTests(ProgramTestMixin, TestCase):
                 if seat.attr.id_verification_required:
                     verified_seats.append(seat)
 
-        self.mock_enrollment_api(basket.owner.username, enrollments=enrollments)
+        self.mock_user_data(basket.owner.username, owned_products=enrollments)
         # If the user has not added all of the remaining courses in program to their basket,
         # the condition should not be satisfied
         basket.flush()
@@ -147,14 +149,13 @@ class ProgramCourseRunSeatsConditionTests(ProgramTestMixin, TestCase):
             self.condition.program_uuid,
             self.site_configuration.discovery_api_url
         )
-
         for course in program['courses']:
             course_run = Course.objects.get(id=course['course_runs'][0]['key'])
             for seat in course_run.seat_products:
                 if seat.attr.id_verification_required:
                     basket.add_product(seat)
 
-        self.mock_enrollment_api(basket.owner.username, response_code=400)
+        self.mock_user_data(basket.owner.username, mocked_api='enrollments', owned_products=None, response_code=400)
         self.assertTrue(self.condition.is_satisfied(offer, basket))
 
     def test_is_satisfied_free_basket(self):
@@ -180,3 +181,87 @@ class ProgramCourseRunSeatsConditionTests(ProgramTestMixin, TestCase):
         basket.add_product(self.test_product)
         self.condition.program_uuid = None
         self.assertFalse(self.condition.is_satisfied(offer, basket))
+
+    @httpretty.activate
+    def test_is_satisfied_with_entitlements(self):
+        """
+        The condition should be satisfied if, for each course in the program, their is either an entitlement sku in the
+        basket or the user already has an entitlement for the course and the site has enabled partial program offers.
+        """
+        offer = factories.ProgramOfferFactory(site=self.site, condition=self.condition)
+        basket = factories.BasketFactory(site=self.site, owner=factories.UserFactory())
+        program = self.mock_program_detail_endpoint(
+            self.condition.program_uuid, self.site_configuration.discovery_api_url
+        )
+        entitlements_response = {
+            "count": 0, "num_pages": 1, "current_page": 1, "results": [
+                {'mode': 'verified', 'course_uuid': '268afbfc-cc1e-415b-a5d8-c58d955bcfc3'},
+                {'mode': 'verified', 'course_uuid': '268afbfc-cc1e-415b-a5d8-c58d955bcfc4'}
+            ], "next": None, "start": 0, "previous": None
+        }
+
+        # Extract one verified seat for each course
+        verified_entitlements = []
+        course_uuids = set([course['uuid'] for course in program['courses']])
+        for entitlement in Product.objects.filter(
+                product_class__name=COURSE_ENTITLEMENT_PRODUCT_CLASS_NAME, structure=Product.CHILD
+        ):
+            if entitlement.attr.UUID in course_uuids and entitlement.attr.certificate_type == 'verified':
+                verified_entitlements.append(entitlement)
+
+        self.mock_user_data(basket.owner.username, mocked_api='entitlements', owned_products=entitlements_response)
+        self.mock_user_data(basket.owner.username)
+        # If the user has not added all of the remaining courses in program to their basket,
+        # the condition should not be satisfied
+        basket.flush()
+        for entitlement in verified_entitlements[2:len(verified_entitlements) - 1]:
+            basket.add_product(entitlement)
+        self.assertFalse(self.condition.is_satisfied(offer, basket))
+
+        # When all courses in the program that the user is not already enrolled in are in their basket
+        # and the site allows partial program completion, the condition should be satisfied
+        basket.add_product(verified_entitlements[-1])
+        self.assertTrue(self.condition.is_satisfied(offer, basket))
+
+        # If the site does not allow partial program completion and the user does not have all of the program
+        # courses in their basket, the condition should not be satisfied
+        basket.site.siteconfiguration.enable_partial_program = False
+        self.assertFalse(self.condition.is_satisfied(offer, basket))
+
+        # Verify the user enrollments are cached
+        basket.site.siteconfiguration.enable_partial_program = True
+        httpretty.disable()
+        with mock.patch('ecommerce.programs.conditions.get_program',
+                        return_value=program):
+            self.assertTrue(self.condition.is_satisfied(offer, basket))
+
+    @httpretty.activate
+    def test_is_satisfied_program_without_entitlements(self):
+        """
+        User entitlements should not be retrieved if no course in the program has a course entitlement product
+        """
+        offer = factories.ProgramOfferFactory(site=self.site, condition=self.condition)
+        basket = factories.BasketFactory(site=self.site, owner=factories.UserFactory())
+        program = self.mock_program_detail_endpoint(
+            self.condition.program_uuid, self.site_configuration.discovery_api_url, include_entitlements=False
+        )
+        enrollments = [{'mode': 'verified', 'course_details': {'course_id': 'course-v1:test-org+course+1'}},
+                       {'mode': 'verified', 'course_details': {'course_id': 'course-v1:test-org+course+2'}}]
+        entitlements_response = {
+            "count": 0, "num_pages": 1, "current_page": 1, "results": [
+                {'mode': 'verified', 'course_uuid': '268afbfc-cc1e-415b-a5d8-c58d955bcfc3'},
+                {'mode': 'verified', 'course_uuid': '268afbfc-cc1e-415b-a5d8-c58d955bcfc4'}
+            ], "next": None, "start": 0, "previous": None
+        }
+        self.mock_user_data(basket.owner.username, owned_products=enrollments)
+        self.mock_user_data(basket.owner.username, mocked_api='entitlements', owned_products=entitlements_response)
+
+        for course in program['courses'][2:len(program['courses']) - 1]:
+            course_run = Course.objects.get(id=course['course_runs'][0]['key'])
+            for seat in course_run.seat_products:
+                if seat.attr.id_verification_required:
+                    basket.add_product(seat)
+
+        with mock.patch('ecommerce.programs.conditions.traverse_pagination') as mock_processing_entitlements:
+            self.assertFalse(self.condition.is_satisfied(offer, basket))
+            mock_processing_entitlements.assert_not_called()

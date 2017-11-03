@@ -388,7 +388,7 @@ class BasketCalculateViewTests(ProgramTestMixin, TestCase):
         )
         program_uuid = offer.condition.program_uuid
         self.mock_program_detail_endpoint(program_uuid, self.site_configuration.discovery_api_url)
-        self.mock_enrollment_api(self.user.username)
+        self.mock_user_data(self.user.username)
 
         response = self.client.get(self.url)
         expected = {
@@ -473,7 +473,7 @@ class BasketCalculateViewTests(ProgramTestMixin, TestCase):
         products = self._get_program_verified_seats(program)
         url = self._generate_sku_username_url(products, differentuser.username)
         enrollment = [{'mode': 'verified', 'course_details': {'course_id': program['courses'][0]['key']}}]
-        self.mock_enrollment_api(differentuser.username, enrollment)
+        self.mock_user_data(differentuser.username, owned_products=enrollment)
 
         expected = {
             'total_incl_tax_excl_discounts': sum(product.stockrecords.first().price_excl_tax
@@ -505,7 +505,7 @@ class BasketCalculateViewTests(ProgramTestMixin, TestCase):
         products = self._get_program_verified_seats(program)
         url = self._generate_sku_username_url(products, 'invalidusername')
         enrollment = [{'mode': 'verified', 'course_details': {'course_id': program['courses'][0]['key']}}]
-        self.mock_enrollment_api(differentuser.username, enrollment)
+        self.mock_user_data(differentuser.username, enrollment)
 
         expected = {
             'total_incl_tax_excl_discounts': sum(product.stockrecords.first().price_excl_tax
