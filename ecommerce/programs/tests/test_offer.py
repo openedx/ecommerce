@@ -27,7 +27,7 @@ class ProgramOfferTests(ProgramTestMixin, TestCase):
 
         program_uuid = offer.condition.program_uuid
         program = self.mock_program_detail_endpoint(program_uuid, self.site_configuration.discovery_api_url)
-        self.mock_enrollment_api(basket.owner.username)
+        self.mock_user_data(basket.owner.username)
 
         # Add one course run seat from each course to the basket.
         products = []

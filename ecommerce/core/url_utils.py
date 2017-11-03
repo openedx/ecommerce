@@ -47,7 +47,7 @@ def get_lms_enrollment_api_url():
 
 def get_lms_entitlement_api_url():
     """ Returns the base lms entitlement api url. """
-    return get_lms_url('/api/entitlements/v1/')
+    return get_lms_url('/api/entitlements/v1/entitlements/')
 
 
 def get_lms_enrollment_base_api_url():
