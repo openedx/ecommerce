@@ -3,10 +3,8 @@ from __future__ import unicode_literals
 import logging
 
 from django.conf import settings
-
 from django.db.models import Q
 from oscar.core.loading import get_model
-
 
 from ecommerce.core.constants import COURSE_ENTITLEMENT_PRODUCT_CLASS_NAME
 from ecommerce.extensions.catalogue.utils import generate_sku

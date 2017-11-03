@@ -3,7 +3,6 @@ import hashlib
 from django.conf import settings
 from django.core.cache import cache
 from django.utils.translation import ugettext_lazy as _
-
 from opaque_keys.edx.keys import CourseKey
 
 from ecommerce.core.utils import traverse_pagination

@@ -7,7 +7,6 @@ from testfixtures import LogCapture
 from ecommerce.tests.factories import PartnerFactory, SiteConfigurationFactory
 from ecommerce.tests.testcases import TestCase
 
-
 LOGGER_NAME = 'ecommerce.extensions.order.management.commands.create_fake_orders'
 Order = get_model('order', 'Order')
 Basket = get_model('basket', 'Basket')
