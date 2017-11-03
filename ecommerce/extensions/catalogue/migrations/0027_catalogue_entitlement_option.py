@@ -4,7 +4,6 @@ from __future__ import unicode_literals
 from django.db import migrations, models
 from oscar.core.loading import get_model
 
-
 Option = get_model('catalogue', 'Option')
 
 

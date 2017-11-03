@@ -2,8 +2,8 @@
 from __future__ import unicode_literals
 
 from hashlib import md5
-import ddt
 
+import ddt
 from django.db.utils import IntegrityError
 from oscar.core.loading import get_model
 
