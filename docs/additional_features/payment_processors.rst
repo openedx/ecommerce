@@ -19,6 +19,55 @@ Finally, there are Waffle flags that can be used to disable payment processors f
     those using pre-built systems such as the EC2 images from Bitnami and other providers.
 
 
+Enabling Payment Processors
+***************************
+Payment processors must be enabled globally and individually for each site/tenant hosted by your installation. At the
+global level, you must specify the Python classes that will be used to process transactions for your processors. Each of
+these classes should inherit from xxx.
+
+.. code-block:: python
+
+   PAYMENT_PROCESSORS = (
+       'ecommerce.extensions.payment.processors.cybersource.Cybersource',
+       'ecommerce.extensions.payment.processors.paypal.Paypal',
+   )
+
+The secret keys and additional configuration must be specified for each site. The keys of the
+``PAYMENT_PROCESSOR_CONFIG`` dict correspond to the ``short_code`` field value on the ``Partner`` model linked to each
+site.
+
+.. code-block:: python
+
+   PAYMENT_PROCESSOR_CONFIG = {
+       'edx': {
+           'cybersource': {
+               ...
+           },
+           'paypal': {
+               ...
+           },
+       },
+       'mitxpro': {
+           'cybersource': {
+               ...
+           },
+           'paypal': {
+               ...
+           },
+       },
+   }
+
+Finally, the payment processors must be activated for each site via Django admin. The **Payment processors** field
+should contain a comma-separated list of payment processor names. These names correspond to the ``NAME`` property of the
+Python classes.
+
+If you are using the checkout page hosted in the E-Commerce Service (e.g. client-side checkout), you must also specify
+the name of the processor to be used for processing credit card transactions. Note that PayPal *cannot* be used for
+these types of payments.
+
+.. image:: ../_static/images/payment-processor-configuration.png
+   :alt: Payment processor configuration
+
 Disabling Payment Processors
 ****************************
 Payment processors sometimes experience temporary outages. When these outages occur, you can use Waffle switches to
@@ -66,6 +115,15 @@ An exhaustive list of devices that support Apple Pay is available on
 .. note::
 
     The Apple Pay button is not displayed to users with incompatible hardware and software.
+
+
+Testing
+-------
+Apple Pay is only available over HTTPS (SSL). If you do not have SSL configured for your local development system, use a
+tunnel/proxy application like `ngrok`_ to expose your system via publicly-accessible URL with HTTPS. Additionally, when
+testing with CyberSource, you will need to validate your ngrok domain at Apple.
+
+.. _ngrok: https://ngrok.com/
 
 
 CyberSource
