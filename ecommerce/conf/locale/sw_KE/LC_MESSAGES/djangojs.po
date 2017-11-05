@@ -16,8 +16,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-10-12 20:55+0000\n"
-"PO-Revision-Date: 2017-09-23 22:12+0000\n"
+"POT-Creation-Date: 2017-10-30 22:36-0400\n"
+"PO-Revision-Date: 2017-10-31 21:18+0000\n"
 "Last-Translator: Ned Batchelder <ned@edx.org>\n"
 "Language-Team: Swahili (Kenya) (http://www.transifex.com/open-edx/edx-platform/language/sw_KE/)\n"
 "MIME-Version: 1.0\n"
@@ -171,43 +171,43 @@ msgstr "Tafadhali chagua njia halali za malipo. "
 msgid "All credit seats must designate a number of credit hours."
 msgstr "Nafasi zote za kutunukiwa lazima ziteuliwe na idadi ya muda wa kutunukiwa."
 
-#: ecommerce/static/js/pages/basket_page.js:25
-msgid "Problem occurred during checkout. Please contact support"
-msgstr "Tatizo limetokea wakati wa kuondoka. Tafadhali wasiliana na 'kitengo cha msaada'"
+#: ecommerce/static/js/pages/basket_page.js:26
+msgid "Problem occurred during checkout. Please contact support."
+msgstr ""
 
-#: ecommerce/static/js/pages/basket_page.js:97
+#: ecommerce/static/js/pages/basket_page.js:99
 msgid "This field is required"
 msgstr "'Sehemu' hii inahitaji kujazwa"
 
-#: ecommerce/static/js/pages/basket_page.js:132
+#: ecommerce/static/js/pages/basket_page.js:134
 msgid "Invalid card number"
 msgstr "Namba batili ya kadi"
 
-#: ecommerce/static/js/pages/basket_page.js:134
+#: ecommerce/static/js/pages/basket_page.js:136
 msgid "Unsupported card type"
 msgstr "Aina ya kadi haikubaliki"
 
-#: ecommerce/static/js/pages/basket_page.js:136
+#: ecommerce/static/js/pages/basket_page.js:138
 msgid "Invalid security number"
 msgstr "Namba batili ya usalama"
 
-#: ecommerce/static/js/pages/basket_page.js:141
+#: ecommerce/static/js/pages/basket_page.js:143
 msgid "Invalid month"
 msgstr "Mwezi batili"
 
-#: ecommerce/static/js/pages/basket_page.js:143
+#: ecommerce/static/js/pages/basket_page.js:145
 msgid "Invalid year"
 msgstr "Mwaka batili"
 
-#: ecommerce/static/js/pages/basket_page.js:145
+#: ecommerce/static/js/pages/basket_page.js:147
 msgid "Card expired"
 msgstr "Kadi imeisha muda wake"
 
-#: ecommerce/static/js/pages/basket_page.js:368
+#: ecommerce/static/js/pages/basket_page.js:465
 msgid "<Choose state/province>"
 msgstr "<Choose state/province>"
 
-#: ecommerce/static/js/pages/basket_page.js:369
+#: ecommerce/static/js/pages/basket_page.js:466
 msgid "State/Province (required)"
 msgstr "Jimbo/Nchi (zinahitajika)"
 

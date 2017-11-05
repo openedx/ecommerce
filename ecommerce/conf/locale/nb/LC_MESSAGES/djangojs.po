@@ -9,9 +9,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-10-12 20:55+0000\n"
-"PO-Revision-Date: 2017-09-23 21:22+0000\n"
-"Last-Translator: Frode Arntsen <frode.arntsen@bibsys.no>\n"
+"POT-Creation-Date: 2017-10-30 22:36-0400\n"
+"PO-Revision-Date: 2017-10-31 21:18+0000\n"
+"Last-Translator: Ned Batchelder <ned@edx.org>\n"
 "Language-Team: Norwegian Bokmål (http://www.transifex.com/open-edx/edx-platform/language/nb/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -164,43 +164,43 @@ msgstr ""
 msgid "All credit seats must designate a number of credit hours."
 msgstr ""
 
-#: ecommerce/static/js/pages/basket_page.js:25
-msgid "Problem occurred during checkout. Please contact support"
-msgstr "Det oppstod et problem ved utsjekk, vennligst kontakt brukerstøtte."
+#: ecommerce/static/js/pages/basket_page.js:26
+msgid "Problem occurred during checkout. Please contact support."
+msgstr ""
 
-#: ecommerce/static/js/pages/basket_page.js:97
+#: ecommerce/static/js/pages/basket_page.js:99
 msgid "This field is required"
 msgstr "Dette feltet er nødvendig"
 
-#: ecommerce/static/js/pages/basket_page.js:132
+#: ecommerce/static/js/pages/basket_page.js:134
 msgid "Invalid card number"
 msgstr "Ugyldig kortnummer"
 
-#: ecommerce/static/js/pages/basket_page.js:134
+#: ecommerce/static/js/pages/basket_page.js:136
 msgid "Unsupported card type"
 msgstr "Korttypen støttes ikke"
 
-#: ecommerce/static/js/pages/basket_page.js:136
+#: ecommerce/static/js/pages/basket_page.js:138
 msgid "Invalid security number"
 msgstr "Ugyldig security nummer"
 
-#: ecommerce/static/js/pages/basket_page.js:141
+#: ecommerce/static/js/pages/basket_page.js:143
 msgid "Invalid month"
 msgstr "Ugyldig måned"
 
-#: ecommerce/static/js/pages/basket_page.js:143
+#: ecommerce/static/js/pages/basket_page.js:145
 msgid "Invalid year"
 msgstr "Ugyldig år"
 
-#: ecommerce/static/js/pages/basket_page.js:145
+#: ecommerce/static/js/pages/basket_page.js:147
 msgid "Card expired"
 msgstr "Kort utløpt"
 
-#: ecommerce/static/js/pages/basket_page.js:368
+#: ecommerce/static/js/pages/basket_page.js:465
 msgid "<Choose state/province>"
 msgstr "<Choose state/province>"
 
-#: ecommerce/static/js/pages/basket_page.js:369
+#: ecommerce/static/js/pages/basket_page.js:466
 msgid "State/Province (required)"
 msgstr "Fylke/kommune (påkrevet)"
 
