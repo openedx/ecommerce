@@ -206,6 +206,21 @@ class UtilTests(CouponMixin, DiscoveryMockMixin, DiscoveryTestMixin, LmsApiMockM
         self.assertEqual(voucher.start_datetime, self.data['start_datetime'])
         self.assertEqual(voucher.usage, Voucher.SINGLE_USE)
 
+    def test_create_voucher_with_long_name(self):
+        self.data.update({
+            'name': (
+                'This Is A Really Really Really Really Really Really Long '
+                'Voucher Name That Needs To Be Trimmed To Fit Into The Name Column Of The DB'
+            )
+        })
+        trimmed = (
+            'This Is A Really Really Really Really Really Really Long '
+            'Voucher Name That Needs To Be Trimmed To Fit Into The Name Column Of Th'
+        )
+        vouchers = create_vouchers(**self.data)
+        voucher = vouchers[0]
+        self.assertEqual(voucher.name, trimmed)
+
     @ddt.data(
         {'end_datetime': ''},
         {'end_datetime': 3},
