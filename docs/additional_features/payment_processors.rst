@@ -90,6 +90,9 @@ processors they control.
    * - CyberSource
      - payment_processor_active_cybersource
      - True
+   * - Stripe
+     - payment_processor_active_stripe
+     - True
 
 In the unlikely event that all payment processors are disabled, the LMS will display an informative error message
 explaining why payment is not currently possible.
