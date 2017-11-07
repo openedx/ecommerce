@@ -238,15 +238,16 @@ Settings
 
 Stripe
 ******
-The Stripe integration supports payments via credit cards, Apple Pay, and the `Payment Request API`_ which is a W3C
-browser standard that provides Apple Pay-like behavior across different browsers. Both payment methods take advantage of
-tokenization. Sensitive data--credit card number, card expiration date, CVC--never touches your servers. Instead this
-information is relayed directly to Stripe in exchange for a token. This token is sent to the E-Commerce Service and used
-to make a final call to Stripe, charging the learner and completing the checkout process. For additional details
-regarding Stripe payments, check out the `Stripe quickstart guide`_.
+The Stripe integration supports payments via credit cards, Apple Pay, `Pay with Google`_, and the `Payment Request API`_
+which is a W3C browser standard that provides Apple Pay-like behavior across different browsers. Both payment methods
+take advantage of tokenization. Sensitive data--credit card number, card expiration date, CVC--never touches your
+servers. Instead this information is relayed directly to Stripe in exchange for a token. This token is sent to the
+E-Commerce Service and used to make a final call to Stripe, charging the learner and completing the checkout process.
+For additional details regarding Stripe payments, check out the `Stripe quickstart guide`_.
 
 If you wish to use Apple Pay, you must use SSL and verify your domain on your `Stripe Dashboard`_.
 
+.. _Pay with Google: https://stripe.com/docs/pay-with-google
 .. _Payment Request API: https://stripe.com/docs/payment-request-api
 .. _Stripe quickstart guide: https://stripe.com/docs/quickstart
 
