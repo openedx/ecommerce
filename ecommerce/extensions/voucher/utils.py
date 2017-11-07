@@ -452,7 +452,7 @@ def _create_new_voucher(code, end_datetime, name, offer, start_datetime, voucher
             )
 
     voucher = Voucher.objects.create(
-        name=name,
+        name=name[:128],
         code=voucher_code,
         usage=voucher_type,
         start_datetime=start_datetime,
