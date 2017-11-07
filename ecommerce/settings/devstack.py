@@ -14,9 +14,6 @@ LOGGING['handlers']['local'] = {
 
 SOCIAL_AUTH_REDIRECT_IS_HTTPS = False
 
-# TODO Remove this once we convert the E-Commerce service to use the latest JWT_ISSUERS configuration.
-JWT_AUTH['JWT_DECODE_HANDLER'] = 'edx_rest_framework_extensions.utils.jwt_decode_handler'
-
 # Allow live changes to JS and CSS
 COMPRESS_OFFLINE = False
 COMPRESS_ENABLED = False
