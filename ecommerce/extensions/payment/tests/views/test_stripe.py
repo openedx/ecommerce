@@ -1,4 +1,5 @@
 import json
+from urllib import urlencode
 
 import stripe
 from django.conf import settings
@@ -9,7 +10,6 @@ from oscar.test.factories import BillingAddressFactory
 
 from ecommerce.extensions.checkout.utils import get_receipt_page_url
 from ecommerce.extensions.order.constants import PaymentEventTypeName
-from ecommerce.extensions.payment.constants import STRIPE_CARD_TYPE_MAP
 from ecommerce.extensions.payment.processors.stripe import Stripe
 from ecommerce.extensions.payment.tests.mixins import PaymentEventsMixin
 from ecommerce.extensions.test.factories import create_basket
@@ -22,11 +22,9 @@ Selector = get_class('partner.strategy', 'Selector')
 Source = get_model('payment', 'Source')
 
 
-class StripeSubmitViewTests(PaymentEventsMixin, TestCase):
-    path = reverse('stripe:submit')
-
+class BaseStripeViewTest(PaymentEventsMixin, TestCase):
     def setUp(self):
-        super(StripeSubmitViewTests, self).setUp()
+        super(BaseStripeViewTest, self).setUp()
         self.user = self.create_user()
         self.client.login(username=self.user.username, password=self.password)
 
@@ -44,7 +42,7 @@ class StripeSubmitViewTests(PaymentEventsMixin, TestCase):
             currency=order.currency,
             amount_allocated=total,
             amount_debited=total,
-            card_type=STRIPE_CARD_TYPE_MAP[card_type],
+            card_type=card_type,
             label=label
         )
         PaymentEvent.objects.get(
@@ -54,17 +52,26 @@ class StripeSubmitViewTests(PaymentEventsMixin, TestCase):
         )
         assert order.billing_address == billing_address
 
-    def generate_form_data(self, basket_id):
-        return {
-            'stripe_token': 'st_abc123',
-            'basket': basket_id,
-        }
-
     def create_basket(self):
         basket = create_basket(owner=self.user, site=self.site)
         basket.strategy = Selector().strategy()
         basket.thaw()
         return basket
+
+
+class StripeSubmitViewTests(BaseStripeViewTest):
+    path = reverse('stripe:submit')
+
+    def setUp(self):
+        super(StripeSubmitViewTests, self).setUp()
+        self.user = self.create_user()
+        self.client.login(username=self.user.username, password=self.password)
+
+    def generate_form_data(self, basket_id):
+        return {
+            'stripe_token': 'st_abc123',
+            'basket': basket_id,
+        }
 
     def test_login_required(self):
         self.client.logout()
@@ -94,6 +101,7 @@ class StripeSubmitViewTests(PaymentEventsMixin, TestCase):
             'source': {
                 'brand': card_type,
                 'last4': label,
+                'object': 'card',
             },
         }, 'fake-key')
 
@@ -107,7 +115,7 @@ class StripeSubmitViewTests(PaymentEventsMixin, TestCase):
             address_mock.assert_called_once_with(data['stripe_token'])
 
         self.assert_successful_order_response(response, basket.order_number)
-        self.assert_order_created(basket, None, card_type, label)
+        self.assert_order_created(basket, None, 'american_express', label)
 
     def test_successful_payment(self):
         basket = self.create_basket()
@@ -119,6 +127,7 @@ class StripeSubmitViewTests(PaymentEventsMixin, TestCase):
             'source': {
                 'brand': card_type,
                 'last4': label,
+                'object': 'card',
             },
         }, 'fake-key')
 
@@ -133,4 +142,53 @@ class StripeSubmitViewTests(PaymentEventsMixin, TestCase):
             address_mock.assert_called_once_with(data['stripe_token'])
 
         self.assert_successful_order_response(response, basket.order_number)
-        self.assert_order_created(basket, billing_address, card_type, label)
+        self.assert_order_created(basket, billing_address, 'american_express', label)
+
+
+class StripeSubmitSourceViewTests(BaseStripeViewTest):
+    path = reverse('stripe:submit_source')
+
+    def generate_form_data(self, basket_id):
+        return {
+            'source': 'src_abc123',
+            'basket': basket_id,
+            'client_secret': 'Setec Astronomy',
+        }
+
+    def test_successful_payment(self):
+        basket = self.create_basket()
+        data = self.generate_form_data(basket.id)
+        charge = stripe.Charge.construct_from({
+            'id': '2404',
+            'source': {
+                'type': 'alipay',
+                'object': 'source',
+            },
+        }, 'fake-key')
+
+        with mock.patch.object(stripe.Charge, 'create') as charge_mock:
+            charge_mock.return_value = charge
+            path = '{path}?{qs}'.format(path=self.path, qs=urlencode(data))
+            response = self.client.get(path)
+
+        expected_url = get_receipt_page_url(self.site_configuration, basket.order_number)
+        self.assertRedirects(response, expected_url)
+        self.assert_order_created(basket, None, 'Alipay', '')
+
+    def test_declined_payment(self):
+        basket = self.create_basket()
+        data = self.generate_form_data(basket.id)
+
+        with mock.patch.object(stripe.Charge, 'create') as charge_mock:
+            charge_mock.side_effect = stripe.error.InvalidRequestError('fake-msg', 'fake-param')
+
+            with mock.patch('stripe.Source.retrieve') as source_mock:
+                source_mock.return_value = stripe.Source.construct_from({
+                    'status': 'failed'
+                }, 'fake-key')
+
+                path = '{path}?{qs}'.format(path=self.path, qs=urlencode(data))
+                response = self.client.get(path)
+
+        expected_url = reverse('basket:summary')
+        self.assertRedirects(response, expected_url)

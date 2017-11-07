@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-12-15 09:43-0500\n"
+"POT-Creation-Date: 2017-12-15 09:45-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -256,13 +256,13 @@ msgid ""
 "Please try again, or select another payment method."
 msgstr ""
 
-#: ecommerce/static/js/payment_processors/stripe.js:71
+#: ecommerce/static/js/payment_processors/stripe.js:76
 msgid ""
 "An error occurred while attempting to process your payment. You have not "
 "been charged. Please check your payment details, and try again."
 msgstr ""
 
-#: ecommerce/static/js/payment_processors/stripe.js:110
+#: ecommerce/static/js/payment_processors/stripe.js:115
 msgid "An error occurred while processing your payment. Please try again."
 msgstr ""
 

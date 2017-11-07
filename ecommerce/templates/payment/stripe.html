@@ -8,16 +8,19 @@
 <script type="text/javascript" src="https://js.stripe.com/v3/"></script>
 <script type="text/javascript">
     window.StripeConfig = {
+        basketId: {{ basket.id }},
         postUrl: '{% url 'stripe:submit' %}',
         publishableKey: '{{ client_side_payment_processor.publishable_key }}',
         country: '{{ client_side_payment_processor.country }}',
+        currency: '{{ basket.currency|lower }}',
         paymentRequest: {
-            currency: '{{ basket.currency|lower }}',
-            label: '{{ platform_name }}',
-            // NOTE: Stripe expects the currency sub-unit (e.g. cents instead of dollars).
-            // widthratio is used to avoid having to write extra code for multiplication.
-            total: {% widthratio order_total.incl_tax 1 100 %}
-        }
+            label: '{{ platform_name }}'
+        },
+        {# TODO Use a template tag to build the absolute URL! #}
+        sourceRedirectUrl: '{{ request.scheme }}://{{ request.get_host }}{% url 'stripe:submit_source' %}',
+        // NOTE: Stripe expects the currency sub-unit (e.g. cents instead of dollars).
+        // widthratio is used to avoid having to write extra code for multiplication.
+        total: {% widthratio order_total.incl_tax 1 100 %}
     }
 </script>
 <script src="{% static 'js/views/stripe.js' %}" type="text/javascript"></script>

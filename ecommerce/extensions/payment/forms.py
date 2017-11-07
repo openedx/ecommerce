@@ -33,7 +33,18 @@ def update_basket_queryset_filter(form, user):
     form.fields['basket'].queryset = form.fields['basket'].queryset.filter(owner=user, status=Basket.OPEN)
 
 
-class PaymentForm(forms.Form):
+class BasketFormMixin(object):
+    def clean_basket(self):
+        basket = self.cleaned_data['basket']
+
+        if basket:
+            basket.strategy = self.request.strategy
+            Applicator().apply(basket, self.request.user, self.request)
+
+        return basket
+
+
+class PaymentForm(BasketFormMixin, forms.Form):
     """
     Payment form with billing details.
 
@@ -119,15 +130,6 @@ class PaymentForm(forms.Form):
     postal_code = forms.CharField(max_length=10, required=False, label=_('Zip/Postal Code'))
     country = forms.ChoiceField(choices=country_choices, label=_('Country'))
 
-    def clean_basket(self):
-        basket = self.cleaned_data['basket']
-
-        if basket:
-            basket.strategy = self.request.strategy
-            Applicator().apply(basket, self.request.user, self.request)
-
-        return basket
-
     def clean(self):
         cleaned_data = super(PaymentForm, self).clean()
 
@@ -182,7 +184,7 @@ class PaymentForm(forms.Form):
         return cleaned_data
 
 
-class StripeSubmitForm(forms.Form):
+class StripeSubmitForm(BasketFormMixin, forms.Form):
     """
     Form for Stripe token submissions.
 
@@ -204,11 +206,13 @@ class StripeSubmitForm(forms.Form):
         self.request = request
         update_basket_queryset_filter(self, user)
 
-    def clean_basket(self):
-        basket = self.cleaned_data['basket']
 
-        if basket:
-            basket.strategy = self.request.strategy
-            Applicator().apply(basket, self.request.user, self.request)
+class StripeSubmitSourceForm(BasketFormMixin, forms.Form):
+    basket = forms.ModelChoiceField(queryset=Basket.objects.all())
+    client_secret = forms.CharField()
+    source = forms.CharField()
 
-        return basket
+    def __init__(self, user, request, *args, **kwargs):
+        super(StripeSubmitSourceForm, self).__init__(*args, **kwargs)
+        self.request = request
+        update_basket_queryset_filter(self, user)

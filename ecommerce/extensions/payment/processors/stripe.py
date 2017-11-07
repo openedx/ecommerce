@@ -7,7 +7,7 @@ import stripe
 from oscar.apps.payment.exceptions import GatewayError, TransactionDeclined
 from oscar.core.loading import get_model
 
-from ecommerce.extensions.payment.constants import STRIPE_CARD_TYPE_MAP
+from ecommerce.extensions.payment.constants import STRIPE_CARD_TYPE_MAP, STRIPE_SOURCE_TYPES
 from ecommerce.extensions.payment.processors import (
     ApplePayMixin,
     BaseClientSidePaymentProcessor,
@@ -50,7 +50,17 @@ class Stripe(ApplePayMixin, BaseClientSidePaymentProcessor):
     def _get_basket_amount(self, basket):
         return str((basket.total_incl_tax * 100).to_integral_value())
 
+    def _is_source_chargeable(self, source_id):
+        try:
+            source = stripe.Source.retrieve(source_id)
+            return source.status == 'chargeable'
+        except stripe.error.StripeError:
+            logger.debug('Failed to determine if source [%s] is chargeable. Assuming it is not.', exc_info=True)
+            return False
+
     def handle_processor_response(self, response, basket=None):
+        # NOTE: This may be a Source (rather than a Token) if the user pays with Alipay or
+        # other asynchronous payment methods.
         token = response
         order_number = basket.order_number
         currency = basket.currency
@@ -77,10 +87,24 @@ class Stripe(ApplePayMixin, BaseClientSidePaymentProcessor):
             logger.exception(msg + ': %s', basket.id, ex.http_status, body)
             self.record_processor_response(body, basket=basket)
             raise TransactionDeclined(msg, basket.id, ex.http_status)
+        except stripe.error.InvalidRequestError:
+            # If the source payment was declined (e.g. user declined to complete the purchase using Alipay), raise a
+            # custom exception so that we can re-present the payment form to the user.
+            if not self._is_source_chargeable(token):
+                raise TransactionDeclined('User declined payment for basket [%d]', basket.id)
+
+            # Raise all other errors since we don't have a method of handling them
+            raise
 
         total = basket.total_incl_tax
-        card_number = charge.source.last4
-        card_type = STRIPE_CARD_TYPE_MAP.get(charge.source.brand)
+
+        source = charge.source
+        if source.object == 'card':
+            card_number = source.last4
+            card_type = STRIPE_CARD_TYPE_MAP.get(source.brand)
+        else:
+            card_number = ''
+            card_type = STRIPE_SOURCE_TYPES.get(source.type, {}).get('display_name', source.type)
 
         return HandledProcessorResponse(
             transaction_id=transaction_id,
@@ -115,7 +139,7 @@ class Stripe(ApplePayMixin, BaseClientSidePaymentProcessor):
         """
         data = stripe.Token.retrieve(token)['card']
         address = BillingAddress(
-            first_name=data['name'],    # Stripe only has a single name field
+            first_name=data['name'],  # Stripe only has a single name field
             last_name='',
             line1=data['address_line1'],
             line2=data.get('address_line2') or '',

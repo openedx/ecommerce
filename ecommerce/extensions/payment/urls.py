@@ -23,6 +23,7 @@ SDN_URLS = [
 
 STRIPE_URLS = [
     url(r'^submit/$', stripe.StripeSubmitView.as_view(), name='submit'),
+    url(r'^submit-source/$', stripe.StripeSubmitSourceView.as_view(), name='submit_source'),
 ]
 
 urlpatterns = [

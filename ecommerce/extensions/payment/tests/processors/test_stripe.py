@@ -22,17 +22,11 @@ class StripeTests(PaymentProcessorTestCaseMixin, TestCase):
     processor_class = Stripe
     processor_name = 'stripe'
 
-    def test_get_transaction_parameters(self):
-        self.assertRaises(NotImplementedError, self.processor.get_transaction_parameters, self.basket)
-
-    def test_handle_processor_response(self):
+    def assert_payment_succeeded(self, source, expected_card_type, expected_card_number):
         token = 'abc123'
         charge = stripe.Charge.construct_from({
             'id': '2404',
-            'source': {
-                'brand': 'American Express',
-                'last4': '1986',
-            },
+            'source': source,
         }, 'fake-key')
 
         with mock.patch('stripe.Charge.create') as charge_mock:
@@ -51,10 +45,28 @@ class StripeTests(PaymentProcessorTestCaseMixin, TestCase):
         assert actual.transaction_id == charge.id
         assert actual.total == self.basket.total_incl_tax
         assert actual.currency == self.basket.currency
-        assert actual.card_number == charge.source.last4
-        assert actual.card_type == 'american_express'
+        assert actual.card_type == expected_card_type
+        assert actual.card_number == expected_card_number
 
         self.assert_processor_response_recorded(self.processor_name, charge.id, charge, basket=self.basket)
+
+    def test_get_transaction_parameters(self):
+        self.assertRaises(NotImplementedError, self.processor.get_transaction_parameters, self.basket)
+
+    def test_handle_processor_response(self):
+        source = {
+            'brand': 'American Express',
+            'last4': '1986',
+            'object': 'card',
+        }
+        self.assert_payment_succeeded(source, 'american_express', source['last4'])
+
+    def test_handle_processor_response_for_source(self):
+        source = {
+            'type': 'alipay',
+            'object': 'source',
+        }
+        self.assert_payment_succeeded(source, 'Alipay', '')
 
     def test_handle_processor_response_error(self):
         with mock.patch('stripe.Charge.create') as charge_mock:
@@ -62,6 +74,18 @@ class StripeTests(PaymentProcessorTestCaseMixin, TestCase):
                 'fake-msg', 'fake-param', 'fake-code', http_body='fake-body', http_status=500
             )
             self.assertRaises(TransactionDeclined, self.processor.handle_processor_response, 'fake-token', self.basket)
+
+    def test_handle_processor_response_with_declined_payment(self):
+        with mock.patch('stripe.Charge.create') as charge_mock:
+            charge_mock.side_effect = stripe.error.InvalidRequestError('fake-msg', 'fake-param')
+
+            with mock.patch('stripe.Source.retrieve') as source_mock:
+                source_mock.return_value = stripe.Source.construct_from({
+                    'status': 'failed'
+                }, 'fake-key')
+
+                self.assertRaises(TransactionDeclined, self.processor.handle_processor_response, 'fake-token',
+                                  self.basket)
 
     def test_issue_credit(self):
         charge_reference_number = '9436'

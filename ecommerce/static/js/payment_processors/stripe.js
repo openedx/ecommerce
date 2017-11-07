@@ -9,16 +9,20 @@ define([
 
     return {
         init: function(config) {
+            this.basketId = config.basketId;
+            this.currency = config.currency;
+            this.total = config.total;
+            this.sourceRedirectUrl = config.sourceRedirectUrl;
             this.publishableKey = config.publishableKey;
             this.postUrl = config.postUrl;
             this.$paymentForm = $('#paymentForm');
             this.stripe = Stripe(this.publishableKey);
             this.paymentRequestConfig = {
                 country: config.country,
-                currency: config.paymentRequest.currency,
+                currency: this.currency,
                 total: {
                     label: config.paymentRequest.label,
-                    amount: config.paymentRequest.total
+                    amount: this.total
                 }
             };
 
@@ -29,6 +33,7 @@ define([
 
             this.$paymentForm.on('submit', $.proxy(this.onPaymentFormSubmit, this));
             this.initializePaymentRequest();
+            this.initializeAlipay();
         },
 
         onPaymentFormSubmit: function(e) {
@@ -146,6 +151,24 @@ define([
 
             paymentRequest.on('token', function(ev) {
                 self.postTokenToServer(ev.token.id, ev);
+            });
+        },
+
+        initializeAlipay: function() {
+            this.$paymentForm.find('#alipay-button').click($.proxy(this.onAlipayClick, this));
+        },
+
+        onAlipayClick: function() {
+            this.stripe.createSource({
+                type: 'alipay',
+                amount: this.total,
+                currency: this.currency,
+                redirect: {
+                    return_url: this.sourceRedirectUrl + '?basket=' + this.basketId
+                }
+            }).then(function(result) {
+                // TODO Handle result.error
+                window.location.href = result.source.redirect.url;
             });
         }
     };

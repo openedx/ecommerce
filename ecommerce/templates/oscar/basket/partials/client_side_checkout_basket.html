@@ -143,6 +143,15 @@
                               class="payment-button apple-pay-button apple-pay-button-black"
                               title="{% trans "Pay with Apple Pay" %}" type="button">
                       </button>
+                      <button id="alipay-button"
+                         data-track-type="click"
+                         data-track-event="edx.bi.ecommerce.basket.payment_selected"
+                         data-track-category="checkout"
+                         data-track-payment-method="Alipay"
+                         class="btn payment-button payment-processor-alipay"
+                         title="{% trans "Pay with AliPay" %}"
+                         type="button">
+                      </button>
                     <div id="payment-request-button"
                          data-track-type="click"
                          data-track-event="edx.bi.ecommerce.basket.payment_selected"
