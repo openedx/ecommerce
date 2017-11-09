@@ -223,7 +223,7 @@ class Alipay(BasePaymentProcessor):
         id = payment.id
         order_string = self.alipay_api.api_alipay_trade_page_pay(
             out_trade_no=payment.id,
-            total_amount=0.01,
+            total_amount=unicode(basket.total_incl_tax),#0.01,
             subject=middle_truncate(line.product.title, 127),
             return_url=return_url,
         )
