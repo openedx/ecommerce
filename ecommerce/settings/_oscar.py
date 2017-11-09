@@ -15,10 +15,10 @@ OSCAR_HOMEPAGE = reverse_lazy('dashboard:index')
 
 # APP CONFIGURATION
 OSCAR_APPS = [
-    'ecommerce.extensions.api',
-    'ecommerce.extensions.fulfillment',
-    'ecommerce.extensions.refund',
-] + get_core_apps([
+                 'ecommerce.extensions.api',
+                 'ecommerce.extensions.fulfillment',
+                 'ecommerce.extensions.refund',
+             ] + get_core_apps([
     'ecommerce.extensions.analytics',
     'ecommerce.extensions.basket',
     'ecommerce.extensions.catalogue',
@@ -100,6 +100,7 @@ OSCAR_DEFAULT_CURRENCY = 'USD'
 PAYMENT_PROCESSORS = (
     'ecommerce.extensions.payment.processors.cybersource.Cybersource',
     'ecommerce.extensions.payment.processors.paypal.Paypal',
+    'ecommerce.extensions.payment.processors.alipay.Alipay',
     'ecommerce.extensions.payment.processors.stripe.Stripe',
 )
 

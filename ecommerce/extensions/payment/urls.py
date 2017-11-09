@@ -1,6 +1,6 @@
 from django.conf.urls import include, url
 
-from ecommerce.extensions.payment.views import PaymentFailedView, SDNFailure, cybersource, paypal, stripe
+from ecommerce.extensions.payment.views import PaymentFailedView, SDNFailure, cybersource, paypal, stripe, alipay
 
 CYBERSOURCE_APPLE_PAY_URLS = [
     url(r'^authorize/$', cybersource.CybersourceApplePayAuthorizationView.as_view(), name='authorize'),
@@ -17,6 +17,11 @@ PAYPAL_URLS = [
     url(r'^profiles/$', paypal.PaypalProfileAdminView.as_view(), name='profiles'),
 ]
 
+ALIPAY_URLS = [
+    url(r'^execute/$', alipay.AlipayPaymentExecutionView.as_view(), name='execute'),
+    url(r'^profiles/$', alipay.AlipayProfileAdminView.as_view(), name='profiles'),
+]
+
 SDN_URLS = [
     url(r'^failure/$', SDNFailure.as_view(), name='failure'),
 ]
@@ -29,6 +34,7 @@ urlpatterns = [
     url(r'^cybersource/', include(CYBERSOURCE_URLS, namespace='cybersource')),
     url(r'^error/$', PaymentFailedView.as_view(), name='payment_error'),
     url(r'^paypal/', include(PAYPAL_URLS, namespace='paypal')),
+    url(r'^alipay/', include(ALIPAY_URLS, namespace='alipay')),
     url(r'^sdn/', include(SDN_URLS, namespace='sdn')),
     url(r'^stripe/', include(STRIPE_URLS, namespace='stripe')),
 ]
