@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-10-30 22:36-0400\n"
-"PO-Revision-Date: 2017-10-31 21:18+0000\n"
+"POT-Creation-Date: 2017-10-31 21:48-0400\n"
+"PO-Revision-Date: 2017-11-07 08:15+0000\n"
 "Last-Translator: Ned Batchelder <ned@edx.org>\n"
 "Language-Team: Hungarian (http://www.transifex.com/open-edx/edx-platform/language/hu/)\n"
 "MIME-Version: 1.0\n"
@@ -255,6 +255,16 @@ msgstr ""
 msgid ""
 "An error occurred while processing your payment. You have NOT been charged. "
 "Please try again, or select another payment method."
+msgstr ""
+
+#: ecommerce/static/js/payment_processors/stripe.js:71
+msgid ""
+"An error occurred while attempting to process your payment. You have not "
+"been charged. Please check your payment details, and try again."
+msgstr ""
+
+#: ecommerce/static/js/payment_processors/stripe.js:110
+msgid "An error occurred while processing your payment. Please try again."
 msgstr ""
 
 #: ecommerce/static/js/utils/utils.js:184

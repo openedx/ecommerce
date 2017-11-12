@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-10-31 21:45-0400\n"
+"POT-Creation-Date: 2017-10-31 21:48-0400\n"
 "PO-Revision-Date: 2017-11-01 09:03+0000\n"
 "Last-Translator: Ned Batchelder <ned@edx.org>\n"
 "Language-Team: Chinese (Hong Kong) (http://www.transifex.com/open-edx/edx-platform/language/zh_HK/)\n"
@@ -699,47 +699,47 @@ msgid ""
 "You will receive an email at {user_email} with your enrollment code(s)."
 msgstr ""
 
-#: ecommerce/extensions/basket/views.py:353
+#: ecommerce/extensions/basket/views.py:354
 #, python-brace-format
 msgid "Could not apply the code '{code}'; it requires data sharing consent."
 msgstr ""
 
-#: ecommerce/extensions/basket/views.py:405
+#: ecommerce/extensions/basket/views.py:406
 #, python-brace-format
 msgid "Coupon code '{code}' has expired."
 msgstr ""
 
-#: ecommerce/extensions/basket/views.py:412
+#: ecommerce/extensions/basket/views.py:413
 #, python-brace-format
 msgid "Coupon code '{code}' is not active."
 msgstr ""
 
-#: ecommerce/extensions/basket/views.py:419
+#: ecommerce/extensions/basket/views.py:420
 #, python-brace-format
 msgid "Coupon code '{code}' has already been redeemed."
 msgstr ""
 
-#: ecommerce/extensions/basket/views.py:429
-#: ecommerce/extensions/basket/views.py:436
+#: ecommerce/extensions/basket/views.py:430
+#: ecommerce/extensions/basket/views.py:437
 #, python-brace-format
 msgid "Coupon code '{code}' is not valid for this basket."
 msgstr ""
 
-#: ecommerce/extensions/basket/views.py:460
+#: ecommerce/extensions/basket/views.py:461
 msgid "Your basket does not qualify for a coupon code discount."
 msgstr ""
 
-#: ecommerce/extensions/basket/views.py:465
+#: ecommerce/extensions/basket/views.py:466
 #, python-brace-format
 msgid "Coupon code '{code}' added to basket."
 msgstr ""
 
-#: ecommerce/extensions/basket/views.py:475
+#: ecommerce/extensions/basket/views.py:476
 #, python-brace-format
 msgid "You have already added coupon code '{code}' to your basket."
 msgstr ""
 
-#: ecommerce/extensions/basket/views.py:483
+#: ecommerce/extensions/basket/views.py:484
 #, python-brace-format
 msgid "Coupon code '{code}' does not exist."
 msgstr ""
@@ -869,7 +869,7 @@ msgstr ""
 msgid "Partner"
 msgstr ""
 
-#: ecommerce/extensions/partner/models.py:20 ecommerce/settings/_oscar.py:214
+#: ecommerce/extensions/partner/models.py:20 ecommerce/settings/_oscar.py:221
 msgid "Partners"
 msgstr ""
 
@@ -877,15 +877,15 @@ msgstr ""
 msgid "American Express"
 msgstr ""
 
-#: ecommerce/extensions/payment/constants.py:14
+#: ecommerce/extensions/payment/constants.py:15
 msgid "Discover"
 msgstr ""
 
-#: ecommerce/extensions/payment/constants.py:19
+#: ecommerce/extensions/payment/constants.py:21
 msgid "MasterCard"
 msgstr ""
 
-#: ecommerce/extensions/payment/constants.py:24
+#: ecommerce/extensions/payment/constants.py:27
 msgid "Visa"
 msgstr ""
 
@@ -906,6 +906,7 @@ msgid "{label} (required)"
 msgstr ""
 
 #: ecommerce/extensions/payment/forms.py:108
+#: ecommerce/extensions/payment/forms.py:198
 #: ecommerce/extensions/payment/views/__init__.py:96
 msgid ""
 "There was a problem retrieving your basket. Refresh the page to try again."
@@ -1319,7 +1320,7 @@ msgstr ""
 msgid "UTM Created At"
 msgstr ""
 
-#: ecommerce/settings/_oscar.py:171
+#: ecommerce/settings/_oscar.py:178
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:17
 #: ecommerce/templates/oscar/dashboard/index.html:22
 #: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:14
@@ -1332,38 +1333,38 @@ msgstr ""
 msgid "Dashboard"
 msgstr ""
 
-#: ecommerce/settings/_oscar.py:176
+#: ecommerce/settings/_oscar.py:183
 msgid "Catalogue"
 msgstr ""
 
-#: ecommerce/settings/_oscar.py:180
+#: ecommerce/settings/_oscar.py:187
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:11
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:20
 msgid "Products"
 msgstr ""
 
-#: ecommerce/settings/_oscar.py:184
+#: ecommerce/settings/_oscar.py:191
 msgid "Product Types"
 msgstr ""
 
-#: ecommerce/settings/_oscar.py:188
+#: ecommerce/settings/_oscar.py:195
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:73
 msgid "Categories"
 msgstr ""
 
-#: ecommerce/settings/_oscar.py:192
+#: ecommerce/settings/_oscar.py:199
 msgid "Ranges"
 msgstr ""
 
-#: ecommerce/settings/_oscar.py:196
+#: ecommerce/settings/_oscar.py:203
 msgid "Low stock alerts"
 msgstr ""
 
-#: ecommerce/settings/_oscar.py:202
+#: ecommerce/settings/_oscar.py:209
 msgid "Fulfillment"
 msgstr ""
 
-#: ecommerce/settings/_oscar.py:206
+#: ecommerce/settings/_oscar.py:213
 #: ecommerce/templates/oscar/dashboard/index.html:33
 #: ecommerce/templates/oscar/dashboard/orders/line_detail.html:16
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:32
@@ -1375,11 +1376,11 @@ msgstr ""
 msgid "Orders"
 msgstr ""
 
-#: ecommerce/settings/_oscar.py:210
+#: ecommerce/settings/_oscar.py:217
 msgid "Statistics"
 msgstr ""
 
-#: ecommerce/settings/_oscar.py:218
+#: ecommerce/settings/_oscar.py:225
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:107
 #: ecommerce/templates/oscar/dashboard/partials/refund_table.html:5
 #: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html:32
@@ -1390,25 +1391,25 @@ msgstr ""
 msgid "Refunds"
 msgstr ""
 
-#: ecommerce/settings/_oscar.py:224 ecommerce/settings/_oscar.py:228
+#: ecommerce/settings/_oscar.py:231 ecommerce/settings/_oscar.py:235
 #: ecommerce/templates/oscar/dashboard/users/detail.html:23
 msgid "Customers"
 msgstr ""
 
-#: ecommerce/settings/_oscar.py:232
+#: ecommerce/settings/_oscar.py:239
 msgid "Stock alert requests"
 msgstr ""
 
-#: ecommerce/settings/_oscar.py:238 ecommerce/settings/_oscar.py:242
+#: ecommerce/settings/_oscar.py:245 ecommerce/settings/_oscar.py:249
 #: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:17
 msgid "Offers"
 msgstr ""
 
-#: ecommerce/settings/_oscar.py:246
+#: ecommerce/settings/_oscar.py:253
 msgid "Vouchers"
 msgstr ""
 
-#: ecommerce/settings/_oscar.py:252
+#: ecommerce/settings/_oscar.py:259
 msgid "Reports"
 msgstr ""
 
@@ -2115,59 +2116,59 @@ msgstr ""
 msgid "Pay with Apple Pay"
 msgstr ""
 
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:152
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:159
 msgid "card holder information"
 msgstr ""
 
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:163
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:170
 msgid "billing information"
 msgstr ""
 
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:165
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:172
 msgid "Credit cards"
 msgstr ""
 
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:172
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:179
 msgid "Card Number (required)"
 msgstr ""
 
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:172
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:181
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:179
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:189
 msgid "Secure"
 msgstr ""
 
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:175
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:182
 msgid "Credit card icon"
 msgstr ""
 
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:180
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:188
 msgid "Security Code (required)"
 msgstr ""
 
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:184
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:192
 msgid "Help with CVV"
 msgstr ""
 
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:187
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:195
 msgid ""
 "The three last digits in the signature area on the back of your card. For "
 "American Express, it is the four digits on the front of the card."
 msgstr ""
 
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:194
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:202
 msgid "Expiration (required)"
 msgstr ""
 
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:198
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:206
 msgid "Month"
 msgstr ""
 
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:208
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:216
 msgid "Year"
 msgstr ""
 
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:225
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:235
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:233
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:243
 #: ecommerce/templates/oscar/basket/partials/hosted_checkout_basket.html:147
 msgid "Place Order"
 msgstr ""
