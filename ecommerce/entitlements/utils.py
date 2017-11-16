@@ -22,6 +22,7 @@ def create_parent_course_entitlement(name, UUID):
     parent, created = Product.objects.get_or_create(
         structure=Product.PARENT,
         product_class=ProductClass.objects.get(name=COURSE_ENTITLEMENT_PRODUCT_CLASS_NAME),
+        title='Parent Course Entitlement for {}'.format(name),
     )
 
     if created:
@@ -46,7 +47,7 @@ def create_or_update_course_entitlement(certificate_type, price, partner, UUID, 
     entitlement_class = ProductClass.objects.get(name=COURSE_ENTITLEMENT_PRODUCT_CLASS_NAME)
 
     certificate_type_query = Q(
-        title='Course Entitlement for {}'.format(name),
+        title='Course {}'.format(name),
         attributes__name='certificate_type',
         attribute_values__value_text=certificate_type,
         product_class=entitlement_class
@@ -61,7 +62,7 @@ def create_or_update_course_entitlement(certificate_type, price, partner, UUID, 
 
     course_entitlement.structure = Product.CHILD
     course_entitlement.is_discountable = True
-    course_entitlement.title = 'Course Entitlement for {}'.format(name)
+    course_entitlement.title = 'Course {}'.format(name)
     course_entitlement.attr.certificate_type = certificate_type
     course_entitlement.attr.UUID = UUID
     course_entitlement.parent = parent_entitlement
@@ -80,7 +81,7 @@ def create_or_update_course_entitlement(certificate_type, price, partner, UUID, 
     )
 
     logger.info(
-        'Course course entitlement product stock record with certificate type [%s] for [%s] does not exist. '
+        'Course entitlement product stock record with certificate type [%s] for [%s] does not exist. '
         'Instantiated a new instance.',
         certificate_type,
         UUID
