@@ -18,7 +18,7 @@ class TestCourseEntitlementProductCreation(TestCase):
 
         product = create_or_update_course_entitlement(
             'verified', 100, self.partner, 'foo-bar', 'Foo Bar Entitlement')
-        self.assertEqual(product.title, 'Course Entitlement for Foo Bar Entitlement')
+        self.assertEqual(product.title, 'Course Foo Bar Entitlement')
         self.assertEqual(product.attr.UUID, 'foo-bar')
 
         stock_record = StockRecord.objects.get(product=product, partner=self.partner)
@@ -32,7 +32,7 @@ class TestCourseEntitlementProductCreation(TestCase):
         stock_record = StockRecord.objects.get(product=product, partner=self.partner)
 
         self.assertEqual(stock_record.price_excl_tax, 100)
-        self.assertEqual(product.title, 'Course Entitlement for Foo Bar Entitlement')
+        self.assertEqual(product.title, 'Course Foo Bar Entitlement')
 
         product = create_or_update_course_entitlement('verified', 200, partner, 'foo-bar', 'Foo Bar Entitlement')
 

@@ -88,7 +88,7 @@ class ProgramTestMixin(DiscoveryTestMixin):
         if mocked_api == 'enrollments':
             api_url = get_lms_enrollment_api_url()
         else:
-            api_url = get_lms_entitlement_api_url()
+            api_url = get_lms_entitlement_api_url() + 'entitlements/'
         httpretty.register_uri(
             method=httpretty.GET,
             uri='{}?user={}'.format(api_url, username),
