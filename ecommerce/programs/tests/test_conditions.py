@@ -203,11 +203,12 @@ class ProgramCourseRunSeatsConditionTests(ProgramTestMixin, TestCase):
         # Extract one verified seat for each course
         verified_entitlements = []
         course_uuids = set([course['uuid'] for course in program['courses']])
-        for entitlement in Product.objects.filter(
-                product_class__name=COURSE_ENTITLEMENT_PRODUCT_CLASS_NAME, structure=Product.CHILD
+        for parent_entitlement in Product.objects.filter(
+                product_class__name=COURSE_ENTITLEMENT_PRODUCT_CLASS_NAME, structure=Product.PARENT
         ):
-            if entitlement.attr.UUID in course_uuids and entitlement.attr.certificate_type == 'verified':
-                verified_entitlements.append(entitlement)
+            for entitlement in Product.objects.filter(parent=parent_entitlement):
+                if entitlement.attr.UUID in course_uuids and entitlement.attr.certificate_type == 'verified':
+                    verified_entitlements.append(entitlement)
 
         self.mock_user_data(basket.owner.username, mocked_api='entitlements', owned_products=entitlements_response)
         self.mock_user_data(basket.owner.username)
