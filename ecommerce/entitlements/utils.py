@@ -44,13 +44,11 @@ def create_or_update_course_entitlement(certificate_type, price, partner, UUID, 
 
     certificate_type = certificate_type.lower()
     UUID = unicode(UUID)
-    entitlement_class = ProductClass.objects.get(name=COURSE_ENTITLEMENT_PRODUCT_CLASS_NAME)
 
     certificate_type_query = Q(
         title='Course {}'.format(name),
         attributes__name='certificate_type',
         attribute_values__value_text=certificate_type,
-        product_class=entitlement_class
     )
 
     try:
@@ -66,7 +64,6 @@ def create_or_update_course_entitlement(certificate_type, price, partner, UUID, 
     course_entitlement.attr.certificate_type = certificate_type
     course_entitlement.attr.UUID = UUID
     course_entitlement.parent = parent_entitlement
-    course_entitlement.product_class = entitlement_class
     course_entitlement.save()
 
     StockRecord.objects.update_or_create(
