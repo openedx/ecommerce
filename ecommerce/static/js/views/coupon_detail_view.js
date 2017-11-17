@@ -120,6 +120,7 @@ define([
                     courseCatalogName = '',
                     invoiceData = this.formatInvoiceData(),
                     emailDomains = this.model.get('email_domains'),
+                    lastEdited = this.model.get('last_edited'),
                     templateData,
                     price = null;
 
@@ -139,7 +140,7 @@ define([
                     courseSeatType: this.formatSeatTypes(),
                     discountValue: this.discountValue(),
                     endDateTime: this.formatDateTime(this.model.get('end_date')),
-                    lastEdited: this.formatLastEditedData(this.model.get('last_edited')),
+                    lastEdited: lastEdited ? this.formatLastEditedData(lastEdited) : '',
                     price: price,
                     startDateTime: this.formatDateTime(this.model.get('start_date')),
                     usage: this.usageLimitation(),
