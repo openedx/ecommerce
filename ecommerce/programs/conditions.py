@@ -11,7 +11,6 @@ from requests.exceptions import ConnectionError, Timeout
 from slumber.exceptions import HttpNotFoundError, SlumberBaseException
 
 from ecommerce.core.utils import get_cache_key, traverse_pagination
-from ecommerce.extensions.offer.decorators import check_condition_applicability
 from ecommerce.extensions.offer.mixins import SingleItemConsumptionConditionMixin
 from ecommerce.programs.utils import get_program
 
@@ -90,7 +89,6 @@ class ProgramCourseRunSeatsCondition(SingleItemConsumptionConditionMixin, Condit
                 return True
         return False
 
-    @check_condition_applicability()
     def is_satisfied(self, offer, basket):  # pylint: disable=unused-argument
         """
         Determines if a user is eligible for a program offer based on products in their basket
@@ -102,6 +100,12 @@ class ProgramCourseRunSeatsCondition(SingleItemConsumptionConditionMixin, Condit
         Returns:
             bool
         """
+        if basket.is_empty:
+            return False
+
+        if basket.total_incl_tax == 0:
+            return False
+
         basket_skus = set([line.stockrecord.partner_sku for line in basket.all_lines()])
         try:
             program = get_program(self.program_uuid, basket.site.siteconfiguration)
