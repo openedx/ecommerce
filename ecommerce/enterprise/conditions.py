@@ -2,13 +2,13 @@ from __future__ import unicode_literals
 
 import logging
 
+import waffle
 from oscar.core.loading import get_model
 from requests.exceptions import ConnectionError, Timeout
 from slumber.exceptions import SlumberHttpBaseException
 
 from ecommerce.enterprise.api import catalog_contains_course_runs, fetch_enterprise_learner_data
 from ecommerce.enterprise.constants import ENTERPRISE_OFFERS_SWITCH
-from ecommerce.extensions.offer.decorators import check_condition_applicability
 from ecommerce.extensions.offer.mixins import ConditionWithoutRangeMixin, SingleItemConsumptionConditionMixin
 
 Condition = get_model('offer', 'Condition')
@@ -24,7 +24,6 @@ class EnterpriseCustomerCondition(ConditionWithoutRangeMixin, SingleItemConsumpt
     def name(self):
         return "Basket contains a seat from {}'s catalog".format(self.enterprise_customer_name)
 
-    @check_condition_applicability([ENTERPRISE_OFFERS_SWITCH])
     def is_satisfied(self, offer, basket):  # pylint: disable=unused-argument
         """
         Determines if a user is eligible for an enterprise customer offer
@@ -36,6 +35,15 @@ class EnterpriseCustomerCondition(ConditionWithoutRangeMixin, SingleItemConsumpt
         Returns:
             bool
         """
+        if not waffle.switch_is_active(ENTERPRISE_OFFERS_SWITCH):
+            return False
+
+        if basket.is_empty:
+            return False
+
+        if basket.total_incl_tax == 0:
+            return False
+
         try:
             learner_data = fetch_enterprise_learner_data(basket.site, basket.owner)['results'][0]
         except (ConnectionError, KeyError, SlumberHttpBaseException, Timeout):
