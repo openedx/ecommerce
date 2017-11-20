@@ -1,10 +1,10 @@
 import itertools
 
 import mock
-from analytics import Client
 from oscar.core.loading import get_class, get_model
 from oscar.test import factories
 
+from analytics import Client
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.extensions.analytics.utils import parse_tracking_context, translate_basket_line_for_segment
 from ecommerce.extensions.api.v2.tests.views.mixins import CatalogMixin
