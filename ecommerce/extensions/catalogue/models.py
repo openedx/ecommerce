@@ -82,10 +82,6 @@ def update_enrollment_code(sender, **kwargs):  # pylint: disable=unused-argument
         instance.original_expires = instance.expires
 
 
-class ProductAttributeValue(AbstractProductAttributeValue):
-    history = HistoricalRecords()
-
-
 class Catalog(models.Model):
     name = models.CharField(max_length=255)
     partner = models.ForeignKey('partner.Partner', related_name='catalogs', on_delete=models.CASCADE)
