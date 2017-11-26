@@ -419,7 +419,7 @@ class ConditionalOfferTests(TestCase):
         self.assertTrue(self.offer.is_email_valid(valid_email_2))
 
     @ddt.data(
-        'domain.com', 'multi.it,domain.hr', 'sub.domain.net', '例如.com', 'val-id.例如', 'valid1.co例如',
+        '', 'domain.com', 'multi.it,domain.hr', 'sub.domain.net', '例如.com', 'val-id.例如', 'valid1.co例如',
         'valid-domain.com', 'çççç.рф', 'çç-ççç32.中国', 'ççç.ççç.இலங்கை'
     )
     def test_creating_offer_with_valid_email_domains(self, email_domains):
@@ -428,7 +428,7 @@ class ConditionalOfferTests(TestCase):
         self.assertEqual(offer.email_domains, email_domains)
 
     @ddt.data(
-        '', 'noDot', 'spaceAfter.comma, domain.hr', 'nothingAfterDot.', '.nothingBeforeDot', 'space not.allowed',
+        'noDot', 'spaceAfter.comma, domain.hr', 'nothingAfterDot.', '.nothingBeforeDot', 'space not.allowed',
         3, '-invalid.com', 'invalid', 'invalid-.com', 'invalid.c', 'valid.com,', 'invalid.photography1',
         'valid.com,invalid', 'valid.com,invalid-.com', 'valid.com,-invalid.com', 'in--valid.com',
         'in..valid.com', 'valid.com,invalid.c', 'invalid,valid.com', 'çççç.çç-çç', 'ççç.xn--ççççç', 'çççç.çç--çç.ççç'
