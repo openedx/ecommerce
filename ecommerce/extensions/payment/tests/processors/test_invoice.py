@@ -51,7 +51,7 @@ class InvoiceTests(PaymentProcessorTestCaseMixin, TestCase):
 
     def test_issue_credit(self):
         """Test issue credit"""
-        self.assertRaises(NotImplementedError, self.processor_class(self.site).issue_credit, None, None, 0, 'USD')
+        self.assertRaises(NotImplementedError, self.processor_class(self.site).issue_credit, None, None, None, 0, 'USD')
 
     def test_issue_credit_error(self):
         """ Tests that Invoice payment processor does not support issuing credit """

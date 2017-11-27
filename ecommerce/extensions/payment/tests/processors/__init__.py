@@ -20,7 +20,7 @@ class DummyProcessor(BaseClientSidePaymentProcessor):
     def is_signature_valid(self, response):
         pass
 
-    def issue_credit(self, order, reference_number, amount, currency):
+    def issue_credit(self, order_number, basket, reference_number, amount, currency):
         return self.REFUND_TRANSACTION_ID
 
 

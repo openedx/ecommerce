@@ -251,7 +251,7 @@ class CybersourceTests(CybersourceMixin, PaymentProcessorTestCaseMixin, TestCase
 
         response = self.mock_refund_response(amount=amount, currency=currency, transaction_id=transaction_id,
                                              basket_id=basket.id)
-        actual = self.processor.issue_credit(order, source.reference, amount, currency)
+        actual = self.processor.issue_credit(order.number, basket, source.reference, amount, currency)
         self.assertEqual(actual, transaction_id)
 
         # Verify PaymentProcessorResponse created
@@ -274,13 +274,15 @@ class CybersourceTests(CybersourceMixin, PaymentProcessorTestCaseMixin, TestCase
 
         # Test for communication failure.
         with mock.patch.object(requests.Session, 'get', mock.Mock(side_effect=requests.Timeout)):
-            self.assertRaises(GatewayError, self.processor.issue_credit, order, source.reference, amount, currency)
+            self.assertRaises(GatewayError, self.processor.issue_credit, order.number, order.basket, source.reference,
+                              amount, currency)
             self.assertEqual(source.amount_refunded, 0)
 
         # Test for declined transaction
         response = self.mock_refund_response(amount=amount, currency=currency, transaction_id=transaction_id,
                                              basket_id=basket.id, decision='DECLINE')
-        self.assertRaises(GatewayError, self.processor.issue_credit, order, source.reference, amount, currency)
+        self.assertRaises(GatewayError, self.processor.issue_credit, order.number, order.basket, source.reference,
+                          amount, currency)
         self.assert_processor_response_recorded(self.processor.NAME, transaction_id, response, basket)
         self.assertEqual(source.amount_refunded, 0)
 
