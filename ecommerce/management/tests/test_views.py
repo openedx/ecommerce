@@ -2,6 +2,7 @@ import mock
 from django.contrib import messages
 from django.urls import reverse
 
+from ecommerce.management.utils import FulfillFrozenBaskets
 from ecommerce.tests.testcases import TestCase
 
 
@@ -50,3 +51,14 @@ class ManagementViewTests(TestCase):
         expected = 'Finished refunding basket transactions. [0] transactions were successfully refunded. ' \
                    '[0] attempts failed.'
         self.assert_first_message(response, messages.INFO, expected)
+
+    def test_fulfill(self):
+        with mock.patch.object(FulfillFrozenBaskets, 'fulfill_basket') as mock_fulfill:
+            response = self.client.post(self.path, {'action': 'fulfill', 'basket_ids': '1,2,3'})
+            mock_fulfill.assert_has_calls([
+                mock.call(basket_id=1, site=self.site),
+                mock.call(basket_id=2, site=self.site),
+                mock.call(basket_id=3, site=self.site),
+            ], any_order=True)
+
+        assert response.status_code == 200

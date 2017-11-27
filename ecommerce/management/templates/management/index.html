@@ -25,5 +25,14 @@
     <input type="hidden" name="action" value="refund_basket_transactions">
     <input type="submit" value="{% trans "Refund Transactions" %}">
 </form>
+
+<h1>Create Orders for Baskets</h1>
+<form method="post">
+    {% csrf_token %}
+    <label>Enter baskets to fulfill</label>
+    <textarea rows="10" cols="80" name="basket_ids"></textarea><br>
+    <input type="hidden" name="action" value="fulfill">
+    <input type="submit" value="Fulfill Baskets">
+</form>
 </body>
 </html>
