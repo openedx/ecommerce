@@ -1,10 +1,11 @@
-from django.test import TestCase
+import mock
+from django.contrib import messages
 from django.urls import reverse
 
-from ecommerce.tests.mixins import UserMixin
+from ecommerce.tests.testcases import TestCase
 
 
-class ManagementViewTests(UserMixin, TestCase):
+class ManagementViewTests(TestCase):
     path = reverse('management:index')
 
     def setUp(self):
@@ -12,11 +13,19 @@ class ManagementViewTests(UserMixin, TestCase):
         self.user = self.create_user(is_staff=True, is_superuser=True)
         self.client.login(username=self.user.username, password=self.password)
 
+    def get_response_messages(self, response):
+        return list(response.context['messages'])
+
+    def assert_first_message(self, response, expected_level, expected_msg):
+        message = self.get_response_messages(response)[0]
+        assert message.message == expected_msg
+        assert message.level == expected_level
+
     def test_login_required(self):
         """ Verify the view requires login. """
         self.client.logout()
         response = self.client.get(self.path)
-        self.assertEqual(response.status_code, 302)
+        assert response.status_code == 302
 
     def test_superuser_required(self):
         """ Verify the view is not accessible to non-superusers. """
@@ -24,4 +33,20 @@ class ManagementViewTests(UserMixin, TestCase):
         user = self.create_user()
         self.client.login(username=user.username, password=self.password)
         response = self.client.get(self.path)
-        self.assertEqual(response.status_code, 302)
+        assert response.status_code == 302
+
+    def test_invalid_action(self):
+        """ Verify the view responds with an error message if an invalid action is posted. """
+        response = self.client.post(self.path, {'action': None})
+        assert response.status_code == 200
+        self.assert_first_message(response, messages.ERROR, 'None is not a valid action.')
+
+    def test_refund_basket_transactions(self):
+        with mock.patch('ecommerce.management.utils.refund_basket_transactions') as mock_refund:
+            response = self.client.post(self.path, {'action': 'refund_basket_transactions', 'basket_ids': '1,2,3'})
+            assert mock_refund.called_once_with(self.site, [1, 2, 3])
+
+        assert response.status_code == 200
+        expected = 'Finished refunding basket transactions. [0] transactions were successfully refunded. ' \
+                   '[0] attempts failed.'
+        self.assert_first_message(response, messages.INFO, expected)

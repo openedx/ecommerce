@@ -14,5 +14,16 @@
         {% endfor %}
     </ul>
 {% endif %}
+<h1>Refund Basket Transactions</h1>
+<p>Enter a comma-separated list of basket IDs. If a payment has been made against this basket, the payment will be
+    refunded.</p>
+<p>Be careful! CyberSource does not prevent duplicate refunds. You can potentially issue the user more credit than they
+    paid us!</p>
+<form method="post">
+    {% csrf_token %}
+    <textarea rows="10" cols="80" name="basket_ids"></textarea><br>
+    <input type="hidden" name="action" value="refund_basket_transactions">
+    <input type="submit" value="{% trans "Refund Transactions" %}">
+</form>
 </body>
 </html>
