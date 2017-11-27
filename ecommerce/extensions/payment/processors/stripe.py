@@ -90,16 +90,15 @@ class Stripe(ApplePayMixin, BaseClientSidePaymentProcessor):
             card_type=card_type
         )
 
-    def issue_credit(self, order, reference_number, amount, currency):
+    def issue_credit(self, order_number, basket, reference_number, amount, currency):
         try:
             refund = stripe.Refund.create(charge=reference_number)
         except:
             msg = 'An error occurred while attempting to issue a credit (via Stripe) for order [{}].'.format(
-                order.number)
+                order_number)
             logger.exception(msg)
             raise GatewayError(msg)
 
-        basket = order.basket
         transaction_id = refund.id
 
         # NOTE: Refund objects subclass dict so there is no need to do any data transformation

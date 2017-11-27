@@ -46,5 +46,5 @@ class InvoicePayment(BasePaymentProcessor):
     def get_transaction_parameters(self, basket, request=None, use_client_side_checkout=False, **kwargs):
         return None
 
-    def issue_credit(self, order, reference_number, amount, currency):
+    def issue_credit(self, order_number, basket, reference_number, amount, currency):
         raise NotImplementedError

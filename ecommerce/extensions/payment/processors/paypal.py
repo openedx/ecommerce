@@ -342,7 +342,7 @@ class Paypal(BasePaymentProcessor):
 
         return None
 
-    def issue_credit(self, order, reference_number, amount, currency):
+    def issue_credit(self, order_number, basket, reference_number, amount, currency):
         try:
             payment = paypalrestsdk.Payment.find(reference_number, api=self.paypal_api)
             sale = self._get_payment_sale(payment)
@@ -359,11 +359,10 @@ class Paypal(BasePaymentProcessor):
 
         except:
             msg = 'An error occurred while attempting to issue a credit (via PayPal) for order [{}].'.format(
-                order.number)
+                order_number)
             logger.exception(msg)
             raise GatewayError(msg)
 
-        basket = order.basket
         if refund.success():
             transaction_id = refund.id
             self.record_processor_response(refund.to_dict(), transaction_id=transaction_id, basket=basket)

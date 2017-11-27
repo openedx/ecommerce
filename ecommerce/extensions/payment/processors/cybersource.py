@@ -338,7 +338,7 @@ class Cybersource(ApplePayMixin, BaseClientSidePaymentProcessor):
         use_sop_profile = req_profile_id == self.sop_profile_id
         return response and (self._generate_signature(response, use_sop_profile) == response.get('signature'))
 
-    def issue_credit(self, order, reference_number, amount, currency):
+    def issue_credit(self, order_number, basket, reference_number, amount, currency):
         try:
             client = Client(self.soap_api_url, wsse=UsernameToken(self.merchant_id, self.transaction_key))
 
@@ -353,7 +353,7 @@ class Cybersource(ApplePayMixin, BaseClientSidePaymentProcessor):
 
             response = client.service.runTransaction(
                 merchantID=self.merchant_id,
-                merchantReferenceCode=order.number,
+                merchantReferenceCode=order_number,
                 orderRequestToken=reference_number,
                 ccCreditService=credit_service,
                 purchaseTotals=purchase_totals
@@ -361,10 +361,10 @@ class Cybersource(ApplePayMixin, BaseClientSidePaymentProcessor):
 
             request_id = response.requestID
             ppr = self.record_processor_response(serialize_object(response), transaction_id=request_id,
-                                                 basket=order.basket)
+                                                 basket=basket)
         except:
             msg = 'An error occurred while attempting to issue a credit (via CyberSource) for order [{}].'.format(
-                order.number)
+                order_number)
             logger.exception(msg)
             raise GatewayError(msg)
 
@@ -374,7 +374,7 @@ class Cybersource(ApplePayMixin, BaseClientSidePaymentProcessor):
             raise GatewayError(
                 'Failed to issue CyberSource credit for order [{order_number}]. '
                 'Complete response has been recorded in entry [{response_id}]'.format(
-                    order_number=order.number, response_id=ppr.id))
+                    order_number=order_number, response_id=ppr.id))
 
     def request_apple_pay_authorization(self, basket, billing_address, payment_token):
         """

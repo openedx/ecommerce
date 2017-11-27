@@ -490,7 +490,8 @@ class PaypalTests(PaypalMixin, PaymentProcessorTestCaseMixin, TestCase):
         })
         with mock.patch.object(paypalrestsdk.Payment, 'find', return_value=payment):
             with mock.patch.object(paypalrestsdk.Sale, 'refund', return_value=paypal_refund):
-                actual_transaction_id = self.processor.issue_credit(order, source.reference, amount, currency)
+                actual_transaction_id = self.processor.issue_credit(order.number, order.basket, source.reference,
+                                                                    amount, currency)
                 self.assertEqual(actual_transaction_id, transaction_id)
 
         # Verify PaymentProcessorResponse created
@@ -520,13 +521,15 @@ class PaypalTests(PaypalMixin, PaymentProcessorTestCaseMixin, TestCase):
         # Test general exception
         with mock.patch.object(paypalrestsdk.Payment, 'find', return_value=payment):
             with mock.patch.object(paypalrestsdk.Sale, 'refund', side_effect=ValueError):
-                self.assertRaises(GatewayError, self.processor.issue_credit, order, source.reference, amount, currency)
+                self.assertRaises(GatewayError, self.processor.issue_credit, order.number, order.basket,
+                                  source.reference, amount, currency)
                 self.assertEqual(source.amount_refunded, 0)
 
         # Test error response
         with mock.patch.object(paypalrestsdk.Payment, 'find', return_value=payment):
             with mock.patch.object(paypalrestsdk.Sale, 'refund', return_value=paypal_refund):
-                self.assertRaises(GatewayError, self.processor.issue_credit, order, source.reference, amount, currency)
+                self.assertRaises(GatewayError, self.processor.issue_credit, order.number, order.basket,
+                                  source.reference, amount, currency)
 
         # Verify PaymentProcessorResponse created
         self.assert_processor_response_recorded(self.processor.NAME, transaction_id, expected_response, basket)
