@@ -289,15 +289,10 @@ LOCAL_APPS = [
     'ecommerce.invoice',
     'ecommerce.programs',
     'ecommerce.referrals',
-
-    # Theming app for customizing visual and behavioral attributes of a site
     'ecommerce.theming',
-
-    # Sailthru email marketing integration
     'ecommerce.sailthru',
-
-    # Enterprise app for ecommerce
     'ecommerce.enterprise',
+    'ecommerce.management',
 ]
 
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
