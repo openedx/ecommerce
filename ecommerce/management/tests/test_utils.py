@@ -2,13 +2,15 @@ import mock
 from django.db import transaction
 from django.test import override_settings
 from oscar.core.loading import get_class, get_model
+from oscar.test.factories import ProductFactory, RangeFactory
 
+from ecommerce.extensions.basket.utils import prepare_basket
 from ecommerce.extensions.order.constants import PaymentEventTypeName
 from ecommerce.extensions.payment.constants import CARD_TYPES
 from ecommerce.extensions.payment.models import PaymentProcessorResponse
 from ecommerce.extensions.payment.processors.cybersource import Cybersource
 from ecommerce.extensions.payment.processors.paypal import Paypal
-from ecommerce.extensions.test.factories import create_basket
+from ecommerce.extensions.test.factories import UserFactory, create_basket, prepare_voucher
 from ecommerce.management.utils import FulfillFrozenBaskets, refund_basket_transactions
 from ecommerce.tests.testcases import TestCase
 
@@ -27,14 +29,21 @@ class RefundBasketTransactionsTests(TestCase):
         assert refund_basket_transactions(self.site, []) == (0, 0,)
 
     def test_success(self):
-        basket = create_basket(site=self.site)
+        product_price = 100
+        percentage_discount = 10
+        product = ProductFactory(stockrecords__price_excl_tax=product_price)
+        voucher, product = prepare_voucher(_range=RangeFactory(products=[product]), benefit_value=percentage_discount)
+        self.request.user = UserFactory()
+        basket = prepare_basket(self.request, [product], voucher)
+
         ppr = PaymentProcessorResponse.objects.create(basket=basket, transaction_id='abc', processor_name='paypal')
         with mock.patch.object(Paypal, 'issue_credit') as mock_issue_credit:
             mock_issue_credit.return_value = None
 
             assert refund_basket_transactions(self.site, [basket.id]) == (1, 0,)
+            total = product_price * (100 - percentage_discount) / 100.
             mock_issue_credit.assert_called_once_with(
-                basket.order_number, basket, ppr.transaction_id, basket.total_excl_tax, basket.currency
+                basket.order_number, basket, ppr.transaction_id, total, basket.currency
             )
 
     def test_failure(self):
@@ -46,7 +55,12 @@ class RefundBasketTransactionsTests(TestCase):
 @override_settings(FULFILLMENT_MODULES=['ecommerce.extensions.fulfillment.tests.modules.FakeFulfillmentModule', ])
 class FulfillFrozenBasketsTests(TestCase):
     def test_success_with_cybersource(self):
-        basket = create_basket(site=self.site)
+        product_price = 100
+        percentage_discount = 10
+        product = ProductFactory(stockrecords__price_excl_tax=product_price)
+        voucher, product = prepare_voucher(_range=RangeFactory(products=[product]), benefit_value=percentage_discount)
+        self.request.user = UserFactory()
+        basket = prepare_basket(self.request, [product], voucher)
         basket.status = 'Frozen'
         basket.save()
 
@@ -62,7 +76,7 @@ class FulfillFrozenBasketsTests(TestCase):
         order = Order.objects.get(number=basket.order_number)
         assert order.status == 'Complete'
 
-        total = basket.total_incl_tax_excl_discounts
+        total = product_price * (100 - percentage_discount) / 100.
         Source.objects.get(
             source_type__name=Cybersource.NAME, currency=order.currency, amount_allocated=total, amount_debited=total,
             label=card_number, card_type='visa')
