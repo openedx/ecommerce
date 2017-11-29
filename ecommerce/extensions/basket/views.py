@@ -275,6 +275,7 @@ class BasketSummaryView(BasketView):
                 benefit_value = None
 
             line_data.update({
+                'sku': line.product.stockrecords.first().partner_sku,
                 'benefit_value': benefit_value,
                 'enrollment_code': line.product.is_enrollment_code_product,
                 'line': line,
@@ -438,7 +439,14 @@ class VoucherAddView(BaseVoucherAddView):  # pylint: disable=function-redefined
             return
 
         # Do not allow single course run coupons used on bundles.
-        if self.request.basket.num_lines > 1 and not voucher.offers.first().condition.program_uuid:
+        BUNDLE = 'bundle_identifier'
+        BasketAttribute = get_model('basket', 'BasketAttribute')
+        BasketAttributeType = get_model('basket', 'BasketAttributeType')
+        bundle_attribute = BasketAttribute.objects.filter(
+            basket=self.request.basket,
+            attribute_type=BasketAttributeType.objects.get(name=BUNDLE)
+        )
+        if len(bundle_attribute) > 0 and not voucher.offers.first().condition.program_uuid:
             messages.error(
                 self.request,
                 _("Coupon code '{code}' is not valid for this basket.").format(code=code))

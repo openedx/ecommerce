@@ -44,6 +44,8 @@ from ecommerce.tests.testcases import TestCase
 
 Applicator = get_class('offer.utils', 'Applicator')
 Basket = get_model('basket', 'Basket')
+BasketAttribute = get_model('basket', 'BasketAttribute')
+BasketAttributeType = get_model('basket', 'BasketAttributeType')
 Benefit = get_model('offer', 'Benefit')
 Catalog = get_model('catalogue', 'Catalog')
 Condition = get_model('offer', 'Condition')
@@ -59,6 +61,7 @@ VoucherApplication = get_model('voucher', 'VoucherApplication')
 VoucherRemoveView = get_class('basket.views', 'VoucherRemoveView')
 
 COUPON_CODE = 'COUPONTEST'
+BUNDLE = 'bundle_identifier'
 
 
 @ddt.ddt
@@ -850,6 +853,12 @@ class VoucherAddViewTests(LmsApiMockMixin, TestCase):
         new_product = factories.ProductFactory(categories=[], stockrecords__partner__short_code='second')
         self.basket.add_product(product)
         self.basket.add_product(new_product)
+        BasketAttributeType.objects.get_or_create(name=BUNDLE)
+        BasketAttribute.objects.update_or_create(
+            basket=self.basket,
+            attribute_type=BasketAttributeType.objects.get(name=BUNDLE),
+            value_text='test_bundle'
+        )
         self.assert_form_valid_message("Coupon code '{code}' is not valid for this basket.".format(code=voucher.code))
 
     def test_form_valid_without_basket_id(self):
