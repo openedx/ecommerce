@@ -39,6 +39,17 @@ PAYMENT_PROCESSOR_CONFIG = {
             'cancel_checkout_path': PAYMENT_PROCESSOR_CANCEL_PATH,
             'error_path': PAYMENT_PROCESSOR_ERROR_PATH,
         },
+        'alipay': {
+            'mode': 'sandbox',
+            'app_id': '2016072900120582',
+            'private_key': 'MIIEowIBAAKCAQEAq+LUdl2+HRTqsED2zsN7cDB/uNr/F+agELRVeqT+ACTx+Hz+gQVMMI7t2V2wWZ1dUwVaiO0l4tnfrMFWEDgD0Vv3mW9kvQ6IU1hPES8QaUDBDzs4GqfmTuJd6rLRgmvj/NjkOE8CWdM/R27FaZgCGFNRbZ2obt6k6iHezkkm6guTMFAogqyiceEU2cu6KNsOyG3Ur79aOhQCE0xDJcsHzgdA54fnld80K/y2dzCoVo1qEIIlUiknxnQc6vsejkZ8XeN/fly3kdYjv3I0980GWcsSg0K7uY1uQZg8YZRseI/JlMzkOPkDrKh8n5fZrISvqWjvzHF9bCSOgDSSlO7k5wIDAQABAoIBABIjidBD7EAdaPbYpDMFpg0c0R2s3qajC9k3bp3Ws4dIXtCeQC1VZcjqDGeX33hVhvev5PH2NL1PyK7uaCql/qElV2e1vafF1NUWyKFDmjPBRZ5Z3X3SohdJBCg0Xq+ouxJ/wPXAQLtB87eSFPsjs3Tltf4fWRr6G+UpVd3nElg4XBXJ3i73jemFLtyU9r4P3fUGD23SvRNFh7qH63jRvJUTOxTEh2c6CbeZQgJ8Hwhyzl+u3Uu5MSDWXeSCoo8GkpgxezNX6apZD9Rb0rLo1TO51Idj0duPSKX8lZ1WuQQ67zTK5t8zASgI9iSsD/x7rquKw1zzosDO+BAEdIfKLsECgYEA4i+LJoQAVsbehs96DHTCvFFT9USLntcDnQhHoMqP22kJ0Gp+NYg/2WBl1AWB3mFuDFqeRgomGL0wXLjffX09GqOk3O4i2HZoZgsMxjDAr5L+XAReWsfFN+QrvTI7n9S80BvArSV74Mg+4URgsyXJPKgppQhujI9Bdi9njUhUfs8CgYEAwor81BCGNgLYMeFP7UIjbRVhEvLlJs5QGTuYeXa53O3Of3Fa+bl4OzKH3uZs2ExpSvZmR2vmJ7AAbeohSj2PwzLDw/62ppyWFNxizW+1bBOuDfSWv25ojmpCdjriHTmEX8tK26TRExXJeIBMJqd3XzF2aWzW+iyhBuG8Hw2TfmkCgYBEKLmQ+LQ1ciY6j6kiuci5APUA8w/z5K1FE+qpzIC/SI7ZjE3OCenbso3c72/sOIX2GRSa3JIQYGqDdn56jVPthCS5ItXDTyM0pN3Ll4NpJS2bQwG/73VB23NGxy1qg6wGNmbAhowm95DjRzywn5FdwvsRrVHK75x1ZeGZlJNJxwKBgQCi4amziC5GlHUcti+sTz7H+yluqw1vQzfPGJWdxOjy7+x/yZHJGh9vOOyHlNe29asGx2x1CgMGYZbKcEf1F7wBS8Same2la99AkhDrPkdguM13A70fhDpoWtFQmhZtL5YEenovkjw2xXwMtyaLCpWojwo8VJNdnPYpg+B1A3HlWQKBgH3FTuKZkiVhKARMf2k4hZRzNmPNSWqSWXsn2l9II3sq9zX1fSDvR+dEqc2okf9XpVqjkRa9Xn0tJDc0PGri4XuxozySmyX/OC1YcAq5a1T8f+/XKhqIsIR3xMwrlyBKL9drnONaonj1NgqBLqH/7kDInFqTA8+i/UgrntF3iKTt',
+            'alipay_public_key': 'MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAuTgxBRFxS0hxT02CeimBgXBo8UAXcxICZoTU4gHb7VjMoyY5PnUOWPrz79DcoBane5HfW5g6JoBf/EqJhu0wyRwEYDKBiNtwAKbNjgR+1mt2SHsi/iMeWiYN14as0O1eQSIdy4+52032Y2ZBBb+zw2pnVGFKuFunvAtrkFNb45PUSpmTOpve0YeDwnfpCWGh/Syt/CIGfbVcuzmZKS59iTv9RSJ/fCzbQkQbU46rz+r6i0NNfuO/hVLZ90g52nDiL7g6dHrcyK5/G86rbEKvPYbVlGaOyF6+QeionRIYUEEg/p1JC1jK4Llbb/wwcaVck9J6Zeh1nj3LJ/v/sAxwrQIDAQAB',
+            'sign_type': 'RSA2',
+            'charset': 'UTF-8',
+            'receipt_path': PAYMENT_PROCESSOR_RECEIPT_PATH,
+            'cancel_checkout_path': PAYMENT_PROCESSOR_CANCEL_PATH,
+            'error_path': PAYMENT_PROCESSOR_ERROR_PATH,
+        },
         'stripe': {
             'publishable_key': 'pk_test_JU90ubQThS4C5K4E3gG2K61N',
             'secret_key': 'sk_test_cHL2I2pDzsp5ApNTKX3E97oq',

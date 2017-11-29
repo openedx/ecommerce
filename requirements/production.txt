@@ -13,3 +13,8 @@ newrelic==2.90.0.75
 python-memcached==1.58
 PyYAML==3.12
 nodeenv==1.1.1
+
+pycryptodome
+mock==2.0.0
+codecov
+tox
