@@ -1,9 +1,9 @@
-###################################
+#############################
 #
-# Use gevent enabled segment client
+#  edX Fork of Segment's python-analytics 1.2.8 using gevent for queueing
 #
-###################################
--e git+https://github.com/edx/analytics-python.git@1.2.9#egg=analytics-python==1.2.9
+#############################
+-e git+https://github.com/edx/analytics-python.git@1.2.10#egg=analytics-python==1.2.10
 
 coreapi==2.3.1
 django==1.10.7
