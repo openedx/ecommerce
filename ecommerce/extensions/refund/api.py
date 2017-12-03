@@ -36,6 +36,30 @@ def find_orders_associated_with_course(user, course_id):
     return list(orders)
 
 
+def create_refunds_for_entitlement(order, entitlement_uuid):
+    """
+    Creates a refund for a given order and entitlement
+
+    Arguments:
+    order (Order): The order for which to create the refund
+    entitlement_uuid (UUID): The entitlement in the order for which to refund
+
+    Returns:
+        list: refunds created
+    """
+    refunds = []
+
+    line = order.lines.get(refund_lines__id__isnull=True,
+                           product__attribute_values__attribute__code='UUID',
+                           product__attribute_values__value_text=entitlement_uuid)
+
+    refund = Refund.create_with_lines(order, [line])
+    if refund is not None:
+        refunds.append(refund)
+
+    return refunds
+
+
 def create_refunds(orders, course_id):
     """
     Creates refunds for the given list of orders.

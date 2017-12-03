@@ -8,6 +8,7 @@ from oscar.core.loading import get_class, get_model
 from oscar.test.newfactories import BasketFactory
 
 from ecommerce.courses.tests.factories import CourseFactory
+from ecommerce.entitlements.utils import create_or_update_course_entitlement
 from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
 from ecommerce.extensions.fulfillment.status import ORDER
 from ecommerce.extensions.payment.tests.processors import DummyProcessor
@@ -37,7 +38,8 @@ class RefundTestMixin(DiscoveryTestMixin):
             credit_provider='HGW'
         )
 
-    def create_order(self, user=None, credit=False, multiple_lines=False, free=False, status=ORDER.COMPLETE):
+    def create_order(self, user=None, credit=False, multiple_lines=False, free=False,
+                     entitlement=False, status=ORDER.COMPLETE):
         user = user or self.user
         basket = BasketFactory(owner=user, site=self.site)
 
@@ -48,6 +50,9 @@ class RefundTestMixin(DiscoveryTestMixin):
             basket.add_product(self.honor_product)
         elif free:
             basket.add_product(self.honor_product)
+        elif entitlement:
+            course_entitlement = create_or_update_course_entitlement('verified', 100, self.partner, '111', 'Foo')
+            basket.add_product(course_entitlement)
         else:
             basket.add_product(self.verified_product)
 

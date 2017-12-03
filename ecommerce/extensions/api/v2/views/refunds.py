@@ -9,8 +9,14 @@ from rest_framework.response import Response
 from ecommerce.extensions.api import serializers
 from ecommerce.extensions.api.exceptions import BadRequestException
 from ecommerce.extensions.api.permissions import CanActForUser
-from ecommerce.extensions.refund.api import create_refunds, find_orders_associated_with_course
+from ecommerce.extensions.refund.api import (
+    create_refunds,
+    create_refunds_for_entitlement,
+    find_orders_associated_with_course
+)
 
+Order = get_model('order', 'Order')
+OrderLine = get_model('order', 'Line')
 Refund = get_model('refund', 'Refund')
 User = get_user_model()
 
@@ -18,12 +24,12 @@ User = get_user_model()
 class RefundCreateView(generics.CreateAPIView):
     """Creates refunds.
 
-    Given a username and course ID, this view finds and creates a refund for each order
-    matching the following criteria:
+    Given a username and course ID or an order number and a course entitlement,
+    this view finds and creates a refund for each order matching the following criteria:
 
         * Order was placed by the User linked to username.
         * Order is in the COMPLETE state.
-        * Order has at least one line item associated with the course ID.
+        * Order has at least one line item associated with the course ID or Course Entitlement.
 
     Note that only the line items associated with the course ID will be refunded.
     Items associated with a different course ID, or not associated with any course ID, will NOT be refunded.
@@ -40,12 +46,31 @@ class RefundCreateView(generics.CreateAPIView):
         pass
 
     def create(self, request, *args, **kwargs):
-        """ Creates refunds, if eligible orders exist. """
+        """
+        Creates refunds, if eligible orders exist.
+
+        This supports creating refunds for both course runs as well as course entitlements.
+
+        Arguments:
+            username (string): This is required by both types of refund
+
+            course_run refund:
+            course_id (string): The course_id for wchich to refund for the given user
+
+            course_entitlement refund:
+            order_number (string): The order for which to refund the coures entitlement
+            entitlement_uuid (string): The UUID for the course entitlement for the given order to refund
+
+        Returns:
+            refunds (list): List of refunds created
+        """
+
         course_id = request.data.get('course_id')
         username = request.data.get('username')
+        order_number = request.data.get('order_number')
+        entitlement_uuid = request.data.get('entitlement_uuid')
 
-        if not course_id:
-            raise BadRequestException('No course_id specified.')
+        refunds = []
 
         # We should always have a username value as long as CanActForUser is in place.
         if not username:  # pragma: no cover
@@ -56,12 +81,21 @@ class RefundCreateView(generics.CreateAPIView):
         except User.DoesNotExist:
             raise BadRequestException('User "{}" does not exist.'.format(username))
 
-        refunds = []
+        # Try and create a refund for the passed in order
+        if entitlement_uuid:
+            try:
+                order = user.orders.get(number=order_number)
+                refunds = create_refunds_for_entitlement(order, entitlement_uuid)
+            except (Order.DoesNotExist, OrderLine.DoesNotExist):
+                raise BadRequestException('Order {} does not exist.'.format(order_number))
+        else:
+            if not course_id:
+                raise BadRequestException('No course_id specified.')
 
-        # We can only create refunds if the user has orders.
-        if user.orders.exists():
-            orders = find_orders_associated_with_course(user, course_id)
-            refunds = create_refunds(orders, course_id)
+            # We can only create refunds if the user has orders.
+            if user.orders.exists():
+                orders = find_orders_associated_with_course(user, course_id)
+                refunds = create_refunds(orders, course_id)
 
         # Return HTTP 201 if we created refunds.
         if refunds:

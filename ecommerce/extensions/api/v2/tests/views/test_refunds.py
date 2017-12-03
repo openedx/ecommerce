@@ -40,8 +40,14 @@ class RefundCreateViewTests(RefundTestMixin, AccessTokenMixin, JwtMixin, TestCas
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(json.loads(response.content), [])
 
-    def _get_data(self, username=None, course_id=None):
+    def _get_data(self, username=None, course_id=None, order_number=None, entitlement_uuid=None):
         data = {}
+
+        if order_number:
+            data['order_number'] = order_number
+
+        if entitlement_uuid:
+            data['entitlement_uuid'] = entitlement_uuid
 
         if username:
             data['username'] = username
@@ -149,6 +155,48 @@ class RefundCreateViewTests(RefundTestMixin, AccessTokenMixin, JwtMixin, TestCas
         # A second call should result in no additional refunds being created
         response = self.client.post(self.path, data, JSON_CONTENT_TYPE)
         self.assert_ok_response(response)
+
+    def test_valid_entitlement_order(self):
+        """
+        View should create a refund if an entitlement order/line are found eligible for refund.
+        """
+
+        order = self.create_order(entitlement=True)
+        self.assertFalse(Refund.objects.exists())
+        data = self._get_data(username=self.user.username, order_number=order.number, entitlement_uuid='111')
+        response = self.client.post(self.path, data, JSON_CONTENT_TYPE)
+        refund = Refund.objects.latest()
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(json.loads(response.content), [refund.id])
+        self.assert_refund_matches_order(refund, order)
+
+        # A second call should result in no additional refunds being created
+        response = self.client.post(self.path, data, JSON_CONTENT_TYPE)
+        self.assert_bad_request_response(response, 'Order {} does not exist.'.format(order.number))
+
+    def test_invalid_entitlement_order(self):
+        """
+        View should not create a refund if an invalid order number is passed
+        """
+
+        self.create_order(entitlement=True)
+        data = self._get_data(username=self.user.username, order_number='123', entitlement_uuid='111')
+        response = self.client.post(self.path, data, JSON_CONTENT_TYPE)
+
+        self.assert_bad_request_response(response, 'Order 123 does not exist.')
+
+    def test_invalid_entitlement_order_line(self):
+        """
+        View should not create a refund if an entitlement order/line is invalid.
+        """
+
+        order = self.create_order(entitlement=True)
+        self.assertFalse(Refund.objects.exists())
+        data = self._get_data(username=self.user.username, order_number=order.number, entitlement_uuid='11')
+        response = self.client.post(self.path, data, JSON_CONTENT_TYPE)
+
+        self.assert_bad_request_response(response, 'Order {} does not exist.'.format(order.number))
 
     def test_refunded_line(self):
         """
