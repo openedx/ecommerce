@@ -34,12 +34,10 @@ class CouponReportCSVViewTest(CouponMixin, DiscoveryTestMixin, LmsApiMockMixin, 
         catalog1 = Catalog.objects.create(name="Test catalog 1", partner=partner1)
         catalog1.stock_records.add(self.stock_record)
         self.coupon1 = self.create_coupon(partner=partner1, catalog=catalog1)
-        self.coupon1.history.all().update(history_user=self.user)
         partner2 = PartnerFactory(name='Tester2')
         catalog2 = Catalog.objects.create(name="Test catalog 2", partner=partner2)
         catalog2.stock_records.add(self.stock_record)
         self.coupon2 = self.create_coupon(partner=partner2, catalog=catalog2)
-        self.coupon2.history.all().update(history_user=self.user)
 
     def request_specific_voucher_report(self, coupon):
         client = factories.UserFactory()

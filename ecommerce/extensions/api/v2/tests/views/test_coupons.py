@@ -490,13 +490,6 @@ class CouponViewSetFunctionalTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
         self.assertEqual(coupon_data['category']['name'], self.data['category']['name'])
         self.assertEqual(coupon_data['client'], self.data['client'])
 
-    def test_list_coupons_no_history(self):
-        self.coupon.history.all().delete()
-        response = self.client.get(COUPONS_LINK)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        coupon_data = json.loads(response.content)['results'][0]
-        self.assertEqual(coupon_data.get('last_edited'), None)
-
     def test_list_and_details_endpoint_return_custom_code(self):
         """Test that the list and details endpoints return the correct code."""
         self.data.update({
@@ -522,11 +515,6 @@ class CouponViewSetFunctionalTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
         })
         self.client.post(COUPONS_LINK, json.dumps(self.data), 'application/json')
         self.assert_post_response_status(self.data)
-
-    def test_coupon_details_no_history(self):
-        self.coupon.history.all().delete()
-        detail_response = self.get_response_json('GET', reverse('api:v2:coupons-detail', args=[self.coupon.id]))
-        self.assertEqual(detail_response['last_edited'], None)
 
     def test_update(self):
         """Test updating a coupon."""
