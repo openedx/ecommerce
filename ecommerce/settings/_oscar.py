@@ -79,6 +79,7 @@ FULFILLMENT_MODULES = [
     'ecommerce.extensions.fulfillment.modules.CouponFulfillmentModule',
     'ecommerce.extensions.fulfillment.modules.EnrollmentCodeFulfillmentModule',
     'ecommerce.extensions.fulfillment.modules.CourseEntitlementFulfillmentModule',
+    'ecommerce.extensions.fulfillment.modules.DonationsFromCheckoutTestFulfillmentModule'
 ]
 
 HAYSTACK_CONNECTIONS = {

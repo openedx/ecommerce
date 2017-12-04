@@ -16,6 +16,7 @@ from testfixtures import LogCapture
 from ecommerce.core.constants import (
     COUPON_PRODUCT_CLASS_NAME,
     COURSE_ENTITLEMENT_PRODUCT_CLASS_NAME,
+    DONATIONS_FROM_CHECKOUT_TESTS_PRODUCT_TYPE_NAME,
     ENROLLMENT_CODE_PRODUCT_CLASS_NAME,
     ENROLLMENT_CODE_SWITCH,
     SEAT_PRODUCT_CLASS_NAME
@@ -30,6 +31,7 @@ from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
 from ecommerce.extensions.fulfillment.modules import (
     CouponFulfillmentModule,
     CourseEntitlementFulfillmentModule,
+    DonationsFromCheckoutTestFulfillmentModule,
     EnrollmentCodeFulfillmentModule,
     EnrollmentFulfillmentModule
 )
@@ -474,6 +476,48 @@ class CouponFulfillmentModuleTest(CouponMixin, FulfillmentTestMixin, TestCase):
         line = self.order.lines.first()
         with self.assertRaises(NotImplementedError):
             CouponFulfillmentModule().revoke_line(line)
+
+
+class DonationsFromCheckoutTestFulfillmentModuleTest(FulfillmentTestMixin, TestCase):
+    """ Test donation fulfillment. """
+
+    def setUp(self):
+        super(DonationsFromCheckoutTestFulfillmentModuleTest, self).setUp()
+        donation_class = ProductClass.objects.get(
+            name=DONATIONS_FROM_CHECKOUT_TESTS_PRODUCT_TYPE_NAME,
+            track_stock=False
+        )
+        donation = factories.create_product(
+            product_class=donation_class,
+            title='Test product'
+        )
+        user = UserFactory()
+        basket = BasketFactory(owner=user, site=self.site)
+        factories.create_stockrecord(donation, num_in_stock=2, price_excl_tax=10)
+        basket.add_product(donation, 1)
+        self.order = create_order(number=1, basket=basket, user=user)
+
+    def test_supports_line(self):
+        """Test that a line containing Coupon returns True."""
+        line = self.order.lines.first()
+        supports_line = DonationsFromCheckoutTestFulfillmentModule().supports_line(line)
+        self.assertTrue(supports_line)
+
+    def test_get_supported_lines(self):
+        """Test that Coupon lines where returned."""
+        lines = self.order.lines.all()
+        supported_lines = DonationsFromCheckoutTestFulfillmentModule().get_supported_lines(lines)
+        self.assertEqual(len(supported_lines), 1)
+
+    def test_fulfill_product(self):
+        """Test fulfilling a Coupon product."""
+        lines = self.order.lines.all()
+        __, completed_lines = DonationsFromCheckoutTestFulfillmentModule().fulfill_product(self.order, lines)
+        self.assertEqual(completed_lines[0].status, LINE.COMPLETE)
+
+    def test_revoke_line(self):
+        line = self.order.lines.first()
+        self.assertTrue(DonationsFromCheckoutTestFulfillmentModule().revoke_line(line))
 
 
 class EnrollmentCodeFulfillmentModuleTests(DiscoveryTestMixin, TestCase):
