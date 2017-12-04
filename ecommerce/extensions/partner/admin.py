@@ -1,7 +1,6 @@
 from django.utils.translation import ugettext_lazy as _
 from oscar.apps.partner.admin import *  # noqa pylint: disable=wildcard-import,unused-wildcard-import
 from oscar.core.loading import get_class
-from simple_history.admin import SimpleHistoryAdmin
 
 Catalog = get_class('ecommerce.extensions.catalogue.models', 'Catalog')
 
@@ -9,7 +8,7 @@ admin.site.unregister((StockRecord, Partner,))
 
 
 @admin.register(StockRecord)
-class StockRecordAdminExtended(SimpleHistoryAdmin):
+class StockRecordAdminExtended(admin.ModelAdmin):
     list_display = ('product', 'partner', 'partner_sku', 'price_excl_tax', 'cost_price', 'num_in_stock')
     list_filter = ('partner',)
     raw_id_fields = ('product',)
