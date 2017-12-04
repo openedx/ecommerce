@@ -16,7 +16,10 @@ from oscar.core.loading import get_model
 from requests.exceptions import ConnectionError, Timeout  # pylint: disable=ungrouped-imports
 from rest_framework import status
 
-from ecommerce.core.constants import ENROLLMENT_CODE_PRODUCT_CLASS_NAME
+from ecommerce.core.constants import (
+    DONATIONS_FROM_CHECKOUT_TESTS_PRODUCT_TYPE_NAME,
+    ENROLLMENT_CODE_PRODUCT_CLASS_NAME
+)
 from ecommerce.core.url_utils import get_lms_enrollment_api_url, get_lms_entitlement_api_url
 from ecommerce.courses.models import Course
 from ecommerce.courses.utils import mode_for_product
@@ -101,6 +104,58 @@ class BaseFulfillmentModule(object):  # pragma: no cover
             True, if the product is revoked; otherwise, False.
         """
         raise NotImplementedError("Revoke method not implemented!")
+
+
+class DonationsFromCheckoutTestFulfillmentModule(BaseFulfillmentModule):
+    """
+    Fulfillment module for fulfilling donations as a part of LEARNER-2842 - Test Donations on Checkout.
+    If that test, or any follow up tests around donations at checkout are not implemented, this module will be reverted.
+    Don't use this code for your own purposes, thanks.
+    """
+    def supports_line(self, line):
+        """
+        Returns True if the given Line has a donation product.
+        """
+        return line.product.get_product_class().name == DONATIONS_FROM_CHECKOUT_TESTS_PRODUCT_TYPE_NAME
+
+    def get_supported_lines(self, lines):
+        """ Return a list of supported lines (that contain a donation product)
+
+        Args:
+            lines (List of Lines): Order Lines, associated with purchased products in an Order.
+
+        Returns:
+            A supported list of lines, unmodified.
+        """
+        return [line for line in lines if self.supports_line(line)]
+
+    def fulfill_product(self, order, lines):
+        """ Fulfills the specified lines in the order.
+        Marks the line status as complete. Does not change anything else.
+
+        Args:
+            order (Order): The Order associated with the lines to be fulfilled
+            lines (List of Lines): Order Lines, associated with purchased products in an Order.
+
+        Returns:
+            The original set of lines, with new statuses set based on the success or failure of fulfillment.
+
+        """
+        for line in lines:
+            line.set_status(LINE.COMPLETE)
+        return order, lines
+
+    def revoke_line(self, line):
+        """ Revokes the specified line.
+        (Returning true to avoid unnecessary errors)
+
+        Args:
+            line (Line): Order Line to be revoked.
+
+        Returns:
+            True, if the product is revoked; otherwise, False.
+        """
+        return True
 
 
 class EnrollmentFulfillmentModule(BaseFulfillmentModule):
