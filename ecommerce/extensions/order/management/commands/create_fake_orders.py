@@ -31,7 +31,7 @@ def create_basket(owner, product, site):
 
 
 class Command(BaseCommand):
-    help = 'Clean history data'
+    help = 'Added Fake orders for testing'
 
     def add_arguments(self, parser):
         parser.add_argument('--count',

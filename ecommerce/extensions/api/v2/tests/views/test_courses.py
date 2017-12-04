@@ -44,7 +44,7 @@ class CourseViewSetTests(ProductSerializerMixin, DiscoveryTestMixin, TestCase):
 
         last_edited = None
         try:
-            last_edited = course.history.latest().history_date.strftime(ISO_8601_FORMAT)
+            last_edited = course.modified.strftime(ISO_8601_FORMAT)
         except ObjectDoesNotExist:
             pass
         enrollment_code = course.enrollment_code_product
@@ -113,14 +113,6 @@ class CourseViewSetTests(ProductSerializerMixin, DiscoveryTestMixin, TestCase):
         Course.objects.all().delete()
         response = self.client.get(self.list_path)
         self.assertDictEqual(json.loads(response.content), {'count': 0, 'next': None, 'previous': None, 'results': []})
-
-    def test_list_without_history(self):
-        course = Course.objects.all()[0]
-        course.history.all().delete()
-
-        response = self.client.get(self.list_path)
-        self.assertEqual(response.status_code, 200)
-        self.assertListEqual(json.loads(response.content)['results'], [self.serialize_course(self.course)])
 
     def test_create(self):
         """ Verify the view can create a new Course."""

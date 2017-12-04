@@ -77,7 +77,6 @@ class UtilTests(CouponMixin, DiscoveryMockMixin, DiscoveryTestMixin, LmsApiMockM
             max_uses=1,
             voucher_type=Voucher.MULTI_USE
         )
-        self.coupon.history.all().update(history_user=self.user)
         self.coupon_vouchers = CouponVouchers.objects.filter(coupon=self.coupon)
 
         self.data = {
@@ -354,8 +353,7 @@ class UtilTests(CouponMixin, DiscoveryMockMixin, DiscoveryTestMixin, LmsApiMockM
         self.assertEqual(row['Discount Amount'], discount_amount)
         self.assertEqual(row['Client'], coupon.client.name)
         self.assertEqual(row['Note'], coupon.attr.note)
-        self.assertEqual(row['Created By'], coupon.history.first().history_user.full_name)
-        self.assertEqual(row['Create Date'], coupon.history.latest().history_date.strftime("%b %d, %y"))
+        self.assertEqual(row['Create Date'], coupon.date_updated.strftime("%b %d, %y"))
         self.assertEqual(row['Coupon Start Date'], voucher.start_datetime.strftime("%b %d, %y"))
         self.assertEqual(row['Coupon Expiry Date'], voucher.end_datetime.strftime("%b %d, %y"))
 
@@ -418,7 +416,6 @@ class UtilTests(CouponMixin, DiscoveryMockMixin, DiscoveryTestMixin, LmsApiMockM
             'Status',
             'Order Number',
             'Redeemed By Username',
-            'Created By',
             'Create Date',
             'Coupon Start Date',
             'Coupon Expiry Date',
@@ -436,22 +433,6 @@ class UtilTests(CouponMixin, DiscoveryMockMixin, DiscoveryTestMixin, LmsApiMockM
         self.assertNotIn('Course Seat Types', field_names)
         self.assertNotIn('Redeemed For Course ID', field_names)
 
-    def test_report_with_no_coupon_history(self):
-        self.setup_coupons_for_report()
-        self.coupon.history.all().delete()
-        client = UserFactory()
-        basket = Basket.get_basket(client, self.site)
-        basket.add_product(self.coupon)
-
-        vouchers = self.coupon_vouchers.first().vouchers.all()
-        self.use_voucher('TESTORDER1', vouchers[1], self.user)
-
-        self.mock_course_api_response(course=self.course)
-        _, rows = generate_coupon_report(self.coupon_vouchers)
-        first_row = rows.pop(0)
-        self.assertEqual(first_row.get('Created By'), 'N/A')
-        self.assertEqual(first_row.get('Create Date'), 'N/A')
-
     def test_report_for_dynamic_coupon_with_fixed_benefit_type(self):
         """ Verify the coupon report contains correct data for coupon with fixed benefit type. """
         dynamic_coupon = self.create_coupon(
@@ -465,7 +446,6 @@ class UtilTests(CouponMixin, DiscoveryMockMixin, DiscoveryTestMixin, LmsApiMockM
             title='Tešt product',
             voucher_type=Voucher.MULTI_USE
         )
-        dynamic_coupon.history.all().update(history_user=self.user)
         coupon_voucher = CouponVouchers.objects.get(coupon=dynamic_coupon)
         __, rows = generate_coupon_report([coupon_voucher])
         voucher = coupon_voucher.vouchers.first()
@@ -494,7 +474,6 @@ class UtilTests(CouponMixin, DiscoveryMockMixin, DiscoveryTestMixin, LmsApiMockM
         catalog_query = 'course:*'
         self.mock_course_runs_endpoint(self.site_configuration.discovery_api_url)
         query_coupon = self.create_catalog_coupon(catalog_query=catalog_query)
-        query_coupon.history.all().update(history_user=self.user)
         field_names, rows = generate_coupon_report([query_coupon.attr.coupon_vouchers])
 
         empty_fields = (
@@ -582,7 +561,6 @@ class UtilTests(CouponMixin, DiscoveryMockMixin, DiscoveryTestMixin, LmsApiMockM
             catalog=self.catalog,
             quantity=2
         )
-        coupon.history.all().update(history_user=self.user)
         vouchers = coupon.attr.coupon_vouchers.vouchers.all()
         self.use_voucher('TEST', vouchers[0], self.user)
         __, rows = generate_coupon_report([coupon.attr.coupon_vouchers])
@@ -607,7 +585,6 @@ class UtilTests(CouponMixin, DiscoveryMockMixin, DiscoveryTestMixin, LmsApiMockM
             discovery_api_url=self.site_configuration.discovery_api_url
         )
         query_coupon = self.create_catalog_coupon(catalog_query=catalog_query)
-        query_coupon.history.all().update(history_user=self.user)
         voucher = query_coupon.attr.coupon_vouchers.vouchers.first()
         voucher.offers.first().condition.range.add_product(self.verified_seat)
         self.use_voucher('TESTORDER4', voucher, self.user)
@@ -633,7 +610,6 @@ class UtilTests(CouponMixin, DiscoveryMockMixin, DiscoveryTestMixin, LmsApiMockM
             OrderLineFactory(product=course2.create_or_update_seat('verified', False, 110, self.partner))
         )
         query_coupon = self.create_catalog_coupon(catalog_query='*:*')
-        query_coupon.history.all().update(history_user=self.user)
         voucher = query_coupon.attr.coupon_vouchers.vouchers.first()
         voucher.record_usage(order, self.user)
         field_names, rows = generate_coupon_report([query_coupon.attr.coupon_vouchers])
@@ -697,7 +673,6 @@ class UtilTests(CouponMixin, DiscoveryMockMixin, DiscoveryTestMixin, LmsApiMockM
             title='Program Coupon Report',
             program_uuid=program_uuid,
         )
-        program_coupon.history.update(history_user=self.user)
         field_names, rows = generate_coupon_report([program_coupon.attr.coupon_vouchers])
 
         for field in ('Discount Amount', 'Price'):
