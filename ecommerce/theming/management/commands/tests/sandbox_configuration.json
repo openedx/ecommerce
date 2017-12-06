@@ -1,0 +1,20 @@
+{
+    "ecommerce_configuration":{
+        "site_partner": "dummy",
+        "theme_dir_name": "dummy.dir",
+        "site_domain": "ecommerce-dummy-{dns_name}.example.com",
+        "configuration": {
+            "lms_url_root": "https://dummy-{dns_name}.example.com",
+            "payment_processors": "dummy-method",
+            "client_side_payment_processor": "dummy-method",
+            "enable_enrollment_codes": true,
+            "oauth_settings": {
+                "dummy-key": "dummy-value"
+            },
+            "payment_support_email": "dummy@example.com",
+            "payment_support_url": "https://dummy-{dns_name}.example.com/contact",
+            "discovery_api_url": "https://discovery-dummy-{dns_name}.example.com/api/v1/"
+        }
+    }
+
+}
