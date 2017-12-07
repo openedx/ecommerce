@@ -6,14 +6,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-    def add_created_modified_date(apps, schema_editor):
-        Course = apps.get_model('courses', 'Course')
-        courses = Course.objects.all()
-
-        for course in courses:
-            course.created = course.history.earliest().history_date
-            course.modified = course.history.latest().history_date
-            course.save()
 
     dependencies = [
         ('courses', '0005_auto_20170525_0131'),
@@ -40,5 +32,4 @@ class Migration(migrations.Migration):
             name='modified',
             field=models.DateTimeField(blank=True, editable=False, null=True),
         ),
-        migrations.RunPython(add_created_modified_date, migrations.RunPython.noop),
     ]
