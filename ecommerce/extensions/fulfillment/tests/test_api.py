@@ -33,6 +33,12 @@ class FulfillmentApiTests(FulfillmentTestMixin, TestCase):
         api.fulfill_order(self.order, self.order.lines)
         self.assert_order_fulfilled(self.order)
 
+    def test_donation_fulfill_order_successful_fulfillment(self):
+        """ Test a successful fulfillment of a donation order. """
+        order_with_donation = self.generate_open_order(product_class="Donation")
+        api.fulfill_order(order_with_donation, order_with_donation.lines)
+        self.assert_order_fulfilled(order_with_donation)
+
     @override_settings(FULFILLMENT_MODULES=['ecommerce.extensions.fulfillment.tests.modules.FakeFulfillmentModule', ])
     @raises(exceptions.IncorrectOrderStatusError)
     def test_fulfill_order_bad_fulfillment_state(self):

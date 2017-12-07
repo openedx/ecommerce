@@ -16,6 +16,10 @@ USER_LIST_VIEW_SWITCH = 'enable_user_list_view'
 # Coupon constant
 COUPON_PRODUCT_CLASS_NAME = 'Coupon'
 
+# Donations from checkout tests constant
+# Don't use this code for your own purposes, thanks.
+DONATIONS_FROM_CHECKOUT_TESTS_PRODUCT_TYPE_NAME = 'Donation'
+
 # Enrollment Code constants
 ENROLLMENT_CODE_PRODUCT_CLASS_NAME = 'Enrollment Code'
 ENROLLMENT_CODE_SWITCH = 'create_enrollment_codes'
