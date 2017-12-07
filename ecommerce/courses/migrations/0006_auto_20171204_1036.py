@@ -8,11 +8,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
     def add_created_modified_date(apps, schema_editor):
         Course = apps.get_model('courses', 'Course')
+        HistoricalCourse = apps.get_model('courses', 'historicalcourse')
         courses = Course.objects.all()
 
         for course in courses:
-            course.created = course.history.earliest().history_date
-            course.modified = course.history.latest().history_date
+            history = HistoricalCourse.objects.filter(id=course.id)
+            course.created = history.earliest().history_date
+            course.modified = history.latest().history_date
             course.save()
 
     dependencies = [
