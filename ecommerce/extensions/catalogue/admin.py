@@ -15,6 +15,6 @@ class ProductAdminExtended(SimpleHistoryAdmin):
 
 
 @admin.register(ProductAttributeValue)
-class ProductAttributeValueAdminExtended(SimpleHistoryAdmin):
+class ProductAttributeValueAdminExtended(admin.ModelAdmin):
     list_display = ('product', 'attribute', 'value')
     show_full_result_count = False

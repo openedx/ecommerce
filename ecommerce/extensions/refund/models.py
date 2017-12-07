@@ -10,7 +10,6 @@ from ecommerce_worker.sailthru.v1.tasks import send_course_refund_email
 from oscar.apps.payment.exceptions import PaymentError
 from oscar.core.loading import get_class, get_model
 from oscar.core.utils import get_default_currency
-from simple_history.models import HistoricalRecords
 
 from ecommerce.core.constants import SEAT_PRODUCT_CLASS_NAME
 from ecommerce.extensions.analytics.utils import audit_log
@@ -82,7 +81,6 @@ class Refund(StatusMixin, TimeStampedModel):
         ]
     )
 
-    history = HistoricalRecords()
     pipeline_setting = 'OSCAR_REFUND_STATUS_PIPELINE'
 
     @classmethod
@@ -310,7 +308,6 @@ class RefundLine(StatusMixin, TimeStampedModel):
         ]
     )
 
-    history = HistoricalRecords()
     pipeline_setting = 'OSCAR_REFUND_LINE_STATUS_PIPELINE'
 
     def deny(self):

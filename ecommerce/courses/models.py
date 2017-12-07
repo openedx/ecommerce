@@ -9,7 +9,6 @@ from django.db.models import Count, Q
 from django.utils.timezone import now, timedelta
 from django.utils.translation import ugettext_lazy as _
 from oscar.core.loading import get_class, get_model
-from simple_history.models import HistoricalRecords
 
 from ecommerce.core.constants import (
     ENROLLMENT_CODE_PRODUCT_CLASS_NAME,
@@ -39,7 +38,6 @@ class Course(models.Model):
         blank=True,
         help_text=_('Last date/time on which verification for this product can be submitted.')
     )
-    history = HistoricalRecords()
     thumbnail_url = models.URLField(null=True, blank=True)
 
     def __unicode__(self):
