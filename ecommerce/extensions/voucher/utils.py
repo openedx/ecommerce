@@ -95,12 +95,7 @@ def _get_discount_info(discount_data):
 
 
 def _get_info_for_coupon_report(coupon, voucher):
-    author = 'N/A'
-    created_date = 'N/A'
-    history = coupon.history.first()
-    if history:
-        author = history.history_user.full_name
-        created_date = history.history_date.strftime("%b %d, %y")
+    created_date = coupon.date_updated.strftime("%b %d, %y") if coupon.date_updated else 'N/A'
     category_name = ProductCategory.objects.get(product=coupon).category.name
 
     try:
@@ -150,7 +145,6 @@ def _get_info_for_coupon_report(coupon, voucher):
         'Coupon Name': voucher.name,
         'Coupon Start Date': voucher.start_datetime.strftime("%b %d, %y"),
         'Coupon Type': coupon_type,
-        'Created By': author,
         'Create Date': created_date,
         'Discount Percentage': discount_percentage,
         'Discount Amount': discount_amount,
@@ -239,7 +233,6 @@ def generate_coupon_report(coupon_vouchers):
         _('Redeemed By Username'),
         _('Redeemed For Course ID'),
         _('Redeemed For Course IDs'),
-        _('Created By'),
         _('Create Date'),
         _('Coupon Start Date'),
         _('Coupon Expiry Date'),

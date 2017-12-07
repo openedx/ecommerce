@@ -7,7 +7,6 @@ from decimal import Decimal
 import waffle
 from dateutil.parser import parse
 from django.contrib.auth import get_user_model
-from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
@@ -298,10 +297,7 @@ class CourseSerializer(serializers.HyperlinkedModelSerializer):
             self.fields.pop('products', None)
 
     def get_last_edited(self, obj):
-        try:
-            return obj.history.latest().history_date.strftime(ISO_8601_FORMAT)
-        except ObjectDoesNotExist:
-            return None
+        return obj.modified.strftime(ISO_8601_FORMAT) if obj.modified else None
 
     def get_products_url(self, obj):
         return reverse('api:v2:course-product-list', kwargs={'parent_lookup_course_id': obj.id},
@@ -637,11 +633,7 @@ class CouponSerializer(ProductPaymentInfoMixin, serializers.ModelSerializer):
         return offer_range.enterprise_customer if offer_range else None
 
     def get_last_edited(self, obj):
-        try:
-            history = obj.history.latest()
-            return history.history_user.username, history.history_date
-        except ObjectDoesNotExist:
-            return None
+        return None, obj.date_updated
 
     def get_max_uses(self, obj):
         offer = retrieve_offer(obj)
