@@ -6,7 +6,6 @@ import jwt
 import mock
 from django.conf import settings
 from django.contrib.auth import get_user_model
-from django.core.exceptions import ObjectDoesNotExist
 from django.core.urlresolvers import reverse
 from oscar.core.loading import get_class, get_model
 
@@ -42,11 +41,7 @@ class CourseViewSetTests(ProductSerializerMixin, DiscoveryTestMixin, TestCase):
         products_url = self.get_full_url(reverse('api:v2:course-product-list',
                                                  kwargs={'parent_lookup_course_id': course.id}))
 
-        last_edited = None
-        try:
-            last_edited = course.history.latest().history_date.strftime(ISO_8601_FORMAT)
-        except ObjectDoesNotExist:
-            pass
+        last_edited = course.modified.strftime(ISO_8601_FORMAT)
         enrollment_code = course.enrollment_code_product
 
         data = {
@@ -113,14 +108,6 @@ class CourseViewSetTests(ProductSerializerMixin, DiscoveryTestMixin, TestCase):
         Course.objects.all().delete()
         response = self.client.get(self.list_path)
         self.assertDictEqual(json.loads(response.content), {'count': 0, 'next': None, 'previous': None, 'results': []})
-
-    def test_list_without_history(self):
-        course = Course.objects.all()[0]
-        course.history.all().delete()
-
-        response = self.client.get(self.list_path)
-        self.assertEqual(response.status_code, 200)
-        self.assertListEqual(json.loads(response.content)['results'], [self.serialize_course(self.course)])
 
     def test_create(self):
         """ Verify the view can create a new Course."""
