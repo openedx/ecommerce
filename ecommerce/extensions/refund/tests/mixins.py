@@ -17,6 +17,7 @@ from ecommerce.extensions.refund.tests.factories import RefundFactory
 from ecommerce.extensions.test.factories import create_order
 
 post_refund = get_class('refund.signals', 'post_refund')
+Option = get_model('catalogue', 'Option')
 Refund = get_model('refund', 'Refund')
 Source = get_model('payment', 'Source')
 SourceType = get_model('payment', 'SourceType')
@@ -58,6 +59,10 @@ class RefundTestMixin(DiscoveryTestMixin):
 
         order = create_order(basket=basket, user=user)
         order.status = status
+        if entitlement:
+            entitlement_option = Option.objects.get(code='course_entitlement')
+            line = order.lines.first()
+            line.attributes.create(option=entitlement_option, value='111')
         order.save()
         return order
 
