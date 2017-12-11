@@ -2,6 +2,7 @@ from oscar.core.loading import get_model
 
 from ecommerce.extensions.fulfillment.status import ORDER
 
+Option = get_model('catalogue', 'Option')
 Refund = get_model('refund', 'Refund')
 RefundLine = get_model('refund', 'RefundLine')
 
@@ -49,9 +50,11 @@ def create_refunds_for_entitlement(order, entitlement_uuid):
     """
     refunds = []
 
+    entitlement_option = Option.objects.get(code='course_entitlement')
+
     line = order.lines.get(refund_lines__id__isnull=True,
-                           product__attribute_values__attribute__code='UUID',
-                           product__attribute_values__value_text=entitlement_uuid)
+                           attributes__option=entitlement_option,
+                           attributes__value=entitlement_uuid)
 
     refund = Refund.create_with_lines(order, [line])
     if refund is not None:

@@ -17,6 +17,7 @@ from ecommerce.extensions.test.factories import create_order
 from ecommerce.tests.mixins import JwtMixin, ThrottlingMixin
 from ecommerce.tests.testcases import TestCase
 
+Option = get_model('catalogue', 'Option')
 Refund = get_model('refund', 'Refund')
 
 
@@ -26,6 +27,7 @@ class RefundCreateViewTests(RefundTestMixin, AccessTokenMixin, JwtMixin, TestCas
     def setUp(self):
         super(RefundCreateViewTests, self).setUp()
         self.course_id = 'edX/DemoX/Demo_Course'
+        self.entitlement_option = Option.objects.get(code='course_entitlement')
         self.user = self.create_user()
         self.client.login(username=self.user.username, password=self.password)
 
@@ -163,7 +165,9 @@ class RefundCreateViewTests(RefundTestMixin, AccessTokenMixin, JwtMixin, TestCas
 
         order = self.create_order(entitlement=True)
         self.assertFalse(Refund.objects.exists())
-        data = self._get_data(username=self.user.username, order_number=order.number, entitlement_uuid='111')
+        line = order.lines.first()
+        entitlement_uuid = line.attributes.get(option=self.entitlement_option).value
+        data = self._get_data(username=self.user.username, order_number=order.number, entitlement_uuid=entitlement_uuid)
         response = self.client.post(self.path, data, JSON_CONTENT_TYPE)
         refund = Refund.objects.latest()
 
