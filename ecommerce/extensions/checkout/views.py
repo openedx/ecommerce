@@ -12,12 +12,15 @@ from django.views.generic import RedirectView, TemplateView
 from oscar.apps.checkout.views import *  # pylint: disable=wildcard-import, unused-wildcard-import
 from oscar.core.loading import get_class, get_model
 
+from ecommerce.core.url_utils import get_lms_dashboard_url, get_lms_program_dashboard_url
 from ecommerce.extensions.checkout.exceptions import BasketNotFreeError
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
 from ecommerce.extensions.checkout.utils import get_receipt_page_url
 
 Applicator = get_class('offer.utils', 'Applicator')
 Basket = get_model('basket', 'Basket')
+BasketAttribute = get_model('basket', 'BasketAttribute')
+BasketAttributeType = get_model('basket', 'BasketAttributeType')
 Order = get_model('order', 'Order')
 
 
@@ -149,6 +152,7 @@ class ReceiptResponseView(ThankYouView):
             'payment_method': self.get_payment_method(order),
             'display_credit_messaging': self.order_contains_credit_seat(order),
         })
+        context.update(self.get_order_dashboard_context(order))
         context.update(self.get_order_verification_context(order))
         return context
 
@@ -180,6 +184,22 @@ class ReceiptResponseView(ThankYouView):
             if getattr(line.product.attr, 'credit_provider', None):
                 return True
         return False
+
+    def get_program_uuid(self, order):
+        bundle_attributes = BasketAttribute.objects.filter(
+            basket=order.basket,
+            attribute_type=BasketAttributeType.objects.get(name='bundle_identifier')
+        )
+        bundle_attribute = bundle_attributes.first()
+        return bundle_attribute.value_text if bundle_attribute else None
+
+    def get_order_dashboard_context(self, order):
+        program_uuid = self.get_program_uuid(order)
+        if program_uuid:
+            order_dashboard_url = get_lms_program_dashboard_url(program_uuid)
+        else:
+            order_dashboard_url = get_lms_dashboard_url()
+        return {'order_dashboard_url': order_dashboard_url}
 
     def get_order_verification_context(self, order):
         context = {}
