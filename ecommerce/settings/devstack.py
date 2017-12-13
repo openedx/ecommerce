@@ -28,8 +28,8 @@ PAYMENT_PROCESSOR_CONFIG = {
             'cancel_checkout_path': PAYMENT_PROCESSOR_CANCEL_PATH,
             'send_level_2_3_details': True,
             'sop_profile_id': '00D31C4B-4E8F-4E9F-A6B9-1DB8C7C86223',
-            'sop_access_key': '90a39534dc513e8a81222b158378dda1',
-            'sop_secret_key': 'ff09d545ddbe4f1e908cc47e3cceb30e4e9ff57a1fe0493392b69a0b75f8ac3df7840f89131d46faa4487071d53576d25047ebb39e9b4af18e9fb5ee1d4f1f66fdb711284c844c4c82bd24f168781e786ecf8b2d3dba4ab5b543c188ca5728e00b8ace43cca14cefbb605ecdc0706eda4cd50785d5754fd691426ddff03fcc7b',
+            'sop_access_key': 'a3b04486204c3032ad1bf1d7b90ab799',
+            'sop_secret_key': 'cd341f912c1a4de390d95b28ce50c04e743478a908294357bfa8eaad4ccd8d0706a6e294d2024d50881bdf986be76e9eea046968324047dd9b1e772e0a9db09caa145adbeaca4b7da7b4859a433f494cb637b488756943ccb08463914dc5ae7ec2ff1a96ce1d4663ad172414171f1001ed619076c9dd4e4297737e428c92c956',
             'sop_payment_page_url': 'https://testsecureacceptance.cybersource.com/silent/pay',
         },
         'paypal': {
