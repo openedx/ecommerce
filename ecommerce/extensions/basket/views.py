@@ -241,7 +241,7 @@ class BasketSummaryView(BasketView):
                 else:
                     if certificate_type == 'verified':
                         order_details_msg = _(
-                            'After you complete your order you will be automatically enrolled'
+                            'After you complete your order you will be automatically enrolled '
                             'in the verified track of the course.'
                         )
                     elif certificate_type == 'credit':
