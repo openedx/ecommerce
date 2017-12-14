@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from django.db import models
 from django.db.models.signals import post_init, post_save
 from django.dispatch import receiver
@@ -46,6 +48,14 @@ class Product(AbstractProduct):
         except AttributeError:
             pass
         super(Product, self).save(*args, **kwargs)  # pylint: disable=bad-super-call
+
+    @property
+    def is_expired(self):
+        """ True for product for which expiration data has pass otherwise false. """
+        now = datetime.now()
+        if self.expires < now:
+            return True
+        return False
 
 
 @receiver(post_init, sender=Product)

@@ -63,6 +63,9 @@ class BasketSingleItemView(View):
             product = StockRecord.objects.get(partner=partner, partner_sku=sku).product
         except StockRecord.DoesNotExist:
             return HttpResponseBadRequest(_('SKU [{sku}] does not exist.').format(sku=sku))
+        
+        if product.is_expired:
+            return HttpResponseBadRequest(_('[{product}] is not available for purchase.').format(product=product))
 
         if voucher is None:
             # If there is an Enterprise entitlement available for this basket,
