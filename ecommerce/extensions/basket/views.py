@@ -309,6 +309,7 @@ class BasketSummaryView(BasketView):
             payment_processor = payment_processor_class(self.request.site)
             current_year = datetime.today().year
 
+            # pylint: disable=no-value-for-parameter
             return {
                 'client_side_payment_processor': payment_processor,
                 'enable_client_side_checkout': True,

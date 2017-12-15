@@ -36,13 +36,13 @@ class EdxOrderPlacementMixin(OrderPlacementMixin):
 
     __metaclass__ = abc.ABCMeta
 
-    def add_payment_event(self, event):  # pylint: disable = arguments-differ
+    def add_payment_event(self, event):  # pylint: disable=arguments-differ
         """ Record a payment event for creation once the order is placed. """
         if self._payment_events is None:
             self._payment_events = []
         self._payment_events.append(event)
 
-    def handle_payment(self, response, basket):
+    def handle_payment(self, response, basket):  # pylint: disable=arguments-differ
         """
         Handle any payment processing and record payment sources and events.
 
@@ -107,7 +107,6 @@ class EdxOrderPlacementMixin(OrderPlacementMixin):
                                shipping_charge,
                                billing_address,
                                order_total,
-                               request=None,
                                **kwargs):
         """
         Place an order and mark the corresponding basket as submitted.
@@ -116,6 +115,7 @@ class EdxOrderPlacementMixin(OrderPlacementMixin):
         and basket submission in a transaction. Should be used only in
         the context of an exception handler.
         """
+        request = kwargs.get('request')
         with transaction.atomic():
             order = self.place_order(
                 order_number=order_number,
@@ -198,8 +198,10 @@ class EdxOrderPlacementMixin(OrderPlacementMixin):
 
         return order
 
-    def send_confirmation_message(self, order, code, site=None, **kwargs):
+    def send_confirmation_message(self, order, code, **kwargs):
+        site = kwargs.get('site')
         ctx = self.get_message_context(order)
+
         try:
             event_type = CommunicationEventType.objects.get(code=code)
         except CommunicationEventType.DoesNotExist:

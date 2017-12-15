@@ -290,10 +290,10 @@ class SiteConfiguration(models.Model):
     def segment_client(self):
         return SegmentClient(self.segment_key, debug=settings.DEBUG, send=settings.SEND_SEGMENT_EVENTS)
 
-    def save(self, *args, **kwargs):
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         # Clear Site cache upon SiteConfiguration changed
         Site.objects.clear_cache()
-        super(SiteConfiguration, self).save(*args, **kwargs)
+        super(SiteConfiguration, self).save(force_insert, force_update, using, update_fields)
 
     def build_ecommerce_url(self, path=''):
         """
@@ -592,9 +592,9 @@ class BusinessClient(models.Model):
     def __str__(self):
         return self.name
 
-    def save(self, *args, **kwargs):
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         if not self.name:
             log_message_and_raise_validation_error(
                 'Failed to create BusinessClient. BusinessClient name may not be empty.'
             )
-        super(BusinessClient, self).save(*args, **kwargs)
+        super(BusinessClient, self).save(force_insert, force_update, using, update_fields)

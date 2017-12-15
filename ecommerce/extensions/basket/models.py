@@ -33,14 +33,15 @@ class Basket(AbstractBasket):
         merge them into one.
         """
         editable_baskets = cls.objects.filter(site=site, owner=user, status__in=cls.editable_statuses)
-        if len(editable_baskets) == 0:
-            basket = cls.create_basket(site, user)
-        else:
+
+        if editable_baskets:
             stale_baskets = list(editable_baskets)
             basket = stale_baskets.pop(0)
             for stale_basket in stale_baskets:
                 # Don't add line quantities when merging baskets
                 basket.merge(stale_basket, add_quantities=False)
+        else:
+            basket = cls.create_basket(site, user)
 
         # Assign the appropriate strategy class to the basket
         basket.strategy = Selector().strategy(user=user)
