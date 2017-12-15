@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-12-15 09:43-0500\n"
+"POT-Creation-Date: 2017-12-15 09:45-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -903,63 +903,63 @@ msgstr ""
 #. Translators: This is a string added next to the name of the required
 #. fields on the payment form. For example, the first name field is
 #. required, so this would read "First name (required)".
-#: ecommerce/extensions/payment/forms.py:100
+#: ecommerce/extensions/payment/forms.py:111
 #, python-brace-format
 msgid "{label} (required)"
 msgstr ""
 
-#: ecommerce/extensions/payment/forms.py:108
-#: ecommerce/extensions/payment/forms.py:198
+#: ecommerce/extensions/payment/forms.py:119
+#: ecommerce/extensions/payment/forms.py:200
 #: ecommerce/extensions/payment/views/__init__.py:96
 msgid ""
 "There was a problem retrieving your basket. Refresh the page to try again."
 msgstr ""
 
-#: ecommerce/extensions/payment/forms.py:111
+#: ecommerce/extensions/payment/forms.py:122
 msgid "First Name"
 msgstr ""
 
-#: ecommerce/extensions/payment/forms.py:112
+#: ecommerce/extensions/payment/forms.py:123
 msgid "Last Name"
 msgstr ""
 
-#: ecommerce/extensions/payment/forms.py:113
+#: ecommerce/extensions/payment/forms.py:124
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:510
 msgid "Address"
 msgstr ""
 
-#: ecommerce/extensions/payment/forms.py:114
+#: ecommerce/extensions/payment/forms.py:125
 msgid "Suite/Apartment Number"
 msgstr ""
 
-#: ecommerce/extensions/payment/forms.py:115
+#: ecommerce/extensions/payment/forms.py:126
 msgid "City"
 msgstr ""
 
-#: ecommerce/extensions/payment/forms.py:118
+#: ecommerce/extensions/payment/forms.py:129
 msgid "State/Province"
 msgstr ""
 
-#: ecommerce/extensions/payment/forms.py:119
+#: ecommerce/extensions/payment/forms.py:130
 msgid "Zip/Postal Code"
 msgstr ""
 
-#: ecommerce/extensions/payment/forms.py:120
+#: ecommerce/extensions/payment/forms.py:131
 msgid "Country"
 msgstr ""
 
-#: ecommerce/extensions/payment/forms.py:147
 #: ecommerce/extensions/payment/forms.py:149
-#: ecommerce/extensions/payment/forms.py:173
+#: ecommerce/extensions/payment/forms.py:151
+#: ecommerce/extensions/payment/forms.py:175
 msgid "This field is required."
 msgstr ""
 
-#: ecommerce/extensions/payment/forms.py:160
+#: ecommerce/extensions/payment/forms.py:162
 #, python-brace-format
 msgid "{state} is not a valid state/province in {country}."
 msgstr ""
 
-#: ecommerce/extensions/payment/forms.py:179
+#: ecommerce/extensions/payment/forms.py:181
 msgid ""
 "Postal codes for the U.S. and Canada are limited to nine (9) characters."
 msgstr ""
@@ -996,6 +996,10 @@ msgid ""
 "An error occurred while processing your payment. You have not been charged. "
 "Please double-check the information you provided and try again. For help, "
 "{link_start}contact support{link_end}."
+msgstr ""
+
+#: ecommerce/extensions/payment/views/stripe.py:110
+msgid "Your payment was declined. Please try again."
 msgstr ""
 
 #: ecommerce/extensions/refund/models.py:67
@@ -2143,59 +2147,63 @@ msgstr ""
 msgid "Pay with Apple Pay"
 msgstr ""
 
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:159
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:152
+msgid "Pay with AliPay"
+msgstr ""
+
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:168
 msgid "card holder information"
 msgstr ""
 
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:170
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:179
 msgid "billing information"
 msgstr ""
 
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:172
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:181
 msgid "Credit cards"
 msgstr ""
 
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:179
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:188
 msgid "Card Number (required)"
 msgstr ""
 
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:179
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:189
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:188
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:198
 msgid "Secure"
 msgstr ""
 
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:182
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:191
 msgid "Credit card icon"
 msgstr ""
 
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:188
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:197
 msgid "Security Code (required)"
 msgstr ""
 
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:192
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:201
 msgid "Help with CVV"
 msgstr ""
 
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:195
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:204
 msgid ""
 "The three last digits in the signature area on the back of your card. For "
 "American Express, it is the four digits on the front of the card."
 msgstr ""
 
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:202
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:211
 msgid "Expiration (required)"
 msgstr ""
 
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:206
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:215
 msgid "Month"
 msgstr ""
 
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:216
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:225
 msgid "Year"
 msgstr ""
 
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:233
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:243
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:242
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:252
 #: ecommerce/templates/oscar/basket/partials/hosted_checkout_basket.html:147
 msgid "Place Order"
 msgstr ""

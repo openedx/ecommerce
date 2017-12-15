@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-12-15 09:43-0500\n"
+"POT-Creation-Date: 2017-12-15 09:45-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1196,6 +1196,12 @@ msgstr ""
 "υłłαм¢σ łαвσяιѕ ηιѕι υт αłιqυιρ єχ єα ¢σммσ∂σ ¢σηѕєqυαт. ∂υιѕ αυтє ιяυяє "
 "∂σłσя ιη яєρяєнєη∂єяιт ιη νσłυρтαтє νєłιт єѕѕє ¢ιłłυм ∂σłσяє єυ ƒυgιαт ηυłłα"
 " ραяιαтυя. єχ¢єρтєυя ѕιηт σ¢¢αє¢αт ¢υρι∂αтαт ηση ρяσι∂єηт, ѕυηт ιη ¢υłρα qυ#"
+
+#: ecommerce/extensions/payment/views/stripe.py
+msgid "Your payment was declined. Please try again."
+msgstr ""
+"Ýöür päýmént wäs déçlïnéd. Pléäsé trý ägäïn. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
+"¢σηѕє¢тєтυя #"
 
 #: ecommerce/extensions/refund/models.py
 msgid "Order"
@@ -2490,6 +2496,10 @@ msgstr "Päý wïth PäýPäl Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт α#"
 #: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html
 msgid "Pay with Apple Pay"
 msgstr "Päý wïth Àpplé Päý Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт#"
+
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html
+msgid "Pay with AliPay"
+msgstr "Päý wïth ÀlïPäý Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт α#"
 
 #: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html
 msgid "card holder information"

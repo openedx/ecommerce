@@ -360,6 +360,14 @@
                 }
             }
 
+            &.payment-processor-alipay {
+                background-image: url('/static/images/alipay_logo.png');
+
+                &:focus {
+                    outline: dotted 1px #000;
+                }
+            }
+
             &.credit-card {
                 @include float(left);
                 border: 1px solid palette(grayscale, base);
