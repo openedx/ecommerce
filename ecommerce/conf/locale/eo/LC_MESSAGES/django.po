@@ -7,14 +7,14 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-10-31 21:48-0400\n"
+"POT-Creation-Date: 2017-12-15 09:43-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Language: \n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #: ecommerce/core/admin.py
@@ -815,24 +815,33 @@ msgstr ""
 
 #: ecommerce/extensions/basket/views.py
 msgid ""
-"You will be automatically enrolled in the verified track of the course upon "
-"completing your order."
+"After you complete your order you will be able to select course dates from "
+"your dashboard."
 msgstr ""
-"Ýöü wïll ßé äütömätïçällý énrölléd ïn thé vérïfïéd träçk öf thé çöürsé üpön "
-"çömplétïng ýöür ördér. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт,#"
-
-#: ecommerce/extensions/basket/views.py
-msgid "You will receive your credit upon completing your order."
-msgstr ""
-"Ýöü wïll réçéïvé ýöür çrédït üpön çömplétïng ýöür ördér. Ⱡ'σяєм ιρѕυм ∂σłσя "
-"ѕιт αмєт, ¢σηѕє¢тєтυя α#"
+"Àftér ýöü çömplété ýöür ördér ýöü wïll ßé äßlé tö séléçt çöürsé dätés fröm "
+"ýöür däshßöärd. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕ#"
 
 #: ecommerce/extensions/basket/views.py
 msgid ""
-"You will be automatically enrolled in the course upon completing your order."
+"After you complete your order you will be automatically enrolled in the "
+"verified track of the course."
 msgstr ""
-"Ýöü wïll ßé äütömätïçällý énrölléd ïn thé çöürsé üpön çömplétïng ýöür ördér."
-" Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυ#"
+"Àftér ýöü çömplété ýöür ördér ýöü wïll ßé äütömätïçällý énrölléd ïn thé "
+"vérïfïéd träçk öf thé çöürsé. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмє#"
+
+#: ecommerce/extensions/basket/views.py
+msgid "After you complete your order you will receive credit for your course."
+msgstr ""
+"Àftér ýöü çömplété ýöür ördér ýöü wïll réçéïvé çrédït för ýöür çöürsé. "
+"Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя #"
+
+#: ecommerce/extensions/basket/views.py
+msgid ""
+"After you complete your order you will be automatically enrolled in the "
+"course."
+msgstr ""
+"Àftér ýöü çömplété ýöür ördér ýöü wïll ßé äütömätïçällý énrölléd ïn thé "
+"çöürsé. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєт#"
 
 #: ecommerce/extensions/basket/views.py
 #, python-brace-format
@@ -1359,10 +1368,6 @@ msgid "Redeemed For Course IDs"
 msgstr "Rédééméd För Çöürsé ÌDs Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σ#"
 
 #: ecommerce/extensions/voucher/utils.py
-msgid "Created By"
-msgstr "Çréätéd Bý Ⱡ'σяєм ιρѕυм ∂σłσ#"
-
-#: ecommerce/extensions/voucher/utils.py
 msgid "Create Date"
 msgstr "Çréäté Däté Ⱡ'σяєм ιρѕυм ∂σłσя #"
 
@@ -1418,6 +1423,19 @@ msgstr "Nöt äpplïçäßlé Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт#"
 #: ecommerce/invoice/models.py
 msgid "Fixed"
 msgstr "Fïxéd Ⱡ'σяєм ιρѕ#"
+
+#: ecommerce/management/templates/management/index.html
+msgid "Management View"
+msgstr "Mänägémént Vïéw Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт α#"
+
+#: ecommerce/management/templates/management/index.html
+msgid "Refund Transactions"
+msgstr "Réfünd Tränsäçtïöns Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт,#"
+
+#: ecommerce/management/views.py
+#, python-brace-format
+msgid "{action} is not a valid action."
+msgstr "{action} ïs nöt ä välïd äçtïön. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕ#"
 
 #: ecommerce/programs/benefits.py
 #, python-brace-format
