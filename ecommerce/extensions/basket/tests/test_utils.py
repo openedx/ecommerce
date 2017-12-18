@@ -28,6 +28,7 @@ Basket = get_model('basket', 'Basket')
 BasketAttribute = get_model('basket', 'BasketAttribute')
 BasketAttributeType = get_model('basket', 'BasketAttributeType')
 BUNDLE = 'bundle_identifier'
+Option = get_model('catalogue', 'Option')
 Product = get_model('catalogue', 'Product')
 
 
@@ -419,6 +420,11 @@ class BasketUtilsTransactionTests(TransactionTestCase):
         self.site_configuration.utm_cookie_name = 'test.edx.utm'
         toggle_switch(DISABLE_REPEAT_ORDER_CHECK_SWITCH_NAME, False)
         BasketAttributeType.objects.get_or_create(name=BUNDLE)
+        course_entitlement_option = Option()
+        course_entitlement_option.name = 'Course Entitlement'
+        course_entitlement_option.code = 'course_entitlement'
+        course_entitlement_option.type = Option.OPTIONAL
+        course_entitlement_option.save()
 
     def _setup_request_cookie(self):
         utm_campaign = 'test-campaign'
