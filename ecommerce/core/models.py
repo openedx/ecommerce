@@ -324,6 +324,10 @@ class SiteConfiguration(models.Model):
         """
         return urljoin(settings.ENTERPRISE_SERVICE_URL, path)
 
+    def build_program_dashboard_url(self, uuid):
+        """ Returns a URL to a specific student program dashboard (hosted by LMS). """
+        return self.build_lms_url('/dashboard/programs/{}'.format(uuid))
+
     @property
     def student_dashboard_url(self):
         """ Returns a URL to the student dashboard (hosted by LMS). """
