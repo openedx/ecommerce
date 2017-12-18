@@ -16,6 +16,8 @@ from ecommerce.extensions.refund.tests.mixins import RefundTestMixin
 from ecommerce.tests.mixins import LmsApiMockMixin
 from ecommerce.tests.testcases import TestCase
 
+BasketAttribute = get_model('basket', 'BasketAttribute')
+BasketAttributeType = get_model('basket', 'BasketAttributeType')
 Order = get_model('order', 'Order')
 
 
@@ -299,3 +301,39 @@ class ReceiptResponseViewTests(DiscoveryMockMixin, LmsApiMockMixin, RefundTestMi
         self.assertEqual(response.status_code, 200)
         order_value_string = 'data-total-amount="{}"'.format(order.total_incl_tax)
         self.assertContains(response, order_value_string)
+
+    @httpretty.activate
+    def test_dashboard_link_for_course_purchase(self):
+        """
+        The dashboard link at the bottom of the receipt for a course purchase
+        should point to the user dashboard.
+        """
+        order = self._create_order_for_receipt(self.user)
+        response = self._get_receipt_response(order.number)
+        context_data = {
+            'order_dashboard_url': self.site.siteconfiguration.build_lms_url('dashboard')
+        }
+
+        self.assertEqual(response.status_code, 200)
+        self.assertDictContainsSubset(context_data, response.context_data)
+
+    @httpretty.activate
+    def test_dashboard_link_for_bundle_purchase(self):
+        """
+        The dashboard link at the bottom of the receipt for a bundle purchase
+        should point to the program dashboard.
+        """
+        order = self._create_order_for_receipt(self.user)
+        BasketAttribute.objects.update_or_create(
+            basket=order.basket,
+            attribute_type=BasketAttributeType.objects.get(name='bundle_identifier'),
+            value_text='test_bundle'
+        )
+
+        response = self._get_receipt_response(order.number)
+        context_data = {
+            'order_dashboard_url': self.site.siteconfiguration.build_lms_url('dashboard/programs/test_bundle')
+        }
+
+        self.assertEqual(response.status_code, 200)
+        self.assertDictContainsSubset(context_data, response.context_data)
