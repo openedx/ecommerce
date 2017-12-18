@@ -39,6 +39,11 @@ def get_lms_dashboard_url():
     return site_configuration.student_dashboard_url
 
 
+def get_lms_program_dashboard_url(uuid):
+    site_configuration = _get_site_configuration()
+    return site_configuration.build_program_dashboard_url(uuid)
+
+
 def get_lms_enrollment_api_url():
     # TODO Update consumers of this method to use `get_lms_enrollment_base_api_url` (which should be renamed
     # get_lms_enrollment_api_url).
