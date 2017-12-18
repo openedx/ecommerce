@@ -52,8 +52,8 @@ class RefundTestMixin(DiscoveryTestMixin):
         elif free:
             basket.add_product(self.honor_product)
         elif entitlement:
-            course_entitlement = create_or_update_course_entitlement('verified', 100, self.partner, '111', 'Foo')
-            basket.add_product(course_entitlement)
+            self.course_entitlement = create_or_update_course_entitlement('verified', 100, self.partner, '111', 'Foo')
+            basket.add_product(self.course_entitlement)
         else:
             basket.add_product(self.verified_product)
 
