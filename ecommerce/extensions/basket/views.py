@@ -88,7 +88,7 @@ class BasketSingleItemView(View):
         try:
             prepare_basket(request, [product], voucher)
         except AlreadyPlacedOrderException:
-            msg = _('You have already purchased {course} seat.').format(course=product.course.name)
+            msg = _('You have already purchased {course} seat.').format(course=product.title)
             return render(request, 'edx/error.html', {'error': msg})
         url = add_utm_params_to_url(reverse('basket:summary'), self.request.GET.items())
         return HttpResponseRedirect(url, status=303)
