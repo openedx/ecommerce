@@ -234,6 +234,29 @@ class UserAlreadyPlacedOrderTests(RefundTestMixin, TestCase):
         httpretty.register_uri(httpretty.GET, get_lms_entitlement_api_url() +
                                'entitlements/' + self.course_entitlement_uuid + '/',
                                status=200, body=json.dumps(body), content_type='application/json')
+        self.assertFalse(UserAlreadyPlacedOrder.user_already_placed_order(user=self.user,
+                                                                          product=self.course_entitlement,
+                                                                          site=self.site))
+
+    @httpretty.activate
+    def test_already_expired_entitlement_order(self):
+        """
+        Test the case that user has a non refunded order for the course entitlement
+        """
+        self.mock_access_token_response()
+        body = {
+            "user": "edx",
+            "uuid": "adfca7da-e593-428b-b12d-f728e2dd220d",
+            "course_uuid": "b084097a-7596-4fe6-b6a2-d335bffeb3f1",
+            "expired_at": None,
+            "created": "2017-12-16T21:35:59.402622Z",
+            "modified": "2017-12-16T21:36:19.280197Z",
+            "mode": "verified",
+            "order_number": "EDX-100014"
+        }
+        httpretty.register_uri(httpretty.GET, get_lms_entitlement_api_url() +
+                               'entitlements/' + self.course_entitlement_uuid + '/',
+                               status=200, body=json.dumps(body), content_type='application/json')
         self.assertTrue(UserAlreadyPlacedOrder.user_already_placed_order(user=self.user,
                                                                          product=self.course_entitlement,
                                                                          site=self.site))
