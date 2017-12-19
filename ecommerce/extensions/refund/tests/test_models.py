@@ -14,6 +14,7 @@ from testfixtures import LogCapture
 from ecommerce.core.constants import SEAT_PRODUCT_CLASS_NAME
 from ecommerce.core.url_utils import get_lms_enrollment_api_url
 from ecommerce.courses.tests.factories import CourseFactory
+from ecommerce.entitlements.utils import create_or_update_course_entitlement
 from ecommerce.extensions.checkout.utils import format_currency, get_receipt_page_url
 from ecommerce.extensions.payment.tests.processors import DummyProcessor
 from ecommerce.extensions.refund import models
@@ -387,6 +388,40 @@ class RefundTests(RefundTestMixin, StatusTestsMixin, TestCase):
         amount = format_currency(order.currency, price)
         mock_task.assert_called_once_with(
             user.email, refund.id, amount, course.name, order.number, order_url, site_code=self.partner.short_code
+        )
+
+    @mock.patch('ecommerce_worker.sailthru.v1.tasks.send_course_refund_email.delay')
+    def test_notify_purchaser_course_entielement(self, mock_task):
+        """ Verify the notification is scheduled if the site has notifications enabled
+        and the refund is for a course entitlement.
+        """
+        site_configuration = self.site.siteconfiguration
+        site_configuration.send_refund_notifications = True
+
+        user = UserFactory()
+
+        course_entitlement = create_or_update_course_entitlement(
+            'verified', 100, self.partner, '111-222-333-444', 'Course Entitlement')
+        basket = create_basket(site=self.site, owner=user, empty=True)
+        basket.add_product(course_entitlement, 1)
+
+        order = create_order(number=1, basket=basket, user=user)
+        order_url = get_receipt_page_url(site_configuration, order.number)
+
+        refund = Refund.create_with_lines(order, order.lines.all())
+
+        with LogCapture(REFUND_MODEL_LOGGER_NAME) as l:
+            refund._notify_purchaser()  # pylint: disable=protected-access
+
+        msg = 'Course refund notification scheduled for Refund [{}].'.format(refund.id)
+        l.check(
+            (REFUND_MODEL_LOGGER_NAME, 'INFO', msg)
+        )
+
+        amount = format_currency(order.currency, 100)
+        mock_task.assert_called_once_with(
+            user.email, refund.id, amount, course_entitlement.title, order.number,
+            order_url, site_code=self.partner.short_code
         )
 
     @mock.patch('ecommerce_worker.sailthru.v1.tasks.send_course_refund_email.delay')
