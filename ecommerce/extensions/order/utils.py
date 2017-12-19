@@ -4,16 +4,25 @@ from __future__ import unicode_literals
 import logging
 
 import waffle
+
+from django.conf import settings
+from django.core.cache import cache
+
+from edx_rest_api_client.client import EdxRestApiClient
+from edx_rest_api_client.exceptions import HttpNotFoundError
 from oscar.apps.order.utils import OrderCreator as OscarOrderCreator
 from oscar.core.loading import get_model
+from requests.exceptions import ConnectionError, ConnectTimeout   # pylint: disable=ungrouped-imports
 from threadlocals.threadlocals import get_current_request
 
+from ecommerce.core.url_utils import get_lms_entitlement_api_url
 from ecommerce.extensions.order.constants import DISABLE_REPEAT_ORDER_CHECK_SWITCH_NAME
 from ecommerce.extensions.refund.status import REFUND_LINE
 from ecommerce.referrals.models import Referral
 
 logger = logging.getLogger(__name__)
 
+Option = get_model('catalogue', 'Option')
 Order = get_model('order', 'Order')
 OrderLine = get_model('order', 'Line')
 RefundLine = get_model('refund', 'RefundLine')
@@ -126,7 +135,32 @@ class UserAlreadyPlacedOrder(object):
     """
 
     @staticmethod
-    def user_already_placed_order(user, product):
+    def is_entitlement_expired(entitlement_uuid, site):
+        """
+        Checks to see if a given entitlement is expired.
+
+        Args:
+            entitlement_uuid: UUID
+            site: (Site)
+
+        Returns:
+            bool: True if the entitlement is expired
+
+        """
+        entitlement_api_client = EdxRestApiClient(get_lms_entitlement_api_url(),
+                                                  jwt=site.siteconfiguration.access_token)
+        partner_short_code = site.siteconfiguration.partner.short_code
+        key = 'course_entitlement_detail_{}{}'.format(entitlement_uuid, partner_short_code)
+        entitlement = cache.get(key)
+
+        if not entitlement:
+            entitlement = entitlement_api_client.entitlements(entitlement_uuid).get()
+            cache.set(key, entitlement, settings.COURSES_API_CACHE_TIMEOUT)
+
+        return entitlement.get('expired_at')
+
+    @staticmethod
+    def user_already_placed_order(user, product, site):
         """
         Checks if the user has already purchased the product.
 
@@ -147,12 +181,21 @@ class UserAlreadyPlacedOrder(object):
         if waffle.switch_is_active(DISABLE_REPEAT_ORDER_CHECK_SWITCH_NAME):
             return False
 
+        entitlement_option = Option.objects.get(code='course_entitlement')
+
         orders_lines = OrderLine.objects.filter(product=product, order__user=user)
         if orders_lines:
             for order_line in orders_lines:
-                if (not UserAlreadyPlacedOrder.is_order_line_refunded(order_line) and
-                        not order_line.product.is_course_entitlement_product):
-                    return True
+                if not UserAlreadyPlacedOrder.is_order_line_refunded(order_line):
+                    if not order_line.product.is_course_entitlement_product:
+                        return True
+                    else:
+                        entitlement_uuid = order_line.attributes.get(option=entitlement_option).value
+                        try:
+                            return UserAlreadyPlacedOrder.is_entitlement_expired(entitlement_uuid, site)
+                        except (ConnectTimeout, ConnectionError, HttpNotFoundError):
+                            logger.exception('Unable to get entitlement info [%s] due to a network problem',
+                                             entitlement_uuid)
 
         return False
 

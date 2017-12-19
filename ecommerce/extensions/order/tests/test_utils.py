@@ -1,16 +1,21 @@
 """Test Order Utility classes """
+import json
 import logging
 
 import ddt
+import httpretty
 import mock
 from django.test.client import RequestFactory
 from oscar.core.loading import get_class, get_model
 from oscar.test.newfactories import BasketFactory
+from requests import Timeout
 from testfixtures import LogCapture
 
+from ecommerce.core.url_utils import get_lms_entitlement_api_url
 from ecommerce.extensions.fulfillment.status import ORDER
 from ecommerce.extensions.order.utils import UserAlreadyPlacedOrder
 from ecommerce.extensions.refund.tests.factories import RefundFactory
+from ecommerce.extensions.refund.tests.mixins import RefundTestMixin
 from ecommerce.extensions.test.factories import create_basket, create_order
 from ecommerce.referrals.models import Referral
 from ecommerce.tests.factories import PartnerFactory, SiteConfigurationFactory
@@ -20,6 +25,7 @@ LOGGER_NAME = 'ecommerce.extensions.order.utils'
 
 Country = get_class('address.models', 'Country')
 NoShippingRequired = get_class('shipping.methods', 'NoShippingRequired')
+Option = get_model('catalogue', 'Option')
 OrderCreator = get_class('order.utils', 'OrderCreator')
 OrderNumberGenerator = get_class('order.utils', 'OrderNumberGenerator')
 OrderTotalCalculator = get_class('checkout.calculators', 'OrderTotalCalculator')
@@ -177,7 +183,7 @@ class OrderCreatorTests(TestCase):
 
 
 @ddt.ddt
-class UserAlreadyPlacedOrderTests(TestCase):
+class UserAlreadyPlacedOrderTests(RefundTestMixin, TestCase):
     """
     Tests for Util class UserAlreadyPlacedOrder
     """
@@ -186,6 +192,11 @@ class UserAlreadyPlacedOrderTests(TestCase):
         self.user = self.create_user()
         self.order = create_order(site=self.site, user=self.user)
         self.product = self.get_order_product()
+        self.entitlement_order = self.create_order(entitlement=True, user=self.user)
+        line = self.entitlement_order.lines.first()
+        self.entitlement_option = Option.objects.get(name='Course Entitlement')
+        self.course_entitlement = line.product
+        self.course_entitlement_uuid = line.attributes.get(option=self.entitlement_option).value
 
     def get_order_product(self, order=None):
         """
@@ -201,14 +212,56 @@ class UserAlreadyPlacedOrderTests(TestCase):
         """
         Test the case that user have a non refunded order for the product.
         """
-        self.assertTrue(UserAlreadyPlacedOrder.user_already_placed_order(user=self.user, product=self.product))
+        self.assertTrue(UserAlreadyPlacedOrder.user_already_placed_order(user=self.user, product=self.product,
+                                                                         site=self.site))
+
+    @httpretty.activate
+    def test_already_have_not_refunded_entitlement_order(self):
+        """
+        Test the case that user has a non refunded order for the course entitlement
+        """
+        self.mock_access_token_response()
+        body = {
+            "user": "edx",
+            "uuid": "adfca7da-e593-428b-b12d-f728e2dd220d",
+            "course_uuid": "b084097a-7596-4fe6-b6a2-d335bffeb3f1",
+            "expired_at": "2017-12-16T21:36:19.279647Z",
+            "created": "2017-12-16T21:35:59.402622Z",
+            "modified": "2017-12-16T21:36:19.280197Z",
+            "mode": "verified",
+            "order_number": "EDX-100014"
+        }
+        httpretty.register_uri(httpretty.GET, get_lms_entitlement_api_url() +
+                               'entitlements/' + self.course_entitlement_uuid + '/',
+                               status=200, body=json.dumps(body), content_type='application/json')
+        self.assertTrue(UserAlreadyPlacedOrder.user_already_placed_order(user=self.user,
+                                                                         product=self.course_entitlement,
+                                                                         site=self.site))
+
+    @httpretty.activate
+    def test_refunded_entitlement_order_connection_timeout(self):
+        """
+        Test the case that we get an error trying to get the entitlement from LMS
+        """
+        httpretty.register_uri(httpretty.GET, get_lms_entitlement_api_url() +
+                               'entitlements/' + self.course_entitlement_uuid + '/',
+                               status=200, body={}, content_type='application/json',
+                               side_effect=Timeout)
+
+        self.assertFalse(UserAlreadyPlacedOrder.user_already_placed_order(user=self.user,
+                                                                          product=self.course_entitlement,
+                                                                          site=self.site))
 
     def test_no_previous_order(self):
         """
         Test the case that user do not have any previous order for the product.
         """
         user = self.create_user()
-        self.assertFalse(UserAlreadyPlacedOrder.user_already_placed_order(user=user, product=self.product))
+        self.assertFalse(UserAlreadyPlacedOrder.user_already_placed_order(user=user, product=self.product,
+                                                                          site=self.site))
+
+        self.assertFalse(UserAlreadyPlacedOrder.user_already_placed_order(user=user, product=self.course_entitlement,
+                                                                          site=self.site))
 
     def test_already_have_refunded_order(self):
         """
@@ -220,7 +273,7 @@ class UserAlreadyPlacedOrderTests(TestCase):
         refund_line.status = 'Complete'
         refund_line.save()
         product = self.get_order_product(order=refund.order)
-        self.assertFalse(UserAlreadyPlacedOrder.user_already_placed_order(user=user, product=product))
+        self.assertFalse(UserAlreadyPlacedOrder.user_already_placed_order(user=user, product=product, site=self.site))
 
     @ddt.data(('Open', False), ('Revocation Error', False), ('Denied', False), ('Complete', True))
     @ddt.unpack
