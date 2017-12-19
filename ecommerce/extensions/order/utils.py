@@ -154,10 +154,15 @@ class UserAlreadyPlacedOrder(object):
         entitlement = cache.get(key)
 
         if not entitlement:
+            logger.debug('Trying to get entitlement {%s}', entitlement_uuid)
             entitlement = entitlement_api_client.entitlements(entitlement_uuid).get()
             cache.set(key, entitlement, settings.COURSES_API_CACHE_TIMEOUT)
 
-        return entitlement.get('expired_at')
+        expired = entitlement.get('expired_at')
+
+        logger.debug('Entitlement {%s} expired = {%s}', entitlement_uuid, expired)
+
+        return expired
 
     @staticmethod
     def user_already_placed_order(user, product, site):
@@ -192,7 +197,8 @@ class UserAlreadyPlacedOrder(object):
                     else:
                         entitlement_uuid = order_line.attributes.get(option=entitlement_option).value
                         try:
-                            return UserAlreadyPlacedOrder.is_entitlement_expired(entitlement_uuid, site)
+                            if not UserAlreadyPlacedOrder.is_entitlement_expired(entitlement_uuid, site):
+                                return True
                         except (ConnectTimeout, ConnectionError, HttpNotFoundError):
                             logger.exception('Unable to get entitlement info [%s] due to a network problem',
                                              entitlement_uuid)
