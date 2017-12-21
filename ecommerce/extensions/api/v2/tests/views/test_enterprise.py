@@ -53,13 +53,13 @@ class TestEnterpriseCustomerView(EnterpriseServiceMockMixin, TestCase):
             {
                 'results': [
                     {
-                        'name': 'Starfleet Academy',
-                        'id': '5113b17bf79f4b5081cf3be0009bc96f'
-                    },  # Note that the private information from the API has been stripped
-                    {
                         'name': 'Millennium Falcon',
                         'id': 'd1fb990fa2784a52a44cca1118ed3993'
-                    }
+                    },
+                    {
+                        'name': 'Starfleet Academy',
+                        'id': '5113b17bf79f4b5081cf3be0009bc96f'
+                    }  # Note that the private information from the API has been stripped
                 ]
             }
         )
