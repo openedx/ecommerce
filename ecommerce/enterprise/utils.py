@@ -79,13 +79,16 @@ def get_enterprise_customers(site):
     client = get_enterprise_api_client(site)
     endpoint = getattr(client, resource)
     response = endpoint.get()
-    return [
-        {
-            'name': each['name'],
-            'id': each['uuid'],
-        }
-        for each in traverse_pagination(response, endpoint)
-    ]
+    return sorted(
+        [
+            {
+                'name': each['name'],
+                'id': each['uuid'],
+            }
+            for each in traverse_pagination(response, endpoint)
+        ],
+        key=lambda k: k['name'].lower()
+    )
 
 
 def get_enterprise_customer_consent_failed_context_data(request, voucher):
