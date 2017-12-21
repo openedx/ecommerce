@@ -6,7 +6,7 @@ django-debug-toolbar==1.7
 
 # i18n
 transifex-client==0.12.2
-edx-i18n-tools==0.3.4
+edx-i18n-tools==0.4.2
 
 # Visual Studio Code Debugger
 ptvsd==3.0
