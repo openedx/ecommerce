@@ -16,7 +16,7 @@ msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2017-12-15 09:43-0500\n"
-"PO-Revision-Date: 2017-12-24 18:25+0000\n"
+"PO-Revision-Date: 2017-12-27 22:38+0000\n"
 "Last-Translator: Ali Işıngör <ali@artistanbul.io>\n"
 "Language-Team: Turkish (Turkey) (http://www.transifex.com/open-edx/edx-platform/language/tr_TR/)\n"
 "MIME-Version: 1.0\n"
@@ -45,7 +45,7 @@ msgid ""
 "User administration has been disabled due to the load on the database. This "
 "functionality can be restored by activating the {switch_name} Waffle switch."
 " Be careful when re-activating this switch!"
-msgstr ""
+msgstr "Veritabanındaki yük nedeniyle kullanıcı yönetimi devre dışı bırakıldı. Bu işlev {switch_name} anahtarı açılarak geri getirilebilir. Bu anahtarı yeniden etkinleştirirken dikkatli olun!"
 
 #: ecommerce/core/models.py:40
 msgid "LMS base url for custom site/microsite"
@@ -61,19 +61,19 @@ msgstr "Özelleştirilmiş site teması yolu"
 
 #: ecommerce/core/models.py:53
 msgid "Payment processors"
-msgstr ""
+msgstr "Ödeme altyapısı"
 
 #: ecommerce/core/models.py:54
 msgid "Comma-separated list of processor names: 'cybersource,paypal'"
-msgstr ""
+msgstr "Virgüllerle ayrılmış ödeme altyapısı isim listesi: 'cybersource,paypal'"
 
 #: ecommerce/core/models.py:60
 msgid "Client-side payment processor"
-msgstr ""
+msgstr "İstemci tarafı ödeme altyapısı"
 
 #: ecommerce/core/models.py:61
 msgid "Processor that will be used for client-side payments"
-msgstr ""
+msgstr "İstemci tarafı ödemelerinde kullanılacak altyapı"
 
 #: ecommerce/core/models.py:67
 msgid "OAuth settings"
@@ -165,7 +165,7 @@ msgstr "SDN listeleri"
 
 #: ecommerce/core/models.py:142
 msgid "A comma-separated list of Treasury OFAC lists to check against."
-msgstr ""
+msgstr "ABD Hazinesi OFAC denetim listelerinin virgüllerle ayrılmış listesi."
 
 #: ecommerce/core/models.py:147
 msgid "Require Account Activation"
@@ -187,31 +187,31 @@ msgstr "Bu betik her sayfada yüklenecek."
 
 #: ecommerce/core/models.py:158 ecommerce/extensions/partner/models.py:9
 msgid "Enable Sailthru Reporting"
-msgstr ""
+msgstr "Sailthru Raporlamasını Etkinleştir"
 
 #: ecommerce/core/models.py:159
 msgid "Determines if purchases should be reported to Sailthru."
-msgstr ""
+msgstr "Satışların Sailthru aracılığıyla raporlanmasını etkinleştirir."
 
 #: ecommerce/core/models.py:163
 msgid "Base Cookie Domain"
-msgstr ""
+msgstr "Temel Çerez Alanı"
 
 #: ecommerce/core/models.py:164
 msgid "Base cookie domain used to share cookies across services."
-msgstr ""
+msgstr "Servisler arası paylaşılacak çerezlerin kullanacağı temel çalışma alanı."
 
 #: ecommerce/core/models.py:170
 msgid "Enable embargo check"
-msgstr ""
+msgstr "Ambargo denetimini etkinleştir"
 
 #: ecommerce/core/models.py:171
 msgid "Enable embargo check at checkout."
-msgstr ""
+msgstr "Ödeme aşamasında ambargo denetimini etkinleştir."
 
 #: ecommerce/core/models.py:175
 msgid "Discovery API URL"
-msgstr ""
+msgstr "Discovery API URL"
 
 #. Translators: Do not translate "Apple Pay"
 #: ecommerce/core/models.py:181
@@ -351,7 +351,7 @@ msgstr "Profesyonel"
 
 #: ecommerce/courses/utils.py:92
 msgid "Verified"
-msgstr "Onaylandı"
+msgstr "Onaylanmış"
 
 #: ecommerce/credit/views.py:42
 msgid ""
@@ -520,7 +520,7 @@ msgstr "Tür"
 #: ecommerce/enterprise/templates/enterprise/enterpriseoffer_list.html:33
 #: ecommerce/programs/templates/programs/programoffer_list.html:32
 msgid "Value"
-msgstr ""
+msgstr "Değer"
 
 #: ecommerce/enterprise/templates/enterprise/enterpriseoffer_list.html:34
 #: ecommerce/programs/templates/programs/programoffer_list.html:33
@@ -658,7 +658,7 @@ msgstr ""
 msgid ""
 "Due to export controls, we cannot allow you to access this course at this "
 "time."
-msgstr ""
+msgstr "İhracat kontrolleri nedeniyle, bu eğitime erişmenize şu an için izin veremiyoruz."
 
 #: ecommerce/extensions/basket/utils.py:125
 msgid "Click here to just purchase an enrollment for yourself"
@@ -852,12 +852,12 @@ msgstr "Program UUID"
 #: ecommerce/extensions/offer/utils.py:64
 #, python-brace-format
 msgid "{benefit_value}%"
-msgstr ""
+msgstr "%{benefit_value}"
 
 #: ecommerce/extensions/offer/utils.py:67
 #, python-brace-format
 msgid "${benefit_value}"
-msgstr ""
+msgstr "{benefit_value}TL"
 
 #. Translators: "Waffle" is the name of a third-party library. It should not
 #. be translated
@@ -886,7 +886,7 @@ msgstr "İş Ortağı"
 
 #: ecommerce/extensions/partner/models.py:15 ecommerce/settings/_oscar.py:222
 msgid "Partners"
-msgstr "Partnerler"
+msgstr "İş Ortakları"
 
 #: ecommerce/extensions/payment/constants.py:9
 msgid "American Express"
@@ -1030,7 +1030,7 @@ msgstr "Para"
 
 #: ecommerce/extensions/refund/models.py:293
 msgid "Refund"
-msgstr "İade ID"
+msgstr "İade"
 
 #: ecommerce/extensions/refund/models.py:296
 msgid "Order Line"
@@ -1038,7 +1038,7 @@ msgstr "Sipariş Hattı"
 
 #: ecommerce/extensions/refund/models.py:298
 msgid "Line Credit (excl. tax)"
-msgstr "Kredi Hatı (vergi hariç)"
+msgstr "Kredi Limiti (vergi hariç)"
 
 #: ecommerce/extensions/refund/models.py:299
 #: ecommerce/templates/edx/checkout/receipt.html:73
@@ -1153,7 +1153,7 @@ msgstr "Not"
 #: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:47
 #: ecommerce/templates/oscar/basket/partials/hosted_checkout_basket.html:62
 msgid "Price"
-msgstr "Fiyat"
+msgstr "Ücret"
 
 #: ecommerce/extensions/voucher/utils.py:228
 msgid "Invoiced Amount"
@@ -1245,12 +1245,12 @@ msgstr ""
 
 #: ecommerce/management/templates/management/index.html:26
 msgid "Refund Transactions"
-msgstr ""
+msgstr "İade İşlemleri"
 
 #: ecommerce/management/views.py:51
 #, python-brace-format
 msgid "{action} is not a valid action."
-msgstr ""
+msgstr "{action} geçerli bir eylem değil."
 
 #: ecommerce/programs/benefits.py:25
 #, python-brace-format
@@ -1342,7 +1342,7 @@ msgstr "UTM İçerik"
 
 #: ecommerce/referrals/models.py:32
 msgid "UTM Created At"
-msgstr ""
+msgstr "UTM Oluşturma Zamanı"
 
 #: ecommerce/settings/_oscar.py:179
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:17
@@ -1475,7 +1475,7 @@ msgstr ""
 
 #: ecommerce/templates/coupons/offer.html:22
 msgid "Why buy a verified certificate?"
-msgstr ""
+msgstr "Neden doğrulanmış bir sertifika almalısınız?"
 
 #: ecommerce/templates/coupons/offer.html:27
 msgid ""
@@ -1512,7 +1512,7 @@ msgstr "Dersler"
 #: ecommerce/templates/courses/course_app.html:28
 #, python-format
 msgid "%(platform_name)s Course Administration Tool"
-msgstr "%(platform_name)s Kurs Yönetim Araçı"
+msgstr "%(platform_name)s Ders Yönetim Aracı"
 
 #: ecommerce/templates/courses/menu_options.html:8
 msgid "Student Dashboard"
@@ -1520,7 +1520,7 @@ msgstr "Öğrenci Paneli"
 
 #: ecommerce/templates/courses/menu_options.html:11
 msgid "Course Admin Tool"
-msgstr "Kurs Yönetim Aracı"
+msgstr "Ders Yönetim Aracı"
 
 #: ecommerce/templates/courses/menu_options.html:14
 msgid "E-Commerce Dashboard"
@@ -1544,7 +1544,7 @@ msgid ""
 "Thank you for purchasing %(course_title)s. The charge below will appear on "
 "your next credit or debit card statement with a company name of "
 "%(platform_name)s."
-msgstr "%(course_title)s satın aldığınız için teşekkür ederiz. Aşağıdaki fiyat bir sonraki kredinizde görünecek ya da %(platform_name)s adlı şirket adı ile borç kart açıklamasında görünecek."
+msgstr "%(course_title)s satın aldığınız için teşekkür ederiz. Aşağıdaki ücret bir sonraki kredinizde görünecek ya da %(platform_name)s adlı şirket adı ile borç kart açıklamasında görünecek."
 
 #: ecommerce/templates/customer/emails/commtype_course_purchased_body.html:13
 #: ecommerce/templates/customer/emails/commtype_course_purchased_body.txt:8
@@ -1560,12 +1560,12 @@ msgstr "%(platform_name)s tablosunda dersinize giriş yapabilirsiniz ve doğrula
 msgid ""
 "To explore other great courses, visit the %(platform_name)s website. More "
 "courses are added every day!"
-msgstr "Diğer harika kursları bulmak için, %(platform_name)s web sitesini ziyaret edin. Her gün daha fazla kurs ekleniyor!"
+msgstr "Diğer harika dersleri bulmak için, %(platform_name)s web sitesini ziyaret edin. Her gün daha fazla ders ekleniyor!"
 
 #: ecommerce/templates/customer/emails/commtype_course_purchased_body.html:16
 #: ecommerce/templates/customer/emails/commtype_course_purchased_body.txt:11
 msgid "Thank you. We hope you enjoy the course!"
-msgstr "Teşekkürler. Umarız kursu beğenirsiniz!"
+msgstr "Teşekkürler. Umarız eğitimi beğenirsiniz!"
 
 #: ecommerce/templates/customer/emails/commtype_course_purchased_body.html:17
 #, python-format
@@ -1577,7 +1577,7 @@ msgstr "%(platform_name)s takımı"
 msgid ""
 "You are receiving this email because you purchased a seat in the "
 "%(platform_name)s course %(course_title)s."
-msgstr "Bu epostayı alıyorsunuz çünkü %(platform_name)s'da %(course_title)s dersinde bir yer satın aldınız."
+msgstr "Bu e-postayı alıyorsunuz çünkü %(platform_name)s'da %(course_title)s dersinde bir yer satın aldınız."
 
 #: ecommerce/templates/customer/emails/commtype_course_purchased_body.txt:2
 msgid "Receipt Confirmation for: "
@@ -1711,7 +1711,7 @@ msgstr ""
 #: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html:58
 #, python-format
 msgid "To view your payment information, please visit %(receipt_page_url)s."
-msgstr ""
+msgstr "Ödeme bilgilerinizi görmek için, lütfen %(receipt_page_url)s adresini ziyaret edin."
 
 #: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html:59
 #: ecommerce/templates/customer/emails/commtype_order_with_csv_body.txt:8
@@ -1824,7 +1824,7 @@ msgstr "Alt toplam"
 #: ecommerce/templates/edx/checkout/receipt.html:109
 #, python-format
 msgid "%(voucher_discount_amount)s off"
-msgstr ""
+msgstr "%(voucher_discount_amount)s indirimi"
 
 #: ecommerce/templates/edx/checkout/receipt.html:123
 #, python-format
@@ -1968,7 +1968,7 @@ msgstr "Bu kapıları açar."
 msgid ""
 "Many of today's most in-demand jobs require a college degree. Start your "
 "path to success!"
-msgstr "Bugünün en revaçta olan çoğu işi üniversite diploması gerektirir. Başarıya olan yolunuza başlayın!"
+msgstr "Bugünün revaçta olan pek çok iş, üniversite eğitimi gerektiriyor. Başarıya olan yolunuza başlayın!"
 
 #: ecommerce/templates/edx/credit/checkout.html:113
 msgid "Questions?"
@@ -2340,7 +2340,7 @@ msgstr ""
 #. Translators: SDN is an acronym for Specially Designated Nationals
 #: ecommerce/templates/oscar/checkout/sdn_failure.html:7
 msgid "SDN Check Failure"
-msgstr ""
+msgstr "SDN Denetimi Hatası"
 
 #: ecommerce/templates/oscar/checkout/sdn_failure.html:20
 msgid ""
@@ -2374,7 +2374,7 @@ msgstr "Kategori düzenle"
 
 #: ecommerce/templates/oscar/dashboard/catalogue/category_row_actions.html:17
 msgid "Add child category"
-msgstr ""
+msgstr "Çocuk kategori ekle"
 
 #: ecommerce/templates/oscar/dashboard/catalogue/category_row_actions.html:22
 msgid "Edit children"
@@ -2450,7 +2450,7 @@ msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:59
 msgid "Sections"
-msgstr ""
+msgstr "Bölümler"
 
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:71
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:101
@@ -2484,7 +2484,7 @@ msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:146
 msgid "Product Type:"
-msgstr ""
+msgstr "Ürün Türü:"
 
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:167
 msgid "Upload, change or remove images"
@@ -2627,11 +2627,11 @@ msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:28
 msgid "Suspending..."
-msgstr ""
+msgstr "Askıya alınıyor..."
 
 #: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:28
 msgid "Suspend offer"
-msgstr ""
+msgstr "Teklifi askıya al"
 
 #: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:29
 msgid "Delete offer"
@@ -2639,7 +2639,7 @@ msgstr "Teklifi sil"
 
 #: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:40
 msgid "Offer currently available"
-msgstr ""
+msgstr "Mevcut teklif"
 
 #: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:41
 msgid "Offer not available due to restrictions!"
@@ -2651,7 +2651,7 @@ msgstr "Toplam maliyet:"
 
 #: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:44
 msgid "Number of orders:"
-msgstr ""
+msgstr "Sipariş sayısı:"
 
 #: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:45
 msgid "Number of uses:"
@@ -2678,7 +2678,7 @@ msgstr "Koşul"
 #: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:79
 #: ecommerce/templates/oscar/dashboard/offers/summary.html:31
 msgid "Restrictions"
-msgstr ""
+msgstr "Kısıtlamalar"
 
 #: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:94
 msgid "Export to CSV"
@@ -2735,7 +2735,7 @@ msgstr "Başlık"
 
 #: ecommerce/templates/oscar/dashboard/orders/line_detail.html:43
 msgid "Product Type"
-msgstr ""
+msgstr "Ürün Türü"
 
 #: ecommerce/templates/oscar/dashboard/orders/line_detail.html:46
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:140
@@ -2761,15 +2761,15 @@ msgstr "Kargo ayrıntıları"
 
 #: ecommerce/templates/oscar/dashboard/orders/line_detail.html:86
 msgid "Partner reference number"
-msgstr ""
+msgstr "İş ortağı referans numarası"
 
 #: ecommerce/templates/oscar/dashboard/orders/line_detail.html:89
 msgid "Partner notes"
-msgstr ""
+msgstr "İş ortağı hakkında"
 
 #: ecommerce/templates/oscar/dashboard/orders/line_detail.html:92
 msgid "Estimate dispatch date"
-msgstr ""
+msgstr "Tahmini sevk tarihi"
 
 #: ecommerce/templates/oscar/dashboard/orders/line_detail.html:101
 msgid "Shipping status"
@@ -2847,7 +2847,7 @@ msgstr "Ad Soyad"
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:50
 #: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html:50
 msgid "Email address"
-msgstr "Email adresi"
+msgstr "E-posta adresi"
 
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:59
 #: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html:59
@@ -3179,7 +3179,7 @@ msgstr "İndir"
 
 #: ecommerce/templates/oscar/dashboard/orders/order_list.html:69
 msgid "Total inc tax"
-msgstr "Vergiler dahil toplam"
+msgstr "Vergiler dâhil toplam"
 
 #: ecommerce/templates/oscar/dashboard/orders/order_list.html:70
 msgid "Number of items"
@@ -3323,7 +3323,7 @@ msgstr "Kredi (vergi hariç)"
 
 #: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html:167
 msgid "Processor"
-msgstr "İşlemci"
+msgstr "Ödeme altyapısı"
 
 #: ecommerce/templates/oscar/dashboard/users/detail.html:36
 msgid "General"
@@ -3372,7 +3372,7 @@ msgstr "Toplam harcanan"
 
 #: ecommerce/templates/oscar/dashboard/users/detail.html:94
 msgid "Reviews written"
-msgstr "Yazılanları incelemeler"
+msgstr "Yazılan incelemeler"
 
 #: ecommerce/templates/oscar/dashboard/users/detail.html:107
 msgid "Send password reset email"
