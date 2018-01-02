@@ -366,12 +366,12 @@ class SiteConfiguration(models.Model):
         """
         key = 'siteconfiguration_access_token_{}'.format(self.id)
         access_token = cache.get(key)
-        log.info("--------------testing---------------------")
         # pylint: disable=unsubscriptable-object
         if not access_token:
             url = '{root}/access_token'.format(root=self.oauth2_provider_url)
             log.info("--------------testing2---------------------")
-            log.info(url)
+            log.info(self.oauth_settings['SOCIAL_AUTH_EDX_OIDC_KEY'])
+            log.info(self.oauth_settings['SOCIAL_AUTH_EDX_OIDC_SECRET'])
             access_token, expiration_datetime = EdxRestApiClient.get_oauth_access_token(
                 url,
                 self.oauth_settings['SOCIAL_AUTH_EDX_OIDC_KEY'],
@@ -381,8 +381,6 @@ class SiteConfiguration(models.Model):
 
             expires = (expiration_datetime - datetime.datetime.utcnow()).seconds
             cache.set(key, access_token, expires)
-        log.info("--------------access token---------------------")
-        log.info(access_token)
         return access_token
 
     @cached_property
