@@ -428,6 +428,8 @@ class SiteConfiguration(models.Model):
 
     @cached_property
     def commerce_api_client(self):
+        log.info("--------------testing---------------------")
+        log.info(self.build_lms_url('/api/commerce/v1/'))
         return EdxRestApiClient(self.build_lms_url('/api/commerce/v1/'), jwt=self.access_token)
 
     @cached_property
