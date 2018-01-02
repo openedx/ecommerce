@@ -430,6 +430,15 @@ class SiteConfiguration(models.Model):
     def commerce_api_client(self):
         log.info("--------------testing---------------------")
         log.info(self.build_lms_url('/api/commerce/v1/'))
+        try:
+            return EdxRestApiClient(self.build_lms_url('/api/commerce/v1/'), jwt=self.access_token)
+        except Exception as e:
+            log.exception(
+                    'Failed to publish CreditCourse for to LMS. Status was [%d]. Body was [%s].',
+                    e.response.status_code,
+                    e.content
+                )
+
         return EdxRestApiClient(self.build_lms_url('/api/commerce/v1/'), jwt=self.access_token)
 
     @cached_property
