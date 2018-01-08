@@ -1,6 +1,7 @@
 import datetime
 import hashlib
 import urllib
+from decimal import Decimal
 
 import ddt
 import httpretty
@@ -28,6 +29,7 @@ from ecommerce.core.tests import toggle_switch
 from ecommerce.core.url_utils import get_lms_url
 from ecommerce.coupons.tests.mixins import CouponMixin, DiscoveryMockMixin
 from ecommerce.courses.tests.factories import CourseFactory
+from ecommerce.enterprise.tests.mixins import EnterpriseServiceMockMixin
 from ecommerce.entitlements.utils import create_or_update_course_entitlement
 from ecommerce.extensions.analytics.utils import translate_basket_line_for_segment
 from ecommerce.extensions.basket.utils import get_basket_switch_data
@@ -367,7 +369,8 @@ class BasketMultipleItemsViewTests(DiscoveryTestMixin, DiscoveryMockMixin, LmsAp
 
 @httpretty.activate
 @ddt.ddt
-class BasketSummaryViewTests(DiscoveryTestMixin, DiscoveryMockMixin, LmsApiMockMixin, ApiMockMixin, TestCase):
+class BasketSummaryViewTests(EnterpriseServiceMockMixin, DiscoveryTestMixin, DiscoveryMockMixin, LmsApiMockMixin,
+                             ApiMockMixin, TestCase):
     """ BasketSummaryView basket view tests. """
     path = reverse('basket:summary')
 
@@ -746,6 +749,20 @@ class BasketSummaryViewTests(DiscoveryTestMixin, DiscoveryMockMixin, LmsApiMockM
             str(message),
             'Could not apply the code \'THISISACOUPONCODE\'; it requires data sharing consent.'
         )
+
+    @httpretty.activate
+    def test_free_basket_redirect(self):
+        """
+        Verify redirect to FreeCheckoutView when basket is free
+        and an Enterprise-related offer is applied.
+        """
+        self.course_run.create_or_update_seat('verified', True, Decimal(10), self.partner)
+        self.create_basket_and_add_product(self.course_run.seat_products[0])
+        self.prepare_enterprise_offer()
+
+        response = self.client.get(self.path)
+
+        self.assertRedirects(response, reverse('checkout:free-checkout'), fetch_redirect_response=False)
 
 
 @httpretty.activate

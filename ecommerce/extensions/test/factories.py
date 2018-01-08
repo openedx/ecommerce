@@ -9,7 +9,7 @@ from oscar.test.factories import *  # pylint:disable=wildcard-import,unused-wild
 
 from ecommerce.enterprise.benefits import EnterpriseAbsoluteDiscountBenefit, EnterprisePercentageDiscountBenefit
 from ecommerce.enterprise.conditions import EnterpriseCustomerCondition
-from ecommerce.extensions.offer.models import OFFER_PRIORITY_VOUCHER
+from ecommerce.extensions.offer.models import OFFER_PRIORITY_ENTERPRISE, OFFER_PRIORITY_VOUCHER
 from ecommerce.programs.benefits import AbsoluteDiscountBenefitWithoutRange, PercentageDiscountBenefitWithoutRange
 from ecommerce.programs.conditions import ProgramCourseRunSeatsCondition
 from ecommerce.programs.custom import class_path
@@ -200,5 +200,5 @@ class EnterpriseOfferFactory(ConditionalOfferFactory):
     condition = factory.SubFactory(EnterpriseCustomerConditionFactory)
     max_basket_applications = 1
     offer_type = ConditionalOffer.SITE
-    priority = 10
+    priority = OFFER_PRIORITY_ENTERPRISE
     status = ConditionalOffer.OPEN
