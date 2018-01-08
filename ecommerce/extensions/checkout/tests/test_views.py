@@ -8,7 +8,9 @@ from django.core.urlresolvers import reverse
 from oscar.core.loading import get_model
 from oscar.test import newfactories as factories
 
+from ecommerce.core.url_utils import get_lms_courseware_url, get_lms_program_dashboard_url
 from ecommerce.coupons.tests.mixins import DiscoveryMockMixin
+from ecommerce.enterprise.tests.mixins import EnterpriseServiceMockMixin
 from ecommerce.extensions.checkout.exceptions import BasketNotFreeError
 from ecommerce.extensions.checkout.utils import get_receipt_page_url
 from ecommerce.extensions.checkout.views import ReceiptResponseView
@@ -21,21 +23,30 @@ BasketAttributeType = get_model('basket', 'BasketAttributeType')
 Order = get_model('order', 'Order')
 
 
-class FreeCheckoutViewTests(TestCase):
+class FreeCheckoutViewTests(EnterpriseServiceMockMixin, TestCase):
     """ FreeCheckoutView view tests. """
     path = reverse('checkout:free-checkout')
 
     def setUp(self):
         super(FreeCheckoutViewTests, self).setUp()
         self.user = self.create_user()
+        self.bundle_attribute_value = 'test_bundle'
         self.client.login(username=self.user.username, password=self.password)
 
-    def prepare_basket(self, price):
+    def prepare_basket(self, price, bundle=False):
         """ Helper function that creates a basket and adds a product with set price to it. """
         basket = factories.BasketFactory(owner=self.user, site=self.site)
-        basket.add_product(factories.ProductFactory(stockrecords__price_excl_tax=price), 1)
+        self.course_run.create_or_update_seat('verified', True, Decimal(price), self.partner)
+        basket.add_product(self.course_run.seat_products[0])
         self.assertEqual(basket.lines.count(), 1)
         self.assertEqual(basket.total_incl_tax, Decimal(price))
+
+        if bundle:
+            BasketAttribute.objects.update_or_create(
+                basket=basket,
+                attribute_type=BasketAttributeType.objects.get(name='bundle_identifier'),
+                value_text=self.bundle_attribute_value
+            )
 
     def test_empty_basket(self):
         """ Verify redirect to basket summary in case of empty basket. """
@@ -49,6 +60,30 @@ class FreeCheckoutViewTests(TestCase):
 
         with self.assertRaises(BasketNotFreeError):
             self.client.get(self.path)
+
+    @httpretty.activate
+    def test_enterprise_offer_program_redirect(self):
+        """ Verify redirect to the program dashboard page. """
+        self.prepare_basket(10, bundle=True)
+        self.prepare_enterprise_offer()
+        self.assertEqual(Order.objects.count(), 0)
+        response = self.client.get(self.path)
+        self.assertEqual(Order.objects.count(), 1)
+
+        expected_url = get_lms_program_dashboard_url(self.bundle_attribute_value)
+        self.assertRedirects(response, expected_url, fetch_redirect_response=False)
+
+    @httpretty.activate
+    def test_enterprise_offer_course_redirect(self):
+        """ Verify redirect to the courseware info page. """
+        self.prepare_basket(10)
+        self.prepare_enterprise_offer()
+        self.assertEqual(Order.objects.count(), 0)
+        response = self.client.get(self.path)
+        self.assertEqual(Order.objects.count(), 1)
+
+        expected_url = get_lms_courseware_url(self.course_run.id)
+        self.assertRedirects(response, expected_url, fetch_redirect_response=False)
 
     @httpretty.activate
     def test_successful_redirect(self):
