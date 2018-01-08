@@ -12,7 +12,8 @@ from django.views.generic import RedirectView, TemplateView
 from oscar.apps.checkout.views import *  # pylint: disable=wildcard-import, unused-wildcard-import
 from oscar.core.loading import get_class, get_model
 
-from ecommerce.core.url_utils import get_lms_dashboard_url, get_lms_program_dashboard_url
+from ecommerce.core.url_utils import get_lms_dashboard_url, get_lms_courseware_url, get_lms_program_dashboard_url
+from ecommerce.enterprise.utils import has_enterprise_offer
 from ecommerce.extensions.checkout.exceptions import BasketNotFreeError
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
 from ecommerce.extensions.checkout.utils import get_receipt_page_url
@@ -22,6 +23,24 @@ Basket = get_model('basket', 'Basket')
 BasketAttribute = get_model('basket', 'BasketAttribute')
 BasketAttributeType = get_model('basket', 'BasketAttributeType')
 Order = get_model('order', 'Order')
+
+
+def get_program_uuid(order):
+    """
+    Return the program UUID associated with the given order, if one exists.
+
+    Arguments:
+        order (Order): The order object.
+
+    Returns:
+        string: The program UUID if the order is associated with a bundled purchase, otherwise None.
+    """
+    bundle_attributes = BasketAttribute.objects.filter(
+        basket=order.basket,
+        attribute_type=BasketAttributeType.objects.get(name='bundle_identifier')
+    )
+    bundle_attribute = bundle_attributes.first()
+    return bundle_attribute.value_text if bundle_attribute else None
 
 
 class FreeCheckoutView(EdxOrderPlacementMixin, RedirectView):
@@ -55,12 +74,22 @@ class FreeCheckoutView(EdxOrderPlacementMixin, RedirectView):
                 )
 
             order = self.place_free_order(basket)
-            receipt_path = get_receipt_page_url(
-                order_number=order.number,
-                site_configuration=order.site.siteconfiguration
-            )
 
-            url = site.siteconfiguration.build_lms_url(receipt_path)
+            if has_enterprise_offer(basket):
+                # Skip the receipt page and redirect to the LMS
+                # if the order is free due to an Enterprise-related offer.
+                program_uuid = get_program_uuid(order)
+                if program_uuid:
+                    url = get_lms_program_dashboard_url(program_uuid)
+                else:
+                    course_run_id = order.lines.all()[:1].get().product.course.id
+                    url = get_lms_courseware_url(course_run_id)
+            else:
+                receipt_path = get_receipt_page_url(
+                    order_number=order.number,
+                    site_configuration=order.site.siteconfiguration
+                )
+                url = site.siteconfiguration.build_lms_url(receipt_path)
         else:
             # If a user's basket is empty redirect the user to the basket summary
             # page which displays the appropriate message for empty baskets.
@@ -185,16 +214,8 @@ class ReceiptResponseView(ThankYouView):
                 return True
         return False
 
-    def get_program_uuid(self, order):
-        bundle_attributes = BasketAttribute.objects.filter(
-            basket=order.basket,
-            attribute_type=BasketAttributeType.objects.get(name='bundle_identifier')
-        )
-        bundle_attribute = bundle_attributes.first()
-        return bundle_attribute.value_text if bundle_attribute else None
-
     def get_order_dashboard_context(self, order):
-        program_uuid = self.get_program_uuid(order)
+        program_uuid = get_program_uuid(order)
         if program_uuid:
             order_dashboard_url = get_lms_program_dashboard_url(program_uuid)
         else:

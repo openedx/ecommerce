@@ -2,12 +2,13 @@ from __future__ import unicode_literals
 
 import logging
 from datetime import datetime
+from decimal import Decimal
 from urllib import urlencode
 
 import dateutil.parser
 import waffle
 from django.http import HttpResponseBadRequest, HttpResponseRedirect
-from django.shortcuts import render
+from django.shortcuts import redirect, render
 from django.utils.translation import ugettext as _
 from opaque_keys.edx.keys import CourseKey
 from oscar.apps.basket.views import VoucherAddView as BaseVoucherAddView
@@ -21,7 +22,11 @@ from ecommerce.core.exceptions import SiteConfigurationError
 from ecommerce.core.url_utils import get_lms_url
 from ecommerce.courses.utils import get_certificate_type_display_value, get_course_info_from_catalog
 from ecommerce.enterprise.entitlements import get_enterprise_code_redemption_redirect
-from ecommerce.enterprise.utils import CONSENT_FAILED_PARAM, get_enterprise_customer_from_voucher
+from ecommerce.enterprise.utils import (
+    CONSENT_FAILED_PARAM,
+    get_enterprise_customer_from_voucher,
+    has_enterprise_offer,
+)
 from ecommerce.extensions.analytics.utils import (
     prepare_analytics_data,
     track_segment_event,
@@ -347,7 +352,10 @@ class BasketSummaryView(BasketView):
         except Exception:  # pylint: disable=broad-except
             logger.exception('Failed to fire Cart Viewed event for basket [%d]', basket.id)
 
-        return super(BasketSummaryView, self).get(request, *args, **kwargs)
+        if has_enterprise_offer(basket) and basket.total_incl_tax == Decimal(0):
+            return redirect('checkout:free-checkout')
+        else:
+            return super(BasketSummaryView, self).get(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
         context = super(BasketSummaryView, self).get_context_data(**kwargs)
