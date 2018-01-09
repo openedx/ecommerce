@@ -22,11 +22,7 @@ from ecommerce.core.exceptions import SiteConfigurationError
 from ecommerce.core.url_utils import get_lms_url
 from ecommerce.courses.utils import get_certificate_type_display_value, get_course_info_from_catalog
 from ecommerce.enterprise.entitlements import get_enterprise_code_redemption_redirect
-from ecommerce.enterprise.utils import (
-    CONSENT_FAILED_PARAM,
-    get_enterprise_customer_from_voucher,
-    has_enterprise_offer,
-)
+from ecommerce.enterprise.utils import CONSENT_FAILED_PARAM, get_enterprise_customer_from_voucher, has_enterprise_offer
 from ecommerce.extensions.analytics.utils import (
     prepare_analytics_data,
     track_segment_event,

@@ -12,7 +12,7 @@ from django.views.generic import RedirectView, TemplateView
 from oscar.apps.checkout.views import *  # pylint: disable=wildcard-import, unused-wildcard-import
 from oscar.core.loading import get_class, get_model
 
-from ecommerce.core.url_utils import get_lms_dashboard_url, get_lms_courseware_url, get_lms_program_dashboard_url
+from ecommerce.core.url_utils import get_lms_courseware_url, get_lms_dashboard_url, get_lms_program_dashboard_url
 from ecommerce.enterprise.utils import has_enterprise_offer
 from ecommerce.extensions.checkout.exceptions import BasketNotFreeError
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin

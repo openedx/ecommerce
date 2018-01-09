@@ -6,6 +6,15 @@ from uuid import uuid4
 import httpretty
 import requests
 from django.conf import settings
+from waffle.models import Switch
+
+from ecommerce.courses.tests.factories import CourseFactory
+from ecommerce.enterprise.constants import ENTERPRISE_OFFERS_SWITCH
+from ecommerce.extensions.test.factories import (
+    EnterpriseCustomerConditionFactory,
+    EnterpriseOfferFactory,
+    EnterprisePercentageDiscountBenefitFactory
+)
 
 
 def raise_timeout(request, uri, headers):  # pylint: disable=unused-argument
@@ -25,6 +34,10 @@ class EnterpriseServiceMockMixin(object):
     ENTERPRISE_COURSE_ENROLLMENT_URL = '{}enterprise-course-enrollment/'.format(
         settings.ENTERPRISE_API_URL,
     )
+
+    def setUp(self):
+        super(EnterpriseServiceMockMixin, self).setUp()
+        self.course_run = CourseFactory()
 
     def mock_enterprise_customer_list_api_get(self):
         """
@@ -528,3 +541,19 @@ class EnterpriseServiceMockMixin(object):
                 body=body,
                 content_type='application/json'
             )
+
+    def prepare_enterprise_offer(self, percentage_discount_value=100):
+        Switch.objects.update_or_create(name=ENTERPRISE_OFFERS_SWITCH, defaults={'active': True})
+        benefit = EnterprisePercentageDiscountBenefitFactory(value=percentage_discount_value)
+        condition = EnterpriseCustomerConditionFactory()
+        EnterpriseOfferFactory(site=self.site, benefit=benefit, condition=condition)
+        self.mock_enterprise_learner_api(
+            learner_id=self.user.id,
+            enterprise_customer_uuid=str(condition.enterprise_customer_uuid),
+            course_run_id=self.course_run.id,
+        )
+        self.mock_catalog_contains_course_runs(
+            [self.course_run.id],
+            condition.enterprise_customer_uuid,
+            enterprise_customer_catalog_uuid=condition.enterprise_customer_catalog_uuid,
+        )
