@@ -47,6 +47,9 @@ PAYPAL_LOCALES = {
     'es': 'MX',
 }
 
+# Set to one of the country codes in in PAYPAL_LOCALES
+PAYPAL_DEFAULT_LOCALE = 'US'
+
 APPLE_PAY_CYBERSOURCE_CARD_TYPE_MAP = {
     value['apple_pay_network']: value['cybersource_code'] for value in six.itervalues(CARD_TYPES) if
     'cybersource_code' in value
