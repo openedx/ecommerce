@@ -12,11 +12,10 @@ import waffle
 from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.utils.functional import cached_property
-from django.utils.translation import get_language
 from oscar.apps.payment.exceptions import GatewayError
 
 from ecommerce.core.url_utils import get_ecommerce_url
-from ecommerce.extensions.payment.constants import PAYPAL_LOCALES
+from ecommerce.extensions.payment.constants import PAYPAL_DEFAULT_LOCALE, PAYPAL_LOCALES
 from ecommerce.extensions.payment.models import PaypalProcessorConfiguration, PaypalWebProfile
 from ecommerce.extensions.payment.processors import BasePaymentProcessor, HandledProcessorResponse
 from ecommerce.extensions.payment.utils import middle_truncate
@@ -67,11 +66,10 @@ class Paypal(BasePaymentProcessor):
         return get_ecommerce_url(self.configuration['error_path'])
 
     def resolve_paypal_locale(self, language_code):
-        default_paypal_locale = PAYPAL_LOCALES.get(re.split(r'[_-]', get_language())[0].lower())
-        if not language_code:
-            return default_paypal_locale
+        if language_code:
+            return PAYPAL_LOCALES.get(re.split(r'[_-]', language_code)[0].lower(), PAYPAL_DEFAULT_LOCALE)
         else:
-            return PAYPAL_LOCALES.get(re.split(r'[_-]', language_code)[0].lower(), default_paypal_locale)
+            return PAYPAL_DEFAULT_LOCALE
 
     def create_temporary_web_profile(self, locale_code):
         """
