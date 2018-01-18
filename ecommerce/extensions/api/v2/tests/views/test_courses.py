@@ -1,6 +1,7 @@
 from __future__ import unicode_literals
 
 import json
+import datetime
 
 import jwt
 import mock
@@ -32,6 +33,7 @@ class CourseViewSetTests(ProductSerializerMixin, DiscoveryTestMixin, TestCase):
         self.user = self.create_user(is_staff=True)
         self.client.login(username=self.user.username, password=self.password)
         self.course = self.create_course()
+        self.maxDiff = None
 
     def create_course(self):
         return CourseFactory(id='edX/DemoX/Demo_Course', name='Test Course', site=self.site)
@@ -41,7 +43,11 @@ class CourseViewSetTests(ProductSerializerMixin, DiscoveryTestMixin, TestCase):
         products_url = self.get_full_url(reverse('api:v2:course-product-list',
                                                  kwargs={'parent_lookup_course_id': course.id}))
 
-        last_edited = course.modified.strftime(ISO_8601_FORMAT)
+        if course.modified:
+            last_edited = course.modified.strftime(ISO_8601_FORMAT)
+        else:
+            last_edited = None
+
         enrollment_code = course.enrollment_code_product
 
         data = {

@@ -31,7 +31,8 @@ class SyncHistoryTests(TestCase):
         self.course.created = self.course.created + datetime.timedelta(days=1)
         self.course.modified = self.course.created + datetime.timedelta(days=1)
         self.course.save()
+        latest_history_update = self.course.history.latest().history_date
         call_command('sync_history_with_course')
         course = Course.objects.get(id='edx/Demo_Course/DemoX')
         self.assertEqual(course.created, self.course.history.earliest().history_date)
-        self.assertEqual(course.modified, self.course.history.latest().history_date)
+        self.assertEqual(course.modified, latest_history_update)
