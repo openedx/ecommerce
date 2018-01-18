@@ -41,7 +41,7 @@ class Course(models.Model):
     )
     history = HistoricalRecords()
     created = models.DateTimeField(null=True, auto_now_add=True)
-    modified = models.DateTimeField(null=True, auto_now=True)
+    modified = models.DateTimeField(null=True, auto_now=False)
     thumbnail_url = models.URLField(null=True, blank=True)
 
     def __unicode__(self):
