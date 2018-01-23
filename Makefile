@@ -43,7 +43,7 @@ production-requirements: requirements.js
 	pip install -r requirements.txt --exists-action w
 
 migrate:
-	python manage.py migrate
+	python manage.py migrate --noinput
 
 serve:
 	python manage.py runserver 0.0.0.0:8002
