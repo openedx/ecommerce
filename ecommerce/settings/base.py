@@ -271,7 +271,6 @@ DJANGO_APPS = [
     'widget_tweaks',
     'compressor',
     'rest_framework',
-    'simple_history',
     'waffle',
     'django_filters',
     'release_util',
