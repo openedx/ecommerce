@@ -126,6 +126,7 @@ class EdxOrderPlacementMixin(OrderPlacementMixin):
                 shipping_charge=shipping_charge,
                 order_total=order_total,
                 billing_address=billing_address,
+                request=request,
                 **kwargs
             )
 

@@ -15,7 +15,7 @@ from factory.django import mute_signals
 from oscar.apps.order.exceptions import UnableToPlaceOrder
 from oscar.apps.payment.exceptions import PaymentError, TransactionDeclined, UserCancelled
 from oscar.core.loading import get_class, get_model
-from oscar.test import factories, newfactories
+from oscar.test import factories
 from oscar.test.contextmanagers import mock_signal_receiver
 from testfixtures import LogCapture
 
@@ -162,10 +162,10 @@ class CybersourceMixin(PaymentEventsMixin):
             'line2': '',  # this is not required by Cybersource, so make it empty unless the caller overrides it.
             'line4': 'TestLine4',
             'postcode': 'TestPostCode',
-            'country': newfactories.CountryFactory(),
+            'country': factories.CountryFactory(),
         }
         kwargs.update(overrides or {})
-        return newfactories.BillingAddressFactory(**kwargs)
+        return factories.BillingAddressFactory(**kwargs)
 
     def generate_notification(self, basket, decision='ACCEPT', billing_address=None, auth_amount=None, **kwargs):
         """

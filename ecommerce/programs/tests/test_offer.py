@@ -10,7 +10,7 @@ from ecommerce.extensions.test import factories
 from ecommerce.programs.tests.mixins import ProgramTestMixin
 from ecommerce.tests.testcases import TestCase
 
-Applicator = get_class('offer.utils', 'Applicator')
+Applicator = get_class('offer.applicator', 'Applicator')
 
 
 class ProgramOfferTests(ProgramTestMixin, TestCase):

@@ -458,3 +458,16 @@ class ConditionalOfferTests(TestCase):
         """Verify creating ConditionalOffer with no site specified"""
         offer = factories.ConditionalOfferFactory()
         self.assertEqual(offer.site, None)
+
+
+class BenefitTests(TestCase):
+    def test_range(self):
+        with self.assertRaises(ValidationError):
+            factories.BenefitFactory(range=None)
+
+    def test_value(self):
+        with self.assertRaises(ValidationError):
+            factories.BenefitFactory(value=110)
+
+        with self.assertRaises(ValidationError):
+            factories.BenefitFactory(value=-10)
