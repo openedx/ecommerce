@@ -13,6 +13,7 @@ ProductAttribute = get_model("catalogue", "ProductAttribute")
 ProductClass = get_model("catalogue", "ProductClass")
 DIGITAL_BOOK_SLUG_NAME = slugify(DIGITAL_BOOK_PRODUCT_CLASS_NAME)
 
+
 def create_product_class(apps, schema_editor):
     """ Create a digital book product class """
 
@@ -41,14 +42,15 @@ def create_product_class(apps, schema_editor):
         name="Digital Books"
     )
 
+
 def remove_product_class(apps, schema_editor):
     """ Reverse function. """
     Product.objects.filter(product_class=ProductClass.objects.get(name=DIGITAL_BOOK_PRODUCT_CLASS_NAME)).delete()
     Category.objects.filter(slug=DIGITAL_BOOK_SLUG_NAME).delete()
     ProductClass.objects.filter(name=DIGITAL_BOOK_PRODUCT_CLASS_NAME).delete()
 
-class Migration(migrations.Migration):
 
+class Migration(migrations.Migration):
     dependencies = [
         ('catalogue', '0001_initial'),
         ('catalogue', '0024_fix_enrollment_code_slug')
