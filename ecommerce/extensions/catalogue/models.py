@@ -36,7 +36,7 @@ class Product(AbstractProduct):
 
     @property
     def is_digital_book_product(self):
-        return self.get_product_class().name = DIGITAL_BOOK_PRODUCT_CLASS_NAME
+        return self.get_product_class().name == DIGITAL_BOOK_PRODUCT_CLASS_NAME
 
     @property
     def is_coupon_product(self):
