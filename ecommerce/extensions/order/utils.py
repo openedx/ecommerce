@@ -77,7 +77,7 @@ class OrderNumberGenerator(object):
 
 class OrderCreator(OscarOrderCreator):
     def create_order_model(self, user, basket, shipping_address, shipping_method, shipping_charge, billing_address,
-                           total, order_number, status, **extra_order_fields):
+                           total, order_number, status, request=None, **extra_order_fields):
         """
         Create an order model.
 

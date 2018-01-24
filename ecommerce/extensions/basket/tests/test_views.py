@@ -16,7 +16,7 @@ from django.test import override_settings
 from factory.fuzzy import FuzzyText
 from oscar.apps.basket.forms import BasketVoucherForm
 from oscar.core.loading import get_class, get_model
-from oscar.test import newfactories as factories
+from oscar.test import factories
 from oscar.test.utils import RequestFactory
 from requests.exceptions import ConnectionError, Timeout
 from slumber.exceptions import SlumberBaseException
@@ -44,7 +44,7 @@ from ecommerce.tests.factories import ProductFactory, SiteFactory, StockRecordFa
 from ecommerce.tests.mixins import ApiMockMixin, LmsApiMockMixin
 from ecommerce.tests.testcases import TestCase
 
-Applicator = get_class('offer.utils', 'Applicator')
+Applicator = get_class('offer.applicator', 'Applicator')
 Basket = get_model('basket', 'Basket')
 BasketAttribute = get_model('basket', 'BasketAttribute')
 BasketAttributeType = get_model('basket', 'BasketAttributeType')
@@ -1015,5 +1015,5 @@ class VoucherRemoveViewTests(TestCase):
         self.assertEqual(response.status_code, 302)
 
         actual = list(get_messages(request))[-1].message
-        expected = "No coupon found with id '{}'".format(pk)
+        expected = "No voucher found with id '{}'".format(pk)
         self.assertEqual(actual, expected)

@@ -5,7 +5,7 @@ import logging
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 from oscar.core.loading import get_class, get_model
-from oscar.test.newfactories import UserFactory
+from oscar.test.factories import UserFactory
 
 from ecommerce.core.models import SiteConfiguration
 

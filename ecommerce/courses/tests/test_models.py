@@ -4,7 +4,7 @@ from django.conf import settings
 from django.utils.timezone import now, timedelta
 from freezegun import freeze_time
 from oscar.core.loading import get_model
-from oscar.test.newfactories import BasketFactory
+from oscar.test.factories import BasketFactory
 
 from ecommerce.core.constants import ENROLLMENT_CODE_PRODUCT_CLASS_NAME, ENROLLMENT_CODE_SWITCH
 from ecommerce.core.tests import toggle_switch

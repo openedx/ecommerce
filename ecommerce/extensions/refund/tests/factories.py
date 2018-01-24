@@ -3,7 +3,7 @@ from decimal import Decimal
 import factory
 from django.conf import settings
 from oscar.core.loading import get_model
-from oscar.test.newfactories import UserFactory
+from oscar.test.factories import UserFactory
 
 from ecommerce.extensions.refund.status import REFUND, REFUND_LINE
 from ecommerce.extensions.test.factories import create_order
