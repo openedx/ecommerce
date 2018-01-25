@@ -58,6 +58,7 @@ class UtilsTests(DiscoveryTestMixin, TestCase):
         actual = generate_sku(product, self.partner)
         self.assertEqual(actual, expected)
 
+
     def test_get_or_create_catalog(self):
         """Verify that the proper catalog is fetched."""
         stock_record = self.seat.stockrecords.first()

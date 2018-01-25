@@ -690,3 +690,39 @@ class CourseEntitlementFulfillmentModule(BaseFulfillmentModule):
             logger.exception('Failed to revoke fulfillment of Line [%d].', line.id)
 
         return False
+
+class DigitalBookFulfillmentModule(BaseFulfillmentModule):
+    """ Fulfillment Module for granting students an entitlement.
+    Allows the entitlement of a student via purchase of a 'Course Entitlement'.
+    """
+
+    def supports_line(self, line):
+        logger.error("SUPPORTS LINE")
+        return line.product.is_course_entitlement_product
+
+    def get_supported_lines(self, lines):
+        """ Return a list of lines that can be fulfilled.
+        Checks each line to determine if it is a "Course Entitlement". Entitlements are fulfilled by granting students
+        an entitlement in a course, which is the sole functionality of this module.
+        Args:
+            lines (List of Lines): Order Lines, associated with purchased products in an Order.
+        Returns:
+            A supported list of unmodified lines associated with "Course ENtitlement" products.
+        """
+        logger.error("GET SUPPORTED LINES")
+        return [line for line in lines if self.supports_line(line)]
+
+    def fulfill_product(self, order, lines):
+        """ Fulfills the purchase of a 'Digital Book'
+        Args:
+            order (Order): The Order associated with the lines to be fulfilled. The user associated with the order
+                is presumed to be the student to grant an entitlement.
+            lines (List of Lines): Order Lines, associated with purchased products in an Order. These should only
+                be "Digital Book" products.
+        Returns:
+            The original set of lines, with new statuses set based on the success or failure of fulfillment.
+        """
+        logger.info('Attempting to fulfill "Digitial Book" product types for order [%s]', order.number)
+
+        logger.error('FULFILL PRODUCT')
+        return False
