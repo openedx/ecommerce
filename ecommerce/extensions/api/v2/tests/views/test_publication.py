@@ -10,6 +10,7 @@ from freezegun import freeze_time
 from oscar.core.loading import get_model
 
 from ecommerce.core.constants import (
+    COURSE_ENTITLEMENT_PRODUCT_CLASS_NAME,
     ENROLLMENT_CODE_PRODUCT_CLASS_NAME,
     ENROLLMENT_CODE_SWITCH,
     ISO_8601_FORMAT,
@@ -19,11 +20,13 @@ from ecommerce.core.tests import toggle_switch
 from ecommerce.courses.models import Course
 from ecommerce.courses.publishers import LMSPublisher
 from ecommerce.courses.tests.factories import CourseFactory
+from ecommerce.entitlements.utils import create_or_update_course_entitlement
 from ecommerce.extensions.api.v2.tests.views import JSON_CONTENT_TYPE
 from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
 from ecommerce.tests.testcases import TestCase
 
 Product = get_model('catalogue', 'Product')
+ProductClass = get_model('catalogue', 'ProductClass')
 
 EXPIRES = datetime(year=1992, month=4, day=24, tzinfo=pytz.utc)
 EXPIRES_STRING = EXPIRES.strftime(ISO_8601_FORMAT)
@@ -134,14 +137,44 @@ class AtomicPublicationTests(DiscoveryTestMixin, TestCase):
                         'type': 'verified',
                         'verification_deadline': None
                     }
-                }
+                },
+                {
+                    'product_class': COURSE_ENTITLEMENT_PRODUCT_CLASS_NAME,
+                    'price': 50.00,
+                    'attribute_values': [
+                        {
+                            'name': 'certificate_type',
+                            'value': 'verified'
+                        },
+                    ],
+                    'course': {
+                        'honor_mode': True,
+                        'id': self.course_id,
+                        'name': self.course_name,
+                        'type': 'verified',
+                        'verification_deadline': None
+                    }
+                },
             ]
         }
 
         self.user = self.create_user(is_staff=True)
         self.client.login(username=self.user.username, password=self.password)
 
+        self.get_course_info_patch = mock.patch('ecommerce.extensions.api.serializers.get_course_info_from_catalog',
+                                                AtomicPublicationTests._fake_get_course_info)
+        self.get_course_info_patch.start()
+
         self.publication_switch = toggle_switch('publish_course_modes_to_lms', True)
+
+    def tearDown(self):
+        self.get_course_info_patch.stop()
+
+    @staticmethod
+    def _fake_get_course_info(_, product):
+        if product.attr.course_key == 'BadgerX/B101/2015':
+            return {'UUID': 'foo-bar'}
+        return {}
 
     def _toggle_publication(self, is_enabled):
         """Toggle LMS publication."""
@@ -165,11 +198,20 @@ class AtomicPublicationTests(DiscoveryTestMixin, TestCase):
             attrs = {'certificate_type': ''}
             attrs.update({attr['name']: attr['value'] for attr in product['attribute_values']})
 
-            attrs['expires'] = EXPIRES if product['expires'] else None
-            attrs['price'] = Decimal(product['price'])
-            attrs['partner'] = self.partner
+            if product['product_class'] == COURSE_ENTITLEMENT_PRODUCT_CLASS_NAME:
+                create_or_update_course_entitlement(
+                    attrs['certificate_type'],
+                    Decimal(product['price']),
+                    self.partner,
+                    'foo-bar',
+                    course.name,
+                )
+            else:
+                attrs['expires'] = EXPIRES if product['expires'] else None
+                attrs['price'] = Decimal(product['price'])
+                attrs['partner'] = self.partner
 
-            course.create_or_update_seat(**attrs)
+                course.create_or_update_seat(**attrs)
 
     def generate_update_payload(self):
         """ Returns dictionary representing the data payload sent for an update request. """
@@ -192,6 +234,50 @@ class AtomicPublicationTests(DiscoveryTestMixin, TestCase):
         """  Verify no Course with the specified ID exists."""
         self.assertFalse(Course.objects.filter(id=course_id).exists())
 
+    def assert_entitlement_saved(self, course, expected):
+        certificate_type = None
+        for attr in expected['attribute_values']:
+            name = attr['name']
+            if name == 'certificate_type':
+                certificate_type = attr['value']
+        self.assertIsNotNone(certificate_type)
+
+        # If the seat does not exist, an error will be raised.
+        entitlement = Product.objects.get(title='Course {}'.format(course.name))
+
+        self.assertEqual(entitlement.structure, Product.CHILD)
+        self.assertEqual(entitlement.parent.product_class.name, COURSE_ENTITLEMENT_PRODUCT_CLASS_NAME)
+        self.assertEqual(entitlement.attr.certificate_type, certificate_type)
+        self.assertEqual(entitlement.attr.UUID, 'foo-bar')
+        self.assertEqual(entitlement.stockrecords.get(partner=self.partner).price_excl_tax, expected['price'])
+
+    def assert_seat_saved(self, course, expected):
+        certificate_type = ''
+        id_verification_required = False
+
+        for attr in expected['attribute_values']:
+            name = attr['name']
+            if name == 'certificate_type':
+                certificate_type = attr['value']
+            elif name == 'id_verification_required':
+                id_verification_required = attr['value']
+
+        seat_title = 'Seat in {course_name}'.format(course_name=course.name)
+
+        if certificate_type:
+            seat_title += ' with {certificate_type} certificate'.format(certificate_type=certificate_type)
+
+        if id_verification_required:
+            seat_title += ' (and ID verification)'
+
+        # If the seat does not exist, an error will be raised.
+        seat = course.seat_products.get(title=seat_title)
+
+        # Verify product price and expiration time.
+        expires = EXPIRES if expected['expires'] else None
+        self.assertEqual(seat.expires, expires)
+        self.assertEqual(seat.stockrecords.get(partner=self.partner).price_excl_tax, expected['price'])
+
     def assert_course_saved(self, course_id, expected):
         """Verify that the expected Course and associated products have been saved."""
         # Verify that Course was saved.
@@ -203,40 +289,19 @@ class AtomicPublicationTests(DiscoveryTestMixin, TestCase):
         verification_deadline = EXPIRES if expected.get('verification_deadline') else None
         self.assertEqual(course.verification_deadline, verification_deadline)
 
-        # Validate product structure.
+        # Validate seat product structure.
         products = expected['products']
         expected_child_products = len(products)
-        expected_parent_products = 1
-        self.assertEqual(len(course.products.all()), expected_parent_products + expected_child_products)
-        self.assertTrue(len(course.products.filter(structure='child')), expected_child_products)
+        expected_parent_products = 2  # entitlement and seat
+        self.assertEqual(len(Product.objects.all()), expected_parent_products + expected_child_products)
+        self.assertEqual(len(Product.objects.filter(structure='child')), expected_child_products)
 
         # Validate product metadata.
         for product in products:
-            certificate_type = ''
-            id_verification_required = False
-
-            for attr in product['attribute_values']:
-                name = attr['name']
-                if name == 'certificate_type':
-                    certificate_type = attr['value']
-                elif name == 'id_verification_required':
-                    id_verification_required = attr['value']
-
-            seat_title = 'Seat in {course_name}'.format(course_name=course.name)
-
-            if certificate_type:
-                seat_title += ' with {certificate_type} certificate'.format(certificate_type=certificate_type)
-
-            if id_verification_required:
-                seat_title += ' (and ID verification)'
-
-            # If the seat does not exist, an error will be raised.
-            seat = course.seat_products.get(title=seat_title)
-
-            # Verify product price and expiration time.
-            expires = EXPIRES if product['expires'] else None
-            self.assertEqual(seat.expires, expires)
-            self.assertEqual(seat.stockrecords.get(partner=self.partner).price_excl_tax, product['price'])
+            if product['product_class'] == COURSE_ENTITLEMENT_PRODUCT_CLASS_NAME:
+                self.assert_entitlement_saved(course, product)
+            else:
+                self.assert_seat_saved(course, product)
 
     def test_lms_publication_disabled(self):
         """ Verify the endpoint returns an error, and does not save the course, if publication is disabled. """
@@ -313,9 +378,12 @@ class AtomicPublicationTests(DiscoveryTestMixin, TestCase):
             u'Invalid product class [{product_class}] requested.'.format(product_class=product_class)
         )
 
-    def test_incomplete_product_attributes(self):
+    def test_incomplete_seat_attributes(self):
         """Verify that submitting incomplete product attributes yields a 400."""
-        self.data['products'][0]['attribute_values'].pop()
+        for product in self.data['products']:
+            if product['product_class'] == SEAT_PRODUCT_CLASS_NAME:
+                product['attribute_values'].pop()
+                break
 
         response = self.client.post(self.create_path, json.dumps(self.data), JSON_CONTENT_TYPE)
 
@@ -326,9 +394,44 @@ class AtomicPublicationTests(DiscoveryTestMixin, TestCase):
         )
         self.assert_course_does_not_exist(self.course_id)
 
-    def test_missing_product_price(self):
-        """Verify that submitting product data without a price yields a 400."""
-        self.data['products'][0].pop('price')
+    def test_incomplete_entitlement_attributes(self):
+        """Verify that submitting incomplete product attributes yields a 400."""
+        for product in self.data['products']:
+            if product['product_class'] == COURSE_ENTITLEMENT_PRODUCT_CLASS_NAME:
+                product['attribute_values'].pop()
+                break
+
+        response = self.client.post(self.create_path, json.dumps(self.data), JSON_CONTENT_TYPE)
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(
+            response.data.get('products')[0],
+            u'Products must have a certificate type.'
+        )
+        self.assert_course_does_not_exist(self.course_id)
+
+    def test_missing_seat_price(self):
+        """Verify that submitting seat data without a price yields a 400."""
+        for product in self.data['products']:
+            if product['product_class'] == SEAT_PRODUCT_CLASS_NAME:
+                product.pop('price')
+                break
+
+        response = self.client.post(self.create_path, json.dumps(self.data), JSON_CONTENT_TYPE)
+        self.assertEqual(response.status_code, 400)
+
+        self.assertEqual(
+            response.data.get('products')[0],
+            u'Products must have a price.'
+        )
+        self.assert_course_does_not_exist(self.course_id)
+
+    def test_missing_entitlement_price(self):
+        """Verify that submitting entitlement data without a price yields a 400."""
+        for product in self.data['products']:
+            if product['product_class'] == COURSE_ENTITLEMENT_PRODUCT_CLASS_NAME:
+                product.pop('price')
+                break
 
         response = self.client.post(self.create_path, json.dumps(self.data), JSON_CONTENT_TYPE)
         self.assertEqual(response.status_code, 400)
