@@ -633,7 +633,7 @@ class CourseEntitlementFulfillmentModule(BaseFulfillmentModule):
 
                 # POST to the Entitlement API.
                 response = entitlement_api_client.entitlements.post(data)
-                line.attributes.create(option=entitlement_option, value=response['uuid'])
+                line.attributes.create(option=entitlement_option, value=response['uuid'])  #TODO: what is this line doing?
                 line.set_status(LINE.COMPLETE)
 
                 audit_log(
@@ -743,7 +743,33 @@ class DigitalBookFulfillmentModule(BaseFulfillmentModule):
 
             logger.info('>>> data: user: [%s], book_key: [%s], order_number: [%s]', data['user'], data['book_key'], data['order_number'] )
 
-        return False
+            try:
+                # TODO: POST to digital book API
+                logger.info('>>> TODO: POST TO DIGITAL BOOK API')
+                line.set_status(LINE.COMPLETE)
+
+                audit_log(
+                    'line_fulfilled',
+                    order_line_id=line.id,
+                    order_number=order.number,
+                    product_class=line.product.get_product_class().name,
+                    book_key=book_key,
+                    user_id=order.user.id,
+                )
+
+            except (Timeout, ConnectionError):
+                logger.exception(
+                    'Unable to fulfill line [%d] of order [%s] due to a network problem', line.id, order.number
+                )
+                line.set_status(LINE.FULFILLMENT_NETWORK_ERROR)
+            except Exception:
+                logger.exception(
+                    'Unable to fulfill line [%d] of order [%s]', line.id, order.number
+                )
+                line.set_status(LINE.FULFILLMENT_SERVER_ERROR)
+
+        logger.info('Finished fulfilling "Digital Book" product types for order [%s]', order.number)
+        return order, lines
 
     def revoke_line(self, line):
         logger.error('REVOKE LINE')
