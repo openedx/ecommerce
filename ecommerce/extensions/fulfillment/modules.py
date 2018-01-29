@@ -588,7 +588,7 @@ class CourseEntitlementFulfillmentModule(BaseFulfillmentModule):
         Args:
             lines (List of Lines): Order Lines, associated with purchased products in an Order.
         Returns:
-            A supported list of unmodified lines associated with "Course ENtitlement" products.
+            A supported list of unmodified lines associated with "Course Entitlement" products.
         """
         return [line for line in lines if self.supports_line(line)]
 
@@ -697,32 +697,54 @@ class DigitalBookFulfillmentModule(BaseFulfillmentModule):
     """
 
     def supports_line(self, line):
-        logger.error("SUPPORTS LINE")
-        return line.product.is_course_entitlement_product
+        logger.debug('Line order: [%s], is digital book: [%s]', line, line.product.is_digital_book_product)
+        return line.product.is_digital_book_product
 
     def get_supported_lines(self, lines):
         """ Return a list of lines that can be fulfilled.
-        Checks each line to determine if it is a "Course Entitlement". Entitlements are fulfilled by granting students
-        an entitlement in a course, which is the sole functionality of this module.
+        Checks each line to determine if it is a "Digital Book". Ditigal Books are fulfilled by granting students
+        an access to a digital book, which is the sole functionality of this module.
         Args:
             lines (List of Lines): Order Lines, associated with purchased products in an Order.
         Returns:
-            A supported list of unmodified lines associated with "Course ENtitlement" products.
+            A supported list of unmodified lines associated with "Digital Book" products.
         """
-        logger.error("GET SUPPORTED LINES")
         return [line for line in lines if self.supports_line(line)]
 
     def fulfill_product(self, order, lines):
         """ Fulfills the purchase of a 'Digital Book'
         Args:
             order (Order): The Order associated with the lines to be fulfilled. The user associated with the order
-                is presumed to be the student to grant an entitlement.
+                fis presumed to be the student to grant an entitlement.
             lines (List of Lines): Order Lines, associated with purchased products in an Order. These should only
                 be "Digital Book" products.
         Returns:
             The original set of lines, with new statuses set based on the success or failure of fulfillment.
         """
-        logger.info('Attempting to fulfill "Digitial Book" product types for order [%s]', order.number)
+        logger.info('Attempting to fulfill "Digital Book" product types for order [%s]', order.number)
 
-        logger.error('FULFILL PRODUCT')
+        logger.info('>>> fulfill_product...')
+
+        for line in lines:
+            logger.info('>>> line: %s', line)
+            try:
+                book_key = line.product.attr.book_key
+                logger.info('>>> Book Key: %s', book_key)
+            except AttributeError:
+                logger.error('Digital Book Product does not have required attributes, [book_key]')
+                line.set_status(LINE.FULFILLMENT_CONFIGURATION_ERROR)
+                continue
+
+            data = {
+                'user': order.user.username,
+                'book_key': book_key,
+                'order_number': order.number,
+            }
+
+            logger.info('>>> data: user: [%s], book_key: [%s], order_number: [%s]', data['user'], data['book_key'], data['order_number'] )
+
+        return False
+
+    def revoke_line(self, line):
+        logger.error('REVOKE LINE')
         return False
