@@ -20,7 +20,7 @@ from ecommerce.core.constants import (
     DONATIONS_FROM_CHECKOUT_TESTS_PRODUCT_TYPE_NAME,
     ENROLLMENT_CODE_PRODUCT_CLASS_NAME
 )
-from ecommerce.core.url_utils import get_lms_enrollment_api_url, get_lms_entitlement_api_url
+from ecommerce.core.url_utils import get_lms_enrollment_api_url, get_lms_entitlement_api_url, get_lms_digital_book_api_url
 from ecommerce.courses.models import Course
 from ecommerce.courses.utils import mode_for_product
 from ecommerce.enterprise.utils import get_or_create_enterprise_customer_user
@@ -745,7 +745,18 @@ class DigitalBookFulfillmentModule(BaseFulfillmentModule):
 
             try:
                 # TODO: POST to digital book API
-                logger.info('>>> TODO: POST TO DIGITAL BOOK API')
+                # TODO: attempt to get any type of response back and print it
+                digital_book_api_client = EdxRestApiClient(
+                    get_lms_digital_book_api_url(),
+                    jwt=order.site.siteconfiguration.access_token
+                )
+
+                # POST to the Digital Book API.
+                response = digital_book_api_client.digital_books.post(data)
+                logger.info(">>> response: %s", response)
+
+                # TODO: line attr create line
+
                 line.set_status(LINE.COMPLETE)
 
                 audit_log(
