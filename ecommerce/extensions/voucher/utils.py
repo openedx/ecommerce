@@ -10,7 +10,7 @@ import dateutil.parser
 import pytz
 from django.conf import settings
 from django.core.cache import cache
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.utils.translation import ugettext_lazy as _
 from opaque_keys.edx.keys import CourseKey
 from oscar.core.loading import get_model

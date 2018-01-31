@@ -10,7 +10,7 @@ import logging
 
 import requests
 from django.conf import settings
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from edx_rest_api_client.client import EdxRestApiClient
 from oscar.core.loading import get_model
 from requests.exceptions import ConnectionError, Timeout  # pylint: disable=ungrouped-imports

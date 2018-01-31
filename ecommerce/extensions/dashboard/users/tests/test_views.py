@@ -3,7 +3,7 @@ import json
 import httpretty
 import mock
 from django.contrib.messages import constants as MSG
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from requests import Timeout
 from testfixtures import LogCapture
 

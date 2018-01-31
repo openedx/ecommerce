@@ -5,7 +5,7 @@ from decimal import Decimal
 
 import mock
 import pytz
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from freezegun import freeze_time
 from oscar.core.loading import get_model
 

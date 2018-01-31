@@ -10,9 +10,9 @@ import pytz
 from django.conf import settings
 from django.contrib.messages import get_messages
 from django.core.cache import cache
-from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
 from django.test import override_settings
+from django.urls import reverse
 from factory.fuzzy import FuzzyText
 from oscar.apps.basket.forms import BasketVoucherForm
 from oscar.core.loading import get_class, get_model

@@ -1,4 +1,4 @@
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 
 from ecommerce.extensions.refund.status import REFUND
 from ecommerce.extensions.refund.tests.factories import RefundFactory

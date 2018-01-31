@@ -6,8 +6,8 @@ import ddt
 import httpretty
 import mock
 import pytz
-from django.core.urlresolvers import reverse
 from django.http import Http404
+from django.urls import reverse
 from django.utils.timezone import now
 from opaque_keys.edx.keys import CourseKey
 from oscar.core.loading import get_model

@@ -2,7 +2,7 @@ import json
 
 import ddt
 import httpretty
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from rest_framework import status
 
 from ecommerce.extensions.api.serializers import ProviderSerializer

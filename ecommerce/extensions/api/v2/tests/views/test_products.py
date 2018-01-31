@@ -4,8 +4,8 @@ import datetime
 import json
 
 import pytz
-from django.core.urlresolvers import reverse
 from django.test import RequestFactory
+from django.urls import reverse
 from oscar.core.loading import get_model
 
 from ecommerce.core.constants import COUPON_PRODUCT_CLASS_NAME, COURSE_ENTITLEMENT_PRODUCT_CLASS_NAME

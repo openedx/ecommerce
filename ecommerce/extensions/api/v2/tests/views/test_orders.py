@@ -4,8 +4,8 @@ import ddt
 import httpretty
 import mock
 from django.contrib.auth.models import Permission
-from django.core.urlresolvers import reverse
 from django.test import RequestFactory, override_settings
+from django.urls import reverse
 from oscar.core.loading import get_model
 
 from ecommerce.extensions.api.serializers import OrderSerializer

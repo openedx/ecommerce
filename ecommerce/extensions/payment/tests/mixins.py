@@ -10,7 +10,7 @@ import ddt
 import mock
 import responses
 from django.conf import settings
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from factory.django import mute_signals
 from oscar.apps.order.exceptions import UnableToPlaceOrder
 from oscar.apps.payment.exceptions import PaymentError, TransactionDeclined, UserCancelled

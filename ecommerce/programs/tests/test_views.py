@@ -1,7 +1,7 @@
 import uuid
 
 import httpretty
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from oscar.core.loading import get_model
 
 from ecommerce.extensions.test import factories

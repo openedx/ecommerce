@@ -5,9 +5,9 @@ import mock
 from auth_backends.tests.mixins import LogoutViewTestMixin
 from django.conf import settings
 from django.contrib.auth import get_user_model
-from django.core.urlresolvers import reverse
 from django.db import DatabaseError
 from django.test.utils import override_settings
+from django.urls import reverse
 from rest_framework import status
 
 from ecommerce.core.constants import Status
