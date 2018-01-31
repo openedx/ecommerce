@@ -6,7 +6,7 @@ import httpretty
 import mock
 import pytz
 from django.conf import settings
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.utils.timezone import now
 from factory.fuzzy import FuzzyText
 from oscar.core.loading import get_class, get_model

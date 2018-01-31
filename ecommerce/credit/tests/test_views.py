@@ -9,7 +9,7 @@ from datetime import timedelta
 import ddt
 import httpretty
 from django.conf import settings
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.utils import timezone
 from oscar.core.loading import get_model
 from oscar.test.factories import RangeFactory

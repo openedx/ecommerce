@@ -5,8 +5,8 @@ from calendar import timegm
 
 import httpretty
 from django.contrib.auth import get_user_model
-from django.core.urlresolvers import reverse
 from django.test import override_settings
+from django.urls import reverse
 from jwkest.jwk import SYMKey
 from jwkest.jws import JWS
 from social_django.models import DjangoStorage

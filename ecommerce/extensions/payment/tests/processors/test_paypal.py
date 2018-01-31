@@ -11,8 +11,8 @@ import mock
 import paypalrestsdk
 import responses
 from django.conf import settings
-from django.core.urlresolvers import reverse
 from django.test import RequestFactory
+from django.urls import reverse
 from django.utils import translation
 from factory.fuzzy import FuzzyInteger
 from oscar.apps.payment.exceptions import GatewayError

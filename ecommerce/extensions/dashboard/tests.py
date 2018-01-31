@@ -1,4 +1,4 @@
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from oscar.test.factories import OrderFactory, UserFactory
 
 from ecommerce.tests.testcases import TestCase

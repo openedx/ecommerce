@@ -4,8 +4,8 @@ from __future__ import unicode_literals
 import ddt
 import mock
 import responses
-from django.core.urlresolvers import reverse
 from django.test.client import RequestFactory
+from django.urls import reverse
 from oscar.apps.order.exceptions import UnableToPlaceOrder
 from oscar.apps.payment.exceptions import PaymentError
 from oscar.core.loading import get_class, get_model

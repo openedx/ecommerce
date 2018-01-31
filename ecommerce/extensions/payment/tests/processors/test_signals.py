@@ -1,6 +1,6 @@
 from django.conf import settings
 from django.core.cache import cache
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from waffle.models import Switch
 
 from ecommerce.extensions.api.v2.views.payments import PAYMENT_PROCESSOR_CACHE_KEY

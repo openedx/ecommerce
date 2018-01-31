@@ -6,7 +6,7 @@ import jwt
 import mock
 from django.conf import settings
 from django.contrib.auth import get_user_model
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from oscar.core.loading import get_class, get_model
 
 from ecommerce.core.constants import ISO_8601_FORMAT, SEAT_PRODUCT_CLASS_NAME

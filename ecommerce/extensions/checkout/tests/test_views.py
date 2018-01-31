@@ -4,7 +4,7 @@ from decimal import Decimal
 import ddt
 import httpretty
 from django.conf import settings
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from oscar.core.loading import get_model
 from oscar.test import factories
 

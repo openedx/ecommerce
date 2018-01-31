@@ -2,7 +2,7 @@ import os
 from unittest import skip
 
 import ddt
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from nose.plugins.skip import SkipTest
 from oscar.core.loading import get_model
 from oscar.test import factories

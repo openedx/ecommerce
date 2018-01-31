@@ -2,7 +2,7 @@ import json
 
 import ddt
 import mock
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from requests.exceptions import HTTPError, Timeout
 from rest_framework import status
 

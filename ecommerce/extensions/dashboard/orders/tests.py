@@ -2,8 +2,8 @@ import os
 from unittest import skipIf
 
 from django.contrib.messages import constants as MSG
-from django.core.urlresolvers import reverse
 from django.test import override_settings
+from django.urls import reverse
 from nose.plugins.skip import SkipTest
 from oscar.core.loading import get_model
 from oscar.test import factories

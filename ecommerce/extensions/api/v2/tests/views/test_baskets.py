@@ -11,8 +11,8 @@ import ddt
 import httpretty
 import mock
 from django.contrib.auth import get_user_model
-from django.core.urlresolvers import reverse
 from django.test import override_settings
+from django.urls import reverse
 from oscar.core.loading import get_model
 from oscar.test import factories
 from oscar.test.factories import BasketFactory

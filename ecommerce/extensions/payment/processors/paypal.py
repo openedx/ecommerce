@@ -10,7 +10,7 @@ from urlparse import urljoin
 import paypalrestsdk
 import waffle
 from django.conf import settings
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.utils.functional import cached_property
 from django.utils.translation import get_language
 from oscar.apps.payment.exceptions import GatewayError
