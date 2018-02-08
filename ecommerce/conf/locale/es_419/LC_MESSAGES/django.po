@@ -3,6 +3,7 @@
 # This file is distributed under the same license as the PACKAGE package.
 # 
 # Translators:
+# Albeiro Gonzalez <albeiro.gonzalez@edunext.co>, 2018
 # Anthony Mangano <amangano@edx.org>, 2017
 # Christopher Lee <clee@edx.org>, 2017
 # Diego Rojas <diego.rojas@edunext.co>, 2017
@@ -11,7 +12,7 @@
 # Elias Estay <eestay@u.uchile.cl>, 2015
 # Ernesto Franz Achá Mamani <fachaa2@hotmail.com>, 2015
 # Jeff Brenes <inactive+ucr.filosofia@transifex.com>, 2016
-# Juan Camilo Montoya Franco <juan.montoya@edunext.co>, 2015-2017
+# Juan Camilo Montoya Franco <juan.montoya@edunext.co>, 2015-2018
 # Laura Silva <lingison@edx.org>, 2016
 # Matías Olivera <MatiasOlivera@outlook.com>, 2016
 # Ned Weitzman <nweitzman@edx.org>, 2017
@@ -21,8 +22,8 @@ msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2017-12-15 09:43-0500\n"
-"PO-Revision-Date: 2017-12-15 19:22+0000\n"
-"Last-Translator: Ned Batchelder <ned@edx.org>\n"
+"PO-Revision-Date: 2018-01-29 19:51+0000\n"
+"Last-Translator: Albeiro Gonzalez <albeiro.gonzalez@edunext.co>\n"
 "Language-Team: Spanish (Latin America) (http://www.transifex.com/open-edx/edx-platform/language/es_419/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
