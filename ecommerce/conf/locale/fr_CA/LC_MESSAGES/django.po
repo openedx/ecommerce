@@ -45,7 +45,7 @@
 # Pedro Guimarães Martins <pedrogmartins7@gmail.com>, 2014
 # PETIT Yannick <yannick.petit@gmail.com>, 2013
 # Pierre-Emmanuel Colas <pecolas44@gmail.com>, 2015
-# Pierre Mailhot <pierre.mailhot@gmail.com>, 2016-2017
+# Pierre Mailhot <pierre.mailhot@gmail.com>, 2016-2018
 # qcappart <quentin.c@swing.be>, 2014
 # Ramarohetra Malalatiana <mtiana8@gmail.com>, 2014
 # Régis Millet <regmillet@ct2c.fr>, 2015
@@ -68,8 +68,8 @@ msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2017-12-15 09:43-0500\n"
-"PO-Revision-Date: 2017-12-15 19:22+0000\n"
-"Last-Translator: Ned Batchelder <ned@edx.org>\n"
+"PO-Revision-Date: 2018-01-26 22:08+0000\n"
+"Last-Translator: Pierre Mailhot <pierre.mailhot@gmail.com>\n"
 "Language-Team: French (Canada) (http://www.transifex.com/open-edx/edx-platform/language/fr_CA/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -97,7 +97,7 @@ msgid ""
 "User administration has been disabled due to the load on the database. This "
 "functionality can be restored by activating the {switch_name} Waffle switch."
 " Be careful when re-activating this switch!"
-msgstr ""
+msgstr "L'administration usager a été désactivée en raison de la charge sur la base de données. Cette fonctionnalité peut être restaurée en activant la Waffle switch {enterprise_customer_name}. Soyez prudent lorsque vous réactivez cette switch."
 
 #: ecommerce/core/models.py:40
 msgid "LMS base url for custom site/microsite"
@@ -272,13 +272,13 @@ msgstr "Activer Apple Pay"
 
 #: ecommerce/core/models.py:185
 msgid "Enable Partial Program Offer"
-msgstr ""
+msgstr "Activer une offre partielle de programme."
 
 #: ecommerce/core/models.py:186
 msgid ""
 "Enable the application of program offers to remaining unenrolled or "
 "unverified courses"
-msgstr ""
+msgstr "Permettre l'application des offres de programme aux cours restants non inscrits ou non vérifiés"
 
 #: ecommerce/core/models.py:445
 msgid "Full Name"
@@ -365,7 +365,7 @@ msgstr "Une réduction a été appliquée, gracieuseté de {enterprise_customer_
 
 #: ecommerce/coupons/views.py:258
 msgid "This coupon code is not valid for this course. Try a different course."
-msgstr ""
+msgstr "Ce code de coupon est invalide pour ce cours. Essayez un autre cours."
 
 #: ecommerce/courses/models.py:34 ecommerce/extensions/basket/models.py:14
 #: ecommerce/extensions/offer/models.py:45
@@ -429,12 +429,12 @@ msgstr "Une erreur est survenue. Nous ne pouvons pas confirmer que l'institution
 #: ecommerce/enterprise/benefits.py:21
 #, python-format
 msgid "%d%% enterprise discount"
-msgstr ""
+msgstr "%d%%rabais d'entreprise"
 
 #: ecommerce/enterprise/benefits.py:33
 #, python-brace-format
 msgid "{value} fixed-price enterprise discount"
-msgstr ""
+msgstr "{value} prix fixe du rabais d'entreprise"
 
 #: ecommerce/enterprise/constants.py:13 ecommerce/invoice/models.py:21
 #: ecommerce/programs/constants.py:13
@@ -448,12 +448,12 @@ msgstr "Absolu"
 #: ecommerce/enterprise/forms.py:21
 #: ecommerce/enterprise/templates/enterprise/enterpriseoffer_list.html:30
 msgid "Enterprise Customer UUID"
-msgstr ""
+msgstr "UUID de Client Entreprise"
 
 #: ecommerce/enterprise/forms.py:22
 #: ecommerce/enterprise/templates/enterprise/enterpriseoffer_list.html:31
 msgid "Enterprise Customer Catalog UUID"
-msgstr ""
+msgstr "UUID du catalogue du Client Entreprise"
 
 #: ecommerce/enterprise/forms.py:23 ecommerce/programs/forms.py:20
 msgid "Discount Type"
@@ -473,7 +473,7 @@ msgstr "Date de fin"
 
 #: ecommerce/enterprise/forms.py:77
 msgid "An offer already exists for this Enterprise & Catalog combination."
-msgstr ""
+msgstr "Une offre existe déjà pour cette combinaison d'Entreprise et de Catalogue."
 
 #: ecommerce/enterprise/forms.py:80 ecommerce/programs/forms.py:70
 msgid "Percentage discounts cannot be greater than 100%."
@@ -490,26 +490,26 @@ msgstr "La date de début doit avoir lieu avant la date de fin."
 #: ecommerce/enterprise/forms.py:98
 #, python-brace-format
 msgid "Discount provided by {enterprise_customer_name}."
-msgstr ""
+msgstr "Rabais fourni par {enterprise_customer_name}."
 
 #: ecommerce/enterprise/templates/enterprise/enterpriseoffer_form.html:8
 #, python-format
 msgid "Edit Enterprise Offer: %(enterprise_customer_name)s"
-msgstr ""
+msgstr "Editer l'offre d'entreprise: %(enterprise_customer_name)s"
 
 #: ecommerce/enterprise/templates/enterprise/enterpriseoffer_form.html:12
 #: ecommerce/enterprise/templates/enterprise/enterpriseoffer_form.html:45
 #: ecommerce/enterprise/templates/enterprise/enterpriseoffer_form.html:58
 #: ecommerce/enterprise/templates/enterprise/enterpriseoffer_list.html:20
 msgid "Create Enterprise Offer"
-msgstr ""
+msgstr "Créer une offre Entreprise"
 
 #: ecommerce/enterprise/templates/enterprise/enterpriseoffer_form.html:28
 #: ecommerce/enterprise/templates/enterprise/enterpriseoffer_list.html:6
 #: ecommerce/enterprise/templates/enterprise/enterpriseoffer_list.html:17
 #: ecommerce/templates/edx/partials/_administration_menu.html:11
 msgid "Enterprise Offers"
-msgstr ""
+msgstr "Offres Entreprise"
 
 #: ecommerce/enterprise/templates/enterprise/enterpriseoffer_form.html:32
 #: ecommerce/programs/templates/programs/programoffer_form.html:32
@@ -534,7 +534,7 @@ msgstr "Créer"
 
 #: ecommerce/enterprise/templates/enterprise/enterpriseoffer_form.html:43
 msgid "Edit Enterprise Offer"
-msgstr ""
+msgstr "Éditer offre Entreprise"
 
 #: ecommerce/enterprise/templates/enterprise/enterpriseoffer_form.html:56
 #: ecommerce/programs/templates/programs/programoffer_form.html:56
@@ -552,15 +552,15 @@ msgstr "Annuler"
 #: ecommerce/enterprise/templates/enterprise/enterpriseoffer_list.html:62
 #, python-format
 msgid "%(platform_name)s Enterprise Offer Administration Tool"
-msgstr ""
+msgstr "%(platform_name)sOutil d'administration d'offre Entreprise"
 
 #: ecommerce/enterprise/templates/enterprise/enterpriseoffer_list.html:26
 msgid "Current enterprise offers"
-msgstr ""
+msgstr "Offres Entreprise actuelles"
 
 #: ecommerce/enterprise/templates/enterprise/enterpriseoffer_list.html:29
 msgid "Enterprise Customer Name"
-msgstr ""
+msgstr "Nom du client Entreprise"
 
 #: ecommerce/enterprise/templates/enterprise/enterpriseoffer_list.html:32
 #: ecommerce/programs/templates/programs/programoffer_list.html:31
@@ -615,11 +615,11 @@ msgstr "L'inscription à {course_name} n'était pas complète."
 
 #: ecommerce/enterprise/views.py:37
 msgid "Enterprise offer updated!"
-msgstr ""
+msgstr "Offre Entreprise mise à jour!"
 
 #: ecommerce/enterprise/views.py:60
 msgid "Enterprise offer created!"
-msgstr ""
+msgstr "Offre Entreprise créée!"
 
 #: ecommerce/extensions/api/exceptions.py:7
 msgid "You can't check out with an empty basket."
@@ -742,23 +742,23 @@ msgstr "Vous avez déjà acheté ces produits"
 msgid ""
 "After you complete your order you will be able to select course dates from "
 "your dashboard."
-msgstr ""
+msgstr "Après avoir terminé votre commande, vous serez en mesure de sélectionner des dates de cours à partir de votre tableau de bord."
 
 #: ecommerce/extensions/basket/views.py:244
 msgid ""
 "After you complete your order you will be automatically enrolled in the "
 "verified track of the course."
-msgstr ""
+msgstr "Après avoir terminé votre commande, vous serez automatiquement inscrit à la piste vérifiée du cours."
 
 #: ecommerce/extensions/basket/views.py:248
 msgid "After you complete your order you will receive credit for your course."
-msgstr ""
+msgstr "Après avoir terminé votre commande, vous recevrez un crédit pour votre cours."
 
 #: ecommerce/extensions/basket/views.py:251
 msgid ""
 "After you complete your order you will be automatically enrolled in the "
 "course."
-msgstr ""
+msgstr "Après avoir terminé votre commande, vous serez automatiquement inscrit au cours."
 
 #: ecommerce/extensions/basket/views.py:257
 #, python-brace-format
@@ -790,7 +790,7 @@ msgstr "Votre coupon '{code}' a déjà été échangé."
 #: ecommerce/extensions/basket/views.py:452
 #, python-brace-format
 msgid "Coupon code '{code}' is not valid for this basket."
-msgstr ""
+msgstr "Le coupon '{code}' est invalide pour ce panier."
 
 #: ecommerce/extensions/basket/views.py:476
 msgid "Your basket does not qualify for a coupon code discount."
@@ -877,7 +877,7 @@ msgstr "Impossible de récupérer les données d'inscriptions."
 
 #: ecommerce/extensions/offer/models.py:188
 msgid "Course Catalog ID from the Discovery Service."
-msgstr ""
+msgstr "Identification du catalogue de cours à partir du service Discovery."
 
 #: ecommerce/extensions/offer/models.py:193
 msgid "UUID for an EnterpriseCustomer from the Enterprise Service."
@@ -885,15 +885,15 @@ msgstr "UUID pour un EnterpriseCustomer à partir du service Enterprise."
 
 #: ecommerce/extensions/offer/models.py:329
 msgid "EnterpriseCustomer UUID"
-msgstr ""
+msgstr "EnterpriseCustomer UUID"
 
 #: ecommerce/extensions/offer/models.py:336
 msgid "EnterpriseCustomer Name"
-msgstr ""
+msgstr "EnterpriseCustomer Nom"
 
 #: ecommerce/extensions/offer/models.py:341
 msgid "EnterpriseCustomerCatalog UUID"
-msgstr ""
+msgstr "EnterpriseCustomerCatalog UUID"
 
 #: ecommerce/extensions/offer/models.py:343
 #: ecommerce/extensions/voucher/utils.py:220 ecommerce/programs/forms.py:19
@@ -919,7 +919,7 @@ msgid ""
 "Order administration has been disabled due to the load on the database. This"
 " functionality can be restored by activating the {switch_name} Waffle "
 "switch. Be careful when re-activating this switch!"
-msgstr ""
+msgstr "L'administration des commandes a été désactivée en raison de la charge sur la base de données. Cette fonctionnalité peut être restaurée en activant la Waffle switch {enterprise_customer_name}. Soyez prudent lorsque vous réactivez cette switch!"
 
 #: ecommerce/extensions/order/models.py:22
 #: ecommerce/extensions/payment/models.py:16
@@ -1293,16 +1293,16 @@ msgstr "Corrigé"
 
 #: ecommerce/management/templates/management/index.html:7
 msgid "Management View"
-msgstr ""
+msgstr "Vue de la gestion"
 
 #: ecommerce/management/templates/management/index.html:26
 msgid "Refund Transactions"
-msgstr ""
+msgstr "Rembourser les transactions"
 
 #: ecommerce/management/views.py:51
 #, python-brace-format
 msgid "{action} is not a valid action."
-msgstr ""
+msgstr "{action} n'est pas une action valide."
 
 #: ecommerce/programs/benefits.py:25
 #, python-brace-format
@@ -2146,7 +2146,7 @@ msgid ""
 "\n"
 "                                    %(benefit)s discount provided by %(enterprise_customer_name)s.\n"
 "                                "
-msgstr ""
+msgstr "\n%(benefit)srabais fourni par %(enterprise_customer_name)s."
 
 #: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:78
 #, python-format
@@ -2667,78 +2667,78 @@ msgid ""
 "\n"
 "        %(name)s | Offers\n"
 "    "
-msgstr ""
+msgstr "\n %(name)s | Offers"
 
 #: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:27
 msgid "Reinstating..."
-msgstr ""
+msgstr "Rétablir..."
 
 #: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:27
 msgid "Reinstate offer"
-msgstr ""
+msgstr "Rétablir l'offre"
 
 #: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:28
 msgid "Suspending..."
-msgstr ""
+msgstr "Suspendre..."
 
 #: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:28
 msgid "Suspend offer"
-msgstr ""
+msgstr "Suspendre l'offre"
 
 #: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:29
 msgid "Delete offer"
-msgstr ""
+msgstr "Supprimer l'offre"
 
 #: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:40
 msgid "Offer currently available"
-msgstr ""
+msgstr "Offre actuellement disponible"
 
 #: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:41
 msgid "Offer not available due to restrictions!"
-msgstr ""
+msgstr "Offre non disponible en raison de restrictions!"
 
 #: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:43
 msgid "Total cost:"
-msgstr ""
+msgstr "Coût total :"
 
 #: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:44
 msgid "Number of orders:"
-msgstr ""
+msgstr "Nombre de commandes :"
 
 #: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:45
 msgid "Number of uses:"
-msgstr ""
+msgstr "Nombre d'utilisations :"
 
 #: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:50
 msgid "Date created:"
-msgstr ""
+msgstr "Date créée :"
 
 #: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:51
 msgid "Offer details"
-msgstr ""
+msgstr "Détails de l'offre"
 
 #: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:69
 #: ecommerce/templates/oscar/dashboard/offers/summary.html:20
 msgid "Incentive"
-msgstr ""
+msgstr "Motivation"
 
 #: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:74
 #: ecommerce/templates/oscar/dashboard/offers/summary.html:26
 msgid "Condition"
-msgstr ""
+msgstr "Condition"
 
 #: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:79
 #: ecommerce/templates/oscar/dashboard/offers/summary.html:31
 msgid "Restrictions"
-msgstr ""
+msgstr "Restrictions"
 
 #: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:94
 msgid "Export to CSV"
-msgstr ""
+msgstr "Exporter vers CSV"
 
 #: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:95
 msgid "Orders that used this offer"
-msgstr ""
+msgstr "Commandes utilisant cette offre"
 
 #: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:99
 #: ecommerce/templates/oscar/dashboard/orders/order_list.html:68
@@ -2747,7 +2747,7 @@ msgstr "Numéro de la commande"
 
 #: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:100
 msgid "Order date"
-msgstr ""
+msgstr "Date de la commande"
 
 #: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:101
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:292
@@ -2756,11 +2756,11 @@ msgstr "Total de la commande"
 
 #: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:102
 msgid "Cost"
-msgstr ""
+msgstr "Coût"
 
 #: ecommerce/templates/oscar/dashboard/offers/summary.html:4
 msgid "Offer summary"
-msgstr ""
+msgstr "Sommaire de l'offre"
 
 #: ecommerce/templates/oscar/dashboard/orders/line_detail.html:5
 #, python-format
@@ -3487,4 +3487,4 @@ msgstr "Ce client n'a pas encore écrit de commentaires."
 
 #: ecommerce/urls.py:41
 msgid "E-Commerce Service Administration"
-msgstr ""
+msgstr "Administration du Service E-Commerce"
