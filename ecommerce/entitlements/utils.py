@@ -22,8 +22,15 @@ def create_parent_course_entitlement(name, UUID):
     parent, created = Product.objects.get_or_create(
         structure=Product.PARENT,
         product_class=ProductClass.objects.get(name=COURSE_ENTITLEMENT_PRODUCT_CLASS_NAME),
-        title='Parent Course Entitlement for {}'.format(name),
+        attributes__name='UUID',
+        attribute_values__value_text=UUID,
+        defaults={
+            'title': 'Parent Course Entitlement for {}'.format(name),
+            'is_discountable': True,
+        },
     )
+    parent.attr.UUID = UUID
+    parent.attr.save()
 
     if created:
         logger.debug('Created new parent course_entitlement [%d] for [%s].', parent.id, UUID)
@@ -31,10 +38,6 @@ def create_parent_course_entitlement(name, UUID):
         logger.debug('Parent course_entitlement [%d] already exists for [%s].', parent.id, UUID)
 
     ProductCategory.objects.get_or_create(category=Category.objects.get(name='Course Entitlements'), product=parent)
-    parent.title = 'Parent Course Entitlement for {}'.format(name)
-    parent.is_discountable = True
-    parent.attr.UUID = UUID
-    parent.save()
 
     return parent, created
 
@@ -45,8 +48,11 @@ def create_or_update_course_entitlement(certificate_type, price, partner, UUID, 
     certificate_type = certificate_type.lower()
     UUID = unicode(UUID)
 
+    uuid_query = Q(
+        attributes__name='UUID',
+        attribute_values__value_text=UUID,
+    )
     certificate_type_query = Q(
-        title='Course {}'.format(name),
         attributes__name='certificate_type',
         attribute_values__value_text=certificate_type,
     )
@@ -54,7 +60,7 @@ def create_or_update_course_entitlement(certificate_type, price, partner, UUID, 
     try:
         parent_entitlement, __ = create_parent_course_entitlement(name, UUID)
         all_products = parent_entitlement.children.all().prefetch_related('stockrecords')
-        course_entitlement = all_products.get(certificate_type_query)
+        course_entitlement = all_products.filter(uuid_query).get(certificate_type_query)
     except Product.DoesNotExist:
         course_entitlement = Product()
 

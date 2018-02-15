@@ -14,9 +14,12 @@ from oscar.core.loading import get_class, get_model
 from rest_framework import serializers
 from rest_framework.reverse import reverse
 
-from ecommerce.core.constants import COURSE_ID_REGEX, ENROLLMENT_CODE_SWITCH, ISO_8601_FORMAT, SEAT_PRODUCT_CLASS_NAME
+from ecommerce.core.constants import (COURSE_ENTITLEMENT_PRODUCT_CLASS_NAME, COURSE_ID_REGEX, ENROLLMENT_CODE_SWITCH,
+                                      ISO_8601_FORMAT, SEAT_PRODUCT_CLASS_NAME)
 from ecommerce.core.url_utils import get_ecommerce_url
 from ecommerce.courses.models import Course
+from ecommerce.courses.utils import get_course_info_from_catalog
+from ecommerce.entitlements.utils import create_or_update_course_entitlement
 from ecommerce.invoice.models import Invoice
 
 logger = logging.getLogger(__name__)
@@ -95,6 +98,11 @@ def retrieve_all_vouchers(obj):
 def retrieve_voucher_usage(obj):
     """Helper method to retrieve usage from voucher. """
     return retrieve_voucher(obj).usage
+
+
+def _flatten(attrs):
+    """Transform a list of attribute names and values into a dictionary keyed on the names."""
+    return {attr['name']: attr['value'] for attr in attrs}
 
 
 class ProductPaymentInfoMixin(serializers.ModelSerializer):
@@ -317,6 +325,73 @@ class CourseSerializer(serializers.HyperlinkedModelSerializer):
         }
 
 
+class EntitlementProductHelper(object):
+    @staticmethod
+    def validate(product):
+        attrs = _flatten(product['attribute_values'])
+
+        if 'certificate_type' not in attrs:
+            raise serializers.ValidationError(_(u"Products must have a certificate type."))
+
+        if 'price' not in product:
+            raise serializers.ValidationError(_(u"Products must have a price."))
+
+    @staticmethod
+    def save(partner, course, uuid, product):
+        attrs = _flatten(product['attribute_values'])
+
+        # Extract arguments required for Seat creation, deserializing as necessary.
+        certificate_type = attrs.get('certificate_type')
+        price = Decimal(product['price'])
+
+        create_or_update_course_entitlement(
+            certificate_type,
+            price,
+            partner,
+            uuid,
+            course.name
+        )
+
+
+class SeatProductHelper(object):
+    @staticmethod
+    def validate(product):
+        attrs = _flatten(product['attribute_values'])
+        if attrs.get('id_verification_required') is None:
+            raise serializers.ValidationError(_(u"Products must indicate whether ID verification is required."))
+
+        # Verify that a price is present.
+        if product.get('price') is None:
+            raise serializers.ValidationError(_(u"Products must have a price."))
+
+    @staticmethod
+    def save(partner, course, product, create_enrollment_code):
+        attrs = _flatten(product['attribute_values'])
+
+        # Extract arguments required for Seat creation, deserializing as necessary.
+        certificate_type = attrs.get('certificate_type', '')
+        id_verification_required = attrs['id_verification_required']
+        price = Decimal(product['price'])
+
+        # Extract arguments which are optional for Seat creation, deserializing as necessary.
+        expires = product.get('expires')
+        expires = parse(expires) if expires else None
+        credit_provider = attrs.get('credit_provider')
+        credit_hours = attrs.get('credit_hours')
+        credit_hours = int(credit_hours) if credit_hours else None
+
+        course.create_or_update_seat(
+            certificate_type,
+            id_verification_required,
+            price,
+            partner,
+            expires=expires,
+            credit_provider=credit_provider,
+            credit_hours=credit_hours,
+            create_enrollment_code=create_enrollment_code
+        )
+
+
 class AtomicPublicationSerializer(serializers.Serializer):  # pylint: disable=abstract-method
     """Serializer for saving and publishing a Course and associated products.
 
@@ -337,21 +412,16 @@ class AtomicPublicationSerializer(serializers.Serializer):  # pylint: disable=ab
     def validate_products(self, products):
         """Validate product data."""
         for product in products:
-            # Verify that each product is intended to be a Seat.
             product_class = product.get('product_class')
-            if product_class != SEAT_PRODUCT_CLASS_NAME:
+
+            if product_class == COURSE_ENTITLEMENT_PRODUCT_CLASS_NAME:
+                EntitlementProductHelper.validate(product)
+            elif product_class == SEAT_PRODUCT_CLASS_NAME:
+                SeatProductHelper.validate(product)
+            else:
                 raise serializers.ValidationError(
-                    _(u"Invalid product class [{product_class}] requested.".format(product_class=product_class))
+                    _(u"Invalid product class [{product_class}] requested.").format(product_class=product_class)
                 )
-
-            # Verify that attributes required to create a Seat are present.
-            attrs = self._flatten(product['attribute_values'])
-            if attrs.get('id_verification_required') is None:
-                raise serializers.ValidationError(_(u"Products must indicate whether ID verification is required."))
-
-            # Verify that a price is present.
-            if product.get('price') is None:
-                raise serializers.ValidationError(_(u"Products must have a price."))
 
         return products
 
@@ -395,34 +465,20 @@ class AtomicPublicationSerializer(serializers.Serializer):  # pylint: disable=ab
                 course.verification_deadline = course_verification_deadline
                 course.save()
 
+                # Fetch full course info (from seat product, because this queries based on attr.course_key)
+                course_info = get_course_info_from_catalog(course.site, course.parent_seat_product)
+
                 create_enrollment_code = False
                 if waffle.switch_is_active(ENROLLMENT_CODE_SWITCH) and site.siteconfiguration.enable_enrollment_codes:
                     create_enrollment_code = create_or_activate_enrollment_code
 
                 for product in products:
-                    attrs = self._flatten(product['attribute_values'])
-                    # Extract arguments required for Seat creation, deserializing as necessary.
-                    certificate_type = attrs.get('certificate_type', '')
-                    id_verification_required = attrs['id_verification_required']
-                    price = Decimal(product['price'])
+                    product_class = product.get('product_class')
 
-                    # Extract arguments which are optional for Seat creation, deserializing as necessary.
-                    expires = product.get('expires')
-                    expires = parse(expires) if expires else None
-                    credit_provider = attrs.get('credit_provider')
-                    credit_hours = attrs.get('credit_hours')
-                    credit_hours = int(credit_hours) if credit_hours else None
-
-                    course.create_or_update_seat(
-                        certificate_type,
-                        id_verification_required,
-                        price,
-                        partner,
-                        expires=expires,
-                        credit_provider=credit_provider,
-                        credit_hours=credit_hours,
-                        create_enrollment_code=create_enrollment_code
-                    )
+                    if product_class == COURSE_ENTITLEMENT_PRODUCT_CLASS_NAME:
+                        EntitlementProductHelper.save(partner, course, course_info['UUID'], product)
+                    elif product_class == SEAT_PRODUCT_CLASS_NAME:
+                        SeatProductHelper.save(partner, course, product, create_enrollment_code)
 
                 if course.get_enrollment_code():
                     course.toggle_enrollment_code_status(is_active=create_enrollment_code)
@@ -438,10 +494,6 @@ class AtomicPublicationSerializer(serializers.Serializer):  # pylint: disable=ab
         except Exception as e:  # pylint: disable=broad-except
             logger.exception(u'Failed to save and publish [%s]: [%s]', course_id, e.message)
             return False, e, e.message
-
-    def _flatten(self, attrs):
-        """Transform a list of attribute names and values into a dictionary keyed on the names."""
-        return {attr['name']: attr['value'] for attr in attrs}
 
 
 class PartnerSerializer(serializers.ModelSerializer):
