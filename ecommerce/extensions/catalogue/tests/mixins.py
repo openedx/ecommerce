@@ -7,6 +7,7 @@ from oscar.core.utils import slugify
 from oscar.test import factories
 
 from ecommerce.core.constants import (
+    COURSE_ENTITLEMENT_PRODUCT_CLASS_NAME,
     ENROLLMENT_CODE_PRODUCT_CLASS_NAME,
     ENROLLMENT_CODE_SWITCH,
     SEAT_PRODUCT_CLASS_NAME
@@ -35,14 +36,16 @@ class DiscoveryTestMixin(object):
         super(DiscoveryTestMixin, self).setUp()
 
         # Force the creation of a seat ProductClass
+        self.entitlement_product_class  # pylint: disable=pointless-statement
         self.seat_product_class  # pylint: disable=pointless-statement
         self.enrollment_code_product_class  # pylint: disable=pointless-statement
 
-        category_name = 'Seats'
-        try:
-            self.category = Category.objects.get(name=category_name)
-        except Category.DoesNotExist:
-            self.category = factories.CategoryFactory(name=category_name)
+        for category_name in ['Course Entitlements', 'Seats']:
+            try:
+                Category.objects.get(name=category_name)
+            except Category.DoesNotExist:
+                factories.CategoryFactory(name=category_name)
+        self.category = Category.objects.get(name='Seats')
 
     def create_course_and_seat(
             self, course_id=None, seat_type='verified', id_verification=False, price=10, partner=None
@@ -91,6 +94,17 @@ class DiscoveryTestMixin(object):
                 factories.ProductAttributeFactory(code=code, name=code, product_class=pc, type=attr_type)
 
         return pc
+
+    @property
+    def entitlement_product_class(self):
+        attributes = (
+            ('certificate_type', 'text'),
+            ('UUID', 'text'),
+        )
+        product_class = self._create_product_class(
+            COURSE_ENTITLEMENT_PRODUCT_CLASS_NAME, slugify(COURSE_ENTITLEMENT_PRODUCT_CLASS_NAME), attributes
+        )
+        return product_class
 
     @property
     def seat_product_class(self):
