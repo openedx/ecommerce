@@ -25,7 +25,7 @@
 <div aria-labelledby="order-details-region"></div>
 
 <div class="spinner">
-  <input class="quantity" id="id_form-0-quantity" min="1" max="10" name="form-0-quantity" type="number" value="1">
+  <input class="quantity" id="input-quantity-field" min="1" max="10" name="form-0-quantity" type="number" value="1">
 
   <div class="input-group-btn-vertical">
     <button class="btn btn-primary" type="button">
@@ -36,6 +36,8 @@
     </button>
   </div>
 </div>
+<button id="quantity-update" class="update-button quantity-update" type="submit" data-loading-text="Updating...">Update</button>
+<div id="error-msg"></div>
 
 <div id="voucher_form_container">
   <input id="id_code">

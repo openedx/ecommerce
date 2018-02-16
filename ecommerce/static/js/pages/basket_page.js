@@ -79,6 +79,7 @@ define([
                         'input[name=first_name]',
                         'input[name=last_name]',
                         'input[name=city]',
+                        'input[name=organization]',
                         'select[name=country]'
                     ],
                     countriesWithRequiredStateAndPostalCodeValues = ['US', 'CA'],
@@ -145,6 +146,26 @@ define([
                     BasketPage.appendCardValidationErrorMsg(event, $expYear, gettext('Invalid year'));
                 } else if (Number(cardExpiryMonth) < currentMonth && Number(cardExpiryYear) === currentYear) {
                     BasketPage.appendCardValidationErrorMsg(event, $expMonth, gettext('Card expired'));
+                }
+            },
+
+            showErrorState: function(e, msg) {
+                e.preventDefault();
+                $("#input-quantity-field" ).addClass('error-state');
+                $('div#error-msg').text(gettext(msg));
+            },
+
+            validateQuantity: function(e) {
+                var input_quantity = $("#input-quantity-field" ).val();
+                var quantity = isNaN(parseInt(input_quantity)) ? "" : parseInt(input_quantity);
+                if (quantity === "") {
+                    this.showErrorState(e, 'Please enter a quantity from 1 to 100.');
+                }
+                else if (quantity > 100) {
+                    this.showErrorState(e, 'Quantity must be less than or equal to 100.');
+                }
+                else if (quantity < 1) {
+                    this.showErrorState(e, 'Quantity must be greater than or equal to 1.');
                 }
             },
 
@@ -481,6 +502,10 @@ define([
 
                 $('#card-number').on('input', function() {
                     BasketPage.detectCreditCard();
+                });
+
+                $('#quantity-update').on('click', function(e) {
+                    BasketPage.validateQuantity(e);
                 });
 
                 $('#payment-button').click(function(e) {
