@@ -30,7 +30,8 @@
                             <label class="product-price-label text-muted quantity-label">{% trans 'Quantity' %}</label>
                             <div class="checkout-quantity form-group">
                                 <div class="input-group spinner {% if form.errors %}error{% endif %}">
-                                    {% render_field form.quantity class+="quantity form-control" min=min_seat_quantity %}
+                                    {% render_field form.quantity class+="quantity form-control" min=min_seat_quantity max=max_seat_quantity %}
+                                    <span class="max-quantity">Max: 100</span>
                                 </div>
                                 <button class="btn btn-primary update-button quantity-update" type="submit"
                                         data-loading-text="{% trans 'Updating...' %}">{% trans "Update" %}</button>
@@ -43,9 +44,19 @@
     </form>
     <div role="region" aria-labelledby="summary-region" aria-live="polite">
         <h2 id="summary-region" class="title">{% trans "summary" %}</h2>
-        <div id="line-price" class="amount row">
-            <span class="description">{% trans "Price" %}</span>
-            <span class="price">{{basket.total_incl_tax_excl_discounts|currency:basket.currency}}</span>
+        <div class="row">
+            <div id="line-price" class="amount col-xs-4 col-sm-4">
+                <span class="description">{% trans "Price" %}</span>
+                <span class="price">{{line_price|currency:basket.currency}}</span>
+            </div>
+            <div id="line-price" class="amount col-xs-4 col-sm-4">
+                <span class="description float-none">{% trans "Quanity" %}</span>
+                <span>{{basket.num_items}}</span>
+            </div>
+            <div id="line-price" class="amount col-xs-4 col-sm-4">
+                <span class="description">{% trans "Subtotal" %}</span>
+                <span class="price">{{order_total.incl_tax|currency:basket.currency}}</span>
+            </div>
         </div>
         {% if basket.total_discount %}
             <div id="line-discount" class="amount row">
@@ -98,14 +109,15 @@
             {% endif %}
         </div>
         <div id="basket-total" class="row" aria-describedby="total-price-desc">
-            <span id="total-price-desc" class="description">{% trans "TOTAL" %}</span>
-            <span class="price">{{ order_total.incl_tax|currency:basket.currency }}</span>
+            <span id="total-price-desc col-xs-4 col-sm-4" class="description">{% trans "TOTAL" %}</span>
+            <span class="col-xs-4 col-sm-4"></span>
+            <span class="price col-xs-4 col-sm-4">{{ order_total.incl_tax|currency:basket.currency }}</span>
         </div>
     </div>
     {% if order_details_msg %}
         <div role="region" aria-labelledby="order-details-region">
             <h2 id="order-details-region" class="title">{% trans "order details" %}</h2>
-            <p>{{ order_details_msg }}</p>
+            <p>{{ order_details_msg | safe}}</p>
         </div>
     {% endif %}
 </div>

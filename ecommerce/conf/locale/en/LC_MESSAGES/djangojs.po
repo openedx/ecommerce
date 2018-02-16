@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-12-15 09:43-0500\n"
+"POT-Creation-Date: 2018-02-22 11:09+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -166,39 +166,39 @@ msgstr ""
 msgid "Problem occurred during checkout. Please contact support."
 msgstr ""
 
-#: ecommerce/static/js/pages/basket_page.js:99
+#: ecommerce/static/js/pages/basket_page.js:100
 msgid "This field is required"
 msgstr ""
 
-#: ecommerce/static/js/pages/basket_page.js:134
+#: ecommerce/static/js/pages/basket_page.js:135
 msgid "Invalid card number"
 msgstr ""
 
-#: ecommerce/static/js/pages/basket_page.js:136
+#: ecommerce/static/js/pages/basket_page.js:137
 msgid "Unsupported card type"
 msgstr ""
 
-#: ecommerce/static/js/pages/basket_page.js:138
+#: ecommerce/static/js/pages/basket_page.js:139
 msgid "Invalid security number"
 msgstr ""
 
-#: ecommerce/static/js/pages/basket_page.js:143
+#: ecommerce/static/js/pages/basket_page.js:144
 msgid "Invalid month"
 msgstr ""
 
-#: ecommerce/static/js/pages/basket_page.js:145
+#: ecommerce/static/js/pages/basket_page.js:146
 msgid "Invalid year"
 msgstr ""
 
-#: ecommerce/static/js/pages/basket_page.js:147
+#: ecommerce/static/js/pages/basket_page.js:148
 msgid "Card expired"
 msgstr ""
 
-#: ecommerce/static/js/pages/basket_page.js:465
+#: ecommerce/static/js/pages/basket_page.js:466
 msgid "<Choose state/province>"
 msgstr ""
 
-#: ecommerce/static/js/pages/basket_page.js:466
+#: ecommerce/static/js/pages/basket_page.js:467
 msgid "State/Province (required)"
 msgstr ""
 

@@ -485,6 +485,8 @@
             .quantity-label {
                 display: inline-block;
                 padding-right: 10px;
+                vertical-align: top;
+                margin: 5px 0 0;
             }
 
             .checkout-quantity {
@@ -492,9 +494,15 @@
             }
 
             .spinner {
-                width: 70px;
+                width: 80px;
                 float: left;
                 padding-right: 10px;
+
+                .max-quantity {
+                    font-size: 10px;
+                    color: #4a4a4a;
+                    font-weight: 600;
+                }
             }
 
             .quantity-update {
@@ -519,18 +527,31 @@
             }
 
             .amount {
-                padding-bottom: 20px;
+                padding: 0;
                 color: $gray-color;
                 font-size: 18px;
+                
+                span {
+                  float: none !important;
+                  display: block;
+                  text-align: unset;
 
-                .price {
-                    font-weight: bold;
+
+                  &:first-child {
+                    margin: 0 0 20px;
+                  }
                 }
             }
 
             #basket-total {
                 font-size: 18px;
                 font-weight: bold;
+
+                .price {
+                  font-weight: bold;
+                  text-align: unset;
+                  padding: 0;
+                }
             }
 
             #voucher-information {
