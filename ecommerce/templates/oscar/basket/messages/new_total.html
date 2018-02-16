@@ -1,0 +1,27 @@
+{% load i18n %}
+{% load currency_filters %}
+
+<p>
+    {% if basket.is_empty %}
+        {% trans "Your basket is now empty" %}
+    {% else %}
+        {% if basket.is_tax_known %}
+        {% blocktrans with num_items=basket.num_items total=basket.total_incl_tax|currency:basket.currency strong_start='<b>' strong_end='</b>' paragraph_start='<p>' paragraph_end='</p>'  %}
+            {{ strong_start }}We’ve updated your quantity.{{ strong_end }}
+            {{ paragraph_start }}Your cart includes {{ num_items }} enrollment codes at a total cost of {{ total }}, that you will receive via email.{{ paragraph_end }}
+        {% endblocktrans %}
+        {% else %}
+            {% blocktrans with num_items=basket.num_items total=basket.total_excl_tax|currency:basket.currency strong_start='<b>' strong_end='</b>' paragraph_start='<p>' paragraph_end='</p>'  %}
+            {{ strong_start }}We’ve updated your quantity.{{ strong_end }}
+            {{ paragraph_start }}Your cart includes {{ num_items }} enrollment codes at a total cost of {{ total }}, that you will receive via email.{{ paragraph_end }}
+        {% endblocktrans %}
+        {% endif %}
+    {% endif %}
+</p>
+
+{% if include_buttons %}
+<p>
+    <a href="{% url 'basket:summary' %}" class="btn btn-info">{% trans "View basket" %}</a>
+    <a href="{% url 'checkout:index' %}" class="btn btn-info">{% trans "Checkout now" %}</a>
+</p>
+{% endif %}

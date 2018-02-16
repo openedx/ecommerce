@@ -44,6 +44,9 @@ class PaymentForm(forms.Form):
     def __init__(self, user, request, *args, **kwargs):
         super(PaymentForm, self).__init__(*args, **kwargs)
         self.request = request
+        self.basket_has_enrollment_code_product = any(
+            line.product.is_enrollment_code_product for line in self.request.basket.all_lines()
+        )
         update_basket_queryset_filter(self, user)
 
         self.helper = FormHelper(self)
@@ -100,6 +103,20 @@ class PaymentForm(forms.Form):
                 self.fields[bound_field.name].label = _('{label} (required)').format(label=bound_field.label)
                 bound_field.field.widget.attrs['required'] = 'required'
 
+                if self.basket_has_enrollment_code_product and 'organization' not in self.fields:
+                    # If basket has any enrollment code items then we will add an organization
+                    # field next to "last_name."
+                    self.fields['organization'] = forms.CharField(max_length=60, label=_('Organization (required)'))
+                    organization_div = Div(
+                        Div(
+                            Div('organization'),
+                            HTML('<p class="help-block"></p>'),
+                            css_class='form-item col-md-6'
+                        ),
+                        css_class='row'
+                    )
+                    self.helper.layout.fields.insert(self.fields.keys().index('last_name') + 1, organization_div)
+
     basket = forms.ModelChoiceField(
         queryset=Basket.objects.all(),
         widget=forms.HiddenInput(),
@@ -108,16 +125,16 @@ class PaymentForm(forms.Form):
             'invalid_choice': _('There was a problem retrieving your basket. Refresh the page to try again.'),
         }
     )
-    first_name = forms.CharField(max_length=60, label=_('First Name'))
-    last_name = forms.CharField(max_length=60, label=_('Last Name'))
-    address_line1 = forms.CharField(max_length=60, label=_('Address'), required=False)
+    first_name = forms.CharField(max_length=60, label=_('First Name (required)'))
+    last_name = forms.CharField(max_length=60, label=_('Last Name (required)'))
+    address_line1 = forms.CharField(max_length=60, label=_('Address (required)'), required=False)
     address_line2 = forms.CharField(max_length=29, required=False, label=_('Suite/Apartment Number'))
-    city = forms.CharField(max_length=32, label=_('City'))
+    city = forms.CharField(max_length=32, label=_('City (required)'))
     # max_length for state field is set to default 60, if it needs to be changed,
     # the equivalent (maxlength) attribute in the basket page JS code needs to be changed too.
     state = forms.CharField(max_length=60, required=False, label=_('State/Province'))
     postal_code = forms.CharField(max_length=10, required=False, label=_('Zip/Postal Code'))
-    country = forms.ChoiceField(choices=country_choices, label=_('Country'))
+    country = forms.ChoiceField(choices=country_choices, label=_('Country (required)'))
 
     def clean_basket(self):
         basket = self.cleaned_data['basket']
