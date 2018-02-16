@@ -36,11 +36,18 @@
               {% captureas link_start %}
                 <a href="mailto:{{ order.user.email }}">
               {% endcaptureas %}
-              {% blocktrans trimmed with email=order.user.email link_end="</a>" %}
-                Your order is complete. If you need a receipt, you can print this page.
-                You will also receive a confirmation message with this information at
-                {{ link_start }}{{ email }}{{ link_end }}.
-              {% endblocktrans %}
+              {% if has_enrollment_code_product %}
+                  {% blocktrans trimmed with email=order.user.email link_end="</a>" %}
+                      Your order is complete. You will receive a confirmation message and your enrollment codes(s) at
+                      {{ link_start }}{{ email }}{{ link_end }}. If you need a receipt, you can print this page.
+                  {% endblocktrans %}
+              {% else %}
+                  {% blocktrans trimmed with email=order.user.email link_end="</a>" %}
+                      Your order is complete. If you need a receipt, you can print this page.
+                      You will also receive a confirmation message with this information at
+                      {{ link_start }}{{ email }}{{ link_end }}.
+                  {% endblocktrans %}
+              {% endif %}
             </div>
 
             {% if order.billing_address %}
@@ -86,7 +93,7 @@
                   {% endif %}
                 </dd>
                 <dt class="line-price sr">{% trans "Item Price:" %}</dt>
-                <dd class="line-price price">{{ line.line_price_before_discounts_incl_tax|currency:order.currency }}</dd>
+                <dd class="line-price price">{{ line.unit_price_incl_tax|currency:order.currency }}</dd>
               </div>
             {% endfor %}
           </dl>
@@ -165,6 +172,11 @@
           </a>
         </div>
       {% endif %}
+      <div id="find-more-courses-link">
+          <a class="find-more-courses-link nav-link" href="{{ explore_courses_url }}" target="_blank">
+            {% trans "Find more courses" %}
+          </a>
+      </div>
     </div>
   </div>
 {% endblock content %}

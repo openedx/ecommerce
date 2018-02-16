@@ -47,6 +47,23 @@ def get_lms_courseware_url(course_run_id):
     return get_lms_url('courses/{}/info'.format(course_run_id))
 
 
+def get_lms_course_about_url(course_key):
+    """
+    Return the courseware about URL for the given course key.
+
+    Returns:
+        string: The course about page URL.
+    """
+    return get_lms_url('courses/{}/about'.format(course_key))
+
+
+def get_lms_explore_courses_url():
+    """
+    Return the explore courses url.
+    """
+    return get_lms_url('courses')
+
+
 def get_lms_dashboard_url():
     site_configuration = _get_site_configuration()
     return site_configuration.student_dashboard_url

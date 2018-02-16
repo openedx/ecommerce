@@ -19,7 +19,7 @@ from requests.exceptions import ConnectionError, Timeout
 from slumber.exceptions import SlumberBaseException
 
 from ecommerce.core.exceptions import SiteConfigurationError
-from ecommerce.core.url_utils import get_lms_url
+from ecommerce.core.url_utils import get_lms_course_about_url, get_lms_url
 from ecommerce.courses.utils import get_certificate_type_display_value, get_course_info_from_catalog
 from ecommerce.enterprise.entitlements import get_enterprise_code_redemption_redirect
 from ecommerce.enterprise.utils import CONSENT_FAILED_PARAM, get_enterprise_customer_from_voucher, has_enterprise_offer
@@ -202,6 +202,26 @@ class BasketSummaryView(BasketView):
         except (ConnectionError, SlumberBaseException, Timeout):
             logger.exception('Failed to retrieve data from Discovery Service for course [%s].', course_key)
 
+        if self.request.basket.num_items == 1 and product.is_enrollment_code_product:
+            course_key = CourseKey.from_string(product.attr.course_key)
+            course_about = get_lms_course_about_url(course_key=course_key)
+            messages.info(
+                self.request,
+                _(
+                    '{strong_start}Purchasing access just for yourself?{strong_end}{paragraph_start}If you are '
+                    'purchasing a single code for someone else, please continue with checkout. However, if you are the '
+                    'learner {link_start}go back{link_end} to enroll directly.{paragraph_end}'
+                ).format(
+                    strong_start='<strong>',
+                    strong_end='</strong>',
+                    paragraph_start='<p>',
+                    paragraph_end='</p>',
+                    link_start='<a href="{course_about}">'.format(course_about=course_about),
+                    link_end='</a>'
+                ),
+                extra_tags='safe'
+            )
+
         return {
             'product_title': course_name,
             'course_key': course_key,
@@ -259,8 +279,26 @@ class BasketSummaryView(BasketView):
                 line_data = self._get_course_data(line.product)
                 show_voucher_form = False
                 order_details_msg = _(
-                    'You will receive an email at {user_email} with your enrollment code(s).'
-                ).format(user_email=self.request.user.email)
+                    '{paragraph_start}By purchasing, you and your organization agree to the following terms:'
+                    '{paragraph_end} {ul_start} {li_start}Each code is valid for the one course covered and can be '
+                    'used only one time.{li_end} {li_start}You are responsible for distributing codes to your learners.'
+                    '{li_end} {li_start}Each code will expire in one year from date of purchase or, if earlier, once '
+                    'the course is closed.{li_end} {li_start}If a course is not designated as self-paced, you should '
+                    'confirm that a course run is available before expiration. {li_end} {li_start}You may not resell '
+                    'codes to third parties.{li_end} {ul_end} {strong_start}All sales final. No refunds.{strong_end} '
+                    '{paragraph_start}You will receive an email at {user_email} with your enrollment code(s). '
+                    '{paragraph_end}'
+                ).format(
+                    strong_start='<strong>',
+                    strong_end='</strong>',
+                    paragraph_start='<p>',
+                    paragraph_end='</p>',
+                    ul_start='<ul>',
+                    li_start='<li>',
+                    li_end='</li>',
+                    ul_end='</ul>',
+                    user_email=self.request.user.email
+                )
             else:
                 line_data = {
                     'product_title': line.product.title,
@@ -401,14 +439,16 @@ class BasketSummaryView(BasketView):
             )
         except ValueError:
             total_benefit = None
-
+        num_of_items = self.request.basket.num_items
         context.update({
             'formset_lines_data': zip(formset, lines_data),
             'free_basket': context['order_total'].incl_tax == 0,
             'homepage_url': get_lms_url(''),
             'min_seat_quantity': 1,
+            'max_seat_quantity': 100,
             'payment_processors': payment_processors,
-            'total_benefit': total_benefit
+            'total_benefit': total_benefit,
+            'line_price': (self.request.basket.total_incl_tax_excl_discounts / num_of_items) if num_of_items > 0 else 0
         })
         return context
 

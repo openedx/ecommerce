@@ -2,11 +2,18 @@ from __future__ import unicode_literals
 
 import ddt
 import pycountry
+from oscar.core.loading import get_model
+from oscar.test import factories
 from waffle.models import Switch
 
+from ecommerce.core.constants import ENROLLMENT_CODE_PRODUCT_CLASS_NAME, ENROLLMENT_CODE_SWITCH
+from ecommerce.core.tests import toggle_switch
+from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.extensions.payment.forms import PaymentForm
 from ecommerce.extensions.test.factories import create_basket
 from ecommerce.tests.testcases import TestCase
+
+Product = get_model('catalogue', 'Product')
 
 
 @ddt.ddt
@@ -15,6 +22,29 @@ class PaymentFormTests(TestCase):
         super(PaymentFormTests, self).setUp()
         self.user = self.create_user()
         self.basket = create_basket(owner=self.user)
+
+    def create_basket_and_add_product(self, product):
+        basket = factories.BasketFactory(owner=self.user, site=self.site)
+        basket.add_product(product, 1)
+        return basket
+
+    def prepare_course_seat_and_enrollment_code(self, seat_type='verified', id_verification=False):
+        """Helper function that creates a new course, enables enrollment codes and creates a new
+        seat and enrollment code for it.
+
+        Args:
+            seat_type (str): Seat/certification type.
+            is_verification (bool): Whether or not id verification is required for the seat.
+        Returns:
+            The newly created course, seat and enrollment code.
+        """
+        course = CourseFactory()
+        toggle_switch(ENROLLMENT_CODE_SWITCH, True)
+        self.site.siteconfiguration.enable_enrollment_codes = True
+        self.site.siteconfiguration.save()
+        seat = course.create_or_update_seat(seat_type, id_verification, 10, self.partner, create_enrollment_code=True)
+        enrollment_code = Product.objects.get(product_class__name=ENROLLMENT_CODE_PRODUCT_CLASS_NAME)
+        return course, seat, enrollment_code
 
     def _generate_data(self, **kwargs):
         data = {
@@ -132,3 +162,45 @@ class PaymentFormTests(TestCase):
         actual = list(form.fields['country'].choices)
         actual.pop(0)   # Remove the "Choose country" placeholder
         self.assertEqual(actual, expected)
+
+    def test_organization_field_in_form(self):
+        """ Verify the field 'organization' is present in the form when the basket has an enrollment code product. """
+        __, __, enrollment_code = self.prepare_course_seat_and_enrollment_code()
+        basket = self.create_basket_and_add_product(enrollment_code)
+        self.request.basket = basket
+        data = {
+            'basket': basket.id,
+            'first_name': 'Test',
+            'last_name': 'User',
+            'address_line1': '141 Portland Ave.',
+            'address_line2': 'Floor 9',
+            'city': 'Cambridge',
+            'state': 'MA',
+            'postal_code': '02139',
+            'country': 'US',
+        }
+        form = PaymentForm(user=self.user, data=data, request=self.request)
+        self.assertTrue('organization' in form.fields)
+
+    def test_organization_field_not_in_form(self):
+        """
+        Verify the field 'organization' is not present in the form when the basket does not have an enrollment
+        code product.
+        """
+        course = CourseFactory()
+        product1 = course.create_or_update_seat("Verified", True, 0, self.partner)
+        basket = self.create_basket_and_add_product(product1)
+        self.request.basket = basket
+        data = {
+            'basket': basket.id,
+            'first_name': 'Test',
+            'last_name': 'User',
+            'address_line1': '141 Portland Ave.',
+            'address_line2': 'Floor 9',
+            'city': 'Cambridge',
+            'state': 'MA',
+            'postal_code': '02139',
+            'country': 'US',
+        }
+        form = PaymentForm(user=self.user, data=data, request=self.request)
+        self.assertFalse('organization' in form.fields)
