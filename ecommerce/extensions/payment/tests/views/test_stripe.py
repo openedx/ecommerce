@@ -7,12 +7,18 @@ from mock import mock
 from oscar.core.loading import get_class, get_model
 from oscar.test.factories import BillingAddressFactory
 
+from ecommerce.core.constants import ENROLLMENT_CODE_PRODUCT_CLASS_NAME, ENROLLMENT_CODE_SWITCH
+from ecommerce.core.models import BusinessClient
+from ecommerce.core.tests import toggle_switch
+from ecommerce.courses.tests.factories import CourseFactory
+from ecommerce.extensions.basket.utils import basket_add_organization_attribute
 from ecommerce.extensions.checkout.utils import get_receipt_page_url
 from ecommerce.extensions.order.constants import PaymentEventTypeName
 from ecommerce.extensions.payment.constants import STRIPE_CARD_TYPE_MAP
 from ecommerce.extensions.payment.processors.stripe import Stripe
 from ecommerce.extensions.payment.tests.mixins import PaymentEventsMixin
 from ecommerce.extensions.test.factories import create_basket
+from ecommerce.invoice.models import Invoice
 from ecommerce.tests.testcases import TestCase
 
 Country = get_model('address', 'Country')
@@ -20,6 +26,7 @@ Order = get_model('order', 'Order')
 PaymentEvent = get_model('order', 'PaymentEvent')
 Selector = get_class('partner.strategy', 'Selector')
 Source = get_model('payment', 'Source')
+Product = get_model('catalogue', 'Product')
 
 
 class StripeSubmitViewTests(PaymentEventsMixin, TestCase):
@@ -134,3 +141,52 @@ class StripeSubmitViewTests(PaymentEventsMixin, TestCase):
 
         self.assert_successful_order_response(response, basket.order_number)
         self.assert_order_created(basket, billing_address, card_type, label)
+
+    def test_successful_payment_for_bulk_purchase(self):
+        """
+        Verify that when a Order has been successfully placed for bulk
+        purchase then that order is linked to the provided business client.
+        """
+        toggle_switch(ENROLLMENT_CODE_SWITCH, True)
+
+        course = CourseFactory()
+        course.create_or_update_seat('verified', True, 50, self.partner, create_enrollment_code=True)
+        basket = create_basket(owner=self.user, site=self.site)
+        enrollment_code = Product.objects.get(product_class__name=ENROLLMENT_CODE_PRODUCT_CLASS_NAME)
+        basket.add_product(enrollment_code, quantity=1)
+        basket.strategy = Selector().strategy()
+
+        data = self.generate_form_data(basket.id)
+        data.update({'organization': 'Dummy Business Client'})
+
+        # Manually add organization attribute on the basket for testing
+        basket_add_organization_attribute(basket, data)
+
+        card_type = 'American Express'
+        label = '1986'
+        charge = stripe.Charge.construct_from({
+            'id': '2404',
+            'source': {
+                'brand': card_type,
+                'last4': label,
+            },
+        }, 'fake-key')
+
+        billing_address = BillingAddressFactory()
+        with mock.patch.object(Stripe, 'get_address_from_token') as address_mock:
+            address_mock.return_value = billing_address
+
+            with mock.patch.object(stripe.Charge, 'create') as charge_mock:
+                charge_mock.return_value = charge
+                response = self.client.post(self.path, data)
+
+            address_mock.assert_called_once_with(data['stripe_token'])
+
+        self.assert_successful_order_response(response, basket.order_number)
+        self.assert_order_created(basket, billing_address, card_type, label)
+
+        # Now verify that a new business client has been created and current
+        # order is now linked with that client through Invoice model.
+        order = Order.objects.filter(basket=basket).first()
+        business_client = BusinessClient.objects.get(name=data['organization'])
+        assert Invoice.objects.get(order=order).business_client == business_client
