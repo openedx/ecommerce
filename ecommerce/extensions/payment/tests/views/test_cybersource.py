@@ -13,7 +13,11 @@ from oscar.apps.payment.exceptions import TransactionDeclined
 from oscar.core.loading import get_class, get_model
 from oscar.test import factories
 
+from ecommerce.core.constants import ENROLLMENT_CODE_PRODUCT_CLASS_NAME, ENROLLMENT_CODE_SWITCH
+from ecommerce.core.models import BusinessClient
+from ecommerce.core.tests import toggle_switch
 from ecommerce.core.url_utils import get_lms_url
+from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.extensions.api.serializers import OrderSerializer
 from ecommerce.extensions.order.constants import PaymentEventTypeName
 from ecommerce.extensions.payment.exceptions import InvalidBasketError, InvalidSignatureError
@@ -32,6 +36,7 @@ PaymentEvent = get_model('order', 'PaymentEvent')
 PaymentProcessorResponse = get_model('payment', 'PaymentProcessorResponse')
 Selector = get_class('partner.strategy', 'Selector')
 Source = get_model('payment', 'Source')
+Product = get_model('catalogue', 'Product')
 
 post_checkout = get_class('checkout.signals', 'post_checkout')
 
@@ -245,6 +250,37 @@ class CybersourceInterstitialViewTests(CybersourceNotificationTestsMixin, TestCa
         response = self.client.post(self.path, notification)
         self.assertTrue(Order.objects.filter(basket=self.basket).exists())
         self.assertEqual(response.status_code, 302)
+
+    def test_successful_order_for_bulk_purchase(self):
+        """
+        Verify the view redirects to the Receipt page when the Order has been
+        successfully placed for bulk purchase and also that the order is linked
+        to the provided business client.
+        """
+        toggle_switch(ENROLLMENT_CODE_SWITCH, True)
+
+        course = CourseFactory()
+        course.create_or_update_seat('verified', True, 50, self.partner, create_enrollment_code=True)
+        enrollment_code = Product.objects.get(product_class__name=ENROLLMENT_CODE_PRODUCT_CLASS_NAME)
+        self.basket = create_basket(owner=self.user, site=self.site)
+        self.basket.add_product(enrollment_code, quantity=1)
+
+        # The basket should not have an associated order if no payment was made.
+        self.assertFalse(Order.objects.filter(basket=self.basket).exists())
+
+        request_data = self.generate_notification(
+            self.basket,
+            billing_address=self.billing_address,
+        )
+        request_data.update({'organization': 'Dummy Business Client'})
+        response = self.client.post(self.path, request_data)
+        self.assertTrue(Order.objects.filter(basket=self.basket).exists())
+        self.assertEqual(response.status_code, 302)
+
+        # Now verify that a new business client has been created in current
+        # order is now linked with that client.
+        business_client = BusinessClient.objects.get(name=request_data['organization'])
+        assert Order.objects.filter(basket=self.basket).first().client == business_client
 
     def test_order_creation_error(self):
         """ Verify the view redirects to the Payment error page when an error occurred during Order creation. """

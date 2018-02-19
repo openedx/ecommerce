@@ -5,11 +5,14 @@ import mock
 from django.core import mail
 from django.test import RequestFactory
 from oscar.core.loading import get_class, get_model
-from oscar.test.factories import ProductFactory, UserFactory
+from oscar.test.factories import BasketFactory, ProductFactory, UserFactory
 from testfixtures import LogCapture
 from waffle.models import Sample
 
-from ecommerce.core.models import SegmentClient
+from ecommerce.core.constants import ENROLLMENT_CODE_PRODUCT_CLASS_NAME, ENROLLMENT_CODE_SWITCH
+from ecommerce.core.models import BusinessClient, SegmentClient
+from ecommerce.core.tests import toggle_switch
+from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.extensions.analytics.utils import parse_tracking_context, translate_basket_line_for_segment
 from ecommerce.extensions.checkout.exceptions import BasketNotFreeError
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
@@ -28,6 +31,7 @@ NoShippingRequired = get_class('shipping.methods', 'NoShippingRequired')
 OrderTotalCalculator = get_class('checkout.calculators', 'OrderTotalCalculator')
 PaymentEventType = get_model('order', 'PaymentEventType')
 SourceType = get_model('payment', 'SourceType')
+Product = get_model('catalogue', 'Product')
 
 
 @mock.patch.object(SegmentClient, 'track')
@@ -148,6 +152,51 @@ class EdxOrderPlacementMixinTests(BusinessIntelligenceMixin, PaymentEventsMixin,
                     )
                 )
             )
+
+    def test_handle_post_order_for_bulk_purchase(self, __):
+        """
+        Ensure that the bulk purchase order is linked to the provided business
+        client when the method `handle_post_order` is invoked.
+        """
+        toggle_switch(ENROLLMENT_CODE_SWITCH, True)
+
+        course = CourseFactory()
+        course.create_or_update_seat('verified', True, 50, self.partner, create_enrollment_code=True)
+        enrollment_code = Product.objects.get(product_class__name=ENROLLMENT_CODE_PRODUCT_CLASS_NAME)
+        user = UserFactory()
+        basket = BasketFactory(owner=user, site=self.site)
+        basket.add_product(enrollment_code, quantity=1)
+        order = create_order(number=1, basket=basket, user=user)
+        request_data = {'organization': 'Dummy Business Client'}
+
+        EdxOrderPlacementMixin().handle_post_order(request_data, order)
+
+        # Now verify that a new business client has been created in current
+        # order is now linked with that client.
+        business_client = BusinessClient.objects.get(name=request_data['organization'])
+        assert order.client == business_client
+
+    def test_handle_post_order_for_seat_purchase(self, __):
+        """
+        Ensure that the single seat purchase order is not linked any business
+        client when the method `handle_post_order` is invoked.
+        """
+        toggle_switch(ENROLLMENT_CODE_SWITCH, False)
+
+        course = CourseFactory()
+        verified_product = course.create_or_update_seat('verified', True, 50, self.partner)
+        user = UserFactory()
+        basket = BasketFactory(owner=user, site=self.site)
+        basket.add_product(verified_product, quantity=1)
+        order = create_order(number=1, basket=basket, user=user)
+        request_data = {'organization': 'Dummy Business Client'}
+
+        EdxOrderPlacementMixin().handle_post_order(request_data, order)
+
+        # Now verify that the single seat order is not linked to business
+        # client
+        assert BusinessClient.objects.count() == 0
+        assert not order.client
 
     def test_handle_successful_order_no_context(self, mock_track):
         """

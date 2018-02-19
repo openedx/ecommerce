@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-12-15 09:43-0500\n"
+"POT-Creation-Date: 2018-02-22 10:47+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -31,7 +31,6 @@ msgstr ""
 
 #. Translators: "Waffle" is the name of a third-party library. It should not be translated
 #: ecommerce/core/admin.py:31
-#, python-brace-format
 msgid ""
 "User administration has been disabled due to the load on the database. This "
 "functionality can be restored by activating the {switch_name} Waffle switch. "
@@ -219,11 +218,11 @@ msgid ""
 "unverified courses"
 msgstr ""
 
-#: ecommerce/core/models.py:445
+#: ecommerce/core/models.py:449
 msgid "Full Name"
 msgstr ""
 
-#: ecommerce/core/models.py:590 ecommerce/extensions/basket/models.py:94
+#: ecommerce/core/models.py:594 ecommerce/extensions/basket/models.py:94
 #: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:56
 #: ecommerce/templates/oscar/dashboard/offers/summary.html:10
 msgid "Name"
@@ -242,7 +241,6 @@ msgid "This coupon code has expired."
 msgstr ""
 
 #: ecommerce/coupons/views.py:87
-#, python-brace-format
 msgid "Product [{product}] not available for purchase."
 msgstr ""
 
@@ -292,13 +290,11 @@ msgstr ""
 msgid "Invalid data sharing consent token provided."
 msgstr ""
 
-#: ecommerce/coupons/views.py:237 ecommerce/extensions/basket/views.py:91
-#, python-brace-format
+#: ecommerce/coupons/views.py:237 ecommerce/extensions/basket/views.py:94
 msgid "You have already purchased {course} seat."
 msgstr ""
 
 #: ecommerce/coupons/views.py:250
-#, python-brace-format
 msgid "A discount has been applied, courtesy of {enterprise_customer_name}."
 msgstr ""
 
@@ -306,20 +302,19 @@ msgstr ""
 msgid "This coupon code is not valid for this course. Try a different course."
 msgstr ""
 
-#: ecommerce/courses/models.py:34 ecommerce/extensions/basket/models.py:14
-#: ecommerce/extensions/offer/models.py:45
+#: ecommerce/courses/models.py:33 ecommerce/extensions/basket/models.py:14
+#: ecommerce/extensions/offer/models.py:51
 #: ecommerce/extensions/payment/models.py:58
 #: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:65
 #: ecommerce/templates/oscar/dashboard/offers/summary.html:14
 msgid "Site"
 msgstr ""
 
-#: ecommerce/courses/models.py:40
+#: ecommerce/courses/models.py:39
 msgid "Last date/time on which verification for this product can be submitted."
 msgstr ""
 
 #: ecommerce/courses/publishers.py:61
-#, python-brace-format
 msgid "Failed to publish commerce data for {course_id} to LMS."
 msgstr ""
 
@@ -350,7 +345,6 @@ msgid ""
 msgstr ""
 
 #: ecommerce/credit/views.py:63
-#, python-brace-format
 msgid ""
 "Credit is not currently available for \"{course_name}\". If you are "
 "currently enrolled in the course, please try again after all grading is "
@@ -370,7 +364,6 @@ msgid "%d%% enterprise discount"
 msgstr ""
 
 #: ecommerce/enterprise/benefits.py:33
-#, python-brace-format
 msgid "{value} fixed-price enterprise discount"
 msgstr ""
 
@@ -426,7 +419,6 @@ msgid "The start date must occur before the end date."
 msgstr ""
 
 #: ecommerce/enterprise/forms.py:98
-#, python-brace-format
 msgid "Discount provided by {enterprise_customer_name}."
 msgstr ""
 
@@ -522,32 +514,27 @@ msgstr ""
 msgid "End"
 msgstr ""
 
-#: ecommerce/enterprise/utils.py:109
-#, python-brace-format
+#: ecommerce/enterprise/utils.py:113
 msgid "SKU {sku} does not exist."
 msgstr ""
 
-#: ecommerce/enterprise/utils.py:117
-#, python-brace-format
+#: ecommerce/enterprise/utils.py:121
 msgid "There is no Enterprise Customer associated with SKU {sku}."
 msgstr ""
 
-#: ecommerce/enterprise/utils.py:125
-#, python-brace-format
+#: ecommerce/enterprise/utils.py:129
 msgid ""
 "If you have concerns about sharing your data, please contact your "
 "administrator at {enterprise}."
 msgstr ""
 
-#: ecommerce/enterprise/utils.py:128
-#, python-brace-format
+#: ecommerce/enterprise/utils.py:132
 msgid ""
 "If you have concerns about sharing your data, please contact your "
 "administrator at {enterprise} at {contact_info}."
 msgstr ""
 
-#: ecommerce/enterprise/utils.py:134
-#, python-brace-format
+#: ecommerce/enterprise/utils.py:138
 msgid "Enrollment in {course_name} was not complete."
 msgstr ""
 
@@ -577,56 +564,57 @@ msgstr ""
 msgid "One of the products you're trying to order is unavailable."
 msgstr ""
 
-#: ecommerce/extensions/api/serializers.py:348
-#, python-brace-format
-msgid "Invalid product class [{product_class}] requested."
+#: ecommerce/extensions/api/serializers.py:334
+msgid "Products must have a certificate type."
 msgstr ""
 
-#: ecommerce/extensions/api/serializers.py:354
-msgid "Products must indicate whether ID verification is required."
-msgstr ""
-
-#: ecommerce/extensions/api/serializers.py:358
+#: ecommerce/extensions/api/serializers.py:337
+#: ecommerce/extensions/api/serializers.py:365
 msgid "Products must have a price."
 msgstr ""
 
-#: ecommerce/extensions/api/serializers.py:387
-#, python-brace-format
+#: ecommerce/extensions/api/serializers.py:361
+msgid "Products must indicate whether ID verification is required."
+msgstr ""
+
+#: ecommerce/extensions/api/serializers.py:423
+msgid "Invalid product class [{product_class}] requested."
+msgstr ""
+
+#: ecommerce/extensions/api/serializers.py:453
 msgid ""
 "Course [{course_id}] was not published to LMS because the switch "
 "[publish_course_modes_to_lms] is disabled. To avoid ghost SKUs, data has not "
 "been saved."
 msgstr ""
 
-#: ecommerce/extensions/api/serializers.py:600
+#: ecommerce/extensions/api/serializers.py:648
 msgid "Enrollment code"
 msgstr ""
 
-#: ecommerce/extensions/api/serializers.py:601
+#: ecommerce/extensions/api/serializers.py:649
 msgid "Discount code"
 msgstr ""
 
-#: ecommerce/extensions/api/serializers.py:615
+#: ecommerce/extensions/api/serializers.py:663
 msgid "ACTIVE"
 msgstr ""
 
-#: ecommerce/extensions/api/serializers.py:615
+#: ecommerce/extensions/api/serializers.py:663
 msgid "INACTIVE"
 msgstr ""
 
 #: ecommerce/extensions/api/v2/views/baskets.py:363
-#: ecommerce/extensions/basket/views.py:110
+#: ecommerce/extensions/basket/views.py:113
 msgid "No SKUs provided."
 msgstr ""
 
 #: ecommerce/extensions/api/v2/views/baskets.py:373
-#: ecommerce/extensions/basket/views.py:114
-#, python-brace-format
+#: ecommerce/extensions/basket/views.py:117
 msgid "Products with SKU(s) [{skus}] do not exist."
 msgstr ""
 
 #: ecommerce/extensions/basket/models.py:83
-#, python-brace-format
 msgid "{id} - {status} basket (owner: {owner}, lines: {num_lines})"
 msgstr ""
 
@@ -650,101 +638,90 @@ msgid ""
 "time."
 msgstr ""
 
-#: ecommerce/extensions/basket/utils.py:125
+#: ecommerce/extensions/basket/utils.py:126
 msgid "Click here to just purchase an enrollment for yourself"
 msgstr ""
 
-#: ecommerce/extensions/basket/utils.py:128
+#: ecommerce/extensions/basket/utils.py:129
 msgid "Click here to purchase multiple seats in this course"
 msgstr ""
 
-#: ecommerce/extensions/basket/views.py:58
+#: ecommerce/extensions/basket/views.py:59
 msgid "No SKU provided."
 msgstr ""
 
-#: ecommerce/extensions/basket/views.py:65
-#, python-brace-format
+#: ecommerce/extensions/basket/views.py:66
 msgid "SKU [{sku}] does not exist."
 msgstr ""
 
-#: ecommerce/extensions/basket/views.py:83
-#, python-brace-format
+#: ecommerce/extensions/basket/views.py:86
 msgid "Product [{product}] not available to buy."
 msgstr ""
 
-#: ecommerce/extensions/basket/views.py:134
+#: ecommerce/extensions/basket/views.py:139
 msgid "You have already purchased these products"
 msgstr ""
 
-#: ecommerce/extensions/basket/views.py:239
+#: ecommerce/extensions/basket/views.py:244
 msgid ""
 "After you complete your order you will be able to select course dates from "
 "your dashboard."
 msgstr ""
 
-#: ecommerce/extensions/basket/views.py:244
+#: ecommerce/extensions/basket/views.py:249
 msgid ""
 "After you complete your order you will be automatically enrolled in the "
 "verified track of the course."
 msgstr ""
 
-#: ecommerce/extensions/basket/views.py:248
+#: ecommerce/extensions/basket/views.py:253
 msgid "After you complete your order you will receive credit for your course."
 msgstr ""
 
-#: ecommerce/extensions/basket/views.py:251
+#: ecommerce/extensions/basket/views.py:256
 msgid ""
 "After you complete your order you will be automatically enrolled in the "
 "course."
 msgstr ""
 
-#: ecommerce/extensions/basket/views.py:257
-#, python-brace-format
+#: ecommerce/extensions/basket/views.py:262
 msgid "You will receive an email at {user_email} with your enrollment code(s)."
 msgstr ""
 
-#: ecommerce/extensions/basket/views.py:362
-#, python-brace-format
+#: ecommerce/extensions/basket/views.py:370
 msgid "Could not apply the code '{code}'; it requires data sharing consent."
 msgstr ""
 
-#: ecommerce/extensions/basket/views.py:414
-#, python-brace-format
+#: ecommerce/extensions/basket/views.py:422
 msgid "Coupon code '{code}' has expired."
 msgstr ""
 
-#: ecommerce/extensions/basket/views.py:421
-#, python-brace-format
+#: ecommerce/extensions/basket/views.py:429
 msgid "Coupon code '{code}' is not active."
 msgstr ""
 
-#: ecommerce/extensions/basket/views.py:428
-#, python-brace-format
+#: ecommerce/extensions/basket/views.py:436
 msgid "Coupon code '{code}' has already been redeemed."
 msgstr ""
 
-#: ecommerce/extensions/basket/views.py:438
-#: ecommerce/extensions/basket/views.py:452
-#, python-brace-format
+#: ecommerce/extensions/basket/views.py:446
+#: ecommerce/extensions/basket/views.py:460
 msgid "Coupon code '{code}' is not valid for this basket."
 msgstr ""
 
-#: ecommerce/extensions/basket/views.py:476
+#: ecommerce/extensions/basket/views.py:484
 msgid "Your basket does not qualify for a coupon code discount."
 msgstr ""
 
-#: ecommerce/extensions/basket/views.py:481
-#, python-brace-format
+#: ecommerce/extensions/basket/views.py:489
 msgid "Coupon code '{code}' added to basket."
 msgstr ""
 
-#: ecommerce/extensions/basket/views.py:491
-#, python-brace-format
+#: ecommerce/extensions/basket/views.py:499
 msgid "You have already added coupon code '{code}' to your basket."
 msgstr ""
 
-#: ecommerce/extensions/basket/views.py:499
-#, python-brace-format
+#: ecommerce/extensions/basket/views.py:507
 msgid "Coupon code '{code}' does not exist."
 msgstr ""
 
@@ -769,10 +746,9 @@ msgid "Email"
 msgstr ""
 
 #: ecommerce/extensions/dashboard/orders/views.py:72
-#, python-brace-format
 msgid ""
-"{link_start}Refund #{refund_id}{link_end} created! Click {link_start}"
-"here{link_end} to view it."
+"{link_start}Refund #{refund_id}{link_end} created! Click {link_start}here"
+"{link_end} to view it."
 msgstr ""
 
 #: ecommerce/extensions/dashboard/orders/views.py:76
@@ -793,7 +769,7 @@ msgstr ""
 
 #: ecommerce/extensions/dashboard/refunds/forms.py:14
 #: ecommerce/extensions/refund/models.py:72
-#: ecommerce/extensions/refund/models.py:301
+#: ecommerce/extensions/refund/models.py:304
 #: ecommerce/extensions/voucher/utils.py:231
 #: ecommerce/templates/oscar/dashboard/orders/line_detail.html:70
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:72
@@ -812,52 +788,53 @@ msgstr ""
 msgid "Failed to retrieve enrollment data."
 msgstr ""
 
-#: ecommerce/extensions/offer/models.py:188
+#: ecommerce/extensions/offer/models.py:194
 msgid "Course Catalog ID from the Discovery Service."
 msgstr ""
 
-#: ecommerce/extensions/offer/models.py:193
+#: ecommerce/extensions/offer/models.py:199
 msgid "UUID for an EnterpriseCustomer from the Enterprise Service."
 msgstr ""
 
-#: ecommerce/extensions/offer/models.py:329
+#: ecommerce/extensions/offer/models.py:335
 msgid "EnterpriseCustomer UUID"
 msgstr ""
 
-#: ecommerce/extensions/offer/models.py:336
+#: ecommerce/extensions/offer/models.py:342
 msgid "EnterpriseCustomer Name"
 msgstr ""
 
-#: ecommerce/extensions/offer/models.py:341
+#: ecommerce/extensions/offer/models.py:347
 msgid "EnterpriseCustomerCatalog UUID"
 msgstr ""
 
-#: ecommerce/extensions/offer/models.py:343
+#: ecommerce/extensions/offer/models.py:349
 #: ecommerce/extensions/voucher/utils.py:220 ecommerce/programs/forms.py:19
 #: ecommerce/programs/templates/programs/programoffer_list.html:30
 msgid "Program UUID"
 msgstr ""
 
 #: ecommerce/extensions/offer/utils.py:64
-#, python-brace-format
 msgid "{benefit_value}%"
 msgstr ""
 
 #: ecommerce/extensions/offer/utils.py:67
-#, python-brace-format
 msgid "${benefit_value}"
 msgstr ""
 
 #. Translators: "Waffle" is the name of a third-party library. It should not be translated
 #: ecommerce/extensions/order/admin.py:29
-#, python-brace-format
 msgid ""
 "Order administration has been disabled due to the load on the database. This "
 "functionality can be restored by activating the {switch_name} Waffle switch. "
 "Be careful when re-activating this switch!"
 msgstr ""
 
-#: ecommerce/extensions/order/models.py:22
+#: ecommerce/extensions/order/models.py:11
+msgid "Business Client"
+msgstr ""
+
+#: ecommerce/extensions/order/models.py:26
 #: ecommerce/extensions/payment/models.py:16
 msgid "Payment Processor"
 msgstr ""
@@ -904,7 +881,6 @@ msgstr ""
 #. fields on the payment form. For example, the first name field is
 #. required, so this would read "First name (required)".
 #: ecommerce/extensions/payment/forms.py:100
-#, python-brace-format
 msgid "{label} (required)"
 msgstr ""
 
@@ -955,7 +931,6 @@ msgid "This field is required."
 msgstr ""
 
 #: ecommerce/extensions/payment/forms.py:160
-#, python-brace-format
 msgid "{state} is not a valid state/province in {country}."
 msgstr ""
 
@@ -991,7 +966,6 @@ msgid "..."
 msgstr ""
 
 #: ecommerce/extensions/payment/views/cybersource.py:308
-#, python-brace-format
 msgid ""
 "An error occurred while processing your payment. You have not been charged. "
 "Please double-check the information you provided and try again. For help, "
@@ -1016,19 +990,19 @@ msgstr ""
 msgid "Currency"
 msgstr ""
 
-#: ecommerce/extensions/refund/models.py:293
+#: ecommerce/extensions/refund/models.py:296
 msgid "Refund"
 msgstr ""
 
-#: ecommerce/extensions/refund/models.py:296
+#: ecommerce/extensions/refund/models.py:299
 msgid "Order Line"
 msgstr ""
 
-#: ecommerce/extensions/refund/models.py:298
+#: ecommerce/extensions/refund/models.py:301
 msgid "Line Credit (excl. tax)"
 msgstr ""
 
-#: ecommerce/extensions/refund/models.py:299
+#: ecommerce/extensions/refund/models.py:302
 #: ecommerce/templates/edx/checkout/receipt.html:73
 #: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:30
 #: ecommerce/templates/oscar/basket/partials/hosted_checkout_basket.html:42
@@ -1069,7 +1043,6 @@ msgstr ""
 #: ecommerce/extensions/voucher/tests/test_utils.py:347
 #: ecommerce/extensions/voucher/utils.py:90
 #: ecommerce/extensions/voucher/utils.py:136
-#, python-brace-format
 msgid "{percentage} %"
 msgstr ""
 
@@ -1189,12 +1162,10 @@ msgid "Email Domains"
 msgstr ""
 
 #: ecommerce/extensions/voucher/utils.py:534
-#, python-brace-format
 msgid "Range for coupon [{coupon_id}]"
 msgstr ""
 
 #: ecommerce/extensions/voucher/views.py:29
-#, python-brace-format
 msgid "Coupon Report for {coupon_name}"
 msgstr ""
 
@@ -1236,17 +1207,14 @@ msgid "Refund Transactions"
 msgstr ""
 
 #: ecommerce/management/views.py:51
-#, python-brace-format
 msgid "{action} is not a valid action."
 msgstr ""
 
 #: ecommerce/programs/benefits.py:25
-#, python-brace-format
 msgid "{value}% program discount"
 msgstr ""
 
 #: ecommerce/programs/benefits.py:42
-#, python-brace-format
 msgid "{value} fixed-price program discount"
 msgstr ""
 
@@ -1255,7 +1223,6 @@ msgid "An offer already exists for this program."
 msgstr ""
 
 #: ecommerce/programs/forms.py:86
-#, python-brace-format
 msgid "Discount for the {program_title} {program_type} Program"
 msgstr ""
 
@@ -2315,8 +2282,8 @@ msgstr ""
 msgid ""
 "\n"
 "                    Please try to submit your payment again. If this problem "
-"persists, contact %(start_link)s\n"
-"                    %(payment_support_email)s%(end_link)s.\n"
+"persists, please refer to our %(start_link)s\n"
+"                    Payments FAQ %(end_link)s for troubleshooting tips.\n"
 "                    "
 msgstr ""
 

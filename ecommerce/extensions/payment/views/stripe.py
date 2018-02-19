@@ -56,7 +56,7 @@ class StripeSubmitView(EdxOrderPlacementMixin, BasePaymentSubmitView):
         shipping_charge = shipping_method.calculate(basket)
         order_total = OrderTotalCalculator().calculate(basket, shipping_charge)
 
-        self.handle_order_placement(
+        order = self.handle_order_placement(
             order_number=order_number,
             user=basket.owner,
             basket=basket,
@@ -67,6 +67,7 @@ class StripeSubmitView(EdxOrderPlacementMixin, BasePaymentSubmitView):
             order_total=order_total,
             request=self.request
         )
+        self.handle_post_order(self.request.POST, order)
 
         receipt_url = get_receipt_page_url(
             site_configuration=self.request.site.siteconfiguration,
