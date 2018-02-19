@@ -112,7 +112,7 @@ class PaypalPaymentExecutionView(EdxOrderPlacementMixin, View):
             # than to retrieve an invoice number from PayPal.
             order_number = basket.order_number
 
-            self.handle_order_placement(
+            order = self.handle_order_placement(
                 order_number=order_number,
                 user=user,
                 basket=basket,
@@ -123,6 +123,7 @@ class PaypalPaymentExecutionView(EdxOrderPlacementMixin, View):
                 order_total=order_total,
                 request=request
             )
+            self.handle_post_order(request.GET, order)
 
             return redirect(receipt_url)
         except:  # pylint: disable=bare-except

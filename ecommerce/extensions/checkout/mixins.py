@@ -10,6 +10,7 @@ from ecommerce_worker.fulfillment.v1.tasks import fulfill_order
 from oscar.apps.checkout.mixins import OrderPlacementMixin
 from oscar.core.loading import get_class, get_model
 
+from ecommerce.core.models import BusinessClient
 from ecommerce.extensions.analytics.utils import audit_log, track_segment_event
 from ecommerce.extensions.api import data as data_api
 from ecommerce.extensions.checkout.exceptions import BasketNotFreeError
@@ -220,3 +221,26 @@ class EdxOrderPlacementMixin(OrderPlacementMixin):
         else:
             logger.warning("Order #%s - no %s communication event type",
                            order.number, code)
+
+    def handle_post_order(self, request_data, order):
+        """
+        Handle extra processing of order after its placed.
+
+        This method links the provided order with the BusinessClient for bulk
+        purchase.
+
+        Arguments:
+            request (dict): HttpRequest data
+            order (Order): Order object
+
+        """
+        basket_has_enrollment_code_product = any(
+            line.product.is_enrollment_code_product for line in order.basket.all_lines()
+        )
+
+        # Name of business client is being passed as "organization" from basket page
+        business_client = request_data.get('organization')
+        if basket_has_enrollment_code_product and business_client:
+            client, __ = BusinessClient.objects.get_or_create(name=business_client)
+            order.client = client
+            order.save()
