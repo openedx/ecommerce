@@ -2,10 +2,14 @@ from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from oscar.apps.order.abstract_models import AbstractOrder, AbstractPaymentEvent
 
+from ecommerce.core.models import BusinessClient
 from ecommerce.extensions.fulfillment.status import ORDER
 
 
 class Order(AbstractOrder):
+    client = models.ForeignKey(
+        BusinessClient, verbose_name=_('Business Client'), null=True, blank=True
+    )
 
     @property
     def is_fulfillable(self):

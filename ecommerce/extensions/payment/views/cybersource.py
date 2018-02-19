@@ -320,7 +320,8 @@ class CybersourceInterstitialView(CybersourceNotificationMixin, View):
             return redirect(reverse('payment_error'))
 
         try:
-            self.create_order(request, basket, self._get_billing_address(notification))
+            order = self.create_order(request, basket, self._get_billing_address(notification))
+            self.link_order_with_business_client(request.POST, order)
 
             return self.redirect_to_receipt_page(notification)
         except:  # pylint: disable=bare-except
