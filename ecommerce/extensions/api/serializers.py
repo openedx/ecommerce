@@ -18,7 +18,6 @@ from ecommerce.core.constants import (COURSE_ENTITLEMENT_PRODUCT_CLASS_NAME, COU
                                       ISO_8601_FORMAT, SEAT_PRODUCT_CLASS_NAME)
 from ecommerce.core.url_utils import get_ecommerce_url
 from ecommerce.courses.models import Course
-from ecommerce.courses.utils import get_course_info_from_catalog
 from ecommerce.entitlements.utils import create_or_update_course_entitlement
 from ecommerce.invoice.models import Invoice
 
@@ -399,6 +398,7 @@ class AtomicPublicationSerializer(serializers.Serializer):  # pylint: disable=ab
     The automatically applied validation logic rejects course IDs which already exist in the database.
     """
     id = serializers.RegexField(COURSE_ID_REGEX, max_length=255)
+    uuid = serializers.UUIDField()
     name = serializers.CharField(max_length=255)
     # Verification deadline should only be required if the course actually requires verification.
     verification_deadline = serializers.DateTimeField(required=False, allow_null=True)
@@ -441,6 +441,7 @@ class AtomicPublicationSerializer(serializers.Serializer):  # pylint: disable=ab
                 if one was raised (else None), and a message for the user, if necessary (else None).
         """
         course_id = self.validated_data['id']
+        course_uuid = self.validated_data['uuid']
         course_name = self.validated_data['name']
         course_verification_deadline = self.validated_data.get('verification_deadline')
         create_or_activate_enrollment_code = self.validated_data.get('create_or_activate_enrollment_code')
@@ -465,9 +466,6 @@ class AtomicPublicationSerializer(serializers.Serializer):  # pylint: disable=ab
                 course.verification_deadline = course_verification_deadline
                 course.save()
 
-                # Fetch full course info (from seat product, because this queries based on attr.course_key)
-                course_info = get_course_info_from_catalog(course.site, course.parent_seat_product)
-
                 create_enrollment_code = False
                 if waffle.switch_is_active(ENROLLMENT_CODE_SWITCH) and site.siteconfiguration.enable_enrollment_codes:
                     create_enrollment_code = create_or_activate_enrollment_code
@@ -476,7 +474,7 @@ class AtomicPublicationSerializer(serializers.Serializer):  # pylint: disable=ab
                     product_class = product.get('product_class')
 
                     if product_class == COURSE_ENTITLEMENT_PRODUCT_CLASS_NAME:
-                        EntitlementProductHelper.save(partner, course, course_info['UUID'], product)
+                        EntitlementProductHelper.save(partner, course, course_uuid, product)
                     elif product_class == SEAT_PRODUCT_CLASS_NAME:
                         SeatProductHelper.save(partner, course, product, create_enrollment_code)
 
