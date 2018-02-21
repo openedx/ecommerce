@@ -8,6 +8,7 @@ from ecommerce.settings.base import *
 
 SITE_ID = 1
 PROTOCOL = 'http'
+ALLOWED_HOSTS = ['*']
 
 # TEST SETTINGS
 INSTALLED_APPS += (

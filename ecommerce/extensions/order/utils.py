@@ -4,15 +4,13 @@ from __future__ import unicode_literals
 import logging
 
 import waffle
-
 from django.conf import settings
 from django.core.cache import cache
-
 from edx_rest_api_client.client import EdxRestApiClient
 from edx_rest_api_client.exceptions import HttpNotFoundError
 from oscar.apps.order.utils import OrderCreator as OscarOrderCreator
 from oscar.core.loading import get_model
-from requests.exceptions import ConnectionError, ConnectTimeout   # pylint: disable=ungrouped-imports
+from requests.exceptions import ConnectionError, ConnectTimeout  # pylint: disable=ungrouped-imports
 from threadlocals.threadlocals import get_current_request
 
 from ecommerce.core.url_utils import get_lms_entitlement_api_url
@@ -79,7 +77,7 @@ class OrderNumberGenerator(object):
 
 class OrderCreator(OscarOrderCreator):
     def create_order_model(self, user, basket, shipping_address, shipping_method, shipping_charge, billing_address,
-                           total, order_number, status, **extra_order_fields):
+                           total, order_number, status, request=None, **extra_order_fields):
         """
         Create an order model.
 

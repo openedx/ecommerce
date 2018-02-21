@@ -1,5 +1,5 @@
 from django.contrib import messages
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from oscar.test.factories import UserFactory
 
 from ecommerce.core.tests import toggle_switch

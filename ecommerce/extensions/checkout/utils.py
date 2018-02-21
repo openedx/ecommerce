@@ -3,7 +3,7 @@ import urllib
 
 from babel.numbers import format_currency as default_format_currency
 from django.conf import settings
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.utils.translation import get_language, to_locale
 from edx_rest_api_client.client import EdxRestApiClient
 from requests.exceptions import ConnectionError, Timeout

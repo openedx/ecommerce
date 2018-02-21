@@ -13,7 +13,6 @@ from oscar.core.loading import get_model
 from ecommerce.core.models import SiteConfiguration
 from ecommerce.theming.models import SiteTheme
 
-
 logger = logging.getLogger(__name__)
 Partner = get_model('partner', 'Partner')
 

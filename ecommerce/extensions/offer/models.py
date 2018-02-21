@@ -37,6 +37,12 @@ class Benefit(AbstractBenefit):
                 'Failed to create Benefit. Benefit value may not be a negative number.'
             )
 
+    def clean_percentage(self):
+        if not self.range:
+            log_message_and_raise_validation_error('Percentage benefits require a product range')
+        if self.value > 100:
+            log_message_and_raise_validation_error('Percentage discount cannot be greater than 100')
+
 
 class ConditionalOffer(AbstractConditionalOffer):
     UPDATABLE_OFFER_FIELDS = ['email_domains', 'max_uses']

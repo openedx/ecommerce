@@ -1,4 +1,4 @@
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 
 from ecommerce.core.url_utils import get_lms_dashboard_url
 from ecommerce.tests.testcases import TestCase

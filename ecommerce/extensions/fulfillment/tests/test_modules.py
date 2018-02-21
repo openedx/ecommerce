@@ -9,7 +9,6 @@ import mock
 from django.test import override_settings
 from oscar.core.loading import get_class, get_model
 from oscar.test import factories
-from oscar.test.newfactories import BasketFactory, UserFactory
 from requests.exceptions import ConnectionError, Timeout
 from testfixtures import LogCapture
 
@@ -46,7 +45,7 @@ from ecommerce.tests.testcases import TestCase
 JSON = 'application/json'
 LOGGER_NAME = 'ecommerce.extensions.analytics.utils'
 
-Applicator = get_class('offer.utils', 'Applicator')
+Applicator = get_class('offer.applicator', 'Applicator')
 Benefit = get_model('offer', 'Benefit')
 Catalog = get_model('catalogue', 'Catalog')
 Option = get_model('catalogue', 'Option')
@@ -69,7 +68,7 @@ class EnrollmentFulfillmentModuleTests(ProgramTestMixin, DiscoveryTestMixin, Ful
     def setUp(self):
         super(EnrollmentFulfillmentModuleTests, self).setUp()
 
-        self.user = UserFactory()
+        self.user = factories.UserFactory()
         self.user.tracking_context = {
             'ga_client_id': 'test-client-id', 'lms_user_id': 'test-user-id', 'lms_ip': '127.0.0.1'
         }
@@ -78,7 +77,7 @@ class EnrollmentFulfillmentModuleTests(ProgramTestMixin, DiscoveryTestMixin, Ful
 
         self.seat = self.course.create_or_update_seat(self.certificate_type, False, 100, self.partner, self.provider)
 
-        basket = BasketFactory(owner=self.user, site=self.site)
+        basket = factories.BasketFactory(owner=self.user, site=self.site)
         basket.add_product(self.seat, 1)
         self.order = create_order(number=1, basket=basket, user=self.user)
 
@@ -96,7 +95,7 @@ class EnrollmentFulfillmentModuleTests(ProgramTestMixin, DiscoveryTestMixin, Ful
         self.provider = provider
         self.seat = self.course.create_or_update_seat(self.certificate_type, False, 100, self.partner, self.provider)
 
-        basket = BasketFactory(owner=self.user, site=self.site)
+        basket = factories.BasketFactory(owner=self.user, site=self.site)
         basket.add_product(self.seat, 1)
         self.order = create_order(number=2, basket=basket, user=self.user)
 
@@ -449,8 +448,8 @@ class CouponFulfillmentModuleTest(CouponMixin, FulfillmentTestMixin, TestCase):
     def setUp(self):
         super(CouponFulfillmentModuleTest, self).setUp()
         coupon = self.create_coupon()
-        user = UserFactory()
-        basket = BasketFactory(owner=user, site=self.site)
+        user = factories.UserFactory()
+        basket = factories.BasketFactory(owner=user, site=self.site)
         basket.add_product(coupon, 1)
         self.order = create_order(number=1, basket=basket, user=user)
 
@@ -491,8 +490,8 @@ class DonationsFromCheckoutTestFulfillmentModuleTest(FulfillmentTestMixin, TestC
             product_class=donation_class,
             title='Test product'
         )
-        user = UserFactory()
-        basket = BasketFactory(owner=user, site=self.site)
+        user = factories.UserFactory()
+        basket = factories.BasketFactory(owner=user, site=self.site)
         factories.create_stockrecord(donation, num_in_stock=2, price_excl_tax=10)
         basket.add_product(donation, 1)
         self.order = create_order(number=1, basket=basket, user=user)
@@ -530,8 +529,8 @@ class EnrollmentCodeFulfillmentModuleTests(DiscoveryTestMixin, TestCase):
         course = CourseFactory()
         course.create_or_update_seat('verified', True, 50, self.partner, create_enrollment_code=True)
         enrollment_code = Product.objects.get(product_class__name=ENROLLMENT_CODE_PRODUCT_CLASS_NAME)
-        user = UserFactory()
-        basket = BasketFactory(owner=user, site=self.site)
+        user = factories.UserFactory()
+        basket = factories.BasketFactory(owner=user, site=self.site)
         basket.add_product(enrollment_code, self.QUANTITY)
         self.order = create_order(number=1, basket=basket, user=user)
 
@@ -572,10 +571,10 @@ class EntitlementFulfillmentModuleTests(FulfillmentTestMixin, TestCase):
 
     def setUp(self):
         super(EntitlementFulfillmentModuleTests, self).setUp()
-        self.user = UserFactory()
+        self.user = factories.UserFactory()
         self.course_entitlement = create_or_update_course_entitlement(
             'verified', 100, self.partner, '111-222-333-444', 'Course Entitlement')
-        basket = BasketFactory(owner=self.user, site=self.site)
+        basket = factories.BasketFactory(owner=self.user, site=self.site)
         basket.add_product(self.course_entitlement, 1)
         self.entitlement_option = Option.objects.get(name='Course Entitlement')
         self.order = create_order(number=1, basket=basket, user=self.user)

@@ -3,7 +3,7 @@ import json
 import ddt
 import httpretty
 import mock
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from oscar.core.loading import get_model
 from requests.exceptions import ConnectionError, Timeout
 from slumber.exceptions import SlumberBaseException

@@ -88,6 +88,9 @@ class ProgramOfferForm(forms.ModelForm):
             program_type=program['type']
         ))
 
+        # Truncate offer_names down to 128 characters, as Oscar's AbstractConditionalOffer name is max_length 128
+        offer_name = (offer_name[:125] + '...') if len(offer_name) > 128 else offer_name  # pylint: disable=unsubscriptable-object
+
         self.instance.name = offer_name
         self.instance.status = ConditionalOffer.OPEN
         self.instance.offer_type = ConditionalOffer.SITE

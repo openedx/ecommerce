@@ -19,6 +19,7 @@ services:
     volumes:
       - ..:/edx/app/ecommerce/ecommerce
       - $HOME/.cache/pip:/edx/app/ecommerce/.cache/pip
+      - /edx/app/ecommerce/ecommerce/node_modules
     # The docker container produced from configuration.git does not currently
     # run and expose a port for ecommerce.  This means that we need to run some
     # command that keeps the ecommerce container alive while we run tests on it.

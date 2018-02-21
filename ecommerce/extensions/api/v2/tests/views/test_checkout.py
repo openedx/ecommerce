@@ -3,8 +3,8 @@ from __future__ import unicode_literals
 import json
 
 from django.conf import settings
-from django.core.urlresolvers import reverse
 from django.test import override_settings
+from django.urls import reverse
 from oscar.core.loading import get_model
 
 from ecommerce.core.tests import toggle_switch

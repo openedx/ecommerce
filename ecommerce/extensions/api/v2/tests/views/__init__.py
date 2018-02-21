@@ -1,7 +1,7 @@
-from django.core.urlresolvers import reverse
 from django.test import RequestFactory
+from django.urls import reverse
 from oscar.core.loading import get_class, get_model
-from oscar.test.newfactories import ProductAttributeValueFactory
+from oscar.test.factories import ProductAttributeValueFactory
 
 from ecommerce.core.constants import ISO_8601_FORMAT
 from ecommerce.extensions.api.serializers import OrderSerializer

@@ -2,7 +2,7 @@
 Tests for theming middleware.
 """
 
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 
 from ecommerce.tests.testcases import TestCase
 

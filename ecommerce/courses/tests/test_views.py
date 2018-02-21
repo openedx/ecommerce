@@ -3,7 +3,7 @@ import json
 import ddt
 import httpretty
 from django.conf import settings
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from testfixtures import LogCapture
 
 from ecommerce.core.constants import ENROLLMENT_CODE_SWITCH

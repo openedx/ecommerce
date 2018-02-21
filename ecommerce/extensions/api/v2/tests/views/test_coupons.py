@@ -9,8 +9,8 @@ from uuid import uuid4
 import ddt
 import httpretty
 import pytz
-from django.core.urlresolvers import reverse
 from django.test import RequestFactory
+from django.urls import reverse
 from django.utils.timezone import now
 from oscar.apps.catalogue.categories import create_from_breadcrumbs
 from oscar.core.loading import get_class, get_model
@@ -30,7 +30,7 @@ from ecommerce.tests.factories import PartnerFactory, ProductFactory, SiteConfig
 from ecommerce.tests.mixins import ThrottlingMixin
 from ecommerce.tests.testcases import TestCase
 
-Applicator = get_class('offer.utils', 'Applicator')
+Applicator = get_class('offer.applicator', 'Applicator')
 Basket = get_model('basket', 'Basket')
 Benefit = get_model('offer', 'Benefit')
 Catalog = get_model('catalogue', 'Catalog')

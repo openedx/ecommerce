@@ -5,7 +5,6 @@ import mock
 from django.core import mail
 from oscar.core.loading import get_class, get_model
 from oscar.test import factories
-from oscar.test.newfactories import BasketFactory
 from testfixtures import LogCapture
 
 from ecommerce.core.constants import ENROLLMENT_CODE_PRODUCT_CLASS_NAME, ENROLLMENT_CODE_SWITCH
@@ -20,7 +19,7 @@ from ecommerce.programs.tests.mixins import ProgramTestMixin
 from ecommerce.tests.factories import ProductFactory
 from ecommerce.tests.testcases import TestCase
 
-Applicator = get_class('offer.utils', 'Applicator')
+Applicator = get_class('offer.applicator', 'Applicator')
 BasketAttribute = get_model('basket', 'BasketAttribute')
 BasketAttributeType = get_model('basket', 'BasketAttributeType')
 Benefit = get_model('offer', 'Benefit')
@@ -52,7 +51,7 @@ class SignalTests(ProgramTestMixin, CouponMixin, TestCase):
         """
         course = CourseFactory()
         seat = course.create_or_update_seat(seat_type, False, 50, self.partner, credit_provider_id, None, 2)
-        basket = BasketFactory(owner=self.user, site=self.site)
+        basket = factories.BasketFactory(owner=self.user, site=self.site)
         basket.add_product(seat, 1)
         order = create_order(basket=basket, user=self.user)
         return order
@@ -218,7 +217,7 @@ class SignalTests(ProgramTestMixin, CouponMixin, TestCase):
             _range = factories.RangeFactory(products=[product], )
             voucher, product = prepare_voucher(_range=_range, benefit_value=percent_benefit)
 
-            basket = BasketFactory(owner=self.user, site=self.site)
+            basket = factories.BasketFactory(owner=self.user, site=self.site)
             basket.add_product(product)
             basket.vouchers.add(voucher)
             Applicator().apply(basket, user=basket.owner, request=self.request)
@@ -242,7 +241,7 @@ class SignalTests(ProgramTestMixin, CouponMixin, TestCase):
                 condition=factories.ConditionFactory(type=Condition.COVERAGE, value=1, range=_range)
             )
 
-            basket = BasketFactory(owner=self.user, site=self.site)
+            basket = factories.BasketFactory(owner=self.user, site=self.site)
             basket.add_product(product)
             basket.vouchers.add(voucher)
             Applicator().apply(basket, user=basket.owner, request=self.request)
@@ -265,7 +264,7 @@ class SignalTests(ProgramTestMixin, CouponMixin, TestCase):
                 condition=factories.ConditionFactory(type=Condition.COVERAGE, value=1, range=_range)
             )
 
-            basket = BasketFactory(owner=self.user, site=self.site)
+            basket = factories.BasketFactory(owner=self.user, site=self.site)
             basket.add_product(product)
             Applicator().apply_offers(basket, [site_offer])
 
@@ -279,7 +278,7 @@ class SignalTests(ProgramTestMixin, CouponMixin, TestCase):
         with mock.patch('ecommerce.extensions.checkout.signals.track_segment_event') as mock_track:
 
             coupon = self.create_coupon()
-            basket = BasketFactory(owner=self.user, site=self.site)
+            basket = factories.BasketFactory(owner=self.user, site=self.site)
             basket.add_product(coupon)
 
             order = factories.create_order(basket=basket, user=self.user)
@@ -299,7 +298,7 @@ class SignalTests(ProgramTestMixin, CouponMixin, TestCase):
             course.create_or_update_seat('verified', True, 50, self.partner, create_enrollment_code=True)
             enrollment_code = Product.objects.get(product_class__name=ENROLLMENT_CODE_PRODUCT_CLASS_NAME)
 
-            basket = BasketFactory(owner=self.user, site=self.site)
+            basket = factories.BasketFactory(owner=self.user, site=self.site)
             basket.add_product(enrollment_code)
 
             order = factories.create_order(basket=basket, user=self.user)

@@ -65,6 +65,8 @@ class BasketSingleItemView(View):
         except StockRecord.DoesNotExist:
             return HttpResponseBadRequest(_('SKU [{sku}] does not exist.').format(sku=sku))
 
+        logger.info('Starting payment flow for user[%s] for product[%s].', request.user.username, sku)
+
         if voucher is None:
             # If there is an Enterprise entitlement available for this basket,
             # we redirect to the CouponRedeemView to apply the discount to the
@@ -113,6 +115,8 @@ class BasketMultipleItemsView(View):
         products = Product.objects.filter(stockrecords__partner=partner, stockrecords__partner_sku__in=skus)
         if not products:
             return HttpResponseBadRequest(_('Products with SKU(s) [{skus}] do not exist.').format(skus=', '.join(skus)))
+
+        logger.info('Starting payment flow for user[%s] for products[%s].', request.user.username, skus)
 
         voucher = Voucher.objects.get(code=code) if code else None
 

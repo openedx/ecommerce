@@ -7,7 +7,7 @@ import ddt
 import mock
 import responses
 from django.conf import settings
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from freezegun import freeze_time
 from oscar.apps.payment.exceptions import TransactionDeclined
 from oscar.core.loading import get_class, get_model

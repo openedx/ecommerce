@@ -7,7 +7,7 @@ import httpretty
 import mock
 from django.test.client import RequestFactory
 from oscar.core.loading import get_class, get_model
-from oscar.test.newfactories import BasketFactory
+from oscar.test.factories import BasketFactory
 from requests import Timeout
 from testfixtures import LogCapture
 
