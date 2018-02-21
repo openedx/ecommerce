@@ -31,7 +31,7 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument(
-            '--course_ids_file',
+            '--course-ids-file',
             action='store',
             dest='course_ids_file',
             default=None,
