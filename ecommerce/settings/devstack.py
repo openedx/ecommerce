@@ -53,7 +53,38 @@ PAYMENT_PROCESSOR_CONFIG = {
 LANGUAGE_COOKIE_NAME = 'openedx-language-preference'
 
 #####################################################################
-# Lastly, see if the developer has any local overrides.
+# Lastly, see if the developer has any local Python overrides.
 if os.path.isfile(join(dirname(abspath(__file__)), 'private.py')):
     # noinspection PyUnresolvedReferences
     from .private import *  # pylint: disable=import-error
+
+#####################################################################
+# And - see if the developer has any local YAML overrides.
+PRIVATE_YML_FILE = 'private.yml'
+
+def _override_key_values(settings, overrides):
+    """
+    Override the values in settings using the values in overrides.
+    If overrides contains nested dictionaries, the dictionaries are recursively
+    followed down to the non-dict values and set, preserving other key/value
+    pairs in the dictionary.
+
+    Params:
+        settings (dict): Dictionary of Django settings.
+        overrides (dict): Dictionary of overrides for the Django settings.
+    """
+    for override in overrides:
+        if isinstance(overrides[override], dict):
+            # The value is a dict. So continue down the override chain.
+            if not override in settings:
+                settings[override] = {}
+            _override_key_values(settings[override], overrides[override])
+        else:
+            # The value is a non-dict. So just set it.
+            settings[override] = overrides[override]
+
+override_path = join(dirname(abspath(__file__)), PRIVATE_YML_FILE)
+if os.path.isfile(override_path):
+    with codecs.open(override_path, encoding='utf-8') as f:
+        config_from_yaml = yaml.load(f)
+        _override_key_values(vars(), config_from_yaml)
