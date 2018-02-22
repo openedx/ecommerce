@@ -203,6 +203,24 @@ class DiscoveryMockMixin(object):
             ]
         )
 
+    def mock_catalog_query_contains_endpoint(self, course_run_ids, course_uuids, absent_ids, query, discovery_api_url):
+        query_contains_info = {str(identifier): True for identifier in course_run_ids + course_uuids}
+        for identifier in absent_ids:
+            query_contains_info[str(identifier)] = False
+        query_contains_info_json = json.dumps(query_contains_info)
+        url = '{base}catalog/query_contains/?course_run_ids={run_ids}&course_uuids={uuids}&query={query}'.format(
+            base=discovery_api_url,
+            run_ids=",".join(course_run_id for course_run_id in course_run_ids),
+            uuids=",".join(str(course_uuid) for course_uuid in course_uuids),
+            query=query
+        )
+        httpretty.register_uri(
+            httpretty.GET, url,
+            body=query_contains_info_json,
+            content_type='application/json'
+        )
+        return url
+
     def mock_catalog_contains_endpoint(
             self, discovery_api_url, catalog_id=1, course_run_ids=None
     ):
@@ -219,7 +237,6 @@ class DiscoveryMockMixin(object):
         catalog_contains_uri = '{}contains/?course_run_id={}'.format(
             self.build_discovery_catalogs_url(discovery_api_url, catalog_id), ','.join(course_run_ids)
         )
-
         httpretty.register_uri(
             method=httpretty.GET,
             uri=catalog_contains_uri,

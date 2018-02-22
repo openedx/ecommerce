@@ -1,5 +1,6 @@
 from __future__ import unicode_literals
 
+import logging
 import re
 
 from django.conf import settings
@@ -20,6 +21,8 @@ from ecommerce.core.utils import get_cache_key, log_message_and_raise_validation
 
 OFFER_PRIORITY_ENTERPRISE = 10
 OFFER_PRIORITY_VOUCHER = 20
+
+logger = logging.getLogger(__name__)
 
 
 class Benefit(AbstractBenefit):
@@ -42,6 +45,77 @@ class Benefit(AbstractBenefit):
             log_message_and_raise_validation_error('Percentage benefits require a product range')
         if self.value > 100:
             log_message_and_raise_validation_error('Percentage discount cannot be greater than 100')
+
+    def _filter_for_paid_course_products(self, lines, applicable_range):
+        """" Filters out products that aren't seats or entitlements or that don't have a paid certificate type. """
+        return [
+            line for line in lines
+            if line.product.is_seat_product or line.product.is_course_entitlement_product and
+            hasattr(line.product.attr, 'certificate_type') and
+            line.product.attr.certificate_type.lower() in applicable_range.course_seat_types
+        ]
+
+    def _identify_uncached_product_identifiers(self, lines, domain, partner_code, query):
+        """
+        Checks the cache to see if each line is in the catalog range specified by the given query
+        and tracks identifiers for which discovery service data is still needed.
+        """
+        course_run_ids = []
+        course_uuids = []
+        applicable_lines = lines
+        for line in applicable_lines:
+            product = line.product
+            cache_key = get_cache_key(
+                site_domain=domain,
+                partner_code=partner_code,
+                resource='catalog_query.contains',
+                course_id=product.course_id if product.is_seat_product else product.attr.UUID,
+                query=query
+            )
+            response = cache.get(cache_key)
+            if response is False:
+                applicable_lines.remove(line)
+            elif response is None:
+                if product.is_seat_product:
+                    course_run_ids.append({'id': product.course.id, 'cache_key': cache_key, 'line': line})
+                else:
+                    course_uuids.append({'id': product.attr.UUID, 'cache_key': cache_key, 'line': line})
+        return course_run_ids, course_uuids, applicable_lines
+
+    def get_applicable_lines(self, offer, basket, range=None):  # pylint: disable=redefined-builtin
+        applicable_range = range if range else self.range
+        if applicable_range and applicable_range.catalog_query is not None:
+            query = applicable_range.catalog_query
+            applicable_lines = self._filter_for_paid_course_products(basket.all_lines(), applicable_range)
+            site = basket.site
+            partner_code = site.siteconfiguration.partner.short_code
+            course_run_ids, course_uuids, applicable_lines = self._identify_uncached_product_identifiers(
+                applicable_lines, site.domain, partner_code, query
+            )
+            if course_run_ids or course_uuids:
+                # Hit Discovery Service to determine if remaining courses and runs are in the range.
+                try:
+                    response = site.siteconfiguration.discovery_api_client.catalog.query_contains.get(
+                        course_run_ids=','.join([metadata['id'] for metadata in course_run_ids]),
+                        course_uuids=','.join([metadata['id'] for metadata in course_uuids]),
+                        query=query,
+                        partner=partner_code
+                    )
+                except Exception as err:  # pylint: disable=bare-except
+                    logger.warning(
+                        '%s raised while attempting to contact Discovery Service for offer catalog_range data.', err
+                    )
+                    raise Exception('Failed to contact Discovery Service to retrieve offer catalog_range data.')
+
+                # Cache range-state individually for each course or run identifier and remove lines not in the range.
+                for metadata in course_run_ids + course_uuids:
+                    in_range = response[str(metadata['id'])]
+                    cache.set(metadata['cache_key'], in_range, settings.COURSES_API_CACHE_TIMEOUT)
+                    if not in_range:
+                        applicable_lines.remove(metadata['line'])
+            return applicable_lines
+        else:
+            return super(Benefit, self).get_applicable_lines(offer, basket, range=range)  # pylint: disable=bad-super-call
 
 
 class ConditionalOffer(AbstractConditionalOffer):
@@ -157,6 +231,10 @@ class ConditionalOffer(AbstractConditionalOffer):
         """
         if not self.is_email_valid(basket.owner.email):
             return False
+        if self.benefit.range and self.benefit.range.catalog_query:
+            # The condition is only satisfied if all basket lines are in the offer range
+            return len(self.benefit.get_applicable_lines(self, basket)) == basket.all_lines().count()
+
         return super(ConditionalOffer, self).is_condition_satisfied(basket)  # pylint: disable=bad-super-call
 
 
@@ -231,33 +309,6 @@ class Range(AbstractRange):
         if self.course_seat_types:
             validate_credit_seat_type(self.course_seat_types)
 
-    def run_catalog_query(self, product):
-        """
-        Retrieve the results from running the query contained in catalog_query field.
-        """
-        request = get_current_request()
-        partner_code = request.site.siteconfiguration.partner.short_code
-        cache_key = get_cache_key(
-            site_domain=request.site.domain,
-            partner_code=partner_code,
-            resource='course_runs.contains',
-            course_id=product.course_id,
-            query=self.catalog_query
-        )
-        response = cache.get(cache_key)
-        if not response:  # pragma: no cover
-            try:
-                response = request.site.siteconfiguration.discovery_api_client.course_runs.contains.get(
-                    query=self.catalog_query,
-                    course_run_ids=product.course_id,
-                    partner=partner_code
-                )
-                cache.set(cache_key, response, settings.COURSES_API_CACHE_TIMEOUT)
-            except:  # pylint: disable=bare-except
-                raise Exception('Could not contact Discovery Service.')
-
-        return response
-
     def catalog_contains_product(self, product):
         """
         Retrieve the results from using the catalog contains endpoint for
@@ -298,13 +349,6 @@ class Range(AbstractRange):
                 # Range can have a catalog query and 'regular' products in it,
                 # therefor an OR is used to check for both possibilities.
                 return ((response['courses'][product.course_id]) or
-                        super(Range, self).contains_product(product))  # pylint: disable=bad-super-call
-        elif self.catalog_query and self.course_seat_types:
-            if product.attr.certificate_type.lower() in self.course_seat_types:  # pylint: disable=unsupported-membership-test
-                response = self.run_catalog_query(product)
-                # Range can have a catalog query and 'regular' products in it,
-                # therefor an OR is used to check for both possibilities.
-                return ((response['course_runs'][product.course_id]) or
                         super(Range, self).contains_product(product))  # pylint: disable=bad-super-call
         elif self.catalog:
             return (
