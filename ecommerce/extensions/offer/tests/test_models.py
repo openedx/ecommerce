@@ -3,16 +3,12 @@ from __future__ import unicode_literals
 
 import ddt
 import httpretty
-import mock
-from django.core.cache import cache
 from django.core.exceptions import ValidationError
-from django.test import RequestFactory
 from oscar.core.loading import get_model
 from oscar.test import factories
 from requests.exceptions import ConnectionError, Timeout
 from slumber.exceptions import SlumberBaseException
 
-from ecommerce.core.utils import get_cache_key
 from ecommerce.coupons.tests.mixins import CouponMixin, DiscoveryMockMixin
 from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
 from ecommerce.tests.testcases import TestCase
@@ -92,62 +88,6 @@ class RangeTests(CouponMixin, DiscoveryTestMixin, DiscoveryMockMixin, TestCase):
         self.range.save()
         self.assertEqual(self.range.catalog_query, large_query)
 
-    @mock.patch('ecommerce.core.url_utils.get_current_request', mock.Mock(return_value=None))
-    def test_run_catalog_query_no_request(self):
-        """
-        run_course_query() should return status 400 response when no request is present.
-        """
-        with self.assertRaises(Exception):
-            self.range.run_catalog_query(self.product)
-
-    def test_run_catalog_query(self):
-        """
-        run_course_query() should return True for included course run ID's.
-        """
-        course, seat = self.create_course_and_seat()
-        self.mock_access_token_response()
-        self.mock_course_runs_contains_endpoint(
-            query='key:*', course_run_ids=[course.id], discovery_api_url=self.site_configuration.discovery_api_url
-        )
-        request = RequestFactory()
-        request.site = self.site
-        self.range.catalog_query = 'key:*'
-
-        partner_code = request.site.siteconfiguration.partner.short_code
-        cache_key = get_cache_key(
-            site_domain=request.site.domain,
-            partner_code=partner_code,
-            resource='course_runs.contains',
-            course_id=seat.course_id,
-            query=self.range.catalog_query
-        )
-        cached_response = cache.get(cache_key)
-        self.assertIsNone(cached_response)
-
-        with mock.patch('ecommerce.core.url_utils.get_current_request', mock.Mock(return_value=request)):
-            response = self.range.run_catalog_query(seat)
-            self.assertTrue(response['course_runs'][course.id])
-            cached_response = cache.get(cache_key)
-            self.assertEqual(response, cached_response)
-
-    def test_query_range_contains_product(self):
-        """
-        contains_product() should return the correct boolean if a product is in it's range.
-        """
-        course, seat = self.create_course_and_seat()
-        self.mock_access_token_response()
-        self.mock_course_runs_contains_endpoint(
-            query='key:*', course_run_ids=[course.id], discovery_api_url=self.site_configuration.discovery_api_url
-        )
-
-        false_response = self.range.contains_product(seat)
-        self.assertFalse(false_response)
-
-        self.range.catalog_query = 'key:*'
-        self.range.course_seat_types = 'verified'
-        response = self.range.contains_product(seat)
-        self.assertTrue(response)
-
     def test_course_catalog_query_range_contains_product(self):
         """
         Verify that the method "contains_product" returns True (boolean) if a
@@ -156,9 +96,9 @@ class RangeTests(CouponMixin, DiscoveryTestMixin, DiscoveryMockMixin, TestCase):
         catalog_query = 'key:*'
         course, seat = self.create_course_and_seat()
         self.mock_access_token_response()
-        self.mock_course_runs_contains_endpoint(
-            query=catalog_query, course_run_ids=[course.id],
-            discovery_api_url=self.site_configuration.discovery_api_url
+        self.mock_catalog_query_contains_endpoint(
+            query=catalog_query, course_run_ids=[course.id], course_uuids=[], absent_ids=[],
+            discovery_api_url=self.site_configuration.discovery_api_url,
         )
 
         false_response = self.range.contains_product(seat)
@@ -356,7 +296,8 @@ class RangeTests(CouponMixin, DiscoveryTestMixin, DiscoveryMockMixin, TestCase):
 
 
 @ddt.ddt
-class ConditionalOfferTests(TestCase):
+@httpretty.activate
+class ConditionalOfferTests(DiscoveryTestMixin, DiscoveryMockMixin, TestCase):
     """Tests for custom ConditionalOffer model."""
     def setUp(self):
         super(ConditionalOfferTests, self).setUp()
@@ -395,6 +336,36 @@ class ConditionalOfferTests(TestCase):
         self.assertEqual(self.offer.email_domains, self.email_domains)
         basket = self.create_basket(email='test@invalid.domain')
         self.assertFalse(self.offer.is_condition_satisfied(basket))
+
+    def test_is_range_condition_satisfied(self):
+        """
+        Verify that a basket satisfies a condition only when all of its products are in its range's catalog queryset.
+        """
+        valid_user_email = 'valid@{domain}'.format(domain=self.valid_sub_domain)
+        basket = factories.BasketFactory(site=self.site, owner=factories.UserFactory(email=valid_user_email))
+        product = self.create_entitlement_product()
+        another_product = self.create_entitlement_product()
+
+        _range = factories.RangeFactory()
+        _range.course_seat_types = ','.join(Range.ALLOWED_SEAT_TYPES)
+        _range.catalog_query = 'uuid:{course_uuid}'.format(course_uuid=product.attr.UUID)
+        benefit = factories.BenefitFactory(range=_range)
+        offer = factories.ConditionalOfferFactory(benefit=benefit)
+        self.mock_access_token_response()
+        self.mock_catalog_query_contains_endpoint(
+            course_run_ids=[], course_uuids=[product.attr.UUID], absent_ids=[another_product.attr.UUID],
+            query=benefit.range.catalog_query, discovery_api_url=self.site_configuration.discovery_api_url
+        )
+
+        basket.add_product(product)
+        self.assertTrue(offer.is_condition_satisfied(basket))
+
+        basket.add_product(another_product)
+        self.assertFalse(offer.is_condition_satisfied(basket))
+
+        # Verify that API return values are cached
+        httpretty.disable()
+        self.assertFalse(offer.is_condition_satisfied(basket))
 
     def test_is_email_valid(self):
         """Verify method returns True for valid emails."""
@@ -460,7 +431,18 @@ class ConditionalOfferTests(TestCase):
         self.assertEqual(offer.site, None)
 
 
-class BenefitTests(TestCase):
+class BenefitTests(DiscoveryTestMixin, DiscoveryMockMixin, TestCase):
+    def setUp(self):
+        super(BenefitTests, self).setUp()
+
+        _range = factories.RangeFactory(
+            course_seat_types=','.join(Range.ALLOWED_SEAT_TYPES[1:]),
+            catalog_query='uuid:*'
+        )
+        self.benefit = factories.BenefitFactory(range=_range)
+        self.offer = factories.ConditionalOfferFactory(benefit=self.benefit)
+        self.user = factories.UserFactory()
+
     def test_range(self):
         with self.assertRaises(ValidationError):
             factories.BenefitFactory(range=None)
@@ -471,3 +453,33 @@ class BenefitTests(TestCase):
 
         with self.assertRaises(ValidationError):
             factories.BenefitFactory(value=-10)
+
+    @httpretty.activate
+    def test_get_applicable_lines(self):
+        """ Assert that basket lines matching the range's discovery query are selected. """
+        basket = factories.BasketFactory(site=self.site, owner=self.user)
+        entitlement_product = self.create_entitlement_product()
+        course, seat = self.create_course_and_seat()
+        no_certificate_product = factories.ProductFactory(stockrecords__price_currency='USD')
+
+        basket.add_product(entitlement_product)
+        basket.add_product(seat)
+        applicable_lines = list(basket.all_lines())
+        basket.add_product(no_certificate_product)
+
+        self.mock_access_token_response()
+
+        # Verify that the method raises an exception when it fails to reach the Discovery Service
+        with self.assertRaises(Exception):
+            self.benefit.get_applicable_lines(self.offer, basket)
+
+        self.mock_catalog_query_contains_endpoint(
+            course_run_ids=[], course_uuids=[entitlement_product.attr.UUID, course.id], absent_ids=[],
+            query=self.benefit.range.catalog_query, discovery_api_url=self.site_configuration.discovery_api_url
+        )
+
+        self.assertEqual(self.benefit.get_applicable_lines(self.offer, basket), applicable_lines)
+
+        # Verify that the API return value is cached
+        httpretty.disable()
+        self.assertEqual(self.benefit.get_applicable_lines(self.offer, basket), applicable_lines)

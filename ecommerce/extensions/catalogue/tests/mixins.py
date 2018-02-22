@@ -1,6 +1,7 @@
 from __future__ import unicode_literals
 
 import logging
+from uuid import uuid4
 
 from oscar.core.loading import get_model
 from oscar.core.utils import slugify
@@ -73,6 +74,16 @@ class DiscoveryTestMixin(object):
 
         seat = course.create_or_update_seat(seat_type, id_verification, price, partner)
         return course, seat
+
+    def create_entitlement_product(self, course_uuid=None, certificate_type='verified'):
+        entitlement = factories.ProductFactory(
+            product_class=self.entitlement_product_class, stockrecords__partner=PartnerFactory(),
+            stockrecords__price_currency='USD'
+        )
+        entitlement.attr.UUID = course_uuid if course_uuid else uuid4()
+        entitlement.attr.certificate_type = certificate_type
+        entitlement.save()
+        return entitlement
 
     def _create_product_class(self, class_name, slug, attributes):
         """ Helper method for creating product classes.
