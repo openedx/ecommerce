@@ -443,9 +443,11 @@ class AtomicPublicationSerializer(serializers.Serializer):  # pylint: disable=ab
         course_id = self.validated_data['id']
         course_name = self.validated_data['name']
         course_verification_deadline = self.validated_data.get('verification_deadline')
-        create_or_activate_enrollment_code = self.validated_data.get('create_or_activate_enrollment_code')
         products = self.validated_data['products']
         partner = self.get_partner()
+
+        # ENT-803: by default enable enrollment code creation
+        create_enrollment_code = True
 
         try:
             if not waffle.switch_is_active('publish_course_modes_to_lms'):
@@ -467,10 +469,6 @@ class AtomicPublicationSerializer(serializers.Serializer):  # pylint: disable=ab
 
                 # Fetch full course info (from seat product, because this queries based on attr.course_key)
                 course_info = get_course_info_from_catalog(course.site, course.parent_seat_product)
-
-                create_enrollment_code = False
-                if waffle.switch_is_active(ENROLLMENT_CODE_SWITCH) and site.siteconfiguration.enable_enrollment_codes:
-                    create_enrollment_code = create_or_activate_enrollment_code
 
                 for product in products:
                     product_class = product.get('product_class')
