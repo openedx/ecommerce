@@ -106,6 +106,18 @@ class TestCreateSitesAndPartners(TestCase):
                 "--theme-path", self.theme_path,
             )
 
+    def test_create_devstack_site_and_partner(self):
+        """
+        Verify that command creates sites and Partners
+        """
+        call_command(
+            "create_sites_and_partners",
+            "--dns-name", self.dns_name,
+            "--theme-path", self.theme_path,
+            "--devstack"
+        )
+        self._assert_sites_data_is_valid()
+
     def test_create_site_and_partner(self):
         """
         Verify that command creates sites and Partners
