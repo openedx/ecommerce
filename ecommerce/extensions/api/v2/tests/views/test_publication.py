@@ -37,11 +37,13 @@ class AtomicPublicationTests(DiscoveryTestMixin, TestCase):
         super(AtomicPublicationTests, self).setUp()
 
         self.course_id = 'BadgerX/B101/2015'
+        self.course_uuid = '394a5ce5-6ff4-4b2b-bea1-a273c6920ae1'
         self.course_name = 'Dances with Badgers'
         self.create_path = reverse('api:v2:publication:create')
         self.update_path = reverse('api:v2:publication:update', kwargs={'course_id': self.course_id})
         self.data = {
             'id': self.course_id,
+            'uuid': self.course_uuid,
             'name': self.course_name,
             'verification_deadline': EXPIRES_STRING,
             'create_or_activate_enrollment_code': False,
@@ -146,14 +148,7 @@ class AtomicPublicationTests(DiscoveryTestMixin, TestCase):
                             'name': 'certificate_type',
                             'value': 'verified'
                         },
-                    ],
-                    'course': {
-                        'honor_mode': True,
-                        'id': self.course_id,
-                        'name': self.course_name,
-                        'type': 'verified',
-                        'verification_deadline': None
-                    }
+                    ]
                 },
             ]
         }
@@ -161,20 +156,7 @@ class AtomicPublicationTests(DiscoveryTestMixin, TestCase):
         self.user = self.create_user(is_staff=True)
         self.client.login(username=self.user.username, password=self.password)
 
-        self.get_course_info_patch = mock.patch('ecommerce.extensions.api.serializers.get_course_info_from_catalog',
-                                                AtomicPublicationTests._fake_get_course_info)
-        self.get_course_info_patch.start()
-
         self.publication_switch = toggle_switch('publish_course_modes_to_lms', True)
-
-    def tearDown(self):
-        self.get_course_info_patch.stop()
-
-    @staticmethod
-    def _fake_get_course_info(_, product):
-        if product.attr.course_key == 'BadgerX/B101/2015':
-            return {'UUID': 'foo-bar'}
-        return {}
 
     def _toggle_publication(self, is_enabled):
         """Toggle LMS publication."""
@@ -203,7 +185,7 @@ class AtomicPublicationTests(DiscoveryTestMixin, TestCase):
                     attrs['certificate_type'],
                     Decimal(product['price']),
                     self.partner,
-                    'foo-bar',
+                    self.course_uuid,
                     course.name,
                 )
             else:
@@ -248,7 +230,7 @@ class AtomicPublicationTests(DiscoveryTestMixin, TestCase):
         self.assertEqual(entitlement.structure, Product.CHILD)
         self.assertEqual(entitlement.parent.product_class.name, COURSE_ENTITLEMENT_PRODUCT_CLASS_NAME)
         self.assertEqual(entitlement.attr.certificate_type, certificate_type)
-        self.assertEqual(entitlement.attr.UUID, 'foo-bar')
+        self.assertEqual(entitlement.attr.UUID, self.course_uuid)
         self.assertEqual(entitlement.stockrecords.get(partner=self.partner).price_excl_tax, expected['price'])
 
     def assert_seat_saved(self, course, expected):
@@ -359,6 +341,22 @@ class AtomicPublicationTests(DiscoveryTestMixin, TestCase):
     def test_invalid_course_id(self):
         """Verify that attempting to save a course with a bad ID yields a 400."""
         self.data['id'] = 'Not an ID'
+
+        response = self.client.post(self.create_path, json.dumps(self.data), JSON_CONTENT_TYPE)
+        self.assertEqual(response.status_code, 400)
+        self.assert_course_does_not_exist(self.course_id)
+
+    def test_missing_course_uuid(self):
+        """Verify that attempting to save a course without a UUID yields a 400."""
+        self.data.pop('uuid')
+
+        response = self.client.post(self.create_path, json.dumps(self.data), JSON_CONTENT_TYPE)
+        self.assertEqual(response.status_code, 400)
+        self.assert_course_does_not_exist(self.course_id)
+
+    def test_invalid_course_uuid(self):
+        """Verify that attempting to save a course with a bad UUID yields a 400."""
+        self.data['uuid'] = 'foo-bar'
 
         response = self.client.post(self.create_path, json.dumps(self.data), JSON_CONTENT_TYPE)
         self.assertEqual(response.status_code, 400)
