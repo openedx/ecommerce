@@ -469,8 +469,6 @@ class AtomicPublicationSerializer(serializers.Serializer):  # pylint: disable=ab
                 course.save()
 
                 create_enrollment_code = False
-                if waffle.switch_is_active(ENROLLMENT_CODE_SWITCH) and site.siteconfiguration.enable_enrollment_codes:
-                    create_enrollment_code = create_or_activate_enrollment_code
 
                 for product in products:
                     product_class = product.get('product_class')
