@@ -317,8 +317,7 @@ define([
                     data = {
                         id: this.get('id'),
                         name: this.get('name'),
-                        verification_deadline: null,
-                        create_or_activate_enrollment_code: this.get('has_active_bulk_enrollment_code') || false
+                        verification_deadline: null
                     };
 
                 if (this.includeHonorMode()) {

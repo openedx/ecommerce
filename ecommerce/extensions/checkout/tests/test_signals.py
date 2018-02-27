@@ -7,7 +7,7 @@ from oscar.core.loading import get_class, get_model
 from oscar.test import factories
 from testfixtures import LogCapture
 
-from ecommerce.core.constants import ENROLLMENT_CODE_PRODUCT_CLASS_NAME, ENROLLMENT_CODE_SWITCH
+from ecommerce.core.constants import ENROLLMENT_CODE_PRODUCT_CLASS_NAME
 from ecommerce.core.tests import toggle_switch
 from ecommerce.coupons.tests.mixins import CouponMixin
 from ecommerce.courses.tests.factories import CourseFactory
@@ -288,11 +288,6 @@ class SignalTests(ProgramTestMixin, CouponMixin, TestCase):
     def test_track_completed_enrollment_order(self):
         """ Make sure we do not send GA events for Enrollment Code orders """
         with mock.patch('ecommerce.extensions.checkout.signals.track_segment_event') as mock_track:
-
-            toggle_switch(ENROLLMENT_CODE_SWITCH, True)
-            site_config = self.site.siteconfiguration
-            site_config.enable_enrollment_codes = True
-            site_config.save()
 
             course = CourseFactory()
             course.create_or_update_seat('verified', True, 50, self.partner, create_enrollment_code=True)

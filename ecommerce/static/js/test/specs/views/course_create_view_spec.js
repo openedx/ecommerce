@@ -39,18 +39,6 @@ define([
                 expect(view.$el.find('.course-types input[type=radio]:checked').length).toEqual(1);
                 expect(view.$el.find('.course-seat.empty').hasClass('hidden')).toBe(true);
             });
-            it('should hide bulk enrollment checkbox if audit mode is selected', function() {
-                var bulkEnrollmentSeatTypes = ['verified', 'professional', 'credit'];
-                view.model.set('type', 'audit');
-                view.formView.toggleBulkEnrollmentField();
-                expect(SpecUtils.formGroup(view, '[name=bulk_enrollment_code]')).toHaveHiddenClass();
-
-                _.each(bulkEnrollmentSeatTypes, function(seat) {
-                    view.model.set('type', seat);
-                    view.formView.toggleBulkEnrollmentField();
-                    expect(SpecUtils.formGroup(view, '[name=bulk_enrollment_code]')).not.toHaveHiddenClass();
-                }, this);
-            });
         });
     }
 );
