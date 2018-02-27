@@ -10,10 +10,8 @@ from oscar.test import factories
 from ecommerce.core.constants import (
     COURSE_ENTITLEMENT_PRODUCT_CLASS_NAME,
     ENROLLMENT_CODE_PRODUCT_CLASS_NAME,
-    ENROLLMENT_CODE_SWITCH,
     SEAT_PRODUCT_CLASS_NAME
 )
-from ecommerce.core.tests import toggle_switch
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.tests.factories import PartnerFactory
 
@@ -160,10 +158,6 @@ class DiscoveryTestMixin(object):
             The newly created course, seat and enrollment code.
         """
         course = CourseFactory()
-        toggle_switch(ENROLLMENT_CODE_SWITCH, True)
-        site_configuration = self.site.siteconfiguration
-        site_configuration.enable_enrollment_codes = True
-        site_configuration.save()
 
         seat = course.create_or_update_seat(
             seat_type, id_verification, price, self.partner, expires=expires, create_enrollment_code=True

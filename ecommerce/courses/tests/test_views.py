@@ -6,8 +6,6 @@ from django.conf import settings
 from django.urls import reverse
 from testfixtures import LogCapture
 
-from ecommerce.core.constants import ENROLLMENT_CODE_SWITCH
-from ecommerce.core.tests import toggle_switch
 from ecommerce.core.url_utils import get_lms_url
 from ecommerce.tests.testcases import TestCase
 
@@ -129,22 +127,6 @@ class CourseAppViewTests(TestCase):
         response = self.client.get(self.path)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.context['credit_providers'], provider_json)
-
-    @ddt.data(True, False)
-    @httpretty.activate
-    def test_bulk_enrollment_code_flag_is_context(self, enabled):
-        """Verify the context data includes a bulk enrollment code flag."""
-        self._create_and_login_staff_user()
-        self.mock_credit_api_providers()
-
-        toggle_switch(ENROLLMENT_CODE_SWITCH, enabled)
-        site_config = self.site.siteconfiguration
-        site_config.enable_enrollment_codes = enabled
-        site_config.save()
-
-        response = self.client.get(self.path)
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.context['bulk_enrollment_codes_enabled'], enabled)
 
     @httpretty.activate
     def test_credit_api_failure(self):

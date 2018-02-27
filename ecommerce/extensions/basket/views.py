@@ -306,10 +306,8 @@ class BasketSummaryView(BasketView):
                     'product_description': line.product.description
                 }
 
-            # TODO: handle these links for multi-line baskets.
-            if self.request.site.siteconfiguration.enable_enrollment_codes:
-                # Get variables for the switch link that toggles from enrollment codes and seat.
-                switch_link_text, partner_sku = get_basket_switch_data(line.product)
+            # Get variables for the switch link that toggles from enrollment codes and seat.
+            switch_link_text, partner_sku = get_basket_switch_data(line.product)
 
             if line.has_discount:
                 benefit = self.request.basket.applied_offers().values()[0].benefit
