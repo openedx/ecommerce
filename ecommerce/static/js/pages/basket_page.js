@@ -79,6 +79,7 @@ define([
                         'input[name=first_name]',
                         'input[name=last_name]',
                         'input[name=city]',
+                        'input[name=organization]',
                         'select[name=country]'
                     ],
                     countriesWithRequiredStateAndPostalCodeValues = ['US', 'CA'],
