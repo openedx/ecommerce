@@ -272,8 +272,7 @@ define([
                         expected = {
                             id: data.id,
                             name: data.name,
-                            verification_deadline: moment.utc(data.verification_deadline).format(),
-                            create_or_activate_enrollment_code: false
+                            verification_deadline: moment.utc(data.verification_deadline).format()
                         };
 
                     products = _.filter(data.products, function(product) {
