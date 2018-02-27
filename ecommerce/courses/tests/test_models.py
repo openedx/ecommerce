@@ -6,8 +6,7 @@ from freezegun import freeze_time
 from oscar.core.loading import get_model
 from oscar.test.factories import BasketFactory
 
-from ecommerce.core.constants import ENROLLMENT_CODE_PRODUCT_CLASS_NAME, ENROLLMENT_CODE_SWITCH
-from ecommerce.core.tests import toggle_switch
+from ecommerce.core.constants import ENROLLMENT_CODE_PRODUCT_CLASS_NAME
 from ecommerce.courses.models import Course
 from ecommerce.courses.publishers import LMSPublisher
 from ecommerce.courses.tests.factories import CourseFactory
@@ -40,7 +39,6 @@ class CourseTests(DiscoveryTestMixin, TestCase):
         self.assertEqual(len(course.seat_products), 0)
 
         # Create the seat products
-        toggle_switch(ENROLLMENT_CODE_SWITCH, True)
         seats = [course.create_or_update_seat('honor', False, 0, self.partner),
                  course.create_or_update_seat('verified', True, 50, self.partner, create_enrollment_code=True)]
         self.assertEqual(course.products.count(), 4)
@@ -331,7 +329,6 @@ class CourseTests(DiscoveryTestMixin, TestCase):
 
     def test_enrollment_code_seat_type_filter(self):
         """ Verify that the ENROLLMENT_CODE_SEAT_TYPES constant is properly applied during seat creation """
-        toggle_switch(ENROLLMENT_CODE_SWITCH, True)
         course = CourseFactory(id='test/course/123', name='Test Course 123', site=self.site)
 
         # Audit seat products should not have a corresponding enrollment code

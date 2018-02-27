@@ -117,10 +117,6 @@ define([
                         validate: true
                     },
                     onSet: 'cleanBooleanValue'
-                },
-                'input[name=bulk_enrollment_code]': {
-                    observe: 'has_active_bulk_enrollment_code',
-                    onSet: 'cleanBooleanValue'
                 }
             },
 
@@ -134,7 +130,6 @@ define([
                 this.listenTo(this.model, 'change:type change:honor_mode',
                     this.renderHonorMode);
                 this.listenTo(this.model, 'change:id', this.validateCourseID);
-                this.listenTo(this.model, 'change:type', this.toggleBulkEnrollmentField);
 
                 // Listen for the sync event so that we can keep track of the original course type.
                 // This helps us determine which course types the course can be upgraded to.
@@ -205,7 +200,6 @@ define([
                 this.$('.fields:first').before(AlertDivTemplate);
 
                 this.stickit();
-                this.toggleBulkEnrollmentField();
                 this._super();
 
                 return this;
@@ -323,27 +317,6 @@ define([
                 Utils.addDatePicker(this);
 
                 return this;
-            },
-
-            /**
-             * Toggle the bulk enrollment checkbox. Hidden only for audit mode.
-             */
-            toggleBulkEnrollmentField: function() {
-                var disableBEC = this.$('#disableBulkEnrollmentCode'),
-                    formGroup = disableBEC.closest('.form-group');
-
-                if (this.$('[name=type]:checked').val() === 'audit') {
-                    disableBEC.prop('checked', false).trigger('change');
-                    formGroup.addClass('hidden');
-                } else {
-                    formGroup.removeClass('hidden');
-                    if (this.model.get('bulk_enrollment_code')) {
-                        this.$('#enableBulkEnrollmentCode').prop('checked', true);
-                    }
-                    if (!window.bulkEnrollmentCodesEnabled) {
-                        this.$('[name=bulk_enrollment_code]').attr('disabled', true);
-                    }
-                }
             }
         });
     }

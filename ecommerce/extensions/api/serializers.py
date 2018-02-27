@@ -14,7 +14,7 @@ from oscar.core.loading import get_class, get_model
 from rest_framework import serializers
 from rest_framework.reverse import reverse
 
-from ecommerce.core.constants import (COURSE_ENTITLEMENT_PRODUCT_CLASS_NAME, COURSE_ID_REGEX, ENROLLMENT_CODE_SWITCH,
+from ecommerce.core.constants import (COURSE_ENTITLEMENT_PRODUCT_CLASS_NAME, COURSE_ID_REGEX,
                                       ISO_8601_FORMAT, SEAT_PRODUCT_CLASS_NAME)
 from ecommerce.core.url_utils import get_ecommerce_url
 from ecommerce.courses.models import Course
@@ -403,10 +403,12 @@ class AtomicPublicationSerializer(serializers.Serializer):  # pylint: disable=ab
     id = serializers.RegexField(COURSE_ID_REGEX, max_length=255)
     uuid = serializers.UUIDField(required=False)
     name = serializers.CharField(max_length=255)
+
+    # ENT-803: by default enable enrollment code creation
+    create_or_activate_enrollment_code = serializers.BooleanField(default=True)
     # Verification deadline should only be required if the course actually requires verification.
     verification_deadline = serializers.DateTimeField(required=False, allow_null=True)
     products = serializers.ListField()
-    create_or_activate_enrollment_code = serializers.BooleanField()
 
     def __init__(self, *args, **kwargs):
         super(AtomicPublicationSerializer, self).__init__(*args, **kwargs)
@@ -469,20 +471,16 @@ class AtomicPublicationSerializer(serializers.Serializer):  # pylint: disable=ab
                 course.verification_deadline = course_verification_deadline
                 course.save()
 
-                create_enrollment_code = False
-                if waffle.switch_is_active(ENROLLMENT_CODE_SWITCH) and site.siteconfiguration.enable_enrollment_codes:
-                    create_enrollment_code = create_or_activate_enrollment_code
-
                 for product in products:
                     product_class = product.get('product_class')
 
                     if product_class == COURSE_ENTITLEMENT_PRODUCT_CLASS_NAME:
                         EntitlementProductHelper.save(partner, course, course_uuid, product)
                     elif product_class == SEAT_PRODUCT_CLASS_NAME:
-                        SeatProductHelper.save(partner, course, product, create_enrollment_code)
+                        SeatProductHelper.save(partner, course, product, create_or_activate_enrollment_code)
 
                 if course.get_enrollment_code():
-                    course.toggle_enrollment_code_status(is_active=create_enrollment_code)
+                    course.toggle_enrollment_code_status(is_active=create_or_activate_enrollment_code)
 
                 resp_message = course.publish_to_lms()
                 published = (resp_message is None)
