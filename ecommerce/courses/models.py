@@ -2,7 +2,6 @@ from __future__ import unicode_literals
 
 import logging
 
-import waffle
 from django.conf import settings
 from django.db import models, transaction
 from django.db.models import Count, Q
@@ -13,7 +12,6 @@ from oscar.core.loading import get_class, get_model
 from ecommerce.core.constants import (
     ENROLLMENT_CODE_PRODUCT_CLASS_NAME,
     ENROLLMENT_CODE_SEAT_TYPES,
-    ENROLLMENT_CODE_SWITCH,
     SEAT_PRODUCT_CLASS_NAME
 )
 from ecommerce.courses.publishers import LMSPublisher
@@ -232,9 +230,7 @@ class Course(models.Model):
         seat.attr.certificate_type = certificate_type
         seat.attr.course_key = course_id
         seat.attr.id_verification_required = id_verification_required
-        if waffle.switch_is_active(ENROLLMENT_CODE_SWITCH) and \
-                certificate_type in ENROLLMENT_CODE_SEAT_TYPES and \
-                create_enrollment_code:
+        if certificate_type in ENROLLMENT_CODE_SEAT_TYPES and create_enrollment_code:
             self._create_or_update_enrollment_code(certificate_type, id_verification_required, partner, price, expires)
 
         if credit_provider:

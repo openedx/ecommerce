@@ -14,7 +14,7 @@ from oscar.core.loading import get_class, get_model
 from rest_framework import serializers
 from rest_framework.reverse import reverse
 
-from ecommerce.core.constants import (COURSE_ENTITLEMENT_PRODUCT_CLASS_NAME, COURSE_ID_REGEX, ENROLLMENT_CODE_SWITCH,
+from ecommerce.core.constants import (COURSE_ENTITLEMENT_PRODUCT_CLASS_NAME, COURSE_ID_REGEX,
                                       ISO_8601_FORMAT, SEAT_PRODUCT_CLASS_NAME)
 from ecommerce.core.url_utils import get_ecommerce_url
 from ecommerce.courses.models import Course
@@ -403,7 +403,6 @@ class AtomicPublicationSerializer(serializers.Serializer):  # pylint: disable=ab
     # Verification deadline should only be required if the course actually requires verification.
     verification_deadline = serializers.DateTimeField(required=False, allow_null=True)
     products = serializers.ListField()
-    create_or_activate_enrollment_code = serializers.BooleanField()
 
     def __init__(self, *args, **kwargs):
         super(AtomicPublicationSerializer, self).__init__(*args, **kwargs)
@@ -444,7 +443,6 @@ class AtomicPublicationSerializer(serializers.Serializer):  # pylint: disable=ab
         course_uuid = self.validated_data['uuid']
         course_name = self.validated_data['name']
         course_verification_deadline = self.validated_data.get('verification_deadline')
-        create_or_activate_enrollment_code = self.validated_data.get('create_or_activate_enrollment_code')
         products = self.validated_data['products']
         partner = self.get_partner()
 
@@ -466,9 +464,8 @@ class AtomicPublicationSerializer(serializers.Serializer):  # pylint: disable=ab
                 course.verification_deadline = course_verification_deadline
                 course.save()
 
-                create_enrollment_code = False
-                if waffle.switch_is_active(ENROLLMENT_CODE_SWITCH) and site.siteconfiguration.enable_enrollment_codes:
-                    create_enrollment_code = create_or_activate_enrollment_code
+                # ENT-803: by default enable enrollment code creation
+                create_enrollment_code = True
 
                 for product in products:
                     product_class = product.get('product_class')

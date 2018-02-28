@@ -6,13 +6,11 @@ from decimal import Decimal
 import mock
 import pytz
 from django.urls import reverse
-from freezegun import freeze_time
 from oscar.core.loading import get_model
 
 from ecommerce.core.constants import (
     COURSE_ENTITLEMENT_PRODUCT_CLASS_NAME,
     ENROLLMENT_CODE_PRODUCT_CLASS_NAME,
-    ENROLLMENT_CODE_SWITCH,
     ISO_8601_FORMAT,
     SEAT_PRODUCT_CLASS_NAME
 )
@@ -46,7 +44,6 @@ class AtomicPublicationTests(DiscoveryTestMixin, TestCase):
             'uuid': self.course_uuid,
             'name': self.course_name,
             'verification_deadline': EXPIRES_STRING,
-            'create_or_activate_enrollment_code': False,
             'products': [
                 {
                     'product_class': SEAT_PRODUCT_CLASS_NAME,
@@ -260,7 +257,7 @@ class AtomicPublicationTests(DiscoveryTestMixin, TestCase):
         self.assertEqual(seat.expires, expires)
         self.assertEqual(seat.stockrecords.get(partner=self.partner).price_excl_tax, expected['price'])
 
-    def assert_course_saved(self, course_id, expected):
+    def assert_course_saved(self, course_id, expected, enrollment_code_count=0):
         """Verify that the expected Course and associated products have been saved."""
         # Verify that Course was saved.
         self.assertTrue(Course.objects.filter(id=course_id).exists())
@@ -275,7 +272,10 @@ class AtomicPublicationTests(DiscoveryTestMixin, TestCase):
         products = expected['products']
         expected_child_products = len(products)
         expected_parent_products = 2  # entitlement and seat
-        self.assertEqual(len(Product.objects.all()), expected_parent_products + expected_child_products)
+        self.assertEqual(
+            len(Product.objects.all()),
+            expected_parent_products + expected_child_products + enrollment_code_count
+        )
         self.assertEqual(len(Product.objects.filter(structure='child')), expected_child_products)
 
         # Validate product metadata.
@@ -315,8 +315,8 @@ class AtomicPublicationTests(DiscoveryTestMixin, TestCase):
             mock_publish.return_value = None
             response = self.client.post(self.create_path, json.dumps(self.data), JSON_CONTENT_TYPE)
             self.assertEqual(response.status_code, 201)
-            self.assert_course_saved(self.course_id, expected=self.data)
-            self.assertFalse(Product.objects.filter(product_class__name=ENROLLMENT_CODE_PRODUCT_CLASS_NAME).exists())
+            self.assert_course_saved(self.course_id, expected=self.data, enrollment_code_count=1)
+            self.assertTrue(Product.objects.filter(product_class__name=ENROLLMENT_CODE_PRODUCT_CLASS_NAME).exists())
 
     def test_update(self):
         """Verify that a Course and associated products can be updated and published."""
@@ -336,7 +336,7 @@ class AtomicPublicationTests(DiscoveryTestMixin, TestCase):
             mock_publish.return_value = None
             response = self.client.put(self.update_path, json.dumps(updated_data), JSON_CONTENT_TYPE)
             self.assertEqual(response.status_code, 200)
-            self.assert_course_saved(self.course_id, expected=updated_data)
+            self.assert_course_saved(self.course_id, expected=updated_data, enrollment_code_count=1)
 
     def test_invalid_course_id(self):
         """Verify that attempting to save a course with a bad ID yields a 400."""
@@ -453,40 +453,13 @@ class AtomicPublicationTests(DiscoveryTestMixin, TestCase):
         self._toggle_publication(True)
 
         self._post_create_request()
-        self.assert_course_saved(self.course_id, expected=self.data)
-
-    def _enable_enrollment_codes_settings(self):
-        """Enable settings necessary for creating enrollment codes."""
-        toggle_switch(ENROLLMENT_CODE_SWITCH, True)
-        site_config = self.site.siteconfiguration
-        site_config.enable_enrollment_codes = True
-        site_config.save()
+        self.assert_course_saved(self.course_id, expected=self.data, enrollment_code_count=1)
 
     def test_create_enrollment_code(self):
         """Verify an enrollment code is created."""
-        self._enable_enrollment_codes_settings()
-        self.data['create_or_activate_enrollment_code'] = True
         self._post_create_request()
 
         course = Course.objects.get(id=self.course_id)
         enrollment_code = course.get_enrollment_code()
         self.assertIsNotNone(enrollment_code)
         self.assertEqual(enrollment_code.expires, EXPIRES)
-
-    @freeze_time('2017-01-01')
-    def test_deactivate_enrollment_code(self):
-        """Verify the enrollment code is not active."""
-        self._enable_enrollment_codes_settings()
-        self.data['create_or_activate_enrollment_code'] = True
-        self._post_create_request()
-        self.data['create_or_activate_enrollment_code'] = False
-
-        with mock.patch.object(LMSPublisher, 'publish') as mock_publish:
-            mock_publish.return_value = None
-            response = self.client.put(self.update_path, json.dumps(self.data), JSON_CONTENT_TYPE)
-        self.assertEqual(response.status_code, 200)
-
-        course = Course.objects.get(id=self.course_id)
-        enrollment_code = course.get_enrollment_code()
-        self.assertIsNotNone(enrollment_code)
-        self.assertIsNone(course.enrollment_code_product)

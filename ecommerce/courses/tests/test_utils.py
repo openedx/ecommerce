@@ -6,8 +6,6 @@ from django.core.cache import cache
 from opaque_keys.edx.keys import CourseKey
 from requests.exceptions import ConnectionError
 
-from ecommerce.core.constants import ENROLLMENT_CODE_SWITCH
-from ecommerce.core.tests import toggle_switch
 from ecommerce.coupons.tests.mixins import DiscoveryMockMixin
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.courses.utils import (
@@ -38,7 +36,6 @@ class UtilsTests(DiscoveryTestMixin, DiscoveryMockMixin, TestCase):
     def test_mode_for_product(self, certificate_type, id_verification_required, mode):
         """ Verify the correct enrollment mode is returned for a given seat. """
         course = CourseFactory(id='edx/Demo_Course/DemoX', site=self.site)
-        toggle_switch(ENROLLMENT_CODE_SWITCH, True)
         seat = course.create_or_update_seat(certificate_type, id_verification_required, 10.00, self.partner)
         self.assertEqual(mode_for_product(seat), mode)
         enrollment_code = course.enrollment_code_product
