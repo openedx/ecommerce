@@ -351,8 +351,18 @@ class AtomicPublicationTests(DiscoveryTestMixin, TestCase):
         self.data.pop('uuid')
 
         response = self.client.post(self.create_path, json.dumps(self.data), JSON_CONTENT_TYPE)
-        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.status_code, 500)
+        self.assertEqual(
+            response.data.get('error'),
+            u'You need to provide a course UUID to create Course Entitlements.'
+        )
         self.assert_course_does_not_exist(self.course_id)
+
+    def test_missing_course_uuid_without_entitlements(self):
+        """Verify that attempting to save a course without a UUID but no entitlements is fine."""
+        self.data.pop('uuid')
+        self.data['products'] = [x for x in self.data['products'] if x['product_class'] == SEAT_PRODUCT_CLASS_NAME]
+        self._post_create_request()
 
     def test_invalid_course_uuid(self):
         """Verify that attempting to save a course with a bad UUID yields a 400."""
@@ -360,6 +370,10 @@ class AtomicPublicationTests(DiscoveryTestMixin, TestCase):
 
         response = self.client.post(self.create_path, json.dumps(self.data), JSON_CONTENT_TYPE)
         self.assertEqual(response.status_code, 400)
+        self.assertEqual(
+            response.data.get('uuid')[0],
+            u'"foo-bar" is not a valid UUID.'
+        )
         self.assert_course_does_not_exist(self.course_id)
 
     def test_invalid_product_class(self):
