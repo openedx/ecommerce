@@ -21,6 +21,7 @@ from ecommerce.extensions.payment.processors.paypal import Paypal
 from ecommerce.extensions.payment.tests.mixins import PaymentEventsMixin, PaypalMixin
 from ecommerce.extensions.payment.views.paypal import PaypalPaymentExecutionView
 from ecommerce.extensions.test.factories import create_basket
+from ecommerce.invoice.models import Invoice
 from ecommerce.tests.testcases import TestCase
 
 JSON = 'application/json'
@@ -162,9 +163,10 @@ class PaypalPaymentExecutionViewTests(PaypalMixin, PaymentEventsMixin, TestCase)
         )
 
         # Now verify that a new business client has been created and current
-        # order is now linked with that client.
+        # order is now linked with that client through Invoice model.
+        order = Order.objects.filter(basket=self.basket).first()
         business_client = BusinessClient.objects.get(name=self.RETURN_DATA['organization'])
-        assert Order.objects.filter(basket=self.basket).first().client == business_client
+        assert Invoice.objects.get(order=order).business_client == business_client
 
     @ddt.data(
         None,  # falls back to PaypalMixin.PAYER_INFO, a fully-populated payer_info object

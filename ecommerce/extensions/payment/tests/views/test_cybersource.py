@@ -25,6 +25,7 @@ from ecommerce.extensions.payment.processors.cybersource import Cybersource
 from ecommerce.extensions.payment.tests.mixins import CybersourceMixin, CybersourceNotificationTestsMixin
 from ecommerce.extensions.payment.views.cybersource import CybersourceInterstitialView
 from ecommerce.extensions.test.factories import create_basket
+from ecommerce.invoice.models import Invoice
 from ecommerce.tests.testcases import TestCase
 
 JSON = 'application/json'
@@ -277,10 +278,11 @@ class CybersourceInterstitialViewTests(CybersourceNotificationTestsMixin, TestCa
         self.assertTrue(Order.objects.filter(basket=self.basket).exists())
         self.assertEqual(response.status_code, 302)
 
-        # Now verify that a new business client has been created in current
-        # order is now linked with that client.
+        # Now verify that a new business client has been created and current
+        # order is now linked with that client through Invoice model.
+        order = Order.objects.filter(basket=self.basket).first()
         business_client = BusinessClient.objects.get(name=request_data['organization'])
-        assert Order.objects.filter(basket=self.basket).first().client == business_client
+        assert Invoice.objects.get(order=order).business_client == business_client
 
     def test_order_creation_error(self):
         """ Verify the view redirects to the Payment error page when an error occurred during Order creation. """
