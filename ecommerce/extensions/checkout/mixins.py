@@ -16,6 +16,7 @@ from ecommerce.extensions.api import data as data_api
 from ecommerce.extensions.checkout.exceptions import BasketNotFreeError
 from ecommerce.extensions.customer.utils import Dispatcher
 from ecommerce.extensions.order.constants import PaymentEventTypeName
+from ecommerce.invoice.models import Invoice
 
 CommunicationEventType = get_model('customer', 'CommunicationEventType')
 logger = logging.getLogger(__name__)
@@ -227,20 +228,20 @@ class EdxOrderPlacementMixin(OrderPlacementMixin):
         Handle extra processing of order after its placed.
 
         This method links the provided order with the BusinessClient for bulk
-        purchase.
+        purchase through Invoice model.
 
         Arguments:
-            request (dict): HttpRequest data
+            request_data (dict): HttpRequest data
             order (Order): Order object
 
         """
         basket_has_enrollment_code_product = any(
             line.product.is_enrollment_code_product for line in order.basket.all_lines()
         )
-
         # Name of business client is being passed as "organization" from basket page
         business_client = request_data.get('organization')
         if basket_has_enrollment_code_product and business_client:
             client, __ = BusinessClient.objects.get_or_create(name=business_client)
-            order.client = client
-            order.save()
+            Invoice.objects.create(
+                order=order, business_client=client, type=Invoice.BULK_PURCHASE, state=Invoice.PAID
+            )
