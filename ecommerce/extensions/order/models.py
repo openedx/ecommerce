@@ -7,9 +7,6 @@ from ecommerce.extensions.fulfillment.status import ORDER
 
 
 class Order(AbstractOrder):
-    client = models.ForeignKey(
-        BusinessClient, verbose_name=_('Business Client'), null=True, blank=True
-    )
 
     @property
     def is_fulfillable(self):
