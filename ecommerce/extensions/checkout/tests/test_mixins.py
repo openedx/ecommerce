@@ -21,6 +21,7 @@ from ecommerce.extensions.payment.tests.mixins import PaymentEventsMixin
 from ecommerce.extensions.payment.tests.processors import DummyProcessor
 from ecommerce.extensions.refund.tests.mixins import RefundTestMixin
 from ecommerce.extensions.test.factories import create_basket, create_order
+from ecommerce.invoice.models import Invoice
 from ecommerce.tests.factories import SiteConfigurationFactory
 from ecommerce.tests.mixins import BusinessIntelligenceMixin
 from ecommerce.tests.testcases import TestCase
@@ -153,10 +154,10 @@ class EdxOrderPlacementMixinTests(BusinessIntelligenceMixin, PaymentEventsMixin,
                 )
             )
 
-    def test_link_order_with_business_client_for_bulk_purchase(self, __):
+    def test_handle_post_order_for_bulk_purchase(self, __):
         """
         Ensure that the bulk purchase order is linked to the provided business
-        client when the method `link_order_with_business_client` is invoked.
+        client when the method `handle_post_order` is invoked.
         """
         toggle_switch(ENROLLMENT_CODE_SWITCH, True)
 
@@ -169,17 +170,17 @@ class EdxOrderPlacementMixinTests(BusinessIntelligenceMixin, PaymentEventsMixin,
         order = create_order(number=1, basket=basket, user=user)
         request_data = {'organization': 'Dummy Business Client'}
 
-        EdxOrderPlacementMixin().link_order_with_business_client(request_data, order)
+        EdxOrderPlacementMixin().handle_post_order(request_data, order)
 
         # Now verify that a new business client has been created in current
-        # order is now linked with that client.
+        # order is now linked with that client through Invoice model.
         business_client = BusinessClient.objects.get(name=request_data['organization'])
-        assert order.client == business_client
+        assert Invoice.objects.get(order=order).business_client == business_client
 
-    def test_link_order_with_business_client_for_seat_purchase(self, __):
+    def test_handle_post_order_for_seat_purchase(self, __):
         """
         Ensure that the single seat purchase order is not linked any business
-        client when the method `link_order_with_business_client` is invoked.
+        client when the method `handle_post_order` is invoked.
         """
         toggle_switch(ENROLLMENT_CODE_SWITCH, False)
 
@@ -191,12 +192,11 @@ class EdxOrderPlacementMixinTests(BusinessIntelligenceMixin, PaymentEventsMixin,
         order = create_order(number=1, basket=basket, user=user)
         request_data = {'organization': 'Dummy Business Client'}
 
-        EdxOrderPlacementMixin().link_order_with_business_client(request_data, order)
+        EdxOrderPlacementMixin().handle_post_order(request_data, order)
 
         # Now verify that the single seat order is not linked to business
-        # client
-        assert BusinessClient.objects.count() == 0
-        assert not order.client
+        # client by checking that there is no record for BusinessClient.
+        assert not BusinessClient.objects.all()
 
     def test_handle_successful_order_no_context(self, mock_track):
         """

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-02-22 11:09+0000\n"
+"POT-Creation-Date: 2017-12-15 09:43-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -219,11 +219,11 @@ msgid ""
 "unverified courses"
 msgstr ""
 
-#: ecommerce/core/models.py:449
+#: ecommerce/core/models.py:445
 msgid "Full Name"
 msgstr ""
 
-#: ecommerce/core/models.py:594 ecommerce/extensions/basket/models.py:94
+#: ecommerce/core/models.py:590 ecommerce/extensions/basket/models.py:94
 #: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:56
 #: ecommerce/templates/oscar/dashboard/offers/summary.html:10
 msgid "Name"
@@ -292,7 +292,7 @@ msgstr ""
 msgid "Invalid data sharing consent token provided."
 msgstr ""
 
-#: ecommerce/coupons/views.py:237 ecommerce/extensions/basket/views.py:94
+#: ecommerce/coupons/views.py:237 ecommerce/extensions/basket/views.py:91
 #, python-brace-format
 msgid "You have already purchased {course} seat."
 msgstr ""
@@ -306,15 +306,15 @@ msgstr ""
 msgid "This coupon code is not valid for this course. Try a different course."
 msgstr ""
 
-#: ecommerce/courses/models.py:33 ecommerce/extensions/basket/models.py:14
-#: ecommerce/extensions/offer/models.py:51
+#: ecommerce/courses/models.py:34 ecommerce/extensions/basket/models.py:14
+#: ecommerce/extensions/offer/models.py:45
 #: ecommerce/extensions/payment/models.py:58
 #: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:65
 #: ecommerce/templates/oscar/dashboard/offers/summary.html:14
 msgid "Site"
 msgstr ""
 
-#: ecommerce/courses/models.py:39
+#: ecommerce/courses/models.py:40
 msgid "Last date/time on which verification for this product can be submitted."
 msgstr ""
 
@@ -522,31 +522,31 @@ msgstr ""
 msgid "End"
 msgstr ""
 
-#: ecommerce/enterprise/utils.py:113
+#: ecommerce/enterprise/utils.py:109
 #, python-brace-format
 msgid "SKU {sku} does not exist."
 msgstr ""
 
-#: ecommerce/enterprise/utils.py:121
+#: ecommerce/enterprise/utils.py:117
 #, python-brace-format
 msgid "There is no Enterprise Customer associated with SKU {sku}."
 msgstr ""
 
-#: ecommerce/enterprise/utils.py:129
+#: ecommerce/enterprise/utils.py:125
 #, python-brace-format
 msgid ""
 "If you have concerns about sharing your data, please contact your "
 "administrator at {enterprise}."
 msgstr ""
 
-#: ecommerce/enterprise/utils.py:132
+#: ecommerce/enterprise/utils.py:128
 #, python-brace-format
 msgid ""
 "If you have concerns about sharing your data, please contact your "
 "administrator at {enterprise} at {contact_info}."
 msgstr ""
 
-#: ecommerce/enterprise/utils.py:138
+#: ecommerce/enterprise/utils.py:134
 #, python-brace-format
 msgid "Enrollment in {course_name} was not complete."
 msgstr ""
@@ -577,25 +577,20 @@ msgstr ""
 msgid "One of the products you're trying to order is unavailable."
 msgstr ""
 
-#: ecommerce/extensions/api/serializers.py:334
-msgid "Products must have a certificate type."
-msgstr ""
-
-#: ecommerce/extensions/api/serializers.py:337
-#: ecommerce/extensions/api/serializers.py:365
-msgid "Products must have a price."
-msgstr ""
-
-#: ecommerce/extensions/api/serializers.py:361
-msgid "Products must indicate whether ID verification is required."
-msgstr ""
-
-#: ecommerce/extensions/api/serializers.py:423
+#: ecommerce/extensions/api/serializers.py:348
 #, python-brace-format
 msgid "Invalid product class [{product_class}] requested."
 msgstr ""
 
-#: ecommerce/extensions/api/serializers.py:453
+#: ecommerce/extensions/api/serializers.py:354
+msgid "Products must indicate whether ID verification is required."
+msgstr ""
+
+#: ecommerce/extensions/api/serializers.py:358
+msgid "Products must have a price."
+msgstr ""
+
+#: ecommerce/extensions/api/serializers.py:387
 #, python-brace-format
 msgid ""
 "Course [{course_id}] was not published to LMS because the switch "
@@ -603,29 +598,29 @@ msgid ""
 "been saved."
 msgstr ""
 
-#: ecommerce/extensions/api/serializers.py:648
+#: ecommerce/extensions/api/serializers.py:600
 msgid "Enrollment code"
 msgstr ""
 
-#: ecommerce/extensions/api/serializers.py:649
+#: ecommerce/extensions/api/serializers.py:601
 msgid "Discount code"
 msgstr ""
 
-#: ecommerce/extensions/api/serializers.py:663
+#: ecommerce/extensions/api/serializers.py:615
 msgid "ACTIVE"
 msgstr ""
 
-#: ecommerce/extensions/api/serializers.py:663
+#: ecommerce/extensions/api/serializers.py:615
 msgid "INACTIVE"
 msgstr ""
 
 #: ecommerce/extensions/api/v2/views/baskets.py:363
-#: ecommerce/extensions/basket/views.py:113
+#: ecommerce/extensions/basket/views.py:110
 msgid "No SKUs provided."
 msgstr ""
 
 #: ecommerce/extensions/api/v2/views/baskets.py:373
-#: ecommerce/extensions/basket/views.py:117
+#: ecommerce/extensions/basket/views.py:114
 #, python-brace-format
 msgid "Products with SKU(s) [{skus}] do not exist."
 msgstr ""
@@ -655,120 +650,100 @@ msgid ""
 "time."
 msgstr ""
 
-#: ecommerce/extensions/basket/utils.py:126
+#: ecommerce/extensions/basket/utils.py:125
 msgid "Click here to just purchase an enrollment for yourself"
 msgstr ""
 
-#: ecommerce/extensions/basket/utils.py:129
+#: ecommerce/extensions/basket/utils.py:128
 msgid "Click here to purchase multiple seats in this course"
 msgstr ""
 
-#: ecommerce/extensions/basket/views.py:59
+#: ecommerce/extensions/basket/views.py:58
 msgid "No SKU provided."
 msgstr ""
 
-#: ecommerce/extensions/basket/views.py:66
+#: ecommerce/extensions/basket/views.py:65
 #, python-brace-format
 msgid "SKU [{sku}] does not exist."
 msgstr ""
 
-#: ecommerce/extensions/basket/views.py:86
+#: ecommerce/extensions/basket/views.py:83
 #, python-brace-format
 msgid "Product [{product}] not available to buy."
 msgstr ""
 
-#: ecommerce/extensions/basket/views.py:139
+#: ecommerce/extensions/basket/views.py:134
 msgid "You have already purchased these products"
 msgstr ""
 
-#: ecommerce/extensions/basket/views.py:211
-#, python-brace-format
-msgid ""
-"{strong_start}Purchasing access just for yourself?{strong_end}"
-"{paragraph_start}If you are purchasing a single code for someone else, "
-"please continue with checkout. However, If you are the learner {link_start}"
-"go back{link_end} to enroll directly.{paragraph_end}"
-msgstr ""
-
-#: ecommerce/extensions/basket/views.py:264
+#: ecommerce/extensions/basket/views.py:239
 msgid ""
 "After you complete your order you will be able to select course dates from "
 "your dashboard."
 msgstr ""
 
-#: ecommerce/extensions/basket/views.py:269
+#: ecommerce/extensions/basket/views.py:244
 msgid ""
 "After you complete your order you will be automatically enrolled in the "
 "verified track of the course."
 msgstr ""
 
-#: ecommerce/extensions/basket/views.py:273
+#: ecommerce/extensions/basket/views.py:248
 msgid "After you complete your order you will receive credit for your course."
 msgstr ""
 
-#: ecommerce/extensions/basket/views.py:276
+#: ecommerce/extensions/basket/views.py:251
 msgid ""
 "After you complete your order you will be automatically enrolled in the "
 "course."
 msgstr ""
 
-#: ecommerce/extensions/basket/views.py:282
+#: ecommerce/extensions/basket/views.py:257
 #, python-brace-format
-msgid ""
-"{paragraph_start}By purchasing, you and your organization agree to the "
-"following terms:{paragraph_end} {ul_start} {li_start}Each code is valid for "
-"the one course covered and can be used only one time.{li_end} {li_start}You "
-"are responsible for distributing codes to your learners.{li_end} {li_start}"
-"Each code will expire in one year from date of purchase or, if earlier, once "
-"the course is closed.{li_end} {li_start}If a course is not designated as "
-"self-paced, you should confirm that a course run is available before "
-"expiration. {li_end} {li_start}You may not resell codes to third parties."
-"{li_end} {ul_end} {strong_start}All sales final. No refunds.{strong_end} "
-"{paragraph_start}You will receive an email at {user_email} with your "
-"enrollment code(s). {paragraph_end}"
+msgid "You will receive an email at {user_email} with your enrollment code(s)."
 msgstr ""
 
-#: ecommerce/extensions/basket/views.py:408
+#: ecommerce/extensions/basket/views.py:362
 #, python-brace-format
 msgid "Could not apply the code '{code}'; it requires data sharing consent."
 msgstr ""
 
-#: ecommerce/extensions/basket/views.py:461
+#: ecommerce/extensions/basket/views.py:414
 #, python-brace-format
 msgid "Coupon code '{code}' has expired."
 msgstr ""
 
-#: ecommerce/extensions/basket/views.py:468
+#: ecommerce/extensions/basket/views.py:421
 #, python-brace-format
 msgid "Coupon code '{code}' is not active."
 msgstr ""
 
-#: ecommerce/extensions/basket/views.py:475
+#: ecommerce/extensions/basket/views.py:428
 #, python-brace-format
 msgid "Coupon code '{code}' has already been redeemed."
 msgstr ""
 
-#: ecommerce/extensions/basket/views.py:485
-#: ecommerce/extensions/basket/views.py:499
+#: ecommerce/extensions/basket/views.py:438
+#: ecommerce/extensions/basket/views.py:452
 #, python-brace-format
 msgid "Coupon code '{code}' is not valid for this basket."
 msgstr ""
 
-#: ecommerce/extensions/basket/views.py:523
+#: ecommerce/extensions/basket/views.py:476
 msgid "Your basket does not qualify for a coupon code discount."
 msgstr ""
 
-#: ecommerce/extensions/basket/views.py:528
+#: ecommerce/extensions/basket/views.py:481
 #, python-brace-format
 msgid "Coupon code '{code}' added to basket."
 msgstr ""
 
-#: ecommerce/extensions/basket/views.py:538
+#: ecommerce/extensions/basket/views.py:491
 #, python-brace-format
 msgid "You have already added coupon code '{code}' to your basket."
 msgstr ""
 
-#: ecommerce/extensions/basket/views.py:546
+#: ecommerce/extensions/basket/views.py:499
 #, python-brace-format
 msgid "Coupon code '{code}' does not exist."
 msgstr ""
@@ -818,7 +793,7 @@ msgstr ""
 
 #: ecommerce/extensions/dashboard/refunds/forms.py:14
 #: ecommerce/extensions/refund/models.py:72
-#: ecommerce/extensions/refund/models.py:304
+#: ecommerce/extensions/refund/models.py:301
 #: ecommerce/extensions/voucher/utils.py:231
 #: ecommerce/templates/oscar/dashboard/orders/line_detail.html:70
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:72
@@ -837,27 +812,27 @@ msgstr ""
 msgid "Failed to retrieve enrollment data."
 msgstr ""
 
-#: ecommerce/extensions/offer/models.py:194
+#: ecommerce/extensions/offer/models.py:188
 msgid "Course Catalog ID from the Discovery Service."
 msgstr ""
 
-#: ecommerce/extensions/offer/models.py:199
+#: ecommerce/extensions/offer/models.py:193
 msgid "UUID for an EnterpriseCustomer from the Enterprise Service."
 msgstr ""
 
-#: ecommerce/extensions/offer/models.py:335
+#: ecommerce/extensions/offer/models.py:329
 msgid "EnterpriseCustomer UUID"
 msgstr ""
 
-#: ecommerce/extensions/offer/models.py:342
+#: ecommerce/extensions/offer/models.py:336
 msgid "EnterpriseCustomer Name"
 msgstr ""
 
-#: ecommerce/extensions/offer/models.py:347
+#: ecommerce/extensions/offer/models.py:341
 msgid "EnterpriseCustomerCatalog UUID"
 msgstr ""
 
-#: ecommerce/extensions/offer/models.py:349
+#: ecommerce/extensions/offer/models.py:343
 #: ecommerce/extensions/voucher/utils.py:220 ecommerce/programs/forms.py:19
 #: ecommerce/programs/templates/programs/programoffer_list.html:30
 msgid "Program UUID"
@@ -928,68 +903,63 @@ msgstr ""
 #. Translators: This is a string added next to the name of the required
 #. fields on the payment form. For example, the first name field is
 #. required, so this would read "First name (required)".
-#: ecommerce/extensions/payment/forms.py:103
+#: ecommerce/extensions/payment/forms.py:100
 #, python-brace-format
 msgid "{label} (required)"
 msgstr ""
 
-#: ecommerce/extensions/payment/forms.py:109
-#: ecommerce/extensions/voucher/utils.py:223
-msgid "Organization"
-msgstr ""
-
-#: ecommerce/extensions/payment/forms.py:125
-#: ecommerce/extensions/payment/forms.py:215
+#: ecommerce/extensions/payment/forms.py:108
+#: ecommerce/extensions/payment/forms.py:198
 #: ecommerce/extensions/payment/views/__init__.py:96
 msgid ""
 "There was a problem retrieving your basket. Refresh the page to try again."
 msgstr ""
 
-#: ecommerce/extensions/payment/forms.py:128
+#: ecommerce/extensions/payment/forms.py:111
 msgid "First Name"
 msgstr ""
 
-#: ecommerce/extensions/payment/forms.py:129
+#: ecommerce/extensions/payment/forms.py:112
 msgid "Last Name"
 msgstr ""
 
-#: ecommerce/extensions/payment/forms.py:130
+#: ecommerce/extensions/payment/forms.py:113
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:510
 msgid "Address"
 msgstr ""
 
-#: ecommerce/extensions/payment/forms.py:131
+#: ecommerce/extensions/payment/forms.py:114
 msgid "Suite/Apartment Number"
 msgstr ""
 
-#: ecommerce/extensions/payment/forms.py:132
+#: ecommerce/extensions/payment/forms.py:115
 msgid "City"
 msgstr ""
 
-#: ecommerce/extensions/payment/forms.py:135
+#: ecommerce/extensions/payment/forms.py:118
 msgid "State/Province"
 msgstr ""
 
-#: ecommerce/extensions/payment/forms.py:136
+#: ecommerce/extensions/payment/forms.py:119
 msgid "Zip/Postal Code"
 msgstr ""
 
-#: ecommerce/extensions/payment/forms.py:137
+#: ecommerce/extensions/payment/forms.py:120
 msgid "Country"
 msgstr ""
 
-#: ecommerce/extensions/payment/forms.py:164
-#: ecommerce/extensions/payment/forms.py:166
-#: ecommerce/extensions/payment/forms.py:190
+#: ecommerce/extensions/payment/forms.py:147
+#: ecommerce/extensions/payment/forms.py:149
+#: ecommerce/extensions/payment/forms.py:173
 msgid "This field is required."
 msgstr ""
 
-#: ecommerce/extensions/payment/forms.py:177
+#: ecommerce/extensions/payment/forms.py:160
 #, python-brace-format
 msgid "{state} is not a valid state/province in {country}."
 msgstr ""
 
-#: ecommerce/extensions/payment/forms.py:196
+#: ecommerce/extensions/payment/forms.py:179
 msgid ""
 "Postal codes for the U.S. and Canada are limited to nine (9) characters."
 msgstr ""
@@ -1046,20 +1016,20 @@ msgstr ""
 msgid "Currency"
 msgstr ""
 
-#: ecommerce/extensions/refund/models.py:296
+#: ecommerce/extensions/refund/models.py:293
 msgid "Refund"
 msgstr ""
 
-#: ecommerce/extensions/refund/models.py:299
+#: ecommerce/extensions/refund/models.py:296
 msgid "Order Line"
 msgstr ""
 
-#: ecommerce/extensions/refund/models.py:301
+#: ecommerce/extensions/refund/models.py:298
 msgid "Line Credit (excl. tax)"
 msgstr ""
 
-#: ecommerce/extensions/refund/models.py:302
-#: ecommerce/templates/edx/checkout/receipt.html:80
+#: ecommerce/extensions/refund/models.py:299
+#: ecommerce/templates/edx/checkout/receipt.html:73
 #: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:30
 #: ecommerce/templates/oscar/basket/partials/hosted_checkout_basket.html:42
 #: ecommerce/templates/oscar/dashboard/orders/line_detail.html:49
@@ -1081,7 +1051,7 @@ msgstr ""
 #: ecommerce/extensions/voucher/tests/test_utils.py:343
 #: ecommerce/extensions/voucher/utils.py:89
 #: ecommerce/extensions/voucher/utils.py:132
-#: ecommerce/templates/edx/checkout/receipt.html:110
+#: ecommerce/templates/edx/checkout/receipt.html:103
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:195
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:217
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:261
@@ -1150,6 +1120,10 @@ msgstr ""
 msgid "Course Seat Types"
 msgstr ""
 
+#: ecommerce/extensions/voucher/utils.py:223
+msgid "Organization"
+msgstr ""
+
 #: ecommerce/extensions/voucher/utils.py:224
 msgid "Client"
 msgstr ""
@@ -1164,7 +1138,7 @@ msgid "Note"
 msgstr ""
 
 #: ecommerce/extensions/voucher/utils.py:227
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:48
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:47
 #: ecommerce/templates/oscar/basket/partials/hosted_checkout_basket.html:62
 msgid "Price"
 msgstr ""
@@ -1789,15 +1763,7 @@ msgstr ""
 msgid "Thank you for your order!"
 msgstr ""
 
-#: ecommerce/templates/edx/checkout/receipt.html:40
-#, python-format
-msgid ""
-"Your order is complete. You will receive a confirmation message and your "
-"enrollment codes(s) at %(link_start)s%(email)s%(link_end)s. If you need a "
-"receipt, you can print this page."
-msgstr ""
-
-#: ecommerce/templates/edx/checkout/receipt.html:45
+#: ecommerce/templates/edx/checkout/receipt.html:39
 #, python-format
 msgid ""
 "Your order is complete. If you need a receipt, you can print this page. You "
@@ -1805,70 +1771,69 @@ msgid ""
 "%(link_start)s%(email)s%(link_end)s."
 msgstr ""
 
-#: ecommerce/templates/edx/checkout/receipt.html:64
+#: ecommerce/templates/edx/checkout/receipt.html:57
 msgid "Order Number:"
 msgstr ""
 
-#: ecommerce/templates/edx/checkout/receipt.html:67
+#: ecommerce/templates/edx/checkout/receipt.html:60
 msgid "Payment Method:"
 msgstr ""
 
-#: ecommerce/templates/edx/checkout/receipt.html:70
+#: ecommerce/templates/edx/checkout/receipt.html:63
 msgid "Order Date:"
 msgstr ""
 
-#: ecommerce/templates/edx/checkout/receipt.html:76
+#: ecommerce/templates/edx/checkout/receipt.html:69
 msgid "Order Information"
 msgstr ""
 
-#: ecommerce/templates/edx/checkout/receipt.html:81
+#: ecommerce/templates/edx/checkout/receipt.html:74
 #: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:61
 #: ecommerce/templates/oscar/dashboard/offers/summary.html:12
 msgid "Description"
 msgstr ""
 
-#: ecommerce/templates/edx/checkout/receipt.html:82
+#: ecommerce/templates/edx/checkout/receipt.html:75
 #: ecommerce/templates/oscar/basket/partials/hosted_checkout_basket.html:38
 msgid "Item Price"
 msgstr ""
 
-#: ecommerce/templates/edx/checkout/receipt.html:86
+#: ecommerce/templates/edx/checkout/receipt.html:79
 #: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html:180
 msgid "Quantity:"
 msgstr ""
 
-#: ecommerce/templates/edx/checkout/receipt.html:88
+#: ecommerce/templates/edx/checkout/receipt.html:81
 msgid "Description:"
 msgstr ""
 
-#: ecommerce/templates/edx/checkout/receipt.html:95
+#: ecommerce/templates/edx/checkout/receipt.html:88
 msgid "Item Price:"
 msgstr ""
 
-#: ecommerce/templates/edx/checkout/receipt.html:101
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:56
+#: ecommerce/templates/edx/checkout/receipt.html:94
 msgid "Subtotal"
 msgstr ""
 
-#: ecommerce/templates/edx/checkout/receipt.html:116
+#: ecommerce/templates/edx/checkout/receipt.html:109
 #, python-format
 msgid "%(voucher_discount_amount)s off"
 msgstr ""
 
-#: ecommerce/templates/edx/checkout/receipt.html:130
+#: ecommerce/templates/edx/checkout/receipt.html:123
 #, python-format
 msgid "Courtesy of %(enterprise_name)s."
 msgstr ""
 
-#: ecommerce/templates/edx/checkout/receipt.html:142
+#: ecommerce/templates/edx/checkout/receipt.html:135
 msgid "Total"
 msgstr ""
 
-#: ecommerce/templates/edx/checkout/receipt.html:153
+#: ecommerce/templates/edx/checkout/receipt.html:146
 msgid "Get Your Course Credit"
 msgstr ""
 
-#: ecommerce/templates/edx/checkout/receipt.html:155
+#: ecommerce/templates/edx/checkout/receipt.html:148
 #, python-format
 msgid ""
 "To receive academic credit for this course, you must apply for credit at the "
@@ -1877,12 +1842,8 @@ msgid ""
 "the course name."
 msgstr ""
 
-#: ecommerce/templates/edx/checkout/receipt.html:171
+#: ecommerce/templates/edx/checkout/receipt.html:164
 msgid "Go to Dashboard"
-msgstr ""
-
-#: ecommerce/templates/edx/checkout/receipt.html:177
-msgid "Find more courses"
 msgstr ""
 
 #: ecommerce/templates/edx/checkout/receipt_not_found.html:6
@@ -2093,30 +2054,6 @@ msgid ""
 "                            "
 msgstr ""
 
-#: ecommerce/templates/oscar/basket/messages/new_total.html:6
-msgid "Your basket is now empty"
-msgstr ""
-
-#: ecommerce/templates/oscar/basket/messages/new_total.html:9
-#: ecommerce/templates/oscar/basket/messages/new_total.html:14
-#, python-format
-msgid ""
-"\n"
-"            %(strong_start)sWe’ve updated your quantity.%(strong_end)s\n"
-"            %(paragraph_start)sYour cart includes %(num_items)s enrollment "
-"codes at a total cost of %(total)s that you will receive via email."
-"%(paragraph_end)s\n"
-"        "
-msgstr ""
-
-#: ecommerce/templates/oscar/basket/messages/new_total.html:24
-msgid "View basket"
-msgstr ""
-
-#: ecommerce/templates/oscar/basket/messages/new_total.html:25
-msgid "Checkout now"
-msgstr ""
-
 #: ecommerce/templates/oscar/basket/partials/add_voucher_form.html:11
 msgid "Applying..."
 msgstr ""
@@ -2149,14 +2086,10 @@ msgid "summary"
 msgstr ""
 
 #: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:52
-msgid "Quanity"
-msgstr ""
-
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:62
 msgid "Discounts applied"
 msgstr ""
 
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:72
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:62
 #, python-format
 msgid ""
 "\n"
@@ -2165,7 +2098,7 @@ msgid ""
 "                                "
 msgstr ""
 
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:88
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:78
 #, python-format
 msgid ""
 "\n"
@@ -2174,95 +2107,95 @@ msgid ""
 "                                    "
 msgstr ""
 
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:93
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:83
 msgid "Remove coupon"
 msgstr ""
 
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:102
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:92
 msgid "Add coupon code"
 msgstr ""
 
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:102
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:92
 msgid "(optional)"
 msgstr ""
 
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:111
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:101
 msgid "TOTAL"
 msgstr ""
 
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:118
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:107
 msgid "order details"
 msgstr ""
 
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:133
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:122
 msgid "select payment method"
 msgstr ""
 
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:135
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:124
 msgid "Pay with a Credit Card"
 msgstr ""
 
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:146
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:135
 msgid "Pay with PayPal"
 msgstr ""
 
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:155
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:144
 msgid "Pay with Apple Pay"
 msgstr ""
 
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:170
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:159
 msgid "card holder information"
 msgstr ""
 
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:181
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:170
 msgid "billing information"
 msgstr ""
 
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:183
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:172
 msgid "Credit cards"
 msgstr ""
 
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:190
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:179
 msgid "Card Number (required)"
 msgstr ""
 
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:190
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:200
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:179
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:189
 msgid "Secure"
 msgstr ""
 
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:193
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:182
 msgid "Credit card icon"
 msgstr ""
 
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:199
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:188
 msgid "Security Code (required)"
 msgstr ""
 
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:203
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:192
 msgid "Help with CVV"
 msgstr ""
 
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:206
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:195
 msgid ""
 "The three last digits in the signature area on the back of your card. For "
 "American Express, it is the four digits on the front of the card."
 msgstr ""
 
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:213
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:202
 msgid "Expiration (required)"
 msgstr ""
 
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:217
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:206
 msgid "Month"
 msgstr ""
 
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:227
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:216
 msgid "Year"
 msgstr ""
 
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:244
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:254
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:233
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:243
 #: ecommerce/templates/oscar/basket/partials/hosted_checkout_basket.html:147
 msgid "Place Order"
 msgstr ""
@@ -2382,8 +2315,8 @@ msgstr ""
 msgid ""
 "\n"
 "                    Please try to submit your payment again. If this problem "
-"persists, please refer to our %(start_link)s\n"
-"                    Payments FAQ %(end_link)s for troubleshooting tips.\n"
+"persists, contact %(start_link)s\n"
+"                    %(payment_support_email)s%(end_link)s.\n"
 "                    "
 msgstr ""
 

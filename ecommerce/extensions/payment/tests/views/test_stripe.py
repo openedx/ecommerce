@@ -17,6 +17,7 @@ from ecommerce.extensions.payment.constants import STRIPE_CARD_TYPE_MAP
 from ecommerce.extensions.payment.processors.stripe import Stripe
 from ecommerce.extensions.payment.tests.mixins import PaymentEventsMixin
 from ecommerce.extensions.test.factories import create_basket
+from ecommerce.invoice.models import Invoice
 from ecommerce.tests.testcases import TestCase
 
 Country = get_model('address', 'Country')
@@ -180,6 +181,7 @@ class StripeSubmitViewTests(PaymentEventsMixin, TestCase):
         self.assert_order_created(basket, billing_address, card_type, label)
 
         # Now verify that a new business client has been created and current
-        # order is now linked with that client.
+        # order is now linked with that client through Invoice model.
+        order = Order.objects.filter(basket=basket).first()
         business_client = BusinessClient.objects.get(name=data['organization'])
-        assert Order.objects.filter(basket=basket).first().client == business_client
+        assert Invoice.objects.get(order=order).business_client == business_client

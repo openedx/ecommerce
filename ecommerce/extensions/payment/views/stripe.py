@@ -67,7 +67,7 @@ class StripeSubmitView(EdxOrderPlacementMixin, BasePaymentSubmitView):
             order_total=order_total,
             request=self.request
         )
-        self.link_order_with_business_client(self.request.POST, order)
+        self.handle_post_order(self.request.POST, order)
 
         receipt_url = get_receipt_page_url(
             site_configuration=self.request.site.siteconfiguration,

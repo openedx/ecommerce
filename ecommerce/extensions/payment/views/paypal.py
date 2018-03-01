@@ -123,7 +123,7 @@ class PaypalPaymentExecutionView(EdxOrderPlacementMixin, View):
                 order_total=order_total,
                 request=request
             )
-            self.link_order_with_business_client(request.GET, order)
+            self.handle_post_order(request.GET, order)
 
             return redirect(receipt_url)
         except:  # pylint: disable=bare-except
