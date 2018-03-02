@@ -403,6 +403,9 @@ class AtomicPublicationSerializer(serializers.Serializer):  # pylint: disable=ab
     id = serializers.RegexField(COURSE_ID_REGEX, max_length=255)
     uuid = serializers.UUIDField(required=False)
     name = serializers.CharField(max_length=255)
+
+    # ENT-803: by default enable enrollment code creation
+    create_or_activate_enrollment_code = serializers.BooleanField(default=True)
     # Verification deadline should only be required if the course actually requires verification.
     verification_deadline = serializers.DateTimeField(required=False, allow_null=True)
     products = serializers.ListField()
@@ -446,6 +449,7 @@ class AtomicPublicationSerializer(serializers.Serializer):  # pylint: disable=ab
         course_uuid = self.validated_data.get('uuid')
         course_name = self.validated_data['name']
         course_verification_deadline = self.validated_data.get('verification_deadline')
+        create_or_activate_enrollment_code = self.validated_data.get('create_or_activate_enrollment_code')
         products = self.validated_data['products']
         partner = self.get_partner()
 
@@ -467,8 +471,7 @@ class AtomicPublicationSerializer(serializers.Serializer):  # pylint: disable=ab
                 course.verification_deadline = course_verification_deadline
                 course.save()
 
-                # ENT-803: by default enable enrollment code creation
-                create_enrollment_code = True
+                create_enrollment_code = create_or_activate_enrollment_code
 
                 for product in products:
                     product_class = product.get('product_class')
