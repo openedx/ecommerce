@@ -14,6 +14,7 @@ from ecommerce.core.models import BusinessClient, SegmentClient
 from ecommerce.core.tests import toggle_switch
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.extensions.analytics.utils import parse_tracking_context, translate_basket_line_for_segment
+from ecommerce.extensions.basket.utils import basket_add_organization_attribute
 from ecommerce.extensions.checkout.exceptions import BasketNotFreeError
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
 from ecommerce.extensions.fulfillment.status import ORDER
@@ -169,8 +170,10 @@ class EdxOrderPlacementMixinTests(BusinessIntelligenceMixin, PaymentEventsMixin,
         basket.add_product(enrollment_code, quantity=1)
         order = create_order(number=1, basket=basket, user=user)
         request_data = {'organization': 'Dummy Business Client'}
+        # Manually add organization attribute on the basket for testing
+        basket_add_organization_attribute(basket, request_data)
 
-        EdxOrderPlacementMixin().handle_post_order(request_data, order)
+        EdxOrderPlacementMixin().handle_post_order(order)
 
         # Now verify that a new business client has been created in current
         # order is now linked with that client through Invoice model.
@@ -191,8 +194,10 @@ class EdxOrderPlacementMixinTests(BusinessIntelligenceMixin, PaymentEventsMixin,
         basket.add_product(verified_product, quantity=1)
         order = create_order(number=1, basket=basket, user=user)
         request_data = {'organization': 'Dummy Business Client'}
+        # Manually add organization attribute on the basket for testing
+        basket_add_organization_attribute(basket, request_data)
 
-        EdxOrderPlacementMixin().handle_post_order(request_data, order)
+        EdxOrderPlacementMixin().handle_post_order(order)
 
         # Now verify that the single seat order is not linked to business
         # client by checking that there is no record for BusinessClient.

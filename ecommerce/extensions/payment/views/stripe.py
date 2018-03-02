@@ -3,6 +3,7 @@ import logging
 from django.http import JsonResponse
 from oscar.core.loading import get_class, get_model
 
+from ecommerce.extensions.basket.utils import basket_add_organization_attribute
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
 from ecommerce.extensions.checkout.utils import get_receipt_page_url
 from ecommerce.extensions.payment.forms import StripeSubmitForm
@@ -36,6 +37,8 @@ class StripeSubmitView(EdxOrderPlacementMixin, BasePaymentSubmitView):
         token = form_data['stripe_token']
         order_number = basket.order_number
 
+        basket_add_organization_attribute(basket, self.request.POST)
+
         try:
             billing_address = self.payment_processor.get_address_from_token(token)
         except Exception:  # pylint: disable=broad-except
@@ -67,7 +70,7 @@ class StripeSubmitView(EdxOrderPlacementMixin, BasePaymentSubmitView):
             order_total=order_total,
             request=self.request
         )
-        self.handle_post_order(self.request.POST, order)
+        self.handle_post_order(order)
 
         receipt_url = get_receipt_page_url(
             site_configuration=self.request.site.siteconfiguration,

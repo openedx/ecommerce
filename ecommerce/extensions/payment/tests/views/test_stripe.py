@@ -11,6 +11,7 @@ from ecommerce.core.constants import ENROLLMENT_CODE_PRODUCT_CLASS_NAME, ENROLLM
 from ecommerce.core.models import BusinessClient
 from ecommerce.core.tests import toggle_switch
 from ecommerce.courses.tests.factories import CourseFactory
+from ecommerce.extensions.basket.utils import basket_add_organization_attribute
 from ecommerce.extensions.checkout.utils import get_receipt_page_url
 from ecommerce.extensions.order.constants import PaymentEventTypeName
 from ecommerce.extensions.payment.constants import STRIPE_CARD_TYPE_MAP
@@ -157,6 +158,10 @@ class StripeSubmitViewTests(PaymentEventsMixin, TestCase):
 
         data = self.generate_form_data(basket.id)
         data.update({'organization': 'Dummy Business Client'})
+
+        # Manually add organization attribute on the basket for testing
+        basket_add_organization_attribute(basket, data)
+
         card_type = 'American Express'
         label = '1986'
         charge = stripe.Charge.construct_from({
