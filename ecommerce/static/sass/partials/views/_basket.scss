@@ -485,6 +485,8 @@
             .quantity-label {
                 display: inline-block;
                 padding-right: 10px;
+                vertical-align: top;
+                margin: 5px 0 0;
             }
 
             .checkout-quantity {
@@ -492,9 +494,15 @@
             }
 
             .spinner {
-                width: 70px;
+                width: 80px;
                 float: left;
                 padding-right: 10px;
+
+                .max-quantity {
+                    font-size: 10px;
+                    color: #4a4a4a;
+                    font-weight: 600;
+                }
             }
 
             .quantity-update {

@@ -57,7 +57,7 @@ def get_lms_course_about_url(course_key):
     return get_lms_url('courses/{}/about'.format(course_key))
 
 
-def get_lms_explore_courses():
+def get_lms_explore_courses_url():
     """
     Return the explore courses url.
     """

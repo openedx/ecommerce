@@ -209,7 +209,7 @@ class BasketSummaryView(BasketView):
                 self.request,
                 _(
                     '{strong_start}Purchasing access just for yourself?{strong_end}{paragraph_start}If you are '
-                    'purchasing a single code for someone else, please continue with checkout. However, If you are the '
+                    'purchasing a single code for someone else, please continue with checkout. However, if you are the '
                     'learner {link_start}go back{link_end} to enroll directly.{paragraph_end}'
                 ).format(
                     strong_start='<strong>',
@@ -443,6 +443,7 @@ class BasketSummaryView(BasketView):
             'free_basket': context['order_total'].incl_tax == 0,
             'homepage_url': get_lms_url(''),
             'min_seat_quantity': 1,
+            'max_seat_quantity': 100,
             'payment_processors': payment_processors,
             'total_benefit': total_benefit,
             'line_price': (self.request.basket.total_incl_tax_excl_discounts / num_of_items) if num_of_items > 0 else 0

@@ -30,7 +30,8 @@
                             <label class="product-price-label text-muted quantity-label">{% trans 'Quantity' %}</label>
                             <div class="checkout-quantity form-group">
                                 <div class="input-group spinner {% if form.errors %}error{% endif %}">
-                                    {% render_field form.quantity class+="quantity form-control" min=min_seat_quantity %}
+                                    {% render_field form.quantity class+="quantity form-control" min=min_seat_quantity max=max_seat_quantity %}
+                                    <span class="max-quantity">Max: 100</span>
                                 </div>
                                 <button class="btn btn-primary update-button quantity-update" type="submit"
                                         data-loading-text="{% trans 'Updating...' %}">{% trans "Update" %}</button>

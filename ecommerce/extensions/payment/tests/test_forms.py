@@ -164,7 +164,7 @@ class PaymentFormTests(TestCase):
         self.assertEqual(actual, expected)
 
     def test_organization_field_in_form(self):
-        """ Verify the field 'organization' is present in form when basket have enrollment code product. """
+        """ Verify the field 'organization' is present in the form when the basket has an enrollment code product. """
         __, __, enrollment_code = self.prepare_course_seat_and_enrollment_code()
         basket = self.create_basket_and_add_product(enrollment_code)
         self.request.basket = basket
@@ -183,7 +183,10 @@ class PaymentFormTests(TestCase):
         self.assertTrue('organization' in form.fields)
 
     def test_organization_field_not_in_form(self):
-        """ Verify the field 'organization' is not present in form when basket has not any enrollment code product. """
+        """
+        Verify the field 'organization' is not present in the form when the basket does not have an enrollment
+        code product.
+        """
         course = CourseFactory()
         product1 = course.create_or_update_seat("Verified", True, 0, self.partner)
         basket = self.create_basket_and_add_product(product1)
