@@ -339,6 +339,9 @@ class EntitlementProductHelper(object):
     def save(partner, course, uuid, product):
         attrs = _flatten(product['attribute_values'])
 
+        if not uuid:
+            raise Exception(_(u"You need to provide a course UUID to create Course Entitlements."))
+
         # Extract arguments required for Seat creation, deserializing as necessary.
         certificate_type = attrs.get('certificate_type')
         price = Decimal(product['price'])
@@ -398,7 +401,7 @@ class AtomicPublicationSerializer(serializers.Serializer):  # pylint: disable=ab
     The automatically applied validation logic rejects course IDs which already exist in the database.
     """
     id = serializers.RegexField(COURSE_ID_REGEX, max_length=255)
-    uuid = serializers.UUIDField()
+    uuid = serializers.UUIDField(required=False)
     name = serializers.CharField(max_length=255)
     # Verification deadline should only be required if the course actually requires verification.
     verification_deadline = serializers.DateTimeField(required=False, allow_null=True)
@@ -440,7 +443,7 @@ class AtomicPublicationSerializer(serializers.Serializer):  # pylint: disable=ab
                 if one was raised (else None), and a message for the user, if necessary (else None).
         """
         course_id = self.validated_data['id']
-        course_uuid = self.validated_data['uuid']
+        course_uuid = self.validated_data.get('uuid')
         course_name = self.validated_data['name']
         course_verification_deadline = self.validated_data.get('verification_deadline')
         products = self.validated_data['products']
