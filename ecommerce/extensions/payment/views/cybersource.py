@@ -26,6 +26,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from ecommerce.extensions.api.serializers import OrderSerializer
+from ecommerce.extensions.basket.utils import basket_add_organization_attribute
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
 from ecommerce.extensions.checkout.utils import get_receipt_page_url
 from ecommerce.extensions.payment.exceptions import DuplicateReferenceNumber, InvalidBasketError, InvalidSignatureError
@@ -135,6 +136,8 @@ class CybersourceSubmitView(BasePaymentSubmitView):
         # Ensure that the response can be properly rendered so that we
         # don't have to deal with thawing the basket in the event of an error.
         response = JsonResponse({'form_fields': parameters})
+
+        basket_add_organization_attribute(basket, data)
 
         # Freeze the basket since the user is paying for it now.
         basket.freeze()
@@ -321,7 +324,7 @@ class CybersourceInterstitialView(CybersourceNotificationMixin, View):
 
         try:
             order = self.create_order(request, basket, self._get_billing_address(notification))
-            self.handle_post_order(request.POST, order)
+            self.handle_post_order(order)
 
             return self.redirect_to_receipt_page(notification)
         except:  # pylint: disable=bare-except
