@@ -3,7 +3,7 @@
 # This file is distributed under the same license as the PACKAGE package.
 # 
 # Translators:
-# cblackburn <cblackburn@edx.org>, 2016
+# Clinton Blackburn <clinton.blackburn@gmail.com>, 2016
 # Hans Magnusson <hansgmagnusson@icloud.com>, 2016
 # Kristoffer Grundström <kristoffer.grundstrom1983@gmail.com>, 2015
 msgid ""
