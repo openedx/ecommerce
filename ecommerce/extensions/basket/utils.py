@@ -21,6 +21,7 @@ Basket = get_model('basket', 'Basket')
 BasketAttribute = get_model('basket', 'BasketAttribute')
 BasketAttributeType = get_model('basket', 'BasketAttributeType')
 BUNDLE = 'bundle_identifier'
+ORGANIZATION_ATTRIBUTE_TYPE = 'organization'
 StockRecord = get_model('partner', 'StockRecord')
 OrderLine = get_model('order', 'Line')
 Refund = get_model('refund', 'Refund')
@@ -221,3 +222,25 @@ def _record_utm_basket_attribution(referral, request):
         created_at_datetime = None
 
     referral.utm_created_at = created_at_datetime
+
+
+def basket_add_organization_attribute(basket, request_data):
+    """
+    Add organization attribute on basket, if organization value is provided
+    in basket data.
+
+    Arguments:
+        basket(Basket): order basket
+        request_data (dict): HttpRequest data
+
+    """
+    # Name of business client is being passed as "organization" from basket page
+    business_client = request_data.get(ORGANIZATION_ATTRIBUTE_TYPE)
+
+    if business_client:
+        organization_attribute, __ = BasketAttributeType.objects.get_or_create(name=ORGANIZATION_ATTRIBUTE_TYPE)
+        BasketAttribute.objects.get_or_create(
+            basket=basket,
+            attribute_type=organization_attribute,
+            value_text=business_client.strip()
+        )

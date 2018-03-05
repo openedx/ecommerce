@@ -16,6 +16,7 @@ from ecommerce.core.constants import ENROLLMENT_CODE_PRODUCT_CLASS_NAME, ENROLLM
 from ecommerce.core.models import BusinessClient
 from ecommerce.core.tests import toggle_switch
 from ecommerce.courses.tests.factories import CourseFactory
+from ecommerce.extensions.basket.utils import basket_add_organization_attribute
 from ecommerce.extensions.checkout.utils import get_receipt_page_url
 from ecommerce.extensions.payment.processors.paypal import Paypal
 from ecommerce.extensions.payment.tests.mixins import PaymentEventsMixin, PaypalMixin
@@ -150,7 +151,9 @@ class PaypalPaymentExecutionViewTests(PaypalMixin, PaymentEventsMixin, TestCase)
         self.mock_payment_execution_response(self.basket)
         self.mock_payment_creation_response(self.basket, find=True)
 
+        # Manually add organization attribute on the basket for testing
         self.RETURN_DATA.update({'organization': 'Dummy Business Client'})
+        basket_add_organization_attribute(self.basket, self.RETURN_DATA)
 
         response = self.client.get(reverse('paypal:execute'), self.RETURN_DATA)
         self.assertRedirects(
