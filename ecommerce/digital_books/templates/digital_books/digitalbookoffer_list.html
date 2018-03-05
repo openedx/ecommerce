@@ -17,7 +17,7 @@
                 {% trans "Digital Book Offers" %}
                 <div class="pull-right">
                     <!--TODO: have this point to new digital book offers -->
-                    <a href="{% url 'programs:offers:new' %}"
+                    <a href="{% url 'digital-books:offers:new' %}"
                        class="btn btn-primary btn-small">{% trans "Create Digital Book Offer" %}</a>
                 </div>
             </h1>
@@ -55,5 +55,5 @@
 {% endblock footer %}
 
 {% block javascript %}
-    <script src="{% static 'js/pages/offer_list_page.js' %}"></script>
+    <script src="{% static 'js/pages/offer_list_page.js' %}">   `</script>
 {% endblock javascript %}

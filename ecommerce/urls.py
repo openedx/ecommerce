@@ -64,7 +64,7 @@ urlpatterns = AUTH_URLS + WELL_KNOWN_URLS + [
     url(r'^management/', include('ecommerce.management.urls', namespace='management')),
     url(r'^programs/', include('ecommerce.programs.urls', namespace='programs')),
     url(r'^enterprise/', include('ecommerce.enterprise.urls', namespace='enterprise')),
-    url(r'^digital-books/', include('ecommerce.digital_books.urls', namespace='digital_books')),
+    url(r'^digital-books/', include('ecommerce.digital_books.urls', namespace='digital-books')),
 ]
 
 # Install Oscar extension URLs
