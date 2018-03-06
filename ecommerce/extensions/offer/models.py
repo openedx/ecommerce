@@ -401,6 +401,11 @@ class Condition(AbstractCondition):
         verbose_name=_('EnterpriseCustomerCatalog UUID')
     )
     program_uuid = models.UUIDField(null=True, blank=True, verbose_name=_('Program UUID'))
+    digital_book_bundle = models.UUIDField(
+        null=True,
+        blank=True,
+        verbose_name=_('DigitalBookBundle UUID')
+    )
 
 
 from oscar.apps.offer.models import *  # noqa isort:skip pylint: disable=wildcard-import,unused-wildcard-import,wrong-import-position,wrong-import-order,ungrouped-imports
