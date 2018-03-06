@@ -401,7 +401,7 @@ class Condition(AbstractCondition):
         verbose_name=_('EnterpriseCustomerCatalog UUID')
     )
     program_uuid = models.UUIDField(null=True, blank=True, verbose_name=_('Program UUID'))
-    digital_book_bundle = models.UUIDField(
+    digital_book_bundle_uuid = models.UUIDField(
         null=True,
         blank=True,
         verbose_name=_('DigitalBookBundle UUID')

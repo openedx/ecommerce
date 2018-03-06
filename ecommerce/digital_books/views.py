@@ -1,9 +1,14 @@
+from django.contrib import messages
+from django.urls import reverse
 from django.views.generic import ListView, CreateView
 from django.utils.translation import ugettext_lazy as _
 from oscar.core.loading import get_model
 
 from ecommerce.core.views import StaffOnlyMixin
 from ecommerce.digital_books.forms import DigitalBookOfferForm
+
+import logging
+logger = logging.getLogger(__name__)
 
 Benefit = get_model('offer', 'Benefit')
 ConditionalOffer = get_model('offer', 'ConditionalOffer')
@@ -15,17 +20,16 @@ class DigitalBookOfferViewMixin(StaffOnlyMixin):
     def get_context_data(self, **kwargs):
         context = super(DigitalBookOfferViewMixin, self).get_context_data(**kwargs)
         context['admin'] = 'digital_books'
+        return context
 
 
 class DigitalBookProcessFormViewMixin(DigitalBookOfferViewMixin):
     form_class = DigitalBookOfferForm
     success_message = _('Digital Book offer updated!')
 
-    def get_from_kwargs(self):
-        kwargs = super(DigitalBookProcessFormViewMixin,self).get_form_kwargs()
-        kwargs.update({
-            'request': self.request,
-        })
+    def get_form_kwargs(self):
+        kwargs = super(DigitalBookProcessFormViewMixin, self).get_form_kwargs()
+        kwargs.update({'request': self.request})
         return kwargs
 
     def get_context_data(self, **kwargs):
@@ -35,14 +39,16 @@ class DigitalBookProcessFormViewMixin(DigitalBookOfferViewMixin):
         })
         return context
 
-    #TODO: get_sueccess_url
+    def get_success_url(self):
+        messages.add_message(self.request, messages.SUCCESS, self.success_message)
+        return reverse('programs:offers:edit', kwargs={'pk': self.object.pk})
+
 
 class DigitalBookOfferCreateView(DigitalBookProcessFormViewMixin, CreateView):
     initial = {
         'benefit_type': Benefit.PERCENTAGE
     }
     success_message = _('Digital Book offer created!')
-    #TODO: replace with digital book offer form
     template_name = 'digital_books/digitalbookoffer_form.html'
 
 

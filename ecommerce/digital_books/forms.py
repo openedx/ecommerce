@@ -8,8 +8,12 @@ from oscar.core.loading import get_model
 from ecommerce.programs.constants import BENEFIT_TYPE_CHOICES, BENEFIT_MAP
 from ecommerce.programs.custom import class_path, create_condition
 
+import logging
+logger = logging.getLogger(__name__)
+
 Benefit = get_model('offer', 'Benefit')
 ConditionalOffer = get_model('offer', 'ConditionalOffer')
+
 
 
 class DigitalBookOfferForm(forms.ModelForm):
@@ -66,7 +70,7 @@ class DigitalBookOfferForm(forms.ModelForm):
         if not self.instance.pk and digital_book_bundle_uuid:
             digital_book_offer_exists = ConditionalOffer.objects.filter(
                 offer_type=ConditionalOffer.SITE,
-                condition__digital_book_offer_uuid=digital_book_bundle_uuid
+                condition__digital_book_bundle_uuid=digital_book_bundle_uuid
             ).exists()
 
             if digital_book_offer_exists:
