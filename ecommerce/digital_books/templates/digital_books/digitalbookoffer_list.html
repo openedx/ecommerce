@@ -28,15 +28,27 @@
             <thead>
             <tr>
                 <!-- TODO: this assumes digital book offers will always be one book and one course, in the future we should create an analog to program called "digital book bundles" which would contain all the items in a given discounted bundle -->
-                <th>{% trans 'Digital Book Title' %}</th>
-                <th>{% trans 'Associated Course' %}</th>
+                <th>{% trans 'Digital Book Bundle Title' %}</th>
+                <th>{% trans 'Bundle UUID' %}</th>
                 <th>{% trans 'Type' %}</th>
                 <th>{% trans 'Value' %}</th>
                 <th>{% trans 'Start' %}</th>
                 <th>{% trans 'End' %}</th>
             </tr>
             </thead>
-            <!-- TODO: body of table -->
+            <tbody>
+            {% for offer in object_list %}
+                <tr>
+                    <!-- link to edit page -->
+                    <td>{{ offer.digital_book_bundle.title }}</td>
+                    <td>{{ offer.digital_book_bundle.uuid }}</td>
+                    <td>{{ offer.benefit|benefit_type|capfirst }}</td>
+                    <td>{{ offer.benefit.value }}</td>
+                    <td>{{ offer.start_datetime|default_if_none:'--' }}</td>
+                    <td>{{ offer.end_datetime|default_if_none:'--' }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
         </table>
     </div>
 {% endblock content %}

@@ -4,6 +4,8 @@ from django.forms.utils import ErrorList
 from django.utils.translation import ugettext_lazy as _
 from oscar.core.loading import get_model
 
+from ecommerce.digital_books.conditions import DigitalBookBundleCondition
+
 #TODO: replace with digital_book constants
 from ecommerce.programs.constants import BENEFIT_TYPE_CHOICES, BENEFIT_MAP
 from ecommerce.programs.custom import class_path, create_condition
@@ -108,7 +110,7 @@ class DigitalBookOfferForm(forms.ModelForm):
         self.instance.site = site
 
         if commit:
-            benefit = getattr(self.instance, 'benefit', Benefit)
+            benefit = getattr(self.instance, 'benefit', Benefit())
             benefit.proxy_class = class_path(BENEFIT_MAP[self.cleaned_data['benefit_type']])
             benefit.value = self.cleaned_data['benefit_value']
             benefit.save()
