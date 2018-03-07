@@ -6,7 +6,7 @@
 -e git+https://github.com/edx/analytics-python.git@1.2.11#egg=analytics-python==1.2.11
 
 coreapi==2.3.1
-django==1.11.9
+django==1.11.11
 django-compressor==2.2
 django-crispy-forms==1.7.0
 django_extensions==1.9.9
