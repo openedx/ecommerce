@@ -27,15 +27,16 @@
                     </div>
                     {% if line_data.enrollment_code %}
                         <div class="col-sm-12 col-xs-12 form-inline quantity-group">
-                            <label class="product-price-label text-muted quantity-label">{% trans 'Quantity' %}</label>
+                            <label for="input-quantity-field " class="product-price-label text-muted quantity-label">{% trans 'Quantity' %}</label>
                             <div class="checkout-quantity form-group">
                                 <div class="input-group spinner {% if form.errors %}error{% endif %}">
-                                    {% render_field form.quantity class+="quantity form-control" min=min_seat_quantity max=max_seat_quantity %}
-                                    <span class="max-quantity">Max: 100</span>
+                                    {% render_field form.quantity class+="quantity form-control" min=min_seat_quantity max=max_seat_quantity title="Quantity" id="input-quantity-field" %}
                                 </div>
-                                <button class="btn btn-primary update-button quantity-update" type="submit"
+                                <button id="quantity-update" class="btn btn-primary update-button quantity-update" type="submit"
                                         data-loading-text="{% trans 'Updating...' %}">{% trans "Update" %}</button>
                             </div>
+                            <div id="error-msg"></div>
+                            <span class="max-quantity">Max: 100</span>
                         </div>
                     {% endif %}
                 </div>

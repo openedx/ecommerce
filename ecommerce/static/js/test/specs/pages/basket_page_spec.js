@@ -153,6 +153,30 @@ define([
                     expect($quantity.first().val()).toEqual('1');
                 });
 
+                it('should show error message when quantity is greater than 100', function() {
+                    BasketPage.onReady();
+
+                    $('input.quantity').first().val(101);
+                    $('#quantity-update').trigger('click');
+                    expect($('div#error-msg').text()).toEqual('Quantity must be less than or equal to 100.');
+                });
+
+                it('should show error message when quantity is less than 1', function() {
+                    BasketPage.onReady();
+
+                    $('input.quantity').first().val(0);
+                    $('#quantity-update').trigger('click');
+                    expect($('div#error-msg').text()).toEqual('Quantity must be greater than or equal to 1.');
+                });
+
+                it('should show error message when quantity is not given', function() {
+                    BasketPage.onReady();
+
+                    $('input.quantity').first().val('');
+                    $('#quantity-update').trigger('click');
+                    expect($('div#error-msg').text()).toEqual('Please enter a quantity from 1 to 100.');
+                });
+
                 it('should recognize the credit card', function() {
                     var validCardList = [
                             {number: '378282246310005', name: 'amex'},

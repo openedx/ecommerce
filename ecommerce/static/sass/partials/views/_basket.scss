@@ -480,6 +480,24 @@
 
             .quantity-group {
                 padding-left: 0;
+
+                .max-quantity {
+                    font-size: 10px;
+                    color: #4a4a4a;
+                    font-weight: 600;
+                    margin: 0 0 0 85px;
+                    display: block;
+                }
+
+                #error-msg {
+                  font-size: 12px;
+                  color: red;
+                  margin: 5px 0 5px 85px;
+                }
+
+                .error-state {
+                  border-color: red;
+                }
             }
 
             .quantity-label {

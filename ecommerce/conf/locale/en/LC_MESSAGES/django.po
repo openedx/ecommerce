@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-02-22 11:09+0000\n"
+"POT-Creation-Date: 2018-03-07 13:03+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -577,25 +577,29 @@ msgstr ""
 msgid "One of the products you're trying to order is unavailable."
 msgstr ""
 
-#: ecommerce/extensions/api/serializers.py:334
+#: ecommerce/extensions/api/serializers.py:333
 msgid "Products must have a certificate type."
 msgstr ""
 
-#: ecommerce/extensions/api/serializers.py:337
-#: ecommerce/extensions/api/serializers.py:365
+#: ecommerce/extensions/api/serializers.py:336
+#: ecommerce/extensions/api/serializers.py:367
 msgid "Products must have a price."
 msgstr ""
 
-#: ecommerce/extensions/api/serializers.py:361
+#: ecommerce/extensions/api/serializers.py:343
+msgid "You need to provide a course UUID to create Course Entitlements."
+msgstr ""
+
+#: ecommerce/extensions/api/serializers.py:363
 msgid "Products must indicate whether ID verification is required."
 msgstr ""
 
-#: ecommerce/extensions/api/serializers.py:423
+#: ecommerce/extensions/api/serializers.py:426
 #, python-brace-format
 msgid "Invalid product class [{product_class}] requested."
 msgstr ""
 
-#: ecommerce/extensions/api/serializers.py:453
+#: ecommerce/extensions/api/serializers.py:457
 #, python-brace-format
 msgid ""
 "Course [{course_id}] was not published to LMS because the switch "
@@ -603,19 +607,19 @@ msgid ""
 "been saved."
 msgstr ""
 
-#: ecommerce/extensions/api/serializers.py:648
+#: ecommerce/extensions/api/serializers.py:649
 msgid "Enrollment code"
 msgstr ""
 
-#: ecommerce/extensions/api/serializers.py:649
+#: ecommerce/extensions/api/serializers.py:650
 msgid "Discount code"
 msgstr ""
 
-#: ecommerce/extensions/api/serializers.py:663
+#: ecommerce/extensions/api/serializers.py:664
 msgid "ACTIVE"
 msgstr ""
 
-#: ecommerce/extensions/api/serializers.py:663
+#: ecommerce/extensions/api/serializers.py:664
 msgid "INACTIVE"
 msgstr ""
 
@@ -686,7 +690,7 @@ msgstr ""
 msgid ""
 "{strong_start}Purchasing access just for yourself?{strong_end}"
 "{paragraph_start}If you are purchasing a single code for someone else, "
-"please continue with checkout. However, If you are the learner {link_start}"
+"please continue with checkout. However, if you are the learner {link_start}"
 "go back{link_end} to enroll directly.{paragraph_end}"
 msgstr ""
 
@@ -733,42 +737,42 @@ msgstr ""
 msgid "Could not apply the code '{code}'; it requires data sharing consent."
 msgstr ""
 
-#: ecommerce/extensions/basket/views.py:461
+#: ecommerce/extensions/basket/views.py:462
 #, python-brace-format
 msgid "Coupon code '{code}' has expired."
 msgstr ""
 
-#: ecommerce/extensions/basket/views.py:468
+#: ecommerce/extensions/basket/views.py:469
 #, python-brace-format
 msgid "Coupon code '{code}' is not active."
 msgstr ""
 
-#: ecommerce/extensions/basket/views.py:475
+#: ecommerce/extensions/basket/views.py:476
 #, python-brace-format
 msgid "Coupon code '{code}' has already been redeemed."
 msgstr ""
 
-#: ecommerce/extensions/basket/views.py:485
-#: ecommerce/extensions/basket/views.py:499
+#: ecommerce/extensions/basket/views.py:486
+#: ecommerce/extensions/basket/views.py:500
 #, python-brace-format
 msgid "Coupon code '{code}' is not valid for this basket."
 msgstr ""
 
-#: ecommerce/extensions/basket/views.py:523
+#: ecommerce/extensions/basket/views.py:524
 msgid "Your basket does not qualify for a coupon code discount."
 msgstr ""
 
-#: ecommerce/extensions/basket/views.py:528
+#: ecommerce/extensions/basket/views.py:529
 #, python-brace-format
 msgid "Coupon code '{code}' added to basket."
 msgstr ""
 
-#: ecommerce/extensions/basket/views.py:538
+#: ecommerce/extensions/basket/views.py:539
 #, python-brace-format
 msgid "You have already added coupon code '{code}' to your basket."
 msgstr ""
 
-#: ecommerce/extensions/basket/views.py:546
+#: ecommerce/extensions/basket/views.py:547
 #, python-brace-format
 msgid "Coupon code '{code}' does not exist."
 msgstr ""
@@ -934,8 +938,7 @@ msgid "{label} (required)"
 msgstr ""
 
 #: ecommerce/extensions/payment/forms.py:109
-#: ecommerce/extensions/voucher/utils.py:223
-msgid "Organization"
+msgid "Organization (required)"
 msgstr ""
 
 #: ecommerce/extensions/payment/forms.py:125
@@ -946,16 +949,15 @@ msgid ""
 msgstr ""
 
 #: ecommerce/extensions/payment/forms.py:128
-msgid "First Name"
+msgid "First Name (required)"
 msgstr ""
 
 #: ecommerce/extensions/payment/forms.py:129
-msgid "Last Name"
+msgid "Last Name (required)"
 msgstr ""
 
 #: ecommerce/extensions/payment/forms.py:130
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html:510
-msgid "Address"
+msgid "Address (required)"
 msgstr ""
 
 #: ecommerce/extensions/payment/forms.py:131
@@ -963,7 +965,7 @@ msgid "Suite/Apartment Number"
 msgstr ""
 
 #: ecommerce/extensions/payment/forms.py:132
-msgid "City"
+msgid "City (required)"
 msgstr ""
 
 #: ecommerce/extensions/payment/forms.py:135
@@ -975,7 +977,7 @@ msgid "Zip/Postal Code"
 msgstr ""
 
 #: ecommerce/extensions/payment/forms.py:137
-msgid "Country"
+msgid "Country (required)"
 msgstr ""
 
 #: ecommerce/extensions/payment/forms.py:164
@@ -1150,6 +1152,10 @@ msgstr ""
 msgid "Course Seat Types"
 msgstr ""
 
+#: ecommerce/extensions/voucher/utils.py:223
+msgid "Organization"
+msgstr ""
+
 #: ecommerce/extensions/voucher/utils.py:224
 msgid "Client"
 msgstr ""
@@ -1164,7 +1170,7 @@ msgid "Note"
 msgstr ""
 
 #: ecommerce/extensions/voucher/utils.py:227
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:48
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:50
 #: ecommerce/templates/oscar/basket/partials/hosted_checkout_basket.html:62
 msgid "Price"
 msgstr ""
@@ -1846,7 +1852,7 @@ msgid "Item Price:"
 msgstr ""
 
 #: ecommerce/templates/edx/checkout/receipt.html:101
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:56
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:58
 msgid "Subtotal"
 msgstr ""
 
@@ -2104,7 +2110,7 @@ msgid ""
 "\n"
 "            %(strong_start)sWe’ve updated your quantity.%(strong_end)s\n"
 "            %(paragraph_start)sYour cart includes %(num_items)s enrollment "
-"codes at a total cost of %(total)s that you will receive via email."
+"codes at a total cost of %(total)s, that you will receive via email."
 "%(paragraph_end)s\n"
 "        "
 msgstr ""
@@ -2144,19 +2150,19 @@ msgstr ""
 msgid "Update"
 msgstr ""
 
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:45
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:47
 msgid "summary"
 msgstr ""
 
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:52
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:54
 msgid "Quanity"
 msgstr ""
 
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:62
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:64
 msgid "Discounts applied"
 msgstr ""
 
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:72
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:74
 #, python-format
 msgid ""
 "\n"
@@ -2165,7 +2171,7 @@ msgid ""
 "                                "
 msgstr ""
 
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:88
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:90
 #, python-format
 msgid ""
 "\n"
@@ -2174,95 +2180,95 @@ msgid ""
 "                                    "
 msgstr ""
 
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:93
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:95
 msgid "Remove coupon"
 msgstr ""
 
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:102
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:104
 msgid "Add coupon code"
 msgstr ""
 
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:102
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:104
 msgid "(optional)"
 msgstr ""
 
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:111
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:113
 msgid "TOTAL"
 msgstr ""
 
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:118
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:120
 msgid "order details"
 msgstr ""
 
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:133
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:135
 msgid "select payment method"
 msgstr ""
 
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:135
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:137
 msgid "Pay with a Credit Card"
 msgstr ""
 
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:146
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:148
 msgid "Pay with PayPal"
 msgstr ""
 
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:155
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:157
 msgid "Pay with Apple Pay"
 msgstr ""
 
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:170
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:172
 msgid "card holder information"
 msgstr ""
 
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:181
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:183
 msgid "billing information"
 msgstr ""
 
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:183
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:185
 msgid "Credit cards"
 msgstr ""
 
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:190
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:192
 msgid "Card Number (required)"
 msgstr ""
 
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:190
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:200
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:192
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:202
 msgid "Secure"
 msgstr ""
 
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:193
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:195
 msgid "Credit card icon"
 msgstr ""
 
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:199
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:201
 msgid "Security Code (required)"
 msgstr ""
 
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:203
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:205
 msgid "Help with CVV"
 msgstr ""
 
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:206
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:208
 msgid ""
 "The three last digits in the signature area on the back of your card. For "
 "American Express, it is the four digits on the front of the card."
 msgstr ""
 
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:213
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:215
 msgid "Expiration (required)"
 msgstr ""
 
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:217
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:219
 msgid "Month"
 msgstr ""
 
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:227
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:229
 msgid "Year"
 msgstr ""
 
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:244
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:254
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:246
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:256
 #: ecommerce/templates/oscar/basket/partials/hosted_checkout_basket.html:147
 msgid "Place Order"
 msgstr ""
@@ -3163,6 +3169,10 @@ msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:506
 msgid "Charge (excl tax)"
+msgstr ""
+
+#: ecommerce/templates/oscar/dashboard/orders/order_detail.html:510
+msgid "Address"
 msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:521
