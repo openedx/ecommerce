@@ -64,22 +64,25 @@ class Benefit(AbstractBenefit):
         course_uuids = []
         applicable_lines = lines
         for line in applicable_lines:
-            product = line.product
+            if line.product.is_seat_product:
+                product_id = line.product.course.id
+            else:  # All lines passed to this method should either have a seat or an entitlement product
+                product_id = line.product.attr.UUID
             cache_key = get_cache_key(
                 site_domain=domain,
                 partner_code=partner_code,
                 resource='catalog_query.contains',
-                course_id=product.course_id if product.is_seat_product else product.attr.UUID,
+                course_id=product_id,
                 query=query
             )
             response = cache.get(cache_key)
             if response is False:
                 applicable_lines.remove(line)
             elif response is None:
-                if product.is_seat_product:
-                    course_run_ids.append({'id': product.course.id, 'cache_key': cache_key, 'line': line})
+                if line.product.is_seat_product:
+                    course_run_ids.append({'id': product_id, 'cache_key': cache_key, 'line': line})
                 else:
-                    course_uuids.append({'id': product.attr.UUID, 'cache_key': cache_key, 'line': line})
+                    course_uuids.append({'id': product_id, 'cache_key': cache_key, 'line': line})
         return course_run_ids, course_uuids, applicable_lines
 
     def get_applicable_lines(self, offer, basket, range=None):  # pylint: disable=redefined-builtin
