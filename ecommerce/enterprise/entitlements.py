@@ -246,7 +246,7 @@ def get_enterprise_code_redemption_redirect(request, products, skus, failure_vie
                     # The basket views do not handle getting data sharing consent. However, the coupon redemption
                     # view does. By adding the `failure_url` parameter, we're informing that view that, in the
                     # event required consent for a coupon can't be collected, the user ought to be directed
-                    # back to this single-item basket view, with the `consent_failed` parameter applied so that
+                    # back to basket view, with the `consent_failed` parameter applied so that
                     # we know not to try to apply the enterprise coupon again.
                     (
                         'failure_url', request.build_absolute_uri(

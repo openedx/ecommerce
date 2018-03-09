@@ -14,7 +14,6 @@ from opaque_keys.edx.keys import CourseKey
 from oscar.apps.basket.views import VoucherAddView as BaseVoucherAddView
 from oscar.apps.basket.views import VoucherRemoveView as BaseVoucherRemoveView
 from oscar.apps.basket.views import *  # pylint: disable=wildcard-import, unused-wildcard-import
-from oscar.core.decorators import deprecated
 from requests.exceptions import ConnectionError, Timeout
 from slumber.exceptions import SlumberBaseException
 
@@ -42,62 +41,7 @@ StockRecord = get_model('partner', 'StockRecord')
 Voucher = get_model('voucher', 'Voucher')
 
 
-@deprecated
-class BasketSingleItemView(View):
-    """
-    View that adds a single product to a user's basket.
-    An additional coupon code can be supplied so the offer is applied to the basket.
-    """
-
-    def get(self, request):
-        partner = get_partner_for_site(request)
-
-        sku = request.GET.get('sku', None)
-        code = request.GET.get('code', None)
-
-        if not sku:
-            return HttpResponseBadRequest(_('No SKU provided.'))
-
-        voucher = Voucher.objects.get(code=code) if code else None
-
-        try:
-            product = StockRecord.objects.get(partner=partner, partner_sku=sku).product
-        except StockRecord.DoesNotExist:
-            return HttpResponseBadRequest(_('SKU [{sku}] does not exist.').format(sku=sku))
-
-        logger.info('Starting payment flow for user[%s] for product[%s].', request.user.username, sku)
-
-        if voucher is None:
-            # If there is an Enterprise entitlement available for this basket,
-            # we redirect to the CouponRedeemView to apply the discount to the
-            # basket and handle the data sharing consent requirement.
-            code_redemption_redirect = get_enterprise_code_redemption_redirect(
-                request,
-                [product],
-                [sku],
-                'basket:single-item'
-            )
-            if code_redemption_redirect:
-                return code_redemption_redirect
-
-        # If the product isn't available then there's no reason to continue with the basket addition
-        purchase_info = request.strategy.fetch_for_product(product)
-        if not purchase_info.availability.is_available_to_buy:
-            msg = _('Product [{product}] not available to buy.').format(product=product.title)
-            return HttpResponseBadRequest(msg)
-
-        # At this point we're either adding an Enrollment Code product to the basket,
-        # or the user is adding a Seat product for which they are not already enrolled
-        try:
-            prepare_basket(request, [product], voucher)
-        except AlreadyPlacedOrderException:
-            msg = _('You have already purchased {course} seat.').format(course=product.title)
-            return render(request, 'edx/error.html', {'error': msg})
-        url = add_utm_params_to_url(reverse('basket:summary'), self.request.GET.items())
-        return HttpResponseRedirect(url, status=303)
-
-
-class BasketMultipleItemsView(View):
+class BasketAddItemsView(View):
     """
     View that adds multiple products to a user's basket.
     An additional coupon code can be supplied so the offer is applied to the basket.
@@ -128,13 +72,26 @@ class BasketMultipleItemsView(View):
                 request,
                 products,
                 skus,
-                'basket:add-multi'
+                'basket:basket-add'
             )
             if code_redemption_redirect:
                 return code_redemption_redirect
 
+        # check availability of products
+        unavailable_product_ids = []
+        for product in products:
+            purchase_info = request.strategy.fetch_for_product(product)
+            if not purchase_info.availability.is_available_to_buy:
+                logger.warning('Product [%s] is not available to buy.', product.title)
+                unavailable_product_ids.append(product.id)
+
+        available_products = products.exclude(id__in=unavailable_product_ids)
+        if not available_products:
+            msg = _('No product is available to buy.')
+            return HttpResponseBadRequest(msg)
+
         try:
-            prepare_basket(request, products, voucher)
+            prepare_basket(request, available_products, voucher)
         except AlreadyPlacedOrderException:
             return render(request, 'edx/error.html', {'error': _('You have already purchased these products')})
         url = add_utm_params_to_url(reverse('basket:summary'), self.request.GET.items())

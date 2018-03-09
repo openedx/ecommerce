@@ -419,7 +419,7 @@ class CouponRedeemViewTests(CouponMixin, DiscoveryTestMixin, LmsApiMockMixin, En
 
     @httpretty.activate
     def test_basket_redirect_discount_code(self):
-        """ Verify the view redirects to the basket single-item view when a discount code is provided. """
+        """ Verify the view redirects to the basket view when a discount code is provided. """
         self.mock_course_api_response(course=self.course)
         self.mock_account_api(self.request, self.user.username, data={'is_active': True})
         self.mock_access_token_response()
@@ -638,7 +638,7 @@ class CouponRedeemViewTests(CouponMixin, DiscoveryTestMixin, LmsApiMockMixin, En
     @httpretty.activate
     def test_active_user_requirement_disabled(self):
         """
-        Verify that a user who hasn't activated their account is redirected to the basket single-item view
+        Verify that a user who hasn't activated their account is redirected to the basket view
         when the account activation requirement has been disabled.
         """
         self.site.siteconfiguration.require_account_activation = False
