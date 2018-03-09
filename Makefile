@@ -80,7 +80,7 @@ validate: validate_python validate_js
 theme_static:
 	python manage.py update_assets --skip-collect
 
-static: theme_static
+static: requirements.js theme_static
 	$(NODE_BIN)/r.js -o build.js
 	python manage.py collectstatic --noinput
 	python manage.py compress --force

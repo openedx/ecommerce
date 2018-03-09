@@ -10,6 +10,7 @@ from django.test import TestCase
 from oscar.core.loading import get_model
 
 from ecommerce.core.models import SiteConfiguration
+from ecommerce.courses.models import Course
 from ecommerce.theming.models import SiteTheme
 
 logger = logging.getLogger(__name__)
@@ -117,6 +118,29 @@ class TestCreateSitesAndPartners(TestCase):
             "--devstack"
         )
         self._assert_sites_data_is_valid()
+
+    def test_create_devstack_site_and_partner_w_course(self):
+        """
+        Verify that command creates sites and Partners
+        """
+        call_command(
+            "create_sites_and_partners",
+            "--dns-name", self.dns_name,
+            "--theme-path", self.theme_path,
+            "--devstack", "--demo_course"
+        )
+        self._assert_sites_data_is_valid()
+
+        partners = Partner.objects.all()
+        for p in partners:
+            course_id = 'course-v1:{}+DemoX+Demo_Course'.format(p.short_code)
+            courses = Course.objects.filter(id=course_id)
+
+            # Check that the course exists
+            self.assertEqual(len(courses), 1)
+
+            # Check that the seat products exist
+            self.assertEqual(len(courses[0].seat_products), 2)
 
     def test_create_site_and_partner(self):
         """
