@@ -507,6 +507,8 @@ class EnrollmentCodeFulfillmentModule(BaseFulfillmentModule):
 
             stock_record = StockRecord.objects.get(product=seat, partner=seat.course.partner)
             coupon_catalog = CouponViewSet.get_coupon_catalog([stock_record.id], seat.course.partner)
+            _range.catalog = coupon_catalog
+            _range.save()
 
             vouchers = create_vouchers(
                 name='Enrollment code voucher [{}]'.format(line.product.title),
