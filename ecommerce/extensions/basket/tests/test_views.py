@@ -67,159 +67,12 @@ BUNDLE = 'bundle_identifier'
 
 
 @ddt.ddt
-class BasketSingleItemViewTests(CouponMixin, DiscoveryTestMixin, DiscoveryMockMixin, LmsApiMockMixin, TestCase):
-    """ BasketSingleItemView view tests. """
-    path = reverse('basket:single-item')
+class BasketAddItemsViewTests(CouponMixin, DiscoveryTestMixin, DiscoveryMockMixin, LmsApiMockMixin, TestCase):
+    """ BasketAddItemsView view tests. """
+    path = reverse('basket:basket-add')
 
     def setUp(self):
-        super(BasketSingleItemViewTests, self).setUp()
-        self.user = self.create_user()
-        self.client.login(username=self.user.username, password=self.password)
-
-        self.course = CourseFactory()
-        self.course.create_or_update_seat('verified', True, 50, self.partner)
-        product = self.course.create_or_update_seat('verified', False, 0, self.partner)
-        self.stock_record = StockRecordFactory(product=product, partner=self.partner)
-        self.catalog = Catalog.objects.create(partner=self.partner)
-        self.catalog.stock_records.add(self.stock_record)
-
-    def test_login_required(self):
-        """ The view should redirect to login page if the user is not logged in. """
-        self.client.logout()
-        response = self.client.get(self.path)
-        testserver_login_url = self.get_full_url(reverse('login'))
-        expected_url = '{path}?next={basket_path}'.format(path=testserver_login_url, basket_path=self.path)
-        self.assertRedirects(response, expected_url, target_status_code=302)
-
-    def test_missing_sku(self):
-        """ The view should return HTTP 400 if no SKU is provided. """
-        response = self.client.get(self.path)
-        self.assertEqual(response.status_code, 400)
-        self.assertEqual(response.content, 'No SKU provided.')
-
-    def test_missing_product(self):
-        """ The view should return HTTP 400 if SKU has no associated product. """
-        sku = 'NONEXISTING'
-        expected_content = 'SKU [{}] does not exist.'.format(sku)
-        url = '{path}?sku={sku}'.format(path=self.path, sku=sku)
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, 400)
-        self.assertEqual(response.content, expected_content)
-
-    @mock.patch('ecommerce.enterprise.entitlements.get_entitlement_voucher')
-    def test_with_entitlement_voucher(self, mock_get_entitlement_voucher):
-        """
-        The view ought to redirect to the coupon redemption flow, which is consent-aware.
-        """
-        voucher = mock_get_entitlement_voucher.return_value
-        voucher.code = 'FAKECODE'
-        sku = self.stock_record.partner_sku
-        url = '{path}?sku={sku}'.format(path=self.path, sku=sku)
-        response = self.client.get(url)
-
-        expected_failure_url = (
-            'http%3A%2F%2Ftestserver.fake%2Fbasket%2Fsingle-item%2F%3Fconsent_failed%3DTrue%26sku%3D{sku}'.format(
-                sku=sku
-            )
-        )
-
-        expected_url = reverse('coupons:redeem') + '?code=FAKECODE&sku={sku}&failure_url={failure_url}'.format(
-            sku=sku,
-            failure_url=expected_failure_url,
-        )
-        self.assertRedirects(response, expected_url)
-
-    @mock.patch('ecommerce.enterprise.entitlements.get_entitlement_voucher')
-    def test_with_entitlement_voucher_consent_failed(self, mock_get_entitlement_voucher):
-        """
-        Since consent has already failed, we ought to follow the standard flow, rather than looping forever.
-        """
-        voucher = mock_get_entitlement_voucher.return_value
-        voucher.code = 'FAKECODE'
-        sku = self.stock_record.partner_sku
-        url = '{path}?sku={sku}&consent_failed=true'.format(path=self.path, sku=sku)
-        self.mock_course_runs_endpoint(self.site_configuration.discovery_api_url, course_run=self.course)
-        response = self.client.get(url)
-        expected_url = self.get_full_url(reverse('basket:summary'))
-        self.assertRedirects(response, expected_url, status_code=303)
-
-    def test_unavailable_product(self):
-        """ The view should return HTTP 400 if the product is not available for purchase. """
-        product = self.stock_record.product
-        product.expires = pytz.utc.localize(datetime.datetime.min)
-        product.save()
-        self.assertFalse(Selector().strategy().fetch_for_product(product).availability.is_available_to_buy)
-
-        expected_content = 'Product [{}] not available to buy.'.format(product.title)
-        url = '{path}?sku={sku}'.format(path=self.path, sku=self.stock_record.partner_sku)
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, 400)
-        self.assertEqual(response.content, expected_content)
-
-    def test_redirect_to_basket_summary(self):
-        """
-        Verify the view redirects to the basket summary page, and that the user's basket is prepared for checkout.
-        """
-        self.create_coupon(catalog=self.catalog, code=COUPON_CODE, benefit_value=5)
-
-        self.mock_course_runs_endpoint(self.site_configuration.discovery_api_url, course_run=self.course)
-        url = '{path}?sku={sku}&code={code}'.format(path=self.path, sku=self.stock_record.partner_sku,
-                                                    code=COUPON_CODE)
-        response = self.client.get(url)
-        expected_url = self.get_full_url(reverse('basket:summary'))
-        self.assertRedirects(response, expected_url, status_code=303)
-
-        basket = Basket.objects.get(owner=self.user, site=self.site)
-        self.assertEqual(basket.status, Basket.OPEN)
-        self.assertEqual(basket.lines.count(), 1)
-        self.assertTrue(basket.contains_a_voucher)
-        self.assertEqual(basket.lines.first().product, self.stock_record.product)
-
-    def test_already_purchased_product(self):
-        """
-        Verify student can not place multiple orders for single course seat
-        """
-        course = CourseFactory()
-        product = course.create_or_update_seat("Verified", True, 0, self.partner)
-        stock_record = StockRecordFactory(product=product, partner=self.partner)
-        catalog = Catalog.objects.create(partner=self.partner)
-        catalog.stock_records.add(stock_record)
-        sku = stock_record.partner_sku
-        basket = factories.BasketFactory(owner=self.user, site=self.site)
-        basket.add_product(product, 1)
-        create_order(user=self.user, basket=basket)
-        url = '{path}?sku={sku}'.format(path=self.path, sku=sku)
-        expected_content = 'You have already purchased {course} seat.'.format(course=product.title)
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.context['error'], expected_content)
-
-    def test_not_already_purchased_product(self):
-        """
-        Verify student can place order for not purchased product
-        """
-        course = CourseFactory()
-        product = course.create_or_update_seat("Verified", True, 0, self.partner)
-        stock_record = StockRecordFactory(product=product, partner=self.partner)
-        catalog = Catalog.objects.create(partner=self.partner)
-        catalog.stock_records.add(stock_record)
-        sku = stock_record.partner_sku
-
-        url = '{path}?sku={sku}'.format(path=self.path, sku=sku)
-        response = self.client.get(url)
-
-        self.assertEqual(response.status_code, 303)
-        self.assertEqual(response.wsgi_request.path_info, '/basket/single-item/')
-        self.assertEqual(response.wsgi_request.GET['sku'], sku)
-
-
-@ddt.ddt
-class BasketMultipleItemsViewTests(DiscoveryTestMixin, DiscoveryMockMixin, LmsApiMockMixin, TestCase):
-    """ BasketMultipleItemsView view tests. """
-    path = reverse('basket:add-multi')
-
-    def setUp(self):
-        super(BasketMultipleItemsViewTests, self).setUp()
+        super(BasketAddItemsViewTests, self).setUp()
         self.user = self.create_user()
         self.client.login(username=self.user.username, password=self.password)
 
@@ -249,6 +102,25 @@ class BasketMultipleItemsViewTests(DiscoveryTestMixin, DiscoveryMockMixin, LmsAp
         url = '{root}?{qs}&utm_source=test'.format(root=self.path, qs=qs)
         response = self.client.get(url)
         self.assertEqual(response.url, '/basket/?utm_source=test')
+
+    def test_redirect_to_basket_summary(self):
+        """
+        Verify the view redirects to the basket summary page, and that the user's basket is prepared for checkout.
+        """
+        self.create_coupon(catalog=self.catalog, code=COUPON_CODE, benefit_value=5)
+
+        self.mock_course_runs_endpoint(self.site_configuration.discovery_api_url, course_run=self.course)
+        url = '{path}?sku={sku}&code={code}'.format(path=self.path, sku=self.stock_record.partner_sku,
+                                                    code=COUPON_CODE)
+        response = self.client.get(url)
+        expected_url = self.get_full_url(reverse('basket:summary'))
+        self.assertRedirects(response, expected_url, status_code=303)
+
+        basket = Basket.objects.get(owner=self.user, site=self.site)
+        self.assertEqual(basket.status, Basket.OPEN)
+        self.assertEqual(basket.lines.count(), 1)
+        self.assertTrue(basket.contains_a_voucher)
+        self.assertEqual(basket.lines.first().product, self.stock_record.product)
 
     def test_add_multiple_products_no_skus_provided(self):
         """ Verify the Bad request exception is thrown when no skus are provided. """
@@ -365,6 +237,36 @@ class BasketMultipleItemsViewTests(DiscoveryTestMixin, DiscoveryMockMixin, LmsAp
         response = self.client.get(url)
         expected_url = self.get_full_url(reverse('basket:summary'))
         self.assertRedirects(response, expected_url, status_code=303)
+
+    def test_no_available_product(self):
+        """ The view should return HTTP 400 if the product is not available for purchase. """
+        product = self.stock_record.product
+        product.expires = pytz.utc.localize(datetime.datetime.min)
+        product.save()
+        self.assertFalse(Selector().strategy().fetch_for_product(product).availability.is_available_to_buy)
+
+        expected_content = 'No product is available to buy.'
+        url = '{path}?sku={sku}'.format(path=self.path, sku=self.stock_record.partner_sku)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.content, expected_content)
+
+    def test_with_both_unavailable_and_available_products(self):
+        """ Verify the basket ignores unavailable products and continue with available products. """
+        products = ProductFactory.create_batch(3, stockrecords__partner=self.partner)
+
+        products[0].expires = pytz.utc.localize(datetime.datetime.min)
+        products[0].save()
+        self.assertFalse(Selector().strategy().fetch_for_product(products[0]).availability.is_available_to_buy)
+
+        qs = urllib.urlencode({
+            'sku': [product.stockrecords.first().partner_sku for product in products],
+        }, True)
+        url = '{root}?{qs}'.format(root=self.path, qs=qs)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 303)
+        basket = response.wsgi_request.basket
+        self.assertEqual(basket.status, Basket.OPEN)
 
 
 @httpretty.activate

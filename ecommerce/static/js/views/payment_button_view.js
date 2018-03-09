@@ -18,7 +18,7 @@ define([
                     code = window.location.search.substring(1).split('=')[1],
                     href;
                 if (code === undefined) {
-                    href = _s.sprintf('/basket/single-item/?sku=%s', sku);
+                    href = _s.sprintf('/basket/add/?sku=%s', sku);
                 } else {
                     href = _s.sprintf('/coupons/redeem/?code=%s&sku=%s', code, sku);
                 }
