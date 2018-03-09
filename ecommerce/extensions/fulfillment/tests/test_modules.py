@@ -523,7 +523,7 @@ class EnrollmentCodeFulfillmentModuleTests(DiscoveryTestMixin, TestCase):
 
     def setUp(self):
         super(EnrollmentCodeFulfillmentModuleTests, self).setUp()
-        course = CourseFactory()
+        course = CourseFactory(site=self.site)
         course.create_or_update_seat('verified', True, 50, self.partner, create_enrollment_code=True)
         enrollment_code = Product.objects.get(product_class__name=ENROLLMENT_CODE_PRODUCT_CLASS_NAME)
         user = factories.UserFactory()
@@ -556,6 +556,7 @@ class EnrollmentCodeFulfillmentModuleTests(DiscoveryTestMixin, TestCase):
         self.assertEqual(completed_lines[0].status, LINE.COMPLETE)
         self.assertEqual(OrderLineVouchers.objects.count(), 1)
         self.assertEqual(OrderLineVouchers.objects.first().vouchers.count(), self.QUANTITY)
+        self.assertIsNotNone(OrderLineVouchers.objects.first().vouchers.first().benefit.range.catalog)
 
     def test_revoke_line(self):
         line = self.order.lines.first()
