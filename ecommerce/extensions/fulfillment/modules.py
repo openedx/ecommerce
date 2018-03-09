@@ -25,6 +25,7 @@ from ecommerce.courses.models import Course
 from ecommerce.courses.utils import mode_for_product
 from ecommerce.enterprise.utils import get_or_create_enterprise_customer_user
 from ecommerce.extensions.analytics.utils import audit_log, parse_tracking_context
+from ecommerce.extensions.api.v2.views.coupons import CouponViewSet
 from ecommerce.extensions.checkout.utils import get_receipt_page_url
 from ecommerce.extensions.fulfillment.status import LINE
 from ecommerce.extensions.voucher.models import OrderLineVouchers
@@ -36,6 +37,7 @@ Option = get_model('catalogue', 'Option')
 Product = get_model('catalogue', 'Product')
 Range = get_model('offer', 'Range')
 Voucher = get_model('voucher', 'Voucher')
+StockRecord = get_model('partner', 'StockRecord')
 logger = logging.getLogger(__name__)
 
 
@@ -503,11 +505,16 @@ class EnrollmentCodeFulfillmentModule(BaseFulfillmentModule):
             if created:
                 _range.add_product(seat)
 
+            stock_record = StockRecord.objects.get(product=seat, partner=seat.course.partner)
+            coupon_catalog = CouponViewSet.get_coupon_catalog([stock_record.id], seat.course.partner)
+            _range.catalog = coupon_catalog
+            _range.save()
+
             vouchers = create_vouchers(
                 name='Enrollment code voucher [{}]'.format(line.product.title),
                 benefit_type=Benefit.PERCENTAGE,
                 benefit_value=100,
-                catalog=None,
+                catalog=coupon_catalog,
                 coupon=seat,
                 end_datetime=settings.ENROLLMENT_CODE_EXIPRATION_DATE,
                 enterprise_customer=None,
