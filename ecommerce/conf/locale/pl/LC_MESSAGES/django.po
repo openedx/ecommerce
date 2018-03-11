@@ -3,7 +3,7 @@
 # This file is distributed under the same license as the PACKAGE package.
 # 
 # Translators:
-# cblackburn <cblackburn@edx.org>, 2016
+# Clinton Blackburn <clinton.blackburn@gmail.com>, 2016
 # Greg Wasowski <gwasowski@salesforce.com>, 2015
 # Magdalena Jarosińska <m.jarosinska@stud.elka.pw.edu.pl>, 2015
 # MONIKA STEFAŃCZYK <monika_stefanczyk@wp.pl>, 2016

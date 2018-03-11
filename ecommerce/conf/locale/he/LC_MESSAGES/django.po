@@ -3,7 +3,7 @@
 # This file is distributed under the same license as the PACKAGE package.
 # 
 # Translators:
-# cblackburn <cblackburn@edx.org>, 2016
+# Clinton Blackburn <clinton.blackburn@gmail.com>, 2016
 # dana bublil <dana.bublil@gmail.com>, 2016
 # e2f_HE c1 <e2f_HE_c1@outlook.com>, 2016-2017
 # e2f he_r1 <e2f_he_r1@outlook.com>, 2016
