@@ -116,7 +116,7 @@ class Benefit(AbstractBenefit):
                     cache.set(metadata['cache_key'], in_range, settings.COURSES_API_CACHE_TIMEOUT)
                     if not in_range:
                         applicable_lines.remove(metadata['line'])
-            return applicable_lines
+            return [(line.product.stockrecords.first().price_excl_tax, line) for line in applicable_lines]
         else:
             return super(Benefit, self).get_applicable_lines(offer, basket, range=range)  # pylint: disable=bad-super-call
 
