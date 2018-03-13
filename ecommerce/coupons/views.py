@@ -310,7 +310,7 @@ class EnrollmentCodeCsvView(View):
         response['Content-Disposition'] = 'attachment; filename={filename}'.format(filename=file_name)
 
         redeem_url = get_ecommerce_url(reverse('coupons:offer'))
-        voucher_field_names = ('Code', 'Redemption URL')
+        voucher_field_names = ('Code', 'Redemption URL', 'Name Of Employee', 'Date Of Distribution', 'Employee Email')
         voucher_writer = csv.DictWriter(response, fieldnames=voucher_field_names)
 
         writer = csv.writer(response)
