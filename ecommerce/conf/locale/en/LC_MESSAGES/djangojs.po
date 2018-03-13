@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-03-14 09:32+0000\n"
+"POT-Creation-Date: 2018-03-15 11:30+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -42,7 +42,7 @@ msgid "A valid course ID is required"
 msgstr ""
 
 #: ecommerce/static/js/models/coupon_model.js:106
-#, c-format
+#, javascript-format
 msgid "Email domain {%s} is invalid."
 msgstr ""
 
@@ -253,28 +253,21 @@ msgstr ""
 #: ecommerce/static/js/payment_processors/cybersource.js:249
 msgid ""
 "An error occurred while processing your payment. You have NOT been charged. "
+"Please try again, or select another payment method."
 msgstr ""
 
 #: ecommerce/static/js/payment_processors/stripe.js:71
 msgid ""
 "An error occurred while attempting to process your payment. You have not "
-"been "
+"been charged. Please check your payment details, and try again."
 msgstr ""
 
 #: ecommerce/static/js/payment_processors/stripe.js:110
-msgid "An error occurred while processing your payment. "
+msgid "An error occurred while processing your payment. Please try again."
 msgstr ""
 
 #: ecommerce/static/js/utils/utils.js:184
 msgid "Trailing comma not allowed."
-msgstr ""
-
-#: ecommerce/static/js/utils/validation_patterns.js:18
-msgid "The course ID is invalid."
-msgstr ""
-
-#: ecommerce/static/js/utils/validation_patterns.js:26
-msgid "The product name cannot contain HTML."
 msgstr ""
 
 #: ecommerce/static/js/views/coupon_detail_view.js:107
@@ -380,12 +373,15 @@ msgid "Professional Education"
 msgstr ""
 
 #: ecommerce/static/js/views/course_form_view.js:66
-msgid "Paid certificate track with initial verification and Professional "
+msgid ""
+"Paid certificate track with initial verification and Professional Education "
+"Certificate"
 msgstr ""
 
 #: ecommerce/static/js/views/course_form_view.js:72
 msgid ""
 "Paid certificate track with initial verification and Verified Certificate, "
+"and option to purchase credit"
 msgstr ""
 
 #. Translators: _START_, _END_, and _TOTAL_ are placeholders. Do NOT translate them.
