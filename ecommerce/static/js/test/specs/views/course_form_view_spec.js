@@ -16,8 +16,6 @@ define([
         });
 
         describe('course form view', function() {
-            window.bulkEnrollmentCodesEnabled = false;
-
             describe('cleanHonorCode', function() {
                 it('should always return a boolean', function() {
                     expect(view.cleanBooleanValue('false')).toEqual(false);
@@ -41,18 +39,6 @@ define([
 
                     view.model.set('type', 'default');
                     expect(view.getActiveCourseTypes()).toEqual(['audit', 'verified', 'professional', 'credit']);
-                });
-            });
-
-            describe('Bulk enrollment code tests', function() {
-                it('should check enrollment code checkbox', function() {
-                    view.$el.append(
-                        '<input type="radio" name="bulk_enrollment_code" value="true" id="enableBulkEnrollmentCode">' +
-                        '<input type="radio" name="bulk_enrollment_code" value="false" id="disableBulkEnrollmentCode">'
-                        );
-                    view.model.set('bulk_enrollment_code', true);
-                    view.toggleBulkEnrollmentField();
-                    expect(view.$('#enableBulkEnrollmentCode').prop('checked')).toBeTruthy();
                 });
             });
         });

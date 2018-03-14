@@ -23,7 +23,7 @@ from slumber.exceptions import SlumberBaseException
 from testfixtures import LogCapture
 from waffle.testutils import override_flag
 
-from ecommerce.core.constants import ENROLLMENT_CODE_PRODUCT_CLASS_NAME, ENROLLMENT_CODE_SWITCH
+from ecommerce.core.constants import ENROLLMENT_CODE_PRODUCT_CLASS_NAME
 from ecommerce.core.exceptions import SiteConfigurationError
 from ecommerce.core.tests import toggle_switch
 from ecommerce.core.url_utils import get_lms_url
@@ -412,9 +412,6 @@ class BasketSummaryViewTests(EnterpriseServiceMockMixin, DiscoveryTestMixin, Dis
             The newly created course, seat and enrollment code.
         """
         course = CourseFactory()
-        toggle_switch(ENROLLMENT_CODE_SWITCH, True)
-        self.site.siteconfiguration.enable_enrollment_codes = True
-        self.site.siteconfiguration.save()
         seat = course.create_or_update_seat(seat_type, id_verification, 10, self.partner, create_enrollment_code=True)
         enrollment_code = Product.objects.get(product_class__name=ENROLLMENT_CODE_PRODUCT_CLASS_NAME)
         return course, seat, enrollment_code
@@ -466,27 +463,6 @@ class BasketSummaryViewTests(EnterpriseServiceMockMixin, DiscoveryTestMixin, Dis
         self.assertFalse(response.context['show_voucher_form'])
         line_data = response.context['formset_lines_data'][0][1]
         self.assertEqual(line_data['seat_type'], enrollment_code.attr.seat_type.capitalize())
-
-    def test_no_switch_link(self):
-        """Verify response does not contain variables for the switch link if seat does not have an EC."""
-        no_ec_course = CourseFactory()
-        seat_without_ec = no_ec_course.create_or_update_seat('verified', False, 10, self.partner)
-        self.create_basket_and_add_product(seat_without_ec)
-        self.mock_course_runs_endpoint(self.site_configuration.discovery_api_url, course_run=no_ec_course)
-
-        response = self.client.get(self.path)
-        self.assertFalse(response.context['switch_link_text'])
-        self.assertFalse(response.context['partner_sku'])
-
-        ec_course, seat_with_ec, enrollment_code = self.prepare_course_seat_and_enrollment_code()
-        Basket.objects.all().delete()
-        self.create_basket_and_add_product(seat_with_ec)
-        self.mock_course_runs_endpoint(self.site_configuration.discovery_api_url, course_run=ec_course)
-
-        response = self.client.get(self.path)
-        enrollment_code_stockrecord = StockRecord.objects.get(product=enrollment_code)
-        self.assertTrue(response.context['switch_link_text'])
-        self.assertEqual(response.context['partner_sku'], enrollment_code_stockrecord.partner_sku)
 
     def test_basket_switch_data(self):
         """Verify the correct basket switch data (single vs. multi quantity) is retrieved."""

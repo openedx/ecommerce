@@ -10,7 +10,7 @@ from django.db import transaction
 from oscar.core.loading import get_model
 from oscar.test.factories import BasketFactory, ProductFactory, RangeFactory, VoucherFactory
 
-from ecommerce.core.constants import ENROLLMENT_CODE_PRODUCT_CLASS_NAME, ENROLLMENT_CODE_SWITCH
+from ecommerce.core.constants import ENROLLMENT_CODE_PRODUCT_CLASS_NAME
 from ecommerce.core.tests import toggle_switch
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.extensions.basket.utils import add_utm_params_to_url, attribute_cookie_data, prepare_basket
@@ -82,7 +82,6 @@ class BasketUtilsTests(DiscoveryTestMixin, TestCase):
     def test_prepare_basket_enrollment_with_voucher(self):
         """Verify the basket does not contain a voucher if enrollment code is added to it."""
         course = CourseFactory()
-        toggle_switch(ENROLLMENT_CODE_SWITCH, True)
         course.create_or_update_seat('verified', False, 10, self.partner, create_enrollment_code=True)
         enrollment_code = Product.objects.get(product_class__name=ENROLLMENT_CODE_PRODUCT_CLASS_NAME)
         voucher, product = prepare_voucher()
@@ -158,7 +157,6 @@ class BasketUtilsTests(DiscoveryTestMixin, TestCase):
         self.site_configuration.enable_embargo_check = True
         self.mock_access_token_response()
         self.mock_embargo_api(body=json.dumps({'access': True}))
-        toggle_switch(ENROLLMENT_CODE_SWITCH, True)
         course = CourseFactory()
         course.create_or_update_seat('verified', False, 10, self.partner, create_enrollment_code=True)
         product = Product.objects.get(product_class__name=ENROLLMENT_CODE_PRODUCT_CLASS_NAME)
@@ -356,7 +354,6 @@ class BasketUtilsTests(DiscoveryTestMixin, TestCase):
         Test prepare_basket returns basket with product even if its already been purchased by user
         """
         course = CourseFactory()
-        toggle_switch(ENROLLMENT_CODE_SWITCH, True)
         course.create_or_update_seat('verified', False, 10, self.partner, create_enrollment_code=True)
         enrollment_code = Product.objects.get(product_class__name=ENROLLMENT_CODE_PRODUCT_CLASS_NAME)
         with mock.patch.object(UserAlreadyPlacedOrder, 'user_already_placed_order', return_value=True):
