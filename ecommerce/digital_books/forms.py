@@ -7,7 +7,7 @@ from oscar.core.loading import get_model
 from ecommerce.digital_books.conditions import DigitalBookBundleCondition
 
 #TODO: replace with digital_book constants
-from ecommerce.programs.constants import BENEFIT_TYPE_CHOICES, BENEFIT_MAP
+from ecommerce.digital_books.constants import BENEFIT_TYPE_CHOICES, BENEFIT_MAP
 from ecommerce.programs.custom import class_path, create_condition
 
 import logging

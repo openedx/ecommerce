@@ -26,7 +26,6 @@ class DigitalBookBundleCondition(SingleItemConsumptionConditionMixin, Condition)
     @check_condition_applicability()
     def is_satisfied(self, offer, basket):
         # TODO: make docstring
-        import pdb; pdb.set_trace()
         basket_skus = set([line.stockrecord.partner_sku for line in basket.all_lines()])
         try:
             digital_book_bundle = get_digital_book_bundle(self.digital_book_bundle_uuid, basket.site.siteconfiguration)
