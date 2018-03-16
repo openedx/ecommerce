@@ -568,6 +568,7 @@ class EnrollmentCodeFulfillmentModule(BaseFulfillmentModule):
                 'order_number': order.number,
                 'partner_name': order.site.siteconfiguration.partner.name,
                 'receipt_page_url': receipt_page_url,
+                'order_history_url': order.site.siteconfiguration.build_lms_url('account/settings'),
             },
             site=order.site
         )

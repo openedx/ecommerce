@@ -12,11 +12,17 @@ from oscar.core.loading import get_class, get_model
 from oscar.test import factories
 from testfixtures import LogCapture
 
+from ecommerce.core.constants import ENROLLMENT_CODE_PRODUCT_CLASS_NAME, ENROLLMENT_CODE_SWITCH
+from ecommerce.core.models import BusinessClient
+from ecommerce.core.tests import toggle_switch
+from ecommerce.courses.tests.factories import CourseFactory
+from ecommerce.extensions.basket.utils import basket_add_organization_attribute
 from ecommerce.extensions.checkout.utils import get_receipt_page_url
 from ecommerce.extensions.payment.processors.paypal import Paypal
 from ecommerce.extensions.payment.tests.mixins import PaymentEventsMixin, PaypalMixin
 from ecommerce.extensions.payment.views.paypal import PaypalPaymentExecutionView
 from ecommerce.extensions.test.factories import create_basket
+from ecommerce.invoice.models import Invoice
 from ecommerce.tests.testcases import TestCase
 
 JSON = 'application/json'
@@ -28,6 +34,7 @@ PaymentEventType = get_model('order', 'PaymentEventType')
 PaymentProcessorResponse = get_model('payment', 'PaymentProcessorResponse')
 Selector = get_class('partner.strategy', 'Selector')
 SourceType = get_model('payment', 'SourceType')
+Product = get_model('catalogue', 'Product')
 
 post_checkout = get_class('checkout.signals', 'post_checkout')
 
@@ -120,6 +127,49 @@ class PaypalPaymentExecutionViewTests(PaypalMixin, PaymentEventsMixin, TestCase)
             ),
             fetch_redirect_response=False
         )
+
+    @responses.activate
+    def test_execution_for_bulk_purchase(self):
+        """
+        Verify redirection to LMS receipt page after attempted payment
+        execution if the Otto receipt page is disabled for bulk purchase and
+        also that the order is linked to the provided business client..
+        """
+        toggle_switch(ENROLLMENT_CODE_SWITCH, True)
+        self.mock_oauth2_response()
+
+        course = CourseFactory()
+        course.create_or_update_seat('verified', True, 50, self.partner, create_enrollment_code=True)
+        self.basket = create_basket(owner=factories.UserFactory(), site=self.site)
+        enrollment_code = Product.objects.get(product_class__name=ENROLLMENT_CODE_PRODUCT_CLASS_NAME)
+        factories.create_stockrecord(enrollment_code, num_in_stock=2, price_excl_tax='10.00')
+        self.basket.add_product(enrollment_code, quantity=1)
+
+        # Create a payment record the view can use to retrieve a basket
+        self.mock_payment_creation_response(self.basket)
+        self.processor.get_transaction_parameters(self.basket, request=self.request)
+        self.mock_payment_execution_response(self.basket)
+        self.mock_payment_creation_response(self.basket, find=True)
+
+        # Manually add organization attribute on the basket for testing
+        self.RETURN_DATA.update({'organization': 'Dummy Business Client'})
+        basket_add_organization_attribute(self.basket, self.RETURN_DATA)
+
+        response = self.client.get(reverse('paypal:execute'), self.RETURN_DATA)
+        self.assertRedirects(
+            response,
+            get_receipt_page_url(
+                order_number=self.basket.order_number,
+                site_configuration=self.basket.site.siteconfiguration
+            ),
+            fetch_redirect_response=False
+        )
+
+        # Now verify that a new business client has been created and current
+        # order is now linked with that client through Invoice model.
+        order = Order.objects.filter(basket=self.basket).first()
+        business_client = BusinessClient.objects.get(name=self.RETURN_DATA['organization'])
+        assert Invoice.objects.get(order=order).business_client == business_client
 
     @ddt.data(
         None,  # falls back to PaypalMixin.PAYER_INFO, a fully-populated payer_info object

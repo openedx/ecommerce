@@ -10,10 +10,11 @@ class Invoice(TimeStampedModel):
         (NOT_PAID, _('Not Paid')),
         (PAID, _('Paid')),
     )
-    PREPAID, POSTPAID, NA = 'Prepaid', 'Postpaid', 'Not applicable'
+    PREPAID, POSTPAID, BULK_PURCHASE, NA = 'Prepaid', 'Postpaid', 'Bulk purchase', 'Not applicable'
     type_choices = (
         (PREPAID, _('Prepaid')),
         (POSTPAID, _('Postpaid')),
+        (BULK_PURCHASE, _('Bulk purchase')),
         (NA, _('Not applicable'))
     )
     PERCENTAGE, FIXED = 'Percentage', 'Fixed'

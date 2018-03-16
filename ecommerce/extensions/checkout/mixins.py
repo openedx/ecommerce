@@ -10,14 +10,20 @@ from ecommerce_worker.fulfillment.v1.tasks import fulfill_order
 from oscar.apps.checkout.mixins import OrderPlacementMixin
 from oscar.core.loading import get_class, get_model
 
+from ecommerce.core.models import BusinessClient
 from ecommerce.extensions.analytics.utils import audit_log, track_segment_event
 from ecommerce.extensions.api import data as data_api
+from ecommerce.extensions.basket.utils import ORGANIZATION_ATTRIBUTE_TYPE
 from ecommerce.extensions.checkout.exceptions import BasketNotFreeError
 from ecommerce.extensions.customer.utils import Dispatcher
 from ecommerce.extensions.order.constants import PaymentEventTypeName
+from ecommerce.invoice.models import Invoice
 
 CommunicationEventType = get_model('customer', 'CommunicationEventType')
 logger = logging.getLogger(__name__)
+Basket = get_model('basket', 'Basket')
+BasketAttribute = get_model('basket', 'BasketAttribute')
+BasketAttributeType = get_model('basket', 'BasketAttributeType')
 Order = get_model('order', 'Order')
 post_checkout = get_class('checkout.signals', 'post_checkout')
 PaymentEvent = get_model('order', 'PaymentEvent')
@@ -220,3 +226,32 @@ class EdxOrderPlacementMixin(OrderPlacementMixin):
         else:
             logger.warning("Order #%s - no %s communication event type",
                            order.number, code)
+
+    def handle_post_order(self, order):
+        """
+        Handle extra processing of order after its placed.
+
+        This method links the provided order with the BusinessClient for bulk
+        purchase through Invoice model.
+
+        Arguments:
+            order (Order): Order object
+
+        """
+        basket_has_enrollment_code_product = any(
+            line.product.is_enrollment_code_product for line in order.basket.all_lines()
+        )
+
+        organization_attribute = BasketAttributeType.objects.filter(name=ORGANIZATION_ATTRIBUTE_TYPE).first()
+        if not organization_attribute:
+            return None
+
+        business_client = BasketAttribute.objects.filter(
+            basket=order.basket,
+            attribute_type=organization_attribute,
+        ).first()
+        if basket_has_enrollment_code_product and business_client:
+            client, __ = BusinessClient.objects.get_or_create(name=business_client.value_text)
+            Invoice.objects.create(
+                order=order, business_client=client, type=Invoice.BULK_PURCHASE, state=Invoice.PAID
+            )

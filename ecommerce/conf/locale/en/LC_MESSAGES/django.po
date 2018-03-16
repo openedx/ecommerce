@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-03-07 13:03+0000\n"
+"POT-Creation-Date: 2018-03-15 11:29+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -306,15 +306,15 @@ msgstr ""
 msgid "This coupon code is not valid for this course. Try a different course."
 msgstr ""
 
-#: ecommerce/courses/models.py:33 ecommerce/extensions/basket/models.py:14
-#: ecommerce/extensions/offer/models.py:51
+#: ecommerce/courses/models.py:31 ecommerce/extensions/basket/models.py:14
+#: ecommerce/extensions/offer/models.py:128
 #: ecommerce/extensions/payment/models.py:58
 #: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:65
 #: ecommerce/templates/oscar/dashboard/offers/summary.html:14
 msgid "Site"
 msgstr ""
 
-#: ecommerce/courses/models.py:39
+#: ecommerce/courses/models.py:37
 msgid "Last date/time on which verification for this product can be submitted."
 msgstr ""
 
@@ -374,7 +374,7 @@ msgstr ""
 msgid "{value} fixed-price enterprise discount"
 msgstr ""
 
-#: ecommerce/enterprise/constants.py:13 ecommerce/invoice/models.py:21
+#: ecommerce/enterprise/constants.py:13 ecommerce/invoice/models.py:22
 #: ecommerce/programs/constants.py:13
 msgid "Percentage"
 msgstr ""
@@ -594,12 +594,12 @@ msgstr ""
 msgid "Products must indicate whether ID verification is required."
 msgstr ""
 
-#: ecommerce/extensions/api/serializers.py:426
+#: ecommerce/extensions/api/serializers.py:428
 #, python-brace-format
 msgid "Invalid product class [{product_class}] requested."
 msgstr ""
 
-#: ecommerce/extensions/api/serializers.py:457
+#: ecommerce/extensions/api/serializers.py:459
 #, python-brace-format
 msgid ""
 "Course [{course_id}] was not published to LMS because the switch "
@@ -607,19 +607,19 @@ msgid ""
 "been saved."
 msgstr ""
 
-#: ecommerce/extensions/api/serializers.py:649
+#: ecommerce/extensions/api/serializers.py:647
 msgid "Enrollment code"
 msgstr ""
 
-#: ecommerce/extensions/api/serializers.py:650
+#: ecommerce/extensions/api/serializers.py:648
 msgid "Discount code"
 msgstr ""
 
-#: ecommerce/extensions/api/serializers.py:664
+#: ecommerce/extensions/api/serializers.py:662
 msgid "ACTIVE"
 msgstr ""
 
-#: ecommerce/extensions/api/serializers.py:664
+#: ecommerce/extensions/api/serializers.py:662
 msgid "INACTIVE"
 msgstr ""
 
@@ -653,17 +653,17 @@ msgstr ""
 msgid "Text Attribute"
 msgstr ""
 
-#: ecommerce/extensions/basket/utils.py:81
+#: ecommerce/extensions/basket/utils.py:82
 msgid ""
 "Due to export controls, we cannot allow you to access this course at this "
 "time."
 msgstr ""
 
-#: ecommerce/extensions/basket/utils.py:126
+#: ecommerce/extensions/basket/utils.py:127
 msgid "Click here to just purchase an enrollment for yourself"
 msgstr ""
 
-#: ecommerce/extensions/basket/utils.py:129
+#: ecommerce/extensions/basket/utils.py:130
 msgid "Click here to purchase multiple seats in this course"
 msgstr ""
 
@@ -732,47 +732,47 @@ msgid ""
 "enrollment code(s). {paragraph_end}"
 msgstr ""
 
-#: ecommerce/extensions/basket/views.py:408
+#: ecommerce/extensions/basket/views.py:406
 #, python-brace-format
 msgid "Could not apply the code '{code}'; it requires data sharing consent."
 msgstr ""
 
-#: ecommerce/extensions/basket/views.py:462
+#: ecommerce/extensions/basket/views.py:460
 #, python-brace-format
 msgid "Coupon code '{code}' has expired."
 msgstr ""
 
-#: ecommerce/extensions/basket/views.py:469
+#: ecommerce/extensions/basket/views.py:467
 #, python-brace-format
 msgid "Coupon code '{code}' is not active."
 msgstr ""
 
-#: ecommerce/extensions/basket/views.py:476
+#: ecommerce/extensions/basket/views.py:474
 #, python-brace-format
 msgid "Coupon code '{code}' has already been redeemed."
 msgstr ""
 
-#: ecommerce/extensions/basket/views.py:486
-#: ecommerce/extensions/basket/views.py:500
+#: ecommerce/extensions/basket/views.py:484
+#: ecommerce/extensions/basket/views.py:498
 #, python-brace-format
 msgid "Coupon code '{code}' is not valid for this basket."
 msgstr ""
 
-#: ecommerce/extensions/basket/views.py:524
+#: ecommerce/extensions/basket/views.py:522
 msgid "Your basket does not qualify for a coupon code discount."
 msgstr ""
 
-#: ecommerce/extensions/basket/views.py:529
+#: ecommerce/extensions/basket/views.py:527
 #, python-brace-format
 msgid "Coupon code '{code}' added to basket."
 msgstr ""
 
-#: ecommerce/extensions/basket/views.py:539
+#: ecommerce/extensions/basket/views.py:537
 #, python-brace-format
 msgid "You have already added coupon code '{code}' to your basket."
 msgstr ""
 
-#: ecommerce/extensions/basket/views.py:547
+#: ecommerce/extensions/basket/views.py:545
 #, python-brace-format
 msgid "Coupon code '{code}' does not exist."
 msgstr ""
@@ -841,27 +841,27 @@ msgstr ""
 msgid "Failed to retrieve enrollment data."
 msgstr ""
 
-#: ecommerce/extensions/offer/models.py:194
+#: ecommerce/extensions/offer/models.py:275
 msgid "Course Catalog ID from the Discovery Service."
 msgstr ""
 
-#: ecommerce/extensions/offer/models.py:199
+#: ecommerce/extensions/offer/models.py:280
 msgid "UUID for an EnterpriseCustomer from the Enterprise Service."
 msgstr ""
 
-#: ecommerce/extensions/offer/models.py:335
+#: ecommerce/extensions/offer/models.py:382
 msgid "EnterpriseCustomer UUID"
 msgstr ""
 
-#: ecommerce/extensions/offer/models.py:342
+#: ecommerce/extensions/offer/models.py:389
 msgid "EnterpriseCustomer Name"
 msgstr ""
 
-#: ecommerce/extensions/offer/models.py:347
+#: ecommerce/extensions/offer/models.py:394
 msgid "EnterpriseCustomerCatalog UUID"
 msgstr ""
 
-#: ecommerce/extensions/offer/models.py:349
+#: ecommerce/extensions/offer/models.py:396
 #: ecommerce/extensions/voucher/utils.py:220 ecommerce/programs/forms.py:19
 #: ecommerce/programs/templates/programs/programoffer_list.html:30
 msgid "Program UUID"
@@ -1022,7 +1022,7 @@ msgstr ""
 msgid "..."
 msgstr ""
 
-#: ecommerce/extensions/payment/views/cybersource.py:308
+#: ecommerce/extensions/payment/views/cybersource.py:311
 #, python-brace-format
 msgid ""
 "An error occurred while processing your payment. You have not been charged. "
@@ -1252,10 +1252,14 @@ msgid "Postpaid"
 msgstr ""
 
 #: ecommerce/invoice/models.py:17
+msgid "Bulk purchase"
+msgstr ""
+
+#: ecommerce/invoice/models.py:18
 msgid "Not applicable"
 msgstr ""
 
-#: ecommerce/invoice/models.py:22
+#: ecommerce/invoice/models.py:23
 msgid "Fixed"
 msgstr ""
 
@@ -1529,7 +1533,7 @@ msgstr ""
 msgid "Courses"
 msgstr ""
 
-#: ecommerce/templates/courses/course_app.html:28
+#: ecommerce/templates/courses/course_app.html:25
 #, python-format
 msgid "%(platform_name)s Course Administration Tool"
 msgstr ""
@@ -1546,7 +1550,7 @@ msgstr ""
 msgid "E-Commerce Dashboard"
 msgstr ""
 
-#: ecommerce/templates/customer/email_base.html:178
+#: ecommerce/templates/customer/email_base.html:188
 #, python-format
 msgid "Copyright © %(year)s %(platform_name)s. All rights reserved."
 msgstr ""
@@ -1630,8 +1634,8 @@ msgstr ""
 
 #: ecommerce/templates/customer/emails/commtype_credit_receipt_body.html:55
 #: ecommerce/templates/customer/emails/commtype_credit_receipt_body.txt:4
-#: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html:54
-#: ecommerce/templates/customer/emails/commtype_order_with_csv_body.txt:4
+#: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html:24
+#: ecommerce/templates/customer/emails/commtype_order_with_csv_body.txt:5
 #, python-format
 msgid "Dear %(full_name)s,"
 msgstr ""
@@ -1713,68 +1717,119 @@ msgid "Order Receipt"
 msgstr ""
 
 #: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html:13
-msgid "Order Confirmation"
+msgid "For Business"
+msgstr ""
+
+#: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html:25
+#: ecommerce/templates/customer/emails/commtype_order_with_csv_body.txt:6
+#, python-format
+msgid ""
+"Thank you for purchasing access to %(course_name)s. Let's get your group "
+"ready to learn with edX:"
 msgstr ""
 
 #: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html:27
-msgid "Order confirmation for"
-msgstr ""
-
-#: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html:43
-msgid "View Order Information"
-msgstr ""
-
-#: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html:55
 #, python-format
 msgid ""
-"Thank you for purchasing access to %(course_name)s.\n"
-"                    Please click <a href=\"%(download_csv_link)s\">HERE</a> "
-"to download a CSV file with the enrollment codes for this course.\n"
-"                    Once you have the codes you can distribute them to your "
-"team. "
+"Download and save the %(link_start)s%(download_csv_link)s%(link_middle)s "
+"enrollment code file.%(link_end)s"
 msgstr ""
 
-#: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html:58
-#, python-format
-msgid "To view your payment information, please visit %(receipt_page_url)s."
+#: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html:28
+#: ecommerce/templates/customer/emails/commtype_order_with_csv_body.txt:9
+msgid "Distribute one code per learner before the expiration date."
 msgstr ""
 
-#: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html:59
-#: ecommerce/templates/customer/emails/commtype_order_with_csv_body.txt:8
-#, python-format
-msgid "To explore other courses, please visit %(lms_url)s."
-msgstr ""
-
-#: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html:60
+#: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html:29
 #: ecommerce/templates/customer/emails/commtype_order_with_csv_body.txt:10
-msgid "Thank you,"
+msgid "Pro tip: Track which code is associated with which person."
 msgstr ""
 
-#: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html:61
+#: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html:30
 #: ecommerce/templates/customer/emails/commtype_order_with_csv_body.txt:11
-#, python-format
-msgid "The %(partner_name)s team"
+msgid "Learners sign-in/register with edX and enroll for the course."
 msgstr ""
 
-#: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html:72
-#: ecommerce/templates/customer/emails/commtype_order_with_csv_body.txt:13
+#: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html:32
 #, python-format
 msgid ""
-"You received this message because you purchased enrollment codes for "
-"%(course_name)s on %(lms_url)s. If you have any questions, please visit "
-"%(contact_url)s."
+"To view your payment information, log in to see your Order History, under "
+"%(link_start)s%(order_history_url)s%(link_middle)sAccount Settings"
+"%(link_end)s"
+msgstr ""
+
+#: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html:33
+#, python-format
+msgid ""
+"For more information and assistance, contact %(link_start)sinfo@edx.org."
+"%(link_end)s"
+msgstr ""
+
+#: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html:34
+#: ecommerce/templates/customer/emails/commtype_order_with_csv_body.txt:16
+msgid "Thank You"
+msgstr ""
+
+#: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html:45
+#: ecommerce/templates/customer/emails/commtype_order_with_csv_body.txt:18
+msgid "By purchasing, you and your organization agree to the following terms:"
+msgstr ""
+
+#: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html:47
+#: ecommerce/templates/customer/emails/commtype_order_with_csv_body.txt:20
+msgid ""
+"Each code is valid for the one course covered and can be used only one time."
+msgstr ""
+
+#: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html:48
+#: ecommerce/templates/customer/emails/commtype_order_with_csv_body.txt:21
+msgid "You are responsible for distributing codes to your learners."
+msgstr ""
+
+#: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html:49
+#: ecommerce/templates/customer/emails/commtype_order_with_csv_body.txt:22
+msgid ""
+"Each code will expire in one year from date of purchase or, if earlier, once "
+"the course is closed."
+msgstr ""
+
+#: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html:50
+#: ecommerce/templates/customer/emails/commtype_order_with_csv_body.txt:23
+msgid ""
+"If a course is not designated as self-paced, you should confirm that a "
+"course run is available before expiration."
+msgstr ""
+
+#: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html:51
+#: ecommerce/templates/customer/emails/commtype_order_with_csv_body.txt:24
+msgid "You may not resell codes to third parties."
+msgstr ""
+
+#: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html:52
+#: ecommerce/templates/customer/emails/commtype_order_with_csv_body.txt:25
+msgid "All sales final. No refunds."
 msgstr ""
 
 #: ecommerce/templates/customer/emails/commtype_order_with_csv_body.txt:2
 msgid "Order confirmation for: "
 msgstr ""
 
-#: ecommerce/templates/customer/emails/commtype_order_with_csv_body.txt:6
+#: ecommerce/templates/customer/emails/commtype_order_with_csv_body.txt:8
 #, python-format
 msgid ""
-"Thank you for purchasing access to %(course_name)s. Please go to "
-"%(download_csv_link)s to download a CSV file with the enrollment codes for "
-"this course. Once you have the codes you can distribute them to your team. "
+"Please visit %(download_csv_link)s to download and save the enrollment code "
+"file."
+msgstr ""
+
+#: ecommerce/templates/customer/emails/commtype_order_with_csv_body.txt:13
+#, python-format
+msgid ""
+"To view your payment information, log in to see your Order History, under "
+"Account Settings at %(order_history_url)s."
+msgstr ""
+
+#: ecommerce/templates/customer/emails/commtype_order_with_csv_body.txt:14
+msgid "For more information and assistance, contact info@edx.org."
 msgstr ""
 
 #: ecommerce/templates/customer/emails/commtype_order_with_csv_subject.txt:2
