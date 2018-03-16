@@ -21,7 +21,6 @@ from ecommerce.core.url_utils import (
 from ecommerce.enterprise.utils import has_enterprise_offer
 from ecommerce.extensions.checkout.exceptions import BasketNotFreeError
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
-from ecommerce.extensions.checkout.utils import get_receipt_page_url
 
 Applicator = get_class('offer.applicator', 'Applicator')
 Basket = get_model('basket', 'Basket')
@@ -52,7 +51,7 @@ class FreeCheckoutView(EdxOrderPlacementMixin, RedirectView):
     """ View to handle free checkouts.
 
     Retrieves the user's basket and checks to see if the basket is free in which case
-    the user is redirected to the receipt page. Otherwise the user is redirected back
+    the user is redirected to the LMS dashboard. Otherwise the user is redirected back
     to the basket summary page.
     """
 
@@ -90,11 +89,7 @@ class FreeCheckoutView(EdxOrderPlacementMixin, RedirectView):
                     course_run_id = order.lines.all()[:1].get().product.course.id
                     url = get_lms_courseware_url(course_run_id)
             else:
-                receipt_path = get_receipt_page_url(
-                    order_number=order.number,
-                    site_configuration=order.site.siteconfiguration
-                )
-                url = site.siteconfiguration.build_lms_url(receipt_path)
+                url = get_lms_dashboard_url()
         else:
             # If a user's basket is empty redirect the user to the basket summary
             # page which displays the appropriate message for empty baskets.

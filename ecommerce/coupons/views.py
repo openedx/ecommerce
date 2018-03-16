@@ -16,7 +16,7 @@ from django.utils.translation import ugettext as _
 from django.views.generic import TemplateView, View
 from oscar.core.loading import get_class, get_model
 
-from ecommerce.core.url_utils import get_ecommerce_url
+from ecommerce.core.url_utils import get_ecommerce_url, get_lms_dashboard_url
 from ecommerce.core.views import StaffOnlyMixin
 from ecommerce.coupons.decorators import login_required_for_credit
 from ecommerce.coupons.utils import is_voucher_applied
@@ -32,7 +32,6 @@ from ecommerce.enterprise.utils import (
 from ecommerce.extensions.api import exceptions
 from ecommerce.extensions.basket.utils import prepare_basket
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
-from ecommerce.extensions.checkout.utils import get_receipt_page_url
 from ecommerce.extensions.offer.utils import render_email_confirmation_if_required
 from ecommerce.extensions.order.exceptions import AlreadyPlacedOrderException
 from ecommerce.extensions.voucher.utils import get_voucher_and_products_from_code
@@ -154,7 +153,6 @@ class CouponRedeemView(EdxOrderPlacementMixin, View):
         code = request.GET.get('code')
         sku = request.GET.get('sku')
         failure_url = request.GET.get('failure_url')
-        site_configuration = request.site.siteconfiguration
 
         if not code:
             return render(request, template_name, {'error': _('Code not provided.')})
@@ -238,12 +236,7 @@ class CouponRedeemView(EdxOrderPlacementMixin, View):
             return render(request, template_name, {'error': msg})
 
         if basket.total_excl_tax == 0:
-            try:
-                order = self.place_free_order(basket)
-                return HttpResponseRedirect(get_receipt_page_url(site_configuration, order.number))
-            except:  # pylint: disable=bare-except
-                logger.exception('Failed to create a free order for basket [%d]', basket.id)
-                return HttpResponseRedirect(reverse('checkout:error'))
+            return self._handle_free_order(basket)
 
         if enterprise_customer:
             if is_voucher_applied(basket, voucher):
@@ -259,6 +252,14 @@ class CouponRedeemView(EdxOrderPlacementMixin, View):
                 self.request.basket.vouchers.remove(voucher)
 
         return HttpResponseRedirect(reverse('basket:summary'))
+
+    def _handle_free_order(self, basket):
+        try:
+            self.place_free_order(basket)
+            return HttpResponseRedirect(get_lms_dashboard_url())
+        except:  # pylint: disable=bare-except
+            logger.exception('Failed to create a free order for basket [%d]', basket.id)
+            return HttpResponseRedirect(reverse('checkout:error'))
 
 
 class EnrollmentCodeCsvView(View):
