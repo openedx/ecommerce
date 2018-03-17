@@ -7,9 +7,14 @@ from ecommerce.extensions.offer.mixins import AbsoluteBenefitMixin, BenefitWitho
 Benefit = get_model('offer', 'Benefit')
 
 
-# TODO: rename
-class DigitalBookPercentageDiscountBenefit(BenefitWithoutRangeMixin, PercentageBenefitMixin, PercentageDiscountBenefit):
-    """ Digital Book related Percentage Discount Benefit without an attached range. """
+class DigitalBookPercentageDiscountBenefitWithoutRange(BenefitWithoutRangeMixin, PercentageBenefitMixin,
+                                            PercentageDiscountBenefit):
+    """ PercentageDiscountBenefit without an attached range.
+
+    The range is only used for the name and description. We would prefer not
+    to deal with ranges since we rely on the condition to fully determine if
+    a conditional offer is applicable to a basket.
+    """
 
     class Meta(object):
         app_label = 'digital_books'
@@ -20,8 +25,13 @@ class DigitalBookPercentageDiscountBenefit(BenefitWithoutRangeMixin, PercentageB
         return _('{value}% digital book discount').format(value=self.value)
 
 
-class DigitalBookAbsoluteDiscountBenefit(BenefitWithoutRangeMixin, AbsoluteBenefitMixin, AbsoluteDiscountBenefit):
-    """ Digital Book related Absolute Discount Benefit without an attached range. """
+class DigitalBookAbsoluteDiscountBenefitWithoutRange(BenefitWithoutRangeMixin, AbsoluteBenefitMixin, AbsoluteDiscountBenefit):
+    """ AbsoluteDiscountBenefit without an attached range.
+
+       The range is only used for the name and description. We would prefer not
+       to deal with ranges since we rely on the condition to fully determine if
+       a conditional offer is applicable to a basket.
+       """
 
     class Meta(object):
         app_label = 'digital_books'
@@ -29,6 +39,4 @@ class DigitalBookAbsoluteDiscountBenefit(BenefitWithoutRangeMixin, AbsoluteBenef
 
     @property
     def name(self):
-        return _('{value} fixed-price enterprise discount').format(value=self.value)
-
-#TODO: implement one free product benefit
+        return _('{value} fixed-price digital book discount').format(value=self.value)
