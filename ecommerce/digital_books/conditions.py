@@ -4,7 +4,7 @@ from slumber.exceptions import HttpNotFoundError, SlumberBaseException
 
 from ecommerce.digital_books.utils import get_digital_book_bundle
 from ecommerce.extensions.offer.decorators import check_condition_applicability
-from ecommerce.extensions.offer.mixins import SingleItemConsumptionConditionMixin
+from ecommerce.extensions.offer.mixins import SingleItemConsumptionConditionMixin, ConditionWithoutRangeMixin
 
 import logging
 logger = logging.getLogger(__name__)
@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 Condition = get_model('offer', 'Condition')
 
 
-class DigitalBookBundleCondition(SingleItemConsumptionConditionMixin, Condition):
+class DigitalBookBundleCondition(ConditionWithoutRangeMixin, SingleItemConsumptionConditionMixin, Condition):
     class Meta(object):
         app_label = 'digital_books'
         proxy = True
