@@ -13,6 +13,7 @@ from oscar.apps.offer.abstract_models import (
     AbstractConditionalOffer,
     AbstractRange
 )
+from oscar.core.loading import get_model
 from requests.exceptions import ConnectionError, Timeout
 from slumber.exceptions import SlumberBaseException
 from threadlocals.threadlocals import get_current_request
@@ -23,6 +24,8 @@ OFFER_PRIORITY_ENTERPRISE = 10
 OFFER_PRIORITY_VOUCHER = 20
 
 logger = logging.getLogger(__name__)
+
+Voucher = get_model('voucher', 'Voucher')
 
 
 class Benefit(AbstractBenefit):
@@ -236,7 +239,11 @@ class ConditionalOffer(AbstractConditionalOffer):
             return False
         if self.benefit.range and self.benefit.range.catalog_query:
             # The condition is only satisfied if all basket lines are in the offer range
-            return len(self.benefit.get_applicable_lines(self, basket)) == basket.all_lines().count()
+            num_lines = basket.all_lines().count()
+            voucher = self.get_voucher()
+            if voucher and num_lines > 1 and voucher.usage != Voucher.MULTI_USE:
+                return False
+            return len(self.benefit.get_applicable_lines(self, basket)) == num_lines
 
         return super(ConditionalOffer, self).is_condition_satisfied(basket)  # pylint: disable=bad-super-call
 
