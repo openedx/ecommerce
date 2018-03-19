@@ -723,13 +723,9 @@ class DigitalBookFulfillmentModule(BaseFulfillmentModule):
         """
         logger.info('Attempting to fulfill "Digital Book" product types for order [%s]', order.number)
 
-        logger.info('>>> fulfill_product...')
-
         for line in lines:
-            logger.info('>>> line: %s', line)
             try:
                 book_key = line.product.attr.book_key
-                logger.info('>>> Book Key: %s', book_key)
             except AttributeError:
                 logger.error('Digital Book Product does not have required attributes, [book_key]')
                 line.set_status(LINE.FULFILLMENT_CONFIGURATION_ERROR)
@@ -741,8 +737,6 @@ class DigitalBookFulfillmentModule(BaseFulfillmentModule):
                 'order_number': order.number,
             }
 
-            logger.info('>>> data: user: [%s], book_key: [%s], order_number: [%s]', data['user'], data['book_key'], data['order_number'] )
-
             try:
                 # TODO: POST to digital book API
                 # TODO: attempt to get any type of response back and print it
@@ -753,7 +747,6 @@ class DigitalBookFulfillmentModule(BaseFulfillmentModule):
 
                 # POST to the Digital Book API.
                 response = digital_book_api_client.digital_books.post(data)
-                logger.info(">>> response: %s", response)
 
                 # TODO: line attr create line
 
