@@ -89,7 +89,9 @@
                 <dd class="course-description">
                   <span>{{ line.title }}</span>
                   {% if line.product.course %}
-                    <p>{{ line.product.course.id|course_organization }}</p>
+                    <p class="course-description-subtitle" data-course-id="{{ line.product.course.id }}">
+                      {{ line.product.course.id|course_organization }}
+                    </p>
                   {% endif %}
                 </dd>
                 <dt class="line-price sr">{% trans "Item Price:" %}</dt>
