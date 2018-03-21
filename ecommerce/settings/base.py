@@ -296,6 +296,7 @@ LOCAL_APPS = [
     'ecommerce.sailthru',
     'ecommerce.enterprise',
     'ecommerce.management',
+    'ecommerce.journal',
 ]
 
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
