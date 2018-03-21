@@ -28,8 +28,8 @@ def create_product_class(apps, schema_editor):
     # Create product attributes for journal products
     ProductAttribute.objects.create(
         product_class=journal,
-        name="journal_key",
-        code="journal_key",
+        name="UUID",
+        code="UUID",
         type="text",
         required=True
     )
@@ -39,7 +39,7 @@ def create_product_class(apps, schema_editor):
         description="All journals",
         slug="journals",
         image="",
-        name="journals"
+        name="Journals"
     )
 
 
