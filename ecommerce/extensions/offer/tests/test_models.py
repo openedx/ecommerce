@@ -367,6 +367,41 @@ class ConditionalOfferTests(DiscoveryTestMixin, DiscoveryMockMixin, TestCase):
         httpretty.disable()
         self.assertFalse(offer.is_condition_satisfied(basket))
 
+    def test_is_single_use_range_condition_satisfied(self):
+        """
+        Verify that the condition for a single use coupon is only satisfied by single-product baskets.
+        """
+        valid_user_email = 'valid@{domain}'.format(domain=self.valid_sub_domain)
+        basket = factories.BasketFactory(site=self.site, owner=factories.UserFactory(email=valid_user_email))
+        product1 = self.create_entitlement_product()
+        product2 = self.create_entitlement_product()
+
+        _range = factories.RangeFactory()
+        _range.course_seat_types = ','.join(Range.ALLOWED_SEAT_TYPES)
+        _range.catalog_query = 'uuid:*'
+        benefit = factories.BenefitFactory(range=_range)
+        offer = factories.ConditionalOfferFactory(benefit=benefit)
+        offer.set_voucher(
+            factories.VoucherFactory(usage='Single-use')
+        )
+        self.mock_access_token_response()
+        self.mock_catalog_query_contains_endpoint(
+            course_run_ids=[], course_uuids=[product1.attr.UUID, product2.attr.UUID], absent_ids=[],
+            query=benefit.range.catalog_query, discovery_api_url=self.site_configuration.discovery_api_url
+        )
+
+        # Verify that each product individually satisfies the condition
+        basket.add_product(product1)
+        self.assertTrue(offer.is_condition_satisfied(basket))
+
+        basket.flush()
+        basket.add_product(product2)
+        self.assertTrue(offer.is_condition_satisfied(basket))
+
+        # Verify that the offer cannot be applied to a multi-product basket
+        basket.add_product(product1)
+        self.assertFalse(offer.is_condition_satisfied(basket))
+
     def test_is_email_valid(self):
         """Verify method returns True for valid emails."""
         invalid_email = 'invalid@email.fake'
