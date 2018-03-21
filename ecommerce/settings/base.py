@@ -470,6 +470,7 @@ TEST_RUNNER = 'django.test.runner.DiscoverRunner'
 SESSION_COOKIE_NAME = 'ecommerce_sessionid'
 CSRF_COOKIE_NAME = 'ecommerce_csrftoken'
 LANGUAGE_COOKIE_NAME = 'ecommerce_language'
+SESSION_COOKIE_SECURE = False
 # END COOKIE CONFIGURATION
 
 
