@@ -1,0 +1,80 @@
+{% extends 'edx/base.html' %}
+{% load crispy_forms_tags %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}
+  {% if editing %}
+    {% blocktrans trimmed with journal_bundle_title=journal_bundle.title %}
+      Edit Journal Bundle Offer: {{ journal_bundle_title }}
+    {% endblocktrans %}
+  {% else %}
+    {% trans "Create Journal Bundle Offer" %}
+  {% endif %}
+{% endblock title %}
+
+{% block stylesheets %}
+  <link rel="stylesheet" href="{% static 'bower_components/pikaday/css/pikaday.css' %}" type="text/x-scss">
+{% endblock stylesheets %}
+
+{% block navbar %}
+  {% include "edx/partials/_staff_navbar.html" %}
+  {% include "edx/partials/_administration_menu.html" %}
+{% endblock navbar %}
+
+{% block content %}
+  <div class="container">
+    <ol class="breadcrumb">
+      <li><a href="{% url 'journal:offers:list' %}">{% trans "Journal Bundle Offers" %}</a> </li>
+
+      {% if editing %}
+        <li>{{ journal_bundle.title }}</li>
+        <li>{% trans "Edit" %}</li>
+      {% else %}
+        <li>{% trans "Create" %}</li>
+      {% endif %}
+    </ol>
+
+    {% include 'partials/alert_messages.html' %}
+
+    <div class="page-header">
+      <h1 class="hd-1 emphasized">
+        {% if editing %}
+          {% trans "Edit Journal Offer" %}
+        {% else %}
+          {% trans "Create Journal Bundle Offer" %}
+        {% endif %}
+      </h1>
+    </div>
+
+    <form id="offerForm" method="post">
+      {% csrf_token %}
+      {{ form|crispy }}
+
+      <div class="form-actions">
+        {% if editing %}
+          <input type="submit" class="btn btn-primary" value={% trans "Save Changes" %}>
+        {% else %}
+          <input type="submit" class="btn btn-primary" value={% trans "Create Journal Bundle Offer" %}>
+        {% endif %}
+        <a class="btn btn-default" href="{% url 'journal:offers:list' %}">{% trans "Cancel" %}</a>
+      </div>
+    </form>
+  </div>
+{% endblock content %}
+
+{% block footer %}
+  <footer class="footer">
+    <div class="container">
+      <div class="row">
+        <div class="col-xs-12 text-right">
+          <em>{% blocktrans %}{{ platform_name }} Journal Bundle Offer Administration Tool{% endblocktrans %}</em>
+        </div>
+      </div>
+    </div>
+  </footer>
+{% endblock footer %}
+
+{% block javascript %}
+  <script src="{% static 'js/pages/offer_form_page.js' %}"></script>
+{% endblock javascript %}
