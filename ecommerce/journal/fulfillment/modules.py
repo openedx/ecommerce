@@ -1,12 +1,11 @@
 import logging
 
-from edx_rest_api_client.client import EdxRestApiClient
 from requests.exceptions import ConnectionError, Timeout
 
 from ecommerce.extensions.analytics.utils import audit_log
 from ecommerce.extensions.fulfillment.modules import BaseFulfillmentModule
 from ecommerce.extensions.fulfillment.status import LINE
-from ecommerce.journal.journals_service_client import post_journal_access
+from ecommerce.journal.client import post_journal_access
 
 
 logger = logging.getLogger(__name__)
