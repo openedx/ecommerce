@@ -1,0 +1,67 @@
+{% extends 'edx/base.html' %}
+{% load i18n %}
+{% load offer_tags %}
+{% load static %}
+
+{% block title %}{% trans "Journal Bundle Offers" %}{% endblock %}
+
+{% block navbar %}
+  {% include "edx/partials/_staff_navbar.html" %}
+  {% include "edx/partials/_administration_menu.html" %}
+{% endblock navbar %}
+
+{% block content %}
+  <div class="container">
+    <div class="page-header">
+      <h1 class="hd-1 emphasized">
+        {% trans "Journal Bundle Offers" %}
+        <div class="pull-right">
+          <a href="{% url 'journal:offers:new' %}"
+             class="btn btn-primary btn-small">{% trans "Create Journal Bundle Offer" %}</a>
+        </div>
+      </h1>
+    </div>
+
+    <table id="offerTable" class="copy copy-base table table-striped table-bordered" cellspacing="0">
+      <caption class="sr-only">{% trans "Current journal bundle offers" %}</caption>
+      <thead>
+      <tr>
+        <th>{% trans 'Journal Bundle Title' %}</th>
+        <th>{% trans 'Bundle UUID' %}</th>
+        <th>{% trans 'Type' %}</th>
+        <th>{% trans 'Value' %}</th>
+        <th>{% trans 'Start' %}</th>
+        <th>{% trans 'End' %}</th>
+      </tr>
+      </thead>
+      <tbody>
+      {% for offer in offers %}
+        <tr>
+          <td><a href="{% url 'journal:offers:edit' pk=offer.pk %}">{{ offer.journal_bundle.title }}</a></td>
+          <td>{{ offer.journal_bundle.uuid }}</td>
+          <td>{{ offer.benefit|benefit_type|capfirst }}</td>
+          <td>{{ offer.benefit.value }}</td>
+          <td>{{ offer.start_datetime|default_if_none:'--' }}</td>
+          <td>{{ offer.end_datetime|default_if_none:'--' }}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endblock content %}
+
+{% block footer %}
+  <footer class="footer">
+    <div class="container">
+      <div class="row">
+        <div class="col-xs-12 text-right">
+          <em>{% blocktrans %}{{ platform_name }} Journal Bundle Offer Administration Tool{% endblocktrans %}</em>
+        </div>
+      </div>
+    </div>
+  </footer>
+{% endblock footer %}
+
+{% block javascript %}
+  <script src="{% static 'js/pages/offer_list_page.js' %}"/>
+{% endblock javascript %}

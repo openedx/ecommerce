@@ -1,7 +1,7 @@
 import datetime
 import hashlib
 import logging
-from urlparse import urljoin
+from urlparse import urljoin, urlsplit, urlunsplit
 
 from dateutil.parser import parse
 from django.conf import settings
@@ -23,6 +23,7 @@ from ecommerce.core.url_utils import get_lms_url
 from ecommerce.core.utils import log_message_and_raise_validation_error
 from ecommerce.extensions.payment.exceptions import ProcessorNotFoundError
 from ecommerce.extensions.payment.helpers import get_processor_class, get_processor_class_by_name
+from ecommerce.journal.constants import JOURNALS_API_PATH
 
 log = logging.getLogger(__name__)
 
@@ -396,6 +397,27 @@ class SiteConfiguration(models.Model):
         """
 
         return EdxRestApiClient(self.discovery_api_url, jwt=self.access_token)
+
+
+    @cached_property
+    def journal_discovery_api_client(self):
+        """
+        Returns an Journal API client to access the Discovery service.
+
+        Returns:
+            EdxRestApiClient: The client to access the Journal API in the Discovery service.
+        """
+        split_url = urlsplit(self.discovery_api_url)
+        journal_discovery_url = urlunsplit([
+            split_url.scheme,
+            split_url.netloc,
+            JOURNALS_API_PATH,
+            split_url.query,
+            split_url.fragment
+        ])
+
+        return EdxRestApiClient(journal_discovery_url, jwt=self.access_token)
+
 
     @cached_property
     def embargo_api_client(self):
