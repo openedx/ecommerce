@@ -176,6 +176,11 @@ class SiteConfiguration(models.Model):
         null=False,
         blank=False,
     )
+    journals_api_url = models.URLField(
+        verbose_name=_('Journals Service API URL'),
+        null=True,
+        blank=True
+    )
     enable_apple_pay = models.BooleanField(
         # Translators: Do not translate "Apple Pay"
         verbose_name=_('Enable Apple Pay'),
