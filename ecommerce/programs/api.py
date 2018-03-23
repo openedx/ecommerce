@@ -36,7 +36,7 @@ class ProgramsApiClient(object):
         if program:  # pragma: no cover
             logger.debug('Program [%s] was found in the cache.', program_uuid)
         else:
-            logging.info('Retrieving details of of program [%s]...', program_uuid)
+            logging.info('Retrieving details of program [%s]...', program_uuid)
             program = self.client.programs(program_uuid).get()
             cache.set(cache_key, program, self.cache_ttl)
             logging.info('Program [%s] was successfully retrieved and cached.', program_uuid)
