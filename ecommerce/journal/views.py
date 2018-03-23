@@ -1,5 +1,10 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
+from django.contrib import messages
+from django.urls import reverse
+from django.views.generic import ListView, CreateView, UpdateView
+from django.utils.translation import ugettext_lazy as _
+from oscar.core.loading import get_model
 
 from django.contrib import messages
 from django.urls import reverse
@@ -35,6 +40,7 @@ class JournalProcessFormViewMixin(JournalOfferViewMixin):
 
     def get_context_data(self, **kwargs):
         context = super(JournalOfferViewMixin, self).get_context_data(**kwargs)     # pylint: disable=bad-super-call
+
         context.update({
             'editing': False
         })

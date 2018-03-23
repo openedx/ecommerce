@@ -398,6 +398,27 @@ class SiteConfiguration(models.Model):
 
         return EdxRestApiClient(self.discovery_api_url, jwt=self.access_token)
 
+
+    @cached_property
+    def journal_discovery_api_client(self):
+        """
+        Returns an Journal API client to access the Discovery service.
+
+        Returns:
+            EdxRestApiClient: The client to access the Journal API in the Discovery service.
+        """
+        split_url = urlsplit(self.discovery_api_url)
+        journal_discovery_url = urlunsplit([
+            split_url.scheme,
+            split_url.netloc,
+            JOURNALS_API_PATH,
+            split_url.query,
+            split_url.fragment
+        ])
+
+        return EdxRestApiClient(journal_discovery_url, jwt=self.access_token)
+
+
     @cached_property
     def journal_discovery_api_client(self):
         """
