@@ -4,8 +4,9 @@
 # 
 # Translators:
 # Alina Kozoriz <alinakozoriz@gmail.com>, 2015
+# Andrey Kryachko, 2018
 # Irene Korotkova <irca.gav@gmail.com>, 2017
-# Natalia Vynogradenko <tannaha@gmail.com>, 2017
+# Natalia Vynogradenko <tannaha@gmail.com>, 2017-2018
 # Olga Filipova <olga.filipova@feedzai.com>, 2016
 # Ксенія Воронова <ksenya.voronova@gmail.com>, 2016
 # Yana Lovyagina <yana.lovyagina@raccoongang.com>, 2016
@@ -13,9 +14,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-12-15 09:43-0500\n"
-"PO-Revision-Date: 2017-12-14 12:06+0000\n"
-"Last-Translator: Irene Korotkova <irca.gav@gmail.com>\n"
+"POT-Creation-Date: 2018-03-14 09:32+0000\n"
+"PO-Revision-Date: 2018-03-14 20:49+0000\n"
+"Last-Translator: Ned Batchelder <ned@edx.org>\n"
 "Language-Team: Ukrainian (http://www.transifex.com/open-edx/edx-platform/language/uk/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -48,7 +49,7 @@ msgid "A valid course ID is required"
 msgstr ""
 
 #: ecommerce/static/js/models/coupon_model.js:106
-#, javascript-format
+#, c-format
 msgid "Email domain {%s} is invalid."
 msgstr ""
 
@@ -154,7 +155,7 @@ msgstr "Сертифікат Кодексу Честі"
 
 #: ecommerce/static/js/models/course_seats/course_seat.js:111
 msgid "No Certificate"
-msgstr ""
+msgstr "Немає сертифікату"
 
 #: ecommerce/static/js/models/course_seats/credit_seat.js:26
 msgid "All credit seats must have a credit provider."
@@ -168,43 +169,43 @@ msgstr ""
 msgid "All credit seats must designate a number of credit hours."
 msgstr ""
 
-#: ecommerce/static/js/pages/basket_page.js:26
+#: ecommerce/static/js/pages/basket_page.js:27
 msgid "Problem occurred during checkout. Please contact support."
 msgstr ""
 
-#: ecommerce/static/js/pages/basket_page.js:99
+#: ecommerce/static/js/pages/basket_page.js:101
 msgid "This field is required"
 msgstr "Це поле є обов'язкове."
 
-#: ecommerce/static/js/pages/basket_page.js:134
+#: ecommerce/static/js/pages/basket_page.js:136
 msgid "Invalid card number"
 msgstr ""
 
-#: ecommerce/static/js/pages/basket_page.js:136
+#: ecommerce/static/js/pages/basket_page.js:138
 msgid "Unsupported card type"
 msgstr ""
 
-#: ecommerce/static/js/pages/basket_page.js:138
+#: ecommerce/static/js/pages/basket_page.js:140
 msgid "Invalid security number"
 msgstr ""
 
-#: ecommerce/static/js/pages/basket_page.js:143
+#: ecommerce/static/js/pages/basket_page.js:145
 msgid "Invalid month"
 msgstr ""
 
-#: ecommerce/static/js/pages/basket_page.js:145
+#: ecommerce/static/js/pages/basket_page.js:147
 msgid "Invalid year"
 msgstr ""
 
-#: ecommerce/static/js/pages/basket_page.js:147
+#: ecommerce/static/js/pages/basket_page.js:149
 msgid "Card expired"
 msgstr ""
 
-#: ecommerce/static/js/pages/basket_page.js:465
+#: ecommerce/static/js/pages/basket_page.js:485
 msgid "<Choose state/province>"
 msgstr ""
 
-#: ecommerce/static/js/pages/basket_page.js:466
+#: ecommerce/static/js/pages/basket_page.js:486
 msgid "State/Province (required)"
 msgstr ""
 
@@ -259,21 +260,28 @@ msgstr ""
 #: ecommerce/static/js/payment_processors/cybersource.js:249
 msgid ""
 "An error occurred while processing your payment. You have NOT been charged. "
-"Please try again, or select another payment method."
 msgstr ""
 
 #: ecommerce/static/js/payment_processors/stripe.js:71
 msgid ""
 "An error occurred while attempting to process your payment. You have not "
-"been charged. Please check your payment details, and try again."
+"been "
 msgstr ""
 
 #: ecommerce/static/js/payment_processors/stripe.js:110
-msgid "An error occurred while processing your payment. Please try again."
+msgid "An error occurred while processing your payment. "
 msgstr ""
 
 #: ecommerce/static/js/utils/utils.js:184
 msgid "Trailing comma not allowed."
+msgstr ""
+
+#: ecommerce/static/js/utils/validation_patterns.js:18
+msgid "The course ID is invalid."
+msgstr ""
+
+#: ecommerce/static/js/utils/validation_patterns.js:26
+msgid "The product name cannot contain HTML."
 msgstr ""
 
 #: ecommerce/static/js/views/coupon_detail_view.js:107
@@ -320,7 +328,7 @@ msgstr ""
 #: ecommerce/static/js/views/coupon_list_view.js:58
 #: ecommerce/static/js/views/course_list_view.js:48
 msgid "Previous"
-msgstr ""
+msgstr "Попередній"
 
 #. Translators: _START_, _END_, and _TOTAL_ are placeholders. Do NOT translate
 #. them.
@@ -380,15 +388,12 @@ msgid "Professional Education"
 msgstr "Професійна освіта"
 
 #: ecommerce/static/js/views/course_form_view.js:66
-msgid ""
-"Paid certificate track with initial verification and Professional Education "
-"Certificate"
+msgid "Paid certificate track with initial verification and Professional "
 msgstr ""
 
 #: ecommerce/static/js/views/course_form_view.js:72
 msgid ""
 "Paid certificate track with initial verification and Verified Certificate, "
-"and option to purchase credit"
 msgstr ""
 
 #. Translators: _START_, _END_, and _TOTAL_ are placeholders. Do NOT translate

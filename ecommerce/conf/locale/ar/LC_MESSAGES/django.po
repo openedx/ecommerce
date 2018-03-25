@@ -7,7 +7,7 @@
 # Ahmed Jazzar <ajazzar@qrf.org>, 2016
 # Anthony Mangano <amangano@edx.org>, 2017
 # AR C2 <e2f458fd4s512@outlook.com>, 2016
-# cblackburn <cblackburn@edx.org>, 2016
+# Clinton Blackburn <clinton.blackburn@gmail.com>, 2016
 # e2f_ar r3 <e2f_ar_r3@outlook.com>, 2016-2017
 # e2f_ar t3 <e2f_ar_t3@outlook.com>, 2016
 # may <may@qordoba.com>, 2015

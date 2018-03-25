@@ -3,14 +3,14 @@
 # This file is distributed under the same license as the PACKAGE package.
 # 
 # Translators:
-# Pierre Mailhot <pierre.mailhot@gmail.com>, 2016-2017
+# Pierre Mailhot <pierre.mailhot@gmail.com>, 2016-2018
 msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-12-15 09:43-0500\n"
-"PO-Revision-Date: 2017-11-07 08:15+0000\n"
-"Last-Translator: Ned Batchelder <ned@edx.org>\n"
+"POT-Creation-Date: 2018-03-14 09:32+0000\n"
+"PO-Revision-Date: 2018-03-14 23:02+0000\n"
+"Last-Translator: Pierre Mailhot <pierre.mailhot@gmail.com>\n"
 "Language-Team: French (Canada) (http://www.transifex.com/open-edx/edx-platform/language/fr_CA/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -43,7 +43,7 @@ msgid "A valid course ID is required"
 msgstr "Un ID de cours valide est nécessaire"
 
 #: ecommerce/static/js/models/coupon_model.js:106
-#, javascript-format
+#, c-format
 msgid "Email domain {%s} is invalid."
 msgstr "Domain de courriel {%s} est invalide."
 
@@ -163,43 +163,43 @@ msgstr "S'il vous plaît choisir un fournisseur de crédit de cours valide."
 msgid "All credit seats must designate a number of credit hours."
 msgstr "Toutes les places avec crédit doivent indiquer un certain nombre d'heures de crédit."
 
-#: ecommerce/static/js/pages/basket_page.js:26
+#: ecommerce/static/js/pages/basket_page.js:27
 msgid "Problem occurred during checkout. Please contact support."
-msgstr ""
+msgstr "Un problème est survenu lors du passage à la caisse. S'il vous plaît contacter le support."
 
-#: ecommerce/static/js/pages/basket_page.js:99
+#: ecommerce/static/js/pages/basket_page.js:101
 msgid "This field is required"
 msgstr "Ce champ est obligatoire"
 
-#: ecommerce/static/js/pages/basket_page.js:134
+#: ecommerce/static/js/pages/basket_page.js:136
 msgid "Invalid card number"
 msgstr "Numéro de carte invalide"
 
-#: ecommerce/static/js/pages/basket_page.js:136
+#: ecommerce/static/js/pages/basket_page.js:138
 msgid "Unsupported card type"
 msgstr "Type de carte non supporté"
 
-#: ecommerce/static/js/pages/basket_page.js:138
+#: ecommerce/static/js/pages/basket_page.js:140
 msgid "Invalid security number"
 msgstr "Numéro de sécurité invalide"
 
-#: ecommerce/static/js/pages/basket_page.js:143
+#: ecommerce/static/js/pages/basket_page.js:145
 msgid "Invalid month"
 msgstr "Mois invalide"
 
-#: ecommerce/static/js/pages/basket_page.js:145
+#: ecommerce/static/js/pages/basket_page.js:147
 msgid "Invalid year"
 msgstr "Année invalide"
 
-#: ecommerce/static/js/pages/basket_page.js:147
+#: ecommerce/static/js/pages/basket_page.js:149
 msgid "Card expired"
 msgstr "Carte expirée"
 
-#: ecommerce/static/js/pages/basket_page.js:465
+#: ecommerce/static/js/pages/basket_page.js:485
 msgid "<Choose state/province>"
 msgstr "<Choose state/province>"
 
-#: ecommerce/static/js/pages/basket_page.js:466
+#: ecommerce/static/js/pages/basket_page.js:486
 msgid "State/Province (required)"
 msgstr "État/Province (obligatoire)"
 
@@ -254,22 +254,29 @@ msgstr "Apple Pay n'est pas disponible pour le moment. SVP essayer une autre mé
 #: ecommerce/static/js/payment_processors/cybersource.js:249
 msgid ""
 "An error occurred while processing your payment. You have NOT been charged. "
-"Please try again, or select another payment method."
-msgstr "Une erreur est survenue pendant le traitement de votre paiement. Vous n'avez pas été facturé. SVP essayer de nouveau, ou choisissez une autre méthode de paiement."
+msgstr "Une erreur est survenue pendant le traitement de votre paiement. Vous n'avez pas été facturé."
 
 #: ecommerce/static/js/payment_processors/stripe.js:71
 msgid ""
 "An error occurred while attempting to process your payment. You have not "
-"been charged. Please check your payment details, and try again."
-msgstr ""
+"been "
+msgstr "Une erreur est survenue pendant le traitement de votre paiement. Vous n'avez pas été"
 
 #: ecommerce/static/js/payment_processors/stripe.js:110
-msgid "An error occurred while processing your payment. Please try again."
-msgstr ""
+msgid "An error occurred while processing your payment. "
+msgstr "Une erreur est survenue pendant le traitement de votre paiement."
 
 #: ecommerce/static/js/utils/utils.js:184
 msgid "Trailing comma not allowed."
 msgstr "La virgule traînante n'est pas autorisée."
+
+#: ecommerce/static/js/utils/validation_patterns.js:18
+msgid "The course ID is invalid."
+msgstr "L'identifiant du cours est invalide"
+
+#: ecommerce/static/js/utils/validation_patterns.js:26
+msgid "The product name cannot contain HTML."
+msgstr "Le nom du produit ne peut contenir du HTML."
 
 #: ecommerce/static/js/views/coupon_detail_view.js:107
 #: ecommerce/static/js/views/coupon_form_view.js:60
@@ -375,16 +382,13 @@ msgid "Professional Education"
 msgstr "Formation professionnelle"
 
 #: ecommerce/static/js/views/course_form_view.js:66
-msgid ""
-"Paid certificate track with initial verification and Professional Education "
-"Certificate"
+msgid "Paid certificate track with initial verification and Professional "
 msgstr "Parcours d'attestation payant avec vérification initiale et une attestation de formation continue professionnelle"
 
 #: ecommerce/static/js/views/course_form_view.js:72
 msgid ""
 "Paid certificate track with initial verification and Verified Certificate, "
-"and option to purchase credit"
-msgstr "Parcours d'attestation payant avec vérification initiale et une attestation vérifiée, et option d'acheter des crédits de cours"
+msgstr "Parcours d'attestation payant avec vérification initiale et attestation vérifiée,"
 
 #. Translators: _START_, _END_, and _TOTAL_ are placeholders. Do NOT translate
 #. them.
