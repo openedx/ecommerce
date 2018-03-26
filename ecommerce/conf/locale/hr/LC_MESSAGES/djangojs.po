@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-12-15 09:43-0500\n"
-"PO-Revision-Date: 2017-11-07 08:15+0000\n"
+"POT-Creation-Date: 2018-03-14 09:32+0000\n"
+"PO-Revision-Date: 2018-03-14 20:49+0000\n"
 "Last-Translator: Ned Batchelder <ned@edx.org>\n"
 "Language-Team: Croatian (http://www.transifex.com/open-edx/edx-platform/language/hr/)\n"
 "MIME-Version: 1.0\n"
@@ -42,7 +42,7 @@ msgid "A valid course ID is required"
 msgstr ""
 
 #: ecommerce/static/js/models/coupon_model.js:106
-#, javascript-format
+#, c-format
 msgid "Email domain {%s} is invalid."
 msgstr ""
 
@@ -162,43 +162,43 @@ msgstr ""
 msgid "All credit seats must designate a number of credit hours."
 msgstr ""
 
-#: ecommerce/static/js/pages/basket_page.js:26
+#: ecommerce/static/js/pages/basket_page.js:27
 msgid "Problem occurred during checkout. Please contact support."
 msgstr ""
 
-#: ecommerce/static/js/pages/basket_page.js:99
+#: ecommerce/static/js/pages/basket_page.js:101
 msgid "This field is required"
 msgstr ""
 
-#: ecommerce/static/js/pages/basket_page.js:134
+#: ecommerce/static/js/pages/basket_page.js:136
 msgid "Invalid card number"
 msgstr ""
 
-#: ecommerce/static/js/pages/basket_page.js:136
+#: ecommerce/static/js/pages/basket_page.js:138
 msgid "Unsupported card type"
 msgstr ""
 
-#: ecommerce/static/js/pages/basket_page.js:138
+#: ecommerce/static/js/pages/basket_page.js:140
 msgid "Invalid security number"
 msgstr ""
 
-#: ecommerce/static/js/pages/basket_page.js:143
+#: ecommerce/static/js/pages/basket_page.js:145
 msgid "Invalid month"
 msgstr ""
 
-#: ecommerce/static/js/pages/basket_page.js:145
+#: ecommerce/static/js/pages/basket_page.js:147
 msgid "Invalid year"
 msgstr ""
 
-#: ecommerce/static/js/pages/basket_page.js:147
+#: ecommerce/static/js/pages/basket_page.js:149
 msgid "Card expired"
 msgstr ""
 
-#: ecommerce/static/js/pages/basket_page.js:465
+#: ecommerce/static/js/pages/basket_page.js:485
 msgid "<Choose state/province>"
 msgstr ""
 
-#: ecommerce/static/js/pages/basket_page.js:466
+#: ecommerce/static/js/pages/basket_page.js:486
 msgid "State/Province (required)"
 msgstr ""
 
@@ -253,21 +253,28 @@ msgstr ""
 #: ecommerce/static/js/payment_processors/cybersource.js:249
 msgid ""
 "An error occurred while processing your payment. You have NOT been charged. "
-"Please try again, or select another payment method."
 msgstr ""
 
 #: ecommerce/static/js/payment_processors/stripe.js:71
 msgid ""
 "An error occurred while attempting to process your payment. You have not "
-"been charged. Please check your payment details, and try again."
+"been "
 msgstr ""
 
 #: ecommerce/static/js/payment_processors/stripe.js:110
-msgid "An error occurred while processing your payment. Please try again."
+msgid "An error occurred while processing your payment. "
 msgstr ""
 
 #: ecommerce/static/js/utils/utils.js:184
 msgid "Trailing comma not allowed."
+msgstr ""
+
+#: ecommerce/static/js/utils/validation_patterns.js:18
+msgid "The course ID is invalid."
+msgstr ""
+
+#: ecommerce/static/js/utils/validation_patterns.js:26
+msgid "The product name cannot contain HTML."
 msgstr ""
 
 #: ecommerce/static/js/views/coupon_detail_view.js:107
@@ -374,15 +381,12 @@ msgid "Professional Education"
 msgstr ""
 
 #: ecommerce/static/js/views/course_form_view.js:66
-msgid ""
-"Paid certificate track with initial verification and Professional Education "
-"Certificate"
+msgid "Paid certificate track with initial verification and Professional "
 msgstr ""
 
 #: ecommerce/static/js/views/course_form_view.js:72
 msgid ""
 "Paid certificate track with initial verification and Verified Certificate, "
-"and option to purchase credit"
 msgstr ""
 
 #. Translators: _START_, _END_, and _TOTAL_ are placeholders. Do NOT translate
