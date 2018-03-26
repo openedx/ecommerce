@@ -165,7 +165,7 @@ class BasketSummaryView(BasketView):
             messages.info(
                 self.request,
                 _(
-                    '{strong_start}Purchasing access just for yourself?{strong_end}{paragraph_start}If you are '
+                    '{strong_start}Purchasing just for yourself?{strong_end}{paragraph_start}If you are '
                     'purchasing a single code for someone else, please continue with checkout. However, if you are the '
                     'learner {link_start}go back{link_end} to enroll directly.{paragraph_end}'
                 ).format(
