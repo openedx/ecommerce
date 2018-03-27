@@ -539,20 +539,9 @@
             }
 
             .amount {
-                padding: 0;
+                padding-bottom: 20px;
                 color: $gray-color;
                 font-size: 18px;
-                
-                span {
-                  float: none !important;
-                  display: block;
-                  text-align: unset;
-
-
-                  &:first-child {
-                    margin: 0 0 20px;
-                  }
-                }
             }
 
             #basket-total {

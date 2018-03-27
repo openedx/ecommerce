@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-03-15 11:29+0000\n"
+"POT-Creation-Date: 2018-03-27 14:51-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -347,7 +347,7 @@ msgstr ""
 "Ìnvälïd dätä shärïng çönsént tökén prövïdéd. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
 "¢σηѕє¢тєтυя #"
 
-#: ecommerce/coupons/views.py ecommerce/extensions/basket/views.py
+#: ecommerce/coupons/views.py
 #, python-brace-format
 msgid "You have already purchased {course} seat."
 msgstr ""
@@ -805,20 +805,8 @@ msgstr ""
 "αмєт, ¢σηѕє¢тєтυя α#"
 
 #: ecommerce/extensions/basket/views.py
-msgid "No SKU provided."
-msgstr "Nö SKÛ prövïdéd. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αм#"
-
-#: ecommerce/extensions/basket/views.py
-#, python-brace-format
-msgid "SKU [{sku}] does not exist."
-msgstr "SKÛ [{sku}] döés nöt éxïst. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕ#"
-
-#: ecommerce/extensions/basket/views.py
-#, python-brace-format
-msgid "Product [{product}] not available to buy."
-msgstr ""
-"Prödüçt [{product}] nöt äväïläßlé tö ßüý. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
-"¢σηѕє¢тєт#"
+msgid "No product is available to buy."
+msgstr "Nö prödüçt ïs äväïläßlé tö ßüý. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢т#"
 
 #: ecommerce/extensions/basket/views.py
 msgid "You have already purchased these products"
@@ -829,20 +817,20 @@ msgstr ""
 #: ecommerce/extensions/basket/views.py
 #, python-brace-format
 msgid ""
-"{strong_start}Purchasing access just for "
-"yourself?{strong_end}{paragraph_start}If you are purchasing a single code "
-"for someone else, please continue with checkout. However, if you are the "
-"learner {link_start}go back{link_end} to enroll directly.{paragraph_end}"
+"{strong_start}Purchasing just for yourself?{strong_end}{paragraph_start}If "
+"you are purchasing a single code for someone else, please continue with "
+"checkout. However, if you are the learner {link_start}go back{link_end} to "
+"enroll directly.{paragraph_end}"
 msgstr ""
-"{strong_start}Pürçhäsïng äççéss jüst för "
-"ýöürsélf?{strong_end}{paragraph_start}Ìf ýöü äré pürçhäsïng ä sïnglé çödé "
-"för söméöné élsé, pléäsé çöntïnüé wïth çhéçköüt. Höwévér, ïf ýöü äré thé "
-"léärnér {link_start}gö ßäçk{link_end} tö énröll dïréçtlý.{paragraph_end} "
-"Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя α∂ιριѕι¢ιηg єłιт, ѕє∂ ∂σ єιυѕмσ∂ "
-"тємρσя ιη¢ι∂ι∂υηт υт łαвσяє єт ∂σłσяє мαgηα αłιqυα. υт єηιм α∂ мιηιм νєηιαм,"
-" qυιѕ ησѕтяυ∂ єχєя¢ιтαтιση υłłαм¢σ łαвσяιѕ ηιѕι υт αłιqυιρ єχ єα ¢σммσ∂σ "
-"¢σηѕєqυαт. ∂υιѕ αυтє ιяυяє ∂σłσя ιη яєρяєнєη∂єяιт ιη νσłυρтαтє νєłιт єѕѕє "
-"¢ιłłυм ∂σłσяє єυ ƒυgιαт ηυłłα ραяιαтυя. єχ¢єρтєυя ѕιηт σ¢¢αє¢αт ¢υ#"
+"{strong_start}Pürçhäsïng jüst för ýöürsélf?{strong_end}{paragraph_start}Ìf "
+"ýöü äré pürçhäsïng ä sïnglé çödé för söméöné élsé, pléäsé çöntïnüé wïth "
+"çhéçköüt. Höwévér, ïf ýöü äré thé léärnér {link_start}gö ßäçk{link_end} tö "
+"énröll dïréçtlý.{paragraph_end} Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя "
+"α∂ιριѕι¢ιηg єłιт, ѕє∂ ∂σ єιυѕмσ∂ тємρσя ιη¢ι∂ι∂υηт υт łαвσяє єт ∂σłσяє мαgηα"
+" αłιqυα. υт єηιм α∂ мιηιм νєηιαм, qυιѕ ησѕтяυ∂ єχєя¢ιтαтιση υłłαм¢σ łαвσяιѕ "
+"ηιѕι υт αłιqυιρ єχ єα ¢σммσ∂σ ¢σηѕєqυαт. ∂υιѕ αυтє ιяυяє ∂σłσя ιη "
+"яєρяєнєη∂єяιт ιη νσłυρтαтє νєłιт єѕѕє ¢ιłłυм ∂σłσяє єυ ƒυgιαт ηυłłα "
+"ραяιαтυя. єχ¢єρтєυя ѕιηт σ¢¢αє¢αт ¢υρι∂αтαт ηση#"
 
 #: ecommerce/extensions/basket/views.py
 msgid ""
@@ -1283,6 +1271,7 @@ msgstr "Lïné Çrédït (éxçl. täx) Ⱡ'σяєм ιρѕυм ∂σłσя ѕι
 #: ecommerce/extensions/refund/models.py
 #: ecommerce/templates/edx/checkout/receipt.html
 #: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html
 #: ecommerce/templates/oscar/basket/partials/hosted_checkout_basket.html
 #: ecommerce/templates/oscar/dashboard/orders/line_detail.html
 #: ecommerce/templates/oscar/dashboard/orders/line_detail.html
@@ -1386,6 +1375,7 @@ msgid "Note"
 msgstr "Nöté Ⱡ'σяєм ι#"
 
 #: ecommerce/extensions/voucher/utils.py
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html
 #: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html
 #: ecommerce/templates/oscar/basket/partials/hosted_checkout_basket.html
 msgid "Price"
@@ -2604,10 +2594,6 @@ msgid "summary"
 msgstr "sümmärý Ⱡ'σяєм ιρѕυм #"
 
 #: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html
-msgid "Quanity"
-msgstr "Qüänïtý Ⱡ'σяєм ιρѕυм #"
-
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html
 msgid "Discounts applied"
 msgstr "Dïsçöünts äpplïéd Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмє#"
 
@@ -2615,23 +2601,23 @@ msgstr "Dïsçöünts äpplïéd Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αм
 #, python-format
 msgid ""
 "\n"
-"                                    %(benefit)s discount provided by %(enterprise_customer_name)s.\n"
-"                                "
+"                                        %(benefit)s discount provided by %(enterprise_customer_name)s.\n"
+"                                    "
 msgstr ""
 "\n"
-"                                    %(benefit)s dïsçöünt prövïdéd ßý %(enterprise_customer_name)s.\n"
-"                                 Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт#"
+"                                        %(benefit)s dïsçöünt prövïdéd ßý %(enterprise_customer_name)s.\n"
+"                                     Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт#"
 
 #: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html
 #, python-format
 msgid ""
 "\n"
-"                                        Coupon %(voucher_code)s applied for %(total_benefit)s off\n"
-"                                    "
+"                                            Coupon %(voucher_code)s applied for %(total_benefit)s off\n"
+"                                        "
 msgstr ""
 "\n"
-"                                        Çöüpön %(voucher_code)s äpplïéd för %(total_benefit)s öff\n"
-"                                     Ⱡ'σяєм ιρѕυм ∂σłσя ѕι#"
+"                                            Çöüpön %(voucher_code)s äpplïéd för %(total_benefit)s öff\n"
+"                                         Ⱡ'σяєм ιρѕυм ∂σ#"
 
 #: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html
 msgid "Remove coupon"
