@@ -2,11 +2,11 @@ import json
 
 import ddt
 import mock
-from analytics import Client
 from django.contrib.auth.models import AnonymousUser
 from django.test.client import RequestFactory
 from oscar.test import factories
 
+from analytics import Client
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.extensions.analytics.utils import (
     get_google_analytics_client_id,
