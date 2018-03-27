@@ -47,16 +47,14 @@
         <h2 id="summary-region" class="title">{% trans "summary" %}</h2>
         {% if enrollment_code_purchase %}
             <div id="summary-header" class="row">
-                    <span class="description col-xs-4 col-sm-4">{% trans "Price" %}</span>
-                    <span class="description col-xs-4 col-sm-4">{% trans "Quantity" %}</span>
-                    <span class="description col-xs-4 col-sm-4" >{% trans "Subtotal" %}</span>
-                </div>
+                <span class="description col-xs-4 col-sm-4">{% trans "Price" %}</span>
+                <span class="description col-xs-4 col-sm-4">{% trans "Quantity" %}</span>
+                <span class="description col-xs-4 col-sm-4" >{% trans "Subtotal" %}</span>
             </div>
             <div id="line-item" class="row">
-                    <span id="line-price" class="col-xs-4 col-sm-4" >{{line_price|currency:basket.currency}}</span>
-                    <span id="line-quantity" class="col-xs-4 col-sm-4">{{basket.num_items}}</span>
-                    <span id="line-subtotal" class="col-xs-4 col-sm-4">{{order_total.incl_tax|currency:basket.currency}}</span>
-                </div>
+                <span id="line-price" class="col-xs-4 col-sm-4" >{{line_price|currency:basket.currency}}</span>
+                <span id="line-quantity" class="col-xs-4 col-sm-4">{{basket.num_items}}</span>
+                <span id="line-subtotal" class="col-xs-4 col-sm-4">{{order_total.incl_tax|currency:basket.currency}}</span>
             </div>
         {% else %}
             <div id="line-price" class="amount row">

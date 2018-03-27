@@ -529,7 +529,12 @@
             .description {
                 @include float(left);
             }
-            
+
+            .price {
+                text-align: right;
+                padding-right: 20px;
+            }
+
             .row {
                 padding-bottom: 20px;
             }
@@ -543,12 +548,6 @@
             #basket-total {
                 font-size: 18px;
                 font-weight: bold;
-
-                .price {
-                  font-weight: bold;
-                  text-align: unset;
-                  padding: 0;
-                }
             }
 
             #voucher-information {
