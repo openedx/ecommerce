@@ -45,7 +45,7 @@
     </form>
     <div role="region" aria-labelledby="summary-region" aria-live="polite">
         <h2 id="summary-region" class="title">{% trans "summary" %}</h2>
-        {% if line_data.enrollment_code %}
+        {% if enrollment_code_purchase %}
             <div id="summary-header" class="row">
                     <span class="description col-xs-4 col-sm-4">{% trans "Price" %}</span>
                     <span class="description col-xs-4 col-sm-4">{% trans "Quantity" %}</span>
@@ -60,8 +60,9 @@
             </div>
         {% else %}
             <div id="line-price" class="amount row">
-                <span class="description">{% trans "Price" %}</span>
-                <span>{{basket.total_incl_tax_excl_discounts|currency:basket.currency}}</span>
+                <span class="description col-xs-4 col-sm-4">{% trans "Price" %}</span>
+                <span class="col-xs-4 col-sm-4"></span>
+                <span class="price col-xs-4 col-sm-4">{{basket.total_incl_tax_excl_discounts|currency:basket.currency}}</span>
             </div>
             {% if basket.total_discount %}
                 <div id="line-discount" class="amount row">
