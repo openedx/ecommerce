@@ -45,24 +45,29 @@
     </form>
     <div role="region" aria-labelledby="summary-region" aria-live="polite">
         <h2 id="summary-region" class="title">{% trans "summary" %}</h2>
-        <div class="row">
-            <div id="line-price" class="amount col-xs-4 col-sm-4">
-                <span class="description">{% trans "Price" %}</span>
-                <span class="price">{{line_price|currency:basket.currency}}</span>
+        {% if is_enrollment_code_purchase %}
+            <div id="summary-header" class="row">
+                <span class="col-xs-4 col-sm-4">{% trans "Price" %}</span>
+                <span class="col-xs-4 col-sm-4">{% trans "Quantity" %}</span>
+                <span class="price col-xs-4 col-sm-4" >{% trans "Subtotal" %}</span>
             </div>
-            <div id="line-price" class="amount col-xs-4 col-sm-4">
-                <span class="description float-none">{% trans "Quanity" %}</span>
-                <span>{{basket.num_items}}</span>
+            <div id="line-item" class="row">
+                <span id="line-price" class="col-xs-4 col-sm-4" >{{line_price|currency:basket.currency}}</span>
+                <span id="line-quantity" class="col-xs-4 col-sm-4">{{basket.num_items}}</span>
+                <span id="line-subtotal" class="price col-xs-4 col-sm-4">{{order_total.incl_tax|currency:basket.currency}}</span>
             </div>
-            <div id="line-price" class="amount col-xs-4 col-sm-4">
-                <span class="description">{% trans "Subtotal" %}</span>
-                <span class="price">{{order_total.incl_tax|currency:basket.currency}}</span>
+        {% else %}
+            <div id="line-price" class="amount row">
+                <span class="description col-xs-4 col-sm-4">{% trans "Price" %}</span>
+                <span class="col-xs-4 col-sm-4"></span>
+                <span class="price col-xs-4 col-sm-4">{{basket.total_incl_tax_excl_discounts|currency:basket.currency}}</span>
             </div>
-        </div>
+        {% endif %}
         {% if basket.total_discount %}
             <div id="line-discount" class="amount row">
                 <span class="description">{% trans "Discounts applied" %}</span>
-                <span class="price">-{{basket.total_discount|currency:basket.currency}}</span>
+                <span class="col-xs-4 col-sm-4"></span>
+                <span class="price col-xs-4 col-sm-4">-{{basket.total_discount|currency:basket.currency}}</span>
             </div>
         {% endif %}
         <div id="offer-information" class="row">
