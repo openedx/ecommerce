@@ -14,12 +14,8 @@ from oscar.core.loading import get_class, get_model
 from rest_framework import serializers
 from rest_framework.reverse import reverse
 
-from ecommerce.core.constants import (
-    COURSE_ENTITLEMENT_PRODUCT_CLASS_NAME,
-    COURSE_ID_REGEX,
-    ISO_8601_FORMAT,
-    SEAT_PRODUCT_CLASS_NAME
-)
+from ecommerce.core.constants import (COURSE_ENTITLEMENT_PRODUCT_CLASS_NAME, COURSE_ID_REGEX,
+                                      ISO_8601_FORMAT, SEAT_PRODUCT_CLASS_NAME)
 from ecommerce.core.url_utils import get_ecommerce_url
 from ecommerce.courses.models import Course
 from ecommerce.entitlements.utils import create_or_update_course_entitlement
