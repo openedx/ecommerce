@@ -47,14 +47,14 @@
         <h2 id="summary-region" class="title">{% trans "summary" %}</h2>
         {% if enrollment_code_purchase %}
             <div id="summary-header" class="row">
-                <span class="description col-xs-4 col-sm-4">{% trans "Price" %}</span>
-                <span class="description col-xs-4 col-sm-4">{% trans "Quantity" %}</span>
-                <span class="description col-xs-4 col-sm-4" >{% trans "Subtotal" %}</span>
+                <span class="col-xs-4 col-sm-4">{% trans "Price" %}</span>
+                <span class="col-xs-4 col-sm-4">{% trans "Quantity" %}</span>
+                <span class="price col-xs-4 col-sm-4" >{% trans "Subtotal" %}</span>
             </div>
             <div id="line-item" class="row">
                 <span id="line-price" class="col-xs-4 col-sm-4" >{{line_price|currency:basket.currency}}</span>
                 <span id="line-quantity" class="col-xs-4 col-sm-4">{{basket.num_items}}</span>
-                <span id="line-subtotal" class="col-xs-4 col-sm-4">{{order_total.incl_tax|currency:basket.currency}}</span>
+                <span id="line-subtotal" class="price col-xs-4 col-sm-4">{{order_total.incl_tax|currency:basket.currency}}</span>
             </div>
         {% else %}
             <div id="line-price" class="amount row">
@@ -62,57 +62,57 @@
                 <span class="col-xs-4 col-sm-4"></span>
                 <span class="price col-xs-4 col-sm-4">{{basket.total_incl_tax_excl_discounts|currency:basket.currency}}</span>
             </div>
-            {% if basket.total_discount %}
-                <div id="line-discount" class="amount row">
-                    <span class="description">{% trans "Discounts applied" %}</span>
-                    <span>-{{basket.total_discount|currency:basket.currency}}</span>
-                </div>
-            {% endif %}
-            <div id="offer-information" class="row">
-                {% block offers %}
-                    <div class="offers">
-                        {% for offer_id, offer in basket.applied_offers.items %}
-                            {% if offer.condition.enterprise_customer_name %}
-                                <p class="offer">
-                                    {% blocktrans with enterprise_customer_name=offer.condition.enterprise_customer_name benefit=offer.benefit|benefit_discount %}
-                                        {{ benefit }} discount provided by {{ enterprise_customer_name }}.
-                                    {% endblocktrans %}
-                                </p>
-                            {% endif %}
-                        {% endfor %}
-                    </div>
-                {% endblock offers %}
-            </div>
-            <div id="voucher-information" class="row">
-                {% if show_voucher_form %}
-                    {% block vouchers %}
-                        {% if basket.contains_a_voucher %}
-                            <div class="vouchers">
-                                {% for voucher in basket.vouchers.all %}
-                                    <p class="voucher">
-                                        {% blocktrans with voucher_code=voucher.code %}
-                                            Coupon {{ voucher_code }} applied for {{ total_benefit }} off
-                                        {% endblocktrans %}
-                                        <form action="{% url 'basket:vouchers-remove' pk=voucher.id %}" method="POST">
-                                            {% csrf_token %}
-                                            <button class="remove-voucher" type="submit" aria-label={% trans "Remove coupon" %}>Remove</button>
-                                        </form>
-                                    </p>
-                                {% endfor %}
-                            </div>
-                        {% else %}
-                            {# Hide the entire section if a custom BasketView doesn't pass in a voucher form #}
-                            {% if voucher_form %}
-                                <div class="use-voucher">
-                                    <label for="id_code">{% trans "Add coupon code" %} <span>{% trans "(optional)" %}</span></label>
-                                    {% include 'basket/partials/add_voucher_form.html' %}
-                                </div>
-                            {% endif %}
-                        {% endif %}
-                    {% endblock vouchers %}
-                {% endif %}
+        {% endif %}
+        {% if basket.total_discount %}
+            <div id="line-discount" class="amount row">
+                <span class="description">{% trans "Discounts applied" %}</span>
+                <span>-{{basket.total_discount|currency:basket.currency}}</span>
             </div>
         {% endif %}
+        <div id="offer-information" class="row">
+            {% block offers %}
+                <div class="offers">
+                    {% for offer_id, offer in basket.applied_offers.items %}
+                        {% if offer.condition.enterprise_customer_name %}
+                            <p class="offer">
+                                {% blocktrans with enterprise_customer_name=offer.condition.enterprise_customer_name benefit=offer.benefit|benefit_discount %}
+                                    {{ benefit }} discount provided by {{ enterprise_customer_name }}.
+                                {% endblocktrans %}
+                            </p>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            {% endblock offers %}
+        </div>
+        <div id="voucher-information" class="row">
+            {% if show_voucher_form %}
+                {% block vouchers %}
+                    {% if basket.contains_a_voucher %}
+                        <div class="vouchers">
+                            {% for voucher in basket.vouchers.all %}
+                                <p class="voucher">
+                                    {% blocktrans with voucher_code=voucher.code %}
+                                        Coupon {{ voucher_code }} applied for {{ total_benefit }} off
+                                    {% endblocktrans %}
+                                    <form action="{% url 'basket:vouchers-remove' pk=voucher.id %}" method="POST">
+                                        {% csrf_token %}
+                                        <button class="remove-voucher" type="submit" aria-label={% trans "Remove coupon" %}>Remove</button>
+                                    </form>
+                                </p>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        {# Hide the entire section if a custom BasketView doesn't pass in a voucher form #}
+                        {% if voucher_form %}
+                            <div class="use-voucher">
+                                <label for="id_code">{% trans "Add coupon code" %} <span>{% trans "(optional)" %}</span></label>
+                                {% include 'basket/partials/add_voucher_form.html' %}
+                            </div>
+                        {% endif %}
+                    {% endif %}
+                {% endblock vouchers %}
+            {% endif %}
+        </div>
         <div id="basket-total" class="row" aria-describedby="total-price-desc">
             <span id="total-price-desc col-xs-4 col-sm-4" class="description">{% trans "TOTAL" %}</span>
             <span class="col-xs-4 col-sm-4"></span>
