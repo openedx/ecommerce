@@ -206,6 +206,7 @@ class BasketSummaryView(BasketView):
         display_verification_message = False
         lines_data = []
         show_voucher_form = True
+        is_enrollment_code_purchase = False
         switch_link_text = partner_sku = order_details_msg = None
 
         for line in lines:
@@ -234,6 +235,7 @@ class BasketSummaryView(BasketView):
                         )
             elif line.product.is_enrollment_code_product:
                 line_data = self._get_course_data(line.product)
+                is_enrollment_code_purchase = True
                 show_voucher_form = False
                 order_details_msg = _(
                     '{paragraph_start}By purchasing, you and your organization agree to the following terms:'
@@ -286,7 +288,8 @@ class BasketSummaryView(BasketView):
             'order_details_msg': order_details_msg,
             'partner_sku': partner_sku,
             'show_voucher_form': show_voucher_form,
-            'switch_link_text': switch_link_text
+            'switch_link_text': switch_link_text,
+            'is_enrollment_code_purchase': is_enrollment_code_purchase
         }
 
         return context_updates, lines_data
