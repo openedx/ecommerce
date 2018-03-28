@@ -261,10 +261,7 @@ class ReceiptResponseView(ThankYouView):
         context = {}
         verification_url = original_context.get('verification_url')
         user_verified = original_context.get('user_verified')
-
-        if verification_url and not user_verified:
-            context.update({
-                'show_verification_banner': True
-            })
-
+        context.update({
+            'show_verification_banner': verification_url and not user_verified
+        })
         return context
