@@ -142,14 +142,21 @@
         text-align: right;
     }
 
-    #cta-links {
-        margin: 20px 20px 40px;
-        float: right;
-        font-size: 16px;
+    #cta-nav-links {
+        margin: 40px 0;
+
+        .nav-link {
+            font-size: 16px;
+        }
 
         .dashboard-link {
             margin-right: 40px;
         }
+    }
+
+    .dashboard-link {
+        line-height: 20px;
+        font-size: 13px;
     }
 
     .order-summary {

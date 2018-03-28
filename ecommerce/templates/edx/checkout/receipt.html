@@ -168,15 +168,17 @@
             {% include 'oscar/checkout/_verification_data.html' %}
         </div>
       {% endif %}
-      <div id="cta-links">
+      <div id="cta-nav-links" class="row">
+        <div class="col-xs-12 text-right">
           {% if not show_verification_banner %}
           <a class="dashboard-link nav-link" href="{{ order_dashboard_url }}">
-              {% trans "Go to Dashboard" %}
+            {% trans "Go to Dashboard" %}
           </a>
           {% endif %}
           <a class="find-more-courses-link nav-link" href="{{ explore_courses_url }}">
             {% trans "Find more courses" %}
           </a>
+        </div>
       </div>
     </div>
   </div>
