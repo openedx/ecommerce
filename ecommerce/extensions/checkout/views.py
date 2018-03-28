@@ -182,17 +182,19 @@ class ReceiptResponseView(ThankYouView):
     def get_context_data(self, **kwargs):
         context = super(ReceiptResponseView, self).get_context_data(**kwargs)
         order = context[self.context_object_name]
+        has_enrollment_code_product = any(
+            line.product.is_enrollment_code_product for line in order.basket.all_lines()
+        )
         context.update({
             'payment_method': self.get_payment_method(order),
             'display_credit_messaging': self.order_contains_credit_seat(order),
         })
         context.update(self.get_order_dashboard_context(order))
         context.update(self.get_order_verification_context(order))
+        context.update(self.get_show_verification_banner_context(context))
         context.update({
             'explore_courses_url': get_lms_explore_courses_url(),
-            'has_enrollment_code_product': any(
-                line.product.is_enrollment_code_product for line in order.basket.all_lines()
-            )
+            'has_enrollment_code_product': has_enrollment_code_product
         })
         return context
 
@@ -252,5 +254,17 @@ class ReceiptResponseView(ThankYouView):
                     'verification_url': site.siteconfiguration.build_lms_url('verify_student/reverify'),
                     'user_verified': request.user.is_verified(site),
                 })
+
+        return context
+
+    def get_show_verification_banner_context(self, original_context):
+        context = {}
+        verification_url = original_context.get('verification_url')
+        user_verified = original_context.get('user_verified')
+
+        if verification_url and not user_verified:
+            context.update({
+                'show_verification_banner': True
+            })
 
         return context

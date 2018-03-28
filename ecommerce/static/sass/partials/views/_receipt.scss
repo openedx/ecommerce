@@ -142,24 +142,14 @@
         text-align: right;
     }
 
-    #dashboard-link {
-        margin: 20px;
-        text-align: center;
-        padding-bottom: 3em;
+    #cta-links {
+        margin: 20px 20px 40px;
+        float: right;
+        font-size: 16px;
 
         .dashboard-link {
-            font-size: 18px;
-            padding: 10px 15px;
+            margin-right: 40px;
         }
-    }
-  #find-more-courses-link {
-    margin: 20px;
-    float: right;
-  }
-
-    .dashboard-link {
-        line-height: 20px;
-        font-size: 13px;
     }
 
     .order-summary {
