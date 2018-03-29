@@ -1,0 +1,2 @@
+# For Sentry integration
+raven==6.6.0
