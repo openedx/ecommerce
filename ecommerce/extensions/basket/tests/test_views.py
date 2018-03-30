@@ -606,6 +606,37 @@ class BasketSummaryViewTests(EnterpriseServiceMockMixin, DiscoveryTestMixin, Dis
             self.assertEqual(line_data['course_start'], expected_result)
             self.assertEqual(line_data['course_end'], expected_result)
 
+    def test_course_about_url(self):
+        """
+        Test that in case of bulk enrollment, We have the marketing url from course metadata
+        if present in response.
+        """
+        course_run_info = {
+            "course": "edX+DemoX",
+            "title": 'course title here',
+            "short_description": 'Foo',
+            "start": "2013-02-05T05:00:00Z",
+            "image": {
+                "src": "/path/to/image.jpg",
+            },
+            'enrollment_end': None,
+            'marketing_url': '/path/to/marketing/site'
+        }
+        self.mock_access_token_response()
+        course, __, enrollment_code = self.prepare_course_seat_and_enrollment_code()
+        self.create_basket_and_add_product(enrollment_code)
+        self.mock_course_run_detail_endpoint(
+            course,
+            self.site_configuration.discovery_api_url,
+            course_run_info
+        )
+
+        response = self.client.get(self.path)
+        self.assertEqual(response.status_code, 200)
+        messages = list(response.context['messages'])
+        self.assertEqual(len(messages), 1)
+        self.assertContains(response, '/path/to/marketing/site', status_code=200)
+
     def test_failed_enterprise_consent_sends_message(self):
         """
         Test that if we receive an indication via a query parameter that data sharing

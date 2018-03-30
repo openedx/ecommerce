@@ -140,6 +140,7 @@ class BasketSummaryView(BasketView):
         short_description = None
         course_start = None
         course_end = None
+        course = None
 
         try:
             course = get_course_info_from_catalog(self.request.site, product)
@@ -161,7 +162,10 @@ class BasketSummaryView(BasketView):
 
         if self.request.basket.num_items == 1 and product.is_enrollment_code_product:
             course_key = CourseKey.from_string(product.attr.course_key)
-            course_about = get_lms_course_about_url(course_key=course_key)
+            if course and course.get('marketing_url', None):
+                course_about_url = course['marketing_url']
+            else:
+                course_about_url = get_lms_course_about_url(course_key=course_key)
             messages.info(
                 self.request,
                 _(
@@ -173,7 +177,7 @@ class BasketSummaryView(BasketView):
                     strong_end='</strong>',
                     paragraph_start='<p>',
                     paragraph_end='</p>',
-                    link_start='<a href="{course_about}">'.format(course_about=course_about),
+                    link_start='<a href="{course_about}">'.format(course_about=course_about_url),
                     link_end='</a>'
                 ),
                 extra_tags='safe'
