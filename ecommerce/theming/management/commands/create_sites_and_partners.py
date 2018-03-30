@@ -16,7 +16,6 @@ from ecommerce.core.models import SiteConfiguration
 from ecommerce.courses.models import Course
 from ecommerce.theming.models import SiteTheme
 
-
 logger = logging.getLogger(__name__)
 Partner = get_model('partner', 'Partner')
 

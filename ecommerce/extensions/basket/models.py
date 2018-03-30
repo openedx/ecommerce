@@ -1,4 +1,5 @@
-from django.db import models
+import waffle
+from django.db import models, transaction
 from django.utils.translation import ugettext_lazy as _
 from oscar.apps.basket.abstract_models import AbstractBasket
 from oscar.core.loading import get_class
@@ -55,7 +56,13 @@ class Basket(AbstractBasket):
             # usage. Given that orders for free items are ignored, there is no need for these events.
             if line.stockrecord.price_excl_tax > 0:
                 properties = translate_basket_line_for_segment(line)
-                track_segment_event(self.site, self.owner, 'Product Removed', properties)
+                if waffle.switch_is_active('basket_transaction_on_commit'):
+                    transaction.on_commit(
+                        lambda: track_segment_event(self.site, self.owner, 'Product Removed', properties)  # pylint: disable=cell-var-from-loop
+                    )
+                else:
+                    track_segment_event(self.site, self.owner, 'Product Removed', properties)
+
         super(Basket, self).flush()  # pylint: disable=bad-super-call
 
     def add_product(self, product, quantity=1, options=None):
@@ -70,7 +77,12 @@ class Basket(AbstractBasket):
         if line.stockrecord.price_excl_tax > 0:
             properties = translate_basket_line_for_segment(line)
             properties['cart_id'] = self.id
-            track_segment_event(self.site, self.owner, 'Product Added', properties)
+            if waffle.switch_is_active('basket_transaction_on_commit'):
+                transaction.on_commit(
+                    lambda: track_segment_event(self.site, self.owner, 'Product Added', properties)  # pylint: disable=cell-var-from-loop
+                )
+            else:
+                track_segment_event(self.site, self.owner, 'Product Added', properties)
 
         return line, created
 
