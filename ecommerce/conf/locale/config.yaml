@@ -94,9 +94,3 @@ ignore_dirs:
     - node_modules
     - static/bower_components
     - static/build
-
-generate_merge:
-    django.po:
-        - django-partial.po
-    djangojs.po:
-        - djangojs-partial.po

@@ -1,14 +1,15 @@
-# SOME DESCRIPTIVE TITLE.
-# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
-# This file is distributed under the same license as the PACKAGE package.
+# #-#-#-#-#  django.po (ecommerce)  #-#-#-#-#
+# edX translation file
+# Copyright (C) 2018 edX
+# This file is distributed under the GNU AFFERO GENERAL PUBLIC LICENSE.
 # 
 # Translators:
 msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
-"Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-12-15 09:43-0500\n"
-"PO-Revision-Date: 2017-11-07 08:15+0000\n"
+"Report-Msgid-Bugs-To: openedx-translation@googlegroups.com\n"
+"POT-Creation-Date: 2018-03-26 16:41-0400\n"
+"PO-Revision-Date: 2018-03-26 19:44+0000\n"
 "Last-Translator: Ned Batchelder <ned@edx.org>\n"
 "Language-Team: Malay (http://www.transifex.com/open-edx/edx-platform/language/ms/)\n"
 "MIME-Version: 1.0\n"
@@ -162,43 +163,43 @@ msgstr ""
 msgid "All credit seats must designate a number of credit hours."
 msgstr ""
 
-#: ecommerce/static/js/pages/basket_page.js:26
+#: ecommerce/static/js/pages/basket_page.js:27
 msgid "Problem occurred during checkout. Please contact support."
 msgstr ""
 
-#: ecommerce/static/js/pages/basket_page.js:99
+#: ecommerce/static/js/pages/basket_page.js:101
 msgid "This field is required"
 msgstr ""
 
-#: ecommerce/static/js/pages/basket_page.js:134
+#: ecommerce/static/js/pages/basket_page.js:136
 msgid "Invalid card number"
 msgstr ""
 
-#: ecommerce/static/js/pages/basket_page.js:136
+#: ecommerce/static/js/pages/basket_page.js:138
 msgid "Unsupported card type"
 msgstr ""
 
-#: ecommerce/static/js/pages/basket_page.js:138
+#: ecommerce/static/js/pages/basket_page.js:140
 msgid "Invalid security number"
 msgstr ""
 
-#: ecommerce/static/js/pages/basket_page.js:143
+#: ecommerce/static/js/pages/basket_page.js:145
 msgid "Invalid month"
 msgstr ""
 
-#: ecommerce/static/js/pages/basket_page.js:145
+#: ecommerce/static/js/pages/basket_page.js:147
 msgid "Invalid year"
 msgstr ""
 
-#: ecommerce/static/js/pages/basket_page.js:147
+#: ecommerce/static/js/pages/basket_page.js:149
 msgid "Card expired"
 msgstr ""
 
-#: ecommerce/static/js/pages/basket_page.js:465
+#: ecommerce/static/js/pages/basket_page.js:485
 msgid "<Choose state/province>"
 msgstr ""
 
-#: ecommerce/static/js/pages/basket_page.js:466
+#: ecommerce/static/js/pages/basket_page.js:486
 msgid "State/Province (required)"
 msgstr ""
 
