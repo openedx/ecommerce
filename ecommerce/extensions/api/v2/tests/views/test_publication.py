@@ -318,21 +318,6 @@ class AtomicPublicationTests(DiscoveryTestMixin, TestCase):
             self.assert_course_saved(self.course_id, expected=self.data, enrollment_code_count=1)
             self.assertTrue(Product.objects.filter(product_class__name=ENROLLMENT_CODE_PRODUCT_CLASS_NAME).exists())
 
-    def test_create_with_enrollment_code_creation_disabled(self):
-        """
-        Verify that an enrollment code is not created when payload data specifically disables its creations.
-        """
-        with mock.patch.object(LMSPublisher, 'publish') as mock_publish:
-            # disable enrollment code creation
-            self.data.update(create_or_activate_enrollment_code=False)
-
-            # If publication succeeds, the view should return a 201 and data should be saved.
-            mock_publish.return_value = None
-            response = self.client.post(self.create_path, json.dumps(self.data), JSON_CONTENT_TYPE)
-            self.assertEqual(response.status_code, 201)
-            self.assert_course_saved(self.course_id, expected=self.data, enrollment_code_count=0)
-            self.assertFalse(Product.objects.filter(product_class__name=ENROLLMENT_CODE_PRODUCT_CLASS_NAME).exists())
-
     def test_update(self):
         """Verify that a Course and associated products can be updated and published."""
         self.create_course_and_seats()
