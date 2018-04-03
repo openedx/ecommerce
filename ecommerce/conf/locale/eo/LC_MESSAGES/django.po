@@ -7,12 +7,12 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: ecommerce\n"
-"Report-Msgid-Bugs-To: openedx-translation@googlegroups.com\n"
-"POT-Creation-Date: 2018-03-26 16:41-0400\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2018-04-05 11:00+0000\n"
 "PO-Revision-Date: 2018-03-30 17:16-0500\n"
 "Last-Translator: Muhammad Ayub khan <ayubkhan@edx.org>\n"
 "Language-Team: openedx-translation <openedx-translation@googlegroups.com>\n"
-"Language: eo\n"
+"Language: en\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -1001,6 +1001,7 @@ msgstr "Réfünd ÌD Ⱡ'σяєм ιρѕυм ∂σł#"
 
 #: ecommerce/extensions/dashboard/refunds/forms.py
 #: ecommerce/extensions/refund/models.py ecommerce/extensions/refund/models.py
+#: ecommerce/extensions/voucher/utils.py ecommerce/extensions/voucher/utils.py
 #: ecommerce/extensions/voucher/utils.py
 #: ecommerce/templates/oscar/dashboard/orders/line_detail.html
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html
@@ -1045,7 +1046,9 @@ msgid "EnterpriseCustomerCatalog UUID"
 msgstr "ÉntérprïséÇüstömérÇätälög ÛÛÌD Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢т#"
 
 #: ecommerce/extensions/offer/models.py ecommerce/extensions/voucher/utils.py
-#: ecommerce/programs/forms.py
+#: ecommerce/extensions/voucher/utils.py ecommerce/extensions/voucher/utils.py
+#: ecommerce/extensions/voucher/utils.py ecommerce/extensions/voucher/utils.py
+#: ecommerce/extensions/voucher/utils.py ecommerce/programs/forms.py
 #: ecommerce/programs/templates/programs/programoffer_list.html
 msgid "Program UUID"
 msgstr "Prögräm ÛÛÌD Ⱡ'σяєм ιρѕυм ∂σłσя ѕ#"
@@ -1239,6 +1242,24 @@ msgstr ""
 "∂σłσя ιη яєρяєнєη∂єяιт ιη νσłυρтαтє νєłιт єѕѕє ¢ιłłυм ∂σłσяє єυ ƒυgιαт ηυłłα"
 " ραяιαтυя. єχ¢єρтєυя ѕιηт σ¢¢αє¢αт ¢υρι∂αтαт ηση ρяσι∂єηт, ѕυηт ιη ¢υłρα qυ#"
 
+#. Translators: "Waffle" is the name of a third-party library. It should not
+#. be translated
+#: ecommerce/extensions/refund/admin.py
+#, python-brace-format
+msgid ""
+"Refund administration has been disabled due to the load on the database. "
+"This functionality can be restored by activating the {switch_name} Waffle "
+"switch. Be careful when re-activating this switch!"
+msgstr ""
+"Réfünd ädmïnïsträtïön häs ßéén dïsäßléd düé tö thé löäd ön thé dätäßäsé. "
+"Thïs fünçtïönälïtý çän ßé réstöréd ßý äçtïvätïng thé {switch_name} Wäfflé "
+"swïtçh. Bé çäréfül whén ré-äçtïvätïng thïs swïtçh! Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт "
+"αмєт, ¢σηѕє¢тєтυя α∂ιριѕι¢ιηg єłιт, ѕє∂ ∂σ єιυѕмσ∂ тємρσя ιη¢ι∂ι∂υηт υт "
+"łαвσяє єт ∂σłσяє мαgηα αłιqυα. υт єηιм α∂ мιηιм νєηιαм, qυιѕ ησѕтяυ∂ "
+"єχєя¢ιтαтιση υłłαм¢σ łαвσяιѕ ηιѕι υт αłιqυιρ єχ єα ¢σммσ∂σ ¢σηѕєqυαт. ∂υιѕ "
+"αυтє ιяυяє ∂σłσя ιη яєρяєнєη∂єяιт ιη νσłυρтαтє νєłιт єѕѕє ¢ιłłυм ∂σłσяє єυ "
+"ƒυgιαт ηυłłα ραяιαтυя. єχ¢єρтєυя ѕιηт σ¢¢αє¢αт ¢υρι∂αтαт ηση ρяσι∂#"
+
 #: ecommerce/extensions/refund/models.py
 msgid "Order"
 msgstr "Ördér Ⱡ'σяєм ιρѕ#"
@@ -1271,6 +1292,7 @@ msgstr "Lïné Çrédït (éxçl. täx) Ⱡ'σяєм ιρѕυм ∂σłσя ѕι
 
 #: ecommerce/extensions/refund/models.py
 #: ecommerce/templates/edx/checkout/receipt.html
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html
 #: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html
 #: ecommerce/templates/oscar/basket/partials/hosted_checkout_basket.html
 #: ecommerce/templates/oscar/dashboard/orders/line_detail.html
@@ -1315,115 +1337,133 @@ msgstr "{percentage} % Ⱡ'σяєм ιρѕ#"
 msgid "Inactive"
 msgstr "Ìnäçtïvé Ⱡ'σяєм ιρѕυм ∂#"
 
+#: ecommerce/extensions/voucher/utils.py ecommerce/extensions/voucher/utils.py
+#: ecommerce/extensions/voucher/utils.py ecommerce/extensions/voucher/utils.py
+#: ecommerce/extensions/voucher/utils.py ecommerce/extensions/voucher/utils.py
+msgid "Catalog Query"
+msgstr "Çätälög Qüérý Ⱡ'σяєм ιρѕυм ∂σłσя ѕι#"
+
+#: ecommerce/extensions/voucher/utils.py ecommerce/extensions/voucher/utils.py
+#: ecommerce/extensions/voucher/utils.py
+msgid "Redeemed For Course IDs"
+msgstr "Rédééméd För Çöürsé ÌDs Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σ#"
+
+#: ecommerce/extensions/voucher/utils.py ecommerce/extensions/voucher/utils.py
+#: ecommerce/extensions/voucher/utils.py ecommerce/extensions/voucher/utils.py
+msgid "Redeemed For Course ID"
+msgstr "Rédééméd För Çöürsé ÌD Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢#"
+
 #: ecommerce/extensions/voucher/utils.py
 #: ecommerce/templates/oscar/dashboard/users/detail.html
 msgid "Active"
 msgstr "Àçtïvé Ⱡ'σяєм ιρѕυ#"
 
+#: ecommerce/extensions/voucher/utils.py ecommerce/extensions/voucher/utils.py
 #: ecommerce/extensions/voucher/utils.py
 msgid "Code"
 msgstr "Çödé Ⱡ'σяєм ι#"
 
 #: ecommerce/extensions/voucher/utils.py
-msgid "Coupon Name"
-msgstr "Çöüpön Nämé Ⱡ'σяєм ιρѕυм ∂σłσя #"
+msgid "This row applies to all vouchers"
+msgstr ""
+"Thïs röw äpplïés tö äll vöüçhérs Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тє#"
 
-#: ecommerce/extensions/voucher/utils.py
-msgid "Maximum Coupon Usage"
-msgstr "Mäxïmüm Çöüpön Ûsägé Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, #"
-
-#: ecommerce/extensions/voucher/utils.py
-msgid "Redemption Count"
-msgstr "Rédémptïön Çöünt Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αм#"
-
-#: ecommerce/extensions/voucher/utils.py
-msgid "Coupon Type"
-msgstr "Çöüpön Týpé Ⱡ'σяєм ιρѕυм ∂σłσя #"
-
-#: ecommerce/extensions/voucher/utils.py
-msgid "URL"
-msgstr "ÛRL Ⱡ'σяєм#"
-
-#: ecommerce/extensions/voucher/utils.py
-#: ecommerce/templates/oscar/dashboard/partials/enrollment_table.html
-msgid "Course ID"
-msgstr "Çöürsé ÌD Ⱡ'σяєм ιρѕυм ∂σł#"
-
-#: ecommerce/extensions/voucher/utils.py
-msgid "Catalog Query"
-msgstr "Çätälög Qüérý Ⱡ'σяєм ιρѕυм ∂σłσя ѕι#"
-
-#: ecommerce/extensions/voucher/utils.py
-msgid "Course Seat Types"
-msgstr "Çöürsé Séät Týpés Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмє#"
-
-#: ecommerce/extensions/voucher/utils.py
-msgid "Organization"
-msgstr "Örgänïzätïön Ⱡ'σяєм ιρѕυм ∂σłσя ѕ#"
-
-#: ecommerce/extensions/voucher/utils.py
-msgid "Client"
-msgstr "Çlïént Ⱡ'σяєм ιρѕυ#"
-
-#: ecommerce/extensions/voucher/utils.py
+#: ecommerce/extensions/voucher/utils.py ecommerce/extensions/voucher/utils.py
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html
 msgid "Category"
 msgstr "Çätégörý Ⱡ'σяєм ιρѕυм ∂#"
 
-#: ecommerce/extensions/voucher/utils.py
+#: ecommerce/extensions/voucher/utils.py ecommerce/extensions/voucher/utils.py
+msgid "Coupon Expiry Date"
+msgstr "Çöüpön Éxpïrý Däté Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт#"
+
+#: ecommerce/extensions/voucher/utils.py ecommerce/extensions/voucher/utils.py
+msgid "Coupon Name"
+msgstr "Çöüpön Nämé Ⱡ'σяєм ιρѕυм ∂σłσя #"
+
+#: ecommerce/extensions/voucher/utils.py ecommerce/extensions/voucher/utils.py
+msgid "Coupon Start Date"
+msgstr "Çöüpön Stärt Däté Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмє#"
+
+#: ecommerce/extensions/voucher/utils.py ecommerce/extensions/voucher/utils.py
+msgid "Coupon Type"
+msgstr "Çöüpön Týpé Ⱡ'σяєм ιρѕυм ∂σłσя #"
+
+#: ecommerce/extensions/voucher/utils.py ecommerce/extensions/voucher/utils.py
+msgid "Create Date"
+msgstr "Çréäté Däté Ⱡ'σяєм ιρѕυм ∂σłσя #"
+
+#: ecommerce/extensions/voucher/utils.py ecommerce/extensions/voucher/utils.py
+msgid "Discount Percentage"
+msgstr "Dïsçöünt Pérçéntägé Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт,#"
+
+#: ecommerce/extensions/voucher/utils.py ecommerce/extensions/voucher/utils.py
+msgid "Discount Amount"
+msgstr "Dïsçöünt Àmöünt Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт α#"
+
+#: ecommerce/extensions/voucher/utils.py ecommerce/extensions/voucher/utils.py
+msgid "Email Domains"
+msgstr "Émäïl Dömäïns Ⱡ'σяєм ιρѕυм ∂σłσя ѕι#"
+
+#: ecommerce/extensions/voucher/utils.py ecommerce/extensions/voucher/utils.py
+msgid "Invoiced Amount"
+msgstr "Ìnvöïçéd Àmöünt Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт α#"
+
+#: ecommerce/extensions/voucher/utils.py ecommerce/extensions/voucher/utils.py
 msgid "Note"
 msgstr "Nöté Ⱡ'σяєм ι#"
 
-#: ecommerce/extensions/voucher/utils.py
+#: ecommerce/extensions/voucher/utils.py ecommerce/extensions/voucher/utils.py
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html
 #: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html
 #: ecommerce/templates/oscar/basket/partials/hosted_checkout_basket.html
 msgid "Price"
 msgstr "Prïçé Ⱡ'σяєм ιρѕ#"
 
-#: ecommerce/extensions/voucher/utils.py
-msgid "Invoiced Amount"
-msgstr "Ìnvöïçéd Àmöünt Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт α#"
+#: ecommerce/extensions/voucher/utils.py ecommerce/extensions/voucher/utils.py
+#: ecommerce/extensions/voucher/utils.py ecommerce/extensions/voucher/utils.py
+#: ecommerce/templates/oscar/dashboard/partials/enrollment_table.html
+msgid "Course ID"
+msgstr "Çöürsé ÌD Ⱡ'σяєм ιρѕυм ∂σł#"
 
-#: ecommerce/extensions/voucher/utils.py
-msgid "Discount Percentage"
-msgstr "Dïsçöünt Pérçéntägé Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт,#"
+#: ecommerce/extensions/voucher/utils.py ecommerce/extensions/voucher/utils.py
+#: ecommerce/extensions/voucher/utils.py ecommerce/extensions/voucher/utils.py
+msgid "Organization"
+msgstr "Örgänïzätïön Ⱡ'σяєм ιρѕυм ∂σłσя ѕ#"
 
-#: ecommerce/extensions/voucher/utils.py
-msgid "Discount Amount"
-msgstr "Dïsçöünt Àmöünt Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт α#"
+#: ecommerce/extensions/voucher/utils.py ecommerce/extensions/voucher/utils.py
+#: ecommerce/extensions/voucher/utils.py ecommerce/extensions/voucher/utils.py
+msgid "Course Seat Types"
+msgstr "Çöürsé Séät Týpés Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмє#"
 
+#: ecommerce/extensions/voucher/utils.py ecommerce/extensions/voucher/utils.py
+#: ecommerce/extensions/voucher/utils.py
+msgid "Maximum Coupon Usage"
+msgstr "Mäxïmüm Çöüpön Ûsägé Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, #"
+
+#: ecommerce/extensions/voucher/utils.py ecommerce/extensions/voucher/utils.py
+#: ecommerce/extensions/voucher/utils.py
+msgid "Redemption Count"
+msgstr "Rédémptïön Çöünt Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αм#"
+
+#: ecommerce/extensions/voucher/utils.py ecommerce/extensions/voucher/utils.py
+msgid "URL"
+msgstr "ÛRL Ⱡ'σяєм#"
+
+#: ecommerce/extensions/voucher/utils.py ecommerce/extensions/voucher/utils.py
+msgid "Client"
+msgstr "Çlïént Ⱡ'σяєм ιρѕυ#"
+
+#: ecommerce/extensions/voucher/utils.py ecommerce/extensions/voucher/utils.py
 #: ecommerce/extensions/voucher/utils.py
 #: ecommerce/templates/oscar/dashboard/users/detail.html
 msgid "Order Number"
 msgstr "Ördér Nümßér Ⱡ'σяєм ιρѕυм ∂σłσя ѕ#"
 
+#: ecommerce/extensions/voucher/utils.py ecommerce/extensions/voucher/utils.py
 #: ecommerce/extensions/voucher/utils.py
 msgid "Redeemed By Username"
 msgstr "Rédééméd Bý Ûsérnämé Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, #"
-
-#: ecommerce/extensions/voucher/utils.py
-msgid "Redeemed For Course ID"
-msgstr "Rédééméd För Çöürsé ÌD Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢#"
-
-#: ecommerce/extensions/voucher/utils.py
-msgid "Redeemed For Course IDs"
-msgstr "Rédééméd För Çöürsé ÌDs Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σ#"
-
-#: ecommerce/extensions/voucher/utils.py
-msgid "Create Date"
-msgstr "Çréäté Däté Ⱡ'σяєм ιρѕυм ∂σłσя #"
-
-#: ecommerce/extensions/voucher/utils.py
-msgid "Coupon Start Date"
-msgstr "Çöüpön Stärt Däté Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмє#"
-
-#: ecommerce/extensions/voucher/utils.py
-msgid "Coupon Expiry Date"
-msgstr "Çöüpön Éxpïrý Däté Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт#"
-
-#: ecommerce/extensions/voucher/utils.py
-msgid "Email Domains"
-msgstr "Émäïl Dömäïns Ⱡ'σяєм ιρѕυм ∂σłσя ѕι#"
 
 #: ecommerce/extensions/voucher/utils.py
 #, python-brace-format
@@ -2046,11 +2086,11 @@ msgstr ""
 msgid ""
 "To view your payment information, log in to see your Order History, under "
 "%(link_start)s%(order_history_url)s%(link_middle)sAccount "
-"Settings%(link_end)s"
+"Settings%(link_end)s."
 msgstr ""
 "Tö vïéw ýöür päýmént ïnförmätïön, lög ïn tö séé ýöür Ördér Hïstörý, ündér "
 "%(link_start)s%(order_history_url)s%(link_middle)sÀççöünt "
-"Séttïngs%(link_end)s Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αм#"
+"Séttïngs%(link_end)s. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αм#"
 
 #: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html
 #, python-format
@@ -2282,8 +2322,8 @@ msgstr ""
 " νєłιт єѕѕє ¢ιłłυм ∂σłσяє єυ ƒυgιαт ηυłłα ραяιαтυя. єχ#"
 
 #: ecommerce/templates/edx/checkout/receipt.html
-msgid "Go to Dashboard"
-msgstr "Gö tö Däshßöärd Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт α#"
+msgid "Go to dashboard"
+msgstr "Gö tö däshßöärd Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт α#"
 
 #: ecommerce/templates/edx/checkout/receipt.html
 msgid "Find more courses"
@@ -2591,10 +2631,6 @@ msgstr "Ûpdäté Ⱡ'σяєм ιρѕυ#"
 #: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html
 msgid "summary"
 msgstr "sümmärý Ⱡ'σяєм ιρѕυм #"
-
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html
-msgid "Quanity"
-msgstr "Qüänïtý Ⱡ'σяєм ιρѕυм #"
 
 #: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html
 msgid "Discounts applied"
