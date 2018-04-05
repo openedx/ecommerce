@@ -3,7 +3,6 @@ import itertools
 import mock
 from oscar.core.loading import get_class, get_model
 from oscar.test import factories
-from waffle.testutils import override_switch
 
 from analytics import Client
 from ecommerce.courses.tests.factories import CourseFactory
@@ -13,13 +12,13 @@ from ecommerce.extensions.basket.models import Basket
 from ecommerce.extensions.basket.tests.mixins import BasketMixin
 from ecommerce.extensions.test.factories import create_basket
 from ecommerce.tests.factories import SiteConfigurationFactory
-from ecommerce.tests.testcases import TransactionTestCase
+from ecommerce.tests.testcases import TestCase
 
 Basket = get_model('basket', 'Basket')
 OrderNumberGenerator = get_class('order.utils', 'OrderNumberGenerator')
 
 
-class BasketTests(CatalogMixin, BasketMixin, TransactionTestCase):
+class BasketTests(CatalogMixin, BasketMixin, TestCase):
     def assert_basket_state(self, basket, status, user, site):
         """ Verify the given basket's properties. """
         self.assertEqual(basket.status, status)
@@ -136,29 +135,6 @@ class BasketTests(CatalogMixin, BasketMixin, TransactionTestCase):
             basket.flush()
             mock_track.assert_called_once_with(user_tracking_id, 'Product Removed', properties, context=context)
 
-    @override_switch('basket_transaction_on_commit', active=True)
-    def test_flush_with_product_with_waffle_switch(self):
-        """
-        Verify the method fires 'Product Removed' Segment event with the correct information when basket is not empty
-        """
-        basket = create_basket(empty=True, site=self.site)
-        course = CourseFactory()
-        seat = course.create_or_update_seat('verified', True, 100, self.partner)
-        basket.add_product(seat)
-
-        properties = translate_basket_line_for_segment(basket.lines.first())
-        user_tracking_id, ga_client_id, lms_ip = parse_tracking_context(basket.owner)
-        context = {
-            'ip': lms_ip,
-            'Google Analytics': {
-                'clientId': ga_client_id
-            }
-        }
-
-        with mock.patch.object(Client, 'track') as mock_track:
-            basket.flush()
-            mock_track.assert_called_once_with(user_tracking_id, 'Product Removed', properties, context=context)
-
     def test_flush_without_product(self):
         """ Verify the method does not fireSegment event when basket is empty """
         basket = create_basket(empty=True, site=self.site)
@@ -168,18 +144,6 @@ class BasketTests(CatalogMixin, BasketMixin, TransactionTestCase):
             self.assertEqual(mock_track.call_count, 0)
 
     def test_add_product(self):
-        """ Verify the method fires Product Added analytic event when a product is added to the basket """
-        course = CourseFactory()
-        basket = create_basket(empty=True)
-        seat = course.create_or_update_seat('verified', True, 100, self.partner)
-        with mock.patch('ecommerce.extensions.basket.models.track_segment_event') as mock_track:
-            basket.add_product(seat)
-            properties = translate_basket_line_for_segment(basket.lines.first())
-            properties['cart_id'] = basket.id
-            mock_track.assert_called_once_with(basket.site, basket.owner, 'Product Added', properties)
-
-    @override_switch('basket_transaction_on_commit', active=True)
-    def test_add_product_with_waffle_switch(self):
         """ Verify the method fires Product Added analytic event when a product is added to the basket """
         course = CourseFactory()
         basket = create_basket(empty=True)

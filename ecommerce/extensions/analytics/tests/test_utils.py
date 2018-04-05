@@ -5,6 +5,7 @@ import mock
 from django.contrib.auth.models import AnonymousUser
 from django.test.client import RequestFactory
 from oscar.test import factories
+from waffle.testutils import override_switch
 
 from analytics import Client
 from ecommerce.courses.tests.factories import CourseFactory
@@ -18,11 +19,11 @@ from ecommerce.extensions.analytics.utils import (
 from ecommerce.extensions.basket.tests.mixins import BasketMixin
 from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
 from ecommerce.extensions.test.factories import create_basket
-from ecommerce.tests.testcases import TestCase
+from ecommerce.tests.testcases import TransactionTestCase
 
 
 @ddt.ddt
-class UtilsTest(DiscoveryTestMixin, BasketMixin, TestCase):
+class UtilsTest(DiscoveryTestMixin, BasketMixin, TransactionTestCase):
     """ Tests for the analytics utils. """
 
     def test_prepare_analytics_data(self):
@@ -76,18 +77,15 @@ class UtilsTest(DiscoveryTestMixin, BasketMixin, TestCase):
             self.assertEqual(track_segment_event(self.site, self.create_user(), 'foo', {}), (False, msg))
             mock_debug.assert_called_with(msg)
 
-    def test_track_segment_event(self):
-        """ The function should fire an event to Segment if the site is properly configured. """
-        properties = {'key': 'value'}
+    @override_switch('basket_transaction_on_commit', active=True)
+    def test_track_segment_event_commit_on_transaction(self):
+        """
+        The function should fire an event to Segment if the site is properly
+        configured and the waffle 'basket_transaction_on_commit' is enabled
+        """
         self.site_configuration.segment_key = 'fake-key'
         self.site_configuration.save()
-        user = self.create_user(
-            tracking_context={
-                'ga_client_id': 'test-client-id',
-                'lms_user_id': 'foo',
-                'lms_ip': '18.0.0.1',
-            }
-        )
+        user, event, properties = self._get_generic_segment_event_parameters()
         user_tracking_id, ga_client_id, lms_ip = parse_tracking_context(user)
         context = {
             'ip': lms_ip,
@@ -95,8 +93,22 @@ class UtilsTest(DiscoveryTestMixin, BasketMixin, TestCase):
                 'clientId': ga_client_id
             }
         }
-        event = 'foo'
+        with mock.patch.object(Client, 'track') as mock_track:
+            track_segment_event(self.site, user, event, properties)
+            mock_track.assert_called_once_with(user_tracking_id, event, properties, context=context)
 
+    def test_track_segment_event(self):
+        """ The function should fire an event to Segment if the site is properly configured. """
+        self.site_configuration.segment_key = 'fake-key'
+        self.site_configuration.save()
+        user, event, properties = self._get_generic_segment_event_parameters()
+        user_tracking_id, ga_client_id, lms_ip = parse_tracking_context(user)
+        context = {
+            'ip': lms_ip,
+            'Google Analytics': {
+                'clientId': ga_client_id
+            }
+        }
         with mock.patch.object(Client, 'track') as mock_track:
             track_segment_event(self.site, user, event, properties)
             mock_track.assert_called_once_with(user_tracking_id, event, properties, context=context)
@@ -152,3 +164,14 @@ class UtilsTest(DiscoveryTestMixin, BasketMixin, TestCase):
 
         expected_client_id = get_google_analytics_client_id(request)
         self.assertEqual(ga_client_id, expected_client_id)
+
+    def _get_generic_segment_event_parameters(self):
+        properties = {'key': 'value'}
+        user = self.create_user(
+            tracking_context={
+                'ga_client_id': 'test-client-id',
+                'lms_user_id': 'foo',
+                'lms_ip': '18.0.0.1',
+            })
+        event = 'foo'
+        return user, event, properties
