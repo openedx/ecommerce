@@ -17,11 +17,12 @@ from oscar.core.loading import get_model
 from oscar.test import factories
 from oscar.test.factories import BasketFactory
 from rest_framework.throttling import UserRateThrottle
+from waffle.testutils import override_flag
 
 from ecommerce.courses.models import Course
 from ecommerce.extensions.api import exceptions as api_exceptions
 from ecommerce.extensions.api.v2.tests.views import JSON_CONTENT_TYPE, OrderDetailViewTestMixin
-from ecommerce.extensions.api.v2.views.baskets import BasketCreateView
+from ecommerce.extensions.api.v2.views.baskets import BasketCalculateView, BasketCreateView
 from ecommerce.extensions.payment import exceptions as payment_exceptions
 from ecommerce.extensions.payment.processors.cybersource import Cybersource
 from ecommerce.extensions.test.factories import (
@@ -317,7 +318,7 @@ class BasketCalculateViewTests(ProgramTestMixin, TestCase):
 
     def setUp(self):
         super(BasketCalculateViewTests, self).setUp()
-        self.products = ProductFactory.create_batch(3, stockrecords__partner=self.partner)
+        self.products = ProductFactory.create_batch(3, stockrecords__partner=self.partner, categories=[])
         qs = urllib.urlencode({'sku': [product.stockrecords.first().partner_sku for product in self.products]}, True)
         self.path = reverse('api:v2:baskets:calculate')
         self.url = '{root}?{qs}'.format(root=self.path, qs=qs)
@@ -487,6 +488,108 @@ class BasketCalculateViewTests(ProgramTestMixin, TestCase):
         self.assertEqual(response.data, expected)
 
     @httpretty.activate
+    @mock.patch('ecommerce.extensions.api.v2.views.baskets.BasketCalculateView._calculate_basket')
+    @override_flag("use_cached_basket_calculate_for_marketing_user", active=True)
+    def test_basket_calculate_by_staff_user_anon_username(self, mock_calculate_basket):
+        """Verify a request made by the Marketing Staff user is cached"""
+        marketing_user = self.create_user(
+            username=BasketCalculateView.MARKETING_USER,
+            is_staff=True
+        )
+        self.client.logout()
+        self.client.login(username=marketing_user.username, password=self.password)
+
+        url_with_one_sku = self._generate_sku_username_url(self.products, username=None)
+        url_with_two_skus = self._generate_sku_username_url(self.products, username=None, skippedskus=2)
+
+        expected = {'Test Succeeded': True}
+        mock_calculate_basket.return_value = {'Test Succeeded': True}
+
+        # Call BasketCalculate. The cache should not be hit.
+        response = self.client.get(url_with_one_sku)
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(mock_calculate_basket.called)
+        self.assertEqual(response.data, expected)
+
+        mock_calculate_basket.reset_mock()
+
+        # Call BasketCalculate again to test that we get the Cached response
+        response = self.client.get(url_with_one_sku)
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(mock_calculate_basket.called)
+        self.assertEqual(response.data, expected)
+
+        mock_calculate_basket.reset_mock()
+
+        # Check that setting the username parameter doesn't hit the cache
+        url_with_different_username = self._generate_sku_username_url(self.products, username="different_user")
+
+        response = self.client.get(url_with_different_username)
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(mock_calculate_basket.called)
+        self.assertEqual(response.data, expected)
+
+        mock_calculate_basket.reset_mock()
+
+        # Check that a different set of skus does not hit cache
+        response = self.client.get(url_with_two_skus)
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(mock_calculate_basket.called)
+        self.assertEqual(response.data, expected)
+
+        mock_calculate_basket.reset_mock()
+
+        different_user = self.create_user(username='different_user', is_staff=False)
+        self.client.logout()
+        self.client.login(username=different_user.username, password=self.password)
+
+        # Check that a being logged in as a different user doesn't hit the cache
+        previous_cached_url = url_with_one_sku
+        response = self.client.get(previous_cached_url)
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(mock_calculate_basket.called)
+        self.assertEqual(response.data, expected)
+
+    @httpretty.activate
+    @mock.patch('ecommerce.extensions.api.v2.views.baskets.BasketCalculateView._calculate_basket')
+    @override_flag("use_cached_basket_calculate_for_marketing_user", active=False)
+    def test_basket_calculate_by_staff_user_anon_username_without_cache(self, mock_calculate_basket):
+        """Verify a request made by the Marketing Staff user is cached"""
+        marketing_user = self.create_user(
+            username=BasketCalculateView.MARKETING_USER,
+            is_staff=True
+        )
+        self.client.logout()
+        self.client.login(username=marketing_user.username, password=self.password)
+
+        # Generate the Offer and Product data
+        products = self.products
+        qs = urllib.urlencode(
+            {'sku': [product.stockrecords.first().partner_sku for product in products]},
+            True
+        )
+
+        # Generate the URL containing the SKUs
+        path = reverse('api:v2:baskets:calculate')
+        url = '{root}?{qs}'.format(root=path, qs=qs)
+        self.mock_user_data(marketing_user, owned_products=[])
+        expected = {'Test Succeeded': True}
+        mock_calculate_basket.return_value = {'Test Succeeded': True}
+
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(mock_calculate_basket.called)
+        self.assertEqual(response.data, expected)
+
+        mock_calculate_basket.reset_mock()
+
+        # Call BasketCalculate again to test that we get the Cached response
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(mock_calculate_basket.called)
+        self.assertEqual(response.data, expected)
+
+    @httpretty.activate
     @mock.patch('ecommerce.extensions.api.v2.views.baskets.logger.exception')
     def test_basket_calculate_by_staff_user_invalid_username(self, mocked_logger):
         """Verify that a staff user passing an invalid username gets a response about themselves
@@ -588,13 +691,15 @@ class BasketCalculateViewTests(ProgramTestMixin, TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data, expected)
 
-    def _generate_sku_username_url(self, products, username, skippedskus=1):
+    def _generate_sku_username_url(self, products, username=None, skippedskus=1):
         qs = urllib.urlencode(
             {'sku': [product.stockrecords.first().partner_sku for product in products[skippedskus:]]},
             True
         )
         path = reverse('api:v2:baskets:calculate')
-        url = '{root}?{qs}'.format(root=path, qs=qs) + '&username={username}'.format(username=username)
+        url = '{root}?{qs}'.format(root=path, qs=qs)
+        if username:
+            url += '&username={username}'.format(username=username)
         return url
 
     def _get_program_verified_seats(self, program):

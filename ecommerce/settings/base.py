@@ -250,6 +250,9 @@ PROGRAM_CACHE_TIMEOUT = 3600  # Value is in seconds.
 PROVIDER_DATA_PROCESSING_TIMEOUT = 15  # Value is in seconds.
 CREDIT_PROVIDER_CACHE_TIMEOUT = 600
 
+# Anonymous User Calculate Cache timeout
+ANONYMOUS_BASKET_CALCULATE_CACHE_TIMEOUT = 3600  # Value is in seconds.
+
 # Enrollment API settings used for fetching information from LMS
 ENROLLMENT_API_CACHE_TIMEOUT = 30  # Value is in seconds.
 # END URL CONFIGURATION
