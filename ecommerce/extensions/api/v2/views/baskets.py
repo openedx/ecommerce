@@ -2,9 +2,12 @@
 from __future__ import unicode_literals
 
 import logging
-import warnings
 
+import waffle
+import warnings
+from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.core.cache import cache
 from django.db import transaction
 from django.http import HttpResponseBadRequest, HttpResponseForbidden
 from django.utils.decorators import method_decorator
@@ -15,6 +18,7 @@ from rest_framework import generics, status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
+from ecommerce.core.utils import get_cache_key
 from ecommerce.enterprise.entitlements import get_entitlement_voucher
 from ecommerce.extensions.analytics.utils import audit_log
 from ecommerce.extensions.api import data as data_api
@@ -336,6 +340,45 @@ class BasketDestroyView(generics.DestroyAPIView):
 
 class BasketCalculateView(generics.GenericAPIView):
     permission_classes = (IsAuthenticated,)
+    MARKETING_USER = 'marketing_site_worker'
+
+    def _calculate_basket(self, user, request, products, voucher, skus, code):
+        response = None
+        try:
+            with transaction.atomic():
+                basket = Basket(owner=user, site=request.site)
+                basket.strategy = Selector().strategy(user=user)
+
+                for product in products:
+                    basket.add_product(product, 1)
+
+                if voucher:
+                    basket.vouchers.add(voucher)
+
+                # Calculate any discounts on the basket.
+                Applicator().apply(basket, user=user, request=request)
+
+                discounts = []
+                if basket.offer_discounts:
+                    discounts = basket.offer_discounts
+                if basket.voucher_discounts:
+                    discounts.extend(basket.voucher_discounts)
+
+                response = {
+                    'total_incl_tax_excl_discounts': basket.total_incl_tax_excl_discounts,
+                    'total_incl_tax': basket.total_incl_tax,
+                    'currency': basket.currency
+                }
+                raise api_exceptions.TemporaryBasketException
+        except api_exceptions.TemporaryBasketException:
+            pass
+        except:  # pylint: disable=bare-except
+            logger.exception(
+                'Failed to calculate basket discount for SKUs [%s] and voucher [%s].',
+                skus, code
+            )
+            raise
+        return response
 
     def get(self, request):
         """ Calculate basket totals given a list of sku's
@@ -378,6 +421,13 @@ class BasketCalculateView(generics.GenericAPIView):
 
         username = request.GET.get('username', default='')
         user = request.user
+
+        # True if this request was made by the marketing user, and does not include a username
+        # query param, and thus is calculating the non-logged in (anonymous) price.
+        # Note: We need to verify separately that all calls without a username query param
+        # can be treated in this same way.
+        is_marketing_anonymous_request = False
+
         # If a username is passed in, validate that the user has staff access or is the same user.
         if username:
             if user.is_staff or (user.username.lower() == username.lower()):
@@ -387,42 +437,28 @@ class BasketCalculateView(generics.GenericAPIView):
                     logger.debug('Request username: [%s] does not exist', username)
             else:
                 return HttpResponseForbidden('Unauthorized user credentials')
+        elif user.username == self.MARKETING_USER:
+            is_marketing_anonymous_request = True
+
+        cache_key = None
+        # Since we know we can't have any enrollments or entitlements, we can directly get
+        # the cached price.
+        if is_marketing_anonymous_request:
+            cache_key = get_cache_key(
+                site_comain=request.site,
+                resource_name='calculate',
+                skus=skus
+            )
+            if waffle.flag_is_active("use_cached_basket_calculate_for_marketing_user"):
+                basket_calculate_results = cache.get(cache_key)
+                if basket_calculate_results:
+                    return Response(basket_calculate_results)
 
         # We wrap this in an atomic operation so we never commit this to the db.
         # This is to avoid merging this temporary basket with a real user basket.
-        try:
-            with transaction.atomic():
-                basket = Basket(owner=user, site=request.site)
-                basket.strategy = Selector().strategy(user=user)
+        response = self._calculate_basket(user, request, products, voucher, skus, code)
 
-                for product in products:
-                    basket.add_product(product, 1)
-
-                if voucher:
-                    basket.vouchers.add(voucher)
-
-                # Calculate any discounts on the basket.
-                Applicator().apply(basket, user=user, request=request)
-
-                discounts = []
-                if basket.offer_discounts:
-                    discounts = basket.offer_discounts
-                if basket.voucher_discounts:
-                    discounts.extend(basket.voucher_discounts)
-
-                response = {
-                    'total_incl_tax_excl_discounts': basket.total_incl_tax_excl_discounts,
-                    'total_incl_tax': basket.total_incl_tax,
-                    'currency': basket.currency
-                }
-                raise api_exceptions.TemporaryBasketException
-        except api_exceptions.TemporaryBasketException:
-            pass
-        except:  # pylint: disable=bare-except
-            logger.exception(
-                'Failed to calculate basket discount for SKUs [%s] and voucher [%s].',
-                skus, code
-            )
-            raise
+        if response and is_marketing_anonymous_request:
+            cache.set(cache_key, response, settings.ANONYMOUS_BASKET_CALCULATE_CACHE_TIMEOUT)
 
         return Response(response)
