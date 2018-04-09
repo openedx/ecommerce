@@ -48,6 +48,9 @@ class UserMixin(object):
 
     def create_user(self, **kwargs):
         """Create a user, with overrideable defaults."""
+        not_provided = object()
+        if kwargs.get('username', not_provided) is None:
+            kwargs.pop('username')
         return factories.UserFactory(password=self.password, **kwargs)
 
     def create_access_token(self, user, access_token=None):
