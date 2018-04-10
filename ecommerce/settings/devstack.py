@@ -23,6 +23,7 @@ PAYMENT_PROCESSOR_CONFIG = {
     'edx': {
         'cybersource': {
             'merchant_id': 'edx_org',
+            'merchant_id': 'edx_org',
             'transaction_key': '/yIJJejEGoNNcecTyxC9ZD0wR2ZjkkKuOaZnq2BGMGIGQIOKA1rBR009OuvKbPW4J1KLb15BMlaoiUXoj/8/Fp6dy33/aHAU0+yGKcEMxyYXQOBPKjuoChIlMRVkrtWZqP9shGxw1jwHNovmGrvd2ULRIn21Rsq6YnHie7lLLRhXyY2MjnFXfv75eH2rFwfi4hBPbVPvx/r8PwgFIh5otAzsgyIlBjaKJkzbNXd5qCOdNFSBcPcJps3YgVH0ASleI/SZp+Ckuyotd+EhzK0tOehPJAm3L03lkPNeFX9lcemuRkeV53V3nvobn3GaX0td4FAEe8CZBn+IpFC2PoK0tw==',
             'soap_api_url': 'https://ics2wstest.ic3.com/commerce/1.x/transactionProcessor/CyberSourceTransaction_1.115.wsdl',
             'cancel_checkout_path': PAYMENT_PROCESSOR_CANCEL_PATH,
@@ -51,6 +52,9 @@ PAYMENT_PROCESSOR_CONFIG = {
 
 # Language cookie
 LANGUAGE_COOKIE_NAME = 'openedx-language-preference'
+
+# Needed for edx-oidc logins on devstack
+SESSION_COOKIE_SECURE = False
 
 #####################################################################
 # Lastly, see if the developer has any local overrides.
