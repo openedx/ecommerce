@@ -237,6 +237,8 @@ for the following settings by using environment variables.
    - The OAuth2 access token used to authenticate requests.
  * - ECOMMERCE_URL_ROOT
    - The URL root for the E-Commerce service.
+ * - ECOMMERCE_TEST_WEB_SECURITY
+   - Whether to run security tests against the E-Commerce service.
  * - LMS_URL_ROOT
    - The URL root for the LMS.
  * - LMS_USERNAME
