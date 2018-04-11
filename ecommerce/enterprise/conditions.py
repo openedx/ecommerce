@@ -36,6 +36,10 @@ class EnterpriseCustomerCondition(ConditionWithoutRangeMixin, SingleItemConsumpt
         Returns:
             bool
         """
+        if not basket.owner:
+            # An anonymous user is never linked to any EnterpriseCustomer.
+            return False
+
         try:
             learner_data = fetch_enterprise_learner_data(basket.site, basket.owner)['results'][0]
         except (ConnectionError, KeyError, SlumberHttpBaseException, Timeout):
@@ -46,7 +50,6 @@ class EnterpriseCustomerCondition(ConditionWithoutRangeMixin, SingleItemConsumpt
             )
             return False
         except IndexError:
-            # Learner is not linked to any EnterpriseCustomer.
             return False
 
         enterprise_customer = learner_data['enterprise_customer']

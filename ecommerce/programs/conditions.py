@@ -28,7 +28,7 @@ class ProgramCourseRunSeatsCondition(SingleItemConsumptionConditionMixin, Condit
     def name(self):
         return 'Basket contains a seat for every course in program {}'.format(self.program_uuid)
 
-    def get_applicable_skus(self, site_configuration):
+    def _get_applicable_skus(self, site_configuration):
         """ SKUs to which this condition applies. """
         program_skus = set()
         program = get_program(self.program_uuid, site_configuration)
@@ -45,7 +45,7 @@ class ProgramCourseRunSeatsCondition(SingleItemConsumptionConditionMixin, Condit
                         program_skus.add(entitlement['sku'])
         return program_skus
 
-    def get_lms_resource(self, basket, resource_name, endpoint):
+    def _get_lms_resource_for_user(self, basket, resource_name, endpoint):
         cache_key = get_cache_key(
             site_domain=basket.site.domain,
             resource=resource_name,
@@ -56,23 +56,29 @@ class ProgramCourseRunSeatsCondition(SingleItemConsumptionConditionMixin, Condit
             user = basket.owner.username
             try:
                 data_list = endpoint.get(user=user)
-                cache.set(cache_key, data_list, settings.ENROLLMENT_API_CACHE_TIMEOUT)
+                cache.set(cache_key, data_list, settings.LMS_API_CACHE_TIMEOUT)
             except (ConnectionError, SlumberBaseException, Timeout) as exc:
                 logger.error('Failed to retrieve %s : %s', resource_name, str(exc))
         return data_list if data_list else []
 
-    def get_user_ownership_data(self, basket, retrieve_entitlements=False):
+    def _get_lms_resource(self, basket, resource_name, endpoint):
+        if not basket.owner:
+            return []
+        return self._get_lms_resource_for_user(basket, resource_name, endpoint)
+
+    def _get_user_ownership_data(self, basket, retrieve_entitlements=False):
         """
         Retrieves existing enrollments and entitlements for a user from LMS
         """
         enrollments = []
         entitlements = []
+
         site_configuration = basket.site.siteconfiguration
         if site_configuration.enable_partial_program:
-            enrollments = self.get_lms_resource(
+            enrollments = self._get_lms_resource(
                 basket, 'enrollments', site_configuration.enrollment_api_client.enrollment)
             if retrieve_entitlements:
-                response = self.get_lms_resource(
+                response = self._get_lms_resource(
                     basket, 'entitlements', site_configuration.entitlement_api_client.entitlements
                 )
                 if isinstance(response, dict):
@@ -81,7 +87,7 @@ class ProgramCourseRunSeatsCondition(SingleItemConsumptionConditionMixin, Condit
                     entitlements = response
         return enrollments, entitlements
 
-    def has_entitlements(self, program):
+    def _has_entitlements(self, program):
         """
         Determines whether an entitlement product exists for any course in the program.
         """
@@ -113,8 +119,8 @@ class ProgramCourseRunSeatsCondition(SingleItemConsumptionConditionMixin, Condit
         else:
             return False
 
-        retrieve_entitlements = self.has_entitlements(program)
-        enrollments, entitlements = self.get_user_ownership_data(basket, retrieve_entitlements)
+        retrieve_entitlements = self._has_entitlements(program)
+        enrollments, entitlements = self._get_user_ownership_data(basket, retrieve_entitlements)
 
         for course in program['courses']:
             # If the user is already enrolled in a course, we do not need to check their basket for it
@@ -159,7 +165,7 @@ class ProgramCourseRunSeatsCondition(SingleItemConsumptionConditionMixin, Condit
             return False
 
         product = line.product
-        return line.stockrecord.partner_sku in self.get_applicable_skus(
+        return line.stockrecord.partner_sku in self._get_applicable_skus(
             line.basket.site.siteconfiguration) and product.get_is_discountable()
 
     def get_applicable_lines(self, offer, basket, most_expensive_first=True):

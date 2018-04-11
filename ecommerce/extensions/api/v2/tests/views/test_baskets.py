@@ -452,7 +452,8 @@ class BasketCalculateViewTests(ProgramTestMixin, TestCase):
         self.assertEqual(response.status_code, 200)
 
     @httpretty.activate
-    def test_basket_calculate_by_staff_user_other_username(self):
+    @mock.patch('ecommerce.programs.conditions.ProgramCourseRunSeatsCondition._get_lms_resource_for_user')
+    def test_basket_calculate_by_staff_user_other_username(self, mock_get_lms_resource_for_user):
         """Verify a staff user passing a valid username gets a response about the other user"""
         self.site_configuration.enable_partial_program = True
         self.site_configuration.save()
@@ -478,13 +479,89 @@ class BasketCalculateViewTests(ProgramTestMixin, TestCase):
         }
 
         response = self.client.get(url)
+
+        # Note: This possibly should be in a test specifically around entitlements/enrollments.
+        self.assertTrue(mock_get_lms_resource_for_user.called, msg='LMS calls should be made for non-anonymous case.')
+
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data, expected)
 
     @httpretty.activate
-    @mock.patch('ecommerce.extensions.api.v2.views.baskets.BasketCalculateView._calculate_basket')
+    @mock.patch('ecommerce.programs.conditions.ProgramCourseRunSeatsCondition._get_lms_resource_for_user')
+    @override_flag("use_basket_calculate_none_user", active=True)
+    def test_basket_calculate_anonymous_skip_lms(self, mock_get_lms_resource_for_user):
+        """Verify a call for an anonymous user skips calls to LMS for entitlements and enrollments"""
+        products, url = self.setup_anonymous_basket_calculate()
+
+        expected = {
+            'total_incl_tax_excl_discounts': sum(product.stockrecords.first().price_excl_tax
+                                                 for product in products),
+            'total_incl_tax': Decimal('0.00'),
+            'currency': 'USD'
+        }
+
+        response = self.client.get(url)
+
+        self.assertFalse(mock_get_lms_resource_for_user.called, msg='LMS calls should be skipped for anonymous case.')
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data, expected)
+
+    @httpretty.activate
+    @mock.patch('ecommerce.programs.conditions.ProgramCourseRunSeatsCondition._get_lms_resource_for_user')
+    @override_flag("use_basket_calculate_none_user", active=False)
+    def test_basket_calculate_anonymous_calls_lms(self, mock_get_lms_resource_for_user):
+        """
+        Verify a call for an anonymous user does not skip calls to LMS for entitlements and enrollments
+        when waffle flag is not set.
+        """
+        products, url = self.setup_anonymous_basket_calculate()
+
+        expected = {
+            'total_incl_tax_excl_discounts': sum(product.stockrecords.first().price_excl_tax
+                                                 for product in products),
+            'total_incl_tax': Decimal('0.00'),
+            'currency': 'USD'
+        }
+
+        response = self.client.get(url)
+
+        self.assertTrue(mock_get_lms_resource_for_user.called, msg='LMS calls should be skipped for anonymous case.')
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data, expected)
+
+    def setup_anonymous_basket_calculate(self):
+        """
+        Sets up anonymous basket calculate.
+
+        Side Effects:
+            Logs in the Marketing User, required for anonymous baskets at this time.
+
+        Returns:
+            products, url: The product list and the url for the anonymous basket
+                calculate.
+        """
+        self._login_as_user(BasketCalculateView.MARKETING_USER, is_staff=True)
+        self.site_configuration.enable_partial_program = True
+        self.site_configuration.save()
+        offer = ProgramOfferFactory(
+            site=self.site,
+            benefit=PercentageDiscountBenefitWithoutRangeFactory(value=100),
+            condition=ProgramCourseRunSeatsConditionFactory()
+        )
+        program_uuid = offer.condition.program_uuid
+        program = self.mock_program_detail_endpoint(
+            program_uuid, self.site_configuration.discovery_api_url
+        )
+        products = self._get_program_verified_seats(program)
+        url = self._generate_sku_url(products, username=None)
+        return products, url
+
+    @httpretty.activate
+    @mock.patch('ecommerce.extensions.api.v2.views.baskets.BasketCalculateView._calculate_temporary_basket')
     @override_flag("use_cached_basket_calculate_for_marketing_user", active=True)
-    def test_basket_calculate_by_staff_user_anon_username(self, mock_calculate_basket):
+    def test_basket_calculate_anonymous_caching(self, mock_calculate_basket):
         """Verify a request made by the Marketing Staff user is cached"""
         self._login_as_user(BasketCalculateView.MARKETING_USER, is_staff=True)
 
@@ -497,7 +574,7 @@ class BasketCalculateViewTests(ProgramTestMixin, TestCase):
         # Call BasketCalculate. The cache should not be hit.
         response = self.client.get(url_with_one_sku)
         self.assertEqual(response.status_code, 200)
-        self.assertTrue(mock_calculate_basket.called)
+        self.assertTrue(mock_calculate_basket.called, msg='The cache should be missed.')
         self.assertEqual(response.data, expected)
 
         mock_calculate_basket.reset_mock()
@@ -505,7 +582,7 @@ class BasketCalculateViewTests(ProgramTestMixin, TestCase):
         # Call BasketCalculate again to test that we get the Cached response
         response = self.client.get(url_with_one_sku)
         self.assertEqual(response.status_code, 200)
-        self.assertFalse(mock_calculate_basket.called)
+        self.assertFalse(mock_calculate_basket.called, msg='The cache should be hit.')
         self.assertEqual(response.data, expected)
 
         mock_calculate_basket.reset_mock()
@@ -515,7 +592,7 @@ class BasketCalculateViewTests(ProgramTestMixin, TestCase):
 
         response = self.client.get(url_with_different_username)
         self.assertEqual(response.status_code, 200)
-        self.assertTrue(mock_calculate_basket.called)
+        self.assertTrue(mock_calculate_basket.called, msg='The cache should be missed.')
         self.assertEqual(response.data, expected)
 
         mock_calculate_basket.reset_mock()
@@ -523,7 +600,7 @@ class BasketCalculateViewTests(ProgramTestMixin, TestCase):
         # Check that a different set of skus does not hit cache
         response = self.client.get(url_with_two_skus)
         self.assertEqual(response.status_code, 200)
-        self.assertTrue(mock_calculate_basket.called)
+        self.assertTrue(mock_calculate_basket.called, msg='The cache should be missed.')
         self.assertEqual(response.data, expected)
 
         mock_calculate_basket.reset_mock()
@@ -533,14 +610,14 @@ class BasketCalculateViewTests(ProgramTestMixin, TestCase):
         previous_cached_url = url_with_one_sku
         response = self.client.get(previous_cached_url)
         self.assertEqual(response.status_code, 200)
-        self.assertTrue(mock_calculate_basket.called)
+        self.assertTrue(mock_calculate_basket.called, msg='The cache should be missed.')
         self.assertEqual(response.data, expected)
 
     @httpretty.activate
-    @mock.patch('ecommerce.extensions.api.v2.views.baskets.BasketCalculateView._calculate_basket')
+    @mock.patch('ecommerce.extensions.api.v2.views.baskets.BasketCalculateView._calculate_temporary_basket')
     @override_flag("use_cached_basket_calculate_for_marketing_user", active=False)
-    def test_basket_calculate_by_staff_user_anon_username_without_cache(self, mock_calculate_basket):
-        """Verify a request made by the Marketing Staff user is cached"""
+    def test_basket_calculate_with_anonymous_caching_disabled(self, mock_calculate_basket):
+        """Verify a request made by the Marketing Staff user is not cached"""
         self._login_as_user(BasketCalculateView.MARKETING_USER, is_staff=True)
 
         expected = {'Test Succeeded': True}
@@ -553,10 +630,9 @@ class BasketCalculateViewTests(ProgramTestMixin, TestCase):
 
         mock_calculate_basket.reset_mock()
 
-        # Call BasketCalculate again to test that we get the Cached response
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
-        self.assertTrue(mock_calculate_basket.called)
+        self.assertTrue(mock_calculate_basket.called, msg='The cache should be missed.')
         self.assertEqual(response.data, expected)
 
     @httpretty.activate
