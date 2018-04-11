@@ -26,8 +26,9 @@ help:
 	@echo '    make clean_static                 delete compiled/compressed static assets       		'
 	@echo '    make static                       compile and compress static assets               		'
 	@echo '    make detect_changed_source_translations    check if translation files are up-to-date		'
-	@echo '    make validate_translations        install fake translations and check if translation files are up-to-date'
+	@echo '    make check_translations_up_to_date         install fake translations and check if translation files are up-to-date'
 	@echo '    make production-requirements      install requirements for production                    '
+	@echo '    make validate_translations        validate translations                    '
 	@echo '                                                                                     		'
 
 requirements.js:
@@ -121,7 +122,11 @@ update_translations: pull_translations fake_translations
 detect_changed_source_translations:
 	cd ecommerce && i18n_tool changed
 
-validate_translations: fake_translations detect_changed_source_translations
+check_translations_up_to_date: fake_translations detect_changed_source_translations
+
+# Validate translations
+validate_translations:
+	cd ecommerce && i18n_tool validate -v
 
 # Targets in a Makefile which do not produce an output file with the same name as the target name
 .PHONY: help requirements migrate serve clean validate_python quality validate_js validate html_coverage e2e \

@@ -21,6 +21,7 @@ except AttributeError:
     raise RuntimeError('A valid URL root for the E-Commerce Service is required.')
 
 ECOMMERCE_API_URL = os.environ.get('ECOMMERCE_API_URL', ECOMMERCE_URL_ROOT + '/api/v2')
+ECOMMERCE_TEST_WEB_SECURITY = os.environ.get('ECOMMERCE_TEST_WEB_SECURITY')
 
 PAYPAL_EMAIL = os.environ.get('PAYPAL_EMAIL')
 PAYPAL_PASSWORD = os.environ.get('PAYPAL_PASSWORD')
