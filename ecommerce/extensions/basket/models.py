@@ -59,15 +59,16 @@ class Basket(AbstractBasket):
 
         super(Basket, self).flush()  # pylint: disable=bad-super-call
 
-    def add_product(self, product, quantity=1, options=None):
+    def add_product_with_tracking(self, product, quantity=1, options=None):
         """ Add the indicated product to basket.
 
         Performs AbstractBasket add_product method and fires Google Analytics 'Product Added' event.
         """
-        line, created = super(Basket, self).add_product(product, quantity, options)  # pylint: disable=bad-super-call
+        line, created = self.add_product(product, quantity, options)  # pylint: disable=bad-super-call
 
         # Do not fire events for free items. The volume we see for edX.org leads to a dramatic increase in CPU
         # usage. Given that orders for free items are ignored, there is no need for these events.
+        # Default the tracking to True if it doesn't exist as this is normal behavior and should explicitly be False
         if line.stockrecord.price_excl_tax > 0:
             properties = translate_basket_line_for_segment(line)
             properties['cart_id'] = self.id

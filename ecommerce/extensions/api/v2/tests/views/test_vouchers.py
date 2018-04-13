@@ -106,7 +106,7 @@ class VoucherViewSetTests(DiscoveryMockMixin, DiscoveryTestMixin, LmsApiMockMixi
                     'title': seat.title,
                     'enrollment_end': None
                 })
-                new_range.add_product(seat)
+                new_range.add_product_with_tracking(seat)
         else:
             for _ in range(quantity):
                 course, seat = self.create_course_and_seat(seat_type=seat_type)
@@ -119,7 +119,7 @@ class VoucherViewSetTests(DiscoveryMockMixin, DiscoveryTestMixin, LmsApiMockMixi
                     'title': course.name,
                     'enrollment_end': None
                 })
-                new_range.add_product(seat)
+                new_range.add_product_with_tracking(seat)
                 products.append(seat)
 
         self.mock_course_runs_endpoint(
@@ -342,7 +342,7 @@ class VoucherViewOffersEndpointTests(DiscoveryMockMixin, CouponMixin, DiscoveryT
             self.site_configuration.discovery_api_url, query='*:*', course_run=course
         )
         new_range, __ = Range.objects.get_or_create(catalog_query='*:*', course_seat_types='verified')
-        new_range.add_product(seat)
+        new_range.add_product_with_tracking(seat)
         voucher, __ = prepare_voucher(_range=new_range)
         request = self.prepare_offers_listing_request(voucher.code)
 
@@ -358,7 +358,7 @@ class VoucherViewOffersEndpointTests(DiscoveryMockMixin, CouponMixin, DiscoveryT
             self.site_configuration.discovery_api_url, query='*:*', course_run=course
         )
         new_range, __ = Range.objects.get_or_create(catalog_query='*:*', course_seat_types='verified')
-        new_range.add_product(seat)
+        new_range.add_product_with_tracking(seat)
         voucher, __ = prepare_voucher(_range=new_range)
         request = self.prepare_offers_listing_request(voucher.code)
         response = self.endpointView(request)
@@ -407,7 +407,7 @@ class VoucherViewOffersEndpointTests(DiscoveryMockMixin, CouponMixin, DiscoveryT
             self.site_configuration.discovery_api_url, query='*:*', course_run=course
         )
         new_range, __ = Range.objects.get_or_create(catalog_query='*:*', course_seat_types='verified')
-        new_range.add_product(seat)
+        new_range.add_product_with_tracking(seat)
         voucher, __ = prepare_voucher(_range=new_range, benefit_value=10)
         benefit = voucher.offers.first().benefit
         request = self.prepare_offers_listing_request(voucher.code)
@@ -441,7 +441,7 @@ class VoucherViewOffersEndpointTests(DiscoveryMockMixin, CouponMixin, DiscoveryT
         # Populate database for the test case.
         course, seat = self.create_course_and_seat()
         new_range, __ = Range.objects.get_or_create(course_catalog=catalog_id, course_seat_types='verified')
-        new_range.add_product(seat)
+        new_range.add_product_with_tracking(seat)
         voucher, __ = prepare_voucher(_range=new_range, benefit_value=10)
 
         # Mock network calls
@@ -557,7 +557,7 @@ class VoucherViewOffersEndpointTests(DiscoveryMockMixin, CouponMixin, DiscoveryT
         # Populate database for the test case.
         course, seat = self.create_course_and_seat()
         new_range, __ = Range.objects.get_or_create(course_catalog=catalog_id, course_seat_types='verified')
-        new_range.add_product(seat)
+        new_range.add_product_with_tracking(seat)
         voucher, __ = prepare_voucher(_range=new_range, benefit_value=10)
 
         # Mock network calls
@@ -607,7 +607,7 @@ class VoucherViewOffersEndpointTests(DiscoveryMockMixin, CouponMixin, DiscoveryT
         # Populate database for the test case.
         course, seat = self.create_course_and_seat()
         new_range, __ = Range.objects.get_or_create(course_catalog=catalog_id, course_seat_types='verified')
-        new_range.add_product(seat)
+        new_range.add_product_with_tracking(seat)
         voucher, __ = prepare_voucher(_range=new_range, benefit_value=10)
 
         # Mock network calls

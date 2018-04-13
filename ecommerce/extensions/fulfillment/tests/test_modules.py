@@ -76,7 +76,7 @@ class EnrollmentFulfillmentModuleTests(ProgramTestMixin, DiscoveryTestMixin, Ful
         self.seat = self.course.create_or_update_seat(self.certificate_type, False, 100, self.partner, self.provider)
 
         basket = factories.BasketFactory(owner=self.user, site=self.site)
-        basket.add_product(self.seat, 1)
+        basket.add_product_with_tracking(self.seat, 1)
         self.order = create_order(number=1, basket=basket, user=self.user)
 
     # pylint: disable=attribute-defined-outside-init
@@ -94,7 +94,7 @@ class EnrollmentFulfillmentModuleTests(ProgramTestMixin, DiscoveryTestMixin, Ful
         self.seat = self.course.create_or_update_seat(self.certificate_type, False, 100, self.partner, self.provider)
 
         basket = factories.BasketFactory(owner=self.user, site=self.site)
-        basket.add_product(self.seat, 1)
+        basket.add_product_with_tracking(self.seat, 1)
         self.order = create_order(number=2, basket=basket, user=self.user)
 
     def prepare_basket_with_voucher(self, program_uuid=None):
@@ -448,7 +448,7 @@ class CouponFulfillmentModuleTest(CouponMixin, FulfillmentTestMixin, TestCase):
         coupon = self.create_coupon()
         user = factories.UserFactory()
         basket = factories.BasketFactory(owner=user, site=self.site)
-        basket.add_product(coupon, 1)
+        basket.add_product_with_tracking(coupon, 1)
         self.order = create_order(number=1, basket=basket, user=user)
 
     def test_supports_line(self):
@@ -491,7 +491,7 @@ class DonationsFromCheckoutTestFulfillmentModuleTest(FulfillmentTestMixin, TestC
         user = factories.UserFactory()
         basket = factories.BasketFactory(owner=user, site=self.site)
         factories.create_stockrecord(donation, num_in_stock=2, price_excl_tax=10)
-        basket.add_product(donation, 1)
+        basket.add_product_with_tracking(donation, 1)
         self.order = create_order(number=1, basket=basket, user=user)
 
     def test_supports_line(self):
@@ -528,7 +528,7 @@ class EnrollmentCodeFulfillmentModuleTests(DiscoveryTestMixin, TestCase):
         enrollment_code = Product.objects.get(product_class__name=ENROLLMENT_CODE_PRODUCT_CLASS_NAME)
         user = factories.UserFactory()
         basket = factories.BasketFactory(owner=user, site=self.site)
-        basket.add_product(enrollment_code, self.QUANTITY)
+        basket.add_product_with_tracking(enrollment_code, self.QUANTITY)
         self.order = create_order(number=1, basket=basket, user=user)
 
     def test_supports_line(self):
@@ -573,7 +573,7 @@ class EntitlementFulfillmentModuleTests(FulfillmentTestMixin, TestCase):
         self.course_entitlement = create_or_update_course_entitlement(
             'verified', 100, self.partner, '111-222-333-444', 'Course Entitlement')
         basket = factories.BasketFactory(owner=self.user, site=self.site)
-        basket.add_product(self.course_entitlement, 1)
+        basket.add_product_with_tracking(self.course_entitlement, 1)
         self.entitlement_option = Option.objects.get(name='Course Entitlement')
         self.order = create_order(number=1, basket=basket, user=self.user)
         self.logger_name = 'ecommerce.extensions.fulfillment.modules'

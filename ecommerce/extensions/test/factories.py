@@ -39,7 +39,7 @@ def create_basket(owner=None, site=None, empty=False, price='10.00', product_cla
         else:
             product = create_product()
         create_stockrecord(product, num_in_stock=2, price_excl_tax=D(price))
-        basket.add_product(product)
+        basket.add_product_with_tracking(product)
     return basket
 
 

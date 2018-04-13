@@ -185,7 +185,7 @@ class BasketCreateView(EdxOrderPlacementMixin, generics.CreateAPIView):
                             api_exceptions.PRODUCT_UNAVAILABLE_USER_MESSAGE
                         )
 
-                    basket.add_product(product)
+                    basket.add_product_with_tracking(product)
                     logger.info('Added product with SKU [%s] to basket [%d]', sku, basket_id)
 
                     # Call signal handler to notify listeners that something has been added to the basket

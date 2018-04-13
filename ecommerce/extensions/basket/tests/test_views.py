@@ -291,7 +291,7 @@ class BasketSummaryViewTests(EnterpriseServiceMockMixin, DiscoveryTestMixin, Dis
 
     def create_basket_and_add_product(self, product):
         basket = factories.BasketFactory(owner=self.user, site=self.site)
-        basket.add_product(product, 1)
+        basket.add_product_with_tracking(product, 1)
         return basket
 
     def create_seat(self, course, seat_price=100, cert_type='verified'):
@@ -446,7 +446,7 @@ class BasketSummaryViewTests(EnterpriseServiceMockMixin, DiscoveryTestMixin, Dis
 
         course_without_benefit = CourseFactory()
         seat_without_benefit = self.create_seat(course_without_benefit)
-        basket.add_product(seat_without_benefit, 1)
+        basket.add_product_with_tracking(seat_without_benefit, 1)
 
         response = self.client.get(self.path)
         lines = response.context['formset_lines_data']
@@ -707,14 +707,14 @@ class VoucherAddViewTests(LmsApiMockMixin, TestCase):
 
     def test_no_voucher_error_msg(self):
         """ Verify correct error message is returned when voucher can't be found. """
-        self.basket.add_product(ProductFactory())
+        self.basket.add_product_with_tracking(ProductFactory())
         self.assert_form_valid_message("Coupon code '{code}' does not exist.".format(code=COUPON_CODE))
 
     def test_voucher_already_in_basket_error_msg(self):
         """ Verify correct error message is returned when voucher already in basket. """
         voucher, product = prepare_voucher(code=COUPON_CODE)
         self.basket.vouchers.add(voucher)
-        self.basket.add_product(product)
+        self.basket.add_product_with_tracking(product)
         self.assert_form_valid_message(
             "You have already added coupon code '{code}' to your basket.".format(code=COUPON_CODE))
 
@@ -725,7 +725,7 @@ class VoucherAddViewTests(LmsApiMockMixin, TestCase):
         end_datetime = datetime.datetime.now() - datetime.timedelta(days=1)
         start_datetime = datetime.datetime.now() - datetime.timedelta(days=2)
         __, product = prepare_voucher(code=COUPON_CODE, start_datetime=start_datetime, end_datetime=end_datetime)
-        self.basket.add_product(product)
+        self.basket.add_product_with_tracking(product)
         self.assert_form_valid_message("Coupon code '{code}' has expired.".format(code=COUPON_CODE))
 
     def test_voucher_added_to_basket_msg(self):
@@ -733,7 +733,7 @@ class VoucherAddViewTests(LmsApiMockMixin, TestCase):
         self.mock_access_token_response()
         self.mock_account_api(self.request, self.user.username, data={'is_active': True})
         __, product = prepare_voucher(code=COUPON_CODE)
-        self.basket.add_product(product)
+        self.basket.add_product_with_tracking(product)
         self.assert_form_valid_message("Coupon code '{code}' added to basket.".format(code=COUPON_CODE))
 
     def test_voucher_has_no_discount_error_msg(self):
@@ -741,7 +741,7 @@ class VoucherAddViewTests(LmsApiMockMixin, TestCase):
         self.mock_access_token_response()
         self.mock_account_api(self.request, self.user.username, data={'is_active': True})
         __, product = prepare_voucher(code=COUPON_CODE, benefit_value=0)
-        self.basket.add_product(product)
+        self.basket.add_product_with_tracking(product)
         self.assert_form_valid_message("Your basket does not qualify for a coupon code discount.")
 
     def test_voucher_used_error_msg(self):
@@ -749,7 +749,7 @@ class VoucherAddViewTests(LmsApiMockMixin, TestCase):
         self.mock_access_token_response()
         self.mock_account_api(self.request, self.user.username, data={'is_active': True})
         voucher, product = prepare_voucher(code=COUPON_CODE)
-        self.basket.add_product(product)
+        self.basket.add_product_with_tracking(product)
         order = factories.OrderFactory()
         VoucherApplication.objects.create(voucher=voucher, user=self.user, order=order)
         self.assert_form_valid_message("Coupon code '{code}' has already been redeemed.".format(code=COUPON_CODE))
@@ -759,7 +759,7 @@ class VoucherAddViewTests(LmsApiMockMixin, TestCase):
         self.mock_access_token_response()
         self.mock_account_api(self.request, self.user.username, data={'is_active': True})
         __, product = prepare_voucher(code=COUPON_CODE, site=self.request.site)
-        self.basket.add_product(product)
+        self.basket.add_product_with_tracking(product)
         self.assert_form_valid_message("Coupon code '{code}' added to basket.".format(code=COUPON_CODE))
 
     def test_voucher_not_valid_for_other_site(self):
@@ -768,7 +768,7 @@ class VoucherAddViewTests(LmsApiMockMixin, TestCase):
         self.mock_access_token_response()
         self.mock_account_api(self.request, self.user.username, data={'is_active': True})
         voucher, product = prepare_voucher(code=COUPON_CODE, site=site2)
-        self.basket.add_product(product)
+        self.basket.add_product_with_tracking(product)
         self.assert_form_valid_message("Coupon code '{code}' is not valid for this basket.".format(code=voucher.code))
 
     def test_voucher_not_valid_for_bundle(self):
@@ -777,8 +777,8 @@ class VoucherAddViewTests(LmsApiMockMixin, TestCase):
         self.mock_account_api(self.request, self.user.username, data={'is_active': True})
         voucher, product = prepare_voucher(code=COUPON_CODE, benefit_value=0)
         new_product = factories.ProductFactory(categories=[], stockrecords__partner__short_code='second')
-        self.basket.add_product(product)
-        self.basket.add_product(new_product)
+        self.basket.add_product_with_tracking(product)
+        self.basket.add_product_with_tracking(new_product)
         BasketAttributeType.objects.get_or_create(name=BUNDLE)
         BasketAttribute.objects.update_or_create(
             basket=self.basket,
@@ -801,7 +801,7 @@ class VoucherAddViewTests(LmsApiMockMixin, TestCase):
         start_datetime = datetime.datetime.now() + datetime.timedelta(days=1)
         end_datetime = start_datetime + datetime.timedelta(days=2)
         voucher, product = prepare_voucher(code=code, start_datetime=start_datetime, end_datetime=end_datetime)
-        self.basket.add_product(product)
+        self.basket.add_product_with_tracking(product)
         self.form.cleaned_data = {'code': voucher.code}
         self.assert_form_valid_message("Coupon code '{code}' is not active.".format(code=voucher.code))
 
@@ -815,7 +815,7 @@ class VoucherAddViewTests(LmsApiMockMixin, TestCase):
         self.mock_account_api(self.request, self.user.username, data={'is_active': True})
         get_ec.return_value = {'value': 'othervalue'}
         __, product = prepare_voucher(code=COUPON_CODE)
-        self.basket.add_product(product)
+        self.basket.add_product_with_tracking(product)
         resp = self.view.form_valid(self.form)
         self.assertIsInstance(resp, HttpResponseRedirect)
 
@@ -869,7 +869,7 @@ class VoucherAddViewTests(LmsApiMockMixin, TestCase):
             benefit=factories.BenefitFactory(range=_range, value=site_offer_discount),
             condition=factories.ConditionFactory(type=Condition.COVERAGE, value=1, range=_range)
         )
-        self.basket.add_product(product)
+        self.basket.add_product_with_tracking(product)
         # Only site offer is applied to the basket.
         self.assert_basket_discounts([site_offer])
 
@@ -889,7 +889,7 @@ class VoucherAddViewTests(LmsApiMockMixin, TestCase):
         self.mock_access_token_response()
         self.mock_account_api(self.request, self.user.username, data={'is_active': False})
         __, product = prepare_voucher(code=COUPON_CODE)
-        self.basket.add_product(product)
+        self.basket.add_product_with_tracking(product)
         self.assert_account_activation_rendered()
 
     def test_activation_required_for_inactive_user_email_domain_offer(self):
@@ -899,7 +899,7 @@ class VoucherAddViewTests(LmsApiMockMixin, TestCase):
         self.site.siteconfiguration.save()
         email_domain = self.user.email.split('@')[1]
         __, product = prepare_voucher(code=COUPON_CODE, email_domains=email_domain)
-        self.basket.add_product(product)
+        self.basket.add_product_with_tracking(product)
         self.assert_account_activation_rendered()
 
     def test_activation_not_required_for_inactive_user(self):
@@ -908,7 +908,7 @@ class VoucherAddViewTests(LmsApiMockMixin, TestCase):
         self.site.siteconfiguration.require_account_activation = False
         self.site.siteconfiguration.save()
         __, product = prepare_voucher(code=COUPON_CODE)
-        self.basket.add_product(product)
+        self.basket.add_product_with_tracking(product)
         self.assert_form_valid_message("Coupon code '{code}' added to basket.".format(code=COUPON_CODE))
 
 

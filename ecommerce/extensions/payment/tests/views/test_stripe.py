@@ -153,7 +153,7 @@ class StripeSubmitViewTests(PaymentEventsMixin, TestCase):
         course.create_or_update_seat('verified', True, 50, self.partner, create_enrollment_code=True)
         basket = create_basket(owner=self.user, site=self.site)
         enrollment_code = Product.objects.get(product_class__name=ENROLLMENT_CODE_PRODUCT_CLASS_NAME)
-        basket.add_product(enrollment_code, quantity=1)
+        basket.add_product_with_tracking(enrollment_code, quantity=1)
         basket.strategy = Selector().strategy()
 
         data = self.generate_form_data(basket.id)

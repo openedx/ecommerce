@@ -62,25 +62,25 @@ class ProgramCourseRunSeatsConditionTests(ProgramTestMixin, TestCase):
         # Adding seats of all the courses with the wrong seat type should NOT satisfy the condition.
         basket.flush()
         for seat in audit_seats:
-            basket.add_product(seat)
+            basket.add_product_with_tracking(seat)
         self.assertFalse(self.condition.is_satisfied(offer, basket))
 
         # All courses must be represented in the basket.
         # NOTE: We add all but the first verified seat to ensure complete branch coverage of the method.
         basket.flush()
         for verified_seat in verified_seats[1:len(verified_seats)]:
-            basket.add_product(verified_seat)
+            basket.add_product_with_tracking(verified_seat)
         self.assertFalse(self.condition.is_satisfied(offer, basket))
 
         # The condition should be satisfied if one valid course run from each course is in the basket.
-        basket.add_product(verified_seats[0])
+        basket.add_product_with_tracking(verified_seats[0])
         self.assertTrue(self.condition.is_satisfied(offer, basket))
 
         # If the user is enrolled with the wrong seat type for courses missing from their basket that are
         # needed for the program, the condition should NOT be satisfied
         basket.flush()
         for verified_seat in verified_seats[1:len(verified_seats)]:
-            basket.add_product(verified_seat)
+            basket.add_product_with_tracking(verified_seat)
         self.assertFalse(self.condition.is_satisfied(offer, basket))
 
     @httpretty.activate
@@ -108,12 +108,12 @@ class ProgramCourseRunSeatsConditionTests(ProgramTestMixin, TestCase):
         # the condition should not be satisfied
         basket.flush()
         for seat in verified_seats[2:len(verified_seats) - 1]:
-            basket.add_product(seat)
+            basket.add_product_with_tracking(seat)
         self.assertFalse(self.condition.is_satisfied(offer, basket))
 
         # When all courses in the program that the user is not already enrolled in are in their basket
         # and the site allows partial program completion, the condition should be satisfied
-        basket.add_product(verified_seats[-1])
+        basket.add_product_with_tracking(verified_seats[-1])
         self.assertTrue(self.condition.is_satisfied(offer, basket))
 
         # If the site does not allow partial program completion and the user does not have all of the program
@@ -133,7 +133,7 @@ class ProgramCourseRunSeatsConditionTests(ProgramTestMixin, TestCase):
         """ The method should return False if there is an exception when trying to get program details. """
         offer = factories.ProgramOfferFactory(site=self.site, condition=self.condition)
         basket = factories.BasketFactory(site=self.site, owner=factories.UserFactory())
-        basket.add_product(self.test_product)
+        basket.add_product_with_tracking(self.test_product)
 
         with mock.patch('ecommerce.programs.conditions.get_program',
                         side_effect=value):
@@ -153,7 +153,7 @@ class ProgramCourseRunSeatsConditionTests(ProgramTestMixin, TestCase):
             course_run = Course.objects.get(id=course['course_runs'][0]['key'])
             for seat in course_run.seat_products:
                 if seat.attr.id_verification_required:
-                    basket.add_product(seat)
+                    basket.add_product_with_tracking(seat)
 
         self.mock_user_data(basket.owner.username, mocked_api='enrollments', owned_products=None, response_code=400)
         self.assertTrue(self.condition.is_satisfied(offer, basket))
@@ -164,21 +164,21 @@ class ProgramCourseRunSeatsConditionTests(ProgramTestMixin, TestCase):
         basket = factories.BasketFactory(site=self.site, owner=factories.UserFactory())
         test_product = factories.ProductFactory(stockrecords__price_excl_tax=0,
                                                 stockrecords__partner__short_code='test')
-        basket.add_product(test_product)
+        basket.add_product_with_tracking(test_product)
         self.assertFalse(self.condition.is_satisfied(offer, basket))
 
     def test_is_satisfied_site_mismatch(self):
         """ Ensure the condition returns False if the offer site does not match the basket site. """
         offer = factories.ProgramOfferFactory(site=SiteConfigurationFactory().site, condition=self.condition)
         basket = factories.BasketFactory(site=self.site, owner=factories.UserFactory())
-        basket.add_product(self.test_product)
+        basket.add_product_with_tracking(self.test_product)
         self.assertFalse(self.condition.is_satisfied(offer, basket))
 
     def test_is_satisfied_program_retrieval_failure(self):
         """ The method should return False if no program is retrieved """
         offer = factories.ProgramOfferFactory(site=self.site, condition=self.condition)
         basket = factories.BasketFactory(site=self.site, owner=factories.UserFactory())
-        basket.add_product(self.test_product)
+        basket.add_product_with_tracking(self.test_product)
         self.condition.program_uuid = None
         self.assertFalse(self.condition.is_satisfied(offer, basket))
 
@@ -216,12 +216,12 @@ class ProgramCourseRunSeatsConditionTests(ProgramTestMixin, TestCase):
         # the condition should not be satisfied
         basket.flush()
         for entitlement in verified_entitlements[2:len(verified_entitlements) - 1]:
-            basket.add_product(entitlement)
+            basket.add_product_with_tracking(entitlement)
         self.assertFalse(self.condition.is_satisfied(offer, basket))
 
         # When all courses in the program that the user is not already enrolled in are in their basket
         # and the site allows partial program completion, the condition should be satisfied
-        basket.add_product(verified_entitlements[-1])
+        basket.add_product_with_tracking(verified_entitlements[-1])
         self.assertTrue(self.condition.is_satisfied(offer, basket))
 
         # If the site does not allow partial program completion and the user does not have all of the program
@@ -261,7 +261,7 @@ class ProgramCourseRunSeatsConditionTests(ProgramTestMixin, TestCase):
             course_run = Course.objects.get(id=course['course_runs'][0]['key'])
             for seat in course_run.seat_products:
                 if seat.attr.id_verification_required:
-                    basket.add_product(seat)
+                    basket.add_product_with_tracking(seat)
 
         with mock.patch('ecommerce.programs.conditions.traverse_pagination') as mock_processing_entitlements:
             self.assertFalse(self.condition.is_satisfied(offer, basket))

@@ -265,7 +265,7 @@ class CybersourceInterstitialViewTests(CybersourceNotificationTestsMixin, TestCa
         course.create_or_update_seat('verified', True, 50, self.partner, create_enrollment_code=True)
         enrollment_code = Product.objects.get(product_class__name=ENROLLMENT_CODE_PRODUCT_CLASS_NAME)
         self.basket = create_basket(owner=self.user, site=self.site)
-        self.basket.add_product(enrollment_code, quantity=1)
+        self.basket.add_product_with_tracking(enrollment_code, quantity=1)
 
         # The basket should not have an associated order if no payment was made.
         self.assertFalse(Order.objects.filter(basket=self.basket).exists())

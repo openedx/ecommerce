@@ -16,5 +16,5 @@ class BasketMixin(SiteMixin):
         if not empty:
             product = factories.create_product()
             factories.create_stockrecord(product, num_in_stock=2)
-            basket.add_product(product)
+            basket.add_product_with_tracking(product)
         return basket

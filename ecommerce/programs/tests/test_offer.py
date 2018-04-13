@@ -36,7 +36,7 @@ class ProgramOfferTests(ProgramTestMixin, TestCase):
             for seat in course_run.seat_products:
                 if seat.attr.id_verification_required:
                     products.append(seat)
-                    basket.add_product(seat)
+                    basket.add_product_with_tracking(seat)
 
         # No discounts should be applied, and each line should have a price of 100.00.
         self.assertEqual(len(basket.offer_applications), 0)

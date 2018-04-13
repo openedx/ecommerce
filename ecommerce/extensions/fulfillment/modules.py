@@ -503,7 +503,7 @@ class EnrollmentCodeFulfillmentModule(BaseFulfillmentModule):
             )
             _range, created = Range.objects.get_or_create(name=name)
             if created:
-                _range.add_product(seat)
+                _range.add_product_with_tracking(seat)
 
             stock_record = StockRecord.objects.get(product=seat, partner=seat.course.partner)
             coupon_catalog = CouponViewSet.get_coupon_catalog([stock_record.id], seat.course.partner)

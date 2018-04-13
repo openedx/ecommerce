@@ -71,7 +71,7 @@ class SailthruSignalTests(CouponMixin, DiscoveryTestMixin, TestCase):
         """ Verify Sailthru is not contacted for non-seat products. """
         coupon = self.create_coupon()
         basket = BasketFactory(owner=self.user, site=self.site)
-        basket.add_product(coupon, 1)
+        basket.add_product_with_tracking(coupon, 1)
         process_basket_addition(None, request=self.request, user=self.user, product=coupon, basket=basket)
         self.assertFalse(mock_update_course_enrollment.called)
         self.assertFalse(mock_log_error.called)
@@ -90,8 +90,8 @@ class SailthruSignalTests(CouponMixin, DiscoveryTestMixin, TestCase):
         other_course = CourseFactory(site=self.site)
         other_seat = other_course.create_or_update_seat('verified', False, 100, self.partner, None)
         basket = BasketFactory(owner=self.user, site=self.site)
-        basket.add_product(seat)
-        basket.add_product(other_seat)
+        basket.add_product_with_tracking(seat)
+        basket.add_product_with_tracking(other_seat)
         multi_product_order = create_order(number=2, basket=basket, user=self.user, site=self.site)
 
         # This method takes an argument to determine whether that product is part of a multi-product basket
@@ -251,7 +251,7 @@ class SailthruSignalTests(CouponMixin, DiscoveryTestMixin, TestCase):
         seat = self.course.create_or_update_seat(mode, False, price, self.partner, None)
 
         basket = BasketFactory(owner=self.user, site=self.site)
-        basket.add_product(seat, 1)
+        basket.add_product_with_tracking(seat, 1)
         order = create_order(number=1, basket=basket, user=self.user, site=self.site)
         order.total_excl_tax = price
         return seat, order

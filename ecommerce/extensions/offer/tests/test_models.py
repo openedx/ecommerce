@@ -30,7 +30,7 @@ class RangeTests(CouponMixin, DiscoveryTestMixin, DiscoveryMockMixin, TestCase):
         self.catalog = Catalog.objects.create(partner=self.partner)
         self.product = factories.create_product()
 
-        self.range.add_product(self.product)
+        self.range.add_product_with_tracking(self.product)
         self.range_with_catalog.catalog = self.catalog
         self.stock_record = factories.create_stockrecord(self.product, num_in_stock=2)
         self.catalog.stock_records.add(self.stock_record)
@@ -321,7 +321,7 @@ class ConditionalOfferTests(DiscoveryTestMixin, DiscoveryMockMixin, TestCase):
         """Helper method for creating a basket with specific owner."""
         user = self.create_user(email=email)
         basket = factories.BasketFactory(owner=user, site=self.site)
-        basket.add_product(self.product, 1)
+        basket.add_product_with_tracking(self.product, 1)
         return basket
 
     def test_condition_satisfied(self):
@@ -357,10 +357,10 @@ class ConditionalOfferTests(DiscoveryTestMixin, DiscoveryMockMixin, TestCase):
             query=benefit.range.catalog_query, discovery_api_url=self.site_configuration.discovery_api_url
         )
 
-        basket.add_product(product)
+        basket.add_product_with_tracking(product)
         self.assertTrue(offer.is_condition_satisfied(basket))
 
-        basket.add_product(another_product)
+        basket.add_product_with_tracking(another_product)
         self.assertFalse(offer.is_condition_satisfied(basket))
 
         # Verify that API return values are cached
@@ -391,15 +391,15 @@ class ConditionalOfferTests(DiscoveryTestMixin, DiscoveryMockMixin, TestCase):
         )
 
         # Verify that each product individually satisfies the condition
-        basket.add_product(product1)
+        basket.add_product_with_tracking(product1)
         self.assertTrue(offer.is_condition_satisfied(basket))
 
         basket.flush()
-        basket.add_product(product2)
+        basket.add_product_with_tracking(product2)
         self.assertTrue(offer.is_condition_satisfied(basket))
 
         # Verify that the offer cannot be applied to a multi-product basket
-        basket.add_product(product1)
+        basket.add_product_with_tracking(product1)
         self.assertFalse(offer.is_condition_satisfied(basket))
 
     def test_is_email_valid(self):
@@ -497,10 +497,10 @@ class BenefitTests(DiscoveryTestMixin, DiscoveryMockMixin, TestCase):
         course, seat = self.create_course_and_seat()
         no_certificate_product = factories.ProductFactory(stockrecords__price_currency='USD')
 
-        basket.add_product(entitlement_product)
-        basket.add_product(seat)
+        basket.add_product_with_tracking(entitlement_product)
+        basket.add_product_with_tracking(seat)
         applicable_lines = [(line.product.stockrecords.first().price_excl_tax, line) for line in basket.all_lines()]
-        basket.add_product(no_certificate_product)
+        basket.add_product_with_tracking(no_certificate_product)
 
         self.mock_access_token_response()
 

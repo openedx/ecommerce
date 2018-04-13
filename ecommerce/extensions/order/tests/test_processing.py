@@ -56,7 +56,7 @@ class EventHandlerTests(TestCase):
         basket = create_basket()
         product = factories.create_product()
         factories.create_stockrecord(product, num_in_stock=2)
-        basket.add_product(product)
+        basket.add_product_with_tracking(product)
 
         # Create an order from the basket and verify a line item exists for each item in the basket
         order = create_order(basket=basket)

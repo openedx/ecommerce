@@ -167,7 +167,7 @@ class EdxOrderPlacementMixinTests(BusinessIntelligenceMixin, PaymentEventsMixin,
         enrollment_code = Product.objects.get(product_class__name=ENROLLMENT_CODE_PRODUCT_CLASS_NAME)
         user = UserFactory()
         basket = BasketFactory(owner=user, site=self.site)
-        basket.add_product(enrollment_code, quantity=1)
+        basket.add_product_with_tracking(enrollment_code, quantity=1)
         order = create_order(number=1, basket=basket, user=user)
         request_data = {'organization': 'Dummy Business Client'}
         # Manually add organization attribute on the basket for testing
@@ -191,7 +191,7 @@ class EdxOrderPlacementMixinTests(BusinessIntelligenceMixin, PaymentEventsMixin,
         verified_product = course.create_or_update_seat('verified', True, 50, self.partner)
         user = UserFactory()
         basket = BasketFactory(owner=user, site=self.site)
-        basket.add_product(verified_product, quantity=1)
+        basket.add_product_with_tracking(verified_product, quantity=1)
         order = create_order(number=1, basket=basket, user=user)
         request_data = {'organization': 'Dummy Business Client'}
         # Manually add organization attribute on the basket for testing
@@ -270,7 +270,7 @@ class EdxOrderPlacementMixinTests(BusinessIntelligenceMixin, PaymentEventsMixin,
     def test_place_free_order(self, __):
         """ Verify an order is placed and the basket is submitted. """
         basket = create_basket(empty=True)
-        basket.add_product(ProductFactory(stockrecords__price_excl_tax=0))
+        basket.add_product_with_tracking(ProductFactory(stockrecords__price_excl_tax=0))
         order = EdxOrderPlacementMixin().place_free_order(basket)
 
         self.assertIsNotNone(order)
@@ -279,7 +279,7 @@ class EdxOrderPlacementMixinTests(BusinessIntelligenceMixin, PaymentEventsMixin,
     def test_non_free_basket_order(self, __):
         """ Verify an error is raised for non-free basket. """
         basket = create_basket(empty=True)
-        basket.add_product(ProductFactory(stockrecords__price_excl_tax=10))
+        basket.add_product_with_tracking(ProductFactory(stockrecords__price_excl_tax=10))
 
         with self.assertRaises(BasketNotFreeError):
             EdxOrderPlacementMixin().place_free_order(basket)

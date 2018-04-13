@@ -25,7 +25,7 @@ def create_basket(owner, product, site):
     """Create basket to place order"""
     basket = Basket.objects.create(site=site, owner=owner)
     basket.strategy = Default()
-    basket.add_product(product)
+    basket.add_product_with_tracking(product)
     basket.save()
     return basket
 

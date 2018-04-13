@@ -121,7 +121,7 @@ class CybersourceTests(CybersourceMixin, PaymentProcessorTestCaseMixin, TestCase
         product = course.create_or_update_seat(self.CERTIFICATE_TYPE, False, 20, self.partner)
 
         basket = create_basket(owner=factories.UserFactory(), site=self.site, empty=True)
-        basket.add_product(product)
+        basket.add_product_with_tracking(product)
 
         response = self.processor.get_transaction_parameters(basket)
         self.assertEqual(response['item_0_name'], 'Seat in Course with quotes with test-certificate-type certificate')
