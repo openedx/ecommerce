@@ -46,7 +46,7 @@ admin.site.site_title = admin.site.site_header
 AUTH_URLS = [url(r'^logout/$', LogoutView.as_view(), name='logout'), ] + auth_urlpatterns
 
 WELL_KNOWN_URLS = [
-    url(r'^.well-known/apple-developer-merchantid-domain-association$',
+    url(r'^.well-known/apple-developer-merchantid-domain-association.txt$',
         ApplePayMerchantDomainAssociationView.as_view(), name='apple_pay_domain_association'),
 ]
 
