@@ -37,7 +37,7 @@ class EnterpriseCustomerConditionTests(EnterpriseServiceMockMixin, DiscoveryTest
         """ Ensure the condition returns true if all basket requirements are met. """
         offer = factories.EnterpriseOfferFactory(site=self.site, condition=self.condition)
         basket = factories.BasketFactory(site=self.site, owner=self.user)
-        basket.add_product(self.course_run.seat_products[0])
+        basket.add_product_with_tracking(self.course_run.seat_products[0])
         self.mock_enterprise_learner_api(
             learner_id=self.user.id,
             enterprise_customer_uuid=str(self.condition.enterprise_customer_uuid),
@@ -65,14 +65,14 @@ class EnterpriseCustomerConditionTests(EnterpriseServiceMockMixin, DiscoveryTest
             stockrecords__price_excl_tax=0,
             stockrecords__partner__short_code='test'
         )
-        basket.add_product(test_product)
+        basket.add_product_with_tracking(test_product)
         self.assertFalse(self.condition.is_satisfied(offer, basket))
 
     def test_is_satisfied_site_mismatch(self):
         """ Ensure the condition returns False if the offer site does not match the basket site. """
         offer = factories.EnterpriseOfferFactory(site=SiteConfigurationFactory().site, condition=self.condition)
         basket = factories.BasketFactory(site=self.site, owner=self.user)
-        basket.add_product(self.test_product)
+        basket.add_product_with_tracking(self.test_product)
         self.assertFalse(self.condition.is_satisfied(offer, basket))
 
     @httpretty.activate
@@ -80,7 +80,7 @@ class EnterpriseCustomerConditionTests(EnterpriseServiceMockMixin, DiscoveryTest
         """ Ensure the condition returns false if the enterprise learner data cannot be retrieved. """
         offer = factories.EnterpriseOfferFactory(site=self.site, condition=self.condition)
         basket = factories.BasketFactory(site=self.site, owner=self.user)
-        basket.add_product(self.course_run.seat_products[0])
+        basket.add_product_with_tracking(self.course_run.seat_products[0])
         self.mock_enterprise_learner_api_raise_exception()
         self.assertFalse(self.condition.is_satisfied(offer, basket))
 
@@ -89,7 +89,7 @@ class EnterpriseCustomerConditionTests(EnterpriseServiceMockMixin, DiscoveryTest
         """ Ensure the condition returns false if the learner is not linked to an EnterpriseCustomer. """
         offer = factories.EnterpriseOfferFactory(site=self.site, condition=self.condition)
         basket = factories.BasketFactory(site=self.site, owner=self.user)
-        basket.add_product(self.course_run.seat_products[0])
+        basket.add_product_with_tracking(self.course_run.seat_products[0])
         self.mock_enterprise_learner_api_for_learner_with_no_enterprise()
         self.assertFalse(self.condition.is_satisfied(offer, basket))
 
@@ -98,7 +98,7 @@ class EnterpriseCustomerConditionTests(EnterpriseServiceMockMixin, DiscoveryTest
         """ Ensure the condition returns false if the learner is associated with a different EnterpriseCustomer. """
         offer = factories.EnterpriseOfferFactory(site=self.site, condition=self.condition)
         basket = factories.BasketFactory(site=self.site, owner=self.user)
-        basket.add_product(self.course_run.seat_products[0])
+        basket.add_product_with_tracking(self.course_run.seat_products[0])
         self.mock_enterprise_learner_api(
             learner_id=self.user.id,
             course_run_id=self.course_run.id,
@@ -110,7 +110,7 @@ class EnterpriseCustomerConditionTests(EnterpriseServiceMockMixin, DiscoveryTest
         """ Ensure the condition returns false if the basket contains a product not associated with a course run. """
         offer = factories.EnterpriseOfferFactory(site=self.site, condition=self.condition)
         basket = factories.BasketFactory(site=self.site, owner=self.user)
-        basket.add_product(self.test_product)
+        basket.add_product_with_tracking(self.test_product)
         self.mock_enterprise_learner_api(
             learner_id=self.user.id,
             enterprise_customer_uuid=str(self.condition.enterprise_customer_uuid),
@@ -123,7 +123,7 @@ class EnterpriseCustomerConditionTests(EnterpriseServiceMockMixin, DiscoveryTest
         """ Ensure the condition returns false if the course run is not in the Enterprise catalog. """
         offer = factories.EnterpriseOfferFactory(site=self.site, condition=self.condition)
         basket = factories.BasketFactory(site=self.site, owner=self.user)
-        basket.add_product(self.course_run.seat_products[0])
+        basket.add_product_with_tracking(self.course_run.seat_products[0])
         self.mock_enterprise_learner_api(
             learner_id=self.user.id,
             enterprise_customer_uuid=str(self.condition.enterprise_customer_uuid),

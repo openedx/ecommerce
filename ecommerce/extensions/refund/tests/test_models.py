@@ -370,7 +370,7 @@ class RefundTests(RefundTestMixin, StatusTestsMixin, TestCase):
         product = course.create_or_update_seat('verified', True, price, self.partner)
 
         basket = create_basket(site=self.site, owner=user, empty=True)
-        basket.add_product(product)
+        basket.add_product_with_tracking(product)
 
         order = create_order(basket=basket, user=user)
         order_url = get_receipt_page_url(site_configuration, order.number)
@@ -403,7 +403,7 @@ class RefundTests(RefundTestMixin, StatusTestsMixin, TestCase):
         course_entitlement = create_or_update_course_entitlement(
             'verified', 100, self.partner, '111-222-333-444', 'Course Entitlement')
         basket = create_basket(site=self.site, owner=user, empty=True)
-        basket.add_product(course_entitlement, 1)
+        basket.add_product_with_tracking(course_entitlement, 1)
 
         order = create_order(number=1, basket=basket, user=user)
         order_url = get_receipt_page_url(site_configuration, order.number)

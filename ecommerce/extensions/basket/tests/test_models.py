@@ -120,7 +120,7 @@ class BasketTests(CatalogMixin, BasketMixin, TestCase):
         basket = create_basket(empty=True, site=self.site)
         course = CourseFactory()
         seat = course.create_or_update_seat('verified', True, 100, self.partner)
-        basket.add_product(seat)
+        basket.add_product_with_tracking(seat)
 
         properties = translate_basket_line_for_segment(basket.lines.first())
         user_tracking_id, ga_client_id, lms_ip = parse_tracking_context(basket.owner)
@@ -149,7 +149,7 @@ class BasketTests(CatalogMixin, BasketMixin, TestCase):
         basket = create_basket(empty=True)
         seat = course.create_or_update_seat('verified', True, 100, self.partner)
         with mock.patch('ecommerce.extensions.basket.models.track_segment_event') as mock_track:
-            basket.add_product(seat)
+            basket.add_product_with_tracking(seat)
             properties = translate_basket_line_for_segment(basket.lines.first())
             properties['cart_id'] = basket.id
             mock_track.assert_called_once_with(basket.site, basket.owner, 'Product Added', properties)
@@ -161,6 +161,6 @@ class BasketTests(CatalogMixin, BasketMixin, TestCase):
         seat = course.create_or_update_seat('audit', False, 0, self.partner)
 
         with mock.patch('ecommerce.extensions.basket.models.track_segment_event') as mock_track:
-            basket.add_product(seat)
+            basket.add_product_with_tracking(seat)
             basket.flush()
             self.assertEqual(mock_track.call_count, 0)

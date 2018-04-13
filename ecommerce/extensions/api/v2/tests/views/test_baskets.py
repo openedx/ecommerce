@@ -612,7 +612,7 @@ class BasketCalculateViewTests(ProgramTestMixin, TestCase):
         response = self.client.get(self.url + '&username={username}'.format(username=differentuser.username))
         self.assertEqual(response.status_code, 403)
 
-    @mock.patch('ecommerce.extensions.basket.models.Basket.add_product', mock.Mock(side_effect=Exception))
+    @mock.patch('ecommerce.extensions.basket.models.Basket.add_product_with_tracking', mock.Mock(side_effect=Exception))
     @mock.patch('ecommerce.extensions.api.v2.views.baskets.logger.exception')
     def test_exception_log(self, mocked_logger):
         """A log entry is filed when an exception happens."""

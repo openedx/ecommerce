@@ -37,7 +37,7 @@ class PaymentProcessorTestCaseMixin(RefundTestMixin, DiscoveryTestMixin, Payment
 
         self.processor = self.processor_class(self.site)  # pylint: disable=not-callable
         self.basket = create_basket(site=self.site, owner=factories.UserFactory(), empty=True)
-        self.basket.add_product(self.product)
+        self.basket.add_product_with_tracking(self.product)
 
     def test_configuration(self):
         """ Verifies configuration is read from settings. """

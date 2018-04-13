@@ -36,6 +36,6 @@ class OrderTests(TestCase):
         product = factories.create_product(product_class=COUPON_PRODUCT_CLASS_NAME)
         basket = create_basket(empty=True)
         factories.create_stockrecord(product, num_in_stock=1)
-        basket.add_product(product)
+        basket.add_product_with_tracking(product)
         order = create_order(basket=basket)
         self.assertTrue(order.contains_coupon)

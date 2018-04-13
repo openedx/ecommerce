@@ -42,7 +42,7 @@ class CouponReportCSVViewTest(CouponMixin, DiscoveryTestMixin, LmsApiMockMixin, 
     def request_specific_voucher_report(self, coupon):
         client = factories.UserFactory()
         basket = Basket.get_basket(client, self.site)
-        basket.add_product(coupon)
+        basket.add_product_with_tracking(coupon)
 
         request = RequestFactory()
         response = CouponReportCSVView().get(request, coupon_id=coupon.id)

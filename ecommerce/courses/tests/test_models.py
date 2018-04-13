@@ -267,7 +267,7 @@ class CourseTests(DiscoveryTestMixin, TestCase):
         self.assertEqual(course.products.count(), 2)
 
         basket = BasketFactory(owner=user, site=self.site)
-        basket.add_product(professional_product_no_verification)
+        basket.add_product_with_tracking(professional_product_no_verification)
         create_order(basket=basket, user=user)
         course.create_or_update_seat('professional', True, 0, self.partner)
         self.assertEqual(course.products.count(), 3)

@@ -121,7 +121,7 @@ class UtilsTest(DiscoveryTestMixin, BasketMixin, TransactionTestCase):
         basket.save()
         course = CourseFactory()
         seat = course.create_or_update_seat('verified', True, 100, self.partner)
-        basket.add_product(seat)
+        basket.add_product_with_tracking(seat)
         line = basket.lines.first()
         expected = {
             'product_id': seat.stockrecords.first().partner_sku,
@@ -140,7 +140,7 @@ class UtilsTest(DiscoveryTestMixin, BasketMixin, TransactionTestCase):
 
         # Refresh the basket
         basket.flush()
-        basket.add_product(seat)
+        basket.add_product_with_tracking(seat)
         line = basket.lines.first()
 
         expected['name'] = seat.title

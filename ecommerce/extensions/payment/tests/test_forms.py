@@ -25,7 +25,7 @@ class PaymentFormTests(TestCase):
 
     def create_basket_and_add_product(self, product):
         basket = factories.BasketFactory(owner=self.user, site=self.site)
-        basket.add_product(product, 1)
+        basket.add_product_with_tracking(product, 1)
         return basket
 
     def prepare_course_seat_and_enrollment_code(self, seat_type='verified', id_verification=False):

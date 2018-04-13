@@ -52,7 +52,7 @@ class SignalTests(ProgramTestMixin, CouponMixin, TestCase):
         course = CourseFactory()
         seat = course.create_or_update_seat(seat_type, False, 50, self.partner, credit_provider_id, None, 2)
         basket = factories.BasketFactory(owner=self.user, site=self.site)
-        basket.add_product(seat, 1)
+        basket.add_product_with_tracking(seat, 1)
         order = create_order(basket=basket, user=self.user)
         return order
 
@@ -218,7 +218,7 @@ class SignalTests(ProgramTestMixin, CouponMixin, TestCase):
             voucher, product = prepare_voucher(_range=_range, benefit_value=percent_benefit)
 
             basket = factories.BasketFactory(owner=self.user, site=self.site)
-            basket.add_product(product)
+            basket.add_product_with_tracking(product)
             basket.vouchers.add(voucher)
             Applicator().apply(basket, user=basket.owner, request=self.request)
 
@@ -242,7 +242,7 @@ class SignalTests(ProgramTestMixin, CouponMixin, TestCase):
             )
 
             basket = factories.BasketFactory(owner=self.user, site=self.site)
-            basket.add_product(product)
+            basket.add_product_with_tracking(product)
             basket.vouchers.add(voucher)
             Applicator().apply(basket, user=basket.owner, request=self.request)
 
@@ -265,7 +265,7 @@ class SignalTests(ProgramTestMixin, CouponMixin, TestCase):
             )
 
             basket = factories.BasketFactory(owner=self.user, site=self.site)
-            basket.add_product(product)
+            basket.add_product_with_tracking(product)
             Applicator().apply_offers(basket, [site_offer])
 
             order = factories.create_order(basket=basket, user=self.user)
@@ -279,7 +279,7 @@ class SignalTests(ProgramTestMixin, CouponMixin, TestCase):
 
             coupon = self.create_coupon()
             basket = factories.BasketFactory(owner=self.user, site=self.site)
-            basket.add_product(coupon)
+            basket.add_product_with_tracking(coupon)
 
             order = factories.create_order(basket=basket, user=self.user)
             track_completed_order(None, order)
@@ -294,7 +294,7 @@ class SignalTests(ProgramTestMixin, CouponMixin, TestCase):
             enrollment_code = Product.objects.get(product_class__name=ENROLLMENT_CODE_PRODUCT_CLASS_NAME)
 
             basket = factories.BasketFactory(owner=self.user, site=self.site)
-            basket.add_product(enrollment_code)
+            basket.add_product_with_tracking(enrollment_code)
 
             order = factories.create_order(basket=basket, user=self.user)
             track_completed_order(None, order)

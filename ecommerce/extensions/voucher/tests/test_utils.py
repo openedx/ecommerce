@@ -385,7 +385,7 @@ class UtilTests(CouponMixin, DiscoveryMockMixin, DiscoveryTestMixin, LmsApiMockM
         self.setup_coupons_for_report()
         client = UserFactory()
         basket = Basket.get_basket(client, self.site)
-        basket.add_product(self.coupon)
+        basket.add_product_with_tracking(self.coupon)
 
         vouchers = self.coupon_vouchers.first().vouchers.all()
         self.use_voucher('TESTORDER1', vouchers[1], self.user)
@@ -586,7 +586,7 @@ class UtilTests(CouponMixin, DiscoveryMockMixin, DiscoveryTestMixin, LmsApiMockM
         )
         query_coupon = self.create_catalog_coupon(catalog_query=catalog_query)
         voucher = query_coupon.attr.coupon_vouchers.vouchers.first()
-        voucher.offers.first().condition.range.add_product(self.verified_seat)
+        voucher.offers.first().condition.range.add_product_with_tracking(self.verified_seat)
         self.use_voucher('TESTORDER4', voucher, self.user)
         field_names, rows = generate_coupon_report([query_coupon.attr.coupon_vouchers])
 

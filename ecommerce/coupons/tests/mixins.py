@@ -461,7 +461,7 @@ class CouponMixin(object):
         """ Apply the voucher to a basket. """
         basket = factories.BasketFactory(owner=user, site=site)
         product = voucher.offers.first().benefit.range.all_products()[0]
-        basket.add_product(product)
+        basket.add_product_with_tracking(product)
         basket.vouchers.add(voucher)
         Applicator().apply(basket, self.user)
         return basket

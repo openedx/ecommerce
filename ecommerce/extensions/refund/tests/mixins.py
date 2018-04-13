@@ -45,17 +45,17 @@ class RefundTestMixin(DiscoveryTestMixin):
         basket = BasketFactory(owner=user, site=self.site)
 
         if credit:
-            basket.add_product(self.credit_product)
+            basket.add_product_with_tracking(self.credit_product)
         elif multiple_lines:
-            basket.add_product(self.verified_product)
-            basket.add_product(self.honor_product)
+            basket.add_product_with_tracking(self.verified_product)
+            basket.add_product_with_tracking(self.honor_product)
         elif free:
-            basket.add_product(self.honor_product)
+            basket.add_product_with_tracking(self.honor_product)
         elif entitlement:
             self.course_entitlement = create_or_update_course_entitlement('verified', 100, self.partner, '111', 'Foo')
-            basket.add_product(self.course_entitlement)
+            basket.add_product_with_tracking(self.course_entitlement)
         else:
-            basket.add_product(self.verified_product)
+            basket.add_product_with_tracking(self.verified_product)
 
         order = create_order(basket=basket, user=user)
         order.status = status
