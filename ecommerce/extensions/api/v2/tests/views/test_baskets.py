@@ -738,6 +738,14 @@ class BasketCalculateViewTests(ProgramTestMixin, TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data, expected)
 
+    @mock.patch('ecommerce.extensions.analytics.utils.track_segment_event')
+    def test_basket_calculate_tracks_no_events(self, track_segment_event):
+        """ Verify successful basket calculation does not track a segment event """
+        response = self.client.get(self.url)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(track_segment_event.called)
+
     def _generate_sku_url(self, products, number_of_products=None, username=None):
         """
         Generates the calculate basket view's url for the given products

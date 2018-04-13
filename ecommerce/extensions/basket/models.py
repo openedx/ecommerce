@@ -64,11 +64,16 @@ class Basket(AbstractBasket):
 
         Performs AbstractBasket add_product method and fires Google Analytics 'Product Added' event.
         """
+        # Treat this as a non-temporary basket unless provided in options
+        temporary_basket = False
+        if options:
+            temporary_basket = options.pop('temporary_basket', False)  # Default to non-temporary if not provided
+
         line, created = super(Basket, self).add_product(product, quantity, options)  # pylint: disable=bad-super-call
 
         # Do not fire events for free items. The volume we see for edX.org leads to a dramatic increase in CPU
         # usage. Given that orders for free items are ignored, there is no need for these events.
-        if line.stockrecord.price_excl_tax > 0:
+        if line.stockrecord.price_excl_tax > 0 and not temporary_basket:
             properties = translate_basket_line_for_segment(line)
             properties['cart_id'] = self.id
             track_segment_event(self.site, self.owner, 'Product Added', properties)

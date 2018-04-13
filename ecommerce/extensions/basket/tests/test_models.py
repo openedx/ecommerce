@@ -164,3 +164,20 @@ class BasketTests(CatalogMixin, BasketMixin, TestCase):
             basket.add_product(seat)
             basket.flush()
             self.assertEqual(mock_track.call_count, 0)
+
+    @mock.patch('ecommerce.extensions.basket.models.track_segment_event')
+    def test_add_product_for_temporary_basket(self, track_segment_event):
+        """ Verify that an event is not tracked for a temporary basket"""
+        course = CourseFactory()
+        basket = create_basket(empty=True)
+        seat = course.create_or_update_seat('verified', True, 100, self.partner)
+
+        # Verify that event is called
+        basket.add_product(seat, options={"temporary_basket": False})
+        self.assertTrue(track_segment_event.called)
+
+        track_segment_event.reset_mock()
+
+        # Verify that event is not called
+        basket.add_product(seat, options={"temporary_basket": True})
+        self.assertFalse(track_segment_event.called)
