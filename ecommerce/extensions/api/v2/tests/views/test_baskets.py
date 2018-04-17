@@ -319,11 +319,11 @@ class BasketCalculateViewTests(ProgramTestMixin, TestCase):
         super(BasketCalculateViewTests, self).setUp()
         self.products = ProductFactory.create_batch(3, stockrecords__partner=self.partner, categories=[])
         self.path = reverse('api:v2:baskets:calculate')
-        self.url = self._generate_sku_url(self.products)
         self.range = factories.RangeFactory(includes_all_products=True)
         self.product_total = sum(product.stockrecords.first().price_excl_tax for product in self.products)
 
         self.user = self._login_as_user(is_staff=True)
+        self.url = self._generate_sku_url(self.products, username=self.user.username)
 
     def test_no_sku(self):
         """ Verify bad response when not providing sku(s) """
@@ -481,7 +481,6 @@ class BasketCalculateViewTests(ProgramTestMixin, TestCase):
 
         response = self.client.get(url)
 
-        # Note: This possibly should be in a test specifically around entitlements/enrollments.
         self.assertTrue(mock_get_lms_resource_for_user.called, msg='LMS calls should be made for non-anonymous case.')
 
         self.assertEqual(response.status_code, 200)
@@ -536,14 +535,10 @@ class BasketCalculateViewTests(ProgramTestMixin, TestCase):
         """
         Sets up anonymous basket calculate.
 
-        Side Effects:
-            Logs in the Marketing User, required for anonymous baskets at this time.
-
         Returns:
             products, url: The product list and the url for the anonymous basket
                 calculate.
         """
-        self._login_as_user(BasketCalculateView.MARKETING_USER, is_staff=True)
         self.site_configuration.enable_partial_program = True
         self.site_configuration.save()
         offer = ProgramOfferFactory(
@@ -560,17 +555,17 @@ class BasketCalculateViewTests(ProgramTestMixin, TestCase):
         return products, url
 
     @httpretty.activate
+    @mock.patch('ecommerce.extensions.api.v2.views.baskets.logger.warning')
     @mock.patch('ecommerce.extensions.api.v2.views.baskets.BasketCalculateView._calculate_temporary_basket')
-    @override_flag("use_cached_basket_calculate_for_marketing_user", active=True)
-    def test_basket_calculate_anonymous_caching(self, mock_calculate_basket):
-        """Verify a request made by the Marketing Staff user is cached"""
-        self._login_as_user(BasketCalculateView.MARKETING_USER, is_staff=True)
-
+    @override_flag('use_cached_basket_calculate_for_marketing_user', active=True)
+    @override_switch('debug_logging_predates_is_anonymous', active=True)
+    def test_basket_calculate_anonymous_caching(self, mock_calculate_basket, mocked_logger):
+        """Verify a request made with the is_anonymous parameter is cached"""
         url_with_one_sku = self._generate_sku_url(self.products, number_of_products=1, username=None)
         url_with_two_skus = self._generate_sku_url(self.products, number_of_products=2, username=None)
 
         expected = {'Test Succeeded': True}
-        mock_calculate_basket.return_value = {'Test Succeeded': True}
+        mock_calculate_basket.return_value = expected
 
         # Call BasketCalculate. The cache should not be hit.
         response = self.client.get(url_with_one_sku)
@@ -604,23 +599,69 @@ class BasketCalculateViewTests(ProgramTestMixin, TestCase):
         self.assertTrue(mock_calculate_basket.called, msg='The cache should be missed.')
         self.assertEqual(response.data, expected)
 
+        # Check that cache works and that log message is sent for Marketing user
+        # Note: This and the following checks related to it should be removed once we remove
+        # reliance on the Marketing user for caching.
+        # TODO: LEARNER-5057
+        self._login_as_user(username=BasketCalculateView.MARKETING_USER, is_staff=True)
+        url_with_one_sku_no_anon = url_with_one_sku.replace('&is_anonymous=true', '')
+
         mock_calculate_basket.reset_mock()
 
-        # Check that a being logged in as a different user doesn't hit the cache
-        self._login_as_user('different_user', is_staff=False)
-        previous_cached_url = url_with_one_sku
-        response = self.client.get(previous_cached_url)
+        # Call BasketCalculate again to test that we get the Cached response
+        response = self.client.get(url_with_one_sku_no_anon)
         self.assertEqual(response.status_code, 200)
-        self.assertTrue(mock_calculate_basket.called, msg='The cache should be missed.')
+        self.assertFalse(mock_calculate_basket.called, msg='The cache should be hit.')
+        self.assertTrue(mocked_logger.called)
+        self.assertEqual(response.data, expected)
+
+    @httpretty.activate
+    @mock.patch('ecommerce.extensions.api.v2.views.baskets.logger.warning')
+    @mock.patch('ecommerce.extensions.api.v2.views.baskets.BasketCalculateView._calculate_temporary_basket')
+    @override_flag('use_cached_basket_calculate_for_marketing_user', active=True)
+    @override_switch("debug_logging_predates_is_anonymous", active=True)
+    def test_no_query_params_log(self, mock_calculate_basket, mocked_logger):
+        """
+        Verify that when the request contains neither a username parameter or is_anonymous a Warning is logged and
+        response is valid.
+
+        NOTE: This is temporary until we no longer have these calls and can ultimately return a 400 error.
+        Due to backward incompatibility, we should make the switch to a 400 error once we need a version change.
+        TODO: LEARNER-5057
+        """
+        expected = {'Test Succeeded': True}
+        mock_calculate_basket.return_value = expected
+
+        url_with_one_sku = self._generate_sku_url(self.products, number_of_products=1)
+        url_with_one_sku = url_with_one_sku.replace('&is_anonymous=true', '')
+        response = self.client.get(url_with_one_sku)
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(mock_calculate_basket.called)
+        self.assertTrue(mocked_logger.called)
         self.assertEqual(response.data, expected)
 
     @httpretty.activate
     @mock.patch('ecommerce.extensions.api.v2.views.baskets.BasketCalculateView._calculate_temporary_basket')
-    @override_flag("use_cached_basket_calculate_for_marketing_user", active=False)
+    @override_flag('use_cached_basket_calculate_for_marketing_user', active=True)
+    def test_conflicting_user_anonymous_params(self, mock_calculate_basket):
+        """
+        Verify that when the request contains both a username and an is_anonymous parameter, a Bad Request response
+        is returned.
+        """
+        expected = {'Test Succeeded': True}
+        mock_calculate_basket.return_value = expected
+
+        url_with_one_sku = self._generate_sku_url(self.products, number_of_products=1, username='different_user')
+        url_with_one_sku += '&is_anonymous=true'
+        response = self.client.get(url_with_one_sku)
+        self.assertEqual(response.status_code, 400)
+        self.assertFalse(mock_calculate_basket.called)
+
+    @httpretty.activate
+    @mock.patch('ecommerce.extensions.api.v2.views.baskets.BasketCalculateView._calculate_temporary_basket')
+    @override_flag('use_cached_basket_calculate_for_marketing_user', active=False)
     def test_basket_calculate_with_anonymous_caching_disabled(self, mock_calculate_basket):
         """Verify a request made by the Marketing Staff user is not cached"""
-        self._login_as_user(BasketCalculateView.MARKETING_USER, is_staff=True)
-
         expected = {'Test Succeeded': True}
         mock_calculate_basket.return_value = {'Test Succeeded': True}
 
@@ -637,10 +678,12 @@ class BasketCalculateViewTests(ProgramTestMixin, TestCase):
         self.assertEqual(response.data, expected)
 
     @httpretty.activate
+    @mock.patch('ecommerce.programs.conditions.ProgramCourseRunSeatsCondition._get_lms_resource_for_user')
     @mock.patch('ecommerce.extensions.api.v2.views.baskets.logger.exception')
-    def test_basket_calculate_by_staff_user_invalid_username(self, mocked_logger):
-        """Verify that a staff user passing an invalid username gets a response about themselves
-            and an error is logged about a non existant user """
+    @override_switch('debug_logging_predates_is_anonymous', active=True)
+    def test_basket_calculate_by_staff_user_invalid_username(self, mock_get_lms_resource_for_user, mocked_logger):
+        """Verify that a staff user passing an invalid username gets a response the anonymous
+            basket and an error is logged about a non existent user """
         self.site_configuration.enable_partial_program = True
         self.site_configuration.save()
         offer = ProgramOfferFactory(
@@ -650,12 +693,9 @@ class BasketCalculateViewTests(ProgramTestMixin, TestCase):
         )
         program_uuid = offer.condition.program_uuid
         program = self.mock_program_detail_endpoint(program_uuid, self.site_configuration.discovery_api_url)
-        differentuser = self.create_user(username='differentuser', is_staff=False)
 
         products = self._get_program_verified_seats(program)
         url = self._generate_sku_url(products, username='invalidusername')
-        enrollment = [{'mode': 'verified', 'course_details': {'course_id': program['courses'][0]['key']}}]
-        self.mock_user_data(differentuser.username, enrollment)
 
         expected = {
             'total_incl_tax_excl_discounts': sum(product.stockrecords.first().price_excl_tax
@@ -666,6 +706,11 @@ class BasketCalculateViewTests(ProgramTestMixin, TestCase):
 
         with self.assertRaises(Exception):
             response = self.client.get(url)
+
+            self.assertFalse(
+                mock_get_lms_resource_for_user.called, msg='LMS calls should be skipped for anonymous case.'
+            )
+
             self.assertEqual(response.status_code, 200)
             self.assertTrue(mocked_logger.called)
             self.assertEqual(response.data, expected)
@@ -758,6 +803,9 @@ class BasketCalculateViewTests(ProgramTestMixin, TestCase):
         url = '{root}?{qs}'.format(root=self.path, qs=qs)
         if username:
             url += '&username={username}'.format(username=username)
+        else:
+            url += '&is_anonymous=true'
+
         return url
 
     def _get_program_verified_seats(self, program):
