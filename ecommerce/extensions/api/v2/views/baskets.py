@@ -352,7 +352,7 @@ class BasketCalculateView(generics.GenericAPIView):
                 basket.strategy = Selector().strategy(user=user)
 
                 for product in products:
-                    basket.add_product(product, 1)
+                    basket.add_product(product, 1, options={'temporary_basket': True})
 
                 if voucher:
                     basket.vouchers.add(voucher)
