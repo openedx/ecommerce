@@ -40,6 +40,10 @@ DATABASES = {
 CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+    },
+    'request': {
+        'BACKEND': 'ecommerce.request_cache.RequestPlusRemoteCache',
+        'REMOTE_CACHE_NAME': 'default',
     }
 }
 # END CACHE CONFIGURATION
