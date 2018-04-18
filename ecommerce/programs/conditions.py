@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 import logging
 import operator
 
+import waffle
 from django.conf import settings
 from django.core.cache import cache
 from oscar.apps.offer import utils as oscar_utils
@@ -55,6 +56,8 @@ class ProgramCourseRunSeatsCondition(SingleItemConsumptionConditionMixin, Condit
         if not data_list:
             user = basket.owner.username
             try:
+                if waffle.switch_is_active("debug_logging_for_excessive_lms_calls"):
+                    logger.warning("_get_lms_resource_for_user called for username=[%s]", user)  # pragma: no cover
                 data_list = endpoint.get(user=user)
                 cache.set(cache_key, data_list, settings.LMS_API_CACHE_TIMEOUT)
             except (ConnectionError, SlumberBaseException, Timeout) as exc:
