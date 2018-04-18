@@ -426,15 +426,25 @@ class BasketCalculateView(generics.GenericAPIView):
 
         is_anonymous = False
 
+        user_does_not_exist = False
         # If a username is passed in, validate that the user has staff access or is the same user.
         if username:
+            if waffle.switch_is_active("debug_logging_for_excessive_lms_calls"):
+                if username == self.MARKETING_USER:
+                    logger.warning("BasketCalculateView called with query parameter username=marketing_site_worker. "
+                                   "user=[%s]", user.username)  # pragma: no cover
             if user.is_staff or (user.username.lower() == username.lower()):
                 try:
                     user = User.objects.get(username=username)
                 except User.DoesNotExist:
+                    user_does_not_exist = True
                     logger.debug('Request username: [%s] does not exist', username)
             else:
                 return HttpResponseForbidden('Unauthorized user credentials')
+            if waffle.switch_is_active("debug_logging_for_excessive_lms_calls"):
+                if user.username == self.MARKETING_USER:
+                    logger.warning('BasketCalculateView: User was never set for query parameter username=[%s]. '
+                                   'user_does_not_exist=[%s].', username, user_does_not_exist)  # pragma: no cover
         elif user.username == self.MARKETING_USER:
             # A request made by the marketing user without a username query param,
             # means this is calculating the non-logged in (anonymous) price.
@@ -442,6 +452,9 @@ class BasketCalculateView(generics.GenericAPIView):
             # the marketing user.
             if waffle.flag_is_active(request, "use_basket_calculate_none_user"):
                 user = None
+                if waffle.switch_is_active("debug_logging_for_excessive_lms_calls"):  # pragma: no cover
+                    logger.warning("BasketCalculateView called by user marketing_site_worker "
+                                   "and username=[%s]", username)
             is_anonymous = True
 
         cache_key = None

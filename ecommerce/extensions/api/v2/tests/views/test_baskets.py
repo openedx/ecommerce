@@ -17,7 +17,7 @@ from oscar.core.loading import get_model
 from oscar.test import factories
 from oscar.test.factories import BasketFactory
 from rest_framework.throttling import UserRateThrottle
-from waffle.testutils import override_flag
+from waffle.testutils import override_flag, override_switch
 
 from ecommerce.courses.models import Course
 from ecommerce.extensions.api import exceptions as api_exceptions
@@ -446,6 +446,7 @@ class BasketCalculateViewTests(ProgramTestMixin, TestCase):
         self.assertEqual(response.status_code, 200)
 
     @httpretty.activate
+    @override_switch("debug_logging_for_excessive_lms_calls", active=True)
     def test_basket_calculate_by_staff_user_own_username(self):
         """Verify a staff user passing their own username gets a response about themself"""
         response = self.client.get(self.url + '&username={username}'.format(username=self.user.username))
@@ -489,6 +490,7 @@ class BasketCalculateViewTests(ProgramTestMixin, TestCase):
     @httpretty.activate
     @mock.patch('ecommerce.programs.conditions.ProgramCourseRunSeatsCondition._get_lms_resource_for_user')
     @override_flag("use_basket_calculate_none_user", active=True)
+    @override_switch("debug_logging_for_excessive_lms_calls", active=True)
     def test_basket_calculate_anonymous_skip_lms(self, mock_get_lms_resource_for_user):
         """Verify a call for an anonymous user skips calls to LMS for entitlements and enrollments"""
         products, url = self.setup_anonymous_basket_calculate()
