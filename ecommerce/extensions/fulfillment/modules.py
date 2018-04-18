@@ -511,7 +511,7 @@ class EnrollmentCodeFulfillmentModule(BaseFulfillmentModule):
             _range.save()
 
             vouchers = create_vouchers(
-                name='Enrollment code voucher [{}]'.format(line.product.title),
+                name=unicode('Enrollment code voucher [{}]').format(line.product.title),
                 benefit_type=Benefit.PERCENTAGE,
                 benefit_value=100,
                 catalog=coupon_catalog,
