@@ -24,17 +24,15 @@ LOGGING['handlers']['local'] = {'class': 'logging.NullHandler'}
 LOGGING['handlers']['console'] = {'class': 'logging.NullHandler'}
 
 if os.getenv('DISABLE_MIGRATIONS'):
-    class DisableMigrations(object):
-        def __contains__(self, item):
-            return True
+    MIGRATION_MODULES = {
+        'default': None,
+        'sessions': None,
+        'profiles': None,
+        'snippets': None,
+        'scaffold_templates': None,
+    }
 
-        def __getitem__(self, item):
-            return "notmigrations"
-
-
-    MIGRATION_MODULES = DisableMigrations()
 # END TEST SETTINGS
-
 
 DATABASES = {
     'default': {
