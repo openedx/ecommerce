@@ -342,7 +342,7 @@ class BasketCalculateView(generics.GenericAPIView):
     permission_classes = (IsAuthenticated,)
     MARKETING_USER = 'marketing_site_worker'
 
-    def _calculate_basket(self, user, request, products, voucher, skus, code):
+    def _calculate_temporary_basket(self, user, request, products, voucher, skus, code):
         response = None
         try:
             # We wrap this in an atomic operation so we never commit this to the db.
@@ -424,28 +424,43 @@ class BasketCalculateView(generics.GenericAPIView):
         username = request.GET.get('username', default='')
         user = request.user
 
-        # True if this request was made by the marketing user, and does not include a username
-        # query param, and thus is calculating the non-logged in (anonymous) price.
-        # Note: We need to verify separately that all calls without a username query param
-        # can be treated in this same way.
-        is_marketing_anonymous_request = False
+        is_anonymous = False
 
+        user_does_not_exist = False
         # If a username is passed in, validate that the user has staff access or is the same user.
         if username:
+            if waffle.switch_is_active("debug_logging_for_excessive_lms_calls"):
+                if username == self.MARKETING_USER:
+                    logger.warning("BasketCalculateView called with query parameter username=marketing_site_worker. "
+                                   "user=[%s]", user.username)  # pragma: no cover
             if user.is_staff or (user.username.lower() == username.lower()):
                 try:
                     user = User.objects.get(username=username)
                 except User.DoesNotExist:
+                    user_does_not_exist = True
                     logger.debug('Request username: [%s] does not exist', username)
             else:
                 return HttpResponseForbidden('Unauthorized user credentials')
+            if waffle.switch_is_active("debug_logging_for_excessive_lms_calls"):
+                if user.username == self.MARKETING_USER:
+                    logger.warning('BasketCalculateView: User was never set for query parameter username=[%s]. '
+                                   'user_does_not_exist=[%s].', username, user_does_not_exist)  # pragma: no cover
         elif user.username == self.MARKETING_USER:
-            is_marketing_anonymous_request = True
+            # A request made by the marketing user without a username query param,
+            # means this is calculating the non-logged in (anonymous) price.
+            # TODO: LEARNER-4993: Switch to a query param rather than hardcoding to
+            # the marketing user.
+            if waffle.flag_is_active(request, "use_basket_calculate_none_user"):
+                user = None
+                if waffle.switch_is_active("debug_logging_for_excessive_lms_calls"):  # pragma: no cover
+                    logger.warning("BasketCalculateView called by user marketing_site_worker "
+                                   "and username=[%s]", username)
+            is_anonymous = True
 
         cache_key = None
-        # Since we know we can't have any enrollments or entitlements, we can directly get
-        # the cached price.
-        if is_marketing_anonymous_request:
+        if is_anonymous:
+            # For an anonymous user we can directly get the cached price, because
+            # there can't be any enrollments or entitlements.
             cache_key = get_cache_key(
                 site_comain=request.site,
                 resource_name='calculate',
@@ -456,9 +471,9 @@ class BasketCalculateView(generics.GenericAPIView):
                 if basket_calculate_results:
                     return Response(basket_calculate_results)
 
-        response = self._calculate_basket(user, request, products, voucher, skus, code)
+        response = self._calculate_temporary_basket(user, request, products, voucher, skus, code)
 
-        if response and is_marketing_anonymous_request:
+        if response and is_anonymous:
             cache.set(cache_key, response, settings.ANONYMOUS_BASKET_CALCULATE_CACHE_TIMEOUT)
 
         return Response(response)

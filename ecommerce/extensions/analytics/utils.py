@@ -134,6 +134,9 @@ def track_segment_event(site, user, event, properties):
         (success, msg): Tuple indicating the success of enqueuing the event on the message queue.
             This can be safely ignored unless needed for debugging purposes.
     """
+    if not user:
+        return False, 'Event is not fired for anonymous user.'
+
     site_configuration = site.siteconfiguration
     if not site_configuration.segment_key:
         msg = 'Event [{event}] was NOT fired because no Segment key is set for site configuration [{site_id}]'

@@ -235,8 +235,9 @@ class ConditionalOffer(AbstractConditionalOffer):
         In addition to Oscar's check to see if the condition is satisfied,
         a check for if basket owners email domain is within the allowed email domains.
         """
-        if not self.is_email_valid(basket.owner.email):
+        if basket.owner and not self.is_email_valid(basket.owner.email):
             return False
+
         if self.benefit.range and self.benefit.range.catalog_query:
             # The condition is only satisfied if all basket lines are in the offer range
             num_lines = basket.all_lines().count()
