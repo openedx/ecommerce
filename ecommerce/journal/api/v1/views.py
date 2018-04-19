@@ -1,6 +1,7 @@
 '''JournalViewSet'''
 from oscar.core.loading import get_model
 from rest_framework import viewsets
+from rest_framework.permissions import IsAdminUser
 from ecommerce.journal.api.serializers import JournalProductSerializer
 
 
@@ -14,3 +15,4 @@ class JournalProductViewSet(viewsets.ModelViewSet):
     lookup_field = 'id'
     queryset = Product.objects.filter(product_class__name='Journal')
     serializer_class = JournalProductSerializer
+    permission_classes = (IsAdminUser,)
