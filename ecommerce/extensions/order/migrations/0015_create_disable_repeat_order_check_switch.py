@@ -9,7 +9,7 @@ from ecommerce.extensions.order.constants import DISABLE_REPEAT_ORDER_CHECK_SWIT
 
 def create_switch(apps, schema_editor):
     Switch = apps.get_model('waffle', 'Switch')
-    Switch.objects.get_or_create(name=DISABLE_REPEAT_ORDER_CHECK_SWITCH_NAME, defaults={'active': False})
+    Switch.objects.get_or_create(name=DISABLE_REPEAT_ORDER_CHECK_SWITCH_NAME, defaults={'active': True})
 
 
 def delete_switch(apps, schema_editor):
