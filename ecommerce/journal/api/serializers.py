@@ -36,6 +36,17 @@ class StockRecordSerializer(serializers.ModelSerializer):
         fields = ('partner', 'partner_sku', 'price_currency', 'price_excl_tax',)
 
 
+class StockRecordSerializerForUpdate(StockRecordSerializer):
+    """
+    Stock record objects serializer for PUT requests.
+    Allowed fields to update are 'price_currency' and 'price_excl_tax'.
+    """
+
+    class Meta(object):
+        model = StockRecord
+        fields = ('price_currency', 'price_excl_tax',)
+
+
 class JournalProductSerializer(serializers.ModelSerializer):
     """
     Serializer for the Journal Product model.
@@ -73,3 +84,33 @@ class JournalProductSerializer(serializers.ModelSerializer):
     class Meta(object):
         model = Product
         fields = ('id', 'structure', 'attribute_values', 'product_class', 'title', 'expires', 'stockrecords')
+
+
+class JournalProductUpdateSerializer(serializers.ModelSerializer):
+    """
+    Serializer to update the Journal Product model.
+    """
+    stockrecords = StockRecordSerializerForUpdate(many=True, required=False)
+
+    def update(self, instance, validated_data):
+        title = validated_data.pop('title', None)
+        stockrecord_data = validated_data.pop('stockrecords', None)
+
+        # update stockrecords, if any
+        if stockrecord_data:
+            stockrecords = instance.stockrecords.all()
+            for index, stockrecord in enumerate(stockrecords):
+                stockrecord.price_currency = stockrecord_data[index]['price_currency']
+                stockrecord.price_excl_tax = stockrecord_data[index]['price_excl_tax']
+                stockrecord.save()
+
+        # update title
+        if title:
+            instance.title = title
+            instance.save()
+
+        return instance
+
+    class Meta(object):
+        model = Product
+        fields = ('title', 'stockrecords')
