@@ -17,9 +17,10 @@ def get_journals_service_client(site_configuration):
     """
     Returns Journals Service client
     """
-    #TODO: add access tokens
-    # return EdxRestApiClient(site_configuration.journals_api_url, jwt=site_configuration.access_token)
-    return EdxRestApiClient(site_configuration.journals_api_url)
+    return EdxRestApiClient(
+        site_configuration.journals_api_url,
+        jwt=site_configuration.access_token
+    )
 
 
 def post_journal_access(site_configuration, order_number, username, journal_uuid):
