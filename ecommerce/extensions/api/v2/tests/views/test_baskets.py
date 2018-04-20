@@ -454,6 +454,39 @@ class BasketCalculateViewTests(ProgramTestMixin, TestCase):
 
     @httpretty.activate
     @mock.patch('ecommerce.programs.conditions.ProgramCourseRunSeatsCondition._get_lms_resource_for_user')
+    def test_basket_calculate_by_staff_user_own_username(self, mock_get_lms_resource_for_user):
+        """Verify the marketing user passing own username gets an anonymous response"""
+        self.site_configuration.enable_partial_program = True
+        self.site_configuration.save()
+        offer = ProgramOfferFactory(
+            site=self.site,
+            benefit=PercentageDiscountBenefitWithoutRangeFactory(value=100),
+            condition=ProgramCourseRunSeatsConditionFactory()
+        )
+        program_uuid = offer.condition.program_uuid
+        program = self.mock_program_detail_endpoint(program_uuid,
+                                                    self.site_configuration.discovery_api_url)
+
+        products = self._get_program_verified_seats(program)
+        url = self._generate_sku_url(products, username=self.user.username)
+
+        expected = {
+            'total_incl_tax_excl_discounts': sum(
+                product.stockrecords.first().price_excl_tax
+                for product in products),
+            'total_incl_tax': Decimal('0.00'),
+            'currency': 'USD'
+        }
+
+        response = self.client.get(url)
+
+        self.assertFalse(mock_get_lms_resource_for_user.called, msg='LMS calls should be skipped for anonymous case.')
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data, expected)
+
+    @httpretty.activate
+    @mock.patch('ecommerce.programs.conditions.ProgramCourseRunSeatsCondition._get_lms_resource_for_user')
     def test_basket_calculate_by_staff_user_other_username(self, mock_get_lms_resource_for_user):
         """Verify a staff user passing a valid username gets a response about the other user"""
         self.site_configuration.enable_partial_program = True
@@ -638,10 +671,11 @@ class BasketCalculateViewTests(ProgramTestMixin, TestCase):
         self.assertEqual(response.data, expected)
 
     @httpretty.activate
+    @mock.patch('ecommerce.programs.conditions.ProgramCourseRunSeatsCondition._get_lms_resource_for_user')
     @mock.patch('ecommerce.extensions.api.v2.views.baskets.logger.exception')
-    def test_basket_calculate_by_staff_user_invalid_username(self, mocked_logger):
-        """Verify that a staff user passing an invalid username gets a response about themselves
-            and an error is logged about a non existant user """
+    def test_basket_calculate_by_staff_user_invalid_username(self, mocked_logger, mock_get_lms_resource_for_user):
+        """Verify that a staff user passing an invalid username gets the anonymous
+           value and an error is logged about a non existent user """
         self.site_configuration.enable_partial_program = True
         self.site_configuration.save()
         offer = ProgramOfferFactory(
@@ -667,6 +701,9 @@ class BasketCalculateViewTests(ProgramTestMixin, TestCase):
 
         with self.assertRaises(Exception):
             response = self.client.get(url)
+
+            self.assertTrue(mock_get_lms_resource_for_user.called, msg='LMS calls should be skipped for anonymous case.')
+
             self.assertEqual(response.status_code, 200)
             self.assertTrue(mocked_logger.called)
             self.assertEqual(response.data, expected)
