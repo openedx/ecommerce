@@ -490,7 +490,6 @@ class BasketCalculateViewTests(ProgramTestMixin, TestCase):
     @httpretty.activate
     @mock.patch('ecommerce.programs.conditions.ProgramCourseRunSeatsCondition._get_lms_resource_for_user')
     @override_flag("use_basket_calculate_none_user", active=True)
-    @override_switch("debug_logging_for_excessive_lms_calls", active=True)
     def test_basket_calculate_anonymous_skip_lms(self, mock_get_lms_resource_for_user):
         """Verify a call for an anonymous user skips calls to LMS for entitlements and enrollments"""
         products, url = self.setup_anonymous_basket_calculate()
