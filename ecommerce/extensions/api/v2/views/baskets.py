@@ -426,14 +426,12 @@ class BasketCalculateView(generics.GenericAPIView):
 
         is_anonymous = False
 
-        user_does_not_exist = False
         # If a username is passed in, validate that the user has staff access or is the same user.
         if username:
             if user.is_staff or (user.username.lower() == username.lower()):
                 try:
                     user = User.objects.get(username=username)
                 except User.DoesNotExist:
-                    user_does_not_exist = True
                     logger.debug('Request username: [%s] does not exist', username)
             else:
                 return HttpResponseForbidden('Unauthorized user credentials')
