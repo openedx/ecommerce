@@ -4,7 +4,7 @@
 # This file is distributed under the GNU AFFERO GENERAL PUBLIC LICENSE.
 # 
 # Translators:
-# Jack Ryan, 2016
+# Waldo Luís Ribeiro, 2016
 # Manuela Silva <inactive+h_manuela_rodsilva@transifex.com>, 2015
 # Manuela Silva <manuela.silva@sky.com>, 2016
 msgid ""
