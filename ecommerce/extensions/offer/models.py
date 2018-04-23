@@ -53,7 +53,7 @@ class Benefit(AbstractBenefit):
         """" Filters out products that aren't seats or entitlements or that don't have a paid certificate type. """
         return [
             line for line in lines
-            if line.product.is_seat_product or line.product.is_course_entitlement_product and
+            if (line.product.is_seat_product or line.product.is_course_entitlement_product) and
             hasattr(line.product.attr, 'certificate_type') and
             line.product.attr.certificate_type.lower() in applicable_range.course_seat_types
         ]
