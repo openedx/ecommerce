@@ -9,7 +9,7 @@ from selenium.webdriver.support.wait import WebDriverWait
 
 from e2e.api import DiscoveryApi, EcommerceApi, EnrollmentApi
 from e2e.config import LMS_USERNAME, PAYPAL_EMAIL, PAYPAL_PASSWORD
-from e2e.helpers import EcommerceHelpers
+from e2e.helpers import EcommerceHelpers, LmsHelpers
 
 log = logging.getLogger(__name__)
 
@@ -60,30 +60,10 @@ class TestSeatPayment(object):
         # Click the payment button
         selenium.find_element_by_id('payment-button').click()
 
-    def checkout_with_paypal(self, selenium):
-        selenium.find_element_by_css_selector('button.payment-button[data-processor-name=paypal]').click()
-
-        # Wait for login form to load. PayPal's test environment is slow.
-        login_iframe = selenium.find_element_by_css_selector('#injectedUnifiedLogin > iframe')
-        selenium.switch_to.frame(login_iframe)
-
-        # Log into PayPal
-        email = selenium.find_element_by_id('email')
-        password = selenium.find_element_by_id('password')
-        email.send_keys(PAYPAL_EMAIL)
-        password.send_keys(PAYPAL_PASSWORD)
-
-        selenium.find_element_by_id('btnLogin').click()
-        selenium.switch_to.default_content()
-
-        # Wait for the checkout form to load, and for the loading spinner to disappear.
-        wait = WebDriverWait(selenium, 10)
-        spinner_invisibility = EC.invisibility_of_element_located((By.ID, 'spinner'))
-        wait.until(spinner_invisibility)
-        selenium.find_element_by_id('confirmButtonTop').click()
-
     def assert_browser_on_receipt_page(self, selenium):
-        selenium.find_element_by_id('receipt-container')
+        WebDriverWait(selenium, 20).until(
+            EC.visibility_of_element_located((By.ID, 'receipt-container'))
+        )
 
     def assert_user_enrolled_in_course_run(self, username, course_run_key, seat_type='verified', attempts=5):
         """ Asserts the given user has an *active* enrollment for the given course run and seat type/mode.
@@ -119,7 +99,11 @@ class TestSeatPayment(object):
     def add_item_to_basket(self, selenium, sku):
         # Add the item to the basket and start the checkout process
         selenium.get(EcommerceHelpers.build_url('/basket/add/?sku=' + sku))
-        assert selenium.find_element_by_css_selector('.basket-client-side').is_displayed()
+
+        # Wait till the selector is visible
+        WebDriverWait(selenium, 20).until(
+            EC.visibility_of_element_located((By.CSS_SELECTOR, ".basket-client-side"))
+        )
 
     def refund_orders_for_course_run(self, course_run_id):
         api = EcommerceApi()
@@ -128,6 +112,7 @@ class TestSeatPayment(object):
 
         for refund_id in refund_ids:
             api.process_refund(refund_id, 'approve')
+        return True
 
     def get_verified_seat(self, course_run):
         verified_seat = None
@@ -136,3 +121,44 @@ class TestSeatPayment(object):
                 verified_seat = seat
                 break
         return verified_seat
+
+    def checkout_with_paypal(self, selenium):
+        selenium.find_element_by_css_selector('.payment-processor-paypal').click()
+
+        # Log into PayPal
+        paypal_email = WebDriverWait(selenium, 10).until(
+            EC.visibility_of_element_located((By.ID, 'email'))
+        )
+        paypal_email.send_keys(PAYPAL_EMAIL)
+        selenium.find_element_by_id('btnNext').click()
+        password = WebDriverWait(selenium, 10).until(
+            EC.visibility_of_element_located((By.ID, 'password'))
+        )
+        password.send_keys(PAYPAL_PASSWORD)
+        selenium.find_element_by_id('btnLogin').click()
+
+        # Wait for Spinner invisibility as paypal loading is slow
+        WebDriverWait(selenium, 20).until(
+            EC.invisibility_of_element_located((By.ID, 'preloaderSpinner'))
+        )
+
+        paypal_continue = WebDriverWait(selenium, 10).until(
+            EC.visibility_of_element_located((By.ID, 'confirmButtonTop'))
+        )
+
+        paypal_continue.click()
+
+    def test_verified_seat_payment_with_paypal(self, selenium):
+        """ Validates users can add a verified seat to the cart and checkout with PayPal. """
+        LmsHelpers.login(selenium)
+
+        # Get the course run we want to purchase
+        course_run = self.get_verified_course_run()
+        verified_seat = self.get_verified_seat(course_run)
+        self.add_item_to_basket(selenium, verified_seat['sku'])
+        self.checkout_with_paypal(selenium)
+        self.assert_browser_on_receipt_page(selenium)
+
+        course_run_key = course_run['key']
+        self.assert_user_enrolled_in_course_run(LMS_USERNAME, course_run_key)
+        self.refund_orders_for_course_run(course_run_key)
