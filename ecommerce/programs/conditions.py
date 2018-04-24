@@ -11,6 +11,7 @@ from oscar.core.loading import get_model
 from requests.exceptions import ConnectionError, Timeout
 from slumber.exceptions import HttpNotFoundError, SlumberBaseException
 
+from ecommerce.core.cache_utils import CACHE_MISS, safe_cache_get
 from ecommerce.core.utils import get_cache_key, traverse_pagination
 from ecommerce.extensions.offer.decorators import check_condition_applicability
 from ecommerce.extensions.offer.mixins import SingleItemConsumptionConditionMixin
@@ -18,9 +19,6 @@ from ecommerce.programs.utils import get_program
 
 Condition = get_model('offer', 'Condition')
 logger = logging.getLogger(__name__)
-
-
-CACHE_MISS = object()
 
 
 class ProgramCourseRunSeatsCondition(SingleItemConsumptionConditionMixin, Condition):
@@ -55,7 +53,7 @@ class ProgramCourseRunSeatsCondition(SingleItemConsumptionConditionMixin, Condit
             resource=resource_name,
             username=basket.owner.username,
         )
-        data_list = cache.get(cache_key, CACHE_MISS)
+        data_list = safe_cache_get(cache_key)
         if data_list is CACHE_MISS:
             data_list = None
             user = basket.owner.username
