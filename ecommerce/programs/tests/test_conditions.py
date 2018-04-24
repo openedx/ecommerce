@@ -22,7 +22,7 @@ class ProgramCourseRunSeatsConditionTests(ProgramTestMixin, TestCase):
     def setUp(self):
         super(ProgramCourseRunSeatsConditionTests, self).setUp()
         self.condition = factories.ProgramCourseRunSeatsConditionFactory()
-        self.test_product = ProductFactory(stockrecords__price_excl_tax=10)
+        self.test_product = ProductFactory(stockrecords__price_excl_tax=10, categories=[])
         self.site.siteconfiguration.enable_partial_program = True
 
     def test_name(self):
@@ -266,3 +266,25 @@ class ProgramCourseRunSeatsConditionTests(ProgramTestMixin, TestCase):
         with mock.patch('ecommerce.programs.conditions.traverse_pagination') as mock_processing_entitlements:
             self.assertFalse(self.condition.is_satisfied(offer, basket))
             mock_processing_entitlements.assert_not_called()
+
+    @httpretty.activate
+    def test_get_lms_resource_for_user_caching_none(self):
+        """
+        LMS resource should be properly cached when enrollments is None.
+        """
+        basket = factories.BasketFactory(site=self.site, owner=factories.UserFactory())
+        resource_name = 'test_resource_name'
+        mock_endpoint = mock.Mock()
+        mock_endpoint.get.return_value = None
+
+        return_value = self.condition._get_lms_resource_for_user(basket, resource_name, mock_endpoint)  # pylint: disable=protected-access
+
+        self.assertEqual(return_value, [])
+        self.assertEquals(mock_endpoint.get.call_count, 1, 'Endpoint should be called before caching.')
+
+        mock_endpoint.reset_mock()
+
+        return_value = self.condition._get_lms_resource_for_user(basket, resource_name, mock_endpoint)  # pylint: disable=protected-access
+
+        self.assertEqual(return_value, [])
+        self.assertEquals(mock_endpoint.get.call_count, 0, 'Endpoint should NOT be called after caching.')
