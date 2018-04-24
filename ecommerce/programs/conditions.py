@@ -20,6 +20,9 @@ Condition = get_model('offer', 'Condition')
 logger = logging.getLogger(__name__)
 
 
+CACHE_MISS = object()
+
+
 class ProgramCourseRunSeatsCondition(SingleItemConsumptionConditionMixin, Condition):
     class Meta(object):
         app_label = 'programs'
@@ -52,8 +55,9 @@ class ProgramCourseRunSeatsCondition(SingleItemConsumptionConditionMixin, Condit
             resource=resource_name,
             username=basket.owner.username,
         )
-        data_list = cache.get(cache_key)
-        if not data_list:
+        data_list = cache.get(cache_key, CACHE_MISS)
+        if data_list is CACHE_MISS:
+            data_list = None
             user = basket.owner.username
             try:
                 if waffle.switch_is_active("debug_logging_for_excessive_lms_calls"):
