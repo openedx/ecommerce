@@ -274,7 +274,7 @@ class Range(AbstractRange):
         'course_catalog',
         'enterprise_customer',
     ]
-    ALLOWED_SEAT_TYPES = ['credit', 'professional', 'verified']
+    ALLOWED_SEAT_TYPES = ['credit', 'professional', 'verified', 'audit']
     catalog = models.ForeignKey(
         'catalogue.Catalog', blank=True, null=True, related_name='ranges', on_delete=models.CASCADE
     )
