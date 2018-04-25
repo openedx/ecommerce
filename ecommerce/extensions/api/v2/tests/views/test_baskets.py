@@ -563,6 +563,9 @@ class BasketCalculateViewTests(ProgramTestMixin, TestCase):
         """Verify a request made with the is_anonymous parameter is cached"""
         url_with_one_sku = self._generate_sku_url(self.products, number_of_products=1, username=None)
         url_with_two_skus = self._generate_sku_url(self.products, number_of_products=2, username=None)
+        url_with_two_skus_reversed = self._generate_sku_url(
+            self.products, number_of_products=2, username=None, reverse_skus=True
+        )
 
         expected = {'Test Succeeded': True}
         mock_calculate_basket.return_value = expected
@@ -597,6 +600,14 @@ class BasketCalculateViewTests(ProgramTestMixin, TestCase):
         response = self.client.get(url_with_two_skus)
         self.assertEqual(response.status_code, 200)
         self.assertTrue(mock_calculate_basket.called, msg='The cache should be missed.')
+        self.assertEqual(response.data, expected)
+
+        mock_calculate_basket.reset_mock()
+
+        # Check that this new set of skus hits cache, even when reversed
+        response = self.client.get(url_with_two_skus_reversed)
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(mock_calculate_basket.called, msg='The cache should be hit.')
         self.assertEqual(response.data, expected)
 
         # Check that cache works and that log message is sent for Marketing user
@@ -782,7 +793,7 @@ class BasketCalculateViewTests(ProgramTestMixin, TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data, expected)
 
-    def _generate_sku_url(self, products, number_of_products=None, username=None):
+    def _generate_sku_url(self, products, number_of_products=None, username=None, reverse_skus=False):
         """
         Generates the calculate basket view's url for the given products
 
@@ -796,8 +807,11 @@ class BasketCalculateViewTests(ProgramTestMixin, TestCase):
         """
         if not number_of_products:
             number_of_products = len(products)
+        sku_list = [product.stockrecords.first().partner_sku for product in products[:number_of_products]]
+        if reverse_skus:
+            sku_list = list(reversed(sku_list))
         qs = urllib.urlencode(
-            {'sku': [product.stockrecords.first().partner_sku for product in products[:number_of_products]]},
+            {'sku': sku_list},
             True
         )
         url = '{root}?{qs}'.format(root=self.path, qs=qs)

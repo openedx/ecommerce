@@ -406,6 +406,7 @@ class BasketCalculateView(generics.GenericAPIView):
         skus = request.GET.getlist('sku')
         if not skus:
             return HttpResponseBadRequest(_('No SKUs provided.'))
+        skus.sort()
 
         code = request.GET.get('code', None)
         try:
