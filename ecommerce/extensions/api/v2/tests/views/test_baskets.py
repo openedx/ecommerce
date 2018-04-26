@@ -644,7 +644,7 @@ class BasketCalculateViewTests(ProgramTestMixin, TestCase):
         mock_calculate_basket.return_value = expected
 
         url_with_one_sku = self._generate_sku_url(self.products, number_of_products=1)
-        url_with_one_sku = url_with_one_sku.replace('&is_anonymous=true', '')
+        url_with_one_sku = url_with_one_sku.replace('&is_anonymous=tRuE', '')
         response = self.client.get(url_with_one_sku)
         self.assertEqual(response.status_code, 200)
         self.assertTrue(mock_calculate_basket.called)
@@ -793,7 +793,7 @@ class BasketCalculateViewTests(ProgramTestMixin, TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data, expected)
 
-    def _generate_sku_url(self, products, number_of_products=None, username=None, reverse_skus=False):
+    def _generate_sku_url(self, products, number_of_products=None, username=None, reverse_skus=False, ):
         """
         Generates the calculate basket view's url for the given products
 
@@ -818,7 +818,7 @@ class BasketCalculateViewTests(ProgramTestMixin, TestCase):
         if username:
             url += '&username={username}'.format(username=username)
         else:
-            url += '&is_anonymous=true'
+            url += '&is_anonymous=tRuE'
 
         return url
 
