@@ -9,6 +9,7 @@ from selenium.webdriver.support.wait import WebDriverWait
 
 from e2e.api import DiscoveryApi, EcommerceApi, EnrollmentApi
 from e2e.config import LMS_USERNAME, PAYPAL_EMAIL, PAYPAL_PASSWORD
+from e2e.constants import ADDRESS_FR, ADDRESS_US
 from e2e.helpers import EcommerceHelpers, LmsHelpers
 
 log = logging.getLogger(__name__)
@@ -162,3 +163,23 @@ class TestSeatPayment(object):
         course_run_key = course_run['key']
         self.assert_user_enrolled_in_course_run(LMS_USERNAME, course_run_key)
         self.refund_orders_for_course_run(course_run_key)
+
+    def test_verified_seat_payment_with_credit_card(self, selenium):
+        """
+        Validates users can add a verified seat to the cart and checkout with a credit card.
+        This test requires 'disable_repeat_order_check' waffle switch active, to run.
+        """
+        LmsHelpers.login(selenium)
+
+        # Get the course run we want to purchase
+        course_run = self.get_verified_course_run()
+        verified_seat = self.get_verified_seat(course_run)
+
+        for address in (ADDRESS_US, ADDRESS_FR,):
+            self.add_item_to_basket(selenium, verified_seat['sku'])
+            self.checkout_with_credit_card(selenium, address)
+            self.assert_browser_on_receipt_page(selenium)
+
+            course_run_key = course_run['key']
+            self.assert_user_enrolled_in_course_run(LMS_USERNAME, course_run_key)
+            assert self.refund_orders_for_course_run(course_run_key)
