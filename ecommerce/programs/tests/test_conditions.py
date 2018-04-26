@@ -92,8 +92,6 @@ class ProgramCourseRunSeatsConditionTests(ProgramTestMixin, TestCase):
         program = self.mock_program_detail_endpoint(
             self.condition.program_uuid, self.site_configuration.discovery_api_url
         )
-        enrollments = [{'mode': 'verified', 'course_details': {'course_id': 'course-v1:test-org+course+1'}},
-                       {'mode': 'verified', 'course_details': {'course_id': 'course-v1:test-org+course+2'}}]
 
         # Extract one verified seat for each course
         verified_seats = []
@@ -103,8 +101,14 @@ class ProgramCourseRunSeatsConditionTests(ProgramTestMixin, TestCase):
                 if seat.attr.id_verification_required:
                     verified_seats.append(seat)
 
+        # Add verified enrollments for the first two program courses to the mock user data
+        enrollments = [
+            {'mode': 'verified', 'course_details': {'course_id': program['courses'][0]['course_runs'][0]['key']}},
+            {'mode': 'verified', 'course_details': {'course_id': program['courses'][1]['course_runs'][0]['key']}}
+        ]
         self.mock_user_data(basket.owner.username, owned_products=enrollments)
-        # If the user has not added all of the remaining courses in program to their basket,
+
+        # If the user has not added all of the remaining courses in the program to their basket,
         # the condition should not be satisfied
         basket.flush()
         for seat in verified_seats[2:len(verified_seats) - 1]:

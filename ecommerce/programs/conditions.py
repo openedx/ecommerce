@@ -131,10 +131,10 @@ class ProgramCourseRunSeatsCondition(SingleItemConsumptionConditionMixin, Condit
 
         for course in program['courses']:
             # If the user is already enrolled in a course, we do not need to check their basket for it
-            if any(course['key'] in enrollment['course_details']['course_id'] and
+            if any(enrollment['course_details']['course_id'] in [run['key'] for run in course['course_runs']] and
                    enrollment['mode'] in applicable_seat_types for enrollment in enrollments):
                 continue
-            if any(course['uuid'] in entitlement['course_uuid'] and
+            if any(course['uuid'] == entitlement['course_uuid'] and
                    entitlement['mode'] in applicable_seat_types for entitlement in entitlements):
                 continue
 
