@@ -424,7 +424,7 @@ class BasketCalculateView(generics.GenericAPIView):
 
         basket_owner = request.user
         requested_username = request.GET.get('username', default='')
-        is_anonymous = request.GET.get('is_anonymous') == 'true'
+        is_anonymous = request.GET.get('is_anonymous', 'false').lower() == 'true'
         use_default_basket = is_anonymous
 
         # validate query parameters
