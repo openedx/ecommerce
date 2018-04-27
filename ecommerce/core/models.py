@@ -337,7 +337,8 @@ class SiteConfiguration(models.Model):
     @property
     def student_dashboard_url(self):
         """ Returns a URL to the student dashboard (hosted by LMS). """
-        return self.build_lms_url('/dashboard')
+        return 'http://localhost:18000/dashboard/journals'
+        # return self.build_lms_url('/dashboard')
 
     @property
     def enrollment_api_url(self):
