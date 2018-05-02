@@ -58,7 +58,7 @@ clean_static:
 	rm -rf assets/* ecommerce/static/build/*
 
 quality:
-	isort --check-only --recursive e2e/ ecommerce/
+	VIRTUAL_ENV=/edx/app/ecommerce/ecommerce_env isort --check-only --recursive e2e/ ecommerce/
 	pep8 --config=.pep8 ecommerce e2e
 	pylint -j 0 --rcfile=pylintrc ecommerce e2e
 
