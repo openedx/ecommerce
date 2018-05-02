@@ -18,6 +18,7 @@ from ecommerce.extensions.refund.tests.mixins import RefundTestMixin
 from ecommerce.tests.mixins import LmsApiMockMixin
 from ecommerce.tests.testcases import TestCase
 
+Basket = get_model('basket', 'Basket')
 BasketAttribute = get_model('basket', 'BasketAttribute')
 BasketAttributeType = get_model('basket', 'BasketAttributeType')
 Order = get_model('order', 'Order')
@@ -372,3 +373,10 @@ class ReceiptResponseViewTests(DiscoveryMockMixin, LmsApiMockMixin, RefundTestMi
 
         self.assertEqual(response.status_code, 200)
         self.assertDictContainsSubset(context_data, response.context_data)
+
+    @httpretty.activate
+    def test_order_without_basket(self):
+        order = self.create_order()
+        Basket.objects.filter(id=order.basket.id).delete()
+        response = self._get_receipt_response(order.number)
+        self.assertEqual(response.status_code, 200)
