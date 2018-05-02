@@ -40,6 +40,9 @@ requirements: requirements.js
 	pip install -r e2e/requirements.txt --exists-action w
 	pip install -r requirements/local.txt --exists-action w
 
+test-requirements:
+	pip install -r requirements/test.txt --exists-action w
+
 production-requirements: requirements.js
 	pip install -r requirements.txt --exists-action w
 
