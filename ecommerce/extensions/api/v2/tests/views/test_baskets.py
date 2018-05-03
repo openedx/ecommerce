@@ -558,6 +558,7 @@ class BasketCalculateViewTests(ProgramTestMixin, TestCase):
     @mock.patch('ecommerce.extensions.api.v2.views.baskets.logger.warning')
     @mock.patch('ecommerce.extensions.api.v2.views.baskets.BasketCalculateView._calculate_temporary_basket')
     @override_flag('use_cached_basket_calculate_for_marketing_user', active=True)
+    @override_flag('disable_calculate_temporary_basket_atomic_transaction', active=True)
     @override_switch('debug_logging_predates_is_anonymous', active=True)
     def test_basket_calculate_anonymous_caching(self, mock_calculate_basket, mocked_logger):
         """Verify a request made with the is_anonymous parameter is cached"""
@@ -630,6 +631,7 @@ class BasketCalculateViewTests(ProgramTestMixin, TestCase):
     @mock.patch('ecommerce.extensions.api.v2.views.baskets.logger.warning')
     @mock.patch('ecommerce.extensions.api.v2.views.baskets.BasketCalculateView._calculate_temporary_basket')
     @override_flag('use_cached_basket_calculate_for_marketing_user', active=True)
+    @override_flag('disable_calculate_temporary_basket_atomic_transaction', active=True)
     @override_switch("debug_logging_predates_is_anonymous", active=True)
     def test_no_query_params_log(self, mock_calculate_basket, mocked_logger):
         """
@@ -671,6 +673,7 @@ class BasketCalculateViewTests(ProgramTestMixin, TestCase):
     @httpretty.activate
     @mock.patch('ecommerce.extensions.api.v2.views.baskets.BasketCalculateView._calculate_temporary_basket')
     @override_flag('use_cached_basket_calculate_for_marketing_user', active=False)
+    @override_flag('disable_calculate_temporary_basket_atomic_transaction', active=True)
     def test_basket_calculate_with_anonymous_caching_disabled(self, mock_calculate_basket):
         """Verify a request made by the Marketing Staff user is not cached"""
         expected = {'Test Succeeded': True}
@@ -686,6 +689,19 @@ class BasketCalculateViewTests(ProgramTestMixin, TestCase):
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
         self.assertTrue(mock_calculate_basket.called, msg='The cache should be missed.')
+        self.assertEqual(response.data, expected)
+
+    @httpretty.activate
+    @mock.patch('ecommerce.extensions.api.v2.views.baskets.BasketCalculateView._calculate_temporary_basket_atomic')
+    @override_flag('disable_calculate_temporary_basket_atomic_transaction', active=False)
+    def test_basket_calculate_with_atomic_transaction(self, mock_calculate_basket_atomic):
+        """Verify a request that should calculate with the atomic transaction code does so."""
+        expected = {'Test Succeeded': True}
+        mock_calculate_basket_atomic.return_value = {'Test Succeeded': True}
+
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(mock_calculate_basket_atomic.called)
         self.assertEqual(response.data, expected)
 
     @httpretty.activate
