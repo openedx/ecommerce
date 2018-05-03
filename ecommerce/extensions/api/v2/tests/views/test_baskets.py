@@ -456,21 +456,7 @@ class BasketCalculateViewTests(ProgramTestMixin, TestCase):
     @mock.patch('ecommerce.programs.conditions.ProgramCourseRunSeatsCondition._get_lms_resource_for_user')
     def test_basket_calculate_by_staff_user_other_username(self, mock_get_lms_resource_for_user):
         """Verify a staff user passing a valid username gets a response about the other user"""
-        self.site_configuration.enable_partial_program = True
-        self.site_configuration.save()
-        offer = ProgramOfferFactory(
-            site=self.site,
-            benefit=PercentageDiscountBenefitWithoutRangeFactory(value=100),
-            condition=ProgramCourseRunSeatsConditionFactory()
-        )
-        program_uuid = offer.condition.program_uuid
-        program = self.mock_program_detail_endpoint(program_uuid, self.site_configuration.discovery_api_url)
-        differentuser = self.create_user(username='differentuser', is_staff=False)
-
-        products = self._get_program_verified_seats(program)
-        url = self._generate_sku_url(products, username=differentuser.username)
-        enrollment = [{'mode': 'verified', 'course_details': {'course_id': program['courses'][0]['key']}}]
-        self.mock_user_data(differentuser.username, owned_products=enrollment)
+        products, url = self.setup_other_user_basket_calculate()
 
         expected = {
             'total_incl_tax_excl_discounts': sum(product.stockrecords.first().price_excl_tax
@@ -485,6 +471,82 @@ class BasketCalculateViewTests(ProgramTestMixin, TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data, expected)
+
+    @httpretty.activate
+    @mock.patch('ecommerce.extensions.api.v2.views.baskets.logger.exception')
+    @mock.patch('ecommerce.programs.conditions.ProgramCourseRunSeatsCondition._get_lms_resource_for_user')
+    @override_flag('disable_calculate_temporary_basket_atomic_transaction', active=True)
+    def test_basket_calculate_by_staff_user_other_username_non_atomic(
+            self, mock_get_lms_resource_for_user, mock_logger
+    ):
+        """
+        Verify a staff user passing a valid username gets a response about the
+        other user when using the non-atomic version of basket calculate.
+        """
+        products, url = self.setup_other_user_basket_calculate()
+
+        expected = {
+            'total_incl_tax_excl_discounts': sum(product.stockrecords.first().price_excl_tax
+                                                 for product in products),
+            'total_incl_tax': Decimal('0.00'),
+            'currency': 'USD'
+        }
+
+        response = self.client.get(url)
+
+        self.assertTrue(mock_get_lms_resource_for_user.called, msg='LMS calls should be made for non-anonymous case.')
+        self.assertFalse(mock_logger.called, msg='No message should be logged when there is no exception.')
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data, expected)
+
+    @httpretty.activate
+    @mock.patch('ecommerce.extensions.api.v2.views.baskets.logger.exception')
+    @mock.patch('ecommerce.programs.conditions.ProgramCourseRunSeatsCondition._get_lms_resource_for_user')
+    @override_flag('disable_calculate_temporary_basket_atomic_transaction', active=True)
+    def test_basket_calculate_by_staff_user_other_username_non_atomic_exception(
+            self, mock_get_lms_resource_for_user, mock_logger
+    ):
+        """
+        Verify logging occurs when an exception happens when a staff user
+        passing a valid username gets a response about the other user when
+        using the non-atomic version of basket calculate.
+        """
+        _, url = self.setup_other_user_basket_calculate()
+
+        mock_get_lms_resource_for_user.side_effect = Exception('Forced exception to test logging.')
+
+        with self.assertRaises(Exception):
+            self.client.get(url)
+
+        self.assertTrue(mock_get_lms_resource_for_user.called, msg='LMS calls should be made for non-anonymous case.')
+        self.assertTrue(mock_logger.called, msg='A message should have been logged for the exception.')
+
+    def setup_other_user_basket_calculate(self):
+        """
+        Sets up basket calculate for another user.
+
+        Returns:
+            products, url: The product list and the url for the anonymous basket
+                calculate.
+        """
+        self.site_configuration.enable_partial_program = True
+        self.site_configuration.save()
+        offer = ProgramOfferFactory(
+            site=self.site,
+            benefit=PercentageDiscountBenefitWithoutRangeFactory(value=100),
+            condition=ProgramCourseRunSeatsConditionFactory()
+        )
+        program_uuid = offer.condition.program_uuid
+        program = self.mock_program_detail_endpoint(program_uuid, self.site_configuration.discovery_api_url)
+        different_user = self.create_user(username='different_user', is_staff=False)
+
+        products = self._get_program_verified_seats(program)
+        url = self._generate_sku_url(products, username=different_user.username)
+        enrollment = [{'mode': 'verified', 'course_details': {'course_id': program['courses'][0]['key']}}]
+        self.mock_user_data(different_user.username, owned_products=enrollment)
+
+        return products, url
 
     @httpretty.activate
     @mock.patch('ecommerce.programs.conditions.ProgramCourseRunSeatsCondition._get_lms_resource_for_user')
@@ -558,8 +620,9 @@ class BasketCalculateViewTests(ProgramTestMixin, TestCase):
     @mock.patch('ecommerce.extensions.api.v2.views.baskets.logger.warning')
     @mock.patch('ecommerce.extensions.api.v2.views.baskets.BasketCalculateView._calculate_temporary_basket')
     @override_flag('use_cached_basket_calculate_for_marketing_user', active=True)
+    @override_flag('disable_calculate_temporary_basket_atomic_transaction', active=True)
     @override_switch('debug_logging_predates_is_anonymous', active=True)
-    def test_basket_calculate_anonymous_caching(self, mock_calculate_basket, mocked_logger):
+    def test_basket_calculate_anonymous_caching(self, mock_calculate_basket, mock_logger):
         """Verify a request made with the is_anonymous parameter is cached"""
         url_with_one_sku = self._generate_sku_url(self.products, number_of_products=1, username=None)
         url_with_two_skus = self._generate_sku_url(self.products, number_of_products=2, username=None)
@@ -623,15 +686,16 @@ class BasketCalculateViewTests(ProgramTestMixin, TestCase):
         response = self.client.get(url_with_one_sku_no_anon)
         self.assertEqual(response.status_code, 200)
         self.assertFalse(mock_calculate_basket.called, msg='The cache should be hit.')
-        self.assertTrue(mocked_logger.called)
+        self.assertTrue(mock_logger.called)
         self.assertEqual(response.data, expected)
 
     @httpretty.activate
     @mock.patch('ecommerce.extensions.api.v2.views.baskets.logger.warning')
     @mock.patch('ecommerce.extensions.api.v2.views.baskets.BasketCalculateView._calculate_temporary_basket')
     @override_flag('use_cached_basket_calculate_for_marketing_user', active=True)
+    @override_flag('disable_calculate_temporary_basket_atomic_transaction', active=True)
     @override_switch("debug_logging_predates_is_anonymous", active=True)
-    def test_no_query_params_log(self, mock_calculate_basket, mocked_logger):
+    def test_no_query_params_log(self, mock_calculate_basket, mock_logger):
         """
         Verify that when the request contains neither a username parameter or is_anonymous a Warning is logged and
         response is valid.
@@ -648,7 +712,7 @@ class BasketCalculateViewTests(ProgramTestMixin, TestCase):
         response = self.client.get(url_with_one_sku)
         self.assertEqual(response.status_code, 200)
         self.assertTrue(mock_calculate_basket.called)
-        self.assertTrue(mocked_logger.called)
+        self.assertTrue(mock_logger.called)
         self.assertEqual(response.data, expected)
 
     @httpretty.activate
@@ -671,8 +735,9 @@ class BasketCalculateViewTests(ProgramTestMixin, TestCase):
     @httpretty.activate
     @mock.patch('ecommerce.extensions.api.v2.views.baskets.BasketCalculateView._calculate_temporary_basket')
     @override_flag('use_cached_basket_calculate_for_marketing_user', active=False)
+    @override_flag('disable_calculate_temporary_basket_atomic_transaction', active=True)
     def test_basket_calculate_with_anonymous_caching_disabled(self, mock_calculate_basket):
-        """Verify a request made by the Marketing Staff user is not cached"""
+        """Verify a request made by a staff user is not cached"""
         expected = {'Test Succeeded': True}
         mock_calculate_basket.return_value = {'Test Succeeded': True}
 
@@ -689,10 +754,23 @@ class BasketCalculateViewTests(ProgramTestMixin, TestCase):
         self.assertEqual(response.data, expected)
 
     @httpretty.activate
+    @mock.patch('ecommerce.extensions.api.v2.views.baskets.BasketCalculateView._calculate_temporary_basket_atomic')
+    @override_flag('disable_calculate_temporary_basket_atomic_transaction', active=False)
+    def test_basket_calculate_with_atomic_transaction(self, mock_calculate_basket_atomic):
+        """Verify a request that should calculate with the atomic transaction code does so."""
+        expected = {'Test Succeeded': True}
+        mock_calculate_basket_atomic.return_value = {'Test Succeeded': True}
+
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(mock_calculate_basket_atomic.called)
+        self.assertEqual(response.data, expected)
+
+    @httpretty.activate
     @mock.patch('ecommerce.programs.conditions.ProgramCourseRunSeatsCondition._get_lms_resource_for_user')
     @mock.patch('ecommerce.extensions.api.v2.views.baskets.logger.exception')
     @override_switch('debug_logging_predates_is_anonymous', active=True)
-    def test_basket_calculate_by_staff_user_invalid_username(self, mock_get_lms_resource_for_user, mocked_logger):
+    def test_basket_calculate_by_staff_user_invalid_username(self, mock_get_lms_resource_for_user, mock_logger):
         """Verify that a staff user passing an invalid username gets a response the anonymous
             basket and an error is logged about a non existent user """
         self.site_configuration.enable_partial_program = True
@@ -723,7 +801,7 @@ class BasketCalculateViewTests(ProgramTestMixin, TestCase):
             )
 
             self.assertEqual(response.status_code, 200)
-            self.assertTrue(mocked_logger.called)
+            self.assertTrue(mock_logger.called)
             self.assertEqual(response.data, expected)
 
     @httpretty.activate
@@ -747,13 +825,13 @@ class BasketCalculateViewTests(ProgramTestMixin, TestCase):
 
     @mock.patch('ecommerce.extensions.basket.models.Basket.add_product', mock.Mock(side_effect=Exception))
     @mock.patch('ecommerce.extensions.api.v2.views.baskets.logger.exception')
-    def test_exception_log(self, mocked_logger):
+    def test_exception_log(self, mock_logger):
         """A log entry is filed when an exception happens."""
         voucher, _ = prepare_voucher(_range=self.range, benefit_type=Benefit.FIXED, benefit_value=5)
 
         with self.assertRaises(Exception):
             self.client.get(self.url + '&code={code}'.format(code=voucher.code))
-            self.assertTrue(mocked_logger.called)
+            self.assertTrue(mock_logger.called)
 
     @mock.patch('ecommerce.extensions.api.v2.views.baskets.get_entitlement_voucher')
     def test_basket_calculate_entitlement_voucher(self, mock_get_entitlement_voucher):
