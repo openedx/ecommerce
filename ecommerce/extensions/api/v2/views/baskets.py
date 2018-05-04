@@ -342,7 +342,7 @@ class BasketCalculateView(generics.GenericAPIView):
     permission_classes = (IsAuthenticated,)
     MARKETING_USER = 'marketing_site_worker'
 
-    def _calculate_temporary_basket(self, user, request, products, voucher, skus, code):
+    def _calculate_temporary_basket_atomic(self, user, request, products, voucher, skus, code):
         response = None
         try:
             # We wrap this in an atomic operation so we never commit this to the db.
@@ -380,6 +380,46 @@ class BasketCalculateView(generics.GenericAPIView):
                 skus, code
             )
             raise
+        return response
+
+    def _calculate_temporary_basket(self, user, request, products, voucher, skus, code):
+        response = None
+        basket = None
+
+        try:
+            basket = Basket(owner=user, site=request.site)
+            basket.strategy = Selector().strategy(user=user)
+
+            for product in products:
+                basket.add_product(product, 1)
+
+            if voucher:
+                basket.vouchers.add(voucher)
+
+            # Calculate any discounts on the basket.
+            Applicator().apply(basket, user=user, request=request)
+
+            discounts = []
+            if basket.offer_discounts:
+                discounts = basket.offer_discounts
+            if basket.voucher_discounts:
+                discounts.extend(basket.voucher_discounts)
+
+            response = {
+                'total_incl_tax_excl_discounts': basket.total_incl_tax_excl_discounts,
+                'total_incl_tax': basket.total_incl_tax,
+                'currency': basket.currency
+            }
+        except:  # pylint: disable=bare-except
+            logger.exception(
+                'Failed to calculate basket discount for SKUs [%s] and voucher [%s].',
+                skus, code
+            )
+            raise
+        finally:
+            if basket:
+                basket.delete()
+
         return response
 
     def get(self, request):
@@ -480,7 +520,10 @@ class BasketCalculateView(generics.GenericAPIView):
                 if basket_calculate_results:
                     return Response(basket_calculate_results)
 
-        response = self._calculate_temporary_basket(basket_owner, request, products, voucher, skus, code)
+        if waffle.flag_is_active(request, "disable_calculate_temporary_basket_atomic_transaction"):
+            response = self._calculate_temporary_basket(basket_owner, request, products, voucher, skus, code)
+        else:
+            response = self._calculate_temporary_basket_atomic(basket_owner, request, products, voucher, skus, code)
 
         if response and use_default_basket:
             cache.set(cache_key, response, settings.ANONYMOUS_BASKET_CALCULATE_CACHE_TIMEOUT)
