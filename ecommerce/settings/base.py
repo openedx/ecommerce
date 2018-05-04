@@ -253,6 +253,9 @@ CREDIT_PROVIDER_CACHE_TIMEOUT = 600
 # Anonymous User Calculate Cache timeout
 ANONYMOUS_BASKET_CALCULATE_CACHE_TIMEOUT = 3600  # Value is in seconds.
 
+# 
+BASKET_SWTICH_DATA_CACHE_TIMEOUT = 3600
+
 # LMS API settings used for fetching information from LMS
 LMS_API_CACHE_TIMEOUT = 30  # Value is in seconds.
 # END URL CONFIGURATION

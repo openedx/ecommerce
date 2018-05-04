@@ -32,7 +32,6 @@ from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.enterprise.tests.mixins import EnterpriseServiceMockMixin
 from ecommerce.entitlements.utils import create_or_update_course_entitlement
 from ecommerce.extensions.analytics.utils import translate_basket_line_for_segment
-from ecommerce.extensions.basket.utils import get_basket_switch_data
 from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
 from ecommerce.extensions.offer.utils import format_benefit_value
 from ecommerce.extensions.order.utils import UserAlreadyPlacedOrder
@@ -372,9 +371,9 @@ class BasketSummaryViewTests(EnterpriseServiceMockMixin, DiscoveryTestMixin, Dis
         seat_sku = StockRecord.objects.get(product=seat).partner_sku
         ec_sku = StockRecord.objects.get(product=enrollment_code).partner_sku
 
-        __, partner_sku = get_basket_switch_data(seat)
+        __, partner_sku = seat.basket_switch_data
         self.assertEqual(partner_sku, ec_sku)
-        __, partner_sku = get_basket_switch_data(enrollment_code)
+        __, partner_sku = enrollment_code.basket_switch_data
         self.assertEqual(partner_sku, seat_sku)
 
     @ddt.data(

@@ -119,42 +119,6 @@ def prepare_basket(request, products, voucher=None):
     return basket
 
 
-def get_basket_switch_data(product):
-    structure = product.structure
-    switch_link_text = None
-
-    if product.is_enrollment_code_product:
-        switch_link_text = _('Click here to just purchase an enrollment for yourself')
-        structure = 'child'
-    elif product.is_seat_product:
-        switch_link_text = _('Click here to purchase multiple seats in this course')
-        structure = 'standalone'
-
-    stock_records = StockRecord.objects.filter(
-        product__course_id=product.course_id,
-        product__structure=structure
-    )
-
-    # Determine the proper partner SKU to embed in the single/multiple basket switch link
-    # The logic here is a little confusing.  "Seat" products have "certificate_type" attributes, and
-    # "Enrollment Code" products have "seat_type" attributes.  If the basket is in single-purchase
-    # mode, we are working with a Seat product and must present the 'buy multiple' switch link and
-    # SKU from the corresponding Enrollment Code product.  If the basket is in multi-purchase mode,
-    # we are working with an Enrollment Code product and must present the 'buy single' switch link
-    # and SKU from the corresponding Seat product.
-    partner_sku = None
-    product_cert_type = getattr(product.attr, 'certificate_type', None)
-    product_seat_type = getattr(product.attr, 'seat_type', None)
-    for stock_record in stock_records:
-        stock_record_cert_type = getattr(stock_record.product.attr, 'certificate_type', None)
-        stock_record_seat_type = getattr(stock_record.product.attr, 'seat_type', None)
-        if (product_seat_type and product_seat_type == stock_record_cert_type) or \
-           (product_cert_type and product_cert_type == stock_record_seat_type):
-            partner_sku = stock_record.partner_sku
-            break
-    return switch_link_text, partner_sku
-
-
 def attribute_cookie_data(basket, request):
     try:
         with transaction.atomic():

@@ -1,16 +1,24 @@
+import waffle
+from django.conf import settings
+from django.core.cache import cache
 from django.db import models
 from django.db.models.signals import post_init, post_save
 from django.dispatch import receiver
+from django.utils.functional import cached_property
 from django.utils.translation import ugettext_lazy as _
 from oscar.apps.catalogue.abstract_models import AbstractProduct
+from oscar.core.loading import get_model
 
+from ecommerce.core.cache_utils import CACHE_MISS, safe_cache_get
 from ecommerce.core.constants import (
     COUPON_PRODUCT_CLASS_NAME,
     COURSE_ENTITLEMENT_PRODUCT_CLASS_NAME,
     ENROLLMENT_CODE_PRODUCT_CLASS_NAME,
     SEAT_PRODUCT_CLASS_NAME
 )
-from ecommerce.core.utils import log_message_and_raise_validation_error
+from ecommerce.core.utils import get_cache_key, log_message_and_raise_validation_error
+
+StockRecord = get_model('partner', 'StockRecord')
 
 
 class Product(AbstractProduct):
@@ -36,6 +44,55 @@ class Product(AbstractProduct):
     @property
     def is_coupon_product(self):
         return self.get_product_class().name == COUPON_PRODUCT_CLASS_NAME
+
+    @cached_property
+    def basket_switch_data(self):
+        if waffle.switch_is_active("CACHE_BASKET_SWITCH_DATA_FOR_PRODUCT"):
+            cache_key = get_cache_key(
+                resource='basket_switch_data',
+                product_id=self.id,
+            )
+            switch_data = safe_cache_get(cache_key)
+            if switch_data is CACHE_MISS:
+                switch_data = self._get_basket_switch_data()
+                cache.set(cache_key, switch_data, settings.BASKET_SWTICH_DATA_CACHE_TIMEOUT)
+            return switch_data
+        else:
+            return self._get_basket_switch_data()
+
+    def _get_basket_switch_data(self):
+        structure = str(self.structure)
+        switch_link_text = None
+        if self.is_enrollment_code_product:
+            switch_link_text = _('Click here to just purchase an enrollment for yourself')
+            structure = 'child'
+        elif self.is_seat_product:
+            switch_link_text = _('Click here to purchase multiple seats in this course')
+            structure = 'standalone'
+
+        stock_records = StockRecord.objects.filter(
+            product__course_id=self.course_id,
+            product__structure=structure
+        )
+
+        # Determine the proper partner SKU to embed in the single/multiple basket switch link
+        # The logic here is a little confusing.  "Seat" products have "certificate_type" attributes, and
+        # "Enrollment Code" products have "seat_type" attributes.  If the basket is in single-purchase
+        # mode, we are working with a Seat product and must present the 'buy multiple' switch link and
+        # SKU from the corresponding Enrollment Code product.  If the basket is in multi-purchase mode,
+        # we are working with an Enrollment Code product and must present the 'buy single' switch link
+        # and SKU from the corresponding Seat product.
+        partner_sku = None
+        product_cert_type = getattr(self.attr, 'certificate_type', None)
+        product_seat_type = getattr(self.attr, 'seat_type', None)
+        for stock_record in stock_records:
+            stock_record_cert_type = getattr(stock_record.product.attr, 'certificate_type', None)
+            stock_record_seat_type = getattr(stock_record.product.attr, 'seat_type', None)
+            if (product_seat_type and product_seat_type == stock_record_cert_type) or \
+               (product_cert_type and product_cert_type == stock_record_seat_type):
+                partner_sku = stock_record.partner_sku
+                break
+        return switch_link_text, partner_sku
 
     def save(self, *args, **kwargs):
         try:
