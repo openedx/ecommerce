@@ -57,6 +57,15 @@ clean:
 clean_static:
 	rm -rf assets/* ecommerce/static/build/*
 
+run_isort:
+	VIRTUAL_ENV=/edx/app/ecommerce/ecommerce_env isort --check-only --recursive e2e/ ecommerce/
+
+run_pep8:
+	pep8 --config=.pep8 ecommerce e2e
+
+run_pylint:
+	pylint -j 0 --rcfile=pylintrc ecommerce e2e
+
 quality:
 	VIRTUAL_ENV=/edx/app/ecommerce/ecommerce_env isort --check-only --recursive e2e/ ecommerce/
 	pep8 --config=.pep8 ecommerce e2e
@@ -67,8 +76,8 @@ validate_js:
 	$(NODE_BIN)/gulp test
 	$(NODE_BIN)/gulp lint
 
-validate_python: clean quality
-	PATH=$$PATH:$(NODE_BIN) REUSE_DB=1 coverage run --branch --source=ecommerce ./manage.py test ecommerce \
+validate_python: clean
+	DISABLE_MIGRATIONS=1 PATH=$$PATH:$(NODE_BIN) REUSE_DB=1 coverage run --branch --source=ecommerce ./manage.py test ecommerce \
 	--settings=ecommerce.settings.test --with-ignore-docstrings --logging-level=DEBUG
 	coverage report
 
@@ -76,7 +85,7 @@ fast_validate_python: clean quality
 	REUSE_DB=1 DISABLE_ACCEPTANCE_TESTS=True ./manage.py test ecommerce \
 	--settings=ecommerce.settings.test --processes=4 --with-ignore-docstrings --logging-level=DEBUG
 
-validate: validate_python validate_js
+validate: validate_python validate_js quality
 
 theme_static:
 	python manage.py update_assets --skip-collect
