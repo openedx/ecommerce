@@ -231,6 +231,7 @@ MIDDLEWARE_CLASSES = (
     'threadlocals.middleware.ThreadLocalMiddleware',
     'ecommerce.theming.middleware.CurrentSiteThemeMiddleware',
     'ecommerce.theming.middleware.ThemePreviewMiddleware',
+    'ecommerce.cache_utils.middleware.CacheUtilsMiddleware'
 )
 # END MIDDLEWARE CONFIGURATION
 
