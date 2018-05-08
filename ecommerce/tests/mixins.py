@@ -255,6 +255,7 @@ class SiteMixin(object):
         domain = 'testserver.fake'
         self.client = self.client_class(SERVER_NAME=domain)
 
+        Partner.objects.all().delete()
         Site.objects.all().delete()
         self.site_configuration = SiteConfigurationFactory(
             from_email='from@example.com',
