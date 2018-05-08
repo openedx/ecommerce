@@ -5,6 +5,7 @@ import operator
 
 import waffle
 from django.conf import settings
+from django.core.cache import cache
 from oscar.apps.offer import utils as oscar_utils
 from oscar.core.loading import get_model
 from requests.exceptions import ConnectionError, Timeout
@@ -52,7 +53,10 @@ class ProgramCourseRunSeatsCondition(SingleItemConsumptionConditionMixin, Condit
             resource=resource_name,
             username=basket.owner.username,
         )
-        data_list = TieredCache.get_value_or_cache_miss(cache_key)
+        if waffle.switch_is_active('use_request_cache_for_getting_lms_resource'):
+            data_list = TieredCache.get_value_or_cache_miss(cache_key)  # pragma: no cover
+        else:
+            data_list = cache.get(cache_key, CACHE_MISS)
         if data_list is CACHE_MISS:
             data_list = None
             user = basket.owner.username
@@ -60,7 +64,11 @@ class ProgramCourseRunSeatsCondition(SingleItemConsumptionConditionMixin, Condit
                 if waffle.switch_is_active("debug_logging_for_excessive_lms_calls"):
                     logger.warning("_get_lms_resource_for_user called for username=[%s]", user)  # pragma: no cover
                 data_list = endpoint.get(user=user)
-                TieredCache.set_all_tiers(cache_key, data_list, settings.LMS_API_CACHE_TIMEOUT)
+
+                if waffle.switch_is_active('use_request_cache_for_getting_lms_resource'):
+                    TieredCache.set_all_tiers(cache_key, data_list, settings.LMS_API_CACHE_TIMEOUT)  # pragma: no cover
+                else:
+                    cache.set(cache_key, data_list, settings.LMS_API_CACHE_TIMEOUT)
             except (ConnectionError, SlumberBaseException, Timeout) as exc:
                 logger.error('Failed to retrieve %s : %s', resource_name, str(exc))
         return data_list if data_list else []
