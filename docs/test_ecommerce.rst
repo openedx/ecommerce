@@ -101,6 +101,12 @@ these models, which are used for multi-tenancy.
       ecommerce.courses.tests.test_utils --settings=ecommerce.settings.test
       --with-ignore-docstrings --logging-level=DEBUG
 
+* To run tests without creating a database (i.e. really fast), use pytest.
+  If a test has a database dependency, the test will not pass.
+
+  .. code-block:: bash
+
+      $ pytest path_to_test
 
 JavaScript Unit Tests
 **********************
