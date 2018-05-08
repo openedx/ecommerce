@@ -45,6 +45,7 @@ class ProgramCourseRunSeatsCondition(SingleItemConsumptionConditionMixin, Condit
                         program_skus.add(entitlement['sku'])
         return program_skus
 
+
     def _get_lms_resource_for_user(self, basket, resource_name, endpoint):
         cache_key = get_cache_key(
             site_domain=basket.site.domain,
