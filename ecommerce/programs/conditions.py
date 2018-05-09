@@ -61,8 +61,6 @@ class ProgramCourseRunSeatsCondition(SingleItemConsumptionConditionMixin, Condit
             data_list = None
             user = basket.owner.username
             try:
-                if waffle.switch_is_active("debug_logging_for_excessive_lms_calls"):
-                    logger.warning("_get_lms_resource_for_user called for username=[%s]", user)  # pragma: no cover
                 data_list = endpoint.get(user=user)
 
                 if waffle.switch_is_active('use_request_cache_for_getting_lms_resource'):
