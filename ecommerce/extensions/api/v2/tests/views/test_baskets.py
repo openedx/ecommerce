@@ -619,7 +619,6 @@ class BasketCalculateViewTests(ProgramTestMixin, TestCase):
     @httpretty.activate
     @mock.patch('ecommerce.extensions.api.v2.views.baskets.logger.warning')
     @mock.patch('ecommerce.extensions.api.v2.views.baskets.BasketCalculateView._calculate_temporary_basket')
-    @override_flag('use_cached_basket_calculate_for_marketing_user', active=True)
     @override_flag('disable_calculate_temporary_basket_atomic_transaction', active=True)
     @override_switch('debug_logging_predates_is_anonymous', active=True)
     def test_basket_calculate_anonymous_caching(self, mock_calculate_basket, mock_logger):
@@ -692,7 +691,6 @@ class BasketCalculateViewTests(ProgramTestMixin, TestCase):
     @httpretty.activate
     @mock.patch('ecommerce.extensions.api.v2.views.baskets.logger.warning')
     @mock.patch('ecommerce.extensions.api.v2.views.baskets.BasketCalculateView._calculate_temporary_basket')
-    @override_flag('use_cached_basket_calculate_for_marketing_user', active=True)
     @override_flag('disable_calculate_temporary_basket_atomic_transaction', active=True)
     @override_switch("debug_logging_predates_is_anonymous", active=True)
     def test_no_query_params_log(self, mock_calculate_basket, mock_logger):
@@ -717,7 +715,6 @@ class BasketCalculateViewTests(ProgramTestMixin, TestCase):
 
     @httpretty.activate
     @mock.patch('ecommerce.extensions.api.v2.views.baskets.BasketCalculateView._calculate_temporary_basket')
-    @override_flag('use_cached_basket_calculate_for_marketing_user', active=True)
     def test_conflicting_user_anonymous_params(self, mock_calculate_basket):
         """
         Verify that when the request contains both a username and an is_anonymous parameter, a Bad Request response
@@ -734,7 +731,6 @@ class BasketCalculateViewTests(ProgramTestMixin, TestCase):
 
     @httpretty.activate
     @mock.patch('ecommerce.extensions.api.v2.views.baskets.BasketCalculateView._calculate_temporary_basket')
-    @override_flag('use_cached_basket_calculate_for_marketing_user', active=False)
     @override_flag('disable_calculate_temporary_basket_atomic_transaction', active=True)
     def test_basket_calculate_with_anonymous_caching_disabled(self, mock_calculate_basket):
         """Verify a request made by a staff user is not cached"""

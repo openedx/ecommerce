@@ -518,10 +518,9 @@ class BasketCalculateView(generics.GenericAPIView):
                 resource_name='calculate',
                 skus=skus
             )
-            if waffle.flag_is_active(request, "use_cached_basket_calculate_for_marketing_user"):
-                basket_calculate_results = cache.get(cache_key)
-                if basket_calculate_results:
-                    return Response(basket_calculate_results)
+            basket_calculate_results = cache.get(cache_key)
+            if basket_calculate_results:
+                return Response(basket_calculate_results)
 
         if waffle.flag_is_active(request, "disable_calculate_temporary_basket_atomic_transaction"):
             response = self._calculate_temporary_basket(basket_owner, request, products, voucher, skus, code)
