@@ -446,7 +446,6 @@ class BasketCalculateViewTests(ProgramTestMixin, TestCase):
         self.assertEqual(response.status_code, 200)
 
     @httpretty.activate
-    @override_switch("debug_logging_for_excessive_lms_calls", active=True)
     def test_basket_calculate_by_staff_user_own_username(self):
         """Verify a staff user passing their own username gets a response about themself"""
         response = self.client.get(self.url + '&username={username}'.format(username=self.user.username))
