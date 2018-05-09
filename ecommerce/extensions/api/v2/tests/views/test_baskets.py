@@ -550,7 +550,6 @@ class BasketCalculateViewTests(ProgramTestMixin, TestCase):
 
     @httpretty.activate
     @mock.patch('ecommerce.programs.conditions.ProgramCourseRunSeatsCondition._get_lms_resource_for_user')
-    @override_flag("use_basket_calculate_none_user", active=True)
     def test_basket_calculate_anonymous_skip_lms(self, mock_get_lms_resource_for_user):
         """Verify a call for an anonymous user skips calls to LMS for entitlements and enrollments"""
         products, url = self.setup_anonymous_basket_calculate()
@@ -565,30 +564,6 @@ class BasketCalculateViewTests(ProgramTestMixin, TestCase):
         response = self.client.get(url)
 
         self.assertFalse(mock_get_lms_resource_for_user.called, msg='LMS calls should be skipped for anonymous case.')
-
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.data, expected)
-
-    @httpretty.activate
-    @mock.patch('ecommerce.programs.conditions.ProgramCourseRunSeatsCondition._get_lms_resource_for_user')
-    @override_flag("use_basket_calculate_none_user", active=False)
-    def test_basket_calculate_anonymous_calls_lms(self, mock_get_lms_resource_for_user):
-        """
-        Verify a call for an anonymous user does not skip calls to LMS for entitlements and enrollments
-        when waffle flag is not set.
-        """
-        products, url = self.setup_anonymous_basket_calculate()
-
-        expected = {
-            'total_incl_tax_excl_discounts': sum(product.stockrecords.first().price_excl_tax
-                                                 for product in products),
-            'total_incl_tax': Decimal('0.00'),
-            'currency': 'USD'
-        }
-
-        response = self.client.get(url)
-
-        self.assertTrue(mock_get_lms_resource_for_user.called, msg='LMS calls should be skipped for anonymous case.')
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data, expected)
@@ -834,7 +809,7 @@ class BasketCalculateViewTests(ProgramTestMixin, TestCase):
         """ Verify successful basket calculation considering Enterprise entitlement vouchers """
 
         discount = 5
-        # Using ONCE_PER_CUSTOMER usage here because it fully excercises the Oscar Applicator code.
+        # Using ONCE_PER_CUSTOMER usage here because it fully exercises the Oscar Applicator code.
         voucher, _ = prepare_voucher(_range=self.range, benefit_type=Benefit.FIXED, benefit_value=discount,
                                      usage=Voucher.ONCE_PER_CUSTOMER)
         mock_get_entitlement_voucher.return_value = voucher
@@ -853,7 +828,7 @@ class BasketCalculateViewTests(ProgramTestMixin, TestCase):
 
         # If it's only one product, the entitlement voucher is applied
         product = self.products[0]
-        url = self._generate_sku_url(self.products, 1)
+        url = self._generate_sku_url(self.products, 1, username=self.user.username)
         product_total = product.stockrecords.first().price_excl_tax
 
         response = self.client.get(url)
@@ -867,7 +842,7 @@ class BasketCalculateViewTests(ProgramTestMixin, TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data, expected)
 
-    def _generate_sku_url(self, products, number_of_products=None, username=None, reverse_skus=False, ):
+    def _generate_sku_url(self, products, number_of_products=None, username=None, reverse_skus=False):
         """
         Generates the calculate basket view's url for the given products
 

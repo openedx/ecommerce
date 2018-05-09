@@ -506,8 +506,7 @@ class BasketCalculateView(generics.GenericAPIView):
             use_default_basket = True
 
         if use_default_basket:
-            if waffle.flag_is_active(request, "use_basket_calculate_none_user"):
-                basket_owner = None
+            basket_owner = None
 
         cache_key = None
         if use_default_basket:
