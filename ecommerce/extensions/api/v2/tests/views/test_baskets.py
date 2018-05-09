@@ -17,7 +17,7 @@ from oscar.core.loading import get_model
 from oscar.test import factories
 from oscar.test.factories import BasketFactory
 from rest_framework.throttling import UserRateThrottle
-from waffle.testutils import override_flag, override_switch
+from waffle.testutils import override_flag
 
 from ecommerce.courses.models import Course
 from ecommerce.extensions.api import exceptions as api_exceptions
@@ -591,11 +591,9 @@ class BasketCalculateViewTests(ProgramTestMixin, TestCase):
         return products, url
 
     @httpretty.activate
-    @mock.patch('ecommerce.extensions.api.v2.views.baskets.logger.warning')
     @mock.patch('ecommerce.extensions.api.v2.views.baskets.BasketCalculateView._calculate_temporary_basket')
     @override_flag('disable_calculate_temporary_basket_atomic_transaction', active=True)
-    @override_switch('debug_logging_predates_is_anonymous', active=True)
-    def test_basket_calculate_anonymous_caching(self, mock_calculate_basket, mock_logger):
+    def test_basket_calculate_anonymous_caching(self, mock_calculate_basket):
         """Verify a request made with the is_anonymous parameter is cached"""
         url_with_one_sku = self._generate_sku_url(self.products, number_of_products=1, username=None)
         url_with_two_skus = self._generate_sku_url(self.products, number_of_products=2, username=None)
@@ -659,14 +657,12 @@ class BasketCalculateViewTests(ProgramTestMixin, TestCase):
         response = self.client.get(url_with_one_sku_no_anon)
         self.assertEqual(response.status_code, 200)
         self.assertFalse(mock_calculate_basket.called, msg='The cache should be hit.')
-        self.assertTrue(mock_logger.called)
         self.assertEqual(response.data, expected)
 
     @httpretty.activate
     @mock.patch('ecommerce.extensions.api.v2.views.baskets.logger.warning')
     @mock.patch('ecommerce.extensions.api.v2.views.baskets.BasketCalculateView._calculate_temporary_basket')
     @override_flag('disable_calculate_temporary_basket_atomic_transaction', active=True)
-    @override_switch("debug_logging_predates_is_anonymous", active=True)
     def test_no_query_params_log(self, mock_calculate_basket, mock_logger):
         """
         Verify that when the request contains neither a username parameter or is_anonymous a Warning is logged and
@@ -739,7 +735,6 @@ class BasketCalculateViewTests(ProgramTestMixin, TestCase):
     @httpretty.activate
     @mock.patch('ecommerce.programs.conditions.ProgramCourseRunSeatsCondition._get_lms_resource_for_user')
     @mock.patch('ecommerce.extensions.api.v2.views.baskets.logger.exception')
-    @override_switch('debug_logging_predates_is_anonymous', active=True)
     def test_basket_calculate_by_staff_user_invalid_username(self, mock_get_lms_resource_for_user, mock_logger):
         """Verify that a staff user passing an invalid username gets a response the anonymous
             basket and an error is logged about a non existent user """

@@ -474,12 +474,9 @@ class BasketCalculateView(generics.GenericAPIView):
         if requested_username and is_anonymous:
             return HttpResponseBadRequest(_('Provide username or is_anonymous query param, but not both'))
         elif not requested_username and not is_anonymous:
-            if waffle.switch_is_active("debug_logging_predates_is_anonymous"):  # pragma: no cover
-                logger.warning(
-                    ('Request to Basket Calculate must supply either username or '
-                     'is_anonymous query param. Requesting user=[%s]'),
-                    basket_owner.username
-                )
+            logger.warning("Request to Basket Calculate must supply either username or is_anonymous query"
+                           " param. Requesting user=[%s]. Future versions of this API will treat this "
+                           "WARNING as an ERROR and raise an exception.")
 
         # If a username is passed in, validate that the user has staff access or is the same user.
         if requested_username:
@@ -493,8 +490,6 @@ class BasketCalculateView(generics.GenericAPIView):
                     # doesn't yet have an account in ecommerce. These users have
                     # never purchased before.
                     use_default_basket = True
-                    if waffle.switch_is_active("debug_logging_predates_is_anonymous"):  # pragma: no cover
-                        logger.warning('Request username: [%s] does not exist', requested_username)
             else:
                 return HttpResponseForbidden('Unauthorized user credentials')
 
