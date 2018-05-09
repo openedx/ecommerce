@@ -82,14 +82,13 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
             500 if an error occurs when attempting to create a coupon.
         """
         try:
+            try:
+                cleaned_voucher_data = self.clean_voucher_request_data(request)
+            except ValidationError as error:
+                logger.exception('Failed to create coupon. %s', error.message)
+                # FIXME This should ALWAYS return 400.
+                return Response(error.message, status=error.code or 400)
             with transaction.atomic():
-                try:
-                    cleaned_voucher_data = self.clean_voucher_request_data(request)
-                except ValidationError as error:
-                    logger.exception('Failed to create coupon. %s', error.message)
-                    # FIXME This should ALWAYS return 400.
-                    return Response(error.message, status=error.code or 400)
-
                 try:
                     coupon_product = create_coupon_product(
                         benefit_type=cleaned_voucher_data['benefit_type'],
