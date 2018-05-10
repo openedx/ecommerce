@@ -436,7 +436,7 @@ class BasketCalculateView(generics.GenericAPIView):
         Arguments:
             sku (string): A list of sku(s) to calculate
             code (string): Optional voucher code to apply to the basket.
-            username (string): Optional username of a user for which to caclulate the basket.
+            username (string): Optional username of a user for which to calculate the basket.
 
         Returns:
             JSON: {
@@ -468,6 +468,7 @@ class BasketCalculateView(generics.GenericAPIView):
         basket_owner = request.user
         requested_username = request.GET.get('username', default='')
         is_anonymous = request.GET.get('is_anonymous', 'false').lower() == 'true'
+
         use_default_basket = is_anonymous
 
         # validate query parameters
@@ -475,8 +476,8 @@ class BasketCalculateView(generics.GenericAPIView):
             return HttpResponseBadRequest(_('Provide username or is_anonymous query param, but not both'))
         elif not requested_username and not is_anonymous:
             logger.warning("Request to Basket Calculate must supply either username or is_anonymous query"
-                           " param. Requesting user=[%s]. Future versions of this API will treat this "
-                           "WARNING as an ERROR and raise an exception.")
+                           " param. Requesting user=%s. Future versions of this API will treat this "
+                           "WARNING as an ERROR and raise an exception.", basket_owner.username)
 
         # If a username is passed in, validate that the user has staff access or is the same user.
         if requested_username:

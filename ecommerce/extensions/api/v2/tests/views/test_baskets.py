@@ -321,7 +321,6 @@ class BasketCalculateViewTests(ProgramTestMixin, TestCase):
         self.path = reverse('api:v2:baskets:calculate')
         self.range = factories.RangeFactory(includes_all_products=True)
         self.product_total = sum(product.stockrecords.first().price_excl_tax for product in self.products)
-
         self.user = self._login_as_user(is_staff=True)
         self.url = self._generate_sku_url(self.products, username=self.user.username)
 
@@ -361,7 +360,7 @@ class BasketCalculateViewTests(ProgramTestMixin, TestCase):
         discount_value = 10.00
         benefit = factories.BenefitFactory(type=Benefit.PERCENTAGE, range=self.range, value=discount_value)
         condition = factories.ConditionFactory(value=3, range=self.range, type=Condition.COVERAGE)
-        factories.ConditionalOfferFactory(name='Test Offer', benefit=benefit, condition=condition,
+        factories.ConditionalOfferFactory(name=u'Test Offer', benefit=benefit, condition=condition,
                                           offer_type=ConditionalOffer.SITE,
                                           start_datetime=datetime.datetime.now() - datetime.timedelta(days=1),
                                           end_datetime=datetime.datetime.now() + datetime.timedelta(days=2))
@@ -551,7 +550,7 @@ class BasketCalculateViewTests(ProgramTestMixin, TestCase):
     @mock.patch('ecommerce.programs.conditions.ProgramCourseRunSeatsCondition._get_lms_resource_for_user')
     def test_basket_calculate_anonymous_skip_lms(self, mock_get_lms_resource_for_user):
         """Verify a call for an anonymous user skips calls to LMS for entitlements and enrollments"""
-        products, url = self.setup_anonymous_basket_calculate()
+        products, url = self._setup_anonymous_basket_calculate()
 
         expected = {
             'total_incl_tax_excl_discounts': sum(product.stockrecords.first().price_excl_tax
@@ -567,39 +566,14 @@ class BasketCalculateViewTests(ProgramTestMixin, TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data, expected)
 
-    def setup_anonymous_basket_calculate(self):
-        """
-        Sets up anonymous basket calculate.
-
-        Returns:
-            products, url: The product list and the url for the anonymous basket
-                calculate.
-        """
-        self.site_configuration.enable_partial_program = True
-        self.site_configuration.save()
-        offer = ProgramOfferFactory(
-            site=self.site,
-            benefit=PercentageDiscountBenefitWithoutRangeFactory(value=100),
-            condition=ProgramCourseRunSeatsConditionFactory()
-        )
-        program_uuid = offer.condition.program_uuid
-        program = self.mock_program_detail_endpoint(
-            program_uuid, self.site_configuration.discovery_api_url
-        )
-        products = self._get_program_verified_seats(program)
-        url = self._generate_sku_url(products, username=None)
-        return products, url
-
-    @httpretty.activate
     @mock.patch('ecommerce.extensions.api.v2.views.baskets.BasketCalculateView._calculate_temporary_basket')
     @override_flag('disable_calculate_temporary_basket_atomic_transaction', active=True)
     def test_basket_calculate_anonymous_caching(self, mock_calculate_basket):
         """Verify a request made with the is_anonymous parameter is cached"""
-        url_with_one_sku = self._generate_sku_url(self.products, number_of_products=1, username=None)
-        url_with_two_skus = self._generate_sku_url(self.products, number_of_products=2, username=None)
+        url_with_one_sku = self._generate_sku_url(self.products[0:1], username=None)
+        url_with_two_skus = self._generate_sku_url(self.products[0:2], username=None)
         url_with_two_skus_reversed = self._generate_sku_url(
-            self.products, number_of_products=2, username=None, reverse_skus=True
-        )
+            [self.products[0], self.products[1]], username=None)
 
         expected = {'Test Succeeded': True}
         mock_calculate_basket.return_value = expected
@@ -609,7 +583,6 @@ class BasketCalculateViewTests(ProgramTestMixin, TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTrue(mock_calculate_basket.called, msg='The cache should be missed.')
         self.assertEqual(response.data, expected)
-
         mock_calculate_basket.reset_mock()
 
         # Call BasketCalculate again to test that we get the Cached response
@@ -617,7 +590,6 @@ class BasketCalculateViewTests(ProgramTestMixin, TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertFalse(mock_calculate_basket.called, msg='The cache should be hit.')
         self.assertEqual(response.data, expected)
-
         mock_calculate_basket.reset_mock()
 
         # Check that setting the username parameter doesn't hit the cache
@@ -627,7 +599,6 @@ class BasketCalculateViewTests(ProgramTestMixin, TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTrue(mock_calculate_basket.called, msg='The cache should be missed.')
         self.assertEqual(response.data, expected)
-
         mock_calculate_basket.reset_mock()
 
         # Check that a different set of skus does not hit cache
@@ -635,7 +606,6 @@ class BasketCalculateViewTests(ProgramTestMixin, TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTrue(mock_calculate_basket.called, msg='The cache should be missed.')
         self.assertEqual(response.data, expected)
-
         mock_calculate_basket.reset_mock()
 
         # Check that this new set of skus hits cache, even when reversed
@@ -643,15 +613,14 @@ class BasketCalculateViewTests(ProgramTestMixin, TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertFalse(mock_calculate_basket.called, msg='The cache should be hit.')
         self.assertEqual(response.data, expected)
+        mock_calculate_basket.reset_mock()
 
         # Check that cache works and that log message is sent for Marketing user
         # Note: This and the following checks related to it should be removed once we remove
         # reliance on the Marketing user for caching.
         # TODO: LEARNER-5057
         self._login_as_user(username=BasketCalculateView.MARKETING_USER, is_staff=True)
-        url_with_one_sku_no_anon = url_with_one_sku.replace('&is_anonymous=true', '')
-
-        mock_calculate_basket.reset_mock()
+        url_with_one_sku_no_anon = self._generate_sku_url(self.products[0:1], add_query_params=False)
 
         # Call BasketCalculate again to test that we get the Cached response
         response = self.client.get(url_with_one_sku_no_anon)
@@ -675,8 +644,7 @@ class BasketCalculateViewTests(ProgramTestMixin, TestCase):
         expected = {'Test Succeeded': True}
         mock_calculate_basket.return_value = expected
 
-        url_with_one_sku = self._generate_sku_url(self.products, number_of_products=1)
-        url_with_one_sku = url_with_one_sku.replace('&is_anonymous=tRuE', '')
+        url_with_one_sku = self._generate_sku_url(self.products[0:1], add_query_params=False)
         response = self.client.get(url_with_one_sku)
         self.assertEqual(response.status_code, 200)
         self.assertTrue(mock_calculate_basket.called)
@@ -693,7 +661,7 @@ class BasketCalculateViewTests(ProgramTestMixin, TestCase):
         expected = {'Test Succeeded': True}
         mock_calculate_basket.return_value = expected
 
-        url_with_one_sku = self._generate_sku_url(self.products, number_of_products=1, username='different_user')
+        url_with_one_sku = self._generate_sku_url(self.products[0:1], username='different_user')
         url_with_one_sku += '&is_anonymous=true'
         response = self.client.get(url_with_one_sku)
         self.assertEqual(response.status_code, 400)
@@ -822,7 +790,7 @@ class BasketCalculateViewTests(ProgramTestMixin, TestCase):
 
         # If it's only one product, the entitlement voucher is applied
         product = self.products[0]
-        url = self._generate_sku_url(self.products, 1, username=self.user.username)
+        url = self._generate_sku_url(self.products[0:1], username=self.user.username)
         product_total = product.stockrecords.first().price_excl_tax
 
         response = self.client.get(url)
@@ -836,36 +804,58 @@ class BasketCalculateViewTests(ProgramTestMixin, TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data, expected)
 
-    def _generate_sku_url(self, products, number_of_products=None, username=None, reverse_skus=False):
+    def _setup_anonymous_basket_calculate(self):
+        """
+        Sets up anonymous basket calculate.
+
+        Returns:
+            products, url: The product list and the url for the anonymous basket
+                calculate.
+        """
+        self.site_configuration.enable_partial_program = True
+        self.site_configuration.save()
+        offer = ProgramOfferFactory(
+            site=self.site,
+            benefit=PercentageDiscountBenefitWithoutRangeFactory(value=100),
+            condition=ProgramCourseRunSeatsConditionFactory()
+        )
+        program_uuid = offer.condition.program_uuid
+        program = self.mock_program_detail_endpoint(
+            program_uuid, self.site_configuration.discovery_api_url
+        )
+        products = self._get_program_verified_seats(program)
+        url = self._generate_sku_url(products, username=None)
+        return products, url
+
+    def _generate_sku_url(self, products, username=None, add_query_params=True):
         """
         Generates the calculate basket view's url for the given products
 
         Args:
             products (list): A list of products
-            number_of_products (int): Number of given products to add in the url
             username (string, optional): Username to add in the url
+            add_query_params (bool, optional): Bool for adding identifying query parameters
         Returns:
             (string): Url with product skus and username appended as parameters
 
         """
-        if not number_of_products:
-            number_of_products = len(products)
-        sku_list = [product.stockrecords.first().partner_sku for product in products[:number_of_products]]
-        if reverse_skus:
-            sku_list = list(reversed(sku_list))
+        sku_list = [product.stockrecords.first().partner_sku for product in products]
         qs = urllib.urlencode(
             {'sku': sku_list},
             True
         )
         url = '{root}?{qs}'.format(root=self.path, qs=qs)
-        if username:
-            url += '&username={username}'.format(username=username)
-        else:
-            url += '&is_anonymous=tRuE'
+
+        if add_query_params:
+            if username:
+                url += '&username={username}'.format(username=username)
+            else:
+                url += '&is_anonymous=tRuE'
 
         return url
 
-    def _get_program_verified_seats(self, program):
+    @staticmethod
+    def _get_program_verified_seats(program):
         products = []
         for course in program['courses']:
             course_run = Course.objects.get(id=course['course_runs'][0]['key'])
