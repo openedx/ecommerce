@@ -35,7 +35,7 @@ class SiteConfiguration(models.Model):
     """
 
     site = models.OneToOneField('sites.Site', null=False, blank=False, on_delete=models.CASCADE)
-    partner = models.OneToOneField('partner.Partner', null=False, blank=False, on_delete=models.CASCADE)
+    partner = models.ForeignKey('partner.Partner', null=False, blank=False, on_delete=models.CASCADE)
     lms_url_root = models.URLField(
         verbose_name=_('LMS base url for custom site/microsite'),
         help_text=_("Root URL of this site's LMS (e.g. https://courses.stage.edx.org)"),

@@ -271,7 +271,8 @@ class SiteMixin(object):
             base_cookie_domain=domain,
         )
         self.partner = self.site_configuration.partner
-        self.site = self.site_configuration.site
+        self.partner.default_site = self.site = self.site_configuration.site
+        self.partner.save()
 
         self.request = RequestFactory(SERVER_NAME=domain).get('')
         self.request.session = None
