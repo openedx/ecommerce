@@ -52,7 +52,7 @@ class Command(BaseCommand):
         course_title = options['course_title']
         price = options['price']
         partner = Partner.objects.get(short_code=options['partner_code'])
-        site = partner.siteconfiguration.site
+        site = partner.default_site
         one_year = datetime.timedelta(days=365)
         expires = timezone.now() + one_year
 

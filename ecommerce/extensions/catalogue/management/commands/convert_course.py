@@ -53,7 +53,7 @@ class Command(BaseCommand):
         course_ids = map(unicode, self.options.get('course_ids', []))
 
         self.partner = Partner.objects.get(code__iexact=options['partner'])  # pylint: disable=attribute-defined-outside-init
-        site = self.partner.siteconfiguration.site
+        site = self.partner.default_site
         self._install_current_request(site)
 
         if options.get('direction') == HONOR_TO_AUDIT:

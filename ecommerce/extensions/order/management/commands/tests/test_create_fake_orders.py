@@ -26,7 +26,7 @@ class FakeOrdersTests(TestCase):
                     )
                 )
 
-    def test_site_configuration_does_not_exist(self):
+    def test_site_does_not_exist(self):
         partner = PartnerFactory()
         product = create_product()
         stockrecord = create_stockrecord(product=product, partner_name=partner.name)
@@ -37,13 +37,15 @@ class FakeOrdersTests(TestCase):
                     (
                         LOGGER_NAME,
                         'EXCEPTION',
-                        'No Site Configuration exists for partner {}!'.format(partner.id)
+                        'No default site exists for partner {}!'.format(partner.id)
                     )
                 )
 
     def test_create_fake_orders(self):
-        partner = PartnerFactory()
-        SiteConfigurationFactory(partner=partner)
+        site_configuration = SiteConfigurationFactory()
+        partner = site_configuration.partner
+        partner.default_site = site_configuration.site
+        partner.save()
         product = create_product()
         stockrecord = create_stockrecord(product=product, partner_name=partner.name)
         self.assertEqual(Order.objects.all().count(), 0)
