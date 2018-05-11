@@ -11,11 +11,11 @@ class CacheUtilsMiddleware(object):
     """
     def process_request(self, request):
         """
-        Stores whether or not 'force_django_cache_miss' was supplied in the
+        Stores whether or not FORCE_DJANGO_CACHE_MISS_KEY was supplied in the
         request. Also, clears the request cache.
         """
         RequestCache.clear()
-        TieredCache._get_and_set_force_django_cache_miss(request)  # pylint: disable=protected-access
+        TieredCache._get_and_set_force_cache_miss(request)  # pylint: disable=protected-access
 
     def process_response(self, request, response):  # pylint: disable=unused-argument
         """
