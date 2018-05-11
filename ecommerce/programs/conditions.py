@@ -47,29 +47,18 @@ class ProgramCourseRunSeatsCondition(SingleItemConsumptionConditionMixin, Condit
                         program_skus.add(entitlement['sku'])
         return program_skus
 
-    def _get_lms_resource_for_user(self, basket, resource_name, endpoint):
-        cache_key = get_cache_key(
-            site_domain=basket.site.domain,
-            resource=resource_name,
-            username=basket.owner.username,
-        )
-        if waffle.switch_is_active('use_request_cache_for_getting_lms_resource'):
-            data_list = TieredCache.get_value_or_cache_miss(cache_key)  # pragma: no cover
-        else:
-            data_list = cache.get(cache_key, CACHE_MISS)
-        if data_list is CACHE_MISS:
-            data_list = None
-            user = basket.owner.username
-            try:
-                data_list = endpoint.get(user=user)
+    from quickcache.django_quickcache import get_django_quickcache
+    quickcache = get_django_quickcache(memoize_timeout=20, timeout=5 * 60)
 
-                if waffle.switch_is_active('use_request_cache_for_getting_lms_resource'):
-                    TieredCache.set_all_tiers(cache_key, data_list, settings.LMS_API_CACHE_TIMEOUT)  # pragma: no cover
-                else:
-                    cache.set(cache_key, data_list, settings.LMS_API_CACHE_TIMEOUT)
-            except (ConnectionError, SlumberBaseException, Timeout) as exc:
-                logger.error('Failed to retrieve %s : %s', resource_name, str(exc))
-        return data_list if data_list else []
+    @quickcache(['resource_name', 'basket.site.domain', 'basket.owner.username'])
+    def _get_lms_resource_for_user(self, basket, resource_name, endpoint):
+        user = basket.owner.username
+        try:
+            data_list = endpoint.get(user=user) or []
+        except (ConnectionError, SlumberBaseException, Timeout) as exc:
+            logger.error('Failed to retrieve %s : %s', resource_name, str(exc))
+            data_list = []
+        return data_list
 
     def _get_lms_resource(self, basket, resource_name, endpoint):
         if not basket.owner:
