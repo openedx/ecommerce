@@ -5,7 +5,7 @@ Tests for the CacheUtilsMiddleware.
 from django.test import RequestFactory
 
 from ecommerce.cache_utils import middleware
-from ecommerce.cache_utils.utils import CACHE_MISS, RequestCache
+from ecommerce.cache_utils.utils import FORCE_CACHE_MISS_PARAM, SHOULD_FORCE_CACHE_MISS_KEY, RequestCache
 from ecommerce.tests.testcases import TestCase
 
 TEST_KEY = "clobert"
@@ -23,28 +23,28 @@ class TestCacheUtilsMiddleware(TestCase):
     def test_process_request(self):
         self.middleware.process_request(self.request)
 
-        self.assertEqual(RequestCache.get_value_or_cache_miss(TEST_KEY), CACHE_MISS)
-        self.assertFalse(RequestCache.get_value_or_cache_miss('force_django_cache_miss'))
+        self.assertTrue(RequestCache.get_cache_response(TEST_KEY).is_miss)
+        self.assertFalse(RequestCache.get_cache_response(SHOULD_FORCE_CACHE_MISS_KEY).value)
 
     def test_process_request_force_django_cache_miss(self):
-        request = RequestFactory().get('/?force_django_cache_miss=tRuE')
+        request = RequestFactory().get('/?{}=tRuE'.format(FORCE_CACHE_MISS_PARAM))
 
         self.middleware.process_request(request)
 
-        self.assertEqual(RequestCache.get_value_or_cache_miss(TEST_KEY), CACHE_MISS)
-        self.assertTrue(RequestCache.get_value_or_cache_miss('force_django_cache_miss'))
+        self.assertTrue(RequestCache.get_cache_response(TEST_KEY).is_miss)
+        self.assertTrue(RequestCache.get_cache_response(SHOULD_FORCE_CACHE_MISS_KEY).value)
 
     def test_process_response(self):
         response = self.middleware.process_response(self.request, EXPECTED_VALUE)
 
         self.assertEqual(response, EXPECTED_VALUE)
-        self.assertEqual(RequestCache.get_value_or_cache_miss(TEST_KEY), CACHE_MISS)
+        self.assertTrue(RequestCache.get_cache_response(TEST_KEY).is_miss)
 
     def test_process_exception(self):
         response = self.middleware.process_exception(self.request, EXPECTED_VALUE)
 
         self.assertEqual(response, None)
-        self.assertEqual(RequestCache.get_value_or_cache_miss(TEST_KEY), CACHE_MISS)
+        self.assertTrue(RequestCache.get_cache_response(TEST_KEY).is_miss)
 
     @staticmethod
     def _dirty_request_cache():

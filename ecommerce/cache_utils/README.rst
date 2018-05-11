@@ -1,6 +1,12 @@
 Cache Utils
 ===========
 
+RequestCache
+------------
+
+A thread-local for storing request scoped cache values.
+
+
 TieredCache
 -----------
 
@@ -17,23 +23,27 @@ Some baseline rules:
 
 2. Timeouts are ignored for the purposes of the in-memory request cache,
    but do apply to the Django cache. One consequence of this is that
-   sending an explicit timeout of 0 in `set` or `add` will cause that
+   sending an explicit timeout of 0 in `set_all_tiers` will cause that
    item to only be cached across the duration of the request and will not
    cause a write to the remote cache.
 
-Usage::
+Sample Usage using is_hit::
 
-    from ecommerce.cache_utils.utils import CACHE_MISS, TieredCache
+    cache_response = TieredCache.get_cache_response(key)
+    if cache_response.is_hit:
+        return  cache_response.value
+     # calculate, set in cache, and return value.
 
-    TieredCache.get_value_or_cache_miss(key)
-    if value is CACHE_MISS:
-        value = None  # or any appropriate default
-        ...
+Sample Usage using is_miss::
 
-        TieredCache.set_all_tiers(key, value, django_cache_timeout)
+    cache_response = TieredCache.get_cache_response(key)
+    if cache_response.is_miss:
+        # calculate, set in cache, and return value.
+    return  cache_response.value
 
-Force CACHE_MISS
-^^^^^^^^^^^^^^^^
+
+Force Django Cache Miss
+^^^^^^^^^^^^^^^^^^^^^^^
 
 To force recompute a value stored in the django cache, add the query
 parameter 'force_django_cache_miss'. This will force a CACHE_MISS.
@@ -42,10 +52,21 @@ Example::
 
     http://clobert.com/api/v1/resource?force_django_cache_miss=true
 
-CACHE_MISS
-----------
 
-An object to be used to represent a CACHE_MISS.  See TieredCache.
+CacheResponse
+-------------
 
-The CACHE_MISS object avoids the problem where a cache hit that
-is Falsey is misinterpreted as a cache miss.
+A CacheResponse includes the cache miss/hit status and value stored in the
+cache.
+
+The purpose of the CacheResponse is to avoid a common bug with the default
+Django cache interface where a cache hit that is Falsey (e.g. None) is
+misinterpreted as a cache miss.
+
+An example of the Bug::
+
+    cache_value = cache.get(key)
+    if cache_value:
+        # calculated value is None, set None in cache, and return value.
+        # BUG: None will be treated as a cache miss every time.
+    return  cache_value

@@ -3,15 +3,13 @@ from __future__ import unicode_literals
 import logging
 import operator
 
-import waffle
 from django.conf import settings
-from django.core.cache import cache
 from oscar.apps.offer import utils as oscar_utils
 from oscar.core.loading import get_model
 from requests.exceptions import ConnectionError, Timeout
 from slumber.exceptions import HttpNotFoundError, SlumberBaseException
 
-from ecommerce.cache_utils.utils import CACHE_MISS, TieredCache
+from ecommerce.cache_utils.utils import TieredCache
 from ecommerce.core.utils import get_cache_key, traverse_pagination
 from ecommerce.extensions.offer.decorators import check_condition_applicability
 from ecommerce.extensions.offer.mixins import SingleItemConsumptionConditionMixin
@@ -53,23 +51,18 @@ class ProgramCourseRunSeatsCondition(SingleItemConsumptionConditionMixin, Condit
             resource=resource_name,
             username=basket.owner.username,
         )
-        if waffle.switch_is_active('use_request_cache_for_getting_lms_resource'):
-            data_list = TieredCache.get_value_or_cache_miss(cache_key)  # pragma: no cover
-        else:
-            data_list = cache.get(cache_key, CACHE_MISS)
-        if data_list is CACHE_MISS:
-            data_list = None
-            user = basket.owner.username
-            try:
-                data_list = endpoint.get(user=user)
+        cache_response = TieredCache.get_cache_response(cache_key)
+        if cache_response.is_hit:
+            return cache_response.value
 
-                if waffle.switch_is_active('use_request_cache_for_getting_lms_resource'):
-                    TieredCache.set_all_tiers(cache_key, data_list, settings.LMS_API_CACHE_TIMEOUT)  # pragma: no cover
-                else:
-                    cache.set(cache_key, data_list, settings.LMS_API_CACHE_TIMEOUT)
-            except (ConnectionError, SlumberBaseException, Timeout) as exc:
-                logger.error('Failed to retrieve %s : %s', resource_name, str(exc))
-        return data_list if data_list else []
+        user = basket.owner.username
+        try:
+            data_list = endpoint.get(user=user) or []
+            TieredCache.set_all_tiers(cache_key, data_list, settings.LMS_API_CACHE_TIMEOUT)
+        except (ConnectionError, SlumberBaseException, Timeout) as exc:
+            logger.error('Failed to retrieve %s : %s', resource_name, str(exc))
+            data_list = []
+        return data_list
 
     def _get_lms_resource(self, basket, resource_name, endpoint):
         if not basket.owner:
