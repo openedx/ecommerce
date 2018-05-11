@@ -126,7 +126,7 @@ class TestSeatPayment(object):
     def test_verified_seat_payment_with_credit_card(self, selenium):
         """
         Validates users can add a verified seat to the cart and checkout with a credit card.
-        This test requires 'disable_repeat_order_check' waffle switch active, to run.
+        This test requires 'disable_repeat_order_check' waffle switch turned off on stage, to run.
         """
         LmsHelpers.login(selenium)
 
