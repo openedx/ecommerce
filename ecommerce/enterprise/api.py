@@ -5,10 +5,10 @@ import logging
 from urllib import urlencode
 
 from django.conf import settings
-from django.core.cache import cache
 from requests.exceptions import ConnectionError, Timeout
 from slumber.exceptions import SlumberHttpBaseException
 
+from ecommerce.cache_utils.utils import TieredCache
 from ecommerce.core.utils import get_cache_key
 
 logger = logging.getLogger(__name__)
@@ -56,12 +56,14 @@ def fetch_enterprise_learner_entitlements(site, learner_id):
         learner_id=learner_id
     )
 
-    entitlements = cache.get(cache_key)
-    if not entitlements:
-        api = site.siteconfiguration.enterprise_api_client
-        entitlements = getattr(api, resource_url).get()
-        cache.set(cache_key, entitlements, settings.ENTERPRISE_API_CACHE_TIMEOUT)
+    entitlements_cached_response = TieredCache.get_cached_response(cache_key)
+    if entitlements_cached_response.is_hit:
+        return entitlements_cached_response.value
 
+    api = site.siteconfiguration.enterprise_api_client
+    entitlements = getattr(api, resource_url).get()
+
+    TieredCache.set_all_tiers(cache_key, entitlements, settings.ENTERPRISE_API_CACHE_TIMEOUT)
     return entitlements
 
 
@@ -153,14 +155,16 @@ def fetch_enterprise_learner_data(site, user):
         username=user.username
     )
 
-    response = cache.get(cache_key)
-    if not response:
-        api = site.siteconfiguration.enterprise_api_client
-        endpoint = getattr(api, api_resource_name)
-        querystring = {'username': user.username}
-        response = endpoint().get(**querystring)
-        cache.set(cache_key, response, settings.ENTERPRISE_API_CACHE_TIMEOUT)
+    cached_response = TieredCache.get_cached_response(cache_key)
+    if cached_response.is_hit:
+        return cached_response.value
 
+    api = site.siteconfiguration.enterprise_api_client
+    endpoint = getattr(api, api_resource_name)
+    querystring = {'username': user.username}
+    response = endpoint().get(**querystring)
+
+    TieredCache.set_all_tiers(cache_key, response, settings.ENTERPRISE_API_CACHE_TIMEOUT)
     return response
 
 
@@ -184,22 +188,24 @@ def catalog_contains_course_runs(site, course_run_ids, enterprise_customer_uuid,
         query_params=urlencode(query_params, True)
     )
 
-    contains_content = cache.get(cache_key)
-    if contains_content is None:
-        api = site.siteconfiguration.enterprise_api_client
-        endpoint = getattr(api, api_resource_name)(api_resource_id)
-        try:
-            contains_content = endpoint.contains_content_items.get(**query_params)['contains_content_items']
-            cache.set(cache_key, contains_content, settings.ENTERPRISE_API_CACHE_TIMEOUT)
-        except (ConnectionError, KeyError, SlumberHttpBaseException, Timeout):
-            logger.exception(
-                'Failed to check if course_runs [%s] exist in '
-                'EnterpriseCustomerCatalog [%s]'
-                'for EnterpriseCustomer [%s].',
-                course_run_ids,
-                enterprise_customer_catalog_uuid,
-                enterprise_customer_uuid,
-            )
-            contains_content = False
+    contains_content_cached_response = TieredCache.get_cached_response(cache_key)
+    if contains_content_cached_response.is_hit:
+        return contains_content_cached_response.value
 
+    api = site.siteconfiguration.enterprise_api_client
+    endpoint = getattr(api, api_resource_name)(api_resource_id)
+    try:
+        contains_content = endpoint.contains_content_items.get(**query_params)['contains_content_items']
+
+        TieredCache.set_all_tiers(cache_key, contains_content, settings.ENTERPRISE_API_CACHE_TIMEOUT)
+    except (ConnectionError, KeyError, SlumberHttpBaseException, Timeout):
+        logger.exception(
+            'Failed to check if course_runs [%s] exist in '
+            'EnterpriseCustomerCatalog [%s]'
+            'for EnterpriseCustomer [%s].',
+            course_run_ids,
+            enterprise_customer_catalog_uuid,
+            enterprise_customer_uuid,
+        )
+        contains_content = False
     return contains_content

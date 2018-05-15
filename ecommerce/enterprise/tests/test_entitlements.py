@@ -2,11 +2,13 @@
 import ddt
 import httpretty
 from django.conf import settings
+from mock import patch
 from oscar.core.loading import get_model
 from requests.exceptions import ConnectionError, Timeout
 from slumber.exceptions import SlumberBaseException
 from testfixtures import LogCapture
 
+from ecommerce.cache_utils.utils import TieredCache
 from ecommerce.core.tests import toggle_switch
 from ecommerce.coupons.tests.mixins import CouponMixin, DiscoveryMockMixin
 from ecommerce.courses.tests.factories import CourseFactory
@@ -371,6 +373,36 @@ class EntitlementsTests(EnterpriseServiceMockMixin, DiscoveryTestMixin, Discover
         self._assert_num_requests(2)
         self.assertTrue(is_course_available)
 
+    def test_is_course_in_enterprise_catalog_for_available_course_cached(self):
+        """
+        Verify that the response from the discovery API call made in method
+        "is_course_in_enterprise_catalog" is cached for cases where the
+        course is available in the enterprise course catalog.
+
+        We expect 2 calls to set_all_tiers in the
+        is_course_in_enterprise_catalog method due to:
+            - the site_configuration api setup
+            - the result being cached
+        """
+        enterprise_catalog_id = 1
+        self.mock_access_token_response()
+        self.mock_catalog_contains_endpoint(
+            discovery_api_url=self.site_configuration.discovery_api_url, catalog_id=enterprise_catalog_id,
+            course_run_ids=[self.course.id]
+        )
+        with patch.object(TieredCache, 'set_all_tiers', wraps=TieredCache.set_all_tiers) as mocked_set_all_tiers:
+            mocked_set_all_tiers.assert_not_called()
+
+            is_course_available = is_course_in_enterprise_catalog(
+                self.request.site, self.course.id, enterprise_catalog_id)
+            self.assertEqual(mocked_set_all_tiers.call_count, 2)
+            self.assertTrue(is_course_available)
+
+            is_course_available = is_course_in_enterprise_catalog(
+                self.request.site, self.course.id, enterprise_catalog_id)
+            self.assertEqual(mocked_set_all_tiers.call_count, 2)
+            self.assertTrue(is_course_available)
+
     def test_is_course_in_enterprise_catalog_for_unavailable_course(self):
         """
         Verify that method "is_course_in_enterprise_catalog" returns False if
@@ -390,6 +422,38 @@ class EntitlementsTests(EnterpriseServiceMockMixin, DiscoveryTestMixin, Discover
         # checking if course exists in course runs against the course catalog.
         self._assert_num_requests(2)
         self.assertFalse(is_course_available)
+
+    def test_is_course_in_enterprise_catalog_for_unavailable_course_cached(self):
+        """
+        Verify that the response from the discovery API call made in method
+        "is_course_in_enterprise_catalog" is cached for cases where the
+        course is not available in the enterprise course catalog.
+
+        We expect 2 calls to set_all_tiers due to:
+            - the site_configuration api setup
+            - the result being cached
+        """
+        enterprise_catalog_id = 1
+        self.mock_access_token_response()
+        self.mock_catalog_contains_endpoint(
+            discovery_api_url=self.site_configuration.discovery_api_url, catalog_id=enterprise_catalog_id,
+            course_run_ids=[self.course.id]
+        )
+
+        test_course = CourseFactory(id='edx/Non_Enterprise_Course/DemoX')
+
+        with patch.object(TieredCache, 'set_all_tiers', wraps=TieredCache.set_all_tiers) as mocked_set_all_tiers:
+            mocked_set_all_tiers.assert_not_called()
+
+            is_course_available = is_course_in_enterprise_catalog(
+                self.request.site, test_course.id, enterprise_catalog_id)
+            self.assertEqual(mocked_set_all_tiers.call_count, 2)
+            self.assertFalse(is_course_available)
+
+            is_course_available = is_course_in_enterprise_catalog(
+                self.request.site, test_course.id, enterprise_catalog_id)
+            self.assertEqual(mocked_set_all_tiers.call_count, 2)
+            self.assertFalse(is_course_available)
 
     @ddt.data(ConnectionError, SlumberBaseException, Timeout)
     def test_is_course_in_enterprise_catalog_for_error_in_get_course_catalogs(self, error):

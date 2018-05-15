@@ -10,7 +10,6 @@ import jwt
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.sites.models import Site
-from django.core.cache import cache
 from django.urls import reverse
 from django.utils.timezone import now
 from mock import patch
@@ -20,7 +19,9 @@ from oscar.test.utils import RequestFactory
 from social_django.models import UserSocialAuth
 from threadlocals.threadlocals import set_thread_variable
 
+from ecommerce.cache_utils.utils import TieredCache
 from ecommerce.core.url_utils import get_lms_url
+from ecommerce.courses.models import Course
 from ecommerce.courses.utils import mode_for_product
 from ecommerce.extensions.fulfillment.signals import SHIPPING_EVENT_NAME
 from ecommerce.tests.factories import SiteConfigurationFactory
@@ -80,7 +81,7 @@ class ThrottlingMixin(object):
         super(ThrottlingMixin, self).setUp()
 
         # Throttling for tests relies on the cache. To get around throttling, simply clear the cache.
-        self.addCleanup(cache.clear)
+        self.addCleanup(TieredCache.clear_all_tiers)
 
 
 class JwtMixin(object):
@@ -255,6 +256,7 @@ class SiteMixin(object):
         domain = 'testserver.fake'
         self.client = self.client_class(SERVER_NAME=domain)
 
+        Course.objects.all().delete()
         Partner.objects.all().delete()
         Site.objects.all().delete()
         self.site_configuration = SiteConfigurationFactory(

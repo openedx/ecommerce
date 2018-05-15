@@ -9,7 +9,6 @@ import mock
 import pytz
 from django.conf import settings
 from django.contrib.messages import get_messages
-from django.core.cache import cache
 from django.http import HttpResponseRedirect
 from django.test import override_settings
 from django.urls import reverse
@@ -23,6 +22,7 @@ from slumber.exceptions import SlumberBaseException
 from testfixtures import LogCapture
 from waffle.testutils import override_flag
 
+from ecommerce.cache_utils.utils import TieredCache
 from ecommerce.core.constants import ENROLLMENT_CODE_PRODUCT_CLASS_NAME
 from ecommerce.core.exceptions import SiteConfigurationError
 from ecommerce.core.tests import toggle_switch
@@ -465,13 +465,13 @@ class BasketSummaryViewTests(EnterpriseServiceMockMixin, DiscoveryTestMixin, Dis
 
         cache_key = 'courses_api_detail_{}{}'.format(self.course.id, self.site.siteconfiguration.partner.short_code)
         cache_key = hashlib.md5(cache_key).hexdigest()
-        cached_course_before = cache.get(cache_key)
-        self.assertIsNone(cached_course_before)
+        course_before_cached_response = TieredCache.get_cached_response(cache_key)
+        self.assertTrue(course_before_cached_response.is_miss)
 
         response = self.client.get(self.path)
         self.assertEqual(response.status_code, 200)
-        cached_course_after = cache.get(cache_key)
-        self.assertEqual(cached_course_after['title'], self.course.name)
+        course_after_cached_response = TieredCache.get_cached_response(cache_key)
+        self.assertEqual(course_after_cached_response.value['title'], self.course.name)
 
     @ddt.data({
         'course': 'edX+DemoX',
