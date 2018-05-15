@@ -1,20 +1,25 @@
 import ddt
+import httpretty
+from mock import patch
 from oscar.test.factories import ProductFactory, RangeFactory, VoucherFactory
 
-from ecommerce.coupons.utils import is_voucher_applied, prepare_course_seat_types
+from ecommerce.cache_utils.utils import TieredCache
+from ecommerce.coupons.tests.mixins import DiscoveryMockMixin
+from ecommerce.coupons.utils import fetch_course_catalog, is_voucher_applied, prepare_course_seat_types
 from ecommerce.extensions.basket.utils import prepare_basket
 from ecommerce.extensions.test.factories import prepare_voucher
 from ecommerce.tests.testcases import TestCase
 
 
 @ddt.ddt
-class CouponAppViewTests(TestCase):
+@httpretty.activate
+class CouponUtilsTests(TestCase, DiscoveryMockMixin):
 
     def setUp(self):
         """
         Setup variables for test cases.
         """
-        super(CouponAppViewTests, self).setUp()
+        super(CouponUtilsTests, self).setUp()
 
         self.user = self.create_user(email='test@tester.fake')
         self.request.user = self.user
@@ -45,3 +50,23 @@ class CouponAppViewTests(TestCase):
 
         # Verify is_voucher_applied returns False when voucher can not be applied to the basket.
         self.assertFalse(is_voucher_applied(basket, VoucherFactory()))
+
+    def test_fetch_course_catalog(self):
+        """
+        Verify that fetch_course_catalog is cached
+
+        We expect 2 calls to set_all_tiers due to:
+            - the site_configuration api setup
+            - the result being cached
+        """
+        self.mock_access_token_response()
+        self.mock_catalog_detail_endpoint(self.site_configuration.discovery_api_url)
+
+        with patch.object(TieredCache, 'set_all_tiers', wraps=TieredCache.set_all_tiers) as mocked_set_all_tiers:
+            mocked_set_all_tiers.assert_not_called()
+
+            _ = fetch_course_catalog(self.site, 1)
+            self.assertEqual(mocked_set_all_tiers.call_count, 2)
+
+            _ = fetch_course_catalog(self.site, 1)
+            self.assertEqual(mocked_set_all_tiers.call_count, 2)

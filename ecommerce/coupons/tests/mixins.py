@@ -2,11 +2,11 @@ import datetime
 import json
 
 import httpretty
-from django.core.cache import cache
 from django.test import RequestFactory
 from oscar.core.utils import slugify
 from oscar.test import factories
 
+from ecommerce.cache_utils.utils import TieredCache
 from ecommerce.core.constants import COUPON_PRODUCT_CLASS_NAME
 from ecommerce.core.models import BusinessClient
 from ecommerce.extensions.api.v2.views.coupons import CouponViewSet
@@ -20,7 +20,7 @@ class DiscoveryMockMixin(object):
     """ Mocks for the Discovery service response. """
     def setUp(self):
         super(DiscoveryMockMixin, self).setUp()
-        cache.clear()
+        TieredCache.clear_all_tiers()
 
     @staticmethod
     def build_discovery_catalogs_url(discovery_api_url, catalog_id=''):

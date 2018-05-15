@@ -7,7 +7,6 @@ import warnings
 import waffle
 from django.conf import settings
 from django.contrib.auth import get_user_model
-from django.core.cache import cache
 from django.db import transaction
 from django.http import HttpResponseBadRequest, HttpResponseForbidden
 from django.utils.decorators import method_decorator
@@ -18,6 +17,7 @@ from rest_framework import generics, status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
+from ecommerce.cache_utils.utils import TieredCache
 from ecommerce.core.utils import get_cache_key
 from ecommerce.enterprise.entitlements import get_entitlement_voucher
 from ecommerce.extensions.analytics.utils import audit_log
@@ -514,9 +514,9 @@ class BasketCalculateView(generics.GenericAPIView):
                 resource_name='calculate',
                 skus=skus
             )
-            basket_calculate_results = cache.get(cache_key)
-            if basket_calculate_results:
-                return Response(basket_calculate_results)
+            cached_response = TieredCache.get_cached_response(cache_key)
+            if cached_response.is_hit:
+                return Response(cached_response.value)
 
         if waffle.flag_is_active(request, "disable_calculate_temporary_basket_atomic_transaction"):
             response = self._calculate_temporary_basket(basket_owner, request, products, voucher, skus, code)
@@ -524,6 +524,6 @@ class BasketCalculateView(generics.GenericAPIView):
             response = self._calculate_temporary_basket_atomic(basket_owner, request, products, voucher, skus, code)
 
         if response and use_default_basket:
-            cache.set(cache_key, response, settings.ANONYMOUS_BASKET_CALCULATE_CACHE_TIMEOUT)
+            TieredCache.set_all_tiers(cache_key, response, settings.ANONYMOUS_BASKET_CALCULATE_CACHE_TIMEOUT)
 
         return Response(response)

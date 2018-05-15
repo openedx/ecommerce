@@ -1,14 +1,16 @@
 import ddt
 import httpretty
 from django.conf import settings
-from django.core.cache import cache
+from mock import patch
 from oscar.core.loading import get_model
 
+from ecommerce.cache_utils.utils import TieredCache
 from ecommerce.core.tests import toggle_switch
 from ecommerce.core.utils import get_cache_key
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.enterprise import api as enterprise_api
 from ecommerce.enterprise.tests.mixins import EnterpriseServiceMockMixin
+from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
 from ecommerce.extensions.partner.strategy import DefaultStrategy
 from ecommerce.tests.testcases import TestCase
 
@@ -18,7 +20,7 @@ StockRecord = get_model('partner', 'StockRecord')
 
 @ddt.ddt
 @httpretty.activate
-class EnterpriseAPITests(EnterpriseServiceMockMixin, TestCase):
+class EnterpriseAPITests(EnterpriseServiceMockMixin, DiscoveryTestMixin, TestCase):
     def setUp(self):
         super(EnterpriseAPITests, self).setUp()
         self.course_run = CourseFactory()
@@ -54,14 +56,14 @@ class EnterpriseAPITests(EnterpriseServiceMockMixin, TestCase):
             username=self.learner.username
         )
 
-        cached_enterprise_learner_response = cache.get(cache_key)
-        self.assertIsNone(cached_enterprise_learner_response)
+        enterprise_learner_cached_response = TieredCache.get_cached_response(cache_key)
+        self.assertTrue(enterprise_learner_cached_response.is_miss)
 
         response = enterprise_api.fetch_enterprise_learner_data(self.request.site, self.learner)
         self.assertEqual(len(response['results']), 1)
 
-        cached_course = cache.get(cache_key)
-        self.assertEqual(cached_course, response)
+        course_cached_response = TieredCache.get_cached_response(cache_key)
+        self.assertEqual(course_cached_response.value, response)
 
     def _assert_contains_course_runs(self, expected, course_run_ids, enterprise_customer_uuid,
                                      enterprise_customer_catalog_uuid):
@@ -144,6 +146,26 @@ class EnterpriseAPITests(EnterpriseServiceMockMixin, TestCase):
         )
 
         self._assert_contains_course_runs(expected, [self.course_run.id], 'fake-uuid', enterprise_customer_catalog_uuid)
+
+    def test_catalog_contains_course_runs_cache_hit(self):
+        """
+        Verify `catalog_contains_course_runs` returns a cached response
+        """
+        self.mock_catalog_contains_course_runs(
+            [self.course_run.id],
+            'fake-uuid',
+            enterprise_customer_catalog_uuid=None,
+            contains_content=True,
+        )
+
+        with patch.object(TieredCache, 'set_all_tiers', wraps=TieredCache.set_all_tiers) as mocked_set_all_tiers:
+            mocked_set_all_tiers.assert_not_called()
+
+            self._assert_contains_course_runs(True, [self.course_run.id], 'fake-uuid', None)
+            self.assertEqual(mocked_set_all_tiers.call_count, 2)
+
+            self._assert_contains_course_runs(True, [self.course_run.id], 'fake-uuid', None)
+            self.assertEqual(mocked_set_all_tiers.call_count, 2)
 
     def test_catalog_contains_course_runs_with_api_exception(self):
         """

@@ -1,16 +1,19 @@
 """Test Order Utility classes """
+import datetime
 import json
 import logging
 
 import ddt
 import httpretty
 import mock
+import pytz
 from django.test.client import RequestFactory
 from oscar.core.loading import get_class, get_model
 from oscar.test.factories import BasketFactory
 from requests import Timeout
 from testfixtures import LogCapture
 
+from ecommerce.cache_utils.utils import TieredCache
 from ecommerce.core.url_utils import get_lms_entitlement_api_url
 from ecommerce.extensions.fulfillment.status import ORDER
 from ecommerce.extensions.order.utils import UserAlreadyPlacedOrder
@@ -22,6 +25,7 @@ from ecommerce.tests.factories import PartnerFactory, SiteConfigurationFactory
 from ecommerce.tests.testcases import TestCase
 
 LOGGER_NAME = 'ecommerce.extensions.order.utils'
+EXPIRED_DATE = datetime.datetime(year=1985, month=10, day=26, hour=1, minute=20, tzinfo=pytz.utc)
 
 Country = get_class('address.models', 'Country')
 NoShippingRequired = get_class('shipping.methods', 'NoShippingRequired')
@@ -310,3 +314,29 @@ class UserAlreadyPlacedOrderTests(RefundTestMixin, TestCase):
         refund_line.status = refund_line_status
         refund_line.save()
         self.assertEqual(UserAlreadyPlacedOrder.is_order_line_refunded(refund_line.order_line), is_refunded)
+
+    @httpretty.activate
+    def test_is_entitlement_expired_cached(self):
+        """
+        Test that entitlement's expired status gets cached
+
+        We expect 2 calls to set_all_tiers in the is_entitlement_expired
+        method due to:
+            - the site_configuration api setup
+            - the result being cached
+        """
+        self.mock_access_token_response()
+
+        self.course_entitlement.expires = EXPIRED_DATE
+        httpretty.register_uri(httpretty.GET, get_lms_entitlement_api_url() +
+                               'entitlements/' + self.course_entitlement_uuid + '/',
+                               status=200, body=json.dumps({}), content_type='application/json')
+
+        with mock.patch.object(TieredCache, 'set_all_tiers', wraps=TieredCache.set_all_tiers) as mocked_set_all_tiers:
+            mocked_set_all_tiers.assert_not_called()
+
+            _ = UserAlreadyPlacedOrder.is_entitlement_expired(self.course_entitlement_uuid, site=self.site)
+            self.assertEqual(mocked_set_all_tiers.call_count, 2)
+
+            _ = UserAlreadyPlacedOrder.is_entitlement_expired(self.course_entitlement_uuid, site=self.site)
+            self.assertEqual(mocked_set_all_tiers.call_count, 2)

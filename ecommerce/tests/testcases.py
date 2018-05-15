@@ -1,23 +1,23 @@
 from django.conf import settings
-from django.core.cache import cache
 from django.test import LiveServerTestCase as DjangoLiveServerTestCase
 from django.test import TestCase as DjangoTestCase
 from django.test import TransactionTestCase as DjangoTransactionTestCase
 
+from ecommerce.cache_utils.utils import TieredCache
 from ecommerce.tests.mixins import SiteMixin, TestServerUrlMixin, UserMixin
 
 
-class CacheMixin(object):
+class TieredCacheMixin(object):
     def setUp(self):
-        cache.clear()
-        super(CacheMixin, self).setUp()
+        TieredCache.clear_all_tiers()
+        super(TieredCacheMixin, self).setUp()
 
     def tearDown(self):
-        cache.clear()
-        super(CacheMixin, self).tearDown()
+        TieredCache.clear_all_tiers()
+        super(TieredCacheMixin, self).tearDown()
 
 
-class ViewTestMixin(CacheMixin):
+class ViewTestMixin(TieredCacheMixin):
     path = None
 
     def setUp(self):
@@ -50,7 +50,7 @@ class ViewTestMixin(CacheMixin):
         self.assert_get_response_status(200)
 
 
-class TestCase(TestServerUrlMixin, UserMixin, SiteMixin, CacheMixin, DjangoTestCase):
+class TestCase(TestServerUrlMixin, UserMixin, SiteMixin, TieredCacheMixin, DjangoTestCase):
     """
     Base test case for ecommerce tests.
 
@@ -58,7 +58,7 @@ class TestCase(TestServerUrlMixin, UserMixin, SiteMixin, CacheMixin, DjangoTestC
     """
 
 
-class LiveServerTestCase(TestServerUrlMixin, UserMixin, SiteMixin, CacheMixin, DjangoLiveServerTestCase):
+class LiveServerTestCase(TestServerUrlMixin, UserMixin, SiteMixin, TieredCacheMixin, DjangoLiveServerTestCase):
     """
     Base test case for ecommerce tests.
 
@@ -67,7 +67,7 @@ class LiveServerTestCase(TestServerUrlMixin, UserMixin, SiteMixin, CacheMixin, D
     pass
 
 
-class TransactionTestCase(TestServerUrlMixin, UserMixin, SiteMixin, CacheMixin, DjangoTransactionTestCase):
+class TransactionTestCase(TestServerUrlMixin, UserMixin, SiteMixin, TieredCacheMixin, DjangoTransactionTestCase):
     """
     Base test case for ecommerce tests.
 
