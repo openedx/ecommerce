@@ -399,7 +399,6 @@ class SiteConfiguration(models.Model):
 
         return EdxRestApiClient(self.discovery_api_url, jwt=self.access_token)
 
-
     @cached_property
     def journal_discovery_api_client(self):
         """
@@ -418,7 +417,6 @@ class SiteConfiguration(models.Model):
         ])
 
         return EdxRestApiClient(journal_discovery_url, jwt=self.access_token)
-
 
     @cached_property
     def embargo_api_client(self):
