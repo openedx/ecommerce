@@ -1,15 +1,15 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
+
 from django.contrib import messages
 from django.urls import reverse
-from django.views.generic import ListView, CreateView, UpdateView
 from django.utils.translation import ugettext_lazy as _
+from django.views.generic import CreateView, ListView, UpdateView
 from oscar.core.loading import get_model
 
 from ecommerce.core.views import StaffOnlyMixin
-from ecommerce.journal.forms import JournalOfferForm
 from ecommerce.journal.client import fetch_journal_bundle
-
+from ecommerce.journal.forms import JournalOfferForm
 
 Benefit = get_model('offer', 'Benefit')
 ConditionalOffer = get_model('offer', 'ConditionalOffer')
@@ -34,7 +34,7 @@ class JournalProcessFormViewMixin(JournalOfferViewMixin):
         return kwargs
 
     def get_context_data(self, **kwargs):
-        context = super(JournalOfferViewMixin, self).get_context_data(**kwargs)
+        context = super(JournalOfferViewMixin, self).get_context_data(**kwargs)     # pylint: disable=bad-super-call
         context.update({
             'editing': False
         })

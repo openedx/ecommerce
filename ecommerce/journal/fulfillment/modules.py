@@ -7,7 +7,6 @@ from ecommerce.extensions.fulfillment.modules import BaseFulfillmentModule
 from ecommerce.extensions.fulfillment.status import LINE
 from ecommerce.journal.client import post_journal_access
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -75,7 +74,7 @@ class JournalFulfillmentModule(BaseFulfillmentModule):
                     order.number
                 )
                 line.set_status(LINE.FULFILLMENT_NETWORK_ERROR)
-            except Exception:
+            except Exception:   # pylint: disable=broad-except
                 logger.exception(
                     'Unable to fulfill line [%d] of order [%s]',
                     line.id,
