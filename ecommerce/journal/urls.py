@@ -1,4 +1,5 @@
 from django.conf.urls import include, url
+
 from ecommerce.journal import views
 
 OFFER_URLS = [
