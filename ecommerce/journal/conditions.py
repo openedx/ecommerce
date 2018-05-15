@@ -49,7 +49,7 @@ class JournalBundleCondition(SingleItemConsumptionConditionMixin, Condition):
             for course_sku_set in course_skus.values():
                 sku_set.update(course_sku_set)
 
-            course_skus = sku_set
+            course_skus = sku_set   # pylint: disable=redefined-variable-type
 
         return course_skus
 
@@ -164,7 +164,6 @@ class JournalBundleCondition(SingleItemConsumptionConditionMixin, Condition):
             return False
 
         return True
-
 
     def get_applicable_lines(self, offer, basket, most_expensive_first=True):
         """ Return line data for the lines that can be consumed by this condition """
