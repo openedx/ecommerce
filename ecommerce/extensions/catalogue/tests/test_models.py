@@ -7,6 +7,7 @@ from oscar.test import factories
 from ecommerce.coupons.tests.mixins import CouponMixin
 from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
 from ecommerce.extensions.voucher.models import CouponVouchers
+from ecommerce.journal.constants import JOURNAL_PRODUCT_CLASS_NAME
 from ecommerce.tests.testcases import TestCase
 
 Product = get_model('catalogue', 'Product')
@@ -21,7 +22,8 @@ class ProductTests(CouponMixin, DiscoveryTestMixin, TestCase):
         """Helper method that creates a coupon product with note attribute set."""
         coupon_product = factories.ProductFactory(
             title=self.COUPON_PRODUCT_TITLE,
-            product_class=self.coupon_product_class
+            product_class=self.coupon_product_class,
+            categories=[]
         )
         voucher = factories.VoucherFactory()
         coupon_vouchers = CouponVouchers.objects.create(coupon=coupon_product)
@@ -68,6 +70,12 @@ class ProductTests(CouponMixin, DiscoveryTestMixin, TestCase):
         expiration_datetime = self.update_product_expires(seat)
         enrollment_code.refresh_from_db()
         self.assertNotEqual(enrollment_code.expires, expiration_datetime)
+
+    def test_journal_product_attribute(self):
+        """Verify journal product class."""
+        note = 'Some other test note.'
+        coupon = self._create_coupon_product_with_note_attribute(note)
+        self.assertNotEqual(coupon.is_journal_product, JOURNAL_PRODUCT_CLASS_NAME)
 
     def test_create_product_with_note(self):
         """Verify creating a product with valid note value creates product."""

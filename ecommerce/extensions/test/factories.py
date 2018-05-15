@@ -10,6 +10,7 @@ from oscar.test.factories import *  # pylint:disable=wildcard-import,unused-wild
 from ecommerce.enterprise.benefits import EnterpriseAbsoluteDiscountBenefit, EnterprisePercentageDiscountBenefit
 from ecommerce.enterprise.conditions import EnterpriseCustomerCondition
 from ecommerce.extensions.offer.models import OFFER_PRIORITY_ENTERPRISE, OFFER_PRIORITY_VOUCHER
+from ecommerce.journal.benefits import JournalBundleAbsoluteDiscountBenefit, JournalBundlePercentageDiscountBenefit
 from ecommerce.programs.benefits import AbsoluteDiscountBenefitWithoutRange, PercentageDiscountBenefitWithoutRange
 from ecommerce.programs.conditions import ProgramCourseRunSeatsCondition
 from ecommerce.programs.custom import class_path
@@ -160,6 +161,10 @@ class ProgramCourseRunSeatsConditionFactory(ConditionFactory):
         model = ProgramCourseRunSeatsCondition
 
 
+class JournalConditionalFactory(ConditionFactory):  # pylint: disable=function-redefined
+    journal_bundle_uuid = factory.LazyFunction(uuid.uuid4)
+
+
 class ProgramOfferFactory(ConditionalOfferFactory):
     benefit = factory.SubFactory(PercentageDiscountBenefitWithoutRangeFactory)
     condition = factory.SubFactory(ProgramCourseRunSeatsConditionFactory)
@@ -198,6 +203,29 @@ class EnterpriseCustomerConditionFactory(ConditionFactory):
 class EnterpriseOfferFactory(ConditionalOfferFactory):
     benefit = factory.SubFactory(EnterprisePercentageDiscountBenefitFactory)
     condition = factory.SubFactory(EnterpriseCustomerConditionFactory)
+    max_basket_applications = 1
+    offer_type = ConditionalOffer.SITE
+    priority = OFFER_PRIORITY_ENTERPRISE
+    status = ConditionalOffer.OPEN
+
+
+class JournalAbsoluteDiscountBenefitFactory(BenefitFactory):
+    range = None
+    type = ''
+    value = 10
+    proxy_class = class_path(JournalBundleAbsoluteDiscountBenefit)
+
+
+class JournalPercentageDiscountBenefitFactory(BenefitFactory):
+    range = None
+    type = ''
+    value = 10
+    proxy_class = class_path(JournalBundlePercentageDiscountBenefit)
+
+
+class JournalOfferFactory(ConditionalOfferFactory):
+    benefit = factory.SubFactory(JournalPercentageDiscountBenefitFactory)
+    condition = factory.SubFactory(JournalConditionalFactory)
     max_basket_applications = 1
     offer_type = ConditionalOffer.SITE
     priority = OFFER_PRIORITY_ENTERPRISE
