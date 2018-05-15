@@ -4,7 +4,6 @@ Utility Functions to Access the Discovery Journal API and the Journals Service A
 import logging
 
 from django.core.cache import cache
-
 from edx_rest_api_client.client import EdxRestApiClient
 
 from ecommerce.core.utils import get_cache_key
