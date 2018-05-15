@@ -1,9 +1,9 @@
-'''JournalViewSet'''
+""" JournalViewSet """
 from oscar.core.loading import get_model
 from rest_framework import viewsets
 from rest_framework.permissions import IsAdminUser
-from ecommerce.journal.api.serializers import JournalProductSerializer, JournalProductUpdateSerializer
 
+from ecommerce.journal.api.serializers import JournalProductSerializer, JournalProductUpdateSerializer
 
 Product = get_model('catalogue', 'Product')
 
@@ -21,7 +21,8 @@ class JournalProductViewSet(viewsets.ModelViewSet):
     def get_serializer_class(self):
         serializer_class = self.serializer_class
 
-        if self.request and self.request.method == 'PATCH' or self.request.method == 'PUT':
-            serializer_class = JournalProductUpdateSerializer
+        if self.request and hasattr(self.request, 'method'):
+            if self.request.method == 'PATCH' or self.request.method == 'PUT':
+                serializer_class = JournalProductUpdateSerializer
 
         return serializer_class
