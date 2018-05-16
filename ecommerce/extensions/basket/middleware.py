@@ -1,7 +1,11 @@
+import logging
+
 from oscar.apps.basket.middleware import BasketMiddleware as OscarBasketMiddleware
 from oscar.core.loading import get_model
 
 Basket = get_model('basket', 'basket')
+
+logger = logging.getLogger(__name__)
 
 
 class BasketMiddleware(OscarBasketMiddleware):
@@ -42,6 +46,10 @@ class BasketMiddleware(OscarBasketMiddleware):
                 basket = old_baskets[0]
                 for other_basket in old_baskets[1:]:
                     self.merge_baskets(basket, other_basket)
+                logger.warning("Merging multiple baskets for user={username} and site={site}.".format(
+                    username=request.user.username,
+                    site=request.site,
+                ))
 
             # Assign user onto basket to prevent further SQL queries when
             # basket.owner is accessed.

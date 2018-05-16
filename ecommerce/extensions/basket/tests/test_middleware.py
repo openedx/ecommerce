@@ -1,3 +1,4 @@
+import mock
 from django.conf import settings
 from django.contrib.auth.models import AnonymousUser
 from django.test.client import RequestFactory
@@ -45,7 +46,8 @@ class BasketMiddlewareTests(TestCase):
         basket = BasketFactory(owner=self.request.user, site=self.site)
         self.assertEqual(basket, self.middleware.get_basket(self.request))
 
-    def test_get_basket_with_multiple_existing_baskets(self):
+    @mock.patch('ecommerce.extensions.api.v2.views.baskets.logger.warning')
+    def test_get_basket_with_multiple_existing_baskets(self, mock_logger):
         """ If the user already has multiple open baskets, verify the middleware merges the existing
         baskets, and returns the merged basket. """
         self.request.user = self.create_user()
@@ -56,6 +58,7 @@ class BasketMiddlewareTests(TestCase):
         # The latter baskets should always be merged into the earlier basket.
         basket2 = Basket.objects.get(id=basket2.id)
         self.assertEqual(basket2.status, Basket.MERGED)
+        self.assertTrue(mock_logger.called, msg='A warning should have been logged about the merge.')
 
     def test_get_basket_with_siteless_basket(self):
         """ Verify the method should ignores baskets without a site. """
