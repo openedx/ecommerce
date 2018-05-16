@@ -478,6 +478,7 @@ class BasketCalculateView(generics.GenericAPIView):
             logger.warning("Request to Basket Calculate must supply either username or is_anonymous query"
                            " param. Requesting user=%s. Future versions of this API will treat this "
                            "WARNING as an ERROR and raise an exception.", basket_owner.username)
+            requested_username = request.user.username
 
         # If a username is passed in, validate that the user has staff access or is the same user.
         if requested_username:
