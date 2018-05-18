@@ -29,17 +29,17 @@ Some baseline rules:
 
 Sample Usage using is_hit::
 
-    cache_response = TieredCache.get_cache_response(key)
-    if cache_response.is_hit:
-        return  cache_response.value
-     # calculate, set in cache, and return value.
+    x_cached_response = TieredCache.get_cached_response(key)
+    if x_cached_response.is_hit:
+        return x_cached_response.value
+     # calculate x, set in cache, and return value.
 
 Sample Usage using is_miss::
 
-    cache_response = TieredCache.get_cache_response(key)
-    if cache_response.is_miss:
-        # calculate, set in cache, and return value.
-    return  cache_response.value
+    x_cached_response = TieredCache.get_cached_response(key)
+    if x_cached_response.is_miss:
+        # calculate x, set in cache, and return value.
+    return x_cached_response.value
 
 
 Force Django Cache Miss
@@ -53,13 +53,13 @@ Example::
     http://clobert.com/api/v1/resource?force_django_cache_miss=true
 
 
-CacheResponse
--------------
+CachedResponse
+--------------
 
-A CacheResponse includes the cache miss/hit status and value stored in the
+A CachedResponse includes the cache miss/hit status and value stored in the
 cache.
 
-The purpose of the CacheResponse is to avoid a common bug with the default
+The purpose of the CachedResponse is to avoid a common bug with the default
 Django cache interface where a cache hit that is Falsey (e.g. None) is
 misinterpreted as a cache miss.
 
