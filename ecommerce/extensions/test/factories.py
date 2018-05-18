@@ -11,6 +11,7 @@ from ecommerce.enterprise.benefits import EnterpriseAbsoluteDiscountBenefit, Ent
 from ecommerce.enterprise.conditions import EnterpriseCustomerCondition
 from ecommerce.extensions.offer.models import OFFER_PRIORITY_ENTERPRISE, OFFER_PRIORITY_VOUCHER
 from ecommerce.journal.benefits import JournalBundleAbsoluteDiscountBenefit, JournalBundlePercentageDiscountBenefit
+from ecommerce.journal.conditions import JournalBundleCondition
 from ecommerce.programs.benefits import AbsoluteDiscountBenefitWithoutRange, PercentageDiscountBenefitWithoutRange
 from ecommerce.programs.conditions import ProgramCourseRunSeatsCondition
 from ecommerce.programs.custom import class_path
@@ -161,10 +162,6 @@ class ProgramCourseRunSeatsConditionFactory(ConditionFactory):
         model = ProgramCourseRunSeatsCondition
 
 
-class JournalConditionalFactory(ConditionFactory):  # pylint: disable=function-redefined
-    journal_bundle_uuid = factory.LazyFunction(uuid.uuid4)
-
-
 class ProgramOfferFactory(ConditionalOfferFactory):
     benefit = factory.SubFactory(PercentageDiscountBenefitWithoutRangeFactory)
     condition = factory.SubFactory(ProgramCourseRunSeatsConditionFactory)
@@ -223,9 +220,20 @@ class JournalPercentageDiscountBenefitFactory(BenefitFactory):
     proxy_class = class_path(JournalBundlePercentageDiscountBenefit)
 
 
+class JournalConditionFactory(ConditionFactory):
+    range = None
+    type = ''
+    value = None
+    journal_bundle_uuid = factory.LazyFunction(uuid.uuid4)
+    proxy_class = class_path(JournalBundleCondition)
+
+    class Meta(object):
+        model = JournalBundleCondition
+
+
 class JournalOfferFactory(ConditionalOfferFactory):
     benefit = factory.SubFactory(JournalPercentageDiscountBenefitFactory)
-    condition = factory.SubFactory(JournalConditionalFactory)
+    condition = factory.SubFactory(JournalConditionFactory)
     max_basket_applications = 1
     offer_type = ConditionalOffer.SITE
     priority = OFFER_PRIORITY_ENTERPRISE
