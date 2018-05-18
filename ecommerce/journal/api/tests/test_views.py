@@ -4,13 +4,14 @@ import simplejson as json
 from django.urls import reverse
 from oscar.core.loading import get_model
 
+from ecommerce.journal.tests.mixins import JournalMixin     # pylint: disable=no-name-in-module
 from ecommerce.tests.testcases import TestCase
 
 Product = get_model('catalogue', 'Product')
 Partner = get_model('partner', 'Partner')
 
 
-class JournalProductViewTests(TestCase):
+class JournalProductViewTests(TestCase, JournalMixin):
 
     def setUp(self):
         """
@@ -20,41 +21,7 @@ class JournalProductViewTests(TestCase):
         user = self.create_user(is_staff=True)
         self.client.login(username=user.username, password=self.password)
 
-        self.value_text = "dummy_text"
-        self.path = reverse("journal:api:v1:journal-list")
-        self.product = self._create_product()
-
-    def _create_product(self):
-        self.client.post(self.path, json.dumps(self._get_data_for_create()), "application/json")
-        return Product.objects.first()
-
-    def _get_product(self):
-        path = reverse(
-            'journal:api:v1:journal-detail',
-            kwargs={'attribute_values__value_text': self.value_text}
-        )
-        response = self.client.get(path)
-        return json.loads(response.content)
-
-    def _get_data_for_create(self):
-        return {
-            'attribute_values': [
-                {'code': 'weight', 'name': 'weight', 'value': self.value_text}
-            ],
-            'stockrecords': [
-                {
-                    'partner': 'edx',
-                    'partner_sku': 'unit02',
-                    'price_excl_tax': '9.99',
-                    'price_currency': 'GBP'
-                }
-            ],
-            'product_class': 'Journal',
-            'title': 'dummy-product-title',
-            'expires': None,
-            'id': None,
-            'structure': 'standalone'
-        }
+        self.product = self.create_product(self.client)
 
     def _get_data_for_put_endpoint(self):
         """
@@ -79,7 +46,7 @@ class JournalProductViewTests(TestCase):
         """
         Asserts the updated product values.
         """
-        product = self._get_product()
+        product = self.get_product(self.client)
         expected_data = self._get_data_for_put_endpoint()
         self.assertEqual(product['title'], expected_data['title'])
         for index, stockrecord in enumerate(product['stockrecords']):
@@ -131,7 +98,7 @@ class JournalProductViewTests(TestCase):
         )
 
         # PUT endpoint always return 200 status code.
-        self.assertEqual(self._get_product()['title'], product_title)
+        self.assertEqual(self.get_product(self.client)['title'], product_title)
 
     def test_update_with_valid_data(self):
         """
