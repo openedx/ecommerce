@@ -27,20 +27,20 @@ class RequestCache(threading.local):
         cls._data = {}
 
     @classmethod
-    def get_cache_response(cls, key):
+    def get_cached_response(cls, key):
         """
-        Retrieves a CacheResponse for the provided key.
+        Retrieves a CachedResponse for the provided key.
 
         Args:
             key (string)
 
         Returns:
-            A CacheResponse with hit/miss status and value.
+            A CachedResponse with hit/miss status and value.
 
         """
         cached_value = cls._data.get(key, _CACHE_MISS)
         is_miss = cached_value is _CACHE_MISS
-        return CacheResponse(is_miss, cached_value)
+        return CachedResponse(is_miss, cached_value)
 
     @classmethod
     def set(cls, key, value):
@@ -73,24 +73,24 @@ class TieredCache(object):
     """
 
     @classmethod
-    def get_cache_response(cls, key):
+    def get_cached_response(cls, key):
         """
-        Retrieves a CacheResponse for the provided key.
+        Retrieves a CachedResponse for the provided key.
 
         Args:
             key (string)
 
         Returns:
-            A CacheResponse with hit/miss status and value.
+            A CachedResponse with hit/miss status and value.
 
         """
-        request_cache_response = RequestCache.get_cache_response(key)
-        if request_cache_response.is_miss:
-            django_cached_response = cls._get_cache_response_from_django_cache(key)
+        request_cached_response = RequestCache.get_cached_response(key)
+        if request_cached_response.is_miss:
+            django_cached_response = cls._get_cached_response_from_django_cache(key)
             cls._set_request_cache_if_django_cache_hit(key, django_cached_response)
             return django_cached_response
 
-        return request_cache_response
+        return request_cached_response
 
     @staticmethod
     def set_all_tiers(key, value, django_cache_timeout=DEFAULT_TIMEOUT):
@@ -133,9 +133,9 @@ class TieredCache(object):
         django_cache.clear()
 
     @classmethod
-    def _get_cache_response_from_django_cache(cls, key):
+    def _get_cached_response_from_django_cache(cls, key):
         """
-        Retrieves a CacheResponse for the given key from the django cache.
+        Retrieves a CachedResponse for the given key from the django cache.
 
         If the request was set to force cache misses, then this will always
         return a cache miss response.
@@ -144,7 +144,7 @@ class TieredCache(object):
             key (string)
 
         Returns:
-            A CacheResponse with hit/miss status and value.
+            A CachedResponse with hit/miss status and value.
 
         """
         if cls._should_force_django_cache_miss():
@@ -152,20 +152,20 @@ class TieredCache(object):
 
         cached_value = django_cache.get(key, _CACHE_MISS)
         is_miss = cached_value is _CACHE_MISS
-        return CacheResponse(is_miss, cached_value)
+        return CachedResponse(is_miss, cached_value)
 
     @classmethod
-    def _set_request_cache_if_django_cache_hit(cls, key, django_cache_response):
+    def _set_request_cache_if_django_cache_hit(cls, key, django_cached_response):
         """
-        Sets the value in the request cache if the django cache response was a hit.
+        Sets the value in the request cache if the django cached response was a hit.
 
         Args:
             key (string)
-            django_cache_response (CacheResponse)
+            django_cached_response (CachedResponse)
 
         """
-        if django_cache_response.is_hit:
-            RequestCache.set(key, django_cache_response.value)
+        if django_cached_response.is_hit:
+            RequestCache.set(key, django_cached_response.value)
 
     @staticmethod
     def _get_and_set_force_cache_miss(request):
@@ -182,21 +182,21 @@ class TieredCache(object):
 
     @classmethod
     def _should_force_django_cache_miss(cls):
-        cache_response = RequestCache.get_cache_response(SHOULD_FORCE_CACHE_MISS_KEY)
-        return False if cache_response.is_miss else cache_response.value
+        cached_response = RequestCache.get_cached_response(SHOULD_FORCE_CACHE_MISS_KEY)
+        return False if cached_response.is_miss else cached_response.value
 
 
-class CacheResponseError(Exception):
+class CachedResponseError(Exception):
     """
-    Error used when CacheResponse is misused.
+    Error used when CachedResponse is misused.
     """
-    USAGE_MESSAGE = 'CacheResponse was misused. Only use the attributes is_hit (or is_miss) and value.'
+    USAGE_MESSAGE = 'CachedResponse was misused. Only use the attributes is_hit (or is_miss) and value.'
 
     def __init__(self, message=USAGE_MESSAGE):
-        super(CacheResponseError, self).__init__(message)
+        super(CachedResponseError, self).__init__(message)
 
 
-class CacheResponse(object):
+class CachedResponse(object):
     """
     Represents a cache response including hit status and value.
     """
@@ -210,40 +210,40 @@ class CacheResponse(object):
     def __repr__(self):
         # Important: Do not include the cached value to help avoid any security
         # leaks that could happen if these are logged.
-        return 'CacheResponse (is_hit={})'.format(self.is_hit)
+        return 'CachedResponse (is_hit={})'.format(self.is_hit)
 
     @property
     def is_hit(self):
         return not self.is_miss
 
     def __nonzero__(self):
-        raise CacheResponseError()
+        raise CachedResponseError()
 
     def __bool__(self):
-        raise CacheResponseError()
+        raise CachedResponseError()
 
     def __index__(self):
-        raise CacheResponseError()
+        raise CachedResponseError()
 
     def __getattr__(self, name):
-        raise CacheResponseError()
+        raise CachedResponseError()
 
     def __setattr__(self, name, val):
         if name not in self.VALID_ATTRIBUTES:
-            raise CacheResponseError()
-        return super(CacheResponse, self).__setattr__(name, val)
+            raise CachedResponseError()
+        return super(CachedResponse, self).__setattr__(name, val)
 
     def __getitem__(self, key):
-        raise CacheResponseError()
+        raise CachedResponseError()
 
     def __setitem__(self, key, val):
-        raise CacheResponseError()
+        raise CachedResponseError()
 
     def __iter__(self):
-        raise CacheResponseError()
+        raise CachedResponseError()
 
     def __contains__(self, value):
-        raise CacheResponseError()
+        raise CachedResponseError()
 
 
-CACHE_MISS_RESPONSE = CacheResponse(True, None)
+CACHE_MISS_RESPONSE = CachedResponse(True, None)
