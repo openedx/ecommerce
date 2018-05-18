@@ -7,7 +7,7 @@ from oscar.core.loading import get_model
 
 from ecommerce.extensions.test.factories import (
     ConditionalOfferFactory,
-    JournalConditionalFactory,
+    JournalConditionFactory,
     PercentageDiscountBenefitWithoutRangeFactory
 )
 from ecommerce.journal.benefit_constants import BENEFIT_MAP
@@ -61,7 +61,7 @@ class JournalOfferFormTests(TestCase):
         """
         journal_offer = ConditionalOfferFactory(
             benefit=PercentageDiscountBenefitWithoutRangeFactory(),
-            condition=JournalConditionalFactory()
+            condition=JournalConditionFactory()
         )
         form = JournalOfferForm(instance=journal_offer)
         self.assertEqual(form['journal_bundle_uuid'].value(), journal_offer.condition.journal_bundle_uuid.hex)
@@ -96,7 +96,7 @@ class JournalOfferFormTests(TestCase):
         """
         journal_offer = ConditionalOfferFactory(
             benefit=PercentageDiscountBenefitWithoutRangeFactory(),
-            condition=JournalConditionalFactory()
+            condition=JournalConditionFactory()
         )
         data = self.generate_data(journal_bundle_uuid=journal_offer.condition.journal_bundle_uuid)
         self._assert_form_errors(data, {'journal_bundle_uuid': ['An offer already exists for this journal bundle']})
@@ -124,7 +124,7 @@ class JournalOfferFormTests(TestCase):
         mock_discovery_call.return_value = {"title": "test-journal"}
         journal_offer = ConditionalOfferFactory(
             benefit=PercentageDiscountBenefitWithoutRangeFactory(),
-            condition=JournalConditionalFactory()
+            condition=JournalConditionFactory()
         )
         data = self.generate_data(
             journal_bundle_uuid=journal_offer.condition.journal_bundle_uuid,
