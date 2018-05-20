@@ -17,7 +17,7 @@ msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2018-04-05 11:00+0000\n"
-"PO-Revision-Date: 2018-04-12 13:29+0000\n"
+"PO-Revision-Date: 2018-05-17 08:45+0000\n"
 "Last-Translator: Ali Işıngör <ali@artistanbul.io>\n"
 "Language-Team: Turkish (Turkey) (http://www.transifex.com/open-edx/edx-platform/language/tr_TR/)\n"
 "MIME-Version: 1.0\n"
@@ -65,7 +65,7 @@ msgstr "Çok kullanımlı kuponların maksimum kullanım sayısı 2'den fazla ol
 
 #: ecommerce/static/js/models/coupon_model.js:166
 msgid "A valid Program UUID is required."
-msgstr ""
+msgstr "Geçerli bir Program UUID'si gerekiyor."
 
 #: ecommerce/static/js/models/coupon_model.js:190
 msgid "Must occur before end date"
@@ -273,7 +273,7 @@ msgstr "Ödemenizle ilgili bir hata ortaya çıktı. Ücret tahsil edilmedi. Lü
 
 #: ecommerce/static/js/payment_processors/stripe.js:110
 msgid "An error occurred while processing your payment. Please try again."
-msgstr ""
+msgstr "Ödemenizi işlerken bir hata gerçekleşti. Lütfen tekrar deneyin."
 
 #: ecommerce/static/js/utils/utils.js:184
 msgid "Trailing comma not allowed."
@@ -449,7 +449,7 @@ msgstr "Veriyi kaydederken bir hata oluştu."
 
 #: ecommerce/static/js/views/offer_view.js:198
 msgid "Ellipsis"
-msgstr ""
+msgstr "Üç Nokta"
 
 #: ecommerce/static/js/views/offer_view.js:205
 msgid "Load the records for page "
