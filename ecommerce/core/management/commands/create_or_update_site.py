@@ -164,6 +164,7 @@ class Command(BaseCommand):
         if partner_created:
             partner.name = partner_name
             partner.short_code = partner_code
+            partner.default_site = site
             partner.save()
             logger.info('Partner created with code %s', partner_code)
 
