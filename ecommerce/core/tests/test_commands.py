@@ -35,6 +35,7 @@ class CreateOrUpdateSiteCommandTests(TestCase):
         site_configuration = site.siteconfiguration
         self.assertEqual(site_configuration.site, site)
         self.assertEqual(site_configuration.partner, partner)
+        self.assertEqual(site_configuration.partner.default_site, site)
         self.assertEqual(site_configuration.lms_url_root, self.lms_url_root)
         self.assertEqual(site_configuration.payment_processors, self.payment_processors)
         self.assertEqual(site_configuration.client_side_payment_processor, self.client_side_payment_processor)
