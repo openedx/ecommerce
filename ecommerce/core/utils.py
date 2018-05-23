@@ -5,6 +5,7 @@ import logging
 from urlparse import parse_qs, urlparse
 
 import six
+import waffle
 from django.core.exceptions import ValidationError
 
 logger = logging.getLogger(__name__)
@@ -48,9 +49,12 @@ def get_cache_key(**kwargs):
     return hashlib.md5(key).hexdigest()
 
 
-def traverse_pagination(response, endpoint):
+def deprecated_traverse_pagination(response, endpoint):
     """
     Traverse a paginated API response.
+
+    Note: This method should be deprecated since it defeats the purpose
+    of pagination.
 
     Extracts and concatenates "results" (list of dict) returned by DRF-powered
     APIs.
@@ -63,6 +67,9 @@ def traverse_pagination(response, endpoint):
         list of dict.
 
     """
+    if waffle.switch_is_active("debug_logging_for_deprecated_traverse_pagination"):  # pragma: no cover
+        logger.info("deprecated_traverse_pagination method is called for endpoint %s", endpoint)
+
     results = response.get('results', [])
 
     next_page = response.get('next')

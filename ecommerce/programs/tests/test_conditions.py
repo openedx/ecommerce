@@ -267,7 +267,7 @@ class ProgramCourseRunSeatsConditionTests(ProgramTestMixin, TestCase):
                 if seat.attr.id_verification_required:
                     basket.add_product(seat)
 
-        with mock.patch('ecommerce.programs.conditions.traverse_pagination') as mock_processing_entitlements:
+        with mock.patch('ecommerce.programs.conditions.deprecated_traverse_pagination') as mock_processing_entitlements:
             self.assertFalse(self.condition.is_satisfied(offer, basket))
             mock_processing_entitlements.assert_not_called()
 

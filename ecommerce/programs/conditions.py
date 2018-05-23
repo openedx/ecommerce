@@ -10,7 +10,7 @@ from requests.exceptions import ConnectionError, Timeout
 from slumber.exceptions import HttpNotFoundError, SlumberBaseException
 
 from ecommerce.cache_utils.utils import TieredCache
-from ecommerce.core.utils import get_cache_key, traverse_pagination
+from ecommerce.core.utils import deprecated_traverse_pagination, get_cache_key
 from ecommerce.extensions.offer.decorators import check_condition_applicability
 from ecommerce.extensions.offer.mixins import SingleItemConsumptionConditionMixin
 from ecommerce.programs.utils import get_program
@@ -85,7 +85,8 @@ class ProgramCourseRunSeatsCondition(SingleItemConsumptionConditionMixin, Condit
                     basket, 'entitlements', site_configuration.entitlement_api_client.entitlements
                 )
                 if isinstance(response, dict):
-                    entitlements = traverse_pagination(response, site_configuration.entitlement_api_client.entitlements)
+                    entitlements = deprecated_traverse_pagination(
+                        response, site_configuration.entitlement_api_client.entitlements)
                 else:
                     entitlements = response
         return enrollments, entitlements

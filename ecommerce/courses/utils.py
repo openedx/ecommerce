@@ -5,7 +5,7 @@ from django.core.cache import cache
 from django.utils.translation import ugettext_lazy as _
 from opaque_keys.edx.keys import CourseKey
 
-from ecommerce.core.utils import traverse_pagination
+from ecommerce.core.utils import deprecated_traverse_pagination
 
 
 def mode_for_product(product):
@@ -77,7 +77,7 @@ def get_course_catalogs(site, resource_id=None):
     if resource_id:
         results = response
     else:
-        results = traverse_pagination(response, endpoint)
+        results = deprecated_traverse_pagination(response, endpoint)
 
     cache.set(cache_key, results, settings.COURSES_API_CACHE_TIMEOUT)
     return results
