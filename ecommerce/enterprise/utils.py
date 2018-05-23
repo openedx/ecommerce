@@ -16,7 +16,7 @@ from oscar.core.loading import get_model
 from requests.exceptions import ConnectionError, Timeout
 from slumber.exceptions import SlumberHttpBaseException
 
-from ecommerce.core.utils import traverse_pagination
+from ecommerce.core.utils import deprecated_traverse_pagination
 from ecommerce.enterprise.exceptions import EnterpriseDoesNotExist
 from ecommerce.extensions.offer.models import OFFER_PRIORITY_ENTERPRISE
 
@@ -86,7 +86,7 @@ def get_enterprise_customers(site):
                 'name': each['name'],
                 'id': each['uuid'],
             }
-            for each in traverse_pagination(response, endpoint)
+            for each in deprecated_traverse_pagination(response, endpoint)
         ],
         key=lambda k: k['name'].lower()
     )
