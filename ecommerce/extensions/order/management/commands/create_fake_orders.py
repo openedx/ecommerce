@@ -7,7 +7,6 @@ from django.db import transaction
 from oscar.core.loading import get_class, get_model
 from oscar.test.factories import UserFactory
 
-
 logger = logging.getLogger(__name__)
 Order = get_model('order', 'Order')
 Basket = get_model('basket', 'Basket')
