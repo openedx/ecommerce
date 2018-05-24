@@ -5,7 +5,7 @@ from requests.exceptions import ConnectionError, Timeout
 from ecommerce.extensions.analytics.utils import audit_log
 from ecommerce.extensions.fulfillment.modules import BaseFulfillmentModule
 from ecommerce.extensions.fulfillment.status import LINE
-from ecommerce.journal.client import post_journal_access
+from ecommerce.journal.client import post_journal_access, revoke_journal_access
 
 logger = logging.getLogger(__name__)
 
@@ -86,5 +86,26 @@ class JournalFulfillmentModule(BaseFulfillmentModule):
         return order, lines
 
     def revoke_line(self, line):
-        logger.error('REVOKE LINE')
+        try:
+            logger.info('Attempting to revoke fulfillment of Line [%d]...', line.id)
+
+            journal_uuid = line.product.attr.UUID
+
+            revoke_journal_access(
+                site_configuration=line.order.site.siteconfiguration,
+                order_number=line.order.number
+            )
+
+            audit_log(
+                'line_revoked',
+                order_line_id=line.id,
+                order_number=line.order.number,
+                product_class=line.product.get_product_class().name,
+                user_id=line.order.user.id,
+                journal_uuid=journal_uuid
+            )
+            return True
+        except Exception:  # pylint: disable=broad-except
+            logger.exception('Failed to revoke fulfillment of Line [%d].', line.id)
+
         return False
