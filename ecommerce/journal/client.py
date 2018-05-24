@@ -8,7 +8,7 @@ from django.core.cache import cache
 from edx_rest_api_client.client import EdxRestApiClient
 
 from ecommerce.core.utils import get_cache_key
-from ecommerce.journal.constants import JOURNAL_BUNDLE_CACHE_TIMEOUT
+from ecommerce.journal.constants import JOURNAL_BUNDLE_CACHE_TIMEOUT, JOURNAL_CACHE_TIMEOUT
 
 logger = logging.getLogger(__name__)
 
@@ -62,6 +62,43 @@ def revoke_journal_access(site_configuration, order_number):
         'revoke_access': "true"
     }
     return client.journalaccess.post(data)
+
+
+def fetch_journal_info_from_discovery(site, product):
+    """
+    Retrieve journal information for given journal.
+    Retrieve it from cache if present, otherwise send GET request to journal
+        discovery api and store in cache.
+
+    Args:
+        site
+        product (Product): A product with a UUID attribute associated with a journal
+
+    Returns:
+        (dict): contains dict of journal attributes
+
+    Raises:
+        ConnectionError: raised if ecommerce is unable to connect to enterprise api server.
+        SlumberBaseException: raised if API response contains http error status like 4xx, 5xx etc...
+        Timeout: request is raised if API is taking too long to respond
+    """
+
+    api_resource = 'journal'
+    journal_uuid = product.attr.UUID
+
+    cache_key = get_cache_key(
+        site_domain=site.domain,
+        resource=api_resource,
+        journal_uuid=journal_uuid
+    )
+
+    journal = cache.get(cache_key)
+    if not journal:
+        client = site.siteconfiguration.journal_discovery_api_client
+        journal = client.journals(journal_uuid).get()
+        cache.set(cache_key, journal, JOURNAL_CACHE_TIMEOUT)
+
+    return journal
 
 
 def fetch_journal_bundle(site, journal_bundle_uuid):

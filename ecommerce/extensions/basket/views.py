@@ -10,6 +10,7 @@ import waffle
 from django.http import HttpResponseBadRequest, HttpResponseRedirect
 from django.shortcuts import redirect, render
 from django.utils.translation import ugettext as _
+from django.utils.translation import ngettext
 from opaque_keys.edx.keys import CourseKey
 from oscar.apps.basket.views import VoucherAddView as BaseVoucherAddView
 from oscar.apps.basket.views import VoucherRemoveView as BaseVoucherRemoveView
@@ -33,6 +34,7 @@ from ecommerce.extensions.order.exceptions import AlreadyPlacedOrderException
 from ecommerce.extensions.partner.shortcuts import get_partner_for_site
 from ecommerce.extensions.payment.constants import CLIENT_SIDE_CHECKOUT_FLAG_NAME
 from ecommerce.extensions.payment.forms import PaymentForm
+from ecommerce.journal.client import fetch_journal_info_from_discovery
 
 Benefit = get_model('offer', 'Benefit')
 logger = logging.getLogger(__name__)
@@ -192,6 +194,48 @@ class BasketSummaryView(BasketView):
             'course_end': course_end,
         }
 
+    def _get_journal_data(self, product):
+        """
+        Return journal data.
+
+        Args:
+            product (Product): A product that has UUID as attribute
+        Returns:
+            Dictionary containing:
+                'product_title': journal title
+                'image_url': image url,
+                'order_details_msg': message containing details about the order
+        """
+
+        journal_uuid = product.attr.UUID
+        journal_title = None
+        image_url = None
+
+        try:
+            journal = fetch_journal_info_from_discovery(self.request.site, product)
+
+            journal_title = journal.get('title', '')
+            image_url = journal.get('card_image_url', '')
+            access_length = journal.get('access_length', None)
+            if access_length:
+                order_details_msg = ngettext(
+                    'After you complete your order you will automatically be granted access to %(title)s for %(access_length)d day.',  # pylint: disable=line-too-long
+                    'After you complete your order you will automatically be granted access to %(title)s for %(access_length)d days.',  # pylint: disable=line-too-long
+                    access_length
+                ) % {
+                    'title': journal_title,
+                    'access_length': access_length
+                }
+
+        except (ConnectionError, SlumberBaseException, Timeout):
+            logger.exception('Failed to retrieve data from Discovery Service for journal [%s].', journal_uuid)
+
+        return {
+            'product_title': journal_title,
+            'image_url': image_url,
+            'order_details_msg': order_details_msg
+        }
+
     def _process_basket_lines(self, lines):
         """Processes the basket lines and extracts information for the view's context.
         In addition determines whether:
@@ -262,6 +306,9 @@ class BasketSummaryView(BasketView):
                     ul_end='</ul>',
                     user_email=self.request.user.email
                 )
+            elif line.product.is_journal_product:
+                line_data = self._get_journal_data(line.product)
+                order_details_msg = line_data['order_details_msg']
             else:
                 line_data = {
                     'product_title': line.product.title,
