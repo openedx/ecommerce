@@ -44,6 +44,25 @@ def post_journal_access(site_configuration, order_number, username, journal_uuid
     return client.journalaccess.post(data)
 
 
+def revoke_journal_access(site_configuration, order_number):
+    """
+    POST revoke access request to journal access api
+
+    Args:
+        site_configuration (SiteConfiguration): site configuration
+        order_number (str): number of order to be revoked
+
+    Returns:
+        response
+    """
+    client = get_journals_service_client(site_configuration)
+    data = {
+        'order_number': order_number,
+        'revoke_access': "true"
+    }
+    return client.journalaccess.post(data)
+
+
 def fetch_journal_bundle(site, journal_bundle_uuid):
     """
     Retrieve journal bundle for given uuid.
