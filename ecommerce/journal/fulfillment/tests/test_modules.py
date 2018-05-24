@@ -1,9 +1,8 @@
 """ Tests of the Journal's fulfillment modules. """
-
 import mock
 from oscar.core.loading import get_model
 from oscar.test import factories
-from requests.exceptions import ConnectionError
+from requests.exceptions import ConnectionError, HTTPError
 
 from ecommerce.extensions.fulfillment.status import LINE
 from ecommerce.extensions.test.factories import create_order
@@ -83,5 +82,19 @@ class JournalFulfillmentModuleTest(TestCase, JournalMixin):
             LINE.FULFILLMENT_SERVER_ERROR
         )
 
+    @mock.patch("ecommerce.journal.fulfillment.modules.revoke_journal_access", mock.Mock(return_value=''))
     def test_revoke_line(self):
+        self.assertTrue(JournalFulfillmentModule().revoke_line(self.lines[0]))
+
+    @mock.patch("ecommerce.journal.fulfillment.modules.revoke_journal_access", mock.Mock(side_effect=HTTPError))
+    def test_revoke_line_invalid_order_number(self):
         self.assertFalse(JournalFulfillmentModule().revoke_line(self.lines[0]))
+
+    @mock.patch("ecommerce.journal.fulfillment.modules.revoke_journal_access")
+    def test_revoke_product(self, mocked_revoke_journal_access):
+        """ Test revoking a Journal product. """
+        JournalFulfillmentModule().revoke_line(self.lines[0])
+        mocked_revoke_journal_access.assert_called_once_with(
+            site_configuration=self.lines[0].order.site.siteconfiguration,
+            order_number=self.lines[0].order.number
+        )
