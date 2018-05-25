@@ -20,7 +20,7 @@ from ecommerce.core.constants import (
     DONATIONS_FROM_CHECKOUT_TESTS_PRODUCT_TYPE_NAME,
     ENROLLMENT_CODE_PRODUCT_CLASS_NAME
 )
-from ecommerce.core.url_utils import get_lms_enrollment_api_url, get_lms_entitlement_api_url
+from ecommerce.core.url_utils import get_lms_enrollment_api_url, get_lms_entitlement_api_url, get_lms_digital_book_api_url
 from ecommerce.courses.models import Course
 from ecommerce.courses.utils import mode_for_product
 from ecommerce.enterprise.utils import get_or_create_enterprise_customer_user
@@ -589,7 +589,7 @@ class CourseEntitlementFulfillmentModule(BaseFulfillmentModule):
         Args:
             lines (List of Lines): Order Lines, associated with purchased products in an Order.
         Returns:
-            A supported list of unmodified lines associated with "Course ENtitlement" products.
+            A supported list of unmodified lines associated with "Course Entitlement" products.
         """
         return [line for line in lines if self.supports_line(line)]
 
@@ -634,7 +634,7 @@ class CourseEntitlementFulfillmentModule(BaseFulfillmentModule):
 
                 # POST to the Entitlement API.
                 response = entitlement_api_client.entitlements.post(data)
-                line.attributes.create(option=entitlement_option, value=response['uuid'])
+                line.attributes.create(option=entitlement_option, value=response['uuid'])  #TODO: what is this line doing?
                 line.set_status(LINE.COMPLETE)
 
                 audit_log(
@@ -690,4 +690,92 @@ class CourseEntitlementFulfillmentModule(BaseFulfillmentModule):
         except Exception:  # pylint: disable=broad-except
             logger.exception('Failed to revoke fulfillment of Line [%d].', line.id)
 
+        return False
+
+class DigitalBookFulfillmentModule(BaseFulfillmentModule):
+    """ Fulfillment Module for granting students an entitlement.
+    Allows the entitlement of a student via purchase of a 'Course Entitlement'.
+    """
+
+    def supports_line(self, line):
+        logger.debug('Line order: [%s], is digital book: [%s]', line, line.product.is_digital_book_product)
+        return line.product.is_digital_book_product
+
+    def get_supported_lines(self, lines):
+        """ Return a list of lines that can be fulfilled.
+        Checks each line to determine if it is a "Digital Book". Ditigal Books are fulfilled by granting students
+        an access to a digital book, which is the sole functionality of this module.
+        Args:
+            lines (List of Lines): Order Lines, associated with purchased products in an Order.
+        Returns:
+            A supported list of unmodified lines associated with "Digital Book" products.
+        """
+        return [line for line in lines if self.supports_line(line)]
+
+    def fulfill_product(self, order, lines):
+        """ Fulfills the purchase of a 'Digital Book'
+        Args:
+            order (Order): The Order associated with the lines to be fulfilled. The user associated with the order
+                fis presumed to be the student to grant an entitlement.
+            lines (List of Lines): Order Lines, associated with purchased products in an Order. These should only
+                be "Digital Book" products.
+        Returns:
+            The original set of lines, with new statuses set based on the success or failure of fulfillment.
+        """
+        logger.info('Attempting to fulfill "Digital Book" product types for order [%s]', order.number)
+
+        for line in lines:
+            try:
+                book_key = line.product.attr.book_key
+            except AttributeError:
+                logger.error('Digital Book Product does not have required attributes, [book_key]')
+                line.set_status(LINE.FULFILLMENT_CONFIGURATION_ERROR)
+                continue
+
+            data = {
+                'user': order.user.username,
+                'book_key': book_key,
+                'order_number': order.number,
+            }
+
+            try:
+                # TODO: POST to digital book API
+                # TODO: attempt to get any type of response back and print it
+                digital_book_api_client = EdxRestApiClient(
+                    get_lms_digital_book_api_url(),
+                    jwt=order.site.siteconfiguration.access_token
+                )
+
+                # POST to the Digital Book API.
+                response = digital_book_api_client.digital_books.post(data)
+
+                # TODO: line attr create line
+
+                line.set_status(LINE.COMPLETE)
+
+                audit_log(
+                    'line_fulfilled',
+                    order_line_id=line.id,
+                    order_number=order.number,
+                    product_class=line.product.get_product_class().name,
+                    book_key=book_key,
+                    user_id=order.user.id,
+                )
+
+            except (Timeout, ConnectionError):
+                logger.exception(
+                    'Unable to fulfill line [%d] of order [%s] due to a network problem', line.id, order.number
+                )
+                line.set_status(LINE.FULFILLMENT_NETWORK_ERROR)
+            except Exception:
+                logger.exception(
+                    'Unable to fulfill line [%d] of order [%s]', line.id, order.number
+                )
+                line.set_status(LINE.FULFILLMENT_SERVER_ERROR)
+
+        logger.info('Finished fulfilling "Digital Book" product types for order [%s]', order.number)
+        return order, lines
+
+    def revoke_line(self, line):
+        logger.error('REVOKE LINE')
         return False

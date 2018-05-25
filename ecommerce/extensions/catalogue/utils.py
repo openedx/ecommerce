@@ -162,6 +162,11 @@ def generate_sku(product, partner):
             unicode(product.attr.UUID),
             unicode(partner.id)
         )).encode('utf-8')
+    elif product.is_digital_book_product:
+        _hash = ' '.join((
+            getattr(product.attr, 'book_key', ''),
+            unicode(partner.id)
+        )).encode('utf-8')
 
     else:
         raise Exception('Unexpected product class')

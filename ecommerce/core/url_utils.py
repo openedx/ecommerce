@@ -85,6 +85,12 @@ def get_lms_entitlement_api_url():
     return get_lms_url('/api/entitlements/v1/')
 
 
+def get_lms_digital_book_api_url():
+    """ Returns the base lms digital book api url. """
+    #TODO: why do we use v1 in so many apis? is there a plan to change these in the future?
+    return get_lms_url('/api/digital_book/v1/')
+
+
 def get_lms_enrollment_base_api_url():
     """ Returns the Base lms enrollment api url."""
     site_configuration = _get_site_configuration()
