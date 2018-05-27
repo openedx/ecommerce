@@ -5,7 +5,7 @@
 # 
 # Translators:
 # Romandito Mahendrayudha <romandito@gmail.com>, 2016
-# Yayang Panggi <yygdepe@gmail.com>, 2016
+# Yayang Dwijayani Panggi <yygdepe@gmail.com>, 2016
 msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
