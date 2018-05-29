@@ -57,8 +57,11 @@ clean:
 clean_static:
 	rm -rf assets/* ecommerce/static/build/*
 
-run_isort:
+run_check_isort:
 	VIRTUAL_ENV=/edx/app/ecommerce/ecommerce_env isort --check-only --recursive e2e/ ecommerce/
+
+run_isort:
+	VIRTUAL_ENV=/edx/app/ecommerce/ecommerce_env isort --recursive e2e/ ecommerce/
 
 run_pep8:
 	pep8 --config=.pep8 ecommerce e2e
