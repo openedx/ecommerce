@@ -1,4 +1,6 @@
 """Voucher Utility Methods. """
+from __future__ import unicode_literals
+
 import base64
 import datetime
 import hashlib
@@ -673,7 +675,7 @@ def get_cached_voucher(code):
         Voucher.DoesNotExist: When no vouchers with provided code exist.
     """
     cache_key = 'voucher_{code}'.format(code=code)
-    cache_key = hashlib.md5(cache_key).hexdigest()
+    cache_key = hashlib.md5(cache_key).hexdigest()  # pylint: disable=redefined-variable-type
     voucher = cache.get(cache_key)
     if not voucher:
         voucher = Voucher.objects.get(code=code)
