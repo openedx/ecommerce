@@ -59,18 +59,7 @@ class Command(BaseCommand):
         """
         Create Sites, SiteThemes, SiteConfigurations, and Courses (if requested)
         """
-        site, _ = Site.objects.get_or_create(
-            domain=site_domain,
-            defaults={"name": theme_dir_name}
-        )
-
-        logger.info('Creating %s SiteTheme', site_domain)
-        SiteTheme.objects.get_or_create(
-            site=site,
-            theme_dir_name=theme_dir_name
-        )
-
-        logger.info('Creating %s Partner', site_domain)
+        logger.info('Creating or updating %s Partner', partner_code)
         partner, _ = Partner.objects.get_or_create(
             short_code=partner_code,
             defaults={
@@ -78,7 +67,25 @@ class Command(BaseCommand):
             }
         )
 
-        logger.info('Creating %s SiteConfiguration', site_domain)
+        logger.info('Finding if site already exists for %s partner', partner_code)
+        try:
+            site_config = SiteConfiguration.objects.get(partner=partner)
+            site_id = site_config.site.id
+            logger.info('Site already exists for %s partner with site id %s', partner_code, site_id)
+        except SiteConfiguration.DoesNotExist:
+            site_id = None
+
+        logger.info('Creating or updating site %s ', site_domain)
+        site = Site(id=site_id, domain=site_domain, name=theme_dir_name)
+        site.save()
+
+        logger.info('Creating %s SiteTheme', site_domain)
+        SiteTheme.objects.get_or_create(
+            site=site,
+            theme_dir_name=theme_dir_name
+        )
+
+        logger.info('Creating or updating %s SiteConfiguration', site_domain)
         SiteConfiguration.objects.get_or_create(
             site=site,
             partner=partner,

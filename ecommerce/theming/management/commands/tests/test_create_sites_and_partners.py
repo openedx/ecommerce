@@ -160,3 +160,12 @@ class TestCreateSitesAndPartners(TestCase):
         )
         # if we run command with same dns then it will not duplicates the sites and partners.
         self._assert_sites_data_is_valid()
+
+        self.dns_name = "new-dns"
+        call_command(
+            "create_sites_and_partners",
+            "--dns-name", self.dns_name,
+            "--theme-path", self.theme_path
+        )
+        # if we run command with same partner but different dns then it should update sites.
+        self._assert_sites_data_is_valid()
