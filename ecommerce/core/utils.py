@@ -68,7 +68,12 @@ def deprecated_traverse_pagination(response, endpoint):
 
     """
     if waffle.switch_is_active("debug_logging_for_deprecated_traverse_pagination"):  # pragma: no cover
-        logger.info("deprecated_traverse_pagination method is called for endpoint %s", endpoint)
+        base_url = ""
+        try:
+            base_url = endpoint._store['base_url']  # pylint: disable=protected-access
+        except:  # pylint: disable=bare-except
+            pass
+        logger.info("deprecated_traverse_pagination method is called for endpoint %s", base_url)
 
     results = response.get('results', [])
 
