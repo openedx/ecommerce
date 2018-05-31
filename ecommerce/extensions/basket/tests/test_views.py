@@ -341,6 +341,12 @@ class BasketSummaryViewTests(EnterpriseServiceMockMixin, DiscoveryTestMixin, Dis
                 )
             )
 
+    def test_journal_product(self):
+        """ Verify the basket looks right for journal product types. """
+        title = "Test Journal 123"
+        product = factories.Pro
+
+
     def test_non_seat_product(self):
         """Verify the basket accepts non-seat product types."""
         title = 'Test Product 123'
