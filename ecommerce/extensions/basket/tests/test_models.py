@@ -5,9 +5,12 @@ from oscar.core.loading import get_class, get_model
 from oscar.test import factories
 
 from analytics import Client
+
+from ecommerce.cache_utils.utils import RequestCache
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.extensions.analytics.utils import parse_tracking_context, translate_basket_line_for_segment
 from ecommerce.extensions.api.v2.tests.views.mixins import CatalogMixin
+from ecommerce.extensions.basket.constants import is_calculate_temporary_basket
 from ecommerce.extensions.basket.models import Basket
 from ecommerce.extensions.basket.tests.mixins import BasketMixin
 from ecommerce.extensions.test.factories import create_basket
@@ -117,10 +120,7 @@ class BasketTests(CatalogMixin, BasketMixin, TestCase):
         """
         Verify the method fires 'Product Removed' Segment event with the correct information when basket is not empty
         """
-        basket = create_basket(empty=True, site=self.site)
-        course = CourseFactory()
-        seat = course.create_or_update_seat('verified', True, 100, self.partner)
-        basket.add_product(seat)
+        basket = self._create_basket_with_product()
 
         properties = translate_basket_line_for_segment(basket.lines.first())
         user_tracking_id, ga_client_id, lms_ip = parse_tracking_context(basket.owner)
@@ -134,6 +134,19 @@ class BasketTests(CatalogMixin, BasketMixin, TestCase):
         with mock.patch.object(Client, 'track') as mock_track:
             basket.flush()
             mock_track.assert_called_once_with(user_tracking_id, 'Product Removed', properties, context=context)
+
+    def test_flush_with_product_is_not_tracked_for_temporary_basket_calculation(self):
+        """
+        Verify the method does NOT fire 'Product Removed' Segment for temporary basket calculation
+
+        TODO: LEARNER 5463
+        """
+        basket = self._create_basket_with_product()
+        RequestCache.set(is_calculate_temporary_basket, True)
+
+        with mock.patch.object(Client, 'track') as mock_track:
+            basket.flush()
+            mock_track.assert_not_called()
 
     def test_flush_without_product(self):
         """ Verify the method does not fireSegment event when basket is empty """
@@ -154,6 +167,22 @@ class BasketTests(CatalogMixin, BasketMixin, TestCase):
             properties['cart_id'] = basket.id
             mock_track.assert_called_once_with(basket.site, basket.owner, 'Product Added', properties)
 
+    def test_add_product_not_tracked_for_temporary_basket_calculation(self):
+        """
+        Verify the method does NOT fire Product Added analytic event when a product is added to the basket
+
+        TODO: LEARNER 5463
+        """
+        course = CourseFactory()
+        basket = create_basket(empty=True)
+        seat = course.create_or_update_seat('verified', True, 100, self.partner)
+        RequestCache.set(is_calculate_temporary_basket, True)
+        with mock.patch('ecommerce.extensions.basket.models.track_segment_event') as mock_track:
+            basket.add_product(seat)
+            properties = translate_basket_line_for_segment(basket.lines.first())
+            properties['cart_id'] = basket.id
+            mock_track.assert_not_called()
+
     def test_product_events_with_free_items(self):
         """ Product Added/Removed events should not be fired for free products. """
         course = CourseFactory()
@@ -164,3 +193,10 @@ class BasketTests(CatalogMixin, BasketMixin, TestCase):
             basket.add_product(seat)
             basket.flush()
             self.assertEqual(mock_track.call_count, 0)
+
+    def _create_basket_with_product(self):
+        basket = create_basket(empty=True, site=self.site)
+        course = CourseFactory()
+        seat = course.create_or_update_seat('verified', True, 100, self.partner)
+        basket.add_product(seat)
+        return basket

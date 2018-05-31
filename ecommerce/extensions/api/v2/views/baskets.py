@@ -17,13 +17,14 @@ from rest_framework import generics, status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from ecommerce.cache_utils.utils import TieredCache
+from ecommerce.cache_utils.utils import RequestCache, TieredCache
 from ecommerce.core.utils import get_cache_key
 from ecommerce.enterprise.entitlements import get_entitlement_voucher
 from ecommerce.extensions.analytics.utils import audit_log
 from ecommerce.extensions.api import data as data_api
 from ecommerce.extensions.api import exceptions as api_exceptions
 from ecommerce.extensions.api.serializers import OrderSerializer
+from ecommerce.extensions.basket.constants import is_calculate_temporary_basket
 from ecommerce.extensions.basket.utils import attribute_cookie_data
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
 from ecommerce.extensions.partner.shortcuts import get_partner_for_site
@@ -445,6 +446,8 @@ class BasketCalculateView(generics.GenericAPIView):
                     'currency': basket.currency
                 }
         """
+        RequestCache.set(is_calculate_temporary_basket, True)  # TODO: LEARNER 5463
+
         partner = get_partner_for_site(request)
         skus = request.GET.getlist('sku')
         if not skus:
