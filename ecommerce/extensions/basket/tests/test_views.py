@@ -340,11 +340,11 @@ class BasketSummaryViewTests(EnterpriseServiceMockMixin, DiscoveryTestMixin, Dis
                     u'Failed to retrieve data from Discovery Service for course [{}].'.format(self.course.id)
                 )
             )
-
-    def test_journal_product(self):
-        """ Verify the basket looks right for journal product types. """
-        title = "Test Journal 123"
-        product = factories.Pro
+    #
+    # def test_journal_product(self):
+    #     """ Verify the basket looks right for journal product types. """
+    #     title = "Test Journal 123"
+    #     product = factories.Pro
 
 
     def test_non_seat_product(self):
