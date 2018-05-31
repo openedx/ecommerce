@@ -566,6 +566,20 @@ class BasketCalculateViewTests(ProgramTestMixin, TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data, expected)
 
+    @httpretty.activate
+    def test_basket_calculate_does_not_call_tracking_events(self):
+        """
+        Verify successful basket calculation does NOT track any events
+
+        TODO: LEARNER 5463
+        """
+        self.mock_user_data(self.user.username)
+
+        with mock.patch('ecommerce.extensions.basket.models.track_segment_event') as mock_track:
+            response = self.client.get(self.url)
+            self.assertEqual(response.status_code, 200)
+            mock_track.assert_not_called()
+
     @mock.patch('ecommerce.extensions.api.v2.views.baskets.BasketCalculateView._calculate_temporary_basket')
     @override_flag('disable_calculate_temporary_basket_atomic_transaction', active=True)
     def test_basket_calculate_anonymous_caching(self, mock_calculate_basket):
