@@ -24,7 +24,7 @@ from ecommerce.extensions.analytics.utils import audit_log
 from ecommerce.extensions.api import data as data_api
 from ecommerce.extensions.api import exceptions as api_exceptions
 from ecommerce.extensions.api.serializers import OrderSerializer
-from ecommerce.extensions.basket.constants import is_calculate_temporary_basket
+from ecommerce.extensions.basket.constants import TEMPORARY_BASKET_CACHE_KEY
 from ecommerce.extensions.basket.utils import attribute_cookie_data
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
 from ecommerce.extensions.partner.shortcuts import get_partner_for_site
@@ -446,7 +446,7 @@ class BasketCalculateView(generics.GenericAPIView):
                     'currency': basket.currency
                 }
         """
-        RequestCache.set(is_calculate_temporary_basket, True)  # TODO: LEARNER 5463
+        RequestCache.set(TEMPORARY_BASKET_CACHE_KEY, True)  # TODO: LEARNER 5463
 
         partner = get_partner_for_site(request)
         skus = request.GET.getlist('sku')

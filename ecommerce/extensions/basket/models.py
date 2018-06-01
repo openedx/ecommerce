@@ -5,7 +5,7 @@ from oscar.core.loading import get_class
 
 from ecommerce.cache_utils.utils import RequestCache
 from ecommerce.extensions.analytics.utils import track_segment_event, translate_basket_line_for_segment
-from ecommerce.extensions.basket.constants import is_calculate_temporary_basket
+from ecommerce.extensions.basket.constants import TEMPORARY_BASKET_CACHE_KEY
 
 OrderNumberGenerator = get_class('order.utils', 'OrderNumberGenerator')
 Selector = get_class('partner.strategy', 'Selector')
@@ -51,7 +51,7 @@ class Basket(AbstractBasket):
 
     def flush(self):
         """Remove all products in basket and fire Segment 'Product Removed' Analytic event for each"""
-        cached_response = RequestCache.get_cached_response(is_calculate_temporary_basket)
+        cached_response = RequestCache.get_cached_response(TEMPORARY_BASKET_CACHE_KEY)
         if cached_response.is_hit:
             # Do not track anything. This is a temporary basket calculation. TODO: LEARNER 5463
             return
@@ -72,7 +72,7 @@ class Basket(AbstractBasket):
         Performs AbstractBasket add_product method and fires Google Analytics 'Product Added' event.
         """
         line, created = super(Basket, self).add_product(product, quantity, options)  # pylint: disable=bad-super-call
-        cached_response = RequestCache.get_cached_response(is_calculate_temporary_basket)
+        cached_response = RequestCache.get_cached_response(TEMPORARY_BASKET_CACHE_KEY)
         if cached_response.is_hit:
             # Do not track anything. This is a temporary basket calculation. TODO: LEARNER 5463
             return line, created
