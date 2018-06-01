@@ -32,7 +32,7 @@ from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.enterprise.tests.mixins import EnterpriseServiceMockMixin
 from ecommerce.entitlements.utils import create_or_update_course_entitlement
 from ecommerce.extensions.analytics.utils import translate_basket_line_for_segment
-from ecommerce.extensions.basket.utils import get_basket_switch_data
+from ecommerce.extensions.basket.utils import _set_basket_bundle_status, get_basket_switch_data
 from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
 from ecommerce.extensions.offer.utils import format_benefit_value
 from ecommerce.extensions.order.utils import UserAlreadyPlacedOrder
@@ -786,6 +786,17 @@ class VoucherAddViewTests(LmsApiMockMixin, TestCase):
             value_text='test_bundle'
         )
         self.assert_form_valid_message("Coupon code '{code}' is not valid for this basket.".format(code=voucher.code))
+
+    def test_multi_use_voucher_valid_for_bundle(self):
+        """ Verify multi use coupon works when voucher is used against a bundle. """
+        self.mock_access_token_response()
+        self.mock_account_api(self.request, self.user.username, data={'is_active': True})
+        voucher, product = prepare_voucher(code=COUPON_CODE, benefit_value=10, usage=Voucher.MULTI_USE)
+        new_product = factories.ProductFactory(categories=[], stockrecords__partner__short_code='second')
+        self.basket.add_product(product)
+        self.basket.add_product(new_product)
+        _set_basket_bundle_status('test-bundle', self.basket)
+        self.assert_form_valid_message("Coupon code '{code}' added to basket.".format(code=voucher.code))
 
     def test_form_valid_without_basket_id(self):
         """ Verify the view redirects to the basket summary view if the basket has no ID.  """

@@ -65,15 +65,7 @@ def prepare_basket(request, products, voucher=None):
     already_purchased_products = []
     bundle = request.GET.get('bundle')
 
-    if bundle:
-        BasketAttribute.objects.update_or_create(
-            basket=basket,
-            attribute_type=BasketAttributeType.objects.get(name=BUNDLE),
-            defaults={'value_text': bundle}
-        )
-        basket.clear_vouchers()
-    else:
-        BasketAttribute.objects.filter(basket=basket, attribute_type__name=BUNDLE).delete()
+    _set_basket_bundle_status(bundle, basket)
 
     if request.site.siteconfiguration.enable_embargo_check:
         if not embargo_check(request.user, request.site, products):
@@ -244,3 +236,31 @@ def basket_add_organization_attribute(basket, request_data):
             attribute_type=organization_attribute,
             value_text=business_client.strip()
         )
+
+
+def _set_basket_bundle_status(bundle, basket):
+    """
+    Sets the basket's bundle status
+
+    Note: This is a refactor of the existing code. Not sure
+    what the intentions of the side effects are.
+
+    Side effect:
+        clears any vouchers if it's a bundle
+
+    Args:
+        bundle (str): The Bundle ID?
+        basket (Basket): The basket to set the bundle attribute for
+
+    Returns:
+
+    """
+    if bundle:
+        BasketAttribute.objects.update_or_create(
+            basket=basket,
+            attribute_type=BasketAttributeType.objects.get(name=BUNDLE),
+            defaults={'value_text': bundle}
+        )
+        basket.clear_vouchers()
+    else:
+        BasketAttribute.objects.filter(basket=basket, attribute_type__name=BUNDLE).delete()

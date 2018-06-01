@@ -1,6 +1,7 @@
 from decimal import Decimal
 
 import httpretty
+from django.urls import reverse
 from oscar.core.loading import get_class
 from oscar.test.factories import RangeFactory
 
@@ -8,12 +9,13 @@ from ecommerce.courses.models import Course
 from ecommerce.extensions.partner.strategy import DefaultStrategy
 from ecommerce.extensions.test import factories
 from ecommerce.programs.tests.mixins import ProgramTestMixin
+from ecommerce.tests.mixins import LmsApiMockMixin
 from ecommerce.tests.testcases import TestCase
 
 Applicator = get_class('offer.applicator', 'Applicator')
 
 
-class ProgramOfferTests(ProgramTestMixin, TestCase):
+class ProgramOfferTests(LmsApiMockMixin, ProgramTestMixin, TestCase):
     """ Verification for program offer application. """
 
     @httpretty.activate
@@ -59,10 +61,17 @@ class ProgramOfferTests(ProgramTestMixin, TestCase):
         basket.reset_offer_applications()
         product_range = RangeFactory(products=products)
         voucher, __ = factories.prepare_voucher(_range=product_range, benefit_value=50)
-        basket.vouchers.add(voucher)
+        self.mock_account_api(self.request, basket.owner.username, data={'is_active': True})
+        self.client.login(username=basket.owner.username, password=self.password)
+        self.client.post(reverse('basket:vouchers-add'), data={'code': voucher.code})
+        response = self.client.get(reverse('basket:summary'))
+        basket = response.context['basket']
 
-        # Apply offers and verify that voucher-based offer takes precedence over program offer
-        Applicator().apply(basket, basket.owner)
+        # Verify that voucher-based offer takes precedence over program offer.
+        actual_offer_discounts = [discount['offer'] for discount in basket.offer_discounts]
+        actual_voucher_discounts = [discount['offer'] for discount in basket.voucher_discounts]
+        self.assertEqual(actual_offer_discounts, [])
+        self.assertEqual(actual_voucher_discounts, [voucher.offers.first()])
         lines = basket.all_lines()
         self.assertEqual(len(basket.offer_applications), 1)
         self.assertEqual(basket.total_discount, Decimal(50) * len(lines))
