@@ -40,6 +40,7 @@ from ecommerce.extensions.payment.constants import CLIENT_SIDE_CHECKOUT_FLAG_NAM
 from ecommerce.extensions.payment.forms import PaymentForm
 from ecommerce.extensions.payment.tests.processors import DummyProcessor
 from ecommerce.extensions.test.factories import create_order, prepare_voucher
+from ecommerce.journal.constants import JOURNAL_PRODUCT_CLASS_NAME
 from ecommerce.tests.factories import ProductFactory, SiteFactory, StockRecordFactory
 from ecommerce.tests.mixins import ApiMockMixin, LmsApiMockMixin
 from ecommerce.tests.testcases import TestCase
@@ -340,12 +341,27 @@ class BasketSummaryViewTests(EnterpriseServiceMockMixin, DiscoveryTestMixin, Dis
                     u'Failed to retrieve data from Discovery Service for course [{}].'.format(self.course.id)
                 )
             )
-    #
-    # def test_journal_product(self):
-    #     """ Verify the basket looks right for journal product types. """
-    #     title = "Test Journal 123"
-    #     product = factories.Pro
 
+    @mock.patch("from ecommerce.journal.client.fetch_journal_info_from_discovery", mock.Mock(return_value={
+        'title': "Test Journal 123",
+        'card_image_url': "journal_image_url",
+        'access_length': "365"
+    }))
+    def test_journal_product(self):
+        """ Verify the basket looks right for journal product types. """
+        title = "Test Journal 123"
+        journal_product = Product.objects.get(product_class__name=JOURNAL_PRODUCT_CLASS_NAME)
+        self.create_basket_and_add_product(title=title, product=journal_product)
+
+        response = self.client.get(self.path)
+        self.assertEqual(response.status_code, 200)
+        line_data = response.context['formset_lines_data'][0][1]
+        self.assertEqual(line_data['product_title'], title)
+        self.assertEqual(line_data['image_url'], "journal_image_url")
+        self.assertEqual(
+            line_data['order_details_msg'],
+            "After you complete your order you will automatically be granted access to %(title)s for %(access_length)d days."  # pylint: disable=line-too-long
+        )
 
     def test_non_seat_product(self):
         """Verify the basket accepts non-seat product types."""
