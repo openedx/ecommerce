@@ -67,18 +67,17 @@ def deprecated_traverse_pagination(response, endpoint):
         list of dict.
 
     """
-    if waffle.switch_is_active("debug_logging_for_deprecated_traverse_pagination"):  # pragma: no cover
-        base_url = ""
-        try:
-            base_url = endpoint._store['base_url']  # pylint: disable=protected-access
-        except:  # pylint: disable=bare-except
-            pass
-        logger.info("deprecated_traverse_pagination method is called for endpoint %s", base_url)
-
     results = response.get('results', [])
 
     next_page = response.get('next')
     while next_page:
+        if waffle.switch_is_active("debug_logging_for_deprecated_traverse_pagination"):  # pragma: no cover
+            base_url = ""
+            try:
+                base_url = endpoint._store['base_url']  # pylint: disable=protected-access
+            except:  # pylint: disable=bare-except
+                pass
+            logger.info("deprecated_traverse_pagination method is called for endpoint %s", base_url)
         querystring = parse_qs(urlparse(next_page).query, keep_blank_values=True)
         response = endpoint.get(**querystring)
         results += response.get('results', [])
