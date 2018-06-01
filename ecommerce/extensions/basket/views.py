@@ -456,7 +456,10 @@ class VoucherAddView(BaseVoucherAddView):  # pylint: disable=function-redefined
             basket=self.request.basket,
             attribute_type=BasketAttributeType.objects.get(name=BUNDLE)
         )
-        if len(bundle_attribute) > 0 and not voucher.offers.first().condition.program_uuid:
+        is_bundle_purchase = len(bundle_attribute) > 0
+        voucher_program_uuid = voucher.offers.first().condition.program_uuid
+        is_voucher_valid_for_bundle = voucher_program_uuid or voucher.usage == Voucher.MULTI_USE
+        if is_bundle_purchase and not is_voucher_valid_for_bundle:
             messages.error(
                 self.request,
                 _("Coupon code '{code}' is not valid for this basket.").format(code=code))
