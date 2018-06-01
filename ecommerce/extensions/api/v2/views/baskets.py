@@ -2,6 +2,8 @@
 from __future__ import unicode_literals
 
 import logging
+from decimal import Decimal
+
 import warnings
 
 import waffle
@@ -426,6 +428,28 @@ class BasketCalculateView(generics.GenericAPIView):
 
         return response
 
+    def _calculate_temporary_price_no_basket(self, user, request, products, voucher, skus, code):
+        response = None
+
+        try:
+            strategy = Selector().strategy(user=user)
+            total = Decimal(0)
+            for product in products:
+                total += strategy.fetch_for_product(product)[0].incl_tax
+
+            response = {
+                'total_incl_tax_excl_discounts': total,
+                'total_incl_tax': total,
+                'currency': 'GBP'
+            }
+        except:  # pylint: disable=bare-except
+            logger.exception(
+                'Failed to calculate basket discount for SKUs [%s] and voucher [%s].',
+                skus, code
+            )
+
+        return response
+
     def get(self, request):
         """ Calculate basket totals given a list of sku's
 
@@ -524,7 +548,8 @@ class BasketCalculateView(generics.GenericAPIView):
         if waffle.flag_is_active(request, "disable_calculate_temporary_basket_atomic_transaction"):
             response = self._calculate_temporary_basket(basket_owner, request, products, voucher, skus, code)
         else:
-            response = self._calculate_temporary_basket_atomic(basket_owner, request, products, voucher, skus, code)
+            #response = self._calculate_temporary_basket_atomic(basket_owner, request, products, voucher, skus, code)
+            response = self._calculate_temporary_price_no_basket(basket_owner, request, products, voucher, skus, code)
 
         if response and use_default_basket:
             TieredCache.set_all_tiers(cache_key, response, settings.ANONYMOUS_BASKET_CALCULATE_CACHE_TIMEOUT)
