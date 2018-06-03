@@ -17,7 +17,7 @@ msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: openedx-translation@googlegroups.com\n"
 "POT-Creation-Date: 2018-03-26 16:41-0400\n"
-"PO-Revision-Date: 2018-05-13 21:35+0000\n"
+"PO-Revision-Date: 2018-05-29 16:12+0000\n"
 "Last-Translator: Ali Işıngör <ali@artistanbul.io>\n"
 "Language-Team: Turkish (Turkey) (http://www.transifex.com/open-edx/edx-platform/language/tr_TR/)\n"
 "MIME-Version: 1.0\n"
@@ -1220,7 +1220,7 @@ msgstr "Kupon Sona Erme Tarihi"
 
 #: ecommerce/extensions/voucher/utils.py:239
 msgid "Email Domains"
-msgstr ""
+msgstr "E-posta Alan Adları"
 
 #: ecommerce/extensions/voucher/utils.py:534
 #, python-brace-format
@@ -1716,7 +1716,7 @@ msgstr "Sipariş Faturası"
 
 #: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html:13
 msgid "For Business"
-msgstr ""
+msgstr "Kurumsal İçin"
 
 #: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html:25
 #: ecommerce/templates/customer/emails/commtype_order_with_csv_body.txt:6
@@ -2341,7 +2341,7 @@ msgstr "Kupon kodunu uygula"
 
 #: ecommerce/templates/oscar/basket/partials/hosted_checkout_basket.html:159
 msgid "Checkout"
-msgstr "Ödeme yeri"
+msgstr "Ödeme"
 
 #. Translators: Do NOT translate the name PayPal.
 #: ecommerce/templates/oscar/basket/partials/hosted_checkout_basket.html:162
@@ -2543,7 +2543,7 @@ msgid ""
 "\n"
 "                Created product '%(name)s'.\n"
 "            "
-msgstr ""
+msgstr "\n                Oluşturulmuş ürün '%(name)s'.\n            "
 
 #: ecommerce/templates/oscar/dashboard/catalogue/messages/product_saved.html:37
 #, python-format
@@ -2551,7 +2551,7 @@ msgid ""
 "\n"
 "                Updated product '%(name)s'.\n"
 "            "
-msgstr ""
+msgstr "\n                Güncellenmiş ürün '%(name)s'.\n            "
 
 #: ecommerce/templates/oscar/dashboard/catalogue/messages/product_saved.html:48
 msgid "Edit again"
@@ -2626,7 +2626,7 @@ msgstr "Düşük stok seviyesi"
 
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:199
 msgid "Cost price"
-msgstr ""
+msgstr "Maliyet ücreti"
 
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:200
 msgid "Price (excl tax)"
@@ -2709,11 +2709,11 @@ msgstr "Kâr"
 
 #: ecommerce/templates/oscar/dashboard/index.html:36
 msgid "Average order cost"
-msgstr ""
+msgstr "Ortalama sipariş maliyeti"
 
 #: ecommerce/templates/oscar/dashboard/index.html:37
 msgid "Average (paid) order cost"
-msgstr ""
+msgstr "Ortalama (ödenmiş) sipariş maliyeti"
 
 #: ecommerce/templates/oscar/dashboard/index.html:67
 msgid "Products and vouchers"
@@ -2844,7 +2844,7 @@ msgstr "Sıra #%(id)s"
 #: ecommerce/templates/oscar/dashboard/orders/line_detail.html:26
 #, python-format
 msgid "Order #%(number)s - Line #%(id)s"
-msgstr ""
+msgstr "Sipariş #%(number)s - Sıra #%(id)s"
 
 #: ecommerce/templates/oscar/dashboard/orders/line_detail.html:37
 msgctxt "Product title"

@@ -17,7 +17,7 @@ msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2018-04-05 11:00+0000\n"
-"PO-Revision-Date: 2018-05-17 08:45+0000\n"
+"PO-Revision-Date: 2018-05-29 16:24+0000\n"
 "Last-Translator: Ali Işıngör <ali@artistanbul.io>\n"
 "Language-Team: Turkish (Turkey) (http://www.transifex.com/open-edx/edx-platform/language/tr_TR/)\n"
 "MIME-Version: 1.0\n"
@@ -339,7 +339,7 @@ msgstr ""
 #. Translators: _MENU_ is a placeholder. Do NOT translate it.
 #: ecommerce/static/js/views/coupon_list_view.js:68
 msgid "Display _MENU_ coupons"
-msgstr ""
+msgstr "_MENU_ kuponlarını göster"
 
 #: ecommerce/static/js/views/coupon_list_view.js:74
 msgid "Name"
@@ -491,4 +491,4 @@ msgstr "Hata"
 msgid ""
 "Failed to process refund #%(refund_id)s: %(error)s. Please try again, or "
 "contact the E-Commerce Development Team."
-msgstr ""
+msgstr "İade işlemi başarısız oldu #%(refund_id)s: %(error)s. Lütfen tekrar deneyin ya da E-Ticaret Geliştirme Ekibi ile iletişime geçin."
