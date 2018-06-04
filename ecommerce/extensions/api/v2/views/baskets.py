@@ -426,6 +426,7 @@ class BasketCalculateView(generics.GenericAPIView):
 
         return response
 
+    @transaction.non_atomic_requests
     def get(self, request):
         """ Calculate basket totals given a list of sku's
 
