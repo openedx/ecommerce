@@ -342,7 +342,7 @@ class BasketSummaryViewTests(EnterpriseServiceMockMixin, DiscoveryTestMixin, Dis
                 )
             )
 
-    @mock.patch("from ecommerce.journal.client.fetch_journal_info_from_discovery", mock.Mock(return_value={
+    @mock.patch("ecommerce.journal.client.fetch_journal_info_from_discovery", mock.Mock(return_value={
         'title': "Test Journal 123",
         'card_image_url': "journal_image_url",
         'access_length': "365"
