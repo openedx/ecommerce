@@ -5,7 +5,6 @@ from oscar.core.loading import get_class, get_model
 from oscar.test import factories
 
 from analytics import Client
-
 from ecommerce.cache_utils.utils import RequestCache
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.extensions.analytics.utils import parse_tracking_context, translate_basket_line_for_segment

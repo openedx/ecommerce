@@ -427,7 +427,7 @@ class BasketCalculateView(generics.GenericAPIView):
         return response
 
     @transaction.non_atomic_requests
-    def get(self, request):
+    def get(self, request):  # pylint: disable=too-many-statements
         """ Calculate basket totals given a list of sku's
 
         Create a temporary basket add the sku's and apply an optional voucher code.
@@ -435,7 +435,7 @@ class BasketCalculateView(generics.GenericAPIView):
         provided apply a voucher in the Enterprise entitlements available
         to the user.
 
-        Arguments:
+        Query Params:
             sku (string): A list of sku(s) to calculate
             code (string): Optional voucher code to apply to the basket.
             username (string): Optional username of a user for which to calculate the basket.
@@ -470,8 +470,14 @@ class BasketCalculateView(generics.GenericAPIView):
             voucher = get_entitlement_voucher(request, products[0])
 
         basket_owner = request.user
-        requested_username = request.GET.get('username', default='')
-        is_anonymous = request.GET.get('is_anonymous', 'false').lower() == 'true'
+
+        if waffle.switch_is_active("force_anonymous_user_response_for_basket_calculate"):
+            # Use the anonymous user program price for all users
+            requested_username = ''
+            is_anonymous = True
+        else:
+            requested_username = request.GET.get('username', default='')
+            is_anonymous = request.GET.get('is_anonymous', 'false').lower() == 'true'
 
         use_default_basket = is_anonymous
 
@@ -522,7 +528,11 @@ class BasketCalculateView(generics.GenericAPIView):
             if cached_response.is_hit:
                 return Response(cached_response.value)
 
-        if waffle.flag_is_active(request, "disable_calculate_temporary_basket_atomic_transaction"):
+        # There are too many open questions around dropping the atomic transaction for a user's basket,
+        # including how user basket merges was coded.  For now, only allow disabling the atomic
+        # transaction if we are also forcing the anonymous basket response for all users.
+        if waffle.flag_is_active(request, "disable_calculate_temporary_basket_atomic_transaction")\
+                and waffle.switch_is_active("force_anonymous_user_response_for_basket_calculate"):
             response = self._calculate_temporary_basket(basket_owner, request, products, voucher, skus, code)
         else:
             response = self._calculate_temporary_basket_atomic(basket_owner, request, products, voucher, skus, code)
