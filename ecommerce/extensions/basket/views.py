@@ -244,16 +244,16 @@ class BasketSummaryView(BasketView):
                 order_details_msg = _(
                     '{paragraph_start}By purchasing, you and your organization agree to the following terms:'
                     '{paragraph_end} {ul_start} {li_start}Each code is valid for the one course covered and can be '
-                    'used only one time.{li_end} {li_start}You are responsible for distributing codes to your learners.'
+                    'used only one time.{li_end} '
+                    '{li_start}You are responsible for distributing codes to your learners in your organization.'
                     '{li_end} {li_start}Each code will expire in one year from date of purchase or, if earlier, once '
                     'the course is closed.{li_end} {li_start}If a course is not designated as self-paced, you should '
                     'confirm that a course run is available before expiration. {li_end} {li_start}You may not resell '
-                    'codes to third parties.{li_end} {ul_end} {strong_start}All sales final. No refunds.{strong_end} '
+                    'codes to third parties.{li_end} '
+                    '{li_start}All edX for Business Sales are final and not eligible for refunds.{li_end}{ul_end} '
                     '{paragraph_start}You will receive an email at {user_email} with your enrollment code(s). '
                     '{paragraph_end}'
                 ).format(
-                    strong_start='<strong>',
-                    strong_end='</strong>',
                     paragraph_start='<p>',
                     paragraph_end='</p>',
                     ul_start='<ul>',
