@@ -43,6 +43,8 @@ Selector = get_class('partner.strategy', 'Selector')
 User = get_user_model()
 Voucher = get_model('voucher', 'Voucher')
 
+DEFAULT_CURRENCY = 'USD'
+
 
 class BasketCreateView(EdxOrderPlacementMixin, generics.CreateAPIView):
     """Endpoint for creating baskets.
@@ -428,25 +430,25 @@ class BasketCalculateView(generics.GenericAPIView):
 
         return response
 
-    def _calculate_temporary_price_no_basket(self, user, request, products, voucher, skus, code):
-        response = None
+    def _calculate_program_price_no_basket(self, products, bundle):
+        strategy = Selector().strategy()
+        total = Decimal(0)
+        for product in products:
+            price = strategy.fetch_for_product(product)[0]
+            total += price.incl_tax
+            if price.currency != DEFAULT_CURRENCY:
+                logger.warn('Price for product {} does not match default currency of {}'
+                            .format(price.currency, DEFAULT_CURRENCY))
 
-        try:
-            strategy = Selector().strategy(user=user)
-            total = Decimal(0)
-            for product in products:
-                total += strategy.fetch_for_product(product)[0].incl_tax
+        # Find the program discount
+        program_discount = Decimal(0) # Lookup in Offers models
+        total -= program_discount
 
-            response = {
-                'total_incl_tax_excl_discounts': total,
-                'total_incl_tax': total,
-                'currency': 'GBP'
-            }
-        except:  # pylint: disable=bare-except
-            logger.exception(
-                'Failed to calculate basket discount for SKUs [%s] and voucher [%s].',
-                skus, code
-            )
+        response = {
+            'total_incl_tax_excl_discounts': total,
+            'total_incl_tax': total,
+            'currency': DEFAULT_CURRENCY
+        }
 
         return response
 
@@ -545,11 +547,14 @@ class BasketCalculateView(generics.GenericAPIView):
             if cached_response.is_hit:
                 return Response(cached_response.value)
 
-        if waffle.flag_is_active(request, "disable_calculate_temporary_basket_atomic_transaction"):
-            response = self._calculate_temporary_basket(basket_owner, request, products, voucher, skus, code)
+        if waffle.flag_is_active(request, "calculate_program_price_without_basket"):
+            bundle = request.GET.get('bundle', None)
+            response = self._calculate_program_price_no_basket(products, bundle)
         else:
-            #response = self._calculate_temporary_basket_atomic(basket_owner, request, products, voucher, skus, code)
-            response = self._calculate_temporary_price_no_basket(basket_owner, request, products, voucher, skus, code)
+            if waffle.flag_is_active(request, "disable_calculate_temporary_basket_atomic_transaction"):
+                response = self._calculate_temporary_basket(basket_owner, request, products, voucher, skus, code)
+            else:
+                response = self._calculate_temporary_basket_atomic(basket_owner, request, products, voucher, skus, code)
 
         if response and use_default_basket:
             TieredCache.set_all_tiers(cache_key, response, settings.ANONYMOUS_BASKET_CALCULATE_CACHE_TIMEOUT)
