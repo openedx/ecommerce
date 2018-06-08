@@ -10,6 +10,7 @@ from oscar.test.factories import *  # pylint:disable=wildcard-import,unused-wild
 from ecommerce.enterprise.benefits import EnterpriseAbsoluteDiscountBenefit, EnterprisePercentageDiscountBenefit
 from ecommerce.enterprise.conditions import EnterpriseCustomerCondition
 from ecommerce.extensions.offer.models import OFFER_PRIORITY_ENTERPRISE, OFFER_PRIORITY_VOUCHER
+# TODO: journal dependency
 from ecommerce.journal.benefits import JournalBundleAbsoluteDiscountBenefit, JournalBundlePercentageDiscountBenefit
 from ecommerce.journal.conditions import JournalBundleCondition
 from ecommerce.programs.benefits import AbsoluteDiscountBenefitWithoutRange, PercentageDiscountBenefitWithoutRange
@@ -206,6 +207,7 @@ class EnterpriseOfferFactory(ConditionalOfferFactory):
     status = ConditionalOffer.OPEN
 
 
+# TODO: journal dependency
 class JournalAbsoluteDiscountBenefitFactory(BenefitFactory):
     range = None
     type = ''
@@ -213,6 +215,7 @@ class JournalAbsoluteDiscountBenefitFactory(BenefitFactory):
     proxy_class = class_path(JournalBundleAbsoluteDiscountBenefit)
 
 
+# TODO: journal dependency
 class JournalPercentageDiscountBenefitFactory(BenefitFactory):
     range = None
     type = ''
@@ -220,6 +223,7 @@ class JournalPercentageDiscountBenefitFactory(BenefitFactory):
     proxy_class = class_path(JournalBundlePercentageDiscountBenefit)
 
 
+# TODO: journal dependency
 class JournalConditionFactory(ConditionFactory):
     range = None
     type = ''
@@ -231,6 +235,7 @@ class JournalConditionFactory(ConditionFactory):
         model = JournalBundleCondition
 
 
+# TODO: journal dependency
 class JournalOfferFactory(ConditionalOfferFactory):
     benefit = factory.SubFactory(JournalPercentageDiscountBenefitFactory)
     condition = factory.SubFactory(JournalConditionFactory)

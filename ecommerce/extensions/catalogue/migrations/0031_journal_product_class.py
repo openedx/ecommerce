@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# TODO: journal dependency
 from __future__ import unicode_literals
 
 from django.db import migrations
