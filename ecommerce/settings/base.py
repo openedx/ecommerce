@@ -296,7 +296,7 @@ LOCAL_APPS = [
     'ecommerce.sailthru',
     'ecommerce.enterprise',
     'ecommerce.management',
-    'ecommerce.journal',
+    'ecommerce.journal',  # TODO: journal dependency
 ]
 
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
@@ -587,15 +587,14 @@ ENTERPRISE_CUSTOMER_COOKIE_NAME = 'enterprise_customer_uuid'
 
 # DJANGO DEBUG TOOLBAR CONFIGURATION
 # http://django-debug-toolbar.readthedocs.org/en/latest/installation.html
-# if os.environ.get('ENABLE_DJANGO_TOOLBAR', False):
-#     INSTALLED_APPS += [
-#         'debug_toolbar',
-#     ]
-#
-#     MIDDLEWARE_CLASSES += (
-#         'debug_toolbar.middleware.DebugToolbarMiddleware',
-#     )
-# END DJANGO DEBUG TOOLBAR CONFIGURATION
+if os.environ.get('ENABLE_DJANGO_TOOLBAR', False):
+    INSTALLED_APPS += [
+        'debug_toolbar',
+    ]
+
+    MIDDLEWARE_CLASSES += (
+        'debug_toolbar.middleware.DebugToolbarMiddleware',
+    )
 
 # Determines if events are actually sent to Segment. This should only be set to False for testing purposes.
 SEND_SEGMENT_EVENTS = True
