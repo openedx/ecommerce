@@ -11,7 +11,7 @@ msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: openedx-translation@googlegroups.com\n"
 "POT-Creation-Date: 2018-03-26 16:41-0400\n"
-"PO-Revision-Date: 2018-06-03 16:31+0000\n"
+"PO-Revision-Date: 2018-06-05 02:39+0000\n"
 "Last-Translator: Myagmarjav Enkhbileg <miigaa.lucky@gmail.com>\n"
 "Language-Team: Mongolian (http://www.transifex.com/open-edx/edx-platform/language/mn/)\n"
 "MIME-Version: 1.0\n"
@@ -1634,7 +1634,7 @@ msgstr ""
 #: ecommerce/templates/customer/emails/commtype_order_with_csv_body.txt:5
 #, python-format
 msgid "Dear %(full_name)s,"
-msgstr ""
+msgstr "Хүндэт %(full_name)s,"
 
 #: ecommerce/templates/customer/emails/commtype_credit_receipt_body.html:59
 #, python-format
@@ -3392,12 +3392,12 @@ msgstr ""
 #: ecommerce/templates/oscar/dashboard/partials/search_form.html:25
 #: ecommerce/templates/oscar/dashboard/partials/search_form.html:45
 msgid "Search"
-msgstr ""
+msgstr "Хайх "
 
 #: ecommerce/templates/oscar/dashboard/partials/search_form.html:26
 #: ecommerce/templates/oscar/dashboard/partials/search_form.html:34
 msgid "Advanced Search"
-msgstr ""
+msgstr "Нарийвчилсан хайлт"
 
 #: ecommerce/templates/oscar/dashboard/partials/search_form.html:44
 msgid "Close"
@@ -3405,7 +3405,7 @@ msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/partials/search_form.html:45
 msgid "Searching..."
-msgstr ""
+msgstr "Хайж байна..."
 
 #: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html:10
 #: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html:39
@@ -3443,7 +3443,7 @@ msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/users/detail.html:36
 msgid "General"
-msgstr ""
+msgstr "Ерөнхий"
 
 #: ecommerce/templates/oscar/dashboard/users/detail.html:54
 msgid "Yes,No"
