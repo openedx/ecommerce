@@ -17,7 +17,7 @@ msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: openedx-translation@googlegroups.com\n"
 "POT-Creation-Date: 2018-03-26 16:41-0400\n"
-"PO-Revision-Date: 2018-05-29 16:12+0000\n"
+"PO-Revision-Date: 2018-06-05 15:27+0000\n"
 "Last-Translator: Ali Işıngör <ali@artistanbul.io>\n"
 "Language-Team: Turkish (Turkey) (http://www.transifex.com/open-edx/edx-platform/language/tr_TR/)\n"
 "MIME-Version: 1.0\n"
@@ -221,7 +221,7 @@ msgstr "Apple Pay'i Etkinleştir"
 
 #: ecommerce/core/models.py:185
 msgid "Enable Partial Program Offer"
-msgstr ""
+msgstr "Kısmi Program Teklifini Etkinleştir"
 
 #: ecommerce/core/models.py:186
 msgid ""
@@ -736,7 +736,7 @@ msgstr ""
 #: ecommerce/extensions/basket/views.py:363
 #, python-brace-format
 msgid "Could not apply the code '{code}'; it requires data sharing consent."
-msgstr ""
+msgstr "'{code}' kodu uygulanamadı; veri paylaşımı onayı gerektiriyor."
 
 #: ecommerce/extensions/basket/views.py:417
 #, python-brace-format
@@ -1761,7 +1761,7 @@ msgstr ""
 msgid ""
 "For more information and assistance, contact "
 "%(link_start)sinfo@edx.org.%(link_end)s"
-msgstr ""
+msgstr "Daha fazla bilgi ve yardım için, lütfen %(link_start)sinfo@edx.org%(link_end)sile iletişime geçin."
 
 #: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html:34
 #: ecommerce/templates/customer/emails/commtype_order_with_csv_body.txt:16
@@ -1817,7 +1817,7 @@ msgstr "Sipariş onayı: "
 msgid ""
 "Please visit %(download_csv_link)s to download and save the enrollment code "
 "file."
-msgstr ""
+msgstr "Kayıtlanma kodu dosyasını indirmek ve kaydetmek için lütfen%(download_csv_link)s bağlantısını ziyaret edin."
 
 #: ecommerce/templates/customer/emails/commtype_order_with_csv_body.txt:13
 #, python-format
@@ -2359,7 +2359,7 @@ msgstr ""
 msgid ""
 "<strong>Note:</strong> To complete your enrollment, select Checkout or "
 "Checkout with PayPal."
-msgstr ""
+msgstr "<strong>Not:</strong> Kaydınızı tamamlamak için, Ödeme'yi ya da PayPal ile Öde'yi seçin."
 
 #: ecommerce/templates/oscar/basket/partials/hosted_checkout_basket.html:184
 msgid "Have questions?"
