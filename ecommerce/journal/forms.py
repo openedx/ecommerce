@@ -12,7 +12,6 @@ from oscar.core.loading import get_model
 from ecommerce.journal.benefit_constants import BENEFIT_MAP, BENEFIT_TYPE_CHOICES
 from ecommerce.journal.client import fetch_journal_bundle
 from ecommerce.journal.conditions import JournalBundleCondition
-
 from ecommerce.programs.custom import class_path, create_condition
 
 logger = logging.getLogger(__name__)
