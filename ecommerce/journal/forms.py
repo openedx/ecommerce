@@ -7,10 +7,10 @@ from django.forms.utils import ErrorList
 from django.utils.translation import ugettext_lazy as _
 from oscar.core.loading import get_model
 
-from ecommerce.journal.conditions import JournalBundleCondition
-from ecommerce.journal.client import fetch_journal_bundle
-
 from ecommerce.journal.benefit_constants import BENEFIT_TYPE_CHOICES, BENEFIT_MAP
+from ecommerce.journal.client import fetch_journal_bundle
+from ecommerce.journal.conditions import JournalBundleCondition
+
 from ecommerce.programs.custom import class_path, create_condition
 
 import logging
