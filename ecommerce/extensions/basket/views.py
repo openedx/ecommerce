@@ -103,94 +103,89 @@ class BasketSummaryView(BasketView):
     Display basket contents and checkout/payment options.
     """
 
-    def _determine_product_type(self, product):
-        """
-        Return the seat type based on the product class
-        """
-        seat_type = None
-        if product.is_seat_product or product.is_course_entitlement_product:
-            seat_type = get_certificate_type_display_value(product.attr.certificate_type)
-        elif product.is_enrollment_code_product:
-            seat_type = get_certificate_type_display_value(product.attr.seat_type)
-        return seat_type
+    # Methods are sorted in the order in which I think they get called
 
-    def _deserialize_date(self, date_string):
-        date = None
+    # This gets called first. We can also see that we fire events immediately.
+    def get(self, request, *args, **kwargs):
+        basket = request.basket
+
         try:
-            date = dateutil.parser.parse(date_string)
-        except (AttributeError, ValueError):
-            pass
-        return date
+            properties = {
+                'cart_id': basket.id,
+                'products': [translate_basket_line_for_segment(line) for line in basket.all_lines()],
+            }
+            track_segment_event(request.site, request.user, 'Cart Viewed', properties)
 
-    def _get_course_data(self, product):
-        """
-        Return course data.
+            properties = {
+                'checkout_id': basket.order_number,
+                'step': 1
+            }
+            track_segment_event(request.site, request.user, 'Checkout Step Viewed', properties)
+        except Exception:  # pylint: disable=broad-except
+            logger.exception('Failed to fire Cart Viewed event for basket [%d]', basket.id)
 
-        Args:
-            product (Product): A product that has course_key as attribute (seat or bulk enrollment coupon)
-        Returns:
-            Dictionary containing course name, course key, course image URL and description.
-        """
-        if product.is_seat_product:
-            course_key = CourseKey.from_string(product.attr.course_key)
+        if has_enterprise_offer(basket) and basket.total_incl_tax == Decimal(0):
+            return redirect('checkout:free-checkout')
         else:
-            course_key = None
-        course_name = None
-        image_url = None
-        short_description = None
-        course_start = None
-        course_end = None
-        course = None
+            return super(BasketSummaryView, self).get(request, *args, **kwargs)
 
-        try:
-            course = get_course_info_from_catalog(self.request.site, product)
-            try:
-                image_url = course['image']['src']
-            except (KeyError, TypeError):
-                image_url = ''
-            short_description = course.get('short_description', '')
-            course_name = course.get('title', '')
+    # This call is an override of an Oscar method in BasketView
+    def get_context_data(self, **kwargs):
+        context = super(BasketSummaryView, self).get_context_data(**kwargs)
+        formset = context.get('formset', [])
+        lines = context.get('line_list', [])
+        site_configuration = self.request.site.siteconfiguration
 
-            # The course start/end dates are not currently used
-            # in the default basket templates, but we are adding
-            # the dates to the template context so that theme
-            # template overrides can make use of them.
-            course_start = self._deserialize_date(course.get('start'))
-            course_end = self._deserialize_date(course.get('end'))
-        except (ConnectionError, SlumberBaseException, Timeout):
-            logger.exception('Failed to retrieve data from Discovery Service for course [%s].', course_key)
-
-        if self.request.basket.num_items == 1 and product.is_enrollment_code_product:
-            course_key = CourseKey.from_string(product.attr.course_key)
-            if course and course.get('marketing_url', None):
-                course_about_url = course['marketing_url']
-            else:
-                course_about_url = get_lms_course_about_url(course_key=course_key)
-            messages.info(
+        failed_enterprise_consent_code = self.request.GET.get(CONSENT_FAILED_PARAM)
+        if failed_enterprise_consent_code:
+            messages.error(
                 self.request,
-                _(
-                    '{strong_start}Purchasing just for yourself?{strong_end}{paragraph_start}If you are '
-                    'purchasing a single code for someone else, please continue with checkout. However, if you are the '
-                    'learner {link_start}go back{link_end} to enroll directly.{paragraph_end}'
-                ).format(
-                    strong_start='<strong>',
-                    strong_end='</strong>',
-                    paragraph_start='<p>',
-                    paragraph_end='</p>',
-                    link_start='<a href="{course_about}">'.format(course_about=course_about_url),
-                    link_end='</a>'
-                ),
-                extra_tags='safe'
+                _("Could not apply the code '{code}'; it requires data sharing consent.").format(
+                    code=failed_enterprise_consent_code
+                )
             )
 
-        return {
-            'product_title': course_name,
-            'course_key': course_key,
-            'image_url': image_url,
-            'product_description': short_description,
-            'course_start': course_start,
-            'course_end': course_end,
-        }
+        context_updates, lines_data = self._process_basket_lines(lines)
+        context.update(context_updates)
+
+        user = self.request.user
+        context.update({
+            'analytics_data': prepare_analytics_data(
+                user,
+                site_configuration.segment_key,
+            ),
+            'enable_client_side_checkout': False,
+            'sdn_check': site_configuration.enable_sdn_check
+        })
+
+        payment_processors = site_configuration.get_payment_processors()
+        if site_configuration.client_side_payment_processor \
+                and waffle.flag_is_active(self.request, CLIENT_SIDE_CHECKOUT_FLAG_NAME):
+            payment_processors_data = self._get_payment_processors_data(payment_processors)
+            context.update(payment_processors_data)
+
+        # Total benefit displayed in price summary.
+        # Currently only one voucher per basket is supported.
+        try:
+            applied_voucher = self.request.basket.vouchers.first()
+            total_benefit = (
+                format_benefit_value(applied_voucher.offers.first().benefit)
+                if applied_voucher else None
+            )
+        except ValueError:
+            total_benefit = None
+        num_of_items = self.request.basket.num_items
+        context.update({
+            'formset_lines_data': zip(formset, lines_data),
+            'free_basket': context['order_total'].incl_tax == 0,
+            'homepage_url': get_lms_url(''),
+            'min_seat_quantity': 1,
+            'max_seat_quantity': 100,
+            'payment_processors': payment_processors,
+            'total_benefit': total_benefit,
+            'line_price': (self.request.basket.total_incl_tax_excl_discounts / num_of_items) if num_of_items > 0 else 0
+        })
+        return context
 
     def _process_basket_lines(self, lines):
         """Processes the basket lines and extracts information for the view's context.
@@ -298,6 +293,84 @@ class BasketSummaryView(BasketView):
 
         return context_updates, lines_data
 
+    def _get_course_data(self, product):
+        """
+        Return course data.
+
+        Args:
+            product (Product): A product that has course_key as attribute (seat or bulk enrollment coupon)
+        Returns:
+            Dictionary containing course name, course key, course image URL and description.
+        """
+        if product.is_seat_product:
+            course_key = CourseKey.from_string(product.attr.course_key)
+        else:
+            course_key = None
+        course_name = None
+        image_url = None
+        short_description = None
+        course_start = None
+        course_end = None
+        course = None
+
+        try:
+            course = get_course_info_from_catalog(self.request.site, product)
+            try:
+                image_url = course['image']['src']
+            except (KeyError, TypeError):
+                image_url = ''
+            short_description = course.get('short_description', '')
+            course_name = course.get('title', '')
+
+            # The course start/end dates are not currently used
+            # in the default basket templates, but we are adding
+            # the dates to the template context so that theme
+            # template overrides can make use of them.
+            course_start = self._deserialize_date(course.get('start'))
+            course_end = self._deserialize_date(course.get('end'))
+        except (ConnectionError, SlumberBaseException, Timeout):
+            logger.exception('Failed to retrieve data from Discovery Service for course [%s].', course_key)
+
+        if self.request.basket.num_items == 1 and product.is_enrollment_code_product:
+            course_key = CourseKey.from_string(product.attr.course_key)
+            if course and course.get('marketing_url', None):
+                course_about_url = course['marketing_url']
+            else:
+                course_about_url = get_lms_course_about_url(course_key=course_key)
+            messages.info(
+                self.request,
+                _(
+                    '{strong_start}Purchasing just for yourself?{strong_end}{paragraph_start}If you are '
+                    'purchasing a single code for someone else, please continue with checkout. However, if you are the '
+                    'learner {link_start}go back{link_end} to enroll directly.{paragraph_end}'
+                ).format(
+                    strong_start='<strong>',
+                    strong_end='</strong>',
+                    paragraph_start='<p>',
+                    paragraph_end='</p>',
+                    link_start='<a href="{course_about}">'.format(course_about=course_about_url),
+                    link_end='</a>'
+                ),
+                extra_tags='safe'
+            )
+
+        return {
+            'product_title': course_name,
+            'course_key': course_key,
+            'image_url': image_url,
+            'product_description': short_description,
+            'course_start': course_start,
+            'course_end': course_end,
+        }
+
+    def _deserialize_date(self, date_string):
+        date = None
+        try:
+            date = dateutil.parser.parse(date_string)
+        except (AttributeError, ValueError):
+            pass
+        return date
+
     def _get_payment_processors_data(self, payment_processors):
         """Retrieve information about payment processors for the client side checkout basket.
 
@@ -334,86 +407,16 @@ class BasketSummaryView(BasketView):
                                                      sc=site_configuration.id)
             raise SiteConfigurationError(msg)
 
-    def get(self, request, *args, **kwargs):
-        basket = request.basket
-
-        try:
-            properties = {
-                'cart_id': basket.id,
-                'products': [translate_basket_line_for_segment(line) for line in basket.all_lines()],
-            }
-            track_segment_event(request.site, request.user, 'Cart Viewed', properties)
-
-            properties = {
-                'checkout_id': basket.order_number,
-                'step': 1
-            }
-            track_segment_event(request.site, request.user, 'Checkout Step Viewed', properties)
-        except Exception:  # pylint: disable=broad-except
-            logger.exception('Failed to fire Cart Viewed event for basket [%d]', basket.id)
-
-        if has_enterprise_offer(basket) and basket.total_incl_tax == Decimal(0):
-            return redirect('checkout:free-checkout')
-        else:
-            return super(BasketSummaryView, self).get(request, *args, **kwargs)
-
-    def get_context_data(self, **kwargs):
-        context = super(BasketSummaryView, self).get_context_data(**kwargs)
-        formset = context.get('formset', [])
-        lines = context.get('line_list', [])
-        site_configuration = self.request.site.siteconfiguration
-
-        failed_enterprise_consent_code = self.request.GET.get(CONSENT_FAILED_PARAM)
-        if failed_enterprise_consent_code:
-            messages.error(
-                self.request,
-                _("Could not apply the code '{code}'; it requires data sharing consent.").format(
-                    code=failed_enterprise_consent_code
-                )
-            )
-
-        context_updates, lines_data = self._process_basket_lines(lines)
-        context.update(context_updates)
-
-        user = self.request.user
-        context.update({
-            'analytics_data': prepare_analytics_data(
-                user,
-                site_configuration.segment_key,
-            ),
-            'enable_client_side_checkout': False,
-            'sdn_check': site_configuration.enable_sdn_check
-        })
-
-        payment_processors = site_configuration.get_payment_processors()
-        if site_configuration.client_side_payment_processor \
-                and waffle.flag_is_active(self.request, CLIENT_SIDE_CHECKOUT_FLAG_NAME):
-            payment_processors_data = self._get_payment_processors_data(payment_processors)
-            context.update(payment_processors_data)
-
-        # Total benefit displayed in price summary.
-        # Currently only one voucher per basket is supported.
-        try:
-            applied_voucher = self.request.basket.vouchers.first()
-            total_benefit = (
-                format_benefit_value(applied_voucher.offers.first().benefit)
-                if applied_voucher else None
-            )
-        except ValueError:
-            total_benefit = None
-        num_of_items = self.request.basket.num_items
-        context.update({
-            'formset_lines_data': zip(formset, lines_data),
-            'free_basket': context['order_total'].incl_tax == 0,
-            'homepage_url': get_lms_url(''),
-            'min_seat_quantity': 1,
-            'max_seat_quantity': 100,
-            'payment_processors': payment_processors,
-            'total_benefit': total_benefit,
-            'line_price': (self.request.basket.total_incl_tax_excl_discounts / num_of_items) if num_of_items > 0 else 0
-        })
-        return context
-
+    def _determine_product_type(self, product):
+        """
+        Return the seat type based on the product class
+        """
+        seat_type = None
+        if product.is_seat_product or product.is_course_entitlement_product:
+            seat_type = get_certificate_type_display_value(product.attr.certificate_type)
+        elif product.is_enrollment_code_product:
+            seat_type = get_certificate_type_display_value(product.attr.seat_type)
+        return seat_type
 
 class VoucherAddView(BaseVoucherAddView):  # pylint: disable=function-redefined
     def apply_voucher_to_basket(self, voucher):
