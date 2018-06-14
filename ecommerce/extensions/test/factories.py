@@ -10,8 +10,9 @@ from oscar.test.factories import *  # pylint:disable=wildcard-import,unused-wild
 from ecommerce.enterprise.benefits import EnterpriseAbsoluteDiscountBenefit, EnterprisePercentageDiscountBenefit
 from ecommerce.enterprise.conditions import EnterpriseCustomerCondition
 from ecommerce.extensions.offer.models import OFFER_PRIORITY_ENTERPRISE, OFFER_PRIORITY_VOUCHER
-from ecommerce.journal.benefits import JournalBundleAbsoluteDiscountBenefit, JournalBundlePercentageDiscountBenefit
-from ecommerce.journal.conditions import JournalBundleCondition
+# TODO: journals dependency
+from ecommerce.journals.benefits import JournalBundleAbsoluteDiscountBenefit, JournalBundlePercentageDiscountBenefit
+from ecommerce.journals.conditions import JournalBundleCondition
 from ecommerce.programs.benefits import AbsoluteDiscountBenefitWithoutRange, PercentageDiscountBenefitWithoutRange
 from ecommerce.programs.conditions import ProgramCourseRunSeatsCondition
 from ecommerce.programs.custom import class_path
@@ -206,6 +207,7 @@ class EnterpriseOfferFactory(ConditionalOfferFactory):
     status = ConditionalOffer.OPEN
 
 
+# TODO: journals dependency
 class JournalAbsoluteDiscountBenefitFactory(BenefitFactory):
     range = None
     type = ''
@@ -213,6 +215,7 @@ class JournalAbsoluteDiscountBenefitFactory(BenefitFactory):
     proxy_class = class_path(JournalBundleAbsoluteDiscountBenefit)
 
 
+# TODO: journals dependency
 class JournalPercentageDiscountBenefitFactory(BenefitFactory):
     range = None
     type = ''
@@ -220,6 +223,7 @@ class JournalPercentageDiscountBenefitFactory(BenefitFactory):
     proxy_class = class_path(JournalBundlePercentageDiscountBenefit)
 
 
+# TODO: journals dependency
 class JournalConditionFactory(ConditionFactory):
     range = None
     type = ''
@@ -231,7 +235,8 @@ class JournalConditionFactory(ConditionFactory):
         model = JournalBundleCondition
 
 
-class JournalOfferFactory(ConditionalOfferFactory):
+# TODO: journals dependency
+class JournalBundleOfferFactory(ConditionalOfferFactory):
     benefit = factory.SubFactory(JournalPercentageDiscountBenefitFactory)
     condition = factory.SubFactory(JournalConditionFactory)
     max_basket_applications = 1

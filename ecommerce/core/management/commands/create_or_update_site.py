@@ -130,6 +130,7 @@ class Command(BaseCommand):
                             type=str,
                             required=True,
                             help='URL for Discovery service API calls.')
+        # TODO: journals dependency
         parser.add_argument('--journals_api_url',
                             action='store',
                             dest='journals_api_url',
@@ -153,7 +154,8 @@ class Command(BaseCommand):
         payment_support_url = options.get('payment_support_url', '')
         base_cookie_domain = options.get('base_cookie_domain', '')
         discovery_api_url = options.get('discovery_api_url')
-        journals_api_url = options.get('journals_api_url', '')
+        # TODO: journals dependency
+        journals_api_url = options.get('journals_api_url')
 
         try:
             site = Site.objects.get(id=site_id)
@@ -194,7 +196,7 @@ class Command(BaseCommand):
             },
             'base_cookie_domain': base_cookie_domain,
             'discovery_api_url': discovery_api_url,
-            'journals_api_url': journals_api_url,
+            'journals_api_url': journals_api_url,  # TODO: journals dependency
         }
         if payment_support_email:
             site_configuration_defaults['payment_support_email'] = payment_support_email
