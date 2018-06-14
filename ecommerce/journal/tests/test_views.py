@@ -5,7 +5,7 @@ from django.urls import reverse
 from oscar.core.loading import get_model
 
 from ecommerce.extensions.test import factories
-from ecommerce.tests.testcases import CacheMixin, TestCase, ViewTestMixin
+from ecommerce.tests.testcases import TestCase, TieredCacheMixin, ViewTestMixin
 
 Benefit = get_model('offer', 'Benefit')
 ConditionalOffer = get_model('offer', 'ConditionalOffer')
@@ -46,7 +46,7 @@ class JournalOfferListViewTests(ViewTestMixin, TestCase):
 
 @mock.patch('ecommerce.journal.views.fetch_journal_bundle')
 @mock.patch('ecommerce.journal.forms.fetch_journal_bundle')
-class JournalOfferUpdateViewTests(TestCase, CacheMixin):
+class JournalOfferUpdateViewTests(TestCase, TieredCacheMixin):
 
     def setUp(self):
         super(JournalOfferUpdateViewTests, self).setUp()
