@@ -1,4 +1,5 @@
 import json
+from urlparse import urljoin
 
 import ddt
 import httpretty
@@ -14,6 +15,7 @@ from ecommerce.core.models import BusinessClient, SiteConfiguration, User
 from ecommerce.core.tests import toggle_switch
 from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
 from ecommerce.extensions.payment.tests.processors import AnotherDummyProcessor, DummyProcessor
+from ecommerce.journals.constants import JOURNAL_DISCOVERY_API_PATH  # TODO: journals dependency
 from ecommerce.tests.factories import SiteConfigurationFactory
 from ecommerce.tests.mixins import LmsApiMockMixin
 from ecommerce.tests.testcases import TestCase
@@ -313,6 +315,25 @@ class SiteConfigurationTests(TestCase):
         client_auth = client_store['session'].auth
 
         self.assertEqual(client_store['base_url'], ENTERPRISE_API_URL)
+        self.assertIsInstance(client_auth, SuppliedJwtAuth)
+        self.assertEqual(client_auth.token, token)
+
+    # TODO: journals dependency
+    @httpretty.activate
+    def test_journal_discovery_api_client(self):
+        """
+        Verify the property "journal_discovery_api_client" returns a Slumber-based
+        REST API client for journal discovery service API
+        """
+        token = self.mock_access_token_response()
+        client = self.site.siteconfiguration.journal_discovery_api_client
+        client_store = client._store  # pylint: disable=protected-access
+        client_auth = client_store['session'].auth
+
+        self.assertEqual(
+            client_store['base_url'],
+            urljoin(self.site.siteconfiguration.discovery_api_url, JOURNAL_DISCOVERY_API_PATH)
+        )
         self.assertIsInstance(client_auth, SuppliedJwtAuth)
         self.assertEqual(client_auth.token, token)
 
