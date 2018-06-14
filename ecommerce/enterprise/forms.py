@@ -12,7 +12,6 @@ from ecommerce.extensions.offer.models import OFFER_PRIORITY_ENTERPRISE
 from ecommerce.programs.custom import class_path, create_condition
 
 Benefit = get_model('offer', 'Benefit')
-Condition = get_model('offer', 'Condition')
 ConditionalOffer = get_model('offer', 'ConditionalOffer')
 Range = get_model('offer', 'Range')
 
@@ -95,8 +94,12 @@ class EnterpriseOfferForm(forms.ModelForm):
         enterprise_customer = get_enterprise_customer(site, enterprise_customer_uuid)
         enterprise_customer_name = enterprise_customer['name']
 
-        self.instance.name = _(u'Discount provided by {enterprise_customer_name}.'.format(
-            enterprise_customer_name=enterprise_customer_name
+        # Note: the actual name is not displayed like this in the template, so it's safe to use the UUID here.
+        # And in fact we have to, because otherwise we face integrity errors since Oscar forces this name to be unique.
+        self.instance.name = _(u'Discount of type {} provided by {} for {}.'.format(
+            ConditionalOffer.SITE,
+            enterprise_customer_name,
+            enterprise_customer_catalog_uuid,
         ))
         self.instance.status = ConditionalOffer.OPEN
         self.instance.offer_type = ConditionalOffer.SITE
