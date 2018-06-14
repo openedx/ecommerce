@@ -118,7 +118,11 @@ class EnterpriseOfferFormTests(EnterpriseServiceMockMixin, TestCase):
             data['enterprise_customer_catalog_uuid'],
             data['benefit_value'],
             data['benefit_type'],
-            'Discount provided by {}.'.format(data['enterprise_customer_name']),
+            'Discount of type {} provided by {} for {}.'.format(
+                ConditionalOffer.SITE,
+                data['enterprise_customer_name'],
+                data['enterprise_customer_catalog_uuid']
+            ),
         )
 
     @httpretty.activate
@@ -140,7 +144,9 @@ class EnterpriseOfferFormTests(EnterpriseServiceMockMixin, TestCase):
             data['enterprise_customer_catalog_uuid'],
             data['benefit_value'],
             data['benefit_type'],
-            'Discount provided by Spánish Enterprise.'
+            'Discount of type Site provided by Spánish Enterprise for {}.'.format(
+                data['enterprise_customer_catalog_uuid']
+            ),
         )
 
     @httpretty.activate
@@ -164,7 +170,11 @@ class EnterpriseOfferFormTests(EnterpriseServiceMockMixin, TestCase):
             data['enterprise_customer_catalog_uuid'],
             data['benefit_value'],
             data['benefit_type'],
-            'Discount provided by {}.'.format(data['enterprise_customer_name']),
+            'Discount of type {} provided by {} for {}.'.format(
+                ConditionalOffer.SITE,
+                data['enterprise_customer_name'],
+                data['enterprise_customer_catalog_uuid']
+            ),
         )
 
     @httpretty.activate
@@ -194,7 +204,11 @@ class EnterpriseOfferFormTests(EnterpriseServiceMockMixin, TestCase):
             data['enterprise_customer_catalog_uuid'],
             data['benefit_value'],
             data['benefit_type'],
-            'Discount provided by {}.'.format(data['enterprise_customer_name']),
+            'Discount of type {} provided by {} for {}.'.format(
+                ConditionalOffer.SITE,
+                data['enterprise_customer_name'],
+                data['enterprise_customer_catalog_uuid']
+            ),
         )
 
     def test_create_when_conditional_offer_with_uuid_exists(self):
