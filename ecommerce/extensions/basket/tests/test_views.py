@@ -350,8 +350,8 @@ class BasketSummaryViewTests(EnterpriseServiceMockMixin, DiscoveryTestMixin, Dis
     def test_journal_product(self):
         """ Verify the basket looks right for journal product types. """
         title = "Test Journal 123"
-        journal_product = Product.objects.get(product_class__name=JOURNAL_PRODUCT_CLASS_NAME)
-        self.create_basket_and_add_product(title=title, product=journal_product)
+        journal_product = factories.ProductFactory(product_class__name=JOURNAL_PRODUCT_CLASS_NAME, title=title)
+        self.create_basket_and_add_product(product=journal_product)
 
         response = self.client.get(self.path)
         self.assertEqual(response.status_code, 200)
