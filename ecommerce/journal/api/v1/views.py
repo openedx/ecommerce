@@ -3,6 +3,7 @@ from oscar.core.loading import get_model
 from rest_framework import viewsets
 from rest_framework.permissions import IsAdminUser
 
+from ecommerce.journal.api.paginations import LargeResultsSetPagination
 from ecommerce.journal.api.serializers import JournalProductSerializer, JournalProductUpdateSerializer
 
 Product = get_model('catalogue', 'Product')
@@ -17,6 +18,7 @@ class JournalProductViewSet(viewsets.ModelViewSet):
     queryset = Product.objects.filter(product_class__name='Journal')
     serializer_class = JournalProductSerializer
     permission_classes = (IsAdminUser,)
+    pagination_class = LargeResultsSetPagination
 
     def get_serializer_class(self):
         serializer_class = self.serializer_class
