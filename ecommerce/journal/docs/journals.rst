@@ -15,14 +15,13 @@ A New Journal Product Class
 ===========================
 
 Oscar has a concept ‘product class’ (in the Oscar UI it’s referred to as
-‘product type’). This is just a type of product, like “course seat” or
-“course entitlement”.
+‘product type’). This is just a type of product, like 'course seat' or
+'course entitlement'.
 
 Creating a New Product Class
 ----------------------------
 
--  New product classes can be made manually through the oscar dashboard:
-      http://localhost:18130/dashboard/catalogue/product-types/
+-  New product classes can be made manually through the oscar dashboard: http://localhost:18130/dashboard/catalogue/product-types/
 
 -  But we want that product type to exist even if we reprovision
       ecommerce, and we want the Journals product class to exist on
