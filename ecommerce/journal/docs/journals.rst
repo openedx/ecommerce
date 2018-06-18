@@ -14,59 +14,30 @@ of how edx-ecommerce works.
 A New Journal Product Class
 ===========================
 
-Oscar has a concept ‘product class’ (in the Oscar UI it’s referred to as
-‘product type’). This is just a type of product, like “course seat” or
-“course entitlement”.
+Oscar has a concept 'product class' (in the Oscar UI it’s referred to as
+'product type'). This is just a type of product, like 'course seat' or
+'course entitlement'.
 
 Creating a New Product Class
 ----------------------------
 
--  New product classes can be made manually through the oscar dashboard:
-      http://localhost:18130/dashboard/catalogue/product-types/
+New product classes can be made manually through the oscar dashboard: http://localhost:18130/dashboard/catalogue/product-types/
+But we want that product type to exist even if we reprovision ecommerce, and we want the Journals product class to exist on every environment without manual intervention.  So we manually make a migration: [0031_journal_product_class.py] (../../extensions/catalogue/migrations/0031_journal_product_class.py)
 
--  But we want that product type to exist even if we reprovision
-      ecommerce, and we want the Journals product class to exist on
-      every environment without manual intervention.
+-  This migration writes a new row to the `catalogue_productclass` table, creating the product class ‘Journal’
+-  It also writes a row to the `catalogue_productattribute` table, which specifies that the product class ‘Journal’ has an attribute ‘UUID’
 
--  So we manually make a migration:
-      ecommerce/extensions/catalogue/migrations/0031_journal_product_class.py
-
-   -  This migration writes a new row to the \`catalogue_productclass\`
-         table, creating the product class ‘Journal’
-
-   -  It also writes a row to the \`catalogue_productattribute\` table,
-         which specifies that the product class ‘Journal’ has an
-         attribute ‘UUID’
-
--  Important tables that define a product in oscar
-
-   -  \`catalogue_productclass`: defines types of products
-
-   -  \`catalogue_productattribute`: defines a set of attributes for a
+Important tables that define a product in oscar:
+   -  `catalogue_productclass`: defines types of products
+   -  `catalogue_productattribute`: defines a set of attributes for a
          given product type
-
-      -  Ex. the ‘Journal’ product class has one product attribute
-            associated with it; that is UUID. Other products have
-            multiple attributes.
-
-      -  Again, this could be done through the oscar UI, but we do this
-            through migrations to make sure that it persists through
-            provisions:
-            http://localhost:18130/dashboard/catalogue/product-type/6/update/#product_attributes
-
-   -  \`catalogue_product`: describes an instance of a product
-
-      -  Ex. You may have the product class ‘course seat’, but an
-            instance of that product may be ‘seat in course DemoX’
-
-      -  You can create a new product through the dashboard:
-            http://localhost:18130/dashboard/catalogue/
-
-      -  We do not create journals through the oscar dashboard, see
-            ##Creating New Instances of JOurnals
-
-   -  \`catalogue_productattributevalue`: describes attributes of
-         specific instances of products
+      -  Ex. the ‘Journal’ product class has one product attribute associated with it; that is UUID. Other products have multiple attributes.
+      -  Again, this could be done through the oscar UI, but we do this through migrations to make sure that it persists through provisions: http://localhost:18130/dashboard/catalogue/product-type/6/update/#product_attributes
+   -  `catalogue_product`: describes an instance of a product
+      -  Ex. You may have the product class ‘course seat’, but an instance of that product may be ‘seat in course DemoX’
+      -  You can create a new product through the dashboard: http://localhost:18130/dashboard/catalogue/
+      -  We do not create journals through the oscar dashboard, see 'Creating a new instance of a Journal Product' below
+   -  `catalogue_productattributevalue`: describes attributes of specific instances of products
 
 Fulfillment (buying and refunding)
 ----------------------------------
