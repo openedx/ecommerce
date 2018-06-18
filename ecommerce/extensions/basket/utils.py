@@ -32,6 +32,7 @@ Voucher = get_model('voucher', 'Voucher')
 logger = logging.getLogger(__name__)
 
 
+@newrelic.agent.function_trace()
 def add_utm_params_to_url(url, params):
     # utm_params is [(u'utm_content', u'course-v1:IDBx IDB20.1x 1T2017'),...
     utm_params = [item for item in params if 'utm_' in item[0]]
@@ -44,6 +45,7 @@ def add_utm_params_to_url(url, params):
     return url
 
 
+@newrelic.agent.function_trace()
 def prepare_basket(request, products, voucher=None):
     """
     Create or get the basket, add products, apply a voucher, and record referral data.
@@ -118,6 +120,7 @@ def prepare_basket(request, products, voucher=None):
     return basket
 
 
+@newrelic.agent.function_trace()
 def get_basket_switch_data(product):
     """
     Given a seat or enrollment product, find the SKU of the related product of
@@ -145,6 +148,7 @@ def get_basket_switch_data(product):
     return switch_link_text, partner_sku
 
 
+@newrelic.agent.function_trace()
 def _find_seat_enrollment_toggle_sku(product, target_structure):
     """
     Given a seat or enrollment code product, find the SKU of the related product of
@@ -183,6 +187,7 @@ def _find_seat_enrollment_toggle_sku(product, target_structure):
     return None
 
 
+@newrelic.agent.function_trace()
 def attribute_cookie_data(basket, request):
     try:
         with transaction.atomic():
@@ -206,6 +211,7 @@ def attribute_cookie_data(basket, request):
         logger.exception('Error while attributing cookies to basket.')
 
 
+@newrelic.agent.function_trace()
 def _referral_from_basket_site(basket, site):
     try:
         # There should be only 1 referral instance for one basket.
@@ -216,6 +222,7 @@ def _referral_from_basket_site(basket, site):
     return referral
 
 
+@newrelic.agent.function_trace()
 def _record_affiliate_basket_attribution(referral, request):
     """
       Attribute this user's basket to the referring affiliate, if applicable.
@@ -229,6 +236,7 @@ def _record_affiliate_basket_attribution(referral, request):
     referral.affiliate_id = affiliate_id
 
 
+@newrelic.agent.function_trace()
 def _record_utm_basket_attribution(referral, request):
     """
       Attribute this user's basket to UTM data, if applicable.
@@ -252,6 +260,7 @@ def _record_utm_basket_attribution(referral, request):
     referral.utm_created_at = created_at_datetime
 
 
+@newrelic.agent.function_trace()
 def basket_add_organization_attribute(basket, request_data):
     """
     Add organization attribute on basket, if organization value is provided
@@ -304,6 +313,7 @@ def basket_add_enterprise_catalog_attribute(basket, request_data):
         BasketAttribute.objects.filter(basket=basket, attribute_type=enterprise_catalog_attribute).delete()
 
 
+@newrelic.agent.function_trace()
 def _set_basket_bundle_status(bundle, basket):
     """
     Sets the basket's bundle status
@@ -332,6 +342,7 @@ def _set_basket_bundle_status(bundle, basket):
         BasketAttribute.objects.filter(basket=basket, attribute_type__name=BUNDLE).delete()
 
 
+@newrelic.agent.function_trace()
 def validate_voucher(voucher, user, basket, request_site):
     """
     Validates if a voucher code can be used for user and basket.
@@ -386,6 +397,7 @@ def validate_voucher(voucher, user, basket, request_site):
     return True, ''
 
 
+@newrelic.agent.function_trace()
 def _apply_voucher_on_basket(voucher, request, basket):
     """
     Applies voucher on a product.

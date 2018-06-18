@@ -6,6 +6,7 @@ from decimal import Decimal
 from urllib import urlencode
 
 import dateutil.parser
+import newrelic.agent
 import waffle
 from django.http import HttpResponseBadRequest, HttpResponseRedirect
 from django.shortcuts import redirect, render
@@ -108,6 +109,7 @@ class BasketSummaryView(BasketView):
     Display basket contents and checkout/payment options.
     """
 
+    @newrelic.agent.function_trace()
     def _determine_product_type(self, product):
         """
         Return the seat type based on the product class
@@ -119,6 +121,7 @@ class BasketSummaryView(BasketView):
             seat_type = get_certificate_type_display_value(product.attr.seat_type)
         return seat_type
 
+    @newrelic.agent.function_trace()
     def _deserialize_date(self, date_string):
         date = None
         try:
@@ -127,6 +130,7 @@ class BasketSummaryView(BasketView):
             pass
         return date
 
+    @newrelic.agent.function_trace()
     def _get_course_data(self, product):
         """
         Return course data.
@@ -197,6 +201,7 @@ class BasketSummaryView(BasketView):
             'course_end': course_end,
         }
 
+    @newrelic.agent.function_trace()
     def _process_basket_lines(self, lines):
         """Processes the basket lines and extracts information for the view's context.
         In addition determines whether:
@@ -303,6 +308,7 @@ class BasketSummaryView(BasketView):
 
         return context_updates, lines_data
 
+    @newrelic.agent.function_trace()
     def _get_payment_processors_data(self, payment_processors):
         """Retrieve information about payment processors for the client side checkout basket.
 
@@ -362,6 +368,7 @@ class BasketSummaryView(BasketView):
         else:
             return super(BasketSummaryView, self).get(request, *args, **kwargs)
 
+    @newrelic.agent.function_trace()
     def get_context_data(self, **kwargs):
         context = super(BasketSummaryView, self).get_context_data(**kwargs)
         formset = context.get('formset', [])
