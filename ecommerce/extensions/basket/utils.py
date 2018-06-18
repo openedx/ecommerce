@@ -5,6 +5,7 @@ from urllib import unquote, urlencode
 
 import newrelic.agent
 import pytz
+import waffle
 from django.conf import settings
 from django.contrib import messages
 from django.db import transaction
@@ -148,6 +149,31 @@ def get_basket_switch_data(product):
            (product_cert_type and product_cert_type == stock_record_seat_type):
             partner_sku = stock_record.partner_sku
             break
+
+    if waffle.switch_is_active("debug_logging_for_get_basket_switch_data"):  # pragma: no cover
+        if product.course_id is None:
+            if partner_sku is not None:
+                logger.info("get_basket_switch_data: product.course_id is None. partner_sku has been set")
+
+                courseless_stock_records = StockRecord.objects.filter(
+                    product__id=product.id,
+                )
+                courseless_partner_sku = None
+                product_cert_type = getattr(product.attr, 'certificate_type', None)
+                product_seat_type = getattr(product.attr, 'seat_type', None)
+                for courseless_stock_record in courseless_stock_records:
+                    stock_record_cert_type = getattr(courseless_stock_record.product.attr, 'certificate_type', None)
+                    stock_record_seat_type = getattr(courseless_stock_record.product.attr, 'seat_type', None)
+                    if (product_seat_type and product_seat_type == stock_record_cert_type) or \
+                            (product_cert_type and product_cert_type == stock_record_seat_type):
+                        courseless_partner_sku = courseless_stock_record.partner_sku
+                        break
+                if courseless_partner_sku != partner_sku:
+                    msg = "get_basket_switch_data: courseless_partner_sku {} != original_partner_sku {}".format(
+                        courseless_partner_sku, partner_sku
+                    )
+                    logger.info(msg)
+
     return switch_link_text, partner_sku
 
 
