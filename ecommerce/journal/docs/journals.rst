@@ -14,19 +14,18 @@ of how edx-ecommerce works.
 A New Journal Product Class
 ===========================
 
-Oscar has a concept *product class* (in the Oscar UI it’s referred to as
-*product type*). This is just a type of product, like *course seat* or
-*course entitlement*.
+Oscar has a concept 'product class' (in the Oscar UI it’s referred to as
+'product type'). This is just a type of product, like 'course seat' or
+'course entitlement'.
 
 Creating a New Product Class
 ----------------------------
 
--  New product classes can be made manually through the oscar dashboard: http://localhost:18130/dashboard/catalogue/product-types/
--  But we want that product type to exist even if we reprovision ecommerce, and we want the Journals product class to exist on every environment without manual intervention.
--  So we manually make a migration: [0031_journal_product_class.py] (../../extensions/catalogue/migrations/0031_journal_product_class.py)
-   -  This migration writes a new row to the `catalogue_productclass` table, creating the product class ‘Journal’
-   -  It also writes a row to the `catalogue_productattribute` table, which specifies that the product class ‘Journal’ has an attribute ‘UUID’
--  Important tables that define a product in oscar:
+New product classes can be made manually through the oscar dashboard: http://localhost:18130/dashboard/catalogue/product-types/
+But we want that product type to exist even if we reprovision ecommerce, and we want the Journals product class to exist on every environment without manual intervention.  So we manually make a migration: [0031_journal_product_class.py] (../../extensions/catalogue/migrations/0031_journal_product_class.py)
+-  This migration writes a new row to the `catalogue_productclass` table, creating the product class ‘Journal’
+-  It also writes a row to the `catalogue_productattribute` table, which specifies that the product class ‘Journal’ has an attribute ‘UUID’
+Important tables that define a product in oscar:
    -  `catalogue_productclass`: defines types of products
    -  `catalogue_productattribute`: defines a set of attributes for a
          given product type
