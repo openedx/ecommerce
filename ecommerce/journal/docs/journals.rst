@@ -14,9 +14,9 @@ of how edx-ecommerce works.
 A New Journal Product Class
 ===========================
 
-Oscar has a concept ‘product class’ (in the Oscar UI it’s referred to as
-‘product type’). This is just a type of product, like 'course seat' or
-'course entitlement'.
+Oscar has a concept *product class* (in the Oscar UI it’s referred to as
+*product type*). This is just a type of product, like *course seat* or
+*course entitlement*.
 
 Creating a New Product Class
 ----------------------------
