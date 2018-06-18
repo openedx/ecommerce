@@ -270,7 +270,7 @@ class BasketSummaryView(BasketView):
                 }
 
             # Get variables for the switch link that toggles from enrollment codes and seat.
-            switch_link_text, partner_sku = get_basket_switch_data(line.product)
+            switch_link_text, partner_sku = get_basket_switch_data(line.product, self.partner)
 
             if line.has_discount:
                 benefit = self.request.basket.applied_offers().values()[0].benefit
@@ -362,6 +362,7 @@ class BasketSummaryView(BasketView):
         formset = context.get('formset', [])
         lines = context.get('line_list', [])
         site_configuration = self.request.site.siteconfiguration
+        self.partner = get_partner_for_site(self.request)
 
         failed_enterprise_consent_code = self.request.GET.get(CONSENT_FAILED_PARAM)
         if failed_enterprise_consent_code:

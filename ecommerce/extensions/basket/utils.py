@@ -4,6 +4,7 @@ import logging
 from urllib import unquote, urlencode
 
 import pytz
+import waffle
 from django.conf import settings
 from django.contrib import messages
 from django.db import transaction
@@ -111,7 +112,7 @@ def prepare_basket(request, products, voucher=None):
     return basket
 
 
-def get_basket_switch_data(product):
+def get_basket_switch_data(product, partner):
     structure = product.structure
     switch_link_text = None
 
@@ -144,6 +145,23 @@ def get_basket_switch_data(product):
            (product_cert_type and product_cert_type == stock_record_seat_type):
             partner_sku = stock_record.partner_sku
             break
+
+    if waffle.switch_is_active("debug_fast_partner_sku"):  # pragma: no cover
+        stock_records = StockRecord.objects.filter(
+            partner__id=partner.id,
+            product__id=product.id,
+            product__structure=structure
+        )
+        for stock_record in stock_records:
+            stock_record_cert_type = getattr(stock_record.product.attr, 'certificate_type', None)
+            stock_record_seat_type = getattr(stock_record.product.attr, 'seat_type', None)
+            if (product_seat_type and product_seat_type == stock_record_cert_type) or \
+                    (product_cert_type and product_cert_type == stock_record_seat_type):
+                fast_partner_sku = stock_record.partner_sku
+                break
+        if partner_sku != fast_partner_sku:
+            logger.info("get_basket_switch_data: partner sku {} != fast_partner_sku {}".format(partner_sku, fast_partner_sku))
+
     return switch_link_text, partner_sku
 
 
