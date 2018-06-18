@@ -3,6 +3,7 @@ import json
 import logging
 from urllib import unquote, urlencode
 
+import newrelic.agent
 import pytz
 from django.conf import settings
 from django.contrib import messages
@@ -29,6 +30,7 @@ Refund = get_model('refund', 'Refund')
 logger = logging.getLogger(__name__)
 
 
+@newrelic.agent.function_trace()
 def add_utm_params_to_url(url, params):
     # utm_params is [(u'utm_content', u'course-v1:IDBx IDB20.1x 1T2017'),...
     utm_params = [item for item in params if 'utm_' in item[0]]
@@ -41,6 +43,7 @@ def add_utm_params_to_url(url, params):
     return url
 
 
+@newrelic.agent.function_trace()
 def prepare_basket(request, products, voucher=None):
     """
     Create or get the basket, add products, apply a voucher, and record referral data.
@@ -111,6 +114,7 @@ def prepare_basket(request, products, voucher=None):
     return basket
 
 
+@newrelic.agent.function_trace()
 def get_basket_switch_data(product):
     structure = product.structure
     switch_link_text = None
@@ -147,6 +151,7 @@ def get_basket_switch_data(product):
     return switch_link_text, partner_sku
 
 
+@newrelic.agent.function_trace()
 def attribute_cookie_data(basket, request):
     try:
         with transaction.atomic():
@@ -170,6 +175,7 @@ def attribute_cookie_data(basket, request):
         logger.exception('Error while attributing cookies to basket.')
 
 
+@newrelic.agent.function_trace()
 def _referral_from_basket_site(basket, site):
     try:
         # There should be only 1 referral instance for one basket.
@@ -180,6 +186,7 @@ def _referral_from_basket_site(basket, site):
     return referral
 
 
+@newrelic.agent.function_trace()
 def _record_affiliate_basket_attribution(referral, request):
     """
       Attribute this user's basket to the referring affiliate, if applicable.
@@ -193,6 +200,7 @@ def _record_affiliate_basket_attribution(referral, request):
     referral.affiliate_id = affiliate_id
 
 
+@newrelic.agent.function_trace()
 def _record_utm_basket_attribution(referral, request):
     """
       Attribute this user's basket to UTM data, if applicable.
@@ -216,6 +224,7 @@ def _record_utm_basket_attribution(referral, request):
     referral.utm_created_at = created_at_datetime
 
 
+@newrelic.agent.function_trace()
 def basket_add_organization_attribute(basket, request_data):
     """
     Add organization attribute on basket, if organization value is provided
@@ -238,6 +247,7 @@ def basket_add_organization_attribute(basket, request_data):
         )
 
 
+@newrelic.agent.function_trace()
 def _set_basket_bundle_status(bundle, basket):
     """
     Sets the basket's bundle status
