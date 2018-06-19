@@ -154,7 +154,7 @@ def get_basket_switch_data(product):
         msg = "get_basket_switch_data: product.course_id={}, product.product_class.name={}, structure={}, " \
             "partner_sku={}, product_cert_type={}, product_seat_type={}".format(
                 product.course_id,
-                product.product_class.name,
+                product.product_class_id,
                 structure,
                 partner_sku,
                 product_cert_type,
