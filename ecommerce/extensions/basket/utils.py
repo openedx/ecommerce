@@ -151,6 +151,16 @@ def get_basket_switch_data(product):
             break
 
     if waffle.switch_is_active("debug_logging_for_get_basket_switch_data"):  # pragma: no cover
+        msg = "get_basket_switch_data: product.course_id={}, product.product_class.name={}, structure={}, " \
+            "partner_sku={}, product_cert_type={}, product_seat_type={}".format(
+                product.course_id,
+                product.product_class.name,
+                structure,
+                partner_sku,
+                product_cert_type,
+                product_seat_type)
+        logger.info(msg)
+
         if product.course_id is None:
             if partner_sku is not None:
                 logger.info("get_basket_switch_data: product.course_id is None. partner_sku has been set")
