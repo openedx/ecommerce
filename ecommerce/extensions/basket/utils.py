@@ -151,11 +151,12 @@ def get_basket_switch_data(product):
             break
 
     if waffle.switch_is_active("debug_logging_for_get_basket_switch_data"):  # pragma: no cover
-        msg = "get_basket_switch_data: product.course_id={}, product.product_class.name={}, structure={}, " \
-            "partner_sku={}, product_cert_type={}, product_seat_type={}".format(
+        msg = "get_basket_switch_data: product.course_id={}, product.get_product_class().name={}, structure={}, " \
+            "product.structure={}, partner_sku={}, product_cert_type={}, product_seat_type={}".format(
                 product.course_id,
-                product.product_class_id,
+                product.get_product_class().name,
                 structure,
+                product.structure,
                 partner_sku,
                 product_cert_type,
                 product_seat_type)
