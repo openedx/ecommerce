@@ -34,6 +34,7 @@ Important tables that define a product in oscar:
 
    -  *For example*: the ``Journal`` product class has one product attribute associated with it, that is ``UUID``. Other products may have no or multiple attributes.
    -  Again, this could be done through the oscar UI, but we do this through migrations to make sure that it persists through provisions: http://localhost:18130/dashboard/catalogue/product-type/6/update/#product_attributes
+
 -  ``catalogue_product``: describes an instance of a product
 
    -  *For example*: You may have the product class ``course seat``, but an instance of that product may be ``seat in course DemoX``
@@ -75,7 +76,7 @@ How does oscar/ecommerce know how to fulfill a journal properly?
    -  Specifically for journals we make a POST request to the journal service ``journalaccess`` api.
 
       - The ``journal access`` api takes a user name and a journal id and grants access for that user to that journal.  For more info checkout the `journals repo`_
-      -  We call that api in the ``post_journal_access`` method in `client.py`_
+      -  We call that api in the ``post_journal_access`` method in `journal client`_
 
 Refunds
 ~~~~~~~
@@ -85,7 +86,6 @@ Refunds
    -  The user initiates a refund through their dashboard
 
       -  This functionality does not exist for journals yet, it does exist for course seats and entitlements
-
       -  There are policy rules around this for course seats and entitlements, not for journals yet. The policy controls things like how long since purchase can you request a refund.
 
    -  A refund is requested through the oscar dashboard.  
@@ -98,7 +98,8 @@ Refunds
 
    -  Very similar to fulfillment, but instead the method ``revoke_line`` is called in the `journal fulfillment module`_
    -  For journals, when ``revoke_line`` is called we make a POST request to the ``journalaccess`` api but ``revoke_access`` to ``true``
-   -  We call that api in the ``revoke_journal_access`` in `client.py`_
+   -  We call that api in the ``revoke_journal_access`` in `journal client`_
+
 
 Journal Bundle Offers
 =====================
@@ -113,8 +114,9 @@ Actually creating a journal bundle is done through the discovery django
 admin, but creating a discount associated with that journal bundle is
 done through the journal bundle offer page hosted in ecommerce.
 
+
 How to create new journal bundle offers
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+---------------------------------------
 
 -  First, you must have created a journal bundle in the discovery admin:
 
@@ -138,12 +140,12 @@ Just like products, offers can be created through the oscar dashboard (http://lo
 
 -  The UI is made up of two templates that are basically copied between program, enterprise and journal offers
 
-   -  Page listing all of the current journal offers: `templates/journal/journaloffer_list.html`_
-   -  Form where you can create new journal offers: `templates/journal/journaloffer_form.html`_
+   -  Page listing all of the current journal offers: `journaloffer_list`_
+   -  Form where you can create new journal offers: `journaloffer_form`_
     
--  The views controling these UIs can be found here: `views.py`_
+-  The views controling these UIs can be found here: `journal views`_
 
-   -  This calls the discovery api which fetches and caches the journal bundles: see ``fetch_journal_bundles`` in `client.py``_
+   -  This calls the discovery api which fetches and caches the journal bundles: see ``fetch_journal_bundles`` in `journal client`_
 
 -  Important tables related to offers:
 
@@ -152,7 +154,7 @@ Just like products, offers can be created through the oscar dashboard (http://lo
    -  ``offer_benefit``: the benefit that will be applied to a given offer
 
 Creating a new instance of a Journal Product
---------------------------------------------
+============================================
 
 Because ecommerce and discovery need to have knowledge of journal
 products, we have a management command to run that will update each
@@ -172,6 +174,7 @@ These steps assume you have already provisioned journals on your local machine. 
 -  Change the ecommerce domain name back to to ``localhost:18130``: http://localhost:18130/admin/sites/site/
 
 That management command, ``publish_journals``, creates a journal in the journal service and creates an instance of a journal product in ecommerce. It does this by using this API that we made: http://localhost:18130/journal/api/v1/journals/
+
 
 Future work
 ===========
@@ -203,11 +206,11 @@ Suggested Improvements to the Ecommerce that are not specifically related to Jou
 
 
 
+.. _journals repo: https://github.com/edx/journals
 .. _0031_journal_product_class: ../../extensions/catalogue/migrations/0031_journal_product_class.py
 .. _oscar settings: ../../settings/_oscar.py
 .. _journal fulfillment module: ../fulfillment/modules.py
-.. _journals repo: https://github.com/edx/journals
-.. _client.py: ../client.py
-.. _templates/journal/journaloffer_list.html: ../templates/journal/journaloffer_list.html
-.. _templates/journal/journaloffer_form.html: ../templates/journal/journaloffer_form.html
-.. _views.py: ../views.py
+.. _journal client: ../client.py
+.. _journal views: ../views.py
+.. _journaloffer_list: ../templates/journal/journaloffer_list.html
+.. _journaloffer_form: ../templates/journal/journaloffer_form.html
