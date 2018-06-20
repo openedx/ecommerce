@@ -195,6 +195,8 @@ V2 release of Journals - It is a requirement that these issues are dealt with if
    -  Create a policy the controls when a user can and cannot request a refund
 
 -  Fix bug where you have to change your ecommerce site host name in order to run the ``publish_journals`` management command
+- The offers admin pages do not handle pagination well - make sure if there are many journal bundle offers we handle that case. The UI should show paginated results and we should make sure we are only makeing the calls we need to discovery.
+
 
 Suggested Improvements to the Ecommerce that are not specifically related to Journals:
 --------------------------------------------------------------------------------------
