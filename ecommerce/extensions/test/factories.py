@@ -236,7 +236,7 @@ class JournalConditionFactory(ConditionFactory):
 
 
 # TODO: journal dependency
-class JournalOfferFactory(ConditionalOfferFactory):
+class JournalBundleOfferFactory(ConditionalOfferFactory):
     benefit = factory.SubFactory(JournalPercentageDiscountBenefitFactory)
     condition = factory.SubFactory(JournalConditionFactory)
     max_basket_applications = 1

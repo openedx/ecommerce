@@ -21,7 +21,7 @@ Condition = get_model('offer', 'Condition')
 ConditionalOffer = get_model('offer', 'ConditionalOffer')
 
 
-class JournalOfferForm(forms.ModelForm):
+class JournalBundleOfferForm(forms.ModelForm):
     journal_bundle_uuid = forms.UUIDField(
         required=True,
         label=_('Journal Bundle UUID')
@@ -59,14 +59,14 @@ class JournalOfferForm(forms.ModelForm):
                 'benefit_type': instance.benefit.proxy().benefit_class_type,
                 'benefit_value': instance.benefit.value,
             })
-        super(JournalOfferForm, self).__init__(data, files, auto_id, prefix, initial, error_class, label_suffix,
-                                               empty_permitted, instance)
+        super(JournalBundleOfferForm, self).__init__(data, files, auto_id, prefix, initial, error_class, label_suffix,
+                                                     empty_permitted, instance)
         date_ui_class = {'class': 'add-pikaday'}
         self.fields['start_datetime'].widget.attrs.update(date_ui_class)
         self.fields['end_datetime'].widget.attrs.update(date_ui_class)
 
     def clean(self):
-        cleaned_data = super(JournalOfferForm, self).clean()
+        cleaned_data = super(JournalBundleOfferForm, self).clean()
 
         start_datetime = cleaned_data.get('start_datetime')
         end_datetime = cleaned_data.get('end_datetime')
@@ -129,4 +129,4 @@ class JournalOfferForm(forms.ModelForm):
                     journal_bundle_uuid=journal_bundle_uuid
                 )
 
-            return super(JournalOfferForm, self).save(commit)
+            return super(JournalBundleOfferForm, self).save(commit)
