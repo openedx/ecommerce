@@ -11,7 +11,7 @@ from ecommerce.extensions.test.factories import (
     PercentageDiscountBenefitWithoutRangeFactory
 )
 from ecommerce.journal.benefit_constants import BENEFIT_MAP
-from ecommerce.journal.forms import JournalOfferForm
+from ecommerce.journal.forms import JournalBundleOfferForm
 from ecommerce.programs.custom import class_path
 from ecommerce.tests.testcases import TestCase
 
@@ -19,7 +19,7 @@ Benefit = get_model('offer', 'Benefit')
 ConditionalOffer = get_model('offer', 'ConditionalOffer')
 
 
-class JournalOfferFormTests(TestCase):
+class JournalBundleOfferFormTests(TestCase):
 
     def generate_data(self, **kwargs):
         """
@@ -33,8 +33,8 @@ class JournalOfferFormTests(TestCase):
         data.update(**kwargs)
         return data
 
-    def _assert_journal_offer_conditions(self, offer, journal_bundle_uuid, expected_benefit_value,
-                                         expected_benefit_type, expected_name):
+    def _assert_journal_bundle_offer_conditions(self, offer, journal_bundle_uuid, expected_benefit_value,
+                                                expected_benefit_type, expected_name):
         """
         Assert the given offer's parameters with the expected values.
         """
@@ -51,7 +51,7 @@ class JournalOfferFormTests(TestCase):
         """
         Assert that form validation fails with the expected errors.
         """
-        form = JournalOfferForm(data=data)
+        form = JournalBundleOfferForm(data=data)
         self.assertFalse(form.is_valid())
         self.assertEqual(form.errors, expected_errors)
 
@@ -63,7 +63,7 @@ class JournalOfferFormTests(TestCase):
             benefit=PercentageDiscountBenefitWithoutRangeFactory(),
             condition=JournalConditionFactory()
         )
-        form = JournalOfferForm(instance=journal_offer)
+        form = JournalBundleOfferForm(instance=journal_offer)
         self.assertEqual(form['journal_bundle_uuid'].value(), journal_offer.condition.journal_bundle_uuid.hex)
         self.assertEqual(form['benefit_type'].value(), journal_offer.benefit.proxy().benefit_class_type)
         self.assertEqual(form['benefit_value'].value(), journal_offer.benefit.value)
@@ -109,11 +109,11 @@ class JournalOfferFormTests(TestCase):
         """
         mock_discovery_call.return_value = {"title": "test-journal"}
         data = self.generate_data()
-        form = JournalOfferForm(request=self.request, data=data)
+        form = JournalBundleOfferForm(request=self.request, data=data)
         form.is_valid()
         offer = form.save()
-        self._assert_journal_offer_conditions(offer, data['journal_bundle_uuid'], data['benefit_value'],
-                                              data['benefit_type'], 'Journal Bundle Offer: test-journal')
+        self._assert_journal_bundle_offer_conditions(offer, data['journal_bundle_uuid'], data['benefit_value'],
+                                                     data['benefit_type'], 'Journal Bundle Offer: test-journal')
 
     @httpretty.activate
     @mock.patch('ecommerce.journal.forms.fetch_journal_bundle')
@@ -130,13 +130,13 @@ class JournalOfferFormTests(TestCase):
             journal_bundle_uuid=journal_offer.condition.journal_bundle_uuid,
             benefit_type=Benefit.FIXED
         )
-        form = JournalOfferForm(request=self.request, data=data, instance=journal_offer)
+        form = JournalBundleOfferForm(request=self.request, data=data, instance=journal_offer)
         form.is_valid()
         form.save()
 
         journal_offer.refresh_from_db()
-        self._assert_journal_offer_conditions(journal_offer, data['journal_bundle_uuid'], data['benefit_value'],
-                                              data['benefit_type'], 'Journal Bundle Offer: test-journal')
+        self._assert_journal_bundle_offer_conditions(journal_offer, data['journal_bundle_uuid'], data['benefit_value'],
+                                                     data['benefit_type'], 'Journal Bundle Offer: test-journal')
 
     @httpretty.activate
     @mock.patch('ecommerce.journal.forms.fetch_journal_bundle')
@@ -146,14 +146,15 @@ class JournalOfferFormTests(TestCase):
         """
         mock_discovery_call.return_value = {"title": "test-journal"}
         data = self.generate_data()
-        form = JournalOfferForm(request=self.request, data=data)
+        form = JournalBundleOfferForm(request=self.request, data=data)
         form.is_valid()
         instance = form.save(commit=False)
         self.assertIsNone(instance)
 
     def test_create_when_conditional_offer_with_uuid_exists(self):
         """
-        Verify a journal offer can be created if a conditional offer with different type and same uuid already exists.
+        Verify a journal bundle offer can be created if a conditional offer with different type and same uuid already
+        exists.
         """
         data = self.generate_data()
         ConditionalOfferFactory(
@@ -161,5 +162,5 @@ class JournalOfferFormTests(TestCase):
             condition__journal_bundle_uuid=data['journal_bundle_uuid'],
             offer_type=ConditionalOffer.VOUCHER,
         )
-        form = JournalOfferForm(request=self.request, data=data)
+        form = JournalBundleOfferForm(request=self.request, data=data)
         self.assertTrue(form.is_valid())
