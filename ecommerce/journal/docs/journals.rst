@@ -179,15 +179,15 @@ That management command, ``publish_journals``, creates a journal in the journal 
 Future work
 ===========
 
-Must happen before MVP release of Journals:
--------------------------------------------
+Must happen before MVP release of Journals (All have been captured in jira tickets):
+------------------------------------------------------------------------------------
 
 -  Journal fulfillment should be async, just like seat fulfillments are today
 -  Make sure that journals is not over using atomic transactions in its fulfillment or refund
 -  Set up error monitoring for journal fulfilment
 
-V2 release of Journals (What must happen for Journals to be a maintainable product going forward):
---------------------------------------------------------------------------------------------------
+V2 release of Journals - It is a requirement that these issues are dealt with if journals remains in the code (All captured in jira tickets):
+--------------------------------------------------------------------------------------------------------------------------------------------------
 
 -  User initiated refunds: Currently refunds can only be initiated via the oscar dashboard. Practically, this means that a user can only get a refund by contacting support. Support then has to request the refund through the oscar dashboard. Remaining work for refunds includes:
 
