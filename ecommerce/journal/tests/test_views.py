@@ -36,6 +36,19 @@ class JournalBundleOfferListViewTests(ViewTestMixin, TestCase):
         self.assertContains(response, "Journal Bundle Offers")
         self.assertEqual(list(response.context['object_list']), journal_bundle_offers)
 
+    @mock.patch('ecommerce.journal.views.fetch_journal_bundle')
+    def test_get_filter_non_journal_bundle_offers(self, mock_journal_endpoint):
+        """ Test that if there are non journal bundle offers in the conditional offers table, this class will not try
+         to apply them """
+        mock_journal_endpoint.return_value = _get_mocked_endpoint()
+
+        # These should be ignored since their associated Condition objects do NOT have journal bundle UUIDs
+        factories.ConditionalOfferFactory.create_batch(3)
+        journal_bundle_offers = factories.JournalBundleOfferFactory.create_batch(3)
+
+        response = self.assert_get_response_status(200)
+        self.assertEqual(list(response.context['object_list']), journal_bundle_offers)
+
     def test_get_without_offers(self):
         """ Test the "GET" endpoint without any offer """
 
