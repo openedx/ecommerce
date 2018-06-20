@@ -8,7 +8,6 @@ from ecommerce.tests.testcases import TestCase
 
 Product = get_model('catalogue', 'Product')
 ProductClass = get_model('catalogue', 'ProductClass')
-LOGGER_NAME = 'ecommerce.journal.conditions'
 
 
 @mock.patch("ecommerce.journal.conditions.fetch_journal_bundle")
@@ -85,4 +84,26 @@ class JournalBundleConditionTests(TestCase, JournalMixin):
         """ Test the 'get_applicable_lines' with empty basket """
         mocked_journal_api_response.return_value = self.get_mocked_discovery_journal()
         self.basket.flush()
+        self.assertEqual(self.condition.get_applicable_lines(self.offer, self.basket), [])
+
+    def test_get_applicable_lines_sku_not_in_basket(self, mocked_journal_api_response):
+        """ Test the 'get_applicable_lines' where the sku is not in the basket """
+        mocked_journal_api_response.return_value = self.get_mocked_discovery_journal()
+        self.basket.flush()
+        self.basket.add_product(
+            self.create_product(
+                self.client,
+                data=self.get_data_for_create(sku="dummy-sku")
+            ),
+            1
+        )
+        self.assertEqual(self.condition.get_applicable_lines(self.offer, self.basket), [])
+
+    @mock.patch("ecommerce.extensions.catalogue.models.Product.get_is_discountable")
+    def test_get_applicable_lines_product_is_not_discountable(
+            self, mocked_journal_api_response, mocked_product_is_discountable):
+        """ Test the 'get_applicable_lines' where the product is not discountable """
+        mocked_journal_api_response.return_value = self.get_mocked_discovery_journal()
+        mocked_product_is_discountable.return_value = False
+
         self.assertEqual(self.condition.get_applicable_lines(self.offer, self.basket), [])
