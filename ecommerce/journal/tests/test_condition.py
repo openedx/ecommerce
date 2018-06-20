@@ -19,7 +19,7 @@ class JournalBundleConditionTests(TestCase, JournalMixin):
         self.client.login(username=user.username, password=self.password)
 
         self.condition = factories.JournalConditionFactory()
-        self.offer = factories.JournalOfferFactory(site=self.site, condition=self.condition)
+        self.offer = factories.JournalBundleOfferFactory(site=self.site, condition=self.condition)
         self.basket = factories.BasketFactory(site=self.site, owner=factories.UserFactory())
         self.basket.add_product(
             self.create_product(self.client),

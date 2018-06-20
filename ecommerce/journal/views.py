@@ -9,32 +9,32 @@ from oscar.core.loading import get_model
 
 from ecommerce.core.views import StaffOnlyMixin
 from ecommerce.journal.client import fetch_journal_bundle
-from ecommerce.journal.forms import JournalOfferForm
+from ecommerce.journal.forms import JournalBundleOfferForm
 
 Benefit = get_model('offer', 'Benefit')
 ConditionalOffer = get_model('offer', 'ConditionalOffer')
 
 
-class JournalOfferViewMixin(StaffOnlyMixin):
+class JournalBundleOfferViewMixin(StaffOnlyMixin):
     model = ConditionalOffer
 
     def get_context_data(self, **kwargs):
-        context = super(JournalOfferViewMixin, self).get_context_data(**kwargs)
+        context = super(JournalBundleOfferViewMixin, self).get_context_data(**kwargs)
         context['admin'] = 'journals'
         return context
 
 
-class JournalProcessFormViewMixin(JournalOfferViewMixin):
-    form_class = JournalOfferForm
+class JournalBundleProcessFormViewMixin(JournalBundleOfferViewMixin):
+    form_class = JournalBundleOfferForm
     sucess_message = _('Journal Bundle offer updated!')
 
     def get_form_kwargs(self):
-        kwargs = super(JournalProcessFormViewMixin, self).get_form_kwargs()
+        kwargs = super(JournalBundleProcessFormViewMixin, self).get_form_kwargs()
         kwargs.update({'request': self.request})
         return kwargs
 
     def get_context_data(self, **kwargs):
-        context = super(JournalOfferViewMixin, self).get_context_data(**kwargs)     # pylint: disable=bad-super-call
+        context = super(JournalBundleOfferViewMixin, self).get_context_data(**kwargs)     # pylint: disable=bad-super-call
         context.update({
             'editing': False
         })
@@ -45,19 +45,19 @@ class JournalProcessFormViewMixin(JournalOfferViewMixin):
         return reverse('journal:offers:edit', kwargs={'pk': self.object.pk})
 
 
-class JournalOfferCreateView(JournalProcessFormViewMixin, CreateView):
+class JournalBundleOfferCreateView(JournalBundleProcessFormViewMixin, CreateView):
     initial = {
         'benefit_type': Benefit.PERCENTAGE
     }
     success_message = _('Journal Bundle offer created!')
-    template_name = 'journal/journaloffer_form.html'
+    template_name = 'journal/journalbundleoffer_form.html'
 
 
-class JournalOfferUpdateView(JournalProcessFormViewMixin, UpdateView):
-    template_name = 'journal/journaloffer_form.html'
+class JournalBundleOfferUpdateView(JournalBundleProcessFormViewMixin, UpdateView):
+    template_name = 'journal/journalbundleoffer_form.html'
 
     def get_context_data(self, **kwargs):
-        context = super(JournalOfferUpdateView, self).get_context_data(**kwargs)
+        context = super(JournalBundleOfferUpdateView, self).get_context_data(**kwargs)
         context.update({
             'editing': True,
             'journal_bundle': fetch_journal_bundle(
@@ -68,11 +68,11 @@ class JournalOfferUpdateView(JournalProcessFormViewMixin, UpdateView):
         return context
 
 
-class JournalOfferListView(JournalOfferViewMixin, ListView):
-    template_name = 'journal/journaloffer_list.html'
+class JournalBundleOfferListView(JournalBundleOfferViewMixin, ListView):
+    template_name = 'journal/journalbundleoffer_list.html'
 
     def get_context_data(self, **kwargs):
-        context = super(JournalOfferListView, self).get_context_data(**kwargs)
+        context = super(JournalBundleOfferListView, self).get_context_data(**kwargs)
 
         offers = []
         # context['object_list'] returns all conditional offers (including enterprise and program)
