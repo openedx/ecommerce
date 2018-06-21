@@ -3,9 +3,9 @@ Utility Functions to Access the Discovery Journal API and the Journals Service A
 """
 import logging
 
-from django.core.cache import cache
 from edx_rest_api_client.client import EdxRestApiClient
 
+from ecommerce.cache_utils.utils import TieredCache
 from ecommerce.core.utils import get_cache_key
 from ecommerce.journal.constants import JOURNAL_BUNDLE_CACHE_TIMEOUT
 
@@ -89,10 +89,12 @@ def fetch_journal_bundle(site, journal_bundle_uuid):
         journal_bundle_uuid=journal_bundle_uuid
     )
 
-    journal_bundle = cache.get(cache_key)
-    if not journal_bundle:
-        client = site.siteconfiguration.journal_discovery_api_client
-        journal_bundle = client.journal_bundles(journal_bundle_uuid).get()
-        cache.set(cache_key, journal_bundle, JOURNAL_BUNDLE_CACHE_TIMEOUT)
+    journal_bundle_cached_response = TieredCache.get_cached_response(cache_key)
+    if journal_bundle_cached_response.is_hit:
+        return journal_bundle_cached_response.value
+
+    client = site.siteconfiguration.journal_discovery_api_client
+    journal_bundle = client.journal_bundles(journal_bundle_uuid).get()
+    TieredCache.set_all_tiers(cache_key, journal_bundle, JOURNAL_BUNDLE_CACHE_TIMEOUT)
 
     return journal_bundle
