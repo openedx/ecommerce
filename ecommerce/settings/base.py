@@ -296,6 +296,7 @@ LOCAL_APPS = [
     'ecommerce.sailthru',
     'ecommerce.enterprise',
     'ecommerce.management',
+    'ecommerce.journal',  # TODO: journal dependency
 ]
 
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
@@ -594,7 +595,6 @@ if os.environ.get('ENABLE_DJANGO_TOOLBAR', False):
     MIDDLEWARE_CLASSES += (
         'debug_toolbar.middleware.DebugToolbarMiddleware',
     )
-# END DJANGO DEBUG TOOLBAR CONFIGURATION
 
 # Determines if events are actually sent to Segment. This should only be set to False for testing purposes.
 SEND_SEGMENT_EVENTS = True
