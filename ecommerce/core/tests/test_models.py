@@ -1,4 +1,5 @@
 import json
+from urlparse import urljoin
 
 import ddt
 import httpretty
@@ -313,6 +314,25 @@ class SiteConfigurationTests(TestCase):
         client_auth = client_store['session'].auth
 
         self.assertEqual(client_store['base_url'], ENTERPRISE_API_URL)
+        self.assertIsInstance(client_auth, SuppliedJwtAuth)
+        self.assertEqual(client_auth.token, token)
+
+    # TODO: journal dependency
+    @httpretty.activate
+    def test_journal_discovery_api_client(self):
+        """
+        Verify the property "journal_discovery_api_client" returns a Slumber-based
+        REST API client for journal discovery service API
+        """
+        token = self.mock_access_token_response()
+        client = self.site.siteconfiguration.journal_discovery_api_client
+        client_store = client._store  # pylint: disable=protected-access
+        client_auth = client_store['session'].auth
+
+        self.assertEqual(
+            client_store['base_url'],
+            urljoin(self.site.siteconfiguration.discovery_api_url, '/journal/api/v1/')
+        )
         self.assertIsInstance(client_auth, SuppliedJwtAuth)
         self.assertEqual(client_auth.token, token)
 

@@ -47,7 +47,7 @@ class JournalBundleOfferListViewTests(ViewTestMixin, TestCase):
         journal_bundle_offers = factories.JournalBundleOfferFactory.create_batch(3)
 
         response = self.assert_get_response_status(200)
-        self.assertEqual(list(response.context['object_list']), journal_bundle_offers)
+        self.assertEqual(list(response.context['offers']), journal_bundle_offers)
 
     def test_get_without_offers(self):
         """ Test the "GET" endpoint without any offer """

@@ -87,6 +87,65 @@ DEFAULT_COURSE = [
     }
 ]
 
+EXTRA_COURSE = [
+    {
+        "key": "DEF+DEF101",
+        "uuid": "0e8cbcaa-075b-4e38-a8c3-1876464c2926",
+        "title": "Second edX test course",
+        "course_runs": [
+            {
+                "key": "course-v1:DEF+DEF101+2016_T2",
+                "uuid": "4786e7be-2390-4332-a20e-e24895c38109",
+                "title": "Second edX test course",
+                "seats": [
+                    {
+                        "type": "credit",
+                        "price": "10.00",
+                        "currency": "USD",
+                        "upgrade_deadline": "2016-06-27T00:00:00Z",
+                        "credit_provider": "asu",
+                        "credit_hours": 2,
+                        "sku": "sku01",
+                        "bulk_sku": None
+                    },
+                    {
+                        "type": "honor",
+                        "price": "0.00",
+                        "currency": "USD",
+                        "upgrade_deadline": None,
+                        "credit_provider": None,
+                        "credit_hours": None,
+                        "sku": "sku02",
+                        "bulk_sku": None
+                    },
+                    {
+                        "type": "verified",
+                        "price": "10.00",
+                        "currency": "USD",
+                        "upgrade_deadline": "2016-06-27T00:00:00Z",
+                        "credit_provider": None,
+                        "credit_hours": None,
+                        "sku": "sku03",
+                        "bulk_sku": "2DF467D"
+                    }
+                ],
+                "start": "2015-01-08T00:00:00Z",
+                "end": "2016-12-30T00:00:00Z",
+                "enrollment_start": "2016-01-01T00:00:00Z",
+                "enrollment_end": None,
+                "pacing_type": "self_paced",
+                "type": "credit",
+                "status": "unpublished",
+                "course": "DEF+DEF101",
+                "full_description": None,
+                "announcement": None,
+                "availability": "Archived",
+                "reporting_type": "test",
+            }
+        ]
+    }
+]
+
 
 class JournalMixin(object):
     """ Mixin for preparing data for Journal Testing. """
@@ -137,17 +196,24 @@ class JournalMixin(object):
             client.get(path).content
         )
 
-    def get_mocked_discovery_journal(
+    def get_mocked_discovery_journal_bundle(
             self,
             empty_journals=False,
             empty_courses=False,
-            applicable_seat_types=None
+            applicable_seat_types=None,
+            multiple_courses=False
     ):
+        courses = []
+        if not empty_courses:
+            courses = DEFAULT_COURSE
+            if multiple_courses:
+                courses = DEFAULT_COURSE + EXTRA_COURSE
+
         return {
             "uuid": "1918b738-979f-42cb-bde0-13335366fa86",
             "title": "dummy-title",
             "partner": "edx",
             "journals": [] if empty_journals else DEFAULT_JOURNALS,
-            "courses": [] if empty_courses else DEFAULT_COURSE,
+            "courses": courses,
             "applicable_seat_types": applicable_seat_types if applicable_seat_types else ["credit", "honor", "verified"]
         }
