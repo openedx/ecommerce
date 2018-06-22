@@ -117,49 +117,36 @@ def prepare_basket(request, products, voucher=None):
 
 @newrelic.agent.function_trace()
 def get_basket_switch_data(product):
-    structure = product.structure
+    """
+    Given a seat or enrollment product, find the SKU of the related product of
+    the other type, along with the text to display to the user for the
+    toggle link.  This is used on the Basket Summary page to enable users to
+    switch between purchasing a single course run Seat and making a bulk
+    purchase of a set of Enrollment Codes for the same course run.
+
+    Arguments:
+        product (Product): Product of type Seat or Enrollment Code
+
+    Returns:
+        tuple(str, str): containing the link display text and associated sku
+    """
     switch_link_text = None
+    partner_sku = None
 
     if product.is_enrollment_code_product:
+        partner_sku = _find_seat_enrollment_toggle_sku(product, 'child')
         switch_link_text = _('Click here to just purchase an enrollment for yourself')
-        structure = 'child'
     elif product.is_seat_product:
+        partner_sku = _find_seat_enrollment_toggle_sku(product, 'standalone')
         switch_link_text = _('Click here to purchase multiple seats in this course')
-        structure = 'standalone'
-
-    stock_records = StockRecord.objects.filter(
-        product__course_id=product.course_id,
-        product__structure=structure
-    )
-
-    # Determine the proper partner SKU to embed in the single/multiple basket switch link
-    # The logic here is a little confusing.  "Seat" products have "certificate_type" attributes, and
-    # "Enrollment Code" products have "seat_type" attributes.  If the basket is in single-purchase
-    # mode, we are working with a Seat product and must present the 'buy multiple' switch link and
-    # SKU from the corresponding Enrollment Code product.  If the basket is in multi-purchase mode,
-    # we are working with an Enrollment Code product and must present the 'buy single' switch link
-    # and SKU from the corresponding Seat product.
-    partner_sku = None
-    product_cert_type = getattr(product.attr, 'certificate_type', None)
-    product_seat_type = getattr(product.attr, 'seat_type', None)
-    for stock_record in stock_records:
-        stock_record_cert_type = getattr(stock_record.product.attr, 'certificate_type', None)
-        stock_record_seat_type = getattr(stock_record.product.attr, 'seat_type', None)
-        if (product_seat_type and product_seat_type == stock_record_cert_type) or \
-           (product_cert_type and product_cert_type == stock_record_seat_type):
-            partner_sku = stock_record.partner_sku
-            break
 
     if waffle.switch_is_active("debug_logging_for_get_basket_switch_data"):  # pragma: no cover
-        msg = "get_basket_switch_data: product.course_id={}, product.get_product_class().name={}, structure={}, " \
-            "product.structure={}, partner_sku={}, product_cert_type={}, product_seat_type={}".format(
+        msg = "get_basket_switch_data: product.course_id={}, product.get_product_class().name={}, " \
+            "product.structure={}, partner_sku={}".format(
                 product.course_id,
                 product.get_product_class().name,
-                structure,
                 product.structure,
-                partner_sku,
-                product_cert_type,
-                product_seat_type)
+                partner_sku)
         logger.info(msg)
 
         if product.course_id is None:
@@ -186,6 +173,44 @@ def get_basket_switch_data(product):
                     logger.info(msg)
 
     return switch_link_text, partner_sku
+
+
+def _find_seat_enrollment_toggle_sku(product, target_structure):
+    """
+    Given a seat or enrollment code product, find the SKU of the related product of
+    the other type that matches the target structure.
+
+    Arguments:
+        product (Product): Product of type Seat or Enrollment Code
+        target_structure (str): Structure of the related product we're seeking
+
+    Returns:
+        sku (str): The sku of the associated Seat or Enrollment Code product.
+    """
+
+    # Note: This query filter will not perform well with products that do not have a course_id
+    stock_records = StockRecord.objects.filter(
+        product__course_id=product.course_id,
+        product__structure=target_structure
+    )
+
+    # Determine the proper partner SKU to embed in the single/multiple basket switch link
+    # The logic here is a little confusing.  "Seat" products have "certificate_type" attributes, and
+    # "Enrollment Code" products have "seat_type" attributes.  If the basket is in single-purchase
+    # mode, we are working with a Seat product and must present the 'buy multiple' switch link and
+    # SKU from the corresponding Enrollment Code product.  If the basket is in multi-purchase mode,
+    # we are working with an Enrollment Code product and must present the 'buy single' switch link
+    # and SKU from the corresponding Seat product.
+    product_cert_type = getattr(product.attr, 'certificate_type', None)
+    product_seat_type = getattr(product.attr, 'seat_type', None)
+    for stock_record in stock_records:
+        stock_record_cert_type = getattr(stock_record.product.attr, 'certificate_type', None)
+        stock_record_seat_type = getattr(stock_record.product.attr, 'seat_type', None)
+        if (product_seat_type and product_seat_type == stock_record_cert_type) or \
+                (product_cert_type and product_cert_type == stock_record_seat_type):
+            return stock_record.partner_sku
+
+    return None
 
 
 @newrelic.agent.function_trace()

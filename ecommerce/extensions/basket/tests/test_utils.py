@@ -13,7 +13,14 @@ from oscar.test.factories import BasketFactory, ProductFactory, RangeFactory, Vo
 from ecommerce.core.constants import ENROLLMENT_CODE_PRODUCT_CLASS_NAME
 from ecommerce.core.tests import toggle_switch
 from ecommerce.courses.tests.factories import CourseFactory
-from ecommerce.extensions.basket.utils import add_utm_params_to_url, attribute_cookie_data, prepare_basket
+from ecommerce.entitlements.utils import create_or_update_course_entitlement
+from ecommerce.extensions.basket.tests.mixins import BasketMixin
+from ecommerce.extensions.basket.utils import (
+    add_utm_params_to_url,
+    attribute_cookie_data,
+    get_basket_switch_data,
+    prepare_basket
+)
 from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
 from ecommerce.extensions.order.constants import DISABLE_REPEAT_ORDER_CHECK_SWITCH_NAME
 from ecommerce.extensions.order.exceptions import AlreadyPlacedOrderException
@@ -30,6 +37,7 @@ BasketAttributeType = get_model('basket', 'BasketAttributeType')
 BUNDLE = 'bundle_identifier'
 Option = get_model('catalogue', 'Option')
 Product = get_model('catalogue', 'Product')
+ProductClass = get_model('catalogue', 'ProductClass')
 
 
 def timeoutException():
@@ -37,7 +45,7 @@ def timeoutException():
 
 
 @ddt.ddt
-class BasketUtilsTests(DiscoveryTestMixin, TestCase):
+class BasketUtilsTests(DiscoveryTestMixin, BasketMixin, TestCase):
     """ Tests for basket utility functions. """
 
     def setUp(self):
@@ -408,6 +416,45 @@ class BasketUtilsTests(DiscoveryTestMixin, TestCase):
 
         # Verify that no exception is raised when no basket attribute exists fitting the delete statement parameters
         prepare_basket(request, [product])
+
+    def test_basket_switch_data(self):
+        """Verify the correct basket switch data (single vs. multi quantity) is retrieved."""
+        __, seat, enrollment_code = self.prepare_course_seat_and_enrollment_code()
+        seat_sku = StockRecord.objects.get(product=seat).partner_sku
+        ec_sku = StockRecord.objects.get(product=enrollment_code).partner_sku
+        entitlement = create_or_update_course_entitlement(
+            'verified', 100, self.partner, 'foo-bar', 'Foo Bar Entitlement')
+
+        __, partner_sku = get_basket_switch_data(seat)
+        self.assertEqual(partner_sku, ec_sku)
+        __, partner_sku = get_basket_switch_data(enrollment_code)
+        self.assertEqual(partner_sku, seat_sku)
+        # Entitlement products should not return a sku for this function
+        __, partner_sku = get_basket_switch_data(entitlement)
+        self.assertIsNone(partner_sku)
+
+    def test_basket_switch_data_for_non_course_run_products(self):
+        """
+        Verify that no basket switch data is retrieved for product classes that
+        do not relate to course_run instances.
+        """
+        COURSE_RUN_PRODUCT_CLASSES = ['Seat', 'Enrollment Code']
+
+        for product_class in ProductClass.objects.all():
+            product = ProductFactory(
+                product_class=product_class,
+                title='{} product title'.format(product_class.name),
+                categories=None,
+                stockrecords__partner=self.partner
+            )
+
+            # Verify that the StockRecord hunt is only attempted for course run products
+            with mock.patch('ecommerce.extensions.basket.utils._find_seat_enrollment_toggle_sku') as mock_track:
+                _, _ = get_basket_switch_data(product)
+                if product.product_class.name in COURSE_RUN_PRODUCT_CLASSES:
+                    self.assertEqual(mock_track.call_count, 1)
+                else:
+                    mock_track.assert_not_called()
 
 
 class BasketUtilsTransactionTests(TransactionTestCase):

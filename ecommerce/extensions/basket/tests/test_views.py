@@ -23,7 +23,6 @@ from testfixtures import LogCapture
 from waffle.testutils import override_flag
 
 from ecommerce.cache_utils.utils import TieredCache
-from ecommerce.core.constants import ENROLLMENT_CODE_PRODUCT_CLASS_NAME
 from ecommerce.core.exceptions import SiteConfigurationError
 from ecommerce.core.tests import toggle_switch
 from ecommerce.core.url_utils import get_lms_url
@@ -32,7 +31,8 @@ from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.enterprise.tests.mixins import EnterpriseServiceMockMixin
 from ecommerce.entitlements.utils import create_or_update_course_entitlement
 from ecommerce.extensions.analytics.utils import translate_basket_line_for_segment
-from ecommerce.extensions.basket.utils import _set_basket_bundle_status, get_basket_switch_data
+from ecommerce.extensions.basket.tests.mixins import BasketMixin
+from ecommerce.extensions.basket.utils import _set_basket_bundle_status
 from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
 from ecommerce.extensions.offer.utils import format_benefit_value
 from ecommerce.extensions.order.utils import UserAlreadyPlacedOrder
@@ -67,7 +67,8 @@ BUNDLE = 'bundle_identifier'
 
 
 @ddt.ddt
-class BasketAddItemsViewTests(CouponMixin, DiscoveryTestMixin, DiscoveryMockMixin, LmsApiMockMixin, TestCase):
+class BasketAddItemsViewTests(
+        CouponMixin, DiscoveryTestMixin, DiscoveryMockMixin, LmsApiMockMixin, BasketMixin, TestCase):
     """ BasketAddItemsView view tests. """
     path = reverse('basket:basket-add')
 
@@ -272,7 +273,7 @@ class BasketAddItemsViewTests(CouponMixin, DiscoveryTestMixin, DiscoveryMockMixi
 @httpretty.activate
 @ddt.ddt
 class BasketSummaryViewTests(EnterpriseServiceMockMixin, DiscoveryTestMixin, DiscoveryMockMixin, LmsApiMockMixin,
-                             ApiMockMixin, TestCase):
+                             ApiMockMixin, BasketMixin, TestCase):
     """ BasketSummaryView basket view tests. """
     path = reverse('basket:summary')
 
@@ -302,21 +303,6 @@ class BasketSummaryViewTests(EnterpriseServiceMockMixin, DiscoveryTestMixin, Dis
         voucher, __ = prepare_voucher(_range=_range, benefit_type=benefit_type, benefit_value=benefit_value)
         basket.vouchers.add(voucher)
         Applicator().apply(basket)
-
-    def prepare_course_seat_and_enrollment_code(self, seat_type='verified', id_verification=False):
-        """Helper function that creates a new course, enables enrollment codes and creates a new
-        seat and enrollment code for it.
-
-        Args:
-            seat_type (str): Seat/certification type.
-            is_verification (bool): Whether or not id verification is required for the seat.
-        Returns:
-            The newly created course, seat and enrollment code.
-        """
-        course = CourseFactory()
-        seat = course.create_or_update_seat(seat_type, id_verification, 10, self.partner, create_enrollment_code=True)
-        enrollment_code = Product.objects.get(product_class__name=ENROLLMENT_CODE_PRODUCT_CLASS_NAME)
-        return course, seat, enrollment_code
 
     @ddt.data(ConnectionError, SlumberBaseException, Timeout)
     def test_course_api_failure(self, error):
@@ -365,17 +351,6 @@ class BasketSummaryViewTests(EnterpriseServiceMockMixin, DiscoveryTestMixin, Dis
         self.assertFalse(response.context['show_voucher_form'])
         line_data = response.context['formset_lines_data'][0][1]
         self.assertEqual(line_data['seat_type'], enrollment_code.attr.seat_type.capitalize())
-
-    def test_basket_switch_data(self):
-        """Verify the correct basket switch data (single vs. multi quantity) is retrieved."""
-        __, seat, enrollment_code = self.prepare_course_seat_and_enrollment_code()
-        seat_sku = StockRecord.objects.get(product=seat).partner_sku
-        ec_sku = StockRecord.objects.get(product=enrollment_code).partner_sku
-
-        __, partner_sku = get_basket_switch_data(seat)
-        self.assertEqual(partner_sku, ec_sku)
-        __, partner_sku = get_basket_switch_data(enrollment_code)
-        self.assertEqual(partner_sku, seat_sku)
 
     @ddt.data(
         (Benefit.PERCENTAGE, 100),
