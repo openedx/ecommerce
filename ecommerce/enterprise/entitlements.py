@@ -116,6 +116,10 @@ def get_course_entitlements_for_learner(site, user, course_id):
     try:
         enterprise_catalog_id = enterprise_learner_data[0]['enterprise_customer']['catalog']
         learner_id = enterprise_learner_data[0]['id']
+
+        if not enterprise_catalog_id:
+            logger.info('Invalid enterprise catalog id "[%s]"', enterprise_catalog_id)
+            return None
     except KeyError:
         logger.exception('Invalid structure for enterprise learner API response for the learner [%s]', user.username)
         return None

@@ -484,3 +484,21 @@ class EntitlementsTests(EnterpriseServiceMockMixin, DiscoveryTestMixin, Discover
 
         log_message = 'Unable to connect to Discovery Service for catalog contains endpoint.'
         self._assert_is_course_in_enterprise_catalog_for_failure(2, log_message)
+
+    @ddt.data(None, '')
+    def test_get_course_entitlements_for_learner_with_invalid_catalog_id(self, enterprise_catalog_id):
+        """
+        Verify that method "get_course_entitlements_for_learner" logs and returns
+        empty list for entitlements if the enterprise learner API response has
+        invalid enterprise catalog id.
+        """
+        self.mock_access_token_response()
+        self.mock_enterprise_learner_api(catalog_id=enterprise_catalog_id)
+
+        expected_message = 'Invalid enterprise catalog id "[%s]"' % enterprise_catalog_id
+        self._assert_get_course_entitlements_for_learner_response(
+            expected_entitlements=None,
+            log_level='INFO',
+            log_message=expected_message,
+            expected_request_count=2,
+        )
