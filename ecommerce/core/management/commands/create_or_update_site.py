@@ -155,7 +155,7 @@ class Command(BaseCommand):
         base_cookie_domain = options.get('base_cookie_domain', '')
         discovery_api_url = options.get('discovery_api_url')
         # TODO: journal dependency
-        journals_api_url = options.get('journals_api_url', '')
+        journals_api_url = options.get('journals_api_url')
 
         try:
             site = Site.objects.get(id=site_id)
