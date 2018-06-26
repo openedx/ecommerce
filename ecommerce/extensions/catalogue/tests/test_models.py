@@ -7,7 +7,6 @@ from oscar.test import factories
 from ecommerce.coupons.tests.mixins import CouponMixin
 from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
 from ecommerce.extensions.voucher.models import CouponVouchers
-from ecommerce.journal.constants import JOURNAL_PRODUCT_CLASS_NAME  # TODO: journal dependency
 from ecommerce.tests.testcases import TestCase
 
 Product = get_model('catalogue', 'Product')

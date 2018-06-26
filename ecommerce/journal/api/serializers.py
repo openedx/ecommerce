@@ -12,15 +12,9 @@ StockRecord = get_model('partner', 'StockRecord')
 
 class AttributesSerializer(serializers.ModelSerializer):
     """ Serializer for ProductAttributeValue objects. """
-    name = serializers.SerializerMethodField()
-    code = serializers.SerializerMethodField()
+    name = serializers.CharField(source='attribute.name')
+    code = serializers.CharField(source='attribute.code')
     value = serializers.CharField(max_length=256)
-
-    def get_name(self, instance):
-        return instance.attribute.name
-
-    def get_code(self, instance):
-        return instance.attribute.code
 
     class Meta(object):
         model = ProductAttributeValue
