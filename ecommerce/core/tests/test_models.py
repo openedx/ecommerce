@@ -15,6 +15,7 @@ from ecommerce.core.models import BusinessClient, SiteConfiguration, User
 from ecommerce.core.tests import toggle_switch
 from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
 from ecommerce.extensions.payment.tests.processors import AnotherDummyProcessor, DummyProcessor
+from ecommerce.journal.constants import JOURNALS_API_PATH  # TODO: journal dependency
 from ecommerce.tests.factories import SiteConfigurationFactory
 from ecommerce.tests.mixins import LmsApiMockMixin
 from ecommerce.tests.testcases import TestCase
@@ -331,7 +332,7 @@ class SiteConfigurationTests(TestCase):
 
         self.assertEqual(
             client_store['base_url'],
-            urljoin(self.site.siteconfiguration.discovery_api_url, '/journal/api/v1/')
+            urljoin(self.site.siteconfiguration.discovery_api_url, JOURNALS_API_PATH)
         )
         self.assertIsInstance(client_auth, SuppliedJwtAuth)
         self.assertEqual(client_auth.token, token)
