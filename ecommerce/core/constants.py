@@ -31,6 +31,9 @@ COURSE_ENTITLEMENT_PRODUCT_CLASS_NAME = 'Course Entitlement'
 # Discovery Service constants
 DEFAULT_CATALOG_PAGE_SIZE = 100
 
+# Backoff for api calls switch
+BACKOFF_FOR_API_CALLS_SWITCH = u'enable_backoff_for_enterprise_api_calls'
+
 
 class Status(object):
     """Health statuses."""

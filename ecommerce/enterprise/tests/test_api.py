@@ -1,10 +1,14 @@
 import ddt
 import httpretty
+import waffle
 from django.conf import settings
 from mock import patch
 from oscar.core.loading import get_model
+from requests.exceptions import ConnectionError
+from slumber.exceptions import SlumberBaseException
 
 from ecommerce.cache_utils.utils import TieredCache
+from ecommerce.core.constants import BACKOFF_FOR_API_CALLS_SWITCH
 from ecommerce.core.tests import toggle_switch
 from ecommerce.core.utils import get_cache_key
 from ecommerce.courses.tests.factories import CourseFactory
@@ -99,6 +103,35 @@ class EnterpriseAPITests(EnterpriseServiceMockMixin, DiscoveryTestMixin, TestCas
         # the cache
         enterprise_api.fetch_enterprise_learner_data(self.request.site, self.learner)
         self._assert_num_requests(expected_number_of_requests)
+
+    @patch("slumber.Resource.get")
+    @ddt.data(ConnectionError, SlumberBaseException)
+    def test_get_response_backoff(self, exception, mocked_get):
+        """
+        Test the helper function _get_with_backoff(endpoint, **querystring) backoff and
+        retry in case of request exceptions
+        """
+        mocked_get.side_effect = exception
+
+        self.mock_access_token_response()
+        self.mock_enterprise_learner_api()
+        with self.assertRaises(exception):
+            with patch('waffle.switch_is_active', return_value=True):
+                enterprise_api.fetch_enterprise_learner_data(self.request.site, self.learner)
+
+        self.assertEqual(mocked_get.call_count, 3)
+
+    @patch("ecommerce.enterprise.api._get_with_backoff")
+    def test_waffle_backoff_disabled(self, mocked_get):
+        """
+        Test that the helper function _get_with_backoff(endpoint, **querystring) backoff and
+        retry is not called if waffle flag BACKOFF_FOR_API_CALLS_SWITCH is not active
+        """
+        self.mock_access_token_response()
+        self.mock_enterprise_learner_api()
+        enterprise_api.fetch_enterprise_learner_data(self.request.site, self.learner)
+        self.assertEquals(waffle.switch_is_active(BACKOFF_FOR_API_CALLS_SWITCH), False)
+        self.assertEquals(mocked_get.call_count, 0)
 
     def test_fetch_enterprise_learner_entitlements(self):
         """
