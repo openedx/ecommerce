@@ -21,7 +21,7 @@ class AttributesSerializer(serializers.ModelSerializer):
         fields = ('name', 'code', 'value',)
 
 
-class StockRecordSerializer(serializers.ModelSerializer):
+class JournalStockRecordSerializer(serializers.ModelSerializer):
     """ Serializer for stock record objects. """
     partner = serializers.SlugRelatedField(slug_field='short_code', queryset=Partner.objects.all())
 
@@ -30,7 +30,7 @@ class StockRecordSerializer(serializers.ModelSerializer):
         fields = ('partner', 'partner_sku', 'price_currency', 'price_excl_tax',)
 
 
-class StockRecordSerializerForUpdate(StockRecordSerializer):
+class JournalStockRecordSerializerForUpdate(JournalStockRecordSerializer):
     """
     Stock record objects serializer for PUT requests.
     Allowed fields to update are 'price_currency' and 'price_excl_tax'.
@@ -47,7 +47,7 @@ class JournalProductSerializer(serializers.ModelSerializer):
     """
     product_class = serializers.SlugRelatedField(slug_field='name', queryset=ProductClass.objects.all())
     attribute_values = AttributesSerializer(many=True)
-    stockrecords = StockRecordSerializer(many=True)
+    stockrecords = JournalStockRecordSerializer(many=True)
 
     def create(self, validated_data):
         attributes_data = validated_data.pop('attribute_values')
@@ -84,7 +84,7 @@ class JournalProductUpdateSerializer(serializers.ModelSerializer):
     """
     Serializer to update the Journal Product model.
     """
-    stockrecords = StockRecordSerializerForUpdate(many=True, required=False)
+    stockrecords = JournalStockRecordSerializerForUpdate(many=True, required=False)
 
     def update(self, instance, validated_data):
         title = validated_data.pop('title', None)

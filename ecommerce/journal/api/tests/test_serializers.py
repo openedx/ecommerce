@@ -13,8 +13,8 @@ from ecommerce.journal.api.serializers import (
     AttributesSerializer,
     JournalProductSerializer,
     JournalProductUpdateSerializer,
-    StockRecordSerializer,
-    StockRecordSerializerForUpdate
+    JournalStockRecordSerializer,
+    JournalStockRecordSerializerForUpdate
 )
 from ecommerce.tests.factories import PartnerFactory, StockRecordFactory
 from ecommerce.tests.testcases import TestCase
@@ -71,7 +71,7 @@ class StockRecordSerializerTest(TestCase):
     def test_serializer_data(self):
         """ Test serializer return data properly. """
         self.assertEqual(
-            StockRecordSerializer(self.stock_record).data,
+            JournalStockRecordSerializer(self.stock_record).data,
             self._get_expected_data()
         )
 
@@ -99,7 +99,7 @@ class StockRecordSerializerForUpdateTest(TestCase):
     def test_serializer_data(self):
         """ Test serializer return data properly. """
         self.assertEqual(
-            StockRecordSerializerForUpdate(self.stock_record).data,
+            JournalStockRecordSerializerForUpdate(self.stock_record).data,
             self._get_expected_data()
         )
 
@@ -139,7 +139,7 @@ class JournalProductSerializerTest(TestCase):
             "expires": self.product.expires,
             'structure': self.product.structure,
             "product_class": self.product.product_class.name,
-            "stockrecords": StockRecordSerializer(self.product.stockrecords.all(), many=True).data,
+            "stockrecords": JournalStockRecordSerializer(self.product.stockrecords.all(), many=True).data,
             "attribute_values": AttributesSerializer(self.product.attribute_values.all(), many=True).data
         }
 
@@ -175,7 +175,7 @@ class JournalProductUpdateSerializerTest(TestCase):
         """ Returns expected data for serializer """
         return {
             "title": self.product.title,
-            "stockrecords": StockRecordSerializerForUpdate(self.product.stockrecords.all(), many=True).data
+            "stockrecords": JournalStockRecordSerializerForUpdate(self.product.stockrecords.all(), many=True).data
         }
 
     def test_serializer_data(self):
