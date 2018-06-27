@@ -38,8 +38,10 @@ class JournalBundleOfferListViewTests(ViewTestMixin, TestCase):
 
     @mock.patch('ecommerce.journal.views.fetch_journal_bundle')
     def test_get_filter_non_journal_bundle_offers(self, mock_journal_endpoint):
-        """ Test that if there are non journal bundle offers in the conditional offers table, this class will not try
-         to apply them """
+        """
+        Test that if there are non journal bundle offers in the conditional offers table, this class will not try
+        to apply them
+        """
         mock_journal_endpoint.return_value = _get_mocked_endpoint()
 
         # These should be ignored since their associated Condition objects do NOT have journal bundle UUIDs

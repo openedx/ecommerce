@@ -145,11 +145,12 @@ class JournalClientTests(JournalTestCase):
 
     @responses.activate
     def test_fetch_journal_bundle(self):
-        """ Test 'fetch_journal_bundle'
-        The first time it is called the journal discovery api should get hit
-            and store the journal bundle in the cache
-        The second time the api should not be called, the bundle should be retrieved from the cache
-        """
+        """ Test 'fetch_journal_bundle' properly calls API and uses cache """
+
+        # The first time it is called the journal discovery api should get hit
+        #     and store the journal bundle in the cache
+        # The second time the api should not be called, the bundle should be retrieved from the cache
+
         self.mock_access_token_response()
         test_bundle = {
             "uuid": "4786e7be-2390-4332-a20e-e24895c38109",
