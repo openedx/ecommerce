@@ -16,6 +16,9 @@ Condition = get_model('offer', 'Condition')
 
 
 class JournalBundleCondition(SingleItemConsumptionConditionMixin, Condition):
+    """
+    Checks if the set of products in the Basket meet the conditions of a Journal Bundle Offer
+    """
     basket_skus = None
     journal_bundle = None
 
