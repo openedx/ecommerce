@@ -11,14 +11,17 @@ logger = logging.getLogger(__name__)
 
 
 class JournalFulfillmentModule(BaseFulfillmentModule):
-    """ Fulfillment Module for granting learner access to a Journal """
+    """
+    Fulfillment Module for granting learner access to a Journal
+    """
 
     def supports_line(self, line):
         logger.debug('Line order: [%s], is journal: [%s]', line, line.product.is_journal_product)
         return line.product.is_journal_product
 
     def get_supported_lines(self, lines):
-        """ Return a list of lines that can be fulfilled.
+        """
+        Return a list of lines that can be fulfilled.
         Checks each line to determine if it is a "Journal". Journals are fulfilled by
         giving the use access to the specified journal.
         Args:
@@ -30,7 +33,8 @@ class JournalFulfillmentModule(BaseFulfillmentModule):
         return [line for line in lines if self.supports_line(line)]
 
     def fulfill_product(self, order, lines):
-        """ Fulfills the purchase of a 'Journal'
+        """
+        Fulfills the purchase of a 'Journal'
         Args:
             order (Order): The Order associated with the lines to be fulfilled.  The user associated with the order is
                 presumed to be the student to grant access to the journal
@@ -86,6 +90,17 @@ class JournalFulfillmentModule(BaseFulfillmentModule):
         return order, lines
 
     def revoke_line(self, line):
+        """
+        Revokes the purchase of a 'Journal'.  This will attempt to revoke the access that was granted when this order
+        was fulfilled.
+
+        Args:
+            line (Line): A line has data about the purchase.  Access will be revoked for the 'journalaccess' record
+                associated with this line order.
+
+        Returns:
+            Returns True if journal access was successfully revoked.
+        """
         try:
             logger.info('Attempting to revoke fulfillment of Line [%d]...', line.id)
 
