@@ -70,7 +70,7 @@ def fetch_journal_bundle(site, journal_bundle_uuid):
         discovery api and store in cache.
 
     Args:
-        site
+        site (Site): site for current request
         journal_bundle_uuid (str): uuid for desired journal bundle
 
     Returns:
