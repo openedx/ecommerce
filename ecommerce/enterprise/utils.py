@@ -348,6 +348,7 @@ def set_enterprise_customer_cookie(site, response, enterprise_customer_uuid, max
             settings.ENTERPRISE_CUSTOMER_COOKIE_NAME, enterprise_customer_uuid,
             domain=site.siteconfiguration.base_cookie_domain,
             max_age=max_age,
+            secure=True,
         )
     else:
         log.warning(
