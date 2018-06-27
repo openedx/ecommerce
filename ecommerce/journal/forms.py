@@ -97,7 +97,7 @@ class JournalBundleOfferForm(forms.ModelForm):
         site = self.request.site
 
         journal_bundle = fetch_journal_bundle(
-            site=self.request.site,
+            site=site,
             journal_bundle_uuid=journal_bundle_uuid
         )
         offer_name = 'Journal Bundle Offer: {title}'.format(
