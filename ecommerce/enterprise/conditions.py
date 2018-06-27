@@ -7,10 +7,14 @@ from requests.exceptions import ConnectionError, Timeout
 from slumber.exceptions import SlumberHttpBaseException
 
 from ecommerce.enterprise.api import catalog_contains_course_runs, fetch_enterprise_learner_data
+from ecommerce.extensions.basket.utils import ENTERPRISE_CATALOG_ATTRIBUTE_TYPE
 from ecommerce.enterprise.constants import ENTERPRISE_OFFERS_SWITCH
 from ecommerce.extensions.offer.decorators import check_condition_applicability
 from ecommerce.extensions.offer.mixins import ConditionWithoutRangeMixin, SingleItemConsumptionConditionMixin
 
+
+BasketAttribute = get_model('basket', 'BasketAttribute')
+BasketAttributeType = get_model('basket', 'BasketAttributeType')
 Condition = get_model('offer', 'Condition')
 logger = logging.getLogger(__name__)
 
@@ -65,6 +69,28 @@ class EnterpriseCustomerCondition(ConditionWithoutRangeMixin, SingleItemConsumpt
                 return False
 
             course_run_ids.append(course.id)
+
+        # For temporary basket try to get enterprise_customer_catalog_uuid from request
+        enterprise_customer_catalog_uuid = basket.strategy.request.GET.get(
+            'enterprise_customer_catalog_uuid'
+        ) if basket.strategy.request else None
+
+        if not enterprise_customer_catalog_uuid:
+            # For actual baskets get enterprise_customer_catalog_uuid from basket attribute
+            enterprise_catalog_attribute, __ = BasketAttributeType.objects.get_or_create(
+                name=ENTERPRISE_CATALOG_ATTRIBUTE_TYPE
+            )
+            enterprise_customer_catalog = BasketAttribute.objects.filter(
+                basket=basket,
+                attribute_type=enterprise_catalog_attribute,
+            ).first()
+            if enterprise_customer_catalog:
+                enterprise_customer_catalog_uuid = enterprise_customer_catalog.value_text
+
+        # Verify that current offer condition is related to the provided enterprise catalog
+        if enterprise_customer_catalog_uuid:
+            if str(offer.condition.enterprise_customer_catalog_uuid) != enterprise_customer_catalog_uuid:
+                return False
 
         if not catalog_contains_course_runs(basket.site, course_run_ids, self.enterprise_customer_uuid,
                                             enterprise_customer_catalog_uuid=self.enterprise_customer_catalog_uuid):
