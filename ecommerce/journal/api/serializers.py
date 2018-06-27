@@ -55,9 +55,8 @@ class JournalProductSerializer(serializers.ModelSerializer):
         product = Product.objects.create(**validated_data)
 
         # Create the AttributeValues
-        product_class = ProductClass.objects.get(id=product.product_class_id)
         # TODO - get attribute name and code from serializer and use in lookup of ProductAttribute
-        product_attribute = ProductAttribute.objects.get(product_class__id=product_class.id)
+        product_attribute = ProductAttribute.objects.get(product_class__id=product.product_class_id)
 
         for attribute in attributes_data:
             ProductAttributeValue.objects.create(
