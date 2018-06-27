@@ -38,7 +38,7 @@
               {% endcaptureas %}
               {% if has_enrollment_code_product %}
                   {% blocktrans trimmed with email=order.user.email link_end="</a>" %}
-                      Your order is complete. You will receive a confirmation message and your enrollment codes(s) at
+                      Your order is complete. You will receive a confirmation message and your enrollment code(s) at
                       {{ link_start }}{{ email }}{{ link_end }}. If you need a receipt, you can print this page.
                   {% endblocktrans %}
               {% else %}
