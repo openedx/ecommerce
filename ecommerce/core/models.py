@@ -23,7 +23,7 @@ from ecommerce.core.url_utils import get_lms_url
 from ecommerce.core.utils import log_message_and_raise_validation_error
 from ecommerce.extensions.payment.exceptions import ProcessorNotFoundError
 from ecommerce.extensions.payment.helpers import get_processor_class, get_processor_class_by_name
-from ecommerce.journal.constants import JOURNALS_API_PATH  # TODO: journal dependency
+from ecommerce.journals.constants import JOURNALS_API_PATH  # TODO: journals dependency
 
 log = logging.getLogger(__name__)
 
@@ -177,7 +177,7 @@ class SiteConfiguration(models.Model):
         null=False,
         blank=False,
     )
-    # TODO: journal dependency
+    # TODO: journals dependency
     journals_api_url = models.URLField(
         verbose_name=_('Journals Service API URL'),
         null=True,
@@ -399,7 +399,7 @@ class SiteConfiguration(models.Model):
 
         return EdxRestApiClient(self.discovery_api_url, jwt=self.access_token)
 
-    # TODO: journal dependency
+    # TODO: journals dependency
     @cached_property
     def journal_discovery_api_client(self):
         """

@@ -70,7 +70,7 @@ class ProductTests(CouponMixin, DiscoveryTestMixin, TestCase):
         enrollment_code.refresh_from_db()
         self.assertNotEqual(enrollment_code.expires, expiration_datetime)
 
-    # TODO: journal dependency
+    # TODO: journals dependency
     def test_journal_product_attribute(self):
         """Verify journal product class."""
         note = 'Some other test note.'

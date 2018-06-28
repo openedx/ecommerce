@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
-# TODO: journal dependency
+# TODO: journals dependency
 from __future__ import unicode_literals
 
 from django.db import migrations
 from oscar.core.loading import get_model
 from oscar.core.utils import slugify
 
-from ecommerce.journal.constants import JOURNAL_PRODUCT_CLASS_NAME
+from ecommerce.journals.constants import JOURNAL_PRODUCT_CLASS_NAME
 
 Category = get_model("catalogue", "Category")
 Product = get_model('catalogue', 'Product')
