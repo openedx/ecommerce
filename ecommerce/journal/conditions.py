@@ -66,11 +66,14 @@ class JournalBundleCondition(SingleItemConsumptionConditionMixin, Condition):
 
         return journal_skus
 
-    def basket_contains_all_required_courses(self):
+    def _basket_contains_all_required_courses(self):
         """
         Returns True if the basket contains SKUs for all required courses, if they have applicable seat types
 
-        assumption: if a user is enrolled in a course we do not give them this discount
+        Assumption: if a user is enrolled in a course we do not give them this discount
+
+        Usage Note: This function assumes self.basket_skus has already been set, this function should only be called
+            from 'is_satisfied'
         """
         applicable_skus = self.get_applicable_course_skus()
         for course in self.journal_bundle['courses']:
@@ -97,9 +100,12 @@ class JournalBundleCondition(SingleItemConsumptionConditionMixin, Condition):
 
         return True
 
-    def basket_contains_all_journals(self):
+    def _basket_contains_all_journals(self):
         """
         Returns True if basket contains SKUs for all required journals
+
+        Usage Note: This function assumes self.basket_skus has already been set, this function should only be called
+            from 'is_satisfied'
         """
         applicable_journal_skus = self.get_applicable_journal_skus()
 
@@ -122,7 +128,6 @@ class JournalBundleCondition(SingleItemConsumptionConditionMixin, Condition):
         Returns:
             bool: True if condition is met
         """
-        self.basket_skus = set([line.stockrecord.partner_sku for line in basket.all_lines()])
         try:
             self.journal_bundle = fetch_journal_bundle(
                 site=basket.site,
@@ -134,10 +139,14 @@ class JournalBundleCondition(SingleItemConsumptionConditionMixin, Condition):
         if not self.journal_bundle:
             return False
 
-        if not self.basket_contains_all_required_courses():
+        # self._basket_contains_all_required_courses and self._basket_contains_all_journals require self.basket_skus to
+        # be set before they are called.
+        self.basket_skus = set([line.stockrecord.partner_sku for line in basket.all_lines()])
+
+        if not self._basket_contains_all_required_courses():
             return False
 
-        if not self.basket_contains_all_journals():
+        if not self._basket_contains_all_journals():
             return False
 
         return True
