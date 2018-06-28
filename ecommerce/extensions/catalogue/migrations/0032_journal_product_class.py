@@ -54,7 +54,7 @@ def remove_product_class(apps, schema_editor):
 class Migration(migrations.Migration):
     dependencies = [
         ('catalogue', '0001_initial'),
-        ('catalogue', '0024_fix_enrollment_code_slug')
+        ('catalogue', '0031_course_entitlement_idverifyreq_attr')
     ]
 
     operations = [
