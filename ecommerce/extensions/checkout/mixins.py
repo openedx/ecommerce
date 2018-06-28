@@ -38,7 +38,8 @@ class EdxOrderPlacementMixin(OrderPlacementMixin):
     # Instance of a payment processor with which to handle payment. Subclasses should set this value.
     payment_processor = None
 
-    order_placement_failure_msg = 'Payment was received, but an order for basket [%d] could not be placed.'
+    order_placement_failure_msg = 'Order Failure: Payment was received, but an order for basket [%d] ' \
+                                  'could not be placed because of exception [%s].'
 
     __metaclass__ = abc.ABCMeta
 

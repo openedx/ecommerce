@@ -508,9 +508,8 @@ class CybersourceNotificationTestsMixin(CybersourceMixin):
             'handle_order_placement',
             side_effect=exception
         ) as fake_handle_order_placement:
-            error_message = 'Payment was received, but an order for basket [{basket_id}] could not be placed.'.format(
-                basket_id=self.basket.id,
-            )
+            error_message = 'Order Failure: Payment was received, but an order for basket [{basket_id}]' \
+                            ' could not be placed because of exception [].'.format(basket_id=self.basket.id)
             self._assert_processing_failure(notification, error_message)
             self.assertTrue(fake_handle_order_placement.called)
 
