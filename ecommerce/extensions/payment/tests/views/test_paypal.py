@@ -257,9 +257,8 @@ class PaypalPaymentExecutionViewTests(PaypalMixin, PaymentEventsMixin, TestCase)
         """
         with mock.patch.object(PaypalPaymentExecutionView, 'handle_order_placement',
                                side_effect=UnableToPlaceOrder) as fake_handle_order_placement:
-            error_message = 'Payment was received, but an order for basket [{basket_id}] could not be placed.'.format(
-                basket_id=self.basket.id,
-            )
+            error_message = 'Order Failure: Payment was received, but an order for basket [{basket_id}] ' \
+                            'could not be placed because of exception [].'.format(basket_id=self.basket.id)
             self._assert_order_placement_failure(error_message)
             self.assertTrue(fake_handle_order_placement.called)
 
@@ -267,9 +266,8 @@ class PaypalPaymentExecutionViewTests(PaypalMixin, PaymentEventsMixin, TestCase)
         """Verify that unanticipated errors during order placement are handled gracefully."""
         with mock.patch.object(PaypalPaymentExecutionView, 'handle_order_placement',
                                side_effect=KeyError) as fake_handle_order_placement:
-            error_message = 'Payment was received, but an order for basket [{basket_id}] could not be placed.'.format(
-                basket_id=self.basket.id,
-            )
+            error_message = 'Order Failure: Payment was received, but an order for basket [{basket_id}] ' \
+                            'could not be placed because of exception [].'.format(basket_id=self.basket.id)
             self._assert_order_placement_failure(error_message)
             self.assertTrue(fake_handle_order_placement.called)
 
