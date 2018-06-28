@@ -42,6 +42,8 @@ Range = get_model('offer', 'Range')
 StockRecord = get_model('partner', 'StockRecord')
 Voucher = get_model('voucher', 'Voucher')
 
+DEPRECATED_COUPON_CATEGORIES = ['Bulk Enrollment']
+
 
 class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
     """ Coupon resource. """
@@ -505,4 +507,4 @@ class CouponCategoriesListView(generics.ListAPIView):
 
     def get_queryset(self):
         parent_category = Category.objects.get(slug='coupons')
-        return parent_category.get_children()
+        return parent_category.get_children().exclude(name__in=DEPRECATED_COUPON_CATEGORIES)
