@@ -8,13 +8,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('offer', '0016_auto_20180124_1131'),
+        ('core', '0045_auto_20180510_0823'),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='condition',
-            name='journal_bundle_uuid',
-            field=models.UUIDField(blank=True, null=True, verbose_name='JournalBundle UUID'),
+            model_name='siteconfiguration',
+            name='journals_api_url',
+            field=models.URLField(blank=True, null=True, verbose_name='Journals Service API URL'),
         ),
     ]
