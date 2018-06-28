@@ -15,7 +15,7 @@ from ecommerce.core.models import BusinessClient, SiteConfiguration, User
 from ecommerce.core.tests import toggle_switch
 from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
 from ecommerce.extensions.payment.tests.processors import AnotherDummyProcessor, DummyProcessor
-from ecommerce.journal.constants import JOURNALS_API_PATH  # TODO: journal dependency
+from ecommerce.journals.constants import JOURNAL_DISCOVERY_API_PATH  # TODO: journals dependency
 from ecommerce.tests.factories import SiteConfigurationFactory
 from ecommerce.tests.mixins import LmsApiMockMixin
 from ecommerce.tests.testcases import TestCase
@@ -318,7 +318,7 @@ class SiteConfigurationTests(TestCase):
         self.assertIsInstance(client_auth, SuppliedJwtAuth)
         self.assertEqual(client_auth.token, token)
 
-    # TODO: journal dependency
+    # TODO: journals dependency
     @httpretty.activate
     def test_journal_discovery_api_client(self):
         """
@@ -332,7 +332,7 @@ class SiteConfigurationTests(TestCase):
 
         self.assertEqual(
             client_store['base_url'],
-            urljoin(self.site.siteconfiguration.discovery_api_url, JOURNALS_API_PATH)
+            urljoin(self.site.siteconfiguration.discovery_api_url, JOURNAL_DISCOVERY_API_PATH)
         )
         self.assertIsInstance(client_auth, SuppliedJwtAuth)
         self.assertEqual(client_auth.token, token)
