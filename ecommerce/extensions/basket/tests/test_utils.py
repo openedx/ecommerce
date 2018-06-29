@@ -1,6 +1,5 @@
 import datetime
 import json
-from uuid import uuid4
 
 import ddt
 import httpretty
@@ -17,7 +16,6 @@ from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.entitlements.utils import create_or_update_course_entitlement
 from ecommerce.extensions.basket.tests.mixins import BasketMixin
 from ecommerce.extensions.basket.utils import (
-    ENTERPRISE_CATALOG_ATTRIBUTE_TYPE,
     add_utm_params_to_url,
     attribute_cookie_data,
     get_basket_switch_data,
@@ -418,24 +416,6 @@ class BasketUtilsTests(DiscoveryTestMixin, BasketMixin, TestCase):
 
         # Verify that no exception is raised when no basket attribute exists fitting the delete statement parameters
         prepare_basket(request, [product])
-
-    def test_prepare_basket_with_enterprise_catalog(self):
-        """
-        Test `prepare_basket` with enterprise catalog.
-        """
-        product = ProductFactory()
-        request = self.request
-        expected_enterprise_catalog_uuid = str(uuid4())
-        request.GET = {'enterprise_customer_catalog_uuid': expected_enterprise_catalog_uuid}
-        basket = prepare_basket(request, [product])
-
-        # Verify that the enterprise catalog attribute exists for the basket
-        # when basket is prepared with the value of provide catalog UUID
-        enterprise_catalog_uuid = BasketAttribute.objects.get(
-            basket=basket,
-            attribute_type__name=ENTERPRISE_CATALOG_ATTRIBUTE_TYPE
-        ).value_text
-        assert expected_enterprise_catalog_uuid == enterprise_catalog_uuid
 
     def test_basket_switch_data(self):
         """Verify the correct basket switch data (single vs. multi quantity) is retrieved."""
