@@ -3,9 +3,7 @@ import json
 import logging
 from urllib import unquote, urlencode
 
-import newrelic.agent
 import pytz
-import waffle
 from django.conf import settings
 from django.contrib import messages
 from django.db import transaction
@@ -31,7 +29,6 @@ Refund = get_model('refund', 'Refund')
 logger = logging.getLogger(__name__)
 
 
-@newrelic.agent.function_trace()
 def add_utm_params_to_url(url, params):
     # utm_params is [(u'utm_content', u'course-v1:IDBx IDB20.1x 1T2017'),...
     utm_params = [item for item in params if 'utm_' in item[0]]
@@ -44,7 +41,6 @@ def add_utm_params_to_url(url, params):
     return url
 
 
-@newrelic.agent.function_trace()
 def prepare_basket(request, products, voucher=None):
     """
     Create or get the basket, add products, apply a voucher, and record referral data.
@@ -115,7 +111,6 @@ def prepare_basket(request, products, voucher=None):
     return basket
 
 
-@newrelic.agent.function_trace()
 def get_basket_switch_data(product):
     """
     Given a seat or enrollment product, find the SKU of the related product of
@@ -139,38 +134,6 @@ def get_basket_switch_data(product):
     elif product.is_seat_product:
         partner_sku = _find_seat_enrollment_toggle_sku(product, 'standalone')
         switch_link_text = _('Click here to purchase multiple seats in this course')
-
-    if waffle.switch_is_active("debug_logging_for_get_basket_switch_data"):  # pragma: no cover
-        msg = "get_basket_switch_data: product.course_id={}, product.get_product_class().name={}, " \
-            "product.structure={}, partner_sku={}".format(
-                product.course_id,
-                product.get_product_class().name,
-                product.structure,
-                partner_sku)
-        logger.info(msg)
-
-        if product.course_id is None:
-            if partner_sku is not None:
-                logger.info("get_basket_switch_data: product.course_id is None. partner_sku has been set")
-
-                courseless_stock_records = StockRecord.objects.filter(
-                    product__id=product.id,
-                )
-                courseless_partner_sku = None
-                product_cert_type = getattr(product.attr, 'certificate_type', None)
-                product_seat_type = getattr(product.attr, 'seat_type', None)
-                for courseless_stock_record in courseless_stock_records:
-                    stock_record_cert_type = getattr(courseless_stock_record.product.attr, 'certificate_type', None)
-                    stock_record_seat_type = getattr(courseless_stock_record.product.attr, 'seat_type', None)
-                    if (product_seat_type and product_seat_type == stock_record_cert_type) or \
-                            (product_cert_type and product_cert_type == stock_record_seat_type):
-                        courseless_partner_sku = courseless_stock_record.partner_sku
-                        break
-                if courseless_partner_sku != partner_sku:
-                    msg = "get_basket_switch_data: courseless_partner_sku {} != original_partner_sku {}".format(
-                        courseless_partner_sku, partner_sku
-                    )
-                    logger.info(msg)
 
     return switch_link_text, partner_sku
 
@@ -213,7 +176,6 @@ def _find_seat_enrollment_toggle_sku(product, target_structure):
     return None
 
 
-@newrelic.agent.function_trace()
 def attribute_cookie_data(basket, request):
     try:
         with transaction.atomic():
@@ -237,7 +199,6 @@ def attribute_cookie_data(basket, request):
         logger.exception('Error while attributing cookies to basket.')
 
 
-@newrelic.agent.function_trace()
 def _referral_from_basket_site(basket, site):
     try:
         # There should be only 1 referral instance for one basket.
@@ -248,7 +209,6 @@ def _referral_from_basket_site(basket, site):
     return referral
 
 
-@newrelic.agent.function_trace()
 def _record_affiliate_basket_attribution(referral, request):
     """
       Attribute this user's basket to the referring affiliate, if applicable.
@@ -262,7 +222,6 @@ def _record_affiliate_basket_attribution(referral, request):
     referral.affiliate_id = affiliate_id
 
 
-@newrelic.agent.function_trace()
 def _record_utm_basket_attribution(referral, request):
     """
       Attribute this user's basket to UTM data, if applicable.
@@ -286,7 +245,6 @@ def _record_utm_basket_attribution(referral, request):
     referral.utm_created_at = created_at_datetime
 
 
-@newrelic.agent.function_trace()
 def basket_add_organization_attribute(basket, request_data):
     """
     Add organization attribute on basket, if organization value is provided
@@ -309,7 +267,6 @@ def basket_add_organization_attribute(basket, request_data):
         )
 
 
-@newrelic.agent.function_trace()
 def _set_basket_bundle_status(bundle, basket):
     """
     Sets the basket's bundle status
