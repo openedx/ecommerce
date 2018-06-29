@@ -471,13 +471,8 @@ class BasketCalculateView(generics.GenericAPIView):
 
         basket_owner = request.user
 
-        if waffle.switch_is_active("force_anonymous_user_response_for_basket_calculate"):
-            # Use the anonymous user program price for all users
-            requested_username = ''
-            is_anonymous = True
-        else:
-            requested_username = request.GET.get('username', default='')
-            is_anonymous = request.GET.get('is_anonymous', 'false').lower() == 'true'
+        requested_username = request.GET.get('username', default='')
+        is_anonymous = request.GET.get('is_anonymous', 'false').lower() == 'true'
 
         use_default_basket = is_anonymous
 
@@ -528,11 +523,7 @@ class BasketCalculateView(generics.GenericAPIView):
             if cached_response.is_hit:
                 return Response(cached_response.value)
 
-        # There are too many open questions around dropping the atomic transaction for a user's basket,
-        # including how user basket merges was coded.  For now, only allow disabling the atomic
-        # transaction if we are also forcing the anonymous basket response for all users.
-        if waffle.flag_is_active(request, "disable_calculate_temporary_basket_atomic_transaction")\
-                and waffle.switch_is_active("force_anonymous_user_response_for_basket_calculate"):
+        if waffle.flag_is_active(request, "disable_calculate_temporary_basket_atomic_transaction"):
             response = self._calculate_temporary_basket(basket_owner, request, products, voucher, skus, code)
         else:
             response = self._calculate_temporary_basket_atomic(basket_owner, request, products, voucher, skus, code)
