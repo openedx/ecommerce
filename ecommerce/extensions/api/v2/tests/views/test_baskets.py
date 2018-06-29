@@ -17,7 +17,7 @@ from oscar.core.loading import get_model
 from oscar.test import factories
 from oscar.test.factories import BasketFactory
 from rest_framework.throttling import UserRateThrottle
-from waffle.testutils import override_flag, override_switch
+from waffle.testutils import override_flag
 
 from ecommerce.courses.models import Course
 from ecommerce.extensions.api import exceptions as api_exceptions
@@ -582,7 +582,6 @@ class BasketCalculateViewTests(ProgramTestMixin, TestCase):
 
     @mock.patch('ecommerce.extensions.api.v2.views.baskets.BasketCalculateView._calculate_temporary_basket')
     @override_flag('disable_calculate_temporary_basket_atomic_transaction', active=True)
-    @override_switch('force_anonymous_user_response_for_basket_calculate', active=True)
     def test_basket_calculate_anonymous_caching(self, mock_calculate_basket):
         """Verify a request made with the is_anonymous parameter is cached"""
         url_with_one_sku = self._generate_sku_url(self.products[0:1], username=None)
