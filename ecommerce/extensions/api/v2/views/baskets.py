@@ -449,6 +449,10 @@ class BasketCalculateView(generics.GenericAPIView):
         """
         RequestCache.set(TEMPORARY_BASKET_CACHE_KEY, True)  # TODO: LEARNER 5463
 
+        never_true = None
+        if never_true:
+            print 'hello'
+
         partner = get_partner_for_site(request)
         skus = request.GET.getlist('sku')
         if not skus:
