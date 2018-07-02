@@ -55,3 +55,5 @@ APPLE_PAY_CYBERSOURCE_CARD_TYPE_MAP = {
 STRIPE_CARD_TYPE_MAP = {
     value['stripe_brand']: key for key, value in six.iteritems(CARD_TYPES) if 'stripe_brand' in value
 }
+
+VOUCHER_VALIDATION_BEFORE_PAYMENT = 'voucher_validation_before_payment'

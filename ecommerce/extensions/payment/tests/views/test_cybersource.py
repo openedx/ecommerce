@@ -1,6 +1,7 @@
 """ Tests of the Payment Views. """
 from __future__ import unicode_literals
 
+import datetime
 import json
 
 import ddt
@@ -8,10 +9,12 @@ import mock
 import responses
 from django.conf import settings
 from django.urls import reverse
+from django.utils.timezone import now
 from freezegun import freeze_time
 from oscar.apps.payment.exceptions import TransactionDeclined
 from oscar.core.loading import get_class, get_model
 from oscar.test import factories
+from waffle.testutils import override_switch
 
 from ecommerce.core.constants import ENROLLMENT_CODE_PRODUCT_CLASS_NAME, ENROLLMENT_CODE_SWITCH
 from ecommerce.core.models import BusinessClient
@@ -21,11 +24,12 @@ from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.extensions.api.serializers import OrderSerializer
 from ecommerce.extensions.basket.utils import basket_add_organization_attribute
 from ecommerce.extensions.order.constants import PaymentEventTypeName
+from ecommerce.extensions.payment.constants import VOUCHER_VALIDATION_BEFORE_PAYMENT
 from ecommerce.extensions.payment.exceptions import InvalidBasketError, InvalidSignatureError
 from ecommerce.extensions.payment.processors.cybersource import Cybersource
 from ecommerce.extensions.payment.tests.mixins import CybersourceMixin, CybersourceNotificationTestsMixin
 from ecommerce.extensions.payment.views.cybersource import CybersourceInterstitialView
-from ecommerce.extensions.test.factories import create_basket
+from ecommerce.extensions.test.factories import create_basket, prepare_voucher
 from ecommerce.invoice.models import Invoice
 from ecommerce.tests.testcases import TestCase
 
@@ -36,9 +40,10 @@ Order = get_model('order', 'Order')
 OrderNumberGenerator = get_class('order.utils', 'OrderNumberGenerator')
 PaymentEvent = get_model('order', 'PaymentEvent')
 PaymentProcessorResponse = get_model('payment', 'PaymentProcessorResponse')
+Product = get_model('catalogue', 'Product')
 Selector = get_class('partner.strategy', 'Selector')
 Source = get_model('payment', 'Source')
-Product = get_model('catalogue', 'Product')
+Voucher = get_model('voucher', 'Voucher')
 
 post_checkout = get_class('checkout.signals', 'post_checkout')
 
@@ -76,6 +81,16 @@ class CybersourceSubmitViewTests(CybersourceMixin, TestCase):
         """ Creates a Basket ready for checkout. """
         basket = create_basket(owner=self.user, site=self.site)
         basket.strategy = Selector().strategy()
+        basket.thaw()
+        return basket
+
+    def _prepare_basket_for_voucher_validation_tests(self, voucher_start_date, voucher_end_date):
+        """ Prepares basket for voucher validation """
+        basket = Basket.objects.create(site=self.site, owner=self.user)
+        voucher, product = prepare_voucher(start_datetime=voucher_start_date, end_datetime=voucher_end_date)
+        basket.strategy = Selector().strategy()
+        basket.add_product(product)
+        basket.vouchers.add(voucher)
         basket.thaw()
         return basket
 
@@ -178,6 +193,59 @@ class CybersourceSubmitViewTests(CybersourceMixin, TestCase):
 
         errors = json.loads(response.content)['field_errors']
         self.assertIn(field, errors)
+
+    @override_switch(VOUCHER_VALIDATION_BEFORE_PAYMENT, active=True)
+    @ddt.data(
+        (now() - datetime.timedelta(days=3), 400),
+        (now() + datetime.timedelta(days=3), 200))
+    @ddt.unpack
+    def test_submit_view_fails_for_invalid_voucher(self, voucher_end_time, status_code):
+        """ Verify SubmitPaymentView fails if basket invalid voucher"""
+        # Create Basket and payment data
+        voucher_start_time = now() - datetime.timedelta(days=5)
+        basket = self._prepare_basket_for_voucher_validation_tests(voucher_start_time, voucher_end_time)
+
+        data = self._generate_data(basket.id)
+        response = self.client.post(self.path, data)
+
+        self.assertEqual(response.status_code, status_code)
+        self.assertEqual(response['content-type'], JSON)
+
+    @override_switch(VOUCHER_VALIDATION_BEFORE_PAYMENT, active=True)
+    @mock.patch(
+        'ecommerce.extensions.voucher.models.Voucher.is_available_to_user',
+        return_value=(False, None)
+    )
+    def test_submit_view_fails_if_voucher_not_available(self, mock_is_available_to_user):
+        """ Verify SubmitPaymentView fails if basket voucher not available to student"""
+        # Create Basket and payment data
+        voucher_start_time = now() - datetime.timedelta(days=1)
+        voucher_end_time = now() + datetime.timedelta(days=3)
+        basket = self._prepare_basket_for_voucher_validation_tests(voucher_start_time, voucher_end_time)
+
+        data = self._generate_data(basket.id)
+        response = self.client.post(self.path, data)
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response['content-type'], JSON)
+        self.assertEqual(mock_is_available_to_user.call_count, 3)
+
+    @override_switch(VOUCHER_VALIDATION_BEFORE_PAYMENT, active=False)
+    def test_successful_submit_view_with_voucher_switch_disabled(self):
+        """
+        Temporary test to confirm the problem with SubmitPaymentView
+        Accepting an invalid voucher when the waffle switch is False.
+        This will be cleaned up in LEARNER-5719.
+        """
+        voucher_start_time = now() - datetime.timedelta(days=5)
+        voucher_end_time = now() - datetime.timedelta(days=3)
+        basket = self._prepare_basket_for_voucher_validation_tests(voucher_start_time, voucher_end_time)
+
+        data = self._generate_data(basket.id)
+        response = self.client.post(self.path, data)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response['content-type'], JSON)
 
 
 @ddt.ddt

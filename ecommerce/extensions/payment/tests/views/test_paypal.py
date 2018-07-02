@@ -32,9 +32,11 @@ Order = get_model('order', 'Order')
 PaymentEvent = get_model('order', 'PaymentEvent')
 PaymentEventType = get_model('order', 'PaymentEventType')
 PaymentProcessorResponse = get_model('payment', 'PaymentProcessorResponse')
+Product = get_model('catalogue', 'Product')
 Selector = get_class('partner.strategy', 'Selector')
 SourceType = get_model('payment', 'SourceType')
-Product = get_model('catalogue', 'Product')
+Voucher = get_model('voucher', 'Voucher')
+
 
 post_checkout = get_class('checkout.signals', 'post_checkout')
 
