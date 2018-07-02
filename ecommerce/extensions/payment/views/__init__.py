@@ -2,6 +2,7 @@ import abc
 import logging
 
 import six
+import waffle
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.utils.decorators import method_decorator
@@ -10,6 +11,7 @@ from django.views.generic import TemplateView, View
 from oscar.core.loading import get_class, get_model
 
 from ecommerce.core.url_utils import get_lms_url
+from ecommerce.extensions.payment.constants import VOUCHER_VALIDATION_BEFORE_PAYMENT
 from ecommerce.extensions.payment.forms import PaymentForm
 
 logger = logging.getLogger(__name__)
@@ -65,7 +67,7 @@ class BasePaymentSubmitView(View):
         form_kwargs = self.get_form_kwargs()
         form = self.form_class(**form_kwargs)
 
-        if form.is_valid():
+        if form.is_valid() and self.check_valid_voucher():
             return self.form_valid(form)
         else:
             return self.form_invalid(form)
@@ -76,6 +78,27 @@ class BasePaymentSubmitView(View):
             'user': self.request.user,
             'request': self.request,
         }
+
+    def check_valid_voucher(self):
+        """
+        LEARNER-5603 Hot fix
+        Learners are able to bypass the basket views and pay using the
+        expired vouchers. This will disable students from doing so.
+        (https://github.com/django-oscar/django-oscar/blob/master/src/oscar/apps/order/utils.py#L68-L70)
+        # TODO: LEARNER-5719: Clean-up validation code as needed after further investigation.
+        """
+        if waffle.switch_is_active(VOUCHER_VALIDATION_BEFORE_PAYMENT):
+            basket = self.request.basket
+            for voucher in basket.vouchers.select_for_update():
+                available_to_user, __ = voucher.is_available_to_user(user=self.request.user)
+                if not available_to_user or not voucher.is_active():
+                    logger.info(
+                        '[%s] basket was checked out with invalid voucher [%s]',
+                        basket.id,
+                        voucher.code,
+                    )
+                    return False
+        return True
 
     @abc.abstractmethod
     def form_valid(self, form):
