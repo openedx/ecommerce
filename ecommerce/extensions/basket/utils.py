@@ -64,7 +64,7 @@ def prepare_basket(request, products, voucher=None):
         basket (Basket): Contains the product to be redeemed and the Voucher applied.
     """
     basket = Basket.get_basket(request.user, request.site)
-    basket_add_enterprise_catalog_attribute(basket, request.GET or {})
+    basket_add_enterprise_catalog_attribute(basket, request.GET)
     basket.flush()
     basket.save()
     basket_addition = get_class('basket.signals', 'basket_addition')
@@ -314,8 +314,8 @@ def basket_add_organization_attribute(basket, request_data):
 @newrelic.agent.function_trace()
 def basket_add_enterprise_catalog_attribute(basket, request_data):
     """
-    Add enterprise catalog UUID attribute on basket, if catalog UUID value is
-    provided in basket data.
+    Add enterprise catalog UUID attribute on basket, if the catalog UUID value
+    is provided in the request.
 
     Arguments:
         basket(Basket): order basket
@@ -324,7 +324,7 @@ def basket_add_enterprise_catalog_attribute(basket, request_data):
     """
     # Value of enterprise catalog UUID is being passed as
     # `enterprise_customer_catalog_uuid` from basket page
-    enterprise_catalog_uuid = request_data.get('enterprise_customer_catalog_uuid')
+    enterprise_catalog_uuid = request_data.get('enterprise_customer_catalog_uuid') if request_data else None
 
     if enterprise_catalog_uuid:
         enterprise_catalog_attribute, __ = BasketAttributeType.objects.get_or_create(

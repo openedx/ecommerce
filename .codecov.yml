@@ -1,0 +1,3 @@
+# Override team (default) settings
+coverage:
+  precision: 1

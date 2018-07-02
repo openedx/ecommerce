@@ -9,6 +9,7 @@ from slumber.exceptions import SlumberHttpBaseException
 from ecommerce.enterprise.api import catalog_contains_course_runs, fetch_enterprise_learner_data
 from ecommerce.extensions.basket.utils import ENTERPRISE_CATALOG_ATTRIBUTE_TYPE
 from ecommerce.enterprise.constants import ENTERPRISE_OFFERS_SWITCH
+from ecommerce.extensions.basket.utils import ENTERPRISE_CATALOG_ATTRIBUTE_TYPE
 from ecommerce.extensions.offer.decorators import check_condition_applicability
 from ecommerce.extensions.offer.mixins import ConditionWithoutRangeMixin, SingleItemConsumptionConditionMixin
 
@@ -33,6 +34,9 @@ class EnterpriseCustomerCondition(ConditionWithoutRangeMixin, SingleItemConsumpt
         """
         Determines if a user is eligible for an enterprise customer offer
         based on their association with the enterprise customer.
+
+        It also verifies the catalog `enterprise_customer_catalog_uuid` on the
+        offer with the catalog on the basket when provided.
 
         Args:
             basket (Basket): Contains information about order line items, the current site,
@@ -87,7 +91,9 @@ class EnterpriseCustomerCondition(ConditionWithoutRangeMixin, SingleItemConsumpt
             if enterprise_customer_catalog:
                 enterprise_customer_catalog_uuid = enterprise_customer_catalog.value_text
 
-        # Verify that current offer condition is related to the provided enterprise catalog
+        # Verify that the current conditional offer is related to the provided
+        # enterprise catalog
+        enterprise_customer_catalog_uuid = self._get_enterprise_catalog_uuid_from_basket(basket)
         if enterprise_customer_catalog_uuid:
             if str(offer.condition.enterprise_customer_catalog_uuid) != enterprise_customer_catalog_uuid:
                 return False
@@ -99,3 +105,33 @@ class EnterpriseCustomerCondition(ConditionWithoutRangeMixin, SingleItemConsumpt
             return False
 
         return True
+
+    @staticmethod
+    def _get_enterprise_catalog_uuid_from_basket(basket):
+        """
+        Helper method for fetching enterprise catalog UUID from basket.
+
+        Arguments:
+             basket (Basket): The provided basket can be either temporary (just
+             for calculating discounts) or an actual one to buy a product.
+        """
+        # For temporary basket try to get `enterprise_customer_catalog_uuid`
+        # from request
+        enterprise_customer_catalog_uuid = basket.strategy.request.GET.get(
+            'enterprise_customer_catalog_uuid'
+        ) if basket.strategy.request else None
+
+        if not enterprise_customer_catalog_uuid:
+            # For actual baskets get `enterprise_customer_catalog_uuid` from
+            # basket attribute
+            enterprise_catalog_attribute, __ = BasketAttributeType.objects.get_or_create(
+                name=ENTERPRISE_CATALOG_ATTRIBUTE_TYPE
+            )
+            enterprise_customer_catalog = BasketAttribute.objects.filter(
+                basket=basket,
+                attribute_type=enterprise_catalog_attribute,
+            ).first()
+            if enterprise_customer_catalog:
+                enterprise_customer_catalog_uuid = enterprise_customer_catalog.value_text
+
+        return enterprise_customer_catalog_uuid
