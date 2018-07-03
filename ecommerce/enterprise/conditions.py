@@ -33,7 +33,7 @@ class EnterpriseCustomerCondition(ConditionWithoutRangeMixin, SingleItemConsumpt
         Determines if a user is eligible for an enterprise customer offer
         based on their association with the enterprise customer.
 
-        It also verifies the catalog `enterprise_customer_catalog_uuid` on the
+        It also verifies the catalog `catalog` on the
         offer with the catalog on the basket when provided.
 
         Args:
@@ -74,9 +74,9 @@ class EnterpriseCustomerCondition(ConditionWithoutRangeMixin, SingleItemConsumpt
 
         # Verify that the current conditional offer is related to the provided
         # enterprise catalog
-        enterprise_customer_catalog_uuid = self._get_enterprise_catalog_uuid_from_basket(basket)
-        if enterprise_customer_catalog_uuid:
-            if str(offer.condition.enterprise_customer_catalog_uuid) != enterprise_customer_catalog_uuid:
+        catalog = self._get_enterprise_catalog_uuid_from_basket(basket)
+        if catalog:
+            if str(offer.condition.enterprise_customer_catalog_uuid) != catalog:
                 return False
 
         if not catalog_contains_course_runs(basket.site, course_run_ids, self.enterprise_customer_uuid,
@@ -96,15 +96,13 @@ class EnterpriseCustomerCondition(ConditionWithoutRangeMixin, SingleItemConsumpt
              basket (Basket): The provided basket can be either temporary (just
              for calculating discounts) or an actual one to buy a product.
         """
-        # For temporary basket try to get `enterprise_customer_catalog_uuid`
-        # from request
-        enterprise_customer_catalog_uuid = basket.strategy.request.GET.get(
-            'enterprise_customer_catalog_uuid'
+        # For temporary basket try to get `catalog` from request
+        catalog = basket.strategy.request.GET.get(
+            'catalog'
         ) if basket.strategy.request else None
 
-        if not enterprise_customer_catalog_uuid:
-            # For actual baskets get `enterprise_customer_catalog_uuid` from
-            # basket attribute
+        if not catalog:
+            # For actual baskets get `catalog` from basket attribute
             enterprise_catalog_attribute, __ = BasketAttributeType.objects.get_or_create(
                 name=ENTERPRISE_CATALOG_ATTRIBUTE_TYPE
             )
@@ -113,6 +111,6 @@ class EnterpriseCustomerCondition(ConditionWithoutRangeMixin, SingleItemConsumpt
                 attribute_type=enterprise_catalog_attribute,
             ).first()
             if enterprise_customer_catalog:
-                enterprise_customer_catalog_uuid = enterprise_customer_catalog.value_text
+                catalog = enterprise_customer_catalog.value_text
 
-        return enterprise_customer_catalog_uuid
+        return catalog
