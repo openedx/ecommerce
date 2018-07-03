@@ -426,7 +426,7 @@ class BasketUtilsTests(DiscoveryTestMixin, BasketMixin, TestCase):
         product = ProductFactory()
         request = self.request
         expected_enterprise_catalog_uuid = str(uuid4())
-        request.GET = {'enterprise_customer_catalog_uuid': expected_enterprise_catalog_uuid}
+        request.GET = {'catalog': expected_enterprise_catalog_uuid}
         basket = prepare_basket(request, [product])
 
         # Verify that the enterprise catalog attribute exists for the basket
