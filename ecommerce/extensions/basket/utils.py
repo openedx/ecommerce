@@ -281,9 +281,9 @@ def basket_add_enterprise_catalog_attribute(basket, request_data):
         request_data (dict): HttpRequest data
 
     """
-    # Value of enterprise catalog UUID is being passed as
-    # `enterprise_customer_catalog_uuid` from basket page
-    enterprise_catalog_uuid = request_data.get('enterprise_customer_catalog_uuid') if request_data else None
+    # Value of enterprise catalog UUID is being passed as `catalog` from
+    # basket page
+    enterprise_catalog_uuid = request_data.get('catalog') if request_data else None
 
     if enterprise_catalog_uuid:
         enterprise_catalog_attribute, __ = BasketAttributeType.objects.get_or_create(

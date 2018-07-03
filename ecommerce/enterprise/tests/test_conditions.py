@@ -78,7 +78,7 @@ class EnterpriseCustomerConditionTests(EnterpriseServiceMockMixin, DiscoveryTest
         enterprise_catalog_uuid = str(self.condition.enterprise_customer_catalog_uuid)
         basket = factories.BasketFactory(site=self.site, owner=self.user)
         basket.strategy.request = self.request
-        basket.strategy.request.GET = {'enterprise_customer_catalog_uuid': enterprise_catalog_uuid}
+        basket.strategy.request.GET = {'catalog': enterprise_catalog_uuid}
         self._check_condition_is_satisfied(offer, basket, is_satisfied=True)
 
     @httpretty.activate
@@ -89,7 +89,7 @@ class EnterpriseCustomerConditionTests(EnterpriseServiceMockMixin, DiscoveryTest
         offer = factories.EnterpriseOfferFactory(site=self.site, condition=self.condition)
         enterprise_catalog_uuid = str(self.condition.enterprise_customer_catalog_uuid)
         basket = factories.BasketFactory(site=self.site, owner=self.user)
-        request_data = {'enterprise_customer_catalog_uuid': enterprise_catalog_uuid}
+        request_data = {'catalog': enterprise_catalog_uuid}
         basket_add_enterprise_catalog_attribute(basket, request_data)
         self._check_condition_is_satisfied(offer, basket, is_satisfied=True)
 
@@ -103,7 +103,7 @@ class EnterpriseCustomerConditionTests(EnterpriseServiceMockMixin, DiscoveryTest
         invalid_enterprise_catalog_uuid = str(uuid4())
         basket = factories.BasketFactory(site=self.site, owner=self.user)
         basket.strategy.request = self.request
-        basket.strategy.request.GET = {'enterprise_customer_catalog_uuid': invalid_enterprise_catalog_uuid}
+        basket.strategy.request.GET = {'catalog': invalid_enterprise_catalog_uuid}
         self._check_condition_is_satisfied(offer, basket, is_satisfied=False)
         assert invalid_enterprise_catalog_uuid != offer.condition.enterprise_customer_catalog_uuid
 
