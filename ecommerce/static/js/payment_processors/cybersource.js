@@ -145,13 +145,13 @@ define([
                         var applePayBtn = document.getElementById('applePayBtn');
 
                         if (canMakePayments) {
-                            console.log('Learner is eligible for Apple Pay');
+                            console.log('Learner is eligible for Apple Pay');   // eslint-disable-line no-console
 
                             // Display the button
                             applePayBtn.style.display = 'inline-flex';
                             applePayBtn.addEventListener('click', self.onApplePayButtonClicked.bind(self));
                         } else {
-                            console.log('Apple Pay not setup.');
+                            console.log('Apple Pay not setup.');   // eslint-disable-line no-console
                         }
                     }
                 );
@@ -198,7 +198,7 @@ define([
 
         onApplePayValidateMerchant: function(event) {
             var self = this;
-            console.log('Validating merchant...');
+            console.log('Validating merchant...');   // eslint-disable-line no-console
 
             $.ajax({
                 method: 'POST',
@@ -209,17 +209,17 @@ define([
                 data: JSON.stringify({url: event.validationURL}),
                 contentType: 'application/json',
                 success: function(data) {
-                    console.log('Merchant validation succeeded.');
-                    console.log(data);
+                    console.log('Merchant validation succeeded.');   // eslint-disable-line no-console
+                    console.log(data);   // eslint-disable-line no-console
                     self.applePaySession.completeMerchantValidation(data);
                 },
                 error: function(jqXHR, textStatus, errorThrown) {
                     // Translators: Do not translate "Apple Pay".
                     var msg = gettext('Apple Pay is not available at this time. Please try another payment method.');
 
-                    console.log('Merchant validation failed!');
-                    console.log(textStatus);
-                    console.log(errorThrown);
+                    console.log('Merchant validation failed!');   // eslint-disable-line no-console
+                    console.log(textStatus);   // eslint-disable-line no-console
+                    console.log(errorThrown);   // eslint-disable-line no-console
 
                     self.applePaySession.abort();
                     self.displayErrorMessage(msg);
@@ -229,7 +229,7 @@ define([
 
         onApplePayPaymentAuthorized: function(event) {
             var self = this;
-            console.log('Submitting Apple Pay payment to CyberSource...');
+            console.log('Submitting Apple Pay payment to CyberSource...');   // eslint-disable-line no-console
 
             $.ajax({
                 method: 'POST',
@@ -240,8 +240,7 @@ define([
                 data: JSON.stringify(event.payment),
                 contentType: 'application/json',
                 success: function(data) {
-                    console.log('Successfully submitted Apple Pay payment to CyberSource.');
-                    console.log(data);
+                    console.log(data);   // eslint-disable-line no-console
                     self.applePaySession.completePayment(ApplePaySession.STATUS_SUCCESS);
                     self.redirectToReceipt(data.number);
                 },
@@ -249,9 +248,8 @@ define([
                     var msg = gettext('An error occurred while processing your payment. You have NOT been charged. ' +
                         'Please try again, or select another payment method.');
 
-                    console.log('Failed to submit Apple Pay payment to CyberSource!');
-                    console.log(textStatus);
-                    console.log(errorThrown);
+                    console.log(textStatus);   // eslint-disable-line no-console
+                    console.log(errorThrown);   // eslint-disable-line no-console
                     self.applePaySession.completePayment(ApplePaySession.STATUS_FAILURE);
                     self.displayErrorMessage(msg);
                 }

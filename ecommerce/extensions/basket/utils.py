@@ -3,7 +3,6 @@ import json
 import logging
 from urllib import unquote, urlencode
 
-import newrelic.agent
 import pytz
 from django.conf import settings
 from django.contrib import messages
@@ -23,7 +22,6 @@ BasketAttribute = get_model('basket', 'BasketAttribute')
 BasketAttributeType = get_model('basket', 'BasketAttributeType')
 BUNDLE = 'bundle_identifier'
 ORGANIZATION_ATTRIBUTE_TYPE = 'organization'
-ENTERPRISE_CATALOG_ATTRIBUTE_TYPE = 'enterprise_catalog_uuid'
 StockRecord = get_model('partner', 'StockRecord')
 OrderLine = get_model('order', 'Line')
 Refund = get_model('refund', 'Refund')
@@ -61,7 +59,6 @@ def prepare_basket(request, products, voucher=None):
         basket (Basket): Contains the product to be redeemed and the Voucher applied.
     """
     basket = Basket.get_basket(request.user, request.site)
-    basket_add_enterprise_catalog_attribute(basket, request.GET)
     basket.flush()
     basket.save()
     basket_addition = get_class('basket.signals', 'basket_addition')
@@ -267,32 +264,6 @@ def basket_add_organization_attribute(basket, request_data):
             basket=basket,
             attribute_type=organization_attribute,
             value_text=business_client.strip()
-        )
-
-
-@newrelic.agent.function_trace()
-def basket_add_enterprise_catalog_attribute(basket, request_data):
-    """
-    Add enterprise catalog UUID attribute on basket, if the catalog UUID value
-    is provided in the request.
-
-    Arguments:
-        basket(Basket): order basket
-        request_data (dict): HttpRequest data
-
-    """
-    # Value of enterprise catalog UUID is being passed as `catalog` from
-    # basket page
-    enterprise_catalog_uuid = request_data.get('catalog') if request_data else None
-
-    if enterprise_catalog_uuid:
-        enterprise_catalog_attribute, __ = BasketAttributeType.objects.get_or_create(
-            name=ENTERPRISE_CATALOG_ATTRIBUTE_TYPE
-        )
-        BasketAttribute.objects.update_or_create(
-            basket=basket,
-            attribute_type=enterprise_catalog_attribute,
-            defaults={'value_text': enterprise_catalog_uuid.strip()}
         )
 
 
