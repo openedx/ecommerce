@@ -1,4 +1,5 @@
 {
   "directory": "ecommerce/static/bower_components",
-  "interactive": false
+  "interactive": false,
+  "registry": "https://registry.bower.io"
 }
