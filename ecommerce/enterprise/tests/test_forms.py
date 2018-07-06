@@ -120,7 +120,7 @@ class EnterpriseOfferFormTests(EnterpriseServiceMockMixin, TestCase):
             data['benefit_type'],
             'Discount of type {} provided by {} for {}.'.format(
                 ConditionalOffer.SITE,
-                data['enterprise_customer_name'],
+                data['enterprise_customer_name'][:48],
                 data['enterprise_customer_catalog_uuid']
             ),
         )
@@ -172,7 +172,7 @@ class EnterpriseOfferFormTests(EnterpriseServiceMockMixin, TestCase):
             data['benefit_type'],
             'Discount of type {} provided by {} for {}.'.format(
                 ConditionalOffer.SITE,
-                data['enterprise_customer_name'],
+                data['enterprise_customer_name'][:48],
                 data['enterprise_customer_catalog_uuid']
             ),
         )
@@ -206,7 +206,7 @@ class EnterpriseOfferFormTests(EnterpriseServiceMockMixin, TestCase):
             data['benefit_type'],
             'Discount of type {} provided by {} for {}.'.format(
                 ConditionalOffer.SITE,
-                data['enterprise_customer_name'],
+                data['enterprise_customer_name'][:48],
                 data['enterprise_customer_catalog_uuid']
             ),
         )
