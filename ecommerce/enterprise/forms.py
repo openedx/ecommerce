@@ -96,11 +96,16 @@ class EnterpriseOfferForm(forms.ModelForm):
 
         # Note: the actual name is not displayed like this in the template, so it's safe to use the UUID here.
         # And in fact we have to, because otherwise we face integrity errors since Oscar forces this name to be unique.
-        self.instance.name = _(u'Discount of type {} provided by {} for {}.'.format(
+        # Truncate 'enterprise_customer_name' to 48 characters so that our complete name with
+        # format 'Discount of type {site} provided by {enterprise_name} for {catalog_uuid}. does
+        # not exceed the limit of 128 characters for Oscar's 'AbstractConditionalOffer' name.
+        offer_name = _(u'Discount of type {} provided by {} for {}.'.format(
             ConditionalOffer.SITE,
-            enterprise_customer_name,
-            enterprise_customer_catalog_uuid,
+            enterprise_customer_name[:48],  # pylint: disable=unsubscriptable-object,
+            enterprise_customer_catalog_uuid
         ))
+
+        self.instance.name = offer_name
         self.instance.status = ConditionalOffer.OPEN
         self.instance.offer_type = ConditionalOffer.SITE
         self.instance.max_basket_applications = 1

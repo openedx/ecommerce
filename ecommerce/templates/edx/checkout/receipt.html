@@ -121,7 +121,17 @@
                         </span>
                       {% endwith %}
                     {% else %}
-                      <span class="discount">{{ discount.offer_name }}</span>
+                        <span class="discount">
+                            {% if offer.condition.enterprise_customer_name %}
+                                {% blocktrans trimmed with type=discount.offer.offer_type enterprise_name=discount.offer.condition.enterprise_customer_name %}
+                                    Discount of type {{ type }} provided by {{ enterprise_name }}
+                                {% endblocktrans %}
+                            {% else %}
+                                {% blocktrans trimmed with type=discount.offer.offer_type %}
+                                    Discount of type {{ type }} is provided.
+                                {% endblocktrans %}
+                            {% endif %}
+                        </span>
                     {% endif %}
 
                   </div>
