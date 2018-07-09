@@ -12,7 +12,7 @@ from factory.fuzzy import FuzzyText
 from oscar.core.loading import get_class, get_model
 from oscar.test.factories import OrderFactory, OrderLineFactory, RangeFactory, VoucherFactory
 
-from ecommerce.core.url_utils import get_lms_dashboard_url, get_lms_url
+from ecommerce.core.url_utils import get_lms_url
 from ecommerce.coupons.tests.mixins import CouponMixin, DiscoveryMockMixin
 from ecommerce.coupons.views import voucher_is_valid
 from ecommerce.enterprise.tests.mixins import EnterpriseServiceMockMixin
@@ -430,15 +430,12 @@ class CouponRedeemViewTests(CouponMixin, DiscoveryTestMixin, LmsApiMockMixin, En
 
     @httpretty.activate
     def test_basket_redirect_enrollment_code(self):
-        """ Verify the view redirects to the LMS dashboard when an enrollment code is provided. """
+        """ Verify the view redirects to the receipt page when an enrollment code is provided. """
         code = self.create_coupon_and_get_code(benefit_value=100, code='', catalog=self.catalog)
         self.mock_account_api(self.request, self.user.username, data={'is_active': True})
         self.mock_access_token_response()
 
-        self.assert_redemption_page_redirects(
-            get_lms_dashboard_url(),
-            code=code,
-        )
+        self.assert_redirects_to_receipt_page(code=code)
 
     @httpretty.activate
     @mock.patch.object(EdxOrderPlacementMixin, 'place_free_order')
@@ -447,7 +444,7 @@ class CouponRedeemViewTests(CouponMixin, DiscoveryTestMixin, LmsApiMockMixin, En
         code = self.create_coupon_and_get_code(benefit_value=100, code='', catalog=self.catalog)
         self.mock_account_api(self.request, self.user.username, data={'is_active': True})
         self.mock_access_token_response()
-        place_free_order.side_effect = Exception
+        place_free_order.return_value = Exception
 
         with mock.patch('ecommerce.coupons.views.logger.exception') as mock_logger:
             self.assert_redemption_page_redirects(
@@ -531,7 +528,7 @@ class CouponRedeemViewTests(CouponMixin, DiscoveryTestMixin, LmsApiMockMixin, En
 
     @httpretty.activate
     def test_enterprise_customer_successful_redemption(self):
-        """ Verify the view redirects to the LMS dashboard when valid consent is provided. """
+        """ Verify the view redirects to LMS when valid consent is provided. """
         code = self.prepare_enterprise_data(catalog=self.catalog)
         self.mock_enterprise_learner_api_for_learner_with_no_enterprise()
         self.mock_enterprise_learner_post_api()
@@ -542,10 +539,9 @@ class CouponRedeemViewTests(CouponMixin, DiscoveryTestMixin, LmsApiMockMixin, En
             ENTERPRISE_CUSTOMER
         )
 
-        self.assert_redemption_page_redirects(
-            get_lms_dashboard_url(),
+        self.assert_redirects_to_receipt_page(
             code=code,
-            consent_token=consent_token,
+            consent_token=consent_token
         )
         last_request = httpretty.last_request()
         self.assertEqual(last_request.path, '/api/enrollment/v1/enrollment')
@@ -599,7 +595,7 @@ class CouponRedeemViewTests(CouponMixin, DiscoveryTestMixin, LmsApiMockMixin, En
 
     @httpretty.activate
     def test_multiple_vouchers(self):
-        """ Verify a redirect to LMS dashboard happens when a basket with already existing vouchers is used. """
+        """ Verify a redirect to LMS happens when a basket with already existing vouchers is used. """
         code = self.create_coupon_and_get_code(benefit_value=100, code='', catalog=self.catalog)
         basket = Basket.get_basket(self.user, self.site)
         basket.vouchers.add(Voucher.objects.get(code=code))
@@ -607,10 +603,7 @@ class CouponRedeemViewTests(CouponMixin, DiscoveryTestMixin, LmsApiMockMixin, En
         self.mock_account_api(self.request, self.user.username, data={'is_active': True})
         self.mock_access_token_response()
 
-        self.assert_redemption_page_redirects(
-            get_lms_dashboard_url(),
-            code=code,
-        )
+        self.assert_redirects_to_receipt_page(code=code)
 
     @httpretty.activate
     def test_already_enrolled_rejection(self):
