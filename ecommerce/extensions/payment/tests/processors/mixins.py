@@ -32,8 +32,8 @@ class PaymentProcessorTestCaseMixin(RefundTestMixin, DiscoveryTestMixin, Payment
     def setUp(self):
         super(PaymentProcessorTestCaseMixin, self).setUp()
 
-        self.course = CourseFactory(id='a/b/c', name='Demo Course', site=self.site)
-        self.product = self.course.create_or_update_seat(self.CERTIFICATE_TYPE, False, 20, self.partner)
+        self.course = CourseFactory(id='a/b/c', name='Demo Course', partner=self.partner)
+        self.product = self.course.create_or_update_seat(self.CERTIFICATE_TYPE, False, 20)
 
         self.processor = self.processor_class(self.site)  # pylint: disable=not-callable
         self.basket = create_basket(site=self.site, owner=factories.UserFactory(), empty=True)

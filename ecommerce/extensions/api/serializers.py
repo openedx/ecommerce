@@ -371,7 +371,7 @@ class SeatProductHelper(object):
             raise serializers.ValidationError(_(u"Products must have a price."))
 
     @staticmethod
-    def save(partner, course, product, create_enrollment_code):
+    def save(course, product, create_enrollment_code):
         attrs = _flatten(product['attribute_values'])
 
         # Extract arguments required for Seat creation, deserializing as necessary.
@@ -390,7 +390,6 @@ class SeatProductHelper(object):
             certificate_type,
             id_verification_required,
             price,
-            partner,
             expires=expires,
             credit_provider=credit_provider,
             credit_hours=credit_hours,
@@ -469,7 +468,9 @@ class AtomicPublicationSerializer(serializers.Serializer):  # pylint: disable=ab
             # Explicitly delimit operations which will be rolled back if an exception is raised.
             with transaction.atomic():
                 site = self.context['request'].site
-                course, created = Course.objects.get_or_create(id=course_id, site=site)
+                course, created = Course.objects.get_or_create(
+                    id=course_id, partner=site.siteconfiguration.partner
+                )
                 course.name = course_name
                 course.verification_deadline = course_verification_deadline
                 course.save()
@@ -480,7 +481,7 @@ class AtomicPublicationSerializer(serializers.Serializer):  # pylint: disable=ab
                     if product_class == COURSE_ENTITLEMENT_PRODUCT_CLASS_NAME:
                         EntitlementProductHelper.save(partner, course, course_uuid, product)
                     elif product_class == SEAT_PRODUCT_CLASS_NAME:
-                        SeatProductHelper.save(partner, course, product, create_or_activate_enrollment_code)
+                        SeatProductHelper.save(course, product, create_or_activate_enrollment_code)
 
                 if course.get_enrollment_code():
                     course.toggle_enrollment_code_status(is_active=create_or_activate_enrollment_code)

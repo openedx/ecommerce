@@ -30,7 +30,8 @@ class CourseViewSet(NonDestroyableModelViewSet):
     permission_classes = (IsAuthenticated, IsAdminUser,)
 
     def get_queryset(self):
-        return Course.objects.filter(site=self.request.site).prefetch_related(
+        site_configuration = self.request.site.siteconfiguration
+        return Course.objects.filter(partner=site_configuration.partner).prefetch_related(
             self.products_prefetch, self.product_attribute_value_prefetch, 'products__stockrecords'
         )
 
@@ -49,10 +50,11 @@ class CourseViewSet(NonDestroyableModelViewSet):
         return super(CourseViewSet, self).list(request, *args, **kwargs)
 
     def create(self, request, *args, **kwargs):
+        site_configuration = request.site.siteconfiguration
         course = Course.objects.create(
             id=request.data['id'],
             name=request.data['name'],
-            site=request.site
+            partner=site_configuration.partner
         )
         data = serializers.CourseSerializer(course, context={'request': request}).data
         return Response(data, status=status.HTTP_201_CREATED)

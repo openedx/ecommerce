@@ -60,8 +60,8 @@ class UtilTests(CouponMixin, DiscoveryMockMixin, DiscoveryTestMixin, LmsApiMockM
         self.user = self.create_user(full_name="Tešt Ušer", is_staff=True)
         self.client.login(username=self.user.username, password=self.password)
 
-        self.course = CourseFactory(id='course-v1:test-org+course+run')
-        self.verified_seat = self.course.create_or_update_seat('verified', False, 100, self.partner)
+        self.course = CourseFactory(id='course-v1:test-org+course+run', partner=self.partner)
+        self.verified_seat = self.course.create_or_update_seat('verified', False, 100)
 
         self.catalog = Catalog.objects.create(partner=self.partner)
 
@@ -604,10 +604,10 @@ class UtilTests(CouponMixin, DiscoveryMockMixin, DiscoveryTestMixin, LmsApiMockM
         course2 = CourseFactory()
         order = OrderFactory(number='TESTORDER')
         order.lines.add(
-            OrderLineFactory(product=course1.create_or_update_seat('verified', False, 101, self.partner))
+            OrderLineFactory(product=course1.create_or_update_seat('verified', False, 101))
         )
         order.lines.add(
-            OrderLineFactory(product=course2.create_or_update_seat('verified', False, 110, self.partner))
+            OrderLineFactory(product=course2.create_or_update_seat('verified', False, 110))
         )
         query_coupon = self.create_catalog_coupon(catalog_query='*:*')
         voucher = query_coupon.attr.coupon_vouchers.vouchers.first()

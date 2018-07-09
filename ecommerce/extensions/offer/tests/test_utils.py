@@ -18,8 +18,8 @@ class UtilTests(DiscoveryTestMixin, TestCase):
 
     def setUp(self):
         super(UtilTests, self).setUp()
-        self.course = CourseFactory()
-        self.verified_seat = self.course.create_or_update_seat('verified', False, 100, self.partner)
+        self.course = CourseFactory(partner=self.partner)
+        self.verified_seat = self.course.create_or_update_seat('verified', False, 100)
         self.stock_record = StockRecord.objects.filter(product=self.verified_seat).first()
         self.seat_price = self.stock_record.price_excl_tax
         self._range = RangeFactory(products=[self.verified_seat, ])

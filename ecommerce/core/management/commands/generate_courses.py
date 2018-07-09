@@ -55,7 +55,6 @@ class Command(BaseCommand):
             partner_code = course_settings["partner"]
             try:
                 partner = Partner.objects.get(short_code=partner_code)
-                site = partner.default_site
             except Partner.DoesNotExist:
                 logger.warning(partner_code + " partner does not exist")
                 logger.warning("Can't create course, proceeding to next course")
@@ -68,12 +67,12 @@ class Command(BaseCommand):
             course_name = course_settings["fields"]["display_name"]
             course_id = "course-v1:{org}+{num}+{run}".format(org=org, num=num, run=run)
             defaults = {'name': course_name}
-            course, __ = Course.objects.update_or_create(id=course_id, site=site, defaults=defaults)
+            course, __ = Course.objects.update_or_create(id=course_id, partner=partner, defaults=defaults)
             logger.info("Created course with id %s", course.id)
 
             # Create seats
             enrollment = course_settings["enrollment"]
-            self._create_seats(enrollment, course, partner)
+            self._create_seats(enrollment, course)
 
             # Publish the data to the LMS
             if course.publish_to_lms():
@@ -119,7 +118,7 @@ class Command(BaseCommand):
 
         return is_valid
 
-    def _create_seats(self, enrollment, course, partner):
+    def _create_seats(self, enrollment, course):
         """ Create the seats for a given course based on the enrollment parameters """
         for setting in enrollment:
             if setting not in self.course_enrollment_settings:
@@ -128,17 +127,16 @@ class Command(BaseCommand):
                 logger.info(setting + " has been set to " + str(enrollment[setting]))
 
         if enrollment["audit"]:
-            course.create_or_update_seat("", False, 0, partner)
+            course.create_or_update_seat("", False, 0)
             logger.info("Created audit seat for course %s", course.id)
         if enrollment["honor"]:
-            course.create_or_update_seat("honor", False, 0, partner)
+            course.create_or_update_seat("honor", False, 0)
             logger.info("Created honor seat for course %s", course.id)
         if enrollment["verified"]:
             course.create_or_update_seat(
                 certificate_type="verified",
                 id_verification_required=True,
                 price=100,
-                partner=partner,
                 expires=self.default_upgrade_deadline
             )
             logger.info("Created verified seat for course %s", course.id)
@@ -147,8 +145,7 @@ class Command(BaseCommand):
             course.create_or_update_seat(
                 certificate_type="professional",
                 id_verification_required=id_verification_required,
-                price=1000,
-                partner=partner
+                price=1000
             )
             logger.info(
                 "Created professional seat for course %s. ID verification requirement has been set to %s",
@@ -161,7 +158,6 @@ class Command(BaseCommand):
                 certificate_type="credit",
                 id_verification_required=True,
                 price=2000,
-                partner=partner,
                 credit_provider=credit_provider,
                 credit_hours=100
             )

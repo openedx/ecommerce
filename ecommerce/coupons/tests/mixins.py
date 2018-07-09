@@ -46,7 +46,7 @@ class DiscoveryMockMixin(object):
         course_run_url = '{}course_runs/{}/?partner={}'.format(
             discovery_api_url,
             course_run.id,
-            self.site.siteconfiguration.partner.short_code
+            self.partner.short_code
         )
 
         httpretty.register_uri(

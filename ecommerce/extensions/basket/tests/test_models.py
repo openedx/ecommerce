@@ -155,9 +155,9 @@ class BasketTests(CatalogMixin, BasketMixin, TestCase):
 
     def test_add_product(self):
         """ Verify the method fires Product Added analytic event when a product is added to the basket """
-        course = CourseFactory()
+        course = CourseFactory(partner=self.partner)
         basket = create_basket(empty=True)
-        seat = course.create_or_update_seat('verified', True, 100, self.partner)
+        seat = course.create_or_update_seat('verified', True, 100)
         with mock.patch('ecommerce.extensions.basket.models.track_segment_event') as mock_track:
             basket.add_product(seat)
             properties = translate_basket_line_for_segment(basket.lines.first())
@@ -168,9 +168,9 @@ class BasketTests(CatalogMixin, BasketMixin, TestCase):
         """
         Verify the method does NOT fire Product Added analytic event when a product is added to the basket
         """
-        course = CourseFactory()
+        course = CourseFactory(partner=self.partner)
         basket = create_basket(empty=True)
-        seat = course.create_or_update_seat('verified', True, 100, self.partner)
+        seat = course.create_or_update_seat('verified', True, 100)
         DEFAULT_REQUEST_CACHE.set(TEMPORARY_BASKET_CACHE_KEY, True)
         with mock.patch('ecommerce.extensions.basket.models.track_segment_event') as mock_track:
             basket.add_product(seat)
@@ -180,9 +180,9 @@ class BasketTests(CatalogMixin, BasketMixin, TestCase):
 
     def test_product_events_with_free_items(self):
         """ Product Added/Removed events should not be fired for free products. """
-        course = CourseFactory()
+        course = CourseFactory(partner=self.partner)
         basket = create_basket(empty=True)
-        seat = course.create_or_update_seat('audit', False, 0, self.partner)
+        seat = course.create_or_update_seat('audit', False, 0)
 
         with mock.patch('ecommerce.extensions.basket.models.track_segment_event') as mock_track:
             basket.add_product(seat)
@@ -191,7 +191,7 @@ class BasketTests(CatalogMixin, BasketMixin, TestCase):
 
     def _create_basket_with_product(self):
         basket = create_basket(empty=True, site=self.site)
-        course = CourseFactory()
-        seat = course.create_or_update_seat('verified', True, 100, self.partner)
+        course = CourseFactory(partner=self.partner)
+        seat = course.create_or_update_seat('verified', True, 100)
         basket.add_product(seat)
         return basket

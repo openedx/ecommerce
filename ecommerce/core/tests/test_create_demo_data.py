@@ -1,3 +1,6 @@
+import sys
+from StringIO import StringIO
+
 import httpretty
 import mock
 from django.core.management import call_command
@@ -49,3 +52,15 @@ class CreateDemoDataTests(DiscoveryTestMixin, TestCase):
             mock_publish.assert_called_once_with()
 
         self.assert_seats_created(course_id, course_title, price)
+
+    @httpretty.activate
+    def test_handle_with_error_in_publish_to_lms(self):
+        """
+        The command should log error message if there was an error in publish to LMS.
+        """
+        err_out = StringIO()
+        sys.stderr = err_out
+        with mock.patch.object(Course, 'publish_to_lms', return_value="Failed to publish"):
+            call_command('create_demo_data', '--partner={}'.format(self.partner.short_code))
+            output = err_out.getvalue().strip()
+            self.assertIn("An error occurred while attempting to publish", output)

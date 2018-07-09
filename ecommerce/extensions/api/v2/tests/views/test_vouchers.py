@@ -184,12 +184,12 @@ class VoucherViewSetTests(DiscoveryMockMixin, DiscoveryTestMixin, LmsApiMockMixi
     @httpretty.activate
     def test_multiple_providers(self):
         """ Verify offer contains information about credit providers. """
-        course = CourseFactory()
+        course = CourseFactory(partner=self.partner)
         seat1 = course.create_or_update_seat(
-            'credit', False, 100, partner=self.partner, credit_provider='test_provider_1'
+            'credit', False, 100, credit_provider='test_provider_1'
         )
         seat2 = course.create_or_update_seat(
-            'credit', False, 100, partner=self.partner, credit_provider='test_provider_2'
+            'credit', False, 100, credit_provider='test_provider_2'
         )
         self.assertEqual(Product.objects.filter(parent=seat1.parent).count(), 2)
 
@@ -203,9 +203,9 @@ class VoucherViewSetTests(DiscoveryMockMixin, DiscoveryTestMixin, LmsApiMockMixi
 
     def test_omitting_expired_courses(self):
         """Verify professional courses who's enrollment end datetime have passed are omitted."""
-        no_date_seat = CourseFactory().create_or_update_seat('professional', False, 100, partner=self.partner)
-        valid_seat = CourseFactory().create_or_update_seat('professional', False, 100, partner=self.partner)
-        expired_seat = CourseFactory().create_or_update_seat('professional', False, 100, partner=self.partner)
+        no_date_seat = CourseFactory(partner=self.partner).create_or_update_seat('professional', False, 100)
+        valid_seat = CourseFactory(partner=self.partner).create_or_update_seat('professional', False, 100)
+        expired_seat = CourseFactory(partner=self.partner).create_or_update_seat('professional', False, 100)
 
         course_discovery_results = [{
             'key': no_date_seat.attr.course_key,

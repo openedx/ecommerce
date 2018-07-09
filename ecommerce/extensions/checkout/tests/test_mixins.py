@@ -162,8 +162,8 @@ class EdxOrderPlacementMixinTests(BusinessIntelligenceMixin, PaymentEventsMixin,
         """
         toggle_switch(ENROLLMENT_CODE_SWITCH, True)
 
-        course = CourseFactory()
-        course.create_or_update_seat('verified', True, 50, self.partner, create_enrollment_code=True)
+        course = CourseFactory(partner=self.partner)
+        course.create_or_update_seat('verified', True, 50, create_enrollment_code=True)
         enrollment_code = Product.objects.get(product_class__name=ENROLLMENT_CODE_PRODUCT_CLASS_NAME)
         user = UserFactory()
         basket = BasketFactory(owner=user, site=self.site)
@@ -187,8 +187,8 @@ class EdxOrderPlacementMixinTests(BusinessIntelligenceMixin, PaymentEventsMixin,
         """
         toggle_switch(ENROLLMENT_CODE_SWITCH, False)
 
-        course = CourseFactory()
-        verified_product = course.create_or_update_seat('verified', True, 50, self.partner)
+        course = CourseFactory(partner=self.partner)
+        verified_product = course.create_or_update_seat('verified', True, 50)
         user = UserFactory()
         basket = BasketFactory(owner=user, site=self.site)
         basket.add_product(verified_product, quantity=1)

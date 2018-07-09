@@ -49,8 +49,8 @@ class SignalTests(ProgramTestMixin, CouponMixin, TestCase):
         Returns:
             Order
         """
-        course = CourseFactory()
-        seat = course.create_or_update_seat(seat_type, False, 50, self.partner, credit_provider_id, None, 2)
+        course = CourseFactory(partner=self.partner)
+        seat = course.create_or_update_seat(seat_type, False, 50, credit_provider_id, None, 2)
         basket = factories.BasketFactory(owner=self.user, site=self.site)
         basket.add_product(seat, 1)
         order = create_order(basket=basket, user=self.user)
@@ -289,8 +289,8 @@ class SignalTests(ProgramTestMixin, CouponMixin, TestCase):
         """ Make sure we are sending GA events for Enrollment Code orders """
         with mock.patch('ecommerce.extensions.checkout.signals.track_segment_event') as mock_track:
 
-            course = CourseFactory()
-            course.create_or_update_seat('verified', True, 50, self.partner, create_enrollment_code=True)
+            course = CourseFactory(partner=self.partner)
+            course.create_or_update_seat('verified', True, 50, create_enrollment_code=True)
             enrollment_code = Product.objects.get(product_class__name=ENROLLMENT_CODE_PRODUCT_CLASS_NAME)
 
             basket = factories.BasketFactory(owner=self.user, site=self.site)

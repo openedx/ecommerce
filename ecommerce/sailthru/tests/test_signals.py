@@ -35,7 +35,7 @@ class SailthruSignalTests(CouponMixin, DiscoveryTestMixin, TestCase):
         # create some test course objects
         self.course_id = 'edX/toy/2012_Fall'
         self.course_url = 'http://lms.testserver.fake/courses/edX/toy/2012_Fall/info'
-        self.course = CourseFactory(id=self.course_id, name='Demo Course', site=self.site)
+        self.course = CourseFactory(id=self.course_id, name='Demo Course', partner=self.partner)
 
         self.basket_attribute_type, __ = BasketAttributeType.objects.get_or_create(name=SAILTHRU_CAMPAIGN)
 
@@ -86,9 +86,9 @@ class SailthruSignalTests(CouponMixin, DiscoveryTestMixin, TestCase):
     def test_stop_sailthru_update_on_multi_product_baskets(self, mock_log_error, mock_update_course_enrollment):
         """ Verify Sailthru is not contacted for multi-product baskets. """
         # Create multi-product basket
-        seat = self.course.create_or_update_seat('verified', False, 100, self.partner, None)
-        other_course = CourseFactory(site=self.site)
-        other_seat = other_course.create_or_update_seat('verified', False, 100, self.partner, None)
+        seat = self.course.create_or_update_seat('verified', False, 100, None)
+        other_course = CourseFactory(partner=self.partner)
+        other_seat = other_course.create_or_update_seat('verified', False, 100, None)
         basket = BasketFactory(owner=self.user, site=self.site)
         basket.add_product(seat)
         basket.add_product(other_seat)
@@ -248,7 +248,7 @@ class SailthruSignalTests(CouponMixin, DiscoveryTestMixin, TestCase):
         )
 
     def _create_order(self, price, mode='verified'):
-        seat = self.course.create_or_update_seat(mode, False, price, self.partner, None)
+        seat = self.course.create_or_update_seat(mode, False, price, None)
 
         basket = BasketFactory(owner=self.user, site=self.site)
         basket.add_product(seat, 1)

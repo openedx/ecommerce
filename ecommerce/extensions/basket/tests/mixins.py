@@ -33,7 +33,7 @@ class BasketMixin(SiteMixin):
         Returns:
             The newly created course, seat and enrollment code.
         """
-        course = CourseFactory()
-        seat = course.create_or_update_seat(seat_type, id_verification, 10, self.partner, create_enrollment_code=True)
+        course = CourseFactory(partner=self.partner)
+        seat = course.create_or_update_seat(seat_type, id_verification, 10, create_enrollment_code=True)
         enrollment_code = Product.objects.get(product_class__name=ENROLLMENT_CODE_PRODUCT_CLASS_NAME)
         return course, seat, enrollment_code

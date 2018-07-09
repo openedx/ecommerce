@@ -31,11 +31,11 @@ class ProductViewSetBase(ProductSerializerMixin, DiscoveryTestMixin, TestCase):
         super(ProductViewSetBase, self).setUp()
         self.user = self.create_user(is_staff=True)
         self.client.login(username=self.user.username, password=self.password)
-        self.course = CourseFactory(id='edX/DemoX/Demo_Course', name='Test Course', site=self.site)
+        self.course = CourseFactory(id='edX/DemoX/Demo_Course', name='Test Course', partner=self.partner)
 
         # TODO Update the expiration date by 2099-12-31
         expires = datetime.datetime(2100, 1, 1, tzinfo=pytz.UTC)
-        self.seat = self.course.create_or_update_seat('honor', False, 0, self.partner, expires=expires)
+        self.seat = self.course.create_or_update_seat('honor', False, 0, expires=expires)
 
 
 class ProductViewSetTests(ProductViewSetBase):
@@ -92,8 +92,8 @@ class ProductViewSetTests(ProductViewSetBase):
     def test_list_for_course(self):
         """ Verify the view supports listing products for a single course. """
         # Create another course and seat to confirm filtering.
-        other_course = CourseFactory(id='edX/DemoX/XYZ', name='Test Course 2', site=self.site)
-        other_course.create_or_update_seat('honor', False, 0, self.partner)
+        other_course = CourseFactory(id='edX/DemoX/XYZ', name='Test Course 2', partner=self.partner)
+        other_course.create_or_update_seat('honor', False, 0)
 
         path = reverse('api:v2:course-product-list', kwargs={'parent_lookup_course_id': self.course.id})
         response = self.client.get(path)

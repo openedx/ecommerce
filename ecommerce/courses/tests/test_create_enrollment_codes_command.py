@@ -50,8 +50,8 @@ class CreateEnrollmentCodesTests(DiscoveryTestMixin, TransactionTestCase):
         Returns:
             The created course.
         """
-        course = CourseFactory(site=self.site)
-        course.create_or_update_seat(seat_type, False, Decimal(10.0), self.site.siteconfiguration.partner)
+        course = CourseFactory(partner=self.partner)
+        course.create_or_update_seat(seat_type, False, Decimal(10.0))
         return course
 
     @classmethod
@@ -216,9 +216,7 @@ class CreateEnrollmentCodesTests(DiscoveryTestMixin, TransactionTestCase):
         Verify multiple paid seats for the same course scenario is handled gracefully by the command.
         """
         # emulate multiple seat scenario for a course.
-        self.professional_course_1.create_or_update_seat(
-            'verified', False, Decimal(10.0), self.site.siteconfiguration.partner
-        )
+        self.professional_course_1.create_or_update_seat('verified', False, Decimal(10.0))
 
         self.create_course_ids_file(
             self.tmp_file_path,
@@ -298,9 +296,7 @@ class CreateEnrollmentCodesTests(DiscoveryTestMixin, TransactionTestCase):
         Verify proper info messages are logged when courses do not have required info.
         """
         # emulate multiple seat scenario for a course.
-        self.professional_course_1.create_or_update_seat(
-            'verified', False, Decimal(10.0), self.site.siteconfiguration.partner
-        )
+        self.professional_course_1.create_or_update_seat('verified', False, Decimal(10.0))
 
         # Delete some courses.
         self.audit_course.delete()

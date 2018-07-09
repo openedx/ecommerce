@@ -52,7 +52,6 @@ class Command(BaseCommand):
         course_title = options['course_title']
         price = options['price']
         partner = Partner.objects.get(short_code=options['partner_code'])
-        site = partner.default_site
         one_year = datetime.timedelta(days=365)
         expires = timezone.now() + one_year
 
@@ -62,14 +61,14 @@ class Command(BaseCommand):
         Flag.objects.update_or_create(name='enable_client_side_checkout', defaults={'everyone': True})
 
         # Create the course
-        course, __ = Course.objects.update_or_create(id=course_id, site=site, defaults={
+        course, __ = Course.objects.update_or_create(id=course_id, partner=partner, defaults={
             'name': course_title,
             'verification_deadline': expires + one_year,
         })
 
         # Create the audit and verified seats
-        course.create_or_update_seat('', False, 0, partner)
-        course.create_or_update_seat('verified', True, price, partner, expires=expires, create_enrollment_code=True)
+        course.create_or_update_seat('', False, 0)
+        course.create_or_update_seat('verified', True, price, expires=expires, create_enrollment_code=True)
         self.stdout.write(
             self.style.SUCCESS('Created audit and verified seats for [{course_id}]'.format(course_id=course_id))
         )

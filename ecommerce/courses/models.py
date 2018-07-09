@@ -28,7 +28,8 @@ StockRecord = get_model('partner', 'StockRecord')
 
 
 class Course(models.Model):
-    site = models.ForeignKey('sites.Site', verbose_name=_('Site'), null=False, blank=False, on_delete=models.PROTECT)
+    site = models.ForeignKey('sites.Site', verbose_name=_('Site'), null=True, blank=True, on_delete=models.PROTECT)
+    partner = models.ForeignKey('partner.Partner', null=False, blank=False, on_delete=models.PROTECT)
     id = models.CharField(null=False, max_length=255, primary_key=True, verbose_name='ID')
     name = models.CharField(null=False, max_length=255)
     verification_deadline = models.DateTimeField(
@@ -120,10 +121,6 @@ class Course(models.Model):
                 return enrollment_code
         return None
 
-    @property
-    def partner(self):
-        return self.site.siteconfiguration.partner
-
     def get_course_seat_name(self, certificate_type, id_verification_required):
         """ Returns the name for a course seat. """
         name = u'Seat in {}'.format(self.name)
@@ -141,7 +138,6 @@ class Course(models.Model):
             certificate_type,
             id_verification_required,
             price,
-            partner,
             credit_provider=None,
             expires=None,
             credit_hours=None,
@@ -231,7 +227,9 @@ class Course(models.Model):
         seat.attr.course_key = course_id
         seat.attr.id_verification_required = id_verification_required
         if certificate_type in ENROLLMENT_CODE_SEAT_TYPES and create_enrollment_code:
-            self._create_or_update_enrollment_code(certificate_type, id_verification_required, partner, price, expires)
+            self._create_or_update_enrollment_code(
+                certificate_type, id_verification_required, self.partner, price, expires
+            )
 
         if credit_provider:
             seat.attr.credit_provider = credit_provider
@@ -242,15 +240,15 @@ class Course(models.Model):
         seat.attr.save()
 
         try:
-            stock_record = StockRecord.objects.get(product=seat, partner=partner)
+            stock_record = StockRecord.objects.get(product=seat, partner=self.partner)
             logger.info(
                 'Retrieved course seat product stock record with certificate type [%s] for [%s] from database.',
                 certificate_type,
                 course_id
             )
         except StockRecord.DoesNotExist:
-            partner_sku = generate_sku(seat, partner)
-            stock_record = StockRecord(product=seat, partner=partner, partner_sku=partner_sku)
+            partner_sku = generate_sku(seat, self.partner)
+            stock_record = StockRecord(product=seat, partner=self.partner, partner_sku=partner_sku)
             logger.info(
                 'Course seat product stock record with certificate type [%s] for [%s] does not exist. '
                 'Instantiated a new instance.',

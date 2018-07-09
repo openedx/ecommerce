@@ -25,8 +25,8 @@ class CouponReportCSVViewTest(CouponMixin, DiscoveryTestMixin, LmsApiMockMixin, 
         self.user = self.create_user(full_name="Test User", is_staff=True)
         self.client.login(username=self.user.username, password=self.password)
 
-        self.course = CourseFactory()
-        self.verified_seat = self.course.create_or_update_seat('verified', False, 0, self.partner)
+        self.course = CourseFactory(partner=self.partner)
+        self.verified_seat = self.course.create_or_update_seat('verified', False, 0)
 
         self.stock_record = StockRecord.objects.filter(product=self.verified_seat).first()
 

@@ -98,8 +98,8 @@ class UtilsTest(DiscoveryTestMixin, BasketMixin, TransactionTestCase):
         basket.site = self.site
         basket.owner = factories.UserFactory()
         basket.save()
-        course = CourseFactory()
-        seat = course.create_or_update_seat('verified', True, 100, self.partner)
+        course = CourseFactory(partner=self.partner)
+        seat = course.create_or_update_seat('verified', True, 100)
         basket.add_product(seat)
         line = basket.lines.first()
         expected = {

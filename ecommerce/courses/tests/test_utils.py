@@ -36,8 +36,8 @@ class UtilsTests(DiscoveryTestMixin, DiscoveryMockMixin, TestCase):
     )
     def test_mode_for_product(self, certificate_type, id_verification_required, mode):
         """ Verify the correct enrollment mode is returned for a given seat. """
-        course = CourseFactory(id='edx/Demo_Course/DemoX', site=self.site)
-        seat = course.create_or_update_seat(certificate_type, id_verification_required, 10.00, self.partner)
+        course = CourseFactory(id='edx/Demo_Course/DemoX', partner=self.partner)
+        seat = course.create_or_update_seat(certificate_type, id_verification_required, 10.00)
         self.assertEqual(mode_for_product(seat), mode)
         enrollment_code = course.enrollment_code_product
         if enrollment_code:  # We should only have enrollment codes for allowed types
@@ -50,8 +50,8 @@ class UtilsTests(DiscoveryTestMixin, DiscoveryMockMixin, TestCase):
         """ Check to see if course info gets cached """
         self.mock_access_token_response()
         if course_run:
-            course = CourseFactory()
-            product = course.create_or_update_seat('verified', None, 100, self.site.siteconfiguration.partner)
+            course = CourseFactory(partner=self.partner)
+            product = course.create_or_update_seat('verified', None, 100)
             key = CourseKey.from_string(product.attr.course_key)
             self.mock_course_run_detail_endpoint(
                 course, discovery_api_url=self.site_configuration.discovery_api_url
@@ -62,7 +62,7 @@ class UtilsTests(DiscoveryTestMixin, DiscoveryMockMixin, TestCase):
             key = product.attr.UUID
             self.mock_course_detail_endpoint(product, discovery_api_url=self.site_configuration.discovery_api_url)
 
-        cache_key = 'courses_api_detail_{}{}'.format(key, self.site.siteconfiguration.partner.short_code)
+        cache_key = 'courses_api_detail_{}{}'.format(key, self.partner.short_code)
         cache_key = hashlib.md5(cache_key).hexdigest()
         course_cached_response = TieredCache.get_cached_response(cache_key)
         self.assertTrue(course_cached_response.is_miss)

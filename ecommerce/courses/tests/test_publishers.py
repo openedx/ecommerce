@@ -32,9 +32,12 @@ class LMSPublisherTests(DiscoveryTestMixin, TestCase):
         httpretty.enable()
         self.mock_access_token_response()
 
-        self.course = CourseFactory(verification_deadline=timezone.now() + datetime.timedelta(days=7), site=self.site)
-        self.course.create_or_update_seat('honor', False, 0, self.partner)
-        self.course.create_or_update_seat('verified', True, 50, self.partner)
+        self.course = CourseFactory(
+            verification_deadline=timezone.now() + datetime.timedelta(days=7),
+            partner=self.partner
+        )
+        self.course.create_or_update_seat('honor', False, 0)
+        self.course.create_or_update_seat('verified', True, 50)
         self.publisher = LMSPublisher()
         self.error_message = 'Failed to publish commerce data for {course_id} to LMS.'.format(course_id=self.course.id)
 
@@ -152,7 +155,7 @@ class LMSPublisherTests(DiscoveryTestMixin, TestCase):
         no-id-professional seats.
         """
         seat = self.course.create_or_update_seat(
-            'professional', is_verified, 500, self.partner, expires=datetime.datetime.utcnow()
+            'professional', is_verified, 500, expires=datetime.datetime.utcnow()
         )
         stock_record = seat.stockrecords.first()
         actual = self.publisher.serialize_seat_for_commerce_api(seat)
@@ -167,7 +170,7 @@ class LMSPublisherTests(DiscoveryTestMixin, TestCase):
         self.assertDictEqual(actual, expected)
 
     def test_serialize_seat_with_enrollment_code(self):
-        seat = self.course.create_or_update_seat('verified', False, 10, self.partner, create_enrollment_code=True)
+        seat = self.course.create_or_update_seat('verified', False, 10, create_enrollment_code=True)
         stock_record = seat.stockrecords.first()
         ec_stock_record = StockRecord.objects.get(product__product_class__name=ENROLLMENT_CODE_PRODUCT_CLASS_NAME)
 
@@ -190,7 +193,7 @@ class LMSPublisherTests(DiscoveryTestMixin, TestCase):
             String - Publish error message.
         """
         # Setup the course and mock the API endpoints
-        self.course.create_or_update_seat('credit', True, 100, self.partner, credit_provider='acme', credit_hours=1)
+        self.course.create_or_update_seat('credit', True, 100, credit_provider='acme', credit_hours=1)
         self.mock_creditcourse_endpoint(self.course.id, api_status)
         self._mock_commerce_api(201)
 

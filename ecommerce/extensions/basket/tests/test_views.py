@@ -77,9 +77,9 @@ class BasketAddItemsViewTests(
         self.user = self.create_user()
         self.client.login(username=self.user.username, password=self.password)
 
-        self.course = CourseFactory()
-        self.course.create_or_update_seat('verified', True, 50, self.partner)
-        product = self.course.create_or_update_seat('verified', False, 0, self.partner)
+        self.course = CourseFactory(partner=self.partner)
+        self.course.create_or_update_seat('verified', True, 50)
+        product = self.course.create_or_update_seat('verified', False, 0)
         self.stock_record = StockRecordFactory(product=product, partner=self.partner)
         self.catalog = Catalog.objects.create(partner=self.partner)
         self.catalog.stock_records.add(self.stock_record)
@@ -160,9 +160,9 @@ class BasketAddItemsViewTests(
         """
         Test user can not purchase products again using the multiple item view
         """
-        course = CourseFactory()
-        product1 = course.create_or_update_seat("Verified", True, 0, self.partner)
-        product2 = course.create_or_update_seat("Professional", True, 0, self.partner)
+        course = CourseFactory(partner=self.partner)
+        product1 = course.create_or_update_seat("Verified", True, 0)
+        product2 = course.create_or_update_seat("Professional", True, 0)
         stock_record = StockRecordFactory(product=product1, partner=self.partner)
         catalog = Catalog.objects.create(partner=self.partner)
         catalog.stock_records.add(stock_record)
@@ -281,7 +281,7 @@ class BasketSummaryViewTests(EnterpriseServiceMockMixin, DiscoveryTestMixin, Dis
         super(BasketSummaryViewTests, self).setUp()
         self.user = self.create_user()
         self.client.login(username=self.user.username, password=self.password)
-        self.course = CourseFactory(name='BasketSummaryTest')
+        self.course = CourseFactory(name='BasketSummaryTest', partner=self.partner)
         site_configuration = self.site.siteconfiguration
 
         site_configuration.payment_processors = DummyProcessor.NAME
@@ -296,7 +296,7 @@ class BasketSummaryViewTests(EnterpriseServiceMockMixin, DiscoveryTestMixin, Dis
         return basket
 
     def create_seat(self, course, seat_price=100, cert_type='verified'):
-        return course.create_or_update_seat(cert_type, True, seat_price, self.partner)
+        return course.create_or_update_seat(cert_type, True, seat_price)
 
     def create_and_apply_benefit_to_basket(self, basket, product, benefit_type, benefit_value):
         _range = factories.RangeFactory(products=[product, ])
@@ -438,7 +438,7 @@ class BasketSummaryViewTests(EnterpriseServiceMockMixin, DiscoveryTestMixin, Dis
             self.course, discovery_api_url=self.site_configuration.discovery_api_url
         )
 
-        cache_key = 'courses_api_detail_{}{}'.format(self.course.id, self.site.siteconfiguration.partner.short_code)
+        cache_key = 'courses_api_detail_{}{}'.format(self.course.id, self.partner.short_code)
         cache_key = hashlib.md5(cache_key).hexdigest()
         course_before_cached_response = TieredCache.get_cached_response(cache_key)
         self.assertTrue(course_before_cached_response.is_miss)
@@ -640,7 +640,7 @@ class BasketSummaryViewTests(EnterpriseServiceMockMixin, DiscoveryTestMixin, Dis
         Verify redirect to FreeCheckoutView when basket is free
         and an Enterprise-related offer is applied.
         """
-        self.course_run.create_or_update_seat('verified', True, Decimal(10), self.partner)
+        self.course_run.create_or_update_seat('verified', True, Decimal(10))
         self.create_basket_and_add_product(self.course_run.seat_products[0])
         self.prepare_enterprise_offer()
 

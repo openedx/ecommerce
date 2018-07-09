@@ -29,7 +29,8 @@ class PublishCoursesToLMSTests(DiscoveryTestMixin, TransactionTestCase):
 
     def setUp(self):
         super(PublishCoursesToLMSTests, self).setUp()
-        self.course = CourseFactory()
+        self.partner.default_site = self.site
+        self.course = CourseFactory(partner=self.partner)
         self.create_course_ids_file(self.tmp_file_path, [self.course.id])
 
     @classmethod
@@ -79,7 +80,7 @@ class PublishCoursesToLMSTests(DiscoveryTestMixin, TransactionTestCase):
     def test_course_publish_successfully(self):
         """ Verify all courses are successfully published."""
 
-        second_course = CourseFactory.create()
+        second_course = CourseFactory(partner=self.partner)
         self.create_course_ids_file(self.tmp_file_path, [self.course.id, second_course.id])
         expected = (
             (
@@ -108,7 +109,9 @@ class PublishCoursesToLMSTests(DiscoveryTestMixin, TransactionTestCase):
                 call_command('publish_to_lms', course_ids_file=self.tmp_file_path)
                 lc.check(*expected)
         # Check that the mocked function was called twice.
-        self.assertListEqual(mock_publish.call_args_list, [mock.call(self.course), mock.call(second_course)])
+        self.assertListEqual(
+            mock_publish.call_args_list, [mock.call(self.course), mock.call(second_course)]
+        )
 
     def test_course_publish_failed(self):
         """ Verify failed courses are logged."""

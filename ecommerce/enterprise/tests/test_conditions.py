@@ -27,8 +27,8 @@ class EnterpriseCustomerConditionTests(EnterpriseServiceMockMixin, DiscoveryTest
         self.user = factories.UserFactory()
         self.condition = factories.EnterpriseCustomerConditionFactory()
         self.test_product = ProductFactory(stockrecords__price_excl_tax=10, categories=[])
-        self.course_run = CourseFactory()
-        self.course_run.create_or_update_seat('verified', True, Decimal(100), self.partner)
+        self.course_run = CourseFactory(partner=self.partner)
+        self.course_run.create_or_update_seat('verified', True, Decimal(100))
 
     def test_name(self):
         """ The name should contain the EnterpriseCustomer's name. """

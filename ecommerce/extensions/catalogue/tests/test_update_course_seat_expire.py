@@ -35,7 +35,7 @@ class UpdateSeatExpireDateTests(DiscoveryTestMixin, TestCase):
         self.expire_date = now - datetime.timedelta(days=7)
         self.verified_expire_date = now - datetime.timedelta(days=8)
         self.seats_to_update = ['honor', 'audit', 'no-id-professional', 'professional']
-        self.course = CourseFactory()
+        self.course = CourseFactory(partner=self.partner)
         self.course_info = {
             'pagination': {},
             'results': [
@@ -46,11 +46,11 @@ class UpdateSeatExpireDateTests(DiscoveryTestMixin, TestCase):
             ],
         }
 
-        self.honor_seat = self.course.create_or_update_seat('honor', False, 0, self.partner)
+        self.honor_seat = self.course.create_or_update_seat('honor', False, 0)
         self.verified_seat = self.course.create_or_update_seat(
-            'verified', False, 500, self.partner, expires=self.verified_expire_date
+            'verified', False, 500, expires=self.verified_expire_date
         )
-        self.professional_seat = self.course.create_or_update_seat('professional', False, 0, self.partner)
+        self.professional_seat = self.course.create_or_update_seat('professional', False, 0)
 
     def mock_courses_api(self, status, body=None):
         """ Mock Courses API with specific status and body. """

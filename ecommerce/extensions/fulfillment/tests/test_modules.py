@@ -71,9 +71,9 @@ class EnrollmentFulfillmentModuleTests(ProgramTestMixin, DiscoveryTestMixin, Ful
             'ga_client_id': 'test-client-id', 'lms_user_id': 'test-user-id', 'lms_ip': '127.0.0.1'
         }
         self.user.save()
-        self.course = CourseFactory(id=self.course_id, name='Demo Course', site=self.site)
+        self.course = CourseFactory(id=self.course_id, name='Demo Course', partner=self.partner)
 
-        self.seat = self.course.create_or_update_seat(self.certificate_type, False, 100, self.partner, self.provider)
+        self.seat = self.course.create_or_update_seat(self.certificate_type, False, 100, self.provider)
 
         basket = factories.BasketFactory(owner=self.user, site=self.site)
         basket.add_product(self.seat, 1)
@@ -91,7 +91,7 @@ class EnrollmentFulfillmentModuleTests(ProgramTestMixin, DiscoveryTestMixin, Ful
         """
         self.certificate_type = certificate_type
         self.provider = provider
-        self.seat = self.course.create_or_update_seat(self.certificate_type, False, 100, self.partner, self.provider)
+        self.seat = self.course.create_or_update_seat(self.certificate_type, False, 100, self.provider)
 
         basket = factories.BasketFactory(owner=self.user, site=self.site)
         basket.add_product(self.seat, 1)
@@ -523,8 +523,8 @@ class EnrollmentCodeFulfillmentModuleTests(DiscoveryTestMixin, TestCase):
 
     def setUp(self):
         super(EnrollmentCodeFulfillmentModuleTests, self).setUp()
-        course = CourseFactory(site=self.site)
-        course.create_or_update_seat('verified', True, 50, self.partner, create_enrollment_code=True)
+        course = CourseFactory(partner=self.partner)
+        course.create_or_update_seat('verified', True, 50, create_enrollment_code=True)
         enrollment_code = Product.objects.get(product_class__name=ENROLLMENT_CODE_PRODUCT_CLASS_NAME)
         user = factories.UserFactory()
         basket = factories.BasketFactory(owner=user, site=self.site)

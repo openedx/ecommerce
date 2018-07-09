@@ -332,7 +332,7 @@ class CybersourceInterstitialViewTests(CybersourceNotificationTestsMixin, TestCa
         toggle_switch(ENROLLMENT_CODE_SWITCH, True)
 
         course = CourseFactory()
-        course.create_or_update_seat('verified', True, 50, self.partner, create_enrollment_code=True)
+        course.create_or_update_seat('verified', True, 50, create_enrollment_code=True)
         enrollment_code = Product.objects.get(product_class__name=ENROLLMENT_CODE_PRODUCT_CLASS_NAME)
         self.basket = create_basket(owner=self.user, site=self.site)
         self.basket.add_product(enrollment_code, quantity=1)

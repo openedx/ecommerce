@@ -42,7 +42,7 @@ class CheckoutPageTest(DiscoveryTestMixin, TestCase, JwtMixin):
         self.credit_hours = 2
         self.eligibility_url = get_lms_url('/api/credit/v1/eligibility/')
         self.provider_url = get_lms_url('/api/credit/v1/providers/')
-        self.course = CourseFactory(thumbnail_url='http://www.edx.org/course.jpg')
+        self.course = CourseFactory(thumbnail_url='http://www.edx.org/course.jpg', partner=self.partner)
 
         self.provider_data = [
             {
@@ -124,7 +124,7 @@ class CheckoutPageTest(DiscoveryTestMixin, TestCase, JwtMixin):
 
         # Create the credit seat
         self.course.create_or_update_seat(
-            'credit', True, self.price, self.partner, self.provider, credit_hours=self.credit_hours
+            'credit', True, self.price, self.provider, credit_hours=self.credit_hours
         )
 
         self._enable_payment_providers()
@@ -164,7 +164,7 @@ class CheckoutPageTest(DiscoveryTestMixin, TestCase, JwtMixin):
 
         # Create the credit seat
         self.course.create_or_update_seat(
-            'credit', True, self.price, self.partner, self.provider, credit_hours=self.credit_hours
+            'credit', True, self.price, self.provider, credit_hours=self.credit_hours
         )
         self._mock_providers_api(body=[])
         self._assert_error_without_providers()
@@ -185,7 +185,7 @@ class CheckoutPageTest(DiscoveryTestMixin, TestCase, JwtMixin):
 
         # Create the credit seat
         self.course.create_or_update_seat(
-            'credit', True, self.price, self.partner, self.provider, credit_hours=self.credit_hours
+            'credit', True, self.price, self.provider, credit_hours=self.credit_hours
         )
         self._mock_eligibility_api(body=self.eligibilities)
         self._mock_providers_api(body=[], status=500)
@@ -198,7 +198,7 @@ class CheckoutPageTest(DiscoveryTestMixin, TestCase, JwtMixin):
         """
         # Create the credit seat
         self.course.create_or_update_seat(
-            'credit', True, self.price, self.partner, self.provider, credit_hours=self.credit_hours
+            'credit', True, self.price, self.provider, credit_hours=self.credit_hours
         )
 
         self._mock_eligibility_api(body=self.eligibilities)
@@ -213,11 +213,11 @@ class CheckoutPageTest(DiscoveryTestMixin, TestCase, JwtMixin):
         """
         # Create the credit seat
         self.course.create_or_update_seat(
-            'credit', True, self.price, self.partner, self.provider, credit_hours=self.credit_hours
+            'credit', True, self.price, self.provider, credit_hours=self.credit_hours
         )
 
         # Create the audit seat
-        self.course.create_or_update_seat('', False, 0, self.partner)
+        self.course.create_or_update_seat('', False, 0)
 
         self._mock_eligibility_api(body=self.eligibilities)
         self._mock_providers_api(body=self.provider_data)
@@ -229,7 +229,7 @@ class CheckoutPageTest(DiscoveryTestMixin, TestCase, JwtMixin):
         """ Verify the view displays an error message to the user if no seat is available for purchase. """
         expires = timezone.now() - timedelta(days=1)
         self.course.create_or_update_seat(
-            'credit', True, self.price, self.partner, self.provider, credit_hours=self.credit_hours, expires=expires
+            'credit', True, self.price, self.provider, credit_hours=self.credit_hours, expires=expires
         )
         self._mock_eligibility_api(body=self.eligibilities)
 
@@ -252,7 +252,7 @@ class CheckoutPageTest(DiscoveryTestMixin, TestCase, JwtMixin):
     def test_provider_fields(self, benefit_type, discount):
         code = 'TEST'
         seat = self.course.create_or_update_seat(
-            'credit', True, self.price, self.partner, self.provider, credit_hours=self.credit_hours
+            'credit', True, self.price, self.provider, credit_hours=self.credit_hours
         )
         new_range = RangeFactory(products=[seat, ])
         prepare_voucher(code=code, _range=new_range, benefit_value=100, benefit_type=benefit_type)

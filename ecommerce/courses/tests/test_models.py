@@ -24,7 +24,7 @@ class CourseTests(DiscoveryTestMixin, TestCase):
     def test_unicode(self):
         """Verify the __unicode__ method returns the Course ID."""
         course_id = u'edx/Demo_Course/DemoX'
-        course = CourseFactory(id=course_id, site=self.site)
+        course = CourseFactory(id=course_id, partner=self.partner)
         self.assertEqual(unicode(course), course_id)
 
     def test_seat_products(self):
@@ -34,13 +34,13 @@ class CourseTests(DiscoveryTestMixin, TestCase):
         These seats should be the child products.
         """
         # Create a new course and verify it has a parent product, but no children.
-        course = CourseFactory()
+        course = CourseFactory(partner=self.partner)
         self.assertEqual(course.products.count(), 1)
         self.assertEqual(len(course.seat_products), 0)
 
         # Create the seat products
-        seats = [course.create_or_update_seat('honor', False, 0, self.partner),
-                 course.create_or_update_seat('verified', True, 50, self.partner, create_enrollment_code=True)]
+        seats = [course.create_or_update_seat('honor', False, 0),
+                 course.create_or_update_seat('verified', True, 50, create_enrollment_code=True)]
         self.assertEqual(course.products.count(), 4)
 
         # The property should return only the child seats.
@@ -83,7 +83,7 @@ class CourseTests(DiscoveryTestMixin, TestCase):
 
     def test_save_creates_parent_seat(self):
         """ Verify the save method creates a parent seat if one does not exist. """
-        course = CourseFactory(id='a/b/c', name='Test Course', site=self.site)
+        course = CourseFactory(id='a/b/c', name='Test Course', partner=self.partner)
         self.assertEqual(course.products.count(), 1)
 
         parent = course.parent_seat_product
@@ -112,13 +112,13 @@ class CourseTests(DiscoveryTestMixin, TestCase):
 
     def test_create_or_update_seat(self):
         """ Verify the method creates or updates a seat Product. """
-        course = CourseFactory(id='a/b/c', name='Test Course', site=self.site)
+        course = CourseFactory(id='a/b/c', name='Test Course', partner=self.partner)
 
         # Test seat creation
         certificate_type = 'verified'
         id_verification_required = True
         price = 5
-        course.create_or_update_seat(certificate_type, id_verification_required, price, self.partner)
+        course.create_or_update_seat(certificate_type, id_verification_required, price)
 
         # Two seats: one verified, the other the parent seat product
         self.assertEqual(course.products.count(), 2)
@@ -127,7 +127,7 @@ class CourseTests(DiscoveryTestMixin, TestCase):
 
         # Test seat update
         price = 10
-        course.create_or_update_seat(certificate_type, id_verification_required, price, self.partner)
+        course.create_or_update_seat(certificate_type, id_verification_required, price)
 
         # Again, only two seats with one being the parent seat product.
         self.assertEqual(course.products.count(), 2)
@@ -144,7 +144,7 @@ class CourseTests(DiscoveryTestMixin, TestCase):
         self.assertIsNone(enrollment_code.expires)
 
         # Second time should skip over the enrollment code creation logic but result in the same data
-        course.create_or_update_seat(seat_type, True, price, self.partner)
+        course.create_or_update_seat(seat_type, True, price)
         enrollment_code.refresh_from_db()
         self.assertEqual(enrollment_code.attr.course_key, course.id)
         self.assertEqual(enrollment_code.attr.seat_type, seat_type)
@@ -157,7 +157,7 @@ class CourseTests(DiscoveryTestMixin, TestCase):
 
     def test_create_credit_seats(self):
         """Verify that the model's seat creation method allows the creation of multiple credit seats."""
-        course = CourseFactory(id='a/b/c', name='Test Course', site=self.site)
+        course = CourseFactory(id='a/b/c', name='Test Course', partner=self.partner)
         credit_data = {'MIT': 2, 'Harvard': 1}
         certificate_type = 'credit'
         id_verification_required = True
@@ -169,7 +169,6 @@ class CourseTests(DiscoveryTestMixin, TestCase):
                 certificate_type,
                 id_verification_required,
                 price,
-                self.partner,
                 credit_provider=credit_provider,
                 credit_hours=credit_hours
             )
@@ -191,7 +190,7 @@ class CourseTests(DiscoveryTestMixin, TestCase):
         """
         Tests that model's seat update method updates the seat and attribute values
         """
-        course = CourseFactory()
+        course = CourseFactory(partner=self.partner)
         credit_provider = 'MIT'
         credit_hours = 2
         certificate_type = 'credit'
@@ -201,7 +200,6 @@ class CourseTests(DiscoveryTestMixin, TestCase):
             certificate_type,
             id_verification_required,
             price,
-            self.partner,
             credit_provider=credit_provider,
             credit_hours=credit_hours
         )
@@ -211,7 +209,6 @@ class CourseTests(DiscoveryTestMixin, TestCase):
             certificate_type,
             id_verification_required,
             price,
-            self.partner,
             credit_provider=credit_provider,
             credit_hours=credit_hours
         )
@@ -230,14 +227,14 @@ class CourseTests(DiscoveryTestMixin, TestCase):
         Sanity check verifying that course IDs which produced collisions due to a
         lossy slug generation process no longer do so.
         """
-        dotted_course = CourseFactory(id='a/...course.../id', site=self.site)
-        regular_course = CourseFactory(id='a/course/id', site=self.site)
+        dotted_course = CourseFactory(id='a/...course.../id', partner=self.partner)
+        regular_course = CourseFactory(id='a/course/id', partner=self.partner)
 
         certificate_type = 'honor'
         id_verification_required = False
         price = 0
-        dotted_course.create_or_update_seat(certificate_type, id_verification_required, price, self.partner)
-        regular_course.create_or_update_seat(certificate_type, id_verification_required, price, self.partner)
+        dotted_course.create_or_update_seat(certificate_type, id_verification_required, price)
+        regular_course.create_or_update_seat(certificate_type, id_verification_required, price)
 
         child_products = Product.objects.filter(structure=Product.CHILD).count()
         self.assertEqual(child_products, 2)
@@ -246,11 +243,11 @@ class CourseTests(DiscoveryTestMixin, TestCase):
         """
         Verify that stale professional education seats are deleted if they have not been purchased.
         """
-        course = CourseFactory()
-        course.create_or_update_seat('professional', False, 0, self.partner)
+        course = CourseFactory(partner=self.partner)
+        course.create_or_update_seat('professional', False, 0)
         self.assertEqual(course.products.count(), 2)
 
-        course.create_or_update_seat('professional', True, 0, self.partner)
+        course.create_or_update_seat('professional', True, 0)
         self.assertEqual(course.products.count(), 2)
 
         product_mode = course.products.first()
@@ -262,14 +259,14 @@ class CourseTests(DiscoveryTestMixin, TestCase):
         Verify that professional education seats are never deleted if they have been purchased.
         """
         user = self.create_user()
-        course = CourseFactory()
-        professional_product_no_verification = course.create_or_update_seat('professional', False, 0, self.partner)
+        course = CourseFactory(partner=self.partner)
+        professional_product_no_verification = course.create_or_update_seat('professional', False, 0)
         self.assertEqual(course.products.count(), 2)
 
         basket = BasketFactory(owner=user, site=self.site)
         basket.add_product(professional_product_no_verification)
         create_order(basket=basket, user=user)
-        course.create_or_update_seat('professional', True, 0, self.partner)
+        course.create_or_update_seat('professional', True, 0)
         self.assertEqual(course.products.count(), 3)
 
         product_mode = course.products.all()[0]
@@ -284,11 +281,11 @@ class CourseTests(DiscoveryTestMixin, TestCase):
         """
         Verify that professional education seats are not deleted if remove_stale_modes flag is not set.
         """
-        course = CourseFactory()
-        course.create_or_update_seat('professional', False, 0, self.partner)
+        course = CourseFactory(partner=self.partner)
+        course.create_or_update_seat('professional', False, 0)
         self.assertEqual(course.products.count(), 2)
 
-        course.create_or_update_seat('professional', True, 0, self.partner, remove_stale_modes=False)
+        course.create_or_update_seat('professional', True, 0, remove_stale_modes=False)
         self.assertEqual(course.products.count(), 3)
 
         product_mode = course.products.all()[0]
@@ -299,50 +296,44 @@ class CourseTests(DiscoveryTestMixin, TestCase):
         self.assertEqual(product_mode.attr.id_verification_required, False)
         self.assertEqual(product_mode.attr.certificate_type, 'professional')
 
-    def test_partner_property(self):
-        """ Partner property should return the correct partner. """
-        partner = self.site.siteconfiguration.partner
-        course = CourseFactory(id='abc', name='Test Course', site=self.site)
-        self.assertEqual(course.partner, partner)
-
     def test_type(self):
         """ Verify the property returns a type value corresponding to the available products. """
-        course = CourseFactory(id='a/b/c', name='Test Course', site=self.site)
+        course = CourseFactory(id='a/b/c', name='Test Course', partner=self.partner)
         self.assertEqual(course.type, 'audit')
 
-        course.create_or_update_seat('audit', False, 0, self.partner)
+        course.create_or_update_seat('audit', False, 0)
         self.assertEqual(course.type, 'audit')
 
-        course.create_or_update_seat('verified', True, 10, self.partner)
+        course.create_or_update_seat('verified', True, 10)
         self.assertEqual(course.type, 'verified')
 
-        seat = course.create_or_update_seat('professional', True, 100, self.partner)
+        seat = course.create_or_update_seat('professional', True, 100)
         self.assertEqual(course.type, 'professional')
 
         seat.delete()
         self.assertEqual(course.type, 'verified')
-        course.create_or_update_seat('no-id-professional', False, 100, self.partner)
+        course.create_or_update_seat('no-id-professional', False, 100)
         self.assertEqual(course.type, 'professional')
 
-        course.create_or_update_seat('credit', True, 1000, self.partner, credit_provider='SMU')
+        course.create_or_update_seat('credit', True, 1000, credit_provider='SMU')
         self.assertEqual(course.type, 'credit')
 
     def test_enrollment_code_seat_type_filter(self):
         """ Verify that the ENROLLMENT_CODE_SEAT_TYPES constant is properly applied during seat creation """
-        course = CourseFactory(id='test/course/123', name='Test Course 123', site=self.site)
+        course = CourseFactory(id='test/course/123', name='Test Course 123', partner=self.partner)
 
         # Audit seat products should not have a corresponding enrollment code
-        course.create_or_update_seat('audit', False, 0, self.partner, create_enrollment_code=True)
+        course.create_or_update_seat('audit', False, 0, create_enrollment_code=True)
         with self.assertRaises(Product.DoesNotExist):
             Product.objects.get(product_class__name=ENROLLMENT_CODE_PRODUCT_CLASS_NAME)
 
         # Honor seat products should not have a corresponding enrollment code
-        course.create_or_update_seat('honor', False, 0, self.partner, create_enrollment_code=True)
+        course.create_or_update_seat('honor', False, 0, create_enrollment_code=True)
         with self.assertRaises(Product.DoesNotExist):
             Product.objects.get(product_class__name=ENROLLMENT_CODE_PRODUCT_CLASS_NAME)
 
         # Verified seat products should have a corresponding enrollment code
-        course.create_or_update_seat('verified', True, 10, self.partner, create_enrollment_code=True)
+        course.create_or_update_seat('verified', True, 10, create_enrollment_code=True)
         enrollment_code = Product.objects.get(product_class__name=ENROLLMENT_CODE_PRODUCT_CLASS_NAME)
         self.assertEqual(enrollment_code.attr.course_key, course.id)
         self.assertEqual(enrollment_code.attr.seat_type, 'verified')
