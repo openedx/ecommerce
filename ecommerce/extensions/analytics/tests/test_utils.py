@@ -5,7 +5,6 @@ import mock
 from django.contrib.auth.models import AnonymousUser
 from django.test.client import RequestFactory
 from oscar.test import factories
-from waffle.testutils import override_switch
 
 from analytics import Client
 from ecommerce.courses.tests.factories import CourseFactory
@@ -76,26 +75,6 @@ class UtilsTest(DiscoveryTestMixin, BasketMixin, TransactionTestCase):
             msg = msg.format(self.site_configuration.pk)
             self.assertEqual(track_segment_event(self.site, self.create_user(), 'foo', {}), (False, msg))
             mock_debug.assert_called_with(msg)
-
-    @override_switch('basket_transaction_on_commit', active=True)
-    def test_track_segment_event_commit_on_transaction(self):
-        """
-        The function should fire an event to Segment if the site is properly
-        configured and the waffle 'basket_transaction_on_commit' is enabled
-        """
-        self.site_configuration.segment_key = 'fake-key'
-        self.site_configuration.save()
-        user, event, properties = self._get_generic_segment_event_parameters()
-        user_tracking_id, ga_client_id, lms_ip = parse_tracking_context(user)
-        context = {
-            'ip': lms_ip,
-            'Google Analytics': {
-                'clientId': ga_client_id
-            }
-        }
-        with mock.patch.object(Client, 'track') as mock_track:
-            track_segment_event(self.site, user, event, properties)
-            mock_track.assert_called_once_with(user_tracking_id, event, properties, context=context)
 
     def test_track_segment_event(self):
         """ The function should fire an event to Segment if the site is properly configured. """
