@@ -8,10 +8,11 @@ from django.urls import reverse
 from oscar.core.loading import get_model
 from oscar.test import factories
 
-from ecommerce.core.url_utils import get_lms_courseware_url, get_lms_dashboard_url, get_lms_program_dashboard_url
+from ecommerce.core.url_utils import get_lms_courseware_url, get_lms_program_dashboard_url
 from ecommerce.coupons.tests.mixins import DiscoveryMockMixin
 from ecommerce.enterprise.tests.mixins import EnterpriseServiceMockMixin
 from ecommerce.extensions.checkout.exceptions import BasketNotFreeError
+from ecommerce.extensions.checkout.utils import get_receipt_page_url
 from ecommerce.extensions.checkout.views import ReceiptResponseView
 from ecommerce.extensions.refund.tests.mixins import RefundTestMixin
 from ecommerce.tests.mixins import LmsApiMockMixin
@@ -86,14 +87,19 @@ class FreeCheckoutViewTests(EnterpriseServiceMockMixin, TestCase):
         self.assertRedirects(response, expected_url, fetch_redirect_response=False)
 
     @httpretty.activate
-    def test_successful_redirect_dashboard(self):
-        """ Verify redirect to the dashboard page. """
+    def test_successful_redirect(self):
+        """ Verify redirect to the receipt page. """
         self.prepare_basket(0)
         self.assertEqual(Order.objects.count(), 0)
         response = self.client.get(self.path)
         self.assertEqual(Order.objects.count(), 1)
 
-        self.assertRedirects(response, get_lms_dashboard_url(), fetch_redirect_response=False)
+        order = Order.objects.first()
+        expected_url = get_receipt_page_url(
+            order_number=order.number,
+            site_configuration=order.site.siteconfiguration
+        )
+        self.assertRedirects(response, expected_url, fetch_redirect_response=False)
 
 
 class CancelCheckoutViewTests(TestCase):
