@@ -17,7 +17,6 @@ from oscar.core.loading import get_model
 from oscar.test import factories
 from oscar.test.factories import BasketFactory
 from rest_framework.throttling import UserRateThrottle
-from waffle.testutils import override_flag
 
 from ecommerce.courses.models import Course
 from ecommerce.extensions.api import exceptions as api_exceptions
@@ -473,7 +472,6 @@ class BasketCalculateViewTests(ProgramTestMixin, TestCase):
     @httpretty.activate
     @mock.patch('ecommerce.extensions.api.v2.views.baskets.logger.exception')
     @mock.patch('ecommerce.programs.conditions.ProgramCourseRunSeatsCondition._get_lms_resource_for_user')
-    @override_flag('disable_calculate_temporary_basket_atomic_transaction', active=True)
     def test_basket_calculate_by_staff_user_other_username_non_atomic(
             self, mock_get_lms_resource_for_user, mock_logger
     ):
@@ -501,7 +499,6 @@ class BasketCalculateViewTests(ProgramTestMixin, TestCase):
     @httpretty.activate
     @mock.patch('ecommerce.extensions.api.v2.views.baskets.logger.exception')
     @mock.patch('ecommerce.programs.conditions.ProgramCourseRunSeatsCondition._get_lms_resource_for_user')
-    @override_flag('disable_calculate_temporary_basket_atomic_transaction', active=True)
     def test_basket_calculate_by_staff_user_other_username_non_atomic_exception(
             self, mock_get_lms_resource_for_user, mock_logger
     ):
@@ -580,8 +577,7 @@ class BasketCalculateViewTests(ProgramTestMixin, TestCase):
             self.assertEqual(response.status_code, 200)
             mock_track.assert_not_called()
 
-    @mock.patch('ecommerce.extensions.api.v2.views.baskets.BasketCalculateView._calculate_temporary_basket')
-    @override_flag('disable_calculate_temporary_basket_atomic_transaction', active=True)
+    @mock.patch('ecommerce.extensions.api.v2.views.baskets.BasketCalculateView._calculate_temporary_basket_atomic')
     def test_basket_calculate_anonymous_caching(self, mock_calculate_basket):
         """Verify a request made with the is_anonymous parameter is cached"""
         url_with_one_sku = self._generate_sku_url(self.products[0:1], username=None)
@@ -678,7 +674,7 @@ class BasketCalculateViewTests(ProgramTestMixin, TestCase):
         self.assertTrue(mock_logger.called)
 
     @httpretty.activate
-    @mock.patch('ecommerce.extensions.api.v2.views.baskets.BasketCalculateView._calculate_temporary_basket')
+    @mock.patch('ecommerce.extensions.api.v2.views.baskets.BasketCalculateView._calculate_temporary_basket_atomic')
     def test_conflicting_user_anonymous_params(self, mock_calculate_basket):
         """
         Verify that when the request contains both a username and an is_anonymous parameter, a Bad Request response
@@ -710,19 +706,6 @@ class BasketCalculateViewTests(ProgramTestMixin, TestCase):
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
         self.assertTrue(mock_calculate_basket_atomic.called, msg='The cache should be missed.')
-        self.assertEqual(response.data, expected)
-
-    @httpretty.activate
-    @mock.patch('ecommerce.extensions.api.v2.views.baskets.BasketCalculateView._calculate_temporary_basket_atomic')
-    @override_flag('disable_calculate_temporary_basket_atomic_transaction', active=False)
-    def test_basket_calculate_with_atomic_transaction(self, mock_calculate_basket_atomic):
-        """Verify a request that should calculate with the atomic transaction code does so."""
-        expected = {'Test Succeeded': True}
-        mock_calculate_basket_atomic.return_value = {'Test Succeeded': True}
-
-        response = self.client.get(self.url)
-        self.assertEqual(response.status_code, 200)
-        self.assertTrue(mock_calculate_basket_atomic.called)
         self.assertEqual(response.data, expected)
 
     @httpretty.activate
