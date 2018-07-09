@@ -92,8 +92,8 @@ class BasketUtilsTests(DiscoveryTestMixin, BasketMixin, TestCase):
 
     def test_prepare_basket_enrollment_with_voucher(self):
         """Verify the basket does not contain a voucher if enrollment code is added to it."""
-        course = CourseFactory()
-        course.create_or_update_seat('verified', False, 10, self.partner, create_enrollment_code=True)
+        course = CourseFactory(partner=self.partner)
+        course.create_or_update_seat('verified', False, 10, create_enrollment_code=True)
         enrollment_code = Product.objects.get(product_class__name=ENROLLMENT_CODE_PRODUCT_CLASS_NAME)
         voucher, product = prepare_voucher()
 
@@ -158,8 +158,8 @@ class BasketUtilsTests(DiscoveryTestMixin, BasketMixin, TestCase):
         self.site_configuration.enable_embargo_check = True
         self.mock_access_token_response()
         self.mock_embargo_api(body=json.dumps({'access': False}))
-        course = CourseFactory()
-        product = course.create_or_update_seat('verified', False, 10, self.partner)
+        course = CourseFactory(partner=self.partner)
+        product = course.create_or_update_seat('verified', False, 10)
         basket = prepare_basket(self.request, [product])
         self.assertEqual(basket.lines.count(), 0)
 
@@ -169,8 +169,8 @@ class BasketUtilsTests(DiscoveryTestMixin, BasketMixin, TestCase):
         self.site_configuration.enable_embargo_check = True
         self.mock_access_token_response()
         self.mock_embargo_api(body=json.dumps({'access': True}))
-        course = CourseFactory()
-        course.create_or_update_seat('verified', False, 10, self.partner, create_enrollment_code=True)
+        course = CourseFactory(partner=self.partner)
+        course.create_or_update_seat('verified', False, 10, create_enrollment_code=True)
         product = Product.objects.get(product_class__name=ENROLLMENT_CODE_PRODUCT_CLASS_NAME)
         basket = prepare_basket(self.request, [product])
         self.assertEqual(basket.lines.count(), 1)
@@ -181,8 +181,8 @@ class BasketUtilsTests(DiscoveryTestMixin, BasketMixin, TestCase):
         self.site_configuration.enable_embargo_check = True
         self.mock_access_token_response()
         self.mock_embargo_api(body=timeoutException)
-        course = CourseFactory()
-        product = course.create_or_update_seat('verified', False, 10, self.partner)
+        course = CourseFactory(partner=self.partner)
+        product = course.create_or_update_seat('verified', False, 10)
         basket = prepare_basket(self.request, [product])
         self.assertEqual(basket.lines.count(), 1)
 
@@ -365,8 +365,8 @@ class BasketUtilsTests(DiscoveryTestMixin, BasketMixin, TestCase):
         """
         Test prepare_basket returns basket with product even if its already been purchased by user
         """
-        course = CourseFactory()
-        course.create_or_update_seat('verified', False, 10, self.partner, create_enrollment_code=True)
+        course = CourseFactory(partner=self.partner)
+        course.create_or_update_seat('verified', False, 10, create_enrollment_code=True)
         enrollment_code = Product.objects.get(product_class__name=ENROLLMENT_CODE_PRODUCT_CLASS_NAME)
         with mock.patch.object(UserAlreadyPlacedOrder, 'user_already_placed_order', return_value=True):
             basket = prepare_basket(self.request, [enrollment_code])

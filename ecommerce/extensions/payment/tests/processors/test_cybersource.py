@@ -81,7 +81,7 @@ class CybersourceTests(CybersourceMixin, PaymentProcessorTestCaseMixin, TestCase
         UUID(actual['transaction_uuid'], version=4)
 
     def test_init_without_config(self):
-        partner_short_code = self.site.siteconfiguration.partner.short_code
+        partner_short_code = self.partner.short_code
 
         payment_processor_config = copy.deepcopy(settings.PAYMENT_PROCESSOR_CONFIG)
         for key in ('sop_access_key', 'sop_payment_page_url', 'sop_profile_id', 'sop_secret_key', 'access_key',
@@ -117,7 +117,7 @@ class CybersourceTests(CybersourceMixin, PaymentProcessorTestCaseMixin, TestCase
     def test_get_transaction_parameters_with_quoted_product_title(self):
         """ Verify quotes are removed from item name """
         course = CourseFactory(id='a/b/c/d', name='Course with "quotes"')
-        product = course.create_or_update_seat(self.CERTIFICATE_TYPE, False, 20, self.partner)
+        product = course.create_or_update_seat(self.CERTIFICATE_TYPE, False, 20)
 
         basket = create_basket(owner=factories.UserFactory(), site=self.site, empty=True)
         basket.add_product(product)

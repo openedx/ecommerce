@@ -29,8 +29,8 @@ class UtilsTests(DiscoveryTestMixin, TestCase):
 
     def setUp(self):
         super(UtilsTests, self).setUp()
-        self.course = CourseFactory(id=COURSE_ID, name='Test Course', site=self.site)
-        self.seat = self.course.create_or_update_seat('verified', False, 0, self.partner)
+        self.course = CourseFactory(id=COURSE_ID, name='Test Course', partner=self.partner)
+        self.seat = self.course.create_or_update_seat('verified', False, 0)
         self.catalog = Catalog.objects.create(name='Test', partner_id=self.partner.id)
 
     def test_generate_sku_with_missing_product_class(self):
@@ -47,9 +47,9 @@ class UtilsTests(DiscoveryTestMixin, TestCase):
     @ddt.data('sku/test/course', 'course-v1:UNCórdobaX+CS001x+3T2017')
     def test_generate_sku_for_course_seat(self, course_id):
         """Verify the method generates a SKU for a course seat."""
-        course = CourseFactory(id=course_id, name='Test Course', site=self.site)
+        course = CourseFactory(id=course_id, name='Test Course', partner=self.partner)
         certificate_type = 'audit'
-        product = course.create_or_update_seat(certificate_type, False, 0, self.partner)
+        product = course.create_or_update_seat(certificate_type, False, 0)
 
         _hash = '{} {} {} {} {}'.format(certificate_type, course_id, 'False', '', self.partner.id).encode('utf-8')
         _hash = md5(_hash.lower()).hexdigest()[-7:]
@@ -73,8 +73,8 @@ class UtilsTests(DiscoveryTestMixin, TestCase):
         self.assertEqual(Catalog.objects.count(), 1)
 
         course_id = 'sku/test2/course'
-        course = CourseFactory(id=course_id, name='Test Course 2', site=self.site)
-        seat_2 = course.create_or_update_seat('verified', False, 0, self.partner)
+        course = CourseFactory(id=course_id, name='Test Course 2', partner=self.partner)
+        seat_2 = course.create_or_update_seat('verified', False, 0)
         stock_record_2 = seat_2.stockrecords.first()
 
         new_catalog, created = get_or_create_catalog(
@@ -90,7 +90,7 @@ class UtilsTests(DiscoveryTestMixin, TestCase):
 class CouponUtilsTests(CouponMixin, DiscoveryTestMixin, TestCase):
     def setUp(self):
         super(CouponUtilsTests, self).setUp()
-        self.course = CourseFactory(id=COURSE_ID, name='Test Course', site=self.site)
+        self.course = CourseFactory(id=COURSE_ID, name='Test Course', partner=self.partner)
         self.catalog = Catalog.objects.create(name='Test', partner_id=self.partner.id)
 
     def test_generate_sku_for_coupon(self):

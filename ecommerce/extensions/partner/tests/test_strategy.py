@@ -16,8 +16,8 @@ class DefaultStrategyTests(DiscoveryTestMixin, TestCase):
     def setUp(self):
         super(DefaultStrategyTests, self).setUp()
         self.strategy = DefaultStrategy()
-        course = CourseFactory(id='a/b/c', name='Demo Course', site=self.site)
-        self.honor_seat = course.create_or_update_seat('honor', False, 0, self.partner)
+        course = CourseFactory(id='a/b/c', name='Demo Course', partner=self.partner)
+        self.honor_seat = course.create_or_update_seat('honor', False, 0)
 
     def test_seat_class(self):
         """ Verify the property returns the course seat Product Class. """

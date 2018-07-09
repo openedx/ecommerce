@@ -22,8 +22,8 @@ class ConvertCourseTest(DiscoveryTestMixin, TestCase):
     @ddt.unpack
     def test_convert_course(self, initial_cert_type, direction, new_cert_type):
         """Verify that an honor course can be converted to audit correctly."""
-        course = CourseFactory(site=self.site)
-        seat_to_convert = course.create_or_update_seat(initial_cert_type, False, 0, self.partner)
+        course = CourseFactory(partner=self.partner)
+        seat_to_convert = course.create_or_update_seat(initial_cert_type, False, 0)
         stock_record = StockRecord.objects.get(product=seat_to_convert)
         order_line = OrderLineFactory(stockrecord=stock_record, product=seat_to_convert)
 
@@ -61,8 +61,8 @@ class ConvertCourseTest(DiscoveryTestMixin, TestCase):
     @ddt.unpack
     def test_without_commit(self, initial_cert_type, direction, new_cert_type):
         """Verify that the commit flag is necessary to run the command successfully."""
-        course = CourseFactory()
-        seat_to_convert = course.create_or_update_seat(initial_cert_type, False, 0, self.partner)
+        course = CourseFactory(partner=self.partner)
+        seat_to_convert = course.create_or_update_seat(initial_cert_type, False, 0)
 
         call_command('convert_course', course.id, commit=False, direction=direction, partner=self.partner.code)
 

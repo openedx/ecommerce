@@ -41,9 +41,9 @@ class ProgramTestMixin(DiscoveryTestMixin):
                 key = 'course-v1:test-org+course+' + str(i)
                 course_runs = []
                 for __ in range(1, 4):
-                    course_run = CourseFactory()
-                    course_run.create_or_update_seat('audit', False, Decimal(0), self.partner)
-                    course_run.create_or_update_seat('verified', True, Decimal(100), self.partner)
+                    course_run = CourseFactory(partner=self.partner)
+                    course_run.create_or_update_seat('audit', False, Decimal(0))
+                    course_run.create_or_update_seat('verified', True, Decimal(100))
 
                     course_runs.append({
                         'key': course_run.id,

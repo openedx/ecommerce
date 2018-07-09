@@ -56,7 +56,7 @@ class LMSPublisher(object):
         Returns:
             None, if publish operation succeeded; otherwise, error message.
         """
-
+        site = course.partner.default_site
         course_id = course.id
         error_message = _('Failed to publish commerce data for {course_id} to LMS.').format(course_id=course_id)
 
@@ -71,7 +71,7 @@ class LMSPublisher(object):
                     'course_key': course_id,
                     'enabled': True
                 }
-                credit_api_client = course.site.siteconfiguration.credit_api_client
+                credit_api_client = site.siteconfiguration.credit_api_client
                 credit_api_client.courses(course_id).put(data)
                 logger.info('Successfully published CreditCourse for [%s] to LMS.', course_id)
             except SlumberHttpBaseException as e:
@@ -97,7 +97,7 @@ class LMSPublisher(object):
                 'modes': modes,
             }
 
-            commerce_api_client = course.site.siteconfiguration.commerce_api_client
+            commerce_api_client = site.siteconfiguration.commerce_api_client
             commerce_api_client.courses(course_id).put(data=data)
             logger.info('Successfully published commerce data for [%s].', course_id)
         except SlumberHttpBaseException as e:  # pylint: disable=bare-except

@@ -66,11 +66,11 @@ class DiscoveryTestMixin(object):
         if not partner:
             partner = PartnerFactory()
         if not course_id:
-            course = CourseFactory()
+            course = CourseFactory(partner=partner)
         else:
-            course = CourseFactory(id=course_id)
+            course = CourseFactory(id=course_id, partner=partner)
 
-        seat = course.create_or_update_seat(seat_type, id_verification, price, partner)
+        seat = course.create_or_update_seat(seat_type, id_verification, price)
         return course, seat
 
     def create_entitlement_product(self, course_uuid=None, certificate_type='verified'):
@@ -157,10 +157,10 @@ class DiscoveryTestMixin(object):
         Returns:
             The newly created course, seat and enrollment code.
         """
-        course = CourseFactory()
+        course = CourseFactory(partner=self.partner)
 
         seat = course.create_or_update_seat(
-            seat_type, id_verification, price, self.partner, expires=expires, create_enrollment_code=True
+            seat_type, id_verification, price, expires=expires, create_enrollment_code=True
         )
         enrollment_code = Product.objects.get(product_class__name=ENROLLMENT_CODE_PRODUCT_CLASS_NAME)
         return course, seat, enrollment_code

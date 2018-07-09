@@ -34,7 +34,7 @@ class CourseViewSetTests(ProductSerializerMixin, DiscoveryTestMixin, TestCase):
         self.course = self.create_course()
 
     def create_course(self):
-        return CourseFactory(id='edX/DemoX/Demo_Course', name='Test Course', site=self.site)
+        return CourseFactory(id='edX/DemoX/Demo_Course', name='Test Course', partner=self.partner)
 
     def serialize_course(self, course, include_products=False):
         """ Serializes a course to a Python dict. """

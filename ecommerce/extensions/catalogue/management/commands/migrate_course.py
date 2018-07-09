@@ -18,9 +18,9 @@ logger = logging.getLogger(__name__)
 
 class MigratedCourse(object):
     def __init__(self, course_id, site_domain):
-        site = Site.objects.get(domain=site_domain)
-        self.course, _created = Course.objects.get_or_create(id=course_id, site=site)
-        self.site_configuration = site.siteconfiguration
+        self.site = Site.objects.get(domain=site_domain)
+        self.site_configuration = self.site.siteconfiguration
+        self.course, _created = Course.objects.get_or_create(id=course_id, partner=self.site_configuration.partner)
 
     def load_from_lms(self):
         """
@@ -44,7 +44,7 @@ class MigratedCourse(object):
 
     def _query_commerce_api(self):
         """Get course name and verification deadline from the Commerce API."""
-        commerce_api_client = self.course.site.siteconfiguration.commerce_api_client
+        commerce_api_client = self.site_configuration.commerce_api_client
 
         data = commerce_api_client.courses(self.course.id).get()
         logger.debug(data)
@@ -62,10 +62,9 @@ class MigratedCourse(object):
 
     def _query_course_structure_api(self):
         """Get course name from the Course Structure API."""
-        site_configuration = self.course.site.siteconfiguration
         api_client = EdxRestApiClient(
-            site_configuration.build_lms_url('/api/course_structure/v0/'),
-            jwt=site_configuration.access_token
+            self.site_configuration.build_lms_url('/api/course_structure/v0/'),
+            jwt=self.site_configuration.access_token
         )
         data = api_client.courses(self.course.id).get()
         logger.debug(data)
@@ -129,8 +128,7 @@ class MigratedCourse(object):
             expires = mode.get('expiration_datetime')
             expires = parse(expires) if expires else None
             self.course.create_or_update_seat(
-                certificate_type, id_verification_required, price, self.site_configuration.partner,
-                expires=expires, remove_stale_modes=False
+                certificate_type, id_verification_required, price, expires=expires, remove_stale_modes=False
             )
 
 

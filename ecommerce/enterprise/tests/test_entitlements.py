@@ -39,8 +39,8 @@ class EntitlementsTests(EnterpriseServiceMockMixin, DiscoveryTestMixin, Discover
         # Enable enterprise functionality
         toggle_switch(settings.ENABLE_ENTERPRISE_ON_RUNTIME_SWITCH, True)
 
-        self.course = CourseFactory(id='edx/Demo_Course/DemoX')
-        course_seat = self.course.create_or_update_seat('verified', False, 100, partner=self.partner)
+        self.course = CourseFactory(id='edx/Demo_Course/DemoX', partner=self.partner)
+        course_seat = self.course.create_or_update_seat('verified', False, 100)
         stock_record = StockRecord.objects.get(product=course_seat)
         self.catalog = Catalog.objects.create(partner=self.partner)
         self.catalog.stock_records.add(stock_record)

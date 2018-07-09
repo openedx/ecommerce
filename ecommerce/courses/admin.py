@@ -4,9 +4,9 @@ from ecommerce.courses.models import Course
 
 
 class CourseAdmin(admin.ModelAdmin):
-    list_display = ('id', 'name', 'site',)
-    search_fields = ('id', 'name', 'site', )
-    list_filter = ('site', )
+    list_display = ('id', 'name', 'partner',)
+    search_fields = ('id', 'name', 'partner', )
+    list_filter = ('partner', )
 
 
 admin.site.register(Course, CourseAdmin)

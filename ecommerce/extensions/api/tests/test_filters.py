@@ -17,8 +17,8 @@ class ProductFilterTests(DiscoveryTestMixin, TestCase):
 
     def test_filter_product_class(self):
         """ Verify the method supports filtering by product class or the parent product's class. """
-        course = CourseFactory()
-        seat = course.create_or_update_seat('verified', True, 1, self.partner)
+        course = CourseFactory(partner=self.partner)
+        seat = course.create_or_update_seat('verified', True, 1)
         parent = course.parent_seat_product
         product_class_name = self.seat_product_class.name
         queryset = Product.objects.all()

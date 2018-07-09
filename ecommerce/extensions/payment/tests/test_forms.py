@@ -38,11 +38,11 @@ class PaymentFormTests(TestCase):
         Returns:
             The newly created course, seat and enrollment code.
         """
-        course = CourseFactory()
+        course = CourseFactory(partner=self.partner)
         toggle_switch(ENROLLMENT_CODE_SWITCH, True)
         self.site.siteconfiguration.enable_enrollment_codes = True
         self.site.siteconfiguration.save()
-        seat = course.create_or_update_seat(seat_type, id_verification, 10, self.partner, create_enrollment_code=True)
+        seat = course.create_or_update_seat(seat_type, id_verification, 10, create_enrollment_code=True)
         enrollment_code = Product.objects.get(product_class__name=ENROLLMENT_CODE_PRODUCT_CLASS_NAME)
         return course, seat, enrollment_code
 
@@ -187,8 +187,8 @@ class PaymentFormTests(TestCase):
         Verify the field 'organization' is not present in the form when the basket does not have an enrollment
         code product.
         """
-        course = CourseFactory()
-        product1 = course.create_or_update_seat("Verified", True, 0, self.partner)
+        course = CourseFactory(partner=self.partner)
+        product1 = course.create_or_update_seat("Verified", True, 0)
         basket = self.create_basket_and_add_product(product1)
         self.request.basket = basket
         data = {

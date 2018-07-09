@@ -56,8 +56,8 @@ class CouponViewSetTest(CouponMixin, DiscoveryTestMixin, TestCase):
         self.user = self.create_user(is_staff=True)
         self.client.login(username=self.user.username, password=self.password)
 
-        course = CourseFactory(id='edx/Demo_Course/DemoX')
-        self.seat = course.create_or_update_seat('verified', True, 50, self.partner)
+        course = CourseFactory(id='edx/Demo_Course/DemoX', partner=self.partner)
+        self.seat = course.create_or_update_seat('verified', True, 50)
 
         self.catalog = Catalog.objects.create(partner=self.partner)
         self.coupon_data = {
@@ -761,8 +761,8 @@ class CouponViewSetFunctionalTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
     @ddt.data('audit', 'honor')
     def test_restricted_course_mode(self, mode):
         """Test that an exception is raised when a black-listed course mode is used."""
-        course = CourseFactory(id='black/list/mode')
-        seat = course.create_or_update_seat(mode, False, 0, self.partner)
+        course = CourseFactory(id='black/list/mode', partner=self.partner)
+        seat = course.create_or_update_seat(mode, False, 0)
         # Seats derived from a migrated "audit" mode do not have a certificate_type attribute.
         if mode == 'audit':
             seat = ProductFactory()

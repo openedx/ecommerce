@@ -92,14 +92,14 @@ class Command(BaseCommand):
             expires = timezone.now() + one_year
             price = 159
 
-            course, __ = Course.objects.update_or_create(id=course_id, site=site, defaults={
+            course, __ = Course.objects.update_or_create(id=course_id, partner=partner, defaults={
                 'name': 'edX Demonstration Course',
                 'verification_deadline': expires + one_year,
             })
 
             # Create the audit and verified seats
-            course.create_or_update_seat('', False, 0, partner)
-            course.create_or_update_seat('verified', True, price, partner, expires=expires, create_enrollment_code=True)
+            course.create_or_update_seat('', False, 0)
+            course.create_or_update_seat('verified', True, price, expires=expires, create_enrollment_code=True)
             logger.info('Created audit and verified seats for [%s]', course_id)
 
     def find(self, pattern, path):

@@ -169,7 +169,7 @@ class AtomicPublicationTests(DiscoveryTestMixin, TestCase):
             id=self.course_id,
             name=self.course_name,
             verification_deadline=EXPIRES,
-            site=self.site
+            partner=self.partner
         )
 
         # Create associated products.
@@ -188,7 +188,6 @@ class AtomicPublicationTests(DiscoveryTestMixin, TestCase):
             else:
                 attrs['expires'] = EXPIRES if product['expires'] else None
                 attrs['price'] = Decimal(product['price'])
-                attrs['partner'] = self.partner
 
                 course.create_or_update_seat(**attrs)
 

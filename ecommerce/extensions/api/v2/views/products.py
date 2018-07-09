@@ -24,8 +24,9 @@ class ProductViewSet(NestedViewSetMixin, NonDestroyableModelViewSet):
         # products so that they are propery filtered by parent ID first.
         # Products are then filtered by:
         #   - stockrecord partner: for products that have stockrecords (seats, coupons, ...)
-        #   - course site: for products that don't have a stockrecord (parent course)
+        #   - course partner: for products that don't have a stockrecord (parent course)
+        partner = self.request.site.siteconfiguration.partner
         return super(ProductViewSet, self).get_queryset().filter(
-            Q(stockrecords__partner=self.request.site.siteconfiguration.partner) |
-            Q(course__site=self.request.site)
+            Q(stockrecords__partner=partner) |
+            Q(course__partner=partner)
         )

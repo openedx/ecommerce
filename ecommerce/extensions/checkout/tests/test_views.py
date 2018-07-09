@@ -37,7 +37,7 @@ class FreeCheckoutViewTests(EnterpriseServiceMockMixin, TestCase):
     def prepare_basket(self, price, bundle=False):
         """ Helper function that creates a basket and adds a product with set price to it. """
         basket = factories.BasketFactory(owner=self.user, site=self.site)
-        self.course_run.create_or_update_seat('verified', True, Decimal(price), self.partner)
+        self.course_run.create_or_update_seat('verified', True, Decimal(price))
         basket.add_product(self.course_run.seat_products[0])
         self.assertEqual(basket.lines.count(), 1)
         self.assertEqual(basket.total_incl_tax, Decimal(price))

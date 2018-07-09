@@ -96,7 +96,7 @@ class CatalogViewSetTest(CatalogMixin, DiscoveryMockMixin, ApiMockMixin, TestCas
     def test_preview_success(self):
         """ Verify the endpoint returns a list of catalogs from the Catalog API. """
         self.mock_access_token_response()
-        seat = self.course.create_or_update_seat('verified', False, 0, self.partner)
+        seat = self.course.create_or_update_seat('verified', False, 0)
         self.mock_course_runs_endpoint(self.site_configuration.discovery_api_url, course_run=self.course)
 
         url = '{path}?query=id:course*&seat_types=verified'.format(path=reverse('api:v2:catalog-preview-list'))
