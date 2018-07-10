@@ -137,8 +137,6 @@ class BasketTests(CatalogMixin, BasketMixin, TestCase):
     def test_flush_with_product_is_not_tracked_for_temporary_basket_calculation(self):
         """
         Verify the method does NOT fire 'Product Removed' Segment for temporary basket calculation
-
-        TODO: LEARNER 5463
         """
         basket = self._create_basket_with_product()
         RequestCache.set(TEMPORARY_BASKET_CACHE_KEY, True)
@@ -169,8 +167,6 @@ class BasketTests(CatalogMixin, BasketMixin, TestCase):
     def test_add_product_not_tracked_for_temporary_basket_calculation(self):
         """
         Verify the method does NOT fire Product Added analytic event when a product is added to the basket
-
-        TODO: LEARNER 5463
         """
         course = CourseFactory()
         basket = create_basket(empty=True)

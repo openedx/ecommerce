@@ -53,7 +53,7 @@ class Basket(AbstractBasket):
         """Remove all products in basket and fire Segment 'Product Removed' Analytic event for each"""
         cached_response = RequestCache.get_cached_response(TEMPORARY_BASKET_CACHE_KEY)
         if cached_response.is_hit:
-            # Do not track anything. This is a temporary basket calculation. TODO: LEARNER 5463
+            # Do not track anything. This is a temporary basket calculation.
             return
         for line in self.all_lines():
             # Do not fire events for free items. The volume we see for edX.org leads to a dramatic increase in CPU
@@ -74,7 +74,7 @@ class Basket(AbstractBasket):
         line, created = super(Basket, self).add_product(product, quantity, options)  # pylint: disable=bad-super-call
         cached_response = RequestCache.get_cached_response(TEMPORARY_BASKET_CACHE_KEY)
         if cached_response.is_hit:
-            # Do not track anything. This is a temporary basket calculation. TODO: LEARNER 5463
+            # Do not track anything. This is a temporary basket calculation.
             return line, created
 
         # Do not fire events for free items. The volume we see for edX.org leads to a dramatic increase in CPU
