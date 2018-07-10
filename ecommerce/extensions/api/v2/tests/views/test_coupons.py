@@ -20,7 +20,7 @@ from testfixtures import LogCapture
 
 from ecommerce.coupons.tests.mixins import CouponMixin, DiscoveryMockMixin
 from ecommerce.courses.tests.factories import CourseFactory
-from ecommerce.extensions.api.v2.views.coupons import CouponViewSet
+from ecommerce.extensions.api.v2.views.coupons import DEPRECATED_COUPON_CATEGORIES, CouponViewSet
 from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
 from ecommerce.extensions.voucher.models import CouponVouchers
 from ecommerce.invoice.models import Invoice
@@ -1147,3 +1147,10 @@ class CouponCategoriesListViewTests(TestCase):
         response_data = json.loads(response.content)
         self.assertEqual(response_data['count'], 1)
         self.assertEqual(response_data['results'][0]['name'], 'Coupon test category')
+
+    def test_deprecated_category_filtering(self):
+        """ Verify the endpoint doesn't return deprecated coupon categories. """
+        response = self.client.get(self.path)
+        response_data = json.loads(response.content)
+        received_coupon_categories = [category['name'] for category in response_data['results']]
+        self.assertFalse(any(coupon in received_coupon_categories for coupon in DEPRECATED_COUPON_CATEGORIES))
