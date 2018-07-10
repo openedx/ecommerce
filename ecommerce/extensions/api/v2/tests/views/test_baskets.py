@@ -567,8 +567,6 @@ class BasketCalculateViewTests(ProgramTestMixin, TestCase):
     def test_basket_calculate_does_not_call_tracking_events(self):
         """
         Verify successful basket calculation does NOT track any events
-
-        TODO: LEARNER 5463
         """
         self.mock_user_data(self.user.username)
 
