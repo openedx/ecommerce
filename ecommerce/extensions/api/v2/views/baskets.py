@@ -4,7 +4,6 @@ from __future__ import unicode_literals
 import logging
 import warnings
 
-import waffle
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.db import transaction
@@ -383,51 +382,7 @@ class BasketCalculateView(generics.GenericAPIView):
             raise
         return response
 
-    def _calculate_temporary_basket(self, user, request, products, voucher, skus, code):
-        # TODO: LEARNER-5197: Delete the "pragma: no cover" pragmas from this function
-        # once the disable_calculate_temporary_basket_atomic_transaction waffle flag has
-        # been removed.
-        response = None
-        basket = None
-
-        try:
-            basket = Basket(owner=user, site=request.site)
-            basket.strategy = Selector().strategy(user=user)
-
-            for product in products:
-                basket.add_product(product, 1)
-
-            if voucher:  # pragma: no cover
-                basket.vouchers.add(voucher)
-
-            # Calculate any discounts on the basket.
-            Applicator().apply(basket, user=user, request=request)
-
-            discounts = []
-            if basket.offer_discounts:  # pragma: no cover
-                discounts = basket.offer_discounts
-            if basket.voucher_discounts:  # pragma: no cover
-                discounts.extend(basket.voucher_discounts)
-
-            response = {
-                'total_incl_tax_excl_discounts': basket.total_incl_tax_excl_discounts,
-                'total_incl_tax': basket.total_incl_tax,
-                'currency': basket.currency
-            }
-        except:  # pylint: disable=bare-except
-            logger.exception(
-                'Failed to calculate basket discount for SKUs [%s] and voucher [%s].',
-                skus, code
-            )
-            raise
-        finally:
-            if basket:
-                basket.delete()
-
-        return response
-
-    @transaction.non_atomic_requests
-    def get(self, request):  # pylint: disable=too-many-statements
+    def get(self, request):
         """ Calculate basket totals given a list of sku's
 
         Create a temporary basket add the sku's and apply an optional voucher code.
@@ -523,10 +478,7 @@ class BasketCalculateView(generics.GenericAPIView):
             if cached_response.is_hit:
                 return Response(cached_response.value)
 
-        if waffle.flag_is_active(request, "disable_calculate_temporary_basket_atomic_transaction"):
-            response = self._calculate_temporary_basket(basket_owner, request, products, voucher, skus, code)
-        else:
-            response = self._calculate_temporary_basket_atomic(basket_owner, request, products, voucher, skus, code)
+        response = self._calculate_temporary_basket_atomic(basket_owner, request, products, voucher, skus, code)
 
         if response and use_default_basket:
             TieredCache.set_all_tiers(cache_key, response, settings.ANONYMOUS_BASKET_CALCULATE_CACHE_TIMEOUT)
