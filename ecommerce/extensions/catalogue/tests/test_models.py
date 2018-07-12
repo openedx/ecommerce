@@ -21,7 +21,8 @@ class ProductTests(CouponMixin, DiscoveryTestMixin, TestCase):
         """Helper method that creates a coupon product with note attribute set."""
         coupon_product = factories.ProductFactory(
             title=self.COUPON_PRODUCT_TITLE,
-            product_class=self.coupon_product_class
+            product_class=self.coupon_product_class,
+            categories=[]
         )
         voucher = factories.VoucherFactory()
         coupon_vouchers = CouponVouchers.objects.create(coupon=coupon_product)
@@ -68,6 +69,13 @@ class ProductTests(CouponMixin, DiscoveryTestMixin, TestCase):
         expiration_datetime = self.update_product_expires(seat)
         enrollment_code.refresh_from_db()
         self.assertNotEqual(enrollment_code.expires, expiration_datetime)
+
+    # TODO: journals dependency
+    def test_journal_product_attribute(self):
+        """Verify journal product class."""
+        note = 'Some other test note.'
+        coupon = self._create_coupon_product_with_note_attribute(note)
+        self.assertFalse(coupon.is_journal_product)
 
     def test_create_product_with_note(self):
         """Verify creating a product with valid note value creates product."""

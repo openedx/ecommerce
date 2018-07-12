@@ -403,7 +403,17 @@ class Condition(AbstractCondition):
         blank=True,
         verbose_name=_('EnterpriseCustomerCatalog UUID')
     )
-    program_uuid = models.UUIDField(null=True, blank=True, verbose_name=_('Program UUID'))
+    program_uuid = models.UUIDField(
+        null=True,
+        blank=True,
+        verbose_name=_('Program UUID')
+    )
+    # TODO: journals dependency
+    journal_bundle_uuid = models.UUIDField(
+        null=True,
+        blank=True,
+        verbose_name=_('JournalBundle UUID')
+    )
 
 
 from oscar.apps.offer.models import *  # noqa isort:skip pylint: disable=wildcard-import,unused-wildcard-import,wrong-import-position,wrong-import-order,ungrouped-imports

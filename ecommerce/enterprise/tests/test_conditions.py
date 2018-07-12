@@ -1,5 +1,7 @@
 from decimal import Decimal
+from uuid import uuid4
 
+import ddt
 import httpretty
 from oscar.core.loading import get_model
 from waffle.models import Switch
@@ -7,6 +9,7 @@ from waffle.models import Switch
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.enterprise.constants import ENTERPRISE_OFFERS_SWITCH
 from ecommerce.enterprise.tests.mixins import EnterpriseServiceMockMixin
+from ecommerce.extensions.basket.utils import basket_add_enterprise_catalog_attribute
 from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
 from ecommerce.extensions.test import factories
 from ecommerce.tests.factories import ProductFactory, SiteConfigurationFactory
@@ -16,6 +19,7 @@ Product = get_model('catalogue', 'Product')
 LOGGER_NAME = 'ecommerce.programs.conditions'
 
 
+@ddt.ddt
 class EnterpriseCustomerConditionTests(EnterpriseServiceMockMixin, DiscoveryTestMixin, TestCase):
     def setUp(self):
         super(EnterpriseCustomerConditionTests, self).setUp()
@@ -49,6 +53,62 @@ class EnterpriseCustomerConditionTests(EnterpriseServiceMockMixin, DiscoveryTest
             enterprise_customer_catalog_uuid=self.condition.enterprise_customer_catalog_uuid,
         )
         self.assertTrue(self.condition.is_satisfied(offer, basket))
+
+    def _check_condition_is_satisfied(self, offer, basket, is_satisfied):
+        """
+        Helper method to verify that conditional offer is valid for provided basket.
+        """
+        basket.add_product(self.course_run.seat_products[0])
+        self.mock_enterprise_learner_api(
+            learner_id=self.user.id,
+            enterprise_customer_uuid=str(self.condition.enterprise_customer_uuid),
+            course_run_id=self.course_run.id,
+        )
+        self.mock_catalog_contains_course_runs(
+            [self.course_run.id],
+            self.condition.enterprise_customer_uuid,
+            enterprise_customer_catalog_uuid=self.condition.enterprise_customer_catalog_uuid,
+            contains_content=is_satisfied,
+        )
+        assert is_satisfied == self.condition.is_satisfied(offer, basket)
+
+    @httpretty.activate
+    def test_is_satisfied_true_for_enterprise_catalog_in_get_request(self):
+        """
+        Ensure that condition returns true for valid enterprise catalog uuid in GET request.
+        """
+        offer = factories.EnterpriseOfferFactory(site=self.site, condition=self.condition)
+        enterprise_catalog_uuid = str(self.condition.enterprise_customer_catalog_uuid)
+        basket = factories.BasketFactory(site=self.site, owner=self.user)
+        basket.strategy.request = self.request
+        basket.strategy.request.GET = {'catalog': enterprise_catalog_uuid}
+        self._check_condition_is_satisfied(offer, basket, is_satisfied=True)
+
+    @httpretty.activate
+    def test_is_satisfied_true_for_enterprise_catalog_in_basket_attribute(self):
+        """
+        Ensure that condition returns true for valid enterprise catalog uuid in basket attribute.
+        """
+        offer = factories.EnterpriseOfferFactory(site=self.site, condition=self.condition)
+        enterprise_catalog_uuid = str(self.condition.enterprise_customer_catalog_uuid)
+        basket = factories.BasketFactory(site=self.site, owner=self.user)
+        request_data = {'catalog': enterprise_catalog_uuid}
+        basket_add_enterprise_catalog_attribute(basket, request_data)
+        self._check_condition_is_satisfied(offer, basket, is_satisfied=True)
+
+    @httpretty.activate
+    @ddt.data(str(uuid4()), 'INVALID_UUID_STRING')
+    def test_is_satisfied_false_for_invalid_enterprise_catalog(self, invalid_enterprise_catalog_uuid):
+        """
+        Ensure the condition returns false if provided enterprise catalog UUID is invalid.
+        """
+        offer = factories.EnterpriseOfferFactory(site=self.site, condition=self.condition)
+
+        basket = factories.BasketFactory(site=self.site, owner=self.user)
+        basket.strategy.request = self.request
+        basket.strategy.request.GET = {'catalog': invalid_enterprise_catalog_uuid}
+        self._check_condition_is_satisfied(offer, basket, is_satisfied=False)
+        assert invalid_enterprise_catalog_uuid != offer.condition.enterprise_customer_catalog_uuid
 
     @httpretty.activate
     def test_is_satisfied_for_anonymous_user(self):
