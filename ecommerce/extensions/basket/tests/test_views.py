@@ -437,6 +437,42 @@ class BasketSummaryViewTests(EnterpriseServiceMockMixin, DiscoveryTestMixin, Dis
         self.assertFalse(line_data['enrollment_code'])
         self.assertEqual(response.context['payment_processors'][0].NAME, DummyProcessor.NAME)
 
+    @override_settings(PAYMENT_PROCESSORS=['ecommerce.extensions.payment.tests.processors.DummyProcessor'])
+    def test_bundle_id_is_added_to_event(self):
+        """ Verify that a bundle_id is added to an event"""
+        seat = self.create_seat(self.course, 500)
+        basket = self.create_basket_and_add_product(seat)
+
+        BasketAttribute.objects.update_or_create(
+            basket=basket,
+            attribute_type=BasketAttributeType.objects.get(name=BUNDLE),
+            value_text='test_bundle'
+        )
+
+        self.mock_access_token_response()
+        self.assertEqual(basket.lines.count(), 1)
+        self.mock_course_run_detail_endpoint(
+            self.course, discovery_api_url=self.site_configuration.discovery_api_url
+        )
+
+        with mock.patch('ecommerce.extensions.basket.views.track_segment_event', return_value=(True, '')) as mock_track:
+            self.client.get(self.path)
+            # Verify events are sent to Segment
+            calls = []
+            properties = {
+                'bundle_id': "test_bundle",
+                'cart_id': basket.id,
+                'products': [translate_basket_line_for_segment(line) for line in basket.all_lines()],
+            }
+            calls.append(mock.call(self.site, self.user, 'Cart Viewed', properties,))
+
+            properties = {
+                'checkout_id': basket.order_number,
+                'step': 1
+            }
+            calls.append(mock.call(self.site, self.user, 'Checkout Step Viewed', properties))
+            mock_track.assert_has_calls(calls)
+
     def assert_empty_basket(self):
         """ Assert that the basket is empty on visiting the basket summary page. """
         response = self.client.get(self.path)

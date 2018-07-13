@@ -31,6 +31,7 @@ from ecommerce.extensions.analytics.utils import (
 )
 from ecommerce.extensions.basket.constants import EMAIL_OPT_IN_ATTRIBUTE
 from ecommerce.extensions.basket.utils import (
+    BUNDLE,
     add_utm_params_to_url,
     apply_voucher_on_basket_and_check_discount,
     get_basket_switch_data,
@@ -367,6 +368,13 @@ class BasketSummaryView(BasketView):
                 'cart_id': basket.id,
                 'products': [translate_basket_line_for_segment(line) for line in basket.all_lines()],
             }
+            attributes = BasketAttribute.objects.filter(
+                basket=basket,
+                attribute_type__name=BUNDLE
+            )
+            if len(attributes) == 1:
+                properties['bundle_id'] = attributes[0].value_text
+
             track_segment_event(request.site, request.user, 'Cart Viewed', properties)
 
             properties = {
