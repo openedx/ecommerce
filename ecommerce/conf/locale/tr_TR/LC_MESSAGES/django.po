@@ -17,7 +17,7 @@ msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: openedx-translation@googlegroups.com\n"
 "POT-Creation-Date: 2018-03-26 16:41-0400\n"
-"PO-Revision-Date: 2018-06-05 15:27+0000\n"
+"PO-Revision-Date: 2018-07-06 14:29+0000\n"
 "Last-Translator: Ali Işıngör <ali@artistanbul.io>\n"
 "Language-Team: Turkish (Turkey) (http://www.transifex.com/open-edx/edx-platform/language/tr_TR/)\n"
 "MIME-Version: 1.0\n"
@@ -86,11 +86,11 @@ msgstr "OAuth backend ayarlarını içeren JSON katarları."
 
 #: ecommerce/core/models.py:74
 msgid "Segment key"
-msgstr ""
+msgstr "Segment anahtarı"
 
 #: ecommerce/core/models.py:75
 msgid "Segment write/API key."
-msgstr ""
+msgstr "Segment yazma/API anahtarı."
 
 #: ecommerce/core/models.py:81
 msgid "From email"
@@ -2496,7 +2496,7 @@ msgstr "Çocuk kategori ekle"
 
 #: ecommerce/templates/oscar/dashboard/catalogue/category_row_actions.html:22
 msgid "Edit children"
-msgstr ""
+msgstr "Çocukları düzenle"
 
 #: ecommerce/templates/oscar/dashboard/catalogue/category_row_actions.html:27
 #: ecommerce/templates/oscar/dashboard/catalogue/product_row_actions.html:14
@@ -2618,7 +2618,7 @@ msgstr "Stok rakamı"
 
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:195
 msgid "Num allocated"
-msgstr ""
+msgstr "Ayrılan sayı"
 
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:196
 msgid "Low stock threshold"
@@ -2666,7 +2666,7 @@ msgstr "Bu noktada bu ürüne kimse varyantlar ekleyemez."
 
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:282
 msgid "This is likely because this product still has stock records."
-msgstr ""
+msgstr "Bunun nedeni muhtemelen bu ürünün hâlâ stok kayıtlarının olmasıdır."
 
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:298
 msgid "Recommended products"
@@ -2737,11 +2737,11 @@ msgstr "\n        %(name)s | Teklifler\n    "
 
 #: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:27
 msgid "Reinstating..."
-msgstr ""
+msgstr "Eski durumuna getiriliyor..."
 
 #: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:27
 msgid "Reinstate offer"
-msgstr ""
+msgstr "Teklifi eski durumuna getir"
 
 #: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:28
 msgid "Suspending..."
@@ -3343,13 +3343,13 @@ msgstr "İade İşlemini Onayla"
 msgid ""
 "Are you sure you want to issue a full refund and revoke student's "
 "enrollment?"
-msgstr ""
+msgstr "Tam bir geri ödeme yapmak ve öğrencinin kaydını iptal etmek istediğinizden emin misiniz?"
 
 #: ecommerce/templates/oscar/dashboard/partials/refund_action_modal.html:14
 msgid ""
 "Are you sure you want to issue a full refund without revoking student's "
 "enrollment?"
-msgstr ""
+msgstr "Öğrencinin kaydını iptal etmeksizin tam bir geri ödeme yapmak istediğinizden emin misiniz?"
 
 #: ecommerce/templates/oscar/dashboard/partials/refund_action_modal.html:17
 msgid "Are you sure you want to deny this refund request?"
@@ -3361,7 +3361,7 @@ msgstr "Onayla"
 
 #: ecommerce/templates/oscar/dashboard/partials/refund_buttons.html:5
 msgid "Approve Credit and Revoke"
-msgstr ""
+msgstr "Krediyi Onayla ve İptal Et"
 
 #: ecommerce/templates/oscar/dashboard/partials/refund_buttons.html:8
 msgid "Approve Credit Only"
@@ -3392,18 +3392,18 @@ msgstr "Oluşturuldu"
 #: ecommerce/templates/oscar/dashboard/partials/refund_table.html:31
 #: ecommerce/templates/oscar/dashboard/refunds/refund_list.html:104
 msgid "No refunds found."
-msgstr "Hiç bir iade bulunamadı."
+msgstr "Hiçbir iade bulunamadı."
 
 #: ecommerce/templates/oscar/dashboard/partials/search_form.html:4
 #: ecommerce/templates/oscar/dashboard/partials/search_form.html:25
 #: ecommerce/templates/oscar/dashboard/partials/search_form.html:45
 msgid "Search"
-msgstr "Arama"
+msgstr "Ara"
 
 #: ecommerce/templates/oscar/dashboard/partials/search_form.html:26
 #: ecommerce/templates/oscar/dashboard/partials/search_form.html:34
 msgid "Advanced Search"
-msgstr "Gelişmiş Arama"
+msgstr "Gelişmiş Ara"
 
 #: ecommerce/templates/oscar/dashboard/partials/search_form.html:44
 msgid "Close"
