@@ -8,8 +8,9 @@ import mock
 import pytz
 import requests
 from django.db import transaction
+from django.utils.timezone import now
 from oscar.core.loading import get_model
-from oscar.test.factories import BasketFactory, ProductFactory, RangeFactory, VoucherFactory
+from oscar.test.factories import BasketFactory, ProductFactory, RangeFactory
 
 from ecommerce.core.constants import ENROLLMENT_CODE_PRODUCT_CLASS_NAME
 from ecommerce.core.tests import toggle_switch
@@ -108,13 +109,14 @@ class BasketUtilsTests(DiscoveryTestMixin, BasketMixin, TestCase):
 
     def test_multiple_vouchers(self):
         """ Verify only the last entered voucher is contained in the basket. """
-        product = ProductFactory()
-        voucher1 = VoucherFactory(code='FIRST')
+        product = ProductFactory(stockrecords__price_excl_tax=100)
+        new_range = RangeFactory(products=[product, ])
+        voucher1, __ = prepare_voucher(code='TEST1', _range=new_range, benefit_value=10)
         basket = prepare_basket(self.request, [product], voucher1)
         self.assertEqual(basket.vouchers.count(), 1)
         self.assertEqual(basket.vouchers.first(), voucher1)
 
-        voucher2 = VoucherFactory(code='SECOND')
+        voucher2, __ = prepare_voucher(code='TEST2', _range=new_range, benefit_value=20)
         new_basket = prepare_basket(self.request, [product], voucher2)
         self.assertEqual(basket, new_basket)
         self.assertEqual(new_basket.vouchers.count(), 1)
@@ -388,8 +390,10 @@ class BasketUtilsTests(DiscoveryTestMixin, BasketMixin, TestCase):
         """
         Test prepare_basket clears vouchers for a bundle
         """
-        product = ProductFactory()
-        voucher = VoucherFactory(code='FIRST')
+        product = ProductFactory(stockrecords__price_excl_tax=100)
+        new_range = RangeFactory(products=[product, ])
+        voucher, __ = prepare_voucher(_range=new_range, benefit_value=10)
+
         request = self.request
         basket = prepare_basket(request, [product], voucher)
         self.assertTrue(basket.vouchers.all())
@@ -488,6 +492,84 @@ class BasketUtilsTests(DiscoveryTestMixin, BasketMixin, TestCase):
                     self.assertEqual(mock_track.call_count, 1)
                 else:
                     mock_track.assert_not_called()
+
+    def test_prepare_basket_ignores_invalid_voucher(self):
+        """
+        Tests that prepare_basket validates provided voucher and
+        does not applies it if invalid.
+        """
+        voucher_start_time = now() - datetime.timedelta(days=5)
+        voucher_end_time = now() - datetime.timedelta(days=3)
+        product = ProductFactory(stockrecords__partner__short_code='test1', stockrecords__price_excl_tax=100)
+        expired_voucher, __ = prepare_voucher(start_datetime=voucher_start_time, end_datetime=voucher_end_time)
+
+        basket = prepare_basket(self.request, [product], expired_voucher)
+        self.assertIsNotNone(basket)
+        self.assertEqual(basket.status, Basket.OPEN)
+        self.assertEqual(basket.lines.count(), 1)
+        self.assertEqual(basket.lines.first().product, product)
+        self.assertEqual(basket.vouchers.count(), 0)
+
+    def test_prepare_basket_applies_valid_voucher_argument(self):
+        """
+            Tests that prepare_basket applies a valid voucher passed as an
+            an argument, even when there is also a valid voucher already on
+            the basket.
+        """
+        product = ProductFactory(stockrecords__partner__short_code='test1', stockrecords__price_excl_tax=100)
+        new_range = RangeFactory(products=[product])
+        new_voucher, __ = prepare_voucher(code='xyz', _range=new_range, benefit_value=10)
+        existing_voucher, __ = prepare_voucher(code='test', _range=new_range, benefit_value=50)
+
+        basket = BasketFactory(owner=self.request.user, site=self.request.site)
+        basket.vouchers.add(existing_voucher)
+        self.assertEqual(basket.vouchers.count(), 1)
+
+        basket = prepare_basket(self.request, [product], new_voucher)
+        self.assertIsNotNone(basket)
+        self.assertEqual(basket.vouchers.count(), 1)
+        self.assertEqual(basket.vouchers.first().code, 'XYZ')
+        self.assertEqual(basket.total_discount, 10.00)
+
+    def test_prepare_basket_removes_existing_basket_invalid_voucher(self):
+        """
+        Tests that prepare_basket removes an existing basket voucher that is invalid
+        for multiple products when used to purchase any of those products.
+        """
+        voucher_start_time = now() - datetime.timedelta(days=5)
+        voucher_end_time = now() - datetime.timedelta(days=3)
+        product = ProductFactory(stockrecords__partner__short_code='xyz', stockrecords__price_excl_tax=100)
+        expired_voucher, __ = prepare_voucher(start_datetime=voucher_start_time, end_datetime=voucher_end_time)
+
+        basket = BasketFactory(owner=self.request.user, site=self.request.site)
+        basket.vouchers.add(expired_voucher)
+
+        self.assertEqual(basket.vouchers.count(), 1)
+        basket = prepare_basket(self.request, [product])
+        self.assertIsNotNone(basket)
+        self.assertEqual(basket.lines.first().product, product)
+        self.assertEqual(basket.vouchers.count(), 0)
+
+    def test_prepare_basket_applies_existing_basket_valid_voucher(self):
+        """
+        Tests that prepare_basket applies an existing basket voucher that is valid
+        for multiple products when used to purchase any of those products.
+        """
+        product = ProductFactory(stockrecords__partner__short_code='test1', stockrecords__price_excl_tax=100)
+
+        new_range = RangeFactory(products=[product])
+        voucher, __ = prepare_voucher(_range=new_range, benefit_value=10)
+
+        basket = BasketFactory(owner=self.request.user, site=self.request.site)
+        basket.vouchers.add(voucher)
+        self.assertEqual(basket.vouchers.count(), 1)
+
+        basket = prepare_basket(self.request, [product])
+        self.assertIsNotNone(basket)
+        self.assertEqual(basket.vouchers.count(), 1)
+        self.assertEqual(basket.lines.first().product, product)
+        self.assertIsNotNone(basket.applied_offers())
+        self.assertEqual(basket.total_discount, 10.00)
 
 
 class BasketUtilsTransactionTests(TransactionTestCase):

@@ -27,7 +27,12 @@ from ecommerce.extensions.analytics.utils import (
     track_segment_event,
     translate_basket_line_for_segment
 )
-from ecommerce.extensions.basket.utils import add_utm_params_to_url, get_basket_switch_data, prepare_basket
+from ecommerce.extensions.basket.utils import (
+    add_utm_params_to_url,
+    get_basket_switch_data,
+    prepare_basket,
+    validate_voucher
+)
 from ecommerce.extensions.offer.utils import format_benefit_value, render_email_confirmation_if_required
 from ecommerce.extensions.order.exceptions import AlreadyPlacedOrderException
 from ecommerce.extensions.partner.shortcuts import get_partner_for_site
@@ -418,51 +423,10 @@ class BasketSummaryView(BasketView):
 class VoucherAddView(BaseVoucherAddView):  # pylint: disable=function-redefined
     def apply_voucher_to_basket(self, voucher):
         code = voucher.code
-        if voucher.is_expired():
-            messages.error(
-                self.request,
-                _("Coupon code '{code}' has expired.").format(code=code)
-            )
-            return
 
-        if not voucher.is_active():
-            messages.error(
-                self.request,
-                _("Coupon code '{code}' is not active.").format(code=code))
-            return
-
-        is_available, message = voucher.is_available_to_user(self.request.user)
-
-        if not is_available:
-            if voucher.usage == Voucher.SINGLE_USE:
-                message = _("Coupon code '{code}' has already been redeemed.").format(code=code)
+        is_valid, message = validate_voucher(voucher, self.request.user, self.request.basket, self.request.site)
+        if not is_valid:
             messages.error(self.request, message)
-            return
-
-        # Do not allow coupons for one site to be used on another site
-        request_site = self.request.site
-        voucher_site = voucher.offers.first().site
-        if request_site and voucher_site and request_site != voucher_site:
-            messages.error(
-                self.request,
-                _("Coupon code '{code}' is not valid for this basket.").format(code=code))
-            return
-
-        # Do not allow single course run coupons used on bundles.
-        BUNDLE = 'bundle_identifier'
-        BasketAttribute = get_model('basket', 'BasketAttribute')
-        BasketAttributeType = get_model('basket', 'BasketAttributeType')
-        bundle_attribute = BasketAttribute.objects.filter(
-            basket=self.request.basket,
-            attribute_type=BasketAttributeType.objects.get(name=BUNDLE)
-        )
-        is_bundle_purchase = len(bundle_attribute) > 0
-        voucher_program_uuid = voucher.offers.first().condition.program_uuid
-        is_voucher_valid_for_bundle = voucher_program_uuid or voucher.usage == Voucher.MULTI_USE
-        if is_bundle_purchase and not is_voucher_valid_for_bundle:
-            messages.error(
-                self.request,
-                _("Coupon code '{code}' is not valid for this basket.").format(code=code))
             return
 
         # Reset any site offers that are applied so that only one offer is active.

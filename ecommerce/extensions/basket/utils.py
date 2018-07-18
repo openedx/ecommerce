@@ -27,6 +27,7 @@ ENTERPRISE_CATALOG_ATTRIBUTE_TYPE = 'enterprise_catalog_uuid'
 StockRecord = get_model('partner', 'StockRecord')
 OrderLine = get_model('order', 'Line')
 Refund = get_model('refund', 'Refund')
+Voucher = get_model('voucher', 'Voucher')
 
 logger = logging.getLogger(__name__)
 
@@ -104,11 +105,14 @@ def prepare_basket(request, products, voucher=None):
 
     if len(products) == 1 and products[0].is_enrollment_code_product:
         basket.clear_vouchers()
-    elif voucher:
+    elif voucher or basket.vouchers.exists():
+        voucher = voucher or basket.vouchers.first()
         basket.clear_vouchers()
-        basket.vouchers.add(voucher)
-        Applicator().apply(basket, request.user, request)
-        logger.info('Applied Voucher [%s] to basket [%s].', voucher.code, basket.id)
+        is_valid, message = validate_voucher(voucher, request.user, basket, request.site)
+        if is_valid:
+            _apply_voucher_on_basket(voucher, request, basket)
+        else:
+            logger.info(message)
 
     attribute_cookie_data(basket, request)
     return basket
@@ -326,3 +330,71 @@ def _set_basket_bundle_status(bundle, basket):
         basket.clear_vouchers()
     else:
         BasketAttribute.objects.filter(basket=basket, attribute_type__name=BUNDLE).delete()
+
+
+def validate_voucher(voucher, user, basket, request_site):
+    """
+    Validates if a voucher code can be used for user and basket.
+
+    Args:
+        voucher (Voucher) : Voucher to be validated
+        user (User) : basket user
+        basket (Basket) : Basket for which checking voucher
+        request_site (Site) : Site on which voucher is being used
+
+    Does the following checks
+        1. Voucher is not expired.
+        2. Voucher is active.
+        3. Voucher is not already used.
+        4. Voucher is not being used outside site scope.
+        5. Voucher is valid for basket if its a bundle basket
+
+    """
+    if voucher.is_expired():
+        message = _("Coupon code '{code}' has expired.").format(code=voucher.code)
+        return False, message
+
+    if not voucher.is_active():
+        message = _("Coupon code '{code}' is not active.").format(code=voucher.code)
+        return False, message
+
+    is_available, __ = voucher.is_available_to_user(user)
+
+    if not is_available:
+        message = _("Coupon code '{code}' has already been redeemed.").format(code=voucher.code)
+        return False, message
+
+    # Do not allow coupons for one site to be used on another site
+    voucher_site = voucher.offers.first().site
+    if request_site and voucher_site and request_site != voucher_site:
+        message = _("Coupon code '{code}' is not valid for this basket.").format(code=voucher.code)
+        return False, message
+
+    # Do not allow single course run coupons used on bundles.
+    bundle_attribute = BasketAttribute.objects.filter(
+        basket=basket,
+        attribute_type=BasketAttributeType.objects.get(name=BUNDLE)
+    )
+    is_bundle_purchase = len(bundle_attribute) > 0
+    voucher_program_uuid = voucher.offers.first().condition.program_uuid
+    is_voucher_valid_for_bundle = voucher_program_uuid or voucher.usage == Voucher.MULTI_USE
+
+    if is_bundle_purchase and not is_voucher_valid_for_bundle:
+        message = _("Coupon code '{code}' is not valid for this basket.").format(code=voucher.code)
+        return False, message
+
+    return True, ''
+
+
+def _apply_voucher_on_basket(voucher, request, basket):
+    """
+    Applies voucher on a product.
+
+    Args:
+        voucher (Voucher): voucher to be applied
+        basket (Basket): basket object on which voucher is going to be applied
+        request (Request): Request object
+    """
+    basket.vouchers.add(voucher)
+    Applicator().apply(basket, request.user, request)
+    logger.info('Applied Voucher [%s] to basket [%s].', voucher.code, basket.id)
