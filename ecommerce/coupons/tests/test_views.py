@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import datetime
 import urllib
 
@@ -10,7 +11,7 @@ from django.urls import reverse
 from django.utils.timezone import now
 from factory.fuzzy import FuzzyText
 from oscar.core.loading import get_class, get_model
-from oscar.test.factories import OrderFactory, OrderLineFactory, RangeFactory, VoucherFactory
+from oscar.test.factories import OrderFactory, OrderLineFactory, ProductFactory, RangeFactory, VoucherFactory
 
 from ecommerce.core.url_utils import get_lms_url
 from ecommerce.coupons.tests.mixins import CouponMixin, DiscoveryMockMixin
@@ -667,6 +668,7 @@ class CouponRedeemViewTests(CouponMixin, DiscoveryTestMixin, LmsApiMockMixin, En
         self.assertEqual(response.context['user_email'], self.user.email)
 
 
+@ddt.ddt
 class EnrollmentCodeCsvViewTests(TestCase):
     """ Tests for the EnrollmentCodeCsvView view. """
     path = 'coupons:enrollment_code_csv'
@@ -690,11 +692,16 @@ class EnrollmentCodeCsvViewTests(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response['location'], get_lms_url('dashboard'))
 
-    def test_successful_response(self):
+    @ddt.data(
+        u'Plain English product title',
+        u'Unicode product títle 可以用“我不太懂艺术 但我知道我喜欢什么”做比喻'
+    )
+    def test_successful_response(self, product_title):
         """ Verify a successful response is returned. """
         voucher = VoucherFactory()
         order = OrderFactory(user=self.user)
-        line = OrderLineFactory(order=order)
+        product = ProductFactory(title=product_title, categories=[])
+        line = OrderLineFactory(order=order, product=product)
         order_line_vouchers = OrderLineVouchers.objects.create(line=line)
         order_line_vouchers.vouchers.add(voucher)
 

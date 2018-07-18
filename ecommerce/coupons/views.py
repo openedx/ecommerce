@@ -1,8 +1,8 @@
 from __future__ import unicode_literals
 
-import csv
 import logging
 
+import unicodecsv as csv
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
