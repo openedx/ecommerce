@@ -8,12 +8,14 @@ import ddt
 import mock
 import responses
 from django.conf import settings
+from django.test.client import RequestFactory
 from django.urls import reverse
 from django.utils.timezone import now
 from freezegun import freeze_time
 from oscar.apps.payment.exceptions import TransactionDeclined
 from oscar.core.loading import get_class, get_model
 from oscar.test import factories
+from testfixtures import LogCapture
 from waffle.testutils import override_switch
 
 from ecommerce.core.constants import ENROLLMENT_CODE_PRODUCT_CLASS_NAME, ENROLLMENT_CODE_SWITCH
@@ -28,8 +30,8 @@ from ecommerce.extensions.payment.constants import VOUCHER_VALIDATION_BEFORE_PAY
 from ecommerce.extensions.payment.exceptions import InvalidBasketError, InvalidSignatureError
 from ecommerce.extensions.payment.processors.cybersource import Cybersource
 from ecommerce.extensions.payment.tests.mixins import CybersourceMixin, CybersourceNotificationTestsMixin
-from ecommerce.extensions.payment.views.cybersource import CybersourceInterstitialView
-from ecommerce.extensions.test.factories import create_basket, prepare_voucher
+from ecommerce.extensions.payment.views.cybersource import CybersourceInterstitialView, OrderCreationMixin
+from ecommerce.extensions.test.factories import create_basket, create_order, prepare_voucher
 from ecommerce.invoice.models import Invoice
 from ecommerce.tests.testcases import TestCase
 
@@ -365,6 +367,26 @@ class CybersourceInterstitialViewTests(CybersourceNotificationTestsMixin, TestCa
         with mock.patch.object(self.view, 'create_order', side_effect=Exception):
             response = self.client.post(self.path, notification)
             self.assertRedirects(response, self.get_full_url(path=reverse('payment_error')), status_code=302)
+
+    def test_duplicate_order_attempt_logging(self):
+        """
+        Verify that attempts at creation of a duplicate order are logged correctly
+        """
+        prior_order = create_order()
+        dummy_request = RequestFactory(SERVER_NAME='testserver.fake').get('')
+        dummy_mixin = OrderCreationMixin()
+        dummy_mixin.payment_processor = Cybersource(self.site)
+
+        with LogCapture(self.DUPLICATE_ORDER_LOGGER_NAME) as lc:
+            with self.assertRaises(ValueError):
+                dummy_mixin.create_order(dummy_request, prior_order.basket, None)
+                lc.check(
+                    (
+                        self.DUPLICATE_ORDER_LOGGER_NAME,
+                        'ERROR',
+                        self.get_duplicate_order_error_message(payment_processor='Cybersource', order=prior_order)
+                    ),
+                )
 
 
 @ddt.ddt

@@ -38,8 +38,10 @@ class EdxOrderPlacementMixin(OrderPlacementMixin):
     # Instance of a payment processor with which to handle payment. Subclasses should set this value.
     payment_processor = None
 
-    order_placement_failure_msg = 'Order Failure: Payment was received, but an order for basket [%d] ' \
-                                  'could not be placed because of exception [%s].'
+    duplicate_order_attempt_msg = 'Duplicate Order Attempt: %s payment was received, but an order with number [%s] ' \
+                                  'already exists. Basket id: [%d].'
+    order_placement_failure_msg = 'Order Failure: %s payment was received, but an order for basket [%d] ' \
+                                  'could not be placed.'
 
     __metaclass__ = abc.ABCMeta
 
@@ -256,3 +258,14 @@ class EdxOrderPlacementMixin(OrderPlacementMixin):
             Invoice.objects.create(
                 order=order, business_client=client, type=Invoice.BULK_PURCHASE, state=Invoice.PAID
             )
+
+    def log_order_placement_exception(self, order_number, basket_id):
+        payment_processor = self.payment_processor.NAME.title() if self.payment_processor else None
+        if Order.objects.filter(number=order_number).exists():
+            # One cause of this is Cybersource sending us duplicate notifications for a single payment.
+            # See Jira ticket EG-15
+            logger.exception(
+                self.duplicate_order_attempt_msg, payment_processor, order_number, basket_id
+            )
+        else:
+            logger.exception(self.order_placement_failure_msg, payment_processor, basket_id)
