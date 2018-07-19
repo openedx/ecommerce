@@ -388,6 +388,19 @@ class CybersourceInterstitialViewTests(CybersourceNotificationTestsMixin, TestCa
                     ),
                 )
 
+    def test_order_creation_after_duplicate_reference_number_error(self):
+        """ Verify view creates the order if there is no existing order in case of DuplicateReferenceNumber """
+        self.assertFalse(Order.objects.filter(basket=self.basket).exists())
+        notification = self.generate_notification(
+            self.basket,
+            billing_address=self.billing_address,
+            decision='error',
+            reason_code='104',
+        )
+        response = self.client.post(self.path, notification)
+        self.assertTrue(Order.objects.filter(basket=self.basket).exists())
+        self.assertEqual(response.status_code, 302)
+
 
 @ddt.ddt
 class ApplePayStartSessionViewTests(LoginMixin, TestCase):
