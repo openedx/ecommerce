@@ -55,6 +55,7 @@ class CyberSourceProcessorMixin(object):
 
 class OrderCreationMixin(EdxOrderPlacementMixin):
     def create_order(self, request, basket, billing_address):
+        order_number = OrderNumberGenerator().order_number(basket)
         try:
             # Note (CCB): In the future, if we do end up shipping physical products, we will need to
             # properly implement shipping methods. For more, see
@@ -66,7 +67,6 @@ class OrderCreationMixin(EdxOrderPlacementMixin):
             # thus we use the amounts stored in the database rather than those received from the payment processor.
             order_total = OrderTotalCalculator().calculate(basket, shipping_charge)
             user = basket.owner
-            order_number = OrderNumberGenerator().order_number(basket)
 
             return self.handle_order_placement(
                 order_number,
@@ -79,8 +79,8 @@ class OrderCreationMixin(EdxOrderPlacementMixin):
                 order_total,
                 request=request
             )
-        except Exception as e:  # pylint: disable=broad-except
-            logger.exception(self.order_placement_failure_msg, basket.id, e)
+        except Exception:  # pylint: disable=broad-except
+            self.log_order_placement_exception(order_number, basket.id)
             raise
 
 

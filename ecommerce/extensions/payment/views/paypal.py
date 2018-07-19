@@ -104,6 +104,11 @@ class PaypalPaymentExecutionView(EdxOrderPlacementMixin, View):
             logger.exception('Attempts to handle payment for basket [%d] failed.', basket.id)
             return redirect(receipt_url)
 
+        self.call_handle_order_placement(basket, request)
+
+        return redirect(receipt_url)
+
+    def call_handle_order_placement(self, basket, request):
         try:
             shipping_method = NoShippingRequired()
             shipping_charge = shipping_method.calculate(basket)
@@ -128,10 +133,8 @@ class PaypalPaymentExecutionView(EdxOrderPlacementMixin, View):
             )
             self.handle_post_order(order)
 
-            return redirect(receipt_url)
-        except Exception as e:  # pylint: disable=broad-except
-            logger.exception(self.order_placement_failure_msg, basket.id, e)
-            return redirect(receipt_url)
+        except Exception:  # pylint: disable=broad-except
+            self.log_order_placement_exception(basket.order_number, basket.id)
 
 
 class PaypalProfileAdminView(View):

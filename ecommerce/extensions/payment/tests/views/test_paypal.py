@@ -21,7 +21,7 @@ from ecommerce.extensions.checkout.utils import get_receipt_page_url
 from ecommerce.extensions.payment.processors.paypal import Paypal
 from ecommerce.extensions.payment.tests.mixins import PaymentEventsMixin, PaypalMixin
 from ecommerce.extensions.payment.views.paypal import PaypalPaymentExecutionView
-from ecommerce.extensions.test.factories import create_basket
+from ecommerce.extensions.test.factories import create_basket, create_order
 from ecommerce.invoice.models import Invoice
 from ecommerce.tests.testcases import TestCase
 
@@ -82,9 +82,12 @@ class PaypalPaymentExecutionViewTests(PaypalMixin, PaymentEventsMixin, TestCase)
 
         return creation_response, execution_response
 
-    def _assert_order_placement_failure(self, error_message):
+    def _assert_order_placement_failure(self, basket_id):
         """Verify that order placement fails gracefully."""
-        logger_name = 'ecommerce.extensions.payment.views.paypal'
+        logger_name = 'ecommerce.extensions.checkout.mixins'
+        error_message = \
+            'Order Failure: Paypal payment was received, but an order for basket [{basket_id}] ' \
+            'could not be placed.'.format(basket_id=basket_id)
         with LogCapture(logger_name) as l:
             __, execution_response = self._assert_execution_redirect()
 
@@ -97,14 +100,6 @@ class PaypalPaymentExecutionViewTests(PaypalMixin, PaymentEventsMixin, TestCase)
             )
 
             l.check(
-                (
-                    logger_name,
-                    'INFO',
-                    'Payment [{payment_id}] approved by payer [{payer_id}]'.format(
-                        payment_id=self.PAYMENT_ID,
-                        payer_id=self.PAYER_ID
-                    )
-                ),
                 (logger_name, 'ERROR', error_message)
             )
 
@@ -259,19 +254,34 @@ class PaypalPaymentExecutionViewTests(PaypalMixin, PaymentEventsMixin, TestCase)
         """
         with mock.patch.object(PaypalPaymentExecutionView, 'handle_order_placement',
                                side_effect=UnableToPlaceOrder) as fake_handle_order_placement:
-            error_message = 'Order Failure: Payment was received, but an order for basket [{basket_id}] ' \
-                            'could not be placed because of exception [].'.format(basket_id=self.basket.id)
-            self._assert_order_placement_failure(error_message)
+            self._assert_order_placement_failure(self.basket.id)
             self.assertTrue(fake_handle_order_placement.called)
 
     def test_unanticipated_error_during_order_placement(self):
         """Verify that unanticipated errors during order placement are handled gracefully."""
         with mock.patch.object(PaypalPaymentExecutionView, 'handle_order_placement',
                                side_effect=KeyError) as fake_handle_order_placement:
-            error_message = 'Order Failure: Payment was received, but an order for basket [{basket_id}] ' \
-                            'could not be placed because of exception [].'.format(basket_id=self.basket.id)
-            self._assert_order_placement_failure(error_message)
+            self._assert_order_placement_failure(self.basket.id)
             self.assertTrue(fake_handle_order_placement.called)
+
+    def test_duplicate_order_attempt_logging(self):
+        """
+        Verify that attempts at creation of a duplicate order are logged correctly
+        """
+        prior_order = create_order()
+        dummy_view = PaypalPaymentExecutionView()
+        self.request.site = self.site
+        dummy_view.request = self.request
+
+        with LogCapture(self.DUPLICATE_ORDER_LOGGER_NAME) as lc:
+            dummy_view.call_handle_order_placement(prior_order.basket, self.request)
+            lc.check(
+                (
+                    self.DUPLICATE_ORDER_LOGGER_NAME,
+                    'ERROR',
+                    self.get_duplicate_order_error_message(payment_processor='Paypal', order=prior_order)
+                ),
+            )
 
     @responses.activate
     def test_payment_error_with_duplicate_payment_id(self):

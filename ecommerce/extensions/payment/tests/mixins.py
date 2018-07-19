@@ -39,9 +39,18 @@ post_checkout = get_class('checkout.signals', 'post_checkout')
 
 
 class PaymentEventsMixin(object):
+
+    DUPLICATE_ORDER_LOGGER_NAME = 'ecommerce.extensions.checkout.mixins'
+
     def get_order(self, basket):
         """ Return the order associated with a basket. """
         return Order.objects.get(basket=basket)
+
+    def get_duplicate_order_error_message(self, order, payment_processor):
+        """ Return the expected error message for a duplicate order attempt. """
+        return 'Duplicate Order Attempt: {payment_processor} payment was received, but an order with number ' \
+               '[{order_number}] already exists. Basket id: [{basket_id}].' \
+            .format(payment_processor=payment_processor, order_number=order.number, basket_id=order.basket.id)
 
     def assert_processor_response_recorded(self, processor_name, transaction_id, response, basket=None):
         """ Ensures a PaymentProcessorResponse exists for the corresponding processor and response. """
@@ -508,9 +517,18 @@ class CybersourceNotificationTestsMixin(CybersourceMixin):
             'handle_order_placement',
             side_effect=exception
         ) as fake_handle_order_placement:
-            error_message = 'Order Failure: Payment was received, but an order for basket [{basket_id}]' \
-                            ' could not be placed because of exception [].'.format(basket_id=self.basket.id)
-            self._assert_processing_failure(notification, error_message)
+            error_message = \
+                'Order Failure: {payment_processor} payment was received, but an order for basket [{basket_id}] ' \
+                'could not be placed.'.format(payment_processor='Cybersource', basket_id=self.basket.id)
+
+            logger_name = 'ecommerce.extensions.checkout.mixins'
+            with LogCapture(logger_name) as lc:
+                self.client.post(self.path, notification)
+
+                lc.check(
+                    (logger_name, 'ERROR', error_message)
+                )
+
             self.assertTrue(fake_handle_order_placement.called)
 
     def test_invalid_basket(self):
