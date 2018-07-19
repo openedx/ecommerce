@@ -11,7 +11,7 @@ from decimal import Decimal
 from django.conf import settings
 from django.urls import reverse
 from oscar.apps.payment.exceptions import GatewayError, TransactionDeclined, UserCancelled
-from oscar.core.loading import get_class
+from oscar.core.loading import get_class, get_model
 from zeep import Client
 from zeep.helpers import serialize_object
 from zeep.wsse import UsernameToken
@@ -38,6 +38,7 @@ from ecommerce.extensions.payment.utils import clean_field_value
 
 logger = logging.getLogger(__name__)
 
+Order = get_model('order', 'Order')
 OrderNumberGenerator = get_class('order.utils', 'OrderNumberGenerator')
 
 
@@ -255,13 +256,24 @@ class Cybersource(ApplePayMixin, BaseClientSidePaymentProcessor):
             reason_code = int(response['reason_code'])
 
             if decision == 'error' and reason_code == 104:
-                raise DuplicateReferenceNumber
-
-            raise {
-                'cancel': UserCancelled,
-                'decline': TransactionDeclined,
-                'error': GatewayError
-            }.get(decision, InvalidCybersourceDecision)
+                # This means user submitted payment request twice within 15 min.
+                # We need to check if user first payment notification was handled successfuly and user has an order
+                # if user has an order we can raise DuplicateReferenceNumber exception else we need to continue
+                # the order creation process. to upgrade user in correct course mode.
+                if Order.objects.filter(number=response['req_reference_number']).exists():
+                    raise DuplicateReferenceNumber
+                else:
+                    logger.info(
+                        'Received duplicate CyberSource payment notification for basket [%d] which is not associated '
+                        'with any existing order. Continuing to validation and order creation processes.',
+                        basket.id,
+                    )
+            else:
+                raise {
+                    'cancel': UserCancelled,
+                    'decline': TransactionDeclined,
+                    'error': GatewayError
+                }.get(decision, InvalidCybersourceDecision)
 
         # Raise an exception if the authorized amount differs from the requested amount.
         # Note (CCB): We should never reach this point in production since partial authorization is disabled
