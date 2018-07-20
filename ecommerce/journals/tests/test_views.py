@@ -29,7 +29,7 @@ class JournalBundleOfferListViewTests(ViewTestMixin, TestCase):
         """ Test the "GET" endpoint with offers and assert the rendered template """
         mock_journal_endpoint.return_value = _get_mocked_endpoint()
 
-        journal_bundle_offers = factories.JournalBundleOfferFactory.create_batch(3)
+        journal_bundle_offers = factories.JournalBundleOfferFactory.create_batch(3, site=self.site)
 
         response = self.assert_get_response_status(200)
         self.assertContains(response, "mocked_title")
@@ -45,8 +45,8 @@ class JournalBundleOfferListViewTests(ViewTestMixin, TestCase):
         mock_journal_endpoint.return_value = _get_mocked_endpoint()
 
         # These should be ignored since their associated Condition objects do NOT have journal bundle UUIDs
-        factories.ConditionalOfferFactory.create_batch(3)
-        journal_bundle_offers = factories.JournalBundleOfferFactory.create_batch(3)
+        factories.ConditionalOfferFactory.create_batch(3, site=self.site)
+        journal_bundle_offers = factories.JournalBundleOfferFactory.create_batch(3, site=self.site)
 
         response = self.assert_get_response_status(200)
         self.assertEqual(list(response.context['offers']), journal_bundle_offers)
