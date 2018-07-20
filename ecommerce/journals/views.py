@@ -23,6 +23,13 @@ class JournalBundleOfferViewMixin(StaffOnlyMixin):
         context['admin'] = 'journals'
         return context
 
+    def get_queryset(self):
+        return super(JournalBundleOfferViewMixin, self).get_queryset().filter(
+            site=self.request.site.id,
+            condition__journal_bundle_uuid__isnull=False,
+            offer_type=ConditionalOffer.SITE
+        )
+
 
 class JournalBundleProcessFormViewMixin(JournalBundleOfferViewMixin):
     form_class = JournalBundleOfferForm
@@ -75,16 +82,12 @@ class JournalBundleOfferListView(JournalBundleOfferViewMixin, ListView):
         context = super(JournalBundleOfferListView, self).get_context_data(**kwargs)
 
         offers = []
-        # context['object_list'] returns all conditional offers (including enterprise and program)
-        # we only want to pass journal bundle offers to the context, so ignore all offers that do not
-        # have a journal bundle uuid
         for offer in context['object_list']:
-            if offer.condition.journal_bundle_uuid:
-                offer.journal_bundle = fetch_journal_bundle(
-                    site=self.request.site,
-                    journal_bundle_uuid=offer.condition.journal_bundle_uuid
-                )
-                offers.append(offer)
+            offer.journal_bundle = fetch_journal_bundle(
+                site=self.request.site,
+                journal_bundle_uuid=offer.condition.journal_bundle_uuid
+            )
+            offers.append(offer)
 
         context['offers'] = offers
         return context
