@@ -4,7 +4,7 @@ import simplejson as json
 from django.urls import reverse
 from oscar.core.loading import get_model
 
-from ecommerce.journals.tests.mixins import JournalMixin     # pylint: disable=no-name-in-module
+from ecommerce.journals.tests.mixins import JournalMixin  # pylint: disable=no-name-in-module
 from ecommerce.tests.testcases import TestCase
 
 Product = get_model('catalogue', 'Product')

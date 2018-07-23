@@ -8,7 +8,7 @@ from ecommerce.extensions.fulfillment.status import LINE
 from ecommerce.extensions.test.factories import create_order
 from ecommerce.journals.constants import JOURNAL_PRODUCT_CLASS_NAME
 from ecommerce.journals.fulfillment.modules import JournalFulfillmentModule
-from ecommerce.journals.tests.mixins import JournalMixin     # pylint: disable=no-name-in-module
+from ecommerce.journals.tests.mixins import JournalMixin  # pylint: disable=no-name-in-module
 from ecommerce.tests.testcases import TestCase
 
 Product = get_model('catalogue', 'Product')
