@@ -34,7 +34,7 @@ class PaymentProcessorListViewTests(TestCase):
         self.addCleanup(reset_site_config)
 
         # Clear the view cache
-        TieredCache.clear_all_tiers()
+        TieredCache.dangerous_clear_all_tiers()
 
     def toggle_payment_processor(self, processor, active):
         """Set the given payment processor's Waffle switch."""

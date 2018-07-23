@@ -6,13 +6,16 @@ RequestCache
 
 A thread-local for storing request scoped cache values.
 
+An optional namespace can be used with the RequestCache, or you can use
+the `DEFAULT_REQUEST_CACHE`.
+
 
 TieredCache
 -----------
 
-The first tier is a request cache that is tied to the life of a
-given request. The second tier is the Django cache -- e.g. the
-"default" entry in settings.CACHES, typically backed by memcached.
+The first tier is the default request cache that is tied to the life of a
+given request. The second tier is the Django cache -- e.g. the "default"
+entry in settings.CACHES, typically backed by memcached.
 
 Some baseline rules:
 
@@ -42,11 +45,16 @@ Sample Usage using is_miss::
     return x_cached_response.value
 
 
+You must include 'ecommerce.cache_utils.middleware.CacheUtilsMiddleware'
+for the TieredCache to work properly.
+
 Force Django Cache Miss
 ^^^^^^^^^^^^^^^^^^^^^^^
 
 To force recompute a value stored in the django cache, add the query
 parameter 'force_django_cache_miss'. This will force a CACHE_MISS.
+
+This requires staff permissions.
 
 Example::
 

@@ -81,7 +81,7 @@ class ThrottlingMixin(object):
         super(ThrottlingMixin, self).setUp()
 
         # Throttling for tests relies on the cache. To get around throttling, simply clear the cache.
-        self.addCleanup(TieredCache.clear_all_tiers)
+        self.addCleanup(TieredCache.dangerous_clear_all_tiers)
 
 
 class JwtMixin(object):

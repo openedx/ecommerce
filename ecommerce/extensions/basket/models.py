@@ -3,7 +3,7 @@ from django.utils.translation import ugettext_lazy as _
 from oscar.apps.basket.abstract_models import AbstractBasket
 from oscar.core.loading import get_class
 
-from ecommerce.cache_utils.utils import RequestCache
+from ecommerce.cache_utils.utils import DEFAULT_REQUEST_CACHE
 from ecommerce.extensions.analytics.utils import track_segment_event, translate_basket_line_for_segment
 from ecommerce.extensions.basket.constants import TEMPORARY_BASKET_CACHE_KEY
 
@@ -51,7 +51,7 @@ class Basket(AbstractBasket):
 
     def flush(self):
         """Remove all products in basket and fire Segment 'Product Removed' Analytic event for each"""
-        cached_response = RequestCache.get_cached_response(TEMPORARY_BASKET_CACHE_KEY)
+        cached_response = DEFAULT_REQUEST_CACHE.get_cached_response(TEMPORARY_BASKET_CACHE_KEY)
         if cached_response.is_hit:
             # Do not track anything. This is a temporary basket calculation.
             return
@@ -72,7 +72,7 @@ class Basket(AbstractBasket):
         Performs AbstractBasket add_product method and fires Google Analytics 'Product Added' event.
         """
         line, created = super(Basket, self).add_product(product, quantity, options)  # pylint: disable=bad-super-call
-        cached_response = RequestCache.get_cached_response(TEMPORARY_BASKET_CACHE_KEY)
+        cached_response = DEFAULT_REQUEST_CACHE.get_cached_response(TEMPORARY_BASKET_CACHE_KEY)
         if cached_response.is_hit:
             # Do not track anything. This is a temporary basket calculation.
             return line, created

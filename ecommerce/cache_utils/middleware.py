@@ -14,19 +14,19 @@ class CacheUtilsMiddleware(object):
         Stores whether or not FORCE_DJANGO_CACHE_MISS_KEY was supplied in the
         request. Also, clears the request cache.
         """
-        RequestCache.clear()
+        RequestCache.clear_all_namespaces()
         TieredCache._get_and_set_force_cache_miss(request)  # pylint: disable=protected-access
 
     def process_response(self, request, response):  # pylint: disable=unused-argument
         """
          Clear the request cache after processing a response.
          """
-        RequestCache.clear()
+        RequestCache.clear_all_namespaces()
         return response
 
     def process_exception(self, request, exception):  # pylint: disable=unused-argument
         """
         Clear the request cache after a failed request.
         """
-        RequestCache.clear()
+        RequestCache.clear_all_namespaces()
         return None

@@ -16,7 +16,7 @@ from rest_framework import generics, status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from ecommerce.cache_utils.utils import RequestCache, TieredCache
+from ecommerce.cache_utils.utils import DEFAULT_REQUEST_CACHE, TieredCache
 from ecommerce.core.utils import get_cache_key
 from ecommerce.enterprise.entitlements import get_entitlement_voucher
 from ecommerce.extensions.analytics.utils import audit_log
@@ -402,7 +402,7 @@ class BasketCalculateView(generics.GenericAPIView):
                     'currency': basket.currency
                 }
         """
-        RequestCache.set(TEMPORARY_BASKET_CACHE_KEY, True)
+        DEFAULT_REQUEST_CACHE.set(TEMPORARY_BASKET_CACHE_KEY, True)
 
         partner = get_partner_for_site(request)
         skus = request.GET.getlist('sku')
