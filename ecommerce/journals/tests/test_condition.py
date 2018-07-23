@@ -4,7 +4,7 @@ from requests.exceptions import Timeout
 from slumber.exceptions import HttpNotFoundError, SlumberBaseException
 
 from ecommerce.extensions.test import factories
-from ecommerce.journals.tests.mixins import JournalMixin     # pylint: disable=no-name-in-module
+from ecommerce.journals.tests.mixins import JournalMixin  # pylint: disable=no-name-in-module
 from ecommerce.tests.testcases import TestCase
 
 Product = get_model('catalogue', 'Product')
