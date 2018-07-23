@@ -20,7 +20,7 @@ class DiscoveryMockMixin(object):
     """ Mocks for the Discovery service response. """
     def setUp(self):
         super(DiscoveryMockMixin, self).setUp()
-        TieredCache.clear_all_tiers()
+        TieredCache.dangerous_clear_all_tiers()
 
     @staticmethod
     def build_discovery_catalogs_url(discovery_api_url, catalog_id=''):

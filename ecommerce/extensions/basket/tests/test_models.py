@@ -5,7 +5,7 @@ from oscar.core.loading import get_class, get_model
 from oscar.test import factories
 
 from analytics import Client
-from ecommerce.cache_utils.utils import RequestCache
+from ecommerce.cache_utils.utils import DEFAULT_REQUEST_CACHE
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.extensions.analytics.utils import parse_tracking_context, translate_basket_line_for_segment
 from ecommerce.extensions.api.v2.tests.views.mixins import CatalogMixin
@@ -139,7 +139,7 @@ class BasketTests(CatalogMixin, BasketMixin, TestCase):
         Verify the method does NOT fire 'Product Removed' Segment for temporary basket calculation
         """
         basket = self._create_basket_with_product()
-        RequestCache.set(TEMPORARY_BASKET_CACHE_KEY, True)
+        DEFAULT_REQUEST_CACHE.set(TEMPORARY_BASKET_CACHE_KEY, True)
 
         with mock.patch.object(Client, 'track') as mock_track:
             basket.flush()
@@ -171,7 +171,7 @@ class BasketTests(CatalogMixin, BasketMixin, TestCase):
         course = CourseFactory()
         basket = create_basket(empty=True)
         seat = course.create_or_update_seat('verified', True, 100, self.partner)
-        RequestCache.set(TEMPORARY_BASKET_CACHE_KEY, True)
+        DEFAULT_REQUEST_CACHE.set(TEMPORARY_BASKET_CACHE_KEY, True)
         with mock.patch('ecommerce.extensions.basket.models.track_segment_event') as mock_track:
             basket.add_product(seat)
             properties = translate_basket_line_for_segment(basket.lines.first())

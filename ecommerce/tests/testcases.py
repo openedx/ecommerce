@@ -9,11 +9,11 @@ from ecommerce.tests.mixins import SiteMixin, TestServerUrlMixin, UserMixin
 
 class TieredCacheMixin(object):
     def setUp(self):
-        TieredCache.clear_all_tiers()
+        TieredCache.dangerous_clear_all_tiers()
         super(TieredCacheMixin, self).setUp()
 
     def tearDown(self):
-        TieredCache.clear_all_tiers()
+        TieredCache.dangerous_clear_all_tiers()
         super(TieredCacheMixin, self).tearDown()
 
 

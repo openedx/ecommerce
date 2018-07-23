@@ -6,28 +6,74 @@ import threading
 from django.core.cache import cache as django_cache
 from django.core.cache.backends.base import DEFAULT_TIMEOUT
 
-SHOULD_FORCE_CACHE_MISS_KEY = 'cache_utils.should_force_cache_miss'
 FORCE_CACHE_MISS_PARAM = 'force_cache_miss'
+SHOULD_FORCE_CACHE_MISS_KEY = 'cache_utils.should_force_cache_miss'
+DEFAULT_NAMESPACE = 'cache_utils.default'
 
 _CACHE_MISS = object()
 
 
-class RequestCache(threading.local):
+class _RequestCache(threading.local):
     """
-    A thread-local for storing the per-request cache.
-    """
+    A thread-local for storing the per-request caches.
 
+    The data is a dict of dicts, keyed by namespace.
+    """
     _data = {}
-
-    def __init__(self):
-        super(RequestCache, self).__init__()
 
     @classmethod
     def clear(cls):
         cls._data = {}
 
     @classmethod
-    def get_cached_response(cls, key):
+    def get_data(cls, namespace):
+        """
+        Gets the thread.local data (dict) for a given namespace.
+
+        Args:
+            namespace: The namespace, or key, of the data dict.
+
+        Returns:
+            (dict)
+
+        """
+        if namespace in cls._data:
+            return cls._data[namespace]
+        else:
+            new_data = {}
+            cls._data[namespace] = new_data
+            return new_data
+
+
+class RequestCache(object):
+    """
+    A namespaced request cache for caching per-request data.
+    """
+
+    def __init__(self, namespace=None):
+        """
+        Creates a request cache with the provided namespace.
+
+        Args:
+            namespace (string): (optional) uses 'default' if not provided.
+        """
+        assert namespace != DEFAULT_NAMESPACE, 'Optional namespace can not be {}.'.format(DEFAULT_NAMESPACE)
+        self.namespace = namespace or DEFAULT_NAMESPACE
+
+    @classmethod
+    def clear_all_namespaces(cls):
+        """
+        Clears the data for all namespaces.
+        """
+        _RequestCache.clear()
+
+    def clear(self):
+        """
+        Clears data for the namespaced request cache.
+        """
+        self._get_data().clear()
+
+    def get_cached_response(self, key):
         """
         Retrieves a CachedResponse for the provided key.
 
@@ -38,12 +84,11 @@ class RequestCache(threading.local):
             A CachedResponse with hit/miss status and value.
 
         """
-        cached_value = cls._data.get(key, _CACHE_MISS)
+        cached_value = self._get_data().get(key, _CACHE_MISS)
         is_miss = cached_value is _CACHE_MISS
         return CachedResponse(is_miss, cached_value)
 
-    @classmethod
-    def set(cls, key, value):
+    def set(self, key, value):
         """
         Caches the value for the provided key.
 
@@ -52,10 +97,9 @@ class RequestCache(threading.local):
             value (object)
 
         """
-        cls._data[key] = value
+        self._get_data()[key] = value
 
-    @classmethod
-    def delete(cls, key):
+    def delete(self, key):
         """
         Deletes the cached value for the provided key.
 
@@ -63,8 +107,18 @@ class RequestCache(threading.local):
             key (string)
 
         """
-        if key in cls._data:
-            del cls._data[key]
+        if key in self._get_data():
+            del self._get_data()[key]
+
+    def _get_data(self):
+        """
+        Returns:
+            (dict): The data for this namespaced cache.
+        """
+        return _RequestCache.get_data(self.namespace)
+
+
+DEFAULT_REQUEST_CACHE = RequestCache()
 
 
 class TieredCache(object):
@@ -84,7 +138,7 @@ class TieredCache(object):
             A CachedResponse with hit/miss status and value.
 
         """
-        request_cached_response = RequestCache.get_cached_response(key)
+        request_cached_response = DEFAULT_REQUEST_CACHE.get_cached_response(key)
         if request_cached_response.is_miss:
             django_cached_response = cls._get_cached_response_from_django_cache(key)
             cls._set_request_cache_if_django_cache_hit(key, django_cached_response)
@@ -107,7 +161,7 @@ class TieredCache(object):
                 timeout for the key; otherwise use the default cache timeout.
 
         """
-        RequestCache.set(key, value)
+        DEFAULT_REQUEST_CACHE.set(key, value)
         django_cache.set(key, value, django_cache_timeout)
 
     @staticmethod
@@ -120,20 +174,22 @@ class TieredCache(object):
             key (string)
 
         """
-        RequestCache.delete(key)
+        DEFAULT_REQUEST_CACHE.delete(key)
         django_cache.delete(key)
 
     @staticmethod
-    def clear_all_tiers():
+    def dangerous_clear_all_tiers():
         """
-        This clears both the test cache and the backing cache.
-        Important: This will probably only be called for testing purposes.
+        This clears both the default request cache and the entire django
+        backing cache.
+
+        Important: This should probably only be called for testing purposes.
         """
-        RequestCache.clear()
+        DEFAULT_REQUEST_CACHE.clear()
         django_cache.clear()
 
-    @classmethod
-    def _get_cached_response_from_django_cache(cls, key):
+    @staticmethod
+    def _get_cached_response_from_django_cache(key):
         """
         Retrieves a CachedResponse for the given key from the django cache.
 
@@ -147,15 +203,15 @@ class TieredCache(object):
             A CachedResponse with hit/miss status and value.
 
         """
-        if cls._should_force_django_cache_miss():
+        if TieredCache._should_force_django_cache_miss():
             return CACHE_MISS_RESPONSE
 
         cached_value = django_cache.get(key, _CACHE_MISS)
         is_miss = cached_value is _CACHE_MISS
         return CachedResponse(is_miss, cached_value)
 
-    @classmethod
-    def _set_request_cache_if_django_cache_hit(cls, key, django_cached_response):
+    @staticmethod
+    def _set_request_cache_if_django_cache_hit(key, django_cached_response):
         """
         Sets the value in the request cache if the django cached response was a hit.
 
@@ -165,24 +221,34 @@ class TieredCache(object):
 
         """
         if django_cached_response.is_hit:
-            RequestCache.set(key, django_cached_response.value)
+            DEFAULT_REQUEST_CACHE.set(key, django_cached_response.value)
 
     @staticmethod
     def _get_and_set_force_cache_miss(request):
         """
         Gets value for request query parameter FORCE_CACHE_MISS
-        and sets it in the request cache.
+        and sets it in the default request cache.
+
+        This functionality is only available for staff.
 
         Example:
             http://clobert.com/api/v1/resource?force_cache_miss=true
 
         """
-        force_cache_miss = request.GET.get(FORCE_CACHE_MISS_PARAM, 'false').lower() == 'true'
-        RequestCache.set(SHOULD_FORCE_CACHE_MISS_KEY, force_cache_miss)
+        if not (request.user and request.user.is_active and request.user.is_staff):
+            force_cache_miss = False
+        else:
+            force_cache_miss = request.GET.get(FORCE_CACHE_MISS_PARAM, 'false').lower() == 'true'
+        DEFAULT_REQUEST_CACHE.set(SHOULD_FORCE_CACHE_MISS_KEY, force_cache_miss)
 
     @classmethod
     def _should_force_django_cache_miss(cls):
-        cached_response = RequestCache.get_cached_response(SHOULD_FORCE_CACHE_MISS_KEY)
+        """
+        Returns True if the tiered cache should force a cache miss for the
+        django cache, and False otherwise.
+
+        """
+        cached_response = DEFAULT_REQUEST_CACHE.get_cached_response(SHOULD_FORCE_CACHE_MISS_KEY)
         return False if cached_response.is_miss else cached_response.value
 
 
