@@ -21,7 +21,7 @@ msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: openedx-translation@googlegroups.com\n"
 "POT-Creation-Date: 2018-03-26 16:41-0400\n"
-"PO-Revision-Date: 2018-06-24 15:10+0000\n"
+"PO-Revision-Date: 2018-08-05 09:36+0000\n"
 "Last-Translator: Xaver Y.R. Chen <yrchen@atcity.org>\n"
 "Language-Team: Chinese (Taiwan) (http://www.transifex.com/open-edx/edx-platform/language/zh_TW/)\n"
 "MIME-Version: 1.0\n"
@@ -2236,7 +2236,7 @@ msgstr ""
 
 #: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:104
 msgid "(optional)"
-msgstr ""
+msgstr "(可選填)"
 
 #: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:113
 msgid "TOTAL"
