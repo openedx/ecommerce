@@ -21,7 +21,7 @@ msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: openedx-translation@googlegroups.com\n"
 "POT-Creation-Date: 2018-03-26 16:41-0400\n"
-"PO-Revision-Date: 2018-06-24 15:10+0000\n"
+"PO-Revision-Date: 2018-08-08 09:00+0000\n"
 "Last-Translator: Xaver Y.R. Chen <yrchen@atcity.org>\n"
 "Language-Team: Chinese (Taiwan) (http://www.transifex.com/open-edx/edx-platform/language/zh_TW/)\n"
 "MIME-Version: 1.0\n"
@@ -1675,7 +1675,7 @@ msgstr ""
 #: ecommerce/templates/customer/emails/commtype_credit_receipt_body.html:72
 #: ecommerce/templates/customer/emails/commtype_credit_receipt_body.txt:15
 msgid "Thank you. We hope you enjoyed your course!"
-msgstr ""
+msgstr "謝謝，我們希望您能喜歡您的課程！"
 
 #: ecommerce/templates/customer/emails/commtype_credit_receipt_body.html:73
 #: ecommerce/templates/customer/emails/commtype_credit_receipt_body.txt:16
@@ -1850,7 +1850,7 @@ msgstr ""
 
 #: ecommerce/templates/edx/checkout/receipt.html:30
 msgid "Thank you for your order!"
-msgstr ""
+msgstr "感謝您的訂購！"
 
 #: ecommerce/templates/edx/checkout/receipt.html:40
 #, python-format
@@ -1858,7 +1858,7 @@ msgid ""
 "Your order is complete. You will receive a confirmation message and your "
 "enrollment codes(s) at %(link_start)s%(email)s%(link_end)s. If you need a "
 "receipt, you can print this page."
-msgstr ""
+msgstr "您的訂單已完成，同時您將會於%(link_start)s%(email)s%(link_end)s收到包含此訂單資訊以及註冊代號(enrollment codes)的確認訊息。如果您需要收據，請列印此頁面。"
 
 #: ecommerce/templates/edx/checkout/receipt.html:45
 #, python-format
@@ -1866,7 +1866,7 @@ msgid ""
 "Your order is complete. If you need a receipt, you can print this page. You "
 "will also receive a confirmation message with this information at "
 "%(link_start)s%(email)s%(link_end)s."
-msgstr ""
+msgstr "您的訂單已完成，如果您需要收據，請列印此頁面。同時您將會於%(link_start)s%(email)s%(link_end)s收到一封包含此訂單資訊的確認訊息。"
 
 #: ecommerce/templates/edx/checkout/receipt.html:64
 msgid "Order Number:"
@@ -1882,7 +1882,7 @@ msgstr ""
 
 #: ecommerce/templates/edx/checkout/receipt.html:76
 msgid "Order Information"
-msgstr ""
+msgstr "訂單資訊"
 
 #: ecommerce/templates/edx/checkout/receipt.html:81
 #: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:61
@@ -2236,7 +2236,7 @@ msgstr ""
 
 #: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:104
 msgid "(optional)"
-msgstr ""
+msgstr "(可選填)"
 
 #: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:113
 msgid "TOTAL"
@@ -2248,7 +2248,7 @@ msgstr ""
 
 #: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:135
 msgid "select payment method"
-msgstr ""
+msgstr "選擇付款方式"
 
 #: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:137
 msgid "Pay with a Credit Card"
@@ -2394,7 +2394,7 @@ msgstr ""
 
 #: ecommerce/templates/oscar/checkout/_verification_data.html:21
 msgid "Verify Now"
-msgstr ""
+msgstr "立刻驗證"
 
 #: ecommerce/templates/oscar/checkout/_verification_data.html:30
 msgid "Go to my dashboard and verify later"

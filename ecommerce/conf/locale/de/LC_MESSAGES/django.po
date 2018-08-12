@@ -5,14 +5,15 @@
 # 
 # Translators:
 # Agata Kawczynski, 2015
+# Alexander Gropmann <alexander.gropmann@charite.de>, 2018
 # Bin Trash, 2017
 msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: openedx-translation@googlegroups.com\n"
 "POT-Creation-Date: 2018-03-26 16:41-0400\n"
-"PO-Revision-Date: 2018-03-30 10:50+0000\n"
-"Last-Translator: Muhammad Ayub khan <ayubkhan@edx.org>\n"
+"PO-Revision-Date: 2018-07-31 13:25+0000\n"
+"Last-Translator: Alexander Gropmann <alexander.gropmann@charite.de>\n"
 "Language-Team: German (http://www.transifex.com/open-edx/edx-platform/language/de/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
