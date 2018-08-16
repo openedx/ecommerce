@@ -4,12 +4,12 @@ import logging
 import operator
 
 from django.conf import settings
+from edx_django_utils.cache import TieredCache
 from oscar.apps.offer import utils as oscar_utils
 from oscar.core.loading import get_model
 from requests.exceptions import ConnectionError, Timeout
 from slumber.exceptions import HttpNotFoundError, SlumberBaseException
 
-from ecommerce.cache_utils.utils import TieredCache
 from ecommerce.core.utils import deprecated_traverse_pagination, get_cache_key
 from ecommerce.extensions.offer.decorators import check_condition_applicability
 from ecommerce.extensions.offer.mixins import SingleItemConsumptionConditionMixin

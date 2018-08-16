@@ -10,13 +10,13 @@ from django.db import transaction
 from django.http import HttpResponseBadRequest, HttpResponseForbidden
 from django.utils.decorators import method_decorator
 from django.utils.translation import ugettext as _
+from edx_django_utils.cache import DEFAULT_REQUEST_CACHE, TieredCache
 from edx_rest_framework_extensions.permissions import IsSuperuser
 from oscar.core.loading import get_class, get_model
 from rest_framework import generics, status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from ecommerce.cache_utils.utils import DEFAULT_REQUEST_CACHE, TieredCache
 from ecommerce.core.utils import get_cache_key
 from ecommerce.enterprise.entitlements import get_entitlement_voucher
 from ecommerce.extensions.analytics.utils import audit_log

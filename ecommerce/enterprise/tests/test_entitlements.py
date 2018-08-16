@@ -2,13 +2,13 @@
 import ddt
 import httpretty
 from django.conf import settings
+from edx_django_utils.cache import TieredCache
 from mock import patch
 from oscar.core.loading import get_model
 from requests.exceptions import ConnectionError, Timeout
 from slumber.exceptions import SlumberBaseException
 from testfixtures import LogCapture
 
-from ecommerce.cache_utils.utils import TieredCache
 from ecommerce.core.tests import toggle_switch
 from ecommerce.coupons.tests.mixins import CouponMixin, DiscoveryMockMixin
 from ecommerce.courses.tests.factories import CourseFactory

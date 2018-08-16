@@ -1,8 +1,7 @@
 import logging
 
 from django.conf import settings
-
-from ecommerce.cache_utils.utils import TieredCache
+from edx_django_utils.cache import TieredCache
 
 logger = logging.getLogger(__name__)
 

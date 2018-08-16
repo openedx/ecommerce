@@ -3,10 +3,10 @@ import hashlib
 import logging
 
 from django.conf import settings
+from edx_django_utils.cache import TieredCache
 from oscar.core.loading import get_model
 from slumber.exceptions import HttpNotFoundError
 
-from ecommerce.cache_utils.utils import TieredCache
 from ecommerce.core.utils import get_cache_key
 
 Product = get_model('catalogue', 'Product')

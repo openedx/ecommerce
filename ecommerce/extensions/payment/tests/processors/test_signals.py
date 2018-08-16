@@ -1,8 +1,8 @@
 from django.conf import settings
 from django.urls import reverse
+from edx_django_utils.cache import TieredCache
 from waffle.models import Switch
 
-from ecommerce.cache_utils.utils import TieredCache
 from ecommerce.extensions.api.v2.views.payments import PAYMENT_PROCESSOR_CACHE_KEY
 from ecommerce.tests.testcases import TestCase
 

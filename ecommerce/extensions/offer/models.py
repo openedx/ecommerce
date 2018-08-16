@@ -6,6 +6,7 @@ import re
 from django.conf import settings
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
+from edx_django_utils.cache import TieredCache
 from oscar.apps.offer.abstract_models import (
     AbstractBenefit,
     AbstractCondition,
@@ -17,7 +18,6 @@ from requests.exceptions import ConnectionError, Timeout
 from slumber.exceptions import SlumberBaseException
 from threadlocals.threadlocals import get_current_request
 
-from ecommerce.cache_utils.utils import TieredCache
 from ecommerce.core.utils import get_cache_key, log_message_and_raise_validation_error
 
 OFFER_PRIORITY_ENTERPRISE = 10

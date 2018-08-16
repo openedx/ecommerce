@@ -5,10 +5,10 @@ import logging
 from urllib import urlencode
 
 from django.conf import settings
+from edx_django_utils.cache import TieredCache
 from requests.exceptions import ConnectionError, Timeout
 from slumber.exceptions import SlumberHttpBaseException
 
-from ecommerce.cache_utils.utils import TieredCache
 from ecommerce.core.utils import get_cache_key
 
 logger = logging.getLogger(__name__)

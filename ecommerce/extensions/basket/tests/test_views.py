@@ -12,6 +12,7 @@ from django.contrib.messages import get_messages
 from django.http import HttpResponseRedirect
 from django.test import override_settings
 from django.urls import reverse
+from edx_django_utils.cache import TieredCache
 from factory.fuzzy import FuzzyText
 from oscar.apps.basket.forms import BasketVoucherForm
 from oscar.core.loading import get_class, get_model
@@ -22,7 +23,6 @@ from slumber.exceptions import SlumberBaseException
 from testfixtures import LogCapture
 from waffle.testutils import override_flag
 
-from ecommerce.cache_utils.utils import TieredCache
 from ecommerce.core.exceptions import SiteConfigurationError
 from ecommerce.core.tests import toggle_switch
 from ecommerce.core.url_utils import get_lms_url
