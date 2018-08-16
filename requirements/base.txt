@@ -18,6 +18,7 @@ django-solo==1.1.2
 django-threadlocals==0.8
 django-waffle==0.12.0
 djangorestframework==3.6.4
+djangorestframework-datatables==0.4.0
 djangorestframework-jwt==1.11.0
 drf-extensions==0.3.1
 edx-auth-backends==1.1.3

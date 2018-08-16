@@ -12,10 +12,8 @@ define([
             title: gettext('Courses'),
 
             initialize: function() {
-                this.collection = new CourseCollection();
-                this.view = new CourseListView({collection: this.collection});
+                this.view = new CourseListView();
                 this.render();
-                this.collection.fetch({remove: false, data: {page_size: 50}});
             }
         });
     }
