@@ -4,13 +4,13 @@ from __future__ import unicode_literals
 import ddt
 import httpretty
 from django.core.exceptions import ValidationError
+from edx_django_utils.cache import TieredCache
 from mock import patch
 from oscar.core.loading import get_model
 from oscar.test import factories
 from requests.exceptions import ConnectionError, Timeout
 from slumber.exceptions import SlumberBaseException
 
-from ecommerce.cache_utils.utils import TieredCache
 from ecommerce.coupons.tests.mixins import CouponMixin, DiscoveryMockMixin
 from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
 from ecommerce.tests.testcases import TestCase

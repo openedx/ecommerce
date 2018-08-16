@@ -2,9 +2,9 @@ import hashlib
 
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
+from edx_django_utils.cache import TieredCache
 from opaque_keys.edx.keys import CourseKey
 
-from ecommerce.cache_utils.utils import TieredCache
 from ecommerce.core.utils import deprecated_traverse_pagination
 
 

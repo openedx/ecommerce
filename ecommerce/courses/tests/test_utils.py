@@ -2,11 +2,11 @@ import hashlib
 
 import ddt
 import httpretty
+from edx_django_utils.cache import TieredCache
 from mock import patch
 from opaque_keys.edx.keys import CourseKey
 from requests.exceptions import ConnectionError
 
-from ecommerce.cache_utils.utils import TieredCache
 from ecommerce.coupons.tests.mixins import DiscoveryMockMixin
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.courses.utils import (

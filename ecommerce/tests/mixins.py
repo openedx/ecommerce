@@ -12,6 +12,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.sites.models import Site
 from django.urls import reverse
 from django.utils.timezone import now
+from edx_django_utils.cache import TieredCache
 from mock import patch
 from oscar.core.loading import get_class, get_model
 from oscar.test import factories
@@ -19,7 +20,6 @@ from oscar.test.utils import RequestFactory
 from social_django.models import UserSocialAuth
 from threadlocals.threadlocals import set_thread_variable
 
-from ecommerce.cache_utils.utils import TieredCache
 from ecommerce.core.url_utils import get_lms_url
 from ecommerce.courses.models import Course
 from ecommerce.courses.utils import mode_for_product

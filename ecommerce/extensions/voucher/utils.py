@@ -13,11 +13,11 @@ import pytz
 from django.conf import settings
 from django.urls import reverse
 from django.utils.translation import ugettext_lazy as _
+from edx_django_utils.cache import TieredCache
 from opaque_keys.edx.keys import CourseKey
 from oscar.core.loading import get_model
 from oscar.templatetags.currency_filters import currency
 
-from ecommerce.cache_utils.utils import TieredCache
 from ecommerce.core.url_utils import get_ecommerce_url
 from ecommerce.core.utils import log_message_and_raise_validation_error
 from ecommerce.extensions.api import exceptions

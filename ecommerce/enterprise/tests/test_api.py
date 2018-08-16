@@ -1,10 +1,10 @@
 import ddt
 import httpretty
 from django.conf import settings
+from edx_django_utils.cache import TieredCache
 from mock import patch
 from oscar.core.loading import get_model
 
-from ecommerce.cache_utils.utils import TieredCache
 from ecommerce.core.tests import toggle_switch
 from ecommerce.core.utils import get_cache_key
 from ecommerce.courses.tests.factories import CourseFactory

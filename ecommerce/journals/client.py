@@ -3,9 +3,9 @@ Utility Functions to Access the Discovery Journal API and the Journals Service A
 """
 import logging
 
+from edx_django_utils.cache import TieredCache
 from edx_rest_api_client.client import EdxRestApiClient
 
-from ecommerce.cache_utils.utils import TieredCache
 from ecommerce.core.utils import get_cache_key
 from ecommerce.journals.constants import JOURNAL_BUNDLE_CACHE_TIMEOUT
 

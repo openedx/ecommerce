@@ -4,10 +4,10 @@ import ddt
 import httpretty
 from django.conf import settings
 from django.urls import reverse
+from edx_django_utils.cache import TieredCache
 from mock import patch
 from testfixtures import LogCapture
 
-from ecommerce.cache_utils.utils import TieredCache
 from ecommerce.core.url_utils import get_lms_url
 from ecommerce.tests.testcases import TestCase
 

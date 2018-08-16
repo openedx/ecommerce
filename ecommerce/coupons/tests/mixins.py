@@ -3,10 +3,10 @@ import json
 
 import httpretty
 from django.test import RequestFactory
+from edx_django_utils.cache import TieredCache
 from oscar.core.utils import slugify
 from oscar.test import factories
 
-from ecommerce.cache_utils.utils import TieredCache
 from ecommerce.core.constants import COUPON_PRODUCT_CLASS_NAME
 from ecommerce.core.models import BusinessClient
 from ecommerce.extensions.api.v2.views.coupons import CouponViewSet

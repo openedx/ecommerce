@@ -1,9 +1,9 @@
 import ddt
 import httpretty
+from edx_django_utils.cache import TieredCache
 from mock import patch
 from oscar.test.factories import ProductFactory, RangeFactory, VoucherFactory
 
-from ecommerce.cache_utils.utils import TieredCache
 from ecommerce.coupons.tests.mixins import DiscoveryMockMixin
 from ecommerce.coupons.utils import fetch_course_catalog, is_voucher_applied, prepare_course_seat_types
 from ecommerce.extensions.basket.utils import prepare_basket

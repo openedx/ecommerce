@@ -2,12 +2,15 @@ from django.conf import settings
 from django.test import LiveServerTestCase as DjangoLiveServerTestCase
 from django.test import TestCase as DjangoTestCase
 from django.test import TransactionTestCase as DjangoTransactionTestCase
+from edx_django_utils.cache import TieredCache
 
-from ecommerce.cache_utils.utils import TieredCache
 from ecommerce.tests.mixins import SiteMixin, TestServerUrlMixin, UserMixin
 
 
 class TieredCacheMixin(object):
+    # TODO: Once the CacheIsolationMixin and CacheIsolationTestCase from edx-platform,
+    # are moved to edx-django-utils, this can be replaced.
+
     def setUp(self):
         TieredCache.dangerous_clear_all_tiers()
         super(TieredCacheMixin, self).setUp()

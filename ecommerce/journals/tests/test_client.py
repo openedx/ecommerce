@@ -7,10 +7,10 @@ import re
 from urlparse import urljoin, urlsplit, urlunsplit
 
 import responses
+from edx_django_utils.cache import TieredCache
 from edx_rest_api_client.auth import SuppliedJwtAuth
 from edx_rest_api_client.client import EdxRestApiClient
 
-from ecommerce.cache_utils.utils import TieredCache
 from ecommerce.core.utils import get_cache_key
 from ecommerce.journals.client import (
     fetch_journal_bundle,

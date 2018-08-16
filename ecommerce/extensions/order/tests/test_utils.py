@@ -8,12 +8,12 @@ import httpretty
 import mock
 import pytz
 from django.test.client import RequestFactory
+from edx_django_utils.cache import TieredCache
 from oscar.core.loading import get_class, get_model
 from oscar.test.factories import BasketFactory
 from requests import Timeout
 from testfixtures import LogCapture
 
-from ecommerce.cache_utils.utils import TieredCache
 from ecommerce.core.url_utils import get_lms_entitlement_api_url
 from ecommerce.extensions.fulfillment.status import ORDER
 from ecommerce.extensions.order.utils import UserAlreadyPlacedOrder

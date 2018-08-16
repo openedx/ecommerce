@@ -14,11 +14,11 @@ from urllib import urlencode
 from django.conf import settings
 from django.http import HttpResponseRedirect
 from django.urls import reverse
+from edx_django_utils.cache import TieredCache
 from oscar.core.loading import get_model
 from requests.exceptions import ConnectionError, Timeout
 from slumber.exceptions import SlumberBaseException
 
-from ecommerce.cache_utils.utils import TieredCache
 from ecommerce.core.constants import COUPON_PRODUCT_CLASS_NAME
 from ecommerce.core.utils import get_cache_key
 from ecommerce.coupons.views import voucher_is_valid
