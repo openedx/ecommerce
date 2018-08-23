@@ -6,6 +6,7 @@ from urlparse import parse_qs, urlparse
 
 import six
 import waffle
+from django.conf import settings
 from django.core.exceptions import ValidationError
 
 logger = logging.getLogger(__name__)
@@ -84,3 +85,10 @@ def deprecated_traverse_pagination(response, endpoint):
         next_page = response.get('next')
 
     return results
+
+
+def use_read_replica_if_available(queryset):
+    """
+    If there is a database called 'read_replica', use that database for the queryset.
+    """
+    return queryset.using("read_replica") if "read_replica" in settings.DATABASES else queryset
