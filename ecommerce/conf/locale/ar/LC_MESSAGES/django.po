@@ -4,8 +4,8 @@
 # This file is distributed under the GNU AFFERO GENERAL PUBLIC LICENSE.
 # 
 # Translators:
-# Ahmed Jazzar <ajazzar@qrf.org>, 2015
-# Ahmed Jazzar <ajazzar@qrf.org>, 2016
+# Ahmed Jazzar <ahmed.mojaz@gmail.com>, 2015
+# Ahmed Jazzar <ahmed.mojaz@gmail.com>, 2016
 # Anthony Mangano <amangano@edx.org>, 2017
 # AR C2 <e2f458fd4s512@outlook.com>, 2016
 # Clinton Blackburn <clinton.blackburn@gmail.com>, 2016
