@@ -33,6 +33,7 @@ import logging
 import pytz
 from django.core.management.base import BaseCommand, CommandError
 from oscar.core.loading import get_model
+from ecommerce.core.utils import use_read_replica_if_available
 
 logger = logging.getLogger(__name__)
 Order = get_model('order', 'Order')
@@ -71,14 +72,14 @@ class Command(BaseCommand):
         start = datetime.datetime.now(pytz.utc) - datetime.timedelta(minutes=start_delta)
         end = datetime.datetime.now(pytz.utc) - datetime.timedelta(minutes=end_delta)
 
-        orders = Order.objects.all().filter(date_placed__gte=start, date_placed__lt=end)
+        orders = use_read_replica_if_available(Order.objects.all().filter(date_placed__gte=start, date_placed__lt=end))
 
         orders_without_payments = []
         multi_payment_on_order = []
         order_payment_totals_mismatch = []
 
         for order in orders:
-            payment_events = PaymentEvent.objects.filter(order_id=order.id)
+            payment_events = use_read_replica_if_available(PaymentEvent.objects.filter(order_id=order.id))
             if payment_events.count() == 0 and order.total_incl_tax > 0:
                 # If a coupon is used to purchase a product for the full price, there will be no PaymentEvent.
                 orders_without_payments.append(order.id)
