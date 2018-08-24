@@ -43,7 +43,7 @@ class CourseAppView(StaffOnlyMixin, TemplateView):
         """
         key = 'credit_providers'
         credit_providers_cache_response = TieredCache.get_cached_response(key)
-        if credit_providers_cache_response.is_hit:
+        if credit_providers_cache_response.is_found:
             return credit_providers_cache_response.value
 
         try:

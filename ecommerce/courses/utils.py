@@ -36,7 +36,7 @@ def get_course_info_from_catalog(site, product):
     cache_key = 'courses_api_detail_{}{}'.format(key, partner_short_code)
     cache_key = hashlib.md5(cache_key).hexdigest()
     course_cached_response = TieredCache.get_cached_response(cache_key)
-    if course_cached_response.is_hit:
+    if course_cached_response.is_found:
         return course_cached_response.value
 
     if product.is_course_entitlement_product:
@@ -72,7 +72,7 @@ def get_course_catalogs(site, resource_id=None):
     cache_key = hashlib.md5(cache_key).hexdigest()
 
     cached_response = TieredCache.get_cached_response(cache_key)
-    if cached_response.is_hit:
+    if cached_response.is_found:
         return cached_response.value
 
     api = site.siteconfiguration.discovery_api_client

@@ -65,7 +65,7 @@ class UtilsTests(DiscoveryTestMixin, DiscoveryMockMixin, TestCase):
         cache_key = 'courses_api_detail_{}{}'.format(key, self.partner.short_code)
         cache_key = hashlib.md5(cache_key).hexdigest()
         course_cached_response = TieredCache.get_cached_response(cache_key)
-        self.assertTrue(course_cached_response.is_miss)
+        self.assertFalse(course_cached_response.is_found)
 
         response = get_course_info_from_catalog(self.request.site, product)
 
@@ -138,7 +138,7 @@ class GetCourseCatalogUtilTests(DiscoveryMockMixin, TestCase):
         cache_key = '{}.catalog.api.data'.format(self.request.site.domain)
         cache_key = hashlib.md5(cache_key).hexdigest()
         course_catalogs_cached_response = TieredCache.get_cached_response(cache_key)
-        self.assertTrue(course_catalogs_cached_response.is_miss)
+        self.assertFalse(course_catalogs_cached_response.is_found)
 
         response = get_course_catalogs(self.request.site)
 
@@ -161,7 +161,7 @@ class GetCourseCatalogUtilTests(DiscoveryMockMixin, TestCase):
         cache_key = '{}.catalog.api.data.{}'.format(self.request.site.domain, catalog_id)
         cache_key = hashlib.md5(cache_key).hexdigest()
         course_catalogs_cached_response = TieredCache.get_cached_response(cache_key)
-        self.assertTrue(course_catalogs_cached_response.is_miss)
+        self.assertFalse(course_catalogs_cached_response.is_found)
 
         response = get_course_catalogs(self.request.site, catalog_id)
         self.assertEqual(response['name'], 'All Courses')

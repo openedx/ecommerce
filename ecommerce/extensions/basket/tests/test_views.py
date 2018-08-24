@@ -441,7 +441,7 @@ class BasketSummaryViewTests(EnterpriseServiceMockMixin, DiscoveryTestMixin, Dis
         cache_key = 'courses_api_detail_{}{}'.format(self.course.id, self.partner.short_code)
         cache_key = hashlib.md5(cache_key).hexdigest()
         course_before_cached_response = TieredCache.get_cached_response(cache_key)
-        self.assertTrue(course_before_cached_response.is_miss)
+        self.assertFalse(course_before_cached_response.is_found)
 
         response = self.client.get(self.path)
         self.assertEqual(response.status_code, 200)

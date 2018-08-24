@@ -79,7 +79,7 @@ class Benefit(AbstractBenefit):
                 query=query
             )
             cached_response = TieredCache.get_cached_response(cache_key)
-            if cached_response.is_miss:
+            if not cached_response.is_found:
                 if line.product.is_seat_product:
                     course_run_ids.append({'id': product_id, 'cache_key': cache_key, 'line': line})
                 else:
@@ -335,7 +335,7 @@ class Range(AbstractRange):
             catalog_id=self.course_catalog
         )
         cached_response = TieredCache.get_cached_response(cache_key)
-        if cached_response.is_hit:
+        if cached_response.is_found:
             return cached_response.value
 
         discovery_api_client = request.site.siteconfiguration.discovery_api_client

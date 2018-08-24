@@ -173,7 +173,7 @@ def is_course_in_enterprise_catalog(site, course_id, enterprise_catalog_id):
         catalog_id=enterprise_catalog_id
     )
     cached_response = TieredCache.get_cached_response(cache_key)
-    if cached_response.is_hit:
+    if cached_response.is_found:
         response = cached_response.value
     else:
         try:

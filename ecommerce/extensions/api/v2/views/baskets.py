@@ -475,7 +475,7 @@ class BasketCalculateView(generics.GenericAPIView):
                 skus=skus
             )
             cached_response = TieredCache.get_cached_response(cache_key)
-            if cached_response.is_hit:
+            if cached_response.is_found:
                 return Response(cached_response.value)
 
         response = self._calculate_temporary_basket_atomic(basket_owner, request, products, voucher, skus, code)

@@ -93,7 +93,7 @@ def fetch_journal_bundle(site, journal_bundle_uuid):
     )
 
     journal_bundle_cached_response = TieredCache.get_cached_response(cache_key)
-    if journal_bundle_cached_response.is_hit:
+    if journal_bundle_cached_response.is_found:
         return journal_bundle_cached_response.value
 
     client = site.siteconfiguration.journal_discovery_api_client
