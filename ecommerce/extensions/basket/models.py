@@ -52,7 +52,7 @@ class Basket(AbstractBasket):
     def flush(self):
         """Remove all products in basket and fire Segment 'Product Removed' Analytic event for each"""
         cached_response = DEFAULT_REQUEST_CACHE.get_cached_response(TEMPORARY_BASKET_CACHE_KEY)
-        if cached_response.is_hit:
+        if cached_response.is_found:
             # Do not track anything. This is a temporary basket calculation.
             return
         for line in self.all_lines():
@@ -73,7 +73,7 @@ class Basket(AbstractBasket):
         """
         line, created = super(Basket, self).add_product(product, quantity, options)  # pylint: disable=bad-super-call
         cached_response = DEFAULT_REQUEST_CACHE.get_cached_response(TEMPORARY_BASKET_CACHE_KEY)
-        if cached_response.is_hit:
+        if cached_response.is_found:
             # Do not track anything. This is a temporary basket calculation.
             return line, created
 

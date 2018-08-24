@@ -373,7 +373,7 @@ class SiteConfiguration(models.Model):
         """
         key = 'siteconfiguration_access_token_{}'.format(self.id)
         access_token_cached_response = TieredCache.get_cached_response(key)
-        if access_token_cached_response.is_hit:
+        if access_token_cached_response.is_found:
             return access_token_cached_response.value
 
         url = '{root}/access_token'.format(root=self.oauth2_provider_url)
@@ -569,7 +569,7 @@ class User(AbstractUser):
             cache_key = 'verification_status_{username}'.format(username=self.username)
             cache_key = hashlib.md5(cache_key).hexdigest()
             verification_cached_response = TieredCache.get_cached_response(cache_key)
-            if verification_cached_response.is_hit:
+            if verification_cached_response.is_found:
                 return verification_cached_response.value
 
             api = EdxRestApiClient(

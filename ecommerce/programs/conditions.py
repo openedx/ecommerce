@@ -52,7 +52,7 @@ class ProgramCourseRunSeatsCondition(SingleItemConsumptionConditionMixin, Condit
             username=basket.owner.username,
         )
         data_list_cached_response = TieredCache.get_cached_response(cache_key)
-        if data_list_cached_response.is_hit:
+        if data_list_cached_response.is_found:
             return data_list_cached_response.value
 
         user = basket.owner.username

@@ -150,7 +150,7 @@ class UserAlreadyPlacedOrder(object):
         partner_short_code = site.siteconfiguration.partner.short_code
         key = 'course_entitlement_detail_{}{}'.format(entitlement_uuid, partner_short_code)
         entitlement_cached_response = TieredCache.get_cached_response(key)
-        if entitlement_cached_response.is_hit:
+        if entitlement_cached_response.is_found:
             entitlement = entitlement_cached_response.value
         else:
             logger.debug('Trying to get entitlement {%s}', entitlement_uuid)

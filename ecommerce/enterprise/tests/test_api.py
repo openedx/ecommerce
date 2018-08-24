@@ -57,7 +57,7 @@ class EnterpriseAPITests(EnterpriseServiceMockMixin, DiscoveryTestMixin, TestCas
         )
 
         enterprise_learner_cached_response = TieredCache.get_cached_response(cache_key)
-        self.assertTrue(enterprise_learner_cached_response.is_miss)
+        self.assertFalse(enterprise_learner_cached_response.is_found)
 
         response = enterprise_api.fetch_enterprise_learner_data(self.request.site, self.learner)
         self.assertEqual(len(response['results']), 1)

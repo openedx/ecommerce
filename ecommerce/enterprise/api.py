@@ -57,7 +57,7 @@ def fetch_enterprise_learner_entitlements(site, learner_id):
     )
 
     entitlements_cached_response = TieredCache.get_cached_response(cache_key)
-    if entitlements_cached_response.is_hit:
+    if entitlements_cached_response.is_found:
         return entitlements_cached_response.value
 
     api = site.siteconfiguration.enterprise_api_client
@@ -156,7 +156,7 @@ def fetch_enterprise_learner_data(site, user):
     )
 
     cached_response = TieredCache.get_cached_response(cache_key)
-    if cached_response.is_hit:
+    if cached_response.is_found:
         return cached_response.value
 
     api = site.siteconfiguration.enterprise_api_client
@@ -189,7 +189,7 @@ def catalog_contains_course_runs(site, course_run_ids, enterprise_customer_uuid,
     )
 
     contains_content_cached_response = TieredCache.get_cached_response(cache_key)
-    if contains_content_cached_response.is_hit:
+    if contains_content_cached_response.is_found:
         return contains_content_cached_response.value
 
     api = site.siteconfiguration.enterprise_api_client

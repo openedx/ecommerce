@@ -33,7 +33,7 @@ class ProgramsApiClient(object):
 
         program_cached_response = TieredCache.get_cached_response(cache_key)
 
-        if program_cached_response.is_hit:  # pragma: no cover
+        if program_cached_response.is_found:  # pragma: no cover
             logger.debug('Program [%s] was found in the cache.', program_uuid)
             return program_cached_response.value
 

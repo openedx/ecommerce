@@ -677,7 +677,7 @@ def get_cached_voucher(code):
     voucher_code = 'voucher_{code}'.format(code=code)
     cache_key = hashlib.md5(voucher_code).hexdigest()
     voucher_cached_response = TieredCache.get_cached_response(cache_key)
-    if voucher_cached_response.is_hit:
+    if voucher_cached_response.is_found:
         return voucher_cached_response.value
 
     voucher = Voucher.objects.get(code=code)
