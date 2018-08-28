@@ -25,7 +25,7 @@ class JournalBundleOfferViewMixin(StaffOnlyMixin):
 
     def get_queryset(self):
         return super(JournalBundleOfferViewMixin, self).get_queryset().filter(
-            site=self.request.site.id,
+            partner=self.request.site.siteconfiguration.partner,
             condition__journal_bundle_uuid__isnull=False,
             offer_type=ConditionalOffer.SITE
         )

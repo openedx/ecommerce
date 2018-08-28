@@ -14,7 +14,7 @@ class OfferDecoratorTests(DiscoveryTestMixin, TestCase):
     def setUp(self):
         super(OfferDecoratorTests, self).setUp()
         self.condition = ConditionFactory()
-        self.offer = ConditionalOfferFactory(condition=self.condition, site=self.site)
+        self.offer = ConditionalOfferFactory(condition=self.condition, partner=self.partner)
         self.user = UserFactory()
 
     @patch('ecommerce.extensions.offer.models.Condition.is_satisfied')

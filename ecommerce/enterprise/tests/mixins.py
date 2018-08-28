@@ -546,7 +546,7 @@ class EnterpriseServiceMockMixin(object):
         Switch.objects.update_or_create(name=ENTERPRISE_OFFERS_SWITCH, defaults={'active': True})
         benefit = EnterprisePercentageDiscountBenefitFactory(value=percentage_discount_value)
         condition = EnterpriseCustomerConditionFactory()
-        EnterpriseOfferFactory(site=self.site, benefit=benefit, condition=condition)
+        EnterpriseOfferFactory(partner=self.partner, benefit=benefit, condition=condition)
         self.mock_enterprise_learner_api(
             learner_id=self.user.id,
             enterprise_customer_uuid=str(condition.enterprise_customer_uuid),

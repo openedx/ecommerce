@@ -39,7 +39,7 @@ class EnterpriseCustomerConditionTests(EnterpriseServiceMockMixin, DiscoveryTest
     @httpretty.activate
     def test_is_satisfied_true(self):
         """ Ensure the condition returns true if all basket requirements are met. """
-        offer = factories.EnterpriseOfferFactory(site=self.site, condition=self.condition)
+        offer = factories.EnterpriseOfferFactory(partner=self.partner, condition=self.condition)
         basket = factories.BasketFactory(site=self.site, owner=self.user)
         basket.add_product(self.course_run.seat_products[0])
         self.mock_enterprise_learner_api(
@@ -77,7 +77,7 @@ class EnterpriseCustomerConditionTests(EnterpriseServiceMockMixin, DiscoveryTest
         """
         Ensure that condition returns true for valid enterprise catalog uuid in GET request.
         """
-        offer = factories.EnterpriseOfferFactory(site=self.site, condition=self.condition)
+        offer = factories.EnterpriseOfferFactory(partner=self.partner, condition=self.condition)
         enterprise_catalog_uuid = str(self.condition.enterprise_customer_catalog_uuid)
         basket = factories.BasketFactory(site=self.site, owner=self.user)
         basket.strategy.request = self.request
@@ -89,7 +89,7 @@ class EnterpriseCustomerConditionTests(EnterpriseServiceMockMixin, DiscoveryTest
         """
         Ensure that condition returns true for valid enterprise catalog uuid in basket attribute.
         """
-        offer = factories.EnterpriseOfferFactory(site=self.site, condition=self.condition)
+        offer = factories.EnterpriseOfferFactory(partner=self.partner, condition=self.condition)
         enterprise_catalog_uuid = str(self.condition.enterprise_customer_catalog_uuid)
         basket = factories.BasketFactory(site=self.site, owner=self.user)
         request_data = {'catalog': enterprise_catalog_uuid}
@@ -102,7 +102,7 @@ class EnterpriseCustomerConditionTests(EnterpriseServiceMockMixin, DiscoveryTest
         """
         Ensure the condition returns false if provided enterprise catalog UUID is invalid.
         """
-        offer = factories.EnterpriseOfferFactory(site=self.site, condition=self.condition)
+        offer = factories.EnterpriseOfferFactory(partner=self.partner, condition=self.condition)
 
         basket = factories.BasketFactory(site=self.site, owner=self.user)
         basket.strategy.request = self.request
@@ -113,7 +113,7 @@ class EnterpriseCustomerConditionTests(EnterpriseServiceMockMixin, DiscoveryTest
     @httpretty.activate
     def test_is_satisfied_for_anonymous_user(self):
         """ Ensure the condition returns false for an anonymous user. """
-        offer = factories.EnterpriseOfferFactory(site=self.site, condition=self.condition)
+        offer = factories.EnterpriseOfferFactory(partner=self.partner, condition=self.condition)
         basket = factories.BasketFactory(site=self.site, owner=None)
         basket.add_product(self.course_run.seat_products[0])
         self.mock_enterprise_learner_api(
@@ -130,14 +130,14 @@ class EnterpriseCustomerConditionTests(EnterpriseServiceMockMixin, DiscoveryTest
 
     def test_is_satisfied_empty_basket(self):
         """ Ensure the condition returns False if the basket is empty. """
-        offer = factories.EnterpriseOfferFactory(site=self.site, condition=self.condition)
+        offer = factories.EnterpriseOfferFactory(partner=self.partner, condition=self.condition)
         basket = factories.BasketFactory(site=self.site, owner=self.user)
         self.assertTrue(basket.is_empty)
         self.assertFalse(self.condition.is_satisfied(offer, basket))
 
     def test_is_satisfied_free_basket(self):
         """ Ensure the condition returns False if the basket total is zero. """
-        offer = factories.EnterpriseOfferFactory(site=self.site, condition=self.condition)
+        offer = factories.EnterpriseOfferFactory(partner=self.partner, condition=self.condition)
         basket = factories.BasketFactory(site=self.site, owner=self.user)
         test_product = factories.ProductFactory(
             stockrecords__price_excl_tax=0,
@@ -147,8 +147,8 @@ class EnterpriseCustomerConditionTests(EnterpriseServiceMockMixin, DiscoveryTest
         self.assertFalse(self.condition.is_satisfied(offer, basket))
 
     def test_is_satisfied_site_mismatch(self):
-        """ Ensure the condition returns False if the offer site does not match the basket site. """
-        offer = factories.EnterpriseOfferFactory(site=SiteConfigurationFactory().site, condition=self.condition)
+        """ Ensure the condition returns False if the offer partner does not match the basket site partner. """
+        offer = factories.EnterpriseOfferFactory(partner=SiteConfigurationFactory().partner, condition=self.condition)
         basket = factories.BasketFactory(site=self.site, owner=self.user)
         basket.add_product(self.test_product)
         self.assertFalse(self.condition.is_satisfied(offer, basket))
@@ -156,7 +156,7 @@ class EnterpriseCustomerConditionTests(EnterpriseServiceMockMixin, DiscoveryTest
     @httpretty.activate
     def test_is_satisfied_enterprise_learner_error(self):
         """ Ensure the condition returns false if the enterprise learner data cannot be retrieved. """
-        offer = factories.EnterpriseOfferFactory(site=self.site, condition=self.condition)
+        offer = factories.EnterpriseOfferFactory(partner=self.partner, condition=self.condition)
         basket = factories.BasketFactory(site=self.site, owner=self.user)
         basket.add_product(self.course_run.seat_products[0])
         self.mock_enterprise_learner_api_raise_exception()
@@ -165,7 +165,7 @@ class EnterpriseCustomerConditionTests(EnterpriseServiceMockMixin, DiscoveryTest
     @httpretty.activate
     def test_is_satisfied_no_enterprise_learner(self):
         """ Ensure the condition returns false if the learner is not linked to an EnterpriseCustomer. """
-        offer = factories.EnterpriseOfferFactory(site=self.site, condition=self.condition)
+        offer = factories.EnterpriseOfferFactory(partner=self.partner, condition=self.condition)
         basket = factories.BasketFactory(site=self.site, owner=self.user)
         basket.add_product(self.course_run.seat_products[0])
         self.mock_enterprise_learner_api_for_learner_with_no_enterprise()
@@ -174,7 +174,7 @@ class EnterpriseCustomerConditionTests(EnterpriseServiceMockMixin, DiscoveryTest
     @httpretty.activate
     def test_is_satisfied_wrong_enterprise(self):
         """ Ensure the condition returns false if the learner is associated with a different EnterpriseCustomer. """
-        offer = factories.EnterpriseOfferFactory(site=self.site, condition=self.condition)
+        offer = factories.EnterpriseOfferFactory(partner=self.partner, condition=self.condition)
         basket = factories.BasketFactory(site=self.site, owner=self.user)
         basket.add_product(self.course_run.seat_products[0])
         self.mock_enterprise_learner_api(
@@ -186,7 +186,7 @@ class EnterpriseCustomerConditionTests(EnterpriseServiceMockMixin, DiscoveryTest
     @httpretty.activate
     def test_is_satisfied_no_course_product(self):
         """ Ensure the condition returns false if the basket contains a product not associated with a course run. """
-        offer = factories.EnterpriseOfferFactory(site=self.site, condition=self.condition)
+        offer = factories.EnterpriseOfferFactory(partner=self.partner, condition=self.condition)
         basket = factories.BasketFactory(site=self.site, owner=self.user)
         basket.add_product(self.test_product)
         self.mock_enterprise_learner_api(
@@ -199,7 +199,7 @@ class EnterpriseCustomerConditionTests(EnterpriseServiceMockMixin, DiscoveryTest
     @httpretty.activate
     def test_is_satisfied_course_run_not_in_catalog(self):
         """ Ensure the condition returns false if the course run is not in the Enterprise catalog. """
-        offer = factories.EnterpriseOfferFactory(site=self.site, condition=self.condition)
+        offer = factories.EnterpriseOfferFactory(partner=self.partner, condition=self.condition)
         basket = factories.BasketFactory(site=self.site, owner=self.user)
         basket.add_product(self.course_run.seat_products[0])
         self.mock_enterprise_learner_api(

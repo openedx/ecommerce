@@ -22,7 +22,7 @@ class ProgramOfferTests(LmsApiMockMixin, ProgramTestMixin, TestCase):
     def test_offer(self):
         # Our offer is for 100%, so all lines should end up with a price of 0.
         offer = factories.ProgramOfferFactory(
-            site=self.site,
+            partner=self.partner,
             benefit=factories.PercentageDiscountBenefitWithoutRangeFactory(value=100)
         )
         basket = factories.BasketFactory(site=self.site, owner=self.create_user())

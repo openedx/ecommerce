@@ -34,7 +34,7 @@ class ProgramOfferListViewTests(ProgramTestMixin, ViewTestMixin, TestCase):
         # These should be ignored since their associated Condition objects do NOT have a program UUID.
         factories.ConditionalOfferFactory.create_batch(3)
 
-        program_offers = factories.ProgramOfferFactory.create_batch(4, site=self.site)
+        program_offers = factories.ProgramOfferFactory.create_batch(4, partner=self.partner)
 
         for offer in program_offers:
             self.mock_program_detail_endpoint(offer.condition.program_uuid, self.site_configuration.discovery_api_url)
@@ -51,17 +51,17 @@ class ProgramOfferListViewTests(ProgramTestMixin, ViewTestMixin, TestCase):
         """ Should return only Conditional Offers with Site offer type. """
 
         # Conditional Offer should contain a condition with program uuid set in order to be returned
-        site_conditional_offer = factories.ProgramOfferFactory(site=self.site)
+        site_conditional_offer = factories.ProgramOfferFactory(partner=self.partner)
 
-        # Conditional Offer with null Site or non-matching Site should not be returned
-        null_site_offer = factories.ProgramOfferFactory()
-        different_site_offer = factories.ProgramOfferFactory(site=factories.SiteConfigurationFactory().site)
+        # Conditional Offer with null Partner or non-matching Partner should not be returned
+        null_partner_offer = factories.ProgramOfferFactory()
+        different_partner_offer = factories.ProgramOfferFactory(partner=factories.SiteConfigurationFactory().partner)
         program_offers = [
             site_conditional_offer,
             factories.ProgramOfferFactory(offer_type=ConditionalOffer.VOUCHER),
             factories.ConditionalOfferFactory(offer_type=ConditionalOffer.SITE),
-            null_site_offer,
-            different_site_offer
+            null_partner_offer,
+            different_partner_offer
         ]
 
         for offer in program_offers:
@@ -74,7 +74,7 @@ class ProgramOfferListViewTests(ProgramTestMixin, ViewTestMixin, TestCase):
 class ProgramOfferUpdateViewTests(ProgramTestMixin, ViewTestMixin, TestCase):
     def setUp(self):
         super(ProgramOfferUpdateViewTests, self).setUp()
-        self.program_offer = factories.ProgramOfferFactory(site=self.site)
+        self.program_offer = factories.ProgramOfferFactory(partner=self.partner)
         self.path = reverse('programs:offers:edit', kwargs={'pk': self.program_offer.pk})
 
         # NOTE: We activate httpretty here so that we don't have to decorate every test method.
