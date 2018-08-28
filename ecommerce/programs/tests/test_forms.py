@@ -32,7 +32,7 @@ class ProgramOfferFormTests(ProgramTestMixin, TestCase):
         self.assertEqual(offer.offer_type, ConditionalOffer.SITE)
         self.assertEqual(offer.status, ConditionalOffer.OPEN)
         self.assertEqual(offer.max_basket_applications, 1)
-        self.assertEqual(offer.site, self.site)
+        self.assertEqual(offer.partner, self.partner)
         self.assertEqual(offer.condition.program_uuid, program_uuid)
         self.assertEqual(offer.benefit.proxy_class, class_path(BENEFIT_MAP[expected_benefit_type]))
         self.assertEqual(offer.benefit.value, expected_benefit_value)

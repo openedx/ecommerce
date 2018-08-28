@@ -528,7 +528,7 @@ class BasketCalculateViewTests(ProgramTestMixin, TestCase):
         self.site_configuration.enable_partial_program = True
         self.site_configuration.save()
         offer = ProgramOfferFactory(
-            site=self.site,
+            partner=self.partner,
             benefit=PercentageDiscountBenefitWithoutRangeFactory(value=100),
             condition=ProgramCourseRunSeatsConditionFactory()
         )
@@ -821,7 +821,7 @@ class BasketCalculateViewTests(ProgramTestMixin, TestCase):
         self.site_configuration.enable_partial_program = True
         self.site_configuration.save()
         offer = ProgramOfferFactory(
-            site=self.site,
+            partner=self.partner,
             benefit=PercentageDiscountBenefitWithoutRangeFactory(value=100),
             condition=ProgramCourseRunSeatsConditionFactory()
         )

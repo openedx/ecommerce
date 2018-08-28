@@ -20,10 +20,10 @@ class ConditionAdminExtended(ConditionAdmin):
 @admin.register(ConditionalOffer)
 class ConditionalOfferAdminExtended(ConditionalOfferAdmin):
     list_display = ('name', 'offer_type', 'start_datetime', 'end_datetime',
-                    'condition', 'benefit', 'total_discount', 'site')
+                    'condition', 'benefit', 'total_discount', 'partner')
     fieldsets = (
         (None, {
-            'fields': ('name', 'description', 'site', 'offer_type', 'condition',
+            'fields': ('name', 'description', 'partner', 'offer_type', 'condition',
                        'benefit', 'start_datetime', 'end_datetime', 'priority')
         }),
         ('Usage', {

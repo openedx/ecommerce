@@ -130,6 +130,7 @@ class ConditionalOffer(AbstractConditionalOffer):
     site = models.ForeignKey(
         'sites.Site', verbose_name=_('Site'), null=True, blank=True, default=None
     )
+    partner = models.ForeignKey('partner.Partner', null=True, blank=True)
 
     def save(self, *args, **kwargs):
         self.clean()

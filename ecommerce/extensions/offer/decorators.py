@@ -19,7 +19,7 @@ def check_condition_applicability(switches=None):
     def outer_wrapper(func):
         @wraps(func)
         def _decorated(condition, offer, basket):
-            if offer.site != basket.site:
+            if offer.partner != basket.site.siteconfiguration.partner:
                 return False
 
             if basket.is_empty:

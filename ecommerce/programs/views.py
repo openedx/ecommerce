@@ -25,7 +25,7 @@ class ProgramOfferViewMixin(StaffOnlyMixin):
 
     def get_queryset(self):
         return super(ProgramOfferViewMixin, self).get_queryset().filter(
-            site=self.request.site.id,
+            partner=self.request.site.siteconfiguration.partner,
             condition__program_uuid__isnull=False,
             offer_type=ConditionalOffer.SITE
         )

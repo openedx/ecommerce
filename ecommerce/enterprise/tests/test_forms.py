@@ -36,7 +36,7 @@ class EnterpriseOfferFormTests(EnterpriseServiceMockMixin, TestCase):
         self.assertEqual(offer.offer_type, ConditionalOffer.SITE)
         self.assertEqual(offer.status, ConditionalOffer.OPEN)
         self.assertEqual(offer.max_basket_applications, 1)
-        self.assertEqual(offer.site, self.site)
+        self.assertEqual(offer.partner, self.partner)
         self.assertEqual(offer.priority, OFFER_PRIORITY_ENTERPRISE)
         self.assertEqual(offer.condition.enterprise_customer_uuid, enterprise_customer_uuid)
         self.assertEqual(offer.condition.enterprise_customer_name, enterprise_customer_name)

@@ -6,7 +6,7 @@ from django.urls import reverse
 from oscar.core.loading import get_model
 from oscar.test.factories import RangeFactory
 
-from ecommerce.tests.factories import SiteFactory
+from ecommerce.tests.factories import SiteConfigurationFactory
 from ecommerce.tests.testcases import TestCase
 
 Benefit = get_model('offer', 'Benefit')
@@ -19,7 +19,8 @@ class OfferWizardTests(TestCase):
         """ Verify the site is stored in the session. """
         user = self.create_user(is_staff=True)
         self.client.login(username=user.username, password=self.password)
-        site = SiteFactory()
+        site_configuration = SiteConfigurationFactory()
+        site = site_configuration.site
 
         self.assertEqual(ConditionalOffer.objects.count(), 0)
 
@@ -73,5 +74,5 @@ class OfferWizardTests(TestCase):
         offer = ConditionalOffer.objects.first()
         self.assertEqual(response['Location'], reverse('dashboard:offer-detail', kwargs={'pk': offer.pk}))
 
-        # Ensure the offer is associated to the site set in the first step of the wizard
-        self.assertEqual(offer.site, site)
+        # Ensure the offer is associated to the partner set in the first step of the wizard
+        self.assertEqual(offer.partner, site_configuration.partner)
