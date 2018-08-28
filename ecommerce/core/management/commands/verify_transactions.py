@@ -93,7 +93,6 @@ class Command(BaseCommand):
                 else:
                     multi_payment_on_order.append((order.id, [event.id for event in payment_events]))
             for event in payment_events:
-                print("event: ", event)
                 if event.amount != order.total_incl_tax:
                     order_payment_totals_mismatch.append(("Order: " + str(order.id) + " Amount: " +
                                                           str(order.total_incl_tax), "Payment: " +
@@ -110,5 +109,4 @@ class Command(BaseCommand):
             exit_errors["multi_pay_on_order"] = "The following orders had multiple payments " \
                                                 + str(multi_payment_on_order)
         if exit_errors:
-            print("exit errors: ", exit_errors)
             raise CommandError("Errors in transactions: " + str(exit_errors))
