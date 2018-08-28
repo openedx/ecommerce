@@ -73,6 +73,7 @@ class Command(BaseCommand):
         end = datetime.datetime.now(pytz.utc) - datetime.timedelta(minutes=end_delta)
 
         orders = use_read_replica_if_available(Order.objects.all().filter(date_placed__gte=start, date_placed__lt=end))
+        logger.info("Number of orders to verify: " + str(orders.count()))
 
         orders_without_payments = []
         multi_payment_on_order = []
