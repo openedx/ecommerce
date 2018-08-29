@@ -46,8 +46,8 @@ class CatalogAdmin(admin.ModelAdmin):
         return super(CatalogAdmin, self).formfield_for_foreignkey(db_field, request, **kwargs)
 
     def get_object_updated(self, request, model):
-        object_id = request.META['PATH_INFO'].strip('/').split('/')[-1]
-        if object_id and object_id != 'add':
+        object_id = request.META['PATH_INFO'].strip('/').split('/')[-2]
+        if object_id and object_id.isdigit():
             return model.objects.get(pk=object_id)
 
 
