@@ -46,8 +46,8 @@ class VerifyTransactionsTest(TestCase):
 
         try:
             call_command('verify_transactions')
-        except CommandError:
-            self.fail("Failed to verify transactions when no errors were expected.")
+        except CommandError as e:
+            self.fail("Failed to verify transactions when no errors were expected. " + e.message)
 
     def test_no_errors(self):
         """Test verify_transactions with order and payment of same amount."""
@@ -63,8 +63,8 @@ class VerifyTransactionsTest(TestCase):
         refund.save()
         try:
             call_command('verify_transactions')
-        except CommandError:
-            self.fail("Failed to verify transactions when no errors were expected.")
+        except CommandError as e:
+            self.fail("Failed to verify transactions when no errors were expected. " + e.message)
 
     def test_no_payment_for_order(self):
         """Verify errors are thrown when there are orders without payments."""
@@ -133,5 +133,27 @@ class VerifyTransactionsTest(TestCase):
         self.assertIn("Order totals mismatch with payments received", exception.message)
         self.assertIn(str(self.order.id), exception.message)
         self.assertIn(str(payment.id), exception.message)
+        self.assertIn("Amount: 90.00", exception.message)
+        self.assertIn("Amount: 100.00", exception.message)
+
+    def test_refund_exceeded(self):
+        """ Verify errors thrown when payment and order totals don't match."""
+        payment = PaymentEventFactory(order=self.order,
+                                      amount=90,
+                                      event_type_id=self.payevent[0].id,
+                                      date_created=self.timestamp)
+        payment.save()
+        refund = PaymentEventFactory(order=self.order,
+                                     amount=100,
+                                     event_type_id=self.refundevent[0].id,
+                                     date_created=self.timestamp)
+        refund.save()
+        payment.save()
+        with self.assertRaises(CommandError) as cm:
+            call_command('verify_transactions')
+        exception = cm.exception
+        self.assertIn("The following orders had excessive refunds", exception.message)
+        self.assertIn(str(self.order.id), exception.message)
+        self.assertIn(str(refund.id), exception.message)
         self.assertIn("Amount: 90.00", exception.message)
         self.assertIn("Amount: 100.00", exception.message)
