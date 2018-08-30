@@ -66,6 +66,18 @@ class VerifyTransactionsTest(TestCase):
         except CommandError as e:
             self.fail("Failed to verify transactions when no errors were expected. " + e.message)
 
+    def test_zero_dollar_order(self):
+        total_incl_tax_before = self.order.total_incl_tax
+        self.order.total_incl_tax = 0
+        self.order.save()
+        try:
+            call_command('verify_transactions')
+        except CommandError as e:
+            self.fail("Failed to verify transactions when no errors were expected. " + e.message)
+        finally:
+            self.order.total_incl_tax = total_incl_tax_before
+            self.order.save()
+
     def test_no_payment_for_order(self):
         """Verify errors are thrown when there are orders without payments."""
         with self.assertRaises(CommandError) as cm:
