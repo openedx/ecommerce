@@ -32,18 +32,27 @@ import logging
 
 import pytz
 from django.core.management.base import BaseCommand, CommandError
-from oscar.core.loading import get_model
+from django.db.models import Sum
+from oscar.core.loading import get_class, get_model
 from ecommerce.core.utils import use_read_replica_if_available
 
 logger = logging.getLogger(__name__)
 Order = get_model('order', 'Order')
 PaymentEvent = get_model('order', 'PaymentEvent')
+PaymentEventType = get_model('order', 'PaymentEventType')
+PaymentEventTypeName = get_class('order.constants', 'PaymentEventTypeName')
 
 DEFAULT_START_DELTA_TIME = 240
 DEFAULT_END_DELTA_TIME = 60
 
 
 class Command(BaseCommand):
+    ORDERS_WITHOUT_PAYMENTS = None
+    MULTI_PAYMENT_ON_ORDER = None
+    ORDER_PAYMENT_TOTALS_MISMATCH = None
+    REFUND_AMOUNT_EXCEEDED = None
+    PAID_EVENT_TYPE = None
+    REFUNDED_EVENT_TYPE = None
 
     help = 'Management command to verify ecommerce transactions and log if there is any imbalance.'
 
@@ -66,48 +75,107 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options):
+        self.ORDERS_WITHOUT_PAYMENTS = []
+        self.MULTI_PAYMENT_ON_ORDER = []
+        self.ORDER_PAYMENT_TOTALS_MISMATCH = []
+        self.REFUND_AMOUNT_EXCEEDED = []
+        self.PAID_EVENT_TYPE = PaymentEventType.objects.get(name=PaymentEventTypeName.PAID)
+        self.REFUNDED_EVENT_TYPE = PaymentEventType.objects.get(name=PaymentEventTypeName.REFUNDED)
+
         start_delta = options['start_delta']
         end_delta = options['end_delta']
-        exit_errors = {}
+
         start = datetime.datetime.now(pytz.utc) - datetime.timedelta(minutes=start_delta)
         end = datetime.datetime.now(pytz.utc) - datetime.timedelta(minutes=end_delta)
 
-        orders = use_read_replica_if_available(Order.objects.all().filter(date_placed__gte=start, date_placed__lt=end))
-        logger.info("Number of orders to verify: " + str(orders.count()))
+        orders = use_read_replica_if_available(
+            Order.objects.all()
+            .filter(date_placed__gte=start, date_placed__lt=end)
+            .prefetch_related('payment_events__event_type')
+        )
 
-        orders_without_payments = []
-        multi_payment_on_order = []
-        order_payment_totals_mismatch = []
+        logger.info("Number of orders to verify: %s", orders.count())
 
         for order in orders:
-            payment_events = use_read_replica_if_available(PaymentEvent.objects.filter(order_id=order.id))
-            if payment_events.count() == 0 and order.total_incl_tax > 0:
-                # If a coupon is used to purchase a product for the full price, there will be no PaymentEvent.
-                orders_without_payments.append(order.id)
-            if payment_events.count() > 1:
-                if payment_events.count() == 2:
-                    event1 = payment_events[0]
-                    event2 = payment_events[1]
-                    if event1.event_type_id == event2.event_type_id:
-                        # If PaymentEvents are the same type then there were multiple payments.
-                        multi_payment_on_order.append((order.id, [event.id for event in payment_events]))
-                else:
-                    multi_payment_on_order.append((order.id, [event.id for event in payment_events]))
-            for event in payment_events:
-                if event.amount != order.total_incl_tax:
-                    order_payment_totals_mismatch.append(("Order: " + str(order.id) + " Amount: " +
-                                                          str(order.total_incl_tax), "Payment: " +
-                                                          str(event.id) + " Amount: " +
-                                                          str(event.amount)))
+            all_payment_events = order.payment_events
+            refunds = all_payment_events.filter(event_type=self.REFUNDED_EVENT_TYPE)
+            payments = all_payment_events.filter(event_type=self.PAID_EVENT_TYPE)
 
-        if order_payment_totals_mismatch:
-            exit_errors["totals_mismatch"] = "Order totals mismatch with payments received. " \
-                                             + str(order_payment_totals_mismatch)
-        if orders_without_payments:
-            exit_errors["orders_no_pay"] = "The following orders are without payments " \
-                                           + str(orders_without_payments) + ". "
-        if multi_payment_on_order:
-            exit_errors["multi_pay_on_order"] = "The following orders had multiple payments " \
-                                                + str(multi_payment_on_order)
+            self.validate_order_payments(order, payments)
+            self.validate_order_refunds(order, refunds, payments)
+
+        exit_errors = self.compile_errors()
+
         if exit_errors:
-            raise CommandError("Errors in transactions: " + str(exit_errors))
+            raise CommandError("Errors in transactions: {errors}".format(errors=exit_errors))
+
+    def validate_order_payments(self, order, payments):
+        # If a coupon is used to purchase a product for the full price, there will be no PaymentEvent
+        # so we must also verify that order had a price > 0.
+        if payments.count() == 0 and order.total_incl_tax > 0:
+            self.ORDERS_WITHOUT_PAYMENTS.append(
+                (order, None)
+            )
+
+        # We do not support multi-payment today, so flag this for review.
+        if payments.count() > 1:
+            self.MULTI_PAYMENT_ON_ORDER.append(
+                (order, payments)
+            )
+
+        # If the payment total and the order total do not match, flag for review.
+        if payments.aggregate(total=Sum('amount')).get('total') != order.total_incl_tax:
+            self.ORDER_PAYMENT_TOTALS_MISMATCH.append(
+                (order, payments)
+            )
+
+    def validate_order_refunds(self, order, refunds, payments):
+        refund_total = refunds.aggregate(total=Sum('amount')).get('total')
+        payment_total = payments.aggregate(total=Sum('amount')).get('total')
+        if refund_total > payment_total:
+            self.REFUND_AMOUNT_EXCEEDED.append(
+                (order, refunds)
+            )
+
+    def compile_errors(self):
+        exit_errors = {}
+        if self.ORDER_PAYMENT_TOTALS_MISMATCH:
+            exit_errors["totals_mismatch"] = "Order totals mismatch with payments received. " \
+                                             + self.error_msg(self.ORDER_PAYMENT_TOTALS_MISMATCH)
+        if self.ORDERS_WITHOUT_PAYMENTS:
+            exit_errors["orders_no_pay"] = "The following orders are without payments " \
+                                           + self.error_msg(self.ORDERS_WITHOUT_PAYMENTS)
+        if self.MULTI_PAYMENT_ON_ORDER:
+            exit_errors["multi_pay_on_order"] = "The following orders had multiple payments " \
+                                                + self.error_msg(self.MULTI_PAYMENT_ON_ORDER)
+
+        if self.REFUND_AMOUNT_EXCEEDED:
+            exit_errors["refund_amount_exceeded"] = "The following orders had excessive refunds " \
+                                                    + self.error_msg(self.REFUND_AMOUNT_EXCEEDED)
+        return exit_errors
+
+    def error_msg(self, errors):
+        msg = ""
+        for order, payments in errors:
+            order_str = "Order(Id: {order_id}, Number: {num}, Amount: {amount}) \n".format(
+                order_id=order.id,
+                num=order.number,
+                amount=order.total_incl_tax
+            )
+            payment_str = ""
+
+            if payments:
+                for payment in payments:
+                    payment_str += "Payment(Id: {payment_id}, Processor: {processor}, " \
+                        "Amount: {amount}, Type:{type} \n" \
+                        .format(
+                            payment_id=payment.id,
+                            processor=payment.processor_name,
+                            amount=payment.amount,
+                            type=payment.event_type.name
+                        )
+
+            msg += order_str
+            msg += payment_str
+
+        return msg
