@@ -112,10 +112,12 @@ class Command(BaseCommand):
     def validate_order_payments(self, order, payments):
         # If a coupon is used to purchase a product for the full price, there will be no PaymentEvent
         # so we must also verify that order had a price > 0.
-        if payments.count() == 0 and order.total_incl_tax > 0:
-            self.ORDERS_WITHOUT_PAYMENTS.append(
-                (order, None)
-            )
+        if payments.count() == 0:
+            if order.total_incl_tax > 0:
+                self.ORDERS_WITHOUT_PAYMENTS.append(
+                    (order, None)
+                )
+            return
 
         # We do not support multi-payment today, so flag this for review.
         if payments.count() > 1:
