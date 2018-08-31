@@ -34,6 +34,8 @@ import pytz
 from django.core.management.base import BaseCommand, CommandError
 from django.db.models import Sum
 from oscar.core.loading import get_class, get_model
+
+from ecommerce.core.constants import COURSE_ENTITLEMENT_PRODUCT_CLASS_NAME, SEAT_PRODUCT_CLASS_NAME
 from ecommerce.core.utils import use_read_replica_if_available
 
 logger = logging.getLogger(__name__)
@@ -44,6 +46,7 @@ PaymentEventTypeName = get_class('order.constants', 'PaymentEventTypeName')
 
 DEFAULT_START_DELTA_TIME = 240
 DEFAULT_END_DELTA_TIME = 60
+VALID_PRODUCT_CLASS_NAMES = [SEAT_PRODUCT_CLASS_NAME, COURSE_ENTITLEMENT_PRODUCT_CLASS_NAME]
 
 
 class Command(BaseCommand):
@@ -104,6 +107,7 @@ class Command(BaseCommand):
             self.validate_order_payments(order, payments)
             self.validate_order_refunds(order, refunds, payments)
 
+        self.clean_orders()
         exit_errors = self.compile_errors()
 
         if exit_errors:
@@ -176,8 +180,25 @@ class Command(BaseCommand):
                             amount=payment.amount,
                             type=payment.event_type.name
                         )
-
             msg += order_str
             msg += payment_str
-
         return msg
+
+    def clean_orders(self):
+        # We only expect immediate payments for Seats and Entitlements.
+        # Filter out orders that were flagged as being without payment for other product types
+        cleaned_orders_without_payments = [
+            (o, p) for o, p in self.ORDERS_WITHOUT_PAYMENTS if self.valid_order_without_payment(o)
+        ]
+        self.ORDERS_WITHOUT_PAYMENTS = cleaned_orders_without_payments
+
+    def valid_order_without_payment(self, order):
+        valid = False
+        for line in order.lines.all():
+            if self.verifiable_product(line.product):
+                valid = True
+
+        return valid
+
+    def verifiable_product(self, product):
+        return product.get_product_class().name in VALID_PRODUCT_CLASS_NAMES
