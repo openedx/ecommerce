@@ -465,6 +465,7 @@ def create_vouchers(
         coupon,
         end_datetime,
         enterprise_customer,
+        enterprise_customer_catalog,
         name,
         quantity,
         start_datetime,
@@ -495,6 +496,7 @@ def create_vouchers(
         email_domains (str): List of email domains to restrict coupons. Defaults to None.
         end_datetime (datetime): End date for voucher offer.
         enterprise_customer (str): UUID of an EnterpriseCustomer attached to this voucher
+        enterprise_customer_catalog (str): UUID of an EnterpriseCustomerCatalog attached to this voucher
         max_uses (int): Number of Voucher max uses. Defaults to None.
         name (str): Voucher name.
         quantity (int): Number of vouchers to be created.
@@ -538,6 +540,7 @@ def create_vouchers(
         course_catalog = course_catalog if course_catalog else None
         # make sure enterprise_customer is None if it's empty
         enterprise_customer = enterprise_customer or None
+        enterprise_customer_catalog = enterprise_customer_catalog or None
         # we do not need a range if this is for a Program
         if program_uuid:
             product_range = None
@@ -549,6 +552,7 @@ def create_vouchers(
                 course_catalog=course_catalog,
                 course_seat_types=course_seat_types,
                 enterprise_customer=enterprise_customer,
+                enterprise_customer_catalog=enterprise_customer_catalog,
             )
 
     # In case of more than 1 multi-usage coupon, each voucher needs to have an individual
