@@ -121,10 +121,12 @@ class DiscoveryMockMixin(object):
                     'image': {
                         'src': 'path/to/the/course/image'
                     },
+                    'enrollment_start': '2016-05-01T00:00:00Z',
                     'enrollment_end': None
                 }] if course_run else [{
                     'key': 'test',
                     'title': 'Test course',
+                    'enrollment_start': '2016-05-01T00:00:00Z',
                     'enrollment_end': None
                 }],
             }
@@ -159,6 +161,49 @@ class DiscoveryMockMixin(object):
         httpretty.register_uri(
             httpretty.GET, course_run_url_with_key,
             body=json.dumps(course_run_info['results'][0]),
+            content_type='application/json'
+        )
+
+    def mock_enterprise_catalog_course_endpoint(
+            self, enterprise_api_url, enterprise_catalog_id, course_run=None, course_info=None
+    ):
+        """
+        Helper function to register a enterprise API endpoint for getting course information.
+        """
+        if not course_info:
+            course_info = {
+                'count': 1,
+                'next': None,
+                'previous': None,
+                'results': [{
+                    'key': course_run.id,
+                    'title': course_run.name,
+                    'card_image_url': 'path/to/the/course/image',
+                    'content_type': 'course',
+                    'course_runs': [{
+                        'key': course_run.id,
+                        'start': '2016-05-01T00:00:00Z',
+                        'enrollment_start': '2016-05-01T00:00:00Z',
+                        'enrollment_end': None,
+                    }, {
+                        'key': 'test',
+                        'title': 'Test course',
+                    }],
+                }] if course_run else [{
+                    'key': 'test',
+                    'title': 'Test course',
+                    'course_runs': [],
+                }],
+            }
+        course_info_json = json.dumps(course_info)
+        enterprise_catalog_url = '{}enterprise_catalogs/{}/'.format(
+            enterprise_api_url,
+            enterprise_catalog_id
+        )
+        httpretty.register_uri(
+            httpretty.GET,
+            enterprise_catalog_url,
+            body=course_info_json,
             content_type='application/json'
         )
 
@@ -429,6 +474,7 @@ class CouponMixin(object):
             email_domains=email_domains,
             end_datetime=datetime.datetime(2020, 1, 1),
             enterprise_customer=enterprise_customer,
+            enterprise_customer_catalog=None,
             max_uses=max_uses,
             note=note,
             partner=partner,

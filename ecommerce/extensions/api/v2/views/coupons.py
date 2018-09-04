@@ -105,6 +105,7 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
                         email_domains=cleaned_voucher_data['email_domains'],
                         end_datetime=cleaned_voucher_data['end_datetime'],
                         enterprise_customer=cleaned_voucher_data['enterprise_customer'],
+                        enterprise_customer_catalog=cleaned_voucher_data['enterprise_customer_catalog'],
                         max_uses=cleaned_voucher_data['max_uses'],
                         note=cleaned_voucher_data['note'],
                         partner=cleaned_voucher_data['partner'],
@@ -205,6 +206,7 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
             'email_domains': request.data.get('email_domains'),
             'end_datetime': request.data.get('end_datetime'),
             'enterprise_customer': enterprise_customer,
+            'enterprise_customer_catalog': request.data.get('enterprise_customer_catalog'),
             'max_uses': max_uses,
             'note': request.data.get('note'),
             'partner': partner,
@@ -325,6 +327,9 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
             range_data['enterprise_customer'] = enterprise_customer_data.get('id')
         else:
             range_data['enterprise_customer'] = None
+
+        if 'enterprise_customer_catalog' in request.data:
+            range_data['enterprise_customer_catalog'] = request.data.get('enterprise_customer_catalog') or None
 
         for attr, value in range_data.iteritems():
             setattr(voucher_range, attr, value)

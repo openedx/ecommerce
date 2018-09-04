@@ -86,6 +86,7 @@ class UtilTests(CouponMixin, DiscoveryMockMixin, DiscoveryTestMixin, LmsApiMockM
             'coupon': self.coupon,
             'end_datetime': datetime.datetime.now() + datetime.timedelta(days=1),
             'enterprise_customer': None,
+            'enterprise_customer_catalog': None,
             'name': "Test voucher",
             'quantity': 10,
             'start_datetime': datetime.datetime.now() - datetime.timedelta(days=1),

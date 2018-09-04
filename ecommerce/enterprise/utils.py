@@ -11,6 +11,7 @@ import waffle
 from django.conf import settings
 from django.urls import reverse
 from django.utils.translation import ugettext as _
+from edx_django_utils.cache import TieredCache
 from edx_rest_api_client.client import EdxRestApiClient
 from oscar.core.loading import get_model
 from requests.exceptions import ConnectionError, Timeout
@@ -373,3 +374,46 @@ def has_enterprise_offer(basket):
         if offer['offer'].priority == OFFER_PRIORITY_ENTERPRISE:
             return True
     return False
+
+
+def get_enterprise_catalog(site, enterprise_catalog, limit, page):
+    """
+    Get the EnterpriseCustomerCatalog for a given catalog uuid.
+
+    Args:
+        site (Site): The site which is handling the current request
+        enterprise_catalog (str): The uuid of the Enterprise Catalog
+        limit (int): The number of results to return per page.
+        page (int): The page number to fetch.
+
+    Returns:
+        dict: The result set containing the content objects associated with the Enterprise Catalog.
+        NoneType: Return None if no catalog with that uuid is found.
+    """
+    resource = 'enterprise_catalogs'
+    partner_code = site.siteconfiguration.partner.short_code
+    cache_key = '{site_domain}_{partner_code}_{resource}_{catalog}_{limit}_{page}'.format(
+        site_domain=site.domain,
+        partner_code=partner_code,
+        resource=resource,
+        catalog=enterprise_catalog,
+        limit=limit,
+        page=page
+    )
+    cache_key = hashlib.md5(cache_key).hexdigest()
+
+    cached_response = TieredCache.get_cached_response(cache_key)
+    if cached_response.is_found:
+        return cached_response.value
+
+    client = get_enterprise_api_client(site)
+    path = [resource, str(enterprise_catalog)]
+    client = reduce(getattr, path, client)
+
+    response = client.get(
+        limit=limit,
+        page=page,
+    )
+    TieredCache.set_all_tiers(cache_key, response, settings.CATALOG_RESULTS_CACHE_TIMEOUT)
+
+    return response
