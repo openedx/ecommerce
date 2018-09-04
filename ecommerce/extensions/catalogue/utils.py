@@ -30,6 +30,7 @@ def create_coupon_product(
         email_domains,
         end_datetime,
         enterprise_customer,
+        enterprise_customer_catalog,
         max_uses,
         note,
         partner,
@@ -57,6 +58,7 @@ def create_coupon_product(
         email_domains (str): Comma-separated list of email domains.
         end_datetime (Datetime): Voucher end Datetime.
         enterprise_customer (str): UUID of an EnterpriseCustomer to attach to this voucher
+        enterprise_customer_catalog (str): UUID of an EnterpriseCustomerCatalog to attach to this voucher
         max_uses (int): Number of Voucher max uses.
         note (str): Coupon note.
         partner (User): Partner associated with coupon Stock Record.
@@ -96,6 +98,7 @@ def create_coupon_product(
             email_domains=email_domains,
             end_datetime=end_datetime,
             enterprise_customer=enterprise_customer,
+            enterprise_customer_catalog=enterprise_customer_catalog,
             max_uses=max_uses,
             name=title,
             quantity=int(quantity),

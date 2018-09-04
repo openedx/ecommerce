@@ -202,6 +202,13 @@ define([
                     model.validate();
                     expect(model.isValid()).toBeTruthy();
                 });
+
+                it('should validate enterprise customer is set if enterprise customer catalog is set', function() {
+                    model.set('enterprise_customer_catalog', 'fake_uuid');
+                    model.set('enterprise_customer', '');
+                    model.validate();
+                    expect(model.isValid()).toBeFalsy();
+                });
             });
 
             describe('test model methods', function() {

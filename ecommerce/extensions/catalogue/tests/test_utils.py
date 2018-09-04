@@ -127,6 +127,7 @@ class CouponCreationTests(CouponMixin, TestCase):
             email_domains=None,
             end_datetime='2020-1-1',
             enterprise_customer=None,
+            enterprise_customer_catalog=None,
             max_uses=max_uses,
             note=note,
             partner=self.partner,
