@@ -1,6 +1,7 @@
 from __future__ import unicode_literals
 
 import datetime
+from uuid import uuid4
 
 import ddt
 import httpretty
@@ -103,6 +104,7 @@ class VoucherViewSetTests(DiscoveryMockMixin, DiscoveryTestMixin, LmsApiMockMixi
                     },
                     'key': seat.course_id,
                     'start': '2016-05-01T00:00:00Z',
+                    'enrollment_start': '2016-05-01T00:00:00Z',
                     'title': seat.title,
                     'enrollment_end': None
                 })
@@ -116,6 +118,7 @@ class VoucherViewSetTests(DiscoveryMockMixin, DiscoveryTestMixin, LmsApiMockMixi
                     },
                     'key': course.id,
                     'start': '2016-05-01T00:00:00Z',
+                    'enrollment_start': '2016-05-01T00:00:00Z',
                     'title': course.name,
                     'enrollment_end': None
                 })
@@ -203,25 +206,46 @@ class VoucherViewSetTests(DiscoveryMockMixin, DiscoveryTestMixin, LmsApiMockMixi
 
     def test_omitting_expired_courses(self):
         """Verify professional courses who's enrollment end datetime have passed are omitted."""
-        no_date_seat = CourseFactory(partner=self.partner).create_or_update_seat('professional', False, 100)
+        no_enrollment_end_seat = CourseFactory(partner=self.partner).create_or_update_seat('professional', False, 100)
+        no_enrollment_start_seat = CourseFactory(partner=self.partner).create_or_update_seat('professional', False, 100)
         valid_seat = CourseFactory(partner=self.partner).create_or_update_seat('professional', False, 100)
+        expired_enrollment_seat = CourseFactory(partner=self.partner).create_or_update_seat('professional', False, 100)
         expired_seat = CourseFactory(partner=self.partner).create_or_update_seat('professional', False, 100)
+        future_enrollment_seat = CourseFactory(partner=self.partner).create_or_update_seat('professional', False, 100)
 
         course_discovery_results = [{
-            'key': no_date_seat.attr.course_key,
+            'key': no_enrollment_end_seat.attr.course_key,
+            'enrollment_end': None,
+            'enrollment_start': str(now() - datetime.timedelta(days=1)),
+        }, {
+            'key': no_enrollment_start_seat.attr.course_key,
             'enrollment_end': None,
         }, {
             'key': valid_seat.attr.course_key,
             'enrollment_end': str(now() + datetime.timedelta(days=1)),
+            'enrollment_start': str(now() - datetime.timedelta(days=1)),
+        }, {
+            'key': expired_enrollment_seat.attr.course_key,
+            'enrollment_end': str(now() - datetime.timedelta(days=1)),
+            'enrollment_start': str(now() - datetime.timedelta(days=1)),
         }, {
             'key': expired_seat.attr.course_key,
-            'enrollment_end': str(now() - datetime.timedelta(days=1)),
+            'enrollment_end': None,
+            'enrollment_start': str(now() - datetime.timedelta(days=1)),
+            'end': str(now() - datetime.timedelta(days=1)),
+        }, {
+            'key': future_enrollment_seat.attr.course_key,
+            'enrollment_end': None,
+            'enrollment_start': str(now() + datetime.timedelta(days=1)),
         }]
 
-        products, __ = VoucherViewSet().retrieve_course_objects(course_discovery_results, 'professional')
-        self.assertIn(no_date_seat, products)
+        products, __, __ = VoucherViewSet().retrieve_course_objects(course_discovery_results, 'professional')
+        self.assertIn(no_enrollment_end_seat, products)
+        self.assertNotIn(no_enrollment_start_seat, products)
         self.assertIn(valid_seat, products)
+        self.assertNotIn(expired_enrollment_seat, products)
         self.assertNotIn(expired_seat, products)
+        self.assertNotIn(future_enrollment_seat, products)
 
 
 @ddt.ddt
@@ -407,6 +431,45 @@ class VoucherViewOffersEndpointTests(DiscoveryMockMixin, CouponMixin, DiscoveryT
             self.site_configuration.discovery_api_url, query='*:*', course_run=course
         )
         new_range, __ = Range.objects.get_or_create(catalog_query='*:*', course_seat_types='verified')
+        new_range.add_product(seat)
+        voucher, __ = prepare_voucher(_range=new_range, benefit_value=10)
+        benefit = voucher.offers.first().benefit
+        request = self.prepare_offers_listing_request(voucher.code)
+        offers = VoucherViewSet().get_offers(request=request, voucher=voucher)['results']
+        first_offer = offers[0]
+        self.assertEqual(len(offers), 1)
+        self.assertDictEqual(first_offer, {
+            'benefit': {
+                'type': benefit.type,
+                'value': benefit.value
+            },
+            'contains_verified': True,
+            'course_start_date': '2016-05-01T00:00:00Z',
+            'id': course.id,
+            'image_url': 'path/to/the/course/image',
+            'multiple_credit_providers': False,
+            'organization': CourseKey.from_string(course.id).org,
+            'credit_provider_price': None,
+            'seat_type': course.type,
+            'stockrecords': serializers.StockRecordSerializer(seat.stockrecords.first()).data,
+            'title': course.name,
+            'voucher_end_date': voucher.end_datetime,
+        })
+
+    def test_get_offers_for_enterprise_catalog_voucher(self):
+        """ Verify that the course offers data is returned for an enterprise catalog voucher. """
+        self.mock_access_token_response()
+        course, seat = self.create_course_and_seat()
+        enterprise_catalog_id = str(uuid4())
+        self.mock_enterprise_catalog_course_endpoint(
+            self.site_configuration.enterprise_api_url, enterprise_catalog_id, course_run=course
+        )
+        new_range, __ = Range.objects.get_or_create(
+            catalog_query='*:*',
+            course_seat_types='verified',
+            enterprise_customer=str(uuid4()),
+            enterprise_customer_catalog=enterprise_catalog_id,
+        )
         new_range.add_product(seat)
         voucher, __ = prepare_voucher(_range=new_range, benefit_value=10)
         benefit = voucher.offers.first().benefit

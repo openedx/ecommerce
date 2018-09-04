@@ -234,6 +234,19 @@ define([
                 });
             });
 
+            describe('enterprise customer catalogs', function() {
+                it('enterprise customer catalog field should be hidden when a catalog is selected', function() {
+                    view.$('#single-course').prop('checked', true).trigger('change');
+                    expect(SpecUtils.formGroup(view, '[name=enterprise_customer_catalog]')).not.toHaveHiddenClass();
+
+                    view.$('#catalog').prop('checked', true).trigger('change');
+                    expect(SpecUtils.formGroup(view, '[name=enterprise_customer_catalog]')).toHaveHiddenClass();
+
+                    view.$('#multiple-courses').prop('checked', true).trigger('change');
+                    expect(SpecUtils.formGroup(view, '[name=enterprise_customer_catalog]')).not.toHaveHiddenClass();
+                });
+            });
+
             describe('discount code', function() {
                 var prepaidInvoiceFields = [
                     '[name=invoice_number]',

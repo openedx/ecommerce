@@ -116,6 +116,7 @@ class EnrollmentFulfillmentModuleTests(ProgramTestMixin, DiscoveryTestMixin, Ful
             coupon=coupon,
             end_datetime=datetime.datetime.now() + datetime.timedelta(days=30),
             enterprise_customer=None,
+            enterprise_customer_catalog=None,
             name="Test Voucher",
             quantity=10,
             start_datetime=datetime.datetime.now(),

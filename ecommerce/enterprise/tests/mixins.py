@@ -35,6 +35,10 @@ class EnterpriseServiceMockMixin(object):
         settings.ENTERPRISE_API_URL,
     )
 
+    ENTERPRISE_CATALOG_URL = '{}enterprise_catalogs/'.format(
+        settings.ENTERPRISE_API_URL
+    )
+
     def setUp(self):
         super(EnterpriseServiceMockMixin, self).setUp()
         self.course_run = CourseFactory()
@@ -85,6 +89,80 @@ class EnterpriseServiceMockMixin(object):
             method=httpretty.GET,
             uri=self.ENTERPRISE_CUSTOMER_URL,
             body=enterprise_customer_api_response_json,
+            content_type='application/json'
+        )
+
+    def mock_enterprise_catalog_api_get(self, enterprise_catalog_uuid):
+        """
+        Helper function to register the enterprise catalog API endpoint.
+        """
+        enterprise_catalog_api_response = {
+            "count": 60,
+            "next": "{}{}/?page=2".format(self.ENTERPRISE_CATALOG_URL, enterprise_catalog_uuid),
+            "previous": None,
+            "results": [
+                {
+                    "full_description": "kjhl",
+                    "short_description": "jhgh",
+                    "card_image_url": None,
+                    "content_type": "course",
+                    "course_runs": [],
+                    "title": "Test Course for enrollment codes",
+                    "key": "edX+123",
+                    "aggregation_key": "course:edX+123"
+                },
+                {
+                    "full_description": None,
+                    "short_description": None,
+                    "card_image_url": None,
+                    "content_type": "course",
+                    "course_runs": [
+                        {
+                            "end": "2019-12-31T00:00:00Z",
+                            "start": "2018-09-01T00:00:00Z",
+                            "enrollment_end": "2018-12-31T00:00:00Z",
+                            "key": "course-v1:Mattx+TCE2E+2018",
+                            "enrollment_start": "2018-08-01T00:00:00Z"
+                        }
+                    ],
+                    "title": "TestCourseE2E",
+                    "key": "Mattx+TCE2E",
+                    "aggregation_key": "course:Mattx+TCE2E"
+                },
+                {
+                    "full_description": None,
+                    "short_description": None,
+                    "card_image_url": None,
+                    "content_type": "course",
+                    "course_runs": [
+                        {
+                            "end": "2019-05-01T00:00:00Z",
+                            "start": "2018-05-01T00:00:00Z",
+                            "enrollment_end": None,
+                            "key": "course-v1:MAX+MAX101+2018_T1",
+                            "enrollment_start": None
+                        },
+                        {
+                            "end": "2019-05-01T00:00:00Z",
+                            "start": "2030-01-01T00:00:00Z",
+                            "enrollment_end": None,
+                            "key": "course-v1:MAX+MAX101+2018_R2",
+                            "enrollment_start": None
+                        }
+                    ],
+                    "title": "MA Info",
+                    "key": "MAX+MAX101",
+                    "aggregation_key": "course:MAX+MAX101"
+                }
+            ]
+        }
+
+        enterprise_catalog_api_response_json = json.dumps(enterprise_catalog_api_response)
+        self.mock_access_token_response()
+        httpretty.register_uri(
+            method=httpretty.GET,
+            uri='{}{}/'.format(self.ENTERPRISE_CATALOG_URL, enterprise_catalog_uuid),
+            body=enterprise_catalog_api_response_json,
             content_type='application/json'
         )
 
