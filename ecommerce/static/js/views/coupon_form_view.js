@@ -268,6 +268,9 @@ define([
                         };
                     }
                 },
+                'input[name=enterprise_customer_catalog]': {
+                    observe: 'enterprise_customer_catalog'
+                },
                 'input[name=program_uuid]': {
                     observe: 'program_uuid'
                 }
@@ -304,6 +307,7 @@ define([
                         'course_catalog',
                         'end_date',
                         'enterprise_customer',
+                        'enterprise_customer_catalog',
                         'invoice_discount_type',
                         'invoice_discount_value',
                         'invoice_number',
@@ -483,9 +487,11 @@ define([
 
             toggleEnterpriseRelatedFields: function(hide) {
                 this.formGroup('[name=enterprise_customer]').toggleClass(this.hiddenClass, hide);
+                this.formGroup('[name=enterprise_customer_catalog]').toggleClass(this.hiddenClass, hide);
 
                 if (hide) {
                     this.model.unset('enterprise_customer');
+                    this.model.unset('enterprise_customer_catalog');
                 }
             },
 
