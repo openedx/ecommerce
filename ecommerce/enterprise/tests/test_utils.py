@@ -11,6 +11,7 @@ from oscar.test.factories import VoucherFactory
 from ecommerce.enterprise.tests.mixins import EnterpriseServiceMockMixin
 from ecommerce.enterprise.utils import (
     enterprise_customer_user_needs_consent,
+    get_enterprise_catalog,
     get_enterprise_customer,
     get_enterprise_customer_uuid,
     get_enterprise_customers,
@@ -161,3 +162,20 @@ class EnterpriseUtilsTests(EnterpriseServiceMockMixin, TestCase):
         result = set_enterprise_customer_cookie(self.site, response, enterprise_customer_uuid)
 
         self.assertNotIn(settings.ENTERPRISE_CUSTOMER_COOKIE_NAME, result.cookies)
+
+    def test_get_enterprise_catalog(self):
+        """
+        Verify that "get_enterprise_catalog" returns an appropriate response from the
+        "enterprise-catalog" Enterprise service API endpoint.
+        """
+        enterprise_catalog_uuid = str(uuid.uuid4())
+        self.mock_access_token_response()
+        self.mock_enterprise_catalog_api_get(enterprise_catalog_uuid)
+        response = get_enterprise_catalog(self.site, enterprise_catalog_uuid, 50, 1)
+        self.assertTrue(enterprise_catalog_uuid in response['next'])
+        self.assertTrue(len(response['results']) == 3)
+        for result in response['results']:
+            self.assertTrue('course_runs' in result)
+
+        cached_response = get_enterprise_catalog(self.site, enterprise_catalog_uuid, 50, 1)
+        self.assertEqual(response, cached_response)

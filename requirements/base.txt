@@ -37,7 +37,7 @@ paypalrestsdk==1.11.5
 premailer==2.9.2
 pycountry==17.1.8
 pygments==2.2.0
-python-dateutil==2.4.2
+python-dateutil==2.7.3
 pytz==2016.10
 requests==2.18.1
 sailthru-client==2.2.3
