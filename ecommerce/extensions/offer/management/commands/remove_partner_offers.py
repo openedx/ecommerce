@@ -50,12 +50,26 @@ class Command(BaseCommand):
 
         count = len(conditional_offers)
         if count == 0:
-            logger.info('No offer found for partner %s.', partner_code)
+            logger.info('No offer found for partner [%s].', partner_code)
             return
+
+        line_feed = '\n'
+        offer_names = 'Conditional offers to be deleted for partner [{partner_code}] {line_feed}'.format(
+            partner_code=partner_code, line_feed=line_feed
+        )
+        for i in range(count):
+            if i == count - 1:
+                line_feed = ''
+            offer_names = '{names} {index}. {name} {line_feed}'.format(
+                names=offer_names, index=i + 1, name=conditional_offers[i].name, line_feed=line_feed
+            )
+
+        # List down all conditional offers to be deleted.
+        logger.warning(offer_names)
 
         pluralized = pluralize(count)
         if query_yes_no(self.CONFIRMATION_PROMPT.format(count=count, pluralized=pluralized), default="no"):
-            # disconnect post_delete oscar receiver to avoid Condition matching query.
+            # disconnect post_delete oscar receiver to avoid Condition matching query does not exist.
             signals.post_delete.disconnect(
                 receiver=delete_unused_related_conditions_and_benefits, sender=ConditionalOffer
             )
