@@ -10,3 +10,6 @@ edx-i18n-tools==0.4.4
 
 # Visual Studio Code Debugger
 ptvsd==3.0
+
+# For devserver code reloading
+pyinotify==0.9.6
