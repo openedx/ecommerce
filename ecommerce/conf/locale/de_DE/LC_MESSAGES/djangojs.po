@@ -4,6 +4,7 @@
 # This file is distributed under the GNU AFFERO GENERAL PUBLIC LICENSE.
 # 
 # Translators:
+# Abstract Technology <stefania.trabucchi@abstract-technology.de>, 2018
 # Akif Vohra <akifvohra@gmail.com>, 2016
 # Alexander L. <alexander.lohberg@ufo-style.de>, 2017
 # Ettore Atalan <atalanttore@googlemail.com>, 2016
@@ -14,7 +15,7 @@ msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2018-04-05 11:00+0000\n"
-"PO-Revision-Date: 2018-07-19 08:47+0000\n"
+"PO-Revision-Date: 2018-09-05 14:23+0000\n"
 "Last-Translator: Abstract Technology <stefania.trabucchi@abstract-technology.de>\n"
 "Language-Team: German (Germany) (http://www.transifex.com/open-edx/edx-platform/language/de_DE/)\n"
 "MIME-Version: 1.0\n"
@@ -170,7 +171,7 @@ msgstr "Alle Credit-Kursplätze benötigen eine Festlegung der Credit-Stunden."
 
 #: ecommerce/static/js/pages/basket_page.js:27
 msgid "Problem occurred during checkout. Please contact support."
-msgstr ""
+msgstr "Es ist ein Fehler beim Bezahlen aufgetreten. Bitte kontaktieren Sie den Support."
 
 #: ecommerce/static/js/pages/basket_page.js:101
 msgid "This field is required"
@@ -344,7 +345,7 @@ msgstr "Name"
 
 #: ecommerce/static/js/views/coupon_list_view.js:81
 msgid "Created"
-msgstr ""
+msgstr "Erstellt"
 
 #: ecommerce/static/js/views/coupon_list_view.js:85
 msgid "Custom Code"
