@@ -4,6 +4,7 @@
 # This file is distributed under the GNU AFFERO GENERAL PUBLIC LICENSE.
 # 
 # Translators:
+# Abstract Technology <stefania.trabucchi@abstract-technology.de>, 2018
 # Akif Vohra <akifvohra@gmail.com>, 2016
 # Alexander L. <alexander.lohberg@ufo-style.de>, 2016-2017
 # Bert Krohn <bert.krohn@tum.de>, 2018
@@ -15,7 +16,7 @@ msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: openedx-translation@googlegroups.com\n"
 "POT-Creation-Date: 2018-03-26 16:41-0400\n"
-"PO-Revision-Date: 2018-04-24 12:32+0000\n"
+"PO-Revision-Date: 2018-09-05 14:22+0000\n"
 "Last-Translator: Abstract Technology <stefania.trabucchi@abstract-technology.de>\n"
 "Language-Team: German (Germany) (http://www.transifex.com/open-edx/edx-platform/language/de_DE/)\n"
 "MIME-Version: 1.0\n"
@@ -168,7 +169,7 @@ msgstr "Eine kommagetrennte Liste der Fiskal OFAC Liste gegen die gerpüft wird.
 
 #: ecommerce/core/models.py:147
 msgid "Require Account Activation"
-msgstr ""
+msgstr "Die Aktivierung Ihres Benutzerkontos ist erforderlich"
 
 #: ecommerce/core/models.py:148
 msgid ""
@@ -182,7 +183,7 @@ msgstr ""
 
 #: ecommerce/core/models.py:153
 msgid "This script will be loaded on every page."
-msgstr ""
+msgstr "Das Skript wird auf jeder Seite geladen."
 
 #: ecommerce/core/models.py:158 ecommerce/extensions/partner/models.py:9
 msgid "Enable Sailthru Reporting"
@@ -412,7 +413,7 @@ msgstr ""
 
 #: ecommerce/enterprise/forms.py:38 ecommerce/programs/forms.py:32
 msgid "Start Date"
-msgstr ""
+msgstr "Start-Datum"
 
 #: ecommerce/enterprise/forms.py:39 ecommerce/programs/forms.py:33
 msgid "End Date"
