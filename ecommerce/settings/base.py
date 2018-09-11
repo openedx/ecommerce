@@ -284,6 +284,7 @@ DJANGO_APPS = [
     'solo',
     'social_django',
     'rest_framework_swagger',
+    'rest_framework_datatables',
 ]
 
 # Apps specific to this project go here.
@@ -446,12 +447,20 @@ EXTRA_SCOPE = ['permissions']
 
 # DJANGO REST FRAMEWORK
 REST_FRAMEWORK = {
+    'DEFAULT_RENDERER_CLASSES': (
+        'rest_framework.renderers.JSONRenderer',
+        'rest_framework.renderers.BrowsableAPIRenderer',
+        'rest_framework_datatables.renderers.DatatablesRenderer',
+    ),
+    'DEFAULT_FILTER_BACKENDS': (
+        'rest_framework_datatables.filters.DatatablesFilterBackend',
+    ),
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'edx_rest_framework_extensions.authentication.JwtAuthentication',
         'ecommerce.extensions.api.authentication.BearerAuthentication',
         'rest_framework.authentication.SessionAuthentication',
     ),
-    'DEFAULT_PAGINATION_CLASS': 'ecommerce.extensions.api.pagination.PageNumberPagination',
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework_datatables.pagination.DatatablesPageNumberPagination',
     'PAGE_SIZE': 20,
     'DEFAULT_THROTTLE_CLASSES': (
         'rest_framework.throttling.UserRateThrottle',
