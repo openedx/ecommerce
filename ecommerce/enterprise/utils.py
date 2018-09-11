@@ -376,19 +376,19 @@ def has_enterprise_offer(basket):
     return False
 
 
-def get_enterprise_catalog(site, enterprise_catalog, limit, offset):
+def get_enterprise_catalog(site, enterprise_catalog, limit, page):
     """
 
     """
     resource = 'enterprise_catalogs'
     partner_code = site.siteconfiguration.partner.short_code
-    cache_key = '{site_domain}_{partner_code}_{resource}_{catalog}_{limit}_{offset}'.format(
+    cache_key = '{site_domain}_{partner_code}_{resource}_{catalog}_{limit}_{page}'.format(
         site_domain=site.domain,
         partner_code=partner_code,
         resource=resource,
         catalog=enterprise_catalog,
         limit=limit,
-        offset=offset
+        page=page
     )
     cache_key = hashlib.md5(cache_key).hexdigest()
 
@@ -397,12 +397,12 @@ def get_enterprise_catalog(site, enterprise_catalog, limit, offset):
         return cached_response.value
 
     client = get_enterprise_api_client(site)
-    path = [resource, enterprise_catalog]
+    path = [resource, str(enterprise_catalog)]
     client = reduce(getattr, path, client)
 
     response = client.get(
         limit=limit,
-        offset=offset,
+        page=page,
     )
     TieredCache.set_all_tiers(cache_key, response, settings.COURSES_API_CACHE_TIMEOUT)
 

@@ -150,17 +150,17 @@ class VoucherViewSet(NonDestroyableModelViewSet):
         multiple_credit_providers = False
         credit_provider_price = None
 
-        if catalog_query:
-            response = get_catalog_course_runs(
-                site=request.site,
-                query=catalog_query,
-                limit=request.GET.get('limit', DEFAULT_CATALOG_PAGE_SIZE),
-                offset=request.GET.get('offset'),
-            )
-        elif enterprise_catalog:
+        if enterprise_catalog:
             response = get_enterprise_catalog(
                 site=request.site,
                 enterprise_catalog=enterprise_catalog,
+                limit=request.GET.get('limit', DEFAULT_CATALOG_PAGE_SIZE),
+                page=request.GET.get('page'),
+            )
+        elif catalog_query:
+            response = get_catalog_course_runs(
+                site=request.site,
+                query=catalog_query,
                 limit=request.GET.get('limit', DEFAULT_CATALOG_PAGE_SIZE),
                 offset=request.GET.get('offset'),
             )
