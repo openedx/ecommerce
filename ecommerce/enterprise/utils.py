@@ -11,6 +11,7 @@ import waffle
 from django.conf import settings
 from django.urls import reverse
 from django.utils.translation import ugettext as _
+from edx_django_utils.cache import TieredCache
 from edx_rest_api_client.client import EdxRestApiClient
 from oscar.core.loading import get_model
 from requests.exceptions import ConnectionError, Timeout
@@ -373,3 +374,36 @@ def has_enterprise_offer(basket):
         if offer['offer'].priority == OFFER_PRIORITY_ENTERPRISE:
             return True
     return False
+
+
+def get_enterprise_catalog(site, enterprise_catalog, limit, offset):
+    """
+
+    """
+    resource = 'enterprise_catalogs'
+    partner_code = site.siteconfiguration.partner.short_code
+    cache_key = '{site_domain}_{partner_code}_{resource}_{catalog}_{limit}_{offset}'.format(
+        site_domain=site.domain,
+        partner_code=partner_code,
+        resource=resource,
+        catalog=enterprise_catalog,
+        limit=limit,
+        offset=offset
+    )
+    cache_key = hashlib.md5(cache_key).hexdigest()
+
+    cached_response = TieredCache.get_cached_response(cache_key)
+    if cached_response.is_found:
+        return cached_response.value
+
+    client = get_enterprise_api_client(site)
+    path = [resource, enterprise_catalog]
+    client = reduce(getattr, path, client)
+
+    response = client.get(
+        limit=limit,
+        offset=offset,
+    )
+    TieredCache.set_all_tiers(cache_key, response, settings.COURSES_API_CACHE_TIMEOUT)
+
+    return response

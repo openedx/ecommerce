@@ -18,6 +18,7 @@ from ecommerce.core.constants import DEFAULT_CATALOG_PAGE_SIZE
 from ecommerce.coupons.utils import fetch_course_catalog, get_catalog_course_runs
 from ecommerce.courses.models import Course
 from ecommerce.courses.utils import get_course_info_from_catalog
+from ecommerce.enterprise.utils import get_enterprise_catalog
 from ecommerce.extensions.api import serializers
 from ecommerce.extensions.api.permissions import IsOffersOrIsAuthenticatedAndStaff
 from ecommerce.extensions.api.v2.views import NonDestroyableModelViewSet
@@ -94,6 +95,12 @@ class VoucherViewSet(NonDestroyableModelViewSet):
             )
         return Response(data=offers_data)
 
+    def add_course_run_key(self, result, all_course_ids, nonexpired_course_ids):
+        all_course_ids.append(result['key'])
+        if not result['enrollment_end'] or \
+                (result['enrollment_end'] and parser.parse(result['enrollment_end']) > now()):
+            nonexpired_course_ids.append(result['key'])
+
     def retrieve_course_objects(self, results, course_seat_types):
         """ Helper method to retrieve all the courses, products and stock records
         from course IDs in course catalog response results. Professional courses
@@ -109,10 +116,11 @@ class VoucherViewSet(NonDestroyableModelViewSet):
         all_course_ids = []
         nonexpired_course_ids = []
         for result in results:
-            all_course_ids.append(result['key'])
-            if not result['enrollment_end'] or \
-                    (result['enrollment_end'] and parser.parse(result['enrollment_end']) > now()):
-                nonexpired_course_ids.append(result['key'])
+            if 'content_type' in result and result['content_type'] == 'course':
+                for course_run in result['course_runs']:
+                    self.add_course_run_key(course_run, all_course_ids, nonexpired_course_ids)
+            else:
+                self.add_course_run_key(result, all_course_ids, nonexpired_course_ids)
 
         products = []
         for seat_type in course_seat_types.split(','):
@@ -124,8 +132,8 @@ class VoucherViewSet(NonDestroyableModelViewSet):
         stock_records = StockRecord.objects.filter(product__in=products)
         return products, stock_records
 
-    def get_offers_from_query(self, request, voucher, catalog_query):
-        """ Helper method for collecting offers from catalog query.
+    def get_offers_from_catalog(self, request, voucher, catalog_query, enterprise_catalog):
+        """ Helper method for collecting offers from catalog query or enterprise catalog.
 
         Args:
             request (WSGIRequest): Request data.
@@ -142,12 +150,23 @@ class VoucherViewSet(NonDestroyableModelViewSet):
         multiple_credit_providers = False
         credit_provider_price = None
 
-        response = get_catalog_course_runs(
-            site=request.site,
-            query=catalog_query,
-            limit=request.GET.get('limit', DEFAULT_CATALOG_PAGE_SIZE),
-            offset=request.GET.get('offset'),
-        )
+        if catalog_query:
+            response = get_catalog_course_runs(
+                site=request.site,
+                query=catalog_query,
+                limit=request.GET.get('limit', DEFAULT_CATALOG_PAGE_SIZE),
+                offset=request.GET.get('offset'),
+            )
+        elif enterprise_catalog:
+            response = get_enterprise_catalog(
+                site=request.site,
+                enterprise_catalog=enterprise_catalog,
+                limit=request.GET.get('limit', DEFAULT_CATALOG_PAGE_SIZE),
+                offset=request.GET.get('offset'),
+            )
+        else:
+            logger.error('No catalog parameter set for fetching offers for voucher {}'.format(voucher))
+            response = {}
         next_page = response['next']
         products, stock_records = self.retrieve_course_objects(response['results'], course_seat_types)
         contains_verified_course = (course_seat_types == 'verified')
@@ -219,6 +238,7 @@ class VoucherViewSet(NonDestroyableModelViewSet):
         benefit = voucher.offers.first().benefit
         catalog_query = benefit.range.catalog_query
         catalog_id = benefit.range.course_catalog
+        enterprise_catalog = benefit.range.enterprise_customer_catalog
         next_page = None
         offers = []
 
@@ -226,8 +246,8 @@ class VoucherViewSet(NonDestroyableModelViewSet):
             catalog = fetch_course_catalog(request.site, catalog_id)
             catalog_query = catalog.get("query") if catalog else catalog_query
 
-        if catalog_query:
-            offers, next_page = self.get_offers_from_query(request, voucher, catalog_query)
+        if catalog_query or enterprise_catalog:
+            offers, next_page = self.get_offers_from_catalog(request, voucher, catalog_query, enterprise_catalog)
         else:
             product_range = voucher.offers.first().benefit.range
             products = product_range.all_products()

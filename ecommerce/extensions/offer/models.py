@@ -274,6 +274,7 @@ class Range(AbstractRange):
         'course_seat_types',
         'course_catalog',
         'enterprise_customer',
+        'enterprise_customer_catalog',
     ]
     ALLOWED_SEAT_TYPES = ['credit', 'professional', 'verified']
     catalog = models.ForeignKey(
@@ -287,6 +288,12 @@ class Range(AbstractRange):
     )
     enterprise_customer = models.UUIDField(
         help_text=_('UUID for an EnterpriseCustomer from the Enterprise Service.'),
+        null=True,
+        blank=True,
+    )
+
+    enterprise_customer_catalog = models.UUIDField(
+        help_text=_('UUID for an EnterpriseCustomerCatalog from the Enterprise Service.'),
         null=True,
         blank=True,
     )
