@@ -1,0 +1,2 @@
+PROGRAM_APPLICATOR_LOG_FLAG = 'enable_program_applicator_logging'
+PROGRAM_APPLICATOR_USE_FLAG = 'enable_program_applicator_use'
