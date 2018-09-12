@@ -1,9 +1,11 @@
 """HTTP endpoints for interacting with vouchers."""
 import logging
+import pytz
 from urlparse import urlparse
 
 import django_filters
-from dateutil import parser
+from dateutil.parser import parse
+from dateutil.utils import default_tzinfo
 from django.shortcuts import get_object_or_404
 from django.utils.timezone import now
 from opaque_keys.edx.keys import CourseKey
@@ -122,10 +124,10 @@ class VoucherViewSet(NonDestroyableModelViewSet):
         products = []
         all_course_ids = course_run_metadata.keys()
         nonexpired_course_ids = [
-            course_run_metadata['key']
+            course_run['key']
             for course_run in course_run_metadata.values()
             if not course_run['enrollment_end'] or
-            (course_run['enrollment_end'] and parser.parse(course_run['enrollment_end']) > now())
+            (course_run['enrollment_end'] and default_tzinfo(parse(course_run['enrollment_end']), pytz.UTC) > now())
         ]
         for seat_type in course_seat_types.split(','):
             products.extend(Product.objects.filter(
@@ -294,7 +296,7 @@ class VoucherViewSet(NonDestroyableModelViewSet):
         Returns:
             dict: Course offer data
         """
-        if 'image' in course_info and 'src' in course_info['image']:
+        if course_info.get('image') and 'src' in course_info['image']:
             image = course_info['image']['src']
         elif 'card_image_url' in course_info:
             image = course_info['card_image_url']
