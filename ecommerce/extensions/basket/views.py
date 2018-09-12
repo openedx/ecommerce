@@ -123,7 +123,7 @@ class BasketSummaryView(BasketView):
         date = None
         try:
             date = dateutil.parser.parse(date_string)
-        except (AttributeError, ValueError):
+        except (AttributeError, ValueError, TypeError):
             pass
         return date
 
