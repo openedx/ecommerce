@@ -95,12 +95,6 @@ class VoucherViewSet(NonDestroyableModelViewSet):
             )
         return Response(data=offers_data)
 
-    def add_course_run_key(self, result, all_course_ids, nonexpired_course_ids):
-        all_course_ids.append(result['key'])
-        if not result['enrollment_end'] or \
-                (result['enrollment_end'] and parser.parse(result['enrollment_end']) > now()):
-            nonexpired_course_ids.append(result['key'])
-
     def retrieve_course_objects(self, results, course_seat_types):
         """ Helper method to retrieve all the courses, products and stock records
         from course IDs in course catalog response results. Professional courses
@@ -113,16 +107,26 @@ class VoucherViewSet(NonDestroyableModelViewSet):
         Returns:
             Querysets of products and stock records retrieved from results.
         """
-        all_course_ids = []
-        nonexpired_course_ids = []
+        course_run_metadata = {}
         for result in results:
             if 'content_type' in result and result['content_type'] == 'course':
                 for course_run in result['course_runs']:
-                    self.add_course_run_key(course_run, all_course_ids, nonexpired_course_ids)
+                    course_run_metadata[course_run['key']] = course_run
+                    # Copy over title and image from course to course_run metadata,
+                    # which get used to display the offer.
+                    course_run_metadata[course_run['key']]['title'] = result['title']
+                    course_run_metadata[course_run['key']]['card_image_url'] = result['card_image_url']
             else:
-                self.add_course_run_key(result, all_course_ids, nonexpired_course_ids)
+                course_run_metadata[result['key']] = result
 
         products = []
+        all_course_ids = course_run_metadata.keys()
+        nonexpired_course_ids = [
+            course_run_metadata['key']
+            for course_run in course_run_metadata.values()
+            if not course_run['enrollment_end'] or
+            (course_run['enrollment_end'] and parser.parse(course_run['enrollment_end']) > now())
+        ]
         for seat_type in course_seat_types.split(','):
             products.extend(Product.objects.filter(
                 course_id__in=nonexpired_course_ids if seat_type == 'professional' else all_course_ids,
@@ -130,7 +134,7 @@ class VoucherViewSet(NonDestroyableModelViewSet):
                 attribute_values__value_text=seat_type
             ))
         stock_records = StockRecord.objects.filter(product__in=products)
-        return products, stock_records
+        return products, stock_records, course_run_metadata
 
     def get_offers_from_catalog(self, request, voucher, catalog_query, enterprise_catalog):
         """ Helper method for collecting offers from catalog query or enterprise catalog.
@@ -168,7 +172,9 @@ class VoucherViewSet(NonDestroyableModelViewSet):
             logger.error('No catalog parameter set for fetching offers for voucher {}'.format(voucher))
             response = {}
         next_page = response['next']
-        products, stock_records = self.retrieve_course_objects(response['results'], course_seat_types)
+        products, stock_records, course_run_metadata = self.retrieve_course_objects(
+            response['results'], course_seat_types
+        )
         contains_verified_course = (course_seat_types == 'verified')
         for product in products:
             # Omit unavailable seats from the offer results so that one seat does not cause an
@@ -178,10 +184,7 @@ class VoucherViewSet(NonDestroyableModelViewSet):
                 continue
 
             course_id = product.course_id
-            course_catalog_data = next(
-                (result for result in response['results'] if result['key'] == course_id),
-                None
-            )
+            course_catalog_data = course_run_metadata[course_id]
             if course_seat_types == 'credit':
                 # Omit credit seats for which the user is not eligible or which the user already bought.
                 if request.user.is_eligible_for_credit(product.course_id):
@@ -291,9 +294,11 @@ class VoucherViewSet(NonDestroyableModelViewSet):
         Returns:
             dict: Course offer data
         """
-        try:
+        if 'image' in course_info and 'src' in course_info['image']:
             image = course_info['image']['src']
-        except (KeyError, TypeError):
+        elif 'card_image_url' in course_info:
+            image = course_info['card_image_url']
+        else:
             image = ''
         return {
             'benefit': serializers.BenefitSerializer(benefit).data,
