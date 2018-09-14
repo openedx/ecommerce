@@ -10,6 +10,7 @@ from django.conf import settings
 from django.contrib import messages
 from django.db import transaction
 from django.utils.translation import ugettext_lazy as _
+from oscar.apps.basket.signals import voucher_addition
 from oscar.core.loading import get_class, get_model
 
 from ecommerce.courses.utils import mode_for_product
@@ -115,7 +116,7 @@ def prepare_basket(request, products, voucher=None):
         basket.clear_vouchers()
         is_valid, message = validate_voucher(voucher, request.user, basket, request.site)
         if is_valid:
-            _apply_voucher_on_basket(voucher, request, basket)
+            apply_voucher_on_basket_and_check_discount(voucher, request, basket)
         else:
             logger.info(message)
 
@@ -401,7 +402,7 @@ def validate_voucher(voucher, user, basket, request_site):
 
 
 @newrelic.agent.function_trace()
-def _apply_voucher_on_basket(voucher, request, basket):
+def apply_voucher_on_basket_and_check_discount(voucher, request, basket):
     """
     Applies voucher on a product.
 
@@ -410,10 +411,35 @@ def _apply_voucher_on_basket(voucher, request, basket):
         basket (Basket): basket object on which voucher is going to be applied
         request (Request): Request object
     """
+    # Note: some of this code was adapted from `apply_voucher_to_basket` in Oscar's `BasketAddView`.
+    # See https://github.com/django-oscar/django-oscar/blob/1.5.1/src/oscar/apps/basket/views.py#L310-L356
+
+    # Reset any site offers that are applied so that only one offer is active.
+    basket.reset_offer_applications()
     basket.vouchers.add(voucher)
+    voucher_addition.send(sender=None, basket=basket, voucher=voucher)
+
     if waffle.flag_is_active(request, PROGRAM_APPLICATOR_USE_FLAG):  # pragma: no cover
         ProgramApplicator().apply(basket, request.user, request)
     else:
         Applicator().apply(basket, request.user, request)
 
-    logger.info('Applied Voucher [%s] to basket [%s].', voucher.code, basket.id)
+    # Recalculate discounts to see if the voucher gives any
+    discounts_after = basket.offer_applications
+
+    # Look for discounts from this new voucher
+    found_discount = False
+    for discount in discounts_after:
+        if discount['voucher'] and discount['voucher'] == voucher:
+            found_discount = True
+            break
+
+    if found_discount:
+        logger.info('Applied Voucher [%s] to basket [%s].', voucher.code, basket.id)
+        msg = _("Coupon code '{code}' added to basket.").format(code=voucher.code)
+        return True, msg
+    else:
+        msg = _('Basket does not qualify for coupon code {code}.').format(code=voucher.code)
+        logger.info('Coupon Code [%s] is not valid for basket [%s]', voucher.code, basket.id)
+        basket.clear_vouchers()
+        return False, msg
