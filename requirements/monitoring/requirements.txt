@@ -6,7 +6,7 @@
 
 -r ../base.txt
 -r ../docs.txt
--r ../local.txt
+-r ../dev.txt
 -r ../production.txt
 -r ../test.txt
 -r ../../e2e/requirements.txt
