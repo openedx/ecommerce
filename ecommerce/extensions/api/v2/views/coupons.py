@@ -421,7 +421,8 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
         voucher_offers = vouchers.first().offers
         voucher_offer = voucher_offers.first()
 
-        if program_uuid:
+        # Only update Conditions if one doesn't already exist with the new program_uuid
+        if program_uuid and not Condition.objects.filter(program_uuid=program_uuid).exists():
             Condition.objects.filter(
                 program_uuid=voucher_offer.condition.program_uuid
             ).update(program_uuid=program_uuid)
