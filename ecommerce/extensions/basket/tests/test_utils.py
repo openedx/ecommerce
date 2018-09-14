@@ -20,6 +20,7 @@ from ecommerce.extensions.basket.tests.mixins import BasketMixin
 from ecommerce.extensions.basket.utils import (
     ENTERPRISE_CATALOG_ATTRIBUTE_TYPE,
     add_utm_params_to_url,
+    apply_voucher_on_basket_and_check_discount,
     attribute_cookie_data,
     get_basket_switch_data,
     prepare_basket
@@ -74,8 +75,8 @@ class BasketUtilsTests(DiscoveryTestMixin, BasketMixin, TestCase):
         """ Verify a basket is returned and contains a voucher and the voucher is applied. """
         # Prepare a product with price of 100 and a voucher with 10% discount for that product.
         product = ProductFactory(stockrecords__price_excl_tax=100)
-        new_range = RangeFactory(products=[product, ])
-        voucher, product = prepare_voucher(_range=new_range, benefit_value=10)
+        new_range = RangeFactory(products=[product])
+        voucher, __ = prepare_voucher(_range=new_range, benefit_value=10)
 
         stock_record = StockRecord.objects.get(product=product)
         self.assertEqual(stock_record.price_excl_tax, 100.00)
@@ -550,6 +551,22 @@ class BasketUtilsTests(DiscoveryTestMixin, BasketMixin, TestCase):
         self.assertEqual(basket.lines.first().product, product)
         self.assertEqual(basket.vouchers.count(), 0)
 
+    def test_prepare_basket_removes_existing_basket_invalid_range_voucher(self):
+        """
+        Tests that prepare_basket removes an existing basket voucher that is not
+        valid for the product and used to purchase that product.
+        """
+        product = ProductFactory(stockrecords__partner__short_code='xyz', stockrecords__price_excl_tax=100)
+        invalid_range_voucher, __ = prepare_voucher()
+        basket = BasketFactory(owner=self.request.user, site=self.request.site)
+
+        basket.vouchers.add(invalid_range_voucher)
+        basket = prepare_basket(self.request, [product])
+
+        self.assertIsNotNone(basket)
+        self.assertEqual(basket.lines.first().product, product)
+        self.assertEqual(basket.vouchers.count(), 0)
+
     def test_prepare_basket_applies_existing_basket_valid_voucher(self):
         """
         Tests that prepare_basket applies an existing basket voucher that is valid
@@ -570,6 +587,62 @@ class BasketUtilsTests(DiscoveryTestMixin, BasketMixin, TestCase):
         self.assertEqual(basket.lines.first().product, product)
         self.assertIsNotNone(basket.applied_offers())
         self.assertEqual(basket.total_discount, 10.00)
+
+    def test_apply_voucher_on_basket_and_check_discount_with_valid_voucher(self):
+        """
+        Tests apply_voucher_on_basket_and_check_discount when called with valid voucher
+        applies voucher and returns the correct values.
+        """
+        basket = BasketFactory(owner=self.request.user, site=self.request.site)
+        voucher, product = prepare_voucher()
+        basket.add_product(product, 1)
+        applied, msg = apply_voucher_on_basket_and_check_discount(voucher, self.request, basket)
+        self.assertEqual(applied, True)
+        self.assertIsNotNone(basket.applied_offers())
+        self.assertEqual(msg, "Coupon code '{code}' added to basket.".format(code=voucher.code))
+
+    def test_apply_voucher_on_basket_and_check_discount_with_invalid_voucher(self):
+        """
+        Tests apply_voucher_on_basket_and_check_discount when called with invalid voucher
+        does not apply voucher and returns the correct values.
+        """
+        basket = BasketFactory(owner=self.request.user, site=self.request.site)
+        product = ProductFactory(stockrecords__partner__short_code='test1', stockrecords__price_excl_tax=100)
+        voucher, __ = prepare_voucher()
+        basket.add_product(product, 1)
+        applied, msg = apply_voucher_on_basket_and_check_discount(voucher, self.request, basket)
+        self.assertEqual(applied, False)
+        self.assertEqual(basket.applied_offers(), {})
+        self.assertEqual(msg, 'Basket does not qualify for coupon code {code}.'.format(code=voucher.code))
+
+    def test_apply_voucher_on_basket_and_check_discount_with_invalid_product(self):
+        """
+        Tests apply_voucher_on_basket_and_check_discount when called with invalid product
+        does not apply voucher and returns the correct values.
+        """
+        basket = BasketFactory(owner=self.request.user, site=self.request.site)
+        product = ProductFactory(stockrecords__partner__short_code='test1', stockrecords__price_excl_tax=0)
+        voucher, __ = prepare_voucher(_range=RangeFactory(products=[product]))
+        basket.add_product(product, 1)
+        applied, msg = apply_voucher_on_basket_and_check_discount(voucher, self.request, basket)
+        self.assertEqual(applied, False)
+        self.assertEqual(basket.applied_offers(), {})
+        self.assertEqual(msg, 'Basket does not qualify for coupon code {code}.'.format(code=voucher.code))
+
+    def test_apply_voucher_on_basket_and_check_discount_with_multiple_vouchers(self):
+        """
+        Tests apply_voucher_on_basket_and_check_discount when called with a basket already
+        containing a valid voucher it only checks the new voucher.
+        """
+        basket = BasketFactory(owner=self.request.user, site=self.request.site)
+        product = ProductFactory(stockrecords__partner__short_code='test1', stockrecords__price_excl_tax=10)
+        invalid_voucher, __ = prepare_voucher(code='TEST1')
+        valid_voucher, __ = prepare_voucher(code='TEST2', _range=RangeFactory(products=[product]))
+        basket.add_product(product, 1)
+        basket.vouchers.add(valid_voucher)
+        applied, msg = apply_voucher_on_basket_and_check_discount(invalid_voucher, self.request, basket)
+        self.assertEqual(applied, False)
+        self.assertEqual(msg, 'Basket does not qualify for coupon code {code}.'.format(code=invalid_voucher.code))
 
 
 class BasketUtilsTransactionTests(TransactionTestCase):

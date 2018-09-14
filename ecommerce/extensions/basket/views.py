@@ -31,6 +31,7 @@ from ecommerce.extensions.analytics.utils import (
 )
 from ecommerce.extensions.basket.utils import (
     add_utm_params_to_url,
+    apply_voucher_on_basket_and_check_discount,
     get_basket_switch_data,
     prepare_basket,
     validate_voucher
@@ -431,41 +432,24 @@ class BasketSummaryView(BasketView):
 
 class VoucherAddView(BaseVoucherAddView):  # pylint: disable=function-redefined
     def apply_voucher_to_basket(self, voucher):
-        code = voucher.code
+        """
+        Validates and applies voucher on basket.
+        """
+        self.request.basket.clear_vouchers()
 
         is_valid, message = validate_voucher(voucher, self.request.user, self.request.basket, self.request.site)
         if not is_valid:
             messages.error(self.request, message)
+            self.request.basket.vouchers.remove(voucher)
             return
 
-        # Reset any site offers that are applied so that only one offer is active.
-        self.request.basket.reset_offer_applications()
-        self.request.basket.vouchers.add(voucher)
+        valid, msg = apply_voucher_on_basket_and_check_discount(voucher, self.request, self.request.basket)
 
-        # Raise signal
-        self.add_signal.send(sender=self, basket=self.request.basket, voucher=voucher)
-
-        # Recalculate discounts to see if the voucher gives any
-        Applicator().apply(self.request.basket, self.request.user,
-                           self.request)
-        discounts_after = self.request.basket.offer_applications
-
-        # Look for discounts from this new voucher
-        found_discount = False
-        for discount in discounts_after:
-            if discount['voucher'] and discount['voucher'] == voucher:
-                found_discount = True
-                break
-        if not found_discount:
-            messages.warning(
-                self.request,
-                _('Your basket does not qualify for a coupon code discount.'))
+        if not valid:
+            messages.warning(self.request, msg)
             self.request.basket.vouchers.remove(voucher)
         else:
-            messages.info(
-                self.request,
-                _("Coupon code '{code}' added to basket.").format(code=code)
-            )
+            messages.info(self.request, msg)
 
     def form_valid(self, form):
         code = form.cleaned_data['code']
