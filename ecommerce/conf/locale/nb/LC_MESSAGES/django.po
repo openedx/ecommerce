@@ -5,7 +5,7 @@
 # 
 # Translators:
 # Erle Nilsen, 2015
-# Frode Arntsen <frode.arntsen@bibsys.no>, 2016-2017
+# Frode Arntsen <frode.arntsen@unit.no>, 2016-2017
 # Joakim S. Johnson, 2016
 # Vangenplotz edx <edx@vangenplotz.no>, 2015
 msgid ""

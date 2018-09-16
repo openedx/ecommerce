@@ -4,7 +4,7 @@
 # This file is distributed under the GNU AFFERO GENERAL PUBLIC LICENSE.
 # 
 # Translators:
-# Frode Arntsen <frode.arntsen@bibsys.no>, 2016-2017
+# Frode Arntsen <frode.arntsen@unit.no>, 2016-2017
 # Vangenplotz edx <edx@vangenplotz.no>, 2015
 msgid ""
 msgstr ""
@@ -12,7 +12,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2018-04-05 11:00+0000\n"
 "PO-Revision-Date: 2018-03-26 19:44+0000\n"
-"Last-Translator: Frode Arntsen <frode.arntsen@bibsys.no>\n"
+"Last-Translator: Frode Arntsen <frode.arntsen@unit.no>\n"
 "Language-Team: Norwegian Bokmål (http://www.transifex.com/open-edx/edx-platform/language/nb/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
