@@ -345,6 +345,7 @@ class BasketSummaryView(BasketView):
                                                      sc=site_configuration.id)
             raise SiteConfigurationError(msg)
 
+    @newrelic.agent.function_trace()
     def get(self, request, *args, **kwargs):
         basket = request.basket
 
