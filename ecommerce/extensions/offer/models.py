@@ -63,14 +63,16 @@ class Benefit(AbstractBenefit):
         Checks the cache to see if each line is in the catalog range specified by the given query
         and tracks identifiers for which discovery service data is still needed.
         """
-        course_run_ids = []
-        course_uuids = []
+        uncached_course_run_ids = []
+        uncached_course_uuids = []
+
         applicable_lines = lines
         for line in applicable_lines:
             if line.product.is_seat_product:
                 product_id = line.product.course.id
             else:  # All lines passed to this method should either have a seat or an entitlement product
                 product_id = line.product.attr.UUID
+
             cache_key = get_cache_key(
                 site_domain=domain,
                 partner_code=partner_code,
@@ -78,26 +80,35 @@ class Benefit(AbstractBenefit):
                 course_id=product_id,
                 query=query
             )
-            cached_response = TieredCache.get_cached_response(cache_key)
-            if not cached_response.is_found:
+            in_catalog_range_cached_response = TieredCache.get_cached_response(cache_key)
+
+            if not in_catalog_range_cached_response.is_found:
                 if line.product.is_seat_product:
-                    course_run_ids.append({'id': product_id, 'cache_key': cache_key, 'line': line})
+                    uncached_course_run_ids.append({'id': product_id, 'cache_key': cache_key, 'line': line})
                 else:
-                    course_uuids.append({'id': product_id, 'cache_key': cache_key, 'line': line})
-            elif cached_response.value is False:
+                    uncached_course_uuids.append({'id': product_id, 'cache_key': cache_key, 'line': line})
+            elif not in_catalog_range_cached_response.value:
                 applicable_lines.remove(line)
-        return course_run_ids, course_uuids, applicable_lines
+
+        return uncached_course_run_ids, uncached_course_uuids, applicable_lines
 
     def get_applicable_lines(self, offer, basket, range=None):  # pylint: disable=redefined-builtin
+        """
+        Returns the basket lines for which the benefit is applicable.
+        """
         applicable_range = range if range else self.range
+
         if applicable_range and applicable_range.catalog_query is not None:
+
             query = applicable_range.catalog_query
             applicable_lines = self._filter_for_paid_course_products(basket.all_lines(), applicable_range)
+
             site = basket.site
             partner_code = site.siteconfiguration.partner.short_code
             course_run_ids, course_uuids, applicable_lines = self._identify_uncached_product_identifiers(
                 applicable_lines, site.domain, partner_code, query
             )
+
             if course_run_ids or course_uuids:
                 # Hit Discovery Service to determine if remaining courses and runs are in the range.
                 try:
@@ -116,9 +127,16 @@ class Benefit(AbstractBenefit):
                 # Cache range-state individually for each course or run identifier and remove lines not in the range.
                 for metadata in course_run_ids + course_uuids:
                     in_range = response[str(metadata['id'])]
+
+                    # Convert to int, because this is what memcached will return, and the request cache should return
+                    # the same value.
+                    # Note: once the TieredCache is fixed to handle this case, we could remove this line.
+                    in_range = int(in_range)
                     TieredCache.set_all_tiers(metadata['cache_key'], in_range, settings.COURSES_API_CACHE_TIMEOUT)
+
                     if not in_range:
                         applicable_lines.remove(metadata['line'])
+
             return [(line.product.stockrecords.first().price_excl_tax, line) for line in applicable_lines]
         else:
             return super(Benefit, self).get_applicable_lines(offer, basket, range=range)  # pylint: disable=bad-super-call

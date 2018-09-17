@@ -431,7 +431,7 @@ def _create_new_voucher(code, end_datetime, name, offer, start_datetime, voucher
     elif not isinstance(end_datetime, datetime.datetime):
         try:
             end_datetime = dateutil.parser.parse(end_datetime)
-        except (AttributeError, ValueError):
+        except (AttributeError, ValueError, TypeError):
             log_message_and_raise_validation_error(
                 'Failed to create Voucher. Voucher end datetime value [{date}] is invalid.'.format(date=end_datetime)
             )
@@ -441,7 +441,7 @@ def _create_new_voucher(code, end_datetime, name, offer, start_datetime, voucher
     elif not isinstance(start_datetime, datetime.datetime):
         try:
             start_datetime = dateutil.parser.parse(start_datetime)
-        except (AttributeError, ValueError):
+        except (AttributeError, ValueError, TypeError):
             log_message_and_raise_validation_error(
                 'Failed to create Voucher. Voucher start datetime [{date}] is invalid.'.format(date=start_datetime)
             )

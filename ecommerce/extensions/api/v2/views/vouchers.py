@@ -1,9 +1,9 @@
 """HTTP endpoints for interacting with vouchers."""
 import logging
-import pytz
 from urlparse import urlparse
 
 import django_filters
+import pytz
 from dateutil.parser import parse
 from dateutil.utils import default_tzinfo
 from django.shortcuts import get_object_or_404
@@ -155,6 +155,7 @@ class VoucherViewSet(NonDestroyableModelViewSet):
         course_seat_types = benefit.range.course_seat_types
         multiple_credit_providers = False
         credit_provider_price = None
+        response = {}
 
         if enterprise_catalog:
             response = get_enterprise_catalog(
@@ -170,9 +171,7 @@ class VoucherViewSet(NonDestroyableModelViewSet):
                 limit=request.GET.get('limit', DEFAULT_CATALOG_PAGE_SIZE),
                 offset=request.GET.get('offset'),
             )
-        else:
-            logger.error('No catalog parameter set for fetching offers for voucher {}'.format(voucher))
-            response = {}
+
         next_page = response['next']
         products, stock_records, course_run_metadata = self.retrieve_course_objects(
             response['results'], course_seat_types

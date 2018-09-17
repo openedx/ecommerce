@@ -53,14 +53,6 @@ class TestWAF(object):
         response = self.request(params={'id': '<script>alert()</script>'})
         self.assert_denial(response)
 
-    def test_ssi_injection(self):
-        """
-        Checks if simple SSI injection attacks are stopped.
-        https://www.owasp.org/index.php/Testing_for_SSI_Injection_(OTG-INPVAL-009)
-        """
-        response = self.request(headers={'User-Agent': '<!--#include virtual="/etc/passwd"-->'})
-        self.assert_denial(response)
-
     def test_sql_injection(self):
         """
         Checks if simple SQL injection attacks are stopped.
