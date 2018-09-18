@@ -40,7 +40,7 @@ from ecommerce.extensions.payment.constants import CLIENT_SIDE_CHECKOUT_FLAG_NAM
 from ecommerce.extensions.payment.forms import PaymentForm
 from ecommerce.extensions.payment.tests.processors import DummyProcessor
 from ecommerce.extensions.test.factories import create_order, prepare_voucher
-from ecommerce.tests.factories import ProductFactory, SiteFactory, StockRecordFactory
+from ecommerce.tests.factories import ProductFactory, SiteConfigurationFactory, StockRecordFactory
 from ecommerce.tests.mixins import ApiMockMixin, LmsApiMockMixin
 from ecommerce.tests.testcases import TestCase
 
@@ -739,10 +739,10 @@ class VoucherAddViewTests(LmsApiMockMixin, TestCase):
 
     def test_voucher_not_valid_for_other_site(self):
         """ Verify correct error message is returned when coupon is applied against on the wrong site. """
-        site2 = SiteFactory()
+        other_site = SiteConfigurationFactory().site
         self.mock_access_token_response()
         self.mock_account_api(self.request, self.user.username, data={'is_active': True})
-        voucher, product = prepare_voucher(code=COUPON_CODE, site=site2)
+        voucher, product = prepare_voucher(code=COUPON_CODE, site=other_site)
         self.basket.add_product(product)
         self.assert_form_valid_message("Coupon code '{code}' is not valid for this basket.".format(code=voucher.code))
 
