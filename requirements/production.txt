@@ -14,3 +14,4 @@ python-memcached==1.58
 PyYAML==3.12
 nodeenv==1.1.1
 redis==2.10.6
+pyinstrument==2.2.1

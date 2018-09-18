@@ -1,5 +1,6 @@
 import json
 import logging
+import newrelic.agent
 from functools import wraps
 
 from ecommerce.courses.utils import mode_for_product
@@ -150,7 +151,7 @@ def track_segment_event(site, user, event, properties):
     }
     return site.siteconfiguration.segment_client.track(user_tracking_id, event, properties, context=context)
 
-
+@newrelic.agent.function_trace()
 def translate_basket_line_for_segment(line):
     """ Translates a BasketLine to Segment's expected format for cart events.
 

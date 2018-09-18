@@ -40,6 +40,7 @@ from ecommerce.extensions.partner.shortcuts import get_partner_for_site
 from ecommerce.extensions.payment.constants import CLIENT_SIDE_CHECKOUT_FLAG_NAME
 from ecommerce.extensions.payment.forms import PaymentForm
 
+ProgramApplicator = get_class('offer.applicator', 'ProgramApplicator')
 Benefit = get_model('offer', 'Benefit')
 logger = logging.getLogger(__name__)
 Product = get_model('catalogue', 'Product')
@@ -101,6 +102,18 @@ class BasketAddItemsView(View):
         except AlreadyPlacedOrderException:
             return render(request, 'edx/error.html', {'error': _('You have already purchased these products')})
         url = add_utm_params_to_url(reverse('basket:summary'), self.request.GET.items())
+        url = url + "?"
+        if self.request.GET.get('program_applicator', False) == "true":
+            url = url + "&program_applicator={}".format(request.GET.get('program_applicator'))
+        if self.request.GET.get('skip_upsell', False) == "true":
+            url = url + "&skip_upsell={}".format(request.GET.get('skip_upsell'))
+        if self.request.GET.get('skip_tracking', False) == "true":
+            url = url + "&skip_tracking={}".format(request.GET.get('skip_tracking'))
+        if self.request.GET.get('skip_context', False) == "true":
+            url = url + "&skip_context={}".format(request.GET.get('skip_context'))
+        if self.request.GET.get('skip_enterprise_offers', False) == "true":
+            url = url + "&skip_enterprise_offers={}".format(request.GET.get('skip_enterprise_offers'))
+
         return HttpResponseRedirect(url, status=303)
 
 
@@ -348,30 +361,66 @@ class BasketSummaryView(BasketView):
     @newrelic.agent.function_trace()
     def get(self, request, *args, **kwargs):
         basket = request.basket
+        if not self.request.GET.get('skip_tracking', False) == "true":
+            try:
+                properties = {
+                    'cart_id': basket.id,
+                    'products': [translate_basket_line_for_segment(line) for line in basket.all_lines()],
+                }
+                track_segment_event(request.site, request.user, 'Cart Viewed', properties)
 
-        try:
-            properties = {
-                'cart_id': basket.id,
-                'products': [translate_basket_line_for_segment(line) for line in basket.all_lines()],
-            }
-            track_segment_event(request.site, request.user, 'Cart Viewed', properties)
+                properties = {
+                    'checkout_id': basket.order_number,
+                    'step': 1
+                }
+                track_segment_event(request.site, request.user, 'Checkout Step Viewed', properties)
+            except Exception:  # pylint: disable=broad-except
+                logger.exception('Failed to fire Cart Viewed event for basket [%d]', basket.id)
 
-            properties = {
-                'checkout_id': basket.order_number,
-                'step': 1
-            }
-            track_segment_event(request.site, request.user, 'Checkout Step Viewed', properties)
-        except Exception:  # pylint: disable=broad-except
-            logger.exception('Failed to fire Cart Viewed event for basket [%d]', basket.id)
-
-        if has_enterprise_offer(basket) and basket.total_incl_tax == Decimal(0):
-            return redirect('checkout:free-checkout')
+        if not self.request.GET.get('skip_enterprise_offers', False) == "true":
+            if has_enterprise_offer(basket) and basket.total_incl_tax == Decimal(0):
+                return redirect('checkout:free-checkout')
+            else:
+                return super(BasketSummaryView, self).get(request, *args, **kwargs)
         else:
             return super(BasketSummaryView, self).get(request, *args, **kwargs)
 
     @newrelic.agent.function_trace()
+    def get_upsell_messages(self, basket):
+        if self.request.GET.get('skip_upsell', False) == "true":
+            print("A")
+            return ""
+
+        if self.request.GET.get('program_applicator', False) == "true":
+            print("B")
+
+            offers = ProgramApplicator().get_offers(basket, self.request.user, self.request)
+        else:
+            print("C")
+
+            offers = Applicator().get_offers(basket, self.request.user, self.request)
+        applied_offers = list(basket.offer_applications.offers.values())
+        msgs = []
+        for offer in offers:
+            if offer.is_condition_partially_satisfied(basket) \
+                    and offer not in applied_offers:
+                data = {
+                    'message': offer.get_upsell_message(basket),
+                    'offer': offer}
+                msgs.append(data)
+        return msgs
+
+    @newrelic.agent.function_trace()
     def get_context_data(self, **kwargs):
-        context = super(BasketSummaryView, self).get_context_data(**kwargs)
+        if self.request.GET.get('skip_context', False) == "true":
+            context = super(BasketView, self).get_context_data(**kwargs)
+            method = self.get_default_shipping_method(self.request.basket)
+            shipping_charge = method.calculate(self.request.basket)
+            context['shipping_charge'] = shipping_charge
+            context['order_total'] = OrderTotalCalculator().calculate(
+                self.request.basket, shipping_charge)
+        else:
+            context = super(BasketSummaryView, self).get_context_data(**kwargs)
         formset = context.get('formset', [])
         lines = context.get('line_list', [])
         site_configuration = self.request.site.siteconfiguration

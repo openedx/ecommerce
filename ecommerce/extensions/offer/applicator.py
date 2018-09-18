@@ -40,10 +40,15 @@ class ProgramApplicator(Applicator):
             basket=basket,
             attribute_type=BasketAttributeType.objects.get(name=BUNDLE)
         )
+        logger.info("ProgramApplicator: Looking for offer")
+
         if bundle_attributes.count() > 0:
+            logger.info("ProgramApplicator: Found a bundle")
             program_offers = self.get_program_offers(bundle_attributes.first())
             site_offers = []
         else:
+            logger.info("ProgramApplicator: Applying all offers instead")
+
             if waffle.flag_is_active(request, PROGRAM_APPLICATOR_LOG_FLAG):
                 logger.warning(
                     'ProgramApplicator processed Basket [%s] from Request [%s] and User [%s] without a bundle meaning'

@@ -4,6 +4,7 @@ Helper methods for enterprise app.
 import hashlib
 import hmac
 import logging
+import newrelic.agent
 from collections import OrderedDict
 from urllib import urlencode
 
@@ -358,7 +359,7 @@ def set_enterprise_customer_cookie(site, response, enterprise_customer_uuid, max
 
     return response
 
-
+@newrelic.agent.function_trace()
 def has_enterprise_offer(basket):
     """
     Return True if the basket has an Enterprise-related offer applied.

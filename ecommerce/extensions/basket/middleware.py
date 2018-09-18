@@ -1,10 +1,15 @@
-from oscar.apps.basket.middleware import BasketMiddleware as OscarBasketMiddleware
-from oscar.core.loading import get_model
+import newrelic.agent
 
+from oscar.apps.basket.middleware import BasketMiddleware as OscarBasketMiddleware
+from oscar.core.loading import get_model, get_class
+
+Applicator = get_class('offer.applicator', 'Applicator')
+ProgramApplicator = get_class('offer.applicator', 'ProgramApplicator')
 Basket = get_model('basket', 'basket')
 
 
 class BasketMiddleware(OscarBasketMiddleware):
+
     def get_cookie_key(self, request):
         """
         Returns the cookie name to use for storing a cookie basket.
@@ -45,7 +50,7 @@ class BasketMiddleware(OscarBasketMiddleware):
 
             # Assign user onto basket to prevent further SQL queries when
             # basket.owner is accessed.
-            basket.owner = request.user
+            basket.owner = request.usera
 
             if cookie_basket:
                 self.merge_baskets(basket, cookie_basket)
@@ -62,3 +67,14 @@ class BasketMiddleware(OscarBasketMiddleware):
         request._basket_cache = basket
 
         return basket
+
+    @newrelic.agent.function_trace()
+    def apply_offers_to_basket(self, request, basket):
+        if not basket.is_empty:
+            if request.GET.get('program_applicator', False) == "true":
+                print("apply_offers_to_basket: Using ProgramApplicator")
+                ProgramApplicator().apply(basket, request.user, request)
+            else:
+                print("apply_offers_to_basket: Using Applicator")
+                Applicator().apply(basket, request.user, request)
+
