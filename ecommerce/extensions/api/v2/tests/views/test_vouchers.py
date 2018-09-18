@@ -104,6 +104,7 @@ class VoucherViewSetTests(DiscoveryMockMixin, DiscoveryTestMixin, LmsApiMockMixi
                     },
                     'key': seat.course_id,
                     'start': '2016-05-01T00:00:00Z',
+                    'enrollment_start': '2016-05-01T00:00:00Z',
                     'title': seat.title,
                     'enrollment_end': None
                 })
@@ -117,6 +118,7 @@ class VoucherViewSetTests(DiscoveryMockMixin, DiscoveryTestMixin, LmsApiMockMixi
                     },
                     'key': course.id,
                     'start': '2016-05-01T00:00:00Z',
+                    'enrollment_start': '2016-05-01T00:00:00Z',
                     'title': course.name,
                     'enrollment_end': None
                 })
@@ -204,25 +206,46 @@ class VoucherViewSetTests(DiscoveryMockMixin, DiscoveryTestMixin, LmsApiMockMixi
 
     def test_omitting_expired_courses(self):
         """Verify professional courses who's enrollment end datetime have passed are omitted."""
-        no_date_seat = CourseFactory(partner=self.partner).create_or_update_seat('professional', False, 100)
+        no_enrollment_end_seat = CourseFactory(partner=self.partner).create_or_update_seat('professional', False, 100)
+        no_enrollment_start_seat = CourseFactory(partner=self.partner).create_or_update_seat('professional', False, 100)
         valid_seat = CourseFactory(partner=self.partner).create_or_update_seat('professional', False, 100)
+        expired_enrollment_seat = CourseFactory(partner=self.partner).create_or_update_seat('professional', False, 100)
         expired_seat = CourseFactory(partner=self.partner).create_or_update_seat('professional', False, 100)
+        future_enrollment_seat = CourseFactory(partner=self.partner).create_or_update_seat('professional', False, 100)
 
         course_discovery_results = [{
-            'key': no_date_seat.attr.course_key,
+            'key': no_enrollment_end_seat.attr.course_key,
+            'enrollment_end': None,
+            'enrollment_start': str(now() - datetime.timedelta(days=1)),
+        }, {
+            'key': no_enrollment_start_seat.attr.course_key,
             'enrollment_end': None,
         }, {
             'key': valid_seat.attr.course_key,
             'enrollment_end': str(now() + datetime.timedelta(days=1)),
+            'enrollment_start': str(now() - datetime.timedelta(days=1)),
+        }, {
+            'key': expired_enrollment_seat.attr.course_key,
+            'enrollment_end': str(now() - datetime.timedelta(days=1)),
+            'enrollment_start': str(now() - datetime.timedelta(days=1)),
         }, {
             'key': expired_seat.attr.course_key,
-            'enrollment_end': str(now() - datetime.timedelta(days=1)),
+            'enrollment_end': None,
+            'enrollment_start': str(now() - datetime.timedelta(days=1)),
+            'end': str(now() - datetime.timedelta(days=1)),
+        }, {
+            'key': future_enrollment_seat.attr.course_key,
+            'enrollment_end': None,
+            'enrollment_start': str(now() + datetime.timedelta(days=1)),
         }]
 
         products, __, __ = VoucherViewSet().retrieve_course_objects(course_discovery_results, 'professional')
-        self.assertIn(no_date_seat, products)
+        self.assertIn(no_enrollment_end_seat, products)
+        self.assertNotIn(no_enrollment_start_seat, products)
         self.assertIn(valid_seat, products)
+        self.assertNotIn(expired_enrollment_seat, products)
         self.assertNotIn(expired_seat, products)
+        self.assertNotIn(future_enrollment_seat, products)
 
 
 @ddt.ddt

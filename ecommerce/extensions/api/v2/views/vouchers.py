@@ -110,28 +110,41 @@ class VoucherViewSet(NonDestroyableModelViewSet):
             Querysets of products and stock records retrieved from results.
         """
         course_run_metadata = {}
+
+        def is_course_run_enrollable(course_run):
+            # Checks if a course run is available for enrollment by checking the following conditions:
+            #   if end date is not set or is in the future
+            #   if enrollment start is set and is in the past
+            #   if enrollment end is not set or is in the future
+            end = course_run.get('end') and default_tzinfo(parse(course_run['end']), pytz.UTC)
+            enrollment_start = (course_run.get('enrollment_start') and
+                                default_tzinfo(parse(course_run['enrollment_start']), pytz.UTC))
+            enrollment_end = (course_run.get('enrollment_end') and
+                              default_tzinfo(parse(course_run['enrollment_end']), pytz.UTC))
+            current_time = now()
+
+            return (
+                (not end or end > current_time) and
+                (enrollment_start and enrollment_start <= current_time) and
+                (not enrollment_end or enrollment_end > current_time)
+            )
+
         for result in results:
             if 'content_type' in result and result['content_type'] == 'course':
                 for course_run in result['course_runs']:
-                    course_run_metadata[course_run['key']] = course_run
-                    # Copy over title and image from course to course_run metadata,
-                    # which get used to display the offer.
-                    course_run_metadata[course_run['key']]['title'] = result['title']
-                    course_run_metadata[course_run['key']]['card_image_url'] = result['card_image_url']
-            else:
+                    if is_course_run_enrollable(course_run):
+                        course_run_metadata[course_run['key']] = course_run
+                        # Copy over title and image from course to course_run metadata,
+                        # which get used to display the offer.
+                        course_run_metadata[course_run['key']]['title'] = result['title']
+                        course_run_metadata[course_run['key']]['card_image_url'] = result['card_image_url']
+            elif is_course_run_enrollable(result):
                 course_run_metadata[result['key']] = result
 
         products = []
-        all_course_ids = course_run_metadata.keys()
-        nonexpired_course_ids = [
-            course_run['key']
-            for course_run in course_run_metadata.values()
-            if not course_run['enrollment_end'] or
-            (course_run['enrollment_end'] and default_tzinfo(parse(course_run['enrollment_end']), pytz.UTC) > now())
-        ]
         for seat_type in course_seat_types.split(','):
             products.extend(Product.objects.filter(
-                course_id__in=nonexpired_course_ids if seat_type == 'professional' else all_course_ids,
+                course_id__in=course_run_metadata.keys(),
                 attributes__name='certificate_type',
                 attribute_values__value_text=seat_type
             ))
