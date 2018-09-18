@@ -184,7 +184,8 @@ class UtilTests(CouponMixin, DiscoveryMockMixin, DiscoveryTestMixin, LmsApiMockM
         email_domains = 'edx.org,example.com'
         self.data.update({
             'email_domains': email_domains,
-            'name': 'Tešt voučher'
+            'name': 'Tešt voučher',
+            'site': self.site
         })
         vouchers = create_vouchers(**self.data)
 
@@ -200,6 +201,7 @@ class UtilTests(CouponMixin, DiscoveryMockMixin, DiscoveryTestMixin, LmsApiMockM
         self.assertEqual(voucher_offer.benefit.range.catalog, self.catalog)
         self.assertEqual(voucher_offer.email_domains, email_domains)
         self.assertEqual(voucher_offer.priority, OFFER_PRIORITY_VOUCHER)
+        self.assertEqual(voucher_offer.partner, self.partner)
         self.assertEqual(len(coupon_voucher.vouchers.all()), 11)
         self.assertEqual(voucher.end_datetime, self.data['end_datetime'])
         self.assertEqual(voucher.start_datetime, self.data['start_datetime'])

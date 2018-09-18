@@ -122,7 +122,7 @@ def prepare_voucher(code='COUPONTEST', _range=None, start_datetime=None, end_dat
             benefit=benefit,
             condition=condition,
             email_domains=email_domains,
-            site=site,
+            partner=site.siteconfiguration.partner if site else None,
             priority=OFFER_PRIORITY_VOUCHER
         )
     voucher.offers.add(offer)
