@@ -121,10 +121,12 @@ class DiscoveryMockMixin(object):
                     'image': {
                         'src': 'path/to/the/course/image'
                     },
+                    'enrollment_start': '2016-05-01T00:00:00Z',
                     'enrollment_end': None
                 }] if course_run else [{
                     'key': 'test',
                     'title': 'Test course',
+                    'enrollment_start': '2016-05-01T00:00:00Z',
                     'enrollment_end': None
                 }],
             }
@@ -181,6 +183,7 @@ class DiscoveryMockMixin(object):
                     'course_runs': [{
                         'key': course_run.id,
                         'start': '2016-05-01T00:00:00Z',
+                        'enrollment_start': '2016-05-01T00:00:00Z',
                         'enrollment_end': None,
                     }],
                 }] if course_run else [{

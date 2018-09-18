@@ -378,9 +378,9 @@ def validate_voucher(voucher, user, basket, request_site):
         message = _("Coupon code '{code}' has already been redeemed.").format(code=voucher.code)
         return False, message
 
-    # Do not allow coupons for one site to be used on another site
-    voucher_site = voucher.offers.first().site
-    if request_site and voucher_site and request_site != voucher_site:
+    # Do not allow coupons for one partner's site to be used on another partner's site
+    voucher_partner = voucher.offers.first().partner
+    if request_site and voucher_partner and request_site.siteconfiguration.partner != voucher_partner:
         message = _("Coupon code '{code}' is not valid for this basket.").format(code=voucher.code)
         return False, message
 

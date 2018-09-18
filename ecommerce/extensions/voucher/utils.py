@@ -374,6 +374,7 @@ def _get_or_create_offer(
         max_global_applications=max_uses,
         email_domains=email_domains,
         site=site,
+        partner=site.siteconfiguration.partner if site else None,
         priority=OFFER_PRIORITY_VOUCHER,
     )
 
