@@ -1,5 +1,6 @@
--r test.in
--r docs.in
+# Packages required for local development
+-r test.txt
+-r docs.txt
 
 django-debug-toolbar==1.7
 
@@ -11,4 +12,4 @@ edx-i18n-tools==0.4.4
 ptvsd==3.0
 
 # For devserver code reloading
-pyinotify==0.9.6 # This breaks OSX virtualenv installation
+pyinotify==0.9.6
