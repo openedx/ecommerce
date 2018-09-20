@@ -185,6 +185,9 @@ class DiscoveryMockMixin(object):
                         'start': '2016-05-01T00:00:00Z',
                         'enrollment_start': '2016-05-01T00:00:00Z',
                         'enrollment_end': None,
+                    }, {
+                        'key': 'test',
+                        'title': 'Test course',
                     }],
                 }] if course_run else [{
                     'key': 'test',
