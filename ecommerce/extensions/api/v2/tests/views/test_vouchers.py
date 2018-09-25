@@ -219,6 +219,7 @@ class VoucherViewSetTests(DiscoveryMockMixin, DiscoveryTestMixin, LmsApiMockMixi
             'enrollment_start': str(now() - datetime.timedelta(days=1)),
         }, {
             'key': no_enrollment_start_seat.attr.course_key,
+            'enrollment_start': None,
             'enrollment_end': None,
         }, {
             'key': valid_seat.attr.course_key,
@@ -241,7 +242,7 @@ class VoucherViewSetTests(DiscoveryMockMixin, DiscoveryTestMixin, LmsApiMockMixi
 
         products, __, __ = VoucherViewSet().retrieve_course_objects(course_discovery_results, 'professional')
         self.assertIn(no_enrollment_end_seat, products)
-        self.assertNotIn(no_enrollment_start_seat, products)
+        self.assertIn(no_enrollment_start_seat, products)
         self.assertIn(valid_seat, products)
         self.assertNotIn(expired_enrollment_seat, products)
         self.assertNotIn(expired_seat, products)

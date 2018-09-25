@@ -114,7 +114,7 @@ class VoucherViewSet(NonDestroyableModelViewSet):
         def is_course_run_enrollable(course_run):
             # Checks if a course run is available for enrollment by checking the following conditions:
             #   if end date is not set or is in the future
-            #   if enrollment start is set and is in the past
+            #   if enrollment start is not set or is in the past
             #   if enrollment end is not set or is in the future
             end = course_run.get('end') and default_tzinfo(parse(course_run['end']), pytz.UTC)
             enrollment_start = (course_run.get('enrollment_start') and
@@ -125,7 +125,7 @@ class VoucherViewSet(NonDestroyableModelViewSet):
 
             return (
                 (not end or end > current_time) and
-                (enrollment_start and enrollment_start <= current_time) and
+                (not enrollment_start or enrollment_start <= current_time) and
                 (not enrollment_end or enrollment_end > current_time)
             )
 
