@@ -3,8 +3,6 @@
 {% load crispy_forms_tags %}
 {% load offer_tags %}
 {% load widget_tweaks %}
-hello
-
 {% load static %}
 
 {% include 'partials/alert_messages.html' %}
@@ -44,7 +42,6 @@ hello
             {% endfor %}
         </div>
     </form>
-
     <div role="region" aria-labelledby="summary-region" aria-live="polite">
         <h2 id="summary-region" class="title">{% trans "summary" %}</h2>
         {% if is_enrollment_code_purchase %}
