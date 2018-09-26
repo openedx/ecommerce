@@ -44,9 +44,10 @@ class PaymentForm(forms.Form):
     def __init__(self, user, request, *args, **kwargs):
         super(PaymentForm, self).__init__(*args, **kwargs)
         self.request = request
-        self.basket_has_enrollment_code_product = any(
-            line.product.is_enrollment_code_product for line in self.request.basket.all_lines()
-        )
+        self.basket_has_enrollment_code_product = False
+        # self.basket_has_enrollment_code_product = any(
+        #     line.product.is_enrollment_code_product for line in self.request.basket.all_lines()
+        # )
         update_basket_queryset_filter(self, user)
 
         self.helper = FormHelper(self)
@@ -134,7 +135,7 @@ class PaymentForm(forms.Form):
     # the equivalent (maxlength) attribute in the basket page JS code needs to be changed too.
     state = forms.CharField(max_length=60, required=False, label=_('State/Province'))
     postal_code = forms.CharField(max_length=10, required=False, label=_('Zip/Postal Code'))
-    country = forms.ChoiceField(choices=country_choices, label=_('Country (required)'))
+    # country = forms.ChoiceField(choices=country_choices, label=_('Country (required)'))
 
     def clean_basket(self):
         basket = self.cleaned_data['basket']

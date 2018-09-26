@@ -62,7 +62,7 @@
                 <span class="col-xs-4 col-sm-4"></span>
                 <span class="price col-xs-4 col-sm-4">{{basket.total_incl_tax_excl_discounts|currency:basket.currency}}</span>
             </div>
-        {% endif %}jdbc:mysql://prod-edx-ecommerce-replica-002.ciqreuddjk02.us-east-1.rds.amazonaws.com:3306/ecommerce
+        {% endif %}
         {% if basket.total_discount %}
             <div id="line-discount" class="amount row">
                 <span class="description">{% trans "Discounts applied" %}</span>
@@ -70,21 +70,21 @@
                 <span class="price col-xs-4 col-sm-4">-{{basket.total_discount|currency:basket.currency}}</span>
             </div>
         {% endif %}
-{#        <div id="offer-information" class="row">#}
-{#            {% block offers %}#}
-{#                <div class="offers">#}
-{#                    {% for offer_id, offer in basket.applied_offers.items %}#}
-{#                        {% if offer.condition.enterprise_customer_name %}#}
-{#                            <p class="offer">#}
-{#                                {% blocktrans with enterprise_customer_name=offer.condition.enterprise_customer_name benefit=offer.benefit|benefit_discount %}#}
-{#                                    {{ benefit }} discount provided by {{ enterprise_customer_name }}.#}
-{#                                {% endblocktrans %}#}
-{#                            </p>#}
-{#                        {% endif %}#}
-{#                    {% endfor %}#}
-{#                </div>#}
-{#            {% endblock offers %}#}
-{#        </div>#}
+        <div id="offer-information" class="row">
+            {% block offers %}
+                <div class="offers">
+                    {% for offer_id, offer in basket.applied_offers.items %}
+                        {% if offer.condition.enterprise_customer_name %}
+                            <p class="offer">
+                                {% blocktrans with enterprise_customer_name=offer.condition.enterprise_customer_name benefit=offer.benefit|benefit_discount %}
+                                    {{ benefit }} discount provided by {{ enterprise_customer_name }}.
+                                {% endblocktrans %}
+                            </p>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            {% endblock offers %}
+        </div>
         <div id="voucher-information" class="row">
             {% if show_voucher_form %}
                 {% block vouchers %}
