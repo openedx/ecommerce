@@ -1,5 +1,5 @@
 # Packages required in a production environment
--r base.txt
+-r base.in
 
 django-ses==0.8.2
 
