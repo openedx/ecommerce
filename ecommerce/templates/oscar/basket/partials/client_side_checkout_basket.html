@@ -1,267 +1,267 @@
-{% load i18n %}
-{% load currency_filters %}
-{% load crispy_forms_tags %}
-{% load offer_tags %}
-{% load widget_tweaks %}
-{% load static %}
-
-{% include 'partials/alert_messages.html' %}
-<div id="summary" class="col-sm-5">
-    <form action="." method="post" class="row">
-        {% csrf_token %}
-        {{ formset.management_form }}
-
-        <div role="region" aria-labelledby="cart-region">
-            <h2 id="cart-region" class="title">{% trans "in your cart" %}</h2>
-            <p>{% trans "Your purchase contains the following" %}:</p>
-            {% for form, line_data in formset_lines_data %}
-                {{ form.id }}
-                <div class="product row" data-sku={{line_data.sku}}>
-                    <div class="product-image col-sm-5 col-xs-5">
-                        <img class="thumbnail" src="{{ line_data.image_url|default_if_none:'' }}" alt=""/>
-                    </div>
-                    <div class="product-information col-sm-7 col-xs-7">
-                        <p class="product-name">{{ line_data.product_title }}</p>
-                        {% include 'oscar/basket/partials/seat_type.html' %}
-                    </div>
-                    {% if line_data.enrollment_code %}
-                        <div class="col-sm-12 col-xs-12 form-inline quantity-group">
-                            <label for="input-quantity-field " class="product-price-label text-muted quantity-label">{% trans 'Quantity' %}</label>
-                            <div class="checkout-quantity form-group">
-                                <div class="input-group spinner {% if form.errors %}error{% endif %}">
-                                    {% render_field form.quantity class+="quantity form-control" min=min_seat_quantity max=max_seat_quantity title="Quantity" id="input-quantity-field" %}
-                                </div>
-                                <button id="quantity-update" class="btn btn-primary update-button quantity-update" type="submit"
-                                        data-loading-text="{% trans 'Updating...' %}">{% trans "Update" %}</button>
-                            </div>
-                            <div id="error-msg" role="alert"></div>
-                            <span class="max-quantity">Max: 100</span>
-                        </div>
-                    {% endif %}
-                </div>
-            {% endfor %}
-        </div>
-    </form>
-    <div role="region" aria-labelledby="summary-region" aria-live="polite">
-        <h2 id="summary-region" class="title">{% trans "summary" %}</h2>
-        {% if is_enrollment_code_purchase %}
-            <div id="summary-header" class="row">
-                <span class="col-xs-4 col-sm-4">{% trans "Price" %}</span>
-                <span class="col-xs-4 col-sm-4">{% trans "Quantity" %}</span>
-                <span class="price col-xs-4 col-sm-4" >{% trans "Subtotal" %}</span>
-            </div>
-            <div id="line-item" class="row">
-                <span id="line-price" class="col-xs-4 col-sm-4" >{{line_price|currency:basket.currency}}</span>
-                <span id="line-quantity" class="col-xs-4 col-sm-4">{{basket.num_items}}</span>
-                <span id="line-subtotal" class="price col-xs-4 col-sm-4">{{order_total.incl_tax|currency:basket.currency}}</span>
-            </div>
-        {% else %}
-            <div id="line-price" class="amount row">
-                <span class="description col-xs-4 col-sm-4">{% trans "Price" %}</span>
-                <span class="col-xs-4 col-sm-4"></span>
-                <span class="price col-xs-4 col-sm-4">{{basket.total_incl_tax_excl_discounts|currency:basket.currency}}</span>
-            </div>
-        {% endif %}
-        {% if basket.total_discount %}
-            <div id="line-discount" class="amount row">
-                <span class="description">{% trans "Discounts applied" %}</span>
-                <span class="col-xs-4 col-sm-4"></span>
-                <span class="price col-xs-4 col-sm-4">-{{basket.total_discount|currency:basket.currency}}</span>
-            </div>
-        {% endif %}
-        <div id="offer-information" class="row">
-            {% block offers %}
-                <div class="offers">
-                    {% for offer_id, offer in basket.applied_offers.items %}
-                        {% if offer.condition.enterprise_customer_name %}
-                            <p class="offer">
-                                {% blocktrans with enterprise_customer_name=offer.condition.enterprise_customer_name benefit=offer.benefit|benefit_discount %}
-                                    {{ benefit }} discount provided by {{ enterprise_customer_name }}.
-                                {% endblocktrans %}
-                            </p>
-                        {% endif %}
-                    {% endfor %}
-                </div>
-            {% endblock offers %}
-        </div>
-        <div id="voucher-information" class="row">
-            {% if show_voucher_form %}
-                {% block vouchers %}
-                    {% if basket.contains_a_voucher %}
-                        <div class="vouchers">
-                            {% for voucher in basket.vouchers.all %}
-                                <p class="voucher">
-                                    {% blocktrans with voucher_code=voucher.code %}
-                                        Coupon {{ voucher_code }} applied for {{ total_benefit }} off
-                                    {% endblocktrans %}
-                                    <form action="{% url 'basket:vouchers-remove' pk=voucher.id %}" method="POST">
-                                        {% csrf_token %}
-                                        <button class="remove-voucher" type="submit" aria-label={% trans "Remove coupon" %}>Remove</button>
-                                    </form>
-                                </p>
-                            {% endfor %}
-                        </div>
-                    {% else %}
+{#{% load i18n %}#}
+{#{% load currency_filters %}#}
+{#{% load crispy_forms_tags %}#}
+{#{% load offer_tags %}#}
+{#{% load widget_tweaks %}#}
+{#{% load static %}#}
+{##}
+{#{% include 'partials/alert_messages.html' %}#}
+{#<div id="summary" class="col-sm-5">#}
+{#    <form action="." method="post" class="row">#}
+{#        {% csrf_token %}#}
+{#        {{ formset.management_form }}#}
+{##}
+{#        <div role="region" aria-labelledby="cart-region">#}
+{#            <h2 id="cart-region" class="title">{% trans "in your cart" %}</h2>#}
+{#            <p>{% trans "Your purchase contains the following" %}:</p>#}
+{#            {% for form, line_data in formset_lines_data %}#}
+{#                {{ form.id }}#}
+{#                <div class="product row" data-sku={{line_data.sku}}>#}
+{#                    <div class="product-image col-sm-5 col-xs-5">#}
+{#                        <img class="thumbnail" src="{{ line_data.image_url|default_if_none:'' }}" alt=""/>#}
+{#                    </div>#}
+{#                    <div class="product-information col-sm-7 col-xs-7">#}
+{#                        <p class="product-name">{{ line_data.product_title }}</p>#}
+{#                        {% include 'oscar/basket/partials/seat_type.html' %}#}
+{#                    </div>#}
+{#                    {% if line_data.enrollment_code %}#}
+{#                        <div class="col-sm-12 col-xs-12 form-inline quantity-group">#}
+{#                            <label for="input-quantity-field " class="product-price-label text-muted quantity-label">{% trans 'Quantity' %}</label>#}
+{#                            <div class="checkout-quantity form-group">#}
+{#                                <div class="input-group spinner {% if form.errors %}error{% endif %}">#}
+{#                                    {% render_field form.quantity class+="quantity form-control" min=min_seat_quantity max=max_seat_quantity title="Quantity" id="input-quantity-field" %}#}
+{#                                </div>#}
+{#                                <button id="quantity-update" class="btn btn-primary update-button quantity-update" type="submit"#}
+{#                                        data-loading-text="{% trans 'Updating...' %}">{% trans "Update" %}</button>#}
+{#                            </div>#}
+{#                            <div id="error-msg" role="alert"></div>#}
+{#                            <span class="max-quantity">Max: 100</span>#}
+{#                        </div>#}
+{#                    {% endif %}#}
+{#                </div>#}
+{#            {% endfor %}#}
+{#        </div>#}
+{#    </form>#}
+{#    <div role="region" aria-labelledby="summary-region" aria-live="polite">#}
+{#        <h2 id="summary-region" class="title">{% trans "summary" %}</h2>#}
+{#        {% if is_enrollment_code_purchase %}#}
+{#            <div id="summary-header" class="row">#}
+{#                <span class="col-xs-4 col-sm-4">{% trans "Price" %}</span>#}
+{#                <span class="col-xs-4 col-sm-4">{% trans "Quantity" %}</span>#}
+{#                <span class="price col-xs-4 col-sm-4" >{% trans "Subtotal" %}</span>#}
+{#            </div>#}
+{#            <div id="line-item" class="row">#}
+{#                <span id="line-price" class="col-xs-4 col-sm-4" >{{line_price|currency:basket.currency}}</span>#}
+{#                <span id="line-quantity" class="col-xs-4 col-sm-4">{{basket.num_items}}</span>#}
+{#                <span id="line-subtotal" class="price col-xs-4 col-sm-4">{{order_total.incl_tax|currency:basket.currency}}</span>#}
+{#            </div>#}
+{#        {% else %}#}
+{#            <div id="line-price" class="amount row">#}
+{#                <span class="description col-xs-4 col-sm-4">{% trans "Price" %}</span>#}
+{#                <span class="col-xs-4 col-sm-4"></span>#}
+{#                <span class="price col-xs-4 col-sm-4">{{basket.total_incl_tax_excl_discounts|currency:basket.currency}}</span>#}
+{#            </div>#}
+{#        {% endif %}#}
+{#        {% if basket.total_discount %}#}
+{#            <div id="line-discount" class="amount row">#}
+{#                <span class="description">{% trans "Discounts applied" %}</span>#}
+{#                <span class="col-xs-4 col-sm-4"></span>#}
+{#                <span class="price col-xs-4 col-sm-4">-{{basket.total_discount|currency:basket.currency}}</span>#}
+{#            </div>#}
+{#        {% endif %}#}
+{#        <div id="offer-information" class="row">#}
+{#            {% block offers %}#}
+{#                <div class="offers">#}
+{#                    {% for offer_id, offer in basket.applied_offers.items %}#}
+{#                        {% if offer.condition.enterprise_customer_name %}#}
+{#                            <p class="offer">#}
+{#                                {% blocktrans with enterprise_customer_name=offer.condition.enterprise_customer_name benefit=offer.benefit|benefit_discount %}#}
+{#                                    {{ benefit }} discount provided by {{ enterprise_customer_name }}.#}
+{#                                {% endblocktrans %}#}
+{#                            </p>#}
+{#                        {% endif %}#}
+{#                    {% endfor %}#}
+{#                </div>#}
+{#            {% endblock offers %}#}
+{#        </div>#}
+{#        <div id="voucher-information" class="row">#}
+{#            {% if show_voucher_form %}#}
+{#                {% block vouchers %}#}
+{#                    {% if basket.contains_a_voucher %}#}
+{#                        <div class="vouchers">#}
+{#                            {% for voucher in basket.vouchers.all %}#}
+{#                                <p class="voucher">#}
+{#                                    {% blocktrans with voucher_code=voucher.code %}#}
+{#                                        Coupon {{ voucher_code }} applied for {{ total_benefit }} off#}
+{#                                    {% endblocktrans %}#}
+{#                                    <form action="{% url 'basket:vouchers-remove' pk=voucher.id %}" method="POST">#}
+{#                                        {% csrf_token %}#}
+{#                                        <button class="remove-voucher" type="submit" aria-label={% trans "Remove coupon" %}>Remove</button>#}
+{#                                    </form>#}
+{#                                </p>#}
+{#                            {% endfor %}#}
+{#                        </div>#}
+{#                    {% else %}#}
                         {# Hide the entire section if a custom BasketView doesn't pass in a voucher form #}
-                        {% if voucher_form %}
-                            <div class="use-voucher">
-                                <label for="id_code">{% trans "Add coupon code" %} <span>{% trans "(optional)" %}</span></label>
-                                {% include 'basket/partials/add_voucher_form.html' %}
-                            </div>
-                        {% endif %}
-                    {% endif %}
-                {% endblock vouchers %}
-            {% endif %}
-        </div>
-        <div id="basket-total" class="row" aria-describedby="total-price-desc">
-            <span id="total-price-desc col-xs-4 col-sm-4" class="description">{% trans "TOTAL" %}</span>
-            <span class="col-xs-4 col-sm-4"></span>
-            <span class="price col-xs-4 col-sm-4">{{ order_total.incl_tax|currency:basket.currency }}</span>
-        </div>
-    </div>
-    {% if order_details_msg %}
-        <div role="region" aria-labelledby="order-details-region">
-            <h2 id="order-details-region" class="title">{% trans "order details" %}</h2>
-            <p>{{ order_details_msg | safe}}</p>
-        </div>
-    {% endif %}
-</div>
-
-
-<form id="paymentForm" class="payment-form form-horizontal" method="post" aria-live="polite">
-    {% csrf_token %}
-
-    <div id="payment-information" class="col-sm-7">
-        {% if not free_basket %}
-        {% if paypal_enabled %}
-        <div id="payment-method-information" class="placeholder row">
-            <div role="region" aria-labelledby="payment-method-region">
-                <h2 id="payment-method-region" class="title">{% trans "select payment method" %}</h2>
-                  <div id="payment-processor" class="payment-buttons col-sm-12" data-basket-id="{{ basket.id }}">
-                      <a href="#payment-information" class="payment-button credit-card" title="{% trans "Pay with a Credit Card" %}" role="button">
-                          <img src="/static/images/credit_card_options.png">
-                      </a>
+{#                        {% if voucher_form %}#}
+{#                            <div class="use-voucher">#}
+{#                                <label for="id_code">{% trans "Add coupon code" %} <span>{% trans "(optional)" %}</span></label>#}
+{#                                {% include 'basket/partials/add_voucher_form.html' %}#}
+{#                            </div>#}
+{#                        {% endif %}#}
+{#                    {% endif %}#}
+{#                {% endblock vouchers %}#}
+{#            {% endif %}#}
+{#        </div>#}
+{#        <div id="basket-total" class="row" aria-describedby="total-price-desc">#}
+{#            <span id="total-price-desc col-xs-4 col-sm-4" class="description">{% trans "TOTAL" %}</span>#}
+{#            <span class="col-xs-4 col-sm-4"></span>#}
+{#            <span class="price col-xs-4 col-sm-4">{{ order_total.incl_tax|currency:basket.currency }}</span>#}
+{#        </div>#}
+{#    </div>#}
+{#    {% if order_details_msg %}#}
+{#        <div role="region" aria-labelledby="order-details-region">#}
+{#            <h2 id="order-details-region" class="title">{% trans "order details" %}</h2>#}
+{#            <p>{{ order_details_msg | safe}}</p>#}
+{#        </div>#}
+{#    {% endif %}#}
+{#</div>#}
+{##}
+{##}
+{#<form id="paymentForm" class="payment-form form-horizontal" method="post" aria-live="polite">#}
+{#    {% csrf_token %}#}
+{##}
+{#    <div id="payment-information" class="col-sm-7">#}
+{#        {% if not free_basket %}#}
+{#        {% if paypal_enabled %}#}
+{#        <div id="payment-method-information" class="placeholder row">#}
+{#            <div role="region" aria-labelledby="payment-method-region">#}
+{#                <h2 id="payment-method-region" class="title">{% trans "select payment method" %}</h2>#}
+{#                  <div id="payment-processor" class="payment-buttons col-sm-12" data-basket-id="{{ basket.id }}">#}
+{#                      <a href="#payment-information" class="payment-button credit-card" title="{% trans "Pay with a Credit Card" %}" role="button">#}
+{#                          <img src="/static/images/credit_card_options.png">#}
+{#                      </a>#}
                       {# Translators: Do NOT translate the name PayPal. #}
-                      <button data-track-type="click"
-                              data-track-event="edx.bi.ecommerce.basket.payment_selected"
-                              data-track-category="checkout"
-                              data-track-payment-method="PayPal"
-                              data-processor-name="paypal"
-                              class="btn payment-button payment-processor-paypal"
-                              value="paypal"
-                              title="{% trans "Pay with PayPal" %}"
-                              type="button">
-                      </button>
-                      <button id="applePayBtn" lang="{{ LANGUAGE_CODE|default:"en-us" }}" style="display:none"
-                              data-track-type="click"
-                              data-track-event="edx.bi.ecommerce.basket.payment_selected"
-                              data-track-category="checkout"
-                              data-track-payment-method="Apple Pay"
-                              class="payment-button apple-pay-button apple-pay-button-black"
-                              title="{% trans "Pay with Apple Pay" %}" type="button">
-                      </button>
-                    <div id="payment-request-button"
-                         data-track-type="click"
-                         data-track-event="edx.bi.ecommerce.basket.payment_selected"
-                         data-track-category="checkout"
-                         data-track-payment-method="Stripe Payment Request">
-                      <!-- A Stripe Element will be inserted here. -->
-                    </div>
-                  </div>
-            </div>
-        </div>
-        {% endif %}
-        <div id="card-holder-information" class="form-input-elements placeholder row">
-            <div role="region" aria-labelledby="card-holder-information-region">
-                <h2 id="card-holder-information-region" class="title">{% trans "card holder information" %}</h2>
-                {% if sdn_check %}
-                    <input type="hidden" name="sdn-check" value="enabled">
-                {% endif %}
-                {% crispy payment_form %}
-            </div>
-        </div>
-        {% endif %}
-        <div class="form-input-elements placeholder">
-            <div role="region" {% if not free_basket %}aria-labelledby="billing-information-region"{% endif %}>
-                {% if not free_basket %}
-                    <h2 id="billing-information-region" class="title">{% trans "billing information" %}</h2>
-                {% if not paypal_enabled %}
-                    <img aria-hidden="true" class="credit-card-list" src="/static/images/credit_card_options.png" alt="{% trans "Credit cards" %}">
-                {% endif %}
-                <div class="pci-fields row">
+{#                      <button data-track-type="click"#}
+{#                              data-track-event="edx.bi.ecommerce.basket.payment_selected"#}
+{#                              data-track-category="checkout"#}
+{#                              data-track-payment-method="PayPal"#}
+{#                              data-processor-name="paypal"#}
+{#                              class="btn payment-button payment-processor-paypal"#}
+{#                              value="paypal"#}
+{#                              title="{% trans "Pay with PayPal" %}"#}
+{#                              type="button">#}
+{#                      </button>#}
+{#                      <button id="applePayBtn" lang="{{ LANGUAGE_CODE|default:"en-us" }}" style="display:none"#}
+{#                              data-track-type="click"#}
+{#                              data-track-event="edx.bi.ecommerce.basket.payment_selected"#}
+{#                              data-track-category="checkout"#}
+{#                              data-track-payment-method="Apple Pay"#}
+{#                              class="payment-button apple-pay-button apple-pay-button-black"#}
+{#                              title="{% trans "Pay with Apple Pay" %}" type="button">#}
+{#                      </button>#}
+{#                    <div id="payment-request-button"#}
+{#                         data-track-type="click"#}
+{#                         data-track-event="edx.bi.ecommerce.basket.payment_selected"#}
+{#                         data-track-category="checkout"#}
+{#                         data-track-payment-method="Stripe Payment Request">#}
+{#                      <!-- A Stripe Element will be inserted here. -->#}
+{#                    </div>#}
+{#                  </div>#}
+{#            </div>#}
+{#        </div>#}
+{#        {% endif %}#}
+{#        <div id="card-holder-information" class="form-input-elements placeholder row">#}
+{#            <div role="region" aria-labelledby="card-holder-information-region">#}
+{#                <h2 id="card-holder-information-region" class="title">{% trans "card holder information" %}</h2>#}
+{#                {% if sdn_check %}#}
+{#                    <input type="hidden" name="sdn-check" value="enabled">#}
+{#                {% endif %}#}
+{#                {% crispy payment_form %}#}
+{#            </div>#}
+{#        </div>#}
+{#        {% endif %}#}
+{#        <div class="form-input-elements placeholder">#}
+{#            <div role="region" {% if not free_basket %}aria-labelledby="billing-information-region"{% endif %}>#}
+{#                {% if not free_basket %}#}
+{#                    <h2 id="billing-information-region" class="title">{% trans "billing information" %}</h2>#}
+{#                {% if not paypal_enabled %}#}
+{#                    <img aria-hidden="true" class="credit-card-list" src="/static/images/credit_card_options.png" alt="{% trans "Credit cards" %}">#}
+{#                {% endif %}#}
+{#                <div class="pci-fields row">#}
                     {# NOTE: The PCI fields should NOT have name attributes by default. This ensures the fields are #}
                     {# not posted to the server if JavaScript is disabled/fails. The processor-specific JS should #}
                     {# restore the name attribute to ensure this information is sent to the payment processor. #}
-                    <div class="form-group col-md-6">
-                        <label for="card-number" class="control-label">{% trans "Card Number (required)" %}<span class="sr">, {% trans "Secure" %}</span></label>
-                        <input id="card-number" type="text" class="form-control pci-field" maxlength="20" required pattern="[0-9]*"/>
-                        <i class="fa fa-lock" aria-hidden="true"></i>
-                        <img class="card-type-icon hidden" alt="{% trans "Credit card icon" %}">
-                        <p class="help-block"></p>
-                    </div>
-                    <input type="hidden" data-name="card_type" class="pci-field">
-                    <div class="form-group col-md-6">
-                        <label for="card-cvn" class="control-label">
-                            {% trans "Security Code (required)" %}
-                            <span class="sr">, {% trans "Secure" %}</span>
-                            <button id="card-cvn-help" aria-haspopup=true aria-controls="cvvtooltip" aria-expanded=false>
-                                <i class="fa fa-question-circle" aria-hidden="true"></i>
-                                <span class="sr">{% trans 'Help with CVV' %}</span>
-                            </button>
-                            <div id="cvvtooltip" class="popover popover-content">
-                                {% trans 'The three last digits in the signature area on the back of your card. For American Express, it is the four digits on the front of the card.' %}
-                            </div>
-                        </label>
-                        <input type="password" id="card-cvn" class="form-control pci-field" maxlength="4" required pattern="[0-9]*"/>
-                        <i class="fa fa-lock" aria-hidden="true"></i>
-                        <p class="help-block"></p>
-                    </div>
-                    <p id="expiration-label" for="card-expiry-month" class="control-label">{% trans "Expiration (required)" %}</p>
-                    <div class="form-group col-sm-6 col-xs-7">
-                        <select id="card-expiry-month" class="form-control pci-field" required
-                        aria-labelledby="month-label expiration-label">
-                            <option id="month-label">{% trans "Month" %}</option>
-                            {% for month in months %}
-                                <option value="{{forloop.counter|stringformat:'02d'}}">{{month}}</option>
-                            {% endfor %}
-                        </select>
-                        <p class="help-block"></p>
-                    </div>
-                    <div class="form-group col-sm-6 col-xs-5">
-                        <select id="card-expiry-year" class="form-control pci-field" required
-                        aria-labelledby="year-label expiration-label">
-                            <option id="year-label">{% trans "Year" %}</option>
-                            {% for year in years %}
-                                <option value="{{year}}">{{year}}</option>
-                            {% endfor %}
-                        </select>
-                        <p class="help-block"></p>
-                    </div>
-                </div>
-                {% endif %}
-
-                <div class="payment-button col-sm-6 col-sm-offset-6 col-xs-12">
-                {% if free_basket %}
-                    <a href="{% url 'checkout:free-checkout' %}"
-                       data-track-type="click"
-                       data-track-event="edx.bi.ecommerce.basket.free_checkout"
-                       data-track-category="checkout"
-                       class="btn btn-primary btn-large col-sm-12 col-xs-12">
-                        {% trans "Place Order" %}
-                    </a>
-                {% else %}
-                    <button id="payment-button" type="submit" class="btn btn-primary btn-large col-sm-12 col-xs-12"
-                            data-track-type="click"
-                            data-track-event="edx.bi.ecommerce.basket.payment_selected"
-                            data-track-category="checkout"
-                            data-track-payment-method="Credit Card"
-                            data-processor-name="{{ client_side_payment_processor.NAME }}"
-                            data-track-checkout-type="client_side">
-                      {% trans "Place Order" %}
-                    </button>
-                {% endif %}
-                </div>
-            </div>
-        </div>
-    </div>
-</form>
+{#                    <div class="form-group col-md-6">#}
+{#                        <label for="card-number" class="control-label">{% trans "Card Number (required)" %}<span class="sr">, {% trans "Secure" %}</span></label>#}
+{#                        <input id="card-number" type="text" class="form-control pci-field" maxlength="20" required pattern="[0-9]*"/>#}
+{#                        <i class="fa fa-lock" aria-hidden="true"></i>#}
+{#                        <img class="card-type-icon hidden" alt="{% trans "Credit card icon" %}">#}
+{#                        <p class="help-block"></p>#}
+{#                    </div>#}
+{#                    <input type="hidden" data-name="card_type" class="pci-field">#}
+{#                    <div class="form-group col-md-6">#}
+{#                        <label for="card-cvn" class="control-label">#}
+{#                            {% trans "Security Code (required)" %}#}
+{#                            <span class="sr">, {% trans "Secure" %}</span>#}
+{#                            <button id="card-cvn-help" aria-haspopup=true aria-controls="cvvtooltip" aria-expanded=false>#}
+{#                                <i class="fa fa-question-circle" aria-hidden="true"></i>#}
+{#                                <span class="sr">{% trans 'Help with CVV' %}</span>#}
+{#                            </button>#}
+{#                            <div id="cvvtooltip" class="popover popover-content">#}
+{#                                {% trans 'The three last digits in the signature area on the back of your card. For American Express, it is the four digits on the front of the card.' %}#}
+{#                            </div>#}
+{#                        </label>#}
+{#                        <input type="password" id="card-cvn" class="form-control pci-field" maxlength="4" required pattern="[0-9]*"/>#}
+{#                        <i class="fa fa-lock" aria-hidden="true"></i>#}
+{#                        <p class="help-block"></p>#}
+{#                    </div>#}
+{#                    <p id="expiration-label" for="card-expiry-month" class="control-label">{% trans "Expiration (required)" %}</p>#}
+{#                    <div class="form-group col-sm-6 col-xs-7">#}
+{#                        <select id="card-expiry-month" class="form-control pci-field" required#}
+{#                        aria-labelledby="month-label expiration-label">#}
+{#                            <option id="month-label">{% trans "Month" %}</option>#}
+{#                            {% for month in months %}#}
+{#                                <option value="{{forloop.counter|stringformat:'02d'}}">{{month}}</option>#}
+{#                            {% endfor %}#}
+{#                        </select>#}
+{#                        <p class="help-block"></p>#}
+{#                    </div>#}
+{#                    <div class="form-group col-sm-6 col-xs-5">#}
+{#                        <select id="card-expiry-year" class="form-control pci-field" required#}
+{#                        aria-labelledby="year-label expiration-label">#}
+{#                            <option id="year-label">{% trans "Year" %}</option>#}
+{#                            {% for year in years %}#}
+{#                                <option value="{{year}}">{{year}}</option>#}
+{#                            {% endfor %}#}
+{#                        </select>#}
+{#                        <p class="help-block"></p>#}
+{#                    </div>#}
+{#                </div>#}
+{#                {% endif %}#}
+{##}
+{#                <div class="payment-button col-sm-6 col-sm-offset-6 col-xs-12">#}
+{#                {% if free_basket %}#}
+{#                    <a href="{% url 'checkout:free-checkout' %}"#}
+{#                       data-track-type="click"#}
+{#                       data-track-event="edx.bi.ecommerce.basket.free_checkout"#}
+{#                       data-track-category="checkout"#}
+{#                       class="btn btn-primary btn-large col-sm-12 col-xs-12">#}
+{#                        {% trans "Place Order" %}#}
+{#                    </a>#}
+{#                {% else %}#}
+{#                    <button id="payment-button" type="submit" class="btn btn-primary btn-large col-sm-12 col-xs-12"#}
+{#                            data-track-type="click"#}
+{#                            data-track-event="edx.bi.ecommerce.basket.payment_selected"#}
+{#                            data-track-category="checkout"#}
+{#                            data-track-payment-method="Credit Card"#}
+{#                            data-processor-name="{{ client_side_payment_processor.NAME }}"#}
+{#                            data-track-checkout-type="client_side">#}
+{#                      {% trans "Place Order" %}#}
+{#                    </button>#}
+{#                {% endif %}#}
+{#                </div>#}
+{#            </div>#}
+{#        </div>#}
+{#    </div>#}
+{#</form>#}

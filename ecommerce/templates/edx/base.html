@@ -15,14 +15,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}{% endblock title %}</title>
-{##}
-{#    {% compress css %}#}
-{#        {% if main_css %}#}
-{#            <link rel="stylesheet" href="{{ main_css }}" type="text/x-scss">#}
-{#        {% else %}#}
-{#            <link rel="stylesheet" href="{% static 'css/base/main.css' %}" type="text/x-scss">#}
-{#        {% endif %}#}
-{#    {% endcompress %}#}
+
+    {% compress css %}
+        {% if main_css %}
+            <link rel="stylesheet" href="{{ main_css }}" type="text/x-scss">
+        {% else %}
+            <link rel="stylesheet" href="{% static 'css/base/main.css' %}" type="text/x-scss">
+        {% endif %}
+    {% endcompress %}
 
     {% compress css %}
         {# This block is separated to better support browser caching. #}
