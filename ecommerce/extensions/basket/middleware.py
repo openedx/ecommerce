@@ -74,6 +74,8 @@ class BasketMiddleware(OscarBasketMiddleware):
 
     @newrelic.agent.function_trace()
     def apply_offers_to_basket(self, request, basket):
+        if request.GET.get('skip_offers', False) == "true":
+            return
         if not basket.is_empty:
             if request.GET.get('program_applicator', False) == "true":
                 logger.info("apply_offers_to_basket: Using ProgramApplicator")

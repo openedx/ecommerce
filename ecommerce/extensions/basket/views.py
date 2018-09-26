@@ -113,6 +113,8 @@ class BasketAddItemsView(View):
             url = url + "&skip_context={}".format(request.GET.get('skip_context'))
         if self.request.GET.get('skip_enterprise_offers', False) == "true":
             url = url + "&skip_enterprise_offers={}".format(request.GET.get('skip_enterprise_offers'))
+        if self.request.GET.get('skip_offers', False) == "true":
+            url = url + "&skip_offers={}".format(request.GET.get('skip_offers'))
 
         return HttpResponseRedirect(url, status=303)
 
