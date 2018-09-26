@@ -15,32 +15,32 @@
         <div role="region" aria-labelledby="cart-region">
             <h2 id="cart-region" class="title">{% trans "in your cart" %}</h2>
             <p>{% trans "Your purchase contains the following" %}:</p>
-            {% for form, line_data in formset_lines_data %}
-                {{ form.id }}
-                <div class="product row" data-sku={{line_data.sku}}>
-                    <div class="product-image col-sm-5 col-xs-5">
-                        <img class="thumbnail" src="{{ line_data.image_url|default_if_none:'' }}" alt=""/>
-                    </div>
-                    <div class="product-information col-sm-7 col-xs-7">
-                        <p class="product-name">{{ line_data.product_title }}</p>
-                        {% include 'oscar/basket/partials/seat_type.html' %}
-                    </div>
-                    {% if line_data.enrollment_code %}
-                        <div class="col-sm-12 col-xs-12 form-inline quantity-group">
-                            <label for="input-quantity-field " class="product-price-label text-muted quantity-label">{% trans 'Quantity' %}</label>
-                            <div class="checkout-quantity form-group">
-                                <div class="input-group spinner {% if form.errors %}error{% endif %}">
-                                    {% render_field form.quantity class+="quantity form-control" min=min_seat_quantity max=max_seat_quantity title="Quantity" id="input-quantity-field" %}
-                                </div>
-                                <button id="quantity-update" class="btn btn-primary update-button quantity-update" type="submit"
-                                        data-loading-text="{% trans 'Updating...' %}">{% trans "Update" %}</button>
-                            </div>
-                            <div id="error-msg" role="alert"></div>
-                            <span class="max-quantity">Max: 100</span>
-                        </div>
-                    {% endif %}
-                </div>
-            {% endfor %}
+{#            {% for form, line_data in formset_lines_data %}#}
+{#                {{ form.id }}#}
+{#                <div class="product row" data-sku={{line_data.sku}}>#}
+{#                    <div class="product-image col-sm-5 col-xs-5">#}
+{#                        <img class="thumbnail" src="{{ line_data.image_url|default_if_none:'' }}" alt=""/>#}
+{#                    </div>#}
+{#                    <div class="product-information col-sm-7 col-xs-7">#}
+{#                        <p class="product-name">{{ line_data.product_title }}</p>#}
+{#                        {% include 'oscar/basket/partials/seat_type.html' %}#}
+{#                    </div>#}
+{#                    {% if line_data.enrollment_code %}#}
+{#                        <div class="col-sm-12 col-xs-12 form-inline quantity-group">#}
+{#                            <label for="input-quantity-field " class="product-price-label text-muted quantity-label">{% trans 'Quantity' %}</label>#}
+{#                            <div class="checkout-quantity form-group">#}
+{#                                <div class="input-group spinner {% if form.errors %}error{% endif %}">#}
+{#                                    {% render_field form.quantity class+="quantity form-control" min=min_seat_quantity max=max_seat_quantity title="Quantity" id="input-quantity-field" %}#}
+{#                                </div>#}
+{#                                <button id="quantity-update" class="btn btn-primary update-button quantity-update" type="submit"#}
+{#                                        data-loading-text="{% trans 'Updating...' %}">{% trans "Update" %}</button>#}
+{#                            </div>#}
+{#                            <div id="error-msg" role="alert"></div>#}
+{#                            <span class="max-quantity">Max: 100</span>#}
+{#                        </div>#}
+{#                    {% endif %}#}
+{#                </div>#}
+{#            {% endfor %}#}
         </div>
     </form>
     <div role="region" aria-labelledby="summary-region" aria-live="polite">

@@ -1,7 +1,11 @@
+import logging
+
 import newrelic.agent
 
 from oscar.apps.basket.middleware import BasketMiddleware as OscarBasketMiddleware
 from oscar.core.loading import get_model, get_class
+
+logger = logging.getLogger(__name__)
 
 Applicator = get_class('offer.applicator', 'Applicator')
 ProgramApplicator = get_class('offer.applicator', 'ProgramApplicator')
@@ -72,9 +76,9 @@ class BasketMiddleware(OscarBasketMiddleware):
     def apply_offers_to_basket(self, request, basket):
         if not basket.is_empty:
             if request.GET.get('program_applicator', False) == "true":
-                print("apply_offers_to_basket: Using ProgramApplicator")
+                logger.info("apply_offers_to_basket: Using ProgramApplicator")
                 ProgramApplicator().apply(basket, request.user, request)
             else:
-                print("apply_offers_to_basket: Using Applicator")
+                logger.info("apply_offers_to_basket: Using Applicator")
                 Applicator().apply(basket, request.user, request)
 
