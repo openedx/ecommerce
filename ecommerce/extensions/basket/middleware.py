@@ -50,7 +50,7 @@ class BasketMiddleware(OscarBasketMiddleware):
 
             # Assign user onto basket to prevent further SQL queries when
             # basket.owner is accessed.
-            basket.owner = request.usera
+            basket.owner = request.user
 
             if cookie_basket:
                 self.merge_baskets(basket, cookie_basket)
