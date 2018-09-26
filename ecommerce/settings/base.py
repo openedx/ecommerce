@@ -282,6 +282,7 @@ DJANGO_APPS = [
     'solo',
     'social_django',
     'rest_framework_swagger',
+    'django_sites_extensions',
 ]
 
 # Apps specific to this project go here.
