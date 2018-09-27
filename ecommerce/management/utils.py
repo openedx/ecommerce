@@ -67,6 +67,12 @@ def refund_basket_transactions(site, basket_ids):
 
 
 class FulfillFrozenBaskets(EdxOrderPlacementMixin):
+    """
+    TODO: Add Validation for this:
+        1. Check basket is actually frozen.
+        2. Ensure the processorresponse from paypal has state="approved", cybersource has "decision":"ACCEPT".
+        3. Ensure there is not already an order before trying to create one and the payment info.
+    """
 
     def fulfill_basket(self, basket_id, site):
 
@@ -81,6 +87,8 @@ class FulfillFrozenBaskets(EdxOrderPlacementMixin):
         basket.strategy = strategy.Default()
         Applicator().apply(basket, user=basket.owner)
 
+        # TODO: This won't work while we are recording debug_id as the transaction_id.
+        # - Do we rely on this debug_id elsewhere?  It can always be found in the response.
         transaction_responses = basket.paymentprocessorresponse_set.filter(transaction_id__isnull=False)
         unique_transaction_ids = set([response.transaction_id for response in transaction_responses])
 
@@ -116,7 +124,7 @@ class FulfillFrozenBaskets(EdxOrderPlacementMixin):
             user = basket.owner
             # Given a basket, order number generation is idempotent. Although we've already
             # generated this order number once before, it's faster to generate it again
-            # than to retrieve an invoice number from PayPal.
+            # than to retrieve an invoice number from PayPal/CyberSource.
             order_number = basket.order_number
 
             self.handle_order_placement(

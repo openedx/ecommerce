@@ -257,7 +257,7 @@ class Cybersource(ApplePayMixin, BaseClientSidePaymentProcessor):
 
             if decision == 'error' and reason_code == 104:
                 # This means user submitted payment request twice within 15 min.
-                # We need to check if user first payment notification was handled successfuly and user has an order
+                # We need to check if user first payment notification was handled successfully and user has an order
                 # if user has an order we can raise DuplicateReferenceNumber exception else we need to continue
                 # the order creation process. to upgrade user in correct course mode.
                 if Order.objects.filter(number=response['req_reference_number']).exists():
