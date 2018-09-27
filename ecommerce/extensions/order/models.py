@@ -6,6 +6,7 @@ from ecommerce.extensions.fulfillment.status import ORDER
 
 
 class Order(AbstractOrder):
+    partner = models.ForeignKey('partner.Partner', null=True, blank=True)
 
     @property
     def is_fulfillable(self):

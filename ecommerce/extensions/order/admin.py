@@ -20,6 +20,7 @@ class LineInlineExtended(LineInline):
 @admin.register(Order)
 class OrderAdminExtended(OrderAdmin):
     inlines = [LineInlineExtended]
+    list_display = ('partner',) + OrderAdmin.list_display
     readonly_fields = ('basket',) + OrderAdmin.readonly_fields
     show_full_result_count = False
 
@@ -34,7 +35,7 @@ class OrderAdminExtended(OrderAdmin):
             return Order.objects.none()
 
         queryset = super(OrderAdminExtended, self).get_queryset(request)
-        queryset = queryset.select_related('site', 'user', 'basket', )
+        queryset = queryset.select_related('partner', 'site', 'user', 'basket', )
         return queryset
 
 

@@ -116,17 +116,18 @@ class OrderCreatorTests(TestCase):
         """ Returns a new Referral associated with the specified basket. """
         return Referral.objects.create(basket=basket, affiliate_id=affiliate_id, site=basket.site)
 
-    def test_create_order_model_default_site(self):
+    def test_create_order_model_default_site_and_partner(self):
         """
-        Verify the create_order_model method associates the order with the default site
+        Verify the create_order_model method associates the order with the default site and it's partner
         if the basket does not have a site set.
         """
         # Create a basket without a site
         basket = self.create_basket(None)
 
-        # Ensure the order's site is set to the default site
+        # Ensure the order's site and partner is set to the default site and partner
         order = self.create_order_model(basket)
         self.assertEqual(order.site, self.site)
+        self.assertEqual(order.partner, self.partner)
 
     def test_create_order_model_basket_site(self):
         """ Verify the create_order_model method associates the order with the basket's site. """
@@ -137,9 +138,10 @@ class OrderCreatorTests(TestCase):
         # Associate the basket with the non-default site
         basket = self.create_basket(site)
 
-        # Ensure the order has the non-default site
+        # Ensure the order has the non-default site and partner
         order = self.create_order_model(basket)
         self.assertEqual(order.site, site)
+        self.assertEqual(order.partner, site_configuration.partner)
 
     def test_create_order_model_basket_referral(self):
         """ Verify the create_order_model method associates the order with the basket's site. """
