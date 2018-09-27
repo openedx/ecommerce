@@ -95,6 +95,7 @@ class OrderCreator(OscarOrderCreator):
         order_data = {'basket': basket,
                       'number': order_number,
                       'site': site,
+                      'partner': site.siteconfiguration.partner,
                       'currency': total.currency,
                       'total_incl_tax': total.incl_tax,
                       'total_excl_tax': total.excl_tax,
