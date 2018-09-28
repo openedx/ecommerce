@@ -75,29 +75,28 @@ class JournalFulfillmentModule(BaseFulfillmentModule):
                     user_id=order.user.id,
                     journal_uuid=journal_uuid,
                 )
-            except (Timeout, ConnectionError):
-                logger.error(
-                    'Unable to fulfill line [%d] of order [%s] due to a network problem',
+                logger.info(
+                    'Successfully fulfilled Journal purchase for line [%d] of order [%s]',
                     line.id,
                     order.number
+                )
+            except (Timeout, ConnectionError) as neterr:
+                logger.error(
+                    'Error fulfilling Journal purchase, line [%d] of order [%s] due to a network problem, err=[%s]',
+                    line.id,
+                    order.number,
+                    neterr
                 )
                 line.set_status(LINE.FULFILLMENT_NETWORK_ERROR)
-            except HttpClientError:
+            except (Exception, HttpClientError) as err:  # pylint: disable=broad-except
                 logger.error(
-                    'Unable to fulfill line [%d] of order [%s] due to a client error. See Journals logs for more info',
+                    'Error fulfilling Journal purchase, line [%d] of order [%s] due to an error, err=[%s]',
                     line.id,
-                    order.number
-                )
-                line.set_status(LINE.FULFILLMENT_SERVER_ERROR)
-            except Exception:   # pylint: disable=broad-except
-                logger.error(
-                    'Unable to fulfill line [%d] of order [%s]',
-                    line.id,
-                    order.number
+                    order.number,
+                    err
                 )
                 line.set_status(LINE.FULFILLMENT_SERVER_ERROR)
 
-        logger.info('Finished fulfilling "Journal" product types for order [%s]', order.number)
         return order, lines
 
     def revoke_line(self, line):
