@@ -2,6 +2,7 @@ from mock import patch
 from oscar.test.factories import UserFactory
 
 from ecommerce.core.models import SegmentClient
+from ecommerce.extensions.analytics.utils import ECOM_TRACKING_ID_FMT
 from ecommerce.extensions.refund.api import create_refunds
 from ecommerce.extensions.refund.tests.mixins import RefundTestMixin
 from ecommerce.tests.testcases import TestCase
@@ -21,7 +22,10 @@ class RefundTrackingTests(RefundTestMixin, TestCase):
         (event_user_id, event_name, event_payload), kwargs = mock_track.call_args
 
         self.assertTrue(mock_track.called)
-        self.assertEqual(event_user_id, tracking_context.get('lms_user_id', 'ecommerce-{}'.format(refund.user.id)))
+        self.assertEqual(
+            event_user_id,
+            tracking_context.get('lms_user_id', ECOM_TRACKING_ID_FMT.format(refund.user.id))
+        )
         self.assertEqual(event_name, 'Order Refunded')
 
         expected_context = {

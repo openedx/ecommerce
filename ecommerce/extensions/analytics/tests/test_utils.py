@@ -9,6 +9,7 @@ from oscar.test import factories
 from analytics import Client
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.extensions.analytics.utils import (
+    ECOM_TRACKING_ID_FMT,
     get_google_analytics_client_id,
     parse_tracking_context,
     prepare_analytics_data,
@@ -62,7 +63,7 @@ class UtilsTest(DiscoveryTestMixin, BasketMixin, TransactionTestCase):
         # If no LMS user ID is provided, we should create one based on the E-Commerce ID
         del tracking_context['lms_user_id']
         user = self.create_user(tracking_context=tracking_context)
-        expected = ('ecommerce-{}'.format(user.id), tracking_context['ga_client_id'], tracking_context['lms_ip'])
+        expected = (ECOM_TRACKING_ID_FMT.format(user.id), tracking_context['ga_client_id'], tracking_context['lms_ip'])
         self.assertEqual(parse_tracking_context(user), expected)
 
     def test_track_segment_event_without_segment_key(self):

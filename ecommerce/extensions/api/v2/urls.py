@@ -15,6 +15,7 @@ from ecommerce.extensions.api.v2.views import products as product_views
 from ecommerce.extensions.api.v2.views import providers as provider_views
 from ecommerce.extensions.api.v2.views import publication as publication_views
 from ecommerce.extensions.api.v2.views import refunds as refund_views
+from ecommerce.extensions.api.v2.views import retirement as retirement_views
 from ecommerce.extensions.api.v2.views import sdn as sdn_views
 from ecommerce.extensions.api.v2.views import stockrecords as stockrecords_views
 from ecommerce.extensions.api.v2.views import vouchers as voucher_views
@@ -22,6 +23,10 @@ from ecommerce.extensions.voucher.views import CouponReportCSVView
 
 ORDER_NUMBER_PATTERN = r'(?P<number>[-\w]+)'
 BASKET_ID_PATTERN = r'(?P<basket_id>[\d]+)'
+
+# From edx-platform's lms/envs/common.py as of 2018-10-09
+USERNAME_REGEX_PARTIAL = r'[\w .@_+-]+'
+USERNAME_PATTERN = r'(?P<username>{regex})'.format(regex=USERNAME_REGEX_PARTIAL)
 
 BASKET_URLS = [
     url(r'^$', basket_views.BasketCreateView.as_view(), name='create'),
@@ -45,6 +50,10 @@ PAYMENT_URLS = [
 REFUND_URLS = [
     url(r'^$', refund_views.RefundCreateView.as_view(), name='create'),
     url(r'^(?P<pk>[\d]+)/process/$', refund_views.RefundProcessView.as_view(), name='process'),
+]
+
+RETIREMENT_URLS = [
+    url(r'^tracking_id/{}/$'.format(USERNAME_PATTERN), retirement_views.EcommerceIdView.as_view(), name='tracking_id')
 ]
 
 COUPON_URLS = [
@@ -86,6 +95,7 @@ urlpatterns = [
     url(r'^providers/', include(PROVIDER_URLS, namespace='providers')),
     url(r'^publication/', include(ATOMIC_PUBLICATION_URLS, namespace='publication')),
     url(r'^refunds/', include(REFUND_URLS, namespace='refunds')),
+    url(r'^retirement/', include(RETIREMENT_URLS, namespace='retirement')),
     url(r'^sdn/', include(SDN_URLS, namespace='sdn')),
 ]
 
