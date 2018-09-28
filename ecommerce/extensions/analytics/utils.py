@@ -6,6 +6,8 @@ from ecommerce.courses.utils import mode_for_product
 
 logger = logging.getLogger(__name__)
 
+ECOM_TRACKING_ID_FMT = 'ecommerce-{}'
+
 
 def parse_tracking_context(user):
     """Extract user ID, client ID, and IP address from a user's tracking context.
@@ -24,7 +26,7 @@ def parse_tracking_context(user):
         # event with an arbitrary local user ID. However, we need to disambiguate the ID we choose
         # since there's no guarantee it won't collide with a platform user ID that may be tracked
         # at some point.
-        user_tracking_id = 'ecommerce-{}'.format(user.id)
+        user_tracking_id = ECOM_TRACKING_ID_FMT.format(user.id)
 
     lms_ip = tracking_context.get('lms_ip')
     ga_client_id = tracking_context.get('ga_client_id')

@@ -13,7 +13,11 @@ from ecommerce.core.constants import ENROLLMENT_CODE_PRODUCT_CLASS_NAME, ENROLLM
 from ecommerce.core.models import BusinessClient, SegmentClient
 from ecommerce.core.tests import toggle_switch
 from ecommerce.courses.tests.factories import CourseFactory
-from ecommerce.extensions.analytics.utils import parse_tracking_context, translate_basket_line_for_segment
+from ecommerce.extensions.analytics.utils import (
+    ECOM_TRACKING_ID_FMT,
+    parse_tracking_context,
+    translate_basket_line_for_segment
+)
 from ecommerce.extensions.basket.utils import basket_add_organization_attribute
 from ecommerce.extensions.checkout.exceptions import BasketNotFreeError
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
@@ -215,7 +219,7 @@ class EdxOrderPlacementMixinTests(BusinessIntelligenceMixin, PaymentEventsMixin,
         self.assert_correct_event(
             mock_track,
             self.order,
-            'ecommerce-{}'.format(self.user.id),
+            ECOM_TRACKING_ID_FMT.format(self.user.id),
             None,
             None,
             self.order.number,
