@@ -15,7 +15,7 @@ msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2018-04-05 11:00+0000\n"
-"PO-Revision-Date: 2018-09-19 14:31+0000\n"
+"PO-Revision-Date: 2018-09-25 10:20+0000\n"
 "Last-Translator: Abstract Technology <stefania.trabucchi@abstract-technology.de>\n"
 "Language-Team: German (Germany) (http://www.transifex.com/open-edx/edx-platform/language/de_DE/)\n"
 "MIME-Version: 1.0\n"
@@ -261,17 +261,17 @@ msgstr ""
 msgid ""
 "An error occurred while processing your payment. You have NOT been charged. "
 "Please try again, or select another payment method."
-msgstr ""
+msgstr "Ein Fehler ist beim Verarbeiten der Bezahlung aufgetreten. Es wurde KEIN Betrag abgebucht. Bitte versuchen Sie es daher noch einmal oder wählen Sie eine andere Bezahlmöglichkeit."
 
 #: ecommerce/static/js/payment_processors/stripe.js:71
 msgid ""
 "An error occurred while attempting to process your payment. You have not "
 "been charged. Please check your payment details, and try again."
-msgstr ""
+msgstr "Ein Fehler ist beim Verarbeiten der Bezahlung aufgetreten. Es wurde KEIN Betrag abgebucht. Bitte kontrollieren Sie Ihre Zahlungsdetails und versuchen Sie es erneut."
 
 #: ecommerce/static/js/payment_processors/stripe.js:110
 msgid "An error occurred while processing your payment. Please try again."
-msgstr ""
+msgstr "Es ist ein Fehler bei dem Zahlungsvorgang aufgetreten. Bitte versuchen Sie es erneut."
 
 #: ecommerce/static/js/utils/utils.js:184
 msgid "Trailing comma not allowed."
