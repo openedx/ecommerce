@@ -164,7 +164,7 @@ class VoucherViewSet(NonDestroyableModelViewSet):
             page of the Course Discovery results.
             """
         offers = []
-        benefit = voucher.offers.first().benefit
+        benefit = voucher.best_offer.benefit
         course_seat_types = benefit.range.course_seat_types
         multiple_credit_providers = False
         credit_provider_price = None
@@ -252,7 +252,7 @@ class VoucherViewSet(NonDestroyableModelViewSet):
             dict: Dictionary containing a link to the next page of Course Discovery results and
                   a List of course offers where each offer is represented as a dictionary.
         """
-        benefit = voucher.offers.first().benefit
+        benefit = voucher.best_offer.benefit
         catalog_query = benefit.range.catalog_query
         catalog_id = benefit.range.course_catalog
         enterprise_catalog = benefit.range.enterprise_customer_catalog
@@ -266,7 +266,7 @@ class VoucherViewSet(NonDestroyableModelViewSet):
         if catalog_query or enterprise_catalog:
             offers, next_page = self.get_offers_from_catalog(request, voucher, catalog_query, enterprise_catalog)
         else:
-            product_range = voucher.offers.first().benefit.range
+            product_range = voucher.best_offer.benefit.range
             products = product_range.all_products()
             if products:
                 product = products[0]

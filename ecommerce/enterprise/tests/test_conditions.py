@@ -15,6 +15,7 @@ from ecommerce.extensions.test import factories
 from ecommerce.tests.factories import ProductFactory, SiteConfigurationFactory
 from ecommerce.tests.testcases import TestCase
 
+ConditionalOffer = get_model('offer', 'ConditionalOffer')
 Product = get_model('catalogue', 'Product')
 LOGGER_NAME = 'ecommerce.programs.conditions'
 
@@ -115,6 +116,28 @@ class EnterpriseCustomerConditionTests(EnterpriseServiceMockMixin, DiscoveryTest
         """ Ensure the condition returns false for an anonymous user. """
         offer = factories.EnterpriseOfferFactory(partner=self.partner, condition=self.condition)
         basket = factories.BasketFactory(site=self.site, owner=None)
+        basket.add_product(self.course_run.seat_products[0])
+        self.mock_enterprise_learner_api(
+            learner_id=self.user.id,
+            enterprise_customer_uuid=str(self.condition.enterprise_customer_uuid),
+            course_run_id=self.course_run.id,
+        )
+        self.mock_catalog_contains_course_runs(
+            [self.course_run.id],
+            self.condition.enterprise_customer_uuid,
+            enterprise_customer_catalog_uuid=self.condition.enterprise_customer_catalog_uuid,
+        )
+        self.assertFalse(self.condition.is_satisfied(offer, basket))
+
+    @httpretty.activate
+    def test_is_satisfied_false_for_voucher_offer(self):
+        """ Ensure the condition returns false for a coupon with an enterprise conditional offer. """
+        offer = factories.EnterpriseOfferFactory(
+            partner=self.partner,
+            condition=self.condition,
+            offer_type=ConditionalOffer.VOUCHER
+        )
+        basket = factories.BasketFactory(site=self.site, owner=self.user)
         basket.add_product(self.course_run.seat_products[0])
         self.mock_enterprise_learner_api(
             learner_id=self.user.id,
