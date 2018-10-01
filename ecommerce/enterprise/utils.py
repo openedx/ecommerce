@@ -215,29 +215,40 @@ def enterprise_customer_user_needs_consent(site, enterprise_customer_uuid, cours
     )['consent_required']
 
 
+def get_enterprise_customer_uuid_from_voucher(voucher):
+    """
+    Given a Voucher, find the associated Enterprise Customer UUID, if it exists.
+    """
+    enterprise_customer_uuid = None
+    for offer in voucher.offers.all():
+        if offer.benefit.range and offer.benefit.range.enterprise_customer:
+            enterprise_customer_uuid = offer.benefit.range.enterprise_customer
+        elif offer.condition.enterprise_customer_uuid:
+            enterprise_customer_uuid = offer.condition.enterprise_customer_uuid
+
+    return enterprise_customer_uuid
+
+
 def get_enterprise_customer_from_voucher(site, voucher):
     """
     Given a Voucher, find the associated Enterprise Customer and retrieve data about
     that customer from the Enterprise service. If there is no Enterprise Customer
     associated with the Voucher, `None` is returned.
     """
-    try:
-        offer = voucher.offers.get(benefit__range__enterprise_customer__isnull=False)
-    except ConditionalOffer.DoesNotExist:
-        # There's no Enterprise Customer associated with this voucher.
-        return None
+    enterprise_customer_uuid = get_enterprise_customer_uuid_from_voucher(voucher)
 
-    # Get information about the enterprise customer from the Enterprise service.
-    enterprise_customer_uuid = offer.benefit.range.enterprise_customer
-    enterprise_customer = get_enterprise_customer(site, enterprise_customer_uuid)
-    if enterprise_customer is None:
-        raise EnterpriseDoesNotExist(
-            'Enterprise customer with UUID {uuid} does not exist in the Enterprise service.'.format(
-                uuid=enterprise_customer_uuid
+    if enterprise_customer_uuid:
+        enterprise_customer = get_enterprise_customer(site, enterprise_customer_uuid)
+        if enterprise_customer is None:
+            raise EnterpriseDoesNotExist(
+                'Enterprise customer with UUID {uuid} does not exist in the Enterprise service.'.format(
+                    uuid=enterprise_customer_uuid
+                )
             )
-        )
 
-    return enterprise_customer
+        return enterprise_customer
+
+    return None
 
 
 def get_enterprise_course_consent_url(
@@ -320,13 +331,7 @@ def get_enterprise_customer_uuid(coupon_code):
     except Voucher.DoesNotExist:
         return None
 
-    try:
-        offer = voucher.offers.get(benefit__range__enterprise_customer__isnull=False)
-    except ConditionalOffer.DoesNotExist:
-        # There's no Enterprise Customer associated with this voucher.
-        return None
-
-    return offer.benefit.range.enterprise_customer
+    return get_enterprise_customer_uuid_from_voucher(voucher)
 
 
 def set_enterprise_customer_cookie(site, response, enterprise_customer_uuid, max_age=None):
