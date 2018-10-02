@@ -1,10 +1,11 @@
 from django.utils.translation import ugettext_lazy as _
-from oscar.apps.offer.benefits import AbsoluteDiscountBenefit, PercentageDiscountBenefit
 from oscar.core.loading import get_model
 
 from ecommerce.extensions.offer.mixins import AbsoluteBenefitMixin, BenefitWithoutRangeMixin, PercentageBenefitMixin
 
 Benefit = get_model('offer', 'Benefit')
+AbsoluteDiscountBenefit = get_model('offer', 'AbsoluteDiscountBenefit')
+PercentageDiscountBenefit = get_model('offer', 'PercentageDiscountBenefit')
 
 
 class EnterprisePercentageDiscountBenefit(BenefitWithoutRangeMixin, PercentageBenefitMixin, PercentageDiscountBenefit):

@@ -404,7 +404,7 @@ def _get_or_create_enterprise_offer(benefit_type, benefit_value, enterprise_cust
         value=Decimal(benefit_value)
     )
 
-    offer_name = "Coupon [{}]-{}-{}".format(coupon_id, benefit.type, benefit.value)
+    offer_name = "Coupon [{}]-{}-{}".format(coupon_id, benefit_type, benefit_value)
     if offer_number:
         offer_name = "{} [{}]".format(offer_name, offer_number)
     offer = ConditionalOffer.objects.get_or_create(
