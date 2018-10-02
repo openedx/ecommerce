@@ -27,6 +27,9 @@ from ecommerce.invoice.models import Invoice
 from ecommerce.programs.conditions import ProgramCourseRunSeatsCondition
 from ecommerce.programs.constants import BENEFIT_MAP
 from ecommerce.programs.custom import class_path, create_condition
+from ecommerce.enterprise.conditions import EnterpriseCustomerCondition
+from ecommerce.enterprise.utils import get_enterprise_customer
+from ecommerce.enterprise.constants import BENEFIT_MAP
 
 logger = logging.getLogger(__name__)
 
@@ -381,6 +384,46 @@ def _get_or_create_offer(
     return offer
 
 
+def _get_or_create_enterprise_offer(benefit_type, benefit_value, enterprise_customer, enterprise_customer_catalog,
+                                    coupon_id=None, max_uses=None, offer_number=None, email_domains=None, site=None):
+
+    enterprise_customer_object = get_enterprise_customer(enterprise_customer, site)
+    enterprise_customer_name = enterprise_customer_object['name']
+
+    condition = Condition.objects.get_or_create(
+        proxy_class=class_path(EnterpriseCustomerCondition),
+        enterprise_customer_uuid=enterprise_customer,
+        enterprise_customer_name=enterprise_customer_name,
+        enterprise_customer_catalog_uuid=enterprise_customer_catalog,
+        type=Condition.COUNT,
+        value=1,
+    )
+
+    benefit = Benefit.objects.get_or_create(
+        proxy_class=class_path(BENEFIT_MAP[benefit_type]),
+        value=Decimal(benefit_value)
+    )
+
+    offer_name = "Coupon [{}]-{}-{}".format(coupon_id, benefit.type, benefit.value)
+    if offer_number:
+        offer_name = "{} [{}]".format(offer_name, offer_number)
+    offer = ConditionalOffer.objects.get_or_create(
+        name=offer_name,
+        offer_type=ConditionalOffer.VOUCHER,
+        condition=condition,
+        benefit=benefit,
+        max_global_applications=max_uses,
+        email_domains=email_domains,
+        site=site,
+        partner=site.siteconfiguration.partner if site else None,
+        # For initial creation, we are setting the priority lower so that we don't want to use these
+        #  until we've done some other implementation work. We will update this to a higher value later.
+        priority=5,
+    )
+
+    return offer
+
+
 def _generate_code_string(length):
     """
     Create a string of random characters of specified length
@@ -513,6 +556,7 @@ def create_vouchers(
     logger.info("Creating [%d] vouchers product [%s]", quantity, coupon.id)
     vouchers = []
     offers = []
+    enterprise_offers = []
 
     # Maximum number of uses can be set for each voucher type and disturb
     # the predefined behaviours of the different voucher types. Therefor
@@ -578,6 +622,23 @@ def create_vouchers(
         )
         offers.append(offer)
 
+        # This is a temporary measure to create enterprise conditional offers ahead of updating the Coupon creation
+        # and redemption logic to use enterprise conditional offers when appropriate.
+        # This and the surrounding code will be refactored at that point.
+        if enterprise_customer:
+            enterprise_offer = _get_or_create_enterprise_offer(
+                benefit_type=benefit_type,
+                benefit_value=benefit_value,
+                enterprise_customer=enterprise_customer,
+                enterprise_customer_catalog=enterprise_customer_catalog,
+                max_uses=max_uses,
+                coupon_id=coupon.id,
+                offer_number=num,
+                email_domains=email_domains,
+                site=site
+            )
+            enterprise_offers.append(enterprise_offer)
+
     for i in range(quantity):
         voucher = _create_new_voucher(
             end_datetime=end_datetime,
@@ -587,6 +648,8 @@ def create_vouchers(
             code=code,
             name=name
         )
+        if enterprise_customer:
+            voucher.offers.add(enterprise_offers[i] if multi_offer else enterprise_offers[0])
         vouchers.append(voucher)
 
     return vouchers
