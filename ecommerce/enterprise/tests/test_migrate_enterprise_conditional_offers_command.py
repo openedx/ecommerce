@@ -4,11 +4,7 @@
 from __future__ import unicode_literals
 
 import logging
-import os
-import tempfile
-from decimal import Decimal
 
-from django.core.management import CommandError, call_command
 from faker import Factory as FakerFactory
 from oscar.test.factories import (
     BenefitFactory,
@@ -17,10 +13,9 @@ from oscar.test.factories import (
     RangeFactory,
     VoucherFactory
 )
-from testfixtures import LogCapture
 
 from ecommerce.programs.custom import get_model
-from ecommerce.tests.testcases import TransactionTestCase
+from ecommerce.tests.testcases import TestCase
 
 Benefit = get_model('offer', 'Benefit')
 Condition = get_model('offer', 'Condition')
@@ -33,11 +28,10 @@ FAKER = FakerFactory.create()
 LOGGER_NAME = 'ecommerce.enterprise.management.commands.migrate_enterprise_conditional_offers'
 
 
-class MigrateEnterpriseConditionalOffersTests(TransactionTestCase):
+class MigrateEnterpriseConditionalOffersTests(TestCase):
     """
     Tests the enrollment code creation command.
     """
-    tmp_file_path = os.path.join(tempfile.gettempdir(), 'tmp-courses.txt')
 
     def setUp(self):
         """
