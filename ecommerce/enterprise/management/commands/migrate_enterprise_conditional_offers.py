@@ -4,11 +4,11 @@ This command migrates the conditional offers for enterprise coupons to the enter
 from __future__ import unicode_literals
 
 import logging
-import os
+from time import sleep
 
-from django.core.management import BaseCommand, CommandError
+from django.core.management import BaseCommand
 from ecommerce.extensions.voucher.models import Voucher
-from ecommerce.programs.custom import get_model, class_path, create_condition
+from ecommerce.programs.custom import get_model, class_path
 from ecommerce.enterprise.conditions import EnterpriseCustomerCondition
 from ecommerce.enterprise.utils import get_enterprise_customer
 from ecommerce.enterprise.constants import BENEFIT_MAP
@@ -19,16 +19,13 @@ ConditionalOffer = get_model('offer', 'ConditionalOffer')
 
 logger = logging.getLogger(__name__)
 
-# add batch offset support
-# add logging and error handling
-# write tests
-# deploy to business sandbox and test there
 
 class Command(BaseCommand):
     """
-    Creates enrollment codes for courses.
+    Migrates conditional offers for enterprise coupons to enterprise conditional offer implementation.
     """
 
+    enterprise_customer_map = {}
     help = ('This command migrates the conditional offers for enterprise coupons '
             'to the enterprise conditional offer implementation.')
 
@@ -43,6 +40,15 @@ class Command(BaseCommand):
         )
 
         parser.add_argument(
+            '--batch-offset',
+            action='store',
+            dest='batch_offset',
+            default=0,
+            help='Which index to start batching from.',
+            type=int,
+        )
+
+        parser.add_argument(
             '--batch-sleep',
             action='store',
             dest='batch_sleep',
@@ -51,53 +57,75 @@ class Command(BaseCommand):
             type=int,
         )
 
+    def _get_enterprise_customer(self, enterprise_customer_uuid, site):
+        if enterprise_customer_uuid not in self.enterprise_customer_map:
+            enterprise_customer = get_enterprise_customer(site, enterprise_customer_uuid)
+            self.enterprise_customer_map[enterprise_customer_uuid] = enterprise_customer
+
+        return self.enterprise_customer_map[enterprise_customer_uuid]
+
+    def _migrate_voucher(self, voucher):
+        offer = voucher.offers.first()
+        enterprise_customer_uuid = offer.condition.range.enterprise_customer
+        enterprise_customer = self._get_enterprise_customer(enterprise_customer_uuid, offer.site)
+        enterprise_customer_name = enterprise_customer['name']
+
+        new_condition = Condition.objects.get_or_create(
+            proxy_class=class_path(EnterpriseCustomerCondition),
+            enterprise_customer_uuid=enterprise_customer_uuid,
+            enterprise_customer_name=enterprise_customer_name,
+            enterprise_customer_catalog_uuid=offer.condition.range.enterprise_customer_catalog,
+            type=Condition.COUNT,
+            value=1,
+        )
+
+        new_benefit = Benefit.objects.get_or_create(
+            proxy_class=class_path(BENEFIT_MAP[offer.benefit.type]),
+            value=offer.benefit.value
+        )
+
+        new_offer = ConditionalOffer.objects.get_or_create(
+            name=offer.name,
+            offer_type=ConditionalOffer.VOUCHER,
+            condition=new_condition,
+            benefit=new_benefit,
+            max_global_applications=offer.max_global_applications,
+            email_domains=offer.email_domains,
+            site=offer.site,
+            partner=offer.partner,
+            # For initial creation, we are setting the priority lower so that we don't want to use these
+            #  until we've done some other implementation work. We will update this to a higher value later.
+            priority=5,
+        )
+
+        voucher.offers.add(new_offer)
+        voucher.save()
+
+    def _get_voucher_batch(self, start, end):
+        logger.info('Fetching new batch of vouchers from indexes: {} to {}'.format(start, end))
+        return Voucher.objects.filter(offers__condition__range__enterprise_customer__isnull=False)[start:end]
+
     def handle(self, *args, **options):
         batch_limit = options['batch_limit']
         batch_sleep = options['batch_sleep']
-        # batch_offset =
+        batch_offset = options['batch_offset']
 
-        total_vouchers = 0
+        current_batch_index = batch_offset
+        logger.info('Starting migration of enterprise conditional offers!')
 
-        vouchers = Voucher.objects.all()[0:batch_limit]
-        while len(vouchers) > 0:
-            total_vouchers += len(vouchers)
-            for voucher in vouchers:
-                offer = voucher.offers.first()
-                if not offer.condition.range.enterprise_customer:
-                    continue
+        try:
+            vouchers = self._get_voucher_batch(batch_offset, batch_offset+batch_limit)
+            while len(vouchers) > 0:
+                for index, voucher in enumerate(vouchers):
+                    logger.info('Processing Voucher with index {} and id {}'.format(
+                        current_batch_index+index, voucher.id
+                    ))
+                    self._migrate_voucher(voucher)
 
-                enterprise_customer_uuid = offer.condition.range.enterprise_customer
-                enterprise_customer = get_enterprise_customer(offer.site, enterprise_customer_uuid)
-                enterprise_customer_name = enterprise_customer['name']
-                new_condition = Condition.objects.get_or_create(
-                    proxy_class=class_path(EnterpriseCustomerCondition),
-                    enterprise_customer_uuid=enterprise_customer_uuid,
-                    enterprise_customer_name=enterprise_customer_name,
-                    enterprise_customer_catalog_uuid=offer.condition.range.enterprise_customer_catalog,
-                    type=Condition.COUNT,
-                    value=1,
-                )
+                sleep(batch_sleep)
+                current_batch_index += len(vouchers)
+                vouchers = self._get_voucher_batch(current_batch_index, current_batch_index+batch_limit)
+        except Exception:
+            logger.exception('Script execution failed!')
 
-                new_benefit = Benefit.objects.get_or_create(
-                    proxy_class=class_path(BENEFIT_MAP[offer.benefit.type]),
-                    value=offer.benefit.value
-                )
-
-                new_offer = ConditionalOffer.objects.get_or_create(
-                    name=offer.name,
-                    offer_type=ConditionalOffer.VOUCHER,
-                    condition=new_condition,
-                    benefit=new_benefit,
-                    max_global_applications=offer.max_global_applications,
-                    email_domains=offer.email_domains,
-                    site=offer.site,
-                    partner=offer.partner,
-                    # For initial creation, we are setting the priority lower so that we don't want to use these
-                    #  until we've done some other implementation work. We will update this to a higher value later.
-                    priority=5,
-                )
-
-                voucher.offers.add(new_offer)
-                voucher.save()
-
-            vouchers = Voucher.objects.all()[total_vouchers:total_vouchers+batch_limit]
+        logger.info('Successfully finished migrating enterprise conditional offers!')
