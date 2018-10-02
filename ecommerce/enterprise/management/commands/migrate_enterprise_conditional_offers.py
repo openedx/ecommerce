@@ -7,11 +7,12 @@ import logging
 from time import sleep
 
 from django.core.management import BaseCommand
-from ecommerce.extensions.voucher.models import Voucher
-from ecommerce.programs.custom import get_model, class_path
+
 from ecommerce.enterprise.conditions import EnterpriseCustomerCondition
-from ecommerce.enterprise.utils import get_enterprise_customer
 from ecommerce.enterprise.constants import BENEFIT_MAP
+from ecommerce.enterprise.utils import get_enterprise_customer
+from ecommerce.extensions.voucher.models import Voucher
+from ecommerce.programs.custom import class_path, get_model
 
 Condition = get_model('offer', 'Condition')
 Benefit = get_model('offer', 'Benefit')
@@ -102,7 +103,7 @@ class Command(BaseCommand):
         voucher.save()
 
     def _get_voucher_batch(self, start, end):
-        logger.info('Fetching new batch of vouchers from indexes: {} to {}'.format(start, end))
+        logger.info('Fetching new batch of vouchers from indexes: %s to %s', start, end)
         return Voucher.objects.filter(offers__condition__range__enterprise_customer__isnull=False)[start:end]
 
     def handle(self, *args, **options):
@@ -114,18 +115,16 @@ class Command(BaseCommand):
         logger.info('Starting migration of enterprise conditional offers!')
 
         try:
-            vouchers = self._get_voucher_batch(batch_offset, batch_offset+batch_limit)
+            vouchers = self._get_voucher_batch(batch_offset, batch_offset + batch_limit)
             while len(vouchers) > 0:
                 for index, voucher in enumerate(vouchers):
-                    logger.info('Processing Voucher with index {} and id {}'.format(
-                        current_batch_index+index, voucher.id
-                    ))
+                    logger.info('Processing Voucher with index %s and id %s', current_batch_index + index, voucher.id)
                     self._migrate_voucher(voucher)
 
                 sleep(batch_sleep)
                 current_batch_index += len(vouchers)
-                vouchers = self._get_voucher_batch(current_batch_index, current_batch_index+batch_limit)
-        except Exception:
+                vouchers = self._get_voucher_batch(current_batch_index, current_batch_index + batch_limit)
+        except Exception:  # pylint: disable=broad-except
             logger.exception('Script execution failed!')
 
         logger.info('Successfully finished migrating enterprise conditional offers!')
