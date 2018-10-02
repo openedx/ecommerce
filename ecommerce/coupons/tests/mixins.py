@@ -1,5 +1,6 @@
 import datetime
 import json
+import mock
 
 import httpretty
 from django.test import RequestFactory
@@ -13,7 +14,7 @@ from ecommerce.extensions.api.v2.views.coupons import CouponViewSet
 from ecommerce.extensions.basket.utils import prepare_basket
 from ecommerce.extensions.catalogue.utils import create_coupon_product
 from ecommerce.tests.factories import PartnerFactory
-from ecommerce.tests.mixins import Applicator, Benefit, Catalog, ProductClass, Voucher
+from ecommerce.tests.mixins import Applicator, Benefit, Catalog, ProductClass, SiteMixin, Voucher
 
 
 class DiscoveryMockMixin(object):
@@ -388,7 +389,7 @@ class DiscoveryMockMixin(object):
         )
 
 
-class CouponMixin(object):
+class CouponMixin(SiteMixin):
     """ Mixin for preparing data for coupons and creating coupons. """
 
     REDEMPTION_URL = "/coupons/offer/?code={}"
@@ -462,30 +463,33 @@ class CouponMixin(object):
         if code is not '':
             quantity = 1
 
-        coupon = create_coupon_product(
-            benefit_type=benefit_type,
-            benefit_value=benefit_value,
-            catalog=catalog,
-            catalog_query=catalog_query,
-            category=self.category,
-            code=code,
-            course_catalog=course_catalog,
-            course_seat_types=course_seat_types,
-            email_domains=email_domains,
-            end_datetime=datetime.datetime(2020, 1, 1),
-            enterprise_customer=enterprise_customer,
-            enterprise_customer_catalog=None,
-            max_uses=max_uses,
-            note=note,
-            partner=partner,
-            price=price,
-            quantity=quantity,
-            start_datetime=datetime.datetime(2015, 1, 1),
-            title=title,
-            voucher_type=voucher_type,
-            program_uuid=program_uuid,
-            site=self.site
-        )
+        with mock.patch(
+                "ecommerce.extensions.voucher.utils.get_enterprise_customer",
+                mock.Mock(return_value={'name': 'Fake enterprise'})):
+            coupon = create_coupon_product(
+                benefit_type=benefit_type,
+                benefit_value=benefit_value,
+                catalog=catalog,
+                catalog_query=catalog_query,
+                category=self.category,
+                code=code,
+                course_catalog=course_catalog,
+                course_seat_types=course_seat_types,
+                email_domains=email_domains,
+                end_datetime=datetime.datetime(2020, 1, 1),
+                enterprise_customer=enterprise_customer,
+                enterprise_customer_catalog=None,
+                max_uses=max_uses,
+                note=note,
+                partner=partner,
+                price=price,
+                quantity=quantity,
+                start_datetime=datetime.datetime(2015, 1, 1),
+                title=title,
+                voucher_type=voucher_type,
+                program_uuid=program_uuid,
+                site=self.site
+            )
 
         request = RequestFactory()
         request.site = self.site
