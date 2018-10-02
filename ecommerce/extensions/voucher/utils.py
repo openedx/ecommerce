@@ -20,6 +20,9 @@ from oscar.templatetags.currency_filters import currency
 
 from ecommerce.core.url_utils import get_ecommerce_url
 from ecommerce.core.utils import log_message_and_raise_validation_error
+from ecommerce.enterprise.conditions import EnterpriseCustomerCondition
+from ecommerce.enterprise.constants import BENEFIT_MAP as ENTERPRISE_BENEFIT_MAP
+from ecommerce.enterprise.utils import get_enterprise_customer
 from ecommerce.extensions.api import exceptions
 from ecommerce.extensions.offer.models import OFFER_PRIORITY_VOUCHER
 from ecommerce.extensions.offer.utils import get_discount_percentage, get_discount_value
@@ -27,9 +30,6 @@ from ecommerce.invoice.models import Invoice
 from ecommerce.programs.conditions import ProgramCourseRunSeatsCondition
 from ecommerce.programs.constants import BENEFIT_MAP
 from ecommerce.programs.custom import class_path, create_condition
-from ecommerce.enterprise.conditions import EnterpriseCustomerCondition
-from ecommerce.enterprise.utils import get_enterprise_customer
-from ecommerce.enterprise.constants import BENEFIT_MAP
 
 logger = logging.getLogger(__name__)
 
@@ -400,7 +400,7 @@ def _get_or_create_enterprise_offer(benefit_type, benefit_value, enterprise_cust
     )
 
     benefit = Benefit.objects.get_or_create(
-        proxy_class=class_path(BENEFIT_MAP[benefit_type]),
+        proxy_class=class_path(ENTERPRISE_BENEFIT_MAP[benefit_type]),
         value=Decimal(benefit_value)
     )
 
