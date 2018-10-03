@@ -85,8 +85,9 @@ class Command(BaseCommand):
             value=offer.benefit.value
         )
 
+        offer_name = offer.name + "ENT offer"
         new_offer, _ = ConditionalOffer.objects.get_or_create(
-            name=offer.name,
+            name=offer_name,
             offer_type=ConditionalOffer.VOUCHER,
             condition=new_condition,
             benefit=new_benefit,
@@ -126,5 +127,6 @@ class Command(BaseCommand):
                 vouchers = self._get_voucher_batch(current_batch_index, current_batch_index + batch_limit)
         except Exception:  # pylint: disable=broad-except
             logger.exception('Script execution failed!')
+            raise
 
         logger.info('Successfully finished migrating enterprise conditional offers!')
