@@ -4,9 +4,9 @@
 from __future__ import unicode_literals
 
 import logging
-from mock import patch
 
 from django.core.management import call_command
+from mock import patch
 from oscar.test.factories import (
     BenefitFactory,
     ConditionalOfferFactory,
@@ -134,7 +134,7 @@ class MigrateEnterpriseConditionalOffersTests(TestCase):
                    '.commands.migrate_enterprise_conditional_offers'
                    '.Command._get_enterprise_customer') as mock_get_ent_customer:
             mock_get_ent_customer.return_value = {'name': 'Boo Radley'}
-            self.command._migrate_voucher(voucher)
+            self.command._migrate_voucher(voucher)  # pylint: disable=protected-access
 
         voucher.refresh_from_db()
         assert voucher.offers.count() == 2
@@ -151,6 +151,7 @@ class MigrateEnterpriseConditionalOffersTests(TestCase):
                    '.migrate_enterprise_conditional_offers'
                    '.get_enterprise_customer') as mock_get_customer:
             mock_get_customer.return_value = 'Hannah Dee'
+            # pylint: disable=protected-access
             actual = self.command._get_enterprise_customer(enterprise_customer_uuid, site)
         assert actual == 'Hannah Dee'
 
@@ -164,7 +165,7 @@ class MigrateEnterpriseConditionalOffersTests(TestCase):
         expected_query = str(
             Voucher.objects.filter(offers__condition__range__enterprise_customer__isnull=False)[start:end].query
         )
-        actual_query = str(self.command._get_voucher_batch(start, end).query)
+        actual_query = str(self.command._get_voucher_batch(start, end).query)  # pylint: disable=protected-access
         assert actual_query == expected_query
 
     def test_handle(self):
@@ -227,7 +228,7 @@ class MigrateEnterpriseConditionalOffersTests(TestCase):
                 'migrate_enterprise_conditional_offers',
                 batch_sleep=0,
                 batch_limit=58,
-                batch_offset=3, # 3rd index is the 4th item
+                batch_offset=3,  # 3rd index is the 4th item
             )
 
         offers = ConditionalOffer.objects.all()

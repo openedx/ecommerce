@@ -1,8 +1,8 @@
 import datetime
 import json
-import mock
 
 import httpretty
+import mock
 from django.test import RequestFactory
 from edx_django_utils.cache import TieredCache
 from oscar.core.utils import slugify
@@ -464,8 +464,9 @@ class CouponMixin(SiteMixin):
             quantity = 1
 
         with mock.patch(
-                "ecommerce.extensions.voucher.utils.get_enterprise_customer",
-                mock.Mock(return_value={'name': 'Fake enterprise'})):
+            "ecommerce.extensions.voucher.utils.get_enterprise_customer",
+            mock.Mock(return_value={'name': 'Fake enterprise'})
+        ):
             coupon = create_coupon_product(
                 benefit_type=benefit_type,
                 benefit_value=benefit_value,
