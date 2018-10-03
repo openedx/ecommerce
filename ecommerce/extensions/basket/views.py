@@ -10,6 +10,7 @@ import newrelic.agent
 import waffle
 from django.http import HttpResponseBadRequest, HttpResponseRedirect
 from django.shortcuts import redirect, render
+from django.utils.html import escape
 from django.utils.translation import ugettext as _
 from opaque_keys.edx.keys import CourseKey
 from oscar.apps.basket.views import VoucherAddView as BaseVoucherAddView
@@ -56,7 +57,7 @@ class BasketAddItemsView(View):
     def get(self, request):
         partner = get_partner_for_site(request)
 
-        skus = request.GET.getlist('sku')
+        skus = [escape(sku) for sku in request.GET.getlist('sku')]
         code = request.GET.get('code', None)
 
         if not skus:
