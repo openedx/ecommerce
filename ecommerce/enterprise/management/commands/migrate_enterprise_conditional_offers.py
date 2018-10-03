@@ -71,7 +71,7 @@ class Command(BaseCommand):
         enterprise_customer = self._get_enterprise_customer(enterprise_customer_uuid, offer.site)
         enterprise_customer_name = enterprise_customer['name']
 
-        new_condition = Condition.objects.get_or_create(
+        new_condition, _ = Condition.objects.get_or_create(
             proxy_class=class_path(EnterpriseCustomerCondition),
             enterprise_customer_uuid=enterprise_customer_uuid,
             enterprise_customer_name=enterprise_customer_name,
@@ -80,12 +80,12 @@ class Command(BaseCommand):
             value=1,
         )
 
-        new_benefit = Benefit.objects.get_or_create(
+        new_benefit, _ = Benefit.objects.get_or_create(
             proxy_class=class_path(BENEFIT_MAP[offer.benefit.type]),
             value=offer.benefit.value
         )
 
-        new_offer = ConditionalOffer.objects.get_or_create(
+        new_offer, _ = ConditionalOffer.objects.get_or_create(
             name=offer.name,
             offer_type=ConditionalOffer.VOUCHER,
             condition=new_condition,
