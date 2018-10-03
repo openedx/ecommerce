@@ -5,10 +5,10 @@ import datetime
 import json
 from decimal import Decimal
 from uuid import uuid4
-import mock
 
 import ddt
 import httpretty
+import mock
 import pytz
 from django.test import RequestFactory
 from django.urls import reverse
@@ -113,8 +113,9 @@ class CouponViewSetTest(CouponMixin, DiscoveryTestMixin, TestCase):
         view = CouponViewSet()
         view.request = request
         with mock.patch(
-                "ecommerce.extensions.voucher.utils.get_enterprise_customer",
-                mock.Mock(return_value={'name': 'Fake enterprise'})):
+            "ecommerce.extensions.voucher.utils.get_enterprise_customer",
+            mock.Mock(return_value={'name': 'Fake enterprise'})
+        ):
             response = view.create(request)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -348,8 +349,9 @@ class CouponViewSetFunctionalTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
     def get_response(self, method, path, data=None):
         """Helper method for sending requests and returning the response."""
         with mock.patch(
-                "ecommerce.extensions.voucher.utils.get_enterprise_customer",
-                mock.Mock(return_value={'name': 'Fake enterprise'})):
+            "ecommerce.extensions.voucher.utils.get_enterprise_customer",
+            mock.Mock(return_value={'name': 'Fake enterprise'})
+        ):
             if method == 'GET':
                 return self.client.get(path)
             elif method == 'POST':
