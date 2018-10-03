@@ -390,7 +390,7 @@ def _get_or_create_enterprise_offer(benefit_type, benefit_value, enterprise_cust
     enterprise_customer_object = get_enterprise_customer(enterprise_customer, site)
     enterprise_customer_name = enterprise_customer_object['name']
 
-    condition = Condition.objects.get_or_create(
+    condition, __ = Condition.objects.get_or_create(
         proxy_class=class_path(EnterpriseCustomerCondition),
         enterprise_customer_uuid=enterprise_customer,
         enterprise_customer_name=enterprise_customer_name,
@@ -399,15 +399,15 @@ def _get_or_create_enterprise_offer(benefit_type, benefit_value, enterprise_cust
         value=1,
     )
 
-    benefit = Benefit.objects.get_or_create(
+    benefit, __ = Benefit.objects.get_or_create(
         proxy_class=class_path(ENTERPRISE_BENEFIT_MAP[benefit_type]),
         value=Decimal(benefit_value)
     )
 
-    offer_name = "Coupon [{}]-{}-{}".format(coupon_id, benefit_type, benefit_value)
+    offer_name = "Coupon [{}]-{}-{} ENT Offer".format(coupon_id, benefit_type, benefit_value)
     if offer_number:
-        offer_name = "{} [{}]".format(offer_name, offer_number)
-    offer = ConditionalOffer.objects.get_or_create(
+        offer_name = "{} [{}] ENT Offer".format(offer_name, offer_number)
+    offer, __ = ConditionalOffer.objects.get_or_create(
         name=offer_name,
         offer_type=ConditionalOffer.VOUCHER,
         condition=condition,
@@ -417,7 +417,7 @@ def _get_or_create_enterprise_offer(benefit_type, benefit_value, enterprise_cust
         site=site,
         partner=site.siteconfiguration.partner if site else None,
         # For initial creation, we are setting the priority lower so that we don't want to use these
-        #  until we've done some other implementation work. We will update this to a higher value later.
+        # until we've done some other implementation work. We will update this to a higher value later.
         priority=5,
     )
 
