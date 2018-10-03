@@ -7,6 +7,7 @@ import logging
 import os
 import tempfile
 from decimal import Decimal
+from mock import patch
 
 from django.core.management import CommandError, call_command
 from faker import Factory as FakerFactory
@@ -19,6 +20,7 @@ from oscar.test.factories import (
 )
 from testfixtures import LogCapture
 
+from ecommerce.enterprise.management.commands.migrate_enterprise_conditional_offers import Command
 from ecommerce.programs.custom import get_model
 from ecommerce.tests.testcases import TransactionTestCase
 
@@ -104,9 +106,30 @@ class MigrateEnterpriseConditionalOffersTests(TransactionTestCase):
             offers__condition__range__enterprise_customer__isnull=True
         ).count() == 3
 
+        self.command = Command()
+
     def test_migrate_voucher(self):
-        # test cases include: percentage discount, absolute discount, with enterprise catalog,
-        pass
+        """
+        Management command should create new conditional offers for vouchers
+        that ultimately relate to an enterprise_customer
+        """
+        voucher = Voucher.objects.filter(
+            offers__condition__range__enterprise_customer__isnull=False
+        ).first()
+
+        assert voucher.offers.count() == 1
+
+        # run the migration on the voucher
+        with patch('ecommerce.enterprise.management'
+                   '.commands.migrate_enterprise_conditional_offers'
+                   '.Command._get_enterprise_customer') as mock_get_ent_customer:
+            mock_get_ent_customer.return_value = {'name': 'Boo Radley'}
+            self.command._migrate_voucher(voucher)
+            #call_command('migrate_enterprise_conditional_offers')
+
+        voucher.refresh_from_db()
+        assert voucher.offers.count() == 2
+        assert voucher.offers.last().offer_type == ConditionalOffer.VOUCHER
 
     def test_get_voucher_batch(self):
         # test cases include filtering out non enterprise vouchers and getting the correct inidices
