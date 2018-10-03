@@ -16,6 +16,7 @@ from ecommerce.extensions.offer.mixins import ConditionWithoutRangeMixin, Single
 BasketAttribute = get_model('basket', 'BasketAttribute')
 BasketAttributeType = get_model('basket', 'BasketAttributeType')
 Condition = get_model('offer', 'Condition')
+ConditionalOffer = get_model('offer', 'ConditionalOffer')
 logger = logging.getLogger(__name__)
 
 
@@ -50,6 +51,10 @@ class EnterpriseCustomerCondition(ConditionWithoutRangeMixin, SingleItemConsumpt
         """
         if not basket.owner:
             # An anonymous user is never linked to any EnterpriseCustomer.
+            return False
+
+        if offer.offer_type == ConditionalOffer.VOUCHER:
+            logger.info('Skipping Voucher type enterprise conditional offer until we are ready to support it.')
             return False
 
         try:
