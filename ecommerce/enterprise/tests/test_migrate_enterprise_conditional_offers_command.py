@@ -4,9 +4,6 @@
 from __future__ import unicode_literals
 
 import logging
-import os
-import tempfile
-from decimal import Decimal
 from mock import patch
 
 from faker import Factory as FakerFactory
