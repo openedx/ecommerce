@@ -10,7 +10,6 @@ import newrelic.agent
 import waffle
 from django.http import HttpResponseBadRequest, HttpResponseRedirect
 from django.shortcuts import redirect, render
-from django.utils.html import escape
 from django.utils.translation import ugettext as _
 from opaque_keys.edx.keys import CourseKey
 from oscar.apps.basket.views import VoucherAddView as BaseVoucherAddView
@@ -57,7 +56,7 @@ class BasketAddItemsView(View):
     def get(self, request):
         partner = get_partner_for_site(request)
 
-        skus = [escape(sku) for sku in request.GET.getlist('sku')]
+        skus = request.GET.getlist('sku')
         code = request.GET.get('code', None)
 
         if not skus:
@@ -65,7 +64,8 @@ class BasketAddItemsView(View):
 
         products = Product.objects.filter(stockrecords__partner=partner, stockrecords__partner_sku__in=skus)
         if not products:
-            return HttpResponseBadRequest(_('Products with SKU(s) [{skus}] do not exist.').format(skus=', '.join(skus)))
+            logger.warning('Products with SKU(s) [%s] do not exist.', ', '.join(skus))
+            return HttpResponseBadRequest(_('Provided SKUs do not exist.'))
 
         logger.info('Starting payment flow for user[%s] for products[%s].', request.user.username, skus)
 

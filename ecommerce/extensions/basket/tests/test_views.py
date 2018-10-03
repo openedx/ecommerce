@@ -64,6 +64,7 @@ VoucherRemoveView = get_class('basket.views', 'VoucherRemoveView')
 
 COUPON_CODE = 'COUPONTEST'
 BUNDLE = 'bundle_identifier'
+LOGGER_NAME = 'ecommerce.extensions.basket.views'
 
 
 @ddt.ddt
@@ -130,10 +131,17 @@ class BasketAddItemsViewTests(
         self.assertEqual(response.content, 'No SKUs provided.')
 
     def test_add_multiple_products_no_available_products(self):
-        """ Verify the Bad request exception is thrown when no skus are provided. """
-        response = self.client.get(self.path, data=[('sku', 1), ('sku', 2)])
-        self.assertEqual(response.status_code, 400)
-        self.assertEqual(response.content, 'Products with SKU(s) [1, 2] do not exist.')
+        """ Verify the Bad request exception is thrown when a sku that does not exist is given """
+        with LogCapture(LOGGER_NAME) as l:
+            response = self.client.get(self.path, data=[('sku', 1), ('sku', 2)])
+            self.assertEqual(response.status_code, 400)
+
+            l.check(
+                (
+                    LOGGER_NAME, 'WARNING',
+                    'Products with SKU(s) [1, 2] do not exist.'
+                )
+            )
 
     @ddt.data(Voucher.SINGLE_USE, Voucher.MULTI_USE)
     def test_add_multiple_products_and_use_voucher(self, usage):

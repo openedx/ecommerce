@@ -418,7 +418,8 @@ class BasketCalculateView(generics.GenericAPIView):
 
         products = Product.objects.filter(stockrecords__partner=partner, stockrecords__partner_sku__in=skus)
         if not products:
-            return HttpResponseBadRequest(_('Products with SKU(s) [{skus}] do not exist.').format(skus=', '.join(skus)))
+            logger.warning('Products with SKU(s) [%s] do not exist.', ', '.join(skus))
+            return HttpResponseBadRequest(_('Provided SKUs do not exist.'))
 
         # If there is only one product apply an Enterprise entitlement voucher
         if not voucher and len(products) == 1:
