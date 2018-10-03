@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import logging
 from mock import patch
 
-from faker import Factory as FakerFactory
+from django.core.management import call_command
 from oscar.test.factories import (
     BenefitFactory,
     ConditionalOfferFactory,
@@ -26,7 +26,6 @@ Range = get_model('offer', 'Range')
 Voucher = get_model('voucher', 'Voucher')
 
 logger = logging.getLogger(__name__)
-FAKER = FakerFactory.create()
 LOGGER_NAME = 'ecommerce.enterprise.management.commands.migrate_enterprise_conditional_offers'
 
 
@@ -55,23 +54,35 @@ class MigrateEnterpriseConditionalOffersTests(TestCase):
             type='Absolute',
             value=47,
         )
+
         for i in range(2):
+            code = '{}EntUserPercentBenefit'.format(i)
+            voucher = VoucherFactory(code=code)
+            offer_name = "Coupon [{}]-{}-{}".format(
+                voucher.pk,
+                benefit_percent.type,
+                benefit_percent.value
+            )
             conditional_offer = ConditionalOfferFactory(
                 condition=condition,
                 benefit=benefit_percent,
-                name=FAKER.name(),
+                name=offer_name,
             )
-            code = '{}EntUserPercentBenefit'.format(i)
-            voucher = VoucherFactory(code=code)
             voucher.offers.add(conditional_offer)
+
         for i in range(2):
+            code = '{}EntUserAbsoluteBenefit'.format(i)
+            voucher = VoucherFactory(code=code)
+            offer_name = "Coupon [{}]-{}-{}".format(
+                voucher.pk,
+                benefit_absolute.type,
+                benefit_absolute.value
+            )
             conditional_offer = ConditionalOfferFactory(
                 condition=condition,
                 benefit=benefit_absolute,
-                name=FAKER.name(),
+                name=offer_name,
             )
-            code = '{}EntUserAbsoluteBenefit'.format(i)
-            voucher = VoucherFactory(code=code)
             voucher.offers.add(conditional_offer)
 
         # Set up vouchers that do not relate to a range with an enterprise_customer
@@ -82,14 +93,20 @@ class MigrateEnterpriseConditionalOffersTests(TestCase):
             type='Percentage',
             value=10.00,
         )
+
         for i in range(3):
+            code = '{}NoEntUserPercentBenefit'.format(i)
+            voucher = VoucherFactory(code=code)
+            offer_name = "Coupon [{}]-{}-{}".format(
+                voucher.pk,
+                benefit.type,
+                benefit.value
+            )
             conditional_offer = ConditionalOfferFactory(
                 condition=condition,
                 benefit=benefit,
-                name=FAKER.name(),
+                name=offer_name,
             )
-            code = '{}NoEntUserPercentBenefit'.format(i)
-            voucher = VoucherFactory(code=code)
             voucher.offers.add(conditional_offer)
 
         assert Voucher.objects.filter(
@@ -104,7 +121,7 @@ class MigrateEnterpriseConditionalOffersTests(TestCase):
 
     def test_migrate_voucher(self):
         """
-        Management command should create new conditional offers for vouchers
+        _migrate_voucher should create new conditional offers for vouchers
         that ultimately relate to an enterprise_customer
         """
         voucher = Voucher.objects.filter(
@@ -113,22 +130,118 @@ class MigrateEnterpriseConditionalOffersTests(TestCase):
 
         assert voucher.offers.count() == 1
 
-        # run the migration on the voucher
         with patch('ecommerce.enterprise.management'
                    '.commands.migrate_enterprise_conditional_offers'
                    '.Command._get_enterprise_customer') as mock_get_ent_customer:
             mock_get_ent_customer.return_value = {'name': 'Boo Radley'}
             self.command._migrate_voucher(voucher)
-            #call_command('migrate_enterprise_conditional_offers')
 
         voucher.refresh_from_db()
         assert voucher.offers.count() == 2
-        assert voucher.offers.last().offer_type == ConditionalOffer.VOUCHER
+        assert voucher.offers.get(name__contains='ENT offer').offer_type == ConditionalOffer.VOUCHER
+
+    def test_get_enterprise_customer(self):
+        """
+        _get_enterprise_customer should return the correct value for enterprise
+        customer that is stored in the command's enterprise_customer_map
+        """
+        enterprise_customer_uuid = "some uuid"
+        site = "some site"
+        with patch('ecommerce.enterprise.management.commands'
+                   '.migrate_enterprise_conditional_offers'
+                   '.get_enterprise_customer') as mock_get_customer:
+            mock_get_customer.return_value = 'Hannah Dee'
+            actual = self.command._get_enterprise_customer(enterprise_customer_uuid, site)
+        assert actual == 'Hannah Dee'
 
     def test_get_voucher_batch(self):
-        # test cases include filtering out non enterprise vouchers and getting the correct inidices
-        pass
+        """
+        _get_voucher_batch should return the correct query_set based on start
+        and end inidices provided
+        """
+        start = 2
+        end = 5
+        expected_query = str(
+            Voucher.objects.filter(offers__condition__range__enterprise_customer__isnull=False)[start:end].query
+        )
+        actual_query = str(self.command._get_voucher_batch(start, end).query)
+        assert actual_query == expected_query
 
     def test_handle(self):
-        # test cases include handling an error, starting from a non default batch offset
-        pass
+        """
+        handle should create new conditional offers for all voucher objects
+        that ultimately relate to a range that has an enterprise_customer
+        """
+        offers = ConditionalOffer.objects.all()
+        assert offers.count() == 7
+        assert offers.filter(name__contains='Ent offer').count() == 0
+
+        for voucher in Voucher.objects.all():
+            assert voucher.offers.count() == 1
+
+        with patch('ecommerce.enterprise.management'
+                   '.commands.migrate_enterprise_conditional_offers'
+                   '.Command._get_enterprise_customer') as mock_get_ent_customer:
+            mock_get_ent_customer.return_value = {'name': 'Boo Radley'}
+            call_command('migrate_enterprise_conditional_offers', batch_sleep=0)
+
+        offers = ConditionalOffer.objects.all()
+        assert offers.count() == 11
+        assert offers.filter(name__contains='Ent offer').count() == 4
+
+        # Targets the original set of vouchers that have an enterprise_customer
+        # value on a range they are related to
+        vouchers = Voucher.objects.filter(
+            offers__condition__range__enterprise_customer__isnull=False
+        )
+        for voucher in vouchers:
+            assert voucher.offers.count() == 2
+
+        # The inverse of this same query returns a set of vouchers that we hoped
+        # not to process. We should be then able to assert that there is only
+        # one offer per one of these vouchers
+        vouchers = Voucher.objects.exclude(
+            offers__condition__range__enterprise_customer__isnull=False
+        )
+        for voucher in vouchers:
+            assert voucher.offers.count() == 1
+
+    def test_handle_non_default_settings(self):
+        """
+        handle should create new conditional offers for voucher objects
+        that ultimately relate to a range that has an enterprise_customer
+        for a different subset of vouchers
+        """
+        offers = ConditionalOffer.objects.all()
+        assert offers.count() == 7
+        assert offers.filter(name__contains='Ent offer').count() == 0
+
+        for voucher in Voucher.objects.all():
+            assert voucher.offers.count() == 1
+
+        with patch('ecommerce.enterprise.management'
+                   '.commands.migrate_enterprise_conditional_offers'
+                   '.Command._get_enterprise_customer') as mock_get_ent_customer:
+            mock_get_ent_customer.return_value = {'name': 'Boo Radley'}
+            call_command(
+                'migrate_enterprise_conditional_offers',
+                batch_sleep=0,
+                batch_limit=58,
+                batch_offset=3, # 3rd index is the 4th item
+            )
+
+        offers = ConditionalOffer.objects.all()
+        assert offers.count() == 8
+        assert offers.filter(name__contains='Ent offer').count() == 1
+
+    def test_handle_error(self):
+        """
+        handle should raise error if something goes wrong during batch
+        processing of vouchers
+        """
+        with patch('ecommerce.enterprise.management'
+                   '.commands.migrate_enterprise_conditional_offers'
+                   '.Command._get_voucher_batch') as mock_get_voucher:
+            mock_get_voucher.side_effect = IndexError()
+            with self.assertRaises(Exception):
+                call_command('migrate_enterprise_conditional_offers')
