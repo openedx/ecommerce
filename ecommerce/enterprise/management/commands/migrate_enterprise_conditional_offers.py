@@ -99,7 +99,7 @@ class Command(BaseCommand):
         except MultipleObjectsReturned:
             new_benefit = Benefit.objects.filter(**benefit_kwargs)[0]
 
-        offer_name = offer.name + "ENT offer"
+        offer_name = offer.name + "ENT Offer"
         new_offer, _ = ConditionalOffer.objects.get_or_create(
             name=offer_name,
             offer_type=ConditionalOffer.VOUCHER,
