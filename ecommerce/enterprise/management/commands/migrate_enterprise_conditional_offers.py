@@ -86,18 +86,16 @@ class Command(BaseCommand):
             enterprise_customer_uuid=enterprise_customer_uuid,
             enterprise_customer_name=enterprise_customer_name,
             enterprise_customer_catalog_uuid=offer.condition.range.enterprise_customer_catalog,
+            range=offer.condition.range,
             type=Condition.COUNT,
             value=1,
         )
 
-        benefit_kwargs = {
-            'proxy_class': class_path(BENEFIT_MAP[offer.benefit.type]),
-            'value': offer.benefit.value,
-        }
-        try:
-            new_benefit, _ = Benefit.objects.get_or_create(**benefit_kwargs)
-        except MultipleObjectsReturned:
-            new_benefit = Benefit.objects.filter(**benefit_kwargs)[0]
+        new_benefit, _ = Benefit.objects.get_or_create(
+            proxy_class=class_path(BENEFIT_MAP[offer.benefit.type]),
+            value=offer.benefit.value,
+            range=offer.benefit.range,
+        )
 
         offer_name = offer.name + "ENT Offer"
         new_offer, _ = ConditionalOffer.objects.get_or_create(
