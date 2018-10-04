@@ -183,7 +183,7 @@ class MigrateEnterpriseConditionalOffersTests(TestCase):
         """
         offers = ConditionalOffer.objects.all()
         assert offers.count() == 7
-        assert offers.filter(name__contains='Ent offer').count() == 0
+        assert offers.filter(name__contains='ENT Offer').count() == 0
 
         for voucher in Voucher.objects.all():
             assert voucher.offers.count() == 1
@@ -208,9 +208,9 @@ class MigrateEnterpriseConditionalOffersTests(TestCase):
             print(voucher)
             for offer in voucher.offers.all():
                 print(offer.name)
-        print("This is our expected value: {}".format(offers.filter(name__contains='Ent offer').count()))
+        print("This is our expected value: {}".format(offers.filter(name__contains='ENT Offer').count()))
         print("##############################")
-        assert offers.filter(name__contains='Ent offer').count() == 4
+        assert offers.filter(name__contains='ENT Offer').count() == 4
 
         # Targets the original set of vouchers that have an enterprise_customer
         # value on a range they are related to
@@ -237,7 +237,7 @@ class MigrateEnterpriseConditionalOffersTests(TestCase):
         """
         offers = ConditionalOffer.objects.all()
         assert offers.count() == 7
-        assert offers.filter(name__contains='Ent offer').count() == 0
+        assert offers.filter(name__contains='ENT Offer').count() == 0
 
         for voucher in Voucher.objects.all():
             assert voucher.offers.count() == 1
