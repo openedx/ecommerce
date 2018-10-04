@@ -146,7 +146,7 @@ class MigrateEnterpriseConditionalOffersTests(TestCase):
 
         voucher.refresh_from_db()
         assert voucher.offers.count() == 2
-        assert voucher.offers.get(name__contains='ENT offer').offer_type == ConditionalOffer.VOUCHER
+        assert voucher.offers.get(name__contains='ENT Offer').offer_type == ConditionalOffer.VOUCHER
 
     def test_get_enterprise_customer(self):
         """
