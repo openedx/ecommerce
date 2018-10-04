@@ -387,8 +387,8 @@ def _get_or_create_offer(
 def _get_or_create_enterprise_offer(benefit_type, benefit_value, enterprise_customer, enterprise_customer_catalog,
                                     coupon_id=None, max_uses=None, offer_number=None, email_domains=None, site=None):
 
-    enterprise_customer_object = get_enterprise_customer(enterprise_customer, site)
-    enterprise_customer_name = enterprise_customer_object['name']
+    enterprise_customer_object = get_enterprise_customer(enterprise_customer, site) if site else {}
+    enterprise_customer_name = enterprise_customer_object.get('name', '')
 
     condition, __ = Condition.objects.get_or_create(
         proxy_class=class_path(EnterpriseCustomerCondition),
