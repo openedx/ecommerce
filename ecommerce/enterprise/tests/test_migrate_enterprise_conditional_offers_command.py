@@ -267,9 +267,9 @@ class MigrateEnterpriseConditionalOffersTests(TestCase):
             print(voucher)
             for offer in voucher.offers.all():
                 print(offer.name)
-        print("This is our expected value: {}".format(offers.filter(name__contains='Ent offer').count()))
+        print("This is our expected value: {}".format(offers.filter(name__contains='ENT Offer').count()))
         print("##############################")
-        assert offers.filter(name__contains='Ent offer').count() == 1
+        assert offers.filter(name__contains='ENT Offer').count() == 1
 
     def test_handle_error(self):
         """
