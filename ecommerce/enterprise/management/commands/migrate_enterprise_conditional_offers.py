@@ -6,6 +6,7 @@ from __future__ import unicode_literals
 import logging
 from time import sleep
 
+from django.contrib.sites.models import Site
 from django.core.management import BaseCommand
 
 from ecommerce.enterprise.conditions import EnterpriseCustomerCondition
@@ -26,6 +27,7 @@ class Command(BaseCommand):
     Migrates conditional offers for enterprise coupons to enterprise conditional offer implementation.
     """
 
+    site = None
     enterprise_customer_map = {}
     help = ('This command migrates the conditional offers for enterprise coupons '
             'to the enterprise conditional offer implementation.')
@@ -58,6 +60,12 @@ class Command(BaseCommand):
             type=int,
         )
 
+    def _get_default_site(self):
+        if not self.site:
+            self.site = Site.objects.get(id=1)
+
+        return self.site
+
     def _get_enterprise_customer(self, enterprise_customer_uuid, site):
         if enterprise_customer_uuid not in self.enterprise_customer_map:
             enterprise_customer = get_enterprise_customer(site, enterprise_customer_uuid)
@@ -68,7 +76,8 @@ class Command(BaseCommand):
     def _migrate_voucher(self, voucher):
         offer = voucher.offers.first()
         enterprise_customer_uuid = offer.condition.range.enterprise_customer
-        enterprise_customer = self._get_enterprise_customer(enterprise_customer_uuid, offer.site)
+        site = offer.site or self._get_default_site()
+        enterprise_customer = self._get_enterprise_customer(enterprise_customer_uuid, site)
         enterprise_customer_name = enterprise_customer['name']
 
         new_condition, _ = Condition.objects.get_or_create(
