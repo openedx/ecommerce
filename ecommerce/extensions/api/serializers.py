@@ -70,7 +70,7 @@ def retrieve_end_date(obj):
 
 def retrieve_offer(obj):
     """Helper method to retrieve the offer from coupon. """
-    return retrieve_voucher(obj).offers.first()
+    return retrieve_voucher(obj).best_offer
 
 
 def retrieve_range(obj):
@@ -557,7 +557,7 @@ class VoucherSerializer(serializers.ModelSerializer):
         return obj.is_available_to_user(user=request.user)
 
     def get_benefit(self, obj):
-        benefit = obj.offers.first().benefit
+        benefit = obj.best_offer.benefit
         return BenefitSerializer(benefit).data
 
     def get_redeem_url(self, obj):

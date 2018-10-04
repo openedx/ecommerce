@@ -111,7 +111,7 @@ def _get_info_for_coupon_report(coupon, voucher):
 
     coupon_stockrecord = StockRecord.objects.get(product=coupon)
     invoiced_amount = currency(coupon_stockrecord.price_excl_tax)
-    offer = voucher.offers.first()
+    offer = voucher.best_offer
     offer_range = offer.condition.range
     program_uuid = offer.condition.program_uuid
     benefit = offer.benefit
@@ -173,7 +173,7 @@ def _get_info_for_coupon_report(coupon, voucher):
 
 
 def _get_voucher_info_for_coupon_report(voucher):
-    offer = voucher.offers.first()
+    offer = voucher.best_offer
     status = _get_voucher_status(voucher, offer)
     path = '{path}?code={code}'.format(path=reverse('coupons:offer'), code=voucher.code)
     url = get_ecommerce_url(path)
@@ -775,7 +775,7 @@ def get_voucher_and_products_from_code(code):
         ProductNotFoundError: When no products are associated with the voucher.
     """
     voucher = get_cached_voucher(code)
-    voucher_range = voucher.offers.first().benefit.range
+    voucher_range = voucher.best_offer.benefit.range
     products = voucher_range.all_products()
 
     if products or voucher_range.catalog_query or voucher_range.course_catalog:

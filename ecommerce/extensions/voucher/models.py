@@ -62,5 +62,9 @@ class Voucher(AbstractVoucher):
         except Voucher.DoesNotExist:
             return False
 
+    @property
+    def best_offer(self):
+        return self.offers.order_by('date_created')[0]
+
 
 from oscar.apps.voucher.models import *  # noqa isort:skip pylint: disable=wildcard-import,unused-wildcard-import,wrong-import-position,wrong-import-order,ungrouped-imports

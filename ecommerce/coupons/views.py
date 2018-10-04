@@ -87,7 +87,7 @@ def voucher_is_valid(voucher, products, request):
             return False, _('Product [{product}] not available for purchase.'.format(product=products[0]))
 
     # If the voucher's number of applications exceeds it's limit.
-    offer = voucher.offers.first()
+    offer = voucher.best_offer
     if offer.get_max_applications(request.user) == 0:
         return False, _('This coupon code is no longer available.')
 
@@ -176,7 +176,7 @@ class CouponRedeemView(EdxOrderPlacementMixin, View):
         if not valid_voucher:
             return render(request, template_name, {'error': msg})
 
-        offer = voucher.offers.first()
+        offer = voucher.best_offer
         if not offer.is_email_valid(request.user.email):
             return render(request, template_name, {'error': _('You are not eligible to use this coupon.')})
 
