@@ -379,7 +379,7 @@ def validate_voucher(voucher, user, basket, request_site):
         return False, message
 
     # Do not allow coupons for one partner's site to be used on another partner's site
-    voucher_partner = voucher.offers.first().partner
+    voucher_partner = voucher.best_offer.partner
     if request_site and voucher_partner and request_site.siteconfiguration.partner != voucher_partner:
         message = _("Coupon code '{code}' is not valid for this basket.").format(code=voucher.code)
         return False, message
@@ -390,7 +390,7 @@ def validate_voucher(voucher, user, basket, request_site):
         attribute_type=BasketAttributeType.objects.get(name=BUNDLE)
     )
     is_bundle_purchase = len(bundle_attribute) > 0
-    voucher_program_uuid = voucher.offers.first().condition.program_uuid
+    voucher_program_uuid = voucher.best_offer.condition.program_uuid
     is_voucher_valid_for_bundle = voucher_program_uuid or voucher.usage == Voucher.MULTI_USE
 
     if is_bundle_purchase and not is_voucher_valid_for_bundle:
