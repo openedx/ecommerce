@@ -75,7 +75,7 @@ class Command(BaseCommand):
         return self.enterprise_customer_map[enterprise_customer_uuid]
 
     def _migrate_voucher(self, voucher):
-        offer = voucher.offers.first()
+        offer = voucher.offers.order_by('date_created')[0]
         enterprise_customer_uuid = offer.condition.range.enterprise_customer
         site = offer.site or self._get_default_site()
         enterprise_customer = self._get_enterprise_customer(enterprise_customer_uuid, site)

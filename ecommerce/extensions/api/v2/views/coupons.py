@@ -299,7 +299,7 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
         if not range_data:
             return None
 
-        voucher_range = vouchers.first().offers.first().benefit.range
+        voucher_range = vouchers.first().best_offer.benefit.range
         enterprise_customer_data = request.data.get('enterprise_customer')
 
         # Remove catalog if switching from single course to dynamic query
@@ -423,8 +423,7 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
             benefit_value (Decimal): Benefit value associated with a new offer
             program_uuid (str): Program UUID
         """
-        voucher_offers = vouchers.first().offers
-        voucher_offer = voucher_offers.first()
+        voucher_offer = vouchers.first().best_offer
 
         if program_uuid:
             Condition.objects.filter(

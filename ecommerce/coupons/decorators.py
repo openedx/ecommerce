@@ -18,7 +18,8 @@ def login_required_for_credit(function):
         code = request.GET.get('code', None)
         try:
             voucher = get_cached_voucher(code)
-            if voucher.offers.first().condition.range.course_seat_types == 'credit':
+            offer = voucher.best_offer
+            if offer.condition.range and offer.condition.range.course_seat_types == 'credit':
                 if not request.user.is_authenticated():
                     # The next url needs to have the coupon code as a query parameter.
                     next_url = '{}?{}'.format(request.path, request.META.get('QUERY_STRING'))
