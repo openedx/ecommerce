@@ -8,6 +8,7 @@ from time import sleep
 
 from django.contrib.sites.models import Site
 from django.core.management import BaseCommand
+from django.core.exceptions import MultipleObjectsReturned
 
 from ecommerce.enterprise.conditions import EnterpriseCustomerCondition
 from ecommerce.enterprise.constants import BENEFIT_MAP
@@ -89,10 +90,14 @@ class Command(BaseCommand):
             value=1,
         )
 
-        new_benefit, _ = Benefit.objects.get_or_create(
-            proxy_class=class_path(BENEFIT_MAP[offer.benefit.type]),
-            value=offer.benefit.value
-        )
+        benefit_kwargs = {
+            'proxy_class': class_path(BENEFIT_MAP[offer.benefit.type]),
+            'value': offer.benefit.value,
+        }
+        try:
+            new_benefit, _ = Benefit.objects.get_or_create(**benefit_kwargs)
+        except MultipleObjectsReturned:
+            new_benefit = Benefit.objects.filter(**benefit_kwargs)[0]
 
         offer_name = offer.name + "ENT offer"
         new_offer, _ = ConditionalOffer.objects.get_or_create(

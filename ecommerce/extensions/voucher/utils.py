@@ -11,6 +11,7 @@ from decimal import Decimal, DecimalException
 import dateutil.parser
 import pytz
 from django.conf import settings
+from django.core.exceptions import MultipleObjectsReturned
 from django.urls import reverse
 from django.utils.translation import ugettext_lazy as _
 from edx_django_utils.cache import TieredCache
@@ -399,10 +400,14 @@ def _get_or_create_enterprise_offer(benefit_type, benefit_value, enterprise_cust
         value=1,
     )
 
-    benefit, __ = Benefit.objects.get_or_create(
-        proxy_class=class_path(ENTERPRISE_BENEFIT_MAP[benefit_type]),
-        value=Decimal(benefit_value)
-    )
+    benefit_kwargs = {
+        'proxy_class': class_path(ENTERPRISE_BENEFIT_MAP[benefit_type]),
+        'value': benefit_value,
+    }
+    try:
+        benefit, _ = Benefit.objects.get_or_create(**benefit_kwargs)
+    except MultipleObjectsReturned:
+        benefit = Benefit.objects.filter(**benefit_kwargs)[0]
 
     offer_name = "Coupon [{}]-{}-{} ENT Offer".format(coupon_id, benefit_type, benefit_value)
     if offer_number:
