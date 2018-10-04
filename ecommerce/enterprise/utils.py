@@ -322,13 +322,8 @@ def get_enterprise_customer_uuid(coupon_code):
     except Voucher.DoesNotExist:
         return None
 
-    try:
-        offer = voucher.offers.get(benefit__range__enterprise_customer__isnull=False)
-    except ConditionalOffer.DoesNotExist:
-        # There's no Enterprise Customer associated with this voucher.
-        return None
-
-    return offer.benefit.range.enterprise_customer
+    offer = voucher.offers.filter(benefit__range__enterprise_customer__isnull=False).first()
+    return offer and offer.benefit.range.enterprise_customer
 
 
 def set_enterprise_customer_cookie(site, response, enterprise_customer_uuid, max_age=None):

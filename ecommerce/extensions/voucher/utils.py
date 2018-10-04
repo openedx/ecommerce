@@ -337,6 +337,7 @@ def _get_or_create_offer(
             offer_condition = create_condition(ProgramCourseRunSeatsCondition, program_uuid=program_uuid)
     else:
         offer_condition, __ = Condition.objects.get_or_create(
+            proxy_class=None,
             range=product_range,
             type=Condition.COUNT,
             value=1,
@@ -385,8 +386,9 @@ def _get_or_create_offer(
     return offer
 
 
-def _get_or_create_enterprise_offer(benefit_type, benefit_value, enterprise_customer, enterprise_customer_catalog,
-                                    coupon_id=None, max_uses=None, offer_number=None, email_domains=None, site=None):
+def _get_or_create_enterprise_offer(product_range, benefit_type, benefit_value, enterprise_customer,
+                                    enterprise_customer_catalog, coupon_id=None, max_uses=None, offer_number=None,
+                                    email_domains=None, site=None):
 
     enterprise_customer_object = get_enterprise_customer(enterprise_customer, site) if site else {}
     enterprise_customer_name = enterprise_customer_object.get('name', '')
@@ -396,18 +398,16 @@ def _get_or_create_enterprise_offer(benefit_type, benefit_value, enterprise_cust
         enterprise_customer_uuid=enterprise_customer,
         enterprise_customer_name=enterprise_customer_name,
         enterprise_customer_catalog_uuid=enterprise_customer_catalog,
+        range=product_range,
         type=Condition.COUNT,
         value=1,
     )
 
-    benefit_kwargs = {
-        'proxy_class': class_path(ENTERPRISE_BENEFIT_MAP[benefit_type]),
-        'value': benefit_value,
-    }
-    try:
-        benefit, _ = Benefit.objects.get_or_create(**benefit_kwargs)
-    except MultipleObjectsReturned:
-        benefit = Benefit.objects.filter(**benefit_kwargs)[0]
+    benefit, _ = Benefit.objects.get_or_create(
+        proxy_class=class_path(ENTERPRISE_BENEFIT_MAP[benefit_type]),
+        value=benefit_value,
+        range=product_range,
+    )
 
     offer_name = "Coupon [{}]-{}-{} ENT Offer".format(coupon_id, benefit_type, benefit_value)
     if offer_number:
@@ -632,6 +632,7 @@ def create_vouchers(
         # This and the surrounding code will be refactored at that point.
         if enterprise_customer:
             enterprise_offer = _get_or_create_enterprise_offer(
+                product_range=product_range,
                 benefit_type=benefit_type,
                 benefit_value=benefit_value,
                 enterprise_customer=enterprise_customer,
