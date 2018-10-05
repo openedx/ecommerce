@@ -8,7 +8,6 @@ from time import sleep
 
 from django.contrib.sites.models import Site
 from django.core.management import BaseCommand
-from django.core.exceptions import MultipleObjectsReturned
 
 from ecommerce.enterprise.conditions import EnterpriseCustomerCondition
 from ecommerce.enterprise.constants import BENEFIT_MAP
