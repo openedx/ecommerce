@@ -94,6 +94,7 @@ class Command(BaseCommand):
             proxy_class=class_path(BENEFIT_MAP[offer.benefit.type]),
             value=offer.benefit.value,
             range=offer.benefit.range,
+            max_affected_items=offer.benefit.max_affected_items,
         )
 
         offer_name = offer.name + "ENT Offer"

@@ -353,9 +353,17 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
 
             program_uuid = request.data.get('program_uuid')
             benefit_value = request.data.get('benefit_value')
-            if benefit_value or program_uuid:
-                self.update_coupon_offer(benefit_value=benefit_value, vouchers=vouchers,
-                                         coupon=coupon, program_uuid=program_uuid)
+            enterprise_customer = request.data.get('enterprise_customer', {}).get('id', None)
+            enterprise_catalog = request.data.get('enterprise_customer_catalog')
+            if benefit_value or program_uuid or enterprise_customer or enterprise_catalog:
+                self.update_coupon_offer(
+                    benefit_value=benefit_value,
+                    vouchers=vouchers,
+                    coupon=coupon,
+                    program_uuid=program_uuid,
+                    enterprise_customer=enterprise_customer,
+                    enterprise_catalog=enterprise_catalog
+                )
 
             category_data = request.data.get('category')
             if category_data:
@@ -414,7 +422,8 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
                     update_dict[field.replace('invoice_', '')] = value
         return update_dict
 
-    def update_coupon_offer(self, coupon, vouchers, benefit_value=None, program_uuid=None):
+    def update_coupon_offer(self, coupon, vouchers, benefit_value=None, program_uuid=None,
+                            enterprise_customer=None, enterprise_catalog=None):
         """
         Remove all offers from the vouchers and add a new offer
         Arguments:
@@ -423,29 +432,36 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
             benefit_value (Decimal): Benefit value associated with a new offer
             program_uuid (str): Program UUID
         """
-        voucher_offer = vouchers.first().best_offer
+        new_offers = []
 
-        if program_uuid:
-            Condition.objects.filter(
-                program_uuid=voucher_offer.condition.program_uuid
-            ).update(program_uuid=program_uuid)
+        for voucher_offer in vouchers.first().offers.all():
+            if program_uuid:
+                Condition.objects.filter(
+                    program_uuid=voucher_offer.condition.program_uuid
+                ).update(program_uuid=program_uuid)
 
-        # The program uuid (if program coupon) is required for the benefit and condition update logic
-        program_uuid = program_uuid or voucher_offer.condition.program_uuid
+            # The program uuid (if program coupon) is required for the benefit and condition update logic
+            program_uuid = program_uuid or voucher_offer.condition.program_uuid
 
-        new_offer = update_voucher_offer(
-            offer=voucher_offer,
-            benefit_value=benefit_value or voucher_offer.benefit.value,
-            benefit_type=voucher_offer.benefit.type or getattr(
-                voucher_offer.benefit.proxy(), 'benefit_class_type', None
-            ),
-            coupon=coupon,
-            max_uses=voucher_offer.max_global_applications,
-            program_uuid=program_uuid
-        )
+            new_offer = update_voucher_offer(
+                offer=voucher_offer,
+                benefit_value=benefit_value or voucher_offer.benefit.value,
+                benefit_type=voucher_offer.benefit.type or getattr(
+                    voucher_offer.benefit.proxy(), 'benefit_class_type', None
+                ),
+                coupon=coupon,
+                max_uses=voucher_offer.max_global_applications,
+                program_uuid=program_uuid,
+                enterprise_customer=enterprise_customer,
+                enterprise_catalog=enterprise_catalog,
+            )
+
+            new_offers.append(new_offer)
+
         for voucher in vouchers.all():
             voucher.offers.clear()
-            voucher.offers.add(new_offer)
+            for new_offer in new_offers:
+                voucher.offers.add(new_offer)
 
     def update_coupon_client(self, baskets, client_username):
         """
