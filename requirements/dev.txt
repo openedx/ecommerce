@@ -22,7 +22,7 @@ cffi==1.11.5              # via cryptography
 chardet==3.0.4            # via requests
 configparser==3.5.0       # via pylint
 cookies==2.2.1            # via responses
-coreapi==2.3.1
+coreapi==2.3.3
 coreschema==0.0.4         # via coreapi
 coverage==4.3.4
 cryptography==2.3.1       # via pyopenssl
@@ -33,7 +33,7 @@ defusedxml==0.5.0         # via zeep
 diff-cover==0.9.6
 django-appconf==1.0.2     # via django-compressor
 django-compressor==2.2
-django-crispy-forms==1.7.0
+django-crispy-forms==1.7.2
 django-debug-toolbar==1.7
 django-extra-views==0.6.4  # via django-oscar
 django-filter==1.0.4
@@ -43,11 +43,11 @@ django-nose==1.4.4
 django-oscar==1.5.1
 django-phonenumber-field==1.3.0  # via django-oscar
 django-rest-swagger==2.2.0
-django-solo==1.1.2
+django-solo==1.1.3
 django-tables2==1.21.2    # via django-oscar
 django-threadlocals==0.8
 django-treebeard==4.3     # via django-oscar
-django-waffle==0.12.0
+django-waffle==0.14.0
 django-webtest==1.9.2
 django-widget-tweaks==1.4.3  # via django-oscar
 django==1.11.15
@@ -60,10 +60,10 @@ edx-auth-backends==1.1.3
 edx-django-release-util==0.3.1
 edx-django-sites-extensions==2.4.0
 edx-django-utils==1.0.1
-edx-drf-extensions==1.6.1
+edx-drf-extensions==1.10.0
 edx-ecommerce-worker==0.6.0
 edx-i18n-tools==0.4.4
-edx-opaque-keys==0.3.1
+edx-opaque-keys==0.4.4
 edx-rest-api-client==1.8.2
 edx-sphinx-theme==1.0.2
 enum34==1.1.6             # via cryptography
@@ -75,7 +75,7 @@ future==0.16.0            # via pyjwkest
 gevent==1.0.2
 greenlet==0.4.15          # via gevent
 httpretty==0.8.14
-idna==2.5                 # via cryptography, requests
+idna==2.7                 # via cryptography, requests
 imagesize==1.1.0          # via sphinx
 inflect==1.0.1            # via jinja2-pluralize
 ipaddress==1.0.22         # via cryptography, faker
@@ -94,14 +94,14 @@ markupsafe==1.0           # via jinja2
 mccabe==0.6.1             # via pylint
 mock-django==0.6.9
 mock==1.3.0
-ndg-httpsclient==0.4.2
+ndg-httpsclient==0.5.1
 newrelic==4.4.1.104       # via edx-django-utils
 nose-ignore-docstring==0.2
 nose==1.3.7               # via django-nose
 oauthlib==2.1.0           # via requests-oauthlib, social-auth-core
 openapi-codec==1.3.2      # via django-rest-swagger
 path.py==7.2
-paypalrestsdk==1.11.5
+paypalrestsdk==1.13.1
 pbr==4.2.0                # via mock, stevedore
 pep8==1.6.2
 phonenumberslite==8.9.14  # via django-phonenumber-field
@@ -111,10 +111,12 @@ premailer==2.9.2
 psutil==1.2.1             # via edx-django-utils, edx-drf-extensions
 ptvsd==3.0
 purl==1.4                 # via django-oscar
+pyasn1==0.4.4             # via ndg-httpsclient
 pycountry==17.1.8
 pycparser==2.19           # via cffi
 pycryptodomex==3.6.6      # via pyjwkest
 pygments==2.2.0
+pyinotify==0.9.6
 pyjwkest==1.3.2           # via edx-drf-extensions, social-auth-core
 pyjwt==1.6.4              # via djangorestframework-jwt, edx-rest-api-client, social-auth-core
 pylint==1.6.4
@@ -127,7 +129,7 @@ pyyaml==3.13              # via edx-django-release-util, edx-i18n-tools
 rcssmin==1.0.6            # via django-compressor
 requests-oauthlib==1.0.0  # via social-auth-core
 requests-toolbelt==0.8.0  # via zeep
-requests==2.18.1
+requests==2.19.1
 responses==0.5.1
 rest-condition==1.0.3     # via edx-drf-extensions
 rjsmin==1.0.12            # via django-compressor
@@ -135,7 +137,7 @@ sailthru-client==2.2.3
 selenium==3.4.3
 semantic-version==2.6.0   # via edx-drf-extensions
 simplejson==3.16.0        # via django-rest-swagger, sailthru-client
-six==1.10.0
+six==1.11.0
 slumber==0.7.1            # via edx-rest-api-client
 snowballstemmer==1.2.1    # via sphinx
 social-auth-app-django==1.2.0  # via edx-auth-backends
@@ -152,7 +154,7 @@ typing==3.6.6             # via django-extensions
 unicodecsv==0.14.1
 unidecode==0.4.21         # via django-oscar
 uritemplate==3.0.0        # via coreapi
-urllib3==1.21.1           # via requests, transifex-client
+urllib3==1.23             # via requests, transifex-client
 waitress==1.1.0           # via webtest
 webob==1.8.2              # via webtest
 webtest==2.0.30           # via django-webtest

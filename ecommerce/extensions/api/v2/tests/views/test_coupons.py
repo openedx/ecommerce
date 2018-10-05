@@ -374,7 +374,7 @@ class CouponViewSetFunctionalTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             'catalog_query': '*:*',
             'course_seat_types': ['verified'],
         }
-        self.client.put(path, json.dumps(data), 'application/json')
+        self.get_response('PUT', path, data)
         new_coupon = Product.objects.get(id=self.coupon.id)
         vouchers = new_coupon.attr.coupon_vouchers.vouchers
         return vouchers.first().offers.first().benefit.range, data
@@ -606,7 +606,7 @@ class CouponViewSetFunctionalTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             'id': self.coupon.id,
             'benefit_value': 50
         }
-        self.client.put(path, json.dumps(data), 'application/json')
+        self.get_response('PUT', path, data)
 
         new_coupon = Product.objects.get(id=self.coupon.id)
         vouchers = new_coupon.attr.coupon_vouchers.vouchers.all()
@@ -620,7 +620,7 @@ class CouponViewSetFunctionalTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             'id': self.coupon.id,
             'category': {'name': category.name}
         }
-        self.client.put(path, json.dumps(data), 'application/json')
+        self.get_response('PUT', path, data)
 
         new_coupon = Product.objects.get(id=self.coupon.id)
         coupon_category = ProductCategory.objects.get(product=new_coupon)
@@ -633,7 +633,7 @@ class CouponViewSetFunctionalTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             'id': self.coupon.id,
             'client': client
         }
-        self.client.put(path, json.dumps(data), 'application/json')
+        self.get_response('PUT', path, data)
 
         new_coupon = Product.objects.get(id=self.coupon.id)
         basket = Basket.objects.filter(lines__product_id=new_coupon.id).first()
@@ -647,7 +647,7 @@ class CouponViewSetFunctionalTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             'id': self.coupon.id,
             'price': 77
         }
-        self.client.put(path, json.dumps(data), 'application/json')
+        self.get_response('PUT', path, data)
 
         new_coupon = Product.objects.get(id=self.coupon.id)
         stock_records = StockRecord.objects.filter(product=new_coupon).all()
@@ -661,7 +661,7 @@ class CouponViewSetFunctionalTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             'id': self.coupon.id,
             'note': note
         }
-        self.client.put(path, json.dumps(data), 'application/json')
+        self.get_response('PUT', path, data)
 
         new_coupon = Product.objects.get(id=self.coupon.id)
         self.assertEqual(new_coupon.attr.note, note)
@@ -696,7 +696,7 @@ class CouponViewSetFunctionalTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             'course_catalog': course_catalog,
             'course_seat_types': course_seat_types,
         }
-        self.client.put(path, json.dumps(data), 'application/json')
+        self.get_response('PUT', path, data)
 
         updated_coupon = Product.objects.get(id=self.coupon.id)
         vouchers = updated_coupon.attr.coupon_vouchers.vouchers
@@ -726,7 +726,7 @@ class CouponViewSetFunctionalTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
         expected_logger_message = 'Failed to create Range. Either catalog_query or course_catalog must be given ' \
                                   'but not both and course_seat_types fields must be set.'
         with LogCapture(logger_name) as logger:
-            response = self.client.put(path, json.dumps(data), 'application/json')
+            response = self.get_response('PUT', path, data)
 
             self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
             logger.check(
@@ -742,11 +742,15 @@ class CouponViewSetFunctionalTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
         max_uses = vouchers[0].offers.first().max_global_applications
         benefit_value = Decimal(54)
 
-        CouponViewSet().update_coupon_offer(
-            benefit_value=benefit_value,
-            vouchers=vouchers,
-            coupon=self.coupon
-        )
+        with mock.patch(
+            "ecommerce.extensions.voucher.utils.get_enterprise_customer",
+            mock.Mock(return_value={'name': 'Fake enterprise'})
+        ):
+            CouponViewSet().update_coupon_offer(
+                benefit_value=benefit_value,
+                vouchers=vouchers,
+                coupon=self.coupon
+            )
         for voucher in vouchers:
             self.assertEqual(voucher.offers.first().benefit.value, benefit_value)
             self.assertEqual(voucher.offers.first().max_global_applications, max_uses)
@@ -998,10 +1002,10 @@ class CouponViewSetFunctionalTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
         self.assertEqual(details['voucher_type'], Voucher.SINGLE_USE)
 
         self.data['max_uses'] = 9
-        response = self.client.put(
+        response = self.get_response(
+            'PUT',
             reverse('api:v2:coupons-detail', args=[self.coupon.id]),
-            json.dumps(self.data),
-            'application/json'
+            self.data
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
@@ -1035,10 +1039,10 @@ class CouponViewSetFunctionalTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
         self.assertEqual(details['max_uses'], 2)
 
         self.data.update({'max_uses': max_uses})
-        response = self.client.put(
+        response = self.get_response(
+            'PUT',
             reverse('api:v2:coupons-detail', args=[details['id']]),
-            json.dumps(self.data),
-            'application/json'
+            self.data
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
@@ -1059,10 +1063,10 @@ class CouponViewSetFunctionalTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
         self.assertEqual(details['note'], self.data['note'])
 
         self.data['note'] = invalid_note
-        response = self.client.put(
+        response = self.get_response(
+            'PUT',
             reverse('api:v2:coupons-detail', args=[details['id']]),
-            json.dumps(self.data),
-            'application/json'
+            self.data
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 

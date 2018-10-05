@@ -229,6 +229,8 @@ MIDDLEWARE_CLASSES = (
     'ecommerce.theming.middleware.ThemePreviewMiddleware',
     'edx_django_utils.cache.middleware.TieredCacheMiddleware',
     'edx_rest_framework_extensions.middleware.RequestMetricsMiddleware',
+    'edx_rest_framework_extensions.auth.jwt.middleware.EnsureJWTAuthSettingsMiddleware',
+    'edx_rest_framework_extensions.auth.jwt.middleware.JwtAuthCookieMiddleware',
 )
 # END MIDDLEWARE CONFIGURATION
 

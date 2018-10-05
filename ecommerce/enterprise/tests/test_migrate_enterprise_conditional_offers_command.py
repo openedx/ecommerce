@@ -40,14 +40,6 @@ class MigrateEnterpriseConditionalOffersTests(TestCase):
         """
         super(MigrateEnterpriseConditionalOffersTests, self).setUp()
 
-        print("##############################")
-        print("Setting up. These are the initial object counts:")
-        print("Benefits: {}".format(Benefit.objects.count()))
-        print("Condition: {}".format(Condition.objects.count()))
-        print("ConditionalOffer: {}".format(ConditionalOffer.objects.count()))
-        print("Range: {}".format(Range.objects.count()))
-        print("Voucher: {}".format(Voucher.objects.count()))
-        print("##############################")
         # Set up vouchers that relate to a range with a enterprise_customer
         uuid = '123e4567-e89b-12d3-a456-426655440000'
         range_with_ent_customer = RangeFactory(enterprise_customer=uuid)
@@ -146,7 +138,7 @@ class MigrateEnterpriseConditionalOffersTests(TestCase):
 
         voucher.refresh_from_db()
         assert voucher.offers.count() == 2
-        assert voucher.offers.get(name__contains='ENT offer').offer_type == ConditionalOffer.VOUCHER
+        assert voucher.offers.get(name__contains='ENT Offer').offer_type == ConditionalOffer.VOUCHER
 
     def test_get_enterprise_customer(self):
         """
@@ -196,20 +188,6 @@ class MigrateEnterpriseConditionalOffersTests(TestCase):
 
         offers = ConditionalOffer.objects.all()
         assert offers.count() == 11
-        print("##############################")
-        print("Object counts before we")
-        print("Benefits: {}".format(Benefit.objects.count()))
-        print("Condition: {}".format(Condition.objects.count()))
-        print("ConditionalOffer: {}".format(ConditionalOffer.objects.count()))
-        print("Range: {}".format(Range.objects.count()))
-        print("Voucher: {}".format(Voucher.objects.count()))
-        print("Here are the names of all offers, for each voucher:")
-        for voucher in Voucher.objects.all():
-            print(voucher)
-            for offer in voucher.offers.all():
-                print(offer.name)
-        print("This is our expected value: {}".format(offers.filter(name__contains='ENT Offer').count()))
-        print("##############################")
         assert offers.filter(name__contains='ENT Offer').count() == 4
 
         # Targets the original set of vouchers that have an enterprise_customer
@@ -255,20 +233,6 @@ class MigrateEnterpriseConditionalOffersTests(TestCase):
 
         offers = ConditionalOffer.objects.all()
         assert offers.count() == 8
-        print("##############################")
-        print("Object counts before we")
-        print("Benefits: {}".format(Benefit.objects.count()))
-        print("Condition: {}".format(Condition.objects.count()))
-        print("ConditionalOffer: {}".format(ConditionalOffer.objects.count()))
-        print("Range: {}".format(Range.objects.count()))
-        print("Voucher: {}".format(Voucher.objects.count()))
-        print("Here are the names of all offers, for each voucher:")
-        for voucher in Voucher.objects.all():
-            print(voucher)
-            for offer in voucher.offers.all():
-                print(offer.name)
-        print("This is our expected value: {}".format(offers.filter(name__contains='ENT Offer').count()))
-        print("##############################")
         assert offers.filter(name__contains='ENT Offer').count() == 1
 
     def test_handle_error(self):

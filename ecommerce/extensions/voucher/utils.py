@@ -11,7 +11,7 @@ from decimal import Decimal, DecimalException
 import dateutil.parser
 import pytz
 from django.conf import settings
-from django.core.exceptions import MultipleObjectsReturned
+from django.db import IntegrityError
 from django.urls import reverse
 from django.utils.translation import ugettext_lazy as _
 from edx_django_utils.cache import TieredCache
@@ -371,17 +371,72 @@ def _get_or_create_offer(
     if offer_number:
         offer_name = "{} [{}]".format(offer_name, offer_number)
 
-    offer, __ = ConditionalOffer.objects.get_or_create(
-        name=offer_name,
-        offer_type=ConditionalOffer.VOUCHER,
-        condition=offer_condition,
-        benefit=offer_benefit,
-        max_global_applications=max_uses,
-        email_domains=email_domains,
-        site=site,
-        partner=site.siteconfiguration.partner if site else None,
-        priority=OFFER_PRIORITY_VOUCHER,
+    offer_kwargs = {
+        'name': offer_name,
+        'offer_type': ConditionalOffer.VOUCHER,
+        'condition': offer_condition,
+        'benefit': offer_benefit,
+        'max_global_applications': max_uses,
+        'email_domains': email_domains,
+        'site': site,
+        'partner': site.siteconfiguration.partner if site else None,
+        'priority': OFFER_PRIORITY_VOUCHER,
+    }
+    try:
+        offer, __ = ConditionalOffer.objects.get_or_create(**offer_kwargs)
+    except IntegrityError:
+        ConditionalOffer.objects.filter(name=offer_name).update(**offer_kwargs)
+        offer = ConditionalOffer.objects.get(name=offer_name)
+
+    return offer
+
+
+def _get_or_create_enterprise_offer(product_range, benefit_type, benefit_value, enterprise_customer,
+                                    enterprise_customer_catalog, coupon_id=None, max_uses=None, offer_number=None,
+                                    email_domains=None, site=None):
+
+    enterprise_customer_object = get_enterprise_customer(site, enterprise_customer) if site else {}
+    enterprise_customer_name = enterprise_customer_object.get('name', '')
+
+    condition, __ = Condition.objects.get_or_create(
+        proxy_class=class_path(EnterpriseCustomerCondition),
+        enterprise_customer_uuid=enterprise_customer,
+        enterprise_customer_name=enterprise_customer_name,
+        enterprise_customer_catalog_uuid=enterprise_customer_catalog,
+        range=product_range,
+        type=Condition.COUNT,
+        value=1,
     )
+
+    benefit, _ = Benefit.objects.get_or_create(
+        proxy_class=class_path(ENTERPRISE_BENEFIT_MAP[benefit_type]),
+        value=benefit_value,
+        range=product_range,
+        max_affected_items=1,
+    )
+
+    offer_name = "Coupon [{}]-{}-{} ENT Offer".format(coupon_id, benefit_type, benefit_value)
+    if offer_number:
+        offer_name = "{} [{}] ENT Offer".format(offer_name, offer_number)
+
+    offer_kwargs = {
+        'name': offer_name,
+        'offer_type': ConditionalOffer.VOUCHER,
+        'condition': condition,
+        'benefit': benefit,
+        'max_global_applications': max_uses,
+        'email_domains': email_domains,
+        'site': site,
+        'partner': site.siteconfiguration.partner if site else None,
+        # For initial creation, we are setting the priority lower so that we don't want to use these
+        # until we've done some other implementation work. We will update this to a higher value later.
+        'priority': 5,
+    }
+    try:
+        offer, __ = ConditionalOffer.objects.get_or_create(**offer_kwargs)
+    except IntegrityError:
+        ConditionalOffer.objects.filter(name=offer_name).update(**offer_kwargs)
+        offer = ConditionalOffer.objects.get(name=offer_name)
 
     return offer
 
@@ -703,8 +758,8 @@ def get_voucher_discount_info(benefit, price):
         }
 
 
-def update_voucher_offer(offer, benefit_value, benefit_type, coupon, max_uses=None,
-                         email_domains=None, program_uuid=None):
+def update_voucher_offer(offer, benefit_value, benefit_type, coupon, max_uses=None, email_domains=None,
+                         program_uuid=None, enterprise_customer=None, enterprise_catalog=None):
     """
     Update voucher offer with new benefit value.
 
@@ -719,10 +774,25 @@ def update_voucher_offer(offer, benefit_value, benefit_type, coupon, max_uses=No
         email_domains (str): a comma-separated string of email domains allowed to apply
                             this offer.
         program_uuid (str): Program UUID
+        enterprise_customer (str): Enterprise Customer UUID
+        enterprise_catalog (str): Enterprise Catalog UUID
 
     Returns:
         Offer
     """
+    # For enterprise conditional offers attached to coupons, use function for creating/updating enterprise offers.
+    if offer.condition.enterprise_customer_uuid:
+        return _get_or_create_enterprise_offer(
+            product_range=offer.benefit.range,
+            benefit_value=benefit_value,
+            benefit_type=benefit_type,
+            enterprise_customer=enterprise_customer,
+            enterprise_customer_catalog=enterprise_catalog,
+            coupon_id=coupon.id,
+            max_uses=max_uses,
+            email_domains=email_domains,
+            site=offer.site,
+        )
     return _get_or_create_offer(
         product_range=offer.benefit.range,
         benefit_value=benefit_value,
@@ -730,7 +800,8 @@ def update_voucher_offer(offer, benefit_value, benefit_type, coupon, max_uses=No
         coupon_id=coupon.id,
         max_uses=max_uses,
         email_domains=email_domains,
-        program_uuid=program_uuid
+        program_uuid=program_uuid,
+        site=offer.site,
     )
 
 
