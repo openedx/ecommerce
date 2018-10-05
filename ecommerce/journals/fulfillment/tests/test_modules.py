@@ -3,6 +3,7 @@ import mock
 from oscar.core.loading import get_model
 from oscar.test import factories
 from requests.exceptions import ConnectionError, HTTPError
+from slumber.exceptions import HttpClientError
 
 from ecommerce.extensions.fulfillment.status import LINE
 from ecommerce.extensions.test.factories import create_order
@@ -71,6 +72,15 @@ class JournalFulfillmentModuleTest(TestCase, JournalMixin):
         self.assertEqual(
             completed_lines[0].status,
             LINE.FULFILLMENT_NETWORK_ERROR
+        )
+
+    @mock.patch("ecommerce.journals.fulfillment.modules.post_journal_access", mock.Mock(side_effect=HttpClientError))
+    def test_fulfill_with_client_error(self):
+        """ Test fulfilling a Journal product with raising the ConnectionError exception """
+        __, completed_lines = JournalFulfillmentModule().fulfill_product(self.order, self.lines)
+        self.assertEqual(
+            completed_lines[0].status,
+            LINE.FULFILLMENT_SERVER_ERROR
         )
 
     @mock.patch("ecommerce.journals.fulfillment.modules.post_journal_access", mock.Mock(side_effect=Exception))

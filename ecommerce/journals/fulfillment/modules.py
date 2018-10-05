@@ -2,6 +2,7 @@ import logging
 
 from requests.exceptions import ConnectionError, Timeout
 
+from slumber.exceptions import HttpClientError
 from ecommerce.extensions.analytics.utils import audit_log
 from ecommerce.extensions.fulfillment.modules import BaseFulfillmentModule
 from ecommerce.extensions.fulfillment.status import LINE
@@ -49,7 +50,7 @@ class JournalFulfillmentModule(BaseFulfillmentModule):
             try:
                 journal_uuid = line.product.attr.UUID
             except AttributeError:
-                logger.error('Journal Product does not have required attributes, [uuid]')
+                logger.error('Journal fulfillment failed, journal does not have uuid. Order [%s]', order.number)
                 line.set_status(LINE.FULFILLMENT_CONFIGURATION_ERROR)
                 continue
 
@@ -73,14 +74,21 @@ class JournalFulfillmentModule(BaseFulfillmentModule):
                     journal_uuid=journal_uuid,
                 )
             except (Timeout, ConnectionError):
-                logger.exception(
+                logger.error(
                     'Unable to fulfill line [%d] of order [%s] due to a network problem',
                     line.id,
                     order.number
                 )
                 line.set_status(LINE.FULFILLMENT_NETWORK_ERROR)
+            except HttpClientError:
+                logger.error(
+                    'Unable to fulfill line [%d] of order [%s] due to a client error. See Journals logs for more info',
+                    line.id,
+                    order.number
+                )
+                line.set_status(LINE.FULFILLMENT_SERVER_ERROR)
             except Exception:   # pylint: disable=broad-except
-                logger.exception(
+                logger.error(
                     'Unable to fulfill line [%d] of order [%s]',
                     line.id,
                     order.number
