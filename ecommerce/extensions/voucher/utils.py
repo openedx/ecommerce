@@ -11,7 +11,6 @@ from decimal import Decimal, DecimalException
 import dateutil.parser
 import pytz
 from django.conf import settings
-from django.core.exceptions import MultipleObjectsReturned
 from django.urls import reverse
 from django.utils.translation import ugettext_lazy as _
 from edx_django_utils.cache import TieredCache
