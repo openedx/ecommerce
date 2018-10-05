@@ -441,49 +441,6 @@ def _get_or_create_enterprise_offer(product_range, benefit_type, benefit_value, 
     return offer
 
 
-def _get_or_create_enterprise_offer(product_range, benefit_type, benefit_value, enterprise_customer,
-                                    enterprise_customer_catalog, coupon_id=None, max_uses=None, offer_number=None,
-                                    email_domains=None, site=None):
-
-    enterprise_customer_object = get_enterprise_customer(enterprise_customer, site) if site else {}
-    enterprise_customer_name = enterprise_customer_object.get('name', '')
-
-    condition, __ = Condition.objects.get_or_create(
-        proxy_class=class_path(EnterpriseCustomerCondition),
-        enterprise_customer_uuid=enterprise_customer,
-        enterprise_customer_name=enterprise_customer_name,
-        enterprise_customer_catalog_uuid=enterprise_customer_catalog,
-        range=product_range,
-        type=Condition.COUNT,
-        value=1,
-    )
-
-    benefit, _ = Benefit.objects.get_or_create(
-        proxy_class=class_path(ENTERPRISE_BENEFIT_MAP[benefit_type]),
-        value=benefit_value,
-        range=product_range,
-    )
-
-    offer_name = "Coupon [{}]-{}-{} ENT Offer".format(coupon_id, benefit_type, benefit_value)
-    if offer_number:
-        offer_name = "{} [{}] ENT Offer".format(offer_name, offer_number)
-    offer, __ = ConditionalOffer.objects.get_or_create(
-        name=offer_name,
-        offer_type=ConditionalOffer.VOUCHER,
-        condition=condition,
-        benefit=benefit,
-        max_global_applications=max_uses,
-        email_domains=email_domains,
-        site=site,
-        partner=site.siteconfiguration.partner if site else None,
-        # For initial creation, we are setting the priority lower so that we don't want to use these
-        # until we've done some other implementation work. We will update this to a higher value later.
-        priority=5,
-    )
-
-    return offer
-
-
 def _generate_code_string(length):
     """
     Create a string of random characters of specified length
