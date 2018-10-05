@@ -372,7 +372,6 @@ def _get_or_create_offer(
         offer_name = "{} [{}]".format(offer_name, offer_number)
 
     offer_kwargs = {
-        'name': offer_name,
         'offer_type': ConditionalOffer.VOUCHER,
         'condition': offer_condition,
         'benefit': offer_benefit,
@@ -382,11 +381,7 @@ def _get_or_create_offer(
         'partner': site.siteconfiguration.partner if site else None,
         'priority': OFFER_PRIORITY_VOUCHER,
     }
-    try:
-        offer, __ = ConditionalOffer.objects.get_or_create(**offer_kwargs)
-    except IntegrityError:
-        ConditionalOffer.objects.filter(name=offer_name).update(**offer_kwargs)
-        offer = ConditionalOffer.objects.get(name=offer_name)
+    offer, __ = ConditionalOffer.objects.update_or_create(name=offer_name, defaults=offer_kwargs)
 
     return offer
 
@@ -420,7 +415,6 @@ def _get_or_create_enterprise_offer(product_range, benefit_type, benefit_value, 
         offer_name = "{} [{}] ENT Offer".format(offer_name, offer_number)
 
     offer_kwargs = {
-        'name': offer_name,
         'offer_type': ConditionalOffer.VOUCHER,
         'condition': condition,
         'benefit': benefit,
@@ -432,11 +426,7 @@ def _get_or_create_enterprise_offer(product_range, benefit_type, benefit_value, 
         # until we've done some other implementation work. We will update this to a higher value later.
         'priority': 5,
     }
-    try:
-        offer, __ = ConditionalOffer.objects.get_or_create(**offer_kwargs)
-    except IntegrityError:
-        ConditionalOffer.objects.filter(name=offer_name).update(**offer_kwargs)
-        offer = ConditionalOffer.objects.get(name=offer_name)
+    offer, __ = ConditionalOffer.objects.update_or_create(name=offer_name, defaults=offer_kwargs)
 
     return offer
 
