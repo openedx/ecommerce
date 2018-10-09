@@ -18,24 +18,25 @@ class RefundTrackingTests(RefundTestMixin, TestCase):
         self.refund = create_refunds([self.create_order()], self.course.id)[0]
 
     def assert_refund_event_fired(self, mock_track, refund, tracking_context=None):
-        tracking_context = tracking_context or {}
         (event_user_id, event_name, event_payload), kwargs = mock_track.call_args
 
         self.assertTrue(mock_track.called)
-        self.assertEqual(
-            event_user_id,
-            tracking_context.get('lms_user_id', ECOM_TRACKING_ID_FMT.format(refund.user.id))
-        )
         self.assertEqual(event_name, 'Order Refunded')
 
-        expected_context = {
-            'ip': tracking_context.get('lms_ip'),
-            'Google Analytics': {
-                'clientId': tracking_context.get('ga_client_id')
+        if tracking_context is not None:
+            expected_event_user_id = tracking_context['lms_user_id']
+            expected_context = {
+                'ip': tracking_context['lms_ip'],
+                'Google Analytics': {
+                    'clientId': tracking_context['ga_client_id']
+                }
             }
-        }
-        self.assertEqual(kwargs['context'], expected_context)
+        else:
+            expected_event_user_id = ECOM_TRACKING_ID_FMT.format(refund.user.id)
+            expected_context = {'ip': None, 'Google Analytics': {'clientId': None}}
 
+        self.assertEqual(event_user_id, expected_event_user_id)
+        self.assertEqual(kwargs['context'], expected_context)
         self.assertEqual(event_payload['orderId'], refund.order.number)
 
         expected_products = [
