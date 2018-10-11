@@ -62,7 +62,6 @@ def format_currency(currency, amount, format=None, locale=None):  # pylint: disa
     return default_format_currency(
         amount,
         currency,
-        format=format,
         locale=locale
     )
 
