@@ -24,7 +24,7 @@ from ecommerce.extensions.catalogue.utils import create_coupon_product, get_or_c
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
 from ecommerce.extensions.payment.processors.invoice import InvoicePayment
 from ecommerce.extensions.voucher.models import CouponVouchers
-from ecommerce.extensions.voucher.utils import update_voucher_offer
+from ecommerce.extensions.voucher.utils import update_voucher_offer, update_voucher_with_enterprise_offer
 from ecommerce.invoice.models import Invoice
 
 Basket = get_model('basket', 'Basket')
@@ -354,7 +354,7 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
             program_uuid = request.data.get('program_uuid')
             benefit_value = request.data.get('benefit_value')
             enterprise_customer = request.data.get('enterprise_customer', {}).get('id', None)
-            enterprise_catalog = request.data.get('enterprise_customer_catalog')
+            enterprise_catalog = request.data.get('enterprise_customer_catalog') or None
             if benefit_value or program_uuid or enterprise_customer or enterprise_catalog:
                 self.update_coupon_offer(
                     benefit_value=benefit_value,
@@ -431,19 +431,34 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
             vouchers (ManyRelatedManager): Vouchers associated with the coupon to be updated
             benefit_value (Decimal): Benefit value associated with a new offer
             program_uuid (str): Program UUID
+            enterprise_customer (str): Enterprise Customer UUID
+            enterprise_catalog (str): Enterprise Catalog UUID
         """
         new_offers = []
 
-        for voucher_offer in vouchers.first().offers.all():
-            if program_uuid:
-                Condition.objects.filter(
-                    program_uuid=voucher_offer.condition.program_uuid
-                ).update(program_uuid=program_uuid)
+        # Only process the original conditional offer, and update/create the enterprise offer if needed.
+        voucher_offer = vouchers.first().best_offer
+        if program_uuid:
+            Condition.objects.filter(
+                program_uuid=voucher_offer.condition.program_uuid
+            ).update(program_uuid=program_uuid)
 
-            # The program uuid (if program coupon) is required for the benefit and condition update logic
-            program_uuid = program_uuid or voucher_offer.condition.program_uuid
+        # The program uuid (if program coupon) is required for the benefit and condition update logic
+        program_uuid = program_uuid or voucher_offer.condition.program_uuid
 
-            new_offer = update_voucher_offer(
+        new_offers.append(update_voucher_offer(
+            offer=voucher_offer,
+            benefit_value=benefit_value or voucher_offer.benefit.value,
+            benefit_type=voucher_offer.benefit.type or getattr(
+                voucher_offer.benefit.proxy(), 'benefit_class_type', None
+            ),
+            coupon=coupon,
+            max_uses=voucher_offer.max_global_applications,
+            program_uuid=program_uuid,
+        ))
+
+        if enterprise_customer:
+            new_offers.append(update_voucher_with_enterprise_offer(
                 offer=voucher_offer,
                 benefit_value=benefit_value or voucher_offer.benefit.value,
                 benefit_type=voucher_offer.benefit.type or getattr(
@@ -451,12 +466,9 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
                 ),
                 coupon=coupon,
                 max_uses=voucher_offer.max_global_applications,
-                program_uuid=program_uuid,
                 enterprise_customer=enterprise_customer,
                 enterprise_catalog=enterprise_catalog,
-            )
-
-            new_offers.append(new_offer)
+            ))
 
         for voucher in vouchers.all():
             voucher.offers.clear()

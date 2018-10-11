@@ -85,7 +85,6 @@ class Command(BaseCommand):
             enterprise_customer_uuid=enterprise_customer_uuid,
             enterprise_customer_name=enterprise_customer_name,
             enterprise_customer_catalog_uuid=offer.condition.range.enterprise_customer_catalog,
-            range=offer.condition.range,
             type=Condition.COUNT,
             value=1,
         )
@@ -93,11 +92,10 @@ class Command(BaseCommand):
         new_benefit, _ = Benefit.objects.get_or_create(
             proxy_class=class_path(BENEFIT_MAP[offer.benefit.type]),
             value=offer.benefit.value,
-            range=offer.benefit.range,
             max_affected_items=offer.benefit.max_affected_items,
         )
 
-        offer_name = offer.name + "ENT Offer"
+        offer_name = offer.name + " ENT Offer"
         new_offer, _ = ConditionalOffer.objects.get_or_create(
             name=offer_name,
             offer_type=ConditionalOffer.VOUCHER,

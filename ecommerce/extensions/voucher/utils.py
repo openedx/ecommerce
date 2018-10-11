@@ -11,7 +11,6 @@ from decimal import Decimal, DecimalException
 import dateutil.parser
 import pytz
 from django.conf import settings
-from django.db import IntegrityError
 from django.urls import reverse
 from django.utils.translation import ugettext_lazy as _
 from edx_django_utils.cache import TieredCache
@@ -386,7 +385,7 @@ def _get_or_create_offer(
     return offer
 
 
-def _get_or_create_enterprise_offer(product_range, benefit_type, benefit_value, enterprise_customer,
+def _get_or_create_enterprise_offer(benefit_type, benefit_value, enterprise_customer,
                                     enterprise_customer_catalog, coupon_id=None, max_uses=None, offer_number=None,
                                     email_domains=None, site=None):
 
@@ -398,7 +397,6 @@ def _get_or_create_enterprise_offer(product_range, benefit_type, benefit_value, 
         enterprise_customer_uuid=enterprise_customer,
         enterprise_customer_name=enterprise_customer_name,
         enterprise_customer_catalog_uuid=enterprise_customer_catalog,
-        range=product_range,
         type=Condition.COUNT,
         value=1,
     )
@@ -406,7 +404,6 @@ def _get_or_create_enterprise_offer(product_range, benefit_type, benefit_value, 
     benefit, _ = Benefit.objects.get_or_create(
         proxy_class=class_path(ENTERPRISE_BENEFIT_MAP[benefit_type]),
         value=benefit_value,
-        range=product_range,
         max_affected_items=1,
     )
 
@@ -634,7 +631,6 @@ def create_vouchers(
         # This and the surrounding code will be refactored at that point.
         if enterprise_customer:
             enterprise_offer = _get_or_create_enterprise_offer(
-                product_range=product_range,
                 benefit_type=benefit_type,
                 benefit_value=benefit_value,
                 enterprise_customer=enterprise_customer,
@@ -705,8 +701,41 @@ def get_voucher_discount_info(benefit, price):
         }
 
 
+def update_voucher_with_enterprise_offer(offer, benefit_value, benefit_type, coupon, enterprise_customer,
+                                         max_uses=None, email_domains=None, enterprise_catalog=None):
+    """
+    Update voucher with enteprise offer.
+
+    Args:
+        offer (Offer): Offer associated with a voucher.
+        benefit_value (Decimal): Value of benefit associated with vouchers.
+        benefit_type (str): Type of benefit associated with vouchers.
+        coupon (Product): The coupon whos offer(s) is updated.
+        enterprise_customer (str): The uuid of the enterprise customer.
+
+    Kwargs:
+        max_uses (int): number of maximum global application number an offer can have.
+        email_domains (str): a comma-separated string of email domains allowed to apply
+                            this offer.
+        enterprise_catalog (str): Enterprise Catalog UUID
+
+    Returns:
+        Offer
+    """
+    return _get_or_create_enterprise_offer(
+        benefit_value=benefit_value,
+        benefit_type=benefit_type,
+        enterprise_customer=enterprise_customer,
+        enterprise_customer_catalog=enterprise_catalog,
+        coupon_id=coupon.id,
+        max_uses=max_uses,
+        email_domains=email_domains,
+        site=offer.site,
+    )
+
+
 def update_voucher_offer(offer, benefit_value, benefit_type, coupon, max_uses=None, email_domains=None,
-                         program_uuid=None, enterprise_customer=None, enterprise_catalog=None):
+                         program_uuid=None):
     """
     Update voucher offer with new benefit value.
 
@@ -721,25 +750,11 @@ def update_voucher_offer(offer, benefit_value, benefit_type, coupon, max_uses=No
         email_domains (str): a comma-separated string of email domains allowed to apply
                             this offer.
         program_uuid (str): Program UUID
-        enterprise_customer (str): Enterprise Customer UUID
-        enterprise_catalog (str): Enterprise Catalog UUID
 
     Returns:
         Offer
     """
-    # For enterprise conditional offers attached to coupons, use function for creating/updating enterprise offers.
-    if offer.condition.enterprise_customer_uuid:
-        return _get_or_create_enterprise_offer(
-            product_range=offer.benefit.range,
-            benefit_value=benefit_value,
-            benefit_type=benefit_type,
-            enterprise_customer=enterprise_customer,
-            enterprise_customer_catalog=enterprise_catalog,
-            coupon_id=coupon.id,
-            max_uses=max_uses,
-            email_domains=email_domains,
-            site=offer.site,
-        )
+
     return _get_or_create_offer(
         product_range=offer.benefit.range,
         benefit_value=benefit_value,
