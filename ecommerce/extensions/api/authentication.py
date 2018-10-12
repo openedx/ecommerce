@@ -1,6 +1,6 @@
 """ Custom DRF authentication modules. """
 
-from edx_rest_framework_extensions.authentication import BearerAuthentication as BaseBearerAuthentication
+from edx_rest_framework_extensions.auth.bearer.authentication import BearerAuthentication as BaseBearerAuthentication
 
 from ecommerce.core.url_utils import get_oauth2_provider_url
 
