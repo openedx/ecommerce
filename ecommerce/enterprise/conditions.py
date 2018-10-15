@@ -2,13 +2,14 @@ from __future__ import unicode_literals
 
 import logging
 from uuid import UUID
+import waffle
 
 from oscar.core.loading import get_model
 from requests.exceptions import ConnectionError, Timeout
 from slumber.exceptions import SlumberHttpBaseException
 
 from ecommerce.enterprise.api import catalog_contains_course_runs, fetch_enterprise_learner_data
-from ecommerce.enterprise.constants import ENTERPRISE_OFFERS_SWITCH
+from ecommerce.enterprise.constants import ENTERPRISE_OFFERS_SWITCH, ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH
 from ecommerce.extensions.basket.utils import ENTERPRISE_CATALOG_ATTRIBUTE_TYPE
 from ecommerce.extensions.offer.decorators import check_condition_applicability
 from ecommerce.extensions.offer.mixins import ConditionWithoutRangeMixin, SingleItemConsumptionConditionMixin
@@ -53,7 +54,8 @@ class EnterpriseCustomerCondition(ConditionWithoutRangeMixin, SingleItemConsumpt
             # An anonymous user is never linked to any EnterpriseCustomer.
             return False
 
-        if offer.offer_type == ConditionalOffer.VOUCHER:
+        if (offer.offer_type == ConditionalOffer.VOUCHER and
+                not waffle.switch_is_active(ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH)):
             logger.info('Skipping Voucher type enterprise conditional offer until we are ready to support it.')
             return False
 

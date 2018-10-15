@@ -115,13 +115,19 @@ def _get_info_for_coupon_report(coupon, voucher):
     program_uuid = offer.condition.program_uuid
     benefit = offer.benefit
 
+    course_id = None
+    seat_stockrecord = None
+    course_organization = None
+    catalog_query = None
+    course_seat_types = None
+
     if program_uuid:
         course_id = None
-    elif offer_range.catalog:
+    elif offer_range and offer_range.catalog:
         seat_stockrecord = offer_range.catalog.stock_records.first()
         course_id = seat_stockrecord.product.attr.course_key
         course_organization = CourseKey.from_string(course_id).org
-    elif offer_range.catalog_query:
+    elif offer_range and offer_range.catalog_query:
         catalog_query = offer_range.catalog_query
         course_id = None
         course_seat_types = offer_range.course_seat_types
@@ -810,9 +816,11 @@ def get_voucher_and_products_from_code(code):
     """
     voucher = get_cached_voucher(code)
     voucher_range = voucher.best_offer.benefit.range
-    products = voucher_range.all_products()
+    has_catalog_configuration = voucher_range and (voucher_range.catalog_query or voucher_range.course_catalog)
+    is_enterprise = voucher_range.enterprise_customer or voucher.best_offer.condition.enterprise_customer_uuid
+    products = voucher_range.all_products() if voucher_range else []
 
-    if products or voucher_range.catalog_query or voucher_range.course_catalog:
+    if products or has_catalog_configuration or is_enterprise:
         # List of products is empty in case of Multi-course coupon
         return voucher, products
     else:
