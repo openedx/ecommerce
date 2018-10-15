@@ -7,6 +7,7 @@ from oscar.test.factories import ConditionalOfferFactory as BaseConditionalOffer
 from oscar.test.factories import VoucherFactory as BaseVoucherFactory
 from oscar.test.factories import *  # pylint:disable=wildcard-import,unused-wildcard-import
 
+from ecommerce.enterprise.benefits import BENEFIT_MAP as ENTERPRISE_BENEFIT_MAP
 from ecommerce.enterprise.benefits import EnterpriseAbsoluteDiscountBenefit, EnterprisePercentageDiscountBenefit
 from ecommerce.enterprise.conditions import EnterpriseCustomerCondition
 from ecommerce.extensions.offer.models import OFFER_PRIORITY_ENTERPRISE, OFFER_PRIORITY_VOUCHER
@@ -106,7 +107,7 @@ def prepare_voucher(code='COUPONTEST', _range=None, start_datetime=None, end_dat
         usage=usage
     )
     benefit = BenefitFactory(type=benefit_type, range=_range, value=benefit_value)
-    condition = ConditionFactory(value=1, range=_range)
+    condition = ConditionFactory(value=1, range=_range, enterprise_customer_uuid=enterprise_customer)
     if max_usage:
         offer = ConditionalOfferFactory(
             offer_type=ConditionalOffer.VOUCHER,
@@ -127,6 +128,45 @@ def prepare_voucher(code='COUPONTEST', _range=None, start_datetime=None, end_dat
         )
     voucher.offers.add(offer)
     return voucher, product
+
+
+def prepare_enterprise_voucher(code='COUPONTEST', start_datetime=None, end_datetime=None, benefit_value=100,
+                               benefit_type=Benefit.PERCENTAGE, usage=Voucher.SINGLE_USE,
+                               enterprise_customer=None, enterprise_customer_catalog=None):
+    """ Helper function to create a voucher and add an enterprise conditional offer to it. """
+    if start_datetime is None:
+        start_datetime = now() - datetime.timedelta(days=1)
+
+    if end_datetime is None:
+        end_datetime = now() + datetime.timedelta(days=10)
+
+    voucher = VoucherFactory(
+        code=code,
+        start_datetime=start_datetime,
+        end_datetime=end_datetime,
+        usage=usage
+    )
+    benefit = BenefitFactory(
+        proxy_class=class_path(ENTERPRISE_BENEFIT_MAP[benefit_type]),
+        value=benefit_value,
+        type='',
+        range=None,
+    )
+    condition = ConditionFactory(
+        proxy_class=class_path(EnterpriseCustomerCondition),
+        enterprise_customer_uuid=enterprise_customer,
+        enterprise_customer_catalog_uuid=enterprise_customer_catalog,
+        range=None,
+    )
+    offer = ConditionalOfferFactory(
+        offer_type=ConditionalOffer.VOUCHER,
+        benefit=benefit,
+        condition=condition,
+        priority=OFFER_PRIORITY_VOUCHER
+    )
+
+    voucher.offers.add(offer)
+    return voucher
 
 
 class VoucherFactory(BaseVoucherFactory):  # pylint: disable=function-redefined

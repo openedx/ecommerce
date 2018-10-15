@@ -5,8 +5,8 @@ from django.forms.utils import ErrorList
 from django.utils.translation import ugettext_lazy as _
 from oscar.core.loading import get_model
 
+from ecommerce.enterprise.benefits import BENEFIT_MAP, BENEFIT_TYPE_CHOICES
 from ecommerce.enterprise.conditions import EnterpriseCustomerCondition
-from ecommerce.enterprise.constants import BENEFIT_MAP, BENEFIT_TYPE_CHOICES
 from ecommerce.enterprise.utils import get_enterprise_customer
 from ecommerce.extensions.offer.models import OFFER_PRIORITY_ENTERPRISE
 from ecommerce.programs.custom import class_path, create_condition

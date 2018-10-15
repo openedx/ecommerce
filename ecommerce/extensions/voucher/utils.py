@@ -20,8 +20,8 @@ from oscar.templatetags.currency_filters import currency
 
 from ecommerce.core.url_utils import get_ecommerce_url
 from ecommerce.core.utils import log_message_and_raise_validation_error
+from ecommerce.enterprise.benefits import BENEFIT_MAP as ENTERPRISE_BENEFIT_MAP
 from ecommerce.enterprise.conditions import EnterpriseCustomerCondition
-from ecommerce.enterprise.constants import BENEFIT_MAP as ENTERPRISE_BENEFIT_MAP
 from ecommerce.enterprise.utils import get_enterprise_customer
 from ecommerce.extensions.api import exceptions
 from ecommerce.extensions.offer.models import OFFER_PRIORITY_VOUCHER
@@ -115,13 +115,19 @@ def _get_info_for_coupon_report(coupon, voucher):
     program_uuid = offer.condition.program_uuid
     benefit = offer.benefit
 
+    course_id = None
+    seat_stockrecord = None
+    course_organization = None
+    catalog_query = None
+    course_seat_types = None
+
     if program_uuid:
         course_id = None
-    elif offer_range.catalog:
+    elif offer_range and offer_range.catalog:
         seat_stockrecord = offer_range.catalog.stock_records.first()
         course_id = seat_stockrecord.product.attr.course_key
         course_organization = CourseKey.from_string(course_id).org
-    elif offer_range.catalog_query:
+    elif offer_range and offer_range.catalog_query:
         catalog_query = offer_range.catalog_query
         course_id = None
         course_seat_types = offer_range.course_seat_types
@@ -702,7 +708,7 @@ def get_voucher_discount_info(benefit, price):
 
 
 def update_voucher_with_enterprise_offer(offer, benefit_value, benefit_type, coupon, enterprise_customer,
-                                         max_uses=None, email_domains=None, enterprise_catalog=None):
+                                         max_uses=None, email_domains=None, enterprise_catalog=None, site=None):
     """
     Update voucher with enteprise offer.
 
@@ -718,6 +724,7 @@ def update_voucher_with_enterprise_offer(offer, benefit_value, benefit_type, cou
         email_domains (str): a comma-separated string of email domains allowed to apply
                             this offer.
         enterprise_catalog (str): Enterprise Catalog UUID
+        site (Site): Site for this offer
 
     Returns:
         Offer
@@ -730,12 +737,12 @@ def update_voucher_with_enterprise_offer(offer, benefit_value, benefit_type, cou
         coupon_id=coupon.id,
         max_uses=max_uses,
         email_domains=email_domains,
-        site=offer.site,
+        site=offer.site or site,
     )
 
 
 def update_voucher_offer(offer, benefit_value, benefit_type, coupon, max_uses=None, email_domains=None,
-                         program_uuid=None):
+                         program_uuid=None, site=None):
     """
     Update voucher offer with new benefit value.
 
@@ -750,6 +757,7 @@ def update_voucher_offer(offer, benefit_value, benefit_type, coupon, max_uses=No
         email_domains (str): a comma-separated string of email domains allowed to apply
                             this offer.
         program_uuid (str): Program UUID
+        site (Site): Site for this offer
 
     Returns:
         Offer
@@ -763,7 +771,7 @@ def update_voucher_offer(offer, benefit_value, benefit_type, coupon, max_uses=No
         max_uses=max_uses,
         email_domains=email_domains,
         program_uuid=program_uuid,
-        site=offer.site,
+        site=offer.site or site,
     )
 
 
@@ -810,9 +818,12 @@ def get_voucher_and_products_from_code(code):
     """
     voucher = get_cached_voucher(code)
     voucher_range = voucher.best_offer.benefit.range
-    products = voucher_range.all_products()
+    has_catalog_configuration = voucher_range and (voucher_range.catalog_query or voucher_range.course_catalog)
+    is_enterprise = ((voucher_range and voucher_range.enterprise_customer) or
+                     voucher.best_offer.condition.enterprise_customer_uuid)
+    products = voucher_range.all_products() if voucher_range else []
 
-    if products or voucher_range.catalog_query or voucher_range.course_catalog:
+    if products or has_catalog_configuration or is_enterprise:
         # List of products is empty in case of Multi-course coupon
         return voucher, products
     else:

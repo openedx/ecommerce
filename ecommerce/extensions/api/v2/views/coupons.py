@@ -299,7 +299,8 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
         if not range_data:
             return None
 
-        voucher_range = vouchers.first().best_offer.benefit.range
+        voucher_range = vouchers.first().original_offer.benefit.range
+
         enterprise_customer_data = request.data.get('enterprise_customer')
 
         # Remove catalog if switching from single course to dynamic query
@@ -359,6 +360,7 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
                 self.update_coupon_offer(
                     benefit_value=benefit_value,
                     vouchers=vouchers,
+                    site=self.request.site,
                     coupon=coupon,
                     program_uuid=program_uuid,
                     enterprise_customer=enterprise_customer,
@@ -422,13 +424,14 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
                     update_dict[field.replace('invoice_', '')] = value
         return update_dict
 
-    def update_coupon_offer(self, coupon, vouchers, benefit_value=None, program_uuid=None,
+    def update_coupon_offer(self, coupon, vouchers, site, benefit_value=None, program_uuid=None,
                             enterprise_customer=None, enterprise_catalog=None):
         """
         Remove all offers from the vouchers and add a new offer
         Arguments:
             coupon (Product): Coupon product associated with vouchers
             vouchers (ManyRelatedManager): Vouchers associated with the coupon to be updated
+            site (Site): The Site associated with this offer
             benefit_value (Decimal): Benefit value associated with a new offer
             program_uuid (str): Program UUID
             enterprise_customer (str): Enterprise Customer UUID
@@ -438,6 +441,7 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
 
         # Only process the original conditional offer, and update/create the enterprise offer if needed.
         voucher_offer = vouchers.first().best_offer
+        oldest_offer = vouchers.first().original_offer
         if program_uuid:
             Condition.objects.filter(
                 program_uuid=voucher_offer.condition.program_uuid
@@ -447,14 +451,15 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
         program_uuid = program_uuid or voucher_offer.condition.program_uuid
 
         new_offers.append(update_voucher_offer(
-            offer=voucher_offer,
-            benefit_value=benefit_value or voucher_offer.benefit.value,
-            benefit_type=voucher_offer.benefit.type or getattr(
-                voucher_offer.benefit.proxy(), 'benefit_class_type', None
+            offer=oldest_offer,
+            benefit_value=benefit_value or oldest_offer.benefit.value,
+            benefit_type=oldest_offer.benefit.type or getattr(
+                oldest_offer.benefit.proxy(), 'benefit_class_type', None
             ),
             coupon=coupon,
-            max_uses=voucher_offer.max_global_applications,
+            max_uses=oldest_offer.max_global_applications,
             program_uuid=program_uuid,
+            site=site,
         ))
 
         if enterprise_customer:
@@ -468,6 +473,7 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
                 max_uses=voucher_offer.max_global_applications,
                 enterprise_customer=enterprise_customer,
                 enterprise_catalog=enterprise_catalog,
+                site=site,
             ))
 
         for voucher in vouchers.all():

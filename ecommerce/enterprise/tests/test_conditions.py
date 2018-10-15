@@ -7,7 +7,7 @@ from oscar.core.loading import get_model
 from waffle.models import Switch
 
 from ecommerce.courses.tests.factories import CourseFactory
-from ecommerce.enterprise.constants import ENTERPRISE_OFFERS_SWITCH
+from ecommerce.enterprise.constants import ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, ENTERPRISE_OFFERS_SWITCH
 from ecommerce.enterprise.tests.mixins import EnterpriseServiceMockMixin
 from ecommerce.extensions.basket.utils import basket_add_enterprise_catalog_attribute
 from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
@@ -129,9 +129,7 @@ class EnterpriseCustomerConditionTests(EnterpriseServiceMockMixin, DiscoveryTest
         )
         self.assertFalse(self.condition.is_satisfied(offer, basket))
 
-    @httpretty.activate
-    def test_is_satisfied_false_for_voucher_offer(self):
-        """ Ensure the condition returns false for a coupon with an enterprise conditional offer. """
+    def setup_enterprise_coupon_data(self, mock_learner_api=True):
         offer = factories.EnterpriseOfferFactory(
             partner=self.partner,
             condition=self.condition,
@@ -139,17 +137,42 @@ class EnterpriseCustomerConditionTests(EnterpriseServiceMockMixin, DiscoveryTest
         )
         basket = factories.BasketFactory(site=self.site, owner=self.user)
         basket.add_product(self.course_run.seat_products[0])
-        self.mock_enterprise_learner_api(
-            learner_id=self.user.id,
-            enterprise_customer_uuid=str(self.condition.enterprise_customer_uuid),
-            course_run_id=self.course_run.id,
-        )
+        if mock_learner_api:
+            self.mock_enterprise_learner_api(
+                learner_id=self.user.id,
+                enterprise_customer_uuid=str(self.condition.enterprise_customer_uuid),
+                course_run_id=self.course_run.id,
+            )
+        else:
+            self.mock_enterprise_learner_api_for_learner_with_no_enterprise()
+
         self.mock_catalog_contains_course_runs(
             [self.course_run.id],
             self.condition.enterprise_customer_uuid,
             enterprise_customer_catalog_uuid=self.condition.enterprise_customer_catalog_uuid,
         )
+        return offer, basket
+
+    @httpretty.activate
+    def test_is_satisfied_false_for_voucher_offer_coupon_switch_off(self):
+        """ Ensure the condition returns false for a coupon with an enterprise conditional offer. """
+        Switch.objects.update_or_create(name=ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, defaults={'active': False})
+        offer, basket = self.setup_enterprise_coupon_data()
         self.assertFalse(self.condition.is_satisfied(offer, basket))
+
+    @httpretty.activate
+    def test_is_satisfied_true_for_voucher_offer_coupon_switch_on(self):
+        """ Ensure the condition returns true for a coupon with an enterprise conditional offer. """
+        Switch.objects.update_or_create(name=ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, defaults={'active': True})
+        offer, basket = self.setup_enterprise_coupon_data()
+        self.assertTrue(self.condition.is_satisfied(offer, basket))
+
+    @httpretty.activate
+    def test_is_satisfied_true_for_voucher_offer_coupon_switch_on_new_user(self):
+        """ Ensure the condition returns true for a coupon with an enterprise conditional offer. """
+        Switch.objects.update_or_create(name=ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, defaults={'active': True})
+        offer, basket = self.setup_enterprise_coupon_data(mock_learner_api=False)
+        self.assertTrue(self.condition.is_satisfied(offer, basket))
 
     def test_is_satisfied_empty_basket(self):
         """ Ensure the condition returns False if the basket is empty. """
