@@ -1,10 +1,13 @@
 import datetime
 import logging
+import waffle
 
+from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
 from django.db import models
 from oscar.apps.voucher.abstract_models import AbstractVoucher  # pylint: disable=ungrouped-imports
 
 from ecommerce.core.utils import log_message_and_raise_validation_error
+from ecommerce.enterprise.constants import ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH
 
 logger = logging.getLogger(__name__)
 
@@ -63,8 +66,26 @@ class Voucher(AbstractVoucher):
             return False
 
     @property
+    def original_offer(self):
+        try:
+            return self.offers.filter(condition__range__isnull=False)[0]
+        except (IndexError, ObjectDoesNotExist):
+            return self.offers.order_by('date_created')[0]
+
+    @property
     def best_offer(self):
-        return self.offers.order_by('date_created')[0]
+        # If the ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH is inactive, return offer containing a range
+        if not waffle.switch_is_active(ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH):
+            return self.original_offer
+        # If the switch is enabled, return the enterprise offer if it exists.
+        try:
+            return self.offers.get(condition__enterprise_customer_uuid__isnull=False)
+        except ObjectDoesNotExist:
+            # If no enterprise offer is found, return the first available offer.
+            return self.original_offer
+        except MultipleObjectsReturned:
+            logger.exception('There is more than one enterprise offer associated with voucher %s!', self.id)
+            return self.original_offer
 
 
 from oscar.apps.voucher.models import *  # noqa isort:skip pylint: disable=wildcard-import,unused-wildcard-import,wrong-import-position,wrong-import-order,ungrouped-imports
