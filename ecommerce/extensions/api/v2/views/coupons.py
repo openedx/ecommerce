@@ -300,6 +300,9 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
             return None
 
         voucher_range = vouchers.first().best_offer.benefit.range
+        if not voucher_range:
+            return None
+
         enterprise_customer_data = request.data.get('enterprise_customer')
 
         # Remove catalog if switching from single course to dynamic query
@@ -438,6 +441,7 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
 
         # Only process the original conditional offer, and update/create the enterprise offer if needed.
         voucher_offer = vouchers.first().best_offer
+        oldest_offer = vouchers.first().oldest_offer
         if program_uuid:
             Condition.objects.filter(
                 program_uuid=voucher_offer.condition.program_uuid
@@ -447,7 +451,7 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
         program_uuid = program_uuid or voucher_offer.condition.program_uuid
 
         new_offers.append(update_voucher_offer(
-            offer=voucher_offer,
+            offer=oldest_offer,
             benefit_value=benefit_value or voucher_offer.benefit.value,
             benefit_type=voucher_offer.benefit.type or getattr(
                 voucher_offer.benefit.proxy(), 'benefit_class_type', None
