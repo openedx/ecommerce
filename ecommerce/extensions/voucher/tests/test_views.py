@@ -1,3 +1,5 @@
+from uuid import uuid4
+
 import httpretty
 from django.test import RequestFactory
 from oscar.core.loading import get_model
@@ -38,6 +40,11 @@ class CouponReportCSVViewTest(CouponMixin, DiscoveryTestMixin, LmsApiMockMixin, 
         catalog2 = Catalog.objects.create(name="Test catalog 2", partner=partner2)
         catalog2.stock_records.add(self.stock_record)
         self.coupon2 = self.create_coupon(partner=partner2, catalog=catalog2)
+        self.coupon3 = self.create_coupon(
+            partner=partner1,
+            enterprise_customer=str(uuid4()),
+            enterprise_customer_catalog=str(uuid4())
+        )
 
     def request_specific_voucher_report(self, coupon):
         client = factories.UserFactory()
@@ -59,6 +66,7 @@ class CouponReportCSVViewTest(CouponMixin, DiscoveryTestMixin, LmsApiMockMixin, 
         self.mock_course_api_response(course=self.course)
         self.request_specific_voucher_report(self.coupon1)
         self.request_specific_voucher_report(self.coupon2)
+        self.request_specific_voucher_report(self.coupon3)
 
     def test_report_missing_stockrecord_raises_http404(self):
         """ Verify that Http404 is raised when no StockRecord for coupon """

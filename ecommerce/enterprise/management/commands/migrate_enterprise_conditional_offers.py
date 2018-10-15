@@ -9,8 +9,8 @@ from time import sleep
 from django.contrib.sites.models import Site
 from django.core.management import BaseCommand
 
+from ecommerce.enterprise.benefits import BENEFIT_MAP
 from ecommerce.enterprise.conditions import EnterpriseCustomerCondition
-from ecommerce.enterprise.constants import BENEFIT_MAP
 from ecommerce.enterprise.utils import get_enterprise_customer
 from ecommerce.extensions.voucher.models import Voucher
 from ecommerce.programs.custom import class_path, get_model

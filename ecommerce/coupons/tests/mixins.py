@@ -424,9 +424,9 @@ class CouponMixin(SiteMixin):
 
         return pc
 
-    def create_coupon(self, benefit_type=Benefit.PERCENTAGE, benefit_value=100, catalog=None,
-                      catalog_query=None, client=None, code='', course_seat_types=None, email_domains=None,
-                      enterprise_customer=None, max_uses=None, note=None, partner=None, price=100, quantity=5,
+    def create_coupon(self, benefit_type=Benefit.PERCENTAGE, benefit_value=100, catalog=None, catalog_query=None,
+                      client=None, code='', course_seat_types=None, email_domains=None, enterprise_customer=None,
+                      enterprise_customer_catalog=None, max_uses=None, note=None, partner=None, price=100, quantity=5,
                       title='Test coupon', voucher_type=Voucher.SINGLE_USE, course_catalog=None, program_uuid=None):
         """Helper method for creating a coupon.
 
@@ -440,6 +440,7 @@ class CouponMixin(SiteMixin):
             course_catalog (int): Course catalog id from Discovery Service
             course_seat_types(str): A string of comma-separated list of seat types
             enterprise_customer (str): Hex-encoded UUID for an Enterprise Customer object from the Enterprise app.
+            enterprise_customer_catalog (str): UUID for an Enterprise Customer Catalog from the Enterprise app.
             email_domains(str): A comma seperated list of email domains
             max_uses (int): Number of Voucher max uses
             note (str): Coupon note.
@@ -458,7 +459,8 @@ class CouponMixin(SiteMixin):
             partner = PartnerFactory(name='Tester')
         if client is None:
             client, __ = BusinessClient.objects.get_or_create(name='Test Client')
-        if catalog is None and not ((catalog_query or course_catalog or program_uuid) and course_seat_types):
+        if (catalog is None and not enterprise_customer_catalog and not
+                ((catalog_query or course_catalog or program_uuid) and course_seat_types)):
             catalog = Catalog.objects.create(partner=partner)
         if code is not '':
             quantity = 1
@@ -479,7 +481,7 @@ class CouponMixin(SiteMixin):
                 email_domains=email_domains,
                 end_datetime=datetime.datetime(2020, 1, 1),
                 enterprise_customer=enterprise_customer,
-                enterprise_customer_catalog=None,
+                enterprise_customer_catalog=enterprise_customer_catalog,
                 max_uses=max_uses,
                 note=note,
                 partner=partner,

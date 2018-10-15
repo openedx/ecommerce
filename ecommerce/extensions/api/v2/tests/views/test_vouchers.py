@@ -17,14 +17,21 @@ from requests.exceptions import ConnectionError, Timeout
 from rest_framework import status
 from rest_framework.test import APIRequestFactory
 from slumber.exceptions import SlumberBaseException
+from waffle.models import Switch
 
 from ecommerce.coupons.tests.mixins import CouponMixin, DiscoveryMockMixin
 from ecommerce.courses.tests.factories import CourseFactory
+from ecommerce.enterprise.constants import ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH
 from ecommerce.extensions.api import serializers
 from ecommerce.extensions.api.v2.views.vouchers import VoucherViewSet
 from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
 from ecommerce.extensions.partner.strategy import DefaultStrategy
-from ecommerce.extensions.test.factories import ConditionalOfferFactory, VoucherFactory, prepare_voucher
+from ecommerce.extensions.test.factories import (
+    ConditionalOfferFactory,
+    VoucherFactory,
+    prepare_enterprise_voucher,
+    prepare_voucher
+)
 from ecommerce.extensions.voucher.models import CouponVouchers
 from ecommerce.tests.factories import PartnerFactory
 from ecommerce.tests.mixins import Catalog, LmsApiMockMixin
@@ -459,6 +466,7 @@ class VoucherViewOffersEndpointTests(DiscoveryMockMixin, CouponMixin, DiscoveryT
 
     def test_get_offers_for_enterprise_catalog_voucher(self):
         """ Verify that the course offers data is returned for an enterprise catalog voucher. """
+        Switch.objects.update_or_create(name=ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, defaults={'active': False})
         self.mock_access_token_response()
         course, seat = self.create_course_and_seat()
         enterprise_catalog_id = str(uuid4())
@@ -495,6 +503,57 @@ class VoucherViewOffersEndpointTests(DiscoveryMockMixin, CouponMixin, DiscoveryT
             'title': course.name,
             'voucher_end_date': voucher.end_datetime,
         })
+
+    def test_get_offers_for_enterprise_offer_switch_on(self):
+        """ Verify that the course offers data is returned for an enterprise catalog voucher. """
+        Switch.objects.update_or_create(name=ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, defaults={'active': True})
+        self.mock_access_token_response()
+        course, seat = self.create_course_and_seat()
+        enterprise_customer_id = str(uuid4())
+        enterprise_catalog_id = str(uuid4())
+        self.mock_enterprise_catalog_course_endpoint(
+            self.site_configuration.enterprise_api_url, enterprise_catalog_id, course_run=course
+        )
+        voucher = prepare_enterprise_voucher(
+            benefit_value=10,
+            enterprise_customer=enterprise_customer_id,
+            enterprise_customer_catalog=enterprise_catalog_id
+        )
+        benefit = voucher.offers.first().benefit
+        request = self.prepare_offers_listing_request(voucher.code)
+        offers = VoucherViewSet().get_offers(request=request, voucher=voucher)['results']
+        first_offer = offers[0]
+        self.assertEqual(len(offers), 1)
+        self.assertDictEqual(first_offer, {
+            'benefit': {
+                'type': benefit.type,
+                'value': benefit.value
+            },
+            'contains_verified': True,
+            'course_start_date': '2016-05-01T00:00:00Z',
+            'id': course.id,
+            'image_url': 'path/to/the/course/image',
+            'multiple_credit_providers': False,
+            'organization': CourseKey.from_string(course.id).org,
+            'credit_provider_price': None,
+            'seat_type': course.type,
+            'stockrecords': serializers.StockRecordSerializer(seat.stockrecords.first()).data,
+            'title': course.name,
+            'voucher_end_date': voucher.end_datetime,
+        })
+
+    def test_get_offers_for_enterprise_offer_switch_on_no_catalog(self):
+        """ Verify that the course offers data is returned for an enterprise catalog voucher. """
+        Switch.objects.update_or_create(name=ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, defaults={'active': True})
+        self.mock_access_token_response()
+        enterprise_customer_id = str(uuid4())
+        voucher = prepare_enterprise_voucher(
+            benefit_value=10,
+            enterprise_customer=enterprise_customer_id,
+        )
+        request = self.prepare_offers_listing_request(voucher.code)
+        offers = VoucherViewSet().get_offers(request=request, voucher=voucher)['results']
+        self.assertEqual(len(offers), 0)
 
     def test_get_offers_for_course_catalog_voucher(self):
         """ Verify that the course offers data is returned for a course catalog voucher. """

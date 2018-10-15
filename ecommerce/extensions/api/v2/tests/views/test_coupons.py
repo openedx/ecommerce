@@ -18,9 +18,11 @@ from oscar.core.loading import get_class, get_model
 from oscar.test import factories
 from rest_framework import status
 from testfixtures import LogCapture
+from waffle.models import Switch
 
 from ecommerce.coupons.tests.mixins import CouponMixin, DiscoveryMockMixin
 from ecommerce.courses.tests.factories import CourseFactory
+from ecommerce.enterprise.constants import ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH
 from ecommerce.extensions.api.v2.views.coupons import DEPRECATED_COUPON_CATEGORIES, CouponViewSet
 from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
 from ecommerce.extensions.voucher.models import CouponVouchers
@@ -545,9 +547,9 @@ class CouponViewSetFunctionalTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
         self.assertEqual(response_data['title'], 'New title')
         self.assertIsNone(response_data['email_domains'])
 
-    def test_update_enterprise_with_catalog(self):
-        """Test updating a coupon enterprise and seat type."""
+    def _test_update_enterprise_coupon(self):
         enterprise_customer_id = str(uuid4()).decode('utf-8')
+        enterprise_catalog_id = str(uuid4()).decode('utf-8')
         response_data = self.get_response_json(
             'PUT',
             reverse('api:v2:coupons-detail', kwargs={'pk': self.coupon.id}),
@@ -555,11 +557,32 @@ class CouponViewSetFunctionalTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
                 'catalog_query': 'key:*',
                 'course_catalog': None,
                 'course_seat_types': ['verified'],
-                'enterprise_customer': {'name': 'test enterprise', 'id': enterprise_customer_id}
+                'enterprise_customer': {'name': 'test enterprise', 'id': enterprise_customer_id},
+                'enterprise_customer_catalog': enterprise_catalog_id,
             }
         )
         self.assertEqual(response_data['id'], self.coupon.id)
         self.assertEqual(response_data['enterprise_customer'], enterprise_customer_id)
+
+        new_coupon = Product.objects.get(id=self.coupon.id)
+        vouchers = new_coupon.attr.coupon_vouchers.vouchers.all()
+        for voucher in vouchers:
+            all_offers = voucher.offers.all()
+            self.assertEqual(len(all_offers), 2)
+            self.assertEqual(str(all_offers[0].condition.range.enterprise_customer), enterprise_customer_id)
+            self.assertEqual(str(all_offers[0].condition.range.enterprise_customer_catalog), enterprise_catalog_id)
+            self.assertEqual(str(all_offers[1].condition.enterprise_customer_uuid), enterprise_customer_id)
+            self.assertEqual(str(all_offers[1].condition.enterprise_customer_catalog_uuid), enterprise_catalog_id)
+
+    def test_update_enterprise_with_catalog(self):
+        """Test updating a coupon enterprise and seat type."""
+        Switch.objects.update_or_create(name=ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, defaults={'active': False})
+        self._test_update_enterprise_coupon()
+
+    def test_update_enterprise_offers_switch_on(self):
+        """Test updating a coupon enterprise and seat type."""
+        Switch.objects.update_or_create(name=ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, defaults={'active': True})
+        self._test_update_enterprise_coupon()
 
     def test_update_name(self):
         """Test updating voucher name."""
@@ -749,7 +772,8 @@ class CouponViewSetFunctionalTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             CouponViewSet().update_coupon_offer(
                 benefit_value=benefit_value,
                 vouchers=vouchers,
-                coupon=self.coupon
+                coupon=self.coupon,
+                site=self.site,
             )
         for voucher in vouchers:
             self.assertEqual(voucher.offers.first().benefit.value, benefit_value)
