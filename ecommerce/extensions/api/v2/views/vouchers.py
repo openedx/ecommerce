@@ -151,23 +151,34 @@ class VoucherViewSet(NonDestroyableModelViewSet):
         stock_records = StockRecord.objects.filter(product__in=products)
         return products, stock_records, course_run_metadata
 
-    def get_offers_from_catalog(self, request, voucher, catalog_query, enterprise_catalog):
+    def get_offers_from_catalog(self, request, voucher):
         """ Helper method for collecting offers from catalog query or enterprise catalog.
 
         Args:
             request (WSGIRequest): Request data.
             voucher (Voucher): Oscar Voucher for which the offers are returned.
-            catalog_query (str): The query for the Course Discovery.
 
         Returns:
             A list of dictionaries with retrieved offers and a link to the next
             page of the Course Discovery results.
             """
-        offers = []
         benefit = voucher.best_offer.benefit
-        course_seat_types = benefit.range.course_seat_types
-        multiple_credit_providers = False
-        credit_provider_price = None
+        condition = voucher.best_offer.condition
+
+        # Pull all catalog related data from the offer.
+        catalog_query = benefit.range.catalog_query if benefit.range else None
+        catalog_id = benefit.range.course_catalog if benefit.range else None
+        enterprise_customer = condition.enterprise_customer_uuid or benefit.range.enterprise_customer
+        enterprise_catalog = condition.enterprise_customer_catalog_uuid or benefit.range.enterprise_customer_catalog
+
+        # There is no catalog related data specified for this condition, so return None.
+        if not catalog_query and not catalog_id and not enterprise_customer:
+            return [], None
+
+        if catalog_id:
+            catalog = fetch_course_catalog(request.site, catalog_id)
+            catalog_query = catalog.get("query") if catalog else catalog_query
+
         response = {}
 
         if enterprise_catalog:
@@ -184,12 +195,20 @@ class VoucherViewSet(NonDestroyableModelViewSet):
                 limit=request.GET.get('limit', DEFAULT_CATALOG_PAGE_SIZE),
                 offset=request.GET.get('offset'),
             )
+        else:
+            # TODO: new call to enterprise-customer/{enterprise_id}/courses to get all courses in an enterprise's catalogs
+            response = {}
+
+        offers = []
+        course_seat_types = benefit.range.course_seat_types if benefit.range else 'verified,professional,credit'
+        multiple_credit_providers = False
+        credit_provider_price = None
 
         next_page = response['next']
         products, stock_records, course_run_metadata = self.retrieve_course_objects(
             response['results'], course_seat_types
         )
-        contains_verified_course = (course_seat_types == 'verified')
+        contains_verified_course = ('verified' in course_seat_types)
         for product in products:
             # Omit unavailable seats from the offer results so that one seat does not cause an
             # error message for every seat in the query result.
@@ -252,20 +271,8 @@ class VoucherViewSet(NonDestroyableModelViewSet):
             dict: Dictionary containing a link to the next page of Course Discovery results and
                   a List of course offers where each offer is represented as a dictionary.
         """
-        benefit = voucher.best_offer.benefit
-        catalog_query = benefit.range.catalog_query
-        catalog_id = benefit.range.course_catalog
-        enterprise_catalog = benefit.range.enterprise_customer_catalog
-        next_page = None
-        offers = []
-
-        if catalog_id:
-            catalog = fetch_course_catalog(request.site, catalog_id)
-            catalog_query = catalog.get("query") if catalog else catalog_query
-
-        if catalog_query or enterprise_catalog:
-            offers, next_page = self.get_offers_from_catalog(request, voucher, catalog_query, enterprise_catalog)
-        else:
+        offers, next_page = self.get_offers_from_catalog(request, voucher)
+        if not offers:
             product_range = voucher.best_offer.benefit.range
             products = product_range.all_products()
             if products:
@@ -279,7 +286,7 @@ class VoucherViewSet(NonDestroyableModelViewSet):
 
             if course_info:
                 offers.append(self.get_course_offer_data(
-                    benefit=benefit,
+                    benefit=voucher.best_offer.benefit,
                     course=course,
                     course_info=course_info,
                     credit_provider_price=None,

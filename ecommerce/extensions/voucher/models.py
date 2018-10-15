@@ -1,10 +1,16 @@
 import datetime
 import logging
+import waffle
 
+from django.core.exceptions import MultipleObjectsReturned
 from django.db import models
+from oscar.core.loading import get_model
 from oscar.apps.voucher.abstract_models import AbstractVoucher  # pylint: disable=ungrouped-imports
 
 from ecommerce.core.utils import log_message_and_raise_validation_error
+from ecommerce.enterprise.constants import ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH
+
+ConditionalOffer = get_model('offer', 'ConditionalOffer')
 
 logger = logging.getLogger(__name__)
 
@@ -63,8 +69,23 @@ class Voucher(AbstractVoucher):
             return False
 
     @property
-    def best_offer(self):
+    def oldest_offer(self):
         return self.offers.order_by('date_created')[0]
+
+    @property
+    def best_offer(self):
+        # If the ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH is inactive, return the oldest available offer
+        if not waffle.switch_is_active(ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH):
+            return self.oldest_offer
+        # If the switch is enabled, return the enterprise offer if it exists.
+        try:
+            return self.offers.get(condition__enterprise_customer_uuid__isnull=False)
+        except ConditionalOffer.DoesNotExist:
+            # If no enterprise offer is found, return the first available offer.
+            return self.oldest_offer
+        except MultipleObjectsReturned:
+            logger.exception('There is more than one enterprise offer associated with voucher %s!', self.id)
+            return self.oldest_offer
 
 
 from oscar.apps.voucher.models import *  # noqa isort:skip pylint: disable=wildcard-import,unused-wildcard-import,wrong-import-position,wrong-import-order,ungrouped-imports
