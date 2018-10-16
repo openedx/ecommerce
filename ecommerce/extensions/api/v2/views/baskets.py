@@ -13,8 +13,9 @@ from django.utils.translation import ugettext as _
 from edx_django_utils.cache import DEFAULT_REQUEST_CACHE, TieredCache
 from edx_rest_framework_extensions.permissions import IsSuperuser
 from oscar.core.loading import get_class, get_model
-from rest_framework import generics, status
-from rest_framework.permissions import IsAuthenticated
+from rest_framework import generics, status, viewsets
+from rest_framework.exceptions import PermissionDenied
+from rest_framework.permissions import DjangoModelPermissions, IsAuthenticated
 from rest_framework.response import Response
 
 from ecommerce.core.utils import get_cache_key
@@ -22,7 +23,9 @@ from ecommerce.enterprise.entitlements import get_entitlement_voucher
 from ecommerce.extensions.analytics.utils import audit_log
 from ecommerce.extensions.api import data as data_api
 from ecommerce.extensions.api import exceptions as api_exceptions
-from ecommerce.extensions.api.serializers import OrderSerializer
+from ecommerce.extensions.api.permissions import IsStaffOrOwner
+from ecommerce.extensions.api.serializers import BasketSerializer, OrderSerializer
+from ecommerce.extensions.api.throttles import ServiceUserThrottle
 from ecommerce.extensions.basket.constants import TEMPORARY_BASKET_CACHE_KEY
 from ecommerce.extensions.basket.utils import attribute_cookie_data
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
@@ -330,6 +333,21 @@ class OrderByBasketRetrieveView(generics.RetrieveAPIView):
             queryset = queryset.filter(user=user)
 
         return queryset
+
+
+class BasketViewSet(viewsets.ReadOnlyModelViewSet):
+    """ View Set for Baskets"""
+    permission_classes = (IsAuthenticated, IsStaffOrOwner, DjangoModelPermissions,)
+    serializer_class = BasketSerializer
+    throttle_classes = (ServiceUserThrottle,)
+
+    def get_queryset(self):
+        user = self.request.user
+        # only accessible for staff
+        if not user.is_staff:
+            raise PermissionDenied
+
+        return Basket.objects.filter(site=self.request.site)
 
 
 class BasketDestroyView(generics.DestroyAPIView):
