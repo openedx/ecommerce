@@ -32,3 +32,14 @@ class EnterpriseAbsoluteDiscountBenefit(BenefitWithoutRangeMixin, AbsoluteBenefi
     @property
     def name(self):
         return _('{value} fixed-price enterprise discount').format(value=self.value)
+
+
+# constants related to enterprise benefits
+BENEFIT_MAP = {
+    Benefit.FIXED: EnterpriseAbsoluteDiscountBenefit,
+    Benefit.PERCENTAGE: EnterprisePercentageDiscountBenefit,
+}
+BENEFIT_TYPE_CHOICES = (
+    (Benefit.PERCENTAGE, _('Percentage')),
+    (Benefit.FIXED, _('Absolute')),
+)
