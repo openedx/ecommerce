@@ -2,15 +2,12 @@ import datetime
 import logging
 import waffle
 
-from django.core.exceptions import MultipleObjectsReturned
+from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
 from django.db import models
-from oscar.core.loading import get_model
 from oscar.apps.voucher.abstract_models import AbstractVoucher  # pylint: disable=ungrouped-imports
 
 from ecommerce.core.utils import log_message_and_raise_validation_error
 from ecommerce.enterprise.constants import ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH
-
-ConditionalOffer = get_model('offer', 'ConditionalOffer')
 
 logger = logging.getLogger(__name__)
 
@@ -80,7 +77,7 @@ class Voucher(AbstractVoucher):
         # If the switch is enabled, return the enterprise offer if it exists.
         try:
             return self.offers.get(condition__enterprise_customer_uuid__isnull=False)
-        except ConditionalOffer.DoesNotExist:
+        except ObjectDoesNotExist:
             # If no enterprise offer is found, return the first available offer.
             return self.oldest_offer
         except MultipleObjectsReturned:

@@ -17,7 +17,7 @@ from oscar.core.loading import get_model
 from requests.exceptions import ConnectionError, Timeout
 from slumber.exceptions import SlumberHttpBaseException
 
-from ecommerce.core.utils import deprecated_traverse_pagination
+from ecommerce.core.utils import deprecated_traverse_pagination, get_cache_key
 from ecommerce.enterprise.exceptions import EnterpriseDoesNotExist
 from ecommerce.extensions.offer.models import OFFER_PRIORITY_ENTERPRISE
 
@@ -51,6 +51,16 @@ def get_enterprise_api_client(site):
     """
     return EdxRestApiClient(
         site.siteconfiguration.enterprise_api_url,
+        jwt=site.siteconfiguration.access_token
+    )
+
+
+def get_enterprise_api_v2_client(site):
+    """
+    Constructs a REST client to communicate with the Open edX Enterprise Service V2 API
+    """
+    return EdxRestApiClient(
+        site.siteconfiguration.build_enterprise_service_url('api/v2/'),
         jwt=site.siteconfiguration.access_token
     )
 
@@ -381,6 +391,17 @@ def has_enterprise_offer(basket):
     return False
 
 
+def get_and_set_cached_response(cache_key, client, query_params, cache_timeout):
+    cached_response = TieredCache.get_cached_response(cache_key)
+    if cached_response.is_found:
+        return cached_response.value
+
+    response = client.get(**query_params)
+    TieredCache.set_all_tiers(cache_key, response, cache_timeout)
+
+    return response
+
+
 def get_enterprise_catalog(site, enterprise_catalog, limit, page):
     """
     Get the EnterpriseCustomerCatalog for a given catalog uuid.
@@ -397,7 +418,7 @@ def get_enterprise_catalog(site, enterprise_catalog, limit, page):
     """
     resource = 'enterprise_catalogs'
     partner_code = site.siteconfiguration.partner.short_code
-    cache_key = '{site_domain}_{partner_code}_{resource}_{catalog}_{limit}_{page}'.format(
+    cache_key = get_cache_key(
         site_domain=site.domain,
         partner_code=partner_code,
         resource=resource,
@@ -405,20 +426,51 @@ def get_enterprise_catalog(site, enterprise_catalog, limit, page):
         limit=limit,
         page=page
     )
-    cache_key = hashlib.md5(cache_key).hexdigest()
 
-    cached_response = TieredCache.get_cached_response(cache_key)
-    if cached_response.is_found:
-        return cached_response.value
-
-    client = get_enterprise_api_client(site)
+    client = site.siteconfiguration.enterprise_api_client
     path = [resource, str(enterprise_catalog)]
     client = reduce(getattr, path, client)
 
-    response = client.get(
-        limit=limit,
-        page=page,
+    return get_and_set_cached_response(
+        cache_key,
+        client,
+        {'limit': limit, 'page': page},
+        settings.CATALOG_RESULTS_CACHE_TIMEOUT
     )
-    TieredCache.set_all_tiers(cache_key, response, settings.CATALOG_RESULTS_CACHE_TIMEOUT)
 
-    return response
+
+def get_all_enterprise_courses(site, enterprise, limit, page):
+    """
+    Get the Courses in the EnterpriseCustomerCatalogs for a given Enterprise uuid.
+
+    Args:
+        site (Site): The site which is handling the current request
+        enterprise (str): The uuid of the Enterprise Catalog
+        limit (int): The number of results to return per page.
+        page (int): The page number to fetch.
+
+    Returns:
+        dict: The result set containing the content objects associated with the Enterprise's Catalogs.
+        NoneType: Return None if no catalog with that uuid is found.
+    """
+    resource = 'enterprise-customer'
+    partner_code = site.siteconfiguration.partner.short_code
+    cache_key = get_cache_key(
+        site_domain=site.domain,
+        partner_code=partner_code,
+        resource=resource + '-courses',
+        enterprise=enterprise,
+        limit=limit,
+        page=page
+    )
+
+    client = get_enterprise_api_v2_client(site)
+    path = [resource, str(enterprise), 'courses']
+    client = reduce(getattr, path, client)
+
+    return get_and_set_cached_response(
+        cache_key,
+        client,
+        {'limit': limit, 'page': page},
+        settings.CATALOG_RESULTS_CACHE_TIMEOUT
+    )

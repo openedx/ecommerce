@@ -2,8 +2,8 @@ from __future__ import unicode_literals
 
 import logging
 import re
-import waffle
 
+import waffle
 from django.conf import settings
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
@@ -14,13 +14,13 @@ from oscar.apps.offer.abstract_models import (
     AbstractConditionalOffer,
     AbstractRange
 )
-from ecommerce.enterprise.constants import ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH
 from oscar.core.loading import get_model
 from requests.exceptions import ConnectionError, Timeout
 from slumber.exceptions import SlumberBaseException
 from threadlocals.threadlocals import get_current_request
 
 from ecommerce.core.utils import get_cache_key, log_message_and_raise_validation_error
+from ecommerce.enterprise.constants import ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH
 
 OFFER_PRIORITY_ENTERPRISE = 10
 OFFER_PRIORITY_VOUCHER = 20
