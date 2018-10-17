@@ -467,6 +467,7 @@ def get_all_enterprise_courses(site, enterprise, limit, page):
     client = get_enterprise_api_v2_client(site)
     path = [resource, str(enterprise), 'courses']
     client = reduce(getattr, path, client)
+    print('client: {}'.format(client))
 
     return get_and_set_cached_response(
         cache_key,
