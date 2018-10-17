@@ -7,7 +7,7 @@ from oscar.core.loading import get_model
 from waffle.models import Switch
 
 from ecommerce.courses.tests.factories import CourseFactory
-from ecommerce.enterprise.constants import ENTERPRISE_OFFERS_SWITCH
+from ecommerce.enterprise.constants import ENTERPRISE_OFFERS_SWITCH, ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH
 from ecommerce.enterprise.tests.mixins import EnterpriseServiceMockMixin
 from ecommerce.extensions.basket.utils import basket_add_enterprise_catalog_attribute
 from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
@@ -129,9 +129,7 @@ class EnterpriseCustomerConditionTests(EnterpriseServiceMockMixin, DiscoveryTest
         )
         self.assertFalse(self.condition.is_satisfied(offer, basket))
 
-    @httpretty.activate
-    def test_is_satisfied_false_for_voucher_offer(self):
-        """ Ensure the condition returns false for a coupon with an enterprise conditional offer. """
+    def setup_enterprise_coupon_data(self):
         offer = factories.EnterpriseOfferFactory(
             partner=self.partner,
             condition=self.condition,
@@ -149,7 +147,21 @@ class EnterpriseCustomerConditionTests(EnterpriseServiceMockMixin, DiscoveryTest
             self.condition.enterprise_customer_uuid,
             enterprise_customer_catalog_uuid=self.condition.enterprise_customer_catalog_uuid,
         )
+        return offer, basket
+
+    @httpretty.activate
+    def test_is_satisfied_false_for_voucher_offer_coupon_switch_off(self):
+        """ Ensure the condition returns false for a coupon with an enterprise conditional offer. """
+        Switch.objects.update_or_create(name=ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, defaults={'active': False})
+        offer, basket = self.setup_enterprise_coupon_data()
         self.assertFalse(self.condition.is_satisfied(offer, basket))
+
+    @httpretty.activate
+    def test_is_satisfied_true_for_voucher_offer_coupon_switch_on(self):
+        """ Ensure the condition returns true for a coupon with an enterprise conditional offer. """
+        Switch.objects.update_or_create(name=ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, defaults={'active': True})
+        offer, basket = self.setup_enterprise_coupon_data()
+        self.assertTrue(self.condition.is_satisfied(offer, basket))
 
     def test_is_satisfied_empty_basket(self):
         """ Ensure the condition returns False if the basket is empty. """

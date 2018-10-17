@@ -106,7 +106,7 @@ def prepare_voucher(code='COUPONTEST', _range=None, start_datetime=None, end_dat
         usage=usage
     )
     benefit = BenefitFactory(type=benefit_type, range=_range, value=benefit_value)
-    condition = ConditionFactory(value=1, range=_range)
+    condition = ConditionFactory(value=1, range=_range, enterprise_customer_uuid=enterprise_customer)
     if max_usage:
         offer = ConditionalOfferFactory(
             offer_type=ConditionalOffer.VOUCHER,

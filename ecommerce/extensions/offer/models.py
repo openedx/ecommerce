@@ -257,11 +257,13 @@ class ConditionalOffer(AbstractConditionalOffer):
         a check for if basket owners email domain is within the allowed email domains.
         """
         if basket.owner and not self.is_email_valid(basket.owner.email):
+            print('invalid email')
             return False
 
         if (self.benefit.range and self.benefit.range.enterprise_customer and
                 waffle.switch_is_active(ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH)):
             # If we are using enterprise conditional offers for enterprise coupons, the old style offer is not used.
+            print('returning false because switch is active for old style enterprise offer')
             return False
 
         if self.benefit.range and self.benefit.range.catalog_query:
@@ -269,6 +271,7 @@ class ConditionalOffer(AbstractConditionalOffer):
             num_lines = basket.all_lines().count()
             voucher = self.get_voucher()
             if voucher and num_lines > 1 and voucher.usage != Voucher.MULTI_USE:
+                print('using multi use voucher on multiple lines')
                 return False
             return len(self.benefit.get_applicable_lines(self, basket)) == num_lines
 

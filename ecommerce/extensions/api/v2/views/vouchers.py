@@ -154,7 +154,10 @@ class VoucherViewSet(NonDestroyableModelViewSet):
     def convert_catalog_response_to_offers(self, request, voucher, response):
         offers = []
         benefit = voucher.best_offer.benefit
-        course_seat_types = benefit.range.course_seat_types if benefit.range else 'verified,professional,credit'
+        # default course_seat_types value to all paid seat types.
+        course_seat_types = 'verified,professional,credit'
+        if benefit.range and benefit.range.course_seat_types:
+            course_seat_types = benefit.range.course_seat_types
         multiple_credit_providers = False
         credit_provider_price = None
 
