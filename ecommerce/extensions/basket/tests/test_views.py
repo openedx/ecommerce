@@ -31,6 +31,7 @@ from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.enterprise.tests.mixins import EnterpriseServiceMockMixin
 from ecommerce.entitlements.utils import create_or_update_course_entitlement
 from ecommerce.extensions.analytics.utils import translate_basket_line_for_segment
+from ecommerce.extensions.basket.constants import EMAIL_OPT_IN_ATTRIBUTE
 from ecommerce.extensions.basket.tests.mixins import BasketMixin
 from ecommerce.extensions.basket.utils import _set_basket_bundle_status
 from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
@@ -264,6 +265,45 @@ class BasketAddItemsViewTests(
         self.assertEqual(response.status_code, 303)
         basket = response.wsgi_request.basket
         self.assertEqual(basket.status, Basket.OPEN)
+
+    @ddt.data(
+        ('false', 'False'),
+        ('true', 'True'),
+    )
+    @ddt.unpack
+    def test_email_opt_in_when_explicitly_given(self, opt_in, expected_value):
+        """
+        Verify the email_opt_in query string is saved into a BasketAttribute.
+        """
+        url = '{path}?sku={sku}&email_opt_in={opt_in}'.format(
+            path=self.path,
+            sku=self.stock_record.partner_sku,
+            opt_in=opt_in,
+        )
+        response = self.client.get(url)
+        basket = response.wsgi_request.basket
+        basket_attribute = BasketAttribute.objects.get(
+            basket=basket,
+            attribute_type=BasketAttributeType.objects.get(name=EMAIL_OPT_IN_ATTRIBUTE),
+        )
+        self.assertEqual(basket_attribute.value_text, expected_value)
+
+    def test_email_opt_in_when_not_given(self):
+        """
+        Verify that email_opt_in defaults to false if not specified.
+        """
+
+        url = '{path}?sku={sku}'.format(
+            path=self.path,
+            sku=self.stock_record.partner_sku,
+        )
+        response = self.client.get(url)
+        basket = response.wsgi_request.basket
+        basket_attribute = BasketAttribute.objects.get(
+            basket=basket,
+            attribute_type=BasketAttributeType.objects.get(name=EMAIL_OPT_IN_ATTRIBUTE),
+        )
+        self.assertEqual(basket_attribute.value_text, 'False')
 
 
 @httpretty.activate

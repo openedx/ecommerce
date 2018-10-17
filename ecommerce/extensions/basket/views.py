@@ -29,6 +29,7 @@ from ecommerce.extensions.analytics.utils import (
     track_segment_event,
     translate_basket_line_for_segment
 )
+from ecommerce.extensions.basket.constants import EMAIL_OPT_IN_ATTRIBUTE
 from ecommerce.extensions.basket.utils import (
     add_utm_params_to_url,
     apply_voucher_on_basket_and_check_discount,
@@ -42,6 +43,8 @@ from ecommerce.extensions.partner.shortcuts import get_partner_for_site
 from ecommerce.extensions.payment.constants import CLIENT_SIDE_CHECKOUT_FLAG_NAME
 from ecommerce.extensions.payment.forms import PaymentForm
 
+BasketAttribute = get_model('basket', 'BasketAttribute')
+BasketAttributeType = get_model('basket', 'BasketAttributeType')
 Benefit = get_model('offer', 'Benefit')
 logger = logging.getLogger(__name__)
 Product = get_model('catalogue', 'Product')
@@ -97,6 +100,14 @@ class BasketAddItemsView(View):
         if not available_products:
             msg = _('No product is available to buy.')
             return HttpResponseBadRequest(msg)
+
+        # Associate the user's email opt in preferences with the basket in
+        # order to opt them in later as part of fulfillment
+        BasketAttribute.objects.get_or_create(
+            basket=request.basket,
+            attribute_type=BasketAttributeType.objects.get(name=EMAIL_OPT_IN_ATTRIBUTE),
+            value_text=request.GET.get('email_opt_in') == 'true',
+        )
 
         try:
             prepare_basket(request, available_products, voucher)
