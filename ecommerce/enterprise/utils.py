@@ -55,16 +55,6 @@ def get_enterprise_api_client(site):
     )
 
 
-def get_enterprise_api_v2_client(site):
-    """
-    Constructs a REST client to communicate with the Open edX Enterprise Service V2 API
-    """
-    return EdxRestApiClient(
-        site.siteconfiguration.build_enterprise_service_url('api/v2/'),
-        jwt=site.siteconfiguration.access_token
-    )
-
-
 def get_enterprise_customer(site, uuid):
     """
     Return a single enterprise customer
@@ -430,44 +420,6 @@ def get_enterprise_catalog(site, enterprise_catalog, limit, page):
     client = site.siteconfiguration.enterprise_api_client
     path = [resource, str(enterprise_catalog)]
     client = reduce(getattr, path, client)
-
-    return get_and_set_cached_response(
-        cache_key,
-        client,
-        {'limit': limit, 'page': page},
-        settings.CATALOG_RESULTS_CACHE_TIMEOUT
-    )
-
-
-def get_all_enterprise_courses(site, enterprise, limit, page):
-    """
-    Get the Courses in the EnterpriseCustomerCatalogs for a given Enterprise uuid.
-
-    Args:
-        site (Site): The site which is handling the current request
-        enterprise (str): The uuid of the Enterprise Catalog
-        limit (int): The number of results to return per page.
-        page (int): The page number to fetch.
-
-    Returns:
-        dict: The result set containing the content objects associated with the Enterprise's Catalogs.
-        NoneType: Return None if no catalog with that uuid is found.
-    """
-    resource = 'enterprise-customer'
-    partner_code = site.siteconfiguration.partner.short_code
-    cache_key = get_cache_key(
-        site_domain=site.domain,
-        partner_code=partner_code,
-        resource=resource + '-courses',
-        enterprise=enterprise,
-        limit=limit,
-        page=page
-    )
-
-    client = get_enterprise_api_v2_client(site)
-    path = [resource, str(enterprise), 'courses']
-    client = reduce(getattr, path, client)
-    print('client: {}'.format(client))
 
     return get_and_set_cached_response(
         cache_key,

@@ -496,41 +496,6 @@ class VoucherViewOffersEndpointTests(DiscoveryMockMixin, CouponMixin, DiscoveryT
             'voucher_end_date': voucher.end_datetime,
         })
 
-    def test_get_offers_for_enterprise_only_voucher(self):
-        """ Verify that the course offers data is returned for an enterprise catalog voucher. """
-        self.mock_access_token_response()
-        course, seat = self.create_course_and_seat()
-        enterprise_customer = str(uuid4())
-        self.mock_enterprise_all_courses_endpoint(
-            self.site_configuration.build_enterprise_service_url('api/v2/'),
-            enterprise_customer,
-            course_run=course
-        )
-
-        voucher, __ = prepare_voucher(benefit_value=10, enterprise_customer=enterprise_customer)
-        benefit = voucher.offers.first().benefit
-        request = self.prepare_offers_listing_request(voucher.code)
-        offers = VoucherViewSet().get_offers(request=request, voucher=voucher)['results']
-        first_offer = offers[0]
-        self.assertEqual(len(offers), 1)
-        self.assertDictEqual(first_offer, {
-            'benefit': {
-                'type': benefit.type,
-                'value': benefit.value
-            },
-            'contains_verified': True,
-            'course_start_date': '2016-05-01T00:00:00Z',
-            'id': course.id,
-            'image_url': 'path/to/the/course/image',
-            'multiple_credit_providers': False,
-            'organization': CourseKey.from_string(course.id).org,
-            'credit_provider_price': None,
-            'seat_type': course.type,
-            'stockrecords': serializers.StockRecordSerializer(seat.stockrecords.first()).data,
-            'title': course.name,
-            'voucher_end_date': voucher.end_datetime,
-        })
-
     def test_get_offers_for_course_catalog_voucher(self):
         """ Verify that the course offers data is returned for a course catalog voucher. """
         catalog_id = 1
