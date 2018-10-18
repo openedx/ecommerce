@@ -234,8 +234,6 @@ class VoucherViewSet(NonDestroyableModelViewSet):
         # Pull all catalog related data from the offer.
         catalog_query = benefit.range.catalog_query if benefit.range else None
         catalog_id = benefit.range.course_catalog if benefit.range else None
-        enterprise_customer = (condition.enterprise_customer_uuid or
-                               (benefit.range and benefit.range.enterprise_customer))
         enterprise_catalog = (condition.enterprise_customer_catalog_uuid or
                               (benefit.range and benefit.range.enterprise_customer_catalog))
 
@@ -244,7 +242,7 @@ class VoucherViewSet(NonDestroyableModelViewSet):
             catalog_query = catalog.get("query") if catalog else catalog_query
 
         # There is no catalog related data specified for this condition, so return None.
-        if not catalog_query and not catalog_id and not enterprise_customer:
+        if not catalog_query and not enterprise_catalog:
             return None, None
 
         if enterprise_catalog:
