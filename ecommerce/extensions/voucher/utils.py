@@ -817,7 +817,8 @@ def get_voucher_and_products_from_code(code):
     voucher = get_cached_voucher(code)
     voucher_range = voucher.best_offer.benefit.range
     has_catalog_configuration = voucher_range and (voucher_range.catalog_query or voucher_range.course_catalog)
-    is_enterprise = voucher_range.enterprise_customer or voucher.best_offer.condition.enterprise_customer_uuid
+    is_enterprise = ((voucher_range and voucher_range.enterprise_customer) or
+                     voucher.best_offer.condition.enterprise_customer_uuid)
     products = voucher_range.all_products() if voucher_range else []
 
     if products or has_catalog_configuration or is_enterprise:
