@@ -411,7 +411,7 @@ class BasketSummaryView(BasketView):
         try:
             applied_voucher = self.request.basket.vouchers.first()
             total_benefit = (
-                format_benefit_value(applied_voucher.offers.first().benefit)
+                format_benefit_value(applied_voucher.best_offer.benefit)
                 if applied_voucher else None
             )
         except ValueError:
@@ -475,7 +475,7 @@ class VoucherAddView(BaseVoucherAddView):  # pylint: disable=function-redefined
                 # specifically with the code that was submitted.
                 stock_record = basket_lines[0].stockrecord
 
-                offer = voucher.offers.first()
+                offer = voucher.best_offer
                 product = stock_record.product
                 email_confirmation_response = render_email_confirmation_if_required(self.request, offer, product)
                 if email_confirmation_response:

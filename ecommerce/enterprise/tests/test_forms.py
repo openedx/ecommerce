@@ -4,7 +4,7 @@ import uuid
 import httpretty
 from oscar.core.loading import get_model
 
-from ecommerce.enterprise.constants import BENEFIT_MAP
+from ecommerce.enterprise.benefits import BENEFIT_MAP
 from ecommerce.enterprise.forms import EnterpriseOfferForm
 from ecommerce.enterprise.tests.mixins import EnterpriseServiceMockMixin
 from ecommerce.extensions.offer.models import OFFER_PRIORITY_ENTERPRISE
