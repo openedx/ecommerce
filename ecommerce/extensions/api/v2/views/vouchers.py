@@ -234,8 +234,10 @@ class VoucherViewSet(NonDestroyableModelViewSet):
         # Pull all catalog related data from the offer.
         catalog_query = benefit.range.catalog_query if benefit.range else None
         catalog_id = benefit.range.course_catalog if benefit.range else None
-        enterprise_customer = condition.enterprise_customer_uuid or benefit.range.enterprise_customer
-        enterprise_catalog = condition.enterprise_customer_catalog_uuid or benefit.range.enterprise_customer_catalog
+        enterprise_customer = (condition.enterprise_customer_uuid or
+                               (benefit.range and benefit.range.enterprise_customer))
+        enterprise_catalog = (condition.enterprise_customer_catalog_uuid or
+                              (benefit.range and benefit.range.enterprise_customer_catalog))
 
         if catalog_id:
             catalog = fetch_course_catalog(request.site, catalog_id)
