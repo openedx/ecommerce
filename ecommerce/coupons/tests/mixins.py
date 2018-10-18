@@ -208,50 +208,6 @@ class DiscoveryMockMixin(object):
             content_type='application/json'
         )
 
-    def mock_enterprise_all_courses_endpoint(
-            self, enterprise_api_url, enterprise_customer, course_run=None, course_info=None
-    ):
-        """
-        Helper function to register a enterprise API endpoint for getting course information.
-        """
-        if not course_info:
-            course_info = {
-                'count': 1,
-                'next': None,
-                'previous': None,
-                'results': [{
-                    'key': course_run.id,
-                    'title': course_run.name,
-                    'card_image_url': 'path/to/the/course/image',
-                    'content_type': 'course',
-                    'course_runs': [{
-                        'key': course_run.id,
-                        'start': '2016-05-01T00:00:00Z',
-                        'enrollment_start': '2016-05-01T00:00:00Z',
-                        'enrollment_end': None,
-                    }, {
-                        'key': 'test',
-                        'title': 'Test course',
-                    }],
-                }] if course_run else [{
-                    'key': 'test',
-                    'title': 'Test course',
-                    'course_runs': [],
-                }],
-            }
-        course_info_json = json.dumps(course_info)
-        enterprise_catalog_url = '{}enterprise-customer/{}/courses/'.format(
-            enterprise_api_url,
-            enterprise_customer
-        )
-        print('enterprise url: {}'.format(enterprise_catalog_url))
-        httpretty.register_uri(
-            httpretty.GET,
-            enterprise_catalog_url,
-            body=course_info_json,
-            content_type='application/json'
-        )
-
     def mock_course_runs_contains_endpoint(self, course_run_ids, query, discovery_api_url):
         """ Helper function to register a dynamic discovery API endpoint for the contains information. """
         course_contains_info = {

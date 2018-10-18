@@ -20,7 +20,7 @@ from ecommerce.core.constants import DEFAULT_CATALOG_PAGE_SIZE
 from ecommerce.coupons.utils import fetch_course_catalog, get_catalog_course_runs
 from ecommerce.courses.models import Course
 from ecommerce.courses.utils import get_course_info_from_catalog
-from ecommerce.enterprise.utils import get_all_enterprise_courses, get_enterprise_catalog
+from ecommerce.enterprise.utils import get_enterprise_catalog
 from ecommerce.extensions.api import serializers
 from ecommerce.extensions.api.permissions import IsOffersOrIsAuthenticatedAndStaff
 from ecommerce.extensions.api.v2.views import NonDestroyableModelViewSet
@@ -260,12 +260,11 @@ class VoucherViewSet(NonDestroyableModelViewSet):
                 offset=request.GET.get('offset'),
             )
         else:
-            response = get_all_enterprise_courses(
-                site=request.site,
-                enterprise=enterprise_customer,
-                limit=request.GET.get('limit', DEFAULT_CATALOG_PAGE_SIZE),
-                page=request.GET.get('page'),
+            logger.warning(
+                'User is trying to redeem Voucher %s, but no catalog information is configured!',
+                voucher.code
             )
+            return [], None
 
         next_page = response['next']
         offers = self.convert_catalog_response_to_offers(request, voucher, response)
