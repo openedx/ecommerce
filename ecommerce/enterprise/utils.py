@@ -17,7 +17,7 @@ from oscar.core.loading import get_model
 from requests.exceptions import ConnectionError, Timeout
 from slumber.exceptions import SlumberHttpBaseException
 
-from ecommerce.core.utils import deprecated_traverse_pagination, get_cache_key
+from ecommerce.core.utils import deprecated_traverse_pagination
 from ecommerce.enterprise.exceptions import EnterpriseDoesNotExist
 from ecommerce.extensions.offer.models import OFFER_PRIORITY_ENTERPRISE
 
@@ -381,17 +381,6 @@ def has_enterprise_offer(basket):
     return False
 
 
-def get_and_set_cached_response(cache_key, client, query_params, cache_timeout):
-    cached_response = TieredCache.get_cached_response(cache_key)
-    if cached_response.is_found:
-        return cached_response.value
-
-    response = client.get(**query_params)
-    TieredCache.set_all_tiers(cache_key, response, cache_timeout)
-
-    return response
-
-
 def get_enterprise_catalog(site, enterprise_catalog, limit, page):
     """
     Get the EnterpriseCustomerCatalog for a given catalog uuid.
@@ -408,7 +397,7 @@ def get_enterprise_catalog(site, enterprise_catalog, limit, page):
     """
     resource = 'enterprise_catalogs'
     partner_code = site.siteconfiguration.partner.short_code
-    cache_key = get_cache_key(
+    cache_key = '{site_domain}_{partner_code}_{resource}_{catalog}_{limit}_{page}'.format(
         site_domain=site.domain,
         partner_code=partner_code,
         resource=resource,
@@ -416,14 +405,20 @@ def get_enterprise_catalog(site, enterprise_catalog, limit, page):
         limit=limit,
         page=page
     )
+    cache_key = hashlib.md5(cache_key).hexdigest()
 
-    client = site.siteconfiguration.enterprise_api_client
+    cached_response = TieredCache.get_cached_response(cache_key)
+    if cached_response.is_found:
+        return cached_response.value
+
+    client = get_enterprise_api_client(site)
     path = [resource, str(enterprise_catalog)]
     client = reduce(getattr, path, client)
 
-    return get_and_set_cached_response(
-        cache_key,
-        client,
-        {'limit': limit, 'page': page},
-        settings.CATALOG_RESULTS_CACHE_TIMEOUT
+    response = client.get(
+        limit=limit,
+        page=page,
     )
+    TieredCache.set_all_tiers(cache_key, response, settings.CATALOG_RESULTS_CACHE_TIMEOUT)
+
+    return response
