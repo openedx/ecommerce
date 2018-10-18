@@ -59,6 +59,7 @@ class EnterpriseCustomerCondition(ConditionWithoutRangeMixin, SingleItemConsumpt
             logger.info('Skipping Voucher type enterprise conditional offer until we are ready to support it.')
             return False
 
+        learner_data = {}
         try:
             learner_data = fetch_enterprise_learner_data(basket.site, basket.owner)['results'][0]
         except (ConnectionError, KeyError, SlumberHttpBaseException, Timeout):
@@ -69,11 +70,14 @@ class EnterpriseCustomerCondition(ConditionWithoutRangeMixin, SingleItemConsumpt
             )
             return False
         except IndexError:
-            return False
+            if offer.offer_type == ConditionalOffer.SITE:
+                logger.info('No learner data returned for user %s', basket.owner)
+                return False
 
-        enterprise_customer = learner_data['enterprise_customer']
-        if str(self.enterprise_customer_uuid) != enterprise_customer['uuid']:
+        if (learner_data and 'enterprise_customer' in learner_data and
+                    str(self.enterprise_customer_uuid) != learner_data['enterprise_customer']['uuid']):
             # Learner is not linked to the EnterpriseCustomer associated with this condition.
+            logger.info('Learner\'s enterprise does not match this conditions\'s enterprise.')
             return False
 
         course_run_ids = []
@@ -81,6 +85,7 @@ class EnterpriseCustomerCondition(ConditionWithoutRangeMixin, SingleItemConsumpt
             course = line.product.course
             if not course:
                 # Basket contains products not related to a course_run.
+                logger.info('Basket contains products not related to a course_run.')
                 return False
 
             course_run_ids.append(course.id)
@@ -91,12 +96,14 @@ class EnterpriseCustomerCondition(ConditionWithoutRangeMixin, SingleItemConsumpt
         catalog = self._get_enterprise_catalog_uuid_from_basket(basket)
         if catalog:
             if offer.condition.enterprise_customer_catalog_uuid != catalog:
+                logger.info('Enterprise catalog id on the basket does not match the catalog for this condition.')
                 return False
 
         if not catalog_contains_course_runs(basket.site, course_run_ids, self.enterprise_customer_uuid,
                                             enterprise_customer_catalog_uuid=self.enterprise_customer_catalog_uuid):
             # Basket contains course runs that do not exist in the EnterpriseCustomerCatalogs
             # associated with the EnterpriseCustomer.
+            logger.info('Enterprise catalog does not contain the course(s) in this basket.')
             return False
 
         return True
