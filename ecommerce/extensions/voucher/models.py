@@ -66,23 +66,23 @@ class Voucher(AbstractVoucher):
             return False
 
     @property
-    def oldest_offer(self):
-        return self.offers.order_by('date_created')[0]
+    def offer_with_range(self):
+        return self.offers.filter(condition__range__isnull=False)[0]
 
     @property
     def best_offer(self):
-        # If the ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH is inactive, return the oldest available offer
+        # If the ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH is inactive, return offer containing a range
         if not waffle.switch_is_active(ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH):
-            return self.oldest_offer
+            return self.offer_with_range
         # If the switch is enabled, return the enterprise offer if it exists.
         try:
             return self.offers.get(condition__enterprise_customer_uuid__isnull=False)
         except ObjectDoesNotExist:
             # If no enterprise offer is found, return the first available offer.
-            return self.oldest_offer
+            return self.offer_with_range
         except MultipleObjectsReturned:
             logger.exception('There is more than one enterprise offer associated with voucher %s!', self.id)
-            return self.oldest_offer
+            return self.offer_with_range
 
 
 from oscar.apps.voucher.models import *  # noqa isort:skip pylint: disable=wildcard-import,unused-wildcard-import,wrong-import-position,wrong-import-order,ungrouped-imports
