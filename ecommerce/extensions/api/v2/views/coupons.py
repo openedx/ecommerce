@@ -441,7 +441,7 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
 
         # Only process the original conditional offer, and update/create the enterprise offer if needed.
         voucher_offer = vouchers.first().best_offer
-        oldest_offer = vouchers.first().oldest_offer
+        oldest_offer = vouchers.first().offer_with_range
         if program_uuid:
             Condition.objects.filter(
                 program_uuid=voucher_offer.condition.program_uuid
