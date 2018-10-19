@@ -60,12 +60,12 @@ def is_enrollment_code(obj):
 
 def retrieve_benefit(obj):
     """Helper method to retrieve the benefit from voucher. """
-    return retrieve_voucher(obj).benefit
+    return retrieve_offer(obj).benefit
 
 
 def retrieve_condition(obj):
     """Helper method to retrieve the benefit from voucher. """
-    return retrieve_voucher(obj).condition
+    return retrieve_offer(obj).condition
 
 
 def retrieve_end_date(obj):
