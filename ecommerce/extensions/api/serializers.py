@@ -63,6 +63,11 @@ def retrieve_benefit(obj):
     return retrieve_voucher(obj).benefit
 
 
+def retrieve_condition(obj):
+    """Helper method to retrieve the benefit from voucher. """
+    return retrieve_voucher(obj).condition
+
+
 def retrieve_end_date(obj):
     """Helper method to retrieve the voucher end datetime. """
     return retrieve_voucher(obj).end_datetime
@@ -686,12 +691,24 @@ class CouponSerializer(ProductPaymentInfoMixin, serializers.ModelSerializer):
     def get_enterprise_customer(self, obj):
         """ Get the Enterprise Customer UUID attached to a coupon. """
         offer_range = retrieve_range(obj)
-        return offer_range.enterprise_customer if offer_range else None
+        offer_condition = retrieve_condition(obj)
+        if offer_range and offer_range.enterprise_customer:
+            return offer_range.enterprise_customer
+        elif offer_condition.enterprise_customer_uuid:
+            return offer_condition.enterprise_customer_uuid
+        else:
+            return None
 
     def get_enterprise_customer_catalog(self, obj):
         """ Get the Enterprise Customer Catalog UUID attached to a coupon. """
         offer_range = retrieve_range(obj)
-        return offer_range.enterprise_customer_catalog if offer_range else None
+        offer_condition = retrieve_condition(obj)
+        if offer_range and offer_range.enterprise_customer_catalog:
+            return offer_range.enterprise_customer_catalog
+        elif offer_condition.enterprise_customer_catalog_uuid:
+            return offer_condition.enterprise_customer_catalog_uuid
+        else:
+            return None
 
     def get_last_edited(self, obj):
         return None, obj.date_updated
