@@ -299,7 +299,7 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
         if not range_data:
             return None
 
-        voucher_range = vouchers.first().best_offer.benefit.range
+        voucher_range = vouchers.first().offer_with_range.benefit.range
         if not voucher_range:
             return None
 
@@ -452,12 +452,12 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
 
         new_offers.append(update_voucher_offer(
             offer=oldest_offer,
-            benefit_value=benefit_value or voucher_offer.benefit.value,
-            benefit_type=voucher_offer.benefit.type or getattr(
-                voucher_offer.benefit.proxy(), 'benefit_class_type', None
+            benefit_value=benefit_value or oldest_offer.benefit.value,
+            benefit_type=oldest_offer.benefit.type or getattr(
+                oldest_offer.benefit.proxy(), 'benefit_class_type', None
             ),
             coupon=coupon,
-            max_uses=voucher_offer.max_global_applications,
+            max_uses=oldest_offer.max_global_applications,
             program_uuid=program_uuid,
         ))
 
