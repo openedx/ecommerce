@@ -15,8 +15,8 @@ msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2018-04-05 11:00+0000\n"
-"PO-Revision-Date: 2018-09-09 16:09+0000\n"
-"Last-Translator: Iaroslav V <yivasilev@fa.ru>\n"
+"PO-Revision-Date: 2018-10-17 17:41+0000\n"
+"Last-Translator: Michael Savin <m.savin.ru@gmail.com>\n"
 "Language-Team: Russian (http://www.transifex.com/open-edx/edx-platform/language/ru/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -26,7 +26,7 @@ msgstr ""
 
 #: ecommerce/static/js/models/coupon_model.js:33
 msgid "This field is required."
-msgstr ""
+msgstr "Это обязательное поле."
 
 #: ecommerce/static/js/models/coupon_model.js:34
 msgid "This value must be a number."
@@ -243,7 +243,7 @@ msgstr "Курсы"
 
 #: ecommerce/static/js/pages/offer_page.js:14
 msgid "Redeem"
-msgstr ""
+msgstr "Использовать"
 
 #: ecommerce/static/js/pages/receipt_page.js:21
 msgid ""
@@ -384,13 +384,13 @@ msgstr "Профессиональное образование"
 msgid ""
 "Paid certificate track with initial verification and Professional Education "
 "Certificate"
-msgstr ""
+msgstr "Платный курс с предварительным удостоверением личности и Сертификатом повышения квалификации"
 
 #: ecommerce/static/js/views/course_form_view.js:72
 msgid ""
 "Paid certificate track with initial verification and Verified Certificate, "
 "and option to purchase credit"
-msgstr ""
+msgstr "Платный курс с предварительным удостоверением личности, Подтверждённым сертификатом и возможностью получения зачётных единиц."
 
 #. Translators: _START_, _END_, and _TOTAL_ are placeholders. Do NOT translate
 #. them.
