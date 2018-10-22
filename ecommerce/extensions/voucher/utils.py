@@ -708,7 +708,7 @@ def get_voucher_discount_info(benefit, price):
 
 
 def update_voucher_with_enterprise_offer(offer, benefit_value, benefit_type, coupon, enterprise_customer,
-                                         max_uses=None, email_domains=None, enterprise_catalog=None):
+                                         max_uses=None, email_domains=None, enterprise_catalog=None, site=None):
     """
     Update voucher with enteprise offer.
 
@@ -724,6 +724,7 @@ def update_voucher_with_enterprise_offer(offer, benefit_value, benefit_type, cou
         email_domains (str): a comma-separated string of email domains allowed to apply
                             this offer.
         enterprise_catalog (str): Enterprise Catalog UUID
+        site (Site): Site for this offer
 
     Returns:
         Offer
@@ -736,12 +737,12 @@ def update_voucher_with_enterprise_offer(offer, benefit_value, benefit_type, cou
         coupon_id=coupon.id,
         max_uses=max_uses,
         email_domains=email_domains,
-        site=offer.site,
+        site=offer.site or site,
     )
 
 
 def update_voucher_offer(offer, benefit_value, benefit_type, coupon, max_uses=None, email_domains=None,
-                         program_uuid=None):
+                         program_uuid=None, site=None):
     """
     Update voucher offer with new benefit value.
 
@@ -756,6 +757,7 @@ def update_voucher_offer(offer, benefit_value, benefit_type, coupon, max_uses=No
         email_domains (str): a comma-separated string of email domains allowed to apply
                             this offer.
         program_uuid (str): Program UUID
+        site (Site): Site for this offer
 
     Returns:
         Offer
@@ -769,7 +771,7 @@ def update_voucher_offer(offer, benefit_value, benefit_type, coupon, max_uses=No
         max_uses=max_uses,
         email_domains=email_domains,
         program_uuid=program_uuid,
-        site=offer.site,
+        site=offer.site or site,
     )
 
 

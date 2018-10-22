@@ -362,6 +362,7 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
                 self.update_coupon_offer(
                     benefit_value=benefit_value,
                     vouchers=vouchers,
+                    site=self.request.site,
                     coupon=coupon,
                     program_uuid=program_uuid,
                     enterprise_customer=enterprise_customer,
@@ -425,13 +426,14 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
                     update_dict[field.replace('invoice_', '')] = value
         return update_dict
 
-    def update_coupon_offer(self, coupon, vouchers, benefit_value=None, program_uuid=None,
+    def update_coupon_offer(self, coupon, vouchers, site, benefit_value=None, program_uuid=None,
                             enterprise_customer=None, enterprise_catalog=None):
         """
         Remove all offers from the vouchers and add a new offer
         Arguments:
             coupon (Product): Coupon product associated with vouchers
             vouchers (ManyRelatedManager): Vouchers associated with the coupon to be updated
+            site (Site): The Site associated with this offer
             benefit_value (Decimal): Benefit value associated with a new offer
             program_uuid (str): Program UUID
             enterprise_customer (str): Enterprise Customer UUID
@@ -459,6 +461,7 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
             coupon=coupon,
             max_uses=oldest_offer.max_global_applications,
             program_uuid=program_uuid,
+            site=site,
         ))
 
         if enterprise_customer:
@@ -472,6 +475,7 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
                 max_uses=voucher_offer.max_global_applications,
                 enterprise_customer=enterprise_customer,
                 enterprise_catalog=enterprise_catalog,
+                site=site,
             ))
 
         for voucher in vouchers.all():

@@ -791,7 +791,8 @@ class CouponViewSetFunctionalTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             CouponViewSet().update_coupon_offer(
                 benefit_value=benefit_value,
                 vouchers=vouchers,
-                coupon=self.coupon
+                coupon=self.coupon,
+                site=self.site,
             )
         for voucher in vouchers:
             self.assertEqual(voucher.offers.first().benefit.value, benefit_value)
