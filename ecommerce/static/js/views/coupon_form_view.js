@@ -790,10 +790,10 @@ define([
                     this.$('.catalog-query').removeClass('editing');
                 }
 
-                if (this.$('[name=invoice_discount_type]').val() === 'Percentage') {
+                if (this.$('[name=invoice_discount_type]:checked').val() === 'Percentage') {
                     this.setLimitToElement(this.$('[name=invoice_discount_value]'), 100, 1);
                 }
-                if (this.$('[name=benefit_type]').val() === 'Percentage') {
+                if (this.$('[name=benefit_type]:checked').val() === 'Percentage') {
                     this.setLimitToElement(this.$('[name=benefit_value]'), 100, 1);
                 }
 
