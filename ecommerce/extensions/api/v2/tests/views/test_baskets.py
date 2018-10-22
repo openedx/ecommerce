@@ -22,6 +22,7 @@ from ecommerce.courses.models import Course
 from ecommerce.extensions.api import exceptions as api_exceptions
 from ecommerce.extensions.api.v2.tests.views import JSON_CONTENT_TYPE, OrderDetailViewTestMixin
 from ecommerce.extensions.api.v2.views.baskets import BasketCalculateView, BasketCreateView
+from ecommerce.extensions.basket.constants import EMAIL_OPT_IN_ATTRIBUTE
 from ecommerce.extensions.payment import exceptions as payment_exceptions
 from ecommerce.extensions.payment.processors.cybersource import Cybersource
 from ecommerce.extensions.test.factories import (
@@ -36,6 +37,7 @@ from ecommerce.tests.mixins import BasketCreationMixin, ThrottlingMixin
 from ecommerce.tests.testcases import TestCase, TransactionTestCase
 
 Basket = get_model('basket', 'Basket')
+BasketAttributeType = get_model('basket', 'BasketAttributeType')
 Benefit = get_model('offer', 'Benefit')
 ConditionalOffer = get_model('offer', 'ConditionalOffer')
 Condition = get_model('offer', 'Condition')
@@ -90,6 +92,9 @@ class BasketCreateViewTests(BasketCreationMixin, ThrottlingMixin, TransactionTes
             stockrecords__price_excl_tax=Decimal('240000.00'),
             stockrecords__partner__short_code='dummy',
         )
+        # Ensure that the basket attribute type exists for these tests
+        basket_attribute_type, _ = BasketAttributeType.objects.get_or_create(name=EMAIL_OPT_IN_ATTRIBUTE)
+        basket_attribute_type.save()
 
     @ddt.data(
         ([FREE_SKU], False, None, False),

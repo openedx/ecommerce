@@ -22,7 +22,8 @@ class EventHandler(processing.EventHandler):
     def handle_shipping_event(self, order, event_type, lines, line_quantities, **kwargs):
         self.validate_shipping_event(order, event_type, lines, line_quantities, **kwargs)
 
-        order = fulfillment_api.fulfill_order(order, lines)
+        email_opt_in = kwargs.get('email_opt_in', False)
+        order = fulfillment_api.fulfill_order(order, lines, email_opt_in=email_opt_in)
 
         self.create_shipping_event(order, event_type, lines, line_quantities, **kwargs)
 

@@ -6,7 +6,7 @@ import mock
 from django.contrib.auth.models import Permission
 from django.test import RequestFactory, override_settings
 from django.urls import reverse
-from oscar.core.loading import get_model
+from oscar.core.loading import get_class, get_model
 
 from ecommerce.extensions.api.serializers import OrderSerializer
 from ecommerce.extensions.api.tests.test_authentication import AccessTokenMixin
@@ -20,6 +20,7 @@ from ecommerce.tests.testcases import TestCase
 
 Order = get_model('order', 'Order')
 ShippingEventType = get_model('order', 'ShippingEventType')
+post_checkout = get_class('checkout.signals', 'post_checkout')
 
 
 @ddt.ddt
@@ -262,6 +263,37 @@ class OrderFulfillViewTests(TestCase):
 
         response = self._put_to_view()
         self.assertEqual(500, response.status_code)
+
+    def test_email_opt_in_default(self):
+        """
+        Verify that email_opt_in defaults to false if not given.
+        """
+        post_checkout.send = mock.MagicMock(side_effect=post_checkout.send)
+        self._assert_fulfillment_success()
+        send_arguments = {
+            'sender': post_checkout,
+            'order': self.order,
+            'request': mock.ANY,
+            'email_opt_in': False,
+        }
+        post_checkout.send.assert_called_once_with(**send_arguments)
+
+    @ddt.data(True, False)
+    def test_email_opt_in(self, expected_opt_in):
+        """
+        Verify that email_opt_in is set to the query param if given.
+        """
+        # Add email_opt_in to url
+        self.url += '?email_opt_in={expected_opt_in}'.format(expected_opt_in=expected_opt_in)
+        post_checkout.send = mock.MagicMock(side_effect=post_checkout.send)
+        self._assert_fulfillment_success()
+        send_arguments = {
+            'sender': post_checkout,
+            'order': self.order,
+            'request': mock.ANY,
+            'email_opt_in': expected_opt_in,
+        }
+        post_checkout.send.assert_called_once_with(**send_arguments)
 
 
 class OrderDetailViewTests(OrderDetailViewTestMixin, TestCase):

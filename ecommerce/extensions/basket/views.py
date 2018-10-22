@@ -103,10 +103,10 @@ class BasketAddItemsView(View):
 
         # Associate the user's email opt in preferences with the basket in
         # order to opt them in later as part of fulfillment
-        BasketAttribute.objects.get_or_create(
+        BasketAttribute.objects.update_or_create(
             basket=request.basket,
             attribute_type=BasketAttributeType.objects.get(name=EMAIL_OPT_IN_ATTRIBUTE),
-            value_text=request.GET.get('email_opt_in') == 'true',
+            defaults={'value_text': request.GET.get('email_opt_in') == 'true'},
         )
 
         try:

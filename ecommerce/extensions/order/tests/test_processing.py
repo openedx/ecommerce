@@ -1,3 +1,5 @@
+import ddt
+import mock
 from oscar.core.loading import get_model
 from oscar.test import factories
 
@@ -11,6 +13,7 @@ ShippingEventType = get_model('order', 'ShippingEventType')
 ShippingEvent = get_model('order', 'ShippingEvent')
 
 
+@ddt.ddt
 class EventHandlerTests(TestCase):
     def setUp(self):
         super(EventHandlerTests, self).setUp()
@@ -88,3 +91,42 @@ class EventHandlerTests(TestCase):
         self.assertEqual(shipping_event.order.id, order.id)
         self.assertEqual(shipping_event.lines.count(), 1)
         self.assertEqual(shipping_event.lines.first().id, lines[1].id)
+
+    def test_handle_shipping_event_email_opt_in_default(self):
+        """
+        Verify that the shipping defaults email opt in to false if not given.
+        """
+        basket = create_basket()
+        product = factories.create_product()
+        factories.create_stockrecord(product, num_in_stock=2)
+        basket.add_product(product)
+
+        order = create_order(basket=basket)
+        lines = order.lines.all()
+
+        with mock.patch('ecommerce.extensions.order.processing.fulfillment_api.fulfill_order') as mock_fulfill:
+            EventHandler().handle_shipping_event(order, self.shipping_event_type, lines, [1, 1])
+            mock_fulfill.assert_called_once_with(order, lines, email_opt_in=False)
+
+    @ddt.data(True, False)
+    def test_handle_shipping_event_email_opt_in(self, expected_opt_in):
+        """
+        Verify that the shipping sends email opt in if specified.
+        """
+        basket = create_basket()
+        product = factories.create_product()
+        factories.create_stockrecord(product, num_in_stock=2)
+        basket.add_product(product)
+
+        order = create_order(basket=basket)
+        lines = order.lines.all()
+
+        with mock.patch('ecommerce.extensions.order.processing.fulfillment_api.fulfill_order') as mock_fulfill:
+            EventHandler().handle_shipping_event(
+                order,
+                self.shipping_event_type,
+                lines,
+                [1, 1],
+                email_opt_in=expected_opt_in,
+            )
+            mock_fulfill.assert_called_once_with(order, lines, email_opt_in=expected_opt_in)
