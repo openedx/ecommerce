@@ -60,7 +60,12 @@ def is_enrollment_code(obj):
 
 def retrieve_benefit(obj):
     """Helper method to retrieve the benefit from voucher. """
-    return retrieve_voucher(obj).benefit
+    return retrieve_offer(obj).benefit
+
+
+def retrieve_condition(obj):
+    """Helper method to retrieve the benefit from voucher. """
+    return retrieve_offer(obj).condition
 
 
 def retrieve_end_date(obj):
@@ -70,7 +75,7 @@ def retrieve_end_date(obj):
 
 def retrieve_offer(obj):
     """Helper method to retrieve the offer from coupon. """
-    return retrieve_voucher(obj).offers.first()
+    return retrieve_voucher(obj).best_offer
 
 
 def retrieve_range(obj):
@@ -557,7 +562,7 @@ class VoucherSerializer(serializers.ModelSerializer):
         return obj.is_available_to_user(user=request.user)
 
     def get_benefit(self, obj):
-        benefit = obj.offers.first().benefit
+        benefit = obj.best_offer.benefit
         return BenefitSerializer(benefit).data
 
     def get_redeem_url(self, obj):
@@ -686,12 +691,24 @@ class CouponSerializer(ProductPaymentInfoMixin, serializers.ModelSerializer):
     def get_enterprise_customer(self, obj):
         """ Get the Enterprise Customer UUID attached to a coupon. """
         offer_range = retrieve_range(obj)
-        return offer_range.enterprise_customer if offer_range else None
+        offer_condition = retrieve_condition(obj)
+        if offer_range and offer_range.enterprise_customer:
+            return offer_range.enterprise_customer
+        elif offer_condition.enterprise_customer_uuid:
+            return offer_condition.enterprise_customer_uuid
+        else:
+            return None
 
     def get_enterprise_customer_catalog(self, obj):
         """ Get the Enterprise Customer Catalog UUID attached to a coupon. """
         offer_range = retrieve_range(obj)
-        return offer_range.enterprise_customer_catalog if offer_range else None
+        offer_condition = retrieve_condition(obj)
+        if offer_range and offer_range.enterprise_customer_catalog:
+            return offer_range.enterprise_customer_catalog
+        elif offer_condition.enterprise_customer_catalog_uuid:
+            return offer_condition.enterprise_customer_catalog_uuid
+        else:
+            return None
 
     def get_last_edited(self, obj):
         return None, obj.date_updated

@@ -20,6 +20,9 @@ from oscar.templatetags.currency_filters import currency
 
 from ecommerce.core.url_utils import get_ecommerce_url
 from ecommerce.core.utils import log_message_and_raise_validation_error
+from ecommerce.enterprise.benefits import BENEFIT_MAP as ENTERPRISE_BENEFIT_MAP
+from ecommerce.enterprise.conditions import EnterpriseCustomerCondition
+from ecommerce.enterprise.utils import get_enterprise_customer
 from ecommerce.extensions.api import exceptions
 from ecommerce.extensions.offer.models import OFFER_PRIORITY_VOUCHER
 from ecommerce.extensions.offer.utils import get_discount_percentage, get_discount_value
@@ -107,18 +110,24 @@ def _get_info_for_coupon_report(coupon, voucher):
 
     coupon_stockrecord = StockRecord.objects.get(product=coupon)
     invoiced_amount = currency(coupon_stockrecord.price_excl_tax)
-    offer = voucher.offers.first()
+    offer = voucher.best_offer
     offer_range = offer.condition.range
     program_uuid = offer.condition.program_uuid
     benefit = offer.benefit
 
+    course_id = None
+    seat_stockrecord = None
+    course_organization = None
+    catalog_query = None
+    course_seat_types = None
+
     if program_uuid:
         course_id = None
-    elif offer_range.catalog:
+    elif offer_range and offer_range.catalog:
         seat_stockrecord = offer_range.catalog.stock_records.first()
         course_id = seat_stockrecord.product.attr.course_key
         course_organization = CourseKey.from_string(course_id).org
-    elif offer_range.catalog_query:
+    elif offer_range and offer_range.catalog_query:
         catalog_query = offer_range.catalog_query
         course_id = None
         course_seat_types = offer_range.course_seat_types
@@ -169,7 +178,7 @@ def _get_info_for_coupon_report(coupon, voucher):
 
 
 def _get_voucher_info_for_coupon_report(voucher):
-    offer = voucher.offers.first()
+    offer = voucher.best_offer
     status = _get_voucher_status(voucher, offer)
     path = '{path}?code={code}'.format(path=reverse('coupons:offer'), code=voucher.code)
     url = get_ecommerce_url(path)
@@ -333,6 +342,7 @@ def _get_or_create_offer(
             offer_condition = create_condition(ProgramCourseRunSeatsCondition, program_uuid=program_uuid)
     else:
         offer_condition, __ = Condition.objects.get_or_create(
+            proxy_class=None,
             range=product_range,
             type=Condition.COUNT,
             value=1,
@@ -366,17 +376,60 @@ def _get_or_create_offer(
     if offer_number:
         offer_name = "{} [{}]".format(offer_name, offer_number)
 
-    offer, __ = ConditionalOffer.objects.get_or_create(
-        name=offer_name,
-        offer_type=ConditionalOffer.VOUCHER,
-        condition=offer_condition,
-        benefit=offer_benefit,
-        max_global_applications=max_uses,
-        email_domains=email_domains,
-        site=site,
-        partner=site.siteconfiguration.partner if site else None,
-        priority=OFFER_PRIORITY_VOUCHER,
+    offer_kwargs = {
+        'offer_type': ConditionalOffer.VOUCHER,
+        'condition': offer_condition,
+        'benefit': offer_benefit,
+        'max_global_applications': max_uses,
+        'email_domains': email_domains,
+        'site': site,
+        'partner': site.siteconfiguration.partner if site else None,
+        'priority': OFFER_PRIORITY_VOUCHER,
+    }
+    offer, __ = ConditionalOffer.objects.update_or_create(name=offer_name, defaults=offer_kwargs)
+
+    return offer
+
+
+def _get_or_create_enterprise_offer(benefit_type, benefit_value, enterprise_customer,
+                                    enterprise_customer_catalog, coupon_id=None, max_uses=None, offer_number=None,
+                                    email_domains=None, site=None):
+
+    enterprise_customer_object = get_enterprise_customer(site, enterprise_customer) if site else {}
+    enterprise_customer_name = enterprise_customer_object.get('name', '')
+
+    condition, __ = Condition.objects.get_or_create(
+        proxy_class=class_path(EnterpriseCustomerCondition),
+        enterprise_customer_uuid=enterprise_customer,
+        enterprise_customer_name=enterprise_customer_name,
+        enterprise_customer_catalog_uuid=enterprise_customer_catalog,
+        type=Condition.COUNT,
+        value=1,
     )
+
+    benefit, _ = Benefit.objects.get_or_create(
+        proxy_class=class_path(ENTERPRISE_BENEFIT_MAP[benefit_type]),
+        value=benefit_value,
+        max_affected_items=1,
+    )
+
+    offer_name = "Coupon [{}]-{}-{} ENT Offer".format(coupon_id, benefit_type, benefit_value)
+    if offer_number:
+        offer_name = "{} [{}] ENT Offer".format(offer_name, offer_number)
+
+    offer_kwargs = {
+        'offer_type': ConditionalOffer.VOUCHER,
+        'condition': condition,
+        'benefit': benefit,
+        'max_global_applications': max_uses,
+        'email_domains': email_domains,
+        'site': site,
+        'partner': site.siteconfiguration.partner if site else None,
+        # For initial creation, we are setting the priority lower so that we don't want to use these
+        # until we've done some other implementation work. We will update this to a higher value later.
+        'priority': 5,
+    }
+    offer, __ = ConditionalOffer.objects.update_or_create(name=offer_name, defaults=offer_kwargs)
 
     return offer
 
@@ -513,6 +566,7 @@ def create_vouchers(
     logger.info("Creating [%d] vouchers product [%s]", quantity, coupon.id)
     vouchers = []
     offers = []
+    enterprise_offers = []
 
     # Maximum number of uses can be set for each voucher type and disturb
     # the predefined behaviours of the different voucher types. Therefor
@@ -578,6 +632,23 @@ def create_vouchers(
         )
         offers.append(offer)
 
+        # This is a temporary measure to create enterprise conditional offers ahead of updating the Coupon creation
+        # and redemption logic to use enterprise conditional offers when appropriate.
+        # This and the surrounding code will be refactored at that point.
+        if enterprise_customer:
+            enterprise_offer = _get_or_create_enterprise_offer(
+                benefit_type=benefit_type,
+                benefit_value=benefit_value,
+                enterprise_customer=enterprise_customer,
+                enterprise_customer_catalog=enterprise_customer_catalog,
+                max_uses=max_uses,
+                coupon_id=coupon.id,
+                offer_number=num,
+                email_domains=email_domains,
+                site=site
+            )
+            enterprise_offers.append(enterprise_offer)
+
     for i in range(quantity):
         voucher = _create_new_voucher(
             end_datetime=end_datetime,
@@ -587,6 +658,8 @@ def create_vouchers(
             code=code,
             name=name
         )
+        if enterprise_customer:
+            voucher.offers.add(enterprise_offers[i] if multi_offer else enterprise_offers[0])
         vouchers.append(voucher)
 
     return vouchers
@@ -634,8 +707,42 @@ def get_voucher_discount_info(benefit, price):
         }
 
 
-def update_voucher_offer(offer, benefit_value, benefit_type, coupon, max_uses=None,
-                         email_domains=None, program_uuid=None):
+def update_voucher_with_enterprise_offer(offer, benefit_value, benefit_type, coupon, enterprise_customer,
+                                         max_uses=None, email_domains=None, enterprise_catalog=None, site=None):
+    """
+    Update voucher with enteprise offer.
+
+    Args:
+        offer (Offer): Offer associated with a voucher.
+        benefit_value (Decimal): Value of benefit associated with vouchers.
+        benefit_type (str): Type of benefit associated with vouchers.
+        coupon (Product): The coupon whos offer(s) is updated.
+        enterprise_customer (str): The uuid of the enterprise customer.
+
+    Kwargs:
+        max_uses (int): number of maximum global application number an offer can have.
+        email_domains (str): a comma-separated string of email domains allowed to apply
+                            this offer.
+        enterprise_catalog (str): Enterprise Catalog UUID
+        site (Site): Site for this offer
+
+    Returns:
+        Offer
+    """
+    return _get_or_create_enterprise_offer(
+        benefit_value=benefit_value,
+        benefit_type=benefit_type,
+        enterprise_customer=enterprise_customer,
+        enterprise_customer_catalog=enterprise_catalog,
+        coupon_id=coupon.id,
+        max_uses=max_uses,
+        email_domains=email_domains,
+        site=offer.site or site,
+    )
+
+
+def update_voucher_offer(offer, benefit_value, benefit_type, coupon, max_uses=None, email_domains=None,
+                         program_uuid=None, site=None):
     """
     Update voucher offer with new benefit value.
 
@@ -650,10 +757,12 @@ def update_voucher_offer(offer, benefit_value, benefit_type, coupon, max_uses=No
         email_domains (str): a comma-separated string of email domains allowed to apply
                             this offer.
         program_uuid (str): Program UUID
+        site (Site): Site for this offer
 
     Returns:
         Offer
     """
+
     return _get_or_create_offer(
         product_range=offer.benefit.range,
         benefit_value=benefit_value,
@@ -661,7 +770,8 @@ def update_voucher_offer(offer, benefit_value, benefit_type, coupon, max_uses=No
         coupon_id=coupon.id,
         max_uses=max_uses,
         email_domains=email_domains,
-        program_uuid=program_uuid
+        program_uuid=program_uuid,
+        site=offer.site or site,
     )
 
 
@@ -707,10 +817,13 @@ def get_voucher_and_products_from_code(code):
         ProductNotFoundError: When no products are associated with the voucher.
     """
     voucher = get_cached_voucher(code)
-    voucher_range = voucher.offers.first().benefit.range
-    products = voucher_range.all_products()
+    voucher_range = voucher.best_offer.benefit.range
+    has_catalog_configuration = voucher_range and (voucher_range.catalog_query or voucher_range.course_catalog)
+    is_enterprise = ((voucher_range and voucher_range.enterprise_customer) or
+                     voucher.best_offer.condition.enterprise_customer_uuid)
+    products = voucher_range.all_products() if voucher_range else []
 
-    if products or voucher_range.catalog_query or voucher_range.course_catalog:
+    if products or has_catalog_configuration or is_enterprise:
         # List of products is empty in case of Multi-course coupon
         return voucher, products
     else:

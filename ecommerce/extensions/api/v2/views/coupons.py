@@ -24,7 +24,7 @@ from ecommerce.extensions.catalogue.utils import create_coupon_product, get_or_c
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
 from ecommerce.extensions.payment.processors.invoice import InvoicePayment
 from ecommerce.extensions.voucher.models import CouponVouchers
-from ecommerce.extensions.voucher.utils import update_voucher_offer
+from ecommerce.extensions.voucher.utils import update_voucher_offer, update_voucher_with_enterprise_offer
 from ecommerce.invoice.models import Invoice
 
 Basket = get_model('basket', 'Basket')
@@ -299,7 +299,10 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
         if not range_data:
             return None
 
-        voucher_range = vouchers.first().offers.first().benefit.range
+        voucher_range = vouchers.first().offer_with_range.benefit.range
+        if not voucher_range:
+            return None
+
         enterprise_customer_data = request.data.get('enterprise_customer')
 
         # Remove catalog if switching from single course to dynamic query
@@ -353,9 +356,18 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
 
             program_uuid = request.data.get('program_uuid')
             benefit_value = request.data.get('benefit_value')
-            if benefit_value or program_uuid:
-                self.update_coupon_offer(benefit_value=benefit_value, vouchers=vouchers,
-                                         coupon=coupon, program_uuid=program_uuid)
+            enterprise_customer = request.data.get('enterprise_customer', {}).get('id', None)
+            enterprise_catalog = request.data.get('enterprise_customer_catalog') or None
+            if benefit_value or program_uuid or enterprise_customer or enterprise_catalog:
+                self.update_coupon_offer(
+                    benefit_value=benefit_value,
+                    vouchers=vouchers,
+                    site=self.request.site,
+                    coupon=coupon,
+                    program_uuid=program_uuid,
+                    enterprise_customer=enterprise_customer,
+                    enterprise_catalog=enterprise_catalog
+                )
 
             category_data = request.data.get('category')
             if category_data:
@@ -414,18 +426,24 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
                     update_dict[field.replace('invoice_', '')] = value
         return update_dict
 
-    def update_coupon_offer(self, coupon, vouchers, benefit_value=None, program_uuid=None):
+    def update_coupon_offer(self, coupon, vouchers, site, benefit_value=None, program_uuid=None,
+                            enterprise_customer=None, enterprise_catalog=None):
         """
         Remove all offers from the vouchers and add a new offer
         Arguments:
             coupon (Product): Coupon product associated with vouchers
             vouchers (ManyRelatedManager): Vouchers associated with the coupon to be updated
+            site (Site): The Site associated with this offer
             benefit_value (Decimal): Benefit value associated with a new offer
             program_uuid (str): Program UUID
+            enterprise_customer (str): Enterprise Customer UUID
+            enterprise_catalog (str): Enterprise Catalog UUID
         """
-        voucher_offers = vouchers.first().offers
-        voucher_offer = voucher_offers.first()
+        new_offers = []
 
+        # Only process the original conditional offer, and update/create the enterprise offer if needed.
+        voucher_offer = vouchers.first().best_offer
+        oldest_offer = vouchers.first().offer_with_range
         if program_uuid:
             Condition.objects.filter(
                 program_uuid=voucher_offer.condition.program_uuid
@@ -434,19 +452,36 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
         # The program uuid (if program coupon) is required for the benefit and condition update logic
         program_uuid = program_uuid or voucher_offer.condition.program_uuid
 
-        new_offer = update_voucher_offer(
-            offer=voucher_offer,
-            benefit_value=benefit_value or voucher_offer.benefit.value,
-            benefit_type=voucher_offer.benefit.type or getattr(
-                voucher_offer.benefit.proxy(), 'benefit_class_type', None
+        new_offers.append(update_voucher_offer(
+            offer=oldest_offer,
+            benefit_value=benefit_value or oldest_offer.benefit.value,
+            benefit_type=oldest_offer.benefit.type or getattr(
+                oldest_offer.benefit.proxy(), 'benefit_class_type', None
             ),
             coupon=coupon,
-            max_uses=voucher_offer.max_global_applications,
-            program_uuid=program_uuid
-        )
+            max_uses=oldest_offer.max_global_applications,
+            program_uuid=program_uuid,
+            site=site,
+        ))
+
+        if enterprise_customer:
+            new_offers.append(update_voucher_with_enterprise_offer(
+                offer=voucher_offer,
+                benefit_value=benefit_value or voucher_offer.benefit.value,
+                benefit_type=voucher_offer.benefit.type or getattr(
+                    voucher_offer.benefit.proxy(), 'benefit_class_type', None
+                ),
+                coupon=coupon,
+                max_uses=voucher_offer.max_global_applications,
+                enterprise_customer=enterprise_customer,
+                enterprise_catalog=enterprise_catalog,
+                site=site,
+            ))
+
         for voucher in vouchers.all():
             voucher.offers.clear()
-            voucher.offers.add(new_offer)
+            for new_offer in new_offers:
+                voucher.offers.add(new_offer)
 
     def update_coupon_client(self, baskets, client_username):
         """

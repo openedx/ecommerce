@@ -206,9 +206,9 @@ def get_available_voucher_for_product(request, product, vouchers):
     for voucher in vouchers:
         is_valid_voucher, __ = voucher_is_valid(voucher, [product], request)
         if is_valid_voucher:
-            voucher_offer = voucher.offers.first()
+            voucher_offer = voucher.best_offer
             offer_range = voucher_offer.condition.range
-            if offer_range.contains_product(product):
+            if offer_range and offer_range.contains_product(product):
                 return voucher
 
     # Explicitly return None in case product has no valid voucher
