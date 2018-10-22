@@ -33,7 +33,7 @@ class JournalFulfillmentModule(BaseFulfillmentModule):
 
         return [line for line in lines if self.supports_line(line)]
 
-    def fulfill_product(self, order, lines):
+    def fulfill_product(self, order, lines, email_opt_in=False):
         """
         Fulfills the purchase of a 'Journal'
         Args:
@@ -41,6 +41,8 @@ class JournalFulfillmentModule(BaseFulfillmentModule):
                 presumed to be the student to grant access to the journal
             lines (List of Lines): Order Lines, associated with purchased products in the Order.  These should only be
                 'Journal' products.
+            email_opt_in (bool): Whether the user should be opted in to emails
+                as part of the fulfillment. Defaults to False.
         Returns:
             The original set of lines, with new statuses set based on the success or failure of fulfillment.
         """

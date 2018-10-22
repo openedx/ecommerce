@@ -13,6 +13,7 @@ from oscar.core.loading import get_class, get_model
 from ecommerce.core.models import BusinessClient
 from ecommerce.extensions.analytics.utils import audit_log, track_segment_event
 from ecommerce.extensions.api import data as data_api
+from ecommerce.extensions.basket.constants import EMAIL_OPT_IN_ATTRIBUTE
 from ecommerce.extensions.basket.utils import ORGANIZATION_ATTRIBUTE_TYPE
 from ecommerce.extensions.checkout.exceptions import BasketNotFreeError
 from ecommerce.extensions.customer.utils import Dispatcher
@@ -155,14 +156,27 @@ class EdxOrderPlacementMixin(OrderPlacementMixin):
             contains_coupon=order.contains_coupon
         )
 
+        # Check for the user's email opt in preference, defaulting to false if it hasn't been set
+        try:
+            email_opt_in = BasketAttribute.objects.get(
+                basket=order.basket,
+                attribute_type=BasketAttributeType.objects.get(name=EMAIL_OPT_IN_ATTRIBUTE),
+            ).value_text == 'True'
+        except BasketAttribute.DoesNotExist:
+            email_opt_in = False
+
         if waffle.sample_is_active('async_order_fulfillment'):
             # Always commit transactions before sending tasks depending on state from the current transaction!
             # There's potential for a race condition here if the task starts executing before the active
             # transaction has been committed; the necessary order doesn't exist in the database yet.
             # See http://celery.readthedocs.org/en/latest/userguide/tasks.html#database-transactions.
-            fulfill_order.delay(order.number, site_code=order.site.siteconfiguration.partner.short_code)
+            fulfill_order.delay(
+                order.number,
+                site_code=order.site.siteconfiguration.partner.short_code,
+                email_opt_in=email_opt_in
+            )
         else:
-            post_checkout.send(sender=self, order=order, request=request)
+            post_checkout.send(sender=self, order=order, request=request, email_opt_in=email_opt_in)
 
         return order
 
