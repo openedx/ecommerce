@@ -1,6 +1,7 @@
 """
 Tests for the ecommerce.extensions.checkout.mixins module.
 """
+import ddt
 import mock
 from django.core import mail
 from django.test import RequestFactory
@@ -18,6 +19,7 @@ from ecommerce.extensions.analytics.utils import (
     parse_tracking_context,
     translate_basket_line_for_segment
 )
+from ecommerce.extensions.basket.constants import EMAIL_OPT_IN_ATTRIBUTE
 from ecommerce.extensions.basket.utils import basket_add_organization_attribute
 from ecommerce.extensions.checkout.exceptions import BasketNotFreeError
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
@@ -33,6 +35,8 @@ from ecommerce.tests.testcases import TestCase
 
 LOGGER_NAME = 'ecommerce.extensions.analytics.utils'
 Basket = get_model('basket', 'Basket')
+BasketAttribute = get_model('basket', 'BasketAttribute')
+BasketAttributeType = get_model('basket', 'BasketAttributeType')
 NoShippingRequired = get_class('shipping.methods', 'NoShippingRequired')
 OrderTotalCalculator = get_class('checkout.calculators', 'OrderTotalCalculator')
 PaymentEventType = get_model('order', 'PaymentEventType')
@@ -40,6 +44,7 @@ SourceType = get_model('payment', 'SourceType')
 Product = get_model('catalogue', 'Product')
 
 
+@ddt.ddt
 @mock.patch.object(SegmentClient, 'track')
 class EdxOrderPlacementMixinTests(BusinessIntelligenceMixin, PaymentEventsMixin, RefundTestMixin, TestCase):
     """
@@ -268,8 +273,39 @@ class EdxOrderPlacementMixinTests(BusinessIntelligenceMixin, PaymentEventsMixin,
 
         with mock.patch('ecommerce.extensions.checkout.mixins.fulfill_order.delay') as mock_delay:
             EdxOrderPlacementMixin().handle_successful_order(self.order)
-            self.assertTrue(mock_delay.called)
-            mock_delay.assert_called_once_with(self.order.number, site_code=self.partner.short_code)
+            mock_delay.assert_called_once_with(self.order.number, site_code=self.partner.short_code, email_opt_in=False)
+
+    def test_handle_successful_order_no_email_opt_in(self, _):
+        """
+        Verify that the post checkout defaults email_opt_in to false.
+        """
+        with mock.patch('ecommerce.extensions.checkout.mixins.post_checkout.send') as mock_send:
+            mixin = EdxOrderPlacementMixin()
+            mixin.handle_successful_order(self.order)
+            send_arguments = {'sender': mixin, 'order': self.order, 'request': None, 'email_opt_in': False}
+            mock_send.assert_called_once_with(**send_arguments)
+
+    @ddt.data(True, False)
+    def test_handle_successful_order_with_email_opt_in(self, expected_opt_in, _):
+        """
+        Verify that the post checkout sets email_opt_in if it is given.
+        """
+        BasketAttribute.objects.get_or_create(
+            basket=self.order.basket,
+            attribute_type=BasketAttributeType.objects.get(name=EMAIL_OPT_IN_ATTRIBUTE),
+            value_text=expected_opt_in,
+        )
+
+        with mock.patch('ecommerce.extensions.checkout.mixins.post_checkout.send') as mock_send:
+            mixin = EdxOrderPlacementMixin()
+            mixin.handle_successful_order(self.order)
+            send_arguments = {
+                'sender': mixin,
+                'order': self.order,
+                'request': None,
+                'email_opt_in': expected_opt_in,
+            }
+            mock_send.assert_called_once_with(**send_arguments)
 
     def test_place_free_order(self, __):
         """ Verify an order is placed and the basket is submitted. """
