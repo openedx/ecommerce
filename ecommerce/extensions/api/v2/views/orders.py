@@ -16,6 +16,7 @@ from ecommerce.extensions.api.throttles import ServiceUserThrottle
 logger = logging.getLogger(__name__)
 
 Order = get_model('order', 'Order')
+post_checkout = get_class('checkout.signals', 'post_checkout')
 
 
 class OrderViewSet(viewsets.ReadOnlyModelViewSet):
@@ -50,9 +51,11 @@ class OrderViewSet(viewsets.ReadOnlyModelViewSet):
         if not order.is_fulfillable:
             return Response(status=status.HTTP_406_NOT_ACCEPTABLE)
 
+        # Get email_opt_in from the query parameters if it exists, defaulting to false
+        email_opt_in = request.query_params.get('email_opt_in', False) == 'True'
+
         logger.info('Attempting fulfillment of order [%s]...', order.number)
-        post_checkout = get_class('checkout.signals', 'post_checkout')
-        post_checkout.send(sender=post_checkout, order=order, request=request)
+        post_checkout.send(sender=post_checkout, order=order, request=request, email_opt_in=email_opt_in)
 
         if order.is_fulfillable:
             logger.warning('Fulfillment of order [%s] failed!', order.number)
