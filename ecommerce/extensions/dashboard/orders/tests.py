@@ -1,15 +1,10 @@
 import os
-from unittest import skipIf
 
 from django.contrib.messages import constants as MSG
-from django.test import override_settings
 from django.urls import reverse
 from nose.plugins.skip import SkipTest
 from oscar.core.loading import get_model
 from oscar.test import factories
-from selenium.common.exceptions import NoSuchElementException
-from selenium.webdriver.firefox.webdriver import WebDriver
-from selenium.webdriver.support.wait import WebDriverWait
 
 from ecommerce.extensions.dashboard.orders.views import queryset_orders_for_user
 from ecommerce.extensions.dashboard.tests import DashboardViewTestMixin
@@ -49,13 +44,7 @@ class OrderViewBrowserTestBase(LiveServerTestCase):
         if os.environ.get('DISABLE_ACCEPTANCE_TESTS') == 'True':
             raise SkipTest
 
-        cls.selenium = WebDriver()
         super(OrderViewBrowserTestBase, cls).setUpClass()
-
-    @classmethod
-    def tearDownClass(cls):
-        cls.selenium.quit()
-        super(OrderViewBrowserTestBase, cls).tearDownClass()
 
     def setUp(self):
         super(OrderViewBrowserTestBase, self).setUp()
@@ -71,75 +60,9 @@ class OrderViewBrowserTestBase(LiveServerTestCase):
 
         ShippingEventType.objects.get_or_create(name=SHIPPING_EVENT_NAME)
 
-    def login(self, path):
-        """ Log into the service and navigate to the order list view. """
-        self.selenium.get(self.live_server_url + reverse('auto_auth'))
-        self.selenium.get(self.live_server_url + path)
-
-    def retry_fulfillment(self):
-        """ Click the retry fulfillment button and wait for the AJAX call to finish. """
-        button = self.selenium.find_element_by_css_selector(self.btn_selector)
-        self.assertEqual(unicode(self.order.number), button.get_attribute('data-order-number'))
-        button.click()
-
-        # Wait for the AJAX call to finish and display an alert
-        WebDriverWait(self.selenium, 1.0).until(lambda d: d.find_element_by_css_selector('#messages .alert'))
-
-    def assertAlertDisplayed(self, alert_class, text):
-        """ Verifies that the most recent alert has the given class and message. """
-        alert = self.selenium.find_elements_by_css_selector('#messages .alert')[-1]
-        classes = alert.get_attribute('class').split(' ')
-        self.assertIn(alert_class, classes, )
-        self.assertEqual(alert.find_element_by_css_selector('.message').text, text)
-
-    def assert_retry_fulfillment_success(self, order_number):
-        # Ensure the button is removed.
-        self.assertRaises(NoSuchElementException, self.selenium.find_element_by_css_selector, self.btn_selector)
-
-        # Ensure the status is updated.
-        selector = 'tr[data-order-number="{}"] .order-status'.format(order_number)
-        status = self.selenium.find_element_by_css_selector(selector)
-        self.assertEqual(ORDER.COMPLETE, status.text)
-
-        # Ensure an alert is displayed
-        self.assertAlertDisplayed('alert-success', 'Order {} has been fulfilled.'.format(order_number))
-
-    def assert_retry_fulfillment_failed(self, order_number):
-        selector = 'tr[data-order-number="{}"] .order-status'.format(order_number)
-        status = self.selenium.find_element_by_css_selector(selector)
-        self.assertEqual(ORDER.FULFILLMENT_ERROR, status.text)
-
-        # Ensure the button is active
-        button = self.selenium.find_element_by_css_selector(self.btn_selector)
-        classes = button.get_attribute('class').split(' ')
-        self.assertNotIn('disabled', classes, 'Button is disabled, but should have been re-enabled!')
-
-        # Ensure an alert is displayed)
-        self.assertAlertDisplayed('alert-error',
-                                  'Failed to fulfill order {}: Internal Server Error'.format(order_number))
-
 
 class OrderListViewBrowserTests(OrderViewTestsMixin, RefundTestMixin, OrderViewBrowserTestBase):
     path = reverse('dashboard:order-list')
-
-    @skipIf(os.environ.get('TRAVIS'), 'This test consistently fails on Travis.')
-    @override_settings(FULFILLMENT_MODULES=['ecommerce.extensions.fulfillment.tests.modules.FakeFulfillmentModule', ])
-    def test_retry_fulfillment(self):
-        """
-        The order list should display a "Retry Fulfillment" button beside orders in the Fulfillment Error state.
-        Clicking the button should call the fulfillment API endpoint via AJAX. When successful, the order status
-        should be updated, an alert displayed, and the button removed.
-        """
-
-        self.login(self.path)
-        self.retry_fulfillment()
-        self.assert_retry_fulfillment_success(self.order.number)
-
-    def test_fulfillment_failed(self):
-        """ If fulfillment fails, an alert should be displayed, and the Retry Fulfillment button reactivated. """
-        self.login(self.path)
-        self.retry_fulfillment()
-        self.assert_retry_fulfillment_failed(self.order.number)
 
     def test_filtering(self):
         """Verify that the view allows filtering by username."""
@@ -236,30 +159,6 @@ class OrderDetailViewTests(DashboardViewTestMixin, OrderViewTestsMixin, RefundTe
         self.assert_message_equals(response,
                                    'A refund cannot be created for these lines. They may have already been refunded.',
                                    MSG.ERROR)
-
-
-class OrderDetailViewBrowserTests(OrderViewTestsMixin, RefundTestMixin, OrderViewBrowserTestBase):
-
-    @skipIf(os.environ.get('TRAVIS'), 'This test consistently fails on Travis.')
-    @override_settings(FULFILLMENT_MODULES=['ecommerce.extensions.fulfillment.tests.modules.FakeFulfillmentModule', ])
-    def test_retry_fulfillment(self):
-        """
-        The order details should display a "Retry Fulfillment" button within orders table
-        while order in the Fulfillment Error state. Clicking the button should call the fulfillment
-        API endpoint via AJAX. When successful, the order status should be updated, an alert displayed,
-        and the button removed.
-        """
-        order_detail_path = reverse('dashboard:order-detail', kwargs={'number': self.order.number})
-        self.login(order_detail_path)
-        self.retry_fulfillment()
-        self.assert_retry_fulfillment_success(self.order.number)
-
-    def test_fulfillment_failed(self):
-        """ If fulfillment fails, an alert should be displayed, and the Retry Fulfillment button reactivated. """
-        order_detail_path = reverse('dashboard:order-detail', kwargs={'number': self.order.number})
-        self.login(order_detail_path)
-        self.retry_fulfillment()
-        self.assert_retry_fulfillment_failed(self.order.number)
 
 
 class HelperMethodTests(TestCase):
