@@ -33,7 +33,7 @@ SourceType = get_model('payment', 'SourceType')
 
 
 class EdxOrderPlacementMixin(OrderPlacementMixin):
-    """ Mixin for edX-specific order placement. """
+    """ Mixin for edX-specific order placement. Test """
 
     # Instance of a payment processor with which to handle payment. Subclasses should set this value.
     payment_processor = None
