@@ -7,7 +7,7 @@ from nose.plugins.skip import SkipTest
 from oscar.core.loading import get_model
 from oscar.test import factories
 from selenium.common.exceptions import NoSuchElementException
-from selenium.webdriver.safari.webdriver import WebDriver
+from selenium.webdriver.ie.webdriver import WebDriver
 from selenium.webdriver.support.wait import WebDriverWait
 
 from ecommerce.extensions.refund.status import REFUND
