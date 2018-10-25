@@ -124,7 +124,10 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
                 basket = prepare_basket(request, [coupon_product])
 
                 # Create an order now since payment is handled out of band via an invoice.
-                client, __ = BusinessClient.objects.get_or_create(name=request.data.get('client'))
+                client, __ = BusinessClient.objects.update_or_create(
+                    name=request.data.get('client'),
+                    defaults={'enterprise_customer_uuid': cleaned_voucher_data['enterprise_customer']}
+                )
                 invoice_data = self.create_update_data_dict(data=request.data, fields=Invoice.UPDATEABLE_INVOICE_FIELDS)
                 response_data = self.create_order_for_invoice(
                     basket, coupon_id=coupon_product.id, client=client, invoice_data=invoice_data
@@ -373,8 +376,12 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
                 ProductCategory.objects.filter(product=coupon).update(category=category)
 
             client_username = request.data.get('client')
-            if client_username:
-                self.update_coupon_client(baskets=baskets, client_username=client_username)
+            if client_username or enterprise_customer:
+                self.update_coupon_client(
+                    baskets=baskets,
+                    client_username=client_username,
+                    enterprise_customer=enterprise_customer
+                )
 
             coupon_price = request.data.get('price')
             if coupon_price:
@@ -481,14 +488,17 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
             for new_offer in new_offers:
                 voucher.offers.add(new_offer)
 
-    def update_coupon_client(self, baskets, client_username):
+    def update_coupon_client(self, baskets, client_username, enterprise_customer):
         """
         Update Invoice client for new coupons.
         Arguments:
             baskets (QuerySet): Baskets associated with the coupons
             client_username (str): Client username
         """
-        client, __ = BusinessClient.objects.get_or_create(name=client_username)
+        client, __ = BusinessClient.objects.update_or_create(
+            name=client_username,
+            defaults={'enterprise_customer_uuid': enterprise_customer},
+        )
         Invoice.objects.filter(order__basket=baskets.first()).update(business_client=client)
 
     def update_invoice_data(self, coupon, data):

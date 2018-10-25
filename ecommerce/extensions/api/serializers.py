@@ -607,6 +607,45 @@ class CouponListSerializer(serializers.ModelSerializer):
         fields = ('category', 'client', 'code', 'id', 'title', 'date_created')
 
 
+class EnterpriseCouponListSerializer(serializers.ModelSerializer):
+    client = serializers.SerializerMethodField()
+    enterprise_customer = serializers.SerializerMethodField()
+    enterprise_customer_catalog = serializers.SerializerMethodField()
+    code_status = serializers.SerializerMethodField()
+
+    def get_client(self, obj):
+        return Invoice.objects.get(order__lines__product=obj).business_client.name
+
+    def get_enterprise_customer(self, obj):
+        """ Get the Enterprise Customer UUID attached to a coupon. """
+        offer_condition = retrieve_condition(obj)
+        return offer_condition.enterprise_customer_uuid
+
+    def get_enterprise_customer_catalog(self, obj):
+        """ Get the Enterprise Customer Catalog UUID attached to a coupon. """
+        offer_condition = retrieve_condition(obj)
+        return offer_condition.enterprise_customer_catalog_uuid
+
+    def get_code_status(self, obj):
+        start_date = retrieve_start_date(obj)
+        end_date = retrieve_end_date(obj)
+        current_datetime = timezone.now()
+        in_time_interval = start_date < current_datetime < end_date
+        return _('ACTIVE') if in_time_interval else _('INACTIVE')
+
+    class Meta(object):
+        model = Product
+        fields = (
+            'client',
+            'code_status',
+            'enterprise_customer',
+            'enterprise_customer_catalog',
+            'id',
+            'title',
+            'date_created',
+        )
+
+
 class CouponSerializer(ProductPaymentInfoMixin, serializers.ModelSerializer):
     """ Serializer for Coupons. """
     benefit_type = serializers.SerializerMethodField()
