@@ -50,7 +50,7 @@ edx-django-release-util==0.3.1
 edx-django-sites-extensions==2.4.0
 edx-django-utils==1.0.1
 edx-drf-extensions==2.0.0
-edx-ecommerce-worker==0.7.0
+edx-ecommerce-worker==0.6.0
 edx-opaque-keys==0.4.4
 edx-rest-api-client==1.8.2
 enum34==1.1.6             # via cryptography
