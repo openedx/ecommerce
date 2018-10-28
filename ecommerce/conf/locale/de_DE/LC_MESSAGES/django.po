@@ -16,7 +16,7 @@ msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: openedx-translation@googlegroups.com\n"
 "POT-Creation-Date: 2018-03-26 16:41-0400\n"
-"PO-Revision-Date: 2018-09-25 10:19+0000\n"
+"PO-Revision-Date: 2018-10-25 13:52+0000\n"
 "Last-Translator: Abstract Technology <stefania.trabucchi@abstract-technology.de>\n"
 "Language-Team: German (Germany) (http://www.transifex.com/open-edx/edx-platform/language/de_DE/)\n"
 "MIME-Version: 1.0\n"
@@ -679,7 +679,7 @@ msgstr "Hier klicken um mehrere Plätze in diesem Kurs kaufen"
 
 #: ecommerce/extensions/basket/views.py:90
 msgid "No product is available to buy."
-msgstr ""
+msgstr "Es ist kein Produkt zum Kauf verfügbar."
 
 #: ecommerce/extensions/basket/views.py:96
 msgid "You have already purchased these products"
@@ -698,23 +698,23 @@ msgstr ""
 msgid ""
 "After you complete your order you will be able to select course dates from "
 "your dashboard."
-msgstr ""
+msgstr "Nachdem Sie die Bestellung abgeschlossen haben, können Sie die Kursdaten in Ihrer Übersichtsseite einsehen."
 
 #: ecommerce/extensions/basket/views.py:226
 msgid ""
 "After you complete your order you will be automatically enrolled in the "
 "verified track of the course."
-msgstr ""
+msgstr "Nachdem Sie die Bestellung abgeschlossen haben, sind Sie automatisch im verifizierten Lern- Modus."
 
 #: ecommerce/extensions/basket/views.py:230
 msgid "After you complete your order you will receive credit for your course."
-msgstr ""
+msgstr "Nachdem Sie die Bestellung abgeschlossen haben, erhalten Sie von uns eine Gutschrift für Ihren Kurs."
 
 #: ecommerce/extensions/basket/views.py:233
 msgid ""
 "After you complete your order you will be automatically enrolled in the "
 "course."
-msgstr ""
+msgstr "Nachdem Sie die Bestellung abgeschlossen haben, sind Sie automatisch in diesem Kurs eingeschrieben."
 
 #: ecommerce/extensions/basket/views.py:239
 #, python-brace-format
@@ -745,7 +745,7 @@ msgstr "Gutscheincode '{code}' ist abgelaufen."
 #: ecommerce/extensions/basket/views.py:424
 #, python-brace-format
 msgid "Coupon code '{code}' is not active."
-msgstr ""
+msgstr "Gutschein Code '{code}' ist nicht aktiv."
 
 #: ecommerce/extensions/basket/views.py:431
 #, python-brace-format
@@ -756,7 +756,7 @@ msgstr "Gutscheincode '{code}' wurde bereits eingelöst."
 #: ecommerce/extensions/basket/views.py:455
 #, python-brace-format
 msgid "Coupon code '{code}' is not valid for this basket."
-msgstr ""
+msgstr "Gutschein Code '{code}' ist nicht für diesen Kurs gültig."
 
 #: ecommerce/extensions/basket/views.py:479
 msgid "Your basket does not qualify for a coupon code discount."
@@ -928,7 +928,7 @@ msgstr "Wir unterstützen die ausgewählte Zahlungsmethode nicht."
 
 #: ecommerce/extensions/payment/forms.py:28
 msgid "Choose country"
-msgstr ""
+msgstr "Wählen Sie ein Land aus"
 
 #. Translators: This is a string added next to the name of the required
 #. fields on the payment form. For example, the first name field is
@@ -936,30 +936,30 @@ msgstr ""
 #: ecommerce/extensions/payment/forms.py:103
 #, python-brace-format
 msgid "{label} (required)"
-msgstr ""
+msgstr "{label} (erforderlich)"
 
 #: ecommerce/extensions/payment/forms.py:109
 msgid "Organization (required)"
-msgstr ""
+msgstr "Organisation (erforderlich)"
 
 #: ecommerce/extensions/payment/forms.py:125
 #: ecommerce/extensions/payment/forms.py:215
 #: ecommerce/extensions/payment/views/__init__.py:96
 msgid ""
 "There was a problem retrieving your basket. Refresh the page to try again."
-msgstr ""
+msgstr "Es ist ein Problem beim Aufrufen Ihres Einkaufswagens aufgetreten. Bitte laden Sie die Seite noch einmal."
 
 #: ecommerce/extensions/payment/forms.py:128
 msgid "First Name (required)"
-msgstr ""
+msgstr "Vorname (erforderlich)"
 
 #: ecommerce/extensions/payment/forms.py:129
 msgid "Last Name (required)"
-msgstr ""
+msgstr "Nachname (erforderlich)"
 
 #: ecommerce/extensions/payment/forms.py:130
 msgid "Address (required)"
-msgstr ""
+msgstr "Addresse (erforderlich)"
 
 #: ecommerce/extensions/payment/forms.py:131
 msgid "Suite/Apartment Number"
@@ -967,7 +967,7 @@ msgstr "Zimmer/Apartment Number"
 
 #: ecommerce/extensions/payment/forms.py:132
 msgid "City (required)"
-msgstr ""
+msgstr "Stadt (erforderlich)"
 
 #: ecommerce/extensions/payment/forms.py:135
 msgid "State/Province"
@@ -979,7 +979,7 @@ msgstr "Postleitzahl"
 
 #: ecommerce/extensions/payment/forms.py:137
 msgid "Country (required)"
-msgstr ""
+msgstr "Land (erforderlich)"
 
 #: ecommerce/extensions/payment/forms.py:164
 #: ecommerce/extensions/payment/forms.py:166
@@ -990,12 +990,12 @@ msgstr "Dieses Feld ist erforderlich"
 #: ecommerce/extensions/payment/forms.py:177
 #, python-brace-format
 msgid "{state} is not a valid state/province in {country}."
-msgstr ""
+msgstr "{state} ist kein gültier Staat/Provinz in {country}."
 
 #: ecommerce/extensions/payment/forms.py:196
 msgid ""
 "Postal codes for the U.S. and Canada are limited to nine (9) characters."
-msgstr ""
+msgstr "Postleitzahlen für die USA und Kanada sind limitiert auf (9) Zeichen"
 
 #: ecommerce/extensions/payment/models.py:17
 msgid "Transaction ID"
@@ -1109,7 +1109,7 @@ msgstr "{percentage} %"
 #: ecommerce/extensions/voucher/tests/test_utils.py:470
 #: ecommerce/extensions/voucher/utils.py:72
 msgid "Inactive"
-msgstr ""
+msgstr "Inaktiv"
 
 #: ecommerce/extensions/voucher/utils.py:70
 #: ecommerce/templates/oscar/dashboard/users/detail.html:52
@@ -1134,7 +1134,7 @@ msgstr ""
 
 #: ecommerce/extensions/voucher/utils.py:217
 msgid "Coupon Type"
-msgstr ""
+msgstr "Gutschein Typ"
 
 #: ecommerce/extensions/voucher/utils.py:218
 msgid "URL"
@@ -1178,7 +1178,7 @@ msgstr "Preis"
 
 #: ecommerce/extensions/voucher/utils.py:228
 msgid "Invoiced Amount"
-msgstr ""
+msgstr "Berechnete Menge"
 
 #: ecommerce/extensions/voucher/utils.py:229
 msgid "Discount Percentage"
@@ -1186,7 +1186,7 @@ msgstr "Ermäßigung in Prozent"
 
 #: ecommerce/extensions/voucher/utils.py:230
 msgid "Discount Amount"
-msgstr ""
+msgstr "Rabattmenge"
 
 #: ecommerce/extensions/voucher/utils.py:232
 #: ecommerce/templates/oscar/dashboard/users/detail.html:138
@@ -1195,31 +1195,31 @@ msgstr "Bestellnummer"
 
 #: ecommerce/extensions/voucher/utils.py:233
 msgid "Redeemed By Username"
-msgstr ""
+msgstr "Eingelöst durch Benutzername"
 
 #: ecommerce/extensions/voucher/utils.py:234
 msgid "Redeemed For Course ID"
-msgstr ""
+msgstr "Eingelöst für Kurs-ID"
 
 #: ecommerce/extensions/voucher/utils.py:235
 msgid "Redeemed For Course IDs"
-msgstr ""
+msgstr "Eingelöst für Kurs-IDs"
 
 #: ecommerce/extensions/voucher/utils.py:236
 msgid "Create Date"
-msgstr ""
+msgstr "Datum erstellen"
 
 #: ecommerce/extensions/voucher/utils.py:237
 msgid "Coupon Start Date"
-msgstr ""
+msgstr "Gutschein Start-Datum"
 
 #: ecommerce/extensions/voucher/utils.py:238
 msgid "Coupon Expiry Date"
-msgstr ""
+msgstr "Gutschein End-Datum"
 
 #: ecommerce/extensions/voucher/utils.py:239
 msgid "Email Domains"
-msgstr ""
+msgstr "E-Mail Domains"
 
 #: ecommerce/extensions/voucher/utils.py:534
 #, python-brace-format
@@ -1246,11 +1246,11 @@ msgstr "Bezahlt"
 
 #: ecommerce/invoice/models.py:15
 msgid "Prepaid"
-msgstr ""
+msgstr "Im voraus bezahlen"
 
 #: ecommerce/invoice/models.py:16
 msgid "Postpaid"
-msgstr ""
+msgstr "Im nachhinein bezahlen"
 
 #: ecommerce/invoice/models.py:17
 msgid "Bulk purchase"
@@ -1262,7 +1262,7 @@ msgstr ""
 
 #: ecommerce/invoice/models.py:23
 msgid "Fixed"
-msgstr ""
+msgstr "Fest"
 
 #: ecommerce/management/templates/management/index.html:7
 msgid "Management View"
@@ -1280,44 +1280,44 @@ msgstr "{action} ist keine gültige Aktion."
 #: ecommerce/programs/benefits.py:25
 #, python-brace-format
 msgid "{value}% program discount"
-msgstr ""
+msgstr "{value}% Rabatt"
 
 #: ecommerce/programs/benefits.py:42
 #, python-brace-format
 msgid "{value} fixed-price program discount"
-msgstr ""
+msgstr "{value} Rabatt"
 
 #: ecommerce/programs/forms.py:67
 msgid "An offer already exists for this program."
-msgstr ""
+msgstr "Es besteht bereits ein Angebot für dieses Programm."
 
 #: ecommerce/programs/forms.py:86
 #, python-brace-format
 msgid "Discount for the {program_title} {program_type} Program"
-msgstr ""
+msgstr "Rabatt für das {program_title} {program_type} Programm"
 
 #: ecommerce/programs/templates/programs/programoffer_form.html:8
 #, python-format
 msgid "Edit Program Offer: %(program_title)s"
-msgstr ""
+msgstr "Programmangebot bearbeiten: %(program_title)s"
 
 #: ecommerce/programs/templates/programs/programoffer_form.html:12
 #: ecommerce/programs/templates/programs/programoffer_form.html:45
 #: ecommerce/programs/templates/programs/programoffer_form.html:58
 #: ecommerce/programs/templates/programs/programoffer_list.html:20
 msgid "Create Program Offer"
-msgstr ""
+msgstr "Ein Programmangebot erstellen"
 
 #: ecommerce/programs/templates/programs/programoffer_form.html:28
 #: ecommerce/programs/templates/programs/programoffer_list.html:6
 #: ecommerce/programs/templates/programs/programoffer_list.html:17
 #: ecommerce/templates/edx/partials/_administration_menu.html:8
 msgid "Program Offers"
-msgstr ""
+msgstr "Programmangebote"
 
 #: ecommerce/programs/templates/programs/programoffer_form.html:43
 msgid "Edit Program Offer"
-msgstr ""
+msgstr "Programmangebot bearbeiten"
 
 #: ecommerce/programs/templates/programs/programoffer_form.html:72
 #: ecommerce/programs/templates/programs/programoffer_list.html:58
@@ -1327,19 +1327,19 @@ msgstr ""
 
 #: ecommerce/programs/templates/programs/programoffer_list.html:26
 msgid "Current program offers"
-msgstr ""
+msgstr "Aktuelle Programmangebote"
 
 #: ecommerce/programs/templates/programs/programoffer_list.html:29
 msgid "Program Title"
-msgstr ""
+msgstr "Programmtitel"
 
 #: ecommerce/programs/views.py:36
 msgid "Program offer updated!"
-msgstr ""
+msgstr "Programmangebot wurde aktualisiert!"
 
 #: ecommerce/programs/views.py:59
 msgid "Program offer created!"
-msgstr ""
+msgstr "Prgrammangebot wurde erstellt"
 
 #: ecommerce/referrals/models.py:26
 msgid "Affiliate ID"
@@ -1347,27 +1347,27 @@ msgstr ""
 
 #: ecommerce/referrals/models.py:27
 msgid "UTM Source"
-msgstr ""
+msgstr "UTM Quelle"
 
 #: ecommerce/referrals/models.py:28
 msgid "UTM Medium"
-msgstr ""
+msgstr "UTM Medium"
 
 #: ecommerce/referrals/models.py:29
 msgid "UTM Campaign"
-msgstr ""
+msgstr "UTM Kampagne"
 
 #: ecommerce/referrals/models.py:30
 msgid "UTM Term"
-msgstr ""
+msgstr "UTM Term"
 
 #: ecommerce/referrals/models.py:31
 msgid "UTM Content"
-msgstr ""
+msgstr "UTM Inhalt"
 
 #: ecommerce/referrals/models.py:32
 msgid "UTM Created At"
-msgstr ""
+msgstr "UTM erstellt bei"
 
 #: ecommerce/settings/_oscar.py:179
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:17
@@ -1403,7 +1403,7 @@ msgstr "Kategorien"
 
 #: ecommerce/settings/_oscar.py:200
 msgid "Ranges"
-msgstr ""
+msgstr "Bereiche"
 
 #: ecommerce/settings/_oscar.py:204
 msgid "Low stock alerts"
@@ -1464,23 +1464,23 @@ msgstr "Meldungen"
 
 #: ecommerce/settings/base.py:84
 msgid "English"
-msgstr ""
+msgstr "Englisch"
 
 #: ecommerce/settings/base.py:85
 msgid "Spanish"
-msgstr ""
+msgstr "Spanisch"
 
 #: ecommerce/settings/base.py:86
 msgid "Spanish (Latin American)"
-msgstr ""
+msgstr "Spanisch (Südamerika)"
 
 #: ecommerce/templates/base.html:10
 msgid "Build"
-msgstr ""
+msgstr "Erstellen"
 
 #: ecommerce/templates/base.html:71
 msgid "Version:"
-msgstr ""
+msgstr "Version:"
 
 #: ecommerce/templates/coupons/_offer_error.html:4
 #: ecommerce/templates/coupons/offer.html:5
@@ -1500,7 +1500,7 @@ msgstr ""
 
 #: ecommerce/templates/coupons/offer.html:22
 msgid "Why buy a verified certificate?"
-msgstr ""
+msgstr "Warum sollten Sie ein verifiziertes Zertifikat kaufen?"
 
 #: ecommerce/templates/coupons/offer.html:27
 msgid ""
@@ -1515,19 +1515,19 @@ msgstr ""
 msgid ""
 "A verified certificate demonstrates to future employers that you've mastered"
 " the course material."
-msgstr ""
+msgstr "Ein verifiziertes Zertifikat können Sie für Ihren Lebenslauf nutzen."
 
 #: ecommerce/templates/coupons/offer.html:32
 msgid ""
 "The certificate is officially signed and stamped by the institution that "
 "offers the course."
-msgstr ""
+msgstr "Jedes Zertifikat ist offiziell unterzeichnet und gestempelt von der jeweiligen Institution."
 
 #: ecommerce/templates/coupons/offer.html:34
 msgid ""
 "You're twelve times more likely to complete the course if you're working "
 "toward a verified certificate."
-msgstr ""
+msgstr "Sie sind sicherlich motivierter den Kurs zu beenden, wenn Sie anschließend ein verifizierten und offiziellen Nachweis dafür bekommen."
 
 #: ecommerce/templates/courses/course_app.html:5
 #: ecommerce/templates/edx/partials/_administration_menu.html:5
@@ -1715,7 +1715,7 @@ msgstr "Bestellbestätigung"
 
 #: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html:13
 msgid "For Business"
-msgstr ""
+msgstr "Für geschäftliches"
 
 #: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html:25
 #: ecommerce/templates/customer/emails/commtype_order_with_csv_body.txt:6
