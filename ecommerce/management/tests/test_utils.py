@@ -1,5 +1,3 @@
-import json
-
 import mock
 from django.db import transaction
 from django.test import override_settings
@@ -65,7 +63,7 @@ class FulfillFrozenBasketsTests(TestCase):
         basket.status = 'Frozen'
         basket.save()
         PaymentProcessorResponse.objects.create(basket=basket, transaction_id='PAY-123', processor_name='paypal',
-                                                response=json.dumps({'state': 'approved'}))
+                                                response={'state': 'approved'})
         return basket
 
     @staticmethod
@@ -95,7 +93,7 @@ class FulfillFrozenBasketsTests(TestCase):
             u'decision': u'ACCEPT',
         }
         PaymentProcessorResponse.objects.create(basket=basket, transaction_id='abc', processor_name='cybersource',
-                                                response=json.dumps(response))
+                                                response=response)
         assert FulfillFrozenBaskets().fulfill_basket(basket.id, self.site)
 
         order = Order.objects.get(number=basket.order_number)
@@ -128,7 +126,7 @@ class FulfillFrozenBasketsTests(TestCase):
         """ Test utility against multiple payment processor responses."""
         basket = self._dummy_basket_data()
         PaymentProcessorResponse.objects.create(basket=basket, transaction_id='abc', processor_name='cybersource',
-                                                response=json.dumps({u'decision': u'ACCEPT'}))
+                                                response={u'decision': u'ACCEPT'})
         assert FulfillFrozenBaskets().fulfill_basket(basket.id, self.site)
 
     def test_no_successful_transaction(self):
@@ -219,6 +217,6 @@ class FulfillFrozenBasketsTests(TestCase):
         basket.save()
 
         PaymentProcessorResponse.objects.create(basket=basket, transaction_id='PAY-123', processor_name='paypal',
-                                                response=json.dumps({'state': 'approved'}))
+                                                response={'state': 'approved'})
         with mock.patch('oscar.apps.offer.applicator.Applicator.apply', side_effect=ValueError):
             assert FulfillFrozenBaskets().fulfill_basket(basket.id, self.site)

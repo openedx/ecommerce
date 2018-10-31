@@ -1,4 +1,3 @@
-import json
 import logging
 
 from django.db.models import Q
@@ -75,19 +74,59 @@ def refund_basket_transactions(site, basket_ids):
 
 class FulfillFrozenBaskets(EdxOrderPlacementMixin):
 
-    def fulfill_basket(self, basket_id, site):
-
-        logger.info('Trying to complete order for frozen basket %d', basket_id)
-
+    @staticmethod
+    def get_valid_basket(basket_id):
+        """
+        Checks if basket id is valid.
+        :param basket_id: basket's id
+        :return: basket object if valid otherwise None
+        """
         # Validate the basket.
         try:
             basket = Basket.objects.get(id=basket_id)
         except Basket.DoesNotExist:
             logger.info('Basket %d does not exist', basket_id)
-            return False
+            return None
 
         # Make sure basket is Frozen which means payment was done.
         if basket.status != basket.FROZEN:
+            return None
+
+        return basket
+
+    @staticmethod
+    def get_payment_notification(basket):
+        """
+        Gets payment notifications for basket. logs in case of no successful
+        payment notification or multiple successful payment notifications.
+        :return: first successful payment notification or None if no successful
+        payment notification exists.
+        """
+        # Filter the successful payment processor response which in case
+        # of Cybersource includes "u'decision': u'ACCEPT'" and in case of
+        # Paypal includes "u'state': u'approved'".
+        successful_transaction = basket.paymentprocessorresponse_set.filter(
+            Q(response__contains='ACCEPT') | Q(response__contains='approved')
+        )
+
+        # In case of no successful transactions log and return none.
+        if not successful_transaction:
+            logger.info('Basket %d does not have any successful payment response', basket.id)
+            return None
+
+        # Check and log if multiple payment notifications found
+        unique_transaction_ids = set([response.transaction_id for response in successful_transaction])
+        if len(unique_transaction_ids) > 1:
+            logger.warning('Basket %d has more than one successful transaction id, using the first one', basket.id)
+        return successful_transaction[0]
+
+    def fulfill_basket(self, basket_id, site):
+
+        logger.info('Trying to complete order for frozen basket %d', basket_id)
+
+        basket = self.get_valid_basket(basket_id)
+
+        if not basket:
             return False
 
         # We need to check if an order for basket exists.
@@ -109,36 +148,25 @@ class FulfillFrozenBaskets(EdxOrderPlacementMixin):
             except ValueError:
                 basket.clear_vouchers()
 
-            # Filter the successful payment processor response which in case
-            # of Cybersource includes "u'decision': u'ACCEPT'" and in case of
-            # Paypal includes "u'state': u'approved'".
-            successful_transaction = basket.paymentprocessorresponse_set.filter(
-                Q(response__contains='ACCEPT') | Q(response__contains='approved')
-            )
-
-            # In case of no successful transactions log and stop the process.
-            if not successful_transaction:
-                logger.info('Basket %d does not have any successful payment response', basket_id)
+            payment_notification = self.get_payment_notification(basket)
+            if not payment_notification:
                 return False
 
-            unique_transaction_ids = set([response.transaction_id for response in successful_transaction])
-            if len(unique_transaction_ids) > 1:
-                logger.warning('Basket %d has more than one successful transaction id, using the first one', basket_id)
+            if payment_notification.transaction_id.startswith('PAY'):
+                card_number = 'Paypal Account'
+                card_type = None
+            else:
+                card_number = payment_notification.response['req_card_number']
+                card_type = CYBERSOURCE_CARD_TYPE_MAP.get(payment_notification.response['req_card_type'])
 
-            successful_payment_notification = successful_transaction[0]
-
-            self.payment_processor = _get_payment_processor(site, successful_payment_notification.processor_name)
+            self.payment_processor = _get_payment_processor(site, payment_notification.processor_name)
             # Create handled response
             handled_response = HandledProcessorResponse(
-                transaction_id=successful_payment_notification.transaction_id,
+                transaction_id=payment_notification.transaction_id,
                 total=basket.total_excl_tax,
                 currency=basket.currency,
-                card_number=json.loads(successful_payment_notification.response).get(
-                    'req_card_number', 'Paypal Account'
-                ),
-                card_type=CYBERSOURCE_CARD_TYPE_MAP.get(
-                    json.loads(successful_payment_notification.response).get('req_card_type'), None
-                )
+                card_number=card_number,
+                card_type=card_type
             )
 
             # Record Payment and try to place order
