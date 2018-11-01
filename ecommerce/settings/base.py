@@ -207,6 +207,9 @@ TEMPLATES = [
 # MIDDLEWARE CONFIGURATION
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#middleware-classes
 MIDDLEWARE_CLASSES = (
+    # NOTE: This middleware is used to debug issues why incorrect
+    # session is loaded, would be removed after the fix.
+    'ecommerce.social_auth.middleware.LogInspectResponseSessionMiddleware',
     'edx_django_utils.cache.middleware.RequestCacheMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.locale.LocaleMiddleware',
@@ -224,12 +227,18 @@ MIDDLEWARE_CLASSES = (
     'ecommerce.extensions.basket.middleware.BasketMiddleware',
     'django.contrib.flatpages.middleware.FlatpageFallbackMiddleware',
     'social_django.middleware.SocialAuthExceptionMiddleware',
+    # NOTE: This middleware is used to debug issues why incorrect
+    # session is loaded, would be removed after the fix.
+    'ecommerce.social_auth.middleware.LogStateMissingExceptionMiddleware',
     'threadlocals.middleware.ThreadLocalMiddleware',
     'ecommerce.theming.middleware.CurrentSiteThemeMiddleware',
     'ecommerce.theming.middleware.ThemePreviewMiddleware',
     'edx_django_utils.cache.middleware.TieredCacheMiddleware',
     'edx_rest_framework_extensions.middleware.RequestMetricsMiddleware',
     'edx_rest_framework_extensions.auth.jwt.middleware.EnsureJWTAuthSettingsMiddleware',
+    # NOTE: This middleware is used to debug issues why incorrect
+    # session is loaded, would be removed after the fix.
+    'ecommerce.social_auth.middleware.LogInspectRequestSessionMiddleware',
 )
 # END MIDDLEWARE CONFIGURATION
 
