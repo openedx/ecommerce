@@ -161,6 +161,8 @@ class ProgramCourseRunSeatsCondition(SingleItemConsumptionConditionMixin, Condit
             # does NOT affect the actual basket, just our copy of its SKUs.
             basket_skus = diff
 
+        logger.info('Basket {%d} is eligible for program offer {%d}', basket.id, offer.id)
+
         return True
 
     def can_apply_condition(self, line):
@@ -184,4 +186,5 @@ class ProgramCourseRunSeatsCondition(SingleItemConsumptionConditionMixin, Condit
                 continue
             line_tuples.append((price, line))
 
+        logger.info('Basket {%d} have applicable lines that can be consumed by offer {%d}', basket.id, offer.id)
         return sorted(line_tuples, reverse=most_expensive_first, key=operator.itemgetter(0))
