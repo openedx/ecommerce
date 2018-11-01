@@ -12,6 +12,7 @@ from selenium.webdriver.support.wait import WebDriverWait
 
 from ecommerce.extensions.refund.status import REFUND
 from ecommerce.extensions.refund.tests.mixins import RefundTestMixin
+from ecommerce.tests.testcases import LiveServerTestCase
 
 Refund = get_model('refund', 'Refund')
 
@@ -210,3 +211,19 @@ class RefundAcceptanceTestMixin(RefundTestMixin):
                 self.selenium.find_element_by_css_selector,
                 self.deny_button_selector
             )
+
+
+class RefundListViewTests(RefundAcceptanceTestMixin, LiveServerTestCase):
+    """Acceptance tests of the refund list view."""
+
+    def setUp(self):
+        super(RefundListViewTests, self).setUp()
+        self.path = reverse('dashboard:refunds:list')
+
+
+class RefundDetailViewTests(RefundAcceptanceTestMixin, LiveServerTestCase):
+    """Acceptance tests of the refund detail view."""
+
+    def setUp(self):
+        super(RefundDetailViewTests, self).setUp()
+        self.path = reverse('dashboard:refunds:detail', args=[self.refund.id])
