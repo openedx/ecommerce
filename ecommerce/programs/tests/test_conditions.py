@@ -292,3 +292,24 @@ class ProgramCourseRunSeatsConditionTests(ProgramTestMixin, TestCase):
 
         self.assertEqual(return_value, [])
         self.assertEquals(mock_endpoint.get.call_count, 0, 'Endpoint should NOT be called after caching.')
+
+    @httpretty.activate
+    def test_is_satisfied_with_non_active_program(self):
+        """
+        Is satisfied should return false if program is not active.
+        """
+        offer = factories.ProgramOfferFactory(partner=self.partner, condition=self.condition)
+        basket = factories.BasketFactory(site=self.site, owner=factories.UserFactory())
+        program = self.mock_program_detail_endpoint(
+            self.condition.program_uuid,
+            self.site_configuration.discovery_api_url,
+            status="retired"
+        )
+        for course in program['courses']:
+            course_run = Course.objects.get(id=course['course_runs'][0]['key'])
+            for seat in course_run.seat_products:
+                if seat.attr.id_verification_required:
+                    basket.add_product(seat)
+                    break
+
+        self.assertFalse(self.condition.is_satisfied(offer, basket))
