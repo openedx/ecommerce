@@ -118,7 +118,7 @@ class ProgramCourseRunSeatsCondition(SingleItemConsumptionConditionMixin, Condit
         except (HttpNotFoundError, SlumberBaseException, Timeout):
             return False
 
-        if program:
+        if program and program['status'] == 'active':
             applicable_seat_types = program['applicable_seat_types']
         else:
             return False
