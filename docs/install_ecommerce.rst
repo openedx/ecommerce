@@ -28,6 +28,14 @@ Set Up a Virtual Environment
 
    For more information, see `Virtual Environments`_.
 
+#. (Optional) If your server is behind a proxy, set the `GECKODRIVER_CDNURL`
+   in your environment. You need to download `geckodriver` first and
+   place it in a server inside your network:
+
+   [Download according to your server specifications](https://github.com/vladikoff/node-geckodriver/blob/v1.7.1/index.js#L19-L23)
+
+   Add the `GECKODRIVER_CDNURL` setting to the `/etc/environment` file.
+
 #. Run the following command to install dependencies.
 
    .. code-block:: bash
