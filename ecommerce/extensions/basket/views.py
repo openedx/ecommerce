@@ -295,7 +295,6 @@ class BasketSummaryView(BasketView):
             # Get variables for the switch link that toggles from enrollment codes and seat.
             switch_link_text, partner_sku = get_basket_switch_data(line.product)
 
-            # todo: Remove this commit after LEARNER-6578 is resolved.
             try:
                 if line.has_discount:
                     benefit = self.request.basket.applied_offers().values()[0].benefit
@@ -305,11 +304,6 @@ class BasketSummaryView(BasketView):
             except IndexError:
                 logger.exception('Basket {%d} line{%d} has discount value {%s} ', self.request.basket.id, line.id,
                                  line.discount_value)
-                Applicator().apply(self.request.basket, self.request.user, self.request)
-                logger.info('Basket {%d} line{%d} has discount value {%s} after applicator ', self.request.basket.id,
-                            line.id, line.discount_value)
-                logger.info('Basket {%d} has {%d} applied offers', self.request.basket.id,
-                            len(self.request.basket.applied_offers().values()))
                 benefit_value = None
 
             line_data.update({
