@@ -61,7 +61,8 @@ class OrderListViewTests(AccessTokenMixin, ThrottlingMixin, TestCase):
 
     def test_with_orders(self):
         """
-        The view should return a list of the user's orders, sorted reverse chronologically, filtered by current site.
+        The view should return a list of the user's orders, sorted reverse chronologically,
+        filtered by current site's partner.
         """
         order = create_order(site=self.site, user=self.user)
         site = SiteConfigurationFactory().site
@@ -156,6 +157,46 @@ class OrderListViewTests(AccessTokenMixin, ThrottlingMixin, TestCase):
             response.data['results'][0],
             OrderSerializer(order, context={'request': RequestFactory(SERVER_NAME=self.site.domain).get('/')}).data
         )
+
+    def test_orders_with_multiple_sites(self):
+        """
+        The view should return a list of the user's orders for multiple sites against same partner.
+        """
+        order = create_order(site=self.site, user=self.user)
+        second_order = create_order(site=self.site, user=self.user)
+        response = self.client.get(self.path, HTTP_AUTHORIZATION=self.token)
+        self.assertEqual(response.status_code, 200)
+        content = json.loads(response.content)
+
+        self.assertEqual(Order.objects.count(), 2)
+        self.assertEqual(content['count'], 2)
+        self.assertEqual(content['results'][0]['number'], unicode(second_order.number))
+        self.assertEqual(content['results'][1]['number'], unicode(order.number))
+
+        # Configure new site for same partner.
+        domain = 'testserver.fake.internal'
+        site_configuration = SiteConfigurationFactory(
+            from_email='from@example.com',
+            oauth_settings={
+                'SOCIAL_AUTH_EDX_OIDC_KEY': 'key',
+                'SOCIAL_AUTH_EDX_OIDC_SECRET': 'secret'
+            },
+            partner=self.partner,
+            segment_key='fake_segment_key',
+            site__domain=domain,
+            base_cookie_domain=domain,
+        )
+
+        self.request.site = site_configuration.site
+        self.client = self.client_class(SERVER_NAME=domain)
+
+        response = self.client.get(self.path, HTTP_AUTHORIZATION=self.token)
+        self.assertEqual(response.status_code, 200)
+        content = json.loads(response.content)
+
+        self.assertEqual(content['count'], 2)
+        self.assertEqual(content['results'][0]['number'], unicode(second_order.number))
+        self.assertEqual(content['results'][1]['number'], unicode(order.number))
 
 
 @ddt.ddt

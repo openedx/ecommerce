@@ -41,7 +41,7 @@ class OrderViewSet(viewsets.ReadOnlyModelViewSet):
 
             queryset = queryset.filter(user=user)
 
-        return queryset.filter(site=self.request.site)
+        return queryset.filter(partner=self.request.site.siteconfiguration.partner)
 
     @detail_route(methods=['put', 'patch'])
     def fulfill(self, request, number=None):  # pylint: disable=unused-argument
