@@ -35,8 +35,6 @@ define([
 
             template: _.template(CouponFormTemplate),
 
-            seatTypes: [],
-
             codeTypes: [
                 {
                     value: 'Enrollment code',
@@ -116,9 +114,6 @@ define([
                 },
                 'input[name=benefit_value]': {
                     observe: 'benefit_value'
-                },
-                'input[name=client]': {
-                    observe: 'client'
                 },
                 'input[name=quantity]': {
                     observe: 'quantity'
@@ -247,7 +242,6 @@ define([
                     this.editableAttributes = [
                         'benefit_value',
                         'category',
-                        'client',
                         'end_date',
                         'enterprise_customer',
                         'enterprise_customer_catalog',

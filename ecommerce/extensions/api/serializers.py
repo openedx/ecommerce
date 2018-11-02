@@ -68,6 +68,12 @@ def retrieve_condition(obj):
     return retrieve_offer(obj).condition
 
 
+def retrieve_enterprise_condition(obj):
+    """Helper method to retrieve the benefit from voucher. """
+    enterprise_offer = retrieve_enterprise_offer(obj)
+    return enterprise_offer and enterprise_offer.condition
+
+
 def retrieve_end_date(obj):
     """Helper method to retrieve the voucher end datetime. """
     return retrieve_voucher(obj).end_datetime
@@ -76,6 +82,11 @@ def retrieve_end_date(obj):
 def retrieve_offer(obj):
     """Helper method to retrieve the offer from coupon. """
     return retrieve_voucher(obj).best_offer
+
+
+def retrieve_enterprise_offer(obj):
+    """Helper method to retrieve the offer from coupon. """
+    return retrieve_voucher(obj).enterprise_offer
 
 
 def retrieve_range(obj):
@@ -618,13 +629,13 @@ class EnterpriseCouponListSerializer(serializers.ModelSerializer):
 
     def get_enterprise_customer(self, obj):
         """ Get the Enterprise Customer UUID attached to a coupon. """
-        offer_condition = retrieve_condition(obj)
-        return offer_condition.enterprise_customer_uuid
+        offer_condition = retrieve_enterprise_condition(obj)
+        return offer_condition and offer_condition.enterprise_customer_uuid
 
     def get_enterprise_customer_catalog(self, obj):
         """ Get the Enterprise Customer Catalog UUID attached to a coupon. """
-        offer_condition = retrieve_condition(obj)
-        return offer_condition.enterprise_customer_catalog_uuid
+        offer_condition = retrieve_enterprise_condition(obj)
+        return offer_condition and offer_condition.enterprise_customer_catalog_uuid
 
     def get_code_status(self, obj):
         start_date = retrieve_start_date(obj)

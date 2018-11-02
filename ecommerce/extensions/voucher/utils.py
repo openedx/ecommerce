@@ -307,9 +307,24 @@ def generate_coupon_report(coupon_vouchers):
     return field_names, rows
 
 
+def generate_offer_name(coupon_id, benefit_type, benefit_value, offer_number=None, is_enterprise=False):
+    offer_name = "Coupon [{}]-{}-{}".format(coupon_id, benefit_type, benefit_value)
+    if offer_number:
+        offer_name = "{} [{}]".format(offer_name, offer_number)
+    if is_enterprise:
+        offer_name = offer_name + " ENT Offer"
+    return offer_name
+
+
 def _get_or_create_offer(
-        product_range, benefit_type, benefit_value, coupon_id=None,
-        max_uses=None, offer_number=None, email_domains=None, program_uuid=None, site=None
+        product_range,
+        benefit_type,
+        benefit_value,
+        offer_name,
+        max_uses,
+        site,
+        email_domains=None,
+        program_uuid=None
 ):
     """
     Return an offer for a catalog with condition and benefit.
@@ -358,7 +373,7 @@ def _get_or_create_offer(
                 offer_benefit.value = benefit_value
                 offer_benefit.save()
 
-            offer_name = "Coupon [{}]-{}".format(coupon_id, offer_benefit.name)
+            offer_name = "{}-{}".format(offer_name, offer_benefit.name)
         else:
             offer_benefit, __ = Benefit.objects.get_or_create(
                 range=product_range,
@@ -366,15 +381,11 @@ def _get_or_create_offer(
                 value=Decimal(benefit_value),
                 max_affected_items=1,
             )
-            offer_name = "Coupon [{}]-{}-{}".format(coupon_id, offer_benefit.type, offer_benefit.value)
 
     except (TypeError, DecimalException):  # If the benefit_value parameter is not sent TypeError will be raised
         log_message_and_raise_validation_error(
             'Failed to create Benefit. Benefit value must be a positive number or 0.'
         )
-
-    if offer_number:
-        offer_name = "{} [{}]".format(offer_name, offer_number)
 
     offer_kwargs = {
         'offer_type': ConditionalOffer.VOUCHER,
@@ -391,9 +402,15 @@ def _get_or_create_offer(
     return offer
 
 
-def _get_or_create_enterprise_offer(benefit_type, benefit_value, enterprise_customer,
-                                    enterprise_customer_catalog, coupon_id=None, max_uses=None, offer_number=None,
-                                    email_domains=None, site=None):
+def get_or_create_enterprise_offer(
+        benefit_type,
+        benefit_value,
+        enterprise_customer,
+        enterprise_customer_catalog,
+        offer_name,
+        site,
+        max_uses=None,
+        email_domains=None):
 
     enterprise_customer_object = get_enterprise_customer(site, enterprise_customer) if site else {}
     enterprise_customer_name = enterprise_customer_object.get('name', '')
@@ -412,10 +429,6 @@ def _get_or_create_enterprise_offer(benefit_type, benefit_value, enterprise_cust
         value=benefit_value,
         max_affected_items=1,
     )
-
-    offer_name = "Coupon [{}]-{}-{} ENT Offer".format(coupon_id, benefit_type, benefit_value)
-    if offer_number:
-        offer_name = "{} [{}] ENT Offer".format(offer_name, offer_number)
 
     offer_kwargs = {
         'offer_type': ConditionalOffer.VOUCHER,
@@ -459,7 +472,7 @@ def _generate_code_string(length):
     return voucher_code
 
 
-def _create_new_voucher(code, end_datetime, name, offer, start_datetime, voucher_type):
+def create_new_voucher(code, end_datetime, name, start_datetime, voucher_type):
     """
     Creates a voucher.
 
@@ -476,15 +489,51 @@ def _create_new_voucher(code, end_datetime, name, offer, start_datetime, voucher
     Returns:
         Voucher
     """
-    if offer.benefit.type == Benefit.PERCENTAGE and offer.benefit.value == 100 and code:
-        log_message_and_raise_validation_error('Failed to create Voucher. Code may not be set for enrollment coupon.')
     voucher_code = code or _generate_code_string(settings.VOUCHER_CODE_LENGTH)
+
+    voucher = Voucher.objects.create(
+        name=name[:128],
+        code=voucher_code,
+        usage=voucher_type,
+        start_datetime=dateutil.parser.parse(start_datetime),
+        end_datetime=dateutil.parser.parse(end_datetime),
+    )
+
+    return voucher
+
+
+def validate_voucher_fields(
+        max_uses,
+        voucher_type,
+        benefit_type,
+        benefit_value,
+        code,
+        end_datetime,
+        start_datetime):
+    # Maximum number of uses can be set for each voucher type and disturb
+    # the predefined behaviours of the different voucher types. Therefor
+    # here we enforce that the max_uses variable can't be used for SINGLE_USE
+    # voucher types.
+    if max_uses is not None:
+        if voucher_type == Voucher.SINGLE_USE:
+            log_message_and_raise_validation_error(
+                'Failed to create Voucher. max_uses field cannot be set for voucher type [{voucher_type}].'.format(
+                    voucher_type=Voucher.SINGLE_USE
+                )
+            )
+        try:
+            _ = int(max_uses)
+        except ValueError:
+            raise log_message_and_raise_validation_error('Failed to create Voucher. max_uses field must be a number.')
+
+    if benefit_type == Benefit.PERCENTAGE and benefit_value == 100 and code:
+        log_message_and_raise_validation_error('Failed to create Voucher. Code may not be set for enrollment coupon.')
 
     if not end_datetime:
         log_message_and_raise_validation_error('Failed to create Voucher. Voucher end datetime field must be set.')
     elif not isinstance(end_datetime, datetime.datetime):
         try:
-            end_datetime = dateutil.parser.parse(end_datetime)
+            _ = dateutil.parser.parse(end_datetime)
         except (AttributeError, ValueError, TypeError):
             log_message_and_raise_validation_error(
                 'Failed to create Voucher. Voucher end datetime value [{date}] is invalid.'.format(date=end_datetime)
@@ -494,22 +543,68 @@ def _create_new_voucher(code, end_datetime, name, offer, start_datetime, voucher
         log_message_and_raise_validation_error('Failed to create Voucher. Voucher start datetime field must be set.')
     elif not isinstance(start_datetime, datetime.datetime):
         try:
-            start_datetime = dateutil.parser.parse(start_datetime)
+            _ = dateutil.parser.parse(start_datetime)
         except (AttributeError, ValueError, TypeError):
             log_message_and_raise_validation_error(
                 'Failed to create Voucher. Voucher start datetime [{date}] is invalid.'.format(date=start_datetime)
             )
 
-    voucher = Voucher.objects.create(
-        name=name[:128],
-        code=voucher_code,
-        usage=voucher_type,
-        start_datetime=start_datetime,
-        end_datetime=end_datetime
-    )
-    voucher.offers.add(offer)
 
-    return voucher
+def create_enterprise_vouchers(
+        voucher_type,
+        quantity,
+        coupon_id,
+        benefit_type,
+        benefit_value,
+        enterprise_customer,
+        enterprise_customer_catalog,
+        max_uses,
+        email_domains,
+        site,
+        end_datetime,
+        start_datetime,
+        code,
+        name
+):
+    # Validation
+    validate_voucher_fields(
+        max_uses,
+        voucher_type,
+        benefit_type,
+        benefit_value,
+        code,
+        end_datetime,
+        start_datetime)
+
+    offers = []
+    num_of_offers = quantity if voucher_type in (Voucher.MULTI_USE, Voucher.ONCE_PER_CUSTOMER) else 1
+    for num in range(num_of_offers):
+        offer_name = generate_offer_name(coupon_id, benefit_type, benefit_value, num, is_enterprise=True)
+        offer = get_or_create_enterprise_offer(
+            benefit_type=benefit_type,
+            benefit_value=benefit_value,
+            enterprise_customer=enterprise_customer,
+            enterprise_customer_catalog=enterprise_customer_catalog,
+            max_uses=max_uses,
+            offer_name=offer_name,
+            email_domains=email_domains,
+            site=site
+        )
+        offers.append(offer)
+
+    vouchers = []
+    for i in range(quantity):
+        voucher = create_new_voucher(
+            end_datetime=end_datetime,
+            start_datetime=start_datetime,
+            voucher_type=voucher_type,
+            code=code,
+            name=name
+        )
+        voucher.offers.add(offers[i] if len(offers) > 1 else offers[0])
+        vouchers.append(voucher)
+
+    return vouchers
 
 
 def create_vouchers(
@@ -568,21 +663,15 @@ def create_vouchers(
     offers = []
     enterprise_offers = []
 
-    # Maximum number of uses can be set for each voucher type and disturb
-    # the predefined behaviours of the different voucher types. Therefor
-    # here we enforce that the max_uses variable can't be used for SINGLE_USE
-    # voucher types.
-    if max_uses is not None:
-        if voucher_type == Voucher.SINGLE_USE:
-            log_message_and_raise_validation_error(
-                'Failed to create Voucher. max_uses field cannot be set for voucher type [{voucher_type}].'.format(
-                    voucher_type=Voucher.SINGLE_USE
-                )
-            )
-        try:
-            max_uses = int(max_uses)
-        except ValueError:
-            raise log_message_and_raise_validation_error('Failed to create Voucher. max_uses field must be a number.')
+    # Validation
+    validate_voucher_fields(
+        max_uses,
+        voucher_type,
+        benefit_type,
+        benefit_value,
+        code,
+        end_datetime,
+        start_datetime)
 
     if _range:
         # Enrollment codes use a custom range.
@@ -614,18 +703,15 @@ def create_vouchers(
     # offer because the usage is tied to the offer so that a usage on one voucher would
     # mean all vouchers will have their usage decreased by one, hence each voucher needs
     # its own offer to keep track of its own usages without interfering with others.
-    multi_offer = True if (
-        voucher_type == Voucher.MULTI_USE or voucher_type == Voucher.ONCE_PER_CUSTOMER
-    ) else False
-    num_of_offers = quantity if multi_offer else 1
+    num_of_offers = quantity if voucher_type in (Voucher.MULTI_USE, Voucher.ONCE_PER_CUSTOMER) else 1
     for num in range(num_of_offers):
+        offer_name = generate_offer_name(coupon.id, benefit_type, benefit_value, num)
         offer = _get_or_create_offer(
             product_range=product_range,
             benefit_type=benefit_type,
             benefit_value=benefit_value,
             max_uses=max_uses,
-            coupon_id=coupon.id,
-            offer_number=num,
+            offer_name=offer_name,
             email_domains=email_domains,
             program_uuid=program_uuid,
             site=site
@@ -636,30 +722,30 @@ def create_vouchers(
         # and redemption logic to use enterprise conditional offers when appropriate.
         # This and the surrounding code will be refactored at that point.
         if enterprise_customer:
-            enterprise_offer = _get_or_create_enterprise_offer(
+            offer_name = generate_offer_name(coupon.id, benefit_type, benefit_value, num, is_enterprise=True)
+            enterprise_offer = get_or_create_enterprise_offer(
                 benefit_type=benefit_type,
                 benefit_value=benefit_value,
                 enterprise_customer=enterprise_customer,
                 enterprise_customer_catalog=enterprise_customer_catalog,
                 max_uses=max_uses,
-                coupon_id=coupon.id,
-                offer_number=num,
+                offer_name=offer_name,
                 email_domains=email_domains,
                 site=site
             )
             enterprise_offers.append(enterprise_offer)
 
     for i in range(quantity):
-        voucher = _create_new_voucher(
+        voucher = create_new_voucher(
             end_datetime=end_datetime,
-            offer=offers[i] if multi_offer else offers[0],
             start_datetime=start_datetime,
             voucher_type=voucher_type,
             code=code,
             name=name
         )
+        voucher.offers.add(offers[i] if len(offers) > 1 else offers[0])
         if enterprise_customer:
-            voucher.offers.add(enterprise_offers[i] if multi_offer else enterprise_offers[0])
+            voucher.offers.add(enterprise_offers[i] if len(enterprise_offers) > 1 else enterprise_offers[0])
         vouchers.append(voucher)
 
     return vouchers
@@ -707,7 +793,7 @@ def get_voucher_discount_info(benefit, price):
         }
 
 
-def update_voucher_with_enterprise_offer(offer, benefit_value, benefit_type, coupon, enterprise_customer,
+def update_voucher_with_enterprise_offer(offer, benefit_value, enterprise_customer, benefit_type=None,
                                          max_uses=None, email_domains=None, enterprise_catalog=None, site=None):
     """
     Update voucher with enteprise offer.
@@ -729,19 +815,21 @@ def update_voucher_with_enterprise_offer(offer, benefit_value, benefit_type, cou
     Returns:
         Offer
     """
-    return _get_or_create_enterprise_offer(
-        benefit_value=benefit_value,
-        benefit_type=benefit_type,
-        enterprise_customer=enterprise_customer,
-        enterprise_customer_catalog=enterprise_catalog,
-        coupon_id=coupon.id,
-        max_uses=max_uses,
-        email_domains=email_domains,
-        site=offer.site or site,
+    return get_or_create_enterprise_offer(
+        benefit_value=benefit_value or offer.benefit.value,
+        benefit_type=benefit_type or offer.benefit.type or getattr(
+            offer.benefit.proxy(), 'benefit_class_type', None
+        ),
+        enterprise_customer=enterprise_customer or offer.condition.enterprise_customer_uuid,
+        enterprise_customer_catalog=enterprise_catalog or offer.condition.enterprise_customer_catalog_uuid,
+        offer_name=offer.name,
+        max_uses=max_uses or offer.max_global_applications,
+        email_domains=email_domains or offer.email_domains,
+        site=site or offer.site,
     )
 
 
-def update_voucher_offer(offer, benefit_value, benefit_type, coupon, max_uses=None, email_domains=None,
+def update_voucher_offer(offer, benefit_value, benefit_type=None, max_uses=None, email_domains=None,
                          program_uuid=None, site=None):
     """
     Update voucher offer with new benefit value.
@@ -750,7 +838,6 @@ def update_voucher_offer(offer, benefit_value, benefit_type, coupon, max_uses=No
         offer (Offer): Offer associated with a voucher.
         benefit_value (Decimal): Value of benefit associated with vouchers.
         benefit_type (str): Type of benefit associated with vouchers.
-        coupon (Product): The coupon whos offer(s) is updated.
 
     Kwargs:
         max_uses (int): number of maximum global application number an offer can have.
@@ -765,13 +852,15 @@ def update_voucher_offer(offer, benefit_value, benefit_type, coupon, max_uses=No
 
     return _get_or_create_offer(
         product_range=offer.benefit.range,
-        benefit_value=benefit_value,
-        benefit_type=benefit_type,
-        coupon_id=coupon.id,
-        max_uses=max_uses,
-        email_domains=email_domains,
-        program_uuid=program_uuid,
-        site=offer.site or site,
+        benefit_value=benefit_value or offer.benefit.value,
+        benefit_type=benefit_type or offer.benefit.type or getattr(
+            offer.benefit.proxy(), 'benefit_class_type', None
+        ),
+        offer_name=offer.name,
+        max_uses=max_uses or offer.max_global_applications,
+        email_domains=email_domains or offer.email_domains,
+        program_uuid=program_uuid or offer.condition.program_uuid,
+        site=site or offer.site,
     )
 
 
