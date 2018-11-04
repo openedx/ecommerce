@@ -6,7 +6,7 @@
 # Translators:
 # Clinton Blackburn <clinton.blackburn@gmail.com>, 2016
 # Hans Magnusson <hansgmagnusson@icloud.com>, 2016
-# Kristoffer Grundström <kristoffer.grundstrom1983@gmail.com>, 2015
+# Kristoffer Grundström <hamnisdude@gmail.com>, 2015
 # Thomas Ochman <thomas@nocebo.se>, 2018
 msgid ""
 msgstr ""
