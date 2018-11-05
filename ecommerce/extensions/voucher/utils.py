@@ -21,7 +21,7 @@ from oscar.templatetags.currency_filters import currency
 from ecommerce.core.url_utils import get_ecommerce_url
 from ecommerce.core.utils import log_message_and_raise_validation_error
 from ecommerce.enterprise.benefits import BENEFIT_MAP as ENTERPRISE_BENEFIT_MAP
-from ecommerce.enterprise.conditions import EnterpriseCustomerCondition
+from ecommerce.enterprise.conditions import AssignableEnterpriseCustomerCondition
 from ecommerce.enterprise.utils import get_enterprise_customer
 from ecommerce.extensions.api import exceptions
 from ecommerce.extensions.offer.models import OFFER_PRIORITY_VOUCHER
@@ -416,7 +416,7 @@ def get_or_create_enterprise_offer(
     enterprise_customer_name = enterprise_customer_object.get('name', '')
 
     condition, __ = Condition.objects.get_or_create(
-        proxy_class=class_path(EnterpriseCustomerCondition),
+        proxy_class=class_path(AssignableEnterpriseCustomerCondition),
         enterprise_customer_uuid=enterprise_customer,
         enterprise_customer_name=enterprise_customer_name,
         enterprise_customer_catalog_uuid=enterprise_customer_catalog,
@@ -553,6 +553,63 @@ def validate_voucher_fields(
             log_message_and_raise_validation_error(
                 'Failed to create Voucher. Voucher start datetime [{date}] is invalid.'.format(date=start_datetime)
             )
+
+
+def create_enterprise_vouchers(
+        voucher_type,
+        quantity,
+        coupon_id,
+        benefit_type,
+        benefit_value,
+        enterprise_customer,
+        enterprise_customer_catalog,
+        max_uses,
+        email_domains,
+        site,
+        end_datetime,
+        start_datetime,
+        code,
+        name
+):
+    # Validation
+    validate_voucher_fields(
+        max_uses,
+        voucher_type,
+        benefit_type,
+        benefit_value,
+        code,
+        end_datetime,
+        start_datetime)
+
+    offers = []
+    num_of_offers = int(quantity) if voucher_type in (Voucher.MULTI_USE, Voucher.ONCE_PER_CUSTOMER) else 1
+    for num in range(num_of_offers):
+        offer_name = generate_offer_name(coupon_id, benefit_type, benefit_value, num, is_enterprise=True)
+        offer = get_or_create_enterprise_offer(
+            benefit_type=benefit_type,
+            benefit_value=benefit_value,
+            enterprise_customer=enterprise_customer,
+            enterprise_customer_catalog=enterprise_customer_catalog,
+            max_uses=max_uses,
+            offer_name=offer_name,
+            email_domains=email_domains,
+            site=site
+        )
+        offers.append(offer)
+
+    vouchers = []
+    for i in range(quantity):
+        voucher = create_new_voucher(
+            end_datetime=end_datetime,
+            start_datetime=start_datetime,
+            voucher_type=voucher_type,
+            code=code,
+            name=name
+        )
+        voucher.offers.add(offers[i] if len(offers) > 1 else offers[0])
+        vouchers.append(voucher)
+
+    return vouchers
 
 
 def create_vouchers(
