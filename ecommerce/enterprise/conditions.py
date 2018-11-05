@@ -155,3 +155,10 @@ class EnterpriseCustomerCondition(ConditionWithoutRangeMixin, SingleItemConsumpt
             catalog = None
 
         return catalog
+
+
+class AssignableEnterpriseCustomerCondition(EnterpriseCustomerCondition):
+    """An enterprise condition that can be redeemed by one or more assigned users."""
+    class Meta(object):
+        app_label = 'enterprise'
+        proxy = True
