@@ -33,12 +33,16 @@ define([
                 this._super(); // eslint-disable-line no-underscore-dangle
             },
 
+            getFormView: function() {
+                return this.formView || new CouponFormView({editing: this.editing, model: this.model});
+            },
+
             render: function() {
                 var $html,
                     data = this.model.attributes;
 
                 // The form should be instantiated only once.
-                this.formView = this.formView || new CouponFormView({editing: this.editing, model: this.model});
+                this.formView = this.getFormView();
 
                 // Render the basic page layout
                 data.editing = this.editing;

@@ -56,45 +56,19 @@ define([
 
             catalogTypes: CATALOG_TYPES,
 
-            validation: {
+            baseCouponValidation: {
                 benefit_value: {
                     pattern: 'number',
                     required: function() {
                         return this.get('coupon_type') === 'Discount code';
                     }
                 },
-                catalog_query: {
-                    required: function() {
-                        return this.get('catalog_type') === CATALOG_TYPES.multiple_courses;
-                    }
-                },
-                course_catalog: {
-                    required: function() {
-                        return this.get('catalog_type') === CATALOG_TYPES.catalog;
-                    }
-                },
                 category: {required: true},
-                client: {required: true},
                 code: {
                     pattern: /^[a-zA-Z0-9]+$/,
                     required: false,
                     rangeLength: [1, 16],
                     msg: gettext('This field must be empty or contain 1-16 alphanumeric characters.')
-                },
-                course_id: {
-                    pattern: 'courseId',
-                    msg: gettext('A valid course ID is required'),
-                    required: function() {
-                        return this.get('catalog_type') === CATALOG_TYPES.single_course;
-                    }
-                },
-                course_seat_types: function(val) {
-                    // add validation only for dynamic coupons, e.g. dynamic query coupon or catalog coupon
-                    var dynamicCoupons = [CATALOG_TYPES.multiple_courses, CATALOG_TYPES.catalog];
-                    if (dynamicCoupons.indexOf(this.get('catalog_type')) !== -1 && val.length === 0) {
-                        return Backbone.Validation.messages.seat_types;
-                    }
-                    return undefined;
                 },
                 email_domains: function(val) {
                     var invalidDomain;
@@ -108,15 +82,6 @@ define([
                     }
                     return undefined;
                 },
-                enterprise_customer: function(val) {
-                    if ((_.isEmpty(val) || _.isEmpty(val.id)) &&
-                        !_.isEmpty(this.get('enterprise_customer_catalog'))) {
-                        return gettext('Enterprise Customer must be set if Enterprise Customer Catalog is set');
-                    }
-
-                    return undefined;
-                },
-                enterprise_customer_catalog: {required: false},
                 end_date: function(val) {
                     var startDate,
                         endDate;
@@ -170,19 +135,7 @@ define([
                         return this.isPrepaidInvoiceType();
                     }
                 },
-                program_uuid: {
-                    msg: gettext('A valid Program UUID is required.'),
-                    required: function() {
-                        return this.get('catalog_type') === CATALOG_TYPES.program;
-                    }
-                },
                 quantity: {pattern: 'number'},
-                // seat_type is for validation only, stock_record_ids holds the values
-                seat_type: {
-                    required: function() {
-                        return this.get('catalog_type') === CATALOG_TYPES.single_course;
-                    }
-                },
                 start_date: function(val) {
                     var startDate,
                         endDate;
@@ -201,6 +154,60 @@ define([
                     return undefined;
                 },
                 title: {required: true}
+            },
+
+            couponValidation: {
+                catalog_query: {
+                    required: function() {
+                        return this.get('catalog_type') === CATALOG_TYPES.multiple_courses;
+                    }
+                },
+                course_catalog: {
+                    required: function() {
+                        return this.get('catalog_type') === CATALOG_TYPES.catalog;
+                    }
+                },
+                client: {required: true},
+                course_id: {
+                    pattern: 'courseId',
+                    msg: gettext('A valid course ID is required'),
+                    required: function() {
+                        return this.get('catalog_type') === CATALOG_TYPES.single_course;
+                    }
+                },
+                course_seat_types: function(val) {
+                    // add validation only for dynamic coupons, e.g. dynamic query coupon or catalog coupon
+                    var dynamicCoupons = [CATALOG_TYPES.multiple_courses, CATALOG_TYPES.catalog];
+                    if (dynamicCoupons.indexOf(this.get('catalog_type')) !== -1 && val.length === 0) {
+                        return Backbone.Validation.messages.seat_types;
+                    }
+                    return undefined;
+                },
+                enterprise_customer: function(val) {
+                    if ((_.isEmpty(val) || _.isEmpty(val.id)) &&
+                        !_.isEmpty(this.get('enterprise_customer_catalog'))) {
+                        return gettext('Enterprise Customer must be set if Enterprise Customer Catalog is set');
+                    }
+
+                    return undefined;
+                },
+                enterprise_customer_catalog: {required: false},
+                program_uuid: {
+                    msg: gettext('A valid Program UUID is required.'),
+                    required: function() {
+                        return this.get('catalog_type') === CATALOG_TYPES.program;
+                    }
+                },
+                // seat_type is for validation only, stock_record_ids holds the values
+                seat_type: {
+                    required: function() {
+                        return this.get('catalog_type') === CATALOG_TYPES.single_course;
+                    }
+                }
+            },
+
+            validation: function() {
+                return _.extend({}, this.baseCouponValidation, this.couponValidation);
             },
 
             url: function() {

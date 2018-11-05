@@ -1,6 +1,7 @@
 import uuid
 
 import httpretty
+from django.conf import settings
 from django.urls import reverse
 from oscar.core.loading import get_model
 
@@ -138,3 +139,26 @@ class EnterpriseOfferCreateViewTests(EnterpriseServiceMockMixin, ViewTestMixin, 
         self.assertEqual(enterprise_offer.benefit.type, '')
         self.assertEqual(enterprise_offer.benefit.value, expected_benefit_value)
         self.assertEqual(enterprise_offer.benefit.proxy_class, class_path(EnterprisePercentageDiscountBenefit))
+
+
+class EnterpriseCouponAppViewTests(TestCase):
+    path = reverse('enterprise:coupons', args=[''])
+
+    def test_login_required(self):
+        """ Users are required to login before accessing the view. """
+        self.client.logout()
+        response = self.client.get(self.path)
+        self.assertEqual(response.status_code, 302)
+        self.assertIn(settings.LOGIN_URL, response.url)
+
+    def assert_response_status(self, is_staff, status_code):
+        """Create a user and assert the status code from the response for that user."""
+        user = self.create_user(is_staff=is_staff)
+        self.client.login(username=user.username, password=self.password)
+        response = self.client.get(self.path)
+        self.assertEqual(response.status_code, status_code)
+
+    def test_staff_user_required(self):
+        """ Verify the view is only accessible to staff users. """
+        self.assert_response_status(is_staff=False, status_code=404)
+        self.assert_response_status(is_staff=True, status_code=200)
