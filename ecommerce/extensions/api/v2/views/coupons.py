@@ -2,6 +2,7 @@ from __future__ import unicode_literals
 
 import logging
 
+import waffle
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError, transaction
@@ -16,6 +17,7 @@ from ecommerce.core.constants import COUPON_PRODUCT_CLASS_NAME
 from ecommerce.core.models import BusinessClient
 from ecommerce.core.utils import log_message_and_raise_validation_error
 from ecommerce.coupons.utils import prepare_course_seat_types
+from ecommerce.enterprise.constants import ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH
 from ecommerce.extensions.api import data as data_api
 from ecommerce.extensions.api.filters import ProductFilter
 from ecommerce.extensions.api.serializers import CategorySerializer, CouponListSerializer, CouponSerializer
@@ -25,7 +27,9 @@ from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
 from ecommerce.extensions.payment.processors.invoice import InvoicePayment
 from ecommerce.extensions.voucher.models import CouponVouchers
 from ecommerce.extensions.voucher.utils import (
-    get_or_create_enterprise_offer, update_voucher_offer, update_voucher_with_enterprise_offer
+    get_or_create_enterprise_offer,
+    update_voucher_offer,
+    update_voucher_with_enterprise_offer
 )
 from ecommerce.invoice.models import Invoice
 
@@ -36,7 +40,6 @@ Category = get_model('catalogue', 'Category')
 Condition = get_model('offer', 'Condition')
 ConditionalOffer = get_model('offer', 'ConditionalOffer')
 logger = logging.getLogger(__name__)
-Order = get_model('order', 'Order')
 Product = get_model('catalogue', 'Product')
 ProductCategory = get_model('catalogue', 'ProductCategory')
 ProductClass = get_model('catalogue', 'ProductClass')
@@ -54,10 +57,18 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
     filter_class = ProductFilter
 
     def get_queryset(self):
-        return Product.objects.filter(
+        product_filter = Product.objects.filter(
             product_class__name=COUPON_PRODUCT_CLASS_NAME,
             stockrecords__partner=self.request.site.siteconfiguration.partner
         )
+        # If we have switched to using enterprise offers, ensure that enterprise coupons do not show up
+        # in the regular coupon list view
+        if waffle.switch_is_active(ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH):
+            return product_filter.exclude(
+                coupon_vouchers__vouchers__offers__condition__enterprise_customer_uuid__isnull=False,
+            )
+
+        return product_filter
 
     def get_serializer_class(self):
         if self.action == 'list':
@@ -88,6 +99,7 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
         try:
             with transaction.atomic():
                 try:
+                    self.validate_access_for_enterprise_switch(request.data)
                     cleaned_voucher_data = self.clean_voucher_request_data(
                         request.data, request.site.siteconfiguration.partner
                     )
@@ -105,7 +117,10 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
                 basket = prepare_basket(request, [coupon_product])
 
                 # Create an order now since payment is handled out of band via an invoice.
-                client, __ = BusinessClient.objects.get_or_create(name=request.data.get('client'))
+                client, __ = BusinessClient.objects.update_or_create(
+                    name=cleaned_voucher_data['enterprise_customer_name'] or request.data.get('client'),
+                    defaults={'enterprise_customer_uuid': cleaned_voucher_data['enterprise_customer']}
+                )
                 invoice_data = self.create_update_data_dict(data=request.data, fields=Invoice.UPDATEABLE_INVOICE_FIELDS)
                 response_data = self.create_order_for_invoice(
                     basket, coupon_id=coupon_product.id, client=client, invoice_data=invoice_data
@@ -140,6 +155,12 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
             program_uuid=cleaned_voucher_data['program_uuid'],
             site=self.request.site
         )
+
+    def validate_access_for_enterprise_switch(self, request_data):
+        enterprise_customer_data = request_data.get('enterprise_customer')
+        if (enterprise_customer_data and enterprise_customer_data.get('id') and
+                waffle.switch_is_active(ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH)):
+            raise ValidationError('Enterprise coupons can no longer be created or updated from this endpoint.')
 
     @classmethod
     def clean_voucher_request_data(cls, request_data, partner):
@@ -195,6 +216,7 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
 
         try:
             enterprise_customer = enterprise_customer_data['id'] if enterprise_customer_data else None
+            enterprise_customer_name = enterprise_customer_data.get('name') if enterprise_customer_data else None
         except (KeyError, TypeError):
             validation_message = 'Unexpected EnterpriseCustomer data format received for coupon.'
             raise ValidationError(validation_message)
@@ -213,6 +235,7 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
             'email_domains': request_data.get('email_domains'),
             'end_datetime': request_data.get('end_datetime'),
             'enterprise_customer': enterprise_customer,
+            'enterprise_customer_name': enterprise_customer_name,
             'enterprise_customer_catalog': request_data.get('enterprise_customer_catalog'),
             'max_uses': max_uses,
             'note': request_data.get('note'),
@@ -312,7 +335,7 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
             return Response(serializer.data)
         except ValidationError as error:
             error_message = 'Failed to update Coupon [{coupon_id}]. {msg}'.format(
-                coupon_id=coupon.id,
+                coupon_id=kwargs.get('pk'),
                 msg=error.message
             )
             logger.exception(error_message)
@@ -402,8 +425,14 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
             ProductCategory.objects.filter(product=coupon).update(category=category)
 
         client_username = request_data.get('client')
-        if client_username:
-            client, __ = BusinessClient.objects.get_or_create(name=client_username)
+        enterprise_customer_data = request_data.get('enterprise_customer')
+        enterprise_customer = enterprise_customer_data.get('id', None) if enterprise_customer_data else None
+        enterprise_customer_name = enterprise_customer_data.get('name', None) if enterprise_customer_data else None
+        if client_username or enterprise_customer:
+            client, __ = BusinessClient.objects.update_or_create(
+                name=enterprise_customer_name or client_username,
+                defaults={'enterprise_customer_uuid': enterprise_customer}
+            )
             Invoice.objects.filter(order__basket=baskets.first()).update(business_client=client)
 
         coupon_price = request_data.get('price')
@@ -429,7 +458,8 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
         """
         program_uuid = request_data.get('program_uuid')
         benefit_value = request_data.get('benefit_value')
-        enterprise_customer = request_data.get('enterprise_customer', {}).get('id', None)
+        enterprise_customer_data = request_data.get('enterprise_customer')
+        enterprise_customer = enterprise_customer_data.get('id', None) if enterprise_customer_data else None
         enterprise_catalog = request_data.get('enterprise_customer_catalog') or None
         max_uses = request_data.get('max_uses')
         email_domains = request_data.get('email_domains')

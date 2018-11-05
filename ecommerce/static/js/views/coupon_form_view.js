@@ -39,6 +39,8 @@ define([
 
             className: 'coupon-form-view',
 
+            updateWithPatch: false,
+
             template: _.template(CouponFormTemplate),
 
             seatTypes: [],

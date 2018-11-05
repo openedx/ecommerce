@@ -620,6 +620,12 @@ class BusinessClient(models.Model):
     """The model for the business client."""
 
     name = models.CharField(_('Name'), unique=True, max_length=255)
+    enterprise_customer_uuid = models.UUIDField(
+        verbose_name=_('EnterpriseCustomer UUID'),
+        help_text=_('UUID for an EnterpriseCustomer from the Enterprise Service.'),
+        null=True,
+        blank=True,
+    )
 
     def __str__(self):
         return self.name
