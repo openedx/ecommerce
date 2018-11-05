@@ -189,7 +189,7 @@ class CouponViewSetTest(CouponMixin, DiscoveryTestMixin, TestCase):
 
         view = CouponViewSet()
         view.request = request
-        cleaned_voucher_data = view.clean_voucher_request_data(request)
+        cleaned_voucher_data = view.clean_voucher_request_data(request.data, request.site.siteconfiguration.partner)
 
         expected_cleaned_voucher_data_keys = [
             'benefit_type',
@@ -584,6 +584,18 @@ class CouponViewSetFunctionalTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
         Switch.objects.update_or_create(name=ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, defaults={'active': True})
         self._test_update_enterprise_coupon()
 
+    def test_update_coupon_to_add_enterprise_fields(self):
+        """
+        Test that a coupon without enterprise data will get enterprise conditional offers when updated
+        to have enterprise data.
+        """
+        del self.data['enterprise_customer']
+        del self.data['enterprise_customer_catalog']
+        self.data.update({'title': 'Title 2'})
+        self.response = self.get_response('POST', COUPONS_LINK, self.data)
+        self.coupon = Product.objects.get(title=self.data['title'])
+        self._test_update_enterprise_coupon()
+
     def test_update_name(self):
         """Test updating voucher name."""
         data = {
@@ -769,10 +781,9 @@ class CouponViewSetFunctionalTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             "ecommerce.extensions.voucher.utils.get_enterprise_customer",
             mock.Mock(return_value={'name': 'Fake enterprise'})
         ):
-            CouponViewSet().update_coupon_offer(
-                benefit_value=benefit_value,
+            CouponViewSet().update_offer_data(
+                request_data={'benefit_value': benefit_value},
                 vouchers=vouchers,
-                coupon=self.coupon,
                 site=self.site,
             )
         for voucher in vouchers:
@@ -783,9 +794,9 @@ class CouponViewSetFunctionalTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
         baskets = Basket.objects.filter(lines__product_id=self.coupon.id)
         basket = baskets.first()
         client_username = 'Tešt Člient Ušername'
-        CouponViewSet().update_coupon_client(
-            baskets=baskets,
-            client_username=client_username
+        CouponViewSet().update_coupon_product_data(
+            request_data={'client': client_username},
+            coupon=self.coupon
         )
 
         invoice = Invoice.objects.get(order__basket=basket)
@@ -796,7 +807,7 @@ class CouponViewSetFunctionalTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
         self.assertEqual(invoice.discount_type, Invoice.PERCENTAGE)
         CouponViewSet().update_invoice_data(
             coupon=self.coupon,
-            data={
+            request_data={
                 'invoice_discount_type': Invoice.FIXED
             }
         )
