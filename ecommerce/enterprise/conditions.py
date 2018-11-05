@@ -80,11 +80,11 @@ class EnterpriseCustomerCondition(ConditionWithoutRangeMixin, SingleItemConsumpt
         if (learner_data and 'enterprise_customer' in learner_data and
                 str(self.enterprise_customer_uuid) != learner_data['enterprise_customer']['uuid']):
             # Learner is not linked to the EnterpriseCustomer associated with this condition.
-            logger.warning('Unable to apply enterprise offer %s because Learner\'s enterprise (%s)'
-                           'does not match this conditions\'s enterprise (%s).',
-                           offer.id,
-                           learner_data['enterprise_customer']['uuid'],
-                           str(self.enterprise_customer_uuid))
+            logger.debug('Unable to apply enterprise offer %s because Learner\'s enterprise (%s)'
+                         'does not match this conditions\'s enterprise (%s).',
+                         offer.id,
+                         learner_data['enterprise_customer']['uuid'],
+                         str(self.enterprise_customer_uuid))
             return False
 
         course_run_ids = []
