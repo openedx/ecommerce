@@ -4,6 +4,9 @@
   <div class="container">
     <a {% if admin == "course" %}class="selected"{% endif %} href="{% url 'courses:app' '' %}">{% trans "Courses" %}</a>
     <a {% if admin == "coupon" %}class="selected"{% endif %} href="{% url 'coupons:app' '' %}">{% trans "Coupons" %}</a>
+    <a {% if admin == "enterprise_coupons" %}class="selected"{% endif %} href="{% url 'enterprise:coupons' '' %}">
+      {% trans "Enterprise Coupons" %}
+    </a>
     <a {% if admin == "program_offers" %}class="selected"{% endif %} href="{% url 'programs:offers:list' %}">
       {% trans "Program Offers" %}
     </a>

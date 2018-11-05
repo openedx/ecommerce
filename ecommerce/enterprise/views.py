@@ -4,7 +4,7 @@ import logging
 from django.contrib import messages
 from django.urls import reverse
 from django.utils.translation import ugettext_lazy as _
-from django.views.generic import CreateView, ListView, UpdateView
+from django.views.generic import CreateView, ListView, TemplateView, UpdateView
 from oscar.core.loading import get_model
 
 from ecommerce.core.views import StaffOnlyMixin
@@ -78,3 +78,12 @@ class EnterpriseOfferUpdateView(EnterpriseOfferProcessFormViewMixin, UpdateView)
 
 class EnterpriseOfferListView(EnterpriseOfferViewMixin, ListView):
     template_name = 'enterprise/enterpriseoffer_list.html'
+
+
+class EnterpriseCouponAppView(StaffOnlyMixin, TemplateView):
+    template_name = 'enterprise/enterprise_coupon_app.html'
+
+    def get_context_data(self, **kwargs):
+        context = super(EnterpriseCouponAppView, self).get_context_data(**kwargs)
+        context['admin'] = 'enterprise_coupons'
+        return context
