@@ -637,7 +637,7 @@ class UtilTests(CouponMixin, DiscoveryMockMixin, DiscoveryTestMixin, LmsApiMockM
         new_email_domains = 'example.org'
         new_offer = update_voucher_offer(
             voucher_offer, 50.00, Benefit.PERCENTAGE,
-            self.coupon, email_domains=new_email_domains
+            email_domains=new_email_domains
         )
         self.assertEqual(new_offer.benefit.type, Benefit.PERCENTAGE)
         self.assertEqual(new_offer.benefit.value, 50.00)
