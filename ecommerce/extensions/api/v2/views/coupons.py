@@ -24,7 +24,9 @@ from ecommerce.extensions.catalogue.utils import create_coupon_product, get_or_c
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
 from ecommerce.extensions.payment.processors.invoice import InvoicePayment
 from ecommerce.extensions.voucher.models import CouponVouchers
-from ecommerce.extensions.voucher.utils import update_voucher_offer, update_voucher_with_enterprise_offer
+from ecommerce.extensions.voucher.utils import (
+    get_or_create_enterprise_offer, update_voucher_offer, update_voucher_with_enterprise_offer
+)
 from ecommerce.invoice.models import Invoice
 
 Basket = get_model('basket', 'Basket')
@@ -93,30 +95,7 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
                     return Response(error.message, status=error.code or 400)
 
                 try:
-                    coupon_product = create_coupon_product(
-                        benefit_type=cleaned_voucher_data['benefit_type'],
-                        benefit_value=cleaned_voucher_data['benefit_value'],
-                        catalog=cleaned_voucher_data['coupon_catalog'],
-                        catalog_query=cleaned_voucher_data['catalog_query'],
-                        category=cleaned_voucher_data['category'],
-                        code=cleaned_voucher_data['code'],
-                        course_catalog=cleaned_voucher_data['course_catalog'],
-                        course_seat_types=cleaned_voucher_data['course_seat_types'],
-                        email_domains=cleaned_voucher_data['email_domains'],
-                        end_datetime=cleaned_voucher_data['end_datetime'],
-                        enterprise_customer=cleaned_voucher_data['enterprise_customer'],
-                        enterprise_customer_catalog=cleaned_voucher_data['enterprise_customer_catalog'],
-                        max_uses=cleaned_voucher_data['max_uses'],
-                        note=cleaned_voucher_data['note'],
-                        partner=cleaned_voucher_data['partner'],
-                        price=cleaned_voucher_data['price'],
-                        quantity=cleaned_voucher_data['quantity'],
-                        start_datetime=cleaned_voucher_data['start_datetime'],
-                        title=cleaned_voucher_data['title'],
-                        voucher_type=cleaned_voucher_data['voucher_type'],
-                        program_uuid=cleaned_voucher_data['program_uuid'],
-                        site=self.request.site
-                    )
+                    coupon_product = self.create_coupon_product(cleaned_voucher_data)
                 except (KeyError, IntegrityError) as error:
                     logger.exception('Coupon creation failed!')
                     return Response(str(error), status=status.HTTP_400_BAD_REQUEST)
@@ -133,6 +112,32 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
                 return Response(response_data, status=status.HTTP_200_OK)
         except ValidationError as e:
             raise serializers.ValidationError(e.message)
+
+    def create_coupon_product(self, cleaned_voucher_data):
+        return create_coupon_product(
+            benefit_type=cleaned_voucher_data['benefit_type'],
+            benefit_value=cleaned_voucher_data['benefit_value'],
+            catalog=cleaned_voucher_data['coupon_catalog'],
+            catalog_query=cleaned_voucher_data['catalog_query'],
+            category=cleaned_voucher_data['category'],
+            code=cleaned_voucher_data['code'],
+            course_catalog=cleaned_voucher_data['course_catalog'],
+            course_seat_types=cleaned_voucher_data['course_seat_types'],
+            email_domains=cleaned_voucher_data['email_domains'],
+            end_datetime=cleaned_voucher_data['end_datetime'],
+            enterprise_customer=cleaned_voucher_data['enterprise_customer'],
+            enterprise_customer_catalog=cleaned_voucher_data['enterprise_customer_catalog'],
+            max_uses=cleaned_voucher_data['max_uses'],
+            note=cleaned_voucher_data['note'],
+            partner=cleaned_voucher_data['partner'],
+            price=cleaned_voucher_data['price'],
+            quantity=cleaned_voucher_data['quantity'],
+            start_datetime=cleaned_voucher_data['start_datetime'],
+            title=cleaned_voucher_data['title'],
+            voucher_type=cleaned_voucher_data['voucher_type'],
+            program_uuid=cleaned_voucher_data['program_uuid'],
+            site=self.request.site
+        )
 
     @classmethod
     def clean_voucher_request_data(cls, request):
@@ -290,18 +295,18 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
 
         return response_data
 
-    def update_range_data(self, request, vouchers):
+    def update_range_data(self, request_data, vouchers):
         """
         Update the range data for a particular request.
         """
-        range_data = self.create_update_data_dict(data=request.data, fields=Range.UPDATABLE_RANGE_FIELDS)
+        range_data = self.create_update_data_dict(data=request_data, fields=Range.UPDATABLE_RANGE_FIELDS)
 
         if not range_data:
             return None
 
         voucher_range = vouchers.first().original_offer.benefit.range
 
-        enterprise_customer_data = request.data.get('enterprise_customer')
+        enterprise_customer_data = request_data.get('enterprise_customer')
 
         # Remove catalog if switching from single course to dynamic query
         # In case of enterprise, range_data has enterprise data in it as enterprise is defined in UPDATABLE_RANGE_FIELDS
@@ -313,7 +318,7 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
             if enterprise_customer_data and range_data.get('catalog_query'):
                 range_data['catalog'] = None
 
-        course_catalog_data = request.data.get('course_catalog')
+        course_catalog_data = request_data.get('course_catalog')
         if course_catalog_data:
             course_catalog = course_catalog_data.get('id')
             range_data['course_catalog'] = course_catalog
@@ -329,8 +334,8 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
         else:
             range_data['enterprise_customer'] = None
 
-        if 'enterprise_customer_catalog' in request.data:
-            range_data['enterprise_customer_catalog'] = request.data.get('enterprise_customer_catalog') or None
+        if 'enterprise_customer_catalog' in request_data:
+            range_data['enterprise_customer_catalog'] = request_data.get('enterprise_customer_catalog') or None
 
         for attr, value in range_data.iteritems():
             setattr(voucher_range, attr, value)
@@ -341,53 +346,13 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
         """Update coupon depending on request data sent."""
         try:
             super(CouponViewSet, self).update(request, *args, **kwargs)
-
             coupon = self.get_object()
             vouchers = coupon.attr.coupon_vouchers.vouchers
-            baskets = Basket.objects.filter(lines__product_id=coupon.id, status=Basket.SUBMITTED)
-            data = self.create_update_data_dict(data=request.data, fields=CouponVouchers.UPDATEABLE_VOUCHER_FIELDS)
-
-            if data:
-                vouchers.all().update(**data)
-
-            self.update_range_data(request, vouchers)
-
-            program_uuid = request.data.get('program_uuid')
-            benefit_value = request.data.get('benefit_value')
-            enterprise_customer = request.data.get('enterprise_customer', {}).get('id', None)
-            enterprise_catalog = request.data.get('enterprise_customer_catalog') or None
-            if benefit_value or program_uuid or enterprise_customer or enterprise_catalog:
-                self.update_coupon_offer(
-                    benefit_value=benefit_value,
-                    vouchers=vouchers,
-                    site=self.request.site,
-                    coupon=coupon,
-                    program_uuid=program_uuid,
-                    enterprise_customer=enterprise_customer,
-                    enterprise_catalog=enterprise_catalog
-                )
-
-            category_data = request.data.get('category')
-            if category_data:
-                category = Category.objects.get(name=category_data['name'])
-                ProductCategory.objects.filter(product=coupon).update(category=category)
-
-            client_username = request.data.get('client')
-            if client_username:
-                self.update_coupon_client(baskets=baskets, client_username=client_username)
-
-            coupon_price = request.data.get('price')
-            if coupon_price:
-                StockRecord.objects.filter(product=coupon).update(price_excl_tax=coupon_price)
-
-            note = request.data.get('note')
-            if note is not None:
-                coupon.attr.note = note
-                coupon.save()
-
-            self.update_offer_data(request.data, vouchers, coupon.id)
-            self.update_invoice_data(coupon, request.data)
-
+            self.update_voucher_data(request.data, vouchers)
+            self.update_range_data(request.data, vouchers)
+            self.update_offer_data(request.data, vouchers, self.request.site)
+            self.update_coupon_product_data(request.data, coupon)
+            self.update_invoice_data(request.data, coupon)
             serializer = self.get_serializer(coupon)
             return Response(serializer.data)
         except ValidationError as error:
@@ -397,6 +362,11 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
             )
             logger.exception(error_message)
             raise serializers.ValidationError(error_message)
+
+    def update_voucher_data(self, request_data, vouchers):
+        data = self.create_update_data_dict(data=request_data, fields=CouponVouchers.UPDATEABLE_VOUCHER_FIELDS)
+        if data:
+            vouchers.all().update(**data)
 
     def create_update_data_dict(self, data, fields):
         """
@@ -424,8 +394,29 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
                     update_dict[field.replace('invoice_', '')] = value
         return update_dict
 
-    def update_coupon_offer(self, coupon, vouchers, site, benefit_value=None, program_uuid=None,
-                            enterprise_customer=None, enterprise_catalog=None):
+    def update_coupon_product_data(self, request_data, coupon):
+        baskets = Basket.objects.filter(lines__product_id=coupon.id, status=Basket.SUBMITTED)
+
+        category_data = request_data.get('category')
+        if category_data:
+            category = Category.objects.get(name=category_data['name'])
+            ProductCategory.objects.filter(product=coupon).update(category=category)
+
+        client_username = request_data.get('client')
+        if client_username:
+            client, __ = BusinessClient.objects.get_or_create(name=client_username)
+            Invoice.objects.filter(order__basket=baskets.first()).update(business_client=client)
+
+        coupon_price = request_data.get('price')
+        if coupon_price:
+            StockRecord.objects.filter(product=coupon).update(price_excl_tax=coupon_price)
+
+        note = request_data.get('note')
+        if note is not None:
+            coupon.attr.note = note
+            coupon.save()
+
+    def update_offer_data(self, request_data, vouchers, site):
         """
         Remove all offers from the vouchers and add a new offer
         Arguments:
@@ -437,94 +428,79 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
             enterprise_customer (str): Enterprise Customer UUID
             enterprise_catalog (str): Enterprise Catalog UUID
         """
-        new_offers = []
+        program_uuid = request_data.get('program_uuid')
+        benefit_value = request_data.get('benefit_value')
+        enterprise_customer = request_data.get('enterprise_customer', {}).get('id', None)
+        enterprise_catalog = request_data.get('enterprise_customer_catalog') or None
+        max_uses = request_data.get('max_uses')
+        email_domains = request_data.get('email_domains')
 
-        # Only process the original conditional offer, and update/create the enterprise offer if needed.
-        voucher_offer = vouchers.first().best_offer
-        oldest_offer = vouchers.first().original_offer
-        if program_uuid:
-            Condition.objects.filter(
-                program_uuid=voucher_offer.condition.program_uuid
-            ).update(program_uuid=program_uuid)
-
-        # The program uuid (if program coupon) is required for the benefit and condition update logic
-        program_uuid = program_uuid or voucher_offer.condition.program_uuid
-
-        new_offers.append(update_voucher_offer(
-            offer=oldest_offer,
-            benefit_value=benefit_value or oldest_offer.benefit.value,
-            benefit_type=oldest_offer.benefit.type or getattr(
-                oldest_offer.benefit.proxy(), 'benefit_class_type', None
-            ),
-            coupon=coupon,
-            max_uses=oldest_offer.max_global_applications,
-            program_uuid=program_uuid,
-            site=site,
-        ))
-
-        if enterprise_customer:
-            new_offers.append(update_voucher_with_enterprise_offer(
-                offer=voucher_offer,
-                benefit_value=benefit_value or voucher_offer.benefit.value,
-                benefit_type=voucher_offer.benefit.type or getattr(
-                    voucher_offer.benefit.proxy(), 'benefit_class_type', None
-                ),
-                coupon=coupon,
-                max_uses=voucher_offer.max_global_applications,
-                enterprise_customer=enterprise_customer,
-                enterprise_catalog=enterprise_catalog,
-                site=site,
-            ))
+        # Validate max_uses
+        if max_uses is not None:
+            if vouchers.first().usage == Voucher.SINGLE_USE:
+                log_message_and_raise_validation_error(
+                    'Failed to update Coupon. '
+                    'max_global_applications field cannot be set for voucher type [{voucher_type}].'.format(
+                        voucher_type=Voucher.SINGLE_USE
+                    ))
+            try:
+                max_uses = int(max_uses)
+                if max_uses < 1:
+                    raise ValueError
+            except ValueError:
+                raise ValidationError('max_global_applications field must be a positive number.')
 
         for voucher in vouchers.all():
+            updated_original_offer = update_voucher_offer(
+                offer=voucher.original_offer,
+                benefit_value=benefit_value,
+                max_uses=max_uses,
+                program_uuid=program_uuid,
+                email_domains=email_domains,
+                site=site,
+            )
+            updated_enterprise_offer = None
+            if voucher.enterprise_offer:
+                updated_enterprise_offer = update_voucher_with_enterprise_offer(
+                    offer=voucher.enterprise_offer,
+                    benefit_value=benefit_value,
+                    max_uses=max_uses,
+                    enterprise_customer=enterprise_customer,
+                    enterprise_catalog=enterprise_catalog,
+                    email_domains=email_domains,
+                    site=site,
+                )
+            elif enterprise_customer:
+                # If we are performing an update on an existing enterprise coupon,
+                # we need to ensure the enterprise offer is created if it didn't already exist.
+                updated_enterprise_offer = get_or_create_enterprise_offer(
+                    benefit_value=benefit_value or voucher.original_offer.benefit.value,
+                    benefit_type=voucher.original_offer.benefit.type,
+                    enterprise_customer=enterprise_customer,
+                    enterprise_customer_catalog=enterprise_catalog,
+                    offer_name=voucher.original_offer.name + " ENT Offer",
+                    max_uses=max_uses or voucher.original_offer.max_global_applications,
+                    email_domains=email_domains or voucher.original_offer.email_domains,
+                    site=site or voucher.original_offer.site,
+                )
             voucher.offers.clear()
-            for new_offer in new_offers:
-                voucher.offers.add(new_offer)
+            voucher.offers.add(updated_original_offer)
+            if updated_enterprise_offer:
+                voucher.offers.add(updated_enterprise_offer)
 
-    def update_coupon_client(self, baskets, client_username):
-        """
-        Update Invoice client for new coupons.
-        Arguments:
-            baskets (QuerySet): Baskets associated with the coupons
-            client_username (str): Client username
-        """
-        client, __ = BusinessClient.objects.get_or_create(name=client_username)
-        Invoice.objects.filter(order__basket=baskets.first()).update(business_client=client)
-
-    def update_invoice_data(self, coupon, data):
+    def update_invoice_data(self, data, coupon):
         """
         Update the invoice data.
 
         Arguments:
-            coupon (Product): The coupon product with which the invoice is retrieved.
             data (dict): The request's data from which the invoice data is retrieved
                          and used for the updated.
+            coupon (Product): The coupon product with which the invoice is retrieved.
         """
         invoice_data = self.create_update_data_dict(data=data, fields=Invoice.UPDATEABLE_INVOICE_FIELDS)
 
         if invoice_data:
             Invoice.objects.filter(order__lines__product=coupon).update(**invoice_data)
-
-    def update_offer_data(self, data, vouchers, coupon_id):
-        offer_data = self.create_update_data_dict(data=data, fields=ConditionalOffer.UPDATABLE_OFFER_FIELDS)
-
-        if offer_data:
-            if offer_data.get('max_global_applications') is not None:
-                if vouchers.first().usage == Voucher.SINGLE_USE:
-                    log_message_and_raise_validation_error(
-                        'Failed to update Coupon [{coupon_id}]. '
-                        'max_global_applications field cannot be set for voucher type [{voucher_type}].'.format(
-                            coupon_id=coupon_id,
-                            voucher_type=Voucher.SINGLE_USE
-                        )
-                    )
-                try:
-                    offer_data['max_global_applications'] = int(offer_data['max_global_applications'])
-                    if offer_data['max_global_applications'] < 1:
-                        raise ValueError
-                except ValueError:
-                    raise ValidationError('max_global_applications field must be a positive number.')
-            ConditionalOffer.objects.filter(vouchers__in=vouchers.all()).update(**offer_data)
 
     def destroy(self, request, pk):  # pylint: disable=unused-argument
         try:

@@ -77,11 +77,11 @@ class VoucherTests(TestCase):
         second_offer = factories.EnterpriseOfferFactory()
         voucher.offers.add(second_offer)
         assert voucher.best_offer == second_offer
-        # Add a third enterprise offer, and see that the original offer gets returned
-        # because of multiple enterprise offers being available, which is unexpected data.
+        # Add a third enterprise offer, and see that the first enterprise offer gets returned
+        # because of multiple enterprise offers being available.
         third_offer = factories.EnterpriseOfferFactory()
         voucher.offers.add(third_offer)
-        assert voucher.best_offer == first_offer
+        assert voucher.best_offer == second_offer
         # Turn the switch off and see that the oldest offer gets returned.
         Switch.objects.update_or_create(name=ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, defaults={'active': False})
         assert voucher.best_offer == first_offer
