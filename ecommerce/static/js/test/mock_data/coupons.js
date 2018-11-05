@@ -224,6 +224,42 @@ define([], function() {
             seat_type: 'verified',
             course: verifiedSeat
         },
+        enterpriseCouponData = {
+            id: 11,
+            title: 'Test Enterprise Code',
+            code_type: 'Enrollment code',
+            last_edited: lastEditData,
+            seats: [verifiedSeat],
+            client: 'TestEnterprise',
+            category: {
+                id: 4,
+                name: 'TESTCAT'
+            },
+            enterprise_customer: '42a30ade47834489a607cd0f52ba13cf',
+            enterprise_customer_catalog: 'f9098aab184245c881a20e53d8e7609a',
+            invoice_type: 'Prepaid',
+            invoice_discount_type: 'Percentage',
+            invoice_discount_value: 40,
+            invoice_number: 'INV-00001',
+            invoice_payment_date: '2015-01-01T00:00:00Z',
+            tax_deducted_source: 50,
+            start_date: '2015-01-01T00:00:00Z',
+            end_date: '2016-01-01T00:00:00Z',
+            voucher_type: 'Single use',
+            code_status: 'ACTIVE',
+            coupon_type: 'Enrollment Code',
+            benefit_type: 'Percentage',
+            benefit_value: 100
+        },
+        enterpriseCouponModelData = {
+            title: 'Test Enterprise',
+            coupon_type: 'Enrollment code',
+            start_date: '2015-01-01T00:00:00Z',
+            end_date: '2016-01-01T00:00:00Z',
+            voucher_type: 'Single use',
+            enterprise_customer: {id: '349bef52-c0fb-4901-a5b5-26e9b70a4102', name: 'test client'},
+            enterprise_customer_catalog: 'f9098aab-1842-45c8-81a2-0e53d8e7609a'
+        },
         couponAPIResponseData = {
             count: 1,
             next: null,
@@ -339,6 +375,8 @@ define([], function() {
         dynamicCouponData: dynamicCouponData,
         enrollmentCodeCouponData: enrollmentCodeCouponData,
         enrollmentCodeCouponModelData: enrollmentCodeCouponModelData,
+        enterpriseCouponData: enterpriseCouponData,
+        enterpriseCouponModelData: enterpriseCouponModelData,
         enrollmentCodeVoucher: enrollmentCodeVoucher,
         enrollmentMultiUseCouponData: enrollmentMultiUseCouponData,
         lastEditData: lastEditData,
