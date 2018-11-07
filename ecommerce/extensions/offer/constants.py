@@ -1,2 +1,2 @@
-PROGRAM_APPLICATOR_LOG_FLAG = 'enable_program_applicator_logging'
-PROGRAM_APPLICATOR_USE_FLAG = 'enable_program_applicator_use'
+CUSTOM_APPLICATOR_LOG_FLAG = 'enable_custom_applicator_logging'
+CUSTOM_APPLICATOR_USE_FLAG = 'enable_custom_applicator_use'
