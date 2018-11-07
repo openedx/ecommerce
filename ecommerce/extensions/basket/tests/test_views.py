@@ -684,18 +684,6 @@ class BasketSummaryViewTests(EnterpriseServiceMockMixin, DiscoveryTestMixin, Dis
 
         self.assertRedirects(response, reverse('checkout:free-checkout'), fetch_redirect_response=False)
 
-    def test_basket_offer_index_exception(self):
-        """
-        Test Basket offers index error is handled properly.
-        # todo : Remove this test once LEARNER-6578 is resolved.
-        """
-        seat = self.create_seat(self.course)
-        self.create_basket_and_add_product(seat)
-
-        with mock.patch('ecommerce.extensions.basket.models.Line.has_discount', return_value=True):
-            response = self.client.get(self.get_full_url(self.path))
-        self.assertEqual(response.status_code, 200)
-
 
 @httpretty.activate
 class VoucherAddViewTests(LmsApiMockMixin, TestCase):
