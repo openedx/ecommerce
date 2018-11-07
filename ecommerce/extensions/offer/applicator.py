@@ -5,7 +5,7 @@ import waffle
 from oscar.apps.offer.applicator import Applicator
 from oscar.core.loading import get_model
 
-from ecommerce.extensions.offer.constants import PROGRAM_APPLICATOR_LOG_FLAG
+from ecommerce.extensions.offer.constants import CUSTOM_APPLICATOR_LOG_FLAG
 
 logger = logging.getLogger(__name__)
 BasketAttribute = get_model('basket', 'BasketAttribute')
@@ -13,9 +13,9 @@ BasketAttributeType = get_model('basket', 'BasketAttributeType')
 BUNDLE = 'bundle_identifier'
 
 
-class ProgramApplicator(Applicator):
+class CustomApplicator(Applicator):
     """
-    Custom applicator for applying offers to programs.
+    Custom applicator for applying offers to program baskets and voucher baskets.
     """
 
     def get_offers(self, basket, user=None, request=None):
@@ -24,7 +24,7 @@ class ProgramApplicator(Applicator):
 
         If the basket has a bundle, i.e. a program, gets only the site offers
         associated with that specific bundle, rather than all site offers.
-        Otherwise, behaves like the regular Oscar applicator.
+        Otherwise, Gets the site offers not associated with a bundle.
 
         Args:
             basket (Basket): The basket to check for eligible
@@ -43,11 +43,16 @@ class ProgramApplicator(Applicator):
         if bundle_attributes.count() > 0:
             program_offers = self.get_program_offers(bundle_attributes.first())
             site_offers = []
-        else:
-            if waffle.flag_is_active(request, PROGRAM_APPLICATOR_LOG_FLAG):
+            if waffle.flag_is_active(request, CUSTOM_APPLICATOR_LOG_FLAG):
                 logger.warning(
-                    'ProgramApplicator processed Basket [%s] from Request [%s] and User [%s] without a bundle meaning'
-                    ' all site offers were considered.', basket, request, user,
+                    'CustomApplicator processed Basket [%s] from Request [%s] and User [%s] with a bundle.',
+                    basket, request, user,
+                )
+        else:
+            if waffle.flag_is_active(request, CUSTOM_APPLICATOR_LOG_FLAG):
+                logger.warning(
+                    'CustomApplicator processed Basket [%s] from Request [%s] and User [%s] without a bundle.',
+                    basket, request, user,
                 )
             program_offers = []
             site_offers = self.get_site_offers()
@@ -66,6 +71,14 @@ class ProgramApplicator(Applicator):
                 reverse=True,
             )
         )
+
+    def get_site_offers(self):
+        """
+        Return site offers that are available to baskets without bundle ids.
+        """
+        ConditionalOffer = get_model('offer', 'ConditionalOffer')
+        qs = ConditionalOffer.active.filter(offer_type=ConditionalOffer.SITE, condition__program_uuid__isnull=True)
+        return qs.select_related('condition', 'benefit')
 
     def get_program_offers(self, bundle_attribute):
         """
