@@ -769,10 +769,9 @@ class CouponViewSetFunctionalTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             "ecommerce.extensions.voucher.utils.get_enterprise_customer",
             mock.Mock(return_value={'name': 'Fake enterprise'})
         ):
-            CouponViewSet().update_coupon_offer(
-                benefit_value=benefit_value,
+            CouponViewSet().update_offer_data(
+                request_data={'benefit_value': benefit_value},
                 vouchers=vouchers,
-                coupon=self.coupon,
                 site=self.site,
             )
         for voucher in vouchers:
@@ -783,9 +782,9 @@ class CouponViewSetFunctionalTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
         baskets = Basket.objects.filter(lines__product_id=self.coupon.id)
         basket = baskets.first()
         client_username = 'Tešt Člient Ušername'
-        CouponViewSet().update_coupon_client(
-            baskets=baskets,
-            client_username=client_username
+        CouponViewSet().update_coupon_product_data(
+            request_data={'client': client_username},
+            coupon=self.coupon
         )
 
         invoice = Invoice.objects.get(order__basket=basket)
