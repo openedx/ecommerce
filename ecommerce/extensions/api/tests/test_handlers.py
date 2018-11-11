@@ -76,15 +76,12 @@ class JWTDecodeHandlerTests(TestCase):
             'JWT_VERIFY_AUDIENCE': False,
         }
     )
-    @override_switch('jwt_decode_handler.log_exception.edx-drf-extensions', active=True)
-    @mock.patch('ecommerce.extensions.api.handlers.logger')
-    def test_decode_success_with_multiple_legacy_issuers(self, mock_logger):
+    def test_decode_success_with_multiple_legacy_issuers(self):
         payload = generate_jwt_payload_from_legacy_issuers(self.user)
         for issuer in settings.JWT_AUTH['JWT_ISSUERS']:
             payload['iss'] = issuer
             token = generate_jwt_token_from_legacy_secret(payload)
             self.assertEqual(jwt_decode_handler(token), payload)
-            mock_logger.info.assert_called_with('Failed to use edx-drf-extensions jwt_decode_handler.', exc_info=True)
 
     @override_settings(
         JWT_AUTH={
@@ -169,6 +166,7 @@ class JWTDecodeHandlerTests(TestCase):
             'JWT_VERIFY_AUDIENCE': False,
         }
     )
+    @override_switch('jwt_decode_handler.log_exception.edx-drf-extensions', active=True)
     @mock.patch('edx_django_utils.monitoring.set_custom_metric')
     @mock.patch('ecommerce.extensions.api.handlers.logger')
     def test_decode_success_updated_config(self, mock_logger, mock_set_custom_metric):
@@ -185,6 +183,7 @@ class JWTDecodeHandlerTests(TestCase):
         self.assertDictContainsSubset(payload, jwt_decode_handler(token))
         mock_set_custom_metric.assert_called_with('ecom_jwt_decode_handler', 'ecommerce-updated-config')
         mock_logger.exception.assert_not_called()
+        mock_logger.info.assert_called_with('Failed to use edx-drf-extensions jwt_decode_handler.', exc_info=True)
 
     @override_settings(
         JWT_AUTH={
@@ -219,7 +218,13 @@ class JWTDecodeHandlerTests(TestCase):
         payload = generate_jwt_payload(self.user, issuer_name='test-issuer-2')
         payload['exp'] = 0
         token = generate_jwt_token(payload, 'test-secret-key-2')
-        with self.assertRaises(jwt.InvalidTokenError):
+        with self.assertRaisesMessage(
+            jwt.InvalidTokenError,
+            (
+                "All combinations of JWT issuers with updated config failed to validate the token. "
+                "Wrong secret_key for issuer test-issuer. Invalid token found using issuer test-issuer-2."
+            )
+        ):
             jwt_decode_handler(token)
 
             mock_logger.exception.assert_called_with('Custom config JWT decode failed!')
