@@ -71,7 +71,7 @@ class EnterpriseCustomerCondition(ConditionWithoutRangeMixin, SingleItemConsumpt
             return False
         except IndexError:
             if offer.offer_type == ConditionalOffer.SITE:
-                logger.warning(
+                logger.debug(
                     'Unable to apply enterprise site offer %s because no learner data was returned for user %s',
                     offer.id,
                     basket.owner)
