@@ -340,16 +340,19 @@ class EnrollmentFulfillmentModule(BaseFulfillmentModule):
                         "Fulfillment of line [%d] on order [%s] failed with status code [%d]: %s",
                         line.id, order.number, response.status_code, reason
                     )
+                    order.notes.create(message=reason, note_type='Error')
                     line.set_status(LINE.FULFILLMENT_SERVER_ERROR)
             except ConnectionError:
                 logger.error(
                     "Unable to fulfill line [%d] of order [%s] due to a network problem", line.id, order.number
                 )
+                order.notes.create(message='Fulfillment of order failed due to a network problem.', note_type='Error')
                 line.set_status(LINE.FULFILLMENT_NETWORK_ERROR)
             except Timeout:
                 logger.error(
                     "Unable to fulfill line [%d] of order [%s] due to a request time out", line.id, order.number
                 )
+                order.notes.create(message='Fulfillment of order failed due to a request time out.', note_type='Error')
                 line.set_status(LINE.FULFILLMENT_TIMEOUT_ERROR)
         logger.info("Finished fulfilling 'Seat' product types for order [%s]", order.number)
         return order, lines
@@ -669,11 +672,13 @@ class CourseEntitlementFulfillmentModule(BaseFulfillmentModule):
                 logger.exception(
                     'Unable to fulfill line [%d] of order [%s] due to a network problem', line.id, order.number
                 )
+                order.notes.create(message='Fulfillment of order failed due to a network problem.', note_type='Error')
                 line.set_status(LINE.FULFILLMENT_NETWORK_ERROR)
             except Exception:  # pylint: disable=broad-except
                 logger.exception(
                     'Unable to fulfill line [%d] of order [%s]', line.id, order.number
                 )
+                order.notes.create(message='Fulfillment of order failed due to an Exception.', note_type='Error')
                 line.set_status(LINE.FULFILLMENT_SERVER_ERROR)
 
         logger.info('Finished fulfilling "Course Entitlement" product types for order [%s]', order.number)
