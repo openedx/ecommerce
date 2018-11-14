@@ -5,6 +5,7 @@ import waffle
 from django.core.exceptions import ValidationError
 from oscar.core.loading import get_model
 from rest_framework import generics, serializers
+from rest_framework.decorators import list_route
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 
@@ -12,7 +13,11 @@ from ecommerce.core.constants import COUPON_PRODUCT_CLASS_NAME
 from ecommerce.core.utils import log_message_and_raise_validation_error
 from ecommerce.enterprise.constants import ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH
 from ecommerce.enterprise.utils import get_enterprise_customers
-from ecommerce.extensions.api.serializers import CouponSerializer, EnterpriseCouponListSerializer
+from ecommerce.extensions.api.serializers import (
+    CouponSerializer,
+    CouponVoucherSerializer,
+    EnterpriseCouponListSerializer,
+)
 from ecommerce.extensions.api.v2.views.coupons import CouponViewSet
 from ecommerce.extensions.catalogue.utils import (
     attach_vouchers_to_coupon_product,
@@ -30,6 +35,7 @@ Order = get_model('order', 'Order')
 Line = get_model('basket', 'Line')
 Product = get_model('catalogue', 'Product')
 Voucher = get_model('voucher', 'Voucher')
+VoucherApplication = get_model('voucher', 'VoucherApplication')
 
 DEPRECATED_COUPON_CATEGORIES = ['Bulk Enrollment']
 
@@ -47,6 +53,7 @@ class EnterpriseCouponViewSet(CouponViewSet):
     """ Coupon resource. """
 
     def get_queryset(self):
+        # import pdb; pdb.set_trace()
         invoices = Invoice.objects.filter(business_client__enterprise_customer_uuid__isnull=False)
         orders = Order.objects.filter(id__in=[invoice.order_id for invoice in invoices])
         basket_lines = Line.objects.filter(basket_id__in=[order.basket_id for order in orders])
@@ -164,3 +171,42 @@ class EnterpriseCouponViewSet(CouponViewSet):
 
         if coupon_was_migrated:
             super(EnterpriseCouponViewSet, self).update_range_data(request_data, vouchers)
+
+    @list_route(url_path='(?P<coupon_id>\d+)/codes')
+    def codes(self, request, coupon_id):
+        """
+        GET codes belong to a `coupon`.
+
+        Response will looks like
+        {
+            results: [
+                {
+                    code: '1234-5678-90',
+                    assigned_to: 'Barry Allen',
+                    redemptions: {
+                        used: 1,
+                        available: 5,
+                    },
+                },
+            ]
+        }
+        """
+        try:
+            queryset = self.get_queryset()
+            coupon = queryset.get(id=coupon_id)
+        except Product.DoesNotExist:
+            return Response({'message': 'Invalid coupon id'}, status=400)
+
+        coupon_vouchers_with_applications = Voucher.objects.filter(
+            applications__voucher_id__in=coupon.attr.coupon_vouchers.vouchers.all()
+        )
+        coupon_vouchers_wo_applications = Voucher.objects.filter(
+            coupon_vouchers__coupon__id=coupon_id,
+            applications__isnull=True
+        )
+
+        all_coupon_vouchers = coupon_vouchers_with_applications|coupon_vouchers_wo_applications
+
+        page = self.paginate_queryset(all_coupon_vouchers)
+        serializer = CouponVoucherSerializer(page, many=True)
+        return self.get_paginated_response(serializer.data)

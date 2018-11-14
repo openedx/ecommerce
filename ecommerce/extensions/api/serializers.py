@@ -656,6 +656,35 @@ class VoucherSerializer(serializers.ModelSerializer):
         )
 
 
+class CouponVoucherSerializer(serializers.Serializer):
+    code = serializers.SerializerMethodField()
+    assigned_to = serializers.SerializerMethodField()
+    redemptions = serializers.SerializerMethodField()
+
+    def get_code(self, voucher):
+        return voucher.code
+
+    def get_assigned_to(self, obj):
+        return ''
+
+    def get_redemptions(self, voucher):
+        offer = voucher.best_offer
+        redemption_count = offer.num_applications
+
+        if voucher.usage == Voucher.SINGLE_USE:
+            max_coupon_usage = 1
+            redemption_count = voucher.num_orders
+        elif voucher.usage != Voucher.SINGLE_USE and offer.max_global_applications is None:
+            max_coupon_usage = 10000
+        else:
+            max_coupon_usage = offer.max_global_applications
+
+        return {
+            'used': redemption_count,
+            'available': max_coupon_usage,
+        }
+
+
 class CategorySerializer(serializers.ModelSerializer):
     # NOTE (CCB): We are explicitly ignoring child categories. They are not relevant to our current needs. Support
     # should be added later, if needed.

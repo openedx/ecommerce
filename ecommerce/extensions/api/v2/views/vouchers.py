@@ -78,6 +78,7 @@ class VoucherViewSet(NonDestroyableModelViewSet):
             logger.error('Voucher with code %s not found.', code)
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
+        # import pdb;pdb.set_trace()
         try:
             offers_data = self.get_offers(request, voucher)
         except (ConnectionError, SlumberBaseException, Timeout):
