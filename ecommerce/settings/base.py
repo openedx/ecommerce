@@ -406,7 +406,6 @@ JWT_AUTH = {
     'JWT_ISSUERS': (),
     # NOTE (CCB): This is temporarily set to False until we decide what values are acceptable.
     'JWT_VERIFY_AUDIENCE': False,
-    'JWT_SECRET_KEYS': (),
 }
 
 # Service user for worker processes.

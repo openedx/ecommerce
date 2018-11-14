@@ -56,7 +56,7 @@ JWT_AUTH.update({
             'ISSUER': 'http://edx.devstack.lms:18000/oauth2'
         },
         {
-            # TODO: ARCH-277: Remove this second issuer once we are no longer
+            # TODO: ARCH-276: Remove this second issuer once we are no longer
             # using multiple issuers.
             'SECRET_KEY': 'insecure-secret-key',
             # NOTE: This value of AUDIENCE doesn't make sense, even for the
