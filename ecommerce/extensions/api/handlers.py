@@ -92,7 +92,7 @@ def jwt_decode_handler(token):
     # Note: this jwt_decode_handler can handle asymmetric keys, but only a
     #   single issuer. Therefore, the LMS must be the first configured issuer.
     try:
-        jwt_payload = edx_drf_extensions_jwt_decode_handler(token)
+        jwt_payload = edx_drf_extensions_jwt_decode_handler(token, suppress_logging=True)
         monitoring_utils.set_custom_metric(JWT_DECODE_HANDLER_METRIC_KEY, 'edx-drf-extensions')
         return jwt_payload
     except Exception:  # pylint: disable=broad-except

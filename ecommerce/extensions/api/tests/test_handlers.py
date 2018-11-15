@@ -85,8 +85,9 @@ class JWTDecodeHandlerTests(TestCase):
     )
     @override_switch('jwt_decode_handler.log_exception.edx-drf-extensions', active=True)
     @mock.patch('edx_django_utils.monitoring.set_custom_metric')
+    @mock.patch('edx_rest_framework_extensions.auth.jwt.decoder.logger')
     @mock.patch('ecommerce.extensions.api.handlers.logger')
-    def test_decode_success_multiple_issuers(self, mock_logger, mock_set_custom_metric):
+    def test_decode_success_multiple_issuers(self, mock_logger, mock_drf_logger, mock_set_custom_metric):
         """
         Should pass using ``_ecommerce_jwt_decode_handler_multiple_issuers``.
 
@@ -99,10 +100,11 @@ class JWTDecodeHandlerTests(TestCase):
         token = generate_jwt_token(payload, non_first_issuer['SECRET_KEY'])
         self.assertDictContainsSubset(payload, jwt_decode_handler(token))
         mock_set_custom_metric.assert_called_with('ecom_jwt_decode_handler', 'ecommerce-multiple-issuers')
-        mock_logger.exception.assert_not_called()
-        mock_logger.warning.assert_not_called()
-        mock_logger.error.assert_not_called()
         mock_logger.info.assert_called_with('Failed to use edx-drf-extensions jwt_decode_handler.', exc_info=True)
+        mock_drf_logger.info.assert_not_called()
+        mock_drf_logger.warn.assert_not_called()
+        mock_drf_logger.error.assert_not_called()
+        mock_drf_logger.exception.assert_not_called()
 
     @override_settings(
         JWT_AUTH={
