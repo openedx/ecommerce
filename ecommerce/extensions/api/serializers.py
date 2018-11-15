@@ -86,6 +86,11 @@ def retrieve_offer(obj):
     return retrieve_voucher(obj).best_offer
 
 
+def retrieve_original_offer(obj):
+    """Helper method to retrieve the offer from coupon. """
+    return retrieve_voucher(obj).original_offer
+
+
 def retrieve_enterprise_offer(obj):
     """Helper method to retrieve the offer from coupon. """
     return retrieve_voucher(obj).enterprise_offer
@@ -93,7 +98,7 @@ def retrieve_enterprise_offer(obj):
 
 def retrieve_range(obj):
     """Helper method to retrieve the range from coupon."""
-    return retrieve_offer(obj).condition.range
+    return retrieve_original_offer(obj).condition.range
 
 
 def retrieve_quantity(obj):

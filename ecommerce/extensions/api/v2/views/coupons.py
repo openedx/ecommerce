@@ -327,7 +327,6 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
         """Update coupon depending on request data sent."""
         try:
             super(CouponViewSet, self).update(request, *args, **kwargs)
-            self.validate_access_for_enterprise_switch(request.data)
             coupon = self.get_object()
             vouchers = coupon.attr.coupon_vouchers.vouchers
             self.update_voucher_data(request.data, vouchers)
@@ -429,8 +428,9 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
             ProductCategory.objects.filter(product=coupon).update(category=category)
 
         client_username = request_data.get('client')
-        enterprise_customer = request_data.get('enterprise_customer', {}).get('id', None)
-        enterprise_customer_name = request_data.get('enterprise_customer', {}).get('name', None)
+        enterprise_customer_data = request_data.get('enterprise_customer')
+        enterprise_customer = enterprise_customer_data.get('id', None) if enterprise_customer_data else None
+        enterprise_customer_name = enterprise_customer_data.get('name', None) if enterprise_customer_data else None
         if client_username or enterprise_customer:
             client, __ = BusinessClient.objects.update_or_create(
                 name=enterprise_customer_name or client_username,
@@ -461,7 +461,8 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
         """
         program_uuid = request_data.get('program_uuid')
         benefit_value = request_data.get('benefit_value')
-        enterprise_customer = request_data.get('enterprise_customer', {}).get('id', None)
+        enterprise_customer_data = request_data.get('enterprise_customer')
+        enterprise_customer = enterprise_customer_data.get('id', None) if enterprise_customer_data else None
         enterprise_catalog = request_data.get('enterprise_customer_catalog') or None
         max_uses = request_data.get('max_uses')
         email_domains = request_data.get('email_domains')
