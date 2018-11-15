@@ -3,9 +3,8 @@ from __future__ import unicode_literals
 import logging
 import waffle
 from django.core.exceptions import ValidationError
-from django.db import IntegrityError
 from oscar.core.loading import get_model
-from rest_framework import generics
+from rest_framework import generics, serializers
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 
@@ -74,29 +73,34 @@ class EnterpriseCouponViewSet(CouponViewSet):
             cleaned_voucher_data['price']
         )
 
-        try:
-            vouchers = create_enterprise_vouchers(
-                voucher_type=cleaned_voucher_data['voucher_type'],
-                quantity=cleaned_voucher_data['quantity'],
-                coupon_id=coupon_product.id,
-                benefit_type=cleaned_voucher_data['benefit_type'],
-                benefit_value=cleaned_voucher_data['benefit_value'],
-                enterprise_customer=cleaned_voucher_data['enterprise_customer'],
-                enterprise_customer_catalog=cleaned_voucher_data['enterprise_customer_catalog'],
-                max_uses=cleaned_voucher_data['max_uses'],
-                email_domains=cleaned_voucher_data['email_domains'],
-                site=self.request.site,
-                end_datetime=cleaned_voucher_data['end_datetime'],
-                start_datetime=cleaned_voucher_data['start_datetime'],
-                code=cleaned_voucher_data['code'],
-                name=cleaned_voucher_data['title']
-            )
-        except IntegrityError:
-            logger.exception('Failed to create vouchers for [%s] coupon.', coupon_product.title)
-            raise
+        vouchers = create_enterprise_vouchers(
+            voucher_type=cleaned_voucher_data['voucher_type'],
+            quantity=cleaned_voucher_data['quantity'],
+            coupon_id=coupon_product.id,
+            benefit_type=cleaned_voucher_data['benefit_type'],
+            benefit_value=cleaned_voucher_data['benefit_value'],
+            enterprise_customer=cleaned_voucher_data['enterprise_customer'],
+            enterprise_customer_catalog=cleaned_voucher_data['enterprise_customer_catalog'],
+            max_uses=cleaned_voucher_data['max_uses'],
+            email_domains=cleaned_voucher_data['email_domains'],
+            site=self.request.site,
+            end_datetime=cleaned_voucher_data['end_datetime'],
+            start_datetime=cleaned_voucher_data['start_datetime'],
+            code=cleaned_voucher_data['code'],
+            name=cleaned_voucher_data['title']
+        )
 
         attach_vouchers_to_coupon_product(coupon_product, vouchers, cleaned_voucher_data['note'])
         return coupon_product
+
+    def update(self, request, *args, **kwargs):
+        """Update coupon depending on request data sent."""
+        try:
+            self.validate_access_for_enterprise_switch(request.data)
+        except ValidationError as error:
+            logger.exception(error.message)
+            raise serializers.ValidationError(error.message)
+        return super(EnterpriseCouponViewSet, self).update(request, *args, **kwargs)
 
     def update_range_data(self, request_data, vouchers):
         pass

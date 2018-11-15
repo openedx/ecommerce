@@ -22,6 +22,7 @@ from waffle.models import Switch
 
 from ecommerce.coupons.tests.mixins import CouponMixin, DiscoveryMockMixin
 from ecommerce.courses.tests.factories import CourseFactory
+from ecommerce.enterprise.conditions import AssignableEnterpriseCustomerCondition
 from ecommerce.enterprise.constants import ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH
 from ecommerce.extensions.api.v2.views.coupons import DEPRECATED_COUPON_CATEGORIES, CouponViewSet
 from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
@@ -429,6 +430,7 @@ class CouponViewSetFunctionalTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             self.assertEqual(str(all_offers[0].condition.range.enterprise_customer_catalog), enterprise_catalog_id)
             self.assertEqual(str(all_offers[1].condition.enterprise_customer_uuid), enterprise_customer_id)
             self.assertEqual(str(all_offers[1].condition.enterprise_customer_catalog_uuid), enterprise_catalog_id)
+            self.assertEqual(all_offers[1].condition.proxy_class, class_path(AssignableEnterpriseCustomerCondition))
 
         # Check that the enterprise name took precedence as the client name
         basket = Basket.objects.filter(lines__product_id=coupon.id).first()
@@ -514,7 +516,7 @@ class CouponViewSetFunctionalTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
         Switch.objects.update_or_create(name=ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, defaults={'active': True})
         enterprise_customer_id = str(uuid4()).decode('utf-8')
         enterprise_catalog_id = str(uuid4()).decode('utf-8')
-        response = self.get_response(
+        self.get_response(
             'PUT',
             reverse('api:v2:coupons-detail', kwargs={'pk': self.coupon.id}),
             data={
@@ -522,7 +524,8 @@ class CouponViewSetFunctionalTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
                 'enterprise_customer_catalog': enterprise_catalog_id,
             }
         )
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        new_coupon = Product.objects.get(id=self.coupon.id)
+        self._check_enterprise_fields(new_coupon, enterprise_customer_id, enterprise_catalog_id, 'test enterprise')
 
     def test_update_enterprise_offers_enterprise_coupon_switch_on(self):
         """Test updating an enterrprise coupon with the enterprise offers switch on."""

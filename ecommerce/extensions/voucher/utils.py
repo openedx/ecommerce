@@ -21,7 +21,7 @@ from oscar.templatetags.currency_filters import currency
 from ecommerce.core.url_utils import get_ecommerce_url
 from ecommerce.core.utils import log_message_and_raise_validation_error
 from ecommerce.enterprise.benefits import BENEFIT_MAP as ENTERPRISE_BENEFIT_MAP
-from ecommerce.enterprise.conditions import EnterpriseCustomerCondition
+from ecommerce.enterprise.conditions import AssignableEnterpriseCustomerCondition
 from ecommerce.enterprise.utils import get_enterprise_customer
 from ecommerce.extensions.api import exceptions
 from ecommerce.extensions.offer.models import OFFER_PRIORITY_VOUCHER
@@ -416,7 +416,7 @@ def get_or_create_enterprise_offer(
     enterprise_customer_name = enterprise_customer_object.get('name', '')
 
     condition, __ = Condition.objects.get_or_create(
-        proxy_class=class_path(EnterpriseCustomerCondition),
+        proxy_class=class_path(AssignableEnterpriseCustomerCondition),
         enterprise_customer_uuid=enterprise_customer,
         enterprise_customer_name=enterprise_customer_name,
         enterprise_customer_catalog_uuid=enterprise_customer_catalog,

@@ -15,6 +15,7 @@ from waffle.models import Switch
 
 from ecommerce.coupons.tests.mixins import CouponMixin, DiscoveryMockMixin
 from ecommerce.enterprise.benefits import BENEFIT_MAP as ENTERPRISE_BENEFIT_MAP
+from ecommerce.enterprise.conditions import AssignableEnterpriseCustomerCondition
 from ecommerce.enterprise.constants import ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH
 from ecommerce.enterprise.tests.mixins import EnterpriseServiceMockMixin
 from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
@@ -161,6 +162,7 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             offer = all_offers[0]
             self.assertEqual(str(offer.condition.enterprise_customer_uuid), enterprise_customer_id)
             self.assertEqual(str(offer.condition.enterprise_customer_catalog_uuid), enterprise_catalog_id)
+            self.assertEqual(offer.condition.proxy_class, class_path(AssignableEnterpriseCustomerCondition))
             self.assertIsNone(offer.condition.range)
             self.assertEqual(offer.benefit.proxy_class, class_path(ENTERPRISE_BENEFIT_MAP[self.data['benefit_type']]))
             self.assertEqual(offer.benefit.value, self.data['benefit_value'])
@@ -171,20 +173,6 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
         invoice = Invoice.objects.get(order__basket=basket)
         self.assertEqual(invoice.business_client.name, enterprise_name)
         self.assertEqual(str(invoice.business_client.enterprise_customer_uuid), enterprise_customer_id)
-
-    def test_create_raises_integrity_error(self):
-        Switch.objects.update_or_create(name=ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, defaults={'active': True})
-        self.data.update({
-            'code': 'CUSTOMENTCODE',
-            'benefit_value': 20,
-            'quantity': 1,
-        })
-        response = self.get_response('POST', ENTERPRISE_COUPONS_LINK, self.data)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-
-        self.data.update({'title': 'Duplicate Custom Code Coupon'})
-        response = self.get_response('POST', ENTERPRISE_COUPONS_LINK, self.data)
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_update_ent_offers_switch_off(self):
         Switch.objects.update_or_create(name=ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, defaults={'active': True})
