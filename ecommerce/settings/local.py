@@ -49,11 +49,24 @@ SOCIAL_AUTH_REDIRECT_IS_HTTPS = False
 
 JWT_AUTH.update({
     'JWT_SECRET_KEY': 'insecure-secret-key',
-    'JWT_ISSUERS': (
-        'http://127.0.0.1:8000/oauth2',
-        # Must match the value of JWT_ISSUER configured for the ecommerce worker.
-        'ecommerce_worker',
-    ),
+    'JWT_ISSUERS': [
+        {
+            'SECRET_KEY': 'lms-secret',
+            'AUDIENCE': 'lms-key',
+            'ISSUER': 'http://edx.devstack.lms:18000/oauth2'
+        },
+        {
+            # TODO: ARCH-277: Remove this second issuer once we are no longer
+            # using multiple issuers.
+            'SECRET_KEY': 'insecure-secret-key',
+            # NOTE: This value of AUDIENCE doesn't make sense, even for the
+            # LMS, but we are just making it match for now until AUDIENCE is
+            # potentially removed altogether.
+            'AUDIENCE': 'lms-key',
+            # Must match the value of JWT_ISSUER configured for the ecommerce worker.
+            'ISSUER': 'ecommerce_worker'
+        },
+    ],
 })
 # END AUTHENTICATION
 

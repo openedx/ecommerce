@@ -685,7 +685,7 @@ class EntitlementFulfillmentModuleTests(FulfillmentTestMixin, TestCase):
         self.assertFalse(CourseEntitlementFulfillmentModule().revoke_line(line))
 
     @httpretty.activate
-    def test_entitlement_module_fulfill_connection_error(self):
+    def test_entitlement_module_fulfill_unknown_error(self):
         """Test Course Entitlement Fulfillment with exception when posting to LMS."""
 
         self.mock_access_token_response()
@@ -706,6 +706,26 @@ class EntitlementFulfillmentModuleTests(FulfillmentTestMixin, TestCase):
                 (logger_name, 'INFO', 'Finished fulfilling "Course Entitlement" product types for order [{}]'.
                  format(self.order.number))
             )
+
+    def test_entitlement_module_fulfill_network_error(self):
+        """Test Course Entitlement Fulfillment with exceptions(Timeout/ConnectionError) when posting to LMS."""
+
+        logger_name = 'ecommerce.extensions.fulfillment.modules'
+
+        line = self.order.lines.first()
+        with mock.patch('edx_rest_api_client.client.EdxRestApiClient',
+                        side_effect=ConnectionError):
+            with LogCapture(logger_name) as l:
+                CourseEntitlementFulfillmentModule().fulfill_product(self.order, list(self.order.lines.all()))
+                self.assertEqual(LINE.FULFILLMENT_NETWORK_ERROR, self.order.lines.all()[0].status)
+                l.check(
+                    (logger_name, 'INFO', 'Attempting to fulfill "Course Entitlement" product types for order [{}]'.
+                     format(self.order.number)),
+                    (logger_name, 'ERROR', 'Unable to fulfill line [{}] of order [{}] due to a network problem'.
+                     format(line.id, self.order.number)),
+                    (logger_name, 'INFO', 'Finished fulfilling "Course Entitlement" product types for order [{}]'.
+                     format(self.order.number))
+                )
 
     def test_entitlement_module_fulfill_bad_attributes(self):
         """ Test the Entitlement Fulfillment Module fails when the product does not have proper attributes. """

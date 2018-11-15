@@ -8,6 +8,7 @@ import waffle
 from dateutil.parser import parse
 from django.contrib.auth import get_user_model
 from django.db import transaction
+from django.db.models import Q
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 from oscar.core.loading import get_class, get_model
@@ -28,6 +29,7 @@ from ecommerce.invoice.models import Invoice
 logger = logging.getLogger(__name__)
 
 Basket = get_model('basket', 'Basket')
+BasketLine = get_model('basket', 'Line')
 Benefit = get_model('offer', 'Benefit')
 BillingAddress = get_model('order', 'BillingAddress')
 Catalog = get_model('catalogue', 'Catalog')
@@ -68,6 +70,12 @@ def retrieve_condition(obj):
     return retrieve_offer(obj).condition
 
 
+def retrieve_enterprise_condition(obj):
+    """Helper method to retrieve the benefit from voucher. """
+    enterprise_offer = retrieve_enterprise_offer(obj)
+    return enterprise_offer and enterprise_offer.condition
+
+
 def retrieve_end_date(obj):
     """Helper method to retrieve the voucher end datetime. """
     return retrieve_voucher(obj).end_datetime
@@ -76,6 +84,11 @@ def retrieve_end_date(obj):
 def retrieve_offer(obj):
     """Helper method to retrieve the offer from coupon. """
     return retrieve_voucher(obj).best_offer
+
+
+def retrieve_enterprise_offer(obj):
+    """Helper method to retrieve the offer from coupon. """
+    return retrieve_voucher(obj).enterprise_offer
 
 
 def retrieve_range(obj):
@@ -277,6 +290,67 @@ class OrderSerializer(serializers.ModelSerializer):
             'total_excl_tax',
             'user',
             'vouchers',
+        )
+
+
+class BasketSerializer(serializers.ModelSerializer):
+    """Serializer for parsing basket data."""
+    owner = UserSerializer()
+    products = serializers.SerializerMethodField()
+    vouchers = serializers.SerializerMethodField()
+    payment_status = serializers.SerializerMethodField()
+    payment_processor = serializers.SerializerMethodField()
+
+    def get_vouchers(self, obj):
+        try:
+            serializer = VoucherSerializer(
+                obj.vouchers.all(), many=True, context={'request': self.context['request']}
+            )
+            return serializer.data
+        except (AttributeError, ValueError):
+            return None
+
+    def get_payment_status(self, obj):
+        successful_payment_notifications = obj.paymentprocessorresponse_set.filter(
+            Q(response__contains='ACCEPT') | Q(response__contains='approved')
+        )
+        if successful_payment_notifications:
+            return "Accepted"
+        return "Declined"
+
+    def get_payment_processor(self, obj):
+        payment_notifications = obj.paymentprocessorresponse_set.filter(transaction_id__isnull=False)
+        if payment_notifications:
+            return payment_notifications[0].processor_name
+        return "None"
+
+    def get_products(self, obj):
+        lines = BasketLine.objects.filter(basket=obj)
+        products = [line.product for line in lines]
+        serialized_data = []
+        for product in products:
+
+            serialized_data.append(ProductAttributeValueSerializer(
+                product.attr,
+                many=True,
+                read_only=True,
+                context={'request': self.context['request']}
+            ).data)
+        # return serializer.data
+        # serializer = ProductSerializer(products, many=True, context={'request': self.context['request']})
+        return serialized_data
+
+    class Meta(object):
+        model = Basket
+        fields = (
+            'id',
+            'status',
+            'owner',
+            'order_number',
+            'products',
+            'vouchers',
+            'payment_status',
+            'payment_processor',
         )
 
 
@@ -605,6 +679,45 @@ class CouponListSerializer(serializers.ModelSerializer):
     class Meta(object):
         model = Product
         fields = ('category', 'client', 'code', 'id', 'title', 'date_created')
+
+
+class EnterpriseCouponListSerializer(serializers.ModelSerializer):
+    client = serializers.SerializerMethodField()
+    enterprise_customer = serializers.SerializerMethodField()
+    enterprise_customer_catalog = serializers.SerializerMethodField()
+    code_status = serializers.SerializerMethodField()
+
+    def get_client(self, obj):
+        return Invoice.objects.get(order__lines__product=obj).business_client.name
+
+    def get_enterprise_customer(self, obj):
+        """ Get the Enterprise Customer UUID attached to a coupon. """
+        offer_condition = retrieve_enterprise_condition(obj)
+        return offer_condition and offer_condition.enterprise_customer_uuid
+
+    def get_enterprise_customer_catalog(self, obj):
+        """ Get the Enterprise Customer Catalog UUID attached to a coupon. """
+        offer_condition = retrieve_enterprise_condition(obj)
+        return offer_condition and offer_condition.enterprise_customer_catalog_uuid
+
+    def get_code_status(self, obj):
+        start_date = retrieve_start_date(obj)
+        end_date = retrieve_end_date(obj)
+        current_datetime = timezone.now()
+        in_time_interval = start_date < current_datetime < end_date
+        return _('ACTIVE') if in_time_interval else _('INACTIVE')
+
+    class Meta(object):
+        model = Product
+        fields = (
+            'client',
+            'code_status',
+            'enterprise_customer',
+            'enterprise_customer_catalog',
+            'id',
+            'title',
+            'date_created',
+        )
 
 
 class CouponSerializer(ProductPaymentInfoMixin, serializers.ModelSerializer):

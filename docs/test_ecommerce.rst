@@ -101,6 +101,12 @@ these models, which are used for multi-tenancy.
       ecommerce.courses.tests.test_utils --settings=ecommerce.settings.test
       --with-ignore-docstrings --logging-level=DEBUG
 
+To debug when running tests using ``manage.py``, you may need to use the
+following instead of ``pdb`` directly, or nosetests may hang while creating
+the database::
+
+    import nose.tools as nosepdb; nosepdb.set_trace()
+
 * To run tests without creating a database (i.e. really fast), use pytest.
   If a test has a database dependency, the test will not pass.
 

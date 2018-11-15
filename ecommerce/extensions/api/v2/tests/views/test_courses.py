@@ -79,7 +79,7 @@ class CourseViewSetTests(ProductSerializerMixin, DiscoveryTestMixin, TestCase):
             'administrator': True,
             'username': username,
             'email': email,
-            'iss': settings.JWT_AUTH['JWT_ISSUERS'][0]
+            'iss': settings.JWT_AUTH['JWT_ISSUERS'][0]['ISSUER']
         }
         auth_header = "JWT {token}".format(token=jwt.encode(payload, settings.JWT_AUTH['JWT_SECRET_KEY']))
         self.assertFalse(User.objects.filter(username=username).exists())

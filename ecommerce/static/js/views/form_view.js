@@ -25,6 +25,8 @@ define([
                 submit: 'submit'
             },
 
+            updateWithPatch: true,
+
             initialize: function() {
                 this.alertViews = [];
 
@@ -183,7 +185,7 @@ define([
                         {
                             complete: onSaveComplete,
                             error: onSaveError,
-                            patch: true,
+                            patch: this.updateWithPatch,
                             success: this.saveSuccess.bind(this)
                         }
                     );

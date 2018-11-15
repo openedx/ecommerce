@@ -15,7 +15,7 @@ msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2018-04-05 11:00+0000\n"
-"PO-Revision-Date: 2018-09-25 10:20+0000\n"
+"PO-Revision-Date: 2018-11-09 10:31+0000\n"
 "Last-Translator: Abstract Technology <stefania.trabucchi@abstract-technology.de>\n"
 "Language-Team: German (Germany) (http://www.transifex.com/open-edx/edx-platform/language/de_DE/)\n"
 "MIME-Version: 1.0\n"
@@ -63,7 +63,7 @@ msgstr "Die maximale Nutzungsanzahl für multi-use-coupons muss größer als 2 s
 
 #: ecommerce/static/js/models/coupon_model.js:166
 msgid "A valid Program UUID is required."
-msgstr ""
+msgstr "Eine gültige Programm-UUID ist erforderlich."
 
 #: ecommerce/static/js/models/coupon_model.js:190
 msgid "Must occur before end date"
@@ -113,7 +113,7 @@ msgstr "Alle Kursplätze müssen einen Preis haben. "
 
 #: ecommerce/static/js/models/course_seats/course_seat.js:45
 msgid "Verified seats must have an upgrade deadline."
-msgstr ""
+msgstr "Verifizierte Plätze müssen eine Aktualisierungsfrist haben."
 
 #: ecommerce/static/js/models/course_seats/course_seat.js:53
 msgid "The upgrade deadline must occur BEFORE the verification deadline."
@@ -255,7 +255,7 @@ msgstr "Achtung! Das Benutzen des 'Zurück-Buttons' bewirkt, dass die Seite Neug
 #: ecommerce/static/js/payment_processors/cybersource.js:218
 msgid ""
 "Apple Pay is not available at this time. Please try another payment method."
-msgstr ""
+msgstr "Apple Pay ist derzeit nicht verfügbar. Bitte versuchen Sie es mit einer anderen Zahlungsmethode."
 
 #: ecommerce/static/js/payment_processors/cybersource.js:249
 msgid ""
@@ -390,7 +390,7 @@ msgstr "Teilnahme mit bezahltem Zertifikat und Vorabverifikation zur Erlangung e
 msgid ""
 "Paid certificate track with initial verification and Verified Certificate, "
 "and option to purchase credit"
-msgstr ""
+msgstr "Bezahlter Zertifikat-Modus mit anfänglicher Verifikation und verifiziertem Zertifikat und Einstellung zum Kauf von Guthaben."
 
 #. Translators: _START_, _END_, and _TOTAL_ are placeholders. Do NOT translate
 #. them.

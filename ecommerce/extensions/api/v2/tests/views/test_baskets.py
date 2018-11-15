@@ -20,10 +20,12 @@ from rest_framework.throttling import UserRateThrottle
 
 from ecommerce.courses.models import Course
 from ecommerce.extensions.api import exceptions as api_exceptions
+from ecommerce.extensions.api.tests.test_authentication import AccessTokenMixin
 from ecommerce.extensions.api.v2.tests.views import JSON_CONTENT_TYPE, OrderDetailViewTestMixin
 from ecommerce.extensions.api.v2.views.baskets import BasketCalculateView, BasketCreateView
 from ecommerce.extensions.basket.constants import EMAIL_OPT_IN_ATTRIBUTE
 from ecommerce.extensions.payment import exceptions as payment_exceptions
+from ecommerce.extensions.payment.models import PaymentProcessorResponse
 from ecommerce.extensions.payment.processors.cybersource import Cybersource
 from ecommerce.extensions.test.factories import (
     PercentageDiscountBenefitWithoutRangeFactory,
@@ -275,6 +277,76 @@ class BasketCreateViewTests(BasketCreationMixin, ThrottlingMixin, TransactionTes
             'developer_message': 'Test message'
         }
         self.assertDictEqual(actual, expected)
+
+
+class BasketViewSetTests(AccessTokenMixin, ThrottlingMixin, TestCase):
+
+    def setUp(self):
+        super(BasketViewSetTests, self).setUp()
+        self.path = reverse('api:v2:basket-list')
+        self.user = self.create_user(is_staff=True)
+        self.token = self.generate_jwt_token_header(self.user)
+
+    def test_is_user_authenticated(self):
+        """ If the user is not authenticated, the view should return HTTP status 403. """
+        response = self.client.get(self.path)
+        self.assertEqual(response.status_code, 401)
+
+    @httpretty.activate
+    def test_oauth2_authentication(self):
+        """Verify clients can authenticate with OAuth 2.0."""
+        auth_header = 'Bearer {}'.format(self.DEFAULT_TOKEN)
+
+        self.mock_user_info_response(username=self.user.username)
+        response = self.client.get(self.path, HTTP_AUTHORIZATION=auth_header)
+        self.assertEqual(response.status_code, 200)
+
+    def test_only_works_for_staff_users(self):
+        """ Test view only return results when accessed by staff. """
+        basket = BasketFactory(site=self.site)
+        response = self.client.get(self.path, HTTP_AUTHORIZATION=self.token)
+
+        self.assertEqual(response.status_code, 200)
+        content = json.loads(response.content)
+        self.assertEqual(content['count'], 1)
+        self.assertEqual(content['results'][0]['id'], basket.id)
+
+        other_user = self.create_user()
+        self.client.login(username=other_user.username, password=self.password)
+        response = self.client.get(self.path)
+        self.assertEqual(response.status_code, 403)
+
+    def test_basket_information(self):
+        """ Test data return by the Api"""
+        basket = BasketFactory(site=self.site)
+        voucher, product = prepare_voucher(code='test101')
+        basket.vouchers.add(voucher)
+        basket.add_product(product)
+        PaymentProcessorResponse.objects.create(basket=basket, transaction_id='PAY-123', processor_name='paypal',
+                                                response=json.dumps({'state': 'approved'}))
+        response = self.client.get(self.path, HTTP_AUTHORIZATION=self.token)
+
+        self.assertEqual(response.status_code, 200)
+        content = json.loads(response.content)
+        self.assertEqual(content['results'][0]['id'], basket.id)
+        self.assertEqual(content['results'][0]['status'], basket.status)
+        self.assertIsNotNone(content['results'][0]['vouchers'])
+        self.assertEqual(content['results'][0]['payment_status'], "Accepted")
+
+    def test_voucher_errors(self):
+        """ Test data when voucher error happen"""
+        basket = BasketFactory(site=self.site)
+        voucher, product = prepare_voucher(code='test101')
+        basket.vouchers.add(voucher)
+        basket.add_product(product)
+
+        with mock.patch('ecommerce.extensions.api.serializers.VoucherSerializer', side_effect=ValueError):
+            response = self.client.get(self.path, HTTP_AUTHORIZATION=self.token)
+            self.assertIsNone(json.loads(response.content)['results'][0]['vouchers'])
+
+        with mock.patch('ecommerce.extensions.api.serializers.VoucherSerializer', side_effect=AttributeError):
+            response = self.client.get(self.path, HTTP_AUTHORIZATION=self.token)
+            self.assertIsNone(json.loads(response.content)['results'][0]['vouchers'])
 
 
 class OrderByBasketRetrieveViewTests(OrderDetailViewTestMixin, TestCase):

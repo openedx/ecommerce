@@ -2,6 +2,7 @@ from __future__ import unicode_literals
 
 import logging
 
+import waffle
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError, transaction
@@ -16,6 +17,7 @@ from ecommerce.core.constants import COUPON_PRODUCT_CLASS_NAME
 from ecommerce.core.models import BusinessClient
 from ecommerce.core.utils import log_message_and_raise_validation_error
 from ecommerce.coupons.utils import prepare_course_seat_types
+from ecommerce.enterprise.constants import ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH
 from ecommerce.extensions.api import data as data_api
 from ecommerce.extensions.api.filters import ProductFilter
 from ecommerce.extensions.api.serializers import CategorySerializer, CouponListSerializer, CouponSerializer
@@ -25,7 +27,9 @@ from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
 from ecommerce.extensions.payment.processors.invoice import InvoicePayment
 from ecommerce.extensions.voucher.models import CouponVouchers
 from ecommerce.extensions.voucher.utils import (
-    get_or_create_enterprise_offer, update_voucher_offer, update_voucher_with_enterprise_offer
+    get_or_create_enterprise_offer,
+    update_voucher_offer,
+    update_voucher_with_enterprise_offer
 )
 from ecommerce.invoice.models import Invoice
 
@@ -43,6 +47,7 @@ ProductClass = get_model('catalogue', 'ProductClass')
 Range = get_model('offer', 'Range')
 StockRecord = get_model('partner', 'StockRecord')
 Voucher = get_model('voucher', 'Voucher')
+Line = get_model('basket', 'Line')
 
 DEPRECATED_COUPON_CATEGORIES = ['Bulk Enrollment']
 
@@ -54,10 +59,19 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
     filter_class = ProductFilter
 
     def get_queryset(self):
-        return Product.objects.filter(
+        product_filter = Product.objects.filter(
             product_class__name=COUPON_PRODUCT_CLASS_NAME,
             stockrecords__partner=self.request.site.siteconfiguration.partner
         )
+        # If we have switched to using enterprise offers, ensure that enterprise coupons do not show up
+        # in the regular coupon list view
+        if waffle.switch_is_active(ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH):
+            invoices = Invoice.objects.filter(business_client__enterprise_customer_uuid__isnull=False)
+            orders = Order.objects.filter(id__in=[invoice.order_id for invoice in invoices])
+            basket_lines = Line.objects.filter(basket_id__in=[order.basket_id for order in orders])
+            return product_filter.exclude(id__in=[line.product_id for line in basket_lines])
+
+        return product_filter
 
     def get_serializer_class(self):
         if self.action == 'list':
@@ -88,14 +102,17 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
         try:
             with transaction.atomic():
                 try:
-                    cleaned_voucher_data = self.clean_voucher_request_data(request)
+                    self.validate_access_for_enterprise_switch(request.data)
+                    cleaned_voucher_data = self.clean_voucher_request_data(
+                        request.data, request.site.siteconfiguration.partner
+                    )
                 except ValidationError as error:
                     logger.exception('Failed to create coupon. %s', error.message)
                     # FIXME This should ALWAYS return 400.
                     return Response(error.message, status=error.code or 400)
 
                 try:
-                    coupon_product = self.create_coupon_product(cleaned_voucher_data)
+                    coupon_product = self.create_coupon_and_vouchers(cleaned_voucher_data)
                 except (KeyError, IntegrityError) as error:
                     logger.exception('Coupon creation failed!')
                     return Response(str(error), status=status.HTTP_400_BAD_REQUEST)
@@ -103,7 +120,10 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
                 basket = prepare_basket(request, [coupon_product])
 
                 # Create an order now since payment is handled out of band via an invoice.
-                client, __ = BusinessClient.objects.get_or_create(name=request.data.get('client'))
+                client, __ = BusinessClient.objects.update_or_create(
+                    name=cleaned_voucher_data['enterprise_customer_name'] or request.data.get('client'),
+                    defaults={'enterprise_customer_uuid': cleaned_voucher_data['enterprise_customer']}
+                )
                 invoice_data = self.create_update_data_dict(data=request.data, fields=Invoice.UPDATEABLE_INVOICE_FIELDS)
                 response_data = self.create_order_for_invoice(
                     basket, coupon_id=coupon_product.id, client=client, invoice_data=invoice_data
@@ -113,7 +133,7 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
         except ValidationError as e:
             raise serializers.ValidationError(e.message)
 
-    def create_coupon_product(self, cleaned_voucher_data):
+    def create_coupon_and_vouchers(self, cleaned_voucher_data):
         return create_coupon_product(
             benefit_type=cleaned_voucher_data['benefit_type'],
             benefit_value=cleaned_voucher_data['benefit_value'],
@@ -139,27 +159,33 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
             site=self.request.site
         )
 
+    def validate_access_for_enterprise_switch(self, request_data):
+        enterprise_customer_data = request_data.get('enterprise_customer')
+        if (enterprise_customer_data and enterprise_customer_data.get('id') and
+                waffle.switch_is_active(ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH)):
+            raise ValidationError('Enterprise coupons can no longer be created or updated from this endpoint.')
+
     @classmethod
-    def clean_voucher_request_data(cls, request):
+    def clean_voucher_request_data(cls, request_data, partner):
         """
         Helper method to return cleaned request data for voucher creation or
         raise validation error with error code.
 
         Arguments:
-            request (HttpRequest): request with voucher data
+            request (dict): request's data with voucher data
+            partner (str): the request's site's partner
 
         """
-        benefit_type = request.data.get('benefit_type')
-        category_data = request.data.get('category')
-        code = request.data.get('code')
-        course_catalog_data = request.data.get('course_catalog')
-        enterprise_customer_data = request.data.get('enterprise_customer')
-        course_seat_types = request.data.get('course_seat_types')
-        max_uses = request.data.get('max_uses')
-        partner = request.site.siteconfiguration.partner
-        stock_record_ids = request.data.get('stock_record_ids')
-        voucher_type = request.data.get('voucher_type')
-        program_uuid = request.data.get('program_uuid')
+        benefit_type = request_data.get('benefit_type')
+        category_data = request_data.get('category')
+        code = request_data.get('code')
+        course_catalog_data = request_data.get('course_catalog')
+        enterprise_customer_data = request_data.get('enterprise_customer')
+        course_seat_types = request_data.get('course_seat_types')
+        max_uses = request_data.get('max_uses')
+        stock_record_ids = request_data.get('stock_record_ids')
+        voucher_type = request_data.get('voucher_type')
+        program_uuid = request_data.get('program_uuid')
 
         if benefit_type not in (Benefit.PERCENTAGE, Benefit.FIXED,):
             raise ValidationError('Benefit type [{type}] is not allowed'.format(type=benefit_type))
@@ -193,6 +219,7 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
 
         try:
             enterprise_customer = enterprise_customer_data['id'] if enterprise_customer_data else None
+            enterprise_customer_name = enterprise_customer_data.get('name') if enterprise_customer_data else None
         except (KeyError, TypeError):
             validation_message = 'Unexpected EnterpriseCustomer data format received for coupon.'
             raise ValidationError(validation_message)
@@ -201,24 +228,25 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
 
         return {
             'benefit_type': benefit_type,
-            'benefit_value': request.data.get('benefit_value'),
+            'benefit_value': request_data.get('benefit_value'),
             'coupon_catalog': coupon_catalog,
-            'catalog_query': request.data.get('catalog_query'),
+            'catalog_query': request_data.get('catalog_query'),
             'category': category,
             'code': code,
             'course_catalog': course_catalog,
             'course_seat_types': course_seat_types,
-            'email_domains': request.data.get('email_domains'),
-            'end_datetime': request.data.get('end_datetime'),
+            'email_domains': request_data.get('email_domains'),
+            'end_datetime': request_data.get('end_datetime'),
             'enterprise_customer': enterprise_customer,
-            'enterprise_customer_catalog': request.data.get('enterprise_customer_catalog'),
+            'enterprise_customer_name': enterprise_customer_name,
+            'enterprise_customer_catalog': request_data.get('enterprise_customer_catalog'),
             'max_uses': max_uses,
-            'note': request.data.get('note'),
+            'note': request_data.get('note'),
             'partner': partner,
-            'price': request.data.get('price'),
-            'quantity': request.data.get('quantity'),
-            'start_datetime': request.data.get('start_datetime'),
-            'title': request.data.get('title'),
+            'price': request_data.get('price'),
+            'quantity': request_data.get('quantity'),
+            'start_datetime': request_data.get('start_datetime'),
+            'title': request_data.get('title'),
             'voucher_type': voucher_type,
             'program_uuid': program_uuid,
         }
@@ -295,6 +323,56 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
 
         return response_data
 
+    def update(self, request, *args, **kwargs):
+        """Update coupon depending on request data sent."""
+        try:
+            super(CouponViewSet, self).update(request, *args, **kwargs)
+            self.validate_access_for_enterprise_switch(request.data)
+            coupon = self.get_object()
+            vouchers = coupon.attr.coupon_vouchers.vouchers
+            self.update_voucher_data(request.data, vouchers)
+            self.update_range_data(request.data, vouchers)
+            self.update_offer_data(request.data, vouchers, self.request.site)
+            self.update_coupon_product_data(request.data, coupon)
+            self.update_invoice_data(request.data, coupon)
+            serializer = self.get_serializer(coupon)
+            return Response(serializer.data)
+        except ValidationError as error:
+            error_message = 'Failed to update Coupon [{coupon_id}]. {msg}'.format(
+                coupon_id=kwargs.get('pk'),
+                msg=error.message
+            )
+            logger.exception(error_message)
+            raise serializers.ValidationError(error_message)
+
+    def update_voucher_data(self, request_data, vouchers):
+        data = self.create_update_data_dict(data=request_data, fields=CouponVouchers.UPDATEABLE_VOUCHER_FIELDS)
+        if data:
+            vouchers.all().update(**data)
+
+    def create_update_data_dict(self, data, fields):
+        """
+        Creates a dictionary for updating model attributes.
+
+        Arguments:
+            data (QueryDict): Request data
+            fields (list): List of updatable model fields
+
+        Returns:
+            update_dict (dict): Dictionary that will be used to update model objects.
+        """
+        update_dict = {}
+
+        for field in fields:
+            if field in data:
+                if field == 'course_seat_types':
+                    value = prepare_course_seat_types(data.get(field))
+                    update_dict[field] = value
+                else:
+                    value = data.get(field)
+                    update_dict[field.replace('invoice_', '')] = value
+        return update_dict
+
     def update_range_data(self, request_data, vouchers):
         """
         Update the range data for a particular request.
@@ -342,58 +420,6 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
 
         voucher_range.save()
 
-    def update(self, request, *args, **kwargs):
-        """Update coupon depending on request data sent."""
-        try:
-            super(CouponViewSet, self).update(request, *args, **kwargs)
-            coupon = self.get_object()
-            vouchers = coupon.attr.coupon_vouchers.vouchers
-            self.update_voucher_data(request.data, vouchers)
-            self.update_range_data(request.data, vouchers)
-            self.update_offer_data(request.data, vouchers, self.request.site)
-            self.update_coupon_product_data(request.data, coupon)
-            self.update_invoice_data(request.data, coupon)
-            serializer = self.get_serializer(coupon)
-            return Response(serializer.data)
-        except ValidationError as error:
-            error_message = 'Failed to update Coupon [{coupon_id}]. {msg}'.format(
-                coupon_id=coupon.id,
-                msg=error.message
-            )
-            logger.exception(error_message)
-            raise serializers.ValidationError(error_message)
-
-    def update_voucher_data(self, request_data, vouchers):
-        data = self.create_update_data_dict(data=request_data, fields=CouponVouchers.UPDATEABLE_VOUCHER_FIELDS)
-        if data:
-            vouchers.all().update(**data)
-
-    def create_update_data_dict(self, data, fields):
-        """
-        Creates a dictionary for updating model attributes.
-
-        Arguments:
-            data (QueryDict): Request data
-            fields (list): List of updatable model fields
-
-        Returns:
-            update_dict (dict): Dictionary that will be used to update model objects.
-        """
-        update_dict = {}
-
-        for field in fields:
-            if field in data:
-                if field == 'course_seat_types':
-                    value = prepare_course_seat_types(data.get(field))
-                    update_dict[field] = value
-                elif field == 'max_uses':
-                    value = data.get(field)
-                    update_dict['max_global_applications'] = value
-                else:
-                    value = data.get(field)
-                    update_dict[field.replace('invoice_', '')] = value
-        return update_dict
-
     def update_coupon_product_data(self, request_data, coupon):
         baskets = Basket.objects.filter(lines__product_id=coupon.id, status=Basket.SUBMITTED)
 
@@ -403,8 +429,13 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
             ProductCategory.objects.filter(product=coupon).update(category=category)
 
         client_username = request_data.get('client')
-        if client_username:
-            client, __ = BusinessClient.objects.get_or_create(name=client_username)
+        enterprise_customer = request_data.get('enterprise_customer', {}).get('id', None)
+        enterprise_customer_name = request_data.get('enterprise_customer', {}).get('name', None)
+        if client_username or enterprise_customer:
+            client, __ = BusinessClient.objects.update_or_create(
+                name=enterprise_customer_name or client_username,
+                defaults={'enterprise_customer_uuid': enterprise_customer}
+            )
             Invoice.objects.filter(order__basket=baskets.first()).update(business_client=client)
 
         coupon_price = request_data.get('price')
@@ -488,16 +519,16 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
             if updated_enterprise_offer:
                 voucher.offers.add(updated_enterprise_offer)
 
-    def update_invoice_data(self, data, coupon):
+    def update_invoice_data(self, request_data, coupon):
         """
         Update the invoice data.
 
         Arguments:
-            data (dict): The request's data from which the invoice data is retrieved
+            request_data (dict): The request's data from which the invoice data is retrieved
                          and used for the updated.
             coupon (Product): The coupon product with which the invoice is retrieved.
         """
-        invoice_data = self.create_update_data_dict(data=data, fields=Invoice.UPDATEABLE_INVOICE_FIELDS)
+        invoice_data = self.create_update_data_dict(data=request_data, fields=Invoice.UPDATEABLE_INVOICE_FIELDS)
 
         if invoice_data:
             Invoice.objects.filter(order__lines__product=coupon).update(**invoice_data)
