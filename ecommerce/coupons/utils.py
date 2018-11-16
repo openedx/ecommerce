@@ -66,9 +66,9 @@ def get_catalog_course_runs(site, query, limit=None, offset=None):
     )
     cache_key = hashlib.md5(cache_key).hexdigest()
 
-    # cached_response = TieredCache.get_cached_response(cache_key)
-    # if cached_response.is_found:
-    #     return cached_response.value
+    cached_response = TieredCache.get_cached_response(cache_key)
+    if cached_response.is_found:
+        return cached_response.value
 
     api = site.siteconfiguration.discovery_api_client
     endpoint = getattr(api, api_resource_name)

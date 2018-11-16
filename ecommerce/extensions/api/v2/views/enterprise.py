@@ -1,6 +1,7 @@
 from __future__ import unicode_literals
 
 import logging
+
 import waffle
 from django.core.exceptions import ValidationError
 from oscar.core.loading import get_model
@@ -16,7 +17,7 @@ from ecommerce.enterprise.utils import get_enterprise_customers
 from ecommerce.extensions.api.serializers import (
     CouponSerializer,
     CouponVoucherSerializer,
-    EnterpriseCouponListSerializer,
+    EnterpriseCouponListSerializer
 )
 from ecommerce.extensions.api.v2.views.coupons import CouponViewSet
 from ecommerce.extensions.catalogue.utils import (
@@ -53,7 +54,6 @@ class EnterpriseCouponViewSet(CouponViewSet):
     """ Coupon resource. """
 
     def get_queryset(self):
-        # import pdb; pdb.set_trace()
         invoices = Invoice.objects.filter(business_client__enterprise_customer_uuid__isnull=False)
         orders = Order.objects.filter(id__in=[invoice.order_id for invoice in invoices])
         basket_lines = Line.objects.filter(basket_id__in=[order.basket_id for order in orders])
@@ -205,7 +205,7 @@ class EnterpriseCouponViewSet(CouponViewSet):
             applications__isnull=True
         )
 
-        all_coupon_vouchers = coupon_vouchers_with_applications|coupon_vouchers_wo_applications
+        all_coupon_vouchers = coupon_vouchers_with_applications | coupon_vouchers_wo_applications
 
         page = self.paginate_queryset(all_coupon_vouchers)
         serializer = CouponVoucherSerializer(page, many=True)
