@@ -63,12 +63,6 @@ def track_completed_order(sender, order=None, **kwargs):  # pylint: disable=unus
 
     voucher = order.basket_discounts.filter(voucher_id__isnull=False).first()
     coupon = voucher.voucher_code if voucher else None
-
-    try:
-        bundle_id = BasketAttribute.objects.get(basket=order.basket, attribute_type__name=BUNDLE).value_text
-    except BasketAttribute.DoesNotExist:
-        bundle_id = None
-
     properties['coupon'] = coupon
 
     try:
