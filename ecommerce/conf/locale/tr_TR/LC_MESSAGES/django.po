@@ -12,13 +12,14 @@
 # İlker IŞIK <m.ilkerisik@hotmail.com>, 2015
 # Kubilay <kubilayinceoren10@gmail.com>, 2015
 # Muha Aliss <muhaaliss@gmail.com>, 2015
+# Nil Enkavi <nilenkavi@hotmail.com>, 2018
 msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: openedx-translation@googlegroups.com\n"
 "POT-Creation-Date: 2018-03-26 16:41-0400\n"
-"PO-Revision-Date: 2018-07-06 14:29+0000\n"
-"Last-Translator: Ali Işıngör <ali@artistanbul.io>\n"
+"PO-Revision-Date: 2018-11-15 11:43+0000\n"
+"Last-Translator: Nil Enkavi <nilenkavi@hotmail.com>\n"
 "Language-Team: Turkish (Turkey) (http://www.transifex.com/open-edx/edx-platform/language/tr_TR/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -1966,7 +1967,7 @@ msgid ""
 "                You may also view your previous orders on the %(link_start)sAccount Settings%(link_end)s\n"
 "                page.\n"
 "              "
-msgstr ""
+msgstr "\nÖnceki siparişlerinizi ayrıca %(link_start)s Hesap Ayarları %(link_end)s sayfa\nkısmından da görüntüleyebilirsiniz."
 
 #: ecommerce/templates/edx/credit/_provider_detail.html:8
 msgid "Select"
@@ -2386,7 +2387,7 @@ msgid ""
 "To receive a verified certificate, you have to verify your identity using "
 "your <strong>webcam</strong> and an <strong>official government-issued photo"
 " identification</strong> before the verification deadline."
-msgstr ""
+msgstr "Onaylanmış bir sertifika sahibi olmak için, onayın gerçekleşmesi için gereken tarihten önce <strong>web kamerası</strong> kullanmanız ve <strong>biyometrik fotoğrafınızın olduğu kimlik kartınız</strong> ile kimliğinizi doğrulamanız gerekmektedir."
 
 #: ecommerce/templates/oscar/checkout/_verification_data.html:21
 msgid "Verify Now"
@@ -2441,14 +2442,14 @@ msgstr "Ödeme Başarısız"
 msgid ""
 "An error occurred while processing your payment. <strong>You have not been "
 "charged.</strong>"
-msgstr ""
+msgstr "Ödeme işlemi sırasında bir problem gerçekleşti. <strong>Ödemeniz alınmadı.</strong>"
 
 #: ecommerce/templates/oscar/checkout/payment_error.html:23
 #, python-format
 msgid ""
 "Please wait a few minutes and then try again. For help, contact "
 "%(start_link)s%(payment_support_email)s%(end_link)s."
-msgstr ""
+msgstr "Lütfen birkaç dakika bekleyin ve tekrar deneyin. Yardım için %(start_link)s%(payment_support_email)s%(end_link)s ile temasa geçin."
 
 #: ecommerce/templates/oscar/checkout/payment_error.html:31
 #, python-format
