@@ -16,7 +16,7 @@ msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: openedx-translation@googlegroups.com\n"
 "POT-Creation-Date: 2018-03-26 16:41-0400\n"
-"PO-Revision-Date: 2018-11-09 15:59+0000\n"
+"PO-Revision-Date: 2018-11-14 11:50+0000\n"
 "Last-Translator: Abstract Technology <stefania.trabucchi@abstract-technology.de>\n"
 "Language-Team: German (Germany) (http://www.transifex.com/open-edx/edx-platform/language/de_DE/)\n"
 "MIME-Version: 1.0\n"
@@ -347,7 +347,7 @@ msgstr "Teilnahmemodus"
 
 #: ecommerce/courses/utils.py:91
 msgid "Professional"
-msgstr "Professionell"
+msgstr "professionelles"
 
 #: ecommerce/courses/utils.py:92
 msgid "Verified"
@@ -959,11 +959,11 @@ msgstr "Nachname (erforderlich)"
 
 #: ecommerce/extensions/payment/forms.py:130
 msgid "Address (required)"
-msgstr "Addresse (erforderlich)"
+msgstr "Straße (erforderlich)"
 
 #: ecommerce/extensions/payment/forms.py:131
 msgid "Suite/Apartment Number"
-msgstr "Zimmer/Apartment Number"
+msgstr "Hausnummer erforderlich"
 
 #: ecommerce/extensions/payment/forms.py:132
 msgid "City (required)"
@@ -2075,7 +2075,7 @@ msgstr "\n                    Bitte lesen Sie %(link_start)sunsere FAQs, um allg
 
 #: ecommerce/templates/edx/email_confirmation_required.html:16
 msgid "You are enrolling in: "
-msgstr "Sie schreiben sich ein für:"
+msgstr "Sie haben sich eingeschrieben für:"
 
 #: ecommerce/templates/edx/email_confirmation_required.html:23
 #, python-format
@@ -2180,7 +2180,7 @@ msgstr "Im Warenkorb"
 
 #: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:17
 msgid "Your purchase contains the following"
-msgstr "Sie haben folgendes gekauft:"
+msgstr "Sie haben folgendes gekauft"
 
 #: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:36
 #: ecommerce/templates/oscar/basket/partials/hosted_checkout_basket.html:56
@@ -2271,7 +2271,7 @@ msgstr "Kreditkarten"
 
 #: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:192
 msgid "Card Number (required)"
-msgstr "Kartennummer (benötigt)"
+msgstr "Kartennummer (erforderlich)"
 
 #: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:192
 #: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:202
