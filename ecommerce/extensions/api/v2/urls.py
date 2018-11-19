@@ -105,6 +105,8 @@ router.register(r'catalogs', catalog_views.CatalogViewSet, base_name='catalog') 
     .register(r'products', product_views.ProductViewSet, base_name='catalog-product',
               parents_query_lookups=['stockrecords__catalogs'])
 router.register(r'coupons', coupon_views.CouponViewSet, base_name='coupons')
+router.register(r'coupons/enterprise/(?P<enterprise_id>.+)', enterprise_views.EnterpriseCouponViewSet,
+                base_name='enterprise-coupon-overview')
 router.register(r'enterprise/coupons', enterprise_views.EnterpriseCouponViewSet, base_name='enterprise-coupons')
 router.register(r'courses', course_views.CourseViewSet, base_name='course') \
     .register(r'products', product_views.ProductViewSet,
