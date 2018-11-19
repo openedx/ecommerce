@@ -6,7 +6,7 @@ import waffle
 from django.core.exceptions import ValidationError
 from oscar.core.loading import get_model
 from rest_framework import generics, serializers
-from rest_framework.decorators import list_route
+from rest_framework.decorators import detail_route
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 
@@ -36,7 +36,6 @@ Order = get_model('order', 'Order')
 Line = get_model('basket', 'Line')
 Product = get_model('catalogue', 'Product')
 Voucher = get_model('voucher', 'Voucher')
-VoucherApplication = get_model('voucher', 'VoucherApplication')
 
 DEPRECATED_COUPON_CATEGORIES = ['Bulk Enrollment']
 
@@ -172,8 +171,8 @@ class EnterpriseCouponViewSet(CouponViewSet):
         if coupon_was_migrated:
             super(EnterpriseCouponViewSet, self).update_range_data(request_data, vouchers)
 
-    @list_route(url_path='(?P<coupon_id>\d+)/codes')
-    def codes(self, request, coupon_id):
+    @detail_route(url_path='codes')
+    def codes(self, request, pk):  # pylint: disable=unused-argument
         """
         GET codes belong to a `coupon`.
 
@@ -191,17 +190,13 @@ class EnterpriseCouponViewSet(CouponViewSet):
             ]
         }
         """
-        try:
-            queryset = self.get_queryset()
-            coupon = queryset.get(id=coupon_id)
-        except Product.DoesNotExist:
-            return Response({'message': 'Invalid coupon id'}, status=400)
+        coupon = self.get_object()
 
         coupon_vouchers_with_applications = Voucher.objects.filter(
             applications__voucher_id__in=coupon.attr.coupon_vouchers.vouchers.all()
         )
         coupon_vouchers_wo_applications = Voucher.objects.filter(
-            coupon_vouchers__coupon__id=coupon_id,
+            coupon_vouchers__coupon__id=coupon.id,
             applications__isnull=True
         )
 

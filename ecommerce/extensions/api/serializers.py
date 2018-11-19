@@ -656,7 +656,7 @@ class VoucherSerializer(serializers.ModelSerializer):
         )
 
 
-class CouponVoucherSerializer(serializers.Serializer):
+class CouponVoucherSerializer(serializers.Serializer):  # pylint: disable=abstract-method
     code = serializers.SerializerMethodField()
     assigned_to = serializers.SerializerMethodField()
     redemptions = serializers.SerializerMethodField()
@@ -664,16 +664,15 @@ class CouponVoucherSerializer(serializers.Serializer):
     def get_code(self, voucher):
         return voucher.code
 
-    def get_assigned_to(self, obj):
+    def get_assigned_to(self, obj):  # pylint: disable=unused-argument
         return ''
 
     def get_redemptions(self, voucher):
         offer = voucher.best_offer
-        redemption_count = offer.num_applications
+        redemption_count = voucher.num_orders
 
         if voucher.usage == Voucher.SINGLE_USE:
             max_coupon_usage = 1
-            redemption_count = voucher.num_orders
         elif voucher.usage != Voucher.SINGLE_USE and offer.max_global_applications is None:
             max_coupon_usage = 10000
         else:
