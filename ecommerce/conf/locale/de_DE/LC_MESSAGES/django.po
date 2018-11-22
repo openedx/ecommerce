@@ -16,7 +16,7 @@ msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: openedx-translation@googlegroups.com\n"
 "POT-Creation-Date: 2018-03-26 16:41-0400\n"
-"PO-Revision-Date: 2018-11-14 11:50+0000\n"
+"PO-Revision-Date: 2018-11-19 11:30+0000\n"
 "Last-Translator: Abstract Technology <stefania.trabucchi@abstract-technology.de>\n"
 "Language-Team: German (Germany) (http://www.transifex.com/open-edx/edx-platform/language/de_DE/)\n"
 "MIME-Version: 1.0\n"
@@ -698,7 +698,7 @@ msgstr "{strong_start}Erwerb nur für Sie selbst?{strong_end}{paragraph_start}We
 msgid ""
 "After you complete your order you will be able to select course dates from "
 "your dashboard."
-msgstr "Nachdem Sie die Bestellung abgeschlossen haben, können Sie die Kursdaten in Ihrer Übersichtsseite einsehen."
+msgstr "Nachdem Sie die Bestellung abgeschlossen haben, können Sie die Kursdaten in \"Meine Kurse\" einsehen."
 
 #: ecommerce/extensions/basket/views.py:226
 msgid ""
@@ -936,11 +936,11 @@ msgstr "Wählen Sie ein Land aus"
 #: ecommerce/extensions/payment/forms.py:103
 #, python-brace-format
 msgid "{label} (required)"
-msgstr "{label} (erforderlich)"
+msgstr "{label} (*)"
 
 #: ecommerce/extensions/payment/forms.py:109
 msgid "Organization (required)"
-msgstr "Organisation (erforderlich)"
+msgstr "Organisation (*)"
 
 #: ecommerce/extensions/payment/forms.py:125
 #: ecommerce/extensions/payment/forms.py:215
@@ -951,15 +951,15 @@ msgstr "Es ist ein Problem beim Aufrufen Ihres Einkaufswagens aufgetreten. Bitte
 
 #: ecommerce/extensions/payment/forms.py:128
 msgid "First Name (required)"
-msgstr "Vorname (erforderlich)"
+msgstr "Vorname (*)"
 
 #: ecommerce/extensions/payment/forms.py:129
 msgid "Last Name (required)"
-msgstr "Nachname (erforderlich)"
+msgstr "Nachname (*)"
 
 #: ecommerce/extensions/payment/forms.py:130
 msgid "Address (required)"
-msgstr "Straße (erforderlich)"
+msgstr "Straße (*)"
 
 #: ecommerce/extensions/payment/forms.py:131
 msgid "Suite/Apartment Number"
@@ -967,7 +967,7 @@ msgstr "Hausnummer erforderlich"
 
 #: ecommerce/extensions/payment/forms.py:132
 msgid "City (required)"
-msgstr "Stadt (erforderlich)"
+msgstr "Stadt (*)"
 
 #: ecommerce/extensions/payment/forms.py:135
 msgid "State/Province"
@@ -979,7 +979,7 @@ msgstr "Postleitzahl"
 
 #: ecommerce/extensions/payment/forms.py:137
 msgid "Country (required)"
-msgstr "Land (erforderlich)"
+msgstr "Land (*)"
 
 #: ecommerce/extensions/payment/forms.py:164
 #: ecommerce/extensions/payment/forms.py:166
@@ -1937,7 +1937,7 @@ msgstr ""
 
 #: ecommerce/templates/edx/checkout/receipt.html:173
 msgid "Go to Dashboard"
-msgstr "Gehe zur Übersichtsseite"
+msgstr "Gehe zu \"Meine Kurse\""
 
 #: ecommerce/templates/edx/checkout/receipt.html:179
 msgid "Find more courses"
@@ -2271,7 +2271,7 @@ msgstr "Kreditkarten"
 
 #: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:192
 msgid "Card Number (required)"
-msgstr "Kartennummer (erforderlich)"
+msgstr "Kartennummer (*)"
 
 #: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:192
 #: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:202
@@ -2284,7 +2284,7 @@ msgstr "Kreditkarten-Symbol"
 
 #: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:201
 msgid "Security Code (required)"
-msgstr "Kartenprüfnummer (erforderlich)"
+msgstr "Kartenprüfnummer (*)"
 
 #: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:205
 msgid "Help with CVV"
@@ -2298,7 +2298,7 @@ msgstr "Die drei letzten Ziffern im Signaturbereich auf der Rückseite Ihrer Kar
 
 #: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:215
 msgid "Expiration (required)"
-msgstr "Gültigkeit (erforderlich)"
+msgstr "Gültigkeit (*)"
 
 #: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:219
 msgid "Month"
@@ -2393,7 +2393,7 @@ msgstr "Jetzt verifizieren"
 
 #: ecommerce/templates/oscar/checkout/_verification_data.html:30
 msgid "Go to my dashboard and verify later"
-msgstr "Gehe zu meiner Übersichtsseite und bestätige später"
+msgstr "Gehe zu \"Meine Kurse\" und bestätige später"
 
 #: ecommerce/templates/oscar/checkout/cancel_checkout.html:6
 #: ecommerce/templates/oscar/checkout/cancel_checkout.html:15
@@ -2452,7 +2452,7 @@ msgstr "Bitte warten Sie einen Augenblick und versuchen es dann erneut. Für Hil
 #: ecommerce/templates/oscar/checkout/payment_error.html:31
 #, python-format
 msgid "To try again, return to your %(start_link)sdashboard%(end_link)s."
-msgstr "Um es erneut zu versuchen, kehren Sie zurück zur %(start_link)sÜbersichtsseite%(end_link)s."
+msgstr "Um es erneut zu versuchen, kehren Sie zurück zu %(start_link)sMeine Kurse%(end_link)s."
 
 #. Translators: SDN is an acronym for Specially Designated Nationals
 #: ecommerce/templates/oscar/checkout/sdn_failure.html:7

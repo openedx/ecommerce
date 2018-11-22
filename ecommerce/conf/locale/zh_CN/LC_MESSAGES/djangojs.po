@@ -4,6 +4,7 @@
 # This file is distributed under the GNU AFFERO GENERAL PUBLIC LICENSE.
 # 
 # Translators:
+# abby li <yc.li@eliteu.cn>, 2018
 # CN C2 <e2f48d4sf5ds@outlook.com>, 2016
 # hohomi <hohomi@gmail.com>, 2016
 # ifLab <webmaster@iflab.org>, 2018
@@ -16,8 +17,8 @@ msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2018-04-05 11:00+0000\n"
-"PO-Revision-Date: 2018-10-25 01:38+0000\n"
-"Last-Translator: ifLab <webmaster@iflab.org>\n"
+"PO-Revision-Date: 2018-11-21 02:28+0000\n"
+"Last-Translator: abby li <yc.li@eliteu.cn>\n"
 "Language-Team: Chinese (China) (http://www.transifex.com/open-edx/edx-platform/language/zh_CN/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -27,23 +28,23 @@ msgstr ""
 
 #: ecommerce/static/js/models/coupon_model.js:33
 msgid "This field is required."
-msgstr ""
+msgstr "此项必填"
 
 #: ecommerce/static/js/models/coupon_model.js:34
 msgid "This value must be a number."
-msgstr ""
+msgstr "此值必须是数字。"
 
 #: ecommerce/static/js/models/coupon_model.js:35
 msgid "This value must be a date."
-msgstr ""
+msgstr "此值必须是日期。"
 
 #: ecommerce/static/js/models/coupon_model.js:36
 msgid "At least one seat type must be selected."
-msgstr ""
+msgstr "至少必须选择一种坐席类型。"
 
 #: ecommerce/static/js/models/coupon_model.js:82
 msgid "This field must be empty or contain 1-16 alphanumeric characters."
-msgstr ""
+msgstr "此字段必须为空或介于1-16 个字母数字字符之间。"
 
 #: ecommerce/static/js/models/coupon_model.js:86
 msgid "A valid course ID is required"
@@ -52,7 +53,7 @@ msgstr "需要一个有效的课程编号"
 #: ecommerce/static/js/models/coupon_model.js:106
 #, javascript-format
 msgid "Email domain {%s} is invalid."
-msgstr ""
+msgstr "Email域名 {%s}无效。"
 
 #: ecommerce/static/js/models/coupon_model.js:124
 msgid "Must occur after start date"
@@ -60,11 +61,11 @@ msgstr "应在开始日期之后"
 
 #: ecommerce/static/js/models/coupon_model.js:154
 msgid "Max uses for multi-use coupons must be higher than 2."
-msgstr ""
+msgstr "可重复使用的优惠券的最大使用量必须大于2。"
 
 #: ecommerce/static/js/models/coupon_model.js:166
 msgid "A valid Program UUID is required."
-msgstr ""
+msgstr "需要一个有效的专业课程编号。"
 
 #: ecommerce/static/js/models/coupon_model.js:190
 msgid "Must occur before end date"
@@ -114,7 +115,7 @@ msgstr "所有的课程项都必须包含标价。"
 
 #: ecommerce/static/js/models/course_seats/course_seat.js:45
 msgid "Verified seats must have an upgrade deadline."
-msgstr ""
+msgstr "认证坐席必须要有升级的最后期限。"
 
 #: ecommerce/static/js/models/course_seats/course_seat.js:53
 msgid "The upgrade deadline must occur BEFORE the verification deadline."
@@ -164,7 +165,7 @@ msgstr "所有的学分席位必须有一个学分颁发者。"
 
 #: ecommerce/static/js/models/course_seats/credit_seat.js:30
 msgid "Please select a valid credit provider."
-msgstr ""
+msgstr "请选择有效的学分提供者。"
 
 #: ecommerce/static/js/models/course_seats/credit_seat.js:39
 msgid "All credit seats must designate a number of credit hours."
@@ -172,43 +173,43 @@ msgstr "所有学分席位必须规定学分时长。"
 
 #: ecommerce/static/js/pages/basket_page.js:27
 msgid "Problem occurred during checkout. Please contact support."
-msgstr ""
+msgstr "付款时出现问题。请联系支持人员。"
 
 #: ecommerce/static/js/pages/basket_page.js:101
 msgid "This field is required"
-msgstr ""
+msgstr "此项必填"
 
 #: ecommerce/static/js/pages/basket_page.js:136
 msgid "Invalid card number"
-msgstr ""
+msgstr "卡号无效"
 
 #: ecommerce/static/js/pages/basket_page.js:138
 msgid "Unsupported card type"
-msgstr ""
+msgstr "不支持此卡类型"
 
 #: ecommerce/static/js/pages/basket_page.js:140
 msgid "Invalid security number"
-msgstr ""
+msgstr "安全码无效"
 
 #: ecommerce/static/js/pages/basket_page.js:145
 msgid "Invalid month"
-msgstr ""
+msgstr "月份无效"
 
 #: ecommerce/static/js/pages/basket_page.js:147
 msgid "Invalid year"
-msgstr ""
+msgstr "年份无效"
 
 #: ecommerce/static/js/pages/basket_page.js:149
 msgid "Card expired"
-msgstr ""
+msgstr "卡已过期"
 
 #: ecommerce/static/js/pages/basket_page.js:485
 msgid "<Choose state/province>"
-msgstr ""
+msgstr "<Choose state/province>"
 
 #: ecommerce/static/js/pages/basket_page.js:486
 msgid "State/Province (required)"
-msgstr ""
+msgstr "州/省（必需）"
 
 #: ecommerce/static/js/pages/coupon_create_page.js:12
 msgid "Create New Coupon"
@@ -244,39 +245,39 @@ msgstr "课程"
 
 #: ecommerce/static/js/pages/offer_page.js:14
 msgid "Redeem"
-msgstr ""
+msgstr "兑换"
 
 #: ecommerce/static/js/pages/receipt_page.js:21
 msgid ""
 "Caution! Using the back button on this page may cause you to be charged "
 "again."
-msgstr ""
+msgstr "请注意！使用这个页面上的返回按钮可能会导致你被重复收费。"
 
 #. Translators: Do not translate "Apple Pay".
 #: ecommerce/static/js/payment_processors/cybersource.js:218
 msgid ""
 "Apple Pay is not available at this time. Please try another payment method."
-msgstr ""
+msgstr "目前尚不支持Apple Pay支付。请尝试另一种付款方式。"
 
 #: ecommerce/static/js/payment_processors/cybersource.js:249
 msgid ""
 "An error occurred while processing your payment. You have NOT been charged. "
 "Please try again, or select another payment method."
-msgstr ""
+msgstr "处理付款时出错，扣费失败。请重新付款，或选择另一种付款方式。"
 
 #: ecommerce/static/js/payment_processors/stripe.js:71
 msgid ""
 "An error occurred while attempting to process your payment. You have not "
 "been charged. Please check your payment details, and try again."
-msgstr ""
+msgstr "试图处理付款时发生错误，扣费失败。请检查您的付款明细，并重试。"
 
 #: ecommerce/static/js/payment_processors/stripe.js:110
 msgid "An error occurred while processing your payment. Please try again."
-msgstr ""
+msgstr "处理付款时出错。请重试。"
 
 #: ecommerce/static/js/utils/utils.js:184
 msgid "Trailing comma not allowed."
-msgstr ""
+msgstr "不允许加逗号。"
 
 #: ecommerce/static/js/views/coupon_detail_view.js:107
 #: ecommerce/static/js/views/coupon_form_view.js:60
@@ -346,19 +347,19 @@ msgstr " 名字"
 
 #: ecommerce/static/js/views/coupon_list_view.js:81
 msgid "Created"
-msgstr ""
+msgstr "已创建"
 
 #: ecommerce/static/js/views/coupon_list_view.js:85
 msgid "Custom Code"
-msgstr ""
+msgstr "自定义代码"
 
 #: ecommerce/static/js/views/coupon_list_view.js:89
 msgid "Client"
-msgstr ""
+msgstr "客户端"
 
 #: ecommerce/static/js/views/coupon_list_view.js:93
 msgid "Category"
-msgstr ""
+msgstr "分类"
 
 #: ecommerce/static/js/views/coupon_list_view.js:97
 msgid "Coupon Report"
@@ -385,13 +386,13 @@ msgstr "专业教育"
 msgid ""
 "Paid certificate track with initial verification and Professional Education "
 "Certificate"
-msgstr ""
+msgstr "付费证书通道，包含初始认证和专业教育证书"
 
 #: ecommerce/static/js/views/course_form_view.js:72
 msgid ""
 "Paid certificate track with initial verification and Verified Certificate, "
 "and option to purchase credit"
-msgstr ""
+msgstr "付费证书通道，包含初始认证和认证证书，可以选择付费获得学分。"
 
 #. Translators: _START_, _END_, and _TOTAL_ are placeholders. Do NOT translate
 #. them.
@@ -419,15 +420,15 @@ msgstr "最后一次编辑"
 
 #: ecommerce/static/js/views/dynamic_catalog_view.js:74
 msgid "Seat title"
-msgstr ""
+msgstr "坐席标题"
 
 #: ecommerce/static/js/views/dynamic_catalog_view.js:78
 msgid "Seat type"
-msgstr ""
+msgstr "坐席类型"
 
 #: ecommerce/static/js/views/form_view.js:69
 msgid "A course with the specified ID already exists."
-msgstr ""
+msgstr "具有相同ID的课程已存在。"
 
 #: ecommerce/static/js/views/form_view.js:79
 #: ecommerce/static/js/views/form_view.js:172
@@ -440,7 +441,7 @@ msgstr "正在保存…"
 
 #: ecommerce/static/js/views/form_view.js:134
 msgid "Please complete all required fields."
-msgstr ""
+msgstr "请填写所有必填项。"
 
 #: ecommerce/static/js/views/form_view.js:159
 msgid "An error occurred while saving the data."
@@ -448,19 +449,19 @@ msgstr "保存数据时发生错误。"
 
 #: ecommerce/static/js/views/offer_view.js:198
 msgid "Ellipsis"
-msgstr ""
+msgstr "省略号"
 
 #: ecommerce/static/js/views/offer_view.js:205
 msgid "Load the records for page "
-msgstr ""
+msgstr "加载网页记录"
 
 #: ecommerce/static/js/views/offer_view.js:212
 msgid "Load the records for the next page"
-msgstr ""
+msgstr "加载下一页的记录"
 
 #: ecommerce/static/js/views/offer_view.js:220
 msgid "Load the records for the previous page"
-msgstr ""
+msgstr "加载上一页的记录"
 
 #: ecommerce/static/js/views/provider_selection_view.js:33
 msgid "Select"
