@@ -59,21 +59,42 @@ def get_enterprise_customer(site, uuid):
     """
     Return a single enterprise customer
     """
+    resource = 'enterprise-customer'
+    cache_key = '{site_domain}_{partner_code}_{resource}_{enterprise_uuid}'.format(
+        site_domain=site.domain,
+        partner_code=site.siteconfiguration.partner.short_code,
+        resource=resource,
+        enterprise_uuid=uuid,
+    )
+    cache_key = hashlib.md5(cache_key).hexdigest()
+    cached_response = TieredCache.get_cached_response(cache_key)
+    if cached_response.is_found:
+        return cached_response.value
+
     client = get_enterprise_api_client(site)
-    path = ['enterprise-customer', str(uuid)]
+    path = [resource, str(uuid)]
     client = reduce(getattr, path, client)
 
     try:
         response = client.get()
     except (ConnectionError, SlumberHttpBaseException, Timeout):
         return None
-    return {
+
+    enterprise_customer_response = {
         'name': response['name'],
         'id': response['uuid'],
         'enable_data_sharing_consent': response['enable_data_sharing_consent'],
         'enforce_data_sharing_consent': response['enforce_data_sharing_consent'],
         'contact_email': response.get('contact_email', ''),
     }
+
+    TieredCache.set_all_tiers(
+        cache_key,
+        enterprise_customer_response,
+        settings.ENTERPRISE_CUSTOMER_RESULTS_CACHE_TIMEOUT
+    )
+
+    return enterprise_customer_response
 
 
 def get_enterprise_customers(site):
@@ -395,6 +416,7 @@ def get_enterprise_catalog(site, enterprise_catalog, limit, page):
         dict: The result set containing the content objects associated with the Enterprise Catalog.
         NoneType: Return None if no catalog with that uuid is found.
     """
+    from nose.tools import set_trace; set_trace()
     resource = 'enterprise_catalogs'
     partner_code = site.siteconfiguration.partner.short_code
     cache_key = '{site_domain}_{partner_code}_{resource}_{catalog}_{limit}_{page}'.format(

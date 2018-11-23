@@ -7,6 +7,8 @@ import httpretty
 from django.conf import settings
 from django.http.response import HttpResponse
 from oscar.test.factories import VoucherFactory
+from edx_django_utils.cache import TieredCache
+from mock import patch
 
 from ecommerce.enterprise.tests.mixins import EnterpriseServiceMockMixin
 from ecommerce.enterprise.utils import (
@@ -50,9 +52,18 @@ class EnterpriseUtilsTests(EnterpriseServiceMockMixin, TestCase):
         """
         self.mock_access_token_response()
         self.mock_specific_enterprise_customer_api(TEST_ENTERPRISE_CUSTOMER_UUID)
-        response = get_enterprise_customer(self.site, TEST_ENTERPRISE_CUSTOMER_UUID)
 
-        self.assertEqual(TEST_ENTERPRISE_CUSTOMER_UUID, response.get('id'))
+        # verify the caching
+        with patch.object(TieredCache, 'set_all_tiers', wraps=TieredCache.set_all_tiers) as mocked_set_all_tiers:
+            mocked_set_all_tiers.assert_not_called()
+
+            response = get_enterprise_customer(self.site, TEST_ENTERPRISE_CUSTOMER_UUID)
+            self.assertEqual(TEST_ENTERPRISE_CUSTOMER_UUID, response.get('id'))
+            self.assertEqual(mocked_set_all_tiers.call_count, 2)
+
+            cached_response = get_enterprise_customer(self.site, TEST_ENTERPRISE_CUSTOMER_UUID)
+            self.assertEqual(mocked_set_all_tiers.call_count, 2)
+            self.assertEqual(response, cached_response)
 
     @ddt.data(
         (
