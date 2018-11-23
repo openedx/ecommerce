@@ -248,6 +248,9 @@ PROGRAM_CACHE_TIMEOUT = 3600  # Value is in seconds.
 # Cache catalog results from the enterprise and discovery service.
 CATALOG_RESULTS_CACHE_TIMEOUT = 86400
 
+# Cache timeout for enterprise customer results from the enterprise service.
+ENTERPRISE_CUSTOMER_RESULTS_CACHE_TIMEOUT = 3600  # Value is in seconds
+
 # PROVIDER DATA PROCESSING
 PROVIDER_DATA_PROCESSING_TIMEOUT = 15  # Value is in seconds.
 CREDIT_PROVIDER_CACHE_TIMEOUT = 600
@@ -406,7 +409,7 @@ JWT_AUTH = {
     'JWT_ISSUERS': (),
     # NOTE (CCB): This is temporarily set to False until we decide what values are acceptable.
     'JWT_VERIFY_AUDIENCE': False,
-    'JWT_SECRET_KEYS': (),
+    'JWT_PUBLIC_SIGNING_JWK_SET': None,
 }
 
 # Service user for worker processes.
