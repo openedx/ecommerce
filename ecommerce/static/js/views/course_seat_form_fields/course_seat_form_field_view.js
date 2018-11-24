@@ -5,7 +5,8 @@ define([
     'backbone.stickit',
     'underscore',
     'underscore.string',
-    'utils/utils'
+    'utils/utils',
+    'ecommerce'
 ],
     function($,
               Backbone,
@@ -13,7 +14,8 @@ define([
               BackboneStickit,
               _,
               _s,
-              Utils) {
+              Utils,
+              ecommerce) {
         'use strict';
 
         return Backbone.View.extend({
@@ -50,7 +52,13 @@ define([
             },
 
             render: function() {
-                this.$el.html(this.template(this.model.attributes));
+                var context = _.extend({}, this.model.attributes, {
+                    currency_code: ecommerce.currency.currencyCode,
+                    currency_symbol: ecommerce.currency.currencySymbol
+                });
+
+                this.$el.html(this.template(context));
+
                 this.stickit();
 
                 return this;

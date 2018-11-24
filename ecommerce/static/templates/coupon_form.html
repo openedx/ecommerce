@@ -69,7 +69,7 @@
                 <input id="benefit-percent" type="radio" class="non-editable" name="benefit_type" value="Percentage">
                 <label for="benefit-percent" class="normal-font-weight"><%= gettext('Percent') %></label>
                 <input id="benefit-fixed" type="radio" class="non-editable" name="benefit_type" value="Absolute">
-                <label for="benefit-fixed" class="normal-font-weight"><%= gettext('Fixed ($USD)') %></label>
+                <label for="benefit-fixed" class="normal-font-weight"><%= gettext('Fixed (') %><%= currency_code %>) </label>
             </div>
             <p class="help-block"></p>
         </div>
@@ -108,7 +108,7 @@
         <div class="form-group">
             <label for="price"><%= gettext('Invoiced Amount') %> *</label>
             <div class="input-group">
-                <div class="input-group-addon">$</div>
+                <div class="input-group-addon"><%= currency_symbol %></div>
                 <input id="price" type="number" step="0.01" min="0" class="form-control" name="price">
             </div>
             <p class="help-block"></p>
@@ -133,7 +133,7 @@
                 <input id="invoice-discount-percent" type="radio" name="invoice_discount_type" value="Percentage">
                 <label for="invoice-discount-percent" class="normal-font-weight"><%= gettext('Percent') %></label>
                 <input id="invoice-discount-fixed" type="radio" name="invoice_discount_type" value="Absolute">
-                <label for="invoice-discount-fixed" class="normal-font-weight"><%= gettext('Fixed ($USD)') %></label>
+                <label for="invoice-discount-fixed" class="normal-font-weight"><%= gettext('Fixed (') %><%= currency_code %>)</label>
             </div>
             <p class="help-block"></p>
         </div>

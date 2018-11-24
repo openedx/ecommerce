@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """Common settings and globals."""
 import datetime
 import os
@@ -598,3 +599,5 @@ if os.environ.get('ENABLE_DJANGO_TOOLBAR', False):
 
 # Determines if events are actually sent to Segment. This should only be set to False for testing purposes.
 SEND_SEGMENT_EVENTS = True
+
+CURRENCY_SYMBOL = '$'

@@ -18,6 +18,10 @@ require([
 
             ecommerce.credit = ecommerce.credit || {};
             ecommerce.credit.providers = new CreditProviderCollection($app.data('credit-providers'));
+            ecommerce.currency = {
+                currencyCode: $app.data('currency-code'),
+                currencySymbol: $app.data('currency-symbol')
+            };
 
             courseApp.start();
 

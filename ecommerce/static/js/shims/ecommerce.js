@@ -11,7 +11,8 @@ define([],
 
         return {
             coupons: {},
-            credit: {}
+            credit: {},
+            currency: {}
         };
     }
 );

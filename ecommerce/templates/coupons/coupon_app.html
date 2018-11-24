@@ -14,7 +14,11 @@
 {% endblock navbar %}
 
 {% block content %}
-    <div id="app" class="container"></div>
+    <div id="app"
+         class="container"
+         data-currency-code="{{ OSCAR_DEFAULT_CURRENCY }}"
+         data-currency-symbol="{{ CURRENCY_SYMBOL }}"
+    ></div>
 {% endblock %}
 
 {% block javascript %}

@@ -30,6 +30,10 @@ require([
 
             ecommerce.coupons.enterprise_customers = new EnterpriseCustomerCollection();
             ecommerce.coupons.enterprise_customers.fetch({async: false});
+            ecommerce.currency = {
+                currencyCode: $app.data('currency-code'),
+                currencySymbol: $app.data('currency-symbol')
+            };
 
             couponApp.start();
 

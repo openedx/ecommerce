@@ -66,7 +66,11 @@ define([
             },
 
             render: function() {
-                var context = _.extend({}, this.model.attributes, {isRemovable: this.isRemovable});
+                var context = _.extend({}, this.model.attributes, {
+                    isRemovable: this.isRemovable,
+                    currency_code: ecommerce.currency.currencyCode,
+                    currency_symbol: ecommerce.currency.currencySymbol
+                });
 
                 this.$el.html(this.template(context));
                 this.stickit();

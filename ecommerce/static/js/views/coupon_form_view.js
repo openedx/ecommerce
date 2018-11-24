@@ -388,7 +388,7 @@ define([
                 if (val === 'Percentage') {
                     icon = '%';
                 } else if (val === 'Absolute') {
-                    icon = '$';
+                    icon = ecommerce.currency.currencySymbol;
                 }
                 return icon;
             },
@@ -729,7 +729,12 @@ define([
                 var catalogId = '';
                 var customerId = '';
 
-                this.$el.html(this.template(this.model.attributes));
+                var context = _.extend({}, this.model.attributes, {
+                    currency_code: ecommerce.currency.currencyCode,
+                    currency_symbol: ecommerce.currency.currencySymbol
+                });
+
+                this.$el.html(this.template(context));
                 this.stickit();
 
                 this.toggleCatalogTypeField();

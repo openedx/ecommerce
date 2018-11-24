@@ -4,14 +4,16 @@ define([
     'views/course_seat_form_fields/credit_course_seat_form_field_row_view',
     'text!templates/credit_course_seat_form_field.html',
     'utils/course_utils',
-    'utils/utils'
+    'utils/utils',
+    'ecommerce'
 ],
     function(_,
              CourseSeatFormFieldView,
              CreditCourseSeatFormFieldRowView,
              FieldTemplate,
              CourseUtils,
-             Utils) {
+             Utils,
+             ecommerce) {
         'use strict';
 
         return CourseSeatFormFieldView.extend({
@@ -49,7 +51,11 @@ define([
                     $tableBody,
                     rows = [];
 
-                this.$el.html(this.template());
+                this.$el.html(this.template({
+                    currency_code: ecommerce.currency.currencyCode,
+                    currency_symbol: ecommerce.currency.currencySymbol
+                }));
+
                 $tableBody = this.$el.find('tbody');
 
                 // Instantiate new Views handling data binding for each Model in the Collection.

@@ -57,7 +57,12 @@ define([
                 seats = CourseUtils.filterSeats(seats, 'credit');
 
                 _.each(seats.residual, function(seat) {
-                    html += _.template(CourseSeatTemplate)({seat: seat, moment: moment});
+                    html += _.template(CourseSeatTemplate)({
+                        seat: seat,
+                        moment: moment,
+                        currency_code: ecommerce.currency.currencyCode,
+                        currency_symbol: ecommerce.currency.currencySymbol
+                    });
                 });
 
                 if (seats.filtered && seats.filtered.length > 0) {
@@ -68,7 +73,12 @@ define([
                             seat.set('credit_provider_display_name', creditProvider.get('display_name'));
                         }
                     });
-                    html += _.template(CourseCreditSeatsTemplate)({creditSeats: seats.filtered, moment: moment});
+                    html += _.template(CourseCreditSeatsTemplate)({
+                        creditSeats: seats.filtered,
+                        moment: moment,
+                        currency_code: ecommerce.currency.currencyCode,
+                        currency_symbol: ecommerce.currency.currencySymbol
+                    });
                 }
 
                 $seatHolder.html(html);

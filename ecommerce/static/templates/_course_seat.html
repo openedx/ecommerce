@@ -3,7 +3,7 @@
         <div class="seat-type"><%= seat.getSeatTypeDisplayName() %></div>
     </div>
     <div class="col-sm-4">
-        <div class="seat-price"><%= gettext('Price:') + ' $' + Number(seat.get('price')).toLocaleString() %></div>
+        <div class="seat-price"><%= gettext('Price: ') + currency_symbol + Number(seat.get('price')) .toLocaleString() %></div>
         <% var expires = seat.get('expires');
         if(expires) {
         print(gettext('Upgrade Deadline:') + ' ' + moment.utc(expires).format('lll z'));
