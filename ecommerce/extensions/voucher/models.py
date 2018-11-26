@@ -1,7 +1,7 @@
 import datetime
 import logging
-import waffle
 
+import waffle
 from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
 from django.db import models
 from oscar.apps.voucher.abstract_models import AbstractVoucher  # pylint: disable=ungrouped-imports

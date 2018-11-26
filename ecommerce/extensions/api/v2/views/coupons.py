@@ -25,7 +25,9 @@ from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
 from ecommerce.extensions.payment.processors.invoice import InvoicePayment
 from ecommerce.extensions.voucher.models import CouponVouchers
 from ecommerce.extensions.voucher.utils import (
-    get_or_create_enterprise_offer, update_voucher_offer, update_voucher_with_enterprise_offer
+    get_or_create_enterprise_offer,
+    update_voucher_offer,
+    update_voucher_with_enterprise_offer
 )
 from ecommerce.invoice.models import Invoice
 

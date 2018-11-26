@@ -2,6 +2,7 @@
 from __future__ import unicode_literals
 
 from django.db import migrations
+
 from ecommerce.enterprise.constants import ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH
 
 

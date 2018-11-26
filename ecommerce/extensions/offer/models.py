@@ -21,6 +21,7 @@ from threadlocals.threadlocals import get_current_request
 
 from ecommerce.core.utils import get_cache_key, log_message_and_raise_validation_error
 from ecommerce.enterprise.constants import ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH
+from ecommerce.settings.base import CATALOG_QUERY_CONTAINS_TIMEOUT
 
 OFFER_PRIORITY_ENTERPRISE = 10
 OFFER_PRIORITY_VOUCHER = 20
@@ -94,54 +95,94 @@ class Benefit(AbstractBenefit):
 
         return uncached_course_run_ids, uncached_course_uuids, applicable_lines
 
+    @staticmethod
+    def _get_catalog_query_contains_courses(course_run_ids, course_uuids, query, partner, site):
+        """
+        Calls the CatalogQueryContainsViewSet API in the discovery services with a combination
+        of course uuids and course run ids.
+
+        Args:
+            course_run_ids (list): List of course run ids
+            course_uuids (list): List of course uuids
+            query (str): Search query for the CatalogQueryContainsViewSet aPI
+            partner (str): partner code
+            site (Site): Site object used to call the discovery API
+
+        Returns:
+            (dict): a mapping of course and run identifiers included in the request to boolean values
+            indicating whether or not the associated course or run is contained in the queryset
+            described by the query found in the request.
+        """
+        course_run_ids_csv = ','.join([metadata['id'] for metadata in sorted(course_run_ids)])
+        course_uuids_csv = ','.join([metadata['id'] for metadata in sorted(course_uuids)])
+        cache_key = get_cache_key(
+            course_run_ids=course_run_ids_csv,
+            course_uuids=course_uuids_csv,
+            query=query,
+            partner=partner
+        )
+        cached_response = TieredCache.get_cached_response(cache_key)
+
+        if cached_response.is_found:
+            return cached_response.value
+        try:
+            catalog_query_contains_courses = \
+                site.siteconfiguration.discovery_api_client.catalog.query_contains.get(
+                    course_run_ids=course_run_ids_csv,
+                    course_uuids=course_uuids_csv,
+                    query=query,
+                    partner=partner
+                )
+            TieredCache.set_all_tiers(cache_key, catalog_query_contains_courses, CATALOG_QUERY_CONTAINS_TIMEOUT)
+
+        except Exception as err:  # pylint: disable=bare-except
+            logger.warning(
+                '%s raised while attempting to contact Discovery Service for offer catalog_range data.', err
+            )
+            raise Exception('Failed to contact Discovery Service to retrieve offer catalog_range data.')
+        return catalog_query_contains_courses
+
     def get_applicable_lines(self, offer, basket, range=None):  # pylint: disable=redefined-builtin
         """
         Returns the basket lines for which the benefit is applicable.
         """
         applicable_range = range if range else self.range
 
-        if applicable_range and applicable_range.catalog_query is not None:
+        if not applicable_range or (applicable_range and applicable_range.catalog_query is None):
+            return super(Benefit, self).get_applicable_lines(offer, basket, range=range)  # pylint: disable=bad-super-call
 
-            query = applicable_range.catalog_query
-            applicable_lines = self._filter_for_paid_course_products(basket.all_lines(), applicable_range)
+        query = applicable_range.catalog_query
+        applicable_lines = self._filter_for_paid_course_products(basket.all_lines(), applicable_range)
 
-            site = basket.site
-            partner_code = site.siteconfiguration.partner.short_code
-            course_run_ids, course_uuids, applicable_lines = self._identify_uncached_product_identifiers(
-                applicable_lines, site.domain, partner_code, query
+        site = basket.site
+        partner_code = site.siteconfiguration.partner.short_code
+        course_run_ids, course_uuids, applicable_lines = self._identify_uncached_product_identifiers(
+            applicable_lines, site.domain, partner_code, query
+        )
+
+        if course_run_ids or course_uuids:
+            catalog_query_contains_courses = self._get_catalog_query_contains_courses(
+                course_run_ids=course_run_ids,
+                course_uuids=course_uuids,
+                query=query,
+                partner=partner_code,
+                site=site
             )
 
-            if course_run_ids or course_uuids:
-                # Hit Discovery Service to determine if remaining courses and runs are in the range.
-                try:
-                    response = site.siteconfiguration.discovery_api_client.catalog.query_contains.get(
-                        course_run_ids=','.join([metadata['id'] for metadata in course_run_ids]),
-                        course_uuids=','.join([metadata['id'] for metadata in course_uuids]),
-                        query=query,
-                        partner=partner_code
-                    )
-                except Exception as err:  # pylint: disable=bare-except
-                    logger.warning(
-                        '%s raised while attempting to contact Discovery Service for offer catalog_range data.', err
-                    )
-                    raise Exception('Failed to contact Discovery Service to retrieve offer catalog_range data.')
+            # Cache range-state individually for each course or run identifier and remove lines not in the range.
+            for metadata in course_run_ids + course_uuids:
+                in_range = catalog_query_contains_courses[str(metadata['id'])]
 
-                # Cache range-state individually for each course or run identifier and remove lines not in the range.
-                for metadata in course_run_ids + course_uuids:
-                    in_range = response[str(metadata['id'])]
+                # Convert to int, because this is what memcached will return, and the request cache should return
+                # the same value.
+                # Note: once the TieredCache is fixed to handle this case, we could remove this line.
+                in_range = int(in_range)
+                TieredCache.set_all_tiers(metadata['cache_key'], in_range, settings.COURSES_API_CACHE_TIMEOUT)
 
-                    # Convert to int, because this is what memcached will return, and the request cache should return
-                    # the same value.
-                    # Note: once the TieredCache is fixed to handle this case, we could remove this line.
-                    in_range = int(in_range)
-                    TieredCache.set_all_tiers(metadata['cache_key'], in_range, settings.COURSES_API_CACHE_TIMEOUT)
+                if not in_range:
+                    applicable_lines.remove(metadata['line'])
 
-                    if not in_range:
-                        applicable_lines.remove(metadata['line'])
-
-            return [(line.product.stockrecords.first().price_excl_tax, line) for line in applicable_lines]
-        else:
-            return super(Benefit, self).get_applicable_lines(offer, basket, range=range)  # pylint: disable=bad-super-call
+        return [(line.product.stockrecords.first().price_excl_tax, line) for line in applicable_lines]
 
 
 class ConditionalOffer(AbstractConditionalOffer):
