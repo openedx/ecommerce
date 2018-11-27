@@ -40,7 +40,6 @@ Category = get_model('catalogue', 'Category')
 Condition = get_model('offer', 'Condition')
 ConditionalOffer = get_model('offer', 'ConditionalOffer')
 logger = logging.getLogger(__name__)
-Order = get_model('order', 'Order')
 Product = get_model('catalogue', 'Product')
 ProductCategory = get_model('catalogue', 'ProductCategory')
 ProductClass = get_model('catalogue', 'ProductClass')
@@ -66,10 +65,9 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
         # If we have switched to using enterprise offers, ensure that enterprise coupons do not show up
         # in the regular coupon list view
         if waffle.switch_is_active(ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH):
-            invoices = Invoice.objects.filter(business_client__enterprise_customer_uuid__isnull=False)
-            orders = Order.objects.filter(id__in=[invoice.order_id for invoice in invoices])
-            basket_lines = Line.objects.filter(basket_id__in=[order.basket_id for order in orders])
-            return product_filter.exclude(id__in=[line.product_id for line in basket_lines])
+            return product_filter.exclude(
+                coupon_vouchers__vouchers__offers__condition__enterprise_customer_uuid__isnull=False,
+            )
 
         return product_filter
 

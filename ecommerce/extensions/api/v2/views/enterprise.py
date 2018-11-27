@@ -63,7 +63,8 @@ class EnterpriseCouponViewSet(CouponViewSet):
             product_class__name=COUPON_PRODUCT_CLASS_NAME,
             stockrecords__partner=self.request.site.siteconfiguration.partner,
             id__in=[line.product_id for line in basket_lines],
-        )
+            coupon_vouchers__vouchers__offers__condition__enterprise_customer_uuid__isnull=False,
+        ).distinct()
 
     def get_serializer_class(self):
         if self.action == 'list':
@@ -135,19 +136,16 @@ class EnterpriseCouponViewSet(CouponViewSet):
         return super(EnterpriseCouponViewSet, self).update(request, *args, **kwargs)
 
     def update_range_data(self, request_data, vouchers):
+        # Since enterprise coupons do not have ranges, we bypass the range update logic entirely.
         pass
 
     def update_offer_data(self, request_data, vouchers, site):
         """
         Remove all offers from the vouchers and add a new offer
         Arguments:
-            coupon (Product): Coupon product associated with vouchers
-            vouchers (ManyRelatedManager): Vouchers associated with the coupon to be updated
-            site (Site): The Site associated with this offer
-            benefit_value (Decimal): Benefit value associated with a new offer
-            program_uuid (str): Program UUID
-            enterprise_customer (str): Enterprise Customer UUID
-            enterprise_catalog (str): Enterprise Catalog UUID
+            request_data (dict): the request parameters sent via api.
+            vouchers (list): the vouchers attached to this coupon to update.
+            site (Site): the site for this request.
         """
         benefit_value = request_data.get('benefit_value')
         enterprise_customer = request_data.get('enterprise_customer', {}).get('id', None)
