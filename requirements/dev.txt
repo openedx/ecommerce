@@ -62,7 +62,7 @@ edx-django-sites-extensions==2.4.0
 edx-django-utils==1.0.1
 edx-drf-extensions==2.0.0
 edx-ecommerce-worker==0.7.0
-edx-i18n-tools==0.4.4
+edx-i18n-tools
 edx-opaque-keys==0.4.4
 edx-rest-api-client==1.8.2
 edx-sphinx-theme==1.0.2
