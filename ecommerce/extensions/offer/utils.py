@@ -1,12 +1,17 @@
 """Offer Utility Methods. """
+import logging
+
 from decimal import Decimal
 
+from django.conf import settings
 from django.shortcuts import render
 from django.utils.translation import ugettext_lazy as _
+from ecommerce_worker.sailthru.v1.tasks import send_offer_assignment_email
 from oscar.core.loading import get_model
 
 from ecommerce.extensions.checkout.utils import add_currency
 
+logger = logging.getLogger(__name__)
 Benefit = get_model('offer', 'Benefit')
 
 
@@ -99,3 +104,49 @@ def render_email_confirmation_if_required(request, offer, product):
                 'user_email': request.user and request.user.email,
             }
         )
+
+
+def send_assigned_offer_email(
+        template,
+        offer_assignment_id,
+        learner_email,
+        code,
+        enrollment_url,
+        redemptions_remaining,
+        code_expiration_date):
+    """
+    Arguments:
+        *template*
+            The email template with placeholders that will receive the following tokens
+        *offer_assignment_id*
+            Primary key of the entry in the offer_assignment model.
+        *learner_email*
+            Email of the customer who will receive the code.
+        *code*
+            Code for the user.
+        *enrollment_url*
+            URL for the user.
+        *redemptions_remaining*
+            Number of times the code can be redeemed.
+        *code_expiration_date*
+            Date till code is valid.
+
+    Returns:
+         True when successful or False in case of any exception
+    """
+
+    email_subject = settings.OFFER_ASSIGNMENT_EMAIL_DEFAULT_SUBJECT
+    try:
+        email_body = template.format(
+            REDEMPTIONS_REMAINING=redemptions_remaining,
+            USER_EMAIL=learner_email,
+            ENROLLMENT_URL=enrollment_url,
+            CODE=code,
+            EXPIRATION_DATE=code_expiration_date
+        )
+        send_offer_assignment_email.delay(learner_email, offer_assignment_id, email_subject, email_body)
+    except Exception as exc:  # pylint: disable=broad-except
+        logger.exception(
+            '[Offer Assignment] send_offer_assignment_email celery task raised: %r', exc)
+        return False
+    return True

@@ -1,12 +1,18 @@
 from decimal import Decimal
 
 import ddt
+import mock
+from django.conf import settings
 from oscar.core.loading import get_model
 
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
 from ecommerce.extensions.checkout.utils import add_currency
-from ecommerce.extensions.offer.utils import _remove_exponent_and_trailing_zeros, format_benefit_value
+from ecommerce.extensions.offer.utils import (
+    _remove_exponent_and_trailing_zeros,
+    format_benefit_value,
+    send_assigned_offer_email
+)
 from ecommerce.extensions.test.factories import *  # pylint:disable=wildcard-import,unused-wildcard-import
 from ecommerce.tests.testcases import TestCase
 
@@ -61,3 +67,61 @@ class UtilTests(DiscoveryTestMixin, TestCase):
         """
         decimal = _remove_exponent_and_trailing_zeros(Decimal(value))
         self.assertEqual(decimal, Decimal(expected))
+
+    @mock.patch('ecommerce.extensions.offer.utils.send_offer_assignment_email')
+    @ddt.data(
+        (
+            {
+                'offer_assignment_id': 555,
+                'learner_email': 'johndoe@unknown.com',
+                'code': 'GIL7RUEOU7VHBH7Q',
+                'enrollment_url': 'http://tempurl.url/enroll',
+                'redemptions_remaining': 10,
+                'code_expiration_date': '2018-12-19'
+            },
+            None,
+            True,
+        ),
+        (
+            {'offer_assignment_id': 555,
+             'learner_email': 'johndoe@unknown.com',
+             'code': 'GIL7RUEOU7VHBH7Q',
+             'enrollment_url': 'http://tempurl.url/enroll',
+             'redemptions_remaining': 10,
+             'code_expiration_date': '2018-12-19'},
+            Exception(),
+            False,
+        ),
+    )
+    @ddt.unpack
+    def test_send_assigned_offer_email(
+            self,
+            tokens,
+            side_effect,
+            returns,
+            mock_sailthru_task,
+    ):
+        email_subject = settings.OFFER_ASSIGNMENT_EMAIL_DEFAULT_SUBJECT
+        mock_sailthru_task.delay.side_effect = side_effect
+        template = settings.OFFER_ASSIGNMENT_EMAIL_DEFAULT_TEMPLATE
+        status = send_assigned_offer_email(
+            template,
+            tokens.get('offer_assignment_id'),
+            tokens.get('learner_email'),
+            tokens.get('code'),
+            tokens.get('enrollment_url'),
+            tokens.get('redemptions_remaining'),
+            tokens.get('code_expiration_date'),
+        )
+        expected_email_body = template.format(
+            REDEMPTIONS_REMAINING=tokens.get('redemptions_remaining'),
+            USER_EMAIL=tokens.get('learner_email'),
+            ENROLLMENT_URL=tokens.get('enrollment_url'),
+            CODE=tokens.get('code'),
+            EXPIRATION_DATE=tokens.get('code_expiration_date')
+        )
+        mock_sailthru_task.delay.assert_called_once_with(
+            tokens.get('learner_email'),
+            tokens.get('offer_assignment_id'),
+            email_subject, expected_email_body)
+        self.assertEqual(status, returns)
