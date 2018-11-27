@@ -2,6 +2,7 @@ from django.conf.urls import include, url
 from rest_framework_extensions.routers import ExtendedSimpleRouter
 
 from ecommerce.core.constants import COURSE_ID_PATTERN
+from ecommerce.extensions.api.v2.views import assignmentemail as assignment_email
 from ecommerce.extensions.api.v2.views import baskets as basket_views
 from ecommerce.extensions.api.v2.views import catalog as catalog_views
 from ecommerce.extensions.api.v2.views import checkout as checkout_views
@@ -86,6 +87,12 @@ ENTERPRISE_URLS = [
     url(r'^customers$', enterprise_views.EnterpriseCustomerViewSet.as_view(), name='enterprise_customers'),
 ]
 
+ASSIGNMENT_EMAIL_URLS = [
+    url(r'^template$', assignment_email.AssignmentEmail.as_view(), name='get_template'),
+    url(r'^updatestatus$', assignment_email.AssignmentEmailStatus.as_view(), name='update_status'),
+    url(r'^receivebounce$', assignment_email.AssignmentEmailBounce.as_view(), name='receive_bounce')
+]
+
 urlpatterns = [
     url(r'^baskets/', include(BASKET_URLS, namespace='baskets')),
     url(r'^checkout/', include(CHECKOUT_URLS, namespace='checkout')),
@@ -97,6 +104,7 @@ urlpatterns = [
     url(r'^refunds/', include(REFUND_URLS, namespace='refunds')),
     url(r'^retirement/', include(RETIREMENT_URLS, namespace='retirement')),
     url(r'^sdn/', include(SDN_URLS, namespace='sdn')),
+    url(r'^assignmentemail/', include(ASSIGNMENT_EMAIL_URLS, namespace='assignmentemail')),
 ]
 
 router = ExtendedSimpleRouter()

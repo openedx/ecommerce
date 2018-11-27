@@ -6,6 +6,7 @@ from django.utils.translation import ugettext_lazy as _
 from oscar.core.loading import get_model
 
 from ecommerce.extensions.checkout.utils import add_currency
+from ecommerce_worker.sailthru.v1.tasks import send_offer_assignment_email
 
 Benefit = get_model('offer', 'Benefit')
 
@@ -99,3 +100,41 @@ def render_email_confirmation_if_required(request, offer, product):
                 'user_email': request.user and request.user.email,
             }
         )
+
+
+def send_assigned_offer_email(
+        template, offer_assignment_id, learner_email, code, enrollment_url, code_usage_count, code_expiration_date):
+    """
+    Arguments:
+        *template*
+            The email template with placeholders that will receive the following tokens
+        *offer_assignment_id*
+            Primary key of the entry in the offer_assignment model.
+        *learner_email*
+            Email of the customer who will receive the code.
+        *code*
+            Code for the user.
+        *enrollment_url*
+            URL for the user.
+        *code_usage_count*
+            Number of times the code can be redeemed.
+        *code_expiration_date*
+            Date till code is valid.
+
+    Returns:
+         True when successful or False in case of any exception
+    """
+
+    email_subject = 'New edX course assignment'
+    try:
+        email_body = template.format(
+            code_usage_count=code_usage_count,
+            user_email=learner_email,
+            enrollment_url=enrollment_url,
+            code=code,
+            code_expiration_date=code_expiration_date
+        )
+        send_offer_assignment_email.delay(learner_email, offer_assignment_id, email_subject, email_body)
+    except Exception:  # pylint: disable=broad-except
+        return False
+    return True
