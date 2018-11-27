@@ -149,6 +149,10 @@ BROKER_URL = 'amqp://'
 
 ENABLE_AUTO_AUTH = True
 
+#SAILTHRU settings
+SAILTHRU_KEY = 'abc123'
+SAILTHRU_SECRET = 'top_secret'
+
 #####################################################################
 # Lastly, see if the developer has any local overrides.
 if os.path.isfile(join(dirname(abspath(__file__)), 'private.py')):

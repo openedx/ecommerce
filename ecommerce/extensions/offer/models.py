@@ -481,4 +481,13 @@ class OfferAssignment(TimeStampedModel):
     )
 
 
+class OfferAssignmentEmailAttempt(models.Model):
+    """
+    This model is required to map the message identifier received from Sailthru to the OfferAssignment identifier.
+    The primary application of this model is in the asynchronous email status update from ecommerce-worker and Sailthru
+    """
+    offer_assignment = models.ForeignKey('offer.OfferAssignment', on_delete=models.CASCADE)
+    send_id = models.CharField(max_length=255, unique=True)
+
+
 from oscar.apps.offer.models import *  # noqa isort:skip pylint: disable=wildcard-import,unused-wildcard-import,wrong-import-position,wrong-import-order,ungrouped-imports

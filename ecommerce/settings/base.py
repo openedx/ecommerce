@@ -522,6 +522,7 @@ CELERY_ROUTES = {
     'ecommerce_worker.fulfillment.v1.tasks.fulfill_order': {'queue': 'fulfillment'},
     'ecommerce_worker.sailthru.v1.tasks.update_course_enrollment': {'queue': 'email_marketing'},
     'ecommerce_worker.sailthru.v1.tasks.send_course_refund_email': {'queue': 'email_marketing'},
+    'ecommerce_worker.sailthru.v1.tasks.send_offer_assignment_email': {'queue': 'email_marketing'},
 }
 
 # Prevent Celery from removing handlers on the root logger. Allows setting custom logging handlers.
@@ -628,3 +629,24 @@ NEW_CODES_EMAIL_CONFIG = {
         Thank you.
     '''
 }
+
+OFFER_ASSIGNMENT_EMAIL_DEFAULT_TEMPLATE = '''
+    Your learning manager has provided you with a new access code to take a course at edX.
+    You may redeem this code for {REDEMPTIONS_REMAINING} courses.
+
+    edX login: {USER_EMAIL}
+    Enrollment url: {ENROLLMENT_URL}
+    Access Code: {CODE}
+    Expiration date: {EXPIRATION_DATE}
+
+    You may go directly to the Enrollment URL to view courses that are available for this code
+    or you can insert the access code at check out under "coupon code" for applicable courses.
+
+    For any questions, please reach out to your Learning Manager.
+'''
+OFFER_ASSIGNMENT_EMAIL_DEFAULT_SUBJECT = 'New edX course assignment'
+
+#SAILTHRU settings
+SAILTHRU_KEY = None
+SAILTHRU_SECRET = None
+

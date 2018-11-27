@@ -76,6 +76,10 @@ LANGUAGE_COOKIE_NAME = 'openedx-language-preference'
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
+#SAILTHRU settings
+SAILTHRU_KEY = 'abc123'
+SAILTHRU_SECRET = 'top_secret'
+
 #####################################################################
 # Lastly, see if the developer has any local overrides.
 if os.path.isfile(join(dirname(abspath(__file__)), 'private.py')):
