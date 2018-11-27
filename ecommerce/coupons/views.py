@@ -37,10 +37,10 @@ from ecommerce.extensions.offer.utils import render_email_confirmation_if_requir
 from ecommerce.extensions.order.exceptions import AlreadyPlacedOrderException
 from ecommerce.extensions.voucher.utils import get_voucher_and_products_from_code
 
-Applicator = get_class('offer.applicator', 'Applicator')
 Basket = get_model('basket', 'Basket')
 Benefit = get_model('offer', 'Benefit')
 ConditionalOffer = get_model('offer', 'ConditionalOffer')
+CustomApplicator = get_class('offer.applicator', 'CustomApplicator')
 logger = logging.getLogger(__name__)
 OrderLineVouchers = get_model('voucher', 'OrderLineVouchers')
 Order = get_model('order', 'Order')

@@ -34,12 +34,14 @@ from ecommerce.tests.factories import PartnerFactory, ProductFactory, SiteConfig
 from ecommerce.tests.mixins import ThrottlingMixin
 from ecommerce.tests.testcases import TestCase
 
+
 Basket = get_model('basket', 'Basket')
 Benefit = get_model('offer', 'Benefit')
 Catalog = get_model('catalogue', 'Catalog')
 Category = get_model('catalogue', 'Category')
 Condition = get_model('offer', 'Condition')
 Course = get_model('courses', 'Course')
+CustomApplicator = get_class('offer.applicator', 'CustomApplicator')
 Order = get_model('order', 'Order')
 Product = get_model('catalogue', 'Product')
 ProductCategory = get_model('catalogue', 'ProductCategory')

@@ -627,8 +627,8 @@ class BasketCalculateViewTests(ProgramTestMixin, ThrottlingMixin, TestCase):
         products, url = self._setup_anonymous_basket_calculate()
 
         expected = {
-            'total_incl_tax_excl_discounts': sum(product.stockrecords.first().price_excl_tax
-                                                 for product in products),
+            'total_incl_tax_excl_discounts': sum(
+                product.stockrecords.first().price_excl_tax for product in products),
             'total_incl_tax': Decimal('0.00'),
             'currency': 'USD'
         }
@@ -638,6 +638,7 @@ class BasketCalculateViewTests(ProgramTestMixin, ThrottlingMixin, TestCase):
         self.assertFalse(mock_get_lms_resource_for_user.called, msg='LMS calls should be skipped for anonymous case.')
 
         self.assertEqual(response.status_code, 200)
+
         self.assertEqual(response.data, expected)
 
     @httpretty.activate

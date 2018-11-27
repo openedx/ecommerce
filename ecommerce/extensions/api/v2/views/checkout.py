@@ -11,7 +11,7 @@ from ecommerce.extensions.api.serializers import CheckoutSerializer
 from ecommerce.extensions.payment.exceptions import ProcessorNotFoundError
 from ecommerce.extensions.payment.helpers import get_processor_class_by_name
 
-Applicator = get_class('offer.applicator', 'Applicator')
+CustomApplicator = get_class('offer.applicator', 'CustomApplicator')
 logger = logging.getLogger(__name__)
 
 
@@ -38,7 +38,7 @@ class CheckoutView(APIView):
 
         # Freeze the basket so that it cannot be modified
         basket.strategy = request.strategy
-        Applicator().apply(basket, request.user, request)
+        CustomApplicator().apply(basket, request.user, request)
         basket.freeze()
 
         # Return the payment info

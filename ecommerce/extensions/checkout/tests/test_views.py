@@ -36,7 +36,7 @@ class FreeCheckoutViewTests(EnterpriseServiceMockMixin, TestCase):
     def setUp(self):
         super(FreeCheckoutViewTests, self).setUp()
         self.user = self.create_user()
-        self.bundle_attribute_value = 'test_bundle'
+        self.bundle_attribute_value = '12345678-1234-1234-1234-123456789abc'
         self.client.login(username=self.user.username, password=self.password)
 
     def prepare_basket(self, price, bundle=False):

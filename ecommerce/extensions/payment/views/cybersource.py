@@ -41,10 +41,10 @@ from ecommerce.extensions.payment.views import BasePaymentSubmitView
 
 logger = logging.getLogger(__name__)
 
-Applicator = get_class('offer.applicator', 'Applicator')
 Basket = get_model('basket', 'Basket')
 BillingAddress = get_model('order', 'BillingAddress')
 Country = get_model('address', 'Country')
+CustomApplicator = get_class('offer.applicator', 'CustomApplicator')
 NoShippingRequired = get_class('shipping.methods', 'NoShippingRequired')
 Order = get_model('order', 'Order')
 OrderNumberGenerator = get_class('order.utils', 'OrderNumberGenerator')
@@ -191,7 +191,7 @@ class CybersourceNotificationMixin(CyberSourceProcessorMixin, OrderCreationMixin
             basket_id = int(basket_id)
             basket = Basket.objects.get(id=basket_id)
             basket.strategy = strategy.Default()
-            Applicator().apply(basket, basket.owner, self.request)
+            CustomApplicator().apply(basket, basket.owner, self.request)
             return basket
         except (ValueError, ObjectDoesNotExist):
             return None

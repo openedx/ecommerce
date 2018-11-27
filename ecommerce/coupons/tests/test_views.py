@@ -31,11 +31,11 @@ from ecommerce.extensions.test.factories import prepare_voucher
 from ecommerce.tests.mixins import ApiMockMixin, LmsApiMockMixin
 from ecommerce.tests.testcases import TestCase
 
-Applicator = get_class('offer.applicator', 'Applicator')
 Basket = get_model('basket', 'Basket')
 Benefit = get_model('offer', 'Benefit')
 Catalog = get_model('catalogue', 'Catalog')
 Course = get_model('courses', 'Course')
+CustomApplicator = get_class('offer.applicator', 'CustomApplicator')
 Product = get_model('catalogue', 'Product')
 Order = get_model('order', 'Order')
 OrderLineVouchers = get_model('voucher', 'OrderLineVouchers')

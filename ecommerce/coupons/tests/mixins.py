@@ -14,7 +14,7 @@ from ecommerce.extensions.api.v2.views.coupons import CouponViewSet
 from ecommerce.extensions.basket.utils import prepare_basket
 from ecommerce.extensions.catalogue.utils import create_coupon_product
 from ecommerce.tests.factories import PartnerFactory
-from ecommerce.tests.mixins import Applicator, Benefit, Catalog, ProductClass, SiteMixin, Voucher
+from ecommerce.tests.mixins import Benefit, Catalog, CustomApplicator, ProductClass, SiteMixin, Voucher
 
 
 class DiscoveryMockMixin(object):
@@ -522,5 +522,5 @@ class CouponMixin(SiteMixin):
         product = voucher.offers.first().benefit.range.all_products()[0]
         basket.add_product(product)
         basket.vouchers.add(voucher)
-        Applicator().apply(basket, self.user)
+        CustomApplicator().apply(basket, self.user)
         return basket

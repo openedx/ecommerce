@@ -1,11 +1,7 @@
 import newrelic.agent
-import waffle
 from oscar.apps.basket.middleware import BasketMiddleware as OscarBasketMiddleware
 from oscar.core.loading import get_class, get_model
 
-from ecommerce.extensions.offer.constants import CUSTOM_APPLICATOR_USE_FLAG
-
-Applicator = get_class('offer.applicator', 'Applicator')
 Basket = get_model('basket', 'basket')
 CustomApplicator = get_class('offer.applicator', 'CustomApplicator')
 
@@ -72,7 +68,4 @@ class BasketMiddleware(OscarBasketMiddleware):
     @newrelic.agent.function_trace()
     def apply_offers_to_basket(self, request, basket):
         if not basket.is_empty:
-            if waffle.flag_is_active(request, CUSTOM_APPLICATOR_USE_FLAG):  # pragma: no cover
-                CustomApplicator().apply(basket, request.user, request)
-            else:
-                Applicator().apply(basket, request.user, request)
+            CustomApplicator().apply(basket, request.user, request)

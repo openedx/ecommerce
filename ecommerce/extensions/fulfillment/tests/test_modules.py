@@ -43,9 +43,9 @@ from ecommerce.tests.testcases import TestCase
 JSON = 'application/json'
 LOGGER_NAME = 'ecommerce.extensions.analytics.utils'
 
-Applicator = get_class('offer.applicator', 'Applicator')
 Benefit = get_model('offer', 'Benefit')
 Catalog = get_model('catalogue', 'Catalog')
+CustomApplicator = get_class('offer.applicator', 'CustomApplicator')
 Option = get_model('catalogue', 'Option')
 Product = get_model('catalogue', 'Product')
 ProductAttribute = get_model('catalogue', 'ProductAttribute')
@@ -123,7 +123,7 @@ class EnrollmentFulfillmentModuleTests(ProgramTestMixin, DiscoveryTestMixin, Ful
             voucher_type=Voucher.SINGLE_USE,
             program_uuid=program_uuid,
         )
-        Applicator().apply_offers(self.order.basket, vouchers[0].offers.all())
+        CustomApplicator().apply_offers(self.order.basket, vouchers[0].offers.all())
 
     def test_enrollment_module_support(self):
         """Test that we get the correct values back for supported product lines."""

@@ -12,9 +12,9 @@ from ecommerce.extensions.payment.views import BasePaymentSubmitView
 
 logger = logging.getLogger(__name__)
 
-Applicator = get_class('offer.applicator', 'Applicator')
 BillingAddress = get_model('order', 'BillingAddress')
 Country = get_model('address', 'Country')
+CustomApplicator = get_class('offer.applicator', 'CustomApplicator')
 NoShippingRequired = get_class('shipping.methods', 'NoShippingRequired')
 OrderTotalCalculator = get_class('checkout.calculators', 'OrderTotalCalculator')
 

@@ -13,8 +13,8 @@ from oscar.core.loading import get_class, get_model
 
 logger = logging.getLogger(__name__)
 
-Applicator = get_class('offer.applicator', 'Applicator')
 Basket = get_model('basket', 'Basket')
+CustomApplicator = get_class('offer.applicator', 'CustomApplicator')
 
 
 def country_choices():
@@ -141,7 +141,7 @@ class PaymentForm(forms.Form):
 
         if basket:
             basket.strategy = self.request.strategy
-            Applicator().apply(basket, self.request.user, self.request)
+            CustomApplicator().apply(basket, self.request.user, self.request)
 
         return basket
 
@@ -226,6 +226,6 @@ class StripeSubmitForm(forms.Form):
 
         if basket:
             basket.strategy = self.request.strategy
-            Applicator().apply(basket, self.request.user, self.request)
+            CustomApplicator().apply(basket, self.request.user, self.request)
 
         return basket

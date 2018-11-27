@@ -45,7 +45,6 @@ from ecommerce.tests.factories import ProductFactory, SiteConfigurationFactory, 
 from ecommerce.tests.mixins import ApiMockMixin, LmsApiMockMixin
 from ecommerce.tests.testcases import TestCase
 
-Applicator = get_class('offer.applicator', 'Applicator')
 Basket = get_model('basket', 'Basket')
 BasketAttribute = get_model('basket', 'BasketAttribute')
 BasketAttributeType = get_model('basket', 'BasketAttributeType')
@@ -53,6 +52,7 @@ Benefit = get_model('offer', 'Benefit')
 Catalog = get_model('catalogue', 'Catalog')
 Condition = get_model('offer', 'Condition')
 ConditionalOffer = get_model('offer', 'ConditionalOffer')
+CustomApplicator = get_class('offer.applicator', 'CustomApplicator')
 OrderLine = get_model('order', 'Line')
 Product = get_model('catalogue', 'Product')
 ProductAttribute = get_model('catalogue', 'ProductAttribute')
@@ -338,7 +338,7 @@ class BasketSummaryViewTests(EnterpriseServiceMockMixin, DiscoveryTestMixin, Dis
         _range = factories.RangeFactory(products=[product, ])
         voucher, __ = prepare_voucher(_range=_range, benefit_type=benefit_type, benefit_value=benefit_value)
         basket.vouchers.add(voucher)
-        Applicator().apply(basket)
+        CustomApplicator().apply(basket)
 
     @ddt.data(ConnectionError, SlumberBaseException, Timeout)
     def test_course_api_failure(self, error):
@@ -810,7 +810,7 @@ class VoucherAddViewTests(LmsApiMockMixin, TestCase):
         new_product = factories.ProductFactory(categories=[], stockrecords__partner__short_code='second')
         self.basket.add_product(product)
         self.basket.add_product(new_product)
-        _set_basket_bundle_status('test-bundle', self.basket)
+        _set_basket_bundle_status('12345678-1234-1234-1234-123456789abc', self.basket)
         self.assert_form_valid_message("Coupon code '{code}' added to basket.".format(code=voucher.code))
 
     def test_form_valid_without_basket_id(self):

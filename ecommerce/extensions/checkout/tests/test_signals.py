@@ -19,12 +19,12 @@ from ecommerce.programs.tests.mixins import ProgramTestMixin
 from ecommerce.tests.factories import ProductFactory
 from ecommerce.tests.testcases import TestCase
 
-Applicator = get_class('offer.applicator', 'Applicator')
 BasketAttribute = get_model('basket', 'BasketAttribute')
 BasketAttributeType = get_model('basket', 'BasketAttributeType')
 Benefit = get_model('offer', 'Benefit')
 Condition = get_model('offer', 'Condition')
 ConditionalOffer = get_model('offer', 'ConditionalOffer')
+CustomApplicator = get_class('offer.applicator', 'CustomApplicator')
 Product = get_model('catalogue', 'Product')
 
 BUNDLE = 'bundle_identifier'
@@ -223,7 +223,7 @@ class SignalTests(ProgramTestMixin, CouponMixin, TestCase):
             basket = factories.BasketFactory(owner=self.user, site=self.site)
             basket.add_product(product)
             basket.vouchers.add(voucher)
-            Applicator().apply(basket, user=basket.owner, request=self.request)
+            CustomApplicator().apply(basket, user=basket.owner, request=self.request)
 
             order = factories.create_order(basket=basket, user=self.user)
             track_completed_order(None, order)
@@ -247,7 +247,7 @@ class SignalTests(ProgramTestMixin, CouponMixin, TestCase):
             basket = factories.BasketFactory(owner=self.user, site=self.site)
             basket.add_product(product)
             basket.vouchers.add(voucher)
-            Applicator().apply(basket, user=basket.owner, request=self.request)
+            CustomApplicator().apply(basket, user=basket.owner, request=self.request)
 
             order = factories.create_order(basket=basket, user=self.user)
             track_completed_order(None, order)
@@ -269,7 +269,7 @@ class SignalTests(ProgramTestMixin, CouponMixin, TestCase):
 
             basket = factories.BasketFactory(owner=self.user, site=self.site)
             basket.add_product(product)
-            Applicator().apply_offers(basket, [site_offer])
+            CustomApplicator().apply_offers(basket, [site_offer])
 
             order = factories.create_order(basket=basket, user=self.user)
             track_completed_order(None, order)

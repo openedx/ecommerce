@@ -11,8 +11,8 @@ from ecommerce.extensions.payment.processors import HandledProcessorResponse
 
 logger = logging.getLogger(__name__)
 
-Applicator = get_class('offer.applicator', 'Applicator')
 Basket = get_model('basket', 'Basket')
+CustomApplicator = get_class('offer.applicator', 'CustomApplicator')
 EventHandler = get_class('order.processing', 'EventHandler')
 NoShippingRequired = get_class('shipping.methods', 'NoShippingRequired')
 Order = get_model('order', 'Order')
@@ -43,7 +43,7 @@ def refund_basket_transactions(site, basket_ids):
 
     for basket in baskets:
         basket.strategy = strategy.Default()
-        Applicator().apply(basket, basket.owner, None)
+        CustomApplicator().apply(basket, basket.owner, None)
 
         logger.info('Refunding transactions for basket [%d]...', basket.id)
         transactions = set(
@@ -144,7 +144,7 @@ class FulfillFrozenBaskets(EdxOrderPlacementMixin):
             # This will create the order  with out discount but subsequently
             # run the fulfillment to update course mode.
             try:
-                Applicator().apply(basket, user=basket.owner)
+                CustomApplicator().apply(basket, user=basket.owner)
             except ValueError:
                 basket.clear_vouchers()
 

@@ -1,12 +1,10 @@
 import logging
 from itertools import chain
 
-import waffle
 from oscar.apps.offer.applicator import Applicator
 from oscar.core.loading import get_model
 
 from ecommerce.enterprise.utils import get_enterprise_id_for_user
-from ecommerce.extensions.offer.constants import CUSTOM_APPLICATOR_LOG_FLAG
 
 logger = logging.getLogger(__name__)
 BasketAttribute = get_model('basket', 'BasketAttribute')
@@ -41,23 +39,16 @@ class CustomApplicator(Applicator):
             basket=basket,
             attribute_type=BasketAttributeType.objects.get(name=BUNDLE)
         )
-        if bundle_attributes.count() > 0:
-            program_offers = self.get_program_offers(bundle_attributes.first())
-            site_offers = []
-            if waffle.flag_is_active(request, CUSTOM_APPLICATOR_LOG_FLAG):
-                logger.warning(
-                    'CustomApplicator processed Basket [%s] from Request [%s] and User [%s] with a bundle.',
-                    basket, request, user,
-                )
-        else:
-            if waffle.flag_is_active(request, CUSTOM_APPLICATOR_LOG_FLAG):
-                logger.warning(
-                    'CustomApplicator processed Basket [%s] from Request [%s] and User [%s] without a bundle.',
-                    basket, request, user,
-                )
+        if request.path and request.path == u'/checkout/free-checkout/':
+            # TODO Enterprise to handle free checkout case
             program_offers = []
             site_offers = self.get_site_offers()
-
+        elif bundle_attributes.count() > 0:
+            program_offers = self.get_program_offers(bundle_attributes.first())
+            site_offers = []
+        else:
+            program_offers = []
+            site_offers = self.get_site_offers()
         basket_offers = self.get_basket_offers(basket, user)
 
         # edX currently does not use user offers or session offers.
@@ -65,7 +56,6 @@ class CustomApplicator(Applicator):
         enterprise_offers = self.get_enterprise_offers(basket.site, user)
         user_offers = self.get_user_offers(user)
         session_offers = self.get_session_offers(request)
-
         return list(
             sorted(
                 chain(session_offers, basket_offers, user_offers, program_offers, enterprise_offers, site_offers),
@@ -79,11 +69,7 @@ class CustomApplicator(Applicator):
         Return site offers that are available to baskets without bundle ids.
         """
         ConditionalOffer = get_model('offer', 'ConditionalOffer')
-        qs = ConditionalOffer.active.filter(
-            offer_type=ConditionalOffer.SITE,
-            condition__program_uuid__isnull=True,
-            condition__enterprise_customer_uuid__isnull=True,
-        )
+        qs = ConditionalOffer.active.filter(offer_type=ConditionalOffer.SITE)
         return qs.select_related('condition', 'benefit')
 
     def get_enterprise_offers(self, site, user):

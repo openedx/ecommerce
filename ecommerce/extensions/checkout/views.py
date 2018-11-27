@@ -24,10 +24,10 @@ from ecommerce.extensions.checkout.exceptions import BasketNotFreeError
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
 from ecommerce.extensions.checkout.utils import get_receipt_page_url
 
-Applicator = get_class('offer.applicator', 'Applicator')
 Basket = get_model('basket', 'Basket')
 BasketAttribute = get_model('basket', 'BasketAttribute')
 BasketAttributeType = get_model('basket', 'BasketAttributeType')
+CustomApplicator = get_class('offer.applicator', 'CustomApplicator')
 Order = get_model('order', 'Order')
 
 
@@ -70,7 +70,7 @@ class FreeCheckoutView(EdxOrderPlacementMixin, RedirectView):
 
         if not basket.is_empty:
             # Need to re-apply the voucher to the basket.
-            Applicator().apply(basket, request.user, request)
+            CustomApplicator().apply(basket, request.user, request)
             if basket.total_incl_tax != Decimal(0):
                 raise BasketNotFreeError(
                     'Basket [{}] is not free. User affected [{}]'.format(

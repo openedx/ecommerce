@@ -14,8 +14,8 @@ from ecommerce.extensions.payment.forms import PaymentForm
 
 logger = logging.getLogger(__name__)
 
-Applicator = get_class('offer.applicator', 'Applicator')
 Basket = get_model('basket', 'Basket')
+CustomApplicator = get_class('offer.applicator', 'CustomApplicator')
 
 
 class PaymentFailedView(TemplateView):

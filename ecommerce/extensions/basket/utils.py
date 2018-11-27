@@ -5,7 +5,6 @@ from urllib import unquote, urlencode
 
 import newrelic.agent
 import pytz
-import waffle
 from django.conf import settings
 from django.contrib import messages
 from django.db import transaction
@@ -14,18 +13,16 @@ from oscar.apps.basket.signals import voucher_addition
 from oscar.core.loading import get_class, get_model
 
 from ecommerce.courses.utils import mode_for_product
-from ecommerce.extensions.offer.constants import CUSTOM_APPLICATOR_USE_FLAG
 from ecommerce.extensions.order.exceptions import AlreadyPlacedOrderException
 from ecommerce.extensions.order.utils import UserAlreadyPlacedOrder
 from ecommerce.extensions.payment.utils import embargo_check
 from ecommerce.referrals.models import Referral
 
-Applicator = get_class('offer.applicator', 'Applicator')
-CustomApplicator = get_class('offer.applicator', 'CustomApplicator')
 Basket = get_model('basket', 'Basket')
 BasketAttribute = get_model('basket', 'BasketAttribute')
 BasketAttributeType = get_model('basket', 'BasketAttributeType')
 BUNDLE = 'bundle_identifier'
+CustomApplicator = get_class('offer.applicator', 'CustomApplicator')
 ORGANIZATION_ATTRIBUTE_TYPE = 'organization'
 ENTERPRISE_CATALOG_ATTRIBUTE_TYPE = 'enterprise_catalog_uuid'
 StockRecord = get_model('partner', 'StockRecord')
@@ -422,10 +419,7 @@ def apply_voucher_on_basket_and_check_discount(voucher, request, basket):
     basket.vouchers.add(voucher)
     voucher_addition.send(sender=None, basket=basket, voucher=voucher)
 
-    if waffle.flag_is_active(request, CUSTOM_APPLICATOR_USE_FLAG):  # pragma: no cover
-        CustomApplicator().apply(basket, request.user, request)
-    else:
-        Applicator().apply(basket, request.user, request)
+    CustomApplicator().apply(basket, request.user, request)
 
     # Recalculate discounts to see if the voucher gives any
     discounts_after = basket.offer_applications

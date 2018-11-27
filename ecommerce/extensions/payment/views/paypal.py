@@ -23,10 +23,10 @@ from ecommerce.extensions.payment.processors.paypal import Paypal
 
 logger = logging.getLogger(__name__)
 
-Applicator = get_class('offer.applicator', 'Applicator')
 Basket = get_model('basket', 'Basket')
 BillingAddress = get_model('order', 'BillingAddress')
 Country = get_model('address', 'Country')
+CustomApplicator = get_class('offer.applicator', 'CustomApplicator')
 NoShippingRequired = get_class('shipping.methods', 'NoShippingRequired')
 OrderNumberGenerator = get_class('order.utils', 'OrderNumberGenerator')
 OrderTotalCalculator = get_class('checkout.calculators', 'OrderTotalCalculator')
@@ -66,7 +66,7 @@ class PaypalPaymentExecutionView(EdxOrderPlacementMixin, View):
                 transaction_id=payment_id
             ).basket
             basket.strategy = strategy.Default()
-            Applicator().apply(basket, basket.owner, self.request)
+            CustomApplicator().apply(basket, basket.owner, self.request)
 
             basket_add_organization_attribute(basket, self.request.GET)
             return basket

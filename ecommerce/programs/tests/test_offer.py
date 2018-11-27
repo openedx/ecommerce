@@ -12,7 +12,7 @@ from ecommerce.programs.tests.mixins import ProgramTestMixin
 from ecommerce.tests.mixins import LmsApiMockMixin
 from ecommerce.tests.testcases import TestCase
 
-Applicator = get_class('offer.applicator', 'Applicator')
+CustomApplicator = get_class('offer.applicator', 'CustomApplicator')
 
 
 class ProgramOfferTests(LmsApiMockMixin, ProgramTestMixin, TestCase):
@@ -48,7 +48,7 @@ class ProgramOfferTests(LmsApiMockMixin, ProgramTestMixin, TestCase):
 
         # Apply the offers as Oscar will in a request
         basket.strategy = DefaultStrategy()
-        Applicator().apply(basket, basket.owner)
+        CustomApplicator().apply(basket, basket.owner)
 
         # Our discount should be applied, and each line should have a price of 0
         lines = basket.all_lines()
