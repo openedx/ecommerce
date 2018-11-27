@@ -12,7 +12,7 @@
             <thead>
                 <tr>
                     <th><%= gettext('Credit Provider') %></th>
-                    <th><%= gettext('Price ') %> (<%= currency_symbol %>)</th>
+                    <th><%= gettext('Price ') %> (<%= currency_code %>)</th>
                     <th><%= gettext('Credit Hours') %></th>
                     <th><%= gettext('Upgrade Deadline') %></th>
                 </tr>
@@ -21,7 +21,7 @@
                 <% _.each(creditSeats, function (seat) { %>
                     <tr class="course-seat">
                         <td class="seat-credit-provider"><%= seat.get('credit_provider_display_name') %></td>
-                        <td class="seat-price"><%= '$' +  Number(seat.get('price')).toLocaleString() %></td>
+                        <td class="seat-price"><%= currency_symbol +  Number(seat.get('price')).toLocaleString() %></td>
                         <td class="seat-credit-hours"><%= seat.get('credit_hours') %></td>
                         <td class="seat-expires"><% var expires = seat.get('expires');
                             if (expires) {

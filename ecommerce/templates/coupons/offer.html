@@ -12,7 +12,11 @@
     <div id="offer">
         <div class="container">
             <div class="row">
-                <div id="offerApp" data-offer-app-page-heading="{{ offer_app_page_heading }}" data-offer-app-page-heading-message="{{ offer_app_page_heading_message }}">
+                <div id="offerApp"
+                     data-offer-app-page-heading="{{ offer_app_page_heading }}"
+                     data-offer-app-page-heading-message="{{ offer_app_page_heading_message }}"
+                     data-currency-code="{{ OSCAR_DEFAULT_CURRENCY }}"
+                     data-currency-symbol="{{ CURRENCY_SYMBOL }}">
                 </div>
                 <section class="verified-info col-xs-12 col-md-4 col-lg-12 hidden">
                     <p class="earn-verified-certificate col-xs-12 col-lg-5 pull-left-lg">{% trans "Earn a verified certificate in one of our popular courses to advance your career, showcase your accomplishments or enhance your college application." %}</p>

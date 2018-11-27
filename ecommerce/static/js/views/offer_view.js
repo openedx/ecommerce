@@ -5,7 +5,8 @@ define([
     'underscore.string',
     'moment',
     'text!templates/_offer_course_list.html',
-    'text!templates/_offer_error.html'
+    'text!templates/_offer_error.html',
+    'ecommerce'
 ],
     function($,
               Backbone,
@@ -13,7 +14,8 @@ define([
               _s,
               moment,
               OfferCourseListTemplate,
-              OfferErrorTemplate) {
+              OfferErrorTemplate,
+              ecommerce) {
         'use strict';
 
         return Backbone.View.extend({
@@ -61,7 +63,9 @@ define([
                             courses: this.collection,
                             isCredit: this.isCredit,
                             isEnrollmentCode: this.isEnrollmentCode,
-                            page: this.collection.goToPage(this.collection.page)
+                            page: this.collection.goToPage(this.collection.page),
+                            currency_code: ecommerce.currency.currencyCode,
+                            currency_symbol: ecommerce.currency.currencySymbol
                         })
                     );
                     this.renderPagination();
@@ -95,7 +99,7 @@ define([
                 if (benefit.type === 'Percentage') {
                     benefitValue += '%';
                 } else {
-                    benefitValue = '$' + benefitValue;
+                    benefitValue = ecommerce.currency.currencySymbol + benefitValue;
                 }
 
                 course.set({benefit_value: benefitValue});

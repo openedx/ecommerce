@@ -44,7 +44,7 @@ define([
             },
 
             discountValue: function() {
-                var stringFormat = (this.model.get('benefit_type') === 'Percentage') ? '%u%%' : '$%u';
+                var stringFormat = (this.model.get('benefit_type') === 'Percentage') ? '%u%%' : ecommerce.currency.currencySymbol + '%u';
                 return _s.sprintf(stringFormat, this.model.get('benefit_value'));
             },
 
@@ -57,7 +57,7 @@ define([
             },
 
             invoiceDiscountValue: function(type, value) {
-                var stringFormat = (type === 'Percentage') ? '%u%%' : '$%u';
+                var stringFormat = (type === 'Percentage') ? '%u%%' : ecommerce.currency.currencySymbol + '%u';
                 return _s.sprintf(stringFormat, parseInt(value, 10));
             },
 
@@ -125,7 +125,7 @@ define([
                     price = null;
 
                 if (this.model.get('price') !== '0.00') {
-                    price = _s.sprintf('$%s', this.model.get('price'));
+                    price = _s.sprintf('%s%s', ecommerce.currency.currencySymbol, this.model.get('price'));
                 }
 
                 if (_.isNumber(this.model.get('course_catalog'))) {

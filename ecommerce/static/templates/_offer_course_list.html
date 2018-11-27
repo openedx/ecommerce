@@ -52,12 +52,12 @@
                             <% } else { %>
                             <div class="pull-left">
                                 <p class="course-price">
-                                    <span>$<%= course.attributes.stockrecords.price_excl_tax %></span>
+                                    <span><%= currency_symbol %><%= course.attributes.stockrecords.price_excl_tax %></span>
                                 </p>
                             </div>
                             <div class="pull-left">
                                 <p class="course-new-price">
-                                    <span><%- gettext('Now') %> $<%= course.attributes.new_price %></span>
+                                    <span><%- gettext('Now') %> <%= currency_symbol %><%= course.attributes.new_price %></span>
                                 </p>
                             </div>
                             <% } %>
