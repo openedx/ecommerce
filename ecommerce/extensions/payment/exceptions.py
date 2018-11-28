@@ -54,3 +54,8 @@ class PCIViolation(PaymentError):
 class InvalidBasketError(PaymentError):
     """ Payment was made for an invalid basket. """
     pass
+
+
+class AuthorizationError(PaymentError):
+    """ Authorization was declined. """
+    pass

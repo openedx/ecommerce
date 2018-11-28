@@ -23,6 +23,7 @@ from ecommerce.core.constants import ISO_8601_FORMAT
 from ecommerce.extensions.checkout.utils import get_receipt_page_url
 from ecommerce.extensions.fulfillment.status import ORDER
 from ecommerce.extensions.payment.constants import CARD_TYPES
+from ecommerce.extensions.payment.exceptions import AuthorizationError
 from ecommerce.extensions.payment.helpers import sign
 from ecommerce.extensions.payment.processors.cybersource import Cybersource
 from ecommerce.extensions.test.factories import create_basket
@@ -477,13 +478,17 @@ class CybersourceNotificationTestsMixin(CybersourceMixin):
 
     @ddt.data(
         (PaymentError, 'ERROR', 'CyberSource payment failed for basket [{basket_id}]. '
-                                'The payment response was recorded in entry [{response_id}].'),
+                                'The payment response [Unknown Error] was recorded in entry [{response_id}].'),
         (UserCancelled, 'INFO', 'CyberSource payment did not complete for basket [{basket_id}] because '
-                                '[UserCancelled]. The payment response was recorded in entry [{response_id}].'),
+                                '[UserCancelled]. The payment response [Unknown Error] was recorded in '
+                                'entry [{response_id}].'),
         (TransactionDeclined, 'INFO', 'CyberSource payment did not complete for basket [{basket_id}] because '
-                                      '[TransactionDeclined]. The payment response was recorded in entry '
-                                      '[{response_id}].'),
-        (KeyError, 'ERROR', 'Attempts to handle payment for basket [{basket_id}] failed.')
+                                      '[TransactionDeclined]. The payment response [Unknown Error] was recorded'
+                                      ' in entry [{response_id}].'),
+        (KeyError, 'ERROR', 'Attempts to handle payment for basket [{basket_id}] failed. The payment response '
+                            '[Unknown Error] was recorded in entry [{response_id}].'),
+        (AuthorizationError, 'INFO', 'Payment Authorization was declined for basket [{basket_id}]. The payment '
+                                     'response was recorded in entry [{response_id}].')
     )
     @ddt.unpack
     def test_payment_handling_error(self, error_class, log_level, error_message):
