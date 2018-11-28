@@ -10,6 +10,11 @@ from decimal import Decimal
 
 from django.conf import settings
 from django.urls import reverse
+from oscar.apps.payment.exceptions import GatewayError, TransactionDeclined, UserCancelled
+from oscar.core.loading import get_class, get_model
+from zeep import Client
+from zeep.helpers import serialize_object
+from zeep.wsse import UsernameToken
 
 from ecommerce.core.constants import ISO_8601_FORMAT
 from ecommerce.core.url_utils import get_ecommerce_url
@@ -31,11 +36,6 @@ from ecommerce.extensions.payment.processors import (
     HandledProcessorResponse
 )
 from ecommerce.extensions.payment.utils import clean_field_value
-from oscar.apps.payment.exceptions import GatewayError, TransactionDeclined, UserCancelled
-from oscar.core.loading import get_class, get_model
-from zeep import Client
-from zeep.helpers import serialize_object
-from zeep.wsse import UsernameToken
 
 logger = logging.getLogger(__name__)
 

@@ -487,8 +487,8 @@ class CybersourceNotificationTestsMixin(CybersourceMixin):
                                       ' in entry [{response_id}].'),
         (KeyError, 'ERROR', 'Attempts to handle payment for basket [{basket_id}] failed. The payment response '
                             '[Unknown Error] was recorded in entry [{response_id}].'),
-        (AuthorizationError, 'ERROR', 'Payment Authorization was declined for basket [{basket_id}]. The payment '
-                                      'response was recorded in entry [{response_id}].')
+        (AuthorizationError, 'INFO', 'Payment Authorization was declined for basket [{basket_id}]. The payment '
+                                     'response was recorded in entry [{response_id}].')
     )
     @ddt.unpack
     def test_payment_handling_error(self, error_class, log_level, error_message):
