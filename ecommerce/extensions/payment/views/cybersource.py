@@ -17,9 +17,6 @@ from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext as _
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import View
-from oscar.apps.partner import strategy
-from oscar.apps.payment.exceptions import GatewayError, PaymentError, TransactionDeclined, UserCancelled
-from oscar.core.loading import get_class, get_model
 from rest_framework import permissions, status
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
@@ -29,11 +26,18 @@ from ecommerce.extensions.api.serializers import OrderSerializer
 from ecommerce.extensions.basket.utils import basket_add_organization_attribute
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
 from ecommerce.extensions.checkout.utils import get_receipt_page_url
-from ecommerce.extensions.payment.exceptions import \
-    AuthorizationError, DuplicateReferenceNumber, InvalidBasketError, InvalidSignatureError
+from ecommerce.extensions.payment.exceptions import (
+    AuthorizationError,
+    DuplicateReferenceNumber,
+    InvalidBasketError,
+    InvalidSignatureError
+)
 from ecommerce.extensions.payment.processors.cybersource import Cybersource
 from ecommerce.extensions.payment.utils import clean_field_value
 from ecommerce.extensions.payment.views import BasePaymentSubmitView
+from oscar.apps.partner import strategy
+from oscar.apps.payment.exceptions import GatewayError, PaymentError, TransactionDeclined, UserCancelled
+from oscar.core.loading import get_class, get_model
 
 logger = logging.getLogger(__name__)
 
@@ -260,7 +264,8 @@ class CybersourceNotificationMixin(CyberSourceProcessorMixin, OrderCreationMixin
                 raise
             except AuthorizationError:
                 logger.info(
-                    "Payment authentication for basket [%d]. The payment response was recorded in entry [%d].",
+                    'Payment Authorization was declined for basket [%d]. The payment response was '
+                    'recorded in entry [%d].',
                     basket.id,
                     ppr.id,
                 )
