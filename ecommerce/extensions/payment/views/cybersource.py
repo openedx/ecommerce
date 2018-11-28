@@ -29,7 +29,12 @@ from ecommerce.extensions.api.serializers import OrderSerializer
 from ecommerce.extensions.basket.utils import basket_add_organization_attribute
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
 from ecommerce.extensions.checkout.utils import get_receipt_page_url
-from ecommerce.extensions.payment.exceptions import DuplicateReferenceNumber, InvalidBasketError, InvalidSignatureError
+from ecommerce.extensions.payment.exceptions import (
+    AuthorizationError,
+    DuplicateReferenceNumber,
+    InvalidBasketError,
+    InvalidSignatureError
+)
 from ecommerce.extensions.payment.processors.cybersource import Cybersource
 from ecommerce.extensions.payment.utils import clean_field_value
 from ecommerce.extensions.payment.views import BasePaymentSubmitView
@@ -242,9 +247,10 @@ class CybersourceNotificationMixin(CyberSourceProcessorMixin, OrderCreationMixin
             except (UserCancelled, TransactionDeclined) as exception:
                 logger.info(
                     'CyberSource payment did not complete for basket [%d] because [%s]. '
-                    'The payment response was recorded in entry [%d].',
+                    'The payment response [%s] was recorded in entry [%d].',
                     basket.id,
                     exception.__class__.__name__,
+                    notification.get("message", "Unknown Error"),
                     ppr.id
                 )
                 raise
@@ -256,15 +262,29 @@ class CybersourceNotificationMixin(CyberSourceProcessorMixin, OrderCreationMixin
                     order_number
                 )
                 raise
+            except AuthorizationError:
+                logger.info(
+                    'Payment Authorization was declined for basket [%d]. The payment response was '
+                    'recorded in entry [%d].',
+                    basket.id,
+                    ppr.id,
+                )
             except PaymentError:
                 logger.exception(
-                    'CyberSource payment failed for basket [%d]. The payment response was recorded in entry [%d].',
+                    'CyberSource payment failed for basket [%d]. The payment response [%s] was recorded in entry [%d].',
                     basket.id,
+                    notification.get("message", "Unknown Error"),
                     ppr.id
                 )
                 raise
             except:  # pylint: disable=bare-except
-                logger.exception('Attempts to handle payment for basket [%d] failed.', basket.id)
+                logger.exception(
+                    'Attempts to handle payment for basket [%d] failed. The payment response [%s] was recorded in'
+                    ' entry [%d].',
+                    basket.id,
+                    notification.get("message", "Unknown Error"),
+                    ppr.id
+                )
                 raise
 
         return basket
