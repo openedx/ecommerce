@@ -6,6 +6,8 @@ import ddt
 import httpretty
 from django.conf import settings
 from django.http.response import HttpResponse
+from edx_django_utils.cache import TieredCache
+from mock import patch
 from oscar.test.factories import VoucherFactory
 from edx_django_utils.cache import TieredCache
 from mock import patch

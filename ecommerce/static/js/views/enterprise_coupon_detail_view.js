@@ -4,7 +4,6 @@ define([
     'ecommerce',
     'underscore',
     'underscore.string',
-    'moment',
     'views/coupon_detail_view',
     'text!templates/_alert_div.html',
     'text!templates/enterprise_coupon_detail.html'
@@ -14,7 +13,6 @@ define([
               ecommerce,
               _,
               _s,
-              moment,
               CouponDetailView,
               AlertDivTemplate,
               EnterpriseCouponDetailTemplate) {

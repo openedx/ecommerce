@@ -582,7 +582,7 @@ def create_enterprise_vouchers(
         start_datetime)
 
     offers = []
-    num_of_offers = quantity if voucher_type in (Voucher.MULTI_USE, Voucher.ONCE_PER_CUSTOMER) else 1
+    num_of_offers = int(quantity) if voucher_type in (Voucher.MULTI_USE, Voucher.ONCE_PER_CUSTOMER) else 1
     for num in range(num_of_offers):
         offer_name = generate_offer_name(coupon_id, benefit_type, benefit_value, num, is_enterprise=True)
         offer = get_or_create_enterprise_offer(

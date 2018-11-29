@@ -1,19 +1,13 @@
 define([
     'backbone',
-    'backbone.super',
     'backbone.validation',
     'models/coupon_model',
-    'jquery',
-    'js-cookie',
     'underscore',
     'backbone.relational'
 ],
     function(Backbone,
-              BackboneSuper,
               BackboneValidation,
               CouponModel,
-              $,
-              Cookies,
               _) {
         'use strict';
 

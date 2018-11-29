@@ -2,7 +2,6 @@ define([
     'jquery',
     'views/coupon_list_view',
     'underscore',
-    'underscore.string',
     'moment',
     'text!templates/enterprise_coupon_list.html',
     'dataTablesBootstrap'
@@ -10,7 +9,6 @@ define([
     function($,
               CouponListView,
               _,
-              _s,
               moment,
               EnterpriseCouponListViewTemplate) {
         'use strict';

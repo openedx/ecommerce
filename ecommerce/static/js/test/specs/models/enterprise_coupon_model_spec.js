@@ -1,16 +1,10 @@
 define([
     'jquery',
-    'js-cookie',
-    'moment',
-    'underscore',
     'models/enterprise_coupon_model',
     'models/coupon_model',
     'test/mock_data/coupons'
 ],
     function($,
-             Cookies,
-             moment,
-             _,
              EnterpriseCoupon,
              Coupon,
              MockCoupons) {

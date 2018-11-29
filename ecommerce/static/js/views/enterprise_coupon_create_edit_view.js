@@ -1,17 +1,11 @@
 define([
-    'jquery',
-    'backbone',
-    'backbone.super',
     'underscore',
     'views/coupon_create_edit_view',
     'views/enterprise_coupon_form_view',
     'text!templates/enterprise_coupon_create_edit.html',
     'bootstrap'
 ],
-    function($,
-              Backbone,
-              BackboneSuper,
-              _,
+    function(_,
               CouponCreateEditView,
               EnterpriseCouponFormView,
               EnterpriseCouponCreateEditTemplate) {

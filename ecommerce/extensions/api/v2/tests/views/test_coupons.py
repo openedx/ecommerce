@@ -372,6 +372,7 @@ class CouponViewSetFunctionalTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
         self.assertIsNone(response_data['email_domains'])
 
     def test_update_multi_offer_coupon(self):
+        """Test updating a coupon that has unique offers under each offer."""
         self.data.update({
             'title': 'Test Multi Use Coupon Update',
             'quantity': 5,

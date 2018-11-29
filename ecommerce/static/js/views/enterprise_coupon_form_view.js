@@ -5,12 +5,8 @@ define([
     'backbone',
     'backbone.super',
     'backbone.validation',
-    'backbone.stickit',
     'ecommerce',
     'underscore',
-    'underscore.string',
-    'utils/utils',
-    'text!templates/_alert_div.html',
     'text!templates/enterprise_coupon_form.html',
     'views/coupon_form_view'
 ],
@@ -18,12 +14,8 @@ define([
               Backbone,
               BackboneSuper,
               BackboneValidation,
-              BackboneStickit,
               ecommerce,
               _,
-              _s,
-              Utils,
-              AlertDivTemplate,
               EnterpriseCouponFormTemplate,
               CouponFormView) {
         'use strict';
