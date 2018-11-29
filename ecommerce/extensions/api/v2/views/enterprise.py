@@ -1,11 +1,13 @@
 from __future__ import unicode_literals
 
 import logging
+
 import waffle
 from django.core.exceptions import ValidationError
 from oscar.core.loading import get_model
 from rest_framework import generics, serializers
 from rest_framework.decorators import list_route
+from rest_framework.decorators import detail_route
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 
@@ -16,7 +18,8 @@ from ecommerce.enterprise.utils import get_enterprise_customers
 from ecommerce.extensions.api.serializers import (
     CouponSerializer,
     EnterpriseCouponListSerializer,
-    EnterpriseCouponOverviewListSerializer
+    EnterpriseCouponOverviewListSerializer,
+    CouponVoucherSerializer,
 )
 from ecommerce.extensions.api.v2.views.coupons import CouponViewSet
 from ecommerce.extensions.catalogue.utils import (
@@ -196,3 +199,38 @@ class EnterpriseCouponViewSet(CouponViewSet):
 
         if coupon_was_migrated:
             super(EnterpriseCouponViewSet, self).update_range_data(request_data, vouchers)
+
+    @detail_route(url_path='codes')
+    def codes(self, request, pk):  # pylint: disable=unused-argument
+        """
+        GET codes belong to a `coupon`.
+
+        Response will looks like
+        {
+            results: [
+                {
+                    code: '1234-5678-90',
+                    assigned_to: 'Barry Allen',
+                    redemptions: {
+                        used: 1,
+                        available: 5,
+                    },
+                },
+            ]
+        }
+        """
+        coupon = self.get_object()
+
+        coupon_vouchers_with_applications = Voucher.objects.filter(
+            applications__voucher_id__in=coupon.attr.coupon_vouchers.vouchers.all()
+        )
+        coupon_vouchers_wo_applications = Voucher.objects.filter(
+            coupon_vouchers__coupon__id=coupon.id,
+            applications__isnull=True
+        )
+
+        all_coupon_vouchers = coupon_vouchers_with_applications | coupon_vouchers_wo_applications
+
+        page = self.paginate_queryset(all_coupon_vouchers)
+        serializer = CouponVoucherSerializer(page, many=True)
+        return self.get_paginated_response(serializer.data)
