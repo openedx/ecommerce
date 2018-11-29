@@ -24,6 +24,7 @@ from ecommerce.enterprise.benefits import BENEFIT_MAP as ENTERPRISE_BENEFIT_MAP
 from ecommerce.enterprise.conditions import AssignableEnterpriseCustomerCondition
 from ecommerce.enterprise.utils import get_enterprise_customer
 from ecommerce.extensions.api import exceptions
+from ecommerce.extensions.offer.constants import OFFER_MAX_USES_DEFAULT
 from ecommerce.extensions.offer.models import OFFER_PRIORITY_VOUCHER
 from ecommerce.extensions.offer.utils import get_discount_percentage, get_discount_value
 from ecommerce.invoice.models import Invoice
@@ -193,7 +194,7 @@ def _get_voucher_info_for_coupon_report(voucher):
         max_uses_count = 1
         redemption_count = voucher.num_orders
     elif voucher.usage != Voucher.SINGLE_USE and offer.max_global_applications is None:
-        max_uses_count = 10000
+        max_uses_count = OFFER_MAX_USES_DEFAULT
     else:
         max_uses_count = offer.max_global_applications
 

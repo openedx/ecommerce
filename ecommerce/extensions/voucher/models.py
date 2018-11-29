@@ -1,7 +1,7 @@
 import datetime
 import logging
-import waffle
 
+import waffle
 from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
@@ -9,6 +9,7 @@ from oscar.apps.voucher.abstract_models import AbstractVoucher  # pylint: disabl
 
 from ecommerce.core.utils import log_message_and_raise_validation_error
 from ecommerce.enterprise.constants import ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH
+from ecommerce.extensions.offer.constants import OFFER_ASSIGNMENT_REVOKED, OFFER_MAX_USES_DEFAULT, OFFER_REDEEMED
 
 logger = logging.getLogger(__name__)
 
@@ -110,5 +111,32 @@ class Voucher(AbstractVoucher):
             return self.original_offer
         # If the switch is enabled, return the enterprise offer if it exists.
         return self.enterprise_offer or self.original_offer
+
+    @property
+    def slots_available_for_assignment(self):
+        """
+        Calculate the number of available slots left for this voucher.
+        A slot is a potential redemption of the voucher.
+        """
+        enterprise_offer = self.enterprise_offer
+        # Assignment is only valid for Vouchers linked to an enterprise offer.
+        if not enterprise_offer:
+            return None
+
+        # Find the number of OfferAssignments that already exist that are not redeemed or revoked.
+        # Redeemed OfferAssignments are excluded in favor of using num_orders on this voucher.
+        num_assignments = enterprise_offer.offerassignment_set.filter(code=self.code).exclude(
+            status__in=[OFFER_REDEEMED, OFFER_ASSIGNMENT_REVOKED]).count()
+
+        # If this a Single use or Multi use per customer voucher,
+        # it must have no orders or existing assignments to be assigned.
+        if self.usage in (self.SINGLE_USE, self.MULTI_USE_PER_CUSTOMER):
+            if self.num_orders or num_assignments:
+                return 0
+            return enterprise_offer.max_global_applications or 1
+        else:
+            offer_max_uses = enterprise_offer.max_global_applications or OFFER_MAX_USES_DEFAULT
+            return offer_max_uses - (self.num_orders + num_assignments)
+
 
 from oscar.apps.voucher.models import *  # noqa isort:skip pylint: disable=wildcard-import,unused-wildcard-import,wrong-import-position,wrong-import-order,ungrouped-imports

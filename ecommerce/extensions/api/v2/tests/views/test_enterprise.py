@@ -29,6 +29,7 @@ from ecommerce.tests.testcases import TestCase
 
 Basket = get_model('basket', 'Basket')
 Benefit = get_model('offer', 'Benefit')
+OfferAssignment = get_model('offer', 'OfferAssignment')
 Product = get_model('catalogue', 'Product')
 Voucher = get_model('voucher', 'Voucher')
 VoucherApplication = get_model('voucher', 'VoucherApplication')
@@ -501,3 +502,126 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
                 'previous': None,
             }
         )
+
+    @ddt.data(
+        (Voucher.SINGLE_USE, 2, None, ['test1@example.com', 'test2@example.com'], [1]),
+        (Voucher.MULTI_USE_PER_CUSTOMER, 2, 3, ['test1@example.com', 'test2@example.com'], [3]),
+        (Voucher.MULTI_USE, 1, None, ['test1@example.com', 'test2@example.com'], [2]),
+        (Voucher.MULTI_USE, 2, 3, ['t1@example.com', 't2@example.com', 't3@example.com', 't4@example.com'], [3, 1]),
+        (Voucher.ONCE_PER_CUSTOMER, 2, 2, ['test1@example.com', 'test2@example.com'], [2]),
+    )
+    @ddt.unpack
+    def test_coupon_codes_assign_success(self, voucher_type, quantity, max_uses, emails, assignments_per_code):
+        """Test assigning codes to users."""
+        Switch.objects.update_or_create(name=ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, defaults={'active': True})
+
+        coupon_post_data = dict(self.data, voucher_type=voucher_type, quantity=quantity, max_uses=max_uses)
+        coupon = self.get_response('POST', ENTERPRISE_COUPONS_LINK, coupon_post_data)
+        coupon = coupon.json()
+        coupon_id = coupon['coupon_id']
+
+        response = self.get_response(
+            'POST',
+            '/api/v2/enterprise/coupons/{}/assign/'.format(coupon_id),
+            {'emails': emails}
+        )
+        response = response.json()
+
+        for i, email in enumerate(emails):
+            if voucher_type != Voucher.MULTI_USE_PER_CUSTOMER:
+                assert response['offer_assignments'][i]['user_email'] == email
+            else:
+                for j in range(max_uses):
+                    assert response['offer_assignments'][(i * max_uses) + j]['user_email'] == email
+
+        assigned_codes = []
+        for assignment in response['offer_assignments']:
+            if assignment['code'] not in assigned_codes:
+                assigned_codes.append(assignment['code'])
+
+        for code in assigned_codes:
+            assert OfferAssignment.objects.filter(code=code).count() in assignments_per_code
+
+    def test_coupon_codes_assign_success_with_codes_filter(self):
+        Switch.objects.update_or_create(name=ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, defaults={'active': True})
+        coupon_post_data = dict(self.data, voucher_type=Voucher.SINGLE_USE, quantity=5)
+        coupon = self.get_response('POST', ENTERPRISE_COUPONS_LINK, coupon_post_data)
+        coupon = coupon.json()
+        coupon_id = coupon['coupon_id']
+
+        vouchers = Product.objects.get(id=coupon_id).attr.coupon_vouchers.vouchers.all()
+        codes = [voucher.code for voucher in vouchers]
+        codes_param = codes[3:]
+
+        emails = ['t1@example.com', 't2@example.com']
+
+        response = self.get_response(
+            'POST',
+            '/api/v2/enterprise/coupons/{}/assign/'.format(coupon_id),
+            {'emails': emails, 'codes': codes_param}
+        )
+        response = response.json()
+
+        for i, email in enumerate(emails):
+            assert response['offer_assignments'][i]['user_email'] == email
+            assert response['offer_assignments'][i]['code'] in codes_param
+
+        for code in codes:
+            if code not in codes_param:
+                assert OfferAssignment.objects.filter(code=code).count() == 0
+            else:
+                assert OfferAssignment.objects.filter(code=code).count() == 1
+
+    def test_coupon_codes_assign_success_exclude_used_codes(self):
+        Switch.objects.update_or_create(name=ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, defaults={'active': True})
+        coupon_post_data = dict(self.data, voucher_type=Voucher.SINGLE_USE, quantity=5)
+        coupon = self.get_response('POST', ENTERPRISE_COUPONS_LINK, coupon_post_data)
+        coupon = coupon.json()
+        coupon_id = coupon['coupon_id']
+
+        vouchers = Product.objects.get(id=coupon_id).attr.coupon_vouchers.vouchers.all()
+        # Use some of the vouchers
+        used_codes = []
+        for voucher in vouchers[:3]:
+            self.use_voucher(voucher, self.create_user())
+            used_codes.append(voucher.code)
+        unused_codes = [voucher.code for voucher in vouchers[3:]]
+        emails = ['t1@example.com', 't2@example.com']
+
+        response = self.get_response(
+            'POST',
+            '/api/v2/enterprise/coupons/{}/assign/'.format(coupon_id),
+            {'emails': emails}
+        )
+        response = response.json()
+
+        for i, email in enumerate(emails):
+            assert response['offer_assignments'][i]['user_email'] == email
+            assert response['offer_assignments'][i]['code'] in unused_codes
+
+        for code in used_codes:
+            assert OfferAssignment.objects.filter(code=code).count() == 0
+        for code in unused_codes:
+            assert OfferAssignment.objects.filter(code=code).count() == 1
+
+    @ddt.data(
+        (Voucher.SINGLE_USE, 1, None, ['test1@example.com', 'test2@example.com']),
+        (Voucher.MULTI_USE_PER_CUSTOMER, 1, 3, ['test1@example.com', 'test2@example.com']),
+        (Voucher.MULTI_USE, 1, 3, ['t1@example.com', 't2@example.com', 't3@example.com', 't4@example.com']),
+    )
+    @ddt.unpack
+    def test_coupon_codes_assign_failure(self, voucher_type, quantity, max_uses, emails):
+        Switch.objects.update_or_create(name=ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, defaults={'active': True})
+
+        coupon_post_data = dict(self.data, voucher_type=voucher_type, quantity=quantity, max_uses=max_uses)
+        coupon = self.get_response('POST', ENTERPRISE_COUPONS_LINK, coupon_post_data)
+        coupon = coupon.json()
+        coupon_id = coupon['coupon_id']
+
+        response = self.get_response(
+            'POST',
+            '/api/v2/enterprise/coupons/{}/assign/'.format(coupon_id),
+            {'emails': emails}
+        )
+        response = response.json()
+        assert response['non_field_errors'] == ['Not enough available codes for assignment!']

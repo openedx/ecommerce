@@ -5,7 +5,7 @@ import logging
 import waffle
 from django.core.exceptions import ValidationError
 from oscar.core.loading import get_model
-from rest_framework import generics, serializers
+from rest_framework import generics, serializers, status
 from rest_framework.decorators import detail_route
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
@@ -15,6 +15,7 @@ from ecommerce.core.utils import log_message_and_raise_validation_error
 from ecommerce.enterprise.constants import ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH
 from ecommerce.enterprise.utils import get_enterprise_customers
 from ecommerce.extensions.api.serializers import (
+    CouponCodeAssignmentSerializer,
     CouponSerializer,
     CouponVoucherSerializer,
     EnterpriseCouponListSerializer
@@ -209,3 +210,19 @@ class EnterpriseCouponViewSet(CouponViewSet):
         page = self.paginate_queryset(all_coupon_vouchers)
         serializer = CouponVoucherSerializer(page, many=True)
         return self.get_paginated_response(serializer.data)
+
+    @detail_route(methods=['post'])
+    def assign(self, request, pk):  # pylint: disable=unused-argument
+        """
+        Assign users by email to codes within the Coupon.
+        """
+        coupon = self.get_object()
+        serializer = CouponCodeAssignmentSerializer(
+            data=request.data,
+            context={'coupon': coupon}
+        )
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
