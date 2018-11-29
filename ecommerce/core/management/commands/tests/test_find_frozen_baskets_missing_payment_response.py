@@ -1,4 +1,4 @@
-""" Tests for Django management command to find unfulfilled baskets. """
+""" Tests for Django management command to find frozen baskets missing payment response. """
 
 from datetime import datetime, timedelta
 
@@ -8,17 +8,17 @@ from django.test import TestCase
 from oscar.core.loading import get_model
 from testfixtures import LogCapture
 
-from ecommerce.core.management.commands.find_unfulfilled_baskets import IncorrectRange
+from ecommerce.core.management.commands.find_frozen_baskets_missing_payment_response import InvalidDateRange
 
 Basket = get_model('basket', 'Basket')
 PaymentProcessorResponse = get_model('payment', 'PaymentProcessorResponse')
 
-LOGGER_NAME = 'ecommerce.core.management.commands.find_unfulfilled_baskets'
+LOGGER_NAME = 'ecommerce.core.management.commands.find_frozen_baskets_missing_payment_response'
 command_args = '--start-date {start_date} --end-date {end_date}'
 
 
-class FindUnfulfilledBasketsTest(TestCase):
-    """ Test the functionality of find_unfulfilled_baskets Command. """
+class FindFrozenBasketsMissingPaymentResponseTest(TestCase):
+    """ Test the functionality of find_frozen_baskets_missing_payment_response command. """
 
     def test_invalid_command_arguments(self):
         """ Test command with invalid arguments """
@@ -28,19 +28,19 @@ class FindUnfulfilledBasketsTest(TestCase):
         # Invalid date format
         with self.assertRaises(ValueError):
             call_command(
-                'find_unfulfilled_baskets',
+                'find_frozen_baskets_missing_payment_response',
                 *command_args.format(start_date=start_date.date(), end_date='30-11-2018').split(' ')
             )
         # End date prior to start date
-        with self.assertRaises(IncorrectRange):
+        with self.assertRaises(InvalidDateRange):
             call_command(
-                'find_unfulfilled_baskets',
+                'find_frozen_baskets_missing_payment_response',
                 *command_args.format(start_date=start_date.date(), end_date=end_date.date()).split(' ')
             )
 
     def test_date_submitted_not_NULL(self):
         """
-        Tests that unfulfilled basket is not returned when date_submission
+        Tests that frozen baskets missing payment response are not returned when date_submission
         is not NULL
         """
         start_date = datetime.utcnow()
@@ -55,18 +55,18 @@ class FindUnfulfilledBasketsTest(TestCase):
 
         with LogCapture(LOGGER_NAME) as logger:
             call_command(
-                'find_unfulfilled_baskets',
+                'find_frozen_baskets_missing_payment_response',
                 *command_args.format(start_date=start_date.date(), end_date=end_date.date()).split(' ')
             )
             logger.check(
-                (LOGGER_NAME, 'INFO', 'No unfulfilled baskets found'),
+                (LOGGER_NAME, 'INFO', 'No frozen baskets missing payment response found'),
             )
 
     def test_Payment_Processor_Response_found(self):
         """
         Test a basket when it's PaymentProcessorResponse is found.
-        When a PaymentProcessorResponse is found basket is not unfulfilled and
-        must not be returned
+        When a PaymentProcessorResponse is found basket is must not
+        be returned
         """
         start_date = datetime.utcnow()
         end_date = datetime.utcnow() + timedelta(days=1)
@@ -76,16 +76,18 @@ class FindUnfulfilledBasketsTest(TestCase):
             date_submitted=None,
             owner_id=1,
             site_id=1
-        ).save()
+        )
+        basket.order_number = 'EDX-00000'
+        basket.save()
         PaymentProcessorResponse.objects.create(basket=basket)
 
         with LogCapture(LOGGER_NAME) as logger:
             call_command(
-                'find_unfulfilled_baskets',
+                'find_frozen_baskets_missing_payment_response',
                 *command_args.format(start_date=start_date.date(), end_date=end_date.date()).split(' ')
             )
             logger.check(
-                (LOGGER_NAME, 'INFO', 'No unfulfilled baskets found'),
+                (LOGGER_NAME, 'INFO', 'No frozen baskets missing payment response found'),
             )
 
     def test_basket_out_of_date_range(self):
@@ -107,11 +109,11 @@ class FindUnfulfilledBasketsTest(TestCase):
 
         with LogCapture(LOGGER_NAME) as logger:
             call_command(
-                'find_unfulfilled_baskets',
+                'find_frozen_baskets_missing_payment_response',
                 *command_args.format(start_date=start_date.date(), end_date=end_date.date()).split(' ')
             )
             logger.check(
-                (LOGGER_NAME, 'INFO', 'No unfulfilled baskets found'),
+                (LOGGER_NAME, 'INFO', 'No frozen baskets missing payment response found'),
             )
 
     def test_valid_arguments(self):
@@ -129,6 +131,6 @@ class FindUnfulfilledBasketsTest(TestCase):
 
         with self.assertRaises(CommandError):
             call_command(
-                'find_unfulfilled_baskets',
+                'find_frozen_baskets_missing_payment_response',
                 *command_args.format(start_date=start_date.date(), end_date=end_date.date()).split(' ')
             )
