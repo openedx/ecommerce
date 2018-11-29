@@ -6,7 +6,9 @@
 
     <div class="seat-price">
         <div class="form-group">
-            <label for="price"><%= gettext('Price (in ') %><%= currency_code %>)</label>
+            <label for="price">
+              <%= interpolate(gettext('Price (in %s)'), [currency_code ]) %>
+            </label>
 
             <div class="input-group">
                 <div class="input-group-addon"><%= currency_symbol %></div>

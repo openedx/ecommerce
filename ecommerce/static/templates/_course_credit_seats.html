@@ -12,7 +12,7 @@
             <thead>
                 <tr>
                     <th><%= gettext('Credit Provider') %></th>
-                    <th><%= gettext('Price ') %> (<%= currency_code %>)</th>
+                    <th><%= interpolate(gettext('Price (%s)'), [currency_code]) %></th>
                     <th><%= gettext('Credit Hours') %></th>
                     <th><%= gettext('Upgrade Deadline') %></th>
                 </tr>
