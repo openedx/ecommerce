@@ -9,6 +9,7 @@ from oscar.core.loading import get_model
 from testfixtures import LogCapture
 
 from ecommerce.core.management.commands.find_frozen_baskets_missing_payment_response import InvalidDateRange
+from ecommerce.tests.mixins import SiteMixin
 
 Basket = get_model('basket', 'Basket')
 PaymentProcessorResponse = get_model('payment', 'PaymentProcessorResponse')
@@ -17,7 +18,7 @@ LOGGER_NAME = 'ecommerce.core.management.commands.find_frozen_baskets_missing_pa
 command_args = '--start-date {start_date} --end-date {end_date}'
 
 
-class FindFrozenBasketsMissingPaymentResponseTest(TestCase):
+class FindFrozenBasketsMissingPaymentResponseTest(SiteMixin, TestCase):
     """ Test the functionality of find_frozen_baskets_missing_payment_response command. """
 
     def test_invalid_command_arguments(self):
@@ -49,8 +50,7 @@ class FindFrozenBasketsMissingPaymentResponseTest(TestCase):
         Basket.objects.create(
             status='Frozen',
             date_submitted=start_date,
-            owner_id=1,
-            site_id=1
+            owner_id=1
         ).save()
 
         with LogCapture(LOGGER_NAME) as logger:
@@ -74,11 +74,8 @@ class FindFrozenBasketsMissingPaymentResponseTest(TestCase):
         basket = Basket.objects.create(
             status='Frozen',
             date_submitted=None,
-            owner_id=1,
-            site_id=1
-        )
-        basket.order_number = 'EDX-00000'
-        basket.save()
+            owner_id=1
+        ).save()
         PaymentProcessorResponse.objects.create(basket=basket)
 
         with LogCapture(LOGGER_NAME) as logger:
@@ -101,8 +98,7 @@ class FindFrozenBasketsMissingPaymentResponseTest(TestCase):
             status='Frozen',
             date_submitted=None,
             date_merged=start_date + timedelta(days=-1),
-            owner_id=1,
-            site_id=1
+            owner_id=1
         )
         basket.date_created = start_date + timedelta(days=-1)
         basket.save()
@@ -126,7 +122,6 @@ class FindFrozenBasketsMissingPaymentResponseTest(TestCase):
             date_submitted=None,
             date_merged=start_date,
             owner_id=1,
-            site_id=1
         ).save()
 
         with self.assertRaises(CommandError):
