@@ -10,7 +10,7 @@ from oscar.test.factories import *  # pylint:disable=wildcard-import,unused-wild
 from ecommerce.enterprise.benefits import BENEFIT_MAP as ENTERPRISE_BENEFIT_MAP
 from ecommerce.enterprise.benefits import EnterpriseAbsoluteDiscountBenefit, EnterprisePercentageDiscountBenefit
 from ecommerce.enterprise.conditions import EnterpriseCustomerCondition
-from ecommerce.extensions.offer.models import OFFER_PRIORITY_ENTERPRISE, OFFER_PRIORITY_VOUCHER
+from ecommerce.extensions.offer.models import OFFER_PRIORITY_ENTERPRISE, OFFER_PRIORITY_VOUCHER, OfferAssignment
 # TODO: journals dependency
 from ecommerce.journals.benefits import JournalBundleAbsoluteDiscountBenefit, JournalBundlePercentageDiscountBenefit
 from ecommerce.journals.conditions import JournalBundleCondition
@@ -245,6 +245,15 @@ class EnterpriseOfferFactory(ConditionalOfferFactory):
     offer_type = ConditionalOffer.SITE
     priority = OFFER_PRIORITY_ENTERPRISE
     status = ConditionalOffer.OPEN
+
+
+class OfferAssignmentFactory(factory.DjangoModelFactory):
+    offer = factory.SubFactory(EnterpriseOfferFactory)
+    code = factory.Sequence(lambda n: 'VOUCHERCODE{number}'.format(number=n))
+    user_email = factory.Sequence(lambda n: 'example_%s@example.com' % n)
+
+    class Meta(object):
+        model = OfferAssignment
 
 
 # TODO: journals dependency
