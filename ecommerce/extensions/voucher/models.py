@@ -4,6 +4,7 @@ import waffle
 
 from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
 from django.db import models
+from django.utils.translation import ugettext_lazy as _
 from oscar.apps.voucher.abstract_models import AbstractVoucher  # pylint: disable=ungrouped-imports
 
 from ecommerce.core.utils import log_message_and_raise_validation_error
@@ -28,6 +29,26 @@ class OrderLineVouchers(models.Model):
 
 
 class Voucher(AbstractVoucher):
+    SINGLE_USE, MULTI_USE, ONCE_PER_CUSTOMER, MULTI_USE_PER_CUSTOMER = (
+        'Single use', 'Multi-use', 'Once per customer', 'Multi-use-per-Customer')
+    USAGE_CHOICES = (
+        (SINGLE_USE, _("Can be used once by one customer")),
+        (MULTI_USE, _("Can be used multiple times by multiple customers")),
+        (ONCE_PER_CUSTOMER, _("Can only be used once per customer")),
+        (MULTI_USE_PER_CUSTOMER, _("Can be used multiple times by one customer")),
+    )
+    usage = models.CharField(_("Usage"), max_length=128,
+                             choices=USAGE_CHOICES, default=MULTI_USE)
+
+    def is_available_to_user(self, user=None):
+        is_available, message = super(Voucher, self).is_available_to_user(user)  # pylint: disable=bad-super-call
+
+        if self.usage == self.MULTI_USE_PER_CUSTOMER:
+            is_available = True
+            message = ''
+
+        return is_available, message
+
     def save(self, *args, **kwargs):
         self.clean()
         super(Voucher, self).save(*args, **kwargs)  # pylint: disable=bad-super-call

@@ -23,6 +23,25 @@ define([
         return CouponFormView.extend({
             template: _.template(EnterpriseCouponFormTemplate),
 
+            voucherTypes: [
+                {
+                    value: 'Single use',
+                    label: gettext('Can be used once by one customer')
+                },
+                {
+                    value: 'Once per customer',
+                    label: gettext('Can be used once by multiple customers')
+                },
+                {
+                    value: 'Multi-use',
+                    label: gettext('Can be used multiple times by multiple customers')
+                },
+                {
+                    value: 'Multi-use-per-Customer',
+                    label: gettext('Can be used multiple times by one customer')
+                }
+            ],
+
             couponBindings: {
                 'select[name=enterprise_customer]': {
                     observe: 'enterprise_customer',
