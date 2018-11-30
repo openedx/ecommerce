@@ -46,6 +46,8 @@ StockRecord = get_model('partner', 'StockRecord')
 Voucher = get_model('voucher', 'Voucher')
 VoucherApplication = get_model('voucher', 'VoucherApplication')
 
+MULTI_USE_PER_CUSTOMER_VOUCHER = 'Multi-use-per-Customer'
+
 
 def _add_redemption_course_ids(new_row_to_append, header_row, redemption_course_ids):
     if any(row in [_('Catalog Query'), _('Program UUID')] for row in header_row):
@@ -581,9 +583,12 @@ def create_enterprise_vouchers(
         end_datetime,
         start_datetime)
 
+    voucher_types = (Voucher.MULTI_USE, Voucher.ONCE_PER_CUSTOMER, MULTI_USE_PER_CUSTOMER_VOUCHER)
+    quantity = int(quantity)
+
     offers = []
     quantity = int(quantity)
-    num_of_offers = quantity if voucher_type in (Voucher.MULTI_USE, Voucher.ONCE_PER_CUSTOMER) else 1
+    num_of_offers = quantity if voucher_type in voucher_types else 1
     for num in range(num_of_offers):
         offer_name = generate_offer_name(coupon_id, benefit_type, benefit_value, num, is_enterprise=True)
         offer = get_or_create_enterprise_offer(
