@@ -1,6 +1,9 @@
+import datetime
+
 import mock
 from django.db import transaction
 from django.test import override_settings
+from django.utils.timezone import now
 from oscar.core.loading import get_class, get_model
 from oscar.test.factories import ProductFactory, RangeFactory, create_order
 
@@ -209,7 +212,11 @@ class FulfillFrozenBasketsTests(TestCase):
         basket = create_basket()
         product = ProductFactory(stockrecords__price_excl_tax=100, stockrecords__partner=self.partner,
                                  stockrecords__price_currency='USD')
-        voucher, product = prepare_voucher(code='TEST101', _range=RangeFactory(products=[product]))
+
+        start_datetime = now() - datetime.timedelta(days=20)
+        end_datetime = now() - datetime.timedelta(days=10)
+        voucher, product = prepare_voucher(code='TEST101', _range=RangeFactory(products=[product]),
+                                           start_datetime=start_datetime, end_datetime=end_datetime)
         self.request.user = UserFactory()
         basket.add_product(product)
         basket.vouchers.add(voucher)
@@ -218,5 +225,9 @@ class FulfillFrozenBasketsTests(TestCase):
 
         PaymentProcessorResponse.objects.create(basket=basket, transaction_id='PAY-123', processor_name='paypal',
                                                 response={'state': 'approved'})
-        with mock.patch('oscar.apps.offer.applicator.Applicator.apply', side_effect=ValueError):
-            assert FulfillFrozenBaskets().fulfill_basket(basket.id, self.site)
+        assert FulfillFrozenBaskets().fulfill_basket(basket.id, self.site)
+
+        order = Order.objects.get(basket=basket)
+        self.assertEqual(order.notes.last().message,
+                         'The coupon : {} was used at the time of order placement. Do not refund '
+                         'the order without considering coupon'.format(voucher))
