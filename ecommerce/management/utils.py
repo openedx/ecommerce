@@ -143,10 +143,10 @@ class FulfillFrozenBaskets(EdxOrderPlacementMixin):
             # Need to handle the case that applied voucher has been expired.
             # This will create the order  with out discount but subsequently
             # run the fulfillment to update course mode.
-            try:
-                Applicator().apply(basket, user=basket.owner)
-            except ValueError:
+            voucher = basket.vouchers.first()
+            if voucher and not (voucher.is_active() or voucher.is_available_to_user(user=basket.owner)):
                 basket.clear_vouchers()
+            Applicator().apply(basket, user=basket.owner)
 
             payment_notification = self.get_payment_notification(basket)
             if not payment_notification:
@@ -183,7 +183,7 @@ class FulfillFrozenBaskets(EdxOrderPlacementMixin):
                 # than to retrieve an invoice number from PayPal.
                 order_number = basket.order_number
 
-                self.handle_order_placement(
+                order = self.handle_order_placement(
                     order_number=order_number,
                     user=user,
                     basket=basket,
@@ -193,6 +193,12 @@ class FulfillFrozenBaskets(EdxOrderPlacementMixin):
                     billing_address=None,
                     order_total=order_total,
                 )
+                if voucher and not (voucher.is_active() or voucher.is_available_to_user(user=basket.owner)):
+                    order.notes.create(message='The coupon : {} was used at the time of order placement. '
+                                               'Do not refund the order without considering coupon'.format(voucher),
+                                       note_type='INFO')
+                    order.save()
+
                 logger.info('Successfully created order for basket %d', basket.id)
                 return True
             except:  # pylint: disable=bare-except
