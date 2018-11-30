@@ -1,7 +1,7 @@
 """ Django management command to find frozen baskets missing payment response. """
 
 import logging
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import pytz
 from django.core.management.base import BaseCommand, CommandError
@@ -12,10 +12,13 @@ logger = logging.getLogger(__name__)
 Basket = get_model('basket', 'Basket')
 PaymentProcessorResponse = get_model('payment', 'PaymentProcessorResponse')
 
+DEFAULT_START_DELTA_TIME = 180
+DEFAULT_END_DELTA_TIME = 60
 
-class InvalidDateRange(Exception):
+
+class InvalidTimeRange(Exception):
     """
-    Exception raised explicitly when end date is prior to start date
+    Exception raised explicitly when End Time is prior to Start Time
     """
     pass
 
@@ -27,14 +30,18 @@ class Command(BaseCommand):
     This management command is responsible for checking the baskets
     and finding out the baskets for which the payment form was submitted.
 
-    Date format: yyyy-mm-dd
-    Start date should be prior to End date
+    start-delta : Minutes before now to start looking at frozen baskets that are missing
+                  payment response
+    end-delta : Minutes before now to end looking at frozen baskets that are missing payment
+                response
+
+    end-delta cannot be greater than start-delta
 
     Example:
-        $ ... find_frozen_baskets_missing_payment_response -s 2018-11-01 -e 2018-11-02
+        $ ... find_frozen_baskets_missing_payment_response --start-delta 240 --end-delta 60
 
     Output:
-        Frozen baskets missing payment response found
+        Command Error: Frozen baskets missing payment response found
         Basket ID 7 Order Number EDX-100007
         Basket ID 20 Order Number EDX-100020
         Basket ID 1230 Order Number EDX-101230
@@ -42,14 +49,22 @@ class Command(BaseCommand):
     """
 
     def add_arguments(self, parser):
-        parser.add_argument('-s', '--start-date',
-                            dest='start_date',
-                            required=True,
-                            help='start date (yyyy-mm-dd)')
-        parser.add_argument('-e', '--end-date',
-                            dest='end_date',
-                            required=True,
-                            help='end date (yyyy-mm-dd)')
+        parser.add_argument(
+            '--start-delta',
+            dest='start_delta',
+            action='store',
+            type=int,
+            default=DEFAULT_START_DELTA_TIME,
+            help='Minutes before now to start looking at baskets.'
+        )
+        parser.add_argument(
+            '--end-delta',
+            dest='end_delta',
+            action='store',
+            type=int,
+            default=DEFAULT_END_DELTA_TIME,
+            help='Minutes before now to end looking at baskets.'
+        )
 
     def handle(self, *args, **options):
         """
@@ -59,25 +74,26 @@ class Command(BaseCommand):
         calls find_frozen_baskets_missing_payment_response for
         the given date range
         """
+        start_delta = options['start_delta']
+        end_delta = options['end_delta']
+
         try:
-            start_date = datetime.strptime(options['start_date'], '%Y-%m-%d')
-            end_date = datetime.strptime(options['end_date'], '%Y-%m-%d')
-            if end_date < start_date:
-                raise InvalidDateRange('Invalid date range')
-        except (ValueError, InvalidDateRange):
-            logger.exception('Incorrect date format or Range')
+            if end_delta > start_delta:
+                raise InvalidTimeRange('Invalid time range')
+        except InvalidTimeRange:
+            logger.exception('Incorrect Time Range')
             raise
 
-        start_date = pytz.utc.localize(start_date)
-        end_date = pytz.utc.localize(end_date)
+        start = datetime.now(pytz.utc) - timedelta(minutes=start_delta)
+        end = datetime.now(pytz.utc) - timedelta(minutes=end_delta)
 
-        self.find_frozen_baskets_missing_payment_response(start_date, end_date)
+        self.find_frozen_baskets_missing_payment_response(start, end)
 
-    def find_frozen_baskets_missing_payment_response(self, start_date, end_date):
+    def find_frozen_baskets_missing_payment_response(self, start, end):
         """ Find baskets that are Frozen and missing payment response """
         frozen_baskets = Basket.objects.filter(status='Frozen', date_submitted=None)
-        frozen_baskets = frozen_baskets.filter(Q(date_created__range=(start_date, end_date)) |
-                                               Q(date_merged__range=(start_date, end_date)))
+        frozen_baskets = frozen_baskets.filter(Q(date_created__gte=start, date_created__lt=end) |
+                                               Q(date_merged__gte=start, date_merged__lt=end))
         frozen_baskets_missing_payment_response = frozen_baskets.exclude(id__in=Subquery(
             PaymentProcessorResponse.objects.values_list('basket_id')))
 
