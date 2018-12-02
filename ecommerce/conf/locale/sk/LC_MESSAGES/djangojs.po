@@ -5,7 +5,7 @@
 # 
 # Translators:
 # Marcel Miklosik <marcel.miklosik@gmail.com>, 2015
-# Vladimír Záhradník <vladimir.zahradnik@gmail.com>, 2015
+# Vladimír Záhradník <vladimir.zahradnik@protonmail.com>, 2015
 msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
