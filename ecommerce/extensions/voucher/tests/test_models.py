@@ -4,6 +4,7 @@ import ddt
 from django.core.exceptions import ValidationError
 from django.utils.timezone import now
 from oscar.core.loading import get_model
+from oscar.test.factories import UserFactory
 from waffle.models import Switch
 from ecommerce.enterprise.constants import ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH
 from ecommerce.extensions.test import factories
@@ -85,3 +86,13 @@ class VoucherTests(TestCase):
         # Turn the switch off and see that the oldest offer gets returned.
         Switch.objects.update_or_create(name=ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, defaults={'active': False})
         assert voucher.best_offer == first_offer
+
+    def test_create_voucher_with_multi_use_per_customer_usage(self):
+        """ Verify voucher is created with `MULTI_USE_PER_CUSTOMER` usage type. """
+        voucher_data = dict(self.data, usage=Voucher.MULTI_USE_PER_CUSTOMER)
+        voucher = Voucher.objects.create(**voucher_data)
+        user = UserFactory()
+        self.assertEqual(voucher.usage, Voucher.MULTI_USE_PER_CUSTOMER)
+        is_available, message = voucher.is_available_to_user(user)
+        self.assertTrue(is_available)
+        self.assertEqual(message, '')
