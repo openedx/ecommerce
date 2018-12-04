@@ -7,6 +7,7 @@ import waffle
 from django.conf import settings
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
+from django_extensions.db.models import TimeStampedModel
 from edx_django_utils.cache import TieredCache
 from oscar.apps.offer.abstract_models import (
     AbstractBenefit,
@@ -21,6 +22,13 @@ from threadlocals.threadlocals import get_current_request
 
 from ecommerce.core.utils import get_cache_key, log_message_and_raise_validation_error
 from ecommerce.enterprise.constants import ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH
+from ecommerce.extensions.offer.constants import (
+    OFFER_ASSIGNED,
+    OFFER_ASSIGNMENT_EMAIL_BOUNCED,
+    OFFER_ASSIGNMENT_EMAIL_PENDING,
+    OFFER_ASSIGNMENT_REVOKED,
+    OFFER_REDEEMED
+)
 
 OFFER_PRIORITY_ENTERPRISE = 10
 OFFER_PRIORITY_VOUCHER = 20
@@ -446,6 +454,30 @@ class Condition(AbstractCondition):
         null=True,
         blank=True,
         verbose_name=_('JournalBundle UUID')
+    )
+
+
+class OfferAssignment(TimeStampedModel):
+    STATUS_CHOICES = (
+        (OFFER_ASSIGNMENT_EMAIL_PENDING, _("Email to user pending.")),
+        (OFFER_ASSIGNED, _("Code successfully assigned to user.")),
+        (OFFER_REDEEMED, _("Code has been redeemed by user.")),
+        (OFFER_ASSIGNMENT_EMAIL_BOUNCED, _("Email to user bounced.")),
+        (OFFER_ASSIGNMENT_REVOKED, _("Code has been revoked for this user.")),
+    )
+
+    offer = models.ForeignKey('offer.ConditionalOffer')
+    code = models.CharField(max_length=128)
+    user_email = models.EmailField()
+    status = models.CharField(
+        max_length=255,
+        choices=STATUS_CHOICES,
+        default=OFFER_ASSIGNMENT_EMAIL_PENDING,
+    )
+    voucher_application = models.ForeignKey(
+        'voucher.VoucherApplication',
+        null=True,
+        blank=True
     )
 
 
