@@ -25,27 +25,11 @@ define([
                 '*path': 'notFound'
             },
 
-            getListPage: function() {
-                return new CouponListPage();
-            },
-
-            getCreatePage: function() {
-                return new CouponCreatePage();
-            },
-
-            getDetailPage: function(id) {
-                return new CouponDetailPage({id: id});
-            },
-
-            getEditPage: function(id) {
-                return new CouponEditPage({id: id});
-            },
-
             /**
              * Display a list of all codes in the system.
              */
             index: function() {
-                var page = this.getListPage();
+                var page = new CouponListPage();
                 this.currentView = page;
                 this.$el.html(page.el);
             },
@@ -54,7 +38,7 @@ define([
              * Display a form for creating a new enrollment code.
              */
             new: function() {
-                var page = this.getCreatePage();
+                var page = new CouponCreatePage();
                 this.currentView = page;
                 this.$el.html(page.el);
             },
@@ -64,7 +48,7 @@ define([
              * @param {String} id - ID of the coupon to display.
              */
             show: function(id) {
-                var page = this.getDetailPage(id);
+                var page = new CouponDetailPage({id: id});
                 this.currentView = page;
                 this.$el.html(page.el);
             },
@@ -73,7 +57,7 @@ define([
              * Display a form for editing an existing coupon.
              */
             edit: function(id) {
-                var page = this.getEditPage(id);
+                var page = new CouponEditPage({id: id});
                 this.currentView = page;
                 this.$el.html(page.el);
             }
