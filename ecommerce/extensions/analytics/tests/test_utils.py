@@ -87,7 +87,10 @@ class UtilsTest(DiscoveryTestMixin, BasketMixin, TransactionTestCase):
             'ip': lms_ip,
             'Google Analytics': {
                 'clientId': ga_client_id
-            }
+            },
+            'page': {
+                'url': 'https://testserver.fake/'
+            },
         }
         with mock.patch.object(Client, 'track') as mock_track:
             track_segment_event(self.site, user, event, properties)
