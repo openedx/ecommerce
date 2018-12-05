@@ -29,11 +29,18 @@ class RefundTrackingTests(RefundTestMixin, TestCase):
                 'ip': tracking_context['lms_ip'],
                 'Google Analytics': {
                     'clientId': tracking_context['ga_client_id']
-                }
+                },
+                'page': {
+                    'url': 'https://testserver.fake/'
+                },
             }
         else:
             expected_event_user_id = ECOM_TRACKING_ID_FMT.format(refund.user.id)
-            expected_context = {'ip': None, 'Google Analytics': {'clientId': None}}
+            expected_context = {
+                'ip': None,
+                'Google Analytics': {'clientId': None},
+                'page': {'url': 'https://testserver.fake/'}
+            }
 
         self.assertEqual(event_user_id, expected_event_user_id)
         self.assertEqual(kwargs['context'], expected_context)

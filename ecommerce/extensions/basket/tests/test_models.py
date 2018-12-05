@@ -127,7 +127,10 @@ class BasketTests(CatalogMixin, BasketMixin, TestCase):
             'ip': lms_ip,
             'Google Analytics': {
                 'clientId': ga_client_id
-            }
+            },
+            'page': {
+                'url': 'https://testserver.fake/'
+            },
         }
 
         with mock.patch.object(Client, 'track') as mock_track:
