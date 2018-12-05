@@ -381,7 +381,10 @@ class EdxOrderPlacementMixinTests(BusinessIntelligenceMixin, PaymentEventsMixin,
             'ip': lms_ip,
             'Google Analytics': {
                 'clientId': ga_client_id
-            }
+            },
+            'page': {
+                'url': 'https://testserver.fake/'
+            },
         }
 
         mixin.handle_payment({}, basket)
