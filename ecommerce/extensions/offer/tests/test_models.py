@@ -589,8 +589,12 @@ class BenefitTests(DiscoveryTestMixin, DiscoveryMockMixin, TestCase):
             query=self.benefit.range.catalog_query, discovery_api_url=self.site_configuration.discovery_api_url
         )
 
-        self.assertEqual(self.benefit.get_applicable_lines(self.offer, basket), applicable_lines)
+        with patch.object(TieredCache, 'set_all_tiers', wraps=TieredCache.set_all_tiers) as mocked_set_all_tiers:
+            mocked_set_all_tiers.assert_not_called()
+            self.assertEqual(self.benefit.get_applicable_lines(self.offer, basket), applicable_lines)
+            self.assertEqual(mocked_set_all_tiers.call_count, 3)
 
-        # Verify that the API return value is cached
-        httpretty.disable()
-        self.assertEqual(self.benefit.get_applicable_lines(self.offer, basket), applicable_lines)
+            # Verify that the API return value is cached
+            httpretty.disable()
+            self.assertEqual(self.benefit.get_applicable_lines(self.offer, basket), applicable_lines)
+            self.assertEqual(mocked_set_all_tiers.call_count, 3)

@@ -1,8 +1,8 @@
 import logging
 
 from requests.exceptions import ConnectionError, Timeout
-
 from slumber.exceptions import HttpClientError
+
 from ecommerce.extensions.analytics.utils import audit_log
 from ecommerce.extensions.fulfillment.modules import BaseFulfillmentModule
 from ecommerce.extensions.fulfillment.status import LINE

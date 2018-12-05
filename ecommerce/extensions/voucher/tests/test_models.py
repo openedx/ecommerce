@@ -5,9 +5,9 @@ from django.core.exceptions import ValidationError
 from django.utils.timezone import now
 from oscar.core.loading import get_model
 from waffle.models import Switch
+
 from ecommerce.enterprise.constants import ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH
 from ecommerce.extensions.test import factories
-
 from ecommerce.tests.testcases import TestCase
 
 ConditionalOffer = get_model('offer', 'ConditionalOffer')
