@@ -662,10 +662,15 @@ class VoucherSerializer(serializers.ModelSerializer):
 class CouponVoucherSerializer(serializers.Serializer):  # pylint: disable=abstract-method
     code = serializers.SerializerMethodField()
     assigned_to = serializers.SerializerMethodField()
+    redeem_url = serializers.SerializerMethodField()
     redemptions = serializers.SerializerMethodField()
 
     def get_code(self, voucher):
         return voucher.code
+
+    def get_redeem_url(self, obj):
+        url = get_ecommerce_url('/coupons/offer/')
+        return '{url}?code={code}'.format(url=url, code=obj.code)
 
     def get_assigned_to(self, obj):  # pylint: disable=unused-argument
         return ''

@@ -348,29 +348,36 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
-    def assert_coupon_codes_response(self, response, coupon_id, max_uses, results_count, pagination):
+    def assert_coupon_codes_response(self, response, coupon_id, max_uses, results_count, pagination=None, is_csv=False):
         """
         Verify response received from `/api/v2/enterprise/coupons/{coupon_id}/codes/` endpoint
         """
         coupon = Product.objects.get(id=coupon_id)
         all_coupon_codes = coupon.attr.coupon_vouchers.vouchers.values_list('code', flat=True)
         all_coupon_codes = [code for code in all_coupon_codes]
-        all_received_codes = [result['code'] for result in response['results']]
-        all_received_code_max_uses = [result['redemptions']['available'] for result in response['results']]
+        if is_csv:
+            total_result_count = len(response)
+            all_received_codes = [result.split(',')[1] for result in response if result]
+            all_received_code_max_uses = [int(result.split(',')[3]) for result in response if result]
+        else:
+            total_result_count = len(response['results'])
+            all_received_codes = [result['code'] for result in response['results']]
+            all_received_code_max_uses = [result['redemptions']['available'] for result in response['results']]
 
         # `max_uses` should be same for all codes
         max_uses = max_uses or 1
         self.assertEqual(set(all_received_code_max_uses), set([max_uses]))
 
         # total count of results returned is correct
-        self.assertEqual(len(response['results']), results_count)
+        self.assertEqual(total_result_count, results_count)
 
         # all received codes must be equals to coupon codes
         self.assertTrue(set(all_received_codes).issubset(all_coupon_codes))
 
-        self.assertEqual(response['count'], pagination['count'])
-        self.assertEqual(response['next'], pagination['next'])
-        self.assertEqual(response['previous'], pagination['previous'])
+        if pagination:
+            self.assertEqual(response['count'], pagination['count'])
+            self.assertEqual(response['next'], pagination['next'])
+            self.assertEqual(response['previous'], pagination['previous'])
 
     def use_voucher(self, voucher, user):
         """
@@ -559,6 +566,41 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
                 'next': None,
                 'previous': None,
             }
+        )
+
+    def test_coupon_codes_detail_csv(self):
+        """
+        Verify that `/api/v2/enterprise/coupons/{coupon_id}/codes/` endpoint returns correct csv data.
+        """
+        coupon_data = {
+            'voucher_type': Voucher.MULTI_USE,
+            'quantity': 2,
+            'max_uses': 3
+        }
+
+        coupon_id = self.create_coupon_with_applications(
+            self.data,
+            coupon_data['voucher_type'],
+            coupon_data['quantity'],
+            coupon_data['max_uses']
+        )
+
+        response = self.get_response('GET', '/api/v2/enterprise/coupons/{}/codes.csv/?no_page'.format(coupon_id))
+        csv_content = response.content.split('\r\n')
+        csv_header = csv_content[0]
+        # Strip out first row (headers) and last row (extra csv line)
+        csv_data = csv_content[1:-1]
+
+        # Verify headers.
+        self.assertEqual(csv_header, 'assigned_to,code,redeem_url,redemptions.available,redemptions.used')
+
+        # Verify csv data.
+        self.assert_coupon_codes_response(
+            csv_data,
+            coupon_id,
+            coupon_data['max_uses'],
+            6,
+            is_csv=True
         )
 
     @ddt.data(

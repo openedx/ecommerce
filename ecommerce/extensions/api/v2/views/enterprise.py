@@ -54,6 +54,14 @@ class EnterpriseCustomerViewSet(generics.GenericAPIView):
 class EnterpriseCouponViewSet(CouponViewSet):
     """ Coupon resource. """
 
+    def paginate_queryset(self, queryset):
+        """
+        Allows no_page query param to skip pagination
+        """
+        if 'no_page' in self.request.query_params:
+            return None
+        return super(EnterpriseCouponViewSet, self).paginate_queryset(queryset)
+
     def get_queryset(self):
         enterprise_id = self.kwargs.get('enterprise_id')
         if enterprise_id:
@@ -180,7 +188,7 @@ class EnterpriseCouponViewSet(CouponViewSet):
             super(EnterpriseCouponViewSet, self).update_range_data(request_data, vouchers)
 
     @detail_route(url_path='codes')
-    def codes(self, request, pk):  # pylint: disable=unused-argument
+    def codes(self, request, pk, format=None):  # pylint: disable=unused-argument, redefined-builtin
         """
         GET codes belong to a `coupon`.
 
@@ -194,6 +202,7 @@ class EnterpriseCouponViewSet(CouponViewSet):
                         used: 1,
                         available: 5,
                     },
+                    redeem_url: 'https://testserver.fake/coupons/offer/?code=1234-5678-90',
                 },
             ]
         }
@@ -215,8 +224,11 @@ class EnterpriseCouponViewSet(CouponViewSet):
         all_coupon_vouchers = coupon_vouchers_with_applications | coupon_vouchers_wo_applications
 
         page = self.paginate_queryset(all_coupon_vouchers)
-        serializer = CouponVoucherSerializer(page, many=True)
-        return self.get_paginated_response(serializer.data)
+        if page is not None:
+            serializer = CouponVoucherSerializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+        serializer = CouponVoucherSerializer(all_coupon_vouchers, many=True)
+        return Response(serializer.data)
 
     @list_route(url_path=r'(?P<enterprise_id>.+)/overview')
     def overview(self, request, enterprise_id):     # pylint: disable=unused-argument
