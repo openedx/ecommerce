@@ -19,6 +19,7 @@ django-solo
 django-threadlocals
 django-waffle<0.15.0                # Unpinning this causes multiple test failures
 djangorestframework==3.6.4
+djangorestframework-csv
 djangorestframework-jwt
 drf-extensions==0.3.1
 edx-auth-backends

@@ -190,7 +190,7 @@ class EnterpriseCouponViewSet(CouponViewSet):
             super(EnterpriseCouponViewSet, self).update_range_data(request_data, vouchers)
 
     @detail_route(url_path='codes')
-    def codes(self, request, pk):  # pylint: disable=unused-argument
+    def codes(self, request, pk, format=None):  # pylint: disable=unused-argument, redefined-builtin
         """
         GET codes belong to a `coupon`.
 
@@ -204,6 +204,7 @@ class EnterpriseCouponViewSet(CouponViewSet):
                         used: 1,
                         available: 5,
                     },
+                    redeem_url: 'https://testserver.fake/coupons/offer/?code=1234-5678-90',
                 },
             ]
         }
@@ -224,9 +225,12 @@ class EnterpriseCouponViewSet(CouponViewSet):
         # we need a combined querset so that pagination works as expected
         all_coupon_vouchers = coupon_vouchers_with_applications | coupon_vouchers_wo_applications
 
-        page = self.paginate_queryset(all_coupon_vouchers)
-        serializer = CouponVoucherSerializer(page, many=True)
-        return self.get_paginated_response(serializer.data)
+        if format is None:
+            page = self.paginate_queryset(all_coupon_vouchers)
+            serializer = CouponVoucherSerializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+        serializer = CouponVoucherSerializer(all_coupon_vouchers, many=True)
+        return Response(serializer.data)
 
     @list_route(url_path=r'(?P<enterprise_id>.+)/overview')
     def overview(self, request, enterprise_id):     # pylint: disable=unused-argument
