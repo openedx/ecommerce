@@ -19,12 +19,17 @@ from ecommerce.extensions.checkout.exceptions import BasketNotFreeError
 from ecommerce.extensions.customer.utils import Dispatcher
 from ecommerce.extensions.order.constants import PaymentEventTypeName
 from ecommerce.invoice.models import Invoice
+from ecommerce.extensions.offer.constants import (
+    OFFER_ASSIGNMENT_REVOKED,
+    OFFER_REDEEMED,
+)
 
 CommunicationEventType = get_model('customer', 'CommunicationEventType')
 logger = logging.getLogger(__name__)
 Basket = get_model('basket', 'Basket')
 BasketAttribute = get_model('basket', 'BasketAttribute')
 BasketAttributeType = get_model('basket', 'BasketAttributeType')
+OfferAssignment = get_model('offer', 'OfferAssignment')
 Order = get_model('order', 'Order')
 post_checkout = get_class('checkout.signals', 'post_checkout')
 PaymentEvent = get_model('order', 'PaymentEvent')
@@ -165,6 +170,9 @@ class EdxOrderPlacementMixin(OrderPlacementMixin):
         except BasketAttribute.DoesNotExist:
             email_opt_in = False
 
+        # update offer assignment with voucher application
+        self.update_assigned_voucher_offer_assignment(order)
+
         if waffle.sample_is_active('async_order_fulfillment'):
             # Always commit transactions before sending tasks depending on state from the current transaction!
             # There's potential for a race condition here if the task starts executing before the active
@@ -283,3 +291,26 @@ class EdxOrderPlacementMixin(OrderPlacementMixin):
             )
         else:
             logger.exception(self.order_placement_failure_msg, payment_processor, basket_id)
+
+    def update_assigned_voucher_offer_assignment(self, order):
+        """
+        Update `OfferAssignment` when an assigned voucher is redeeemed.
+        """
+        basket = order.basket
+        voucher = basket.vouchers.first()
+        offer = voucher and voucher.enterprise_offer
+        # can't entertain non enterprise offers
+        if not offer:
+            return None
+
+        assignment = offer.offerassignment_set.filter(code=voucher.code, user_email=basket.owner.email).exclude(
+            status__in=[OFFER_REDEEMED, OFFER_ASSIGNMENT_REVOKED]
+        ).first()
+
+        if assignment:
+            assignment.voucher_application = voucher.applications.filter(
+                user=basket.owner,
+                order=order
+            ).order_by('-date_created').first()
+            assignment.status = OFFER_REDEEMED
+            assignment.save()

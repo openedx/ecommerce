@@ -9,7 +9,7 @@ from oscar.test.factories import *  # pylint:disable=wildcard-import,unused-wild
 
 from ecommerce.enterprise.benefits import BENEFIT_MAP as ENTERPRISE_BENEFIT_MAP
 from ecommerce.enterprise.benefits import EnterpriseAbsoluteDiscountBenefit, EnterprisePercentageDiscountBenefit
-from ecommerce.enterprise.conditions import EnterpriseCustomerCondition
+from ecommerce.enterprise.conditions import EnterpriseCustomerCondition, AssignableEnterpriseCustomerCondition
 from ecommerce.extensions.offer.models import OFFER_PRIORITY_ENTERPRISE, OFFER_PRIORITY_VOUCHER, OfferAssignment
 # TODO: journals dependency
 from ecommerce.journals.benefits import JournalBundleAbsoluteDiscountBenefit, JournalBundlePercentageDiscountBenefit
@@ -236,6 +236,13 @@ class EnterpriseCustomerConditionFactory(ConditionFactory):
 
     class Meta(object):
         model = EnterpriseCustomerCondition
+
+
+class AssignableEnterpriseCustomerConditionFactory(ConditionFactory):
+    proxy_class = class_path(AssignableEnterpriseCustomerCondition)
+
+    class Meta(object):
+        model = AssignableEnterpriseCustomerCondition
 
 
 class EnterpriseOfferFactory(ConditionalOfferFactory):

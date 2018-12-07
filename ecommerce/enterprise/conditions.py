@@ -11,6 +11,7 @@ from slumber.exceptions import SlumberHttpBaseException
 from ecommerce.enterprise.api import catalog_contains_course_runs, fetch_enterprise_learner_data
 from ecommerce.enterprise.constants import ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, ENTERPRISE_OFFERS_SWITCH
 from ecommerce.extensions.basket.utils import ENTERPRISE_CATALOG_ATTRIBUTE_TYPE
+from ecommerce.extensions.offer.constants import OFFER_MAX_USES_DEFAULT
 from ecommerce.extensions.offer.decorators import check_condition_applicability
 from ecommerce.extensions.offer.mixins import ConditionWithoutRangeMixin, SingleItemConsumptionConditionMixin
 
@@ -18,7 +19,14 @@ BasketAttribute = get_model('basket', 'BasketAttribute')
 BasketAttributeType = get_model('basket', 'BasketAttributeType')
 Condition = get_model('offer', 'Condition')
 ConditionalOffer = get_model('offer', 'ConditionalOffer')
+OfferAssignment = get_model('offer', 'OfferAssignment')
+Voucher = get_model('voucher', 'Voucher')
 logger = logging.getLogger(__name__)
+
+from ecommerce.extensions.offer.constants import (
+    OFFER_ASSIGNMENT_REVOKED,
+    OFFER_REDEEMED,
+)
 
 
 class EnterpriseCustomerCondition(ConditionWithoutRangeMixin, SingleItemConsumptionConditionMixin, Condition):
@@ -162,3 +170,44 @@ class AssignableEnterpriseCustomerCondition(EnterpriseCustomerCondition):
     class Meta(object):
         app_label = 'enterprise'
         proxy = True
+
+    def is_satisfied(self, offer, basket):  # pylint: disable=unused-argument
+        """
+        Determines that if user has assigned a voucher and is eligible for redeem it.
+
+        Arguments:
+            offer (ConditionalOffer): The offer to be redeemed.
+            basket (Basket): The basket of products being purchased.
+
+        Returns:
+            bool
+        """
+        condition_satisfied = super(AssignableEnterpriseCustomerCondition, self).is_satisfied(offer, basket)
+        if condition_satisfied is False:
+            return False
+
+        voucher = basket.vouchers.first()
+
+        # check if voucher has any assignments
+        voucher_offer_assignments = OfferAssignment.objects.filter(code=voucher.code)
+        # basket owner can redeem the voucher if there were no offer assignments created for voucher
+        if not voucher_offer_assignments.exists():
+            return True
+
+        # check if there are free slots available that the basket owner can redeem
+        voucher_offer_assignments_available = voucher_offer_assignments.filter(user_email=basket.owner.email).exclude(
+            status__in=[OFFER_REDEEMED, OFFER_ASSIGNMENT_REVOKED]
+        )
+
+        redemeptions_available = False
+        if voucher.usage == Voucher.SINGLE_USE:
+            redemeptions_available = voucher.num_orders == 0
+        else:
+            offer_max_uses = offer.max_global_applications or OFFER_MAX_USES_DEFAULT
+            redemeptions_available = voucher.num_orders < offer_max_uses
+
+        # if both the slots and redemptions are available then basket owner can redeem the voucher
+        if voucher_offer_assignments_available.exists() and redemeptions_available:
+            return True
+
+        return False

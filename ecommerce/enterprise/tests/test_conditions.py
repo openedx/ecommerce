@@ -1,22 +1,33 @@
+import datetime
 from decimal import Decimal
 from uuid import uuid4
 
 import ddt
 import httpretty
+import mock
+from django.utils.timezone import now
 from oscar.core.loading import get_model
 from waffle.models import Switch
 
 from ecommerce.courses.tests.factories import CourseFactory
+from ecommerce.enterprise.conditions import EnterpriseCustomerCondition
 from ecommerce.enterprise.constants import ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, ENTERPRISE_OFFERS_SWITCH
 from ecommerce.enterprise.tests.mixins import EnterpriseServiceMockMixin
 from ecommerce.extensions.basket.utils import basket_add_enterprise_catalog_attribute
 from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
+from ecommerce.extensions.offer.constants import (
+    OFFER_ASSIGNMENT_EMAIL_PENDING,
+    OFFER_ASSIGNED,
+    OFFER_ASSIGNMENT_REVOKED,
+    OFFER_REDEEMED,
+)
 from ecommerce.extensions.test import factories
 from ecommerce.tests.factories import ProductFactory, SiteConfigurationFactory
 from ecommerce.tests.testcases import TestCase
 
 ConditionalOffer = get_model('offer', 'ConditionalOffer')
 Product = get_model('catalogue', 'Product')
+Voucher = get_model('voucher', 'Voucher')
 LOGGER_NAME = 'ecommerce.programs.conditions'
 
 
@@ -260,3 +271,186 @@ class EnterpriseCustomerConditionTests(EnterpriseServiceMockMixin, DiscoveryTest
             contains_content=False
         )
         self.assertFalse(self.condition.is_satisfied(offer, basket))
+
+
+@ddt.ddt
+class AssignableEnterpriseCustomerCondition(EnterpriseServiceMockMixin, DiscoveryTestMixin, TestCase):
+    def setUp(self):
+        super(AssignableEnterpriseCustomerCondition, self).setUp()
+        self.condition = factories.AssignableEnterpriseCustomerConditionFactory()
+
+    def create_data(self, voucher_type, max_uses, assignments):
+        """
+        Create vouchers, offers and offer assignments.
+        """
+        if voucher_type == Voucher.SINGLE_USE:
+            enterprise_offer = factories.EnterpriseOfferFactory()
+
+        for assignment in assignments:
+            code = assignment['code']
+
+            if voucher_type != Voucher.SINGLE_USE:
+                enterprise_offer = factories.EnterpriseOfferFactory(max_global_applications=max_uses)
+
+            voucher, __ = Voucher.objects.get_or_create(
+                usage=voucher_type,
+                code=code,
+                defaults={
+                    'start_datetime': now() - datetime.timedelta(days=10),
+                    'end_datetime': now() + datetime.timedelta(days=10),
+                }
+            )
+            voucher.offers.add(enterprise_offer)
+
+            factories.OfferAssignmentFactory(offer=enterprise_offer, code=code, user_email=assignment['user_email'])
+
+    def assert_condition(self, voucher_type, assignments, expected_condition_result):
+        """
+        Verify that condition works as expected for different vouchers and assignments.
+        """
+        for assignment in assignments:
+            code = assignment['code']
+            email = assignment['user_email']
+
+            voucher = Voucher.objects.get(usage=voucher_type, code=code)
+            basket = factories.BasketFactory(site=self.site, owner=factories.UserFactory(email=email))
+            basket.vouchers.add(voucher)
+
+            is_condition_satisfied = self.condition.is_satisfied(voucher.enterprise_offer, basket)
+            assert is_condition_satisfied == expected_condition_result
+
+            # update the `num_orders` so that we can also verify the redemptions check
+            if expected_condition_result:
+                voucher.num_orders += 1
+                voucher.save()
+
+    @mock.patch.object(EnterpriseCustomerCondition, 'is_satisfied', mock.Mock(return_value=True))
+    @ddt.data(
+        (0, 'test1@example.com', OFFER_ASSIGNMENT_EMAIL_PENDING, True),
+        (1, 'test1@example.com', OFFER_REDEEMED, False),
+        (0, 'test1@example.com', OFFER_ASSIGNMENT_REVOKED, False),
+    )
+    @ddt.unpack
+    def test_is_satisfied(self, num_orders, email, offer_status, condition_result):
+        """
+        Ensure that condition returns expected result.
+        """
+        voucher = factories.VoucherFactory(usage=Voucher.SINGLE_USE, num_orders=num_orders)
+        enterprise_offer = factories.EnterpriseOfferFactory(max_global_applications=None)
+        voucher.offers.add(enterprise_offer)
+        basket = factories.BasketFactory(site=self.site, owner=factories.UserFactory(email=email))
+        basket.vouchers.add(voucher)
+        factories.OfferAssignmentFactory(
+            offer=enterprise_offer,
+            code=voucher.code,
+            user_email=email,
+            status=offer_status,
+        )
+
+        is_condition_satisfied = self.condition.is_satisfied(enterprise_offer, basket)
+        self.assertEqual(is_condition_satisfied, condition_result)
+
+    @mock.patch.object(EnterpriseCustomerCondition, 'is_satisfied', mock.Mock(return_value=True))
+    def test_is_satisfied_with_different_users(self):
+        """
+        Ensure that condition returns expected result when wrong user is try to redeem the voucher.
+
+        # code = 'ASD' assigned_to = 'test1@example.com'
+        # code = 'ZXC' assigned_to = 'test2@example.com'
+        # test2@example.com try to redeem `ASD` code
+        # `is_satisfied` should return False
+        """
+        voucher1 = factories.VoucherFactory(usage=Voucher.SINGLE_USE, code='ASD')
+        voucher2 = factories.VoucherFactory(usage=Voucher.SINGLE_USE, code='ZXC')
+
+        enterprise_offers = factories.EnterpriseOfferFactory.create_batch(2)
+        voucher1.offers.add(enterprise_offers[0])
+        voucher2.offers.add(enterprise_offers[1])
+
+        basket = factories.BasketFactory(site=self.site, owner=factories.UserFactory(email='test2@example.com'))
+        basket.vouchers.add(voucher1)
+
+        factories.OfferAssignmentFactory(offer=enterprise_offers[0], code=voucher1.code, user_email='test1@example.com')
+        factories.OfferAssignmentFactory(offer=enterprise_offers[1], code=voucher2.code, user_email='test2@example.com')
+
+        is_condition_satisfied = self.condition.is_satisfied(enterprise_offers[1], basket)
+        self.assertFalse(is_condition_satisfied)
+
+    @mock.patch.object(EnterpriseCustomerCondition, 'is_satisfied', mock.Mock(return_value=True))
+    @ddt.data(
+        (
+            Voucher.SINGLE_USE,
+            None,
+            [
+                {'code': 'ZZZCYOBK4BSGKGKF', 'user_email': 'test1@example.com'},
+                {'code': 'KUGOW7Z37KUTGRI6', 'user_email': 'test2@example.com'},
+            ],
+            [
+                {'code': 'ZZZCYOBK4BSGKGKF', 'user_email': 'test1@example.com'},
+                {'code': 'ZZZCYOBK4BSGKGKF', 'user_email': 'test2@example.com'},
+                {'code': 'KUGOW7Z37KUTGRI6', 'user_email': 'test1@example.com'},
+            ]
+        ),
+        (
+            Voucher.ONCE_PER_CUSTOMER,
+            2,
+            [
+                {'code': 'KM2CDM3M3V3AY62Q', 'user_email': 'test1@example.com'},
+                {'code': 'KM2CDM3M3V3AY62Q', 'user_email': 'test2@example.com'},
+            ],
+            [
+                {'code': 'KM2CDM3M3V3AY62Q', 'user_email': 'none@example.com'}
+            ]
+        ),
+        (
+            Voucher.MULTI_USE,
+            None,
+            [
+                {'code': 'TA7WCQD3T4C7GHZ4', 'user_email': 'test1@example.com'},
+                {'code': 'TA7WCQD3T4C7GHZ4', 'user_email': 'test2@example.com'},
+            ],
+            [
+                {'code': 'TA7WCQD3T4C7GHZ4', 'user_email': 'bob@example.com'}
+            ]
+        ),
+        (
+            Voucher.MULTI_USE,
+            3,
+            [
+                {'code': 'NWW3BEOKOY5GITFH', 'user_email': 't1@example.com'},
+                {'code': 'NWW3BEOKOY5GITFH', 'user_email': 't2@example.com'},
+                {'code': 'NWW3BEOKOY5GITFH', 'user_email': 't3@example.com'},
+                {'code': 'GLPDHRB7JJYY2MEK', 'user_email': 't4@example.com'},
+            ],
+            [
+                {'code': 'NWW3BEOKOY5GITFH', 'user_email': 't4@example.com'},
+                {'code': 'GLPDHRB7JJYY2MEK', 'user_email': 't3@example.com'},
+            ]
+        ),
+        (
+            Voucher.MULTI_USE_PER_CUSTOMER,
+            3,
+            [
+                {'code': 'GAOJIXZLHMDJFMZE', 'user_email': 'test1@example.com'},
+                {'code': 'GAOJIXZLHMDJFMZE', 'user_email': 'test1@example.com'},
+                {'code': 'GAOJIXZLHMDJFMZE', 'user_email': 'test1@example.com'},
+                {'code': '3ZVMFPE4WKMMKEUE', 'user_email': 'test2@example.com'},
+                {'code': '3ZVMFPE4WKMMKEUE', 'user_email': 'test2@example.com'},
+                {'code': '3ZVMFPE4WKMMKEUE', 'user_email': 'test2@example.com'},
+            ],
+            [
+                {'code': 'GAOJIXZLHMDJFMZE', 'user_email': 'test1@example.com'},
+                {'code': 'GAOJIXZLHMDJFMZE', 'user_email': 'test2@example.com'},
+                {'code': '3ZVMFPE4WKMMKEUE', 'user_email': 'test1@example.com'},
+            ]
+        )
+    )
+    @ddt.unpack
+    def test_is_satisfied_for_all_voucher_types(self, voucher_type, max_uses, assignments, wrong_assignments):
+        """
+        Ensure that condition returns expected result for `Voucher.MULTI_USE` voucher assignments.
+        """
+        self.create_data(voucher_type, max_uses, assignments)
+
+        self.assert_condition(voucher_type, assignments, True)
+        self.assert_condition(voucher_type, wrong_assignments, False)
