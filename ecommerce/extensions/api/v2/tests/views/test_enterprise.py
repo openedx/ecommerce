@@ -348,19 +348,22 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
-    def assert_coupon_codes_response(self, response, coupon_id, max_uses, results_count, pagination):
+    def assert_coupon_codes_response(self, response, coupon_id, max_uses=1, results_count=0, pagination=None):
         """
         Verify response received from `/api/v2/enterprise/coupons/{coupon_id}/codes/` endpoint
         """
         coupon = Product.objects.get(id=coupon_id)
+
         all_coupon_codes = coupon.attr.coupon_vouchers.vouchers.values_list('code', flat=True)
         all_coupon_codes = [code for code in all_coupon_codes]
         all_received_codes = [result['code'] for result in response['results']]
         all_received_code_max_uses = [result['redemptions']['available'] for result in response['results']]
 
-        # `max_uses` should be same for all codes
-        max_uses = max_uses or 1
-        self.assertEqual(set(all_received_code_max_uses), set([max_uses]))
+        voucher_type = coupon.attr.coupon_vouchers.vouchers.first().usage
+        if results_count and voucher_type != Voucher.SINGLE_USE:
+            # `max_uses` should be same for all codes
+            max_uses = max_uses or 1
+            self.assertEqual(set(all_received_code_max_uses), set([max_uses]))
 
         # total count of results returned is correct
         self.assertEqual(len(response['results']), results_count)
@@ -368,6 +371,8 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
         # all received codes must be equals to coupon codes
         self.assertTrue(set(all_received_codes).issubset(all_coupon_codes))
 
+        # Verify pagination.
+        pagination = pagination or {'count': results_count, 'next': None, 'previous': None}
         self.assertEqual(response['count'], pagination['count'])
         self.assertEqual(response['next'], pagination['next'])
         self.assertEqual(response['previous'], pagination['previous'])
@@ -382,25 +387,40 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
         voucher.record_usage(order, user)
         voucher.offers.first().record_usage(discount={'freq': 1, 'discount': 1})
 
-    def create_coupon_with_applications(self, coupon_data, voucher_type, quantity, max_uses):
+    def create_enterprise_coupon(self, coupon_data, with_applications=False):
         """
-        Create coupon and voucher applications(redemeptions).
+        Create coupon and voucher applications(redemeptions) if required.
         """
         Switch.objects.update_or_create(name=ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, defaults={'active': True})
 
         # create coupon
-        coupon_post_data = dict(coupon_data, voucher_type=voucher_type, quantity=quantity, max_uses=max_uses)
-        coupon = self.get_response('POST', ENTERPRISE_COUPONS_LINK, coupon_post_data)
+        coupon = self.get_response('POST', ENTERPRISE_COUPONS_LINK, coupon_data)
         coupon = coupon.json()
+        coupon_id = coupon['coupon_id']
 
         # create some voucher applications
-        coupon_id = coupon['coupon_id']
-        coupon = Product.objects.get(id=coupon_id)
-        for voucher in coupon.attr.coupon_vouchers.vouchers.all():
-            for _ in range(max_uses or 1):
-                self.use_voucher(voucher, self.create_user())
+        if with_applications:
+            max_uses = coupon_data.get('max_uses', None)
+            coupon = Product.objects.get(id=coupon_id)
+            for voucher in coupon.attr.coupon_vouchers.vouchers.all():
+                for _ in range(max_uses or 1):
+                    self.use_voucher(voucher, self.create_user())
 
         return coupon_id
+
+    def assign_coupon_codes(self, coupon_id):
+        """
+        Assigns codes.
+        """
+        vouchers = Product.objects.get(id=coupon_id).attr.coupon_vouchers.vouchers.all()
+        codes = [voucher.code for voucher in vouchers]
+        codes_param = codes[3:]
+        emails = ['t1@example.com', 't2@example.com']
+        self.get_response(
+            'POST',
+            '/api/v2/enterprise/coupons/{}/assign/'.format(coupon_id),
+            {'emails': emails, 'codes': codes_param}
+        )
 
     @ddt.data(
         {
@@ -433,12 +453,11 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             'previous': None,
         }
 
-        coupon_id = self.create_coupon_with_applications(
-            self.data,
-            data['voucher_type'],
-            data['quantity'],
-            data['max_uses']
+        coupon_id = self.create_enterprise_coupon(
+            dict(self.data, voucher_type=data['voucher_type'], quantity=data['quantity'], max_uses=data['max_uses']),
+            with_applications=True
         )
+
 
         # get coupon codes usage details
         response = self.get_response('GET', endpoint.format(coupon_id))
@@ -447,8 +466,8 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
         self.assert_coupon_codes_response(
             response,
             coupon_id,
-            data['max_uses'],
-            data['expected_results_count'],
+            max_uses=data['max_uses'],
+            results_count=data['expected_results_count'],
             pagination=pagination
         )
 
@@ -494,13 +513,7 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             'quantity': 2,
             'max_uses': 3,
         }
-
-        coupon_id = self.create_coupon_with_applications(
-            self.data,
-            coupon_data['voucher_type'],
-            coupon_data['quantity'],
-            coupon_data['max_uses']
-        )
+        coupon_id = self.create_enterprise_coupon(dict(self.data, **coupon_data), with_applications=True)
 
         # update the coupon id in `previous` and next urls
         pagination['previous'] = pagination['previous'] and pagination['previous'].format(coupon_id)
@@ -515,8 +528,8 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
         self.assert_coupon_codes_response(
             response,
             coupon_id,
-            coupon_data['max_uses'],
-            expected_results_count,
+            max_uses=coupon_data['max_uses'],
+            results_count=expected_results_count,
             pagination=pagination,
         )
 
@@ -538,13 +551,11 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
         coupon_data = {
             'voucher_type': Voucher.MULTI_USE,
             'quantity': 1,
+            'max_uses': None
         }
-
-        coupon_id = self.create_coupon_with_applications(
-            self.data,
-            coupon_data['voucher_type'],
-            coupon_data['quantity'],
-            None
+        coupon_id = self.create_enterprise_coupon(
+            dict(self.data, **coupon_data),
+            with_applications=True
         )
 
         response = self.get_response('GET', '/api/v2/enterprise/coupons/{}/codes/'.format(coupon_id))
@@ -552,13 +563,113 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
         self.assert_coupon_codes_response(
             response,
             coupon_id,
-            10000,
-            1,
-            {
-                'count': 1,
-                'next': None,
-                'previous': None,
-            }
+            max_uses=10000,
+            results_count=1
+        )
+
+    @ddt.data(
+        # default
+        {
+            'code_filter': '',
+            'do_assignment': False,
+            'with_applications': False,
+            'expected_results_count': 2
+        },
+        {
+            'code_filter': '',
+            'do_assignment': True,
+            'with_applications': False,
+            'expected_results_count': 2
+        },
+        {
+            'code_filter': '',
+            'do_assignment': False,
+            'with_applications': True,
+            'expected_results_count': 2
+        },
+        {
+            'code_filter': '',
+            'do_assignment': True,
+            'with_applications': True,
+            'expected_results_count': 2
+        },
+        # not-redeemed
+        {
+            'code_filter': 'not-redeemed',
+            'do_assignment': False,
+            'with_applications': False,
+            'expected_results_count': 2
+        },
+        {
+            'code_filter': 'not-redeemed',
+            'do_assignment': False,
+            'with_applications': True,
+            'expected_results_count': 0
+        },
+        {
+            'code_filter': 'not-redeemed',
+            'do_assignment': True,
+            'with_applications': False,
+            'expected_results_count': 2
+        },
+        {
+            'code_filter': 'not-redeemed',
+            'do_assignment': True,
+            'with_applications': True,
+            'expected_results_count': 0
+        },
+        # not-assigned
+        {
+            'code_filter': 'not-assigned',
+            'do_assignment': False,
+            'with_applications': False,
+            'expected_results_count': 2
+        },
+        {
+            'code_filter': 'not-assigned',
+            'do_assignment': True,
+            'with_applications': False,
+            'expected_results_count': 0
+        },
+        {
+            'code_filter': 'not-assigned',
+            'do_assignment': False,
+            'with_applications': True,
+            'expected_results_count': 0
+        },
+        {
+            'code_filter': 'not-assigned',
+            'do_assignment': True,
+            'with_applications': True,
+            'expected_results_count': 0
+        },
+    )
+    @ddt.unpack
+    def test_coupon_codes_detail_filtering(self, code_filter, do_assignment, with_applications, expected_results_count):
+        """
+        Verify that `/api/v2/enterprise/coupons/{coupon_id}/codes/` endpoint returns correct data when filtered.
+        """
+        coupon_data = {
+            'voucher_type': Voucher.MULTI_USE,
+            'max_uses': 1
+        }
+        coupon_id = self.create_enterprise_coupon(dict(self.data, **coupon_data), with_applications=with_applications)
+
+        if do_assignment:
+            self.assign_coupon_codes(coupon_id)
+
+        # Get coupon codes.
+        response = self.get_response(
+            'GET',
+            '/api/v2/enterprise/coupons/{}/codes/?code_filter={}'.format(coupon_id, code_filter)
+        )
+        response = response.json()
+
+        self.assert_coupon_codes_response(
+            response,
+            coupon_id,
+            max_uses=coupon_data['max_uses'],
+            results_count=expected_results_count
         )
 
     @ddt.data(
