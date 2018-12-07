@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 import logging
 import waffle
 from django.core.exceptions import ValidationError
+from django.db.models import F
 from oscar.core.loading import get_model
 from rest_framework import generics, serializers, status
 from rest_framework.decorators import detail_route, list_route
@@ -28,6 +29,14 @@ from ecommerce.extensions.catalogue.utils import (
     attach_vouchers_to_coupon_product,
     create_coupon_product_and_stockrecord
 )
+from ecommerce.extensions.offer.constants import (
+    OFFER_REDEEMED,
+    OFFER_ASSIGNMENT_REVOKED,
+    VOUCHER_UNASSIGNED,
+    VOUCHER_UNREDEEMED,
+    VOUCHER_REDEEMED,
+    VOUCHER_PARTIAL_REDEEMED
+)
 from ecommerce.extensions.voucher.utils import (
     create_enterprise_vouchers,
     update_voucher_offer,
@@ -38,6 +47,7 @@ from ecommerce.invoice.models import Invoice
 logger = logging.getLogger(__name__)
 Order = get_model('order', 'Order')
 Line = get_model('basket', 'Line')
+OfferAssignment = get_model('offer', 'OfferAssignment')
 Product = get_model('catalogue', 'Product')
 Voucher = get_model('voucher', 'Voucher')
 
@@ -190,6 +200,102 @@ class EnterpriseCouponViewSet(CouponViewSet):
         if coupon_was_migrated:
             super(EnterpriseCouponViewSet, self).update_range_data(request_data, vouchers)
 
+    def get_voucher_type(self):
+        coupon = self.get_object()
+        return coupon.attr.coupon_vouchers.vouchers.first().usage
+
+    def get_assigned_codes(self):
+        """
+        Returns the list of all assigned codes.
+        """
+        return OfferAssignment.objects.exclude(
+            status__in=[OFFER_REDEEMED, OFFER_ASSIGNMENT_REVOKED]
+        ).values_list('code', flat=True)
+
+    def get_redeemable_vouchers(self, coupon_vouchers):
+        """
+        Return vouchers which are redeemable. These vouchers are not fully redeemed.
+        """
+        vouchers_with_full_redemptions = self.get_fully_redeemed_coupon_vouchers(coupon_vouchers)
+        redeemable_vouchers =  coupon_vouchers.exclude(pk__in=vouchers_with_full_redemptions)
+
+        assigne_codes = self.get_assigned_codes()
+        vouchers_with_some_assignments = redeemable_vouchers.filter(code__in=assigne_codes)
+        vouchers_with_no_assignments = redeemable_vouchers.exclude(code__in=assigne_codes)
+
+        # Also check how many assignments for this code.
+        voucher_type = self.get_voucher_type()
+        if voucher_type != Voucher.SINGLE_USE:
+            redeemable_vouchers_with_some_assignments = vouchers_with_some_assignments.filter(offers__max_global_applications__gt=F('num_orders') + F('offers__offerassignment'))
+            redeemable_vouchers_with_no_assignments = vouchers_with_no_assignments.filter(offers__max_global_applications__gt=F('num_orders'))
+            redeemable_vouchers = redeemable_vouchers_with_some_assignments | redeemable_vouchers_with_no_assignments
+        return redeemable_vouchers
+
+
+    def get_vouchers_with_no_applications(self, coupon_vouchers):
+        """
+        Returns vouchers with no voucher application.
+        """
+        return coupon_vouchers.filter(applications__isnull=True)
+
+    def get_redeemed_coupon_vouchers(self, coupon_vouchers):
+        """
+        Returns vouchers against each voucher application, so if a
+        voucher has two applications than this queryset will give 2 vouchers.
+        """
+        return Voucher.objects.filter(
+            applications__voucher_id__in=coupon_vouchers
+        )
+
+    def get_unassigned_coupon_vouchers(self, coupon_vouchers):
+        """
+        Returns only those vouchers which have free slots available.
+
+        This will give us a list of vouchers which have any potential slot available for assignment,
+        Some scenarios to consider;
+            SINGLE_USE, 3 quantiy, no assignment, no redemption --> 3 slots available.
+            SINGLE_USE, 3 quantiy, 3 assignments, no redemption --> 0 slot available.
+            SINGLE_USE, 3 quantiy, 0 assignment, 3 redemptions --> 0 slot available.
+            SINGLE_USE, 3 quantiy, 1 assignment, no redemption --> 2 slots available.
+            SINGLE_USE, 3 quantiy, no assignment, 1 redemption --> 2 slots available.
+            SINGLE_USE, 3 quantiy, 1 assignment, 1 assigned redemption --> 2 slots available.
+            SINGLE_USE, 3 quantiy, 1 assignment, 1 assigned + other redemption --> 1 slots available.
+            SINGLE_USE, 3 quantiy, 1 assignment, 1 assigned + 2 other redemptions --> 0 slots available.
+            SINGLE_USE, 3 quantiy, 3 assignment, 3 assigned redemptions --> 0 slots available.
+
+
+            MULTI_USE, 3 quantiy, 10 max_uses, no assignment, no redemption --> 3 slots available.
+        """
+        assigned_codes = self.get_assigned_codes()
+        redeemable_vouchers = self.get_redeemable_vouchers(coupon_vouchers)
+        unassigned_vouchers = redeemable_vouchers.exclude(code__in=assigned_codes)
+        return unassigned_vouchers
+
+    def get_unredeemed_coupon_vouchers(self, coupon_vouchers):
+        """
+        Returns assigned vouchers but never redeemed.
+        """
+        assigned_codes = self.get_assigned_codes()
+        redeemable_vouchers = self.get_redeemable_vouchers(coupon_vouchers)
+        unredeemed_vouchers = redeemable_vouchers.filter(code__in=assigned_codes)
+        return unredeemed_vouchers
+
+    def get_partial_redeemed_coupon_vouchers(self, coupon_vouchers):
+        """
+        Returns assigned vouchers having at-least one redemption.
+        """
+        # TODO: FAQ - Single use has only one redemption? what to do in this case? return empty queryset?
+        return coupon_vouchers.filter(num_orders_gte=1, offers__max_global_applications__gt=F('num_orders'))
+
+    def get_fully_redeemed_coupon_vouchers(self, coupon_vouchers):
+        """
+        Returns vouchers that are fully redeemed, these vouchers do not have any assignment or redemption left.
+        """
+        voucher_type = self.get_voucher_type()
+        if voucher_type == Voucher.SINGLE_USE:
+            return coupon_vouchers.filter(num_orders=1)
+        return coupon_vouchers.filter(offers__max_global_applications=F('num_orders'))
+
     @detail_route(url_path='codes')
     def codes(self, request, pk, format=None):  # pylint: disable=unused-argument, redefined-builtin
         """
@@ -211,26 +317,30 @@ class EnterpriseCouponViewSet(CouponViewSet):
         }
         """
         coupon = self.get_object()
+        coupon_vouchers = coupon.attr.coupon_vouchers.vouchers.all()
 
-        # this will give us vouchers against each voucher application, so if a
-        # voucher has two applications than this queryset will give 2 vouchers
-        coupon_vouchers_with_applications = Voucher.objects.filter(
-            applications__voucher_id__in=coupon.attr.coupon_vouchers.vouchers.all()
-        )
-        # this will give us only those vouchers having no application
-        coupon_vouchers_wo_applications = Voucher.objects.filter(
-            coupon_vouchers__coupon__id=coupon.id,
-            applications__isnull=True
-        )
-
-        # we need a combined querset so that pagination works as expected
-        all_coupon_vouchers = coupon_vouchers_with_applications | coupon_vouchers_wo_applications
+        coupon_code_filter = request.query_params.get('code_filter')
+        if coupon_code_filter == VOUCHER_UNASSIGNED:
+            # This filter will give us only those vouchers which have free slots available.
+            coupon_vouchers = self.get_unassigned_coupon_vouchers(coupon_vouchers)
+        elif coupon_code_filter == VOUCHER_UNREDEEMED:
+            # Assigned vouchers which are not yet redeemed.
+            coupon_vouchers = self.get_unredeemed_coupon_vouchers(coupon_vouchers)
+        elif coupon_code_filter == VOUCHER_PARTIAL_REDEEMED:
+            # Assigned vouchers having at-least one redemption.
+            coupon_vouchers = self.get_partial_redeemed_coupon_vouchers(coupon_vouchers)
+        elif coupon_code_filter == VOUCHER_REDEEMED:
+            # This filter would return only those vouchers which are fully redeemed.
+            coupon_vouchers = self.get_fully_redeemed_coupon_vouchers(coupon_vouchers)
+        else:
+            # TODO: Return all vouchers for coupon (unassigned + unredeemed + partial-redeemed + redeemed).
+            coupon_vouchers = self.get_redeemed_coupon_vouchers(coupon_vouchers) | self.get_vouchers_with_no_applications(coupon_vouchers)
 
         if format is None:
-            page = self.paginate_queryset(all_coupon_vouchers)
+            page = self.paginate_queryset(coupon_vouchers)
             serializer = CouponVoucherSerializer(page, many=True)
             return self.get_paginated_response(serializer.data)
-        serializer = CouponVoucherSerializer(all_coupon_vouchers, many=True)
+        serializer = CouponVoucherSerializer(coupon_vouchers, many=True)
         return Response(serializer.data)
 
     @list_route(url_path=r'(?P<enterprise_id>.+)/overview')

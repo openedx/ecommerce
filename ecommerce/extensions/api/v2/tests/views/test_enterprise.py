@@ -23,7 +23,11 @@ from ecommerce.enterprise.conditions import AssignableEnterpriseCustomerConditio
 from ecommerce.enterprise.constants import ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH
 from ecommerce.enterprise.tests.mixins import EnterpriseServiceMockMixin
 from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
-from ecommerce.extensions.offer.constants import OFFER_ASSIGNMENT_REVOKED
+from ecommerce.extensions.offer.constants import (
+    OFFER_ASSIGNMENT_REVOKED,
+    VOUCHER_UNASSIGNED,
+    VOUCHER_REDEEMED
+)
 from ecommerce.invoice.models import Invoice
 from ecommerce.programs.custom import class_path
 from ecommerce.tests.mixins import ThrottlingMixin
@@ -376,25 +380,35 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
-    def assert_coupon_codes_response(self, response, coupon_id, max_uses, results_count, pagination=None, is_csv=False):
+    def assert_coupon_codes_response(self, response, coupon_id, max_uses=1, results_count=0, pagination=None, is_csv=False):
         """
         Verify response received from `/api/v2/enterprise/coupons/{coupon_id}/codes/` endpoint
         """
         coupon = Product.objects.get(id=coupon_id)
+
         all_coupon_codes = coupon.attr.coupon_vouchers.vouchers.values_list('code', flat=True)
         all_coupon_codes = [code for code in all_coupon_codes]
+
         if is_csv:
             total_result_count = len(response)
             all_received_codes = [result.split(',')[1] for result in response if result]
-            all_received_code_max_uses = [int(result.split(',')[3]) for result in response if result]
+            all_received_code_max_uses = [
+                int(result.split(',')[3]) + int(result.split(',')[4])
+                for result in response if result
+            ]
         else:
             total_result_count = len(response['results'])
             all_received_codes = [result['code'] for result in response['results']]
-            all_received_code_max_uses = [result['redemptions']['available'] for result in response['results']]
+            all_received_code_max_uses = [
+                result['redemptions']['available'] + result['redemptions']['used']
+                for result in response['results']
+            ]
 
-        # `max_uses` should be same for all codes
-        max_uses = max_uses or 1
-        self.assertEqual(set(all_received_code_max_uses), set([max_uses]))
+        voucher_type = coupon.attr.coupon_vouchers.vouchers.first().usage
+        if results_count and voucher_type != Voucher.SINGLE_USE:
+            # `max_uses` should be same for all codes
+            max_uses = max_uses or 1
+            self.assertEqual(set(all_received_code_max_uses), set([max_uses]))
 
         # total count of results returned is correct
         self.assertEqual(total_result_count, results_count)
@@ -417,25 +431,50 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
         voucher.record_usage(order, user)
         voucher.offers.first().record_usage(discount={'freq': 1, 'discount': 1})
 
-    def create_coupon_with_applications(self, coupon_data, voucher_type, quantity, max_uses):
+    def create_enterprise_coupon(self, coupon_data, with_applications=False):
         """
-        Create coupon and voucher applications(redemeptions).
+        Create coupon and voucher applications(redemeptions) if required.
         """
         Switch.objects.update_or_create(name=ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, defaults={'active': True})
 
         # create coupon
-        coupon_post_data = dict(coupon_data, voucher_type=voucher_type, quantity=quantity, max_uses=max_uses)
-        coupon = self.get_response('POST', ENTERPRISE_COUPONS_LINK, coupon_post_data)
+        coupon = self.get_response('POST', ENTERPRISE_COUPONS_LINK, coupon_data)
         coupon = coupon.json()
+        coupon_id = coupon['coupon_id']
 
         # create some voucher applications
-        coupon_id = coupon['coupon_id']
-        coupon = Product.objects.get(id=coupon_id)
-        for voucher in coupon.attr.coupon_vouchers.vouchers.all():
-            for _ in range(max_uses or 1):
-                self.use_voucher(voucher, self.create_user())
+        if with_applications:
+            max_uses = coupon_data.get('max_uses', 1)
+            coupon = Product.objects.get(id=coupon_id)
+            coupon_vouchers = coupon.attr.coupon_vouchers.vouchers.all()
+            self.create_coupon_vouchers(coupon_vouchers=coupon_vouchers, voucher_redeem_count=max_uses)
 
         return coupon_id
+
+    def create_coupon_vouchers(self, coupon_vouchers, voucher_redeem_count=1):
+        for voucher in coupon_vouchers:
+            # How many uses for a voucher to create.
+            for _ in range(voucher_redeem_count or 1):
+                self.use_voucher(voucher, self.create_user())
+
+    def assign_coupon_codes(self, coupon_id, vouchers):
+        """
+        Assigns codes.
+        """
+        if not vouchers:
+            return
+
+        emails = []
+        codes = [voucher.code for voucher in vouchers]
+        # TODO: for multi-use-per-customer case, email list should be same.
+        for email_index in range(len(codes)):
+            emails.append('test{email_index}@example.com'.format(email_index=email_index))
+
+        self.get_response(
+            'POST',
+            '/api/v2/enterprise/coupons/{}/assign/'.format(coupon_id),
+            {'emails': emails, 'codes': codes}
+        )
 
     @ddt.data(
         {
@@ -468,22 +507,20 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             'previous': None,
         }
 
-        coupon_id = self.create_coupon_with_applications(
-            self.data,
-            data['voucher_type'],
-            data['quantity'],
-            data['max_uses']
+        coupon_id = self.create_enterprise_coupon(
+            dict(self.data, voucher_type=data['voucher_type'], quantity=data['quantity'], max_uses=data['max_uses']),
+            with_applications=True
         )
 
-        # get coupon codes usage details
+        # Get coupon codes usage details
         response = self.get_response('GET', endpoint.format(coupon_id))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response = response.json()
         self.assert_coupon_codes_response(
             response,
             coupon_id,
-            data['max_uses'],
-            data['expected_results_count'],
+            max_uses=data['max_uses'],
+            results_count=data['expected_results_count'],
             pagination=pagination
         )
 
@@ -529,13 +566,7 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             'quantity': 2,
             'max_uses': 3,
         }
-
-        coupon_id = self.create_coupon_with_applications(
-            self.data,
-            coupon_data['voucher_type'],
-            coupon_data['quantity'],
-            coupon_data['max_uses']
-        )
+        coupon_id = self.create_enterprise_coupon(dict(self.data, **coupon_data), with_applications=True)
 
         # update the coupon id in `previous` and next urls
         pagination['previous'] = pagination['previous'] and pagination['previous'].format(coupon_id)
@@ -550,8 +581,8 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
         self.assert_coupon_codes_response(
             response,
             coupon_id,
-            coupon_data['max_uses'],
-            expected_results_count,
+            max_uses=coupon_data['max_uses'],
+            results_count=expected_results_count,
             pagination=pagination,
         )
 
@@ -573,13 +604,11 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
         coupon_data = {
             'voucher_type': Voucher.MULTI_USE,
             'quantity': 1,
+            'max_uses': None
         }
-
-        coupon_id = self.create_coupon_with_applications(
-            self.data,
-            coupon_data['voucher_type'],
-            coupon_data['quantity'],
-            None
+        coupon_id = self.create_enterprise_coupon(
+            dict(self.data, **coupon_data),
+            with_applications=True
         )
 
         response = self.get_response('GET', '/api/v2/enterprise/coupons/{}/codes/'.format(coupon_id))
@@ -587,30 +616,197 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
         self.assert_coupon_codes_response(
             response,
             coupon_id,
-            10000,
-            1,
-            {
-                'count': 1,
-                'next': None,
-                'previous': None,
-            }
+            max_uses=10000,
+            results_count=1
         )
+
+    @ddt.data(
+        # SINGLE_USE - no assignment, no redemption, all codes un-assigned, all slots are available.
+        {
+            'code_filter': VOUCHER_UNASSIGNED,
+            'voucher_type': Voucher.SINGLE_USE,
+            'quantity': 3,
+            'max_uses': None,
+            'assign_slice': slice(0, 0),    # No assignment
+            'redeem_slice': slice(0, 0),    # No redeemption.
+            'expected_results_count': 3
+        },
+        # SINGLE_USE - 3 assignments, no redemption, all codes assigned, no slot available.
+        {
+            'code_filter': VOUCHER_UNASSIGNED,
+            'voucher_type': Voucher.SINGLE_USE,
+            'quantity': 3,
+            'max_uses': None,
+            'assign_slice': slice(0, 3),    # All assignments - no slot left.
+            'redeem_slice': slice(0, 0),    # No redeemptions.
+            'expected_results_count': 0
+        },
+        # SINGLE_USE - no assignment, 3 redemptions, all codes redeemed, hence no slot available.
+        {
+            'code_filter': VOUCHER_UNASSIGNED,
+            'voucher_type': Voucher.SINGLE_USE,
+            'quantity': 3,
+            'max_uses': None,
+            'assign_slice': slice(0, 0),    # No assignments.
+            'redeem_slice': slice(0, 3),    # All redeemptions - no slot left.
+            'expected_results_count': 0
+        },
+        # SINGLE_USE - 1 assignment, 1 other redemption, hence 1 slot available.
+        {
+            'code_filter': VOUCHER_UNASSIGNED,
+            'voucher_type': Voucher.SINGLE_USE,
+            'quantity': 3,
+            'max_uses': None,
+            'assign_slice': slice(0, 1),
+            'redeem_slice': slice(1, 2),    # Assignments not redeemed.
+            'expected_results_count': 1
+        },
+        # SINGLE_USE - 1 assignment, 1 assigned redemption, hence 2 slots available.
+        {
+            'code_filter': VOUCHER_UNASSIGNED,
+            'voucher_type': Voucher.SINGLE_USE,
+            'quantity': 3,
+            'max_uses': None,
+            'assign_slice': slice(0, 1),
+            'redeem_slice': slice(0, 1),    # All assignments redeemed.
+            'expected_results_count': 2
+        },
+        # SINGLE_USE - 2 assignments, 1 assigned redemption, hence 1 slot available.
+        {
+            'code_filter': VOUCHER_UNASSIGNED,
+            'voucher_type': Voucher.SINGLE_USE,
+            'quantity': 3,
+            'max_uses': None,
+            'assign_slice': slice(0, 2),
+            'redeem_slice': slice(0, 1),    # Some assignments redeemed.
+            'expected_results_count': 1
+        },
+        # SINGLE_USE - 1 assignment, 1 assigned + 1 other redemption, hence 1 slot available.
+        {
+            'code_filter': VOUCHER_UNASSIGNED,
+            'voucher_type': Voucher.SINGLE_USE,
+            'quantity': 3,
+            'max_uses': None,
+            'assign_slice': slice(0, 1),
+            'redeem_slice': slice(0, 2),    # All assignments redeemed + other redemptions.
+            'expected_results_count': 1
+        },
+        # SINGLE_USE - 2 assignments, 1 other redemption, hence no slot available.
+        {
+            'code_filter': VOUCHER_UNASSIGNED,
+            'voucher_type': Voucher.SINGLE_USE,
+            'quantity': 3,
+            'max_uses': None,
+            'assign_slice': slice(0, 2),
+            'redeem_slice': slice(2, 3),    # No assignment redeemed + other redemption.
+            'expected_results_count': 0 # No slot available for assignment.
+        },
+        # MULTI_USE - 0 assignment, 0 redemption, hence 3 slots available.
+        {
+            'code_filter': VOUCHER_UNASSIGNED,
+            'voucher_type': Voucher.MULTI_USE,
+            'quantity': 3,
+            'max_uses': 10,
+            'assign_slice': slice(0, 0),
+            'redeem_slice': slice(0, 0),    # All assignments redeemed.
+            'expected_results_count': 3
+        },
+        # MULTI_USE - 1 assignment, 1 assigned redemption, hence 2 slots available.
+        {
+            'code_filter': VOUCHER_UNASSIGNED,
+            'voucher_type': Voucher.MULTI_USE,
+            'quantity': 3,
+            'max_uses': 10,
+            'assign_slice': slice(0, 1),
+            'redeem_slice': slice(0, 1),    # All assignments redeemed.
+            'expected_results_count': 2
+        },
+        # MULTI_USE - 1 assignment, 1 other redemption, hence 1 slot available.
+        {
+            'code_filter': VOUCHER_UNASSIGNED,
+            'voucher_type': Voucher.MULTI_USE,
+            'quantity': 3,
+            'max_uses': 10,
+            'assign_slice': slice(0, 1),
+            'redeem_slice': slice(1, 2), # No assignments redeemed.
+            'expected_results_count': 1
+        },
+        # MULTI_USE - 1 assignment, 1 assigned + 1 other redemption, hence 1 slot available.
+        {
+            'code_filter': VOUCHER_UNASSIGNED,
+            'voucher_type': Voucher.MULTI_USE,
+            'quantity': 3,
+            'max_uses': 10,
+            'assign_slice': slice(0, 1),
+            'redeem_slice': slice(0, 2),    # All assignments redeemed + extra redemptions.
+            'expected_results_count': 1
+        },
+        # VOUCHER_REDEEMED: MULTI_USE - 1 assignment, 3 redemption, hence 3 slots available.
+        {
+            'code_filter': VOUCHER_REDEEMED,
+            'voucher_type': Voucher.MULTI_USE,
+            'quantity': 3,
+            'max_uses': 10,
+            'assign_slice': slice(0, 1),
+            'redeem_slice': slice(1, 3),    # All assignments redeemed.
+            'expected_results_count': 2
+        },
+    )
+    def test_coupon_codes_filters(self, data):
+        """
+        Verify that `/api/v2/enterprise/coupons/{coupon_id}/codes/` endpoint returns correct data when filtered.
+        """
+        coupon_data = {
+            'quantity': data['quantity'],
+            'voucher_type': data['voucher_type'],
+            'max_uses': data.get('max_uses')
+        }
+        coupon_id = self.create_enterprise_coupon(dict(self.data, **coupon_data))
+
+        vouchers = Product.objects.get(id=coupon_id).attr.coupon_vouchers.vouchers.all()
+
+        # Assign coupon code.
+        for _ in range(data.get('voucher_assign_count', data.get('max_uses') or 1)):
+            self.assign_coupon_codes(coupon_id, vouchers[data['assign_slice']])
+
+        # create voucher applications.
+        self.create_coupon_vouchers(
+            coupon_vouchers=vouchers[data['redeem_slice']],
+            voucher_redeem_count=data.get('voucher_redeem_count', data.get('max_uses') or 1)
+        )
+
+        # Get coupon codes.
+        response = self.get_response(
+            'GET',
+            '/api/v2/enterprise/coupons/{}/codes/?code_filter={}'.format(coupon_id, data['code_filter'])
+        )
+        response = response.json()
+
+        self.assert_coupon_codes_response(
+            response,
+            coupon_id,
+            max_uses=data['max_uses'],
+            results_count=data['expected_results_count']
+        )
+
+        # Also verify available slots left for assignment.
+        for response_voucher in response['results']:
+            voucher = [voucher for voucher in vouchers if voucher.code == response_voucher['code']][0]
+            assert voucher.slots_available_for_assignment == response_voucher['redemptions']['available']
 
     def test_coupon_codes_detail_csv(self):
         """
         Verify that `/api/v2/enterprise/coupons/{coupon_id}/codes/` endpoint returns correct csv data.
         """
-        coupon_data = {
+        data = {
             'voucher_type': Voucher.MULTI_USE,
             'quantity': 2,
             'max_uses': 3
         }
 
-        coupon_id = self.create_coupon_with_applications(
-            self.data,
-            coupon_data['voucher_type'],
-            coupon_data['quantity'],
-            coupon_data['max_uses']
+        coupon_id = self.create_enterprise_coupon(
+            dict(self.data, voucher_type=data['voucher_type'], quantity=data['quantity'], max_uses=data['max_uses']),
+            with_applications=True
         )
 
         response = self.get_response('GET', '/api/v2/enterprise/coupons/{}/codes.csv'.format(coupon_id))
@@ -626,7 +822,7 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
         self.assert_coupon_codes_response(
             csv_data,
             coupon_id,
-            coupon_data['max_uses'],
+            data['max_uses'],
             6,
             is_csv=True
         )
