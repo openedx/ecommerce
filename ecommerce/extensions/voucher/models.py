@@ -47,6 +47,10 @@ class Voucher(AbstractVoucher):
         if self.usage == self.MULTI_USE_PER_CUSTOMER:
             is_available = True
             message = ''
+            applications = self.applications.filter(voucher=self).exclude(user=user)
+            if applications.exists():
+                is_available = False
+                message = _('This voucher is only available to another user')  # pylint: disable=redefined-variable-type
 
         return is_available, message
 

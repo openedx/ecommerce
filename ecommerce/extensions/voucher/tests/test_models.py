@@ -7,9 +7,11 @@ from oscar.core.loading import get_model
 from oscar.test.factories import UserFactory
 from waffle.models import Switch
 
+from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.enterprise.constants import ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH
 from ecommerce.extensions.offer.constants import OFFER_ASSIGNED, OFFER_ASSIGNMENT_REVOKED, OFFER_REDEEMED
 from ecommerce.extensions.test import factories
+from ecommerce.tests.factories import PartnerFactory
 from ecommerce.tests.testcases import TestCase
 
 ConditionalOffer = get_model('offer', 'ConditionalOffer')
@@ -97,6 +99,40 @@ class VoucherTests(TestCase):
         is_available, message = voucher.is_available_to_user(user)
         self.assertTrue(is_available)
         self.assertEqual(message, '')
+
+    def use_voucher(self, voucher, user):
+        """
+        Mark voucher as used by provided user
+        """
+        partner = PartnerFactory(short_code='testX')
+        course = CourseFactory(id='course-v1:test-org+course+run', partner=partner)
+        verified_seat = course.create_or_update_seat('verified', False, 100)
+
+        order = factories.OrderFactory()
+        order_line = factories.OrderLineFactory(product=verified_seat)
+        order.lines.add(order_line)
+        voucher.record_usage(order, user)
+        voucher.offers.first().record_usage(discount={'freq': 1, 'discount': 1})
+
+    def test_multi_use_per_customer_voucher(self):
+        """
+        Verify `MULTI_USE_PER_CUSTOMER` behaves as expected.
+        """
+        voucher_data = dict(self.data, usage=Voucher.MULTI_USE_PER_CUSTOMER)
+        enterprise_offer = factories.EnterpriseOfferFactory(max_global_applications=3)
+        voucher = factories.VoucherFactory(**voucher_data)
+        voucher.offers.add(enterprise_offer)
+
+        user1 = UserFactory(email='test1@example.com')
+        user2 = UserFactory(email='test2@example.com')
+
+        self.use_voucher(voucher, user1)
+
+        is_available, message = voucher.is_available_to_user(user1)
+        assert (is_available, message) == (True, '')
+
+        is_available, message = voucher.is_available_to_user(user2)
+        assert (is_available, message) == (False, 'This voucher is only available to another user')
 
     def test_slots_available_for_assignment_no_enterprise_offer(self):
         """ Verify that a voucher with no enterprise offer returns none for slots_available_for_assignment. """
