@@ -4,6 +4,7 @@
 #
 #############################
 -e git+https://github.com/edx/analytics-python.git@1.2.11#egg=analytics-python==1.2.11
+-e git+https://github.com/edx/ecommerce-worker.git@iahmad/ENT-1362-api-for-sending-emails-to-assigned-learners#egg=ecommerce-worker==iahmad/ENT-1362-api-for-sending-emails-to-assigned-learners
 
 coreapi
 django==1.11.15
@@ -25,7 +26,7 @@ edx-django-release-util
 edx-django-utils
 edx-drf-extensions
 edx-django-sites-extensions
-edx-ecommerce-worker
+#edx-ecommerce-worker
 edx-opaque-keys
 edx-rest-api-client
 gevent==1.0.2
