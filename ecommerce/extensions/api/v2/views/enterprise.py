@@ -171,6 +171,35 @@ class EnterpriseCouponViewSet(CouponViewSet):
         if coupon_was_migrated:
             super(EnterpriseCouponViewSet, self).update_range_data(request_data, vouchers)
 
+    def get_coupon_vouchers(self, coupon):
+        """
+        This will give us only those vouchers for a coupon.
+        """
+        return Voucher.objects.filter(
+            coupon_vouchers__coupon__id=coupon.id
+        )
+
+    def get_coupon_without_offer_assignment(self, queryset):
+        """
+        This will give us only those vouchers having no offer assigment.
+        """
+        return queryset.filter(offerassignment_set__isnull=True)
+
+    def get_coupon_without_applications_vouchers(self, queryset):
+        """
+        This will give us only those vouchers having no application.
+        """
+        return queryset.filter(applications__isnull=True)
+
+    def get_coupon_with_applications_vouchers(self, coupon):
+        """
+        This will give us vouchers against each voucher application, so if a
+        voucher has two applications than this queryset will give 2 vouchers.
+        """
+        return Voucher.objects.filter(
+            applications__voucher_id__in=coupon.attr.coupon_vouchers.vouchers.all()
+        )
+
     @detail_route(url_path='codes')
     def codes(self, request, pk):  # pylint: disable=unused-argument
         """
@@ -191,21 +220,17 @@ class EnterpriseCouponViewSet(CouponViewSet):
         }
         """
         coupon = self.get_object()
+        coupon_vouchers = self.get_coupon_vouchers(coupon)
 
-        # this will give us vouchers against each voucher application, so if a
-        # voucher has two applications than this queryset will give 2 vouchers
-        coupon_vouchers_with_applications = Voucher.objects.filter(
-            applications__voucher_id__in=coupon.attr.coupon_vouchers.vouchers.all()
-        )
-        # this will give us only those vouchers having no application
-        coupon_vouchers_wo_applications = Voucher.objects.filter(
-            coupon_vouchers__coupon__id=coupon.id,
-            applications__isnull=True
-        )
+        coupon_code_filter = request.query_params.get('code_filter')
+        if coupon_code_filter == 'no_redeemed':
+            coupon_vouchers = self.get_coupon_without_applications_vouchers(coupon_vouchers)
+        elif coupon_code_filter == 'no_assigned':
+            coupon_vouchers = self.get_coupon_without_offer_assignment(coupon_vouchers)
+        else:
+            # We need a combined querset so that pagination works as expected
+            coupon_vouchers = self.get_coupon_with_applications_vouchers(coupon) | self.get_coupon_without_applications_vouchers(coupon_vouchers)
 
-        # we need a combined querset so that pagination works as expected
-        all_coupon_vouchers = coupon_vouchers_with_applications | coupon_vouchers_wo_applications
-
-        page = self.paginate_queryset(all_coupon_vouchers)
+        page = self.paginate_queryset(coupon_vouchers)
         serializer = CouponVoucherSerializer(page, many=True)
         return self.get_paginated_response(serializer.data)
