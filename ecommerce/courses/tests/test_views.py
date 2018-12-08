@@ -4,8 +4,10 @@ import ddt
 import httpretty
 from django.conf import settings
 from django.urls import reverse
+from mock import patch
 from testfixtures import LogCapture
 
+from ecommerce.cache_utils.utils import TieredCache
 from ecommerce.core.url_utils import get_lms_url
 from ecommerce.tests.testcases import TestCase
 
@@ -127,6 +129,26 @@ class CourseAppViewTests(TestCase):
         response = self.client.get(self.path)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.context['credit_providers'], provider_json)
+
+    @httpretty.activate
+    def test_credit_providers_in_context_cached(self):
+        """ Verify the cached context data includes a list of credit providers. """
+        self._create_and_login_staff_user()
+
+        __, provider_json = self.mock_credit_api_providers()
+
+        with patch.object(TieredCache, 'set_all_tiers', wraps=TieredCache.set_all_tiers) as mocked_set_all_tiers:
+            mocked_set_all_tiers.assert_not_called()
+
+            response = self.client.get(self.path)
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(response.context['credit_providers'], provider_json)
+            self.assertEqual(mocked_set_all_tiers.call_count, 1)
+
+            response = self.client.get(self.path)
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(response.context['credit_providers'], provider_json)
+            self.assertEqual(mocked_set_all_tiers.call_count, 1)
 
     @httpretty.activate
     def test_credit_api_failure(self):

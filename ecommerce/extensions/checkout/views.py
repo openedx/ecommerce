@@ -182,9 +182,12 @@ class ReceiptResponseView(ThankYouView):
     def get_context_data(self, **kwargs):
         context = super(ReceiptResponseView, self).get_context_data(**kwargs)
         order = context[self.context_object_name]
-        has_enrollment_code_product = any(
-            line.product.is_enrollment_code_product for line in order.basket.all_lines()
-        )
+        has_enrollment_code_product = False
+        if order.basket:
+            has_enrollment_code_product = any(
+                line.product.is_enrollment_code_product for line in order.basket.all_lines()
+            )
+
         context.update({
             'payment_method': self.get_payment_method(order),
             'display_credit_messaging': self.order_contains_credit_seat(order),
@@ -237,23 +240,23 @@ class ReceiptResponseView(ThankYouView):
 
     def get_order_verification_context(self, order):
         context = {}
-        verified_course_id = None
         request = self.request
         site = request.site
 
         # NOTE: Only display verification and credit completion details to the user who actually placed the order.
-        if request.user == order.user:
-            for line in order.lines.all():
-                product = line.product
+        if request.user != order.user:
+            return context
 
-                if not verified_course_id and getattr(product.attr, 'id_verification_required', False):
-                    verified_course_id = product.attr.course_key
+        for line in order.lines.all():
+            product = line.product
 
-            if verified_course_id:
+            if (getattr(product.attr, 'id_verification_required', False) and
+                    (getattr(product.attr, 'course_key', False) or getattr(product.attr, 'UUID', False))):
                 context.update({
                     'verification_url': site.siteconfiguration.build_lms_url('verify_student/reverify'),
                     'user_verified': request.user.is_verified(site),
                 })
+                return context
 
         return context
 

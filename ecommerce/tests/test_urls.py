@@ -22,7 +22,7 @@ class TestUrls(TestCase):
         """
         Verify that the API docs render.
         """
-        path = reverse('api-docs:docs-index')
+        path = reverse('api_docs')
         response = self.client.get(path)
 
         assert response.status_code == 200

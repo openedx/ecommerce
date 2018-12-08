@@ -22,7 +22,7 @@ class EnterpriseCustomerConditionTests(EnterpriseServiceMockMixin, DiscoveryTest
         Switch.objects.update_or_create(name=ENTERPRISE_OFFERS_SWITCH, defaults={'active': True})
         self.user = factories.UserFactory()
         self.condition = factories.EnterpriseCustomerConditionFactory()
-        self.test_product = ProductFactory(stockrecords__price_excl_tax=10)
+        self.test_product = ProductFactory(stockrecords__price_excl_tax=10, categories=[])
         self.course_run = CourseFactory()
         self.course_run.create_or_update_seat('verified', True, Decimal(100), self.partner)
 
@@ -49,6 +49,24 @@ class EnterpriseCustomerConditionTests(EnterpriseServiceMockMixin, DiscoveryTest
             enterprise_customer_catalog_uuid=self.condition.enterprise_customer_catalog_uuid,
         )
         self.assertTrue(self.condition.is_satisfied(offer, basket))
+
+    @httpretty.activate
+    def test_is_satisfied_for_anonymous_user(self):
+        """ Ensure the condition returns false for an anonymous user. """
+        offer = factories.EnterpriseOfferFactory(site=self.site, condition=self.condition)
+        basket = factories.BasketFactory(site=self.site, owner=None)
+        basket.add_product(self.course_run.seat_products[0])
+        self.mock_enterprise_learner_api(
+            learner_id=self.user.id,
+            enterprise_customer_uuid=str(self.condition.enterprise_customer_uuid),
+            course_run_id=self.course_run.id,
+        )
+        self.mock_catalog_contains_course_runs(
+            [self.course_run.id],
+            self.condition.enterprise_customer_uuid,
+            enterprise_customer_catalog_uuid=self.condition.enterprise_customer_catalog_uuid,
+        )
+        self.assertFalse(self.condition.is_satisfied(offer, basket))
 
     def test_is_satisfied_empty_basket(self):
         """ Ensure the condition returns False if the basket is empty. """

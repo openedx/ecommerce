@@ -4,11 +4,13 @@ from __future__ import unicode_literals
 import ddt
 import httpretty
 from django.core.exceptions import ValidationError
+from mock import patch
 from oscar.core.loading import get_model
 from oscar.test import factories
 from requests.exceptions import ConnectionError, Timeout
 from slumber.exceptions import SlumberBaseException
 
+from ecommerce.cache_utils.utils import TieredCache
 from ecommerce.coupons.tests.mixins import CouponMixin, DiscoveryMockMixin
 from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
 from ecommerce.tests.testcases import TestCase
@@ -293,6 +295,39 @@ class RangeTests(CouponMixin, DiscoveryTestMixin, DiscoveryMockMixin, TestCase):
         }
         _range = Range.objects.create(**data)
         self.assertEqual(_range.course_seat_types, course_seat_types)
+
+    def test_catalog_contains_product(self):
+        """
+        Verify that catalog_contains_product is cached
+
+        We expect 2 calls to set_all_tiers due to:
+            - the site_configuration api setup
+            - the result being cached
+        """
+        self.mock_access_token_response()
+
+        course, __ = self.create_course_and_seat()
+        course_catalog_id = 1
+        self.range.catalog_query = None
+        self.range.course_seat_types = 'verified'
+        self.range.course_catalog = course_catalog_id
+        self.range.save()
+        self.product.course = course
+        self.product.save()
+
+        self.mock_catalog_contains_endpoint(
+            discovery_api_url=self.site_configuration.discovery_api_url, catalog_id=course_catalog_id,
+            course_run_ids=[course.id]
+        )
+
+        with patch.object(TieredCache, 'set_all_tiers', wraps=TieredCache.set_all_tiers) as mocked_set_all_tiers:
+            mocked_set_all_tiers.assert_not_called()
+
+            _ = self.range.catalog_contains_product(self.product)
+            self.assertEqual(mocked_set_all_tiers.call_count, 2)
+
+            _ = self.range.catalog_contains_product(self.product)
+            self.assertEqual(mocked_set_all_tiers.call_count, 2)
 
 
 @ddt.ddt

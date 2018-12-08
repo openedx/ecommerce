@@ -6,6 +6,7 @@ from decimal import Decimal
 from urllib import urlencode
 
 import dateutil.parser
+import newrelic.agent
 import waffle
 from django.http import HttpResponseBadRequest, HttpResponseRedirect
 from django.shortcuts import redirect, render
@@ -103,6 +104,7 @@ class BasketSummaryView(BasketView):
     Display basket contents and checkout/payment options.
     """
 
+    @newrelic.agent.function_trace()
     def _determine_product_type(self, product):
         """
         Return the seat type based on the product class
@@ -114,6 +116,7 @@ class BasketSummaryView(BasketView):
             seat_type = get_certificate_type_display_value(product.attr.seat_type)
         return seat_type
 
+    @newrelic.agent.function_trace()
     def _deserialize_date(self, date_string):
         date = None
         try:
@@ -122,6 +125,7 @@ class BasketSummaryView(BasketView):
             pass
         return date
 
+    @newrelic.agent.function_trace()
     def _get_course_data(self, product):
         """
         Return course data.
@@ -192,6 +196,7 @@ class BasketSummaryView(BasketView):
             'course_end': course_end,
         }
 
+    @newrelic.agent.function_trace()
     def _process_basket_lines(self, lines):
         """Processes the basket lines and extracts information for the view's context.
         In addition determines whether:
@@ -244,16 +249,16 @@ class BasketSummaryView(BasketView):
                 order_details_msg = _(
                     '{paragraph_start}By purchasing, you and your organization agree to the following terms:'
                     '{paragraph_end} {ul_start} {li_start}Each code is valid for the one course covered and can be '
-                    'used only one time.{li_end} {li_start}You are responsible for distributing codes to your learners.'
+                    'used only one time.{li_end} '
+                    '{li_start}You are responsible for distributing codes to your learners in your organization.'
                     '{li_end} {li_start}Each code will expire in one year from date of purchase or, if earlier, once '
                     'the course is closed.{li_end} {li_start}If a course is not designated as self-paced, you should '
                     'confirm that a course run is available before expiration. {li_end} {li_start}You may not resell '
-                    'codes to third parties.{li_end} {ul_end} {strong_start}All sales final. No refunds.{strong_end} '
+                    'codes to third parties.{li_end} '
+                    '{li_start}All edX for Business Sales are final and not eligible for refunds.{li_end}{ul_end} '
                     '{paragraph_start}You will receive an email at {user_email} with your enrollment code(s). '
                     '{paragraph_end}'
                 ).format(
-                    strong_start='<strong>',
-                    strong_end='</strong>',
                     paragraph_start='<p>',
                     paragraph_end='</p>',
                     ul_start='<ul>',
@@ -298,6 +303,7 @@ class BasketSummaryView(BasketView):
 
         return context_updates, lines_data
 
+    @newrelic.agent.function_trace()
     def _get_payment_processors_data(self, payment_processors):
         """Retrieve information about payment processors for the client side checkout basket.
 
@@ -357,6 +363,7 @@ class BasketSummaryView(BasketView):
         else:
             return super(BasketSummaryView, self).get(request, *args, **kwargs)
 
+    @newrelic.agent.function_trace()
     def get_context_data(self, **kwargs):
         context = super(BasketSummaryView, self).get_context_data(**kwargs)
         formset = context.get('formset', [])
@@ -456,7 +463,10 @@ class VoucherAddView(BaseVoucherAddView):  # pylint: disable=function-redefined
             basket=self.request.basket,
             attribute_type=BasketAttributeType.objects.get(name=BUNDLE)
         )
-        if len(bundle_attribute) > 0 and not voucher.offers.first().condition.program_uuid:
+        is_bundle_purchase = len(bundle_attribute) > 0
+        voucher_program_uuid = voucher.offers.first().condition.program_uuid
+        is_voucher_valid_for_bundle = voucher_program_uuid or voucher.usage == Voucher.MULTI_USE
+        if is_bundle_purchase and not is_voucher_valid_for_bundle:
             messages.error(
                 self.request,
                 _("Coupon code '{code}' is not valid for this basket.").format(code=code))

@@ -30,6 +30,7 @@ class BadRequestException(APIException):
     status_code = status.HTTP_400_BAD_REQUEST
 
 
+# TODO: LEARNER-5197: Remove this exception when the atomic transaction code is deleted.
 class TemporaryBasketException(Exception):
     """Exception raised to force a transaction rollback so that the temporary basket
     is not saved to the database."""

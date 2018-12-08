@@ -16,9 +16,9 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
-"Report-Msgid-Bugs-To: openedx-translation@googlegroups.com\n"
-"POT-Creation-Date: 2018-03-26 16:41-0400\n"
-"PO-Revision-Date: 2018-03-26 19:44+0000\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2018-04-05 11:00+0000\n"
+"PO-Revision-Date: 2018-05-29 22:34+0000\n"
 "Last-Translator: Albeiro Gonzalez <albeiro.gonzalez@edunext.co>\n"
 "Language-Team: Spanish (Latin America) (http://www.transifex.com/open-edx/edx-platform/language/es_419/)\n"
 "MIME-Version: 1.0\n"
@@ -264,17 +264,17 @@ msgstr "Apple Pay no está disponible en estos momentos. Por favor intente con o
 msgid ""
 "An error occurred while processing your payment. You have NOT been charged. "
 "Please try again, or select another payment method."
-msgstr ""
+msgstr "Ocurrió un error mientras procesamos tu pago. NO has sido cargado. Por favor intente de nuevo, o seleccione otro método de pago."
 
 #: ecommerce/static/js/payment_processors/stripe.js:71
 msgid ""
 "An error occurred while attempting to process your payment. You have not "
 "been charged. Please check your payment details, and try again."
-msgstr ""
+msgstr "Un error ocurrió mientras procesábamos su pago.No se cobró ningún dinero. Por favor revise sus ajustes de pago e intente de nuevo."
 
 #: ecommerce/static/js/payment_processors/stripe.js:110
 msgid "An error occurred while processing your payment. Please try again."
-msgstr ""
+msgstr "Ocurrió un error mientras procesábamos su pago. Intente de nuevo."
 
 #: ecommerce/static/js/utils/utils.js:184
 msgid "Trailing comma not allowed."
@@ -387,13 +387,13 @@ msgstr "Educación profesional"
 msgid ""
 "Paid certificate track with initial verification and Professional Education "
 "Certificate"
-msgstr ""
+msgstr "Ruta de certificado pagado con verificación inicial y Certificado de Educación Profesional"
 
 #: ecommerce/static/js/views/course_form_view.js:72
 msgid ""
 "Paid certificate track with initial verification and Verified Certificate, "
 "and option to purchase credit"
-msgstr ""
+msgstr "Ruta de certificado pagado con verificación inicial y Certificado Verificado, y opción de comprar crédito"
 
 #. Translators: _START_, _END_, and _TOTAL_ are placeholders. Do NOT translate
 #. them.

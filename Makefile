@@ -26,8 +26,9 @@ help:
 	@echo '    make clean_static                 delete compiled/compressed static assets       		'
 	@echo '    make static                       compile and compress static assets               		'
 	@echo '    make detect_changed_source_translations    check if translation files are up-to-date		'
-	@echo '    make validate_translations        install fake translations and check if translation files are up-to-date'
+	@echo '    make check_translations_up_to_date         install fake translations and check if translation files are up-to-date'
 	@echo '    make production-requirements      install requirements for production                    '
+	@echo '    make validate_translations        validate translations                    '
 	@echo '                                                                                     		'
 
 requirements.js:
@@ -56,8 +57,20 @@ clean:
 clean_static:
 	rm -rf assets/* ecommerce/static/build/*
 
+run_check_isort:
+	VIRTUAL_ENV=/edx/app/ecommerce/ecommerce_env isort --check-only --recursive e2e/ ecommerce/
+
+run_isort:
+	VIRTUAL_ENV=/edx/app/ecommerce/ecommerce_env isort --recursive e2e/ ecommerce/
+
+run_pep8:
+	pep8 --config=.pep8 ecommerce e2e
+
+run_pylint:
+	pylint -j 0 --rcfile=pylintrc ecommerce e2e
+
 quality:
-	isort --check-only --recursive e2e/ ecommerce/
+	VIRTUAL_ENV=/edx/app/ecommerce/ecommerce_env isort --check-only --recursive e2e/ ecommerce/
 	pep8 --config=.pep8 ecommerce e2e
 	pylint -j 0 --rcfile=pylintrc ecommerce e2e
 
@@ -66,8 +79,8 @@ validate_js:
 	$(NODE_BIN)/gulp test
 	$(NODE_BIN)/gulp lint
 
-validate_python: clean quality
-	PATH=$$PATH:$(NODE_BIN) REUSE_DB=1 coverage run --branch --source=ecommerce ./manage.py test ecommerce \
+validate_python: clean
+	DISABLE_MIGRATIONS=1 PATH=$$PATH:$(NODE_BIN) REUSE_DB=1 coverage run --branch --source=ecommerce ./manage.py test ecommerce \
 	--settings=ecommerce.settings.test --with-ignore-docstrings --logging-level=DEBUG
 	coverage report
 
@@ -75,7 +88,7 @@ fast_validate_python: clean quality
 	REUSE_DB=1 DISABLE_ACCEPTANCE_TESTS=True ./manage.py test ecommerce \
 	--settings=ecommerce.settings.test --processes=4 --with-ignore-docstrings --logging-level=DEBUG
 
-validate: validate_python validate_js
+validate: validate_python validate_js quality
 
 theme_static:
 	python manage.py update_assets --skip-collect
@@ -121,7 +134,11 @@ update_translations: pull_translations fake_translations
 detect_changed_source_translations:
 	cd ecommerce && i18n_tool changed
 
-validate_translations: fake_translations detect_changed_source_translations
+check_translations_up_to_date: fake_translations detect_changed_source_translations
+
+# Validate translations
+validate_translations:
+	cd ecommerce && i18n_tool validate -v
 
 # Targets in a Makefile which do not produce an output file with the same name as the target name
 .PHONY: help requirements migrate serve clean validate_python quality validate_js validate html_coverage e2e \

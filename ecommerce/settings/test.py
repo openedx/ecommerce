@@ -24,17 +24,15 @@ LOGGING['handlers']['local'] = {'class': 'logging.NullHandler'}
 LOGGING['handlers']['console'] = {'class': 'logging.NullHandler'}
 
 if os.getenv('DISABLE_MIGRATIONS'):
-    class DisableMigrations(object):
-        def __contains__(self, item):
-            return True
+    MIGRATION_MODULES = {
+        'default': None,
+        'sessions': None,
+        'profiles': None,
+        'snippets': None,
+        'scaffold_templates': None,
+    }
 
-        def __getitem__(self, item):
-            return "notmigrations"
-
-
-    MIGRATION_MODULES = DisableMigrations()
 # END TEST SETTINGS
-
 
 DATABASES = {
     'default': {
@@ -48,7 +46,6 @@ DATABASES = {
         'ATOMIC_REQUESTS': True,
     },
 }
-
 
 # AUTHENTICATION
 ENABLE_AUTO_AUTH = True
@@ -162,3 +159,9 @@ ENTERPRISE_API_URL = urljoin(ENTERPRISE_SERVICE_URL, 'api/v1/')
 
 # Don't bother sending fake events to Segment. Doing so creates unnecessary threads.
 SEND_SEGMENT_EVENTS = False
+
+# SPEED
+DEBUG = False
+TEMPLATE_DEBUG = False
+CELERY_EAGER_PROPAGATES_EXCEPTIONS = True
+BROKER_BACKEND = 'memory'

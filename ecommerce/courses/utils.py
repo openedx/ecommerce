@@ -1,11 +1,11 @@
 import hashlib
 
 from django.conf import settings
-from django.core.cache import cache
 from django.utils.translation import ugettext_lazy as _
 from opaque_keys.edx.keys import CourseKey
 
-from ecommerce.core.utils import traverse_pagination
+from ecommerce.cache_utils.utils import TieredCache
+from ecommerce.core.utils import deprecated_traverse_pagination
 
 
 def mode_for_product(product):
@@ -32,15 +32,19 @@ def get_course_info_from_catalog(site, product):
 
     api = site.siteconfiguration.discovery_api_client
     partner_short_code = site.siteconfiguration.partner.short_code
+
     cache_key = 'courses_api_detail_{}{}'.format(key, partner_short_code)
     cache_key = hashlib.md5(cache_key).hexdigest()
-    course = cache.get(cache_key)
-    if not course:  # pragma: no cover
-        if product.is_course_entitlement_product:
-            course = api.courses(key).get()
-        else:
-            course = api.course_runs(key).get(partner=partner_short_code)
-        cache.set(cache_key, course, settings.COURSES_API_CACHE_TIMEOUT)
+    course_cached_response = TieredCache.get_cached_response(cache_key)
+    if course_cached_response.is_hit:
+        return course_cached_response.value
+
+    if product.is_course_entitlement_product:
+        course = api.courses(key).get()
+    else:
+        course = api.course_runs(key).get(partner=partner_short_code)
+
+    TieredCache.set_all_tiers(cache_key, course, settings.COURSES_API_CACHE_TIMEOUT)
     return course
 
 
@@ -66,9 +70,10 @@ def get_course_catalogs(site, resource_id=None):
 
     cache_key = '{}.{}'.format(base_cache_key, resource_id) if resource_id else base_cache_key
     cache_key = hashlib.md5(cache_key).hexdigest()
-    cached = cache.get(cache_key)
-    if cached:
-        return cached
+
+    cached_response = TieredCache.get_cached_response(cache_key)
+    if cached_response.is_hit:
+        return cached_response.value
 
     api = site.siteconfiguration.discovery_api_client
     endpoint = getattr(api, resource)
@@ -77,9 +82,9 @@ def get_course_catalogs(site, resource_id=None):
     if resource_id:
         results = response
     else:
-        results = traverse_pagination(response, endpoint)
+        results = deprecated_traverse_pagination(response, endpoint)
 
-    cache.set(cache_key, results, settings.COURSES_API_CACHE_TIMEOUT)
+    TieredCache.set_all_tiers(cache_key, results, settings.COURSES_API_CACHE_TIMEOUT)
     return results
 
 

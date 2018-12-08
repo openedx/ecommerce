@@ -1,0 +1,1 @@
+TEMPORARY_BASKET_CACHE_KEY = "ecommerce.is_calculate_temporary_basket"

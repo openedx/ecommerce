@@ -286,7 +286,7 @@ class SignalTests(ProgramTestMixin, CouponMixin, TestCase):
             assert not mock_track.called
 
     def test_track_completed_enrollment_order(self):
-        """ Make sure we do not send GA events for Enrollment Code orders """
+        """ Make sure we are sending GA events for Enrollment Code orders """
         with mock.patch('ecommerce.extensions.checkout.signals.track_segment_event') as mock_track:
 
             course = CourseFactory()
@@ -298,4 +298,4 @@ class SignalTests(ProgramTestMixin, CouponMixin, TestCase):
 
             order = factories.create_order(basket=basket, user=self.user)
             track_completed_order(None, order)
-            assert not mock_track.called
+            assert mock_track.called

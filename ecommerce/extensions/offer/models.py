@@ -4,7 +4,6 @@ import logging
 import re
 
 from django.conf import settings
-from django.core.cache import cache
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from oscar.apps.offer.abstract_models import (
@@ -18,6 +17,7 @@ from requests.exceptions import ConnectionError, Timeout
 from slumber.exceptions import SlumberBaseException
 from threadlocals.threadlocals import get_current_request
 
+from ecommerce.cache_utils.utils import TieredCache
 from ecommerce.core.utils import get_cache_key, log_message_and_raise_validation_error
 
 OFFER_PRIORITY_ENTERPRISE = 10
@@ -53,7 +53,7 @@ class Benefit(AbstractBenefit):
         """" Filters out products that aren't seats or entitlements or that don't have a paid certificate type. """
         return [
             line for line in lines
-            if line.product.is_seat_product or line.product.is_course_entitlement_product and
+            if (line.product.is_seat_product or line.product.is_course_entitlement_product) and
             hasattr(line.product.attr, 'certificate_type') and
             line.product.attr.certificate_type.lower() in applicable_range.course_seat_types
         ]
@@ -78,14 +78,14 @@ class Benefit(AbstractBenefit):
                 course_id=product_id,
                 query=query
             )
-            response = cache.get(cache_key)
-            if response is False:
-                applicable_lines.remove(line)
-            elif response is None:
+            cached_response = TieredCache.get_cached_response(cache_key)
+            if cached_response.is_miss:
                 if line.product.is_seat_product:
                     course_run_ids.append({'id': product_id, 'cache_key': cache_key, 'line': line})
                 else:
                     course_uuids.append({'id': product_id, 'cache_key': cache_key, 'line': line})
+            elif cached_response.value is False:
+                applicable_lines.remove(line)
         return course_run_ids, course_uuids, applicable_lines
 
     def get_applicable_lines(self, offer, basket, range=None):  # pylint: disable=redefined-builtin
@@ -116,7 +116,7 @@ class Benefit(AbstractBenefit):
                 # Cache range-state individually for each course or run identifier and remove lines not in the range.
                 for metadata in course_run_ids + course_uuids:
                     in_range = response[str(metadata['id'])]
-                    cache.set(metadata['cache_key'], in_range, settings.COURSES_API_CACHE_TIMEOUT)
+                    TieredCache.set_all_tiers(metadata['cache_key'], in_range, settings.COURSES_API_CACHE_TIMEOUT)
                     if not in_range:
                         applicable_lines.remove(metadata['line'])
             return [(line.product.stockrecords.first().price_excl_tax, line) for line in applicable_lines]
@@ -235,8 +235,9 @@ class ConditionalOffer(AbstractConditionalOffer):
         In addition to Oscar's check to see if the condition is satisfied,
         a check for if basket owners email domain is within the allowed email domains.
         """
-        if not self.is_email_valid(basket.owner.email):
+        if basket.owner and not self.is_email_valid(basket.owner.email):
             return False
+
         if self.benefit.range and self.benefit.range.catalog_query:
             # The condition is only satisfied if all basket lines are in the offer range
             num_lines = basket.all_lines().count()
@@ -333,19 +334,21 @@ class Range(AbstractRange):
             course_id=product.course_id,
             catalog_id=self.course_catalog
         )
-        response = cache.get(cache_key)
-        if not response:
-            discovery_api_client = request.site.siteconfiguration.discovery_api_client
-            try:
-                # GET: /api/v1/catalogs/{catalog_id}/contains?course_run_id={course_run_ids}
-                response = discovery_api_client.catalogs(self.course_catalog).contains.get(
-                    course_run_id=product.course_id
-                )
-                cache.set(cache_key, response, settings.COURSES_API_CACHE_TIMEOUT)
-            except (ConnectionError, SlumberBaseException, Timeout):
-                raise Exception('Unable to connect to Discovery Service for catalog contains endpoint.')
+        cached_response = TieredCache.get_cached_response(cache_key)
+        if cached_response.is_hit:
+            return cached_response.value
 
-        return response
+        discovery_api_client = request.site.siteconfiguration.discovery_api_client
+        try:
+            # GET: /api/v1/catalogs/{catalog_id}/contains?course_run_id={course_run_ids}
+            response = discovery_api_client.catalogs(self.course_catalog).contains.get(
+                course_run_id=product.course_id
+            )
+
+            TieredCache.set_all_tiers(cache_key, response, settings.COURSES_API_CACHE_TIMEOUT)
+            return response
+        except (ConnectionError, SlumberBaseException, Timeout):
+            raise Exception('Unable to connect to Discovery Service for catalog contains endpoint.')
 
     def contains_product(self, product):
         """

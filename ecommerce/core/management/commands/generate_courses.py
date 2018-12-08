@@ -55,7 +55,7 @@ class Command(BaseCommand):
             partner_code = course_settings["partner"]
             try:
                 partner = Partner.objects.get(short_code=partner_code)
-                site = partner.siteconfiguration.site
+                site = partner.default_site
             except Partner.DoesNotExist:
                 logger.warning(partner_code + " partner does not exist")
                 logger.warning("Can't create course, proceeding to next course")

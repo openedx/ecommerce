@@ -7,10 +7,10 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
-"Report-Msgid-Bugs-To: openedx-translation@googlegroups.com\n"
-"POT-Creation-Date: 2018-03-26 16:41-0400\n"
-"PO-Revision-Date: 2018-03-26 19:44+0000\n"
-"Last-Translator: Ned Batchelder <ned@edx.org>\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2018-04-05 11:00+0000\n"
+"PO-Revision-Date: 2018-06-11 08:26+0000\n"
+"Last-Translator: Zane Mičule <ltmc.training@gmail.com>\n"
 "Language-Team: Latvian (http://www.transifex.com/open-edx/edx-platform/language/lv/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -82,11 +82,11 @@ msgstr ""
 #: ecommerce/static/js/models/course_model.js:94
 #: ecommerce/static/js/views/dynamic_catalog_view.js:70
 msgid "Course ID"
-msgstr ""
+msgstr "Kursa ID"
 
 #: ecommerce/static/js/models/course_model.js:95
 msgid "Course Name"
-msgstr ""
+msgstr "Kursa nosaukums"
 
 #: ecommerce/static/js/models/course_model.js:96
 #: ecommerce/static/js/views/course_list_view.js:72
@@ -95,7 +95,7 @@ msgstr ""
 
 #: ecommerce/static/js/models/course_model.js:97
 msgid "Verification Deadline"
-msgstr ""
+msgstr "Apstiprināšanas termiņš"
 
 #: ecommerce/static/js/models/course_model.js:98
 msgid "Include Honor Seat"
@@ -116,7 +116,7 @@ msgstr ""
 #: ecommerce/static/js/models/course_seats/course_seat.js:84
 #: ecommerce/static/js/views/course_form_view.js:60
 msgid "Verified"
-msgstr ""
+msgstr "Verificēts"
 
 #: ecommerce/static/js/models/course_seats/course_seat.js:86
 #: ecommerce/static/js/views/course_form_view.js:71
@@ -125,19 +125,19 @@ msgstr ""
 
 #: ecommerce/static/js/models/course_seats/course_seat.js:89
 msgid "Professional"
-msgstr ""
+msgstr "Profesionālais"
 
 #: ecommerce/static/js/models/course_seats/course_seat.js:91
 msgid "Honor"
-msgstr ""
+msgstr "Gods"
 
 #: ecommerce/static/js/models/course_seats/course_seat.js:93
 msgid "Audit"
-msgstr ""
+msgstr "Audita"
 
 #: ecommerce/static/js/models/course_seats/course_seat.js:101
 msgid "Verified Certificate"
-msgstr ""
+msgstr "Verificēts sertifikāts"
 
 #: ecommerce/static/js/models/course_seats/course_seat.js:105
 msgid "Professional Certificate"
@@ -217,7 +217,7 @@ msgstr ""
 
 #: ecommerce/static/js/pages/coupon_list_page.js:12
 msgid "Coupon Codes"
-msgstr ""
+msgstr "Kuponu kods"
 
 #: ecommerce/static/js/pages/course_create_page.js:12
 msgid "Create New Course"
@@ -225,7 +225,7 @@ msgstr ""
 
 #: ecommerce/static/js/pages/course_detail_page.js:13
 msgid "View Course"
-msgstr ""
+msgstr "Skatīt kursu"
 
 #: ecommerce/static/js/pages/course_edit_page.js:13
 msgid "Edit Course"
@@ -233,7 +233,7 @@ msgstr ""
 
 #: ecommerce/static/js/pages/course_list_page.js:12
 msgid "Courses"
-msgstr ""
+msgstr "Kursi"
 
 #: ecommerce/static/js/pages/offer_page.js:14
 msgid "Redeem"
@@ -288,7 +288,7 @@ msgstr ""
 
 #: ecommerce/static/js/views/coupon_form_view.js:49
 msgid "Enrollment Code"
-msgstr ""
+msgstr "Reģistrācijas kods"
 
 #: ecommerce/static/js/views/coupon_form_view.js:53
 msgid "Discount Code"
@@ -310,12 +310,12 @@ msgstr ""
 #: ecommerce/static/js/views/coupon_list_view.js:57
 #: ecommerce/static/js/views/course_list_view.js:47
 msgid "Next"
-msgstr ""
+msgstr "Nākamais"
 
 #: ecommerce/static/js/views/coupon_list_view.js:58
 #: ecommerce/static/js/views/course_list_view.js:48
 msgid "Previous"
-msgstr ""
+msgstr "Iepriekšējais"
 
 #. Translators: _START_, _END_, and _TOTAL_ are placeholders. Do NOT translate
 #. them.
@@ -335,7 +335,7 @@ msgstr ""
 
 #: ecommerce/static/js/views/coupon_list_view.js:74
 msgid "Name"
-msgstr ""
+msgstr "Vārds"
 
 #: ecommerce/static/js/views/coupon_list_view.js:81
 msgid "Created"
@@ -351,7 +351,7 @@ msgstr ""
 
 #: ecommerce/static/js/views/coupon_list_view.js:93
 msgid "Category"
-msgstr ""
+msgstr "Grupa"
 
 #: ecommerce/static/js/views/coupon_list_view.js:97
 msgid "Coupon Report"
@@ -372,7 +372,7 @@ msgstr ""
 
 #: ecommerce/static/js/views/course_form_view.js:65
 msgid "Professional Education"
-msgstr ""
+msgstr "Profesionālā izglītība"
 
 #: ecommerce/static/js/views/course_form_view.js:66
 msgid ""
@@ -404,7 +404,7 @@ msgstr ""
 
 #: ecommerce/static/js/views/course_list_view.js:64
 msgid "Course"
-msgstr ""
+msgstr "Kurss"
 
 #: ecommerce/static/js/views/course_list_view.js:79
 msgid "Last Edited"
@@ -477,7 +477,7 @@ msgstr ""
 
 #: ecommerce/static/vendor-extensions/oscar/js/refund_list.js:33
 msgid "Error"
-msgstr ""
+msgstr "Kļūda"
 
 #: ecommerce/static/vendor-extensions/oscar/js/refund_list.js:36
 msgid ""

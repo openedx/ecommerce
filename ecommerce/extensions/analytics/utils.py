@@ -2,6 +2,9 @@ import json
 import logging
 from functools import wraps
 
+import waffle
+from django.db import transaction
+
 from ecommerce.courses.utils import mode_for_product
 
 logger = logging.getLogger(__name__)
@@ -131,6 +134,9 @@ def track_segment_event(site, user, event, properties):
         (success, msg): Tuple indicating the success of enqueuing the event on the message queue.
             This can be safely ignored unless needed for debugging purposes.
     """
+    if not user:
+        return False, 'Event is not fired for anonymous user.'
+
     site_configuration = site.siteconfiguration
     if not site_configuration.segment_key:
         msg = 'Event [{event}] was NOT fired because no Segment key is set for site configuration [{site_id}]'
@@ -145,7 +151,13 @@ def track_segment_event(site, user, event, properties):
             'clientId': ga_client_id
         }
     }
-    return site.siteconfiguration.segment_client.track(user_tracking_id, event, properties, context=context)
+    if waffle.switch_is_active('basket_transaction_on_commit'):
+        return transaction.on_commit(
+            lambda: site.siteconfiguration.segment_client.track(user_tracking_id, event, properties, context=context)
+            # pylint: disable=cell-var-from-loop
+        )
+    else:
+        return site.siteconfiguration.segment_client.track(user_tracking_id, event, properties, context=context)
 
 
 def translate_basket_line_for_segment(line):

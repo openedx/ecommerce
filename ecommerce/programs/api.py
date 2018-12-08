@@ -1,7 +1,8 @@
 import logging
 
 from django.conf import settings
-from django.core.cache import cache
+
+from ecommerce.cache_utils.utils import TieredCache
 
 logger = logging.getLogger(__name__)
 
@@ -31,14 +32,15 @@ class ProgramsApiClient(object):
         program_uuid = str(uuid)
         cache_key = '{site_domain}-program-{uuid}'.format(site_domain=self.site_domain, uuid=program_uuid)
 
-        program = cache.get(cache_key)
+        program_cached_response = TieredCache.get_cached_response(cache_key)
 
-        if program:  # pragma: no cover
+        if program_cached_response.is_hit:  # pragma: no cover
             logger.debug('Program [%s] was found in the cache.', program_uuid)
-        else:
-            logging.info('Retrieving details of of program [%s]...', program_uuid)
-            program = self.client.programs(program_uuid).get()
-            cache.set(cache_key, program, self.cache_ttl)
-            logging.info('Program [%s] was successfully retrieved and cached.', program_uuid)
+            return program_cached_response.value
 
+        logging.info('Retrieving details of of program [%s]...', program_uuid)
+        program = self.client.programs(program_uuid).get()
+
+        TieredCache.set_all_tiers(cache_key, program, self.cache_ttl)
+        logging.info('Program [%s] was successfully retrieved and cached.', program_uuid)
         return program

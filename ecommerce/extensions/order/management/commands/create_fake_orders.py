@@ -7,8 +7,6 @@ from django.db import transaction
 from oscar.core.loading import get_class, get_model
 from oscar.test.factories import UserFactory
 
-from ecommerce.core.models import SiteConfiguration
-
 logger = logging.getLogger(__name__)
 Order = get_model('order', 'Order')
 Basket = get_model('basket', 'Basket')
@@ -60,10 +58,9 @@ class Command(BaseCommand):
             logger.exception(msg)
             raise CommandError(msg)
 
-        try:
-            site = partner.siteconfiguration.site
-        except SiteConfiguration.DoesNotExist:
-            msg = 'No Site Configuration exists for partner {}!'.format(partner.id)
+        site = partner.default_site
+        if not site:
+            msg = 'No default site exists for partner {}!'.format(partner.id)
             logger.exception(msg)
             raise CommandError(msg)
 

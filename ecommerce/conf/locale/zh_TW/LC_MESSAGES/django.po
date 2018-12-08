@@ -7,7 +7,7 @@
 # JauhorngChen <jauhorng.chen@gmail.com>, 2015
 # JEN-HAO HSIEH <orienthauz@gmail.com>, 2015
 # Mushiyo, 2015
-# TW C2 <lily@weasto.com>, 2016
+# TW C2 <info@weasto.com>, 2016
 # vincent <orzkng2007@yahoo.com.tw>, 2015
 # wei-chi lin <vickybunny1989@hotmail.com>, 2016
 # Wun-Han Syu <whsyu@mail.fcu.edu.tw>, 2016

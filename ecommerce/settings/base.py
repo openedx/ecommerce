@@ -231,6 +231,7 @@ MIDDLEWARE_CLASSES = (
     'threadlocals.middleware.ThreadLocalMiddleware',
     'ecommerce.theming.middleware.CurrentSiteThemeMiddleware',
     'ecommerce.theming.middleware.ThemePreviewMiddleware',
+    'ecommerce.cache_utils.middleware.CacheUtilsMiddleware'
 )
 # END MIDDLEWARE CONFIGURATION
 
@@ -250,8 +251,11 @@ PROGRAM_CACHE_TIMEOUT = 3600  # Value is in seconds.
 PROVIDER_DATA_PROCESSING_TIMEOUT = 15  # Value is in seconds.
 CREDIT_PROVIDER_CACHE_TIMEOUT = 600
 
-# Enrollment API settings used for fetching information from LMS
-ENROLLMENT_API_CACHE_TIMEOUT = 30  # Value is in seconds.
+# Anonymous User Calculate Cache timeout
+ANONYMOUS_BASKET_CALCULATE_CACHE_TIMEOUT = 3600  # Value is in seconds.
+
+# LMS API settings used for fetching information from LMS
+LMS_API_CACHE_TIMEOUT = 30  # Value is in seconds.
 # END URL CONFIGURATION
 
 VOUCHER_CACHE_TIMEOUT = 10  # Value is in seconds.
@@ -277,6 +281,7 @@ DJANGO_APPS = [
     'crispy_forms',
     'solo',
     'social_django',
+    'rest_framework_swagger',
 ]
 
 # Apps specific to this project go here.
@@ -470,6 +475,7 @@ TEST_RUNNER = 'django.test.runner.DiscoverRunner'
 SESSION_COOKIE_NAME = 'ecommerce_sessionid'
 CSRF_COOKIE_NAME = 'ecommerce_csrftoken'
 LANGUAGE_COOKIE_NAME = 'ecommerce_language'
+SESSION_COOKIE_SECURE = False
 # END COOKIE CONFIGURATION
 
 

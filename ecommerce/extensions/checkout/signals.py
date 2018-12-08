@@ -23,26 +23,18 @@ ORDER_LINE_COUNT = 1
 @receiver(post_checkout, dispatch_uid='tracking.post_checkout_callback')
 @silence_exceptions('Failed to emit tracking event upon order completion.')
 def track_completed_order(sender, order=None, **kwargs):  # pylint: disable=unused-argument
-    """Emit a tracking event when an order is placed."""
+    """
+    Emit a tracking event when
+    1. An order is placed OR
+    2. An enrollment code purchase order is placed.
+    """
     if order.total_excl_tax <= 0:
         return
-
-    for line in order.lines.all():
-        if line.product.is_coupon_product or line.product.is_enrollment_code_product:
-            return
-
-    voucher = order.basket_discounts.filter(voucher_id__isnull=False).first()
-    coupon = voucher.voucher_code if voucher else None
-    try:
-        bundle_id = BasketAttribute.objects.get(basket=order.basket, attribute_type__name=BUNDLE).value_text
-    except BasketAttribute.DoesNotExist:
-        bundle_id = None
 
     properties = {
         'orderId': order.number,
         'total': str(order.total_excl_tax),
         'currency': order.currency,
-        'coupon': coupon,
         'discount': str(order.total_discount_incl_tax),
         'products': [
             {
@@ -59,6 +51,25 @@ def track_completed_order(sender, order=None, **kwargs):  # pylint: disable=unus
             } for line in order.lines.all()
         ],
     }
+
+    for line in order.lines.all():
+        if line.product.is_enrollment_code_product:
+            # Send analytics events to track bulk enrollment code purchases.
+            track_segment_event(order.site, order.user, 'Bulk Enrollment Codes Order Completed', properties)
+            return
+
+        if line.product.is_coupon_product:
+            return
+
+    voucher = order.basket_discounts.filter(voucher_id__isnull=False).first()
+    coupon = voucher.voucher_code if voucher else None
+
+    try:
+        bundle_id = BasketAttribute.objects.get(basket=order.basket, attribute_type__name=BUNDLE).value_text
+    except BasketAttribute.DoesNotExist:
+        bundle_id = None
+
+    properties['coupon'] = coupon
 
     try:
         bundle_id = BasketAttribute.objects.get(basket=order.basket, attribute_type__name=BUNDLE).value_text

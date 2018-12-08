@@ -11,18 +11,14 @@ def offline_context():
     through all applied themes and returns a separate context for each theme.
     """
     main_css_path = "css/base/main.css"
-    swagger_css_path = "css/base/edx-swagger.css"
 
     for theme in get_themes():
         main_css = ThemeStorage(prefix=theme.theme_dir_name).url(main_css_path)
-        swagger_css = ThemeStorage(prefix=theme.theme_dir_name).url(swagger_css_path)
 
         yield {
             'main_css': main_css,
-            'swagger_css': swagger_css,
         }
 
     yield {
         'main_css': ThemeStorage().url(main_css_path),
-        'swagger_css': ThemeStorage().url(swagger_css_path),
     }

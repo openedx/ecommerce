@@ -5,7 +5,6 @@ import logging
 
 import waffle
 from django.conf import settings
-from django.core.cache import cache
 from edx_rest_api_client.client import EdxRestApiClient
 from edx_rest_api_client.exceptions import HttpNotFoundError
 from oscar.apps.order.utils import OrderCreator as OscarOrderCreator
@@ -13,6 +12,7 @@ from oscar.core.loading import get_model
 from requests.exceptions import ConnectionError, ConnectTimeout  # pylint: disable=ungrouped-imports
 from threadlocals.threadlocals import get_current_request
 
+from ecommerce.cache_utils.utils import TieredCache
 from ecommerce.core.url_utils import get_lms_entitlement_api_url
 from ecommerce.extensions.order.constants import DISABLE_REPEAT_ORDER_CHECK_SWITCH_NAME
 from ecommerce.extensions.refund.status import REFUND_LINE
@@ -149,15 +149,15 @@ class UserAlreadyPlacedOrder(object):
                                                   jwt=site.siteconfiguration.access_token)
         partner_short_code = site.siteconfiguration.partner.short_code
         key = 'course_entitlement_detail_{}{}'.format(entitlement_uuid, partner_short_code)
-        entitlement = cache.get(key)
-
-        if not entitlement:
+        entitlement_cached_response = TieredCache.get_cached_response(key)
+        if entitlement_cached_response.is_hit:
+            entitlement = entitlement_cached_response.value
+        else:
             logger.debug('Trying to get entitlement {%s}', entitlement_uuid)
             entitlement = entitlement_api_client.entitlements(entitlement_uuid).get()
-            cache.set(key, entitlement, settings.COURSES_API_CACHE_TIMEOUT)
+            TieredCache.set_all_tiers(key, entitlement, settings.COURSES_API_CACHE_TIMEOUT)
 
         expired = entitlement.get('expired_at')
-
         logger.debug('Entitlement {%s} expired = {%s}', entitlement_uuid, expired)
 
         return expired

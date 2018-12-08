@@ -3,11 +3,11 @@ import hashlib
 import logging
 
 from django.conf import settings
-from django.core.cache import cache
 from oscar.core.loading import get_model
 from slumber.exceptions import HttpNotFoundError
 
-from ecommerce.core.utils import get_cache_key, traverse_pagination
+from ecommerce.cache_utils.utils import TieredCache
+from ecommerce.core.utils import get_cache_key
 
 Product = get_model('catalogue', 'Product')
 
@@ -66,33 +66,20 @@ def get_catalog_course_runs(site, query, limit=None, offset=None):
     )
     cache_key = hashlib.md5(cache_key).hexdigest()
 
-    response = cache.get(cache_key)
-    if not response:
-        api = site.siteconfiguration.discovery_api_client
-        endpoint = getattr(api, api_resource_name)
+    cached_response = TieredCache.get_cached_response(cache_key)
+    if cached_response.is_hit:
+        return cached_response.value
 
-        if limit:
-            response = endpoint().get(
-                partner=partner_code,
-                q=query,
-                limit=limit,
-                offset=offset
-            )
-        else:
-            response = endpoint().get(
-                partner=partner_code,
-                q=query
-            )
-            all_response_results = traverse_pagination(response, endpoint)
-            response = {
-                'count': len(all_response_results),
-                'next': 'None',
-                'previous': 'None',
-                'results': all_response_results,
-            }
+    api = site.siteconfiguration.discovery_api_client
+    endpoint = getattr(api, api_resource_name)
 
-        cache.set(cache_key, response, settings.COURSES_API_CACHE_TIMEOUT)
-
+    response = endpoint().get(
+        partner=partner_code,
+        q=query,
+        limit=limit,
+        offset=offset
+    )
+    TieredCache.set_all_tiers(cache_key, response, settings.COURSES_API_CACHE_TIMEOUT)
     return response
 
 
@@ -150,18 +137,20 @@ def fetch_course_catalog(site, catalog_id):
         catalog_id=catalog_id,
     )
 
-    response = cache.get(cache_key)
-    if not response:
-        api = site.siteconfiguration.discovery_api_client
-        endpoint = getattr(api, api_resource)
+    cached_response = TieredCache.get_cached_response(cache_key)
+    if cached_response.is_hit:
+        return cached_response.value
 
-        try:
-            response = endpoint(catalog_id).get()
-        except HttpNotFoundError:
-            logger.exception("Catalog '%s' not found.", catalog_id)
-            raise
+    api = site.siteconfiguration.discovery_api_client
+    endpoint = getattr(api, api_resource)
 
-    cache.set(cache_key, response, settings.COURSES_API_CACHE_TIMEOUT)
+    try:
+        response = endpoint(catalog_id).get()
+    except HttpNotFoundError:
+        logger.exception("Catalog '%s' not found.", catalog_id)
+        raise
+
+    TieredCache.set_all_tiers(cache_key, response, settings.COURSES_API_CACHE_TIMEOUT)
     return response
 
 

@@ -17,8 +17,8 @@ msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: openedx-translation@googlegroups.com\n"
 "POT-Creation-Date: 2018-03-26 16:41-0400\n"
-"PO-Revision-Date: 2018-03-30 10:50+0000\n"
-"Last-Translator: Muhammad Ayub khan <ayubkhan@edx.org>\n"
+"PO-Revision-Date: 2018-06-05 15:27+0000\n"
+"Last-Translator: Ali Işıngör <ali@artistanbul.io>\n"
 "Language-Team: Turkish (Turkey) (http://www.transifex.com/open-edx/edx-platform/language/tr_TR/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -221,7 +221,7 @@ msgstr "Apple Pay'i Etkinleştir"
 
 #: ecommerce/core/models.py:185
 msgid "Enable Partial Program Offer"
-msgstr ""
+msgstr "Kısmi Program Teklifini Etkinleştir"
 
 #: ecommerce/core/models.py:186
 msgid ""
@@ -590,7 +590,7 @@ msgstr "Sipariş için denediğiniz ürünlerden biri mevcut değil."
 
 #: ecommerce/extensions/api/serializers.py:337
 msgid "Products must have a certificate type."
-msgstr ""
+msgstr "Ürünler bir sertifika türüne sahip olmak zorunda."
 
 #: ecommerce/extensions/api/serializers.py:340
 #: ecommerce/extensions/api/serializers.py:371
@@ -680,7 +680,7 @@ msgstr ""
 
 #: ecommerce/extensions/basket/views.py:90
 msgid "No product is available to buy."
-msgstr ""
+msgstr "Satın alınabilecek ürün yok."
 
 #: ecommerce/extensions/basket/views.py:96
 msgid "You have already purchased these products"
@@ -736,7 +736,7 @@ msgstr ""
 #: ecommerce/extensions/basket/views.py:363
 #, python-brace-format
 msgid "Could not apply the code '{code}'; it requires data sharing consent."
-msgstr ""
+msgstr "'{code}' kodu uygulanamadı; veri paylaşımı onayı gerektiriyor."
 
 #: ecommerce/extensions/basket/views.py:417
 #, python-brace-format
@@ -941,7 +941,7 @@ msgstr "{label} (gerekli)"
 
 #: ecommerce/extensions/payment/forms.py:109
 msgid "Organization (required)"
-msgstr ""
+msgstr "Kuruluş (gerekli)"
 
 #: ecommerce/extensions/payment/forms.py:125
 #: ecommerce/extensions/payment/forms.py:215
@@ -952,15 +952,15 @@ msgstr "Sepetinizi işlemede bir sorun yaşandı. Sayfayı yenileyerek tekrar de
 
 #: ecommerce/extensions/payment/forms.py:128
 msgid "First Name (required)"
-msgstr ""
+msgstr "Ad (gerekli)"
 
 #: ecommerce/extensions/payment/forms.py:129
 msgid "Last Name (required)"
-msgstr ""
+msgstr "Soyad (gerekli)"
 
 #: ecommerce/extensions/payment/forms.py:130
 msgid "Address (required)"
-msgstr ""
+msgstr "Adres (gerekli)"
 
 #: ecommerce/extensions/payment/forms.py:131
 msgid "Suite/Apartment Number"
@@ -968,7 +968,7 @@ msgstr "Apartman/Daire No"
 
 #: ecommerce/extensions/payment/forms.py:132
 msgid "City (required)"
-msgstr ""
+msgstr "Şehir (gerekli)"
 
 #: ecommerce/extensions/payment/forms.py:135
 msgid "State/Province"
@@ -980,7 +980,7 @@ msgstr "Posta Kodu"
 
 #: ecommerce/extensions/payment/forms.py:137
 msgid "Country (required)"
-msgstr ""
+msgstr "Ülke (gerekli)"
 
 #: ecommerce/extensions/payment/forms.py:164
 #: ecommerce/extensions/payment/forms.py:166
@@ -1220,7 +1220,7 @@ msgstr "Kupon Sona Erme Tarihi"
 
 #: ecommerce/extensions/voucher/utils.py:239
 msgid "Email Domains"
-msgstr ""
+msgstr "E-posta Alan Adları"
 
 #: ecommerce/extensions/voucher/utils.py:534
 #, python-brace-format
@@ -1255,7 +1255,7 @@ msgstr "Sonradan Ödemeli"
 
 #: ecommerce/invoice/models.py:17
 msgid "Bulk purchase"
-msgstr ""
+msgstr "Yığın satınalma"
 
 #: ecommerce/invoice/models.py:18
 msgid "Not applicable"
@@ -1716,7 +1716,7 @@ msgstr "Sipariş Faturası"
 
 #: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html:13
 msgid "For Business"
-msgstr ""
+msgstr "Kurumsal İçin"
 
 #: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html:25
 #: ecommerce/templates/customer/emails/commtype_order_with_csv_body.txt:6
@@ -1736,7 +1736,7 @@ msgstr ""
 #: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html:28
 #: ecommerce/templates/customer/emails/commtype_order_with_csv_body.txt:9
 msgid "Distribute one code per learner before the expiration date."
-msgstr ""
+msgstr "Son geçerlilik tarihinden önce her öğrenciye bir kod dağıt."
 
 #: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html:29
 #: ecommerce/templates/customer/emails/commtype_order_with_csv_body.txt:10
@@ -1761,52 +1761,52 @@ msgstr ""
 msgid ""
 "For more information and assistance, contact "
 "%(link_start)sinfo@edx.org.%(link_end)s"
-msgstr ""
+msgstr "Daha fazla bilgi ve yardım için, lütfen %(link_start)sinfo@edx.org%(link_end)sile iletişime geçin."
 
 #: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html:34
 #: ecommerce/templates/customer/emails/commtype_order_with_csv_body.txt:16
 msgid "Thank You"
-msgstr ""
+msgstr "Teşekkürler"
 
 #: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html:45
 #: ecommerce/templates/customer/emails/commtype_order_with_csv_body.txt:18
 msgid "By purchasing, you and your organization agree to the following terms:"
-msgstr ""
+msgstr "Satın alarak, siz ve kuruluşunuz aşağıdaki koşulları kabul ediyorsunuz:"
 
 #: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html:47
 #: ecommerce/templates/customer/emails/commtype_order_with_csv_body.txt:20
 msgid ""
 "Each code is valid for the one course covered and can be used only one time."
-msgstr ""
+msgstr "Her bir kod kapsam içindeki bir ders için geçerlidir ve sadece bir kez kullanılabilir."
 
 #: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html:48
 #: ecommerce/templates/customer/emails/commtype_order_with_csv_body.txt:21
 msgid "You are responsible for distributing codes to your learners."
-msgstr ""
+msgstr "Öğrencilerinize kodların dağıtımından siz sorumlusunuz."
 
 #: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html:49
 #: ecommerce/templates/customer/emails/commtype_order_with_csv_body.txt:22
 msgid ""
 "Each code will expire in one year from date of purchase or, if earlier, once"
 " the course is closed."
-msgstr ""
+msgstr "Her bir kod satın alma tarihinden itibaren bir yıl boyunca ya da öncesinde gerçekleşebilecek eğitimin kapanması tarihine dek geçerlidir."
 
 #: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html:50
 #: ecommerce/templates/customer/emails/commtype_order_with_csv_body.txt:23
 msgid ""
 "If a course is not designated as self-paced, you should confirm that a "
 "course run is available before expiration."
-msgstr ""
+msgstr "Eğer eğitim \"kendi kendine\" formatında tasarlanmamışsa, dersin kapanma tarihinden önce müsaitlik durumuna göz atmanız gerekmektedir."
 
 #: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html:51
 #: ecommerce/templates/customer/emails/commtype_order_with_csv_body.txt:24
 msgid "You may not resell codes to third parties."
-msgstr ""
+msgstr "Bu kodların üçüncü taraflara yeniden satışını yapamazsınız."
 
 #: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html:52
 #: ecommerce/templates/customer/emails/commtype_order_with_csv_body.txt:25
 msgid "All sales final. No refunds."
-msgstr ""
+msgstr "Tüm satışlar kesindir. Ücret iadesi yapılmaz."
 
 #: ecommerce/templates/customer/emails/commtype_order_with_csv_body.txt:2
 msgid "Order confirmation for: "
@@ -1817,7 +1817,7 @@ msgstr "Sipariş onayı: "
 msgid ""
 "Please visit %(download_csv_link)s to download and save the enrollment code "
 "file."
-msgstr ""
+msgstr "Kayıtlanma kodu dosyasını indirmek ve kaydetmek için lütfen%(download_csv_link)s bağlantısını ziyaret edin."
 
 #: ecommerce/templates/customer/emails/commtype_order_with_csv_body.txt:13
 #, python-format
@@ -1828,7 +1828,7 @@ msgstr ""
 
 #: ecommerce/templates/customer/emails/commtype_order_with_csv_body.txt:14
 msgid "For more information and assistance, contact info@edx.org."
-msgstr ""
+msgstr "Daha fazla bilgi ve yardım için, info@edx.org ile iletişime geçin."
 
 #: ecommerce/templates/customer/emails/commtype_order_with_csv_subject.txt:2
 #, python-format
@@ -1942,7 +1942,7 @@ msgstr "Panele Git"
 
 #: ecommerce/templates/edx/checkout/receipt.html:179
 msgid "Find more courses"
-msgstr ""
+msgstr "Yeni dersler bul"
 
 #: ecommerce/templates/edx/checkout/receipt_not_found.html:6
 msgid "Order Not Found"
@@ -2147,7 +2147,7 @@ msgstr ""
 
 #: ecommerce/templates/oscar/basket/messages/new_total.html:6
 msgid "Your basket is now empty"
-msgstr ""
+msgstr "Sepetiniz şu an boş"
 
 #: ecommerce/templates/oscar/basket/messages/new_total.html:9
 #: ecommerce/templates/oscar/basket/messages/new_total.html:14
@@ -2161,11 +2161,11 @@ msgstr ""
 
 #: ecommerce/templates/oscar/basket/messages/new_total.html:24
 msgid "View basket"
-msgstr ""
+msgstr "Sepeti göster"
 
 #: ecommerce/templates/oscar/basket/messages/new_total.html:25
 msgid "Checkout now"
-msgstr ""
+msgstr "Şimdi öde"
 
 #: ecommerce/templates/oscar/basket/partials/add_voucher_form.html:11
 msgid "Applying..."
@@ -2200,7 +2200,7 @@ msgstr "özet"
 
 #: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:54
 msgid "Quanity"
-msgstr ""
+msgstr "Miktar"
 
 #: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:64
 msgid "Discounts applied"
@@ -2212,7 +2212,7 @@ msgid ""
 "\n"
 "                                    %(benefit)s discount provided by %(enterprise_customer_name)s.\n"
 "                                "
-msgstr ""
+msgstr "\n                                    %(enterprise_customer_name)s tarafından sağlanan indirim %(benefit)s.\n                                "
 
 #: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:90
 #, python-format
@@ -2341,7 +2341,7 @@ msgstr "Kupon kodunu uygula"
 
 #: ecommerce/templates/oscar/basket/partials/hosted_checkout_basket.html:159
 msgid "Checkout"
-msgstr "Ödeme yeri"
+msgstr "Ödeme"
 
 #. Translators: Do NOT translate the name PayPal.
 #: ecommerce/templates/oscar/basket/partials/hosted_checkout_basket.html:162
@@ -2359,7 +2359,7 @@ msgstr ""
 msgid ""
 "<strong>Note:</strong> To complete your enrollment, select Checkout or "
 "Checkout with PayPal."
-msgstr ""
+msgstr "<strong>Not:</strong> Kaydınızı tamamlamak için, Ödeme'yi ya da PayPal ile Öde'yi seçin."
 
 #: ecommerce/templates/oscar/basket/partials/hosted_checkout_basket.html:184
 msgid "Have questions?"
@@ -2543,7 +2543,7 @@ msgid ""
 "\n"
 "                Created product '%(name)s'.\n"
 "            "
-msgstr ""
+msgstr "\n                Oluşturulmuş ürün '%(name)s'.\n            "
 
 #: ecommerce/templates/oscar/dashboard/catalogue/messages/product_saved.html:37
 #, python-format
@@ -2551,7 +2551,7 @@ msgid ""
 "\n"
 "                Updated product '%(name)s'.\n"
 "            "
-msgstr ""
+msgstr "\n                Güncellenmiş ürün '%(name)s'.\n            "
 
 #: ecommerce/templates/oscar/dashboard/catalogue/messages/product_saved.html:48
 msgid "Edit again"
@@ -2598,7 +2598,7 @@ msgstr "Varyantlar"
 
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:88
 msgid "Upselling"
-msgstr ""
+msgstr "Upselling"
 
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:146
 msgid "Product Type:"
@@ -2626,7 +2626,7 @@ msgstr "Düşük stok seviyesi"
 
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:199
 msgid "Cost price"
-msgstr ""
+msgstr "Maliyet ücreti"
 
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:200
 msgid "Price (excl tax)"
@@ -2709,11 +2709,11 @@ msgstr "Kâr"
 
 #: ecommerce/templates/oscar/dashboard/index.html:36
 msgid "Average order cost"
-msgstr ""
+msgstr "Ortalama sipariş maliyeti"
 
 #: ecommerce/templates/oscar/dashboard/index.html:37
 msgid "Average (paid) order cost"
-msgstr ""
+msgstr "Ortalama (ödenmiş) sipariş maliyeti"
 
 #: ecommerce/templates/oscar/dashboard/index.html:67
 msgid "Products and vouchers"
@@ -2761,7 +2761,7 @@ msgstr "Mevcut teklif"
 
 #: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:41
 msgid "Offer not available due to restrictions!"
-msgstr ""
+msgstr "Kısıtlamalardan dolayı teklif yapılamıyor!"
 
 #: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:43
 msgid "Total cost:"
@@ -2804,7 +2804,7 @@ msgstr "CSV olarak Kaydet"
 
 #: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:95
 msgid "Orders that used this offer"
-msgstr ""
+msgstr "Bu teklifi kullanan siparişler"
 
 #: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:99
 #: ecommerce/templates/oscar/dashboard/orders/order_list.html:68
@@ -2834,17 +2834,17 @@ msgid ""
 "\n"
 "        Order %(number)s - Line #%(id)s\n"
 "    "
-msgstr ""
+msgstr "\n        Sipariş %(number)s - Sıra #%(id)s\n    "
 
 #: ecommerce/templates/oscar/dashboard/orders/line_detail.html:21
 #, python-format
 msgid "Line #%(id)s"
-msgstr ""
+msgstr "Sıra #%(id)s"
 
 #: ecommerce/templates/oscar/dashboard/orders/line_detail.html:26
 #, python-format
 msgid "Order #%(number)s - Line #%(id)s"
-msgstr ""
+msgstr "Sipariş #%(number)s - Sıra #%(id)s"
 
 #: ecommerce/templates/oscar/dashboard/orders/line_detail.html:37
 msgctxt "Product title"

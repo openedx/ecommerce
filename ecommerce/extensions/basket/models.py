@@ -1,10 +1,11 @@
-import waffle
-from django.db import models, transaction
+from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from oscar.apps.basket.abstract_models import AbstractBasket
 from oscar.core.loading import get_class
 
+from ecommerce.cache_utils.utils import RequestCache
 from ecommerce.extensions.analytics.utils import track_segment_event, translate_basket_line_for_segment
+from ecommerce.extensions.basket.constants import TEMPORARY_BASKET_CACHE_KEY
 
 OrderNumberGenerator = get_class('order.utils', 'OrderNumberGenerator')
 Selector = get_class('partner.strategy', 'Selector')
@@ -50,40 +51,38 @@ class Basket(AbstractBasket):
 
     def flush(self):
         """Remove all products in basket and fire Segment 'Product Removed' Analytic event for each"""
+        cached_response = RequestCache.get_cached_response(TEMPORARY_BASKET_CACHE_KEY)
+        if cached_response.is_hit:
+            # Do not track anything. This is a temporary basket calculation. TODO: LEARNER 5463
+            return
         for line in self.all_lines():
-
             # Do not fire events for free items. The volume we see for edX.org leads to a dramatic increase in CPU
             # usage. Given that orders for free items are ignored, there is no need for these events.
             if line.stockrecord.price_excl_tax > 0:
                 properties = translate_basket_line_for_segment(line)
-                if waffle.switch_is_active('basket_transaction_on_commit'):
-                    transaction.on_commit(
-                        lambda: track_segment_event(self.site, self.owner, 'Product Removed', properties)  # pylint: disable=cell-var-from-loop
-                    )
-                else:
-                    track_segment_event(self.site, self.owner, 'Product Removed', properties)
+                track_segment_event(self.site, self.owner, 'Product Removed', properties)
 
+        # Call flush after we fetch all_lines() which is cleared during flush()
         super(Basket, self).flush()  # pylint: disable=bad-super-call
 
     def add_product(self, product, quantity=1, options=None):
-        """ Add the indicated product to basket.
+        """
+        Add the indicated product to basket.
 
         Performs AbstractBasket add_product method and fires Google Analytics 'Product Added' event.
         """
         line, created = super(Basket, self).add_product(product, quantity, options)  # pylint: disable=bad-super-call
+        cached_response = RequestCache.get_cached_response(TEMPORARY_BASKET_CACHE_KEY)
+        if cached_response.is_hit:
+            # Do not track anything. This is a temporary basket calculation. TODO: LEARNER 5463
+            return line, created
 
         # Do not fire events for free items. The volume we see for edX.org leads to a dramatic increase in CPU
         # usage. Given that orders for free items are ignored, there is no need for these events.
         if line.stockrecord.price_excl_tax > 0:
             properties = translate_basket_line_for_segment(line)
             properties['cart_id'] = self.id
-            if waffle.switch_is_active('basket_transaction_on_commit'):
-                transaction.on_commit(
-                    lambda: track_segment_event(self.site, self.owner, 'Product Added', properties)  # pylint: disable=cell-var-from-loop
-                )
-            else:
-                track_segment_event(self.site, self.owner, 'Product Added', properties)
-
+            track_segment_event(self.site, self.owner, 'Product Added', properties)
         return line, created
 
     def clear_vouchers(self):

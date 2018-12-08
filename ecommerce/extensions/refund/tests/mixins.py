@@ -40,7 +40,7 @@ class RefundTestMixin(DiscoveryTestMixin):
         )
 
     def create_order(self, user=None, credit=False, multiple_lines=False, free=False,
-                     entitlement=False, status=ORDER.COMPLETE):
+                     entitlement=False, status=ORDER.COMPLETE, id_verification_required=False):
         user = user or self.user
         basket = BasketFactory(owner=user, site=self.site)
 
@@ -52,8 +52,15 @@ class RefundTestMixin(DiscoveryTestMixin):
         elif free:
             basket.add_product(self.honor_product)
         elif entitlement:
-            self.course_entitlement = create_or_update_course_entitlement('verified', 100, self.partner, '111', 'Foo')
-            basket.add_product(self.course_entitlement)
+            course_entitlement = create_or_update_course_entitlement(
+                certificate_type='verified',
+                price=100,
+                partner=self.partner,
+                UUID='111',
+                name='Foo',
+                id_verification_required=id_verification_required
+            )
+            basket.add_product(course_entitlement)
         else:
             basket.add_product(self.verified_product)
 

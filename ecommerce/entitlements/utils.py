@@ -42,7 +42,7 @@ def create_parent_course_entitlement(name, UUID):
     return parent, created
 
 
-def create_or_update_course_entitlement(certificate_type, price, partner, UUID, name):
+def create_or_update_course_entitlement(certificate_type, price, partner, UUID, name, id_verification_required=False):
     """ Create or Update Course Entitlement Products """
 
     certificate_type = certificate_type.lower()
@@ -69,6 +69,7 @@ def create_or_update_course_entitlement(certificate_type, price, partner, UUID, 
     course_entitlement.title = 'Course {}'.format(name)
     course_entitlement.attr.certificate_type = certificate_type
     course_entitlement.attr.UUID = UUID
+    course_entitlement.attr.id_verification_required = id_verification_required
     course_entitlement.parent = parent_entitlement
     course_entitlement.save()
 

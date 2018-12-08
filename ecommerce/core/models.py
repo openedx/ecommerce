@@ -7,7 +7,6 @@ from dateutil.parser import parse
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.contrib.sites.models import Site
-from django.core.cache import cache
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.functional import cached_property
@@ -19,6 +18,7 @@ from requests.exceptions import ConnectionError, Timeout
 from slumber.exceptions import HttpNotFoundError, SlumberBaseException
 
 from analytics import Client as SegmentClient
+from ecommerce.cache_utils.utils import TieredCache
 from ecommerce.core.url_utils import get_lms_url
 from ecommerce.core.utils import log_message_and_raise_validation_error
 from ecommerce.extensions.payment.exceptions import ProcessorNotFoundError
@@ -35,7 +35,7 @@ class SiteConfiguration(models.Model):
     """
 
     site = models.OneToOneField('sites.Site', null=False, blank=False, on_delete=models.CASCADE)
-    partner = models.OneToOneField('partner.Partner', null=False, blank=False, on_delete=models.CASCADE)
+    partner = models.ForeignKey('partner.Partner', null=False, blank=False, on_delete=models.CASCADE)
     lms_url_root = models.URLField(
         verbose_name=_('LMS base url for custom site/microsite'),
         help_text=_("Root URL of this site's LMS (e.g. https://courses.stage.edx.org)"),
@@ -365,21 +365,20 @@ class SiteConfiguration(models.Model):
             str: JWT access token
         """
         key = 'siteconfiguration_access_token_{}'.format(self.id)
-        access_token = cache.get(key)
+        access_token_cached_response = TieredCache.get_cached_response(key)
+        if access_token_cached_response.is_hit:
+            return access_token_cached_response.value
 
-        # pylint: disable=unsubscriptable-object
-        if not access_token:
-            url = '{root}/access_token'.format(root=self.oauth2_provider_url)
-            access_token, expiration_datetime = EdxRestApiClient.get_oauth_access_token(
-                url,
-                self.oauth_settings['SOCIAL_AUTH_EDX_OIDC_KEY'],
-                self.oauth_settings['SOCIAL_AUTH_EDX_OIDC_SECRET'],
-                token_type='jwt'
-            )
+        url = '{root}/access_token'.format(root=self.oauth2_provider_url)
+        access_token, expiration_datetime = EdxRestApiClient.get_oauth_access_token(
+            url,
+            self.oauth_settings['SOCIAL_AUTH_EDX_OIDC_KEY'],  # pylint: disable=unsubscriptable-object
+            self.oauth_settings['SOCIAL_AUTH_EDX_OIDC_SECRET'],  # pylint: disable=unsubscriptable-object
+            token_type='jwt'
+        )
 
-            expires = (expiration_datetime - datetime.datetime.utcnow()).seconds
-            cache.set(key, access_token, expires)
-
+        expires = (expiration_datetime - datetime.datetime.utcnow()).seconds
+        TieredCache.set_all_tiers(key, access_token, expires)
         return access_token
 
     @cached_property
@@ -542,18 +541,20 @@ class User(AbstractUser):
         try:
             cache_key = 'verification_status_{username}'.format(username=self.username)
             cache_key = hashlib.md5(cache_key).hexdigest()
-            verification = cache.get(cache_key)
-            if not verification:
-                api = EdxRestApiClient(
-                    site.siteconfiguration.build_lms_url('api/user/v1/'),
-                    oauth_access_token=self.access_token
-                )
-                response = api.accounts(self.username).verification_status().get()
+            verification_cached_response = TieredCache.get_cached_response(cache_key)
+            if verification_cached_response.is_hit:
+                return verification_cached_response.value
 
-                verification = response.get('is_verified', False)
-                if verification:
-                    cache_timeout = int((parse(response.get('expiration_datetime')) - now()).total_seconds())
-                    cache.set(cache_key, verification, cache_timeout)
+            api = EdxRestApiClient(
+                site.siteconfiguration.build_lms_url('api/user/v1/'),
+                oauth_access_token=self.access_token
+            )
+            response = api.accounts(self.username).verification_status().get()
+
+            verification = response.get('is_verified', False)
+            if verification:
+                cache_timeout = int((parse(response.get('expiration_datetime')) - now()).total_seconds())
+                TieredCache.set_all_tiers(cache_key, verification, cache_timeout)
             return verification
         except HttpNotFoundError:
             log.debug('No verification data found for [%s]', self.username)
@@ -564,7 +565,7 @@ class User(AbstractUser):
             return False
 
     def deactivate_account(self, site_configuration):
-        """Deactive the user's account.
+        """Deactivate the user's account.
 
         Args:
             site_configuration (SiteConfiguration): The site configuration

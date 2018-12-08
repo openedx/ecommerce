@@ -10,11 +10,13 @@
 # Diego Rojas <diego.rojas@edunext.co>, 2017
 # e2f_lat_r3 <e2f_lat_r3@outlook.com>, 2017
 # e2f_lat_t3 <e2f_lat_t3@outlook.com>, 2017
+# Eduardo Zambrano <ezambrano@edx.org>, 2018
 # Elias Estay <eestay@u.uchile.cl>, 2015
 # Ernesto Franz Achá Mamani <fachaa2@hotmail.com>, 2015
 # Jeff Brenes <inactive+ucr.filosofia@transifex.com>, 2016
 # Juan Camilo Montoya Franco <juan.montoya@edunext.co>, 2015-2018
 # Laura Silva <lingison@edx.org>, 2016
+# Marina Pastor <mpastor@edx.org>, 2018
 # Matías Olivera <MatiasOlivera@outlook.com>, 2016
 # Ned Weitzman <nweitzman@edx.org>, 2017
 # Ernesto Sánchez Benitez <sbernesto@gmail.com>, 2016
@@ -23,8 +25,8 @@ msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: openedx-translation@googlegroups.com\n"
 "POT-Creation-Date: 2018-03-26 16:41-0400\n"
-"PO-Revision-Date: 2018-03-30 10:50+0000\n"
-"Last-Translator: Muhammad Ayub khan <ayubkhan@edx.org>\n"
+"PO-Revision-Date: 2018-04-27 09:51+0000\n"
+"Last-Translator: Marina Pastor <mpastor@edx.org>\n"
 "Language-Team: Spanish (Latin America) (http://www.transifex.com/open-edx/edx-platform/language/es_419/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -596,7 +598,7 @@ msgstr "Uno de los productos que usted está intentando comprar no está disponi
 
 #: ecommerce/extensions/api/serializers.py:337
 msgid "Products must have a certificate type."
-msgstr ""
+msgstr "Los productos deben tener algún tipo de certificado."
 
 #: ecommerce/extensions/api/serializers.py:340
 #: ecommerce/extensions/api/serializers.py:371
@@ -605,7 +607,7 @@ msgstr "Los productos deben tener un precio"
 
 #: ecommerce/extensions/api/serializers.py:347
 msgid "You need to provide a course UUID to create Course Entitlements."
-msgstr ""
+msgstr "Necesitas proporcionar una UUID de curso para crear derechos de curso."
 
 #: ecommerce/extensions/api/serializers.py:367
 msgid "Products must indicate whether ID verification is required."
@@ -686,7 +688,7 @@ msgstr "Haga clic para comprar multiples asientos para este curso"
 
 #: ecommerce/extensions/basket/views.py:90
 msgid "No product is available to buy."
-msgstr ""
+msgstr "No hay ningún producto disponible para comprar."
 
 #: ecommerce/extensions/basket/views.py:96
 msgid "You have already purchased these products"
@@ -699,7 +701,7 @@ msgid ""
 "you are purchasing a single code for someone else, please continue with "
 "checkout. However, if you are the learner {link_start}go back{link_end} to "
 "enroll directly.{paragraph_end}"
-msgstr ""
+msgstr "{strong_start}¿Comprando solo para ti?{strong_end}{paragraph_start}Si estás comprando para otra persona, por favor continua con el proceso de compra. Sin embardo, si eres el estudiante {link_start}vuelva atrás{link_end} para inscribirte directamente{paragraph_end}"
 
 #: ecommerce/extensions/basket/views.py:221
 msgid ""
@@ -737,7 +739,7 @@ msgid ""
 "parties.{li_end} {ul_end} {strong_start}All sales final. No "
 "refunds.{strong_end} {paragraph_start}You will receive an email at "
 "{user_email} with your enrollment code(s). {paragraph_end}"
-msgstr ""
+msgstr "{paragraph_start}Al comprar, tu organización y tú aceptáis las siguientes condiciones:{paragraph_end} {ul_start} {li_start}Cada código es válido para el curso incluido y solo puede usarse una vez{li_end} {li_start}Tú eres el responsable de distribuir los códigos a los estudiantes.{li_end} {li_start}Cada código expirará al año de haber realizado la compra o, si ocurre antes, una vez el curso esté cerrado.{li_end} {li_start}Si un curso no está diseñado para tomarlo a tu propio ritmo, deberías confirmar que alguna edición del curso está disponible antes de la expiración del código. {li_end} {li_start}No puedes revender códigos a terceras partes.{li_end} {ul_end} {strong_start}Todas las ventas son finales. No hay devoluciones.{strong_end} {paragraph_start}Recibirás un correo electrónico en{user_email} con tu código(s) de inscripción. {paragraph_end}"
 
 #: ecommerce/extensions/basket/views.py:363
 #, python-brace-format
@@ -947,7 +949,7 @@ msgstr "{label} (requerido)"
 
 #: ecommerce/extensions/payment/forms.py:109
 msgid "Organization (required)"
-msgstr ""
+msgstr "Organización (requerida)"
 
 #: ecommerce/extensions/payment/forms.py:125
 #: ecommerce/extensions/payment/forms.py:215
@@ -958,15 +960,15 @@ msgstr "Se ha producido un problema al recuperar su cesta. Actualice la página 
 
 #: ecommerce/extensions/payment/forms.py:128
 msgid "First Name (required)"
-msgstr ""
+msgstr "Nombre (requerido)"
 
 #: ecommerce/extensions/payment/forms.py:129
 msgid "Last Name (required)"
-msgstr ""
+msgstr "Apellido (requerido)"
 
 #: ecommerce/extensions/payment/forms.py:130
 msgid "Address (required)"
-msgstr ""
+msgstr "Dirección (requerida)"
 
 #: ecommerce/extensions/payment/forms.py:131
 msgid "Suite/Apartment Number"
@@ -974,7 +976,7 @@ msgstr "Número de casa/apartamento"
 
 #: ecommerce/extensions/payment/forms.py:132
 msgid "City (required)"
-msgstr ""
+msgstr "Ciudad (requerida)"
 
 #: ecommerce/extensions/payment/forms.py:135
 msgid "State/Province"
@@ -986,7 +988,7 @@ msgstr "Código Postal"
 
 #: ecommerce/extensions/payment/forms.py:137
 msgid "Country (required)"
-msgstr ""
+msgstr "País (requerido)"
 
 #: ecommerce/extensions/payment/forms.py:164
 #: ecommerce/extensions/payment/forms.py:166
@@ -1261,7 +1263,7 @@ msgstr "Postpago"
 
 #: ecommerce/invoice/models.py:17
 msgid "Bulk purchase"
-msgstr ""
+msgstr "Compra agrupada"
 
 #: ecommerce/invoice/models.py:18
 msgid "Not applicable"
@@ -1722,7 +1724,7 @@ msgstr "Recibo de la orden"
 
 #: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html:13
 msgid "For Business"
-msgstr ""
+msgstr "Para los negocios"
 
 #: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html:25
 #: ecommerce/templates/customer/emails/commtype_order_with_csv_body.txt:6
@@ -1730,29 +1732,29 @@ msgstr ""
 msgid ""
 "Thank you for purchasing access to %(course_name)s. Let's get your group "
 "ready to learn with edX:"
-msgstr ""
+msgstr "Gracias por comprar el acceso a %(course_name)s. Vamos a preparar a tu grupo para que aprenda con edX:"
 
 #: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html:27
 #, python-format
 msgid ""
 "Download and save the %(link_start)s%(download_csv_link)s%(link_middle)s "
 "enrollment code file.%(link_end)s"
-msgstr ""
+msgstr "Descarga y guarda el %(link_start)s%(download_csv_link)s%(link_middle)s fichero del código de inscripción%(link_end)s"
 
 #: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html:28
 #: ecommerce/templates/customer/emails/commtype_order_with_csv_body.txt:9
 msgid "Distribute one code per learner before the expiration date."
-msgstr ""
+msgstr "Distribuye un código por alumno antes de la fecha de vencimiento."
 
 #: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html:29
 #: ecommerce/templates/customer/emails/commtype_order_with_csv_body.txt:10
 msgid "Pro tip: Track which code is associated with which person."
-msgstr ""
+msgstr "Consejo profesional: monitoriza qué codigo está asociado con cada persona."
 
 #: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html:30
 #: ecommerce/templates/customer/emails/commtype_order_with_csv_body.txt:11
 msgid "Learners sign-in/register with edX and enroll for the course."
-msgstr ""
+msgstr "Los estudiantes se inscriben/registran con edX y se inscriben al curso."
 
 #: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html:32
 #, python-format
@@ -1760,59 +1762,59 @@ msgid ""
 "To view your payment information, log in to see your Order History, under "
 "%(link_start)s%(order_history_url)s%(link_middle)sAccount "
 "Settings%(link_end)s"
-msgstr ""
+msgstr "Para ver tu información de pago, inicia sesión para ver tu historial de pedidos, debajo de %(link_start)s%(order_history_url)s%(link_middle)sAjustes de Cuenta%(link_end)s"
 
 #: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html:33
 #, python-format
 msgid ""
 "For more information and assistance, contact "
 "%(link_start)sinfo@edx.org.%(link_end)s"
-msgstr ""
+msgstr "Para más información y ayuda, contacta con %(link_start)sinfo@edx.org.%(link_end)s"
 
 #: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html:34
 #: ecommerce/templates/customer/emails/commtype_order_with_csv_body.txt:16
 msgid "Thank You"
-msgstr ""
+msgstr "Gracias"
 
 #: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html:45
 #: ecommerce/templates/customer/emails/commtype_order_with_csv_body.txt:18
 msgid "By purchasing, you and your organization agree to the following terms:"
-msgstr ""
+msgstr "Al comprar, tú y tu organización aceptáis los siguientes términos:"
 
 #: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html:47
 #: ecommerce/templates/customer/emails/commtype_order_with_csv_body.txt:20
 msgid ""
 "Each code is valid for the one course covered and can be used only one time."
-msgstr ""
+msgstr "Cada código es válido para el curso incluido y solo se puede usar una vez."
 
 #: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html:48
 #: ecommerce/templates/customer/emails/commtype_order_with_csv_body.txt:21
 msgid "You are responsible for distributing codes to your learners."
-msgstr ""
+msgstr "Tú eres el responsable de distribuir códigos a tus alumnos."
 
 #: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html:49
 #: ecommerce/templates/customer/emails/commtype_order_with_csv_body.txt:22
 msgid ""
 "Each code will expire in one year from date of purchase or, if earlier, once"
 " the course is closed."
-msgstr ""
+msgstr "Cada código vencerá en un año a partir de la fecha de compra o, si ocurre antes, una vez que se cierre el curso."
 
 #: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html:50
 #: ecommerce/templates/customer/emails/commtype_order_with_csv_body.txt:23
 msgid ""
 "If a course is not designated as self-paced, you should confirm that a "
 "course run is available before expiration."
-msgstr ""
+msgstr "Si un curso no está diseñado para tomarlo a tu propio ritmo, deberías confirmar que alguna edición del curso está disponible antes de la expiración."
 
 #: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html:51
 #: ecommerce/templates/customer/emails/commtype_order_with_csv_body.txt:24
 msgid "You may not resell codes to third parties."
-msgstr ""
+msgstr "No debe revender códigos a terceros."
 
 #: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html:52
 #: ecommerce/templates/customer/emails/commtype_order_with_csv_body.txt:25
 msgid "All sales final. No refunds."
-msgstr ""
+msgstr "Todas las ventas son finales. Sin reembolsos."
 
 #: ecommerce/templates/customer/emails/commtype_order_with_csv_body.txt:2
 msgid "Order confirmation for: "
@@ -1823,18 +1825,18 @@ msgstr "Confirmación de orden para:"
 msgid ""
 "Please visit %(download_csv_link)s to download and save the enrollment code "
 "file."
-msgstr ""
+msgstr "Por favor visita %(download_csv_link)s para descargar y guardar el fichero de códigos de inscripción."
 
 #: ecommerce/templates/customer/emails/commtype_order_with_csv_body.txt:13
 #, python-format
 msgid ""
 "To view your payment information, log in to see your Order History, under "
 "Account Settings at %(order_history_url)s."
-msgstr ""
+msgstr "Para ver tu información de pago, inicia sesión para ver tu historial de pedidos, debajo de Ajustes de Cuenta%(order_history_url)s."
 
 #: ecommerce/templates/customer/emails/commtype_order_with_csv_body.txt:14
 msgid "For more information and assistance, contact info@edx.org."
-msgstr ""
+msgstr "Para obtener más información y ayuda, ponte en contacto con info@edx.org."
 
 #: ecommerce/templates/customer/emails/commtype_order_with_csv_subject.txt:2
 #, python-format
@@ -1860,7 +1862,7 @@ msgid ""
 "Your order is complete. You will receive a confirmation message and your "
 "enrollment codes(s) at %(link_start)s%(email)s%(link_end)s. If you need a "
 "receipt, you can print this page."
-msgstr ""
+msgstr "Tu pedido está completo. Recibirás un mensaje de confirmación y tu código(s) de inscripción en%(link_start)s%(email)s%(link_end)s. Si necesitas un recibo, puedes imprimir esta página."
 
 #: ecommerce/templates/edx/checkout/receipt.html:45
 #, python-format
@@ -1948,7 +1950,7 @@ msgstr "Ir al panel de control"
 
 #: ecommerce/templates/edx/checkout/receipt.html:179
 msgid "Find more courses"
-msgstr ""
+msgstr "Encuentra más cursos"
 
 #: ecommerce/templates/edx/checkout/receipt_not_found.html:6
 msgid "Order Not Found"
@@ -2153,7 +2155,7 @@ msgstr "\n                                Si intentó realizar una compra , no h
 
 #: ecommerce/templates/oscar/basket/messages/new_total.html:6
 msgid "Your basket is now empty"
-msgstr ""
+msgstr "Tu cesta está vacía ahora"
 
 #: ecommerce/templates/oscar/basket/messages/new_total.html:9
 #: ecommerce/templates/oscar/basket/messages/new_total.html:14
@@ -2163,15 +2165,15 @@ msgid ""
 "            %(strong_start)sWe’ve updated your quantity.%(strong_end)s\n"
 "            %(paragraph_start)sYour cart includes %(num_items)s enrollment codes at a total cost of %(total)s, that you will receive via email.%(paragraph_end)s\n"
 "        "
-msgstr ""
+msgstr "\n            %(strong_start)sHemos actualizado tu cantidad%(strong_end)s\n            %(paragraph_start)sTu carrito incluye%(num_items)s códigos de inscripción con un coste total de %(total)s, que recibirás vía correo electrónico%(paragraph_end)s\n        "
 
 #: ecommerce/templates/oscar/basket/messages/new_total.html:24
 msgid "View basket"
-msgstr ""
+msgstr "Ver cesta"
 
 #: ecommerce/templates/oscar/basket/messages/new_total.html:25
 msgid "Checkout now"
-msgstr ""
+msgstr "Finalizar ahora"
 
 #: ecommerce/templates/oscar/basket/partials/add_voucher_form.html:11
 msgid "Applying..."
@@ -2206,7 +2208,7 @@ msgstr "resumen"
 
 #: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:54
 msgid "Quanity"
-msgstr ""
+msgstr "Cantidad"
 
 #: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:64
 msgid "Discounts applied"
@@ -2436,7 +2438,7 @@ msgid ""
 "                    Please try to submit your payment again. If this problem persists, please refer to our %(start_link)s\n"
 "                    Payments FAQ %(end_link)s for troubleshooting tips.\n"
 "                    "
-msgstr ""
+msgstr "\n                    Por favor intenta realizar tu pago de nuevo. Si este problema persiste, por favor consulta nuestras %(start_link)s\n                    FAQ de pagos %(end_link)s para obtener consejos para la resolución de problemas\n                    "
 
 #: ecommerce/templates/oscar/checkout/payment_error.html:6
 #: ecommerce/templates/oscar/checkout/payment_error.html:15

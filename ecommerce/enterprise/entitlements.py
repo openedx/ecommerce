@@ -12,13 +12,13 @@ from collections import OrderedDict
 from urllib import urlencode
 
 from django.conf import settings
-from django.core.cache import cache
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 from oscar.core.loading import get_model
 from requests.exceptions import ConnectionError, Timeout
 from slumber.exceptions import SlumberBaseException
 
+from ecommerce.cache_utils.utils import TieredCache
 from ecommerce.core.constants import COUPON_PRODUCT_CLASS_NAME
 from ecommerce.core.utils import get_cache_key
 from ecommerce.coupons.views import voucher_is_valid
@@ -168,14 +168,15 @@ def is_course_in_enterprise_catalog(site, course_id, enterprise_catalog_id):
         course_id=course_id,
         catalog_id=enterprise_catalog_id
     )
-    response = cache.get(cache_key)
-    if not response:
+    cached_response = TieredCache.get_cached_response(cache_key)
+    if cached_response.is_hit:
+        response = cached_response.value
+    else:
         try:
-            # GET: /api/v1/catalogs/{catalog_id}/contains?course_run_id={course_run_ids}
             response = site.siteconfiguration.discovery_api_client.catalogs(enterprise_catalog_id).contains.get(
                 course_run_id=course_id
             )
-            cache.set(cache_key, response, settings.COURSES_API_CACHE_TIMEOUT)
+            TieredCache.set_all_tiers(cache_key, response, settings.COURSES_API_CACHE_TIMEOUT)
         except (ConnectionError, SlumberBaseException, Timeout):
             logger.exception('Unable to connect to Discovery Service for catalog contains endpoint.')
             return False
