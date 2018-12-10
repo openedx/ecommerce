@@ -24,6 +24,7 @@ from ecommerce.core.constants import (
 from ecommerce.core.url_utils import get_ecommerce_url
 from ecommerce.courses.models import Course
 from ecommerce.entitlements.utils import create_or_update_course_entitlement
+from ecommerce.extensions.offer.constants import OFFER_MAX_USES_DEFAULT
 from ecommerce.invoice.models import Invoice
 
 logger = logging.getLogger(__name__)
@@ -35,6 +36,7 @@ BillingAddress = get_model('order', 'BillingAddress')
 Catalog = get_model('catalogue', 'Catalog')
 Category = get_model('catalogue', 'Category')
 Line = get_model('order', 'Line')
+OfferAssignment = get_model('offer', 'OfferAssignment')
 Order = get_model('order', 'Order')
 Partner = get_model('partner', 'Partner')
 Product = get_model('catalogue', 'Product')
@@ -656,6 +658,34 @@ class VoucherSerializer(serializers.ModelSerializer):
         )
 
 
+class CouponVoucherSerializer(serializers.Serializer):  # pylint: disable=abstract-method
+    code = serializers.SerializerMethodField()
+    assigned_to = serializers.SerializerMethodField()
+    redemptions = serializers.SerializerMethodField()
+
+    def get_code(self, voucher):
+        return voucher.code
+
+    def get_assigned_to(self, obj):  # pylint: disable=unused-argument
+        return ''
+
+    def get_redemptions(self, voucher):
+        offer = voucher.best_offer
+        redemption_count = voucher.num_orders
+
+        if voucher.usage == Voucher.SINGLE_USE:
+            max_coupon_usage = 1
+        elif voucher.usage != Voucher.SINGLE_USE and offer.max_global_applications is None:
+            max_coupon_usage = OFFER_MAX_USES_DEFAULT
+        else:
+            max_coupon_usage = offer.max_global_applications
+
+        return {
+            'used': redemption_count,
+            'available': max_coupon_usage,
+        }
+
+
 class CategorySerializer(serializers.ModelSerializer):
     # NOTE (CCB): We are explicitly ignoring child categories. They are not relevant to our current needs. Support
     # should be added later, if needed.
@@ -915,3 +945,93 @@ class ProviderSerializer(serializers.Serializer):  # pylint: disable=abstract-me
     status_url = serializers.CharField()
     thumbnail_url = serializers.CharField()
     url = serializers.CharField()
+
+
+class OfferAssignmentSerializer(serializers.ModelSerializer):
+    class Meta(object):
+        model = OfferAssignment
+        fields = ('user_email', 'code')
+
+
+class CouponCodeAssignmentSerializer(serializers.Serializer):  # pylint: disable=abstract-method
+    codes = serializers.ListField(
+        child=serializers.CharField(), required=False, write_only=True
+    )
+    emails = serializers.ListField(
+        child=serializers.EmailField(), required=True, write_only=True
+    )
+    offer_assignments = serializers.ListField(
+        child=OfferAssignmentSerializer(), read_only=True
+    )
+
+    def create(self, validated_data):
+        """Create OfferAssignment objects for each email and the available_assignments determined from validation."""
+        emails = validated_data.get('emails')
+        voucher_usage_type = validated_data.pop('voucher_usage_type')
+        available_assignments = validated_data.pop('available_assignments')
+        email_iterator = iter(emails)
+        offer_assignments = []
+
+        for code in available_assignments:
+            offer = available_assignments[code]['offer']
+            email = next(email_iterator) if voucher_usage_type == Voucher.MULTI_USE_PER_CUSTOMER else None
+            for _ in range(available_assignments[code]['num_slots']):
+                offer_assignments.append(
+                    OfferAssignment.objects.create(
+                        offer=offer,
+                        code=code,
+                        user_email=email or next(email_iterator),
+                    )
+                )
+
+        validated_data['offer_assignments'] = offer_assignments
+        return validated_data
+
+    def validate(self, data):
+        """
+        Validate that the given emails can be assigned to a slot in the coupon, to the codes if specified.
+        A slot is a potential redemption of a voucher contained within the top level Coupon.
+        """
+        codes = data.get('codes')
+        emails = data.get('emails')
+        coupon = self.context.get('coupon')
+        available_assignments = {}
+        vouchers = coupon.attr.coupon_vouchers.vouchers
+
+        # Limit which vouchers to consider for assignment by the codes passed in.
+        if codes:
+            vouchers = vouchers.filter(code__in=codes)
+
+        total_slots = 0
+        for voucher in vouchers.all():
+            available_slots = voucher.slots_available_for_assignment
+            # If there are no available slots for this voucher, skip it.
+            if available_slots < 1:
+                continue
+
+            if voucher.usage != Voucher.MULTI_USE_PER_CUSTOMER:
+                available_slots = min(available_slots, len(emails) - total_slots)
+
+            # If there are available slots, and we still have slots to fill,
+            # add information to the available_assignments dict.
+            if total_slots < len(emails):
+                # Keep track of which codes can be assigned how many times
+                # along with its corresponding ConditionalOffer.
+                available_assignments[voucher.code] = {'offer': voucher.enterprise_offer, 'num_slots': available_slots}
+
+                # For Multi use per customer vouchers, all of the slots must go to one user email,
+                # so for accounting purposes we only count one slot here towards the total.
+                if voucher.usage == Voucher.MULTI_USE_PER_CUSTOMER:
+                    total_slots += 1
+                else:
+                    total_slots += available_slots
+            else:
+                break
+        # If we got through all the vouchers and don't have enough slots for the emails given, the request isn't valid.
+        if total_slots < len(emails):
+            raise serializers.ValidationError('Not enough available codes for assignment!')
+
+        # Add available_assignments to the validated data so that we can perform the assignments in create.
+        data['voucher_usage_type'] = vouchers.first().usage
+        data['available_assignments'] = available_assignments
+        return data
