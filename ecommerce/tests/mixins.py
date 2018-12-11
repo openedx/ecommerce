@@ -204,7 +204,12 @@ class BusinessIntelligenceMixin(object):
         (event_user_id, event_name, event_payload), kwargs = mock_track.call_args
         self.assertEqual(event_user_id, expected_user_id)
         self.assertEqual(event_name, 'Order Completed')
-        self.assertEqual(kwargs['context'], {'ip': expected_ip, 'Google Analytics': {'clientId': expected_client_id}})
+        expected_context = {
+            'ip': expected_ip,
+            'Google Analytics': {'clientId': expected_client_id},
+            'page': {'url': 'https://testserver.fake/'},
+        }
+        self.assertEqual(kwargs['context'], expected_context)
         self.assert_correct_event_payload(
             instance, event_payload, order_number, currency, total, coupon, discount
         )

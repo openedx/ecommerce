@@ -1,6 +1,7 @@
 import json
 import logging
 from functools import wraps
+from urlparse import urlunsplit
 
 from ecommerce.courses.utils import mode_for_product
 
@@ -144,10 +145,24 @@ def track_segment_event(site, user, event, properties):
         return False, msg
 
     user_tracking_id, ga_client_id, lms_ip = parse_tracking_context(user)
+    # construct a URL, so that hostname can be sent to GA.
+    # For now, send a dummy value for path.  Segment parses the URL and sends
+    # the host and path separately. When needed, the path can be fetched by adding:
+    # request = crum.get_current_request()
+    # if request:
+    #     path = request.META.get('PATH_INFO')
+    hostname = site.domain
+    path = '/'
+    parts = ("https", hostname, path, "", "")
+    page = urlunsplit(parts)
+
     context = {
         'ip': lms_ip,
         'Google Analytics': {
-            'clientId': ga_client_id
+            'clientId': ga_client_id,
+        },
+        'page': {
+            'url': page,
         }
     }
     return site.siteconfiguration.segment_client.track(user_tracking_id, event, properties, context=context)
