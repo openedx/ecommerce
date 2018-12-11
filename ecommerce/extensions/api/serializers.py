@@ -716,6 +716,59 @@ class CouponListSerializer(serializers.ModelSerializer):
         fields = ('category', 'client', 'code', 'id', 'title', 'date_created')
 
 
+class EnterpriseCouponOverviewListSerializer(serializers.ModelSerializer):
+    """
+    Serializer for Enterprise Coupons list overview.
+    """
+    end_date = serializers.SerializerMethodField()
+    has_error = serializers.SerializerMethodField()
+    max_uses = serializers.SerializerMethodField()
+    num_codes = serializers.SerializerMethodField()
+    num_unassigned = serializers.SerializerMethodField()
+    num_uses = serializers.SerializerMethodField()
+    start_date = serializers.SerializerMethodField()
+    usage_limitation = serializers.SerializerMethodField()
+
+    # TODO: ENT-1184
+    def get_num_unassigned(self, obj):  # pylint: disable=unused-argument
+        return 0
+
+    # TODO: ENT-1184
+    def get_has_error(self, obj):   # pylint: disable=unused-argument
+        return False
+
+    # Max number of codes available (Maximum Coupon Usage).
+    def get_max_uses(self, obj):
+        offer = retrieve_offer(obj)
+        return offer.max_global_applications
+
+    # Redemption count.
+    def get_num_uses(self, obj):
+        voucher = retrieve_voucher(obj)
+        return voucher.num_orders
+
+    # Number of codes.
+    def get_num_codes(self, obj):
+        return retrieve_quantity(obj)
+
+    # Usage Limitation (Maximum # of usages per code).
+    def get_usage_limitation(self, obj):
+        return retrieve_voucher_usage(obj)
+
+    def get_start_date(self, obj):
+        return retrieve_start_date(obj)
+
+    def get_end_date(self, obj):
+        return retrieve_end_date(obj)
+
+    class Meta(object):
+        model = Product
+        fields = (
+            'end_date', 'has_error', 'id', 'max_uses', 'num_codes', 'num_unassigned',
+            'num_uses', 'start_date', 'title', 'usage_limitation'
+        )
+
+
 class EnterpriseCouponListSerializer(serializers.ModelSerializer):
     client = serializers.SerializerMethodField()
     enterprise_customer = serializers.SerializerMethodField()

@@ -69,14 +69,14 @@ class TestEnterpriseCustomerView(EnterpriseServiceMockMixin, TestCase):
         )
         url = reverse('api:v2:enterprise:enterprise_customers')
         result = self.client.get(url)
-        self.assertEqual(result.status_code, 401)
+        self.assertEqual(result.status_code, status.HTTP_401_UNAUTHORIZED)
 
         user = self.create_user(is_staff=True)
 
         self.client.login(username=user.username, password=self.password)
 
         result = self.client.get(url)
-        self.assertEqual(result.status_code, 200)
+        self.assertEqual(result.status_code, status.HTTP_200_OK)
         self.assertJSONEqual(
             result.content.decode('utf-8'),
             {
@@ -96,7 +96,9 @@ class TestEnterpriseCustomerView(EnterpriseServiceMockMixin, TestCase):
 
 @ddt.ddt
 class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMockMixin, ThrottlingMixin, TestCase):
-    """Test the enterprise coupon order creation functionality."""
+    """
+    Test the enterprise coupon order functionality.
+    """
     def setUp(self):
         super(EnterpriseCouponViewSetTest, self).setUp()
         self.user = self.create_user(is_staff=True)
@@ -120,11 +122,58 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
         self.course = CourseFactory(id='course-v1:test-org+course+run', partner=self.partner)
         self.verified_seat = self.course.create_or_update_seat('verified', False, 100)
 
+    def get_coupon_voucher(self, coupon):
+        """
+        Helper method to get coupon voucher.
+        """
+        return coupon.attr.coupon_vouchers.vouchers.first()
+
+    def get_coupon_data(self, coupon_title):
+        """
+        Helper method to return coupon data by coupon title.
+        """
+        coupon = Product.objects.get(title=coupon_title)
+        return {
+            'end_date': self.get_coupon_voucher_end_date(coupon),
+            'has_error': False,
+            'id': coupon.id,
+            'max_uses': None,
+            'num_codes': 2,
+            'num_unassigned': 0,
+            'num_uses': 0,
+            'start_date': self.get_coupon_voucher_start_date(coupon),
+            'title': coupon.title,
+            'usage_limitation': 'Single use'
+        }
+
+    def get_coupon_voucher_start_date(self, coupon):
+        """
+        Helper method to return coupon voucher start date.
+        """
+        return self.get_coupon_voucher(coupon).start_datetime.isoformat().replace('+00:00', 'Z')
+
+    def get_coupon_voucher_end_date(self, coupon):
+        """
+        Helper method to return coupon voucher end date.
+        """
+        return self.get_coupon_voucher(coupon).end_datetime.isoformat().replace('+00:00', 'Z')
+
     def get_response(self, method, path, data=None):
-        """Helper method for sending requests and returning the response."""
+        """
+        Helper method for sending requests and returning the response.
+        """
+        enterprise_id = ''
+        enterprise_name = 'ToyX'
+        if data and data.get('enterprise_customer'):
+            enterprise_id = data['enterprise_customer']['id']
+            enterprise_name = data['enterprise_customer']['name']
+
         with mock.patch(
-            "ecommerce.extensions.voucher.utils.get_enterprise_customer",
-            mock.Mock(return_value={'name': 'Fake enterprise'})
+            'ecommerce.extensions.voucher.utils.get_enterprise_customer',
+            mock.Mock(return_value={
+                'name': enterprise_name,
+                'enterprise_customer_uuid': enterprise_id
+            })
         ):
             if method == 'GET':
                 return self.client.get(path)
@@ -132,6 +181,15 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
                 return self.client.post(path, json.dumps(data), 'application/json')
             elif method == 'PUT':
                 return self.client.put(path, json.dumps(data), 'application/json')
+        return None
+
+    def get_response_json(self, method, path, data=None):
+        """
+        Helper method for sending requests and returning JSON response content.
+        """
+        response = self.get_response(method, path, data)
+        if response:
+            return json.loads(response.content)
         return None
 
     def test_list_enterprise_coupons(self):
@@ -502,6 +560,61 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
                 'previous': None,
             }
         )
+
+    @ddt.data(
+        (
+            '85b08dde-0877-4474-a4e9-8408fe47ce88',
+            ['coupon-1', 'coupon-2']
+        ),
+        (
+            'f5c9149f-8dce-4410-bb0f-85c0f2dda864',
+            ['coupon-3']
+        ),
+        (
+            'f5c9149f-8dce-4410-bb0f-85c0f2dda860',
+            []
+        ),
+    )
+    @ddt.unpack
+    def test_get_enterprise_coupon_overview_data(self, enterprise_id, expected_coupons):
+        """
+        Test if we get correct enterprise coupon overview data.
+        """
+        Switch.objects.update_or_create(name=ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, defaults={'active': True})
+        coupons_data = [{
+            'title': 'coupon-1',
+            'enterprise_customer': {'name': 'LOTRx', 'id': '85b08dde-0877-4474-a4e9-8408fe47ce88'}
+        }, {
+            'title': 'coupon-2',
+            'enterprise_customer': {'name': 'LOTRx', 'id': '85b08dde-0877-4474-a4e9-8408fe47ce88'}
+        }, {
+            'title': 'coupon-3',
+            'enterprise_customer': {'name': 'HPx', 'id': 'f5c9149f-8dce-4410-bb0f-85c0f2dda864'}
+        }]
+
+        # Create coupons.
+        for coupon_data in coupons_data:
+            self.get_response('POST', ENTERPRISE_COUPONS_LINK, dict(self.data, **coupon_data))
+
+        # Build expected results.
+        expected_results = []
+        for coupon_title in expected_coupons:
+            expected_results.append(self.get_coupon_data(coupon_title))
+
+        overview_response = self.get_response_json(
+            'GET',
+            reverse(
+                'api:v2:enterprise-coupons-(?P<enterprise-id>.+)/overview-list',
+                kwargs={'enterprise_id': enterprise_id}
+            )
+        )
+
+        # Verify that we get correct number of results related enterprise id.
+        self.assertEqual(overview_response['count'], len(expected_results))
+
+        # Verify that we get correct results.
+        for actual_result in overview_response['results']:
+            self.assertIn(actual_result, expected_results)
 
     @ddt.data(
         (Voucher.SINGLE_USE, 2, None, ['test1@example.com', 'test2@example.com'], [1]),
