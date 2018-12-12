@@ -1,31 +1,31 @@
-import datetime
 from decimal import Decimal
 from uuid import uuid4
 
 import ddt
 import httpretty
 import mock
-from django.utils.timezone import now
 from oscar.core.loading import get_model
 from waffle.models import Switch
 
+from ecommerce.coupons.tests.mixins import CouponMixin
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.enterprise.conditions import EnterpriseCustomerCondition
 from ecommerce.enterprise.constants import ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, ENTERPRISE_OFFERS_SWITCH
 from ecommerce.enterprise.tests.mixins import EnterpriseServiceMockMixin
+from ecommerce.extensions.api.serializers import CouponCodeAssignmentSerializer
 from ecommerce.extensions.basket.utils import basket_add_enterprise_catalog_attribute
 from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
 from ecommerce.extensions.offer.constants import (
     OFFER_ASSIGNMENT_EMAIL_PENDING,
-    OFFER_ASSIGNED,
     OFFER_ASSIGNMENT_REVOKED,
-    OFFER_REDEEMED,
+    OFFER_REDEEMED
 )
 from ecommerce.extensions.test import factories
 from ecommerce.tests.factories import ProductFactory, SiteConfigurationFactory
 from ecommerce.tests.testcases import TestCase
 
 ConditionalOffer = get_model('offer', 'ConditionalOffer')
+OfferAssignment = get_model('offer', 'OfferAssignment')
 Product = get_model('catalogue', 'Product')
 Voucher = get_model('voucher', 'Voucher')
 LOGGER_NAME = 'ecommerce.programs.conditions'
@@ -274,7 +274,7 @@ class EnterpriseCustomerConditionTests(EnterpriseServiceMockMixin, DiscoveryTest
 
 
 @ddt.ddt
-class AssignableEnterpriseCustomerCondition(EnterpriseServiceMockMixin, DiscoveryTestMixin, TestCase):
+class AssignableEnterpriseCustomerCondition(EnterpriseServiceMockMixin, DiscoveryTestMixin, CouponMixin, TestCase):
     def setUp(self):
         super(AssignableEnterpriseCustomerCondition, self).setUp()
         self.condition = factories.AssignableEnterpriseCustomerConditionFactory()
@@ -283,26 +283,29 @@ class AssignableEnterpriseCustomerCondition(EnterpriseServiceMockMixin, Discover
         """
         Create vouchers, offers and offer assignments.
         """
-        if voucher_type == Voucher.SINGLE_USE:
-            enterprise_offer = factories.EnterpriseOfferFactory()
+        codes = {assignment['code'] for assignment in assignments}
+        emails = sorted({assignment['user_email'] for assignment in assignments})
+        quantity = len(codes)
 
-        for assignment in assignments:
-            code = assignment['code']
+        voucher_types = (Voucher.MULTI_USE, Voucher.ONCE_PER_CUSTOMER, Voucher.MULTI_USE_PER_CUSTOMER)
+        num_of_offers = quantity if voucher_type in voucher_types else 1
 
-            if voucher_type != Voucher.SINGLE_USE:
-                enterprise_offer = factories.EnterpriseOfferFactory(max_global_applications=max_uses)
+        offers = []
+        for __ in range(num_of_offers):
+            offers.append(factories.EnterpriseOfferFactory(max_global_applications=max_uses))
 
-            voucher, __ = Voucher.objects.get_or_create(
-                usage=voucher_type,
-                code=code,
-                defaults={
-                    'start_datetime': now() - datetime.timedelta(days=10),
-                    'end_datetime': now() + datetime.timedelta(days=10),
-                }
-            )
-            voucher.offers.add(enterprise_offer)
+        coupon = self.create_coupon(quantity=quantity, voucher_type=voucher_type)
+        for index, info in enumerate(zip(coupon.attr.coupon_vouchers.vouchers.all(), codes)):
+            voucher, code = info
+            voucher.code = code
+            voucher.offers.add(offers[index] if len(offers) > 1 else offers[0])
+            voucher.save()
 
-            factories.OfferAssignmentFactory(offer=enterprise_offer, code=code, user_email=assignment['user_email'])
+        data = {'codes': codes, 'emails': emails}
+        serializer = CouponCodeAssignmentSerializer(data=data, context={'coupon': coupon})
+        if serializer.is_valid():
+            serializer.save()
+            assignments = serializer.data
 
     def assert_condition(self, voucher_type, assignments, expected_condition_result):
         """
@@ -311,6 +314,8 @@ class AssignableEnterpriseCustomerCondition(EnterpriseServiceMockMixin, Discover
         for assignment in assignments:
             code = assignment['code']
             email = assignment['user_email']
+            # In some cases individual assignments have their own expected result
+            expected_condition_result = assignment.get('result', expected_condition_result)
 
             voucher = Voucher.objects.get(usage=voucher_type, code=code)
             basket = factories.BasketFactory(site=self.site, owner=factories.UserFactory(email=email))
@@ -320,15 +325,24 @@ class AssignableEnterpriseCustomerCondition(EnterpriseServiceMockMixin, Discover
             assert is_condition_satisfied == expected_condition_result
 
             # update the `num_orders` so that we can also verify the redemptions check
+            # also update the offer assignment status
             if expected_condition_result:
                 voucher.num_orders += 1
                 voucher.save()
+                assignment = OfferAssignment.objects.filter(
+                    offer=voucher.enterprise_offer, code=code, user_email=email
+                ).exclude(
+                    status__in=[OFFER_REDEEMED, OFFER_ASSIGNMENT_REVOKED]
+                ).first()
+                if assignment:
+                    assignment.status = OFFER_REDEEMED
+                    assignment.save()
 
     @mock.patch.object(EnterpriseCustomerCondition, 'is_satisfied', mock.Mock(return_value=True))
     @ddt.data(
         (0, 'test1@example.com', OFFER_ASSIGNMENT_EMAIL_PENDING, True),
         (1, 'test1@example.com', OFFER_REDEEMED, False),
-        (0, 'test1@example.com', OFFER_ASSIGNMENT_REVOKED, False),
+        (0, 'test1@example.com', OFFER_ASSIGNMENT_REVOKED, True),
     )
     @ddt.unpack
     def test_is_satisfied(self, num_orders, email, offer_status, condition_result):
@@ -347,8 +361,7 @@ class AssignableEnterpriseCustomerCondition(EnterpriseServiceMockMixin, Discover
             status=offer_status,
         )
 
-        is_condition_satisfied = self.condition.is_satisfied(enterprise_offer, basket)
-        self.assertEqual(is_condition_satisfied, condition_result)
+        assert self.condition.is_satisfied(enterprise_offer, basket) == condition_result
 
     @mock.patch.object(EnterpriseCustomerCondition, 'is_satisfied', mock.Mock(return_value=True))
     def test_is_satisfied_with_different_users(self):
@@ -373,8 +386,7 @@ class AssignableEnterpriseCustomerCondition(EnterpriseServiceMockMixin, Discover
         factories.OfferAssignmentFactory(offer=enterprise_offers[0], code=voucher1.code, user_email='test1@example.com')
         factories.OfferAssignmentFactory(offer=enterprise_offers[1], code=voucher2.code, user_email='test2@example.com')
 
-        is_condition_satisfied = self.condition.is_satisfied(enterprise_offers[1], basket)
-        self.assertFalse(is_condition_satisfied)
+        assert self.condition.is_satisfied(enterprise_offers[1], basket) is False
 
     @mock.patch.object(EnterpriseCustomerCondition, 'is_satisfied', mock.Mock(return_value=True))
     @ddt.data(
@@ -386,10 +398,24 @@ class AssignableEnterpriseCustomerCondition(EnterpriseServiceMockMixin, Discover
                 {'code': 'KUGOW7Z37KUTGRI6', 'user_email': 'test2@example.com'},
             ],
             [
+                {'code': 'KUGOW7Z37KUTGRI6', 'user_email': 'test1@example.com'},
                 {'code': 'ZZZCYOBK4BSGKGKF', 'user_email': 'test1@example.com'},
                 {'code': 'ZZZCYOBK4BSGKGKF', 'user_email': 'test2@example.com'},
+            ],
+            True
+        ),
+        (
+            Voucher.SINGLE_USE,
+            None,
+            [
+                {'code': 'ZZZCYOBK4BSGKGKF', 'user_email': 'test1@example.com'},
+                {'code': 'KUGOW7Z37KUTGRI6', 'user_email': 'test2@example.com'},
+            ],
+            [
                 {'code': 'KUGOW7Z37KUTGRI6', 'user_email': 'test1@example.com'},
-            ]
+                {'code': 'ZZZCYOBK4BSGKGKF', 'user_email': 'test2@example.com'},
+            ],
+            False
         ),
         (
             Voucher.ONCE_PER_CUSTOMER,
@@ -399,8 +425,23 @@ class AssignableEnterpriseCustomerCondition(EnterpriseServiceMockMixin, Discover
                 {'code': 'KM2CDM3M3V3AY62Q', 'user_email': 'test2@example.com'},
             ],
             [
-                {'code': 'KM2CDM3M3V3AY62Q', 'user_email': 'none@example.com'}
-            ]
+                {'code': 'KM2CDM3M3V3AY62Q', 'user_email': 'test1@example.com'},
+                {'code': 'KM2CDM3M3V3AY62Q', 'user_email': 'other@example.com'},
+            ],
+            True
+        ),
+        (
+            Voucher.ONCE_PER_CUSTOMER,
+            5,
+            [
+                {'code': 'KM2CDM3M3V3AY62Q', 'user_email': 'test1@example.com'},
+                {'code': 'KM2CDM3M3V3AY62Q', 'user_email': 'test2@example.com'},
+            ],
+            [
+                # `other@example.com` should be able to redeem because we have slots available
+                {'code': 'KM2CDM3M3V3AY62Q', 'user_email': 'other@example.com', 'result': True},
+            ],
+            True
         ),
         (
             Voucher.MULTI_USE,
@@ -409,9 +450,8 @@ class AssignableEnterpriseCustomerCondition(EnterpriseServiceMockMixin, Discover
                 {'code': 'TA7WCQD3T4C7GHZ4', 'user_email': 'test1@example.com'},
                 {'code': 'TA7WCQD3T4C7GHZ4', 'user_email': 'test2@example.com'},
             ],
-            [
-                {'code': 'TA7WCQD3T4C7GHZ4', 'user_email': 'bob@example.com'}
-            ]
+            [],
+            True
         ),
         (
             Voucher.MULTI_USE,
@@ -420,12 +460,25 @@ class AssignableEnterpriseCustomerCondition(EnterpriseServiceMockMixin, Discover
                 {'code': 'NWW3BEOKOY5GITFH', 'user_email': 't1@example.com'},
                 {'code': 'NWW3BEOKOY5GITFH', 'user_email': 't2@example.com'},
                 {'code': 'NWW3BEOKOY5GITFH', 'user_email': 't3@example.com'},
-                {'code': 'GLPDHRB7JJYY2MEK', 'user_email': 't4@example.com'},
             ],
             [
                 {'code': 'NWW3BEOKOY5GITFH', 'user_email': 't4@example.com'},
-                {'code': 'GLPDHRB7JJYY2MEK', 'user_email': 't3@example.com'},
-            ]
+            ],
+            True
+        ),
+        (
+            Voucher.MULTI_USE,
+            5,
+            [
+                {'code': 'NWW3BEOKOY5GITFH', 'user_email': 't1@example.com'},
+                {'code': 'NWW3BEOKOY5GITFH', 'user_email': 't2@example.com'},
+                {'code': 'NWW3BEOKOY5GITFH', 'user_email': 't3@example.com'},
+            ],
+            [
+                # `other@example.com` should be able to redeem because we have slots available
+                {'code': 'NWW3BEOKOY5GITFH', 'user_email': 'other@example.com', 'result': True},
+            ],
+            True
         ),
         (
             Voucher.MULTI_USE_PER_CUSTOMER,
@@ -442,15 +495,126 @@ class AssignableEnterpriseCustomerCondition(EnterpriseServiceMockMixin, Discover
                 {'code': 'GAOJIXZLHMDJFMZE', 'user_email': 'test1@example.com'},
                 {'code': 'GAOJIXZLHMDJFMZE', 'user_email': 'test2@example.com'},
                 {'code': '3ZVMFPE4WKMMKEUE', 'user_email': 'test1@example.com'},
-            ]
+                {'code': '3ZVMFPE4WKMMKEUE', 'user_email': 'other@example.com'},
+            ],
+            True
+        ),
+        (
+            Voucher.MULTI_USE_PER_CUSTOMER,
+            2,
+            [
+                {'code': 'PO73EDONFDRJIYL5', 'user_email': 'test1@example.com'},
+                {'code': 'PO73EDONFDRJIYL5', 'user_email': 'test1@example.com'},
+                {'code': 'LQUKUCDDVZZWM4VD', 'user_email': 'test2@example.com'},
+                {'code': 'LQUKUCDDVZZWM4VD', 'user_email': 'test2@example.com'},
+            ],
+            [
+                {'code': 'PO73EDONFDRJIYL5', 'user_email': 'test2@example.com'},
+                {'code': 'LQUKUCDDVZZWM4VD', 'user_email': 'test1@example.com'},
+            ],
+            False
         )
     )
     @ddt.unpack
-    def test_is_satisfied_for_all_voucher_types(self, voucher_type, max_uses, assignments, wrong_assignments):
+    def test_is_satisfied_for_all_voucher_types(
+            self,
+            voucher_type,
+            max_uses,
+            assignments,
+            wrong_assignments,
+            check_correct_assignments
+    ):
         """
-        Ensure that condition returns expected result for `Voucher.MULTI_USE` voucher assignments.
+        Ensure that condition returns expected result for all types of voucher assignments.
         """
         self.create_data(voucher_type, max_uses, assignments)
 
-        self.assert_condition(voucher_type, assignments, True)
+        # for correct assignments we will also update status in OfferAssignment Model
+        # In some cases we only want to check the condition for wrong assignments
+        # without redeeming the correct assignments
+        if check_correct_assignments:
+            self.assert_condition(voucher_type, assignments, True)
         self.assert_condition(voucher_type, wrong_assignments, False)
+
+    @mock.patch.object(EnterpriseCustomerCondition, 'is_satisfied', mock.Mock(return_value=True))
+    def test_is_satisfied_when_owner_has_no_assignment(self):
+        """
+        Ensure that condition returns expected result the basket owner has no assignments.
+
+        # voucher has free slots(3) available, no offer assignment for basket owner,
+        # assignments(2) exist for other users, voucher has some redemptions(num_orders = 2)
+        # basket owner is allowed to redeem the voucher
+        """
+        code = 'TA7WCQD3T4C7GHZ4'
+        num_orders = 2
+        max_global_applications = 7
+
+        enterprise_offer = factories.EnterpriseOfferFactory(max_global_applications=max_global_applications)
+        voucher = factories.VoucherFactory(usage=Voucher.MULTI_USE, code=code, num_orders=num_orders)
+        voucher.offers.add(enterprise_offer)
+
+        factories.OfferAssignmentFactory(offer=enterprise_offer, code=code, user_email='test1@example.com')
+        factories.OfferAssignmentFactory(offer=enterprise_offer, code=code, user_email='test2@example.com')
+
+        basket = factories.BasketFactory(site=self.site, owner=factories.UserFactory(email='bob@example.com'))
+        basket.vouchers.add(voucher)
+
+        assert self.condition.is_satisfied(enterprise_offer, basket) is True
+
+    @mock.patch.object(EnterpriseCustomerCondition, 'is_satisfied', mock.Mock(return_value=True))
+    def test_is_satisfied_when_user_has_no_assignment(self):
+        """
+        Ensure that condition returns expected result when code has assignments
+        but user has no assignments and free slots are available.
+        """
+        voucher_code = 'NWW3BEOKOY5GITFH'
+        voucher_type, max_uses, assignments = (
+            Voucher.MULTI_USE,
+            7,
+            [
+                {'code': voucher_code, 'user_email': 't1@example.com'},
+                {'code': voucher_code, 'user_email': 't2@example.com'},
+            ]
+        )
+        user_with_no_assignment = [{'code': voucher_code, 'user_email': 'user_with_no_assignment@example.com'}]
+
+        self.create_data(voucher_type, max_uses, assignments)
+
+        # initially voucher should have 0 redemptions
+        voucher = Voucher.objects.get(usage=voucher_type, code=voucher_code)
+        assert voucher.num_orders == 0
+
+        # after this voucher's num_orders should be 2
+        self.assert_condition(voucher_type, assignments, True)
+        voucher = Voucher.objects.get(usage=voucher_type, code=voucher_code)
+        assert voucher.num_orders == 2
+
+        # consume all free slots
+        for __ in range(5):
+            self.assert_condition(voucher_type, user_with_no_assignment, True)
+
+        # all free slots should be redeemed
+        voucher = Voucher.objects.get(usage=voucher_type, code=voucher_code)
+        assert voucher.num_orders == 7
+
+        # no redemption available
+        self.assert_condition(voucher_type, user_with_no_assignment, False)
+
+    @mock.patch.object(EnterpriseCustomerCondition, 'is_satisfied', mock.Mock(return_value=True))
+    @ddt.data(
+        (0, True),
+        (1, False),
+    )
+    @ddt.unpack
+    def test_is_satisfied_when_no_code_assignments_exists(self, num_orders, redemptions_available):
+        """
+        Ensure that condition returns expected result when code has no assignments.
+        """
+        enterprise_offer = factories.EnterpriseOfferFactory()
+        voucher = factories.VoucherFactory(usage=Voucher.SINGLE_USE, code='AAA', num_orders=num_orders)
+        voucher.offers.add(enterprise_offer)
+
+        basket = factories.BasketFactory(site=self.site, owner=factories.UserFactory(email='wow@example.com'))
+        basket.vouchers.add(voucher)
+
+        assert self.condition.is_satisfied(enterprise_offer, basket) == redemptions_available

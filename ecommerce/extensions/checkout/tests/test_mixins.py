@@ -22,17 +22,17 @@ from ecommerce.extensions.analytics.utils import (
 from ecommerce.extensions.basket.constants import EMAIL_OPT_IN_ATTRIBUTE
 from ecommerce.extensions.basket.utils import basket_add_organization_attribute
 from ecommerce.extensions.checkout.exceptions import BasketNotFreeError
-from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin, OFFER_REDEEMED
+from ecommerce.extensions.checkout.mixins import OFFER_REDEEMED, EdxOrderPlacementMixin
 from ecommerce.extensions.fulfillment.status import ORDER
 from ecommerce.extensions.payment.tests.mixins import PaymentEventsMixin
 from ecommerce.extensions.payment.tests.processors import DummyProcessor
 from ecommerce.extensions.refund.tests.mixins import RefundTestMixin
 from ecommerce.extensions.test.factories import (
-    create_basket,
-    create_order,
-    VoucherFactory,
     EnterpriseOfferFactory,
-    OfferAssignmentFactory
+    OfferAssignmentFactory,
+    VoucherFactory,
+    create_basket,
+    create_order
 )
 from ecommerce.invoice.models import Invoice
 from ecommerce.tests.factories import SiteConfigurationFactory
@@ -423,7 +423,6 @@ class EdxOrderPlacementMixinTests(BusinessIntelligenceMixin, PaymentEventsMixin,
         """
         Verify the "update_assigned_voucher_offer_assignment" works as expected.
         """
-        from nose.tools import set_trace; set_trace()
         enterprise_offer = EnterpriseOfferFactory()
         voucher = VoucherFactory()
         voucher.offers.add(enterprise_offer)
