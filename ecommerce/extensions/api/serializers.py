@@ -24,7 +24,7 @@ from ecommerce.core.constants import (
 from ecommerce.core.url_utils import get_ecommerce_url
 from ecommerce.courses.models import Course
 from ecommerce.entitlements.utils import create_or_update_course_entitlement
-from ecommerce.extensions.offer.constants import OFFER_MAX_USES_DEFAULT
+from ecommerce.extensions.offer.constants import OFFER_ASSIGNMENT_REVOKED, OFFER_MAX_USES_DEFAULT
 from ecommerce.invoice.models import Invoice
 
 logger = logging.getLogger(__name__)
@@ -46,6 +46,7 @@ Refund = get_model('refund', 'Refund')
 Selector = get_class('partner.strategy', 'Selector')
 StockRecord = get_model('partner', 'StockRecord')
 Voucher = get_model('voucher', 'Voucher')
+VoucherApplication = get_model('voucher', 'VoucherApplication')
 User = get_user_model()
 
 COURSE_DETAIL_VIEW = 'api:v2:course-detail'
@@ -1055,6 +1056,29 @@ class CouponCodeAssignmentSerializer(serializers.Serializer):  # pylint: disable
         if codes:
             vouchers = vouchers.filter(code__in=codes)
 
+        # For ONCE_PER_CUSTOMER Coupons, exclude vouchers that have already
+        # been assigned to or redeemed by the requested emails.
+        voucher_usage_type = vouchers.first().usage
+        if voucher_usage_type == Voucher.ONCE_PER_CUSTOMER:
+            existing_assignments_for_users = OfferAssignment.objects.filter(user_email__in=emails).exclude(
+                status__in=OFFER_ASSIGNMENT_REVOKED
+            )
+            existing_applications_for_users = VoucherApplication.objects.filter(user__email__in=emails)
+            codes_to_exclude = (
+                [assignment.code for assignment in existing_assignments_for_users] +
+                [application.voucher.code for application in existing_applications_for_users]
+            )
+            emails_requiring_exclusions = (
+                [assignment.user_email for assignment in existing_assignments_for_users] +
+                [application.user.email for application in existing_applications_for_users]
+            )
+            logger.info(
+                'Excluding the following codes because they have been assigned to or redeemed by '
+                'at least one user in the given list of emails to assign to this coupon. '
+                'codes: %s, emails: %s, coupon_id: %s', codes_to_exclude, emails_requiring_exclusions, coupon.id
+            )
+            vouchers = vouchers.exclude(code__in=codes_to_exclude)
+
         total_slots = 0
         for voucher in vouchers.all():
             available_slots = voucher.slots_available_for_assignment
@@ -1062,7 +1086,7 @@ class CouponCodeAssignmentSerializer(serializers.Serializer):  # pylint: disable
             if available_slots < 1:
                 continue
 
-            if voucher.usage != Voucher.MULTI_USE_PER_CUSTOMER:
+            if voucher_usage_type != Voucher.MULTI_USE_PER_CUSTOMER:
                 available_slots = min(available_slots, len(emails) - total_slots)
 
             # If there are available slots, and we still have slots to fill,
@@ -1074,7 +1098,7 @@ class CouponCodeAssignmentSerializer(serializers.Serializer):  # pylint: disable
 
                 # For Multi use per customer vouchers, all of the slots must go to one user email,
                 # so for accounting purposes we only count one slot here towards the total.
-                if voucher.usage == Voucher.MULTI_USE_PER_CUSTOMER:
+                if voucher_usage_type == Voucher.MULTI_USE_PER_CUSTOMER:
                     total_slots += 1
                 else:
                     total_slots += available_slots
@@ -1085,6 +1109,6 @@ class CouponCodeAssignmentSerializer(serializers.Serializer):  # pylint: disable
             raise serializers.ValidationError('Not enough available codes for assignment!')
 
         # Add available_assignments to the validated data so that we can perform the assignments in create.
-        data['voucher_usage_type'] = vouchers.first().usage
+        data['voucher_usage_type'] = voucher_usage_type
         data['available_assignments'] = available_assignments
         return data

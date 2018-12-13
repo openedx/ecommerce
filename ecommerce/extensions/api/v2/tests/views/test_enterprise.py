@@ -717,6 +717,42 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
         for code in unused_codes:
             assert OfferAssignment.objects.filter(code=code).count() == 1
 
+    def test_coupon_codes_assign_once_per_customer_with_used_codes(self):
+        Switch.objects.update_or_create(name=ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, defaults={'active': True})
+        coupon_post_data = dict(self.data, voucher_type=Voucher.ONCE_PER_CUSTOMER, quantity=3)
+        coupon = self.get_response('POST', ENTERPRISE_COUPONS_LINK, coupon_post_data)
+        coupon = coupon.json()
+        coupon_id = coupon['coupon_id']
+
+        vouchers = Product.objects.get(id=coupon_id).attr.coupon_vouchers.vouchers.all()
+        # Redeem and assign two of the vouchers
+        already_redeemed_voucher = vouchers[0]
+        already_assigned_voucher = vouchers[1]
+        unused_voucher = vouchers[2]
+        redeemed_user = self.create_user(email='t1@example.com')
+        self.use_voucher(already_redeemed_voucher, redeemed_user)
+        OfferAssignment.objects.create(
+            code=already_assigned_voucher.code,
+            offer=already_assigned_voucher.enterprise_offer,
+            user_email='t2@example.com',
+        )
+        emails = ['t1@example.com', 't2@example.com', 't3@example.com']
+
+        response = self.get_response(
+            'POST',
+            '/api/v2/enterprise/coupons/{}/assign/'.format(coupon_id),
+            {'emails': emails}
+        )
+        response = response.json()
+
+        for i, email in enumerate(emails):
+            assert response['offer_assignments'][i]['user_email'] == email
+            assert response['offer_assignments'][i]['code'] == unused_voucher.code
+
+        assert OfferAssignment.objects.filter(code=unused_voucher.code).count() == 3
+        assert OfferAssignment.objects.filter(code=already_assigned_voucher.code).count() == 1
+        assert OfferAssignment.objects.filter(code=already_redeemed_voucher.code).count() == 0
+
     @ddt.data(
         (Voucher.SINGLE_USE, 1, None, ['test1@example.com', 'test2@example.com']),
         (Voucher.MULTI_USE_PER_CUSTOMER, 1, 3, ['test1@example.com', 'test2@example.com']),
