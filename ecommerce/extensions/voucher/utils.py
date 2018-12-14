@@ -831,8 +831,8 @@ def update_voucher_with_enterprise_offer(offer, benefit_value, enterprise_custom
         enterprise_customer=enterprise_customer or offer.condition.enterprise_customer_uuid,
         enterprise_customer_catalog=enterprise_catalog or offer.condition.enterprise_customer_catalog_uuid,
         offer_name=offer.name,
-        max_uses=max_uses or offer.max_global_applications,
-        email_domains=email_domains or offer.email_domains,
+        max_uses=max_uses,
+        email_domains=email_domains,
         site=site or offer.site,
     )
 
@@ -865,8 +865,8 @@ def update_voucher_offer(offer, benefit_value, benefit_type=None, max_uses=None,
             offer.benefit.proxy(), 'benefit_class_type', None
         ),
         offer_name=offer.name,
-        max_uses=max_uses or offer.max_global_applications,
-        email_domains=email_domains or offer.email_domains,
+        max_uses=max_uses,
+        email_domains=email_domains,
         program_uuid=program_uuid or offer.condition.program_uuid,
         site=site or offer.site,
     )
