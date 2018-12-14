@@ -379,6 +379,7 @@ class CouponViewSetFunctionalTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             'voucher_type': Voucher.MULTI_USE,
             'max_uses': 10,
             'benefit_value': 10,
+            'email_domains': 'edx.org'
         })
 
         self.get_response('POST', COUPONS_LINK, self.data)
@@ -389,13 +390,14 @@ class CouponViewSetFunctionalTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             offer = voucher.offers.first()
             offers[offer.name] = offer
             self.assertEqual(offer.max_global_applications, 10)
+            self.assertEqual(offer.email_domains, 'edx.org')
             self.assertEqual(offer.benefit.value, 10)
         self.assertEqual(len(offers.keys()), 5)
 
         self.get_response_json(
             'PUT',
             reverse('api:v2:coupons-detail', kwargs={'pk': coupon.id}),
-            data={'benefit_value': 20}
+            data={'benefit_value': 20, 'email_domains': '', 'max_uses': None}
         )
         updated_coupon = Product.objects.get(title=self.data['title'])
         self.assertEqual(coupon.id, updated_coupon.id)
@@ -404,8 +406,9 @@ class CouponViewSetFunctionalTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
         for voucher in vouchers:
             offer = voucher.offers.first()
             offers[offer.name] = offer
-            self.assertEqual(offer.max_global_applications, 10)
+            self.assertEqual(offer.max_global_applications, None)
             self.assertEqual(offer.benefit.value, 20)
+            self.assertEqual(offer.email_domains, '')
         self.assertEqual(len(offers.keys()), 5)
 
     def _create_enterprise_coupon(self, enterprise_customer_id, enterprise_catalog_id, enterprise_name):
