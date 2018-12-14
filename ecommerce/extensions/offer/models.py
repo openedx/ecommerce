@@ -253,7 +253,7 @@ class ConditionalOffer(AbstractConditionalOffer):
         if self.email_domains:
             for domain in self.email_domains.split(','):
                 pattern = r'(?P<username>.+)@(?P<subdomain>\w+\.)*{domain}'.format(domain=domain)
-                match = re.match(pattern, email)
+                match = re.match(pattern, email, re.IGNORECASE)
                 if match and match.group(0) == email:
                     return True
             return False
