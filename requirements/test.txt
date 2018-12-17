@@ -11,12 +11,12 @@ appdirs==1.4.3            # via zeep
 asn1crypto==0.24.0        # via cryptography
 astroid==1.4.9            # via pylint
 babel==2.6.0              # via django-oscar, django-phonenumber-field
-backports.functools-lru-cache==1.5  # via pylint
-beautifulsoup4==4.6.3     # via webtest
+backports.functools-lru-cache==1.5  # via pylint, soupsieve
+beautifulsoup4==4.7.0     # via webtest
 billiard==3.3.0.23        # via celery
 cached-property==1.5.1    # via zeep
 celery==3.1.26.post2      # via edx-ecommerce-worker
-certifi==2018.8.24        # via requests
+certifi==2018.11.29       # via requests
 cffi==1.11.5              # via cryptography
 chardet==3.0.4            # via requests
 configparser==3.5.0       # via pylint
@@ -24,7 +24,7 @@ cookies==2.2.1            # via responses
 coreapi==2.3.3
 coreschema==0.0.4         # via coreapi
 coverage==4.3.4
-cryptography==2.3.1       # via pyopenssl
+cryptography==2.4.2       # via pyopenssl
 cssselect==1.0.3          # via premailer
 cssutils==1.0.2           # via premailer
 ddt==1.1.1
@@ -54,25 +54,25 @@ django_extensions==1.9.9
 djangorestframework-jwt==1.11.0
 djangorestframework==3.6.4
 drf-extensions==0.3.1
-edx-auth-backends==1.1.3
+edx-auth-backends==1.2.1
 edx-django-release-util==0.3.1
 edx-django-sites-extensions==2.4.0
-edx-django-utils==1.0.1
+edx-django-utils==1.0.3
 edx-drf-extensions==2.0.1
 edx-ecommerce-worker==0.7.0
 edx-opaque-keys==0.4.4
-edx-rest-api-client==1.8.2
+edx-rest-api-client==1.9.2
 enum34==1.1.6             # via cryptography
 factory-boy==2.8.1
-faker==0.9.1              # via factory-boy
+faker==1.0.1              # via factory-boy
 freezegun==0.3.7
 funcsigs==1.0.2           # via mock
-future==0.16.0            # via pyjwkest
+future==0.17.1            # via pyjwkest
 gevent==1.0.2
 greenlet==0.4.15          # via gevent
 httpretty==0.8.14
-idna==2.7                 # via cryptography, requests
-inflect==1.0.1            # via jinja2-pluralize
+idna==2.8                 # via cryptography, requests
+inflect==2.1.0            # via jinja2-pluralize
 ipaddress==1.0.22         # via cryptography, faker
 isodate==0.6.0            # via zeep
 isort==4.2.5
@@ -85,43 +85,43 @@ lazy-object-proxy==1.3.1  # via astroid
 libsass==0.9.2
 lxml==3.8.0
 markdown==2.6.9
-markupsafe==1.0           # via jinja2
+markupsafe==1.1.0         # via jinja2
 mccabe==0.6.1             # via pylint
 mock-django==0.6.9
 mock==1.3.0
 ndg-httpsclient==0.5.1
-newrelic==4.4.1.104       # via edx-django-utils
+newrelic==4.8.0.110       # via edx-django-utils
 nose-ignore-docstring==0.2
 nose==1.3.7               # via django-nose
 oauthlib==2.1.0           # via requests-oauthlib, social-auth-core
 openapi-codec==1.3.2      # via django-rest-swagger
 path.py==7.2
 paypalrestsdk==1.13.1
-pbr==4.2.0                # via mock, stevedore
+pbr==5.1.1                # via mock, stevedore
 pep8==1.6.2
-phonenumberslite==8.9.14  # via django-phonenumber-field
-pillow==5.2.0             # via django-oscar
+phonenumberslite==8.10.2  # via django-phonenumber-field
+pillow==5.4.0             # via django-oscar
 premailer==2.9.2
 psutil==1.2.1             # via edx-django-utils, edx-drf-extensions
 purl==1.4                 # via django-oscar
-pyasn1==0.4.4             # via ndg-httpsclient
+pyasn1==0.4.5             # via ndg-httpsclient
 pycountry==17.1.8
 pycparser==2.19           # via cffi
-pycryptodomex==3.6.6      # via pyjwkest
-pygments==2.2.0
+pycryptodomex==3.7.2      # via pyjwkest
+pygments==2.3.1
 pyjwkest==1.3.2           # via edx-drf-extensions, social-auth-core
-pyjwt==1.6.4              # via djangorestframework-jwt, edx-rest-api-client, social-auth-core
+pyjwt==1.7.1              # via djangorestframework-jwt, edx-auth-backends, edx-rest-api-client, social-auth-core
 pylint==1.6.4
-pymongo==3.7.1            # via edx-opaque-keys
+pymongo==3.7.2            # via edx-opaque-keys
 pyopenssl==18.0.0         # via ndg-httpsclient, paypalrestsdk
-python-dateutil==2.7.3
+python-dateutil==2.7.5
 python-openid==2.2.5      # via social-auth-core
 pytz==2016.10
 pyyaml==3.13              # via edx-django-release-util
 rcssmin==1.0.6            # via django-compressor
 requests-oauthlib==1.0.0  # via social-auth-core
 requests-toolbelt==0.8.0  # via zeep
-requests==2.19.1
+requests==2.21.0
 responses==0.5.1
 rest-condition==1.0.3     # via edx-drf-extensions
 rjsmin==1.0.12            # via django-compressor
@@ -129,12 +129,13 @@ sailthru-client==2.2.3
 selenium==3.4.3
 semantic-version==2.6.0   # via edx-drf-extensions
 simplejson==3.16.0        # via django-rest-swagger, sailthru-client
-six==1.11.0
+six==1.12.0
 slumber==0.7.1            # via edx-rest-api-client
 social-auth-app-django==1.2.0  # via edx-auth-backends
 social-auth-core[openidconnect]==1.7.0  # via edx-auth-backends, social-auth-app-django
 sorl-thumbnail==12.5.0    # via django-oscar
-stevedore==1.29.0         # via edx-opaque-keys
+soupsieve==1.6.1          # via beautifulsoup4
+stevedore==1.30.0         # via edx-opaque-keys
 stripe==1.70.0
 testfixtures==4.5.0
 text-unidecode==1.2       # via faker
@@ -142,9 +143,9 @@ typing==3.6.6             # via django-extensions
 unicodecsv==0.14.1
 unidecode==0.4.21         # via django-oscar
 uritemplate==3.0.0        # via coreapi
-urllib3==1.23             # via requests
+urllib3==1.24.1           # via requests
 waitress==1.1.0           # via webtest
-webob==1.8.2              # via webtest
-webtest==2.0.30           # via django-webtest
+webob==1.8.4              # via webtest
+webtest==2.0.32           # via django-webtest
 wrapt==1.10.11            # via astroid
 zeep==2.1.1
