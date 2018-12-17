@@ -26,7 +26,7 @@ from ecommerce.extensions.catalogue.utils import (
     attach_vouchers_to_coupon_product,
     create_coupon_product_and_stockrecord
 )
-from ecommerce.extensions.offer.constants import OFFER_ASSIGNED, OFFER_ASSIGNMENT_EMAIL_PENDING
+from ecommerce.extensions.offer.constants import OFFER_NOT_ASSIGNED, OFFER_NOT_REDEEMED, OFFER_REDEEMED
 from ecommerce.extensions.voucher.utils import (
     create_enterprise_vouchers,
     update_voucher_offer,
@@ -181,20 +181,17 @@ class EnterpriseCouponViewSet(CouponViewSet):
         if coupon_was_migrated:
             super(EnterpriseCouponViewSet, self).update_range_data(request_data, vouchers)
 
-    def get_coupon_vouchers(self, coupon):
-        """
-        Returns vouchers for a coupon.
-        """
-        return Voucher.objects.filter(
-            coupon_vouchers__coupon__id=coupon.id
-        )
-
     def get_not_assigned_coupon_vouchers(self, queryset):
         """
         Returns vouchers which have not been redeemed yet with no offer assigment.
         """
+        # First we filter to get coupon not-redeemed vouchers which will give us assigned and not-assigned vouchers
+        # then we filter to find assigned codes and exclude assigned vouchers from not-redeemed vouchers, giving us
+        # not assigned codes only.
         not_redeemed_vouchers = self.get_not_redeemed_coupon_vouchers(queryset)
-        assigned_codes = OfferAssignment.objects.filter(voucher_application__isnull=True, status__in=[OFFER_ASSIGNED, OFFER_ASSIGNMENT_EMAIL_PENDING]).values_list('code', flat=True)
+        assigned_codes = OfferAssignment.objects.exclude(
+            status__in=[OFFER_REDEEMED]
+        ).values_list('code', flat=True)
         return not_redeemed_vouchers.exclude(code__in=assigned_codes)
 
     def get_not_redeemed_coupon_vouchers(self, queryset):
@@ -232,12 +229,12 @@ class EnterpriseCouponViewSet(CouponViewSet):
         }
         """
         coupon = self.get_object()
-        coupon_vouchers = self.get_coupon_vouchers(coupon)
+        coupon_vouchers = coupon.attr.coupon_vouchers.vouchers.all()
 
         coupon_code_filter = request.query_params.get('code_filter')
-        if coupon_code_filter == 'not-redeemed':
+        if coupon_code_filter == OFFER_NOT_REDEEMED:
             coupon_vouchers = self.get_not_redeemed_coupon_vouchers(coupon_vouchers)
-        elif coupon_code_filter == 'not-assigned':
+        elif coupon_code_filter == OFFER_NOT_ASSIGNED:
             coupon_vouchers = self.get_not_assigned_coupon_vouchers(coupon_vouchers)
         else:
             # We need a combined querset so that pagination works as expected

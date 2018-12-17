@@ -458,8 +458,7 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             with_applications=True
         )
 
-
-        # get coupon codes usage details
+        # Get coupon codes usage details
         response = self.get_response('GET', endpoint.format(coupon_id))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response = response.json()
