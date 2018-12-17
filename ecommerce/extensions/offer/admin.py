@@ -1,8 +1,11 @@
 from oscar.apps.offer.admin import *  # pylint: disable=unused-import,wildcard-import,unused-wildcard-import
+from oscar.core.loading import get_model
 
 admin.site.unregister(ConditionalOffer)
 admin.site.unregister(Condition)
 admin.site.unregister(Range)
+
+OfferAssignment = get_model('offer', 'OfferAssignment')
 
 
 @admin.register(Range)
@@ -30,3 +33,15 @@ class ConditionalOfferAdminExtended(ConditionalOfferAdmin):
             'fields': ('total_discount', 'num_orders')
         }),
     )
+
+
+@admin.register(OfferAssignment)
+class OfferAssignmentAdmin(admin.ModelAdmin):
+    """
+    Django admin model for `OfferAssignment`
+    """
+    class Meta(object):
+        model = OfferAssignment
+
+    list_display = ('code', 'user_email', 'status', 'offer', 'voucher_application')
+    search_fields = ('code', 'user_email', 'status')
