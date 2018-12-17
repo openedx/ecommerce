@@ -198,7 +198,7 @@ class BusinessIntelligenceMixin(object):
 
     def assert_correct_event(
             self, mock_track, instance, expected_user_id, expected_client_id, expected_ip, order_number, currency,
-            email, total, coupon=None, discount='0.00'
+            email, total, revenue, coupon=None, discount='0.00'
     ):
         """Check that the tracking context was correctly reflected in the emitted event."""
         (event_user_id, event_name, event_payload), kwargs = mock_track.call_args
@@ -211,11 +211,11 @@ class BusinessIntelligenceMixin(object):
         }
         self.assertEqual(kwargs['context'], expected_context)
         self.assert_correct_event_payload(
-            instance, event_payload, order_number, currency, email, total, coupon, discount
+            instance, event_payload, order_number, currency, email, total, revenue, coupon, discount
         )
 
     def assert_correct_event_payload(
-            self, instance, event_payload, order_number, currency, email, total,
+            self, instance, event_payload, order_number, currency, email, total, revenue,
             coupon, discount
     ):
         """
@@ -223,7 +223,7 @@ class BusinessIntelligenceMixin(object):
         completed order or refund.
         """
         self.assertEqual(
-            ['coupon', 'currency', 'discount', 'email', 'orderId', 'products', 'total'],
+            ['coupon', 'currency', 'discount', 'email', 'orderId', 'products', 'revenue', 'total'],
             sorted(event_payload.keys())
         )
         self.assertEqual(event_payload['orderId'], order_number)
@@ -240,6 +240,9 @@ class BusinessIntelligenceMixin(object):
 
         if model_name == 'Order':
             self.assertEqual(event_payload['total'], str(total))
+            self.assertEqual(event_payload['revenue'], str(revenue))
+            # value of revenue field should be the same as total.
+            self.assertEqual(event_payload['revenue'], str(total))
 
             for line in lines:
                 tracked_product = tracked_products_dict.get(line.partner_sku)

@@ -134,6 +134,7 @@ class SignalTests(ProgramTestMixin, CouponMixin, TestCase):
         properties = {
             'orderId': order.number,
             'total': str(order.total_excl_tax),
+            'revenue': str(order.total_excl_tax),
             'currency': order.currency,
             'coupon': coupon,
             'discount': str(order.total_discount_incl_tax),
