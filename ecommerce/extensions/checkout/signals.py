@@ -34,6 +34,9 @@ def track_completed_order(sender, order=None, **kwargs):  # pylint: disable=unus
     properties = {
         'orderId': order.number,
         'total': str(order.total_excl_tax),
+        # For Rockerbox integration, we need a field named revenue since they cannot parse a field named total.
+        # TODO: DE-1188: Remove / move Rockerbox integration code.
+        'revenue': str(order.total_excl_tax),
         'currency': order.currency,
         'discount': str(order.total_discount_incl_tax),
         'products': [
