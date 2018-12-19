@@ -198,7 +198,7 @@ class BusinessIntelligenceMixin(object):
 
     def assert_correct_event(
             self, mock_track, instance, expected_user_id, expected_client_id, expected_ip, order_number, currency,
-            total, coupon=None, discount='0.00'
+            email, total, coupon=None, discount='0.00'
     ):
         """Check that the tracking context was correctly reflected in the emitted event."""
         (event_user_id, event_name, event_payload), kwargs = mock_track.call_args
@@ -211,11 +211,11 @@ class BusinessIntelligenceMixin(object):
         }
         self.assertEqual(kwargs['context'], expected_context)
         self.assert_correct_event_payload(
-            instance, event_payload, order_number, currency, total, coupon, discount
+            instance, event_payload, order_number, currency, email, total, coupon, discount
         )
 
     def assert_correct_event_payload(
-            self, instance, event_payload, order_number, currency, total,
+            self, instance, event_payload, order_number, currency, email, total,
             coupon, discount
     ):
         """
@@ -223,13 +223,14 @@ class BusinessIntelligenceMixin(object):
         completed order or refund.
         """
         self.assertEqual(
-            ['coupon', 'currency', 'discount', 'orderId', 'products', 'total'],
+            ['coupon', 'currency', 'discount', 'email', 'orderId', 'products', 'total'],
             sorted(event_payload.keys())
         )
         self.assertEqual(event_payload['orderId'], order_number)
         self.assertEqual(event_payload['currency'], currency)
         self.assertEqual(event_payload['coupon'], coupon)
         self.assertEqual(event_payload['discount'], discount)
+        self.assertEqual(event_payload['email'], email)
 
         lines = instance.lines.all()
         self.assertEqual(len(lines), len(event_payload['products']))

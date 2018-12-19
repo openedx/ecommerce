@@ -154,6 +154,7 @@ class EdxOrderPlacementMixinTests(BusinessIntelligenceMixin, PaymentEventsMixin,
                 tracking_context['lms_ip'],
                 self.order.number,
                 self.order.currency,
+                self.order.user.email,
                 self.order.total_excl_tax
             )
             l.check(
@@ -237,6 +238,7 @@ class EdxOrderPlacementMixinTests(BusinessIntelligenceMixin, PaymentEventsMixin,
             None,
             self.order.number,
             self.order.currency,
+            self.order.user.email,
             self.order.total_excl_tax
         )
 

@@ -51,6 +51,8 @@ def track_completed_order(sender, order=None, **kwargs):  # pylint: disable=unus
             } for line in order.lines.all()
         ],
     }
+    if order.user:
+        properties['email'] = order.user.email
 
     for line in order.lines.all():
         if line.product.is_enrollment_code_product:
