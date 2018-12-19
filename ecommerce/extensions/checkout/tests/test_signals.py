@@ -34,7 +34,7 @@ LOGGER_NAME = 'ecommerce.extensions.checkout.signals'
 class SignalTests(ProgramTestMixin, CouponMixin, TestCase):
     def setUp(self):
         super(SignalTests, self).setUp()
-        self.user = self.create_user()
+        self.user = self.create_user(email="example@example.com")
         self.request.user = self.user
         toggle_switch('ENABLE_NOTIFICATIONS', True)
 
@@ -148,6 +148,8 @@ class SignalTests(ProgramTestMixin, CouponMixin, TestCase):
                 } for line in order.lines.all()
             ],
         }
+        if order.user:
+            properties['email'] = order.user.email
         if bundle_id:
             program = self.mock_get_program_data(fullBundle)
             if len(order.lines.all()) < len(program['courses']):
