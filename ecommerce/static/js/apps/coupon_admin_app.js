@@ -17,27 +17,30 @@ require([
         'use strict';
 
         $(function() {
-            var $app = $('#app'),
-                couponApp = new CouponRouter({$el: $app});
+            var startApp = function() {
+                var $app = $('#app'),
+                    couponApp = new CouponRouter({$el: $app});
+                couponApp.start();
+
+                // Handle navbar clicks.
+                $('a.navbar-brand').on('click', navigate);
+
+                // Handle internal clicks
+                $app.on('click', 'a', navigate);
+            };
 
             ecommerce.coupons = ecommerce.coupons || {};
             ecommerce.coupons.categories = new CategoryCollection();
             ecommerce.coupons.categories.url = '/api/v2/coupons/categories/';
-            ecommerce.coupons.categories.fetch({async: false});
 
             ecommerce.coupons.catalogs = new CatalogCollection();
-            ecommerce.coupons.catalogs.fetch({async: false});
 
             ecommerce.coupons.enterprise_customers = new EnterpriseCustomerCollection();
-            ecommerce.coupons.enterprise_customers.fetch({async: false});
 
-            couponApp.start();
-
-            // Handle navbar clicks.
-            $('a.navbar-brand').on('click', navigate);
-
-            // Handle internal clicks
-            $app.on('click', 'a', navigate);
+            $.when(ecommerce.coupons.categories.fetch(),
+                ecommerce.coupons.catalogs.fetch(),
+                ecommerce.coupons.enterprise_customers.fetch()).then(
+                    startApp(), startApp());
         });
     }
 );
