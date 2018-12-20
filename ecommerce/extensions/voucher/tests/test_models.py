@@ -4,10 +4,14 @@ import ddt
 from django.core.exceptions import ValidationError
 from django.utils.timezone import now
 from oscar.core.loading import get_model
+from oscar.test.factories import UserFactory
 from waffle.models import Switch
-from ecommerce.enterprise.constants import ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH
-from ecommerce.extensions.test import factories
 
+from ecommerce.courses.tests.factories import CourseFactory
+from ecommerce.enterprise.constants import ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH
+from ecommerce.extensions.offer.constants import OFFER_ASSIGNED, OFFER_ASSIGNMENT_REVOKED, OFFER_REDEEMED
+from ecommerce.extensions.test import factories
+from ecommerce.tests.factories import PartnerFactory
 from ecommerce.tests.testcases import TestCase
 
 ConditionalOffer = get_model('offer', 'ConditionalOffer')
@@ -85,3 +89,82 @@ class VoucherTests(TestCase):
         # Turn the switch off and see that the oldest offer gets returned.
         Switch.objects.update_or_create(name=ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, defaults={'active': False})
         assert voucher.best_offer == first_offer
+
+    def test_create_voucher_with_multi_use_per_customer_usage(self):
+        """ Verify voucher is created with `MULTI_USE_PER_CUSTOMER` usage type. """
+        voucher_data = dict(self.data, usage=Voucher.MULTI_USE_PER_CUSTOMER)
+        voucher = Voucher.objects.create(**voucher_data)
+        user = UserFactory()
+        self.assertEqual(voucher.usage, Voucher.MULTI_USE_PER_CUSTOMER)
+        is_available, message = voucher.is_available_to_user(user)
+        self.assertTrue(is_available)
+        self.assertEqual(message, '')
+
+    def use_voucher(self, voucher, user):
+        """
+        Mark voucher as used by provided user
+        """
+        partner = PartnerFactory(short_code='testX')
+        course = CourseFactory(id='course-v1:test-org+course+run', partner=partner)
+        verified_seat = course.create_or_update_seat('verified', False, 100)
+
+        order = factories.OrderFactory()
+        order_line = factories.OrderLineFactory(product=verified_seat)
+        order.lines.add(order_line)
+        voucher.record_usage(order, user)
+        voucher.offers.first().record_usage(discount={'freq': 1, 'discount': 1})
+
+    def test_multi_use_per_customer_voucher(self):
+        """
+        Verify `MULTI_USE_PER_CUSTOMER` behaves as expected.
+        """
+        voucher_data = dict(self.data, usage=Voucher.MULTI_USE_PER_CUSTOMER)
+        enterprise_offer = factories.EnterpriseOfferFactory(max_global_applications=3)
+        voucher = factories.VoucherFactory(**voucher_data)
+        voucher.offers.add(enterprise_offer)
+
+        user1 = UserFactory(email='test1@example.com')
+        user2 = UserFactory(email='test2@example.com')
+
+        self.use_voucher(voucher, user1)
+
+        is_available, message = voucher.is_available_to_user(user1)
+        assert (is_available, message) == (True, '')
+
+        is_available, message = voucher.is_available_to_user(user2)
+        assert (is_available, message) == (False, 'This voucher is only available to another user')
+
+    def test_slots_available_for_assignment_no_enterprise_offer(self):
+        """ Verify that a voucher with no enterprise offer returns none for slots_available_for_assignment. """
+        voucher = Voucher.objects.create(**self.data)
+        assert not voucher.slots_available_for_assignment
+
+    @ddt.data(
+        (Voucher.SINGLE_USE, 0, None, [], 1),
+        (Voucher.MULTI_USE_PER_CUSTOMER, 0, 10, [], 10),
+        (Voucher.MULTI_USE, 0, 10, [], 10),
+        (Voucher.ONCE_PER_CUSTOMER, 0, 10, [], 10),
+        (Voucher.SINGLE_USE, 1, None, [], 0),
+        (Voucher.MULTI_USE_PER_CUSTOMER, 3, 10, [], 0),
+        (Voucher.MULTI_USE, 3, 10, [], 7),
+        (Voucher.SINGLE_USE, 0, None, [{'status': OFFER_ASSIGNED}], 0),
+        (Voucher.MULTI_USE_PER_CUSTOMER, 0, 10, [{'status': OFFER_ASSIGNED}, {'status': OFFER_ASSIGNED}], 0),
+        (Voucher.MULTI_USE, 0, 10, [{'status': OFFER_ASSIGNED}, {'status': OFFER_ASSIGNED}], 8),
+        (Voucher.MULTI_USE, 99, None, [{'status': OFFER_ASSIGNED}], 9900),
+        (Voucher.MULTI_USE, 3, 10, [{'status': OFFER_REDEEMED}], 7),
+        (Voucher.SINGLE_USE, 0, None, [{'status': OFFER_ASSIGNMENT_REVOKED}], 1),
+        (Voucher.MULTI_USE_PER_CUSTOMER, 0, 10, [{'status': OFFER_ASSIGNMENT_REVOKED}], 10),
+        (Voucher.MULTI_USE_PER_CUSTOMER, 1, 10, [{'status': OFFER_ASSIGNMENT_REVOKED}], 0),
+    )
+    @ddt.unpack
+    def test_slots_available_for_assignment(self, usage, num_orders, max_uses, offer_assignments, expected):
+        voucher_data = dict(self.data, usage=usage, num_orders=num_orders)
+        voucher = Voucher.objects.create(**voucher_data)
+
+        enterprise_offer = factories.EnterpriseOfferFactory(max_global_applications=max_uses)
+        voucher.offers.add(enterprise_offer)
+
+        for assignment_data in offer_assignments:
+            factories.OfferAssignmentFactory(offer=enterprise_offer, code=voucher.code, **assignment_data)
+
+        assert voucher.slots_available_for_assignment == expected

@@ -24,6 +24,7 @@ from ecommerce.core.constants import (
 from ecommerce.core.url_utils import get_ecommerce_url
 from ecommerce.courses.models import Course
 from ecommerce.entitlements.utils import create_or_update_course_entitlement
+from ecommerce.extensions.offer.constants import OFFER_ASSIGNMENT_REVOKED, OFFER_MAX_USES_DEFAULT
 from ecommerce.invoice.models import Invoice
 
 logger = logging.getLogger(__name__)
@@ -35,6 +36,7 @@ BillingAddress = get_model('order', 'BillingAddress')
 Catalog = get_model('catalogue', 'Catalog')
 Category = get_model('catalogue', 'Category')
 Line = get_model('order', 'Line')
+OfferAssignment = get_model('offer', 'OfferAssignment')
 Order = get_model('order', 'Order')
 Partner = get_model('partner', 'Partner')
 Product = get_model('catalogue', 'Product')
@@ -44,6 +46,7 @@ Refund = get_model('refund', 'Refund')
 Selector = get_class('partner.strategy', 'Selector')
 StockRecord = get_model('partner', 'StockRecord')
 Voucher = get_model('voucher', 'Voucher')
+VoucherApplication = get_model('voucher', 'VoucherApplication')
 User = get_user_model()
 
 COURSE_DETAIL_VIEW = 'api:v2:course-detail'
@@ -70,6 +73,12 @@ def retrieve_condition(obj):
     return retrieve_offer(obj).condition
 
 
+def retrieve_enterprise_condition(obj):
+    """Helper method to retrieve the benefit from voucher. """
+    enterprise_offer = retrieve_enterprise_offer(obj)
+    return enterprise_offer and enterprise_offer.condition
+
+
 def retrieve_end_date(obj):
     """Helper method to retrieve the voucher end datetime. """
     return retrieve_voucher(obj).end_datetime
@@ -80,9 +89,19 @@ def retrieve_offer(obj):
     return retrieve_voucher(obj).best_offer
 
 
+def retrieve_original_offer(obj):
+    """Helper method to retrieve the offer from coupon. """
+    return retrieve_voucher(obj).original_offer
+
+
+def retrieve_enterprise_offer(obj):
+    """Helper method to retrieve the offer from coupon. """
+    return retrieve_voucher(obj).enterprise_offer
+
+
 def retrieve_range(obj):
     """Helper method to retrieve the range from coupon."""
-    return retrieve_offer(obj).condition.range
+    return retrieve_original_offer(obj).condition.range
 
 
 def retrieve_quantity(obj):
@@ -640,6 +659,34 @@ class VoucherSerializer(serializers.ModelSerializer):
         )
 
 
+class CouponVoucherSerializer(serializers.Serializer):  # pylint: disable=abstract-method
+    code = serializers.SerializerMethodField()
+    assigned_to = serializers.SerializerMethodField()
+    redemptions = serializers.SerializerMethodField()
+
+    def get_code(self, voucher):
+        return voucher.code
+
+    def get_assigned_to(self, obj):  # pylint: disable=unused-argument
+        return ''
+
+    def get_redemptions(self, voucher):
+        offer = voucher.best_offer
+        redemption_count = voucher.num_orders
+
+        if voucher.usage == Voucher.SINGLE_USE:
+            max_coupon_usage = 1
+        elif voucher.usage != Voucher.SINGLE_USE and offer.max_global_applications is None:
+            max_coupon_usage = OFFER_MAX_USES_DEFAULT
+        else:
+            max_coupon_usage = offer.max_global_applications
+
+        return {
+            'used': redemption_count,
+            'available': max_coupon_usage,
+        }
+
+
 class CategorySerializer(serializers.ModelSerializer):
     # NOTE (CCB): We are explicitly ignoring child categories. They are not relevant to our current needs. Support
     # should be added later, if needed.
@@ -668,6 +715,98 @@ class CouponListSerializer(serializers.ModelSerializer):
     class Meta(object):
         model = Product
         fields = ('category', 'client', 'code', 'id', 'title', 'date_created')
+
+
+class EnterpriseCouponOverviewListSerializer(serializers.ModelSerializer):
+    """
+    Serializer for Enterprise Coupons list overview.
+    """
+    end_date = serializers.SerializerMethodField()
+    has_error = serializers.SerializerMethodField()
+    max_uses = serializers.SerializerMethodField()
+    num_codes = serializers.SerializerMethodField()
+    num_unassigned = serializers.SerializerMethodField()
+    num_uses = serializers.SerializerMethodField()
+    start_date = serializers.SerializerMethodField()
+    usage_limitation = serializers.SerializerMethodField()
+
+    # TODO: ENT-1184
+    def get_num_unassigned(self, obj):  # pylint: disable=unused-argument
+        return 0
+
+    # TODO: ENT-1184
+    def get_has_error(self, obj):   # pylint: disable=unused-argument
+        return False
+
+    # Max number of codes available (Maximum Coupon Usage).
+    def get_max_uses(self, obj):
+        offer = retrieve_offer(obj)
+        return offer.max_global_applications
+
+    # Redemption count.
+    def get_num_uses(self, obj):
+        voucher = retrieve_voucher(obj)
+        return voucher.num_orders
+
+    # Number of codes.
+    def get_num_codes(self, obj):
+        return retrieve_quantity(obj)
+
+    # Usage Limitation (Maximum # of usages per code).
+    def get_usage_limitation(self, obj):
+        return retrieve_voucher_usage(obj)
+
+    def get_start_date(self, obj):
+        return retrieve_start_date(obj)
+
+    def get_end_date(self, obj):
+        return retrieve_end_date(obj)
+
+    class Meta(object):
+        model = Product
+        fields = (
+            'end_date', 'has_error', 'id', 'max_uses', 'num_codes', 'num_unassigned',
+            'num_uses', 'start_date', 'title', 'usage_limitation'
+        )
+
+
+class EnterpriseCouponListSerializer(serializers.ModelSerializer):
+    client = serializers.SerializerMethodField()
+    enterprise_customer = serializers.SerializerMethodField()
+    enterprise_customer_catalog = serializers.SerializerMethodField()
+    code_status = serializers.SerializerMethodField()
+
+    def get_client(self, obj):
+        return Invoice.objects.get(order__lines__product=obj).business_client.name
+
+    def get_enterprise_customer(self, obj):
+        """ Get the Enterprise Customer UUID attached to a coupon. """
+        offer_condition = retrieve_enterprise_condition(obj)
+        return offer_condition and offer_condition.enterprise_customer_uuid
+
+    def get_enterprise_customer_catalog(self, obj):
+        """ Get the Enterprise Customer Catalog UUID attached to a coupon. """
+        offer_condition = retrieve_enterprise_condition(obj)
+        return offer_condition and offer_condition.enterprise_customer_catalog_uuid
+
+    def get_code_status(self, obj):
+        start_date = retrieve_start_date(obj)
+        end_date = retrieve_end_date(obj)
+        current_datetime = timezone.now()
+        in_time_interval = start_date < current_datetime < end_date
+        return _('ACTIVE') if in_time_interval else _('INACTIVE')
+
+    class Meta(object):
+        model = Product
+        fields = (
+            'client',
+            'code_status',
+            'enterprise_customer',
+            'enterprise_customer_catalog',
+            'id',
+            'title',
+            'date_created',
+        )
 
 
 class CouponSerializer(ProductPaymentInfoMixin, serializers.ModelSerializer):
@@ -860,3 +999,116 @@ class ProviderSerializer(serializers.Serializer):  # pylint: disable=abstract-me
     status_url = serializers.CharField()
     thumbnail_url = serializers.CharField()
     url = serializers.CharField()
+
+
+class OfferAssignmentSerializer(serializers.ModelSerializer):
+    class Meta(object):
+        model = OfferAssignment
+        fields = ('user_email', 'code')
+
+
+class CouponCodeAssignmentSerializer(serializers.Serializer):  # pylint: disable=abstract-method
+    codes = serializers.ListField(
+        child=serializers.CharField(), required=False, write_only=True
+    )
+    emails = serializers.ListField(
+        child=serializers.EmailField(), required=True, write_only=True
+    )
+    offer_assignments = serializers.ListField(
+        child=OfferAssignmentSerializer(), read_only=True
+    )
+
+    def create(self, validated_data):
+        """Create OfferAssignment objects for each email and the available_assignments determined from validation."""
+        emails = validated_data.get('emails')
+        voucher_usage_type = validated_data.pop('voucher_usage_type')
+        available_assignments = validated_data.pop('available_assignments')
+        email_iterator = iter(emails)
+        offer_assignments = []
+
+        for code in available_assignments:
+            offer = available_assignments[code]['offer']
+            email = next(email_iterator) if voucher_usage_type == Voucher.MULTI_USE_PER_CUSTOMER else None
+            for _ in range(available_assignments[code]['num_slots']):
+                offer_assignments.append(
+                    OfferAssignment.objects.create(
+                        offer=offer,
+                        code=code,
+                        user_email=email or next(email_iterator),
+                    )
+                )
+
+        validated_data['offer_assignments'] = offer_assignments
+        return validated_data
+
+    def validate(self, data):
+        """
+        Validate that the given emails can be assigned to a slot in the coupon, to the codes if specified.
+        A slot is a potential redemption of a voucher contained within the top level Coupon.
+        """
+        codes = data.get('codes')
+        emails = data.get('emails')
+        coupon = self.context.get('coupon')
+        available_assignments = {}
+        vouchers = coupon.attr.coupon_vouchers.vouchers
+
+        # Limit which vouchers to consider for assignment by the codes passed in.
+        if codes:
+            vouchers = vouchers.filter(code__in=codes)
+
+        # For ONCE_PER_CUSTOMER Coupons, exclude vouchers that have already
+        # been assigned to or redeemed by the requested emails.
+        voucher_usage_type = vouchers.first().usage
+        if voucher_usage_type == Voucher.ONCE_PER_CUSTOMER:
+            existing_assignments_for_users = OfferAssignment.objects.filter(user_email__in=emails).exclude(
+                status__in=OFFER_ASSIGNMENT_REVOKED
+            )
+            existing_applications_for_users = VoucherApplication.objects.filter(user__email__in=emails)
+            codes_to_exclude = (
+                [assignment.code for assignment in existing_assignments_for_users] +
+                [application.voucher.code for application in existing_applications_for_users]
+            )
+            emails_requiring_exclusions = (
+                [assignment.user_email for assignment in existing_assignments_for_users] +
+                [application.user.email for application in existing_applications_for_users]
+            )
+            logger.info(
+                'Excluding the following codes because they have been assigned to or redeemed by '
+                'at least one user in the given list of emails to assign to this coupon. '
+                'codes: %s, emails: %s, coupon_id: %s', codes_to_exclude, emails_requiring_exclusions, coupon.id
+            )
+            vouchers = vouchers.exclude(code__in=codes_to_exclude)
+
+        total_slots = 0
+        for voucher in vouchers.all():
+            available_slots = voucher.slots_available_for_assignment
+            # If there are no available slots for this voucher, skip it.
+            if available_slots < 1:
+                continue
+
+            if voucher_usage_type != Voucher.MULTI_USE_PER_CUSTOMER:
+                available_slots = min(available_slots, len(emails) - total_slots)
+
+            # If there are available slots, and we still have slots to fill,
+            # add information to the available_assignments dict.
+            if total_slots < len(emails):
+                # Keep track of which codes can be assigned how many times
+                # along with its corresponding ConditionalOffer.
+                available_assignments[voucher.code] = {'offer': voucher.enterprise_offer, 'num_slots': available_slots}
+
+                # For Multi use per customer vouchers, all of the slots must go to one user email,
+                # so for accounting purposes we only count one slot here towards the total.
+                if voucher_usage_type == Voucher.MULTI_USE_PER_CUSTOMER:
+                    total_slots += 1
+                else:
+                    total_slots += available_slots
+            else:
+                break
+        # If we got through all the vouchers and don't have enough slots for the emails given, the request isn't valid.
+        if total_slots < len(emails):
+            raise serializers.ValidationError('Not enough available codes for assignment!')
+
+        # Add available_assignments to the validated data so that we can perform the assignments in create.
+        data['voucher_usage_type'] = voucher_usage_type
+        data['available_assignments'] = available_assignments
+        return data

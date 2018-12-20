@@ -486,6 +486,9 @@ class ConditionalOfferTests(DiscoveryTestMixin, DiscoveryMockMixin, TestCase):
         valid_email = 'valid@{domain}'.format(domain=self.valid_sub_domain)
         self.assertTrue(self.offer.is_email_valid(valid_email))
 
+        valid_uppercase_email = 'valid@{domain}'.format(domain=self.valid_sub_domain.upper())
+        self.assertTrue(self.offer.is_email_valid(valid_uppercase_email))
+
         no_email_offer = factories.ConditionalOffer()
         self.assertTrue(no_email_offer.is_email_valid(invalid_email))
 

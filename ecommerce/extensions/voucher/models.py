@@ -1,13 +1,15 @@
 import datetime
 import logging
-import waffle
 
+import waffle
 from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
 from django.db import models
+from django.utils.translation import ugettext_lazy as _
 from oscar.apps.voucher.abstract_models import AbstractVoucher  # pylint: disable=ungrouped-imports
 
 from ecommerce.core.utils import log_message_and_raise_validation_error
 from ecommerce.enterprise.constants import ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH
+from ecommerce.extensions.offer.constants import OFFER_ASSIGNMENT_REVOKED, OFFER_MAX_USES_DEFAULT, OFFER_REDEEMED
 
 logger = logging.getLogger(__name__)
 
@@ -28,6 +30,30 @@ class OrderLineVouchers(models.Model):
 
 
 class Voucher(AbstractVoucher):
+    SINGLE_USE, MULTI_USE, ONCE_PER_CUSTOMER, MULTI_USE_PER_CUSTOMER = (
+        'Single use', 'Multi-use', 'Once per customer', 'Multi-use-per-Customer')
+    USAGE_CHOICES = (
+        (SINGLE_USE, _("Can be used once by one customer")),
+        (MULTI_USE, _("Can be used multiple times by multiple customers")),
+        (ONCE_PER_CUSTOMER, _("Can only be used once per customer")),
+        (MULTI_USE_PER_CUSTOMER, _("Can be used multiple times by one customer")),
+    )
+    usage = models.CharField(_("Usage"), max_length=128,
+                             choices=USAGE_CHOICES, default=MULTI_USE)
+
+    def is_available_to_user(self, user=None):
+        is_available, message = super(Voucher, self).is_available_to_user(user)  # pylint: disable=bad-super-call
+
+        if self.usage == self.MULTI_USE_PER_CUSTOMER:
+            is_available = True
+            message = ''
+            applications = self.applications.filter(voucher=self).exclude(user=user)
+            if applications.exists():
+                is_available = False
+                message = _('This voucher is only available to another user')  # pylint: disable=redefined-variable-type
+
+        return is_available, message
+
     def save(self, *args, **kwargs):
         self.clean()
         super(Voucher, self).save(*args, **kwargs)  # pylint: disable=bad-super-call
@@ -89,5 +115,32 @@ class Voucher(AbstractVoucher):
             return self.original_offer
         # If the switch is enabled, return the enterprise offer if it exists.
         return self.enterprise_offer or self.original_offer
+
+    @property
+    def slots_available_for_assignment(self):
+        """
+        Calculate the number of available slots left for this voucher.
+        A slot is a potential redemption of the voucher.
+        """
+        enterprise_offer = self.enterprise_offer
+        # Assignment is only valid for Vouchers linked to an enterprise offer.
+        if not enterprise_offer:
+            return None
+
+        # Find the number of OfferAssignments that already exist that are not redeemed or revoked.
+        # Redeemed OfferAssignments are excluded in favor of using num_orders on this voucher.
+        num_assignments = enterprise_offer.offerassignment_set.filter(code=self.code).exclude(
+            status__in=[OFFER_REDEEMED, OFFER_ASSIGNMENT_REVOKED]).count()
+
+        # If this a Single use or Multi use per customer voucher,
+        # it must have no orders or existing assignments to be assigned.
+        if self.usage in (self.SINGLE_USE, self.MULTI_USE_PER_CUSTOMER):
+            if self.num_orders or num_assignments:
+                return 0
+            return enterprise_offer.max_global_applications or 1
+        else:
+            offer_max_uses = enterprise_offer.max_global_applications or OFFER_MAX_USES_DEFAULT
+            return offer_max_uses - (self.num_orders + num_assignments)
+
 
 from oscar.apps.voucher.models import *  # noqa isort:skip pylint: disable=wildcard-import,unused-wildcard-import,wrong-import-position,wrong-import-order,ungrouped-imports

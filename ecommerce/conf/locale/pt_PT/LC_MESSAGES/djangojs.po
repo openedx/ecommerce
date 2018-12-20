@@ -4,6 +4,7 @@
 # This file is distributed under the GNU AFFERO GENERAL PUBLIC LICENSE.
 # 
 # Translators:
+# Cátia Lopes <catia.lopes@bridgelk.com>, 2018
 # MS <manuelarodsilva@gmail.com>, 2018
 # MS <manuelarodsilva@gmail.com>, 2016
 # MS, 2016,2018
@@ -13,7 +14,7 @@ msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2018-04-05 11:00+0000\n"
-"PO-Revision-Date: 2018-11-06 17:40+0000\n"
+"PO-Revision-Date: 2018-11-23 17:57+0000\n"
 "Last-Translator: Beatriz Sousa <beatriz.sousa@bridgelk.com>\n"
 "Language-Team: Portuguese (Portugal) (http://www.transifex.com/open-edx/edx-platform/language/pt_PT/)\n"
 "MIME-Version: 1.0\n"
