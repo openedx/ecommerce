@@ -39,8 +39,8 @@ require([
 
             $.when(ecommerce.coupons.categories.fetch(),
                 ecommerce.coupons.catalogs.fetch(),
-                ecommerce.coupons.enterprise_customers.fetch()).then(
-                    startApp(), startApp());
+                ecommerce.coupons.enterprise_customers.fetch()).always(
+                    startApp());
         });
     }
 );
