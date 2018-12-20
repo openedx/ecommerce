@@ -2,12 +2,12 @@ import logging
 
 import waffle
 from django.dispatch import receiver
-from ecommerce_worker.sailthru.v1.tasks import update_course_enrollment
 from oscar.core.loading import get_class, get_model
 
 from ecommerce.core.url_utils import get_lms_url
 from ecommerce.courses.utils import mode_for_product
 from ecommerce.extensions.analytics.utils import silence_exceptions
+from ecommerce_worker.sailthru.v1.tasks import update_course_enrollment
 
 logger = logging.getLogger(__name__)
 post_checkout = get_class('checkout.signals', 'post_checkout')

@@ -6,7 +6,6 @@ import logging
 
 import waffle
 from django.db import transaction
-from ecommerce_worker.fulfillment.v1.tasks import fulfill_order
 from oscar.apps.checkout.mixins import OrderPlacementMixin
 from oscar.core.loading import get_class, get_model
 
@@ -20,6 +19,7 @@ from ecommerce.extensions.customer.utils import Dispatcher
 from ecommerce.extensions.offer.constants import OFFER_ASSIGNMENT_REVOKED, OFFER_REDEEMED
 from ecommerce.extensions.order.constants import PaymentEventTypeName
 from ecommerce.invoice.models import Invoice
+from ecommerce_worker.fulfillment.v1.tasks import fulfill_order
 
 CommunicationEventType = get_model('customer', 'CommunicationEventType')
 logger = logging.getLogger(__name__)
