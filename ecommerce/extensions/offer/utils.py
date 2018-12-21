@@ -136,17 +136,11 @@ def send_assigned_offer_email(
     """
 
     email_subject = settings.OFFER_ASSIGNMENT_EMAIL_DEFAULT_SUBJECT
-    try:
-        email_body = template.format(
-            REDEMPTIONS_REMAINING=redemptions_remaining,
-            USER_EMAIL=learner_email,
-            ENROLLMENT_URL=enrollment_url,
-            CODE=code,
-            EXPIRATION_DATE=code_expiration_date
-        )
-        send_offer_assignment_email.delay(learner_email, offer_assignment_id, email_subject, email_body)
-    except Exception as exc:  # pylint: disable=broad-except
-        logger.exception(
-            '[Offer Assignment] send_offer_assignment_email celery task raised: %r', exc)
-        return False
-    return True
+    email_body = template.format(
+        REDEMPTIONS_REMAINING=redemptions_remaining,
+        USER_EMAIL=learner_email,
+        ENROLLMENT_URL=enrollment_url,
+        CODE=code,
+        EXPIRATION_DATE=code_expiration_date
+    )
+    send_offer_assignment_email.delay(learner_email, offer_assignment_id, email_subject, email_body)
