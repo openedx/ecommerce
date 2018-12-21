@@ -22,12 +22,18 @@ from ecommerce.extensions.analytics.utils import (
 from ecommerce.extensions.basket.constants import EMAIL_OPT_IN_ATTRIBUTE
 from ecommerce.extensions.basket.utils import basket_add_organization_attribute
 from ecommerce.extensions.checkout.exceptions import BasketNotFreeError
-from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
+from ecommerce.extensions.checkout.mixins import OFFER_REDEEMED, EdxOrderPlacementMixin
 from ecommerce.extensions.fulfillment.status import ORDER
 from ecommerce.extensions.payment.tests.mixins import PaymentEventsMixin
 from ecommerce.extensions.payment.tests.processors import DummyProcessor
 from ecommerce.extensions.refund.tests.mixins import RefundTestMixin
-from ecommerce.extensions.test.factories import create_basket, create_order
+from ecommerce.extensions.test.factories import (
+    EnterpriseOfferFactory,
+    OfferAssignmentFactory,
+    VoucherFactory,
+    create_basket,
+    create_order
+)
 from ecommerce.invoice.models import Invoice
 from ecommerce.tests.factories import SiteConfigurationFactory
 from ecommerce.tests.mixins import BusinessIntelligenceMixin
@@ -38,10 +44,12 @@ Basket = get_model('basket', 'Basket')
 BasketAttribute = get_model('basket', 'BasketAttribute')
 BasketAttributeType = get_model('basket', 'BasketAttributeType')
 NoShippingRequired = get_class('shipping.methods', 'NoShippingRequired')
+OfferAssignment = get_model('offer', 'OfferAssignment')
 OrderTotalCalculator = get_class('checkout.calculators', 'OrderTotalCalculator')
 PaymentEventType = get_model('order', 'PaymentEventType')
 SourceType = get_model('payment', 'SourceType')
 Product = get_model('catalogue', 'Product')
+VoucherApplication = get_model('voucher', 'VoucherApplication')
 
 
 @ddt.ddt
@@ -381,7 +389,10 @@ class EdxOrderPlacementMixinTests(BusinessIntelligenceMixin, PaymentEventsMixin,
             'ip': lms_ip,
             'Google Analytics': {
                 'clientId': ga_client_id
-            }
+            },
+            'page': {
+                'url': 'https://testserver.fake/'
+            },
         }
 
         mixin.handle_payment({}, basket)
@@ -407,3 +418,22 @@ class EdxOrderPlacementMixinTests(BusinessIntelligenceMixin, PaymentEventsMixin,
         calls.append(mock.call(user_tracking_id, 'Payment Info Entered', properties, context=context))
 
         mock_track.assert_has_calls(calls)
+
+    def test_update_assigned_voucher_offer_assignment(self, __):
+        """
+        Verify the "update_assigned_voucher_offer_assignment" works as expected.
+        """
+        enterprise_offer = EnterpriseOfferFactory()
+        voucher = VoucherFactory()
+        voucher.offers.add(enterprise_offer)
+        basket = create_basket(owner=self.user, site=self.site)
+        basket.vouchers.add(voucher)
+        order = create_order(user=self.user, basket=basket)
+        voucher_application = VoucherApplication.objects.create(voucher=voucher, user=self.user, order=order)
+        offer_assignment = OfferAssignmentFactory(offer=enterprise_offer, code=voucher.code, user_email=self.user.email)
+
+        EdxOrderPlacementMixin().update_assigned_voucher_offer_assignment(order)
+
+        offer_assignment = OfferAssignment.objects.get(id=offer_assignment.id)
+        assert offer_assignment.status == OFFER_REDEEMED
+        assert offer_assignment.voucher_application == voucher_application

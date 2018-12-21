@@ -1,10 +1,12 @@
 from __future__ import unicode_literals
 
 import logging
+
 import waffle
 from django.core.exceptions import ValidationError
 from oscar.core.loading import get_model
-from rest_framework import generics, serializers
+from rest_framework import generics, serializers, status
+from rest_framework.decorators import detail_route, list_route
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 
@@ -12,7 +14,13 @@ from ecommerce.core.constants import COUPON_PRODUCT_CLASS_NAME
 from ecommerce.core.utils import log_message_and_raise_validation_error
 from ecommerce.enterprise.constants import ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH
 from ecommerce.enterprise.utils import get_enterprise_customers
-from ecommerce.extensions.api.serializers import CouponSerializer, EnterpriseCouponListSerializer
+from ecommerce.extensions.api.serializers import (
+    CouponCodeAssignmentSerializer,
+    CouponSerializer,
+    CouponVoucherSerializer,
+    EnterpriseCouponListSerializer,
+    EnterpriseCouponOverviewListSerializer
+)
 from ecommerce.extensions.api.v2.views.coupons import CouponViewSet
 from ecommerce.extensions.catalogue.utils import (
     attach_vouchers_to_coupon_product,
@@ -47,7 +55,11 @@ class EnterpriseCouponViewSet(CouponViewSet):
     """ Coupon resource. """
 
     def get_queryset(self):
-        invoices = Invoice.objects.filter(business_client__enterprise_customer_uuid__isnull=False)
+        enterprise_id = self.kwargs.get('enterprise_id')
+        if enterprise_id:
+            invoices = Invoice.objects.filter(business_client__enterprise_customer_uuid=enterprise_id)
+        else:
+            invoices = Invoice.objects.filter(business_client__enterprise_customer_uuid__isnull=False)
         orders = Order.objects.filter(id__in=[invoice.order_id for invoice in invoices])
         basket_lines = Line.objects.filter(basket_id__in=[order.basket_id for order in orders])
         return Product.objects.filter(
@@ -60,6 +72,8 @@ class EnterpriseCouponViewSet(CouponViewSet):
     def get_serializer_class(self):
         if self.action == 'list':
             return EnterpriseCouponListSerializer
+        elif self.action == 'overview':
+            return EnterpriseCouponOverviewListSerializer
         return CouponSerializer
 
     def validate_access_for_enterprise_switch(self, request_data):
@@ -164,3 +178,76 @@ class EnterpriseCouponViewSet(CouponViewSet):
 
         if coupon_was_migrated:
             super(EnterpriseCouponViewSet, self).update_range_data(request_data, vouchers)
+
+    @detail_route(url_path='codes')
+    def codes(self, request, pk):  # pylint: disable=unused-argument
+        """
+        GET codes belong to a `coupon`.
+
+        Response will looks like
+        {
+            results: [
+                {
+                    code: '1234-5678-90',
+                    assigned_to: 'Barry Allen',
+                    redemptions: {
+                        used: 1,
+                        available: 5,
+                    },
+                },
+            ]
+        }
+        """
+        coupon = self.get_object()
+
+        # this will give us vouchers against each voucher application, so if a
+        # voucher has two applications than this queryset will give 2 vouchers
+        coupon_vouchers_with_applications = Voucher.objects.filter(
+            applications__voucher_id__in=coupon.attr.coupon_vouchers.vouchers.all()
+        )
+        # this will give us only those vouchers having no application
+        coupon_vouchers_wo_applications = Voucher.objects.filter(
+            coupon_vouchers__coupon__id=coupon.id,
+            applications__isnull=True
+        )
+
+        # we need a combined querset so that pagination works as expected
+        all_coupon_vouchers = coupon_vouchers_with_applications | coupon_vouchers_wo_applications
+
+        page = self.paginate_queryset(all_coupon_vouchers)
+        serializer = CouponVoucherSerializer(page, many=True)
+        return self.get_paginated_response(serializer.data)
+
+    @list_route(url_path=r'(?P<enterprise_id>.+)/overview')
+    def overview(self, request, enterprise_id):     # pylint: disable=unused-argument
+        """
+        Overview of Enterprise coupons.
+        Returns the following data:
+            - Coupon ID
+            - Coupon name.
+            - Max number of codes available (Maximum coupon usage).
+            - Number of codes.
+            - Redemption count.
+            - Valid from.
+            - Valid end.
+        """
+        enterprise_coupons = self.get_queryset()
+        page = self.paginate_queryset(enterprise_coupons)
+        serializer = self.get_serializer(page, many=True)
+        return self.get_paginated_response(serializer.data)
+
+    @detail_route(methods=['post'])
+    def assign(self, request, pk):  # pylint: disable=unused-argument
+        """
+        Assign users by email to codes within the Coupon.
+        """
+        coupon = self.get_object()
+        serializer = CouponCodeAssignmentSerializer(
+            data=request.data,
+            context={'coupon': coupon}
+        )
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

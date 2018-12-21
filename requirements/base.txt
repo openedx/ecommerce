@@ -24,6 +24,7 @@ cssutils==1.0.2           # via premailer
 defusedxml==0.5.0         # via zeep
 django-appconf==1.0.2     # via django-compressor
 django-compressor==2.2
+django-cors-headers==2.4.0
 django-crispy-forms==1.7.2
 django-extra-views==0.6.4  # via django-oscar
 django-filter==1.0.4

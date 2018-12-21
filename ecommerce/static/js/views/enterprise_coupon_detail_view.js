@@ -21,6 +21,16 @@ define([
         return CouponDetailView.extend({
             template: _.template(EnterpriseCouponDetailTemplate),
 
+            usageLimitation: function() {
+                var message = this._super();
+                if (!message) {
+                    if (this.model.get('voucher_type') === 'Multi-use-per-Customer') {
+                        message = gettext('Can be used multiple times by one customer');
+                    }
+                }
+                return message;
+            },
+
             render: function() {
                 var html,
                     category = this.model.get('category').name,

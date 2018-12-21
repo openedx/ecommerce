@@ -24,6 +24,7 @@ from ecommerce.enterprise.benefits import BENEFIT_MAP as ENTERPRISE_BENEFIT_MAP
 from ecommerce.enterprise.conditions import AssignableEnterpriseCustomerCondition
 from ecommerce.enterprise.utils import get_enterprise_customer
 from ecommerce.extensions.api import exceptions
+from ecommerce.extensions.offer.constants import OFFER_MAX_USES_DEFAULT
 from ecommerce.extensions.offer.models import OFFER_PRIORITY_VOUCHER
 from ecommerce.extensions.offer.utils import get_discount_percentage, get_discount_value
 from ecommerce.invoice.models import Invoice
@@ -193,7 +194,7 @@ def _get_voucher_info_for_coupon_report(voucher):
         max_uses_count = 1
         redemption_count = voucher.num_orders
     elif voucher.usage != Voucher.SINGLE_USE and offer.max_global_applications is None:
-        max_uses_count = 10000
+        max_uses_count = OFFER_MAX_USES_DEFAULT
     else:
         max_uses_count = offer.max_global_applications
 
@@ -581,9 +582,11 @@ def create_enterprise_vouchers(
         end_datetime,
         start_datetime)
 
+    voucher_types = (Voucher.MULTI_USE, Voucher.ONCE_PER_CUSTOMER, Voucher.MULTI_USE_PER_CUSTOMER)
+
     offers = []
     quantity = int(quantity)
-    num_of_offers = quantity if voucher_type in (Voucher.MULTI_USE, Voucher.ONCE_PER_CUSTOMER) else 1
+    num_of_offers = quantity if voucher_type in voucher_types else 1
     for num in range(num_of_offers):
         offer_name = generate_offer_name(coupon_id, benefit_type, benefit_value, num, is_enterprise=True)
         offer = get_or_create_enterprise_offer(
@@ -829,8 +832,8 @@ def update_voucher_with_enterprise_offer(offer, benefit_value, enterprise_custom
         enterprise_customer=enterprise_customer or offer.condition.enterprise_customer_uuid,
         enterprise_customer_catalog=enterprise_catalog or offer.condition.enterprise_customer_catalog_uuid,
         offer_name=offer.name,
-        max_uses=max_uses or offer.max_global_applications,
-        email_domains=email_domains or offer.email_domains,
+        max_uses=max_uses,
+        email_domains=email_domains,
         site=site or offer.site,
     )
 
@@ -863,8 +866,8 @@ def update_voucher_offer(offer, benefit_value, benefit_type=None, max_uses=None,
             offer.benefit.proxy(), 'benefit_class_type', None
         ),
         offer_name=offer.name,
-        max_uses=max_uses or offer.max_global_applications,
-        email_domains=email_domains or offer.email_domains,
+        max_uses=max_uses,
+        email_domains=email_domains,
         program_uuid=program_uuid or offer.condition.program_uuid,
         site=site or offer.site,
     )
