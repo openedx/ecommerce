@@ -80,17 +80,6 @@ class UtilTests(DiscoveryTestMixin, TestCase):
                 'code_expiration_date': '2018-12-19'
             },
             None,
-            True,
-        ),
-        (
-            {'offer_assignment_id': 555,
-             'learner_email': 'johndoe@unknown.com',
-             'code': 'GIL7RUEOU7VHBH7Q',
-             'enrollment_url': 'http://tempurl.url/enroll',
-             'redemptions_remaining': 10,
-             'code_expiration_date': '2018-12-19'},
-            Exception(),
-            False,
         ),
     )
     @ddt.unpack
@@ -98,13 +87,13 @@ class UtilTests(DiscoveryTestMixin, TestCase):
             self,
             tokens,
             side_effect,
-            returns,
             mock_sailthru_task,
     ):
+        """ Test that the offer assignment email message is correctly formatted with correct call to async task. """
         email_subject = settings.OFFER_ASSIGNMENT_EMAIL_DEFAULT_SUBJECT
         mock_sailthru_task.delay.side_effect = side_effect
         template = settings.OFFER_ASSIGNMENT_EMAIL_DEFAULT_TEMPLATE
-        status = send_assigned_offer_email(
+        send_assigned_offer_email(
             template,
             tokens.get('offer_assignment_id'),
             tokens.get('learner_email'),
@@ -124,4 +113,3 @@ class UtilTests(DiscoveryTestMixin, TestCase):
             tokens.get('learner_email'),
             tokens.get('offer_assignment_id'),
             email_subject, expected_email_body)
-        self.assertEqual(status, returns)

@@ -2,6 +2,7 @@
 from __future__ import unicode_literals
 
 import logging
+from datetime import timedelta
 from decimal import Decimal
 
 import waffle
@@ -25,6 +26,7 @@ from ecommerce.core.url_utils import get_ecommerce_url
 from ecommerce.courses.models import Course
 from ecommerce.entitlements.utils import create_or_update_course_entitlement
 from ecommerce.extensions.offer.constants import OFFER_ASSIGNMENT_REVOKED, OFFER_MAX_USES_DEFAULT
+from ecommerce.extensions.offer.utils import send_assigned_offer_email
 from ecommerce.invoice.models import Invoice
 
 logger = logging.getLogger(__name__)
@@ -1016,7 +1018,7 @@ class ProviderSerializer(serializers.Serializer):  # pylint: disable=abstract-me
 class OfferAssignmentSerializer(serializers.ModelSerializer):
     class Meta(object):
         model = OfferAssignment
-        fields = ('user_email', 'code')
+        fields = ('id', 'user_email', 'code')
 
 
 class CouponCodeAssignmentSerializer(serializers.Serializer):  # pylint: disable=abstract-method
@@ -1034,21 +1036,27 @@ class CouponCodeAssignmentSerializer(serializers.Serializer):  # pylint: disable
         """Create OfferAssignment objects for each email and the available_assignments determined from validation."""
         emails = validated_data.get('emails')
         voucher_usage_type = validated_data.pop('voucher_usage_type')
+        email_template = validated_data.pop('template')
         available_assignments = validated_data.pop('available_assignments')
         email_iterator = iter(emails)
         offer_assignments = []
+        emails_already_sent = set()
 
         for code in available_assignments:
             offer = available_assignments[code]['offer']
             email = next(email_iterator) if voucher_usage_type == Voucher.MULTI_USE_PER_CUSTOMER else None
             for _ in range(available_assignments[code]['num_slots']):
-                offer_assignments.append(
-                    OfferAssignment.objects.create(
-                        offer=offer,
-                        code=code,
-                        user_email=email or next(email_iterator),
-                    )
+                new_offer_assignment = OfferAssignment.objects.create(
+                    offer=offer,
+                    code=code,
+                    user_email=email or next(email_iterator),
                 )
+                offer_assignments.append(new_offer_assignment)
+                # Start async email task. For MULTI_USE_PER_CUSTOMER, a single email is sent
+                email_code_pair = frozenset((new_offer_assignment.user_email, new_offer_assignment.code))
+                if email_code_pair not in emails_already_sent:
+                    self._trigger_email_sending_task(email_template, new_offer_assignment, voucher_usage_type)
+                    emails_already_sent.add(email_code_pair)
 
         validated_data['offer_assignments'] = offer_assignments
         return validated_data
@@ -1061,6 +1069,7 @@ class CouponCodeAssignmentSerializer(serializers.Serializer):  # pylint: disable
         codes = data.get('codes')
         emails = data.get('emails')
         coupon = self.context.get('coupon')
+        template = self.context.get('template')
         available_assignments = {}
         vouchers = coupon.attr.coupon_vouchers.vouchers
 
@@ -1123,4 +1132,29 @@ class CouponCodeAssignmentSerializer(serializers.Serializer):  # pylint: disable
         # Add available_assignments to the validated data so that we can perform the assignments in create.
         data['voucher_usage_type'] = voucher_usage_type
         data['available_assignments'] = available_assignments
+        data['template'] = template
         return data
+
+    def _trigger_email_sending_task(self, template, assigned_offer, voucher_usage_type):
+        """
+        Schedule async task to send email to the learner who has been assigned the code.
+        """
+        url = get_ecommerce_url('/coupons/offer/')
+        enrollment_url = '{url}?code={code}'.format(url=url, code=assigned_offer.code)
+        code_expiration_date = assigned_offer.created + timedelta(days=365)
+        redemptions_remaining = (
+            assigned_offer.offer.max_global_applications if voucher_usage_type == Voucher.MULTI_USE_PER_CUSTOMER else 1
+        )
+        try:
+            send_assigned_offer_email(
+                template=template,
+                offer_assignment_id=assigned_offer.id,
+                learner_email=assigned_offer.user_email,
+                code=assigned_offer.code,
+                enrollment_url=enrollment_url,
+                redemptions_remaining=redemptions_remaining,
+                code_expiration_date=code_expiration_date.strftime('%d %B,%Y')
+            )
+        except Exception as exc:  # pylint: disable=broad-except
+            logger.exception(
+                '[Offer Assignment] Email for offer_assignment_id: %d raised exception: %r', assigned_offer.id, exc)

@@ -1,7 +1,6 @@
 from __future__ import unicode_literals
 
 import logging
-
 import waffle
 from django.core.exceptions import ValidationError
 from oscar.core.loading import get_model
@@ -256,12 +255,12 @@ class EnterpriseCouponViewSet(CouponViewSet):
         Assign users by email to codes within the Coupon.
         """
         coupon = self.get_object()
+        template = request.data.pop('template')
         serializer = CouponCodeAssignmentSerializer(
             data=request.data,
-            context={'coupon': coupon}
+            context={'coupon': coupon, 'template': template}
         )
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
-
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
