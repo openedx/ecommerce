@@ -1004,7 +1004,7 @@ class ProviderSerializer(serializers.Serializer):  # pylint: disable=abstract-me
 class OfferAssignmentSerializer(serializers.ModelSerializer):
     class Meta(object):
         model = OfferAssignment
-        fields = ('user_email', 'code')
+        fields = ('id', 'user_email', 'code')
 
 
 class CouponCodeAssignmentSerializer(serializers.Serializer):  # pylint: disable=abstract-method
