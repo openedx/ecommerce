@@ -26,7 +26,13 @@ from ecommerce.extensions.catalogue.utils import (
     attach_vouchers_to_coupon_product,
     create_coupon_product_and_stockrecord
 )
-from ecommerce.extensions.offer.constants import OFFER_NOT_ASSIGNED, OFFER_NOT_REDEEMED, OFFER_REDEEMED
+from ecommerce.extensions.offer.constants import (
+    OFFER_REDEEMED,
+    VOUCHER_NOT_ASSIGNED,
+    VOUCHER_REDEEMED,
+    VOUCHER_PARTIAL_REDEEMED,
+    VOUCHER_REDEEMED
+)
 from ecommerce.extensions.voucher.utils import (
     create_enterprise_vouchers,
     update_voucher_offer,
@@ -181,33 +187,48 @@ class EnterpriseCouponViewSet(CouponViewSet):
         if coupon_was_migrated:
             super(EnterpriseCouponViewSet, self).update_range_data(request_data, vouchers)
 
-    def get_not_assigned_coupon_vouchers(self, queryset):
+    def get_assigned_codes(self):
         """
-        Returns vouchers which have not been redeemed yet with no offer assigment.
+        Returns the list of all assigned codes.
         """
-        # First we filter to get coupon not-redeemed vouchers which will give us assigned and not-assigned vouchers
-        # then we filter to find assigned codes and exclude assigned vouchers from not-redeemed vouchers, giving us
-        # not assigned codes only.
-        not_redeemed_vouchers = self.get_not_redeemed_coupon_vouchers(queryset)
-        assigned_codes = OfferAssignment.objects.exclude(
-            status__in=[OFFER_REDEEMED]
-        ).values_list('code', flat=True)
-        return not_redeemed_vouchers.exclude(code__in=assigned_codes)
+        return OfferAssignment.objects.exclude(status__in=[OFFER_REDEEMED]).values_list('code', flat=True)
 
-    def get_not_redeemed_coupon_vouchers(self, queryset):
+    def get_vouchers_with_no_applications(self, coupon_vouchers):
         """
-        Returns vouchers having no voucher application.
+        Returns vouchers with no voucher application.
         """
-        return queryset.filter(applications__isnull=True)
+        return coupon_vouchers.filter(applications__isnull=True)
 
-    def get_redeemed_coupon_vouchers(self, coupon):
+    def get_redeemed_coupon_vouchers(self, coupon_vouchers):
         """
         Returns vouchers against each voucher application, so if a
         voucher has two applications than this queryset will give 2 vouchers.
         """
         return Voucher.objects.filter(
-            applications__voucher_id__in=coupon.attr.coupon_vouchers.vouchers.all()
+            applications__voucher_id__in=coupon_vouchers
         )
+
+    def get_not_assigned_coupon_vouchers(self, coupon_vouchers):
+        """
+        Returns vouchers which have not been redeemed yet with no offer assigment.
+        """
+        vouchers_without_applications = self.get_vouchers_with_no_applications(coupon_vouchers)
+        assigned_codes = self.get_assigned_codes()
+        return vouchers_without_applications.exclude(code__in=assigned_codes)
+
+    def get_not_redeemed_coupon_vouchers(self, coupon_vouchers):
+        """
+        Returns assigned vouchers but never redeemed.
+        """
+        assigned_codes = self.get_assigned_codes()
+        return self.get_vouchers_with_no_applications(coupon_vouchers).filter(code__in=assigned_codes)
+
+    def get_partial_redeemed_coupon_vouchers(self, coupon_vouchers):
+        """
+        Returns assigned vouchers having at-least one redemption.
+        """
+        # TODO: get assigned vouchers having atleast one redemption.
+        return coupon_vouchers
 
     @detail_route(url_path='codes')
     def codes(self, request, pk):  # pylint: disable=unused-argument
@@ -232,13 +253,21 @@ class EnterpriseCouponViewSet(CouponViewSet):
         coupon_vouchers = coupon.attr.coupon_vouchers.vouchers.all()
 
         coupon_code_filter = request.query_params.get('code_filter')
-        if coupon_code_filter == OFFER_NOT_REDEEMED:
-            coupon_vouchers = self.get_not_redeemed_coupon_vouchers(coupon_vouchers)
-        elif coupon_code_filter == OFFER_NOT_ASSIGNED:
+        if coupon_code_filter == VOUCHER_NOT_ASSIGNED:
+            # Vouchers having assignments left or unassigned.
             coupon_vouchers = self.get_not_assigned_coupon_vouchers(coupon_vouchers)
+        elif coupon_code_filter == VOUCHER_NOT_REDEEMED:
+            # Assigned vouchers which are not yet redeemed.
+            coupon_vouchers = self.get_not_redeemed_coupon_vouchers(coupon_vouchers)
+        elif coupon_code_filter == VOUCHER_PARTIAL_REDEEMED:
+            # Assigned vouchers having at-least one redemption.
+            coupon_vouchers = self.get_partial_redeemed_coupon_vouchers(coupon_vouchers)
+        else coupon_code_filter == VOUCHER_REDEEMED:
+            # Fully redeemed vouchers.
+            coupon_vouchers = self.get_redeemed_coupon_vouchers(coupon_vouchers)
         else:
-            # We need a combined querset so that pagination works as expected
-            coupon_vouchers = self.get_redeemed_coupon_vouchers(coupon) | self.get_not_redeemed_coupon_vouchers(coupon_vouchers)
+            # Return all vouchers for coupon (redeemed + not-redeemed).
+            coupon_vouchers = self.get_redeemed_coupon_vouchers(coupon_vouchers) | self.get_not_redeemed_coupon_vouchers(coupon_vouchers)
 
         page = self.paginate_queryset(coupon_vouchers)
         serializer = CouponVoucherSerializer(page, many=True)

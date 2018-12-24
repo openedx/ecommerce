@@ -11,5 +11,7 @@ OFFER_ASSIGNMENT_REVOKED = 'REVOKED'
 OFFER_MAX_USES_DEFAULT = 10000
 
 # Coupon code filters
-OFFER_NOT_ASSIGNED = 'not-assigned'
-OFFER_NOT_REDEEMED = 'not-redeemed'
+VOUCHER_NOT_ASSIGNED = 'not-assigned'
+VOUCHER_NOT_REDEEMED = 'not-redeemed'
+VOUCHER_PARTIAL_REDEEMED = 'partial-redeemed'
+VOUCHER_REDEEMED = 'redeemed'
