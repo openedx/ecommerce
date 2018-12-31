@@ -68,6 +68,12 @@ define([
                 },
                 'input[name=enterprise_customer_catalog]': {
                     observe: 'enterprise_customer_catalog'
+                },
+                'input[name=notify_email]': {
+                    observe: 'notify_email',
+                    onSet: function(val) {
+                        return val === '' ? null : val;
+                    }
                 }
             },
 
@@ -88,6 +94,7 @@ define([
                     'end_date',
                     'enterprise_customer',
                     'enterprise_customer_catalog',
+                    'notify_email',
                     'invoice_discount_type',
                     'invoice_discount_value',
                     'invoice_number',

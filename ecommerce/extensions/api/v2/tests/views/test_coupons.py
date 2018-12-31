@@ -24,7 +24,7 @@ from ecommerce.coupons.tests.mixins import CouponMixin, DiscoveryMockMixin
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.enterprise.conditions import AssignableEnterpriseCustomerCondition
 from ecommerce.enterprise.constants import ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH
-from ecommerce.extensions.api.v2.views.coupons import DEPRECATED_COUPON_CATEGORIES, CouponViewSet
+from ecommerce.extensions.api.v2.views.coupons import DEPRECATED_COUPON_CATEGORIES, CouponViewSet, ValidationError
 from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
 from ecommerce.extensions.voucher.models import CouponVouchers
 from ecommerce.invoice.models import Invoice
@@ -98,6 +98,7 @@ class CouponViewSetTest(CouponMixin, DiscoveryTestMixin, TestCase):
             'price': 100,
             'category': {'name': self.category.name},
             'max_uses': 1,
+            'notify_email': 'batman@gotham.comics',
         })
         view = CouponViewSet()
         cleaned_voucher_data = view.clean_voucher_request_data(self.coupon_data, self.site.siteconfiguration.partner)
@@ -124,9 +125,31 @@ class CouponViewSetTest(CouponMixin, DiscoveryTestMixin, TestCase):
             'start_datetime',
             'title',
             'voucher_type',
-            'program_uuid'
+            'program_uuid',
+            'notify_email',
         ]
         self.assertEqual(sorted(expected_cleaned_voucher_data_keys), sorted(cleaned_voucher_data.keys()))
+
+    def test_clean_voucher_request_data_notify_email_validation_msg(self):
+        """
+        Test that the method "clean_voucher_request_data" raise ValidationError if notify_email is incorrect
+        """
+        title = 'Test coupon'
+        self.coupon_data.update({
+            'title': title,
+            'client': 'Člient',
+            'stock_record_ids': ['111'],
+            'voucher_type': Voucher.ONCE_PER_CUSTOMER,
+            'price': 100,
+            'category': {'name': self.category.name},
+            'max_uses': 1,
+            'notify_email': 'batman',
+        })
+        view = CouponViewSet()
+        with self.assertRaises(ValidationError) as ve:
+            view.clean_voucher_request_data(self.coupon_data, self.site.siteconfiguration.partner)
+        exception = ve.exception
+        self.assertIn('Notification email must be a valid email address.', exception.message)
 
     def test_creating_multi_offer_coupon(self):
         """Test the creation of a multi-offer coupon."""
@@ -1135,6 +1158,18 @@ class CouponViewSetFunctionalTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
         })
         details = self._create_and_get_coupon_details()
         self.assertEqual(details['benefit_type'], benefit_type)
+
+    def test_update_notify_email(self):
+        path = reverse('api:v2:coupons-detail', kwargs={'pk': self.coupon.id})
+        notify_email = 'batman@gotham.comics'
+        data = {
+            'id': self.coupon.id,
+            'notify_email': notify_email
+        }
+        self.get_response('PUT', path, data)
+
+        coupon = Product.objects.get(id=self.coupon.id)
+        self.assertEqual(coupon.attr.notify_email, notify_email)
 
 
 class CouponCategoriesListViewTests(TestCase):

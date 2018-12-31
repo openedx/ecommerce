@@ -8,6 +8,7 @@ from uuid import uuid4
 import ddt
 import httpretty
 import mock
+from django.conf import settings
 from django.urls import reverse
 from django.utils.timezone import now
 from oscar.core.loading import get_model
@@ -117,10 +118,16 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             'voucher_type': Voucher.SINGLE_USE,
             'enterprise_customer': {'name': 'test enterprise', 'id': str(uuid4()).decode('utf-8')},
             'enterprise_customer_catalog': str(uuid4()).decode('utf-8'),
+            'notify_email': 'batman@gotham.comics',
         }
 
         self.course = CourseFactory(id='course-v1:test-org+course+run', partner=self.partner)
         self.verified_seat = self.course.create_or_update_seat('verified', False, 100)
+        self.enterprise_slug = 'batman'
+
+        patcher = mock.patch('ecommerce.extensions.api.v2.utils.send_mail')
+        self.send_mail_patcher = patcher.start()
+        self.addCleanup(patcher.stop)
 
     def get_coupon_voucher(self, coupon):
         """
@@ -168,19 +175,19 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             enterprise_id = data['enterprise_customer']['id']
             enterprise_name = data['enterprise_customer']['name']
 
-        with mock.patch(
-            'ecommerce.extensions.voucher.utils.get_enterprise_customer',
-            mock.Mock(return_value={
-                'name': enterprise_name,
-                'enterprise_customer_uuid': enterprise_id
-            })
-        ):
-            if method == 'GET':
-                return self.client.get(path)
-            elif method == 'POST':
-                return self.client.post(path, json.dumps(data), 'application/json')
-            elif method == 'PUT':
-                return self.client.put(path, json.dumps(data), 'application/json')
+        with mock.patch('ecommerce.extensions.voucher.utils.get_enterprise_customer') as patch1:
+            with mock.patch('ecommerce.extensions.api.v2.utils.get_enterprise_customer') as patch2:
+                patch1.return_value = patch2.return_value = {
+                    'name': enterprise_name,
+                    'enterprise_customer_uuid': enterprise_id,
+                    'slug': self.enterprise_slug,
+                }
+                if method == 'GET':
+                    return self.client.get(path)
+                elif method == 'POST':
+                    return self.client.post(path, json.dumps(data), 'application/json')
+                elif method == 'PUT':
+                    return self.client.put(path, json.dumps(data), 'application/json')
         return None
 
     def get_response_json(self, method, path, data=None):
@@ -191,6 +198,26 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
         if response:
             return json.loads(response.content)
         return None
+
+    def assert_new_codes_email(self):
+        """
+        Verify that new codes email is sent as expected
+        """
+        self.send_mail_patcher.assert_called_with(
+            subject=settings.NEW_CODES_EMAIL_CONFIG['email_subject'],
+            message=settings.NEW_CODES_EMAIL_CONFIG['email_body'].format(enterprise_slug=self.enterprise_slug),
+            from_email=settings.NEW_CODES_EMAIL_CONFIG['from_email'],
+            recipient_list=[self.data['notify_email']],
+            fail_silently=False
+        )
+
+    def test_new_codes_email_for_enterprise_coupon(self):
+        """"
+        Test that new codes emails is sent with correct data upon enterprise coupon creation.
+        """
+        Switch.objects.update_or_create(name=ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, defaults={'active': True})
+        self.get_response('POST', ENTERPRISE_COUPONS_LINK, self.data)
+        self.assert_new_codes_email()
 
     def test_list_enterprise_coupons(self):
         Switch.objects.update_or_create(name=ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, defaults={'active': True})

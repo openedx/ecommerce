@@ -1,3 +1,5 @@
+from django.core.exceptions import ValidationError
+from django.core.validators import validate_email
 from django.db import models
 from django.db.models.signals import post_init, post_save
 from django.dispatch import receiver
@@ -51,6 +53,17 @@ class Product(AbstractProduct):
                 )
         except AttributeError:
             pass
+
+        try:
+            if self.attr.notify_email is not None:
+                validate_email(self.attr.notify_email)
+        except ValidationError:
+            log_message_and_raise_validation_error(
+                'Notification email must be a valid email address.'
+            )
+        except AttributeError:
+            pass
+
         super(Product, self).save(*args, **kwargs)  # pylint: disable=bad-super-call
 
 
