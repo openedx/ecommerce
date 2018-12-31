@@ -5,6 +5,7 @@ import logging
 import waffle
 from django.conf import settings
 from django.core.exceptions import ValidationError
+from django.core.validators import validate_email
 from django.db import IntegrityError, transaction
 from django.http import Http404
 from django.shortcuts import get_object_or_404
@@ -125,10 +126,20 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
                 response_data = self.create_order_for_invoice(
                     basket, coupon_id=coupon_product.id, client=client, invoice_data=invoice_data
                 )
-
+                if cleaned_voucher_data['notify_email']:
+                    self.send_codes_availability_email(
+                        self.request.site,
+                        cleaned_voucher_data['notify_email'],
+                        cleaned_voucher_data['enterprise_customer'],
+                        coupon_product.id
+                    )
                 return Response(response_data, status=status.HTTP_200_OK)
         except ValidationError as e:
             raise serializers.ValidationError(e.message)
+
+    @staticmethod
+    def send_codes_availability_email(site, email_address, enterprise_id, coupon_id):
+        pass
 
     def create_coupon_and_vouchers(self, cleaned_voucher_data):
         return create_coupon_product(
@@ -183,6 +194,7 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
         stock_record_ids = request_data.get('stock_record_ids')
         voucher_type = request_data.get('voucher_type')
         program_uuid = request_data.get('program_uuid')
+        notify_email = request_data.get('notify_email')
 
         if benefit_type not in (Benefit.PERCENTAGE, Benefit.FIXED,):
             raise ValidationError('Benefit type [{type}] is not allowed'.format(type=benefit_type))
@@ -221,6 +233,12 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
             validation_message = 'Unexpected EnterpriseCustomer data format received for coupon.'
             raise ValidationError(validation_message)
 
+        if notify_email:
+            try:
+                validate_email(notify_email)
+            except ValidationError:
+                raise ValidationError('Notification email must be a valid email address.')
+
         coupon_catalog = cls.get_coupon_catalog(stock_record_ids, partner)
 
         return {
@@ -246,6 +264,7 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
             'title': request_data.get('title'),
             'voucher_type': voucher_type,
             'program_uuid': program_uuid,
+            'notify_email': notify_email,
         }
 
     @classmethod
@@ -442,6 +461,10 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
         note = request_data.get('note')
         if note is not None:
             coupon.attr.note = note
+            coupon.save()
+
+        if 'notify_email' in request_data:
+            coupon.attr.notify_email = request_data.get('notify_email')
             coupon.save()
 
     def update_offer_data(self, request_data, vouchers, site):

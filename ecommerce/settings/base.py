@@ -607,3 +607,19 @@ if os.environ.get('ENABLE_DJANGO_TOOLBAR', False):
 
 # Determines if events are actually sent to Segment. This should only be set to False for testing purposes.
 SEND_SEGMENT_EVENTS = True
+
+NEW_CODES_EMAIL_CONFIG = {
+    'email_subject': 'New edX codes available',
+    'from_email': 'customersuccess@edx.org',
+    'email_body': '''
+        Hello,
+
+        This message is to inform you that a new order has been processed for your organization. Please visit the
+        following page, in your Admin Dashboard, to find new codes ready for use.
+
+        https://portal.edx.org/{enterprise_slug}/admin/codes
+
+        Having trouble accessing your codes? Please contact edX Enterprise Support at customersuccess@edx.org.
+        Thank you.
+    '''
+}

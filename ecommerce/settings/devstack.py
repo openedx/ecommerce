@@ -63,6 +63,8 @@ PAYMENT_PROCESSOR_CONFIG = {
 # Language cookie
 LANGUAGE_COOKIE_NAME = 'openedx-language-preference'
 
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
 #####################################################################
 # Lastly, see if the developer has any local overrides.
 if os.path.isfile(join(dirname(abspath(__file__)), 'private.py')):
