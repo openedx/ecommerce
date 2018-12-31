@@ -192,6 +192,7 @@ define([
                     return undefined;
                 },
                 enterprise_customer_catalog: {required: false},
+                notify_email: {required: false},
                 program_uuid: {
                     msg: gettext('A valid Program UUID is required.'),
                     required: function() {

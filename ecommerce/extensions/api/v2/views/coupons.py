@@ -125,10 +125,16 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
                 response_data = self.create_order_for_invoice(
                     basket, coupon_id=coupon_product.id, client=client, invoice_data=invoice_data
                 )
-
+                self.send_codes_availability_email(
+                    request.data.get('notify_email'),
+                    cleaned_voucher_data['enterprise_customer']
+                )
                 return Response(response_data, status=status.HTTP_200_OK)
         except ValidationError as e:
             raise serializers.ValidationError(e.message)
+
+    def send_codes_availability_email(self, email_address, enterprise_id):
+        pass
 
     def create_coupon_and_vouchers(self, cleaned_voucher_data):
         return create_coupon_product(

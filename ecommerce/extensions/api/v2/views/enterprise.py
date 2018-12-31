@@ -21,6 +21,7 @@ from ecommerce.extensions.api.serializers import (
     EnterpriseCouponListSerializer,
     EnterpriseCouponOverviewListSerializer
 )
+from ecommerce.extensions.api.v2.utils import send_new_codes_notification_email
 from ecommerce.extensions.api.v2.views.coupons import CouponViewSet
 from ecommerce.extensions.catalogue.utils import (
     attach_vouchers_to_coupon_product,
@@ -79,6 +80,10 @@ class EnterpriseCouponViewSet(CouponViewSet):
     def validate_access_for_enterprise_switch(self, request_data):
         if not waffle.switch_is_active(ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH):
             raise ValidationError('This endpoint will be available once the enterprise offers switch is on.')
+
+    def send_codes_availability_email(self, email_address, enterprise_id):
+        site = self.request.site
+        send_new_codes_notification_email(site, email_address, enterprise_id)
 
     def create_coupon_and_vouchers(self, cleaned_voucher_data):
         coupon_product = create_coupon_product_and_stockrecord(
