@@ -6,7 +6,7 @@ from decimal import Decimal
 from django.conf import settings
 from django.shortcuts import render
 from django.utils.translation import ugettext_lazy as _
-from ecommerce_worker.sailthru.v1.tasks import send_offer_assignment_email
+from ecommerce_worker.sailthru.v1.tasks import send_offer_assignment_email, send_offer_update_email
 from oscar.core.loading import get_model
 
 from ecommerce.extensions.checkout.utils import add_currency
@@ -144,3 +144,23 @@ def send_assigned_offer_email(
         EXPIRATION_DATE=code_expiration_date
     )
     send_offer_assignment_email.delay(learner_email, offer_assignment_id, email_subject, email_body)
+
+
+def send_revoked_offer_email(template, learner_email, code):
+    """
+    Arguments:
+        *template*
+            The email template with placeholders that will receive the following tokens
+        *learner_email*
+            Email of the customer who will receive the code.
+        *code*
+            Code for the user.
+    """
+
+    email_subject = settings.OFFER_REVOKE_EMAIL_DEFAULT_SUBJECT
+
+    email_body = template.format(
+        user_email=learner_email,
+        code=code,
+    )
+    send_offer_update_email.delay(learner_email, email_subject, email_body)
