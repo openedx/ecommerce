@@ -648,6 +648,7 @@ OFFER_ASSIGNMENT_EMAIL_DEFAULT_TEMPLATE = '''
     For any questions, please reach out to your Learning Manager.
 '''
 OFFER_ASSIGNMENT_EMAIL_DEFAULT_SUBJECT = 'New edX course assignment'
+OFFER_REVOKE_EMAIL_DEFAULT_SUBJECT = 'edX Course Assignment Revoked'
 
 #SAILTHRU settings
 SAILTHRU_KEY = None
