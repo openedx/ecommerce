@@ -17,6 +17,7 @@ from ecommerce.enterprise.constants import ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH
 from ecommerce.enterprise.utils import get_enterprise_customers
 from ecommerce.extensions.api.serializers import (
     CouponCodeAssignmentSerializer,
+    CouponCodeRevokeSerializer,
     CouponSerializer,
     CouponVoucherSerializer,
     EnterpriseCouponListSerializer,
@@ -289,3 +290,21 @@ class EnterpriseCouponViewSet(CouponViewSet):
                 status_keys.update({'status': 'email_dispatch_failed'})
             emails_status.append(status_keys)
         return emails_status
+
+    @detail_route(methods=['post'])
+    def revoke(self, request, pk):  # pylint: disable=unused-argument
+        """
+        Revoke users by email from codes within the Coupon.
+        """
+        coupon = self.get_object()
+        email_template = request.data.pop('template', None)
+        serializer = CouponCodeRevokeSerializer(
+            data=request.data.get('assignments'),
+            many=True,
+            context={'coupon': coupon, 'template': email_template}
+        )
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
