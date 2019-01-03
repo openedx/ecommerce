@@ -73,7 +73,7 @@ define([
                     observe: 'notify_email',
                     setOptions: {
                         validate: true
-                    },
+                    }
                 }
             },
 

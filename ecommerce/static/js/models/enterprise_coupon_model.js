@@ -37,7 +37,7 @@ define([
                 notify_email: {
                     pattern: 'email',
                     required: false
-                },
+                }
             },
 
             initialize: function() {

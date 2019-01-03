@@ -258,7 +258,8 @@ define([], function() {
             end_date: '2016-01-01T00:00:00Z',
             voucher_type: 'Single use',
             enterprise_customer: {id: '349bef52-c0fb-4901-a5b5-26e9b70a4102', name: 'test client'},
-            enterprise_customer_catalog: 'f9098aab-1842-45c8-81a2-0e53d8e7609a'
+            enterprise_customer_catalog: 'f9098aab-1842-45c8-81a2-0e53d8e7609a',
+            notify_email: 'batman@gotham.comics'
         },
         couponAPIResponseData = {
             count: 1,

@@ -81,9 +81,9 @@ class EnterpriseCouponViewSet(CouponViewSet):
         if not waffle.switch_is_active(ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH):
             raise ValidationError('This endpoint will be available once the enterprise offers switch is on.')
 
-    def send_codes_availability_email(self, email_address, enterprise_id):
-        site = self.request.site
-        send_new_codes_notification_email(site, email_address, enterprise_id)
+    @staticmethod
+    def send_codes_availability_email(site, email_address, enterprise_id, coupon_id):
+        send_new_codes_notification_email(site, email_address, enterprise_id, coupon_id)
 
     def create_coupon_and_vouchers(self, cleaned_voucher_data):
         coupon_product = create_coupon_product_and_stockrecord(

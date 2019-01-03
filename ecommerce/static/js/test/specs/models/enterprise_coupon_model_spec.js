@@ -45,6 +45,12 @@ define([
                     model.validate();
                     expect(model.isValid()).toBeFalsy();
                 });
+
+                it('should validate notify email is correct', function() {
+                    model.set('notify_email', 'batman');
+                    model.validate();
+                    expect(model.isValid()).toBeFalsy();
+                });
             });
 
             describe('save', function() {
@@ -59,6 +65,7 @@ define([
                     expect(ajaxData.enterprise_customer).toEqual(enterpriseCouponData.enterprise_customer);
                     expect(ajaxData.enterprise_customer_catalog)
                         .toEqual(enterpriseCouponData.enterprise_customer_catalog);
+                    expect(ajaxData.notify_email).toEqual(enterpriseCouponData.notify_email);
                 });
 
                 it('should call Coupon model when saved', function() {
