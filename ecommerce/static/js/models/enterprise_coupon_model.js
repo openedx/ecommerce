@@ -14,7 +14,8 @@ define([
         _.extend(Backbone.Validation.messages, {
             required: gettext('This field is required.'),
             number: gettext('This value must be a number.'),
-            date: gettext('This value must be a date.')
+            date: gettext('This value must be a date.'),
+            email: gettext('This value must be a valid email.')
         });
         _.extend(Backbone.Model.prototype, Backbone.Validation.mixin);
 
@@ -32,7 +33,11 @@ define([
 
             couponValidation: {
                 enterprise_customer: {required: true},
-                enterprise_customer_catalog: {required: true}
+                enterprise_customer_catalog: {required: true},
+                notify_email: {
+                    pattern: 'email',
+                    required: false
+                },
             },
 
             initialize: function() {
