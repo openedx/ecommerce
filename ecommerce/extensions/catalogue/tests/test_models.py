@@ -17,8 +17,8 @@ ProductClass = get_model('catalogue', 'ProductClass')
 class ProductTests(CouponMixin, DiscoveryTestMixin, TestCase):
     COUPON_PRODUCT_TITLE = 'Some test title.'
 
-    def _create_coupon_product_with_note_attribute(self, note):
-        """Helper method that creates a coupon product with note attribute set."""
+    def _create_coupon_product_with_attributes(self, note='note', notify_email=None):
+        """Helper method that creates a coupon product with note and notify_email attributes."""
         coupon_product = factories.ProductFactory(
             title=self.COUPON_PRODUCT_TITLE,
             product_class=self.coupon_product_class,
@@ -29,6 +29,8 @@ class ProductTests(CouponMixin, DiscoveryTestMixin, TestCase):
         coupon_vouchers.vouchers.add(voucher)
         coupon_product.attr.coupon_vouchers = coupon_vouchers
         coupon_product.attr.note = note
+        if notify_email:
+            coupon_product.attr.notify_email = notify_email
         coupon_product.save()
         return coupon_product
 
@@ -74,17 +76,36 @@ class ProductTests(CouponMixin, DiscoveryTestMixin, TestCase):
     def test_journal_product_attribute(self):
         """Verify journal product class."""
         note = 'Some other test note.'
-        coupon = self._create_coupon_product_with_note_attribute(note)
+        coupon = self._create_coupon_product_with_attributes(note)
         self.assertFalse(coupon.is_journal_product)
 
     def test_create_product_with_note(self):
         """Verify creating a product with valid note value creates product."""
         note = 'Some test note.'
-        coupon = self._create_coupon_product_with_note_attribute(note)
+        coupon = self._create_coupon_product_with_attributes(note)
         self.assertEqual(coupon.attr.note, note)
 
     @ddt.data(1, {'some': 'dict'}, ['array'])
     def test_incorrect_note_value_raises_exception(self, note):
         """Verify creating product with invalid note type raises ValidationError."""
         with self.assertRaises(ValidationError):
-            self._create_coupon_product_with_note_attribute(note)
+            self._create_coupon_product_with_attributes(note)
+
+    def test_create_product_with_correct_notify_email(self):
+        """
+        Verify creating a product with valid notify_email value creates product.
+        """
+        notify_email = 'batman@gotham.comics'
+        coupon_product = self._create_coupon_product_with_attributes(notify_email=notify_email)
+        self.assertEqual(coupon_product.attr.notify_email, notify_email)
+
+    @ddt.data('batman', 1, {'some': 'dict'}, ['array'])
+    def test_create_product_with_incorrect_notify_email(self, notify_email):
+        """
+        Verify creating product with invalid notify_email type raises ValidationError.
+        """
+        with self.assertRaises(ValidationError) as ve:
+            self._create_coupon_product_with_attributes(notify_email=notify_email)
+
+        exception = ve.exception
+        self.assertIn('Notification email must be a valid email address.', exception.message)

@@ -43,6 +43,12 @@
             <div class="value"><%= coupon.note %></div><br />
         </div>
         <%}%>
+        <% if(coupon.notify_email) {%>
+        <div class="info-item grid-item notify_email">
+            <div class="heading"><%= gettext('Notification Email') %></div>
+            <div class="value"><%= coupon.notify_email %></div><br />
+        </div>
+        <%}%>
         <div class="info-item grid-item discount-value">
             <div class="heading"><%= gettext('Discount Value:') %></div>
             <div class="value"><%= discountValue %></div>
