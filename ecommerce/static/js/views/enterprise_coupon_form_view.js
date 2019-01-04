@@ -70,10 +70,7 @@ define([
                     observe: 'enterprise_customer_catalog'
                 },
                 'input[name=notify_email]': {
-                    observe: 'notify_email',
-                    setOptions: {
-                        validate: true
-                    }
+                    observe: 'notify_email'
                 }
             },
 

@@ -130,11 +130,13 @@ def create_coupon_product_and_stockrecord(title, category, partner, price):
     return coupon_product
 
 
-def attach_vouchers_to_coupon_product(coupon_product, vouchers, note):
+def attach_vouchers_to_coupon_product(coupon_product, vouchers, note, notify_email=None):
     coupon_vouchers, __ = CouponVouchers.objects.get_or_create(coupon=coupon_product)
     coupon_vouchers.vouchers.add(*vouchers)
     coupon_product.attr.coupon_vouchers = coupon_vouchers
     coupon_product.attr.note = note
+    if notify_email:
+        coupon_product.attr.notify_email = notify_email
     coupon_product.save()
 
 

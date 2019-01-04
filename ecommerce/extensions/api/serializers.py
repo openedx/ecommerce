@@ -828,6 +828,7 @@ class CouponSerializer(ProductPaymentInfoMixin, serializers.ModelSerializer):
     last_edited = serializers.SerializerMethodField()
     max_uses = serializers.SerializerMethodField()
     note = serializers.SerializerMethodField()
+    notify_email = serializers.SerializerMethodField()
     num_uses = serializers.SerializerMethodField()
     payment_information = serializers.SerializerMethodField()
     program_uuid = serializers.SerializerMethodField()
@@ -925,6 +926,12 @@ class CouponSerializer(ProductPaymentInfoMixin, serializers.ModelSerializer):
         except AttributeError:
             return None
 
+    def get_notify_email(self, obj):
+        try:
+            return obj.attr.notify_email
+        except AttributeError:
+            return None
+
     def get_num_uses(self, obj):
         offer = retrieve_offer(obj)
         return offer.num_applications
@@ -970,7 +977,7 @@ class CouponSerializer(ProductPaymentInfoMixin, serializers.ModelSerializer):
             'benefit_type', 'benefit_value', 'catalog_query', 'course_catalog', 'category',
             'client', 'code', 'code_status', 'coupon_type', 'course_seat_types',
             'email_domains', 'end_date', 'enterprise_customer', 'enterprise_customer_catalog',
-            'id', 'last_edited', 'max_uses', 'note', 'num_uses', 'payment_information',
+            'id', 'last_edited', 'max_uses', 'note', 'notify_email', 'num_uses', 'payment_information',
             'program_uuid', 'price', 'quantity', 'seats', 'start_date', 'title', 'voucher_type'
         )
 
