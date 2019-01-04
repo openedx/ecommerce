@@ -110,7 +110,12 @@ class EnterpriseCouponViewSet(CouponViewSet):
             name=cleaned_voucher_data['title']
         )
 
-        attach_vouchers_to_coupon_product(coupon_product, vouchers, cleaned_voucher_data['note'])
+        attach_vouchers_to_coupon_product(
+            coupon_product,
+            vouchers,
+            cleaned_voucher_data['note'],
+            cleaned_voucher_data.get('notify_email')
+        )
         return coupon_product
 
     def update(self, request, *args, **kwargs):

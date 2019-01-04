@@ -1159,6 +1159,18 @@ class CouponViewSetFunctionalTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
         details = self._create_and_get_coupon_details()
         self.assertEqual(details['benefit_type'], benefit_type)
 
+    def test_update_notify_email(self):
+        path = reverse('api:v2:coupons-detail', kwargs={'pk': self.coupon.id})
+        notify_email = 'batman@gotham.comics'
+        data = {
+            'id': self.coupon.id,
+            'notify_email': notify_email
+        }
+        self.get_response('PUT', path, data)
+
+        coupon = Product.objects.get(id=self.coupon.id)
+        self.assertEqual(coupon.attr.notify_email, notify_email)
+
 
 class CouponCategoriesListViewTests(TestCase):
     """ Tests for the coupon category list view. """
