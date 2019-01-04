@@ -71,8 +71,8 @@ define([
                 },
                 'input[name=notify_email]': {
                     observe: 'notify_email',
-                    setOptions: {
-                        validate: true
+                    onSet: function(val) {
+                        return val === '' ? null : val;
                     }
                 }
             },

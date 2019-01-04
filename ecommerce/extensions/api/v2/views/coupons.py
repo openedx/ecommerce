@@ -126,12 +126,13 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
                 response_data = self.create_order_for_invoice(
                     basket, coupon_id=coupon_product.id, client=client, invoice_data=invoice_data
                 )
-                self.send_codes_availability_email(
-                    self.request.site,
-                    cleaned_voucher_data['notify_email'],
-                    cleaned_voucher_data['enterprise_customer'],
-                    coupon_product.id
-                )
+                if cleaned_voucher_data['notify_email']:
+                    self.send_codes_availability_email(
+                        self.request.site,
+                        cleaned_voucher_data['notify_email'],
+                        cleaned_voucher_data['enterprise_customer'],
+                        coupon_product.id
+                    )
                 return Response(response_data, status=status.HTTP_200_OK)
         except ValidationError as e:
             raise serializers.ValidationError(e.message)
@@ -460,6 +461,10 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
         note = request_data.get('note')
         if note is not None:
             coupon.attr.note = note
+            coupon.save()
+
+        if 'notify_email' in request_data:
+            coupon.attr.notify_email = request_data.get('notify_email')
             coupon.save()
 
     def update_offer_data(self, request_data, vouchers, site):
