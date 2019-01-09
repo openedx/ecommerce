@@ -421,6 +421,12 @@ class CouponMixin(SiteMixin):
                 product_class=pc,
                 type='text'
             )
+            factories.ProductAttributeFactory(
+                product_class=pc,
+                name='Notification Email',
+                code='notify_email',
+                type='text'
+            )
 
         return pc
 
