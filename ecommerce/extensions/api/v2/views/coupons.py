@@ -463,9 +463,8 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
             coupon.attr.note = note
             coupon.save()
 
-        notify_email = request_data.get('notify_email')
-        if notify_email:
-            coupon.attr.notify_email = notify_email
+        if 'notify_email' in request_data:
+            coupon.attr.notify_email = request_data.get('notify_email')
             coupon.save()
 
     def update_offer_data(self, request_data, vouchers, site):

@@ -55,7 +55,8 @@ class Product(AbstractProduct):
             pass
 
         try:
-            validate_email(self.attr.notify_email)
+            if self.attr.notify_email is not None:
+                validate_email(self.attr.notify_email)
         except ValidationError:
             log_message_and_raise_validation_error(
                 'Notification email must be a valid email address.'
