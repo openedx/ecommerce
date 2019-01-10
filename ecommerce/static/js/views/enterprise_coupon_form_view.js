@@ -70,7 +70,10 @@ define([
                     observe: 'enterprise_customer_catalog'
                 },
                 'input[name=notify_email]': {
-                    observe: 'notify_email'
+                    observe: 'notify_email',
+                    onSet: function(val) {
+                        return val === '' ? null : val;
+                    }
                 }
             },
 
