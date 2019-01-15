@@ -100,6 +100,25 @@ def _get_discount_info(discount_data):
     return None, None, None
 
 
+def _get_course_id_and_organization(seat_stockrecord):
+    """
+    Return course_id and organization of given product
+
+    Arguments:
+        seat_stockrecord: stock record from offer catalogue
+
+    Returns
+        course_id (str or None if entitlement)
+        course_organization (str or None if entitlement)
+    """
+    if seat_stockrecord.product.is_course_entitlement_product:
+        return None, None
+    else:
+        course_id = seat_stockrecord.product.attr.course_key
+        course_organization = CourseKey.from_string(course_id).org
+    return course_id, course_organization
+
+
 def _get_info_for_coupon_report(coupon, voucher):
     created_date = coupon.date_updated.strftime("%b %d, %y") if coupon.date_updated else 'N/A'
     category_name = ProductCategory.objects.get(product=coupon).category.name
@@ -126,8 +145,7 @@ def _get_info_for_coupon_report(coupon, voucher):
         course_id = None
     elif offer_range and offer_range.catalog:
         seat_stockrecord = offer_range.catalog.stock_records.first()
-        course_id = seat_stockrecord.product.attr.course_key
-        course_organization = CourseKey.from_string(course_id).org
+        course_id, course_organization = _get_course_id_and_organization(seat_stockrecord)
     elif offer_range and offer_range.catalog_query:
         catalog_query = offer_range.catalog_query
         course_id = None
@@ -209,6 +227,21 @@ def _get_voucher_info_for_coupon_report(voucher):
     return coupon_data
 
 
+def _get_line_id(line):
+    """
+    Return unique id of line
+    Args:
+        line: line in application orders
+
+    Returns:
+         if product is entitlement product then uuid
+         else course_id.
+    """
+    if line.product.is_course_entitlement_product:
+        return line.product.attr.UUID
+    return line.product.course_id
+
+
 def generate_coupon_report(coupon_vouchers):
     """
     Generate coupon report data
@@ -275,7 +308,7 @@ def generate_coupon_report(coupon_vouchers):
                     redemption_user_username = application.user.username
 
                     for line in application.order.lines.all():
-                        redemption_course_ids.append(line.product.course_id)
+                        redemption_course_ids.append(_get_line_id(line))
 
                     new_row = row.copy()
                     _add_redemption_course_ids(new_row, rows[0], redemption_course_ids)
