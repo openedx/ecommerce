@@ -16,6 +16,7 @@ from oscar.test.factories import *  # pylint:disable=wildcard-import,unused-wild
 from ecommerce.core.url_utils import get_ecommerce_url
 from ecommerce.coupons.tests.mixins import CouponMixin, DiscoveryMockMixin
 from ecommerce.courses.tests.factories import CourseFactory
+from ecommerce.entitlements.utils import create_or_update_course_entitlement
 from ecommerce.extensions.api import exceptions
 from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
 from ecommerce.extensions.fulfillment.modules import CouponFulfillmentModule
@@ -78,6 +79,22 @@ class UtilTests(CouponMixin, DiscoveryMockMixin, DiscoveryTestMixin, LmsApiMockM
             voucher_type=Voucher.MULTI_USE
         )
         self.coupon_vouchers = CouponVouchers.objects.filter(coupon=self.coupon)
+
+        self.entitlement = create_or_update_course_entitlement(
+            'verified', 100, self.partner, 'foo-bar', 'Foo Bar Entitlement'
+        )
+        self.entitlement_stock_record = StockRecord.objects.filter(product=self.entitlement).first()
+        self.entitlement_catalog = Catalog.objects.create(partner=self.partner)
+        self.entitlement_catalog.stock_records.add(self.entitlement_stock_record)
+        self.entitlement_coupon = self.create_coupon(
+            title='Tešt Entitlement product',
+            catalog=self.entitlement_catalog,
+            note='Tešt Entitlement note',
+            quantity=1,
+            max_uses=1,
+            voucher_type=Voucher.MULTI_USE
+        )
+        self.entitlement_coupon_vouchers = CouponVouchers.objects.filter(coupon=self.entitlement_coupon)
 
         self.data = {
             'benefit_type': Benefit.PERCENTAGE,
@@ -157,7 +174,7 @@ class UtilTests(CouponMixin, DiscoveryMockMixin, DiscoveryTestMixin, LmsApiMockM
             course_seat_types=course_seat_types,
         )
 
-    def use_voucher(self, order_num, voucher, user):
+    def use_voucher(self, order_num, voucher, user, add_entitlement=False):
         """
         Mark voucher as used by provided users
 
@@ -167,6 +184,9 @@ class UtilTests(CouponMixin, DiscoveryMockMixin, DiscoveryTestMixin, LmsApiMockM
             users (list): list of users
         """
         order = OrderFactory(number=order_num)
+        if add_entitlement:
+            order_line = OrderLineFactory(product=self.entitlement)
+            order.lines.add(order_line)
         order_line = OrderLineFactory(product=self.verified_seat)
         order.lines.add(order_line)
         voucher.record_usage(order, user)
@@ -382,6 +402,24 @@ class UtilTests(CouponMixin, DiscoveryMockMixin, DiscoveryTestMixin, LmsApiMockM
             row['URL'],
             get_ecommerce_url() + self.REDEMPTION_URL.format(voucher.code)
         )
+
+    def test_generate_coupon_report_for_entitlement(self):
+        """ Verify the coupon report is generated properly in case of entitlements. """
+        self.data['coupon'] = self.entitlement_coupon
+        self.data['catalog'] = self.entitlement_catalog
+        self.coupon_vouchers = self.entitlement_coupon_vouchers
+        self.setup_coupons_for_report()
+        client = UserFactory()
+        basket = Basket.get_basket(client, self.site)
+        basket.add_product(self.entitlement_coupon)
+
+        vouchers = self.coupon_vouchers.first().vouchers.all()
+        self.use_voucher('TESTORDER1', vouchers[1], self.user, add_entitlement=True)
+        self.mock_course_api_response(course=self.course)
+        try:
+            generate_coupon_report(self.coupon_vouchers)
+        except TypeError:
+            self.fail("Exception:ErrorType raised unexpectedly!")
 
     def test_generate_coupon_report(self):
         """ Verify the coupon report is generated properly. """
