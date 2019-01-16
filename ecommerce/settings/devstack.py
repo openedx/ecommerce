@@ -1,7 +1,10 @@
 """Devstack settings"""
+from corsheaders.defaults import default_headers as corsheaders_default_headers
+
+from ecommerce.settings.production import *
+
 # noinspection PyUnresolvedReferences
 from ecommerce.settings._debug_toolbar import *  # isort:skip
-from ecommerce.settings.production import *
 
 DEBUG = True
 INTERNAL_IPS = ['127.0.0.1']
@@ -28,6 +31,14 @@ JWT_AUTH.update({
         'y5ZLcTUomo4rZLjghVpq6KZxfS6I1Vz79ZsMVUWEdXOYePCKKsrQG20ogQEkmTf9FT_SouC6jPcHLXw"}]}'
     ),
 })
+
+CORS_ORIGIN_WHITELIST = (
+    'localhost:1991'
+)
+CORS_ALLOW_HEADERS = corsheaders_default_headers + (
+    'use-jwt-cookie',
+)
+CORS_ALLOW_CREDENTIALS = True
 
 # PAYMENT PROCESSING
 PAYMENT_PROCESSOR_CONFIG = {
