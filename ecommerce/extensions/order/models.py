@@ -18,6 +18,11 @@ class Order(AbstractOrder):
         """ Return a boolean if the order contains a Coupon. """
         return any(line.product.is_coupon_product for line in self.basket.all_lines())
 
+    @property
+    def is_journal_order(self):
+        """ Return a boolean if the order contains Journal product. """
+        return any(line.product.is_journal_product for line in self.basket.all_lines()) if self.basket else False
+
 
 class PaymentEvent(AbstractPaymentEvent):
     processor_name = models.CharField(_('Payment Processor'), max_length=32, blank=True, null=True)
