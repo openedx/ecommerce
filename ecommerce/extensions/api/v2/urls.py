@@ -1,4 +1,5 @@
 from django.conf.urls import include, url
+from rest_framework.urlpatterns import format_suffix_patterns
 from rest_framework_extensions.routers import ExtendedSimpleRouter
 
 from ecommerce.core.constants import COURSE_ID_PATTERN
@@ -121,3 +122,4 @@ router.register(r'vouchers', voucher_views.VoucherViewSet, base_name='vouchers')
 router.register(r'stockrecords', stockrecords_views.StockRecordViewSet, base_name='stockrecords')
 
 urlpatterns += router.urls
+urlpatterns = format_suffix_patterns(urlpatterns)
