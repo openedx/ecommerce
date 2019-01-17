@@ -1,7 +1,7 @@
 from __future__ import unicode_literals
 
 import logging
-
+from datetime import timedelta
 import waffle
 from django.core.exceptions import ValidationError
 from oscar.core.loading import get_model
@@ -11,11 +11,13 @@ from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 
 from ecommerce.core.constants import COUPON_PRODUCT_CLASS_NAME
+from ecommerce.core.url_utils import get_ecommerce_url
 from ecommerce.core.utils import log_message_and_raise_validation_error
 from ecommerce.enterprise.constants import ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH
 from ecommerce.enterprise.utils import get_enterprise_customers
 from ecommerce.extensions.api.serializers import (
     CouponCodeAssignmentSerializer,
+    CouponCodeRevokeSerializer,
     CouponSerializer,
     CouponVoucherSerializer,
     EnterpriseCouponListSerializer,
@@ -27,6 +29,8 @@ from ecommerce.extensions.catalogue.utils import (
     attach_vouchers_to_coupon_product,
     create_coupon_product_and_stockrecord
 )
+from ecommerce.extensions.offer.models import OfferAssignment
+from ecommerce.extensions.offer.utils import send_assigned_offer_email
 from ecommerce.extensions.voucher.utils import (
     create_enterprise_vouchers,
     update_voucher_offer,
@@ -256,9 +260,62 @@ class EnterpriseCouponViewSet(CouponViewSet):
         Assign users by email to codes within the Coupon.
         """
         coupon = self.get_object()
+        email_template = request.data.pop('template')
         serializer = CouponCodeAssignmentSerializer(
             data=request.data,
             context={'coupon': coupon}
+        )
+        if serializer.is_valid():
+            serializer.save()
+            tasks_status = self._trigger_email_sending_task(
+                email_template,
+                serializer.data.get('offer_assignments')
+            )
+            return Response({'offer_assignments': tasks_status}, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def _trigger_email_sending_task(self, template, offer_assignments):
+        """
+        Schedule async tasks to send emails to learners who have been assigned codes.
+        """
+        emails_status = []
+        for offer_assignment in offer_assignments:
+            assigned_offer = OfferAssignment.objects.get(id=offer_assignment['id'])
+            url = get_ecommerce_url('/coupons/offer/')
+            enrollment_url = '{url}?code={code}'.format(url=url, code=assigned_offer.code)
+            code_expiration_date = assigned_offer.created + timedelta(days=365)
+            email_send_status = send_assigned_offer_email(
+                template=template,
+                offer_assignment_id=assigned_offer.id,
+                learner_email=assigned_offer.user_email,
+                code=assigned_offer.code,
+                enrollment_url=enrollment_url,
+                code_usage_count=assigned_offer.offer.max_global_applications,
+                code_expiration_date=code_expiration_date.strftime('%d %B,%Y')
+            )
+            status_keys = {
+                'id': assigned_offer.id,
+                'user_email': assigned_offer.user_email,
+                'code': assigned_offer.code,
+            }
+            if email_send_status:
+                status_keys.update({'status': 'email_dispatch_success'})
+            else:
+                status_keys.update({'status': 'email_dispatch_failed'})
+            emails_status.append(status_keys)
+        return emails_status
+
+    @detail_route(methods=['post'])
+    def revoke(self, request, pk):  # pylint: disable=unused-argument
+        """
+        Revoke users by email from codes within the Coupon.
+        """
+        coupon = self.get_object()
+        email_template = request.data.pop('template')
+        serializer = CouponCodeRevokeSerializer(
+            data=request.data.get('assignments'),
+            many=True,
+            context={'coupon': coupon, 'template': email_template}
         )
         if serializer.is_valid():
             serializer.save()

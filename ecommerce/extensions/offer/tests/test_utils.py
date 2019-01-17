@@ -1,12 +1,17 @@
 from decimal import Decimal
 
 import ddt
+import mock
 from oscar.core.loading import get_model
 
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
 from ecommerce.extensions.checkout.utils import add_currency
-from ecommerce.extensions.offer.utils import _remove_exponent_and_trailing_zeros, format_benefit_value
+from ecommerce.extensions.offer.utils import (
+    _remove_exponent_and_trailing_zeros,
+    format_benefit_value,
+    send_assigned_offer_email
+)
 from ecommerce.extensions.test.factories import *  # pylint:disable=wildcard-import,unused-wildcard-import
 from ecommerce.tests.testcases import TestCase
 
@@ -61,3 +66,101 @@ class UtilTests(DiscoveryTestMixin, TestCase):
         """
         decimal = _remove_exponent_and_trailing_zeros(Decimal(value))
         self.assertEqual(decimal, Decimal(expected))
+
+    @mock.patch('ecommerce.extensions.offer.utils.send_offer_assignment_email')
+    @ddt.data(
+        (
+            ('Your learning manager has provided you with a new access code to take a course at edX.'
+             ' You may redeem this code for {code_usage_count} courses. '
+
+             'edX login: {user_email}'
+             'Enrollment url: {enrollment_url}'
+             'Access Code: {code}'
+             'Expiration date: {code_expiration_date}'
+
+             'You may go directly to the Enrollment URL to view courses that are available for this code'
+             ' or you can insert the access code at check out under "coupon code" for applicable courses.'
+
+             'For any questions, please reach out to your Learning Manager.'),
+            {'offer_assignment_id': 555,
+             'learner_email': 'johndoe@unknown.com',
+             'code': 'GIL7RUEOU7VHBH7Q',
+             'enrollment_url': 'http://tempurl.url/enroll',
+             'code_usage_count': 10,
+             'code_expiration_date': '2018-12-19'},
+            ('Your learning manager has provided you with a new access code to take a course at edX.'
+             ' You may redeem this code for 10 courses. '
+
+             'edX login: johndoe@unknown.com'
+             'Enrollment url: http://tempurl.url/enroll'
+             'Access Code: GIL7RUEOU7VHBH7Q'
+             'Expiration date: 2018-12-19'
+
+             'You may go directly to the Enrollment URL to view courses that are available for this code'
+             ' or you can insert the access code at check out under "coupon code" for applicable courses.'
+
+             'For any questions, please reach out to your Learning Manager.'),
+            None,
+            True,
+        ),
+        (
+            ('Your learning manager has provided you with a new access code to take a course at edX.'
+             ' You may redeem this code for {code_usage_count} courses. '
+
+             'edX login: {user_email}'
+             'Enrollment url: {enrollment_url}'
+             'Access Code: {code}'
+             'Expiration date: {code_expiration_date}'
+
+             'You may go directly to the Enrollment URL to view courses that are available for this code'
+             ' or you can insert the access code at check out under "coupon code" for applicable courses.'
+
+             'For any questions, please reach out to your Learning Manager.'),
+            {'offer_assignment_id': 555,
+             'learner_email': 'johndoe@unknown.com',
+             'code': 'GIL7RUEOU7VHBH7Q',
+             'enrollment_url': 'http://tempurl.url/enroll',
+             'code_usage_count': 10,
+             'code_expiration_date': '2018-12-19'},
+            ('Your learning manager has provided you with a new access code to take a course at edX.'
+             ' You may redeem this code for 10 courses. '
+
+             'edX login: johndoe@unknown.com'
+             'Enrollment url: http://tempurl.url/enroll'
+             'Access Code: GIL7RUEOU7VHBH7Q'
+             'Expiration date: 2018-12-19'
+
+             'You may go directly to the Enrollment URL to view courses that are available for this code'
+             ' or you can insert the access code at check out under "coupon code" for applicable courses.'
+
+             'For any questions, please reach out to your Learning Manager.'),
+            Exception(),
+            False,
+        ),
+    )
+    @ddt.unpack
+    def test_send_assigned_offer_email(
+            self,
+            template,
+            tokens,
+            expected_email_body,
+            side_effect,
+            returns,
+            mock_sailthru_task,
+    ):
+        email_subject = 'New edX course assignment'
+        mock_sailthru_task.delay.side_effect = side_effect
+        status = send_assigned_offer_email(
+            template,
+            tokens.get('offer_assignment_id'),
+            tokens.get('learner_email'),
+            tokens.get('code'),
+            tokens.get('enrollment_url'),
+            tokens.get('code_usage_count'),
+            tokens.get('code_expiration_date'),
+        )
+        mock_sailthru_task.delay.assert_called_once_with(
+            tokens.get('learner_email'),
+            tokens.get('offer_assignment_id'),
+            email_subject, expected_email_body)
+        self.assertEqual(status, returns)

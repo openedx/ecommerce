@@ -481,4 +481,9 @@ class OfferAssignment(TimeStampedModel):
     )
 
 
+class OfferAssignmentEmailAttempt(models.Model):
+    offer_assignment = models.ForeignKey('offer.OfferAssignment', on_delete=models.CASCADE)
+    send_id = models.CharField(max_length=255, unique=True)
+
+
 from oscar.apps.offer.models import *  # noqa isort:skip pylint: disable=wildcard-import,unused-wildcard-import,wrong-import-position,wrong-import-order,ungrouped-imports

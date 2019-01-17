@@ -5,6 +5,7 @@
 #    make upgrade
 #
 -e git+https://github.com/edx/analytics-python.git@1.2.11#egg=analytics-python==1.2.11
+-e git+https://github.com/edx/ecommerce-worker.git@master#egg=ecommerce-worker==master
 alabaster==0.7.12         # via sphinx
 amqp==1.4.9               # via kombu
 anyjson==0.3.3            # via kombu
@@ -63,7 +64,7 @@ edx-django-release-util==0.3.1
 edx-django-sites-extensions==2.4.0
 edx-django-utils==1.0.3
 edx-drf-extensions==2.0.1
-edx-ecommerce-worker==0.7.0
+#edx-ecommerce-worker==0.7.0
 edx-i18n-tools==0.4.8
 edx-opaque-keys==0.4.4
 edx-rest-api-client==1.9.2
