@@ -22,6 +22,7 @@ from ecommerce.enterprise.conditions import AssignableEnterpriseCustomerConditio
 from ecommerce.enterprise.constants import ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH
 from ecommerce.enterprise.tests.mixins import EnterpriseServiceMockMixin
 from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
+from ecommerce.extensions.offer.constants import VOUCHER_NOT_ASSIGNED
 from ecommerce.invoice.models import Invoice
 from ecommerce.programs.custom import class_path
 from ecommerce.tests.mixins import ThrottlingMixin
@@ -400,27 +401,33 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
 
         # create some voucher applications
         if with_applications:
-            max_uses = coupon_data.get('max_uses', None)
+            max_uses = coupon_data.get('max_uses', 1)
             coupon = Product.objects.get(id=coupon_id)
-            for voucher in coupon.attr.coupon_vouchers.vouchers.all():
-                for _ in range(max_uses or 1):
-                    self.use_voucher(voucher, self.create_user())
+            coupon_vouchers = coupon.attr.coupon_vouchers.vouchers.all()
+            self.create_coupon_vouchers(coupon_vouchers=coupon_vouchers, voucher_usages=max_uses)
 
         return coupon_id
 
-    def assign_coupon_codes(self, coupon_id):
+    def create_coupon_vouchers(self, coupon_vouchers, voucher_usages=1):
+        for voucher in coupon_vouchers:
+            # How many uses for a voucher to create.
+            for _ in range(voucher_usages or 1):
+                self.use_voucher(voucher, self.create_user())
+
+    def assign_coupon_codes(self, coupon_id, total_assignments=1):
         """
         Assigns codes.
         """
         vouchers = Product.objects.get(id=coupon_id).attr.coupon_vouchers.vouchers.all()
         codes = [voucher.code for voucher in vouchers]
-        codes_param = codes[3:]
-        emails = ['t1@example.com', 't2@example.com']
-        self.get_response(
-            'POST',
-            '/api/v2/enterprise/coupons/{}/assign/'.format(coupon_id),
-            {'emails': emails, 'codes': codes_param}
-        )
+        if total_assignments:
+            codes_param = codes[1:2]
+            emails = ['t1@example.com']# , 't2@example.com'] # TODO:
+            self.get_response(
+                'POST',
+                '/api/v2/enterprise/coupons/{}/assign/'.format(coupon_id),
+                {'emails': emails, 'codes': codes_param}
+            )
 
     @ddt.data(
         {
@@ -567,108 +574,59 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
         )
 
     @ddt.data(
-        # default
         {
-            'code_filter': '',
-            'do_assignment': False,
-            'with_applications': False,
-            'expected_results_count': 2
+            'code_filter': VOUCHER_NOT_ASSIGNED,
+            'voucher_type': Voucher.MULTI_USE,
+            'quantity': 3,
+            'max_uses': 10,
+            'assign_slice': slice(0, 2),    # TODO: test more indexes.
+            'redeem_slice': slice(0, 2),    # Assigned codes are redeemed.
+            'voucher_usages': 1,    # if set to same as max_uses, redeem all usages.
+            'expected_results_count': 1
         },
         {
-            'code_filter': '',
-            'do_assignment': True,
-            'with_applications': False,
-            'expected_results_count': 2
-        },
-        {
-            'code_filter': '',
-            'do_assignment': False,
-            'with_applications': True,
-            'expected_results_count': 2
-        },
-        {
-            'code_filter': '',
-            'do_assignment': True,
-            'with_applications': True,
-            'expected_results_count': 2
-        },
-        # not-redeemed
-        {
-            'code_filter': 'not-redeemed',
-            'do_assignment': False,
-            'with_applications': False,
-            'expected_results_count': 2
-        },
-        {
-            'code_filter': 'not-redeemed',
-            'do_assignment': False,
-            'with_applications': True,
-            'expected_results_count': 0
-        },
-        {
-            'code_filter': 'not-redeemed',
-            'do_assignment': True,
-            'with_applications': False,
-            'expected_results_count': 2
-        },
-        {
-            'code_filter': 'not-redeemed',
-            'do_assignment': True,
-            'with_applications': True,
-            'expected_results_count': 0
-        },
-        # not-assigned
-        {
-            'code_filter': 'not-assigned',
-            'do_assignment': False,
-            'with_applications': False,
-            'expected_results_count': 2
-        },
-        {
-            'code_filter': 'not-assigned',
-            'do_assignment': True,
-            'with_applications': False,
-            'expected_results_count': 0
-        },
-        {
-            'code_filter': 'not-assigned',
-            'do_assignment': False,
-            'with_applications': True,
-            'expected_results_count': 0
-        },
-        {
-            'code_filter': 'not-assigned',
-            'do_assignment': True,
-            'with_applications': True,
-            'expected_results_count': 0
-        },
+            'code_filter': VOUCHER_NOT_ASSIGNED,
+            'voucher_type': Voucher.MULTI_USE,
+            'quantity': 3,
+            'max_uses': 10,
+            'assign_slice': slice(0, 1), # TODO: test more indexes
+            'redeem_slice': slice(2, 3), # Assigned code is not redeemed.
+            'voucher_usages': 1,    # if set to same as max_uses, redeem all usages.
+            'expected_results_count': 1
+        }
     )
-    @ddt.unpack
-    def test_coupon_codes_detail_filtering(self, code_filter, do_assignment, with_applications, expected_results_count):
+    def test_coupon_codes_filters(self, data):#, code_filter, do_assignment, with_applications, expected_results_count):
         """
         Verify that `/api/v2/enterprise/coupons/{coupon_id}/codes/` endpoint returns correct data when filtered.
         """
         coupon_data = {
-            'voucher_type': Voucher.MULTI_USE,
-            'max_uses': 1
+            'quantity': data['quantity'],
+            'voucher_type': data['voucher_type'],
+            'max_uses': data['max_uses']
         }
-        coupon_id = self.create_enterprise_coupon(dict(self.data, **coupon_data), with_applications=with_applications)
+        coupon_id = self.create_enterprise_coupon(dict(self.data, **coupon_data))
 
-        if do_assignment:
-            self.assign_coupon_codes(coupon_id)
+        vouchers = Product.objects.get(id=coupon_id).attr.coupon_vouchers.vouchers.all()
+        codes = [voucher.code for voucher in vouchers]
+
+        # Assign coupon code.
+        self.assign_coupon_codes(coupon_id, vouchers[data['assign_slice']])
+
+        # create voucher applications.
+        self.create_coupon_vouchers(coupon_vouchers=vouchers[data['redeem_slice']])
 
         # Get coupon codes.
         response = self.get_response(
             'GET',
-            '/api/v2/enterprise/coupons/{}/codes/?code_filter={}'.format(coupon_id, code_filter)
+            '/api/v2/enterprise/coupons/{}/codes/?code_filter={}'.format(coupon_id, data['code_filter'])
         )
         response = response.json()
 
         self.assert_coupon_codes_response(
             response,
             coupon_id,
-            max_uses=coupon_data['max_uses'],
-            results_count=expected_results_count
+            max_uses=data['max_uses'],
+            results_count=data['expected_results_count']
         )
 
     @ddt.data(
