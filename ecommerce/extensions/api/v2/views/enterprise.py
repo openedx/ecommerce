@@ -192,7 +192,9 @@ class EnterpriseCouponViewSet(CouponViewSet):
         """
         Returns the list of all assigned codes.
         """
-        return OfferAssignment.objects.exclude(status__in=[OFFER_REDEEMED, OFFER_ASSIGNMENT_REVOKED]).values_list('code', flat=True)
+        return OfferAssignment.objects.exclude(
+            status__in=[OFFER_REDEEMED, OFFER_ASSIGNMENT_REVOKED]
+        ).values_list('code', flat=True)
 
     def get_vouchers_with_no_applications(self, coupon_vouchers):
         """
