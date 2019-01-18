@@ -895,13 +895,13 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             assert OfferAssignment.objects.filter(code=code).count() in assignments_per_code
 
     @ddt.data(
-        (Voucher.SINGLE_USE, 2, None),
-        (Voucher.MULTI_USE_PER_CUSTOMER, 2, 3),
-        (Voucher.MULTI_USE, 1, None),
-        (Voucher.ONCE_PER_CUSTOMER, 2, 2),
+        (Voucher.SINGLE_USE, 2, None, True),
+        (Voucher.MULTI_USE_PER_CUSTOMER, 2, 3, False),
+        (Voucher.MULTI_USE, 1, None, True),
+        (Voucher.ONCE_PER_CUSTOMER, 2, 2, False),
     )
     @ddt.unpack
-    def test_coupon_codes_revoke_success(self, voucher_type, quantity, max_uses):
+    def test_coupon_codes_revoke_success(self, voucher_type, quantity, max_uses, send_email):
         """Test revoking codes from users."""
         Switch.objects.update_or_create(name=ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, defaults={'active': True})
 
@@ -918,16 +918,19 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             )
 
         offer_assignment = OfferAssignment.objects.filter(user_email=email).first()
+        payload = {'assignments': [{'email': email, 'code': offer_assignment.code}]}
+        if send_email:
+            payload['template'] = 'Test template'
         with mock.patch('ecommerce.extensions.offer.utils.send_offer_update_email.delay') as mock_send_email:
             response = self.get_response(
                 'POST',
                 '/api/v2/enterprise/coupons/{}/revoke/'.format(coupon_id),
-                {'template': 'Test template', 'assignments': [{'email': email, 'code': offer_assignment.code}]}
+                payload
             )
 
         response = response.json()
         assert response == [{'code': offer_assignment.code, 'email': email, 'detail': 'success'}]
-        assert mock_send_email.call_count == 1
+        assert mock_send_email.call_count == (1 if send_email else 0)
         for offer_assignment in OfferAssignment.objects.filter(user_email=email):
             assert offer_assignment.status == OFFER_ASSIGNMENT_REVOKED
 

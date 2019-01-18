@@ -1199,6 +1199,7 @@ class CouponCodeRevokeSerializer(serializers.Serializer):  # pylint: disable=abs
         offer_assignments = validated_data.get('offer_assignments')
         email = validated_data.get('email')
         code = validated_data.get('code')
+        template = self.context.get('template')
         detail = 'success'
 
         try:
@@ -1206,11 +1207,12 @@ class CouponCodeRevokeSerializer(serializers.Serializer):  # pylint: disable=abs
                 offer_assignment.status = OFFER_ASSIGNMENT_REVOKED
                 offer_assignment.save()
 
-            send_revoked_offer_email(
-                template=self.context.get('template'),
-                learner_email=email,
-                code=code
-            )
+            if template:
+                send_revoked_offer_email(
+                    template=template,
+                    learner_email=email,
+                    code=code
+                )
         except Exception as exc:  # pylint: disable=broad-except
             logger.exception('Encountered error when revoking code %s for user %s', code, email)
             detail = unicode(exc)

@@ -311,7 +311,7 @@ class EnterpriseCouponViewSet(CouponViewSet):
         Revoke users by email from codes within the Coupon.
         """
         coupon = self.get_object()
-        email_template = request.data.pop('template')
+        email_template = request.data.pop('template', None)
         serializer = CouponCodeRevokeSerializer(
             data=request.data.get('assignments'),
             many=True,
