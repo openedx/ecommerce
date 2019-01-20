@@ -4,6 +4,7 @@
 # This file is distributed under the GNU AFFERO GENERAL PUBLIC LICENSE.
 # 
 # Translators:
+# abby li <yc.li@eliteu.cn>, 2019
 # CN C2 <e2f48d4sf5ds@outlook.com>, 2016
 # Dandi Xu <dandi.xu.china@gmail.com>, 2015
 # Dustin Yu <dustintt123@hotmail.com>, 2015
@@ -28,8 +29,8 @@ msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: openedx-translation@googlegroups.com\n"
 "POT-Creation-Date: 2018-03-26 16:41-0400\n"
-"PO-Revision-Date: 2018-12-08 11:28+0000\n"
-"Last-Translator: 嘉杰 李 <jj.li@eliteu.com.cn>\n"
+"PO-Revision-Date: 2019-01-15 08:04+0000\n"
+"Last-Translator: abby li <yc.li@eliteu.cn>\n"
 "Language-Team: Chinese (China) (http://www.transifex.com/open-edx/edx-platform/language/zh_CN/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -109,7 +110,7 @@ msgstr "来自电子邮件"
 
 #: ecommerce/core/models.py:82
 msgid "Address from which emails are sent."
-msgstr "电子邮件发件人地址。"
+msgstr "发件人邮箱。"
 
 #: ecommerce/core/models.py:88
 msgid "Enable enrollment codes"
@@ -181,13 +182,13 @@ msgstr "财政部OFAC列表使用逗号隔开，以便核对。"
 
 #: ecommerce/core/models.py:147
 msgid "Require Account Activation"
-msgstr "需要激活账户"
+msgstr "需要激活账号"
 
 #: ecommerce/core/models.py:148
 msgid ""
 "Require users to activate their account before allowing them to redeem a "
 "coupon."
-msgstr "在获得兑换优惠券的权限前，用户需要激活账户。"
+msgstr "在获得兑换优惠券的权限前，用户需要激活账号。"
 
 #: ecommerce/core/models.py:152
 msgid "Optimizely snippet source URL"
@@ -359,7 +360,7 @@ msgstr "荣誉"
 
 #: ecommerce/courses/utils.py:91
 msgid "Professional"
-msgstr "专业的"
+msgstr "专业"
 
 #: ecommerce/courses/utils.py:92
 msgid "Verified"
@@ -726,7 +727,7 @@ msgstr "完成订单后，您将收到课程学分。"
 msgid ""
 "After you complete your order you will be automatically enrolled in the "
 "course."
-msgstr "完成订单后，您将自动在此课程中进行选课。"
+msgstr "完成订单后，您将立即加入此课程。"
 
 #: ecommerce/extensions/basket/views.py:239
 #, python-brace-format
@@ -814,7 +815,7 @@ msgstr "电子邮件"
 msgid ""
 "{link_start}Refund #{refund_id}{link_end} created! Click "
 "{link_start}here{link_end} to view it."
-msgstr "{link_start}退款#{refund_id}{link_end} 已创建! 点击 {link_start}这里{link_end} 查看。"
+msgstr "{link_start}退款#{refund_id}{link_end} 已创建！点击 {link_start}这里{link_end} 查看。"
 
 #: ecommerce/extensions/dashboard/orders/views.py:76
 msgid ""
@@ -1572,7 +1573,7 @@ msgstr "版权 © %(year)s %(platform_name)s。保留所有权利。"
 #: ecommerce/templates/customer/emails/commtype_course_purchased_body.txt:4
 #, python-format
 msgid "Hi %(full_name)s,"
-msgstr "%(full_name)s 你好,"
+msgstr "%(full_name)s 您好，"
 
 #: ecommerce/templates/customer/emails/commtype_course_purchased_body.html:11
 #: ecommerce/templates/customer/emails/commtype_course_purchased_body.txt:6
@@ -1581,7 +1582,7 @@ msgid ""
 "Thank you for purchasing %(course_title)s. The charge below will appear on "
 "your next credit or debit card statement with a company name of "
 "%(platform_name)s."
-msgstr "感谢你购买 %(course_title)s。以下费用将以公司名称为 %(platform_name)s 显示在您的下一次信用卡或借记卡账单中。"
+msgstr "感谢您购买 %(course_title)s。以下费用将以公司名称为 %(platform_name)s 显示在您的下一次信用卡或借记卡账单中。"
 
 #: ecommerce/templates/customer/emails/commtype_course_purchased_body.html:13
 #: ecommerce/templates/customer/emails/commtype_course_purchased_body.txt:8
@@ -1589,7 +1590,7 @@ msgstr "感谢你购买 %(course_title)s。以下费用将以公司名称为 %(p
 msgid ""
 "You can access your course and complete your verification (if required) on "
 "your %(platform_name)s dashboard. "
-msgstr "你可以访问你的课程并在你的 %(platform_name)s 仪表板上完成认证（如要求）。"
+msgstr "您可以访问您的课程并在您的 %(platform_name)s 仪表板上完成认证（如要求）。"
 
 #: ecommerce/templates/customer/emails/commtype_course_purchased_body.html:14
 #: ecommerce/templates/customer/emails/commtype_course_purchased_body.txt:9
@@ -1614,7 +1615,7 @@ msgstr "%(platform_name)s团队"
 msgid ""
 "You are receiving this email because you purchased a seat in the "
 "%(platform_name)s course %(course_title)s."
-msgstr "你收到此电子邮件是因为你在 %(platform_name)s 的课程 %(course_title)s中购买了一个座席。"
+msgstr "您收到此电子邮件是因为您在 %(platform_name)s 的课程 %(course_title)s中购买了一个座席。"
 
 #: ecommerce/templates/customer/emails/commtype_course_purchased_body.txt:2
 msgid "Receipt Confirmation for: "
@@ -1696,7 +1697,7 @@ msgid ""
 "\n"
 "                            You received this message because you purchased credit hours for %(course_title)s, an %(platform_name)s course.\n"
 "                        "
-msgstr "\n                            您收到此信息是因为你购买了 %(platform_name)s 课程 %(course_title)s 的学分时。"
+msgstr "\n                            您收到此信息是因为您购买了 %(platform_name)s 课程 %(course_title)s 的学分时。"
 
 #: ecommerce/templates/customer/emails/commtype_credit_receipt_body.txt:2
 msgid "Payment confirmation for: "
@@ -1765,7 +1766,7 @@ msgid ""
 "To view your payment information, log in to see your Order History, under "
 "%(link_start)s%(order_history_url)s%(link_middle)sAccount "
 "Settings%(link_end)s"
-msgstr "如需查看您的支付信息，请登录并在%(link_start)s%(order_history_url)s%(link_middle)s账户设置%(link_end)s中查看您的订单历史记录。"
+msgstr "如需查看您的支付信息，请登录并在%(link_start)s%(order_history_url)s%(link_middle)s账号设置%(link_end)s中查看您的订单历史记录。"
 
 #: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html:33
 #, python-format
@@ -1977,7 +1978,7 @@ msgid ""
 "                You may also view your previous orders on the %(link_start)sAccount Settings%(link_end)s\n"
 "                page.\n"
 "              "
-msgstr "\n您也可以在%(link_start)s账户设置%(link_end)s页面上查看之前的订单。\n              "
+msgstr "\n您也可以在%(link_start)s账号设置%(link_end)s页面上查看之前的订单。\n              "
 
 #: ecommerce/templates/edx/credit/_provider_detail.html:8
 msgid "Select"
@@ -2028,7 +2029,7 @@ msgid ""
 "                        You must purchase your credit before %(date)s.\n"
 "                        Select one of the following institutions to purchase your credit.\n"
 "                    "
-msgstr "\n                        恭喜你！你有资格购买此课程的学术课程学分。\n你必须在 %(date)s 之前购买你的学分。\n选择以下其中一个机构来购买你的学分。"
+msgstr "\n                        恭喜！您有资格购买此课程的学术课程学分。\n您必须在 %(date)s 之前购买您的学分。\n选择以下其中一个机构来购买您的学分。"
 
 #: ecommerce/templates/edx/credit/checkout.html:46
 msgid "Price:"
@@ -2045,7 +2046,7 @@ msgstr "总共:"
 
 #: ecommerce/templates/edx/credit/checkout.html:84
 msgid "You deserve it."
-msgstr "这是你应得的。"
+msgstr "这是您努力的结果。"
 
 #: ecommerce/templates/edx/credit/checkout.html:87
 msgid ""
@@ -2094,7 +2095,7 @@ msgstr "您正在选课："
 msgid ""
 "An email has been sent to %(user_email)s with a link for you to activate "
 "your account."
-msgstr "已发送邮件至%(user_email)s，内含用于激活账户的链接。"
+msgstr "已发送邮件至%(user_email)s，内含用于激活账号的链接。"
 
 #: ecommerce/templates/edx/email_confirmation_required.html:25
 msgid "Why activate?"
@@ -2104,7 +2105,7 @@ msgstr "为何需要激活？"
 msgid ""
 "We ask you to activate your account to ensure it is really you creating the "
 "account and to prevent fraud."
-msgstr "我们要求您激活账户，以确保此账户由您本人注册并防止欺诈行为。"
+msgstr "我们要求您激活账号，以确保此账号由您本人注册并防止欺诈行为。"
 
 #: ecommerce/templates/edx/error.html:16
 msgid "If you need assistance, contact edX support."
@@ -2188,7 +2189,7 @@ msgstr "应用"
 
 #: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:16
 msgid "in your cart"
-msgstr "您的购物车中"
+msgstr "您的购物车"
 
 #: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:17
 msgid "Your purchase contains the following"
@@ -2207,7 +2208,7 @@ msgstr "更新"
 
 #: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:47
 msgid "summary"
-msgstr "总结"
+msgstr "总计"
 
 #: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:54
 msgid "Quanity"
@@ -2486,7 +2487,7 @@ msgid ""
 "%(ofac_email_link)s ofac.reconsideration@treasury.gov%(end_link)s for "
 "information about options for clearing a match. Your account will be "
 "suspended until this matter is resolved satisfactorily."
-msgstr "如果您对清除匹配项有疑问，请联系%(ofac_email_link)sofac.reconsideration@treasury.gov%(end_link)s了解清除匹配项的事宜。您的账户将一直被停用，直至此问题得到妥善解决。"
+msgstr "如果您对清除匹配项有疑问，请联系%(ofac_email_link)sofac.reconsideration@treasury.gov%(end_link)s了解清除匹配项的事宜。您的账号将一直被停用，直至此问题得到妥善解决。"
 
 #: ecommerce/templates/oscar/dashboard/catalogue/category_row_actions.html:6
 #: ecommerce/templates/oscar/dashboard/catalogue/product_row_actions.html:6
@@ -2976,12 +2977,12 @@ msgstr "全名"
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:50
 #: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html:50
 msgid "Email address"
-msgstr "电子邮件地址"
+msgstr "邮箱"
 
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:59
 #: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html:59
 msgid "Customer has deleted their account."
-msgstr "客户已经删除了他们的账户。"
+msgstr "客户已经删除了他们的账号。"
 
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:67
 msgid "Order information"
@@ -3234,7 +3235,7 @@ msgstr "指令"
 
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:538
 msgid "Billing address"
-msgstr "帐单地址"
+msgstr "账单地址"
 
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:549
 msgid "Payment sources"
@@ -3464,7 +3465,7 @@ msgstr "一般"
 
 #: ecommerce/templates/oscar/dashboard/users/detail.html:54
 msgid "Yes,No"
-msgstr "是,否"
+msgstr "是，否"
 
 #: ecommerce/templates/oscar/dashboard/users/detail.html:58
 msgid "Superuser"
@@ -3473,7 +3474,7 @@ msgstr "超级用户"
 #: ecommerce/templates/oscar/dashboard/users/detail.html:59
 #: ecommerce/templates/oscar/dashboard/users/detail.html:63
 msgid "True,False"
-msgstr "真,假"
+msgstr "真，假"
 
 #: ecommerce/templates/oscar/dashboard/users/detail.html:62
 msgid "Staff"
