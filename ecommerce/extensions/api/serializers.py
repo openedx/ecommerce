@@ -30,9 +30,14 @@ from ecommerce.extensions.offer.constants import (
     OFFER_ASSIGNED,
     OFFER_ASSIGNMENT_EMAIL_PENDING,
     OFFER_ASSIGNMENT_REVOKED,
-    OFFER_MAX_USES_DEFAULT
+    OFFER_MAX_USES_DEFAULT,
+    OFFER_REDEEMED
 )
-from ecommerce.extensions.offer.utils import send_assigned_offer_email, send_revoked_offer_email
+from ecommerce.extensions.offer.utils import (
+    send_assigned_offer_email,
+    send_assigned_offer_reminder_email,
+    send_revoked_offer_email
+)
 from ecommerce.invoice.models import Invoice
 
 logger = logging.getLogger(__name__)
@@ -1166,7 +1171,7 @@ class CouponCodeAssignmentSerializer(serializers.Serializer):  # pylint: disable
                 '[Offer Assignment] Email for offer_assignment_id: %d raised exception: %r', assigned_offer.id, exc)
 
 
-class CouponCodeRevokeBulkSerializer(serializers.ListSerializer):  # pylint: disable=abstract-method
+class CouponCodeRevokeRemindBulkSerializer(serializers.ListSerializer):  # pylint: disable=abstract-method
 
     def to_internal_value(self, data):
         """
@@ -1216,10 +1221,36 @@ class CouponCodeRevokeBulkSerializer(serializers.ListSerializer):  # pylint: dis
         ]
 
 
-class CouponCodeRevokeSerializer(serializers.Serializer):  # pylint: disable=abstract-method
+class CouponCodeMixin(object):
+
+    def validate_coupon_has_code(self, coupon, code):
+        """
+        Validate that the code is associated with the coupon
+        :param coupon: (Product): Coupon product associated with vouchers
+        :param code: (str): Code associated with the voucher
+        :raises rest_framework.exceptions.ValidationError in case code is not associated with the coupon
+        """
+        if not coupon.attr.coupon_vouchers.vouchers.filter(code=code).exists():
+            raise serializers.ValidationError('Code {} is not associated with this Coupon'.format(code))
+
+    def get_unredeemed_offer_assignments(self, code, email):
+        """
+        Returns offer assignments associated with the code and email
+        :param code: (str): Code associated with the voucher
+        :param email: (str): Learner email
+        :return: QuerySet containing offer assignments associated with the code and email
+        """
+        return OfferAssignment.objects.filter(
+            code=code,
+            user_email=email,
+            status__in=[OFFER_ASSIGNED, OFFER_ASSIGNMENT_EMAIL_PENDING]
+        )
+
+
+class CouponCodeRevokeSerializer(CouponCodeMixin, serializers.Serializer):  # pylint: disable=abstract-method
 
     class Meta:  # pylint: disable=old-style-class
-        list_serializer_class = CouponCodeRevokeBulkSerializer
+        list_serializer_class = CouponCodeRevokeRemindBulkSerializer
 
     code = serializers.CharField(required=True)
     email = serializers.EmailField(required=True)
@@ -1259,19 +1290,84 @@ class CouponCodeRevokeSerializer(serializers.Serializer):  # pylint: disable=abs
         """
         code = data.get('code')
         email = data.get('email')
-
         coupon = self.context.get('coupon')
-        if not coupon.attr.coupon_vouchers.vouchers.filter(code=code).exists():
-            raise serializers.ValidationError('Code {} is not associated with this Coupon'.format(code))
-
-        offer_assignments = OfferAssignment.objects.filter(
-            code=code,
-            user_email=email,
-            status__in=[OFFER_ASSIGNED, OFFER_ASSIGNMENT_EMAIL_PENDING]
-        )
-
+        self.validate_coupon_has_code(coupon, code)
+        offer_assignments = self.get_unredeemed_offer_assignments(code, email)
         if not offer_assignments.exists():
             raise serializers.ValidationError('No assignments exist for user {} and code {}'.format(email, code))
-
         data['offer_assignments'] = offer_assignments
         return data
+
+
+class CouponCodeRemindSerializer(CouponCodeMixin, serializers.Serializer):  # pylint: disable=abstract-method
+
+    class Meta:  # pylint: disable=old-style-class
+        list_serializer_class = CouponCodeRevokeRemindBulkSerializer
+
+    code = serializers.CharField(required=True)
+    email = serializers.EmailField(required=True)
+    detail = serializers.CharField(read_only=True)
+
+    def create(self, validated_data):
+        """
+        Send remind email(s) for pending OfferAssignments.
+        """
+        offer_assignments = validated_data.get('offer_assignments')
+        email = validated_data.get('email')
+        code = validated_data.get('code')
+        redeemed_offer_count = validated_data.get('redeemed_offer_count')
+        total_offer_count = validated_data.get('total_offer_count')
+        template = self.context.get('template')
+        detail = 'success'
+
+        try:
+            self._trigger_email_sending_task(
+                template,
+                offer_assignments.first(),
+                redeemed_offer_count,
+                total_offer_count
+            )
+        except Exception as exc:  # pylint: disable=broad-except
+            logger.exception('Encountered error during reminder email for code %s of user %s', code, email)
+            detail = unicode(exc)
+
+        validated_data['detail'] = detail
+        return validated_data
+
+    def validate(self, data):
+        """
+        Validate that the code is part of the Coupon the code and email provided have an active OfferAssignment.
+        """
+        code = data.get('code')
+        email = data.get('email')
+        coupon = self.context.get('coupon')
+        self.validate_coupon_has_code(coupon, code)
+        offer_assignments = self.get_unredeemed_offer_assignments(code, email)
+        offer_assignments_redeemed = OfferAssignment.objects.filter(
+            code=code,
+            user_email=email,
+            status=OFFER_REDEEMED
+        )
+        if not offer_assignments.exists():
+            raise serializers.ValidationError('No assignments exist for user {} and code {}'.format(email, code))
+        data['offer_assignments'] = offer_assignments
+        data['redeemed_offer_count'] = offer_assignments_redeemed.count()
+        data['total_offer_count'] = offer_assignments.count()
+        return data
+
+    def _trigger_email_sending_task(self, template, assigned_offer, redeemed_offer_count, total_offer_count):
+        """
+        Schedule async task to send email to the learner who has been assigned the code.
+        """
+        url = get_ecommerce_url('/coupons/offer/')
+        enrollment_url = '{url}?code={code}'.format(url=url, code=assigned_offer.code)
+        code_expiration_date = assigned_offer.created + timedelta(days=365)
+        send_assigned_offer_reminder_email(
+            template=template,
+            learner_email=assigned_offer.user_email,
+            code=assigned_offer.code,
+            enrollment_url=enrollment_url,
+            redeemed_offer_count=redeemed_offer_count,
+            total_offer_count=total_offer_count,
+            code_expiration_date=code_expiration_date.strftime('%d %B,%Y')
+        )
