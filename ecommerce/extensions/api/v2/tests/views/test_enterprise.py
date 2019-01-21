@@ -1054,3 +1054,136 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
         assert mock_send_email.call_count == 1
         for offer_assignment in OfferAssignment.objects.filter(user_email=offer_assignment.user_email):
             assert offer_assignment.status == OFFER_ASSIGNMENT_REVOKED
+
+    @ddt.data(
+        (Voucher.SINGLE_USE, 2, None),
+        (Voucher.MULTI_USE_PER_CUSTOMER, 2, 3),
+        (Voucher.MULTI_USE, 1, None),
+        (Voucher.ONCE_PER_CUSTOMER, 2, 2),
+    )
+    @ddt.unpack
+    def test_coupon_codes_remind_success(self, voucher_type, quantity, max_uses):
+        """Test sending reminder emails for codes."""
+        Switch.objects.update_or_create(name=ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, defaults={'active': True})
+
+        email = 'test1@example.com'
+        coupon_post_data = dict(self.data, voucher_type=voucher_type, quantity=quantity, max_uses=max_uses)
+        coupon = self.get_response('POST', ENTERPRISE_COUPONS_LINK, coupon_post_data)
+        coupon = coupon.json()
+        coupon_id = coupon['coupon_id']
+        with mock.patch('ecommerce.extensions.offer.utils.send_offer_assignment_email.delay'):
+            self.get_response(
+                'POST',
+                '/api/v2/enterprise/coupons/{}/assign/'.format(coupon_id),
+                {'template': 'Test template', 'emails': [email]}
+            )
+        offer_assignment = OfferAssignment.objects.filter(user_email=email).first()
+        payload = {'assignments': [{'email': email, 'code': offer_assignment.code}]}
+        payload['template'] = 'Test template'
+        with mock.patch('ecommerce.extensions.offer.utils.send_offer_update_email.delay') as mock_send_email:
+            response = self.get_response(
+                'POST',
+                '/api/v2/enterprise/coupons/{}/remind/'.format(coupon_id),
+                payload
+            )
+        response = response.json()
+        assert response == [{'code': offer_assignment.code, 'email': email, 'detail': 'success'}]
+        assert mock_send_email.call_count == 1
+
+    def test_coupon_codes_remind_code_not_in_coupon(self):
+        """Test that remind fails when the specified code is not associated with the Coupon."""
+        Switch.objects.update_or_create(name=ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, defaults={'active': True})
+        email = 'test1@example.com'
+        coupon_post_data = dict(self.data, voucher_type=Voucher.SINGLE_USE, quantity=1)
+        coupon = self.get_response('POST', ENTERPRISE_COUPONS_LINK, coupon_post_data)
+        coupon = coupon.json()
+        coupon_id = coupon['coupon_id']
+        response = self.get_response(
+            'POST',
+            '/api/v2/enterprise/coupons/{}/remind/'.format(coupon_id),
+            {'template': 'Test template', 'assignments': [{'email': email, 'code': 'RANDOMCODE'}]}
+        )
+        response = response.json()
+        assert response == [
+            {'non_field_errors': ['Code RANDOMCODE is not associated with this Coupon']}
+        ]
+
+    def test_coupon_codes_remind_no_assignment_exists(self):
+        """Test that remind fails when the user has no existing assignments for the code."""
+        Switch.objects.update_or_create(name=ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, defaults={'active': True})
+        email = 'test1@example.com'
+        coupon_post_data = dict(self.data, voucher_type=Voucher.SINGLE_USE, quantity=1)
+        coupon = self.get_response('POST', ENTERPRISE_COUPONS_LINK, coupon_post_data)
+        coupon = coupon.json()
+        coupon_id = coupon['coupon_id']
+        voucher = Product.objects.get(id=coupon_id).attr.coupon_vouchers.vouchers.first()
+        response = self.get_response(
+            'POST',
+            '/api/v2/enterprise/coupons/{}/remind/'.format(coupon_id),
+            {'template': 'Test template', 'assignments': [{'email': email, 'code': voucher.code}]}
+        )
+        response = response.json()
+        assert response == [
+            {'non_field_errors': ['No assignments exist for user {} and code {}'.format(email, voucher.code)]}
+        ]
+
+    def test_coupon_codes_remind_email_failure(self):
+        """Test sending a reminder for a code with an email failure."""
+        Switch.objects.update_or_create(name=ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, defaults={'active': True})
+
+        email = 'test1@example.com'
+        coupon_post_data = dict(self.data, voucher_type=Voucher.SINGLE_USE, quantity=1)
+        coupon = self.get_response('POST', ENTERPRISE_COUPONS_LINK, coupon_post_data)
+        coupon = coupon.json()
+        coupon_id = coupon['coupon_id']
+        with mock.patch('ecommerce.extensions.offer.utils.send_offer_assignment_email.delay'):
+            self.get_response(
+                'POST',
+                '/api/v2/enterprise/coupons/{}/assign/'.format(coupon_id),
+                {'template': 'Test template', 'emails': [email]}
+            )
+        offer_assignment = OfferAssignment.objects.filter(user_email=email).first()
+        with mock.patch(
+            'ecommerce.extensions.offer.utils.send_offer_update_email.delay',
+            side_effect=Exception('email_dispatch_failed')
+        ) as mock_send_email:
+            response = self.get_response(
+                'POST',
+                '/api/v2/enterprise/coupons/{}/remind/'.format(coupon_id),
+                {'template': 'Test template', 'assignments': [{'email': email, 'code': offer_assignment.code}]}
+            )
+        response = response.json()
+        assert response == [{'email': email, 'code': offer_assignment.code, 'detail': 'email_dispatch_failed'}]
+        assert mock_send_email.call_count == 1
+
+    def test_coupon_codes_remind_bulk(self):
+        """Test sending multiple remind requests (bulk use case)."""
+        Switch.objects.update_or_create(name=ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, defaults={'active': True})
+
+        emails = ['test1@example.com', 'test2@example.com']
+        coupon_post_data = dict(self.data, voucher_type=Voucher.SINGLE_USE, quantity=2)
+        coupon = self.get_response('POST', ENTERPRISE_COUPONS_LINK, coupon_post_data)
+        coupon = coupon.json()
+        coupon_id = coupon['coupon_id']
+        with mock.patch('ecommerce.extensions.offer.utils.send_offer_update_email.delay'):
+            self.get_response(
+                'POST',
+                '/api/v2/enterprise/coupons/{}/assign/'.format(coupon_id),
+                {'template': 'Test template', 'emails': emails}
+            )
+        offer_assignment = OfferAssignment.objects.filter(user_email__in=emails).first()
+        with mock.patch('ecommerce.extensions.offer.utils.send_offer_update_email.delay') as mock_send_email:
+            response = self.get_response(
+                'POST',
+                '/api/v2/enterprise/coupons/{}/remind/'.format(coupon_id),
+                {'template': 'Test template', 'assignments': [
+                    {'email': offer_assignment.user_email, 'code': offer_assignment.code},
+                    {'email': 'test3@example.com', 'code': 'RANDOMCODE'},
+                ]}
+            )
+        response = response.json()
+        assert response == [
+            {'email': offer_assignment.user_email, 'code': offer_assignment.code, 'detail': 'success'},
+            {'non_field_errors': ['Code RANDOMCODE is not associated with this Coupon']},
+        ]
+        assert mock_send_email.call_count == 1
