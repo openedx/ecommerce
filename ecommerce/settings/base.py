@@ -652,6 +652,22 @@ OFFER_ASSIGNMENT_EMAIL_DEFAULT_TEMPLATE = '''
 OFFER_ASSIGNMENT_EMAIL_DEFAULT_SUBJECT = 'New edX course assignment'
 OFFER_REVOKE_EMAIL_DEFAULT_SUBJECT = 'edX Course Assignment Revoked'
 
+OFFER_ASSIGNMENT_EMAIL_REMINDER_DEFAULT_TEMPLATE = '''
+    This is a reminder email that your learning manager has provided you with a access code to take a course at edX.
+    You have redeemed this code {REDEEMED_OFFER_COUNT} of times out of {TOTAL_OFFER_COUNT} number of available course redemptions.
+    
+    edX login: {USER_EMAIL}
+    Enrollment url: {ENROLLMENT_URL}
+    Access Code: {CODE}
+    Expiration date: {EXPIRATION_DATE}
+
+    You may go directly to the Enrollment URL to view courses that are available for this code
+    or you can insert the access code at check out under "coupon code" for applicable courses.
+
+    For any questions, please reach out to your Learning Manager.
+'''
+OFFER_ASSIGNMENT_EMAIL_REMINDER_DEFAULT_SUBJECT = 'Reminder on edX course assignment'
+
 #SAILTHRU settings
 SAILTHRU_KEY = None
 SAILTHRU_SECRET = None
