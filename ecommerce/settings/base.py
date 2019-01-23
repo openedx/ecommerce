@@ -419,6 +419,9 @@ JWT_AUTH = {
 # Service user for worker processes.
 ECOMMERCE_SERVICE_WORKER_USERNAME = 'ecommerce_worker'
 
+# Worker user used by prospectus to query ecommerce
+PROSPECTUS_WORKER_USERNAME = 'prospectus_worker'
+
 # Used to access the Enrollment API. Set this to the same value used by the LMS.
 EDX_API_KEY = None
 
