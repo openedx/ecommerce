@@ -75,6 +75,11 @@ urlpatterns += [
     url(r'^robots\.txt$', robots, name='robots')
 ]
 
+# edx-drf-extensions csrf app
+urlpatterns += [
+    url(r'', include('csrf.urls')),
+]
+
 if settings.DEBUG and settings.MEDIA_ROOT:  # pragma: no cover
     urlpatterns += static(
         settings.MEDIA_URL,
