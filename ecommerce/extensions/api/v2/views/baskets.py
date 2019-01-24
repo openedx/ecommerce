@@ -358,6 +358,7 @@ class BasketDestroyView(generics.DestroyAPIView):
 
 class BasketCalculateView(generics.GenericAPIView):
     permission_classes = (IsAuthenticated,)
+    throttle_classes = (ServiceUserThrottle,)
     MARKETING_USER = 'marketing_site_worker'
 
     def _calculate_temporary_basket_atomic(self, user, request, products, voucher, skus, code):
