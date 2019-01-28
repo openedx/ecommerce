@@ -15,6 +15,7 @@ from django.utils.translation import ugettext_lazy as _
 from oscar.core.loading import get_class, get_model
 from rest_framework import serializers
 from rest_framework.reverse import reverse
+from rest_framework.settings import api_settings
 
 from ecommerce.core.constants import (
     COURSE_ENTITLEMENT_PRODUCT_CLASS_NAME,
@@ -25,8 +26,13 @@ from ecommerce.core.constants import (
 from ecommerce.core.url_utils import get_ecommerce_url
 from ecommerce.courses.models import Course
 from ecommerce.entitlements.utils import create_or_update_course_entitlement
-from ecommerce.extensions.offer.constants import OFFER_ASSIGNMENT_REVOKED, OFFER_MAX_USES_DEFAULT
-from ecommerce.extensions.offer.utils import send_assigned_offer_email
+from ecommerce.extensions.offer.constants import (
+    OFFER_ASSIGNED,
+    OFFER_ASSIGNMENT_EMAIL_PENDING,
+    OFFER_ASSIGNMENT_REVOKED,
+    OFFER_MAX_USES_DEFAULT
+)
+from ecommerce.extensions.offer.utils import send_assigned_offer_email, send_revoked_offer_email
 from ecommerce.invoice.models import Invoice
 
 logger = logging.getLogger(__name__)
@@ -1158,3 +1164,114 @@ class CouponCodeAssignmentSerializer(serializers.Serializer):  # pylint: disable
         except Exception as exc:  # pylint: disable=broad-except
             logger.exception(
                 '[Offer Assignment] Email for offer_assignment_id: %d raised exception: %r', assigned_offer.id, exc)
+
+
+class CouponCodeRevokeBulkSerializer(serializers.ListSerializer):  # pylint: disable=abstract-method
+
+    def to_internal_value(self, data):
+        """
+        This implements the same relevant logic as ListSerializer except that if one or more items fail validation,
+        processing for other items that did not fail will continue.
+        """
+
+        if not isinstance(data, list):
+            message = self.error_messages['not_a_list'].format(
+                input_type=type(data).__name__
+            )
+            raise serializers.ValidationError({
+                api_settings.NON_FIELD_ERRORS_KEY: [message]
+            })
+
+        ret = []
+
+        for item in data:
+            try:
+                validated = self.child.run_validation(item)
+            except serializers.ValidationError as exc:
+                ret.append(exc.detail)
+            else:
+                ret.append(validated)
+
+        return ret
+
+    def create(self, validated_data):
+        """
+        This selectively calls the child create method based on whether or not validation failed for each payload.
+        """
+        ret = []
+        for attrs in validated_data:
+            if 'non_field_errors' not in attrs and not any(isinstance(attrs[field], list) for field in attrs):
+                ret.append(self.child.create(attrs))
+            else:
+                ret.append(attrs)
+
+        return ret
+
+    def to_representation(self, data):
+        """
+        This selectively calls to_representation on each result that was processed by create.
+        """
+        return [
+            self.child.to_representation(item) if 'detail' in item else item for item in data
+        ]
+
+
+class CouponCodeRevokeSerializer(serializers.Serializer):  # pylint: disable=abstract-method
+
+    class Meta:  # pylint: disable=old-style-class
+        list_serializer_class = CouponCodeRevokeBulkSerializer
+
+    code = serializers.CharField(required=True)
+    email = serializers.EmailField(required=True)
+    detail = serializers.CharField(read_only=True)
+
+    def create(self, validated_data):
+        """
+        Update OfferAssignments to have Revoked status.
+        """
+        offer_assignments = validated_data.get('offer_assignments')
+        email = validated_data.get('email')
+        code = validated_data.get('code')
+        template = self.context.get('template')
+        detail = 'success'
+
+        try:
+            for offer_assignment in offer_assignments:
+                offer_assignment.status = OFFER_ASSIGNMENT_REVOKED
+                offer_assignment.save()
+
+            if template:
+                send_revoked_offer_email(
+                    template=template,
+                    learner_email=email,
+                    code=code
+                )
+        except Exception as exc:  # pylint: disable=broad-except
+            logger.exception('Encountered error when revoking code %s for user %s', code, email)
+            detail = unicode(exc)
+
+        validated_data['detail'] = detail
+        return validated_data
+
+    def validate(self, data):
+        """
+        Validate that the code is part of the Coupon and the provided code and email have an active OfferAssignment.
+        """
+        code = data.get('code')
+        email = data.get('email')
+
+        coupon = self.context.get('coupon')
+        if not coupon.attr.coupon_vouchers.vouchers.filter(code=code).exists():
+            raise serializers.ValidationError('Code {} is not associated with this Coupon'.format(code))
+
+        offer_assignments = OfferAssignment.objects.filter(
+            code=code,
+            user_email=email,
+            status__in=[OFFER_ASSIGNED, OFFER_ASSIGNMENT_EMAIL_PENDING]
+        )
+
+        if not offer_assignments.exists():
+            raise serializers.ValidationError('No assignments exist for user {} and code {}'.format(email, code))
+
+        data['offer_assignments'] = offer_assignments
+        return data

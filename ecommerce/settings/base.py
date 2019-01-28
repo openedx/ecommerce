@@ -290,6 +290,8 @@ DJANGO_APPS = [
     'social_django',
     'rest_framework_swagger',
     'django_sites_extensions',
+    # edx-drf-extensions
+    'csrf.apps.CsrfAppConfig',  # Enables frontend apps to retrieve CSRF tokens.
 ]
 
 # Apps specific to this project go here.
@@ -418,6 +420,9 @@ JWT_AUTH = {
 
 # Service user for worker processes.
 ECOMMERCE_SERVICE_WORKER_USERNAME = 'ecommerce_worker'
+
+# Worker user used by prospectus to query ecommerce
+PROSPECTUS_WORKER_USERNAME = 'prospectus_worker'
 
 # Used to access the Enrollment API. Set this to the same value used by the LMS.
 EDX_API_KEY = None
@@ -645,6 +650,7 @@ OFFER_ASSIGNMENT_EMAIL_DEFAULT_TEMPLATE = '''
     For any questions, please reach out to your Learning Manager.
 '''
 OFFER_ASSIGNMENT_EMAIL_DEFAULT_SUBJECT = 'New edX course assignment'
+OFFER_REVOKE_EMAIL_DEFAULT_SUBJECT = 'edX Course Assignment Revoked'
 
 #SAILTHRU settings
 SAILTHRU_KEY = None

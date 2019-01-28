@@ -390,7 +390,7 @@ class BasketDestroyViewTests(TestCase):
         self.assertFalse(Basket.objects.filter(id=self.basket.id).exists())
 
 
-class BasketCalculateViewTests(ProgramTestMixin, TestCase):
+class BasketCalculateViewTests(ProgramTestMixin, ThrottlingMixin, TestCase):
     def setUp(self):
         super(BasketCalculateViewTests, self).setUp()
         self.products = ProductFactory.create_batch(3, stockrecords__partner=self.partner, categories=[])
