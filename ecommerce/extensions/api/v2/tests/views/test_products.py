@@ -2,15 +2,18 @@ from __future__ import unicode_literals
 
 import datetime
 import json
+import uuid
 
+import ddt
 import pytz
 from django.test import RequestFactory
 from django.urls import reverse
 from oscar.core.loading import get_model
 
-from ecommerce.core.constants import COUPON_PRODUCT_CLASS_NAME
+from ecommerce.core.constants import COUPON_PRODUCT_CLASS_NAME, COURSE_ENTITLEMENT_PRODUCT_CLASS_NAME
 from ecommerce.coupons.tests.mixins import CouponMixin
 from ecommerce.courses.tests.factories import CourseFactory
+from ecommerce.entitlements.utils import get_entitlement
 from ecommerce.extensions.api.serializers import ProductSerializer
 from ecommerce.extensions.api.v2.tests.views import JSON_CONTENT_TYPE, ProductSerializerMixin
 from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
@@ -133,6 +136,115 @@ class ProductViewSetTests(ProductViewSetBase):
             'results': []
         }
         self.assertDictEqual(json.loads(response.content), expected)
+
+
+@ddt.ddt
+class ProductViewSetCourseEntitlementTests(ProductViewSetBase):
+    def setUp(self):
+        self.entitlement_data = {
+            'product_class': COURSE_ENTITLEMENT_PRODUCT_CLASS_NAME,
+            'title': 'Test Course',
+            'price': 50,
+            'certificate_type': 'verified',
+            'uuid': str(uuid.uuid4()),
+        }
+        super(ProductViewSetCourseEntitlementTests, self).setUp()
+
+    def test_entitlement_post(self):
+        """ Verify the view allows individual Course Entitlement products to be made via post"""
+        self.assertEqual(Product.objects.count(), 2)
+        response = self.client.post('/api/v2/products/', json.dumps(self.entitlement_data), JSON_CONTENT_TYPE)
+        self.assertEqual(response.status_code, 201)
+        # count goes up by 2 because it also creates the parent entitlement
+        self.assertEqual(Product.objects.count(), 4)
+
+    def test_entitlement_post_bad_request(self):
+        """
+        Verify the view returns a 400 status code with a message when not all fields
+        are provided for Course Entitlement products attempting to be made via post
+        """
+        del self.entitlement_data['price']
+        del self.entitlement_data['title']
+        response = self.client.post('/api/v2/products/', json.dumps(self.entitlement_data), JSON_CONTENT_TYPE)
+        error_message = 'Missing or bad value for: [price]. Missing or bad value for: [title].'
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.data, error_message)
+
+    def test_non_entitlement_post(self):
+        """ Verify the view does not allow anything but Course Entitlement products to be made via post"""
+        self.entitlement_data['product_class'] = 'Seat'
+        response = self.client.post('/api/v2/products/', json.dumps(self.entitlement_data), JSON_CONTENT_TYPE)
+        error_message = 'Product API only supports POST for Course Entitlement products.'
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.data, error_message)
+
+    @ddt.data(
+        {'title': 'Updated Test Course', 'price': 100},
+        {'price': 100},
+        {'title': 'Patched Test Course'},
+    )
+    def test_entitlement_patch(self, update_data):
+        """ Verify the view allows individual Course Entitlement products to be updated via patch"""
+        self.assertEqual(Product.objects.count(), 2)
+        response = self.client.post('/api/v2/products/', json.dumps(self.entitlement_data), JSON_CONTENT_TYPE)
+        # count goes up by 2 because it also creates the parent entitlement
+        self.assertEqual(Product.objects.count(), 4)
+
+        entitlement = get_entitlement(self.entitlement_data['uuid'], self.entitlement_data['certificate_type'])
+        self.assertEqual('Course ' + self.entitlement_data['title'], entitlement.title)
+
+        patch_data = {
+            'product_class': COURSE_ENTITLEMENT_PRODUCT_CLASS_NAME,
+            'uuid': self.entitlement_data['uuid'],
+            'certificate_type': 'verified',
+        }
+        patch_data.update(update_data)
+        url = reverse('api:v2:product-detail', kwargs={'pk': entitlement.id})
+        response = self.client.patch(url, json.dumps(patch_data), JSON_CONTENT_TYPE)
+
+        self.assertEqual(response.status_code, 200)
+        # Assert that new no products are created during a patch
+        self.assertEqual(Product.objects.count(), 4)
+        entitlement = get_entitlement(self.entitlement_data['uuid'], self.entitlement_data['certificate_type'])
+        if 'title' in patch_data:
+            self.assertEqual('Course ' + patch_data['title'], entitlement.title)
+        if 'price' in patch_data:
+            self.assertEqual(patch_data['price'], entitlement.stockrecords.first().price_excl_tax)
+
+    def test_entitlement_patch_bad_request(self):
+        """
+        Verify the view returns a 400 status code with a message when not all fields
+        are provided for Course Entitlement products attempting to be made via patch
+        """
+        response = self.client.post('/api/v2/products/', json.dumps(self.entitlement_data), JSON_CONTENT_TYPE)
+        entitlement = get_entitlement(self.entitlement_data['uuid'], self.entitlement_data['certificate_type'])
+
+        del self.entitlement_data['uuid']
+        del self.entitlement_data['certificate_type']
+        url = reverse('api:v2:product-detail', kwargs={'pk': entitlement.id})
+        response = self.client.patch(url, json.dumps(self.entitlement_data), JSON_CONTENT_TYPE)
+
+        error_message = 'Missing or bad value for: [certificate_type]. Missing or bad value for: [uuid].'
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.data, error_message)
+
+    def test_entitlement_put_fails(self):
+        """ Verify the view does not allow Course Entitlement products to be updated via put """
+        response = self.client.post('/api/v2/products/', json.dumps(self.entitlement_data), JSON_CONTENT_TYPE)
+        entitlement = get_entitlement(self.entitlement_data['uuid'], self.entitlement_data['certificate_type'])
+
+        put_data = {
+            'product_class': COURSE_ENTITLEMENT_PRODUCT_CLASS_NAME,
+            'title': 'Updated Test Course',
+            'price': 77,
+            'certificate_type': 'verified',
+            'uuid': self.entitlement_data['uuid'],
+        }
+        url = reverse('api:v2:product-detail', kwargs={'pk': entitlement.id})
+        response = self.client.put(url, json.dumps(put_data), JSON_CONTENT_TYPE)
+        self.assertEqual(response.status_code, 400)
+        error_message = 'Product API only supports POST and PATCH for Course Entitlement products.'
+        self.assertEqual(response.data, error_message)
 
 
 class ProductViewSetCouponTests(CouponMixin, ProductViewSetBase):
