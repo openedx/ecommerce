@@ -13,5 +13,5 @@ OFFER_MAX_USES_DEFAULT = 10000
 # Coupon code filters
 VOUCHER_UNASSIGNED = 'unassigned'
 VOUCHER_UNREDEEMED = 'unredeemed'
-VOUCHER_PARTIAL_REDEEMED = 'partial-redeemed'
+VOUCHER_PARTIAL_REDEEMED = 'partially-redeemed'
 VOUCHER_REDEEMED = 'redeemed'

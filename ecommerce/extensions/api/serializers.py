@@ -703,7 +703,7 @@ class CouponVoucherSerializer(serializers.Serializer):  # pylint: disable=abstra
 
         return {
             'used': redemption_count + num_offerassignments,
-            'available': voucher.slots_available_for_assignment,
+            'available': max_coupon_usage,
         }
 
 
