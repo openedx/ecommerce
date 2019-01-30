@@ -723,6 +723,7 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             'redeem_slice': slice(0, 1),    # All assignments redeemed.
             'expected_results_count': 2
         },
+        # FIXME: response result 10.
         # MULTI_USE - 1 assignment, 1 other redemption, hence 1 slot available.
         {
             'code_filter': VOUCHER_UNASSIGNED,
