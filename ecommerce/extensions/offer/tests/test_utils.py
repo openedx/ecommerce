@@ -11,7 +11,8 @@ from ecommerce.extensions.checkout.utils import add_currency
 from ecommerce.extensions.offer.utils import (
     _remove_exponent_and_trailing_zeros,
     format_benefit_value,
-    send_assigned_offer_email
+    send_assigned_offer_email,
+    send_assigned_offer_reminder_email
 )
 from ecommerce.extensions.test.factories import *  # pylint:disable=wildcard-import,unused-wildcard-import
 from ecommerce.tests.testcases import TestCase
@@ -113,3 +114,53 @@ class UtilTests(DiscoveryTestMixin, TestCase):
             tokens.get('learner_email'),
             tokens.get('offer_assignment_id'),
             email_subject, expected_email_body)
+
+    @mock.patch('ecommerce.extensions.offer.utils.send_offer_update_email')
+    @ddt.data(
+        (
+            {
+                'learner_email': 'johndoe@unknown.com',
+                'code': 'GIL7RUEOU7VHBH7Q',
+                'enrollment_url': 'http://tempurl.url/enroll',
+                'redeemed_offer_count': 0,
+                'total_offer_count': 1,
+                'code_expiration_date': '2018-12-19'
+            },
+            None,
+        ),
+    )
+    @ddt.unpack
+    def test_send_assigned_offer_reminder_email(
+            self,
+            tokens,
+            side_effect,
+            mock_sailthru_task,
+    ):
+        """ Test that the offer assignment reminder email message is correctly formatted
+         with correct call to the async task in ecommerce-worker.
+        """
+        email_subject = settings.OFFER_ASSIGNMENT_EMAIL_REMINDER_DEFAULT_SUBJECT
+        mock_sailthru_task.delay.side_effect = side_effect
+        template = settings.OFFER_ASSIGNMENT_EMAIL_REMINDER_DEFAULT_TEMPLATE
+        send_assigned_offer_reminder_email(
+            template,
+            tokens.get('learner_email'),
+            tokens.get('code'),
+            tokens.get('enrollment_url'),
+            tokens.get('redeemed_offer_count'),
+            tokens.get('total_offer_count'),
+            tokens.get('code_expiration_date'),
+        )
+        expected_email_body = template.format(
+            REDEEMED_OFFER_COUNT=tokens.get('redeemed_offer_count'),
+            TOTAL_OFFER_COUNT=tokens.get('total_offer_count'),
+            USER_EMAIL=tokens.get('learner_email'),
+            ENROLLMENT_URL=tokens.get('enrollment_url'),
+            CODE=tokens.get('code'),
+            EXPIRATION_DATE=tokens.get('code_expiration_date')
+        )
+        mock_sailthru_task.delay.assert_called_once_with(
+            tokens.get('learner_email'),
+            email_subject,
+            expected_email_body
+        )
