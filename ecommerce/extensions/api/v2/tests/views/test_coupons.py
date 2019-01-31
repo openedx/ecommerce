@@ -529,6 +529,44 @@ class CouponViewSetFunctionalTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
         new_coupon = Product.objects.get(id=self.coupon.id)
         self._check_enterprise_fields(new_coupon, enterprise_customer_id, enterprise_catalog_id, enterprise_name)
 
+    def test_update_enterprise_offers_switch_off_duplicate_condition(self):
+        """Test updating a coupon with enterprise data when a duplicate condition exists."""
+        Switch.objects.update_or_create(name=ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, defaults={'active': False})
+        enterprise_customer_id = str(uuid4()).decode('utf-8')
+        enterprise_catalog_id = str(uuid4()).decode('utf-8')
+        enterprise_name = 'test enterprise'
+        response_data = self._create_enterprise_coupon(enterprise_customer_id, enterprise_catalog_id, enterprise_name)
+        self.assertEqual(response_data.status_code, status.HTTP_200_OK)
+
+        # Create duplicate Condition
+        coupon = Product.objects.get(title=self.data['title'])
+        voucher = coupon.attr.coupon_vouchers.vouchers.first()
+        condition = voucher.enterprise_offer.condition
+        Condition.objects.create(
+            proxy_class=condition.proxy_class,
+            enterprise_customer_uuid=condition.enterprise_customer_uuid,
+            enterprise_customer_name=condition.enterprise_customer_name,
+            enterprise_customer_catalog_uuid=condition.enterprise_customer_catalog_uuid,
+            type=condition.type,
+            value=condition.value,
+        )
+
+        response_data = self.get_response_json(
+            'PUT',
+            reverse('api:v2:coupons-detail', kwargs={'pk': self.coupon.id}),
+            data={
+                'catalog_query': 'key:*',
+                'course_catalog': None,
+                'course_seat_types': ['verified'],
+                'enterprise_customer': {'name': enterprise_name, 'id': enterprise_customer_id},
+                'enterprise_customer_catalog': enterprise_catalog_id,
+            }
+        )
+        self.assertEqual(response_data['id'], self.coupon.id)
+        self.assertEqual(response_data['enterprise_customer'], enterprise_customer_id)
+        new_coupon = Product.objects.get(id=self.coupon.id)
+        self._check_enterprise_fields(new_coupon, enterprise_customer_id, enterprise_catalog_id, enterprise_name)
+
     def test_create_enterprise_offers_switch_on(self):
         """Test creating an enterprise coupon with the enterprise offers switch on."""
         Switch.objects.update_or_create(name=ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, defaults={'active': True})
@@ -555,7 +593,7 @@ class CouponViewSetFunctionalTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
         self._check_enterprise_fields(new_coupon, enterprise_customer_id, enterprise_catalog_id, 'test enterprise')
 
     def test_update_enterprise_offers_enterprise_coupon_switch_on(self):
-        """Test updating an enterrprise coupon with the enterprise offers switch on."""
+        """Test updating an enterprise coupon with the enterprise offers switch on."""
         Switch.objects.update_or_create(name=ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, defaults={'active': False})
         enterprise_customer_id = str(uuid4()).decode('utf-8')
         enterprise_catalog_id = str(uuid4()).decode('utf-8')

@@ -449,14 +449,21 @@ def get_or_create_enterprise_offer(
     enterprise_customer_object = get_enterprise_customer(site, enterprise_customer) if site else {}
     enterprise_customer_name = enterprise_customer_object.get('name', '')
 
-    condition, __ = Condition.objects.get_or_create(
-        proxy_class=class_path(AssignableEnterpriseCustomerCondition),
-        enterprise_customer_uuid=enterprise_customer,
-        enterprise_customer_name=enterprise_customer_name,
-        enterprise_customer_catalog_uuid=enterprise_customer_catalog,
-        type=Condition.COUNT,
-        value=1,
-    )
+    condition_kwargs = {
+        'proxy_class': class_path(AssignableEnterpriseCustomerCondition),
+        'enterprise_customer_uuid': enterprise_customer,
+        'enterprise_customer_name': enterprise_customer_name,
+        'enterprise_customer_catalog_uuid': enterprise_customer_catalog,
+        'type': Condition.COUNT,
+        'value': 1,
+    }
+
+    # Because there is a chance of duplicate Conditions, we are checking here for this case.
+    # If duplicates are encountered, then grab the first matching Condition.
+    try:
+        condition, __ = Condition.objects.get_or_create(**condition_kwargs)
+    except Condition.MultipleObjectsReturned:
+        condition = Condition.objects.filter(**condition_kwargs).first()
 
     benefit, _ = Benefit.objects.get_or_create(
         proxy_class=class_path(ENTERPRISE_BENEFIT_MAP[benefit_type]),
