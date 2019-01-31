@@ -744,7 +744,7 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             'redeem_slice': slice(0, 2),    # All assignments redeemed + extra redemptions.
             'expected_results_count': 1
         },
-        # VOUCHER_UNREDEEMED: MULTI_USE - 1 assignment, 3 redemption, hence 3 slots available.
+        # VOUCHER_UNREDEEMED: MULTI_USE
         {
             'code_filter': VOUCHER_UNREDEEMED,
             'voucher_type': Voucher.MULTI_USE,
@@ -754,7 +754,7 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             'redeem_slice': slice(1, 3),    # All assignments redeemed.
             'expected_results_count': 1
         },
-        # VOUCHER_PARTIAL_REDEEMED: SINGLE_USE, no assignment, no redemption, will always give no qs.
+        # VOUCHER_PARTIAL_REDEEMED: SINGLE_USE
         {
             'code_filter': VOUCHER_PARTIAL_REDEEMED,
             'voucher_type': Voucher.SINGLE_USE,
@@ -763,7 +763,6 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             'redeem_slice': slice(0, 0),    # All assignments redeemed.
             'expected_results_count': 0
         },
-        # VOUCHER_PARTIAL_REDEEMED: SINGLE_USE, 1 assignment, 2 redemptions, will always give no qs.
         {
             'code_filter': VOUCHER_PARTIAL_REDEEMED,
             'voucher_type': Voucher.SINGLE_USE,
@@ -772,7 +771,7 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             'redeem_slice': slice(1, 3),    # All assignments redeemed.
             'expected_results_count': 0
         },
-        # VOUCHER_PARTIAL_REDEEMED: MULTI_USE - 1 assignment, 3 redemption, hence 3 slots available.
+        # VOUCHER_PARTIAL_REDEEMED: MULTI_USE
         {
             'code_filter': VOUCHER_PARTIAL_REDEEMED,
             'voucher_type': Voucher.MULTI_USE,
@@ -781,12 +780,68 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             'voucher_redeem_count': 2,
             'assign_slice': slice(0, 1),
             'redeem_slice': slice(1, 3),    # All assignments redeemed.
+            'expected_results_count': 4 # Should this return those voucher applications ?
+        },
+        # FIXME: VOUCHER_REDEEMED: MULTI_USE_PER_CUSTOMER
+        {
+            'code_filter': VOUCHER_PARTIAL_REDEEMED,
+            'voucher_type': Voucher.MULTI_USE_PER_CUSTOMER,
+            'quantity': 3,
+            'max_uses': 10,
+            'voucher_redeem_count': 2,
+            'assign_slice': slice(0, 1),
+            'redeem_slice': slice(1, 3),    # All assignments redeemed.
             'expected_results_count': 2
         },
-        # VOUCHER_REDEEMED: MULTI_USE - 1 assignment, 3 redemption, hence 3 slots available.
+        # VOUCHER_REDEEMED: SINGLE_USE
+        {
+            'code_filter': VOUCHER_REDEEMED,
+            'voucher_type': Voucher.SINGLE_USE,
+            'quantity': 3,
+            'assign_slice': slice(0, 0),
+            'redeem_slice': slice(0, 0),    # All assignments redeemed.
+            'expected_results_count': 0
+        },
+        {
+            'code_filter': VOUCHER_REDEEMED,
+            'voucher_type': Voucher.SINGLE_USE,
+            'quantity': 3,
+            'assign_slice': slice(0, 0),
+            'redeem_slice': slice(0, 3),    # All assignments redeemed.
+            'expected_results_count': 3
+        },
+        {
+            'code_filter': VOUCHER_REDEEMED,
+            'voucher_type': Voucher.SINGLE_USE,
+            'quantity': 3,
+            'assign_slice': slice(0, 1),
+            'redeem_slice': slice(1, 3),    # All assignments redeemed.
+            'expected_results_count': 2
+        },
+        # VOUCHER_REDEEMED: MULTI_USE
         {
             'code_filter': VOUCHER_REDEEMED,
             'voucher_type': Voucher.MULTI_USE,
+            'quantity': 3,
+            'max_uses': 10,
+            'assign_slice': slice(0, 1),
+            'redeem_slice': slice(1, 3),    # All assignments redeemed.
+            'expected_results_count': 20
+        },
+        # VOUCHER_REDEEMED: ONCE_PER_CUSTOMER
+        {
+            'code_filter': VOUCHER_REDEEMED,
+            'voucher_type': Voucher.ONCE_PER_CUSTOMER,
+            'quantity': 3,
+            'max_uses': 10,
+            'assign_slice': slice(0, 1),
+            'redeem_slice': slice(1, 3),    # All assignments redeemed.
+            'expected_results_count': 20
+        },
+        # VOUCHER_REDEEMED: MULTI_USE_PER_CUSTOMER
+        {
+            'code_filter': VOUCHER_REDEEMED,
+            'voucher_type': Voucher.MULTI_USE_PER_CUSTOMER,
             'quantity': 3,
             'max_uses': 10,
             'assign_slice': slice(0, 1),

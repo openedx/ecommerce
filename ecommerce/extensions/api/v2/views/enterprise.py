@@ -240,7 +240,7 @@ class EnterpriseCouponViewSet(CouponViewSet):
         """
         Return vouchers with free slots available.
         """
-        # FIXME: {u'expected_results_count': 1, u'redeem_slice': slice(1, 2, None), u'assign_slice': slice(0, 1, None), u'voucher_type': 'Multi-use', u'code_filter': 'unassigned', u'max_uses': 10, u'quantity': 3}
+        # FIXME: returns 10 {u'expected_results_count': 1, u'redeem_slice': slice(1, 2, None), u'assign_slice': slice(0, 1, None), u'voucher_type': 'Multi-use', u'code_filter': 'unassigned', u'max_uses': 10, u'quantity': 3}
         from django.db.models import Count, IntegerField, OuterRef, Subquery
         from django.db.models.functions import Coalesce
 
@@ -279,7 +279,7 @@ class EnterpriseCouponViewSet(CouponViewSet):
         """
         return coupon_vouchers.filter(applications__isnull=True)
 
-    def get_redeemed_coupon_vouchers(self, coupon_vouchers):
+    def get_expanded_coupon_vouchers(self, coupon_vouchers):
         """
         Return vouchers against each voucher application, so if a
         voucher has two applications than this queryset will give 2 vouchers.
@@ -297,15 +297,13 @@ class EnterpriseCouponViewSet(CouponViewSet):
         # assigned_uredeemed_codes = self.get_assigned_uredeemed_codes()
         # redeemable_vouchers = self.get_redeemable_vouchers(coupon_vouchers)
         # unassigned_unredeemed_vouchers = redeemable_vouchers.exclude(code__in=assigned_uredeemed_codes)
-        # return unassigned_unredeemed_vouchers
 
         # OLD 2
-        # assigned_uredeemed_codes = self.get_assigned_uredeemed_codes()
-        # redeemable_vouchers = self.get_redeemable_vouchers(coupon_vouchers)
-        # unassigned_unredeemed_vouchers = redeemable_vouchers.exclude(code__in=assigned_uredeemed_codes)
-        # return unassigned_unredeemed_vouchers
-        return self.get_vouchers_with_free_slots(coupon_vouchers)
+        # unassigned_unredeemed_vouchers = self.get_redeemable_vouchers(coupon_vouchers)
 
+        # NEW: Ammar
+        unassigned_unredeemed_vouchers =  self.get_vouchers_with_free_slots(coupon_vouchers)
+        return unassigned_unredeemed_vouchers
 
     def get_unredeemed_coupon_vouchers(self, coupon_vouchers):
         """
@@ -324,7 +322,13 @@ class EnterpriseCouponViewSet(CouponViewSet):
         voucher_type = self.get_voucher_type()
         if voucher_type == Voucher.SINGLE_USE:
             return coupon_vouchers.none()
-        return coupon_vouchers.filter(num_orders__gte=1, offers__max_global_applications__gt=F('num_orders'))
+
+        partially_redeemed_vouchers = coupon_vouchers.filter(num_orders__gte=1, offers__max_global_applications__gt=F('num_orders'))
+        # TODO: add test for this.
+        if voucher_type != Voucher.MULTI_USE_PER_CUSTOMER:
+            partially_redeemed_vouchers = self.get_expanded_coupon_vouchers(partially_redeemed_vouchers)
+
+        return partially_redeemed_vouchers
 
     def get_fully_redeemed_coupon_vouchers(self, coupon_vouchers):
         """
@@ -334,7 +338,11 @@ class EnterpriseCouponViewSet(CouponViewSet):
         voucher_type = self.get_voucher_type()
         if voucher_type == Voucher.SINGLE_USE:
             return coupon_vouchers.filter(num_orders=1)
-        return coupon_vouchers.filter(offers__max_global_applications=F('num_orders'))
+
+        redeemed_coupon_vouchers = coupon_vouchers.filter(offers__max_global_applications=F('num_orders'))
+        if voucher_type != Voucher.MULTI_USE_PER_CUSTOMER:
+            redeemed_coupon_vouchers = self.get_expanded_coupon_vouchers(redeemed_coupon_vouchers)
+        return redeemed_coupon_vouchers
 
     @detail_route(url_path='codes')
     def codes(self, request, pk, format=None):  # pylint: disable=unused-argument, redefined-builtin
@@ -375,7 +383,7 @@ class EnterpriseCouponViewSet(CouponViewSet):
         else:
             # Return all vouchers for coupon (unassigned + unredeemed + redeemed).
             # TODO: coupon_vouchers = self.get_unassigned_coupon_vouchers(coupon_vouchers) | self.get_unredeemed_coupon_vouchers(coupon_vouchers) | self.get_fully_redeemed_coupon_vouchers(coupon_vouchers)
-            coupon_vouchers = self.get_redeemed_coupon_vouchers(coupon_vouchers) | self.get_vouchers_with_no_applications(coupon_vouchers)
+            coupon_vouchers = self.get_expanded_coupon_vouchers(coupon_vouchers) | self.get_vouchers_with_no_applications(coupon_vouchers)
 
         if format is None:
             page = self.paginate_queryset(coupon_vouchers)
