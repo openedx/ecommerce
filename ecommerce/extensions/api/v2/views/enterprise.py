@@ -250,7 +250,7 @@ class EnterpriseCouponViewSet(CouponViewSet):
             code=OuterRef('code')
         ).exclude(
             status__in=[OFFER_REDEEMED, OFFER_ASSIGNMENT_REVOKED]
-        ).values('code').annotate(assignment_count=Count('pk', distinct=True)).values('assignment_count')
+        ).order_by().values('code').annotate(assignment_count=Count('pk')).values('assignment_count')
 
         # Coalesce is used so that if there are no assigments than return 0
         offerassignments_subquery = Coalesce(Subquery(offerassignments, output_field=IntegerField()), 0)
@@ -266,6 +266,7 @@ class EnterpriseCouponViewSet(CouponViewSet):
             )
         else:
             qs_may_have_free_slots = coupon_vouchers.filter(offers__max_global_applications__gt=F('num_orders'))
+            # TODO: Add tests for MULTI_USE_PER_CUSTOMER
             vouchers_with_free_slots = qs_may_have_free_slots.annotate(
                 assignment_count=offerassignments_subquery
             ).filter(
