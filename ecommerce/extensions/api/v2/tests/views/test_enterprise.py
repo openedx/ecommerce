@@ -402,7 +402,7 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             total_result_count = len(response['results'])
             all_received_codes = [result['code'] for result in response['results']]
             all_received_code_max_uses = [
-                result['redemptions']['available']
+                result['redemptions']['total']
                 for result in response['results']
             ]
 
@@ -623,7 +623,7 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
         )
 
     @ddt.data(
-        # SINGLE_USE - no assignment, no redemption, all codes un-assigned, all slots are available.
+        # VOUCHER_UNASSIGNED: SINGLE_USE
         {
             'code_filter': VOUCHER_UNASSIGNED,
             'voucher_type': Voucher.SINGLE_USE,
@@ -633,116 +633,156 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             'redeem_slice': slice(0, 0),    # No redeemption.
             'expected_results_count': 3
         },
-        # SINGLE_USE - 3 assignments, no redemption, all codes assigned, no slot available.
         {
             'code_filter': VOUCHER_UNASSIGNED,
             'voucher_type': Voucher.SINGLE_USE,
             'quantity': 3,
             'max_uses': None,
-            'assign_slice': slice(0, 3),    # All assignments - no slot left.
-            'redeem_slice': slice(0, 0),    # No redeemptions.
+            'assign_slice': slice(0, 3),
+            'redeem_slice': slice(0, 0),
             'expected_results_count': 0
         },
-        # SINGLE_USE - no assignment, 3 redemptions, all codes redeemed, hence no slot available.
         {
             'code_filter': VOUCHER_UNASSIGNED,
             'voucher_type': Voucher.SINGLE_USE,
             'quantity': 3,
             'max_uses': None,
-            'assign_slice': slice(0, 0),    # No assignments.
-            'redeem_slice': slice(0, 3),    # All redeemptions - no slot left.
+            'assign_slice': slice(0, 0),
+            'redeem_slice': slice(0, 3),
             'expected_results_count': 0
         },
-        # SINGLE_USE - 1 assignment, 1 other redemption, hence 1 slot available.
         {
             'code_filter': VOUCHER_UNASSIGNED,
             'voucher_type': Voucher.SINGLE_USE,
             'quantity': 3,
             'max_uses': None,
             'assign_slice': slice(0, 1),
-            'redeem_slice': slice(1, 2),    # Assignments not redeemed.
+            'redeem_slice': slice(1, 2),
             'expected_results_count': 1
         },
-        # SINGLE_USE - 1 assignment, 1 assigned redemption, hence 2 slots available.
         {
             'code_filter': VOUCHER_UNASSIGNED,
             'voucher_type': Voucher.SINGLE_USE,
             'quantity': 3,
             'max_uses': None,
             'assign_slice': slice(0, 1),
-            'redeem_slice': slice(0, 1),    # All assignments redeemed.
+            'redeem_slice': slice(0, 1),
             'expected_results_count': 2
         },
-        # SINGLE_USE - 2 assignments, 1 assigned redemption, hence 1 slot available.
         {
             'code_filter': VOUCHER_UNASSIGNED,
             'voucher_type': Voucher.SINGLE_USE,
             'quantity': 3,
             'max_uses': None,
             'assign_slice': slice(0, 2),
-            'redeem_slice': slice(0, 1),    # Some assignments redeemed.
+            'redeem_slice': slice(0, 1),
             'expected_results_count': 1
         },
-        # SINGLE_USE - 1 assignment, 1 assigned + 1 other redemption, hence 1 slot available.
         {
             'code_filter': VOUCHER_UNASSIGNED,
             'voucher_type': Voucher.SINGLE_USE,
             'quantity': 3,
             'max_uses': None,
             'assign_slice': slice(0, 1),
-            'redeem_slice': slice(0, 2),    # All assignments redeemed + other redemptions.
+            'redeem_slice': slice(0, 2),
             'expected_results_count': 1
         },
-        # SINGLE_USE - 2 assignments, 1 other redemption, hence no slot available.
         {
             'code_filter': VOUCHER_UNASSIGNED,
             'voucher_type': Voucher.SINGLE_USE,
             'quantity': 3,
             'max_uses': None,
             'assign_slice': slice(0, 2),
-            'redeem_slice': slice(2, 3),    # No assignment redeemed + other redemption.
-            'expected_results_count': 0 # No slot available for assignment.
+            'redeem_slice': slice(2, 3),
+            'expected_results_count': 0
         },
-        # MULTI_USE - 0 assignment, 0 redemption, hence 3 slots available.
+        # VOUCHER_UNASSIGNED: MULTI_USE
         {
             'code_filter': VOUCHER_UNASSIGNED,
             'voucher_type': Voucher.MULTI_USE,
             'quantity': 3,
             'max_uses': 10,
             'assign_slice': slice(0, 0),
-            'redeem_slice': slice(0, 0),    # All assignments redeemed.
+            'redeem_slice': slice(0, 0),
             'expected_results_count': 3
         },
-        # MULTI_USE - 1 assignment, 1 assigned redemption, hence 2 slots available.
         {
             'code_filter': VOUCHER_UNASSIGNED,
             'voucher_type': Voucher.MULTI_USE,
             'quantity': 3,
             'max_uses': 10,
             'assign_slice': slice(0, 1),
-            'redeem_slice': slice(0, 1),    # All assignments redeemed.
+            'redeem_slice': slice(0, 1),
             'expected_results_count': 2
         },
-        # FIXME: response result 10.
-        # MULTI_USE - 1 assignment, 1 other redemption, hence 1 slot available.
         {
             'code_filter': VOUCHER_UNASSIGNED,
             'voucher_type': Voucher.MULTI_USE,
             'quantity': 3,
             'max_uses': 10,
             'assign_slice': slice(0, 1),
-            'redeem_slice': slice(1, 2), # No assignments redeemed.
+            'redeem_slice': slice(1, 2),
             'expected_results_count': 1
         },
-        # MULTI_USE - 1 assignment, 1 assigned + 1 other redemption, hence 1 slot available.
         {
             'code_filter': VOUCHER_UNASSIGNED,
             'voucher_type': Voucher.MULTI_USE,
             'quantity': 3,
             'max_uses': 10,
             'assign_slice': slice(0, 1),
-            'redeem_slice': slice(0, 2),    # All assignments redeemed + extra redemptions.
+            'redeem_slice': slice(0, 2),
             'expected_results_count': 1
+        },
+        # VOUCHER_UNASSIGNED: ONCE_PER_CUSTOMER
+        # FIXME: result count is 1 instead of zero.
+        # {
+        #     'code_filter': VOUCHER_UNASSIGNED,
+        #     'voucher_type': Voucher.ONCE_PER_CUSTOMER,
+        #     'quantity': 3,
+        #     'max_uses': 10,
+        #     'assign_slice': slice(0, 1), # only 1 is assigned, why ?
+        #     'redeem_slice': slice(1, 3),
+        #     'expected_results_count': 0
+        # },
+        # VOUCHER_UNASSIGNED: MULTI_USE_PER_CUSTOMER
+        {
+            'code_filter': VOUCHER_UNASSIGNED,
+            'voucher_type': Voucher.MULTI_USE_PER_CUSTOMER,
+            'quantity': 3,
+            'max_uses': 10,
+            'voucher_redeem_count': 2,
+            'assign_slice': slice(0, 1),
+            'redeem_slice': slice(1, 3),
+            'expected_results_count': 2
+        },
+        {
+            'code_filter': VOUCHER_UNASSIGNED,
+            'voucher_type': Voucher.MULTI_USE_PER_CUSTOMER,
+            'quantity': 3,
+            'max_uses': 10,
+            'voucher_redeem_count': 2,
+            'assign_slice': slice(0, 3),
+            'redeem_slice': slice(0, 0),
+            'expected_results_count': 0
+        },
+        {
+            'code_filter': VOUCHER_UNASSIGNED,
+            'voucher_type': Voucher.MULTI_USE_PER_CUSTOMER,
+            'quantity': 3,
+            'max_uses': 10,
+            'assign_slice': slice(0, 0),
+            'redeem_slice': slice(0, 1),
+            'expected_results_count': 2
+        },
+        {
+            'code_filter': VOUCHER_UNASSIGNED,
+            'voucher_type': Voucher.MULTI_USE_PER_CUSTOMER,
+            'quantity': 3,
+            'max_uses': 10,
+            'voucher_redeem_count': 2,
+            'assign_slice': slice(0, 0),
+            'redeem_slice': slice(0, 1),
+            'expected_results_count': 3
         },
         # VOUCHER_UNREDEEMED: MULTI_USE
         {
@@ -751,7 +791,7 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             'quantity': 3,
             'max_uses': 10,
             'assign_slice': slice(0, 1),
-            'redeem_slice': slice(1, 3),    # All assignments redeemed.
+            'redeem_slice': slice(1, 3),
             'expected_results_count': 1
         },
         # VOUCHER_PARTIAL_REDEEMED: SINGLE_USE
@@ -760,7 +800,7 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             'voucher_type': Voucher.SINGLE_USE,
             'quantity': 3,
             'assign_slice': slice(0, 0),
-            'redeem_slice': slice(0, 0),    # All assignments redeemed.
+            'redeem_slice': slice(0, 0),
             'expected_results_count': 0
         },
         {
@@ -768,7 +808,7 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             'voucher_type': Voucher.SINGLE_USE,
             'quantity': 3,
             'assign_slice': slice(0, 1),
-            'redeem_slice': slice(1, 3),    # All assignments redeemed.
+            'redeem_slice': slice(1, 3),
             'expected_results_count': 0
         },
         # VOUCHER_PARTIAL_REDEEMED: MULTI_USE
@@ -779,10 +819,9 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             'max_uses': 10,
             'voucher_redeem_count': 2,
             'assign_slice': slice(0, 1),
-            'redeem_slice': slice(1, 3),    # All assignments redeemed.
+            'redeem_slice': slice(1, 3),
             'expected_results_count': 4 # Should this return those voucher applications ?
         },
-        # FIXME: VOUCHER_REDEEMED: MULTI_USE_PER_CUSTOMER
         {
             'code_filter': VOUCHER_PARTIAL_REDEEMED,
             'voucher_type': Voucher.MULTI_USE_PER_CUSTOMER,
@@ -790,7 +829,7 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             'max_uses': 10,
             'voucher_redeem_count': 2,
             'assign_slice': slice(0, 1),
-            'redeem_slice': slice(1, 3),    # All assignments redeemed.
+            'redeem_slice': slice(1, 3),
             'expected_results_count': 2
         },
         # VOUCHER_REDEEMED: SINGLE_USE
@@ -799,7 +838,7 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             'voucher_type': Voucher.SINGLE_USE,
             'quantity': 3,
             'assign_slice': slice(0, 0),
-            'redeem_slice': slice(0, 0),    # All assignments redeemed.
+            'redeem_slice': slice(0, 0),
             'expected_results_count': 0
         },
         {
@@ -807,7 +846,7 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             'voucher_type': Voucher.SINGLE_USE,
             'quantity': 3,
             'assign_slice': slice(0, 0),
-            'redeem_slice': slice(0, 3),    # All assignments redeemed.
+            'redeem_slice': slice(0, 3),
             'expected_results_count': 3
         },
         {
@@ -815,7 +854,7 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             'voucher_type': Voucher.SINGLE_USE,
             'quantity': 3,
             'assign_slice': slice(0, 1),
-            'redeem_slice': slice(1, 3),    # All assignments redeemed.
+            'redeem_slice': slice(1, 3),
             'expected_results_count': 2
         },
         # VOUCHER_REDEEMED: MULTI_USE
@@ -825,7 +864,7 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             'quantity': 3,
             'max_uses': 10,
             'assign_slice': slice(0, 1),
-            'redeem_slice': slice(1, 3),    # All assignments redeemed.
+            'redeem_slice': slice(1, 3),
             'expected_results_count': 20
         },
         # VOUCHER_REDEEMED: ONCE_PER_CUSTOMER
@@ -835,7 +874,7 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             'quantity': 3,
             'max_uses': 10,
             'assign_slice': slice(0, 1),
-            'redeem_slice': slice(1, 3),    # All assignments redeemed.
+            'redeem_slice': slice(1, 3),
             'expected_results_count': 20
         },
         # VOUCHER_REDEEMED: MULTI_USE_PER_CUSTOMER
@@ -845,7 +884,7 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             'quantity': 3,
             'max_uses': 10,
             'assign_slice': slice(0, 1),
-            'redeem_slice': slice(1, 3),    # All assignments redeemed.
+            'redeem_slice': slice(1, 3),
             'expected_results_count': 2
         },
     )
@@ -881,20 +920,17 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
         )
         response = response.json()
 
-        try:
-            self.assert_coupon_codes_response(
-                response,
-                coupon_id,
-                max_uses=max_uses,
-                results_count=data['expected_results_count']
-            )
-        except:
-            from nose.tools import set_trace; set_trace();
+        self.assert_coupon_codes_response(
+            response,
+            coupon_id,
+            max_uses=max_uses,
+            results_count=data['expected_results_count']
+        )
 
-        # # Also verify available slots left for assignment.
-        # for response_voucher in response['results']:
-        #     voucher = [voucher for voucher in vouchers if voucher.code == response_voucher['code']][0]
-        #     assert voucher.slots_available_for_assignment == response_voucher['redemptions']['available']
+        for response_voucher in response['results']:
+            voucher = [voucher for voucher in vouchers if voucher.code == response_voucher['code']][0]
+            available_slots = response_voucher['redemptions']['total'] - response_voucher['redemptions']['used']
+            assert voucher.slots_available_for_assignment == available_slots
 
     def test_coupon_codes_detail_csv(self):
         """
@@ -918,7 +954,7 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
         csv_data = csv_content[1:-1]
 
         # Verify headers.
-        self.assertEqual(csv_header, 'assigned_to,code,redeem_url,redemptions.available,redemptions.used')
+        self.assertEqual(csv_header, 'assigned_to,code,redeem_url,redemptions.total,redemptions.used')
 
         # Verify csv data.
         self.assert_coupon_codes_response(

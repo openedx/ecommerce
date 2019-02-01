@@ -691,7 +691,7 @@ class CouponVoucherSerializer(serializers.Serializer):  # pylint: disable=abstra
     def get_redemptions(self, voucher):
         offer = voucher.best_offer
         redemption_count = voucher.num_orders
-        num_offerassignments = offer.offerassignment_set.filter(code=voucher.code).exclude(
+        num_unredeemed_offerassignments = offer.offerassignment_set.filter(code=voucher.code).exclude(
             status__in=[OFFER_REDEEMED, OFFER_ASSIGNMENT_REVOKED]).count()
 
         if voucher.usage == Voucher.SINGLE_USE:
@@ -701,9 +701,14 @@ class CouponVoucherSerializer(serializers.Serializer):  # pylint: disable=abstra
         else:
             max_coupon_usage = offer.max_global_applications
 
+        slots_used = redemption_count + num_unredeemed_offerassignments
+        if voucher.usage in (Voucher.SINGLE_USE, Voucher.MULTI_USE_PER_CUSTOMER):
+            if redemption_count or num_unredeemed_offerassignments:
+                slots_used = max_coupon_usage
+
         return {
-            'used': redemption_count + num_offerassignments,
-            'available': max_coupon_usage,
+            'used': slots_used,
+            'total': max_coupon_usage,
         }
 
 

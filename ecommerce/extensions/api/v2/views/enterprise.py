@@ -3,7 +3,8 @@ from __future__ import unicode_literals
 import logging
 import waffle
 from django.core.exceptions import ValidationError
-from django.db.models import F
+from django.db.models import Count, F, IntegerField, OuterRef, Subquery
+from django.db.models.functions import Coalesce
 from oscar.core.loading import get_model
 from rest_framework import generics, serializers, status
 from rest_framework.decorators import detail_route, list_route
@@ -240,10 +241,6 @@ class EnterpriseCouponViewSet(CouponViewSet):
         """
         Return vouchers with free slots available.
         """
-        # FIXME: returns 10 {u'expected_results_count': 1, u'redeem_slice': slice(1, 2, None), u'assign_slice': slice(0, 1, None), u'voucher_type': 'Multi-use', u'code_filter': 'unassigned', u'max_uses': 10, u'quantity': 3}
-        from django.db.models import Count, IntegerField, OuterRef, Subquery
-        from django.db.models.functions import Coalesce
-
         # subquery to count number of unredeemed offer assignments of a code
         # the way this subquery is written is suggested in [django docs](https://docs.djangoproject.com/en/1.11/ref/models/expressions/#using-aggregates-within-a-subquery-expression)
         offerassignments = OfferAssignment.objects.filter(
@@ -266,7 +263,6 @@ class EnterpriseCouponViewSet(CouponViewSet):
             )
         else:
             qs_may_have_free_slots = coupon_vouchers.filter(offers__max_global_applications__gt=F('num_orders'))
-            # TODO: Add tests for MULTI_USE_PER_CUSTOMER
             vouchers_with_free_slots = qs_may_have_free_slots.annotate(
                 assignment_count=offerassignments_subquery
             ).filter(
@@ -358,7 +354,7 @@ class EnterpriseCouponViewSet(CouponViewSet):
                     assigned_to: 'Barry Allen',
                     redemptions: {
                         used: 1,
-                        total: 5, # TODO: Rename all places
+                        total: 5,
                     },
                     redeem_url: 'https://testserver.fake/coupons/offer/?code=1234-5678-90',
                 },
