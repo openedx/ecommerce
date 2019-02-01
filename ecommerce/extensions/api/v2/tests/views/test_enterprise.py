@@ -1187,3 +1187,43 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             {'non_field_errors': ['Code RANDOMCODE is not associated with this Coupon']},
         ]
         assert mock_send_email.call_count == 1
+
+    @ddt.data(
+        {
+            'voucher_type': Voucher.SINGLE_USE,
+            'quantity': 2,
+            'max_uses': None,
+            'expected_assigned_user_count': 2
+        },
+        {
+            'voucher_type': Voucher.ONCE_PER_CUSTOMER,
+            'quantity': 2,
+            'max_uses': 2,
+            'expected_assigned_user_count': 4
+        },
+        {
+            'voucher_type': Voucher.MULTI_USE,
+            'quantity': 2,
+            'max_uses': 3,
+            'expected_assigned_user_count': 6
+        },
+    )
+    def test_coupon_codes_assigned_to_detail(self, data):
+        """
+        Verify that `/api/v2/enterprise/coupons/{coupon_id}/codes/` endpoint returns correct
+        assigned_to data for different coupons
+        """
+        endpoint = '/api/v2/enterprise/coupons/{}/codes/'
+        coupon_id = self.create_coupon_with_applications(
+            self.data,
+            data['voucher_type'],
+            data['quantity'],
+            data['max_uses']
+        )
+        # get coupon codes usage details
+        response = self.get_response('GET', endpoint.format(coupon_id))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response = response.json()
+        assigned_to_received_count = len([result['assigned_to'] for result in response['results']])
+        # total count of assigned_to returned is correct
+        self.assertEqual(assigned_to_received_count, data['expected_assigned_user_count'])

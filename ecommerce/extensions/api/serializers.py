@@ -2,6 +2,7 @@
 from __future__ import unicode_literals
 
 import logging
+from collections import Counter
 from datetime import timedelta
 from decimal import Decimal
 
@@ -685,8 +686,12 @@ class CouponVoucherSerializer(serializers.Serializer):  # pylint: disable=abstra
         url = get_ecommerce_url('/coupons/offer/')
         return '{url}?code={code}'.format(url=url, code=obj.code)
 
-    def get_assigned_to(self, obj):  # pylint: disable=unused-argument
-        return ''
+    def get_assigned_to(self, voucher):
+        offer = voucher.best_offer
+        user_email_from_applications = list(voucher.applications.values_list('user__email', flat=True))
+        user_email_from_offer_assignments = list(offer.offerassignment_set.filter(code=voucher.code).exclude(
+            status__in=[OFFER_ASSIGNMENT_REVOKED, OFFER_REDEEMED]).values_list('user_email', flat=True))
+        return Counter(user_email_from_applications + user_email_from_offer_assignments)
 
     def get_redemptions(self, voucher):
         offer = voucher.best_offer
