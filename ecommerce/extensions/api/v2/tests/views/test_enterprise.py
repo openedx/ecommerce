@@ -456,6 +456,10 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             assignment.status = OFFER_REDEEMED
             assignment.save()
 
+            # For MULTI_USE_PER_CUSTOMER case, only update one assignment.
+            if voucher.usage == Voucher.MULTI_USE_PER_CUSTOMER:
+                break
+
     def create_enterprise_coupon(self, coupon_data, with_applications=False):
         """
         Create coupon and voucher applications(redemeptions) if required.
@@ -485,9 +489,11 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
                 voucher_usage = max_uses if max_uses else 1
 
             for usage_index in range(voucher_usage):
-                self.use_voucher(voucher, self.create_user(
-                    email='user{email_index}@example.com'.format(email_index=usage_index))
-                )
+                if voucher.usage == Voucher.MULTI_USE_PER_CUSTOMER:
+                    email = 'user@example.com'
+                else:
+                    email = 'user{email_index}@example.com'.format(email_index=usage_index)
+                self.use_voucher(voucher, self.create_user(email=email))
 
     def assign_coupon_codes(self, coupon_id, vouchers, voucher_assignments=None):
         """
@@ -500,7 +506,7 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
 
             # For multi-use-per-customer case, email list should be same.
             if voucher.usage == Voucher.MULTI_USE_PER_CUSTOMER:
-                emails = ['user0@example.com' for _ in range(voucher_assignments[i])]
+                emails = ['user@example.com']
             else:
                 emails = [
                     'user{email_index}@example.com'.format(email_index=email_index)
@@ -771,26 +777,24 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             'expected_results_count': 0
         },
         # VOUCHER_UNASSIGNED: MULTI_USE_PER_CUSTOMER
-        # FIXME: result count is 3.
-        # {
-        #     'code_filter': VOUCHER_UNASSIGNED,
-        #     'voucher_type': Voucher.MULTI_USE_PER_CUSTOMER,
-        #     'quantity': 3,
-        #     'max_uses': 10,
-        #     'voucher_assignments': [10, 0, 0],
-        #     'voucher_redemptions': [0, 1, 4],
-        #     'expected_results_count': 2
-        # },
-        # FIXME: result count is 3.
-        # {
-        #     'code_filter': VOUCHER_UNASSIGNED,
-        #     'voucher_type': Voucher.MULTI_USE_PER_CUSTOMER,
-        #     'quantity': 3,
-        #     'max_uses': 10,
-        #     'voucher_assignments': [10, 10, 10],
-        #     'voucher_redemptions': [0, 0, 0],
-        #     'expected_results_count': 0
-        # },
+        {
+            'code_filter': VOUCHER_UNASSIGNED,
+            'voucher_type': Voucher.MULTI_USE_PER_CUSTOMER,
+            'quantity': 3,
+            'max_uses': 10,
+            'voucher_assignments': [10, 0, 0],
+            'voucher_redemptions': [0, 1, 4],
+            'expected_results_count': 2
+        },
+        {
+            'code_filter': VOUCHER_UNASSIGNED,
+            'voucher_type': Voucher.MULTI_USE_PER_CUSTOMER,
+            'quantity': 3,
+            'max_uses': 10,
+            'voucher_assignments': [10, 10, 10],
+            'voucher_redemptions': [0, 0, 0],
+            'expected_results_count': 0
+        },
         {
             'code_filter': VOUCHER_UNASSIGNED,
             'voucher_type': Voucher.MULTI_USE_PER_CUSTOMER,
@@ -988,16 +992,15 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             'expected_results_count': 2
         },
         # VOUCHER_PARTIAL_REDEEMED: MULTI_USE_PER_CUSTOMER
-        # # FIXME: result count is 0.
-        # {
-        #     'code_filter': VOUCHER_PARTIAL_REDEEMED,
-        #     'voucher_type': Voucher.MULTI_USE_PER_CUSTOMER,
-        #     'quantity': 3,
-        #     'max_uses': 10,
-        #     'voucher_assignments': [10, 10, 10],
-        #     'voucher_redemptions': [0, 1, 4],
-        #     'expected_results_count': 2
-        # },
+        {
+            'code_filter': VOUCHER_PARTIAL_REDEEMED,
+            'voucher_type': Voucher.MULTI_USE_PER_CUSTOMER,
+            'quantity': 3,
+            'max_uses': 10,
+            'voucher_assignments': [10, 10, 10],
+            'voucher_redemptions': [0, 1, 4],
+            'expected_results_count': 2
+        },
         # VOUCHER_REDEEMED: SINGLE_USE
         {
             'code_filter': VOUCHER_REDEEMED,

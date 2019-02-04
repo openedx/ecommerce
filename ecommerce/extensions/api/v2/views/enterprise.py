@@ -290,15 +290,6 @@ class EnterpriseCouponViewSet(CouponViewSet):
         Return only those vouchers which have free slots available.
         This will give us a list of vouchers which have any potential slot available for assignment,
         """
-        # OLD 1
-        # assigned_uredeemed_codes = self.get_assigned_uredeemed_codes()
-        # redeemable_vouchers = self.get_redeemable_vouchers(coupon_vouchers)
-        # unassigned_unredeemed_vouchers = redeemable_vouchers.exclude(code__in=assigned_uredeemed_codes)
-
-        # OLD 2
-        # unassigned_unredeemed_vouchers = self.get_redeemable_vouchers(coupon_vouchers)
-
-        # NEW: Ammar
         unassigned_unredeemed_vouchers =  self.get_vouchers_with_free_slots(coupon_vouchers)
         return unassigned_unredeemed_vouchers
 
