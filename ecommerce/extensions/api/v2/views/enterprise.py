@@ -249,7 +249,7 @@ class EnterpriseCouponViewSet(CouponViewSet):
             status__in=[OFFER_REDEEMED, OFFER_ASSIGNMENT_REVOKED]
         ).order_by().values('code').annotate(assignment_count=Count('pk')).values('assignment_count')
 
-        # Coalesce is used so that if there are no assigments than return 0
+        # Coalesce is used so that if there are no assignments than return 0
         offerassignments_subquery = Coalesce(Subquery(offerassignments, output_field=IntegerField()), 0)
 
         voucher_type = self.get_voucher_type()
@@ -306,7 +306,6 @@ class EnterpriseCouponViewSet(CouponViewSet):
         """
         Return assigned vouchers but never redeemed.
         """
-        # FIXME: single use - edx-portal
         assigned_uredeemed_codes = self.get_assigned_uredeemed_codes()
         unredeemed_vouchers = coupon_vouchers.filter(code__in=assigned_uredeemed_codes)
         return unredeemed_vouchers
