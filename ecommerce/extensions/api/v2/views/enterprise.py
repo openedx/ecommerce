@@ -320,12 +320,10 @@ class EnterpriseCouponViewSet(CouponViewSet):
         if voucher_type == Voucher.SINGLE_USE:
             return coupon_vouchers.none()
 
+        assigned_uredeemed_codes = self.get_assigned_uredeemed_codes()
         partially_redeemed_vouchers = coupon_vouchers.filter(num_orders__gte=1, offers__max_global_applications__gt=F('num_orders'))
-        # TODO: add test for this.
-        if voucher_type != Voucher.MULTI_USE_PER_CUSTOMER:
-            partially_redeemed_vouchers = self.get_expanded_coupon_vouchers(partially_redeemed_vouchers)
-
-        return partially_redeemed_vouchers
+        assigned_partially_redeemed_vouchers = partially_redeemed_vouchers.filter(code__in=assigned_uredeemed_codes)
+        return assigned_partially_redeemed_vouchers
 
     def get_fully_redeemed_coupon_vouchers(self, coupon_vouchers):
         """

@@ -631,6 +631,7 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             results_count=1
         )
 
+    # TODO: Get rid of slices for simplicity.
     @ddt.data(
         # VOUCHER_UNASSIGNED: SINGLE_USE
         {
@@ -820,24 +821,65 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             'expected_results_count': 0
         },
         # VOUCHER_PARTIAL_REDEEMED: MULTI_USE
-        # TODO: Should this only return redeemed voucher applications objects?
         {
             'code_filter': VOUCHER_PARTIAL_REDEEMED,
             'voucher_type': Voucher.MULTI_USE,
             'quantity': 3,
             'max_uses': 10,
-            'voucher_redeem_count': [1, 4],
-            'assign_slice': slice(0, 1),
-            'redeem_slice': slice(1, 3),
-            'expected_results_count': 5
+            'voucher_redeem_count': [1, 4, 1],
+            'assign_slice': slice(0, 0),
+            'redeem_slice': slice(0, 3),
+            'expected_results_count': 0
         },
+        {
+            'code_filter': VOUCHER_PARTIAL_REDEEMED,
+            'voucher_type': Voucher.MULTI_USE,
+            'quantity': 3,
+            'max_uses': 10,
+            'voucher_redeem_count': [1, 4, 1],
+            'assign_slice': slice(0, 1),
+            'redeem_slice': slice(0, 3),
+            'expected_results_count': 1
+        },
+        {
+            'code_filter': VOUCHER_PARTIAL_REDEEMED,
+            'voucher_type': Voucher.MULTI_USE,
+            'quantity': 3,
+            'max_uses': 10,
+            'voucher_redeem_count': [1, 4, 1],
+            'assign_slice': slice(0, 3),
+            'redeem_slice': slice(0, 3),
+            'expected_results_count': 3
+        },
+        {
+            'code_filter': VOUCHER_PARTIAL_REDEEMED,
+            'voucher_type': Voucher.MULTI_USE,
+            'quantity': 3,
+            'max_uses': 10,
+            'voucher_redeem_count': [10, 4, 1],
+            'assign_slice': slice(0, 3),
+            'redeem_slice': slice(0, 3),
+            'expected_results_count': 2
+        },
+        # VOUCHER_PARTIAL_REDEEMED: ONCE_PER_CUSTOMER
+        {
+            'code_filter': VOUCHER_PARTIAL_REDEEMED,
+            'voucher_type': Voucher.ONCE_PER_CUSTOMER,
+            'quantity': 3,
+            'max_uses': 10,
+            'voucher_redeem_count': [1, 4],
+            'assign_slice': slice(0, 3),
+            'redeem_slice': slice(1, 3),
+            'expected_results_count': 2
+        },
+        # VOUCHER_PARTIAL_REDEEMED: MULTI_USE_PER_CUSTOMER
         {
             'code_filter': VOUCHER_PARTIAL_REDEEMED,
             'voucher_type': Voucher.MULTI_USE_PER_CUSTOMER,
             'quantity': 3,
             'max_uses': 10,
             'voucher_redeem_count': [1, 4],
-            'assign_slice': slice(0, 1),
+            'assign_slice': slice(0, 3),
             'redeem_slice': slice(1, 3),
             'expected_results_count': 2
         },
