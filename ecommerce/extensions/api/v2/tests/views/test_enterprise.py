@@ -766,6 +766,24 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             'voucher_redemptions': [10, 10, 0],
             'expected_results_count': 1
         },
+        {
+            'code_filter': VOUCHER_UNASSIGNED,
+            'voucher_type': Voucher.MULTI_USE,
+            'quantity': 3,
+            'max_uses': 10,
+            'voucher_assignments': [5, 10, 0],
+            'voucher_redemptions': [5, 0, 10],
+            'expected_results_count': 1
+        },
+        {
+            'code_filter': VOUCHER_UNASSIGNED,
+            'voucher_type': Voucher.MULTI_USE,
+            'quantity': 3,
+            'max_uses': 10,
+            'voucher_assignments': [3, 5, 0],
+            'voucher_redemptions': [5, 3, 0],
+            'expected_results_count': 3
+        },
         # VOUCHER_UNASSIGNED: ONCE_PER_CUSTOMER
         {
             'code_filter': VOUCHER_UNASSIGNED,
@@ -775,6 +793,24 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             'voucher_assignments': [10, 0, 0],
             'voucher_redemptions': [0, 10, 10],
             'expected_results_count': 0
+        },
+        {
+            'code_filter': VOUCHER_UNASSIGNED,
+            'voucher_type': Voucher.ONCE_PER_CUSTOMER,
+            'quantity': 3,
+            'max_uses': 10,
+            'voucher_assignments': [10, 5, 1],
+            'voucher_redemptions': [0, 5, 0],
+            'expected_results_count': 2
+        },
+        {
+            'code_filter': VOUCHER_UNASSIGNED,
+            'voucher_type': Voucher.ONCE_PER_CUSTOMER,
+            'quantity': 3,
+            'max_uses': 10,
+            'voucher_assignments': [3, 5, 5],
+            'voucher_redemptions': [2, 8, 1],
+            'expected_results_count': 3
         },
         # VOUCHER_UNASSIGNED: MULTI_USE_PER_CUSTOMER
         {
@@ -812,6 +848,24 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             'voucher_assignments': [0, 0, 0],
             'voucher_redemptions': [5, 0, 0],
             'expected_results_count': 3
+        },
+        {
+            'code_filter': VOUCHER_UNASSIGNED,
+            'voucher_type': Voucher.MULTI_USE_PER_CUSTOMER,
+            'quantity': 3,
+            'max_uses': 10,
+            'voucher_assignments': [5, 0, 0],
+            'voucher_redemptions': [3, 10, 5],
+            'expected_results_count': 1
+        },
+        {
+            'code_filter': VOUCHER_UNASSIGNED,
+            'voucher_type': Voucher.MULTI_USE_PER_CUSTOMER,
+            'quantity': 3,
+            'max_uses': 10,
+            'voucher_assignments': [7, 3, 5],
+            'voucher_redemptions': [3, 7, 3],
+            'expected_results_count': 0
         },
         # VOUCHER_UNREDEEMED: SINGLE_USE
         {
@@ -924,6 +978,71 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             'max_uses': 10,
             'voucher_assignments': [10, 10, 10],
             'voucher_redemptions': [2, 3, 5],
+            'expected_results_count': 3
+        },
+        {
+            'code_filter': VOUCHER_UNREDEEMED,
+            'voucher_type': Voucher.MULTI_USE,
+            'quantity': 3,
+            'max_uses': 10,
+            'voucher_assignments': [5, 10, 5],
+            'voucher_redemptions': [2, 3, 5],
+            'expected_results_count': 2
+        },
+        {
+            'code_filter': VOUCHER_UNREDEEMED,
+            'voucher_type': Voucher.MULTI_USE,
+            'quantity': 3,
+            'max_uses': 10,
+            'voucher_assignments': [0, 10, 10],
+            'voucher_redemptions': [10, 0, 10],
+            'expected_results_count': 1
+        },
+        {
+            'code_filter': VOUCHER_UNREDEEMED,
+            'voucher_type': Voucher.MULTI_USE,
+            'quantity': 3,
+            'max_uses': 10,
+            'voucher_assignments': [0, 2, 5],
+            'voucher_redemptions': [2, 3, 5],
+            'expected_results_count': 0
+        },
+        # VOUCHER_UNREDEEMED: ONCE_PER_CUSTOMER
+        {
+            'code_filter': VOUCHER_UNREDEEMED,
+            'voucher_type': Voucher.ONCE_PER_CUSTOMER,
+            'quantity': 3,
+            'max_uses': 10,
+            'voucher_assignments': [0, 2, 5],
+            'voucher_redemptions': [2, 3, 5],
+            'expected_results_count': 0
+        },
+        {
+            'code_filter': VOUCHER_UNREDEEMED,
+            'voucher_type': Voucher.ONCE_PER_CUSTOMER,
+            'quantity': 3,
+            'max_uses': 10,
+            'voucher_assignments': [10, 2, 5],
+            'voucher_redemptions': [2, 3, 4],
+            'expected_results_count': 2
+        },
+        # VOUCHER_UNREDEEMED: MULTI_USE_PER_CUSTOMER
+        {
+            'code_filter': VOUCHER_UNREDEEMED,
+            'voucher_type': Voucher.MULTI_USE_PER_CUSTOMER,
+            'quantity': 3,
+            'max_uses': 10,
+            'voucher_assignments': [10, 5, 10],
+            'voucher_redemptions': [2, 3, 5],
+            'expected_results_count': 3
+        },
+        {
+            'code_filter': VOUCHER_UNREDEEMED,
+            'voucher_type': Voucher.MULTI_USE_PER_CUSTOMER,
+            'quantity': 3,
+            'max_uses': 10,
+            'voucher_assignments': [10, 2, 5],
+            'voucher_redemptions': [2, 3, 4],
             'expected_results_count': 3
         },
         # VOUCHER_PARTIAL_REDEEMED: SINGLE_USE
@@ -1143,15 +1262,12 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
         )
         response = response.json()
 
-        try:
-            self.assert_coupon_codes_response(
-                response,
-                coupon_id,
-                max_uses=max_uses,
-                results_count=data['expected_results_count']
-            )
-        except:
-            from nose.tools import set_trace; set_trace();
+        self.assert_coupon_codes_response(
+            response,
+            coupon_id,
+            max_uses=max_uses,
+            results_count=data['expected_results_count']
+        )
 
         for response_voucher in response['results']:
             voucher = [voucher for voucher in vouchers if voucher.code == response_voucher['code']][0]
