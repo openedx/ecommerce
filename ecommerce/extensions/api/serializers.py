@@ -672,37 +672,96 @@ class VoucherSerializer(serializers.ModelSerializer):
         )
 
 
-class CouponVoucherSerializer(serializers.Serializer):  # pylint: disable=abstract-method
+class CodeUsageSerializer(serializers.Serializer):  # pylint: disable=abstract-method
     code = serializers.SerializerMethodField()
     assigned_to = serializers.SerializerMethodField()
     redeem_url = serializers.SerializerMethodField()
     redemptions = serializers.SerializerMethodField()
 
-    def get_code(self, voucher):
-        return voucher.code
+    def get_code(self, obj):
+        return obj.get('code')
 
     def get_redeem_url(self, obj):
         url = get_ecommerce_url('/coupons/offer/')
-        return '{url}?code={code}'.format(url=url, code=obj.code)
+        return '{url}?code={code}'.format(url=url, code=self.get_code(obj))
 
-    def get_assigned_to(self, obj):  # pylint: disable=unused-argument
-        return ''
+    def get_assigned_to(self, obj):
+        return obj.get('user_email')
 
-    def get_redemptions(self, voucher):
+    def get_redemptions(self, obj):
+        voucher = Voucher.objects.get(code=self.get_code(obj))
         offer = voucher.best_offer
         redemption_count = voucher.num_orders
 
         if voucher.usage == Voucher.SINGLE_USE:
             max_coupon_usage = 1
-        elif voucher.usage != Voucher.SINGLE_USE and offer.max_global_applications is None:
+        elif offer.max_global_applications is None:
             max_coupon_usage = OFFER_MAX_USES_DEFAULT
         else:
             max_coupon_usage = offer.max_global_applications
 
         return {
             'used': redemption_count,
-            'available': max_coupon_usage,
+            'total': max_coupon_usage,
         }
+
+
+class NotAssignedCodeUsageSerializer(CodeUsageSerializer):  # pylint: disable=abstract-method
+
+    def get_assigned_to(self, obj):
+        return ''
+
+
+class NotRedeemedCodeUsageSerializer(CodeUsageSerializer):  # pylint: disable=abstract-method
+
+    def get_redemptions(self, obj):
+        usage_type = self.context.get('usage_type')
+        if usage_type in (Voucher.SINGLE_USE, Voucher.MULTI_USE_PER_CUSTOMER):
+            return super(NotRedeemedCodeUsageSerializer, self).get_redemptions(obj)
+        else:
+            num_assignments = OfferAssignment.objects.filter(
+                code=self.get_code(obj),
+                user_email=self.get_assigned_to(obj),
+                status__in=[OFFER_ASSIGNED, OFFER_ASSIGNMENT_EMAIL_PENDING],
+            ).count()
+            return {'used': 0, 'total': num_assignments}
+
+
+class PartialRedeemedCodeUsageSerializer(CodeUsageSerializer):  # pylint: disable=abstract-method
+
+    def get_redemptions(self, obj):
+        usage_type = self.context.get('usage_type')
+        if usage_type == Voucher.SINGLE_USE:
+            return {}
+        elif usage_type == Voucher.MULTI_USE_PER_CUSTOMER:
+            return super(PartialRedeemedCodeUsageSerializer, self).get_redemptions(obj)
+        else:
+            num_assignments = OfferAssignment.objects.filter(
+                code=self.get_code(obj),
+                user_email=self.get_assigned_to(obj),
+                status__in=[OFFER_ASSIGNED, OFFER_ASSIGNMENT_EMAIL_PENDING],
+            ).count()
+            num_applications = VoucherApplication.objects.filter(
+                voucher__code=self.get_code(obj),
+                user__email=self.get_assigned_to(obj)
+            ).count()
+            return {'used': num_applications, 'total': num_assignments + num_applications}
+
+
+class RedeemedCodeUsageSerializer(CodeUsageSerializer):  # pylint: disable=abstract-method
+
+    def get_code(self, obj):
+        return obj.get('voucher__code')
+
+    def get_assigned_to(self, obj):
+        return obj.get('user__email')
+
+    def get_redemptions(self, obj):
+        num_applications = VoucherApplication.objects.filter(
+            voucher__code=self.get_code(obj),
+            user__email=self.get_assigned_to(obj)
+        ).count()
+        return {'used': num_applications, 'total': num_applications}
 
 
 class CategorySerializer(serializers.ModelSerializer):
