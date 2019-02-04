@@ -449,14 +449,19 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             max_uses = coupon_data.get('max_uses', 1)
             coupon = Product.objects.get(id=coupon_id)
             coupon_vouchers = coupon.attr.coupon_vouchers.vouchers.all()
-            self.create_coupon_vouchers(coupon_vouchers=coupon_vouchers, voucher_redeem_count=max_uses)
+            self.create_coupon_vouchers(coupon_vouchers=coupon_vouchers, max_uses=max_uses, redeem_completely=True)
 
         return coupon_id
 
-    def create_coupon_vouchers(self, coupon_vouchers, voucher_redeem_count=1):
-        for voucher in coupon_vouchers:
+    def create_coupon_vouchers(self, coupon_vouchers, voucher_redeem_count=None, max_uses=None, redeem_completely=True):
+        for i, voucher in enumerate(coupon_vouchers):
             # How many uses for a voucher to create.
-            for _ in range(voucher_redeem_count or 1):
+            if not redeem_completely:
+                voucher_usage = voucher_redeem_count[i] if voucher_redeem_count is not None else 1
+            else:
+                voucher_usage = max_uses if max_uses else 1
+
+            for _ in range(voucher_usage):
                 self.use_voucher(voucher, self.create_user())
 
     def assign_coupon_codes(self, coupon_id, vouchers):
@@ -466,11 +471,15 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
         if not vouchers:
             return
 
-        emails = []
         codes = [voucher.code for voucher in vouchers]
-        # TODO: for multi-use-per-customer case, email list should be same.
-        for email_index in range(len(codes)):
-            emails.append('test{email_index}@example.com'.format(email_index=email_index))
+        # For multi-use-per-customer case, email list should be same.
+        if vouchers[0].usage == Voucher.MULTI_USE_PER_CUSTOMER:
+            emails = ['test@example.com' for _ in range(len(codes))]
+        else:
+            emails = [
+                'test{email_index}@example.com'.format(email_index=email_index)
+                for email_index in range(len(codes))
+            ]
 
         self.get_response(
             'POST',
@@ -750,7 +759,7 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             'voucher_type': Voucher.MULTI_USE_PER_CUSTOMER,
             'quantity': 3,
             'max_uses': 10,
-            'voucher_redeem_count': 2,
+            'voucher_redeem_count': [1, 4],
             'assign_slice': slice(0, 1),
             'redeem_slice': slice(1, 3),
             'expected_results_count': 2
@@ -760,7 +769,6 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             'voucher_type': Voucher.MULTI_USE_PER_CUSTOMER,
             'quantity': 3,
             'max_uses': 10,
-            'voucher_redeem_count': 2,
             'assign_slice': slice(0, 3),
             'redeem_slice': slice(0, 0),
             'expected_results_count': 0
@@ -779,7 +787,7 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             'voucher_type': Voucher.MULTI_USE_PER_CUSTOMER,
             'quantity': 3,
             'max_uses': 10,
-            'voucher_redeem_count': 2,
+            'voucher_redeem_count': [5],
             'assign_slice': slice(0, 0),
             'redeem_slice': slice(0, 1),
             'expected_results_count': 3
@@ -812,22 +820,23 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             'expected_results_count': 0
         },
         # VOUCHER_PARTIAL_REDEEMED: MULTI_USE
+        # TODO: Should this only return redeemed voucher applications objects?
         {
             'code_filter': VOUCHER_PARTIAL_REDEEMED,
             'voucher_type': Voucher.MULTI_USE,
             'quantity': 3,
             'max_uses': 10,
-            'voucher_redeem_count': 2,
+            'voucher_redeem_count': [1, 4],
             'assign_slice': slice(0, 1),
             'redeem_slice': slice(1, 3),
-            'expected_results_count': 4 # Should this return those voucher applications ?
+            'expected_results_count': 5
         },
         {
             'code_filter': VOUCHER_PARTIAL_REDEEMED,
             'voucher_type': Voucher.MULTI_USE_PER_CUSTOMER,
             'quantity': 3,
             'max_uses': 10,
-            'voucher_redeem_count': 2,
+            'voucher_redeem_count': [1, 4],
             'assign_slice': slice(0, 1),
             'redeem_slice': slice(1, 3),
             'expected_results_count': 2
@@ -867,6 +876,26 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             'redeem_slice': slice(1, 3),
             'expected_results_count': 20
         },
+        {
+            'code_filter': VOUCHER_REDEEMED,
+            'voucher_type': Voucher.MULTI_USE,
+            'quantity': 3,
+            'max_uses': 10,
+            'voucher_redeem_count': [1, 4],
+            'assign_slice': slice(0, 1),
+            'redeem_slice': slice(1, 3),
+            'expected_results_count': 0
+        },
+        {
+            'code_filter': VOUCHER_REDEEMED,
+            'voucher_type': Voucher.MULTI_USE,
+            'quantity': 3,
+            'max_uses': 10,
+            'voucher_redeem_count': [10, 4],
+            'assign_slice': slice(0, 1),
+            'redeem_slice': slice(1, 3),
+            'expected_results_count': 10
+        },
         # VOUCHER_REDEEMED: ONCE_PER_CUSTOMER
         {
             'code_filter': VOUCHER_REDEEMED,
@@ -883,9 +912,38 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             'voucher_type': Voucher.MULTI_USE_PER_CUSTOMER,
             'quantity': 3,
             'max_uses': 10,
+            'assign_slice': slice(0, 0),
+            'redeem_slice': slice(0, 3),
+            'expected_results_count': 3
+        },
+        {
+            'code_filter': VOUCHER_REDEEMED,
+            'voucher_type': Voucher.MULTI_USE_PER_CUSTOMER,
+            'quantity': 3,
+            'max_uses': 10,
             'assign_slice': slice(0, 1),
             'redeem_slice': slice(1, 3),
             'expected_results_count': 2
+        },
+        {
+            'code_filter': VOUCHER_REDEEMED,
+            'voucher_type': Voucher.MULTI_USE_PER_CUSTOMER,
+            'quantity': 3,
+            'max_uses': 10,
+            'voucher_redeem_count': [1, 4],
+            'assign_slice': slice(0, 1),
+            'redeem_slice': slice(1, 3),
+            'expected_results_count': 0
+        },
+        {
+            'code_filter': VOUCHER_REDEEMED,
+            'voucher_type': Voucher.MULTI_USE_PER_CUSTOMER,
+            'quantity': 3,
+            'max_uses': 10,
+            'voucher_redeem_count': [10, 4],
+            'assign_slice': slice(0, 1),
+            'redeem_slice': slice(1, 3),
+            'expected_results_count': 1
         },
     )
     def test_coupon_codes_filters(self, data):
@@ -907,10 +965,13 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             self.assign_coupon_codes(coupon_id, vouchers[data['assign_slice']])
 
         # create voucher applications.
-        voucher_redeem_count = data.get('voucher_redeem_count', max_uses or 1)
+        voucher_redeem_count = data.get('voucher_redeem_count')
+        redeem_completely = data.get('redeem_completely', True)
         self.create_coupon_vouchers(
             coupon_vouchers=vouchers[data['redeem_slice']],
-            voucher_redeem_count=voucher_redeem_count
+            max_uses=max_uses,
+            redeem_completely=redeem_completely if voucher_redeem_count is None else False,
+            voucher_redeem_count=voucher_redeem_count,
         )
 
         # Get coupon codes.
