@@ -453,13 +453,13 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
 
         return coupon_id
 
-    def create_coupon_vouchers(self, coupon_vouchers, voucher_redeem_count=None, max_uses=None, redeem_completely=True):
+    def create_coupon_vouchers(self, coupon_vouchers, voucher_redemptions=None, max_uses=None, redeem_completely=True):
         for i, voucher in enumerate(coupon_vouchers):
             # How many uses for a voucher to create.
             if not redeem_completely:
-                voucher_usage = voucher_redeem_count[i] if voucher_redeem_count is not None else 1
+                voucher_usage = voucher_redemptions[i] if voucher_redemptions is not None else 0
             else:
-                voucher_usage = max_uses if max_uses else 1
+                voucher_usage = max_uses if max_uses else 0
 
             for _ in range(voucher_usage):
                 self.use_voucher(voucher, self.create_user())
@@ -631,7 +631,6 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             results_count=1
         )
 
-    # TODO: Get rid of slices for simplicity.
     @ddt.data(
         # VOUCHER_UNASSIGNED: SINGLE_USE
         {
@@ -640,7 +639,7 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             'quantity': 3,
             'max_uses': None,
             'assign_slice': slice(0, 0),    # No assignment
-            'redeem_slice': slice(0, 0),    # No redeemption.
+            'voucher_redemptions': [0, 0, 0],    # No redeemption.
             'expected_results_count': 3
         },
         {
@@ -649,7 +648,7 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             'quantity': 3,
             'max_uses': None,
             'assign_slice': slice(0, 3),
-            'redeem_slice': slice(0, 0),
+            'voucher_redemptions': [0, 0, 0],
             'expected_results_count': 0
         },
         {
@@ -658,7 +657,7 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             'quantity': 3,
             'max_uses': None,
             'assign_slice': slice(0, 0),
-            'redeem_slice': slice(0, 3),
+            'voucher_redemptions': [1, 1, 1],
             'expected_results_count': 0
         },
         {
@@ -667,7 +666,7 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             'quantity': 3,
             'max_uses': None,
             'assign_slice': slice(0, 1),
-            'redeem_slice': slice(1, 2),
+            'voucher_redemptions': [0, 1, 0],
             'expected_results_count': 1
         },
         {
@@ -676,7 +675,7 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             'quantity': 3,
             'max_uses': None,
             'assign_slice': slice(0, 1),
-            'redeem_slice': slice(0, 1),
+            'voucher_redemptions': [1, 0, 0],
             'expected_results_count': 2
         },
         {
@@ -685,7 +684,7 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             'quantity': 3,
             'max_uses': None,
             'assign_slice': slice(0, 2),
-            'redeem_slice': slice(0, 1),
+            'voucher_redemptions': [1, 0, 0],
             'expected_results_count': 1
         },
         {
@@ -694,7 +693,7 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             'quantity': 3,
             'max_uses': None,
             'assign_slice': slice(0, 1),
-            'redeem_slice': slice(0, 2),
+            'voucher_redemptions': [1, 1, 0],
             'expected_results_count': 1
         },
         {
@@ -703,7 +702,7 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             'quantity': 3,
             'max_uses': None,
             'assign_slice': slice(0, 2),
-            'redeem_slice': slice(2, 3),
+            'voucher_redemptions': [0, 0, 1],
             'expected_results_count': 0
         },
         # VOUCHER_UNASSIGNED: MULTI_USE
@@ -713,7 +712,7 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             'quantity': 3,
             'max_uses': 10,
             'assign_slice': slice(0, 0),
-            'redeem_slice': slice(0, 0),
+            'voucher_redemptions': [0, 0, 0],
             'expected_results_count': 3
         },
         {
@@ -722,7 +721,7 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             'quantity': 3,
             'max_uses': 10,
             'assign_slice': slice(0, 1),
-            'redeem_slice': slice(0, 1),
+            'voucher_redemptions': [10, 0, 0],
             'expected_results_count': 2
         },
         {
@@ -731,7 +730,7 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             'quantity': 3,
             'max_uses': 10,
             'assign_slice': slice(0, 1),
-            'redeem_slice': slice(1, 2),
+            'voucher_redemptions': [0, 10, 0],
             'expected_results_count': 1
         },
         {
@@ -740,7 +739,7 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             'quantity': 3,
             'max_uses': 10,
             'assign_slice': slice(0, 1),
-            'redeem_slice': slice(0, 2),
+            'voucher_redemptions': [10, 10, 0],
             'expected_results_count': 1
         },
         # VOUCHER_UNASSIGNED: ONCE_PER_CUSTOMER
@@ -751,7 +750,7 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
         #     'quantity': 3,
         #     'max_uses': 10,
         #     'assign_slice': slice(0, 1), # only 1 is assigned, why ?
-        #     'redeem_slice': slice(1, 3),
+        #     'voucher_redemptions': [0, 10, 10],
         #     'expected_results_count': 0
         # },
         # VOUCHER_UNASSIGNED: MULTI_USE_PER_CUSTOMER
@@ -760,9 +759,8 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             'voucher_type': Voucher.MULTI_USE_PER_CUSTOMER,
             'quantity': 3,
             'max_uses': 10,
-            'voucher_redeem_count': [1, 4],
             'assign_slice': slice(0, 1),
-            'redeem_slice': slice(1, 3),
+            'voucher_redemptions': [0, 1, 4],
             'expected_results_count': 2
         },
         {
@@ -771,7 +769,7 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             'quantity': 3,
             'max_uses': 10,
             'assign_slice': slice(0, 3),
-            'redeem_slice': slice(0, 0),
+            'voucher_redemptions': [0, 0, 0],
             'expected_results_count': 0
         },
         {
@@ -780,7 +778,7 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             'quantity': 3,
             'max_uses': 10,
             'assign_slice': slice(0, 0),
-            'redeem_slice': slice(0, 1),
+            'voucher_redemptions': [10, 0, 0],
             'expected_results_count': 2
         },
         {
@@ -788,9 +786,17 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             'voucher_type': Voucher.MULTI_USE_PER_CUSTOMER,
             'quantity': 3,
             'max_uses': 10,
-            'voucher_redeem_count': [5],
             'assign_slice': slice(0, 0),
-            'redeem_slice': slice(0, 1),
+            'voucher_redemptions': [5, 0, 0],
+            'expected_results_count': 3
+        },
+        # VOUCHER_UNREDEEMED: SINGLE_USE
+        {
+            'code_filter': VOUCHER_UNREDEEMED,
+            'voucher_type': Voucher.SINGLE_USE,
+            'quantity': 3,
+            'assign_slice': slice(0, 3),
+            'voucher_redemptions': [0, 0, 0],
             'expected_results_count': 3
         },
         # VOUCHER_UNREDEEMED: MULTI_USE
@@ -800,7 +806,7 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             'quantity': 3,
             'max_uses': 10,
             'assign_slice': slice(0, 1),
-            'redeem_slice': slice(1, 3),
+            'voucher_redemptions': [0, 10, 10],
             'expected_results_count': 1
         },
         # VOUCHER_PARTIAL_REDEEMED: SINGLE_USE
@@ -809,7 +815,7 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             'voucher_type': Voucher.SINGLE_USE,
             'quantity': 3,
             'assign_slice': slice(0, 0),
-            'redeem_slice': slice(0, 0),
+            'voucher_redemptions': [0, 0, 0],
             'expected_results_count': 0
         },
         {
@@ -817,7 +823,7 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             'voucher_type': Voucher.SINGLE_USE,
             'quantity': 3,
             'assign_slice': slice(0, 1),
-            'redeem_slice': slice(1, 3),
+            'voucher_redemptions': [0, 1, 1],
             'expected_results_count': 0
         },
         # VOUCHER_PARTIAL_REDEEMED: MULTI_USE
@@ -826,9 +832,8 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             'voucher_type': Voucher.MULTI_USE,
             'quantity': 3,
             'max_uses': 10,
-            'voucher_redeem_count': [1, 4, 1],
             'assign_slice': slice(0, 0),
-            'redeem_slice': slice(0, 3),
+            'voucher_redemptions': [1, 4, 1],
             'expected_results_count': 0
         },
         {
@@ -836,9 +841,8 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             'voucher_type': Voucher.MULTI_USE,
             'quantity': 3,
             'max_uses': 10,
-            'voucher_redeem_count': [1, 4, 1],
             'assign_slice': slice(0, 1),
-            'redeem_slice': slice(0, 3),
+            'voucher_redemptions': [1, 4, 1],
             'expected_results_count': 1
         },
         {
@@ -846,9 +850,8 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             'voucher_type': Voucher.MULTI_USE,
             'quantity': 3,
             'max_uses': 10,
-            'voucher_redeem_count': [1, 4, 1],
             'assign_slice': slice(0, 3),
-            'redeem_slice': slice(0, 3),
+            'voucher_redemptions': [1, 4, 1],
             'expected_results_count': 3
         },
         {
@@ -856,9 +859,8 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             'voucher_type': Voucher.MULTI_USE,
             'quantity': 3,
             'max_uses': 10,
-            'voucher_redeem_count': [10, 4, 1],
             'assign_slice': slice(0, 3),
-            'redeem_slice': slice(0, 3),
+            'voucher_redemptions': [10, 4, 1],
             'expected_results_count': 2
         },
         # VOUCHER_PARTIAL_REDEEMED: ONCE_PER_CUSTOMER
@@ -867,9 +869,8 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             'voucher_type': Voucher.ONCE_PER_CUSTOMER,
             'quantity': 3,
             'max_uses': 10,
-            'voucher_redeem_count': [1, 4],
             'assign_slice': slice(0, 3),
-            'redeem_slice': slice(1, 3),
+            'voucher_redemptions': [0, 1, 4],
             'expected_results_count': 2
         },
         # VOUCHER_PARTIAL_REDEEMED: MULTI_USE_PER_CUSTOMER
@@ -878,9 +879,8 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             'voucher_type': Voucher.MULTI_USE_PER_CUSTOMER,
             'quantity': 3,
             'max_uses': 10,
-            'voucher_redeem_count': [1, 4],
             'assign_slice': slice(0, 3),
-            'redeem_slice': slice(1, 3),
+            'voucher_redemptions': [0, 1, 4],
             'expected_results_count': 2
         },
         # VOUCHER_REDEEMED: SINGLE_USE
@@ -889,7 +889,7 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             'voucher_type': Voucher.SINGLE_USE,
             'quantity': 3,
             'assign_slice': slice(0, 0),
-            'redeem_slice': slice(0, 0),
+            'voucher_redemptions': [0, 0, 0],
             'expected_results_count': 0
         },
         {
@@ -897,7 +897,7 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             'voucher_type': Voucher.SINGLE_USE,
             'quantity': 3,
             'assign_slice': slice(0, 0),
-            'redeem_slice': slice(0, 3),
+            'voucher_redemptions': [1, 1, 1],
             'expected_results_count': 3
         },
         {
@@ -905,7 +905,7 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             'voucher_type': Voucher.SINGLE_USE,
             'quantity': 3,
             'assign_slice': slice(0, 1),
-            'redeem_slice': slice(1, 3),
+            'voucher_redemptions': [0, 1, 1],
             'expected_results_count': 2
         },
         # VOUCHER_REDEEMED: MULTI_USE
@@ -915,7 +915,7 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             'quantity': 3,
             'max_uses': 10,
             'assign_slice': slice(0, 1),
-            'redeem_slice': slice(1, 3),
+            'voucher_redemptions': [10, 10, 10],
             'expected_results_count': 20
         },
         {
@@ -923,9 +923,8 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             'voucher_type': Voucher.MULTI_USE,
             'quantity': 3,
             'max_uses': 10,
-            'voucher_redeem_count': [1, 4],
             'assign_slice': slice(0, 1),
-            'redeem_slice': slice(1, 3),
+            'voucher_redemptions': [0, 1, 4],
             'expected_results_count': 0
         },
         {
@@ -933,9 +932,8 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             'voucher_type': Voucher.MULTI_USE,
             'quantity': 3,
             'max_uses': 10,
-            'voucher_redeem_count': [10, 4],
             'assign_slice': slice(0, 1),
-            'redeem_slice': slice(1, 3),
+            'voucher_redemptions': [0, 10, 4],
             'expected_results_count': 10
         },
         # VOUCHER_REDEEMED: ONCE_PER_CUSTOMER
@@ -945,7 +943,7 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             'quantity': 3,
             'max_uses': 10,
             'assign_slice': slice(0, 1),
-            'redeem_slice': slice(1, 3),
+            'voucher_redemptions': [0, 10, 10],
             'expected_results_count': 20
         },
         # VOUCHER_REDEEMED: MULTI_USE_PER_CUSTOMER
@@ -955,7 +953,7 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             'quantity': 3,
             'max_uses': 10,
             'assign_slice': slice(0, 0),
-            'redeem_slice': slice(0, 3),
+            'voucher_redemptions': [10, 10, 10],
             'expected_results_count': 3
         },
         {
@@ -964,7 +962,7 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             'quantity': 3,
             'max_uses': 10,
             'assign_slice': slice(0, 1),
-            'redeem_slice': slice(1, 3),
+            'voucher_redemptions': [0, 10, 10],
             'expected_results_count': 2
         },
         {
@@ -972,9 +970,8 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             'voucher_type': Voucher.MULTI_USE_PER_CUSTOMER,
             'quantity': 3,
             'max_uses': 10,
-            'voucher_redeem_count': [1, 4],
             'assign_slice': slice(0, 1),
-            'redeem_slice': slice(1, 3),
+            'voucher_redemptions': [0, 1, 4],
             'expected_results_count': 0
         },
         {
@@ -982,9 +979,8 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             'voucher_type': Voucher.MULTI_USE_PER_CUSTOMER,
             'quantity': 3,
             'max_uses': 10,
-            'voucher_redeem_count': [10, 4],
             'assign_slice': slice(0, 1),
-            'redeem_slice': slice(1, 3),
+            'voucher_redemptions': [0, 10, 4],
             'expected_results_count': 1
         },
     )
@@ -1007,13 +1003,13 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             self.assign_coupon_codes(coupon_id, vouchers[data['assign_slice']])
 
         # create voucher applications.
-        voucher_redeem_count = data.get('voucher_redeem_count')
+        voucher_redemptions = data.get('voucher_redemptions')
         redeem_completely = data.get('redeem_completely', True)
         self.create_coupon_vouchers(
-            coupon_vouchers=vouchers[data['redeem_slice']],
+            coupon_vouchers=vouchers,
             max_uses=max_uses,
-            redeem_completely=redeem_completely if voucher_redeem_count is None else False,
-            voucher_redeem_count=voucher_redeem_count,
+            redeem_completely=redeem_completely if voucher_redemptions is None else False,
+            voucher_redemptions=voucher_redemptions,
         )
 
         # Get coupon codes.
