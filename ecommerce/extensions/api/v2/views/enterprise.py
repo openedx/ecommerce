@@ -20,7 +20,8 @@ from ecommerce.extensions.api.serializers import (
     CouponSerializer,
     CouponVoucherSerializer,
     EnterpriseCouponListSerializer,
-    EnterpriseCouponOverviewListSerializer
+    EnterpriseCouponOverviewListSerializer,
+    CouponUsageSerializer,
 )
 from ecommerce.extensions.api.v2.utils import send_new_codes_notification_email
 from ecommerce.extensions.api.v2.views.coupons import CouponViewSet
@@ -210,27 +211,16 @@ class EnterpriseCouponViewSet(CouponViewSet):
             ]
         }
         """
-        coupon = self.get_object()
-
-        # this will give us vouchers against each voucher application, so if a
-        # voucher has two applications than this queryset will give 2 vouchers
-        coupon_vouchers_with_applications = Voucher.objects.filter(
-            applications__voucher_id__in=coupon.attr.coupon_vouchers.vouchers.all()
+        serializer = CouponUsageSerializer(
+            data=self.get_object(),
+            context={'code_filter': request.query_params.get('code_filter')}
         )
-        # this will give us only those vouchers having no application
-        coupon_vouchers_wo_applications = Voucher.objects.filter(
-            coupon_vouchers__coupon__id=coupon.id,
-            applications__isnull=True
-        )
+        # TODO: figure out pagination...
+        #if format is None:
+        #    page = self.paginate_queryset(all_coupon_vouchers)
+        #    serializer = CouponVoucherSerializer(page, many=True)
+        #    return self.get_paginated_response(serializer.data)
 
-        # we need a combined querset so that pagination works as expected
-        all_coupon_vouchers = coupon_vouchers_with_applications | coupon_vouchers_wo_applications
-
-        if format is None:
-            page = self.paginate_queryset(all_coupon_vouchers)
-            serializer = CouponVoucherSerializer(page, many=True)
-            return self.get_paginated_response(serializer.data)
-        serializer = CouponVoucherSerializer(all_coupon_vouchers, many=True)
         return Response(serializer.data)
 
     @list_route(url_path=r'(?P<enterprise_id>.+)/overview')
