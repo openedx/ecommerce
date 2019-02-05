@@ -10,7 +10,7 @@ def test_login_and_logout(selenium):
 
     LmsHelpers.login(selenium)
 
-    # Visit the Otto dashboard to trigger an OpenID Connect login
+    # Visit the Otto dashboard to trigger a login
     EcommerceHelpers.visit_dashboard(selenium)
 
     # Logging out of Otto should redirect the user to the LMS logout page, which redirects
@@ -24,7 +24,7 @@ def test_provider_logout(selenium):
 
     LmsHelpers.login(selenium)
 
-    # Visit the Otto dashboard to trigger an OpenID Connect login
+    # Visit the Otto dashboard to trigger a login
     EcommerceHelpers.visit_dashboard(selenium)
 
     LmsHelpers.logout(selenium)
