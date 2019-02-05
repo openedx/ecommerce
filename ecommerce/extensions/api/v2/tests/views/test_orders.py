@@ -178,8 +178,8 @@ class OrderListViewTests(AccessTokenMixin, ThrottlingMixin, TestCase):
         site_configuration = SiteConfigurationFactory(
             from_email='from@example.com',
             oauth_settings={
-                'SOCIAL_AUTH_EDX_OIDC_KEY': 'key',
-                'SOCIAL_AUTH_EDX_OIDC_SECRET': 'secret'
+                'SOCIAL_AUTH_EDX_OAUTH2_KEY': 'key',
+                'SOCIAL_AUTH_EDX_OAUTH2_SECRET': 'secret'
             },
             partner=self.partner,
             segment_key='fake_segment_key',
