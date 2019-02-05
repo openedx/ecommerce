@@ -435,18 +435,15 @@ ENABLE_AUTO_AUTH = False
 # If it were not set, we would be unable to automatically remove all auto-auth users.
 AUTO_AUTH_USERNAME_PREFIX = 'AUTO_AUTH_'
 
-AUTHENTICATION_BACKENDS = ('auth_backends.backends.EdXOpenIdConnect',) + AUTHENTICATION_BACKENDS
+AUTHENTICATION_BACKENDS = ('auth_backends.backends.EdXOAuth2',) + AUTHENTICATION_BACKENDS
 
 SOCIAL_AUTH_STRATEGY = 'ecommerce.social_auth.strategies.CurrentSiteDjangoStrategy'
 
-# Set these to the correct values for your OAuth2/OpenID Connect provider
-SOCIAL_AUTH_EDX_OIDC_KEY = None
-SOCIAL_AUTH_EDX_OIDC_SECRET = None
-SOCIAL_AUTH_EDX_OIDC_URL_ROOT = None
-SOCIAL_AUTH_EDX_OIDC_LOGOUT_URL = None
-
-# This value should be the same as SOCIAL_AUTH_EDX_OIDC_SECRET
-SOCIAL_AUTH_EDX_OIDC_ID_TOKEN_DECRYPTION_KEY = SOCIAL_AUTH_EDX_OIDC_SECRET
+# Set these to the correct values for your OAuth2 provider
+SOCIAL_AUTH_EDX_OAUTH2_KEY = None
+SOCIAL_AUTH_EDX_OAUTH2_SECRET = None
+SOCIAL_AUTH_EDX_OAUTH2_URL_ROOT = None
+SOCIAL_AUTH_EDX_OAUTH2_LOGOUT_URL = None
 
 # Redirect successfully authenticated users to the Oscar dashboard.
 LOGIN_REDIRECT_URL = 'dashboard:index'
