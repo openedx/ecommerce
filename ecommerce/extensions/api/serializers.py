@@ -676,237 +676,97 @@ class VoucherSerializer(serializers.ModelSerializer):
         )
 
 
-class CouponVoucherSerializer(serializers.Serializer):  # pylint: disable=abstract-method
+class CodeUsageSerializer(serializers.Serializer):  # pylint: disable=abstract-method
     code = serializers.SerializerMethodField()
     assigned_to = serializers.SerializerMethodField()
     redeem_url = serializers.SerializerMethodField()
     redemptions = serializers.SerializerMethodField()
 
-    def get_code(self, voucher):
-        return voucher.code
+    def get_code(self, obj):
+        return obj.code
 
     def get_redeem_url(self, obj):
+        code = self.get_code(obj)
         url = get_ecommerce_url('/coupons/offer/')
-        return '{url}?code={code}'.format(url=url, code=obj.code)
+        return '{url}?code={code}'.format(url=url, code=code)
 
-    def get_assigned_to(self, obj):  # pylint: disable=unused-argument
+    def get_assigned_to(self, obj):
+        return obj.user_email
+
+    def get_redemptions(self, obj):
+        offer = obj.best_offer
+        redemption_count = obj.num_orders
+
+        if obj.usage == Voucher.SINGLE_USE:
+            max_coupon_usage = 1
+        elif offer.max_global_applications is None:
+            max_coupon_usage = OFFER_MAX_USES_DEFAULT
+        else:
+            max_coupon_usage = offer.max_global_applications
+
+        return {
+            'used': redemption_count,
+            'available': max_coupon_usage,
+        }
+
+
+class NotAssignedCodeUsageSerializer(CodeUsageSerializer):  # pylint: disable=abstract-method
+
+    def get_assigned_to(self, obj):
         return ''
 
-    def get_redemptions(self, voucher):
-        offer = voucher.best_offer
-        redemption_count = voucher.num_orders
 
-        if voucher.usage == Voucher.SINGLE_USE:
-            max_coupon_usage = 1
-        elif voucher.usage != Voucher.SINGLE_USE and offer.max_global_applications is None:
-            max_coupon_usage = OFFER_MAX_USES_DEFAULT
+class NotRedeemedCodeUsageSerializer(CodeUsageSerializer):  # pylint: disable=abstract-method
+
+    def get_redemptions(self, obj):
+        usage_type = self.context.get('usage_type')
+        if usage_type in (Voucher.SINGLE_USE, Voucher.MULTI_USE_PER_CUSTOMER):
+            return super(NotRedeemedCodeUsageSerializer, self).get_redemptions(obj)
         else:
-            max_coupon_usage = offer.max_global_applications
-
-        return {
-            'used': redemption_count,
-            'available': max_coupon_usage,
-        }
-
-
-class CouponUsageSerializer(serializers.ModelSerializer):  # pylint: disable=abstract-method
-    code_usages = serializers.SerializerMethodField(read_only=True)
-
-    def get_code_usages(self, obj):
-        code_filter = self.context.get('code_filter')
-        code_usages = []
-        for voucher in obj.attr.coupon_vouchers.vouchers.all():
-            code_usages += self._get_code_usages_for_voucher(voucher, code_filter)
-        return code_usages
-
-    def _get_redeem_url(self, obj):
-        url = get_ecommerce_url('/coupons/offer/')
-        return '{url}?code={code}'.format(url=url, code=obj.code)
-
-    def _get_redemptions(self, voucher):
-        offer = voucher.best_offer
-        redemption_count = voucher.num_orders
-
-        if voucher.usage == Voucher.SINGLE_USE:
-            max_coupon_usage = 1
-        elif voucher.usage != Voucher.SINGLE_USE and offer.max_global_applications is None:
-            max_coupon_usage = OFFER_MAX_USES_DEFAULT
-        else:
-            max_coupon_usage = offer.max_global_applications
-
-        return {
-            'used': redemption_count,
-            'available': max_coupon_usage,
-        }
-
-    def _get_code_usages_for_voucher(self, voucher, code_filter):
-        enterprise_offer = voucher.enterprise_offer
-        if not enterprise_offer:
-            return
-
-        if code_filter == VOUCHER_NOT_ASSIGNED:
-            return self._get_not_assigned_usages(voucher)
-        elif code_filter == VOUCHER_NOT_REDEEMED:
-            return self._get_not_redeemed_usages(voucher)
-        elif code_filter == VOUCHER_PARTIAL_REDEEMED:
-            return self._get_partial_redeemed_usages(voucher)
-        elif code_filter == VOUCHER_REDEEMED:
-            return self._get_redeemed_usages(voucher)
-
-    def _get_not_assigned_usages(self, voucher):
-        slots_available = voucher.slots_available_for_assignment
-        if slots_available == 0:
-            return
-
-        redeem_url = self._get_redeem_url(voucher)
-        redemptions = self._get_redemptions(voucher)
-        if voucher.usage in (Voucher.SINGLE_USE, Voucher.MULTI_USE_PER_CUSTOMER):
-            return [{
-                'code': voucher.code,
-                'assigned_to': '',
-                'redeem_url': redeem_url,
-                'redemptions': redemptions,
-            }]
-        elif voucher.usage in (Voucher.MULTI_USE, Voucher.ONCE_PER_CUSTOMER):
-            code_usages = []
-            for _ in range(0, slots_available):
-                code_usages.append({
-                    'code': voucher.code,
-                    'assigned_to': '',
-                    'redeem_url': redeem_url,
-                    'redemptions': redemptions,
-                })
-            return code_usages
-
-    def _get_not_redeemed_usages(self, voucher):
-        assignments = voucher.enterprise_offer.offerassignment_set.filter(
-            code=voucher.code,
-            status__in=[OFFER_ASSIGNED, OFFER_ASSIGNMENT_EMAIL_PENDING]
-        )
-
-        if assignments.count() == 0:
-            return
-
-        redeem_url = self._get_redeem_url(voucher)
-        if voucher.usage in (Voucher.SINGLE_USE, Voucher.MULTI_USE_PER_CUSTOMER):
-            user_email = assignments.first().user_email
-            if VoucherApplication.object.filter(
-                voucher=voucher,
-                user=User.objects.get(email=user_email)
-            ).count() > 0:
-                return
-
-            redemptions = self._get_redemptions(voucher)
-            return [{
-                'code': voucher.code,
-                'assigned_to': user_email,
-                'redeem_url': redeem_url,
-                'redemptions': redemptions
-            }]
-        elif voucher.usage in (Voucher.MULTI_USE, Voucher.ONCE_PER_CUSTOMER):
-            code_usages = {}
-            for assignment in assignments:
-                if assignment.user_email not in code_usages:
-                    code_usages[assignment.user_email] = 0
-                code_usages[assignment.user_email] += 1
-
-            return [
-                {
-                    'code': voucher.code,
-                    'assigned_to': user_email,
-                    'redeem_url': redeem_url,
-                    'redemptions': {'used': 0, 'available': num_assignments}
-                }
-                for user_email, num_assignments in code_usages.iteritems()
-                if VoucherApplication.object.filter(
-                    voucher=voucher,
-                    user=User.objects.get(email=user_email)
-                ).count() == 0
-            ]
-
-    def _get_partial_redeemed_usages(self, voucher):
-        assignments = voucher.enterprise_offer.offerassignment_set.filter(
-            code=voucher.code,
-            status__in=[OFFER_ASSIGNED, OFFER_ASSIGNMENT_EMAIL_PENDING]
-        )
-
-        if assignments.count() == 0:
-            return
-
-        redeem_url = self._get_redeem_url(voucher)
-        if voucher.usage in (Voucher.SINGLE_USE, Voucher.MULTI_USE_PER_CUSTOMER):
-            user_email = assignments.first().user_email
-            if VoucherApplication.object.filter(
-                    voucher=voucher,
-                    user=User.objects.get(email=user_email)
-            ).count() == 0:
-                return
-
-            redemptions = self._get_redemptions(voucher)
-            return [{
-                'code': voucher.code,
-                'assigned_to': user_email,
-                'redeem_url': redeem_url,
-                'redemptions': redemptions
-            }]
-        elif voucher.usage in (Voucher.MULTI_USE, Voucher.ONCE_PER_CUSTOMER):
-            code_usages = {}
-            for assignment in assignments:
-                if assignment.user_email not in code_usages:
-                    code_usages[assignment.user_email] = {
-                        'available': 0,
-                        'used': VoucherApplication.object.filter(
-                            voucher=voucher,
-                            user=User.objects.get(email=assignment.user_email)
-                        ).count()
-                    }
-                code_usages[assignment.user_email]['used'] += 1
-                code_usages[assignment.user_email]['available'] += 1
-
-            return [
-                {
-                    'code': voucher.code,
-                    'assigned_to': user_email,
-                    'redeem_url': redeem_url,
-                    'redemptions': redemptions,
-                }
-                for user_email, redemptions in code_usages.iteritems()
-                if redemptions['used'] > 0
-            ]
-
-    def _get_redeemed_usages(self, voucher):
-        voucher_applications = VoucherApplication.object.filter(voucher=voucher)
-        code_usages = {}
-        has_redemptions_left = {}
-        redeem_url = self._get_redeem_url(voucher)
-        for application in voucher_applications:
-            user_email = application.user.email
-            if user_email in has_redemptions_left:
-                 continue
-            if voucher.enterprise_offer.offerassignment_set.filter(
-                code=voucher.code,
+            num_assignments = OfferAssignment.objects.filter(
+                code=obj.code,
+                user_email=obj.user_email,
                 status__in=[OFFER_ASSIGNED, OFFER_ASSIGNMENT_EMAIL_PENDING],
-                user_email=user_email
-            ).exists():
-                has_redemptions_left[user_email] = 1
-            else:
-                if user_email not in code_usages:
-                    code_usages[user_email] = 0
-                code_usages[user_email] += 1
+            ).count()
+            return {'used': 0, 'available': num_assignments}
 
-        return [
-            {
-                'code': voucher.code,
-                'assigned_to': user_email,
-                'redeem_url': redeem_url,
-                'redemptions': {'used': redemptions, 'available': redemptions},
-            }
-            for user_email, redemptions in code_usages.iteritems()
-        ]
 
-    class Meta(object):
-        model = Product
-        fields = ('code_usages')
+class PartialRedeemedCodeUsageSerializer(CodeUsageSerializer):  # pylint: disable=abstract-method
+
+    def get_redemptions(self, obj):
+        usage_type = self.context.get('usage_type')
+        if usage_type == Voucher.SINGLE_USE:
+            return {}
+        elif usage_type == Voucher.MULTI_USE_PER_CUSTOMER:
+            return super(PartialRedeemedCodeUsageSerializer, self).get_redemptions(obj)
+        else:
+            num_assignments = OfferAssignment.objects.filter(
+                code=obj.code,
+                user_email=obj.user_email,
+                status__in=[OFFER_ASSIGNED, OFFER_ASSIGNMENT_EMAIL_PENDING],
+            )
+            num_applications = VoucherApplication.object.filter(
+                voucher=obj,
+                user__email=obj.user_email
+            ).count()
+            return {'used': num_applications, 'available': num_assignments + num_applications}
+
+
+class RedeemedCodeUsageSerializer(CodeUsageSerializer):  # pylint: disable=abstract-method
+
+    def get_code(self, obj):
+        return obj.voucher__code
+
+    def get_assigned_to(self, obj):
+        return obj.user__email
+
+    def get_redemptions(self, obj):
+        num_applications = VoucherApplication.object.filter(
+            voucher__code=obj.voucher__code,
+            user__email=obj.user__email
+        ).count()
+        return {'used': num_applications, 'available': num_applications}
+
 
 class CategorySerializer(serializers.ModelSerializer):
     # NOTE (CCB): We are explicitly ignoring child categories. They are not relevant to our current needs. Support

@@ -18,16 +18,26 @@ from ecommerce.extensions.api.serializers import (
     CouponCodeRemindSerializer,
     CouponCodeRevokeSerializer,
     CouponSerializer,
-    CouponVoucherSerializer,
     EnterpriseCouponListSerializer,
     EnterpriseCouponOverviewListSerializer,
-    CouponUsageSerializer,
+    NotAssignedCodeUsageSerializer,
+    NotRedeemedCodeUsageSerializer,
+    PartialRedeemedCodeUsageSerializer,
+    RedeemedCodeUsageSerializer,
 )
 from ecommerce.extensions.api.v2.utils import send_new_codes_notification_email
 from ecommerce.extensions.api.v2.views.coupons import CouponViewSet
 from ecommerce.extensions.catalogue.utils import (
     attach_vouchers_to_coupon_product,
     create_coupon_product_and_stockrecord
+)
+from ecommerce.extensions.offer.constants import (
+    OFFER_ASSIGNED,
+    OFFER_ASSIGNMENT_EMAIL_PENDING,
+    VOUCHER_NOT_ASSIGNED,
+    VOUCHER_NOT_REDEEMED,
+    VOUCHER_PARTIAL_REDEEMED,
+    VOUCHER_REDEEMED,
 )
 from ecommerce.extensions.voucher.utils import (
     create_enterprise_vouchers,
@@ -39,8 +49,10 @@ from ecommerce.invoice.models import Invoice
 logger = logging.getLogger(__name__)
 Order = get_model('order', 'Order')
 Line = get_model('basket', 'Line')
+OfferAssignment = get_model('offer', 'OfferAssignment')
 Product = get_model('catalogue', 'Product')
 Voucher = get_model('voucher', 'Voucher')
+VoucherApplication = get_model('voucher', 'VoucherApplication')
 
 DEPRECATED_COUPON_CATEGORIES = ['Bulk Enrollment']
 
@@ -211,17 +223,137 @@ class EnterpriseCouponViewSet(CouponViewSet):
             ]
         }
         """
-        serializer = CouponUsageSerializer(
-            data=self.get_object(),
-            context={'code_filter': request.query_params.get('code_filter')}
-        )
-        # TODO: figure out pagination...
-        #if format is None:
-        #    page = self.paginate_queryset(all_coupon_vouchers)
-        #    serializer = CouponVoucherSerializer(page, many=True)
-        #    return self.get_paginated_response(serializer.data)
+        coupon = self.get_object()
+        coupon_vouchers = coupon.attr.coupon_vouchers.vouchers.all()
+        usage_type = coupon_vouchers.first().usage
+        code_filter = request.query_params.get('code_filter')
+        queryset = None
+        serializer_class = None
 
+        if not code_filter:
+            raise ValidationError('code_filter must be specified')
+
+        if code_filter == VOUCHER_NOT_ASSIGNED:
+            queryset = self._get_not_assigned_usages(coupon_vouchers)
+            serializer_class = NotAssignedCodeUsageSerializer
+        elif code_filter == VOUCHER_NOT_REDEEMED:
+            queryset = self._get_not_redeemed_usages(coupon_vouchers)
+            serializer_class = NotRedeemedCodeUsageSerializer
+        elif code_filter == VOUCHER_PARTIAL_REDEEMED:
+            queryset = self._get_partial_redeemed_usages(coupon_vouchers)
+            serializer_class = PartialRedeemedCodeUsageSerializer
+        elif code_filter == VOUCHER_REDEEMED:
+            queryset =  self._get_redeemed_usages(coupon_vouchers)
+            serializer_class = RedeemedCodeUsageSerializer
+
+        if not queryset or not serializer_class:
+            raise ValidationError('Invalid code_filter specified: %s', code_filter)
+
+        if format is None:
+            page = self.paginate_queryset(queryset)
+            serializer = serializer_class(page, many=True, context={'usage_type': usage_type})
+            return self.get_paginated_response(serializer.data)
+
+        serializer = serializer_class(queryset, many=True, context={'usage_type': usage_type})
         return Response(serializer.data)
+
+    def _get_not_assigned_usages(self, vouchers):
+        """
+        Returns a queryset containing Vouchers with slots that have not been assigned.
+        For SINGLE_USE and MULTI_USE_PER_CUSTOMER, unique Vouchers will be included in the final queryset.
+        For MULTI_USE and ONCE_PER_CUSTOMER, duplicate Vouchers matching the number of available slots will
+        be included in the final queryset.
+        """
+        queryset = Voucher.objects.none()
+        for voucher in vouchers:
+            slots_available = voucher.slots_available_for_assignment
+            if slots_available == 0:
+                continue
+
+            if voucher.usage in (Voucher.SINGLE_USE, Voucher.MULTI_USE_PER_CUSTOMER):
+                queryset = queryset.union(id=voucher.id, all=True)
+            elif voucher.usage in (Voucher.MULTI_USE, Voucher.ONCE_PER_CUSTOMER):
+                for _ in range(0, slots_available):
+                    queryset = queryset.union(id=voucher.id, all=True)
+
+        return queryset
+
+    def _get_not_redeemed_usages(self, vouchers):
+        """
+        Returns a queryset containing unique code and user_email pairs from OfferAssignments.
+        Only code and user_email pairs that have no corresponding VoucherApplication are returned.
+        """
+        queryset = OfferAssignment.objects.none()
+        for voucher in vouchers:
+            assignments = voucher.enterprise_offer.offerassignment_set.filter(
+                code=voucher.code,
+                status__in=[OFFER_ASSIGNED, OFFER_ASSIGNMENT_EMAIL_PENDING]
+            )
+
+            if assignments.count() == 0:
+                continue
+
+            users_having_usages = VoucherApplication.objects.filter(
+                voucher=voucher).values_list('user__email', flat=True)
+
+            queryset = queryset.union(
+                assignments.values('code', 'user_email')
+                    .exclude(user_email__in=users_having_usages)
+                    .distinct()
+            )
+
+        return queryset
+
+    def _get_partial_redeemed_usages(self, vouchers):
+        """
+        Returns a queryset containing unique code and user_email pairs from OfferAssignments.
+        Only code and user_email pairs that have at least one corresponding VoucherApplication are returned.
+        """
+        queryset = OfferAssignment.objects.none()
+        # There are no partially redeemed SINGLE_USE codes, so return the empty queryset.
+        if vouchers.first().usage == Voucher.SINGLE_USE:
+            return queryset
+
+        for voucher in vouchers:
+            assignments = voucher.enterprise_offer.offerassignment_set.filter(
+                code=voucher.code,
+                status__in=[OFFER_ASSIGNED, OFFER_ASSIGNMENT_EMAIL_PENDING]
+            )
+
+            if assignments.count() == 0:
+                continue
+
+            users_having_usages = VoucherApplication.objects.filter(
+                voucher=voucher).values_list('user__email', flat=True)
+
+            queryset = queryset.union(
+                assignments.values('code', 'user_email')
+                    .filter(user_email__in=users_having_usages)
+                    .distinct()
+            )
+
+        return queryset
+
+    def _get_redeemed_usages(self, vouchers):
+        """
+        Returns a queryset containing unique voucher.code and user.email pairs from VoucherApplications.
+        Only code and email pairs that have no corresponding active OfferAssignments are returned.
+        """
+        queryset = VoucherApplication.objects.none()
+        for voucher in vouchers:
+            voucher_applications = VoucherApplication.objects.filter(
+                voucher=voucher).values('voucher__code', 'user__email').distinct()
+
+            users_with_assignments = voucher.enterprise_offer.offerassignment_set.filter(
+                code=voucher.code,
+                status__in=[OFFER_ASSIGNED, OFFER_ASSIGNMENT_EMAIL_PENDING]
+            ).values_list('user_email', flat=True)
+
+            queryset = queryset.union(
+                voucher_applications.exclude(user__email__in=users_with_assignments)
+            )
+
+        return queryset
 
     @list_route(url_path=r'(?P<enterprise_id>.+)/overview')
     def overview(self, request, enterprise_id):     # pylint: disable=unused-argument
