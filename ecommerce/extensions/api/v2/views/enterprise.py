@@ -263,15 +263,15 @@ class EnterpriseCouponViewSet(CouponViewSet):
         Returns a queryset containing Vouchers with slots that have not been assigned.
         Unique Vouchers will be included in the final queryset for all types.
         """
-        queryset = Voucher.objects.none()
+        vouchers_with_slots = []
         for voucher in vouchers:
             slots_available = voucher.slots_available_for_assignment
             if slots_available == 0:
                 continue
 
-            queryset = queryset.union(Voucher.objects.filter(id=voucher.id).values('code'))
+            vouchers_with_slots.append(voucher.id)
 
-        return queryset.order_by('code')
+        return Voucher.objects.filter(id__in=vouchers_with_slots).values('code').order_by('code')
 
     def _get_not_redeemed_usages(self, vouchers):
         """
