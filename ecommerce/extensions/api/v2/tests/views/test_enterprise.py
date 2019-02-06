@@ -448,23 +448,19 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
         """
         Mark assignment as redeemed by provided user.
         """
-        assignments = offer.offerassignment_set.filter(
+        assignment = offer.offerassignment_set.filter(
             code=voucher.code, user_email=user.email
         ).exclude(
             status__in=[OFFER_REDEEMED, OFFER_ASSIGNMENT_REVOKED]
-        )
+        ).first()
 
-        for assignment in assignments:
+        if assignment:
             assignment.voucher_application = voucher.applications.filter(
                 user=user,
                 order=order
             ).order_by('-date_created').first()
             assignment.status = OFFER_REDEEMED
             assignment.save()
-
-            # For MULTI_USE_PER_CUSTOMER case, only update one assignment.
-            if voucher.usage == Voucher.MULTI_USE_PER_CUSTOMER:
-                break
 
     def create_enterprise_coupon(self, coupon_data, with_applications=False):
         """
