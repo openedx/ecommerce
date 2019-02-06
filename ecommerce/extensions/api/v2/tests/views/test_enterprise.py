@@ -29,7 +29,7 @@ from ecommerce.extensions.offer.constants import (
     VOUCHER_PARTIAL_REDEEMED,
     VOUCHER_REDEEMED,
     VOUCHER_UNASSIGNED,
-    VOUCHER_UNREDEEMED,
+    VOUCHER_UNREDEEMED
 )
 from ecommerce.invoice.models import Invoice
 from ecommerce.programs.custom import class_path
@@ -505,7 +505,6 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
         """
         Assigns codes.
         """
-        # for _ in range(voucher_assignmentsmax_uses or 1)):
         for i, voucher in enumerate(vouchers):
             if voucher_assignments[i] == 0:
                 continue

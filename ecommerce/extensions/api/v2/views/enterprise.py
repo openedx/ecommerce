@@ -1,6 +1,7 @@
 from __future__ import unicode_literals
 
 import logging
+
 import waffle
 from django.core.exceptions import ValidationError
 from django.db.models import Count, F, IntegerField, OuterRef, Subquery
@@ -31,12 +32,12 @@ from ecommerce.extensions.catalogue.utils import (
     create_coupon_product_and_stockrecord
 )
 from ecommerce.extensions.offer.constants import (
-    OFFER_REDEEMED,
     OFFER_ASSIGNMENT_REVOKED,
-    VOUCHER_UNASSIGNED,
-    VOUCHER_UNREDEEMED,
+    OFFER_REDEEMED,
+    VOUCHER_PARTIAL_REDEEMED,
     VOUCHER_REDEEMED,
-    VOUCHER_PARTIAL_REDEEMED
+    VOUCHER_UNASSIGNED,
+    VOUCHER_UNREDEEMED
 )
 from ecommerce.extensions.voucher.utils import (
     create_enterprise_vouchers,
