@@ -702,7 +702,7 @@ class CodeUsageSerializer(serializers.Serializer):  # pylint: disable=abstract-m
 
         return {
             'used': redemption_count,
-            'available': max_coupon_usage,
+            'total': max_coupon_usage,
         }
 
 
@@ -724,7 +724,7 @@ class NotRedeemedCodeUsageSerializer(CodeUsageSerializer):  # pylint: disable=ab
                 user_email=self.get_assigned_to(obj),
                 status__in=[OFFER_ASSIGNED, OFFER_ASSIGNMENT_EMAIL_PENDING],
             ).count()
-            return {'used': 0, 'available': num_assignments}
+            return {'used': 0, 'total': num_assignments}
 
 
 class PartialRedeemedCodeUsageSerializer(CodeUsageSerializer):  # pylint: disable=abstract-method
@@ -745,7 +745,7 @@ class PartialRedeemedCodeUsageSerializer(CodeUsageSerializer):  # pylint: disabl
                 voucher__code=self.get_code(obj),
                 user__email=self.get_assigned_to(obj)
             ).count()
-            return {'used': num_applications, 'available': num_assignments + num_applications}
+            return {'used': num_applications, 'total': num_assignments + num_applications}
 
 
 class RedeemedCodeUsageSerializer(CodeUsageSerializer):  # pylint: disable=abstract-method
@@ -761,7 +761,7 @@ class RedeemedCodeUsageSerializer(CodeUsageSerializer):  # pylint: disable=abstr
             voucher__code=self.get_code(obj),
             user__email=self.get_assigned_to(obj)
         ).count()
-        return {'used': num_applications, 'available': num_applications}
+        return {'used': num_applications, 'total': num_applications}
 
 
 class CategorySerializer(serializers.ModelSerializer):

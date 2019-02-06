@@ -477,14 +477,14 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             'code_redemptions': {'user2@example.com': {'code': 2, 'num': 1}},
             'expected_responses': {
                 VOUCHER_NOT_ASSIGNED: [
-                    {'code': 0, 'assigned_to': '', 'redemptions': {'used': 0, 'available': 1}}
+                    {'code': 0, 'assigned_to': '', 'redemptions': {'used': 0, 'total': 1}}
                 ],
                 VOUCHER_NOT_REDEEMED: [
-                    {'code': 1, 'assigned_to': 'user1@example.com', 'redemptions': {'used': 0, 'available': 1}}
+                    {'code': 1, 'assigned_to': 'user1@example.com', 'redemptions': {'used': 0, 'total': 1}}
                 ],
                 VOUCHER_PARTIAL_REDEEMED: [],
                 VOUCHER_REDEEMED: [
-                    {'code': 2, 'assigned_to': 'user2@example.com', 'redemptions': {'used': 1, 'available': 1}}
+                    {'code': 2, 'assigned_to': 'user2@example.com', 'redemptions': {'used': 1, 'total': 1}}
                 ]
             }
         },
@@ -499,16 +499,16 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             },
             'expected_responses': {
                 VOUCHER_NOT_ASSIGNED: [
-                    {'code': 0, 'assigned_to': '', 'redemptions': {'used': 0, 'available': 2}}
+                    {'code': 0, 'assigned_to': '', 'redemptions': {'used': 0, 'total': 2}}
                 ],
                 VOUCHER_NOT_REDEEMED: [
-                    {'code': 1, 'assigned_to': 'user1@example.com', 'redemptions': {'used': 0, 'available': 2}}
+                    {'code': 1, 'assigned_to': 'user1@example.com', 'redemptions': {'used': 0, 'total': 2}}
                 ],
                 VOUCHER_PARTIAL_REDEEMED: [
-                    {'code': 2, 'assigned_to': 'user2@example.com', 'redemptions': {'used': 1, 'available': 2}}
+                    {'code': 2, 'assigned_to': 'user2@example.com', 'redemptions': {'used': 1, 'total': 2}}
                 ],
                 VOUCHER_REDEEMED: [
-                    {'code': 3, 'assigned_to': 'user3@example.com', 'redemptions': {'used': 2, 'available': 2}}
+                    {'code': 3, 'assigned_to': 'user3@example.com', 'redemptions': {'used': 2, 'total': 2}}
                 ]
             }
         },
@@ -524,18 +524,18 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             },
             'expected_responses': {
                 VOUCHER_NOT_ASSIGNED: [
-                    {'code': 0, 'assigned_to': '', 'redemptions': {'used': 0, 'available': 4}},
-                    {'code': 1, 'assigned_to': '', 'redemptions': {'used': 1, 'available': 4}}
+                    {'code': 0, 'assigned_to': '', 'redemptions': {'used': 0, 'total': 4}},
+                    {'code': 1, 'assigned_to': '', 'redemptions': {'used': 1, 'total': 4}}
                 ],
                 VOUCHER_NOT_REDEEMED: [
-                    {'code': 1, 'assigned_to': 'user1@example.com', 'redemptions': {'used': 0, 'available': 1}}
+                    {'code': 1, 'assigned_to': 'user1@example.com', 'redemptions': {'used': 0, 'total': 1}}
                 ],
                 VOUCHER_PARTIAL_REDEEMED: [
-                    {'code': 1, 'assigned_to': 'user2@example.com', 'redemptions': {'used': 1, 'available': 2}}
+                    {'code': 1, 'assigned_to': 'user2@example.com', 'redemptions': {'used': 1, 'total': 2}}
                 ],
                 VOUCHER_REDEEMED: [
-                    {'code': 2, 'assigned_to': 'user3@example.com', 'redemptions': {'used': 2, 'available': 2}},
-                    {'code': 2, 'assigned_to': 'user4@example.com', 'redemptions': {'used': 2, 'available': 2}}
+                    {'code': 2, 'assigned_to': 'user3@example.com', 'redemptions': {'used': 2, 'total': 2}},
+                    {'code': 2, 'assigned_to': 'user4@example.com', 'redemptions': {'used': 2, 'total': 2}}
                 ]
             }
         },
@@ -547,15 +547,15 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             'code_redemptions': {'user2@example.com': {'code': 1, 'num': 1}},
             'expected_responses': {
                 VOUCHER_NOT_ASSIGNED: [
-                    {'code': 0, 'assigned_to': '', 'redemptions': {'used': 0, 'available': 3}},
-                    {'code': 1, 'assigned_to': '', 'redemptions': {'used': 1, 'available': 3}}
+                    {'code': 0, 'assigned_to': '', 'redemptions': {'used': 0, 'total': 3}},
+                    {'code': 1, 'assigned_to': '', 'redemptions': {'used': 1, 'total': 3}}
                 ],
                 VOUCHER_NOT_REDEEMED: [
-                    {'code': 1, 'assigned_to': 'user1@example.com', 'redemptions': {'used': 0, 'available': 1}}
+                    {'code': 1, 'assigned_to': 'user1@example.com', 'redemptions': {'used': 0, 'total': 1}}
                 ],
                 VOUCHER_PARTIAL_REDEEMED: [],
                 VOUCHER_REDEEMED: [
-                    {'code': 1, 'assigned_to': 'user2@example.com', 'redemptions': {'used': 1, 'available': 1}}
+                    {'code': 1, 'assigned_to': 'user2@example.com', 'redemptions': {'used': 1, 'total': 1}}
                 ]
             }
         },
@@ -569,6 +569,16 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             code_assignments,
             code_redemptions,
             expected_responses):
+        """
+        Tests the expected response for the code details endpoint based on various types and usage states for a coupon.
+        :param voucher_type: Usage type for vouchers to be created.
+        :param quantity: Number of vouchers to create.
+        :param max_uses: Number of usages per voucher.
+        :param code_assignments: Mapping of user emails to be assigned to a particular code, indicated by its index.
+        :param code_redemptions: Mapping of user emails to a code index and the # of redemptions to make for that user.
+        :param expected_responses: Mapping of code filter to the expected response for that filter.
+        :return:
+        """
         Switch.objects.update_or_create(name=ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, defaults={'active': True})
         coupon_post_data = dict(self.data, voucher_type=voucher_type, quantity=quantity, max_uses=max_uses)
         coupon = self.get_response('POST', ENTERPRISE_COUPONS_LINK, coupon_post_data)
@@ -602,6 +612,36 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             response.json(),
             {'detail': 'Not found.'}
         )
+
+    def test_coupon_codes_detail_with_invalid_code_filter(self):
+        Switch.objects.update_or_create(name=ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, defaults={'active': True})
+        coupon_post_data = dict(self.data, voucher_type=Voucher.SINGLE_USE, quantity=1, max_uses=None)
+        coupon = self.get_response('POST', ENTERPRISE_COUPONS_LINK, coupon_post_data)
+        coupon = coupon.json()
+        coupon_id = coupon['coupon_id']
+
+        response = self.get_response(
+            'GET',
+            '/api/v2/enterprise/coupons/{}/codes/?code_filter={}'.format(coupon_id, 'invalid-filter')
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        response = response.json()
+        assert response == ['Invalid code_filter specified: invalid-filter']
+
+    def test_coupon_codes_detail_with_no_code_filter(self):
+        Switch.objects.update_or_create(name=ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, defaults={'active': True})
+        coupon_post_data = dict(self.data, voucher_type=Voucher.SINGLE_USE, quantity=1, max_uses=None)
+        coupon = self.get_response('POST', ENTERPRISE_COUPONS_LINK, coupon_post_data)
+        coupon = coupon.json()
+        coupon_id = coupon['coupon_id']
+
+        response = self.get_response(
+            'GET',
+            '/api/v2/enterprise/coupons/{}/codes/'.format(coupon_id)
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        response = response.json()
+        assert response == ['code_filter must be specified']
 
     @ddt.data(
         (

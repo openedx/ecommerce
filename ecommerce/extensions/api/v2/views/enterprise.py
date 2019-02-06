@@ -232,7 +232,7 @@ class EnterpriseCouponViewSet(CouponViewSet):
         serializer_class = None
 
         if not code_filter:
-            raise ValidationError('code_filter must be specified')
+            raise serializers.ValidationError('code_filter must be specified')
 
         if code_filter == VOUCHER_NOT_ASSIGNED:
             queryset = self._get_not_assigned_usages(coupon_vouchers)
@@ -248,7 +248,7 @@ class EnterpriseCouponViewSet(CouponViewSet):
             serializer_class = RedeemedCodeUsageSerializer
 
         if not serializer_class:
-            raise ValidationError('Invalid code_filter specified: %s', code_filter)
+            raise serializers.ValidationError('Invalid code_filter specified: {}'.format(code_filter))
 
         if format is None:
             page = self.paginate_queryset(queryset)
