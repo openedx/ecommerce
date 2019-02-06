@@ -15,7 +15,7 @@ msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2018-04-05 11:00+0000\n"
-"PO-Revision-Date: 2019-01-18 19:31+0000\n"
+"PO-Revision-Date: 2019-01-29 19:28+0000\n"
 "Last-Translator: Katerina Ligkovanli <kaligova@gmail.com>\n"
 "Language-Team: Greek (http://www.transifex.com/open-edx/edx-platform/language/el/)\n"
 "MIME-Version: 1.0\n"
@@ -88,11 +88,11 @@ msgstr ""
 #: ecommerce/static/js/models/course_model.js:94
 #: ecommerce/static/js/views/dynamic_catalog_view.js:70
 msgid "Course ID"
-msgstr ""
+msgstr "Ταυτότητα μαθήματος"
 
 #: ecommerce/static/js/models/course_model.js:95
 msgid "Course Name"
-msgstr ""
+msgstr "Τίτλος Μαθήματος"
 
 #: ecommerce/static/js/models/course_model.js:96
 #: ecommerce/static/js/views/course_list_view.js:72
@@ -223,7 +223,7 @@ msgstr ""
 
 #: ecommerce/static/js/pages/coupon_list_page.js:12
 msgid "Coupon Codes"
-msgstr ""
+msgstr "Κωδικοί κουπονιού."
 
 #: ecommerce/static/js/pages/course_create_page.js:12
 msgid "Create New Course"
@@ -378,7 +378,7 @@ msgstr ""
 
 #: ecommerce/static/js/views/course_form_view.js:65
 msgid "Professional Education"
-msgstr ""
+msgstr "Επαγγελματική Κατάρτιση"
 
 #: ecommerce/static/js/views/course_form_view.js:66
 msgid ""
@@ -410,7 +410,7 @@ msgstr ""
 
 #: ecommerce/static/js/views/course_list_view.js:64
 msgid "Course"
-msgstr ""
+msgstr "Το μάθημα"
 
 #: ecommerce/static/js/views/course_list_view.js:79
 msgid "Last Edited"

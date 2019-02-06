@@ -672,29 +672,30 @@ class VoucherSerializer(serializers.ModelSerializer):
         )
 
 
-class CouponVoucherSerializer(serializers.Serializer):  # pylint: disable=abstract-method
+class CodeUsageSerializer(serializers.Serializer):  # pylint: disable=abstract-method
     code = serializers.SerializerMethodField()
     assigned_to = serializers.SerializerMethodField()
     redeem_url = serializers.SerializerMethodField()
     redemptions = serializers.SerializerMethodField()
 
-    def get_code(self, voucher):
-        return voucher.code
+    def get_code(self, obj):
+        return obj.get('code')
 
     def get_redeem_url(self, obj):
         url = get_ecommerce_url('/coupons/offer/')
-        return '{url}?code={code}'.format(url=url, code=obj.code)
+        return '{url}?code={code}'.format(url=url, code=self.get_code(obj))
 
-    def get_assigned_to(self, obj):  # pylint: disable=unused-argument
-        return ''
+    def get_assigned_to(self, obj):
+        return obj.get('user_email')
 
-    def get_redemptions(self, voucher):
+    def get_redemptions(self, obj):
+        voucher = Voucher.objects.get(code=self.get_code(obj))
         offer = voucher.best_offer
         redemption_count = voucher.num_orders
 
         if voucher.usage == Voucher.SINGLE_USE:
             max_coupon_usage = 1
-        elif voucher.usage != Voucher.SINGLE_USE and offer.max_global_applications is None:
+        elif offer.max_global_applications is None:
             max_coupon_usage = OFFER_MAX_USES_DEFAULT
         else:
             max_coupon_usage = offer.max_global_applications
@@ -703,6 +704,64 @@ class CouponVoucherSerializer(serializers.Serializer):  # pylint: disable=abstra
             'used': redemption_count,
             'available': max_coupon_usage,
         }
+
+
+class NotAssignedCodeUsageSerializer(CodeUsageSerializer):  # pylint: disable=abstract-method
+
+    def get_assigned_to(self, obj):
+        return ''
+
+
+class NotRedeemedCodeUsageSerializer(CodeUsageSerializer):  # pylint: disable=abstract-method
+
+    def get_redemptions(self, obj):
+        usage_type = self.context.get('usage_type')
+        if usage_type in (Voucher.SINGLE_USE, Voucher.MULTI_USE_PER_CUSTOMER):
+            return super(NotRedeemedCodeUsageSerializer, self).get_redemptions(obj)
+        else:
+            num_assignments = OfferAssignment.objects.filter(
+                code=self.get_code(obj),
+                user_email=self.get_assigned_to(obj),
+                status__in=[OFFER_ASSIGNED, OFFER_ASSIGNMENT_EMAIL_PENDING],
+            ).count()
+            return {'used': 0, 'available': num_assignments}
+
+
+class PartialRedeemedCodeUsageSerializer(CodeUsageSerializer):  # pylint: disable=abstract-method
+
+    def get_redemptions(self, obj):
+        usage_type = self.context.get('usage_type')
+        if usage_type == Voucher.SINGLE_USE:
+            return {}
+        elif usage_type == Voucher.MULTI_USE_PER_CUSTOMER:
+            return super(PartialRedeemedCodeUsageSerializer, self).get_redemptions(obj)
+        else:
+            num_assignments = OfferAssignment.objects.filter(
+                code=self.get_code(obj),
+                user_email=self.get_assigned_to(obj),
+                status__in=[OFFER_ASSIGNED, OFFER_ASSIGNMENT_EMAIL_PENDING],
+            ).count()
+            num_applications = VoucherApplication.objects.filter(
+                voucher__code=self.get_code(obj),
+                user__email=self.get_assigned_to(obj)
+            ).count()
+            return {'used': num_applications, 'available': num_assignments + num_applications}
+
+
+class RedeemedCodeUsageSerializer(CodeUsageSerializer):  # pylint: disable=abstract-method
+
+    def get_code(self, obj):
+        return obj.get('voucher__code')
+
+    def get_assigned_to(self, obj):
+        return obj.get('user__email')
+
+    def get_redemptions(self, obj):
+        num_applications = VoucherApplication.objects.filter(
+            voucher__code=self.get_code(obj),
+            user__email=self.get_assigned_to(obj)
+        ).count()
+        return {'used': num_applications, 'available': num_applications}
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -1221,7 +1280,33 @@ class CouponCodeRevokeRemindBulkSerializer(serializers.ListSerializer):  # pylin
         ]
 
 
-class CouponCodeRevokeSerializer(serializers.Serializer):  # pylint: disable=abstract-method
+class CouponCodeMixin(object):
+
+    def validate_coupon_has_code(self, coupon, code):
+        """
+        Validate that the code is associated with the coupon
+        :param coupon: (Product): Coupon product associated with vouchers
+        :param code: (str): Code associated with the voucher
+        :raises rest_framework.exceptions.ValidationError in case code is not associated with the coupon
+        """
+        if not coupon.attr.coupon_vouchers.vouchers.filter(code=code).exists():
+            raise serializers.ValidationError('Code {} is not associated with this Coupon'.format(code))
+
+    def get_unredeemed_offer_assignments(self, code, email):
+        """
+        Returns offer assignments associated with the code and email
+        :param code: (str): Code associated with the voucher
+        :param email: (str): Learner email
+        :return: QuerySet containing offer assignments associated with the code and email
+        """
+        return OfferAssignment.objects.filter(
+            code=code,
+            user_email=email,
+            status__in=[OFFER_ASSIGNED, OFFER_ASSIGNMENT_EMAIL_PENDING]
+        )
+
+
+class CouponCodeRevokeSerializer(CouponCodeMixin, serializers.Serializer):  # pylint: disable=abstract-method
 
     class Meta:  # pylint: disable=old-style-class
         list_serializer_class = CouponCodeRevokeRemindBulkSerializer
@@ -1264,21 +1349,69 @@ class CouponCodeRevokeSerializer(serializers.Serializer):  # pylint: disable=abs
         """
         code = data.get('code')
         email = data.get('email')
-
         coupon = self.context.get('coupon')
-        if not coupon.attr.coupon_vouchers.vouchers.filter(code=code).exists():
-            raise serializers.ValidationError('Code {} is not associated with this Coupon'.format(code))
-
-        offer_assignments = OfferAssignment.objects.filter(
-            code=code,
-            user_email=email,
-            status__in=[OFFER_ASSIGNED, OFFER_ASSIGNMENT_EMAIL_PENDING]
-        )
-
+        self.validate_coupon_has_code(coupon, code)
+        offer_assignments = self.get_unredeemed_offer_assignments(code, email)
         if not offer_assignments.exists():
             raise serializers.ValidationError('No assignments exist for user {} and code {}'.format(email, code))
-
         data['offer_assignments'] = offer_assignments
+        return data
+
+
+class CouponCodeRemindSerializer(CouponCodeMixin, serializers.Serializer):  # pylint: disable=abstract-method
+
+    class Meta:  # pylint: disable=old-style-class
+        list_serializer_class = CouponCodeRevokeRemindBulkSerializer
+
+    code = serializers.CharField(required=True)
+    email = serializers.EmailField(required=True)
+    detail = serializers.CharField(read_only=True)
+
+    def create(self, validated_data):
+        """
+        Send remind email(s) for pending OfferAssignments.
+        """
+        offer_assignments = validated_data.get('offer_assignments')
+        email = validated_data.get('email')
+        code = validated_data.get('code')
+        redeemed_offer_count = validated_data.get('redeemed_offer_count')
+        total_offer_count = validated_data.get('total_offer_count')
+        template = self.context.get('template')
+        detail = 'success'
+
+        try:
+            self._trigger_email_sending_task(
+                template,
+                offer_assignments.first(),
+                redeemed_offer_count,
+                total_offer_count
+            )
+        except Exception as exc:  # pylint: disable=broad-except
+            logger.exception('Encountered error during reminder email for code %s of user %s', code, email)
+            detail = unicode(exc)
+
+        validated_data['detail'] = detail
+        return validated_data
+
+    def validate(self, data):
+        """
+        Validate that the code is part of the Coupon the code and email provided have an active OfferAssignment.
+        """
+        code = data.get('code')
+        email = data.get('email')
+        coupon = self.context.get('coupon')
+        self.validate_coupon_has_code(coupon, code)
+        offer_assignments = self.get_unredeemed_offer_assignments(code, email)
+        offer_assignments_redeemed = OfferAssignment.objects.filter(
+            code=code,
+            user_email=email,
+            status=OFFER_REDEEMED
+        )
+        if not offer_assignments.exists():
+            raise serializers.ValidationError('No assignments exist for user {} and code {}'.format(email, code))
+        data['offer_assignments'] = offer_assignments
+        data['redeemed_offer_count'] = offer_assignments_redeemed.count()
+        data['total_offer_count'] = offer_assignments.count()
         return data
 
 
