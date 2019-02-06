@@ -16,6 +16,7 @@ from oscar.test import factories
 from rest_framework import status
 from waffle.models import Switch
 
+from ecommerce.core.url_utils import get_ecommerce_url
 from ecommerce.coupons.tests.mixins import CouponMixin, DiscoveryMockMixin
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.enterprise.benefits import BENEFIT_MAP as ENTERPRISE_BENEFIT_MAP
@@ -28,7 +29,7 @@ from ecommerce.extensions.offer.constants import (
     VOUCHER_NOT_ASSIGNED,
     VOUCHER_NOT_REDEEMED,
     VOUCHER_PARTIAL_REDEEMED,
-    VOUCHER_REDEEMED,
+    VOUCHER_REDEEMED
 )
 from ecommerce.invoice.models import Invoice
 from ecommerce.programs.custom import class_path
@@ -443,177 +444,153 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
 
         return coupon_id
 
-    def assert_code_detail_response(self, response, code, email, used, available):
-        self.assertEqual(response['code'], code)
-        self.assertEqual(response['assigned_to'], email)
-        self.assertEqual(response['redemptions'], {'used': used, 'available': available})
+    def assert_code_detail_response(self, response, expected, codes):
+        self.assertEqual(len(response), len(expected))
+        expected_response = []
+        for result in expected:
+            expected_result = result
+            expected_result['code'] = codes[result['code']]
+            expected_result['redeem_url'] = '{url}?code={code}'.format(
+                url=get_ecommerce_url('/coupons/offer/'),
+                code=expected_result['code']
+            )
+            expected_response.append(expected_result)
 
-    def test_coupon_codes_detail_single_use(self):
+        response = sorted(response, key=lambda k: (k['code'], k['assigned_to']))
+        expected_response = sorted(expected_response, key=lambda k: (k['code'], k['assigned_to']))
+        self.assertEqual(response, expected_response)
+
+    def assign_user_to_code(self, coupon_id, emails, codes):
+        with mock.patch('ecommerce.extensions.offer.utils.send_offer_assignment_email.delay'):
+            self.get_response(
+                'POST',
+                '/api/v2/enterprise/coupons/{}/assign/'.format(coupon_id),
+                {'template': 'Test template', 'emails': emails, 'codes': codes}
+            )
+
+    @ddt.data(
+        {
+            'voucher_type': Voucher.SINGLE_USE,
+            'quantity': 3,
+            'max_uses': None,
+            'code_assignments': {'user1@example.com': 1},
+            'code_redemptions': {'user2@example.com': {'code': 2, 'num': 1}},
+            'expected_responses': {
+                VOUCHER_NOT_ASSIGNED: [
+                    {'code': 0, 'assigned_to': '', 'redemptions': {'used': 0, 'available': 1}}
+                ],
+                VOUCHER_NOT_REDEEMED: [
+                    {'code': 1, 'assigned_to': 'user1@example.com', 'redemptions': {'used': 0, 'available': 1}}
+                ],
+                VOUCHER_PARTIAL_REDEEMED: [],
+                VOUCHER_REDEEMED: [
+                    {'code': 2, 'assigned_to': 'user2@example.com', 'redemptions': {'used': 1, 'available': 1}}
+                ]
+            }
+        },
+        {
+            'voucher_type': Voucher.MULTI_USE_PER_CUSTOMER,
+            'quantity': 4,
+            'max_uses': 2,
+            'code_assignments': {'user1@example.com': 1, 'user2@example.com': 2},
+            'code_redemptions': {
+                'user2@example.com': {'code': 2, 'num': 1},
+                'user3@example.com': {'code': 3, 'num': 2}
+            },
+            'expected_responses': {
+                VOUCHER_NOT_ASSIGNED: [
+                    {'code': 0, 'assigned_to': '', 'redemptions': {'used': 0, 'available': 2}}
+                ],
+                VOUCHER_NOT_REDEEMED: [
+                    {'code': 1, 'assigned_to': 'user1@example.com', 'redemptions': {'used': 0, 'available': 2}}
+                ],
+                VOUCHER_PARTIAL_REDEEMED: [
+                    {'code': 2, 'assigned_to': 'user2@example.com', 'redemptions': {'used': 1, 'available': 2}}
+                ],
+                VOUCHER_REDEEMED: [
+                    {'code': 3, 'assigned_to': 'user3@example.com', 'redemptions': {'used': 2, 'available': 2}}
+                ]
+            }
+        },
+        {
+            'voucher_type': Voucher.MULTI_USE,
+            'quantity': 3,
+            'max_uses': 4,
+            'code_assignments': {'user1@example.com': 1, 'user2@example.com': 1},
+            'code_redemptions': {
+                'user2@example.com': {'code': 1, 'num': 1},
+                'user3@example.com': {'code': 2, 'num': 2},
+                'user4@example.com': {'code': 2, 'num': 2},
+            },
+            'expected_responses': {
+                VOUCHER_NOT_ASSIGNED: [
+                    {'code': 0, 'assigned_to': '', 'redemptions': {'used': 0, 'available': 4}},
+                    {'code': 1, 'assigned_to': '', 'redemptions': {'used': 1, 'available': 4}}
+                ],
+                VOUCHER_NOT_REDEEMED: [
+                    {'code': 1, 'assigned_to': 'user1@example.com', 'redemptions': {'used': 0, 'available': 1}}
+                ],
+                VOUCHER_PARTIAL_REDEEMED: [
+                    {'code': 1, 'assigned_to': 'user2@example.com', 'redemptions': {'used': 1, 'available': 2}}
+                ],
+                VOUCHER_REDEEMED: [
+                    {'code': 2, 'assigned_to': 'user3@example.com', 'redemptions': {'used': 2, 'available': 2}},
+                    {'code': 2, 'assigned_to': 'user4@example.com', 'redemptions': {'used': 2, 'available': 2}}
+                ]
+            }
+        },
+        {
+            'voucher_type': Voucher.ONCE_PER_CUSTOMER,
+            'quantity': 2,
+            'max_uses': 3,
+            'code_assignments': {'user1@example.com': 1},
+            'code_redemptions': {'user2@example.com': {'code': 1, 'num': 1}},
+            'expected_responses': {
+                VOUCHER_NOT_ASSIGNED: [
+                    {'code': 0, 'assigned_to': '', 'redemptions': {'used': 0, 'available': 3}},
+                    {'code': 1, 'assigned_to': '', 'redemptions': {'used': 1, 'available': 3}}
+                ],
+                VOUCHER_NOT_REDEEMED: [
+                    {'code': 1, 'assigned_to': 'user1@example.com', 'redemptions': {'used': 0, 'available': 1}}
+                ],
+                VOUCHER_PARTIAL_REDEEMED: [],
+                VOUCHER_REDEEMED: [
+                    {'code': 1, 'assigned_to': 'user2@example.com', 'redemptions': {'used': 1, 'available': 1}}
+                ]
+            }
+        },
+    )
+    @ddt.unpack
+    def test_coupon_codes_detail(
+            self,
+            voucher_type,
+            quantity,
+            max_uses,
+            code_assignments,
+            code_redemptions,
+            expected_responses):
         Switch.objects.update_or_create(name=ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, defaults={'active': True})
-
-        coupon_post_data = dict(self.data, voucher_type=Voucher.SINGLE_USE, quantity=3, max_uses=None)
+        coupon_post_data = dict(self.data, voucher_type=voucher_type, quantity=quantity, max_uses=max_uses)
         coupon = self.get_response('POST', ENTERPRISE_COUPONS_LINK, coupon_post_data)
         coupon = coupon.json()
         coupon_id = coupon['coupon_id']
         vouchers = Product.objects.get(id=coupon_id).attr.coupon_vouchers.vouchers.all()
         codes = [voucher.code for voucher in vouchers]
-        with mock.patch('ecommerce.extensions.offer.utils.send_offer_assignment_email.delay'):
-            self.get_response(
-                'POST',
-                '/api/v2/enterprise/coupons/{}/assign/'.format(coupon_id),
-                {'template': 'Test template', 'emails': ['user1@example.com'], 'codes':[codes[1]]}
-            )
 
-        redeeming_user = self.create_user()
-        self.use_voucher(Voucher.objects.get(code=codes[2]), redeeming_user)
+        for email, code_index in code_assignments.iteritems():
+            self.assign_user_to_code(coupon_id, [email], [codes[code_index]])
 
-        response = self.get_response(
-            'GET',
-            '/api/v2/enterprise/coupons/{}/codes/?code_filter={}'.format(coupon_id, VOUCHER_NOT_ASSIGNED)
-        ).json()
-        self.assertEqual(len(response['results']), 1)
-        self.assert_code_detail_response(response['results'][0], codes[0], '', 0, 1)
+        for email, data in code_redemptions.iteritems():
+            redeeming_user = self.create_user(email=email)
+            for _ in range(0, data['num']):
+                self.use_voucher(Voucher.objects.get(code=codes[data['code']]), redeeming_user)
 
-        response = self.get_response(
-            'GET',
-            '/api/v2/enterprise/coupons/{}/codes/?code_filter={}'.format(coupon_id, VOUCHER_NOT_REDEEMED)
-        ).json()
-        self.assertEqual(len(response['results']), 1)
-        self.assert_code_detail_response(response['results'][0], codes[1], 'user1@example.com', 0, 1)
-
-        response = self.get_response(
-            'GET',
-            '/api/v2/enterprise/coupons/{}/codes/?code_filter={}'.format(coupon_id, VOUCHER_PARTIAL_REDEEMED)
-        ).json()
-        self.assertEqual(len(response['results']), 0)
-
-        response = self.get_response(
-            'GET',
-            '/api/v2/enterprise/coupons/{}/codes/?code_filter={}'.format(coupon_id, VOUCHER_REDEEMED)
-        ).json()
-        self.assertEqual(len(response['results']), 1)
-        self.assert_code_detail_response(response['results'][0], codes[2], redeeming_user.email, 1, 1)
-
-    def test_coupon_codes_detail_multi_use_per_customer(self):
-        Switch.objects.update_or_create(name=ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, defaults={'active': True})
-
-        coupon_post_data = dict(self.data, voucher_type=Voucher.MULTI_USE_PER_CUSTOMER, quantity=4, max_uses=2)
-        coupon = self.get_response('POST', ENTERPRISE_COUPONS_LINK, coupon_post_data)
-        coupon = coupon.json()
-        coupon_id = coupon['coupon_id']
-        vouchers = Product.objects.get(id=coupon_id).attr.coupon_vouchers.vouchers.all()
-        codes = [voucher.code for voucher in vouchers]
-
-        with mock.patch('ecommerce.extensions.offer.utils.send_offer_assignment_email.delay'):
-            self.get_response(
-                'POST',
-                '/api/v2/enterprise/coupons/{}/assign/'.format(coupon_id),
-                {'template': 'Test template', 'emails': ['user1@example.com'], 'codes': [codes[1]]}
-            )
-
-            self.get_response(
-                'POST',
-                '/api/v2/enterprise/coupons/{}/assign/'.format(coupon_id),
-                {'template': 'Test template', 'emails': ['user2@example.com'], 'codes': [codes[2]]}
-            )
-
-        self.use_voucher(Voucher.objects.get(code=codes[2]), self.create_user(email='user2@example.com'))
-        redeeming_user = self.create_user()
-        for _ in range(0, 2):
-            self.use_voucher(Voucher.objects.get(code=codes[3]), redeeming_user)
-
-        response = self.get_response(
-            'GET',
-            '/api/v2/enterprise/coupons/{}/codes/?code_filter={}'.format(coupon_id, VOUCHER_NOT_ASSIGNED)
-        ).json()
-        self.assertEqual(len(response['results']), 1)
-        self.assert_code_detail_response(response['results'][0], codes[0], '', 0, 2)
-
-        response = self.get_response(
-            'GET',
-            '/api/v2/enterprise/coupons/{}/codes/?code_filter={}'.format(coupon_id, VOUCHER_NOT_REDEEMED)
-        ).json()
-        print response['results']
-        self.assertEqual(len(response['results']), 1)
-        self.assert_code_detail_response(response['results'][0], codes[1], 'user1@example.com', 0, 2)
-
-        response = self.get_response(
-            'GET',
-            '/api/v2/enterprise/coupons/{}/codes/?code_filter={}'.format(coupon_id, VOUCHER_PARTIAL_REDEEMED)
-        ).json()
-        self.assertEqual(len(response['results']), 1)
-        self.assert_code_detail_response(response['results'][0], codes[2], 'user2@example.com', 1, 2)
-
-        response = self.get_response(
-            'GET',
-            '/api/v2/enterprise/coupons/{}/codes/?code_filter={}'.format(coupon_id, VOUCHER_REDEEMED)
-        ).json()
-        self.assertEqual(len(response['results']), 1)
-        self.assert_code_detail_response(response['results'][0], codes[3], redeeming_user.email, 2, 2)
-
-    def test_coupon_codes_detail_multi_use(self):
-        Switch.objects.update_or_create(name=ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, defaults={'active': True})
-
-        coupon_post_data = dict(self.data, voucher_type=Voucher.MULTI_USE, quantity=3, max_uses=4)
-        coupon = self.get_response('POST', ENTERPRISE_COUPONS_LINK, coupon_post_data)
-        coupon = coupon.json()
-        coupon_id = coupon['coupon_id']
-        vouchers = Product.objects.get(id=coupon_id).attr.coupon_vouchers.vouchers.all()
-        codes = [voucher.code for voucher in vouchers]
-
-        with mock.patch('ecommerce.extensions.offer.utils.send_offer_assignment_email.delay'):
-            self.get_response(
-                'POST',
-                '/api/v2/enterprise/coupons/{}/assign/'.format(coupon_id),
-                {
-                    'template': 'Test template',
-                    'emails': ['user1@example.com', 'user2@example.com'],
-                    'codes': [codes[1]]
-                }
-            )
-
-        self.use_voucher(Voucher.objects.get(code=codes[1]), self.create_user(email='user2@example.com'))
-        redeeming_user1 = self.create_user()
-        redeeming_user2 = self.create_user()
-        for _ in range(0, 2):
-            self.use_voucher(Voucher.objects.get(code=codes[2]), redeeming_user1)
-            self.use_voucher(Voucher.objects.get(code=codes[2]), redeeming_user2)
-
-        response = self.get_response(
-            'GET',
-            '/api/v2/enterprise/coupons/{}/codes/?code_filter={}'.format(coupon_id, VOUCHER_NOT_ASSIGNED)
-        ).json()
-        self.assertEqual(len(response['results']), 2)
-        for result in response['results']:
-            if result['code'] == codes[0]:
-                self.assert_code_detail_response(result, codes[0], '', 0, 4)
-            else:
-                self.assert_code_detail_response(result, codes[1], '', 1, 4)
-
-        response = self.get_response(
-            'GET',
-            '/api/v2/enterprise/coupons/{}/codes/?code_filter={}'.format(coupon_id, VOUCHER_NOT_REDEEMED)
-        ).json()
-        self.assertEqual(len(response['results']), 1)
-        self.assert_code_detail_response(response['results'][0], codes[1], 'user1@example.com', 0, 1)
-
-        response = self.get_response(
-            'GET',
-            '/api/v2/enterprise/coupons/{}/codes/?code_filter={}'.format(coupon_id, VOUCHER_PARTIAL_REDEEMED)
-        ).json()
-        self.assertEqual(len(response['results']), 1)
-        self.assert_code_detail_response(response['results'][0], codes[1], 'user2@example.com', 1, 2)
-
-        response = self.get_response(
-            'GET',
-            '/api/v2/enterprise/coupons/{}/codes/?code_filter={}'.format(coupon_id, VOUCHER_REDEEMED)
-        ).json()
-        self.assertEqual(len(response['results']), 2)
-        for result in response['results']:
-            if result['assigned_to'] == redeeming_user1.email:
-                self.assert_code_detail_response(result, codes[2], redeeming_user1.email, 2, 2)
-            else:
-                self.assert_code_detail_response(result, codes[2], redeeming_user2.email, 2, 2)
+        for code_filter, expected_response in expected_responses.iteritems():
+            response = self.get_response(
+                'GET',
+                '/api/v2/enterprise/coupons/{}/codes/?code_filter={}'.format(coupon_id, code_filter)
+            ).json()
+            self.assert_code_detail_response(response['results'], expected_response, codes)
 
     def test_coupon_codes_detail_with_invalid_coupon_id(self):
         """

@@ -1,6 +1,7 @@
 from __future__ import unicode_literals
 
 import logging
+
 import waffle
 from django.core.exceptions import ValidationError
 from oscar.core.loading import get_model
@@ -23,7 +24,7 @@ from ecommerce.extensions.api.serializers import (
     NotAssignedCodeUsageSerializer,
     NotRedeemedCodeUsageSerializer,
     PartialRedeemedCodeUsageSerializer,
-    RedeemedCodeUsageSerializer,
+    RedeemedCodeUsageSerializer
 )
 from ecommerce.extensions.api.v2.utils import send_new_codes_notification_email
 from ecommerce.extensions.api.v2.views.coupons import CouponViewSet
@@ -37,7 +38,7 @@ from ecommerce.extensions.offer.constants import (
     VOUCHER_NOT_ASSIGNED,
     VOUCHER_NOT_REDEEMED,
     VOUCHER_PARTIAL_REDEEMED,
-    VOUCHER_REDEEMED,
+    VOUCHER_REDEEMED
 )
 from ecommerce.extensions.voucher.utils import (
     create_enterprise_vouchers,
@@ -243,7 +244,7 @@ class EnterpriseCouponViewSet(CouponViewSet):
             queryset = self._get_partial_redeemed_usages(coupon_vouchers)
             serializer_class = PartialRedeemedCodeUsageSerializer
         elif code_filter == VOUCHER_REDEEMED:
-            queryset =  self._get_redeemed_usages(coupon_vouchers)
+            queryset = self._get_redeemed_usages(coupon_vouchers)
             serializer_class = RedeemedCodeUsageSerializer
 
         if not serializer_class:
@@ -270,7 +271,7 @@ class EnterpriseCouponViewSet(CouponViewSet):
 
             queryset = queryset.union(Voucher.objects.filter(id=voucher.id).values('code'))
 
-        return queryset
+        return queryset.order_by('code')
 
     def _get_not_redeemed_usages(self, vouchers):
         """
@@ -291,11 +292,10 @@ class EnterpriseCouponViewSet(CouponViewSet):
                 voucher=voucher).values_list('user__email', flat=True)
 
             queryset = queryset.union(
-                assignments.values('code', 'user_email')
-                    .exclude(user_email__in=users_having_usages)
+                assignments.values('code', 'user_email').exclude(user_email__in=users_having_usages)
             )
 
-        return queryset.distinct()
+        return queryset.distinct().order_by('user_email')
 
     def _get_partial_redeemed_usages(self, vouchers):
         """
@@ -320,11 +320,10 @@ class EnterpriseCouponViewSet(CouponViewSet):
                 voucher=voucher).values_list('user__email', flat=True)
 
             queryset = queryset.union(
-                assignments.values('code', 'user_email')
-                    .filter(user_email__in=users_having_usages)
+                assignments.values('code', 'user_email').filter(user_email__in=users_having_usages)
             )
 
-        return queryset.distinct()
+        return queryset.distinct().order_by('user_email')
 
     def _get_redeemed_usages(self, vouchers):
         """
@@ -337,7 +336,7 @@ class EnterpriseCouponViewSet(CouponViewSet):
         ).values_list('user_email', flat=True)
         voucher_applications = VoucherApplication.objects.filter(voucher__in=vouchers)
         return voucher_applications.exclude(user__email__in=users_with_assignments).values(
-            'voucher__code', 'user__email').distinct()
+            'voucher__code', 'user__email').distinct().order_by('user__email')
 
     @list_route(url_path=r'(?P<enterprise_id>.+)/overview')
     def overview(self, request, enterprise_id):     # pylint: disable=unused-argument

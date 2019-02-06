@@ -31,11 +31,7 @@ from ecommerce.extensions.offer.constants import (
     OFFER_ASSIGNMENT_EMAIL_PENDING,
     OFFER_ASSIGNMENT_REVOKED,
     OFFER_MAX_USES_DEFAULT,
-    OFFER_REDEEMED,
-    VOUCHER_NOT_ASSIGNED,
-    VOUCHER_NOT_REDEEMED,
-    VOUCHER_PARTIAL_REDEEMED,
-    VOUCHER_REDEEMED,
+    OFFER_REDEEMED
 )
 from ecommerce.extensions.offer.utils import (
     send_assigned_offer_email,
