@@ -23,7 +23,6 @@ from ecommerce.enterprise.conditions import AssignableEnterpriseCustomerConditio
 from ecommerce.enterprise.constants import ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH
 from ecommerce.enterprise.tests.mixins import EnterpriseServiceMockMixin
 from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
-from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
 from ecommerce.extensions.offer.constants import (
     OFFER_ASSIGNMENT_REVOKED,
     OFFER_REDEEMED,
@@ -384,7 +383,14 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
-    def assert_coupon_codes_response(self, response, coupon_id, max_uses=1, results_count=0, pagination=None, is_csv=False):
+    def assert_coupon_codes_response(
+            self,
+            response,
+            coupon_id,
+            max_uses=1,
+            results_count=0,
+            pagination=None,
+            is_csv=False):
         """
         Verify response received from `/api/v2/enterprise/coupons/{coupon_id}/codes/` endpoint
         """

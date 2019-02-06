@@ -208,7 +208,7 @@ class EnterpriseCouponViewSet(CouponViewSet):
         coupon = self.get_object()
         return coupon.attr.coupon_vouchers.vouchers.first().usage
 
-    def get_assigned_uredeemed_codes(self):
+    def get_assigned_unredeemed_codes(self):
         """
         Returns the list of all those assigned codes which are not redeemed yet.
         """
@@ -216,40 +216,20 @@ class EnterpriseCouponViewSet(CouponViewSet):
             status__in=[OFFER_REDEEMED, OFFER_ASSIGNMENT_REVOKED]
         ).values_list('code', flat=True)
 
-    def get_redeemable_vouchers(self, coupon_vouchers):
-        """
-        Return vouchers which are redeemable. These vouchers are not fully redeemed.
-        """
-        vouchers_with_full_redemptions = self.get_fully_redeemed_coupon_vouchers(coupon_vouchers)
-        redeemable_vouchers =  coupon_vouchers.exclude(pk__in=vouchers_with_full_redemptions)
-
-        assigned_unredeemed_codes = self.get_assigned_uredeemed_codes()
-        vouchers_with_some_assignments = redeemable_vouchers.filter(code__in=assigned_unredeemed_codes)
-        vouchers_with_no_assignments = redeemable_vouchers.exclude(code__in=assigned_unredeemed_codes)
-
-        # Also check how many assignments for this code.
-        voucher_type = self.get_voucher_type()
-        if voucher_type == Voucher.SINGLE_USE:
-            redeemable_vouchers = redeemable_vouchers.exclude(code__in=assigned_unredeemed_codes)
-        else:
-            redeemable_vouchers_with_some_assignments = vouchers_with_some_assignments.filter(offers__max_global_applications__gt=F('num_orders') + F('offers__offerassignment'))
-            redeemable_vouchers_with_no_assignments = vouchers_with_no_assignments.filter(offers__max_global_applications__gt=F('num_orders'))
-            redeemable_vouchers = redeemable_vouchers_with_some_assignments | redeemable_vouchers_with_no_assignments
-        return redeemable_vouchers
-
     def get_vouchers_with_free_slots(self, coupon_vouchers):
         """
         Return vouchers with free slots available.
         """
-        # subquery to count number of unredeemed offer assignments of a code
-        # the way this subquery is written is suggested in [django docs](https://docs.djangoproject.com/en/1.11/ref/models/expressions/#using-aggregates-within-a-subquery-expression)
+        # Subquery to count number of unredeemed offer assignments of a code.
+        # This is suggested in django docs
+        # https://docs.djangoproject.com/en/1.11/ref/models/expressions/#using-aggregates-within-a-subquery-expression
         offerassignments = OfferAssignment.objects.filter(
             code=OuterRef('code')
         ).exclude(
             status__in=[OFFER_REDEEMED, OFFER_ASSIGNMENT_REVOKED]
         ).order_by().values('code').annotate(assignment_count=Count('pk')).values('assignment_count')
 
-        # Coalesce is used so that if there are no assignments than return 0
+        # Coalesce is used so that if there are no assignments than return 0.
         offerassignments_subquery = Coalesce(Subquery(offerassignments, output_field=IntegerField()), 0)
 
         voucher_type = self.get_voucher_type()
@@ -290,14 +270,14 @@ class EnterpriseCouponViewSet(CouponViewSet):
         Return only those vouchers which have free slots available.
         This will give us a list of vouchers which have any potential slot available for assignment,
         """
-        unassigned_unredeemed_vouchers =  self.get_vouchers_with_free_slots(coupon_vouchers)
+        unassigned_unredeemed_vouchers = self.get_vouchers_with_free_slots(coupon_vouchers)
         return unassigned_unredeemed_vouchers
 
     def get_unredeemed_coupon_vouchers(self, coupon_vouchers):
         """
         Return assigned vouchers but never redeemed.
         """
-        assigned_uredeemed_codes = self.get_assigned_uredeemed_codes()
+        assigned_uredeemed_codes = self.get_assigned_unredeemed_codes()
         unredeemed_vouchers = coupon_vouchers.filter(code__in=assigned_uredeemed_codes)
         return unredeemed_vouchers
 
@@ -310,8 +290,11 @@ class EnterpriseCouponViewSet(CouponViewSet):
         if voucher_type == Voucher.SINGLE_USE:
             return coupon_vouchers.none()
 
-        assigned_uredeemed_codes = self.get_assigned_uredeemed_codes()
-        partially_redeemed_vouchers = coupon_vouchers.filter(num_orders__gte=1, offers__max_global_applications__gt=F('num_orders'))
+        assigned_uredeemed_codes = self.get_assigned_unredeemed_codes()
+        partially_redeemed_vouchers = coupon_vouchers.filter(
+            num_orders__gte=1,
+            offers__max_global_applications__gt=F('num_orders')
+        )
         assigned_partially_redeemed_vouchers = partially_redeemed_vouchers.filter(code__in=assigned_uredeemed_codes)
         return assigned_partially_redeemed_vouchers
 
@@ -366,9 +349,11 @@ class EnterpriseCouponViewSet(CouponViewSet):
             # This filter would return only those vouchers which are redeemed completely.
             coupon_vouchers = self.get_fully_redeemed_coupon_vouchers(coupon_vouchers)
         else:
-            # Return all vouchers for coupon (unassigned + unredeemed + redeemed).
-            # TODO: coupon_vouchers = self.get_unassigned_coupon_vouchers(coupon_vouchers) | self.get_unredeemed_coupon_vouchers(coupon_vouchers) | self.get_fully_redeemed_coupon_vouchers(coupon_vouchers)
-            coupon_vouchers = self.get_expanded_coupon_vouchers(coupon_vouchers) | self.get_vouchers_with_no_applications(coupon_vouchers)
+            # Return all vouchers for a coupon. This is still used for for return csv data.
+            # TODO: Remove this once csv data is fetched against code_filter.
+            coupon_vouchers = self.get_expanded_coupon_vouchers(
+                coupon_vouchers
+            ) | self.get_vouchers_with_no_applications(coupon_vouchers)
 
         if format is None:
             page = self.paginate_queryset(coupon_vouchers)
