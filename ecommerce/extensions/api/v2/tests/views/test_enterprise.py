@@ -1274,11 +1274,6 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             results_count=data['expected_results_count']
         )
 
-        for response_voucher in response['results']:
-            voucher = [voucher for voucher in vouchers if voucher.code == response_voucher['code']][0]
-            available_slots = response_voucher['redemptions']['total'] - response_voucher['redemptions']['used']
-            assert voucher.slots_available_for_assignment == available_slots
-
     def test_coupon_codes_detail_csv(self):
         """
         Verify that `/api/v2/enterprise/coupons/{coupon_id}/codes/` endpoint returns correct csv data.

@@ -701,13 +701,8 @@ class CouponVoucherSerializer(serializers.Serializer):  # pylint: disable=abstra
         else:
             max_coupon_usage = offer.max_global_applications
 
-        slots_used = redemption_count + num_unredeemed_offerassignments
-        if voucher.usage in (Voucher.SINGLE_USE, Voucher.MULTI_USE_PER_CUSTOMER):
-            if redemption_count or num_unredeemed_offerassignments:
-                slots_used = max_coupon_usage
-
         return {
-            'used': slots_used,
+            'used': redemption_count + num_unredeemed_offerassignments,
             'total': max_coupon_usage,
         }
 
