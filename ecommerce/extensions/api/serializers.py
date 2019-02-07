@@ -826,13 +826,25 @@ class EnterpriseCouponOverviewListSerializer(serializers.ModelSerializer):
 
     # Max number of codes available (Maximum Coupon Usage).
     def get_max_uses(self, obj):
+        voucher_usage = retrieve_voucher_usage(obj)
         offer = retrieve_offer(obj)
-        return offer.max_global_applications
+        max_uses_per_code = None
+        if voucher_usage == Voucher.SINGLE_USE:
+            max_uses_per_code = 1
+        elif offer.max_global_applications:
+            max_uses_per_code = offer.max_global_applications
+        else:
+            max_uses_per_code = OFFER_MAX_USES_DEFAULT
+
+        return max_uses_per_code * retrieve_quantity(obj)
 
     # Redemption count.
     def get_num_uses(self, obj):
-        voucher = retrieve_voucher(obj)
-        return voucher.num_orders
+        vouchers = retrieve_all_vouchers(obj)
+        num_uses = 0
+        for voucher in vouchers:
+            num_uses += voucher.num_orders
+        return num_uses
 
     # Number of codes.
     def get_num_codes(self, obj):
