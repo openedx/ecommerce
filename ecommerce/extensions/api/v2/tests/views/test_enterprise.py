@@ -147,7 +147,7 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             'id': coupon.id,
             'max_uses': None,
             'num_codes': 2,
-            'num_unassigned': 0,
+            'num_unassigned': 2,
             'num_uses': 0,
             'start_date': self.get_coupon_voucher_start_date(coupon),
             'title': coupon.title,
@@ -406,6 +406,29 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             self.assertEqual(response['count'], pagination['count'])
             self.assertEqual(response['next'], pagination['next'])
             self.assertEqual(response['previous'], pagination['previous'])
+
+    def assign_coupon_codes(self, coupon_id, vouchers, code_assignments=None):
+        """
+        Assigns codes.
+        """
+        for i, voucher in enumerate(vouchers):
+            if code_assignments[i] == 0:
+                continue
+
+            # For multi-use-per-customer case, email list should be same.
+            if voucher.usage == Voucher.MULTI_USE_PER_CUSTOMER:
+                emails = ['user@example.com']
+            else:
+                emails = [
+                    'user{email_index}@example.com'.format(email_index=email_index)
+                    for email_index in range(code_assignments[i])
+                ]
+
+            self.get_response(
+                'POST',
+                '/api/v2/enterprise/coupons/{}/assign/'.format(coupon_id),
+                {'emails': emails, 'codes': [voucher.code], 'template': 'Test template'}
+            )
 
     def use_voucher(self, voucher, user):
         """
@@ -685,6 +708,139 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
         # Verify that we get correct results.
         for actual_result in overview_response['results']:
             self.assertIn(actual_result, expected_results)
+
+    @ddt.data(
+        {
+            'voucher_type': Voucher.SINGLE_USE,
+            'quantity': 3,
+            'max_uses': None,
+            'code_assignments': [0, 0, 0],
+            'expected_num_unassigned': 3
+        },
+        {
+            'voucher_type': Voucher.SINGLE_USE,
+            'quantity': 3,
+            'max_uses': None,
+            'code_assignments': [1, 0, 0],
+            'expected_num_unassigned': 2
+        },
+        {
+            'voucher_type': Voucher.SINGLE_USE,
+            'quantity': 3,
+            'max_uses': None,
+            'code_assignments': [1, 1, 1],
+            'expected_num_unassigned': 0
+        },
+        {
+            'voucher_type': Voucher.MULTI_USE_PER_CUSTOMER,
+            'quantity': 3,
+            'max_uses': 2,
+            'code_assignments': [0, 0, 0],
+            'expected_num_unassigned': 3,
+        },
+        {
+            'voucher_type': Voucher.MULTI_USE_PER_CUSTOMER,
+            'quantity': 3,
+            'max_uses': 2,
+            'code_assignments': [1, 0, 0],
+            'expected_num_unassigned': 2,
+        },
+        {
+            'voucher_type': Voucher.MULTI_USE_PER_CUSTOMER,
+            'quantity': 3,
+            'max_uses': 2,
+            'code_assignments': [1, 1, 0],
+            'expected_num_unassigned': 1,
+        },
+        {
+            'voucher_type': Voucher.MULTI_USE_PER_CUSTOMER,
+            'quantity': 3,
+            'max_uses': 2,
+            'code_assignments': [1, 1, 1],
+            'expected_num_unassigned': 0,
+        },
+        {
+            'voucher_type': Voucher.MULTI_USE,
+            'quantity': 3,
+            'max_uses': 2,
+            'code_assignments': [1, 0, 0],
+            'expected_num_unassigned': 3,
+        },
+        {
+            'voucher_type': Voucher.MULTI_USE,
+            'quantity': 3,
+            'max_uses': 2,
+            'code_assignments': [2, 0, 0],
+            'expected_num_unassigned': 2
+        },
+        {
+            'voucher_type': Voucher.MULTI_USE,
+            'quantity': 3,
+            'max_uses': 2,
+            'code_assignments': [2, 1, 1],
+            'expected_num_unassigned': 2
+        },
+        {
+            'voucher_type': Voucher.MULTI_USE,
+            'quantity': 3,
+            'max_uses': 2,
+            'code_assignments': [2, 2, 2],
+            'expected_num_unassigned': 0
+        },
+        {
+            'voucher_type': Voucher.ONCE_PER_CUSTOMER,
+            'quantity': 3,
+            'max_uses': 2,
+            'code_assignments': [0, 0, 0],
+            'expected_num_unassigned': 3,
+        },
+        {
+            'voucher_type': Voucher.ONCE_PER_CUSTOMER,
+            'quantity': 3,
+            'max_uses': 2,
+            'code_assignments': [2, 1, 0],
+            'expected_num_unassigned': 2,
+        },
+    )
+    @ddt.unpack
+    def test_coupon_num_unassigned(
+            self,
+            voucher_type,
+            quantity,
+            max_uses,
+            code_assignments,
+            expected_num_unassigned):
+        """
+        Tests coupon overview endpoint returns correct value for `num_unassigned` field.
+        """
+        Switch.objects.update_or_create(name=ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, defaults={'active': True})
+
+        enterprise_id = '85b08dde-0877-4474-a4e9-8408fe47ce88'
+        coupon_data = {
+            'max_uses': max_uses,
+            'quantity': quantity,
+            'voucher_type': voucher_type,
+            'enterprise_customer': {'name': 'LOTRx', 'id': enterprise_id}
+        }
+
+        coupon_response = self.get_response('POST', ENTERPRISE_COUPONS_LINK, dict(self.data, **coupon_data))
+        coupon = coupon_response.json()
+        coupon_id = coupon['coupon_id']
+        vouchers = Product.objects.get(id=coupon_id).attr.coupon_vouchers.vouchers.all()
+
+        # code assignments.
+        self.assign_coupon_codes(coupon_id, vouchers, code_assignments)
+
+        coupon_overview_response = self.get_response_json(
+            'GET',
+            reverse(
+                'api:v2:enterprise-coupons-(?P<enterprise-id>.+)/overview-list',
+                kwargs={'enterprise_id': enterprise_id}
+            )
+        )
+
+        # Verify that we get correct results.
+        self.assertEqual(coupon_overview_response['results'][0]['num_unassigned'], expected_num_unassigned)
 
     @ddt.data(
         (Voucher.SINGLE_USE, 2, None, ['test1@example.com', 'test2@example.com'], [1]),
