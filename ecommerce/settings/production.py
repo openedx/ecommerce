@@ -4,6 +4,7 @@ from os import environ
 from urlparse import urljoin
 
 import yaml
+from corsheaders.defaults import default_headers as corsheaders_default_headers
 # Normally you should not import ANYTHING from Django directly
 # into your settings, but ImproperlyConfigured is an exception.
 from django.core.exceptions import ImproperlyConfigured
@@ -84,3 +85,10 @@ for __, configs in PAYMENT_PROCESSOR_CONFIG.iteritems():
 # END PAYMENT PROCESSOR OVERRIDES
 
 ENTERPRISE_API_URL = urljoin(ENTERPRISE_SERVICE_URL, 'api/v1/')
+
+CORS_ORIGIN_WHITELIST = environ.get('CORS_ORIGIN_WHITELIST', ())
+CORS_URLS_REGEX = r'{regex}'.format(regex=environ.get('CORS_URLS_REGEX', ''))
+CORS_ALLOW_HEADERS = corsheaders_default_headers + (
+    'use-jwt-cookie',
+)
+CORS_ALLOW_CREDENTIALS = environ.get('CORS_ALLOW_CREDENTIALS', False)
