@@ -748,9 +748,18 @@ class EnterpriseCouponOverviewListSerializer(serializers.ModelSerializer):
     start_date = serializers.SerializerMethodField()
     usage_limitation = serializers.SerializerMethodField()
 
-    # TODO: ENT-1184
-    def get_num_unassigned(self, obj):  # pylint: disable=unused-argument
-        return 0
+    def get_num_unassigned(self, coupon):
+        """
+        Returns number of unassigned vouchers. These are the vouchers that have
+        at-least 1 potential slot available for asssignment.
+        """
+        vouchers = coupon.attr.coupon_vouchers.vouchers.all()
+        num_unassigned = len([
+            voucher.code
+            for voucher in vouchers
+            if voucher.slots_available_for_assignment > 0
+        ])
+        return num_unassigned
 
     # TODO: ENT-1184
     def get_has_error(self, obj):   # pylint: disable=unused-argument
