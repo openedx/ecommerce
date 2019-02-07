@@ -278,52 +278,51 @@ class EnterpriseCouponViewSet(CouponViewSet):
         Returns a queryset containing unique code and user_email pairs from OfferAssignments.
         Only code and user_email pairs that have no corresponding VoucherApplication are returned.
         """
-        queryset = OfferAssignment.objects.none()
+        unredeemed_assignments = []
         for voucher in vouchers:
+            users_having_usages = VoucherApplication.objects.filter(
+                voucher=voucher).values_list('user__email', flat=True)
+
             assignments = voucher.enterprise_offer.offerassignment_set.filter(
                 code=voucher.code,
                 status__in=[OFFER_ASSIGNED, OFFER_ASSIGNMENT_EMAIL_PENDING]
-            )
+            ).exclude(user_email__in=users_having_usages)
 
             if assignments.count() == 0:
                 continue
 
-            users_having_usages = VoucherApplication.objects.filter(
-                voucher=voucher).values_list('user__email', flat=True)
+            unredeemed_assignments.append(assignments.first().id)
 
-            queryset = queryset.union(
-                assignments.values('code', 'user_email').exclude(user_email__in=users_having_usages)
-            )
-
-        return queryset.distinct().order_by('user_email')
+        return OfferAssignment.objects.filter(
+            id__in=unredeemed_assignments).values('code', 'user_email').order_by('user_email')
 
     def _get_partial_redeemed_usages(self, vouchers):
         """
         Returns a queryset containing unique code and user_email pairs from OfferAssignments.
         Only code and user_email pairs that have at least one corresponding VoucherApplication are returned.
         """
-        queryset = OfferAssignment.objects.none()
         # There are no partially redeemed SINGLE_USE codes, so return the empty queryset.
         if vouchers.first().usage == Voucher.SINGLE_USE:
-            return queryset
+            return OfferAssignment.objects.none()
 
+        parially_redeemed_assignments = []
         for voucher in vouchers:
+            users_having_usages = VoucherApplication.objects.filter(
+                voucher=voucher).values_list('user__email', flat=True)
+
             assignments = voucher.enterprise_offer.offerassignment_set.filter(
                 code=voucher.code,
-                status__in=[OFFER_ASSIGNED, OFFER_ASSIGNMENT_EMAIL_PENDING]
+                status__in=[OFFER_ASSIGNED, OFFER_ASSIGNMENT_EMAIL_PENDING],
+                user_email__in=users_having_usages
             )
 
             if assignments.count() == 0:
                 continue
 
-            users_having_usages = VoucherApplication.objects.filter(
-                voucher=voucher).values_list('user__email', flat=True)
+            parially_redeemed_assignments.append(assignments.first().id)
 
-            queryset = queryset.union(
-                assignments.values('code', 'user_email').filter(user_email__in=users_having_usages)
-            )
-
-        return queryset.distinct().order_by('user_email')
+        return OfferAssignment.objects.filter(
+            id__in=parially_redeemed_assignments).values('code', 'user_email').order_by('user_email')
 
     def _get_redeemed_usages(self, vouchers):
         """
