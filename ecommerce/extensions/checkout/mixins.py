@@ -167,6 +167,9 @@ class EdxOrderPlacementMixin(OrderPlacementMixin):
         except BasketAttribute.DoesNotExist:
             email_opt_in = False
 
+        # create offer assignment for MULTI_USE_PER_CUSTOMER
+        self.create_assignments_for_multi_use_per_customer(order)
+
         # update offer assignment with voucher application
         self.update_assigned_voucher_offer_assignment(order)
 
@@ -311,3 +314,22 @@ class EdxOrderPlacementMixin(OrderPlacementMixin):
             ).order_by('-date_created').first()
             assignment.status = OFFER_REDEEMED
             assignment.save()
+
+    def create_assignments_for_multi_use_per_customer(self, order):
+        """
+        Create `OfferAssignment` records for MULTI_USE_PER_CUSTOMER coupon type.
+        """
+        basket = order.basket
+        voucher = basket.vouchers.first()
+        offer = voucher and voucher.enterprise_offer
+        # can't entertain non enterprise offers
+        if not offer:
+            return None
+
+        if voucher.usage == voucher.MULTI_USE_PER_CUSTOMER:
+            if not OfferAssignment.objects.filter(code=voucher.code, user_email=basket.owner.email).exists():
+                assignments = [
+                    OfferAssignment(offer=offer, code=voucher.code, user_email=basket.owner.email)
+                    for __ in range(offer.max_global_applications)
+                ]
+                OfferAssignment.objects.bulk_create(assignments)

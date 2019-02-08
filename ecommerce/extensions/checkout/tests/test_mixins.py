@@ -50,6 +50,7 @@ PaymentEventType = get_model('order', 'PaymentEventType')
 SourceType = get_model('payment', 'SourceType')
 Product = get_model('catalogue', 'Product')
 VoucherApplication = get_model('voucher', 'VoucherApplication')
+Voucher = get_model('voucher', 'Voucher')
 
 
 @ddt.ddt
@@ -441,3 +442,28 @@ class EdxOrderPlacementMixinTests(BusinessIntelligenceMixin, PaymentEventsMixin,
         offer_assignment = OfferAssignment.objects.get(id=offer_assignment.id)
         assert offer_assignment.status == OFFER_REDEEMED
         assert offer_assignment.voucher_application == voucher_application
+
+    def test_create_assignments_for_multi_use_per_customer(self, __):
+        """
+        Verify the `create_assignments_for_multi_use_per_customer` works as expected for `MULTI_USE_PER_CUSTOMER`.
+        """
+        coupon_max_global_applications = 10
+        enterprise_offer = EnterpriseOfferFactory(max_global_applications=coupon_max_global_applications)
+        voucher = VoucherFactory(usage=Voucher.MULTI_USE_PER_CUSTOMER)
+        voucher.offers.add(enterprise_offer)
+        basket = create_basket(owner=self.user, site=self.site)
+        basket.vouchers.add(voucher)
+        order = create_order(user=self.user, basket=basket)
+
+        assert OfferAssignment.objects.all().count() == 0
+
+        EdxOrderPlacementMixin().create_assignments_for_multi_use_per_customer(order)
+        EdxOrderPlacementMixin().update_assigned_voucher_offer_assignment(order)
+
+        assert OfferAssignment.objects.all().count() == coupon_max_global_applications
+        assert OfferAssignment.objects.filter(
+            offer=enterprise_offer, code=voucher.code, user_email=basket.owner.email
+        ).count() == coupon_max_global_applications
+        assert OfferAssignment.objects.filter(
+            offer=enterprise_offer, code=voucher.code, user_email=basket.owner.email, status=OFFER_REDEEMED
+        ).count() == 1
