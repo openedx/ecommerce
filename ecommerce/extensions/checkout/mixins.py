@@ -17,7 +17,7 @@ from ecommerce.extensions.basket.constants import EMAIL_OPT_IN_ATTRIBUTE
 from ecommerce.extensions.basket.utils import ORGANIZATION_ATTRIBUTE_TYPE
 from ecommerce.extensions.checkout.exceptions import BasketNotFreeError
 from ecommerce.extensions.customer.utils import Dispatcher
-from ecommerce.extensions.offer.constants import OFFER_ASSIGNMENT_REVOKED, OFFER_REDEEMED
+from ecommerce.extensions.offer.constants import OFFER_ASSIGNED, OFFER_ASSIGNMENT_REVOKED, OFFER_REDEEMED
 from ecommerce.extensions.order.constants import PaymentEventTypeName
 from ecommerce.invoice.models import Invoice
 
@@ -167,6 +167,9 @@ class EdxOrderPlacementMixin(OrderPlacementMixin):
         except BasketAttribute.DoesNotExist:
             email_opt_in = False
 
+        # create offer assignment for MULTI_USE_PER_CUSTOMER
+        self.create_assignments_for_multi_use_per_customer(order)
+
         # update offer assignment with voucher application
         self.update_assigned_voucher_offer_assignment(order)
 
@@ -311,3 +314,23 @@ class EdxOrderPlacementMixin(OrderPlacementMixin):
             ).order_by('-date_created').first()
             assignment.status = OFFER_REDEEMED
             assignment.save()
+
+    def create_assignments_for_multi_use_per_customer(self, order):
+        """
+        Create `OfferAssignment` records for MULTI_USE_PER_CUSTOMER coupon type.
+        """
+        basket = order.basket
+        voucher = basket.vouchers.first()
+        offer = voucher and voucher.enterprise_offer
+        # can't entertain non enterprise offers
+        if not offer:
+            return None
+
+        if voucher.usage == voucher.MULTI_USE_PER_CUSTOMER:
+            user_email = basket.owner.email
+            if not OfferAssignment.objects.filter(code=voucher.code, user_email=user_email).exists():
+                assignments = [
+                    OfferAssignment(offer=offer, code=voucher.code, user_email=user_email, status=OFFER_ASSIGNED)
+                    for __ in range(offer.max_global_applications)
+                ]
+                OfferAssignment.objects.bulk_create(assignments)
