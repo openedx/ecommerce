@@ -28,6 +28,7 @@ from ecommerce.courses.models import Course
 from ecommerce.entitlements.utils import create_or_update_course_entitlement
 from ecommerce.extensions.offer.constants import (
     OFFER_ASSIGNED,
+    OFFER_ASSIGNMENT_EMAIL_BOUNCED,
     OFFER_ASSIGNMENT_EMAIL_PENDING,
     OFFER_ASSIGNMENT_REVOKED,
     OFFER_MAX_USES_DEFAULT,
@@ -820,9 +821,16 @@ class EnterpriseCouponOverviewListSerializer(serializers.ModelSerializer):
         ])
         return num_unassigned
 
-    # TODO: ENT-1184
-    def get_has_error(self, obj):   # pylint: disable=unused-argument
-        return False
+    def get_has_error(self, obj):
+        """
+        Returns True if any assignment associated with coupon is having
+        error, otherwise False.
+        """
+        offer = retrieve_offer(obj)
+        offer_assignments_with_error = offer.offerassignment_set.filter(
+            status=OFFER_ASSIGNMENT_EMAIL_BOUNCED
+        )
+        return offer_assignments_with_error.exists()
 
     # Max number of codes available (Maximum Coupon Usage).
     def get_max_uses(self, obj):
