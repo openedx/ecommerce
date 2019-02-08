@@ -194,6 +194,13 @@ class SiteConfiguration(models.Model):
         blank=True,
         default=False
     )
+    hubspot_secret_key = models.CharField(
+        verbose_name=_('Hubspot Portal Secret Key'),
+        help_text=_('Secret key for Hubspot portal authentication'),
+        max_length=255,
+        null=True,
+        blank=True
+    )
 
     @property
     def payment_processors_set(self):

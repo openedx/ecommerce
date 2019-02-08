@@ -6,7 +6,7 @@ from decimal import Decimal
 from django.conf import settings
 from django.shortcuts import render
 from django.utils.translation import ugettext_lazy as _
-from ecommerce_worker.sailthru.v1.tasks import send_offer_assignment_email
+from ecommerce_worker.sailthru.v1.tasks import send_offer_assignment_email, send_offer_update_email
 from oscar.core.loading import get_model
 
 from ecommerce.extensions.checkout.utils import add_currency
@@ -130,9 +130,6 @@ def send_assigned_offer_email(
             Number of times the code can be redeemed.
         *code_expiration_date*
             Date till code is valid.
-
-    Returns:
-         True when successful or False in case of any exception
     """
 
     email_subject = settings.OFFER_ASSIGNMENT_EMAIL_DEFAULT_SUBJECT
@@ -144,3 +141,61 @@ def send_assigned_offer_email(
         EXPIRATION_DATE=code_expiration_date
     )
     send_offer_assignment_email.delay(learner_email, offer_assignment_id, email_subject, email_body)
+
+
+def send_revoked_offer_email(template, learner_email, code):
+    """
+    Arguments:
+        *template*
+            The email template with placeholders that will receive the following tokens
+        *learner_email*
+            Email of the customer who will receive the code.
+        *code*
+            Code for the user.
+    """
+
+    email_subject = settings.OFFER_REVOKE_EMAIL_DEFAULT_SUBJECT
+
+    email_body = template.format(
+        user_email=learner_email,
+        code=code,
+    )
+    send_offer_update_email.delay(learner_email, email_subject, email_body)
+
+
+def send_assigned_offer_reminder_email(
+        template,
+        learner_email,
+        code,
+        enrollment_url,
+        redeemed_offer_count,
+        total_offer_count,
+        code_expiration_date):
+    """
+    Arguments:
+       *template*
+           The email template with placeholders that will receive the following tokens
+       *learner_email*
+           Email of the customer who will receive the code.
+       *code*
+           Code for the user.
+       *enrollment_url*
+           URL for the user.
+       *redeemed_offer_count*
+           Number of times the code has been redeemed.
+       *total_offer_count*
+           Total number of offer assignments for this (code,email) pair
+       *code_expiration_date*
+           Date till code is valid.
+    """
+
+    email_subject = settings.OFFER_ASSIGNMENT_EMAIL_REMINDER_DEFAULT_SUBJECT
+    email_body = template.format(
+        REDEEMED_OFFER_COUNT=redeemed_offer_count,
+        TOTAL_OFFER_COUNT=total_offer_count,
+        USER_EMAIL=learner_email,
+        ENROLLMENT_URL=enrollment_url,
+        CODE=code,
+        EXPIRATION_DATE=code_expiration_date
+    )
+    send_offer_update_email.delay(learner_email, email_subject, email_body)

@@ -18,7 +18,7 @@ msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: openedx-translation@googlegroups.com\n"
 "POT-Creation-Date: 2018-03-26 16:41-0400\n"
-"PO-Revision-Date: 2019-01-18 19:30+0000\n"
+"PO-Revision-Date: 2019-01-29 19:28+0000\n"
 "Last-Translator: Katerina Ligkovanli <kaligova@gmail.com>\n"
 "Language-Team: Greek (http://www.transifex.com/open-edx/edx-platform/language/el/)\n"
 "MIME-Version: 1.0\n"
@@ -415,7 +415,7 @@ msgstr ""
 
 #: ecommerce/enterprise/forms.py:38 ecommerce/programs/forms.py:32
 msgid "Start Date"
-msgstr ""
+msgstr "Ημερομηνία Έναρξης"
 
 #: ecommerce/enterprise/forms.py:39 ecommerce/programs/forms.py:33
 msgid "End Date"
@@ -797,7 +797,7 @@ msgstr "Ψευδώνυμο"
 #: ecommerce/templates/oscar/dashboard/refunds/refund_list.html:60
 #: ecommerce/templates/oscar/dashboard/users/detail.html:48
 msgid "Email"
-msgstr ""
+msgstr "Email"
 
 #: ecommerce/extensions/dashboard/orders/views.py:72
 #, python-brace-format
@@ -1098,7 +1098,7 @@ msgstr ""
 #: ecommerce/extensions/voucher/utils.py:89
 #: ecommerce/extensions/voucher/utils.py:132
 msgid "Enrollment"
-msgstr ""
+msgstr "Εγγραφή"
 
 #: ecommerce/extensions/voucher/tests/test_utils.py:339
 #: ecommerce/extensions/voucher/tests/test_utils.py:347
@@ -1145,7 +1145,7 @@ msgstr ""
 #: ecommerce/extensions/voucher/utils.py:219
 #: ecommerce/templates/oscar/dashboard/partials/enrollment_table.html:8
 msgid "Course ID"
-msgstr ""
+msgstr "Ταυτότητα μαθήματος"
 
 #: ecommerce/extensions/voucher/utils.py:221
 msgid "Catalog Query"
@@ -1492,7 +1492,7 @@ msgstr ""
 
 #: ecommerce/templates/coupons/coupon_app.html:5
 msgid "Coupon Codes"
-msgstr ""
+msgstr "Κωδικοί κουπονιού."
 
 #: ecommerce/templates/coupons/offer.html:18
 msgid ""
@@ -1534,7 +1534,7 @@ msgstr ""
 #: ecommerce/templates/courses/course_app.html:5
 #: ecommerce/templates/edx/partials/_administration_menu.html:5
 msgid "Courses"
-msgstr ""
+msgstr "Μαθήματα"
 
 #: ecommerce/templates/courses/course_app.html:25
 #, python-format
@@ -1556,7 +1556,7 @@ msgstr ""
 #: ecommerce/templates/customer/email_base.html:188
 #, python-format
 msgid "Copyright © %(year)s %(platform_name)s. All rights reserved."
-msgstr "Δικαίωμα πνευματικής ιδιοκτησίας ©%(year)s %(platform_name)s. Με την επιφύλαξη κάθε νόμιμου δικαιώματος."
+msgstr "©%(year)s %(platform_name)s. Με την επιφύλαξη κάθε νόμιμου δικαιώματος."
 
 #: ecommerce/templates/customer/emails/commtype_course_purchased_body.html:9
 #: ecommerce/templates/customer/emails/commtype_course_purchased_body.txt:4
@@ -3278,7 +3278,7 @@ msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:681
 msgid "Admin"
-msgstr ""
+msgstr "Διαχειριστής"
 
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:706
 msgid "No notes available."
@@ -3313,7 +3313,7 @@ msgstr ""
 #: ecommerce/templates/oscar/dashboard/refunds/refund_list.html:78
 #: ecommerce/templates/oscar/dashboard/refunds/refund_list.html:85
 msgid "Deleted"
-msgstr ""
+msgstr "Διαγράφηκε "
 
 #: ecommerce/templates/oscar/dashboard/orders/order_list.html:149
 msgid "No orders found."
@@ -3467,7 +3467,7 @@ msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/users/detail.html:62
 msgid "Staff"
-msgstr ""
+msgstr "ΠΡΟΣΩΠΙΚΟ"
 
 #: ecommerce/templates/oscar/dashboard/users/detail.html:66
 msgid "Last login"
