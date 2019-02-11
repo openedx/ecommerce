@@ -4,6 +4,7 @@ import logging
 
 import waffle
 from django.core.exceptions import ValidationError
+from edx_rest_framework_extensions.paginators import DefaultPagination
 from oscar.core.loading import get_model
 from rest_framework import generics, serializers, status
 from rest_framework.decorators import detail_route, list_route
@@ -69,6 +70,7 @@ class EnterpriseCustomerViewSet(generics.GenericAPIView):
 
 class EnterpriseCouponViewSet(CouponViewSet):
     """ Coupon resource. """
+    pagination_class = DefaultPagination
 
     def get_queryset(self):
         enterprise_id = self.kwargs.get('enterprise_id')
