@@ -94,7 +94,7 @@ def track_completed_order(sender, order=None, **kwargs):  # pylint: disable=unus
 
 @receiver(post_checkout, dispatch_uid='send_completed_order_email')
 @silence_exceptions("Failed to send order completion email.")
-def send_course_purchase_email(sender, order=None, **kwargs):  # pylint: disable=unused-argument
+def send_course_purchase_email(sender, order=None, request=None, **kwargs):  # pylint: disable=unused-argument
     """Send course purchase notification email when a course is purchased."""
     if waffle.switch_is_active('ENABLE_NOTIFICATIONS'):
         # We do not currently support email sending for orders with more than one item.
@@ -116,6 +116,8 @@ def send_course_purchase_email(sender, order=None, **kwargs):  # pylint: disable
                     order_number=order.number,
                     site_configuration=order.site.siteconfiguration
                 )
+
+                recipient = request.POST.get('req_bill_to_email', order.user.email)
 
                 if provider_data:
                     send_notification(

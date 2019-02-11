@@ -25,26 +25,27 @@ class Dispatcher(Dispatcher):
             # pylint: disable=protected-access
             CommunicationEvent._default_manager.create(order=order, event_type=event_type)
 
-    def dispatch_user_messages(self, user, messages, site=None):  # pylint: disable=arguments-differ
+    def dispatch_user_messages(self, user, messages, site=None, recipient=None):  # pylint: disable=arguments-differ
         """
         Send messages to a site user
         """
         if messages['subject'] and (messages['body'] or messages['html']):
-            self.send_user_email_messages(user, messages, site)
+            self.send_user_email_messages(user, messages, site, recipient)
         if messages['sms']:
             self.send_text_message(user, messages['sms'])
 
-    def send_user_email_messages(self, user, messages, site=None):  # pylint: disable=arguments-differ
+    def send_user_email_messages(self, user, messages, site=None, recipient=None):  # pylint: disable=arguments-differ
         """
         Sends message to the registered user / customer and collects data in
         database
         """
-        if not user.email:
+        if not (recipient or user.email):
             msg = "Unable to send email messages: No email address for '{username}'.".format(username=user.username)
             self.logger.warning(msg)
             return
 
-        email = self.send_email_messages(user.email, messages, site)
+        recipient = recipient if recipient else user.email
+        email = self.send_email_messages(recipient, messages, site)
 
         # Is user is signed in, record the event for audit
         if email and user.is_authenticated():
