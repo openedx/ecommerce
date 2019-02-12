@@ -10,7 +10,7 @@ from rest_framework.response import Response
 from rest_framework_extensions.mixins import NestedViewSetMixin
 
 from ecommerce.core.constants import COURSE_ENTITLEMENT_PRODUCT_CLASS_NAME
-from ecommerce.entitlements.utils import create_or_update_course_entitlement, get_entitlement
+from ecommerce.entitlements.utils import create_or_update_course_entitlement
 from ecommerce.extensions.api import serializers
 from ecommerce.extensions.api.filters import ProductFilter
 from ecommerce.extensions.api.v2.views import NonDestroyableModelViewSet
@@ -89,40 +89,3 @@ class ProductViewSet(NestedViewSetMixin, NonDestroyableModelViewSet):
             return Response(entitlement_data, status=status.HTTP_201_CREATED)
         else:
             return self.invalid_product_response('POST')
-
-    def partial_update(self, request, *args, **kwargs):  # pylint: disable=unused-argument
-        """
-        Update one, or more, fields for a Product. The only supported fields at this time are
-        price and title. uuid and certificate_type are required to be sent.
-        """
-        data = request.data
-        if data.get('product_class') == COURSE_ENTITLEMENT_PRODUCT_CLASS_NAME:
-            certificate_type = data.get('certificate_type')
-            price = data.get('price')
-            uuid = data.get('uuid')
-            title = data.get('title')
-            if certificate_type and uuid:
-                entitlement = get_entitlement(uuid, certificate_type)
-                stockrecord = entitlement.stockrecords.first()
-                if price:
-                    stockrecord.price_excl_tax = price
-                    stockrecord.save()
-                if title:
-                    entitlement.title = 'Course {}'.format(title)
-                    entitlement.save()
-                entitlement_data = self.serializer_class(entitlement, context={'request': request}).data
-                return Response(entitlement_data, status=status.HTTP_200_OK)
-            else:
-                missing_values = [k for k in ['certificate_type', 'uuid'] if data.get(k) is None]
-                return self.missing_values_response(missing_values)
-        else:
-            return super(ProductViewSet, self).partial_update(request, *args, **kwargs)
-
-    def update(self, request, *args, **kwargs):
-        """ Update one, or more, fields for a Product. """
-        # We are restricting the updates for entitlements to PATCH only for now. In theory, this could be
-        # supported, but was expensive for us when our use case is to PATCH.
-        if request.data.get('product_class') == COURSE_ENTITLEMENT_PRODUCT_CLASS_NAME:
-            return self.invalid_product_response('POST and PATCH')
-        else:
-            return super(ProductViewSet, self).update(request, *args, **kwargs)
