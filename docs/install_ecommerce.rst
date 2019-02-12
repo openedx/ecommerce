@@ -14,7 +14,9 @@ following steps.
 .. note::
  These steps assume that you are running Open edX `devstack`_. If you prefer to
  run the E-Commerce service locally on your computer instead of on the virtual
- machine (VM) that devstack uses, see :`Development Outside Devstack`_.
+ machine (VM) that devstack uses, see :ref:`Development Outside Devstack`.
+
+.. _Set Up a Virtual Environment:
 
 ****************************
 Set Up a Virtual Environment
@@ -58,39 +60,60 @@ To set up the ``ecommerce`` database, you must run migrations.
 
 When you run migrations, the E-Commerce service adds a default site to your installation.
 
-***************
-Configure OAuth
-***************
+.. _Configure OIDC:
 
-The E-Commerce service relies on the LMS, which serves as the OAuth 2.0 authentication provider.
+***********************************
+Configure edX OpenID Connect (OIDC)
+***********************************
 
-To configure the E-Commerce service to work with OAuth, complete the following
+The E-Commerce service relies on the edX `OpenID Connect`_ (OIDC)
+authentication provider for login. OIDC is built on top of OAuth 2.0.
+Currently, the LMS serves as the authentication provider.
+
+To configure the E-Commerce service to work with OIDC, complete the following
 procedures.
 
 .. contents::
    :depth: 1
    :local:
 
+.. _Create Register Client:
+
 ============================
 Create and Register a Client
 ============================
 
-To create and register a new OAuth client, follow these steps.
+To create and register a new OIDC client, follow these steps.
 
 #. Start the LMS.
-#. In your browser, go to ``http://127.0.0.1:8000/admin/oauth2_provider/application/``.
+#. In your browser, go to ``http://127.0.0.1:8000/admin/oauth2/client/``.
 #. Select **Add client**.
 #. Leave the **User** field blank.
 #. For **Client Name**, enter ``E-Commerce Service``.
 #. For **URL**, enter ``http://localhost:8002/``.
-#. For **Redirect URL**, enter ``http://127.0.0.1:8002/complete/edx-oauth2/``.
-   This is the OAuth client endpoint.
+#. For **Redirect URL**, enter ``http://127.0.0.1:8002/complete/edx-oidc/``.
+   This is the OIDC client endpoint.
 
    The system automatically generates values in the **Client ID** and **Client
    Secret** fields.
 
-#. For **Client Type**, select **Authorization code**.
-#. Enable **Skip authorization**.
+#. For **Client Type**, select **Confidential (Web applications)**.
+#. Select **Save**.
+
+===============================
+Designate the Client as Trusted
+===============================
+
+After you create your client, designate it as trusted. Trusted clients
+bypass the user consent form that usually appears after the system validates
+the user's credentials.
+
+To designate your client as trusted, follow these steps.
+
+#. In your browser, go to
+   ``http://127.0.0.1:8000/admin/edx_oauth2_provider/trustedclient/add/``.
+#. In the **OAuth 2.0 clients** list, select the redirect URL for the client
+   that you just created.
 #. Select **Save**.
 
 .. _Configure a Site Partner and Site Configuration:
@@ -99,13 +122,13 @@ To create and register a new OAuth client, follow these steps.
 Configure a Site, Partner, and Site Configuration
 *************************************************
 
-To finish creating and configuring your OAuth client, you must configure a
+To finish creating and configuring your OIDC client, you must configure a
 partner, site, and site configuration for the E-Commerce service to use. The
 site that you configure is the default site that the E-Commerce service adds
 when you run migrations. You must update this default site to match the domain
 that you will use to access the E-Commerce service. You must also set up a site
 configuration that contains an ``oauth_settings`` JSON field that stores your
-OAuth client's settings, as follows.
+OIDC client's settings, as follows.
 
 .. list-table::
    :widths: 25 60 20
@@ -114,27 +137,25 @@ OAuth client's settings, as follows.
    * - Setting
      - Description
      - Value
-   * - ``BACKEND_SERVICE_EDX_OAUTH2_KEY``
+   * - ``SOCIAL_AUTH_EDX_OIDC_KEY``
      - OAuth 2.0 client key
-     - The **Client ID** field in the `Create and Register a Client`_
-       section for backend server-to-server calls.
-   * - ``BACKEND_SERVICE_EDX_OAUTH2_SECRET``
+     - The **Client ID** field in the :ref:`Create
+       Register Client` section.
+   * - ``SOCIAL_AUTH_EDX_OIDC_SECRET``
      - OAuth 2.0 client secret
-     - The **Client Secret** field in the `Create and Register a Client`_
-       ection for backend server-to-server calls.
-   * - ``SOCIAL_AUTH_EDX_OAUTH2_KEY``
-     - OAuth 2.0 client key
-     - The **Client ID** field in the `Create and Register a Client`_ section.
-   * - ``SOCIAL_AUTH_EDX_OAUTH2_SECRET``
-     - OAuth 2.0 client secret
-     - The **Client Secret** field in the `Create and Register a Client`_ section.
-   * - ``SOCIAL_AUTH_EDX_OAUTH2_URL_ROOT``
+     - The value from the **Client Secret** field in the :ref:`Create
+       Register Client` section.
+   * - ``SOCIAL_AUTH_EDX_OIDC_URL_ROOT``
      - OAuth 2.0 authentication URL
-     - For example, ``http://127.0.0.1:8000``.
-   * - ``SOCIAL_AUTH_EDX_OAUTH2_ISSUER``
-     - OAuth token issuer
-     - For example, ``http://127.0.0.1:8000``.
-   * - ``SOCIAL_AUTH_EDX_OAUTH2_LOGOUT_URL``
+     - For example, ``http://127.0.0.1:8000/oauth2``.
+   * - ``SOCIAL_AUTH_EDX_OIDC_ID_TOKEN_DECRYPTION_KEY``
+     - OIDC ID token decryption key, used to validate the ID
+       token
+     - The same value as ``SOCIAL_AUTH_EDX_OIDC_SECRET``.
+   * - ``SOCIAL_AUTH_EDX_OIDC_ISSUER``
+     - OIDC ID token issuer
+     - For example, ``http://127.0.0.1:8000/oauth2``.
+   * - ``SOCIAL_AUTH_EDX_OIDC_LOGOUT_URL``
      - User logout URL
      - For example, ``http://127.0.0.1:8000/logout``.
 
@@ -148,7 +169,7 @@ partner and site configuration with the specified options.
     .. code-block:: bash
 
       $ sudo su ecommerce
-      $ python manage.py create_or_update_site --site-id=1 --site-domain=localhost:8002 --partner-code=edX --partner-name='Open edX' --lms-url-root=localhost:8000 --theme-scss-path=sass/themes/edx.scss --payment-processors=cybersource,paypal --backend-service-client-id=[Change to OAuth Client ID for backend service calls] --backend-service-client-key=[Change to OAuth Client Secret for backend service calls] --sso-client-id=[Change to OAuth Client ID for SSO calls] --sso-client-key=[Change to OAuth Client Secret for SSO calls]
+      $ python manage.py create_or_update_site --site-id=1 --site-domain=localhost:8002 --partner-code=edX --partner-name='Open edX' --lms-url-root=localhost:8000 --theme-scss-path=sass/themes/edx.scss --payment-processors=cybersource,paypal --client-id=[change to OIDC client ID] --client-secret=[change to OIDC client secret]
 
 .. _Add Another Site Partner and Site Configuration:
 
@@ -203,11 +224,11 @@ this command.
      - ``--payment-processors=cybersource,paypal``
    * - ``--client-id``
      - Yes
-     - OAuth client ID.
+     - OIDC client ID.
      - ``--client-id=ecommerce-key``
    * - ``--client-secret``
      - Yes
-     - OAuth client secret.
+     - OIDC client secret.
      - ``--client-secret=ecommerce-secret``
    * - ``--from-email``
      - Yes
@@ -237,7 +258,7 @@ configuration with the options that you specify.
     .. code-block:: bash
 
       $ sudo su ecommerce
-      $ python manage.py create_or_update_site --site-domain=[change me] --partner-code=[change me] --partner-name=[change me] --lms-url-root=[change me] --client-id=[OAuth client ID] --client-secret=[OAuth client secret] --from-email=[from email]
+      $ python manage.py create_or_update_site --site-domain=[change me] --partner-code=[change me] --partner-name=[change me] --lms-url-root=[change me] --client-id=[OIDC client ID] --client-secret=[OIDC client secret] --from-email=[from email]
 
 ****************
 Start the Server
@@ -267,9 +288,9 @@ steps.
      $ python manage.py runserver 8002
 
    .. note::
-     If you use a different port, make sure you update the OAuth client by using
+     If you use a different port, make sure you update the OIDC client by using
      the Django administration panel in the LMS. For more information about
-     configuring the OAuth client, see `Configure OAuth`_.
+     configuring the OIDC client, see :ref:`Configure OIDC`.
 
 *****************************************
 Switch from ShoppingCart to E-Commerce
@@ -299,6 +320,8 @@ instead of ShoppingCart, follow these steps.
 #. Select the site for which you want to enable the E-Commerce service.
 
 #. Select **Save**.
+
+.. _Development Outside Devstack:
 
 ****************************
 Development Outside Devstack
