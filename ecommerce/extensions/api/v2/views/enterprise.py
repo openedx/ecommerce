@@ -407,8 +407,34 @@ class EnterpriseCouponViewSet(CouponViewSet):
         email_template = request.data.pop('template', None)
         if not email_template:
             log_message_and_raise_validation_error(str('Template is required.'))
+
+        if request.data.get('assignments'):
+            assignments = request.data.get('assignments')
+        else:
+            # If no assignment is passed, send reminder to all assignments associated with the coupon.
+            vouchers = coupon.attr.coupon_vouchers.vouchers.all()
+            code_filter = request.data.get('code_filter')
+
+            if not code_filter:
+                raise serializers.ValidationError('code_filter must be specified')
+
+            if code_filter == VOUCHER_NOT_REDEEMED:
+                assignment_usages = self._get_not_redeemed_usages(vouchers)
+            elif code_filter == VOUCHER_PARTIAL_REDEEMED:
+                assignment_usages = self._get_partial_redeemed_usages(vouchers)
+            else:
+                raise serializers.ValidationError('Invalid code_filter specified: {}'.format(code_filter))
+
+            assignments = [
+                {
+                    'code': assignment['code'],
+                    'email': assignment['user_email']
+                }
+                for assignment in assignment_usages
+            ]
+
         serializer = CouponCodeRemindSerializer(
-            data=request.data.get('assignments'),
+            data=assignments,
             many=True,
             context={'coupon': coupon, 'template': email_template}
         )

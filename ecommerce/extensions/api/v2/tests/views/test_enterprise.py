@@ -1596,3 +1596,100 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             },
         ]
         assert mock_send_email.call_count == 1
+
+    def test_coupon_codes_remind_all_not_redeemed(self):
+        """Test sending multiple remind requests (remind all not redeemed assignments use case for)."""
+        Switch.objects.update_or_create(name=ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, defaults={'active': True})
+
+        emails = ['test1@example.com', 'test2@example.com']
+        coupon_post_data = dict(self.data, voucher_type=Voucher.MULTI_USE, quantity=2, max_uses=3)
+        coupon = self.get_response('POST', ENTERPRISE_COUPONS_LINK, coupon_post_data)
+        coupon = coupon.json()
+        coupon_id = coupon['coupon_id']
+        vouchers = Product.objects.get(id=coupon_id).attr.coupon_vouchers.vouchers.all()
+        codes = [voucher.code for voucher in vouchers]
+
+        for code_index, email in enumerate(emails):
+            self.assign_user_to_code(coupon_id, [email], [codes[code_index]])
+
+        offer_assignments = OfferAssignment.objects.filter(user_email__in=emails).order_by('user_email')
+        with mock.patch('ecommerce.extensions.offer.utils.send_offer_update_email.delay') as mock_send_email:
+            response = self.get_response(
+                'POST',
+                '/api/v2/enterprise/coupons/{}/remind/'.format(coupon_id),
+                {'template': 'Test template', 'code_filter': VOUCHER_NOT_REDEEMED}
+            )
+        response = response.json()
+        assert response == [
+            {'code': offer_assignment.code, 'email': offer_assignment.user_email, 'detail': 'success'}
+            for offer_assignment in offer_assignments
+        ]
+        assert mock_send_email.call_count == 2
+
+    def test_coupon_codes_remind_all_partial_redeemed(self):
+        """Test sending multiple remind requests (remind all partial redeemed assignments use case)."""
+        Switch.objects.update_or_create(name=ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, defaults={'active': True})
+
+        emails = ['test1@example.com', 'test2@example.com']
+        coupon_post_data = dict(self.data, voucher_type=Voucher.MULTI_USE, quantity=2, max_uses=3)
+        coupon = self.get_response('POST', ENTERPRISE_COUPONS_LINK, coupon_post_data)
+        coupon = coupon.json()
+        coupon_id = coupon['coupon_id']
+        vouchers = Product.objects.get(id=coupon_id).attr.coupon_vouchers.vouchers.all()
+        codes = [voucher.code for voucher in vouchers]
+
+        for code_index, email in enumerate(emails):
+            self.assign_user_to_code(coupon_id, [email], [codes[code_index]])
+
+        # Redeem voucher partially
+        redeeming_user = self.create_user(email=emails[0])
+        self.use_voucher(Voucher.objects.get(code=codes[0]), redeeming_user)
+
+        offer_assignments = OfferAssignment.objects.filter(user_email__in=[redeeming_user.email]).order_by('user_email')
+
+        with mock.patch('ecommerce.extensions.offer.utils.send_offer_update_email.delay') as mock_send_email:
+            response = self.get_response(
+                'POST',
+                '/api/v2/enterprise/coupons/{}/remind/'.format(coupon_id),
+                {'template': 'Test template', 'code_filter': VOUCHER_PARTIAL_REDEEMED}
+            )
+        response = response.json()
+        assert response == [
+            {'code': offer_assignment.code, 'email': offer_assignment.user_email, 'detail': 'success'}
+            for offer_assignment in offer_assignments
+        ]
+        assert mock_send_email.call_count == 1
+
+    def test_coupon_codes_remind_all_with_no_code_filter(self):
+        """Test sending multiple remind requests (remind all use case with no code filter supplied)."""
+        Switch.objects.update_or_create(name=ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, defaults={'active': True})
+        coupon_post_data = dict(self.data, voucher_type=Voucher.SINGLE_USE, quantity=1, max_uses=None)
+        coupon = self.get_response('POST', ENTERPRISE_COUPONS_LINK, coupon_post_data)
+        coupon = coupon.json()
+        coupon_id = coupon['coupon_id']
+
+        response = self.get_response(
+            'POST',
+            '/api/v2/enterprise/coupons/{}/remind/'.format(coupon_id),
+            {'template': 'Test template'}
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        response = response.json()
+        assert response == ['code_filter must be specified']
+
+    def test_coupon_codes_remind_all_with_invalid_code_filter(self):
+        """Test sending multiple remind requests (remind all use case with invalid code filter supplied)."""
+        Switch.objects.update_or_create(name=ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, defaults={'active': True})
+        coupon_post_data = dict(self.data, voucher_type=Voucher.SINGLE_USE, quantity=1, max_uses=None)
+        coupon = self.get_response('POST', ENTERPRISE_COUPONS_LINK, coupon_post_data)
+        coupon = coupon.json()
+        coupon_id = coupon['coupon_id']
+
+        response = self.get_response(
+            'POST',
+            '/api/v2/enterprise/coupons/{}/remind/'.format(coupon_id),
+            {'template': 'Test template', 'code_filter': 'invalid-filter'}
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        response = response.json()
+        assert response == ['Invalid code_filter specified: invalid-filter']
