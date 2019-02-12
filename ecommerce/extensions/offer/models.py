@@ -480,6 +480,9 @@ class OfferAssignment(TimeStampedModel):
         blank=True
     )
 
+    def __unicode__(self):
+        return "{code}-{email}".format(code=self.code, email=self.user_email)
+
 
 class OfferAssignmentEmailAttempt(models.Model):
     """
