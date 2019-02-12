@@ -1,7 +1,5 @@
 """Tests of social auth strategies."""
 import datetime
-import json
-import re
 import uuid
 from calendar import timegm
 
@@ -18,8 +16,6 @@ from ecommerce.tests.testcases import TestCase
 
 User = get_user_model()
 
-CONTENT_TYPE = 'application/json'
-
 
 class CurrentSiteDjangoStrategyTests(TestCase):
     """Tests of the CurrentSiteDjangoStrategy."""
@@ -30,7 +26,7 @@ class CurrentSiteDjangoStrategyTests(TestCase):
 
     def test_get_setting_from_siteconfiguration(self):
         """Test that a setting can be retrieved from the site configuration."""
-        setting_name = 'SOCIAL_AUTH_EDX_OAUTH2_KEY'
+        setting_name = 'SOCIAL_AUTH_EDX_OIDC_KEY'
         expected = str(uuid.uuid4())
         self.site.siteconfiguration.oauth_settings[setting_name] = expected
         self.site.siteconfiguration.save()
@@ -39,7 +35,7 @@ class CurrentSiteDjangoStrategyTests(TestCase):
 
     def test_get_setting_from_django_settings(self):
         """Test that a setting can be retrieved from django settings if it doesn't exist in site configuration."""
-        setting_name = 'SOCIAL_AUTH_EDX_OAUTH2_SECRET'
+        setting_name = 'SOCIAL_AUTH_EDX_OIDC_SECRET'
         expected = str(uuid.uuid4())
 
         if setting_name in self.site.siteconfiguration.oauth_settings:
@@ -54,46 +50,32 @@ class CurrentSiteDjangoStrategyTests(TestCase):
         with self.assertRaises(KeyError):
             self.strategy.get_setting('FAKE_SETTING')
 
-    def create_jwt(self, user):
+    def create_id_token(self, user):
         """
         Creates a signed (JWS) ID token.
 
         Returns:
             str: JWS
         """
-        key = SYMKey(key=self.site.siteconfiguration.oauth_settings['SOCIAL_AUTH_EDX_OAUTH2_SECRET'])
+        key = SYMKey(key=self.site.siteconfiguration.oauth_settings['SOCIAL_AUTH_EDX_OIDC_SECRET'])
         now = datetime.datetime.utcnow()
         expiration_datetime = now + datetime.timedelta(seconds=3600)
         issue_datetime = now
         payload = {
-            'iss': self.site.siteconfiguration.lms_url_root,
+            'iss': self.site.siteconfiguration.oauth2_provider_url,
             'administrator': False,
             'iat': timegm(issue_datetime.utctimetuple()),
+            'given_name': user.first_name,
             'sub': str(uuid.uuid4()),
             'preferred_username': user.username,
-            'aud': self.site.siteconfiguration.oauth_settings['SOCIAL_AUTH_EDX_OAUTH2_KEY'],
+            'aud': self.site.siteconfiguration.oauth_settings['SOCIAL_AUTH_EDX_OIDC_KEY'],
+            'email': user.email,
             'exp': timegm(expiration_datetime.utctimetuple()),
+            'name': user.get_full_name(),
+            'family_name': user.last_name,
         }
         access_token = JWS(payload, jwk=key, alg='HS512').sign_compact()
         return access_token
-
-    def mock_access_token_jwt_response(self, user, status=200):
-        """ Mock the response from the OAuth provider's access token endpoint. """
-        assert httpretty.is_enabled(), 'httpretty must be enabled to mock the access token response.'
-
-        # Use a regex to account for the optional trailing slash
-        url = '{root}/access_token/?'.format(root=self.site.siteconfiguration.oauth2_provider_url)
-        url = re.compile(url)
-
-        token = self.create_jwt(user)
-        data = {
-            'access_token': token,
-            'expires_in': 3600,
-        }
-        body = json.dumps(data)
-        httpretty.register_uri(httpretty.POST, url, body=body, content_type=CONTENT_TYPE, status=status)
-
-        return token
 
     @httpretty.activate
     def test_authentication(self):
@@ -101,10 +83,11 @@ class CurrentSiteDjangoStrategyTests(TestCase):
         a UUID. This validates the fix made by https://github.com/python-social-auth/social-core/pull/74.
         """
         self.site.siteconfiguration.oauth_settings = {
-            'SOCIAL_AUTH_EDX_OAUTH2_KEY': 'test-key',
-            'SOCIAL_AUTH_EDX_OAUTH2_SECRET': 'test-secret',
-            'SOCIAL_AUTH_EDX_OAUTH2_URL_ROOT': self.site.siteconfiguration.lms_url_root,
-            'SOCIAL_AUTH_EDX_OAUTH2_ISSUER': self.site.siteconfiguration.lms_url_root,
+            'SOCIAL_AUTH_EDX_OIDC_KEY': 'test-key',
+            'SOCIAL_AUTH_EDX_OIDC_SECRET': 'test-secret',
+            'SOCIAL_AUTH_EDX_OIDC_URL_ROOT': self.site.siteconfiguration.oauth2_provider_url,
+            'SOCIAL_AUTH_EDX_OIDC_ID_TOKEN_DECRYPTION_KEY': 'test-secret',
+            'SOCIAL_AUTH_EDX_OIDC_ISSUER': self.site.siteconfiguration.oauth2_provider_url,
 
         }
         self.site.siteconfiguration.save()
@@ -118,14 +101,15 @@ class CurrentSiteDjangoStrategyTests(TestCase):
         self.assertEqual(user.social_auth.count(), 0)
 
         # Mock access token endpoint so that it returns an ID token
-        self.mock_access_token_jwt_response(user)
+        id_token = self.create_id_token(user)
+        self.mock_access_token_response(id_token=id_token)
 
         # Simulate login completion
         state = str(uuid.uuid4())
         session = self.client.session
-        session['edx-oauth2_state'] = state
+        session['edx-oidc_state'] = state
         session.save()
-        url = '{host}?state={state}'.format(host=reverse('social:complete', args=['edx-oauth2']), state=state)
+        url = '{host}?state={state}'.format(host=reverse('social:complete', args=['edx-oidc']), state=state)
         response = self.client.get(url)
         self.assertEqual(response.status_code, 302)
 
