@@ -268,11 +268,16 @@ class SiteMixin(object):
         Course.objects.all().delete()
         Partner.objects.all().delete()
         Site.objects.all().delete()
+        lms_url_root = "http://lms.testserver.fake"
         self.site_configuration = SiteConfigurationFactory(
+            lms_url_root=lms_url_root,
             from_email='from@example.com',
             oauth_settings={
-                'SOCIAL_AUTH_EDX_OIDC_KEY': 'key',
-                'SOCIAL_AUTH_EDX_OIDC_SECRET': 'secret'
+                'SOCIAL_AUTH_EDX_OAUTH2_KEY': 'key',
+                'SOCIAL_AUTH_EDX_OAUTH2_SECRET': 'secret',
+                'BACKEND_SERVICE_EDX_OAUTH2_KEY': 'key',
+                'BACKEND_SERVICE_EDX_OAUTH2_SECRET': 'secret',
+                'SOCIAL_AUTH_EDX_OAUTH2_LOGOUT_URL': lms_url_root + '/logout',
             },
             partner__name='edX',
             partner__short_code='edx',
