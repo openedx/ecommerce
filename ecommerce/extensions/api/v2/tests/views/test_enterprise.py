@@ -10,6 +10,7 @@ import httpretty
 import mock
 from django.conf import settings
 from django.urls import reverse
+from django.utils.http import urlencode
 from django.utils.timezone import now
 from oscar.core.loading import get_model
 from oscar.test import factories
@@ -837,6 +838,55 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
         # Verify that we get correct results.
         for actual_result in overview_response['results']:
             self.assertIn(actual_result, expected_results)
+
+    @ddt.data(
+        (
+            '85b08dde-0877-4474-a4e9-8408fe47ce88',
+            ['coupon-1', 'coupon-2']
+        ),
+        (
+            'f5c9149f-8dce-4410-bb0f-85c0f2dda864',
+            ['coupon-3']
+        ),
+    )
+    @ddt.unpack
+    def test_get_single_enterprise_coupon_overview_data(self, enterprise_id, expected_coupons):
+        """
+        Test if we get correct enterprise coupon overview data for a single coupon.
+        """
+        Switch.objects.update_or_create(name=ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, defaults={'active': True})
+        coupons_data = [{
+            'title': 'coupon-1',
+            'enterprise_customer': {'name': 'LOTRx', 'id': '85b08dde-0877-4474-a4e9-8408fe47ce88'}
+        }, {
+            'title': 'coupon-2',
+            'enterprise_customer': {'name': 'LOTRx', 'id': '85b08dde-0877-4474-a4e9-8408fe47ce88'}
+        }, {
+            'title': 'coupon-3',
+            'enterprise_customer': {'name': 'HPx', 'id': 'f5c9149f-8dce-4410-bb0f-85c0f2dda864'}
+        }]
+
+        # Create coupons.
+        for coupon_data in coupons_data:
+            self.get_response('POST', ENTERPRISE_COUPONS_LINK, dict(self.data, **coupon_data))
+
+        # Build expected results for all coupons.
+        expected_results = []
+        for coupon_title in expected_coupons:
+            expected_results.append(self.get_coupon_data(coupon_title))
+
+        # Build request URL with `coupon_id` query parameter
+        base_url = reverse(
+            'api:v2:enterprise-coupons-(?P<enterprise-id>.+)/overview-list',
+            kwargs={'enterprise_id': enterprise_id}
+        )
+        coupon_id = expected_results[0].get('id')
+        request_url = '{}?{}'.format(base_url, urlencode({'coupon_id': coupon_id}))
+
+        # Fetch single coupon overview data
+        overview_response = self.get_response_json('GET', request_url)
+
+        self.assertEqual(overview_response, expected_results[0])
 
     @ddt.data(
         {
