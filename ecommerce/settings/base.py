@@ -7,6 +7,7 @@ from os.path import abspath, basename, dirname, join, normpath
 from sys import path
 
 from django.utils.translation import ugettext_lazy as _
+from kombu import Exchange, Queue
 from oscar import OSCAR_MAIN_TEMPLATE_DIR
 
 from ecommerce.core.constants import (
@@ -554,6 +555,10 @@ CELERYD_HIJACK_ROOT_LOGGER = False
 CELERY_ALWAYS_EAGER = False
 # END CELERY
 
+CELERY_DEFAULT_QUEUE = 'ecommerce'
+CELERY_QUEUES = (
+    Queue('ecommerce', Exchange('ecommerce'), routing_key='ecommerce'),
+)
 
 THEME_SCSS = 'sass/themes/default.scss'
 
