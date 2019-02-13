@@ -93,4 +93,4 @@ class AutoAuthTests(TestCase):
 
 class LogoutViewTests(LogoutViewTestMixin, TestCase):
     def get_redirect_url(self):
-        return self.site.siteconfiguration.build_lms_url('logout')
+        return self.site.siteconfiguration.oauth_settings['SOCIAL_AUTH_EDX_OAUTH2_LOGOUT_URL']

@@ -157,8 +157,8 @@ def send_revoked_offer_email(template, learner_email, code):
     email_subject = settings.OFFER_REVOKE_EMAIL_DEFAULT_SUBJECT
 
     email_body = template.format(
-        user_email=learner_email,
-        code=code,
+        USER_EMAIL=learner_email,
+        CODE=code,
     )
     send_offer_update_email.delay(learner_email, email_subject, email_body)
 
