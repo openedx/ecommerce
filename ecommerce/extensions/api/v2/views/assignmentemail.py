@@ -110,9 +110,8 @@ class AssignmentEmailStatus(APIView):
 
 class AssignmentEmailBounce(APIView):
     """
-    Receive Sailthru bounce-api POST
-    Note: The endpoint is configured without security since Sailthru does not have any configuration options for
-    adding security tokens. Please refer to https://getstarted.sailthru.com/developers/api-basics/postbacks/
+    Receive Sailthru bounce-api POST.
+    Please refer to https://getstarted.sailthru.com/developers/api-basics/postbacks/
     """
     permission_classes = ()
     authentication_classes = ()

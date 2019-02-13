@@ -64,6 +64,13 @@ class StockRecordViewSetTests(ProductSerializerMixin, DiscoveryTestMixin, Thrott
         self.assertEqual(response.status_code, 200)
         self.assertDictEqual(json.loads(response.content), self.serialize_stockrecord(self.stockrecord))
 
+    def test_retrieve_by_sku(self):
+        """ Verify a single stockrecord is returned by giving a sku. """
+        path = reverse(self.detail_path, kwargs={'pk': self.stockrecord.partner_sku})
+        response = self.client.get(path)
+        self.assertEqual(response.status_code, 200)
+        self.assertDictEqual(json.loads(response.content), self.serialize_stockrecord(self.stockrecord))
+
     def test_update(self):
         """ Verify update endpoint allows to update 'price_currency' and 'price_excl_tax'. """
         self.user.user_permissions.add(self.change_permission)
@@ -91,6 +98,17 @@ class StockRecordViewSetTests(ProductSerializerMixin, DiscoveryTestMixin, Thrott
         }
         response = self.attempt_update(data)
         self.assertEqual(response.status_code, 403)
+
+    def test_update_as_staff(self):
+        """ Verify update endpoint allows updating with staff permission. """
+        self.user.is_staff = True
+        self.user.save()
+
+        data = {
+            "price_excl_tax": "500.00"
+        }
+        response = self.attempt_update(data)
+        self.assertEqual(response.status_code, 200)
 
     def test_allowed_fields_for_update(self):
         """ Verify the endpoint only allows the price_excl_tax and price_currency fields to be updated. """

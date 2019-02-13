@@ -6,6 +6,7 @@ admin.site.unregister(Condition)
 admin.site.unregister(Range)
 
 OfferAssignment = get_model('offer', 'OfferAssignment')
+OfferAssignmentEmailAttempt = get_model('offer', 'OfferAssignmentEmailAttempt')
 
 
 @admin.register(Range)
@@ -45,3 +46,16 @@ class OfferAssignmentAdmin(admin.ModelAdmin):
 
     list_display = ('code', 'user_email', 'status', 'offer', 'voucher_application')
     search_fields = ('code', 'user_email', 'status')
+
+
+@admin.register(OfferAssignmentEmailAttempt)
+class OfferAssignmentEmailAttemptAdmin(admin.ModelAdmin):
+    """
+    Django admin model for `OfferAssignmentEmailAttempt`
+    """
+    class Meta(object):
+        model = OfferAssignmentEmailAttempt
+
+    list_display = ('send_id', 'offer_assignment')
+    search_fields = ('send_id',)
+    fields = ('send_id', 'offer_assignment')

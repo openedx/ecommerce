@@ -28,6 +28,7 @@ from ecommerce.courses.models import Course
 from ecommerce.entitlements.utils import create_or_update_course_entitlement
 from ecommerce.extensions.offer.constants import (
     OFFER_ASSIGNED,
+    OFFER_ASSIGNMENT_EMAIL_BOUNCED,
     OFFER_ASSIGNMENT_EMAIL_PENDING,
     OFFER_ASSIGNMENT_REVOKED,
     OFFER_MAX_USES_DEFAULT,
@@ -672,37 +673,96 @@ class VoucherSerializer(serializers.ModelSerializer):
         )
 
 
-class CouponVoucherSerializer(serializers.Serializer):  # pylint: disable=abstract-method
+class CodeUsageSerializer(serializers.Serializer):  # pylint: disable=abstract-method
     code = serializers.SerializerMethodField()
     assigned_to = serializers.SerializerMethodField()
     redeem_url = serializers.SerializerMethodField()
     redemptions = serializers.SerializerMethodField()
 
-    def get_code(self, voucher):
-        return voucher.code
+    def get_code(self, obj):
+        return obj.get('code')
 
     def get_redeem_url(self, obj):
         url = get_ecommerce_url('/coupons/offer/')
-        return '{url}?code={code}'.format(url=url, code=obj.code)
+        return '{url}?code={code}'.format(url=url, code=self.get_code(obj))
 
-    def get_assigned_to(self, obj):  # pylint: disable=unused-argument
-        return ''
+    def get_assigned_to(self, obj):
+        return obj.get('user_email')
 
-    def get_redemptions(self, voucher):
+    def get_redemptions(self, obj):
+        voucher = Voucher.objects.get(code=self.get_code(obj))
         offer = voucher.best_offer
         redemption_count = voucher.num_orders
 
         if voucher.usage == Voucher.SINGLE_USE:
             max_coupon_usage = 1
-        elif voucher.usage != Voucher.SINGLE_USE and offer.max_global_applications is None:
+        elif offer.max_global_applications is None:
             max_coupon_usage = OFFER_MAX_USES_DEFAULT
         else:
             max_coupon_usage = offer.max_global_applications
 
         return {
             'used': redemption_count,
-            'available': max_coupon_usage,
+            'total': max_coupon_usage,
         }
+
+
+class NotAssignedCodeUsageSerializer(CodeUsageSerializer):  # pylint: disable=abstract-method
+
+    def get_assigned_to(self, obj):
+        return ''
+
+
+class NotRedeemedCodeUsageSerializer(CodeUsageSerializer):  # pylint: disable=abstract-method
+
+    def get_redemptions(self, obj):
+        usage_type = self.context.get('usage_type')
+        if usage_type in (Voucher.SINGLE_USE, Voucher.MULTI_USE_PER_CUSTOMER):
+            return super(NotRedeemedCodeUsageSerializer, self).get_redemptions(obj)
+        else:
+            num_assignments = OfferAssignment.objects.filter(
+                code=self.get_code(obj),
+                user_email=self.get_assigned_to(obj),
+                status__in=[OFFER_ASSIGNED, OFFER_ASSIGNMENT_EMAIL_PENDING],
+            ).count()
+            return {'used': 0, 'total': num_assignments}
+
+
+class PartialRedeemedCodeUsageSerializer(CodeUsageSerializer):  # pylint: disable=abstract-method
+
+    def get_redemptions(self, obj):
+        usage_type = self.context.get('usage_type')
+        if usage_type == Voucher.SINGLE_USE:
+            return {}
+        elif usage_type == Voucher.MULTI_USE_PER_CUSTOMER:
+            return super(PartialRedeemedCodeUsageSerializer, self).get_redemptions(obj)
+        else:
+            num_assignments = OfferAssignment.objects.filter(
+                code=self.get_code(obj),
+                user_email=self.get_assigned_to(obj),
+                status__in=[OFFER_ASSIGNED, OFFER_ASSIGNMENT_EMAIL_PENDING],
+            ).count()
+            num_applications = VoucherApplication.objects.filter(
+                voucher__code=self.get_code(obj),
+                user__email=self.get_assigned_to(obj)
+            ).count()
+            return {'used': num_applications, 'total': num_assignments + num_applications}
+
+
+class RedeemedCodeUsageSerializer(CodeUsageSerializer):  # pylint: disable=abstract-method
+
+    def get_code(self, obj):
+        return obj.get('voucher__code')
+
+    def get_assigned_to(self, obj):
+        return obj.get('user__email')
+
+    def get_redemptions(self, obj):
+        num_applications = VoucherApplication.objects.filter(
+            voucher__code=self.get_code(obj),
+            user__email=self.get_assigned_to(obj)
+        ).count()
+        return {'used': num_applications, 'total': num_applications}
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -748,23 +808,51 @@ class EnterpriseCouponOverviewListSerializer(serializers.ModelSerializer):
     start_date = serializers.SerializerMethodField()
     usage_limitation = serializers.SerializerMethodField()
 
-    # TODO: ENT-1184
-    def get_num_unassigned(self, obj):  # pylint: disable=unused-argument
-        return 0
+    def get_num_unassigned(self, coupon):
+        """
+        Returns number of unassigned vouchers. These are the vouchers that have
+        at-least 1 potential slot available for asssignment.
+        """
+        vouchers = coupon.attr.coupon_vouchers.vouchers.all()
+        num_unassigned = len([
+            voucher.code
+            for voucher in vouchers
+            if voucher.slots_available_for_assignment > 0
+        ])
+        return num_unassigned
 
-    # TODO: ENT-1184
-    def get_has_error(self, obj):   # pylint: disable=unused-argument
-        return False
+    def get_has_error(self, obj):
+        """
+        Returns True if any assignment associated with coupon is having
+        error, otherwise False.
+        """
+        offer = retrieve_offer(obj)
+        offer_assignments_with_error = offer.offerassignment_set.filter(
+            status=OFFER_ASSIGNMENT_EMAIL_BOUNCED
+        )
+        return offer_assignments_with_error.exists()
 
     # Max number of codes available (Maximum Coupon Usage).
     def get_max_uses(self, obj):
+        voucher_usage = retrieve_voucher_usage(obj)
         offer = retrieve_offer(obj)
-        return offer.max_global_applications
+        max_uses_per_code = None
+        if voucher_usage == Voucher.SINGLE_USE:
+            max_uses_per_code = 1
+        elif offer.max_global_applications:
+            max_uses_per_code = offer.max_global_applications
+        else:
+            max_uses_per_code = OFFER_MAX_USES_DEFAULT
+
+        return max_uses_per_code * retrieve_quantity(obj)
 
     # Redemption count.
     def get_num_uses(self, obj):
-        voucher = retrieve_voucher(obj)
-        return voucher.num_orders
+        vouchers = retrieve_all_vouchers(obj)
+        num_uses = 0
+        for voucher in vouchers:
+            num_uses += voucher.num_orders
+        return num_uses
 
     # Number of codes.
     def get_num_codes(self, obj):
