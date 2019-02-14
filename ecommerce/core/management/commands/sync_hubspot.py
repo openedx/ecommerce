@@ -155,9 +155,17 @@ class Command(BaseCommand):
         try:
             site_configs = self._get_hubspot_enable_sites()
             # setting initial configuration before sync
+
+            if not site_configs:
+                self.stdout.write('No Hubspot enabled SiteConfiguration Found.')
+                return
+
             for site_conf in site_configs:
+                self.stdout.write('Started syncing data of site {site} to Hubspot.'
+                                  .format(site=site_conf.site))
                 self._install_hubspot_ecommerce_bridge(site_conf)
                 self._define_hubspot_ecommerce_settings(site_conf)
+
         except Exception as ex:
             traceback.print_exc()
             raise CommandError('Command failed with traceback %s' % str(ex))
