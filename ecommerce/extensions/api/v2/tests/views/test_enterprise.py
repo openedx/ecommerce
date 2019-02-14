@@ -398,7 +398,7 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
         else:
             total_result_count = len(response['results'])
             all_received_codes = [result['code'] for result in response['results']]
-            all_received_code_max_uses = [result['redemptions']['available'] for result in response['results']]
+            all_received_code_max_uses = [result['redemptions']['total'] for result in response['results']]
 
         # `max_uses` should be same for all codes
         max_uses = max_uses or 1
@@ -412,6 +412,8 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
 
         if pagination:
             self.assertEqual(response['count'], pagination['count'])
+            self.assertEqual(response['current_page'], pagination['current_page'])
+            self.assertEqual(response['num_pages'], pagination['num_pages'])
             self.assertEqual(response['next'], pagination['next'])
             self.assertEqual(response['previous'], pagination['previous'])
 
@@ -666,6 +668,120 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         response = response.json()
         assert response == ['code_filter must be specified']
+
+    def test_coupon_codes_detail_csv(self):
+        """
+        Verify that `/api/v2/enterprise/coupons/{coupon_id}/codes/` endpoint returns correct csv data.
+        """
+        coupon_data = {
+            'voucher_type': Voucher.MULTI_USE,
+            'quantity': 2,
+            'max_uses': 3
+        }
+
+        coupon_id = self.create_coupon_with_applications(
+            self.data,
+            coupon_data['voucher_type'],
+            coupon_data['quantity'],
+            coupon_data['max_uses']
+        )
+
+        response = self.get_response(
+            'GET',
+            '/api/v2/enterprise/coupons/{}/codes.csv?code_filter={}'.format(coupon_id, VOUCHER_REDEEMED)
+        )
+        csv_content = response.content.split('\r\n')
+        csv_header = csv_content[0]
+        # Strip out first row (headers) and last row (extra csv line)
+        csv_data = csv_content[1:-1]
+
+        # Verify headers.
+        self.assertEqual(csv_header, 'assigned_to,code,redeem_url,redemptions.total,redemptions.used')
+
+        # Verify csv data.
+        self.assert_coupon_codes_response(
+            csv_data,
+            coupon_id,
+            1,
+            6,
+            is_csv=True
+        )
+
+    @ddt.data(
+        {
+            'page': 1,
+            'page_size': 2,
+            'pagination': {
+                'count': 6,
+                'current_page': 1,
+                'num_pages': 3,
+                'next': 'http://testserver.fake/api/v2/enterprise/coupons/{}/codes/?code_filter={}&page=2&page_size=2',
+                'previous': None,
+            },
+            'expected_results_count': 2,
+        },
+        {
+            'page': 2,
+            'page_size': 4,
+            'pagination': {
+                'count': 6,
+                'current_page': 2,
+                'num_pages': 2,
+                'next': None,
+                'previous': 'http://testserver.fake/api/v2/enterprise/coupons/{}/codes/?code_filter={}&page_size=4',
+            },
+            'expected_results_count': 2,
+        },
+        {
+            'page': 2,
+            'page_size': 3,
+            'pagination': {
+                'count': 6,
+                'current_page': 2,
+                'num_pages': 2,
+                'next': None,
+                'previous': 'http://testserver.fake/api/v2/enterprise/coupons/{}/codes/?code_filter={}&page_size=3',
+            },
+            'expected_results_count': 3,
+        },
+    )
+    @ddt.unpack
+    def test_coupon_codes_detail_with_pagination(self, page, page_size, pagination, expected_results_count):
+        """
+        Verify that `/api/v2/enterprise/coupons/{coupon_id}/codes/` endpoint pagination works
+        """
+        coupon_data = {
+            'voucher_type': Voucher.MULTI_USE,
+            'quantity': 2,
+            'max_uses': 3,
+        }
+
+        coupon_id = self.create_coupon_with_applications(
+            self.data,
+            coupon_data['voucher_type'],
+            coupon_data['quantity'],
+            coupon_data['max_uses']
+        )
+
+        # update the coupon id in `previous` and next urls
+        pagination['previous'] = pagination['previous'] and pagination['previous'].format(coupon_id, VOUCHER_REDEEMED)
+        pagination['next'] = pagination['next'] and pagination['next'].format(coupon_id, VOUCHER_REDEEMED)
+
+        endpoint = '/api/v2/enterprise/coupons/{}/codes/?code_filter={}&page={}&page_size={}'.format(
+            coupon_id, VOUCHER_REDEEMED, page, page_size
+        )
+
+        # get coupon codes usage details
+        response = self.get_response('GET', endpoint)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response = response.json()
+        self.assert_coupon_codes_response(
+            response,
+            coupon_id,
+            1,
+            expected_results_count,
+            pagination=pagination,
+        )
 
     @ddt.data(
         (
