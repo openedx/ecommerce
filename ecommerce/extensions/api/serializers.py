@@ -1281,7 +1281,16 @@ class CouponCodeRevokeRemindBulkSerializer(serializers.ListSerializer):  # pylin
             try:
                 validated = self.child.run_validation(item)
             except serializers.ValidationError as exc:
-                ret.append(exc.detail)
+                ret.append(
+                    {
+                        'non_field_errors': [{
+                            'code': item.get('code'),
+                            'email': item.get('email'),
+                            'detail': 'failure',
+                            'message': exc.detail['non_field_errors'][0]
+                        }]
+                    }
+                )
             else:
                 ret.append(validated)
 
@@ -1304,9 +1313,16 @@ class CouponCodeRevokeRemindBulkSerializer(serializers.ListSerializer):  # pylin
         """
         This selectively calls to_representation on each result that was processed by create.
         """
-        return [
-            self.child.to_representation(item) if 'detail' in item else item for item in data
-        ]
+        response = []
+        for item in data:
+            if 'detail' in item:
+                response.append(self.child.to_representation(item))
+            elif 'non_field_errors' in item:
+                response.append(item['non_field_errors'][0])
+            else:
+                response.append(item)
+
+        return response
 
 
 class CouponCodeMixin(object):

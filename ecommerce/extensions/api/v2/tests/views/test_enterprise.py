@@ -1338,7 +1338,12 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
 
         response = response.json()
         assert response == [
-            {'non_field_errors': ['Code RANDOMCODE is not associated with this Coupon']}
+            {
+                'code': 'RANDOMCODE',
+                'email': 'test1@example.com',
+                'detail': 'failure',
+                'message': 'Code RANDOMCODE is not associated with this Coupon',
+            }
         ]
 
     def test_coupon_codes_revoke_no_assignment_exists(self):
@@ -1359,7 +1364,12 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
 
         response = response.json()
         assert response == [
-            {'non_field_errors': ['No assignments exist for user {} and code {}'.format(email, voucher.code)]}
+            {
+                'code': voucher.code,
+                'email': email,
+                'detail': 'failure',
+                'message': 'No assignments exist for user {} and code {}'.format(email, voucher.code),
+            }
         ]
 
     def test_coupon_codes_revoke_email_failure(self):
@@ -1425,7 +1435,12 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
         response = response.json()
         assert response == [
             {'email': offer_assignment.user_email, 'code': offer_assignment.code, 'detail': 'success'},
-            {'non_field_errors': ['Code RANDOMCODE is not associated with this Coupon']},
+            {
+                'code': 'RANDOMCODE',
+                'email': 'test3@example.com',
+                'detail': 'failure',
+                'message': 'Code RANDOMCODE is not associated with this Coupon',
+            },
         ]
         assert mock_send_email.call_count == 1
         for offer_assignment in OfferAssignment.objects.filter(user_email=offer_assignment.user_email):
@@ -1479,9 +1494,15 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             '/api/v2/enterprise/coupons/{}/remind/'.format(coupon_id),
             {'template': 'Test template', 'assignments': [{'email': email, 'code': 'RANDOMCODE'}]}
         )
+
         response = response.json()
         assert response == [
-            {'non_field_errors': ['Code RANDOMCODE is not associated with this Coupon']}
+            {
+                'code': 'RANDOMCODE',
+                'email': 'test1@example.com',
+                'detail': 'failure',
+                'message': 'Code RANDOMCODE is not associated with this Coupon',
+            }
         ]
 
     def test_coupon_codes_remind_no_assignment_exists(self):
@@ -1498,9 +1519,15 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             '/api/v2/enterprise/coupons/{}/remind/'.format(coupon_id),
             {'template': 'Test template', 'assignments': [{'email': email, 'code': voucher.code}]}
         )
+
         response = response.json()
         assert response == [
-            {'non_field_errors': ['No assignments exist for user {} and code {}'.format(email, voucher.code)]}
+            {
+                'code': voucher.code,
+                'email': email,
+                'detail': 'failure',
+                'message': 'No assignments exist for user {} and code {}'.format(email, voucher.code),
+            }
         ]
 
     def test_coupon_codes_remind_email_failure(self):
@@ -1557,9 +1584,15 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
                     {'email': 'test3@example.com', 'code': 'RANDOMCODE'},
                 ]}
             )
+
         response = response.json()
         assert response == [
             {'email': offer_assignment.user_email, 'code': offer_assignment.code, 'detail': 'success'},
-            {'non_field_errors': ['Code RANDOMCODE is not associated with this Coupon']},
+            {
+                'code': 'RANDOMCODE',
+                'email': 'test3@example.com',
+                'detail': 'failure',
+                'message': 'Code RANDOMCODE is not associated with this Coupon',
+            },
         ]
         assert mock_send_email.call_count == 1
