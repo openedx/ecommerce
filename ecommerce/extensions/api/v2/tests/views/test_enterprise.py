@@ -10,6 +10,7 @@ import httpretty
 import mock
 from django.conf import settings
 from django.urls import reverse
+from django.utils.http import urlencode
 from django.utils.timezone import now
 from oscar.core.loading import get_model
 from oscar.test import factories
@@ -25,6 +26,7 @@ from ecommerce.enterprise.constants import ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH
 from ecommerce.enterprise.tests.mixins import EnterpriseServiceMockMixin
 from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
 from ecommerce.extensions.offer.constants import (
+    OFFER_ASSIGNMENT_EMAIL_BOUNCED,
     OFFER_ASSIGNMENT_REVOKED,
     VOUCHER_NOT_ASSIGNED,
     VOUCHER_NOT_REDEEMED,
@@ -397,7 +399,7 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
         else:
             total_result_count = len(response['results'])
             all_received_codes = [result['code'] for result in response['results']]
-            all_received_code_max_uses = [result['redemptions']['available'] for result in response['results']]
+            all_received_code_max_uses = [result['redemptions']['total'] for result in response['results']]
 
         # `max_uses` should be same for all codes
         max_uses = max_uses or 1
@@ -411,6 +413,8 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
 
         if pagination:
             self.assertEqual(response['count'], pagination['count'])
+            self.assertEqual(response['current_page'], pagination['current_page'])
+            self.assertEqual(response['num_pages'], pagination['num_pages'])
             self.assertEqual(response['next'], pagination['next'])
             self.assertEqual(response['previous'], pagination['previous'])
 
@@ -666,6 +670,120 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
         response = response.json()
         assert response == ['code_filter must be specified']
 
+    def test_coupon_codes_detail_csv(self):
+        """
+        Verify that `/api/v2/enterprise/coupons/{coupon_id}/codes/` endpoint returns correct csv data.
+        """
+        coupon_data = {
+            'voucher_type': Voucher.MULTI_USE,
+            'quantity': 2,
+            'max_uses': 3
+        }
+
+        coupon_id = self.create_coupon_with_applications(
+            self.data,
+            coupon_data['voucher_type'],
+            coupon_data['quantity'],
+            coupon_data['max_uses']
+        )
+
+        response = self.get_response(
+            'GET',
+            '/api/v2/enterprise/coupons/{}/codes.csv?code_filter={}'.format(coupon_id, VOUCHER_REDEEMED)
+        )
+        csv_content = response.content.split('\r\n')
+        csv_header = csv_content[0]
+        # Strip out first row (headers) and last row (extra csv line)
+        csv_data = csv_content[1:-1]
+
+        # Verify headers.
+        self.assertEqual(csv_header, 'assigned_to,code,redeem_url,redemptions.total,redemptions.used')
+
+        # Verify csv data.
+        self.assert_coupon_codes_response(
+            csv_data,
+            coupon_id,
+            1,
+            6,
+            is_csv=True
+        )
+
+    @ddt.data(
+        {
+            'page': 1,
+            'page_size': 2,
+            'pagination': {
+                'count': 6,
+                'current_page': 1,
+                'num_pages': 3,
+                'next': 'http://testserver.fake/api/v2/enterprise/coupons/{}/codes/?code_filter={}&page=2&page_size=2',
+                'previous': None,
+            },
+            'expected_results_count': 2,
+        },
+        {
+            'page': 2,
+            'page_size': 4,
+            'pagination': {
+                'count': 6,
+                'current_page': 2,
+                'num_pages': 2,
+                'next': None,
+                'previous': 'http://testserver.fake/api/v2/enterprise/coupons/{}/codes/?code_filter={}&page_size=4',
+            },
+            'expected_results_count': 2,
+        },
+        {
+            'page': 2,
+            'page_size': 3,
+            'pagination': {
+                'count': 6,
+                'current_page': 2,
+                'num_pages': 2,
+                'next': None,
+                'previous': 'http://testserver.fake/api/v2/enterprise/coupons/{}/codes/?code_filter={}&page_size=3',
+            },
+            'expected_results_count': 3,
+        },
+    )
+    @ddt.unpack
+    def test_coupon_codes_detail_with_pagination(self, page, page_size, pagination, expected_results_count):
+        """
+        Verify that `/api/v2/enterprise/coupons/{coupon_id}/codes/` endpoint pagination works
+        """
+        coupon_data = {
+            'voucher_type': Voucher.MULTI_USE,
+            'quantity': 2,
+            'max_uses': 3,
+        }
+
+        coupon_id = self.create_coupon_with_applications(
+            self.data,
+            coupon_data['voucher_type'],
+            coupon_data['quantity'],
+            coupon_data['max_uses']
+        )
+
+        # update the coupon id in `previous` and next urls
+        pagination['previous'] = pagination['previous'] and pagination['previous'].format(coupon_id, VOUCHER_REDEEMED)
+        pagination['next'] = pagination['next'] and pagination['next'].format(coupon_id, VOUCHER_REDEEMED)
+
+        endpoint = '/api/v2/enterprise/coupons/{}/codes/?code_filter={}&page={}&page_size={}'.format(
+            coupon_id, VOUCHER_REDEEMED, page, page_size
+        )
+
+        # get coupon codes usage details
+        response = self.get_response('GET', endpoint)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response = response.json()
+        self.assert_coupon_codes_response(
+            response,
+            coupon_id,
+            1,
+            expected_results_count,
+            pagination=pagination,
+        )
+
     @ddt.data(
         (
             '85b08dde-0877-4474-a4e9-8408fe47ce88',
@@ -722,13 +840,62 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             self.assertIn(actual_result, expected_results)
 
     @ddt.data(
+        (
+            '85b08dde-0877-4474-a4e9-8408fe47ce88',
+            ['coupon-1', 'coupon-2']
+        ),
+        (
+            'f5c9149f-8dce-4410-bb0f-85c0f2dda864',
+            ['coupon-3']
+        ),
+    )
+    @ddt.unpack
+    def test_get_single_enterprise_coupon_overview_data(self, enterprise_id, expected_coupons):
+        """
+        Test if we get correct enterprise coupon overview data for a single coupon.
+        """
+        Switch.objects.update_or_create(name=ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, defaults={'active': True})
+        coupons_data = [{
+            'title': 'coupon-1',
+            'enterprise_customer': {'name': 'LOTRx', 'id': '85b08dde-0877-4474-a4e9-8408fe47ce88'}
+        }, {
+            'title': 'coupon-2',
+            'enterprise_customer': {'name': 'LOTRx', 'id': '85b08dde-0877-4474-a4e9-8408fe47ce88'}
+        }, {
+            'title': 'coupon-3',
+            'enterprise_customer': {'name': 'HPx', 'id': 'f5c9149f-8dce-4410-bb0f-85c0f2dda864'}
+        }]
+
+        # Create coupons.
+        for coupon_data in coupons_data:
+            self.get_response('POST', ENTERPRISE_COUPONS_LINK, dict(self.data, **coupon_data))
+
+        # Build expected results for all coupons.
+        expected_results = []
+        for coupon_title in expected_coupons:
+            expected_results.append(self.get_coupon_data(coupon_title))
+
+        # Build request URL with `coupon_id` query parameter
+        base_url = reverse(
+            'api:v2:enterprise-coupons-(?P<enterprise-id>.+)/overview-list',
+            kwargs={'enterprise_id': enterprise_id}
+        )
+        coupon_id = expected_results[0].get('id')
+        request_url = '{}?{}'.format(base_url, urlencode({'coupon_id': coupon_id}))
+
+        # Fetch single coupon overview data
+        overview_response = self.get_response_json('GET', request_url)
+
+        self.assertEqual(overview_response, expected_results[0])
+
+    @ddt.data(
         {
             'voucher_type': Voucher.SINGLE_USE,
             'quantity': 3,
             'max_uses': None,
             'code_assignments': [0, 0, 0],
             'code_redemptions': [0, 0, 0],
-            'expected_response': {'max_uses': 3, 'num_codes': 3, 'num_unassigned': 3, 'num_uses': 0}
+            'expected_response': {'max_uses': 3, 'num_codes': 3, 'num_unassigned': 3, 'num_uses': 0, 'has_error': False}
         },
         {
             'voucher_type': Voucher.SINGLE_USE,
@@ -736,7 +903,7 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             'max_uses': None,
             'code_assignments': [1, 0, 0],
             'code_redemptions': [0, 1, 0],
-            'expected_response': {'max_uses': 3, 'num_codes': 3, 'num_unassigned': 1, 'num_uses': 1}
+            'expected_response': {'max_uses': 3, 'num_codes': 3, 'num_unassigned': 1, 'num_uses': 1, 'has_error': False}
         },
         {
             'voucher_type': Voucher.SINGLE_USE,
@@ -744,7 +911,8 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             'max_uses': None,
             'code_assignments': [1, 1, 1],
             'code_redemptions': [0, 1, 1],
-            'expected_response': {'max_uses': 3, 'num_codes': 3, 'num_unassigned': 0, 'num_uses': 2}
+            'assignment_has_error': True,
+            'expected_response': {'max_uses': 3, 'num_codes': 3, 'num_unassigned': 0, 'num_uses': 2, 'has_error': True}
         },
         {
             'voucher_type': Voucher.MULTI_USE_PER_CUSTOMER,
@@ -752,7 +920,7 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             'max_uses': 2,
             'code_assignments': [0, 0, 0],
             'code_redemptions': [0, 0, 0],
-            'expected_response': {'max_uses': 6, 'num_codes': 3, 'num_unassigned': 3, 'num_uses': 0}
+            'expected_response': {'max_uses': 6, 'num_codes': 3, 'num_unassigned': 3, 'num_uses': 0, 'has_error': False}
         },
         {
             'voucher_type': Voucher.MULTI_USE_PER_CUSTOMER,
@@ -760,7 +928,7 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             'max_uses': 2,
             'code_assignments': [1, 0, 0],
             'code_redemptions': [0, 1, 0],
-            'expected_response': {'max_uses': 6, 'num_codes': 3, 'num_unassigned': 1, 'num_uses': 1}
+            'expected_response': {'max_uses': 6, 'num_codes': 3, 'num_unassigned': 1, 'num_uses': 1, 'has_error': False}
         },
         {
             'voucher_type': Voucher.MULTI_USE_PER_CUSTOMER,
@@ -768,7 +936,7 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             'max_uses': 2,
             'code_assignments': [1, 1, 0],
             'code_redemptions': [0, 2, 0],
-            'expected_response': {'max_uses': 6, 'num_codes': 3, 'num_unassigned': 1, 'num_uses': 2}
+            'expected_response': {'max_uses': 6, 'num_codes': 3, 'num_unassigned': 1, 'num_uses': 2, 'has_error': False}
         },
         {
             'voucher_type': Voucher.MULTI_USE_PER_CUSTOMER,
@@ -776,7 +944,8 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             'max_uses': 2,
             'code_assignments': [1, 1, 1],
             'code_redemptions': [0, 1, 2],
-            'expected_response': {'max_uses': 6, 'num_codes': 3, 'num_unassigned': 0, 'num_uses': 3}
+            'assignment_has_error': True,
+            'expected_response': {'max_uses': 6, 'num_codes': 3, 'num_unassigned': 0, 'num_uses': 3, 'has_error': True}
         },
         {
             'voucher_type': Voucher.MULTI_USE,
@@ -784,7 +953,7 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             'max_uses': 2,
             'code_assignments': [1, 0, 0],
             'code_redemptions': [0, 1, 0],
-            'expected_response': {'max_uses': 6, 'num_codes': 3, 'num_unassigned': 3, 'num_uses': 1}
+            'expected_response': {'max_uses': 6, 'num_codes': 3, 'num_unassigned': 3, 'num_uses': 1, 'has_error': False}
         },
         {
             'voucher_type': Voucher.MULTI_USE,
@@ -792,7 +961,7 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             'max_uses': 2,
             'code_assignments': [2, 0, 0],
             'code_redemptions': [0, 2, 0],
-            'expected_response': {'max_uses': 6, 'num_codes': 3, 'num_unassigned': 1, 'num_uses': 2}
+            'expected_response': {'max_uses': 6, 'num_codes': 3, 'num_unassigned': 1, 'num_uses': 2, 'has_error': False}
         },
         {
             'voucher_type': Voucher.MULTI_USE,
@@ -800,7 +969,7 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             'max_uses': 2,
             'code_assignments': [2, 1, 1],
             'code_redemptions': [2, 0, 1],
-            'expected_response': {'max_uses': 6, 'num_codes': 3, 'num_unassigned': 1, 'num_uses': 3}
+            'expected_response': {'max_uses': 6, 'num_codes': 3, 'num_unassigned': 1, 'num_uses': 3, 'has_error': False}
         },
         {
             'voucher_type': Voucher.MULTI_USE,
@@ -808,7 +977,7 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             'max_uses': 2,
             'code_assignments': [2, 2, 2],
             'code_redemptions': [0, 0, 0],
-            'expected_response': {'max_uses': 6, 'num_codes': 3, 'num_unassigned': 0, 'num_uses': 0}
+            'expected_response': {'max_uses': 6, 'num_codes': 3, 'num_unassigned': 0, 'num_uses': 0, 'has_error': False}
         },
         {
             'voucher_type': Voucher.MULTI_USE,
@@ -816,7 +985,10 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             'max_uses': None,
             'code_assignments': [1],
             'code_redemptions': [1],
-            'expected_response': {'max_uses': 10000, 'num_codes': 1, 'num_unassigned': 1, 'num_uses': 1}
+            'assignment_has_error': True,
+            'expected_response': {
+                'max_uses': 10000, 'num_codes': 1, 'num_unassigned': 1, 'num_uses': 1, 'has_error': True
+            }
         },
         {
             'voucher_type': Voucher.ONCE_PER_CUSTOMER,
@@ -824,7 +996,7 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             'max_uses': 2,
             'code_assignments': [0, 0, 0],
             'code_redemptions': [0, 0, 0],
-            'expected_response': {'max_uses': 6, 'num_codes': 3, 'num_unassigned': 3, 'num_uses': 0}
+            'expected_response': {'max_uses': 6, 'num_codes': 3, 'num_unassigned': 3, 'num_uses': 0, 'has_error': False}
         },
         {
             'voucher_type': Voucher.ONCE_PER_CUSTOMER,
@@ -832,18 +1004,20 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             'max_uses': 2,
             'code_assignments': [2, 1, 0],
             'code_redemptions': [0, 0, 1],
-            'expected_response': {'max_uses': 6, 'num_codes': 3, 'num_unassigned': 2, 'num_uses': 1}
+            'assignment_has_error': True,
+            'expected_response': {'max_uses': 6, 'num_codes': 3, 'num_unassigned': 2, 'num_uses': 1, 'has_error': True}
         },
     )
     @ddt.unpack
-    def test_coupon_num_unassigned(
+    def test_coupon_overview_fields(
             self,
             voucher_type,
             quantity,
             max_uses,
             code_assignments,
             code_redemptions,
-            expected_response):
+            expected_response,
+            assignment_has_error=False):
         """
         Tests coupon overview endpoint returns correct value for calculated fields.
         """
@@ -864,6 +1038,13 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
 
         # code assignments.
         self.assign_coupon_codes(coupon_id, vouchers, code_assignments)
+
+        # Should we update assignment with error
+        if assignment_has_error:
+            assignment = OfferAssignment.objects.filter(code=vouchers[0].code).first()
+            if assignment:
+                assignment.status = OFFER_ASSIGNMENT_EMAIL_BOUNCED
+                assignment.save()
 
         for i, voucher in enumerate(vouchers):
             for _ in range(0, code_redemptions[i]):
@@ -1157,7 +1338,12 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
 
         response = response.json()
         assert response == [
-            {'non_field_errors': ['Code RANDOMCODE is not associated with this Coupon']}
+            {
+                'code': 'RANDOMCODE',
+                'email': 'test1@example.com',
+                'detail': 'failure',
+                'message': 'Code RANDOMCODE is not associated with this Coupon',
+            }
         ]
 
     def test_coupon_codes_revoke_no_assignment_exists(self):
@@ -1178,7 +1364,12 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
 
         response = response.json()
         assert response == [
-            {'non_field_errors': ['No assignments exist for user {} and code {}'.format(email, voucher.code)]}
+            {
+                'code': voucher.code,
+                'email': email,
+                'detail': 'failure',
+                'message': 'No assignments exist for user {} and code {}'.format(email, voucher.code),
+            }
         ]
 
     def test_coupon_codes_revoke_email_failure(self):
@@ -1244,7 +1435,12 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
         response = response.json()
         assert response == [
             {'email': offer_assignment.user_email, 'code': offer_assignment.code, 'detail': 'success'},
-            {'non_field_errors': ['Code RANDOMCODE is not associated with this Coupon']},
+            {
+                'code': 'RANDOMCODE',
+                'email': 'test3@example.com',
+                'detail': 'failure',
+                'message': 'Code RANDOMCODE is not associated with this Coupon',
+            },
         ]
         assert mock_send_email.call_count == 1
         for offer_assignment in OfferAssignment.objects.filter(user_email=offer_assignment.user_email):
@@ -1298,9 +1494,15 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             '/api/v2/enterprise/coupons/{}/remind/'.format(coupon_id),
             {'template': 'Test template', 'assignments': [{'email': email, 'code': 'RANDOMCODE'}]}
         )
+
         response = response.json()
         assert response == [
-            {'non_field_errors': ['Code RANDOMCODE is not associated with this Coupon']}
+            {
+                'code': 'RANDOMCODE',
+                'email': 'test1@example.com',
+                'detail': 'failure',
+                'message': 'Code RANDOMCODE is not associated with this Coupon',
+            }
         ]
 
     def test_coupon_codes_remind_no_assignment_exists(self):
@@ -1317,9 +1519,15 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             '/api/v2/enterprise/coupons/{}/remind/'.format(coupon_id),
             {'template': 'Test template', 'assignments': [{'email': email, 'code': voucher.code}]}
         )
+
         response = response.json()
         assert response == [
-            {'non_field_errors': ['No assignments exist for user {} and code {}'.format(email, voucher.code)]}
+            {
+                'code': voucher.code,
+                'email': email,
+                'detail': 'failure',
+                'message': 'No assignments exist for user {} and code {}'.format(email, voucher.code),
+            }
         ]
 
     def test_coupon_codes_remind_email_failure(self):
@@ -1376,9 +1584,15 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
                     {'email': 'test3@example.com', 'code': 'RANDOMCODE'},
                 ]}
             )
+
         response = response.json()
         assert response == [
             {'email': offer_assignment.user_email, 'code': offer_assignment.code, 'detail': 'success'},
-            {'non_field_errors': ['Code RANDOMCODE is not associated with this Coupon']},
+            {
+                'code': 'RANDOMCODE',
+                'email': 'test3@example.com',
+                'detail': 'failure',
+                'message': 'Code RANDOMCODE is not associated with this Coupon',
+            },
         ]
         assert mock_send_email.call_count == 1

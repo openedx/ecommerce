@@ -2,13 +2,15 @@ from __future__ import unicode_literals
 
 import datetime
 import json
+import uuid
 
+import ddt
 import pytz
 from django.test import RequestFactory
 from django.urls import reverse
 from oscar.core.loading import get_model
 
-from ecommerce.core.constants import COUPON_PRODUCT_CLASS_NAME
+from ecommerce.core.constants import COUPON_PRODUCT_CLASS_NAME, COURSE_ENTITLEMENT_PRODUCT_CLASS_NAME
 from ecommerce.coupons.tests.mixins import CouponMixin
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.extensions.api.serializers import ProductSerializer
@@ -133,6 +135,47 @@ class ProductViewSetTests(ProductViewSetBase):
             'results': []
         }
         self.assertDictEqual(json.loads(response.content), expected)
+
+
+@ddt.ddt
+class ProductViewSetCourseEntitlementTests(ProductViewSetBase):
+    def setUp(self):
+        self.entitlement_data = {
+            'product_class': COURSE_ENTITLEMENT_PRODUCT_CLASS_NAME,
+            'title': 'Test Course',
+            'price': 50,
+            'certificate_type': 'verified',
+            'uuid': str(uuid.uuid4()),
+        }
+        super(ProductViewSetCourseEntitlementTests, self).setUp()
+
+    def test_entitlement_post(self):
+        """ Verify the view allows individual Course Entitlement products to be made via post"""
+        self.assertEqual(Product.objects.count(), 2)
+        response = self.client.post('/api/v2/products/', json.dumps(self.entitlement_data), JSON_CONTENT_TYPE)
+        self.assertEqual(response.status_code, 201)
+        # count goes up by 2 because it also creates the parent entitlement
+        self.assertEqual(Product.objects.count(), 4)
+
+    def test_entitlement_post_bad_request(self):
+        """
+        Verify the view returns a 400 status code with a message when not all fields
+        are provided for Course Entitlement products attempting to be made via post
+        """
+        del self.entitlement_data['price']
+        del self.entitlement_data['title']
+        response = self.client.post('/api/v2/products/', json.dumps(self.entitlement_data), JSON_CONTENT_TYPE)
+        error_message = 'Missing or bad value for: [price]. Missing or bad value for: [title].'
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.data, error_message)
+
+    def test_non_entitlement_post(self):
+        """ Verify the view does not allow anything but Course Entitlement products to be made via post"""
+        self.entitlement_data['product_class'] = 'Seat'
+        response = self.client.post('/api/v2/products/', json.dumps(self.entitlement_data), JSON_CONTENT_TYPE)
+        error_message = 'Product API only supports POST for Course Entitlement products.'
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.data, error_message)
 
 
 class ProductViewSetCouponTests(CouponMixin, ProductViewSetBase):

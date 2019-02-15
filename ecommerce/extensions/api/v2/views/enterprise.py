@@ -4,6 +4,8 @@ import logging
 
 import waffle
 from django.core.exceptions import ValidationError
+from django.shortcuts import get_object_or_404
+from edx_rest_framework_extensions.paginators import DefaultPagination
 from oscar.core.loading import get_model
 from rest_framework import generics, serializers, status
 from rest_framework.decorators import detail_route, list_route
@@ -69,6 +71,7 @@ class EnterpriseCustomerViewSet(generics.GenericAPIView):
 
 class EnterpriseCouponViewSet(CouponViewSet):
     """ Coupon resource. """
+    pagination_class = DefaultPagination
 
     def get_queryset(self):
         enterprise_id = self.kwargs.get('enterprise_id')
@@ -217,7 +220,7 @@ class EnterpriseCouponViewSet(CouponViewSet):
                     assigned_to: 'Barry Allen',
                     redemptions: {
                         used: 1,
-                        available: 5,
+                        total: 5,
                     },
                     redeem_url: 'https://testserver.fake/coupons/offer/?code=1234-5678-90',
                 },
@@ -351,9 +354,15 @@ class EnterpriseCouponViewSet(CouponViewSet):
             - Valid end.
         """
         enterprise_coupons = self.get_queryset()
-        page = self.paginate_queryset(enterprise_coupons)
-        serializer = self.get_serializer(page, many=True)
-        return self.get_paginated_response(serializer.data)
+        coupon_id = self.request.query_params.get('coupon_id', None)
+        if coupon_id is not None:
+            coupon = get_object_or_404(enterprise_coupons, id=coupon_id)
+            serializer = self.get_serializer(coupon)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        else:
+            page = self.paginate_queryset(enterprise_coupons)
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
 
     @detail_route(methods=['post'])
     def assign(self, request, pk):  # pylint: disable=unused-argument

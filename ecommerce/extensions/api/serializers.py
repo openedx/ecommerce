@@ -28,6 +28,7 @@ from ecommerce.courses.models import Course
 from ecommerce.entitlements.utils import create_or_update_course_entitlement
 from ecommerce.extensions.offer.constants import (
     OFFER_ASSIGNED,
+    OFFER_ASSIGNMENT_EMAIL_BOUNCED,
     OFFER_ASSIGNMENT_EMAIL_PENDING,
     OFFER_ASSIGNMENT_REVOKED,
     OFFER_MAX_USES_DEFAULT,
@@ -820,9 +821,16 @@ class EnterpriseCouponOverviewListSerializer(serializers.ModelSerializer):
         ])
         return num_unassigned
 
-    # TODO: ENT-1184
-    def get_has_error(self, obj):   # pylint: disable=unused-argument
-        return False
+    def get_has_error(self, obj):
+        """
+        Returns True if any assignment associated with coupon is having
+        error, otherwise False.
+        """
+        offer = retrieve_offer(obj)
+        offer_assignments_with_error = offer.offerassignment_set.filter(
+            status=OFFER_ASSIGNMENT_EMAIL_BOUNCED
+        )
+        return offer_assignments_with_error.exists()
 
     # Max number of codes available (Maximum Coupon Usage).
     def get_max_uses(self, obj):
@@ -1273,7 +1281,16 @@ class CouponCodeRevokeRemindBulkSerializer(serializers.ListSerializer):  # pylin
             try:
                 validated = self.child.run_validation(item)
             except serializers.ValidationError as exc:
-                ret.append(exc.detail)
+                ret.append(
+                    {
+                        'non_field_errors': [{
+                            'code': item.get('code'),
+                            'email': item.get('email'),
+                            'detail': 'failure',
+                            'message': exc.detail['non_field_errors'][0]
+                        }]
+                    }
+                )
             else:
                 ret.append(validated)
 
@@ -1296,9 +1313,16 @@ class CouponCodeRevokeRemindBulkSerializer(serializers.ListSerializer):  # pylin
         """
         This selectively calls to_representation on each result that was processed by create.
         """
-        return [
-            self.child.to_representation(item) if 'detail' in item else item for item in data
-        ]
+        response = []
+        for item in data:
+            if 'detail' in item:
+                response.append(self.child.to_representation(item))
+            elif 'non_field_errors' in item:
+                response.append(item['non_field_errors'][0])
+            else:
+                response.append(item)
+
+        return response
 
 
 class CouponCodeMixin(object):

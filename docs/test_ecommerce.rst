@@ -156,7 +156,6 @@ To configure the LMS, follow these steps.
       "ECOMMERCE_PUBLIC_URL_ROOT": "http://localhost:8002/"
       "JWT_ISSUER": "http://127.0.0.1:8000/oauth2" // Must match the E-Commerce JWT_ISSUER setting
       "OAUTH_ENFORCE_SECURE": false
-      "OAUTH_OIDC_ISSUER": "http://127.0.0.1:8000/oauth2"
 
 #. Verify that the following settings in ``lms.auth.json`` are correct.
 
@@ -183,16 +182,17 @@ To configure the LMS, follow these steps.
 #. In the Django administration panel, verify that an OAuth2 client with the
    following attributes exists. If one does not already exist, :ref:`create a
    new one <Create Register Client>`. The client ID and secret must match the
-   values of the E-Commerce ``SOCIAL_AUTH_EDX_OIDC_KEY`` and
-   ``SOCIAL_AUTH_EDX_OIDC_SECRET`` settings, respectively.
+   values of the E-Commerce ``SOCIAL_AUTH_EDX_OAUTH2_KEY`` and
+   ``SOCIAL_AUTH_EDX_OAUTH2_SECRET`` settings, respectively.
 
    .. code-block:: bash
 
       URL:  http://localhost:8002/
-      Redirect URI: http://localhost:8002/complete/edx-oidc/
-      Client ID: 'replace-me'
-      Client Secret: 'replace-me'
-      Client Type: Confidential
+      Redirect uris: http://localhost:8002/complete/edx-oauth2/
+      Client id: 'replace-me'
+      Client secret: 'replace-me'
+      Client type: Confidentials
+      Authorization grant type: Authorization code
 
 #. In the Django administration panel, verify that the OAuth2 client referred
    to above is designated as a trusted client. If this isn't already the case,
