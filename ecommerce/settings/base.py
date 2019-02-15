@@ -437,6 +437,12 @@ AUTO_AUTH_USERNAME_PREFIX = 'AUTO_AUTH_'
 
 AUTHENTICATION_BACKENDS = ('auth_backends.backends.EdXOAuth2',) + AUTHENTICATION_BACKENDS
 
+# NOTE: This old auth backend is retained as a temporary fallback in order to
+# support old browser sessions that were established using OIDC.  After a few
+# days, we should be safe to remove this line, along with deleting the rest of
+# the OIDC/DOP settings and keys in the ecommerce site configurations.
+AUTHENTICATION_BACKENDS += ('auth_backends.backends.EdXOpenIdConnect',)
+
 SOCIAL_AUTH_STRATEGY = 'ecommerce.social_auth.strategies.CurrentSiteDjangoStrategy'
 
 # Set these to the correct values for your OAuth2 provider
@@ -525,6 +531,7 @@ CELERY_ROUTES = {
     'ecommerce_worker.sailthru.v1.tasks.update_course_enrollment': {'queue': 'email_marketing'},
     'ecommerce_worker.sailthru.v1.tasks.send_course_refund_email': {'queue': 'email_marketing'},
     'ecommerce_worker.sailthru.v1.tasks.send_offer_assignment_email': {'queue': 'email_marketing'},
+    'ecommerce_worker.sailthru.v1.tasks.send_offer_update_email': {'queue': 'email_marketing'},
 }
 
 # Prevent Celery from removing handlers on the root logger. Allows setting custom logging handlers.
