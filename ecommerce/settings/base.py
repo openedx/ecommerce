@@ -437,6 +437,12 @@ AUTO_AUTH_USERNAME_PREFIX = 'AUTO_AUTH_'
 
 AUTHENTICATION_BACKENDS = ('auth_backends.backends.EdXOAuth2',) + AUTHENTICATION_BACKENDS
 
+# NOTE: This old auth backend is retained as a temporary fallback in order to
+# support old browser sessions that were established using OIDC.  After a few
+# days, we should be safe to remove this line, along with deleting the rest of
+# the OIDC/DOP settings and keys in the ecommerce site configurations.
+AUTHENTICATION_BACKENDS += ('auth_backends.backends.EdXOpenIdConnect',)
+
 SOCIAL_AUTH_STRATEGY = 'ecommerce.social_auth.strategies.CurrentSiteDjangoStrategy'
 
 # Set these to the correct values for your OAuth2 provider
