@@ -11,7 +11,7 @@ from rest_framework import generics, serializers, status
 from rest_framework.decorators import detail_route, list_route
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
-
+from rules.contrib.views import permission_required, objectgetter
 from ecommerce.core.constants import COUPON_PRODUCT_CLASS_NAME
 from ecommerce.core.utils import log_message_and_raise_validation_error
 from ecommerce.enterprise.constants import ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH
@@ -207,6 +207,7 @@ class EnterpriseCouponViewSet(CouponViewSet):
         if coupon_was_migrated:
             super(EnterpriseCouponViewSet, self).update_range_data(request_data, vouchers)
 
+    @permission_required('enterprise.can_view_coupon', fn=objectgetter(Product, 'pk'))
     @detail_route(url_path='codes')
     def codes(self, request, pk, format=None):  # pylint: disable=unused-argument, redefined-builtin
         """
@@ -364,6 +365,7 @@ class EnterpriseCouponViewSet(CouponViewSet):
             serializer = self.get_serializer(page, many=True)
             return self.get_paginated_response(serializer.data)
 
+    @permission_required('enterprise.can_assign_coupon', fn=objectgetter(Product, 'pk'))
     @detail_route(methods=['post'])
     def assign(self, request, pk):  # pylint: disable=unused-argument
         """
@@ -380,6 +382,7 @@ class EnterpriseCouponViewSet(CouponViewSet):
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+    @permission_required('enterprise.can_assign_coupon', fn=objectgetter(Product, 'pk'))
     @detail_route(methods=['post'])
     def revoke(self, request, pk):  # pylint: disable=unused-argument
         """
@@ -398,6 +401,7 @@ class EnterpriseCouponViewSet(CouponViewSet):
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+    @permission_required('enterprise.can_assign_coupon', fn=objectgetter(Product, 'pk'))
     @detail_route(methods=['post'])
     def remind(self, request, pk):  # pylint: disable=unused-argument
         """
