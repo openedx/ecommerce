@@ -31,7 +31,7 @@ class JwtAuthCookieRoleMiddleware(object):
         Reconstitute the full JWT and add a new cookie on the request object.
         """
 
-        jwt_cookie = request.COOKIES[jwt_cookie_name()]
+        jwt_cookie = request.COOKIES.get(jwt_cookie_name(), None)
         if not jwt_cookie:
             return
 

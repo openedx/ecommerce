@@ -293,6 +293,7 @@ DJANGO_APPS = [
     'django_sites_extensions',
     # edx-drf-extensions
     'csrf.apps.CsrfAppConfig',  # Enables frontend apps to retrieve CSRF tokens.
+    'rules',
 ]
 
 # Apps specific to this project go here.
