@@ -310,8 +310,8 @@ class Command(BaseCommand):
                 )
         except (HttpClientError, HttpServerError) as ex:
             self.stderr.write(
-                'An error occurred while upserting {object_type} for site {domain}: {message}'.format(
-                    object_type=object_type, domain=site_configuration.site.domain, message=ex.message
+                'An error occurred while upserting {object_type} for site {site}: {message}'.format(
+                    object_type=object_type, site=site_configuration.site.domain, message=ex.message
                 )
             )
 
@@ -319,19 +319,26 @@ class Command(BaseCommand):
         """
         Calls the sync error endpoint and print the response
         """
-        response = self._hubspot_endpoint(
-            'sync-errors',
-            'extensions/ecomm/v1/',
-            'GET',
-            hapikey=site_configuration.hubspot_secret_key
-        )
-        for error in response.get('results'):
+        try:
+            response = self._hubspot_endpoint(
+                'sync-errors',
+                'extensions/ecomm/v1/',
+                'GET',
+                hapikey=site_configuration.hubspot_secret_key
+            )
+            for error in response.get('results'):
+                self.stderr.write(
+                    'sync-error endpoint: for {object_type} with id {id} for site {site}: {message}'.format(
+                        object_type=error.get('objectType'),
+                        id=error.get('integratorObjectId'),
+                        site=site_configuration.site.domain,
+                        message=error.get('details')
+                    )
+                )
+        except (HttpClientError, HttpServerError) as ex:
             self.stderr.write(
-                'sync-error endpoint: for {object_type} with id {id} for site {site}: {message}'.format(
-                    object_type=error.get('objectType'),
-                    id=error.get('integratorObjectId'),
-                    site=site_configuration.site.domain,
-                    message=error.get('details')
+                'An error occurred while getting the syncing message for site {site}: {message} '.format(
+                    site=site_configuration.site.domain, message=ex.message
                 )
             )
 

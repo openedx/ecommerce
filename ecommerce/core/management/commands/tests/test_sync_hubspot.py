@@ -7,6 +7,7 @@ from django.test import TestCase
 from django.utils.six import StringIO
 from factory.django import get_model
 from mock import patch
+from slumber.exceptions import HttpClientError
 
 from ecommerce.core.management.commands.sync_hubspot import Command as sync_command
 from ecommerce.extensions.test.factories import create_order
@@ -44,6 +45,9 @@ class TestSyncHubspotCommand(TestCase):
             self.product = product
             self.order_line = order_line
         return order
+
+    def _mocked_recent_modified_deal_response(self):
+        return {'results': [{'properties': {'ip__ecomm_bridge__order_number': {'value': self.order.number}}}]}
 
     def _get_command_output(self):
         """
@@ -97,17 +101,17 @@ class TestSyncHubspotCommand(TestCase):
             self.assertIn('Pulled unsynced orders', output)
             self.assertEqual(mocked_hubspot.call_count, 6)
 
-    def test_no_data_to_sync(self, mocked_hubspot):
-        """
-        Test when there is no data to sync
-        1. Install Bridge
-        2. Define settings
-        3. Sync-error
-        """
-        with patch.object(sync_command, '_get_last_synced_order', return_value=self.order):
-            output = self._get_command_output()
-            self.assertIn('No data found to sync', output)
-            self.assertEqual(mocked_hubspot.call_count, 3)
+    # def test_no_data_to_sync(self, mocked_hubspot):
+    #     """
+    #     Test when there is no data to sync
+    #     1. Install Bridge
+    #     2. Define settings
+    #     3. Sync-error
+    #     """
+    #     with patch.object(sync_command, '_get_last_synced_order', return_value=self.order):
+    #         output = self._get_command_output()
+    #         self.assertIn('No data found to sync', output)
+    #         self.assertEqual(mocked_hubspot.call_count, 3)
 
     def test_with_exception(self, mocked_hubspot):
         """
@@ -119,3 +123,21 @@ class TestSyncHubspotCommand(TestCase):
             with self.assertRaises(CommandError):
                 self._get_command_output()
                 self.assertEqual(mocked_hubspot.call_count, 2)
+
+    def test_last_synced_order(self, mocked_hubspot):
+        """
+        Test when _get_last_synced_order function raises an exception.
+        1. Recent Modified Deal.
+        2. Sync Error.
+        """
+        with patch.object(sync_command, '_install_hubspot_ecommerce_bridge', return_value=True):
+            with patch.object(sync_command, '_define_hubspot_ecommerce_settings', return_value=True):
+                # mocked the Recent Modified Deal endpoint
+                mocked_hubspot.return_value = self._mocked_recent_modified_deal_response()
+                output = self._get_command_output()
+                self.assertIn('No data found to sync', output)
+                self.assertEqual(mocked_hubspot.call_count, 2)
+
+                # mocked the Recent Modified Deal with exception.
+                mocked_hubspot.side_effect = HttpClientError
+                self._get_command_output()
