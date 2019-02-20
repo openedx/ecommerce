@@ -161,9 +161,10 @@ class AssignmentEmailBounce(APIView):
             if sailthru_client.receive_hardbounce_post(request.data):
                 try:
                     self.update_email_status(send_id)
-                except (OfferAssignment.DoesNotExist, OfferAssignmentEmailAttempt.DoesNotExist) as exc:
-                    logger.exception(
-                        '[Offer Assignment] AssignmentEmailBounce could not update status and raised: %r', exc)
+                except (OfferAssignment.DoesNotExist, OfferAssignmentEmailAttempt.DoesNotExist):
+                    # Note: Marketing email bounces also come through this code path and
+                    # its expected that they would not have a corresponding OfferAssignment
+                    pass
             else:
                 logger.error('[Offer Assignment] AssignmentEmailBounce: Bounce message could not be verified. '
                              'send_id: %s, email: %s, sig: %s, api_key_sailthru: %s, api_key_local: %s ',
