@@ -11,7 +11,7 @@ from rest_framework import generics, serializers, status
 from rest_framework.decorators import detail_route, list_route
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
-from rules.contrib.views import permission_required, objectgetter
+from ecommerce.core.decorators import permission_required
 from ecommerce.core.constants import COUPON_PRODUCT_CLASS_NAME
 from ecommerce.core.utils import log_message_and_raise_validation_error
 from ecommerce.enterprise.constants import ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH
@@ -72,6 +72,7 @@ class EnterpriseCustomerViewSet(generics.GenericAPIView):
 class EnterpriseCouponViewSet(CouponViewSet):
     """ Coupon resource. """
     pagination_class = DefaultPagination
+    permission_classes = (IsAuthenticated, )
 
     def get_queryset(self):
         enterprise_id = self.kwargs.get('enterprise_id')
@@ -207,8 +208,8 @@ class EnterpriseCouponViewSet(CouponViewSet):
         if coupon_was_migrated:
             super(EnterpriseCouponViewSet, self).update_range_data(request_data, vouchers)
 
-    @permission_required('enterprise.can_view_coupon', fn=objectgetter(Product, 'pk'))
     @detail_route(url_path='codes')
+    @permission_required('enterprise.can_view_coupon', fn=lambda request, pk: Product.objects.get(pk=pk))
     def codes(self, request, pk, format=None):  # pylint: disable=unused-argument, redefined-builtin
         """
         GET codes belong to a `coupon`.
@@ -342,6 +343,7 @@ class EnterpriseCouponViewSet(CouponViewSet):
             'voucher__code', 'user__email').distinct().order_by('user__email')
 
     @list_route(url_path=r'(?P<enterprise_id>.+)/overview')
+    @permission_required('enterprise.can_view_coupon', fn=lambda request, enterprise_id: enterprise_id)
     def overview(self, request, enterprise_id):     # pylint: disable=unused-argument
         """
         Overview of Enterprise coupons.
@@ -365,8 +367,8 @@ class EnterpriseCouponViewSet(CouponViewSet):
             serializer = self.get_serializer(page, many=True)
             return self.get_paginated_response(serializer.data)
 
-    @permission_required('enterprise.can_assign_coupon', fn=objectgetter(Product, 'pk'))
     @detail_route(methods=['post'])
+    @permission_required('enterprise.can_assign_coupon', fn=lambda request, pk: Product.objects.get(pk=pk))
     def assign(self, request, pk):  # pylint: disable=unused-argument
         """
         Assign users by email to codes within the Coupon.
@@ -382,8 +384,8 @@ class EnterpriseCouponViewSet(CouponViewSet):
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    @permission_required('enterprise.can_assign_coupon', fn=objectgetter(Product, 'pk'))
     @detail_route(methods=['post'])
+    @permission_required('enterprise.can_assign_coupon', fn=lambda request, pk: Product.objects.get(pk=pk))
     def revoke(self, request, pk):  # pylint: disable=unused-argument
         """
         Revoke users by email from codes within the Coupon.
@@ -401,8 +403,8 @@ class EnterpriseCouponViewSet(CouponViewSet):
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    @permission_required('enterprise.can_assign_coupon', fn=objectgetter(Product, 'pk'))
     @detail_route(methods=['post'])
+    @permission_required('enterprise.can_assign_coupon', fn=lambda request, pk: Product.objects.get(pk=pk))
     def remind(self, request, pk):  # pylint: disable=unused-argument
         """
         Remind users of pending offer assignments by email.
