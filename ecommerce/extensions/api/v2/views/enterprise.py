@@ -294,10 +294,10 @@ class EnterpriseCouponViewSet(CouponViewSet):
             if assignments.count() == 0:
                 continue
 
-            unredeemed_assignments.append(assignments.first().id)
+            unredeemed_assignments.extend(assignments.values_list('id', flat=True))
 
         return OfferAssignment.objects.filter(
-            id__in=unredeemed_assignments).values('code', 'user_email').order_by('user_email')
+            id__in=unredeemed_assignments).values('code', 'user_email').order_by('user_email').distinct()
 
     def _get_partial_redeemed_usages(self, vouchers):
         """
