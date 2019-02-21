@@ -1399,6 +1399,15 @@ class CouponCodeRevokeSerializer(CouponCodeMixin, serializers.Serializer):  # py
         offer_assignments = self.get_unredeemed_offer_assignments(code, email)
         if not offer_assignments.exists():
             raise serializers.ValidationError('No assignments exist for user {} and code {}'.format(email, code))
+
+        # Only revoke a single assignment, Conside the below sample assignments,
+        # in case od single revoke, it should only revoke a single assignment
+        # code = ABC101   email = batman@abc.com
+        # code = ABC101   email = batman@abc.com
+        # code = ABC101   email = batman@abc.com
+        if coupon.attr.coupon_vouchers.vouchers.first().usage == Voucher.MULTI_USE:
+            offer_assignments = offer_assignments[0:1]
+
         data['offer_assignments'] = offer_assignments
         return data
 
