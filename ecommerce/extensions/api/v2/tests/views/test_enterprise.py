@@ -26,7 +26,9 @@ from ecommerce.enterprise.constants import ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH
 from ecommerce.enterprise.tests.mixins import EnterpriseServiceMockMixin
 from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
 from ecommerce.extensions.offer.constants import (
+    OFFER_ASSIGNED,
     OFFER_ASSIGNMENT_EMAIL_BOUNCED,
+    OFFER_ASSIGNMENT_EMAIL_PENDING,
     OFFER_ASSIGNMENT_REVOKED,
     VOUCHER_NOT_ASSIGNED,
     VOUCHER_NOT_REDEEMED,
@@ -1693,3 +1695,55 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         response = response.json()
         assert response == ['Invalid code_filter specified: invalid-filter']
+
+    def test_coupon_codes_revoke_multi_use(self):
+        """
+        Test code revoke as expected for MULTI_USE.
+
+        Scenario:
+            Create multiple assignments for a user for a same code like below
+                # code = ABC101   email = batman@abc.com
+                # code = ABC101   email = batman@abc.com
+                # code = ABC101   email = batman@abc.com
+            Revoking an offer assignment should only revoke a single assignemnt not all
+        """
+        voucher_type, quantity, max_uses = Voucher.MULTI_USE, 1, 3
+        Switch.objects.update_or_create(name=ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, defaults={'active': True})
+
+        email = 'test1@example.com'
+        coupon_post_data = dict(self.data, voucher_type=voucher_type, quantity=quantity, max_uses=max_uses)
+        coupon = self.get_response('POST', ENTERPRISE_COUPONS_LINK, coupon_post_data)
+        coupon = coupon.json()
+        coupon_id = coupon['coupon_id']
+        coupon = Product.objects.get(id=coupon_id)
+        voucher = coupon.attr.coupon_vouchers.vouchers.first()
+
+        with mock.patch('ecommerce.extensions.offer.utils.send_offer_assignment_email.delay'):
+            for _ in range(max_uses):
+                self.get_response(
+                    'POST',
+                    '/api/v2/enterprise/coupons/{}/assign/'.format(coupon_id),
+                    {'template': 'Test template', 'emails': [email], 'codes': [voucher.code]}
+                )
+
+        offer_assignment = OfferAssignment.objects.filter(user_email=email).first()
+        payload = {'assignments': [{'email': email, 'code': offer_assignment.code}]}
+
+        with mock.patch('ecommerce.extensions.offer.utils.send_offer_update_email.delay'):
+            response = self.get_response(
+                'POST',
+                '/api/v2/enterprise/coupons/{}/revoke/'.format(coupon_id),
+                payload
+            )
+
+        code = offer_assignment.code
+
+        response = response.json()
+        assert response == [{'code': code, 'email': email, 'detail': 'success'}]
+
+        assert OfferAssignment.objects.filter(code=code, user_email=email).count() == max_uses
+
+        assert OfferAssignment.objects.filter(code=code, user_email=email, status=OFFER_ASSIGNMENT_REVOKED).count() == 1
+        assert OfferAssignment.objects.filter(
+            code=code, user_email=email, status__in=[OFFER_ASSIGNED, OFFER_ASSIGNMENT_EMAIL_PENDING]
+        ).count() == 2
