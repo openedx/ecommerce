@@ -1281,7 +1281,16 @@ class CouponCodeRevokeRemindBulkSerializer(serializers.ListSerializer):  # pylin
             try:
                 validated = self.child.run_validation(item)
             except serializers.ValidationError as exc:
-                ret.append(exc.detail)
+                ret.append(
+                    {
+                        'non_field_errors': [{
+                            'code': item.get('code'),
+                            'email': item.get('email'),
+                            'detail': 'failure',
+                            'message': exc.detail['non_field_errors'][0]
+                        }]
+                    }
+                )
             else:
                 ret.append(validated)
 
@@ -1304,9 +1313,16 @@ class CouponCodeRevokeRemindBulkSerializer(serializers.ListSerializer):  # pylin
         """
         This selectively calls to_representation on each result that was processed by create.
         """
-        return [
-            self.child.to_representation(item) if 'detail' in item else item for item in data
-        ]
+        response = []
+        for item in data:
+            if 'detail' in item:
+                response.append(self.child.to_representation(item))
+            elif 'non_field_errors' in item:
+                response.append(item['non_field_errors'][0])
+            else:
+                response.append(item)
+
+        return response
 
 
 class CouponCodeMixin(object):
@@ -1383,6 +1399,15 @@ class CouponCodeRevokeSerializer(CouponCodeMixin, serializers.Serializer):  # py
         offer_assignments = self.get_unredeemed_offer_assignments(code, email)
         if not offer_assignments.exists():
             raise serializers.ValidationError('No assignments exist for user {} and code {}'.format(email, code))
+
+        # Only revoke a single assignment, Conside the below sample assignments,
+        # in case od single revoke, it should only revoke a single assignment
+        # code = ABC101   email = batman@abc.com
+        # code = ABC101   email = batman@abc.com
+        # code = ABC101   email = batman@abc.com
+        if coupon.attr.coupon_vouchers.vouchers.first().usage == Voucher.MULTI_USE:
+            offer_assignments = offer_assignments[0:1]
+
         data['offer_assignments'] = offer_assignments
         return data
 

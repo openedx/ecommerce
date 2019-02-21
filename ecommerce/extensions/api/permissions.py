@@ -33,3 +33,13 @@ class IsStaffOrOwner(permissions.BasePermission):
 
     def has_object_permission(self, request, view, obj):
         return request.user and (request.user.is_staff or obj.user == request.user)
+
+
+class IsStaffOrModelPermissionsOrAnonReadOnly(permissions.DjangoModelPermissionsOrAnonReadOnly):
+    """
+    Permission that allows staff users and users that have been granted specific access to write,
+    but allows read access to anyone.
+    """
+    def has_permission(self, request, view):
+        user = request.user
+        return user.is_staff or super(IsStaffOrModelPermissionsOrAnonReadOnly, self).has_permission(request, view)

@@ -4,6 +4,7 @@ import logging
 
 import waffle
 from django.core.exceptions import ValidationError
+from django.shortcuts import get_object_or_404
 from edx_rest_framework_extensions.paginators import DefaultPagination
 from oscar.core.loading import get_model
 from rest_framework import generics, serializers, status
@@ -219,7 +220,7 @@ class EnterpriseCouponViewSet(CouponViewSet):
                     assigned_to: 'Barry Allen',
                     redemptions: {
                         used: 1,
-                        available: 5,
+                        total: 5,
                     },
                     redeem_url: 'https://testserver.fake/coupons/offer/?code=1234-5678-90',
                 },
@@ -353,9 +354,15 @@ class EnterpriseCouponViewSet(CouponViewSet):
             - Valid end.
         """
         enterprise_coupons = self.get_queryset()
-        page = self.paginate_queryset(enterprise_coupons)
-        serializer = self.get_serializer(page, many=True)
-        return self.get_paginated_response(serializer.data)
+        coupon_id = self.request.query_params.get('coupon_id', None)
+        if coupon_id is not None:
+            coupon = get_object_or_404(enterprise_coupons, id=coupon_id)
+            serializer = self.get_serializer(coupon)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        else:
+            page = self.paginate_queryset(enterprise_coupons)
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
 
     @detail_route(methods=['post'])
     def assign(self, request, pk):  # pylint: disable=unused-argument
@@ -400,8 +407,34 @@ class EnterpriseCouponViewSet(CouponViewSet):
         email_template = request.data.pop('template', None)
         if not email_template:
             log_message_and_raise_validation_error(str('Template is required.'))
+
+        if request.data.get('assignments'):
+            assignments = request.data.get('assignments')
+        else:
+            # If no assignment is passed, send reminder to all assignments associated with the coupon.
+            vouchers = coupon.attr.coupon_vouchers.vouchers.all()
+            code_filter = request.data.get('code_filter')
+
+            if not code_filter:
+                raise serializers.ValidationError('code_filter must be specified')
+
+            if code_filter == VOUCHER_NOT_REDEEMED:
+                assignment_usages = self._get_not_redeemed_usages(vouchers)
+            elif code_filter == VOUCHER_PARTIAL_REDEEMED:
+                assignment_usages = self._get_partial_redeemed_usages(vouchers)
+            else:
+                raise serializers.ValidationError('Invalid code_filter specified: {}'.format(code_filter))
+
+            assignments = [
+                {
+                    'code': assignment['code'],
+                    'email': assignment['user_email']
+                }
+                for assignment in assignment_usages
+            ]
+
         serializer = CouponCodeRemindSerializer(
-            data=request.data.get('assignments'),
+            data=assignments,
             many=True,
             context={'coupon': coupon, 'template': email_template}
         )
