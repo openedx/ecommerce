@@ -4,7 +4,6 @@ import logging
 
 import waffle
 from django.core.exceptions import ValidationError
-from django.db.models import F
 from django.shortcuts import get_object_or_404
 from edx_rest_framework_extensions.paginators import DefaultPagination
 from oscar.core.loading import get_model
@@ -333,15 +332,21 @@ class EnterpriseCouponViewSet(CouponViewSet):
         Returns a queryset containing unique voucher.code and user.email pairs from VoucherApplications.
         Only code and email pairs that have no corresponding active OfferAssignments are returned.
         """
-        # SINGLE_USE codes can only have one redemption.
-        if vouchers.first().usage == Voucher.SINGLE_USE:
-            redeemed_vouchers = vouchers.filter(num_orders=1)
-        else:
-            # A code is fully redeemed if all uses are redeemed.
-            redeemed_vouchers = vouchers.filter(offers__max_global_applications=F('num_orders'))
+        voucher_applications = VoucherApplication.objects.filter(voucher__in=vouchers)
+        redeemed_voucher_application_ids = []
+        for voucher_application in voucher_applications:
+            unredeemed_voucher_assignments = OfferAssignment.objects.filter(
+                code=voucher_application.voucher.code,
+                user_email=voucher_application.user.email,
+                status__in=[OFFER_ASSIGNED, OFFER_ASSIGNMENT_EMAIL_PENDING]
+            )
 
-        voucher_applications = VoucherApplication.objects.filter(voucher__in=redeemed_vouchers)
-        return voucher_applications.values('voucher__code', 'user__email').distinct().order_by('user__email')
+            if unredeemed_voucher_assignments.count() == 0:
+                redeemed_voucher_application_ids.append(voucher_application.id)
+
+        return VoucherApplication.objects.filter(
+            id__in=redeemed_voucher_application_ids
+        ).values('voucher__code', 'user__email').distinct().order_by('user__email')
 
     @list_route(url_path=r'(?P<enterprise_id>.+)/overview')
     def overview(self, request, enterprise_id):     # pylint: disable=unused-argument
