@@ -1238,8 +1238,6 @@ class CouponCodeAssignmentSerializer(serializers.Serializer):  # pylint: disable
         """
         Schedule async task to send email to the learner who has been assigned the code.
         """
-        url = get_ecommerce_url('/coupons/offer/')
-        enrollment_url = '{url}?code={code}'.format(url=url, code=assigned_offer.code)
         code_expiration_date = assigned_offer.created + timedelta(days=365)
         redemptions_remaining = (
             assigned_offer.offer.max_global_applications if voucher_usage_type == Voucher.MULTI_USE_PER_CUSTOMER else 1
@@ -1250,7 +1248,6 @@ class CouponCodeAssignmentSerializer(serializers.Serializer):  # pylint: disable
                 offer_assignment_id=assigned_offer.id,
                 learner_email=assigned_offer.user_email,
                 code=assigned_offer.code,
-                enrollment_url=enrollment_url,
                 redemptions_remaining=redemptions_remaining,
                 code_expiration_date=code_expiration_date.strftime('%d %B,%Y')
             )
@@ -1463,14 +1460,11 @@ class CouponCodeRemindSerializer(CouponCodeMixin, serializers.Serializer):  # py
         """
         Schedule async task to send email to the learner who has been assigned the code.
         """
-        url = get_ecommerce_url('/coupons/offer/')
-        enrollment_url = '{url}?code={code}'.format(url=url, code=assigned_offer.code)
         code_expiration_date = assigned_offer.created + timedelta(days=365)
         send_assigned_offer_reminder_email(
             template=template,
             learner_email=assigned_offer.user_email,
             code=assigned_offer.code,
-            enrollment_url=enrollment_url,
             redeemed_offer_count=redeemed_offer_count,
             total_offer_count=total_offer_count,
             code_expiration_date=code_expiration_date.strftime('%d %B,%Y')

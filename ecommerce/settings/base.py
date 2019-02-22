@@ -644,12 +644,10 @@ OFFER_ASSIGNMENT_EMAIL_DEFAULT_TEMPLATE = '''
     You may redeem this code for {REDEMPTIONS_REMAINING} courses.
 
     edX login: {USER_EMAIL}
-    Enrollment url: {ENROLLMENT_URL}
     Access Code: {CODE}
     Expiration date: {EXPIRATION_DATE}
 
-    You may go directly to the Enrollment URL to view courses that are available for this code
-    or you can insert the access code at check out under "coupon code" for applicable courses.
+    You can insert the access code at check out under "coupon code" for applicable courses.
 
     For any questions, please reach out to your Learning Manager.
 '''
@@ -661,12 +659,10 @@ OFFER_ASSIGNMENT_EMAIL_REMINDER_DEFAULT_TEMPLATE = '''
     You have redeemed this code {REDEEMED_OFFER_COUNT} of times out of {TOTAL_OFFER_COUNT} number of available course redemptions.
     
     edX login: {USER_EMAIL}
-    Enrollment url: {ENROLLMENT_URL}
     Access Code: {CODE}
     Expiration date: {EXPIRATION_DATE}
 
-    You may go directly to the Enrollment URL to view courses that are available for this code
-    or you can insert the access code at check out under "coupon code" for applicable courses.
+    You can insert the access code at check out under "coupon code" for applicable courses.
 
     For any questions, please reach out to your Learning Manager.
 '''

@@ -76,7 +76,6 @@ class UtilTests(DiscoveryTestMixin, TestCase):
                 'offer_assignment_id': 555,
                 'learner_email': 'johndoe@unknown.com',
                 'code': 'GIL7RUEOU7VHBH7Q',
-                'enrollment_url': 'http://tempurl.url/enroll',
                 'redemptions_remaining': 10,
                 'code_expiration_date': '2018-12-19'
             },
@@ -99,14 +98,12 @@ class UtilTests(DiscoveryTestMixin, TestCase):
             tokens.get('offer_assignment_id'),
             tokens.get('learner_email'),
             tokens.get('code'),
-            tokens.get('enrollment_url'),
             tokens.get('redemptions_remaining'),
             tokens.get('code_expiration_date'),
         )
         expected_email_body = template.format(
             REDEMPTIONS_REMAINING=tokens.get('redemptions_remaining'),
             USER_EMAIL=tokens.get('learner_email'),
-            ENROLLMENT_URL=tokens.get('enrollment_url'),
             CODE=tokens.get('code'),
             EXPIRATION_DATE=tokens.get('code_expiration_date')
         )
@@ -121,7 +118,6 @@ class UtilTests(DiscoveryTestMixin, TestCase):
             {
                 'learner_email': 'johndoe@unknown.com',
                 'code': 'GIL7RUEOU7VHBH7Q',
-                'enrollment_url': 'http://tempurl.url/enroll',
                 'redeemed_offer_count': 0,
                 'total_offer_count': 1,
                 'code_expiration_date': '2018-12-19'
@@ -146,7 +142,6 @@ class UtilTests(DiscoveryTestMixin, TestCase):
             template,
             tokens.get('learner_email'),
             tokens.get('code'),
-            tokens.get('enrollment_url'),
             tokens.get('redeemed_offer_count'),
             tokens.get('total_offer_count'),
             tokens.get('code_expiration_date'),
@@ -155,7 +150,6 @@ class UtilTests(DiscoveryTestMixin, TestCase):
             REDEEMED_OFFER_COUNT=tokens.get('redeemed_offer_count'),
             TOTAL_OFFER_COUNT=tokens.get('total_offer_count'),
             USER_EMAIL=tokens.get('learner_email'),
-            ENROLLMENT_URL=tokens.get('enrollment_url'),
             CODE=tokens.get('code'),
             EXPIRATION_DATE=tokens.get('code_expiration_date')
         )
