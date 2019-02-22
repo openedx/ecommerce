@@ -1,5 +1,6 @@
 import logging
 
+from django.conf import settings
 from oscar.core.loading import get_model
 from requests.exceptions import ConnectionError, Timeout
 from rest_framework import permissions
@@ -11,6 +12,8 @@ from ecommerce.extensions.api.serializers import retrieve_enterprise_condition
 Product = get_model('catalogue', 'Product')
 
 LOGGER = logging.getLogger(__name__)
+
+USERNAME_REPLACEMENT_GROUP = "username_replacement_admin"
 
 
 class CanActForUser(permissions.IsAdminUser):
@@ -100,5 +103,12 @@ class HasDataAPIDjangoGroupAccess(permissions.BasePermission):
                 return False
             enterprise_condition = retrieve_enterprise_condition(coupon)
             enterprise_id = enterprise_condition and enterprise_condition.enterprise_customer_uuid
-
         return self._request_is_permitted_for_enterprise(request, enterprise_id)
+
+
+class CanReplaceUsername(permissions.BasePermission):
+    """
+    Grants access to the Username Replacement API for a the service user.
+    """
+    def has_permission(self, request, view):
+        return request.user.username == getattr(settings, 'USERNAME_REPLACEMENT_WORKER')
