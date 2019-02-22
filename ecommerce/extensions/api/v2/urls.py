@@ -20,6 +20,7 @@ from ecommerce.extensions.api.v2.views import refunds as refund_views
 from ecommerce.extensions.api.v2.views import retirement as retirement_views
 from ecommerce.extensions.api.v2.views import sdn as sdn_views
 from ecommerce.extensions.api.v2.views import stockrecords as stockrecords_views
+from ecommerce.extensions.api.v2.views import user_management as user_management_views
 from ecommerce.extensions.api.v2.views import vouchers as voucher_views
 from ecommerce.extensions.voucher.views import CouponReportCSVView
 
@@ -93,6 +94,10 @@ ASSIGNMENT_EMAIL_URLS = [
     url(r'^bounce$', assignment_email.AssignmentEmailBounce.as_view(), name='receive_bounce')
 ]
 
+USER_MANAGEMENT_URLS = [
+    url(r'^replace_usernames/$', user_management_views.UsernameReplacementView.as_view(), name='username_replacement'),
+]
+
 urlpatterns = [
     url(r'^baskets/', include(BASKET_URLS, namespace='baskets')),
     url(r'^checkout/', include(CHECKOUT_URLS, namespace='checkout')),
@@ -103,6 +108,7 @@ urlpatterns = [
     url(r'^publication/', include(ATOMIC_PUBLICATION_URLS, namespace='publication')),
     url(r'^refunds/', include(REFUND_URLS, namespace='refunds')),
     url(r'^retirement/', include(RETIREMENT_URLS, namespace='retirement')),
+    url(r'^user_management/', include(USER_MANAGEMENT_URLS, namespace='user_management')),
     url(r'^sdn/', include(SDN_URLS, namespace='sdn')),
     url(r'^assignment-email/', include(ASSIGNMENT_EMAIL_URLS, namespace='assignment-email')),
 ]

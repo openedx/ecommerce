@@ -659,7 +659,7 @@ OFFER_REVOKE_EMAIL_DEFAULT_SUBJECT = 'edX Course Assignment Revoked'
 OFFER_ASSIGNMENT_EMAIL_REMINDER_DEFAULT_TEMPLATE = '''
     This is a reminder email that your learning manager has provided you with a access code to take a course at edX.
     You have redeemed this code {REDEEMED_OFFER_COUNT} of times out of {TOTAL_OFFER_COUNT} number of available course redemptions.
-    
+
     edX login: {USER_EMAIL}
     Access Code: {CODE}
     Expiration date: {EXPIRATION_DATE}
@@ -674,3 +674,4 @@ OFFER_ASSIGNMENT_EMAIL_REMINDER_DEFAULT_SUBJECT = 'Reminder on edX course assign
 SAILTHRU_KEY = None
 SAILTHRU_SECRET = None
 
+USERNAME_REPLACEMENT_WORKER = "replace with valid username"
