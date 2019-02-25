@@ -224,6 +224,7 @@ class AssignmentEmailBounceTests(TestCase):
             offer=enterprise_offer,
             code='jfhrmndk554lwre',
             user_email='johndoe@unknown.com',
+            status=OFFER_ASSIGNED
         )
         OfferAssignmentEmailAttempt.objects.create(offer_assignment=offer_assignment, send_id=post_data.get('send_id'))
         with LogCapture(level=logging.INFO) as log:
