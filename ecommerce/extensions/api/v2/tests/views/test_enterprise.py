@@ -504,7 +504,7 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             'code_redemptions': {'user2@example.com': {'code': 2, 'num': 1}},
             'expected_responses': {
                 VOUCHER_NOT_ASSIGNED: [
-                    {'code': 0, 'assigned_to': '', 'redemptions': {'used': 0, 'total': 1}}
+                    {'code': 0, 'assigned_to': '', 'redemptions': {'used': 0, 'total': 1, 'num_assignments': 0}}
                 ],
                 VOUCHER_NOT_REDEEMED: [
                     {'code': 1, 'assigned_to': 'user1@example.com', 'redemptions': {'used': 0, 'total': 1}}
@@ -526,7 +526,7 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             },
             'expected_responses': {
                 VOUCHER_NOT_ASSIGNED: [
-                    {'code': 0, 'assigned_to': '', 'redemptions': {'used': 0, 'total': 2}}
+                    {'code': 0, 'assigned_to': '', 'redemptions': {'used': 0, 'total': 2, 'num_assignments': 0}}
                 ],
                 VOUCHER_NOT_REDEEMED: [
                     {'code': 1, 'assigned_to': 'user1@example.com', 'redemptions': {'used': 0, 'total': 2}}
@@ -551,8 +551,8 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             },
             'expected_responses': {
                 VOUCHER_NOT_ASSIGNED: [
-                    {'code': 0, 'assigned_to': '', 'redemptions': {'used': 0, 'total': 4}},
-                    {'code': 1, 'assigned_to': '', 'redemptions': {'used': 1, 'total': 4}}
+                    {'code': 0, 'assigned_to': '', 'redemptions': {'used': 0, 'total': 4, 'num_assignments': 0}},
+                    {'code': 1, 'assigned_to': '', 'redemptions': {'used': 1, 'total': 4, 'num_assignments': 2}}
                 ],
                 VOUCHER_NOT_REDEEMED: [
                     {'code': 1, 'assigned_to': 'user1@example.com', 'redemptions': {'used': 0, 'total': 1}}
@@ -574,8 +574,8 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             'code_redemptions': {'user2@example.com': {'code': 1, 'num': 1}},
             'expected_responses': {
                 VOUCHER_NOT_ASSIGNED: [
-                    {'code': 0, 'assigned_to': '', 'redemptions': {'used': 0, 'total': 3}},
-                    {'code': 1, 'assigned_to': '', 'redemptions': {'used': 1, 'total': 3}}
+                    {'code': 0, 'assigned_to': '', 'redemptions': {'used': 0, 'total': 3, 'num_assignments': 0}},
+                    {'code': 1, 'assigned_to': '', 'redemptions': {'used': 1, 'total': 3, 'num_assignments': 1}}
                 ],
                 VOUCHER_NOT_REDEEMED: [
                     {'code': 1, 'assigned_to': 'user1@example.com', 'redemptions': {'used': 0, 'total': 1}}
