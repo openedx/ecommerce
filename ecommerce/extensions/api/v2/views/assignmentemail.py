@@ -11,7 +11,11 @@ from rest_framework.views import APIView
 from sailthru.sailthru_client import SailthruClient
 
 from ecommerce.extensions.api.permissions import IsStaffOrOwner
-from ecommerce.extensions.offer.constants import OFFER_ASSIGNED, OFFER_ASSIGNMENT_EMAIL_BOUNCED
+from ecommerce.extensions.offer.constants import (
+    OFFER_ASSIGNED,
+    OFFER_ASSIGNMENT_EMAIL_BOUNCED,
+    OFFER_ASSIGNMENT_EMAIL_PENDING
+)
 from ecommerce.extensions.offer.models import OfferAssignment, OfferAssignmentEmailAttempt
 
 logger = logging.getLogger(__name__)
@@ -39,7 +43,8 @@ class AssignmentEmailStatus(APIView):
         with transaction.atomic():
             OfferAssignment.objects.select_for_update().filter(
                 user_email=assigned_offer.user_email,
-                code=assigned_offer.code
+                code=assigned_offer.code,
+                status=OFFER_ASSIGNMENT_EMAIL_PENDING
             ).update(status=OFFER_ASSIGNED)
             OfferAssignmentEmailAttempt.objects.create(offer_assignment=assigned_offer, send_id=send_id)
 
@@ -122,7 +127,8 @@ class AssignmentEmailBounce(APIView):
         with transaction.atomic():
             OfferAssignment.objects.select_for_update().filter(
                 user_email=assigned_offer.user_email,
-                code=assigned_offer.code
+                code=assigned_offer.code,
+                status=OFFER_ASSIGNED
             ).update(status=OFFER_ASSIGNMENT_EMAIL_BOUNCED)
 
     def post(self, request):
@@ -161,9 +167,10 @@ class AssignmentEmailBounce(APIView):
             if sailthru_client.receive_hardbounce_post(request.data):
                 try:
                     self.update_email_status(send_id)
-                except (OfferAssignment.DoesNotExist, OfferAssignmentEmailAttempt.DoesNotExist) as exc:
-                    logger.exception(
-                        '[Offer Assignment] AssignmentEmailBounce could not update status and raised: %r', exc)
+                except (OfferAssignment.DoesNotExist, OfferAssignmentEmailAttempt.DoesNotExist):
+                    # Note: Marketing email bounces also come through this code path and
+                    # its expected that they would not have a corresponding OfferAssignment
+                    pass
             else:
                 logger.error('[Offer Assignment] AssignmentEmailBounce: Bounce message could not be verified. '
                              'send_id: %s, email: %s, sig: %s, api_key_sailthru: %s, api_key_local: %s ',

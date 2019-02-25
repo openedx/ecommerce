@@ -294,10 +294,10 @@ class EnterpriseCouponViewSet(CouponViewSet):
             if assignments.count() == 0:
                 continue
 
-            unredeemed_assignments.append(assignments.first().id)
+            unredeemed_assignments.extend(assignments.values_list('id', flat=True))
 
         return OfferAssignment.objects.filter(
-            id__in=unredeemed_assignments).values('code', 'user_email').order_by('user_email')
+            id__in=unredeemed_assignments).values('code', 'user_email').order_by('user_email').distinct()
 
     def _get_partial_redeemed_usages(self, vouchers):
         """
@@ -332,13 +332,21 @@ class EnterpriseCouponViewSet(CouponViewSet):
         Returns a queryset containing unique voucher.code and user.email pairs from VoucherApplications.
         Only code and email pairs that have no corresponding active OfferAssignments are returned.
         """
-        users_with_assignments = OfferAssignment.objects.filter(
-            code__in=vouchers.values_list('code', flat=True),
-            status__in=[OFFER_ASSIGNED, OFFER_ASSIGNMENT_EMAIL_PENDING]
-        ).values_list('user_email', flat=True)
         voucher_applications = VoucherApplication.objects.filter(voucher__in=vouchers)
-        return voucher_applications.exclude(user__email__in=users_with_assignments).values(
-            'voucher__code', 'user__email').distinct().order_by('user__email')
+        redeemed_voucher_application_ids = []
+        for voucher_application in voucher_applications:
+            unredeemed_voucher_assignments = OfferAssignment.objects.filter(
+                code=voucher_application.voucher.code,
+                user_email=voucher_application.user.email,
+                status__in=[OFFER_ASSIGNED, OFFER_ASSIGNMENT_EMAIL_PENDING]
+            )
+
+            if unredeemed_voucher_assignments.count() == 0:
+                redeemed_voucher_application_ids.append(voucher_application.id)
+
+        return VoucherApplication.objects.filter(
+            id__in=redeemed_voucher_application_ids
+        ).values('voucher__code', 'user__email').distinct().order_by('user__email')
 
     @list_route(url_path=r'(?P<enterprise_id>.+)/overview')
     def overview(self, request, enterprise_id):     # pylint: disable=unused-argument
