@@ -41,21 +41,41 @@ class JwtAuthCookieRoleMiddleware(object):
             user = JwtAuthentication().authenticate_credentials(decoded_jwt)
 
         roles_claim = decoded_jwt.get('roles')
-        if not roles_claim:
-            return
-        role_cache_data = {}
+        role_cache_key = '{user_id}:role_metadata'.format(user_id=user.id)
+        previous_role_cache_data = cache.get(role_cache_key) or {}
 
+        if not roles_claim:
+            for role in previous_role_cache_data.keys():
+                remove_user_role(role, user)
+            cache.delete(role_cache_key)
+            return
+
+        role_cache_data = {}
         for role_data in roles_claim:
             role, object_type, object_key = role_data.split(':')
-            mapped_role = ROLE_MAPPING[role]
-            if mapped_role and not user.groups.filter(name=mapped_role).exists():
-                group, _ = Group.objects.get_or_create(name=mapped_role)
-                group.user_set.add(user)
+            add_user_role(role, user)
 
             if role not in role_cache_data:
                 role_cache_data[role] = []
 
             role_cache_data[role].append(object_key)
 
-        role_cache_key = '{user_id}:role_metadata'.format(user_id=user.id)
+        for role in previous_role_cache_data.keys():
+            if role not in role_cache_data:
+                remove_user_role(role, user)
+
         cache.set(role_cache_key, role_cache_data)
+
+
+def add_user_role(role, user):
+    mapped_role = ROLE_MAPPING[role]
+    if mapped_role and not user.groups.filter(name=mapped_role).exists():
+        group, _ = Group.objects.get_or_create(name=mapped_role)
+        group.user_set.add(user)
+
+
+def remove_user_role(role, user):
+    mapped_role = ROLE_MAPPING[role]
+    if mapped_role and user.groups.filter(name=mapped_role).exists():
+        group, _ = Group.objects.get_or_create(name=mapped_role)
+        group.user_set.remove(user)

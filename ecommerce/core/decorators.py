@@ -9,7 +9,7 @@ def permission_required(*permissions, **decorator_kwargs):
     def decorator(view):
         def wrapped_view(self, request, *args, **kwargs):
 
-            fn = decorator_kwargs.pop('fn', None)
+            fn = decorator_kwargs.get('fn', None)
             if callable(fn):
                 obj = fn(request, *args, **kwargs)
             else:

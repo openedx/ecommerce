@@ -25,12 +25,14 @@ def is_enterprise_admin_for_coupon(user, obj):
         return False
 
     user_role_metadata = cache.get('{user_id}:role_metadata'.format(user_id=user.id))
+    if not user_role_metadata or 'enterprise_admin' not in user_role_metadata:
+        return False
 
-    if isinstance(obj, unicode) and obj in user_role_metadata['enterprise_admin']:
+    if isinstance(obj, unicode) and obj in user_role_metadata.get('enterprise_admin', []):
         return True
     elif isinstance(obj, Product):
         invoices = Invoice.objects.filter(
-            business_client__enterprise_customer_uuid__in=user_role_metadata['enterprise_admin']
+            business_client__enterprise_customer_uuid__in=user_role_metadata.get('enterprise_admin', [])
         )
         orders = Order.objects.filter(id__in=[invoice.order_id for invoice in invoices])
         basket_lines = Line.objects.filter(
