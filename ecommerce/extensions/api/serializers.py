@@ -712,6 +712,16 @@ class NotAssignedCodeUsageSerializer(CodeUsageSerializer):  # pylint: disable=ab
     def get_assigned_to(self, obj):
         return ''
 
+    def get_redemptions(self, obj):
+        redemptions = super(NotAssignedCodeUsageSerializer, self).get_redemptions(obj)
+
+        num_assignments = OfferAssignment.objects.filter(
+            code=self.get_code(obj),
+            status__in=[OFFER_ASSIGNED, OFFER_ASSIGNMENT_EMAIL_PENDING],
+        ).count()
+
+        return dict(redemptions, num_assignments=num_assignments)
+
 
 class NotRedeemedCodeUsageSerializer(CodeUsageSerializer):  # pylint: disable=abstract-method
 
