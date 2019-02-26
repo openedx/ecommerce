@@ -784,6 +784,47 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             pagination=pagination,
         )
 
+    def test_unredeemed_filter_email_bounced_codes(self):
+        """
+        Test that codes with `OFFER_ASSIGNMENT_EMAIL_BOUNCED` error status are shown in unredeemed filter.
+        """
+        Switch.objects.update_or_create(name=ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, defaults={'active': True})
+        coupon_response = self.get_response('POST', ENTERPRISE_COUPONS_LINK, self.data)
+        coupon = coupon_response.json()
+        coupon_id = coupon['coupon_id']
+        vouchers = Product.objects.get(id=coupon_id).attr.coupon_vouchers.vouchers.all()
+        codes = [voucher.code for voucher in vouchers]
+
+        # Code assignments.
+        self.assign_user_to_code(coupon_id, ['user1@example.com'], [codes[0]])
+
+        response = self.get_response(
+            'GET',
+            '/api/v2/enterprise/coupons/{}/codes/?code_filter={}'.format(coupon_id, VOUCHER_NOT_REDEEMED)
+        ).json()
+
+        # Verify that code appears in unredeemed filter.
+        self.assert_code_detail_response(
+            response['results'],
+            [{'code': 0, 'assigned_to': 'user1@example.com', 'redemptions': {'used': 0, 'total': 1}}],
+            codes
+        )
+
+        # Email bounce a code.
+        OfferAssignment.objects.filter(code=vouchers[0].code).update(status=OFFER_ASSIGNMENT_EMAIL_BOUNCED)
+
+        response = self.get_response(
+            'GET',
+            '/api/v2/enterprise/coupons/{}/codes/?code_filter={}'.format(coupon_id, VOUCHER_NOT_REDEEMED)
+        ).json()
+
+        # Now verify that code still appears in unredeemed filter.
+        self.assert_code_detail_response(
+            response['results'],
+            [{'code': 0, 'assigned_to': 'user1@example.com', 'redemptions': {'used': 0, 'total': 1}}],
+            codes
+        )
+
     @ddt.data(
         (
             '85b08dde-0877-4474-a4e9-8408fe47ce88',

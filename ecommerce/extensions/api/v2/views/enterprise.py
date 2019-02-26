@@ -36,6 +36,7 @@ from ecommerce.extensions.catalogue.utils import (
 )
 from ecommerce.extensions.offer.constants import (
     OFFER_ASSIGNED,
+    OFFER_ASSIGNMENT_EMAIL_BOUNCED,
     OFFER_ASSIGNMENT_EMAIL_PENDING,
     VOUCHER_NOT_ASSIGNED,
     VOUCHER_NOT_REDEEMED,
@@ -288,7 +289,7 @@ class EnterpriseCouponViewSet(CouponViewSet):
 
             assignments = voucher.enterprise_offer.offerassignment_set.filter(
                 code=voucher.code,
-                status__in=[OFFER_ASSIGNED, OFFER_ASSIGNMENT_EMAIL_PENDING]
+                status__in=[OFFER_ASSIGNED, OFFER_ASSIGNMENT_EMAIL_BOUNCED, OFFER_ASSIGNMENT_EMAIL_PENDING]
             ).exclude(user_email__in=users_having_usages)
 
             if assignments.count() == 0:
