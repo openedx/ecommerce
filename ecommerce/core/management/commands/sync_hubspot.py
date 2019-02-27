@@ -6,6 +6,7 @@ import time
 import traceback
 from datetime import datetime, timedelta
 
+from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand, CommandError
 from edx_rest_api_client.client import EdxRestApiClient
 from oscar.core.loading import get_model
@@ -17,6 +18,7 @@ Order = get_model('order', 'Order')
 OrderLine = get_model('order', 'Line')
 Product = get_model('catalogue', 'Product')
 SiteConfiguration = get_model('core', 'SiteConfiguration')
+User = get_user_model()
 logger = logging.getLogger(__name__)
 
 
@@ -68,6 +70,16 @@ HUBSPOT_ECOMMERCE_SETTINGS = {
                 'propertyName': 'number',
                 'dataType': 'STRING',
                 'targetHubspotProperty': 'ip__ecomm_bridge__order_number'
+            },
+            {
+                'propertyName': 'deal_name',
+                'dataType': 'STRING',
+                'targetHubspotProperty': 'dealname'
+            },
+            {
+                'propertyName': 'user_id',
+                'dataType': 'STRING',
+                'targetHubspotProperty': 'hs_assoc__contact_ids'
             }
         ]
     },
@@ -130,6 +142,7 @@ ORDER_STATUS = {
     ORDER.FULFILLMENT_ERROR: "cancelled",
     ORDER.COMPLETE: "processed"
 }
+CONTACT = "CONTACT"
 PRODUCT = "PRODUCT"
 LINE_ITEM = "LINE_ITEM"
 DEAL = "DEAL"
@@ -211,6 +224,22 @@ class Command(BaseCommand):
             )
         return status
 
+    def _get_hubspot_user_structure(self, users):
+        """
+        Returns list of dicts, each dict represents hubspot CONTACT.
+        """
+        hubspot_contacts = []
+        for user in users:
+            hubspot_contacts.append({
+                'integratorObjectId': str(user.id),
+                'action': 'UPSERT',
+                'changeOccurredTimestamp': int(time.time()),
+                'propertyNameToValues': {
+                    'email': user.email
+                }
+            })
+        return hubspot_contacts
+
     def _get_hubspot_deal_structure(self, orders):
         """
         Returns list of dicts, each dict represents hubspot DEAL.
@@ -222,12 +251,14 @@ class Command(BaseCommand):
                 'action': 'UPSERT',
                 'changeOccurredTimestamp': int(time.time()),
                 'propertyNameToValues': {
+                    'deal_name': order.number,
                     'total_incl_tax': float(order.total_incl_tax),
-                    'checkout_status': ORDER_STATUS[order.status],
+                    'checkout_status': ORDER_STATUS.get(order.status),
                     'date_placed': int(
                         (order.date_placed - datetime(1970, 1, 1, tzinfo=order.date_placed.tzinfo)).total_seconds()
                     ),
-                    'number': order.number
+                    'number': order.number,
+                    'user_id': str(order.user.id)
                 }
             })
         return hubspot_orders
@@ -259,19 +290,16 @@ class Command(BaseCommand):
         Returns list of dicts, each dict represents hubspot PRODUCT.
         """
         hubspot_products = []
-        unique_product_ids = []
         for product in products:
-            if product.id not in unique_product_ids:
-                hubspot_products.append({
-                    'integratorObjectId': str(product.id),
-                    'action': 'UPSERT',
-                    'changeOccurredTimestamp': int(time.time()),
-                    'propertyNameToValues': {
-                        'title': str(product.title),
-                        'description': str(product.description)
-                    }
-                })
-                unique_product_ids.append(product.id)
+            hubspot_products.append({
+                'integratorObjectId': str(product.id),
+                'action': 'UPSERT',
+                'changeOccurredTimestamp': int(time.time()),
+                'propertyNameToValues': {
+                    'title': str(product.title),
+                    'description': str(product.description)
+                }
+            })
         return hubspot_products
 
     def _upsert_hubspot_objects(self, object_type, objects, site_configuration):
@@ -328,7 +356,7 @@ class Command(BaseCommand):
                 hapikey=site_configuration.hubspot_secret_key
             )
             for error in response.get('results'):
-                self.stderr.write(
+                self.stdout.write(
                     'sync-error endpoint: for {object_type} with id {id} for site {site}: {message}'.format(
                         object_type=error.get('objectType'),
                         id=error.get('integratorObjectId'),
@@ -359,13 +387,20 @@ class Command(BaseCommand):
             count=1
         )
         if response.get('results'):
-            number = response.get('results')[0].get('properties').get('ip__ecomm_bridge__order_number').get('value')
-            last_synced_order = Order.objects.filter(number=number).first()
-            self.stdout.write(
-                "Successfully fetched last sync DEAl with order_number: {number}".format(
-                    number=number
+            try:
+                number = response.get('results')[0].get('properties').get('ip__ecomm_bridge__order_number').get('value')
+                last_synced_order = Order.objects.filter(number=number).first()
+                self.stdout.write(
+                    "Successfully fetched last sync DEAl with order_number: {number}".format(
+                        number=number
+                    )
                 )
-            )
+            except (KeyError, AttributeError) as ex:
+                self.stderr.write(
+                    'An error occurred while getting the last sync order for site {site}: {message} '.format(
+                        site=site_configuration.site.domain, message=ex.message
+                    )
+                )
         return last_synced_order
 
     def _get_unsynced_orders(self, site_configuration):
@@ -404,8 +439,16 @@ class Command(BaseCommand):
         """
         unsynced_orders = self._get_unsynced_orders(site_configuration)
         if unsynced_orders:
-            unsynced_order_lines = OrderLine.objects.filter(order__in=unsynced_orders)
+            # we need to exclude the OrderLines without product
+            # because product is required in hubspot for LINE_ITEM.
+            unsynced_order_lines = OrderLine.objects.filter(order__in=unsynced_orders).exclude(product=None)
             unsynced_products = Product.objects.filter(line__in=unsynced_order_lines)
+            unsynced_users = User.objects.filter(orders__in=unsynced_orders)
+            self._upsert_hubspot_objects(
+                CONTACT,
+                self._get_hubspot_user_structure(unsynced_users),
+                site_configuration
+            )
             self._upsert_hubspot_objects(
                 PRODUCT,
                 self._get_hubspot_product_structure(unsynced_products),
