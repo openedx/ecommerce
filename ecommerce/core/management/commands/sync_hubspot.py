@@ -404,7 +404,10 @@ class Command(BaseCommand):
         """
         unsynced_orders = self._get_unsynced_orders(site_configuration)
         if unsynced_orders:
-            unsynced_order_lines = OrderLine.objects.filter(order__in=unsynced_orders)
+            unsynced_order_lines = OrderLine.objects.filter(
+                order__in=unsynced_orders,
+                product__isnull=False
+            )
             unsynced_products = Product.objects.filter(line__in=unsynced_order_lines)
             self._upsert_hubspot_objects(
                 PRODUCT,
