@@ -810,7 +810,7 @@ class EnterpriseCouponOverviewListSerializer(serializers.ModelSerializer):
     Serializer for Enterprise Coupons list overview.
     """
     end_date = serializers.SerializerMethodField()
-    has_error = serializers.SerializerMethodField()
+    errors = serializers.SerializerMethodField()
     max_uses = serializers.SerializerMethodField()
     num_codes = serializers.SerializerMethodField()
     num_unassigned = serializers.SerializerMethodField()
@@ -831,16 +831,15 @@ class EnterpriseCouponOverviewListSerializer(serializers.ModelSerializer):
         ])
         return num_unassigned
 
-    def get_has_error(self, obj):
+    def get_errors(self, obj):
         """
-        Returns True if any assignment associated with coupon is having
-        error, otherwise False.
+        Returns a list of OfferAssignment errors associated with coupon.
         """
         offer = retrieve_offer(obj)
         offer_assignments_with_error = offer.offerassignment_set.filter(
             status=OFFER_ASSIGNMENT_EMAIL_BOUNCED
         )
-        return offer_assignments_with_error.exists()
+        return OfferAssignmentSerializer(offer_assignments_with_error, many=True).data
 
     # Max number of codes available (Maximum Coupon Usage).
     def get_max_uses(self, obj):
@@ -881,7 +880,7 @@ class EnterpriseCouponOverviewListSerializer(serializers.ModelSerializer):
     class Meta(object):
         model = Product
         fields = (
-            'end_date', 'has_error', 'id', 'max_uses', 'num_codes', 'num_unassigned',
+            'end_date', 'errors', 'id', 'max_uses', 'num_codes', 'num_unassigned',
             'num_uses', 'start_date', 'title', 'usage_limitation'
         )
 
