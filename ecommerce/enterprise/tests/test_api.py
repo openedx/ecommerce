@@ -181,3 +181,109 @@ class EnterpriseAPITests(EnterpriseServiceMockMixin, DiscoveryTestMixin, TestCas
         )
 
         self._assert_contains_course_runs(False, [self.course_run.id], 'fake-uuid', 'fake-uuid')
+
+    @ddt.data(
+        ('cf246b88-d5f6-4908-a522-fc307e0b0c59',
+         settings.ENTERPRISE_DATA_API_GROUP,
+         {
+             "enterprise_customer": {
+                 "uuid": "cf246b88-d5f6-4908-a522-fc307e0b0c59",
+                 "name": "BigEnterprise",
+             }
+         },
+         {
+             'results': [
+                 {
+                     "enterprise_customer": {
+                         "uuid": "cf246b88-d5f6-4908-a522-fc307e0b0c59",
+                         "name": "BigEnterprise",
+                     }
+                 }],
+             'count': 1
+         },
+         False),
+        ('cf246b88-d5f6-4908-a522-fc307e0b0c59',
+         settings.ENTERPRISE_DATA_API_GROUP,
+         None,
+         {
+             'results': [
+                 {
+                     "enterprise_customer": {
+                         "uuid": "cf246b88-d5f6-4908-a522-fc307e0b0c59",
+                         "name": "BigEnterprise",
+                     }
+                 }],
+             'count': 1
+         },
+         True),
+        ('cf246b88-d5f6-4908-a522-fc307e0b0c59',
+         settings.ENTERPRISE_DATA_API_GROUP,
+         None,
+         {
+             'results': [],
+             'count': 0
+         },
+         False),
+        ('cf246b88-d5f6-4908-a522-fc307e0b0c60',
+         settings.ENTERPRISE_DATA_API_GROUP,
+         None,
+         {
+             'results': [
+                 {
+                     "enterprise_customer": {
+                         "uuid": "cf246b88-d5f6-4908-a522-fc307e0b0c60",
+                         "name": "BigEnterprise1",
+                     }
+                 },
+                 {
+                     "enterprise_customer": {
+                         "uuid": "cf246b88-d5f6-4908-a522-fc307e0b0c61",
+                         "name": "BigEnterprise2",
+                     }
+                 }],
+             'count': 2
+         },
+         False),
+    )
+    @ddt.unpack
+    def test_get_with_access_to(self, enterprise_id, enterprise_data_api_group, expected, mock_response, exception):
+        """
+        Verify that method `get_with_access_to` returns the appropriate response.
+        """
+        self.mock_with_access_to(
+            enterprise_id,
+            enterprise_data_api_group,
+            mock_response,
+            exception
+        )
+        actual = enterprise_api.get_with_access_to(self.site, self.learner, '', 'cf246b88-d5f6-4908-a522-fc307e0b0c59')
+        self.assertEqual(expected, actual)
+
+    def test_get_with_access_to_cache_hit(self):
+        """
+        Verify `get_with_access_to` returns a cached response
+        """
+        self.mock_with_access_to(
+            'cf246b88-d5f6-4908-a522-fc307e0b0c59',
+            settings.ENTERPRISE_DATA_API_GROUP,
+            {
+                'results': [
+                    {
+                        "enterprise_customer": {
+                            "uuid": "cf246b88-d5f6-4908-a522-fc307e0b0c59",
+                            "name": "BigEnterprise",
+                        }
+                    }],
+                'count': 1
+            },
+            False
+        )
+
+        with patch.object(TieredCache, 'set_all_tiers', wraps=TieredCache.set_all_tiers) as mocked_set_all_tiers:
+            mocked_set_all_tiers.assert_not_called()
+
+            enterprise_api.get_with_access_to(self.site, self.learner, '', 'cf246b88-d5f6-4908-a522-fc307e0b0c59')
+            self.assertEqual(mocked_set_all_tiers.call_count, 1)
+
+            enterprise_api.get_with_access_to(self.site, self.learner, '', 'cf246b88-d5f6-4908-a522-fc307e0b0c59')
+            self.assertEqual(mocked_set_all_tiers.call_count, 1)

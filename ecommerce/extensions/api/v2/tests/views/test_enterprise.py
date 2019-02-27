@@ -138,6 +138,11 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
         patcher = mock.patch('ecommerce.extensions.api.v2.utils.send_mail')
         self.send_mail_patcher = patcher.start()
         self.addCleanup(patcher.stop)
+        mock_DataAPIDjangoGroupAccess = mock.patch(
+            'ecommerce.extensions.api.v2.views.enterprise.HasDataAPIDjangoGroupAccess.has_permission')
+        self.mock_permission = mock_DataAPIDjangoGroupAccess.start()
+        self.mock_permission.return_value = True
+        self.addCleanup(mock_DataAPIDjangoGroupAccess.stop)
 
     def get_coupon_voucher(self, coupon):
         """
