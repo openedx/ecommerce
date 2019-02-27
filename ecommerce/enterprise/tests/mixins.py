@@ -635,3 +635,20 @@ class EnterpriseServiceMockMixin(object):
             condition.enterprise_customer_uuid,
             enterprise_customer_catalog_uuid=condition.enterprise_customer_catalog_uuid,
         )
+
+    def mock_with_access_to(self, enterprise_id, enterprise_data_api_group, expected_response, raise_exception=False):
+        self.mock_access_token_response()
+        query_params = urlencode({
+            'permissions': [enterprise_data_api_group],
+            'enterprise_id': enterprise_id,
+        }, True)
+        body = raise_timeout if raise_exception else json.dumps(expected_response)
+        httpretty.register_uri(
+            method=httpretty.GET,
+            uri='{}enterprise-customer/with_access_to/?{}'.format(
+                self.site.siteconfiguration.enterprise_api_url,
+                query_params
+            ),
+            body=body,
+            content_type='application/json'
+        )
