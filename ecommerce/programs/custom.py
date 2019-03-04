@@ -18,3 +18,6 @@ def create_condition(condition_class, **kwargs):
     """
     return Condition.objects.create(
         proxy_class=class_path(condition_class), **kwargs)
+
+def no_cover():
+    return True
