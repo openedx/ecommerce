@@ -1,0 +1,13 @@
+coverage:
+  status:
+    project:
+      default:
+        enabled: yes
+        threshold: 0.1
+        target: auto
+    patch:
+      default:
+        enabled: yes
+        target: 98
+
+comment: false
