@@ -733,7 +733,7 @@ class NotRedeemedCodeUsageSerializer(CodeUsageSerializer):  # pylint: disable=ab
             num_assignments = OfferAssignment.objects.filter(
                 code=self.get_code(obj),
                 user_email=self.get_assigned_to(obj),
-                status__in=[OFFER_ASSIGNED, OFFER_ASSIGNMENT_EMAIL_PENDING],
+                status__in=[OFFER_ASSIGNED, OFFER_ASSIGNMENT_EMAIL_PENDING, OFFER_ASSIGNMENT_EMAIL_BOUNCED],
             ).count()
             return {'used': 0, 'total': num_assignments}
 
@@ -750,7 +750,7 @@ class PartialRedeemedCodeUsageSerializer(CodeUsageSerializer):  # pylint: disabl
             num_assignments = OfferAssignment.objects.filter(
                 code=self.get_code(obj),
                 user_email=self.get_assigned_to(obj),
-                status__in=[OFFER_ASSIGNED, OFFER_ASSIGNMENT_EMAIL_PENDING],
+                status__in=[OFFER_ASSIGNED, OFFER_ASSIGNMENT_EMAIL_PENDING, OFFER_ASSIGNMENT_EMAIL_BOUNCED],
             ).count()
             num_applications = VoucherApplication.objects.filter(
                 voucher__code=self.get_code(obj),
