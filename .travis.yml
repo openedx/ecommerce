@@ -5,6 +5,7 @@ python:
 branches:
   only:
     - master
+    - open-release/ironwood.master
 
 sudo: required
 services:
