@@ -1,6 +1,6 @@
 from django.conf.urls import include, url
 
-from ecommerce.extensions.payment.views import PaymentFailedView, SDNFailure, cybersource, paypal, stripe
+from ecommerce.extensions.payment.views import PaymentFailedView, SDNFailure, cybersource, paypal, stripe, bluefin
 
 CYBERSOURCE_APPLE_PAY_URLS = [
     url(r'^authorize/$', cybersource.CybersourceApplePayAuthorizationView.as_view(), name='authorize'),
@@ -25,10 +25,15 @@ STRIPE_URLS = [
     url(r'^submit/$', stripe.StripeSubmitView.as_view(), name='submit'),
 ]
 
+BLUEFIN_URLS = [
+    url(r'^submit/$', bluefin.BluefinSubmitView.as_view(), name='submit'),
+]
+
 urlpatterns = [
     url(r'^cybersource/', include(CYBERSOURCE_URLS, namespace='cybersource')),
     url(r'^error/$', PaymentFailedView.as_view(), name='payment_error'),
     url(r'^paypal/', include(PAYPAL_URLS, namespace='paypal')),
     url(r'^sdn/', include(SDN_URLS, namespace='sdn')),
     url(r'^stripe/', include(STRIPE_URLS, namespace='stripe')),
+    url(r'^bluefin/', include(BLUEFIN_URLS, namespace='bluefin')),
 ]

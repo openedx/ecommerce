@@ -515,7 +515,10 @@ define([
                     if ($('#card-number').val()) {
                         BasketPage.detectCreditCard();
                     }
-                    BasketPage.cardInfoValidation(e);
+                    if(!document.getElementById("payment_iframe"))
+                    {
+                        BasketPage.cardInfoValidation(e);
+                    }
                     BasketPage.cardHolderInfoValidation(e);
                     if ($('input[name=sdn-check]').val() === 'enabled' && !$('.payment-form').data('has-error')) {
                         BasketPage.sdnCheck(e);
