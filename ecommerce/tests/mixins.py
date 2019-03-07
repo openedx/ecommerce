@@ -398,7 +398,7 @@ class LmsApiMockMixin(object):
             'expiration_datetime': (now() + datetime.timedelta(days=1)).isoformat(),
             'is_verified': is_verified
         }
-        url = '{host}/accounts/{username}/verification_status/'.format(
+        url = '{host}/accounts/{username}/verification_status'.format(
             host=site.siteconfiguration.build_lms_url('/api/user/v1'),
             username=user.username
         )
@@ -411,7 +411,7 @@ class LmsApiMockMixin(object):
 
     def mock_deactivation_api(self, request, username, response):
         """ Mock deactivation API endpoint. """
-        url = '{host}/accounts/{username}/deactivate/'.format(
+        url = '{host}/accounts/{username}/deactivate'.format(
             host=request.site.siteconfiguration.build_lms_url('/api/user/v1'),
             username=username
         )

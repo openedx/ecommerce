@@ -19,7 +19,6 @@ from requests.exceptions import ConnectionError, Timeout
 from slumber.exceptions import HttpNotFoundError, SlumberBaseException
 
 from analytics import Client as SegmentClient
-from ecommerce.core.url_utils import get_lms_url
 from ecommerce.core.utils import log_message_and_raise_validation_error
 from ecommerce.extensions.payment.exceptions import ProcessorNotFoundError
 from ecommerce.extensions.payment.helpers import get_processor_class, get_processor_class_by_name
@@ -456,7 +455,7 @@ class SiteConfiguration(models.Model):
         Returns:
             EdxRestApiClient: The client to access the LMS user API service.
         """
-        return EdxRestApiClient(self.build_lms_url('/api/user/v1/'), jwt=self.access_token)
+        return EdxRestApiClient(self.build_lms_url('/api/user/v1/'), jwt=self.access_token, append_slash=False)
 
     @cached_property
     def commerce_api_client(self):
@@ -510,11 +509,7 @@ class User(AbstractUser):
             connection with the LMS account API endpoint.
         """
         try:
-            api = EdxRestApiClient(
-                request.site.siteconfiguration.build_lms_url('/api/user/v1'),
-                append_slash=False,
-                jwt=request.site.siteconfiguration.access_token
-            )
+            api = request.site.siteconfiguration.user_api_client
             response = api.accounts(self.username).get()
             return response
         except (ConnectionError, SlumberBaseException, Timeout):
@@ -524,7 +519,7 @@ class User(AbstractUser):
             )
             raise
 
-    def is_eligible_for_credit(self, course_key):
+    def is_eligible_for_credit(self, course_key, site_configuration):
         """
         Check if a user is eligible for a credit course.
         Calls the LMS eligibility API endpoint and sends the username and course key
@@ -545,10 +540,7 @@ class User(AbstractUser):
             'course_key': course_key
         }
         try:
-            api = EdxRestApiClient(
-                get_lms_url('api/credit/v1/'),
-                oauth_access_token=self.access_token
-            )
+            api = site_configuration.credit_api_client
             response = api.eligibility().get(**query_strings)
         except (ConnectionError, SlumberBaseException, Timeout):  # pragma: no cover
             log.exception(
@@ -578,10 +570,7 @@ class User(AbstractUser):
             if verification_cached_response.is_found:
                 return verification_cached_response.value
 
-            api = EdxRestApiClient(
-                site.siteconfiguration.build_lms_url('api/user/v1/'),
-                oauth_access_token=self.access_token
-            )
+            api = site.siteconfiguration.user_api_client
             response = api.accounts(self.username).verification_status().get()
 
             verification = response.get('is_verified', False)

@@ -6,14 +6,11 @@ from dateutil.parser import parse
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404
 from django.utils.decorators import method_decorator
-from django.utils.functional import cached_property
 from django.utils.translation import ugettext_lazy as _
 from django.views.generic import TemplateView
-from edx_rest_api_client.client import EdxRestApiClient
 from oscar.core.loading import get_model
 from slumber.exceptions import SlumberHttpBaseException
 
-from ecommerce.core.url_utils import get_lms_url
 from ecommerce.courses.models import Course
 from ecommerce.extensions.analytics.utils import prepare_analytics_data
 from ecommerce.extensions.offer.utils import format_benefit_value
@@ -106,7 +103,8 @@ class Checkout(TemplateView):
             Eligibility deadline date or None if user is not eligible.
         """
         try:
-            eligibilities = self.credit_api_client.eligibility.get(username=user.username, course_key=course_key)
+            credit_api_client = self.request.site.siteconfiguration.credit_api_client
+            eligibilities = credit_api_client.eligibility.get(username=user.username, course_key=course_key)
             if not eligibilities:
                 return None
 
@@ -179,16 +177,8 @@ class Checkout(TemplateView):
         provider_ids = ",".join([seat.attr.credit_provider for seat in credit_seats if seat.attr.credit_provider])
 
         try:
-            return self.credit_api_client.providers.get(provider_ids=provider_ids)
+            credit_api_client = self.request.site.siteconfiguration.credit_api_client
+            return credit_api_client.providers.get(provider_ids=provider_ids)
         except SlumberHttpBaseException:
             logger.exception('An error occurred while retrieving credit provider details.')
             return None
-
-    @cached_property
-    def credit_api_client(self):
-        """ Returns an instance of the Credit API client. """
-
-        return EdxRestApiClient(
-            get_lms_url('api/credit/v1/'),
-            oauth_access_token=self.request.user.access_token
-        )

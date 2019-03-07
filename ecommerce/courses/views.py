@@ -8,11 +8,9 @@ from django.core.management import call_command
 from django.http import Http404, HttpResponse
 from django.views.generic import TemplateView, View
 from edx_django_utils.cache import TieredCache
-from edx_rest_api_client.client import EdxRestApiClient
 from requests import Timeout
 from slumber.exceptions import SlumberBaseException
 
-from ecommerce.core.url_utils import get_lms_url
 from ecommerce.core.views import StaffOnlyMixin
 from ecommerce.extensions.partner.shortcuts import get_partner_for_site
 
@@ -47,10 +45,7 @@ class CourseAppView(StaffOnlyMixin, TemplateView):
             return credit_providers_cache_response.value
 
         try:
-            credit_api = EdxRestApiClient(
-                get_lms_url('/api/credit/v1/'),
-                oauth_access_token=self.request.user.access_token
-            )
+            credit_api = self.request.site.siteconfiguration.credit_api_client
             credit_providers = credit_api.providers.get()
             credit_providers.sort(key=lambda provider: provider['display_name'])
 
