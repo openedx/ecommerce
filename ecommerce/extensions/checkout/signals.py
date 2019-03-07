@@ -108,7 +108,6 @@ def send_course_purchase_email(sender, order=None, **kwargs):  # pylint: disable
                 return
             elif product.is_seat_product:
                 provider_data = get_credit_provider_details(
-                    access_token=order.site.siteconfiguration.access_token,
                     credit_provider_id=credit_provider_id,
                     site_configuration=order.site.siteconfiguration
                 )

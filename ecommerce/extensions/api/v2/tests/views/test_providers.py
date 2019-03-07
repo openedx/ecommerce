@@ -29,7 +29,7 @@ class ProvidersViewSetTest(TestCase):
             'thumbnail_url': 'http://thumbnail.example.com/',
         }
 
-    def mock_provider_api(self):
+    def mock_provider_api(self, data=None):
         provider_url = '{lms_url}{provider}/'.format(
             lms_url=self.site.siteconfiguration.build_lms_url('api/credit/v1/providers/'),
             provider=self.provider
@@ -37,19 +37,32 @@ class ProvidersViewSetTest(TestCase):
         httpretty.register_uri(
             httpretty.GET,
             provider_url,
-            body=json.dumps(self.data),
+            body=json.dumps(data if data else self.data),
             content_type='application/json'
         )
 
     @httpretty.activate
     def test_getting_provider(self):
         """Verify endpoint returns correct provider data."""
+        self.mock_access_token_response()
         self.mock_provider_api()
         response = self.client.get('{path}?credit_provider_id={provider}'.format(
             path=self.path, provider=self.provider
         ))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertDictEqual(json.loads(response.content), ProviderSerializer(self.data).data)
+
+    @httpretty.activate
+    def test_getting_provider_with_many_true(self):
+        """Verify endpoint returns correct provider data with many True."""
+        data = [self.data, self.data]
+        self.mock_access_token_response()
+        self.mock_provider_api(data=data)
+        response = self.client.get('{path}?credit_provider_id={provider}'.format(
+            path=self.path, provider=self.provider
+        ))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertListEqual(json.loads(response.content), ProviderSerializer(data, many=True).data)
 
     def test_invalid_provider(self):
         """Verify endpoint response is empty for invalid provider."""

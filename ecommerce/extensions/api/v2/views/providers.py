@@ -15,7 +15,6 @@ class ProviderViewSet(APIView):
     def get(self, request):
         credit_provider_id = request.GET.get('credit_provider_id')
         provider_data = get_credit_provider_details(
-            access_token=request.user.access_token,
             credit_provider_id=credit_provider_id,
             site_configuration=request.site.siteconfiguration
         )
