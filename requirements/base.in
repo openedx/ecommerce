@@ -30,11 +30,10 @@ django-extra-views==0.6.4
 django-filter==1.0.4
 django-haystack==2.8.1
 django-libsass==0.5
-django-oscar==1.5.1
+django-oscar<1.6                            # 1.6 has backwards incompatible changes
 django-phonenumber-field==1.3.0
 django-rest-swagger==2.2.0
 django-solo==1.1.3
-django-tables2==1.21.2
 django-threadlocals==0.8
 django-treebeard==4.3
 django-waffle<0.15.0                        # Unpinning this causes multiple test failures
