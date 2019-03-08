@@ -13,10 +13,13 @@ from oscar.test.factories import UserFactory
 from slumber.exceptions import HttpClientError
 
 from ecommerce.core.management.commands.sync_hubspot import Command as sync_command
-from ecommerce.extensions.test.factories import create_order
+from ecommerce.extensions.test.factories import create_basket, create_order
 from ecommerce.tests.factories import SiteConfigurationFactory
 
 SiteConfiguration = get_model('core', 'SiteConfiguration')
+Basket = get_model('basket', 'Basket')
+
+DEFAULT_INITIAL_DAYS = 1
 
 
 class TestSyncHubspotCommand(TestCase):
@@ -31,7 +34,24 @@ class TestSyncHubspotCommand(TestCase):
         self.hubspot_site_configuration = SiteConfigurationFactory.create(
             hubspot_secret_key='test_key',
         )
-        self.order = self._create_order('1122', self.hubspot_site_configuration.site)
+        self._create_basket(self.hubspot_site_configuration.site)
+        self._create_order('1122', self.hubspot_site_configuration.site)
+
+    def _get_date(self, days=1):
+        return datetime.now() - timedelta(days=days)
+
+    def _create_basket(self, site):
+        """
+        Creates the basket with given site
+        """
+        basket = create_basket(site=site)
+        basket.date_created = self._get_date()
+        basket.save()
+        basket_line = basket.lines.first()
+        product = basket_line.product
+        product.title = "product-title-dummy"
+        product.description = "product-description-dummy"
+        product.save()
 
     def _create_order(self, order_number, site):
         """
@@ -47,13 +67,10 @@ class TestSyncHubspotCommand(TestCase):
         product = order_line.product
         product.title = "product-title-{order_number}".format(order_number=order_number)
         product.save()
-        return order
-
-    def _mocked_recent_modified_deal_endpoint(self):
-        """
-        Returns mocked recent_modified_deal_endpoint's response
-        """
-        return {'results': [{'properties': {'ip__ecomm_bridge__order_number': {'value': self.order.number}}}]}
+        basket = order.basket
+        basket.date_created = self._get_date(days=2)
+        basket.date_submitted = self._get_date(days=1)
+        basket.save()
 
     def _mocked_sync_errors_messages_endpoint(self):
         """
@@ -64,12 +81,12 @@ class TestSyncHubspotCommand(TestCase):
             {'objectType': 'PRODUCT', 'integratorObjectId': '4321', 'details': 'dummy-details-product'},
         ]}
 
-    def _get_command_output(self, is_stderr=False, initial_sync_days=7):
+    def _get_command_output(self, is_stderr=False):
         """
         Runs the command and returns the stdout or stderr output of command.
         """
         out = StringIO()
-        initial_sync_days_param = '--initial-sync-day=' + str(initial_sync_days)
+        initial_sync_days_param = '--initial-sync-day=' + str(DEFAULT_INITIAL_DAYS)
         if is_stderr:
             call_command('sync_hubspot', initial_sync_days_param, stderr=out)
         else:
@@ -91,69 +108,20 @@ class TestSyncHubspotCommand(TestCase):
         self.assertEqual(mocked_hubspot.call_count, 0)
 
     @patch.object(sync_command, '_hubspot_endpoint')
-    def test_without_last_synced_order(self, mocked_hubspot):
+    def test_without_unsynced_carts(self, mocked_hubspot):
         """
         Test with SiteConfiguration having hubspot_secret_key and last_synced_order doesn't exit.
         1. Install Bridge
         2. Define settings
-        3. Upsert(PRODUCT)
-        4. Upsert(CONTACT)
-        5. Upsert(DEAL)
-        6. Upsert(LINE ITEM)
-        7. Sync-error
+        3. Sync-error
         """
-        initial_sync_days = 4
-        with patch.object(sync_command, '_get_last_synced_order', return_value=''):
-            output = self._get_command_output(initial_sync_days=initial_sync_days)
-            self.assertIn('No last synced order found. Pulled unsynced orders for site {site} from {start_date}'.format(
-                site=self.hubspot_site_configuration.site.domain,
-                start_date=datetime.now().date() - timedelta(initial_sync_days)
-            ), output)
-            self.assertEqual(mocked_hubspot.call_count, 7)
-
-    @patch.object(sync_command, '_hubspot_endpoint')
-    def test_with_last_synced_order(self, mocked_hubspot):
-        """
-        Test with SiteConfiguration having hubspot_secret_key and there exists a last sync order.
-        1. Install Bridge
-        2. Define settings
-        3. Upsert(PRODUCT)
-        4. Upsert(CONTACT)
-        5. Upsert(DEAL)
-        6. Upsert(LINE ITEM)
-        7. Sync-error
-        """
-        with patch.object(sync_command, '_get_last_synced_order', return_value=self.order):
-            self._create_order('11221', self.hubspot_site_configuration.site)
+        with patch.object(sync_command, '_get_unsynced_carts', return_value=None):
             output = self._get_command_output()
-            self.assertIn('Pulled unsynced orders', output)
-            self.assertEqual(mocked_hubspot.call_count, 7)
-
-    @patch.object(sync_command, '_hubspot_endpoint')
-    def test_last_synced_order(self, mocked_hubspot):
-        """
-        Test when _get_last_synced_order function raises an exception.
-        1. Recent Modified Deal.
-        2. Sync Error.
-        """
-        with patch.object(sync_command, '_install_hubspot_ecommerce_bridge', return_value=True), \
-                patch.object(sync_command, '_define_hubspot_ecommerce_settings', return_value=True):
-            # mocked the Recent Modified Deal endpoint
-            mocked_hubspot.return_value = self._mocked_recent_modified_deal_endpoint()
-            output = self._get_command_output()
-            self.assertIn('No data found to sync', output)
-            self.assertEqual(mocked_hubspot.call_count, 2)
-
-            mocked_hubspot.return_value = {'results': [{'dummy': 'dummy'}]}
-            output = self._get_command_output(is_stderr=True)
-            self.assertIn('An error occurred while getting the last sync order', output)
-
-            with self.assertRaises(CommandError):
-                # if Recent Modified Deal raises an exception
-                mocked_hubspot.side_effect = HttpClientError
-                output = self._get_command_output()
-                # command will stop when _get_last_synced_order doesn't work properly
-                self.assertEqual('', output)
+            self.assertIn(
+                'No data found to sync for site {site}'.format(site=self.hubspot_site_configuration.site.domain),
+                output
+            )
+            self.assertEqual(mocked_hubspot.call_count, 3)
 
     @patch.object(sync_command, '_hubspot_endpoint')
     def test_upsert_hubspot_objects(self, mocked_hubspot):
@@ -161,8 +129,7 @@ class TestSyncHubspotCommand(TestCase):
         Test when _upsert_hubspot_objects function raises an exception.
         """
         with patch.object(sync_command, '_install_hubspot_ecommerce_bridge', return_value=True), \
-                patch.object(sync_command, '_define_hubspot_ecommerce_settings', return_value=True), \
-                patch.object(sync_command, '_get_last_synced_order', return_value=''):
+                patch.object(sync_command, '_define_hubspot_ecommerce_settings', return_value=True):
             # if _upsert_hubspot_objects raises an exception
             mocked_hubspot.side_effect = HttpClientError
             output = self._get_command_output(is_stderr=True)
@@ -173,7 +140,7 @@ class TestSyncHubspotCommand(TestCase):
         """
         Test _install_hubspot_ecommerce_bridge function.
         """
-        with patch.object(sync_command, '_get_last_synced_order', return_value=self.order):
+        with patch.object(sync_command, '_define_hubspot_ecommerce_settings', return_value=False):
             output = self._get_command_output()
             self.assertIn('Successfully installed hubspot ecommerce bridge', output)
             # if _install_hubspot_ecommerce_bridge raises an exception
@@ -186,8 +153,7 @@ class TestSyncHubspotCommand(TestCase):
         """
         Test _define_hubspot_ecommerce_settings function.
         """
-        with patch.object(sync_command, '_install_hubspot_ecommerce_bridge', return_value=True), \
-                patch.object(sync_command, '_get_last_synced_order', return_value=self.order):
+        with patch.object(sync_command, '_install_hubspot_ecommerce_bridge', return_value=True):
             output = self._get_command_output()
             self.assertIn('Successfully defined the hubspot ecommerce settings', output)
             # if _define_hubspot_ecommerce_settings raises an exception
@@ -234,9 +200,21 @@ class TestSyncHubspotCommand(TestCase):
         6. Upsert(LINE ITEM)
         7. Sync-error
         """
-        with patch('ecommerce.core.management.commands.sync_hubspot.EdxRestApiClient') as mock_client, \
-                patch.object(sync_command, '_get_last_synced_order', return_value=None):
+        with patch('ecommerce.core.management.commands.sync_hubspot.EdxRestApiClient') as mock_client:
             output = self._get_command_output()
             self.assertEqual(mock_client.call_count, 7)
             self.assertIn('Successfully installed hubspot ecommerce bridge', output)
             self.assertIn('Successfully defined the hubspot ecommerce settings', output)
+
+    @patch.object(sync_command, '_hubspot_endpoint')
+    def test_with_exception(self, mocked_hubspot):      # pylint: disable=unused-argument
+        """
+        Test the command if it raises an exception
+        """
+        with patch.object(sync_command, '_install_hubspot_ecommerce_bridge', return_value=True), \
+                patch.object(sync_command, '_define_hubspot_ecommerce_settings', return_value=True), \
+                patch.object(sync_command, '_get_unsynced_carts') as mocked_get_unsynced_carts:
+            mocked_get_unsynced_carts.side_effect = HttpClientError
+            with self.assertRaises(CommandError):
+                output = self._get_command_output(is_stderr=True)
+                self.assertIn('Command failed with ', output)
