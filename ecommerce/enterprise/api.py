@@ -6,7 +6,6 @@ from urllib import urlencode
 
 from django.conf import settings
 from edx_django_utils.cache import TieredCache
-from edx_rest_api_client.client import EdxRestApiClient
 from requests.exceptions import ConnectionError, Timeout
 from slumber.exceptions import SlumberHttpBaseException
 
@@ -217,6 +216,8 @@ def get_with_access_to(site, user, enterprise_id):
     Get the enterprises that this user has access to for the data api permission django group.
     """
     api_resource_name = 'enterprise-customer'
+    api = site.siteconfiguration.enterprise_api_client
+    endpoint = getattr(api, api_resource_name)
 
     cache_key = get_cache_key(
         resource='{api_resource_name}-with_access_to_enterprises'.format(api_resource_name=api_resource_name),
@@ -227,8 +228,6 @@ def get_with_access_to(site, user, enterprise_id):
     if cached_response.is_found:
         return cached_response.value
     try:
-        api = EdxRestApiClient(site.siteconfiguration.enterprise_api_url, jwt=user.access_token)
-        endpoint = getattr(api, api_resource_name)
         query_params = {
             'permissions': [settings.ENTERPRISE_DATA_API_GROUP],
             'enterprise_id': enterprise_id,

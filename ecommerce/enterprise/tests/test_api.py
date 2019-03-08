@@ -251,7 +251,6 @@ class EnterpriseAPITests(EnterpriseServiceMockMixin, DiscoveryTestMixin, TestCas
         Verify that method `get_with_access_to` returns the appropriate response.
         """
         self.mock_with_access_to(
-            self.learner,
             enterprise_id,
             enterprise_data_api_group,
             mock_response,
@@ -265,7 +264,6 @@ class EnterpriseAPITests(EnterpriseServiceMockMixin, DiscoveryTestMixin, TestCas
         Verify `get_with_access_to` returns a cached response
         """
         self.mock_with_access_to(
-            self.learner,
             'cf246b88-d5f6-4908-a522-fc307e0b0c59',
             settings.ENTERPRISE_DATA_API_GROUP,
             {
@@ -285,7 +283,7 @@ class EnterpriseAPITests(EnterpriseServiceMockMixin, DiscoveryTestMixin, TestCas
             mocked_set_all_tiers.assert_not_called()
 
             enterprise_api.get_with_access_to(self.site, self.learner, 'cf246b88-d5f6-4908-a522-fc307e0b0c59')
-            self.assertEqual(mocked_set_all_tiers.call_count, 1)
+            self.assertEqual(mocked_set_all_tiers.call_count, 2)
 
             enterprise_api.get_with_access_to(self.site, self.learner, 'cf246b88-d5f6-4908-a522-fc307e0b0c59')
-            self.assertEqual(mocked_set_all_tiers.call_count, 1)
+            self.assertEqual(mocked_set_all_tiers.call_count, 2)
