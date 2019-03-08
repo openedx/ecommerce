@@ -16,7 +16,6 @@ from ecommerce.core.constants import COUPON_PRODUCT_CLASS_NAME
 from ecommerce.core.utils import log_message_and_raise_validation_error
 from ecommerce.enterprise.constants import ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH
 from ecommerce.enterprise.utils import get_enterprise_customers
-from ecommerce.extensions.api.permissions import HasDataAPIDjangoGroupAccess
 from ecommerce.extensions.api.serializers import (
     CouponCodeAssignmentSerializer,
     CouponCodeRemindSerializer,
@@ -209,7 +208,7 @@ class EnterpriseCouponViewSet(CouponViewSet):
         if coupon_was_migrated:
             super(EnterpriseCouponViewSet, self).update_range_data(request_data, vouchers)
 
-    @detail_route(url_path='codes', permission_classes=[IsAuthenticated, HasDataAPIDjangoGroupAccess])
+    @detail_route(url_path='codes')
     def codes(self, request, pk, format=None):  # pylint: disable=unused-argument, redefined-builtin
         """
         GET codes belong to a `coupon`.
@@ -350,8 +349,7 @@ class EnterpriseCouponViewSet(CouponViewSet):
             id__in=redeemed_voucher_application_ids
         ).values('voucher__code', 'user__email').distinct().order_by('user__email')
 
-    @list_route(url_path=r'(?P<enterprise_id>.+)/overview',
-                permission_classes=[IsAuthenticated, HasDataAPIDjangoGroupAccess])
+    @list_route(url_path=r'(?P<enterprise_id>.+)/overview')
     def overview(self, request, enterprise_id):     # pylint: disable=unused-argument
         """
         Overview of Enterprise coupons.
@@ -375,7 +373,7 @@ class EnterpriseCouponViewSet(CouponViewSet):
             serializer = self.get_serializer(page, many=True)
             return self.get_paginated_response(serializer.data)
 
-    @detail_route(methods=['post'], permission_classes=[IsAuthenticated, HasDataAPIDjangoGroupAccess])
+    @detail_route(methods=['post'])
     def assign(self, request, pk):  # pylint: disable=unused-argument
         """
         Assign users by email to codes within the Coupon.
@@ -391,7 +389,7 @@ class EnterpriseCouponViewSet(CouponViewSet):
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    @detail_route(methods=['post'], permission_classes=[IsAuthenticated, HasDataAPIDjangoGroupAccess])
+    @detail_route(methods=['post'])
     def revoke(self, request, pk):  # pylint: disable=unused-argument
         """
         Revoke users by email from codes within the Coupon.
@@ -409,7 +407,7 @@ class EnterpriseCouponViewSet(CouponViewSet):
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    @detail_route(methods=['post'], permission_classes=[IsAuthenticated, HasDataAPIDjangoGroupAccess])
+    @detail_route(methods=['post'])
     def remind(self, request, pk):  # pylint: disable=unused-argument
         """
         Remind users of pending offer assignments by email.
