@@ -157,7 +157,7 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
         coupon = Product.objects.get(title=coupon_title)
         return {
             'end_date': self.get_coupon_voucher_end_date(coupon),
-            'has_error': False,
+            'errors': [],
             'id': coupon.id,
             'max_uses': 2,
             'num_codes': 2,
@@ -789,6 +789,47 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             pagination=pagination,
         )
 
+    def test_unredeemed_filter_email_bounced_codes(self):
+        """
+        Test that codes with `OFFER_ASSIGNMENT_EMAIL_BOUNCED` error status are shown in unredeemed filter.
+        """
+        Switch.objects.update_or_create(name=ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, defaults={'active': True})
+        coupon_response = self.get_response('POST', ENTERPRISE_COUPONS_LINK, self.data)
+        coupon = coupon_response.json()
+        coupon_id = coupon['coupon_id']
+        vouchers = Product.objects.get(id=coupon_id).attr.coupon_vouchers.vouchers.all()
+        codes = [voucher.code for voucher in vouchers]
+
+        # Code assignments.
+        self.assign_user_to_code(coupon_id, ['user1@example.com'], [codes[0]])
+
+        response = self.get_response(
+            'GET',
+            '/api/v2/enterprise/coupons/{}/codes/?code_filter={}'.format(coupon_id, VOUCHER_NOT_REDEEMED)
+        ).json()
+
+        # Verify that code appears in unredeemed filter.
+        self.assert_code_detail_response(
+            response['results'],
+            [{'code': 0, 'assigned_to': 'user1@example.com', 'redemptions': {'used': 0, 'total': 1}}],
+            codes
+        )
+
+        # Email bounce a code.
+        OfferAssignment.objects.filter(code=vouchers[0].code).update(status=OFFER_ASSIGNMENT_EMAIL_BOUNCED)
+
+        response = self.get_response(
+            'GET',
+            '/api/v2/enterprise/coupons/{}/codes/?code_filter={}'.format(coupon_id, VOUCHER_NOT_REDEEMED)
+        ).json()
+
+        # Now verify that code still appears in unredeemed filter.
+        self.assert_code_detail_response(
+            response['results'],
+            [{'code': 0, 'assigned_to': 'user1@example.com', 'redemptions': {'used': 0, 'total': 1}}],
+            codes
+        )
+
     @ddt.data(
         (
             '85b08dde-0877-4474-a4e9-8408fe47ce88',
@@ -900,7 +941,7 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             'max_uses': None,
             'code_assignments': [0, 0, 0],
             'code_redemptions': [0, 0, 0],
-            'expected_response': {'max_uses': 3, 'num_codes': 3, 'num_unassigned': 3, 'num_uses': 0, 'has_error': False}
+            'expected_response': {'max_uses': 3, 'num_codes': 3, 'num_unassigned': 3, 'num_uses': 0, 'errors': []}
         },
         {
             'voucher_type': Voucher.SINGLE_USE,
@@ -908,7 +949,7 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             'max_uses': None,
             'code_assignments': [1, 0, 0],
             'code_redemptions': [0, 1, 0],
-            'expected_response': {'max_uses': 3, 'num_codes': 3, 'num_unassigned': 1, 'num_uses': 1, 'has_error': False}
+            'expected_response': {'max_uses': 3, 'num_codes': 3, 'num_unassigned': 1, 'num_uses': 1, 'errors': []}
         },
         {
             'voucher_type': Voucher.SINGLE_USE,
@@ -917,7 +958,7 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             'code_assignments': [1, 1, 1],
             'code_redemptions': [0, 1, 1],
             'assignment_has_error': True,
-            'expected_response': {'max_uses': 3, 'num_codes': 3, 'num_unassigned': 0, 'num_uses': 2, 'has_error': True}
+            'expected_response': {'max_uses': 3, 'num_codes': 3, 'num_unassigned': 0, 'num_uses': 2, 'errors': True}
         },
         {
             'voucher_type': Voucher.MULTI_USE_PER_CUSTOMER,
@@ -925,7 +966,7 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             'max_uses': 2,
             'code_assignments': [0, 0, 0],
             'code_redemptions': [0, 0, 0],
-            'expected_response': {'max_uses': 6, 'num_codes': 3, 'num_unassigned': 3, 'num_uses': 0, 'has_error': False}
+            'expected_response': {'max_uses': 6, 'num_codes': 3, 'num_unassigned': 3, 'num_uses': 0, 'errors': []}
         },
         {
             'voucher_type': Voucher.MULTI_USE_PER_CUSTOMER,
@@ -933,7 +974,7 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             'max_uses': 2,
             'code_assignments': [1, 0, 0],
             'code_redemptions': [0, 1, 0],
-            'expected_response': {'max_uses': 6, 'num_codes': 3, 'num_unassigned': 1, 'num_uses': 1, 'has_error': False}
+            'expected_response': {'max_uses': 6, 'num_codes': 3, 'num_unassigned': 1, 'num_uses': 1, 'errors': []}
         },
         {
             'voucher_type': Voucher.MULTI_USE_PER_CUSTOMER,
@@ -941,7 +982,7 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             'max_uses': 2,
             'code_assignments': [1, 1, 0],
             'code_redemptions': [0, 2, 0],
-            'expected_response': {'max_uses': 6, 'num_codes': 3, 'num_unassigned': 1, 'num_uses': 2, 'has_error': False}
+            'expected_response': {'max_uses': 6, 'num_codes': 3, 'num_unassigned': 1, 'num_uses': 2, 'errors': []}
         },
         {
             'voucher_type': Voucher.MULTI_USE_PER_CUSTOMER,
@@ -950,7 +991,7 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             'code_assignments': [1, 1, 1],
             'code_redemptions': [0, 1, 2],
             'assignment_has_error': True,
-            'expected_response': {'max_uses': 6, 'num_codes': 3, 'num_unassigned': 0, 'num_uses': 3, 'has_error': True}
+            'expected_response': {'max_uses': 6, 'num_codes': 3, 'num_unassigned': 0, 'num_uses': 3, 'errors': True}
         },
         {
             'voucher_type': Voucher.MULTI_USE,
@@ -958,7 +999,7 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             'max_uses': 2,
             'code_assignments': [1, 0, 0],
             'code_redemptions': [0, 1, 0],
-            'expected_response': {'max_uses': 6, 'num_codes': 3, 'num_unassigned': 3, 'num_uses': 1, 'has_error': False}
+            'expected_response': {'max_uses': 6, 'num_codes': 3, 'num_unassigned': 3, 'num_uses': 1, 'errors': []}
         },
         {
             'voucher_type': Voucher.MULTI_USE,
@@ -966,7 +1007,7 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             'max_uses': 2,
             'code_assignments': [2, 0, 0],
             'code_redemptions': [0, 2, 0],
-            'expected_response': {'max_uses': 6, 'num_codes': 3, 'num_unassigned': 1, 'num_uses': 2, 'has_error': False}
+            'expected_response': {'max_uses': 6, 'num_codes': 3, 'num_unassigned': 1, 'num_uses': 2, 'errors': []}
         },
         {
             'voucher_type': Voucher.MULTI_USE,
@@ -974,7 +1015,7 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             'max_uses': 2,
             'code_assignments': [2, 1, 1],
             'code_redemptions': [2, 0, 1],
-            'expected_response': {'max_uses': 6, 'num_codes': 3, 'num_unassigned': 1, 'num_uses': 3, 'has_error': False}
+            'expected_response': {'max_uses': 6, 'num_codes': 3, 'num_unassigned': 1, 'num_uses': 3, 'errors': []}
         },
         {
             'voucher_type': Voucher.MULTI_USE,
@@ -982,7 +1023,7 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             'max_uses': 2,
             'code_assignments': [2, 2, 2],
             'code_redemptions': [0, 0, 0],
-            'expected_response': {'max_uses': 6, 'num_codes': 3, 'num_unassigned': 0, 'num_uses': 0, 'has_error': False}
+            'expected_response': {'max_uses': 6, 'num_codes': 3, 'num_unassigned': 0, 'num_uses': 0, 'errors': []}
         },
         {
             'voucher_type': Voucher.MULTI_USE,
@@ -992,7 +1033,7 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             'code_redemptions': [1],
             'assignment_has_error': True,
             'expected_response': {
-                'max_uses': 10000, 'num_codes': 1, 'num_unassigned': 1, 'num_uses': 1, 'has_error': True
+                'max_uses': 10000, 'num_codes': 1, 'num_unassigned': 1, 'num_uses': 1, 'errors': True
             }
         },
         {
@@ -1001,7 +1042,7 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             'max_uses': 2,
             'code_assignments': [0, 0, 0],
             'code_redemptions': [0, 0, 0],
-            'expected_response': {'max_uses': 6, 'num_codes': 3, 'num_unassigned': 3, 'num_uses': 0, 'has_error': False}
+            'expected_response': {'max_uses': 6, 'num_codes': 3, 'num_unassigned': 3, 'num_uses': 0, 'errors': []}
         },
         {
             'voucher_type': Voucher.ONCE_PER_CUSTOMER,
@@ -1010,7 +1051,7 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             'code_assignments': [2, 1, 0],
             'code_redemptions': [0, 0, 1],
             'assignment_has_error': True,
-            'expected_response': {'max_uses': 6, 'num_codes': 3, 'num_unassigned': 2, 'num_uses': 1, 'has_error': True}
+            'expected_response': {'max_uses': 6, 'num_codes': 3, 'num_unassigned': 2, 'num_uses': 1, 'errors': True}
         },
     )
     @ddt.unpack
@@ -1065,6 +1106,16 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
 
         # Verify that we get correct results.
         for field, value in expected_response.iteritems():
+            if assignment_has_error and field == 'errors':
+                assignment_with_errors = OfferAssignment.objects.filter(status=OFFER_ASSIGNMENT_EMAIL_BOUNCED)
+                value = [
+                    {
+                        'id': assignment.id,
+                        'code': assignment.code,
+                        'user_email': assignment.user_email
+                    }
+                    for assignment in assignment_with_errors
+                ]
             self.assertEqual(coupon_overview_response['results'][0][field], value)
 
     @ddt.data(
