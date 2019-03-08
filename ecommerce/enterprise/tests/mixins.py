@@ -636,8 +636,14 @@ class EnterpriseServiceMockMixin(object):
             enterprise_customer_catalog_uuid=condition.enterprise_customer_catalog_uuid,
         )
 
-    def mock_with_access_to(self, enterprise_id, enterprise_data_api_group, expected_response, raise_exception=False):
-        self.mock_access_token_response()
+    def mock_with_access_to(
+            self,
+            user,
+            enterprise_id,
+            enterprise_data_api_group,
+            expected_response,
+            raise_exception=False):
+        self.create_access_token(user)
         query_params = urlencode({
             'permissions': [enterprise_data_api_group],
             'enterprise_id': enterprise_id,
