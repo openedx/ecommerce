@@ -831,12 +831,13 @@ class EnterpriseCouponOverviewListSerializer(serializers.ModelSerializer):
         ])
         return num_unassigned
 
-    def get_errors(self, obj):
+    def get_errors(self, coupon):
         """
         Returns a list of OfferAssignment errors associated with coupon.
         """
-        offer = retrieve_offer(obj)
-        offer_assignments_with_error = offer.offerassignment_set.filter(
+        codes = coupon.attr.coupon_vouchers.vouchers.values_list('code', flat=True)
+        offer_assignments_with_error = OfferAssignment.objects.filter(
+            code__in=codes,
             status=OFFER_ASSIGNMENT_EMAIL_BOUNCED
         )
         return OfferAssignmentSerializer(offer_assignments_with_error, many=True).data
