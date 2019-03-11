@@ -7,7 +7,6 @@ from os.path import abspath, basename, dirname, join, normpath
 from sys import path
 
 from django.utils.translation import ugettext_lazy as _
-from kombu import Exchange, Queue
 from oscar import OSCAR_MAIN_TEMPLATE_DIR
 
 from ecommerce.settings._oscar import *
