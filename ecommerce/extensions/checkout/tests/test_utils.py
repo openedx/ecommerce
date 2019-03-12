@@ -33,6 +33,7 @@ class UtilTests(TestCase):
     @httpretty.activate
     def test_get_credit_provider_details(self):
         """ Check that credit provider details are returned. """
+        self.mock_access_token_response()
         httpretty.register_uri(
             httpretty.GET,
             self.site.siteconfiguration.build_lms_url(self.get_credit_provider_details_url(self.credit_provider_id)),
@@ -40,7 +41,6 @@ class UtilTests(TestCase):
             content_type="application/json"
         )
         provider_data = get_credit_provider_details(
-            self.access_token,
             self.credit_provider_id,
             self.site.siteconfiguration
         )
@@ -55,7 +55,6 @@ class UtilTests(TestCase):
             status=400
         )
         provider_data = get_credit_provider_details(
-            self.access_token,
             self.credit_provider_id,
             self.site.siteconfiguration
         )
@@ -67,7 +66,6 @@ class UtilTests(TestCase):
         with mock.patch.object(requests, 'get', mock.Mock(side_effect=exception)):
             self.assertIsNone(
                 get_credit_provider_details(
-                    self.access_token,
                     self.credit_provider_id,
                     self.site.siteconfiguration
                 )

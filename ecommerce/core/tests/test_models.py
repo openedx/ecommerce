@@ -37,6 +37,17 @@ def _make_site_config(payment_processors_str, site_id=1):
 class UserTests(DiscoveryTestMixin, LmsApiMockMixin, TestCase):
     TEST_CONTEXT = {'foo': 'bar', 'baz': None}
 
+    def setUp(self):
+        super(UserTests, self).setUp()
+
+        httpretty.enable()
+        self.mock_access_token_response()
+
+    def tearDown(self):
+        super(UserTests, self).tearDown()
+        httpretty.disable()
+        httpretty.reset()
+
     def test_access_token(self):
         user = self.create_user()
         self.assertIsNone(user.access_token)
@@ -71,7 +82,6 @@ class UserTests(DiscoveryTestMixin, LmsApiMockMixin, TestCase):
         user = self.create_user(full_name=full_name, first_name=first_name, last_name=last_name)
         self.assertEquals(user.get_full_name(), full_name)
 
-    @httpretty.activate
     def test_user_details(self):
         """ Verify user details are returned. """
         user = self.create_user()
@@ -80,7 +90,6 @@ class UserTests(DiscoveryTestMixin, LmsApiMockMixin, TestCase):
         self.mock_access_token_response()
         self.assertDictEqual(user.account_details(self.request), user_details)
 
-    @httpretty.activate
     def test_user_details_uses_jwt(self):
         """Verify user_details uses jwt from site configuration to call EdxRestApiClient."""
         user = self.create_user()
@@ -108,20 +117,19 @@ class UserTests(DiscoveryTestMixin, LmsApiMockMixin, TestCase):
         self.mock_eligibility_api(self.request, user, course_key, eligible=eligible)
         return user, course_key
 
-    @httpretty.activate
     def test_user_is_eligible(self):
         """ Verify the method returns eligibility information. """
+        site_config = self.request.site.siteconfiguration
         user, course_key = self.prepare_credit_eligibility_info()
-        self.assertEqual(user.is_eligible_for_credit(course_key)[0]['username'], user.username)
-        self.assertEqual(user.is_eligible_for_credit(course_key)[0]['course_key'], course_key)
+        self.assertEqual(user.is_eligible_for_credit(course_key, site_config)[0]['username'], user.username)
+        self.assertEqual(user.is_eligible_for_credit(course_key, site_config)[0]['course_key'], course_key)
 
-    @httpretty.activate
     def test_user_is_not_eligible(self):
         """ Verify method returns false (empty list) if user is not eligible. """
+        site_config = self.request.site.siteconfiguration
         user, course_key = self.prepare_credit_eligibility_info(eligible=False)
-        self.assertFalse(user.is_eligible_for_credit(course_key))
+        self.assertFalse(user.is_eligible_for_credit(course_key, site_config))
 
-    @httpretty.activate
     @ddt.data(
         (200, True),
         (200, False),
@@ -139,7 +147,6 @@ class UserTests(DiscoveryTestMixin, LmsApiMockMixin, TestCase):
         user = self.create_user()
         self.assertFalse(user.is_verified(self.site))
 
-    @httpretty.activate
     def test_user_verification_status_cache(self):
         """ Verify the user verification status values are cached. """
         user = self.create_user()
@@ -149,7 +156,6 @@ class UserTests(DiscoveryTestMixin, LmsApiMockMixin, TestCase):
         httpretty.disable()
         self.assertTrue(user.is_verified(self.site))
 
-    @httpretty.activate
     def test_user_verification_status_not_cached(self):
         """ Verify the user verification status values is not cached when user is not verified. """
         user = self.create_user()
@@ -159,13 +165,12 @@ class UserTests(DiscoveryTestMixin, LmsApiMockMixin, TestCase):
         httpretty.disable()
         self.assertFalse(user.is_verified(self.site))
 
-    @httpretty.activate
     def test_deactivation(self):
         """Verify the deactivation endpoint is called for the user."""
         user = self.create_user()
         expected_response = {'user_deactivated': True}
-        self.mock_deactivation_api(self.request, user.username, response=json.dumps(expected_response))
         self.mock_access_token_response()
+        self.mock_deactivation_api(self.request, user.username, response=json.dumps(expected_response))
 
         self.assertEqual(user.deactivate_account(self.request.site.siteconfiguration), expected_response)
 
