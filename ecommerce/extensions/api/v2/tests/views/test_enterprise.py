@@ -14,6 +14,7 @@ from django.utils.http import urlencode
 from django.utils.timezone import now
 from oscar.core.loading import get_model
 from oscar.test import factories
+from requests.exceptions import ConnectionError
 from rest_framework import status
 from waffle.models import Switch
 
@@ -138,11 +139,12 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
         patcher = mock.patch('ecommerce.extensions.api.v2.utils.send_mail')
         self.send_mail_patcher = patcher.start()
         self.addCleanup(patcher.stop)
-        mock_DataAPIDjangoGroupAccess = mock.patch(
-            'ecommerce.extensions.api.v2.views.enterprise.HasDataAPIDjangoGroupAccess.has_permission')
-        self.mock_permission = mock_DataAPIDjangoGroupAccess.start()
-        self.mock_permission.return_value = True
-        self.addCleanup(mock_DataAPIDjangoGroupAccess.stop)
+        enterprise_api_client = mock.patch('ecommerce.extensions.api.permissions.get_with_access_to')
+        self.enterprise_api_client = enterprise_api_client.start()
+        self.enterprise_api_client.return_value = {
+            'uuid': self.data['enterprise_customer']['id']
+        }
+        self.addCleanup(enterprise_api_client.stop)
 
     def get_coupon_voucher(self, coupon):
         """
@@ -639,11 +641,7 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
         Verify that `/api/v2/enterprise/coupons/{coupon_id}/codes/` endpoint returns 400 on invalid coupon id
         """
         response = self.get_response('GET', '/api/v2/enterprise/coupons/1212121212/codes/')
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
-        self.assertEqual(
-            response.json(),
-            {'detail': 'Not found.'}
-        )
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_coupon_codes_detail_with_invalid_code_filter(self):
         Switch.objects.update_or_create(name=ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, defaults={'active': True})
@@ -829,6 +827,40 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             [{'code': 0, 'assigned_to': 'user1@example.com', 'redemptions': {'used': 0, 'total': 1}}],
             codes
         )
+
+    def test_permission_denied_coupon_overview(self):
+        """
+        Test that we get access denied when with_access_to returns no data.
+        """
+        Switch.objects.update_or_create(name=ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, defaults={'active': True})
+        # Make the call to get_with_access_to return an error
+        enterprise_api_client = mock.patch(
+            'ecommerce.extensions.api.permissions.get_with_access_to', side_effect=ConnectionError()
+        )
+        self.enterprise_api_client = enterprise_api_client.start()
+        response = self.get_response(
+            'GET',
+            reverse(
+                'api:v2:enterprise-coupons-(?P<enterprise-id>.+)/overview-list',
+                kwargs={'enterprise_id': self.data['enterprise_customer']['id']}
+            )
+        )
+        enterprise_api_client.stop()
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+        # Now, make the call to get_with_access_to return empty results
+        enterprise_api_client = mock.patch('ecommerce.extensions.api.permissions.get_with_access_to')
+        self.enterprise_api_client = enterprise_api_client.start()
+        self.enterprise_api_client.return_value = {}
+        response = self.get_response(
+            'GET',
+            reverse(
+                'api:v2:enterprise-coupons-(?P<enterprise-id>.+)/overview-list',
+                kwargs={'enterprise_id': self.data['enterprise_customer']['id']}
+            )
+        )
+        enterprise_api_client.stop()
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     @ddt.data(
         (
