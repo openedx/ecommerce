@@ -13,6 +13,7 @@ from django.utils.functional import cached_property
 from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
 from edx_django_utils.cache import TieredCache
+from edx_rbac.models import UserRole, UserRoleAssignment
 from edx_rest_api_client.client import EdxRestApiClient
 from jsonfield.fields import JSONField
 from requests.exceptions import ConnectionError, Timeout
@@ -635,3 +636,47 @@ class BusinessClient(models.Model):
                 'Failed to create BusinessClient. BusinessClient name may not be empty.'
             )
         super(BusinessClient, self).save(*args, **kwargs)
+
+
+class EcommerceFeatureRole(UserRole):
+    """
+    User role definitions specific to Ecommerce.
+     .. no_pii:
+    """
+
+    def __str__(self):
+        """
+        Return human-readable string representation.
+        """
+        return "<EcommerceFeatureRole {role}>".format(role=self.name)
+
+    def __repr__(self):
+        """
+        Return uniquely identifying string representation.
+        """
+        return self.__str__()
+
+
+class EcommerceFeatureRoleAssignment(UserRoleAssignment):
+    """
+    Model to map users to a EcommerceFeatureRole.
+     .. no_pii:
+    """
+
+    role_class = EcommerceFeatureRole
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, db_index=True, on_delete=models.CASCADE)
+
+    def __str__(self):
+        """
+        Return human-readable string representation.
+        """
+        return "<EcommerceFeatureRoleAssignment for User {user} assigned to role {role}>".format(
+            user=self.user.id,
+            role=self.role.name
+        )
+
+    def __repr__(self):
+        """
+        Return uniquely identifying string representation.
+        """
+        return self.__str__()

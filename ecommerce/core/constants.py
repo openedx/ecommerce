@@ -31,6 +31,8 @@ COURSE_ENTITLEMENT_PRODUCT_CLASS_NAME = 'Course Entitlement'
 # Discovery Service constants
 DEFAULT_CATALOG_PAGE_SIZE = 100
 
+ENTERPRISE_COUPON_ADMIN_ROLE = 'enterprise_coupon_admin'
+
 
 class Status(object):
     """Health statuses."""
