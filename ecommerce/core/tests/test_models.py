@@ -11,7 +11,13 @@ from django.test import override_settings
 from edx_rest_api_client.auth import SuppliedJwtAuth
 from requests.exceptions import ConnectionError
 
-from ecommerce.core.models import BusinessClient, SiteConfiguration, User
+from ecommerce.core.models import (
+    BusinessClient,
+    EcommerceFeatureRole,
+    EcommerceFeatureRoleAssignment,
+    SiteConfiguration,
+    User
+)
 from ecommerce.core.tests import toggle_switch
 from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
 from ecommerce.extensions.payment.tests.processors import AnotherDummyProcessor, DummyProcessor
@@ -365,3 +371,37 @@ class SiteConfigurationTests(TestCase):
         self.assertEqual(client_store['base_url'], self.site_configuration.enrollment_api_url)
         self.assertIsInstance(client_auth, SuppliedJwtAuth)
         self.assertEqual(client_auth.token, token)
+
+
+class EcommerceFeatureRoleTests(TestCase):
+    def test_str(self):
+        role = EcommerceFeatureRole.objects.create(name='TestRole')
+        self.assertEquals(str(role), '<EcommerceFeatureRole TestRole>')
+
+    def test_repr(self):
+        role = EcommerceFeatureRole.objects.create(name='TestRole')
+        self.assertEquals(repr(role), '<EcommerceFeatureRole TestRole>')
+
+
+class EcommerceFeatureRoleAssignmentTests(TestCase):
+    def test_str(self):
+        role = EcommerceFeatureRole.objects.create(name='TestRole')
+        user = self.create_user()
+        role_assignment = EcommerceFeatureRoleAssignment.objects.create(role=role, user=user)
+        self.assertEquals(
+            str(role_assignment),
+            '<EcommerceFeatureRoleAssignment for User {user} assigned to role {role}>'.format(
+                user=user.id, role=role.name
+            )
+        )
+
+    def test_repr(self):
+        role = EcommerceFeatureRole.objects.create(name='TestRole')
+        user = self.create_user()
+        role_assignment = EcommerceFeatureRoleAssignment.objects.create(role=role, user=user)
+        self.assertEquals(
+            repr(role_assignment),
+            '<EcommerceFeatureRoleAssignment for User {user} assigned to role {role}>'.format(
+                user=user.id, role=role.name
+            )
+        )
