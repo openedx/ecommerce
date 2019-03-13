@@ -29,6 +29,7 @@ edx-drf-extensions
 edx-django-sites-extensions
 edx-ecommerce-worker
 edx-opaque-keys
+edx-rbac
 edx-rest-api-client
 gevent==1.0.2
 jsonfield==1.0.3
