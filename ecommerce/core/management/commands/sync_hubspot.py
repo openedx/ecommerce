@@ -5,23 +5,29 @@ import logging
 import time
 import traceback
 from datetime import datetime, timedelta
+from decimal import Decimal as D
 
 from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand, CommandError
+from django.db.models import Q
 from edx_rest_api_client.client import EdxRestApiClient
-from oscar.core.loading import get_model
+from oscar.core.loading import get_class, get_model
 from slumber.exceptions import HttpClientError, HttpServerError
 
 from ecommerce.extensions.fulfillment.status import ORDER
 
+Basket = get_model('basket', 'Basket')
+CartLine = get_model('basket', 'Line')
 Order = get_model('order', 'Order')
 OrderLine = get_model('order', 'Line')
+OrderNumberGenerator = get_class('order.utils', 'OrderNumberGenerator')
 Product = get_model('catalogue', 'Product')
 SiteConfiguration = get_model('core', 'SiteConfiguration')
 User = get_user_model()
 logger = logging.getLogger(__name__)
 
 
+DEFAULT_INITIAL_DAYS = 1
 HUBSPOT_API_BASE_URL = 'https://api.hubapi.com'
 HUBSPOT_ECOMMERCE_SETTINGS = {
     'enabled': True,
@@ -137,10 +143,22 @@ HUBSPOT_ECOMMERCE_SETTINGS = {
         ]
     }
 }
-ORDER_STATUS = {
-    ORDER.OPEN: "checkout_completed",
-    ORDER.FULFILLMENT_ERROR: "cancelled",
-    ORDER.COMPLETE: "processed"
+CHECKOUT_PENDING = "checkout_pending"
+CHECKOUT_ABANDONED = "checkout_abandoned"
+CHECKOUT_COMPLETED = "checkout_completed"
+PROCESSED = "processed"
+BASKET_TO_HUBSPOT_STATUS = {
+    Basket.OPEN: CHECKOUT_PENDING,
+    Basket.MERGED: CHECKOUT_PENDING,
+    Basket.SAVED: CHECKOUT_ABANDONED,
+    Basket.FROZEN: CHECKOUT_PENDING,
+    Basket.SUBMITTED: CHECKOUT_COMPLETED,
+}
+
+ORDER_TO_HUBSPOT_STATUS = {
+    ORDER.OPEN: CHECKOUT_COMPLETED,
+    ORDER.FULFILLMENT_ERROR: CHECKOUT_COMPLETED,
+    ORDER.COMPLETE: PROCESSED
 }
 CONTACT = "CONTACT"
 PRODUCT = "PRODUCT"
@@ -224,7 +242,28 @@ class Command(BaseCommand):
             )
         return status
 
-    def _get_hubspot_user_structure(self, users):
+    def _get_timestamp(self, date=None):
+        """
+        If date is given then returns its timestamp
+        otherwise returns the current timestamp.
+        """
+        if date:
+            timestamp = (date - datetime(1970, 1, 1, tzinfo=date.tzinfo)).total_seconds()
+        else:
+            timestamp = time.time()
+        return int(timestamp * 1000)
+
+    def _get_cart_total_price(self, cart):
+        total_price = D(0.0)
+        lines = cart.all_lines()
+        for line in lines:
+            total_price += self._get_cart_line_prices(line, 'price_incl_tax')
+        return float(total_price)
+
+    def _get_cart_line_prices(self, line, attr):
+        return getattr(line, attr, D(0.0)) * line.quantity
+
+    def _get_hubspot_contact_structure(self, users):
         """
         Returns list of dicts, each dict represents hubspot CONTACT.
         """
@@ -233,35 +272,44 @@ class Command(BaseCommand):
             hubspot_contacts.append({
                 'integratorObjectId': str(user.id),
                 'action': 'UPSERT',
-                'changeOccurredTimestamp': int(time.time()),
+                'changeOccurredTimestamp': self._get_timestamp(),
                 'propertyNameToValues': {
                     'email': user.email
                 }
             })
         return hubspot_contacts
 
-    def _get_hubspot_deal_structure(self, orders):
+    def _get_hubspot_deal_structure(self, carts, partner):
         """
         Returns list of dicts, each dict represents hubspot DEAL.
         """
-        hubspot_orders = []
-        for order in orders:
-            hubspot_orders.append({
-                'integratorObjectId': str(order.id),
+        hubspot_deals = []
+        for cart in carts:
+            deal = {
+                'integratorObjectId': str(cart.id),
                 'action': 'UPSERT',
-                'changeOccurredTimestamp': int(time.time()),
-                'propertyNameToValues': {
+                'changeOccurredTimestamp': self._get_timestamp(),
+                'propertyNameToValues': {}
+            }
+            if cart.status == Basket.SUBMITTED:
+                order = Order.objects.filter(basket=cart).first()
+                deal['propertyNameToValues'] = {
                     'deal_name': order.number,
                     'total_incl_tax': float(order.total_incl_tax),
-                    'checkout_status': ORDER_STATUS.get(order.status),
-                    'date_placed': int(
-                        (order.date_placed - datetime(1970, 1, 1, tzinfo=order.date_placed.tzinfo)).total_seconds()
-                    ),
+                    'checkout_status': ORDER_TO_HUBSPOT_STATUS.get(order.status),
+                    'date_placed': self._get_timestamp(date=order.date_placed),
                     'number': order.number,
-                    'user_id': str(order.user.id)
+                    'user_id': str(order.user.id) if order.user else ''
                 }
-            })
-        return hubspot_orders
+            else:
+                deal['propertyNameToValues'] = {
+                    'deal_name': OrderNumberGenerator().order_number_from_basket_id(partner, cart.id),
+                    'total_incl_tax': self._get_cart_total_price(cart),
+                    'checkout_status': BASKET_TO_HUBSPOT_STATUS.get(cart.status),
+                    'user_id': str(cart.owner.id) if cart.owner else ''
+                }
+            hubspot_deals.append(deal)
+        return hubspot_deals
 
     def _get_hubspot_line_item_structure(self, lines):
         """
@@ -269,17 +317,19 @@ class Command(BaseCommand):
         """
         hubspot_line_items = []
         for line in lines:
+            line_price_incl_tax = self._get_cart_line_prices(line, 'price_incl_tax')
+            line_price_excl_tax = self._get_cart_line_prices(line, 'price_excl_tax')
             hubspot_line_items.append({
                 'integratorObjectId': str(line.id),
                 'action': 'UPSERT',
-                'changeOccurredTimestamp': int(time.time()),
+                'changeOccurredTimestamp': self._get_timestamp(),
                 'propertyNameToValues': {
-                    'order_id': str(line.order.id),
-                    'price_currency': str(line.order.currency),
-                    'tax': float(line.line_price_incl_tax - line.line_price_excl_tax),
+                    'order_id': str(line.basket.id),
+                    'price_currency': str(line.price_currency),
+                    'tax': float(line_price_incl_tax - line_price_excl_tax),
                     'product_id': str(line.product.id),
-                    'price_incl_tax': float(line.line_price_incl_tax),
-                    'price_excl_tax': float(line.line_price_excl_tax),
+                    'price_incl_tax': float(line_price_incl_tax),
+                    'price_excl_tax': float(line_price_excl_tax),
                     'quantity': line.quantity
                 }
             })
@@ -291,13 +341,17 @@ class Command(BaseCommand):
         """
         hubspot_products = []
         for product in products:
+            if product.description:
+                description = product.description
+            else:
+                description = product.course.id if product.course else ''
             hubspot_products.append({
                 'integratorObjectId': str(product.id),
                 'action': 'UPSERT',
-                'changeOccurredTimestamp': int(time.time()),
+                'changeOccurredTimestamp': self._get_timestamp(),
                 'propertyNameToValues': {
                     'title': str(product.title),
-                    'description': str(product.description)
+                    'description': description
                 }
             })
         return hubspot_products
@@ -371,82 +425,34 @@ class Command(BaseCommand):
                 )
             )
 
-    def _get_last_synced_order(self, site_configuration):
-        """
-        Calls the deal/recent/modified hubspot endpoint
-        then returns the Order object for that deal.
-        """
-        # if this endpoint has any kind of exception
-        # then command should stop so no try except block.
-        last_synced_order = None
-        response = self._hubspot_endpoint(
-            'modified',
-            'deals/v1/deal/recent/',
-            'GET',
-            hapikey=site_configuration.hubspot_secret_key,
-            count=1
+    def _get_unsynced_carts(self, site_configuration):
+        carts = Basket.objects.filter(site=site_configuration.site, lines__isnull=False)
+        start_date = datetime.now().date() - timedelta(self.initial_sync_days)
+        unsynced_carts = carts.filter(
+            Q(date_created__date=start_date) | Q(date_submitted__date=start_date)
         )
-        if response.get('results'):
-            try:
-                number = response.get('results')[0].get('properties').get('ip__ecomm_bridge__order_number').get('value')
-                last_synced_order = Order.objects.filter(number=number).first()
-                self.stdout.write(
-                    "Successfully fetched last sync DEAl with order_number: {number}".format(
-                        number=number
-                    )
-                )
-            except (KeyError, AttributeError) as ex:
-                self.stderr.write(
-                    'An error occurred while getting the last sync order for site {site}: {message} '.format(
-                        site=site_configuration.site.domain, message=ex.message
-                    )
-                )
-        return last_synced_order
-
-    def _get_unsynced_orders(self, site_configuration):
-        """
-        Returns the list of orders which are not synced with hubspot.
-        If last synced order exits then it will return all the orders
-        that has greater date_place than last sync_order's date_placed.
-        else it will return all the orders between start date to now
-        where start date is today - initial_sync_days.
-        """
-        orders = Order.objects.filter(site=site_configuration.site)
-        last_synced_order = self._get_last_synced_order(site_configuration)
-        if last_synced_order:
-            orders = orders.filter(date_placed__gt=last_synced_order.date_placed)
-            if orders:
-                self.stdout.write(
-                    'Pulled unsynced orders for site {site} from last sync date: {last_sync}'.format(
-                        site=site_configuration.site.domain, last_sync=last_synced_order.date_placed
-                    )
-                )
-        else:
-            start_date = datetime.now().date() - timedelta(self.initial_sync_days)
-            orders = orders.filter(date_placed__date__gt=start_date)
-            if orders:
-                self.stdout.write(
-                    'No last synced order found. Pulled unsynced orders for site {site} from {start_date}'.format(
-                        site=site_configuration.site.domain, start_date=start_date
-                    )
-                )
-        return orders
+        self.stdout.write(
+            'Pulled unsynced carts for site {site} from {start_date} and total count is total: {count}'.format(
+                site=site_configuration.site.domain, start_date=start_date, count=unsynced_carts.count()
+            )
+        )
+        return unsynced_carts
 
     def _sync_data(self, site_configuration):
         """
         Create lists of Order, OrderLine and Product objects and
         call upsert(PUT) sync-messages endpoint for each objects.
         """
-        unsynced_orders = self._get_unsynced_orders(site_configuration)
-        if unsynced_orders:
-            # we need to exclude the OrderLines without product
+        unsynced_carts = self._get_unsynced_carts(site_configuration)
+        if unsynced_carts:
+            # we need to exclude the CartLines without product
             # because product is required in hubspot for LINE_ITEM.
-            unsynced_order_lines = OrderLine.objects.filter(order__in=unsynced_orders).exclude(product=None)
-            unsynced_products = Product.objects.filter(line__in=unsynced_order_lines)
-            unsynced_users = User.objects.filter(orders__in=unsynced_orders)
+            unsynced_cart_lines = CartLine.objects.filter(basket__in=unsynced_carts).exclude(product=None)
+            unsynced_products = Product.objects.filter(basket_lines__in=unsynced_cart_lines)
+            unsynced_users = User.objects.filter(baskets__in=unsynced_carts)
             self._upsert_hubspot_objects(
                 CONTACT,
-                self._get_hubspot_user_structure(unsynced_users),
+                self._get_hubspot_contact_structure(unsynced_users),
                 site_configuration
             )
             self._upsert_hubspot_objects(
@@ -456,12 +462,12 @@ class Command(BaseCommand):
             )
             self._upsert_hubspot_objects(
                 DEAL,
-                self._get_hubspot_deal_structure(unsynced_orders),
+                self._get_hubspot_deal_structure(unsynced_carts, site_configuration.partner),
                 site_configuration
             )
             self._upsert_hubspot_objects(
                 LINE_ITEM,
-                self._get_hubspot_line_item_structure(unsynced_order_lines),
+                self._get_hubspot_line_item_structure(unsynced_cart_lines),
                 site_configuration
             )
         else:
@@ -470,7 +476,7 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument(
             '--initial-sync-days',
-            default=7,
+            default=DEFAULT_INITIAL_DAYS,
             dest='initial_sync_days',
             type=int,
             help='Number of days before today to start initial sync',

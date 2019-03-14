@@ -1,12 +1,14 @@
 import logging
 
+from oscar.core.loading import get_model
 from requests.exceptions import ConnectionError, Timeout
 from rest_framework import permissions
-
 from slumber.exceptions import SlumberHttpBaseException
 
-from ecommerce.enterprise.api import fetch_enterprise_learner_data, get_with_access_to
+from ecommerce.enterprise.api import get_with_access_to
+from ecommerce.extensions.api.serializers import retrieve_enterprise_condition
 
+Product = get_model('catalogue', 'Product')
 
 LOGGER = logging.getLogger(__name__)
 
@@ -68,10 +70,22 @@ class HasDataAPIDjangoGroupAccess(permissions.BasePermission):
 
         Returns: enterprise or None if unable to get or user is not associated with an enterprise
         """
-        enterprise_data = get_with_access_to(site, user, jwt, enterprise_id)
+        try:
+            enterprise_data = get_with_access_to(site, user, jwt, enterprise_id)
+        except (ConnectionError, SlumberHttpBaseException, Timeout):
+            LOGGER.exception('Failed to hit with_access_to endpoint for user [%s] and enterprise [%s]',
+                             user, enterprise_id)
+            return False
         if not enterprise_data:
-            return None
+            return False
         return enterprise_data
+
+    def _request_is_permitted_for_enterprise(self, request, enterprise_id):
+        token = request.auth or request.user.access_token
+        permitted = self.get_enterprise_with_access_to(request.site, request.user, token, enterprise_id)
+        if not permitted:
+            LOGGER.warning('User %s denied access to Enterprise API for enterprise %s', request.user, enterprise_id)
+        return permitted
 
     def has_permission(self, request, view):
         """
@@ -79,17 +93,12 @@ class HasDataAPIDjangoGroupAccess(permissions.BasePermission):
         """
         enterprise_id = request.parser_context.get('kwargs', {}).get('enterprise_id', '')
         if not enterprise_id:
+            pk = request.parser_context.get('kwargs', {}).get('pk', '')
             try:
-                learner_data = fetch_enterprise_learner_data(request.site, request.user)['results'][0]
-                if learner_data and 'enterprise_customer' in learner_data:
-                    enterprise_id = learner_data['enterprise_customer']['uuid']
-            except (ConnectionError, IndexError, KeyError, SlumberHttpBaseException, Timeout):
-                LOGGER.exception(
-                    'Failed to retrieve enterprise id for site [%s] and user [%s].', request.site, request.user)
+                coupon = Product.objects.get(pk=pk)
+            except Product.DoesNotExist:
                 return False
+            enterprise_condition = retrieve_enterprise_condition(coupon)
+            enterprise_id = enterprise_condition and enterprise_condition.enterprise_customer_uuid
 
-        token = request.auth or request.user.access_token
-        permitted = self.get_enterprise_with_access_to(request.site, request.user, token, enterprise_id)
-        if not permitted:
-            LOGGER.warning('User %s denied access to Enterprise API for enterprise %s', request.user, enterprise_id)
-        return permitted
+        return self._request_is_permitted_for_enterprise(request, enterprise_id)
