@@ -11,7 +11,7 @@
 # Max Max <reservemail.box@yandex.ru>, 2016
 # Michael Savin <m.savin.ru@gmail.com>, 2015-2016
 # Nikolay K Medvedev <elsin16@gmail.com>, 2015
-# Oleg Tekeli <ann.sova1919@gmail.com>, 2015
+# 78de15452dcdabcb6a1fd4e895863876, 2015
 # Romanov Aleksei, 2015
 # Sergei Gryzin <diamontron4752@gmail.com>, 2016
 # Weyedide <weyedide@gmail.com>, 2015-2016
