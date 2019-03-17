@@ -8,8 +8,8 @@
 # Anthony Mangano <amangano@edx.org>, 2017
 # Christopher Lee <clee@edx.org>, 2017
 # Diego Rojas <diego.rojas@edunext.co>, 2017
-# e2f_lat_r3 <e2f_lat_r3@outlook.com>, 2017
-# e2f_lat_t3 <e2f_lat_t3@outlook.com>, 2017
+# d140edf1d29adbbec4ddbec5a4f4eba5, 2017
+# d90218c7862ca3d0c3f6747c76b18fe1, 2017
 # Eduardo Zambrano <ezambrano@edx.org>, 2018
 # Elias Estay <eestay@u.uchile.cl>, 2015
 # Ernesto Franz Achá Mamani <fachaa2@hotmail.com>, 2015

@@ -5,7 +5,7 @@
 # 
 # Translators:
 # Ahmed Jazzar <ahmed.mojaz@gmail.com>, 2015
-# AR C2 <e2f458fd4s512@outlook.com>, 2016
+# 6e68c7971a89e50e680ae9444d303c8f, 2016
 # Bushra Hashem <purple.planet1996@gmail.com>, 2015
 # e2f_ar r3 <e2f_ar_r3@outlook.com>, 2016-2017
 # e2f_ar t3 <e2f_ar_t3@outlook.com>, 2016

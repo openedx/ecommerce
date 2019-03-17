@@ -6,7 +6,7 @@
 # Translators:
 # JEN-HAO HSIEH <orienthauz@gmail.com>, 2015
 # Mushiyo, 2015
-# TW C2 <info@weasto.com>, 2016
+# 14d459d8c000b8ccf321b2ffedc7aa57, 2016
 # wei-chi lin <vickybunny1989@hotmail.com>, 2016
 # Wun-Han Syu <whsyu@mail.fcu.edu.tw>, 2016
 # Xaver Y.R. Chen <yrchen@atcity.org>, 2018

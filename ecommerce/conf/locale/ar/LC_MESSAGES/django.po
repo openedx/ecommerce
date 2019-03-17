@@ -7,7 +7,7 @@
 # Ahmed Jazzar <ahmed.mojaz@gmail.com>, 2015
 # Ahmed Jazzar <ahmed.mojaz@gmail.com>, 2016
 # Anthony Mangano <amangano@edx.org>, 2017
-# AR C2 <e2f458fd4s512@outlook.com>, 2016
+# 6e68c7971a89e50e680ae9444d303c8f, 2016
 # Clinton Blackburn <clinton.blackburn@gmail.com>, 2016
 # e2f_ar r3 <e2f_ar_r3@outlook.com>, 2016-2017
 # e2f_ar t3 <e2f_ar_t3@outlook.com>, 2016

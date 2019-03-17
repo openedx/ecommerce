@@ -5,7 +5,7 @@
 # 
 # Translators:
 # abby li <yc.li@eliteu.cn>, 2018-2019
-# CN C2 <e2f48d4sf5ds@outlook.com>, 2016
+# 759b81c7bb2252a11f36c89344f31007, 2016
 # hohomi <hohomi@gmail.com>, 2016
 # ifLab <webmaster@iflab.org>, 2018
 # jsgang <jsgang9@gmail.com>, 2016-2018
