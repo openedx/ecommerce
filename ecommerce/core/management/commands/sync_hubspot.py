@@ -1,6 +1,7 @@
 """
 Django management command to Sync Product, Orders and Lines to Hubspot server.
 """
+import json
 import logging
 import time
 import traceback
@@ -71,6 +72,11 @@ HUBSPOT_ECOMMERCE_SETTINGS = {
                 'propertyName': 'date_placed',
                 'dataType': 'DATETIME',
                 'targetHubspotProperty': 'closedate'
+            },
+            {
+                'propertyName': 'description',
+                'dataType': 'STRING',
+                'targetHubspotProperty': 'description'
             },
             {
                 'propertyName': 'number',
@@ -253,15 +259,29 @@ class Command(BaseCommand):
             timestamp = time.time()
         return int(timestamp * 1000)
 
-    def _get_cart_total_price(self, cart):
+    def _get_carts_extra_properties(self, cart):
         total_price = D(0.0)
+        description = ''
         lines = cart.all_lines()
         for line in lines:
             total_price += self._get_cart_line_prices(line, 'price_incl_tax')
-        return float(total_price)
+            description += self._get_cart_line_information(line)
+        return float(total_price), description
 
     def _get_cart_line_prices(self, line, attr):
         return getattr(line, attr, D(0.0)) * line.quantity
+
+    def _get_cart_line_information(self, line):
+        return json.dumps({
+            'Product': "{title} {course_id}".format(
+                title=line.product.title,
+                course_id=line.product.course.id if line.product.course else ''
+            ),
+            'Currency': line.price_currency,
+            'Price including tax': float(self._get_cart_line_prices(line, 'price_incl_tax')),
+            'Price': float(self._get_cart_line_prices(line, 'price_excl_tax')),
+            'Quantity': line.quantity
+        })
 
     def _get_hubspot_contact_structure(self, users):
         """
@@ -291,6 +311,7 @@ class Command(BaseCommand):
                 'changeOccurredTimestamp': self._get_timestamp(),
                 'propertyNameToValues': {}
             }
+            total_price, description = self._get_carts_extra_properties(cart)
             if cart.status == Basket.SUBMITTED:
                 order = Order.objects.filter(basket=cart).first()
                 deal['propertyNameToValues'] = {
@@ -304,10 +325,11 @@ class Command(BaseCommand):
             else:
                 deal['propertyNameToValues'] = {
                     'deal_name': OrderNumberGenerator().order_number_from_basket_id(partner, cart.id),
-                    'total_incl_tax': self._get_cart_total_price(cart),
+                    'total_incl_tax': total_price,
                     'checkout_status': BASKET_TO_HUBSPOT_STATUS.get(cart.status),
                     'user_id': str(cart.owner.id) if cart.owner else ''
                 }
+            deal['propertyNameToValues']['description'] = description
             hubspot_deals.append(deal)
         return hubspot_deals
 
