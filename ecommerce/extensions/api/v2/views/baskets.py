@@ -349,7 +349,7 @@ class BasketCalculateView(generics.GenericAPIView):
             # This is to avoid merging this temporary basket with a real user basket.
             with transaction.atomic():
                 basket = Basket(owner=user, site=request.site)
-                basket.strategy = Selector().strategy(user=user, request=request)
+                basket.strategy = Selector().strategy(user=user)
 
                 for product in products:
                     basket.add_product(product, 1)

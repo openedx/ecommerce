@@ -5,24 +5,9 @@
 #    make upgrade
 #
 -e git+https://github.com/edx/analytics-python.git@1.2.11#egg=analytics-python==1.2.11
-amqp==1.4.9               # via kombu
-anyjson==0.3.3            # via kombu
-appdirs==1.4.3            # via zeep
-asn1crypto==0.24.0        # via cryptography
-babel==2.6.0              # via django-oscar, django-phonenumber-field
-billiard==3.3.0.23        # via celery
-cached-property==1.5.1    # via zeep
-celery==3.1.26.post2      # via edx-ecommerce-worker
-certifi==2018.8.24        # via requests
-cffi==1.11.5              # via cryptography
-chardet==3.0.4            # via requests
-coreapi==2.3.3
-coreschema==0.0.4         # via coreapi
-cryptography==2.3.1       # via pyopenssl
-cssselect==1.0.3          # via premailer
-cssutils==1.0.2           # via premailer
-defusedxml==0.5.0         # via zeep
-django-appconf==1.0.2     # via django-compressor
+
+coreapi==2.3.1
+django==1.11.15
 django-compressor==2.2
 django-crispy-forms==1.7.2
 django-extra-views==0.6.4  # via django-oscar

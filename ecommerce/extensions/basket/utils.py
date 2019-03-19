@@ -3,7 +3,6 @@ import json
 import logging
 from urllib import unquote, urlencode
 
-import newrelic.agent
 import pytz
 import waffle
 from django.conf import settings
@@ -27,7 +26,6 @@ BasketAttribute = get_model('basket', 'BasketAttribute')
 BasketAttributeType = get_model('basket', 'BasketAttributeType')
 BUNDLE = 'bundle_identifier'
 ORGANIZATION_ATTRIBUTE_TYPE = 'organization'
-ENTERPRISE_CATALOG_ATTRIBUTE_TYPE = 'enterprise_catalog_uuid'
 StockRecord = get_model('partner', 'StockRecord')
 OrderLine = get_model('order', 'Line')
 Refund = get_model('refund', 'Refund')
@@ -68,7 +66,6 @@ def prepare_basket(request, products, voucher=None):
         basket (Basket): Contains the product to be redeemed and the Voucher applied.
     """
     basket = Basket.get_basket(request.user, request.site)
-    basket_add_enterprise_catalog_attribute(basket, request.GET)
     basket.flush()
     basket.save()
     basket_addition = get_class('basket.signals', 'basket_addition')
@@ -287,37 +284,6 @@ def basket_add_organization_attribute(basket, request_data):
         )
 
 
-@newrelic.agent.function_trace()
-def basket_add_enterprise_catalog_attribute(basket, request_data):
-    """
-    Add enterprise catalog UUID attribute on basket, if the catalog UUID value
-    is provided in the request.
-
-    Arguments:
-        basket(Basket): order basket
-        request_data (dict): HttpRequest data
-
-    """
-    # Value of enterprise catalog UUID is being passed as `catalog` from
-    # basket page
-    enterprise_catalog_uuid = request_data.get('catalog') if request_data else None
-    enterprise_catalog_attribute, __ = BasketAttributeType.objects.get_or_create(
-        name=ENTERPRISE_CATALOG_ATTRIBUTE_TYPE
-    )
-    if enterprise_catalog_uuid:
-        BasketAttribute.objects.update_or_create(
-            basket=basket,
-            attribute_type=enterprise_catalog_attribute,
-            defaults={
-                'value_text': enterprise_catalog_uuid.strip()
-            }
-        )
-    else:
-        # Remove the enterprise catalog attribute for future update in basket
-        BasketAttribute.objects.filter(basket=basket, attribute_type=enterprise_catalog_attribute).delete()
-
-
-@newrelic.agent.function_trace()
 def _set_basket_bundle_status(bundle, basket):
     """
     Sets the basket's bundle status
