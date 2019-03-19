@@ -2,9 +2,11 @@ import waffle
 from django.contrib import admin, messages
 from django.contrib.auth.admin import UserAdmin
 from django.utils.translation import ugettext_lazy as _
+from edx_rbac.admin import UserRoleAssignmentAdmin
 
 from ecommerce.core.constants import USER_LIST_VIEW_SWITCH
-from ecommerce.core.models import BusinessClient, SiteConfiguration, User
+from ecommerce.core.forms import EcommerceFeatureRoleAssignmentAdminForm
+from ecommerce.core.models import BusinessClient, EcommerceFeatureRoleAssignment, SiteConfiguration, User
 
 
 @admin.register(SiteConfiguration)
@@ -41,3 +43,16 @@ class EcommerceUserAdmin(UserAdmin):
 @admin.register(BusinessClient)
 class BusinessClientAdmin(admin.ModelAdmin):
     pass
+
+
+@admin.register(EcommerceFeatureRoleAssignment)
+class EcommerceFeatureRoleAssignmentAdmin(UserRoleAssignmentAdmin):
+    """
+    Admin site for EcommerceFeatureRoleAssignment model
+    """
+    class Meta(object):
+        """
+        Meta class for EcommerceFeatureRoleAssignment admin model
+        """
+        model = EcommerceFeatureRoleAssignment
+    form = EcommerceFeatureRoleAssignmentAdminForm
