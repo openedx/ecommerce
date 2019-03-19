@@ -2,7 +2,7 @@ import datetime
 import json
 import logging
 from urllib import unquote, urlencode
-
+import newrelic
 import pytz
 import waffle
 from django.conf import settings

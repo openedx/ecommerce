@@ -46,6 +46,9 @@ class Bluefin(BaseClientSidePaymentProcessor):
 
     def _get_basket_amount(self, basket):
         return str((basket.total_incl_tax * 100).to_integral_value())
+    
+    def get_transaction_parameters(self, basket, request=None, use_client_side_checkout=True, **kwargs):
+        raise NotImplementedError('The Bluefin payment processor does not support transaction parameters.')
 
     def handle_processor_response(self, request_data, basket=None):
         request_data['street_address1'] = request_data.pop(

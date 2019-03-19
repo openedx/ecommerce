@@ -60,6 +60,7 @@ function submitPayment(post_url){
 
 //Function to POST form data to server for processing via PayConex.
 function payConexRequest(data, url){
+    document.getElementById("payment-button").disabled = true
     $.ajax({
         type: "POST",
         url: url,
@@ -70,6 +71,7 @@ function payConexRequest(data, url){
     }).done(function ( response ) {
         window.location.href = response.url;
     }).fail(function ( data ) {
+        document.getElementById("payment-button").disabled = false
         displayErrorMessage(gettext(
             'An error occurred while processing your payment. Please try again.'
         ));
