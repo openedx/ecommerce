@@ -72,8 +72,15 @@ DB_OVERRIDES = dict(
 for override, value in DB_OVERRIDES.iteritems():
     DATABASES['default'][override] = value
 
-
 # PAYMENT PROCESSOR OVERRIDES
+bluefin_dict = {
+    'merchant_account_id': environ.get('BLUEFIN_ACCOUNT_ID'),
+    'api_access_key': environ.get('BLUEFIN_API_KEY'),
+    'post_api_url': 'https://cert.payconex.net/api/qsapi/3.8',
+}
+
+PAYMENT_PROCESSOR_CONFIG['edx'].update({'bluefin': bluefin_dict})
+
 for __, configs in PAYMENT_PROCESSOR_CONFIG.iteritems():
     for __, config in configs.iteritems():
         config.update({

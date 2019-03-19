@@ -229,3 +229,11 @@ class StripeSubmitForm(forms.Form):
             Applicator().apply(basket, self.request.user, self.request)
 
         return basket
+
+
+class BluefinSubmitForm(PaymentForm):
+    """
+    Form for Bluefin token submissions.
+    """
+
+    bluefin_token = forms.CharField(widget=forms.HiddenInput(), required=True)
