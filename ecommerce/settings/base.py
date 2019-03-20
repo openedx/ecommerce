@@ -9,6 +9,7 @@ from sys import path
 from django.utils.translation import ugettext_lazy as _
 from oscar import OSCAR_MAIN_TEMPLATE_DIR
 
+from ecommerce.core.constants import ENTERPRISE_COUPON_ADMIN_ROLE, SYSTEM_ENTERPRISE_ADMIN_ROLE
 from ecommerce.settings._oscar import *
 
 # PATH CONFIGURATION
@@ -292,6 +293,7 @@ DJANGO_APPS = [
     'django_sites_extensions',
     # edx-drf-extensions
     'csrf.apps.CsrfAppConfig',  # Enables frontend apps to retrieve CSRF tokens.
+    'rules.apps.AutodiscoverRulesConfig',
 ]
 
 # Apps specific to this project go here.
@@ -378,6 +380,11 @@ LOGGING = {
             'handlers': ['console', 'local'],
             'propagate': True,
             'level': 'WARNING'
+        },
+        'rules': {
+            'handlers': ['console', 'local'],
+            'level': 'DEBUG',
+            'propagate': True,
         },
         '': {
             'handlers': ['console', 'local'],
@@ -609,6 +616,11 @@ ENABLE_ENTERPRISE_ON_RUNTIME_SWITCH = 'enable_enterprise_on_runtime'
 ENTERPRISE_CUSTOMER_COOKIE_NAME = 'enterprise_customer_uuid'
 
 ENTERPRISE_DATA_API_GROUP = 'enterprise_data_api_access'
+
+SYSTEM_TO_FEATURE_ROLE_MAPPING = {
+    SYSTEM_ENTERPRISE_ADMIN_ROLE: [ENTERPRISE_COUPON_ADMIN_ROLE],
+}
+
 # END ENTERPRISE APP CONFIGURATION
 
 # DJANGO DEBUG TOOLBAR CONFIGURATION

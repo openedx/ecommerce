@@ -44,6 +44,7 @@ pygments
 python-dateutil
 pytz==2016.10
 requests
+rules
 sailthru-client==2.2.3
 six
 stripe==1.70.0

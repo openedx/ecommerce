@@ -56,3 +56,4 @@ class EcommerceFeatureRoleAssignmentAdmin(UserRoleAssignmentAdmin):
         """
         model = EcommerceFeatureRoleAssignment
     form = EcommerceFeatureRoleAssignmentAdminForm
+    fields = ('user', 'role', 'enterprise_id')

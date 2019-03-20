@@ -5,6 +5,7 @@ import logging
 import waffle
 from django.core.exceptions import ValidationError
 from django.shortcuts import get_object_or_404
+from edx_rbac.decorators import permission_required
 from edx_rest_framework_extensions.paginators import DefaultPagination
 from oscar.core.loading import get_model
 from rest_framework import generics, serializers, status
@@ -29,7 +30,7 @@ from ecommerce.extensions.api.serializers import (
     PartialRedeemedCodeUsageSerializer,
     RedeemedCodeUsageSerializer
 )
-from ecommerce.extensions.api.v2.utils import send_new_codes_notification_email
+from ecommerce.extensions.api.v2.utils import get_enterprise_from_product, send_new_codes_notification_email
 from ecommerce.extensions.api.v2.views.coupons import CouponViewSet
 from ecommerce.extensions.catalogue.utils import (
     attach_vouchers_to_coupon_product,
@@ -210,6 +211,9 @@ class EnterpriseCouponViewSet(CouponViewSet):
             super(EnterpriseCouponViewSet, self).update_range_data(request_data, vouchers)
 
     @detail_route(url_path='codes', permission_classes=[IsAuthenticated, HasDataAPIDjangoGroupAccess])
+    @permission_required(
+        'enterprise.can_view_coupon', fn=lambda request, pk, format=None: get_enterprise_from_product(pk)
+    )
     def codes(self, request, pk, format=None):  # pylint: disable=unused-argument, redefined-builtin
         """
         GET codes belong to a `coupon`.
@@ -352,6 +356,7 @@ class EnterpriseCouponViewSet(CouponViewSet):
 
     @list_route(url_path=r'(?P<enterprise_id>.+)/overview',
                 permission_classes=[IsAuthenticated, HasDataAPIDjangoGroupAccess])
+    @permission_required('enterprise.can_view_coupon', fn=lambda request, enterprise_id: enterprise_id)
     def overview(self, request, enterprise_id):     # pylint: disable=unused-argument
         """
         Overview of Enterprise coupons.
@@ -376,6 +381,7 @@ class EnterpriseCouponViewSet(CouponViewSet):
             return self.get_paginated_response(serializer.data)
 
     @detail_route(methods=['post'], permission_classes=[IsAuthenticated, HasDataAPIDjangoGroupAccess])
+    @permission_required('enterprise.can_assign_coupon', fn=lambda request, pk: get_enterprise_from_product(pk))
     def assign(self, request, pk):  # pylint: disable=unused-argument
         """
         Assign users by email to codes within the Coupon.
@@ -392,6 +398,7 @@ class EnterpriseCouponViewSet(CouponViewSet):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     @detail_route(methods=['post'], permission_classes=[IsAuthenticated, HasDataAPIDjangoGroupAccess])
+    @permission_required('enterprise.can_assign_coupon', fn=lambda request, pk: get_enterprise_from_product(pk))
     def revoke(self, request, pk):  # pylint: disable=unused-argument
         """
         Revoke users by email from codes within the Coupon.
@@ -410,6 +417,7 @@ class EnterpriseCouponViewSet(CouponViewSet):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     @detail_route(methods=['post'], permission_classes=[IsAuthenticated, HasDataAPIDjangoGroupAccess])
+    @permission_required('enterprise.can_assign_coupon', fn=lambda request, pk: get_enterprise_from_product(pk))
     def remind(self, request, pk):  # pylint: disable=unused-argument
         """
         Remind users of pending offer assignments by email.
