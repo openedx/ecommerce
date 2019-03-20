@@ -74,8 +74,8 @@ for override, value in DB_OVERRIDES.iteritems():
 
 # PAYMENT PROCESSOR OVERRIDES
 bluefin_dict = {
-    'merchant_account_id': environ.get('BLUEFIN_ACCOUNT_ID'),
-    'api_access_key': environ.get('BLUEFIN_API_KEY'),
+    'merchant_account_id': config_from_yaml.get('BLUEFIN_ACCOUNT_ID'),
+    'api_access_key': config_from_yaml.get('BLUEFIN_API_KEY'),
     'post_api_url': 'https://cert.payconex.net/api/qsapi/3.8',
 }
 
