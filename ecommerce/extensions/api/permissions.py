@@ -1,4 +1,5 @@
 import logging
+import waffle
 
 from django.conf import settings
 from oscar.core.loading import get_model
@@ -7,6 +8,8 @@ from rest_framework import permissions
 from slumber.exceptions import SlumberHttpBaseException
 
 from ecommerce.enterprise.api import get_with_access_to
+from ecommerce.enterprise.constants import USE_ROLE_BASED_ACCESS_CONTROL
+
 from ecommerce.extensions.api.serializers import retrieve_enterprise_condition
 
 Product = get_model('catalogue', 'Product')
@@ -94,6 +97,8 @@ class HasDataAPIDjangoGroupAccess(permissions.BasePermission):
         """
         Verify the user is staff or the associated enterprise matches the requested enterprise.
         """
+        if waffle.switch_is_active(USE_ROLE_BASED_ACCESS_CONTROL):
+            return True
         enterprise_id = request.parser_context.get('kwargs', {}).get('enterprise_id', '')
         if not enterprise_id:
             pk = request.parser_context.get('kwargs', {}).get('pk', '')
