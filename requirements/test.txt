@@ -64,7 +64,7 @@ edx-django-utils==1.0.3
 edx-drf-extensions==2.1.0
 edx-ecommerce-worker==0.7.2
 edx-opaque-keys==0.4.4
-edx-rbac==0.1.6
+edx-rbac==0.1.8
 edx-rest-api-client==1.9.2
 enum34==1.1.6             # via cryptography
 factory-boy==2.8.1
@@ -129,6 +129,7 @@ requests==2.21.0
 responses==0.5.1
 rest-condition==1.0.3     # via edx-drf-extensions
 rjsmin==1.0.12            # via django-compressor
+rules==2.0.1
 sailthru-client==2.2.3
 selenium==3.4.3
 semantic-version==2.6.0   # via edx-drf-extensions

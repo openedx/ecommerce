@@ -292,6 +292,7 @@ DJANGO_APPS = [
     'django_sites_extensions',
     # edx-drf-extensions
     'csrf.apps.CsrfAppConfig',  # Enables frontend apps to retrieve CSRF tokens.
+    'rules.apps.AutodiscoverRulesConfig',
 ]
 
 # Apps specific to this project go here.
@@ -378,6 +379,11 @@ LOGGING = {
             'handlers': ['console', 'local'],
             'propagate': True,
             'level': 'WARNING'
+        },
+        'rules': {
+            'handlers': ['console', 'local'],
+            'level': 'DEBUG',
+            'propagate': True,
         },
         '': {
             'handlers': ['console', 'local'],
