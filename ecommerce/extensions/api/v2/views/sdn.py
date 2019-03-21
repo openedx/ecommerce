@@ -27,6 +27,7 @@ class SDNCheckViewSet(APIView):
         hits = 0
 
         site_configuration = request.site.siteconfiguration
+
         basket = Basket.get_basket(request.user, site_configuration.site)
 
         if site_configuration.enable_sdn_check:
