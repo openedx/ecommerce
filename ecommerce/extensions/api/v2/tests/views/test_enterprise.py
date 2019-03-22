@@ -14,8 +14,10 @@ from django.utils.http import urlencode
 from django.utils.timezone import now
 from oscar.core.loading import get_model
 from oscar.test import factories
+from requests.exceptions import ConnectionError
 from rest_framework import status
 from waffle.models import Switch
+from waffle.testutils import override_switch
 
 from ecommerce.core.constants import ENTERPRISE_COUPON_ADMIN_ROLE
 from ecommerce.core.models import EcommerceFeatureRole, EcommerceFeatureRoleAssignment
@@ -24,7 +26,7 @@ from ecommerce.coupons.tests.mixins import CouponMixin, DiscoveryMockMixin
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.enterprise.benefits import BENEFIT_MAP as ENTERPRISE_BENEFIT_MAP
 from ecommerce.enterprise.conditions import AssignableEnterpriseCustomerCondition
-from ecommerce.enterprise.constants import ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH
+from ecommerce.enterprise.constants import ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, USE_ROLE_BASED_ACCESS_CONTROL
 from ecommerce.enterprise.tests.mixins import EnterpriseServiceMockMixin
 from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
 from ecommerce.extensions.offer.constants import (
@@ -114,6 +116,7 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
     """
     def setUp(self):
         super(EnterpriseCouponViewSetTest, self).setUp()
+        Switch.objects.update_or_create(name=USE_ROLE_BASED_ACCESS_CONTROL, defaults={'active': True})
         self.user = self.create_user(is_staff=True)
         self.client.login(username=self.user.username, password=self.password)
 
@@ -831,9 +834,9 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             codes
         )
 
-    def test_permission_denied_coupon_overview(self):
+    def test_permission_denied_coupon_overview_with_rbac(self):
         """
-        Test that we get access denied when with_access_to returns no data.
+        Test that we get access denied when ecommerce feature role assignment is absent.
         """
         Switch.objects.update_or_create(name=ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, defaults={'active': True})
         EcommerceFeatureRoleAssignment.objects.all().delete()
@@ -844,6 +847,41 @@ class EnterpriseCouponViewSetTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
                 kwargs={'enterprise_id': self.data['enterprise_customer']['id']}
             )
         )
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    @override_switch(USE_ROLE_BASED_ACCESS_CONTROL, active=False)
+    def test_permission_denied_coupon_overview(self):
+        """
+        Test that we get access denied when with_access_to returns no data.
+        """
+        Switch.objects.update_or_create(name=ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, defaults={'active': True})
+        # Make the call to get_with_access_to return an error
+        enterprise_api_client = mock.patch(
+            'ecommerce.extensions.api.permissions.get_with_access_to', side_effect=ConnectionError()
+        )
+        self.enterprise_api_client = enterprise_api_client.start()
+        response = self.get_response(
+            'GET',
+            reverse(
+                'api:v2:enterprise-coupons-(?P<enterprise-id>.+)/overview-list',
+                kwargs={'enterprise_id': self.data['enterprise_customer']['id']}
+            )
+        )
+        enterprise_api_client.stop()
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+        # Now, make the call to get_with_access_to return empty results
+        enterprise_api_client = mock.patch('ecommerce.extensions.api.permissions.get_with_access_to')
+        self.enterprise_api_client = enterprise_api_client.start()
+        self.enterprise_api_client.return_value = {}
+        response = self.get_response(
+            'GET',
+            reverse(
+                'api:v2:enterprise-coupons-(?P<enterprise-id>.+)/overview-list',
+                kwargs={'enterprise_id': self.data['enterprise_customer']['id']}
+            )
+        )
+        enterprise_api_client.stop()
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     @ddt.data(

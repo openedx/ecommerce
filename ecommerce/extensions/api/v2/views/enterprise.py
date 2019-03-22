@@ -17,6 +17,7 @@ from ecommerce.core.constants import COUPON_PRODUCT_CLASS_NAME
 from ecommerce.core.utils import log_message_and_raise_validation_error
 from ecommerce.enterprise.constants import ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH
 from ecommerce.enterprise.utils import get_enterprise_customers
+from ecommerce.extensions.api.permissions import HasDataAPIDjangoGroupAccess
 from ecommerce.extensions.api.serializers import (
     CouponCodeAssignmentSerializer,
     CouponCodeRemindSerializer,
@@ -209,7 +210,7 @@ class EnterpriseCouponViewSet(CouponViewSet):
         if coupon_was_migrated:
             super(EnterpriseCouponViewSet, self).update_range_data(request_data, vouchers)
 
-    @detail_route(url_path='codes', permission_classes=[IsAuthenticated, ])
+    @detail_route(url_path='codes', permission_classes=[IsAuthenticated, HasDataAPIDjangoGroupAccess])
     @permission_required(
         'enterprise.can_view_coupon', fn=lambda request, pk, format=None: Product.objects.filter(pk=pk).first(),
         enabled=True)
@@ -354,8 +355,12 @@ class EnterpriseCouponViewSet(CouponViewSet):
         ).values('voucher__code', 'user__email').distinct().order_by('user__email')
 
     @list_route(url_path=r'(?P<enterprise_id>.+)/overview',
-                permission_classes=[IsAuthenticated, ])
-    @permission_required('enterprise.can_view_coupon', fn=lambda request, enterprise_id: enterprise_id, enabled=True)
+                permission_classes=[IsAuthenticated, HasDataAPIDjangoGroupAccess])
+    @permission_required(
+        'enterprise.can_view_coupon',
+        fn=lambda request, enterprise_id: enterprise_id,
+        enabled=True
+    )
     def overview(self, request, enterprise_id):     # pylint: disable=unused-argument
         """
         Overview of Enterprise coupons.
@@ -379,7 +384,7 @@ class EnterpriseCouponViewSet(CouponViewSet):
             serializer = self.get_serializer(page, many=True)
             return self.get_paginated_response(serializer.data)
 
-    @detail_route(methods=['post'], permission_classes=[IsAuthenticated, ])
+    @detail_route(methods=['post'], permission_classes=[IsAuthenticated, HasDataAPIDjangoGroupAccess])
     @permission_required('enterprise.can_assign_coupon', fn=lambda request, pk: Product.objects.filter(pk=pk).first(),
                          enabled=True)
     def assign(self, request, pk):  # pylint: disable=unused-argument
@@ -397,7 +402,7 @@ class EnterpriseCouponViewSet(CouponViewSet):
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    @detail_route(methods=['post'], permission_classes=[IsAuthenticated, ])
+    @detail_route(methods=['post'], permission_classes=[IsAuthenticated, HasDataAPIDjangoGroupAccess])
     @permission_required('enterprise.can_assign_coupon', fn=lambda request, pk: Product.objects.filter(pk=pk).first(),
                          enabled=True)
     def revoke(self, request, pk):  # pylint: disable=unused-argument
@@ -417,7 +422,7 @@ class EnterpriseCouponViewSet(CouponViewSet):
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    @detail_route(methods=['post'], permission_classes=[IsAuthenticated, ])
+    @detail_route(methods=['post'], permission_classes=[IsAuthenticated, HasDataAPIDjangoGroupAccess])
     @permission_required('enterprise.can_assign_coupon', fn=lambda request, pk: Product.objects.filter(pk=pk).first(),
                          enabled=True)
     def remind(self, request, pk):  # pylint: disable=unused-argument
