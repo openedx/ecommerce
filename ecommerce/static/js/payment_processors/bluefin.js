@@ -49,6 +49,11 @@ function submitPayment(post_url){
         </div>'
     })
     .success( function (res) {
+        document.getElementById("payment-button").disabled = true
+        displayMessage(gettext(
+            'Please, do not refresh this page. It will take few seconds as your request is being processed'
+        ), 'alert-warning');
+
         //Prepare form_data with etoken (return by bluefin after encryption).
         form_data = new FormData($('#paymentForm')[0])
         form_data.append("bluefin_token", res.eToken);
@@ -60,7 +65,6 @@ function submitPayment(post_url){
 
 //Function to POST form data to server for processing via PayConex.
 function payConexRequest(data, url){
-    document.getElementById("payment-button").disabled = true
     $.ajax({
         type: "POST",
         url: url,
@@ -72,16 +76,16 @@ function payConexRequest(data, url){
         window.location.href = response.url;
     }).fail(function ( data ) {
         document.getElementById("payment-button").disabled = false
-        displayErrorMessage(gettext(
+        displayMessage(gettext(
             'An error occurred while processing your payment. Please try again.'
-        ));
+        ), 'alert-error');
     });
 }
 
 //Function to display error-message.
-function displayErrorMessage(message) {
+function displayMessage(message, alert_type) {
     $('#messages').html(
-        '<div class="alert alert-error">\
+        '<div class="alert '+alert_type+'">\
             <i class="icon fa fa-exclamation-triangle"></i>'+message+
         '</div>',     
     )
