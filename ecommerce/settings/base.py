@@ -219,7 +219,6 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.contrib.sites.middleware.CurrentSiteMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'edx_rest_framework_extensions.auth.jwt.middleware.EnsureJWTAuthSettingsMiddleware',
     'waffle.middleware.WaffleMiddleware',
     # NOTE: The overridden BasketMiddleware relies on request.site. This middleware
     # MUST appear AFTER CurrentSiteMiddleware.
