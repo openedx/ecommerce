@@ -50,8 +50,9 @@ function submitPayment(post_url){
     })
     .success( function (res) {
         document.getElementById("payment-button").disabled = true
+        $("#spin").addClass("fa fa-circle-o-notch fa-spin")
         displayMessage(gettext(
-            'Please, do not refresh this page. It will take few seconds as your request is being processed'
+            'Caution! Do not Refresh this page as it may cause you to be charged again. It will take few seconds as your request is being processed.'
         ), 'alert-warning');
 
         //Prepare form_data with etoken (return by bluefin after encryption).
@@ -76,6 +77,7 @@ function payConexRequest(data, url){
         window.location.href = response.url;
     }).fail(function ( data ) {
         document.getElementById("payment-button").disabled = false
+        $("#spin").removeClass("fa fa-circle-o-notch fa-spin")
         displayMessage(gettext(
             'An error occurred while processing your payment. Please try again.'
         ), 'alert-error');
@@ -104,6 +106,10 @@ define([
                 submitPayment(config.postUrl);
                 return false;
             });
+
+            let inode = document.createElement("i")
+            inode.setAttribute("id", "spin")
+            document.getElementById("payment-button").appendChild(inode)
 
             // replace card div with bluefin iframe
             let bluefin_iframe_code = '\
