@@ -109,10 +109,6 @@ fast_diff_coverage:
 e2e:
 	pytest e2e --junitxml=e2e/xunit.xml
 
-extract_translations:
-	python manage.py makemessages -l en -v1 -d django --ignore="docs/*" --ignore="src/*" --ignore="i18n/*" --ignore="assets/*" --ignore="node_modules/*" --ignore="ecommerce/static/bower_components/*" --ignore="ecommerce/static/build/*"
-	python manage.py makemessages -l en -v1 -d djangojs --ignore="docs/*" --ignore="src/*" --ignore="i18n/*" --ignore="assets/*" --ignore="node_modules/*" --ignore="ecommerce/static/bower_components/*" --ignore="ecommerce/static/build/*"
-
 dummy_translations:
 	cd ecommerce && i18n_tool dummy
 
@@ -121,17 +117,28 @@ compile_translations:
 
 fake_translations: extract_translations dummy_translations compile_translations
 
-pull_translations:
-	cd ecommerce && tx pull -af --mode reviewed
+extract_translations: ## extract localizable strings from sources
+	cd ecommerce
+	i18n_tool extract -v
 
-push_translations:
-	cd ecommerce && tx push -s
+push_translations: ## push source strings to Transifex for translation
+	cd ecommerce
+	i18n_tool transifex push
 
-update_translations: pull_translations fake_translations
+pull_translations: ## pull translations from Transifex
+	cd ecommerce
+	git clean -fdX conf/locale
+	i18n_tool transifex pull
+	i18n_tool extract
+	i18n_tool dummy
+	i18n_tool generate
+	git clean -fdX conf/locale/rtl
+	git clean -fdX conf/locale/eo
+	i18n_tool validate
 
-# extract_translations should be called before this command can detect changes
-detect_changed_source_translations:
-	cd ecommerce && i18n_tool changed
+detect_changed_source_translations: ## check if translation files are up-to-date
+	cd ecommerce
+	i18n_tool changed
 
 check_translations_up_to_date: fake_translations detect_changed_source_translations
 
