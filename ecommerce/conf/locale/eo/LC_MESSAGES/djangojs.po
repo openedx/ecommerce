@@ -8,25 +8,28 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ecommerce\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-04-05 11:00+0000\n"
+"POT-Creation-Date: 2019-03-26 17:16+0000\n"
 "PO-Revision-Date: 2018-03-30 17:16-0500\n"
 "Last-Translator: Muhammad Ayub khan <ayubkhan@edx.org>\n"
 "Language-Team: openedx-translation <openedx-translation@googlegroups.com>\n"
-"Language: en\n"
+"Language: eo\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #: ecommerce/static/js/models/coupon_model.js
+#: ecommerce/static/js/models/enterprise_coupon_model.js
 msgid "This field is required."
 msgstr "Thïs fïéld ïs réqüïréd. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σ#"
 
 #: ecommerce/static/js/models/coupon_model.js
+#: ecommerce/static/js/models/enterprise_coupon_model.js
 msgid "This value must be a number."
 msgstr "Thïs välüé müst ßé ä nümßér. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢#"
 
 #: ecommerce/static/js/models/coupon_model.js
+#: ecommerce/static/js/models/enterprise_coupon_model.js
 msgid "This value must be a date."
 msgstr "Thïs välüé müst ßé ä däté. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕ#"
 
@@ -41,10 +44,6 @@ msgid "This field must be empty or contain 1-16 alphanumeric characters."
 msgstr ""
 "Thïs fïéld müst ßé émptý ör çöntäïn 1-16 älphänümérïç çhäräçtérs. Ⱡ'σяєм "
 "ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя α#"
-
-#: ecommerce/static/js/models/coupon_model.js
-msgid "A valid course ID is required"
-msgstr "À välïd çöürsé ÌD ïs réqüïréd Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢#"
 
 #: ecommerce/static/js/models/coupon_model.js
 #, javascript-format
@@ -62,13 +61,23 @@ msgstr ""
 " αмєт, ¢σηѕє¢тєтυя α#"
 
 #: ecommerce/static/js/models/coupon_model.js
+msgid "Must occur before end date"
+msgstr "Müst öççür ßéföré énd däté Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕ#"
+
+#: ecommerce/static/js/models/coupon_model.js
+msgid "A valid course ID is required"
+msgstr "À välïd çöürsé ÌD ïs réqüïréd Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢#"
+
+#: ecommerce/static/js/models/coupon_model.js
+msgid "Enterprise Customer must be set if Enterprise Customer Catalog is set"
+msgstr ""
+"Éntérprïsé Çüstömér müst ßé sét ïf Éntérprïsé Çüstömér Çätälög ïs sét Ⱡ'σяєм"
+" ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя #"
+
+#: ecommerce/static/js/models/coupon_model.js
 msgid "A valid Program UUID is required."
 msgstr ""
 "À välïd Prögräm ÛÛÌD ïs réqüïréd. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тє#"
-
-#: ecommerce/static/js/models/coupon_model.js
-msgid "Must occur before end date"
-msgstr "Müst öççür ßéföré énd däté Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕ#"
 
 #: ecommerce/static/js/models/course_model.js
 msgid "You must select a course type."
@@ -185,6 +194,11 @@ msgstr ""
 "Àll çrédït séäts müst désïgnäté ä nümßér öf çrédït höürs. Ⱡ'σяєм ιρѕυм ∂σłσя"
 " ѕιт αмєт, ¢σηѕє¢тєтυя α#"
 
+#: ecommerce/static/js/models/enterprise_coupon_model.js
+msgid "This value must be a valid email."
+msgstr ""
+"Thïs välüé müst ßé ä välïd émäïl. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тє#"
+
 #: ecommerce/static/js/pages/basket_page.js
 msgid "Problem occurred during checkout. Please contact support."
 msgstr ""
@@ -228,14 +242,17 @@ msgid "State/Province (required)"
 msgstr "Stäté/Prövïnçé (réqüïréd) Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕ#"
 
 #: ecommerce/static/js/pages/coupon_create_page.js
+#: ecommerce/static/js/pages/enterprise_coupon_create_page.js
 msgid "Create New Coupon"
 msgstr "Çréäté Néw Çöüpön Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмє#"
 
 #: ecommerce/static/js/pages/coupon_detail_page.js
+#: ecommerce/static/js/pages/enterprise_coupon_detail_page.js
 msgid "View Coupon"
 msgstr "Vïéw Çöüpön Ⱡ'σяєм ιρѕυм ∂σłσя #"
 
 #: ecommerce/static/js/pages/coupon_edit_page.js
+#: ecommerce/static/js/pages/enterprise_coupon_edit_page.js
 msgid "Edit Coupon"
 msgstr "Édït Çöüpön Ⱡ'σяєм ιρѕυм ∂σłσя #"
 
@@ -258,6 +275,10 @@ msgstr "Édït Çöürsé Ⱡ'σяєм ιρѕυм ∂σłσя #"
 #: ecommerce/static/js/pages/course_list_page.js
 msgid "Courses"
 msgstr "Çöürsés Ⱡ'σяєм ιρѕυм #"
+
+#: ecommerce/static/js/pages/enterprise_coupon_list_page.js
+msgid "Enterprise Coupon Codes"
+msgstr "Éntérprïsé Çöüpön Çödés Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σ#"
 
 #: ecommerce/static/js/pages/offer_page.js
 msgid "Redeem"
@@ -313,12 +334,14 @@ msgstr "Träïlïng çömmä nöt ällöwéd. Ⱡ'σяєм ιρѕυм ∂σłσ�
 
 #: ecommerce/static/js/views/coupon_detail_view.js
 #: ecommerce/static/js/views/coupon_form_view.js
+#: ecommerce/static/js/views/enterprise_coupon_form_view.js
 msgid "Can be used once by one customer"
 msgstr ""
 "Çän ßé üséd önçé ßý öné çüstömér Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тє#"
 
 #: ecommerce/static/js/views/coupon_detail_view.js
 #: ecommerce/static/js/views/coupon_form_view.js
+#: ecommerce/static/js/views/enterprise_coupon_form_view.js
 msgid "Can be used multiple times by multiple customers"
 msgstr ""
 "Çän ßé üséd mültïplé tïmés ßý mültïplé çüstömérs Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт "
@@ -326,6 +349,7 @@ msgstr ""
 
 #: ecommerce/static/js/views/coupon_detail_view.js
 #: ecommerce/static/js/views/coupon_form_view.js
+#: ecommerce/static/js/views/enterprise_coupon_form_view.js
 msgid "Can be used once by multiple customers"
 msgstr ""
 "Çän ßé üséd önçé ßý mültïplé çüstömérs Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
@@ -346,6 +370,34 @@ msgstr "Sävé Çhängés Ⱡ'σяєм ιρѕυм ∂σłσя ѕ#"
 #: ecommerce/static/js/views/coupon_form_view.js
 msgid "Create Coupon"
 msgstr "Çréäté Çöüpön Ⱡ'σяєм ιρѕυм ∂σłσя ѕι#"
+
+#: ecommerce/static/js/views/coupon_list_view.js
+#: ecommerce/static/js/views/enterprise_coupon_list_view.js
+msgid "Name"
+msgstr "Nämé Ⱡ'σяєм ι#"
+
+#: ecommerce/static/js/views/coupon_list_view.js
+#: ecommerce/static/js/views/enterprise_coupon_list_view.js
+msgid "Created"
+msgstr "Çréätéd Ⱡ'σяєм ιρѕυм #"
+
+#: ecommerce/static/js/views/coupon_list_view.js
+msgid "Custom Code"
+msgstr "Çüstöm Çödé Ⱡ'σяєм ιρѕυм ∂σłσя #"
+
+#: ecommerce/static/js/views/coupon_list_view.js
+#: ecommerce/static/js/views/enterprise_coupon_list_view.js
+msgid "Client"
+msgstr "Çlïént Ⱡ'σяєм ιρѕυ#"
+
+#: ecommerce/static/js/views/coupon_list_view.js
+msgid "Category"
+msgstr "Çätégörý Ⱡ'σяєм ιρѕυм ∂#"
+
+#: ecommerce/static/js/views/coupon_list_view.js
+#: ecommerce/static/js/views/enterprise_coupon_list_view.js
+msgid "Coupon Report"
+msgstr "Çöüpön Répört Ⱡ'σяєм ιρѕυм ∂σłσя ѕι#"
 
 #: ecommerce/static/js/views/coupon_list_view.js
 #: ecommerce/static/js/views/course_list_view.js
@@ -380,30 +432,6 @@ msgstr ""
 #: ecommerce/static/js/views/coupon_list_view.js
 msgid "Display _MENU_ coupons"
 msgstr "Dïspläý _MÉNÛ_ çöüpöns Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢#"
-
-#: ecommerce/static/js/views/coupon_list_view.js
-msgid "Name"
-msgstr "Nämé Ⱡ'σяєм ι#"
-
-#: ecommerce/static/js/views/coupon_list_view.js
-msgid "Created"
-msgstr "Çréätéd Ⱡ'σяєм ιρѕυм #"
-
-#: ecommerce/static/js/views/coupon_list_view.js
-msgid "Custom Code"
-msgstr "Çüstöm Çödé Ⱡ'σяєм ιρѕυм ∂σłσя #"
-
-#: ecommerce/static/js/views/coupon_list_view.js
-msgid "Client"
-msgstr "Çlïént Ⱡ'σяєм ιρѕυ#"
-
-#: ecommerce/static/js/views/coupon_list_view.js
-msgid "Category"
-msgstr "Çätégörý Ⱡ'σяєм ιρѕυм ∂#"
-
-#: ecommerce/static/js/views/coupon_list_view.js
-msgid "Coupon Report"
-msgstr "Çöüpön Répört Ⱡ'σяєм ιρѕυм ∂σłσя ѕι#"
 
 #: ecommerce/static/js/views/course_form_view.js
 msgid "Free (Audit)"
@@ -475,6 +503,25 @@ msgstr "Séät tïtlé Ⱡ'σяєм ιρѕυм ∂σłσ#"
 #: ecommerce/static/js/views/dynamic_catalog_view.js
 msgid "Seat type"
 msgstr "Séät týpé Ⱡ'σяєм ιρѕυм ∂σł#"
+
+#: ecommerce/static/js/views/enterprise_coupon_detail_view.js
+#: ecommerce/static/js/views/enterprise_coupon_form_view.js
+msgid "Can be used multiple times by one customer"
+msgstr ""
+"Çän ßé üséd mültïplé tïmés ßý öné çüstömér Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
+"¢σηѕє¢тєтυя #"
+
+#: ecommerce/static/js/views/enterprise_coupon_list_view.js
+msgid "Status"
+msgstr "Stätüs Ⱡ'σяєм ιρѕυ#"
+
+#: ecommerce/static/js/views/enterprise_coupon_list_view.js
+msgid "Enterprise Customer"
+msgstr "Éntérprïsé Çüstömér Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт,#"
+
+#: ecommerce/static/js/views/enterprise_coupon_list_view.js
+msgid "Enterprise Customer Catalog"
+msgstr "Éntérprïsé Çüstömér Çätälög Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє#"
 
 #: ecommerce/static/js/views/form_view.js
 msgid "A course with the specified ID already exists."
