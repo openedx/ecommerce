@@ -45,6 +45,7 @@ CONTENT_TYPE = 'application/json'
 class UserMixin(object):
     """Provides utility methods for creating and authenticating users in test cases."""
     access_token = 'test-access-token'
+    user_id = 'test-user-id'
     password = 'test'
 
     def create_user(self, **kwargs):
@@ -62,6 +63,15 @@ class UserMixin(object):
         """
         access_token = access_token or self.access_token
         UserSocialAuth.objects.create(user=user, extra_data={'access_token': access_token})
+
+    def set_user_id_in_social_auth(self, user, user_id=None):
+        """
+        Sets the user_id in social auth for the specified user.
+
+        If no user_id value is supplied, the default (self.user_id) will be used.
+        """
+        user_id = user_id or self.user_id
+        UserSocialAuth.objects.create(user=user, extra_data={'user_id': user_id})
 
     def generate_jwt_token_header(self, user, secret=None):
         """Generate a valid JWT token header for authenticated requests."""

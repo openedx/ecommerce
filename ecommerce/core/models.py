@@ -12,6 +12,7 @@ from django.db import models
 from django.utils.functional import cached_property
 from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
+from edx_django_utils import monitoring as monitoring_utils
 from edx_django_utils.cache import TieredCache
 from edx_rbac.models import UserRole, UserRoleAssignment
 from edx_rest_api_client.client import EdxRestApiClient
@@ -486,6 +487,29 @@ class User(AbstractUser):
             return self.social_auth.first().extra_data[u'access_token']  # pylint: disable=no-member
         except Exception:  # pylint: disable=broad-except
             return None
+
+    @property
+    def lms_user_id(self):
+        """
+        Returns the lms_user_id, or None if not found.
+        """
+        # get lms_user_id passed through tracking_context.
+        tracking_context = self.tracking_context or {}
+        lms_user_id_tracking_context = tracking_context.get('lms_user_id')
+        monitoring_utils.set_custom_metric('lms_user_id_tracking_context', lms_user_id_tracking_context)
+
+        # get lms_user_id passed through social auth.
+        lms_user_id_social_auth = None
+        try:
+            lms_user_id_social_auth = self.social_auth.first().extra_data[u'user_id']  # pylint: disable=no-member
+        except Exception:  # pylint: disable=broad-except
+            pass
+        monitoring_utils.set_custom_metric('lms_user_id_social_auth', lms_user_id_social_auth)
+
+        # TODO: Return as soon as any non-None tracking id is found.  Temporarily, (as of April 2019)
+        # checking all values to get some additional monitoring to ensure ids agree and look good.
+        monitoring_utils.set_custom_metric('ecommerce_user_id', self.id)
+        return lms_user_id_tracking_context or lms_user_id_social_auth
 
     tracking_context = JSONField(blank=True, null=True)
 
