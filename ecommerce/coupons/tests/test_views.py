@@ -12,10 +12,12 @@ from django.utils.timezone import now
 from factory.fuzzy import FuzzyText
 from oscar.core.loading import get_class, get_model
 from oscar.test.factories import OrderFactory, OrderLineFactory, ProductFactory, RangeFactory, VoucherFactory
+from waffle.models import Switch
 
 from ecommerce.core.url_utils import get_lms_url
 from ecommerce.coupons.tests.mixins import CouponMixin, DiscoveryMockMixin
 from ecommerce.coupons.views import voucher_is_valid
+from ecommerce.enterprise.constants import ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, ENTERPRISE_OFFERS_SWITCH
 from ecommerce.enterprise.tests.mixins import EnterpriseServiceMockMixin
 from ecommerce.enterprise.utils import (
     get_enterprise_course_consent_url,
@@ -44,6 +46,7 @@ VoucherApplication = get_model('voucher', 'VoucherApplication')
 CONTENT_TYPE = 'application/json'
 COUPON_CODE = 'COUPONTEST'
 ENTERPRISE_CUSTOMER = 'cf246b88-d5f6-4908-a522-fc307e0b0c59'
+ENTERPRISE_CUSTOMER_CATALOG = 'abc18838-adcb-41d5-abec-b28be5bfcc13'
 
 
 def format_url(base='', path='', params=None):
@@ -333,6 +336,7 @@ class CouponRedeemViewTests(CouponMixin, DiscoveryTestMixin, LmsApiMockMixin, En
             code=COUPON_CODE,
             email_domains=None,
             enterprise_customer=None,
+            enterprise_customer_catalog=None,
             course_id=None,
             catalog=None
     ):
@@ -342,7 +346,8 @@ class CouponRedeemViewTests(CouponMixin, DiscoveryTestMixin, LmsApiMockMixin, En
             catalog=catalog,
             code=code,
             email_domains=email_domains,
-            enterprise_customer=enterprise_customer
+            enterprise_customer=enterprise_customer,
+            enterprise_customer_catalog=enterprise_customer_catalog,
         )
         coupon.course_id = course_id
         coupon.save()
@@ -456,14 +461,15 @@ class CouponRedeemViewTests(CouponMixin, DiscoveryTestMixin, LmsApiMockMixin, En
             self.assertTrue(mock_logger.called)
 
     def prepare_enterprise_data(self, benefit_value=100, consent_enabled=True, consent_provided=False, course_id=None,
-                                catalog=None):
+                                catalog=None, enterprise_customer_catalog=None):
         """Creates an enterprise coupon and mocks enterprise endpoints."""
         code = self.create_coupon_and_get_code(
             benefit_value=benefit_value,
             code='',
             enterprise_customer=ENTERPRISE_CUSTOMER,
             course_id=course_id,
-            catalog=catalog
+            catalog=catalog,
+            enterprise_customer_catalog=enterprise_customer_catalog
         )
         self.request.user = self.user
         self.mock_consent_response(
@@ -530,7 +536,10 @@ class CouponRedeemViewTests(CouponMixin, DiscoveryTestMixin, LmsApiMockMixin, En
     @httpretty.activate
     def test_enterprise_customer_successful_redemption(self):
         """ Verify the view redirects to LMS when valid consent is provided. """
-        code = self.prepare_enterprise_data(catalog=self.catalog)
+        Switch.objects.update_or_create(name=ENTERPRISE_OFFERS_SWITCH, defaults={'active': True})
+        Switch.objects.update_or_create(name=ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, defaults={'active': True})
+        code = self.prepare_enterprise_data(enterprise_customer_catalog=ENTERPRISE_CUSTOMER_CATALOG)
+        self.mock_assignable_enterprise_condition_calls(ENTERPRISE_CUSTOMER_CATALOG)
         self.mock_enterprise_learner_api_for_learner_with_no_enterprise()
         self.mock_enterprise_learner_post_api()
 
