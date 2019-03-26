@@ -22,7 +22,6 @@ help:
 	@echo '    make compile_translations         generate translation files                     		'
 	@echo '    make fake_translations            install fake translations                      		'
 	@echo '    make pull_translations            pull translations from Transifex               		'
-	@echo '    make update_translations          install new translations from Transifex        		'
 	@echo '    make clean_static                 delete compiled/compressed static assets       		'
 	@echo '    make static                       compile and compress static assets               		'
 	@echo '    make detect_changed_source_translations    check if translation files are up-to-date		'
@@ -165,4 +164,4 @@ upgrade: ## update the requirements/*.txt files with the latest packages satisfy
 # Targets in a Makefile which do not produce an output file with the same name as the target name
 .PHONY: help requirements migrate serve clean validate_python quality validate_js validate html_coverage e2e \
 	extract_translations dummy_translations compile_translations fake_translations pull_translations \
-	push_translations update_translations fast_validate_python clean_static production-requirements
+	push_translations fast_validate_python clean_static production-requirements
