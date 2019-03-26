@@ -317,6 +317,19 @@ class EnterpriseServiceMockMixin(object):
             content_type='application/json'
         )
 
+    def mock_assignable_enterprise_condition_calls(self, uuid):
+        self.mock_enterprise_learner_api_for_learner_with_no_enterprise()
+        catalog_contains_content_response = {
+            'contains_content_items': True
+        }
+        self.mock_access_token_response()
+        httpretty.register_uri(
+            method=httpretty.GET,
+            uri='{}{}/contains_content_items/'.format(self.ENTERPRISE_CATALOG_URL, uuid),
+            body=json.dumps(catalog_contains_content_response),
+            content_type='application/json'
+        )
+
     def mock_enterprise_learner_api_for_learner_with_no_enterprise(self):
         """
         Helper function to register enterprise learner API endpoint for a
