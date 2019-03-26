@@ -11,7 +11,11 @@ ECOM_TRACKING_ID_FMT = 'ecommerce-{}'
 
 
 def parse_tracking_context(user):
-    """Extract user ID, client ID, and IP address from a user's tracking context.
+    """
+    Extract user ID, client ID, and IP address from a user's tracking context.
+
+    Note: The tracking context may not exist, so user ID has backups so it will
+    always have a value.
 
     Arguments:
         user (User): An instance of the User model.
@@ -19,16 +23,14 @@ def parse_tracking_context(user):
     Returns:
         Tuple of strings: user_tracking_id, ga_client_id, lms_ip
     """
-    tracking_context = user.tracking_context or {}
-
-    user_tracking_id = tracking_context.get('lms_user_id')
+    user_tracking_id = user.lms_user_id
     if user_tracking_id is None:
-        # Even if we cannot extract a good platform user ID from the context, we can still track the
-        # event with an arbitrary local user ID. However, we need to disambiguate the ID we choose
-        # since there's no guarantee it won't collide with a platform user ID that may be tracked
-        # at some point.
+        # If we still don't have the lms user ID, we will use the local user ID. However, we need
+        # to disambiguate the ID we choose since there's no guarantee it won't collide with the
+        # lms user ID that may be tracked at some point.
         user_tracking_id = ECOM_TRACKING_ID_FMT.format(user.id)
 
+    tracking_context = user.tracking_context or {}
     lms_ip = tracking_context.get('lms_ip')
     ga_client_id = tracking_context.get('ga_client_id')
 

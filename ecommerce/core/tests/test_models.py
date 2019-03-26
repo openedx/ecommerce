@@ -41,7 +41,7 @@ def _make_site_config(payment_processors_str, site_id=1):
 
 @ddt.ddt
 class UserTests(DiscoveryTestMixin, LmsApiMockMixin, TestCase):
-    TEST_CONTEXT = {'foo': 'bar', 'baz': None}
+    TEST_CONTEXT = {'foo': 'bar', 'baz': None, 'lms_user_id': 'test-context-user-id'}
 
     def setUp(self):
         super(UserTests, self).setUp()
@@ -60,6 +60,26 @@ class UserTests(DiscoveryTestMixin, LmsApiMockMixin, TestCase):
 
         self.create_access_token(user)
         self.assertEqual(user.access_token, self.access_token)
+
+    def test_lms_user_id_from_social_auth(self):
+        """ Ensures the lms_user_id can be pulled from the tracking context. """
+        user = self.create_user()
+        self.assertIsNone(user.lms_user_id)
+
+        self.set_user_id_in_social_auth(user, 'test-social-auth-user-id')
+
+        self.assertEqual(user.lms_user_id, 'test-social-auth-user-id')
+
+    def test_lms_user_id_from_tracking_context(self):
+        """ Ensures the lms_user_id can be pulled from the tracking context. """
+        user = self.create_user()
+        self.assertIsNone(user.lms_user_id)
+
+        user.tracking_context = self.TEST_CONTEXT
+        user.save()
+
+        same_user = User.objects.get(id=user.id)
+        self.assertEqual(same_user.lms_user_id, self.TEST_CONTEXT['lms_user_id'])
 
     def test_tracking_context(self):
         """ Ensures that the tracking_context dictionary is written / read
