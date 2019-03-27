@@ -1,7 +1,11 @@
 """Development settings and globals."""
 from __future__ import absolute_import
+import six
 
-from urlparse import urljoin
+if six.PY2:
+    from urlparse import urljoin
+else:
+    from urllib.parse import urljoin
 
 from corsheaders.defaults import default_headers as corsheaders_default_headers
 
