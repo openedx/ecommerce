@@ -13,6 +13,8 @@ from django.contrib.sites.models import Site
 from django.urls import reverse
 from django.utils.timezone import now
 from edx_django_utils.cache import TieredCache
+from edx_rest_framework_extensions.auth.jwt.cookies import jwt_cookie_name
+from edx_rest_framework_extensions.auth.jwt.tests.utils import generate_jwt_token, generate_unversioned_payload
 from mock import patch
 from oscar.core.loading import get_class, get_model
 from oscar.test import factories
@@ -20,6 +22,7 @@ from oscar.test.utils import RequestFactory
 from social_django.models import UserSocialAuth
 from threadlocals.threadlocals import set_thread_variable
 
+from ecommerce.core.constants import SYSTEM_ENTERPRISE_ADMIN_ROLE
 from ecommerce.core.url_utils import get_lms_url
 from ecommerce.courses.models import Course
 from ecommerce.courses.utils import mode_for_product
@@ -94,6 +97,20 @@ class JwtMixin(object):
         secret = secret or self.JWT_SECRET_KEY
         token = jwt.encode(dict(payload, iss=self.issuer), secret)
         return token
+
+    def set_jwt_cookie(self, system_wide_role=SYSTEM_ENTERPRISE_ADMIN_ROLE, context='some_context'):
+        """
+        Set jwt token in cookies
+        """
+        payload = generate_unversioned_payload(self.user)
+        payload.update({
+            'roles': [
+                '{system_wide_role}:{context}'.format(system_wide_role=system_wide_role, context=context)
+            ]
+        })
+        jwt_token = generate_jwt_token(payload)
+
+        self.client.cookies[jwt_cookie_name()] = jwt_token
 
 
 class BasketCreationMixin(UserMixin, JwtMixin):

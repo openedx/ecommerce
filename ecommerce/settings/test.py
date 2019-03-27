@@ -4,6 +4,7 @@ from urlparse import urljoin
 
 from path import Path
 
+from ecommerce.core.constants import ENTERPRISE_COUPON_ADMIN_ROLE, SYSTEM_ENTERPRISE_ADMIN_ROLE
 from ecommerce.settings.base import *
 
 SITE_ID = 1
@@ -173,3 +174,7 @@ BROKER_BACKEND = 'memory'
 #SAILTHRU settings
 SAILTHRU_KEY = 'abc123'
 SAILTHRU_SECRET = 'top_secret'
+
+SYSTEM_TO_FEATURE_ROLE_MAPPING = {
+    SYSTEM_ENTERPRISE_ADMIN_ROLE: [ENTERPRISE_COUPON_ADMIN_ROLE],
+}

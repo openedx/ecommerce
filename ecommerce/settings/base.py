@@ -626,6 +626,7 @@ if os.environ.get('ENABLE_DJANGO_TOOLBAR', False):
 
     MIDDLEWARE_CLASSES += (
         'debug_toolbar.middleware.DebugToolbarMiddleware',
+        'crum.CurrentRequestUserMiddleware',
     )
 
 # Determines if events are actually sent to Segment. This should only be set to False for testing purposes.

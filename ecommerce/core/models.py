@@ -665,6 +665,13 @@ class EcommerceFeatureRoleAssignment(UserRoleAssignment):
 
     role_class = EcommerceFeatureRole
     user = models.ForeignKey(settings.AUTH_USER_MODEL, db_index=True, on_delete=models.CASCADE)
+    enterprise_id = models.UUIDField(blank=True, null=True, verbose_name='Enterprise Customer UUID')
+
+    def get_context(self):
+        """
+        Return the context for this role assignment class.
+        """
+        return self.enterprise_id and str(self.enterprise_id)
 
     def __str__(self):
         """
