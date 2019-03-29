@@ -24,11 +24,16 @@ def has_correct_context_for_implicit_access(obj, decoded_jwt, system_wide_role_n
     Check if request has correct role assignment context.
     """
     jwt_roles_claim = decoded_jwt.get('roles', []) if decoded_jwt else []
+    print(jwt_roles_claim)
     for role_data in jwt_roles_claim:
+        print(role_data)
         role_in_jwt, enterprise_id_in_jwt = role_data.split(':')
         if role_in_jwt == system_wide_role_name:
             if isinstance(obj, unicode):
                 enterprise_id_in_request = obj
+                print("path number 1")
+                print(enterprise_id_in_jwt)
+                print(enterprise_id_in_request)
                 return enterprise_id_in_jwt == enterprise_id_in_request
             elif isinstance(obj, Product):
                 invoices = Invoice.objects.filter(
@@ -86,6 +91,8 @@ def request_user_has_implicit_access(user, obj):  # pylint: disable=unused-argum
     implicit_access = (
         request_user_has_implicit_access_via_jwt(decoded_jwt, ENTERPRISE_COUPON_ADMIN_ROLE) if decoded_jwt else False
     )
+    print("implicit_access is...")
+    print(implicit_access)
 
     if not implicit_access:
         return False
