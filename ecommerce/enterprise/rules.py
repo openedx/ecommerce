@@ -88,6 +88,8 @@ def request_user_has_implicit_access(user, obj):  # pylint: disable=unused-argum
     request = get_request_or_stub()
     decoded_jwt = get_decoded_jwt_from_request(request)
 
+    print(ENTERPRISE_COUPON_ADMIN_ROLE)
+    print(decoded_jwt)
     implicit_access = (
         request_user_has_implicit_access_via_jwt(decoded_jwt, ENTERPRISE_COUPON_ADMIN_ROLE) if decoded_jwt else False
     )
