@@ -67,7 +67,6 @@ class UserTests(DiscoveryTestMixin, LmsApiMockMixin, TestCase):
         self.assertIsNone(user.lms_user_id)
 
         self.set_user_id_in_social_auth(user, 'test-social-auth-user-id')
-
         self.assertEqual(user.lms_user_id, 'test-social-auth-user-id')
 
     def test_lms_user_id_from_tracking_context(self):

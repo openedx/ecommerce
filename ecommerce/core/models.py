@@ -493,23 +493,27 @@ class User(AbstractUser):
         """
         Returns the lms_user_id, or None if not found.
         """
-        # get lms_user_id passed through tracking_context.
-        tracking_context = self.tracking_context or {}
-        lms_user_id_tracking_context = tracking_context.get('lms_user_id')
-        monitoring_utils.set_custom_metric('lms_user_id_tracking_context', lms_user_id_tracking_context)
-
-        # get lms_user_id passed through social auth.
+        # Return lms_user_id passed through social auth, if found.
         lms_user_id_social_auth = None
         try:
             lms_user_id_social_auth = self.social_auth.first().extra_data[u'user_id']  # pylint: disable=no-member
+            if lms_user_id_social_auth:
+                monitoring_utils.set_custom_metric('lms_user_id_social_auth', lms_user_id_social_auth)
+                return lms_user_id_social_auth
+            else:  # pragma: no cover
+                pass  # allows coverage skip for just this case.
         except Exception:  # pylint: disable=broad-except
             pass
-        monitoring_utils.set_custom_metric('lms_user_id_social_auth', lms_user_id_social_auth)
 
-        # TODO: Return as soon as any non-None tracking id is found.  Temporarily, (as of April 2019)
-        # checking all values to get some additional monitoring to ensure ids agree and look good.
-        monitoring_utils.set_custom_metric('ecommerce_user_id', self.id)
-        return lms_user_id_tracking_context or lms_user_id_social_auth
+        # Return lms_user_id passed through tracking_context, if found.
+        tracking_context = self.tracking_context or {}
+        lms_user_id_tracking_context = tracking_context.get('lms_user_id')
+        if lms_user_id_tracking_context:
+            monitoring_utils.set_custom_metric('lms_user_id_tracking_context', lms_user_id_tracking_context)
+            return lms_user_id_tracking_context
+
+        monitoring_utils.set_custom_metric('ecommerce_user_missing_lms_user_id', self.id)
+        return None
 
     tracking_context = JSONField(blank=True, null=True)
 
