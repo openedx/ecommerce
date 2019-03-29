@@ -71,7 +71,7 @@ class UserMixin(object):
         If no user_id value is supplied, the default (self.user_id) will be used.
         """
         user_id = user_id or self.user_id
-        UserSocialAuth.objects.create(user=user, extra_data={'user_id': user_id})
+        UserSocialAuth.objects.update_or_create(user=user, extra_data={'user_id': user_id})
 
     def generate_jwt_token_header(self, user, secret=None):
         """Generate a valid JWT token header for authenticated requests."""
