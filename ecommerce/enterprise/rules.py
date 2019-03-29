@@ -86,6 +86,7 @@ def request_user_has_implicit_access(user, obj):  # pylint: disable=unused-argum
     if not waffle.switch_is_active(USE_ROLE_BASED_ACCESS_CONTROL):
         return True
     request = get_request_or_stub()
+    print(request.COOKIES)
     decoded_jwt = get_decoded_jwt_from_request(request)
 
     print(ENTERPRISE_COUPON_ADMIN_ROLE)
