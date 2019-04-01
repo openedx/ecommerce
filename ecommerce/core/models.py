@@ -501,23 +501,29 @@ class User(AbstractUser):
         """
         Returns the LMS user_id, or None if not found.
         """
-        # TODO: ARCH-603: Update to actually return user_id from JWT first if found
-        # - Remove pragma: no cover from _get_lms_user_id_from_jwt_cookie
-        # - Initially, being careful and just adding the metric
-        self._get_lms_user_id_from_jwt_cookie()
+        # JWT cookie is used with API calls from new microfrontends. This is not persisted.
+        lms_user_id = self._get_lms_user_id_from_jwt_cookie()
+        if lms_user_id:
+            return lms_user_id
 
+        # This is persisted to the database during any new oAuth+SSO flow.
         lms_user_id = self._get_lms_user_id_from_social_auth()
         if lms_user_id:
             return lms_user_id
 
+        # Server-to-server calls from LMS to ecommerce use a specially crafted JWT.
         lms_user_id = self._get_lms_user_id_from_tracking_context()
         if lms_user_id:
             return lms_user_id
 
+        # If we get here, it means either:
+        # 1. The user has an old social_auth session created before the LMS user_id was written to the database, or
+        # 2. This could be a server-to-server call that isn't properly handled, or
+        # 3. Some other unknown flow.
         monitoring_utils.set_custom_metric('ecommerce_user_missing_lms_user_id', self.id)
         return None
 
-    def _get_lms_user_id_from_jwt_cookie(self):  # pragma: no cover
+    def _get_lms_user_id_from_jwt_cookie(self):
         """
         Return LMS user_id from JWT cookie, if found.
         Returns None if not found.

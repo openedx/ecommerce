@@ -9,6 +9,7 @@ from django.contrib.sites.models import Site
 from django.core.exceptions import ValidationError
 from django.test import override_settings
 from edx_rest_api_client.auth import SuppliedJwtAuth
+from edx_rest_framework_extensions.auth.jwt.tests.utils import generate_jwt_token, generate_latest_version_payload
 from requests.exceptions import ConnectionError
 
 from ecommerce.core.models import (
@@ -60,6 +61,19 @@ class UserTests(DiscoveryTestMixin, LmsApiMockMixin, TestCase):
 
         self.create_access_token(user)
         self.assertEqual(user.access_token, self.access_token)
+
+    def test_lms_user_id_from_jwt_cookie(self):
+        """ Ensures the lms_user_id can be pulled from the jwt cookie. """
+        user = self.create_user()
+        self.assertIsNone(user.lms_user_id)
+
+        payload = generate_latest_version_payload(user, scopes=['user_id'])
+        payload['user_id'] = 'test-lms-user-id'
+        jwt = generate_jwt_token(payload)
+        mock_request_with_cookie = mock.Mock(COOKIES={'edx-jwt-cookie': jwt})
+
+        with mock.patch('ecommerce.core.models.crum.get_current_request', return_value=mock_request_with_cookie):
+            self.assertEqual(user.lms_user_id, 'test-lms-user-id')
 
     def test_lms_user_id_from_social_auth(self):
         """ Ensures the lms_user_id can be pulled from the tracking context. """
