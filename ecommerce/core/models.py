@@ -3,6 +3,7 @@ import hashlib
 import logging
 from urlparse import urljoin, urlsplit, urlunsplit
 
+import crum
 from dateutil.parser import parse
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
@@ -16,6 +17,7 @@ from edx_django_utils import monitoring as monitoring_utils
 from edx_django_utils.cache import TieredCache
 from edx_rbac.models import UserRole, UserRoleAssignment
 from edx_rest_api_client.client import EdxRestApiClient
+from edx_rest_framework_extensions.auth.jwt.cookies import get_decoded_jwt as get_decoded_jwt_from_jwt_cookie
 from jsonfield.fields import JSONField
 from requests.exceptions import ConnectionError, Timeout
 from slumber.exceptions import HttpNotFoundError, SlumberBaseException
@@ -481,6 +483,12 @@ class User(AbstractUser):
 
     full_name = models.CharField(_('Full Name'), max_length=255, blank=True, null=True)
 
+    tracking_context = JSONField(blank=True, null=True)
+
+    class Meta(object):
+        get_latest_by = 'date_joined'
+        db_table = 'ecommerce_user'
+
     @property
     def access_token(self):
         try:
@@ -491,10 +499,53 @@ class User(AbstractUser):
     @property
     def lms_user_id(self):
         """
-        Returns the lms_user_id, or None if not found.
+        Returns the LMS user_id, or None if not found.
         """
-        # Return lms_user_id passed through social auth, if found.
-        lms_user_id_social_auth = None
+        # TODO: ARCH-603: Update to actually return user_id from JWT first if found
+        # - Remove pragma: no cover from _get_lms_user_id_from_jwt_cookie
+        # - Initially, being careful and just adding the metric
+        self._get_lms_user_id_from_jwt_cookie()
+
+        lms_user_id = self._get_lms_user_id_from_social_auth()
+        if lms_user_id:
+            return lms_user_id
+
+        lms_user_id = self._get_lms_user_id_from_tracking_context()
+        if lms_user_id:
+            return lms_user_id
+
+        monitoring_utils.set_custom_metric('ecommerce_user_missing_lms_user_id', self.id)
+        return None
+
+    def _get_lms_user_id_from_jwt_cookie(self):  # pragma: no cover
+        """
+        Return LMS user_id from JWT cookie, if found.
+        Returns None if not found.
+
+        Side effect:
+            If found, writes custom metric: 'lms_user_id_jwt_cookie'
+        """
+        request = crum.get_current_request()
+        if not request:
+            return None
+
+        decoded_jwt = get_decoded_jwt_from_jwt_cookie(request)
+        if not decoded_jwt:
+            return None
+
+        if 'user_id' in decoded_jwt:
+            lms_user_id_in_jwt_cookie = decoded_jwt['user_id']
+            monitoring_utils.set_custom_metric('lms_user_id_jwt_cookie', lms_user_id_in_jwt_cookie)
+            return lms_user_id_in_jwt_cookie
+
+    def _get_lms_user_id_from_social_auth(self):
+        """
+        Return LMS user_id passed through social auth, if found.
+        Returns None if not found.
+
+        Side effect:
+            If found, writes custom metric: 'lms_user_id_social_auth'
+        """
         try:
             lms_user_id_social_auth = self.social_auth.first().extra_data[u'user_id']  # pylint: disable=no-member
             if lms_user_id_social_auth:
@@ -505,21 +556,20 @@ class User(AbstractUser):
         except Exception:  # pylint: disable=broad-except
             pass
 
+    def _get_lms_user_id_from_tracking_context(self):
+        """
+        Return LMS user_id passed through tracking_context, if found.
+        Returns None if not found.
+
+        Side effect:
+            If found, writes custom metric: 'lms_user_id_tracking_context'
+        """
         # Return lms_user_id passed through tracking_context, if found.
         tracking_context = self.tracking_context or {}
         lms_user_id_tracking_context = tracking_context.get('lms_user_id')
         if lms_user_id_tracking_context:
             monitoring_utils.set_custom_metric('lms_user_id_tracking_context', lms_user_id_tracking_context)
             return lms_user_id_tracking_context
-
-        monitoring_utils.set_custom_metric('ecommerce_user_missing_lms_user_id', self.id)
-        return None
-
-    tracking_context = JSONField(blank=True, null=True)
-
-    class Meta(object):
-        get_latest_by = 'date_joined'
-        db_table = 'ecommerce_user'
 
     def get_full_name(self):
         return self.full_name or super(User, self).get_full_name()
