@@ -1,6 +1,5 @@
 import newrelic.agent
 import waffle
-
 from oscar.apps.basket.middleware import BasketMiddleware as OscarBasketMiddleware
 from oscar.core.loading import get_class, get_model
 

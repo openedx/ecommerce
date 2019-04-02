@@ -5,7 +5,6 @@ from oscar.core.loading import get_class
 
 from ecommerce.core.views import LogoutView
 
-
 # Note: Add ecommerce's logout override first to ensure it is registered by Django as the
 # actual logout view. Ecommerce's logout implementation supports different site configuration.
 AUTH_URLS = [url(r'^logout/$', LogoutView.as_view(), name='logout'), ] + oauth2_urlpatterns
