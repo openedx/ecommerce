@@ -1,7 +1,6 @@
 """API endpoint for sending assignment emails to Learners"""
 import logging
 
-
 from django.conf import settings
 from django.db import transaction
 from rest_framework import status
