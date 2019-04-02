@@ -34,6 +34,10 @@ DEFAULT_CATALOG_PAGE_SIZE = 100
 ENTERPRISE_COUPON_ADMIN_ROLE = 'enterprise_coupon_admin'
 
 SYSTEM_ENTERPRISE_ADMIN_ROLE = 'enterprise_admin'
+SYSTEM_ENTERPRISE_OPERATOR_ROLE = 'enterprise_openedx_operator'
+
+# Context to give access to all resources
+ALL_ACCESS_CONTEXT = '*'
 
 
 class Status(object):

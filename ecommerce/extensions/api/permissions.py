@@ -1,6 +1,6 @@
 import logging
-import waffle
 
+import waffle
 from django.conf import settings
 from oscar.core.loading import get_model
 from requests.exceptions import ConnectionError, Timeout
@@ -9,7 +9,6 @@ from slumber.exceptions import SlumberHttpBaseException
 
 from ecommerce.enterprise.api import get_with_access_to
 from ecommerce.enterprise.constants import USE_ROLE_BASED_ACCESS_CONTROL
-
 from ecommerce.extensions.api.serializers import retrieve_enterprise_condition
 
 Product = get_model('catalogue', 'Product')
