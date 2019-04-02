@@ -21,7 +21,12 @@ from rest_framework import status
 from waffle.models import Switch
 from waffle.testutils import override_switch
 
-from ecommerce.core.constants import ENTERPRISE_COUPON_ADMIN_ROLE, SYSTEM_ENTERPRISE_ADMIN_ROLE
+from ecommerce.core.constants import (
+    ALL_ACCESS_CONTEXT,
+    ENTERPRISE_COUPON_ADMIN_ROLE,
+    SYSTEM_ENTERPRISE_ADMIN_ROLE,
+    SYSTEM_ENTERPRISE_OPERATOR_ROLE
+)
 from ecommerce.core.models import EcommerceFeatureRole, EcommerceFeatureRoleAssignment
 from ecommerce.core.url_utils import get_ecommerce_url
 from ecommerce.coupons.tests.mixins import CouponMixin, DiscoveryMockMixin
@@ -29,7 +34,11 @@ from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.enterprise.benefits import BENEFIT_MAP as ENTERPRISE_BENEFIT_MAP
 from ecommerce.enterprise.conditions import AssignableEnterpriseCustomerCondition
 from ecommerce.enterprise.constants import ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, USE_ROLE_BASED_ACCESS_CONTROL
-from ecommerce.enterprise.rules import request_user_has_explicit_access, request_user_has_implicit_access
+from ecommerce.enterprise.rules import (
+    rbac_permissions_disabled,
+    request_user_has_explicit_access,
+    request_user_has_implicit_access
+)
 from ecommerce.enterprise.tests.mixins import EnterpriseServiceMockMixin
 from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
 from ecommerce.extensions.offer.constants import (
@@ -1834,12 +1843,11 @@ class EnterpriseCouponViewSetRbacTests(
         self.verified_seat = self.course.create_or_update_seat('verified', False, 100)
         self.enterprise_slug = 'batman'
         self.role = EcommerceFeatureRole.objects.get(name=ENTERPRISE_COUPON_ADMIN_ROLE)
-        if self.role:
-            EcommerceFeatureRoleAssignment.objects.get_or_create(
-                role=self.role,
-                user=self.user,
-                enterprise_id=self.data['enterprise_customer']['id']
-            )
+        EcommerceFeatureRoleAssignment.objects.get_or_create(
+            role=self.role,
+            user=self.user,
+            enterprise_id=self.data['enterprise_customer']['id']
+        )
         self.set_jwt_cookie(
             system_wide_role=SYSTEM_ENTERPRISE_ADMIN_ROLE, context=self.data['enterprise_customer']['id']
         )
@@ -2609,9 +2617,16 @@ class EnterpriseCouponViewSetRbacTests(
         Test that we get explicit access via role assignment
         """
         Switch.objects.update_or_create(name=ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, defaults={'active': True})
+
+        # Re-order rules predicate to check explicit access first.
         rules.remove_perm('enterprise.can_view_coupon')
-        rules.add_perm('enterprise.can_view_coupon',
-                       request_user_has_explicit_access | request_user_has_implicit_access)
+        rules.add_perm(
+            'enterprise.can_view_coupon',
+            rbac_permissions_disabled |
+            request_user_has_explicit_access |
+            request_user_has_implicit_access
+        )
+
         with override_switch(USE_ROLE_BASED_ACCESS_CONTROL, active=rbac_switch):
             response = self.get_response('POST', ENTERPRISE_COUPONS_LINK, self.data)
             self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -2662,6 +2677,57 @@ class EnterpriseCouponViewSetRbacTests(
             )
         )
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_permissions_with_enterprise_openedx_operator(self):
+        """
+        Test that role base permissions works as expected with `enterprise_openedx_operator` role.
+        """
+        Switch.objects.update_or_create(name=ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, defaults={'active': True})
+
+        self.set_jwt_cookie(system_wide_role=SYSTEM_ENTERPRISE_OPERATOR_ROLE, context=ALL_ACCESS_CONTEXT)
+
+        response = self.get_response('POST', ENTERPRISE_COUPONS_LINK, self.data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        EcommerceFeatureRoleAssignment.objects.all().delete()
+
+        response = self.get_response(
+            'GET',
+            reverse(
+                'api:v2:enterprise-coupons-(?P<enterprise-id>.+)/overview-list',
+                kwargs={'enterprise_id': self.data['enterprise_customer']['id']}
+            )
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    @ddt.data(SYSTEM_ENTERPRISE_ADMIN_ROLE, 'role_with_no_mapped_permissions')
+    def test_permissions_with_all_access_context(self, system_wide_role):
+        """
+        Test that role base permissions works as expected with all access context.
+        """
+        Switch.objects.update_or_create(name=ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, defaults={'active': True})
+
+        # Create a feature role assignment with no enterprise id i.e it would have all access context.
+        EcommerceFeatureRoleAssignment.objects.all().delete()
+        EcommerceFeatureRoleAssignment.objects.get_or_create(
+            role=self.role,
+            user=self.user
+        )
+
+        self.set_jwt_cookie(
+            system_wide_role=system_wide_role, context=ALL_ACCESS_CONTEXT
+        )
+
+        response = self.get_response('POST', ENTERPRISE_COUPONS_LINK, self.data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        response = self.get_response(
+            'GET',
+            reverse(
+                'api:v2:enterprise-coupons-(?P<enterprise-id>.+)/overview-list',
+                kwargs={'enterprise_id': self.data['enterprise_customer']['id']}
+            )
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     @ddt.data(
         (

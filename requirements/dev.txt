@@ -68,7 +68,7 @@ edx-drf-extensions==2.2.0
 edx-ecommerce-worker==0.7.2
 edx-i18n-tools==0.4.8
 edx-opaque-keys==0.4.4
-edx-rbac==0.1.9
+edx-rbac==0.1.10
 edx-rest-api-client==1.9.2
 edx-sphinx-theme==1.0.2
 enum34==1.1.6             # via cryptography
@@ -88,7 +88,7 @@ isodate==0.6.0            # via zeep
 isort==4.2.5
 itypes==1.1.0             # via coreapi
 jinja2-pluralize==0.3.0   # via diff-cover
-jinja2==2.10              # via coreschema, diff-cover, jinja2-pluralize, sphinx
+jinja2==2.10.1            # via coreschema, diff-cover, jinja2-pluralize, sphinx
 jsonfield==1.0.3
 kombu==3.0.37             # via celery
 lazy-object-proxy==1.3.1  # via astroid
@@ -109,7 +109,7 @@ path.py==7.2
 paypalrestsdk==1.13.1
 pbr==5.1.3                # via mock, stevedore
 pep8==1.6.2
-phonenumberslite==8.10.8  # via django-phonenumber-field
+phonenumberslite==8.10.9  # via django-phonenumber-field
 pillow==6.0.0             # via django-oscar
 polib==1.1.0              # via edx-i18n-tools
 premailer==2.9.2
@@ -119,7 +119,7 @@ purl==1.5                 # via django-oscar
 pyasn1==0.4.5             # via ndg-httpsclient
 pycountry==17.1.8
 pycparser==2.19           # via cffi
-pycryptodomex==3.8.0      # via pyjwkest
+pycryptodomex==3.8.1      # via pyjwkest
 pygments==2.3.1
 pyinotify==0.9.6
 pyjwkest==1.3.2           # via edx-drf-extensions, social-auth-core

@@ -12,7 +12,7 @@ docutils==0.14            # via sphinx
 edx-sphinx-theme==1.0.2
 idna==2.8                 # via requests
 imagesize==1.1.0          # via sphinx
-jinja2==2.10              # via sphinx
+jinja2==2.10.1            # via sphinx
 markupsafe==1.1.1         # via jinja2
 pygments==2.3.1           # via sphinx
 pytz==2018.9              # via babel

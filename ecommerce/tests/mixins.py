@@ -112,11 +112,13 @@ class JwtMixin(object):
         """
         Set jwt token in cookies
         """
+        role_data = '{system_wide_role}'.format(system_wide_role=system_wide_role)
+        if context is not None:
+            role_data += ':{context}'.format(context=context)
+
         payload = generate_unversioned_payload(self.user)
         payload.update({
-            'roles': [
-                '{system_wide_role}:{context}'.format(system_wide_role=system_wide_role, context=context)
-            ]
+            'roles': [role_data]
         })
         jwt_token = generate_jwt_token(payload)
 
