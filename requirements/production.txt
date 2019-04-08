@@ -46,6 +46,7 @@ django-widget-tweaks==1.4.3  # via django-oscar
 django==1.11.15
 django_extensions==1.9.9
 djangorestframework-csv==2.1.0
+djangorestframework-datatables==0.5.0
 djangorestframework-jwt==1.11.0
 djangorestframework==3.6.4
 drf-extensions==0.3.1
@@ -56,11 +57,11 @@ edx-django-utils==1.0.3
 edx-drf-extensions==2.2.0
 edx-ecommerce-worker==0.7.2
 edx-opaque-keys==0.4.4
-edx-rbac==0.1.10
+edx-rbac==0.1.11
 edx-rest-api-client==1.9.2
 enum34==1.1.6             # via cryptography
 factory-boy==2.11.1       # via django-oscar
-faker==1.0.4              # via factory-boy
+faker==1.0.5              # via factory-boy
 funcsigs==1.0.2           # via mock
 future==0.17.1            # via pyjwkest
 gevent==1.0.2
