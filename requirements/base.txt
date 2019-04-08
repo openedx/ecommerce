@@ -46,6 +46,7 @@ django_extensions==1.9.9
 djangorestframework-csv==2.1.0
 djangorestframework-jwt==1.11.0
 djangorestframework==3.6.4
+djangorestframework-datatables==0.4.0
 drf-extensions==0.3.1
 edx-auth-backends==2.0.0
 edx-django-release-util==0.3.1

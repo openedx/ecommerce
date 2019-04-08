@@ -20,28 +20,32 @@ define([
 
             template: _.template(courseListViewTemplate),
 
-            initialize: function() {
-                this.listenTo(this.collection, 'update', this.refreshTableData);
-            },
-
-            getRowData: function(course) {
-                return {
-                    id: course.get('id'),
-                    type: course.get('type'),
-                    name: course.get('name'),
-                    last_edited: moment(course.get('last_edited')).format('MMMM DD, YYYY, h:mm A')
-                };
-            },
-
             renderCourseTable: function() {
                 var filterPlaceholder = gettext('Search...'),
                     $emptyLabel = '<label class="sr">' + filterPlaceholder + '</label>';
 
                 if (!$.fn.dataTable.isDataTable('#courseTable')) {
-                    this.$el.find('#courseTable').DataTable({
+                    var courseTable = this.$el.find('#courseTable').DataTable({
+                        serverSide: true,
+                        ajax: '/api/v2/courses/?format=datatables',
                         autoWidth: false,
+                        lengthMenu: [10, 25, 50, 100],
                         info: true,
                         paging: true,
+                        initComplete: function() {
+                            $('#courseTable_filter input').unbind()
+                            .bind('keyup', function(e) {
+                                // If the length is 3 or more characters, or the user pressed ENTER, search
+                                if(this.value.length >= 3 || e.keyCode == 13) {
+                                    courseTable.search( this.value ).draw();
+                                }
+
+                                // Ensure we clear the search if they backspace far enough
+                                if(this.value == "") {
+                                    courseTable.search("").draw();
+                                }
+                            });
+                        },
                         oLanguage: {
                             oPaginate: {
                                 sNext: gettext('Next'),
@@ -73,11 +77,17 @@ define([
                                 data: 'type',
                                 fnCreatedCell: function(nTd, sData, oData) {
                                     $(nTd).html(_s.capitalize(oData.type));
-                                }
+                                },
+                                searchable: false,
+                                orderable: false
                             },
                             {
                                 title: gettext('Last Edited'),
-                                data: 'last_edited'
+                                data: 'last_edited',
+                                name: 'modified',
+                                fnCreatedCell: function(nTd, sData, oData) {
+                                    $(nTd).html(moment(oData.last_edited).format('MMMM DD, YYYY, h:mm A'));
+                                }
                             },
                             {
                                 data: 'id',
@@ -100,19 +110,7 @@ define([
             render: function() {
                 this.$el.html(this.template);
                 this.renderCourseTable();
-                this.refreshTableData();
 
-                return this;
-            },
-
-            /**
-             * Refresh the data table with the collection's current information.
-             */
-            refreshTableData: function() {
-                var data = this.collection.map(this.getRowData, this),
-                    $table = this.$el.find('#courseTable').DataTable();
-
-                $table.clear().rows.add(data).draw();
                 return this;
             }
         });
