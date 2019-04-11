@@ -42,38 +42,40 @@ def create_parent_course_entitlement(name, UUID):
     return parent, created
 
 
-def create_or_update_course_entitlement(certificate_type, price, partner, UUID, name, id_verification_required=False):
-    """ Create or Update Course Entitlement Products """
-
-    certificate_type = certificate_type.lower()
-    UUID = unicode(UUID)
-
+def get_entitlement(uuid, certificate_type):
+    """ Get a Course Entitlement Product """
     uuid_query = Q(
         attributes__name='UUID',
-        attribute_values__value_text=UUID,
+        attribute_values__value_text=unicode(uuid),
     )
     certificate_type_query = Q(
         attributes__name='certificate_type',
-        attribute_values__value_text=certificate_type,
+        attribute_values__value_text=certificate_type.lower(),
     )
+    return Product.objects.filter(uuid_query).get(certificate_type_query)
+
+
+def create_or_update_course_entitlement(certificate_type, price, partner, UUID, title, id_verification_required=False):
+    """ Create or Update Course Entitlement Products """
+    certificate_type = certificate_type.lower()
+    UUID = unicode(UUID)
 
     try:
-        parent_entitlement, __ = create_parent_course_entitlement(name, UUID)
-        all_products = parent_entitlement.children.all().prefetch_related('stockrecords')
-        course_entitlement = all_products.filter(uuid_query).get(certificate_type_query)
+        parent_entitlement, __ = create_parent_course_entitlement(title, UUID)
+        course_entitlement = get_entitlement(UUID, certificate_type)
     except Product.DoesNotExist:
         course_entitlement = Product()
 
     course_entitlement.structure = Product.CHILD
     course_entitlement.is_discountable = True
-    course_entitlement.title = 'Course {}'.format(name)
+    course_entitlement.title = 'Course {}'.format(title)
     course_entitlement.attr.certificate_type = certificate_type
     course_entitlement.attr.UUID = UUID
     course_entitlement.attr.id_verification_required = id_verification_required
     course_entitlement.parent = parent_entitlement
     course_entitlement.save()
 
-    StockRecord.objects.update_or_create(
+    __, created = StockRecord.objects.update_or_create(
         product=course_entitlement, partner=partner,
         defaults={
             'product': course_entitlement,
@@ -84,11 +86,12 @@ def create_or_update_course_entitlement(certificate_type, price, partner, UUID, 
         }
     )
 
-    logger.info(
-        'Course entitlement product stock record with certificate type [%s] for [%s] does not exist. '
-        'Instantiated a new instance.',
-        certificate_type,
-        UUID
-    )
+    if created:
+        logger.info(
+            'Course entitlement product stock record with certificate type [%s] for [%s] does not exist. '
+            'Instantiated a new instance.',
+            certificate_type,
+            UUID
+        )
 
     return course_entitlement

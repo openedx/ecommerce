@@ -7,6 +7,7 @@ from django.test.client import RequestFactory
 from oscar.test import factories
 
 from analytics import Client
+from ecommerce.core.models import User  # pylint: disable=unused-import
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.extensions.analytics.utils import (
     ECOM_TRACKING_ID_FMT,
@@ -65,6 +66,20 @@ class UtilsTest(DiscoveryTestMixin, BasketMixin, TransactionTestCase):
         user = self.create_user(tracking_context=tracking_context)
         expected = (ECOM_TRACKING_ID_FMT.format(user.id), tracking_context['ga_client_id'], tracking_context['lms_ip'])
         self.assertEqual(parse_tracking_context(user), expected)
+
+    def test_parse_tracking_context_not_available(self):
+        """
+        The method should still pull the user_id from lms_user_id on the User object when there is
+        no tracking context.
+        """
+        user = self.create_user()
+        expected = ('test-user-id', None, None)
+        with mock.patch(
+            'ecommerce.core.models.User.lms_user_id',
+            new_callable=mock.PropertyMock,
+            return_value='test-user-id'
+        ):
+            self.assertEqual(parse_tracking_context(user), expected)
 
     def test_track_segment_event_without_segment_key(self):
         """ If the site has no Segment key, the function should log a debug message and NOT send an event."""

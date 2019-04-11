@@ -13,7 +13,7 @@ django-crispy-forms
 django_extensions==1.9.9
 django-filter==1.0.4
 django-libsass==0.5
-django-oscar==1.5.1
+django-oscar<1.6                    # 1.6 has backwards incompatible changes
 django-rest-swagger
 django-solo
 django-threadlocals
@@ -29,6 +29,7 @@ edx-drf-extensions
 edx-django-sites-extensions
 edx-ecommerce-worker
 edx-opaque-keys
+edx-rbac
 edx-rest-api-client
 gevent==1.0.2
 jsonfield==1.0.3
@@ -43,6 +44,7 @@ pygments
 python-dateutil
 pytz==2016.10
 requests
+rules
 sailthru-client==2.2.3
 six
 stripe==1.70.0

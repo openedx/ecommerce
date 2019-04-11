@@ -317,6 +317,19 @@ class EnterpriseServiceMockMixin(object):
             content_type='application/json'
         )
 
+    def mock_assignable_enterprise_condition_calls(self, uuid):
+        self.mock_enterprise_learner_api_for_learner_with_no_enterprise()
+        catalog_contains_content_response = {
+            'contains_content_items': True
+        }
+        self.mock_access_token_response()
+        httpretty.register_uri(
+            method=httpretty.GET,
+            uri='{}{}/contains_content_items/'.format(self.ENTERPRISE_CATALOG_URL, uuid),
+            body=json.dumps(catalog_contains_content_response),
+            content_type='application/json'
+        )
+
     def mock_enterprise_learner_api_for_learner_with_no_enterprise(self):
         """
         Helper function to register enterprise learner API endpoint for a
@@ -634,4 +647,25 @@ class EnterpriseServiceMockMixin(object):
             [self.course_run.id],
             condition.enterprise_customer_uuid,
             enterprise_customer_catalog_uuid=condition.enterprise_customer_catalog_uuid,
+        )
+
+    def mock_with_access_to(self,
+                            enterprise_id,
+                            enterprise_data_api_group,
+                            expected_response,
+                            raise_exception=False):
+        self.mock_access_token_response()
+        query_params = urlencode({
+            'permissions': [enterprise_data_api_group],
+            'enterprise_id': enterprise_id,
+        }, True)
+        body = raise_timeout if raise_exception else json.dumps(expected_response)
+        httpretty.register_uri(
+            method=httpretty.GET,
+            uri='{}enterprise-customer/with_access_to/?{}'.format(
+                self.site.siteconfiguration.enterprise_api_url,
+                query_params
+            ),
+            body=body,
+            content_type='application/json'
         )

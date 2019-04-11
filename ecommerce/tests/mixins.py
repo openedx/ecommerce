@@ -13,6 +13,8 @@ from django.contrib.sites.models import Site
 from django.urls import reverse
 from django.utils.timezone import now
 from edx_django_utils.cache import TieredCache
+from edx_rest_framework_extensions.auth.jwt.cookies import jwt_cookie_name
+from edx_rest_framework_extensions.auth.jwt.tests.utils import generate_jwt_token, generate_unversioned_payload
 from mock import patch
 from oscar.core.loading import get_class, get_model
 from oscar.test import factories
@@ -20,6 +22,7 @@ from oscar.test.utils import RequestFactory
 from social_django.models import UserSocialAuth
 from threadlocals.threadlocals import set_thread_variable
 
+from ecommerce.core.constants import SYSTEM_ENTERPRISE_ADMIN_ROLE
 from ecommerce.core.url_utils import get_lms_url
 from ecommerce.courses.models import Course
 from ecommerce.courses.utils import mode_for_product
@@ -45,6 +48,7 @@ CONTENT_TYPE = 'application/json'
 class UserMixin(object):
     """Provides utility methods for creating and authenticating users in test cases."""
     access_token = 'test-access-token'
+    user_id = 'test-user-id'
     password = 'test'
 
     def create_user(self, **kwargs):
@@ -62,6 +66,15 @@ class UserMixin(object):
         """
         access_token = access_token or self.access_token
         UserSocialAuth.objects.create(user=user, extra_data={'access_token': access_token})
+
+    def set_user_id_in_social_auth(self, user, user_id=None):
+        """
+        Sets the user_id in social auth for the specified user.
+
+        If no user_id value is supplied, the default (self.user_id) will be used.
+        """
+        user_id = user_id or self.user_id
+        UserSocialAuth.objects.create(user=user, extra_data={'user_id': user_id})
 
     def generate_jwt_token_header(self, user, secret=None):
         """Generate a valid JWT token header for authenticated requests."""
@@ -94,6 +107,22 @@ class JwtMixin(object):
         secret = secret or self.JWT_SECRET_KEY
         token = jwt.encode(dict(payload, iss=self.issuer), secret)
         return token
+
+    def set_jwt_cookie(self, system_wide_role=SYSTEM_ENTERPRISE_ADMIN_ROLE, context='some_context'):
+        """
+        Set jwt token in cookies
+        """
+        role_data = '{system_wide_role}'.format(system_wide_role=system_wide_role)
+        if context is not None:
+            role_data += ':{context}'.format(context=context)
+
+        payload = generate_unversioned_payload(self.user)
+        payload.update({
+            'roles': [role_data]
+        })
+        jwt_token = generate_jwt_token(payload)
+
+        self.client.cookies[jwt_cookie_name()] = jwt_token
 
 
 class BasketCreationMixin(UserMixin, JwtMixin):

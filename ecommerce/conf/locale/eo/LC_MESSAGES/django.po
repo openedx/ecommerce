@@ -8,11 +8,11 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ecommerce\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-04-05 11:00+0000\n"
+"POT-Creation-Date: 2019-03-26 17:16+0000\n"
 "PO-Revision-Date: 2018-03-30 17:16-0500\n"
 "Last-Translator: Muhammad Ayub khan <ayubkhan@edx.org>\n"
 "Language-Team: openedx-translation <openedx-translation@googlegroups.com>\n"
-"Language: en\n"
+"Language: eo\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -243,6 +243,10 @@ msgstr ""
 msgid "Discovery API URL"
 msgstr "Dïsçövérý ÀPÌ ÛRL Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмє#"
 
+#: ecommerce/core/models.py
+msgid "Journals Service API URL"
+msgstr "Jöürnäls Sérvïçé ÀPÌ ÛRL Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢ση#"
+
 #. Translators: Do not translate "Apple Pay"
 #: ecommerce/core/models.py
 msgid "Enable Apple Pay"
@@ -261,6 +265,16 @@ msgstr ""
 "ünvérïfïéd çöürsés Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢#"
 
 #: ecommerce/core/models.py
+msgid "Hubspot Portal Secret Key"
+msgstr "Hüßspöt Pörtäl Séçrét Kéý Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕ#"
+
+#: ecommerce/core/models.py
+msgid "Secret key for Hubspot portal authentication"
+msgstr ""
+"Séçrét kéý för Hüßspöt pörtäl äüthéntïçätïön Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
+"¢σηѕє¢тєтυя #"
+
+#: ecommerce/core/models.py
 msgid "Full Name"
 msgstr "Füll Nämé Ⱡ'σяєм ιρѕυм ∂σł#"
 
@@ -269,6 +283,16 @@ msgstr "Füll Nämé Ⱡ'σяєм ιρѕυм ∂σł#"
 #: ecommerce/templates/oscar/dashboard/offers/summary.html
 msgid "Name"
 msgstr "Nämé Ⱡ'σяєм ι#"
+
+#: ecommerce/core/models.py ecommerce/extensions/offer/models.py
+msgid "EnterpriseCustomer UUID"
+msgstr "ÉntérprïséÇüstömér ÛÛÌD Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σ#"
+
+#: ecommerce/core/models.py ecommerce/extensions/offer/models.py
+msgid "UUID for an EnterpriseCustomer from the Enterprise Service."
+msgstr ""
+"ÛÛÌD för än ÉntérprïséÇüstömér fröm thé Éntérprïsé Sérvïçé. Ⱡ'σяєм ιρѕυм "
+"∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя α#"
 
 #: ecommerce/coupons/views.py ecommerce/coupons/views.py
 msgid "Coupon does not exist."
@@ -454,12 +478,13 @@ msgstr ""
 "{value} fïxéd-prïçé éntérprïsé dïsçöünt Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
 "¢σηѕє¢тєт#"
 
-#: ecommerce/enterprise/constants.py ecommerce/invoice/models.py
-#: ecommerce/programs/constants.py
+#: ecommerce/enterprise/benefits.py ecommerce/invoice/models.py
+#: ecommerce/journals/benefit_constants.py ecommerce/programs/constants.py
 msgid "Percentage"
 msgstr "Pérçéntägé Ⱡ'σяєм ιρѕυм ∂σłσ#"
 
-#: ecommerce/enterprise/constants.py ecommerce/programs/constants.py
+#: ecommerce/enterprise/benefits.py ecommerce/journals/benefit_constants.py
+#: ecommerce/programs/constants.py
 msgid "Absolute"
 msgstr "Àßsölüté Ⱡ'σяєм ιρѕυм ∂#"
 
@@ -474,19 +499,23 @@ msgid "Enterprise Customer Catalog UUID"
 msgstr ""
 "Éntérprïsé Çüstömér Çätälög ÛÛÌD Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тє#"
 
-#: ecommerce/enterprise/forms.py ecommerce/programs/forms.py
+#: ecommerce/enterprise/forms.py ecommerce/journals/forms.py
+#: ecommerce/programs/forms.py
 msgid "Discount Type"
 msgstr "Dïsçöünt Týpé Ⱡ'σяєм ιρѕυм ∂σłσя ѕι#"
 
-#: ecommerce/enterprise/forms.py ecommerce/programs/forms.py
+#: ecommerce/enterprise/forms.py ecommerce/journals/forms.py
+#: ecommerce/programs/forms.py
 msgid "Discount Value"
 msgstr "Dïsçöünt Välüé Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт#"
 
-#: ecommerce/enterprise/forms.py ecommerce/programs/forms.py
+#: ecommerce/enterprise/forms.py ecommerce/journals/forms.py
+#: ecommerce/programs/forms.py
 msgid "Start Date"
 msgstr "Stärt Däté Ⱡ'σяєм ιρѕυм ∂σłσ#"
 
-#: ecommerce/enterprise/forms.py ecommerce/programs/forms.py
+#: ecommerce/enterprise/forms.py ecommerce/journals/forms.py
+#: ecommerce/programs/forms.py
 msgid "End Date"
 msgstr "Énd Däté Ⱡ'σяєм ιρѕυм ∂#"
 
@@ -496,7 +525,8 @@ msgstr ""
 "Àn öffér älréädý éxïsts för thïs Éntérprïsé & Çätälög çömßïnätïön. Ⱡ'σяєм "
 "ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя #"
 
-#: ecommerce/enterprise/forms.py ecommerce/programs/forms.py
+#: ecommerce/enterprise/forms.py ecommerce/journals/forms.py
+#: ecommerce/programs/forms.py
 msgid "Percentage discounts cannot be greater than 100%."
 msgstr ""
 "Pérçéntägé dïsçöünts çännöt ßé gréätér thän 100%. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт "
@@ -515,11 +545,14 @@ msgstr ""
 "¢σηѕє¢тєтυя α#"
 
 #: ecommerce/enterprise/forms.py
-#, python-brace-format
-msgid "Discount provided by {enterprise_customer_name}."
+msgid "Discount of type {} provided by {} for {}."
 msgstr ""
-"Dïsçöünt prövïdéd ßý {enterprise_customer_name}. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт "
-"αмєт, ¢σηѕ#"
+"Dïsçöünt öf týpé {} prövïdéd ßý {} för {}. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
+"¢σηѕє¢тєтυя #"
+
+#: ecommerce/enterprise/templates/enterprise/enterprise_coupon_app.html
+msgid "Enterprise Coupon Codes"
+msgstr "Éntérprïsé Çöüpön Çödés Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σ#"
 
 #: ecommerce/enterprise/templates/enterprise/enterpriseoffer_form.html
 #, python-format
@@ -543,6 +576,7 @@ msgid "Enterprise Offers"
 msgstr "Éntérprïsé Öfférs Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмє#"
 
 #: ecommerce/enterprise/templates/enterprise/enterpriseoffer_form.html
+#: ecommerce/journals/templates/journals/journalbundleoffer_form.html
 #: ecommerce/programs/templates/programs/programoffer_form.html
 #: ecommerce/templates/oscar/dashboard/catalogue/product_row_actions.html
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html
@@ -559,6 +593,7 @@ msgid "Edit"
 msgstr "Édït Ⱡ'σяєм ι#"
 
 #: ecommerce/enterprise/templates/enterprise/enterpriseoffer_form.html
+#: ecommerce/journals/templates/journals/journalbundleoffer_form.html
 #: ecommerce/programs/templates/programs/programoffer_form.html
 msgid "Create"
 msgstr "Çréäté Ⱡ'σяєм ιρѕυ#"
@@ -568,11 +603,13 @@ msgid "Edit Enterprise Offer"
 msgstr "Édït Éntérprïsé Öffér Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, #"
 
 #: ecommerce/enterprise/templates/enterprise/enterpriseoffer_form.html
+#: ecommerce/journals/templates/journals/journalbundleoffer_form.html
 #: ecommerce/programs/templates/programs/programoffer_form.html
 msgid "Save Changes"
 msgstr "Sävé Çhängés Ⱡ'σяєм ιρѕυм ∂σłσя ѕ#"
 
 #: ecommerce/enterprise/templates/enterprise/enterpriseoffer_form.html
+#: ecommerce/journals/templates/journals/journalbundleoffer_form.html
 #: ecommerce/programs/templates/programs/programoffer_form.html
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html
 #: ecommerce/templates/oscar/dashboard/partials/refund_action_modal.html
@@ -596,6 +633,7 @@ msgid "Enterprise Customer Name"
 msgstr "Éntérprïsé Çüstömér Nämé Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢ση#"
 
 #: ecommerce/enterprise/templates/enterprise/enterpriseoffer_list.html
+#: ecommerce/journals/templates/journals/journalbundleoffer_list.html
 #: ecommerce/programs/templates/programs/programoffer_list.html
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html
@@ -603,16 +641,19 @@ msgid "Type"
 msgstr "Týpé Ⱡ'σяєм ι#"
 
 #: ecommerce/enterprise/templates/enterprise/enterpriseoffer_list.html
+#: ecommerce/journals/templates/journals/journalbundleoffer_list.html
 #: ecommerce/programs/templates/programs/programoffer_list.html
 msgid "Value"
 msgstr "Välüé Ⱡ'σяєм ιρѕ#"
 
 #: ecommerce/enterprise/templates/enterprise/enterpriseoffer_list.html
+#: ecommerce/journals/templates/journals/journalbundleoffer_list.html
 #: ecommerce/programs/templates/programs/programoffer_list.html
 msgid "Start"
 msgstr "Stärt Ⱡ'σяєм ιρѕ#"
 
 #: ecommerce/enterprise/templates/enterprise/enterpriseoffer_list.html
+#: ecommerce/journals/templates/journals/journalbundleoffer_list.html
 #: ecommerce/programs/templates/programs/programoffer_list.html
 msgid "End"
 msgstr "Énd Ⱡ'σяєм#"
@@ -736,20 +777,22 @@ msgstr ""
 "¢υρι∂αтαт ηση ρяσι∂єηт, ѕυηт ιη ¢υłρα qυι σƒƒι¢ια ∂єѕєяυηт мσłłιт αηιм ι∂#"
 
 #: ecommerce/extensions/api/serializers.py
+#: ecommerce/extensions/api/serializers.py
+msgid "ACTIVE"
+msgstr "ÀÇTÌVÉ Ⱡ'σяєм ιρѕυ#"
+
+#: ecommerce/extensions/api/serializers.py
+#: ecommerce/extensions/api/serializers.py
+msgid "INACTIVE"
+msgstr "ÌNÀÇTÌVÉ Ⱡ'σяєм ιρѕυм ∂#"
+
+#: ecommerce/extensions/api/serializers.py
 msgid "Enrollment code"
 msgstr "Énröllmént çödé Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт α#"
 
 #: ecommerce/extensions/api/serializers.py
 msgid "Discount code"
 msgstr "Dïsçöünt çödé Ⱡ'σяєм ιρѕυм ∂σłσя ѕι#"
-
-#: ecommerce/extensions/api/serializers.py
-msgid "ACTIVE"
-msgstr "ÀÇTÌVÉ Ⱡ'σяєм ιρѕυ#"
-
-#: ecommerce/extensions/api/serializers.py
-msgid "INACTIVE"
-msgstr "ÌNÀÇTÌVÉ Ⱡ'σяєм ιρѕυм ∂#"
 
 #: ecommerce/extensions/api/v2/views/baskets.py
 #: ecommerce/extensions/basket/views.py
@@ -763,6 +806,25 @@ msgid "Products with SKU(s) [{skus}] do not exist."
 msgstr ""
 "Prödüçts wïth SKÛ(s) [{skus}] dö nöt éxïst. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
 "¢σηѕє¢тєтυя#"
+
+#: ecommerce/extensions/api/v2/views/baskets.py
+msgid "Provide username or is_anonymous query param, but not both"
+msgstr ""
+"Prövïdé üsérnämé ör ïs_änönýmöüs qüérý päräm, ßüt nöt ßöth Ⱡ'σяєм ιρѕυм "
+"∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя α#"
+
+#: ecommerce/extensions/api/v2/views/products.py
+#, python-brace-format
+msgid "Product API only supports {http_method} for {product_class} products."
+msgstr ""
+"Prödüçt ÀPÌ önlý süppörts {http_method} för {product_class} prödüçts. Ⱡ'σяєм"
+" ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя α#"
+
+#: ecommerce/extensions/api/v2/views/products.py
+#, python-brace-format
+msgid "Missing or bad value for: [{name}]."
+msgstr ""
+"Mïssïng ör ßäd välüé för: [{name}]. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тє#"
 
 #: ecommerce/extensions/basket/models.py
 #, python-brace-format
@@ -804,6 +866,46 @@ msgid "Click here to purchase multiple seats in this course"
 msgstr ""
 "Çlïçk héré tö pürçhäsé mültïplé séäts ïn thïs çöürsé Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт "
 "αмєт, ¢σηѕє¢тєтυя α#"
+
+#: ecommerce/extensions/basket/utils.py
+#, python-brace-format
+msgid "Coupon code '{code}' has expired."
+msgstr ""
+"Çöüpön çödé '{code}' häs éxpïréd. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢т#"
+
+#: ecommerce/extensions/basket/utils.py
+#, python-brace-format
+msgid "Coupon code '{code}' is not active."
+msgstr ""
+"Çöüpön çödé '{code}' ïs nöt äçtïvé. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тє#"
+
+#: ecommerce/extensions/basket/utils.py
+#, python-brace-format
+msgid "Coupon code '{code}' has already been redeemed."
+msgstr ""
+"Çöüpön çödé '{code}' häs älréädý ßéén rédééméd. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт,"
+" ¢σηѕє¢тєтυя #"
+
+#: ecommerce/extensions/basket/utils.py ecommerce/extensions/basket/utils.py
+#, python-brace-format
+msgid "Coupon code '{code}' is not valid for this basket."
+msgstr ""
+"Çöüpön çödé '{code}' ïs nöt välïd för thïs ßäskét. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт "
+"αмєт, ¢σηѕє¢тєтυя α#"
+
+#: ecommerce/extensions/basket/utils.py
+#, python-brace-format
+msgid "Coupon code '{code}' added to basket."
+msgstr ""
+"Çöüpön çödé '{code}' äddéd tö ßäskét. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
+"¢σηѕє¢тєт#"
+
+#: ecommerce/extensions/basket/utils.py
+#, python-brace-format
+msgid "Basket does not qualify for coupon code {code}."
+msgstr ""
+"Bäskét döés nöt qüälïfý för çöüpön çödé {code}. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт,"
+" ¢σηѕє¢тєтυя #"
 
 #: ecommerce/extensions/basket/views.py
 msgid "No product is available to buy."
@@ -869,26 +971,28 @@ msgid ""
 "{paragraph_start}By purchasing, you and your organization agree to the "
 "following terms:{paragraph_end} {ul_start} {li_start}Each code is valid for "
 "the one course covered and can be used only one time.{li_end} {li_start}You "
-"are responsible for distributing codes to your learners.{li_end} "
-"{li_start}Each code will expire in one year from date of purchase or, if "
-"earlier, once the course is closed.{li_end} {li_start}If a course is not "
-"designated as self-paced, you should confirm that a course run is available "
-"before expiration. {li_end} {li_start}You may not resell codes to third "
-"parties.{li_end} {ul_end} {strong_start}All sales final. No "
-"refunds.{strong_end} {paragraph_start}You will receive an email at "
-"{user_email} with your enrollment code(s). {paragraph_end}"
+"are responsible for distributing codes to your learners in your "
+"organization.{li_end} {li_start}Each code will expire in one year from date "
+"of purchase or, if earlier, once the course is closed.{li_end} {li_start}If "
+"a course is not designated as self-paced, you should confirm that a course "
+"run is available before expiration. {li_end} {li_start}You may not resell "
+"codes to third parties.{li_end} {li_start}All edX for Business Sales are "
+"final and not eligible for refunds.{li_end}{ul_end} {paragraph_start}You "
+"will receive an email at {user_email} with your enrollment code(s). "
+"{paragraph_end}"
 msgstr ""
 "{paragraph_start}Bý pürçhäsïng, ýöü änd ýöür örgänïzätïön ägréé tö thé "
 "föllöwïng térms:{paragraph_end} {ul_start} {li_start}Éäçh çödé ïs välïd för "
 "thé öné çöürsé çövéréd änd çän ßé üséd önlý öné tïmé.{li_end} {li_start}Ýöü "
-"äré réspönsïßlé för dïstrïßütïng çödés tö ýöür léärnérs.{li_end} "
-"{li_start}Éäçh çödé wïll éxpïré ïn öné ýéär fröm däté öf pürçhäsé ör, ïf "
-"éärlïér, önçé thé çöürsé ïs çlöséd.{li_end} {li_start}Ìf ä çöürsé ïs nöt "
-"désïgnätéd äs sélf-päçéd, ýöü shöüld çönfïrm thät ä çöürsé rün ïs äväïläßlé "
-"ßéföré éxpïrätïön. {li_end} {li_start}Ýöü mäý nöt réséll çödés tö thïrd "
-"pärtïés.{li_end} {ul_end} {strong_start}Àll sälés fïnäl. Nö "
-"réfünds.{strong_end} {paragraph_start}Ýöü wïll réçéïvé än émäïl ät "
-"{user_email} wïth ýöür énröllmént çödé(s). {paragraph_end}#"
+"äré réspönsïßlé för dïstrïßütïng çödés tö ýöür léärnérs ïn ýöür "
+"örgänïzätïön.{li_end} {li_start}Éäçh çödé wïll éxpïré ïn öné ýéär fröm däté "
+"öf pürçhäsé ör, ïf éärlïér, önçé thé çöürsé ïs çlöséd.{li_end} {li_start}Ìf "
+"ä çöürsé ïs nöt désïgnätéd äs sélf-päçéd, ýöü shöüld çönfïrm thät ä çöürsé "
+"rün ïs äväïläßlé ßéföré éxpïrätïön. {li_end} {li_start}Ýöü mäý nöt réséll "
+"çödés tö thïrd pärtïés.{li_end} {li_start}Àll édX för Büsïnéss Sälés äré "
+"fïnäl änd nöt élïgïßlé för réfünds.{li_end}{ul_end} {paragraph_start}Ýöü "
+"wïll réçéïvé än émäïl ät {user_email} wïth ýöür énröllmént çödé(s). "
+"{paragraph_end}#"
 
 #: ecommerce/extensions/basket/views.py
 #, python-brace-format
@@ -896,45 +1000,6 @@ msgid "Could not apply the code '{code}'; it requires data sharing consent."
 msgstr ""
 "Çöüld nöt äpplý thé çödé '{code}'; ït réqüïrés dätä shärïng çönsént. Ⱡ'σяєм "
 "ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя α#"
-
-#: ecommerce/extensions/basket/views.py
-#, python-brace-format
-msgid "Coupon code '{code}' has expired."
-msgstr ""
-"Çöüpön çödé '{code}' häs éxpïréd. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢т#"
-
-#: ecommerce/extensions/basket/views.py
-#, python-brace-format
-msgid "Coupon code '{code}' is not active."
-msgstr ""
-"Çöüpön çödé '{code}' ïs nöt äçtïvé. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тє#"
-
-#: ecommerce/extensions/basket/views.py
-#, python-brace-format
-msgid "Coupon code '{code}' has already been redeemed."
-msgstr ""
-"Çöüpön çödé '{code}' häs älréädý ßéén rédééméd. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт,"
-" ¢σηѕє¢тєтυя #"
-
-#: ecommerce/extensions/basket/views.py ecommerce/extensions/basket/views.py
-#, python-brace-format
-msgid "Coupon code '{code}' is not valid for this basket."
-msgstr ""
-"Çöüpön çödé '{code}' ïs nöt välïd för thïs ßäskét. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт "
-"αмєт, ¢σηѕє¢тєтυя α#"
-
-#: ecommerce/extensions/basket/views.py
-msgid "Your basket does not qualify for a coupon code discount."
-msgstr ""
-"Ýöür ßäskét döés nöt qüälïfý för ä çöüpön çödé dïsçöünt. Ⱡ'σяєм ιρѕυм ∂σłσя "
-"ѕιт αмєт, ¢σηѕє¢тєтυя α#"
-
-#: ecommerce/extensions/basket/views.py
-#, python-brace-format
-msgid "Coupon code '{code}' added to basket."
-msgstr ""
-"Çöüpön çödé '{code}' äddéd tö ßäskét. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
-"¢σηѕє¢тєт#"
 
 #: ecommerce/extensions/basket/views.py
 #, python-brace-format
@@ -1028,14 +1093,10 @@ msgstr ""
 "¢σηѕє¢тєтυя #"
 
 #: ecommerce/extensions/offer/models.py
-msgid "UUID for an EnterpriseCustomer from the Enterprise Service."
+msgid "UUID for an EnterpriseCustomerCatalog from the Enterprise Service."
 msgstr ""
-"ÛÛÌD för än ÉntérprïséÇüstömér fröm thé Éntérprïsé Sérvïçé. Ⱡ'σяєм ιρѕυм "
-"∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя α#"
-
-#: ecommerce/extensions/offer/models.py
-msgid "EnterpriseCustomer UUID"
-msgstr "ÉntérprïséÇüstömér ÛÛÌD Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σ#"
+"ÛÛÌD för än ÉntérprïséÇüstömérÇätälög fröm thé Éntérprïsé Sérvïçé. Ⱡ'σяєм "
+"ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя #"
 
 #: ecommerce/extensions/offer/models.py
 msgid "EnterpriseCustomer Name"
@@ -1052,6 +1113,33 @@ msgstr "ÉntérprïséÇüstömérÇätälög ÛÛÌD Ⱡ'σяєм ιρѕυм �
 #: ecommerce/programs/templates/programs/programoffer_list.html
 msgid "Program UUID"
 msgstr "Prögräm ÛÛÌD Ⱡ'σяєм ιρѕυм ∂σłσя ѕ#"
+
+#: ecommerce/extensions/offer/models.py
+msgid "JournalBundle UUID"
+msgstr "JöürnälBündlé ÛÛÌD Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт#"
+
+#: ecommerce/extensions/offer/models.py
+msgid "Email to user pending."
+msgstr "Émäïl tö üsér péndïng. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢#"
+
+#: ecommerce/extensions/offer/models.py
+msgid "Code successfully assigned to user."
+msgstr ""
+"Çödé süççéssfüllý ässïgnéd tö üsér. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєт#"
+
+#: ecommerce/extensions/offer/models.py
+msgid "Code has been redeemed by user."
+msgstr "Çödé häs ßéén rédééméd ßý üsér. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢т#"
+
+#: ecommerce/extensions/offer/models.py
+msgid "Email to user bounced."
+msgstr "Émäïl tö üsér ßöünçéd. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢#"
+
+#: ecommerce/extensions/offer/models.py
+msgid "Code has been revoked for this user."
+msgstr ""
+"Çödé häs ßéén révökéd för thïs üsér. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
+"¢σηѕє¢тєтυ#"
 
 #: ecommerce/extensions/offer/utils.py
 #, python-brace-format
@@ -1304,6 +1392,38 @@ msgstr "Lïné Çrédït (éxçl. täx) Ⱡ'σяєм ιρѕυм ∂σłσя ѕι
 msgid "Quantity"
 msgstr "Qüäntïtý Ⱡ'σяєм ιρѕυм ∂#"
 
+#: ecommerce/extensions/voucher/models.py
+msgid "Can be used once by one customer"
+msgstr ""
+"Çän ßé üséd önçé ßý öné çüstömér Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тє#"
+
+#: ecommerce/extensions/voucher/models.py
+msgid "Can be used multiple times by multiple customers"
+msgstr ""
+"Çän ßé üséd mültïplé tïmés ßý mültïplé çüstömérs Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт "
+"αмєт, ¢σηѕє¢тєтυя α#"
+
+#: ecommerce/extensions/voucher/models.py
+msgid "Can only be used once per customer"
+msgstr ""
+"Çän önlý ßé üséd önçé pér çüstömér Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєт#"
+
+#: ecommerce/extensions/voucher/models.py
+msgid "Can be used multiple times by one customer"
+msgstr ""
+"Çän ßé üséd mültïplé tïmés ßý öné çüstömér Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
+"¢σηѕє¢тєтυя #"
+
+#: ecommerce/extensions/voucher/models.py
+msgid "Usage"
+msgstr "Ûsägé Ⱡ'σяєм ιρѕ#"
+
+#: ecommerce/extensions/voucher/models.py
+msgid "This voucher is only available to another user"
+msgstr ""
+"Thïs vöüçhér ïs önlý äväïläßlé tö änöthér üsér Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
+"¢σηѕє¢тєтυя α#"
+
 #: ecommerce/extensions/voucher/tests/test_utils.py
 #: ecommerce/extensions/voucher/utils.py ecommerce/extensions/voucher/utils.py
 msgid "Redeemed"
@@ -1509,6 +1629,93 @@ msgstr "Nöt äpplïçäßlé Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт#"
 #: ecommerce/invoice/models.py
 msgid "Fixed"
 msgstr "Fïxéd Ⱡ'σяєм ιρѕ#"
+
+#: ecommerce/journals/benefits.py
+#, python-format
+msgid "%d%% journal bundle discount"
+msgstr "%d%% jöürnäl ßündlé dïsçöünt Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢#"
+
+#: ecommerce/journals/benefits.py
+#, python-format
+msgid "%d fixed-price journal bundle discount"
+msgstr ""
+"%d fïxéd-prïçé jöürnäl ßündlé dïsçöünt Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
+"¢σηѕє¢тєтυя#"
+
+#: ecommerce/journals/forms.py
+msgid "Journal Bundle UUID"
+msgstr "Jöürnäl Bündlé ÛÛÌD Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт,#"
+
+#: ecommerce/journals/forms.py
+msgid "An offer already exists for this journal bundle"
+msgstr ""
+"Àn öffér älréädý éxïsts för thïs jöürnäl ßündlé Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт,"
+" ¢σηѕє¢тєтυя α#"
+
+#: ecommerce/journals/forms.py
+msgid "A start date must be specified when specifying an end date"
+msgstr ""
+"À stärt däté müst ßé spéçïfïéd whén spéçïfýïng än énd däté Ⱡ'σяєм ιρѕυм "
+"∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя α#"
+
+#: ecommerce/journals/forms.py
+msgid "The start date must occur before the end date"
+msgstr ""
+"Thé stärt däté müst öççür ßéföré thé énd däté Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
+"¢σηѕє¢тєтυя #"
+
+#: ecommerce/journals/templates/journals/journalbundleoffer_form.html
+#, python-format
+msgid "Edit Journal Bundle Offer: %(journal_bundle_title)s"
+msgstr ""
+"Édït Jöürnäl Bündlé Öffér: %(journal_bundle_title)s Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт "
+"αмєт, ¢σηѕє¢т#"
+
+#: ecommerce/journals/templates/journals/journalbundleoffer_form.html
+#: ecommerce/journals/templates/journals/journalbundleoffer_form.html
+#: ecommerce/journals/templates/journals/journalbundleoffer_form.html
+#: ecommerce/journals/templates/journals/journalbundleoffer_list.html
+msgid "Create Journal Bundle Offer"
+msgstr "Çréäté Jöürnäl Bündlé Öffér Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє#"
+
+#: ecommerce/journals/templates/journals/journalbundleoffer_form.html
+#: ecommerce/journals/templates/journals/journalbundleoffer_list.html
+#: ecommerce/journals/templates/journals/journalbundleoffer_list.html
+#: ecommerce/templates/edx/partials/_administration_menu.html
+msgid "Journal Bundle Offers"
+msgstr "Jöürnäl Bündlé Öfférs Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, #"
+
+#: ecommerce/journals/templates/journals/journalbundleoffer_form.html
+msgid "Edit Journal Bundle Offer"
+msgstr "Édït Jöürnäl Bündlé Öffér Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕ#"
+
+#: ecommerce/journals/templates/journals/journalbundleoffer_form.html
+#: ecommerce/journals/templates/journals/journalbundleoffer_list.html
+#, python-format
+msgid "%(platform_name)s Journal Bundle Offer Administration Tool"
+msgstr ""
+"%(platform_name)s Jöürnäl Bündlé Öffér Àdmïnïsträtïön Tööl Ⱡ'σяєм ιρѕυм "
+"∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя #"
+
+#: ecommerce/journals/templates/journals/journalbundleoffer_list.html
+msgid "Current journal bundle offers"
+msgstr "Çürrént jöürnäl ßündlé öfférs Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢#"
+
+#: ecommerce/journals/templates/journals/journalbundleoffer_list.html
+msgid "Journal Bundle Title"
+msgstr "Jöürnäl Bündlé Tïtlé Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, #"
+
+#: ecommerce/journals/templates/journals/journalbundleoffer_list.html
+msgid "Bundle UUID"
+msgstr "Bündlé ÛÛÌD Ⱡ'σяєм ιρѕυм ∂σłσя #"
+
+#: ecommerce/journals/views.py
+msgid "Journal Bundle offer updated!"
+msgstr "Jöürnäl Bündlé öffér üpdätéd! Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢#"
+
+#: ecommerce/journals/views.py
+msgid "Journal Bundle offer created!"
+msgstr "Jöürnäl Bündlé öffér çréätéd! Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢#"
 
 #: ecommerce/management/templates/management/index.html
 msgid "Management View"
@@ -2211,18 +2418,18 @@ msgstr "Thänk ýöü för ýöür ördér! Ⱡ'σяєм ιρѕυм ∂σłσя 
 #, python-format
 msgid ""
 "Your order is complete. You will receive a confirmation message and your "
-"enrollment codes(s) at %(link_start)s%(email)s%(link_end)s. If you need a "
+"enrollment code(s) at %(link_start)s%(email)s%(link_end)s. If you need a "
 "receipt, you can print this page."
 msgstr ""
 "Ýöür ördér ïs çömplété. Ýöü wïll réçéïvé ä çönfïrmätïön méssägé änd ýöür "
-"énröllmént çödés(s) ät %(link_start)s%(email)s%(link_end)s. Ìf ýöü nééd ä "
+"énröllmént çödé(s) ät %(link_start)s%(email)s%(link_end)s. Ìf ýöü nééd ä "
 "réçéïpt, ýöü çän prïnt thïs pägé. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя "
 "α∂ιριѕι¢ιηg єłιт, ѕє∂ ∂σ єιυѕмσ∂ тємρσя ιη¢ι∂ι∂υηт υт łαвσяє єт ∂σłσяє мαgηα"
 " αłιqυα. υт єηιм α∂ мιηιм νєηιαм, qυιѕ ησѕтяυ∂ єχєя¢ιтαтιση υłłαм¢σ łαвσяιѕ "
 "ηιѕι υт αłιqυιρ єχ єα ¢σммσ∂σ ¢σηѕєqυαт. ∂υιѕ αυтє ιяυяє ∂σłσя ιη "
 "яєρяєнєη∂єяιт ιη νσłυρтαтє νєłιт єѕѕє ¢ιłłυм ∂σłσяє єυ ƒυgιαт ηυłłα "
 "ραяιαтυя. єχ¢єρтєυя ѕιηт σ¢¢αє¢αт ¢υρι∂αтαт ηση ρяσι∂єηт, ѕυηт ιη ¢υłρα qυι "
-"σƒƒι¢ια ∂єѕєяυηт мσłł#"
+"σƒƒι¢ια ∂єѕєяυηт мσłłι#"
 
 #: ecommerce/templates/edx/checkout/receipt.html
 #, python-format
@@ -2290,6 +2497,20 @@ msgstr "Süßtötäl Ⱡ'σяєм ιρѕυм ∂#"
 #, python-format
 msgid "%(voucher_discount_amount)s off"
 msgstr "%(voucher_discount_amount)s öff Ⱡ'σяєм ιρѕυм #"
+
+#: ecommerce/templates/edx/checkout/receipt.html
+#, python-format
+msgid "Discount of type %(type)s provided by %(enterprise_name)s"
+msgstr ""
+"Dïsçöünt öf týpé %(type)s prövïdéd ßý %(enterprise_name)s Ⱡ'σяєм ιρѕυм ∂σłσя"
+" ѕιт αмєт, ¢σηѕє¢тєтυ#"
+
+#: ecommerce/templates/edx/checkout/receipt.html
+#, python-format
+msgid "Discount of type %(type)s is provided."
+msgstr ""
+"Dïsçöünt öf týpé %(type)s ïs prövïdéd. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
+"¢σηѕє¢тє#"
 
 #: ecommerce/templates/edx/checkout/receipt.html
 #, python-format
@@ -2522,6 +2743,10 @@ msgstr ""
 #: ecommerce/templates/edx/partials/_administration_menu.html
 msgid "Coupons"
 msgstr "Çöüpöns Ⱡ'σяєм ιρѕυм #"
+
+#: ecommerce/templates/edx/partials/_administration_menu.html
+msgid "Enterprise Coupons"
+msgstr "Éntérprïsé Çöüpöns Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт#"
 
 #: ecommerce/templates/edx/partials/_base_navbar.html
 msgid "Toggle navigation"

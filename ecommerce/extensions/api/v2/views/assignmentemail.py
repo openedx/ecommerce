@@ -1,8 +1,5 @@
 """API endpoint for sending assignment emails to Learners"""
-import hashlib
-import json
 import logging
-
 
 from django.conf import settings
 from django.db import transaction
@@ -10,9 +7,14 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from sailthru.sailthru_client import SailthruClient
 
 from ecommerce.extensions.api.permissions import IsStaffOrOwner
-from ecommerce.extensions.offer.constants import OFFER_ASSIGNED, OFFER_ASSIGNMENT_EMAIL_BOUNCED
+from ecommerce.extensions.offer.constants import (
+    OFFER_ASSIGNED,
+    OFFER_ASSIGNMENT_EMAIL_BOUNCED,
+    OFFER_ASSIGNMENT_EMAIL_PENDING
+)
 from ecommerce.extensions.offer.models import OfferAssignment, OfferAssignmentEmailAttempt
 
 logger = logging.getLogger(__name__)
@@ -40,7 +42,8 @@ class AssignmentEmailStatus(APIView):
         with transaction.atomic():
             OfferAssignment.objects.select_for_update().filter(
                 user_email=assigned_offer.user_email,
-                code=assigned_offer.code
+                code=assigned_offer.code,
+                status=OFFER_ASSIGNMENT_EMAIL_PENDING
             ).update(status=OFFER_ASSIGNED)
             OfferAssignmentEmailAttempt.objects.create(offer_assignment=assigned_offer, send_id=send_id)
 
@@ -110,9 +113,8 @@ class AssignmentEmailStatus(APIView):
 
 class AssignmentEmailBounce(APIView):
     """
-    Receive Sailthru bounce-api POST
-    Note: The endpoint is configured without security since Sailthru does not have any configuration options for
-    adding security tokens. Please refer to https://getstarted.sailthru.com/developers/api-basics/postbacks/
+    Receive Sailthru bounce-api POST.
+    Please refer to https://getstarted.sailthru.com/developers/api-basics/postbacks/
     """
     permission_classes = ()
     authentication_classes = ()
@@ -124,7 +126,8 @@ class AssignmentEmailBounce(APIView):
         with transaction.atomic():
             OfferAssignment.objects.select_for_update().filter(
                 user_email=assigned_offer.user_email,
-                code=assigned_offer.code
+                code=assigned_offer.code,
+                status=OFFER_ASSIGNED
             ).update(status=OFFER_ASSIGNMENT_EMAIL_BOUNCED)
 
     def post(self, request):
@@ -152,29 +155,25 @@ class AssignmentEmailBounce(APIView):
         *sig*
             Hash of API key and all parameter values for the postback call
         """
-        send_id = request.data.get('send_id')
-        received_data = {
-            'email': request.data.get('email'),
-            'send_id': send_id,
-            'action': request.data.get('action')
-        }
-        received_hash = request.data.get('sig')
-        sailthru_secret = settings.SAILTHRU_SECRET
-        sailthru_key = settings.SAILTHRU_KEY
-        if sailthru_secret and sailthru_key:
-            hash_string = sailthru_secret + sailthru_key + 'json' + json.dumps(received_data)
-            computed_hash = hashlib.md5(hash_string).hexdigest()
-            if computed_hash == received_hash:
+        secret = settings.SAILTHRU_SECRET
+        key = settings.SAILTHRU_KEY
+        if secret and key:
+            sailthru_client = SailthruClient(key, secret)
+            send_id = request.data.get('send_id')
+            email = request.data.get('email')
+            sig = request.data.get('sig')
+            api_key = request.data.get('api_key')
+            if sailthru_client.receive_hardbounce_post(request.data):
                 try:
                     self.update_email_status(send_id)
-                except (OfferAssignment.DoesNotExist, OfferAssignmentEmailAttempt.DoesNotExist) as exc:
-                    logger.exception(
-                        '[Offer Assignment] AssignmentEmailBounce could not update status and raised: %r', exc)
-                    return Response({}, status=status.HTTP_400_BAD_REQUEST)
+                except (OfferAssignment.DoesNotExist, OfferAssignmentEmailAttempt.DoesNotExist):
+                    # Note: Marketing email bounces also come through this code path and
+                    # its expected that they would not have a corresponding OfferAssignment
+                    pass
             else:
-                logger.error('[Offer Assignment] AssignmentEmailBounce: Message hash does not match the '
-                             'computed hash. Received hash: %s, Computed hash: %s', received_hash, computed_hash)
-                return Response({}, status=status.HTTP_400_BAD_REQUEST)
+                logger.error('[Offer Assignment] AssignmentEmailBounce: Bounce message could not be verified. '
+                             'send_id: %s, email: %s, sig: %s, api_key_sailthru: %s, api_key_local: %s ',
+                             send_id, email, sig, api_key, key)
         else:
             logger.error('[Offer Assignment] AssignmentEmailBounce: SAILTHRU Parameters not found')
         return Response({}, status=status.HTTP_200_OK)

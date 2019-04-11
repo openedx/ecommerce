@@ -9,6 +9,11 @@ from sys import path
 from django.utils.translation import ugettext_lazy as _
 from oscar import OSCAR_MAIN_TEMPLATE_DIR
 
+from ecommerce.core.constants import (
+    ENTERPRISE_COUPON_ADMIN_ROLE,
+    SYSTEM_ENTERPRISE_ADMIN_ROLE,
+    SYSTEM_ENTERPRISE_OPERATOR_ROLE
+)
 from ecommerce.settings._oscar import *
 
 # PATH CONFIGURATION
@@ -219,7 +224,6 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.contrib.sites.middleware.CurrentSiteMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'edx_rest_framework_extensions.auth.jwt.middleware.EnsureJWTAuthSettingsMiddleware',
     'waffle.middleware.WaffleMiddleware',
     # NOTE: The overridden BasketMiddleware relies on request.site. This middleware
     # MUST appear AFTER CurrentSiteMiddleware.
@@ -233,6 +237,7 @@ MIDDLEWARE_CLASSES = (
     'edx_django_utils.cache.middleware.TieredCacheMiddleware',
     'edx_rest_framework_extensions.middleware.RequestMetricsMiddleware',
     'edx_rest_framework_extensions.auth.jwt.middleware.EnsureJWTAuthSettingsMiddleware',
+    'crum.CurrentRequestUserMiddleware',
 )
 # END MIDDLEWARE CONFIGURATION
 
@@ -292,6 +297,7 @@ DJANGO_APPS = [
     'django_sites_extensions',
     # edx-drf-extensions
     'csrf.apps.CsrfAppConfig',  # Enables frontend apps to retrieve CSRF tokens.
+    'rules.apps.AutodiscoverRulesConfig',
 ]
 
 # Apps specific to this project go here.
@@ -379,6 +385,11 @@ LOGGING = {
             'propagate': True,
             'level': 'WARNING'
         },
+        'rules': {
+            'handlers': ['console', 'local'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
         '': {
             'handlers': ['console', 'local'],
             'level': 'DEBUG',
@@ -436,6 +447,12 @@ ENABLE_AUTO_AUTH = False
 AUTO_AUTH_USERNAME_PREFIX = 'AUTO_AUTH_'
 
 AUTHENTICATION_BACKENDS = ('auth_backends.backends.EdXOAuth2',) + AUTHENTICATION_BACKENDS
+
+# NOTE: This old auth backend is retained as a temporary fallback in order to
+# support old browser sessions that were established using OIDC.  After a few
+# days, we should be safe to remove this line, along with deleting the rest of
+# the OIDC/DOP settings and keys in the ecommerce site configurations.
+AUTHENTICATION_BACKENDS += ('auth_backends.backends.EdXOpenIdConnect',)
 
 SOCIAL_AUTH_STRATEGY = 'ecommerce.social_auth.strategies.CurrentSiteDjangoStrategy'
 
@@ -525,6 +542,7 @@ CELERY_ROUTES = {
     'ecommerce_worker.sailthru.v1.tasks.update_course_enrollment': {'queue': 'email_marketing'},
     'ecommerce_worker.sailthru.v1.tasks.send_course_refund_email': {'queue': 'email_marketing'},
     'ecommerce_worker.sailthru.v1.tasks.send_offer_assignment_email': {'queue': 'email_marketing'},
+    'ecommerce_worker.sailthru.v1.tasks.send_offer_update_email': {'queue': 'email_marketing'},
 }
 
 # Prevent Celery from removing handlers on the root logger. Allows setting custom logging handlers.
@@ -602,6 +620,14 @@ ENTERPRISE_API_CACHE_TIMEOUT = 300  # Value is in seconds
 ENABLE_ENTERPRISE_ON_RUNTIME_SWITCH = 'enable_enterprise_on_runtime'
 
 ENTERPRISE_CUSTOMER_COOKIE_NAME = 'enterprise_customer_uuid'
+
+ENTERPRISE_DATA_API_GROUP = 'enterprise_data_api_access'
+
+SYSTEM_TO_FEATURE_ROLE_MAPPING = {
+    SYSTEM_ENTERPRISE_ADMIN_ROLE: [ENTERPRISE_COUPON_ADMIN_ROLE],
+    SYSTEM_ENTERPRISE_OPERATOR_ROLE: [ENTERPRISE_COUPON_ADMIN_ROLE],
+}
+
 # END ENTERPRISE APP CONFIGURATION
 
 # DJANGO DEBUG TOOLBAR CONFIGURATION
@@ -639,12 +665,10 @@ OFFER_ASSIGNMENT_EMAIL_DEFAULT_TEMPLATE = '''
     You may redeem this code for {REDEMPTIONS_REMAINING} courses.
 
     edX login: {USER_EMAIL}
-    Enrollment url: {ENROLLMENT_URL}
     Access Code: {CODE}
     Expiration date: {EXPIRATION_DATE}
 
-    You may go directly to the Enrollment URL to view courses that are available for this code
-    or you can insert the access code at check out under "coupon code" for applicable courses.
+    You can insert the access code at check out under "coupon code" for applicable courses.
 
     For any questions, please reach out to your Learning Manager.
 '''
@@ -654,14 +678,12 @@ OFFER_REVOKE_EMAIL_DEFAULT_SUBJECT = 'edX Course Assignment Revoked'
 OFFER_ASSIGNMENT_EMAIL_REMINDER_DEFAULT_TEMPLATE = '''
     This is a reminder email that your learning manager has provided you with a access code to take a course at edX.
     You have redeemed this code {REDEEMED_OFFER_COUNT} of times out of {TOTAL_OFFER_COUNT} number of available course redemptions.
-    
+
     edX login: {USER_EMAIL}
-    Enrollment url: {ENROLLMENT_URL}
     Access Code: {CODE}
     Expiration date: {EXPIRATION_DATE}
 
-    You may go directly to the Enrollment URL to view courses that are available for this code
-    or you can insert the access code at check out under "coupon code" for applicable courses.
+    You can insert the access code at check out under "coupon code" for applicable courses.
 
     For any questions, please reach out to your Learning Manager.
 '''
@@ -671,3 +693,4 @@ OFFER_ASSIGNMENT_EMAIL_REMINDER_DEFAULT_SUBJECT = 'Reminder on edX course assign
 SAILTHRU_KEY = None
 SAILTHRU_SECRET = None
 
+USERNAME_REPLACEMENT_WORKER = "replace with valid username"

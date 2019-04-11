@@ -1,6 +1,5 @@
 """Offer Utility Methods. """
 import logging
-
 from decimal import Decimal
 
 from django.conf import settings
@@ -111,7 +110,6 @@ def send_assigned_offer_email(
         offer_assignment_id,
         learner_email,
         code,
-        enrollment_url,
         redemptions_remaining,
         code_expiration_date):
     """
@@ -124,8 +122,6 @@ def send_assigned_offer_email(
             Email of the customer who will receive the code.
         *code*
             Code for the user.
-        *enrollment_url*
-            URL for the user.
         *redemptions_remaining*
             Number of times the code can be redeemed.
         *code_expiration_date*
@@ -136,7 +132,6 @@ def send_assigned_offer_email(
     email_body = template.format(
         REDEMPTIONS_REMAINING=redemptions_remaining,
         USER_EMAIL=learner_email,
-        ENROLLMENT_URL=enrollment_url,
         CODE=code,
         EXPIRATION_DATE=code_expiration_date
     )
@@ -167,7 +162,6 @@ def send_assigned_offer_reminder_email(
         template,
         learner_email,
         code,
-        enrollment_url,
         redeemed_offer_count,
         total_offer_count,
         code_expiration_date):
@@ -179,8 +173,6 @@ def send_assigned_offer_reminder_email(
            Email of the customer who will receive the code.
        *code*
            Code for the user.
-       *enrollment_url*
-           URL for the user.
        *redeemed_offer_count*
            Number of times the code has been redeemed.
        *total_offer_count*
@@ -194,7 +186,6 @@ def send_assigned_offer_reminder_email(
         REDEEMED_OFFER_COUNT=redeemed_offer_count,
         TOTAL_OFFER_COUNT=total_offer_count,
         USER_EMAIL=learner_email,
-        ENROLLMENT_URL=enrollment_url,
         CODE=code,
         EXPIRATION_DATE=code_expiration_date
     )

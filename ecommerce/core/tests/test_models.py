@@ -9,9 +9,16 @@ from django.contrib.sites.models import Site
 from django.core.exceptions import ValidationError
 from django.test import override_settings
 from edx_rest_api_client.auth import SuppliedJwtAuth
+from edx_rest_framework_extensions.auth.jwt.tests.utils import generate_jwt_token, generate_latest_version_payload
 from requests.exceptions import ConnectionError
 
-from ecommerce.core.models import BusinessClient, SiteConfiguration, User
+from ecommerce.core.models import (
+    BusinessClient,
+    EcommerceFeatureRole,
+    EcommerceFeatureRoleAssignment,
+    SiteConfiguration,
+    User
+)
 from ecommerce.core.tests import toggle_switch
 from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
 from ecommerce.extensions.payment.tests.processors import AnotherDummyProcessor, DummyProcessor
@@ -35,7 +42,18 @@ def _make_site_config(payment_processors_str, site_id=1):
 
 @ddt.ddt
 class UserTests(DiscoveryTestMixin, LmsApiMockMixin, TestCase):
-    TEST_CONTEXT = {'foo': 'bar', 'baz': None}
+    TEST_CONTEXT = {'foo': 'bar', 'baz': None, 'lms_user_id': 'test-context-user-id'}
+
+    def setUp(self):
+        super(UserTests, self).setUp()
+
+        httpretty.enable()
+        self.mock_access_token_response()
+
+    def tearDown(self):
+        super(UserTests, self).tearDown()
+        httpretty.disable()
+        httpretty.reset()
 
     def test_access_token(self):
         user = self.create_user()
@@ -43,6 +61,38 @@ class UserTests(DiscoveryTestMixin, LmsApiMockMixin, TestCase):
 
         self.create_access_token(user)
         self.assertEqual(user.access_token, self.access_token)
+
+    def test_lms_user_id_from_jwt_cookie(self):
+        """ Ensures the lms_user_id can be pulled from the jwt cookie. """
+        user = self.create_user()
+        self.assertIsNone(user.lms_user_id)
+
+        payload = generate_latest_version_payload(user, scopes=['user_id'])
+        payload['user_id'] = 'test-lms-user-id'
+        jwt = generate_jwt_token(payload)
+        mock_request_with_cookie = mock.Mock(COOKIES={'edx-jwt-cookie': jwt})
+
+        with mock.patch('ecommerce.core.models.crum.get_current_request', return_value=mock_request_with_cookie):
+            self.assertEqual(user.lms_user_id, 'test-lms-user-id')
+
+    def test_lms_user_id_from_social_auth(self):
+        """ Ensures the lms_user_id can be pulled from the tracking context. """
+        user = self.create_user()
+        self.assertIsNone(user.lms_user_id)
+
+        self.set_user_id_in_social_auth(user, 'test-social-auth-user-id')
+        self.assertEqual(user.lms_user_id, 'test-social-auth-user-id')
+
+    def test_lms_user_id_from_tracking_context(self):
+        """ Ensures the lms_user_id can be pulled from the tracking context. """
+        user = self.create_user()
+        self.assertIsNone(user.lms_user_id)
+
+        user.tracking_context = self.TEST_CONTEXT
+        user.save()
+
+        same_user = User.objects.get(id=user.id)
+        self.assertEqual(same_user.lms_user_id, self.TEST_CONTEXT['lms_user_id'])
 
     def test_tracking_context(self):
         """ Ensures that the tracking_context dictionary is written / read
@@ -71,7 +121,6 @@ class UserTests(DiscoveryTestMixin, LmsApiMockMixin, TestCase):
         user = self.create_user(full_name=full_name, first_name=first_name, last_name=last_name)
         self.assertEquals(user.get_full_name(), full_name)
 
-    @httpretty.activate
     def test_user_details(self):
         """ Verify user details are returned. """
         user = self.create_user()
@@ -80,7 +129,6 @@ class UserTests(DiscoveryTestMixin, LmsApiMockMixin, TestCase):
         self.mock_access_token_response()
         self.assertDictEqual(user.account_details(self.request), user_details)
 
-    @httpretty.activate
     def test_user_details_uses_jwt(self):
         """Verify user_details uses jwt from site configuration to call EdxRestApiClient."""
         user = self.create_user()
@@ -108,20 +156,19 @@ class UserTests(DiscoveryTestMixin, LmsApiMockMixin, TestCase):
         self.mock_eligibility_api(self.request, user, course_key, eligible=eligible)
         return user, course_key
 
-    @httpretty.activate
     def test_user_is_eligible(self):
         """ Verify the method returns eligibility information. """
+        site_config = self.request.site.siteconfiguration
         user, course_key = self.prepare_credit_eligibility_info()
-        self.assertEqual(user.is_eligible_for_credit(course_key)[0]['username'], user.username)
-        self.assertEqual(user.is_eligible_for_credit(course_key)[0]['course_key'], course_key)
+        self.assertEqual(user.is_eligible_for_credit(course_key, site_config)[0]['username'], user.username)
+        self.assertEqual(user.is_eligible_for_credit(course_key, site_config)[0]['course_key'], course_key)
 
-    @httpretty.activate
     def test_user_is_not_eligible(self):
         """ Verify method returns false (empty list) if user is not eligible. """
+        site_config = self.request.site.siteconfiguration
         user, course_key = self.prepare_credit_eligibility_info(eligible=False)
-        self.assertFalse(user.is_eligible_for_credit(course_key))
+        self.assertFalse(user.is_eligible_for_credit(course_key, site_config))
 
-    @httpretty.activate
     @ddt.data(
         (200, True),
         (200, False),
@@ -139,7 +186,6 @@ class UserTests(DiscoveryTestMixin, LmsApiMockMixin, TestCase):
         user = self.create_user()
         self.assertFalse(user.is_verified(self.site))
 
-    @httpretty.activate
     def test_user_verification_status_cache(self):
         """ Verify the user verification status values are cached. """
         user = self.create_user()
@@ -149,7 +195,6 @@ class UserTests(DiscoveryTestMixin, LmsApiMockMixin, TestCase):
         httpretty.disable()
         self.assertTrue(user.is_verified(self.site))
 
-    @httpretty.activate
     def test_user_verification_status_not_cached(self):
         """ Verify the user verification status values is not cached when user is not verified. """
         user = self.create_user()
@@ -159,13 +204,12 @@ class UserTests(DiscoveryTestMixin, LmsApiMockMixin, TestCase):
         httpretty.disable()
         self.assertFalse(user.is_verified(self.site))
 
-    @httpretty.activate
     def test_deactivation(self):
         """Verify the deactivation endpoint is called for the user."""
         user = self.create_user()
         expected_response = {'user_deactivated': True}
-        self.mock_deactivation_api(self.request, user.username, response=json.dumps(expected_response))
         self.mock_access_token_response()
+        self.mock_deactivation_api(self.request, user.username, response=json.dumps(expected_response))
 
         self.assertEqual(user.deactivate_account(self.request.site.siteconfiguration), expected_response)
 
@@ -360,3 +404,37 @@ class SiteConfigurationTests(TestCase):
         self.assertEqual(client_store['base_url'], self.site_configuration.enrollment_api_url)
         self.assertIsInstance(client_auth, SuppliedJwtAuth)
         self.assertEqual(client_auth.token, token)
+
+
+class EcommerceFeatureRoleTests(TestCase):
+    def test_str(self):
+        role = EcommerceFeatureRole.objects.create(name='TestRole')
+        self.assertEquals(str(role), '<EcommerceFeatureRole TestRole>')
+
+    def test_repr(self):
+        role = EcommerceFeatureRole.objects.create(name='TestRole')
+        self.assertEquals(repr(role), '<EcommerceFeatureRole TestRole>')
+
+
+class EcommerceFeatureRoleAssignmentTests(TestCase):
+    def test_str(self):
+        role = EcommerceFeatureRole.objects.create(name='TestRole')
+        user = self.create_user()
+        role_assignment = EcommerceFeatureRoleAssignment.objects.create(role=role, user=user)
+        self.assertEquals(
+            str(role_assignment),
+            '<EcommerceFeatureRoleAssignment for User {user} assigned to role {role}>'.format(
+                user=user.id, role=role.name
+            )
+        )
+
+    def test_repr(self):
+        role = EcommerceFeatureRole.objects.create(name='TestRole')
+        user = self.create_user()
+        role_assignment = EcommerceFeatureRoleAssignment.objects.create(role=role, user=user)
+        self.assertEquals(
+            repr(role_assignment),
+            '<EcommerceFeatureRoleAssignment for User {user} assigned to role {role}>'.format(
+                user=user.id, role=role.name
+            )
+        )

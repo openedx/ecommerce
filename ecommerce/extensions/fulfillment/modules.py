@@ -23,7 +23,10 @@ from ecommerce.core.constants import (
 from ecommerce.core.url_utils import get_lms_enrollment_api_url, get_lms_entitlement_api_url
 from ecommerce.courses.models import Course
 from ecommerce.courses.utils import mode_for_product
-from ecommerce.enterprise.utils import get_or_create_enterprise_customer_user
+from ecommerce.enterprise.utils import (
+    get_enterprise_customer_uuid_from_voucher,
+    get_or_create_enterprise_customer_user
+)
 from ecommerce.extensions.analytics.utils import audit_log, parse_tracking_context
 from ecommerce.extensions.api.v2.views.coupons import CouponViewSet
 from ecommerce.extensions.checkout.utils import get_receipt_page_url
@@ -204,11 +207,8 @@ class EnrollmentFulfillmentModule(BaseFulfillmentModule):
         # Collect the EnterpriseCustomer UUID from the coupon, if any.
         enterprise_customer_uuid = None
         for discount in order.discounts.all():
-            try:
-                enterprise_customer_uuid = discount.voucher.benefit.range.enterprise_customer
-            except AttributeError:
-                # The voucher did not have an enterprise customer associated with it.
-                pass
+            if discount.voucher:
+                enterprise_customer_uuid = get_enterprise_customer_uuid_from_voucher(discount.voucher)
 
             if enterprise_customer_uuid is not None:
                 data['linked_enterprise_customer'] = str(enterprise_customer_uuid)

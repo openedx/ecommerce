@@ -3,6 +3,7 @@ import hashlib
 import logging
 from urlparse import urljoin, urlsplit, urlunsplit
 
+import crum
 from dateutil.parser import parse
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
@@ -12,14 +13,17 @@ from django.db import models
 from django.utils.functional import cached_property
 from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
+from edx_django_utils import monitoring as monitoring_utils
 from edx_django_utils.cache import TieredCache
+from edx_rbac.models import UserRole, UserRoleAssignment
 from edx_rest_api_client.client import EdxRestApiClient
+from edx_rest_framework_extensions.auth.jwt.cookies import get_decoded_jwt as get_decoded_jwt_from_jwt_cookie
 from jsonfield.fields import JSONField
 from requests.exceptions import ConnectionError, Timeout
 from slumber.exceptions import HttpNotFoundError, SlumberBaseException
 
 from analytics import Client as SegmentClient
-from ecommerce.core.url_utils import get_lms_url
+from ecommerce.core.constants import ALL_ACCESS_CONTEXT
 from ecommerce.core.utils import log_message_and_raise_validation_error
 from ecommerce.extensions.payment.exceptions import ProcessorNotFoundError
 from ecommerce.extensions.payment.helpers import get_processor_class, get_processor_class_by_name
@@ -193,6 +197,12 @@ class SiteConfiguration(models.Model):
         help_text=_('Enable the application of program offers to remaining unenrolled or unverified courses'),
         blank=True,
         default=False
+    )
+    hubspot_secret_key = models.CharField(
+        verbose_name=_('Hubspot Portal Secret Key'),
+        help_text=_('Secret key for Hubspot portal authentication'),
+        max_length=255,
+        blank=True
     )
 
     @property
@@ -474,6 +484,12 @@ class User(AbstractUser):
 
     full_name = models.CharField(_('Full Name'), max_length=255, blank=True, null=True)
 
+    tracking_context = JSONField(blank=True, null=True)
+
+    class Meta(object):
+        get_latest_by = 'date_joined'
+        db_table = 'ecommerce_user'
+
     @property
     def access_token(self):
         try:
@@ -481,11 +497,86 @@ class User(AbstractUser):
         except Exception:  # pylint: disable=broad-except
             return None
 
-    tracking_context = JSONField(blank=True, null=True)
+    @property
+    def lms_user_id(self):
+        """
+        Returns the LMS user_id, or None if not found.
+        """
+        # JWT cookie is used with API calls from new microfrontends. This is not persisted.
+        lms_user_id = self._get_lms_user_id_from_jwt_cookie()
+        if lms_user_id:
+            return lms_user_id
 
-    class Meta(object):
-        get_latest_by = 'date_joined'
-        db_table = 'ecommerce_user'
+        # This is persisted to the database during any new oAuth+SSO flow.
+        lms_user_id = self._get_lms_user_id_from_social_auth()
+        if lms_user_id:
+            return lms_user_id
+
+        # Server-to-server calls from LMS to ecommerce use a specially crafted JWT.
+        lms_user_id = self._get_lms_user_id_from_tracking_context()
+        if lms_user_id:
+            return lms_user_id
+
+        # If we get here, it means either:
+        # 1. The user has an old social_auth session created before the LMS user_id was written to the database, or
+        # 2. This could be a server-to-server call that isn't properly handled, or
+        # 3. Some other unknown flow.
+        monitoring_utils.set_custom_metric('ecommerce_user_missing_lms_user_id', self.id)
+        return None
+
+    def _get_lms_user_id_from_jwt_cookie(self):
+        """
+        Return LMS user_id from JWT cookie, if found.
+        Returns None if not found.
+
+        Side effect:
+            If found, writes custom metric: 'lms_user_id_jwt_cookie'
+        """
+        request = crum.get_current_request()
+        if not request:
+            return None
+
+        decoded_jwt = get_decoded_jwt_from_jwt_cookie(request)
+        if not decoded_jwt:
+            return None
+
+        if 'user_id' in decoded_jwt:
+            lms_user_id_in_jwt_cookie = decoded_jwt['user_id']
+            monitoring_utils.set_custom_metric('lms_user_id_jwt_cookie', lms_user_id_in_jwt_cookie)
+            return lms_user_id_in_jwt_cookie
+
+    def _get_lms_user_id_from_social_auth(self):
+        """
+        Return LMS user_id passed through social auth, if found.
+        Returns None if not found.
+
+        Side effect:
+            If found, writes custom metric: 'lms_user_id_social_auth'
+        """
+        try:
+            lms_user_id_social_auth = self.social_auth.first().extra_data[u'user_id']  # pylint: disable=no-member
+            if lms_user_id_social_auth:
+                monitoring_utils.set_custom_metric('lms_user_id_social_auth', lms_user_id_social_auth)
+                return lms_user_id_social_auth
+            else:  # pragma: no cover
+                pass  # allows coverage skip for just this case.
+        except Exception:  # pylint: disable=broad-except
+            pass
+
+    def _get_lms_user_id_from_tracking_context(self):
+        """
+        Return LMS user_id passed through tracking_context, if found.
+        Returns None if not found.
+
+        Side effect:
+            If found, writes custom metric: 'lms_user_id_tracking_context'
+        """
+        # Return lms_user_id passed through tracking_context, if found.
+        tracking_context = self.tracking_context or {}
+        lms_user_id_tracking_context = tracking_context.get('lms_user_id')
+        if lms_user_id_tracking_context:
+            monitoring_utils.set_custom_metric('lms_user_id_tracking_context', lms_user_id_tracking_context)
+            return lms_user_id_tracking_context
 
     def get_full_name(self):
         return self.full_name or super(User, self).get_full_name()
@@ -518,7 +609,7 @@ class User(AbstractUser):
             )
             raise
 
-    def is_eligible_for_credit(self, course_key):
+    def is_eligible_for_credit(self, course_key, site_configuration):
         """
         Check if a user is eligible for a credit course.
         Calls the LMS eligibility API endpoint and sends the username and course key
@@ -539,10 +630,7 @@ class User(AbstractUser):
             'course_key': course_key
         }
         try:
-            api = EdxRestApiClient(
-                get_lms_url('api/credit/v1/'),
-                oauth_access_token=self.access_token
-            )
+            api = site_configuration.credit_api_client
             response = api.eligibility().get(**query_strings)
         except (ConnectionError, SlumberBaseException, Timeout):  # pragma: no cover
             log.exception(
@@ -572,10 +660,7 @@ class User(AbstractUser):
             if verification_cached_response.is_found:
                 return verification_cached_response.value
 
-            api = EdxRestApiClient(
-                site.siteconfiguration.build_lms_url('api/user/v1/'),
-                oauth_access_token=self.access_token
-            )
+            api = site.siteconfiguration.user_api_client
             response = api.accounts(self.username).verification_status().get()
 
             verification = response.get('is_verified', False)
@@ -636,3 +721,57 @@ class BusinessClient(models.Model):
                 'Failed to create BusinessClient. BusinessClient name may not be empty.'
             )
         super(BusinessClient, self).save(*args, **kwargs)
+
+
+class EcommerceFeatureRole(UserRole):
+    """
+    User role definitions specific to Ecommerce.
+     .. no_pii:
+    """
+
+    def __str__(self):
+        """
+        Return human-readable string representation.
+        """
+        return "<EcommerceFeatureRole {role}>".format(role=self.name)
+
+    def __repr__(self):
+        """
+        Return uniquely identifying string representation.
+        """
+        return self.__str__()
+
+
+class EcommerceFeatureRoleAssignment(UserRoleAssignment):
+    """
+    Model to map users to a EcommerceFeatureRole.
+     .. no_pii:
+    """
+
+    role_class = EcommerceFeatureRole
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, db_index=True, on_delete=models.CASCADE)
+    enterprise_id = models.UUIDField(blank=True, null=True, verbose_name='Enterprise Customer UUID')
+
+    def get_context(self):
+        """
+        Return the enterprise customer id or `*` if the user has access to all resources.
+        """
+        enterprise_id = ALL_ACCESS_CONTEXT
+        if self.enterprise_id:
+            enterprise_id = str(self.enterprise_id)     # pylint: disable=redefined-variable-type
+        return enterprise_id
+
+    def __str__(self):
+        """
+        Return human-readable string representation.
+        """
+        return "<EcommerceFeatureRoleAssignment for User {user} assigned to role {role}>".format(
+            user=self.user.id,
+            role=self.role.name
+        )
+
+    def __repr__(self):
+        """
+        Return uniquely identifying string representation.
+        """
+        return self.__str__()
