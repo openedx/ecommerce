@@ -479,9 +479,7 @@ def get_or_create_enterprise_offer(
         'email_domains': email_domains,
         'site': site,
         'partner': site.siteconfiguration.partner if site else None,
-        # For initial creation, we are setting the priority lower so that we don't want to use these
-        # until we've done some other implementation work. We will update this to a higher value later.
-        'priority': 5,
+        'priority': OFFER_PRIORITY_VOUCHER,
     }
     offer, __ = ConditionalOffer.objects.update_or_create(name=offer_name, defaults=offer_kwargs)
 
