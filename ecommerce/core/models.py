@@ -23,6 +23,7 @@ from requests.exceptions import ConnectionError, Timeout
 from slumber.exceptions import HttpNotFoundError, SlumberBaseException
 
 from analytics import Client as SegmentClient
+from ecommerce.core.constants import ALL_ACCESS_CONTEXT
 from ecommerce.core.utils import log_message_and_raise_validation_error
 from ecommerce.extensions.payment.exceptions import ProcessorNotFoundError
 from ecommerce.extensions.payment.helpers import get_processor_class, get_processor_class_by_name
@@ -753,9 +754,12 @@ class EcommerceFeatureRoleAssignment(UserRoleAssignment):
 
     def get_context(self):
         """
-        Return the context for this role assignment class.
+        Return the enterprise customer id or `*` if the user has access to all resources.
         """
-        return self.enterprise_id and str(self.enterprise_id)
+        enterprise_id = ALL_ACCESS_CONTEXT
+        if self.enterprise_id:
+            enterprise_id = str(self.enterprise_id)     # pylint: disable=redefined-variable-type
+        return enterprise_id
 
     def __str__(self):
         """
