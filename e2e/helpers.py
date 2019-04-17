@@ -7,6 +7,8 @@ from e2e.config import (
     LMS_URL_ROOT
 )
 
+from e2e.constants import TEST_COURSE_KEY
+
 
 class LmsHelpers(object):
     @staticmethod
@@ -30,15 +32,21 @@ class LmsHelpers(object):
 
     @staticmethod
     def submit_login_form(selenium):
-        assert selenium.find_element_by_css_selector('form#login').is_displayed()
-        selenium.find_element_by_css_selector('input#login-email').send_keys(LMS_EMAIL)
-        selenium.find_element_by_css_selector('input#login-password').send_keys(LMS_PASSWORD)
-        selenium.find_element_by_css_selector('button.login-button').click()
+        assert selenium.find_element_by_css_selector('form#login-form').is_displayed()
+        selenium.find_element_by_css_selector('input#email').send_keys(LMS_EMAIL)
+        selenium.find_element_by_css_selector('input#password').send_keys(LMS_PASSWORD)
+        selenium.find_element_by_css_selector('button#submit').click()
 
     @staticmethod
     def logout(selenium):
         url = LmsHelpers.build_url('logout')
         selenium.get(url)
+
+    @staticmethod
+    def enroll_user(selenium):
+        url = LmsHelpers.build_url('courses/{}/course/'.format(TEST_COURSE_KEY))
+        selenium.get(url)
+        selenium.find_element_by_css_selector('button.enroll-btn').click()
 
 
 class EcommerceHelpers(object):

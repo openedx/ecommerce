@@ -1,4 +1,5 @@
 from edx_rest_api_client.client import EdxRestApiClient
+from e2e.constants import TEST_COURSE_KEY
 
 from e2e.config import (
     DISCOVERY_API_URL_ROOT,
@@ -46,12 +47,16 @@ class DiscoveryApi(BaseApi):
         Returns:
             dict
         """
-        results = self._client.search.course_runs.facets.get(
-            selected_query_facets='availability_current', selected_facets='seat_types_exact:{}'.format(seat_type))
-        results = results['objects']['results']
+
         # TODO Verify the course run exists on LMS and Otto. Some course runs are only present on Drupal.
         # TODO Cache the result so we don't waste resources doing this work again. The search endpoint order is stable.
-        return self._client.course_runs(results[0]['key']).get()
+
+        course_run = self._client.course_runs(TEST_COURSE_KEY).get()
+
+        assert course_run.get('type') == seat_type
+        assert course_run.get('availability') == 'Current'
+
+        return course_run
 
 
 class EcommerceApi(BaseApi):

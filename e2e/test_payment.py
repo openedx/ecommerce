@@ -2,10 +2,14 @@ import datetime
 import logging
 import time
 
+
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.select import Select
 from selenium.webdriver.support.wait import WebDriverWait
+from selenium.common.exceptions import NoSuchElementException
+from selenium.webdriver.common.keys import Keys
+
 
 from e2e.api import DiscoveryApi, EcommerceApi, EnrollmentApi
 from e2e.config import LMS_USERNAME
@@ -21,6 +25,7 @@ class TestSeatPayment(object):
         return DiscoveryApi().get_course_run('verified')
 
     def checkout_with_credit_card(self, selenium, address):
+
         """ Submits the credit card form hosted by the E-Commerce Service. """
         billing_information = {
             'id_first_name': 'Ed',
@@ -29,8 +34,6 @@ class TestSeatPayment(object):
             'id_address_line2': address['line2'],
             'id_city': address['city'],
             'id_postal_code': address['postal_code'],
-            'card-number': '4111111111111111',
-            'card-cvn': '123'
         }
 
         country = address['country']
@@ -38,15 +41,35 @@ class TestSeatPayment(object):
 
         card_expiry_year = str(datetime.datetime.now().year + 3)
         select_fields = [
-            ('id_country', country),
-            ('card-expiry-month', '12'),
-            ('card-expiry-year', card_expiry_year),
+            ('id_country', country)
         ]
 
         if country in ('US', 'CA',):
             select_fields.append(('id_state', state,))
         else:
             billing_information['id_state'] = state
+
+        try:
+            selenium.find_element_by_css_selector('div#iframe')
+
+            selenium.switch_to.frame("payment_iframe")
+
+            selenium.find_element_by_id('id_number_input').send_keys('4111111111111111')
+            selenium.find_element_by_id('id_expy_input').send_keys('0422')
+            selenium.find_element_by_id('id_cvv_input').send_keys('123')
+
+            selenium.switch_to.default_content()
+
+        except NoSuchElementException:
+            select_fields.append(
+                ('card-expiry-month', '12',)
+                ('card-expiry-year', card_expiry_year,)
+            )
+
+            billing_information.update({
+                'card-number': '4111111111111111',
+                'card-cvn': '123'
+            })
 
         # Select the appropriate <option> elements
         for selector, value in select_fields:
@@ -59,7 +82,7 @@ class TestSeatPayment(object):
             selenium.find_element_by_id(field).send_keys(value)
 
         # Click the payment button
-        selenium.find_element_by_id('payment-button').click()
+        selenium.find_element_by_id('payment-button').send_keys("\n")
 
     def assert_browser_on_receipt_page(self, selenium):
         WebDriverWait(selenium, 20).until(
@@ -128,17 +151,28 @@ class TestSeatPayment(object):
         Validates users can add a verified seat to the cart and checkout with a credit card.
         This test requires 'disable_repeat_order_check' waffle switch turned off on stage, to run.
         """
+
         LmsHelpers.login(selenium)
 
-        # Get the course run we want to purchase
         course_run = self.get_verified_course_run()
+        course_run_key = course_run['key']
+
+        #enroll user if not already enrolled in given course
+        try:
+            self.assert_user_enrolled_in_course_run(LMS_USERNAME, course_run_key, 'audit')
+        except AssertionError:
+            LmsHelpers.enroll_user(selenium)
+
+        # Get the course run we want to purchase
         verified_seat = self.get_verified_seat(course_run)
 
         for address in (ADDRESS_US, ADDRESS_FR,):
+            time.sleep(0.5)
             self.add_item_to_basket(selenium, verified_seat['sku'])
             self.checkout_with_credit_card(selenium, address)
             self.assert_browser_on_receipt_page(selenium)
-
-            course_run_key = course_run['key']
             self.assert_user_enrolled_in_course_run(LMS_USERNAME, course_run_key)
             assert self.refund_orders_for_course_run(course_run_key)
+    
+
+
