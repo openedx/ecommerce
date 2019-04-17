@@ -195,20 +195,9 @@ def catalog_contains_course_runs(site, course_run_ids, enterprise_customer_uuid,
 
     api = site.siteconfiguration.enterprise_api_client
     endpoint = getattr(api, api_resource_name)(api_resource_id)
-    try:
-        contains_content = endpoint.contains_content_items.get(**query_params)['contains_content_items']
+    contains_content = endpoint.contains_content_items.get(**query_params)['contains_content_items']
+    TieredCache.set_all_tiers(cache_key, contains_content, settings.ENTERPRISE_API_CACHE_TIMEOUT)
 
-        TieredCache.set_all_tiers(cache_key, contains_content, settings.ENTERPRISE_API_CACHE_TIMEOUT)
-    except (ConnectionError, KeyError, SlumberHttpBaseException, Timeout):
-        logger.exception(
-            'Failed to check if course_runs [%s] exist in '
-            'EnterpriseCustomerCatalog [%s]'
-            'for EnterpriseCustomer [%s].',
-            course_run_ids,
-            enterprise_customer_catalog_uuid,
-            enterprise_customer_uuid,
-        )
-        contains_content = False
     return contains_content
 
 
