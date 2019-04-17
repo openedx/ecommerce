@@ -43,12 +43,12 @@ class ChangeOffersPriorityTests(TestCase):
                 name='ENT Offer {}'.format(idx), offer_type=ConditionalOffer.VOUCHER, priority=5
             )
 
-        offer_names = '1. ENT Offer 0 \n 2. ENT Offer 1 '
+        offer_names = '1. ENT Offer 0\n2. ENT Offer 1'
         expected = [
             (
                 LOGGER_NAME,
                 'WARNING',
-                'Conditional offers to be updated \n {offer_names}'.format(
+                'Conditional offers to be updated\n{offer_names}'.format(
                     offer_names=offer_names,
                 )
             )
@@ -70,4 +70,63 @@ class ChangeOffersPriorityTests(TestCase):
                         log_msg
                     )
                 )
+                log.check(*expected)
+
+    @ddt.data(
+        (0, 10, 5),
+        (10, 20, 10),
+        (20, 25, 15),
+    )
+    @ddt.unpack
+    def test_change_priority_of_offers_in_batches(self, offset, limit, priority):
+        """Test that command changes priority of voucher offers in batches."""
+        ent_offer_count = 30
+        for idx in range(ent_offer_count):
+            factories.ConditionalOfferFactory(
+                name='ENT Offer {}'.format(idx), offer_type=ConditionalOffer.VOUCHER, priority=priority
+            )
+
+        update_offer_cnt = limit if offset + limit <= ent_offer_count else ent_offer_count - offset
+        offers_list = [
+            '{}. ENT Offer {}'.format(idx + 1, val) for idx, val in enumerate(range(offset, offset + update_offer_cnt))
+        ]
+        offer_names = '\n'.join(offers_list)
+        expected = [
+            (
+                LOGGER_NAME,
+                'WARNING',
+                'Conditional offers to be updated\n{offer_names}'.format(
+                    offer_names=offer_names,
+                )
+            )
+        ]
+
+        with patch(self.YES_NO_PATCH_LOCATION) as mocked_yes_no:
+            mocked_yes_no.return_value = True
+            with LogCapture(LOGGER_NAME) as log:
+                call_command('change_priority_of_offers', offset=offset, limit=limit, priority=priority)
+                log_msg = 'Operation completed. {} conditional offers updated successfully.'.format(update_offer_cnt)
+                expected.append(
+                    (
+                        LOGGER_NAME,
+                        'INFO',
+                        log_msg
+                    )
+                )
+                log.check(*expected)
+
+    def test_change_priority_of_offers_with_exception(self):
+        """Test that command with exception."""
+        expected = [
+            (
+                LOGGER_NAME,
+                'ERROR',
+                'Command execution failed while executing batch -1,10\nNegative indexing is not supported.'
+            )
+        ]
+
+        with patch(self.YES_NO_PATCH_LOCATION) as mocked_yes_no:
+            mocked_yes_no.return_value = True
+            with LogCapture(LOGGER_NAME) as log:
+                call_command('change_priority_of_offers', offset=-1, limit=10)
                 log.check(*expected)
