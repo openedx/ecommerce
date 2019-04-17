@@ -140,7 +140,7 @@ class EnterpriseCustomerConditionTests(EnterpriseServiceMockMixin, DiscoveryTest
         )
         self.assertFalse(self.condition.is_satisfied(offer, basket))
 
-    def setup_enterprise_coupon_data(self, mock_learner_api=True):
+    def setup_enterprise_coupon_data(self, mock_learner_api=True, use_new_enterprise=False):
         offer = factories.EnterpriseOfferFactory(
             partner=self.partner,
             condition=self.condition,
@@ -148,10 +148,13 @@ class EnterpriseCustomerConditionTests(EnterpriseServiceMockMixin, DiscoveryTest
         )
         basket = factories.BasketFactory(site=self.site, owner=self.user)
         basket.add_product(self.course_run.seat_products[0])
+        enterprise_id = self.condition.enterprise_customer_uuid
+        if use_new_enterprise:
+            enterprise_id = uuid4()  # pylint: disable=redefined-variable-type
         if mock_learner_api:
             self.mock_enterprise_learner_api(
                 learner_id=self.user.id,
-                enterprise_customer_uuid=str(self.condition.enterprise_customer_uuid),
+                enterprise_customer_uuid=str(enterprise_id),
                 course_run_id=self.course_run.id,
             )
         else:
@@ -159,7 +162,7 @@ class EnterpriseCustomerConditionTests(EnterpriseServiceMockMixin, DiscoveryTest
 
         self.mock_catalog_contains_course_runs(
             [self.course_run.id],
-            self.condition.enterprise_customer_uuid,
+            enterprise_id,
             enterprise_customer_catalog_uuid=self.condition.enterprise_customer_catalog_uuid,
         )
         return offer, basket
@@ -177,6 +180,13 @@ class EnterpriseCustomerConditionTests(EnterpriseServiceMockMixin, DiscoveryTest
         Switch.objects.update_or_create(name=ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, defaults={'active': True})
         offer, basket = self.setup_enterprise_coupon_data()
         self.assertTrue(self.condition.is_satisfied(offer, basket))
+
+    @httpretty.activate
+    def test_is_satisfied_false_for_voucher_offer_enterprise_mismatch(self):
+        """ Ensure the condition returns false for a enterprise coupon where the user has a different enterprise. """
+        Switch.objects.update_or_create(name=ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, defaults={'active': True})
+        offer, basket = self.setup_enterprise_coupon_data(use_new_enterprise=True)
+        self.assertFalse(self.condition.is_satisfied(offer, basket))
 
     @httpretty.activate
     def test_is_satisfied_true_for_voucher_offer_coupon_switch_on_new_user(self):
@@ -269,6 +279,26 @@ class EnterpriseCustomerConditionTests(EnterpriseServiceMockMixin, DiscoveryTest
             self.condition.enterprise_customer_uuid,
             enterprise_customer_catalog_uuid=self.condition.enterprise_customer_catalog_uuid,
             contains_content=False
+        )
+        self.assertFalse(self.condition.is_satisfied(offer, basket))
+
+    @httpretty.activate
+    def test_is_satisfied_contains_content_items_failure(self):
+        """ Ensure the condition returns false if the contains_content_item call fails. """
+        offer = factories.EnterpriseOfferFactory(partner=self.partner, condition=self.condition)
+        basket = factories.BasketFactory(site=self.site, owner=self.user)
+        basket.add_product(self.course_run.seat_products[0])
+        self.mock_enterprise_learner_api(
+            learner_id=self.user.id,
+            enterprise_customer_uuid=str(self.condition.enterprise_customer_uuid),
+            course_run_id=self.course_run.id,
+        )
+        self.mock_catalog_contains_course_runs(
+            [self.course_run.id],
+            self.condition.enterprise_customer_uuid,
+            enterprise_customer_catalog_uuid=self.condition.enterprise_customer_catalog_uuid,
+            contains_content=False,
+            raise_exception=True
         )
         self.assertFalse(self.condition.is_satisfied(offer, basket))
 

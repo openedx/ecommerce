@@ -62,15 +62,41 @@ class EnterpriseCustomerCondition(ConditionWithoutRangeMixin, SingleItemConsumpt
             logger.info('Skipping Voucher type enterprise conditional offer until we are ready to support it.')
             return False
 
+        enterprise_customer = str(self.enterprise_customer_uuid)
+        enterprise_catalog = str(self.enterprise_customer_catalog_uuid)
+        username = basket.owner.username
+        course_run_ids = []
+        for line in basket.all_lines():
+            course = line.product.course
+            if not course:
+                # Basket contains products not related to a course_run.
+                logger.warning('Unable to apply enterprise offer because '
+                               'the Basket (#%s) contains a product (#%s) not related to a course_run. '
+                               'Offer: %s, Enterprise: %s, Catalog: %s, User: %s',
+                               basket.id,
+                               line.product.id,
+                               offer.id,
+                               enterprise_customer,
+                               enterprise_catalog,
+                               username)
+                return False
+
+            course_run_ids.append(course.id)
+
+        courses_in_basket = ','.join(course_run_ids)
         learner_data = {}
         try:
             learner_data = fetch_enterprise_learner_data(basket.site, basket.owner)['results'][0]
-        except (ConnectionError, KeyError, SlumberHttpBaseException, Timeout):
-            logger.exception(
-                'Failed to retrieve enterprise learner data for site [%s] and user [%s].',
-                basket.site.domain,
-                basket.owner.username,
-            )
+        except (ConnectionError, KeyError, SlumberHttpBaseException, Timeout) as exc:
+            logger.exception('Unable to apply enterprise offer because '
+                             'we failed to retrieve enterprise learner data for the user. '
+                             'Offer: %s, Enterprise: %s, Catalog: %s, User: %s, Courses: %s, Exception: %s',
+                             offer.id,
+                             enterprise_customer,
+                             enterprise_catalog,
+                             username,
+                             courses_in_basket,
+                             exc)
             return False
         except IndexError:
             if offer.offer_type == ConditionalOffer.SITE:
@@ -81,26 +107,20 @@ class EnterpriseCustomerCondition(ConditionWithoutRangeMixin, SingleItemConsumpt
                 return False
 
         if (learner_data and 'enterprise_customer' in learner_data and
-                str(self.enterprise_customer_uuid) != learner_data['enterprise_customer']['uuid']):
+                enterprise_customer != learner_data['enterprise_customer']['uuid']):
             # Learner is not linked to the EnterpriseCustomer associated with this condition.
-            logger.debug('Unable to apply enterprise offer %s because Learner\'s enterprise (%s)'
-                         'does not match this conditions\'s enterprise (%s).',
-                         offer.id,
-                         learner_data['enterprise_customer']['uuid'],
-                         str(self.enterprise_customer_uuid))
+            if offer.offer_type == ConditionalOffer.VOUCHER:
+                logger.warning('Unable to apply enterprise offer because Learner\'s enterprise (%s)'
+                               'does not match this conditions\'s enterprise (%s). '
+                               'Offer: %s, Enterprise: %s, Catalog: %s, User: %s, Courses: %s',
+                               learner_data['enterprise_customer']['uuid'],
+                               enterprise_customer,
+                               offer.id,
+                               enterprise_customer,
+                               enterprise_catalog,
+                               username,
+                               courses_in_basket)
             return False
-
-        course_run_ids = []
-        for line in basket.all_lines():
-            course = line.product.course
-            if not course:
-                # Basket contains products not related to a course_run.
-                logger.warning('Unable to apply enterprise offer %s because '
-                               'the Basket (#%s) contains a product (#%s) not related to a course_run.',
-                               offer.id, basket.id, line.product.id)
-                return False
-
-            course_run_ids.append(course.id)
 
         # Verify that the current conditional offer is related to the provided
         # enterprise catalog, this will also filter out offers which don't
@@ -114,13 +134,33 @@ class EnterpriseCustomerCondition(ConditionWithoutRangeMixin, SingleItemConsumpt
                                offer.id, catalog, offer.condition.enterprise_customer_catalog_uuid)
                 return False
 
-        if not catalog_contains_course_runs(basket.site, course_run_ids, self.enterprise_customer_uuid,
-                                            enterprise_customer_catalog_uuid=self.enterprise_customer_catalog_uuid):
+        try:
+            catalog_contains_course = catalog_contains_course_runs(
+                basket.site, course_run_ids, enterprise_customer, enterprise_customer_catalog_uuid=enterprise_catalog
+            )
+        except (ConnectionError, KeyError, SlumberHttpBaseException, Timeout) as exc:
+            logger.exception('Unable to apply enterprise offer because '
+                             'we failed to check if course_runs exist in the catalog. '
+                             'Offer: %s, Enterprise: %s, Catalog: %s, User: %s, Courses: %s, Exception: %s',
+                             offer.id,
+                             enterprise_customer,
+                             enterprise_catalog,
+                             username,
+                             courses_in_basket,
+                             exc)
+            return False
+
+        if not catalog_contains_course:
             # Basket contains course runs that do not exist in the EnterpriseCustomerCatalogs
             # associated with the EnterpriseCustomer.
-            logger.warning('Unable to apply enterprise offer %s because '
-                           'Enterprise catalog (%s) does not contain the course(s) (%s) in this basket.',
-                           offer.id, self.enterprise_customer_catalog_uuid, ','.join(course_run_ids))
+            logger.warning('Unable to apply enterprise offer because '
+                           'Enterprise catalog does not contain the course(s) in this basket. '
+                           'Offer: %s, Enterprise: %s, Catalog: %s, User: %s, Courses: %s',
+                           offer.id,
+                           enterprise_customer,
+                           enterprise_catalog,
+                           username,
+                           courses_in_basket)
             return False
 
         return True
