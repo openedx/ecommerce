@@ -5,6 +5,7 @@ import hashlib
 import hmac
 import logging
 from collections import OrderedDict
+import crum
 from urllib import urlencode
 
 import waffle
@@ -13,11 +14,14 @@ from django.urls import reverse
 from django.utils.translation import ugettext as _
 from edx_django_utils.cache import TieredCache
 from edx_rest_api_client.client import EdxRestApiClient
+from edx_rest_framework_extensions.auth.jwt.cookies import get_decoded_jwt
 from oscar.core.loading import get_model
 from requests.exceptions import ConnectionError, Timeout
 from slumber.exceptions import SlumberHttpBaseException
 
+from ecommerce.core.constants import SYSTEM_ENTERPRISE_LEARNER_ROLE
 from ecommerce.core.utils import deprecated_traverse_pagination
+from ecommerce.enterprise.api import fetch_enterprise_learner_data
 from ecommerce.enterprise.exceptions import EnterpriseDoesNotExist
 from ecommerce.extensions.offer.models import OFFER_PRIORITY_ENTERPRISE
 
@@ -444,3 +448,36 @@ def get_enterprise_catalog(site, enterprise_catalog, limit, page):
     TieredCache.set_all_tiers(cache_key, response, settings.CATALOG_RESULTS_CACHE_TIMEOUT)
 
     return response
+
+
+def get_enterprise_id_for_current_request_user_from_jwt():
+    request = crum.get_current_request()
+    decoded_jwt = get_decoded_jwt(request)
+    if decoded_jwt:
+        roles_claim = decoded_jwt.get('roles', [])
+        for role_data in roles_claim:
+            role_in_jwt, __, context_in_jwt = role_data.partition(':')
+            if role_in_jwt == SYSTEM_ENTERPRISE_LEARNER_ROLE and context_in_jwt:
+                return context_in_jwt
+
+    return None
+
+
+def get_enterprise_id_for_user(site, user):
+    enterprise_from_jwt = get_enterprise_id_for_current_request_user_from_jwt()
+    if enterprise_from_jwt:
+        return enterprise_from_jwt
+
+    try:
+        enterprise_learner_response = fetch_enterprise_learner_data(site, user)
+    except (ConnectionError, KeyError, SlumberHttpBaseException, Timeout) as exc:
+        logging.exception('Unable to retrieve enterprise learner data for the user!'
+                          'User: %s, Exception: %s', user, exc)
+        return None
+
+    try:
+        return enterprise_learner_response['results'][0]['enterprise_customer']['uuid']
+    except IndexError:
+        pass
+
+    return None

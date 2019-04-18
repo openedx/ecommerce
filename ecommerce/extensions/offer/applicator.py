@@ -6,6 +6,7 @@ from oscar.apps.offer.applicator import Applicator
 from oscar.core.loading import get_model
 
 from ecommerce.extensions.offer.constants import CUSTOM_APPLICATOR_LOG_FLAG
+from ecommerce.enterprise.utils import get_enterprise_id_for_user
 
 logger = logging.getLogger(__name__)
 BasketAttribute = get_model('basket', 'BasketAttribute')
@@ -61,12 +62,13 @@ class CustomApplicator(Applicator):
 
         # edX currently does not use user offers or session offers.
         # The default oscar implementations which return [] are here in case edX ever starts using these offers.
+        enterprise_offers = self.get_enterprise_offers(basket.site, user)
         user_offers = self.get_user_offers(user)
         session_offers = self.get_session_offers(request)
 
         return list(
             sorted(
-                chain(session_offers, basket_offers, user_offers, program_offers, site_offers),
+                chain(session_offers, basket_offers, user_offers, program_offers, enterprise_offers, site_offers),
                 key=lambda o: o.priority,
                 reverse=True,
             )
@@ -77,8 +79,27 @@ class CustomApplicator(Applicator):
         Return site offers that are available to baskets without bundle ids.
         """
         ConditionalOffer = get_model('offer', 'ConditionalOffer')
-        qs = ConditionalOffer.active.filter(offer_type=ConditionalOffer.SITE, condition__program_uuid__isnull=True)
+        qs = ConditionalOffer.active.filter(
+            offer_type=ConditionalOffer.SITE,
+            condition__program_uuid__isnull=True,
+            condition__enterprise_customer_uuid__isnull=True,
+        )
         return qs.select_related('condition', 'benefit')
+
+    def get_enterprise_offers(self, site, user):
+        """
+        Return enterprise offers filtered by the user's enterprise, if it exists.
+        """
+        enterprise_id = get_enterprise_id_for_user(site, user)
+        if enterprise_id:
+            ConditionalOffer = get_model('offer', 'ConditionalOffer')
+            offers = ConditionalOffer.active.filter(
+                offer_type=ConditionalOffer.SITE,
+                condition__enterprise_customer_uuid=enterprise_id
+            )
+            return offers.select_related('condition', 'benefit')
+
+        return []
 
     def get_program_offers(self, bundle_attribute):
         """

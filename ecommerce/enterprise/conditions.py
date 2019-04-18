@@ -71,14 +71,13 @@ class EnterpriseCustomerCondition(ConditionWithoutRangeMixin, SingleItemConsumpt
             if not course:
                 # Basket contains products not related to a course_run.
                 logger.warning('Unable to apply enterprise offer because '
-                               'the Basket (#%s) contains a product (#%s) not related to a course_run. '
-                               'Offer: %s, Enterprise: %s, Catalog: %s, User: %s',
-                               basket.id,
-                               line.product.id,
+                               'the Basket contains a product not related to a course_run. '
+                               'Offer: %s, Enterprise: %s, Catalog: %s, User: %s, Product ID: %s',
                                offer.id,
                                enterprise_customer,
                                enterprise_catalog,
-                               username)
+                               username,
+                               line.product.id)
                 return False
 
             course_run_ids.append(course.id)
@@ -237,5 +236,13 @@ class AssignableEnterpriseCustomerCondition(EnterpriseCustomerCondition):
         # basket owner can redeem the voucher if free slots are avialable
         if voucher.slots_available_for_assignment:
             return True
+
+        logger.warning('Unable to apply enterprise offer because '
+                       'the voucher has not been assigned to this user and their are no remaining available uses. '
+                       'Offer: %s, Enterprise: %s, Catalog: %s, User: %s',
+                       offer.id,
+                       self.enterprise_customer_uuid,
+                       self.enterprise_customer_catalog_uuid,
+                       basket.owner.username)
 
         return False
