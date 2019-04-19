@@ -1,18 +1,15 @@
+from uuid import uuid4
+
 import mock
 from oscar.core.loading import get_model
 from oscar.test import factories
 from testfixtures import LogCapture
 from waffle.testutils import override_flag
-from uuid import uuid4
 
 from ecommerce.core.constants import SYSTEM_ENTERPRISE_LEARNER_ROLE
 from ecommerce.extensions.offer.applicator import CustomApplicator
 from ecommerce.extensions.offer.constants import CUSTOM_APPLICATOR_LOG_FLAG
-from ecommerce.extensions.test.factories import (
-    ConditionFactory,
-    ConditionalOfferFactory,
-    ProgramOfferFactory,
-)
+from ecommerce.extensions.test.factories import ConditionalOfferFactory, ConditionFactory, ProgramOfferFactory
 from ecommerce.tests.testcases import TestCase
 
 BasketAttribute = get_model('basket', 'BasketAttribute')

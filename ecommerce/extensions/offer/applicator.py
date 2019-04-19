@@ -5,8 +5,8 @@ import waffle
 from oscar.apps.offer.applicator import Applicator
 from oscar.core.loading import get_model
 
-from ecommerce.extensions.offer.constants import CUSTOM_APPLICATOR_LOG_FLAG
 from ecommerce.enterprise.utils import get_enterprise_id_for_user
+from ecommerce.extensions.offer.constants import CUSTOM_APPLICATOR_LOG_FLAG
 
 logger = logging.getLogger(__name__)
 BasketAttribute = get_model('basket', 'BasketAttribute')

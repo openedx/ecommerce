@@ -5,9 +5,9 @@ import hashlib
 import hmac
 import logging
 from collections import OrderedDict
-import crum
 from urllib import urlencode
 
+import crum
 import waffle
 from django.conf import settings
 from django.urls import reverse
