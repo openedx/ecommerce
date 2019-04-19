@@ -130,8 +130,8 @@ class CustomApplicatorTests(TestCase):
     def test_get_enterprise_offers(self):
         """ Verify get_enterprise_offers returns correct objects based on filter"""
 
-        # Create conditions
         uuid = uuid4()
+
         for _ in range(2):
             condition = ConditionFactory(
                 program_uuid=None,
@@ -142,6 +142,13 @@ class CustomApplicatorTests(TestCase):
             condition = ConditionFactory(
                 program_uuid=None,
                 enterprise_customer_uuid=None
+            )
+            ConditionalOfferFactory(condition=condition)
+        # Make some condition offers with a uuid other than ours
+        for _ in range(4):
+            condition = ConditionFactory(
+                program_uuid=None,
+                enterprise_customer_uuid=uuid4()
             )
             ConditionalOfferFactory(condition=condition)
 
