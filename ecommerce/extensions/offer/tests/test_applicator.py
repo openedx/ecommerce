@@ -3,10 +3,16 @@ from oscar.core.loading import get_model
 from oscar.test import factories
 from testfixtures import LogCapture
 from waffle.testutils import override_flag
+from uuid import uuid4
 
+from ecommerce.core.constants import SYSTEM_ENTERPRISE_LEARNER_ROLE
 from ecommerce.extensions.offer.applicator import CustomApplicator
 from ecommerce.extensions.offer.constants import CUSTOM_APPLICATOR_LOG_FLAG
-from ecommerce.extensions.test.factories import ConditionalOfferFactory, ProgramOfferFactory
+from ecommerce.extensions.test.factories import (
+    ConditionFactory,
+    ConditionalOfferFactory,
+    ProgramOfferFactory,
+)
 from ecommerce.tests.testcases import TestCase
 
 BasketAttribute = get_model('basket', 'BasketAttribute')
@@ -34,7 +40,11 @@ class CustomApplicatorTests(TestCase):
     def assert_correct_offers(self, expected_offers):
         """ Helper to verify applicator returns the expected offers. """
         # No need to pass a request to get_offers since we currently don't support session offers
-        offers = self.applicator.get_offers(self.basket, self.user)
+        with mock.patch('ecommerce.enterprise.utils.get_decoded_jwt') as mock_get_jwt:
+            mock_get_jwt.return_value = {
+                'roles': ['{}:{}'.format(SYSTEM_ENTERPRISE_LEARNER_ROLE, uuid4())]
+            }
+            offers = self.applicator.get_offers(self.basket, self.user)
         self.assertEqual(offers, expected_offers)
 
     def test_get_offers_with_bundle(self):
@@ -97,3 +107,49 @@ class CustomApplicatorTests(TestCase):
             )
 
         self.assertFalse(self.applicator.get_program_offers.called)  # Verify there was no attempt to match off a bundle
+
+    def test_get_site_offers(self):
+        """ Verify get_site_offers returns correct objects based on filter"""
+
+        uuid = uuid4()
+        for _ in range(2):
+            condition = ConditionFactory(
+                program_uuid=None,
+                enterprise_customer_uuid=uuid
+            )
+            ConditionalOfferFactory(condition=condition)
+        for _ in range(3):
+            condition = ConditionFactory(
+                program_uuid=None,
+                enterprise_customer_uuid=None
+            )
+            ConditionalOfferFactory(condition=condition)
+
+        assert self.applicator.get_site_offers().count() == 3
+
+    def test_get_enterprise_offers(self):
+        """ Verify get_enterprise_offers returns correct objects based on filter"""
+
+        # Create conditions
+        uuid = uuid4()
+        for _ in range(2):
+            condition = ConditionFactory(
+                program_uuid=None,
+                enterprise_customer_uuid=uuid
+            )
+            ConditionalOfferFactory(condition=condition)
+        for _ in range(3):
+            condition = ConditionFactory(
+                program_uuid=None,
+                enterprise_customer_uuid=None
+            )
+            ConditionalOfferFactory(condition=condition)
+
+        with mock.patch('ecommerce.extensions.offer.applicator.get_enterprise_id_for_user') as mock_ent_id:
+            mock_ent_id.return_value = uuid
+            enterprise_offers = self.applicator.get_enterprise_offers(
+                'some-site',
+                self.user
+            )
+
+        assert enterprise_offers.count() == 2
