@@ -89,5 +89,3 @@ ENTERPRISE_API_URL = urljoin(ENTERPRISE_SERVICE_URL, 'api/v1/')
 CORS_ALLOW_HEADERS = corsheaders_default_headers + (
     'use-jwt-cookie',
 )
-
-ROUTING_KEY = environ.get('ECOMMERCE_ROUTING_KEY')
