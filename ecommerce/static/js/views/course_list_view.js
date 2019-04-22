@@ -21,11 +21,12 @@ define([
             template: _.template(courseListViewTemplate),
 
             renderCourseTable: function() {
-                var filterPlaceholder = gettext('Search...'),
+                var courseTable,
+                    filterPlaceholder = gettext('Search...'),
                     $emptyLabel = '<label class="sr">' + filterPlaceholder + '</label>';
 
                 if (!$.fn.dataTable.isDataTable('#courseTable')) {
-                    var courseTable = this.$el.find('#courseTable').DataTable({
+                    courseTable = this.$el.find('#courseTable').DataTable({
                         serverSide: true,
                         ajax: '/api/v2/courses/?format=datatables',
                         autoWidth: false,
@@ -36,13 +37,13 @@ define([
                             $('#courseTable_filter input').unbind()
                             .bind('keyup', function(e) {
                                 // If the length is 3 or more characters, or the user pressed ENTER, search
-                                if(this.value.length >= 3 || e.keyCode == 13) {
-                                    courseTable.search( this.value ).draw();
+                                if (this.value.length >= 3 || e.keyCode === 13) {
+                                    courseTable.search(this.value).draw();
                                 }
 
                                 // Ensure we clear the search if they backspace far enough
-                                if(this.value == "") {
-                                    courseTable.search("").draw();
+                                if (this.value === '') {
+                                    courseTable.search('').draw();
                                 }
                             });
                         },
