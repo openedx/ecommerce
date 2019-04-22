@@ -1,50 +1,41 @@
 define([
     'jquery',
-    'views/coupon_list_view',
-    'collections/coupon_collection'
+    'views/coupon_list_view'
 ],
-    function($, CouponListView, CouponCollection) {
+    function($, CouponListView) {
         'use strict';
 
         describe('coupon list view', function() {
             var view,
-                collection,
-                coupons = [
-                    {
-                        category: {id: 3, name: 'Affiliate Promotion'},
-                        code: 'G7SL19ZZ26PL07E',
-                        course_seats: [],
-                        course_seat_types: [],
-                        id: 1,
-                        max_uses: 2,
-                        price: 10,
-                        quantity: 1,
-                        seats: [],
-                        stock_record_ids: [],
-                        total_value: 10,
-                        date_created: new Date()
-                    },
-                    {
-                        category: {id: 3, name: 'Affiliate Promotion'},
-                        code: 'G7SL19ZZ26PL07E',
-                        course_seats: [],
-                        course_seat_types: [],
-                        id: 1,
-                        max_uses: 2,
-                        price: 10,
-                        quantity: 2,
-                        seats: [],
-                        stock_record_ids: [],
-                        total_value: 20,
-                        date_created: new Date()
-                    }
-                ];
+                coupons = {
+                    recordsTotal: 2,
+                    recordsFiltered: 2,
+                    data: [
+                        {
+                            title: 'Test Coupon 1',
+                            category: {id: 3, name: 'Affiliate Promotion'},
+                            code: 'H7SL19DH26PL07E',
+                            client: 'Test Client 1',
+                            id: 1,
+                            date_created: new Date()
+                        },
+                        {
+                            title: 'Test Coupon 2',
+                            category: {id: 3, name: 'Affiliate Promotion'},
+                            code: 'G7SL19ZZ26PL07E',
+                            client: 'Test Client 2',
+                            id: 2,
+                            date_created: new Date()
+                        }
+                    ],
+                    draw: 1
+                };
 
             beforeEach(function() {
-                collection = new CouponCollection();
-                collection.set(coupons);
-
-                view = new CouponListView({collection: collection}).render();
+                spyOn($, 'ajax').and.callFake(function(params) {
+                    params.success(coupons);
+                });
+                view = new CouponListView().render();
             });
 
             it('should change the default filter placeholder for coupon search field to a custom string', function() {
@@ -58,9 +49,9 @@ define([
                 expect($tableInput.hasClass('form-control input-sm')).toBeFalsy();
             });
 
-            it('should populate the table based on the coupon collection', function() {
+            it('should populate the table based on the coupon api response', function() {
                 var tableData = view.$el.find('#couponTable').DataTable().data();
-                expect(tableData.data().length).toBe(collection.length);
+                expect(tableData.data().length).toBe(coupons.data.length);
             });
         });
     }

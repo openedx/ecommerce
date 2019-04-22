@@ -27,6 +27,7 @@ define([
             downloadTpl: _.template(
                 '<a href="" class="btn btn-secondary btn-small voucher-report-button"' +
                 ' data-coupon-id="<%= id %>"><%=gettext(\'Download Coupon Report\')%></a>'),
+            url: '/api/v2/coupons/?format=datatables',
 
             getTableColumns: function() {
                 return [
@@ -39,7 +40,10 @@ define([
                     },
                     {
                         title: gettext('Created'),
-                        data: 'dateCreated'
+                        data: 'date_created',
+                        fnCreatedCell: function(nTd, sData, oData) {
+                            $(nTd).html(moment(oData.date_created).format('MMMM DD, YYYY, h:mm A'));
+                        }
                     },
                     {
                         title: gettext('Custom Code'),
@@ -51,7 +55,7 @@ define([
                     },
                     {
                         title: gettext('Category'),
-                        data: 'categoryName'
+                        data: 'category.name'
                     },
                     {
                         title: gettext('Coupon Report'),
@@ -59,34 +63,39 @@ define([
                         fnCreatedCell: _.bind(function(nTd, sData, oData) {
                             $(nTd).html(this.downloadTpl(oData));
                         }, this),
-                        orderable: false
+                        orderable: false,
+                        searchable: false
                     }
                 ];
             },
-            initialize: function() {
-                this.listenTo(this.collection, 'update', this.refreshTableData);
-            },
-
-            getRowData: function(coupon) {
-                return {
-                    categoryName: coupon.get('category').name,
-                    client: coupon.get('client'),
-                    code: coupon.get('code'),
-                    id: coupon.get('id'),
-                    title: coupon.get('title'),
-                    dateCreated: moment(coupon.get('date_created')).format('MMMM DD, YYYY, h:mm A')
-                };
-            },
 
             renderCouponTable: function() {
-                var filterPlaceholder = gettext('Search...'),
+                var couponTable,
+                    filterPlaceholder = gettext('Search...'),
                     $emptyLabel = '<label class="sr">' + filterPlaceholder + '</label>';
 
                 if (!$.fn.dataTable.isDataTable('#couponTable')) {
-                    this.$el.find('#couponTable').DataTable({
+                    couponTable = this.$el.find('#couponTable').DataTable({
+                        serverSide: true,
+                        ajax: this.url,
                         autoWidth: false,
+                        lengthMenu: [10, 25, 50, 100],
                         info: true,
                         paging: true,
+                        initComplete: function() {
+                            $('#couponTable_filter input').unbind()
+                            .bind('keyup', function(e) {
+                                // If the length is 3 or more characters, or the user pressed ENTER, search
+                                if (this.value.length >= 3 || e.keyCode === 13) {
+                                    couponTable.search(this.value).draw();
+                                }
+
+                                // Ensure we clear the search if they backspace far enough
+                                if (this.value === '') {
+                                    couponTable.search('').draw();
+                                }
+                            });
+                        },
                         oLanguage: {
                             oPaginate: {
                                 sNext: gettext('Next'),
@@ -120,18 +129,6 @@ define([
             render: function() {
                 this.$el.html(this.template);
                 this.renderCouponTable();
-                this.refreshTableData();
-                return this;
-            },
-
-            /**
-             * Refresh the data table with the collection's current information.
-             */
-            refreshTableData: function() {
-                var data = this.collection.map(this.getRowData, this),
-                    $table = this.$el.find('#couponTable').DataTable();
-
-                $table.clear().rows.add(data).draw();
                 return this;
             },
 
@@ -144,7 +141,6 @@ define([
 
                 event.preventDefault();
                 window.open(url, '_blank');
-                this.refreshTableData();
                 return this;
             }
         });

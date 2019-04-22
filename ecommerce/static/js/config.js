@@ -15,7 +15,6 @@ require.config({
         ecommerce: 'js/shims/ecommerce',
         jquery: 'bower_components/jquery/dist/jquery',
         'js-cookie': 'bower_components/js-cookie/src/js.cookie',
-        'mock-ajax': 'js/test/mock-ajax',
         models: 'js/models',
         moment: 'bower_components/moment/moment',
         pages: 'js/pages',

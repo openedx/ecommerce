@@ -1,40 +1,37 @@
 define([
     'jquery',
-    'views/course_list_view',
-    'mock-ajax'
+    'views/course_list_view'
 ],
     function($, CourseListView) {
         'use strict';
 
         describe('course list view', function() {
             var view,
-                collection,
                 courses = {
-                    "recordsTotal": 2,
-                    "recordsFiltered": 2,
-                    "data": [
+                    recordsTotal: 2,
+                    recordsFiltered: 2,
+                    data: [
                         {
-                            "id": "course-v1:edX+DemoX+Demo_Course_89",
-                            "name": "AAJNCJVJKE",
-                            "type": "verified",
-                            "last_edited": "2019-04-12T14:19:11Z"
-                        }, {
-                            "id": "course-v1:edX+DemoX+Demo_Course_222",
-                            "name": "AAYRYEBQMT",
-                            "type": "verified",
-                            "last_edited": "2019-04-12T14:19:29Z"
+                            id: 'course-v1:edX+TextX+Test_Course_01',
+                            name: 'Test Course 1',
+                            type: 'verified',
+                            last_edited: new Date()
+                        },
+                        {
+                            id: 'course-v1:edX+TestX+Test_Course_02',
+                            name: 'Test Course 2',
+                            type: 'verified',
+                            last_edited: new Date()
                         }
                     ],
-                    "draw": 1
+                    draw: 1
                 };
 
             beforeEach(function() {
-                jasmine.Ajax.install();
+                spyOn($, 'ajax').and.callFake(function(params) {
+                    params.success(courses);
+                });
                 view = new CourseListView().render();
-            });
-
-            afterEach(function() {
-                jasmine.Ajax.uninstall();
             });
 
             it('should change the default filter placeholder to a custom string', function() {
@@ -48,11 +45,7 @@ define([
                 expect($tableInput.hasClass('form-control input-sm')).toBeFalsy();
             });
 
-            it('should populate the table based on the course collection', function() {
-                jasmine.Ajax.stubRequest('/api/v2/courses/?format=datatables').andReturn({
-                    "responseJSON": courses,
-                    "status": 200
-                });
+            it('should populate the table based on the course api response', function() {
                 var tableData = view.$el.find('#courseTable').DataTable().data();
                 expect(tableData.data().length).toBe(courses.data.length);
             });

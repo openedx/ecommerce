@@ -1,10 +1,8 @@
 define([
-    'collections/enterprise_coupon_collection',
     'views/enterprise_coupon_list_view',
     'pages/page'
 ],
-    function(CouponCollection,
-              CouponListView,
+    function(CouponListView,
               Page) {
         'use strict';
 
@@ -12,10 +10,8 @@ define([
             title: gettext('Enterprise Coupon Codes'),
 
             initialize: function() {
-                this.collection = new CouponCollection();
-                this.view = new CouponListView({collection: this.collection});
+                this.view = new CouponListView();
                 this.render();
-                this.collection.fetch({merge: true, data: {page_size: 50}});
             }
         });
     }

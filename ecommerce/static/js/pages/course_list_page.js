@@ -1,10 +1,8 @@
 define([
-    'collections/course_collection',
     'views/course_list_view',
     'pages/page'
 ],
-    function(CourseCollection,
-              CourseListView,
+    function(CourseListView,
               Page) {
         'use strict';
 
