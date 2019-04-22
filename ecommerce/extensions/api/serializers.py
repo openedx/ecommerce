@@ -820,16 +820,12 @@ class EnterpriseCouponOverviewListSerializer(serializers.ModelSerializer):
 
     def get_num_unassigned(self, coupon):
         """
-        Returns number of unassigned vouchers. These are the vouchers that have
-        at-least 1 potential slot available for asssignment.
+        Return number of available assignments.
         """
         vouchers = coupon.attr.coupon_vouchers.vouchers.all()
-        num_unassigned = len([
-            voucher.code
-            for voucher in vouchers
-            if voucher.slots_available_for_assignment > 0
+        return sum([
+            voucher.slots_available_for_assignment for voucher in vouchers if voucher.slots_available_for_assignment > 0
         ])
-        return num_unassigned
 
     def get_errors(self, coupon):
         """

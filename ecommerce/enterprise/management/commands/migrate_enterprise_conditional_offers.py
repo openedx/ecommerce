@@ -12,6 +12,7 @@ from django.core.management import BaseCommand
 from ecommerce.enterprise.benefits import BENEFIT_MAP
 from ecommerce.enterprise.conditions import EnterpriseCustomerCondition
 from ecommerce.enterprise.utils import get_enterprise_customer
+from ecommerce.extensions.offer.models import OFFER_PRIORITY_VOUCHER
 from ecommerce.extensions.voucher.models import Voucher
 from ecommerce.programs.custom import class_path, get_model
 
@@ -105,9 +106,7 @@ class Command(BaseCommand):
             email_domains=offer.email_domains,
             site=offer.site,
             partner=offer.partner,
-            # For initial creation, we are setting the priority lower so that we don't want to use these
-            #  until we've done some other implementation work. We will update this to a higher value later.
-            priority=5,
+            priority=OFFER_PRIORITY_VOUCHER,
         )
 
         voucher.offers.add(new_offer)

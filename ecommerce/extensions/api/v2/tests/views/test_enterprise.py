@@ -1020,7 +1020,7 @@ class EnterpriseCouponViewSetTest(
             'max_uses': 2,
             'code_assignments': [0, 0, 0],
             'code_redemptions': [0, 0, 0],
-            'expected_response': {'max_uses': 6, 'num_codes': 3, 'num_unassigned': 3, 'num_uses': 0, 'errors': []}
+            'expected_response': {'max_uses': 6, 'num_codes': 3, 'num_unassigned': 6, 'num_uses': 0, 'errors': []}
         },
         {
             'voucher_type': Voucher.MULTI_USE_PER_CUSTOMER,
@@ -1028,7 +1028,7 @@ class EnterpriseCouponViewSetTest(
             'max_uses': 2,
             'code_assignments': [1, 0, 0],
             'code_redemptions': [0, 1, 0],
-            'expected_response': {'max_uses': 6, 'num_codes': 3, 'num_unassigned': 1, 'num_uses': 1, 'errors': []}
+            'expected_response': {'max_uses': 6, 'num_codes': 3, 'num_unassigned': 2, 'num_uses': 1, 'errors': []}
         },
         {
             'voucher_type': Voucher.MULTI_USE_PER_CUSTOMER,
@@ -1036,7 +1036,7 @@ class EnterpriseCouponViewSetTest(
             'max_uses': 2,
             'code_assignments': [1, 1, 0],
             'code_redemptions': [0, 2, 0],
-            'expected_response': {'max_uses': 6, 'num_codes': 3, 'num_unassigned': 1, 'num_uses': 2, 'errors': []}
+            'expected_response': {'max_uses': 6, 'num_codes': 3, 'num_unassigned': 2, 'num_uses': 2, 'errors': []}
         },
         {
             'voucher_type': Voucher.MULTI_USE_PER_CUSTOMER,
@@ -1053,7 +1053,7 @@ class EnterpriseCouponViewSetTest(
             'max_uses': 2,
             'code_assignments': [1, 0, 0],
             'code_redemptions': [0, 1, 0],
-            'expected_response': {'max_uses': 6, 'num_codes': 3, 'num_unassigned': 3, 'num_uses': 1, 'errors': []}
+            'expected_response': {'max_uses': 6, 'num_codes': 3, 'num_unassigned': 4, 'num_uses': 1, 'errors': []}
         },
         {
             'voucher_type': Voucher.MULTI_USE,
@@ -1061,7 +1061,7 @@ class EnterpriseCouponViewSetTest(
             'max_uses': 2,
             'code_assignments': [2, 0, 0],
             'code_redemptions': [0, 2, 0],
-            'expected_response': {'max_uses': 6, 'num_codes': 3, 'num_unassigned': 1, 'num_uses': 2, 'errors': []}
+            'expected_response': {'max_uses': 6, 'num_codes': 3, 'num_unassigned': 2, 'num_uses': 2, 'errors': []}
         },
         {
             'voucher_type': Voucher.MULTI_USE,
@@ -1087,7 +1087,7 @@ class EnterpriseCouponViewSetTest(
             'code_redemptions': [1],
             'assignment_has_error': True,
             'expected_response': {
-                'max_uses': 10000, 'num_codes': 1, 'num_unassigned': 1, 'num_uses': 1, 'errors': True
+                'max_uses': 10000, 'num_codes': 1, 'num_unassigned': 9998, 'num_uses': 1, 'errors': True
             }
         },
         {
@@ -1096,7 +1096,7 @@ class EnterpriseCouponViewSetTest(
             'max_uses': 2,
             'code_assignments': [0, 0, 0],
             'code_redemptions': [0, 0, 0],
-            'expected_response': {'max_uses': 6, 'num_codes': 3, 'num_unassigned': 3, 'num_uses': 0, 'errors': []}
+            'expected_response': {'max_uses': 6, 'num_codes': 3, 'num_unassigned': 6, 'num_uses': 0, 'errors': []}
         },
         {
             'voucher_type': Voucher.ONCE_PER_CUSTOMER,
@@ -2875,7 +2875,7 @@ class EnterpriseCouponViewSetRbacTests(
             'max_uses': 2,
             'code_assignments': [0, 0, 0],
             'code_redemptions': [0, 0, 0],
-            'expected_response': {'max_uses': 6, 'num_codes': 3, 'num_unassigned': 3, 'num_uses': 0, 'errors': []}
+            'expected_response': {'max_uses': 6, 'num_codes': 3, 'num_unassigned': 6, 'num_uses': 0, 'errors': []}
         },
         {
             'voucher_type': Voucher.MULTI_USE_PER_CUSTOMER,
@@ -2883,7 +2883,7 @@ class EnterpriseCouponViewSetRbacTests(
             'max_uses': 2,
             'code_assignments': [1, 0, 0],
             'code_redemptions': [0, 1, 0],
-            'expected_response': {'max_uses': 6, 'num_codes': 3, 'num_unassigned': 1, 'num_uses': 1, 'errors': []}
+            'expected_response': {'max_uses': 6, 'num_codes': 3, 'num_unassigned': 2, 'num_uses': 1, 'errors': []}
         },
         {
             'voucher_type': Voucher.MULTI_USE_PER_CUSTOMER,
@@ -2891,7 +2891,7 @@ class EnterpriseCouponViewSetRbacTests(
             'max_uses': 2,
             'code_assignments': [1, 1, 0],
             'code_redemptions': [0, 2, 0],
-            'expected_response': {'max_uses': 6, 'num_codes': 3, 'num_unassigned': 1, 'num_uses': 2, 'errors': []}
+            'expected_response': {'max_uses': 6, 'num_codes': 3, 'num_unassigned': 2, 'num_uses': 2, 'errors': []}
         },
         {
             'voucher_type': Voucher.MULTI_USE_PER_CUSTOMER,
@@ -2908,7 +2908,7 @@ class EnterpriseCouponViewSetRbacTests(
             'max_uses': 2,
             'code_assignments': [1, 0, 0],
             'code_redemptions': [0, 1, 0],
-            'expected_response': {'max_uses': 6, 'num_codes': 3, 'num_unassigned': 3, 'num_uses': 1, 'errors': []}
+            'expected_response': {'max_uses': 6, 'num_codes': 3, 'num_unassigned': 4, 'num_uses': 1, 'errors': []}
         },
         {
             'voucher_type': Voucher.MULTI_USE,
@@ -2916,7 +2916,7 @@ class EnterpriseCouponViewSetRbacTests(
             'max_uses': 2,
             'code_assignments': [2, 0, 0],
             'code_redemptions': [0, 2, 0],
-            'expected_response': {'max_uses': 6, 'num_codes': 3, 'num_unassigned': 1, 'num_uses': 2, 'errors': []}
+            'expected_response': {'max_uses': 6, 'num_codes': 3, 'num_unassigned': 2, 'num_uses': 2, 'errors': []}
         },
         {
             'voucher_type': Voucher.MULTI_USE,
@@ -2942,7 +2942,7 @@ class EnterpriseCouponViewSetRbacTests(
             'code_redemptions': [1],
             'assignment_has_error': True,
             'expected_response': {
-                'max_uses': 10000, 'num_codes': 1, 'num_unassigned': 1, 'num_uses': 1, 'errors': True
+                'max_uses': 10000, 'num_codes': 1, 'num_unassigned': 9998, 'num_uses': 1, 'errors': True
             }
         },
         {
@@ -2951,7 +2951,7 @@ class EnterpriseCouponViewSetRbacTests(
             'max_uses': 2,
             'code_assignments': [0, 0, 0],
             'code_redemptions': [0, 0, 0],
-            'expected_response': {'max_uses': 6, 'num_codes': 3, 'num_unassigned': 3, 'num_uses': 0, 'errors': []}
+            'expected_response': {'max_uses': 6, 'num_codes': 3, 'num_unassigned': 6, 'num_uses': 0, 'errors': []}
         },
         {
             'voucher_type': Voucher.ONCE_PER_CUSTOMER,
