@@ -18,8 +18,7 @@ ADDRESS_FR = {
 
 LOGOUT_REDIRECT_URL = "http://edx.devstack.lms:18000/"
 
-#Conditions:
-# Course should be exist on ecommerce and discovery as verified course
-# Course should be currently available (course-start-date < now > course-end-date)
+# Note: Course should be currently available on studio
+TEST_COURSE_KEY = 'course-v1:edX+DemoX+Demo_Course'
+TEST_COURSE_NAME = 'edX Demonstration Course'
 
-TEST_COURSE_KEY = 'course-v1:edX+E2E-101+course'

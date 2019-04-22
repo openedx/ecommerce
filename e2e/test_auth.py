@@ -17,7 +17,7 @@ def test_login_and_logout(selenium):
     # to the marketing site (if available) or the LMS homepage.
     EcommerceHelpers.logout(selenium)
 
-    assert selenium.current_url == LOGOUT_REDIRECT_URL
+    assert selenium.current_url in [ LOGOUT_REDIRECT_URL, LMS_URL_ROOT ]
 
 
 def test_provider_logout(selenium):
