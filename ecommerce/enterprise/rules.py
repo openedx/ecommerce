@@ -5,7 +5,6 @@ from __future__ import absolute_import
 
 import rules
 import waffle
-
 from edx_rbac.utils import (
     get_decoded_jwt_from_request,
     get_request_or_stub,

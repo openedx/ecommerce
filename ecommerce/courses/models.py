@@ -8,6 +8,7 @@ from django.db.models import Count, Q
 from django.utils.timezone import now, timedelta
 from django.utils.translation import ugettext_lazy as _
 from oscar.core.loading import get_class, get_model
+from simple_history.models import HistoricalRecords
 
 from ecommerce.core.constants import (
     ENROLLMENT_CODE_PRODUCT_CLASS_NAME,
@@ -40,6 +41,7 @@ class Course(models.Model):
     created = models.DateTimeField(null=True, auto_now_add=True)
     modified = models.DateTimeField(null=True, auto_now=True)
     thumbnail_url = models.URLField(null=True, blank=True)
+    history = HistoricalRecords()
 
     def __unicode__(self):
         return unicode(self.id)

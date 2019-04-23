@@ -15,6 +15,7 @@ django-filter==1.0.4
 django-libsass==0.5
 django-oscar<1.6                    # 1.6 has backwards incompatible changes
 django-rest-swagger
+django-simple-history
 django-solo
 django-threadlocals
 django-waffle<0.15.0                # Unpinning this causes multiple test failures
