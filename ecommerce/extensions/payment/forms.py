@@ -11,6 +11,8 @@ from django.core.exceptions import ValidationError
 from django.utils.translation import ugettext_lazy as _
 from oscar.core.loading import get_class, get_model
 
+from ecommerce.extensions.payment.constants import US_MILITARY_ADDRESS
+
 logger = logging.getLogger(__name__)
 
 Applicator = get_class('offer.applicator', 'Applicator')
@@ -167,16 +169,18 @@ class PaymentForm(forms.Form):
 
             if state:
                 code = '{country}-{state}'.format(country=country, state=state)
-
-                try:
-                    # TODO: Remove the if statement once https://bitbucket.org/flyingcircus/pycountry/issues/13394/
-                    # is fixed.
-                    if not pycountry.subdivisions.get(code=code):
-                        raise KeyError
-                except KeyError:
-                    msg = _('{state} is not a valid state/province in {country}.').format(state=state, country=country)
-                    logger.debug(msg)
-                    raise ValidationError({'state': msg})
+                if country != 'US' or state not in US_MILITARY_ADDRESS:
+                    # validation is skipped if the country is US and state code is present in military address
+                    try:
+                        # TODO: Remove the if statement once https://bitbucket.org/flyingcircus/pycountry/issues/13394/
+                        # is fixed.
+                        if not pycountry.subdivisions.get(code=code):
+                            raise KeyError
+                    except KeyError:
+                        msg = _('{state} is not a valid state/province in {country}.').format(state=state,
+                                                                                              country=country)
+                        logger.debug(msg)
+                        raise ValidationError({'state': msg})
 
             # Ensure the postal code is present, and limited to 9 characters
             postal_code = cleaned_data.get('postal_code')

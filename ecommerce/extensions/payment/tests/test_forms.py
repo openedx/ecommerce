@@ -183,6 +183,9 @@ class PaymentFormTests(TestCase):
         form = PaymentForm(user=self.user, data=data, request=self.request)
         self.assertTrue('organization' in form.fields)
 
+    def test_form_validation_with_military_address(self):
+        self.assert_form_valid(country='US', state='AA')
+
     def test_organization_field_not_in_form(self):
         """
         Verify the field 'organization' is not present in the form when the basket does not have an enrollment
