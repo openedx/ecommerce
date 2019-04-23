@@ -424,6 +424,29 @@ class CouponRedeemViewTests(CouponMixin, DiscoveryTestMixin, LmsApiMockMixin, En
         self.assertEqual(response.context['error'], 'This coupon code has expired.')
 
     @httpretty.activate
+    def test_invalid_entitlement_course(self):
+        """ Verify an error is returned when you apply enterprise coupon on entitled product. """
+        entitle_product = ProductFactory(
+            product_class=self.entitlement_product_class, stockrecords__partner=self.partner,
+            stockrecords__price_currency='USD', categories=[]
+        )
+        self.catalog.stock_records.add(StockRecord.objects.get(product=entitle_product))
+        code = self.prepare_enterprise_data(catalog=self.catalog)
+
+        response = self.client.get(
+            format_url(
+                base=self.redeem_url, params={
+                    'code': code,
+                    'sku': StockRecord.objects.get(product=entitle_product).partner_sku
+                }
+            )
+        )
+        self.assertEqual(
+            response.context['error'],
+            'This coupon code is not valid for entitlement course product. Try a different course.'
+        )
+
+    @httpretty.activate
     def test_basket_redirect_discount_code(self):
         """ Verify the view redirects to the basket view when a discount code is provided. """
         self.mock_course_api_response(course=self.course)
