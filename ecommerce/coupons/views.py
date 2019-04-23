@@ -196,6 +196,13 @@ class CouponRedeemView(EdxOrderPlacementMixin, View):
                 {'error': _('Couldn\'t find a matching Enterprise Customer for this coupon.')}
             )
 
+        if enterprise_customer and product.is_course_entitlement_product:
+            return render(
+                request,
+                template_name,
+                {'error': _('This coupon code is not valid for entitlement course product. Try a different course.')}
+            )
+
         if enterprise_customer is not None and enterprise_customer_user_needs_consent(
                 request.site,
                 enterprise_customer['id'],
