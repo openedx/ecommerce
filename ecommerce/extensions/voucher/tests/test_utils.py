@@ -78,6 +78,7 @@ class UtilTests(CouponMixin, DiscoveryMockMixin, DiscoveryTestMixin, LmsApiMockM
             max_uses=1,
             voucher_type=Voucher.MULTI_USE
         )
+        self.coupon.history.all().update(history_user=self.user)
         self.coupon_vouchers = CouponVouchers.objects.filter(coupon=self.coupon)
 
         self.entitlement = create_or_update_course_entitlement(

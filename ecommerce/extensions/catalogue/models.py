@@ -4,7 +4,8 @@ from django.db import models
 from django.db.models.signals import post_init, post_save
 from django.dispatch import receiver
 from django.utils.translation import ugettext_lazy as _
-from oscar.apps.catalogue.abstract_models import AbstractProduct
+from oscar.apps.catalogue.abstract_models import AbstractProduct, AbstractProductAttributeValue
+from simple_history.models import HistoricalRecords
 
 from ecommerce.core.constants import (
     COUPON_PRODUCT_CLASS_NAME,
@@ -23,6 +24,8 @@ class Product(AbstractProduct):
     expires = models.DateTimeField(null=True, blank=True,
                                    help_text=_('Last date/time on which this product can be purchased.'))
     original_expires = None
+
+    history = HistoricalRecords()
 
     @property
     def is_seat_product(self):
@@ -97,6 +100,10 @@ def update_enrollment_code(sender, **kwargs):  # pylint: disable=unused-argument
             enrollment_code.expires = instance.expires
             enrollment_code.save()
         instance.original_expires = instance.expires
+
+
+class ProductAttributeValue(AbstractProductAttributeValue):
+    history = HistoricalRecords()
 
 
 class Catalog(models.Model):

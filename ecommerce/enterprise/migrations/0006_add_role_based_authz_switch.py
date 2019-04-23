@@ -2,6 +2,7 @@
 from __future__ import unicode_literals
 
 from django.db import migrations
+
 from ecommerce.enterprise.constants import USE_ROLE_BASED_ACCESS_CONTROL
 
 
