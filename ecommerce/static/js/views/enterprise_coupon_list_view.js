@@ -36,19 +36,27 @@ define([
                     },
                     {
                         title: gettext('Status'),
-                        data: 'code_status'
+                        data: 'code_status',
+                        orderable: false,
+                        searchable: false
                     },
                     {
                         title: gettext('Client'),
-                        data: 'client'
+                        data: 'client',
+                        orderable: false,
+                        searchable: false
                     },
                     {
                         title: gettext('Enterprise Customer'),
-                        data: 'enterprise_customer'
+                        data: 'enterprise_customer',
+                        orderable: false,
+                        searchable: false
                     },
                     {
                         title: gettext('Enterprise Customer Catalog'),
-                        data: 'enterprise_customer_catalog'
+                        data: 'enterprise_customer_catalog',
+                        orderable: false,
+                        searchable: false
                     },
                     {
                         title: gettext('Coupon Report'),
@@ -56,7 +64,8 @@ define([
                         fnCreatedCell: _.bind(function(nTd, sData, oData) {
                             $(nTd).html(this.downloadTpl(oData));
                         }, this),
-                        orderable: false
+                        orderable: false,
+                        searchable: false
                     }
                 ];
             }
