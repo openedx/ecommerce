@@ -51,6 +51,16 @@ def get_discount_value(discount_percentage, product_price):
     return discount_percentage * product_price / 100.0
 
 
+def get_benefit_type(benefit):
+    """ Returns type of benefit using 'type' or 'proxy_class' attributes of Benefit object"""
+    _type = benefit.type
+
+    if not _type:
+        _type = getattr(benefit.proxy(), 'benefit_class_type', None)
+
+    return _type
+
+
 def format_benefit_value(benefit):
     """
     Format benefit value for display based on the benefit type
@@ -62,7 +72,7 @@ def format_benefit_value(benefit):
         benefit_value (str): String value containing formatted benefit value and type.
     """
     benefit_value = _remove_exponent_and_trailing_zeros(Decimal(str(benefit.value)))
-    benefit_type = benefit.type or getattr(benefit.proxy(), 'benefit_class_type', None)
+    benefit_type = get_benefit_type(benefit)
 
     if benefit_type == Benefit.PERCENTAGE:
         benefit_value = _('{benefit_value}%'.format(benefit_value=benefit_value))

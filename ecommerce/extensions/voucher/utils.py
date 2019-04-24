@@ -26,7 +26,7 @@ from ecommerce.enterprise.utils import get_enterprise_customer
 from ecommerce.extensions.api import exceptions
 from ecommerce.extensions.offer.constants import OFFER_MAX_USES_DEFAULT
 from ecommerce.extensions.offer.models import OFFER_PRIORITY_VOUCHER
-from ecommerce.extensions.offer.utils import get_discount_percentage, get_discount_value
+from ecommerce.extensions.offer.utils import get_benefit_type, get_discount_percentage, get_discount_value
 from ecommerce.invoice.models import Invoice
 from ecommerce.programs.conditions import ProgramCourseRunSeatsCondition
 from ecommerce.programs.constants import BENEFIT_MAP
@@ -156,7 +156,7 @@ def _get_info_for_coupon_report(coupon, voucher):
         discount_data = get_voucher_discount_info(benefit, seat_stockrecord.price_excl_tax)
         coupon_type, discount_percentage, discount_amount = _get_discount_info(discount_data)
     else:
-        benefit_type = benefit.type or getattr(benefit.proxy(), 'benefit_class_type', None)
+        benefit_type = get_benefit_type(benefit)
 
         if benefit_type == Benefit.PERCENTAGE:
             coupon_type = _('Discount') if benefit.value < 100 else _('Enrollment')
@@ -864,9 +864,7 @@ def update_voucher_with_enterprise_offer(offer, benefit_value, enterprise_custom
     """
     return get_or_create_enterprise_offer(
         benefit_value=benefit_value or offer.benefit.value,
-        benefit_type=benefit_type or offer.benefit.type or getattr(
-            offer.benefit.proxy(), 'benefit_class_type', None
-        ),
+        benefit_type=benefit_type or get_benefit_type(offer.benefit),
         enterprise_customer=enterprise_customer or offer.condition.enterprise_customer_uuid,
         enterprise_customer_catalog=enterprise_catalog or offer.condition.enterprise_customer_catalog_uuid,
         offer_name=offer.name,
@@ -900,9 +898,7 @@ def update_voucher_offer(offer, benefit_value, benefit_type=None, max_uses=None,
     return _get_or_create_offer(
         product_range=offer.benefit.range,
         benefit_value=benefit_value or offer.benefit.value,
-        benefit_type=benefit_type or offer.benefit.type or getattr(
-            offer.benefit.proxy(), 'benefit_class_type', None
-        ),
+        benefit_type=benefit_type or get_benefit_type(offer.benefit),
         offer_name=offer.name,
         max_uses=max_uses,
         email_domains=email_domains,
