@@ -706,6 +706,16 @@ class CodeUsageSerializer(serializers.Serializer):  # pylint: disable=abstract-m
             'total': max_coupon_usage,
         }
 
+    def num_assignments(self, code, user_email=None):
+        offer_assignments = OfferAssignment.objects.filter(
+            code=code,
+            status__in=[OFFER_ASSIGNED, OFFER_ASSIGNMENT_EMAIL_PENDING, OFFER_ASSIGNMENT_EMAIL_BOUNCED],
+        )
+        if user_email:
+            offer_assignments = offer_assignments.filter(user_email=user_email)
+
+        return offer_assignments.count()
+
 
 class NotAssignedCodeUsageSerializer(CodeUsageSerializer):  # pylint: disable=abstract-method
 
@@ -714,13 +724,7 @@ class NotAssignedCodeUsageSerializer(CodeUsageSerializer):  # pylint: disable=ab
 
     def get_redemptions(self, obj):
         redemptions = super(NotAssignedCodeUsageSerializer, self).get_redemptions(obj)
-
-        num_assignments = OfferAssignment.objects.filter(
-            code=self.get_code(obj),
-            status__in=[OFFER_ASSIGNED, OFFER_ASSIGNMENT_EMAIL_PENDING],
-        ).count()
-
-        return dict(redemptions, num_assignments=num_assignments)
+        return dict(redemptions, num_assignments=self.num_assignments(code=self.get_code(obj)))
 
 
 class NotRedeemedCodeUsageSerializer(CodeUsageSerializer):  # pylint: disable=abstract-method
@@ -730,11 +734,7 @@ class NotRedeemedCodeUsageSerializer(CodeUsageSerializer):  # pylint: disable=ab
         if usage_type in (Voucher.SINGLE_USE, Voucher.MULTI_USE_PER_CUSTOMER):
             return super(NotRedeemedCodeUsageSerializer, self).get_redemptions(obj)
         else:
-            num_assignments = OfferAssignment.objects.filter(
-                code=self.get_code(obj),
-                user_email=self.get_assigned_to(obj),
-                status__in=[OFFER_ASSIGNED, OFFER_ASSIGNMENT_EMAIL_PENDING, OFFER_ASSIGNMENT_EMAIL_BOUNCED],
-            ).count()
+            num_assignments = self.num_assignments(code=self.get_code(obj), user_email=self.get_assigned_to(obj))
             return {'used': 0, 'total': num_assignments}
 
 
@@ -747,11 +747,7 @@ class PartialRedeemedCodeUsageSerializer(CodeUsageSerializer):  # pylint: disabl
         elif usage_type == Voucher.MULTI_USE_PER_CUSTOMER:
             return super(PartialRedeemedCodeUsageSerializer, self).get_redemptions(obj)
         else:
-            num_assignments = OfferAssignment.objects.filter(
-                code=self.get_code(obj),
-                user_email=self.get_assigned_to(obj),
-                status__in=[OFFER_ASSIGNED, OFFER_ASSIGNMENT_EMAIL_PENDING, OFFER_ASSIGNMENT_EMAIL_BOUNCED],
-            ).count()
+            num_assignments = self.num_assignments(code=self.get_code(obj), user_email=self.get_assigned_to(obj))
             num_applications = VoucherApplication.objects.filter(
                 voucher__code=self.get_code(obj),
                 user__email=self.get_assigned_to(obj)
