@@ -129,7 +129,8 @@ def send_course_purchase_email(sender, order=None, request=None, **kwargs):  # p
                             'credit_hours': product.attr.credit_hours,
                             'credit_provider': provider_data['display_name'],
                         },
-                        order.site
+                        order.site,
+                        recipient
                     )
 
         else:
