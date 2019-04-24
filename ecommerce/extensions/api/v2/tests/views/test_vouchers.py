@@ -25,6 +25,7 @@ from ecommerce.enterprise.constants import ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH
 from ecommerce.extensions.api import serializers
 from ecommerce.extensions.api.v2.views.vouchers import VoucherViewSet
 from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
+from ecommerce.extensions.offer.utils import get_benefit_type
 from ecommerce.extensions.partner.strategy import DefaultStrategy
 from ecommerce.extensions.test.factories import (
     ConditionalOfferFactory,
@@ -415,7 +416,7 @@ class VoucherViewOffersEndpointTests(DiscoveryMockMixin, CouponMixin, DiscoveryT
         self.assertEqual(len(offers), 1)
         self.assertDictEqual(first_offer, {
             'benefit': {
-                'type': benefit.type,
+                'type': get_benefit_type(benefit),
                 'value': benefit.value
             },
             'contains_verified': True,
@@ -448,7 +449,7 @@ class VoucherViewOffersEndpointTests(DiscoveryMockMixin, CouponMixin, DiscoveryT
         self.assertEqual(len(offers), 1)
         self.assertDictEqual(first_offer, {
             'benefit': {
-                'type': benefit.type,
+                'type': get_benefit_type(benefit),
                 'value': benefit.value
             },
             'contains_verified': True,
@@ -488,7 +489,7 @@ class VoucherViewOffersEndpointTests(DiscoveryMockMixin, CouponMixin, DiscoveryT
         self.assertEqual(len(offers), 1)
         self.assertDictEqual(first_offer, {
             'benefit': {
-                'type': benefit.type,
+                'type': get_benefit_type(benefit),
                 'value': benefit.value
             },
             'contains_verified': True,
@@ -526,7 +527,7 @@ class VoucherViewOffersEndpointTests(DiscoveryMockMixin, CouponMixin, DiscoveryT
         self.assertEqual(len(offers), 1)
         self.assertDictEqual(first_offer, {
             'benefit': {
-                'type': benefit.type,
+                'type': get_benefit_type(benefit),
                 'value': benefit.value
             },
             'contains_verified': True,
@@ -585,7 +586,7 @@ class VoucherViewOffersEndpointTests(DiscoveryMockMixin, CouponMixin, DiscoveryT
         self.assertEqual(len(offers), 1)
         self.assertDictEqual(first_offer, {
             'benefit': {
-                'type': benefit.type,
+                'type': get_benefit_type(benefit),
                 'value': benefit.value
             },
             'contains_verified': True,
@@ -628,7 +629,7 @@ class VoucherViewOffersEndpointTests(DiscoveryMockMixin, CouponMixin, DiscoveryT
 
         self.assertDictEqual(offer, {
             'benefit': {
-                'type': benefit.type,
+                'type': get_benefit_type(benefit),
                 'value': benefit.value
             },
             'contains_verified': True,
@@ -702,7 +703,7 @@ class VoucherViewOffersEndpointTests(DiscoveryMockMixin, CouponMixin, DiscoveryT
             response.data['results'],
             [{
                 'benefit': {
-                    'type': benefit.type,
+                    'type': get_benefit_type(benefit),
                     'value': benefit.value
                 },
                 'contains_verified': True,

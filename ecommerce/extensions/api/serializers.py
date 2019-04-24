@@ -35,6 +35,7 @@ from ecommerce.extensions.offer.constants import (
     OFFER_REDEEMED
 )
 from ecommerce.extensions.offer.utils import (
+    get_benefit_type,
     send_assigned_offer_email,
     send_assigned_offer_reminder_email,
     send_revoked_offer_email
@@ -642,10 +643,14 @@ class CatalogSerializer(serializers.ModelSerializer):
 
 class BenefitSerializer(serializers.ModelSerializer):
     value = serializers.IntegerField()
+    type = serializers.SerializerMethodField()
 
     class Meta(object):
         model = Benefit
         fields = ('type', 'value')
+
+    def get_type(self, benefit):
+        return get_benefit_type(benefit)
 
 
 class VoucherSerializer(serializers.ModelSerializer):
