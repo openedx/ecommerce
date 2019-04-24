@@ -47,15 +47,21 @@ define([
                     },
                     {
                         title: gettext('Custom Code'),
-                        data: 'code'
+                        data: 'code',
+                        orderable: false,
+                        searchable: false
                     },
                     {
                         title: gettext('Client'),
-                        data: 'client'
+                        data: 'client',
+                        orderable: false,
+                        searchable: false
                     },
                     {
                         title: gettext('Category'),
-                        data: 'category.name'
+                        data: 'category.name',
+                        orderable: false,
+                        searchable: false
                     },
                     {
                         title: gettext('Coupon Report'),

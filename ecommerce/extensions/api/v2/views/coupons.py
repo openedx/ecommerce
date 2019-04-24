@@ -10,7 +10,7 @@ from django.db import IntegrityError, transaction
 from django.http import Http404
 from django.shortcuts import get_object_or_404
 from oscar.core.loading import get_model
-from rest_framework import filters, generics, serializers, status, viewsets
+from rest_framework import generics, serializers, status, viewsets
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 
@@ -54,7 +54,6 @@ DEPRECATED_COUPON_CATEGORIES = ['Bulk Enrollment']
 class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
     """ Coupon resource. """
     permission_classes = (IsAuthenticated, IsAdminUser)
-    filter_backends = (filters.DjangoFilterBackend,)
     filter_class = ProductFilter
 
     def get_queryset(self):
