@@ -117,7 +117,7 @@ def send_course_purchase_email(sender, order=None, request=None, **kwargs):  # p
                     site_configuration=order.site.siteconfiguration
                 )
 
-                recipient = request.POST.get('req_bill_to_email', order.user.email)
+                recipient = request.POST.get('req_bill_to_email', order.user.email) if request else order.user.email
 
                 if provider_data:
                     send_notification(
