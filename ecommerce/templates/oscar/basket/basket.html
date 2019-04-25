@@ -12,6 +12,13 @@
     {% include 'edx/partials/_student_navbar.html' %}
 {% endblock navbar %}
 
+{% block pre_app_js %}
+  <script>
+    window.lmsUrlRoot = "{{ lms_url_root }}";
+    window.courseKey = "{{ formset_lines_data.0.1.course_key }}";
+  </script>
+{% endblock %}
+
 {% block javascript %}
   <script src="{% static 'js/apps/basket_app.js' %}"></script>
 
