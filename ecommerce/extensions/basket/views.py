@@ -436,7 +436,8 @@ class BasketSummaryView(BasketView):
             'max_seat_quantity': 100,
             'payment_processors': payment_processors,
             'total_benefit': total_benefit,
-            'line_price': (self.request.basket.total_incl_tax_excl_discounts / num_of_items) if num_of_items > 0 else 0
+            'line_price': (self.request.basket.total_incl_tax_excl_discounts / num_of_items) if num_of_items > 0 else 0,
+            'lms_url_root': site_configuration.lms_url_root,
         })
         return context
 
