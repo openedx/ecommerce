@@ -2,24 +2,25 @@ import datetime
 import logging
 import time
 
+
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.select import Select
 from selenium.webdriver.support.wait import WebDriverWait
+from selenium.common.exceptions import NoSuchElementException
+from selenium.webdriver.common.keys import Keys
 
-from e2e.api import DiscoveryApi, EcommerceApi, EnrollmentApi
+
+from e2e.api import EcommerceApi, EnrollmentApi
 from e2e.config import LMS_USERNAME
 from e2e.constants import ADDRESS_FR, ADDRESS_US
 from e2e.helpers import EcommerceHelpers, LmsHelpers
+from e2e.constants import TEST_COURSE_KEY
 
 log = logging.getLogger(__name__)
 
 
 class TestSeatPayment(object):
-    def get_verified_course_run(self):
-        """ Returns a course run data dict. """
-        return DiscoveryApi().get_course_run('verified')
-
     def checkout_with_credit_card(self, selenium, address):
         """ Submits the credit card form hosted by the E-Commerce Service. """
         billing_information = {
@@ -29,8 +30,6 @@ class TestSeatPayment(object):
             'id_address_line2': address['line2'],
             'id_city': address['city'],
             'id_postal_code': address['postal_code'],
-            'card-number': '4111111111111111',
-            'card-cvn': '123'
         }
 
         country = address['country']
@@ -38,15 +37,35 @@ class TestSeatPayment(object):
 
         card_expiry_year = str(datetime.datetime.now().year + 3)
         select_fields = [
-            ('id_country', country),
-            ('card-expiry-month', '12'),
-            ('card-expiry-year', card_expiry_year),
+            ('id_country', country)
         ]
 
         if country in ('US', 'CA',):
             select_fields.append(('id_state', state,))
         else:
             billing_information['id_state'] = state
+
+        try:
+            selenium.find_element_by_css_selector('div#iframe')
+
+            selenium.switch_to.frame("payment_iframe")
+
+            selenium.find_element_by_id('id_number_input').send_keys('4111111111111111')
+            selenium.find_element_by_id('id_expy_input').send_keys('0422')
+            selenium.find_element_by_id('id_cvv_input').send_keys('123')
+
+            selenium.switch_to.default_content()
+
+        except NoSuchElementException:
+            select_fields = select_fields + [
+                ('card-expiry-month', '12'),
+                ('card-expiry-year', card_expiry_year)
+            ]
+
+            billing_information.update({
+                'card-number': '4111111111111111',
+                'card-cvn': '123'
+            })
 
         # Select the appropriate <option> elements
         for selector, value in select_fields:
@@ -59,19 +78,22 @@ class TestSeatPayment(object):
             selenium.find_element_by_id(field).send_keys(value)
 
         # Click the payment button
-        selenium.find_element_by_id('payment-button').click()
+        selenium.find_element_by_id('payment-button').send_keys("\n")
 
     def assert_browser_on_receipt_page(self, selenium):
         WebDriverWait(selenium, 20).until(
             EC.visibility_of_element_located((By.ID, 'receipt-container'))
         )
 
-    def assert_user_enrolled_in_course_run(self, username, course_run_key, seat_type='verified', attempts=5):
+    def assert_course_is_verified(self, selenium):
+        EcommerceHelpers.visit_course_page(selenium)
+        assert selenium.find_element_by_css_selector('div.course-id').text == TEST_COURSE_KEY
+
+    def assert_user_enrolled_in_course_run(self, username, seat_type='verified', attempts=5):
         """ Asserts the given user has an *active* enrollment for the given course run and seat type/mode.
 
          Args:
              username (str): Username of the user whose enrollments should be retrieved.
-             course_run_key (str): ID of the course run for which enrollments should be retrieved.
              seat_type (str): Expected enrolled seat type/mode
              attempts (int): Number of times to attempt to retrieve the enrollment data.
 
@@ -82,63 +104,68 @@ class TestSeatPayment(object):
 
         while attempts > 0:
             attempts -= 1
-            log.info('Retrieving enrollment details for [%s] in [%s]...', username, course_run_key)
-            enrollment = api.get_enrollment(username, course_run_key)
+            log.info('Retrieving enrollment details for [%s] in [%s]...', username, TEST_COURSE_KEY)
+            enrollment = api.get_enrollment(username, TEST_COURSE_KEY)
 
             try:
                 assert enrollment['is_active'] and enrollment['mode'] == seat_type
                 return
             except AssertionError:
                 log.warning('No active enrollment was found for [%s] in the [%s] mode of [%s].',
-                            username, seat_type, course_run_key)
+                            username, seat_type, TEST_COURSE_KEY)
                 if attempts < 1:
                     raise
 
                 log.info('Checking again in 0.5 seconds.')
                 time.sleep(0.5)
 
-    def add_item_to_basket(self, selenium, sku):
+    def add_item_to_basket(self, selenium):
         # Add the item to the basket and start the checkout process
-        selenium.get(EcommerceHelpers.build_url('/basket/add/?sku=' + sku))
+        selenium.get(LmsHelpers.build_url('dashboard'))
+        course_title = 'course-title-' + TEST_COURSE_KEY
+        button_css_selector =  "article[aria-labelledby='{}'] footer a.action-upgrade".format(course_title)
+        selenium.find_element_by_css_selector(button_css_selector).send_keys("\n")
 
         # Wait till the selector is visible
         WebDriverWait(selenium, 20).until(
             EC.visibility_of_element_located((By.CSS_SELECTOR, ".basket-client-side"))
         )
 
-    def refund_orders_for_course_run(self, course_run_id):
+    def refund_orders_for_course_run(self):
         api = EcommerceApi()
-        refund_ids = api.create_refunds_for_course_run(LMS_USERNAME, course_run_id)
+        refund_ids = api.create_refunds_for_course_run(LMS_USERNAME, TEST_COURSE_KEY)
         assert len(refund_ids) > 0
 
         for refund_id in refund_ids:
             api.process_refund(refund_id, 'approve')
         return True
 
-    def get_verified_seat(self, course_run):
-        verified_seat = None
-        for seat in course_run['seats']:
-            if seat['type'] == 'verified':
-                verified_seat = seat
-                break
-        return verified_seat
 
     def test_verified_seat_payment_with_credit_card(self, selenium):
         """
         Validates users can add a verified seat to the cart and checkout with a credit card.
         This test requires 'disable_repeat_order_check' waffle switch turned off on stage, to run.
         """
+
         LmsHelpers.login(selenium)
 
-        # Get the course run we want to purchase
-        course_run = self.get_verified_course_run()
-        verified_seat = self.get_verified_seat(course_run)
+        #enroll user if not already enrolled in given course
+        try:
+            self.assert_user_enrolled_in_course_run(LMS_USERNAME, 'audit')
+        except AssertionError:
+            LmsHelpers.enroll_user(selenium)
+
+        #add course to ecommerce if not verified
+        try:
+            self.assert_course_is_verified(selenium)
+        except NoSuchElementException:
+            EcommerceHelpers.add_course_to_ecommerce(selenium)
 
         for address in (ADDRESS_US, ADDRESS_FR,):
-            self.add_item_to_basket(selenium, verified_seat['sku'])
+            time.sleep(0.5)
+            self.add_item_to_basket(selenium)
             self.checkout_with_credit_card(selenium, address)
             self.assert_browser_on_receipt_page(selenium)
-
-            course_run_key = course_run['key']
-            self.assert_user_enrolled_in_course_run(LMS_USERNAME, course_run_key)
-            assert self.refund_orders_for_course_run(course_run_key)
+            self.assert_user_enrolled_in_course_run(LMS_USERNAME)
+            assert self.refund_orders_for_course_run()
+            LmsHelpers.enroll_user(selenium)

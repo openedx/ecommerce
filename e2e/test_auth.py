@@ -2,12 +2,12 @@ import pytest
 from selenium.common.exceptions import NoSuchElementException
 
 from e2e.config import LMS_URL_ROOT, MARKETING_URL_ROOT
+from e2e.constants import LOGOUT_REDIRECT_URL
 from e2e.helpers import EcommerceHelpers, LmsHelpers
 
 
 def test_login_and_logout(selenium):
     """ Authenticating with the identity provider (LMS) should authenticate users for the E-Commerce Service.  """
-
     LmsHelpers.login(selenium)
 
     # Visit the Otto dashboard to trigger an OpenID Connect login
@@ -16,7 +16,8 @@ def test_login_and_logout(selenium):
     # Logging out of Otto should redirect the user to the LMS logout page, which redirects
     # to the marketing site (if available) or the LMS homepage.
     EcommerceHelpers.logout(selenium)
-    assert selenium.current_url.strip('/') in [MARKETING_URL_ROOT, LMS_URL_ROOT]
+
+    assert selenium.current_url in [ LOGOUT_REDIRECT_URL, LMS_URL_ROOT ]
 
 
 def test_provider_logout(selenium):

@@ -99,5 +99,25 @@ class Bluefin(BaseClientSidePaymentProcessor):
 
     def issue_credit(
             self, order_number, basket, reference_number, amount, currency):
-        raise NotImplementedError('The Bluefin payment processor does not \
-            support issue_credit for Refund.')
+
+        request_data = {
+            'account_id': self.account_id,
+            'api_accesskey': self.api_key,
+            'transaction_type':  'REFUND',
+            'token_id': reference_number,
+            'response_format': 'JSON'
+        }
+
+        response = requests.post(self.post_url, data=request_data)
+        response = json.loads(response.content)
+
+        if response['error']:
+            msg = 'An error occurred while attempting to issue a credit (via Bluefin) for order [{}].'.format(
+                order_number)
+            logger.exception(msg)
+            raise GatewayError(msg)
+
+        transaction_id = response['transaction_id']
+        self.record_processor_response(response, transaction_id=transaction_id, basket=basket)
+
+        return transaction_id
