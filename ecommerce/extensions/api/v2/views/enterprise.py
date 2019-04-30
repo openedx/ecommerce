@@ -135,7 +135,8 @@ class EnterpriseCouponViewSet(CouponViewSet):
             coupon_product,
             vouchers,
             cleaned_voucher_data['note'],
-            cleaned_voucher_data.get('notify_email')
+            cleaned_voucher_data.get('notify_email'),
+            cleaned_voucher_data['enterprise_customer']
         )
         return coupon_product
 
