@@ -288,6 +288,7 @@ class EnterpriseCouponViewSetTest(
         enterprise_customer_id = self.data['enterprise_customer']['id']
         enterprise_name = self.data['enterprise_customer']['name']
         enterprise_catalog_id = self.data['enterprise_customer_catalog']
+        self.assertEqual(coupon.attr.enterprise_customer_uuid, enterprise_customer_id)
         vouchers = coupon.attr.coupon_vouchers.vouchers.all()
         for voucher in vouchers:
             all_offers = voucher.offers.all()
@@ -366,6 +367,7 @@ class EnterpriseCouponViewSetTest(
             'PUT',
             reverse('api:v2:enterprise-coupons-detail', kwargs={'pk': coupon.id}),
             data={
+                'enterprise_customer': self.data['enterprise_customer'],
                 'enterprise_customer_catalog': new_catalog,
                 'benefit_value': 50,
                 'title': 'Updated Enterprise Coupon',
@@ -373,6 +375,7 @@ class EnterpriseCouponViewSetTest(
         )
         updated_coupon = Product.objects.get(title='Updated Enterprise Coupon')
         self.assertEqual(coupon.id, updated_coupon.id)
+        self.assertEqual(updated_coupon.attr.enterprise_customer_uuid, self.data['enterprise_customer']['id'])
         vouchers = updated_coupon.attr.coupon_vouchers.vouchers.all()
         for voucher in vouchers:
             all_offers = voucher.offers.all()

@@ -452,6 +452,8 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
                 defaults={'enterprise_customer_uuid': enterprise_customer}
             )
             Invoice.objects.filter(order__basket=baskets.first()).update(business_client=client)
+            coupon.attr.enterprise_customer_uuid = enterprise_customer
+            coupon.save()
 
         coupon_price = request_data.get('price')
         if coupon_price:

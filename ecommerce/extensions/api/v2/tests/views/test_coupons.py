@@ -527,6 +527,7 @@ class CouponViewSetFunctionalTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
         self.assertEqual(response_data['id'], self.coupon.id)
         self.assertEqual(response_data['enterprise_customer'], enterprise_customer_id)
         new_coupon = Product.objects.get(id=self.coupon.id)
+        self.assertEqual(new_coupon.attr.enterprise_customer_uuid, enterprise_customer_id)
         self._check_enterprise_fields(new_coupon, enterprise_customer_id, enterprise_catalog_id, enterprise_name)
 
     def test_update_enterprise_offers_switch_off_duplicate_condition(self):
@@ -565,6 +566,7 @@ class CouponViewSetFunctionalTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
         self.assertEqual(response_data['id'], self.coupon.id)
         self.assertEqual(response_data['enterprise_customer'], enterprise_customer_id)
         new_coupon = Product.objects.get(id=self.coupon.id)
+        self.assertEqual(new_coupon.attr.enterprise_customer_uuid, enterprise_customer_id)
         self._check_enterprise_fields(new_coupon, enterprise_customer_id, enterprise_catalog_id, enterprise_name)
 
     def test_create_enterprise_offers_switch_on(self):
@@ -590,6 +592,7 @@ class CouponViewSetFunctionalTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             }
         )
         new_coupon = Product.objects.get(id=self.coupon.id)
+        self.assertEqual(new_coupon.attr.enterprise_customer_uuid, enterprise_customer_id)
         self._check_enterprise_fields(new_coupon, enterprise_customer_id, enterprise_catalog_id, 'test enterprise')
 
     def test_update_enterprise_offers_enterprise_coupon_switch_on(self):
