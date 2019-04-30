@@ -557,9 +557,6 @@ CELERYD_HIJACK_ROOT_LOGGER = False
 # Execute tasks locally (synchronously) instead of sending them to the queue.
 # See http://celery.readthedocs.io/en/latest/userguide/configuration.html#task-always-eager.
 CELERY_ALWAYS_EAGER = False
-
-DEFAULT_PRIORITY_QUEUE = 'ecommerce'
-CELERY_DEFAULT_QUEUE = DEFAULT_PRIORITY_QUEUE
 # END CELERY
 
 THEME_SCSS = 'sass/themes/default.scss'
