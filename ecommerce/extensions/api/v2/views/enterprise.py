@@ -50,7 +50,6 @@ from ecommerce.extensions.voucher.utils import (
     update_voucher_offer,
     update_voucher_with_enterprise_offer
 )
-from ecommerce.invoice.models import Invoice
 
 logger = logging.getLogger(__name__)
 Order = get_model('order', 'Order')
@@ -77,19 +76,14 @@ class EnterpriseCouponViewSet(CouponViewSet):
     pagination_class = DefaultPagination
 
     def get_queryset(self):
+        filter_kwargs = {
+            'product_class__name': COUPON_PRODUCT_CLASS_NAME,
+            'attributes__code': 'enterprise_customer_uuid',
+        }
         enterprise_id = self.kwargs.get('enterprise_id')
         if enterprise_id:
-            invoices = Invoice.objects.filter(business_client__enterprise_customer_uuid=enterprise_id)
-        else:
-            invoices = Invoice.objects.filter(business_client__enterprise_customer_uuid__isnull=False)
-        orders = Order.objects.filter(id__in=[invoice.order_id for invoice in invoices])
-        basket_lines = Line.objects.filter(basket_id__in=[order.basket_id for order in orders])
-        return Product.objects.filter(
-            product_class__name=COUPON_PRODUCT_CLASS_NAME,
-            stockrecords__partner=self.request.site.siteconfiguration.partner,
-            id__in=[line.product_id for line in basket_lines],
-            coupon_vouchers__vouchers__offers__condition__enterprise_customer_uuid__isnull=False,
-        ).distinct()
+            filter_kwargs['attribute_values__value_text'] = enterprise_id
+        return Product.objects.filter(**filter_kwargs).distinct()
 
     def get_serializer_class(self):
         if self.action == 'list':

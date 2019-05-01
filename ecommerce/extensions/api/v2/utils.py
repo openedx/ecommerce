@@ -6,11 +6,9 @@ from django.core.mail import send_mail
 from oscar.core.loading import get_model
 
 from ecommerce.enterprise.utils import get_enterprise_customer
-from ecommerce.invoice.models import Invoice
 
 logger = logging.getLogger(__name__)
 
-Basket = get_model('basket', 'Basket')
 Product = get_model('catalogue', 'Product')
 
 
@@ -54,8 +52,6 @@ def get_enterprise_from_product(product_id):
     """
     try:
         product = Product.objects.get(pk=product_id)
-        basket = Basket.objects.filter(lines__product_id=product.id).first()
-        invoice = Invoice.objects.get(order__basket=basket)
-        return str(invoice.business_client.enterprise_customer_uuid)
-    except (Product.DoesNotExist, Invoice.DoesNotExist):
+        return product.attr.enterprise_customer_uuid
+    except Product.DoesNotExist:
         return None
