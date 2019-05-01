@@ -486,6 +486,10 @@ class User(AbstractUser):
 
     tracking_context = JSONField(blank=True, null=True)
 
+    # Adding a history model for this model would conflict with 0006_add_service_user which updates
+    # rows in this model.
+    # history = HistoricalRecords()
+
     class Meta(object):
         get_latest_by = 'date_joined'
         db_table = 'ecommerce_user'
