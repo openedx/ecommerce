@@ -479,8 +479,15 @@ class SiteConfiguration(models.Model):
         return EdxRestApiClient(self.build_lms_url('/api/entitlements/v1/'), jwt=self.access_token)
 
 
+# NOTE: Adding django-simple-history tracking for this model would conflict with the migration
+# "0006_add_service_user" which updates rows in this model.  Adding history to this model was slated
+# in DE-1424, but we ran into this migrations issue and instead punted it.
+#
+# I created a ticket to revisit history for this model: https://openedx.atlassian.net/browse/DE-1481
 class User(AbstractUser):
-    """Custom user model for use with python-social-auth via edx-auth-backends."""
+    """
+    Custom user model for use with python-social-auth via edx-auth-backends.
+    """
 
     full_name = models.CharField(_('Full Name'), max_length=255, blank=True, null=True)
 

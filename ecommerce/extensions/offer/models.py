@@ -13,10 +13,12 @@ from oscar.apps.offer.abstract_models import (
     AbstractBenefit,
     AbstractCondition,
     AbstractConditionalOffer,
-    AbstractRange
+    AbstractRange,
+    AbstractRangeProduct
 )
 from oscar.core.loading import get_model
 from requests.exceptions import ConnectionError, Timeout
+from simple_history.models import HistoricalRecords
 from slumber.exceptions import SlumberBaseException
 from threadlocals.threadlocals import get_current_request
 
@@ -39,6 +41,8 @@ Voucher = get_model('voucher', 'Voucher')
 
 
 class Benefit(AbstractBenefit):
+    history = HistoricalRecords()
+
     def save(self, *args, **kwargs):
         self.clean()
         super(Benefit, self).save(*args, **kwargs)  # pylint: disable=bad-super-call
@@ -159,6 +163,10 @@ class ConditionalOffer(AbstractConditionalOffer):
         'sites.Site', verbose_name=_('Site'), null=True, blank=True, default=None
     )
     partner = models.ForeignKey('partner.Partner', null=True, blank=True)
+
+    # Do not record the slug field in the history table because AutoSlugField is not compatible with
+    # django-simple-history.  Background: https://github.com/edx/course-discovery/pull/332
+    history = HistoricalRecords(excluded_fields=['slug'])
 
     def save(self, *args, **kwargs):
         self.clean()
@@ -301,6 +309,13 @@ def validate_credit_seat_type(course_seat_types):
         )
 
 
+class RangeProduct(AbstractRangeProduct):
+    """
+    Only extend to add a history table.
+    """
+    history = HistoricalRecords()
+
+
 class Range(AbstractRange):
     UPDATABLE_RANGE_FIELDS = [
         'catalog_query',
@@ -336,6 +351,10 @@ class Range(AbstractRange):
         blank=True,
         null=True
     )
+
+    # Do not record the slug field in the history table because AutoSlugField is not compatible with
+    # django-simple-history.  Background: https://github.com/edx/course-discovery/pull/332
+    history = HistoricalRecords(excluded_fields=['slug'])
 
     def save(self, *args, **kwargs):
         self.clean()
@@ -455,6 +474,7 @@ class Condition(AbstractCondition):
         blank=True,
         verbose_name=_('JournalBundle UUID')
     )
+    history = HistoricalRecords()
 
 
 class OfferAssignment(TimeStampedModel):
@@ -479,6 +499,7 @@ class OfferAssignment(TimeStampedModel):
         null=True,
         blank=True
     )
+    history = HistoricalRecords()
 
     def __unicode__(self):
         return "{code}-{email}".format(code=self.code, email=self.user_email)
