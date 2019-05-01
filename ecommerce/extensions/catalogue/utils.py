@@ -108,7 +108,7 @@ def create_coupon_product(
         logger.exception('Failed to create vouchers for [%s] coupon.', coupon_product.title)
         raise
 
-    attach_vouchers_to_coupon_product(coupon_product, vouchers, note)
+    attach_vouchers_to_coupon_product(coupon_product, vouchers, note, enterprise_id=enterprise_customer)
 
     return coupon_product
 

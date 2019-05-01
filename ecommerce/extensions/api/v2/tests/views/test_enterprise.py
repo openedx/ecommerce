@@ -306,7 +306,6 @@ class EnterpriseCouponViewSetTest(
         basket = Basket.objects.filter(lines__product_id=coupon.id).first()
         invoice = Invoice.objects.get(order__basket=basket)
         self.assertEqual(invoice.business_client.name, enterprise_name)
-        self.assertEqual(str(invoice.business_client.enterprise_customer_uuid), enterprise_customer_id)
 
     def test_update_ent_offers_switch_off(self):
         Switch.objects.update_or_create(name=ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, defaults={'active': True})
@@ -2001,7 +2000,6 @@ class EnterpriseCouponViewSetRbacTests(
         basket = Basket.objects.filter(lines__product_id=coupon.id).first()
         invoice = Invoice.objects.get(order__basket=basket)
         self.assertEqual(invoice.business_client.name, enterprise_name)
-        self.assertEqual(str(invoice.business_client.enterprise_customer_uuid), enterprise_customer_id)
 
     def test_update_ent_offers_switch_off(self):
         Switch.objects.update_or_create(name=ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, defaults={'active': True})
@@ -2577,21 +2575,6 @@ class EnterpriseCouponViewSetRbacTests(
             '/api/v2/enterprise/coupons/{}/codes/?code_filter={}'.format(coupon.id, VOUCHER_NOT_ASSIGNED)
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-
-    def test_implicit_permission_codes_detail_no_invoice(self):
-        """
-        Test that we get access denied when invoice not found
-        """
-        Switch.objects.update_or_create(name=ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, defaults={'active': True})
-        self.get_response('POST', ENTERPRISE_COUPONS_LINK, self.data)
-        coupon = Product.objects.get(title=self.data['title'])
-        Invoice.objects.all().delete()
-        EcommerceFeatureRoleAssignment.objects.all().delete()
-        response = self.get_response(
-            'GET',
-            '/api/v2/enterprise/coupons/{}/codes/?code_filter={}'.format(coupon.id, VOUCHER_NOT_ASSIGNED)
-        )
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_implicit_permission_incorrect_role(self):
         """

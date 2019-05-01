@@ -65,7 +65,7 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
         # in the regular coupon list view
         if waffle.switch_is_active(ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH):
             return product_filter.exclude(
-                coupon_vouchers__vouchers__offers__condition__enterprise_customer_uuid__isnull=False,
+                attributes__code='enterprise_customer_uuid',
             )
 
         return product_filter
@@ -119,7 +119,6 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
                 # Create an order now since payment is handled out of band via an invoice.
                 client, __ = BusinessClient.objects.update_or_create(
                     name=cleaned_voucher_data['enterprise_customer_name'] or request.data.get('client'),
-                    defaults={'enterprise_customer_uuid': cleaned_voucher_data['enterprise_customer']}
                 )
                 invoice_data = self.create_update_data_dict(data=request.data, fields=Invoice.UPDATEABLE_INVOICE_FIELDS)
                 response_data = self.create_order_for_invoice(
@@ -449,7 +448,6 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
         if client_username or enterprise_customer:
             client, __ = BusinessClient.objects.update_or_create(
                 name=enterprise_customer_name or client_username,
-                defaults={'enterprise_customer_uuid': enterprise_customer}
             )
             Invoice.objects.filter(order__basket=baskets.first()).update(business_client=client)
             coupon.attr.enterprise_customer_uuid = enterprise_customer
