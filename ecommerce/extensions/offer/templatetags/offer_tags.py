@@ -1,6 +1,6 @@
 from django import template
 
-from ecommerce.extensions.offer.utils import format_benefit_value
+from ecommerce.extensions.offer.utils import format_benefit_value, get_benefit_type
 
 register = template.Library()
 
@@ -25,9 +25,4 @@ def benefit_discount(benefit):
 
 @register.filter(name='benefit_type')
 def benefit_type(benefit):
-    _type = benefit.type
-
-    if not _type:
-        _type = getattr(benefit.proxy(), 'benefit_class_type', None)
-
-    return _type
+    return get_benefit_type(benefit)

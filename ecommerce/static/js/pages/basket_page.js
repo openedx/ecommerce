@@ -132,6 +132,15 @@ define([
 
                 cardType = CreditCardUtils.getCreditCardType(cardNumber);
 
+
+                // Number.isInteger() is not compatible with IE11, so polyfill is required. Polyfill taken from:
+                // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/isInteger
+                Number.isInteger = Number.isInteger || function(value) {
+                    return typeof value === 'number' &&
+                        isFinite(value) &&
+                        Math.floor(value) === value;
+                };
+
                 if (!CreditCardUtils.isValidCardNumber(cardNumber)) {
                     BasketPage.appendCardValidationErrorMsg(event, $number, gettext('Invalid card number'));
                 } else if (_.isUndefined(cardType) || !BasketPage.isCardTypeSupported(cardType.name)) {

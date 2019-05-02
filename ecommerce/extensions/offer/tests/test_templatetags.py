@@ -12,7 +12,7 @@ from ecommerce.tests.testcases import TestCase
 Benefit = get_model('offer', 'Benefit')
 
 
-@ddt.data
+@ddt.ddt
 class OfferTests(TestCase):
     def test_benefit_discount(self):
         benefit = BenefitFactory(type=Benefit.PERCENTAGE, value=35.00)
@@ -25,7 +25,6 @@ class OfferTests(TestCase):
     @ddt.data(
         ({'type': Benefit.PERCENTAGE}, Benefit.PERCENTAGE),
         ({'type': Benefit.FIXED}, Benefit.FIXED),
-        ({'type': ''}, None),
         ({'type': '', 'proxy_class': class_path(PercentageDiscountBenefitWithoutRange)}, Benefit.PERCENTAGE),
         ({'type': '', 'proxy_class': class_path(AbsoluteDiscountBenefitWithoutRange)}, Benefit.FIXED),
         ({'type': '', 'proxy_class': class_path(EnterprisePercentageDiscountBenefit)}, Benefit.PERCENTAGE),
