@@ -16,16 +16,21 @@ BUNDLE = 'bundle_identifier'
 
 class CustomApplicator(Applicator):
     """
-    Custom applicator for applying offers to program baskets and voucher baskets.
+    Custom applicator for more intelligently applying offers to baskets.
+    
+    This applicator uses logic to prefilter the offers, rather than blindly
+    returning every offer, including onces that could never apply.
     """
 
     def get_offers(self, basket, user=None, request=None):
         """
         Returns all offers to apply to the basket.
 
-        If the basket has a bundle, i.e. a program, gets only the site offers
-        associated with that specific bundle, rather than all site offers.
-        Otherwise, Gets the site offers not associated with a bundle.
+        Does prefiltering to filter out offers that could never apply to a
+        particular basket. As an example, if the basket has a bundle, 
+        i.e. a program, gets only the site offers associated with that specific bundle, 
+        rather than all site offers. Otherwise, gets the site offers not associated
+        with a bundle.
 
         Args:
             basket (Basket): The basket to check for eligible
@@ -37,6 +42,13 @@ class CustomApplicator(Applicator):
             list of Offer: A sorted list of all the offers that apply to the
                 basket.
         """
+        # 1. Should this logic be moved to get_program_offers to match get_enterprise_offers?
+        # 2. Regarding the get_site_offers() call:
+        # - Should we rename it to something like `get_other_site_offers`?
+        # - Should we have a separate a separate "if (not program_offers and not program_offers)" test
+        # to determinee whether or not to get_site_offers()?  Assuming we don't want someone to get
+        # both an enterprise offer and another site offer (to be confirmed), we don't want to look
+        # at these offers at all when we have an enterprise offer.
         bundle_attributes = BasketAttribute.objects.filter(
             basket=basket,
             attribute_type=BasketAttributeType.objects.get(name=BUNDLE)
@@ -74,9 +86,11 @@ class CustomApplicator(Applicator):
             )
         )
 
-    def get_site_offers(self):
+    def get_other_site_offers(self):
         """
-        Return site offers that are available to baskets without bundle ids.
+        Return other site offers that are available to baskets.
+        
+        Excludes: Bundle and Enterprise offers.
         """
         ConditionalOffer = get_model('offer', 'ConditionalOffer')
         qs = ConditionalOffer.active.filter(
