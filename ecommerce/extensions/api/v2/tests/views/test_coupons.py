@@ -463,7 +463,6 @@ class CouponViewSetFunctionalTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
         basket = Basket.objects.filter(lines__product_id=coupon.id).first()
         invoice = Invoice.objects.get(order__basket=basket)
         self.assertEqual(invoice.business_client.name, enterprise_name)
-        self.assertEqual(str(invoice.business_client.enterprise_customer_uuid), enterprise_customer_id)
 
     def test_list_coupons_with_enterprise_data(self):
         """The list endpoint should filter enterprise coupons depending on the enterprise offers switch."""
