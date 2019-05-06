@@ -15,32 +15,36 @@ ProductClass = get_model("catalogue", "ProductClass")
 
 def create_product_class(apps, schema_editor):
     """ Create a course entitlement product class """
-
     # Create a new product class for course entitlement
-    course_entitlement = ProductClass.objects.create(
+    course_entitlement = ProductClass(
         track_stock=False,
         requires_shipping=False,
         name=COURSE_ENTITLEMENT_PRODUCT_CLASS_NAME,
         slug=slugify(COURSE_ENTITLEMENT_PRODUCT_CLASS_NAME)
     )
+    course_entitlement.save_without_historical_record()
 
     # Create product attributes for course entitlement products
-    ProductAttribute.objects.create(
+    pa1 = ProductAttribute(
         product_class=course_entitlement,
         name="course_key",
         code="course_key",
         type="text",
         required=True
     )
-    ProductAttribute.objects.create(
+    pa1.save_without_historical_record()
+
+    pa2 = ProductAttribute(
         product_class=course_entitlement,
         name="certificate_type",
         code="certificate_type",
         type="text",
         required=False
     )
+    pa2.save_without_historical_record()
 
     # Create a category for course entitlements
+    Category.skip_history_when_saving = True
     Category.add_root(
         description="All course entitlements",
         slug="course_entitlements",
@@ -51,6 +55,13 @@ def create_product_class(apps, schema_editor):
 
 def remove_product_class(apps, schema_editor):
     """ Reverse function. """
+    Product.skip_history_when_saving = True
+    Category.skip_history_when_saving = True
+    ProductClass.skip_history_when_saving = True
+
+    # For cascading delete
+    ProductAttribute.skip_history_when_saving = True
+
     Product.objects.filter(product_class=ProductClass.objects.get(name=COURSE_ENTITLEMENT_PRODUCT_CLASS_NAME)).delete()
     Category.objects.filter(slug='course_entitlements').delete()
     ProductClass.objects.filter(name=COURSE_ENTITLEMENT_PRODUCT_CLASS_NAME).delete()

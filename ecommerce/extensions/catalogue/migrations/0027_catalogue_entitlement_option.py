@@ -13,11 +13,12 @@ def create_entitlement_option(apps, schema_editor):
     course_entitlement_option.name = 'Course Entitlement'
     course_entitlement_option.code = 'course_entitlement'
     course_entitlement_option.type = Option.OPTIONAL
-    course_entitlement_option.save()
+    course_entitlement_option.save_without_historical_record()
 
 
 def remove_entitlement_option(apps, schema_editor):
     """ Remove course entitlement option """
+    Option.skip_history_when_saving = True
     course_entitlement_option = Option.objects.get(code='course_entitlement')
     course_entitlement_option.delete()
 

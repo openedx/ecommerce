@@ -13,11 +13,13 @@ ON_CAMPUS_CATEGORY = 'On-Campus Learners'
 
 def create_on_campus_category(apps, schema_editor):
     """ Create on-campus coupon category """
+    Category.skip_history_when_saving = True
     create_from_breadcrumbs('{} > {}'.format(COUPON_CATEGORY_NAME, ON_CAMPUS_CATEGORY))
 
 
 def remove_on_campus_category(apps, schema_editor):
     """ Remove on-campus coupon category """
+    Category.skip_history_when_saving = True
     Category.objects.get(
         name=COUPON_CATEGORY_NAME
     ).get_children().filter(

@@ -14,6 +14,8 @@ def create_credit_provider_attribute(apps, schema_editor):
 
     # Create our Product Attributes
     ProductAttribute = apps.get_model('catalogue', 'ProductAttribute')
+    ProductAttribute.skip_history_when_saving = True
+
     ProductAttribute.objects.create(
         product_class=seat,
         name='credit_provider',
@@ -27,6 +29,7 @@ def delete_credit_provider_attribute(apps, schema_editor):
     """For backward compatibility"""
     # Delete our Product Attributes
     ProductAttribute = apps.get_model('catalogue', 'ProductAttribute')
+    ProductAttribute.skip_history_when_saving = True
     ProductAttribute.objects.filter(code='credit_provider').delete()
 
 

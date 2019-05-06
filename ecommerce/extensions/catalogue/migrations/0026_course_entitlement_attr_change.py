@@ -15,6 +15,7 @@ ProductClass = get_model("catalogue", "ProductClass")
 
 def rename_product_attr(apps, schema_editor):
     """ Rename course_entitlement product attr. """
+    ProductAttribute.skip_history_when_saving = True
     course_entitlement_class = ProductClass.objects.get(name=COURSE_ENTITLEMENT_PRODUCT_CLASS_NAME)
     product_attr = ProductAttribute.objects.get(product_class=course_entitlement_class, name="course_key")
 
@@ -25,12 +26,15 @@ def rename_product_attr(apps, schema_editor):
 
 def remove_product_attr(apps, schema_editor):
     """ Remove product attr """
+    ProductAttribute.skip_history_when_saving = True
+
     course_entitlement_class = ProductClass.objects.get(name=COURSE_ENTITLEMENT_PRODUCT_CLASS_NAME)
     product_attr = ProductAttribute.objects.get(product_class=course_entitlement_class, name="UUID")
 
     product_attr.name = 'course_key'
     product_attr.code = 'course_key'
     product_attr.save()
+
 
 
 class Migration(migrations.Migration):

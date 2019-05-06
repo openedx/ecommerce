@@ -13,18 +13,21 @@ ProductClass = get_model("catalogue", "ProductClass")
 def create_notify_email_attribute(apps, schema_editor):
     """Create coupon notify_email attribute."""
     coupon = ProductClass.objects.get(name=COUPON_PRODUCT_CLASS_NAME)
-    ProductAttribute.objects.create(
+    pa = ProductAttribute(
         product_class=coupon,
         name='Notification Email',
         code='notify_email',
         type='text',
         required=False
     )
+    pa.save_without_historical_record()
 
 
 def remove_notify_email_attribute(apps, schema_editor):
     """Remove coupon notify_email attribute."""
     coupon = ProductClass.objects.get(name=COUPON_PRODUCT_CLASS_NAME)
+
+    ProductAttribute.skip_history_when_saving = True
     ProductAttribute.objects.get(product_class=coupon, code='notify_email').delete()
 
 
