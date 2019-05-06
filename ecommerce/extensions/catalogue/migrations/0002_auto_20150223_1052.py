@@ -20,38 +20,44 @@ def create_catalog(apps, schema_editor):
     ProductClass = apps.get_model("catalogue", "ProductClass")
 
     # Create a new product class for course seats
-    seat = ProductClass.objects.create(
+    seat = ProductClass(
         track_stock=False,
         requires_shipping=False,
         name=SEAT_PRODUCT_CLASS_NAME,
         slug=slugify(SEAT_PRODUCT_CLASS_NAME)
     )
+    seat.save()
 
     # Create product attributes for course seat products
-    ProductAttribute.objects.create(
+    pa1 = ProductAttribute(
         product_class=seat,
         name="course_key",
         code="course_key",
         type="text",
         required=True
     )
-    ProductAttribute.objects.create(
+    pa1.save()
+
+    pa2 = ProductAttribute(
         product_class=seat,
         name="id_verification_required",
         code="id_verification_required",
         type="boolean",
         required=False
     )
-    ProductAttribute.objects.create(
+    pa2.save()
+
+    pa3 = ProductAttribute(
         product_class=seat,
         name="certificate_type",
         code="certificate_type",
         type="text",
         required=False
     )
+    pa3.save()
 
     # Create a category for course seats
-    Category.objects.create(
+    c = Category(
         description="All course seats",
         numchild=1,
         slug="seats",
@@ -61,12 +67,20 @@ def create_catalog(apps, schema_editor):
         image="",
         name="Seats"
     )
+    c.save()
 
 
 def remove_catalog(apps, schema_editor):
     """ Reverse function. """
     Category = apps.get_model("catalogue", "Category")
     ProductClass = apps.get_model("catalogue", "ProductClass")
+    ProductAttribute = apps.get_model("catalogue", "ProductAttribute")
+
+    Category.skip_history_when_saving = True
+    ProductClass.skip_history_when_saving = True
+
+    # Needed for cascading delete
+    ProductAttribute.skip_history_when_saving = True
 
     Category.objects.filter(slug='seats').delete()
     ProductClass.objects.filter(name=SEAT_PRODUCT_CLASS_NAME).delete()
