@@ -20,6 +20,7 @@ from edx_rest_api_client.client import EdxRestApiClient
 from edx_rest_framework_extensions.auth.jwt.cookies import get_decoded_jwt as get_decoded_jwt_from_jwt_cookie
 from jsonfield.fields import JSONField
 from requests.exceptions import ConnectionError, Timeout
+from simple_history.models import HistoricalRecords
 from slumber.exceptions import HttpNotFoundError, SlumberBaseException
 
 from analytics import Client as SegmentClient
@@ -718,6 +719,8 @@ class BusinessClient(models.Model):
         null=True,
         blank=True,
     )
+
+    history = HistoricalRecords()
 
     def __str__(self):
         return self.name

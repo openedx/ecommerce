@@ -4,7 +4,15 @@ from django.db import models
 from django.db.models.signals import post_init, post_save
 from django.dispatch import receiver
 from django.utils.translation import ugettext_lazy as _
-from oscar.apps.catalogue.abstract_models import AbstractProduct, AbstractProductAttributeValue
+from oscar.apps.catalogue.abstract_models import (
+    AbstractCategory,
+    AbstractOption,
+    AbstractProduct,
+    AbstractProductClass,
+    AbstractProductCategory,
+    AbstractProductAttribute,
+    AbstractProductAttributeValue
+)
 from simple_history.models import HistoricalRecords
 
 from ecommerce.core.constants import (
@@ -117,5 +125,32 @@ class Catalog(models.Model):
             partner_code=self.partner.short_code,
             catalog_name=self.name
         )
+
+
+class Category(AbstractCategory):
+    # Do not record the slug field in the history table because AutoSlugField is not compatible with
+    # django-simple-history.  Background: https://github.com/edx/course-discovery/pull/332
+    history = HistoricalRecords(excluded_fields=['slug'])
+
+
+class Option(AbstractOption):
+    # Do not record the code field in the history table because AutoSlugField is not compatible with
+    # django-simple-history.  Background: https://github.com/edx/course-discovery/pull/332
+    history = HistoricalRecords(excluded_fields=['code'])
+
+
+class ProductClass(AbstractProductClass):
+    # Do not record the slug field in the history table because AutoSlugField is not compatible with
+    # django-simple-history.  Background: https://github.com/edx/course-discovery/pull/332
+    history = HistoricalRecords(excluded_fields=['slug'])
+
+
+class ProductCategory(AbstractProductCategory):
+    history = HistoricalRecords()
+
+
+class ProductAttribute(AbstractProductAttribute):
+    history = HistoricalRecords()
+
 
 from oscar.apps.catalogue.models import *  # noqa isort:skip pylint: disable=wildcard-import,unused-wildcard-import,wrong-import-position,wrong-import-order,ungrouped-imports
