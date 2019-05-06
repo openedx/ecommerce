@@ -479,7 +479,7 @@ REST_FRAMEWORK = {
         'ecommerce.extensions.api.authentication.BearerAuthentication',
         'rest_framework.authentication.SessionAuthentication',
     ),
-    'DEFAULT_PAGINATION_CLASS': 'rest_framework_datatables.pagination.DatatablesPageNumberPagination',
+    'DEFAULT_PAGINATION_CLASS': 'ecommerce.extensions.api.pagination.PageNumberPagination',
     'PAGE_SIZE': 20,
     'DEFAULT_THROTTLE_CLASSES': (
         'rest_framework.throttling.UserRateThrottle',

@@ -6,7 +6,6 @@ import waffle
 from django.core.exceptions import ValidationError
 from django.shortcuts import get_object_or_404
 from edx_rbac.decorators import permission_required
-from edx_rest_framework_extensions.paginators import DefaultPagination
 from oscar.core.loading import get_model
 from rest_framework import generics, serializers, status
 from rest_framework.decorators import detail_route, list_route
@@ -17,6 +16,7 @@ from ecommerce.core.constants import COUPON_PRODUCT_CLASS_NAME
 from ecommerce.core.utils import log_message_and_raise_validation_error
 from ecommerce.enterprise.constants import ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH
 from ecommerce.enterprise.utils import get_enterprise_customers
+from ecommerce.extensions.api.pagination import DatatablesDefaultPagination
 from ecommerce.extensions.api.permissions import HasDataAPIDjangoGroupAccess
 from ecommerce.extensions.api.serializers import (
     CouponCodeAssignmentSerializer,
@@ -73,7 +73,7 @@ class EnterpriseCustomerViewSet(generics.GenericAPIView):
 
 class EnterpriseCouponViewSet(CouponViewSet):
     """ Coupon resource. """
-    pagination_class = DefaultPagination
+    pagination_class = DatatablesDefaultPagination
 
     def get_queryset(self):
         filter_kwargs = {
