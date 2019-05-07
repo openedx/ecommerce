@@ -40,7 +40,7 @@ class CreateSafeHistoricalRecords(HistoricalRecords):
         """
         if hasattr(instance, "skip_history_when_saving"):
             return
-        if not kwargs.get("raw", False):
+        if not kwargs.get("raw", False):  # pragma: no cover
             self.create_historical_record(instance, created and "+" or "~", using=using)
 
     def post_delete(self, instance, using=None, **kwargs):

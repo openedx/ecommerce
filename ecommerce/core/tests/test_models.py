@@ -258,6 +258,25 @@ class SiteConfigurationTests(TestCase):
         site_config = _make_site_config(payment_processors_str)
         self.assertEqual(site_config.payment_processors_set, expected_result)
 
+    @ddt.data(
+        ('paypal', None),
+        ('paypal ', None),
+        ('paypal,cybersource', None),
+        ('paypal, cybersource', None),
+        ('paypal,cybersource,something_else', ValidationError),
+        ('paypal , cybersource , something_else', ValidationError),
+        (' ', ValidationError),
+    )
+    @ddt.unpack
+    def test_clean_processors(self, payment_processors_str, expected_exception):
+        site_config = _make_site_config(payment_processors_str)
+
+        if expected_exception is None:
+            site_config._clean_payment_processors()  # pylint: disable=protected-access
+        else:
+            with self.assertRaises(expected_exception):
+                site_config._clean_payment_processors()  # pylint: disable=protected-access
+
     @staticmethod
     def _enable_processor_switches(processors):
         for processor in processors:
