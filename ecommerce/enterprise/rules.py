@@ -4,7 +4,6 @@ Django rules for enterprise
 from __future__ import absolute_import
 
 import rules
-import waffle
 from edx_rbac.utils import (
     get_decoded_jwt_from_request,
     get_request_or_stub,
@@ -14,7 +13,6 @@ from edx_rbac.utils import (
 
 from ecommerce.core.constants import ENTERPRISE_COUPON_ADMIN_ROLE
 from ecommerce.core.models import EcommerceFeatureRoleAssignment
-from ecommerce.enterprise.constants import USE_ROLE_BASED_ACCESS_CONTROL
 
 
 @rules.predicate
@@ -48,23 +46,13 @@ def request_user_has_explicit_access(user, context):
     )
 
 
-@rules.predicate
-def rbac_permissions_disabled(user, obj):  # pylint: disable=unused-argument
-    """
-    Temporary check for rbac based permissions being enabled.
-    """
-    return not waffle.switch_is_active(USE_ROLE_BASED_ACCESS_CONTROL)
-
-
 rules.add_perm(
     'enterprise.can_view_coupon',
-    rbac_permissions_disabled |
     request_user_has_implicit_access |
     request_user_has_explicit_access
 )
 rules.add_perm(
     'enterprise.can_assign_coupon',
-    rbac_permissions_disabled |
     request_user_has_implicit_access |
     request_user_has_explicit_access
 )
