@@ -1,12 +1,16 @@
 // navbar
 // --------------------------------------------------
 
-.nav {
-  .nav-link {
-    &:hover,
-    &:focus {
-      outline: inherit;
-      border-bottom-color: transparent;
+.navbar-default {
+  .navbar-nav {
+    nav-link, li > a {
+      &:hover,
+      &:focus {
+        color: white;
+        outline: inherit;
+        background-color: #337ab7;
+        border-bottom-color: transparent;
+      }
     }
   }
 }
@@ -42,6 +46,19 @@
     }
   }
 
+  .navbar-toggle {
+
+    &:hover,
+    &:focus {
+      color: white;
+      border-color: #337ab7;
+      background-color: #337ab7;
+
+      > .icon-bar {
+        background-color: white;
+      }
+    }
+  }
 }
 
 .administration-navbar {

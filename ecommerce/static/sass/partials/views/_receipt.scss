@@ -64,7 +64,8 @@
         background: #e8f6fc none repeat scroll 0 0;
     }
 
-    .nav-link {
+    .nav-link, a {
+        color: #0079bc;
         border-bottom: none;
         text-decoration: none !important;
 
