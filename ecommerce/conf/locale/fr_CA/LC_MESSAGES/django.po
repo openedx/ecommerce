@@ -63,7 +63,7 @@
 # Xavier Antoviaque <xavier@antoviaque.org>, 2014
 # d6910e756eb8532754192e6021dc9f83, 2015
 # ytabaa <ytabaa@uae.ac.ma>, 2014
-# Zimeng Chen <schen@edx.org>, 2017
+# Zimeng Chen, 2017
 # Андрей Поляков <polyakov.andrey@gmail.com>, 2016
 msgid ""
 msgstr ""
