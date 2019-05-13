@@ -4,6 +4,11 @@
 nick: ecom
 oeps: {}
 openedx-release: {ref: master}
-owner: edx/learner
+owner: cpennington
+supporting_teams:
+  - edx/rev-team
+  - edx/rev-mint
+  - edx/rev-emerald
+  - edx/ecommerce
 tags: [ecom]
 track-pulls: true
