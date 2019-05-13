@@ -16,8 +16,8 @@ require([
                     }
                 }).done(function(discount) {
                     if (discount.discount_applicable) {
-                        window.location.replace(window.location.href + '?discount_jwt=' + discount.jwt)
-                    };
+                        window.location.replace(window.location.href + '?discount_jwt=' + discount.jwt);
+                    }
                 });
             }
 
