@@ -139,6 +139,7 @@ check_translations_up_to_date: fake_translations detect_changed_source_translati
 validate_translations:
 	cd ecommerce && i18n_tool validate -v
 
+export CUSTOM_COMPILE_COMMAND = make upgrade
 upgrade: ## update the requirements/*.txt files with the latest packages satisfying requirements/*.in
 	pip install -q -r requirements/pip_tools.txt
 	pip-compile --upgrade -o requirements/pip_tools.txt requirements/pip_tools.in
@@ -147,13 +148,6 @@ upgrade: ## update the requirements/*.txt files with the latest packages satisfy
 	pip-compile --upgrade -o requirements/dev.txt requirements/dev.in
 	pip-compile --upgrade -o requirements/production.txt requirements/production.in
 	pip-compile --upgrade -o requirements/test.txt requirements/test.in
-	scripts/post-pip-compile.sh \
-        requirements/pip_tools.txt \
-	    requirements/base.txt \
-	    requirements/docs.txt \
-	    requirements/dev.txt \
-	    requirements/production.txt \
-	    requirements/test.txt
 
 # Targets in a Makefile which do not produce an output file with the same name as the target name
 .PHONY: help requirements migrate serve clean validate_python quality validate_js validate html_coverage e2e \
