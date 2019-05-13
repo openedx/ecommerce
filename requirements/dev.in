@@ -11,4 +11,4 @@ edx-i18n-tools
 ptvsd==3.0
 
 # For devserver code reloading
-pyinotify==0.9.6 # This breaks OSX virtualenv installation
+#pyinotify==0.9.6 # This breaks OSX virtualenv installation
