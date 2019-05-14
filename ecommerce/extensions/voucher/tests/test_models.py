@@ -132,7 +132,7 @@ class VoucherTests(TestCase):
         assert (is_available, message) == (True, '')
 
         is_available, message = voucher.is_available_to_user(user2)
-        assert (is_available, message) == (False, 'This voucher is only available to another user')
+        assert (is_available, message) == (False, 'This voucher is assigned to another user.')
 
     def test_slots_available_for_assignment_no_enterprise_offer(self):
         """ Verify that a voucher with no enterprise offer returns none for slots_available_for_assignment. """
