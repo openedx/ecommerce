@@ -6,10 +6,8 @@ from uuid import uuid4
 import httpretty
 import requests
 from django.conf import settings
-from waffle.models import Switch
 
 from ecommerce.courses.tests.factories import CourseFactory
-from ecommerce.enterprise.constants import ENTERPRISE_OFFERS_SWITCH
 from ecommerce.extensions.test.factories import (
     EnterpriseCustomerConditionFactory,
     EnterpriseOfferFactory,
@@ -634,7 +632,6 @@ class EnterpriseServiceMockMixin(object):
             )
 
     def prepare_enterprise_offer(self, percentage_discount_value=100):
-        Switch.objects.update_or_create(name=ENTERPRISE_OFFERS_SWITCH, defaults={'active': True})
         benefit = EnterprisePercentageDiscountBenefitFactory(value=percentage_discount_value)
         condition = EnterpriseCustomerConditionFactory()
         EnterpriseOfferFactory(partner=self.partner, benefit=benefit, condition=condition)

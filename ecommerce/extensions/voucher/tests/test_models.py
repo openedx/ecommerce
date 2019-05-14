@@ -5,10 +5,8 @@ from django.core.exceptions import ValidationError
 from django.utils.timezone import now
 from oscar.core.loading import get_model
 from oscar.test.factories import UserFactory
-from waffle.models import Switch
 
 from ecommerce.courses.tests.factories import CourseFactory
-from ecommerce.enterprise.constants import ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH
 from ecommerce.extensions.offer.constants import OFFER_ASSIGNED, OFFER_ASSIGNMENT_REVOKED, OFFER_REDEEMED
 from ecommerce.extensions.test import factories
 from ecommerce.tests.factories import PartnerFactory
@@ -71,13 +69,8 @@ class VoucherTests(TestCase):
         voucher = Voucher.objects.create(**self.data)
         first_offer = factories.ConditionalOfferFactory()
         voucher.offers.add(first_offer)
-        # Test that with the switch off, the offer gets returned.
-        Switch.objects.update_or_create(name=ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, defaults={'active': False})
         assert voucher.best_offer == first_offer
-        # Test that with the switch on, the same offer gets returned.
-        Switch.objects.update_or_create(name=ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, defaults={'active': True})
-        assert voucher.best_offer == first_offer
-        # Now add a second enterprise offer, and see that with the switch on, the enterprise offer gets returned.
+        # Now add a second enterprise offer, and see that the enterprise offer gets returned.
         second_offer = factories.EnterpriseOfferFactory()
         voucher.offers.add(second_offer)
         assert voucher.best_offer == second_offer
@@ -86,9 +79,6 @@ class VoucherTests(TestCase):
         third_offer = factories.EnterpriseOfferFactory()
         voucher.offers.add(third_offer)
         assert voucher.best_offer == second_offer
-        # Turn the switch off and see that the oldest offer gets returned.
-        Switch.objects.update_or_create(name=ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, defaults={'active': False})
-        assert voucher.best_offer == first_offer
 
     def test_create_voucher_with_multi_use_per_customer_usage(self):
         """ Verify voucher is created with `MULTI_USE_PER_CUSTOMER` usage type. """
