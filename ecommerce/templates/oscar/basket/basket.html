@@ -17,6 +17,8 @@
 
   <script>
     window.paymentErrorPath = "{% url 'payment_error' %}";
+    window.lmsUrlRoot = "{{ lms_url_root }}";
+    window.courseKey = "{{ formset_lines_data.0.1.course_key }}";
   </script>
 {% endblock %}
 
