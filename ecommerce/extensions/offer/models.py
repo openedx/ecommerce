@@ -3,7 +3,6 @@ from __future__ import unicode_literals
 import logging
 import re
 
-import waffle
 from django.conf import settings
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
@@ -23,7 +22,6 @@ from slumber.exceptions import SlumberBaseException
 from threadlocals.threadlocals import get_current_request
 
 from ecommerce.core.utils import get_cache_key, log_message_and_raise_validation_error
-from ecommerce.enterprise.constants import ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH
 from ecommerce.extensions.offer.constants import (
     OFFER_ASSIGNED,
     OFFER_ASSIGNMENT_EMAIL_BOUNCED,
@@ -281,8 +279,7 @@ class ConditionalOffer(AbstractConditionalOffer):
                            'User: %s, Offer: %s, Basket: %s', basket.owner.username, self.id, basket.id)
             return False
 
-        if (self.benefit.range and self.benefit.range.enterprise_customer and
-                waffle.switch_is_active(ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH)):
+        if self.benefit.range and self.benefit.range.enterprise_customer:
             # If we are using enterprise conditional offers for enterprise coupons, the old style offer is not used.
             return False
 
