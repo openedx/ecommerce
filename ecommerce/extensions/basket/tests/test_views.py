@@ -763,7 +763,9 @@ class VoucherAddViewTests(LmsApiMockMixin, TestCase):
         self.basket.add_product(product)
         order = factories.OrderFactory()
         VoucherApplication.objects.create(voucher=voucher, user=self.user, order=order)
-        self.assert_form_valid_message("Coupon code '{code}' has already been redeemed.".format(code=COUPON_CODE))
+        self.assert_form_valid_message(
+            "Coupon code '{code}' is not available. This coupon has already been used".format(code=COUPON_CODE)
+        )
 
     def test_voucher_valid_without_site(self):
         """ Verify coupon works when the sites on the coupon and request are the same. """
@@ -796,7 +798,9 @@ class VoucherAddViewTests(LmsApiMockMixin, TestCase):
             attribute_type=BasketAttributeType.objects.get(name=BUNDLE),
             value_text='test_bundle'
         )
-        self.assert_form_valid_message("Coupon code '{code}' is not valid for this basket.".format(code=voucher.code))
+        self.assert_form_valid_message(
+            "Coupon code '{code}' is not valid for this basket for a bundled purchase.".format(code=voucher.code)
+        )
 
     def test_multi_use_voucher_valid_for_bundle(self):
         """ Verify multi use coupon works when voucher is used against a bundle. """

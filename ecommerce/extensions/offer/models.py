@@ -133,8 +133,11 @@ class Benefit(AbstractBenefit):
                         partner=partner_code
                     )
                 except Exception as err:  # pylint: disable=bare-except
-                    logger.warning(
-                        '%s raised while attempting to contact Discovery Service for offer catalog_range data.', err
+                    logger.exception(
+                        '[Code Redemption Failure] Unable to apply benefit because we failed to query the '
+                        'Discovery Service for catalog data. '
+                        'User: %s, Offer: %s, Basket: %s, Message: %s',
+                        basket.owner.username, offer.id, basket.id, err
                     )
                     raise Exception('Failed to contact Discovery Service to retrieve offer catalog_range data.')
 
@@ -273,6 +276,9 @@ class ConditionalOffer(AbstractConditionalOffer):
         a check for if basket owners email domain is within the allowed email domains.
         """
         if basket.owner and not self.is_email_valid(basket.owner.email):
+            logger.warning('[Code Redemption Failure] Unable to apply offer because the user\'s email '
+                           'does not meet the domain requirements. '
+                           'User: %s, Offer: %s, Basket: %s', basket.owner.username, self.id, basket.id)
             return False
 
         if (self.benefit.range and self.benefit.range.enterprise_customer and
@@ -284,9 +290,22 @@ class ConditionalOffer(AbstractConditionalOffer):
             # The condition is only satisfied if all basket lines are in the offer range
             num_lines = basket.all_lines().count()
             voucher = self.get_voucher()
+            code = voucher and voucher.code
+            username = basket.owner and basket.owner.username
             if voucher and num_lines > 1 and voucher.usage != Voucher.MULTI_USE:
+                logger.warning('[Code Redemption Failure] Unable to apply offer because this Voucher '
+                               'can only be used on single item baskets. '
+                               'User: %s, Offer: %s, Basket: %s, Code: %s',
+                               username, self.id, basket.id, code)
                 return False
-            return len(self.benefit.get_applicable_lines(self, basket)) == num_lines
+            is_satisfied = len(self.benefit.get_applicable_lines(self, basket)) == num_lines
+            if not is_satisfied:
+                logger.warning('[Code Redemption Failure] Unable to apply offer because this Voucher '
+                               'is not valid for all courses in basket. '
+                               'User: %s, Offer: %s, Basket: %s, Code: %s',
+                               username, self.id, basket.id, code)
+
+            return is_satisfied
 
         return super(ConditionalOffer, self).is_condition_satisfied(basket)  # pylint: disable=bad-super-call
 
@@ -407,7 +426,10 @@ class Range(AbstractRange):
 
             TieredCache.set_all_tiers(cache_key, response, settings.COURSES_API_CACHE_TIMEOUT)
             return response
-        except (ConnectionError, SlumberBaseException, Timeout):
+        except (ConnectionError, SlumberBaseException, Timeout) as exc:
+            logger.exception('[Code Redemption Failure] Unable to connect to the Discovery Service '
+                             'for catalog contains endpoint. '
+                             'Product: %s, Message: %s, Range: %s', product.id, exc, self.id)
             raise Exception('Unable to connect to Discovery Service for catalog contains endpoint.')
 
     def contains_product(self, product):
@@ -415,20 +437,25 @@ class Range(AbstractRange):
         Assert if the range contains the product.
         """
         # course_catalog is associated with course_seat_types.
+        contains_product = super(Range, self).contains_product(product)  # pylint: disable=bad-super-call
         if self.course_catalog and self.course_seat_types:
             # Product certificate type should belongs to range seat types.
             if product.attr.certificate_type.lower() in self.course_seat_types:  # pylint: disable=unsupported-membership-test
                 response = self.catalog_contains_product(product)
                 # Range can have a catalog query and 'regular' products in it,
                 # therefor an OR is used to check for both possibilities.
-                return ((response['courses'][product.course_id]) or
-                        super(Range, self).contains_product(product))  # pylint: disable=bad-super-call
+                contains_product = ((response['courses'][product.course_id]) or contains_product)
+
         elif self.catalog:
-            return (
-                product.id in self.catalog.stock_records.values_list('product', flat=True) or
-                super(Range, self).contains_product(product)  # pylint: disable=bad-super-call
+            contains_product = (
+                product.id in self.catalog.stock_records.values_list('product', flat=True) or contains_product
             )
-        return super(Range, self).contains_product(product)  # pylint: disable=bad-super-call
+
+        if not contains_product:
+            logger.warning('[Code Redemption Failure] Course catalog for Range does not contain the Product. '
+                           'Product: %s, Range: %s', product.id, self.id)
+
+        return contains_product
 
     contains = contains_product
 
