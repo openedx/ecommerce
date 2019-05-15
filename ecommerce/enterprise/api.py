@@ -6,9 +6,6 @@ from urllib import urlencode
 
 from django.conf import settings
 from edx_django_utils.cache import TieredCache
-from edx_rest_api_client.client import EdxRestApiClient
-from requests.exceptions import ConnectionError, Timeout
-from slumber.exceptions import SlumberHttpBaseException
 
 from ecommerce.core.utils import get_cache_key
 
@@ -199,40 +196,3 @@ def catalog_contains_course_runs(site, course_run_ids, enterprise_customer_uuid,
     TieredCache.set_all_tiers(cache_key, contains_content, settings.ENTERPRISE_API_CACHE_TIMEOUT)
 
     return contains_content
-
-
-def get_with_access_to(site, user, jwt, enterprise_id):
-    """
-    Get the enterprises that this user has access to for the data api permission django group.
-    """
-    api_resource_name = 'enterprise-customer'
-    api = EdxRestApiClient(site.siteconfiguration.enterprise_api_url, jwt=jwt)
-    endpoint = getattr(api, api_resource_name)
-
-    cache_key = get_cache_key(
-        resource='{api_resource_name}-with_access_to_enterprises'.format(api_resource_name=api_resource_name),
-        user=user.username,
-        enterprise_customer=enterprise_id,
-    )
-    cached_response = TieredCache.get_cached_response(cache_key)
-    if cached_response.is_found:
-        return cached_response.value
-    try:
-        query_params = {
-            'permissions': [settings.ENTERPRISE_DATA_API_GROUP],
-            'enterprise_id': enterprise_id,
-        }
-        response = endpoint.with_access_to.get(**query_params)
-    except (ConnectionError, SlumberHttpBaseException, Timeout) as exc:
-        logger.warning('Unable to retrieve Enterprise Customer with_access_to details for user: %s: %r',
-                       user.username, exc)
-        return None
-    if response.get('results', None) is None or response['count'] == 0:
-        logger.warning('Unable to process Enterprise Customer with_access_to details for user: %s, enterprise: %s'
-                       ' No Results Found', user.username, enterprise_id)
-        return None
-    if response['count'] > 1:
-        logger.warning('Multiple Enterprise Customers found for user: %s, enterprise: %s', user.username, enterprise_id)
-        return None
-    TieredCache.set_all_tiers(cache_key, response['results'][0], settings.ENTERPRISE_API_CACHE_TIMEOUT)
-    return response['results'][0]

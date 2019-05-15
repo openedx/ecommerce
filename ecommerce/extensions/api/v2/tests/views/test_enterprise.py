@@ -18,7 +18,6 @@ from oscar.core.loading import get_model
 from oscar.test import factories
 from rest_framework import status
 from waffle.models import Switch
-from waffle.testutils import override_switch
 
 from ecommerce.core.constants import (
     ALL_ACCESS_CONTEXT,
@@ -32,7 +31,7 @@ from ecommerce.coupons.tests.mixins import CouponMixin, DiscoveryMockMixin
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.enterprise.benefits import BENEFIT_MAP as ENTERPRISE_BENEFIT_MAP
 from ecommerce.enterprise.conditions import AssignableEnterpriseCustomerCondition
-from ecommerce.enterprise.constants import ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, USE_ROLE_BASED_ACCESS_CONTROL
+from ecommerce.enterprise.constants import ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH
 from ecommerce.enterprise.rules import request_user_has_explicit_access, request_user_has_implicit_access
 from ecommerce.enterprise.tests.mixins import EnterpriseServiceMockMixin
 from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
@@ -117,7 +116,6 @@ class TestEnterpriseCustomerView(EnterpriseServiceMockMixin, TestCase):
 
 
 @ddt.ddt
-@override_switch(USE_ROLE_BASED_ACCESS_CONTROL, active=True)
 class EnterpriseCouponViewSetRbacTests(
         CouponMixin,
         DiscoveryTestMixin,
