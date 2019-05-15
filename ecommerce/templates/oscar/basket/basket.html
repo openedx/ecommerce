@@ -13,12 +13,12 @@
 {% endblock navbar %}
 
 {% block javascript %}
-  <script src="{% static 'js/apps/basket_app.js' %}"></script>
-
   <script>
     window.paymentErrorPath = "{% url 'payment_error' %}";
     window.courseKey = "{{ formset_lines_data.0.1.course_key }}";
   </script>
+  <script src="{% static 'js/apps/basket_app.js' %}"></script>
+
 {% endblock %}
 
 {% block skip_link %}
