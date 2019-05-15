@@ -12,13 +12,15 @@
     {% include 'edx/partials/_student_navbar.html' %}
 {% endblock navbar %}
 
+<script>
+    window.courseKey = "{{ formset_lines_data }}";
+</script>
 {% block javascript %}
-  <script>
-    window.paymentErrorPath = "{% url 'payment_error' %}";
-    window.courseKey = "{{ formset_lines_data.0.1.course_key }}";
-  </script>
   <script src="{% static 'js/apps/basket_app.js' %}"></script>
 
+  <script>
+    window.paymentErrorPath = "{% url 'payment_error' %}";
+  </script>
 {% endblock %}
 
 {% block skip_link %}
