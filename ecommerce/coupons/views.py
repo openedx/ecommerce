@@ -144,7 +144,7 @@ class CouponRedeemView(EdxOrderPlacementMixin, View):
 
     @method_decorator(set_enterprise_cookie)
     @method_decorator(login_required)
-    def get(self, request):
+    def get(self, request):  # pylint: disable=too-many-statements
         """
         Looks up the passed code and adds the matching product to a basket,
         then applies the voucher and if the basket total is FREE places the order and
@@ -174,10 +174,16 @@ class CouponRedeemView(EdxOrderPlacementMixin, View):
 
         valid_voucher, msg = voucher_is_valid(voucher, [product], request)
         if not valid_voucher:
+            logger.warning('[Code Redemption Failure] The voucher is not valid for this product. '
+                           'User: %s, Product: %s, Code: %s, Message: %s',
+                           request.user.username, product.id, voucher.code, msg)
             return render(request, template_name, {'error': msg})
 
         offer = voucher.best_offer
         if not offer.is_email_valid(request.user.email):
+            logger.warning('[Code Redemption Failure] Unable to apply offer because the user\'s email '
+                           'does not meet the domain requirements. '
+                           'User: %s, Offer: %s, Code: %s', request.user.username, offer.id, voucher.code)
             return render(request, template_name, {'error': _('You are not eligible to use this coupon.')})
 
         email_confirmation_response = render_email_confirmation_if_required(request, offer, product)
@@ -219,6 +225,9 @@ class CouponRedeemView(EdxOrderPlacementMixin, View):
                 # If the consent token is set, then the user is returning from the consent view. Render out an error
                 # if the computed token doesn't match the one received from the redirect URL.
                 if received_consent_token != consent_token:
+                    logger.warning('[Code Redemption Failure] Unable to complete code redemption because of '
+                                   'invalid consent. User: %s, Offer: %s, Code: %s',
+                                   request.user.username, offer.id, voucher.code)
                     return render(
                         request,
                         template_name,

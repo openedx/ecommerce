@@ -3,18 +3,13 @@ Django rules for enterprise
 """
 from __future__ import absolute_import
 
+import crum
 import rules
-import waffle
-from edx_rbac.utils import (
-    get_decoded_jwt_from_request,
-    get_request_or_stub,
-    request_user_has_implicit_access_via_jwt,
-    user_has_access_via_database
-)
+from edx_rbac.utils import request_user_has_implicit_access_via_jwt, user_has_access_via_database
+from edx_rest_framework_extensions.auth.jwt.cookies import get_decoded_jwt
 
 from ecommerce.core.constants import ENTERPRISE_COUPON_ADMIN_ROLE
 from ecommerce.core.models import EcommerceFeatureRoleAssignment
-from ecommerce.enterprise.constants import USE_ROLE_BASED_ACCESS_CONTROL
 
 
 @rules.predicate
@@ -24,8 +19,8 @@ def request_user_has_implicit_access(user, context):  # pylint: disable=unused-a
      Returns:
         boolean: whether the request user has access or not
     """
-    request = get_request_or_stub()
-    decoded_jwt = get_decoded_jwt_from_request(request)
+    request = crum.get_current_request()
+    decoded_jwt = get_decoded_jwt(request)
     if not context:
         return False
     return request_user_has_implicit_access_via_jwt(decoded_jwt, ENTERPRISE_COUPON_ADMIN_ROLE, context)
@@ -48,23 +43,13 @@ def request_user_has_explicit_access(user, context):
     )
 
 
-@rules.predicate
-def rbac_permissions_disabled(user, obj):  # pylint: disable=unused-argument
-    """
-    Temporary check for rbac based permissions being enabled.
-    """
-    return not waffle.switch_is_active(USE_ROLE_BASED_ACCESS_CONTROL)
-
-
 rules.add_perm(
     'enterprise.can_view_coupon',
-    rbac_permissions_disabled |
     request_user_has_implicit_access |
     request_user_has_explicit_access
 )
 rules.add_perm(
     'enterprise.can_assign_coupon',
-    rbac_permissions_disabled |
     request_user_has_implicit_access |
     request_user_has_explicit_access
 )

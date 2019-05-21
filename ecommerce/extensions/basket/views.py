@@ -436,7 +436,8 @@ class BasketSummaryView(BasketView):
             'max_seat_quantity': 100,
             'payment_processors': payment_processors,
             'total_benefit': total_benefit,
-            'line_price': (self.request.basket.total_incl_tax_excl_discounts / num_of_items) if num_of_items > 0 else 0
+            'line_price': (self.request.basket.total_incl_tax_excl_discounts / num_of_items) if num_of_items > 0 else 0,
+            'lms_url_root': site_configuration.lms_url_root,
         })
         return context
 
@@ -447,9 +448,12 @@ class VoucherAddView(BaseVoucherAddView):  # pylint: disable=function-redefined
         Validates and applies voucher on basket.
         """
         self.request.basket.clear_vouchers()
-
+        username = self.request.user and self.request.user.username
         is_valid, message = validate_voucher(voucher, self.request.user, self.request.basket, self.request.site)
         if not is_valid:
+            logger.warning('[Code Redemption Failure] The voucher is not valid for this basket. '
+                           'User: %s, Basket: %s, Code: %s, Message: %s',
+                           username, self.request.basket.id, voucher.code, message)
             messages.error(self.request, message)
             self.request.basket.vouchers.remove(voucher)
             return
@@ -457,6 +461,9 @@ class VoucherAddView(BaseVoucherAddView):  # pylint: disable=function-redefined
         valid, msg = apply_voucher_on_basket_and_check_discount(voucher, self.request, self.request.basket)
 
         if not valid:
+            logger.warning('[Code Redemption Failure] The voucher could not be applied to this basket. '
+                           'User: %s, Basket: %s, Code: %s, Message: %s',
+                           username, self.request.basket.id, voucher.code, msg)
             messages.warning(self.request, msg)
             self.request.basket.vouchers.remove(voucher)
         else:
@@ -464,9 +471,16 @@ class VoucherAddView(BaseVoucherAddView):  # pylint: disable=function-redefined
 
     def form_valid(self, form):
         code = form.cleaned_data['code']
+        username = self.request.user and self.request.user.username
         if self.request.basket.is_empty:
+            logger.warning('[Code Redemption Failure] User attempted to apply a code to an empty basket. '
+                           'User: %s, Basket: %s, Code: %s',
+                           username, self.request.basket.id, code)
             return redirect_to_referrer(self.request, 'basket:summary')
         if self.request.basket.contains_voucher(code):
+            logger.warning('[Code Redemption Failure] User tried to apply a code that is already applied. '
+                           'User: %s, Basket: %s, Code: %s',
+                           username, self.request.basket.id, code)
             messages.error(
                 self.request,
                 _("You have already added coupon code '{code}' to your basket.").format(code=code)

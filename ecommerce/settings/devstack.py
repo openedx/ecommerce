@@ -33,8 +33,8 @@ JWT_AUTH.update({
 })
 
 CORS_ORIGIN_WHITELIST = (
-    'localhost:1991',
-    'localhost:1996'
+    'http://localhost:1991',
+    'http://localhost:1996'
 )
 CORS_ALLOW_HEADERS = corsheaders_default_headers + (
     'use-jwt-cookie',

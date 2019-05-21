@@ -68,6 +68,14 @@
   <script src="{{ optimizely_snippet_src }}"></script>
 {% endif %}
 
+{% comment %}
+    TODO: Remove once this has a MFE, and asking the lms if there is a discount happens in it
+    This was added in order to have the basket page run javascript with context variables. Such javascript
+    cannot be compressed as the variables will change.
+{% endcomment %}
+{% block pre_app_js %}
+{% endblock %}
+
 {% compress js %}
     {# Note: This block is purposely separated from the one above so that browsers cache the common JS instead of
     downloading a single, large file for each page. #}

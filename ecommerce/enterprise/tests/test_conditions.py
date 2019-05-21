@@ -195,6 +195,15 @@ class EnterpriseCustomerConditionTests(EnterpriseServiceMockMixin, DiscoveryTest
         offer, basket = self.setup_enterprise_coupon_data(mock_learner_api=False)
         self.assertTrue(self.condition.is_satisfied(offer, basket))
 
+    @httpretty.activate
+    def test_is_satisfied_no_course_product_for_voucher_offer(self):
+        """ Ensure the condition returns false if the basket contains a product not associated with a course run. """
+        Switch.objects.update_or_create(name=ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, defaults={'active': True})
+        offer, basket = self.setup_enterprise_coupon_data()
+        basket.flush()
+        basket.add_product(self.test_product)
+        self.assertFalse(self.condition.is_satisfied(offer, basket))
+
     def test_is_satisfied_empty_basket(self):
         """ Ensure the condition returns False if the basket is empty. """
         offer = factories.EnterpriseOfferFactory(partner=self.partner, condition=self.condition)

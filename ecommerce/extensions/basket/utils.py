@@ -118,7 +118,9 @@ def prepare_basket(request, products, voucher=None):
         if is_valid:
             apply_voucher_on_basket_and_check_discount(voucher, request, basket)
         else:
-            logger.info(message)
+            logger.warning('[Code Redemption Failure] The voucher is not valid for this basket. '
+                           'User: %s, Basket: %s, Code: %s, Message: %s',
+                           request.user.username, request.basket.id, voucher.code, message)
 
     attribute_cookie_data(basket, request)
     return basket
@@ -373,10 +375,10 @@ def validate_voucher(voucher, user, basket, request_site):
         message = _("Coupon code '{code}' is not active.").format(code=voucher.code)
         return False, message
 
-    is_available, __ = voucher.is_available_to_user(user)
+    is_available, msg = voucher.is_available_to_user(user)
 
     if not is_available:
-        message = _("Coupon code '{code}' has already been redeemed.").format(code=voucher.code)
+        message = _("Coupon code '{code}' is not available. {msg}").format(code=voucher.code, msg=msg)
         return False, message
 
     # Do not allow coupons for one partner's site to be used on another partner's site
@@ -395,7 +397,8 @@ def validate_voucher(voucher, user, basket, request_site):
     is_voucher_valid_for_bundle = voucher_program_uuid or voucher.usage == Voucher.MULTI_USE
 
     if is_bundle_purchase and not is_voucher_valid_for_bundle:
-        message = _("Coupon code '{code}' is not valid for this basket.").format(code=voucher.code)
+        message = _("Coupon code '{code}' is not valid for this basket for a bundled purchase.").format(
+            code=voucher.code)
         return False, message
 
     return True, ''
