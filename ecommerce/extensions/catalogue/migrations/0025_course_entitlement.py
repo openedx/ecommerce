@@ -15,6 +15,9 @@ ProductClass = get_model("catalogue", "ProductClass")
 
 def create_product_class(apps, schema_editor):
     """ Create a course entitlement product class """
+    for klass in (Category, ProductAttribute, ProductClass):
+        klass.skip_history_when_saving = True
+
     # Create a new product class for course entitlement
     course_entitlement = ProductClass(
         track_stock=False,
@@ -22,7 +25,7 @@ def create_product_class(apps, schema_editor):
         name=COURSE_ENTITLEMENT_PRODUCT_CLASS_NAME,
         slug=slugify(COURSE_ENTITLEMENT_PRODUCT_CLASS_NAME)
     )
-    course_entitlement.save_without_historical_record()
+    course_entitlement.save()
 
     # Create product attributes for course entitlement products
     pa1 = ProductAttribute(
@@ -32,7 +35,7 @@ def create_product_class(apps, schema_editor):
         type="text",
         required=True
     )
-    pa1.save_without_historical_record()
+    pa1.save()
 
     pa2 = ProductAttribute(
         product_class=course_entitlement,
@@ -41,10 +44,9 @@ def create_product_class(apps, schema_editor):
         type="text",
         required=False
     )
-    pa2.save_without_historical_record()
+    pa2.save()
 
     # Create a category for course entitlements
-    Category.skip_history_when_saving = True
     Category.add_root(
         description="All course entitlements",
         slug="course_entitlements",
@@ -55,12 +57,9 @@ def create_product_class(apps, schema_editor):
 
 def remove_product_class(apps, schema_editor):
     """ Reverse function. """
-    Product.skip_history_when_saving = True
-    Category.skip_history_when_saving = True
-    ProductClass.skip_history_when_saving = True
-
-    # For cascading delete
-    ProductAttribute.skip_history_when_saving = True
+    # ProductAttribute is needed for cascading delete
+    for klass in (Product, Category, ProductAttribute, ProductClass):
+        klass.skip_history_when_saving = True
 
     Product.objects.filter(product_class=ProductClass.objects.get(name=COURSE_ENTITLEMENT_PRODUCT_CLASS_NAME)).delete()
     Category.objects.filter(slug='course_entitlements').delete()

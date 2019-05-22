@@ -12,6 +12,7 @@ ProductClass = get_model("catalogue", "ProductClass")
 
 def create_enterprise_id_attribute(apps, schema_editor):
     """Create coupon enterprise_customer_uuid attribute."""
+    ProductAttribute.skip_history_when_saving = True
     coupon = ProductClass.objects.get(name=COUPON_PRODUCT_CLASS_NAME)
     pa = ProductAttribute(
         product_class=coupon,
@@ -20,7 +21,7 @@ def create_enterprise_id_attribute(apps, schema_editor):
         type='text',
         required=False
     )
-    pa.save_without_historical_record()
+    pa.save()
 
 
 def remove_enterprise_id_attribute(apps, schema_editor):

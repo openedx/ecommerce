@@ -17,6 +17,9 @@ JOURNAL_SLUG_NAME = slugify(JOURNAL_PRODUCT_CLASS_NAME)
 
 def create_product_class(apps, schema_editor):
     """ Create a journal product class """
+    for klass in (Category, Product, ProductClass, ProductAttribute):
+        klass.skip_history_when_saving = True
+
     # Create a new product class for journal
     journal = ProductClass(
         track_stock=False,
@@ -24,7 +27,7 @@ def create_product_class(apps, schema_editor):
         name=JOURNAL_PRODUCT_CLASS_NAME,
         slug=JOURNAL_SLUG_NAME
     )
-    journal.save_without_historical_record()
+    journal.save()
 
     # Create product attributes for journal products
     pa1 = ProductAttribute.objects.create(
@@ -34,10 +37,9 @@ def create_product_class(apps, schema_editor):
         type="text",
         required=True
     )
-    pa1.save_without_historical_record()
+    pa1.save()
 
     # Create a category for the journal
-    Category.skip_history_when_saving = True
     Category.add_root(
         description="All journals",
         slug="journals",
