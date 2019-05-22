@@ -511,6 +511,10 @@ class User(AbstractUser):
         Returns the LMS user_id, or None if not found.
         """
         # JWT cookie is used with API calls from new microfrontends. This is not persisted.
+        # TODO: Rename ``_get_lms_user_id_from_jwt_cookie`` to ``_get_lms_user_id_from_jwt``
+        #   and update to use new method to be added to JwtAuthentication in edx-drf-extensions
+        #   to get the decoded JWT used for authentication, no matter where it came from.
+        #   See https://github.com/edx/edx-drf-extensions/pull/69#discussion_r286618922
         lms_user_id = self._get_lms_user_id_from_jwt_cookie()
         if lms_user_id:
             return lms_user_id
