@@ -399,6 +399,12 @@ define([
                     BasketPage.hideVoucherForm();
                 });
 
+                $('#voucher_form').on('submit', function() {
+                    $('#apply-voucher-button').attr('disabled', true);
+                    $('#payment-button').attr('disabled', true);
+                    $('.payment-button[type=button]').attr('disabled', true);
+                });
+
                 $('select[name=country]').on('change', function() {
                     var country = $('select[name=country]').val(),
                         $inputDiv = $('#div_id_state .controls'),
