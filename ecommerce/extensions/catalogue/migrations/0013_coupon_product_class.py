@@ -14,13 +14,16 @@ ProductClass = get_model("catalogue", "ProductClass")
 
 def create_product_class(apps, schema_editor):
     """Create a Coupon product class."""
+    for klass in (Category, ProductAttribute, ProductClass):
+        klass.skip_history_when_saving = True
+
     coupon = ProductClass(
         track_stock=False,
         requires_shipping=False,
         name=COUPON_PRODUCT_CLASS_NAME,
         slug=slugify(COUPON_PRODUCT_CLASS_NAME),
     )
-    coupon.save_without_historical_record()
+    coupon.save()
 
     pa = ProductAttribute(
         product_class=coupon,
@@ -29,7 +32,7 @@ def create_product_class(apps, schema_editor):
         type='entity',
         required=False
     )
-    pa.save_without_historical_record()
+    pa.save()
 
     # Create a category for coupons.
     c = Category(
@@ -40,7 +43,7 @@ def create_product_class(apps, schema_editor):
         image='',
         name='Coupons'
     )
-    c.save_without_historical_record()
+    c.save()
 
 
 def remove_product_class(apps, schema_editor):

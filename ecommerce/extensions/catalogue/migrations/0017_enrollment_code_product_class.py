@@ -14,13 +14,16 @@ ProductClass = get_model('catalogue', 'ProductClass')
 
 def create_enrollment_code_product_class(apps, schema_editor):
     """Create an Enrollment code product class and switch to turn automatic creation on."""
+    for klass in (Category, ProductAttribute, ProductClass):
+        klass.skip_history_when_saving = True
+
     enrollment_code = ProductClass(
         track_stock=False,
         requires_shipping=False,
         name=ENROLLMENT_CODE_PRODUCT_CLASS_NAME,
         slug=slugify(ENROLLMENT_CODE_PRODUCT_CLASS_NAME),
     )
-    enrollment_code.save_without_historical_record()
+    enrollment_code.save()
 
     pa1 = ProductAttribute(
         product_class=enrollment_code,
@@ -29,7 +32,7 @@ def create_enrollment_code_product_class(apps, schema_editor):
         type='text',
         required=True
     )
-    pa1.save_without_historical_record()
+    pa1.save()
 
     pa2 = ProductAttribute(
         product_class=enrollment_code,
@@ -38,7 +41,7 @@ def create_enrollment_code_product_class(apps, schema_editor):
         type='text',
         required=True
     )
-    pa2.save_without_historical_record()
+    pa2.save()
 
 
 def remove_enrollment_code_product_class(apps, schema_editor):

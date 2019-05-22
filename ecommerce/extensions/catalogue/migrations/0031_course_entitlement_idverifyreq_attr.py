@@ -12,6 +12,8 @@ ProductClass = get_model("catalogue", "ProductClass")
 
 def create_idverifyreq_attribute(apps, schema_editor):
     """Create entitlement code 'id_verification_required' attribute."""
+    ProductAttribute.skip_history_when_saving = True
+
     entitlement_code_class = ProductClass.objects.get(name=COURSE_ENTITLEMENT_PRODUCT_CLASS_NAME)
     pa = ProductAttribute(
         product_class=entitlement_code_class,
@@ -20,7 +22,7 @@ def create_idverifyreq_attribute(apps, schema_editor):
         type='boolean',
         required=False
     )
-    pa.save_without_historical_record()
+    pa.save()
 
 
 def remove_idverifyreq_attribute(apps, schema_editor):

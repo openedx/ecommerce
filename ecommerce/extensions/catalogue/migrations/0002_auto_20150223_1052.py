@@ -19,6 +19,9 @@ def create_catalog(apps, schema_editor):
     ProductAttribute = apps.get_model("catalogue", "ProductAttribute")
     ProductClass = apps.get_model("catalogue", "ProductClass")
 
+    for klass in (Category, ProductAttribute, ProductClass):
+        klass.skip_history_when_saving = True
+
     # Create a new product class for course seats
     seat = ProductClass(
         track_stock=False,
@@ -76,11 +79,9 @@ def remove_catalog(apps, schema_editor):
     ProductClass = apps.get_model("catalogue", "ProductClass")
     ProductAttribute = apps.get_model("catalogue", "ProductAttribute")
 
-    Category.skip_history_when_saving = True
-    ProductClass.skip_history_when_saving = True
-
-    # Needed for cascading delete
-    ProductAttribute.skip_history_when_saving = True
+    # ProductAttribute is needed for cascading delete
+    for klass in (Category, ProductAttribute, ProductClass):
+        klass.skip_history_when_saving = True
 
     Category.objects.filter(slug='seats').delete()
     ProductClass.objects.filter(name=SEAT_PRODUCT_CLASS_NAME).delete()

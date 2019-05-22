@@ -7,7 +7,6 @@ from ecommerce.core.constants import SEAT_PRODUCT_CLASS_NAME
 
 
 def create_credit_provider_attribute(apps, schema_editor):
-
     # Get seat Object
     ProductClass = apps.get_model('catalogue', 'ProductClass')
     seat = ProductClass.objects.get(name=SEAT_PRODUCT_CLASS_NAME)
