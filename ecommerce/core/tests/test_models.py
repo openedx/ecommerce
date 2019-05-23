@@ -43,6 +43,7 @@ def _make_site_config(payment_processors_str, site_id=1):
 @ddt.ddt
 class UserTests(DiscoveryTestMixin, LmsApiMockMixin, TestCase):
     TEST_CONTEXT = {'foo': 'bar', 'baz': None, 'lms_user_id': 'test-context-user-id'}
+    LMS_USER_ID = 500
 
     def setUp(self):
         super(UserTests, self).setUp()
@@ -105,6 +106,17 @@ class UserTests(DiscoveryTestMixin, LmsApiMockMixin, TestCase):
 
         same_user = User.objects.get(id=user.id)
         self.assertEqual(same_user.tracking_context, self.TEST_CONTEXT)
+
+    def test_user_id(self):
+        """ Ensures that the LMS user id is written / read correctly by the User model. """
+        user = self.create_user()
+        self.assertIsNone(user.user_id)
+
+        user.tracking_context = self.LMS_USER_ID
+        user.save()
+
+        same_user = User.objects.get(id=user.id)
+        self.assertEqual(same_user.user_id, self.LMS_USER_ID)
 
     def test_get_full_name(self):
         """ Test that the user model concatenates first and last name if the full name is not set. """
@@ -293,7 +305,7 @@ class SiteConfigurationTests(TestCase):
     )
     @ddt.unpack
     def test_get_payment_processors(self, processors, expected_result):
-        """ Tests that get_payment_processors returs correct payment processor classes """
+        """ Tests that get_payment_processors returns correct payment processor classes """
         self._enable_processor_switches(processors)
         site_config = _make_site_config(",".join(proc.NAME for proc in processors))
 

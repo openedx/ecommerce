@@ -491,6 +491,11 @@ class User(AbstractUser):
     """
 
     full_name = models.CharField(_('Full Name'), max_length=255, blank=True, null=True)
+    user_id = models.IntegerField(
+        null=True,
+        blank=True,
+        help_text=_(u'LMS user id'),
+    )
 
     tracking_context = JSONField(blank=True, null=True)
 
