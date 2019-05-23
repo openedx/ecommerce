@@ -660,6 +660,15 @@ SYSTEM_TO_FEATURE_ROLE_MAPPING = {
 
 # END ENTERPRISE APP CONFIGURATION
 
+# CYBERSOURCE API CONFIGURATION
+CS_API_CONFIG = {
+    'host': 'apitest.cybersource.com',
+    'merchant_id': 'edx_org',
+    'API_KEY_ID': os.environ.get('API_KEY_ID', None),
+    'API_KEY_SECRET': os.environ.get('API_KEY_SECRET', None)
+}
+# END CYBSERSOURCE API CONFIGURATION
+
 # DJANGO DEBUG TOOLBAR CONFIGURATION
 # http://django-debug-toolbar.readthedocs.org/en/latest/installation.html
 if os.environ.get('ENABLE_DJANGO_TOOLBAR', False):
