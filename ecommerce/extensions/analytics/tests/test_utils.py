@@ -75,7 +75,7 @@ class UtilsTest(DiscoveryTestMixin, BasketMixin, TransactionTestCase):
         user = self.create_user()
         expected = ('test-user-id', None, None)
         with mock.patch(
-            'ecommerce.core.models.User.lms_user_id',
+            'ecommerce.core.models.User.lms_user_id_from_request',
             new_callable=mock.PropertyMock,
             return_value='test-user-id'
         ):
