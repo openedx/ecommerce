@@ -66,7 +66,7 @@ class UserTests(DiscoveryTestMixin, LmsApiMockMixin, TestCase):
     def test_lms_user_id_from_jwt_cookie(self):
         """ Ensures the lms_user_id can be pulled from the jwt cookie. """
         user = self.create_user()
-        self.assertIsNone(user.lms_user_id)
+        self.assertIsNone(user.get_lms_user_id)
 
         payload = generate_latest_version_payload(user, scopes=['user_id'])
         payload['user_id'] = 'test-lms-user-id'
@@ -74,26 +74,26 @@ class UserTests(DiscoveryTestMixin, LmsApiMockMixin, TestCase):
         mock_request_with_cookie = mock.Mock(COOKIES={'edx-jwt-cookie': jwt})
 
         with mock.patch('ecommerce.core.models.crum.get_current_request', return_value=mock_request_with_cookie):
-            self.assertEqual(user.lms_user_id, 'test-lms-user-id')
+            self.assertEqual(user.get_lms_user_id, 'test-lms-user-id')
 
     def test_lms_user_id_from_social_auth(self):
         """ Ensures the lms_user_id can be pulled from the tracking context. """
         user = self.create_user()
-        self.assertIsNone(user.lms_user_id)
+        self.assertIsNone(user.get_lms_user_id)
 
         self.set_user_id_in_social_auth(user, 'test-social-auth-user-id')
-        self.assertEqual(user.lms_user_id, 'test-social-auth-user-id')
+        self.assertEqual(user.get_lms_user_id, 'test-social-auth-user-id')
 
     def test_lms_user_id_from_tracking_context(self):
         """ Ensures the lms_user_id can be pulled from the tracking context. """
         user = self.create_user()
-        self.assertIsNone(user.lms_user_id)
+        self.assertIsNone(user.get_lms_user_id)
 
         user.tracking_context = self.TEST_CONTEXT
         user.save()
 
         same_user = User.objects.get(id=user.id)
-        self.assertEqual(same_user.lms_user_id, self.TEST_CONTEXT['lms_user_id'])
+        self.assertEqual(same_user.get_lms_user_id, self.TEST_CONTEXT['lms_user_id'])
 
     def test_tracking_context(self):
         """ Ensures that the tracking_context dictionary is written / read
@@ -107,16 +107,16 @@ class UserTests(DiscoveryTestMixin, LmsApiMockMixin, TestCase):
         same_user = User.objects.get(id=user.id)
         self.assertEqual(same_user.tracking_context, self.TEST_CONTEXT)
 
-    def test_user_id(self):
+    def test_lms_user_id(self):
         """ Ensures that the LMS user id is written / read correctly by the User model. """
         user = self.create_user()
-        self.assertIsNone(user.user_id)
+        self.assertIsNone(user.lms_user_id)
 
-        user.tracking_context = self.LMS_USER_ID
+        user.lms_user_id = self.LMS_USER_ID
         user.save()
 
         same_user = User.objects.get(id=user.id)
-        self.assertEqual(same_user.user_id, self.LMS_USER_ID)
+        self.assertEqual(same_user.lms_user_id, self.LMS_USER_ID)
 
     def test_get_full_name(self):
         """ Test that the user model concatenates first and last name if the full name is not set. """

@@ -23,7 +23,7 @@ def parse_tracking_context(user):
     Returns:
         Tuple of strings: user_tracking_id, ga_client_id, lms_ip
     """
-    user_tracking_id = user.lms_user_id
+    user_tracking_id = user.get_lms_user_id
     if user_tracking_id is None:
         # If we still don't have the lms user ID, we will use the local user ID. However, we need
         # to disambiguate the ID we choose since there's no guarantee it won't collide with the

@@ -491,13 +491,12 @@ class User(AbstractUser):
     """
 
     full_name = models.CharField(_('Full Name'), max_length=255, blank=True, null=True)
-    user_id = models.IntegerField(
+    tracking_context = JSONField(blank=True, null=True)
+    lms_user_id = models.IntegerField(
         null=True,
         blank=True,
         help_text=_(u'LMS user id'),
     )
-
-    tracking_context = JSONField(blank=True, null=True)
 
     class Meta(object):
         get_latest_by = 'date_joined'
@@ -511,7 +510,7 @@ class User(AbstractUser):
             return None
 
     @property
-    def lms_user_id(self):
+    def get_lms_user_id(self):
         """
         Returns the LMS user_id, or None if not found.
         """
