@@ -16,7 +16,10 @@ from opaque_keys.edx.keys import CourseKey
 from oscar.apps.basket.views import VoucherAddView as BaseVoucherAddView
 from oscar.apps.basket.views import VoucherRemoveView as BaseVoucherRemoveView
 from oscar.apps.basket.views import *  # pylint: disable=wildcard-import, unused-wildcard-import
+from oscar.core.prices import Price
 from requests.exceptions import ConnectionError, Timeout
+from rest_framework.response import Response
+from rest_framework.views import APIView
 from slumber.exceptions import SlumberBaseException
 
 from ecommerce.core.exceptions import SiteConfigurationError
@@ -117,9 +120,9 @@ class BasketAddItemsView(View):
         return HttpResponseRedirect(url, status=303)
 
 
-class BasketSummaryView(BasketView):
+class BasketLogicMixin(object):
     """
-    Display basket contents and checkout/payment options.
+    Business logic for determining basket contents and checkout/payment options.
     """
 
     @newrelic.agent.function_trace()
@@ -359,32 +362,7 @@ class BasketSummaryView(BasketView):
             raise SiteConfigurationError(msg)
 
     @newrelic.agent.function_trace()
-    def get(self, request, *args, **kwargs):
-        basket = request.basket
-
-        try:
-            properties = {
-                'cart_id': basket.id,
-                'products': [translate_basket_line_for_segment(line) for line in basket.all_lines()],
-            }
-            track_segment_event(request.site, request.user, 'Cart Viewed', properties)
-
-            properties = {
-                'checkout_id': basket.order_number,
-                'step': 1
-            }
-            track_segment_event(request.site, request.user, 'Checkout Step Viewed', properties)
-        except Exception:  # pylint: disable=broad-except
-            logger.exception('Failed to fire Cart Viewed event for basket [%d]', basket.id)
-
-        if has_enterprise_offer(basket) and basket.total_incl_tax == Decimal(0):
-            return redirect('checkout:free-checkout')
-        else:
-            return super(BasketSummaryView, self).get(request, *args, **kwargs)
-
-    @newrelic.agent.function_trace()
-    def get_context_data(self, **kwargs):
-        context = super(BasketSummaryView, self).get_context_data(**kwargs)
+    def get_basket_context_data(self, context):
         formset = context.get('formset', [])
         lines = context.get('line_list', [])
         site_configuration = self.request.site.siteconfiguration
@@ -440,6 +418,90 @@ class BasketSummaryView(BasketView):
             'lms_url_root': site_configuration.lms_url_root,
         })
         return context
+
+
+class BasketSummaryView(BasketLogicMixin, BasketView):
+    @newrelic.agent.function_trace()
+    def get_context_data(self, **kwargs):
+        context = super(BasketSummaryView, self).get_context_data(**kwargs)
+        return self.get_basket_context_data(context)
+
+    @newrelic.agent.function_trace()
+    def get(self, request, *args, **kwargs):
+        basket = request.basket
+
+        try:
+            properties = {
+                'cart_id': basket.id,
+                'products': [translate_basket_line_for_segment(line) for line in basket.all_lines()],
+            }
+            track_segment_event(request.site, request.user, 'Cart Viewed', properties)
+
+            properties = {
+                'checkout_id': basket.order_number,
+                'step': 1
+            }
+            track_segment_event(request.site, request.user, 'Checkout Step Viewed', properties)
+        except Exception:  # pylint: disable=broad-except
+            logger.exception('Failed to fire Cart Viewed event for basket [%d]', basket.id)
+
+        if has_enterprise_offer(basket) and basket.total_incl_tax == Decimal(0):
+            return redirect('checkout:free-checkout')
+        else:
+            return super(BasketSummaryView, self).get(request, *args, **kwargs)
+
+
+class WIPBasketApiView(BasketLogicMixin, APIView):
+    """
+    Api for retrieving basket contents and checkout/payment options.
+
+    # TODO: ARCH-867: See ticket for clean-up and refactoring details for this API code.
+
+    GET:
+    Retrieves basket contents and checkout/payment options.
+    """
+    def _get_order_total(self, context):
+        """
+        Add the order total to the context in preparation for the get_basket_context_data call.
+
+        Note: We only calculate what we need.  This result is required before calling the shared
+        ``get_basket_context_data(context)`` call.
+
+        See https://github.com/django-oscar/django-oscar/blob/1.5.4/src/oscar/apps/basket/views.py#L92-L132
+        """
+        shipping_charge = Price('USD', Decimal(0))
+        context['order_total'] = OrderTotalCalculator().calculate(self.request.basket, shipping_charge)
+        return context
+
+    def _get_serialized_price(self, price):
+        """
+        Serializes a Price object.
+
+        Args:
+           price (Price)
+
+        """
+        # TODO: Consider using serializers with DRF for Price
+        # - django-oscar-api has serializer for Price
+        # - from oscarapi.serializers.fields import TaxIncludedDecimalField
+        return {
+            'currency': price.currency,
+            'excl_tax': price.excl_tax,
+            'incl_tax': price.incl_tax,
+        }
+
+    def get(self, request):  # pylint: disable=unused-argument
+        context = {}
+        context = self._get_order_total(context)
+        context = self.get_basket_context_data(context)
+
+        # TODO: ARCH-867: Remove unnecessary processing of anything added to context (e.g. payment_processors) that
+        # isn't ultimately passed on to the response.
+
+        response = {}
+        response['order_total'] = self._get_serialized_price(context['order_total'])
+
+        return Response(response)
 
 
 class VoucherAddView(BaseVoucherAddView):  # pylint: disable=function-redefined

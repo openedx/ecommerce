@@ -306,10 +306,53 @@ class BasketAddItemsViewTests(
         self.assertEqual(basket_attribute.value_text, 'False')
 
 
+class BasketLogicTestMixin(object):
+    """ Helper functions for Basket API and BasketSummaryView tests. """
+    def create_basket_and_add_product(self, product):
+        basket = factories.BasketFactory(owner=self.user, site=self.site)
+        basket.add_product(product, 1)
+        return basket
+
+    def create_seat(self, course, seat_price=100, cert_type='verified'):
+        return course.create_or_update_seat(cert_type, True, seat_price)
+
+
+@httpretty.activate
+class WIPBasketApiViewTests(BasketLogicTestMixin, TestCase):
+    """ WIPBasketApiViewTests basket api tests. """
+    path = reverse('api:v2:baskets:baskets')
+
+    def setUp(self):
+        super(WIPBasketApiViewTests, self).setUp()
+        self.user = self.create_user()
+        self.client.login(username=self.user.username, password=self.password)
+        self.course = CourseFactory(name='WIPBasketApiViewTests', partner=self.partner)
+
+    def test_response_success(self):
+        """ Verify a successful response is returned. """
+        seat = self.create_seat(self.course, seat_price=500)
+        basket = self.create_basket_and_add_product(seat)
+        self.mock_access_token_response()
+        self.assertEqual(basket.lines.count(), 1)
+
+        response = self.client.get(self.path)
+
+        self.assertEqual(response.status_code, 200)
+
+        expected_response = {
+            'order_total': {
+                'excl_tax': 500.0,
+                'currency': 'USD',
+                'incl_tax': None
+            }
+        }
+        self.assertDictEqual(response.json(), expected_response)
+
+
 @httpretty.activate
 @ddt.ddt
 class BasketSummaryViewTests(EnterpriseServiceMockMixin, DiscoveryTestMixin, DiscoveryMockMixin, LmsApiMockMixin,
-                             ApiMockMixin, BasketMixin, TestCase):
+                             ApiMockMixin, BasketMixin, BasketLogicTestMixin, TestCase):
     """ BasketSummaryView basket view tests. """
     path = reverse('basket:summary')
 
@@ -325,14 +368,6 @@ class BasketSummaryViewTests(EnterpriseServiceMockMixin, DiscoveryTestMixin, Dis
         site_configuration.save()
 
         toggle_switch(settings.PAYMENT_PROCESSOR_SWITCH_PREFIX + DummyProcessor.NAME, True)
-
-    def create_basket_and_add_product(self, product):
-        basket = factories.BasketFactory(owner=self.user, site=self.site)
-        basket.add_product(product, 1)
-        return basket
-
-    def create_seat(self, course, seat_price=100, cert_type='verified'):
-        return course.create_or_update_seat(cert_type, True, seat_price)
 
     def create_and_apply_benefit_to_basket(self, basket, product, benefit_type, benefit_value):
         _range = factories.RangeFactory(products=[product, ])
@@ -436,6 +471,29 @@ class BasketSummaryViewTests(EnterpriseServiceMockMixin, DiscoveryTestMixin, Dis
         self.assertEqual(line_data['product_title'], self.course.name)
         self.assertFalse(line_data['enrollment_code'])
         self.assertEqual(response.context['payment_processors'][0].NAME, DummyProcessor.NAME)
+
+    def test_track_segment_event_exception(self):
+        """ Verify error log when track_segment_event fails. """
+        seat = self.create_seat(self.course)
+        basket = self.create_basket_and_add_product(seat)
+        self.mock_access_token_response()
+        self.mock_course_run_detail_endpoint(
+            self.course, discovery_api_url=self.site_configuration.discovery_api_url
+        )
+        self.assertEqual(basket.lines.count(), 1)
+
+        logger_name = 'ecommerce.extensions.basket.views'
+        with LogCapture(logger_name) as l:
+            with mock.patch('ecommerce.extensions.basket.views.track_segment_event') as mock_track:
+                mock_track.side_effect = Exception()
+
+                response = self.client.get(self.path)
+                self.assertEqual(response.status_code, 200)
+
+                l.check((
+                    logger_name, 'ERROR',
+                    u'Failed to fire Cart Viewed event for basket [{}]'.format(basket.id)
+                ))
 
     def assert_empty_basket(self):
         """ Assert that the basket is empty on visiting the basket summary page. """
