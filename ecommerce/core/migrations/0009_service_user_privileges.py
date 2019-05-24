@@ -2,17 +2,17 @@
 from __future__ import unicode_literals
 
 from django.conf import settings
-from django.contrib.auth import get_user_model
 from django.contrib.auth.management import create_permissions
-from django.contrib.auth.models import Permission
 from django.db import migrations
-
-User = get_user_model()
 
 
 class Migration(migrations.Migration):
 
     def alter_service_user_privileges(apps, schema_editor):
+        app_name, _, model_name = settings.AUTH_USER_MODEL.rpartition('.')
+        User = apps.get_model(app_name, model_name)
+        Permission = apps.get_model('auth', 'Permission')
+
         # Explicitly create permissions. Permissions are not created until after
         # Django has finished running migrations, meaning that when migrations are
         # run against a fresh database (e.g., while running tests), any which depend
@@ -34,6 +34,10 @@ class Migration(migrations.Migration):
         service_user.save()
 
     def restore_service_user_privileges(apps, schema_editor):
+        app_name, _, model_name = settings.AUTH_USER_MODEL.rpartition('.')
+        User = apps.get_model(app_name, model_name)
+        Permission = apps.get_model('auth', 'Permission')
+
         service_user = User.objects.get(username=settings.ECOMMERCE_SERVICE_WORKER_USERNAME)
 
         change_order_permission = Permission.objects.get(codename='change_order')
