@@ -22,6 +22,7 @@ from ecommerce.extensions.api.v2.views import sdn as sdn_views
 from ecommerce.extensions.api.v2.views import stockrecords as stockrecords_views
 from ecommerce.extensions.api.v2.views import user_management as user_management_views
 from ecommerce.extensions.api.v2.views import vouchers as voucher_views
+from ecommerce.extensions.basket.views import WIPBasketApiView
 from ecommerce.extensions.voucher.views import CouponReportCSVView
 
 ORDER_NUMBER_PATTERN = r'(?P<number>[-\w]+)'
@@ -33,6 +34,8 @@ USERNAME_PATTERN = r'(?P<username>{regex})'.format(regex=USERNAME_REGEX_PARTIAL)
 
 BASKET_URLS = [
     url(r'^$', basket_views.BasketCreateView.as_view(), name='create'),
+    # TODO: ARCH-867: See ticket for details of final clean-up.
+    url(r'^wip-api/', WIPBasketApiView.as_view(), name='baskets'),
     url(
         r'^{basket_id}/$'.format(basket_id=BASKET_ID_PATTERN),
         basket_views.BasketDestroyView.as_view(),
