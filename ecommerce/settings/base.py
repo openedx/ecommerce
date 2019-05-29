@@ -601,6 +601,7 @@ EDX_DRF_EXTENSIONS = {
         'email': 'email',
         'full_name': 'full_name',
         'tracking_context': 'tracking_context',
+        'user_id': 'lms_user_id',
     },
 }
 
