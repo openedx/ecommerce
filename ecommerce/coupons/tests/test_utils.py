@@ -1,5 +1,6 @@
 import ddt
 import httpretty
+from crum import set_current_request
 from edx_django_utils.cache import TieredCache
 from mock import patch
 from oscar.test.factories import ProductFactory, RangeFactory, VoucherFactory
@@ -24,6 +25,8 @@ class CouponUtilsTests(TestCase, DiscoveryMockMixin):
         self.user = self.create_user(email='test@tester.fake')
         self.request.user = self.user
         self.request.GET = {}
+        set_current_request(self.request)
+        self.addCleanup(set_current_request)
 
     @ddt.data(
         (['verIfiEd', 'profeSSional'], 'verified,professional'),
