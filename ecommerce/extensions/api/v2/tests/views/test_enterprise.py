@@ -1455,6 +1455,51 @@ class EnterpriseCouponViewSetRbacTests(
         assert OfferAssignment.objects.filter(code=already_assigned_voucher.code).count() == 1
         assert OfferAssignment.objects.filter(code=already_redeemed_voucher.code).count() == 0
 
+    def test_coupon_codes_assign_once_per_customer_with_revoked_code(self):
+        Switch.objects.update_or_create(name=ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, defaults={'active': True})
+        coupon_post_data = dict(self.data, voucher_type=Voucher.ONCE_PER_CUSTOMER, quantity=1)
+        coupon = self.get_response('POST', ENTERPRISE_COUPONS_LINK, coupon_post_data)
+        coupon = coupon.json()
+        coupon_id = coupon['coupon_id']
+
+        vouchers = Product.objects.get(id=coupon_id).attr.coupon_vouchers.vouchers.all()
+        voucher = vouchers[0]
+        email = 't1@example.com'
+        # Assign the code to the user.
+        with mock.patch('ecommerce.extensions.offer.utils.send_offer_assignment_email.delay') as mock_send_email:
+            response = self.get_response(
+                'POST',
+                '/api/v2/enterprise/coupons/{}/assign/'.format(coupon_id),
+                {'template': 'Test template', 'emails': [email]}
+            )
+        response = response.json()
+        assert mock_send_email.call_count == 1
+        assert response['offer_assignments'][0]['user_email'] == email
+        assert response['offer_assignments'][0]['code'] == voucher.code
+
+        # Revoke the code from the user.
+        with mock.patch('ecommerce.extensions.offer.utils.send_offer_update_email.delay') as mock_send_email:
+            response = self.get_response(
+                'POST',
+                '/api/v2/enterprise/coupons/{}/revoke/'.format(coupon_id),
+                {'assignments': [{'email': email, 'code': voucher.code}]}
+            )
+
+        response = response.json()
+        assert response == [{'code': voucher.code, 'email': email, 'detail': 'success'}]
+
+        # Assign the same code to the user again.
+        with mock.patch('ecommerce.extensions.offer.utils.send_offer_assignment_email.delay') as mock_send_email:
+            response = self.get_response(
+                'POST',
+                '/api/v2/enterprise/coupons/{}/assign/'.format(coupon_id),
+                {'template': 'Test template', 'emails': [email]}
+            )
+        response = response.json()
+        assert mock_send_email.call_count == 1
+        assert response['offer_assignments'][0]['user_email'] == email
+        assert response['offer_assignments'][0]['code'] == voucher.code
+
     @ddt.data(
         (Voucher.SINGLE_USE, 1, None, ['test1@example.com', 'test2@example.com']),
         (Voucher.MULTI_USE_PER_CUSTOMER, 1, 3, ['test1@example.com', 'test2@example.com']),

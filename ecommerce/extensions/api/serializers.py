@@ -1188,7 +1188,7 @@ class CouponCodeAssignmentSerializer(serializers.Serializer):  # pylint: disable
         voucher_usage_type = vouchers.first().usage
         if voucher_usage_type == Voucher.ONCE_PER_CUSTOMER:
             existing_assignments_for_users = OfferAssignment.objects.filter(user_email__in=emails).exclude(
-                status__in=OFFER_ASSIGNMENT_REVOKED
+                status__in=[OFFER_ASSIGNMENT_REVOKED]
             )
             existing_applications_for_users = VoucherApplication.objects.filter(user__email__in=emails)
             codes_to_exclude = (
@@ -1202,7 +1202,8 @@ class CouponCodeAssignmentSerializer(serializers.Serializer):  # pylint: disable
             logger.info(
                 'Excluding the following codes because they have been assigned to or redeemed by '
                 'at least one user in the given list of emails to assign to this coupon. '
-                'codes: %s, emails: %s, coupon_id: %s', codes_to_exclude, emails_requiring_exclusions, coupon.id
+                'codes: %s, emails: %s, coupon_id: %s',
+                set(codes_to_exclude), set(emails_requiring_exclusions), coupon.id
             )
             vouchers = vouchers.exclude(code__in=codes_to_exclude)
 
