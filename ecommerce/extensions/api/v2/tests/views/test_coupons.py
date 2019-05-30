@@ -14,7 +14,7 @@ from django.test import RequestFactory
 from django.urls import reverse
 from django.utils.timezone import now
 from oscar.apps.catalogue.categories import create_from_breadcrumbs
-from oscar.core.loading import get_model
+from oscar.core.loading import get_class, get_model
 from oscar.test import factories
 from rest_framework import status
 from testfixtures import LogCapture
