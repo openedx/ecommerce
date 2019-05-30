@@ -108,7 +108,7 @@ python-dateutil==2.8.0
 python-memcached==1.58
 python-openid==2.2.5      # via social-auth-core
 pytz==2016.10
-pyyaml==3.13
+pyyaml==5.1
 rcssmin==1.0.6            # via django-compressor
 redis==2.10.6
 requests-oauthlib==1.2.0  # via social-auth-core
