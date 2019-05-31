@@ -6,6 +6,7 @@ import django_filters
 import pytz
 from dateutil.parser import parse
 from dateutil.utils import default_tzinfo
+from django_filters.rest_framework import DjangoFilterBackend
 from django.shortcuts import get_object_or_404
 from django.utils.timezone import now
 from opaque_keys.edx.keys import CourseKey
@@ -48,7 +49,7 @@ class VoucherViewSet(NonDestroyableModelViewSet):
     """ View set for vouchers. """
     serializer_class = serializers.VoucherSerializer
     permission_classes = (IsOffersOrIsAuthenticatedAndStaff,)
-    filter_backends = (filters.DjangoFilterBackend,)
+    filter_backends = (DjangoFilterBackend,)
     filter_class = VoucherFilter
 
     def get_queryset(self):

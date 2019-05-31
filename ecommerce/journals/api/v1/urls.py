@@ -4,5 +4,5 @@ from rest_framework.routers import DefaultRouter
 from .views import JournalProductViewSet
 
 router = DefaultRouter()
-router.register(r'journals', JournalProductViewSet, base_name='journals')
+router.register(r'journals', JournalProductViewSet, basename='journals')
 urlpatterns = router.urls

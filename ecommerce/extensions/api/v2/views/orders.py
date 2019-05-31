@@ -1,8 +1,9 @@
 """HTTP endpoints for interacting with orders."""
 import logging
 
+from django_filters.rest_framework import DjangoFilterBackend
 from oscar.core.loading import get_class, get_model
-from rest_framework import filters, status, viewsets
+from rest_framework import status, viewsets
 from rest_framework.decorators import detail_route
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.permissions import DjangoModelPermissions, IsAuthenticated
@@ -25,7 +26,7 @@ class OrderViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Order.objects.all()
     serializer_class = serializers.OrderSerializer
     throttle_classes = (ServiceUserThrottle,)
-    filter_backends = (filters.DjangoFilterBackend,)
+    filter_backends = (DjangoFilterBackend,)
     filter_class = OrderFilter
 
     def filter_queryset(self, queryset):
