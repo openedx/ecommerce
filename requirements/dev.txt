@@ -26,7 +26,7 @@ cookies==2.2.1            # via responses
 coreapi==2.3.3
 coreschema==0.0.4         # via coreapi
 coverage==4.3.4
-cryptography==2.6.1       # via pyopenssl
+cryptography==2.7         # via pyopenssl
 cssselect==1.0.3          # via premailer
 cssutils==1.0.2           # via premailer
 ddt==1.1.1
