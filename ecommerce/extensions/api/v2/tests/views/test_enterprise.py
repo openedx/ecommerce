@@ -17,7 +17,6 @@ from django.utils.timezone import now
 from oscar.core.loading import get_model
 from oscar.test import factories
 from rest_framework import status
-from waffle.models import Switch
 
 from ecommerce.core.constants import (
     ALL_ACCESS_CONTEXT,
@@ -31,7 +30,6 @@ from ecommerce.coupons.tests.mixins import CouponMixin, DiscoveryMockMixin
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.enterprise.benefits import BENEFIT_MAP as ENTERPRISE_BENEFIT_MAP
 from ecommerce.enterprise.conditions import AssignableEnterpriseCustomerCondition
-from ecommerce.enterprise.constants import ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH
 from ecommerce.enterprise.rules import request_user_has_explicit_access, request_user_has_implicit_access
 from ecommerce.enterprise.tests.mixins import EnterpriseServiceMockMixin
 from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
@@ -249,12 +247,10 @@ class EnterpriseCouponViewSetRbacTests(
         """"
         Test that new codes emails is sent with correct data upon enterprise coupon creation.
         """
-        Switch.objects.update_or_create(name=ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, defaults={'active': True})
         self.get_response('POST', ENTERPRISE_COUPONS_LINK, self.data)
         self.assert_new_codes_email()
 
     def test_list_enterprise_coupons(self):
-        Switch.objects.update_or_create(name=ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, defaults={'active': True})
         self.get_response('POST', ENTERPRISE_COUPONS_LINK, self.data)
         self.create_coupon()
         self.assertEqual(Product.objects.filter(product_class__name='Coupon').count(), 2)
@@ -269,13 +265,7 @@ class EnterpriseCouponViewSetRbacTests(
         self.assertEqual(coupon_data[0]['enterprise_customer_catalog'], self.data['enterprise_customer_catalog'])
         self.assertEqual(coupon_data[0]['code_status'], 'ACTIVE')
 
-    def test_create_ent_offers_switch_off(self):
-        Switch.objects.update_or_create(name=ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, defaults={'active': False})
-        response = self.get_response('POST', ENTERPRISE_COUPONS_LINK, self.data)
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-
-    def test_create_ent_offers_switch_on(self):
-        Switch.objects.update_or_create(name=ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, defaults={'active': True})
+    def test_create_ent_offers(self):
         response = self.get_response('POST', ENTERPRISE_COUPONS_LINK, self.data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -302,23 +292,7 @@ class EnterpriseCouponViewSetRbacTests(
         invoice = Invoice.objects.get(order__basket=basket)
         self.assertEqual(invoice.business_client.name, enterprise_name)
 
-    def test_update_ent_offers_switch_off(self):
-        Switch.objects.update_or_create(name=ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, defaults={'active': True})
-        self.get_response('POST', ENTERPRISE_COUPONS_LINK, self.data)
-        coupon = Product.objects.get(title=self.data['title'])
-
-        Switch.objects.update_or_create(name=ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, defaults={'active': False})
-        response = self.get_response(
-            'PUT',
-            reverse('api:v2:enterprise-coupons-detail', kwargs={'pk': coupon.id}),
-            data={
-                'title': 'Updated Enterprise Coupon',
-            }
-        )
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-
-    def test_update_ent_offers_switch_on(self):
-        Switch.objects.update_or_create(name=ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, defaults={'active': True})
+    def test_update_ent_offers(self):
         self.get_response('POST', ENTERPRISE_COUPONS_LINK, self.data)
         coupon = Product.objects.get(title=self.data['title'])
 
@@ -333,7 +307,6 @@ class EnterpriseCouponViewSetRbacTests(
         self.assertEqual(coupon.id, updated_coupon.id)
 
     def test_update_non_ent_coupon(self):
-        Switch.objects.update_or_create(name=ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, defaults={'active': True})
         coupon = self.create_coupon()
         response = self.get_response(
             'PUT',
@@ -344,45 +317,7 @@ class EnterpriseCouponViewSetRbacTests(
         )
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
-    def test_update_migrated_ent_coupon(self):
-        Switch.objects.update_or_create(name=ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, defaults={'active': False})
-        self.data.update({
-            'catalog_query': '*:*',
-            'course_seat_types': ['verified'],
-            'benefit_value': 20,
-            'title': 'Migrated Enterprise Coupon',
-        })
-        self.get_response('POST', reverse('api:v2:coupons-list'), self.data)
-        coupon = Product.objects.get(title='Migrated Enterprise Coupon')
-
-        Switch.objects.update_or_create(name=ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, defaults={'active': True})
-        new_catalog = str(uuid4()).decode('utf-8')
-        self.get_response(
-            'PUT',
-            reverse('api:v2:enterprise-coupons-detail', kwargs={'pk': coupon.id}),
-            data={
-                'enterprise_customer': self.data['enterprise_customer'],
-                'enterprise_customer_catalog': new_catalog,
-                'benefit_value': 50,
-                'title': 'Updated Enterprise Coupon',
-            }
-        )
-        updated_coupon = Product.objects.get(title='Updated Enterprise Coupon')
-        self.assertEqual(coupon.id, updated_coupon.id)
-        self.assertEqual(updated_coupon.attr.enterprise_customer_uuid, self.data['enterprise_customer']['id'])
-        vouchers = updated_coupon.attr.coupon_vouchers.vouchers.all()
-        for voucher in vouchers:
-            all_offers = voucher.offers.all()
-            self.assertEqual(len(all_offers), 2)
-            original_offer = all_offers[0]
-            self.assertEqual(original_offer.benefit.value, 50)
-            self.assertEqual(str(original_offer.condition.range.enterprise_customer_catalog), new_catalog)
-            enterprise_offer = all_offers[1]
-            self.assertEqual(enterprise_offer.benefit.value, 50)
-            self.assertEqual(str(enterprise_offer.condition.enterprise_customer_catalog_uuid), new_catalog)
-
     def test_update_max_uses_single_use(self):
-        Switch.objects.update_or_create(name=ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, defaults={'active': True})
         self.get_response('POST', ENTERPRISE_COUPONS_LINK, self.data)
         coupon = Product.objects.get(title=self.data['title'])
         response = self.get_response(
@@ -395,7 +330,6 @@ class EnterpriseCouponViewSetRbacTests(
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_update_max_uses_invalid_value(self):
-        Switch.objects.update_or_create(name=ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, defaults={'active': True})
         self.data.update({
             'voucher_type': Voucher.MULTI_USE,
             'max_uses': 5,
@@ -481,8 +415,6 @@ class EnterpriseCouponViewSetRbacTests(
         """
         Create coupon and voucher applications(redemeptions).
         """
-        Switch.objects.update_or_create(name=ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, defaults={'active': True})
-
         # create coupon
         coupon_post_data = dict(coupon_data, voucher_type=voucher_type, quantity=quantity, max_uses=max_uses)
         coupon = self.get_response('POST', ENTERPRISE_COUPONS_LINK, coupon_post_data)
@@ -632,7 +564,6 @@ class EnterpriseCouponViewSetRbacTests(
         :param expected_responses: Mapping of code filter to the expected response for that filter.
         :return:
         """
-        Switch.objects.update_or_create(name=ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, defaults={'active': True})
         coupon_post_data = dict(self.data, voucher_type=voucher_type, quantity=quantity, max_uses=max_uses)
         coupon = self.get_response('POST', ENTERPRISE_COUPONS_LINK, coupon_post_data)
         coupon = coupon.json()
@@ -663,7 +594,6 @@ class EnterpriseCouponViewSetRbacTests(
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_coupon_codes_detail_with_invalid_code_filter(self):
-        Switch.objects.update_or_create(name=ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, defaults={'active': True})
         coupon_post_data = dict(self.data, voucher_type=Voucher.SINGLE_USE, quantity=1, max_uses=None)
         coupon = self.get_response('POST', ENTERPRISE_COUPONS_LINK, coupon_post_data)
         coupon = coupon.json()
@@ -678,7 +608,6 @@ class EnterpriseCouponViewSetRbacTests(
         assert response == ['Invalid code_filter specified: invalid-filter']
 
     def test_coupon_codes_detail_with_no_code_filter(self):
-        Switch.objects.update_or_create(name=ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, defaults={'active': True})
         coupon_post_data = dict(self.data, voucher_type=Voucher.SINGLE_USE, quantity=1, max_uses=None)
         coupon = self.get_response('POST', ENTERPRISE_COUPONS_LINK, coupon_post_data)
         coupon = coupon.json()
@@ -810,7 +739,6 @@ class EnterpriseCouponViewSetRbacTests(
         """
         Test that codes with `OFFER_ASSIGNMENT_EMAIL_BOUNCED` error status are shown in unredeemed filter.
         """
-        Switch.objects.update_or_create(name=ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, defaults={'active': True})
         coupon_response = self.get_response('POST', ENTERPRISE_COUPONS_LINK, self.data)
         coupon = coupon_response.json()
         coupon_id = coupon['coupon_id']
@@ -851,8 +779,6 @@ class EnterpriseCouponViewSetRbacTests(
         """
         Test that we get implicit access via role assignment
         """
-        Switch.objects.update_or_create(name=ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, defaults={'active': True})
-
         response = self.get_response('POST', ENTERPRISE_COUPONS_LINK, self.data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         EcommerceFeatureRoleAssignment.objects.all().delete()
@@ -869,7 +795,6 @@ class EnterpriseCouponViewSetRbacTests(
         """
         Test that we get access when basket and invoice are present
         """
-        Switch.objects.update_or_create(name=ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, defaults={'active': True})
         self.get_response('POST', ENTERPRISE_COUPONS_LINK, self.data)
         coupon = Product.objects.get(title=self.data['title'])
         EcommerceFeatureRoleAssignment.objects.all().delete()
@@ -883,7 +808,6 @@ class EnterpriseCouponViewSetRbacTests(
         """
         Test that we get implicit access via role assignment
         """
-        Switch.objects.update_or_create(name=ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, defaults={'active': True})
         self.set_jwt_cookie(
             system_wide_role='incorrect-role', context=self.data['enterprise_customer']['id']
         )
@@ -904,8 +828,6 @@ class EnterpriseCouponViewSetRbacTests(
         """
         Test that we get explicit access via role assignment
         """
-        Switch.objects.update_or_create(name=ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, defaults={'active': True})
-
         # Re-order rules predicate to check explicit access first.
         rules.remove_perm('enterprise.can_view_coupon')
         rules.add_perm(
@@ -930,7 +852,6 @@ class EnterpriseCouponViewSetRbacTests(
         """
         Test that we get access denied via role assignment when no assignment exists
         """
-        Switch.objects.update_or_create(name=ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, defaults={'active': True})
         response = self.get_response('POST', ENTERPRISE_COUPONS_LINK, self.data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         EcommerceFeatureRoleAssignment.objects.all().delete()
@@ -948,7 +869,6 @@ class EnterpriseCouponViewSetRbacTests(
         """
         Test that we get access denied when role assignment with enterprise_id is absent
         """
-        Switch.objects.update_or_create(name=ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, defaults={'active': True})
         response = self.get_response('POST', ENTERPRISE_COUPONS_LINK, self.data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         EcommerceFeatureRoleAssignment.objects.filter(
@@ -968,8 +888,6 @@ class EnterpriseCouponViewSetRbacTests(
         """
         Test that role base permissions works as expected with `enterprise_openedx_operator` role.
         """
-        Switch.objects.update_or_create(name=ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, defaults={'active': True})
-
         self.set_jwt_cookie(system_wide_role=SYSTEM_ENTERPRISE_OPERATOR_ROLE, context=ALL_ACCESS_CONTEXT)
 
         response = self.get_response('POST', ENTERPRISE_COUPONS_LINK, self.data)
@@ -990,8 +908,6 @@ class EnterpriseCouponViewSetRbacTests(
         """
         Test that role base permissions works as expected with all access context.
         """
-        Switch.objects.update_or_create(name=ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, defaults={'active': True})
-
         # Create a feature role assignment with no enterprise id i.e it would have all access context.
         EcommerceFeatureRoleAssignment.objects.all().delete()
         EcommerceFeatureRoleAssignment.objects.get_or_create(
@@ -1034,7 +950,6 @@ class EnterpriseCouponViewSetRbacTests(
         """
         Test if we get correct enterprise coupon overview data.
         """
-        Switch.objects.update_or_create(name=ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, defaults={'active': True})
         coupons_data = [{
             'title': 'coupon-1',
             'enterprise_customer': {'name': 'LOTRx', 'id': '85b08dde-0877-4474-a4e9-8408fe47ce88'}
@@ -1090,7 +1005,6 @@ class EnterpriseCouponViewSetRbacTests(
         """
         Test if we get correct enterprise coupon overview data for a single coupon.
         """
-        Switch.objects.update_or_create(name=ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, defaults={'active': True})
         coupons_data = [{
             'title': 'coupon-1',
             'enterprise_customer': {'name': 'LOTRx', 'id': '85b08dde-0877-4474-a4e9-8408fe47ce88'}
@@ -1262,8 +1176,6 @@ class EnterpriseCouponViewSetRbacTests(
         """
         Tests coupon overview endpoint returns correct value for calculated fields.
         """
-        Switch.objects.update_or_create(name=ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, defaults={'active': True})
-
         enterprise_id = '85b08dde-0877-4474-a4e9-8408fe47ce88'
         coupon_data = {
             'max_uses': max_uses,
@@ -1328,8 +1240,6 @@ class EnterpriseCouponViewSetRbacTests(
     @ddt.unpack
     def test_coupon_codes_assign_success(self, voucher_type, quantity, max_uses, emails, assignments_per_code):
         """Test assigning codes to users."""
-        Switch.objects.update_or_create(name=ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, defaults={'active': True})
-
         coupon_post_data = dict(self.data, voucher_type=voucher_type, quantity=quantity, max_uses=max_uses)
         coupon = self.get_response('POST', ENTERPRISE_COUPONS_LINK, coupon_post_data)
         coupon = coupon.json()
@@ -1358,7 +1268,6 @@ class EnterpriseCouponViewSetRbacTests(
             assert OfferAssignment.objects.filter(code=code).count() in assignments_per_code
 
     def test_coupon_codes_assign_success_with_codes_filter(self):
-        Switch.objects.update_or_create(name=ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, defaults={'active': True})
         coupon_post_data = dict(self.data, voucher_type=Voucher.SINGLE_USE, quantity=5)
         coupon = self.get_response('POST', ENTERPRISE_COUPONS_LINK, coupon_post_data)
         coupon = coupon.json()
@@ -1388,7 +1297,6 @@ class EnterpriseCouponViewSetRbacTests(
                 assert OfferAssignment.objects.filter(code=code).count() == 1
 
     def test_coupon_codes_assign_success_exclude_used_codes(self):
-        Switch.objects.update_or_create(name=ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, defaults={'active': True})
         coupon_post_data = dict(self.data, voucher_type=Voucher.SINGLE_USE, quantity=5)
         coupon = self.get_response('POST', ENTERPRISE_COUPONS_LINK, coupon_post_data)
         coupon = coupon.json()
@@ -1420,7 +1328,6 @@ class EnterpriseCouponViewSetRbacTests(
             assert OfferAssignment.objects.filter(code=code).count() == 1
 
     def test_coupon_codes_assign_once_per_customer_with_used_codes(self):
-        Switch.objects.update_or_create(name=ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, defaults={'active': True})
         coupon_post_data = dict(self.data, voucher_type=Voucher.ONCE_PER_CUSTOMER, quantity=3)
         coupon = self.get_response('POST', ENTERPRISE_COUPONS_LINK, coupon_post_data)
         coupon = coupon.json()
@@ -1456,7 +1363,6 @@ class EnterpriseCouponViewSetRbacTests(
         assert OfferAssignment.objects.filter(code=already_redeemed_voucher.code).count() == 0
 
     def test_coupon_codes_assign_once_per_customer_with_revoked_code(self):
-        Switch.objects.update_or_create(name=ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, defaults={'active': True})
         coupon_post_data = dict(self.data, voucher_type=Voucher.ONCE_PER_CUSTOMER, quantity=1)
         coupon = self.get_response('POST', ENTERPRISE_COUPONS_LINK, coupon_post_data)
         coupon = coupon.json()
@@ -1507,8 +1413,6 @@ class EnterpriseCouponViewSetRbacTests(
     )
     @ddt.unpack
     def test_coupon_codes_assign_failure(self, voucher_type, quantity, max_uses, emails):
-        Switch.objects.update_or_create(name=ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, defaults={'active': True})
-
         coupon_post_data = dict(self.data, voucher_type=voucher_type, quantity=quantity, max_uses=max_uses)
         coupon = self.get_response('POST', ENTERPRISE_COUPONS_LINK, coupon_post_data)
         coupon = coupon.json()
@@ -1533,8 +1437,6 @@ class EnterpriseCouponViewSetRbacTests(
     @ddt.unpack
     def test_codes_assignment_email_failure(self, voucher_type, quantity, max_uses, emails, assignments_per_code):
         """Test assigning codes to users."""
-        Switch.objects.update_or_create(name=ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, defaults={'active': True})
-
         coupon_post_data = dict(self.data, voucher_type=voucher_type, quantity=quantity, max_uses=max_uses)
         coupon = self.get_response('POST', ENTERPRISE_COUPONS_LINK, coupon_post_data)
         coupon = coupon.json()
@@ -1573,8 +1475,6 @@ class EnterpriseCouponViewSetRbacTests(
     @ddt.unpack
     def test_coupon_codes_revoke_success(self, voucher_type, quantity, max_uses, send_email):
         """Test revoking codes from users."""
-        Switch.objects.update_or_create(name=ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, defaults={'active': True})
-
         email = 'test1@example.com'
         coupon_post_data = dict(self.data, voucher_type=voucher_type, quantity=quantity, max_uses=max_uses)
         coupon = self.get_response('POST', ENTERPRISE_COUPONS_LINK, coupon_post_data)
@@ -1606,7 +1506,6 @@ class EnterpriseCouponViewSetRbacTests(
 
     def test_coupon_codes_revoke_invalid_request(self):
         """Test that revoke fails when the request format is incorrect."""
-        Switch.objects.update_or_create(name=ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, defaults={'active': True})
         email = 'test1@example.com'
         coupon_post_data = dict(self.data, voucher_type=Voucher.SINGLE_USE, quantity=1)
         coupon = self.get_response('POST', ENTERPRISE_COUPONS_LINK, coupon_post_data)
@@ -1624,7 +1523,6 @@ class EnterpriseCouponViewSetRbacTests(
 
     def test_coupon_codes_revoke_code_not_in_coupon(self):
         """Test that revoke fails when the specified code is not associated with the Coupon."""
-        Switch.objects.update_or_create(name=ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, defaults={'active': True})
         email = 'test1@example.com'
         coupon_post_data = dict(self.data, voucher_type=Voucher.SINGLE_USE, quantity=1)
         coupon = self.get_response('POST', ENTERPRISE_COUPONS_LINK, coupon_post_data)
@@ -1649,7 +1547,6 @@ class EnterpriseCouponViewSetRbacTests(
 
     def test_coupon_codes_revoke_no_assignment_exists(self):
         """Test that revoke fails when the user has no existing assignments for the code."""
-        Switch.objects.update_or_create(name=ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, defaults={'active': True})
         email = 'test1@example.com'
         coupon_post_data = dict(self.data, voucher_type=Voucher.SINGLE_USE, quantity=1)
         coupon = self.get_response('POST', ENTERPRISE_COUPONS_LINK, coupon_post_data)
@@ -1675,8 +1572,6 @@ class EnterpriseCouponViewSetRbacTests(
 
     def test_coupon_codes_revoke_email_failure(self):
         """Test revoking a code for a user with an email failure."""
-        Switch.objects.update_or_create(name=ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, defaults={'active': True})
-
         email = 'test1@example.com'
         coupon_post_data = dict(self.data, voucher_type=Voucher.SINGLE_USE, quantity=1)
         coupon = self.get_response('POST', ENTERPRISE_COUPONS_LINK, coupon_post_data)
@@ -1708,8 +1603,6 @@ class EnterpriseCouponViewSetRbacTests(
 
     def test_coupon_codes_revoke_bulk(self):
         """Test sending multiple revoke requests (bulk use case)."""
-        Switch.objects.update_or_create(name=ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, defaults={'active': True})
-
         emails = ['test1@example.com', 'test2@example.com']
         coupon_post_data = dict(self.data, voucher_type=Voucher.SINGLE_USE, quantity=2)
         coupon = self.get_response('POST', ENTERPRISE_COUPONS_LINK, coupon_post_data)
@@ -1756,8 +1649,6 @@ class EnterpriseCouponViewSetRbacTests(
     @ddt.unpack
     def test_coupon_codes_remind_success(self, voucher_type, quantity, max_uses):
         """Test sending reminder emails for codes."""
-        Switch.objects.update_or_create(name=ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, defaults={'active': True})
-
         email = 'test1@example.com'
         coupon_post_data = dict(self.data, voucher_type=voucher_type, quantity=quantity, max_uses=max_uses)
         coupon = self.get_response('POST', ENTERPRISE_COUPONS_LINK, coupon_post_data)
@@ -1784,7 +1675,6 @@ class EnterpriseCouponViewSetRbacTests(
 
     def test_coupon_codes_remind_code_not_in_coupon(self):
         """Test that remind fails when the specified code is not associated with the Coupon."""
-        Switch.objects.update_or_create(name=ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, defaults={'active': True})
         email = 'test1@example.com'
         coupon_post_data = dict(self.data, voucher_type=Voucher.SINGLE_USE, quantity=1)
         coupon = self.get_response('POST', ENTERPRISE_COUPONS_LINK, coupon_post_data)
@@ -1808,7 +1698,6 @@ class EnterpriseCouponViewSetRbacTests(
 
     def test_coupon_codes_remind_no_assignment_exists(self):
         """Test that remind fails when the user has no existing assignments for the code."""
-        Switch.objects.update_or_create(name=ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, defaults={'active': True})
         email = 'test1@example.com'
         coupon_post_data = dict(self.data, voucher_type=Voucher.SINGLE_USE, quantity=1)
         coupon = self.get_response('POST', ENTERPRISE_COUPONS_LINK, coupon_post_data)
@@ -1833,8 +1722,6 @@ class EnterpriseCouponViewSetRbacTests(
 
     def test_coupon_codes_remind_email_failure(self):
         """Test sending a reminder for a code with an email failure."""
-        Switch.objects.update_or_create(name=ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, defaults={'active': True})
-
         email = 'test1@example.com'
         coupon_post_data = dict(self.data, voucher_type=Voucher.SINGLE_USE, quantity=1)
         coupon = self.get_response('POST', ENTERPRISE_COUPONS_LINK, coupon_post_data)
@@ -1862,8 +1749,6 @@ class EnterpriseCouponViewSetRbacTests(
 
     def test_coupon_codes_remind_bulk(self):
         """Test sending multiple remind requests (bulk use case)."""
-        Switch.objects.update_or_create(name=ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, defaults={'active': True})
-
         emails = ['test1@example.com', 'test2@example.com']
         coupon_post_data = dict(self.data, voucher_type=Voucher.SINGLE_USE, quantity=2)
         coupon = self.get_response('POST', ENTERPRISE_COUPONS_LINK, coupon_post_data)
@@ -1900,8 +1785,6 @@ class EnterpriseCouponViewSetRbacTests(
 
     def test_coupon_codes_remind_all_not_redeemed(self):
         """Test sending multiple remind requests (remind all not redeemed assignments use case for)."""
-        Switch.objects.update_or_create(name=ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, defaults={'active': True})
-
         emails = ['test1@example.com', 'test2@example.com']
         coupon_post_data = dict(self.data, voucher_type=Voucher.MULTI_USE, quantity=2, max_uses=3)
         coupon = self.get_response('POST', ENTERPRISE_COUPONS_LINK, coupon_post_data)
@@ -1929,8 +1812,6 @@ class EnterpriseCouponViewSetRbacTests(
 
     def test_coupon_codes_remind_all_partial_redeemed(self):
         """Test sending multiple remind requests (remind all partial redeemed assignments use case)."""
-        Switch.objects.update_or_create(name=ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, defaults={'active': True})
-
         emails = ['test1@example.com', 'test2@example.com']
         coupon_post_data = dict(self.data, voucher_type=Voucher.MULTI_USE, quantity=2, max_uses=3)
         coupon = self.get_response('POST', ENTERPRISE_COUPONS_LINK, coupon_post_data)
@@ -1963,7 +1844,6 @@ class EnterpriseCouponViewSetRbacTests(
 
     def test_coupon_codes_remind_all_with_no_code_filter(self):
         """Test sending multiple remind requests (remind all use case with no code filter supplied)."""
-        Switch.objects.update_or_create(name=ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, defaults={'active': True})
         coupon_post_data = dict(self.data, voucher_type=Voucher.SINGLE_USE, quantity=1, max_uses=None)
         coupon = self.get_response('POST', ENTERPRISE_COUPONS_LINK, coupon_post_data)
         coupon = coupon.json()
@@ -1980,7 +1860,6 @@ class EnterpriseCouponViewSetRbacTests(
 
     def test_coupon_codes_remind_all_with_invalid_code_filter(self):
         """Test sending multiple remind requests (remind all use case with invalid code filter supplied)."""
-        Switch.objects.update_or_create(name=ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, defaults={'active': True})
         coupon_post_data = dict(self.data, voucher_type=Voucher.SINGLE_USE, quantity=1, max_uses=None)
         coupon = self.get_response('POST', ENTERPRISE_COUPONS_LINK, coupon_post_data)
         coupon = coupon.json()

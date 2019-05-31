@@ -2,7 +2,6 @@ from __future__ import unicode_literals
 
 import logging
 
-import waffle
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
@@ -18,7 +17,6 @@ from ecommerce.core.constants import COUPON_PRODUCT_CLASS_NAME
 from ecommerce.core.models import BusinessClient
 from ecommerce.core.utils import log_message_and_raise_validation_error
 from ecommerce.coupons.utils import prepare_course_seat_types
-from ecommerce.enterprise.constants import ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH
 from ecommerce.extensions.api import data as data_api
 from ecommerce.extensions.api.filters import ProductFilter
 from ecommerce.extensions.api.serializers import CategorySerializer, CouponListSerializer, CouponSerializer
@@ -61,14 +59,11 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
             product_class__name=COUPON_PRODUCT_CLASS_NAME,
             stockrecords__partner=self.request.site.siteconfiguration.partner
         )
-        # If we have switched to using enterprise offers, ensure that enterprise coupons do not show up
-        # in the regular coupon list view
-        if waffle.switch_is_active(ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH):
-            return product_filter.exclude(
-                attributes__code='enterprise_customer_uuid',
-            )
-
-        return product_filter
+        # Now that we have switched completely to using enterprise offers, ensure that enterprise coupons do not show up
+        # in the regular coupon list view.
+        return product_filter.exclude(
+            attributes__code='enterprise_customer_uuid',
+        )
 
     def get_serializer_class(self):
         if self.action == 'list':
@@ -99,7 +94,7 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
         try:
             with transaction.atomic():
                 try:
-                    self.validate_access_for_enterprise_switch(request.data)
+                    self.validate_access_for_enterprise(request.data)
                     cleaned_voucher_data = self.clean_voucher_request_data(
                         request.data, request.site.siteconfiguration.partner
                     )
@@ -165,10 +160,9 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
             site=self.request.site
         )
 
-    def validate_access_for_enterprise_switch(self, request_data):
+    def validate_access_for_enterprise(self, request_data):
         enterprise_customer_data = request_data.get('enterprise_customer')
-        if (enterprise_customer_data and enterprise_customer_data.get('id') and
-                waffle.switch_is_active(ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH)):
+        if enterprise_customer_data and enterprise_customer_data.get('id'):
             raise ValidationError('Enterprise coupons can no longer be created or updated from this endpoint.')
 
     @classmethod
