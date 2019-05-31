@@ -49,14 +49,13 @@ djangorestframework-csv==2.1.0
 djangorestframework-datatables==0.5.0
 djangorestframework-jwt==1.11.0
 djangorestframework==3.9.4
-drf-extensions==0.3.1
+drf-extensions==0.5.0
 edx-auth-backends==2.0.1
 edx-django-release-util==0.3.1
 edx-django-sites-extensions==2.4.0
 edx-django-utils==1.0.3
 edx-drf-extensions==2.3.0
 edx-ecommerce-worker==0.7.2
-edx-opaque-keys==1.0.0
 edx-opaque-keys==1.0.0
 edx-rbac==1.0.1
 edx-rest-api-client==1.9.2

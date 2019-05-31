@@ -23,7 +23,7 @@ djangorestframework
 djangorestframework-csv
 djangorestframework-datatables
 djangorestframework-jwt
-drf-extensions==0.3.1
+drf-extensions
 edx-auth-backends
 edx-django-release-util
 edx-django-utils
