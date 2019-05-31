@@ -2,6 +2,7 @@ from __future__ import unicode_literals
 
 import logging
 
+import waffle
 from django.core.exceptions import ValidationError
 from django.shortcuts import get_object_or_404
 from edx_rbac.decorators import permission_required
@@ -13,6 +14,7 @@ from rest_framework.response import Response
 
 from ecommerce.core.constants import COUPON_PRODUCT_CLASS_NAME
 from ecommerce.core.utils import log_message_and_raise_validation_error
+from ecommerce.enterprise.constants import ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH
 from ecommerce.enterprise.utils import get_enterprise_customers
 from ecommerce.extensions.api.pagination import DatatablesDefaultPagination
 from ecommerce.extensions.api.serializers import (
@@ -89,9 +91,9 @@ class EnterpriseCouponViewSet(CouponViewSet):
             return EnterpriseCouponOverviewListSerializer
         return CouponSerializer
 
-    def validate_access_for_enterprise(self, request_data):
-        # Bypass old-style coupons in enterprise veiw.
-        pass
+    def validate_access_for_enterprise_switch(self, request_data):
+        if not waffle.switch_is_active(ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH):
+            raise ValidationError('This endpoint will be available once the enterprise offers switch is on.')
 
     @staticmethod
     def send_codes_availability_email(site, email_address, enterprise_id, coupon_id):
@@ -130,6 +132,15 @@ class EnterpriseCouponViewSet(CouponViewSet):
             cleaned_voucher_data['enterprise_customer']
         )
         return coupon_product
+
+    def update(self, request, *args, **kwargs):
+        """Update coupon depending on request data sent."""
+        try:
+            self.validate_access_for_enterprise_switch(request.data)
+        except ValidationError as error:
+            logger.exception(error.message)
+            raise serializers.ValidationError(error.message)
+        return super(EnterpriseCouponViewSet, self).update(request, *args, **kwargs)
 
     def update_range_data(self, request_data, vouchers):
         # Since enterprise coupons do not have ranges, we bypass the range update logic entirely.
