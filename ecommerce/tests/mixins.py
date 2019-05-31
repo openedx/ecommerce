@@ -22,7 +22,7 @@ from oscar.test.utils import RequestFactory
 from social_django.models import UserSocialAuth
 from threadlocals.threadlocals import set_thread_variable
 
-from ecommerce.core.constants import ALL_ACCESS_CONTEXT, SYSTEM_ENTERPRISE_ADMIN_ROLE, SYSTEM_ENTERPRISE_OPERATOR_ROLE
+from ecommerce.core.constants import SYSTEM_ENTERPRISE_ADMIN_ROLE
 from ecommerce.core.url_utils import get_lms_url
 from ecommerce.courses.models import Course
 from ecommerce.courses.utils import mode_for_product
@@ -153,7 +153,6 @@ class BasketCreationMixin(UserMixin, JwtMixin):
             stockrecords__partner_sku=self.FREE_SKU,
             stockrecords__price_excl_tax=Decimal('0.00'),
         )
-        self.set_jwt_cookie(SYSTEM_ENTERPRISE_OPERATOR_ROLE, ALL_ACCESS_CONTEXT)
 
     def create_basket(self, skus=None, checkout=None, payment_processor_name=None, auth=True, token=None):
         """Issue a POST request to the basket creation endpoint."""

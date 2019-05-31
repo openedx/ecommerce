@@ -13,7 +13,6 @@ import mock
 from django.contrib.auth import get_user_model
 from django.test import override_settings
 from django.urls import reverse
-from edx_rest_framework_extensions.auth.jwt.cookies import jwt_cookie_name
 from oscar.core.loading import get_model
 from oscar.test import factories
 from oscar.test.factories import BasketFactory
@@ -233,9 +232,6 @@ class BasketCreateViewTests(BasketCreationMixin, ThrottlingMixin, TransactionTes
 
     def test_jwt_authentication(self):
         """Test that requests made without a valid JWT fail."""
-        # Remove jwt cookie
-        self.client.cookies[jwt_cookie_name()] = {}
-
         # Verify that the basket creation endpoint requires JWT authentication
         response = self.create_basket(skus=[self.PAID_SKU], auth=False)
         self.assertEqual(response.status_code, 401)

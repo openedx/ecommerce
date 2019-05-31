@@ -27,11 +27,11 @@ drf-extensions==0.3.1
 edx-auth-backends
 edx-django-release-util
 edx-django-utils
-edx-drf-extensions
+edx-drf-extensions==2.2.0
 edx-django-sites-extensions
 edx-ecommerce-worker
 edx-opaque-keys
-edx-rbac
+edx-rbac==0.2.0
 edx-rest-api-client
 gevent==1.0.2
 jsonfield==1.0.3
