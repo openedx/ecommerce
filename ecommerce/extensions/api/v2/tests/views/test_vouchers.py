@@ -17,9 +17,11 @@ from requests.exceptions import ConnectionError, Timeout
 from rest_framework import status
 from rest_framework.test import APIRequestFactory
 from slumber.exceptions import SlumberBaseException
+from waffle.models import Switch
 
 from ecommerce.coupons.tests.mixins import CouponMixin, DiscoveryMockMixin
 from ecommerce.courses.tests.factories import CourseFactory
+from ecommerce.enterprise.constants import ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH
 from ecommerce.extensions.api import serializers
 from ecommerce.extensions.api.v2.views.vouchers import VoucherViewSet
 from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
@@ -465,6 +467,7 @@ class VoucherViewOffersEndpointTests(DiscoveryMockMixin, CouponMixin, DiscoveryT
 
     def test_get_offers_for_enterprise_catalog_voucher(self):
         """ Verify that the course offers data is returned for an enterprise catalog voucher. """
+        Switch.objects.update_or_create(name=ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, defaults={'active': False})
         self.mock_access_token_response()
         course, seat = self.create_course_and_seat()
         enterprise_catalog_id = str(uuid4())
@@ -502,8 +505,9 @@ class VoucherViewOffersEndpointTests(DiscoveryMockMixin, CouponMixin, DiscoveryT
             'voucher_end_date': voucher.end_datetime,
         })
 
-    def test_get_offers_for_enterprise_offer(self):
+    def test_get_offers_for_enterprise_offer_switch_on(self):
         """ Verify that the course offers data is returned for an enterprise catalog voucher. """
+        Switch.objects.update_or_create(name=ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, defaults={'active': True})
         self.mock_access_token_response()
         course, seat = self.create_course_and_seat()
         enterprise_customer_id = str(uuid4())
@@ -539,8 +543,9 @@ class VoucherViewOffersEndpointTests(DiscoveryMockMixin, CouponMixin, DiscoveryT
             'voucher_end_date': voucher.end_datetime,
         })
 
-    def test_get_offers_for_enterprise_offer_no_catalog(self):
+    def test_get_offers_for_enterprise_offer_switch_on_no_catalog(self):
         """ Verify that the course offers data is returned for an enterprise catalog voucher. """
+        Switch.objects.update_or_create(name=ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, defaults={'active': True})
         self.mock_access_token_response()
         enterprise_customer_id = str(uuid4())
         voucher = prepare_enterprise_voucher(
