@@ -12,10 +12,8 @@ from oscar.core.loading import get_model
 from oscar.test import factories
 from requests.exceptions import ConnectionError, Timeout
 from slumber.exceptions import SlumberBaseException
-from waffle.models import Switch
 
 from ecommerce.coupons.tests.mixins import CouponMixin, DiscoveryMockMixin
-from ecommerce.enterprise.constants import ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH
 from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
 from ecommerce.tests.testcases import TestCase
 
@@ -376,28 +374,8 @@ class ConditionalOfferTests(DiscoveryTestMixin, DiscoveryMockMixin, TestCase):
         basket = self.create_basket(email='test@invalid.domain')
         self.assertFalse(self.offer.is_condition_satisfied(basket))
 
-    def test_condition_satisfied_for_enterprise_switch_off(self):
-        """Verify a condition is satisfied."""
-        Switch.objects.update_or_create(name=ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, defaults={'active': False})
-        valid_user_email = 'valid@{domain}'.format(domain=self.valid_sub_domain)
-        basket = factories.BasketFactory(site=self.site, owner=factories.UserFactory(email=valid_user_email))
-
-        _range = factories.RangeFactory(
-            products=[self.product, ],
-            course_seat_types='verified',
-            enterprise_customer=str(uuid4()).decode('utf-8'),
-            catalog_query='*:*'
-        )
-        benefit = factories.BenefitFactory(range=_range)
-        offer = factories.ConditionalOfferFactory(benefit=benefit)
-
-        with patch.object(benefit, 'get_applicable_lines', return_value=[1]):
-            basket.add_product(self.product)
-            self.assertTrue(offer.is_condition_satisfied(basket))
-
-    def test_condition_not_satisfied_for_enterprise_switch_on(self):
+    def test_condition_not_satisfied_for_enterprise(self):
         """Verify a condition is not satisfied."""
-        Switch.objects.update_or_create(name=ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, defaults={'active': True})
         valid_user_email = 'valid@{domain}'.format(domain=self.valid_sub_domain)
         basket = factories.BasketFactory(site=self.site, owner=factories.UserFactory(email=valid_user_email))
 
