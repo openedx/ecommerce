@@ -18,12 +18,10 @@ from oscar.core.loading import get_model
 from oscar.test import factories
 from rest_framework import status
 from testfixtures import LogCapture
-from waffle.models import Switch
 
 from ecommerce.coupons.tests.mixins import CouponMixin, DiscoveryMockMixin
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.enterprise.conditions import AssignableEnterpriseCustomerCondition
-from ecommerce.enterprise.constants import ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH
 from ecommerce.extensions.api.v2.views.coupons import DEPRECATED_COUPON_CATEGORIES, CouponViewSet, ValidationError
 from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
 from ecommerce.extensions.voucher.models import CouponVouchers
@@ -49,6 +47,7 @@ StockRecord = get_model('partner', 'StockRecord')
 Voucher = get_model('voucher', 'Voucher')
 
 COUPONS_LINK = reverse('api:v2:coupons-list')
+ENTERPRISE_COUPONS_LINK = reverse('api:v2:enterprise-coupons-list')
 
 
 @httpretty.activate
@@ -434,14 +433,15 @@ class CouponViewSetFunctionalTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             self.assertEqual(offer.email_domains, '')
         self.assertEqual(len(offers.keys()), 5)
 
-    def _create_enterprise_coupon(self, enterprise_customer_id, enterprise_catalog_id, enterprise_name):
+    def _create_enterprise_coupon(
+            self, enterprise_customer_id, enterprise_catalog_id, enterprise_name, post_url=COUPONS_LINK):
         self.data.update({
             'title': 'Test Create Enterprise Coupon',
             'enterprise_customer': {'name': enterprise_name, 'id': enterprise_customer_id},
             'enterprise_customer_catalog': enterprise_catalog_id,
         })
 
-        return self.get_response('POST', COUPONS_LINK, self.data)
+        return self.get_response('POST', post_url, self.data)
 
     def _check_enterprise_fields(
             self,
@@ -465,121 +465,26 @@ class CouponViewSetFunctionalTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
         self.assertEqual(invoice.business_client.name, enterprise_name)
 
     def test_list_coupons_with_enterprise_data(self):
-        """The list endpoint should filter enterprise coupons depending on the enterprise offers switch."""
-        Switch.objects.update_or_create(name=ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, defaults={'active': False})
-        original_title = self.data['title']
-        original_client = self.data['client']
-        self._create_enterprise_coupon(
-            str(uuid4()).decode('utf-8'),
-            str(uuid4()).decode('utf-8'),
-            'test enterprise'
-        )
-        self.assertEqual(Product.objects.filter(product_class__name='Coupon').count(), 2)
-
-        # With the switch off, both coupons should get returned
-        response = self.client.get(COUPONS_LINK)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        coupon_data = json.loads(response.content)['results']
-        self.assertEqual(len(coupon_data), 2)
-        self.assertEqual(coupon_data[0]['title'], 'Test Create Enterprise Coupon')
-        self.assertEqual(coupon_data[0]['client'], 'test enterprise')
-        self.assertEqual(coupon_data[1]['title'], original_title)
-        self.assertEqual(coupon_data[1]['client'], original_client)
-
-        # Now with the switch on, see that the enterprise coupon gets filtered out
-        Switch.objects.update_or_create(name=ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, defaults={'active': True})
+        """Test list endpoint filters out enterprise coupons."""
+        # Verify that the enterprise coupon gets filtered out
         response = self.client.get(COUPONS_LINK)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         coupon_data = json.loads(response.content)['results']
         self.assertEqual(len(coupon_data), 1)
-        self.assertEqual(coupon_data[0]['title'], original_title)
+        self.assertEqual(coupon_data[0]['title'], self.data['title'])
 
-    def test_create_enterprise_offers_switch_off(self):
-        """Test creating an enterprise coupon with the enterprise offers switch off."""
-        Switch.objects.update_or_create(name=ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, defaults={'active': False})
-        enterprise_customer_id = str(uuid4()).decode('utf-8')
-        enterprise_catalog_id = str(uuid4()).decode('utf-8')
-        enterprise_name = 'test enterprise'
-        response_data = self._create_enterprise_coupon(enterprise_customer_id, enterprise_catalog_id, enterprise_name)
-        self.assertEqual(response_data.status_code, status.HTTP_200_OK)
-        coupon = Product.objects.get(title=self.data['title'])
-        # Check that each voucher has two conditional offers with enterprise data
-        self._check_enterprise_fields(coupon, enterprise_customer_id, enterprise_catalog_id, enterprise_name)
-
-    def test_update_enterprise_offers_switch_off(self):
-        """Test updating a coupon to add enterprise data with the enterprise offers switch off."""
-        Switch.objects.update_or_create(name=ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, defaults={'active': False})
-        enterprise_customer_id = str(uuid4()).decode('utf-8')
-        enterprise_catalog_id = str(uuid4()).decode('utf-8')
-        enterprise_name = 'test enterprise'
-        response_data = self.get_response_json(
-            'PUT',
-            reverse('api:v2:coupons-detail', kwargs={'pk': self.coupon.id}),
-            data={
-                'catalog_query': 'key:*',
-                'course_catalog': None,
-                'course_seat_types': ['verified'],
-                'enterprise_customer': {'name': enterprise_name, 'id': enterprise_customer_id},
-                'enterprise_customer_catalog': enterprise_catalog_id,
-            }
-        )
-        self.assertEqual(response_data['id'], self.coupon.id)
-        self.assertEqual(response_data['enterprise_customer'], enterprise_customer_id)
-        new_coupon = Product.objects.get(id=self.coupon.id)
-        self.assertEqual(new_coupon.attr.enterprise_customer_uuid, enterprise_customer_id)
-        self._check_enterprise_fields(new_coupon, enterprise_customer_id, enterprise_catalog_id, enterprise_name)
-
-    def test_update_enterprise_offers_switch_off_duplicate_condition(self):
-        """Test updating a coupon with enterprise data when a duplicate condition exists."""
-        Switch.objects.update_or_create(name=ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, defaults={'active': False})
-        enterprise_customer_id = str(uuid4()).decode('utf-8')
-        enterprise_catalog_id = str(uuid4()).decode('utf-8')
-        enterprise_name = 'test enterprise'
-        response_data = self._create_enterprise_coupon(enterprise_customer_id, enterprise_catalog_id, enterprise_name)
-        self.assertEqual(response_data.status_code, status.HTTP_200_OK)
-
-        # Create duplicate Condition
-        coupon = Product.objects.get(title=self.data['title'])
-        voucher = coupon.attr.coupon_vouchers.vouchers.first()
-        condition = voucher.enterprise_offer.condition
-        Condition.objects.create(
-            proxy_class=condition.proxy_class,
-            enterprise_customer_uuid=condition.enterprise_customer_uuid,
-            enterprise_customer_name=condition.enterprise_customer_name,
-            enterprise_customer_catalog_uuid=condition.enterprise_customer_catalog_uuid,
-            type=condition.type,
-            value=condition.value,
-        )
-
-        response_data = self.get_response_json(
-            'PUT',
-            reverse('api:v2:coupons-detail', kwargs={'pk': self.coupon.id}),
-            data={
-                'catalog_query': 'key:*',
-                'course_catalog': None,
-                'course_seat_types': ['verified'],
-                'enterprise_customer': {'name': enterprise_name, 'id': enterprise_customer_id},
-                'enterprise_customer_catalog': enterprise_catalog_id,
-            }
-        )
-        self.assertEqual(response_data['id'], self.coupon.id)
-        self.assertEqual(response_data['enterprise_customer'], enterprise_customer_id)
-        new_coupon = Product.objects.get(id=self.coupon.id)
-        self.assertEqual(new_coupon.attr.enterprise_customer_uuid, enterprise_customer_id)
-        self._check_enterprise_fields(new_coupon, enterprise_customer_id, enterprise_catalog_id, enterprise_name)
-
-    def test_create_enterprise_offers_switch_on(self):
-        """Test creating an enterprise coupon with the enterprise offers switch on."""
-        Switch.objects.update_or_create(name=ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, defaults={'active': True})
+    def test_create_enterprise_offers(self):
+        """Test creating an enterprise coupon with the enterprise offers."""
         enterprise_customer_id = str(uuid4()).decode('utf-8')
         enterprise_catalog_id = str(uuid4()).decode('utf-8')
         enterprise_name = 'test enterprise'
         response = self._create_enterprise_coupon(enterprise_customer_id, enterprise_catalog_id, enterprise_name)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        content = json.loads(response.content)
+        self.assertEqual(content, 'Enterprise coupons can no longer be created or updated from this endpoint.')
 
-    def test_update_enterprise_offers_regular_coupon_switch_on(self):
-        """Test updating a coupon to add enterprise data with the enterprise offers switch on."""
-        Switch.objects.update_or_create(name=ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, defaults={'active': True})
+    def test_update_enterprise_offers_regular_coupon(self):
+        """Test updating a coupon to add enterprise data with the enterprise offers."""
         enterprise_customer_id = str(uuid4()).decode('utf-8')
         enterprise_catalog_id = str(uuid4()).decode('utf-8')
         self.get_response(
@@ -594,16 +499,16 @@ class CouponViewSetFunctionalTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
         self.assertEqual(new_coupon.attr.enterprise_customer_uuid, enterprise_customer_id)
         self._check_enterprise_fields(new_coupon, enterprise_customer_id, enterprise_catalog_id, 'test enterprise')
 
-    def test_update_enterprise_offers_enterprise_coupon_switch_on(self):
-        """Test updating an enterprise coupon with the enterprise offers switch on."""
-        Switch.objects.update_or_create(name=ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, defaults={'active': False})
+    def test_update_enterprise_offers_enterprise_coupon(self):
+        """Test updating an enterprise coupon with the enterprise offers."""
         enterprise_customer_id = str(uuid4()).decode('utf-8')
         enterprise_catalog_id = str(uuid4()).decode('utf-8')
         enterprise_name = 'test enterprise'
-        self._create_enterprise_coupon(enterprise_customer_id, enterprise_catalog_id, enterprise_name)
+        self._create_enterprise_coupon(
+            enterprise_customer_id, enterprise_catalog_id, enterprise_name, ENTERPRISE_COUPONS_LINK
+        )
         coupon = Product.objects.get(title=self.data['title'])
 
-        Switch.objects.update_or_create(name=ENTERPRISE_OFFERS_FOR_COUPONS_SWITCH, defaults={'active': True})
         response = self.get_response(
             'PUT',
             reverse('api:v2:coupons-detail', kwargs={'pk': coupon.id}),
