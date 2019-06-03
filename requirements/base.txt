@@ -19,7 +19,7 @@ cffi==1.12.3              # via cryptography
 chardet==3.0.4            # via requests
 coreapi==2.3.3
 coreschema==0.0.4         # via coreapi
-cryptography==2.6.1       # via pyopenssl
+cryptography==2.7         # via pyopenssl
 cssselect==1.0.3          # via premailer
 cssutils==1.0.2           # via premailer
 defusedxml==0.6.0         # via zeep
@@ -43,7 +43,7 @@ django-threadlocals==0.10
 django-treebeard==4.3     # via django-oscar
 django-waffle==0.14.0
 django-widget-tweaks==1.4.3  # via django-oscar
-django==1.11.20
+django==1.11.21
 django_extensions==1.9.9
 djangorestframework-csv==2.1.0
 djangorestframework-datatables==0.5.0
@@ -56,7 +56,6 @@ edx-django-sites-extensions==2.4.0
 edx-django-utils==1.0.3
 edx-drf-extensions==2.3.0
 edx-ecommerce-worker==0.7.2
-edx-opaque-keys==1.0.0
 edx-opaque-keys==1.0.0
 edx-rbac==1.0.1
 edx-rest-api-client==1.9.2
@@ -86,7 +85,7 @@ openapi-codec==1.3.2      # via django-rest-swagger
 path.py==7.2
 paypalrestsdk==1.13.1
 pbr==5.2.1                # via mock, stevedore
-phonenumberslite==8.10.12  # via django-phonenumber-field
+phonenumberslite==8.10.13  # via django-phonenumber-field
 pillow==6.0.0             # via django-oscar
 premailer==2.9.2
 psutil==1.2.1             # via edx-django-utils, edx-drf-extensions
