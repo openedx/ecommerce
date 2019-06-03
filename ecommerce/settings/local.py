@@ -153,6 +153,8 @@ ENABLE_AUTO_AUTH = True
 SAILTHRU_KEY = 'abc123'
 SAILTHRU_SECRET = 'top_secret'
 
+REST_FRAMEWORK['DEFAULT_RENDERER_CLASSES'] = REST_FRAMEWORK['DEFAULT_RENDERER_CLASSES'] + ('rest_framework.renderers.BrowsableAPIRenderer',)
+
 #####################################################################
 # Lastly, see if the developer has any local overrides.
 if os.path.isfile(join(dirname(abspath(__file__)), 'private.py')):
