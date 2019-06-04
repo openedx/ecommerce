@@ -62,6 +62,7 @@ urlpatterns = AUTH_URLS + WELL_KNOWN_URLS + [
     url(r'^i18n/', include('django.conf.urls.i18n')),
     url(r'^jsi18n/$', JavaScriptCatalog.as_view(packages=['courses']), name='javascript-catalog'),
     url(r'^management/', include('ecommerce.management.urls', namespace='management')),
+    url(r'^payment-bff/', include('ecommerce.payment_bff.urls', namespace='payment_bff')),
     url(r'^programs/', include('ecommerce.programs.urls', namespace='programs')),
     url(r'^enterprise/', include('ecommerce.enterprise.urls', namespace='enterprise')),
     url(r'^journals/', include('ecommerce.journals.urls', namespace='journals')),  # TODO: journals dependency
