@@ -1,9 +1,9 @@
 from django.test.client import RequestFactory
+from social_django.models import UserSocialAuth
 
 from ecommerce.core.models import User
 from ecommerce.extensions.analytics import middleware
 from ecommerce.tests.testcases import TestCase
-from social_django.models import UserSocialAuth
 
 
 class TrackingMiddlewareTests(TestCase):
