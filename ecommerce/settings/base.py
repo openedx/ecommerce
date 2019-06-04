@@ -543,8 +543,10 @@ CELERY_IMPORTS = (
     'ecommerce_worker.fulfillment.v1.tasks',
 )
 
+DEFAULT_PRIORITY_QUEUE = 'ecommerce.default'
 CELERY_DEFAULT_EXCHANGE = 'ecommerce'
 CELERY_DEFAULT_ROUTING_KEY = 'ecommerce'
+CELERY_DEFAULT_QUEUE = DEFAULT_PRIORITY_QUEUE
 CELERY_ROUTES = {
     'ecommerce_worker.fulfillment.v1.tasks.fulfill_order': {'queue': 'ecommerce.fulfillment'},
     'ecommerce_worker.sailthru.v1.tasks.update_course_enrollment': {'queue': 'ecommerce.email_marketing'},
