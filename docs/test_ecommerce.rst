@@ -68,6 +68,16 @@ When you create E-Commerce tests, use the ``TestCase`` class in
 ``Partner`` objects configured. This will help you test any code that relies on
 these models, which are used for multi-tenancy.
 
+* To run a test really fast, use pytest.
+
+  .. code-block:: bash
+
+      $ pytest path/to/file.py::TestSuiteClass::test_name
+
+  * Note: You must update requirements and migrations before running with pytest.
+
+  * Some tests involving the database may be flaky.  If this doesn't work, use the ``manage.py`` method below.
+
 * To run all Python unit tests and quality checks, run the following command.
 
   .. code-block:: bash
@@ -91,7 +101,9 @@ these models, which are used for multi-tenancy.
       ecommerce.courses.tests.test_utils --settings=ecommerce.settings.test
       --with-ignore-docstrings --logging-level=DEBUG
 
-  Setting the DISABLE_MIGRATIONS variable significantly decreases the time
+  Note: ``DISABLE_MIGRATIONS`` is broken as of June 2019.
+
+  Setting the ``DISABLE_MIGRATIONS`` variable significantly decreases the time
   needed to run tests by creating the test database directly from Django model
   definitions as opposed to applying the defined migrations.
 
@@ -107,12 +119,7 @@ the database::
 
     import nose.tools as nosepdb; nosepdb.set_trace()
 
-* To run tests without creating a database (i.e. really fast), use pytest.
-  If a test has a database dependency, the test will not pass.
 
-  .. code-block:: bash
-
-      $ pytest path_to_test
 
 JavaScript Unit Tests
 **********************
