@@ -76,7 +76,6 @@ class UtilsTest(DiscoveryTestMixin, BasketMixin, TransactionTestCase):
         expected = ('test-user-id', None, None)
         with mock.patch(
             'ecommerce.core.models.User.lms_user_id_from_request',
-            new_callable=mock.PropertyMock,
             return_value='test-user-id'
         ):
             self.assertEqual(parse_tracking_context(user), expected)
