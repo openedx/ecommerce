@@ -1,6 +1,9 @@
 -r test.in
 -r docs.in
 
+# Perform code annotation checking, such as for PII annotations
+code-annotations
+
 django-debug-toolbar==1.7
 
 # i18n
