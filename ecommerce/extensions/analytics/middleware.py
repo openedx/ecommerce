@@ -1,5 +1,5 @@
 """
-Middleware for analytics app to parse Google Analytics (GA) cookie and the lms_user_id.
+Middleware for analytics app to parse the Google Analytics (GA) cookie and the lms_user_id.
 """
 import logging
 from ecommerce.extensions.analytics.utils import get_google_analytics_client_id
@@ -9,8 +9,10 @@ logger = logging.getLogger(__name__)
 
 class TrackingMiddleware(object):
     """
-    Middleware that parse `_ga` cookie for the user tracking context to obtain the GA client id, extracts the
-    lms_user_id, and updates the user if necessary.
+    Middleware that:
+    1) parses the `_ga` cookie to find the GA client id and adds this to the user's tracking_context
+    2) extracts the lms_user_id
+    and updates the user if necessary.
     """
 
     def process_request(self, request):
