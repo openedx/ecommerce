@@ -18,6 +18,7 @@ from oscar.apps.basket.views import VoucherRemoveView as BaseVoucherRemoveView
 from oscar.apps.basket.views import *  # pylint: disable=wildcard-import, unused-wildcard-import
 from oscar.core.prices import Price
 from requests.exceptions import ConnectionError, Timeout
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from slumber.exceptions import SlumberBaseException
@@ -451,7 +452,7 @@ class BasketSummaryView(BasketLogicMixin, BasketView):
             return super(BasketSummaryView, self).get(request, *args, **kwargs)
 
 
-class WIPBasketApiView(BasketLogicMixin, APIView):
+class PaymentApiView(BasketLogicMixin, APIView):
     """
     Api for retrieving basket contents and checkout/payment options.
 
@@ -460,6 +461,8 @@ class WIPBasketApiView(BasketLogicMixin, APIView):
     GET:
     Retrieves basket contents and checkout/payment options.
     """
+    permission_classes = (IsAuthenticated,)
+
     def _get_order_total(self, context):
         """
         Add the order total to the context in preparation for the get_basket_context_data call.
@@ -473,21 +476,45 @@ class WIPBasketApiView(BasketLogicMixin, APIView):
         context['order_total'] = OrderTotalCalculator().calculate(self.request.basket, shipping_charge)
         return context
 
-    def _get_serialized_price(self, price):
+    def _get_serialized_basket(self, context):
         """
-        Serializes a Price object.
+        Serializes the basket.
 
         Args:
-           price (Price)
+            context (dict): pre-calculated context data
 
         """
-        # TODO: Consider using serializers with DRF for Price
-        # - django-oscar-api has serializer for Price
-        # - from oscarapi.serializers.fields import TaxIncludedDecimalField
         return {
-            'currency': price.currency,
-            'excl_tax': price.excl_tax,
-            'incl_tax': price.incl_tax,
+            'line_total': context['order_total'].excl_tax + 12,
+            'line_discount': 12,
+            'order_total': context['order_total'].excl_tax,
+            'products': [
+                # NOTE: Will add additional level for program and include bundle_id for bundles
+                {
+                    'name': 'Introduction to Happiness',
+                    'seat_type': 'verified-certificate',
+                    'img_url': 'https://prod-discovery.edx-cdn.org/media/course/image/21be6203.small.jpg',
+                },
+            ],
+            'show_voucher_form': True,
+            'voucher': {
+                'code': 'SUMMER20',
+                "benefit": {
+                    "type": "Percentage",
+                    "value": 20
+                },
+            },
+            'payment_providers': [
+                {
+                    'type': 'cybersource',
+                    # I think we will need something else here, but not sure.
+                    # Otherwise, this could just be an enabled/disabled flag.
+                },
+                {
+                    'type': 'paypal',
+                }
+            ],
+            'sdn_check': True,
         }
 
     def get(self, request):  # pylint: disable=unused-argument
@@ -498,9 +525,7 @@ class WIPBasketApiView(BasketLogicMixin, APIView):
         # TODO: ARCH-867: Remove unnecessary processing of anything added to context (e.g. payment_processors) that
         # isn't ultimately passed on to the response.
 
-        response = {}
-        response['order_total'] = self._get_serialized_price(context['order_total'])
-
+        response = self._get_serialized_basket(context)
         return Response(response)
 
 

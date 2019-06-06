@@ -318,15 +318,15 @@ class BasketLogicTestMixin(object):
 
 
 @httpretty.activate
-class WIPBasketApiViewTests(BasketLogicTestMixin, TestCase):
-    """ WIPBasketApiViewTests basket api tests. """
-    path = reverse('api:v2:baskets:baskets')
+class PaymentApiViewTests(BasketLogicTestMixin, TestCase):
+    """ PaymentApiViewTests basket api tests. """
+    path = reverse('payment_bff:v0:payment')
 
     def setUp(self):
-        super(WIPBasketApiViewTests, self).setUp()
+        super(PaymentApiViewTests, self).setUp()
         self.user = self.create_user()
         self.client.login(username=self.user.username, password=self.password)
-        self.course = CourseFactory(name='WIPBasketApiViewTests', partner=self.partner)
+        self.course = CourseFactory(name='PaymentApiViewTests', partner=self.partner)
 
     def test_response_success(self):
         """ Verify a successful response is returned. """
@@ -340,11 +340,33 @@ class WIPBasketApiViewTests(BasketLogicTestMixin, TestCase):
         self.assertEqual(response.status_code, 200)
 
         expected_response = {
-            'order_total': {
-                'excl_tax': 500.0,
-                'currency': 'USD',
-                'incl_tax': None
-            }
+            'line_total': 512,
+            'line_discount': 12,
+            'order_total': 500,
+            'products': [
+                {
+                    'name': 'Introduction to Happiness',
+                    'seat_type': 'verified-certificate',
+                    'img_url': 'https://prod-discovery.edx-cdn.org/media/course/image/21be6203.small.jpg',
+                },
+            ],
+            'show_voucher_form': True,
+            'voucher': {
+                'code': 'SUMMER20',
+                "benefit": {
+                    "type": "Percentage",
+                    "value": 20
+                },
+            },
+            'payment_providers': [
+                {
+                    'type': 'cybersource',
+                },
+                {
+                    'type': 'paypal',
+                }
+            ],
+            'sdn_check': True,
         }
         self.assertDictEqual(response.json(), expected_response)
 
