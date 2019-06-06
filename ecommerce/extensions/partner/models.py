@@ -15,6 +15,8 @@ class Partner(AbstractPartner):
                                           help_text='DEPRECATED: Use SiteConfiguration!')
     default_site = models.OneToOneField('sites.Site', null=True, blank=True, on_delete=models.PROTECT)
 
+    history = HistoricalRecords(excluded_fields=['code'])
+
     class Meta(object):
         # Model name that will appear in the admin panel
         verbose_name = _('Partner')
