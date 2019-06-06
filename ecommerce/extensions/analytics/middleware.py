@@ -40,7 +40,7 @@ class TrackingMiddleware(object):
                     save_user = True
                     logger.info(u'Saving lms_user_id from social auth for user %s', user.id)
                 else:
-                    # TODO: This will be removed in REVMI-258
+                    # TODO: Remove this once we can successfully get the id from social auth and the db. See REVMI-258
                     # Check for the lms_user_id in the tracking context
                     lms_user_id_tracking_context = tracking_context.get('lms_user_id')
                     if lms_user_id_tracking_context:
