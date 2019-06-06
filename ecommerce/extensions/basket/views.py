@@ -45,6 +45,8 @@ from ecommerce.extensions.basket.utils import (
     prepare_basket,
     validate_voucher
 )
+from ecommerce.extensions.offer.constants import DYNAMIC_DISCOUNT_FLAG
+from ecommerce.extensions.offer.dynamic_conditional_offer import get_percentage_from_request
 from ecommerce.extensions.offer.utils import format_benefit_value, get_redirect_to_email_confirmation_if_required
 from ecommerce.extensions.order.exceptions import AlreadyPlacedOrderException
 from ecommerce.extensions.partner.shortcuts import get_partner_for_site
@@ -261,10 +263,20 @@ class BasketLogicMixin(object):
             total_benefit = None
 
         num_of_items = self.request.basket.num_items
+
+        discount_jwt = None
+        discount_percent = None
+        if waffle.flag_is_active(self.request, DYNAMIC_DISCOUNT_FLAG):
+            applied_offers = self.request.basket.applied_offers().values()
+            if len(applied_offers) == 1 and applied_offers[0].condition.name == 'dynamic_discount_condition':
+                discount_jwt = self.request.GET.get('discount_jwt')
+                discount_percent = get_percentage_from_request()
         return {
             'total_benefit': total_benefit,
             'free_basket': context['order_total'].incl_tax == 0,
             'line_price': (self.request.basket.total_incl_tax_excl_discounts / num_of_items) if num_of_items > 0 else 0,
+            'discount_jwt': discount_jwt,
+            'discount_percent': discount_percent,
         }
 
     def fire_segment_events(self, request, basket):

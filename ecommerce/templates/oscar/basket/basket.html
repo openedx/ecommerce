@@ -13,10 +13,13 @@
 {% endblock navbar %}
 
 {% block pre_app_js %}
+  {# Right now, dynamic discounts only apply to single verified certs #}
+  {% if formset_lines_data|length == 1 %}
   <script>
     window.lmsUrlRoot = "{{ lms_url_root }}";
     window.courseKey = "{{ formset_lines_data.0.1.course_key }}";
   </script>
+  {% endif %}
 {% endblock %}
 
 {% block javascript %}
