@@ -14,7 +14,6 @@ from django.utils.html import escape
 from django.utils.translation import ugettext as _
 from opaque_keys.edx.keys import CourseKey
 from oscar.apps.basket.views import VoucherAddView as BaseVoucherAddView
-from oscar.apps.basket.views import VoucherRemoveView as BaseVoucherRemoveView
 from oscar.apps.basket.views import *  # pylint: disable=wildcard-import, unused-wildcard-import
 from oscar.core.prices import Price
 from requests.exceptions import ConnectionError, Timeout
@@ -623,13 +622,3 @@ class VoucherAddView(BaseVoucherAddView):  # pylint: disable=function-redefined
                     )
                 self.apply_voucher_to_basket(voucher)
         return redirect_to_referrer(self.request, 'basket:summary')
-
-
-class VoucherRemoveView(BaseVoucherRemoveView):  # pylint: disable=function-redefined
-    def post(self, request, *args, **kwargs):
-        # TODO Remove this once https://github.com/django-oscar/django-oscar/pull/2241 is merged.
-        # This prevents an issue that arises when the user applies a voucher, opens the basket page in
-        # another window/tab, and attempts to remove the voucher on both screens. Under this scenario the
-        # second attempt to remove the voucher will raise an error.
-        kwargs['pk'] = int(kwargs['pk'])
-        return super(VoucherRemoveView, self).post(request, *args, **kwargs)

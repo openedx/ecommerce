@@ -61,7 +61,6 @@ StockRecord = get_model('partner', 'StockRecord')
 Voucher = get_model('voucher', 'Voucher')
 VoucherAddView = get_class('basket.views', 'VoucherAddView')
 VoucherApplication = get_model('voucher', 'VoucherApplication')
-VoucherRemoveView = get_class('basket.views', 'VoucherRemoveView')
 
 COUPON_CODE = 'COUPONTEST'
 BUNDLE = 'bundle_identifier'
@@ -1016,19 +1015,3 @@ class VoucherAddViewTests(LmsApiMockMixin, TestCase):
         __, product = prepare_voucher(code=COUPON_CODE)
         self.basket.add_product(product)
         self.assert_form_valid_message("Coupon code '{code}' added to basket.".format(code=COUPON_CODE))
-
-
-class VoucherRemoveViewTests(TestCase):
-    def test_post_with_missing_voucher(self):
-        """ If the voucher is missing, verify the view queues a message and redirects. """
-        pk = '12345'
-        view = VoucherRemoveView.as_view()
-        request = RequestFactory().post('/')
-        request.basket.save()
-        response = view(request, pk=pk)
-
-        self.assertEqual(response.status_code, 302)
-
-        actual = list(get_messages(request))[-1].message
-        expected = "No voucher found with id '{}'".format(pk)
-        self.assertEqual(actual, expected)
