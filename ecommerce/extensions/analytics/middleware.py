@@ -2,6 +2,7 @@
 Middleware for analytics app to parse the Google Analytics (GA) cookie and the LMS user_id.
 """
 import logging
+
 from ecommerce.extensions.analytics.utils import get_google_analytics_client_id
 
 logger = logging.getLogger(__name__)

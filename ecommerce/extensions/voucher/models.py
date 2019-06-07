@@ -3,10 +3,13 @@ import logging
 
 from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
 from django.db import models
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 from django.utils.translation import ugettext_lazy as _
 from oscar.apps.voucher.abstract_models import AbstractVoucher  # pylint: disable=ungrouped-imports
 
 from ecommerce.core.utils import log_message_and_raise_validation_error
+from ecommerce.extensions.analytics.utils import audit_log
 from ecommerce.extensions.offer.constants import OFFER_ASSIGNMENT_REVOKED, OFFER_MAX_USES_DEFAULT, OFFER_REDEEMED
 
 logger = logging.getLogger(__name__)
@@ -135,6 +138,20 @@ class Voucher(AbstractVoucher):
         else:
             offer_max_uses = enterprise_offer.max_global_applications or OFFER_MAX_USES_DEFAULT
             return offer_max_uses - (self.num_orders + num_assignments)
+
+
+@receiver(post_save, sender=Voucher)
+def emit_voucher_changed(sender, instance, **kwargs):  # pylint: disable=unused-argument
+    audit_log(
+        'voucher_changed',
+        voucher_name=instance.name,
+        code=instance.code,
+        usage=instance.usage,
+        start_datetime=instance.start_datetime,
+        end_datetime=instance.end_datetime,
+        num_orders=instance.num_orders,
+        total_discount=instance.total_discount
+    )
 
 
 from oscar.apps.voucher.models import *  # noqa isort:skip pylint: disable=wildcard-import,unused-wildcard-import,wrong-import-position,wrong-import-order,ungrouped-imports

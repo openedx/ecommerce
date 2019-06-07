@@ -3,6 +3,7 @@ import datetime
 import ddt
 from django.core.exceptions import ValidationError
 from django.utils.timezone import now
+from mock import patch
 from oscar.core.loading import get_model
 from oscar.test.factories import UserFactory
 
@@ -158,3 +159,33 @@ class VoucherTests(TestCase):
             factories.OfferAssignmentFactory(offer=enterprise_offer, code=voucher.code, **assignment_data)
 
         assert voucher.slots_available_for_assignment == expected
+
+    def test_voucher_logs(self):
+        with patch('ecommerce.extensions.analytics.utils.audit_log') as mock_audit_log:
+            voucher = Voucher.objects.create(**self.data)
+
+            self.assertTrue(mock_audit_log.called_with(
+                'voucher_changed',
+                voucher_name=voucher.name,
+                code=voucher.code,
+                usage=voucher.usage,
+                start_datetime=voucher.start_datetime,
+                end_datetime=voucher.end_datetime,
+                num_orders=voucher.num_orders,
+                total_discount=voucher.total_discount
+            ))
+
+            voucher.name = 'Test 2'
+            voucher.end_datetime = now()
+            voucher.save()
+
+            self.assertTrue(mock_audit_log.called_with(
+                'voucher_changed',
+                voucher_name=voucher.name,
+                code=voucher.code,
+                usage=voucher.usage,
+                start_datetime=voucher.start_datetime,
+                end_datetime=voucher.end_datetime,
+                num_orders=voucher.num_orders,
+                total_discount=voucher.total_discount
+            ))
