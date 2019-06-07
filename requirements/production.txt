@@ -56,7 +56,7 @@ edx-auth-backends==2.0.1
 edx-django-release-util==0.3.1
 edx-django-sites-extensions==2.4.0
 edx-django-utils==1.0.3
-edx-drf-extensions==2.3.0
+edx-drf-extensions==2.3.1
 edx-ecommerce-worker==0.7.2
 edx-opaque-keys==1.0.0
 edx-rbac==1.0.1
@@ -133,4 +133,4 @@ unicodecsv==0.14.1
 unidecode==0.4.21         # via django-oscar
 uritemplate==3.0.0        # via coreapi
 urllib3==1.25.3           # via requests
-zeep==3.3.1
+zeep==3.4.0
