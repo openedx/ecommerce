@@ -1,5 +1,6 @@
 from django.test.client import RequestFactory
 from social_django.models import UserSocialAuth
+from testfixtures import LogCapture
 
 from ecommerce.core.models import User
 from ecommerce.extensions.analytics import middleware
@@ -9,6 +10,7 @@ from ecommerce.tests.testcases import TestCase
 class TrackingMiddlewareTests(TestCase):
     """ Test for TrackingMiddleware. """
     TEST_CONTEXT = {'foo': 'bar', 'baz': None, 'lms_user_id': 12345}
+    LOGGER_NAME = 'ecommerce.extensions.analytics.middleware'
 
     def setUp(self):
         super(TrackingMiddlewareTests, self).setUp()
@@ -37,7 +39,7 @@ class TrackingMiddlewareTests(TestCase):
         self._assert_ga_client_id(updated_client_id)
 
     def test_social_auth_lms_user_id_(self):
-        """ Test that middleware saves the lms_use_id from the social auth. """
+        """ Test that middleware saves the LMS user_id from the social auth. """
         user = self.create_user()
         user.tracking_context = self.TEST_CONTEXT
         user.save()
@@ -53,7 +55,7 @@ class TrackingMiddlewareTests(TestCase):
         self.assertEqual(same_user.lms_user_id, lms_user_id)
 
     def test_tracking_context_lms_user_id_(self):
-        """ Test that middleware saves the lms_use_id from the tracking_context. """
+        """ Test that middleware saves the LMS user_id from the tracking_context. """
         user = self.create_user()
         user.tracking_context = self.TEST_CONTEXT
         user.save()
@@ -66,7 +68,7 @@ class TrackingMiddlewareTests(TestCase):
         self.assertEqual(same_user.lms_user_id, self.TEST_CONTEXT['lms_user_id'])
 
     def test_does_not_overwrite_lms_user_id(self):
-        """ Test that middleware does not overwrite an existing lms_user_id. """
+        """ Test that middleware does not overwrite an existing LMS user_id. """
         initial_lms_user_id = 18
         user = self.create_user()
         user.tracking_context = self.TEST_CONTEXT
@@ -82,3 +84,22 @@ class TrackingMiddlewareTests(TestCase):
         self._process_request(same_user)
         same_user = User.objects.get(id=user.id)
         self.assertEqual(initial_lms_user_id, same_user.lms_user_id)
+
+    def test_no_lms_user_id_(self):
+        """ Test that middleware logs a missing LMS user_id. """
+        user = self.create_user()
+        expected = [
+            (
+                self.LOGGER_NAME,
+                'INFO',
+                'Could not find lms_user_id for user {}. Request path: /, referrer: None'.format(user.id)
+            ),
+        ]
+
+        same_user = User.objects.get(id=user.id)
+        with LogCapture(self.LOGGER_NAME) as log:
+            self._process_request(same_user)
+            log.check_present(*expected)
+
+        same_user = User.objects.get(id=user.id)
+        self.assertIsNone(same_user.lms_user_id)

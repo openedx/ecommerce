@@ -38,7 +38,8 @@ class TrackingMiddleware(object):
                 if lms_user_id_social_auth:
                     user.lms_user_id = lms_user_id_social_auth
                     save_user = True
-                    logger.info(u'Saving lms_user_id from social auth for user %s', user.id)
+                    logger.info(u'Saving lms_user_id from social auth for user %s. Request path: %s, referrer: %s',
+                                user.id, request.get_full_path(), request.META.get('HTTP_REFERER'))
                 else:
                     # TODO: Remove this once we can successfully get the id from social auth and the db. See REVMI-258
                     # Check for the lms_user_id in the tracking context
@@ -46,7 +47,14 @@ class TrackingMiddleware(object):
                     if lms_user_id_tracking_context:
                         user.lms_user_id = lms_user_id_tracking_context
                         save_user = True
-                        logger.info(u'Saving lms_user_id from tracking context for user %s', user.id)
+                        logger.info(u'Saving lms_user_id from tracking context for user %s. Request path: %s, '
+                                    u'referrer: %s', user.id, request.get_full_path(), request.META.get('HTTP_REFERER'))
+
+            if not user.lms_user_id:
+                # TODO: Change this to an error once we can successfully get the id from social auth and the db.
+                # See REVMI-249 and REVMI-269
+                logger.info(u'Could not find lms_user_id for user %s. Request path: %s, referrer: %s', user.id,
+                            request.get_full_path(), request.META.get('HTTP_REFERER'))
 
             if save_user:
                 user.save()
