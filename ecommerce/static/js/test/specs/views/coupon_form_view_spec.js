@@ -200,50 +200,21 @@ define([
             });
 
             describe('enterprise customers', function() {
-                it('enterprise customer dropdown should be hidden when a catalog is selected', function() {
-                    view.$('#single-course').prop('checked', true).trigger('change');
-                    expect(SpecUtils.formGroup(view, '[name=enterprise_customer]')).not.toHaveHiddenClass();
-
-                    view.$('#catalog').prop('checked', true).trigger('change');
-                    expect(SpecUtils.formGroup(view, '[name=enterprise_customer]')).toHaveHiddenClass();
-
-                    view.$('#multiple-courses').prop('checked', true).trigger('change');
-                    expect(SpecUtils.formGroup(view, '[name=enterprise_customer]')).not.toHaveHiddenClass();
+                it('enterprise customer field should not be shown on create coupon', function() {
+                    _.each(['#single-course', '#multiple-courses', '#catalog'], function(catalogType) {
+                        view.$(catalogType).prop('checked', true).trigger('change');
+                        expect(SpecUtils.formGroup(view, '[name=enterprise_customer]').length).toBe(0);
+                    });
                 });
 
-                it('enterprise customer is setting properly', function() {
-                    view.$('#single-course').prop('checked', true).trigger('change');
+                it('enterprise customer field shown on edit coupon only if customer is set', function() {
+                    model = new Coupon({enterprise_customer: MockCustomers[0]});
+                    view = new CouponFormView({editing: true, model: model}).render();
 
-                    view.$('[name=enterprise_customer]').val('29c466f1583b47279265d0a1fd7012a3').trigger('change');
-                    expect(view.$('select[name=enterprise_customer] option:selected').text()).toEqual(
-                        MockCustomers[0].name
-                    );
-                    expect(view.$('[name=enterprise_customer]').val()).toEqual('29c466f1583b47279265d0a1fd7012a3');
-
-                    view.$('[name=enterprise_customer]').val('e7d4a3c6f510405d968e28e098ddb543').trigger('change');
-                    expect(view.$('select[name=enterprise_customer] option:selected').text()).toEqual(
-                        MockCustomers[1].name
-                    );
-                    expect(view.$('[name=enterprise_customer]').val()).toEqual('e7d4a3c6f510405d968e28e098ddb543');
-
-                    view.$('[name=enterprise_customer]').val('42a30ade47834489a607cd0f52ba13cf').trigger('change');
-                    expect(view.$('select[name=enterprise_customer] option:selected').text()).toEqual(
-                        MockCustomers[2].name
-                    );
-                    expect(view.$('[name=enterprise_customer]').val()).toEqual('42a30ade47834489a607cd0f52ba13cf');
-                });
-            });
-
-            describe('enterprise customer catalogs', function() {
-                it('enterprise customer catalog field should be hidden when a catalog is selected', function() {
-                    view.$('#single-course').prop('checked', true).trigger('change');
-                    expect(SpecUtils.formGroup(view, '[name=enterprise_customer_catalog]')).not.toHaveHiddenClass();
-
-                    view.$('#catalog').prop('checked', true).trigger('change');
-                    expect(SpecUtils.formGroup(view, '[name=enterprise_customer_catalog]')).toHaveHiddenClass();
-
-                    view.$('#multiple-courses').prop('checked', true).trigger('change');
-                    expect(SpecUtils.formGroup(view, '[name=enterprise_customer_catalog]')).not.toHaveHiddenClass();
+                    _.each(['#single-course', '#multiple-courses'], function(catalogType) {
+                        view.$(catalogType).prop('checked', true).trigger('change');
+                        expect(view.$('[name=enterprise_customer]').val()).toEqual(MockCustomers[0].id);
+                    });
                 });
             });
 
