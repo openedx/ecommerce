@@ -44,7 +44,7 @@ django-tables2==1.16.0    # via django-oscar
 django-threadlocals==0.10
 django-treebeard==4.3     # via django-oscar
 django-waffle==0.14.0
-django-widget-tweaks==1.4.3  # via django-oscar
+django-widget-tweaks==1.4.5  # via django-oscar
 django==1.11.21
 django_extensions==1.9.9
 djangorestframework-csv==2.1.0
@@ -77,7 +77,7 @@ jinja2==2.10.1            # via coreschema
 jsonfield==1.0.3
 kombu==3.0.37             # via celery
 libsass==0.9.2
-lxml==4.3.3               # via premailer, zeep
+lxml==4.3.4               # via premailer, zeep
 markdown==2.6.9
 markupsafe==1.1.1         # via jinja2
 mock==2.0.0               # via django-oscar
