@@ -19,9 +19,9 @@
       {% endblocktrans %}</p>
 
     <p>
-      {% with "<a class='nav-link' href='mailto:"|add:payment_support_email|add:"'>"|safe as start_link %}
+      {% with "<a class='nav-link' href='https://support.edx.org/hc'>"|safe as start_link %}
         {% blocktrans trimmed with end_link="</a>"|safe %}
-          Please wait a few minutes and then try again. For help, contact {{ start_link }}{{ payment_support_email }}{{ end_link }}.
+          Please wait a few minutes and then try again. For help, check our {{ start_link }}Help Center{{ end_link }}.
         {% endblocktrans %}
       {% endwith %}
     </p>
