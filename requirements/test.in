@@ -17,4 +17,4 @@ pep8==1.6.2
 pylint==1.6.4
 responses==0.5.1
 selenium==3.4.3
-testfixtures==4.5.0
+testfixtures                # Provides a LogCapture utility used by several tests

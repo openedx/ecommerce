@@ -54,7 +54,7 @@ django-threadlocals==0.10
 django-treebeard==4.3     # via django-oscar
 django-waffle==0.14.0
 django-webtest==1.9.2
-django-widget-tweaks==1.4.3  # via django-oscar
+django-widget-tweaks==1.4.5  # via django-oscar
 django==1.11.21
 django_extensions==1.9.9
 djangorestframework-csv==2.1.0
@@ -157,7 +157,7 @@ sphinx==1.5.3
 sqlparse==0.3.0           # via django-debug-toolbar
 stevedore==1.30.1         # via edx-opaque-keys
 stripe==1.70.0
-testfixtures==4.5.0
+testfixtures==6.9.0
 text-unidecode==1.2       # via faker
 transifex-client==0.12.2
 typing==3.6.6             # via django-extensions
