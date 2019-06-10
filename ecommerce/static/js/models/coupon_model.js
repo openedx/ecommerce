@@ -183,15 +183,6 @@ define([
                     }
                     return undefined;
                 },
-                enterprise_customer: function(val) {
-                    if ((_.isEmpty(val) || _.isEmpty(val.id)) &&
-                        !_.isEmpty(this.get('enterprise_customer_catalog'))) {
-                        return gettext('Enterprise Customer must be set if Enterprise Customer Catalog is set');
-                    }
-
-                    return undefined;
-                },
-                enterprise_customer_catalog: {required: false},
                 program_uuid: {
                     msg: gettext('A valid Program UUID is required.'),
                     required: function() {

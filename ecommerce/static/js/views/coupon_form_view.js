@@ -250,31 +250,11 @@ define([
                         };
                     }
                 },
-                'select[name=enterprise_customer]': {
+                'input[name=enterprise_customer]': {
                     observe: 'enterprise_customer',
-                    selectOptions: {
-                        collection: function() {
-                            return ecommerce.coupons.enterprise_customers;
-                        },
-                        defaultOption: {id: '', name: ''},
-                        labelPath: 'name',
-                        valuePath: 'id'
-                    },
-                    setOptions: {
-                        validate: true
-                    },
                     onGet: function(val) {
                         return _.isUndefined(val) || _.isNull(val) ? '' : val.id;
-                    },
-                    onSet: function(val) {
-                        return {
-                            id: val,
-                            name: $('select[name=enterprise_customer] option:selected').text()
-                        };
                     }
-                },
-                'input[name=enterprise_customer_catalog]': {
-                    observe: 'enterprise_customer_catalog'
                 },
                 'input[name=program_uuid]': {
                     observe: 'program_uuid'
@@ -311,8 +291,6 @@ define([
                     'course_seat_types',
                     'course_catalog',
                     'end_date',
-                    'enterprise_customer',
-                    'enterprise_customer_catalog',
                     'invoice_discount_type',
                     'invoice_discount_value',
                     'invoice_number',
@@ -502,11 +480,9 @@ define([
 
             toggleEnterpriseRelatedFields: function(hide) {
                 this.formGroup('[name=enterprise_customer]').toggleClass(this.hiddenClass, hide);
-                this.formGroup('[name=enterprise_customer_catalog]').toggleClass(this.hiddenClass, hide);
 
                 if (hide) {
                     this.model.unset('enterprise_customer');
-                    this.model.unset('enterprise_customer_catalog');
                 }
             },
 
@@ -748,9 +724,13 @@ define([
             render: function() {
                 // Render the parent form/template
                 var catalogId = '';
-                var customerId = '';
+                var enterpriseCustomer = this.model.get('enterprise_customer');
 
-                this.$el.html(this.template(this.model.attributes));
+                this.$el.html(
+                    this.template(
+                        _.extend({}, this.model.attributes, {editing: this.editing})
+                    )
+                );
                 this.stickit();
 
                 this.toggleCatalogTypeField();
@@ -771,10 +751,12 @@ define([
                         catalogId = this.model.get('course_catalog');
                         this.model.set('course_catalog', ecommerce.coupons.catalogs.get(catalogId));
                     }
-                    if (_.isString(this.model.get('enterprise_customer'))) {
+                    if (_.isString(enterpriseCustomer)) {
                         // API returns a string value for enterprise customer
-                        customerId = this.model.get('enterprise_customer');
-                        this.model.set('enterprise_customer', {id: customerId});
+                        this.model.set('enterprise_customer', {id: enterpriseCustomer});
+                    } else if (_.isUndefined(enterpriseCustomer) || _.isNull(enterpriseCustomer)) {
+                        // don't show the enterprise_customer field
+                        this.formGroup('#enterprise-customer').addClass(this.hiddenClass);
                     }
                     if (this.model.get('program_uuid')) {
                         this.$('.catalog-type input').attr('disabled', true);
