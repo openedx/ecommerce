@@ -755,8 +755,7 @@ define([
                         // API returns a string value for enterprise customer
                         this.model.set('enterprise_customer', {id: enterpriseCustomer});
                     } else if (_.isUndefined(enterpriseCustomer) || _.isNull(enterpriseCustomer)) {
-                        // don't show the enterprise_customer field
-                        this.formGroup('#enterprise-customer').addClass(this.hiddenClass);
+                        this.formGroup('#enterprise-customer').remove();
                     }
                     if (this.model.get('program_uuid')) {
                         this.$('.catalog-type input').attr('disabled', true);
