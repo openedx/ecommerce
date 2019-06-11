@@ -11,14 +11,18 @@ import requests
 import responses
 from django.conf import settings
 from django.test import override_settings
+from django.urls import reverse
 from freezegun import freeze_time
 from oscar.apps.payment.exceptions import GatewayError, TransactionDeclined, UserCancelled
 from oscar.test import factories
 
 from ecommerce.courses.tests.factories import CourseFactory
+from ecommerce.extensions.order.models import Order
 from ecommerce.extensions.payment.exceptions import (
+    DuplicatePaymentNotification,
     InvalidCybersourceDecision,
     InvalidSignatureError,
+    MultiplePaymentNotification,
     PartialAuthorizationError,
     PCIViolation,
     ProcessorMisconfiguredError
@@ -217,6 +221,27 @@ class CybersourceTests(CybersourceMixin, PaymentProcessorTestCaseMixin, TestCase
         """
         response = self.generate_notification(self.basket, auth_amount='0.00')
         self.assertRaises(PartialAuthorizationError, self.processor.handle_processor_response, response,
+                          basket=self.basket)
+
+    def test_handle_processor_response_duplicate_notification(self):
+        """
+        The handle_processor_response method should raise respective exception if there is already a
+        payment notification and order existed with same or different transaction IDs.
+        """
+        notification = self.generate_notification(self.basket, billing_address=self.make_billing_address())
+        self.client.post(reverse('cybersource:redirect'), notification)
+
+        self.assertTrue(PaymentProcessorResponse.objects.filter(basket=self.basket).exists())
+        self.assertTrue(Order.objects.filter(basket=self.basket).exists())
+
+        # handle_processor_response should raise MultiplePaymentNotification for same transaction ID
+        self.assertRaises(MultiplePaymentNotification, self.processor.handle_processor_response, notification,
+                          basket=self.basket)
+
+        notification['transaction_id'] = '394934470384'
+        notification['signature'] = self.generate_signature(self.processor.secret_key, notification)
+        # handle_processor_response should raise DuplicatePaymentNotification for different transaction ID
+        self.assertRaises(DuplicatePaymentNotification, self.processor.handle_processor_response, notification,
                           basket=self.basket)
 
     @responses.activate
