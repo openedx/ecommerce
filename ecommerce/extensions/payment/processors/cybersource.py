@@ -22,9 +22,11 @@ from ecommerce.extensions.checkout.utils import get_receipt_page_url
 from ecommerce.extensions.payment.constants import APPLE_PAY_CYBERSOURCE_CARD_TYPE_MAP, CYBERSOURCE_CARD_TYPE_MAP
 from ecommerce.extensions.payment.exceptions import (
     AuthorizationError,
+    DuplicatePaymentNotification,
     DuplicateReferenceNumber,
     InvalidCybersourceDecision,
     InvalidSignatureError,
+    MultiplePaymentNotification,
     PartialAuthorizationError,
     PCIViolation,
     ProcessorMisconfiguredError
@@ -41,6 +43,7 @@ logger = logging.getLogger(__name__)
 
 Order = get_model('order', 'Order')
 OrderNumberGenerator = get_class('order.utils', 'OrderNumberGenerator')
+PaymentProcessorResponse = get_model('payment', 'PaymentProcessorResponse')
 
 
 class Cybersource(ApplePayMixin, BaseClientSidePaymentProcessor):
@@ -278,6 +281,15 @@ class Cybersource(ApplePayMixin, BaseClientSidePaymentProcessor):
                     'review': AuthorizationError,
                 }.get(decision, InvalidCybersourceDecision)
 
+        transaction_id = response.get('transaction_id', None)  # Error Notifications does not include a transaction id.
+        if transaction_id and decision == 'accept':
+            if PaymentProcessorResponse.objects.filter(transaction_id=transaction_id).exists():
+                if Order.objects.filter(number=response['req_reference_number']).exists():
+                    raise MultiplePaymentNotification
+            else:
+                if Order.objects.filter(number=response['req_reference_number']).exists():
+                    raise DuplicatePaymentNotification
+
         # Raise an exception if the authorized amount differs from the requested amount.
         # Note (CCB): We should never reach this point in production since partial authorization is disabled
         # for our account, and should remain that way until we have a proper solution to allowing users to
@@ -287,7 +299,6 @@ class Cybersource(ApplePayMixin, BaseClientSidePaymentProcessor):
 
         currency = response['req_currency']
         total = Decimal(response['req_amount'])
-        transaction_id = response.get('transaction_id', None)  # Error Notifications does not include a transaction id.
         card_number = response['req_card_number']
         card_type = CYBERSOURCE_CARD_TYPE_MAP.get(response['req_card_type'])
 
