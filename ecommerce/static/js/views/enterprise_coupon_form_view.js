@@ -67,7 +67,11 @@ define([
                     }
                 },
                 'input[name=enterprise_customer_catalog]': {
-                    observe: 'enterprise_customer_catalog'
+                    observe: 'enterprise_customer_catalog',
+                    update: function($el, val) {
+                        $el.val(val);
+                        this.updateEnterpriseCatalogDetailsLink();
+                    }
                 },
                 'input[name=notify_email]': {
                     observe: 'notify_email',
@@ -84,7 +88,22 @@ define([
                 'change [name=invoice_type]': 'toggleInvoiceFields',
                 'change [name=tax_deduction]': 'toggleTaxDeductedSourceField',
                 'click .external-link': 'routeToLink',
-                'click #cancel-button': 'cancelButtonClicked'
+                'click #cancel-button': 'cancelButtonClicked',
+                'change input[name=enterprise_customer_catalog]': 'updateEnterpriseCatalogDetailsLink'
+            },
+
+            updateEnterpriseCatalogDetailsLink: function() {
+                var enterpriseCoupon = this.$('[name=enterprise_customer_catalog]').val();
+                var enterpriseAPIURL = this.model.get('enterprise_catalog_url_template');
+                if (enterpriseCoupon && enterpriseAPIURL) {
+                    this.$(
+                        '#enterprise-catalog-details'
+                    ).attr('href', enterpriseAPIURL + enterpriseCoupon).addClass('external-link').removeClass('hidden');
+                } else {
+                    this.$(
+                        '#enterprise-catalog-details'
+                    ).removeAttr('href').removeClass('external-link').addClass('hidden');
+                }
             },
 
             getEditableAttributes: function() {
