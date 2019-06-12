@@ -666,3 +666,37 @@ class EnterpriseServiceMockMixin(object):
             body=body,
             content_type='application/json'
         )
+
+    def mock_enterprise_catalog_api(self, enterprise_customer_uuid, raise_exception=None):
+        """
+        Helper function to register the enterprise catalog API endpoint.
+        """
+        enterprise_catalog_api_response = {
+            'count': 10,
+            'num_pages': 3,
+            'current_page': 2,
+            'results': [
+                {
+                    'enterprise_customer': '6ae013d4-c5c4-474d-8da9-0e559b2448e2',
+                    'uuid': '869d26dd-2c44-487b-9b6a-24eee973f9a4',
+                    'title': 'batman_catalog'
+                },
+                {
+                    'enterprise_customer': '6ae013d4-c5c4-474d-8da9-0e559b2448e2',
+                    'uuid': '1a61de70-f8e8-4e8c-a76e-01783a930ae6',
+                    'title': 'new catalog'
+                }
+            ],
+            'next': "{}?enterprise_customer={}&page=3".format(self.ENTERPRISE_CATALOG_URL, enterprise_customer_uuid),
+            'previous': "{}?enterprise_customer={}".format(self.ENTERPRISE_CATALOG_URL, enterprise_customer_uuid),
+            'start': 0,
+        }
+
+        self.mock_access_token_response()
+        body = raise_timeout if raise_exception else json.dumps(enterprise_catalog_api_response)
+        httpretty.register_uri(
+            method=httpretty.GET,
+            uri='{}'.format(self.ENTERPRISE_CATALOG_URL),
+            body=body,
+            content_type='application/json'
+        )

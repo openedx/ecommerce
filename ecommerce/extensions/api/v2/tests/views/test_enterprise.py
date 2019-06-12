@@ -113,6 +113,75 @@ class TestEnterpriseCustomerView(EnterpriseServiceMockMixin, TestCase):
         )
 
 
+class TestEnterpriseCustomerCatalogsViewSet(EnterpriseServiceMockMixin, TestCase):
+
+    def setUp(self):
+        super(TestEnterpriseCustomerCatalogsViewSet, self).setUp()
+        user = self.create_user(is_staff=True)
+        self.client.login(username=user.username, password=self.password)
+
+        self.test_server_url = 'http://testserver.fake/'
+        self.enterprise = '6ae013d4-c5c4-474d-8da9-0e559b2448e2'
+        self.dummy_enterprise_customer_catalogs_data = {
+            'count': 2,
+            'num_pages': 1,
+            'current_page': 1,
+            'start': 0,
+            'next': '{}?enterprise_customer={}&page=3'.format(self.ENTERPRISE_CATALOG_URL, self.enterprise),
+            'previous': '{}?enterprise_customer={}&page=1'.format(self.ENTERPRISE_CATALOG_URL, self.enterprise),
+            'results': [
+                {
+                    'enterprise_customer': self.enterprise,
+                    'uuid': '869d26dd-2c44-487b-9b6a-24eee973f9a4',
+                    'title': 'batman_catalog'
+                },
+                {
+                    'enterprise_customer': self.enterprise,
+                    'uuid': '1a61de70-f8e8-4e8c-a76e-01783a930ae6',
+                    'title': 'new catalog'
+                }
+            ]
+        }
+
+    @mock.patch('ecommerce.enterprise.utils.EdxRestApiClient')
+    @httpretty.activate
+    def test_get_customer_catalogs(self, mock_client):
+        """
+        Tests that `EnterpriseCustomerCatalogsViewSet`get endpoint works as expected
+        """
+        self.mock_access_token_response()
+
+        instance = mock_client.return_value
+        setattr(
+            instance,
+            'enterprise_catalogs',
+            mock.MagicMock(
+                get=mock.MagicMock(
+                    return_value=self.dummy_enterprise_customer_catalogs_data
+                )
+            ),
+        )
+
+        url = reverse('api:v2:enterprise:enterprise_customer_catalogs')
+        result = self.client.get(url)
+
+        self.assertEqual(result.status_code, status.HTTP_200_OK)
+
+        updated_response = dict(
+            self.dummy_enterprise_customer_catalogs_data,
+            next='{}api/v2/enterprise/customer_catalogs?enterprise_customer={}&page=3'.format(
+                self.test_server_url,
+                self.enterprise
+            ),
+            previous="{}api/v2/enterprise/customer_catalogs?enterprise_customer={}&page=1".format(
+                self.test_server_url,
+                self.enterprise
+            ),
+        )
+
+        self.assertJSONEqual(result.content, updated_response)
+
+
 @ddt.ddt
 class EnterpriseCouponViewSetRbacTests(
         CouponMixin,

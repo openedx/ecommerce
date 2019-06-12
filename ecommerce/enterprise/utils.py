@@ -24,12 +24,23 @@ from ecommerce.core.utils import deprecated_traverse_pagination
 from ecommerce.enterprise.api import fetch_enterprise_learner_data
 from ecommerce.enterprise.exceptions import EnterpriseDoesNotExist
 from ecommerce.extensions.offer.models import OFFER_PRIORITY_ENTERPRISE
+from six.moves.urllib.parse import urlparse  # pylint: disable=import-error
 
 ConditionalOffer = get_model('offer', 'ConditionalOffer')
 StockRecord = get_model('partner', 'StockRecord')
 Voucher = get_model('voucher', 'Voucher')
 CONSENT_FAILED_PARAM = 'consent_failed'
 log = logging.getLogger(__name__)
+
+CUSTOMER_CATALOGS_DEFAULT_RESPONSE = {
+    'count': 0,
+    'num_pages': 0,
+    'current_page': 0,
+    'start': 0,
+    'next': None,
+    'previous': None,
+    'results': [],
+}
 
 
 def is_enterprise_feature_enabled():
@@ -117,6 +128,115 @@ def get_enterprise_customers(site):
         ],
         key=lambda k: k['name'].lower()
     )
+
+
+def update_paginated_response(endpoint_request_url, data):
+    """
+    Update next and previous links with their url replaced by an ecommerce endpoint url.
+
+    Arguments:
+        request_url (str): endpoint request url.
+        data (dict): Dictionary containing catalog courses.
+
+    Returns:
+        dict: response data
+
+    Below are sample input and output
+
+    INPUT: {
+        'next': http://lms.server/enterprise/api/v1/enterprise_catalogs/?enterprise_customer=6ae013d4
+    }
+
+    OUTPUT: {
+        next: http://ecom.server/api/v2/enterprise/customer_catalogs?enterprise_customer=6ae013d4
+    }
+    """
+    next_page = None
+    previous_page = None
+
+    if data.get('next'):
+        next_page = "{endpoint_request_url}?{query_parameters}".format(
+            endpoint_request_url=endpoint_request_url,
+            query_parameters=urlparse(data['next']).query,
+        )
+        next_page = next_page.rstrip('?')
+
+    if data.get('previous'):
+        previous_page = "{endpoint_request_url}?{query_parameters}".format(
+            endpoint_request_url=endpoint_request_url,
+            query_parameters=urlparse(data['previous'] or "").query,
+        )
+        previous_page = previous_page.rstrip('?')
+
+    return dict(data, next=next_page, previous=previous_page)
+
+
+def get_enterprise_customer_catalogs(site, endpoint_request_url, enterprise_customer_uuid, page):
+    """
+    Get catalogs associated with an Enterprise Customer.
+
+    Args:
+        site (Site): The site which is handling the current request
+        enterprise_customer_uuid (str): The uuid of the Enterprise Customer
+
+    Returns:
+        dict: Information associated with the Enterprise Catalog.
+
+    Response will look like
+
+        {
+            'count': 2,
+            'num_pages': 1,
+            'current_page': 1,
+            'results': [
+                {
+                    'enterprise_customer': '6ae013d4-c5c4-474d-8da9-0e559b2448e2',
+                    'uuid': '869d26dd-2c44-487b-9b6a-24eee973f9a4',
+                    'title': 'batman_catalog'
+                },
+                {
+                    'enterprise_customer': '6ae013d4-c5c4-474d-8da9-0e559b2448e2',
+                    'uuid': '1a61de70-f8e8-4e8c-a76e-01783a930ae6',
+                    'title': 'new catalog'
+                }
+            ],
+            'next': None,
+            'start': 0,
+            'previous': None
+        }
+    """
+    resource = 'enterprise_catalogs'
+    partner_code = site.siteconfiguration.partner.short_code
+    cache_key = '{site_domain}_{partner_code}_{resource}_{uuid}_{page}'.format(
+        site_domain=site.domain,
+        partner_code=partner_code,
+        resource=resource,
+        uuid=enterprise_customer_uuid,
+        page=page,
+    )
+    cache_key = hashlib.md5(cache_key).hexdigest()
+
+    cached_response = TieredCache.get_cached_response(cache_key)
+    if cached_response.is_found:
+        return cached_response.value
+
+    client = get_enterprise_api_client(site)
+    endpoint = getattr(client, resource)
+
+    try:
+        response = endpoint.get(enterprise_customer=enterprise_customer_uuid, page=page)
+        response = update_paginated_response(endpoint_request_url, response)
+    except (ConnectionError, SlumberHttpBaseException, Timeout) as exc:
+        logging.exception(
+            'Unable to retrieve catalogs for enterprise customer! customer: %s, Exception: %s',
+            enterprise_customer_uuid,
+            exc
+        )
+        return CUSTOMER_CATALOGS_DEFAULT_RESPONSE
+
+    TieredCache.set_all_tiers(cache_key, response, settings.ENTERPRISE_CUSTOMER_RESULTS_CACHE_TIMEOUT)
+
+    return response
 
 
 def get_enterprise_customer_consent_failed_context_data(request, voucher):

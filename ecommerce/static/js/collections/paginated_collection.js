@@ -8,8 +8,7 @@ define([
             parse: function(response) {
                 // Continue retrieving the remaining data
                 if (response.next) {
-                    this.url = response.next;
-                    this.fetch({remove: false});
+                    this.fetch({remove: false, url: response.next});
                 }
                 return response.results;
             }

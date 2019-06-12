@@ -4,8 +4,10 @@ define([
     'views/enterprise_coupon_create_edit_view',
     'views/alert_view',
     'models/enterprise_coupon_model',
+    'collections/enterprise_customer_catalogs_collection',
     'test/mock_data/categories',
     'test/mock_data/enterprise_customers',
+    'test/mock_data/enterprise_customer_catalogs',
     'test/mock_data/coupons',
     'ecommerce'
 ],
@@ -14,8 +16,10 @@ define([
               EnterpriseCouponCreateEditView,
               AlertView,
               EnterpriseCoupon,
+              EnterpriseCustomerCatalogsCollection,
               MockCategories,
               MockCustomers,
+              MockCustomerCatalogs,
               MockCoupons,
               ecommerce) {
         'use strict';
@@ -27,10 +31,14 @@ define([
             beforeEach(function() {
                 ecommerce.coupons = {
                     categories: MockCategories,
-                    enterprise_customers: MockCustomers
+                    enterprise_customers: MockCustomers,
+                    enterprise_customer_catalogs: new EnterpriseCustomerCatalogsCollection()
                 };
                 model = new EnterpriseCoupon();
                 view = new EnterpriseCouponCreateEditView({model: model, editing: false}).render();
+                spyOn($, 'ajax').and.callFake(function(options) {
+                    options.success(MockCustomerCatalogs);
+                });
                 spyOn(model, 'save');
             });
 
@@ -41,11 +49,18 @@ define([
                 view.$('[name=end_date]').val('2016-01-01T00:00').trigger('change');
                 view.$('[name=category]').val('4').trigger('change');
                 view.$('[name=enterprise_customer]').val('42a30ade47834489a607cd0f52ba13cf').trigger('change');
-                view.$('[name=enterprise_customer_catalog]').val('ec6a900a13c74f2abdb0b9bd9415ed78').trigger('change');
+                view.$('[name=enterprise_customer_catalog]').val('869d26dd-2c44-487b-9b6a-24eee973f9a4').trigger(
+                    'change'
+                );
                 view.$('#not-applicable').prop('checked', true).trigger('change');
                 view.formView.submit($.Event('click'));
                 expect(model.isValid()).toBe(true);
                 expect(model.save).toHaveBeenCalled();
+            });
+
+            it('should disable catalog field when no customer is selected', function() {
+                view.$('[name=enterprise_customer]').val(null).trigger('change');
+                expect(view.$('select[name=enterprise_customer_catalog]').prop('disabled')).toBe(true);
             });
         });
 
@@ -56,6 +71,13 @@ define([
 
             describe('edit enrollment code', function() {
                 beforeEach(function() {
+                    ecommerce.coupons = {
+                        categories: MockCategories,
+                        enterprise_customers: MockCustomers,
+                        enterprise_customer_catalogs: new EnterpriseCustomerCatalogsCollection(
+                            MockCustomerCatalogs.results
+                        )
+                    };
                     enterpriseCouponModelData.enterprise_customer = MockCustomers[0].id;
                     model = EnterpriseCoupon.findOrCreate(enterpriseCouponModelData, {parse: true});
                     view = new EnterpriseCouponCreateEditView({model: model, editing: true}).render();
@@ -78,6 +100,11 @@ define([
                     expect(view.$el.find('[name=enterprise_customer_catalog]').val()).toEqual(
                         model.get('enterprise_customer_catalog')
                     );
+                });
+
+                it('should disable catalog field when no customer is selected', function() {
+                    view.$('[name=enterprise_customer]').val(null).trigger('change');
+                    expect(view.$('select[name=enterprise_customer_catalog]').prop('disabled')).toBe(true);
                 });
             });
         });

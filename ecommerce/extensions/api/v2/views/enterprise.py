@@ -10,10 +10,11 @@ from rest_framework import generics, serializers, status
 from rest_framework.decorators import detail_route, list_route
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.viewsets import ViewSet
 
 from ecommerce.core.constants import COUPON_PRODUCT_CLASS_NAME
 from ecommerce.core.utils import log_message_and_raise_validation_error
-from ecommerce.enterprise.utils import get_enterprise_customers
+from ecommerce.enterprise.utils import get_enterprise_customer_catalogs, get_enterprise_customers
 from ecommerce.extensions.api.pagination import DatatablesDefaultPagination
 from ecommerce.extensions.api.serializers import (
     CouponCodeAssignmentSerializer,
@@ -47,6 +48,7 @@ from ecommerce.extensions.voucher.utils import (
     update_voucher_offer,
     update_voucher_with_enterprise_offer
 )
+from six.moves.urllib.parse import urlparse  # pylint: disable=import-error
 
 logger = logging.getLogger(__name__)
 Order = get_model('order', 'Order')
@@ -66,6 +68,21 @@ class EnterpriseCustomerViewSet(generics.GenericAPIView):
     def get(self, request):
         site = request.site
         return Response(data={'results': get_enterprise_customers(site)})
+
+
+class EnterpriseCustomerCatalogsViewSet(ViewSet):
+
+    permission_classes = (IsAuthenticated, IsAdminUser,)
+
+    def get(self, request):
+        endpoint_request_url = urlparse(request.build_absolute_uri())._replace(query=None).geturl()
+        enterprise_catalogs = get_enterprise_customer_catalogs(
+            request.site,
+            endpoint_request_url,
+            enterprise_customer_uuid=request.GET.get('enterprise_customer'),
+            page=request.GET.get('page', '1'),
+        )
+        return Response(data=enterprise_catalogs)
 
 
 class EnterpriseCouponViewSet(CouponViewSet):
