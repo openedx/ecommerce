@@ -182,7 +182,7 @@ class EnrollmentFulfillmentModule(BaseFulfillmentModule):
             'X-Edx-Api-Key': settings.EDX_API_KEY
         }
 
-        __, client_id, ip = parse_tracking_context(user)
+        __, client_id, ip = parse_tracking_context(user, usage='enrollment')
 
         if client_id:
             headers['X-Edx-Ga-Client-Id'] = client_id

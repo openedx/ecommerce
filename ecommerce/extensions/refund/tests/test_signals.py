@@ -24,7 +24,6 @@ class RefundTrackingTests(RefundTestMixin, TestCase):
         self.assertEqual(event_name, 'Order Refunded')
 
         if tracking_context is not None:
-            expected_event_user_id = tracking_context['lms_user_id']
             expected_context = {
                 'ip': tracking_context['lms_ip'],
                 'Google Analytics': {
@@ -35,12 +34,16 @@ class RefundTrackingTests(RefundTestMixin, TestCase):
                 },
             }
         else:
-            expected_event_user_id = ECOM_TRACKING_ID_FMT.format(refund.user.id)
             expected_context = {
                 'ip': None,
                 'Google Analytics': {'clientId': None},
                 'page': {'url': 'https://testserver.fake/'}
             }
+
+        if refund.user.lms_user_id is not None:
+            expected_event_user_id = refund.user.lms_user_id
+        else:
+            expected_event_user_id = ECOM_TRACKING_ID_FMT.format(refund.user.id)
 
         self.assertEqual(event_user_id, expected_event_user_id)
         self.assertEqual(kwargs['context'], expected_context)

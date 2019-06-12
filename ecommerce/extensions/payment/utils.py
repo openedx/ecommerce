@@ -79,7 +79,7 @@ def embargo_check(user, site, products):
         Bool
     """
     courses = []
-    _, _, ip = parse_tracking_context(user)
+    _, _, ip = parse_tracking_context(user, usage='embargo')
 
     for product in products:
         # We only are checking Seats
