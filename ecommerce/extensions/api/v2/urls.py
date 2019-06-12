@@ -87,6 +87,11 @@ SDN_URLS = [
 
 ENTERPRISE_URLS = [
     url(r'^customers$', enterprise_views.EnterpriseCustomerViewSet.as_view(), name='enterprise_customers'),
+    url(
+        r'^customer_catalogs$',
+        enterprise_views.EnterpriseCustomerCatalogsViewSet.as_view({'get': 'get'}),
+        name='enterprise_customer_catalogs'
+    ),
 ]
 
 ASSIGNMENT_EMAIL_URLS = [

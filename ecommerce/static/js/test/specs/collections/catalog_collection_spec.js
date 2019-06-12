@@ -20,8 +20,9 @@ define([
                     response.next = '/api/v2/catalogs/course_catalogs/?page=2';
 
                     collection.parse(response);
-                    expect(collection.url).toEqual(response.next);
-                    expect(collection.fetch).toHaveBeenCalledWith({remove: false});
+                    expect(collection.fetch).toHaveBeenCalledWith(
+                        {remove: false, url: '/api/v2/catalogs/course_catalogs/?page=2'}
+                    );
                 });
             });
         });

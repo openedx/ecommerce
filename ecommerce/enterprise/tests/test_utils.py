@@ -13,15 +13,18 @@ from oscar.test.factories import VoucherFactory
 from ecommerce.core.constants import SYSTEM_ENTERPRISE_ADMIN_ROLE, SYSTEM_ENTERPRISE_LEARNER_ROLE
 from ecommerce.enterprise.tests.mixins import EnterpriseServiceMockMixin
 from ecommerce.enterprise.utils import (
+    CUSTOMER_CATALOGS_DEFAULT_RESPONSE,
     enterprise_customer_user_needs_consent,
     get_enterprise_catalog,
     get_enterprise_customer,
+    get_enterprise_customer_catalogs,
     get_enterprise_customer_uuid,
     get_enterprise_customers,
     get_enterprise_id_for_current_request_user_from_jwt,
     get_enterprise_id_for_user,
     get_or_create_enterprise_customer_user,
-    set_enterprise_customer_cookie
+    set_enterprise_customer_cookie,
+    update_paginated_response
 )
 from ecommerce.extensions.test.factories import prepare_voucher
 from ecommerce.tests.testcases import TestCase
@@ -288,3 +291,82 @@ class EnterpriseUtilsTests(EnterpriseServiceMockMixin, TestCase):
             'results': []
         }
         assert get_enterprise_id_for_user('some-site', self.learner) is None
+
+    def test_get_enterprise_customer_catalogs(self):
+        """
+        Verify that "get_enterprise_customer_catalogs" works as expected with and without caching.
+        """
+        enterprise_customer_uuid = str(uuid.uuid4())
+        base_url = self.ENTERPRISE_CATALOG_URL
+
+        self.mock_access_token_response()
+        self.mock_enterprise_catalog_api(enterprise_customer_uuid)
+
+        # verify the caching
+        with patch.object(TieredCache, 'set_all_tiers', wraps=TieredCache.set_all_tiers) as mocked_set_all_tiers:
+            mocked_set_all_tiers.assert_not_called()
+
+            response = get_enterprise_customer_catalogs(self.site, base_url, enterprise_customer_uuid, 1)
+            self.assertEqual(mocked_set_all_tiers.call_count, 2)
+
+            cached_response = get_enterprise_customer_catalogs(self.site, base_url, enterprise_customer_uuid, 1)
+            self.assertEqual(response, cached_response)
+            self.assertEqual(mocked_set_all_tiers.call_count, 2)
+
+    def test_get_enterprise_customer_catalogs_with_exception(self):
+        """
+        Verify that "get_enterprise_customer_catalogs" return default response on exception.
+        """
+        enterprise_customer_uuid = str(uuid.uuid4())
+        base_url = self.ENTERPRISE_CATALOG_URL
+
+        self.mock_access_token_response()
+        self.mock_enterprise_catalog_api(enterprise_customer_uuid, raise_exception=True)
+
+        with patch('ecommerce.enterprise.utils.logging.exception') as mock_logger:
+            response = get_enterprise_customer_catalogs(self.site, base_url, enterprise_customer_uuid, 1)
+            self.assertEqual(response, CUSTOMER_CATALOGS_DEFAULT_RESPONSE)
+            self.assertTrue(mock_logger.called)
+
+    @ddt.data(
+        {
+            'next_url': None,
+            'expected_next': None,
+            'previous': None,
+            'expected_previous': None,
+        },
+        {
+            'next_url': None,
+            'expected_next': None,
+            'previous': 'http://lms.server/enterprise/api/v1/enterprise_catalogs/?enterprise=6ae013d4&page=3',
+            'expected_previous': 'http://ecom.server/api/v2/enterprise/customer_catalogs?enterprise=6ae013d4&page=3',
+        },
+        {
+            'next_url': 'http://lms.server/enterprise/api/v1/enterprise_catalogs/?enterprise=6ae013d4&page=3',
+            'expected_next': 'http://ecom.server/api/v2/enterprise/customer_catalogs?enterprise=6ae013d4&page=3',
+            'previous': None,
+            'expected_previous': None,
+        },
+        {
+            'next_url': 'http://lms.server/enterprise/api/v1/enterprise_catalogs/?enterprise=6ae013d4&page=3',
+            'expected_next': 'http://ecom.server/api/v2/enterprise/customer_catalogs?enterprise=6ae013d4&page=3',
+            'previous': 'http://lms.server/enterprise/api/v1/enterprise_catalogs/?enterprise=6ae013d4&page=1',
+            'expected_previous': 'http://ecom.server/api/v2/enterprise/customer_catalogs?enterprise=6ae013d4&page=1',
+        },
+    )
+    @ddt.unpack
+    def test_update_paginated_response(self, next_url, expected_next, previous, expected_previous):
+        """
+        Verify that "update_paginated_response" util works as expected.
+        """
+        ecom_endpoint_url = 'http://ecom.server/api/v2/enterprise/customer_catalogs'
+        original_response = dict(CUSTOMER_CATALOGS_DEFAULT_RESPONSE, next=next_url, previous=previous)
+
+        updated_response = update_paginated_response(ecom_endpoint_url, original_response)
+
+        expected_response = dict(
+            original_response,
+            next=expected_next,
+            previous=expected_previous
+        )
+        self.assertEqual(expected_response, updated_response)
