@@ -64,9 +64,12 @@ class TrackingMiddleware(object):
         Return LMS user_id passed through social auth, if found.
         Returns None if not found.
         """
-        lms_user_id_social_auth = None
         try:
-            lms_user_id_social_auth = user.social_auth.first().extra_data[u'user_id']  # pylint: disable=no-member
+            auth_entries = user.social_auth.all()
+            if auth_entries:
+                for auth_entry in auth_entries:
+                    lms_user_id_social_auth = auth_entry.extra_data.get(u'user_id')
+                    if lms_user_id_social_auth:
+                        return lms_user_id_social_auth
         except Exception:  # pylint: disable=broad-except
             pass
-        return lms_user_id_social_auth
