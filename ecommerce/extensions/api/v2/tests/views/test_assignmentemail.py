@@ -87,7 +87,7 @@ class AssignmentEmailStatusTests(TestCase):
         log_name = 'ecommerce.extensions.api.v2.views.assignmentemail'
         with LogCapture(level=logging.INFO) as log:
             response = self.client.post(self.path, data=json.dumps(post_data), content_type='application/json')
-        log.check(
+        log.check_present(
             (log_name, 'ERROR', log_data),
         )
         self.assertEqual(response.status_code, status_code)
@@ -192,7 +192,7 @@ class AssignmentEmailBounceTests(TestCase):
         with override_settings(SAILTHRU_SECRET=sailthru_secret):
             with LogCapture(level=logging.INFO) as log:
                 response = self.client.post(self.path, data=json.dumps(post_data), content_type='application/json')
-        log.check(
+        log.check_present(
             (self.log_name, 'ERROR', log_data),
         )
         self.assertEqual(response.status_code, status_code)
@@ -231,7 +231,7 @@ class AssignmentEmailBounceTests(TestCase):
             with mock.patch("ecommerce.extensions.api.v2.views.assignmentemail.SailthruClient.receive_hardbounce_post",
                             return_value=True):
                 response = self.client.post(self.path, data=json.dumps(post_data), content_type='application/json')
-        log.check()
+        log.check_present()
         self.assertEqual(response.status_code, status_code)
         self.assertDictEqual(response_data, json.loads(response.content))
         updated_offer_assignment = OfferAssignment.objects.get(id=offer_assignment.id)

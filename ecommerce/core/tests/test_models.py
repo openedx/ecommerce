@@ -63,10 +63,20 @@ class UserTests(DiscoveryTestMixin, LmsApiMockMixin, TestCase):
         self.create_access_token(user)
         self.assertEqual(user.access_token, self.access_token)
 
+    def test_lms_user_id_from_user(self):
+        """ Ensures the lms_user_id can be pulled from the ecommerce user. """
+        user = self.create_user()
+
+        user.lms_user_id = self.LMS_USER_ID
+        user.save()
+
+        same_user = User.objects.get(id=user.id)
+        self.assertEqual(same_user.lms_user_id_from_request(), self.LMS_USER_ID)
+
     def test_lms_user_id_from_jwt_cookie(self):
         """ Ensures the lms_user_id can be pulled from the jwt cookie. """
         user = self.create_user()
-        self.assertIsNone(user.lms_user_id_from_request)
+        self.assertIsNone(user.lms_user_id_from_request())
 
         payload = generate_latest_version_payload(user, scopes=['user_id'])
         payload['user_id'] = 'test-lms-user-id'
@@ -74,26 +84,26 @@ class UserTests(DiscoveryTestMixin, LmsApiMockMixin, TestCase):
         mock_request_with_cookie = mock.Mock(COOKIES={'edx-jwt-cookie': jwt})
 
         with mock.patch('ecommerce.core.models.crum.get_current_request', return_value=mock_request_with_cookie):
-            self.assertEqual(user.lms_user_id_from_request, 'test-lms-user-id')
+            self.assertEqual(user.lms_user_id_from_request(), 'test-lms-user-id')
 
     def test_lms_user_id_from_social_auth(self):
         """ Ensures the lms_user_id can be pulled from the tracking context. """
         user = self.create_user()
-        self.assertIsNone(user.lms_user_id_from_request)
+        self.assertIsNone(user.lms_user_id_from_request())
 
         self.set_user_id_in_social_auth(user, 'test-social-auth-user-id')
-        self.assertEqual(user.lms_user_id_from_request, 'test-social-auth-user-id')
+        self.assertEqual(user.lms_user_id_from_request(), 'test-social-auth-user-id')
 
     def test_lms_user_id_from_tracking_context(self):
         """ Ensures the lms_user_id can be pulled from the tracking context. """
         user = self.create_user()
-        self.assertIsNone(user.lms_user_id_from_request)
+        self.assertIsNone(user.lms_user_id_from_request())
 
         user.tracking_context = self.TEST_CONTEXT
         user.save()
 
         same_user = User.objects.get(id=user.id)
-        self.assertEqual(same_user.lms_user_id_from_request, self.TEST_CONTEXT['lms_user_id'])
+        self.assertEqual(same_user.lms_user_id_from_request(), self.TEST_CONTEXT['lms_user_id'])
 
     def test_tracking_context(self):
         """ Ensures that the tracking_context dictionary is written / read
@@ -345,14 +355,14 @@ class SiteConfigurationTests(TestCase):
 
     def test_get_client_side_payment_processor(self):
         """ Verify the method returns the client-side payment processor. """
-        PROCESSOR_NAME = 'cybersource'
-        site_config = _make_site_config(PROCESSOR_NAME)
+        processor_name = 'cybersource'
+        site_config = _make_site_config(processor_name)
 
         site_config.client_side_payment_processor = None
         self.assertIsNone(site_config.get_client_side_payment_processor_class())
 
-        site_config.client_side_payment_processor = PROCESSOR_NAME
-        self.assertEqual(site_config.get_client_side_payment_processor_class().NAME, PROCESSOR_NAME)
+        site_config.client_side_payment_processor = processor_name
+        self.assertEqual(site_config.get_client_side_payment_processor_class().NAME, processor_name)
 
     def test_get_from_email(self):
         """

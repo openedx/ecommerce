@@ -8,6 +8,7 @@ from django.db import migrations, models
 
 def add_default_site_to_partners(apps, schema_editor):
     Partner = apps.get_model('partner', 'Partner')
+    Partner.skip_history_when_saving = True
 
     for partner in Partner.objects.all():
         if hasattr(partner, 'siteconfiguration'):

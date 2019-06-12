@@ -17,7 +17,6 @@ from factory.fuzzy import FuzzyText
 from oscar.apps.basket.forms import BasketVoucherForm
 from oscar.core.loading import get_class, get_model
 from oscar.test import factories
-from oscar.test.utils import RequestFactory
 from requests.exceptions import ConnectionError, Timeout
 from slumber.exceptions import SlumberBaseException
 from testfixtures import LogCapture
@@ -61,7 +60,6 @@ StockRecord = get_model('partner', 'StockRecord')
 Voucher = get_model('voucher', 'Voucher')
 VoucherAddView = get_class('basket.views', 'VoucherAddView')
 VoucherApplication = get_model('voucher', 'VoucherApplication')
-VoucherRemoveView = get_class('basket.views', 'VoucherRemoveView')
 
 COUPON_CODE = 'COUPONTEST'
 BUNDLE = 'bundle_identifier'
@@ -320,7 +318,7 @@ class BasketLogicTestMixin(object):
 @httpretty.activate
 class PaymentApiViewTests(BasketLogicTestMixin, TestCase):
     """ PaymentApiViewTests basket api tests. """
-    path = reverse('payment_bff:v0:payment')
+    path = reverse('payment_bff:v0:payment:payment')
 
     def setUp(self):
         super(PaymentApiViewTests, self).setUp()
@@ -340,8 +338,8 @@ class PaymentApiViewTests(BasketLogicTestMixin, TestCase):
         self.assertEqual(response.status_code, 200)
 
         expected_response = {
-            'line_total': 512,
-            'line_discount': 12,
+            'total_excl_discount': 512,
+            'total_discount': 12,
             'order_total': 500,
             'products': [
                 {
@@ -352,6 +350,7 @@ class PaymentApiViewTests(BasketLogicTestMixin, TestCase):
             ],
             'show_voucher_form': True,
             'voucher': {
+                'id': 12345,
                 'code': 'SUMMER20',
                 "benefit": {
                     "type": "Percentage",
@@ -366,7 +365,6 @@ class PaymentApiViewTests(BasketLogicTestMixin, TestCase):
                     'type': 'paypal',
                 }
             ],
-            'sdn_check': True,
         }
         self.assertDictEqual(response.json(), expected_response)
 
@@ -1018,17 +1016,71 @@ class VoucherAddViewTests(LmsApiMockMixin, TestCase):
         self.assert_form_valid_message("Coupon code '{code}' added to basket.".format(code=COUPON_CODE))
 
 
-class VoucherRemoveViewTests(TestCase):
-    def test_post_with_missing_voucher(self):
-        """ If the voucher is missing, verify the view queues a message and redirects. """
-        pk = '12345'
-        view = VoucherRemoveView.as_view()
-        request = RequestFactory().post('/')
-        request.basket.save()
-        response = view(request, pk=pk)
+@httpretty.activate
+class AddVoucherApiViewTests(BasketLogicTestMixin, TestCase):
+    """ AddVoucherApiViewTests basket api tests. """
+    path = reverse('payment_bff:v0:payment:addvoucher')
 
-        self.assertEqual(response.status_code, 302)
+    def setUp(self):
+        super(AddVoucherApiViewTests, self).setUp()
+        self.maxDiff = None
+        self.user = self.create_user()
+        self.client.login(username=self.user.username, password=self.password)
+        self.course = CourseFactory(name='AddVoucherApiViewTests', partner=self.partner)
 
-        actual = list(get_messages(request))[-1].message
-        expected = "No voucher found with id '{}'".format(pk)
-        self.assertEqual(actual, expected)
+    def test_response_success(self):
+        """ Verify a successful response is returned. """
+        seat = self.create_seat(self.course, seat_price=500)
+        basket = self.create_basket_and_add_product(seat)
+        self.mock_access_token_response()
+        self.assertEqual(basket.lines.count(), 1)
+
+        response = self.client.post(self.path, {'code': 'test-code'})
+
+        self.assertEqual(response.status_code, 200)
+
+        expected_response = {
+            'total_excl_discount': 112,
+            'total_discount': 12,
+            'order_total': 100,
+            'voucher': {
+                'id': 12345,
+                'code': 'test-code',
+                "benefit": {
+                    "type": "Percentage",
+                    "value": 20
+                },
+            },
+        }
+        self.assertDictEqual(response.json(), expected_response)
+
+
+@httpretty.activate
+class RemoveVoucherApiViewTests(BasketLogicTestMixin, TestCase):
+    """ RemoveVoucherApiViewTests basket api tests. """
+    path = reverse('payment_bff:v0:payment:removevoucher', kwargs={'voucherid': 12345})
+
+    def setUp(self):
+        super(RemoveVoucherApiViewTests, self).setUp()
+        self.maxDiff = None
+        self.user = self.create_user()
+        self.client.login(username=self.user.username, password=self.password)
+        self.course = CourseFactory(name='RemoveVoucherApiViewTests', partner=self.partner)
+
+    def test_response_success(self):
+        """ Verify a successful response is returned. """
+        seat = self.create_seat(self.course, seat_price=500)
+        basket = self.create_basket_and_add_product(seat)
+        self.mock_access_token_response()
+        self.assertEqual(basket.lines.count(), 1)
+
+        response = self.client.delete(self.path)
+
+        self.assertEqual(response.status_code, 200)
+
+        expected_response = {
+            'total_excl_discount': 112,
+            'total_discount': 0,
+            'order_total': 112,
+        }
+        self.assertDictEqual(response.json(), expected_response)

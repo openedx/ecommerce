@@ -13,8 +13,8 @@ from django.shortcuts import redirect, render
 from django.utils.html import escape
 from django.utils.translation import ugettext as _
 from opaque_keys.edx.keys import CourseKey
+
 from oscar.apps.basket.views import VoucherAddView as BaseVoucherAddView
-from oscar.apps.basket.views import VoucherRemoveView as BaseVoucherRemoveView
 from oscar.apps.basket.views import *  # pylint: disable=wildcard-import, unused-wildcard-import
 from oscar.core.prices import Price
 from requests.exceptions import ConnectionError, Timeout
@@ -485,19 +485,22 @@ class PaymentApiView(BasketLogicMixin, APIView):
 
         """
         return {
-            'line_total': context['order_total'].excl_tax + 12,
-            'line_discount': 12,
+            'total_excl_discount': context['order_total'].excl_tax + 12,
+            'total_discount': 12,
             'order_total': context['order_total'].excl_tax,
             'products': [
                 # NOTE: Will add additional level for program and include bundle_id for bundles
                 {
                     'name': 'Introduction to Happiness',
+                    # TODO: A real sample value would be 'verified'.  Not sure what this is called? Certificate type?
+                    # https://github.com/edx/ecommerce/search?q=seat_type+certificate&unscoped_q=seat_type+certificate
                     'seat_type': 'verified-certificate',
                     'img_url': 'https://prod-discovery.edx-cdn.org/media/course/image/21be6203.small.jpg',
                 },
             ],
             'show_voucher_form': True,
             'voucher': {
+                'id': 12345,
                 'code': 'SUMMER20',
                 "benefit": {
                     "type": "Percentage",
@@ -514,7 +517,6 @@ class PaymentApiView(BasketLogicMixin, APIView):
                     'type': 'paypal',
                 }
             ],
-            'sdn_check': True,
         }
 
     def get(self, request):  # pylint: disable=unused-argument
@@ -625,11 +627,54 @@ class VoucherAddView(BaseVoucherAddView):  # pylint: disable=function-redefined
         return redirect_to_referrer(self.request, 'basket:summary')
 
 
-class VoucherRemoveView(BaseVoucherRemoveView):  # pylint: disable=function-redefined
-    def post(self, request, *args, **kwargs):
-        # TODO Remove this once https://github.com/django-oscar/django-oscar/pull/2241 is merged.
-        # This prevents an issue that arises when the user applies a voucher, opens the basket page in
-        # another window/tab, and attempts to remove the voucher on both screens. Under this scenario the
-        # second attempt to remove the voucher will raise an error.
-        kwargs['pk'] = int(kwargs['pk'])
-        return super(VoucherRemoveView, self).post(request, *args, **kwargs)
+class AddVoucherApiView(APIView):
+    """
+    Api for adding voucher to a basket.
+
+    POST:
+    Adds voucher to a basket using the voucher's code.
+    {
+        "code": "SUMMER20"
+    }
+    Will return 200 and the relevant basket updates as json if successful.
+    If unsuccessful, will return 406 with the error.
+    """
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request):  # pylint: disable=unused-argument
+        code = request.data.get('code')
+        # TODO: ARCH-853: Replace mock implementation with real implementation
+        return Response({
+            'voucher': {
+                'id': 12345,
+                'code': code,
+                "benefit": {
+                    "type": "Percentage",
+                    "value": 20
+                },
+            },
+            'total_excl_discount': 112,
+            'total_discount': 12,
+            'order_total': 100,
+        })
+
+
+class RemoveVoucherApiView(APIView):
+    """
+    Api for removing voucher from a basket.
+
+    DELETE:
+    Will return 200 and the relevant basket updates as json if successful.
+    If unsuccessful, will return 406 with the error.
+
+    NOTE: Because this is a backend-for-frontend api, we are ok with returning content for a DELETE api.
+    """
+    permission_classes = (IsAuthenticated,)
+
+    def delete(self, request, voucherid):  # pylint: disable=unused-argument
+        # TODO: ARCH-853: Replace mock implementation with real implementation
+        return Response({
+            'total_excl_discount': 112,
+            'total_discount': 0,
+            'order_total': 112,
+        })

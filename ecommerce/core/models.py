@@ -480,11 +480,6 @@ class SiteConfiguration(models.Model):
         return EdxRestApiClient(self.build_lms_url('/api/entitlements/v1/'), jwt=self.access_token)
 
 
-# NOTE: Adding django-simple-history tracking for this model would conflict with the migration
-# "0006_add_service_user" which updates rows in this model.  Adding history to this model was slated
-# in DE-1424, but we ran into this migrations issue and instead punted it.
-#
-# I created a ticket to revisit history for this model: https://openedx.atlassian.net/browse/DE-1481
 class User(AbstractUser):
     """
     Custom user model for use with python-social-auth via edx-auth-backends.
@@ -509,13 +504,21 @@ class User(AbstractUser):
         except Exception:  # pylint: disable=broad-except
             return None
 
-    # TODO Update this to first check the lms_user_id (see REVMI-198). Also consider making this not a property and
-    # renaming it.
-    @property
     def lms_user_id_from_request(self):
         """
         Returns the LMS user_id, or None if not found.
+
+        First check to see if the user has an LMS user_id. If so, return it. If not, check the jwt, then social_auth,
+        then the tracking_context.
+
+        TODO: Remove this once we can successfully get the id from social auth and the db. See REVMI-258
         """
+        # See if we can read the lms_user_id from the ecommerce_user.
+        lms_user_id = self.lms_user_id
+        if lms_user_id:
+            monitoring_utils.set_custom_metric('lms_user_id_ecommerce_user', lms_user_id)
+            return lms_user_id
+
         # JWT cookie is used with API calls from new microfrontends. This is not persisted.
         # TODO: Rename ``_get_lms_user_id_from_jwt_cookie`` to ``_get_lms_user_id_from_jwt``
         #   and update to use new method to be added to JwtAuthentication in edx-drf-extensions
