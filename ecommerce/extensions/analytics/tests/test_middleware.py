@@ -38,7 +38,7 @@ class TrackingMiddlewareTests(TestCase):
         self.assertNotEqual(updated_client_id, self.user.tracking_context.get('ga_client_id'))
         self._assert_ga_client_id(updated_client_id)
 
-    def test_social_auth_lms_user_id_(self):
+    def test_social_auth_lms_user_id(self):
         """ Test that middleware saves the LMS user_id from the social auth. """
         user = self.create_user()
         user.tracking_context = self.TEST_CONTEXT
@@ -54,7 +54,7 @@ class TrackingMiddlewareTests(TestCase):
         same_user = User.objects.get(id=user.id)
         self.assertEqual(same_user.lms_user_id, lms_user_id)
 
-    def test_social_auth_multiple_entries_lms_user_id_(self):
+    def test_social_auth_multiple_entries_lms_user_id(self):
         """ Test that middleware saves the LMS user_id from the social auth, when the first social auth data does not
         contain a user_id. """
         user = self.create_user()
@@ -67,23 +67,11 @@ class TrackingMiddlewareTests(TestCase):
 
         same_user = User.objects.get(id=user.id)
         self.assertIsNone(same_user.lms_user_id)
+        self.assertEqual(same_user.social_auth.count(), 2)
 
         self._process_request(same_user)
         same_user = User.objects.get(id=user.id)
         self.assertEqual(same_user.lms_user_id, lms_user_id)
-
-    def test_tracking_context_lms_user_id_(self):
-        """ Test that middleware saves the LMS user_id from the tracking_context. """
-        user = self.create_user()
-        user.tracking_context = self.TEST_CONTEXT
-        user.save()
-
-        same_user = User.objects.get(id=user.id)
-        self.assertIsNone(same_user.lms_user_id)
-
-        self._process_request(same_user)
-        same_user = User.objects.get(id=user.id)
-        self.assertEqual(same_user.lms_user_id, self.TEST_CONTEXT['lms_user_id'])
 
     def test_does_not_overwrite_lms_user_id(self):
         """ Test that middleware does not overwrite an existing LMS user_id. """
@@ -103,14 +91,34 @@ class TrackingMiddlewareTests(TestCase):
         same_user = User.objects.get(id=user.id)
         self.assertEqual(initial_lms_user_id, same_user.lms_user_id)
 
-    def test_no_lms_user_id_(self):
+    def test_no_lms_user_id(self):
         """ Test that middleware logs a missing LMS user_id. """
         user = self.create_user()
         expected = [
             (
                 self.LOGGER_NAME,
-                'INFO',
+                'WARNING',
                 'Could not find lms_user_id for user {}. Request path: /, referrer: None'.format(user.id)
+            ),
+        ]
+
+        same_user = User.objects.get(id=user.id)
+        with LogCapture(self.LOGGER_NAME) as log:
+            self._process_request(same_user)
+            log.check_present(*expected)
+
+        same_user = User.objects.get(id=user.id)
+        self.assertIsNone(same_user.lms_user_id)
+
+    def test_lms_user_id_exception(self):
+        """ Test that middleware logs an exception when looking for the LMS user_id. """
+        user = self.create_user()
+        UserSocialAuth.objects.create(user=user, provider='edx-oauth2', extra_data=None)
+        expected = [
+            (
+                self.LOGGER_NAME,
+                'WARNING',
+                'Exception retrieving lms_user_id from social_auth for user {}.'.format(user.id)
             ),
         ]
 

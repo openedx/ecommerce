@@ -110,7 +110,7 @@ class RefundTests(RefundTestMixin, StatusTestsMixin, TestCase):
         """
         Asserts that refund creation is logged.
         """
-        l.check(
+        l.check_present(
             (
                 LOGGER_NAME,
                 'INFO',
@@ -148,8 +148,6 @@ class RefundTests(RefundTestMixin, StatusTestsMixin, TestCase):
             self.assertEqual(isinstance(refund, Refund), refund_created)
             if refund_created:
                 self.assert_refund_creation_logged(l, refund, order)
-            else:
-                l.check()
 
     @httpretty.activate
     @mock.patch('ecommerce.extensions.fulfillment.modules.EnrollmentFulfillmentModule.revoke_line')
@@ -235,7 +233,7 @@ class RefundTests(RefundTestMixin, StatusTestsMixin, TestCase):
             with mock.patch.object(Refund, '_notify_purchaser', return_value=None) as mock_notify:
                 self.approve(refund)
 
-            l.check(
+            l.check_present(
                 (
                     LOGGER_NAME,
                     'INFO',
@@ -341,8 +339,8 @@ class RefundTests(RefundTestMixin, StatusTestsMixin, TestCase):
         with mock.patch('ecommerce.extensions.refund.models.RefundLine.deny', side_effect=Exception):
             with LogCapture(REFUND_MODEL_LOGGER_NAME) as l:
                 self.assertFalse(refund.deny())
-                l.check((REFUND_MODEL_LOGGER_NAME, 'ERROR',
-                         'Failed to deny RefundLine [{}].'.format(refund.lines.first().id)))
+                msg = 'Failed to deny RefundLine [{}].'.format(refund.lines.first().id)
+                l.check_present((REFUND_MODEL_LOGGER_NAME, 'ERROR', msg))
 
     @ddt.data(REFUND.REVOCATION_ERROR, REFUND.PAYMENT_REFUNDED, REFUND.PAYMENT_REFUND_ERROR, REFUND.COMPLETE)
     def test_deny_wrong_state(self, status):
@@ -381,7 +379,7 @@ class RefundTests(RefundTestMixin, StatusTestsMixin, TestCase):
             refund._notify_purchaser()  # pylint: disable=protected-access
 
         msg = 'Course refund notification scheduled for Refund [{}].'.format(refund.id)
-        l.check(
+        l.check_present(
             (REFUND_MODEL_LOGGER_NAME, 'INFO', msg)
         )
 
@@ -414,7 +412,7 @@ class RefundTests(RefundTestMixin, StatusTestsMixin, TestCase):
             refund._notify_purchaser()  # pylint: disable=protected-access
 
         msg = 'Course refund notification scheduled for Refund [{}].'.format(refund.id)
-        l.check(
+        l.check_present(
             (REFUND_MODEL_LOGGER_NAME, 'INFO', msg)
         )
 
@@ -436,7 +434,7 @@ class RefundTests(RefundTestMixin, StatusTestsMixin, TestCase):
 
         msg = 'Refund notifications are disabled for Partner [{code}]. ' \
               'No notification will be sent for Refund [{id}]'.format(code=self.partner.short_code, id=refund.id)
-        l.check(
+        l.check_present(
             (REFUND_MODEL_LOGGER_NAME, 'INFO', msg)
         )
         self.assertFalse(mock_task.called)
@@ -457,7 +455,7 @@ class RefundTests(RefundTestMixin, StatusTestsMixin, TestCase):
 
         msg = ('No refund notification will be sent for Refund [{id}]. The notification supports product '
                'lines of type Course, not [{product_class}].').format(product_class=product_class, id=refund.id)
-        l.check(
+        l.check_present(
             (REFUND_MODEL_LOGGER_NAME, 'WARNING', msg)
         )
         self.assertFalse(mock_task.called)

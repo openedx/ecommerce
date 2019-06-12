@@ -5,6 +5,7 @@ import mock
 from django.contrib.auth.models import AnonymousUser
 from django.test.client import RequestFactory
 from oscar.test import factories
+from testfixtures import LogCapture
 
 from analytics import Client
 from ecommerce.core.models import User  # pylint: disable=unused-import
@@ -26,6 +27,7 @@ from ecommerce.tests.testcases import TransactionTestCase
 @ddt.ddt
 class UtilsTest(DiscoveryTestMixin, BasketMixin, TransactionTestCase):
     """ Tests for the analytics utils. """
+    LOGGER_NAME = 'ecommerce.extensions.analytics.utils'
 
     def test_prepare_analytics_data(self):
         """ Verify the function returns correct analytics data for a logged in user."""
@@ -35,10 +37,11 @@ class UtilsTest(DiscoveryTestMixin, BasketMixin, TransactionTestCase):
             email='test@example.com',
             tracking_context={'lms_user_id': '1235123'}
         )
+        user_tracking_id = ECOM_TRACKING_ID_FMT.format(user.id)
         data = prepare_analytics_data(user, self.site.siteconfiguration.segment_key)
         self.assertDictEqual(json.loads(data), {
             'tracking': {'segmentApplicationId': self.site.siteconfiguration.segment_key},
-            'user': {'user_tracking_id': '1235123', 'name': 'John Doe', 'email': 'test@example.com'}
+            'user': {'user_tracking_id': user_tracking_id, 'name': 'John Doe', 'email': 'test@example.com'}
         })
 
     def test_anon_prepare_analytics_data(self):
@@ -57,28 +60,31 @@ class UtilsTest(DiscoveryTestMixin, BasketMixin, TransactionTestCase):
             'lms_user_id': 'foo',
             'lms_ip': '18.0.0.1',
         }
-        user = self.create_user(tracking_context=tracking_context)
-        expected = (tracking_context['lms_user_id'], tracking_context['ga_client_id'], tracking_context['lms_ip'])
-        self.assertEqual(parse_tracking_context(user), expected)
 
         # If no LMS user ID is provided, we should create one based on the E-Commerce ID
-        del tracking_context['lms_user_id']
         user = self.create_user(tracking_context=tracking_context)
         expected = (ECOM_TRACKING_ID_FMT.format(user.id), tracking_context['ga_client_id'], tracking_context['lms_ip'])
         self.assertEqual(parse_tracking_context(user), expected)
 
     def test_parse_tracking_context_not_available(self):
         """
-        The method should still pull the user_id from lms_user_id on the User object when there is
-        no tracking context.
+        The method should still pull a value for the user_id when there is no tracking context.
         """
         user = self.create_user()
-        expected = ('test-user-id', None, None)
-        with mock.patch(
-            'ecommerce.core.models.User.lms_user_id_from_request',
-            return_value='test-user-id'
-        ):
-            self.assertEqual(parse_tracking_context(user), expected)
+        user_tracking_id = ECOM_TRACKING_ID_FMT.format(user.id)
+        expected_context = (user_tracking_id, None, None)
+        expected_logs = [
+            (
+                self.LOGGER_NAME,
+                'WARNING',
+                'Could not find lms_user_id for user {} for None'.format(user.id)
+            ),
+        ]
+
+        with LogCapture(self.LOGGER_NAME) as log:
+            context = parse_tracking_context(user)
+            log.check_present(*expected_logs)
+            self.assertEqual(context, expected_context)
 
     def test_track_segment_event_without_segment_key(self):
         """ If the site has no Segment key, the function should log a debug message and NOT send an event."""

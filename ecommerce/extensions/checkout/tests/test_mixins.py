@@ -80,7 +80,7 @@ class EdxOrderPlacementMixinTests(BusinessIntelligenceMixin, PaymentEventsMixin,
 
         with LogCapture(LOGGER_NAME) as l:
             mixin.handle_payment({}, basket)
-            l.check(
+            l.check_present(
                 (
                     LOGGER_NAME,
                     'INFO',
@@ -150,7 +150,7 @@ class EdxOrderPlacementMixinTests(BusinessIntelligenceMixin, PaymentEventsMixin,
             self.assert_correct_event(
                 mock_track,
                 self.order,
-                tracking_context['lms_user_id'],
+                ECOM_TRACKING_ID_FMT.format(self.user.id),
                 tracking_context['ga_client_id'],
                 tracking_context['lms_ip'],
                 self.order.number,
@@ -159,7 +159,7 @@ class EdxOrderPlacementMixinTests(BusinessIntelligenceMixin, PaymentEventsMixin,
                 self.order.total_excl_tax,
                 self.order.total_excl_tax        # value for revenue field is same as total.
             )
-            l.check(
+            l.check_present(
                 (
                     LOGGER_NAME,
                     'INFO',

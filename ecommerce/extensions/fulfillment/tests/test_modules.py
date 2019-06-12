@@ -139,7 +139,7 @@ class EnrollmentFulfillmentModuleTests(ProgramTestMixin, DiscoveryTestMixin, Ful
             EnrollmentFulfillmentModule().fulfill_product(self.order, list(self.order.lines.all()))
 
             line = self.order.lines.get()
-            l.check(
+            l.check_present(
                 (
                     LOGGER_NAME,
                     'INFO',
@@ -243,7 +243,7 @@ class EnrollmentFulfillmentModuleTests(ProgramTestMixin, DiscoveryTestMixin, Ful
         with LogCapture(LOGGER_NAME) as l:
             self.assertTrue(EnrollmentFulfillmentModule().revoke_line(line))
 
-            l.check(
+            l.check_present(
                 (
                     LOGGER_NAME,
                     'INFO',
@@ -294,7 +294,7 @@ class EnrollmentFulfillmentModuleTests(ProgramTestMixin, DiscoveryTestMixin, Ful
         logger_name = 'ecommerce.extensions.fulfillment.modules'
         with LogCapture(logger_name) as l:
             self.assertTrue(EnrollmentFulfillmentModule().revoke_line(line))
-            l.check(
+            l.check_present(
                 (logger_name, 'INFO', 'Attempting to revoke fulfillment of Line [{}]...'.format(line.id)),
                 (logger_name, 'INFO', 'Skipping revocation for line [%d]: %s' % (line.id, message))
             )
@@ -310,7 +310,7 @@ class EnrollmentFulfillmentModuleTests(ProgramTestMixin, DiscoveryTestMixin, Ful
         logger_name = 'ecommerce.extensions.fulfillment.modules'
         with LogCapture(logger_name) as l:
             self.assertFalse(EnrollmentFulfillmentModule().revoke_line(line))
-            l.check(
+            l.check_present(
                 (logger_name, 'INFO', 'Attempting to revoke fulfillment of Line [{}]...'.format(line.id)),
                 (logger_name, 'ERROR', 'Failed to revoke fulfillment of Line [%d]: %s' % (line.id, message))
             )
@@ -330,7 +330,7 @@ class EnrollmentFulfillmentModuleTests(ProgramTestMixin, DiscoveryTestMixin, Ful
 
         with LogCapture(logger_name) as l:
             self.assertFalse(EnrollmentFulfillmentModule().revoke_line(line))
-            l.check(
+            l.check_present(
                 (logger_name, 'INFO', 'Attempting to revoke fulfillment of Line [{}]...'.format(line.id)),
                 (logger_name, 'ERROR', 'Failed to revoke fulfillment of Line [{}].'.format(line.id))
             )
@@ -347,7 +347,7 @@ class EnrollmentFulfillmentModuleTests(ProgramTestMixin, DiscoveryTestMixin, Ful
             EnrollmentFulfillmentModule().fulfill_product(self.order, list(self.order.lines.all()))
 
             line = self.order.lines.get()
-            l.check(
+            l.check_present(
                 (
                     LOGGER_NAME,
                     'INFO',
@@ -617,7 +617,7 @@ class EntitlementFulfillmentModuleTests(FulfillmentTestMixin, TestCase):
             CourseEntitlementFulfillmentModule().fulfill_product(self.order, list(self.order.lines.all()))
 
             line = self.order.lines.get()
-            l.check(
+            l.check_present(
                 (
                     LOGGER_NAME,
                     'INFO',
@@ -656,7 +656,7 @@ class EntitlementFulfillmentModuleTests(FulfillmentTestMixin, TestCase):
         with LogCapture(LOGGER_NAME) as l:
             self.assertTrue(CourseEntitlementFulfillmentModule().revoke_line(line))
 
-            l.check(
+            l.check_present(
                 (
                     LOGGER_NAME,
                     'INFO',
@@ -698,7 +698,7 @@ class EntitlementFulfillmentModuleTests(FulfillmentTestMixin, TestCase):
         with LogCapture(logger_name) as l:
             CourseEntitlementFulfillmentModule().fulfill_product(self.order, list(self.order.lines.all()))
             self.assertEqual(LINE.FULFILLMENT_SERVER_ERROR, self.order.lines.all()[0].status)
-            l.check(
+            l.check_present(
                 (logger_name, 'INFO', 'Attempting to fulfill "Course Entitlement" product types for order [{}]'.
                  format(self.order.number)),
                 (logger_name, 'ERROR', 'Unable to fulfill line [{}] of order [{}]'.
@@ -718,7 +718,7 @@ class EntitlementFulfillmentModuleTests(FulfillmentTestMixin, TestCase):
             with LogCapture(logger_name) as l:
                 CourseEntitlementFulfillmentModule().fulfill_product(self.order, list(self.order.lines.all()))
                 self.assertEqual(LINE.FULFILLMENT_NETWORK_ERROR, self.order.lines.all()[0].status)
-                l.check(
+                l.check_present(
                     (logger_name, 'INFO', 'Attempting to fulfill "Course Entitlement" product types for order [{}]'.
                      format(self.order.number)),
                     (logger_name, 'ERROR', 'Unable to fulfill line [{}] of order [{}] due to a network problem'.

@@ -3,7 +3,6 @@ import hashlib
 import logging
 from urlparse import urljoin, urlsplit, urlunsplit
 
-import crum
 from dateutil.parser import parse
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
@@ -13,11 +12,9 @@ from django.db import models
 from django.utils.functional import cached_property
 from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
-from edx_django_utils import monitoring as monitoring_utils
 from edx_django_utils.cache import TieredCache
 from edx_rbac.models import UserRole, UserRoleAssignment
 from edx_rest_api_client.client import EdxRestApiClient
-from edx_rest_framework_extensions.auth.jwt.cookies import get_decoded_jwt as get_decoded_jwt_from_jwt_cookie
 from jsonfield.fields import JSONField
 from requests.exceptions import ConnectionError, Timeout
 from simple_history.models import HistoricalRecords
@@ -503,101 +500,6 @@ class User(AbstractUser):
             return self.social_auth.first().extra_data[u'access_token']  # pylint: disable=no-member
         except Exception:  # pylint: disable=broad-except
             return None
-
-    def lms_user_id_from_request(self):
-        """
-        Returns the LMS user_id, or None if not found.
-
-        First check to see if the user has an LMS user_id. If so, return it. If not, check the jwt, then social_auth,
-        then the tracking_context.
-
-        TODO: Remove this once we can successfully get the id from social auth and the db. See REVMI-258
-        """
-        # See if we can read the lms_user_id from the ecommerce_user.
-        lms_user_id = self.lms_user_id
-        if lms_user_id:
-            monitoring_utils.set_custom_metric('lms_user_id_ecommerce_user', lms_user_id)
-            return lms_user_id
-
-        # JWT cookie is used with API calls from new microfrontends. This is not persisted.
-        # TODO: Rename ``_get_lms_user_id_from_jwt_cookie`` to ``_get_lms_user_id_from_jwt``
-        #   and update to use new method to be added to JwtAuthentication in edx-drf-extensions
-        #   to get the decoded JWT used for authentication, no matter where it came from.
-        #   See https://github.com/edx/edx-drf-extensions/pull/69#discussion_r286618922
-        lms_user_id = self._get_lms_user_id_from_jwt_cookie()
-        if lms_user_id:
-            return lms_user_id
-
-        # This is persisted to the database during any new oAuth+SSO flow.
-        lms_user_id = self._get_lms_user_id_from_social_auth()
-        if lms_user_id:
-            return lms_user_id
-
-        # Server-to-server calls from LMS to ecommerce use a specially crafted JWT.
-        lms_user_id = self._get_lms_user_id_from_tracking_context()
-        if lms_user_id:
-            return lms_user_id
-
-        # If we get here, it means either:
-        # 1. The user has an old social_auth session created before the LMS user_id was written to the database, or
-        # 2. This could be a server-to-server call that isn't properly handled, or
-        # 3. Some other unknown flow.
-        monitoring_utils.set_custom_metric('ecommerce_user_missing_lms_user_id', self.id)
-        return None
-
-    def _get_lms_user_id_from_jwt_cookie(self):
-        """
-        Return LMS user_id from JWT cookie, if found.
-        Returns None if not found.
-
-        Side effect:
-            If found, writes custom metric: 'lms_user_id_jwt_cookie'
-        """
-        request = crum.get_current_request()
-        if not request:
-            return None
-
-        decoded_jwt = get_decoded_jwt_from_jwt_cookie(request)
-        if not decoded_jwt:
-            return None
-
-        if 'user_id' in decoded_jwt:
-            lms_user_id_in_jwt_cookie = decoded_jwt['user_id']
-            monitoring_utils.set_custom_metric('lms_user_id_jwt_cookie', lms_user_id_in_jwt_cookie)
-            return lms_user_id_in_jwt_cookie
-
-    def _get_lms_user_id_from_social_auth(self):
-        """
-        Return LMS user_id passed through social auth, if found.
-        Returns None if not found.
-
-        Side effect:
-            If found, writes custom metric: 'lms_user_id_social_auth'
-        """
-        try:
-            lms_user_id_social_auth = self.social_auth.first().extra_data[u'user_id']  # pylint: disable=no-member
-            if lms_user_id_social_auth:
-                monitoring_utils.set_custom_metric('lms_user_id_social_auth', lms_user_id_social_auth)
-                return lms_user_id_social_auth
-            else:  # pragma: no cover
-                pass  # allows coverage skip for just this case.
-        except Exception:  # pylint: disable=broad-except
-            pass
-
-    def _get_lms_user_id_from_tracking_context(self):
-        """
-        Return LMS user_id passed through tracking_context, if found.
-        Returns None if not found.
-
-        Side effect:
-            If found, writes custom metric: 'lms_user_id_tracking_context'
-        """
-        # Return lms_user_id passed through tracking_context, if found.
-        tracking_context = self.tracking_context or {}
-        lms_user_id_tracking_context = tracking_context.get('lms_user_id')
-        if lms_user_id_tracking_context:
-            monitoring_utils.set_custom_metric('lms_user_id_tracking_context', lms_user_id_tracking_context)
-            return lms_user_id_tracking_context
 
     def get_full_name(self):
         return self.full_name or super(User, self).get_full_name()
