@@ -45,7 +45,25 @@ class TrackingMiddlewareTests(TestCase):
         user.save()
 
         lms_user_id = 67890
-        UserSocialAuth.objects.create(user=user, extra_data={'user_id': lms_user_id})
+        UserSocialAuth.objects.create(user=user, provider='edx-oauth2', extra_data={'user_id': lms_user_id})
+
+        same_user = User.objects.get(id=user.id)
+        self.assertIsNone(same_user.lms_user_id)
+
+        self._process_request(same_user)
+        same_user = User.objects.get(id=user.id)
+        self.assertEqual(same_user.lms_user_id, lms_user_id)
+
+    def test_social_auth_multiple_entries_lms_user_id_(self):
+        """ Test that middleware saves the LMS user_id from the social auth, when the first social auth data does not
+        contain a user_id. """
+        user = self.create_user()
+        user.tracking_context = self.TEST_CONTEXT
+        user.save()
+
+        lms_user_id = 91827
+        UserSocialAuth.objects.create(user=user, provider='edx-oidc')
+        UserSocialAuth.objects.create(user=user, provider='edx-oauth2', extra_data={'user_id': lms_user_id})
 
         same_user = User.objects.get(id=user.id)
         self.assertIsNone(same_user.lms_user_id)
@@ -76,7 +94,7 @@ class TrackingMiddlewareTests(TestCase):
         user.save()
 
         lms_user_id = 10293
-        UserSocialAuth.objects.create(user=user, extra_data={'user_id': lms_user_id})
+        UserSocialAuth.objects.create(user=user, provider='edx-oauth2', extra_data={'user_id': lms_user_id})
 
         same_user = User.objects.get(id=user.id)
         self.assertEqual(initial_lms_user_id, same_user.lms_user_id, )
