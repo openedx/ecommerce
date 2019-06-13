@@ -318,7 +318,7 @@ class BasketLogicTestMixin(object):
 @httpretty.activate
 class PaymentApiViewTests(BasketLogicTestMixin, TestCase):
     """ PaymentApiViewTests basket api tests. """
-    path = reverse('payment_bff:v0:payment:payment')
+    path = reverse('bff:payment:v0:payment')
 
     def setUp(self):
         super(PaymentApiViewTests, self).setUp()
@@ -1017,25 +1017,29 @@ class VoucherAddViewTests(LmsApiMockMixin, TestCase):
 
 
 @httpretty.activate
-class AddVoucherApiViewTests(BasketLogicTestMixin, TestCase):
-    """ AddVoucherApiViewTests basket api tests. """
-    path = reverse('payment_bff:v0:payment:addvoucher')
+class VoucherAddApiViewTests(BasketLogicTestMixin, TestCase):
+    """ VoucherAddApiViewTests basket api tests. """
+    path = reverse('bff:payment:v0:addvoucher')
 
     def setUp(self):
-        super(AddVoucherApiViewTests, self).setUp()
-        self.maxDiff = None
+        super(VoucherAddApiViewTests, self).setUp()
+        # self.maxDiff = None
         self.user = self.create_user()
         self.client.login(username=self.user.username, password=self.password)
-        self.course = CourseFactory(name='AddVoucherApiViewTests', partner=self.partner)
+        # self.course = CourseFactory(name='VoucherAddApiViewTests', partner=self.partner)
 
     def test_response_success(self):
         """ Verify a successful response is returned. """
-        seat = self.create_seat(self.course, seat_price=500)
-        basket = self.create_basket_and_add_product(seat)
+        basket = factories.BasketFactory(owner=self.user, site=self.site)
+        # seat = self.create_seat(self.course, seat_price=500)
+        # basket = self.create_basket_and_add_product(seat)
         self.mock_access_token_response()
-        self.assertEqual(basket.lines.count(), 1)
 
-        response = self.client.post(self.path, {'code': 'test-code'})
+        expected_benefit_value = 20
+        voucher, product = prepare_voucher(code=COUPON_CODE, benefit_value=expected_benefit_value)
+        basket.add_product(product)
+
+        response = self.client.post(self.path, {'code': COUPON_CODE})
 
         self.assertEqual(response.status_code, 200)
 
@@ -1044,11 +1048,11 @@ class AddVoucherApiViewTests(BasketLogicTestMixin, TestCase):
             'total_discount': 12,
             'order_total': 100,
             'voucher': {
-                'id': 12345,
-                'code': 'test-code',
+                'id': voucher.id,
+                'code': COUPON_CODE,
                 "benefit": {
-                    "type": "Percentage",
-                    "value": 20
+                    "type": 'Percentage',
+                    "value": expected_benefit_value,
                 },
             },
         }
@@ -1056,16 +1060,16 @@ class AddVoucherApiViewTests(BasketLogicTestMixin, TestCase):
 
 
 @httpretty.activate
-class RemoveVoucherApiViewTests(BasketLogicTestMixin, TestCase):
-    """ RemoveVoucherApiViewTests basket api tests. """
-    path = reverse('payment_bff:v0:payment:removevoucher', kwargs={'voucherid': 12345})
+class VoucherRemoveApiViewTests(BasketLogicTestMixin, TestCase):
+    """ VoucherRemoveApiViewTests basket api tests. """
+    path = reverse('bff:payment:v0:removevoucher', kwargs={'voucherid': 12345})
 
     def setUp(self):
-        super(RemoveVoucherApiViewTests, self).setUp()
+        super(VoucherRemoveApiViewTests, self).setUp()
         self.maxDiff = None
         self.user = self.create_user()
         self.client.login(username=self.user.username, password=self.password)
-        self.course = CourseFactory(name='RemoveVoucherApiViewTests', partner=self.partner)
+        self.course = CourseFactory(name='VoucherRemoveApiViewTests', partner=self.partner)
 
     def test_response_success(self):
         """ Verify a successful response is returned. """
