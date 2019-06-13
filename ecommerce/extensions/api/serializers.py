@@ -452,13 +452,17 @@ class EntitlementProductHelper(object):
         certificate_type = attrs.get('certificate_type')
         price = Decimal(product['price'])
 
-        create_or_update_course_entitlement(
+        entitlement = create_or_update_course_entitlement(
             certificate_type,
             price,
             partner,
             uuid,
             course.name
         )
+
+        # As a convenience to our caller, provide the SKU in the returned product serialization.
+        # We only create one stockrecord per product, so this first() business is safe.
+        product['partner_sku'] = entitlement.stockrecords.first().partner_sku
 
 
 class SeatProductHelper(object):
@@ -488,7 +492,7 @@ class SeatProductHelper(object):
         credit_hours = attrs.get('credit_hours')
         credit_hours = int(credit_hours) if credit_hours else None
 
-        course.create_or_update_seat(
+        seat = course.create_or_update_seat(
             certificate_type,
             id_verification_required,
             price,
@@ -497,6 +501,10 @@ class SeatProductHelper(object):
             credit_hours=credit_hours,
             create_enrollment_code=create_enrollment_code
         )
+
+        # As a convenience to our caller, provide the SKU in the returned product serialization.
+        # We only create one stockrecord per product, so this first() business is safe.
+        product['partner_sku'] = seat.stockrecords.first().partner_sku
 
 
 class AtomicPublicationSerializer(serializers.Serializer):  # pylint: disable=abstract-method

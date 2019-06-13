@@ -256,6 +256,8 @@ class AtomicPublicationTests(DiscoveryTestMixin, TestCase):
         self.assertEqual(seat.expires, expires)
         self.assertEqual(seat.stockrecords.get(partner=self.partner).price_excl_tax, expected['price'])
 
+        return seat
+
     def assert_course_saved(self, course_id, expected, enrollment_code_count=0):
         """Verify that the expected Course and associated products have been saved."""
         # Verify that Course was saved.
@@ -336,6 +338,18 @@ class AtomicPublicationTests(DiscoveryTestMixin, TestCase):
             response = self.client.put(self.update_path, json.dumps(updated_data), JSON_CONTENT_TYPE)
             self.assertEqual(response.status_code, 200)
             self.assert_course_saved(self.course_id, expected=updated_data, enrollment_code_count=1)
+
+    def test_sku_returned(self):
+        """Verify that the newly created product SKU is returned in the response."""
+        with mock.patch.object(LMSPublisher, 'publish') as mock_publish:
+            mock_publish.return_value = None
+            response = self.client.post(self.create_path, json.dumps(self.data), JSON_CONTENT_TYPE)
+
+        self.assertEqual(response.status_code, 201)
+
+        seat = self.assert_seat_saved(Course.objects.first(), self.data['products'][0])
+        record = seat.stockrecords.first()
+        self.assertEqual(response.data['products'][0]['partner_sku'], record.partner_sku)
 
     def test_invalid_course_id(self):
         """Verify that attempting to save a course with a bad ID yields a 400."""
