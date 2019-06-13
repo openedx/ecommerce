@@ -308,7 +308,7 @@ LOCAL_APPS = [
     'ecommerce.coupons',
     'ecommerce.courses',
     'ecommerce.invoice',
-    'ecommerce.payment_bff',
+    'ecommerce.bff',
     'ecommerce.programs',
     'ecommerce.referrals',
     'ecommerce.theming',
