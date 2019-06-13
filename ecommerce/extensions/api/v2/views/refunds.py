@@ -1,5 +1,8 @@
 """HTTP endpoints for interacting with refunds."""
+import logging
+
 from django.contrib.auth import get_user_model
+from edx_django_utils import monitoring as monitoring_utils
 from oscar.core.loading import get_model
 from rest_framework import generics, status
 from rest_framework.exceptions import ParseError
@@ -19,6 +22,8 @@ Order = get_model('order', 'Order')
 OrderLine = get_model('order', 'Line')
 Refund = get_model('refund', 'Refund')
 User = get_user_model()
+
+logger = logging.getLogger(__name__)
 
 
 class RefundCreateView(generics.CreateAPIView):
@@ -55,14 +60,17 @@ class RefundCreateView(generics.CreateAPIView):
             username (string): This is required by both types of refund
 
             course_run refund:
-            course_id (string): The course_id for wchich to refund for the given user
+            course_id (string): The course_id for which to refund for the given user
 
             course_entitlement refund:
-            order_number (string): The order for which to refund the coures entitlement
+            order_number (string): The order for which to refund the course entitlement
             entitlement_uuid (string): The UUID for the course entitlement for the given order to refund
 
         Returns:
             refunds (list): List of refunds created
+
+        Side effect:
+            If the LMS user_id cannot be found, writes custom metric: 'ecommerce_missing_lms_user_id_refund'
         """
 
         course_id = request.data.get('course_id')
@@ -80,6 +88,16 @@ class RefundCreateView(generics.CreateAPIView):
             user = User.objects.get(username=username)
         except User.DoesNotExist:
             raise BadRequestException('User "{}" does not exist.'.format(username))
+
+        if not user.lms_user_id_with_metric(usage='refund'):
+            requested_by = None
+            if request.user.is_authenticated():
+                requested_by = request.user.id
+            # TODO: Change this to an error once we can successfully get the id from social auth and the db.
+            # See REVMI-249 and REVMI-269
+            monitoring_utils.set_custom_metric('ecommerce_missing_lms_user_id_refund', user.id)
+            logger.warn(u'Could not find lms_user_id for user %s when processing refund requested by %s',
+                        user.id, requested_by)
 
         # Try and create a refund for the passed in order
         if entitlement_uuid:
