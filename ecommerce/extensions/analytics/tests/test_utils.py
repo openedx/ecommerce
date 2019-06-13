@@ -5,7 +5,6 @@ import mock
 from django.contrib.auth.models import AnonymousUser
 from django.test.client import RequestFactory
 from oscar.test import factories
-from testfixtures import LogCapture
 
 from analytics import Client
 from ecommerce.core.models import User  # pylint: disable=unused-import
@@ -27,7 +26,6 @@ from ecommerce.tests.testcases import TransactionTestCase
 @ddt.ddt
 class UtilsTest(DiscoveryTestMixin, BasketMixin, TransactionTestCase):
     """ Tests for the analytics utils. """
-    LOGGER_NAME = 'ecommerce.extensions.analytics.utils'
 
     def test_prepare_analytics_data(self):
         """ Verify the function returns correct analytics data for a logged in user."""
@@ -71,20 +69,12 @@ class UtilsTest(DiscoveryTestMixin, BasketMixin, TransactionTestCase):
         The method should still pull a value for the user_id when there is no tracking context.
         """
         user = self.create_user()
+
         user_tracking_id = ECOM_TRACKING_ID_FMT.format(user.id)
         expected_context = (user_tracking_id, None, None)
-        expected_logs = [
-            (
-                self.LOGGER_NAME,
-                'WARNING',
-                'Could not find lms_user_id for user {} for None'.format(user.id)
-            ),
-        ]
 
-        with LogCapture(self.LOGGER_NAME) as log:
-            context = parse_tracking_context(user)
-            log.check_present(*expected_logs)
-            self.assertEqual(context, expected_context)
+        context = parse_tracking_context(user)
+        self.assertEqual(context, expected_context)
 
     def test_track_segment_event_without_segment_key(self):
         """ If the site has no Segment key, the function should log a debug message and NOT send an event."""

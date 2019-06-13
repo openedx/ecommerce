@@ -24,13 +24,12 @@ def parse_tracking_context(user, usage=None):
     Returns:
         Tuple of strings: user_tracking_id, ga_client_id, lms_ip
     """
-    user_tracking_id = user.lms_user_id
+    user_tracking_id = user.lms_user_id_with_metric(usage=usage)
     if user_tracking_id is None:
         # If we still don't have the lms user ID, we will use the local user ID. However, we need
         # to disambiguate the ID we choose since there's no guarantee it won't collide with the
         # lms user ID that may be tracked at some point.
         user_tracking_id = ECOM_TRACKING_ID_FMT.format(user.id)
-        logger.warn(u'Could not find lms_user_id for user %s for %s', user.id, usage)
 
     tracking_context = user.tracking_context or {}
     lms_ip = tracking_context.get('lms_ip')
