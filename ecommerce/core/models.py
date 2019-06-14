@@ -12,6 +12,7 @@ from django.db import models
 from django.utils.functional import cached_property
 from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
+from edx_django_utils import monitoring as monitoring_utils
 from edx_django_utils.cache import TieredCache
 from edx_rbac.models import UserRole, UserRoleAssignment
 from edx_rest_api_client.client import EdxRestApiClient
@@ -500,6 +501,29 @@ class User(AbstractUser):
             return self.social_auth.first().extra_data[u'access_token']  # pylint: disable=no-member
         except Exception:  # pylint: disable=broad-except
             return None
+
+    def lms_user_id_with_metric(self, usage=None):
+        """
+        Returns the LMS user_id, or None if not found. Also sets a metric with the result.
+
+        Arguments:
+            usage (string): Optional. A description of how the returned id will be used. This will be included in log
+                messages if the LMS user id cannot be found.
+
+        Side effect:
+            If found, writes custom metric: 'ecommerce_found_lms_user_id'
+            If not found, writes custom metric: 'ecommerce_missing_lms_user_id'
+        """
+        # Read the lms_user_id from the ecommerce_user.
+        lms_user_id = self.lms_user_id
+        if lms_user_id:
+            monitoring_utils.set_custom_metric('ecommerce_found_lms_user_id', lms_user_id)
+            return lms_user_id
+
+        # Could not find the lms_user_id
+        monitoring_utils.set_custom_metric('ecommerce_missing_lms_user_id', self.id)
+        log.warn(u'Could not find lms_user_id for user %s for %s', self.id, usage)
+        return None
 
     def get_full_name(self):
         return self.full_name or super(User, self).get_full_name()

@@ -179,7 +179,7 @@ class RefundCreateViewTests(RefundTestMixin, AccessTokenMixin, JwtMixin, TestCas
 
         with LogCapture(self.LOGGER_NAME) as log:
             response = self.client.post(self.path, data, JSON_CONTENT_TYPE)
-            log.check(*expected_logs)
+            log.check_present(*expected_logs)
             self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
     def test_valid_entitlement_order(self):

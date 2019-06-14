@@ -1,6 +1,7 @@
 """HTTP endpoints for interacting with refunds."""
 import logging
 
+from edx_django_utils import monitoring as monitoring_utils
 from django.contrib.auth import get_user_model
 from oscar.core.loading import get_model
 from rest_framework import generics, status
@@ -67,6 +68,9 @@ class RefundCreateView(generics.CreateAPIView):
 
         Returns:
             refunds (list): List of refunds created
+
+        Side effect:
+            If the LMS user_id cannot be found, writes custom metric: 'ecommerce_missing_lms_user_id_refund'
         """
 
         course_id = request.data.get('course_id')
@@ -91,6 +95,7 @@ class RefundCreateView(generics.CreateAPIView):
                 requested_by = request.user.id
             # TODO: Change this to an error once we can successfully get the id from social auth and the db.
             # See REVMI-249 and REVMI-269
+            monitoring_utils.set_custom_metric('ecommerce_missing_lms_user_id_refund', user.id)
             logger.warn(u'Could not find lms_user_id for user %s when processing refund requested by %s',
                         user.id, requested_by)
 
