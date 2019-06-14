@@ -61,11 +61,11 @@ class AuthorizationError(PaymentError):
     pass
 
 
-class MultiplePaymentNotification(PaymentError):
+class RedundantPaymentNotificationError(PaymentError):
     """ Raised when duplicate payment notification is detected with same transaction ID. """
     pass
 
 
-class DuplicatePaymentNotification(PaymentError):
+class ExcessivePaymentForOrderError(PaymentError):
     """ Raised when duplicate payment notification is detected with different transaction ID. """
     pass

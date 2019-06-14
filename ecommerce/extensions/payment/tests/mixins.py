@@ -25,8 +25,8 @@ from ecommerce.extensions.fulfillment.status import ORDER
 from ecommerce.extensions.payment.constants import CARD_TYPES
 from ecommerce.extensions.payment.exceptions import (
     AuthorizationError,
-    DuplicatePaymentNotification,
-    MultiplePaymentNotification
+    ExcessivePaymentForOrderError,
+    RedundantPaymentNotificationError
 )
 from ecommerce.extensions.payment.helpers import sign
 from ecommerce.extensions.payment.processors.cybersource import Cybersource
@@ -495,13 +495,13 @@ class CybersourceNotificationTestsMixin(CybersourceMixin):
                             '[Unknown Error] was recorded in entry [{response_id}].'),
         (AuthorizationError, 'INFO', 'Payment Authorization was declined for basket [{basket_id}]. The payment '
                                      'response was recorded in entry [{response_id}].'),
-        (DuplicatePaymentNotification, 'INFO', 'Received duplicate CyberSource payment notification with different '
-                                               'transaction ID for basket [{basket_id}] which is associated with an '
-                                               'existing order [{order_number}]. Payment collected twice, '
-                                               'requesting a refund.'),
-        (MultiplePaymentNotification, 'INFO', 'Received multiple CyberSource payment notification with same '
-                                              'transaction ID for basket [{basket_id}] which is associated with '
-                                              'an existing order [{order_number}]. No payment was collected.')
+        (ExcessivePaymentForOrderError, 'INFO', 'Received duplicate CyberSource payment notification with different '
+                                                'transaction ID for basket [{basket_id}] which is associated with an '
+                                                'existing order [{order_number}]. Payment collected twice, '
+                                                'request a refund.'),
+        (RedundantPaymentNotificationError, 'INFO', 'Received redundant CyberSource payment notification with same '
+                                                    'transaction ID for basket [{basket_id}] which is associated with '
+                                                    'an existing order [{order_number}]. No payment was collected.')
     )
     @ddt.unpack
     def test_payment_handling_error(self, error_class, log_level, error_message):
