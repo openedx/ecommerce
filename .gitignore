@@ -99,3 +99,5 @@ docs/_build
 
 # emacs
 *~
+
+*.bak
