@@ -55,10 +55,10 @@ drf-extensions==0.3.1
 edx-auth-backends==2.0.1
 edx-django-release-util==0.3.1
 edx-django-sites-extensions==2.4.0
-edx-django-utils==1.0.3
+edx-django-utils==1.0.5
 edx-drf-extensions==2.3.1
 edx-ecommerce-worker==0.7.2
-edx-opaque-keys==1.0.0
+edx-opaque-keys==1.0.1
 edx-rbac==1.0.1
 edx-rest-api-client==1.9.2
 enum34==1.1.6             # via cryptography
@@ -108,7 +108,7 @@ python-dateutil==2.8.0
 python-memcached==1.58
 python-openid==2.2.5      # via social-auth-core
 pytz==2016.10
-pyyaml==5.1
+pyyaml==5.1.1
 rcssmin==1.0.6            # via django-compressor
 redis==2.10.6
 requests-oauthlib==1.2.0  # via social-auth-core
