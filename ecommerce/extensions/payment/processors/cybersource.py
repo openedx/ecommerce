@@ -22,14 +22,14 @@ from ecommerce.extensions.checkout.utils import get_receipt_page_url
 from ecommerce.extensions.payment.constants import APPLE_PAY_CYBERSOURCE_CARD_TYPE_MAP, CYBERSOURCE_CARD_TYPE_MAP
 from ecommerce.extensions.payment.exceptions import (
     AuthorizationError,
-    DuplicatePaymentNotification,
     DuplicateReferenceNumber,
+    ExcessivePaymentForOrderError,
     InvalidCybersourceDecision,
     InvalidSignatureError,
-    MultiplePaymentNotification,
     PartialAuthorizationError,
     PCIViolation,
-    ProcessorMisconfiguredError
+    ProcessorMisconfiguredError,
+    RedundantPaymentNotificationError
 )
 from ecommerce.extensions.payment.helpers import sign
 from ecommerce.extensions.payment.processors import (
@@ -283,12 +283,11 @@ class Cybersource(ApplePayMixin, BaseClientSidePaymentProcessor):
 
         transaction_id = response.get('transaction_id', None)  # Error Notifications does not include a transaction id.
         if transaction_id and decision == 'accept':
-            if PaymentProcessorResponse.objects.filter(transaction_id=transaction_id).exists():
-                if Order.objects.filter(number=response['req_reference_number']).exists():
-                    raise MultiplePaymentNotification
-            else:
-                if Order.objects.filter(number=response['req_reference_number']).exists():
-                    raise DuplicatePaymentNotification
+            if Order.objects.filter(number=response['req_reference_number']).exists():
+                if PaymentProcessorResponse.objects.filter(transaction_id=transaction_id).exists():
+                    raise RedundantPaymentNotificationError
+                else:
+                    raise ExcessivePaymentForOrderError
 
         # Raise an exception if the authorized amount differs from the requested amount.
         # Note (CCB): We should never reach this point in production since partial authorization is disabled

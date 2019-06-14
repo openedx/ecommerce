@@ -19,13 +19,13 @@ from oscar.test import factories
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.extensions.order.models import Order
 from ecommerce.extensions.payment.exceptions import (
-    DuplicatePaymentNotification,
+    ExcessivePaymentForOrderError,
     InvalidCybersourceDecision,
     InvalidSignatureError,
-    MultiplePaymentNotification,
     PartialAuthorizationError,
     PCIViolation,
-    ProcessorMisconfiguredError
+    ProcessorMisconfiguredError,
+    RedundantPaymentNotificationError
 )
 from ecommerce.extensions.payment.models import PaymentProcessorResponse
 from ecommerce.extensions.payment.processors.cybersource import Cybersource
@@ -234,14 +234,14 @@ class CybersourceTests(CybersourceMixin, PaymentProcessorTestCaseMixin, TestCase
         self.assertTrue(PaymentProcessorResponse.objects.filter(basket=self.basket).exists())
         self.assertTrue(Order.objects.filter(basket=self.basket).exists())
 
-        # handle_processor_response should raise MultiplePaymentNotification for same transaction ID
-        self.assertRaises(MultiplePaymentNotification, self.processor.handle_processor_response, notification,
+        # handle_processor_response should raise RedundantPaymentNotificationError for same transaction ID
+        self.assertRaises(RedundantPaymentNotificationError, self.processor.handle_processor_response, notification,
                           basket=self.basket)
 
         notification['transaction_id'] = '394934470384'
         notification['signature'] = self.generate_signature(self.processor.secret_key, notification)
-        # handle_processor_response should raise DuplicatePaymentNotification for different transaction ID
-        self.assertRaises(DuplicatePaymentNotification, self.processor.handle_processor_response, notification,
+        # handle_processor_response should raise ExcessivePaymentForOrderError for different transaction ID
+        self.assertRaises(ExcessivePaymentForOrderError, self.processor.handle_processor_response, notification,
                           basket=self.basket)
 
     @responses.activate
