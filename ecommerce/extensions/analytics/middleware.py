@@ -13,7 +13,7 @@ class TrackingMiddleware(object):
     Middleware that:
         1) parses the `_ga` cookie to find the GA client id and adds this to the user's tracking_context
         2) extracts the LMS user_id
-        and updates the user if necessary.
+        3) updates the user if necessary.
 
     Side effect:
         If the LMS user_id cannot be found, writes custom metric: 'ecommerce_missing_lms_user_id_middleware'
