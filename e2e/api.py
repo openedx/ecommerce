@@ -1,4 +1,5 @@
 from __future__ import absolute_import
+
 from edx_rest_api_client.client import EdxRestApiClient
 
 from e2e.config import (
