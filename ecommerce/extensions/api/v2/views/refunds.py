@@ -1,8 +1,8 @@
 """HTTP endpoints for interacting with refunds."""
 import logging
 
-from edx_django_utils import monitoring as monitoring_utils
 from django.contrib.auth import get_user_model
+from edx_django_utils import monitoring as monitoring_utils
 from oscar.core.loading import get_model
 from rest_framework import generics, status
 from rest_framework.exceptions import ParseError
