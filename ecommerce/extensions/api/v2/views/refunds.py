@@ -91,7 +91,7 @@ class RefundCreateView(generics.CreateAPIView):
 
         if not user.lms_user_id:
             requested_by = None
-            if request.user and request.user.id:
+            if request.user.is_authenticated():
                 requested_by = request.user.id
             # TODO: Change this to an error once we can successfully get the id from social auth and the db.
             # See REVMI-249 and REVMI-269

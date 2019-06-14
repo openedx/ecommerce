@@ -160,7 +160,17 @@ class RefundCreateViewTests(RefundTestMixin, AccessTokenMixin, JwtMixin, TestCas
         response = self.client.post(self.path, data, JSON_CONTENT_TYPE)
         self.assert_ok_response(response)
 
-    def test_missing_lms_user_id(self):
+    def test_refund_lms_user_id(self):
+        """
+        View should create a refund when user has an LMS user id.
+        """
+        user_with_id = self.create_user(lms_user_id=45678)
+        self.client.login(username=user_with_id.username, password=self.password)
+        data = self._get_data(user_with_id.username, self.course_id)
+        response = self.client.post(self.path, data, JSON_CONTENT_TYPE)
+        self.assert_ok_response(response)
+
+    def test_refund_missing_lms_user_id(self):
         """
         View should create a refund even if the LMS user id is missing.
         """

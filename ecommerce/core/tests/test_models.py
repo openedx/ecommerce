@@ -1,5 +1,4 @@
 import json
-from testfixtures import LogCapture
 from urlparse import urljoin
 
 import ddt
@@ -11,6 +10,7 @@ from django.core.exceptions import ValidationError
 from django.test import override_settings
 from edx_rest_api_client.auth import SuppliedJwtAuth
 from requests.exceptions import ConnectionError
+from testfixtures import LogCapture
 
 from ecommerce.core.models import (
     BusinessClient,
