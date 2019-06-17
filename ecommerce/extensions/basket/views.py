@@ -453,16 +453,10 @@ class BasketSummaryView(BasketLogicMixin, BasketView):
             return super(BasketSummaryView, self).get(request, *args, **kwargs)
 
 
-class PaymentApiView(BasketLogicMixin, APIView):
+class PaymentApiLogicMixin(BasketLogicMixin):
     """
-    Api for retrieving basket contents and checkout/payment options.
-
-    # TODO: ARCH-867: See ticket for clean-up and refactoring details for this API code.
-
-    GET:
-    Retrieves basket contents and checkout/payment options.
+    Business logic for the various Payment APIs.
     """
-    permission_classes = (IsAuthenticated,)
 
     def _get_order_total(self, context):
         """
@@ -477,17 +471,18 @@ class PaymentApiView(BasketLogicMixin, APIView):
         context['order_total'] = OrderTotalCalculator().calculate(self.request.basket, shipping_charge)
         return context
 
-    def _get_serialized_basket(self, context):
+    def get_serialized_basket(self, context):
         """
         Serializes the basket.
 
         Args:
             context (dict): pre-calculated context data
-
+            errors (list): array of error details
         """
-        return {
+
+        serialized_basket = {
             'total_excl_discount': context['order_total'].excl_tax + 12,
-            'total_discount': 12,
+            'calculated_discount': context['total_benefit'],
             'order_total': context['order_total'].excl_tax,
             'products': [
                 # NOTE: Will add additional level for program and include bundle_id for bundles
@@ -495,24 +490,14 @@ class PaymentApiView(BasketLogicMixin, APIView):
                     'name': 'Introduction to Happiness',
                     # TODO: A real sample value would be 'verified'.  Not sure what this is called? Certificate type?
                     # https://github.com/edx/ecommerce/search?q=seat_type+certificate&unscoped_q=seat_type+certificate
-                    'seat_type': 'verified-certificate',
+                    'seat_type': 'verified',
                     'img_url': 'https://prod-discovery.edx-cdn.org/media/course/image/21be6203.small.jpg',
                 },
             ],
             'show_voucher_form': True,
-            'voucher': {
-                'id': 12345,
-                'code': 'SUMMER20',
-                "benefit": {
-                    "type": "Percentage",
-                    "value": 20
-                },
-            },
             'payment_providers': [
                 {
                     'type': 'cybersource',
-                    # I think we will need something else here, but not sure.
-                    # Otherwise, this could just be an enabled/disabled flag.
                 },
                 {
                     'type': 'paypal',
@@ -520,7 +505,27 @@ class PaymentApiView(BasketLogicMixin, APIView):
             ],
         }
 
-    def get(self, request):  # pylint: disable=unused-argument
+        voucher = self.request.basket.vouchers.first()
+        if voucher:
+            serialized_basket['voucher'] = {
+                'id': voucher.id,
+                'code': voucher.code,
+                "benefit": {
+                    "type": voucher.benefit.type,
+                    "value": voucher.benefit.value,
+                },
+            }
+
+        return serialized_basket
+
+    def get_payment_api_response(self, errors=None):
+        """
+        Serializes the payment api response.
+
+        Args:
+            errors (list or dict): list of error dicts, or an error dict
+        """
+
         context = {}
         context = self._get_order_total(context)
         context = self.get_basket_context_data(context)
@@ -528,7 +533,27 @@ class PaymentApiView(BasketLogicMixin, APIView):
         # TODO: ARCH-867: Remove unnecessary processing of anything added to context (e.g. payment_processors) that
         # isn't ultimately passed on to the response.
 
-        response = self._get_serialized_basket(context)
+        response = self.get_serialized_basket(context)
+        if errors:
+            response['errors'] = errors if isinstance(errors, list) else [errors]
+
+        return response
+
+
+# TODO: ARCH-967: Remove "pragma: no cover"
+class PaymentApiView(PaymentApiLogicMixin, APIView):  # pragma: no cover
+    """
+    Api for retrieving basket contents and checkout/payment options.
+
+    # TODO: ARCH-867: See ticket for clean-up and refactoring details for this API code.
+
+    GET:
+    Retrieves basket contents and checkout/payment options.
+    """
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request):  # pylint: disable=unused-argument
+        response = self.get_payment_api_response()
         return Response(response)
 
 
@@ -674,7 +699,8 @@ class VoucherAddView(VoucherAddLogicMixin, BaseVoucherAddView):  # pylint: disab
         return redirect_to_referrer(self.request, 'basket:summary')
 
 
-class VoucherAddApiView(VoucherAddLogicMixin, APIView):  # pragma: no cover
+# TODO: ARCH-960: Remove "pragma: no cover"
+class VoucherAddApiView(VoucherAddLogicMixin, PaymentApiLogicMixin, APIView):  # pragma: no cover
     """
     Api for adding voucher to a basket.
 
@@ -713,45 +739,51 @@ class VoucherAddApiView(VoucherAddLogicMixin, APIView):  # pragma: no cover
         # - switch messages to errors for API.  use user_message and let the UI just display it.
         self.apply_voucher_to_basket(voucher)
 
-        return Response(
-            {
-                'voucher': {
-                    'id': voucher.id,
-                    'code': voucher.code,
-                    "benefit": {
-                        "type": voucher.benefit.type,
-                        "value": voucher.benefit.value,
-                    },
-                },
-                # TODO: ARCH-853: Replace mock implementation with real implementation
-                'total_excl_discount': 112,
-                'total_discount': 12,
-                'order_total': 100,
-            }
-        )
+        response = self.get_payment_api_response()
+        return Response(response)
 
 
-class VoucherRemoveApiView(APIView):  # pragma: no cover
+# TODO: ARCH-960: Remove "pragma: no cover"
+class VoucherRemoveApiView(PaymentApiLogicMixin, APIView):  # pragma: no cover
     """
     Api for removing voucher from a basket.
 
     DELETE /bff/payment/v0/vouchers/{voucherid}
     """
     permission_classes = (IsAuthenticated,)
+    voucher_model = get_model('voucher', 'voucher')
+    remove_signal = signals.voucher_removal
 
     def delete(self, request, voucherid):  # pylint: disable=unused-argument
         """
         If successful, removes voucher and returns 200 and the relevant basket updates as json.
         If unsuccessful, returns 400 with relevant error.
         """
-        # Implementation is a copy of django-oscar's VoucherRemoveView without redirect.
+
+        # Implementation is a copy of django-oscar's VoucherRemoveView without redirect, and other minor changes.
         # See: https://github.com/django-oscar/django-oscar/blob/3ee66877a2dbd49b2a0838c369205f4ffbc2a391/src/oscar/apps/basket/views.py#L389-L414  pylint: disable=line-too-long
 
-        # TODO: ARCH-853: Replace mock implementation with real implementation
-        return Response(
-            {
-                'total_excl_discount': 112,
-                'total_discount': 0,
-                'order_total': 112,
+        if not request.basket.id:
+            # Hacking attempt - the basket must be saved for it to have
+            # a voucher in it.
+            # Note: original django-oscar code had no error message.
+            error = {
+                'error_code': 'invalid_add_voucher_request'
             }
-        )
+            response = self.get_payment_api_response(error)
+            return Response(response, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            voucher = request.basket.vouchers.get(id=voucherid)
+        except ObjectDoesNotExist:
+            error = {
+                'user_message': _("No voucher found with id '%s'") % voucherid
+            }
+            response = self.get_payment_api_response(error)
+            return Response(response)
+
+        request.basket.vouchers.remove(voucher)
+        self.remove_signal.send(sender=self, basket=request.basket, voucher=voucher)
+
+        response = self.get_payment_api_response()
+        return Response(response)
