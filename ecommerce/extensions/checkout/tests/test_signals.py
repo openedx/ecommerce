@@ -56,9 +56,9 @@ class SignalTests(ProgramTestMixin, CouponMixin, TestCase):
         order = create_order(basket=basket, user=self.user)
         return order
 
-    def mock_get_program_data(self, isFull):
+    def mock_get_program_data(self, is_full):
         data = {'title': 'test_program', 'courses': [{}]}
-        if isFull:
+        if is_full:
             data['courses'].append({})
         return data
 

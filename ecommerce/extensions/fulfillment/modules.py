@@ -172,9 +172,13 @@ class EnrollmentFulfillmentModule(BaseFulfillmentModule):
     """ Fulfillment Module for enrolling students after a product purchase.
 
     Allows the enrollment of a student via purchase of a 'seat'.
+
+    Arguments:
+        usage (string): A description of why data is being posted to the enrollment API. This will be included in log
+            messages if the LMS user id cannot be found.
     """
 
-    def _post_to_enrollment_api(self, data, user):
+    def _post_to_enrollment_api(self, data, user, usage):
         enrollment_api_url = get_lms_enrollment_api_url()
         timeout = settings.ENROLLMENT_FULFILLMENT_TIMEOUT
         headers = {
@@ -182,7 +186,7 @@ class EnrollmentFulfillmentModule(BaseFulfillmentModule):
             'X-Edx-Api-Key': settings.EDX_API_KEY
         }
 
-        __, client_id, ip = parse_tracking_context(user, usage='enrollment')
+        __, client_id, ip = parse_tracking_context(user, usage=usage)
 
         if client_id:
             headers['X-Edx-Ga-Client-Id'] = client_id
@@ -314,7 +318,7 @@ class EnrollmentFulfillmentModule(BaseFulfillmentModule):
 
                 # Post to the Enrollment API. The LMS will take care of posting a new EnterpriseCourseEnrollment to
                 # the Enterprise service if the user+course has a corresponding EnterpriseCustomerUser.
-                response = self._post_to_enrollment_api(data, user=order.user)
+                response = self._post_to_enrollment_api(data, user=order.user, usage='fulfill enrollment')
 
                 if response.status_code == status.HTTP_200_OK:
                     line.set_status(LINE.COMPLETE)
@@ -372,7 +376,7 @@ class EnrollmentFulfillmentModule(BaseFulfillmentModule):
                 },
             }
 
-            response = self._post_to_enrollment_api(data, user=line.order.user)
+            response = self._post_to_enrollment_api(data, user=line.order.user, usage='revoke enrollment')
 
             if response.status_code == status.HTTP_200_OK:
                 audit_log(

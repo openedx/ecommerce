@@ -62,7 +62,7 @@ class EdxOrderPlacementMixinTests(BusinessIntelligenceMixin, PaymentEventsMixin,
 
     def setUp(self):
         super(EdxOrderPlacementMixinTests, self).setUp()
-        self.user = UserFactory()
+        self.user = UserFactory(lms_user_id=61710)
         self.order = self.create_order(status=ORDER.OPEN)
 
     def test_handle_payment_logging(self, __):
@@ -150,7 +150,7 @@ class EdxOrderPlacementMixinTests(BusinessIntelligenceMixin, PaymentEventsMixin,
             self.assert_correct_event(
                 mock_track,
                 self.order,
-                ECOM_TRACKING_ID_FMT.format(self.user.id),
+                self.user.lms_user_id,
                 tracking_context['ga_client_id'],
                 tracking_context['lms_ip'],
                 self.order.number,
@@ -235,7 +235,7 @@ class EdxOrderPlacementMixinTests(BusinessIntelligenceMixin, PaymentEventsMixin,
         self.assert_correct_event(
             mock_track,
             self.order,
-            ECOM_TRACKING_ID_FMT.format(self.user.id),
+            self.user.lms_user_id,
             None,
             None,
             self.order.number,
@@ -243,6 +243,33 @@ class EdxOrderPlacementMixinTests(BusinessIntelligenceMixin, PaymentEventsMixin,
             self.order.user.email,
             self.order.total_excl_tax,
             self.order.total_excl_tax            # value for revenue field is same as total.
+        )
+
+    def test_order_no_lms_user_id(self, mock_track):
+        """
+        Ensure that expected values are substituted when no LMS user id
+        was available.
+        """
+        tracking_context = {'ga_client_id': 'test-client-id', 'lms_user_id': 'test-user-id', 'lms_ip': '127.0.0.1'}
+        self.user.tracking_context = tracking_context
+        self.user.lms_user_id = None
+        self.user.save()
+
+        EdxOrderPlacementMixin().handle_successful_order(self.order)
+        # ensure event is being tracked
+        self.assertTrue(mock_track.called)
+        # ensure event data is correct
+        self.assert_correct_event(
+            mock_track,
+            self.order,
+            ECOM_TRACKING_ID_FMT.format(self.user.id),
+            tracking_context['ga_client_id'],
+            tracking_context['lms_ip'],
+            self.order.number,
+            self.order.currency,
+            self.order.user.email,
+            self.order.total_excl_tax,
+            self.order.total_excl_tax  # value for revenue field is same as total.
         )
 
     def test_handle_successful_order_no_segment_key(self, mock_track):

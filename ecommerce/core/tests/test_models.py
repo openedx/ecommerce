@@ -10,6 +10,7 @@ from django.core.exceptions import ValidationError
 from django.test import override_settings
 from edx_rest_api_client.auth import SuppliedJwtAuth
 from requests.exceptions import ConnectionError
+from testfixtures import LogCapture
 
 from ecommerce.core.models import (
     BusinessClient,
@@ -43,6 +44,7 @@ def _make_site_config(payment_processors_str, site_id=1):
 class UserTests(DiscoveryTestMixin, LmsApiMockMixin, TestCase):
     TEST_CONTEXT = {'foo': 'bar', 'baz': None, 'lms_user_id': 'test-context-user-id'}
     LMS_USER_ID = 500
+    LOGGER_NAME = 'ecommerce.core.models'
 
     def setUp(self):
         super(UserTests, self).setUp()
@@ -61,6 +63,34 @@ class UserTests(DiscoveryTestMixin, LmsApiMockMixin, TestCase):
 
         self.create_access_token(user)
         self.assertEqual(user.access_token, self.access_token)
+
+    def test_lms_user_id_with_metric(self):
+        """ Ensures the lms_user_id can be pulled from the ecommerce user. """
+        user = self.create_user()
+
+        user.lms_user_id = self.LMS_USER_ID
+        user.save()
+
+        same_user = User.objects.get(id=user.id)
+        user_id = same_user.lms_user_id_with_metric()
+        self.assertEqual(user_id, self.LMS_USER_ID)
+
+    def test_missing_lms_user_id_with_metric(self):
+        """ Ensures a missing lms_user_id is handled by lms_user_id_with_metric(). """
+        user = self.create_user()
+        expected_logs = [
+            (
+                self.LOGGER_NAME,
+                'WARNING',
+                'Could not find lms_user_id for user {} for None'.format(user.id)
+            ),
+        ]
+
+        with LogCapture(self.LOGGER_NAME) as log:
+            same_user = User.objects.get(id=user.id)
+            user_id = same_user.lms_user_id_with_metric()
+            log.check_present(*expected_logs)
+            self.assertIsNone(user_id)
 
     def test_tracking_context(self):
         """ Ensures that the tracking_context dictionary is written / read

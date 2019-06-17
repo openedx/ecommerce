@@ -411,7 +411,7 @@ class EnrollmentFulfillmentModuleTests(ProgramTestMixin, DiscoveryTestMixin, Ful
         # not available for ecommerce tests.
         try:
             # pylint: disable=protected-access
-            EnrollmentFulfillmentModule()._post_to_enrollment_api(data=data, user=self.user)
+            EnrollmentFulfillmentModule()._post_to_enrollment_api(data=data, user=self.user, usage='test enrollment')
         except ConnectionError as exp:
             # Check that the enrollment request object has the analytics header
             # 'x-edx-ga-client-id' and 'x-forwarded-for'.
