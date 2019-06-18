@@ -4,12 +4,14 @@ Fulfillment Modules are designed to allow specific fulfillment logic based on th
 in an Order.
 """
 from __future__ import absolute_import
+
 import abc
 import datetime
 import json
 import logging
 
 import requests
+import six
 from django.conf import settings
 from django.urls import reverse
 from edx_rest_api_client.client import EdxRestApiClient
@@ -35,7 +37,6 @@ from ecommerce.extensions.fulfillment.status import LINE
 from ecommerce.extensions.voucher.models import OrderLineVouchers
 from ecommerce.extensions.voucher.utils import create_vouchers
 from ecommerce.notifications.notifications import send_notification
-import six
 
 Benefit = get_model('offer', 'Benefit')
 Option = get_model('catalogue', 'Option')
