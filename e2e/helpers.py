@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+
 from e2e.config import (
     BASIC_AUTH_PASSWORD,
     BASIC_AUTH_USERNAME,
