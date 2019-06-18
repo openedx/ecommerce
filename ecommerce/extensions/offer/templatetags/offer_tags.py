@@ -1,4 +1,5 @@
 from __future__ import absolute_import
+
 from django import template
 
 from ecommerce.extensions.offer.utils import format_benefit_value, get_benefit_type
