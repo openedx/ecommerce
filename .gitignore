@@ -89,6 +89,7 @@ private.py
 docs/_build
 *.backup
 *.log
+*.bak
 
 # Visual Studio Code
 .vscode
