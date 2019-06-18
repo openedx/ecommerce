@@ -1,9 +1,10 @@
 """Production settings and globals."""
 from __future__ import absolute_import
+
 import codecs
 from os import environ
-from six.moves.urllib.parse import urljoin
 
+import six
 import yaml
 from corsheaders.defaults import default_headers as corsheaders_default_headers
 # Normally you should not import ANYTHING from Django directly
@@ -11,7 +12,7 @@ from corsheaders.defaults import default_headers as corsheaders_default_headers
 from django.core.exceptions import ImproperlyConfigured
 
 from ecommerce.settings.base import *
-import six
+from six.moves.urllib.parse import urljoin
 
 # Protocol used for construcing absolute callback URLs
 PROTOCOL = 'https'

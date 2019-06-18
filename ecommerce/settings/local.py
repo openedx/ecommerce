@@ -1,11 +1,10 @@
 """Development settings and globals."""
 from __future__ import absolute_import
 
-from six.moves.urllib.parse import urljoin
-
 from corsheaders.defaults import default_headers as corsheaders_default_headers
 
 from ecommerce.settings.base import *
+from six.moves.urllib.parse import urljoin
 
 # DEBUG CONFIGURATION
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#debug and
