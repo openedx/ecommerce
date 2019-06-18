@@ -1,4 +1,5 @@
 from __future__ import absolute_import
+
 from django.contrib.sites.models import Site
 from django.forms import ModelChoiceField
 from oscar.apps.dashboard.offers.forms import MetaDataForm as CoreMetaDataForm
