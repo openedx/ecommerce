@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+from __future__ import absolute_import
 import django.db.models.deletion
 import jsonfield.fields
 from django.db import migrations, models

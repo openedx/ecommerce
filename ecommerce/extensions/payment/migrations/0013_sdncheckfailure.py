@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+from __future__ import absolute_import
 import django.utils.timezone
 import django_extensions.db.fields
 import jsonfield.fields
