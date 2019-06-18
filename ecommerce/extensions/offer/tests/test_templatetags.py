@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 import ddt
 from django.template import Context, Template
 from oscar.core.loading import get_model
