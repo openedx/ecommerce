@@ -1,6 +1,5 @@
-from __future__ import unicode_literals
+from __future__ import absolute_import, unicode_literals
 
-from __future__ import absolute_import
 from ddt import data, ddt
 from django.contrib.sites.models import Site
 from django.core.management import CommandError, call_command
