@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
 """Unit tests of Paypal payment processor implementation."""
-from __future__ import unicode_literals
+from __future__ import absolute_import, unicode_literals
 
 import json
 import logging
-from urlparse import urljoin
 
 import ddt
 import mock
@@ -27,6 +26,7 @@ from ecommerce.extensions.payment.processors.paypal import Paypal
 from ecommerce.extensions.payment.tests.mixins import PaypalMixin
 from ecommerce.extensions.payment.tests.processors.mixins import PaymentProcessorTestCaseMixin
 from ecommerce.tests.testcases import TestCase
+from six.moves.urllib.parse import urljoin  # pylint: disable=import-error
 
 log = logging.getLogger(__name__)
 

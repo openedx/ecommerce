@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+
 from django.conf import settings
 from django.urls import reverse
 from edx_django_utils.cache import TieredCache
