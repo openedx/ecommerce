@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+
 from decimal import Decimal
 from uuid import uuid4
 
@@ -21,6 +23,7 @@ from ecommerce.extensions.offer.constants import (
 from ecommerce.extensions.test import factories
 from ecommerce.tests.factories import ProductFactory, SiteConfigurationFactory
 from ecommerce.tests.testcases import TestCase
+from six.moves import range, zip
 
 ConditionalOffer = get_model('offer', 'ConditionalOffer')
 OfferAssignment = get_model('offer', 'OfferAssignment')

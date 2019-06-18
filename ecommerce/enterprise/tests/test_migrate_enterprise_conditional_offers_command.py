@@ -1,7 +1,7 @@
 # encoding: utf-8
 """Contains the tests for migrate enterprise conditional offers command."""
 
-from __future__ import unicode_literals
+from __future__ import absolute_import, unicode_literals
 
 import logging
 
@@ -18,6 +18,7 @@ from oscar.test.factories import (
 from ecommerce.enterprise.management.commands.migrate_enterprise_conditional_offers import Command
 from ecommerce.programs.custom import get_model
 from ecommerce.tests.testcases import TestCase
+from six.moves import range
 
 Benefit = get_model('offer', 'Benefit')
 Condition = get_model('offer', 'Condition')
