@@ -1,7 +1,8 @@
 """Production settings and globals."""
+from __future__ import absolute_import
 import codecs
 from os import environ
-from urlparse import urljoin
+from six.moves.urllib.parse import urljoin
 
 import yaml
 from corsheaders.defaults import default_headers as corsheaders_default_headers
@@ -10,6 +11,7 @@ from corsheaders.defaults import default_headers as corsheaders_default_headers
 from django.core.exceptions import ImproperlyConfigured
 
 from ecommerce.settings.base import *
+import six
 
 # Protocol used for construcing absolute callback URLs
 PROTOCOL = 'https'
@@ -70,13 +72,13 @@ DB_OVERRIDES = dict(
     PORT=environ.get('DB_MIGRATION_PORT', DATABASES['default']['PORT']),
 )
 
-for override, value in DB_OVERRIDES.iteritems():
+for override, value in six.iteritems(DB_OVERRIDES):
     DATABASES['default'][override] = value
 
 
 # PAYMENT PROCESSOR OVERRIDES
-for __, configs in PAYMENT_PROCESSOR_CONFIG.iteritems():
-    for __, config in configs.iteritems():
+for __, configs in six.iteritems(PAYMENT_PROCESSOR_CONFIG):
+    for __, config in six.iteritems(configs):
         config.update({
             'receipt_path': PAYMENT_PROCESSOR_RECEIPT_PATH,
             'cancel_checkout_path': PAYMENT_PROCESSOR_CANCEL_PATH,
