@@ -1,6 +1,6 @@
 from __future__ import absolute_import
 
-from urlparse import urljoin
+from six.moves.urllib.parse import urljoin
 
 from path import Path
 
