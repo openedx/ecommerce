@@ -1,5 +1,6 @@
 from __future__ import unicode_literals
 
+from __future__ import absolute_import
 from django.contrib.sites.models import Site
 from django.core.management import call_command
 from oscar.core.loading import get_model

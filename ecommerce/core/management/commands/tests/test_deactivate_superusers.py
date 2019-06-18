@@ -1,6 +1,7 @@
 """
 Tests for Django management command to verify ecommerce transactions.
 """
+from __future__ import absolute_import
 import mock
 from django.apps import apps
 from django.core.management import call_command

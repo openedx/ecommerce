@@ -27,6 +27,7 @@ Example output:
     ('Order: 71 Amount: 100.00', 'Payment: 65 Amount: 10.00')]"}
 """
 
+from __future__ import absolute_import
 import datetime
 import logging
 
