@@ -100,3 +100,6 @@ docs/_build
 
 # emacs
 *~
+
+### Unknown artifacts
+*.bak
