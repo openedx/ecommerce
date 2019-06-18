@@ -1,10 +1,9 @@
 from __future__ import absolute_import
 
-from six.moves.urllib.parse import urljoin
-
 from path import Path
 
 from ecommerce.settings.base import *
+from six.moves.urllib.parse import urljoin
 
 SITE_ID = 1
 PROTOCOL = 'http'
