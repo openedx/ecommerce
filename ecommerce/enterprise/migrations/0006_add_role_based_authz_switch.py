@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+from __future__ import absolute_import
 from django.db import migrations
 
 from ecommerce.enterprise.constants import USE_ROLE_BASED_ACCESS_CONTROL
