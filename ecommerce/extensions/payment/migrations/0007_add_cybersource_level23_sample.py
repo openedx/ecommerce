@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals
+from __future__ import absolute_import, unicode_literals
 
-from __future__ import absolute_import
 from django.db import migrations
 
 SAMPLE_NAME = 'send_level_2_3_details_to_cybersource'
