@@ -11,6 +11,7 @@ from django.core.exceptions import ValidationError
 from django.test import override_settings
 from edx_rest_api_client.auth import SuppliedJwtAuth
 from requests.exceptions import ConnectionError
+from social_django.models import UserSocialAuth
 from testfixtures import LogCapture
 
 from ecommerce.core.models import (
@@ -60,11 +61,34 @@ class UserTests(DiscoveryTestMixin, LmsApiMockMixin, TestCase):
         httpretty.reset()
 
     def test_access_token(self):
+        """ Ensures the access token can be pulled from the ecommerce user. """
         user = self.create_user()
         self.assertIsNone(user.access_token)
 
         self.create_access_token(user)
-        self.assertEqual(user.access_token, self.access_token)
+
+        same_user = User.objects.get(id=user.id)
+        self.assertEqual(same_user.social_auth.count(), 1)
+        self.assertEqual(same_user.access_token, self.access_token)
+
+    def test_multiple_access_tokens(self):
+        """ Ensures the correct access token is pulled from the ecommerce user when multiple social auth entries
+        exist for that user. """
+        user = self.create_user()
+        self.assertIsNone(user.access_token)
+
+        lms_user_id = 6181
+        expected_access_token = 'access_token_3'
+        UserSocialAuth.objects.create(user=user, provider='edx-oidc', uid='older_6181',
+                                      extra_data={'user_id': lms_user_id, 'access_token': 'access_token_1'})
+        UserSocialAuth.objects.create(user=user, provider='edx-oauth2', uid='older_6181',
+                                      extra_data={'user_id': lms_user_id, 'access_token': 'access_token_2'})
+        UserSocialAuth.objects.create(user=user, provider='edx-oauth2',
+                                      extra_data={'user_id': lms_user_id, 'access_token': expected_access_token})
+
+        same_user = User.objects.get(id=user.id)
+        self.assertEqual(same_user.social_auth.count(), 3)
+        self.assertEqual(same_user.access_token, expected_access_token)
 
     def test_lms_user_id_with_metric(self):
         """ Ensures the lms_user_id can be pulled from the ecommerce user. """

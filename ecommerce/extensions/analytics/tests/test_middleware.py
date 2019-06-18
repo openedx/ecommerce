@@ -55,21 +55,36 @@ class TrackingMiddlewareTests(TestCase):
         self.assertEqual(same_user.lms_user_id, lms_user_id)
 
     def test_social_auth_multiple_entries_lms_user_id(self):
-        """ Test that middleware saves the LMS user_id from the social auth, when the first social auth data does not
-        contain a user_id. """
+        """ Test that middleware saves the LMS user_id from the social auth, when multiple social auth entries
+        exist for that user. """
         user = self.create_user()
         user.tracking_context = self.TEST_CONTEXT
         user.save()
 
         lms_user_id = 91827
-        UserSocialAuth.objects.create(user=user, provider='edx-oidc')
-        UserSocialAuth.objects.create(user=user, provider='edx-oauth2', extra_data={'user_id': lms_user_id})
+        UserSocialAuth.objects.create(user=user, provider='edx-oidc', uid='older_45', extra_data={'user_id': 123})
+        UserSocialAuth.objects.create(user=user, provider='edx-oidc', extra_data={'user_id': 456})
+        social_auth = UserSocialAuth.objects.create(user=user, provider='edx-oauth2',
+                                                    extra_data={'user_id': lms_user_id})
+        UserSocialAuth.objects.create(user=user, provider='edx-oauth2', uid='newer_45')
 
         same_user = User.objects.get(id=user.id)
         self.assertIsNone(same_user.lms_user_id)
-        self.assertEqual(same_user.social_auth.count(), 2)
+        self.assertEqual(same_user.social_auth.count(), 4)
 
-        self._process_request(same_user)
+        expected = [
+            (
+                self.LOGGER_NAME,
+                'INFO',
+                'Saving lms_user_id from social auth with id {} for user {}. Request path: /, referrer: None'.format(
+                    social_auth.id, user.id)
+            ),
+        ]
+        same_user = User.objects.get(id=user.id)
+        with LogCapture(self.LOGGER_NAME) as log:
+            self._process_request(same_user)
+            log.check_present(*expected)
+
         same_user = User.objects.get(id=user.id)
         self.assertEqual(same_user.lms_user_id, lms_user_id)
 

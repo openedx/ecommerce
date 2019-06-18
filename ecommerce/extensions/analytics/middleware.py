@@ -39,12 +39,13 @@ class TrackingMiddleware(object):
             # If the id is not present, try to add it.
             if not user.lms_user_id:
                 # Check for the lms_user_id in social auth
-                lms_user_id_social_auth = self._get_lms_user_id_from_social_auth(user)
+                lms_user_id_social_auth, social_auth_id = self._get_lms_user_id_from_social_auth(user)
                 if lms_user_id_social_auth:
                     user.lms_user_id = lms_user_id_social_auth
                     save_user = True
-                    logger.info(u'Saving lms_user_id from social auth for user %s. Request path: %s, referrer: %s',
-                                user.id, request.get_full_path(), request.META.get('HTTP_REFERER'))
+                    logger.info(u'Saving lms_user_id from social auth with id %s for user %s. Request path: %s, '
+                                u'referrer: %s', social_auth_id, user.id, request.get_full_path(),
+                                request.META.get('HTTP_REFERER'))
                 else:
                     # TODO: Change this to an error once we can successfully get the id from social auth and the db.
                     # See REVMI-249 and REVMI-269
@@ -57,15 +58,20 @@ class TrackingMiddleware(object):
 
     def _get_lms_user_id_from_social_auth(self, user):
         """
-        Return LMS user_id passed through social auth, if found.
-        Returns None if not found.
+        Find the LMS user_id passed through social auth. Because a single user_id can be associated with multiple
+        provider/uid combinations, start by checking the most recently saved social auth entry.
+
+        Returns:
+            (lms_user_id, social_auth_id): a tuple containing the LMS user id and the id of the social auth entry
+                where the LMS user id was found. Returns None, None if the LMS user id was not found.
         """
         try:
-            auth_entries = user.social_auth.all()
+            auth_entries = user.social_auth.order_by('-id')
             if auth_entries:
                 for auth_entry in auth_entries:
                     lms_user_id_social_auth = auth_entry.extra_data.get(u'user_id')
                     if lms_user_id_social_auth:
-                        return lms_user_id_social_auth
+                        return lms_user_id_social_auth, auth_entry.id
         except Exception:  # pylint: disable=broad-except
             logger.warn(u'Exception retrieving lms_user_id from social_auth for user %s.', user.id, exc_info=True)
+        return None, None
