@@ -1,9 +1,11 @@
-import __builtin__
+from __future__ import absolute_import
+
 import sys
-from StringIO import StringIO
 
 import ddt
+from django.utils.six import StringIO
 from mock import patch
+from six.moves import builtins
 
 from ecommerce.tests.testcases import TestCase
 
@@ -25,12 +27,12 @@ class PromptTests(TestCase):
         """Test wrong user input."""
         out = StringIO()
         sys.stdout = out
-        with patch.object(__builtin__, 'raw_input', side_effect=['wrong', 'no']):
+        with patch.object(builtins, 'raw_input', side_effect=['wrong', 'no']):
             query_yes_no(self.CONFIRMATION_PROMPT)
             output = out.getvalue().strip()
             self.assertIn("Please respond with one of the following (y, yes, n, no)", output)
 
-    @patch.object(__builtin__, 'raw_input')
+    @patch.object(builtins, 'raw_input')
     @ddt.data(
         ('yes', True, 'no'), ('no', False, 'yes'), ('', True, 'yes'), ('yes', True, None)
     )
