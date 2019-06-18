@@ -1,4 +1,5 @@
 from __future__ import absolute_import
+
 from django import template
 from django.conf import settings
 from django.utils.safestring import mark_safe
