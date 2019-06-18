@@ -1,6 +1,7 @@
+from __future__ import absolute_import
+
 import datetime
 import hashlib
-import urllib
 from decimal import Decimal
 
 import ddt
@@ -22,6 +23,9 @@ from slumber.exceptions import SlumberBaseException
 from testfixtures import LogCapture
 from waffle.testutils import override_flag
 
+import six.moves.urllib.error  # pylint: disable=import-error
+import six.moves.urllib.parse  # pylint: disable=import-error
+import six.moves.urllib.request  # pylint: disable=import-error
 from ecommerce.core.exceptions import SiteConfigurationError
 from ecommerce.core.tests import toggle_switch
 from ecommerce.core.url_utils import get_lms_url
@@ -85,7 +89,10 @@ class BasketAddItemsViewTests(
     def test_add_multiple_products_to_basket(self):
         """ Verify the basket accepts multiple products. """
         products = ProductFactory.create_batch(3, stockrecords__partner=self.partner)
-        qs = urllib.urlencode({'sku': [product.stockrecords.first().partner_sku for product in products]}, True)
+        # pylint: disable=too-many-function-args
+        qs = six.moves.urllib.parse.urlencode(
+            {'sku': [product.stockrecords.first().partner_sku for product in products]},
+            True)
         url = '{root}?{qs}'.format(root=self.path, qs=qs)
         response = self.client.get(url)
         self.assertEqual(response.status_code, 303)
@@ -97,7 +104,10 @@ class BasketAddItemsViewTests(
     def test_basket_with_utm_params(self):
         """ Verify the basket includes utm params after redirect. """
         products = ProductFactory.create_batch(3, stockrecords__partner=self.partner)
-        qs = urllib.urlencode({'sku': [product.stockrecords.first().partner_sku for product in products]}, True)
+        # pylint: disable=too-many-function-args
+        qs = six.moves.urllib.parse.urlencode(
+            {'sku': [product.stockrecords.first().partner_sku for product in products]},
+            True)
         url = '{root}?{qs}&utm_source=test'.format(root=self.path, qs=qs)
         response = self.client.get(url)
         self.assertEqual(response.url, '/basket/?utm_source=test')
@@ -140,7 +150,8 @@ class BasketAddItemsViewTests(
         product_range = factories.RangeFactory(products=products)
         voucher, __ = prepare_voucher(_range=product_range, usage=usage)
 
-        qs = urllib.urlencode({
+        # pylint: disable=too-many-function-args
+        qs = six.moves.urllib.parse.urlencode({
             'sku': [product.stockrecords.first().partner_sku for product in products],
             'code': voucher.code
         }, True)
@@ -164,8 +175,10 @@ class BasketAddItemsViewTests(
         stock_record = StockRecordFactory(product=product2, partner=self.partner)
         catalog.stock_records.add(stock_record)
 
-        qs = urllib.urlencode({'sku': [product.stockrecords.first().partner_sku for product in [product1, product2]]},
-                              True)
+        # pylint: disable=too-many-function-args
+        qs = six.moves.urllib.parse.urlencode(
+            {'sku': [product.stockrecords.first().partner_sku for product in [product1, product2]]},
+            True)
         url = '{root}?{qs}'.format(root=self.path, qs=qs)
         with mock.patch.object(UserAlreadyPlacedOrder, 'user_already_placed_order', return_value=True):
             response = self.client.get(url)
@@ -177,7 +190,10 @@ class BasketAddItemsViewTests(
         Test user can purchase products which have not been already purchased
         """
         products = ProductFactory.create_batch(3, stockrecords__partner=self.partner)
-        qs = urllib.urlencode({'sku': [product.stockrecords.first().partner_sku for product in products]}, True)
+        # pylint: disable=too-many-function-args
+        qs = six.moves.urllib.parse.urlencode(
+            {'sku': [product.stockrecords.first().partner_sku for product in products]},
+            True)
         url = '{root}?{qs}'.format(root=self.path, qs=qs)
         with mock.patch.object(UserAlreadyPlacedOrder, 'user_already_placed_order', return_value=False):
             response = self.client.get(url)
@@ -190,7 +206,9 @@ class BasketAddItemsViewTests(
         order = create_order(site=self.site, user=self.user)
         products = ProductFactory.create_batch(3, stockrecords__partner=self.partner)
         products.append(OrderLine.objects.get(order=order).product)
-        qs = urllib.urlencode({'sku': [product.stockrecords.first().partner_sku for product in products]}, True)
+        # pylint: disable=too-many-function-args
+        qs = six.moves.urllib.parse.urlencode(
+            {'sku': [product.stockrecords.first().partner_sku for product in products]}, True)
         url = '{root}?{qs}'.format(root=self.path, qs=qs)
         response = self.client.get(url)
         basket = response.wsgi_request.basket
@@ -205,7 +223,8 @@ class BasketAddItemsViewTests(
         voucher = mock_get_entitlement_voucher.return_value
         voucher.code = 'FAKECODE'
         sku = self.stock_record.partner_sku
-        url = '{path}?{skus}'.format(path=self.path, skus=urllib.urlencode({'sku': [sku]}, doseq=True))
+        # pylint: disable=redundant-keyword-arg
+        url = '{path}?{skus}'.format(path=self.path, skus=six.moves.urllib.parse.urlencode({'sku': [sku]}, doseq=True))
         response = self.client.get(url)
 
         expected_failure_url = (
@@ -255,7 +274,8 @@ class BasketAddItemsViewTests(
         products[0].save()
         self.assertFalse(Selector().strategy().fetch_for_product(products[0]).availability.is_available_to_buy)
 
-        qs = urllib.urlencode({
+        # pylint: disable=too-many-function-args
+        qs = six.moves.urllib.parse.urlencode({
             'sku': [product.stockrecords.first().partner_sku for product in products],
         }, True)
         url = '{root}?{qs}'.format(root=self.path, qs=qs)
@@ -667,7 +687,8 @@ class BasketSummaryViewTests(EnterpriseServiceMockMixin, DiscoveryTestMixin, Dis
         self.client.logout()
         response = self.client.get(self.path)
         testserver_login_url = self.get_full_url(reverse(settings.LOGIN_URL))
-        expected_url = '{path}?next={next}'.format(path=testserver_login_url, next=urllib.quote(self.path))
+        expected_url = '{path}?next={next}'.format(path=testserver_login_url,
+                                                   next=six.moves.urllib.parse.quote(self.path))
         self.assertRedirects(response, expected_url, target_status_code=302)
 
     @ddt.data(
