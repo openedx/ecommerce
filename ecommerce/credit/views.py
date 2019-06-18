@@ -1,5 +1,6 @@
 from __future__ import unicode_literals
 
+from __future__ import absolute_import
 import logging
 
 from dateutil.parser import parse
@@ -162,7 +163,7 @@ class Checkout(TemplateView):
                 'new_price': new_price
             })
 
-        return providers_dict.values()
+        return list(providers_dict.values())
 
     def _get_providers_from_lms(self, credit_seats):
         """ Helper method for getting provider info from LMS.
