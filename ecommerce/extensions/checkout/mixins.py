@@ -1,14 +1,16 @@
 # Note: If future versions of django-oscar include new mixins, they will need to be imported here.
-from __future__ import unicode_literals
+from __future__ import absolute_import, unicode_literals
 
 import abc
 import logging
 
+import six
 import waffle
 from django.db import transaction
 from ecommerce_worker.fulfillment.v1.tasks import fulfill_order
 from oscar.apps.checkout.mixins import OrderPlacementMixin
 from oscar.core.loading import get_class, get_model
+from six.moves import range
 
 from ecommerce.core.models import BusinessClient
 from ecommerce.extensions.analytics.utils import audit_log, track_segment_event
@@ -35,7 +37,7 @@ Source = get_model('payment', 'Source')
 SourceType = get_model('payment', 'SourceType')
 
 
-class EdxOrderPlacementMixin(OrderPlacementMixin):
+class EdxOrderPlacementMixin(six.with_metaclass(abc.ABCMeta, OrderPlacementMixin)):
     """ Mixin for edX-specific order placement. """
 
     # Instance of a payment processor with which to handle payment. Subclasses should set this value.
@@ -45,8 +47,6 @@ class EdxOrderPlacementMixin(OrderPlacementMixin):
                                   'already exists. Basket id: [%d].'
     order_placement_failure_msg = 'Order Failure: %s payment was received, but an order for basket [%d] ' \
                                   'could not be placed.'
-
-    __metaclass__ = abc.ABCMeta
 
     def add_payment_event(self, event):  # pylint: disable = arguments-differ
         """ Record a payment event for creation once the order is placed. """
