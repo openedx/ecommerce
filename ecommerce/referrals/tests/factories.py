@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 import factory
 from oscar.test.factories import BasketFactory
 

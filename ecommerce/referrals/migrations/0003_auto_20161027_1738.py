@@ -7,6 +7,7 @@ that previously ran 0002 have the column setup correctly.
 
 from __future__ import unicode_literals
 
+from __future__ import absolute_import
 from django.db import migrations, models
 
 
