@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+
 from uuid import uuid4
 
 import ddt
@@ -12,6 +14,7 @@ from ecommerce.extensions.offer.applicator import CustomApplicator
 from ecommerce.extensions.offer.constants import CUSTOM_APPLICATOR_LOG_FLAG
 from ecommerce.extensions.test.factories import ConditionalOfferFactory, ConditionFactory, ProgramOfferFactory
 from ecommerce.tests.testcases import TestCase
+from six.moves import range
 
 BasketAttribute = get_model('basket', 'BasketAttribute')
 BasketAttributeType = get_model('basket', 'BasketAttributeType')
