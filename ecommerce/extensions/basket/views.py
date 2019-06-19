@@ -536,8 +536,7 @@ class PaymentApiLogicMixin(BasketLogicMixin):
         response = self.get_serialized_basket(context)
         if errors:
             response['errors'] = errors if isinstance(errors, list) else [errors]
-        # TODO: Check flash messages to see if there are any additional errors or warnings?
-        #   If there are, we could log a warning(?) and an additional error to the array.
+        # TODO: ARCH-983: Check for and also return unexpected flash message errors and warnings
 
         return response
 
