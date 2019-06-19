@@ -23,6 +23,8 @@ from ecommerce_worker.fulfillment.v1.tasks import fulfill_order
 from django.core.management.base import BaseCommand, CommandError
 from django.db.models import Q, Subquery
 from oscar.core.loading import get_class, get_model
+from ecommerce.extensions.fulfillment import api as fulfillment_api
+#post_checkout = get_class('checkout.signals', 'post_checkout')
 
 logger = logging.getLogger(__name__)
 Basket = get_model('basket', 'Basket')
@@ -32,6 +34,8 @@ PaymentProcessorResponse = get_model('payment', 'PaymentProcessorResponse')
 NoShippingRequired = get_class('shipping.methods', 'NoShippingRequired')
 OrderTotalCalculator = get_class('checkout.calculators', 'OrderTotalCalculator')
 Country = get_model('address', 'Country')
+#OrderCreator = get_class('order.utils', 'OrderCreator')
+from ecommerce.extensions.partner.strategy import DefaultStrategy
 
 
 DEFAULT_START_DELTA_DAYS = 50
@@ -170,28 +174,28 @@ class CybersourceAPIClient(object):
         return date
 
 
-# would be a celery task
 def check_cs_search_transaction(client, basket, message_body):
 
     try:
         response = requests.post('https://{host}/tss/v2/searches'.format(host=client.host),
                                  data=message_body,
                                  headers=client.post_request_search_headers())
-
-        if 201 == response.status_code:
-            logger.info(u"Response from CyberSource Transaction Search api successful for Order Number " +
-                        basket.order_number)
-            search_transaction_response = json.loads(response.content)
-            _process_search_transaction(search_transaction_response, basket, client)
-        else:
-            logger.info(u"Response from CyberSource Transaction Search api unsuccessful for Order Number " +
-                        basket.order_number)
     except Exception as e:
         logger.exception(u'Exception occurred while fetching detail for Order Number from Search api: [%s]: [%s]',
                          basket.order_number, e.message)
+        raise
+
+    if 201 == response.status_code:
+        logger.info(u"Response from CyberSource Transaction Search api successful for Order Number " +
+                    basket.order_number)
+        search_transaction_response = json.loads(response.content)
+        _process_search_transaction(search_transaction_response, basket, client)
+    else:
+        logger.info(u"Response from CyberSource Transaction Search api unsuccessful for Order Number " +
+                    basket.order_number)
+    return
 
 
-# would be a celery task
 def _process_search_transaction(transaction_response, basket, client):
 
     application_summary = transaction_response['_embedded']['transactionSummaries'][0]['applicationInformation']
@@ -212,14 +216,16 @@ def _process_search_transaction(transaction_response, basket, client):
         client.generate_get_signature(url.path)
 
         try:
+            # fetching transaction detail
             response = requests.get('https://{host}{path}'.format(host=client.host, path=url.path),
                                     headers=client.request_transaction_headers())
-
         except Exception as e:
             logger.exception(u'Exception occurred while fetching transaction detail for Order Number' 
                              u'from Transaction api: [%s]: [%s]', basket.order_number, e.message)
-        transaction = json.loads(response.content)
-        _process_transaction_details(transaction, basket)
+            raise
+
+        transaction_detail = json.loads(response.content)
+        _process_transaction_details(transaction_detail, basket)
 
     return
 
@@ -228,7 +234,7 @@ def _process_transaction_details(transaction, basket):
     application_summary = transaction['applicationInformation']
 
     if '100' == str(application_summary['reasonCode']):
-        logger.info(u"Found successful transaction information from CyberSource "
+        logger.info(u"Successfully found transaction information from CyberSource "
                     u"Transaction api for Order Number: " + basket.order_number)
 
         order_detail = {}
@@ -251,6 +257,9 @@ def _process_transaction_details(transaction, basket):
         })
 
         _process_successful_order(order_detail, basket)
+    else:
+        logger.info(u"CS Transaction information shows unsucccessful transaction logged for Order Number " +
+                    basket.order_number)
 
 
 def _process_successful_order(order_detail, basket):
@@ -299,23 +308,22 @@ def _process_successful_order(order_detail, basket):
                       'shipping_code': shipping_method.code,
                       'user_id': user.id,
                       'billing_address': billing_info,
-                      'status': 'Completed'
+                      'status': 'Open'
                       }
 
         with transaction.atomic():
             order = Order(**order_data)
             order.save()
 
-            basket.submit()
-
-        # fulfill_order.delay(
-        #     order.number,
-        #     site_code=order.site.siteconfiguration.partner.short_code,
-        #     email_opt_in=False
-        # )
-
-        logger.info(u"Order Number: {order_number} created successfully."
+            logger.info(u"Order Number: {order_number} created successfully."
                     .format(order_number=basket.order_number))
+
+            logger.info(u'Requesting fulfillment of order [%s].', order.number)
+            fulfill_order.delay(
+                order.number,
+                site_code=order.site.siteconfiguration.partner.short_code,
+                email_opt_in=False
+            )
     else:
         logger.info(u"Order Number: {order_number} already exist, skipping order creation."
                     .format(order_number=basket.order_number))
@@ -422,19 +430,15 @@ class Command(BaseCommand):
         client = CybersourceAPIClient(cs_config)
 
         for fb in frozen_baskets:
-            from pdb import set_trace
-            set_trace()
-            message_body = client.request_message_body(fb.order_number)
-            client.generate_digest(message_body)
-            client.generate_post_signature()
+            try:
+                message_body = client.request_message_body(fb.order_number)
+                client.generate_digest(message_body)
+                client.generate_post_signature()
 
-            # todo: this should be async task
-            check_cs_search_transaction(client, fb, message_body)
+                check_cs_search_transaction(client, fb, message_body)
 
-
-        # Todos
-        # log an opsgenie alert so that support staff would know that order has been created  and
-        # need to move with course mode upgrade.
+            except Exception as e:
+                continue
 
 
 
