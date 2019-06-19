@@ -536,6 +536,8 @@ class PaymentApiLogicMixin(BasketLogicMixin):
         response = self.get_serialized_basket(context)
         if errors:
             response['errors'] = errors if isinstance(errors, list) else [errors]
+        # TODO: Check flash messages to see if there are any additional errors or warnings?
+        #   If there are, we could log a warning(?) and an additional error to the array.
 
         return response
 
@@ -564,6 +566,9 @@ class VoucherAddLogicMixin(object):
     def apply_voucher_to_basket(self, voucher):
         """
         Validates and applies voucher on basket.
+
+        Returns:
+            message (dict): Dict containing `user_message` and `message_type` (e.g. 'error', 'warning', or 'info')
         """
         self.request.basket.clear_vouchers()
         username = self.request.user and self.request.user.username
@@ -572,20 +577,30 @@ class VoucherAddLogicMixin(object):
             logger.warning('[Code Redemption Failure] The voucher is not valid for this basket. '
                            'User: %s, Basket: %s, Code: %s, Message: %s',
                            username, self.request.basket.id, voucher.code, message)
-            messages.error(self.request, message)
+            message_response = {
+                'message_type': 'error',
+                'user_message': message,
+            }
             self.request.basket.vouchers.remove(voucher)
-            return
+            return message_response
 
-        valid, msg = apply_voucher_on_basket_and_check_discount(voucher, self.request, self.request.basket)
+        valid, message = apply_voucher_on_basket_and_check_discount(voucher, self.request, self.request.basket)
 
         if not valid:
             logger.warning('[Code Redemption Failure] The voucher could not be applied to this basket. '
                            'User: %s, Basket: %s, Code: %s, Message: %s',
-                           username, self.request.basket.id, voucher.code, msg)
-            messages.warning(self.request, msg)
+                           username, self.request.basket.id, voucher.code, message)
+            message_response = {
+                'message_type': 'warning',
+                'user_message': message,
+            }
             self.request.basket.vouchers.remove(voucher)
         else:
-            messages.info(self.request, msg)
+            message_response = {
+                'message_type': 'info',
+                'user_message': message,
+            }
+        return message_response
 
     def check_for_empty_basket_error(self, code):
         """
@@ -695,8 +710,23 @@ class VoucherAddView(VoucherAddLogicMixin, BaseVoucherAddView):  # pylint: disab
                 )
             )
 
-        self.apply_voucher_to_basket(voucher)
+        message = self.apply_voucher_to_basket(voucher)
+        self._set_flash_messages(message)
         return redirect_to_referrer(self.request, 'basket:summary')
+
+    def _set_flash_messages(self, message):
+        """
+        Sets flash messages as needed.
+
+        Argument:
+            message (dict): Dict containing `user_message` and `message_type` (e.g. 'error', 'warning', or 'info')
+        """
+        if message['message_type'] == 'info':
+            messages.info(self.request, message['user_message'])
+        elif message['message_type'] == 'warning':
+            messages.warning(self.request, message['user_message'])
+        else:
+            messages.error(self.request, message['user_message'])
 
 
 # TODO: ARCH-960: Remove "pragma: no cover"
@@ -718,10 +748,9 @@ class VoucherAddApiView(VoucherAddLogicMixin, PaymentApiLogicMixin, APIView):  #
             "code": "SUMMER20"
         }
 
-        If successful, adds voucher and returns 200 and the relevant basket updates.
-        If unsuccessful, returns 400 with the error.
+        If successful, adds voucher and returns 200 and the same response as the payment api.
+        If unsuccessful, returns 400 with the errors and the same response as the payment api.
         """
-        # TODO: Does code need to be trimmed to match original?
         code = request.data.get('code')
 
         error_message = self.check_for_empty_basket_error(code)
@@ -735,12 +764,16 @@ class VoucherAddApiView(VoucherAddLogicMixin, PaymentApiLogicMixin, APIView):  #
         # TODO: ARCH-955: implement render_email_confirmation_if_required check
         # TODO: ARCH-956: implement get_enterprise_customer_from_voucher check
 
-        # TODO: ARCH-853: (a.k.a. now)
-        # - switch messages to errors for API.  use user_message and let the UI just display it.
-        self.apply_voucher_to_basket(voucher)
-
-        response = self.get_payment_api_response()
-        return Response(response)
+        message = self.apply_voucher_to_basket(voucher)
+        if message['message_type'] in ('warning', 'error'):
+            error_message = {
+                'user_message': message['user_message']
+            }
+            response = self.get_payment_api_response(error_message)
+            return Response(response, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            response = self.get_payment_api_response()
+            return Response(response)
 
 
 # TODO: ARCH-960: Remove "pragma: no cover"
@@ -756,8 +789,8 @@ class VoucherRemoveApiView(PaymentApiLogicMixin, APIView):  # pragma: no cover
 
     def delete(self, request, voucherid):  # pylint: disable=unused-argument
         """
-        If successful, removes voucher and returns 200 and the relevant basket updates as json.
-        If unsuccessful, returns 400 with relevant error.
+        If successful, removes voucher and returns 200 and the same response as the payment api.
+        If unsuccessful, returns 400 with relevant errors and the same response as the payment api.
         """
 
         # Implementation is a copy of django-oscar's VoucherRemoveView without redirect, and other minor changes.
