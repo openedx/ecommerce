@@ -41,6 +41,11 @@ from ecommerce.extensions.payment.processors.cybersource import Cybersource
 from ecommerce.extensions.payment.utils import clean_field_value
 from ecommerce.extensions.payment.views import BasePaymentSubmitView
 
+from edx_rest_api_client.client import EdxRestApiClient
+from slumber.exceptions import HttpClientError
+
+from ecommerce.core.url_utils import get_lms_url
+
 logger = logging.getLogger(__name__)
 
 Applicator = get_class('offer.applicator', 'Applicator')
@@ -193,6 +198,14 @@ class CybersourceNotificationMixin(CyberSourceProcessorMixin, OrderCreationMixin
             basket_id = int(basket_id)
             basket = Basket.objects.get(id=basket_id)
             basket.strategy = strategy.Default()
+            # TODO: Remove as a part of REVMI-124
+            # This is a hacky solution to the problem of orders being created after payment processing
+            lms_discount_client = EdxRestApiClient(get_lms_url('/api/discounts/'), jwt=basket.owner.access_token)
+            ck = basket.lines.first().product.course_id
+            try:
+                response = lms_discount_client.course(ck).get()
+                self.request.POST['discount_jwt'] = response.discount_jwt
+            # END TODO
             Applicator().apply(basket, basket.owner, self.request)
             return basket
         except (ValueError, ObjectDoesNotExist):

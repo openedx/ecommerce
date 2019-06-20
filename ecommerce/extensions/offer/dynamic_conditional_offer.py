@@ -13,14 +13,13 @@ def _get_decoded_jwt_discount_from_request():
     request = crum.get_current_request()
     if not waffle.flag_is_active(request, 'offer.dynamic_discount'):
         return None
-
     if request.method == 'GET':
         discount_jwt = request.GET.get('discount_jwt')
     else:
         discount_jwt = request.POST.get('discount_jwt')
     if not discount_jwt:
         return None
-    import pdb; pdb.set_trace()
+
     return jwt_decode_handler(discount_jwt)
 
 
@@ -41,12 +40,13 @@ class DynamicPercentageDiscountBenefit(BenefitWithoutRangeMixin, PercentageDisco
               max_total_discount=None):
         decoded_jwt_discount = _get_decoded_jwt_discount_from_request()
         if decoded_jwt_discount and decoded_jwt_discount.get('discount_percent'):
-            return super(DynamicPercentageDiscountBenefit, self).apply(
+            application_result = super(DynamicPercentageDiscountBenefit, self).apply(
                 basket, 
                 condition, 
                 offer, 
                 discount_percent=decoded_jwt_discount['discount_percent'],
                 max_total_discount=max_total_discount)
+            return application_result
         # What do I do here in the else?
         return None
 

@@ -460,7 +460,6 @@ class BasketSummaryView(BasketLogicMixin, BasketView):
     @newrelic.agent.function_trace()
     def get(self, request, *args, **kwargs):
         basket = request.basket
-        messages.info(request, 'The new purchaser discount was automatically added.')
         try:
             properties = {
                 'cart_id': basket.id,
@@ -484,6 +483,8 @@ class BasketSummaryView(BasketLogicMixin, BasketView):
             if redirect_response:
                 return redirect_response
 
+        if any(discount.get('offer').name == 'dynamic condition' for discount in basket.offer_applications):
+            messages.info(request, 'The new purchaser discount was automatically added.')
         return super(BasketSummaryView, self).get(request, *args, **kwargs)
 
     def _is_single_course_purchase(self, basket):
