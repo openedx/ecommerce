@@ -527,7 +527,7 @@ TEST_RUNNER = 'django.test.runner.DiscoverRunner'
 SESSION_COOKIE_NAME = 'ecommerce_sessionid'
 CSRF_COOKIE_NAME = 'ecommerce_csrftoken'
 LANGUAGE_COOKIE_NAME = 'openedx-language-preference'
-SESSION_COOKIE_SECURE = False
+SESSION_COOKIE_SECURE = True
 # END COOKIE CONFIGURATION
 
 
@@ -590,7 +590,7 @@ BLACK_LIST_COUPON_COURSE_MODES = [u'audit', u'honor']
 
 # Theme settings
 # enable or disbale comprehensive theming
-ENABLE_COMPREHENSIVE_THEMING = True
+ENABLE_COMPREHENSIVE_THEMING = False
 
 # name for waffle switch to use for disabling theming on runtime.
 # Note: management command ignore this switch
