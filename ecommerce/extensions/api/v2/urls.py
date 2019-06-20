@@ -92,6 +92,11 @@ ENTERPRISE_URLS = [
         enterprise_views.EnterpriseCustomerCatalogsViewSet.as_view({'get': 'get'}),
         name='enterprise_customer_catalogs'
     ),
+    url(
+        r'^customer_catalogs/(?P<enterprise_catalog_uuid>[^/]+)$',
+        enterprise_views.EnterpriseCustomerCatalogsViewSet.as_view({'get': 'retrieve'}),
+        name='enterprise_customer_catalog_details'
+    ),
 ]
 
 ASSIGNMENT_EMAIL_URLS = [

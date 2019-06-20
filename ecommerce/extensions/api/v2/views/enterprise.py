@@ -6,16 +6,22 @@ from django.core.exceptions import ValidationError
 from django.shortcuts import get_object_or_404
 from edx_rbac.decorators import permission_required
 from oscar.core.loading import get_model
+from requests.exceptions import ConnectionError, Timeout
 from rest_framework import generics, serializers, status
 from rest_framework.decorators import detail_route, list_route
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import ViewSet
 from six.moves.urllib.parse import urlparse  # pylint: disable=import-error, relative-import
+from slumber.exceptions import SlumberHttpBaseException
 
-from ecommerce.core.constants import COUPON_PRODUCT_CLASS_NAME
+from ecommerce.core.constants import COUPON_PRODUCT_CLASS_NAME, DEFAULT_CATALOG_PAGE_SIZE
 from ecommerce.core.utils import log_message_and_raise_validation_error
-from ecommerce.enterprise.utils import get_enterprise_customer_catalogs, get_enterprise_customers
+from ecommerce.enterprise.utils import (
+    get_enterprise_catalog,
+    get_enterprise_customer_catalogs,
+    get_enterprise_customers
+)
 from ecommerce.extensions.api.pagination import DatatablesDefaultPagination
 from ecommerce.extensions.api.serializers import (
     CouponCodeAssignmentSerializer,
@@ -64,6 +70,7 @@ DEPRECATED_COUPON_CATEGORIES = ['Bulk Enrollment']
 class EnterpriseCustomerViewSet(generics.GenericAPIView):
 
     permission_classes = (IsAuthenticated, IsAdminUser,)
+    queryset = ''
 
     def get(self, request):
         site = request.site
@@ -83,6 +90,29 @@ class EnterpriseCustomerCatalogsViewSet(ViewSet):
             page=request.GET.get('page', '1'),
         )
         return Response(data=enterprise_catalogs)
+
+    def retrieve(self, request, **kwargs):
+        endpoint_request_url = urlparse(request.build_absolute_uri())._replace(query=None).geturl()
+        try:
+            catalog = get_enterprise_catalog(
+                site=request.site,
+                enterprise_catalog=kwargs.get('enterprise_catalog_uuid'),
+                limit=request.GET.get('limit', DEFAULT_CATALOG_PAGE_SIZE),
+                page=request.GET.get('page', '1'),
+                endpoint_request_url=endpoint_request_url
+            )
+        except (ConnectionError, SlumberHttpBaseException, Timeout) as exc:
+            logger.exception(
+                'Unable to retrieve catalog for enterprise customer! customer: %s, Exception: %s',
+                kwargs.get('enterprise_catalog_uuid'),
+                exc
+            )
+            return Response(
+                {'error': 'Unable to retrieve enterprise catalog. Exception: {}'.format(exc.message)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+        return Response(catalog)
 
 
 class EnterpriseCouponViewSet(CouponViewSet):

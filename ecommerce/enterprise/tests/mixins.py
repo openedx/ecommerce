@@ -92,7 +92,7 @@ class EnterpriseServiceMockMixin(object):
             content_type='application/json'
         )
 
-    def mock_enterprise_catalog_api_get(self, enterprise_catalog_uuid):
+    def mock_enterprise_catalog_api_get(self, enterprise_catalog_uuid, custom_response=None):
         """
         Helper function to register the enterprise catalog API endpoint.
         """
@@ -156,13 +156,14 @@ class EnterpriseServiceMockMixin(object):
                 }
             ]
         }
+        enterprise_catalog_api_response = custom_response or enterprise_catalog_api_response
+        enterprise_catalog_api_body = json.dumps(enterprise_catalog_api_response)
 
-        enterprise_catalog_api_response_json = json.dumps(enterprise_catalog_api_response)
         self.mock_access_token_response()
         httpretty.register_uri(
             method=httpretty.GET,
             uri='{}{}/'.format(self.ENTERPRISE_CATALOG_URL, enterprise_catalog_uuid),
-            body=enterprise_catalog_api_response_json,
+            body=enterprise_catalog_api_body,
             content_type='application/json'
         )
 

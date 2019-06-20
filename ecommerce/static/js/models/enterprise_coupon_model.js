@@ -28,7 +28,8 @@ define([
                 id: null,
                 max_uses: 1,
                 price: 0,
-                quantity: 1
+                quantity: 1,
+                enterprise_catalog_url: '/api/v2/enterprise/customer_catalogs/'
             },
 
             couponValidation: {

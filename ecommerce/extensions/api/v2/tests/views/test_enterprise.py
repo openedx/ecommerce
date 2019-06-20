@@ -19,6 +19,7 @@ from oscar.core.loading import get_model
 from oscar.test import factories
 from rest_framework import status
 from six.moves import range
+from slumber.exceptions import SlumberHttpBaseException
 
 from ecommerce.core.constants import (
     ALL_ACCESS_CONTEXT,
@@ -145,6 +146,47 @@ class TestEnterpriseCustomerCatalogsViewSet(EnterpriseServiceMockMixin, TestCase
             ]
         }
 
+        self.enterprise_catalog = '869d26dd-2c44-487b-9b6a-24eee973f9a4'
+        self.dummy_enterprise_customer_catalog_data = {
+            "count": 1,
+            "enterprise_customer": "6ae013d4-c5c4-474d-8da9-0e559b2448e2",
+            "uuid": "869d26dd-2c44-487b-9b6a-24eee973f9a4",
+            "title": "batman_catalog",
+            "results": [
+                {
+                    "organizations": [
+                        "edX: "
+                    ],
+                    "card_image_url": None,
+                    "uuid": "c068b161-ffa3-4df7-90f7-5ee6b3fa3356",
+                    "title": "edX Demonstration Course",
+                    "languages": None,
+                    "subjects": [],
+                    "content_type": "course",
+                    "aggregation_key": "course:edX+DemoX",
+                    "key": "edX+DemoX",
+                    "short_description": None,
+                    "enrollment_url": "http://lms/enterprise/6ae013d4/course/edX+DemoX/enroll/?catalog=869d26dd",
+                    "full_description": None,
+                    "course_runs": [
+                        {
+                            "enrollment_mode": "verified",
+                            "end": None,
+                            "go_live_date": None,
+                            "enrollment_start": "2017-02-11T00:00:00Z",
+                            "start": "2018-02-05T05:00:00Z",
+                            "pacing_type": "instructor_paced",
+                            "key": "course-v1:edX+DemoX+Demo_Course",
+                            "enrollment_end": "2019-02-11T00:00:00Z",
+                            "availability": "Current"
+                        }
+                    ]
+                }
+            ],
+            "next": '{}{}?page=3'.format(self.ENTERPRISE_CATALOG_URL, self.enterprise_catalog),
+            "previous": '{}{}?page=1'.format(self.ENTERPRISE_CATALOG_URL, self.enterprise_catalog)
+        }
+
     @mock.patch('ecommerce.enterprise.utils.EdxRestApiClient')
     @httpretty.activate
     def test_get_customer_catalogs(self, mock_client):
@@ -182,6 +224,56 @@ class TestEnterpriseCustomerCatalogsViewSet(EnterpriseServiceMockMixin, TestCase
         )
 
         self.assertJSONEqual(result.content, updated_response)
+
+    @httpretty.activate
+    def test_retrieve_customer_catalog(self):
+        """
+        Tests that `EnterpriseCustomerCatalogsViewSet` retrieve endpoint works as expected
+        """
+        self.mock_access_token_response()
+        self.mock_enterprise_catalog_api_get(self.enterprise_catalog, self.dummy_enterprise_customer_catalog_data)
+
+        url = reverse(
+            'api:v2:enterprise:enterprise_customer_catalog_details',
+            kwargs={'enterprise_catalog_uuid': self.enterprise_catalog}
+        )
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        response_with_updated_urls = dict(
+            self.dummy_enterprise_customer_catalog_data,
+            next='{}api/v2/enterprise/customer_catalogs/{}?page=3'.format(
+                self.test_server_url,
+                self.enterprise_catalog
+            ),
+            previous="{}api/v2/enterprise/customer_catalogs/{}?page=1".format(
+                self.test_server_url,
+                self.enterprise_catalog
+            ),
+        )
+        self.assertJSONEqual(response.content, response_with_updated_urls)
+
+    def test_retrieve_customer_catalog_with_exception(self):
+        """
+        Tests that `EnterpriseCustomerCatalogsViewSet` retrieve endpoint works as expected on exception
+        """
+        url = reverse(
+            'api:v2:enterprise:enterprise_customer_catalog_details',
+            kwargs={'enterprise_catalog_uuid': self.enterprise_catalog}
+        )
+
+        mock_path = 'ecommerce.extensions.api.v2.views.enterprise.get_enterprise_catalog'
+        with mock.patch(mock_path) as mock_get_enterprise_catalog:
+            mock_get_enterprise_catalog.side_effect = SlumberHttpBaseException('Insecure connection')
+            with mock.patch('ecommerce.extensions.api.v2.views.enterprise.logger') as mock_logger:
+                response = self.client.get(url)
+                self.assertEqual(response.status_code, status.HTTP_500_INTERNAL_SERVER_ERROR)
+                self.assertJSONEqual(
+                    response.content,
+                    {'error': 'Unable to retrieve enterprise catalog. Exception: Insecure connection'}
+                )
+                self.assertTrue(mock_logger.exception.called)
 
 
 @ddt.ddt
