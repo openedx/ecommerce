@@ -410,6 +410,8 @@ class BasketLogicMixin(object):
         num_of_items = self.request.basket.num_items
         context.update({
             'formset_lines_data': zip(formset, lines_data),
+            # the new payment api is not using the formset, so the zip above doesn't work
+            'lines_data': lines_data,
             'free_basket': context['order_total'].incl_tax == 0,
             'homepage_url': get_lms_url(''),
             'min_seat_quantity': 1,
@@ -484,16 +486,7 @@ class PaymentApiLogicMixin(BasketLogicMixin):
             'total_excl_discount': context['order_total'].excl_tax + 12,
             'calculated_discount': context['total_benefit'],
             'order_total': context['order_total'].excl_tax,
-            'products': [
-                # NOTE: Will add additional level for program and include bundle_id for bundles
-                {
-                    'name': 'Introduction to Happiness',
-                    # TODO: A real sample value would be 'verified'.  Not sure what this is called? Certificate type?
-                    # https://github.com/edx/ecommerce/search?q=seat_type+certificate&unscoped_q=seat_type+certificate
-                    'seat_type': 'verified',
-                    'img_url': 'https://prod-discovery.edx-cdn.org/media/course/image/21be6203.small.jpg',
-                },
-            ],
+            'products': [],
             'show_voucher_form': True,
             'payment_providers': [
                 {
@@ -504,6 +497,14 @@ class PaymentApiLogicMixin(BasketLogicMixin):
                 }
             ],
         }
+
+        for line_data in context['lines_data']:
+            serialized_basket['products'].append({
+                'sku': line_data['sku'],
+                'title': line_data['product_title'],
+                'image_url': line_data['image_url'],
+                'seat_type': line_data['seat_type'],
+            })
 
         voucher = self.request.basket.vouchers.first()
         if voucher:
@@ -528,6 +529,7 @@ class PaymentApiLogicMixin(BasketLogicMixin):
 
         context = {}
         context = self._get_order_total(context)
+        context['line_list'] = self.request.basket.all_lines()
         context = self.get_basket_context_data(context)
 
         # TODO: ARCH-867: Remove unnecessary processing of anything added to context (e.g. payment_processors) that
