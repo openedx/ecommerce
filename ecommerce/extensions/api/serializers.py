@@ -7,14 +7,12 @@ from decimal import Decimal
 
 import waffle
 from dateutil.parser import parse
-from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.db import transaction
 from django.db.models import Q
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 from oscar.core.loading import get_class, get_model
-from path import Path
 from rest_framework import serializers
 from rest_framework.reverse import reverse
 from rest_framework.settings import api_settings
@@ -961,7 +959,6 @@ class CouponSerializer(ProductPaymentInfoMixin, serializers.ModelSerializer):
     seats = serializers.SerializerMethodField()
     start_date = serializers.SerializerMethodField()
     voucher_type = serializers.SerializerMethodField()
-    enterprise_catalog_url_template = serializers.SerializerMethodField()
 
     def get_benefit_type(self, obj):
         return retrieve_benefit(obj).type or getattr(retrieve_benefit(obj).proxy(), 'benefit_class_type', None)
@@ -1098,9 +1095,6 @@ class CouponSerializer(ProductPaymentInfoMixin, serializers.ModelSerializer):
     def get_voucher_type(self, obj):
         return retrieve_voucher_usage(obj)
 
-    def get_enterprise_catalog_url_template(self, obj):  # pylint: disable=unused-argument
-        return Path(settings.ENTERPRISE_API_URL) / "enterprise_catalogs/"
-
     class Meta(object):
         model = Product
         fields = (
@@ -1109,7 +1103,6 @@ class CouponSerializer(ProductPaymentInfoMixin, serializers.ModelSerializer):
             'email_domains', 'end_date', 'enterprise_customer', 'enterprise_customer_catalog',
             'id', 'last_edited', 'max_uses', 'note', 'notify_email', 'num_uses', 'payment_information',
             'program_uuid', 'price', 'quantity', 'seats', 'start_date', 'title', 'voucher_type',
-            'enterprise_catalog_url_template'
         )
 
 

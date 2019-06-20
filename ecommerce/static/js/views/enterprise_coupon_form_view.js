@@ -107,16 +107,19 @@ define([
             },
 
             updateEnterpriseCatalogDetailsLink: function() {
-                var enterpriseCoupon = this.$('[name=enterprise_customer_catalog]').val();
-                var enterpriseAPIURL = this.model.get('enterprise_catalog_url_template');
-                if (enterpriseCoupon && enterpriseAPIURL) {
-                    this.$(
-                        '#enterprise-catalog-details'
-                    ).attr('href', enterpriseAPIURL + enterpriseCoupon).addClass('external-link').removeClass('hidden');
+                var enterpriseAPIURL = this.model.get('enterprise_catalog_url'),
+                    enterpriseCatalog = this.$('[name=enterprise_customer_catalog]').val();
+
+                if (enterpriseCatalog) {
+                    this.$('#enterprise-catalog-details')
+                        .attr('href', enterpriseAPIURL + enterpriseCatalog)
+                        .addClass('external-link')
+                        .removeClass('hidden');
                 } else {
-                    this.$(
-                        '#enterprise-catalog-details'
-                    ).removeAttr('href').removeClass('external-link').addClass('hidden');
+                    this.$('#enterprise-catalog-details')
+                        .removeAttr('href')
+                        .removeClass('external-link')
+                        .addClass('hidden');
                 }
             },
 

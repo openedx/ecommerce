@@ -527,7 +527,7 @@ def has_enterprise_offer(basket):
     return False
 
 
-def get_enterprise_catalog(site, enterprise_catalog, limit, page):
+def get_enterprise_catalog(site, enterprise_catalog, limit, page, endpoint_request_url=None):
     """
     Get the EnterpriseCustomerCatalog for a given catalog uuid.
 
@@ -536,6 +536,7 @@ def get_enterprise_catalog(site, enterprise_catalog, limit, page):
         enterprise_catalog (str): The uuid of the Enterprise Catalog
         limit (int): The number of results to return per page.
         page (int): The page number to fetch.
+        endpoint_request_url (str): This is used to replace the lms url with ecommerce url
 
     Returns:
         dict: The result set containing the content objects associated with the Enterprise Catalog.
@@ -565,6 +566,10 @@ def get_enterprise_catalog(site, enterprise_catalog, limit, page):
         limit=limit,
         page=page,
     )
+
+    if endpoint_request_url:
+        response = update_paginated_response(endpoint_request_url, response)
+
     TieredCache.set_all_tiers(cache_key, response, settings.CATALOG_RESULTS_CACHE_TIMEOUT)
 
     return response
