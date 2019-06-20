@@ -18,7 +18,7 @@ LOGGING['handlers']['local'] = {
 }
 
 SOCIAL_AUTH_REDIRECT_IS_HTTPS = False
-SESSION_COOKIE_SECURE = False
+SESSION_COOKIE_SECURE = True
 
 # Allow live changes to JS and CSS
 COMPRESS_OFFLINE = False
