@@ -1,4 +1,4 @@
-from __future__ import unicode_literals
+from __future__ import absolute_import, unicode_literals
 
 from StringIO import StringIO
 
@@ -10,6 +10,7 @@ from oscar.test import factories
 from ecommerce.extensions.test.factories import create_order
 from ecommerce.invoice.models import Invoice
 from ecommerce.tests.testcases import TestCase
+from six.moves import range
 
 Basket = get_model('basket', 'Basket')
 

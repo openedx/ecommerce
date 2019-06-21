@@ -1,6 +1,9 @@
+from __future__ import absolute_import
+
 import itertools
 
 import mock
+import six
 from edx_django_utils.cache import DEFAULT_REQUEST_CACHE
 from oscar.core.loading import get_class, get_model
 from oscar.test import factories
@@ -43,7 +46,7 @@ class BasketTests(CatalogMixin, BasketMixin, TestCase):
             num_lines=basket.num_lines
         )
 
-        self.assertEqual(unicode(basket), expected)
+        self.assertEqual(six.text_type(basket), expected)
 
     def test_get_basket_without_existing_baskets(self):
         """ If the user has no existing baskets, the method should return a new one. """
