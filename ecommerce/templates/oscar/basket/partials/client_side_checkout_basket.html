@@ -80,7 +80,7 @@
                                     {{ benefit }} discount provided by {{ enterprise_customer_name }}.
                                 {% endblocktrans %}
                             </p>
-                        {% elif offer.name == 'dynamic condition' %}
+                        {% elif discount.offer.condition.proxy_class == 'ecommerce.extensions.offer.dynamic_conditional_offer.DynamicCustomerCondition' %}
                             {% blocktrans with benefit=basket.offer_discounts %}
                                     First time purchaser discount applied.
                             {% endblocktrans %}
