@@ -20,7 +20,7 @@ PROTOCOL = 'https'
 # Enable offline compression of CSS/JS
 COMPRESS_ENABLED = True
 COMPRESS_OFFLINE = True
-
+SESSION_COOKIE_SECURE = True
 # Email configuration
 EMAIL_BACKEND = 'django_ses.SESBackend'
 
