@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """Base class for payment processor implementation test classes."""
-from __future__ import unicode_literals
+from __future__ import absolute_import, unicode_literals
 
 import ddt
 from django.conf import settings
