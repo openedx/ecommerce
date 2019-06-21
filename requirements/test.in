@@ -1,5 +1,6 @@
 -r base.in
 
+code-annotations
 coverage==4.3.4
 ddt==1.1.1
 diff-cover==0.9.6
