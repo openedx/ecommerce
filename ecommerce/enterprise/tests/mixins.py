@@ -1,6 +1,7 @@
+from __future__ import absolute_import
+
 import copy
 import json
-from urllib import urlencode
 from uuid import uuid4
 
 import httpretty
@@ -13,6 +14,7 @@ from ecommerce.extensions.test.factories import (
     EnterpriseOfferFactory,
     EnterprisePercentageDiscountBenefitFactory
 )
+from six.moves.urllib.parse import urlencode  # pylint: disable=import-error
 
 
 def raise_timeout(request, uri, headers):  # pylint: disable=unused-argument
