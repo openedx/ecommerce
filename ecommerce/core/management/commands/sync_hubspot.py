@@ -1,6 +1,8 @@
 """
 Django management command to Sync Product, Orders and Lines to Hubspot server.
 """
+from __future__ import absolute_import
+
 import json
 import logging
 import time
@@ -16,6 +18,7 @@ from oscar.core.loading import get_class, get_model
 from slumber.exceptions import HttpClientError, HttpServerError
 
 from ecommerce.extensions.fulfillment.status import ORDER
+from six.moves import range
 
 Basket = get_model('basket', 'Basket')
 CartLine = get_model('basket', 'Line')
