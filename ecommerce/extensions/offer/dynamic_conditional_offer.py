@@ -58,7 +58,7 @@ class DynamicCustomerCondition(ConditionWithoutRangeMixin, SingleItemConsumption
 
     @property
     def name(self):
-        return "First time purchaser condition"
+        return "dynamic_discount_condition"
 
     def is_satisfied(self, offer, basket):  # pylint: disable=unused-argument
         decoded_jwt_discount = _get_decoded_jwt_discount_from_request()
