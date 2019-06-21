@@ -204,7 +204,10 @@ class CybersourceNotificationMixin(CyberSourceProcessorMixin, OrderCreationMixin
             ck = basket.lines.first().product.course_id
             try:
                 response = lms_discount_client.course(ck).get()
-                self.request.POST['discount_jwt'] = response.discount_jwt
+                self.request.POST = self.request.POST.copy()
+                self.request.POST['discount_jwt'] = response.get('jwt')
+            except:  # pylint: disable=bare-except
+                pass
             # END TODO
             Applicator().apply(basket, basket.owner, self.request)
             return basket

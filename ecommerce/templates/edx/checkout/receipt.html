@@ -126,6 +126,10 @@
                                 {% blocktrans trimmed with type=discount.offer.offer_type enterprise_name=discount.offer.condition.enterprise_customer_name %}
                                     Discount of type {{ type }} provided by {{ enterprise_name }}
                                 {% endblocktrans %}
+                            {% elif discount.offer.name == 'dynamic condition' %}
+                                {% blocktrans with benefit=basket.offer_discounts %}
+                                        First time purchaser discount applied.
+                                {% endblocktrans %}
                             {% else %}
                                 {% blocktrans trimmed with type=discount.offer.offer_type %}
                                     Discount of type {{ type }} is provided.
