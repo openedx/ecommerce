@@ -18,7 +18,7 @@ INTERNAL_IPS = ['127.0.0.1']
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#email-backend
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 # END EMAIL CONFIGURATION
-
+SESSION_COOKIE_SECURE = True
 
 # DATABASE CONFIGURATION
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#databases
