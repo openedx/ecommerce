@@ -1,5 +1,6 @@
+from __future__ import absolute_import
+
 import json
-from urlparse import urljoin
 
 import ddt
 import httpretty
@@ -26,6 +27,7 @@ from ecommerce.journals.constants import JOURNAL_DISCOVERY_API_PATH  # TODO: jou
 from ecommerce.tests.factories import SiteConfigurationFactory
 from ecommerce.tests.mixins import LmsApiMockMixin
 from ecommerce.tests.testcases import TestCase
+from six.moves.urllib.parse import urljoin  # pylint: disable=import-error
 
 ENTERPRISE_API_URL = 'https://enterprise.example.com/api/v1/'
 

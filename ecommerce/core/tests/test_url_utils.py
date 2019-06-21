@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+
 import mock
 
 from ecommerce.core.exceptions import MissingRequestError
