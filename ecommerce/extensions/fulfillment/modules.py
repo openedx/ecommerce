@@ -3,12 +3,15 @@
 Fulfillment Modules are designed to allow specific fulfillment logic based on the type (or types) of products
 in an Order.
 """
+from __future__ import absolute_import
+
 import abc
 import datetime
 import json
 import logging
 
 import requests
+import six
 from django.conf import settings
 from django.urls import reverse
 from edx_rest_api_client.client import EdxRestApiClient
@@ -44,13 +47,12 @@ StockRecord = get_model('partner', 'StockRecord')
 logger = logging.getLogger(__name__)
 
 
-class BaseFulfillmentModule(object):  # pragma: no cover
+class BaseFulfillmentModule(six.with_metaclass(abc.ABCMeta, object)):  # pragma: no cover
     """
     Base FulfillmentModule class for containing Product specific fulfillment logic.
 
     All modules should extend the FulfillmentModule and adhere to the defined contract.
     """
-    __metaclass__ = abc.ABCMeta
 
     @abc.abstractmethod
     def supports_line(self, line):
@@ -529,7 +531,7 @@ class EnrollmentCodeFulfillmentModule(BaseFulfillmentModule):
             _range.save()
 
             vouchers = create_vouchers(
-                name=unicode('Enrollment code voucher [{}]').format(line.product.title),
+                name=six.text_type('Enrollment code voucher [{}]').format(line.product.title),
                 benefit_type=Benefit.PERCENTAGE,
                 benefit_value=100,
                 catalog=coupon_catalog,
