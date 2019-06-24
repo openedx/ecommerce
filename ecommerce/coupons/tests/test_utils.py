@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+
 import ddt
 import httpretty
 from edx_django_utils.cache import TieredCache
