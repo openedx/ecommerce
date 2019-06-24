@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+
 import ddt
 from django.core.exceptions import ValidationError
 from django.utils.timezone import now, timedelta
