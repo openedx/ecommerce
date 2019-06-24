@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+
 from django.test.client import RequestFactory
 from social_django.models import UserSocialAuth
 from testfixtures import LogCapture
