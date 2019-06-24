@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+
 from django.conf import settings
 from django.core.mail import EmailMessage, EmailMultiAlternatives
 from oscar.apps.customer.utils import *  # pylint: disable=wildcard-import, unused-wildcard-import
