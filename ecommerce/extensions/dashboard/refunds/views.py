@@ -1,3 +1,6 @@
+from __future__ import absolute_import
+
+import six
 from django.views.generic import DetailView, ListView
 from oscar.core.loading import get_class, get_model
 from oscar.views import sort_queryset
@@ -34,7 +37,7 @@ class RefundListView(FilterFieldsMixin, ListView):
 
         self.form = self.form_class(self.request.GET)
         if self.form.is_valid():
-            for field, value in self.form.cleaned_data.iteritems():
+            for field, value in six.iteritems(self.form.cleaned_data):
                 if value:
                     # Check if the field has a custom query filter setup.
                     # If not, use a standard Django equals/match filter.

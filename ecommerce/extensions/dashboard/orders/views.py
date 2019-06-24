@@ -1,3 +1,6 @@
+from __future__ import absolute_import
+
+import six
 from django.contrib import messages
 from django.urls import reverse
 from django.utils.safestring import mark_safe
@@ -46,7 +49,7 @@ class OrderListView(FilterFieldsMixin, CoreOrderListView):
         # to the form constructor. This results in the form not being populated when re-rendered.
         self.form = self.form_class(self.request.GET)
         if self.form.is_valid():
-            for field, value in self.form.cleaned_data.iteritems():
+            for field, value in six.iteritems(self.form.cleaned_data):
                 if value:
                     _filter = self.get_filter_fields().get(field)
 
