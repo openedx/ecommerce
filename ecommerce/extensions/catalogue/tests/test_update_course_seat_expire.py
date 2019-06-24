@@ -1,5 +1,5 @@
 # encoding: utf-8
-from __future__ import unicode_literals
+from __future__ import absolute_import, unicode_literals
 
 import datetime
 import json
@@ -8,6 +8,7 @@ import logging
 import ddt
 import httpretty
 import mock
+import six
 from django.core.management import CommandError, call_command
 from pytz import UTC
 from slumber.exceptions import HttpClientError
@@ -40,7 +41,7 @@ class UpdateSeatExpireDateTests(DiscoveryTestMixin, TestCase):
             'pagination': {},
             'results': [
                 {
-                    'enrollment_end': unicode(self.expire_date),
+                    'enrollment_end': six.text_type(self.expire_date),
                     'course_id': self.course.id
                 },
             ],
