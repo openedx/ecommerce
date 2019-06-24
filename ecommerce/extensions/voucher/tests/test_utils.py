@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals
+from __future__ import absolute_import, unicode_literals
 
 import uuid
 
@@ -32,6 +32,7 @@ from ecommerce.extensions.voucher.utils import (
 )
 from ecommerce.tests.mixins import LmsApiMockMixin
 from ecommerce.tests.testcases import TestCase
+from six.moves import range
 
 Basket = get_model('basket', 'Basket')
 Benefit = get_model('offer', 'Benefit')
