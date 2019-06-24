@@ -1,6 +1,8 @@
 """
 Tests for comprehensive theme static files storage classes.
 """
+from __future__ import absolute_import
+
 from django.conf import settings
 from django.test import override_settings
 from mock import patch
