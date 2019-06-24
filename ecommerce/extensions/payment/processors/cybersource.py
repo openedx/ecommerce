@@ -1,5 +1,5 @@
 """ CyberSource payment processing. """
-from __future__ import unicode_literals
+from __future__ import absolute_import, unicode_literals
 
 import base64
 import datetime
@@ -8,6 +8,7 @@ import logging
 import uuid
 from decimal import Decimal
 
+import six
 from django.conf import settings
 from django.urls import reverse
 from oscar.apps.payment.exceptions import GatewayError, TransactionDeclined, UserCancelled
@@ -220,7 +221,7 @@ class Cybersource(ApplePayMixin, BaseClientSidePaymentProcessor):
         parameters.update(kwargs.get('extra_parameters', {}))
 
         # Mitigate PCI compliance issues
-        signed_field_names = parameters.keys()
+        signed_field_names = list(parameters.keys())
         if any(pci_field in signed_field_names for pci_field in self.PCI_FIELDS):
             raise PCIViolation('One or more PCI-related fields is contained in the payment parameters. '
                                'This service is NOT PCI-compliant! Deactivate this service immediately!')
@@ -373,7 +374,7 @@ class Cybersource(ApplePayMixin, BaseClientSidePaymentProcessor):
             }
             purchase_totals = {
                 'currency': currency,
-                'grandTotalAmount': unicode(amount),
+                'grandTotalAmount': six.text_type(amount),
             }
 
             response = client.service.runTransaction(
