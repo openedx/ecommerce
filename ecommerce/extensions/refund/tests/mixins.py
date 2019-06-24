@@ -1,5 +1,7 @@
 # coding=utf-8
 
+from __future__ import absolute_import
+
 import mock
 from django.conf import settings
 from django.test import override_settings
@@ -15,6 +17,7 @@ from ecommerce.extensions.payment.tests.processors import DummyProcessor
 from ecommerce.extensions.refund.status import REFUND, REFUND_LINE
 from ecommerce.extensions.refund.tests.factories import RefundFactory
 from ecommerce.extensions.test.factories import create_order
+from six.moves import zip
 
 post_refund = get_class('refund.signals', 'post_refund')
 Option = get_model('catalogue', 'Option')

@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+
 import ddt
 from django.test import override_settings
 from oscar.core.loading import get_model
