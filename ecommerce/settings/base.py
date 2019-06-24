@@ -527,7 +527,7 @@ TEST_RUNNER = 'django.test.runner.DiscoverRunner'
 SESSION_COOKIE_NAME = 'ecommerce_sessionid'
 CSRF_COOKIE_NAME = 'ecommerce_csrftoken'
 LANGUAGE_COOKIE_NAME = 'openedx-language-preference'
-SESSION_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = False
 # END COOKIE CONFIGURATION
 
 
