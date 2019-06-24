@@ -497,8 +497,17 @@ class User(AbstractUser):
 
     @property
     def access_token(self):
+        """
+        Returns the access token from the extra data in the user's social auth.
+
+        Note that a single user_id can be associated with multiple provider/uid combinations. For example:
+            provider    uid             user_id
+            edx-oidc    person          123
+            edx-oauth2  person          123
+            edx-oauth2  person@edx.org  123
+        """
         try:
-            return self.social_auth.first().extra_data[u'access_token']  # pylint: disable=no-member
+            return self.social_auth.order_by('-id').first().extra_data[u'access_token']  # pylint: disable=no-member
         except Exception:  # pylint: disable=broad-except
             return None
 
