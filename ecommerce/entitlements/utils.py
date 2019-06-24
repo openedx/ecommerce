@@ -1,7 +1,8 @@
-from __future__ import unicode_literals
+from __future__ import absolute_import, unicode_literals
 
 import logging
 
+import six
 from django.conf import settings
 from django.db.models import Q
 from oscar.core.loading import get_model
@@ -46,7 +47,7 @@ def get_entitlement(uuid, certificate_type):
     """ Get a Course Entitlement Product """
     uuid_query = Q(
         attributes__name='UUID',
-        attribute_values__value_text=unicode(uuid),
+        attribute_values__value_text=six.text_type(uuid),
     )
     certificate_type_query = Q(
         attributes__name='certificate_type',
@@ -58,7 +59,7 @@ def get_entitlement(uuid, certificate_type):
 def create_or_update_course_entitlement(certificate_type, price, partner, UUID, title, id_verification_required=False):
     """ Create or Update Course Entitlement Products """
     certificate_type = certificate_type.lower()
-    UUID = unicode(UUID)
+    UUID = six.text_type(UUID)
 
     try:
         parent_entitlement, __ = create_parent_course_entitlement(title, UUID)
