@@ -1,4 +1,4 @@
-from __future__ import unicode_literals
+from __future__ import absolute_import, unicode_literals
 
 import datetime
 from uuid import uuid4
@@ -16,6 +16,7 @@ from oscar.test.factories import BenefitFactory, OrderFactory, OrderLineFactory,
 from requests.exceptions import ConnectionError, Timeout
 from rest_framework import status
 from rest_framework.test import APIRequestFactory
+from six.moves import range
 from slumber.exceptions import SlumberBaseException
 
 from ecommerce.coupons.tests.mixins import CouponMixin, DiscoveryMockMixin

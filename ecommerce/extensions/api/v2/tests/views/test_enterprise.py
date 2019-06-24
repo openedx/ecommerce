@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals
+from __future__ import absolute_import, unicode_literals
 
 import datetime
 import json
@@ -9,6 +9,7 @@ import ddt
 import httpretty
 import mock
 import rules
+import six  # pylint: disable=ungrouped-imports
 from django.conf import settings
 from django.test import override_settings
 from django.urls import reverse
@@ -17,6 +18,7 @@ from django.utils.timezone import now
 from oscar.core.loading import get_model
 from oscar.test import factories
 from rest_framework import status
+from six.moves import range
 
 from ecommerce.core.constants import (
     ALL_ACCESS_CONTEXT,
@@ -640,15 +642,15 @@ class EnterpriseCouponViewSetRbacTests(
         vouchers = Product.objects.get(id=coupon_id).attr.coupon_vouchers.vouchers.all()
         codes = [voucher.code for voucher in vouchers]
 
-        for email, code_index in code_assignments.iteritems():
+        for email, code_index in six.iteritems(code_assignments):
             self.assign_user_to_code(coupon_id, [email], [codes[code_index]])
 
-        for email, data in code_redemptions.iteritems():
+        for email, data in six.iteritems(code_redemptions):
             redeeming_user = self.create_user(email=email)
             for _ in range(0, data['num']):
                 self.use_voucher(Voucher.objects.get(code=codes[data['code']]), redeeming_user)
 
-        for code_filter, expected_response in expected_responses.iteritems():
+        for code_filter, expected_response in six.iteritems(expected_responses):
             response = self.get_response(
                 'GET',
                 '/api/v2/enterprise/coupons/{}/codes/?code_filter={}'.format(coupon_id, code_filter)
@@ -1286,7 +1288,7 @@ class EnterpriseCouponViewSetRbacTests(
         )
 
         # Verify that we get correct results.
-        for field, value in expected_response.iteritems():
+        for field, value in six.iteritems(expected_response):
             if assignment_has_error and field == 'errors':
                 assignment_with_errors = OfferAssignment.objects.filter(status=OFFER_ASSIGNMENT_EMAIL_BOUNCED)
                 value = [
