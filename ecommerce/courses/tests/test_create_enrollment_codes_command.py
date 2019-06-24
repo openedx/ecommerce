@@ -1,7 +1,7 @@
 # encoding: utf-8
 """Contains the tests for enrollment code creation command."""
 
-from __future__ import unicode_literals
+from __future__ import absolute_import, unicode_literals
 
 import logging
 import os
