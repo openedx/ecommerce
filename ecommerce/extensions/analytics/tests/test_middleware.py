@@ -112,7 +112,7 @@ class TrackingMiddlewareTests(TestCase):
         expected = [
             (
                 self.LOGGER_NAME,
-                'WARNING',
+                'ERROR',
                 'Could not find lms_user_id for user {}. Request path: /, referrer: None'.format(user.id)
             ),
         ]
