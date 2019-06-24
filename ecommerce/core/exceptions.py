@@ -6,3 +6,8 @@ class MissingRequestError(Exception):
 class SiteConfigurationError(Exception):
     """ Raised when SiteConfiguration is invalid. """
     pass
+
+
+class MissingUserIdError(Exception):
+    """Error indicating the user is missing a LMS user id. """
+    pass

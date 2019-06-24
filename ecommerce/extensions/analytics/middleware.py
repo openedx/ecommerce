@@ -3,6 +3,7 @@ Middleware for analytics app to parse the Google Analytics (GA) cookie and the L
 """
 import logging
 from edx_django_utils import monitoring as monitoring_utils
+from ecommerce.core import exceptions
 from ecommerce.extensions.analytics.utils import get_google_analytics_client_id
 
 logger = logging.getLogger(__name__)
@@ -47,11 +48,12 @@ class TrackingMiddleware(object):
                                 u'referrer: %s', social_auth_id, user.id, request.get_full_path(),
                                 request.META.get('HTTP_REFERER'))
                 else:
-                    # TODO: Change this to an error once we can successfully get the id from social auth and the db.
-                    # See REVMI-249 and REVMI-269
                     monitoring_utils.set_custom_metric('ecommerce_missing_lms_user_id_middleware', user.id)
-                    logger.warn(u'Could not find lms_user_id for user %s. Request path: %s, referrer: %s', user.id,
-                                request.get_full_path(), request.META.get('HTTP_REFERER'))
+                    error_msg = u'Could not find lms_user_id for user {user_id}. Request path: {request}, referrer:' \
+                                u' {referrer}'.format(user_id=user.id, request=request.get_full_path(),
+                                                      referrer=request.META.get('HTTP_REFERER'))
+                    logger.error(error_msg)
+                    raise exceptions.MissingUserIdError(error_msg)
 
             if save_user:
                 user.save()

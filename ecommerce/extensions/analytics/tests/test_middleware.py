@@ -2,6 +2,7 @@ from django.test.client import RequestFactory
 from social_django.models import UserSocialAuth
 from testfixtures import LogCapture
 
+from ecommerce.core import exceptions
 from ecommerce.core.models import User
 from ecommerce.extensions.analytics import middleware
 from ecommerce.tests.testcases import TestCase
@@ -31,6 +32,9 @@ class TrackingMiddlewareTests(TestCase):
 
     def test_save_ga_client_id(self):
         """ Test that middleware save/update GA client id in user tracking context. """
+        self.user.lms_user_id = 06241
+        self.user.save()
+
         self.assertIsNone(self.user.tracking_context)
         self._assert_ga_client_id('test-client-id')
 
@@ -118,9 +122,10 @@ class TrackingMiddlewareTests(TestCase):
         ]
 
         same_user = User.objects.get(id=user.id)
-        with LogCapture(self.LOGGER_NAME) as log:
-            self._process_request(same_user)
-            log.check_present(*expected)
+        with self.assertRaises(exceptions.MissingUserIdError):
+            with LogCapture(self.LOGGER_NAME) as log:
+                self._process_request(same_user)
+                log.check_present(*expected)
 
         same_user = User.objects.get(id=user.id)
         self.assertIsNone(same_user.lms_user_id)
@@ -138,9 +143,10 @@ class TrackingMiddlewareTests(TestCase):
         ]
 
         same_user = User.objects.get(id=user.id)
-        with LogCapture(self.LOGGER_NAME) as log:
-            self._process_request(same_user)
-            log.check_present(*expected)
+        with self.assertRaises(exceptions.MissingUserIdError):
+            with LogCapture(self.LOGGER_NAME) as log:
+                self._process_request(same_user)
+                log.check_present(*expected)
 
         same_user = User.objects.get(id=user.id)
         self.assertIsNone(same_user.lms_user_id)
