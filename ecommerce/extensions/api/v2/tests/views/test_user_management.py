@@ -1,9 +1,12 @@
+from __future__ import absolute_import
+
 import json
 
 import ddt
 import mock
 from django.urls import reverse
 from oscar.test import factories
+from six.moves import range
 
 from ecommerce.tests.testcases import TestCase
 

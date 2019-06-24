@@ -1,8 +1,11 @@
+from __future__ import absolute_import
+
 import json
 
 import ddt
 import httpretty
 import mock
+import six
 from django.contrib.auth.models import Permission
 from django.test import RequestFactory, override_settings
 from django.urls import reverse
@@ -73,7 +76,7 @@ class OrderListViewTests(AccessTokenMixin, ThrottlingMixin, TestCase):
 
         self.assertEqual(Order.objects.count(), 2)
         self.assertEqual(content['count'], 1)
-        self.assertEqual(content['results'][0]['number'], unicode(order.number))
+        self.assertEqual(content['results'][0]['number'], six.text_type(order.number))
 
         # Test ordering
         order_2 = create_order(site=self.site, user=self.user)
@@ -82,8 +85,8 @@ class OrderListViewTests(AccessTokenMixin, ThrottlingMixin, TestCase):
         content = json.loads(response.content)
 
         self.assertEqual(content['count'], 2)
-        self.assertEqual(content['results'][0]['number'], unicode(order_2.number))
-        self.assertEqual(content['results'][1]['number'], unicode(order.number))
+        self.assertEqual(content['results'][0]['number'], six.text_type(order_2.number))
+        self.assertEqual(content['results'][1]['number'], six.text_type(order.number))
 
     def test_with_other_users_orders(self):
         """ The view should only return orders for the authenticated users. """
@@ -96,7 +99,7 @@ class OrderListViewTests(AccessTokenMixin, ThrottlingMixin, TestCase):
         response = self.client.get(self.path, HTTP_AUTHORIZATION=self.token)
         content = json.loads(response.content)
         self.assertEqual(content['count'], 1)
-        self.assertEqual(content['results'][0]['number'], unicode(order.number))
+        self.assertEqual(content['results'][0]['number'], six.text_type(order.number))
 
     @ddt.unpack
     @ddt.data(
@@ -111,7 +114,7 @@ class OrderListViewTests(AccessTokenMixin, ThrottlingMixin, TestCase):
         response = self.client.get(self.path, HTTP_AUTHORIZATION=self.generate_jwt_token_header(admin_user))
         content = json.loads(response.content)
         self.assertEqual(content['count'], 1)
-        self.assertEqual(content['results'][0]['number'], unicode(order.number))
+        self.assertEqual(content['results'][0]['number'], six.text_type(order.number))
 
     def test_user_information(self):
         """ Make sure that the correct user information is returned. """
@@ -121,7 +124,7 @@ class OrderListViewTests(AccessTokenMixin, ThrottlingMixin, TestCase):
         response = self.client.get(self.path, HTTP_AUTHORIZATION=self.generate_jwt_token_header(admin_user))
         content = json.loads(response.content)
         self.assertEqual(content['count'], 1)
-        self.assertEqual(content['results'][0]['number'], unicode(order.number))
+        self.assertEqual(content['results'][0]['number'], six.text_type(order.number))
         self.assertEqual(content['results'][0]['user']['email'], admin_user.email)
         self.assertEqual(content['results'][0]['user']['username'], admin_user.username)
 
@@ -170,8 +173,8 @@ class OrderListViewTests(AccessTokenMixin, ThrottlingMixin, TestCase):
 
         self.assertEqual(Order.objects.count(), 2)
         self.assertEqual(content['count'], 2)
-        self.assertEqual(content['results'][0]['number'], unicode(second_order.number))
-        self.assertEqual(content['results'][1]['number'], unicode(order.number))
+        self.assertEqual(content['results'][0]['number'], six.text_type(second_order.number))
+        self.assertEqual(content['results'][1]['number'], six.text_type(order.number))
 
         # Configure new site for same partner.
         domain = 'testserver.fake.internal'
@@ -195,8 +198,8 @@ class OrderListViewTests(AccessTokenMixin, ThrottlingMixin, TestCase):
         content = json.loads(response.content)
 
         self.assertEqual(content['count'], 2)
-        self.assertEqual(content['results'][0]['number'], unicode(second_order.number))
-        self.assertEqual(content['results'][1]['number'], unicode(order.number))
+        self.assertEqual(content['results'][0]['number'], six.text_type(second_order.number))
+        self.assertEqual(content['results'][1]['number'], six.text_type(order.number))
 
 
 @ddt.ddt
@@ -294,7 +297,7 @@ class OrderFulfillViewTests(TestCase):
 
         # Reload the order from the DB and check its status
         self.order = Order.objects.get(number=self.order.number)
-        self.assertEqual(unicode(self.order.number), response.data['number'])
+        self.assertEqual(six.text_type(self.order.number), response.data['number'])
         self.assertEqual(self.order.status, response.data['status'])
 
     def test_fulfillment_failed(self):

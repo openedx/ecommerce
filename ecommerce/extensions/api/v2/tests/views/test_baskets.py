@@ -1,15 +1,15 @@
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals
+from __future__ import absolute_import, unicode_literals
 
 import datetime
 import json
-import urllib
 from collections import namedtuple
 from decimal import Decimal
 
 import ddt
 import httpretty
 import mock
+import six  # pylint: disable=ungrouped-imports
 from django.contrib.auth import get_user_model
 from django.test import override_settings
 from django.urls import reverse
@@ -18,6 +18,7 @@ from oscar.core.loading import get_model
 from oscar.test import factories
 from oscar.test.factories import BasketFactory
 from rest_framework.throttling import UserRateThrottle
+from six.moves import range
 
 from ecommerce.courses.models import Course
 from ecommerce.extensions.api import exceptions as api_exceptions
@@ -130,7 +131,7 @@ class BasketCreateViewTests(BasketCreationMixin, ThrottlingMixin, TransactionTes
         ALWAYS create a new basket. """
         # Create two editable baskets for the user
         basket_count = 2
-        for _ in xrange(basket_count):
+        for _ in range(basket_count):
             basket = Basket(owner=self.user, status='Open')
             basket.save()
 
@@ -223,7 +224,7 @@ class BasketCreateViewTests(BasketCreationMixin, ThrottlingMixin, TransactionTes
         """Test that the rate of requests to the basket creation endpoint is throttled."""
         request_limit = UserRateThrottle().num_requests
         # Make a number of requests equal to the number of allowed requests
-        for _ in xrange(request_limit):
+        for _ in range(request_limit):
             self.create_basket(skus=[self.PAID_SKU])
 
         # Make one more request to trigger throttling of the client
@@ -927,7 +928,7 @@ class BasketCalculateViewTests(ProgramTestMixin, ThrottlingMixin, TestCase):
 
         """
         sku_list = [product.stockrecords.first().partner_sku for product in products]
-        qs = urllib.urlencode(
+        qs = six.moves.urllib.parse.urlencode(
             {'sku': sku_list},
             True
         )

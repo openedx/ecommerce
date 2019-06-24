@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals
+from __future__ import absolute_import, unicode_literals
 
 import datetime
 import json
@@ -414,7 +414,7 @@ class CouponViewSetFunctionalTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             self.assertEqual(offer.max_global_applications, 10)
             self.assertEqual(offer.email_domains, 'edx.org')
             self.assertEqual(offer.benefit.value, 10)
-        self.assertEqual(len(offers.keys()), 5)
+        self.assertEqual(len(list(offers.keys())), 5)
 
         self.get_response_json(
             'PUT',
@@ -431,7 +431,7 @@ class CouponViewSetFunctionalTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             self.assertEqual(offer.max_global_applications, None)
             self.assertEqual(offer.benefit.value, 20)
             self.assertEqual(offer.email_domains, '')
-        self.assertEqual(len(offers.keys()), 5)
+        self.assertEqual(len(list(offers.keys())), 5)
 
     def _create_enterprise_coupon(
             self, enterprise_customer_id, enterprise_catalog_id, enterprise_name, post_url=COUPONS_LINK):
