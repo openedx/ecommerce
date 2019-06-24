@@ -3,6 +3,7 @@
 #  edX Fork of Segment's python-analytics 1.2.8 using gevent for queueing
 #
 #############################
+
 -e git+https://github.com/edx/analytics-python.git@1.2.11#egg=analytics-python==1.2.11
 
 coreapi
@@ -45,8 +46,8 @@ premailer==2.9.2
 pycountry==17.1.8
 pygments
 python-dateutil
-python-openid ; python_version == "2.7"
-python3-openid ; python_version >= "3"
+python-openid; python_version == "2.7"
+python3-openid; python_version >= "3"
 pytz==2016.10
 requests
 rules

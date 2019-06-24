@@ -1,5 +1,6 @@
 -r base.in
 
+code-annotations
 coverage
 ddt
 diff-cover
