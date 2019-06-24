@@ -2,7 +2,6 @@ from django.test.client import RequestFactory
 from social_django.models import UserSocialAuth
 from testfixtures import LogCapture
 
-from ecommerce.core import exceptions
 from ecommerce.core.models import User
 from ecommerce.extensions.analytics import middleware
 from ecommerce.tests.testcases import TestCase
@@ -32,9 +31,6 @@ class TrackingMiddlewareTests(TestCase):
 
     def test_save_ga_client_id(self):
         """ Test that middleware save/update GA client id in user tracking context. """
-        self.user.lms_user_id = 06241
-        self.user.save()
-
         self.assertIsNone(self.user.tracking_context)
         self._assert_ga_client_id('test-client-id')
 
@@ -44,7 +40,7 @@ class TrackingMiddlewareTests(TestCase):
 
     def test_social_auth_lms_user_id(self):
         """ Test that middleware saves the LMS user_id from the social auth. """
-        user = self.create_user()
+        user = self.create_user(lms_user_id=None)
         user.tracking_context = self.TEST_CONTEXT
         user.save()
 
@@ -61,7 +57,7 @@ class TrackingMiddlewareTests(TestCase):
     def test_social_auth_multiple_entries_lms_user_id(self):
         """ Test that middleware saves the LMS user_id from the social auth, when multiple social auth entries
         exist for that user. """
-        user = self.create_user()
+        user = self.create_user(lms_user_id=None)
         user.tracking_context = self.TEST_CONTEXT
         user.save()
 
@@ -94,17 +90,18 @@ class TrackingMiddlewareTests(TestCase):
 
     def test_does_not_overwrite_lms_user_id(self):
         """ Test that middleware does not overwrite an existing LMS user_id. """
-        initial_lms_user_id = 18
         user = self.create_user()
         user.tracking_context = self.TEST_CONTEXT
-        user.lms_user_id = initial_lms_user_id
         user.save()
 
-        lms_user_id = 10293
-        UserSocialAuth.objects.create(user=user, provider='edx-oauth2', extra_data={'user_id': lms_user_id})
+        initial_lms_user_id = user.lms_user_id
+        self.assertIsNotNone(initial_lms_user_id)
+
+        new_lms_user_id = 10293
+        UserSocialAuth.objects.create(user=user, provider='edx-oauth2', extra_data={'user_id': new_lms_user_id})
 
         same_user = User.objects.get(id=user.id)
-        self.assertEqual(initial_lms_user_id, same_user.lms_user_id, )
+        self.assertEqual(initial_lms_user_id, same_user.lms_user_id)
 
         self._process_request(same_user)
         same_user = User.objects.get(id=user.id)
@@ -112,7 +109,7 @@ class TrackingMiddlewareTests(TestCase):
 
     def test_no_lms_user_id(self):
         """ Test that middleware logs a missing LMS user_id. """
-        user = self.create_user()
+        user = self.create_user(lms_user_id=None)
         expected = [
             (
                 self.LOGGER_NAME,
@@ -122,17 +119,16 @@ class TrackingMiddlewareTests(TestCase):
         ]
 
         same_user = User.objects.get(id=user.id)
-        with self.assertRaises(exceptions.MissingUserIdError):
-            with LogCapture(self.LOGGER_NAME) as log:
-                self._process_request(same_user)
-                log.check_present(*expected)
+        with LogCapture(self.LOGGER_NAME) as log:
+            self._process_request(same_user)
+            log.check_present(*expected)
 
         same_user = User.objects.get(id=user.id)
         self.assertIsNone(same_user.lms_user_id)
 
     def test_lms_user_id_exception(self):
         """ Test that middleware logs an exception when looking for the LMS user_id. """
-        user = self.create_user()
+        user = self.create_user(lms_user_id=None)
         UserSocialAuth.objects.create(user=user, provider='edx-oauth2', extra_data=None)
         expected = [
             (
@@ -143,10 +139,9 @@ class TrackingMiddlewareTests(TestCase):
         ]
 
         same_user = User.objects.get(id=user.id)
-        with self.assertRaises(exceptions.MissingUserIdError):
-            with LogCapture(self.LOGGER_NAME) as log:
-                self._process_request(same_user)
-                log.check_present(*expected)
+        with LogCapture(self.LOGGER_NAME) as log:
+            self._process_request(same_user)
+            log.check_present(*expected)
 
         same_user = User.objects.get(id=user.id)
         self.assertIsNone(same_user.lms_user_id)
