@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
+from __future__ import absolute_import
+
 import json
-from urlparse import urljoin
 
 import httpretty
 import mock
@@ -8,6 +9,7 @@ from django.test import RequestFactory
 
 from ecommerce.extensions.api.authentication import BearerAuthentication
 from ecommerce.tests.testcases import TestCase
+from six.moves.urllib.parse import urljoin  # pylint: disable=import-error
 
 
 class AccessTokenMixin(object):

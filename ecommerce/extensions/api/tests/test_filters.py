@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+
 from oscar.core.loading import get_model
 
 from ecommerce.courses.tests.factories import CourseFactory
