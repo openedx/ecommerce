@@ -1,10 +1,11 @@
 """
 Tests functions in journal/client.py
 """
+from __future__ import absolute_import
+
 import json
 import logging
 import re
-from urlparse import urljoin, urlsplit, urlunsplit
 
 import responses
 from edx_django_utils.cache import TieredCache
@@ -20,6 +21,7 @@ from ecommerce.journals.client import (
 )
 from ecommerce.journals.constants import JOURNAL_DISCOVERY_API_PATH
 from ecommerce.tests.testcases import TestCase
+from six.moves.urllib.parse import urljoin, urlsplit, urlunsplit  # pylint: disable=import-error
 
 logger = logging.getLogger(__name__)
 
