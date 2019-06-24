@@ -65,7 +65,7 @@ class CouponAppViewTests(TestCase):
 
     def assert_response_status(self, is_staff, status_code):
         """Create a user and assert the status code from the response for that user."""
-        user = self.create_user(is_staff=is_staff)
+        user = self.create_user(is_staff=is_staff, lms_user_id=6246)
         self.client.login(username=user.username, password=self.password)
         response = self.client.get(self.path)
         self.assertEqual(response.status_code, status_code)
@@ -110,7 +110,7 @@ class VoucherIsValidTests(DiscoveryTestMixin, TestCase):
         self.assertEqual(msg, 'This coupon code is not yet valid.')
 
     def test_voucher_unavailable_to_buy(self):
-        """ Verify that False is returned for unavialable products. """
+        """ Verify that False is returned for unavailable products. """
         voucher, product = prepare_voucher()
         product.expires = pytz.utc.localize(datetime.datetime.min)
         valid, __ = voucher_is_valid(voucher=voucher, products=[product], request=self.request)
@@ -142,14 +142,14 @@ class VoucherIsValidTests(DiscoveryTestMixin, TestCase):
     def test_usage_exceeded_coupon(self):
         """ Verify voucher_is_valid() assess that the voucher exceeded it's usage limit. """
         voucher, product = prepare_voucher(usage=Voucher.ONCE_PER_CUSTOMER, max_usage=1)
-        user = self.create_user()
+        user = self.create_user(lms_user_id=6247)
         error_msg = 'This coupon code is no longer available.'
         self.assert_error_messages(voucher, product, user, error_msg)
 
     def test_used_voucher(self):
         """Used voucher should not be available."""
         voucher, product = prepare_voucher()
-        user = self.create_user()
+        user = self.create_user(lms_user_id=6248)
         order = OrderFactory()
 
         VoucherApplication.objects.create(voucher=voucher, user=user, order=order)
@@ -165,7 +165,7 @@ class CouponOfferViewTests(ApiMockMixin, CouponMixin, DiscoveryTestMixin, Enterp
 
     def setUp(self):
         super(CouponOfferViewTests, self).setUp()
-        self.user = self.create_user()
+        self.user = self.create_user(lms_user_id=6242)
         self.client.login(username=self.user.username, password=self.password)
 
     def test_no_code(self):
@@ -305,7 +305,7 @@ class CouponRedeemViewTests(CouponMixin, DiscoveryTestMixin, LmsApiMockMixin, En
 
     def setUp(self):
         super(CouponRedeemViewTests, self).setUp()
-        self.user = self.create_user(email='test@tester.fake')
+        self.user = self.create_user(email='test@tester.fake', lms_user_id=6243)
         self.client.login(username=self.user.username, password=self.password)
         self.course_mode = 'verified'
         self.course, self.seat = self.create_course_and_seat(
@@ -707,7 +707,7 @@ class EnrollmentCodeCsvViewTests(TestCase):
 
     def setUp(self):
         super(EnrollmentCodeCsvViewTests, self).setUp()
-        self.user = self.create_user()
+        self.user = self.create_user(lms_user_id=6244)
         self.client.login(username=self.user.username, password=self.password)
 
     def test_invalid_order_number(self):
@@ -718,7 +718,7 @@ class EnrollmentCodeCsvViewTests(TestCase):
     def test_invalid_user(self):
         """ Verify an unauthorized request is redirected to the LMS dashboard. """
         order = OrderFactory()
-        order.user = self.create_user()
+        order.user = self.create_user(lms_user_id=6245)
         response = self.client.get(reverse(self.path, args=[order.number]))
 
         self.assertEqual(response.status_code, 302)
