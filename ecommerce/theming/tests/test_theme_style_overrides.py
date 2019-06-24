@@ -1,6 +1,8 @@
 """
 Tests for comprehensive theme style, template overrides.
 """
+from __future__ import absolute_import
+
 from django.conf import settings
 from django.contrib import staticfiles
 from django.core.management import call_command

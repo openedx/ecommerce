@@ -1,6 +1,9 @@
 """
 Tests of comprehensive theming.
 """
+from __future__ import absolute_import
+
+import six
 from django.conf import ImproperlyConfigured, settings
 from django.test import override_settings
 from mock import patch
@@ -51,7 +54,7 @@ class TestHelpers(TestCase):
         """
         theme = get_current_theme()
         self.assertEqual(theme.path, settings.DJANGO_ROOT + "/tests/themes/test-theme")
-        self.assertIn(theme.path, unicode(theme))
+        self.assertIn(theme.path, six.text_type(theme))
 
     @with_comprehensive_theme('test-theme-2')
     def test_current_theme_path_2(self):
