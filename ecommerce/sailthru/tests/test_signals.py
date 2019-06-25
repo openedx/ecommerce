@@ -1,4 +1,6 @@
 """Tests of ecommerce sailthru signal handlers."""
+from __future__ import absolute_import
+
 import logging
 
 from mock import patch
