@@ -9,10 +9,8 @@ PercentageDiscountBenefit = get_model('offer', 'PercentageDiscountBenefit')
 Condition = get_model('offer', 'Condition')
 
 
-def _get_decoded_jwt_discount_from_request():
+def get_decoded_jwt_discount_from_request():
     request = crum.get_current_request()
-    if not waffle.flag_is_active(request, 'offer.dynamic_discount'):
-        return None
     if request.method == 'GET':
         discount_jwt = request.GET.get('discount_jwt')
     else:
@@ -22,6 +20,12 @@ def _get_decoded_jwt_discount_from_request():
 
     return jwt_decode_handler(discount_jwt)
 
+def get_percentage_from_request():
+    decoded_jwt_discount = get_decoded_jwt_discount_from_request()
+    if decoded_jwt_discount:
+        return decoded_jwt_discount.get('discount_percent')
+    else:
+        return None
 
 class DynamicPercentageDiscountBenefit(BenefitWithoutRangeMixin, PercentageDiscountBenefit):
     """ Dynamic PercentageDiscountBenefit without an attached range. """
@@ -32,19 +36,19 @@ class DynamicPercentageDiscountBenefit(BenefitWithoutRangeMixin, PercentageDisco
 
     @property
     def name(self):
-        # NOTE: We are not using str.format() because gettext incorrectly parses the string,
-        # resulting in translation compilation errors.
-        return ('%d%% dynamic discount') % self.value
+        return 'dynamic_discount_benefit'
 
     def apply(self, basket, condition, offer, discount_percent=None,
               max_total_discount=None):
-        decoded_jwt_discount = _get_decoded_jwt_discount_from_request()
-        if decoded_jwt_discount and decoded_jwt_discount.get('discount_percent'):
+        if not waffle.flag_is_active(crum.get_current_request(), 'offer.dynamic_discount'):
+            return None
+        percent = get_percentage_from_request()
+        if percent:
             application_result = super(DynamicPercentageDiscountBenefit, self).apply(
                 basket, 
                 condition, 
                 offer, 
-                discount_percent=decoded_jwt_discount['discount_percent'],
+                discount_percent=percent,
                 max_total_discount=max_total_discount)
             return application_result
         # What do I do here in the else?
@@ -61,7 +65,9 @@ class DynamicCustomerCondition(ConditionWithoutRangeMixin, SingleItemConsumption
         return "dynamic_discount_condition"
 
     def is_satisfied(self, offer, basket):  # pylint: disable=unused-argument
-        decoded_jwt_discount = _get_decoded_jwt_discount_from_request()
+        if not waffle.flag_is_active(crum.get_current_request(), 'offer.dynamic_discount'):
+            return False
+        decoded_jwt_discount = get_decoded_jwt_discount_from_request()
         if decoded_jwt_discount:
             return decoded_jwt_discount.get('discount_applicable')
         return False

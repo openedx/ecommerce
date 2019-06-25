@@ -127,9 +127,7 @@
                                     Discount of type {{ type }} provided by {{ enterprise_name }}
                                 {% endblocktrans %}
                             {% elif discount.offer.condition.name == 'dynamic_discount_condition' %}
-                                {% blocktrans with benefit=basket.offer_discounts %}
-                                        First time purchaser discount applied.
-                                {% endblocktrans %}
+                                Discount for your first upgrade
                             {% else %}
                                 {% blocktrans trimmed with type=discount.offer.offer_type %}
                                     Discount of type {{ type }} is provided.

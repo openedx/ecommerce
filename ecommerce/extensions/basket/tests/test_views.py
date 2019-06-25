@@ -543,6 +543,23 @@ class BasketSummaryViewTests(EnterpriseServiceMockMixin, DiscoveryTestMixin, Dis
         lines = response.context['formset_lines_data']
         self.assertEqual(lines[0][1]['benefit_value'], '50%')
         self.assertEqual(lines[1][1]['benefit_value'], None)
+    
+    @mock.patch('ecommerce.extensions.offer.get_decoded_jwt_discount_from_request')
+    def test_line_item_discount_data_dynamic_discount(self, mock_get_discount):
+        """ Verify that line item has correct discount data. """
+        discount_json = {'discount_percent':15, 'discount_applicable': True}
+        mock_get_discount.return_value = discount_json
+        
+        self.mock_course_runs_endpoint(self.site_configuration.discovery_api_url, course_run=self.course)
+        seat = self.create_seat(self.course)
+        basket = self.create_basket_and_add_product(seat)
+        Applicator().apply(basket)
+
+        response = self.client.get(self.path)
+        lines = response.context['formset_lines_data']
+        self.assertEqual(context['formset_lines_data'][0][1]['line'].discount_value, 
+            discount_json/100 * context['formset_lines_data'][0][1]['line'].price_incl_tax)
+
 
     def test_cached_course(self):
         """ Verify that the course info is cached. """

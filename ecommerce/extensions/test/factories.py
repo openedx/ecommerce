@@ -23,6 +23,7 @@ from ecommerce.enterprise.benefits import BENEFIT_MAP as ENTERPRISE_BENEFIT_MAP
 from ecommerce.enterprise.benefits import EnterpriseAbsoluteDiscountBenefit, EnterprisePercentageDiscountBenefit
 from ecommerce.enterprise.conditions import AssignableEnterpriseCustomerCondition, EnterpriseCustomerCondition
 from ecommerce.extensions.offer.models import OFFER_PRIORITY_ENTERPRISE, OFFER_PRIORITY_VOUCHER, OfferAssignment
+from ecommerce.extensions.offer.dynamic_conditional_offer import DynamicPercentageDiscountBenefit
 # TODO: journals dependency
 from ecommerce.journals.benefits import JournalBundleAbsoluteDiscountBenefit, JournalBundlePercentageDiscountBenefit
 from ecommerce.journals.conditions import JournalBundleCondition
@@ -311,3 +312,10 @@ class JournalBundleOfferFactory(ConditionalOfferFactory):
     offer_type = ConditionalOffer.SITE
     priority = OFFER_PRIORITY_ENTERPRISE
     status = ConditionalOffer.OPEN
+    status = ConditionalOffer.OPEN
+
+class DynamicPercentageDiscountBenefitFactory(BenefitFactory):
+    range = None
+    type = ''
+    value = 1
+    proxy_class = class_path(DynamicPercentageDiscountBenefit)

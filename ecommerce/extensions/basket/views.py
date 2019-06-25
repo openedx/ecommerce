@@ -50,6 +50,7 @@ from ecommerce.extensions.payment.constants import (
     ENABLE_MICROFRONTEND_FOR_BASKET_PAGE_FLAG_NAME
 )
 from ecommerce.extensions.payment.forms import PaymentForm
+from ecommerce.extensions.offer.dynamic_conditional_offer import get_percentage_from_request
 
 BasketAttribute = get_model('basket', 'BasketAttribute')
 BasketAttributeType = get_model('basket', 'BasketAttributeType')
@@ -434,6 +435,12 @@ class BasketLogicMixin(object):
         except ValueError:
             total_benefit = None
         num_of_items = self.request.basket.num_items
+
+        applied_offers = self.request.basket.applied_offers().values()
+        discount_percent = None
+        if len(applied_offers) == 1 and applied_offers[0].condition.name == 'dynamic_discount_condition':
+            discount_percent = get_percentage_from_request()
+
         context.update({
             'formset_lines_data': list(zip(formset, lines_data)),
             # the new payment api is not using the formset, so the zip above doesn't work
@@ -447,6 +454,7 @@ class BasketLogicMixin(object):
             'line_price': (self.request.basket.total_incl_tax_excl_discounts / num_of_items) if num_of_items > 0 else 0,
             'lms_url_root': site_configuration.lms_url_root,
             'discount_jwt': self.request.GET.get('discount_jwt'),
+            'discount_percent': discount_percent,
         })
         return context
 
