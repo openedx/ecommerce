@@ -1,8 +1,12 @@
 """
 Middleware for analytics app to parse the Google Analytics (GA) cookie and the LMS user_id.
 """
+from __future__ import absolute_import
+
 import logging
+
 from edx_django_utils import monitoring as monitoring_utils
+
 from ecommerce.extensions.analytics.utils import get_google_analytics_client_id
 
 logger = logging.getLogger(__name__)

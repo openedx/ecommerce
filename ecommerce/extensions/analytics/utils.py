@@ -1,9 +1,11 @@
+from __future__ import absolute_import
+
 import json
 import logging
 from functools import wraps
-from urlparse import urlunsplit
 
 from ecommerce.courses.utils import mode_for_product
+from six.moves.urllib.parse import urlunsplit  # pylint: disable=import-error
 
 logger = logging.getLogger(__name__)
 
