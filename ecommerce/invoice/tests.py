@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+
 from oscar.test import factories
 
 from ecommerce.extensions.test.factories import create_basket
