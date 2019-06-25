@@ -47,11 +47,9 @@ class TrackingMiddleware(object):
                                 u'referrer: %s', social_auth_id, user.id, request.get_full_path(),
                                 request.META.get('HTTP_REFERER'))
                 else:
-                    # TODO: Change this to an error once we can successfully get the id from social auth and the db.
-                    # See REVMI-249 and REVMI-269
                     monitoring_utils.set_custom_metric('ecommerce_missing_lms_user_id_middleware', user.id)
-                    logger.warn(u'Could not find lms_user_id for user %s. Request path: %s, referrer: %s', user.id,
-                                request.get_full_path(), request.META.get('HTTP_REFERER'))
+                    logger.error(u'Could not find lms_user_id for user %s. Request path: %s, referrer: %s', user.id,
+                                 request.get_full_path(), request.META.get('HTTP_REFERER'))
 
             if save_user:
                 user.save()
