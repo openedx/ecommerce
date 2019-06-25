@@ -4,7 +4,6 @@ from __future__ import absolute_import, unicode_literals
 import oscar
 from django.db import migrations, models
 
-
 # Depricated. We switched to the Coupon product class.
 
 

@@ -10,9 +10,9 @@ from corsheaders.defaults import default_headers as corsheaders_default_headers
 # Normally you should not import ANYTHING from Django directly
 # into your settings, but ImproperlyConfigured is an exception.
 from django.core.exceptions import ImproperlyConfigured
+from six.moves.urllib.parse import urljoin
 
 from ecommerce.settings.base import *
-from six.moves.urllib.parse import urljoin
 
 # Protocol used for construcing absolute callback URLs
 PROTOCOL = 'https'

@@ -12,6 +12,7 @@ from django.utils.translation import ugettext_lazy as _
 from factory.fuzzy import FuzzyText
 from oscar.templatetags.currency_filters import currency
 from oscar.test.factories import *  # pylint:disable=wildcard-import,unused-wildcard-import
+from six.moves import range
 
 from ecommerce.core.url_utils import get_ecommerce_url
 from ecommerce.coupons.tests.mixins import CouponMixin, DiscoveryMockMixin
@@ -32,7 +33,6 @@ from ecommerce.extensions.voucher.utils import (
 )
 from ecommerce.tests.mixins import LmsApiMockMixin
 from ecommerce.tests.testcases import TestCase
-from six.moves import range
 
 Basket = get_model('basket', 'Basket')
 Benefit = get_model('offer', 'Benefit')

@@ -11,6 +11,7 @@ from rest_framework.decorators import detail_route, list_route
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import ViewSet
+from six.moves.urllib.parse import urlparse  # pylint: disable=import-error
 
 from ecommerce.core.constants import COUPON_PRODUCT_CLASS_NAME
 from ecommerce.core.utils import log_message_and_raise_validation_error
@@ -48,7 +49,6 @@ from ecommerce.extensions.voucher.utils import (
     update_voucher_offer,
     update_voucher_with_enterprise_offer
 )
-from six.moves.urllib.parse import urlparse  # pylint: disable=import-error
 
 logger = logging.getLogger(__name__)
 Order = get_model('order', 'Order')

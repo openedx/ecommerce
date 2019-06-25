@@ -15,10 +15,10 @@ from django.core.management.base import BaseCommand, CommandError
 from django.db.models import Q
 from edx_rest_api_client.client import EdxRestApiClient
 from oscar.core.loading import get_class, get_model
+from six.moves import range
 from slumber.exceptions import HttpClientError, HttpServerError
 
 from ecommerce.extensions.fulfillment.status import ORDER
-from six.moves import range
 
 Basket = get_model('basket', 'Basket')
 CartLine = get_model('basket', 'Line')
