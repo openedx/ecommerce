@@ -1,6 +1,8 @@
 """
 Test cases to cover JournalProductSerializer.
 """
+from __future__ import absolute_import
+
 from oscar.core.loading import get_model
 from oscar.test.factories import (
     ProductAttributeFactory,
