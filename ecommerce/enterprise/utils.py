@@ -17,6 +17,7 @@ from edx_rest_api_client.client import EdxRestApiClient
 from edx_rest_framework_extensions.auth.jwt.cookies import get_decoded_jwt
 from oscar.core.loading import get_model
 from requests.exceptions import ConnectionError, Timeout
+from six.moves.urllib.parse import urlparse  # pylint: disable=import-error
 from slumber.exceptions import SlumberHttpBaseException
 
 from ecommerce.core.constants import SYSTEM_ENTERPRISE_LEARNER_ROLE
@@ -24,7 +25,6 @@ from ecommerce.core.utils import deprecated_traverse_pagination
 from ecommerce.enterprise.api import fetch_enterprise_learner_data
 from ecommerce.enterprise.exceptions import EnterpriseDoesNotExist
 from ecommerce.extensions.offer.models import OFFER_PRIORITY_ENTERPRISE
-from six.moves.urllib.parse import urlparse  # pylint: disable=import-error
 
 ConditionalOffer = get_model('offer', 'ConditionalOffer')
 StockRecord = get_model('partner', 'StockRecord')

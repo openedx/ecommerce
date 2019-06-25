@@ -7,6 +7,7 @@ from uuid import uuid4
 import httpretty
 import requests
 from django.conf import settings
+from six.moves.urllib.parse import urlencode  # pylint: disable=import-error
 
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.extensions.test.factories import (
@@ -14,7 +15,6 @@ from ecommerce.extensions.test.factories import (
     EnterpriseOfferFactory,
     EnterprisePercentageDiscountBenefitFactory
 )
-from six.moves.urllib.parse import urlencode  # pylint: disable=import-error
 
 
 def raise_timeout(request, uri, headers):  # pylint: disable=unused-argument

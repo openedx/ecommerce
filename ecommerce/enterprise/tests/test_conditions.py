@@ -7,6 +7,7 @@ import ddt
 import httpretty
 import mock
 from oscar.core.loading import get_model
+from six.moves import range, zip
 
 from ecommerce.coupons.tests.mixins import CouponMixin
 from ecommerce.courses.tests.factories import CourseFactory
@@ -23,7 +24,6 @@ from ecommerce.extensions.offer.constants import (
 from ecommerce.extensions.test import factories
 from ecommerce.tests.factories import ProductFactory, SiteConfigurationFactory
 from ecommerce.tests.testcases import TestCase
-from six.moves import range, zip
 
 ConditionalOffer = get_model('offer', 'ConditionalOffer')
 OfferAssignment = get_model('offer', 'OfferAssignment')

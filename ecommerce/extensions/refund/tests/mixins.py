@@ -8,6 +8,7 @@ from django.test import override_settings
 from mock_django import mock_signal_receiver
 from oscar.core.loading import get_class, get_model
 from oscar.test.factories import BasketFactory
+from six.moves import zip
 
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.entitlements.utils import create_or_update_course_entitlement
@@ -17,7 +18,6 @@ from ecommerce.extensions.payment.tests.processors import DummyProcessor
 from ecommerce.extensions.refund.status import REFUND, REFUND_LINE
 from ecommerce.extensions.refund.tests.factories import RefundFactory
 from ecommerce.extensions.test.factories import create_order
-from six.moves import zip
 
 post_refund = get_class('refund.signals', 'post_refund')
 Option = get_model('catalogue', 'Option')
