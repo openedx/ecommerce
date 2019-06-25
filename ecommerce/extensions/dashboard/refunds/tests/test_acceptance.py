@@ -7,13 +7,13 @@ import ddt
 from django.urls import reverse
 from nose.plugins.skip import SkipTest
 from oscar.core.loading import get_model
-from oscar.test import factories
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.firefox.webdriver import WebDriver
 from selenium.webdriver.support.wait import WebDriverWait
 
 from ecommerce.extensions.refund.status import REFUND
 from ecommerce.extensions.refund.tests.mixins import RefundTestMixin
+from ecommerce.tests.factories import UserFactory
 from ecommerce.tests.testcases import LiveServerTestCase
 
 Refund = get_model('refund', 'Refund')
@@ -48,7 +48,7 @@ class RefundAcceptanceTestMixin(RefundTestMixin):
         self.deny_button_selector = '[data-refund-id="{}"] [data-decision="deny"]'.format(self.refund.id)
 
         self.password = 'test'
-        self.user = factories.UserFactory(password=self.password, is_superuser=True, is_staff=True)
+        self.user = UserFactory(password=self.password, is_superuser=True, is_staff=True)
 
     def _login(self):
         """Log into the service and navigate to the refund list view."""

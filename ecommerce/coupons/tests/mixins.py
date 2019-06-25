@@ -15,7 +15,7 @@ from ecommerce.core.models import BusinessClient
 from ecommerce.extensions.api.v2.views.coupons import CouponViewSet
 from ecommerce.extensions.basket.utils import prepare_basket
 from ecommerce.extensions.catalogue.utils import create_coupon_product
-from ecommerce.tests.factories import PartnerFactory
+from ecommerce.tests.factories import PartnerFactory, UserFactory
 from ecommerce.tests.mixins import Applicator, Benefit, Catalog, ProductClass, SiteMixin, Voucher
 
 
@@ -504,7 +504,7 @@ class CouponMixin(SiteMixin):
 
         request = RequestFactory()
         request.site = self.site
-        request.user = factories.UserFactory()
+        request.user = UserFactory()
         request.COOKIES = {}
         request.GET = {}
 

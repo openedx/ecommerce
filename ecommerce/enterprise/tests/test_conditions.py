@@ -23,7 +23,7 @@ from ecommerce.extensions.offer.constants import (
     OFFER_REDEEMED
 )
 from ecommerce.extensions.test import factories
-from ecommerce.tests.factories import ProductFactory, SiteConfigurationFactory
+from ecommerce.tests.factories import ProductFactory, SiteConfigurationFactory, UserFactory
 from ecommerce.tests.testcases import TestCase
 
 ConditionalOffer = get_model('offer', 'ConditionalOffer')
@@ -37,7 +37,7 @@ LOGGER_NAME = 'ecommerce.programs.conditions'
 class EnterpriseCustomerConditionTests(EnterpriseServiceMockMixin, DiscoveryTestMixin, TestCase):
     def setUp(self):
         super(EnterpriseCustomerConditionTests, self).setUp()
-        self.user = factories.UserFactory()
+        self.user = UserFactory()
         self.condition = factories.EnterpriseCustomerConditionFactory()
         self.test_product = ProductFactory(stockrecords__price_excl_tax=10, categories=[])
         self.course_run = CourseFactory(partner=self.partner)
@@ -347,7 +347,7 @@ class AssignableEnterpriseCustomerConditionTests(EnterpriseServiceMockMixin, Cou
             expected_condition_result = assignment.get('result', expected_condition_result)
 
             voucher = Voucher.objects.get(usage=voucher_type, code=code)
-            basket = BasketFactory(site=self.site, owner=factories.UserFactory(email=email))
+            basket = BasketFactory(site=self.site, owner=UserFactory(email=email))
             basket.vouchers.add(voucher)
 
             is_condition_satisfied = self.condition.is_satisfied(voucher.enterprise_offer, basket)
@@ -381,7 +381,7 @@ class AssignableEnterpriseCustomerConditionTests(EnterpriseServiceMockMixin, Cou
         voucher = factories.VoucherFactory(usage=Voucher.SINGLE_USE, num_orders=num_orders)
         enterprise_offer = factories.EnterpriseOfferFactory(max_global_applications=None)
         voucher.offers.add(enterprise_offer)
-        basket = BasketFactory(site=self.site, owner=factories.UserFactory(email=email))
+        basket = BasketFactory(site=self.site, owner=UserFactory(email=email))
         basket.vouchers.add(voucher)
         factories.OfferAssignmentFactory(
             offer=enterprise_offer,
@@ -409,7 +409,7 @@ class AssignableEnterpriseCustomerConditionTests(EnterpriseServiceMockMixin, Cou
         voucher1.offers.add(enterprise_offers[0])
         voucher2.offers.add(enterprise_offers[1])
 
-        basket = BasketFactory(site=self.site, owner=factories.UserFactory(email='test2@example.com'))
+        basket = BasketFactory(site=self.site, owner=UserFactory(email='test2@example.com'))
         basket.vouchers.add(voucher1)
 
         factories.OfferAssignmentFactory(offer=enterprise_offers[0], code=voucher1.code, user_email='test1@example.com')
@@ -585,7 +585,7 @@ class AssignableEnterpriseCustomerConditionTests(EnterpriseServiceMockMixin, Cou
         factories.OfferAssignmentFactory(offer=enterprise_offer, code=code, user_email='test1@example.com')
         factories.OfferAssignmentFactory(offer=enterprise_offer, code=code, user_email='test2@example.com')
 
-        basket = BasketFactory(site=self.site, owner=factories.UserFactory(email='bob@example.com'))
+        basket = BasketFactory(site=self.site, owner=UserFactory(email='bob@example.com'))
         basket.vouchers.add(voucher)
 
         assert self.condition.is_satisfied(enterprise_offer, basket) is True
@@ -643,7 +643,7 @@ class AssignableEnterpriseCustomerConditionTests(EnterpriseServiceMockMixin, Cou
         voucher = factories.VoucherFactory(usage=Voucher.SINGLE_USE, code='AAA', num_orders=num_orders)
         voucher.offers.add(enterprise_offer)
 
-        basket = BasketFactory(site=self.site, owner=factories.UserFactory(email='wow@example.com'))
+        basket = BasketFactory(site=self.site, owner=UserFactory(email='wow@example.com'))
         basket.vouchers.add(voucher)
 
         assert self.condition.is_satisfied(enterprise_offer, basket) == redemptions_available

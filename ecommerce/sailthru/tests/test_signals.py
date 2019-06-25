@@ -5,7 +5,7 @@ import logging
 
 from mock import patch
 from oscar.core.loading import get_model
-from oscar.test.factories import BasketFactory, UserFactory
+from oscar.test.factories import BasketFactory
 
 from ecommerce.core.tests import toggle_switch
 from ecommerce.coupons.tests.mixins import CouponMixin
@@ -13,6 +13,7 @@ from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
 from ecommerce.extensions.test.factories import create_order
 from ecommerce.sailthru.signals import SAILTHRU_CAMPAIGN, process_basket_addition, process_checkout_complete
+from ecommerce.tests.factories import UserFactory
 from ecommerce.tests.testcases import TestCase
 
 BasketAttributeType = get_model('basket', 'BasketAttributeType')

@@ -6,7 +6,6 @@ import mock
 import six
 from edx_django_utils.cache import DEFAULT_REQUEST_CACHE
 from oscar.core.loading import get_class, get_model
-from oscar.test import factories
 
 from analytics import Client
 from ecommerce.courses.tests.factories import CourseFactory
@@ -16,7 +15,7 @@ from ecommerce.extensions.basket.constants import TEMPORARY_BASKET_CACHE_KEY
 from ecommerce.extensions.basket.models import Basket
 from ecommerce.extensions.basket.tests.mixins import BasketMixin
 from ecommerce.extensions.test.factories import create_basket
-from ecommerce.tests.factories import SiteConfigurationFactory
+from ecommerce.tests.factories import SiteConfigurationFactory, UserFactory
 from ecommerce.tests.testcases import TestCase
 
 Basket = get_model('basket', 'Basket')
@@ -50,7 +49,7 @@ class BasketTests(CatalogMixin, BasketMixin, TestCase):
 
     def test_get_basket_without_existing_baskets(self):
         """ If the user has no existing baskets, the method should return a new one. """
-        user = factories.UserFactory()
+        user = UserFactory()
         self.assertEqual(user.baskets.count(), 0, 'A new user should not have any associated Baskets.')
 
         basket = Basket.get_basket(user, self.site)
@@ -70,7 +69,7 @@ class BasketTests(CatalogMixin, BasketMixin, TestCase):
 
     def test_get_basket_with_existing_baskets(self):
         """ If the user has existing baskets in editable states, the method should return a single merged basket. """
-        user = factories.UserFactory()
+        user = UserFactory()
 
         # Create baskets in a state that qualifies them for merging
         editable_baskets = []
@@ -113,7 +112,7 @@ class BasketTests(CatalogMixin, BasketMixin, TestCase):
 
     def test_create_basket(self):
         """ Verify the method creates a new basket. """
-        user = factories.UserFactory()
+        user = UserFactory()
         basket = Basket.create_basket(self.site, user)
         self.assertEqual(basket.site, self.site)
         self.assertEqual(basket.owner, user)

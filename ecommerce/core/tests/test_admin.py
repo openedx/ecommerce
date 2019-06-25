@@ -2,10 +2,10 @@ from __future__ import absolute_import
 
 from django.contrib import messages
 from django.urls import reverse
-from oscar.test.factories import UserFactory
 
 from ecommerce.core.constants import USER_LIST_VIEW_SWITCH
 from ecommerce.core.tests import toggle_switch
+from ecommerce.tests.factories import UserFactory
 from ecommerce.tests.testcases import TestCase
 
 

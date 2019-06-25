@@ -5,6 +5,7 @@ from oscar.test import factories
 
 from ecommerce.core.constants import ENROLLMENT_CODE_PRODUCT_CLASS_NAME
 from ecommerce.courses.tests.factories import CourseFactory
+from ecommerce.tests.factories import UserFactory
 from ecommerce.tests.mixins import SiteMixin
 
 Default = get_class('partner.strategy', 'Default')
@@ -14,7 +15,7 @@ Product = get_model('catalogue', 'Product')
 
 class BasketMixin(SiteMixin):
     def create_basket(self, owner, site, status=Basket.OPEN, empty=False):
-        owner = owner or factories.UserFactory()
+        owner = owner or UserFactory()
         site = site or self.site
         basket = Basket.objects.create(owner=owner, site=site, status=status)
         basket.strategy = Default()

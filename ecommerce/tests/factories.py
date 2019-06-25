@@ -46,3 +46,18 @@ class SiteConfigurationFactory(factory.DjangoModelFactory):
 class StockRecordFactory(OscarStockRecordFactory):
     product = factory.SubFactory(ProductFactory)
     price_currency = 'USD'
+
+
+class UserFactory(factory.DjangoModelFactory):
+    class Meta(object):
+        model = get_model('core', 'User')
+
+    username = factory.Sequence(lambda n: 'ecommerce_test_user %d' % n)
+    email = factory.Sequence(lambda n: 'ecommerce_test_%s@example.com' % n)
+    first_name = 'Ecommerce'
+    last_name = 'User'
+    password = factory.PostGenerationMethodCall('set_password', 'somethingSecure')
+    is_active = True
+    is_superuser = False
+    is_staff = False
+    lms_user_id = 98789
