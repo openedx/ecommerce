@@ -46,7 +46,7 @@ def process_checkout_complete(sender, order=None, user=None, request=None,  # py
             basket=order.basket,
             attribute_type=get_basket_attribute_type()
         )
-        if len(saved_id) > 0:
+        if saved_id:
             message_id = saved_id[0].value_text
 
     # loop through lines in order

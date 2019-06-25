@@ -60,7 +60,7 @@ class FreeCheckoutView(EdxOrderPlacementMixin, RedirectView):
     permanent = False
 
     @method_decorator(login_required)
-    def dispatch(self, *args, **kwargs):
+    def dispatch(self, *args, **kwargs):  # pylint: disable=arguments-differ
         return super(FreeCheckoutView, self).dispatch(*args, **kwargs)
 
     def get_redirect_url(self, *args, **kwargs):
@@ -112,7 +112,7 @@ class CancelCheckoutView(TemplateView):
     template_name = 'checkout/cancel_checkout.html'
 
     @method_decorator(csrf_exempt)
-    def dispatch(self, *args, **kwargs):
+    def dispatch(self, *args, **kwargs):  # pylint: disable=arguments-differ
         """
         Request needs to be csrf_exempt to handle POST back from external payment processor.
         """
@@ -139,7 +139,7 @@ class CheckoutErrorView(TemplateView):
     template_name = 'checkout/error.html'
 
     @method_decorator(csrf_exempt)
-    def dispatch(self, *args, **kwargs):
+    def dispatch(self, *args, **kwargs):  # pylint: disable=arguments-differ
         """
         Request needs to be csrf_exempt to handle POST back from external payment processor.
         """
@@ -166,7 +166,7 @@ class ReceiptResponseView(ThankYouView):
 
     @method_decorator(csrf_exempt)
     @method_decorator(login_required)
-    def dispatch(self, *args, **kwargs):
+    def dispatch(self, *args, **kwargs):  # pylint: disable=arguments-differ
         """ Customers should only be able to view their receipts when logged in. """
         return super(ReceiptResponseView, self).dispatch(*args, **kwargs)
 
@@ -180,7 +180,7 @@ class ReceiptResponseView(ThankYouView):
             }
             return self.render_to_response(context=context, status=404)
 
-    def get_context_data(self, **kwargs):
+    def get_context_data(self, **kwargs):  # pylint: disable=arguments-differ
         context = super(ReceiptResponseView, self).get_context_data(**kwargs)
         order = context[self.context_object_name]
         has_enrollment_code_product = False

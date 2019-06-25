@@ -26,8 +26,8 @@ class PaymentProcessorListView(generics.ListAPIView):
         key_func=lambda *args, **kwargs: PAYMENT_PROCESSOR_CACHE_KEY,
         cache_errors=False,
     )
-    def get(self, request):
-        return super(PaymentProcessorListView, self).get(request)
+    def get(self, request, *args, **kwargs):
+        return super(PaymentProcessorListView, self).get(request, *args, **kwargs)
 
     def get_queryset(self):
         """Fetch the list of payment processor classes based on Django settings."""

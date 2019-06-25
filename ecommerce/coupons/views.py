@@ -281,7 +281,7 @@ class EnrollmentCodeCsvView(View):
     """ Download enrollment code CSV file view. """
 
     @method_decorator(login_required)
-    def dispatch(self, *args, **kwargs):
+    def dispatch(self, *args, **kwargs):  # pylint: disable=arguments-differ
         return super(EnrollmentCodeCsvView, self).dispatch(*args, **kwargs)
 
     def get(self, request, number):

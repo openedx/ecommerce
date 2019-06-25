@@ -10,9 +10,6 @@ StockRecord = get_model('partner', 'StockRecord')
 
 class TestCourseEntitlementProductCreation(TestCase):
 
-    def setUp(self):
-        super(TestCourseEntitlementProductCreation, self).setUp()
-
     def test_course_entitlement_creation(self):
         """ Test course entitlement product creation """
 

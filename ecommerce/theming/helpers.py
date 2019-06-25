@@ -177,8 +177,8 @@ def get_themes(themes_dir=None):
     themes_dirs = [Path(themes_dir)] if themes_dir else get_theme_base_dirs()
     # pick only directories and discard files in themes directory
     themes = []
-    for themes_dir in themes_dirs:
-        themes.extend([Theme(name, name, themes_dir) for name in get_theme_dirs(themes_dir)])
+    for tdir in themes_dirs:
+        themes.extend([Theme(name, name, tdir) for name in get_theme_dirs(tdir)])
 
     return themes
 

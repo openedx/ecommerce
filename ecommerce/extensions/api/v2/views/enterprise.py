@@ -11,7 +11,7 @@ from rest_framework.decorators import detail_route, list_route
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import ViewSet
-from six.moves.urllib.parse import urlparse  # pylint: disable=import-error
+from six.moves.urllib.parse import urlparse  # pylint: disable=import-error, relative-import
 
 from ecommerce.core.constants import COUPON_PRODUCT_CLASS_NAME
 from ecommerce.core.utils import log_message_and_raise_validation_error
@@ -374,10 +374,10 @@ class EnterpriseCouponViewSet(CouponViewSet):
             coupon = get_object_or_404(enterprise_coupons, id=coupon_id)
             serializer = self.get_serializer(coupon)
             return Response(serializer.data, status=status.HTTP_200_OK)
-        else:
-            page = self.paginate_queryset(enterprise_coupons)
-            serializer = self.get_serializer(page, many=True)
-            return self.get_paginated_response(serializer.data)
+
+        page = self.paginate_queryset(enterprise_coupons)
+        serializer = self.get_serializer(page, many=True)
+        return self.get_paginated_response(serializer.data)
 
     @detail_route(methods=['post'], permission_classes=[IsAuthenticated])
     @permission_required('enterprise.can_assign_coupon', fn=lambda request, pk: get_enterprise_from_product(pk))

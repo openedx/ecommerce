@@ -113,6 +113,7 @@ def render_email_confirmation_if_required(request, offer, product):
                 'user_email': request.user and request.user.email,
             }
         )
+    return None
 
 
 def send_assigned_offer_email(

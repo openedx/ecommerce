@@ -145,16 +145,16 @@ class UserTests(DiscoveryTestMixin, LmsApiMockMixin, TestCase):
         """ Test that the user model concatenates first and last name if the full name is not set. """
         full_name = "George Costanza"
         user = self.create_user(full_name=full_name)
-        self.assertEquals(user.get_full_name(), full_name)
+        self.assertEqual(user.get_full_name(), full_name)
 
         first_name = "Jerry"
         last_name = "Seinfeld"
         user = self.create_user(full_name=None, first_name=first_name, last_name=last_name)
         expected = "{first_name} {last_name}".format(first_name=first_name, last_name=last_name)
-        self.assertEquals(user.get_full_name(), expected)
+        self.assertEqual(user.get_full_name(), expected)
 
         user = self.create_user(full_name=full_name, first_name=first_name, last_name=last_name)
-        self.assertEquals(user.get_full_name(), full_name)
+        self.assertEqual(user.get_full_name(), full_name)
 
     def test_user_details(self):
         """ Verify user details are returned. """
@@ -266,7 +266,7 @@ class UserTests(DiscoveryTestMixin, LmsApiMockMixin, TestCase):
 class BusinessClientTests(TestCase):
     def test_str(self):
         client = BusinessClient.objects.create(name='TestClient')
-        self.assertEquals(str(client), 'TestClient')
+        self.assertEqual(str(client), 'TestClient')
 
     def test_creating_without_client_name_raises_exception(self):
         with self.assertRaises(ValidationError):
@@ -463,11 +463,11 @@ class SiteConfigurationTests(TestCase):
 class EcommerceFeatureRoleTests(TestCase):
     def test_str(self):
         role = EcommerceFeatureRole.objects.create(name='TestRole')
-        self.assertEquals(str(role), '<EcommerceFeatureRole TestRole>')
+        self.assertEqual(str(role), '<EcommerceFeatureRole TestRole>')
 
     def test_repr(self):
         role = EcommerceFeatureRole.objects.create(name='TestRole')
-        self.assertEquals(repr(role), '<EcommerceFeatureRole TestRole>')
+        self.assertEqual(repr(role), '<EcommerceFeatureRole TestRole>')
 
 
 class EcommerceFeatureRoleAssignmentTests(TestCase):
@@ -475,7 +475,7 @@ class EcommerceFeatureRoleAssignmentTests(TestCase):
         role = EcommerceFeatureRole.objects.create(name='TestRole')
         user = self.create_user()
         role_assignment = EcommerceFeatureRoleAssignment.objects.create(role=role, user=user)
-        self.assertEquals(
+        self.assertEqual(
             str(role_assignment),
             '<EcommerceFeatureRoleAssignment for User {user} assigned to role {role}>'.format(
                 user=user.id, role=role.name
@@ -486,7 +486,7 @@ class EcommerceFeatureRoleAssignmentTests(TestCase):
         role = EcommerceFeatureRole.objects.create(name='TestRole')
         user = self.create_user()
         role_assignment = EcommerceFeatureRoleAssignment.objects.create(role=role, user=user)
-        self.assertEquals(
+        self.assertEqual(
             repr(role_assignment),
             '<EcommerceFeatureRoleAssignment for User {user} assigned to role {role}>'.format(
                 user=user.id, role=role.name

@@ -48,7 +48,7 @@ class Voucher(AbstractVoucher):
             applications = self.applications.filter(voucher=self).exclude(user=user)
             if applications.exists():
                 is_available = False
-                message = _('This voucher is assigned to another user.')  # pylint: disable=redefined-variable-type
+                message = _('This voucher is assigned to another user.')
 
         return is_available, message
 

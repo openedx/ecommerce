@@ -98,6 +98,6 @@ def get_certificate_type_display_value(certificate_type):
     }
 
     if certificate_type not in display_values:
-        raise ValueError('Certificate Type [%s] not found.', certificate_type)
+        raise ValueError('Certificate Type [{}] not found.'.format(certificate_type))
 
     return display_values[certificate_type]

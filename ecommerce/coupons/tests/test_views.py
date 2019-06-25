@@ -87,7 +87,7 @@ class VoucherIsValidTests(DiscoveryTestMixin, TestCase):
         valid, msg = voucher_is_valid(voucher=voucher, products=[product], request=self.request)
 
         self.assertTrue(valid)
-        self.assertEquals(msg, '')
+        self.assertEqual(msg, '')
 
     def test_no_voucher(self):
         """ Verify voucher_is_valid() assess that the voucher is invalid. """

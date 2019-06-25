@@ -130,3 +130,4 @@ class JournalBundleOfferForm(forms.ModelForm):
                 )
 
             return super(JournalBundleOfferForm, self).save(commit)
+        return None

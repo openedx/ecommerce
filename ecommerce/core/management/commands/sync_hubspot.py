@@ -197,6 +197,7 @@ class Command(BaseCommand):
             return getattr(client, hubspot_object).post(**kwargs)
         if method == "PUT":
             return getattr(client, hubspot_object).put(body, **kwargs)
+        raise ValueError("Unexpected method {}".format(method))
 
     def _install_hubspot_ecommerce_bridge(self, site_configuration):
         """

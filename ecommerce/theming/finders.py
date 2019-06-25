@@ -88,9 +88,15 @@ class ThemeFilesFinder(BaseFinder):
         Find a requested static file in an theme's static locations.
         """
         storage = self.storages.get(theme, None)
-        if storage:
-            # only try to find a file if the source dir actually exists
-            if storage.exists(path):
-                matched_path = storage.path(path)
-                if matched_path:
-                    return matched_path
+        if not storage:
+            return None
+
+        # only try to find a file if the source dir actually exists
+        if not storage.exists(path):
+            return None
+
+        matched_path = storage.path(path)
+        if matched_path:
+            return matched_path
+
+        return None

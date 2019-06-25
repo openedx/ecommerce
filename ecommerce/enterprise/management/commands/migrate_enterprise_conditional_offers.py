@@ -126,7 +126,7 @@ class Command(BaseCommand):
 
         try:
             vouchers = self._get_voucher_batch(batch_offset, batch_offset + batch_limit)
-            while len(vouchers) > 0:
+            while vouchers:
                 for index, voucher in enumerate(vouchers):
                     logger.info('Processing Voucher with index %s and id %s', current_batch_index + index, voucher.id)
                     self._migrate_voucher(voucher)

@@ -306,7 +306,7 @@ class SiteConfiguration(models.Model):
     def segment_client(self):
         return SegmentClient(self.segment_key, debug=settings.DEBUG, send=settings.SEND_SEGMENT_EVENTS)
 
-    def save(self, *args, **kwargs):
+    def save(self, *args, **kwargs):  # pylint: disable=arguments-differ
         # Clear Site cache upon SiteConfiguration changed
         Site.objects.clear_cache()
         super(SiteConfiguration, self).save(*args, **kwargs)
@@ -673,7 +673,7 @@ class BusinessClient(models.Model):
     def __str__(self):
         return self.name
 
-    def save(self, *args, **kwargs):
+    def save(self, *args, **kwargs):  # pylint: disable=arguments-differ
         if not self.name:
             log_message_and_raise_validation_error(
                 'Failed to create BusinessClient. BusinessClient name may not be empty.'
@@ -716,7 +716,7 @@ class EcommerceFeatureRoleAssignment(UserRoleAssignment):
         """
         enterprise_id = ALL_ACCESS_CONTEXT
         if self.enterprise_id:
-            enterprise_id = str(self.enterprise_id)     # pylint: disable=redefined-variable-type
+            enterprise_id = str(self.enterprise_id)
         return enterprise_id
 
     def __str__(self):

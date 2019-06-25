@@ -10,7 +10,9 @@ from django.db import transaction
 from ecommerce_worker.fulfillment.v1.tasks import fulfill_order
 from oscar.apps.checkout.mixins import OrderPlacementMixin
 from oscar.core.loading import get_class, get_model
-from six.moves import range
+# Pylint will stop complaining about this when https://github.com/PyCQA/pylint/pull/2824
+# is released
+from six.moves import range  # pylint: disable=ungrouped-imports
 
 from ecommerce.core.models import BusinessClient
 from ecommerce.extensions.analytics.utils import audit_log, track_segment_event
@@ -54,7 +56,7 @@ class EdxOrderPlacementMixin(six.with_metaclass(abc.ABCMeta, OrderPlacementMixin
             self._payment_events = []
         self._payment_events.append(event)
 
-    def handle_payment(self, response, basket):
+    def handle_payment(self, response, basket):  # pylint: disable=arguments-differ
         """
         Handle any payment processing and record payment sources and events.
 
@@ -120,7 +122,7 @@ class EdxOrderPlacementMixin(six.with_metaclass(abc.ABCMeta, OrderPlacementMixin
                                billing_address,
                                order_total,
                                request=None,
-                               **kwargs):
+                               **kwargs):  # pylint: disable=arguments-differ
         """
         Place an order and mark the corresponding basket as submitted.
 
@@ -230,7 +232,7 @@ class EdxOrderPlacementMixin(six.with_metaclass(abc.ABCMeta, OrderPlacementMixin
 
         return order
 
-    def send_confirmation_message(self, order, code, site=None, **kwargs):
+    def send_confirmation_message(self, order, code, site=None, **kwargs):  # pylint: disable=arguments-differ
         ctx = self.get_message_context(order)
         try:
             event_type = CommunicationEventType.objects.get(code=code)
@@ -269,7 +271,7 @@ class EdxOrderPlacementMixin(six.with_metaclass(abc.ABCMeta, OrderPlacementMixin
 
         organization_attribute = BasketAttributeType.objects.filter(name=ORGANIZATION_ATTRIBUTE_TYPE).first()
         if not organization_attribute:
-            return None
+            return
 
         business_client = BasketAttribute.objects.filter(
             basket=order.basket,
@@ -301,7 +303,7 @@ class EdxOrderPlacementMixin(six.with_metaclass(abc.ABCMeta, OrderPlacementMixin
         offer = voucher and voucher.enterprise_offer
         # can't entertain non enterprise offers
         if not offer:
-            return None
+            return
 
         assignment = offer.offerassignment_set.filter(code=voucher.code, user_email=basket.owner.email).exclude(
             status__in=[OFFER_REDEEMED, OFFER_ASSIGNMENT_REVOKED]
@@ -324,7 +326,7 @@ class EdxOrderPlacementMixin(six.with_metaclass(abc.ABCMeta, OrderPlacementMixin
         offer = voucher and voucher.enterprise_offer
         # can't entertain non enterprise offers
         if not offer:
-            return None
+            return
 
         if voucher.usage == voucher.MULTI_USE_PER_CUSTOMER:
             user_email = basket.owner.email

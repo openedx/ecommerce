@@ -41,7 +41,7 @@ Voucher = get_model('voucher', 'Voucher')
 class Benefit(AbstractBenefit):
     history = HistoricalRecords()
 
-    def save(self, *args, **kwargs):
+    def save(self, *args, **kwargs):  # pylint: disable=arguments-differ
         self.clean()
         super(Benefit, self).save(*args, **kwargs)  # pylint: disable=bad-super-call
 
@@ -372,7 +372,7 @@ class Range(AbstractRange):
     # django-simple-history.  Background: https://github.com/edx/course-discovery/pull/332
     history = HistoricalRecords(excluded_fields=['slug'])
 
-    def save(self, *args, **kwargs):
+    def save(self, *args, **kwargs):  # pylint: disable=arguments-differ
         self.clean()
         super(Range, self).save(*args, **kwargs)  # pylint: disable=bad-super-call
 
