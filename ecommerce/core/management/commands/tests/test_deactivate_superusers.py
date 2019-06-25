@@ -48,3 +48,11 @@ class DeactivateSuperUsersTest(TestCase):
         with mock.patch(self.LOGGER) as patched_log:
             call_command(self.command)
             patched_log.warn.assert_called_once_with('No superusers found, falling back.')
+
+    def test_superuser_factory_lms_user_id(self):
+        """
+        Test that the SuperUserFactory creates users with an LMS user id.
+        """
+        user = User.objects.filter(is_superuser=True).first()
+        self.assertIsNotNone(user.lms_user_id)
+        self.assertEqual(SuperUserFactory.lms_user_id, user.lms_user_id)

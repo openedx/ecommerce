@@ -9,7 +9,6 @@ from django.test import override_settings
 from django.urls import reverse
 from nose.plugins.skip import SkipTest
 from oscar.core.loading import get_model
-from oscar.test import factories
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.firefox.webdriver import WebDriver
 from selenium.webdriver.support.wait import WebDriverWait
@@ -20,6 +19,7 @@ from ecommerce.extensions.fulfillment.signals import SHIPPING_EVENT_NAME
 from ecommerce.extensions.fulfillment.status import LINE, ORDER
 from ecommerce.extensions.refund.tests.mixins import RefundTestMixin
 from ecommerce.extensions.test.factories import create_order
+from ecommerce.tests.factories import UserFactory
 from ecommerce.tests.testcases import LiveServerTestCase, TestCase
 
 Order = get_model('order', 'Order')
@@ -65,7 +65,7 @@ class OrderViewBrowserTestBase(LiveServerTestCase):
 
         self.btn_selector = '[data-action=retry-fulfillment]'
         self.password = 'test'
-        self.user = factories.UserFactory(password=self.password, is_superuser=True, is_staff=True)
+        self.user = UserFactory(password=self.password, is_superuser=True, is_staff=True)
 
         self.order = create_order(user=self.user, site=self.site)
         self.order.status = ORDER.FULFILLMENT_ERROR

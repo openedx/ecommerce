@@ -14,6 +14,7 @@ from ecommerce.core.constants import SYSTEM_ENTERPRISE_LEARNER_ROLE
 from ecommerce.extensions.offer.applicator import CustomApplicator
 from ecommerce.extensions.offer.constants import CUSTOM_APPLICATOR_LOG_FLAG
 from ecommerce.extensions.test.factories import ConditionalOfferFactory, ConditionFactory, ProgramOfferFactory
+from ecommerce.tests.factories import UserFactory
 from ecommerce.tests.testcases import TestCase
 
 BasketAttribute = get_model('basket', 'BasketAttribute')
@@ -29,7 +30,7 @@ class CustomApplicatorTests(TestCase):
     def setUp(self):
         self.applicator = CustomApplicator()
         self.basket = factories.create_basket(empty=True)
-        self.user = factories.UserFactory()
+        self.user = UserFactory()
 
     def create_bundle_attribute(self, bundle_id):
         """ Helper to add a bundle attribute to a basket. """

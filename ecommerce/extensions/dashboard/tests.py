@@ -1,8 +1,9 @@
 from __future__ import absolute_import
 
 from django.urls import reverse
-from oscar.test.factories import OrderFactory, UserFactory
+from oscar.test.factories import OrderFactory
 
+from ecommerce.tests.factories import UserFactory
 from ecommerce.tests.testcases import TestCase
 
 

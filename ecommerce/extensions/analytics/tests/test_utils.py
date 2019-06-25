@@ -6,7 +6,6 @@ import ddt
 import mock
 from django.contrib.auth.models import AnonymousUser
 from django.test.client import RequestFactory
-from oscar.test import factories
 
 from analytics import Client
 from ecommerce.core.models import User  # pylint: disable=unused-import
@@ -22,6 +21,7 @@ from ecommerce.extensions.analytics.utils import (
 from ecommerce.extensions.basket.tests.mixins import BasketMixin
 from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
 from ecommerce.extensions.test.factories import create_basket
+from ecommerce.tests.factories import UserFactory
 from ecommerce.tests.testcases import TransactionTestCase
 
 
@@ -124,7 +124,7 @@ class UtilsTest(DiscoveryTestMixin, BasketMixin, TransactionTestCase):
         """ The method should return a dict formatted for Segment. """
         basket = create_basket(empty=True)
         basket.site = self.site
-        basket.owner = factories.UserFactory()
+        basket.owner = UserFactory()
         basket.save()
         course = CourseFactory(partner=self.partner)
         seat = course.create_or_update_seat('verified', True, 100)

@@ -15,6 +15,7 @@ from slumber.exceptions import SlumberBaseException
 
 from ecommerce.coupons.tests.mixins import CouponMixin, DiscoveryMockMixin
 from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
+from ecommerce.tests.factories import UserFactory
 from ecommerce.tests.testcases import TestCase
 
 Catalog = get_model('catalogue', 'Catalog')
@@ -377,7 +378,7 @@ class ConditionalOfferTests(DiscoveryTestMixin, DiscoveryMockMixin, TestCase):
     def test_condition_not_satisfied_for_enterprise(self):
         """Verify a condition is not satisfied."""
         valid_user_email = 'valid@{domain}'.format(domain=self.valid_sub_domain)
-        basket = factories.BasketFactory(site=self.site, owner=factories.UserFactory(email=valid_user_email))
+        basket = factories.BasketFactory(site=self.site, owner=UserFactory(email=valid_user_email))
 
         _range = factories.RangeFactory(
             products=[self.product, ],
@@ -396,7 +397,7 @@ class ConditionalOfferTests(DiscoveryTestMixin, DiscoveryMockMixin, TestCase):
         Verify that a basket satisfies a condition only when all of its products are in its range's catalog queryset.
         """
         valid_user_email = 'valid@{domain}'.format(domain=self.valid_sub_domain)
-        basket = factories.BasketFactory(site=self.site, owner=factories.UserFactory(email=valid_user_email))
+        basket = factories.BasketFactory(site=self.site, owner=UserFactory(email=valid_user_email))
         product = self.create_entitlement_product()
         another_product = self.create_entitlement_product()
 
@@ -426,7 +427,7 @@ class ConditionalOfferTests(DiscoveryTestMixin, DiscoveryMockMixin, TestCase):
         Verify that the condition for a single use coupon is only satisfied by single-product baskets.
         """
         valid_user_email = 'valid@{domain}'.format(domain=self.valid_sub_domain)
-        basket = factories.BasketFactory(site=self.site, owner=factories.UserFactory(email=valid_user_email))
+        basket = factories.BasketFactory(site=self.site, owner=UserFactory(email=valid_user_email))
         product1 = self.create_entitlement_product()
         product2 = self.create_entitlement_product()
 
@@ -533,7 +534,7 @@ class BenefitTests(DiscoveryTestMixin, DiscoveryMockMixin, TestCase):
         )
         self.benefit = factories.BenefitFactory(range=_range)
         self.offer = factories.ConditionalOfferFactory(benefit=self.benefit)
-        self.user = factories.UserFactory()
+        self.user = UserFactory()
 
     def test_range(self):
         with self.assertRaises(ValidationError):

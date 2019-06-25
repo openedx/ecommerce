@@ -8,7 +8,7 @@ import mock
 from django.core import mail
 from django.test import RequestFactory
 from oscar.core.loading import get_class, get_model
-from oscar.test.factories import BasketFactory, ProductFactory, UserFactory
+from oscar.test.factories import BasketFactory, ProductFactory
 from testfixtures import LogCapture
 from waffle.models import Sample
 
@@ -37,7 +37,7 @@ from ecommerce.extensions.test.factories import (
     create_order
 )
 from ecommerce.invoice.models import Invoice
-from ecommerce.tests.factories import SiteConfigurationFactory
+from ecommerce.tests.factories import SiteConfigurationFactory, UserFactory
 from ecommerce.tests.mixins import BusinessIntelligenceMixin
 from ecommerce.tests.testcases import TestCase
 

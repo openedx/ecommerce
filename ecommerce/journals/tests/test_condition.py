@@ -8,6 +8,7 @@ from slumber.exceptions import HttpNotFoundError, SlumberBaseException
 
 from ecommerce.extensions.test import factories
 from ecommerce.journals.tests.mixins import JournalMixin  # pylint: disable=no-name-in-module
+from ecommerce.tests.factories import UserFactory
 from ecommerce.tests.testcases import TestCase
 
 Product = get_model('catalogue', 'Product')
@@ -24,7 +25,7 @@ class JournalBundleConditionTests(TestCase, JournalMixin):
 
         self.condition = factories.JournalConditionFactory()
         self.offer = factories.JournalBundleOfferFactory(partner=self.partner, condition=self.condition)
-        self.basket = BasketFactory(site=self.site, owner=factories.UserFactory())
+        self.basket = BasketFactory(site=self.site, owner=UserFactory())
         self.basket.add_product(
             self.create_product(self.client),
             1

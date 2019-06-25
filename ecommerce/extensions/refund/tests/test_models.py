@@ -9,7 +9,6 @@ import six
 from django.conf import settings
 from oscar.apps.payment.exceptions import PaymentError
 from oscar.core.loading import get_class, get_model
-from oscar.test.factories import UserFactory
 from testfixtures import LogCapture
 
 from ecommerce.core.constants import SEAT_PRODUCT_CLASS_NAME
@@ -24,6 +23,7 @@ from ecommerce.extensions.refund.status import REFUND, REFUND_LINE
 from ecommerce.extensions.refund.tests.factories import RefundFactory, RefundLineFactory
 from ecommerce.extensions.refund.tests.mixins import RefundTestMixin
 from ecommerce.extensions.test.factories import create_basket, create_order
+from ecommerce.tests.factories import UserFactory
 from ecommerce.tests.testcases import TestCase
 
 PaymentEventType = get_model('order', 'PaymentEventType')

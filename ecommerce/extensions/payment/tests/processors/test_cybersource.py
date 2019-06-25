@@ -33,6 +33,7 @@ from ecommerce.extensions.payment.processors.cybersource import Cybersource
 from ecommerce.extensions.payment.tests.mixins import CybersourceMixin
 from ecommerce.extensions.payment.tests.processors.mixins import PaymentProcessorTestCaseMixin
 from ecommerce.extensions.test.factories import create_basket
+from ecommerce.tests.factories import UserFactory
 from ecommerce.tests.testcases import TestCase
 
 BasketAttribute = get_model('basket', 'BasketAttribute')
@@ -148,7 +149,7 @@ class CybersourceTests(CybersourceMixin, PaymentProcessorTestCaseMixin, TestCase
         course = CourseFactory(id='a/b/c/d', name='Course with "quotes"')
         product = course.create_or_update_seat(self.CERTIFICATE_TYPE, False, 20)
 
-        basket = create_basket(owner=factories.UserFactory(), site=self.site, empty=True)
+        basket = create_basket(owner=UserFactory(), site=self.site, empty=True)
         basket.add_product(product)
 
         response = self.processor.get_transaction_parameters(basket)

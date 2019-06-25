@@ -6,12 +6,12 @@ import ddt
 from django.core.exceptions import ValidationError
 from django.utils.timezone import now
 from oscar.core.loading import get_model
-from oscar.test.factories import OrderFactory, OrderLineFactory, UserFactory
+from oscar.test.factories import OrderFactory, OrderLineFactory
 
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.extensions.offer.constants import OFFER_ASSIGNED, OFFER_ASSIGNMENT_REVOKED, OFFER_REDEEMED
 from ecommerce.extensions.test import factories
-from ecommerce.tests.factories import PartnerFactory
+from ecommerce.tests.factories import PartnerFactory, UserFactory
 from ecommerce.tests.testcases import TestCase
 
 ConditionalOffer = get_model('offer', 'ConditionalOffer')
