@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # TODO: journals dependency
-from __future__ import unicode_literals
+from __future__ import absolute_import, unicode_literals
 
 from django.db import migrations
 from oscar.core.loading import get_model
