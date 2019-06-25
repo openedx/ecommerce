@@ -25,13 +25,13 @@ contextlib2==0.5.5        # via importlib-metadata
 cookies==2.2.1            # via responses
 coreapi==2.3.3
 coreschema==0.0.4         # via coreapi
-coverage==4.3.4
+coverage==4.5.3
 cryptography==2.7         # via pyopenssl
 cssselect==1.0.3          # via premailer
 cssutils==1.0.2           # via premailer
-ddt==1.1.1
+ddt==1.2.1
 defusedxml==0.6.0         # via zeep
-diff-cover==0.9.6
+diff-cover==2.2.0
 django-appconf==1.0.3     # via django-compressor
 django-compressor==2.2
 django-cors-headers==3.0.2
@@ -42,7 +42,7 @@ django-filter==1.0.4
 django-haystack==2.8.1    # via django-oscar
 django-libsass==0.5
 django-model-utils==3.2.0  # via edx-rbac
-django-nose==1.4.4
+django-nose==1.4.6
 django-oscar==1.5.4
 django-phonenumber-field==1.3.0  # via django-oscar
 django-rest-swagger==2.2.0
@@ -52,7 +52,7 @@ django-tables2==1.16.0    # via django-oscar
 django-threadlocals==0.10
 django-treebeard==4.3     # via django-oscar
 django-waffle==0.14.0
-django-webtest==1.9.2
+django-webtest==1.9.6
 django-widget-tweaks==1.4.5  # via django-oscar
 django==1.11.21
 django_extensions==1.9.9
@@ -71,22 +71,22 @@ edx-opaque-keys==1.0.1
 edx-rbac==1.0.1
 edx-rest-api-client==1.9.2
 enum34==1.1.6             # via astroid, cryptography
-factory-boy==2.8.1
+factory-boy==2.12.0
 faker==1.0.7              # via factory-boy
 filelock==3.0.12          # via tox
-freezegun==0.3.7
+freezegun==0.3.12
 funcsigs==1.0.2           # via mock
 future==0.17.1            # via pyjwkest
 futures==3.2.0            # via isort
 gevent==1.0.2
 greenlet==0.4.15          # via gevent
-httpretty==0.8.14
+httpretty==0.9.6
 idna==2.8                 # via requests
 importlib-metadata==0.18  # via pluggy, tox
 inflect==2.1.0            # via jinja2-pluralize
 ipaddress==1.0.22         # via cryptography, faker
 isodate==0.6.0            # via zeep
-isort==4.3.20
+isort==4.3.21
 itypes==1.1.0             # via coreapi
 jinja2-pluralize==0.3.0   # via diff-cover
 jinja2==2.10.1            # via coreschema, diff-cover, jinja2-pluralize
@@ -94,12 +94,12 @@ jsonfield==1.0.3
 kombu==3.0.37             # via celery
 lazy-object-proxy==1.4.1  # via astroid
 libsass==0.9.2
-lxml==3.8.0
+lxml==4.3.4
 markdown==2.6.9
 markupsafe==1.1.1         # via jinja2
 mccabe==0.6.1             # via pylint
-mock-django==0.6.9
-mock==1.3.0
+mock-django==0.6.10
+mock==2.0.0
 mysqlclient==1.4.2.post1
 ndg-httpsclient==0.5.1
 newrelic==4.20.1.121      # via edx-django-utils
@@ -112,7 +112,7 @@ path.py==7.2
 pathlib2==2.3.4           # via importlib-metadata
 paypalrestsdk==1.13.1
 pbr==5.3.1                # via mock, stevedore
-pep8==1.6.2
+pep8==1.7.1
 phonenumberslite==8.10.14  # via django-phonenumber-field
 pillow==6.0.0             # via django-oscar
 pluggy==0.12.0            # via tox
@@ -139,13 +139,13 @@ rcssmin==1.0.6            # via django-compressor
 requests-oauthlib==1.2.0  # via social-auth-core
 requests-toolbelt==0.9.1  # via zeep
 requests==2.22.0
-responses==0.5.1
+responses==0.10.6
 rest-condition==1.0.3     # via edx-drf-extensions
 rjsmin==1.0.12            # via django-compressor
 rules==2.0.1
 sailthru-client==2.2.3
 scandir==1.10.0           # via pathlib2
-selenium==3.4.3
+selenium==3.141.0
 semantic-version==2.6.0   # via edx-drf-extensions
 simplejson==3.16.0        # via django-rest-swagger, sailthru-client
 singledispatch==3.4.0.3   # via astroid, pylint
@@ -160,12 +160,12 @@ stripe==1.70.0
 testfixtures==6.10.0
 text-unidecode==1.2       # via faker
 toml==0.10.0              # via tox
-tox==3.13.0
+tox==3.13.1
 typing==3.7.4             # via django-extensions
 unicodecsv==0.14.1
 unidecode==0.4.21         # via django-oscar
 uritemplate==3.0.0        # via coreapi
-urllib3==1.25.3           # via requests
+urllib3==1.25.3           # via requests, selenium
 virtualenv==16.6.1        # via tox
 waitress==1.3.0           # via webtest
 webob==1.8.5              # via webtest
