@@ -1,4 +1,6 @@
 """ Tests of the Journal's fulfillment modules. """
+from __future__ import absolute_import
+
 import mock
 from oscar.core.loading import get_model
 from oscar.test import factories
