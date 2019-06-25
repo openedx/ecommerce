@@ -47,8 +47,8 @@ class RefundCreateView(generics.CreateAPIView):
     """
     permission_classes = (IsAuthenticated, CanActForUser)
 
-    def get_serializer(self):
-        pass
+    def get_serializer(self, *args, **kwargs):
+        return None
 
     def create(self, request, *args, **kwargs):
         """

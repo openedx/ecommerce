@@ -450,8 +450,8 @@ class BasketSummaryView(BasketLogicMixin, BasketView):
 
         if has_enterprise_offer(basket) and basket.total_incl_tax == Decimal(0):
             return redirect('checkout:free-checkout')
-        else:
-            return super(BasketSummaryView, self).get(request, *args, **kwargs)
+
+        return super(BasketSummaryView, self).get(request, *args, **kwargs)
 
 
 class PaymentApiLogicMixin(BasketLogicMixin):
@@ -771,9 +771,9 @@ class VoucherAddApiView(VoucherAddLogicMixin, PaymentApiLogicMixin, APIView):  #
             }
             response = self.get_payment_api_response(error_message)
             return Response(response, status=status.HTTP_400_BAD_REQUEST)
-        else:
-            response = self.get_payment_api_response()
-            return Response(response)
+
+        response = self.get_payment_api_response()
+        return Response(response)
 
 
 # TODO: ARCH-960: Remove "pragma: no cover"

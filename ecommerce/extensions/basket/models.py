@@ -35,7 +35,7 @@ class Basket(AbstractBasket):
         merge them into one.
         """
         editable_baskets = cls.objects.filter(site=site, owner=user, status__in=cls.editable_statuses)
-        if len(editable_baskets) == 0:
+        if not editable_baskets:
             basket = cls.create_basket(site, user)
         else:
             stale_baskets = list(editable_baskets)

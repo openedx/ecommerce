@@ -22,9 +22,6 @@ User = get_user_model()
 class HealthTests(TestCase):
     """Tests of the health endpoint."""
 
-    def setUp(self):
-        super(HealthTests, self).setUp()
-
     def test_all_services_available(self):
         """Test that the endpoint reports when all services are healthy."""
         self._assert_health(status.HTTP_200_OK, Status.OK, Status.OK)

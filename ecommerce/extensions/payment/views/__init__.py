@@ -67,8 +67,8 @@ class BasePaymentSubmitView(View):
 
         if form.is_valid():
             return self.form_valid(form)
-        else:
-            return self.form_invalid(form)
+
+        return self.form_invalid(form)
 
     def get_form_kwargs(self):
         return {

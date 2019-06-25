@@ -17,7 +17,7 @@ from edx_rest_api_client.client import EdxRestApiClient
 from edx_rest_framework_extensions.auth.jwt.cookies import get_decoded_jwt
 from oscar.core.loading import get_model
 from requests.exceptions import ConnectionError, Timeout
-from six.moves.urllib.parse import urlparse  # pylint: disable=import-error
+from six.moves.urllib.parse import urlparse  # pylint: disable=import-error, relative-import
 from slumber.exceptions import SlumberHttpBaseException
 
 from ecommerce.core.constants import SYSTEM_ENTERPRISE_LEARNER_ROLE

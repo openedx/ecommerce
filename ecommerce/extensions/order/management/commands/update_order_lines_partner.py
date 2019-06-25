@@ -41,7 +41,7 @@ class Command(BaseCommand):
         skus = options['skus']
         partner_code = options['partner']
 
-        if not len(skus):
+        if not skus:
             msg = 'update_order_lines_partner requires one or more <SKU>s.'
             logger.exception(msg)
             raise CommandError(msg)

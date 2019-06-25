@@ -107,39 +107,41 @@ class Refund(StatusMixin, TimeStampedModel):
         """
         unrefunded_lines = [line for line in lines if not line.refund_lines.exclude(status=REFUND_LINE.DENIED).exists()]
 
-        if unrefunded_lines:
-            status = getattr(settings, 'OSCAR_INITIAL_REFUND_STATUS', REFUND.OPEN)
-            total_credit_excl_tax = sum([line.line_price_excl_tax for line in unrefunded_lines])
-            refund = cls.objects.create(
-                order=order,
-                user=order.user,
-                status=status,
-                total_credit_excl_tax=total_credit_excl_tax
+        if not unrefunded_lines:
+            return None
+
+        status = getattr(settings, 'OSCAR_INITIAL_REFUND_STATUS', REFUND.OPEN)
+        total_credit_excl_tax = sum([line.line_price_excl_tax for line in unrefunded_lines])
+        refund = cls.objects.create(
+            order=order,
+            user=order.user,
+            status=status,
+            total_credit_excl_tax=total_credit_excl_tax
+        )
+
+        audit_log(
+            'refund_created',
+            amount=total_credit_excl_tax,
+            currency=refund.currency,
+            order_number=order.number,
+            refund_id=refund.id,
+            user_id=refund.user.id
+        )
+
+        status = getattr(settings, 'OSCAR_INITIAL_REFUND_LINE_STATUS', REFUND_LINE.OPEN)
+        for line in unrefunded_lines:
+            RefundLine.objects.create(
+                refund=refund,
+                order_line=line,
+                line_credit_excl_tax=line.line_price_excl_tax,
+                quantity=line.quantity,
+                status=status
             )
 
-            audit_log(
-                'refund_created',
-                amount=total_credit_excl_tax,
-                currency=refund.currency,
-                order_number=order.number,
-                refund_id=refund.id,
-                user_id=refund.user.id
-            )
+        if total_credit_excl_tax == 0:
+            refund.approve(notify_purchaser=False)
 
-            status = getattr(settings, 'OSCAR_INITIAL_REFUND_LINE_STATUS', REFUND_LINE.OPEN)
-            for line in unrefunded_lines:
-                RefundLine.objects.create(
-                    refund=refund,
-                    order_line=line,
-                    line_credit_excl_tax=line.line_price_excl_tax,
-                    quantity=line.quantity,
-                    status=status
-                )
-
-            if total_credit_excl_tax == 0:
-                refund.approve(notify_purchaser=False)
-
-            return refund
+        return refund
 
     @property
     def num_items(self):

@@ -53,15 +53,15 @@ class FulfillmentApiTests(FulfillmentTestMixin, TestCase):
     def test_fulfill_order_unknown_product_type(self):
         """Test an unknown product type."""
         api.fulfill_order(self.order, self.order.lines)
-        self.assertEquals(ORDER.FULFILLMENT_ERROR, self.order.status)
-        self.assertEquals(LINE.FULFILLMENT_CONFIGURATION_ERROR, self.order.lines.all()[0].status)
+        self.assertEqual(ORDER.FULFILLMENT_ERROR, self.order.status)
+        self.assertEqual(LINE.FULFILLMENT_CONFIGURATION_ERROR, self.order.lines.all()[0].status)
 
     @override_settings(FULFILLMENT_MODULES=['ecommerce.extensions.fulfillment.tests.modules.NotARealModule', ])
     def test_fulfill_order_incorrect_module(self):
         """Test an incorrect Fulfillment Module."""
         api.fulfill_order(self.order, self.order.lines)
-        self.assertEquals(ORDER.FULFILLMENT_ERROR, self.order.status)
-        self.assertEquals(LINE.FULFILLMENT_CONFIGURATION_ERROR, self.order.lines.all()[0].status)
+        self.assertEqual(ORDER.FULFILLMENT_ERROR, self.order.status)
+        self.assertEqual(LINE.FULFILLMENT_CONFIGURATION_ERROR, self.order.lines.all()[0].status)
 
     @override_settings(FULFILLMENT_MODULES=['ecommerce.extensions.fulfillment.tests.modules.FakeFulfillmentModule', ])
     @patch('ecommerce.extensions.fulfillment.tests.modules.FakeFulfillmentModule.get_supported_lines')
@@ -70,7 +70,7 @@ class FulfillmentApiTests(FulfillmentTestMixin, TestCase):
         mocked_method.return_value = Exception
         with patch('ecommerce.extensions.fulfillment.api.logger.exception') as mock_logger:
             api.fulfill_order(self.order, self.order.lines)
-            self.assertEquals(ORDER.FULFILLMENT_ERROR, self.order.status)
+            self.assertEqual(ORDER.FULFILLMENT_ERROR, self.order.status)
             self.assertTrue(mock_logger.called)
 
     @override_settings(FULFILLMENT_MODULES=['ecommerce.extensions.fulfillment.tests.modules.FakeFulfillmentModule',

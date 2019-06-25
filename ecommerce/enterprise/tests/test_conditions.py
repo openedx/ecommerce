@@ -150,7 +150,7 @@ class EnterpriseCustomerConditionTests(EnterpriseServiceMockMixin, DiscoveryTest
         basket.add_product(self.course_run.seat_products[0])
         enterprise_id = self.condition.enterprise_customer_uuid
         if use_new_enterprise:
-            enterprise_id = uuid4()  # pylint: disable=redefined-variable-type
+            enterprise_id = uuid4()
         if mock_learner_api:
             self.mock_enterprise_learner_api(
                 learner_id=self.user.id,

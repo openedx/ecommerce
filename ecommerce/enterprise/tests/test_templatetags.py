@@ -61,7 +61,7 @@ class EnterpriseTemplateTagsTests(EnterpriseServiceMockMixin, CouponMixin, TestC
             "{{ enterprise_customer.name }}"
         )
         result = template.render(Context({'voucher': voucher, 'request': self.request}))
-        self.assertEquals(result, '')
+        self.assertEqual(result, '')
 
     def test_enterprise_customer_for_voucher_when_context_missing_request(self):
         """
@@ -78,7 +78,7 @@ class EnterpriseTemplateTagsTests(EnterpriseServiceMockMixin, CouponMixin, TestC
             "{{ enterprise_customer.name }}"
         )
         result = template.render(Context({'voucher': voucher}))
-        self.assertEquals(result, '')
+        self.assertEqual(result, '')
 
     def test_enterprise_customer_for_voucher_when_voucher_is_none(self):
         """

@@ -32,6 +32,7 @@ class IsOffersOrIsAuthenticatedAndStaff(permissions.BasePermission):
 
     def has_permission(self, request, view):
         user = request.user
+        # pylint: disable=consider-using-ternary
         return (user.is_authenticated() and user.is_staff) or view.action == 'offers'
 
 

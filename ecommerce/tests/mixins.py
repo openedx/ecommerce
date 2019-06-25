@@ -357,9 +357,6 @@ class TestServerUrlMixin(object):
 class ApiMockMixin(object):
     """ Common Mocks for the API responses. """
 
-    def setUp(self):
-        super(ApiMockMixin, self).setUp()
-
     def mock_api_error(self, error, url):
         def callback(request, uri, headers):  # pylint: disable=unused-argument
             raise error
@@ -369,9 +366,6 @@ class ApiMockMixin(object):
 
 class LmsApiMockMixin(object):
     """ Mocks for the LMS API reponses. """
-
-    def setUp(self):
-        super(LmsApiMockMixin, self).setUp()
 
     def mock_course_api_response(self, course=None):
         """ Helper function to register an API endpoint for the course information. """

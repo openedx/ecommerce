@@ -48,7 +48,7 @@ class GenerateCoursesTests(DiscoveryTestMixin, TestCase):
         del settings["courses"][0][setting]
         arg = json.dumps(settings)
         call_command("generate_courses", arg)
-        mock_logger.warning.assert_any_call("Course json is missing " + setting)
+        mock_logger.warning.assert_any_call("Course json is missing %s", setting)
 
     @mock.patch('ecommerce.core.management.commands.generate_courses.logger')
     def test_invalid_partner(self, mock_logger):
@@ -74,7 +74,10 @@ class GenerateCoursesTests(DiscoveryTestMixin, TestCase):
         }]}
         arg = json.dumps(settings)
         call_command("generate_courses", arg)
-        mock_logger.warning.assert_any_call(invalid_partner + " partner does not exist")
+        mock_logger.warning.assert_any_call(
+            "%s partner does not exist. Can't create course, proceeding to next course.",
+            invalid_partner
+        )
 
     @mock.patch('ecommerce.core.management.commands.generate_courses.logger')
     def test_missing_course_name(self, mock_logger):
@@ -91,7 +94,7 @@ class GenerateCoursesTests(DiscoveryTestMixin, TestCase):
         }]}
         arg = json.dumps(settings)
         call_command("generate_courses", arg)
-        mock_logger.warning.assert_any_call("Fields json is missing display_name")
+        mock_logger.warning.assert_any_call("Fields json is missing %s", "display_name")
 
     @mock.patch('ecommerce.core.management.commands.generate_courses.logger')
     def test_invalid_enrollment_setting(self, mock_logger):
@@ -117,7 +120,7 @@ class GenerateCoursesTests(DiscoveryTestMixin, TestCase):
         }]}
         arg = json.dumps(settings)
         call_command("generate_courses", arg)
-        mock_logger.info.assert_any_call("invalid_setting is not a recognized enrollment setting")
+        mock_logger.info.assert_any_call("%s is not a recognized enrollment setting", "invalid_setting")
 
     @mock.patch('ecommerce.core.management.commands.generate_courses.logger')
     @ddt.data("audit", "honor", "verified", "professional_education", "no_id_verification")
@@ -144,7 +147,7 @@ class GenerateCoursesTests(DiscoveryTestMixin, TestCase):
         del settings["courses"][0]["enrollment"][enrollment_setting]
         arg = json.dumps(settings)
         call_command("generate_courses", arg)
-        mock_logger.warning.assert_any_call("Enrollment json is missing " + enrollment_setting)
+        mock_logger.warning.assert_any_call("Enrollment json is missing %s", enrollment_setting)
 
     @httpretty.activate
     @mock.patch('ecommerce.core.management.commands.generate_courses.logger')
@@ -190,4 +193,4 @@ class GenerateCoursesTests(DiscoveryTestMixin, TestCase):
         seats = course.seat_products
         seat = seats[0]
         self.assertEqual(seat.stockrecords.get(partner=self.partner).price_excl_tax, price)
-        mock_logger.info.assert_any_call(seat_type + " has been set to True")
+        mock_logger.info.assert_any_call("%s has been set to %s", seat_type, True)

@@ -70,8 +70,8 @@ class Paypal(BasePaymentProcessor):
         default_paypal_locale = PAYPAL_LOCALES.get(re.split(r'[_-]', get_language())[0].lower())
         if not language_code:
             return default_paypal_locale
-        else:
-            return PAYPAL_LOCALES.get(re.split(r'[_-]', language_code)[0].lower(), default_paypal_locale)
+
+        return PAYPAL_LOCALES.get(re.split(r'[_-]', language_code)[0].lower(), default_paypal_locale)
 
     def create_temporary_web_profile(self, locale_code):
         """
@@ -94,14 +94,16 @@ class Paypal(BasePaymentProcessor):
                 )
                 logger.info(msg)
                 return web_profile.id
-            else:
-                msg = "Web profile creation encountered error [%s]. Will continue without one" % (
-                    web_profile.error
-                )
-                logger.warning(msg)
+
+            msg = "Web profile creation encountered error [%s]. Will continue without one" % (
+                web_profile.error
+            )
+            logger.warning(msg)
+            return None
 
         except Exception:  # pylint: disable=broad-except
             logger.warning("Creating PayPal WebProfile resulted in exception. Will continue without one.")
+            return None
 
     def get_transaction_parameters(self, basket, request=None, use_client_side_checkout=False, **kwargs):
         """

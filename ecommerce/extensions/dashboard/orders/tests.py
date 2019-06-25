@@ -164,7 +164,7 @@ class OrderListViewBrowserTests(OrderViewTestsMixin, RefundTestMixin, OrderViewB
         response = self.client.get('{path}?username={username}'.format(
             path=self.path,
             # Cut the configured username in half, then invert the fragment's casing.
-            username=new_user.username[:len(new_user.username) / 2].swapcase()
+            username=new_user.username[:len(new_user.username) / 2].swapcase()  # pylint: disable=unsubscriptable-object
         ))
         self.assert_successful_response(response, [new_order])
 

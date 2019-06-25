@@ -44,9 +44,6 @@ class RefundListViewTests(RefundViewTestMixin, TestCase):
     path = reverse('dashboard:refunds:list')
     username = 'hackerman'
 
-    def setUp(self):
-        super(RefundListViewTests, self).setUp()
-
     def test_filtering(self):
         """ The view should allow filtering by ID, status, and username. """
         refund = RefundFactory()
