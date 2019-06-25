@@ -52,13 +52,14 @@ class UserMixin(object):
     access_token = 'test-access-token'
     user_id = 'test-user-id'
     password = 'test'
+    lms_user_id = 12321
 
-    def create_user(self, **kwargs):
+    def create_user(self, lms_user_id=lms_user_id, **kwargs):
         """Create a user, with overrideable defaults."""
         not_provided = object()
         if kwargs.get('username', not_provided) is None:
             kwargs.pop('username')
-        return factories.UserFactory(password=self.password, **kwargs)
+        return factories.UserFactory(password=self.password, lms_user_id=lms_user_id, **kwargs)
 
     def create_access_token(self, user, access_token=None):
         """
