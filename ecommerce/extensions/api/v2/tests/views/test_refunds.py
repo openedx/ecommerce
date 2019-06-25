@@ -164,8 +164,9 @@ class RefundCreateViewTests(RefundTestMixin, AccessTokenMixin, JwtMixin, TestCas
         """
         View should create a refund when user has an LMS user id.
         """
-        user_with_id = self.create_user(lms_user_id=45678)
+        user_with_id = self.create_user()
         self.client.login(username=user_with_id.username, password=self.password)
+
         data = self._get_data(user_with_id.username, self.course_id)
         response = self.client.post(self.path, data, JSON_CONTENT_TYPE)
         self.assert_ok_response(response)
@@ -174,23 +175,23 @@ class RefundCreateViewTests(RefundTestMixin, AccessTokenMixin, JwtMixin, TestCas
         """
         View should create a refund even if the LMS user id is missing.
         """
-        self.create_order()
-        self.assertFalse(Refund.objects.exists())
+        user_without_id = self.create_user(lms_user_id=None)
+        self.client.login(username=user_without_id.username, password=self.password)
 
-        data = self._get_data(self.user.username, self.course_id)
+        data = self._get_data(user_without_id.username, self.course_id)
         expected_logs = [
             (
                 self.LOGGER_NAME,
                 'WARNING',
                 'Could not find lms_user_id for user {} when processing refund requested by {}'.format(
-                    self.user.id, self.user.id)
+                    user_without_id.id, user_without_id.id)
             ),
         ]
 
         with LogCapture(self.LOGGER_NAME) as log:
             response = self.client.post(self.path, data, JSON_CONTENT_TYPE)
             log.check_present(*expected_logs)
-            self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+            self.assert_ok_response(response)
 
     def test_valid_entitlement_order(self):
         """

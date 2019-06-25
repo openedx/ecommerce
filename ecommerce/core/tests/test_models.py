@@ -103,7 +103,7 @@ class UserTests(DiscoveryTestMixin, LmsApiMockMixin, TestCase):
 
     def test_missing_lms_user_id_with_metric(self):
         """ Ensures a missing lms_user_id is handled by lms_user_id_with_metric(). """
-        user = self.create_user()
+        user = self.create_user(lms_user_id=None)
         expected_logs = [
             (
                 self.LOGGER_NAME,
@@ -132,7 +132,7 @@ class UserTests(DiscoveryTestMixin, LmsApiMockMixin, TestCase):
 
     def test_lms_user_id(self):
         """ Ensures that the LMS user id is written / read correctly by the User model. """
-        user = self.create_user()
+        user = self.create_user(lms_user_id=None)
         self.assertIsNone(user.lms_user_id)
 
         user.lms_user_id = self.LMS_USER_ID

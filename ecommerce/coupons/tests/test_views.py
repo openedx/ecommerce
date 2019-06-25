@@ -114,7 +114,7 @@ class VoucherIsValidTests(DiscoveryTestMixin, TestCase):
         self.assertEqual(msg, 'This coupon code is not yet valid.')
 
     def test_voucher_unavailable_to_buy(self):
-        """ Verify that False is returned for unavialable products. """
+        """ Verify that False is returned for unavailable products. """
         voucher, product = prepare_voucher()
         product.expires = pytz.utc.localize(datetime.datetime.min)
         valid, __ = voucher_is_valid(voucher=voucher, products=[product], request=self.request)
