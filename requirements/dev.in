@@ -1,14 +1,14 @@
 -r test.in
 -r docs.in
 
-django-debug-toolbar==1.7
+django-debug-toolbar
 
 # i18n
-transifex-client==0.12.2
+transifex-client
 edx-i18n-tools
 
 # Visual Studio Code Debugger
-ptvsd==3.0
+ptvsd
 
 # For devserver code reloading
 pyinotify==0.9.6 # This breaks OSX virtualenv installation
