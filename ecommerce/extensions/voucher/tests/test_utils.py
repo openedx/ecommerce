@@ -11,7 +11,17 @@ from django.test import override_settings
 from django.utils.translation import ugettext_lazy as _
 from factory.fuzzy import FuzzyText
 from oscar.templatetags.currency_filters import currency
-from oscar.test.factories import *  # pylint:disable=wildcard-import,unused-wildcard-import
+from oscar.test.factories import (
+    BenefitFactory,
+    ConditionalOfferFactory,
+    OrderFactory,
+    OrderLineFactory,
+    RangeFactory,
+    UserFactory,
+    VoucherFactory,
+    datetime,
+    get_model
+)
 from six.moves import range
 
 from ecommerce.core.url_utils import get_ecommerce_url
