@@ -63,24 +63,32 @@ class UserDetailViewTests(DashboardViewTestMixin, TestCase):
         api_status = 500
         self.mock_enrollment_api(status=api_status)
 
-        with LogCapture(LOGGER_NAME) as l:
+        with LogCapture(LOGGER_NAME) as logger:
             response = self.load_view()
             self.assertEqual(response.status_code, 200)
             self.assertEqual(response.context['enrollments'], [])
             self.assert_message_equals(response, 'Failed to retrieve enrollment data.', MSG.ERROR)
-            l.check((LOGGER_NAME, 'WARNING',
-                     'Failed to retrieve enrollments for [{}]. Enrollment API returned status code [{}].'.format(
-                         self.user.username, api_status)))
+            logger.check((
+                LOGGER_NAME,
+                'WARNING',
+                'Failed to retrieve enrollments for [{}]. Enrollment API returned status code [{}].'.format(
+                    self.user.username,
+                    api_status
+                )
+            ))
 
     @mock.patch('requests.get', mock.Mock(side_effect=Timeout))
     def test_enrollments_exception(self):
         """Verify a message is logged, and a separate message displayed to the user,
         if an exception is raised while retrieving enrollments."""
 
-        with LogCapture(LOGGER_NAME) as l:
+        with LogCapture(LOGGER_NAME) as logger:
             response = self.load_view()
             self.assertEqual(response.status_code, 200)
             self.assertEqual(response.context['enrollments'], [])
             self.assert_message_equals(response, 'Failed to retrieve enrollment data.', MSG.ERROR)
-            l.check((LOGGER_NAME, 'ERROR',
-                     'An unexpected error occurred while retrieving enrollments for [{}].'.format(self.user.username)))
+            logger.check((
+                LOGGER_NAME,
+                'ERROR',
+                'An unexpected error occurred while retrieving enrollments for [{}].'.format(self.user.username)
+            ))

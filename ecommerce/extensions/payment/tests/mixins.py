@@ -1,7 +1,6 @@
 from __future__ import unicode_literals
 
 import datetime
-import logging
 import os
 from decimal import Decimal
 from urlparse import urljoin
@@ -39,7 +38,6 @@ PaymentEventType = get_model('order', 'PaymentEventType')
 PaymentProcessorResponse = get_model('payment', 'PaymentProcessorResponse')
 SourceType = get_model('payment', 'SourceType')
 
-logger = logging.getLogger(__name__)
 post_checkout = get_class('checkout.signals', 'post_checkout')
 
 
@@ -132,7 +130,7 @@ class CybersourceMixin(PaymentEventsMixin):
     def _assert_processing_failure(self, notification, error_message, log_level='ERROR'):
         """Verify that payment processing operations fail gracefully."""
         logger_name = 'ecommerce.extensions.payment.views.cybersource'
-        with LogCapture(logger_name) as l:
+        with LogCapture(logger_name) as logger:
             self.client.post(self.path, notification)
 
             ppr_id = self.assert_processor_response_recorded(
@@ -146,7 +144,7 @@ class CybersourceMixin(PaymentEventsMixin):
                 basket_id=self.basket.id, response_id=ppr_id, order_number=notification['req_reference_number']
             )
 
-            l.check(
+            logger.check(
                 (
                     logger_name,
                     'INFO',

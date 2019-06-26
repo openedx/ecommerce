@@ -82,15 +82,18 @@ class FulfillmentApiTests(FulfillmentTestMixin, TestCase):
         """
         logger_name = 'ecommerce.extensions.fulfillment.api'
 
-        with LogCapture(logger_name) as l:
+        with LogCapture(logger_name) as logger:
             actual = get_fulfillment_modules()
 
             # Only FakeFulfillmentModule should be loaded since it is the only real class.
             self.assertEqual(actual, [FakeFulfillmentModule])
 
             # An error should be logged for NotARealModule since it cannot be loaded.
-            l.check((logger_name, 'ERROR',
-                     'Could not load module at [ecommerce.extensions.fulfillment.tests.modules.NotARealModule]'))
+            logger.check((
+                logger_name,
+                'ERROR',
+                'Could not load module at [ecommerce.extensions.fulfillment.tests.modules.NotARealModule]'
+            ))
 
     @override_settings(FULFILLMENT_MODULES=['ecommerce.extensions.fulfillment.tests.modules.FakeFulfillmentModule',
                                             'ecommerce.extensions.fulfillment.tests.modules.FulfillNothingModule'])

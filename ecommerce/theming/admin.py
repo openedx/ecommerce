@@ -19,4 +19,5 @@ class SiteThemeAdmin(admin.ModelAdmin):
         """
         model = SiteTheme
 
+
 admin.site.register(SiteTheme, SiteThemeAdmin)

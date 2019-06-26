@@ -87,7 +87,7 @@ class PaypalPaymentExecutionViewTests(PaypalMixin, PaymentEventsMixin, TestCase)
         error_message = \
             'Order Failure: Paypal payment was received, but an order for basket [{basket_id}] ' \
             'could not be placed.'.format(basket_id=basket_id)
-        with LogCapture(logger_name) as l:
+        with LogCapture(logger_name) as logger:
             __, execution_response = self._assert_execution_redirect()
 
             # Verify that the payment execution response was recorded despite the error
@@ -98,7 +98,7 @@ class PaypalPaymentExecutionViewTests(PaypalMixin, PaymentEventsMixin, TestCase)
                 basket=self.basket
             )
 
-            l.check(
+            logger.check(
                 (logger_name, 'ERROR', error_message)
             )
 
@@ -187,7 +187,7 @@ class PaypalPaymentExecutionViewTests(PaypalMixin, PaymentEventsMixin, TestCase)
         with mock.patch.object(PaypalPaymentExecutionView, 'handle_payment',
                                side_effect=PaymentError) as fake_handle_payment:
             logger_name = 'ecommerce.extensions.payment.views.paypal'
-            with LogCapture(logger_name) as l:
+            with LogCapture(logger_name) as logger:
                 creation_response, __ = self._assert_execution_redirect(url_redirect=self.processor.error_url)
                 self.assertTrue(fake_handle_payment.called)
 
@@ -199,7 +199,7 @@ class PaypalPaymentExecutionViewTests(PaypalMixin, PaymentEventsMixin, TestCase)
                     basket=self.basket
                 )
 
-                l.check(
+                logger.check(
                     (
                         logger_name,
                         'INFO',
@@ -218,7 +218,7 @@ class PaypalPaymentExecutionViewTests(PaypalMixin, PaymentEventsMixin, TestCase)
         with mock.patch.object(PaypalPaymentExecutionView, 'handle_payment',
                                side_effect=KeyError) as fake_handle_payment:
             logger_name = 'ecommerce.extensions.payment.views.paypal'
-            with LogCapture(logger_name) as l:
+            with LogCapture(logger_name) as logger:
                 creation_response, __ = self._assert_execution_redirect()
                 self.assertTrue(fake_handle_payment.called)
 
@@ -230,7 +230,7 @@ class PaypalPaymentExecutionViewTests(PaypalMixin, PaymentEventsMixin, TestCase)
                     basket=self.basket
                 )
 
-                l.check(
+                logger.check(
                     (
                         logger_name,
                         'INFO',
@@ -289,7 +289,7 @@ class PaypalPaymentExecutionViewTests(PaypalMixin, PaymentEventsMixin, TestCase)
         logging the exception and redirecting the user to an LMS checkout error page.
         """
         logger_name = 'ecommerce.extensions.payment.views.paypal'
-        with LogCapture(logger_name) as l:
+        with LogCapture(logger_name) as logger:
             self.mock_oauth2_response()
 
             # Create payment records with different baskets which will have same payment ID
@@ -301,7 +301,7 @@ class PaypalPaymentExecutionViewTests(PaypalMixin, PaymentEventsMixin, TestCase)
             self.processor.get_transaction_parameters(dummy_basket, request=self.request)
 
             self._assert_error_page_redirect()
-            l.check(
+            logger.check(
                 (
                     logger_name,
                     'INFO',
@@ -325,13 +325,13 @@ class PaypalPaymentExecutionViewTests(PaypalMixin, PaymentEventsMixin, TestCase)
         """
         with mock.patch.object(PaymentProcessorResponse.objects, 'get', side_effect=Exception):
             logger_name = 'ecommerce.extensions.payment.views.paypal'
-            with LogCapture(logger_name) as l:
+            with LogCapture(logger_name) as logger:
                 self.mock_oauth2_response()
                 self.mock_payment_creation_response(self.basket)
                 self.processor.get_transaction_parameters(self.basket, request=self.request)
                 self._assert_error_page_redirect()
 
-                l.check(
+                logger.check(
                     (
                         logger_name,
                         'INFO',

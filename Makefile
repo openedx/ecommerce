@@ -13,7 +13,7 @@ help:
 	@echo '    make validate_js                  run JavaScript unit tests and linting          		'
 	@echo '    make validate_python              run Python unit tests and quality checks       		'
 	@echo '    make fast_validate_python         run Python unit tests (in parallel) and quality checks	'
-	@echo '    make quality                      run PEP8 and Pylint                            		'
+	@echo '    make quality                      run pycodestyle and Pylint                            		'
 	@echo '    make validate                     Run Python and JavaScript unit tests and linting 		'
 	@echo '    make html_coverage                generate and view HTML coverage report         		'
 	@echo '    make e2e                          run end to end acceptance tests                		'
@@ -63,15 +63,15 @@ run_check_isort:
 run_isort:
 	VIRTUAL_ENV=/edx/app/ecommerce/ecommerce_env isort --recursive e2e/ ecommerce/
 
-run_pep8:
-	pep8 --config=.pep8 ecommerce e2e
+run_pycodestyle:
+	pycodestyle --config=.pycodestyle ecommerce e2e
+
+run_pep8: run_pycodestyle
 
 run_pylint:
 	pylint -j 0 --rcfile=pylintrc ecommerce e2e
 
-quality: run_check_isort
-	pep8 --config=.pep8 ecommerce e2e
-	pylint -j 0 --rcfile=pylintrc ecommerce e2e
+quality: run_check_isort run_pycodestyle run_pylint
 
 validate_js:
 	rm -rf coverage

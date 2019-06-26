@@ -112,7 +112,6 @@ path.py==7.2
 pathlib2==2.3.4           # via importlib-metadata
 paypalrestsdk==1.13.1
 pbr==5.3.1                # via mock, stevedore
-pep8==1.7.1
 phonenumberslite==8.10.14  # via django-phonenumber-field
 pillow==6.0.0             # via django-oscar
 pluggy==0.12.0            # via tox
@@ -121,6 +120,7 @@ psutil==1.2.1             # via edx-django-utils, edx-drf-extensions
 purl==1.5                 # via django-oscar
 py==1.8.0                 # via tox
 pyasn1==0.4.5             # via ndg-httpsclient
+pycodestyle==2.5.0
 pycountry==17.1.8
 pycparser==2.19           # via cffi
 pycryptodomex==3.8.2      # via pyjwkest

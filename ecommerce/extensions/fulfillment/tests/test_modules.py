@@ -137,11 +137,11 @@ class EnrollmentFulfillmentModuleTests(ProgramTestMixin, DiscoveryTestMixin, Ful
         """Happy path test to ensure we can properly fulfill enrollments."""
         httpretty.register_uri(httpretty.POST, get_lms_enrollment_api_url(), status=200, body='{}', content_type=JSON)
         # Attempt to enroll.
-        with LogCapture(LOGGER_NAME) as l:
+        with LogCapture(LOGGER_NAME) as logger:
             EnrollmentFulfillmentModule().fulfill_product(self.order, list(self.order.lines.all()))
 
             line = self.order.lines.get()
-            l.check_present(
+            logger.check_present(
                 (
                     LOGGER_NAME,
                     'INFO',
@@ -242,10 +242,10 @@ class EnrollmentFulfillmentModuleTests(ProgramTestMixin, DiscoveryTestMixin, Ful
         httpretty.register_uri(httpretty.POST, get_lms_enrollment_api_url(), status=200, body='{}', content_type=JSON)
         line = self.order.lines.first()
 
-        with LogCapture(LOGGER_NAME) as l:
+        with LogCapture(LOGGER_NAME) as logger:
             self.assertTrue(EnrollmentFulfillmentModule().revoke_line(line))
 
-            l.check_present(
+            logger.check_present(
                 (
                     LOGGER_NAME,
                     'INFO',
@@ -294,9 +294,9 @@ class EnrollmentFulfillmentModuleTests(ProgramTestMixin, DiscoveryTestMixin, Ful
 
         line = self.order.lines.first()
         logger_name = 'ecommerce.extensions.fulfillment.modules'
-        with LogCapture(logger_name) as l:
+        with LogCapture(logger_name) as logger:
             self.assertTrue(EnrollmentFulfillmentModule().revoke_line(line))
-            l.check_present(
+            logger.check_present(
                 (logger_name, 'INFO', 'Attempting to revoke fulfillment of Line [{}]...'.format(line.id)),
                 (logger_name, 'INFO', 'Skipping revocation for line [%d]: %s' % (line.id, message))
             )
@@ -310,9 +310,9 @@ class EnrollmentFulfillmentModuleTests(ProgramTestMixin, DiscoveryTestMixin, Ful
 
         line = self.order.lines.first()
         logger_name = 'ecommerce.extensions.fulfillment.modules'
-        with LogCapture(logger_name) as l:
+        with LogCapture(logger_name) as logger:
             self.assertFalse(EnrollmentFulfillmentModule().revoke_line(line))
-            l.check_present(
+            logger.check_present(
                 (logger_name, 'INFO', 'Attempting to revoke fulfillment of Line [{}]...'.format(line.id)),
                 (logger_name, 'ERROR', 'Failed to revoke fulfillment of Line [%d]: %s' % (line.id, message))
             )
@@ -330,9 +330,9 @@ class EnrollmentFulfillmentModuleTests(ProgramTestMixin, DiscoveryTestMixin, Ful
         line = self.order.lines.first()
         logger_name = 'ecommerce.extensions.fulfillment.modules'
 
-        with LogCapture(logger_name) as l:
+        with LogCapture(logger_name) as logger:
             self.assertFalse(EnrollmentFulfillmentModule().revoke_line(line))
-            l.check_present(
+            logger.check_present(
                 (logger_name, 'INFO', 'Attempting to revoke fulfillment of Line [{}]...'.format(line.id)),
                 (logger_name, 'ERROR', 'Failed to revoke fulfillment of Line [{}].'.format(line.id))
             )
@@ -345,11 +345,11 @@ class EnrollmentFulfillmentModuleTests(ProgramTestMixin, DiscoveryTestMixin, Ful
         httpretty.register_uri(httpretty.POST, get_lms_enrollment_api_url(), status=200, body='{}', content_type=JSON)
 
         # Attempt to enroll.
-        with LogCapture(LOGGER_NAME) as l:
+        with LogCapture(LOGGER_NAME) as logger:
             EnrollmentFulfillmentModule().fulfill_product(self.order, list(self.order.lines.all()))
 
             line = self.order.lines.get()
-            l.check_present(
+            logger.check_present(
                 (
                     LOGGER_NAME,
                     'INFO',
@@ -615,11 +615,11 @@ class EntitlementFulfillmentModuleTests(FulfillmentTestMixin, TestCase):
                                content_type='application/json')
 
         # Attempt to fulfill entitlement.
-        with LogCapture(LOGGER_NAME) as l:
+        with LogCapture(LOGGER_NAME) as logger:
             CourseEntitlementFulfillmentModule().fulfill_product(self.order, list(self.order.lines.all()))
 
             line = self.order.lines.get()
-            l.check_present(
+            logger.check_present(
                 (
                     LOGGER_NAME,
                     'INFO',
@@ -655,10 +655,10 @@ class EntitlementFulfillmentModuleTests(FulfillmentTestMixin, TestCase):
         # Fulfill order first to ensure we have all the line attributes set
         CourseEntitlementFulfillmentModule().fulfill_product(self.order, list(self.order.lines.all()))
 
-        with LogCapture(LOGGER_NAME) as l:
+        with LogCapture(LOGGER_NAME) as logger:
             self.assertTrue(CourseEntitlementFulfillmentModule().revoke_line(line))
 
-            l.check_present(
+            logger.check_present(
                 (
                     LOGGER_NAME,
                     'INFO',
@@ -697,10 +697,10 @@ class EntitlementFulfillmentModuleTests(FulfillmentTestMixin, TestCase):
 
         line = self.order.lines.first()
 
-        with LogCapture(logger_name) as l:
+        with LogCapture(logger_name) as logger:
             CourseEntitlementFulfillmentModule().fulfill_product(self.order, list(self.order.lines.all()))
             self.assertEqual(LINE.FULFILLMENT_SERVER_ERROR, self.order.lines.all()[0].status)
-            l.check_present(
+            logger.check_present(
                 (logger_name, 'INFO', 'Attempting to fulfill "Course Entitlement" product types for order [{}]'.
                  format(self.order.number)),
                 (logger_name, 'ERROR', 'Unable to fulfill line [{}] of order [{}]'.
@@ -717,10 +717,10 @@ class EntitlementFulfillmentModuleTests(FulfillmentTestMixin, TestCase):
         line = self.order.lines.first()
         with mock.patch('edx_rest_api_client.client.EdxRestApiClient',
                         side_effect=ConnectionError):
-            with LogCapture(logger_name) as l:
+            with LogCapture(logger_name) as logger:
                 CourseEntitlementFulfillmentModule().fulfill_product(self.order, list(self.order.lines.all()))
                 self.assertEqual(LINE.FULFILLMENT_NETWORK_ERROR, self.order.lines.all()[0].status)
-                l.check_present(
+                logger.check_present(
                     (logger_name, 'INFO', 'Attempting to fulfill "Course Entitlement" product types for order [{}]'.
                      format(self.order.number)),
                     (logger_name, 'ERROR', 'Unable to fulfill line [{}] of order [{}] due to a network problem'.

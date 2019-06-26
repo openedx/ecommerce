@@ -67,5 +67,6 @@ class SDNCheckFailure(TimeStampedModel):
     class Meta(object):
         verbose_name = 'SDN Check Failure'
 
+
 # noinspection PyUnresolvedReferences
 from oscar.apps.payment.models import *  # noqa isort:skip pylint: disable=ungrouped-imports, wildcard-import,unused-wildcard-import,wrong-import-position,wrong-import-order

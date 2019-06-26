@@ -123,5 +123,6 @@ class BasketAttribute(models.Model):
     class Meta(object):
         unique_together = ('basket', 'attribute_type')
 
+
 # noinspection PyUnresolvedReferences
 from oscar.apps.basket.models import *  # noqa isort:skip pylint: disable=wildcard-import,unused-wildcard-import,wrong-import-position,wrong-import-order,ungrouped-imports

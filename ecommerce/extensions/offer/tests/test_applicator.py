@@ -79,9 +79,9 @@ class CustomApplicatorTests(TestCase):
         bundle_id = program_offers[0].condition.program_uuid
         self.create_bundle_attribute(bundle_id)
 
-        with LogCapture(LOGGER_NAME) as l:
+        with LogCapture(LOGGER_NAME) as logger:
             self.assert_correct_offers(program_offers)
-            l.check(
+            logger.check(
                 (
                     LOGGER_NAME,
                     'WARNING',
@@ -97,9 +97,9 @@ class CustomApplicatorTests(TestCase):
 
         self.applicator.get_program_offers = mock.Mock()
 
-        with LogCapture(LOGGER_NAME) as l:
+        with LogCapture(LOGGER_NAME) as logger:
             self.assert_correct_offers(site_offers)
-            l.check(
+            logger.check(
                 (
                     LOGGER_NAME,
                     'WARNING',
