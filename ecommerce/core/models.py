@@ -203,6 +203,18 @@ class SiteConfiguration(models.Model):
         max_length=255,
         blank=True
     )
+    enable_microfrontend_for_basket_page = models.BooleanField(
+        verbose_name=_('Enable Microfrontend for Basket Page'),
+        help_text=_('Use the microfrontend implementation of the basket page instead of the server-side template'),
+        blank=True,
+        default=False
+    )
+    payment_microfrontend_url = models.URLField(
+        verbose_name=_('Payment Microfrontend URL'),
+        help_text=_('URL for the Payment Microfrontend (used if Enable Microfrontend for Basket Page is set)'),
+        null=True,
+        blank=True
+    )
 
     @property
     def payment_processors_set(self):
