@@ -38,7 +38,7 @@ from ecommerce.extensions.payment.processors import (
     BaseClientSidePaymentProcessor,
     HandledProcessorResponse
 )
-from ecommerce.extensions.payment.utils import clean_field_value
+from ecommerce.extensions.payment.utils import clean_field_value, get_basket_program_uuid
 
 logger = logging.getLogger(__name__)
 
@@ -189,6 +189,7 @@ class Cybersource(ApplePayMixin, BaseClientSidePaymentProcessor):
             ),
             'override_custom_cancel_page': self.cancel_page_url,
         }
+        extra_data = []
         # Level 2/3 details
         if self.send_level_2_3_details:
             parameters['amex_data_taa1'] = site.name
@@ -197,6 +198,14 @@ class Cybersource(ApplePayMixin, BaseClientSidePaymentProcessor):
             # Note (CCB): This field (purchase order) is required for Visa;
             # but, is not actually used by us/exposed on the order form.
             parameters['user_po'] = 'BLANK'
+
+            # Add a parameter specifying the basket's program, None if not present.
+            # This program UUID will *always* be in the merchant_defined_data1, if exists.
+            program_uuid = get_basket_program_uuid(basket)
+            if program_uuid:
+                extra_data.append("program,{program_uuid}".format(program_uuid=program_uuid))
+            else:
+                extra_data.append(None)
 
             for index, line in enumerate(basket.all_lines()):
                 parameters['item_{}_code'.format(index)] = line.product.get_product_class().slug
@@ -213,6 +222,16 @@ class Cybersource(ApplePayMixin, BaseClientSidePaymentProcessor):
                 parameters['item_{}_unit_of_measure'.format(index)] = 'ITM'
                 parameters['item_{}_unit_price'.format(index)] = str(line.unit_price_incl_tax)
 
+                # For each basket line having a course product, add course_id and course type
+                # as an extra CSV-formatted parameter sent to Cybersource.
+                # These extra course parameters will be in parameters merchant_defined_data2+.
+                line_course = line.product.course
+                if line_course:
+                    extra_data.append("course,{course_id},{course_type}".format(
+                        course_id=line_course.id if line_course else None,
+                        course_type=line_course.type if line_course else None
+                    ))
+
         # Only send consumer_id for hosted payment page
         if not use_sop_profile:
             parameters['consumer_id'] = basket.owner.username
@@ -225,6 +244,13 @@ class Cybersource(ApplePayMixin, BaseClientSidePaymentProcessor):
         if any(pci_field in signed_field_names for pci_field in self.PCI_FIELDS):
             raise PCIViolation('One or more PCI-related fields is contained in the payment parameters. '
                                'This service is NOT PCI-compliant! Deactivate this service immediately!')
+
+        if extra_data:
+            # CyberSource allows us to send additional data in merchant_defined_data# fields.
+            for num, item in enumerate(extra_data, start=1):
+                if item:
+                    key = u"merchant_defined_data{num}".format(num=num)
+                    parameters[key] = item
 
         return parameters
 

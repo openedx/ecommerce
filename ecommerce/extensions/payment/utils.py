@@ -14,6 +14,41 @@ from ecommerce.extensions.payment.models import SDNCheckFailure
 
 logger = logging.getLogger(__name__)
 Basket = get_model('basket', 'Basket')
+BasketAttribute = get_model('basket', 'BasketAttribute')
+BasketAttributeType = get_model('basket', 'BasketAttributeType')
+
+
+def get_basket_program_uuid(basket):
+    """
+    Return the program UUID associated with the given basket, if one exists.
+    Arguments:
+        basket (Basket): The basket object.
+    Returns:
+        string: The program UUID if the basket is associated with a bundled purchase, otherwise None.
+    """
+    try:
+        attribute_type = BasketAttributeType.objects.get(name='bundle_identifier')
+    except BasketAttributeType.DoesNotExist:
+        return None
+    bundle_attributes = BasketAttribute.objects.filter(
+        basket=basket,
+        attribute_type=attribute_type
+    )
+    bundle_attribute = bundle_attributes.first()
+    return bundle_attribute.value_text if bundle_attribute else None
+
+
+def get_program_uuid(order):
+    """
+    Return the program UUID associated with the given order, if one exists.
+
+    Arguments:
+        order (Order): The order object.
+
+    Returns:
+        string: The program UUID if the order is associated with a bundled purchase, otherwise None.
+    """
+    return get_basket_program_uuid(order.basket)
 
 
 def middle_truncate(string, chars):

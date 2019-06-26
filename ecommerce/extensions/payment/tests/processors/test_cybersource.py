@@ -14,6 +14,7 @@ from django.test import override_settings
 from django.urls import reverse
 from freezegun import freeze_time
 from oscar.apps.payment.exceptions import GatewayError, TransactionDeclined, UserCancelled
+from oscar.core.loading import get_model
 from oscar.test import factories
 
 from ecommerce.courses.tests.factories import CourseFactory
@@ -33,6 +34,9 @@ from ecommerce.extensions.payment.tests.mixins import CybersourceMixin
 from ecommerce.extensions.payment.tests.processors.mixins import PaymentProcessorTestCaseMixin
 from ecommerce.extensions.test.factories import create_basket
 from ecommerce.tests.testcases import TestCase
+
+BasketAttribute = get_model('basket', 'BasketAttribute')
+BasketAttributeType = get_model('basket', 'BasketAttributeType')
 
 
 @ddt.ddt
@@ -109,13 +113,34 @@ class CybersourceTests(CybersourceMixin, PaymentProcessorTestCaseMixin, TestCase
         with override_settings(PAYMENT_PROCESSOR_CONFIG=payment_processor_config):
             self.assert_correct_transaction_parameters(include_level_2_3_details=False)
 
+    def test_get_transaction_parameters_with_program(self):
+        """ Verify the processor returns parameters including Level 2/3 details. """
+        BasketAttribute.objects.update_or_create(
+            basket=self.basket,
+            attribute_type=BasketAttributeType.objects.get(name='bundle_identifier'),
+            value_text='test_bundle'
+        )
+        self.assert_correct_transaction_parameters(
+            extra_parameters={
+                'merchant_defined_data1': 'program,test_bundle',
+                'merchant_defined_data2': 'course,a/b/c,audit'
+            }
+        )
+
     def test_get_transaction_parameters_with_level2_3_details(self):
         """ Verify the processor returns parameters including Level 2/3 details. """
-        self.assert_correct_transaction_parameters()
+        self.assert_correct_transaction_parameters(
+            extra_parameters={
+                'merchant_defined_data2': 'course,a/b/c,audit'
+            }
+        )
 
     def test_get_transaction_parameters_with_extra_parameters(self):
         """ Verify the method supports adding additional unsigned parameters. """
-        extra_parameters = {'payment_method': 'card'}
+        extra_parameters = {
+            'payment_method': 'card',
+            'merchant_defined_data2': 'course,a/b/c,audit'
+        }
         self.assert_correct_transaction_parameters(extra_parameters=extra_parameters)
 
     def test_get_transaction_parameters_with_quoted_product_title(self):

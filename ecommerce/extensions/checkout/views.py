@@ -23,30 +23,11 @@ from ecommerce.enterprise.utils import has_enterprise_offer
 from ecommerce.extensions.checkout.exceptions import BasketNotFreeError
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
 from ecommerce.extensions.checkout.utils import get_receipt_page_url
+from ecommerce.extensions.payment.utils import get_program_uuid
 
 Applicator = get_class('offer.applicator', 'Applicator')
 Basket = get_model('basket', 'Basket')
-BasketAttribute = get_model('basket', 'BasketAttribute')
-BasketAttributeType = get_model('basket', 'BasketAttributeType')
 Order = get_model('order', 'Order')
-
-
-def get_program_uuid(order):
-    """
-    Return the program UUID associated with the given order, if one exists.
-
-    Arguments:
-        order (Order): The order object.
-
-    Returns:
-        string: The program UUID if the order is associated with a bundled purchase, otherwise None.
-    """
-    bundle_attributes = BasketAttribute.objects.filter(
-        basket=order.basket,
-        attribute_type=BasketAttributeType.objects.get(name='bundle_identifier')
-    )
-    bundle_attribute = bundle_attributes.first()
-    return bundle_attribute.value_text if bundle_attribute else None
 
 
 class FreeCheckoutView(EdxOrderPlacementMixin, RedirectView):
