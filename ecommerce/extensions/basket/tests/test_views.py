@@ -399,10 +399,10 @@ class BasketSummaryViewTests(EnterpriseServiceMockMixin, DiscoveryTestMixin, Dis
             url=get_lms_url('api/courses/v1/courses/{}/'.format(self.course.id))
         )
 
-        with LogCapture(logger_name) as l:
+        with LogCapture(logger_name) as logger:
             response = self.client.get(self.path)
             self.assertEqual(response.status_code, 200)
-            l.check(
+            logger.check(
                 (
                     logger_name, 'ERROR',
                     u'Failed to retrieve data from Discovery Service for course [{}].'.format(self.course.id)
@@ -494,14 +494,14 @@ class BasketSummaryViewTests(EnterpriseServiceMockMixin, DiscoveryTestMixin, Dis
         self.assertEqual(basket.lines.count(), 1)
 
         logger_name = 'ecommerce.extensions.basket.views'
-        with LogCapture(logger_name) as l:
+        with LogCapture(logger_name) as logger:
             with mock.patch('ecommerce.extensions.basket.views.track_segment_event') as mock_track:
                 mock_track.side_effect = Exception()
 
                 response = self.client.get(self.path)
                 self.assertEqual(response.status_code, 200)
 
-                l.check((
+                logger.check((
                     logger_name, 'ERROR',
                     u'Failed to fire Cart Viewed event for basket [{}]'.format(basket.id)
                 ))

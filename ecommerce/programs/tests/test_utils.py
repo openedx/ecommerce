@@ -45,11 +45,11 @@ class UtilTests(ProgramTestMixin, TestCase):
         """
         self.mock_program_detail_endpoint(self.program_uuid, self.discovery_api_url, empty=True)
         with mock.patch.object(ProgramsApiClient, 'get_program', side_effect=exc):
-            with LogCapture(LOGGER_NAME) as l:
+            with LogCapture(LOGGER_NAME) as logger:
                 response = get_program(self.program_uuid, self.site.siteconfiguration)
                 self.assertIsNone(response)
                 msg = 'Failed to retrieve program details for {}'.format(self.program_uuid)
-                l.check((LOGGER_NAME, 'DEBUG', msg))
+                logger.check((LOGGER_NAME, 'DEBUG', msg))
 
     @httpretty.activate
     def test_get_program_not_found(self):  # pylint: disable=unused-argument
@@ -58,8 +58,8 @@ class UtilTests(ProgramTestMixin, TestCase):
         """
         self.mock_program_detail_endpoint(self.program_uuid, self.discovery_api_url, empty=True)
         with mock.patch.object(ProgramsApiClient, 'get_program', side_effect=HttpNotFoundError):
-            with LogCapture(LOGGER_NAME) as l:
+            with LogCapture(LOGGER_NAME) as logger:
                 response = get_program(self.program_uuid, self.site.siteconfiguration)
                 self.assertIsNone(response)
                 msg = 'No program data found for {}'.format(self.program_uuid)
-                l.check((LOGGER_NAME, 'DEBUG', msg))
+                logger.check((LOGGER_NAME, 'DEBUG', msg))

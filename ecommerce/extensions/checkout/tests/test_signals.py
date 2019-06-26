@@ -119,9 +119,9 @@ class SignalTests(ProgramTestMixin, CouponMixin, TestCase):
 
     def test_post_checkout_callback_no_credit_provider(self):
         order = self.prepare_order('verified')
-        with LogCapture(LOGGER_NAME) as l:
+        with LogCapture(LOGGER_NAME) as logger:
             send_course_purchase_email(None, user=self.user, order=order)
-            l.check(
+            logger.check(
                 (
                     LOGGER_NAME,
                     'ERROR',

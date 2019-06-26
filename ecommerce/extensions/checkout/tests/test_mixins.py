@@ -80,9 +80,9 @@ class EdxOrderPlacementMixinTests(BusinessIntelligenceMixin, PaymentEventsMixin,
         total = basket.total_incl_tax
         reference = basket.id
 
-        with LogCapture(LOGGER_NAME) as l:
+        with LogCapture(LOGGER_NAME) as logger:
             mixin.handle_payment({}, basket)
-            l.check_present(
+            logger.check_present(
                 (
                     LOGGER_NAME,
                     'INFO',
@@ -144,7 +144,7 @@ class EdxOrderPlacementMixinTests(BusinessIntelligenceMixin, PaymentEventsMixin,
         self.user.tracking_context = tracking_context
         self.user.save()
 
-        with LogCapture(LOGGER_NAME) as l:
+        with LogCapture(LOGGER_NAME) as logger:
             EdxOrderPlacementMixin().handle_successful_order(self.order)
             # ensure event is being tracked
             self.assertTrue(mock_track.called)
@@ -161,7 +161,7 @@ class EdxOrderPlacementMixinTests(BusinessIntelligenceMixin, PaymentEventsMixin,
                 self.order.total_excl_tax,
                 self.order.total_excl_tax        # value for revenue field is same as total.
             )
-            l.check_present(
+            logger.check_present(
                 (
                     LOGGER_NAME,
                     'INFO',

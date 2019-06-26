@@ -298,14 +298,18 @@ class CommandTests(CourseMigrationTestMixin, TestCase):
         self._mock_lms_apis()
 
         with mock.patch.object(LMSPublisher, 'publish') as mock_publish:
-            with LogCapture(LOGGER_NAME, level=logging.ERROR) as l:
+            with LogCapture(LOGGER_NAME, level=logging.ERROR) as captured_logger:
                 call_command(
                     'migrate_course',
                     self.course_id,
                     commit=True
                 )
 
-                l.check((LOGGER_NAME, 'ERROR', 'Courses cannot be migrated without providing a site domain.'))
+                captured_logger.check((
+                    LOGGER_NAME,
+                    'ERROR',
+                    'Courses cannot be migrated without providing a site domain.'
+                ))
                 # Verify that the migrated course was published back to the LMS
                 self.assertFalse(mock_publish.called)
 

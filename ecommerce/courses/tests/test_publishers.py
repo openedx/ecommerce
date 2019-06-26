@@ -69,9 +69,9 @@ class LMSPublisherTests(DiscoveryTestMixin, TestCase):
         """ If an exception is raised when communicating with the Commerce API, an ERROR message should be logged. """
         error = 'time out error'
         with mock.patch('requests.put', side_effect=Timeout(error)):
-            with LogCapture(LOGGER_NAME) as l:
+            with LogCapture(LOGGER_NAME) as logger:
                 actual = self.publisher.publish(self.course)
-                l.check(
+                logger.check(
                     (
                         LOGGER_NAME, 'ERROR',
                         'Failed to publish commerce data for [{course_id}] to LMS.'.format(course_id=self.course.id)
@@ -86,9 +86,9 @@ class LMSPublisherTests(DiscoveryTestMixin, TestCase):
         api_body = {'non_field_errors': [expected_msg]}
 
         self._mock_commerce_api(status, api_body)
-        with LogCapture(LOGGER_NAME) as l:
+        with LogCapture(LOGGER_NAME) as logger:
             actual = self.publisher.publish(self.course)
-            l.check(
+            logger.check(
                 (
                     LOGGER_NAME, 'ERROR',
                     'Failed to publish commerce data for [{}] to LMS. Status was [{}]. Body was [{}].'.format(
@@ -102,11 +102,11 @@ class LMSPublisherTests(DiscoveryTestMixin, TestCase):
         """ If the Commerce API returns a successful status, an INFO message should be logged. """
         self._mock_commerce_api()
 
-        with LogCapture(LOGGER_NAME) as l:
+        with LogCapture(LOGGER_NAME) as logger:
             response = self.publisher.publish(self.course)
             self.assertIsNone(response)
 
-            l.check((LOGGER_NAME, 'INFO', 'Successfully published commerce data for [{}].'.format(self.course.id)))
+            logger.check((LOGGER_NAME, 'INFO', 'Successfully published commerce data for [{}].'.format(self.course.id)))
 
         last_request = httpretty.last_request()
 
@@ -214,14 +214,14 @@ class LMSPublisherTests(DiscoveryTestMixin, TestCase):
     def test_credit_publication_api_failure(self):
         """ Verify the endpoint fails appropriately when Credit API calls return an error. """
         course_id = self.course.id
-        with LogCapture(LOGGER_NAME) as l:
+        with LogCapture(LOGGER_NAME) as logger:
             status = 400
             actual = self.attempt_credit_publication(status)
 
             # Ensure the HTTP status and response are logged
             expected_log = 'Failed to publish CreditCourse for [{course_id}] to LMS. ' \
                            'Status was [{status}]. Body was [null].'.format(course_id=course_id, status=status)
-            l.check((LOGGER_NAME, 'ERROR', expected_log))
+            logger.check((LOGGER_NAME, 'ERROR', expected_log))
 
         expected = 'Failed to publish commerce data for {} to LMS.'.format(course_id)
         self.assertEqual(actual, expected)

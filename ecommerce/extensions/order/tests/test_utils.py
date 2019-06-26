@@ -168,10 +168,10 @@ class OrderCreatorTests(TestCase):
         # Create the basket WITHOUT an associated referral
         basket = self.create_basket(site)
 
-        with LogCapture(LOGGER_NAME, level=logging.DEBUG) as l:
+        with LogCapture(LOGGER_NAME, level=logging.DEBUG) as logger:
             order = self.create_order_model(basket)
             message = 'Order [{order_id}] has no referral associated with its basket.'.format(order_id=order.id)
-            l.check((LOGGER_NAME, 'DEBUG', message))
+            logger.check((LOGGER_NAME, 'DEBUG', message))
 
     def test_create_order_model_basket_referral_error(self):
         """ Verify the create_order_model method logs error for referral errors. """
@@ -181,13 +181,13 @@ class OrderCreatorTests(TestCase):
         # Create the basket WITHOUT an associated referral
         basket = self.create_basket(site)
 
-        with LogCapture(LOGGER_NAME, level=logging.ERROR) as l:
+        with LogCapture(LOGGER_NAME, level=logging.ERROR) as logger:
             Referral.objects.get = mock.Mock()
             Referral.objects.get.side_effect = Exception
 
             order = self.create_order_model(basket)
             message = 'Referral for Order [{order_id}] failed to save.'.format(order_id=order.id)
-            l.check((LOGGER_NAME, 'ERROR', message))
+            logger.check((LOGGER_NAME, 'ERROR', message))
 
 
 @ddt.ddt

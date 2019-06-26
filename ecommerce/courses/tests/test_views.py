@@ -165,12 +165,12 @@ class CourseAppViewTests(TestCase):
         self.mock_access_token_response()
         self.mock_credit_api_error()
 
-        with LogCapture(LOGGER_NAME) as l:
+        with LogCapture(LOGGER_NAME) as logger:
             response = self.client.get(self.path)
 
             self.assertEqual(response.status_code, 200)
             expected = 'Failed to retrieve credit providers!'
-            l.check((LOGGER_NAME, 'ERROR', expected))
+            logger.check((LOGGER_NAME, 'ERROR', expected))
 
     @httpretty.activate
     def test_missing_access_token(self):
@@ -179,9 +179,9 @@ class CourseAppViewTests(TestCase):
         self.client.login(username=user.username, password=self.password)
         self.mock_credit_api_providers()
 
-        with LogCapture(LOGGER_NAME) as l:
+        with LogCapture(LOGGER_NAME) as logger:
             response = self.client.get(self.path)
 
             self.assertEqual(response.status_code, 200)
             expected = 'User [{}] has no access token, and will not be able to edit courses.'.format(user.username)
-            l.check((LOGGER_NAME, 'WARNING', expected))
+            logger.check((LOGGER_NAME, 'WARNING', expected))

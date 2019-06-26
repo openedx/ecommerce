@@ -13,7 +13,7 @@ lxml
 mock
 mock-django
 nose-ignore-docstring
-pep8
+pycodestyle
 pylint
 responses
 selenium
