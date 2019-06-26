@@ -1,6 +1,8 @@
 """
 Django management command to generate a test course from a course config json
 """
+from __future__ import absolute_import
+
 import datetime
 import json
 import logging
@@ -56,8 +58,10 @@ class Command(BaseCommand):
             try:
                 partner = Partner.objects.get(short_code=partner_code)
             except Partner.DoesNotExist:
-                logger.warning(partner_code + " partner does not exist")
-                logger.warning("Can't create course, proceeding to next course")
+                logger.warning(
+                    "%s partner does not exist. Can't create course, proceeding to next course.",
+                    partner_code
+                )
                 continue
 
             # Create the course
@@ -95,7 +99,7 @@ class Command(BaseCommand):
         ]
         for setting in required_course_settings:
             if setting not in course:
-                logger.warning("Course json is missing " + setting)
+                logger.warning("Course json is missing %s", setting)
                 is_valid = False
 
         # Check fields settings
@@ -105,7 +109,7 @@ class Command(BaseCommand):
         if "fields" in course:
             for setting in required_field_settings:
                 if setting not in course["fields"]:
-                    logger.warning("Fields json is missing " + setting)
+                    logger.warning("Fields json is missing %s", setting)
                     is_valid = False
 
         # Check enrollment settings
@@ -113,7 +117,7 @@ class Command(BaseCommand):
         if "enrollment" in course:
             for setting in required_enrollment_settings:
                 if setting not in course["enrollment"]:
-                    logger.warning("Enrollment json is missing " + setting)
+                    logger.warning("Enrollment json is missing %s", setting)
                     is_valid = False
 
         return is_valid
@@ -122,9 +126,9 @@ class Command(BaseCommand):
         """ Create the seats for a given course based on the enrollment parameters """
         for setting in enrollment:
             if setting not in self.course_enrollment_settings:
-                logger.info(setting + " is not a recognized enrollment setting")
+                logger.info("%s is not a recognized enrollment setting", setting)
             else:
-                logger.info(setting + " has been set to " + str(enrollment[setting]))
+                logger.info("%s has been set to %s", setting, enrollment[setting])
 
         if enrollment["audit"]:
             course.create_or_update_seat("", False, 0)

@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+
 from django.conf import settings
 from django.core.mail import EmailMessage, EmailMultiAlternatives
 from oscar.apps.customer.utils import *  # pylint: disable=wildcard-import, unused-wildcard-import
@@ -71,11 +73,11 @@ class Dispatcher(Dispatcher):
                                            to=[recipient])
             email.attach_alternative(messages['html'], "text/html")
         else:
-            email = EmailMessage(messages['subject'],  # pylint: disable=redefined-variable-type
+            email = EmailMessage(messages['subject'],
                                  messages['body'],
                                  from_email=from_email,
                                  to=[recipient])
-        self.logger.info("Sending email to %s" % recipient)
+        self.logger.info("Sending email to %s", recipient)
         email.send()
 
         return email

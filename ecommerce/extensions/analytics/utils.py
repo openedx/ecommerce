@@ -1,7 +1,10 @@
+from __future__ import absolute_import
+
 import json
 import logging
 from functools import wraps
-from urlparse import urlunsplit
+
+from six.moves.urllib.parse import urlunsplit  # pylint: disable=import-error
 
 from ecommerce.courses.utils import mode_for_product
 
@@ -10,20 +13,21 @@ logger = logging.getLogger(__name__)
 ECOM_TRACKING_ID_FMT = 'ecommerce-{}'
 
 
-def parse_tracking_context(user):
+def parse_tracking_context(user, usage=None):
     """
     Extract user ID, client ID, and IP address from a user's tracking context.
 
-    Note: The tracking context may not exist, so user ID has backups so it will
-    always have a value.
+    Note: User ID has backups so it will always have a value.
 
     Arguments:
         user (User): An instance of the User model.
+        usage (string): Optional. A description of how the returned tuple will be used. This will be included in log
+            messages if the LMS user id cannot be found.
 
     Returns:
         Tuple of strings: user_tracking_id, ga_client_id, lms_ip
     """
-    user_tracking_id = user.lms_user_id_from_request()
+    user_tracking_id = user.lms_user_id_with_metric(usage=usage)
     if user_tracking_id is None:
         # If we still don't have the lms user ID, we will use the local user ID. However, we need
         # to disambiguate the ID we choose since there's no guarantee it won't collide with the
@@ -107,7 +111,7 @@ def prepare_analytics_data(user, segment_key):
     }
 
     if user.is_authenticated():
-        user_tracking_id, __, __ = parse_tracking_context(user)
+        user_tracking_id, __, __ = parse_tracking_context(user, usage='analytics')
         user_data = {
             'user': {
                 'user_tracking_id': user_tracking_id,
@@ -146,7 +150,7 @@ def track_segment_event(site, user, event, properties):
         logger.debug(msg)
         return False, msg
 
-    user_tracking_id, ga_client_id, lms_ip = parse_tracking_context(user)
+    user_tracking_id, ga_client_id, lms_ip = parse_tracking_context(user, usage=event)
     # construct a URL, so that hostname can be sent to GA.
     # For now, send a dummy value for path.  Segment parses the URL and sends
     # the host and path separately. When needed, the path can be fetched by adding:

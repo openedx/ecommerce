@@ -1,5 +1,6 @@
+from __future__ import absolute_import
+
 import json
-from urlparse import urljoin
 
 import ddt
 import httpretty
@@ -9,8 +10,10 @@ from django.contrib.sites.models import Site
 from django.core.exceptions import ValidationError
 from django.test import override_settings
 from edx_rest_api_client.auth import SuppliedJwtAuth
-from edx_rest_framework_extensions.auth.jwt.tests.utils import generate_jwt_token, generate_latest_version_payload
 from requests.exceptions import ConnectionError
+from six.moves.urllib.parse import urljoin  # pylint: disable=import-error
+from social_django.models import UserSocialAuth
+from testfixtures import LogCapture
 
 from ecommerce.core.models import (
     BusinessClient,
@@ -44,6 +47,7 @@ def _make_site_config(payment_processors_str, site_id=1):
 class UserTests(DiscoveryTestMixin, LmsApiMockMixin, TestCase):
     TEST_CONTEXT = {'foo': 'bar', 'baz': None, 'lms_user_id': 'test-context-user-id'}
     LMS_USER_ID = 500
+    LOGGER_NAME = 'ecommerce.core.models'
 
     def setUp(self):
         super(UserTests, self).setUp()
@@ -57,13 +61,36 @@ class UserTests(DiscoveryTestMixin, LmsApiMockMixin, TestCase):
         httpretty.reset()
 
     def test_access_token(self):
+        """ Ensures the access token can be pulled from the ecommerce user. """
         user = self.create_user()
         self.assertIsNone(user.access_token)
 
         self.create_access_token(user)
-        self.assertEqual(user.access_token, self.access_token)
 
-    def test_lms_user_id_from_user(self):
+        same_user = User.objects.get(id=user.id)
+        self.assertEqual(same_user.social_auth.count(), 1)
+        self.assertEqual(same_user.access_token, self.access_token)
+
+    def test_multiple_access_tokens(self):
+        """ Ensures the correct access token is pulled from the ecommerce user when multiple social auth entries
+        exist for that user. """
+        user = self.create_user()
+        self.assertIsNone(user.access_token)
+
+        lms_user_id = 6181
+        expected_access_token = 'access_token_3'
+        UserSocialAuth.objects.create(user=user, provider='edx-oidc', uid='older_6181',
+                                      extra_data={'user_id': lms_user_id, 'access_token': 'access_token_1'})
+        UserSocialAuth.objects.create(user=user, provider='edx-oauth2', uid='older_6181',
+                                      extra_data={'user_id': lms_user_id, 'access_token': 'access_token_2'})
+        UserSocialAuth.objects.create(user=user, provider='edx-oauth2',
+                                      extra_data={'user_id': lms_user_id, 'access_token': expected_access_token})
+
+        same_user = User.objects.get(id=user.id)
+        self.assertEqual(same_user.social_auth.count(), 3)
+        self.assertEqual(same_user.access_token, expected_access_token)
+
+    def test_lms_user_id_with_metric(self):
         """ Ensures the lms_user_id can be pulled from the ecommerce user. """
         user = self.create_user()
 
@@ -71,39 +98,25 @@ class UserTests(DiscoveryTestMixin, LmsApiMockMixin, TestCase):
         user.save()
 
         same_user = User.objects.get(id=user.id)
-        self.assertEqual(same_user.lms_user_id_from_request(), self.LMS_USER_ID)
+        user_id = same_user.lms_user_id_with_metric()
+        self.assertEqual(user_id, self.LMS_USER_ID)
 
-    def test_lms_user_id_from_jwt_cookie(self):
-        """ Ensures the lms_user_id can be pulled from the jwt cookie. """
-        user = self.create_user()
-        self.assertIsNone(user.lms_user_id_from_request())
+    def test_missing_lms_user_id_with_metric(self):
+        """ Ensures a missing lms_user_id is handled by lms_user_id_with_metric(). """
+        user = self.create_user(lms_user_id=None)
+        expected_logs = [
+            (
+                self.LOGGER_NAME,
+                'WARNING',
+                'Could not find lms_user_id for user {} for None'.format(user.id)
+            ),
+        ]
 
-        payload = generate_latest_version_payload(user, scopes=['user_id'])
-        payload['user_id'] = 'test-lms-user-id'
-        jwt = generate_jwt_token(payload)
-        mock_request_with_cookie = mock.Mock(COOKIES={'edx-jwt-cookie': jwt})
-
-        with mock.patch('ecommerce.core.models.crum.get_current_request', return_value=mock_request_with_cookie):
-            self.assertEqual(user.lms_user_id_from_request(), 'test-lms-user-id')
-
-    def test_lms_user_id_from_social_auth(self):
-        """ Ensures the lms_user_id can be pulled from the tracking context. """
-        user = self.create_user()
-        self.assertIsNone(user.lms_user_id_from_request())
-
-        self.set_user_id_in_social_auth(user, 'test-social-auth-user-id')
-        self.assertEqual(user.lms_user_id_from_request(), 'test-social-auth-user-id')
-
-    def test_lms_user_id_from_tracking_context(self):
-        """ Ensures the lms_user_id can be pulled from the tracking context. """
-        user = self.create_user()
-        self.assertIsNone(user.lms_user_id_from_request())
-
-        user.tracking_context = self.TEST_CONTEXT
-        user.save()
-
-        same_user = User.objects.get(id=user.id)
-        self.assertEqual(same_user.lms_user_id_from_request(), self.TEST_CONTEXT['lms_user_id'])
+        with LogCapture(self.LOGGER_NAME) as log:
+            same_user = User.objects.get(id=user.id)
+            user_id = same_user.lms_user_id_with_metric()
+            log.check_present(*expected_logs)
+            self.assertIsNone(user_id)
 
     def test_tracking_context(self):
         """ Ensures that the tracking_context dictionary is written / read
@@ -119,7 +132,7 @@ class UserTests(DiscoveryTestMixin, LmsApiMockMixin, TestCase):
 
     def test_lms_user_id(self):
         """ Ensures that the LMS user id is written / read correctly by the User model. """
-        user = self.create_user()
+        user = self.create_user(lms_user_id=None)
         self.assertIsNone(user.lms_user_id)
 
         user.lms_user_id = self.LMS_USER_ID
@@ -132,16 +145,16 @@ class UserTests(DiscoveryTestMixin, LmsApiMockMixin, TestCase):
         """ Test that the user model concatenates first and last name if the full name is not set. """
         full_name = "George Costanza"
         user = self.create_user(full_name=full_name)
-        self.assertEquals(user.get_full_name(), full_name)
+        self.assertEqual(user.get_full_name(), full_name)
 
         first_name = "Jerry"
         last_name = "Seinfeld"
         user = self.create_user(full_name=None, first_name=first_name, last_name=last_name)
         expected = "{first_name} {last_name}".format(first_name=first_name, last_name=last_name)
-        self.assertEquals(user.get_full_name(), expected)
+        self.assertEqual(user.get_full_name(), expected)
 
         user = self.create_user(full_name=full_name, first_name=first_name, last_name=last_name)
-        self.assertEquals(user.get_full_name(), full_name)
+        self.assertEqual(user.get_full_name(), full_name)
 
     def test_user_details(self):
         """ Verify user details are returned. """
@@ -253,7 +266,7 @@ class UserTests(DiscoveryTestMixin, LmsApiMockMixin, TestCase):
 class BusinessClientTests(TestCase):
     def test_str(self):
         client = BusinessClient.objects.create(name='TestClient')
-        self.assertEquals(str(client), 'TestClient')
+        self.assertEqual(str(client), 'TestClient')
 
     def test_creating_without_client_name_raises_exception(self):
         with self.assertRaises(ValidationError):
@@ -450,11 +463,11 @@ class SiteConfigurationTests(TestCase):
 class EcommerceFeatureRoleTests(TestCase):
     def test_str(self):
         role = EcommerceFeatureRole.objects.create(name='TestRole')
-        self.assertEquals(str(role), '<EcommerceFeatureRole TestRole>')
+        self.assertEqual(str(role), '<EcommerceFeatureRole TestRole>')
 
     def test_repr(self):
         role = EcommerceFeatureRole.objects.create(name='TestRole')
-        self.assertEquals(repr(role), '<EcommerceFeatureRole TestRole>')
+        self.assertEqual(repr(role), '<EcommerceFeatureRole TestRole>')
 
 
 class EcommerceFeatureRoleAssignmentTests(TestCase):
@@ -462,7 +475,7 @@ class EcommerceFeatureRoleAssignmentTests(TestCase):
         role = EcommerceFeatureRole.objects.create(name='TestRole')
         user = self.create_user()
         role_assignment = EcommerceFeatureRoleAssignment.objects.create(role=role, user=user)
-        self.assertEquals(
+        self.assertEqual(
             str(role_assignment),
             '<EcommerceFeatureRoleAssignment for User {user} assigned to role {role}>'.format(
                 user=user.id, role=role.name
@@ -473,7 +486,7 @@ class EcommerceFeatureRoleAssignmentTests(TestCase):
         role = EcommerceFeatureRole.objects.create(name='TestRole')
         user = self.create_user()
         role_assignment = EcommerceFeatureRoleAssignment.objects.create(role=role, user=user)
-        self.assertEquals(
+        self.assertEqual(
             repr(role_assignment),
             '<EcommerceFeatureRoleAssignment for User {user} assigned to role {role}>'.format(
                 user=user.id, role=role.name

@@ -67,8 +67,8 @@ def health(_):
 
     if overall_status == Status.OK:
         return JsonResponse(data)
-    else:
-        return JsonResponse(data, status=503)
+
+    return JsonResponse(data, status=503)
 
 
 class AutoAuth(View):

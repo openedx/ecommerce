@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+
 from oscar.core.loading import get_model
 
 from ecommerce.entitlements.utils import create_or_update_course_entitlement
@@ -7,9 +9,6 @@ StockRecord = get_model('partner', 'StockRecord')
 
 
 class TestCourseEntitlementProductCreation(TestCase):
-
-    def setUp(self):
-        super(TestCourseEntitlementProductCreation, self).setUp()
 
     def test_course_entitlement_creation(self):
         """ Test course entitlement product creation """

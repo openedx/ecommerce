@@ -188,19 +188,20 @@ class UserAlreadyPlacedOrder(object):
         entitlement_option = Option.objects.get(code='course_entitlement')
 
         orders_lines = OrderLine.objects.filter(product=product, order__user=user)
-        if orders_lines:
-            for order_line in orders_lines:
-                if not UserAlreadyPlacedOrder.is_order_line_refunded(order_line):
-                    if not order_line.product.is_course_entitlement_product:
+        for order_line in orders_lines:
+            if not UserAlreadyPlacedOrder.is_order_line_refunded(order_line):
+                if not order_line.product.is_course_entitlement_product:
+                    return True
+
+                entitlement_uuid = order_line.attributes.get(option=entitlement_option).value
+                try:
+                    if not UserAlreadyPlacedOrder.is_entitlement_expired(entitlement_uuid, site):
                         return True
-                    else:
-                        entitlement_uuid = order_line.attributes.get(option=entitlement_option).value
-                        try:
-                            if not UserAlreadyPlacedOrder.is_entitlement_expired(entitlement_uuid, site):
-                                return True
-                        except (ConnectTimeout, ConnectionError, HttpNotFoundError):
-                            logger.exception('Unable to get entitlement info [%s] due to a network problem',
-                                             entitlement_uuid)
+                except (ConnectTimeout, ConnectionError, HttpNotFoundError):
+                    logger.exception(
+                        'Unable to get entitlement info [%s] due to a network problem',
+                        entitlement_uuid
+                    )
 
         return False
 

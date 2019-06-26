@@ -60,14 +60,32 @@ define([
                         return _.isUndefined(val) || _.isNull(val) ? '' : val.id;
                     },
                     onSet: function(val) {
-                        return {
+                        return _.isEmpty(val) ? null : {
                             id: val,
                             name: $('select[name=enterprise_customer] option:selected').text()
                         };
                     }
                 },
-                'input[name=enterprise_customer_catalog]': {
-                    observe: 'enterprise_customer_catalog'
+                'select[name=enterprise_customer_catalog]': {
+                    observe: 'enterprise_customer_catalog',
+                    selectOptions: {
+                        collection: function() {
+                            return ecommerce.coupons.enterprise_customer_catalogs;
+                        },
+                        defaultOption: {uuid: '', title: ''},
+                        labelPath: 'title',
+                        valuePath: 'uuid'
+                    },
+                    setOptions: {
+                        validate: true
+                    },
+                    onGet: function(val) {
+                        this.updateEnterpriseCatalogDetailsLink();
+                        return _.isUndefined(val) || _.isNull(val) ? '' : val;
+                    },
+                    onSet: function(val) {
+                        return !_.isEmpty(val) && _.isString(val) ? val : null;
+                    }
                 },
                 'input[name=notify_email]': {
                     observe: 'notify_email',
@@ -84,7 +102,49 @@ define([
                 'change [name=invoice_type]': 'toggleInvoiceFields',
                 'change [name=tax_deduction]': 'toggleTaxDeductedSourceField',
                 'click .external-link': 'routeToLink',
-                'click #cancel-button': 'cancelButtonClicked'
+                'click #cancel-button': 'cancelButtonClicked',
+                'change select[name=enterprise_customer_catalog]': 'updateEnterpriseCatalogDetailsLink'
+            },
+
+            updateEnterpriseCatalogDetailsLink: function() {
+                var enterpriseCoupon = this.$('[name=enterprise_customer_catalog]').val();
+                var enterpriseAPIURL = this.model.get('enterprise_catalog_url_template');
+                if (enterpriseCoupon && enterpriseAPIURL) {
+                    this.$(
+                        '#enterprise-catalog-details'
+                    ).attr('href', enterpriseAPIURL + enterpriseCoupon).addClass('external-link').removeClass('hidden');
+                } else {
+                    this.$(
+                        '#enterprise-catalog-details'
+                    ).removeAttr('href').removeClass('external-link').addClass('hidden');
+                }
+            },
+
+            fetchEnterpriseCustomerCatalogs: function() {
+                var self = this;
+                var enterpriseCustomer = this.model.get('enterprise_customer');
+
+                if (!_.isEmpty(enterpriseCustomer) && !_.isEmpty(enterpriseCustomer.id)) {
+                    ecommerce.coupons.enterprise_customer_catalogs.fetch(
+                        {
+                            data: {
+                                enterprise_customer: enterpriseCustomer.id
+                            },
+                            success: function() {
+                                self.toggleEnterpriseCatalogField(false);
+                            },
+                            error: function() {
+                                self.toggleEnterpriseCatalogField(true);
+                            }
+                        }
+                    );
+                } else {
+                    self.toggleEnterpriseCatalogField(true);
+                }
+            },
+
+            toggleEnterpriseCatalogField: function(disable) {
+                this.$('select[name=enterprise_customer_catalog]').attr('disabled', disable);
             },
 
             getEditableAttributes: function() {
@@ -115,6 +175,7 @@ define([
                 this.listenTo(this.model, 'change:voucher_type', this.toggleVoucherTypeField);
                 this.listenTo(this.model, 'change:code', this.toggleCodeField);
                 this.listenTo(this.model, 'change:quantity', this.toggleQuantityField);
+                this.listenTo(this.model, 'change:enterprise_customer', this.fetchEnterpriseCustomerCatalogs);
             },
 
             cancelButtonClicked: function() {

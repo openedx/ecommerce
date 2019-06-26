@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+
 import datetime
 import json
 
@@ -468,7 +470,7 @@ class CouponMixin(SiteMixin):
         if (catalog is None and not enterprise_customer_catalog and not
                 ((catalog_query or course_catalog or program_uuid) and course_seat_types)):
             catalog = Catalog.objects.create(partner=partner)
-        if code is not '':
+        if code != '':
             quantity = 1
 
         with mock.patch(

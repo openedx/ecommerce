@@ -1,4 +1,6 @@
 """Common settings and globals."""
+from __future__ import absolute_import
+
 import datetime
 import os
 import platform
@@ -56,10 +58,10 @@ MANAGERS = ADMINS
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.',
-        'NAME': '',
-        'USER': '',
-        'PASSWORD': '',
-        'HOST': '',
+        'NAME': 'ecommerce',
+        'USER': 'ecomm001',
+        'PASSWORD': 'password',
+        'HOST': 'localhost',
         'PORT': '',
         'ATOMIC_REQUESTS': True,
     }
@@ -69,7 +71,7 @@ DATABASES = {
 
 # GENERAL CONFIGURATION
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#time-zone
-TIME_ZONE = 'America/New_York'
+TIME_ZONE = 'UTC'
 
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#language-code
 # http://www.i18nguy.com/unicode/language-identifiers.html
@@ -308,7 +310,7 @@ LOCAL_APPS = [
     'ecommerce.coupons',
     'ecommerce.courses',
     'ecommerce.invoice',
-    'ecommerce.payment_bff',
+    'ecommerce.bff',
     'ecommerce.programs',
     'ecommerce.referrals',
     'ecommerce.theming',
@@ -419,17 +421,26 @@ AUTH_USER_MODEL = 'core.User'
 
 # See: http://getblimp.github.io/django-rest-framework-jwt/#additional-settings
 JWT_AUTH = {
-    'JWT_SECRET_KEY': None,
+    'JWT_SECRET_KEY': 'SET-ME-PLEASE',
     'JWT_ALGORITHM': 'HS256',
     'JWT_AUTH_COOKIE': 'edx-jwt-cookie',
     'JWT_VERIFY_EXPIRATION': True,
     'JWT_LEEWAY': 1,
     'JWT_DECODE_HANDLER': 'ecommerce.extensions.api.handlers.jwt_decode_handler',
     # These settings are NOT part of DRF-JWT's defaults.
-    'JWT_ISSUERS': (),
+    'JWT_ISSUERS': [
+        {
+            'AUDIENCE': 'SET-ME-PLEASE',
+            'ISSUER': 'http://127.0.0.1:8000/oauth2',
+            'SECRET_KEY': 'SET-ME-PLEASE'
+        }
+    ],
     # NOTE (CCB): This is temporarily set to False until we decide what values are acceptable.
     'JWT_VERIFY_AUDIENCE': False,
     'JWT_PUBLIC_SIGNING_JWK_SET': None,
+    'JWT_AUTH_COOKIE_HEADER_PAYLOAD': 'edx-jwt-cookie-header-payload',
+    'JWT_AUTH_COOKIE_SIGNATURE': 'edx-jwt-cookie-signature',
+    'JWT_AUTH_REFRESH_COOKIE': 'edx-jwt-refresh-cookie'
 }
 
 # Service user for worker processes.
@@ -439,7 +450,7 @@ ECOMMERCE_SERVICE_WORKER_USERNAME = 'ecommerce_worker'
 PROSPECTUS_WORKER_USERNAME = 'prospectus_worker'
 
 # Used to access the Enrollment API. Set this to the same value used by the LMS.
-EDX_API_KEY = None
+EDX_API_KEY = 'PUT_YOUR_API_KEY_HERE'
 
 # Enables a special view that, when accessed, creates and logs in a new user.
 # This should NOT be enabled for production deployments.
@@ -460,10 +471,11 @@ AUTHENTICATION_BACKENDS += ('auth_backends.backends.EdXOpenIdConnect',)
 SOCIAL_AUTH_STRATEGY = 'ecommerce.social_auth.strategies.CurrentSiteDjangoStrategy'
 
 # Set these to the correct values for your OAuth2 provider
-SOCIAL_AUTH_EDX_OAUTH2_KEY = None
-SOCIAL_AUTH_EDX_OAUTH2_SECRET = None
-SOCIAL_AUTH_EDX_OAUTH2_URL_ROOT = None
-SOCIAL_AUTH_EDX_OAUTH2_LOGOUT_URL = None
+SOCIAL_AUTH_EDX_OAUTH2_KEY = "ecommerce-sso-key"
+SOCIAL_AUTH_EDX_OAUTH2_SECRET = "ecommerce-sso-secret"
+SOCIAL_AUTH_EDX_OAUTH2_ISSUER = "http://127.0.0.1:8000"
+SOCIAL_AUTH_EDX_OAUTH2_URL_ROOT = "http://127.0.0.1:8000"
+SOCIAL_AUTH_EDX_OAUTH2_LOGOUT_URL = "http://127.0.0.1:8000/logout"
 
 # Redirect successfully authenticated users to the Oscar dashboard.
 LOGIN_REDIRECT_URL = 'dashboard:index'
@@ -514,7 +526,7 @@ TEST_RUNNER = 'django.test.runner.DiscoverRunner'
 # Detailed information at: https://docs.djangoproject.com/en/dev/ref/settings/
 SESSION_COOKIE_NAME = 'ecommerce_sessionid'
 CSRF_COOKIE_NAME = 'ecommerce_csrftoken'
-LANGUAGE_COOKIE_NAME = 'ecommerce_language'
+LANGUAGE_COOKIE_NAME = 'openedx-language-preference'
 SESSION_COOKIE_SECURE = False
 # END COOKIE CONFIGURATION
 
@@ -523,7 +535,7 @@ SESSION_COOKIE_SECURE = False
 # Default broker URL. See http://celery.readthedocs.io/en/latest/userguide/configuration.html#broker-url.
 # In order for tasks to be visible to the ecommerce worker, this must match the value of BROKER_URL
 # configured for the ecommerce worker!
-BROKER_URL = None
+BROKER_URL = 'amqp://celery:celery@127.0.0.1:5672'
 
 # Disable connection pooling. Connections may be severed by load balancers.
 # This forces the application to connect explicitly to the broker each time
@@ -543,12 +555,16 @@ CELERY_IMPORTS = (
     'ecommerce_worker.fulfillment.v1.tasks',
 )
 
+DEFAULT_PRIORITY_QUEUE = 'ecommerce.default'
+CELERY_DEFAULT_EXCHANGE = 'ecommerce'
+CELERY_DEFAULT_ROUTING_KEY = 'ecommerce'
+CELERY_DEFAULT_QUEUE = DEFAULT_PRIORITY_QUEUE
 CELERY_ROUTES = {
-    'ecommerce_worker.fulfillment.v1.tasks.fulfill_order': {'queue': 'fulfillment'},
-    'ecommerce_worker.sailthru.v1.tasks.update_course_enrollment': {'queue': 'email_marketing'},
-    'ecommerce_worker.sailthru.v1.tasks.send_course_refund_email': {'queue': 'email_marketing'},
-    'ecommerce_worker.sailthru.v1.tasks.send_offer_assignment_email': {'queue': 'email_marketing'},
-    'ecommerce_worker.sailthru.v1.tasks.send_offer_update_email': {'queue': 'email_marketing'},
+    'ecommerce_worker.fulfillment.v1.tasks.fulfill_order': {'queue': 'ecommerce.fulfillment'},
+    'ecommerce_worker.sailthru.v1.tasks.update_course_enrollment': {'queue': 'ecommerce.email_marketing'},
+    'ecommerce_worker.sailthru.v1.tasks.send_course_refund_email': {'queue': 'ecommerce.email_marketing'},
+    'ecommerce_worker.sailthru.v1.tasks.send_offer_assignment_email': {'queue': 'ecommerce.email_marketing'},
+    'ecommerce_worker.sailthru.v1.tasks.send_offer_update_email': {'queue': 'ecommerce.email_marketing'},
 }
 
 # Prevent Celery from removing handlers on the root logger. Allows setting custom logging handlers.
@@ -597,13 +613,7 @@ THEME_CACHE_TIMEOUT = 30 * 60
 
 
 EDX_DRF_EXTENSIONS = {
-    'JWT_PAYLOAD_USER_ATTRIBUTE_MAPPING': {
-        'administrator': 'is_staff',
-        'email': 'email',
-        'full_name': 'full_name',
-        'tracking_context': 'tracking_context',
-        'user_id': 'lms_user_id',
-    },
+    "OAUTH2_USER_INFO_URL": "http://127.0.0.1:8000/oauth2/user_info"
 }
 
 # Enrollment codes voucher end datetime used for setting the end dates for vouchers
@@ -695,7 +705,73 @@ OFFER_ASSIGNMENT_EMAIL_REMINDER_DEFAULT_TEMPLATE = '''
 OFFER_ASSIGNMENT_EMAIL_REMINDER_DEFAULT_SUBJECT = 'Reminder on edX course assignment'
 
 #SAILTHRU settings
-SAILTHRU_KEY = None
-SAILTHRU_SECRET = None
+SAILTHRU_KEY = 'sailthru key here'
+SAILTHRU_SECRET = 'sailthru secret here'
 
 USERNAME_REPLACEMENT_WORKER = "replace with valid username"
+
+CORS_ALLOW_CREDENTIALS = False
+ECOMMERCE_URL_ROOT = "http://localhost:8002"
+OSCAR_FROM_EMAIL = 'oscar@example.com'
+PLATFORM_NAME = 'Your Platform Name Here'
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False
+SOCIAL_AUTH_EDX_OIDC_KEY = 'ecommerce-key'
+SOCIAL_AUTH_EDX_OIDC_SECRET = 'ecommerce-secret'
+SOCIAL_AUTH_EDX_OIDC_URL_ROOT = 'http://127.0.0.1:8000/oauth2'
+SOCIAL_AUTH_EDX_OIDC_LOGOUT_URL = 'http://127.0.0.1:8000/logout'
+SOCIAL_AUTH_EDX_OIDC_ID_TOKEN_DECRYPTION_KEY = SOCIAL_AUTH_EDX_OIDC_SECRET
+SOCIAL_AUTH_REDIRECT_IS_HTTPS = False
+SOCIAL_AUTH_EDX_OIDC_PUBLIC_URL_ROOT = 'http://127.0.0.1:8000/oauth2'
+SOCIAL_AUTH_EDX_OIDC_ISSUER = 'http://127.0.0.1:8000/oauth2'
+
+CORS_ORIGIN_WHITELIST = []
+
+ECOMMERCE_PAYMENT_PROCESSOR_CONFIG = {
+    'edx': {
+        'cybersource': {
+            'access_key': 'SET-ME-PLEASE',
+            'apple_pay_country_code': 'US',
+            'apple_pay_merchant_id_certificate_path': '/edx/etc/ssl/apple_pay_merchant.pem',
+            'apple_pay_merchant_id_domain_association': 'This value should also be in private configuration. '
+                                                        'It, too,\nwill span multiple lines.',
+            'apple_pay_merchant_identifier': 'merchant.com.example',
+            'cancel_page_url': '/checkout/cancel-checkout/',
+            'merchant_id': 'SET-ME-PLEASE',
+            'payment_page_url': 'https://testsecureacceptance.cybersource.com/pay',
+            'profile_id': 'SET-ME-PLEASE',
+            'receipt_page_url': '/checkout/receipt/',
+            'secret_key':  'SET-ME-PLEASE',
+            'send_level_2_3_details': True,
+            'soap_api_url': 'https://ics2wstest.ic3.com/commerce/1.x/transactionProcessor/'
+                            'CyberSourceTransaction_1.140.wsdl',
+            'sop_access_key': 'SET-ME-PLEASE',
+            'sop_payment_page_url': 'https://testsecureacceptance.cybersource.com/silent/pay',
+            'sop_profile_id': 'SET-ME-PLEASE',
+            'sop_secret_key': 'SET-ME-PLEASE',
+            'transaction_key': 'SET-ME-PLEASE'
+        },
+        'paypal': {
+            'cancel_url': '/checkout/cancel-checkout/',
+            'client_id': 'SET-ME-PLEASE',
+            'client_secret': 'SET-ME-PLEASE',
+            'error_url': '/checkout/error/',
+            'mode': 'sandbox',
+            'receipt_url': '/checkout/receipt/'
+        }
+    }
+}
+MEDIA_STORAGE_BACKEND = {
+    'DEFAULT_FILE_STORAGE': 'django.core.files.storage.FileSystemStorage',
+    'MEDIA_ROOT': MEDIA_ROOT,
+    'MEDIA_URL': MEDIA_URL
+}
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+    }
+}
+BACKEND_SERVICE_EDX_OAUTH2_KEY = "ecommerce-backend-service-key"
+BACKEND_SERVICE_EDX_OAUTH2_SECRET = "ecommerce-backend-service-secret"
+BACKEND_SERVICE_EDX_OAUTH2_PROVIDER_URL = "http://127.0.0.1:8000/oauth2"
+EXTRA_APPS = []
+API_ROOT = None

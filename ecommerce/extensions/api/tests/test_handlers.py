@@ -1,4 +1,6 @@
 """ Tests for handler functions. """
+from __future__ import absolute_import
+
 from time import time
 
 import jwt

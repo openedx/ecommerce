@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+
 from faker import Faker
 
 from ecommerce.core.context_processors import core

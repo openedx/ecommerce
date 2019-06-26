@@ -5,7 +5,7 @@ has been updated to setup the site column correctly for new installations. This 
 that previously ran 0002 have the column setup correctly.
 """
 
-from __future__ import unicode_literals
+from __future__ import absolute_import, unicode_literals
 
 from django.db import migrations, models
 

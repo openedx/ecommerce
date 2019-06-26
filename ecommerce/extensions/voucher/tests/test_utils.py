@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals
+from __future__ import absolute_import, unicode_literals
 
 import uuid
 
@@ -12,6 +12,7 @@ from django.utils.translation import ugettext_lazy as _
 from factory.fuzzy import FuzzyText
 from oscar.templatetags.currency_filters import currency
 from oscar.test.factories import *  # pylint:disable=wildcard-import,unused-wildcard-import
+from six.moves import range
 
 from ecommerce.core.url_utils import get_ecommerce_url
 from ecommerce.coupons.tests.mixins import CouponMixin, DiscoveryMockMixin

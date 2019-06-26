@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+
 import logging
 
 from oscar.core.loading import get_class, get_model
@@ -21,7 +23,7 @@ def send_notification(user, commtype_code, context, site, recipient=None):
 
     """
 
-    tracking_id, client_id, ip = parse_tracking_context(user)
+    tracking_id, client_id, ip = parse_tracking_context(user, usage='notification')
 
     tracking_pixel = 'https://www.google-analytics.com/collect?v=1&t=event&ec=email&ea=open&tid={tracking_id}' \
                      '&cid={client_id}&uip={ip}'.format(tracking_id=tracking_id, client_id=client_id, ip=ip)

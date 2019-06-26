@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals
+from __future__ import absolute_import, unicode_literals
 
 from hashlib import md5
 
 import ddt
+import six
 from django.db.utils import IntegrityError
 from oscar.core.loading import get_model
 
@@ -97,7 +98,7 @@ class CouponUtilsTests(CouponMixin, DiscoveryTestMixin, TestCase):
         """Verify the method generates a SKU for a coupon."""
         coupon = self.create_coupon(partner=self.partner, catalog=self.catalog)
         _hash = ' '.join((
-            unicode(coupon.id),
+            six.text_type(coupon.id),
             str(self.partner.id)
         ))
         digest = md5(_hash.lower()).hexdigest()[-7:]

@@ -1,4 +1,8 @@
+from __future__ import absolute_import
+
 import sys
+
+from six.moves import builtins
 
 
 def query_yes_no(question, default="yes"):
@@ -17,17 +21,17 @@ def query_yes_no(question, default="yes"):
         "no": False,
         "n": False,
     }
-    if default is None or default in valid.keys():
+    if default is None or default in list(valid.keys()):
         prompt = " [y/n] "
     else:
         raise ValueError("Invalid default answer: '%s'" % default)
 
     while True:
         sys.stdout.write(question + prompt)
-        choice = raw_input().lower()
+        choice = builtins.raw_input().lower()
         if default is not None and choice == '':
             return valid[default]
         elif choice in valid:
             return valid[choice]
         else:
-            sys.stdout.write("Please respond with one of the following ({}).\n".format(', '.join(valid.keys())))
+            sys.stdout.write("Please respond with one of the following ({}).\n".format(', '.join(list(valid.keys()))))

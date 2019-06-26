@@ -3,12 +3,15 @@
 Fulfillment Modules are designed to allow specific fulfillment logic based on the type (or types) of products
 in an Order.
 """
+from __future__ import absolute_import
+
 import abc
 import datetime
 import json
 import logging
 
 import requests
+import six
 from django.conf import settings
 from django.urls import reverse
 from edx_rest_api_client.client import EdxRestApiClient
@@ -44,13 +47,12 @@ StockRecord = get_model('partner', 'StockRecord')
 logger = logging.getLogger(__name__)
 
 
-class BaseFulfillmentModule(object):  # pragma: no cover
+class BaseFulfillmentModule(six.with_metaclass(abc.ABCMeta, object)):  # pragma: no cover
     """
     Base FulfillmentModule class for containing Product specific fulfillment logic.
 
     All modules should extend the FulfillmentModule and adhere to the defined contract.
     """
-    __metaclass__ = abc.ABCMeta
 
     @abc.abstractmethod
     def supports_line(self, line):
@@ -172,9 +174,13 @@ class EnrollmentFulfillmentModule(BaseFulfillmentModule):
     """ Fulfillment Module for enrolling students after a product purchase.
 
     Allows the enrollment of a student via purchase of a 'seat'.
+
+    Arguments:
+        usage (string): A description of why data is being posted to the enrollment API. This will be included in log
+            messages if the LMS user id cannot be found.
     """
 
-    def _post_to_enrollment_api(self, data, user):
+    def _post_to_enrollment_api(self, data, user, usage):
         enrollment_api_url = get_lms_enrollment_api_url()
         timeout = settings.ENROLLMENT_FULFILLMENT_TIMEOUT
         headers = {
@@ -182,7 +188,7 @@ class EnrollmentFulfillmentModule(BaseFulfillmentModule):
             'X-Edx-Api-Key': settings.EDX_API_KEY
         }
 
-        __, client_id, ip = parse_tracking_context(user)
+        __, client_id, ip = parse_tracking_context(user, usage=usage)
 
         if client_id:
             headers['X-Edx-Ga-Client-Id'] = client_id
@@ -314,7 +320,7 @@ class EnrollmentFulfillmentModule(BaseFulfillmentModule):
 
                 # Post to the Enrollment API. The LMS will take care of posting a new EnterpriseCourseEnrollment to
                 # the Enterprise service if the user+course has a corresponding EnterpriseCustomerUser.
-                response = self._post_to_enrollment_api(data, user=order.user)
+                response = self._post_to_enrollment_api(data, user=order.user, usage='fulfill enrollment')
 
                 if response.status_code == status.HTTP_200_OK:
                     line.set_status(LINE.COMPLETE)
@@ -372,7 +378,7 @@ class EnrollmentFulfillmentModule(BaseFulfillmentModule):
                 },
             }
 
-            response = self._post_to_enrollment_api(data, user=line.order.user)
+            response = self._post_to_enrollment_api(data, user=line.order.user, usage='revoke enrollment')
 
             if response.status_code == status.HTTP_200_OK:
                 audit_log(
@@ -525,7 +531,7 @@ class EnrollmentCodeFulfillmentModule(BaseFulfillmentModule):
             _range.save()
 
             vouchers = create_vouchers(
-                name=unicode('Enrollment code voucher [{}]').format(line.product.title),
+                name=six.text_type('Enrollment code voucher [{}]').format(line.product.title),
                 benefit_type=Benefit.PERCENTAGE,
                 benefit_value=100,
                 catalog=coupon_catalog,

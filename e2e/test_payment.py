@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+
 import datetime
 import logging
 import time
@@ -109,7 +111,7 @@ class TestSeatPayment(object):
     def refund_orders_for_course_run(self, course_run_id):
         api = EcommerceApi()
         refund_ids = api.create_refunds_for_course_run(LMS_USERNAME, course_run_id)
-        assert len(refund_ids) > 0
+        assert refund_ids != []
 
         for refund_id in refund_ids:
             api.process_refund(refund_id, 'approve')

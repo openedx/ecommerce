@@ -6,6 +6,7 @@ import mock
 from django.urls import reverse
 from oscar.core.loading import get_model
 from rest_framework import status
+from testfixtures import LogCapture
 
 from ecommerce.extensions.api.serializers import RefundSerializer
 from ecommerce.extensions.api.tests.test_authentication import AccessTokenMixin
@@ -22,6 +23,7 @@ Refund = get_model('refund', 'Refund')
 
 
 class RefundCreateViewTests(RefundTestMixin, AccessTokenMixin, JwtMixin, TestCase):
+    LOGGER_NAME = 'ecommerce.extensions.api.v2.views.refunds'
     path = reverse('api:v2:refunds:create')
 
     def setUp(self):
@@ -157,6 +159,39 @@ class RefundCreateViewTests(RefundTestMixin, AccessTokenMixin, JwtMixin, TestCas
         # A second call should result in no additional refunds being created
         response = self.client.post(self.path, data, JSON_CONTENT_TYPE)
         self.assert_ok_response(response)
+
+    def test_refund_lms_user_id(self):
+        """
+        View should create a refund when user has an LMS user id.
+        """
+        user_with_id = self.create_user()
+        self.client.login(username=user_with_id.username, password=self.password)
+
+        data = self._get_data(user_with_id.username, self.course_id)
+        response = self.client.post(self.path, data, JSON_CONTENT_TYPE)
+        self.assert_ok_response(response)
+
+    def test_refund_missing_lms_user_id(self):
+        """
+        View should create a refund even if the LMS user id is missing.
+        """
+        user_without_id = self.create_user(lms_user_id=None)
+        self.client.login(username=user_without_id.username, password=self.password)
+
+        data = self._get_data(user_without_id.username, self.course_id)
+        expected_logs = [
+            (
+                self.LOGGER_NAME,
+                'WARNING',
+                'Could not find lms_user_id for user {} when processing refund requested by {}'.format(
+                    user_without_id.id, user_without_id.id)
+            ),
+        ]
+
+        with LogCapture(self.LOGGER_NAME) as log:
+            response = self.client.post(self.path, data, JSON_CONTENT_TYPE)
+            log.check_present(*expected_logs)
+            self.assert_ok_response(response)
 
     def test_valid_entitlement_order(self):
         """

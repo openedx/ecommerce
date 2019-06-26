@@ -27,8 +27,8 @@ class CourseSeatAvailabilityPolicyMixin(strategy.StockRequired):
         is_available = product.expires is None or (product.expires >= timezone.now())
         if is_staff or is_available:
             return super(CourseSeatAvailabilityPolicyMixin, self).availability_policy(product, stockrecord)
-        else:
-            return availability.Unavailable()
+
+        return availability.Unavailable()
 
 
 class DefaultStrategy(strategy.UseFirstStockRecord, CourseSeatAvailabilityPolicyMixin,

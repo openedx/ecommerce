@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 import logging
 import time
 
-from dateutil import parser
+import dateutil
 from django.core.management import BaseCommand, CommandError
 from edx_rest_api_client.client import EdxRestApiClient
 from slumber.exceptions import HttpClientError
@@ -26,13 +26,15 @@ class Command(BaseCommand):
     pause_time = 5
     max_tries = 5
 
-    def add_arguments(self, par):
-        par.add_argument('--commit',
-                         action='store_true',
-                         dest='commit',
-                         default=False,
-                         help='Save the data to the database. If this is not set, '
-                              'expires date will not be updated')
+    def add_arguments(self, parser):
+        parser.add_argument(
+            '--commit',
+            action='store_true',
+            dest='commit',
+            default=False,
+            help='Save the data to the database. If this is not set, '
+                 'expires date will not be updated'
+        )
 
     def handle(self, *args, **options):
         seats_to_update = ['honor', 'audit', 'no-id-professional', 'professional']
@@ -60,7 +62,7 @@ class Command(BaseCommand):
                     attributes__name='certificate_type',
                     attribute_values__value_text__in=seats_to_update
                 )
-                expires = parser.parse(enrollment_end_date)
+                expires = dateutil.parser.parse(enrollment_end_date)
                 course_seats.update(expires=expires)
                 logger.info(
                     'Updated expiration date for [%s] seats: [%s]',

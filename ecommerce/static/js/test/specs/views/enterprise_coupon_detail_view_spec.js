@@ -46,7 +46,9 @@ define([
                 expect(view.$('.enterprise-customer > .value').text()).toEqual(
                     model.get('enterprise_customer')
                 );
-                expect(view.$('.enterprise-customer-catalog > .value').text()).toEqual(
+                expect(
+                    view.$('.enterprise-customer-catalog > .value > .enterprise-catalog-details-link').text()
+                ).toEqual(
                     model.get('enterprise_customer_catalog')
                 );
                 expect(view.$('.start-date-info > .value').text()).toEqual(

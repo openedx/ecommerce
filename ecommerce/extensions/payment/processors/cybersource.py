@@ -1,5 +1,5 @@
 """ CyberSource payment processing. """
-from __future__ import unicode_literals
+from __future__ import absolute_import, unicode_literals
 
 import base64
 import datetime
@@ -8,6 +8,7 @@ import logging
 import uuid
 from decimal import Decimal
 
+import six
 from django.conf import settings
 from django.urls import reverse
 from oscar.apps.payment.exceptions import GatewayError, TransactionDeclined, UserCancelled
@@ -23,11 +24,13 @@ from ecommerce.extensions.payment.constants import APPLE_PAY_CYBERSOURCE_CARD_TY
 from ecommerce.extensions.payment.exceptions import (
     AuthorizationError,
     DuplicateReferenceNumber,
+    ExcessivePaymentForOrderError,
     InvalidCybersourceDecision,
     InvalidSignatureError,
     PartialAuthorizationError,
     PCIViolation,
-    ProcessorMisconfiguredError
+    ProcessorMisconfiguredError,
+    RedundantPaymentNotificationError
 )
 from ecommerce.extensions.payment.helpers import sign
 from ecommerce.extensions.payment.processors import (
@@ -41,6 +44,7 @@ logger = logging.getLogger(__name__)
 
 Order = get_model('order', 'Order')
 OrderNumberGenerator = get_class('order.utils', 'OrderNumberGenerator')
+PaymentProcessorResponse = get_model('payment', 'PaymentProcessorResponse')
 
 
 class Cybersource(ApplePayMixin, BaseClientSidePaymentProcessor):
@@ -236,7 +240,7 @@ class Cybersource(ApplePayMixin, BaseClientSidePaymentProcessor):
         parameters.update(kwargs.get('extra_parameters', {}))
 
         # Mitigate PCI compliance issues
-        signed_field_names = parameters.keys()
+        signed_field_names = list(parameters.keys())
         if any(pci_field in signed_field_names for pci_field in self.PCI_FIELDS):
             raise PCIViolation('One or more PCI-related fields is contained in the payment parameters. '
                                'This service is NOT PCI-compliant! Deactivate this service immediately!')
@@ -304,6 +308,14 @@ class Cybersource(ApplePayMixin, BaseClientSidePaymentProcessor):
                     'review': AuthorizationError,
                 }.get(decision, InvalidCybersourceDecision)
 
+        transaction_id = response.get('transaction_id', None)  # Error Notifications does not include a transaction id.
+        if transaction_id and decision == 'accept':
+            if Order.objects.filter(number=response['req_reference_number']).exists():
+                if PaymentProcessorResponse.objects.filter(transaction_id=transaction_id).exists():
+                    raise RedundantPaymentNotificationError
+                else:
+                    raise ExcessivePaymentForOrderError
+
         # Raise an exception if the authorized amount differs from the requested amount.
         # Note (CCB): We should never reach this point in production since partial authorization is disabled
         # for our account, and should remain that way until we have a proper solution to allowing users to
@@ -313,7 +325,6 @@ class Cybersource(ApplePayMixin, BaseClientSidePaymentProcessor):
 
         currency = response['req_currency']
         total = Decimal(response['req_amount'])
-        transaction_id = response.get('transaction_id', None)  # Error Notifications does not include a transaction id.
         card_number = response['req_card_number']
         card_type = CYBERSOURCE_CARD_TYPE_MAP.get(response['req_card_type'])
 
@@ -389,7 +400,7 @@ class Cybersource(ApplePayMixin, BaseClientSidePaymentProcessor):
             }
             purchase_totals = {
                 'currency': currency,
-                'grandTotalAmount': unicode(amount),
+                'grandTotalAmount': six.text_type(amount),
             }
 
             response = client.service.runTransaction(

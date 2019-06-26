@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+
 from decimal import Decimal
 from uuid import uuid4
 
@@ -5,6 +7,7 @@ import ddt
 import httpretty
 import mock
 from oscar.core.loading import get_model
+from six.moves import range, zip
 
 from ecommerce.coupons.tests.mixins import CouponMixin
 from ecommerce.courses.tests.factories import CourseFactory
@@ -147,7 +150,7 @@ class EnterpriseCustomerConditionTests(EnterpriseServiceMockMixin, DiscoveryTest
         basket.add_product(self.course_run.seat_products[0])
         enterprise_id = self.condition.enterprise_customer_uuid
         if use_new_enterprise:
-            enterprise_id = uuid4()  # pylint: disable=redefined-variable-type
+            enterprise_id = uuid4()
         if mock_learner_api:
             self.mock_enterprise_learner_api(
                 learner_id=self.user.id,

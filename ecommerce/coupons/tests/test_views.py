@@ -1,11 +1,15 @@
 # -*- coding: utf-8 -*-
+from __future__ import absolute_import
+
 import datetime
-import urllib
 
 import ddt
 import httpretty
 import mock
 import pytz
+import six.moves.urllib.error  # pylint: disable=import-error
+import six.moves.urllib.parse  # pylint: disable=import-error
+import six.moves.urllib.request  # pylint: disable=import-error
 from django.conf import settings
 from django.urls import reverse
 from django.utils.timezone import now
@@ -49,7 +53,7 @@ ENTERPRISE_CUSTOMER_CATALOG = 'abc18838-adcb-41d5-abec-b28be5bfcc13'
 
 def format_url(base='', path='', params=None):
     if params:
-        return '{base}{path}?{params}'.format(base=base, path=path, params=urllib.urlencode(params))
+        return '{base}{path}?{params}'.format(base=base, path=path, params=six.moves.urllib.parse.urlencode(params))
     return '{base}{path}'.format(base=base, path=path)
 
 
@@ -83,7 +87,7 @@ class VoucherIsValidTests(DiscoveryTestMixin, TestCase):
         valid, msg = voucher_is_valid(voucher=voucher, products=[product], request=self.request)
 
         self.assertTrue(valid)
-        self.assertEquals(msg, '')
+        self.assertEqual(msg, '')
 
     def test_no_voucher(self):
         """ Verify voucher_is_valid() assess that the voucher is invalid. """
@@ -110,7 +114,7 @@ class VoucherIsValidTests(DiscoveryTestMixin, TestCase):
         self.assertEqual(msg, 'This coupon code is not yet valid.')
 
     def test_voucher_unavailable_to_buy(self):
-        """ Verify that False is returned for unavialable products. """
+        """ Verify that False is returned for unavailable products. """
         voucher, product = prepare_voucher()
         product.expires = pytz.utc.localize(datetime.datetime.min)
         valid, __ = voucher_is_valid(voucher=voucher, products=[product], request=self.request)
@@ -229,7 +233,7 @@ class CouponOfferViewTests(ApiMockMixin, CouponMixin, DiscoveryTestMixin, Enterp
         response = self.client.get(url)
 
         testserver_login_url = self.get_full_url(reverse('login'))
-        expected_url = '{path}?next={next}'.format(path=testserver_login_url, next=urllib.quote(url))
+        expected_url = '{path}?next={next}'.format(path=testserver_login_url, next=six.moves.urllib.parse.quote(url))
         self.assertRedirects(response, expected_url, target_status_code=302)
 
     def test_credit_seat_response(self):

@@ -1,14 +1,18 @@
 # Note: If future versions of django-oscar include new mixins, they will need to be imported here.
-from __future__ import unicode_literals
+from __future__ import absolute_import, unicode_literals
 
 import abc
 import logging
 
+import six
 import waffle
 from django.db import transaction
 from ecommerce_worker.fulfillment.v1.tasks import fulfill_order
 from oscar.apps.checkout.mixins import OrderPlacementMixin
 from oscar.core.loading import get_class, get_model
+# Pylint will stop complaining about this when https://github.com/PyCQA/pylint/pull/2824
+# is released
+from six.moves import range  # pylint: disable=ungrouped-imports
 
 from ecommerce.core.models import BusinessClient
 from ecommerce.extensions.analytics.utils import audit_log, track_segment_event
@@ -35,7 +39,7 @@ Source = get_model('payment', 'Source')
 SourceType = get_model('payment', 'SourceType')
 
 
-class EdxOrderPlacementMixin(OrderPlacementMixin):
+class EdxOrderPlacementMixin(six.with_metaclass(abc.ABCMeta, OrderPlacementMixin)):
     """ Mixin for edX-specific order placement. """
 
     # Instance of a payment processor with which to handle payment. Subclasses should set this value.
@@ -46,15 +50,13 @@ class EdxOrderPlacementMixin(OrderPlacementMixin):
     order_placement_failure_msg = 'Order Failure: %s payment was received, but an order for basket [%d] ' \
                                   'could not be placed.'
 
-    __metaclass__ = abc.ABCMeta
-
     def add_payment_event(self, event):  # pylint: disable = arguments-differ
         """ Record a payment event for creation once the order is placed. """
         if self._payment_events is None:
             self._payment_events = []
         self._payment_events.append(event)
 
-    def handle_payment(self, response, basket):
+    def handle_payment(self, response, basket):  # pylint: disable=arguments-differ
         """
         Handle any payment processing and record payment sources and events.
 
@@ -120,7 +122,7 @@ class EdxOrderPlacementMixin(OrderPlacementMixin):
                                billing_address,
                                order_total,
                                request=None,
-                               **kwargs):
+                               **kwargs):  # pylint: disable=arguments-differ
         """
         Place an order and mark the corresponding basket as submitted.
 
@@ -230,7 +232,7 @@ class EdxOrderPlacementMixin(OrderPlacementMixin):
 
         return order
 
-    def send_confirmation_message(self, order, code, site=None, **kwargs):
+    def send_confirmation_message(self, order, code, site=None, **kwargs):  # pylint: disable=arguments-differ
         ctx = self.get_message_context(order)
         try:
             event_type = CommunicationEventType.objects.get(code=code)
@@ -269,7 +271,7 @@ class EdxOrderPlacementMixin(OrderPlacementMixin):
 
         organization_attribute = BasketAttributeType.objects.filter(name=ORGANIZATION_ATTRIBUTE_TYPE).first()
         if not organization_attribute:
-            return None
+            return
 
         business_client = BasketAttribute.objects.filter(
             basket=order.basket,
@@ -301,7 +303,7 @@ class EdxOrderPlacementMixin(OrderPlacementMixin):
         offer = voucher and voucher.enterprise_offer
         # can't entertain non enterprise offers
         if not offer:
-            return None
+            return
 
         assignment = offer.offerassignment_set.filter(code=voucher.code, user_email=basket.owner.email).exclude(
             status__in=[OFFER_REDEEMED, OFFER_ASSIGNMENT_REVOKED]
@@ -324,7 +326,7 @@ class EdxOrderPlacementMixin(OrderPlacementMixin):
         offer = voucher and voucher.enterprise_offer
         # can't entertain non enterprise offers
         if not offer:
-            return None
+            return
 
         if voucher.usage == voucher.MULTI_USE_PER_CUSTOMER:
             user_email = basket.owner.email

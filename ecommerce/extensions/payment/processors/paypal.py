@@ -1,19 +1,21 @@
 """ PayPal payment processing. """
-from __future__ import unicode_literals
+from __future__ import absolute_import, unicode_literals
 
 import logging
 import re
 import uuid
 from decimal import Decimal
-from urlparse import urljoin
 
 import paypalrestsdk
+import six  # pylint: disable=ungrouped-imports
 import waffle
 from django.conf import settings
 from django.urls import reverse
 from django.utils.functional import cached_property
 from django.utils.translation import get_language
 from oscar.apps.payment.exceptions import GatewayError
+from six.moves import range
+from six.moves.urllib.parse import urljoin
 
 from ecommerce.core.url_utils import get_ecommerce_url
 from ecommerce.extensions.payment.constants import PAYPAL_LOCALES
@@ -70,8 +72,8 @@ class Paypal(BasePaymentProcessor):
         default_paypal_locale = PAYPAL_LOCALES.get(re.split(r'[_-]', get_language())[0].lower())
         if not language_code:
             return default_paypal_locale
-        else:
-            return PAYPAL_LOCALES.get(re.split(r'[_-]', language_code)[0].lower(), default_paypal_locale)
+
+        return PAYPAL_LOCALES.get(re.split(r'[_-]', language_code)[0].lower(), default_paypal_locale)
 
     def create_temporary_web_profile(self, locale_code):
         """
@@ -94,14 +96,16 @@ class Paypal(BasePaymentProcessor):
                 )
                 logger.info(msg)
                 return web_profile.id
-            else:
-                msg = "Web profile creation encountered error [%s]. Will continue without one" % (
-                    web_profile.error
-                )
-                logger.warning(msg)
+
+            msg = "Web profile creation encountered error [%s]. Will continue without one" % (
+                web_profile.error
+            )
+            logger.warning(msg)
+            return None
 
         except Exception:  # pylint: disable=broad-except
             logger.warning("Creating PayPal WebProfile resulted in exception. Will continue without one.")
+            return None
 
     def get_transaction_parameters(self, basket, request=None, use_client_side_checkout=False, **kwargs):
         """
@@ -133,7 +137,7 @@ class Paypal(BasePaymentProcessor):
             },
             'transactions': [{
                 'amount': {
-                    'total': unicode(basket.total_incl_tax),
+                    'total': six.text_type(basket.total_incl_tax),
                     'currency': basket.currency,
                 },
                 'item_list': {
@@ -144,7 +148,7 @@ class Paypal(BasePaymentProcessor):
                             'name': middle_truncate(line.product.title, 127),
                             # PayPal requires that the sum of all the item prices (where price = price * quantity)
                             # equals to the total amount set in amount['total'].
-                            'price': unicode(line.line_price_incl_tax_incl_discounts / line.quantity),
+                            'price': six.text_type(line.line_price_incl_tax_incl_discounts / line.quantity),
                             'currency': line.stockrecord.price_currency,
                         }
                         for line in basket.all_lines()
@@ -352,7 +356,7 @@ class Paypal(BasePaymentProcessor):
 
             refund = sale.refund({
                 'amount': {
-                    'total': unicode(amount),
+                    'total': six.text_type(amount),
                     'currency': currency,
                 }
             })

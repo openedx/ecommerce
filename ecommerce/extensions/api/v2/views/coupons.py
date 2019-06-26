@@ -387,7 +387,7 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
         range_data = self.create_update_data_dict(data=request_data, fields=Range.UPDATABLE_RANGE_FIELDS)
 
         if not range_data:
-            return None
+            return
 
         voucher_range = vouchers.first().original_offer.benefit.range
 
@@ -547,7 +547,7 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
         if invoice_data:
             Invoice.objects.filter(order__lines__product=coupon).update(**invoice_data)
 
-    def destroy(self, request, pk):  # pylint: disable=unused-argument
+    def destroy(self, request, pk):  # pylint: disable=unused-argument, arguments-differ
         try:
             coupon = get_object_or_404(Product, pk=pk)
             self.perform_destroy(coupon)
@@ -555,7 +555,7 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
             return Response(status=404)
         return Response(status=204)
 
-    def perform_destroy(self, coupon):
+    def perform_destroy(self, coupon):  # pylint: disable=arguments-differ
         Voucher.objects.filter(coupon_vouchers__coupon=coupon).delete()
         StockRecord.objects.filter(product=coupon).delete()
         coupon.delete()

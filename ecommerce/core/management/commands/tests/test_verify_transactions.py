@@ -1,6 +1,8 @@
 """
 Tests for Django management command to verify ecommerce transactions.
 """
+from __future__ import absolute_import
+
 import datetime
 
 import pytz

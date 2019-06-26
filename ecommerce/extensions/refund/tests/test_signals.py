@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+
 from mock import patch
 from oscar.test.factories import UserFactory
 
@@ -14,17 +16,16 @@ class RefundTrackingTests(RefundTestMixin, TestCase):
 
     def setUp(self):
         super(RefundTrackingTests, self).setUp()
-        self.user = UserFactory()
+        self.user = UserFactory(lms_user_id=6179)
         self.refund = create_refunds([self.create_order()], self.course.id)[0]
 
-    def assert_refund_event_fired(self, mock_track, refund, tracking_context=None):
+    def assert_refund_event_fired(self, mock_track, refund, tracking_context=None, expected_user_id=None):
         (event_user_id, event_name, event_payload), kwargs = mock_track.call_args
 
         self.assertTrue(mock_track.called)
         self.assertEqual(event_name, 'Order Refunded')
 
         if tracking_context is not None:
-            expected_event_user_id = tracking_context['lms_user_id']
             expected_context = {
                 'ip': tracking_context['lms_ip'],
                 'Google Analytics': {
@@ -35,14 +36,16 @@ class RefundTrackingTests(RefundTestMixin, TestCase):
                 },
             }
         else:
-            expected_event_user_id = ECOM_TRACKING_ID_FMT.format(refund.user.id)
             expected_context = {
                 'ip': None,
                 'Google Analytics': {'clientId': None},
                 'page': {'url': 'https://testserver.fake/'}
             }
 
-        self.assertEqual(event_user_id, expected_event_user_id)
+        if expected_user_id is None:
+            expected_user_id = refund.user.lms_user_id
+
+        self.assertEqual(event_user_id, expected_user_id)
         self.assertEqual(kwargs['context'], expected_context)
         self.assertEqual(event_payload['orderId'], refund.order.number)
 
@@ -67,6 +70,13 @@ class RefundTrackingTests(RefundTestMixin, TestCase):
         """Verify that a successfully placed refund is tracked, even if no tracking context is available."""
         self.approve(self.refund)
         self.assert_refund_event_fired(mock_track, self.refund)
+
+    def test_refund_tracking_without_lms_user_id(self, mock_track):
+        """Verify that a successfully placed refund is tracked, even if no LMS user id is available."""
+        self.refund.user.lms_user_id = None
+        self.approve(self.refund)
+        expected_user_id = ECOM_TRACKING_ID_FMT.format(self.refund.user.id)
+        self.assert_refund_event_fired(mock_track, self.refund, expected_user_id=expected_user_id)
 
     def test_successful_refund_no_segment_key(self, mock_track):
         """Verify that a successfully placed refund is not tracked when Segment is disabled."""

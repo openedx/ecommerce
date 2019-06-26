@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+
 import mock
 from oscar.core.loading import get_model
 from requests.exceptions import Timeout

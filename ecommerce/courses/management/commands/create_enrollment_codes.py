@@ -79,7 +79,7 @@ class Command(BaseCommand):
         total_courses = 0
 
         courses = Course.objects.all()[0:batch_limit]
-        while len(courses) > 0:
+        while courses:
             total_courses += len(courses)
             logger.info('Creating enrollment code for %d courses.', courses.count())
 

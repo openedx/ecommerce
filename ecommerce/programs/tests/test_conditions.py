@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+
 import ddt
 import httpretty
 import mock
@@ -284,14 +286,14 @@ class ProgramCourseRunSeatsConditionTests(ProgramTestMixin, TestCase):
         return_value = self.condition._get_lms_resource_for_user(basket, resource_name, mock_endpoint)  # pylint: disable=protected-access
 
         self.assertEqual(return_value, [])
-        self.assertEquals(mock_endpoint.get.call_count, 1, 'Endpoint should be called before caching.')
+        self.assertEqual(mock_endpoint.get.call_count, 1, 'Endpoint should be called before caching.')
 
         mock_endpoint.reset_mock()
 
         return_value = self.condition._get_lms_resource_for_user(basket, resource_name, mock_endpoint)  # pylint: disable=protected-access
 
         self.assertEqual(return_value, [])
-        self.assertEquals(mock_endpoint.get.call_count, 0, 'Endpoint should NOT be called after caching.')
+        self.assertEqual(mock_endpoint.get.call_count, 0, 'Endpoint should NOT be called after caching.')
 
     @httpretty.activate
     def test_is_satisfied_with_non_active_program(self):

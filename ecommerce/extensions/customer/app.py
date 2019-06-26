@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+
 from auth_backends.views import EdxOAuth2LoginView
 from oscar.apps.customer import app
 

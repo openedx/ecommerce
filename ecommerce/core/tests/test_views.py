@@ -1,4 +1,6 @@
 """Tests of the service health endpoint."""
+from __future__ import absolute_import
+
 import json
 
 import mock
@@ -19,9 +21,6 @@ User = get_user_model()
 
 class HealthTests(TestCase):
     """Tests of the health endpoint."""
-
-    def setUp(self):
-        super(HealthTests, self).setUp()
 
     def test_all_services_available(self):
         """Test that the endpoint reports when all services are healthy."""

@@ -8,9 +8,8 @@ django-ses==0.8.2
 gevent==1.0.2
 
 gunicorn==19.7.1
-MySQL-python==1.2.5
 newrelic<5
 python-memcached==1.58
-PyYAML==3.13
+PyYAML
 nodeenv==1.1.1
 redis==2.10.6

@@ -59,3 +59,13 @@ class InvalidBasketError(PaymentError):
 class AuthorizationError(PaymentError):
     """ Authorization was declined. """
     pass
+
+
+class RedundantPaymentNotificationError(PaymentError):
+    """ Raised when duplicate payment notification is detected with same transaction ID. """
+    pass
+
+
+class ExcessivePaymentForOrderError(PaymentError):
+    """ Raised when duplicate payment notification is detected with different transaction ID. """
+    pass

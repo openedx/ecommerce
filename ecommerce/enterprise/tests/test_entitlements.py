@@ -1,4 +1,6 @@
 
+from __future__ import absolute_import
+
 import ddt
 import httpretty
 from django.conf import settings

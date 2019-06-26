@@ -26,7 +26,8 @@ define([
             className: 'coupon-detail-view',
 
             events: {
-                'click .voucher-report-button': 'downloadCouponReport'
+                'click .voucher-report-button': 'downloadCouponReport',
+                'click .external-link': 'routeToLink'
             },
 
             template: _.template(CouponDetailTemplate),
@@ -111,6 +112,16 @@ define([
                     return gettext('Can be used once by multiple customers');
                 }
                 return '';
+            },
+
+            /**
+             * Open external links in a new tab.
+             * Works only for anchor elements that contain 'external-link' class.
+             */
+            routeToLink: function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                window.open(e.currentTarget.href);
             },
 
             render: function() {

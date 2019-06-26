@@ -32,8 +32,10 @@ from ecommerce.extensions.checkout.utils import get_receipt_page_url
 from ecommerce.extensions.payment.exceptions import (
     AuthorizationError,
     DuplicateReferenceNumber,
+    ExcessivePaymentForOrderError,
     InvalidBasketError,
-    InvalidSignatureError
+    InvalidSignatureError,
+    RedundantPaymentNotificationError
 )
 from ecommerce.extensions.payment.processors.cybersource import Cybersource
 from ecommerce.extensions.payment.utils import clean_field_value
@@ -258,6 +260,22 @@ class CybersourceNotificationMixin(CyberSourceProcessorMixin, OrderCreationMixin
                 logger.info(
                     'Received CyberSource payment notification for basket [%d] which is associated '
                     'with existing order [%s]. No payment was collected, and no new order will be created.',
+                    basket.id,
+                    order_number
+                )
+                raise
+            except RedundantPaymentNotificationError:
+                logger.info(
+                    'Received redundant CyberSource payment notification with same transaction ID for basket [%d] '
+                    'which is associated with an existing order [%s]. No payment was collected.',
+                    basket.id,
+                    order_number
+                )
+                raise
+            except ExcessivePaymentForOrderError:
+                logger.info(
+                    'Received duplicate CyberSource payment notification with different transaction ID for basket [%d] '
+                    'which is associated with an existing order [%s]. Payment collected twice, request a refund.',
                     basket.id,
                     order_number
                 )

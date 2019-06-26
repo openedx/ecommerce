@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
 """Unit tests of Paypal payment processor implementation."""
-from __future__ import unicode_literals
+from __future__ import absolute_import, unicode_literals
 
 import json
 import logging
-from urlparse import urljoin
 
 import ddt
 import mock
@@ -18,6 +17,7 @@ from factory.fuzzy import FuzzyInteger
 from oscar.apps.payment.exceptions import GatewayError
 from oscar.core.loading import get_model
 from paypalrestsdk.resource import Resource  # pylint:disable=ungrouped-imports
+from six.moves.urllib.parse import urljoin  # pylint: disable=import-error
 from testfixtures import LogCapture
 
 from ecommerce.core.tests import toggle_switch

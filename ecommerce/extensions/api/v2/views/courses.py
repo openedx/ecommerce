@@ -35,7 +35,7 @@ class CourseViewSet(NonDestroyableModelViewSet):
             self.products_prefetch, self.product_attribute_value_prefetch, 'products__stockrecords'
         )
 
-    def list(self, request, *args, **kwargs):
+    def list(self, request, *args, **kwargs):  # pylint: disable=useless-super-delegation
         """
         List all courses.
         ---
@@ -59,7 +59,7 @@ class CourseViewSet(NonDestroyableModelViewSet):
         data = serializers.CourseSerializer(course, context={'request': request}).data
         return Response(data, status=status.HTTP_201_CREATED)
 
-    def retrieve(self, request, *args, **kwargs):
+    def retrieve(self, request, *args, **kwargs):  # pylint: disable=useless-super-delegation
         """
         Retrieve details for a course.
         ---

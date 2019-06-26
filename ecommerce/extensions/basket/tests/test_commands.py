@@ -1,4 +1,4 @@
-from __future__ import unicode_literals
+from __future__ import absolute_import, unicode_literals
 
 from StringIO import StringIO
 
@@ -6,6 +6,7 @@ from django.contrib.sites.models import Site
 from django.core.management import CommandError, call_command
 from oscar.core.loading import get_model
 from oscar.test import factories
+from six.moves import range
 
 from ecommerce.extensions.test.factories import create_order
 from ecommerce.invoice.models import Invoice

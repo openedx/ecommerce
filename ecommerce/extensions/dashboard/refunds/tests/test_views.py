@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+
 from django.urls import reverse
 
 from ecommerce.extensions.refund.status import REFUND
@@ -41,9 +43,6 @@ class RefundViewTestMixin(object):
 class RefundListViewTests(RefundViewTestMixin, TestCase):
     path = reverse('dashboard:refunds:list')
     username = 'hackerman'
-
-    def setUp(self):
-        super(RefundListViewTests, self).setUp()
 
     def test_filtering(self):
         """ The view should allow filtering by ID, status, and username. """

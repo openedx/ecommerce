@@ -1,15 +1,17 @@
 """
 Tests functions in journal/client.py
 """
+from __future__ import absolute_import
+
 import json
 import logging
 import re
-from urlparse import urljoin, urlsplit, urlunsplit
 
 import responses
 from edx_django_utils.cache import TieredCache
 from edx_rest_api_client.auth import SuppliedJwtAuth
 from edx_rest_api_client.client import EdxRestApiClient
+from six.moves.urllib.parse import urljoin, urlsplit, urlunsplit  # pylint: disable=import-error
 
 from ecommerce.core.utils import get_cache_key
 from ecommerce.journals.client import (

@@ -1,4 +1,6 @@
 """ JournalViewSet """
+from __future__ import absolute_import
+
 from oscar.core.loading import get_model
 from rest_framework import viewsets
 from rest_framework.permissions import IsAdminUser

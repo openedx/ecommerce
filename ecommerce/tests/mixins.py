@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 """Broadly-useful mixins for use in automated tests."""
+from __future__ import absolute_import
+
 import datetime
 import json
 import re
@@ -50,13 +52,14 @@ class UserMixin(object):
     access_token = 'test-access-token'
     user_id = 'test-user-id'
     password = 'test'
+    lms_user_id = 12321
 
-    def create_user(self, **kwargs):
+    def create_user(self, lms_user_id=lms_user_id, **kwargs):
         """Create a user, with overrideable defaults."""
         not_provided = object()
         if kwargs.get('username', not_provided) is None:
             kwargs.pop('username')
-        return factories.UserFactory(password=self.password, **kwargs)
+        return factories.UserFactory(password=self.password, lms_user_id=lms_user_id, **kwargs)
 
     def create_access_token(self, user, access_token=None):
         """
@@ -355,9 +358,6 @@ class TestServerUrlMixin(object):
 class ApiMockMixin(object):
     """ Common Mocks for the API responses. """
 
-    def setUp(self):
-        super(ApiMockMixin, self).setUp()
-
     def mock_api_error(self, error, url):
         def callback(request, uri, headers):  # pylint: disable=unused-argument
             raise error
@@ -367,9 +367,6 @@ class ApiMockMixin(object):
 
 class LmsApiMockMixin(object):
     """ Mocks for the LMS API reponses. """
-
-    def setUp(self):
-        super(LmsApiMockMixin, self).setUp()
 
     def mock_course_api_response(self, course=None):
         """ Helper function to register an API endpoint for the course information. """

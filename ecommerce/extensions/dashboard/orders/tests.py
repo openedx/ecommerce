@@ -1,6 +1,9 @@
+from __future__ import absolute_import
+
 import os
 from unittest import skipIf
 
+import six
 from django.contrib.messages import constants as MSG
 from django.test import override_settings
 from django.urls import reverse
@@ -79,7 +82,7 @@ class OrderViewBrowserTestBase(LiveServerTestCase):
     def retry_fulfillment(self):
         """ Click the retry fulfillment button and wait for the AJAX call to finish. """
         button = self.selenium.find_element_by_css_selector(self.btn_selector)
-        self.assertEqual(unicode(self.order.number), button.get_attribute('data-order-number'))
+        self.assertEqual(six.text_type(self.order.number), button.get_attribute('data-order-number'))
         button.click()
 
         # Wait for the AJAX call to finish and display an alert
@@ -161,7 +164,7 @@ class OrderListViewBrowserTests(OrderViewTestsMixin, RefundTestMixin, OrderViewB
         response = self.client.get('{path}?username={username}'.format(
             path=self.path,
             # Cut the configured username in half, then invert the fragment's casing.
-            username=new_user.username[:len(new_user.username) / 2].swapcase()
+            username=new_user.username[:len(new_user.username) / 2].swapcase()  # pylint: disable=unsubscriptable-object
         ))
         self.assert_successful_response(response, [new_order])
 

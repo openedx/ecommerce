@@ -1,9 +1,12 @@
+from __future__ import absolute_import
+
 from uuid import uuid4
 
 import ddt
 import mock
 from oscar.core.loading import get_model
 from oscar.test import factories
+from six.moves import range
 from testfixtures import LogCapture
 from waffle.testutils import override_flag
 

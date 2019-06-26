@@ -1,6 +1,8 @@
 """
 Comprehensive Theming tests for core functionality.
 """
+from __future__ import absolute_import
+
 from django.conf import settings
 from django.test import override_settings
 from path import Path

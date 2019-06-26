@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+
 from django.urls import reverse
 
 from ecommerce.core.url_utils import get_lms_dashboard_url

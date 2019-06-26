@@ -1,4 +1,6 @@
 """Devstack settings"""
+from __future__ import absolute_import
+
 from corsheaders.defaults import default_headers as corsheaders_default_headers
 
 from ecommerce.settings.production import *
@@ -34,7 +36,8 @@ JWT_AUTH.update({
 
 CORS_ORIGIN_WHITELIST = (
     'http://localhost:1991',
-    'http://localhost:1996'
+    'http://localhost:1996',
+    'http://localhost:1998',
 )
 CORS_ALLOW_HEADERS = corsheaders_default_headers + (
     'use-jwt-cookie',

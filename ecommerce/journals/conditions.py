@@ -52,7 +52,7 @@ class JournalBundleCondition(SingleItemConsumptionConditionMixin, Condition):
             for course_sku_set in course_skus.values():
                 sku_set.update(course_sku_set)
 
-            course_skus = sku_set   # pylint: disable=redefined-variable-type
+            course_skus = sku_set
 
         return course_skus
 

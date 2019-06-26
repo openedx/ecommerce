@@ -1,12 +1,16 @@
+from __future__ import absolute_import
+
 import datetime
 import hashlib
-import urllib
 from decimal import Decimal
 
 import ddt
 import httpretty
 import mock
 import pytz
+import six.moves.urllib.error  # pylint: disable=import-error
+import six.moves.urllib.parse  # pylint: disable=import-error
+import six.moves.urllib.request  # pylint: disable=import-error
 from django.conf import settings
 from django.contrib.messages import get_messages
 from django.http import HttpResponseRedirect
@@ -17,7 +21,6 @@ from factory.fuzzy import FuzzyText
 from oscar.apps.basket.forms import BasketVoucherForm
 from oscar.core.loading import get_class, get_model
 from oscar.test import factories
-from oscar.test.utils import RequestFactory
 from requests.exceptions import ConnectionError, Timeout
 from slumber.exceptions import SlumberBaseException
 from testfixtures import LogCapture
@@ -61,7 +64,6 @@ StockRecord = get_model('partner', 'StockRecord')
 Voucher = get_model('voucher', 'Voucher')
 VoucherAddView = get_class('basket.views', 'VoucherAddView')
 VoucherApplication = get_model('voucher', 'VoucherApplication')
-VoucherRemoveView = get_class('basket.views', 'VoucherRemoveView')
 
 COUPON_CODE = 'COUPONTEST'
 BUNDLE = 'bundle_identifier'
@@ -87,7 +89,10 @@ class BasketAddItemsViewTests(
     def test_add_multiple_products_to_basket(self):
         """ Verify the basket accepts multiple products. """
         products = ProductFactory.create_batch(3, stockrecords__partner=self.partner)
-        qs = urllib.urlencode({'sku': [product.stockrecords.first().partner_sku for product in products]}, True)
+        # pylint: disable=too-many-function-args
+        qs = six.moves.urllib.parse.urlencode(
+            {'sku': [product.stockrecords.first().partner_sku for product in products]},
+            True)
         url = '{root}?{qs}'.format(root=self.path, qs=qs)
         response = self.client.get(url)
         self.assertEqual(response.status_code, 303)
@@ -99,7 +104,10 @@ class BasketAddItemsViewTests(
     def test_basket_with_utm_params(self):
         """ Verify the basket includes utm params after redirect. """
         products = ProductFactory.create_batch(3, stockrecords__partner=self.partner)
-        qs = urllib.urlencode({'sku': [product.stockrecords.first().partner_sku for product in products]}, True)
+        # pylint: disable=too-many-function-args
+        qs = six.moves.urllib.parse.urlencode(
+            {'sku': [product.stockrecords.first().partner_sku for product in products]},
+            True)
         url = '{root}?{qs}&utm_source=test'.format(root=self.path, qs=qs)
         response = self.client.get(url)
         self.assertEqual(response.url, '/basket/?utm_source=test')
@@ -142,7 +150,8 @@ class BasketAddItemsViewTests(
         product_range = factories.RangeFactory(products=products)
         voucher, __ = prepare_voucher(_range=product_range, usage=usage)
 
-        qs = urllib.urlencode({
+        # pylint: disable=too-many-function-args
+        qs = six.moves.urllib.parse.urlencode({
             'sku': [product.stockrecords.first().partner_sku for product in products],
             'code': voucher.code
         }, True)
@@ -166,8 +175,10 @@ class BasketAddItemsViewTests(
         stock_record = StockRecordFactory(product=product2, partner=self.partner)
         catalog.stock_records.add(stock_record)
 
-        qs = urllib.urlencode({'sku': [product.stockrecords.first().partner_sku for product in [product1, product2]]},
-                              True)
+        # pylint: disable=too-many-function-args
+        qs = six.moves.urllib.parse.urlencode(
+            {'sku': [product.stockrecords.first().partner_sku for product in [product1, product2]]},
+            True)
         url = '{root}?{qs}'.format(root=self.path, qs=qs)
         with mock.patch.object(UserAlreadyPlacedOrder, 'user_already_placed_order', return_value=True):
             response = self.client.get(url)
@@ -179,7 +190,10 @@ class BasketAddItemsViewTests(
         Test user can purchase products which have not been already purchased
         """
         products = ProductFactory.create_batch(3, stockrecords__partner=self.partner)
-        qs = urllib.urlencode({'sku': [product.stockrecords.first().partner_sku for product in products]}, True)
+        # pylint: disable=too-many-function-args
+        qs = six.moves.urllib.parse.urlencode(
+            {'sku': [product.stockrecords.first().partner_sku for product in products]},
+            True)
         url = '{root}?{qs}'.format(root=self.path, qs=qs)
         with mock.patch.object(UserAlreadyPlacedOrder, 'user_already_placed_order', return_value=False):
             response = self.client.get(url)
@@ -192,7 +206,9 @@ class BasketAddItemsViewTests(
         order = create_order(site=self.site, user=self.user)
         products = ProductFactory.create_batch(3, stockrecords__partner=self.partner)
         products.append(OrderLine.objects.get(order=order).product)
-        qs = urllib.urlencode({'sku': [product.stockrecords.first().partner_sku for product in products]}, True)
+        # pylint: disable=too-many-function-args
+        qs = six.moves.urllib.parse.urlencode(
+            {'sku': [product.stockrecords.first().partner_sku for product in products]}, True)
         url = '{root}?{qs}'.format(root=self.path, qs=qs)
         response = self.client.get(url)
         basket = response.wsgi_request.basket
@@ -207,7 +223,8 @@ class BasketAddItemsViewTests(
         voucher = mock_get_entitlement_voucher.return_value
         voucher.code = 'FAKECODE'
         sku = self.stock_record.partner_sku
-        url = '{path}?{skus}'.format(path=self.path, skus=urllib.urlencode({'sku': [sku]}, doseq=True))
+        # pylint: disable=redundant-keyword-arg
+        url = '{path}?{skus}'.format(path=self.path, skus=six.moves.urllib.parse.urlencode({'sku': [sku]}, doseq=True))
         response = self.client.get(url)
 
         expected_failure_url = (
@@ -257,7 +274,8 @@ class BasketAddItemsViewTests(
         products[0].save()
         self.assertFalse(Selector().strategy().fetch_for_product(products[0]).availability.is_available_to_buy)
 
-        qs = urllib.urlencode({
+        # pylint: disable=too-many-function-args
+        qs = six.moves.urllib.parse.urlencode({
             'sku': [product.stockrecords.first().partner_sku for product in products],
         }, True)
         url = '{root}?{qs}'.format(root=self.path, qs=qs)
@@ -320,7 +338,7 @@ class BasketLogicTestMixin(object):
 @httpretty.activate
 class PaymentApiViewTests(BasketLogicTestMixin, TestCase):
     """ PaymentApiViewTests basket api tests. """
-    path = reverse('payment_bff:v0:payment')
+    path = reverse('bff:payment:v0:payment')
 
     def setUp(self):
         super(PaymentApiViewTests, self).setUp()
@@ -339,36 +357,7 @@ class PaymentApiViewTests(BasketLogicTestMixin, TestCase):
 
         self.assertEqual(response.status_code, 200)
 
-        expected_response = {
-            'line_total': 512,
-            'line_discount': 12,
-            'order_total': 500,
-            'products': [
-                {
-                    'name': 'Introduction to Happiness',
-                    'seat_type': 'verified-certificate',
-                    'img_url': 'https://prod-discovery.edx-cdn.org/media/course/image/21be6203.small.jpg',
-                },
-            ],
-            'show_voucher_form': True,
-            'voucher': {
-                'code': 'SUMMER20',
-                "benefit": {
-                    "type": "Percentage",
-                    "value": 20
-                },
-            },
-            'payment_providers': [
-                {
-                    'type': 'cybersource',
-                },
-                {
-                    'type': 'paypal',
-                }
-            ],
-            'sdn_check': True,
-        }
-        self.assertDictEqual(response.json(), expected_response)
+        # TODO: ARCH-960: Add assertions for response
 
 
 @httpretty.activate
@@ -669,7 +658,8 @@ class BasketSummaryViewTests(EnterpriseServiceMockMixin, DiscoveryTestMixin, Dis
         self.client.logout()
         response = self.client.get(self.path)
         testserver_login_url = self.get_full_url(reverse(settings.LOGIN_URL))
-        expected_url = '{path}?next={next}'.format(path=testserver_login_url, next=urllib.quote(self.path))
+        expected_url = '{path}?next={next}'.format(path=testserver_login_url,
+                                                   next=six.moves.urllib.parse.quote(self.path))
         self.assertRedirects(response, expected_url, target_status_code=302)
 
     @ddt.data(
@@ -1018,17 +1008,71 @@ class VoucherAddViewTests(LmsApiMockMixin, TestCase):
         self.assert_form_valid_message("Coupon code '{code}' added to basket.".format(code=COUPON_CODE))
 
 
-class VoucherRemoveViewTests(TestCase):
-    def test_post_with_missing_voucher(self):
-        """ If the voucher is missing, verify the view queues a message and redirects. """
-        pk = '12345'
-        view = VoucherRemoveView.as_view()
-        request = RequestFactory().post('/')
-        request.basket.save()
-        response = view(request, pk=pk)
+@httpretty.activate
+class VoucherAddApiViewTests(BasketLogicTestMixin, TestCase):
+    """ VoucherAddApiViewTests basket api tests. """
+    path = reverse('bff:payment:v0:addvoucher')
 
-        self.assertEqual(response.status_code, 302)
+    def setUp(self):
+        super(VoucherAddApiViewTests, self).setUp()
+        # self.maxDiff = None
+        self.user = self.create_user()
+        self.client.login(username=self.user.username, password=self.password)
+        # self.course = CourseFactory(name='VoucherAddApiViewTests', partner=self.partner)
 
-        actual = list(get_messages(request))[-1].message
-        expected = "No voucher found with id '{}'".format(pk)
-        self.assertEqual(actual, expected)
+    def test_response_success(self):
+        """ Verify a successful response is returned. """
+        basket = factories.BasketFactory(owner=self.user, site=self.site)
+        # seat = self.create_seat(self.course, seat_price=500)
+        # basket = self.create_basket_and_add_product(seat)
+        self.mock_access_token_response()
+
+        expected_benefit_value = 20
+        voucher, product = prepare_voucher(code=COUPON_CODE, benefit_value=expected_benefit_value)
+        basket.add_product(product)
+
+        response = self.client.post(self.path, {'code': COUPON_CODE})
+
+        self.assertEqual(response.status_code, 200)
+
+        expected_response = {
+            'voucher': {
+                'id': voucher.id,
+                'code': COUPON_CODE,
+                "benefit": {
+                    "type": 'Percentage',
+                    "value": expected_benefit_value,
+                },
+            },
+        }
+        actual_subset = {k: v for k, v in response.json().items() if k in expected_response}
+
+        # TODO: ARCH-960: Test entire response, and not just voucher
+        self.assertDictEqual(expected_response, actual_subset)
+
+
+@httpretty.activate
+class VoucherRemoveApiViewTests(BasketLogicTestMixin, TestCase):
+    """ VoucherRemoveApiViewTests basket api tests. """
+    path = reverse('bff:payment:v0:removevoucher', kwargs={'voucherid': 12345})
+
+    def setUp(self):
+        super(VoucherRemoveApiViewTests, self).setUp()
+        self.maxDiff = None
+        self.user = self.create_user()
+        self.client.login(username=self.user.username, password=self.password)
+        self.course = CourseFactory(name='VoucherRemoveApiViewTests', partner=self.partner)
+
+    def test_response_success(self):
+        """ Verify a successful response is returned. """
+        seat = self.create_seat(self.course, seat_price=500)
+        basket = self.create_basket_and_add_product(seat)
+        self.mock_access_token_response()
+        self.assertEqual(basket.lines.count(), 1)
+
+        response = self.client.delete(self.path)
+
+        self.assertEqual(response.status_code, 200)
+
+        # TODO: ARCH-960: Test entire response, and not just voucher
+        self.assertTrue('voucher' not in response.json())

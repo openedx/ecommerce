@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+
 from oscar.core.loading import get_class, get_model
 from oscar.test import factories
 

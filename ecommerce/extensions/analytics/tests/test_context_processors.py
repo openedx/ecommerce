@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+
 from django.test import RequestFactory
 
 from ecommerce.extensions.analytics.context_processors import analytics

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals
+from __future__ import absolute_import, unicode_literals
 
 from uuid import uuid4
 
@@ -140,11 +140,11 @@ class RangeTests(CouponMixin, DiscoveryTestMixin, DiscoveryMockMixin, TestCase):
 
         self.mock_access_token_response()
         self.mock_discovery_api_failure(error, self.site_configuration.discovery_api_url, course_catalog_id)
-        with self.assertRaises(Exception) as error:
+        with self.assertRaises(Exception) as err:
             self.range.contains_product(seat)
 
         expected_exception_message = 'Unable to connect to Discovery Service for catalog contains endpoint.'
-        self.assertEqual(error.exception.message, expected_exception_message)
+        self.assertEqual(err.exception.message, expected_exception_message)
         # Verify that there only one call for the course discovery API for
         # checking if course exists in course runs against the course catalog.
         self._assert_num_requests(2)

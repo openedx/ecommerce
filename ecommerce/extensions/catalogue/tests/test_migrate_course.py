@@ -1,18 +1,19 @@
 # coding=utf-8
-from __future__ import unicode_literals
+from __future__ import absolute_import, unicode_literals
 
 import datetime
 import json
 import logging
 from decimal import Decimal
-from urlparse import urlparse
 
 import httpretty
 import mock
 import pytz
+import six  # pylint: disable=ungrouped-imports
 from django.core.management import call_command
 from django.test import override_settings
 from oscar.core.loading import get_model
+from six.moves.urllib.parse import urlparse
 from testfixtures import LogCapture
 
 from ecommerce.core.constants import ISO_8601_FORMAT
@@ -81,7 +82,7 @@ class CourseMigrationTestMixin(DiscoveryTestMixin):
         body = {
             'course_id': self.course_id,
             'course_modes': [{'slug': mode, 'min_price': price, 'expiration_datetime': EXPIRES_STRING} for
-                             mode, price in self.prices.iteritems()]
+                             mode, price in six.iteritems(self.prices)]
         }
         httpretty.register_uri(httpretty.GET, self.enrollment_api_url, body=json.dumps(body), content_type=JSON)
 

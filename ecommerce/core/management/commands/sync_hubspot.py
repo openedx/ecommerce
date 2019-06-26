@@ -1,6 +1,8 @@
 """
 Django management command to Sync Product, Orders and Lines to Hubspot server.
 """
+from __future__ import absolute_import
+
 import json
 import logging
 import time
@@ -13,6 +15,7 @@ from django.core.management.base import BaseCommand, CommandError
 from django.db.models import Q
 from edx_rest_api_client.client import EdxRestApiClient
 from oscar.core.loading import get_class, get_model
+from six.moves import range
 from slumber.exceptions import HttpClientError, HttpServerError
 
 from ecommerce.extensions.fulfillment.status import ORDER
@@ -194,6 +197,7 @@ class Command(BaseCommand):
             return getattr(client, hubspot_object).post(**kwargs)
         if method == "PUT":
             return getattr(client, hubspot_object).put(body, **kwargs)
+        raise ValueError("Unexpected method {}".format(method))
 
     def _install_hubspot_ecommerce_bridge(self, site_configuration):
         """

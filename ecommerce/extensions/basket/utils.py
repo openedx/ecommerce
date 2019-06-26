@@ -441,8 +441,8 @@ def apply_voucher_on_basket_and_check_discount(voucher, request, basket):
         logger.info('Applied Voucher [%s] to basket [%s].', voucher.code, basket.id)
         msg = _("Coupon code '{code}' added to basket.").format(code=voucher.code)
         return True, msg
-    else:
-        msg = _('Basket does not qualify for coupon code {code}.').format(code=voucher.code)
-        logger.info('Coupon Code [%s] is not valid for basket [%s]', voucher.code, basket.id)
-        basket.clear_vouchers()
-        return False, msg
+
+    msg = _('Basket does not qualify for coupon code {code}.').format(code=voucher.code)
+    logger.info('Coupon Code [%s] is not valid for basket [%s]', voucher.code, basket.id)
+    basket.clear_vouchers()
+    return False, msg
