@@ -44,7 +44,10 @@ from ecommerce.extensions.basket.utils import (
 from ecommerce.extensions.offer.utils import format_benefit_value, render_email_confirmation_if_required
 from ecommerce.extensions.order.exceptions import AlreadyPlacedOrderException
 from ecommerce.extensions.partner.shortcuts import get_partner_for_site
-from ecommerce.extensions.payment.constants import CLIENT_SIDE_CHECKOUT_FLAG_NAME
+from ecommerce.extensions.payment.constants import (
+    CLIENT_SIDE_CHECKOUT_FLAG_NAME,
+    ENABLE_MICROFRONTEND_FOR_BASKET_PAGE_FLAG_NAME
+)
 from ecommerce.extensions.payment.forms import PaymentForm
 
 BasketAttribute = get_model('basket', 'BasketAttribute')
@@ -54,6 +57,16 @@ logger = logging.getLogger(__name__)
 Product = get_model('catalogue', 'Product')
 StockRecord = get_model('partner', 'StockRecord')
 Voucher = get_model('voucher', 'Voucher')
+
+
+def _redirect_to_payment_microfrontend_if_configured(request):
+    if waffle.flag_is_active(request, ENABLE_MICROFRONTEND_FOR_BASKET_PAGE_FLAG_NAME):
+        if (
+                request.site.siteconfiguration.enable_microfrontend_for_basket_page and
+                request.site.siteconfiguration.payment_microfrontend_url
+        ):
+            return HttpResponseRedirect(request.site.siteconfiguration.payment_microfrontend_url)
+    return None
 
 
 class BasketAddItemsView(View):
@@ -117,8 +130,17 @@ class BasketAddItemsView(View):
             prepare_basket(request, available_products, voucher)
         except AlreadyPlacedOrderException:
             return render(request, 'edx/error.html', {'error': _('You have already purchased these products')})
+
+        if self._is_single_course_purchase(products):
+            redirect_response = _redirect_to_payment_microfrontend_if_configured(request)
+            if redirect_response:
+                return redirect_response
+
         url = add_utm_params_to_url(reverse('basket:summary'), self.request.GET.items())
         return HttpResponseRedirect(url, status=303)
+
+    def _is_single_course_purchase(self, products):
+        return len(products) == 1 and products[0].is_seat_product
 
 
 class BasketLogicMixin(object):
@@ -451,7 +473,19 @@ class BasketSummaryView(BasketLogicMixin, BasketView):
         if has_enterprise_offer(basket) and basket.total_incl_tax == Decimal(0):
             return redirect('checkout:free-checkout')
 
+        if self._is_single_course_purchase(basket):
+            redirect_response = _redirect_to_payment_microfrontend_if_configured(request)
+            if redirect_response:
+                return redirect_response
+
         return super(BasketSummaryView, self).get(request, *args, **kwargs)
+
+    def _is_single_course_purchase(self, basket):
+        return (
+            basket.num_items == 1 and
+            basket.lines.count() == 1 and
+            basket.lines.first().product.is_seat_product
+        )
 
 
 class PaymentApiLogicMixin(BasketLogicMixin):

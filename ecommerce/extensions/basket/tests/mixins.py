@@ -39,3 +39,12 @@ class BasketMixin(SiteMixin):
         seat = course.create_or_update_seat(seat_type, id_verification, 10, create_enrollment_code=True)
         enrollment_code = Product.objects.get(product_class__name=ENROLLMENT_CODE_PRODUCT_CLASS_NAME)
         return course, seat, enrollment_code
+
+    def configure_redirect_to_microfrontend(self, enable_redirect=True, set_url=True):
+        microfrontend_url = 'http://payment-fe.org'
+        if enable_redirect:
+            self.site.siteconfiguration.enable_microfrontend_for_basket_page = True
+        if set_url:
+            self.site.siteconfiguration.payment_microfrontend_url = microfrontend_url
+        self.site.siteconfiguration.save()
+        return microfrontend_url
