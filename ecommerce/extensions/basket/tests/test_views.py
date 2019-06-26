@@ -2,6 +2,7 @@ from __future__ import absolute_import
 
 import datetime
 import hashlib
+import itertools
 from decimal import Decimal
 
 import ddt
@@ -40,7 +41,10 @@ from ecommerce.extensions.basket.utils import _set_basket_bundle_status
 from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
 from ecommerce.extensions.offer.utils import format_benefit_value
 from ecommerce.extensions.order.utils import UserAlreadyPlacedOrder
-from ecommerce.extensions.payment.constants import CLIENT_SIDE_CHECKOUT_FLAG_NAME
+from ecommerce.extensions.payment.constants import (
+    CLIENT_SIDE_CHECKOUT_FLAG_NAME,
+    ENABLE_MICROFRONTEND_FOR_BASKET_PAGE_FLAG_NAME
+)
 from ecommerce.extensions.payment.forms import PaymentForm
 from ecommerce.extensions.payment.tests.processors import DummyProcessor
 from ecommerce.extensions.test.factories import create_order, prepare_voucher
@@ -86,15 +90,15 @@ class BasketAddItemsViewTests(
         self.catalog = Catalog.objects.create(partner=self.partner)
         self.catalog.stock_records.add(self.stock_record)
 
+    def _get_response(self, product_skus):
+        qs = six.moves.urllib.parse.urlencode({'sku': product_skus}, True)
+        url = '{root}?{qs}'.format(root=self.path, qs=qs)
+        return self.client.get(url)
+
     def test_add_multiple_products_to_basket(self):
         """ Verify the basket accepts multiple products. """
         products = ProductFactory.create_batch(3, stockrecords__partner=self.partner)
-        # pylint: disable=too-many-function-args
-        qs = six.moves.urllib.parse.urlencode(
-            {'sku': [product.stockrecords.first().partner_sku for product in products]},
-            True)
-        url = '{root}?{qs}'.format(root=self.path, qs=qs)
-        response = self.client.get(url)
+        response = self._get_response([product.stockrecords.first().partner_sku for product in products])
         self.assertEqual(response.status_code, 303)
 
         basket = response.wsgi_request.basket
@@ -130,6 +134,32 @@ class BasketAddItemsViewTests(
         self.assertEqual(basket.lines.count(), 1)
         self.assertTrue(basket.contains_a_voucher)
         self.assertEqual(basket.lines.first().product, self.stock_record.product)
+
+    @ddt.data(*itertools.product((True, False), (True, False)))
+    @ddt.unpack
+    @override_flag(ENABLE_MICROFRONTEND_FOR_BASKET_PAGE_FLAG_NAME, active=True)
+    def test_microfrontend_for_single_course_purchase_if_configured(self, enable_redirect, set_url):
+        microfrontend_url = self.configure_redirect_to_microfrontend(enable_redirect, set_url)
+        response = self._get_response(self.stock_record.partner_sku)
+
+        if enable_redirect and set_url:
+            self.assertRedirects(response, microfrontend_url, status_code=302, fetch_redirect_response=False)
+        else:
+            expected_url = self.get_full_url(reverse('basket:summary'))
+            self.assertRedirects(response, expected_url, status_code=303)
+
+    @override_flag(ENABLE_MICROFRONTEND_FOR_BASKET_PAGE_FLAG_NAME, active=True)
+    def test_no_microfrontend_for_enrollment_code_seat(self):
+        self.configure_redirect_to_microfrontend()
+
+        course, __, enrollment_code = self.prepare_course_seat_and_enrollment_code()
+        basket = factories.BasketFactory(owner=self.user, site=self.site)
+        basket.add_product(enrollment_code, 1)
+        self.mock_course_runs_endpoint(self.site_configuration.discovery_api_url, course_run=course)
+
+        response = self._get_response(enrollment_code.stockrecords.first().partner_sku)
+        expected_url = self.get_full_url(reverse('basket:summary'))
+        self.assertRedirects(response, expected_url, status_code=303)
 
     def test_add_multiple_products_no_skus_provided(self):
         """ Verify the Bad request exception is thrown when no skus are provided. """
@@ -433,6 +463,25 @@ class BasketSummaryViewTests(EnterpriseServiceMockMixin, DiscoveryTestMixin, Dis
         self.assertFalse(response.context['show_voucher_form'])
         line_data = response.context['formset_lines_data'][0][1]
         self.assertEqual(line_data['seat_type'], enrollment_code.attr.seat_type.capitalize())
+
+    @override_flag(ENABLE_MICROFRONTEND_FOR_BASKET_PAGE_FLAG_NAME, active=True)
+    def test_microfrontend_for_single_course_purchase(self):
+        microfrontend_url = self.configure_redirect_to_microfrontend()
+
+        seat = self.create_seat(self.course)
+        self.create_basket_and_add_product(seat)
+        response = self.client.get(self.path)
+        self.assertRedirects(response, microfrontend_url, status_code=302, fetch_redirect_response=False)
+
+    @override_flag(ENABLE_MICROFRONTEND_FOR_BASKET_PAGE_FLAG_NAME, active=True)
+    def test_microfrontend_for_enrollment_code_seat_type(self):
+        self.configure_redirect_to_microfrontend()
+
+        course, __, enrollment_code = self.prepare_course_seat_and_enrollment_code()
+        self.create_basket_and_add_product(enrollment_code)
+        self.mock_course_runs_endpoint(self.site_configuration.discovery_api_url, course_run=course)
+        response = self.client.get(self.path)
+        self.assertEqual(response.status_code, 200)
 
     @ddt.data(
         (Benefit.PERCENTAGE, 100),
