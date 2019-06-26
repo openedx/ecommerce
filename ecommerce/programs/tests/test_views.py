@@ -4,6 +4,7 @@ import uuid
 
 import httpretty
 from django.urls import reverse
+from django.db.models import Q
 from oscar.core.loading import get_model
 
 from ecommerce.extensions.test import factories
@@ -125,8 +126,9 @@ class ProgramOfferCreateViewTests(ProgramTestMixin, ViewTestMixin, TestCase):
             'benefit_type': Benefit.PERCENTAGE,
             'benefit_value': expected_benefit_value,
         }
+        existing_offer_ids = [c.id for c in ConditionalOffer.objects.all()]
         response = self.client.post(self.path, data, follow=False)
-        program_offer = ConditionalOffer.objects.get()
+        program_offer = ConditionalOffer.objects.get(~Q(id__in=existing_offer_ids))
 
         self.assertRedirects(response, reverse('programs:offers:edit', kwargs={'pk': program_offer.pk}))
         self.assertIsNone(program_offer.start_datetime)
