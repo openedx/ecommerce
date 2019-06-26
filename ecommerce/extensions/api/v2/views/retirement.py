@@ -22,8 +22,8 @@ class EcommerceIdView(APIView):
 
     def get(self, _, username):
         """
-        Returns the ecommerce tracking id of the given LMS user, identified
-        by username.
+        Returns the old-style ecommerce tracking id (ecommerce-{id}) and the newer-style LMS user id of the given LMS
+        user, identified by username.
         """
         try:
             if not username:
@@ -33,7 +33,8 @@ class EcommerceIdView(APIView):
             return Response(
                 {
                     'id': user.pk,
-                    'ecommerce_tracking_id': ECOM_TRACKING_ID_FMT.format(user.pk)
+                    'ecommerce_tracking_id': ECOM_TRACKING_ID_FMT.format(user.pk),
+                    'lms_user_id': user.lms_user_id_with_metric(usage='retirement API')
                 }
             )
         except User.DoesNotExist:

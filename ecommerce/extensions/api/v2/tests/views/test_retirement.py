@@ -16,7 +16,8 @@ class EcommerceIdViewTest(TestCase):
             response.data,
             {
                 'id': user.pk,
-                'ecommerce_tracking_id': ECOM_TRACKING_ID_FMT.format(user.pk)
+                'ecommerce_tracking_id': ECOM_TRACKING_ID_FMT.format(user.pk),
+                'lms_user_id': user.lms_user_id
             }
         )
 
