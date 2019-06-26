@@ -150,6 +150,8 @@ the following procedures.
    :depth: 1
    :local:
 
+.. warning::: This is very out of date.  It should mention renaming /e2e/.env.devstack, and running ``make e2e``.  There is no more ``make accept`` as detailed below.
+
 Configure the LMS
 *****************
 
