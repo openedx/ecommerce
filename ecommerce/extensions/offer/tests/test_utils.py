@@ -16,7 +16,13 @@ from ecommerce.extensions.offer.utils import (
     send_assigned_offer_email,
     send_assigned_offer_reminder_email
 )
-from ecommerce.extensions.test.factories import *  # pylint:disable=wildcard-import,unused-wildcard-import
+from ecommerce.extensions.test.factories import (
+    AbsoluteDiscountBenefitWithoutRangeFactory,
+    BenefitFactory,
+    PercentageDiscountBenefitWithoutRangeFactory,
+    RangeFactory,
+    StockRecord
+)
 from ecommerce.tests.testcases import TestCase
 
 Benefit = get_model('offer', 'Benefit')
