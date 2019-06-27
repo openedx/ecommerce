@@ -6,6 +6,7 @@ from __future__ import absolute_import, unicode_literals
 import logging
 
 from django.core.management import call_command
+from django.db.models import Q
 from mock import patch
 from oscar.test.factories import (
     BenefitFactory,

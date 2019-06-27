@@ -3,6 +3,7 @@ from __future__ import absolute_import
 import uuid
 
 import mock
+from django.db.models import Q
 from django.urls import reverse
 from oscar.core.loading import get_model
 
