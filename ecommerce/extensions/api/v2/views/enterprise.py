@@ -212,7 +212,8 @@ class EnterpriseCouponViewSet(CouponViewSet):
 
     @detail_route(url_path='codes', permission_classes=[IsAuthenticated])
     @permission_required(
-        'enterprise.can_view_coupon', fn=lambda request, pk, format=None: get_enterprise_from_product(pk)
+        'enterprise.can_view_coupon',
+        fn=lambda request, pk, format=None: (get_enterprise_from_product(pk), request)
     )
     def codes(self, request, pk, format=None):  # pylint: disable=unused-argument, redefined-builtin
         """
@@ -355,7 +356,10 @@ class EnterpriseCouponViewSet(CouponViewSet):
         ).values('voucher__code', 'user__email').distinct().order_by('user__email')
 
     @list_route(url_path=r'(?P<enterprise_id>.+)/overview', permission_classes=[IsAuthenticated])
-    @permission_required('enterprise.can_view_coupon', fn=lambda request, enterprise_id: enterprise_id)
+    @permission_required(
+        'enterprise.can_view_coupon',
+        fn=lambda request, enterprise_id: (enterprise_id, request)
+    )
     def overview(self, request, enterprise_id):     # pylint: disable=unused-argument
         """
         Overview of Enterprise coupons.
@@ -380,7 +384,10 @@ class EnterpriseCouponViewSet(CouponViewSet):
         return self.get_paginated_response(serializer.data)
 
     @detail_route(methods=['post'], permission_classes=[IsAuthenticated])
-    @permission_required('enterprise.can_assign_coupon', fn=lambda request, pk: get_enterprise_from_product(pk))
+    @permission_required(
+        'enterprise.can_assign_coupon',
+        fn=lambda request, pk: (get_enterprise_from_product(pk), request)
+    )
     def assign(self, request, pk):  # pylint: disable=unused-argument
         """
         Assign users by email to codes within the Coupon.
@@ -397,7 +404,10 @@ class EnterpriseCouponViewSet(CouponViewSet):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     @detail_route(methods=['post'], permission_classes=[IsAuthenticated])
-    @permission_required('enterprise.can_assign_coupon', fn=lambda request, pk: get_enterprise_from_product(pk))
+    @permission_required(
+        'enterprise.can_assign_coupon',
+        fn=lambda request, pk: (get_enterprise_from_product(pk), request)
+    )
     def revoke(self, request, pk):  # pylint: disable=unused-argument
         """
         Revoke users by email from codes within the Coupon.
@@ -416,7 +426,10 @@ class EnterpriseCouponViewSet(CouponViewSet):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     @detail_route(methods=['post'], permission_classes=[IsAuthenticated])
-    @permission_required('enterprise.can_assign_coupon', fn=lambda request, pk: get_enterprise_from_product(pk))
+    @permission_required(
+        'enterprise.can_assign_coupon',
+        fn=lambda request, pk: (get_enterprise_from_product(pk), request)
+    )
     def remind(self, request, pk):  # pylint: disable=unused-argument
         """
         Remind users of pending offer assignments by email.

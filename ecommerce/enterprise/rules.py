@@ -3,7 +3,6 @@ Django rules for enterprise
 """
 from __future__ import absolute_import
 
-import crum
 import rules
 from edx_rbac.utils import request_user_has_implicit_access_via_jwt, user_has_access_via_database
 from edx_rest_framework_extensions.auth.jwt.authentication import get_decoded_jwt_from_auth
@@ -14,13 +13,13 @@ from ecommerce.core.models import EcommerceFeatureRoleAssignment
 
 
 @rules.predicate
-def request_user_has_implicit_access(user, context):  # pylint: disable=unused-argument
+def request_user_has_implicit_access(user, args):  # pylint: disable=unused-argument
     """
     Check that if request user has implicit access to `ENTERPRISE_COUPON_ADMIN_ROLE` feature role.
      Returns:
         boolean: whether the request user has access or not
     """
-    request = crum.get_current_request()
+    context, request = args
     decoded_jwt = get_decoded_jwt(request) or get_decoded_jwt_from_auth(request)
     if not context:
         return False
@@ -28,12 +27,13 @@ def request_user_has_implicit_access(user, context):  # pylint: disable=unused-a
 
 
 @rules.predicate
-def request_user_has_explicit_access(user, context):
+def request_user_has_explicit_access(user, args):
     """
     Check that if request user has explicit access to `ENTERPRISE_COUPON_ADMIN_ROLE` feature role.
     Returns:
         boolean: whether the request user has access or not
     """
+    context, __ = args
     if not context:
         return False
     return user_has_access_via_database(
