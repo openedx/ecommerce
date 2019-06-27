@@ -1,13 +1,13 @@
-from __future__ import unicode_literals
+from __future__ import absolute_import, unicode_literals
 
 import datetime
 import os
 from decimal import Decimal
-from urlparse import urljoin
 
 import ddt
 import mock
 import responses
+import six  # pylint: disable=ungrouped-imports
 from django.conf import settings
 from django.urls import reverse
 from factory.django import mute_signals
@@ -16,6 +16,7 @@ from oscar.apps.payment.exceptions import PaymentError, TransactionDeclined, Use
 from oscar.core.loading import get_class, get_model
 from oscar.test import factories
 from oscar.test.contextmanagers import mock_signal_receiver
+from six.moves.urllib.parse import urljoin
 from testfixtures import LogCapture
 
 from ecommerce.core.constants import ISO_8601_FORMAT
@@ -188,7 +189,7 @@ class CybersourceMixin(PaymentEventsMixin):
         """
         reason_code = kwargs.get('reason_code', '100')
         req_reference_number = kwargs.get('req_reference_number', basket.order_number)
-        total = unicode(basket.total_incl_tax)
+        total = six.text_type(basket.total_incl_tax)
         auth_amount = auth_amount or total
 
         notification = {
@@ -221,7 +222,7 @@ class CybersourceMixin(PaymentEventsMixin):
             if billing_address.state:
                 notification['req_bill_to_address_state'] = billing_address.state
 
-        notification['signed_field_names'] = ','.join(notification.keys())
+        notification['signed_field_names'] = ','.join(list(notification.keys()))
         notification['signature'] = self.generate_signature(self.processor.secret_key, notification)
         return notification
 
@@ -305,7 +306,7 @@ class CybersourceMixin(PaymentEventsMixin):
             'locale': settings.LANGUAGE_CODE,
             'transaction_type': 'sale',
             'reference_number': basket.order_number,
-            'amount': unicode(basket.total_incl_tax),
+            'amount': six.text_type(basket.total_incl_tax),
             'currency': basket.currency,
             'override_custom_receipt_page': basket.site.siteconfiguration.build_ecommerce_url(
                 reverse('cybersource:redirect')
@@ -760,7 +761,7 @@ class PaypalMixin(object):
         self.mock_api_response('/v1/oauth2/token', oauth2_response, rsps=rsps)
 
     def get_payment_creation_response_mock(self, basket, state=PAYMENT_CREATION_STATE, approval_url=APPROVAL_URL):
-        total = unicode(basket.total_incl_tax)
+        total = six.text_type(basket.total_incl_tax)
         payment_creation_response = {
             'create_time': '2015-05-04T18:18:27Z',
             'id': self.PAYMENT_ID,
@@ -797,7 +798,7 @@ class PaypalMixin(object):
                         {
                             'quantity': line.quantity,
                             'name': line.product.title,
-                            'price': unicode(line.line_price_incl_tax_incl_discounts / line.quantity),
+                            'price': six.text_type(line.line_price_incl_tax_incl_discounts / line.quantity),
                             'currency': line.stockrecord.price_currency,
                         }
                         for line in basket.all_lines()
@@ -852,7 +853,7 @@ class PaypalMixin(object):
     def mock_payment_execution_response(self, basket, state=PAYMENT_EXECUTION_STATE, payer_info=None):
         if payer_info is None:
             payer_info = self.PAYER_INFO
-        total = unicode(basket.total_incl_tax)
+        total = six.text_type(basket.total_incl_tax)
         payment_execution_response = {
             'create_time': '2015-05-04T15:55:27Z',
             'id': self.PAYMENT_ID,
@@ -882,7 +883,7 @@ class PaypalMixin(object):
                         {
                             'quantity': line.quantity,
                             'name': line.product.title,
-                            'price': unicode(line.line_price_incl_tax_incl_discounts / line.quantity),
+                            'price': six.text_type(line.line_price_incl_tax_incl_discounts / line.quantity),
                             'currency': line.stockrecord.price_currency,
                         }
                         for line in basket.all_lines()

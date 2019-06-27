@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+from __future__ import absolute_import
+
+import six
+
 from ecommerce.extensions.payment.models import SDNCheckFailure
 from ecommerce.tests.testcases import TestCase
 
@@ -24,4 +28,4 @@ class SDNCheckFailureTests(TestCase):
             username=self.username
         )
 
-        self.assertEqual(unicode(basket), expected)
+        self.assertEqual(six.text_type(basket), expected)
