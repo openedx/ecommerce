@@ -2,6 +2,8 @@
 """
 Form to Create Journal Bundle Conditional Offer
 """
+from __future__ import absolute_import
+
 import logging
 
 from django import forms

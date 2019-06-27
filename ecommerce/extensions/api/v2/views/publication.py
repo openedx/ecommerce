@@ -1,4 +1,6 @@
 """HTTP endpoints for course publication."""
+from __future__ import absolute_import
+
 from rest_framework import generics, status
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response

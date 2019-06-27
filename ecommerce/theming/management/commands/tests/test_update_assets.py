@@ -1,6 +1,8 @@
 """
 Tests for Management commands of comprehensive theming.
 """
+from __future__ import absolute_import
+
 from django.conf import settings
 from django.core.management import CommandError, call_command
 from django.test import TestCase, override_settings

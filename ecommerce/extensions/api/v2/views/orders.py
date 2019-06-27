@@ -1,4 +1,6 @@
 """HTTP endpoints for interacting with orders."""
+from __future__ import absolute_import
+
 import logging
 
 from oscar.core.loading import get_class, get_model

@@ -1,11 +1,13 @@
-from __future__ import unicode_literals
+from __future__ import absolute_import, unicode_literals
 
 import logging
 
+import six
 from django.core.management import BaseCommand
 from django.db import transaction
 from oscar.core.loading import get_model
 from oscar.test.utils import RequestFactory
+from six.moves import map
 from threadlocals.threadlocals import set_thread_variable
 
 from ecommerce.courses.models import Course
@@ -50,7 +52,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         self.options = options  # pylint: disable=attribute-defined-outside-init
-        course_ids = map(unicode, self.options.get('course_ids', []))
+        course_ids = list(map(six.text_type, self.options.get('course_ids', [])))
 
         self.partner = Partner.objects.get(code__iexact=options['partner'])  # pylint: disable=attribute-defined-outside-init
         site = self.partner.default_site

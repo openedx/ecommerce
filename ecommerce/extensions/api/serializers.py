@@ -1,10 +1,11 @@
 """Serializers for data manipulated by ecommerce API endpoints."""
-from __future__ import unicode_literals
+from __future__ import absolute_import, unicode_literals
 
 import logging
 from datetime import timedelta
 from decimal import Decimal
 
+import six
 import waffle
 from dateutil.parser import parse
 from django.conf import settings
@@ -18,6 +19,7 @@ from path import Path
 from rest_framework import serializers
 from rest_framework.reverse import reverse
 from rest_framework.settings import api_settings
+from six.moves import range
 
 from ecommerce.core.constants import (
     COURSE_ENTITLEMENT_PRODUCT_CLASS_NAME,
@@ -1406,7 +1408,7 @@ class CouponCodeRevokeSerializer(CouponCodeMixin, serializers.Serializer):  # py
                 )
         except Exception as exc:  # pylint: disable=broad-except
             logger.exception('Encountered error when revoking code %s for user %s', code, email)
-            detail = unicode(exc)
+            detail = six.text_type(exc)
 
         validated_data['detail'] = detail
         return validated_data
@@ -1456,7 +1458,7 @@ class CouponCodeRemindSerializer(CouponCodeMixin, serializers.Serializer):  # py
             )
         except Exception as exc:  # pylint: disable=broad-except
             logger.exception('Encountered error during reminder email for code %s of user %s', code, email)
-            detail = unicode(exc)
+            detail = six.text_type(exc)
 
         validated_data['detail'] = detail
         return validated_data

@@ -1,14 +1,17 @@
 # -*- coding: utf-8 -*-
+from __future__ import absolute_import
+
 import json
 import time
-from urllib import urlencode
 
 import httpretty
 import mock
+import six
 from django.conf import settings
 from django.test import override_settings
 from oscar.test import factories
 from requests.exceptions import HTTPError, Timeout
+from six.moves.urllib.parse import urlencode
 
 from ecommerce.core.models import User
 from ecommerce.extensions.payment.models import SDNCheckFailure
@@ -66,8 +69,8 @@ class SDNCheckTests(TestCase):
             'sources': self.site_configuration.sdn_api_list,
             'api_key': self.site_configuration.sdn_api_key,
             'type': 'individual',
-            'name': unicode(self.name).encode('utf-8'),
-            'address': unicode(self.city).encode('utf-8'),
+            'name': six.text_type(self.name).encode('utf-8'),
+            'address': six.text_type(self.city).encode('utf-8'),
             'countries': self.country
         })
         sdn_check_url = '{api_url}?{params}'.format(

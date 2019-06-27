@@ -3,13 +3,14 @@ Management command that deletes baskets associated with orders.
 
 These baskets don't have much value once the order is placed, and unnecessarily take up space.
 """
-from __future__ import unicode_literals
+from __future__ import absolute_import, unicode_literals
 
 import time
 
 from django.core.management import BaseCommand
 from django.db import transaction
 from oscar.core.loading import get_model
+from six.moves import range
 
 Basket = get_model('basket', 'Basket')
 

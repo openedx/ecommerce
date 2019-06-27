@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+
 from django.utils.translation import ugettext_lazy as _
 from oscar.apps.partner.admin import *  # noqa pylint: disable=wildcard-import,unused-wildcard-import
 from oscar.core.loading import get_class

@@ -1,4 +1,6 @@
 """HTTP endpoints for interacting with payments."""
+from __future__ import absolute_import
+
 from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_extensions.cache.decorators import cache_response

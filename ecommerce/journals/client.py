@@ -1,6 +1,8 @@
 """
 Utility Functions to Access the Discovery Journal API and the Journals Service API
 """
+from __future__ import absolute_import
+
 import logging
 
 from edx_django_utils.cache import TieredCache

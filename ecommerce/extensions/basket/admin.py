@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+
 from oscar.apps.basket.admin import *  # noqa pylint: disable=wildcard-import,unused-wildcard-import
 
 from ecommerce.extensions.basket.models import BasketAttribute, BasketAttributeType
