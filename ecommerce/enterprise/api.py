@@ -1,11 +1,13 @@
 """
 Methods for fetching enterprise API data.
 """
+from __future__ import absolute_import
+
 import logging
-from urllib import urlencode
 
 from django.conf import settings
 from edx_django_utils.cache import TieredCache
+from six.moves.urllib.parse import urlencode
 
 from ecommerce.core.utils import get_cache_key
 
