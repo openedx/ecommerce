@@ -65,7 +65,11 @@ def _redirect_to_payment_microfrontend_if_configured(request):
                 request.site.siteconfiguration.enable_microfrontend_for_basket_page and
                 request.site.siteconfiguration.payment_microfrontend_url
         ):
-            return HttpResponseRedirect(request.site.siteconfiguration.payment_microfrontend_url)
+            url = add_utm_params_to_url(
+                request.site.siteconfiguration.payment_microfrontend_url,
+                request.GET.items(),
+            )
+            return HttpResponseRedirect(url)
     return None
 
 
@@ -516,6 +520,7 @@ class PaymentApiLogicMixin(BasketLogicMixin):
         """
 
         serialized_basket = {
+            'is_free_basket': context['free_basket'],
             'total_excl_discount': context['order_total'].excl_tax + 12,
             'calculated_discount': context['total_benefit'],
             'order_total': context['order_total'].excl_tax,
