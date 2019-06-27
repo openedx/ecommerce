@@ -4,6 +4,7 @@ import crum
 from ecommerce.extensions.offer.mixins import BenefitWithoutRangeMixin, PercentageBenefitMixin, ConditionWithoutRangeMixin, SingleItemConsumptionConditionMixin
 from oscar.core.loading import get_model
 from ecommerce.extensions.api.handlers import jwt_decode_handler
+from ecommerce.extensions.offer.constants import DYNAMIC_DISCOUNT_FLAG
 
 PercentageDiscountBenefit = get_model('offer', 'PercentageDiscountBenefit')
 Condition = get_model('offer', 'Condition')
@@ -40,7 +41,7 @@ class DynamicPercentageDiscountBenefit(BenefitWithoutRangeMixin, PercentageDisco
 
     def apply(self, basket, condition, offer, discount_percent=None,
               max_total_discount=None):
-        if not waffle.flag_is_active(crum.get_current_request(), 'offer.dynamic_discount'):
+        if not waffle.flag_is_active(crum.get_current_request(), DYNAMIC_DISCOUNT_FLAG):
             return None
         percent = get_percentage_from_request()
         if percent:
@@ -50,8 +51,8 @@ class DynamicPercentageDiscountBenefit(BenefitWithoutRangeMixin, PercentageDisco
                 offer, 
                 discount_percent=percent,
                 max_total_discount=max_total_discount)
+            import pdb; pdb.set_trace()
             return application_result
-        # What do I do here in the else?
         return None
 
 
@@ -65,7 +66,7 @@ class DynamicCustomerCondition(ConditionWithoutRangeMixin, SingleItemConsumption
         return "dynamic_discount_condition"
 
     def is_satisfied(self, offer, basket):  # pylint: disable=unused-argument
-        if not waffle.flag_is_active(crum.get_current_request(), 'offer.dynamic_discount'):
+        if not waffle.flag_is_active(crum.get_current_request(), DYNAMIC_DISCOUNT_FLAG):
             return False
         decoded_jwt_discount = get_decoded_jwt_discount_from_request()
         if decoded_jwt_discount:

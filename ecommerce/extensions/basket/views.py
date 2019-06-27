@@ -468,6 +468,7 @@ class BasketSummaryView(BasketLogicMixin, BasketView):
     @newrelic.agent.function_trace()
     def get(self, request, *args, **kwargs):
         basket = request.basket
+        
         try:
             properties = {
                 'cart_id': basket.id,
