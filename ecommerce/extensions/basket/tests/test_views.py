@@ -90,9 +90,11 @@ class BasketAddItemsViewTests(
         self.catalog = Catalog.objects.create(partner=self.partner)
         self.catalog.stock_records.add(self.stock_record)
 
-    def _get_response(self, product_skus):
+    def _get_response(self, product_skus, **url_params):
         qs = six.moves.urllib.parse.urlencode({'sku': product_skus}, True)
         url = '{root}?{qs}'.format(root=self.path, qs=qs)
+        for name, value in url_params.items():
+            url += '&{}={}'.format(name, value)
         return self.client.get(url)
 
     def test_add_multiple_products_to_basket(self):
@@ -108,12 +110,10 @@ class BasketAddItemsViewTests(
     def test_basket_with_utm_params(self):
         """ Verify the basket includes utm params after redirect. """
         products = ProductFactory.create_batch(3, stockrecords__partner=self.partner)
-        # pylint: disable=too-many-function-args
-        qs = six.moves.urllib.parse.urlencode(
-            {'sku': [product.stockrecords.first().partner_sku for product in products]},
-            True)
-        url = '{root}?{qs}&utm_source=test'.format(root=self.path, qs=qs)
-        response = self.client.get(url)
+        response = self._get_response(
+            [product.stockrecords.first().partner_sku for product in products],
+            utm_source='test',
+        )
         self.assertEqual(response.url, '/basket/?utm_source=test')
 
     def test_redirect_to_basket_summary(self):
@@ -123,9 +123,7 @@ class BasketAddItemsViewTests(
         self.create_coupon(catalog=self.catalog, code=COUPON_CODE, benefit_value=5)
 
         self.mock_course_runs_endpoint(self.site_configuration.discovery_api_url, course_run=self.course)
-        url = '{path}?sku={sku}&code={code}'.format(path=self.path, sku=self.stock_record.partner_sku,
-                                                    code=COUPON_CODE)
-        response = self.client.get(url)
+        response = self._get_response(self.stock_record.partner_sku, code=COUPON_CODE)
         expected_url = self.get_full_url(reverse('basket:summary'))
         self.assertRedirects(response, expected_url, status_code=303)
 
@@ -140,13 +138,13 @@ class BasketAddItemsViewTests(
     @override_flag(ENABLE_MICROFRONTEND_FOR_BASKET_PAGE_FLAG_NAME, active=True)
     def test_microfrontend_for_single_course_purchase_if_configured(self, enable_redirect, set_url):
         microfrontend_url = self.configure_redirect_to_microfrontend(enable_redirect, set_url)
-        response = self._get_response(self.stock_record.partner_sku)
+        response = self._get_response(self.stock_record.partner_sku, utm_source='test')
 
-        if enable_redirect and set_url:
-            self.assertRedirects(response, microfrontend_url, status_code=302, fetch_redirect_response=False)
-        else:
-            expected_url = self.get_full_url(reverse('basket:summary'))
-            self.assertRedirects(response, expected_url, status_code=303)
+        expect_microfrontend = enable_redirect and set_url
+        expected_url = microfrontend_url if expect_microfrontend else '/basket/'
+        expected_url += '?utm_source=test'
+        expected_status_code = 302 if expect_microfrontend else 303
+        self.assertRedirects(response, expected_url, status_code=expected_status_code, fetch_redirect_response=False)
 
     @override_flag(ENABLE_MICROFRONTEND_FOR_BASKET_PAGE_FLAG_NAME, active=True)
     def test_no_microfrontend_for_enrollment_code_seat(self):
@@ -180,13 +178,10 @@ class BasketAddItemsViewTests(
         product_range = factories.RangeFactory(products=products)
         voucher, __ = prepare_voucher(_range=product_range, usage=usage)
 
-        # pylint: disable=too-many-function-args
-        qs = six.moves.urllib.parse.urlencode({
-            'sku': [product.stockrecords.first().partner_sku for product in products],
-            'code': voucher.code
-        }, True)
-        url = '{root}?{qs}'.format(root=self.path, qs=qs)
-        response = self.client.get(url)
+        response = self._get_response(
+            [product.stockrecords.first().partner_sku for product in products],
+            code=voucher.code,
+        )
         self.assertEqual(response.status_code, 303)
         basket = response.wsgi_request.basket
         self.assertEqual(basket.status, Basket.OPEN)
@@ -205,13 +200,10 @@ class BasketAddItemsViewTests(
         stock_record = StockRecordFactory(product=product2, partner=self.partner)
         catalog.stock_records.add(stock_record)
 
-        # pylint: disable=too-many-function-args
-        qs = six.moves.urllib.parse.urlencode(
-            {'sku': [product.stockrecords.first().partner_sku for product in [product1, product2]]},
-            True)
-        url = '{root}?{qs}'.format(root=self.path, qs=qs)
         with mock.patch.object(UserAlreadyPlacedOrder, 'user_already_placed_order', return_value=True):
-            response = self.client.get(url)
+            response = self._get_response(
+                [product.stockrecords.first().partner_sku for product in [product1, product2]],
+            )
             self.assertEqual(response.status_code, 200)
             self.assertEqual(response.context['error'], 'You have already purchased these products')
 
@@ -220,13 +212,8 @@ class BasketAddItemsViewTests(
         Test user can purchase products which have not been already purchased
         """
         products = ProductFactory.create_batch(3, stockrecords__partner=self.partner)
-        # pylint: disable=too-many-function-args
-        qs = six.moves.urllib.parse.urlencode(
-            {'sku': [product.stockrecords.first().partner_sku for product in products]},
-            True)
-        url = '{root}?{qs}'.format(root=self.path, qs=qs)
         with mock.patch.object(UserAlreadyPlacedOrder, 'user_already_placed_order', return_value=False):
-            response = self.client.get(url)
+            response = self._get_response([product.stockrecords.first().partner_sku for product in products])
             self.assertEqual(response.status_code, 303)
 
     def test_one_already_purchased_product(self):
@@ -236,11 +223,7 @@ class BasketAddItemsViewTests(
         order = create_order(site=self.site, user=self.user)
         products = ProductFactory.create_batch(3, stockrecords__partner=self.partner)
         products.append(OrderLine.objects.get(order=order).product)
-        # pylint: disable=too-many-function-args
-        qs = six.moves.urllib.parse.urlencode(
-            {'sku': [product.stockrecords.first().partner_sku for product in products]}, True)
-        url = '{root}?{qs}'.format(root=self.path, qs=qs)
-        response = self.client.get(url)
+        response = self._get_response([product.stockrecords.first().partner_sku for product in products])
         basket = response.wsgi_request.basket
         self.assertEqual(response.status_code, 303)
         self.assertEqual(basket.lines.count(), len(products) - 1)
@@ -253,16 +236,13 @@ class BasketAddItemsViewTests(
         voucher = mock_get_entitlement_voucher.return_value
         voucher.code = 'FAKECODE'
         sku = self.stock_record.partner_sku
-        # pylint: disable=redundant-keyword-arg
-        url = '{path}?{skus}'.format(path=self.path, skus=six.moves.urllib.parse.urlencode({'sku': [sku]}, doseq=True))
-        response = self.client.get(url)
 
+        response = self._get_response(sku)
         expected_failure_url = (
             'http%3A%2F%2Ftestserver.fake%2Fbasket%2Fadd%2F%3Fconsent_failed%3DTrue%26sku%3D{sku}'.format(
                 sku=sku
             )
         )
-
         expected_url = reverse('coupons:redeem') + '?code=FAKECODE&sku={sku}&failure_url={failure_url}'.format(
             sku=sku,
             failure_url=expected_failure_url,
@@ -276,10 +256,8 @@ class BasketAddItemsViewTests(
         """
         voucher = mock_get_entitlement_voucher.return_value
         voucher.code = 'FAKECODE'
-        sku = self.stock_record.partner_sku
-        url = '{path}?sku={sku}&consent_failed=true'.format(path=self.path, sku=sku)
         self.mock_course_runs_endpoint(self.site_configuration.discovery_api_url, course_run=self.course)
-        response = self.client.get(url)
+        response = self._get_response(self.stock_record.partner_sku, consent_failed='true')
         expected_url = self.get_full_url(reverse('basket:summary'))
         self.assertRedirects(response, expected_url, status_code=303)
 
@@ -291,8 +269,7 @@ class BasketAddItemsViewTests(
         self.assertFalse(Selector().strategy().fetch_for_product(product).availability.is_available_to_buy)
 
         expected_content = 'No product is available to buy.'
-        url = '{path}?sku={sku}'.format(path=self.path, sku=self.stock_record.partner_sku)
-        response = self.client.get(url)
+        response = self._get_response(self.stock_record.partner_sku)
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.content, expected_content)
 
@@ -304,12 +281,7 @@ class BasketAddItemsViewTests(
         products[0].save()
         self.assertFalse(Selector().strategy().fetch_for_product(products[0]).availability.is_available_to_buy)
 
-        # pylint: disable=too-many-function-args
-        qs = six.moves.urllib.parse.urlencode({
-            'sku': [product.stockrecords.first().partner_sku for product in products],
-        }, True)
-        url = '{root}?{qs}'.format(root=self.path, qs=qs)
-        response = self.client.get(url)
+        response = self._get_response([product.stockrecords.first().partner_sku for product in products])
         self.assertEqual(response.status_code, 303)
         basket = response.wsgi_request.basket
         self.assertEqual(basket.status, Basket.OPEN)
@@ -323,12 +295,7 @@ class BasketAddItemsViewTests(
         """
         Verify the email_opt_in query string is saved into a BasketAttribute.
         """
-        url = '{path}?sku={sku}&email_opt_in={opt_in}'.format(
-            path=self.path,
-            sku=self.stock_record.partner_sku,
-            opt_in=opt_in,
-        )
-        response = self.client.get(url)
+        response = self._get_response(self.stock_record.partner_sku, email_opt_in=opt_in)
         basket = response.wsgi_request.basket
         basket_attribute = BasketAttribute.objects.get(
             basket=basket,
@@ -340,12 +307,7 @@ class BasketAddItemsViewTests(
         """
         Verify that email_opt_in defaults to false if not specified.
         """
-
-        url = '{path}?sku={sku}'.format(
-            path=self.path,
-            sku=self.stock_record.partner_sku,
-        )
-        response = self.client.get(url)
+        response = self._get_response(self.stock_record.partner_sku)
         basket = response.wsgi_request.basket
         basket_attribute = BasketAttribute.objects.get(
             basket=basket,
