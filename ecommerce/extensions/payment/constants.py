@@ -38,7 +38,7 @@ CYBERSOURCE_CARD_TYPE_MAP = {
 
 CLIENT_SIDE_CHECKOUT_FLAG_NAME = 'enable_client_side_checkout'
 
-# .. toggle_name: ENABLE_MICROFRONTEND_FOR_BASKET_PAGE_FLAG_NAME
+# .. toggle_name: enable_microfrontend_for_basket_page
 # .. toggle_type: waffle_flag
 # .. toggle_default: False
 # .. toggle_description: Supports staged rollout of a new micro-frontend-based implementation of the basket page.

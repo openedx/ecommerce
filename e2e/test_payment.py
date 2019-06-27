@@ -99,13 +99,26 @@ class TestSeatPayment(object):
                 log.info('Checking again in 0.5 seconds.')
                 time.sleep(0.5)
 
-    def add_item_to_basket(self, selenium, sku):
+    def add_item_to_basket(self, selenium, sku, new_payment_page):
+        """
+        Arguments:
+            new_payment_page (bool): True to test the new payment page, False to test the older basket page.
+        """
+        if new_payment_page:
+            waffle_flag_enabled = 1
+            page_css_selector = ".page__payment"
+        else:
+            waffle_flag_enabled = 0
+            page_css_selector = ".basket-client-side"
+
         # Add the item to the basket and start the checkout process
-        selenium.get(EcommerceHelpers.build_url('/basket/add/?sku=' + sku))
+        selenium.get(EcommerceHelpers.build_url(
+            '/basket/add/?sku={}&dwft_enable_microfrontend_for_basket_page={}'.format(sku, waffle_flag_enabled)
+        ))
 
         # Wait till the selector is visible
         WebDriverWait(selenium, 20).until(
-            EC.visibility_of_element_located((By.CSS_SELECTOR, ".basket-client-side"))
+            EC.visibility_of_element_located((By.CSS_SELECTOR, page_css_selector))
         )
 
     def refund_orders_for_course_run(self, course_run_id):
@@ -125,11 +138,14 @@ class TestSeatPayment(object):
                 break
         return verified_seat
 
-    def test_verified_seat_payment_with_credit_card(self, selenium):
+    def test_verified_seat_payment_with_credit_card_basket_page(self, selenium):
         """
-        Validates users can add a verified seat to the cart and checkout with a credit card.
+        Using the basket page, validates users can add a verified seat to the cart and
+        checkout with a credit card.
+
         This test requires 'disable_repeat_order_check' waffle switch turned off on stage, to run.
         """
+        new_payment_page = False
         LmsHelpers.login(selenium)
 
         # Get the course run we want to purchase
@@ -137,7 +153,7 @@ class TestSeatPayment(object):
         verified_seat = self.get_verified_seat(course_run)
 
         for address in (ADDRESS_US, ADDRESS_FR,):
-            self.add_item_to_basket(selenium, verified_seat['sku'])
+            self.add_item_to_basket(selenium, verified_seat['sku'], new_payment_page)
             self.checkout_with_credit_card(selenium, address)
             self.assert_browser_on_receipt_page(selenium)
 
