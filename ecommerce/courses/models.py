@@ -1,7 +1,8 @@
-from __future__ import unicode_literals
+from __future__ import absolute_import, unicode_literals
 
 import logging
 
+import six
 from django.conf import settings
 from django.db import models, transaction
 from django.db.models import Count, Q
@@ -44,7 +45,7 @@ class Course(models.Model):
     history = HistoricalRecords()
 
     def __unicode__(self):
-        return unicode(self.id)
+        return six.text_type(self.id)
 
     def _create_parent_seat(self):
         """ Create the parent seat product if it does not already exist. """
@@ -165,7 +166,7 @@ class Course(models.Model):
             Product:  The seat that has been created or updated.
         """
         certificate_type = certificate_type.lower()
-        course_id = unicode(self.id)
+        course_id = six.text_type(self.id)
 
         if certificate_type == self.certificate_type_for_mode('audit'):
             # Yields a match if attribute names do not include 'certificate_type'.
