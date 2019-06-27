@@ -1,7 +1,10 @@
+from __future__ import absolute_import
+
 import uuid
 
 from django.core.management import call_command
 from oscar.core.loading import get_model
+from six.moves import range
 from testfixtures import LogCapture
 
 from ecommerce.coupons.tests.mixins import CouponMixin

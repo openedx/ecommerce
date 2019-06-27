@@ -1,3 +1,6 @@
+from __future__ import absolute_import
+
+import six
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
 from django.db import models
@@ -92,7 +95,7 @@ class Product(AbstractProduct):
 
     def save(self, *args, **kwargs):
         try:
-            if not isinstance(self.attr.note, basestring) and self.attr.note is not None:
+            if not isinstance(self.attr.note, six.string_types) and self.attr.note is not None:
                 log_message_and_raise_validation_error(
                     'Failed to create Product. Product note value must be of type string'
                 )
