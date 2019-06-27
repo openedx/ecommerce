@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 from oscar.apps.voucher import config

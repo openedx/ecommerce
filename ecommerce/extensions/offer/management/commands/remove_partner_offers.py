@@ -1,7 +1,7 @@
 """
 This command removes partner conditional offers.
 """
-from __future__ import unicode_literals
+from __future__ import absolute_import, unicode_literals
 
 import logging
 
@@ -10,6 +10,7 @@ from django.db.models import signals
 from django.template.defaultfilters import pluralize
 from oscar.apps.offer.signals import delete_unused_related_conditions_and_benefits
 from oscar.core.loading import get_model
+from six.moves import range
 
 from ecommerce.extensions.order.management.commands.prompt import query_yes_no
 

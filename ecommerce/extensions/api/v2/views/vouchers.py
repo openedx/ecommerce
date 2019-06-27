@@ -1,6 +1,7 @@
 """HTTP endpoints for interacting with vouchers."""
+from __future__ import absolute_import
+
 import logging
-from urlparse import urlparse
 
 import django_filters
 import pytz
@@ -14,6 +15,7 @@ from requests.exceptions import ConnectionError, Timeout
 from rest_framework import filters, status
 from rest_framework.decorators import list_route
 from rest_framework.response import Response
+from six.moves.urllib.parse import urlparse
 from slumber.exceptions import SlumberBaseException
 
 from ecommerce.core.constants import DEFAULT_CATALOG_PAGE_SIZE
@@ -144,7 +146,7 @@ class VoucherViewSet(NonDestroyableModelViewSet):
         products = []
         for seat_type in course_seat_types.split(','):
             products.extend(Product.objects.filter(
-                course_id__in=course_run_metadata.keys(),
+                course_id__in=list(course_run_metadata.keys()),
                 attributes__name='certificate_type',
                 attribute_values__value_text=seat_type
             ))
