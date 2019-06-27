@@ -93,10 +93,11 @@ class JournalBundleOfferUpdateViewTests(TestCase, TieredCacheMixin):
             'benefit_type': Benefit.PERCENTAGE,
             'benefit_value': expected_benefit_value,
         }
+        existing_offer_ids = [c.id for c in ConditionalOffer.objects.all()]
         response = self.client.post(self.path, data, follow=False)
         self.assertRedirects(response, self.path)
 
-        updated_journal_offer = ConditionalOffer.objects.get()
+        updated_journal_offer = ConditionalOffer.objects.get(~Q(id__in=existing_offer_ids))
         self.assertEqual(updated_journal_offer.benefit.value, expected_benefit_value)
 
     def test_post_with_invalid_data(self, mock_discovery_call_post, mock_discovery_call_update):
@@ -110,8 +111,9 @@ class JournalBundleOfferUpdateViewTests(TestCase, TieredCacheMixin):
             "benefit_type": Benefit.PERCENTAGE,
             "benefit_value": expected_benefit_value,
         }
+        existing_offer_ids = [c.id for c in ConditionalOffer.objects.all()]
         self.client.post(self.path, data, follow=False)
-        self.assertNotEqual(ConditionalOffer.objects.get().benefit.value, expected_benefit_value)
+        self.assertNotEqual(ConditionalOffer.objects.get(~Q(id__in=existing_offer_ids)).benefit.value, expected_benefit_value)
 
 
 class JournalBundleOfferCreateViewTests(ViewTestMixin, TestCase):
@@ -132,8 +134,9 @@ class JournalBundleOfferCreateViewTests(ViewTestMixin, TestCase):
             'benefit_type': Benefit.PERCENTAGE,
             'benefit_value': expected_benefit_value,
         }
+        existing_offer_ids = [c.id for c in ConditionalOffer.objects.all()]
         response = self.client.post(self.path, data)
-        journal_offer = ConditionalOffer.objects.get()
+        journal_offer = ConditionalOffer.objects.get(~Q(id__in=existing_offer_ids))
         self.assertIsNone(journal_offer.start_datetime)
         self.assertIsNone(journal_offer.end_datetime)
         self.assertEqual(journal_offer.benefit.value, expected_benefit_value)

@@ -130,8 +130,9 @@ class EnterpriseOfferCreateViewTests(EnterpriseServiceMockMixin, ViewTestMixin, 
             'benefit_type': Benefit.PERCENTAGE,
             'benefit_value': expected_benefit_value,
         }
+        existing_offer_ids = [c.id for c in ConditionalOffer.objects.all()]
         response = self.client.post(self.path, data, follow=False)
-        enterprise_offer = ConditionalOffer.objects.get()
+        enterprise_offer = ConditionalOffer.objects.get(~Q(id__in=existing_offer_ids))
 
         self.assertRedirects(response, reverse('enterprise:offers:edit', kwargs={'pk': enterprise_offer.pk}))
         self.assertIsNone(enterprise_offer.start_datetime)
