@@ -1,11 +1,13 @@
 """
 Helper methods for enterprise app.
 """
+from __future__ import absolute_import
+
 import hashlib
 import hmac
 import logging
 from collections import OrderedDict
-from urllib import urlencode
+from functools import reduce  # pylint: disable=redefined-builtin
 
 import crum
 import waffle
@@ -18,6 +20,7 @@ from edx_rest_framework_extensions.auth.jwt.cookies import get_decoded_jwt
 from oscar.core.loading import get_model
 from requests.exceptions import ConnectionError, Timeout
 from six.moves.urllib.parse import urlparse  # pylint: disable=import-error, relative-import
+from six.moves.urllib.parse import urlencode
 from slumber.exceptions import SlumberHttpBaseException
 
 from ecommerce.core.constants import SYSTEM_ENTERPRISE_LEARNER_ROLE

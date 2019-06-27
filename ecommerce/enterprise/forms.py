@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 # TODO: Refactor this to consolidate it with `ecommerce.programs.forms`.
+from __future__ import absolute_import
+
 from django import forms
 from django.forms.utils import ErrorList
 from django.utils.translation import ugettext_lazy as _

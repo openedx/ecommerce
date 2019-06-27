@@ -7,9 +7,10 @@ customers with which they are affiliated. The coupon product id's for the
 enterprise entitlements are provided by the Enterprise Service on the basis
 of the learner's enterprise eligibility criterion.
 """
+from __future__ import absolute_import
+
 import logging
 from collections import OrderedDict
-from urllib import urlencode
 
 from django.conf import settings
 from django.http import HttpResponseRedirect
@@ -17,6 +18,7 @@ from django.urls import reverse
 from edx_django_utils.cache import TieredCache
 from oscar.core.loading import get_model
 from requests.exceptions import ConnectionError, Timeout
+from six.moves.urllib.parse import urlencode
 from slumber.exceptions import SlumberBaseException
 
 from ecommerce.core.constants import COUPON_PRODUCT_CLASS_NAME

@@ -1,4 +1,6 @@
 # TODO: Refactor this to consolidate it with `ecommerce.programs.views`.
+from __future__ import absolute_import
+
 import logging
 
 from django.contrib import messages
