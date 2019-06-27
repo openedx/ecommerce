@@ -1,7 +1,8 @@
+from __future__ import absolute_import
+
 import datetime
 import json
 import logging
-from urllib import unquote, urlencode
 
 import newrelic.agent
 import pytz
@@ -12,6 +13,7 @@ from django.db import transaction
 from django.utils.translation import ugettext_lazy as _
 from oscar.apps.basket.signals import voucher_addition
 from oscar.core.loading import get_class, get_model
+from six.moves.urllib.parse import unquote, urlencode
 
 from ecommerce.courses.utils import mode_for_product
 from ecommerce.extensions.offer.constants import CUSTOM_APPLICATOR_USE_FLAG

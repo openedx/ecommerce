@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+
 import newrelic.agent
 import waffle
 from oscar.apps.basket.middleware import BasketMiddleware as OscarBasketMiddleware
