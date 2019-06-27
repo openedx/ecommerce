@@ -1,12 +1,15 @@
+from __future__ import absolute_import
+
 import json
 import logging
 import re
-from urllib import urlencode
 
 import requests
+import six
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 from oscar.core.loading import get_model
+from six.moves.urllib.parse import urlencode
 
 from ecommerce.core.constants import SEAT_PRODUCT_CLASS_NAME
 from ecommerce.extensions.analytics.utils import parse_tracking_context
@@ -164,10 +167,10 @@ class SDNClient(object):
             'sources': self.sdn_list,
             'api_key': self.api_key,
             'type': 'individual',
-            'name': unicode(name).encode('utf-8'),
+            'name': six.text_type(name).encode('utf-8'),
             # We are using the city as the address parameter value as indicated in the documentation:
             # http://developer.trade.gov/consolidated-screening-list.html
-            'address': unicode(city).encode('utf-8'),
+            'address': six.text_type(city).encode('utf-8'),
             'countries': country
         })
         sdn_check_url = '{api_url}?{params}'.format(
