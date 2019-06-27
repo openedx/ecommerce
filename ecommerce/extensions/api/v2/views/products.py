@@ -1,4 +1,6 @@
 """HTTP endpoints for interacting with products."""
+from __future__ import absolute_import
+
 import logging
 
 from django.db.models import Q
