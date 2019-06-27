@@ -174,7 +174,7 @@ class MigrateEnterpriseConditionalOffersTests(TestCase):
         handle should create new conditional offers for all voucher objects
         that ultimately relate to a range that has an enterprise_customer
         """
-        offers = ConditionalOffer.objects.all()
+        offers = ConditionalOffer.objects.filter(~Q(name='dynamic_conditional_offer'))
         assert offers.count() == 7
         assert offers.filter(name__contains='ENT Offer').count() == 0
 
@@ -187,7 +187,7 @@ class MigrateEnterpriseConditionalOffersTests(TestCase):
             mock_get_ent_customer.return_value = {'name': 'Boo Radley'}
             call_command('migrate_enterprise_conditional_offers', batch_sleep=0)
 
-        offers = ConditionalOffer.objects.all()
+        offers = ConditionalOffer.objects.filter(~Q(name='dynamic_conditional_offer'))
         assert offers.count() == 11
         assert offers.filter(name__contains='ENT Offer').count() == 4
 
@@ -214,7 +214,7 @@ class MigrateEnterpriseConditionalOffersTests(TestCase):
         that ultimately relate to a range that has an enterprise_customer
         for a different subset of vouchers
         """
-        offers = ConditionalOffer.objects.all()
+        offers = ConditionalOffer.objects.filter(~Q(name='dynamic_conditional_offer'))
         assert offers.count() == 7
         assert offers.filter(name__contains='ENT Offer').count() == 0
 
