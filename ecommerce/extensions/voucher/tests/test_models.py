@@ -6,7 +6,7 @@ import ddt
 from django.core.exceptions import ValidationError
 from django.utils.timezone import now
 from oscar.core.loading import get_model
-from oscar.test.factories import UserFactory
+from oscar.test.factories import OrderFactory, OrderLineFactory, UserFactory
 
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.extensions.offer.constants import OFFER_ASSIGNED, OFFER_ASSIGNMENT_REVOKED, OFFER_REDEEMED
@@ -100,8 +100,8 @@ class VoucherTests(TestCase):
         course = CourseFactory(id='course-v1:test-org+course+run', partner=partner)
         verified_seat = course.create_or_update_seat('verified', False, 100)
 
-        order = factories.OrderFactory()
-        order_line = factories.OrderLineFactory(product=verified_seat)
+        order = OrderFactory()
+        order_line = OrderLineFactory(product=verified_seat)
         order.lines.add(order_line)
         voucher.record_usage(order, user)
         voucher.offers.first().record_usage(discount={'freq': 1, 'discount': 1})

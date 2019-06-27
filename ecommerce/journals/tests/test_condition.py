@@ -2,6 +2,7 @@ from __future__ import absolute_import
 
 import mock
 from oscar.core.loading import get_model
+from oscar.test.factories import BasketFactory
 from requests.exceptions import Timeout
 from slumber.exceptions import HttpNotFoundError, SlumberBaseException
 
@@ -23,7 +24,7 @@ class JournalBundleConditionTests(TestCase, JournalMixin):
 
         self.condition = factories.JournalConditionFactory()
         self.offer = factories.JournalBundleOfferFactory(partner=self.partner, condition=self.condition)
-        self.basket = factories.BasketFactory(site=self.site, owner=factories.UserFactory())
+        self.basket = BasketFactory(site=self.site, owner=factories.UserFactory())
         self.basket.add_product(
             self.create_product(self.client),
             1

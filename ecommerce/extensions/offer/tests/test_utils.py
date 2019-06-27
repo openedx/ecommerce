@@ -6,6 +6,7 @@ import ddt
 import mock
 from django.conf import settings
 from oscar.core.loading import get_model
+from oscar.test.factories import StockRecord
 
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
@@ -20,8 +21,7 @@ from ecommerce.extensions.test.factories import (
     AbsoluteDiscountBenefitWithoutRangeFactory,
     BenefitFactory,
     PercentageDiscountBenefitWithoutRangeFactory,
-    RangeFactory,
-    StockRecord
+    RangeFactory
 )
 from ecommerce.tests.testcases import TestCase
 
