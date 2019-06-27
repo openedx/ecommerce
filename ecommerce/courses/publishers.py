@@ -1,8 +1,9 @@
-from __future__ import unicode_literals
+from __future__ import absolute_import, unicode_literals
 
 import json
 import logging
 
+import six
 from django.utils.translation import ugettext_lazy as _
 from edx_rest_api_client.exceptions import SlumberHttpBaseException
 from oscar.core.loading import get_model
@@ -130,10 +131,10 @@ class LMSPublisher(object):
         message = None
         try:
             data = json.loads(response)
-            if isinstance(data, basestring):
+            if isinstance(data, six.string_types):
                 message = data
             elif isinstance(data, dict) and data:
-                message = data.values()[0]
+                message = list(data.values())[0]
             if isinstance(message, list):
                 message = message[0]
         except Exception:  # pylint: disable=broad-except
