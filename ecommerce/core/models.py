@@ -1,7 +1,8 @@
+from __future__ import absolute_import
+
 import datetime
 import hashlib
 import logging
-from urlparse import urljoin, urlsplit, urlunsplit
 
 from dateutil.parser import parse
 from django.conf import settings
@@ -19,6 +20,7 @@ from edx_rest_api_client.client import EdxRestApiClient
 from jsonfield.fields import JSONField
 from requests.exceptions import ConnectionError, Timeout
 from simple_history.models import HistoricalRecords
+from six.moves.urllib.parse import urljoin, urlsplit, urlunsplit
 from slumber.exceptions import HttpNotFoundError, SlumberBaseException
 
 from analytics import Client as SegmentClient
