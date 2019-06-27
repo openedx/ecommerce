@@ -6,6 +6,8 @@ Note:
     So it must be added after this middleware in django settings files.
 """
 
+from __future__ import absolute_import
+
 from ecommerce.theming.models import SiteTheme
 
 
