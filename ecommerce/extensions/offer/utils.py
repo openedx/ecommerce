@@ -1,4 +1,6 @@
 """Offer Utility Methods. """
+from __future__ import absolute_import
+
 import logging
 from decimal import Decimal
 

@@ -1,13 +1,14 @@
 """
 This command change priority of conditional offers.
 """
-from __future__ import unicode_literals
+from __future__ import absolute_import, unicode_literals
 
 import logging
 
 from django.core.management import BaseCommand
 from django.template.defaultfilters import pluralize
 from oscar.core.loading import get_model
+from six.moves import range
 
 from ecommerce.extensions.offer.models import OFFER_PRIORITY_VOUCHER
 from ecommerce.extensions.order.management.commands.prompt import query_yes_no

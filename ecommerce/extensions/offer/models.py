@@ -1,8 +1,9 @@
-from __future__ import unicode_literals
+from __future__ import absolute_import, unicode_literals
 
 import logging
 import re
 
+import six
 from django.conf import settings
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
@@ -181,7 +182,7 @@ class ConditionalOffer(AbstractConditionalOffer):
     def clean_email_domains(self):
 
         if self.email_domains:
-            if not isinstance(self.email_domains, basestring):
+            if not isinstance(self.email_domains, six.string_types):
                 log_message_and_raise_validation_error(
                     'Failed to create ConditionalOffer. ConditionalOffer email domains must be of type string.'
                 )
@@ -222,7 +223,7 @@ class ConditionalOffer(AbstractConditionalOffer):
 
     def clean_max_global_applications(self):
         if self.max_global_applications is not None:
-            if self.max_global_applications < 1 or not isinstance(self.max_global_applications, (int, long)):
+            if self.max_global_applications < 1 or not isinstance(self.max_global_applications, six.integer_types):
                 log_message_and_raise_validation_error(
                     'Failed to create ConditionalOffer. max_global_applications field must be a positive number.'
                 )
@@ -308,7 +309,7 @@ class ConditionalOffer(AbstractConditionalOffer):
 
 
 def validate_credit_seat_type(course_seat_types):
-    if not isinstance(course_seat_types, basestring):
+    if not isinstance(course_seat_types, six.string_types):
         log_message_and_raise_validation_error('Failed to create Range. Credit seat types must be of type string.')
 
     course_seat_types_list = course_seat_types.split(',')
