@@ -2,6 +2,8 @@
 Endpoints to facilitate retirement actions
 """
 
+from __future__ import absolute_import
+
 from edx_rest_framework_extensions.auth.jwt.authentication import JwtAuthentication
 from rest_framework import permissions, status
 from rest_framework.response import Response

@@ -1,4 +1,6 @@
 """HTTP endpoints for interacting with refunds."""
+from __future__ import absolute_import
+
 import logging
 
 from django.contrib.auth import get_user_model
