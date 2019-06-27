@@ -234,7 +234,7 @@ def get_enterprise_customer_catalogs(site, endpoint_request_url, enterprise_cust
         )
         return CUSTOMER_CATALOGS_DEFAULT_RESPONSE
 
-    TieredCache.set_all_tiers(cache_key, response, settings.ENTERPRISE_CUSTOMER_RESULTS_CACHE_TIMEOUT)
+    TieredCache.set_all_tiers(cache_key, response, settings.ENTERPRISE_API_CACHE_TIMEOUT)
 
     return response
 
