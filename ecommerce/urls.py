@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+
 import os
 
 from auth_backends.urls import oauth2_urlpatterns

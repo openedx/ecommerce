@@ -17,6 +17,8 @@ interface, as well.
 .. _Django-Pipeline: http://django-pipeline.readthedocs.org/
 .. _Django-Require: https://github.com/etianen/django-require
 """
+from __future__ import absolute_import
+
 import os
 from collections import OrderedDict
 

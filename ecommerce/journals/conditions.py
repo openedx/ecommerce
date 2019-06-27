@@ -1,6 +1,8 @@
 """
 Checks that if a Basket Meets the Conditions of a Journal Bundle Offer
 """
+from __future__ import absolute_import
+
 import operator
 
 from oscar.apps.offer import utils as oscar_utils

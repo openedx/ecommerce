@@ -1,8 +1,9 @@
-from __future__ import unicode_literals
+from __future__ import absolute_import, unicode_literals
 
 import logging
 from hashlib import md5
 
+import six
 from django.conf import settings
 from django.db.utils import IntegrityError
 from oscar.core.loading import get_model
@@ -153,28 +154,28 @@ def generate_sku(product, partner):
 
     if product.is_coupon_product:
         _hash = ' '.join((
-            unicode(product.id),
-            unicode(partner.id)
+            six.text_type(product.id),
+            six.text_type(partner.id)
         )).encode('utf-8')
     elif product.is_enrollment_code_product:
         _hash = ' '.join((
             getattr(product.attr, 'course_key', ''),
             getattr(product.attr, 'seat_type', ''),
-            unicode(partner.id)
+            six.text_type(partner.id)
         )).encode('utf-8')
     elif product.is_seat_product:
         _hash = ' '.join((
             getattr(product.attr, 'certificate_type', ''),
-            unicode(product.attr.course_key),
-            unicode(product.attr.id_verification_required),
+            six.text_type(product.attr.course_key),
+            six.text_type(product.attr.id_verification_required),
             getattr(product.attr, 'credit_provider', ''),
-            unicode(partner.id)
+            six.text_type(partner.id)
         )).encode('utf-8')
     elif product.is_course_entitlement_product:
         _hash = ' '.join((
             getattr(product.attr, 'certificate_type', ''),
-            unicode(product.attr.UUID),
-            unicode(partner.id)
+            six.text_type(product.attr.UUID),
+            six.text_type(partner.id)
         )).encode('utf-8')
 
     else:

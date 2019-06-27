@@ -1,8 +1,11 @@
+from __future__ import absolute_import
+
 import ddt
 from django.core.management import call_command
 from mock import patch
 from oscar.core.loading import get_model
 from oscar.test import factories
+from six.moves import range
 from testfixtures import LogCapture
 
 from ecommerce.tests.testcases import TestCase
@@ -37,7 +40,7 @@ class ChangeOffersPriorityTests(TestCase):
         factories.ConditionalOfferFactory(offer_type=ConditionalOffer.SITE)
         factories.ConditionalOfferFactory(name='Coupon ENT Offer', offer_type=ConditionalOffer.VOUCHER, priority=20)
         ent_offer_count = 2
-        for idx in xrange(ent_offer_count):
+        for idx in range(ent_offer_count):
             factories.ConditionalOfferFactory(
                 name='ENT Offer {}'.format(idx), offer_type=ConditionalOffer.VOUCHER, priority=5
             )

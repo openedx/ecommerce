@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+
 import waffle
 from django.contrib import admin, messages
 from django.contrib.auth.admin import UserAdmin

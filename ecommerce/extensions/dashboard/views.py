@@ -1,3 +1,6 @@
+from __future__ import absolute_import
+
+import six
 from oscar.apps.dashboard.views import *  # pylint: disable=wildcard-import, unused-wildcard-import
 
 
@@ -60,7 +63,7 @@ class FilterFieldsMixin(object):
 
     def exposed_fields(self):
         """ Returns the dictionary of fields that will be immediately exposed to the user in the UI. """
-        return {field: details for (field, details) in self.get_filter_fields().iteritems() if details['exposed']}
+        return {field: details for (field, details) in six.iteritems(self.get_filter_fields()) if details['exposed']}
 
     def get_context_data(self, **kwargs):
         context = super(FilterFieldsMixin, self).get_context_data(**kwargs)

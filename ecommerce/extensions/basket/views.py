@@ -1,9 +1,8 @@
-from __future__ import unicode_literals
+from __future__ import absolute_import, unicode_literals
 
 import logging
 from datetime import datetime
 from decimal import Decimal
-from urllib import urlencode
 
 import dateutil.parser
 import newrelic.agent
@@ -21,6 +20,8 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from six.moves import range, zip
+from six.moves.urllib.parse import urlencode
 from slumber.exceptions import SlumberBaseException
 
 from ecommerce.core.exceptions import SiteConfigurationError
@@ -117,7 +118,7 @@ class BasketAddItemsView(View):
             prepare_basket(request, available_products, voucher)
         except AlreadyPlacedOrderException:
             return render(request, 'edx/error.html', {'error': _('You have already purchased these products')})
-        url = add_utm_params_to_url(reverse('basket:summary'), self.request.GET.items())
+        url = add_utm_params_to_url(reverse('basket:summary'), list(self.request.GET.items()))
         return HttpResponseRedirect(url, status=303)
 
 
@@ -300,7 +301,7 @@ class BasketLogicMixin(object):
             switch_link_text, partner_sku = get_basket_switch_data(line.product)
 
             if line.has_discount:
-                benefit = self.request.basket.applied_offers().values()[0].benefit
+                benefit = list(self.request.basket.applied_offers().values())[0].benefit
                 benefit_value = format_benefit_value(benefit)
             else:
                 benefit_value = None
@@ -345,7 +346,7 @@ class BasketLogicMixin(object):
             return {
                 'client_side_payment_processor': payment_processor,
                 'enable_client_side_checkout': True,
-                'months': range(1, 13),
+                'months': list(range(1, 13)),
                 'payment_form': PaymentForm(
                     user=self.request.user,
                     request=self.request,
@@ -354,7 +355,7 @@ class BasketLogicMixin(object):
                 ),
                 'paypal_enabled': 'paypal' in (p.NAME for p in payment_processors),
                 # Assumption is that the credit card duration is 15 years
-                'years': range(current_year, current_year + 16),
+                'years': list(range(current_year, current_year + 16)),
             }
         else:
             msg = 'Unable to load client-side payment processor [{processor}] for ' \
@@ -408,7 +409,7 @@ class BasketLogicMixin(object):
             total_benefit = None
         num_of_items = self.request.basket.num_items
         context.update({
-            'formset_lines_data': zip(formset, lines_data),
+            'formset_lines_data': list(zip(formset, lines_data)),
             # the new payment api is not using the formset, so the zip above doesn't work
             'lines_data': lines_data,
             'free_basket': context['order_total'].incl_tax == 0,

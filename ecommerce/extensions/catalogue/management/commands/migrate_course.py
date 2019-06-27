@@ -1,8 +1,9 @@
-from __future__ import unicode_literals
+from __future__ import absolute_import, unicode_literals
 
 import logging
 
 import requests
+import six
 import waffle
 from dateutil.parser import parse
 from django.conf import settings
@@ -159,7 +160,7 @@ class Command(BaseCommand):
             return
 
         for course_id in course_ids:
-            course_id = unicode(course_id)
+            course_id = six.text_type(course_id)
             try:
                 with transaction.atomic():
                     migrated_course = MigratedCourse(course_id, site_domain)

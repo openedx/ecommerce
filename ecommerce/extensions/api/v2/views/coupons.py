@@ -1,7 +1,8 @@
-from __future__ import unicode_literals
+from __future__ import absolute_import, unicode_literals
 
 import logging
 
+import six
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
@@ -422,7 +423,7 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
         if 'enterprise_customer_catalog' in request_data:
             range_data['enterprise_customer_catalog'] = request_data.get('enterprise_customer_catalog') or None
 
-        for attr, value in range_data.iteritems():
+        for attr, value in six.iteritems(range_data):
             setattr(voucher_range, attr, value)
 
         voucher_range.save()

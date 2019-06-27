@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+
 from auth_backends.urls import oauth2_urlpatterns
 from django.conf.urls import include, url
 from oscar.apps.dashboard import app

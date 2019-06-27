@@ -1,13 +1,13 @@
-from __future__ import unicode_literals
+from __future__ import absolute_import, unicode_literals
 
 import hashlib
 import logging
-from urlparse import parse_qs, urlparse
 
 import six
 import waffle
 from django.conf import settings
 from django.core.exceptions import ValidationError
+from six.moves.urllib.parse import parse_qs, urlparse
 
 logger = logging.getLogger(__name__)
 

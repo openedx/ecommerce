@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+
 from django.utils import timezone
 from oscar.apps.partner import availability, strategy
 from oscar.core.loading import get_model
