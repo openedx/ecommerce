@@ -144,7 +144,7 @@ pyopenssl==19.0.0         # via ndg-httpsclient, paypalrestsdk
 pyparsing==2.4.0          # via packaging
 python-dateutil==2.8.0
 python-openid==2.2.5 ; python_version == "2.7"
-python-slugify==3.0.2     # via code-annotations
+python-slugify==1.2.6     # via code-annotations, transifex-client
 pytz==2016.10
 pyyaml==5.1.1             # via code-annotations, edx-django-release-util, edx-i18n-tools
 rcssmin==1.0.6            # via django-compressor
