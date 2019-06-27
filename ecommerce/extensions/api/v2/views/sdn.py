@@ -1,4 +1,6 @@
 """API endpoint for performing an SDN check on users."""
+from __future__ import absolute_import
+
 from django.contrib.auth import logout
 from oscar.core.loading import get_model
 from requests.exceptions import HTTPError, Timeout
