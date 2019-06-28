@@ -98,8 +98,10 @@ class RefundCreateView(generics.CreateAPIView):
             # TODO: Change this to an error once we can successfully get the id from social auth and the db.
             # See REVMI-249 and REVMI-269
             monitoring_utils.set_custom_metric('ecommerce_missing_lms_user_id_refund', user.id)
-            logger.warn(u'Could not find lms_user_id for user %s when processing refund requested by %s',
-                        user.id, requested_by)
+            error_msg = u'Could not find lms_user_id for user {user_id} when processing refund requested by ' \
+                        u'{requester}'.format(user_id=user.id, requester=requested_by)
+            logger.warn(error_msg)
+            raise BadRequestException(error_msg)
 
         # Try and create a refund for the passed in order
         if entitlement_uuid:

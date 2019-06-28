@@ -193,7 +193,8 @@ class RefundCreateViewTests(RefundTestMixin, AccessTokenMixin, JwtMixin, TestCas
         with LogCapture(self.LOGGER_NAME) as log:
             response = self.client.post(self.path, data, JSON_CONTENT_TYPE)
             log.check_present(*expected_logs)
-            self.assert_ok_response(response)
+            self.assert_bad_request_response(response, 'Could not find lms_user_id for user {} when processing refund '
+                                                       'requested by {}'.format(user_without_id.id, user_without_id.id))
 
     def test_valid_entitlement_order(self):
         """
