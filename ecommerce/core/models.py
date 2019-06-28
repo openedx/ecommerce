@@ -543,7 +543,7 @@ class User(AbstractUser):
 
         # Could not find the lms_user_id
         monitoring_utils.set_custom_metric('ecommerce_missing_lms_user_id', self.id)
-        log.warn(u'Could not find lms_user_id for user %s for %s', self.id, usage)
+        log.warn(u'Could not find lms_user_id for user %s for %s', self.id, usage, exc_info=True)
         return None
 
     def get_full_name(self):
