@@ -520,6 +520,7 @@ class PaymentApiLogicMixin(BasketLogicMixin):
         """
 
         serialized_basket = {
+            'basket_id': context['basket_id'],
             'is_free_basket': context['free_basket'],
             'total_excl_discount': context['order_total'].excl_tax + 12,
             'calculated_discount': context['total_benefit'],
