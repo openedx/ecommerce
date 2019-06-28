@@ -7,6 +7,7 @@ import ddt
 import httpretty
 import mock
 from oscar.core.loading import get_model
+from oscar.test.factories import BasketFactory
 from six.moves import range, zip
 
 from ecommerce.coupons.tests.mixins import CouponMixin
@@ -52,7 +53,7 @@ class EnterpriseCustomerConditionTests(EnterpriseServiceMockMixin, DiscoveryTest
     def test_is_satisfied_true(self):
         """ Ensure the condition returns true if all basket requirements are met. """
         offer = factories.EnterpriseOfferFactory(partner=self.partner, condition=self.condition)
-        basket = factories.BasketFactory(site=self.site, owner=self.user)
+        basket = BasketFactory(site=self.site, owner=self.user)
         basket.add_product(self.course_run.seat_products[0])
         self.mock_enterprise_learner_api(
             learner_id=self.user.id,
@@ -91,7 +92,7 @@ class EnterpriseCustomerConditionTests(EnterpriseServiceMockMixin, DiscoveryTest
         """
         offer = factories.EnterpriseOfferFactory(partner=self.partner, condition=self.condition)
         enterprise_catalog_uuid = str(self.condition.enterprise_customer_catalog_uuid)
-        basket = factories.BasketFactory(site=self.site, owner=self.user)
+        basket = BasketFactory(site=self.site, owner=self.user)
         basket.strategy.request = self.request
         basket.strategy.request.GET = {'catalog': enterprise_catalog_uuid}
         self._check_condition_is_satisfied(offer, basket, is_satisfied=True)
@@ -103,7 +104,7 @@ class EnterpriseCustomerConditionTests(EnterpriseServiceMockMixin, DiscoveryTest
         """
         offer = factories.EnterpriseOfferFactory(partner=self.partner, condition=self.condition)
         enterprise_catalog_uuid = str(self.condition.enterprise_customer_catalog_uuid)
-        basket = factories.BasketFactory(site=self.site, owner=self.user)
+        basket = BasketFactory(site=self.site, owner=self.user)
         request_data = {'catalog': enterprise_catalog_uuid}
         basket_add_enterprise_catalog_attribute(basket, request_data)
         self._check_condition_is_satisfied(offer, basket, is_satisfied=True)
@@ -116,7 +117,7 @@ class EnterpriseCustomerConditionTests(EnterpriseServiceMockMixin, DiscoveryTest
         """
         offer = factories.EnterpriseOfferFactory(partner=self.partner, condition=self.condition)
 
-        basket = factories.BasketFactory(site=self.site, owner=self.user)
+        basket = BasketFactory(site=self.site, owner=self.user)
         basket.strategy.request = self.request
         basket.strategy.request.GET = {'catalog': invalid_enterprise_catalog_uuid}
         self._check_condition_is_satisfied(offer, basket, is_satisfied=False)
@@ -126,7 +127,7 @@ class EnterpriseCustomerConditionTests(EnterpriseServiceMockMixin, DiscoveryTest
     def test_is_satisfied_for_anonymous_user(self):
         """ Ensure the condition returns false for an anonymous user. """
         offer = factories.EnterpriseOfferFactory(partner=self.partner, condition=self.condition)
-        basket = factories.BasketFactory(site=self.site, owner=None)
+        basket = BasketFactory(site=self.site, owner=None)
         basket.add_product(self.course_run.seat_products[0])
         self.mock_enterprise_learner_api(
             learner_id=self.user.id,
@@ -146,7 +147,7 @@ class EnterpriseCustomerConditionTests(EnterpriseServiceMockMixin, DiscoveryTest
             condition=self.condition,
             offer_type=ConditionalOffer.VOUCHER
         )
-        basket = factories.BasketFactory(site=self.site, owner=self.user)
+        basket = BasketFactory(site=self.site, owner=self.user)
         basket.add_product(self.course_run.seat_products[0])
         enterprise_id = self.condition.enterprise_customer_uuid
         if use_new_enterprise:
@@ -196,14 +197,14 @@ class EnterpriseCustomerConditionTests(EnterpriseServiceMockMixin, DiscoveryTest
     def test_is_satisfied_empty_basket(self):
         """ Ensure the condition returns False if the basket is empty. """
         offer = factories.EnterpriseOfferFactory(partner=self.partner, condition=self.condition)
-        basket = factories.BasketFactory(site=self.site, owner=self.user)
+        basket = BasketFactory(site=self.site, owner=self.user)
         self.assertTrue(basket.is_empty)
         self.assertFalse(self.condition.is_satisfied(offer, basket))
 
     def test_is_satisfied_free_basket(self):
         """ Ensure the condition returns False if the basket total is zero. """
         offer = factories.EnterpriseOfferFactory(partner=self.partner, condition=self.condition)
-        basket = factories.BasketFactory(site=self.site, owner=self.user)
+        basket = BasketFactory(site=self.site, owner=self.user)
         test_product = factories.ProductFactory(
             stockrecords__price_excl_tax=0,
             stockrecords__partner__short_code='test'
@@ -214,7 +215,7 @@ class EnterpriseCustomerConditionTests(EnterpriseServiceMockMixin, DiscoveryTest
     def test_is_satisfied_site_mismatch(self):
         """ Ensure the condition returns False if the offer partner does not match the basket site partner. """
         offer = factories.EnterpriseOfferFactory(partner=SiteConfigurationFactory().partner, condition=self.condition)
-        basket = factories.BasketFactory(site=self.site, owner=self.user)
+        basket = BasketFactory(site=self.site, owner=self.user)
         basket.add_product(self.test_product)
         self.assertFalse(self.condition.is_satisfied(offer, basket))
 
@@ -222,7 +223,7 @@ class EnterpriseCustomerConditionTests(EnterpriseServiceMockMixin, DiscoveryTest
     def test_is_satisfied_enterprise_learner_error(self):
         """ Ensure the condition returns false if the enterprise learner data cannot be retrieved. """
         offer = factories.EnterpriseOfferFactory(partner=self.partner, condition=self.condition)
-        basket = factories.BasketFactory(site=self.site, owner=self.user)
+        basket = BasketFactory(site=self.site, owner=self.user)
         basket.add_product(self.course_run.seat_products[0])
         self.mock_enterprise_learner_api_raise_exception()
         self.assertFalse(self.condition.is_satisfied(offer, basket))
@@ -231,7 +232,7 @@ class EnterpriseCustomerConditionTests(EnterpriseServiceMockMixin, DiscoveryTest
     def test_is_satisfied_no_enterprise_learner(self):
         """ Ensure the condition returns false if the learner is not linked to an EnterpriseCustomer. """
         offer = factories.EnterpriseOfferFactory(partner=self.partner, condition=self.condition)
-        basket = factories.BasketFactory(site=self.site, owner=self.user)
+        basket = BasketFactory(site=self.site, owner=self.user)
         basket.add_product(self.course_run.seat_products[0])
         self.mock_enterprise_learner_api_for_learner_with_no_enterprise()
         self.assertFalse(self.condition.is_satisfied(offer, basket))
@@ -240,7 +241,7 @@ class EnterpriseCustomerConditionTests(EnterpriseServiceMockMixin, DiscoveryTest
     def test_is_satisfied_wrong_enterprise(self):
         """ Ensure the condition returns false if the learner is associated with a different EnterpriseCustomer. """
         offer = factories.EnterpriseOfferFactory(partner=self.partner, condition=self.condition)
-        basket = factories.BasketFactory(site=self.site, owner=self.user)
+        basket = BasketFactory(site=self.site, owner=self.user)
         basket.add_product(self.course_run.seat_products[0])
         self.mock_enterprise_learner_api(
             learner_id=self.user.id,
@@ -252,7 +253,7 @@ class EnterpriseCustomerConditionTests(EnterpriseServiceMockMixin, DiscoveryTest
     def test_is_satisfied_no_course_product(self):
         """ Ensure the condition returns false if the basket contains a product not associated with a course run. """
         offer = factories.EnterpriseOfferFactory(partner=self.partner, condition=self.condition)
-        basket = factories.BasketFactory(site=self.site, owner=self.user)
+        basket = BasketFactory(site=self.site, owner=self.user)
         basket.add_product(self.test_product)
         self.mock_enterprise_learner_api(
             learner_id=self.user.id,
@@ -265,7 +266,7 @@ class EnterpriseCustomerConditionTests(EnterpriseServiceMockMixin, DiscoveryTest
     def test_is_satisfied_course_run_not_in_catalog(self):
         """ Ensure the condition returns false if the course run is not in the Enterprise catalog. """
         offer = factories.EnterpriseOfferFactory(partner=self.partner, condition=self.condition)
-        basket = factories.BasketFactory(site=self.site, owner=self.user)
+        basket = BasketFactory(site=self.site, owner=self.user)
         basket.add_product(self.course_run.seat_products[0])
         self.mock_enterprise_learner_api(
             learner_id=self.user.id,
@@ -284,7 +285,7 @@ class EnterpriseCustomerConditionTests(EnterpriseServiceMockMixin, DiscoveryTest
     def test_is_satisfied_contains_content_items_failure(self):
         """ Ensure the condition returns false if the contains_content_item call fails. """
         offer = factories.EnterpriseOfferFactory(partner=self.partner, condition=self.condition)
-        basket = factories.BasketFactory(site=self.site, owner=self.user)
+        basket = BasketFactory(site=self.site, owner=self.user)
         basket.add_product(self.course_run.seat_products[0])
         self.mock_enterprise_learner_api(
             learner_id=self.user.id,
@@ -346,7 +347,7 @@ class AssignableEnterpriseCustomerConditionTests(EnterpriseServiceMockMixin, Cou
             expected_condition_result = assignment.get('result', expected_condition_result)
 
             voucher = Voucher.objects.get(usage=voucher_type, code=code)
-            basket = factories.BasketFactory(site=self.site, owner=factories.UserFactory(email=email))
+            basket = BasketFactory(site=self.site, owner=factories.UserFactory(email=email))
             basket.vouchers.add(voucher)
 
             is_condition_satisfied = self.condition.is_satisfied(voucher.enterprise_offer, basket)
@@ -380,7 +381,7 @@ class AssignableEnterpriseCustomerConditionTests(EnterpriseServiceMockMixin, Cou
         voucher = factories.VoucherFactory(usage=Voucher.SINGLE_USE, num_orders=num_orders)
         enterprise_offer = factories.EnterpriseOfferFactory(max_global_applications=None)
         voucher.offers.add(enterprise_offer)
-        basket = factories.BasketFactory(site=self.site, owner=factories.UserFactory(email=email))
+        basket = BasketFactory(site=self.site, owner=factories.UserFactory(email=email))
         basket.vouchers.add(voucher)
         factories.OfferAssignmentFactory(
             offer=enterprise_offer,
@@ -408,7 +409,7 @@ class AssignableEnterpriseCustomerConditionTests(EnterpriseServiceMockMixin, Cou
         voucher1.offers.add(enterprise_offers[0])
         voucher2.offers.add(enterprise_offers[1])
 
-        basket = factories.BasketFactory(site=self.site, owner=factories.UserFactory(email='test2@example.com'))
+        basket = BasketFactory(site=self.site, owner=factories.UserFactory(email='test2@example.com'))
         basket.vouchers.add(voucher1)
 
         factories.OfferAssignmentFactory(offer=enterprise_offers[0], code=voucher1.code, user_email='test1@example.com')
@@ -584,7 +585,7 @@ class AssignableEnterpriseCustomerConditionTests(EnterpriseServiceMockMixin, Cou
         factories.OfferAssignmentFactory(offer=enterprise_offer, code=code, user_email='test1@example.com')
         factories.OfferAssignmentFactory(offer=enterprise_offer, code=code, user_email='test2@example.com')
 
-        basket = factories.BasketFactory(site=self.site, owner=factories.UserFactory(email='bob@example.com'))
+        basket = BasketFactory(site=self.site, owner=factories.UserFactory(email='bob@example.com'))
         basket.vouchers.add(voucher)
 
         assert self.condition.is_satisfied(enterprise_offer, basket) is True
@@ -642,7 +643,7 @@ class AssignableEnterpriseCustomerConditionTests(EnterpriseServiceMockMixin, Cou
         voucher = factories.VoucherFactory(usage=Voucher.SINGLE_USE, code='AAA', num_orders=num_orders)
         voucher.offers.add(enterprise_offer)
 
-        basket = factories.BasketFactory(site=self.site, owner=factories.UserFactory(email='wow@example.com'))
+        basket = BasketFactory(site=self.site, owner=factories.UserFactory(email='wow@example.com'))
         basket.vouchers.add(voucher)
 
         assert self.condition.is_satisfied(enterprise_offer, basket) == redemptions_available

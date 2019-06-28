@@ -1,13 +1,24 @@
 from __future__ import absolute_import
 
 import uuid
-from datetime import datetime
+from datetime import timedelta
 
 import factory
 from django.utils.timezone import now
+from oscar.test.factories import Basket, BenefitFactory
 from oscar.test.factories import ConditionalOfferFactory as BaseConditionalOfferFactory
+from oscar.test.factories import (
+    ConditionFactory,
+    D,
+    Free,
+    OrderCreator,
+    OrderTotalCalculator,
+    ProductFactory,
+    RangeFactory,
+    UserFactory
+)
 from oscar.test.factories import VoucherFactory as BaseVoucherFactory
-from oscar.test.factories import *  # pylint:disable=wildcard-import,unused-wildcard-import
+from oscar.test.factories import create_product, create_stockrecord, get_class, get_model
 
 from ecommerce.enterprise.benefits import BENEFIT_MAP as ENTERPRISE_BENEFIT_MAP
 from ecommerce.enterprise.benefits import EnterpriseAbsoluteDiscountBenefit, EnterprisePercentageDiscountBenefit
@@ -97,10 +108,10 @@ def prepare_voucher(code='COUPONTEST', _range=None, start_datetime=None, end_dat
         product = ProductFactory(categories=[])
 
     if start_datetime is None:
-        start_datetime = now() - datetime.timedelta(days=1)
+        start_datetime = now() - timedelta(days=1)
 
     if end_datetime is None:
-        end_datetime = now() + datetime.timedelta(days=10)
+        end_datetime = now() + timedelta(days=10)
 
     voucher = VoucherFactory(
         code=code,
@@ -137,10 +148,10 @@ def prepare_enterprise_voucher(code='COUPONTEST', start_datetime=None, end_datet
                                enterprise_customer=None, enterprise_customer_catalog=None):
     """ Helper function to create a voucher and add an enterprise conditional offer to it. """
     if start_datetime is None:
-        start_datetime = now() - datetime.timedelta(days=1)
+        start_datetime = now() - timedelta(days=1)
 
     if end_datetime is None:
-        end_datetime = now() + datetime.timedelta(days=10)
+        end_datetime = now() + timedelta(days=10)
 
     voucher = VoucherFactory(
         code=code,
