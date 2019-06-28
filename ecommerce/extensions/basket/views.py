@@ -565,7 +565,9 @@ class PaymentApiLogicMixin(BasketLogicMixin):
             errors (list or dict): list of error dicts, or an error dict
         """
 
-        context = {}
+        context = {
+            'basket_id': self.request.basket.id,
+        }
         context = self._get_order_total(context)
         context['line_list'] = self.request.basket.all_lines()
         context = self.get_basket_context_data(context)
