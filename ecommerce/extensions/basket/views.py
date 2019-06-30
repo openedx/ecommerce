@@ -35,6 +35,7 @@ from ecommerce.extensions.analytics.utils import (
     translate_basket_line_for_segment
 )
 from ecommerce.extensions.basket.constants import EMAIL_OPT_IN_ATTRIBUTE
+from ecommerce.extensions.basket.exceptions import BadRequestException, RedirectException
 from ecommerce.extensions.basket.utils import (
     add_utm_params_to_url,
     apply_voucher_on_basket_and_check_discount,
@@ -79,38 +80,48 @@ class BasketAddItemsView(View):
     View that adds multiple products to a user's basket.
     An additional coupon code can be supplied so the offer is applied to the basket.
     """
-
     def get(self, request):
-        partner = get_partner_for_site(request)
+        try:
+            skus = self._get_skus(request)
+            products = self._get_products(request, skus)
+            voucher = self._get_voucher(request)
 
+            logger.info('Starting payment flow for user [%s] for products [%s].', request.user.username, skus)
+
+            self._redirect_for_enterprise_entitlement_if_needed(request, voucher, products, skus)
+            available_products = self._get_available_products(request, products)
+            self._set_email_preference_on_basket(request)
+            prepare_basket(request, available_products, voucher)
+            self._redirect_to_microfrontend_if_needed(request, products)
+
+            url = add_utm_params_to_url(reverse('basket:summary'), list(self.request.GET.items()))
+            return HttpResponseRedirect(url, status=303)
+
+        except AlreadyPlacedOrderException:
+            return render(request, 'edx/error.html', {'error': _('You have already purchased these products')})
+        except BadRequestException as e:
+            return HttpResponseBadRequest(e.message)
+        except RedirectException as e:
+            return e.response
+
+    def _get_skus(self, request):
         skus = [escape(sku) for sku in request.GET.getlist('sku')]
-        code = request.GET.get('code', None)
-
         if not skus:
-            return HttpResponseBadRequest(_('No SKUs provided.'))
+            raise BadRequestException(_('No SKUs provided.'))
+        return skus
 
+    def _get_products(self, request, skus):
+        partner = get_partner_for_site(request)
         products = Product.objects.filter(stockrecords__partner=partner, stockrecords__partner_sku__in=skus)
         if not products:
-            return HttpResponseBadRequest(_('Products with SKU(s) [{skus}] do not exist.').format(skus=', '.join(skus)))
+            raise BadRequestException(_('Products with SKU(s) [{skus}] do not exist.').format(skus=', '.join(skus)))
+        return products
 
-        logger.info('Starting payment flow for user[%s] for products[%s].', request.user.username, skus)
+    def _get_voucher(self, request):
+        code = request.GET.get('code', None)
+        return Voucher.objects.get(code=code) if code else None
 
-        voucher = Voucher.objects.get(code=code) if code else None
-
-        if voucher is None:
-            # If there is an Enterprise entitlement available for this basket,
-            # we redirect to the CouponRedeemView to apply the discount to the
-            # basket and handle the data sharing consent requirement.
-            code_redemption_redirect = get_enterprise_code_redemption_redirect(
-                request,
-                products,
-                skus,
-                'basket:basket-add'
-            )
-            if code_redemption_redirect:
-                return code_redemption_redirect
-
-        # check availability of products
+    def _get_available_products(self, request, products):
         unavailable_product_ids = []
         for product in products:
             purchase_info = request.strategy.fetch_for_product(product)
@@ -120,29 +131,41 @@ class BasketAddItemsView(View):
 
         available_products = products.exclude(id__in=unavailable_product_ids)
         if not available_products:
-            msg = _('No product is available to buy.')
-            return HttpResponseBadRequest(msg)
+            raise BadRequestException(_('No product is available to buy.'))
+        return available_products
 
-        # Associate the user's email opt in preferences with the basket in
-        # order to opt them in later as part of fulfillment
+    def _set_email_preference_on_basket(self, request):
+        """
+        Associate the user's email opt in preferences with the basket in
+        order to opt them in later as part of fulfillment
+        """
         BasketAttribute.objects.update_or_create(
             basket=request.basket,
             attribute_type=BasketAttributeType.objects.get(name=EMAIL_OPT_IN_ATTRIBUTE),
             defaults={'value_text': request.GET.get('email_opt_in') == 'true'},
         )
 
-        try:
-            prepare_basket(request, available_products, voucher)
-        except AlreadyPlacedOrderException:
-            return render(request, 'edx/error.html', {'error': _('You have already purchased these products')})
+    def _redirect_for_enterprise_entitlement_if_needed(self, request, voucher, products, skus):
+        """
+        If there is an Enterprise entitlement available for this basket,
+        we redirect to the CouponRedeemView to apply the discount to the
+        basket and handle the data sharing consent requirement.
+        """
+        if voucher is None:
+            code_redemption_redirect = get_enterprise_code_redemption_redirect(
+                request,
+                products,
+                skus,
+                'basket:basket-add'
+            )
+            if code_redemption_redirect:
+                raise RedirectException(response=code_redemption_redirect)
 
+    def _redirect_to_microfrontend_if_needed(self, request, products):
         if self._is_single_course_purchase(products):
             redirect_response = _redirect_to_payment_microfrontend_if_configured(request)
             if redirect_response:
-                return redirect_response
-
-        url = add_utm_params_to_url(reverse('basket:summary'), list(self.request.GET.items()))
-        return HttpResponseRedirect(url, status=303)
+                raise RedirectException(response=redirect_response)
 
     def _is_single_course_purchase(self, products):
         return len(products) == 1 and products[0].is_seat_product
@@ -184,16 +207,15 @@ class BasketLogicMixin(object):
         Returns:
             Dictionary containing course name, course key, course image URL and description.
         """
-        if product.is_seat_product:
-            course_key = CourseKey.from_string(product.attr.course_key)
-        else:
-            course_key = None
         course_name = None
         image_url = None
         short_description = None
         course_start = None
         course_end = None
         course = None
+        course_key = None
+        if product.is_seat_product:
+            course_key = CourseKey.from_string(product.attr.course_key)
 
         try:
             course = get_course_info_from_catalog(self.request.site, product)
