@@ -64,7 +64,8 @@ factory-boy==2.12.0       # via django-oscar
 faker==1.0.7              # via factory-boy
 funcsigs==1.0.2           # via mock
 future==0.17.1            # via pyjwkest
-gevent==1.0.2
+futures==3.2.0 ; python_version == "2.7"
+gevent==1.4.0
 greenlet==0.4.15          # via gevent
 idna==2.8                 # via requests
 ipaddress==1.0.22         # via cryptography, faker
