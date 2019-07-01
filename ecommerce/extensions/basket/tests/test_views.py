@@ -563,7 +563,7 @@ class BasketSummaryViewTests(EnterpriseServiceMockMixin, DiscoveryTestMixin, Dis
 
         response = self.client.get(self.path)
         lines = response.context['formset_lines_data']
-        if discount_json:
+        if discount_json and discount_json['discount_applicable']:
             self.assertEqual(lines[0][1]['line'].discount_value, 
                 discount_json['discount_percent']/100 * lines[0][1]['line'].price_incl_tax)
         else:
