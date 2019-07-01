@@ -11,12 +11,11 @@ from django.core.management.base import CommandError
 from django.test import TestCase
 from factory.django import get_model
 from mock import patch
-from oscar.test.factories import UserFactory
 from slumber.exceptions import HttpClientError
 
 from ecommerce.core.management.commands.sync_hubspot import Command as sync_command
 from ecommerce.extensions.test.factories import create_basket, create_order
-from ecommerce.tests.factories import SiteConfigurationFactory
+from ecommerce.tests.factories import SiteConfigurationFactory, UserFactory
 
 SiteConfiguration = get_model('core', 'SiteConfiguration')
 Basket = get_model('basket', 'Basket')

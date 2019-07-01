@@ -15,6 +15,7 @@ class PaymentEventFactory(factory.DjangoModelFactory):
 class SuperUserFactory(factory.DjangoModelFactory):
     id = FuzzyInteger(1000, 9999)
     is_superuser = True
+    lms_user_id = 56765
 
     class Meta(object):
         model = get_model('core', 'User')

@@ -5,8 +5,9 @@ import logging
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 from oscar.core.loading import get_class, get_model
-from oscar.test.factories import UserFactory
 from six.moves import range
+
+from ecommerce.tests.factories import UserFactory
 
 logger = logging.getLogger(__name__)
 Order = get_model('order', 'Order')

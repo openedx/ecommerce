@@ -31,6 +31,7 @@ from ecommerce.extensions.payment.exceptions import (
 from ecommerce.extensions.payment.helpers import sign
 from ecommerce.extensions.payment.processors.cybersource import Cybersource
 from ecommerce.extensions.test.factories import create_basket
+from ecommerce.tests.factories import UserFactory
 
 CURRENCY = 'USD'
 Basket = get_model('basket', 'Basket')
@@ -411,7 +412,7 @@ class CybersourceNotificationTestsMixin(CybersourceMixin):
     def setUp(self):
         super(CybersourceNotificationTestsMixin, self).setUp()
 
-        self.user = factories.UserFactory()
+        self.user = UserFactory()
         self.billing_address = self.make_billing_address()
 
         self.basket = create_basket(owner=self.user, site=self.site)

@@ -5,11 +5,10 @@ from decimal import Decimal
 import factory
 from django.conf import settings
 from oscar.core.loading import get_model
-from oscar.test.factories import UserFactory
 
 from ecommerce.extensions.refund.status import REFUND, REFUND_LINE
 from ecommerce.extensions.test.factories import create_order
-from ecommerce.tests.factories import SiteConfigurationFactory
+from ecommerce.tests.factories import SiteConfigurationFactory, UserFactory
 
 Category = get_model("catalogue", "Category")
 Partner = get_model('partner', 'Partner')

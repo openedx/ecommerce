@@ -17,7 +17,6 @@ from oscar.test.factories import (
     OrderFactory,
     OrderLineFactory,
     RangeFactory,
-    UserFactory,
     VoucherFactory,
     datetime,
     get_model
@@ -41,6 +40,7 @@ from ecommerce.extensions.voucher.utils import (
     get_voucher_discount_info,
     update_voucher_offer
 )
+from ecommerce.tests.factories import UserFactory
 from ecommerce.tests.mixins import LmsApiMockMixin
 from ecommerce.tests.testcases import TestCase
 

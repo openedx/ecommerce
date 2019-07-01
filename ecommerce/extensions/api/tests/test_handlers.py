@@ -7,10 +7,10 @@ import jwt
 import mock
 from django.conf import settings
 from django.test import TestCase, override_settings
-from oscar.test.factories import UserFactory
 from waffle.testutils import override_switch
 
 from ecommerce.extensions.api.handlers import jwt_decode_handler
+from ecommerce.tests.factories import UserFactory
 
 
 def generate_jwt_token(payload, signing_key):

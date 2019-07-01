@@ -13,8 +13,9 @@ from ecommerce.extensions.payment.constants import CARD_TYPES
 from ecommerce.extensions.payment.models import PaymentProcessorResponse
 from ecommerce.extensions.payment.processors.cybersource import Cybersource
 from ecommerce.extensions.payment.processors.paypal import Paypal
-from ecommerce.extensions.test.factories import UserFactory, create_basket, prepare_voucher
+from ecommerce.extensions.test.factories import create_basket, prepare_voucher
 from ecommerce.management.utils import FulfillFrozenBaskets, refund_basket_transactions
+from ecommerce.tests.factories import UserFactory
 from ecommerce.tests.testcases import TestCase
 
 Free = get_class('shipping.methods', 'Free')

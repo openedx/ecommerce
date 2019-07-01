@@ -40,6 +40,7 @@ from ecommerce.extensions.test.factories import create_order
 from ecommerce.extensions.voucher.models import OrderLineVouchers
 from ecommerce.extensions.voucher.utils import create_vouchers
 from ecommerce.programs.tests.mixins import ProgramTestMixin
+from ecommerce.tests.factories import UserFactory
 from ecommerce.tests.testcases import TestCase
 
 JSON = 'application/json'
@@ -68,7 +69,7 @@ class EnrollmentFulfillmentModuleTests(ProgramTestMixin, DiscoveryTestMixin, Ful
     def setUp(self):
         super(EnrollmentFulfillmentModuleTests, self).setUp()
 
-        self.user = factories.UserFactory()
+        self.user = UserFactory()
         self.user.tracking_context = {
             'ga_client_id': 'test-client-id', 'lms_user_id': 'test-user-id', 'lms_ip': '127.0.0.1'
         }
@@ -449,7 +450,7 @@ class CouponFulfillmentModuleTest(CouponMixin, FulfillmentTestMixin, TestCase):
     def setUp(self):
         super(CouponFulfillmentModuleTest, self).setUp()
         coupon = self.create_coupon()
-        user = factories.UserFactory()
+        user = UserFactory()
         basket = factories.BasketFactory(owner=user, site=self.site)
         basket.add_product(coupon, 1)
         self.order = create_order(number=1, basket=basket, user=user)
@@ -491,7 +492,7 @@ class DonationsFromCheckoutTestFulfillmentModuleTest(FulfillmentTestMixin, TestC
             product_class=donation_class,
             title='Test product'
         )
-        user = factories.UserFactory()
+        user = UserFactory()
         basket = factories.BasketFactory(owner=user, site=self.site)
         factories.create_stockrecord(donation, num_in_stock=2, price_excl_tax=10)
         basket.add_product(donation, 1)
@@ -529,7 +530,7 @@ class EnrollmentCodeFulfillmentModuleTests(DiscoveryTestMixin, TestCase):
         course = CourseFactory(partner=self.partner)
         course.create_or_update_seat('verified', True, 50, create_enrollment_code=True)
         enrollment_code = Product.objects.get(product_class__name=ENROLLMENT_CODE_PRODUCT_CLASS_NAME)
-        user = factories.UserFactory()
+        user = UserFactory()
         basket = factories.BasketFactory(owner=user, site=self.site)
         basket.add_product(enrollment_code, self.QUANTITY)
         self.order = create_order(number=1, basket=basket, user=user)
@@ -572,7 +573,7 @@ class EntitlementFulfillmentModuleTests(FulfillmentTestMixin, TestCase):
 
     def setUp(self):
         super(EntitlementFulfillmentModuleTests, self).setUp()
-        self.user = factories.UserFactory()
+        self.user = UserFactory()
         self.course_entitlement = create_or_update_course_entitlement(
             'verified', 100, self.partner, '111-222-333-444', 'Course Entitlement')
         basket = factories.BasketFactory(owner=self.user, site=self.site)

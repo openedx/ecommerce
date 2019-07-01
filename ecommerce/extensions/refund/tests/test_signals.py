@@ -1,12 +1,12 @@
 from __future__ import absolute_import
 
 from mock import patch
-from oscar.test.factories import UserFactory
 
 from ecommerce.core.models import SegmentClient
 from ecommerce.extensions.analytics.utils import ECOM_TRACKING_ID_FMT
 from ecommerce.extensions.refund.api import create_refunds
 from ecommerce.extensions.refund.tests.mixins import RefundTestMixin
+from ecommerce.tests.factories import UserFactory
 from ecommerce.tests.testcases import TestCase
 
 

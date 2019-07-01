@@ -3,12 +3,12 @@ from __future__ import absolute_import
 import ddt
 from django.test import override_settings
 from oscar.core.loading import get_model
-from oscar.test.factories import UserFactory
 
 from ecommerce.extensions.fulfillment.status import ORDER
 from ecommerce.extensions.refund.api import create_refunds, find_orders_associated_with_course
 from ecommerce.extensions.refund.tests.factories import RefundLineFactory
 from ecommerce.extensions.refund.tests.mixins import RefundTestMixin
+from ecommerce.tests.factories import UserFactory
 from ecommerce.tests.testcases import TestCase
 
 ProductAttribute = get_model("catalogue", "ProductAttribute")

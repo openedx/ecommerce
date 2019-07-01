@@ -29,7 +29,7 @@ from ecommerce.core.url_utils import get_lms_url
 from ecommerce.courses.models import Course
 from ecommerce.courses.utils import mode_for_product
 from ecommerce.extensions.fulfillment.signals import SHIPPING_EVENT_NAME
-from ecommerce.tests.factories import SiteConfigurationFactory
+from ecommerce.tests.factories import SiteConfigurationFactory, UserFactory
 
 Applicator = get_class('offer.applicator', 'Applicator')
 Basket = get_model('basket', 'Basket')
@@ -59,7 +59,7 @@ class UserMixin(object):
         not_provided = object()
         if kwargs.get('username', not_provided) is None:
             kwargs.pop('username')
-        return factories.UserFactory(password=self.password, lms_user_id=lms_user_id, **kwargs)
+        return UserFactory(password=self.password, lms_user_id=lms_user_id, **kwargs)
 
     def create_access_token(self, user, access_token=None):
         """

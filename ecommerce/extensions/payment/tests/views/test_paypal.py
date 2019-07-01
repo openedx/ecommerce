@@ -23,6 +23,7 @@ from ecommerce.extensions.payment.tests.mixins import PaymentEventsMixin, Paypal
 from ecommerce.extensions.payment.views.paypal import PaypalPaymentExecutionView
 from ecommerce.extensions.test.factories import create_basket, create_order
 from ecommerce.invoice.models import Invoice
+from ecommerce.tests.factories import UserFactory
 from ecommerce.tests.testcases import TestCase
 
 JSON = 'application/json'
@@ -47,7 +48,7 @@ class PaypalPaymentExecutionViewTests(PaypalMixin, PaymentEventsMixin, TestCase)
     def setUp(self):
         super(PaypalPaymentExecutionViewTests, self).setUp()
 
-        self.basket = create_basket(owner=factories.UserFactory(), site=self.site)
+        self.basket = create_basket(owner=UserFactory(), site=self.site)
         self.basket.freeze()
 
         self.processor = Paypal(self.site)
@@ -136,7 +137,7 @@ class PaypalPaymentExecutionViewTests(PaypalMixin, PaymentEventsMixin, TestCase)
 
         course = CourseFactory(partner=self.partner)
         course.create_or_update_seat('verified', True, 50, create_enrollment_code=True)
-        self.basket = create_basket(owner=factories.UserFactory(), site=self.site)
+        self.basket = create_basket(owner=UserFactory(), site=self.site)
         enrollment_code = Product.objects.get(product_class__name=ENROLLMENT_CODE_PRODUCT_CLASS_NAME)
         factories.create_stockrecord(enrollment_code, num_in_stock=2, price_excl_tax='10.00')
         self.basket.add_product(enrollment_code, quantity=1)

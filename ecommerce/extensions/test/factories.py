@@ -14,8 +14,7 @@ from oscar.test.factories import (
     OrderCreator,
     OrderTotalCalculator,
     ProductFactory,
-    RangeFactory,
-    UserFactory
+    RangeFactory
 )
 from oscar.test.factories import VoucherFactory as BaseVoucherFactory
 from oscar.test.factories import create_product, create_stockrecord, get_class, get_model
@@ -30,7 +29,7 @@ from ecommerce.journals.conditions import JournalBundleCondition
 from ecommerce.programs.benefits import AbsoluteDiscountBenefitWithoutRange, PercentageDiscountBenefitWithoutRange
 from ecommerce.programs.conditions import ProgramCourseRunSeatsCondition
 from ecommerce.programs.custom import class_path
-from ecommerce.tests.factories import SiteConfigurationFactory
+from ecommerce.tests.factories import SiteConfigurationFactory, UserFactory
 
 Benefit = get_model('offer', 'Benefit')
 Catalog = get_model('catalogue', 'Catalog')

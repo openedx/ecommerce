@@ -5,9 +5,9 @@ import json
 import ddt
 import mock
 from django.urls import reverse
-from oscar.test import factories
 from six.moves import range
 
+from ecommerce.tests.factories import UserFactory
 from ecommerce.tests.testcases import TestCase
 
 JSON_CONTENT_TYPE = 'application/json'
@@ -21,7 +21,7 @@ class UsernameReplacementViewTests(TestCase):
 
     def setUp(self):
         super(UsernameReplacementViewTests, self).setUp()
-        self.service_user = factories.UserFactory(username=self.SERVICE_USERNAME)
+        self.service_user = UserFactory(username=self.SERVICE_USERNAME)
         self.url = reverse("api:v2:user_management:username_replacement")
 
     def build_jwt_headers(self, user):
@@ -52,7 +52,7 @@ class UsernameReplacementViewTests(TestCase):
         self.assertEqual(response.status_code, 401)
 
         # Test non-service worker
-        random_user = factories.UserFactory()
+        random_user = UserFactory()
         response = self.call_api(random_user, data)
         self.assertEqual(response.status_code, 403)
 
@@ -79,7 +79,7 @@ class UsernameReplacementViewTests(TestCase):
         in this service are also treated as a success because no work needs to
         be done changing their username.
         """
-        random_users = [factories.UserFactory() for _ in range(5)]
+        random_users = [UserFactory() for _ in range(5)]
         fake_usernames = ["myname_" + str(x) for x in range(5)]
         existing_users = [{user.username: user.username + '_new'} for user in random_users]
         non_existing_users = [{username: username + '_new'} for username in fake_usernames]
