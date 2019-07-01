@@ -78,6 +78,7 @@ class AutoAuth(View):
 
     If the ENABLE_AUTO_AUTH setting is not True, returns a 404.
     """
+    lms_user_id = 45654
 
     def get(self, request):
         if not getattr(settings, 'ENABLE_AUTO_AUTH', None):
@@ -87,7 +88,7 @@ class AutoAuth(View):
 
         # Create a new user with staff permissions
         username = password = username_prefix + uuid.uuid4().hex[0:20]
-        User.objects.create_superuser(username, email=None, password=password)
+        User.objects.create_superuser(username, email=None, password=password, lms_user_id=self.lms_user_id)
 
         # Log in the new user
         user = authenticate(username=username, password=password)
