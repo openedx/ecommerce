@@ -546,29 +546,29 @@ class BasketSummaryViewTests(EnterpriseServiceMockMixin, DiscoveryTestMixin, Dis
         self.assertEqual(lines[1][1]['benefit_value'], None)
     
 
-    # @mock.patch('ecommerce.extensions.offer.dynamic_conditional_offer.get_decoded_jwt_discount_from_request')
-    # @ddt.data(
-    #     {'discount_percent':15, 'discount_applicable': True},
-    #     {'discount_percent':15, 'discount_applicable': False},
-    #     None)
-    # @override_flag(DYNAMIC_DISCOUNT_FLAG, active=True)
-    # def test_line_item_discount_data_dynamic_discount(self, discount_json, mock_get_discount):
-    #     """ Verify that line item has correct discount data. """
-    #     mock_get_discount.return_value = discount_json
+    @mock.patch('ecommerce.extensions.offer.dynamic_conditional_offer.get_decoded_jwt_discount_from_request')
+    @ddt.data(
+        {'discount_percent':15, 'discount_applicable': True},
+        {'discount_percent':15, 'discount_applicable': False},
+        None)
+    @override_flag(DYNAMIC_DISCOUNT_FLAG, active=True)
+    def test_line_item_discount_data_dynamic_discount(self, discount_json, mock_get_discount):
+        """ Verify that line item has correct discount data. """
+        mock_get_discount.return_value = discount_json
         
-    #     self.mock_course_runs_endpoint(self.site_configuration.discovery_api_url, course_run=self.course)
-    #     seat = self.create_seat(self.course)
-    #     basket = self.create_basket_and_add_product(seat)
-    #     Applicator().apply(basket)
+        self.mock_course_runs_endpoint(self.site_configuration.discovery_api_url, course_run=self.course)
+        seat = self.create_seat(self.course)
+        basket = self.create_basket_and_add_product(seat)
+        Applicator().apply(basket)
 
-    #     response = self.client.get(self.path)
-    #     lines = response.context['formset_lines_data']
-    #     if discount_json:
-    #         self.assertEqual(context['formset_lines_data'][0][1]['line'].discount_value, 
-    #             discount_json/100 * context['formset_lines_data'][0][1]['line'].price_incl_tax)
-    #     else:
-    #         self.assertEqual(context['formset_lines_data'][0][1]['line'].discount_value,
-    #             Decimal(0))
+        response = self.client.get(self.path)
+        lines = response.context['formset_lines_data']
+        if discount_json:
+            self.assertEqual(context['formset_lines_data'][0][1]['line'].discount_value, 
+                discount_json/100 * context['formset_lines_data'][0][1]['line'].price_incl_tax)
+        else:
+            self.assertEqual(context['formset_lines_data'][0][1]['line'].discount_value,
+                Decimal(0))
 
 
     def test_cached_course(self):
