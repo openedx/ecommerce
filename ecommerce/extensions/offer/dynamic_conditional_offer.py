@@ -51,7 +51,6 @@ class DynamicPercentageDiscountBenefit(BenefitWithoutRangeMixin, PercentageDisco
                 offer, 
                 discount_percent=percent,
                 max_total_discount=max_total_discount)
-            import pdb; pdb.set_trace()
             return application_result
         return None
 
