@@ -1,3 +1,4 @@
+# pylint: disable=no-else-return
 from __future__ import absolute_import, unicode_literals
 
 import logging
@@ -7,6 +8,7 @@ from decimal import Decimal
 import dateutil.parser
 import newrelic.agent
 import waffle
+from django.contrib.messages import get_messages
 from django.http import HttpResponseBadRequest, HttpResponseRedirect
 from django.shortcuts import redirect, render
 from django.utils.html import escape
@@ -91,14 +93,16 @@ class BasketAddItemsView(View):
             self._redirect_for_enterprise_entitlement_if_needed(request, voucher, products, skus)
             available_products = self._get_available_products(request, products)
             self._set_email_preference_on_basket(request)
-            prepare_basket(request, available_products, voucher)
-            self._redirect_to_microfrontend_if_needed(request, products)
 
+            try:
+                prepare_basket(request, available_products, voucher)
+            except AlreadyPlacedOrderException:
+                return render(request, 'edx/error.html', {'error': _('You have already purchased these products')})
+
+            self._redirect_to_microfrontend_if_needed(request, products)
             url = add_utm_params_to_url(reverse('basket:summary'), list(self.request.GET.items()))
             return HttpResponseRedirect(url, status=303)
 
-        except AlreadyPlacedOrderException:
-            return render(request, 'edx/error.html', {'error': _('You have already purchased these products')})
         except BadRequestException as e:
             return HttpResponseBadRequest(e.message)
         except RedirectException as e:
@@ -177,25 +181,99 @@ class BasketLogicMixin(object):
     """
 
     @newrelic.agent.function_trace()
-    def _determine_product_type(self, product):
+    def process_basket_lines(self, lines):
         """
-        Return the seat type based on the product class
-        """
-        seat_type = None
-        if product.is_seat_product or product.is_course_entitlement_product:
-            seat_type = get_certificate_type_display_value(product.attr.certificate_type)
-        elif product.is_enrollment_code_product:
-            seat_type = get_certificate_type_display_value(product.attr.seat_type)
-        return seat_type
+        Processes the basket lines and extracts information for the view's context.
+        In addition determines whether:
+            * verification message should be displayed
+            * voucher form should be displayed
+            * switch link (for switching between seat and enrollment code products) should be displayed
+        and returns that information for the basket view context to be updated with it.
 
-    @newrelic.agent.function_trace()
-    def _deserialize_date(self, date_string):
-        date = None
+        Args:
+            lines (list): List of basket lines.
+        Returns:
+            context_updates (dict): Containing information with which the context needs to
+                                    be updated with.
+            lines_data (list): List of information about the basket lines.
+        """
+        context_updates = {
+            'display_verification_message': False,
+            'order_details_msg': None,
+            'partner_sku': None,
+            'switch_link_text': None,
+            'show_voucher_form': True,
+            'is_enrollment_code_purchase': False
+        }
+
+        lines_data = []
+        for line in lines:
+            product = line.product
+            if product.is_seat_product or product.is_course_entitlement_product:
+                line_data, _ = self._get_course_data(product)
+
+                # TODO this is only used by hosted_checkout_basket template, which may no longer be
+                # used. Consider removing both.
+                if self._is_id_verification_required(product):
+                    context_updates['display_verification_message'] = True
+            elif product.is_enrollment_code_product:
+                line_data, course = self._get_course_data(product)
+                self._set_message_for_enrollment_code(product, course)
+                context_updates['is_enrollment_code_purchase'] = True
+                context_updates['show_voucher_form'] = False
+            else:
+                line_data = {
+                    'product_title': product.title,
+                    'image_url': None,
+                    'product_description': product.description
+                }
+
+            context_updates['order_details_msg'] = self._get_order_details_message(product)
+            context_updates['switch_link_text'], context_updates['partner_sku'] = get_basket_switch_data(product)
+
+            line_data.update({
+                'sku': product.stockrecords.first().partner_sku,
+                'benefit_value': self._get_benefit_value(line),
+                'enrollment_code': product.is_enrollment_code_product,
+                'line': line,
+                'seat_type': self._get_certificate_display(product),
+            })
+            lines_data.append(line_data)
+
+        return context_updates, lines_data
+
+    def process_totals(self, context):
+        """
+        Returns a Dictionary of data related to total price and discounts.
+        """
+        # Total benefit displayed in price summary.
+        # Currently only one voucher per basket is supported.
         try:
-            date = dateutil.parser.parse(date_string)
-        except (AttributeError, ValueError, TypeError):
-            pass
-        return date
+            applied_voucher = self.request.basket.vouchers.first()
+            total_benefit = (
+                format_benefit_value(applied_voucher.best_offer.benefit)
+                if applied_voucher else None
+            )
+        # TODO This ValueError handling no longer seems to be required and could probably be removed
+        except ValueError:  # pragma: no cover
+            total_benefit = None
+
+        num_of_items = self.request.basket.num_items
+        return {
+            'total_benefit': total_benefit,
+            'free_basket': context['order_total'].incl_tax == 0,
+            'line_price': (self.request.basket.total_incl_tax_excl_discounts / num_of_items) if num_of_items > 0 else 0,
+        }
+
+    def verify_enterprise_consent(self):
+        failed_enterprise_consent_code = self.request.GET.get(CONSENT_FAILED_PARAM)
+        if failed_enterprise_consent_code:
+            messages.error(
+                self.request,
+                _("Could not apply the code '{code}'; it requires data sharing consent.").format(
+                    code=failed_enterprise_consent_code
+                )
+            )
 
     @newrelic.agent.function_trace()
     def _get_course_data(self, product):
@@ -205,42 +283,101 @@ class BasketLogicMixin(object):
         Args:
             product (Product): A product that has course_key as attribute (seat or bulk enrollment coupon)
         Returns:
-            Dictionary containing course name, course key, course image URL and description.
+            A dictionary containing product title, course key, image URL, description, and start and end dates.
+            Also returns course information found from catalog.
         """
-        course_name = None
-        image_url = None
-        short_description = None
-        course_start = None
-        course_end = None
+        course_data = {
+            'product_title': None,
+            'course_key': None,
+            'image_url': None,
+            'product_description': None,
+            'course_start': None,
+            'course_end': None,
+        }
         course = None
-        course_key = None
+
         if product.is_seat_product:
-            course_key = CourseKey.from_string(product.attr.course_key)
+            course_data['course_key'] = CourseKey.from_string(product.attr.course_key)
 
         try:
             course = get_course_info_from_catalog(self.request.site, product)
             try:
-                image_url = course['image']['src']
+                course_data['image_url'] = course['image']['src']
             except (KeyError, TypeError):
-                image_url = ''
-            short_description = course.get('short_description', '')
-            course_name = course.get('title', '')
+                pass
+
+            course_data['product_description'] = course.get('short_description', '')
+            course_data['product_title'] = course.get('title', '')
 
             # The course start/end dates are not currently used
             # in the default basket templates, but we are adding
             # the dates to the template context so that theme
             # template overrides can make use of them.
-            course_start = self._deserialize_date(course.get('start'))
-            course_end = self._deserialize_date(course.get('end'))
+            course_data['course_start'] = self._deserialize_date(course.get('start'))
+            course_data['course_end'] = self._deserialize_date(course.get('end'))
         except (ConnectionError, SlumberBaseException, Timeout):
-            logger.exception('Failed to retrieve data from Discovery Service for course [%s].', course_key)
+            logger.exception(
+                'Failed to retrieve data from Discovery Service for course [%s].',
+                course_data['course_key'],
+            )
 
-        if self.request.basket.num_items == 1 and product.is_enrollment_code_product:
+        return course_data, course
+
+    @newrelic.agent.function_trace()
+    def _get_order_details_message(self, product):
+        if product.is_course_entitlement_product:
+            return _(
+                'After you complete your order you will be able to select course dates from your dashboard.'
+            )
+        elif product.is_seat_product:
+            certificate_type = product.attr.certificate_type
+            if certificate_type == 'verified':
+                return _(
+                    'After you complete your order you will be automatically enrolled '
+                    'in the verified track of the course.'
+                )
+            elif certificate_type == 'credit':
+                return _('After you complete your order you will receive credit for your course.')
+            else:
+                return _(
+                    'After you complete your order you will be automatically enrolled in the course.'
+                )
+        elif product.is_enrollment_code_product:
+            return _(
+                '{paragraph_start}By purchasing, you and your organization agree to the following terms:'
+                '{paragraph_end} {ul_start} {li_start}Each code is valid for the one course covered and can be '
+                'used only one time.{li_end} '
+                '{li_start}You are responsible for distributing codes to your learners in your organization.'
+                '{li_end} {li_start}Each code will expire in one year from date of purchase or, if earlier, once '
+                'the course is closed.{li_end} {li_start}If a course is not designated as self-paced, you should '
+                'confirm that a course run is available before expiration. {li_end} {li_start}You may not resell '
+                'codes to third parties.{li_end} '
+                '{li_start}All edX for Business Sales are final and not eligible for refunds.{li_end}{ul_end} '
+                '{paragraph_start}You will receive an email at {user_email} with your enrollment code(s). '
+                '{paragraph_end}'
+            ).format(
+                paragraph_start='<p>',
+                paragraph_end='</p>',
+                ul_start='<ul>',
+                li_start='<li>',
+                li_end='</li>',
+                ul_end='</ul>',
+                user_email=self.request.user.email
+            )
+        else:
+            return None
+
+    @newrelic.agent.function_trace()
+    def _set_message_for_enrollment_code(self, product, course):
+        assert product.is_enrollment_code_product
+
+        if self.request.basket.num_items == 1:
             course_key = CourseKey.from_string(product.attr.course_key)
             if course and course.get('marketing_url', None):
                 course_about_url = course['marketing_url']
             else:
                 course_about_url = get_lms_course_about_url(course_key=course_key)
+
             messages.info(
                 self.request,
                 _(
@@ -258,121 +395,95 @@ class BasketLogicMixin(object):
                 extra_tags='safe'
             )
 
-        return {
-            'product_title': course_name,
-            'course_key': course_key,
-            'image_url': image_url,
-            'product_description': short_description,
-            'course_start': course_start,
-            'course_end': course_end,
-        }
+    @newrelic.agent.function_trace()
+    def _is_id_verification_required(self, product):
+        return (
+            getattr(product.attr, 'id_verification_required', False) and
+            product.attr.certificate_type != 'credit'
+        )
 
     @newrelic.agent.function_trace()
-    def _process_basket_lines(self, lines):
-        """Processes the basket lines and extracts information for the view's context.
-        In addition determines whether:
-            * verification message should be displayed
-            * voucher form should be displayed
-            * switch link (for switching between seat and enrollment code products) should be displayed
-        and returns that information for the basket view context to be updated with it.
+    def _get_benefit_value(self, line):
+        if line.has_discount:
+            benefit = list(self.request.basket.applied_offers().values())[0].benefit
+            return format_benefit_value(benefit)
+        else:
+            return None
 
-        Args:
-            lines (list): List of basket lines.
-        Returns:
-            context_updates (dict): Containing information with which the context needs to
-                                    be updated with.
-            lines_data (list): List of information about the basket lines.
-        """
-        display_verification_message = False
-        lines_data = []
-        show_voucher_form = True
-        is_enrollment_code_purchase = False
-        switch_link_text = partner_sku = order_details_msg = None
+    @newrelic.agent.function_trace()
+    def _get_certificate_display(self, product):
+        if product.is_seat_product or product.is_course_entitlement_product:
+            return get_certificate_type_display_value(product.attr.certificate_type)
+        elif product.is_enrollment_code_product:
+            return get_certificate_type_display_value(product.attr.seat_type)
+        return None
 
-        for line in lines:
-            if line.product.is_seat_product or line.product.is_course_entitlement_product:
-                line_data = self._get_course_data(line.product)
-                certificate_type = line.product.attr.certificate_type
+    @newrelic.agent.function_trace()
+    def _deserialize_date(self, date_string):
+        try:
+            return dateutil.parser.parse(date_string)
+        except (AttributeError, ValueError, TypeError):
+            return None
 
-                if getattr(line.product.attr, 'id_verification_required', False) and certificate_type != 'credit':
-                    display_verification_message = True
 
-                if line.product.is_course_entitlement_product:
-                    order_details_msg = _(
-                        'After you complete your order you will be able to select course dates from your dashboard.'
-                    )
-                else:
-                    if certificate_type == 'verified':
-                        order_details_msg = _(
-                            'After you complete your order you will be automatically enrolled '
-                            'in the verified track of the course.'
-                        )
-                    elif certificate_type == 'credit':
-                        order_details_msg = _('After you complete your order you will receive credit for your course.')
-                    else:
-                        order_details_msg = _(
-                            'After you complete your order you will be automatically enrolled in the course.'
-                        )
-            elif line.product.is_enrollment_code_product:
-                line_data = self._get_course_data(line.product)
-                is_enrollment_code_purchase = True
-                show_voucher_form = False
-                order_details_msg = _(
-                    '{paragraph_start}By purchasing, you and your organization agree to the following terms:'
-                    '{paragraph_end} {ul_start} {li_start}Each code is valid for the one course covered and can be '
-                    'used only one time.{li_end} '
-                    '{li_start}You are responsible for distributing codes to your learners in your organization.'
-                    '{li_end} {li_start}Each code will expire in one year from date of purchase or, if earlier, once '
-                    'the course is closed.{li_end} {li_start}If a course is not designated as self-paced, you should '
-                    'confirm that a course run is available before expiration. {li_end} {li_start}You may not resell '
-                    'codes to third parties.{li_end} '
-                    '{li_start}All edX for Business Sales are final and not eligible for refunds.{li_end}{ul_end} '
-                    '{paragraph_start}You will receive an email at {user_email} with your enrollment code(s). '
-                    '{paragraph_end}'
-                ).format(
-                    paragraph_start='<p>',
-                    paragraph_end='</p>',
-                    ul_start='<ul>',
-                    li_start='<li>',
-                    li_end='</li>',
-                    ul_end='</ul>',
-                    user_email=self.request.user.email
-                )
-            else:
-                line_data = {
-                    'product_title': line.product.title,
-                    'image_url': None,
-                    'product_description': line.product.description
-                }
+class BasketSummaryView(BasketLogicMixin, BasketView):
+    @newrelic.agent.function_trace()
+    def get_context_data(self, **kwargs):
+        context = super(BasketSummaryView, self).get_context_data(**kwargs)
+        return self._add_to_context_data(context)
 
-            # Get variables for the switch link that toggles from enrollment codes and seat.
-            switch_link_text, partner_sku = get_basket_switch_data(line.product)
+    @newrelic.agent.function_trace()
+    def get(self, request, *args, **kwargs):
+        basket = request.basket
+        self._fire_segment_events(request, basket)
 
-            if line.has_discount:
-                benefit = list(self.request.basket.applied_offers().values())[0].benefit
-                benefit_value = format_benefit_value(benefit)
-            else:
-                benefit_value = None
+        self.verify_enterprise_consent()
+        if has_enterprise_offer(basket) and basket.total_incl_tax == Decimal(0):
+            return redirect('checkout:free-checkout')
 
-            line_data.update({
-                'sku': line.product.stockrecords.first().partner_sku,
-                'benefit_value': benefit_value,
-                'enrollment_code': line.product.is_enrollment_code_product,
-                'line': line,
-                'seat_type': self._determine_product_type(line.product),
-            })
-            lines_data.append(line_data)
+        if self._is_single_course_purchase(basket):
+            redirect_response = _redirect_to_payment_microfrontend_if_configured(request)
+            if redirect_response:
+                return redirect_response
 
-        context_updates = {
-            'display_verification_message': display_verification_message,
-            'order_details_msg': order_details_msg,
-            'partner_sku': partner_sku,
-            'show_voucher_form': show_voucher_form,
-            'switch_link_text': switch_link_text,
-            'is_enrollment_code_purchase': is_enrollment_code_purchase
-        }
+        return super(BasketSummaryView, self).get(request, *args, **kwargs)
 
-        return context_updates, lines_data
+    @newrelic.agent.function_trace()
+    def _add_to_context_data(self, context):
+        formset = context.get('formset', [])
+        lines = context.get('line_list', [])
+        site_configuration = self.request.site.siteconfiguration
+
+        context_updates, lines_data = self.process_basket_lines(lines)
+        context.update(context_updates)
+        context.update(self.process_totals(context))
+
+        context.update({
+            'analytics_data': prepare_analytics_data(
+                self.request.user,
+                site_configuration.segment_key,
+            ),
+            'enable_client_side_checkout': False,
+            'sdn_check': site_configuration.enable_sdn_check
+        })
+
+        payment_processors = site_configuration.get_payment_processors()
+        if (
+                site_configuration.client_side_payment_processor and
+                waffle.flag_is_active(self.request, CLIENT_SIDE_CHECKOUT_FLAG_NAME)
+        ):
+            payment_processors_data = self._get_payment_processors_data(payment_processors)
+            context.update(payment_processors_data)
+
+        context.update({
+            'formset_lines_data': list(zip(formset, lines_data)),
+            'homepage_url': get_lms_url(''),
+            'min_seat_quantity': 1,
+            'max_seat_quantity': 100,
+            'payment_processors': payment_processors,
+            'lms_url_root': site_configuration.lms_url_root,
+        })
+        return context
 
     @newrelic.agent.function_trace()
     def _get_payment_processors_data(self, payment_processors):
@@ -411,77 +522,7 @@ class BasketLogicMixin(object):
                                                      sc=site_configuration.id)
             raise SiteConfigurationError(msg)
 
-    @newrelic.agent.function_trace()
-    def get_basket_context_data(self, context):
-        formset = context.get('formset', [])
-        lines = context.get('line_list', [])
-        site_configuration = self.request.site.siteconfiguration
-
-        failed_enterprise_consent_code = self.request.GET.get(CONSENT_FAILED_PARAM)
-        if failed_enterprise_consent_code:
-            messages.error(
-                self.request,
-                _("Could not apply the code '{code}'; it requires data sharing consent.").format(
-                    code=failed_enterprise_consent_code
-                )
-            )
-
-        context_updates, lines_data = self._process_basket_lines(lines)
-        context.update(context_updates)
-
-        user = self.request.user
-        context.update({
-            'analytics_data': prepare_analytics_data(
-                user,
-                site_configuration.segment_key,
-            ),
-            'enable_client_side_checkout': False,
-            'sdn_check': site_configuration.enable_sdn_check
-        })
-
-        payment_processors = site_configuration.get_payment_processors()
-        if site_configuration.client_side_payment_processor \
-                and waffle.flag_is_active(self.request, CLIENT_SIDE_CHECKOUT_FLAG_NAME):
-            payment_processors_data = self._get_payment_processors_data(payment_processors)
-            context.update(payment_processors_data)
-
-        # Total benefit displayed in price summary.
-        # Currently only one voucher per basket is supported.
-        try:
-            applied_voucher = self.request.basket.vouchers.first()
-            total_benefit = (
-                format_benefit_value(applied_voucher.best_offer.benefit)
-                if applied_voucher else None
-            )
-        except ValueError:
-            total_benefit = None
-        num_of_items = self.request.basket.num_items
-        context.update({
-            'formset_lines_data': list(zip(formset, lines_data)),
-            # the new payment api is not using the formset, so the zip above doesn't work
-            'lines_data': lines_data,
-            'free_basket': context['order_total'].incl_tax == 0,
-            'homepage_url': get_lms_url(''),
-            'min_seat_quantity': 1,
-            'max_seat_quantity': 100,
-            'payment_processors': payment_processors,
-            'total_benefit': total_benefit,
-            'line_price': (self.request.basket.total_incl_tax_excl_discounts / num_of_items) if num_of_items > 0 else 0,
-            'lms_url_root': site_configuration.lms_url_root,
-        })
-        return context
-
-
-class BasketSummaryView(BasketLogicMixin, BasketView):
-    @newrelic.agent.function_trace()
-    def get_context_data(self, **kwargs):
-        context = super(BasketSummaryView, self).get_context_data(**kwargs)
-        return self.get_basket_context_data(context)
-
-    @newrelic.agent.function_trace()
-    def get(self, request, *args, **kwargs):
-        basket = request.basket
-
+    def _fire_segment_events(self, request, basket):
         try:
             properties = {
                 'cart_id': basket.id,
@@ -497,16 +538,6 @@ class BasketSummaryView(BasketLogicMixin, BasketView):
         except Exception:  # pylint: disable=broad-except
             logger.exception('Failed to fire Cart Viewed event for basket [%d]', basket.id)
 
-        if has_enterprise_offer(basket) and basket.total_incl_tax == Decimal(0):
-            return redirect('checkout:free-checkout')
-
-        if self._is_single_course_purchase(basket):
-            redirect_response = _redirect_to_payment_microfrontend_if_configured(request)
-            if redirect_response:
-                return redirect_response
-
-        return super(BasketSummaryView, self).get(request, *args, **kwargs)
-
     def _is_single_course_purchase(self, basket):
         return (
             basket.num_items == 1 and
@@ -519,68 +550,6 @@ class PaymentApiLogicMixin(BasketLogicMixin):
     """
     Business logic for the various Payment APIs.
     """
-
-    def _get_order_total(self, context):
-        """
-        Add the order total to the context in preparation for the get_basket_context_data call.
-
-        Note: We only calculate what we need.  This result is required before calling the shared
-        ``get_basket_context_data(context)`` call.
-
-        See https://github.com/django-oscar/django-oscar/blob/1.5.4/src/oscar/apps/basket/views.py#L92-L132
-        """
-        shipping_charge = Price('USD', Decimal(0))
-        context['order_total'] = OrderTotalCalculator().calculate(self.request.basket, shipping_charge)
-        return context
-
-    def get_serialized_basket(self, context):
-        """
-        Serializes the basket.
-
-        Args:
-            context (dict): pre-calculated context data
-            errors (list): array of error details
-        """
-
-        serialized_basket = {
-            'basket_id': context['basket_id'],
-            'is_free_basket': context['free_basket'],
-            'total_excl_discount': context['order_total'].excl_tax + 12,
-            'calculated_discount': context['total_benefit'],
-            'order_total': context['order_total'].excl_tax,
-            'products': [],
-            'show_voucher_form': True,
-            'payment_providers': [
-                {
-                    'type': 'cybersource',
-                },
-                {
-                    'type': 'paypal',
-                }
-            ],
-        }
-
-        for line_data in context['lines_data']:
-            serialized_basket['products'].append({
-                'sku': line_data['sku'],
-                'title': line_data['product_title'],
-                'image_url': line_data['image_url'],
-                'seat_type': line_data['seat_type'],
-            })
-
-        voucher = self.request.basket.vouchers.first()
-        if voucher:
-            serialized_basket['voucher'] = {
-                'id': voucher.id,
-                'code': voucher.code,
-                "benefit": {
-                    "type": voucher.benefit.type,
-                    "value": voucher.benefit.value,
-                },
-            }
-
-        return serialized_basket
-
     def get_payment_api_response(self, errors=None):
         """
         Serializes the payment api response.
@@ -588,23 +557,97 @@ class PaymentApiLogicMixin(BasketLogicMixin):
         Args:
             errors (list or dict): list of error dicts, or an error dict
         """
+        context, lines_data = self.process_basket_lines(self.request.basket.all_lines())
 
-        context = {
-            'basket_id': self.request.basket.id,
-        }
-        context = self._get_order_total(context)
-        context['line_list'] = self.request.basket.all_lines()
-        context = self.get_basket_context_data(context)
+        context['order_total'] = self._get_order_total()
+        context.update(self.process_totals(context))
 
-        # TODO: ARCH-867: Remove unnecessary processing of anything added to context (e.g. payment_processors) that
-        # isn't ultimately passed on to the response.
+        response = self._serialize_context(context, lines_data)
+        self._add_messages(response, context)
 
-        response = self.get_serialized_basket(context)
         if errors:
             response['errors'] = errors if isinstance(errors, list) else [errors]
-        # TODO: ARCH-983: Check for and also return unexpected flash message errors and warnings
 
         return response
+
+    def _get_order_total(self):
+        """
+        Return the order_total in preparation for call to process_totals.
+        See https://github.com/django-oscar/django-oscar/blob/1.5.4/src/oscar/apps/basket/views.py#L92-L132
+        for reference in how this is calculated by Oscar.
+        """
+        shipping_charge = Price('USD', Decimal(0))
+        return OrderTotalCalculator().calculate(self.request.basket, shipping_charge)
+
+    def _serialize_context(self, context, lines_data):
+        """
+        Serializes the data in the given context.
+
+        Args:
+            context (dict): pre-calculated context data
+        """
+        response = {
+            'basket_id': self.request.basket.id,
+            'is_free_basket': context['free_basket'],
+            'currency': self.request.basket.currency,
+        }
+
+        self._add_products(response, lines_data)
+        self._add_total_summary(response, context)
+        self._add_offers(response)
+        self._add_coupons(response, context)
+        return response
+
+    def _add_products(self, response, lines_data):
+        response['products'] = [
+            {
+                'sku': line_data['sku'],
+                'title': line_data['product_title'],
+                'description': line_data['product_description'],
+                'type': line_data['line'].product.get_product_class().name,
+                'image_url': line_data['image_url'],
+                'certificate_type_display_name': line_data['seat_type'],
+            }
+            for line_data in lines_data
+        ]
+
+    def _add_total_summary(self, response, context):
+        response['summary_price'] = self.request.basket.total_incl_tax_excl_discounts
+        response['summary_discounts'] = self.request.basket.total_discount
+        if context['is_enrollment_code_purchase']:
+            response['order_total'] = context['order_total'].incl_tax  # TODO: ARCH-967: Remove "pragma: no cover"
+        else:
+            response['order_total'] = self.request.basket.total_incl_tax_excl_discounts
+
+    def _add_offers(self, response):
+        response['offers'] = [
+            {
+                'provider': offer.condition.enterprise_customer_name,
+                'benefit_value': format_benefit_value(offer.benefit),
+            }
+            for offer in self.request.basket.applied_offers().values()
+        ]
+
+    def _add_coupons(self, response, context):
+        response['show_coupon_form'] = context['show_voucher_form']
+        response['coupons'] = [
+            {
+                'id': voucher.id,
+                'code': voucher.code,
+                'benefit_value': context['total_benefit'],
+            }
+            for voucher in self.request.basket.vouchers.all()
+        ]
+
+    def _add_messages(self, response, context):
+        response['flash_messages'] = [
+            {
+                'message': message.message,
+                'level_tag': message.level_tag,
+            }
+            for message in get_messages(self.request)
+        ]
+        response['switch_message'] = context['switch_link_text']
 
 
 # TODO: ARCH-967: Remove "pragma: no cover"
@@ -612,14 +655,13 @@ class PaymentApiView(PaymentApiLogicMixin, APIView):  # pragma: no cover
     """
     Api for retrieving basket contents and checkout/payment options.
 
-    # TODO: ARCH-867: See ticket for clean-up and refactoring details for this API code.
-
     GET:
-    Retrieves basket contents and checkout/payment options.
+        Retrieves basket contents and checkout/payment options.
     """
     permission_classes = (IsAuthenticated,)
 
     def get(self, request):  # pylint: disable=unused-argument
+        self.verify_enterprise_consent()
         response = self.get_payment_api_response()
         return Response(response)
 
