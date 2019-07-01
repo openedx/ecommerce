@@ -328,7 +328,7 @@ class BasketLogicTestMixin(object):
 
 
 @httpretty.activate
-class PaymentApiViewTests(BasketLogicTestMixin, TestCase):
+class PaymentApiViewTests(BasketLogicTestMixin, DiscoveryMockMixin, TestCase):
     """ PaymentApiViewTests basket api tests. """
     path = reverse('bff:payment:v0:payment')
 
@@ -344,10 +344,26 @@ class PaymentApiViewTests(BasketLogicTestMixin, TestCase):
         basket = self.create_basket_and_add_product(seat)
         self.mock_access_token_response()
         self.assertEqual(basket.lines.count(), 1)
+        self.mock_course_run_detail_endpoint(
+            self.course, discovery_api_url=self.site_configuration.discovery_api_url
+        )
 
         response = self.client.get(self.path)
-
         self.assertEqual(response.status_code, 200)
+
+        expected_response = {
+            'offers': [],
+            'coupons': [],
+            'flash_messages': [],
+            'is_free_basket': False,
+            'show_coupon_form': True,
+            'switch_message': 'Click here to purchase multiple seats in this course',
+            'summary_discounts': Decimal('0.00'),
+            'summary_price': Decimal('500.00'),
+            'order_total': Decimal('500.00'),
+        }
+        actual_subset = {k: v for k, v in response.json().items() if k in expected_response}
+        self.assertDictEqual(expected_response, actual_subset)
 
         # TODO: ARCH-960: Add assertions for response
 
@@ -584,7 +600,7 @@ class BasketSummaryViewTests(EnterpriseServiceMockMixin, DiscoveryTestMixin, Dis
         response = self.client.get(self.path)
         self.assertEqual(response.status_code, 200)
         line_data = response.context['formset_lines_data'][0][1]
-        self.assertEqual(line_data.get('image_url'), '')
+        self.assertEqual(line_data.get('image_url'), None)
         self.assertEqual(line_data.get('course_short_description'), None)
 
     @ddt.data(
@@ -1038,8 +1054,7 @@ class VoucherAddApiViewTests(BasketLogicTestMixin, TestCase):
         # basket = self.create_basket_and_add_product(seat)
         self.mock_access_token_response()
 
-        expected_benefit_value = 20
-        voucher, product = prepare_voucher(code=COUPON_CODE, benefit_value=expected_benefit_value)
+        voucher, product = prepare_voucher(code=COUPON_CODE, benefit_value=20)
         basket.add_product(product)
 
         response = self.client.post(self.path, {'code': COUPON_CODE})
@@ -1047,14 +1062,11 @@ class VoucherAddApiViewTests(BasketLogicTestMixin, TestCase):
         self.assertEqual(response.status_code, 200)
 
         expected_response = {
-            'voucher': {
+            'coupons': [{
                 'id': voucher.id,
                 'code': COUPON_CODE,
-                "benefit": {
-                    "type": 'Percentage',
-                    "value": expected_benefit_value,
-                },
-            },
+                "benefit_value": '20%',
+            }],
         }
         actual_subset = {k: v for k, v in response.json().items() if k in expected_response}
 
