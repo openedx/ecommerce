@@ -53,6 +53,9 @@ from ecommerce.tests.factories import ProductFactory, SiteConfigurationFactory, 
 from ecommerce.tests.mixins import ApiMockMixin, LmsApiMockMixin
 from ecommerce.tests.testcases import TestCase
 
+import logging
+logger = logging.getLogger(__name__)
+
 Applicator = get_class('offer.applicator', 'Applicator')
 Basket = get_model('basket', 'Basket')
 BasketAttribute = get_model('basket', 'BasketAttribute')
@@ -562,8 +565,10 @@ class BasketSummaryViewTests(EnterpriseServiceMockMixin, DiscoveryTestMixin, Dis
         Applicator().apply(basket)
 
         response = self.client.get(self.path)
+        logger.debug(str(response))
         lines = response.context['formset_lines_data']
         if discount_json and discount_json['discount_applicable']:
+            logger.debug(str(discount_json))
             self.assertEqual(lines[0][1]['line'].discount_value, 
                 discount_json['discount_percent']/100 * lines[0][1]['line'].price_incl_tax)
         else:
