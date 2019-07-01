@@ -566,7 +566,7 @@ class BasketSummaryViewTests(EnterpriseServiceMockMixin, DiscoveryTestMixin, Dis
         if discount_json:
             self.assertEqual(lines[0][1]['line'].discount_value, 
                 discount_json/100 * lines[0][1]['line'].price_incl_tax)
-        else:lines
+        else:
             self.assertEqual(lines[0][1]['line'].discount_value,
                 Decimal(0))
 
