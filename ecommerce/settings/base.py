@@ -613,6 +613,13 @@ THEME_CACHE_TIMEOUT = 30 * 60
 
 
 EDX_DRF_EXTENSIONS = {
+    'JWT_PAYLOAD_USER_ATTRIBUTE_MAPPING': {
+        'administrator': 'is_staff',
+        'email': 'email',
+        'full_name': 'full_name',
+        'tracking_context': 'tracking_context',
+        'user_id': 'lms_user_id',
+    },
     "OAUTH2_USER_INFO_URL": "http://127.0.0.1:8000/oauth2/user_info"
 }
 
