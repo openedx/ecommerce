@@ -24,7 +24,6 @@ define([
             describe('onReady', function() {
                 it('should disable the back button by manipulating the fragment', function() {
                     spyOnProperty(document, 'referrer', 'get').and.returnValue('payment/cybersource/redirect/');
-                    spyOn(window, 'alert')
 
                     ReceiptPage.onReady();
 
@@ -33,21 +32,16 @@ define([
                     history.back();
 
                     expect(location.hash).toContain('#');
-                    expect(window.alert).toHaveBeenCalledWith('Caution! Using the back button on this page may cause you to be charged again.');
                 });
 
                 it('should not disable the back button if the referrer is not payment page', function() {
+                    history.replaceState(null, null, '');
                     var referrer = 'account/settings';
-                    var currentLocation = location.href;
 
                     spyOnProperty(document, 'referrer', 'get').and.returnValue(referrer);
 
                     ReceiptPage.onReady();
                     expect(location.hash).toEqual('');
-
-                    // It will allow the user to go back since the referrer is not the payment page
-                    history.back();
-                    expect(location.href).not.toEqual(currentLocation);
                 });
 
                 it('should trigger track purchase', function() {
