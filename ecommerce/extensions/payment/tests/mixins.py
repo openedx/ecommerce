@@ -794,6 +794,7 @@ class PaypalMixin(object):
                     'details': {'subtotal': total},
                     'total': total
                 },
+                'description': 'program_id',
                 'item_list': {
                     'items': [
                         {
