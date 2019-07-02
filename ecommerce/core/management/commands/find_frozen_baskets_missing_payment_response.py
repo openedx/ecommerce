@@ -238,22 +238,29 @@ def _process_transaction_details(transaction, basket):
                     u"Transaction api for Order Number: " + basket.order_number)
 
         order_detail = {}
-        order_information = transaction['orderInformation']
-        bill_to = order_information['billTo']
+        order_information = transaction.get('orderInformation', None)
+
+        if not order_information:
+            logger.info(u"No order information found in transaction detail json "
+                        u"for Order Number: " + basket.order_number)
+            return
+
+        bill_to = order_information.get('billTo', {})
 
         order_detail.update({
-            'first_name': bill_to['firstName'],
-            'last_name': bill_to['lastName'],
-            'address': bill_to['address1'],
-            'zip': bill_to['postalCode'],
-            'country': bill_to['country'],
+            'first_name': bill_to.get('firstName', 'first_name'),
+            'last_name': bill_to.get('lastName', 'last_name'),
+            'address': bill_to.get('address1', 'address1'),
+            'zip': bill_to.get('postalCode', '12345'),
+            'country': bill_to.get('country', 'US'),
         })
 
-        amount_details = order_information['amountDetails']
+        amount_details = order_information.get('amountDetails', {})
+
         order_detail.update({
-            'currency': amount_details['currency'],
-            'total_amount': amount_details['totalAmount'],
-            'tax_amount': amount_details['taxAmount'],
+            'currency': amount_details.get('currency', 'USD'),
+            'total_amount': amount_details.get('totalAmount', 0),
+            'tax_amount': amount_details.get('taxAmount', 0),
         })
 
         _process_successful_order(order_detail, basket)
@@ -263,7 +270,6 @@ def _process_transaction_details(transaction, basket):
 
 
 def _process_successful_order(order_detail, basket):
-
     logger.info(u"Processing Order Number: {order_number} for order creation."
                 .format(order_number=basket.order_number))
 
@@ -317,6 +323,8 @@ def _process_successful_order(order_detail, basket):
 
             logger.info(u"Order Number: {order_number} created successfully."
                     .format(order_number=basket.order_number))
+
+            basket.submit()
 
             logger.info(u'Requesting fulfillment of order [%s].', order.number)
             fulfill_order.delay(
@@ -439,6 +447,3 @@ class Command(BaseCommand):
 
             except Exception as e:
                 continue
-
-
-
