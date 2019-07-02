@@ -570,10 +570,7 @@ class BasketSummaryViewTests(EnterpriseServiceMockMixin, DiscoveryTestMixin, Dis
         if discount_json and discount_json['discount_applicable']:
             logger.debug(str(discount_json))
             self.assertEqual(lines[0][1]['line'].discount_value, 
-                discount_json['discount_percent']/100 * lines[0][1]['line'].price_incl_tax)
-            self.assertEqual(discount_json,{'discount_percent':15, 'discount_applicable': True})
-            self.assertEqual(discount_json['discount_percent'], 15)
-            self.assertEqual(lines[0][1]['line'].price_incl_tax, 100)
+                discount_json['discount_percent']/Decimal('100') * lines[0][1]['line'].price_incl_tax)
         else:
             self.assertEqual(lines[0][1]['line'].discount_value,
                 Decimal(0))
