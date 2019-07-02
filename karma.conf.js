@@ -1,6 +1,10 @@
 // Karma configuration
 // Generated on Tue Jul 21 2015 10:10:16 GMT-0400 (EDT)
 
+var webdriver = require('selenium-webdriver'),
+    JASMINE_WEB_DRIVER = process.env.JASMINE_WEB_DRIVER || 'FirefoxDocker',
+    hostname = process.env.JASMINE_HOSTNAME || 'edx.devstack.ecommerce';
+
 module.exports = function(config) {
     const coveragePath = 'ecommerce/static/js/!(test)/**/*.js';
     var preprocessors = {};
@@ -47,6 +51,7 @@ module.exports = function(config) {
        'karma-coverage-allsources',
        'karma-coverage',
        'karma-spec-reporter',
+       'karma-selenium-webdriver-launcher',
        'karma-sinon'
    ],
 
@@ -70,6 +75,7 @@ module.exports = function(config) {
 
     // web server port
     port: 9876,
+    hostname: hostname,
 
 
     // enable / disable colors in the output (reporters and logs)
@@ -87,7 +93,30 @@ module.exports = function(config) {
 
     // start these browsers
     // available browser launchers: https://npmjs.org/browse/keyword/karma-launcher
-    browsers: ['Firefox'],
+    browsers: [JASMINE_WEB_DRIVER],
+
+    customLaunchers: {
+        ChromeDocker: {
+            base: 'SeleniumWebdriver',
+            browserName: 'chrome',
+            getDriver: function() {
+                return new webdriver.Builder()
+                    .forBrowser('chrome')
+                    .usingServer('http://edx.devstack.chrome:4444/wd/hub')
+                    .build();
+            }
+        },
+        FirefoxDocker: {
+            base: 'SeleniumWebdriver',
+            browserName: 'firefox',
+            getDriver: function() {
+                return new webdriver.Builder()
+                    .forBrowser('firefox')
+                    .usingServer('http://edx.devstack.firefox:4444/wd/hub')
+                    .build();
+            }
+        }
+    },
 
 
     // Continuous Integration mode
