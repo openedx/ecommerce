@@ -1,4 +1,4 @@
-from __future__ import unicode_literals
+from __future__ import absolute_import, unicode_literals
 
 import logging
 
@@ -115,7 +115,7 @@ class PaymentForm(forms.Form):
                         ),
                         css_class='row'
                     )
-                    self.helper.layout.fields.insert(self.fields.keys().index('last_name') + 1, organization_div)
+                    self.helper.layout.fields.insert(list(self.fields.keys()).index('last_name') + 1, organization_div)
 
     basket = forms.ModelChoiceField(
         queryset=Basket.objects.all(),
