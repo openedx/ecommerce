@@ -11,7 +11,8 @@
 # All configuration values have a default; values that are commented out
 # serve to show the default.
 
-from datetime import datetime
+from __future__ import absolute_import
+
 import os
 
 import edx_theme
@@ -50,7 +51,7 @@ master_doc = 'index'
 # General information about the project.
 project = u'E-Commerce Service'
 author = edx_theme.AUTHOR
-copyright = edx_theme.COPYRIGHT
+copyright = edx_theme.COPYRIGHT  # pylint: disable=redefined-builtin
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -238,9 +239,7 @@ man_pages = [
 texinfo_documents = [
     ('index', 'E-Commerce Service', u'E-Commerce Service Documentation',
      u'edX', 'E-Commerce Service', 'E-Commerce Service',
-     'Miscellaneous'
-     ),
-]
+     'Miscellaneous'), ]
 
 
 # Documents to append as an appendix to all manuals.
