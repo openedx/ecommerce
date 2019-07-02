@@ -54,6 +54,8 @@ class Command(BaseCommand):
     OPTIONALLY ENCLOSED BY '"'
     LINES TERMINATED BY '\n'
         (username, lms_user_id)
+
+    CREATE INDEX username_index ON temp_username_userid (username);
     """
 
     def add_arguments(self, parser):
