@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+
 from oscar.core.application import Application
 
 from ecommerce.extensions.payment.urls import urlpatterns

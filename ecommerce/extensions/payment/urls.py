@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+
 from django.conf.urls import include, url
 
 from ecommerce.extensions.payment.views import PaymentFailedView, SDNFailure, cybersource, paypal, stripe
