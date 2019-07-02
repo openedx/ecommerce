@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+
 from oscar import app
 from oscar.core.application import Application
 
