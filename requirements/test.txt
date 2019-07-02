@@ -131,6 +131,7 @@ pylint==1.9.4
 pymongo==3.8.0            # via edx-opaque-keys
 pyopenssl==19.0.0         # via ndg-httpsclient, paypalrestsdk
 pyparsing==2.4.0          # via packaging
+pysqlite==2.8.3
 python-dateutil==2.8.0
 python-openid==2.2.5 ; python_version == "2.7"
 pytz==2016.10
@@ -160,7 +161,7 @@ stripe==1.70.0
 testfixtures==6.10.0
 text-unidecode==1.2       # via faker
 toml==0.10.0              # via tox
-tox==3.13.1
+tox==3.13.2
 typing==3.7.4             # via django-extensions
 unicodecsv==0.14.1
 unidecode==0.4.21         # via django-oscar
