@@ -91,15 +91,13 @@ these models, which are used for multi-tenancy.
 
       $ make fast_validate_python
 
-* To run the Python unit tests in a specific file, such as
+* To run the Python unit tests in a specific file and a specific test, such as
   ``ecommerce/courses/tests/test_utils.py``, run the following command and
   substitute the desired file path.
 
   .. code-block:: bash
 
-      $ DISABLE_ACCEPTANCE_TESTS=True ./manage.py test
-      ecommerce.courses.tests.test_utils --settings=ecommerce.settings.test
-      --with-ignore-docstrings --logging-level=DEBUG
+      $ DISABLE_ACCEPTANCE_TESTS=True ./manage.py test ecommerce.courses.tests.test_utils:UtilsTests.test_get_course_info_from_catalog_cached --settings=ecommerce.settings.test --with-ignore-docstrings --logging-level=DEBUG
 
   Note: ``DISABLE_MIGRATIONS`` is broken as of June 2019.
 
@@ -109,9 +107,7 @@ these models, which are used for multi-tenancy.
 
   .. code-block:: bash
 
-      $ DISABLE_MIGRATIONS=1 DISABLE_ACCEPTANCE_TESTS=True ./manage.py test
-      ecommerce.courses.tests.test_utils --settings=ecommerce.settings.test
-      --with-ignore-docstrings --logging-level=DEBUG
+      $ DISABLE_MIGRATIONS=1 DISABLE_ACCEPTANCE_TESTS=True ./manage.py test ecommerce.courses.tests.test_utils:UtilsTests.test_get_course_info_from_catalog_cached --settings=ecommerce.settings.test --with-ignore-docstrings --logging-level=DEBUG
 
 To debug when running tests using ``manage.py``, you may need to use the
 following instead of ``pdb`` directly, or nosetests may hang while creating
