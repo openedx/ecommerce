@@ -8,7 +8,6 @@ from decimal import Decimal
 import dateutil.parser
 import newrelic.agent
 import waffle
-from django.contrib.messages import get_messages
 from django.http import HttpResponseBadRequest, HttpResponseRedirect
 from django.shortcuts import redirect, render
 from django.utils.html import escape
@@ -236,7 +235,7 @@ class BasketLogicMixin(object):
                 'benefit_value': self._get_benefit_value(line),
                 'enrollment_code': product.is_enrollment_code_product,
                 'line': line,
-                'seat_type': self._get_certificate_display(product),
+                'seat_type': self._get_certificate_type_display_value(product),
             })
             lines_data.append(line_data)
 
@@ -411,11 +410,18 @@ class BasketLogicMixin(object):
             return None
 
     @newrelic.agent.function_trace()
-    def _get_certificate_display(self, product):
+    def _get_certificate_type(self, product):
         if product.is_seat_product or product.is_course_entitlement_product:
-            return get_certificate_type_display_value(product.attr.certificate_type)
+            return product.attr.certificate_type
         elif product.is_enrollment_code_product:
-            return get_certificate_type_display_value(product.attr.seat_type)
+            return product.attr.seat_type
+        return None
+
+    @newrelic.agent.function_trace()
+    def _get_certificate_type_display_value(self, product):
+        certificate_type = self._get_certificate_type(product)
+        if certificate_type:
+            return get_certificate_type_display_value(certificate_type)
         return None
 
     @newrelic.agent.function_trace()
@@ -603,10 +609,9 @@ class PaymentApiLogicMixin(BasketLogicMixin):
             {
                 'sku': line_data['sku'],
                 'title': line_data['product_title'],
-                'description': line_data['product_description'],
                 'type': line_data['line'].product.get_product_class().name,
                 'image_url': line_data['image_url'],
-                'certificate_type_display_name': line_data['seat_type'],
+                'certificate_type': self._get_certificate_type(line_data['line'].product),
             }
             for line_data in lines_data
         ]
@@ -640,13 +645,6 @@ class PaymentApiLogicMixin(BasketLogicMixin):
         ]
 
     def _add_messages(self, response, context):
-        response['flash_messages'] = [
-            {
-                'message': message.message,
-                'level_tag': message.level_tag,
-            }
-            for message in get_messages(self.request)
-        ]
         response['switch_message'] = context['switch_link_text']
 
 
