@@ -71,6 +71,7 @@ def _redirect_to_payment_microfrontend_if_configured(request):
                 list(request.GET.items()),
             )
             return HttpResponseRedirect(url)
+
     return None
 
 
