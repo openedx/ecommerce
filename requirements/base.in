@@ -33,8 +33,7 @@ edx-ecommerce-worker
 edx-opaque-keys
 edx-rbac
 edx-rest-api-client
-futures ; python_version == "2.7"
-gevent
+gevent==1.0.2
 jsonfield==1.0.3
 libsass==0.9.2
 markdown==2.6.9
