@@ -354,7 +354,6 @@ class PaymentApiViewTests(BasketLogicTestMixin, DiscoveryMockMixin, TestCase):
         expected_response = {
             'offers': [],
             'coupons': [],
-            'flash_messages': [],
             'is_free_basket': False,
             'show_coupon_form': True,
             'switch_message': 'Click here to purchase multiple seats in this course',
