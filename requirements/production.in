@@ -5,7 +5,7 @@ django-ses==0.8.2
 
 # Later versions of gevent wrap Python's __import__ in a way that breaks Oscar imports.
 # For more, see https://github.com/edx/ecommerce/pull/920.
-gevent
+gevent==1.0.2
 
 gunicorn==19.7.1
 newrelic<5
