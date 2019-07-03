@@ -85,7 +85,7 @@ class JournalBundleOfferUpdateViewTests(TestCase, TieredCacheMixin):
 
     def test_post(self, mock_discovery_call_post, mock_discovery_call_update):
         """ The journal bundle offer should be updated. """
-
+        journal_offer_id = self.journal_offer.id
         mock_discovery_call_post.return_value = {"title": "test-journal"}
         mock_discovery_call_update.return_value = _get_mocked_endpoint()
         expected_benefit_value = 55
@@ -94,15 +94,15 @@ class JournalBundleOfferUpdateViewTests(TestCase, TieredCacheMixin):
             'benefit_type': Benefit.PERCENTAGE,
             'benefit_value': expected_benefit_value,
         }
-        existing_offer_ids = [c.id for c in ConditionalOffer.objects.all()]
         response = self.client.post(self.path, data, follow=False)
         self.assertRedirects(response, self.path)
 
-        updated_journal_offer = ConditionalOffer.objects.get(~Q(id__in=existing_offer_ids))
+        updated_journal_offer = ConditionalOffer.objects.get(id=journal_offer_id)
         self.assertEqual(updated_journal_offer.benefit.value, expected_benefit_value)
 
     def test_post_with_invalid_data(self, mock_discovery_call_post, mock_discovery_call_update):
         """ The journal bundle offer should not be updated with invalid data. """
+        journal_offer_id = self.journal_offer.id
         mock_discovery_call_post.return_value = {"title": "test-journal"}
         mock_discovery_call_update.return_value = _get_mocked_endpoint()
         expected_benefit_value = 20
@@ -112,10 +112,8 @@ class JournalBundleOfferUpdateViewTests(TestCase, TieredCacheMixin):
             "benefit_type": Benefit.PERCENTAGE,
             "benefit_value": expected_benefit_value,
         }
-        existing_offer_ids = [c.id for c in ConditionalOffer.objects.all()]
         self.client.post(self.path, data, follow=False)
-        self.assertNotEqual(ConditionalOffer.objects.get(~Q(id__in=existing_offer_ids)).benefit.value, expected_benefit_value)
-
+        self.assertNotEqual(ConditionalOffer.objects.get(id=journal_offer_id).benefit.value, expected_benefit_value)
 
 class JournalBundleOfferCreateViewTests(ViewTestMixin, TestCase):
 

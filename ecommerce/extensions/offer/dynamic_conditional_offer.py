@@ -18,7 +18,6 @@ def get_decoded_jwt_discount_from_request():
         discount_jwt = request.POST.get('discount_jwt')
     if not discount_jwt:
         return None
-
     return jwt_decode_handler(discount_jwt)
 
 def get_percentage_from_request():
