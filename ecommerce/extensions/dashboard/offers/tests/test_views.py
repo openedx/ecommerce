@@ -2,6 +2,7 @@ from __future__ import absolute_import, unicode_literals
 
 import json
 
+from django.db.models import Q
 from django.urls import reverse
 from oscar.core.loading import get_model
 from oscar.test.factories import RangeFactory
@@ -22,7 +23,7 @@ class OfferWizardTests(TestCase):
         site_configuration = SiteConfigurationFactory()
         site = site_configuration.site
 
-        self.assertEqual(ConditionalOffer.objects.count(), 0)
+        self.assertEqual(ConditionalOffer.objects.filter(~Q(name='dynamic_conditional_offer')).count(), 0)
 
         # Start creating the offer by defining by setting the name and site
         metadata = {
@@ -70,8 +71,8 @@ class OfferWizardTests(TestCase):
         response = self.client.post(restrictions_url, data)
         self.assertEqual(response.status_code, 302)
 
-        self.assertEqual(ConditionalOffer.objects.count(), 1)
-        offer = ConditionalOffer.objects.first()
+        self.assertEqual(ConditionalOffer.objects.filter(~Q(name='dynamic_conditional_offer')).count(), 1)
+        offer = ConditionalOffer.objects.filter(~Q(name='dynamic_conditional_offer')).first()
         self.assertEqual(response['Location'], reverse('dashboard:offer-detail', kwargs={'pk': offer.pk}))
 
         # Ensure the offer is associated to the partner set in the first step of the wizard

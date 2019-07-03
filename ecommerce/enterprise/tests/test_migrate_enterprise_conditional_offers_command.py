@@ -233,7 +233,7 @@ class MigrateEnterpriseConditionalOffersTests(TestCase):
                 batch_offset=3,  # 3rd index is the 4th item
             )
 
-        offers = ConditionalOffer.objects.all()
+        offers = ConditionalOffer.objects.filter(~Q(name='dynamic_conditional_offer'))
         assert offers.count() == 8
         assert offers.filter(name__contains='ENT Offer').count() == 1
 
