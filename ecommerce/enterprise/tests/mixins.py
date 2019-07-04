@@ -634,9 +634,12 @@ class EnterpriseServiceMockMixin(object):
                 content_type='application/json'
             )
 
-    def prepare_enterprise_offer(self, percentage_discount_value=100):
+    def prepare_enterprise_offer(self, percentage_discount_value=100, enterprise_customer_name=None):
         benefit = EnterprisePercentageDiscountBenefitFactory(value=percentage_discount_value)
-        condition = EnterpriseCustomerConditionFactory()
+        if enterprise_customer_name is not None:
+            condition = EnterpriseCustomerConditionFactory(enterprise_customer_name=enterprise_customer_name)
+        else:
+            condition = EnterpriseCustomerConditionFactory()
         EnterpriseOfferFactory(partner=self.partner, benefit=benefit, condition=condition)
         self.mock_enterprise_learner_api(
             learner_id=self.user.id,
