@@ -25,7 +25,7 @@ class BasketMixin(SiteMixin):
             basket.add_product(product)
         return basket
 
-    def prepare_course_seat_and_enrollment_code(self, seat_type='verified', id_verification=False):
+    def prepare_course_seat_and_enrollment_code(self, seat_type='verified', seat_price=10, id_verification=False):
         """
         Helper function that creates a new course, enables enrollment codes and creates a new
         seat and enrollment code for it.
@@ -37,7 +37,7 @@ class BasketMixin(SiteMixin):
             The newly created course, seat and enrollment code.
         """
         course = CourseFactory(partner=self.partner)
-        seat = course.create_or_update_seat(seat_type, id_verification, 10, create_enrollment_code=True)
+        seat = course.create_or_update_seat(seat_type, id_verification, seat_price, create_enrollment_code=True)
         enrollment_code = Product.objects.get(product_class__name=ENROLLMENT_CODE_PRODUCT_CLASS_NAME)
         return course, seat, enrollment_code
 

@@ -3,6 +3,7 @@ from __future__ import absolute_import
 import datetime
 import hashlib
 import itertools
+from contextlib import contextmanager
 from decimal import Decimal
 
 import ddt
@@ -326,11 +327,39 @@ class BasketLogicTestMixin(object):
     def create_seat(self, course, seat_price=100, cert_type='verified'):
         return course.create_or_update_seat(cert_type, True, seat_price)
 
+    def create_and_apply_benefit_to_basket(self, basket, product, benefit_type, benefit_value):
+        _range = factories.RangeFactory(products=[product, ])
+        voucher, __ = prepare_voucher(_range=_range, benefit_type=benefit_type, benefit_value=benefit_value)
+        basket.vouchers.add(voucher)
+        Applicator().apply(basket)
+        return voucher
 
+    @contextmanager
+    def assert_events_fired_to_segment(self, basket):
+        with mock.patch('ecommerce.extensions.basket.views.track_segment_event', return_value=(True, '')) as mock_track:
+            yield
+
+            calls = []
+            properties = {
+                'cart_id': basket.id,
+                'products': [translate_basket_line_for_segment(line) for line in basket.all_lines()],
+            }
+            calls.append(mock.call(self.site, self.user, 'Cart Viewed', properties,))
+
+            properties = {
+                'checkout_id': basket.order_number,
+                'step': 1
+            }
+            calls.append(mock.call(self.site, self.user, 'Checkout Step Viewed', properties))
+            mock_track.assert_has_calls(calls)
+
+
+@ddt.ddt
 @httpretty.activate
-class PaymentApiViewTests(BasketLogicTestMixin, DiscoveryMockMixin, TestCase):
+class PaymentApiViewTests(BasketLogicTestMixin, BasketMixin, DiscoveryMockMixin, EnterpriseServiceMockMixin, TestCase):
     """ PaymentApiViewTests basket api tests. """
     path = reverse('bff:payment:v0:payment')
+    maxDiff = None
 
     def setUp(self):
         super(PaymentApiViewTests, self).setUp()
@@ -338,9 +367,9 @@ class PaymentApiViewTests(BasketLogicTestMixin, DiscoveryMockMixin, TestCase):
         self.client.login(username=self.user.username, password=self.password)
         self.course = CourseFactory(name='PaymentApiViewTests', partner=self.partner)
 
-    def test_response_success(self):
-        """ Verify a successful response is returned. """
-        seat = self.create_seat(self.course, seat_price=500)
+    @ddt.data('verified', 'professional', 'credit')
+    def test_success_seat_type(self, certificate_type):
+        seat = self.create_seat(self.course, seat_price=100, cert_type=certificate_type)
         basket = self.create_basket_and_add_product(seat)
         self.mock_access_token_response()
         self.assertEqual(basket.lines.count(), 1)
@@ -348,23 +377,148 @@ class PaymentApiViewTests(BasketLogicTestMixin, DiscoveryMockMixin, TestCase):
             self.course, discovery_api_url=self.site_configuration.discovery_api_url
         )
 
-        response = self.client.get(self.path)
+        with self.assert_events_fired_to_segment(basket):
+            response = self.client.get(self.path)
         self.assertEqual(response.status_code, 200)
 
         expected_response = {
+            'basket_id': basket.id,
+            'currency': u'USD',
             'offers': [],
             'coupons': [],
             'is_free_basket': False,
             'show_coupon_form': True,
             'switch_message': 'Click here to purchase multiple seats in this course',
             'summary_discounts': Decimal('0.00'),
-            'summary_price': Decimal('500.00'),
-            'order_total': Decimal('500.00'),
+            'summary_price': Decimal('100.00'),
+            'order_total': Decimal('100.00'),
+            'products': [{
+                'type': u'Seat',
+                'certificate_type': certificate_type,
+                'image_url': u'/path/to/image.jpg',
+                'sku': basket.lines.first().product.stockrecords.first().partner_sku,
+                'title': u'PaymentApiViewTests',
+            }],
         }
-        actual_subset = {k: v for k, v in response.json().items() if k in expected_response}
-        self.assertDictEqual(expected_response, actual_subset)
+        self.assertDictEqual(expected_response, response.json())
 
-        # TODO: ARCH-960: Add assertions for response
+    def test_success_enrollment_code_type(self):
+        course, __, enrollment_code = self.prepare_course_seat_and_enrollment_code(seat_price=100)
+        basket = self.create_basket_and_add_product(enrollment_code)
+        self.mock_course_runs_endpoint(self.site_configuration.discovery_api_url, course_run=course)
+
+        response = self.client.get(self.path)
+        self.assertEqual(response.status_code, 200)
+
+        expected_response = {
+            'basket_id': basket.id,
+            'currency': u'USD',
+            'offers': [],
+            'coupons': [],
+            'is_free_basket': False,
+            'show_coupon_form': False,
+            'switch_message': 'Click here to just purchase an enrollment for yourself',
+            'summary_discounts': Decimal('0.00'),
+            'summary_price': Decimal('100.00'),
+            'order_total': Decimal('100.00'),
+            'products': [{
+                'type': u'Enrollment Code',
+                'certificate_type': u'verified',
+                'image_url': None,
+                'sku': basket.lines.first().product.stockrecords.first().partner_sku,
+                'title': None,
+            }],
+        }
+        self.assertDictEqual(expected_response, response.json())
+
+    def test_success_entitlement_type_with_discount(self):
+        basket = factories.BasketFactory(owner=self.user, site=self.site)
+        product = create_or_update_course_entitlement(
+            'verified', 100, self.partner, 'foo-bar', 'Foo Bar Entitlement',
+        )
+        basket.add_product(product, 1)
+        voucher = self.create_and_apply_benefit_to_basket(basket, product, Benefit.FIXED, 20)
+
+        response = self.client.get(self.path)
+        self.assertEqual(response.status_code, 200)
+
+        expected_response = {
+            'basket_id': basket.id,
+            'currency': u'USD',
+            'offers': [{
+                'benefit_value': u'$20.00',
+                'provider': None,
+            }],
+            'coupons': [{
+                'benefit_value': u'$20.00',
+                'code': u'COUPONTEST',
+                'id': voucher.id,
+            }],
+            'is_free_basket': False,
+            'show_coupon_form': True,
+            'switch_message': None,
+            'summary_discounts': Decimal('20.00'),
+            'summary_price': Decimal('100.00'),
+            'order_total': Decimal('100.00'),
+            'products': [{
+                'type': u'Course Entitlement',
+                'certificate_type': u'verified',
+                'image_url': None,
+                'sku': basket.lines.first().product.stockrecords.first().partner_sku,
+                'title': None,
+            }],
+        }
+        self.assertDictEqual(expected_response, response.json())
+
+    @ddt.data(True, False)
+    def test_discounted_free_basket(self, is_free):
+        seat = self.create_seat(self.course, seat_price=100)
+        basket = self.create_basket_and_add_product(seat)
+        voucher = self.create_and_apply_benefit_to_basket(basket, seat, Benefit.PERCENTAGE, 100 if is_free else 50)
+
+        response = self.client.get(self.path)
+        self.assertEqual(response.status_code, 200)
+
+        expected_response = {
+            'basket_id': basket.id,
+            'currency': u'USD',
+            'offers': [{
+                'benefit_value': u'100%' if is_free else u'50%',
+                'provider': None,
+            }],
+            'coupons': [{
+                'benefit_value': u'100%' if is_free else u'50%',
+                'code': u'COUPONTEST',
+                'id': voucher.id,
+            }],
+            'is_free_basket': is_free,
+            'show_coupon_form': True,
+            'switch_message': u'Click here to purchase multiple seats in this course',
+            'summary_discounts': Decimal('100.00') if is_free else Decimal('50.00'),
+            'summary_price': Decimal('100.00'),
+            'order_total': Decimal('100.00'),
+            'products': [{
+                'type': u'Seat',
+                'certificate_type': u'verified',
+                'image_url': None,
+                'sku': basket.lines.first().product.stockrecords.first().partner_sku,
+                'title': None,
+            }],
+        }
+        self.assertDictEqual(expected_response, response.json())
+
+    @httpretty.activate
+    def test_enterprise_free_basket_redirect(self):
+        """
+        Verify redirect to FreeCheckoutView when basket is free
+        and an Enterprise-related offer is applied.
+        """
+        self.course_run.create_or_update_seat('verified', True, Decimal(100))
+        self.create_basket_and_add_product(self.course_run.seat_products[0])
+        self.prepare_enterprise_offer(enterprise_customer_name='Foo Enterprise')
+
+        response = self.client.get(self.path)
+        self.assertRedirects(response, reverse('checkout:free-checkout'), fetch_redirect_response=False)
 
 
 @httpretty.activate
@@ -386,12 +540,6 @@ class BasketSummaryViewTests(EnterpriseServiceMockMixin, DiscoveryTestMixin, Dis
         site_configuration.save()
 
         toggle_switch(settings.PAYMENT_PROCESSOR_SWITCH_PREFIX + DummyProcessor.NAME, True)
-
-    def create_and_apply_benefit_to_basket(self, basket, product, benefit_type, benefit_value):
-        _range = factories.RangeFactory(products=[product, ])
-        voucher, __ = prepare_voucher(_range=_range, benefit_type=benefit_type, benefit_value=benefit_value)
-        basket.vouchers.add(voucher)
-        Applicator().apply(basket)
 
     @ddt.data(ConnectionError, SlumberBaseException, Timeout)
     def test_course_api_failure(self, error):
@@ -480,26 +628,10 @@ class BasketSummaryViewTests(EnterpriseServiceMockMixin, DiscoveryTestMixin, Dis
         )
 
         benefit, __ = Benefit.objects.get_or_create(type=benefit_type, value=benefit_value)
-
-        with mock.patch('ecommerce.extensions.basket.views.track_segment_event', return_value=(True, '')) as mock_track:
+        with self.assert_events_fired_to_segment(basket):
             response = self.client.get(self.path)
-
-            # Verify events are sent to Segment
-            calls = []
-            properties = {
-                'cart_id': basket.id,
-                'products': [translate_basket_line_for_segment(line) for line in basket.all_lines()],
-            }
-            calls.append(mock.call(self.site, self.user, 'Cart Viewed', properties,))
-
-            properties = {
-                'checkout_id': basket.order_number,
-                'step': 1
-            }
-            calls.append(mock.call(self.site, self.user, 'Checkout Step Viewed', properties))
-            mock_track.assert_has_calls(calls)
-
         self.assertEqual(response.status_code, 200)
+
         self.assertEqual(len(response.context['formset_lines_data']), 1)
 
         line_data = response.context['formset_lines_data'][0][1]
@@ -767,7 +899,7 @@ class BasketSummaryViewTests(EnterpriseServiceMockMixin, DiscoveryTestMixin, Dis
         )
 
     @httpretty.activate
-    def test_free_basket_redirect(self):
+    def test_enterprise_free_basket_redirect(self):
         """
         Verify redirect to FreeCheckoutView when basket is free
         and an Enterprise-related offer is applied.
@@ -779,6 +911,22 @@ class BasketSummaryViewTests(EnterpriseServiceMockMixin, DiscoveryTestMixin, Dis
         response = self.client.get(self.path)
 
         self.assertRedirects(response, reverse('checkout:free-checkout'), fetch_redirect_response=False)
+
+    @override_settings(PAYMENT_PROCESSORS=['ecommerce.extensions.payment.tests.processors.DummyProcessor'])
+    @ddt.data(100, 50)
+    def test_discounted_free_basket(self, percentage_benefit):
+        seat = self.create_seat(self.course, seat_price=100)
+        basket = self.create_basket_and_add_product(seat)
+        self.mock_access_token_response()
+        self.mock_course_run_detail_endpoint(
+            self.course, discovery_api_url=self.site_configuration.discovery_api_url
+        )
+
+        voucher = self.create_and_apply_benefit_to_basket(basket, seat, Benefit.PERCENTAGE, percentage_benefit)
+
+        response = self.client.get(self.path)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context['free_basket'], percentage_benefit == 100)
 
 
 @httpretty.activate
