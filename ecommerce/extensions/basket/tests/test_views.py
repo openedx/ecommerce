@@ -3,6 +3,7 @@ from __future__ import absolute_import
 import datetime
 import hashlib
 import itertools
+from contextlib import contextmanager
 from decimal import Decimal
 
 import ddt
@@ -326,11 +327,62 @@ class BasketLogicTestMixin(object):
     def create_seat(self, course, seat_price=100, cert_type='verified'):
         return course.create_or_update_seat(cert_type, True, seat_price)
 
+    def create_and_apply_benefit_to_basket(self, basket, product, benefit_type, benefit_value):
+        _range = factories.RangeFactory(products=[product, ])
+        voucher, __ = prepare_voucher(_range=_range, benefit_type=benefit_type, benefit_value=benefit_value)
+        basket.vouchers.add(voucher)
+        Applicator().apply(basket)
+        return voucher
 
+    @contextmanager
+    def assert_events_fired_to_segment(self, basket):
+        with mock.patch('ecommerce.extensions.basket.views.track_segment_event', return_value=(True, '')) as mock_track:
+            yield
+
+            calls = []
+            properties = {
+                'cart_id': basket.id,
+                'products': [translate_basket_line_for_segment(line) for line in basket.all_lines()],
+            }
+            calls.append(mock.call(self.site, self.user, 'Cart Viewed', properties,))
+
+            properties = {
+                'checkout_id': basket.order_number,
+                'step': 1
+            }
+            calls.append(mock.call(self.site, self.user, 'Checkout Step Viewed', properties))
+            mock_track.assert_has_calls(calls)
+
+    def verify_exception_logged_on_segment_error(self):
+        """ Verify error log when track_segment_event fails. """
+        seat = self.create_seat(self.course)
+        basket = self.create_basket_and_add_product(seat)
+        self.mock_access_token_response()
+        self.mock_course_run_detail_endpoint(
+            self.course, discovery_api_url=self.site_configuration.discovery_api_url
+        )
+        self.assertEqual(basket.lines.count(), 1)
+
+        logger_name = 'ecommerce.extensions.basket.views'
+        with LogCapture(logger_name) as logger:
+            with mock.patch('ecommerce.extensions.basket.views.track_segment_event') as mock_track:
+                mock_track.side_effect = Exception()
+
+                response = self.client.get(self.path)
+                self.assertEqual(response.status_code, 200)
+
+                logger.check((
+                    logger_name, 'ERROR',
+                    u'Failed to fire Cart Viewed event for basket [{}]'.format(basket.id)
+                ))
+
+
+@ddt.ddt
 @httpretty.activate
-class PaymentApiViewTests(BasketLogicTestMixin, DiscoveryMockMixin, TestCase):
+class PaymentApiViewTests(BasketLogicTestMixin, BasketMixin, DiscoveryMockMixin, EnterpriseServiceMockMixin, TestCase):
     """ PaymentApiViewTests basket api tests. """
     path = reverse('bff:payment:v0:payment')
+    maxDiff = None
 
     def setUp(self):
         super(PaymentApiViewTests, self).setUp()
@@ -338,9 +390,67 @@ class PaymentApiViewTests(BasketLogicTestMixin, DiscoveryMockMixin, TestCase):
         self.client.login(username=self.user.username, password=self.password)
         self.course = CourseFactory(name='PaymentApiViewTests', partner=self.partner)
 
-    def test_response_success(self):
-        """ Verify a successful response is returned. """
-        seat = self.create_seat(self.course, seat_price=500)
+    def _assert_expected_response(
+            self,
+            basket,
+            product_type=u'Seat',
+            discount_value=0,
+            discount_type=Benefit.FIXED,
+            certificate_type=u'verified',
+            summary_price=100,
+            order_total=100,
+            voucher=None,
+            offer_provider=None,
+            switch_message=None,
+            show_coupon_form=True,
+            image_url=None,
+            title=None,
+    ):
+        if discount_type == Benefit.FIXED:
+            benefit_value = u'${}.00'.format(discount_value)
+        else:
+            benefit_value = u'{}%'.format(discount_value)
+
+        response = self.client.get(self.path)
+        self.assertEqual(response.status_code, 200)
+        if discount_value:
+            coupons = [{
+                'benefit_value': benefit_value,
+                'code': u'COUPONTEST',
+                'id': voucher.id,
+            }]
+            offers = [{
+                'benefit_value': benefit_value,
+                'provider': offer_provider,
+            }]
+        else:
+            coupons = []
+            offers = []
+
+        expected_response = {
+            'basket_id': basket.id,
+            'currency': u'USD',
+            'offers': offers,
+            'coupons': coupons,
+            'is_free_basket': True if discount_value == 100 else False,
+            'show_coupon_form': show_coupon_form,
+            'switch_message': switch_message,
+            'summary_discounts': Decimal(discount_value),
+            'summary_price': Decimal(summary_price),
+            'order_total': Decimal(order_total),
+            'products': [{
+                'type': product_type,
+                'certificate_type': certificate_type,
+                'image_url': image_url,
+                'sku': basket.lines.first().product.stockrecords.first().partner_sku,
+                'title': title,
+            }],
+        }
+        self.assertDictEqual(expected_response, response.json())
+
+    @ddt.data('verified', 'professional', 'credit')
+    def test_seat_type(self, certificate_type):
+        seat = self.create_seat(self.course, seat_price=100, cert_type=certificate_type)
         basket = self.create_basket_and_add_product(seat)
         self.mock_access_token_response()
         self.assertEqual(basket.lines.count(), 1)
@@ -348,23 +458,100 @@ class PaymentApiViewTests(BasketLogicTestMixin, DiscoveryMockMixin, TestCase):
             self.course, discovery_api_url=self.site_configuration.discovery_api_url
         )
 
+        with self.assert_events_fired_to_segment(basket):
+            self._assert_expected_response(
+                basket,
+                certificate_type=certificate_type,
+                image_url=u'/path/to/image.jpg',
+                title=u'PaymentApiViewTests',
+                switch_message='Click here to purchase multiple seats in this course',
+            )
+
+    def test_enrollment_code_type(self):
+        course, __, enrollment_code = self.prepare_course_seat_and_enrollment_code(seat_price=100)
+        basket = self.create_basket_and_add_product(enrollment_code)
+        self.mock_course_runs_endpoint(self.site_configuration.discovery_api_url, course_run=course)
+
+        self._assert_expected_response(
+            basket,
+            product_type=u'Enrollment Code',
+            show_coupon_form=False,
+            switch_message='Click here to just purchase an enrollment for yourself',
+
+        )
+
+    def test_entitlement_type(self):
+        basket = factories.BasketFactory(owner=self.user, site=self.site)
+        product = create_or_update_course_entitlement(
+            'verified', 100, self.partner, 'foo-bar', 'Foo Bar Entitlement',
+        )
+        basket.add_product(product, 1)
+
+        self._assert_expected_response(
+            basket,
+            product_type=u'Course Entitlement',
+        )
+
+    @ddt.data(50, 100)
+    def test_discounted_entitlement_type(self, discount_value):
+        basket = factories.BasketFactory(owner=self.user, site=self.site)
+        product = create_or_update_course_entitlement(
+            'verified', 100, self.partner, 'foo-bar', 'Foo Bar Entitlement',
+        )
+        basket.add_product(product, 1)
+        voucher = self.create_and_apply_benefit_to_basket(basket, product, Benefit.FIXED, discount_value)
+
+        self._assert_expected_response(
+            basket,
+            product_type=u'Course Entitlement',
+            discount_value=discount_value,
+            voucher=voucher,
+        )
+
+    @ddt.data(100, 50)
+    def test_discounted_seat_type(self, discount_value):
+        seat = self.create_seat(self.course, seat_price=100)
+        basket = self.create_basket_and_add_product(seat)
+        voucher = self.create_and_apply_benefit_to_basket(basket, seat, Benefit.PERCENTAGE, discount_value)
+
+        self._assert_expected_response(
+            basket,
+            discount_value=discount_value,
+            discount_type=Benefit.PERCENTAGE,
+            voucher=voucher,
+            switch_message=u'Click here to purchase multiple seats in this course',
+        )
+
+    @httpretty.activate
+    def test_enterprise_free_basket_redirect(self):
+        """
+        Verify redirect to FreeCheckoutView when basket is free
+        and an Enterprise-related offer is applied.
+        """
+        self.course_run.create_or_update_seat('verified', True, Decimal(10))
+        self.create_basket_and_add_product(self.course_run.seat_products[0])
+        self.prepare_enterprise_offer()
+
         response = self.client.get(self.path)
         self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data['redirect'], reverse('checkout:free-checkout'))
 
-        expected_response = {
-            'offers': [],
-            'coupons': [],
-            'is_free_basket': False,
-            'show_coupon_form': True,
-            'switch_message': 'Click here to purchase multiple seats in this course',
-            'summary_discounts': Decimal('0.00'),
-            'summary_price': Decimal('500.00'),
-            'order_total': Decimal('500.00'),
-        }
-        actual_subset = {k: v for k, v in response.json().items() if k in expected_response}
-        self.assertDictEqual(expected_response, actual_subset)
+    def test_failed_enterprise_consent_message(self):
+        seat = self.create_seat(self.course)
+        self.create_basket_and_add_product(seat)
 
-        # TODO: ARCH-960: Add assertions for response
+        params = 'consent_failed=THISISACOUPONCODE'
+
+        url = '{path}?{params}'.format(
+            path=self.get_full_url(self.path),
+            params=params
+        )
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        # NAATODO check for error message
+
+    def test_segment_exception_log(self):
+        self.verify_exception_logged_on_segment_error()
 
 
 @httpretty.activate
@@ -386,12 +573,6 @@ class BasketSummaryViewTests(EnterpriseServiceMockMixin, DiscoveryTestMixin, Dis
         site_configuration.save()
 
         toggle_switch(settings.PAYMENT_PROCESSOR_SWITCH_PREFIX + DummyProcessor.NAME, True)
-
-    def create_and_apply_benefit_to_basket(self, basket, product, benefit_type, benefit_value):
-        _range = factories.RangeFactory(products=[product, ])
-        voucher, __ = prepare_voucher(_range=_range, benefit_type=benefit_type, benefit_value=benefit_value)
-        basket.vouchers.add(voucher)
-        Applicator().apply(basket)
 
     @ddt.data(ConnectionError, SlumberBaseException, Timeout)
     def test_course_api_failure(self, error):
@@ -480,26 +661,10 @@ class BasketSummaryViewTests(EnterpriseServiceMockMixin, DiscoveryTestMixin, Dis
         )
 
         benefit, __ = Benefit.objects.get_or_create(type=benefit_type, value=benefit_value)
-
-        with mock.patch('ecommerce.extensions.basket.views.track_segment_event', return_value=(True, '')) as mock_track:
+        with self.assert_events_fired_to_segment(basket):
             response = self.client.get(self.path)
-
-            # Verify events are sent to Segment
-            calls = []
-            properties = {
-                'cart_id': basket.id,
-                'products': [translate_basket_line_for_segment(line) for line in basket.all_lines()],
-            }
-            calls.append(mock.call(self.site, self.user, 'Cart Viewed', properties,))
-
-            properties = {
-                'checkout_id': basket.order_number,
-                'step': 1
-            }
-            calls.append(mock.call(self.site, self.user, 'Checkout Step Viewed', properties))
-            mock_track.assert_has_calls(calls)
-
         self.assertEqual(response.status_code, 200)
+
         self.assertEqual(len(response.context['formset_lines_data']), 1)
 
         line_data = response.context['formset_lines_data'][0][1]
@@ -767,18 +932,29 @@ class BasketSummaryViewTests(EnterpriseServiceMockMixin, DiscoveryTestMixin, Dis
         )
 
     @httpretty.activate
-    def test_free_basket_redirect(self):
-        """
-        Verify redirect to FreeCheckoutView when basket is free
-        and an Enterprise-related offer is applied.
-        """
-        self.course_run.create_or_update_seat('verified', True, Decimal(10))
+    def test_enterprise_free_basket_redirect(self):
+        self.course_run.create_or_update_seat('verified', True, Decimal(100))
         self.create_basket_and_add_product(self.course_run.seat_products[0])
-        self.prepare_enterprise_offer()
+        self.prepare_enterprise_offer(enterprise_customer_name='Foo Enterprise')
 
         response = self.client.get(self.path)
-
         self.assertRedirects(response, reverse('checkout:free-checkout'), fetch_redirect_response=False)
+
+    @override_settings(PAYMENT_PROCESSORS=['ecommerce.extensions.payment.tests.processors.DummyProcessor'])
+    @ddt.data(100, 50)
+    def test_discounted_free_basket(self, percentage_benefit):
+        seat = self.create_seat(self.course, seat_price=100)
+        basket = self.create_basket_and_add_product(seat)
+        self.mock_access_token_response()
+        self.mock_course_run_detail_endpoint(
+            self.course, discovery_api_url=self.site_configuration.discovery_api_url
+        )
+
+        self.create_and_apply_benefit_to_basket(basket, seat, Benefit.PERCENTAGE, percentage_benefit)
+
+        response = self.client.get(self.path)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context['free_basket'], percentage_benefit == 100)
 
 
 @httpretty.activate
