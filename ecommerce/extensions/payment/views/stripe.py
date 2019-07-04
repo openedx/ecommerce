@@ -76,6 +76,7 @@ class StripeSubmitView(EdxOrderPlacementMixin, BasePaymentSubmitView):
 
         receipt_url = get_receipt_page_url(
             site_configuration=self.request.site.siteconfiguration,
-            order_number=order_number
+            order_number=order_number,
+            disable_button=True
         )
         return JsonResponse({'url': receipt_url}, status=201)

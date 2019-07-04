@@ -51,10 +51,17 @@ ENTERPRISE_CUSTOMER = 'cf246b88-d5f6-4908-a522-fc307e0b0c59'
 ENTERPRISE_CUSTOMER_CATALOG = 'abc18838-adcb-41d5-abec-b28be5bfcc13'
 
 
-def format_url(base='', path='', params=None):
-    if params:
-        return '{base}{path}?{params}'.format(base=base, path=path, params=six.moves.urllib.parse.urlencode(params))
-    return '{base}{path}'.format(base=base, path=path)
+def format_url(base='', path='', params=None, disable_button=False):
+    params = six.moves.urllib.parse.urlencode(params)
+    url = '{base}{path}{params}'.format(
+        base=base,
+        path=path,
+        params='?{params}'.format(params=params) if params else ''
+    )
+    if disable_button:
+        url = url + '&back_button=disable' if params else '?back_button=disable'
+
+    return url
 
 
 class CouponAppViewTests(TestCase):
@@ -366,7 +373,7 @@ class CouponRedeemViewTests(CouponMixin, DiscoveryTestMixin, LmsApiMockMixin, En
 
         order = Order.objects.first()
         receipt_page_url = get_receipt_page_url(self.site.siteconfiguration)
-        expected_url = format_url(base=receipt_page_url, params={'order_number': order.number})
+        expected_url = format_url(base=receipt_page_url, params={'order_number': order.number}, disable_button=True)
 
         self.assertRedirects(response, expected_url, status_code=302, fetch_redirect_response=False)
 

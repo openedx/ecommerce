@@ -31,13 +31,14 @@ def get_credit_provider_details(credit_provider_id, site_configuration):
         return None
 
 
-def get_receipt_page_url(site_configuration, order_number=None, override_url=None):
+def get_receipt_page_url(site_configuration, order_number=None, override_url=None, disable_button=False):
     """ Returns the receipt page URL.
 
     Args:
         order_number (str): Order number
         site_configuration (SiteConfiguration): Site Configuration containing the flag for enabling Otto receipt page.
         override_url (str): New receipt page to override the default one.
+        disable_button (bool): To disable the back button from receipt page
 
     Returns:
         str: Receipt page URL.
@@ -48,10 +49,15 @@ def get_receipt_page_url(site_configuration, order_number=None, override_url=Non
         base_url = site_configuration.build_ecommerce_url(reverse('checkout:receipt'))
         params = six.moves.urllib.parse.urlencode({'order_number': order_number}) if order_number else ''
 
-    return '{base_url}{params}'.format(
+    url = '{base_url}{params}'.format(
         base_url=base_url,
         params='?{params}'.format(params=params) if params else ''
     )
+    if disable_button:
+        btn_param = six.moves.urllib.parse.urlencode({'back_button': "disable"})
+        url += ('&' if params else '?') + btn_param
+
+    return url
 
 
 def format_currency(currency, amount, format=None, locale=None):  # pylint: disable=redefined-builtin

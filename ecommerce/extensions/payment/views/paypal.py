@@ -91,7 +91,8 @@ class PaypalPaymentExecutionView(EdxOrderPlacementMixin, View):
 
         receipt_url = get_receipt_page_url(
             order_number=basket.order_number,
-            site_configuration=basket.site.siteconfiguration
+            site_configuration=basket.site.siteconfiguration,
+            disable_button=True
         )
 
         try:

@@ -26,7 +26,8 @@
        class="receipt container content-container"
        data-currency="{{ order.currency }}"
        data-order-id="{{ order.number }}"
-       data-total-amount="{{ order.total_incl_tax | unlocalize }}">
+       data-total-amount="{{ order.total_incl_tax | unlocalize }}"
+       data-back-button="{{ back_button | default:'' }}">
       <h2 class="thank-you">{% trans "Thank you for your order!" %}</h2>
 
       <div class="list-info">

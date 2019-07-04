@@ -75,7 +75,8 @@ class PaypalPaymentExecutionViewTests(PaypalMixin, PaymentEventsMixin, TestCase)
             response,
             url_redirect or get_receipt_page_url(
                 order_number=self.basket.order_number,
-                site_configuration=self.basket.site.siteconfiguration
+                site_configuration=self.basket.site.siteconfiguration,
+                disable_button=True
             ),
             fetch_redirect_response=False
         )
@@ -120,7 +121,8 @@ class PaypalPaymentExecutionViewTests(PaypalMixin, PaymentEventsMixin, TestCase)
             response,
             get_receipt_page_url(
                 order_number=self.basket.order_number,
-                site_configuration=self.basket.site.siteconfiguration
+                site_configuration=self.basket.site.siteconfiguration,
+                disable_button=True
             ),
             fetch_redirect_response=False
         )
@@ -157,7 +159,8 @@ class PaypalPaymentExecutionViewTests(PaypalMixin, PaymentEventsMixin, TestCase)
             response,
             get_receipt_page_url(
                 order_number=self.basket.order_number,
-                site_configuration=self.basket.site.siteconfiguration
+                site_configuration=self.basket.site.siteconfiguration,
+                disable_button=True
             ),
             fetch_redirect_response=False
         )
