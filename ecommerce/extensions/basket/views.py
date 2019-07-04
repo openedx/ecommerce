@@ -264,7 +264,23 @@ class BasketLogicMixin(object):
             'line_price': (self.request.basket.total_incl_tax_excl_discounts / num_of_items) if num_of_items > 0 else 0,
         }
 
-    def verify_enterprise_consent(self):
+    def fire_segment_events(self, request, basket):
+        try:
+            properties = {
+                'cart_id': basket.id,
+                'products': [translate_basket_line_for_segment(line) for line in basket.all_lines()],
+            }
+            track_segment_event(request.site, request.user, 'Cart Viewed', properties)
+
+            properties = {
+                'checkout_id': basket.order_number,
+                'step': 1
+            }
+            track_segment_event(request.site, request.user, 'Checkout Step Viewed', properties)
+        except Exception:  # pylint: disable=broad-except
+            logger.exception('Failed to fire Cart Viewed event for basket [%d]', basket.id)
+
+    def verify_enterprise_needs(self, basket):
         failed_enterprise_consent_code = self.request.GET.get(CONSENT_FAILED_PARAM)
         if failed_enterprise_consent_code:
             messages.error(
@@ -273,6 +289,9 @@ class BasketLogicMixin(object):
                     code=failed_enterprise_consent_code
                 )
             )
+
+        if has_enterprise_offer(basket) and basket.total_incl_tax == Decimal(0):
+            raise RedirectException(response=redirect('checkout:free-checkout'))
 
     @newrelic.agent.function_trace()
     def _get_course_data(self, product):
@@ -441,16 +460,13 @@ class BasketSummaryView(BasketLogicMixin, BasketView):
     @newrelic.agent.function_trace()
     def get(self, request, *args, **kwargs):
         basket = request.basket
-        self._fire_segment_events(request, basket)
 
-        self.verify_enterprise_consent()
-        if has_enterprise_offer(basket) and basket.total_incl_tax == Decimal(0):
-            return redirect('checkout:free-checkout')
-
-        if self._is_single_course_purchase(basket):
-            redirect_response = _redirect_to_payment_microfrontend_if_configured(request)
-            if redirect_response:
-                return redirect_response
+        try:
+            self.fire_segment_events(request, basket)
+            self.verify_enterprise_needs(basket)
+            self._redirect_to_microfrontend_if_needed(request, basket)
+        except RedirectException as e:
+            return e.response
 
         return super(BasketSummaryView, self).get(request, *args, **kwargs)
 
@@ -528,21 +544,11 @@ class BasketSummaryView(BasketLogicMixin, BasketView):
                                                      sc=site_configuration.id)
             raise SiteConfigurationError(msg)
 
-    def _fire_segment_events(self, request, basket):
-        try:
-            properties = {
-                'cart_id': basket.id,
-                'products': [translate_basket_line_for_segment(line) for line in basket.all_lines()],
-            }
-            track_segment_event(request.site, request.user, 'Cart Viewed', properties)
-
-            properties = {
-                'checkout_id': basket.order_number,
-                'step': 1
-            }
-            track_segment_event(request.site, request.user, 'Checkout Step Viewed', properties)
-        except Exception:  # pylint: disable=broad-except
-            logger.exception('Failed to fire Cart Viewed event for basket [%d]', basket.id)
+    def _redirect_to_microfrontend_if_needed(self, request, basket):
+        if self._is_single_course_purchase(basket):
+            redirect_response = _redirect_to_payment_microfrontend_if_configured(request)
+            if redirect_response:
+                raise RedirectException(response=redirect_response)
 
     def _is_single_course_purchase(self, basket):
         return (
@@ -648,8 +654,7 @@ class PaymentApiLogicMixin(BasketLogicMixin):
         response['switch_message'] = context['switch_link_text']
 
 
-# TODO: ARCH-967: Remove "pragma: no cover"
-class PaymentApiView(PaymentApiLogicMixin, APIView):  # pragma: no cover
+class PaymentApiView(PaymentApiLogicMixin, APIView):
     """
     Api for retrieving basket contents and checkout/payment options.
 
@@ -659,8 +664,15 @@ class PaymentApiView(PaymentApiLogicMixin, APIView):  # pragma: no cover
     permission_classes = (IsAuthenticated,)
 
     def get(self, request):  # pylint: disable=unused-argument
-        self.verify_enterprise_consent()
-        response = self.get_payment_api_response()
+        basket = request.basket
+
+        try:
+            self.fire_segment_events(request, basket)
+            self.verify_enterprise_needs(basket)
+            response = self.get_payment_api_response()
+        except RedirectException as e:
+            response = {'redirect': e.response.url}
+
         return Response(response)
 
 
