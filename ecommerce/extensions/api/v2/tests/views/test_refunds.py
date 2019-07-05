@@ -25,7 +25,7 @@ Refund = get_model('refund', 'Refund')
 
 
 class RefundCreateViewTests(RefundTestMixin, AccessTokenMixin, JwtMixin, TestCase):
-    LOGGER_NAME = 'ecommerce.extensions.api.v2.views.refunds'
+    MODEL_LOGGER_NAME = 'ecommerce.core.models'
     path = reverse('api:v2:refunds:create')
 
     def setUp(self):
@@ -183,14 +183,14 @@ class RefundCreateViewTests(RefundTestMixin, AccessTokenMixin, JwtMixin, TestCas
         data = self._get_data(user_without_id.username, self.course_id)
         expected_logs = [
             (
-                self.LOGGER_NAME,
-                'WARNING',
-                'Could not find lms_user_id for user {} when processing refund requested by {}'.format(
-                    user_without_id.id, user_without_id.id)
+                self.MODEL_LOGGER_NAME,
+                'ERROR',
+                'Could not find lms_user_id for user {}. Called from refund processing for user {} requested by {}'
+                .format(user_without_id.id, user_without_id.id, user_without_id.id)
             ),
         ]
 
-        with LogCapture(self.LOGGER_NAME) as log:
+        with LogCapture(self.MODEL_LOGGER_NAME) as log:
             response = self.client.post(self.path, data, JSON_CONTENT_TYPE)
             log.check_present(*expected_logs)
             self.assert_ok_response(response)

@@ -108,7 +108,7 @@ class UserTests(DiscoveryTestMixin, LmsApiMockMixin, TestCase):
             (
                 self.LOGGER_NAME,
                 'WARNING',
-                'Could not find lms_user_id for user {} for None'.format(user.id)
+                'Could not find lms_user_id with metric for user {} for None'.format(user.id)
             ),
         ]
 

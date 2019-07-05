@@ -12,7 +12,7 @@ from ecommerce.tests.testcases import TestCase
 class TrackingMiddlewareTests(TestCase):
     """ Test for TrackingMiddleware. """
     TEST_CONTEXT = {'foo': 'bar', 'baz': None, 'lms_user_id': 12345}
-    LOGGER_NAME = 'ecommerce.extensions.analytics.middleware'
+    MODEL_LOGGER_NAME = 'ecommerce.core.models'
 
     def setUp(self):
         super(TrackingMiddlewareTests, self).setUp()
@@ -76,14 +76,14 @@ class TrackingMiddlewareTests(TestCase):
 
         expected = [
             (
-                self.LOGGER_NAME,
+                self.MODEL_LOGGER_NAME,
                 'INFO',
-                'Saving lms_user_id from social auth with id {} for user {}. Request path: /, referrer: None'.format(
-                    social_auth.id, user.id)
+                'Saving lms_user_id from social auth with id {} for user {}. Called from middleware with request '
+                'path: /, referrer: None'.format(social_auth.id, user.id)
             ),
         ]
         same_user = User.objects.get(id=user.id)
-        with LogCapture(self.LOGGER_NAME) as log:
+        with LogCapture(self.MODEL_LOGGER_NAME) as log:
             self._process_request(same_user)
             log.check_present(*expected)
 
@@ -114,14 +114,15 @@ class TrackingMiddlewareTests(TestCase):
         user = self.create_user(lms_user_id=None)
         expected = [
             (
-                self.LOGGER_NAME,
+                self.MODEL_LOGGER_NAME,
                 'ERROR',
-                'Could not find lms_user_id for user {}. Request path: /, referrer: None'.format(user.id)
+                'Could not find lms_user_id for user {}. Called from middleware with request path: /, referrer: None'
+                .format(user.id)
             ),
         ]
 
         same_user = User.objects.get(id=user.id)
-        with LogCapture(self.LOGGER_NAME) as log:
+        with LogCapture(self.MODEL_LOGGER_NAME) as log:
             self._process_request(same_user)
             log.check_present(*expected)
 
@@ -134,14 +135,14 @@ class TrackingMiddlewareTests(TestCase):
         UserSocialAuth.objects.create(user=user, provider='edx-oauth2', extra_data=None)
         expected = [
             (
-                self.LOGGER_NAME,
+                self.MODEL_LOGGER_NAME,
                 'WARNING',
                 'Exception retrieving lms_user_id from social_auth for user {}.'.format(user.id)
             ),
         ]
 
         same_user = User.objects.get(id=user.id)
-        with LogCapture(self.LOGGER_NAME) as log:
+        with LogCapture(self.MODEL_LOGGER_NAME) as log:
             self._process_request(same_user)
             log.check_present(*expected)
 

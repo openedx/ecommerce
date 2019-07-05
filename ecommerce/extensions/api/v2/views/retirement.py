@@ -18,6 +18,11 @@ class EcommerceIdView(APIView):
     Allows synchronization of the ecommerce user id and tracking id with
     other systems. Specifically this is used to retire users identified
     by "ecommerce-{id}" from Segment.
+
+     Side effects:
+        If the given user does not have an LMS user id, tries to find it. If found, adds the id to the user and
+        saves the user. If the id cannot be found, writes the custom metric
+        'ecommerce_missing_lms_user_retirement'.
     """
     authentication_classes = (JwtAuthentication, )
     permission_classes = (permissions.IsAuthenticated, permissions.IsAdminUser)
@@ -32,6 +37,11 @@ class EcommerceIdView(APIView):
                 raise User.DoesNotExist()
 
             user = User.objects.get(username=username)
+
+            # If the user does not already have an LMS user id, add it
+            called_from = u'retirement API'
+            user.add_lms_user_id('ecommerce_missing_lms_user_retirement', called_from)
+
             return Response(
                 {
                     'id': user.pk,
