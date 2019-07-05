@@ -39,18 +39,18 @@ django-cors-headers==3.0.2
 django-crispy-forms==1.7.2
 django-crum==0.7.3        # via edx-rbac
 django-debug-toolbar==1.11
-django-extra-views==0.10.0  # via django-oscar
+django-extra-views==0.11.0  # via django-oscar
 django-filter==1.0.4
 django-haystack==2.8.1    # via django-oscar
 django-libsass==0.5
 django-model-utils==3.2.0  # via edx-rbac
 django-nose==1.4.6
-django-oscar==1.5.4
-django-phonenumber-field==1.3.0  # via django-oscar
+django-oscar==1.6.7
+django-phonenumber-field==2.0.1  # via django-oscar
 django-rest-swagger==2.2.0
 django-simple-history==2.7.2
 django-solo==1.1.3
-django-tables2==1.16.0    # via django-oscar
+django-tables2==1.21.2    # via django-oscar
 django-threadlocals==0.10
 django-treebeard==4.3     # via django-oscar
 django-waffle==0.14.0
@@ -118,7 +118,7 @@ path.py==7.2
 pathlib2==2.3.4           # via importlib-metadata
 paypalrestsdk==1.13.1
 pbr==5.3.1                # via mock, stevedore
-phonenumberslite==8.10.14  # via django-phonenumber-field
+phonenumbers==8.10.14  # via django-phonenumber-field
 pillow==6.0.0             # via django-oscar
 pluggy==0.12.0            # via tox
 polib==1.1.0              # via edx-i18n-tools
@@ -166,7 +166,7 @@ slumber==0.7.1            # via edx-rest-api-client
 snowballstemmer==1.9.0    # via sphinx
 social-auth-app-django==1.2.0  # via edx-auth-backends
 social-auth-core[openidconnect]==1.7.0  # via edx-auth-backends, social-auth-app-django
-sorl-thumbnail==12.5.0    # via django-oscar
+sorl-thumbnail==12.4.1    # via django-oscar
 soupsieve==1.9.2          # via beautifulsoup4
 sphinx==1.5.3
 sqlparse==0.3.0           # via django-debug-toolbar
@@ -179,7 +179,7 @@ tox==3.13.2
 transifex-client==0.13.6
 typing==3.7.4             # via django-extensions
 unicodecsv==0.14.1
-unidecode==0.4.21         # via django-oscar, python-slugify
+unidecode==1.0.23         # via django-oscar, python-slugify
 uritemplate==3.0.0        # via coreapi
 urllib3==1.23             # via requests, selenium, transifex-client
 virtualenv==16.6.1        # via tox
