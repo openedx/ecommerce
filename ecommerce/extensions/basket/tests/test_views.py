@@ -439,7 +439,7 @@ class PaymentApiViewTests(BasketLogicTestMixin, BasketMixin, DiscoveryMockMixin,
             'summary_price': Decimal(summary_price),
             'order_total': Decimal(order_total),
             'products': [{
-                'type': product_type,
+                'product_type': product_type,
                 'certificate_type': certificate_type,
                 'image_url': image_url,
                 'sku': basket.lines.first().product.stockrecords.first().partner_sku,

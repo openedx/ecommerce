@@ -615,7 +615,7 @@ class PaymentApiLogicMixin(BasketLogicMixin):
             {
                 'sku': line_data['sku'],
                 'title': line_data['product_title'],
-                'type': line_data['line'].product.get_product_class().name,
+                'product_type': line_data['line'].product.get_product_class().name,
                 'image_url': line_data['image_url'],
                 'certificate_type': self._get_certificate_type(line_data['line'].product),
             }
