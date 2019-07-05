@@ -78,7 +78,7 @@ freezegun==0.3.12
 funcsigs==1.0.2           # via mock
 future==0.17.1            # via pyjwkest
 futures==3.2.0            # via isort
-gevent==1.0.2
+gevent==1.4.0
 greenlet==0.4.15          # via gevent
 httpretty==0.9.6
 idna==2.8                 # via requests
