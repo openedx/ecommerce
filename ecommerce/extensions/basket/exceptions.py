@@ -12,4 +12,6 @@ class RedirectException(Exception):
 
 
 class VoucherException(Exception):
-    pass
+    def __init__(self, message=None, response=None):
+        super(VoucherException, self).__init__(message)
+        self.response = response
