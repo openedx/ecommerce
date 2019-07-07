@@ -17,7 +17,6 @@ from oscar.apps.basket.views import VoucherAddView as BaseVoucherAddView
 from oscar.apps.basket.views import *  # pylint: disable=wildcard-import, unused-wildcard-import
 from oscar.core.prices import Price
 from requests.exceptions import ConnectionError, Timeout
-from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -35,9 +34,9 @@ from ecommerce.extensions.analytics.utils import (
     track_segment_event,
     translate_basket_line_for_segment
 )
+from ecommerce.extensions.basket import message_utils
 from ecommerce.extensions.basket.constants import EMAIL_OPT_IN_ATTRIBUTE
 from ecommerce.extensions.basket.exceptions import BadRequestException, RedirectException, VoucherException
-from ecommerce.extensions.basket.message_utils import get_response_status_from_messages, get_serialized_messages
 from ecommerce.extensions.basket.utils import (
     add_utm_params_to_url,
     apply_voucher_on_basket_and_check_discount,
@@ -411,7 +410,7 @@ class BasketLogicMixin(object):
                     link_start='<a href="{course_about}">'.format(course_about=course_about_url),
                     link_end='</a>'
                 ),
-                extra_tags='safe'
+                extra_tags='safe enrollment-code-product-info'
             )
 
     @newrelic.agent.function_trace()
@@ -424,10 +423,11 @@ class BasketLogicMixin(object):
     @newrelic.agent.function_trace()
     def _get_benefit_value(self, line):
         if line.has_discount:
-            benefit = list(self.request.basket.applied_offers().values())[0].benefit
-            return format_benefit_value(benefit)
-        else:
-            return None
+            applied_offer_values = list(self.request.basket.applied_offers().values())
+            if applied_offer_values:
+                benefit = applied_offer_values[0].benefit
+                return format_benefit_value(benefit)
+        return None
 
     @newrelic.agent.function_trace()
     def _get_certificate_type(self, product):
@@ -617,12 +617,15 @@ class PaymentApiLogicMixin(BasketLogicMixin):
         ]
 
     def _add_total_summary(self, response, context):
-        response['summary_price'] = self.request.basket.total_incl_tax_excl_discounts
-        response['summary_discounts'] = self.request.basket.total_discount
         if context['is_enrollment_code_purchase']:
-            response['order_total'] = context['order_total'].incl_tax  # TODO: ARCH-967: Remove "pragma: no cover"
+            response['summary_price'] = context['line_price']
+            response['summary_quantity'] = self.request.basket.num_items
+            response['summary_subtotal'] = context['order_total'].incl_tax
         else:
-            response['order_total'] = self.request.basket.total_incl_tax_excl_discounts
+            response['summary_price'] = self.request.basket.total_incl_tax_excl_discounts
+
+        response['summary_discounts'] = self.request.basket.total_discount
+        response['order_total'] = context['order_total'].incl_tax
 
     def _add_offers(self, response):
         response['offers'] = [
@@ -631,6 +634,7 @@ class PaymentApiLogicMixin(BasketLogicMixin):
                 'benefit_value': format_benefit_value(offer.benefit),
             }
             for offer in self.request.basket.applied_offers().values()
+            if offer.condition.enterprise_customer_name
         ]
 
     def _add_coupons(self, response, context):
@@ -642,14 +646,15 @@ class PaymentApiLogicMixin(BasketLogicMixin):
                 'benefit_value': context['total_benefit'],
             }
             for voucher in self.request.basket.vouchers.all()
+            if response['show_coupon_form'] and self.request.basket.contains_a_voucher
         ]
 
     def _add_messages(self, response, context):
-        response['messages'] = get_serialized_messages(self.request)
+        response['messages'] = message_utils.serialize(self.request)
         response['switch_message'] = context['switch_link_text']
 
     def _get_response_status(self, response):
-        return get_response_status_from_messages(response['messages'])
+        return message_utils.get_response_status(response['messages'])
 
 
 class PaymentApiView(PaymentApiLogicMixin, APIView):
@@ -676,35 +681,28 @@ class VoucherAddLogicMixin(object):
     """
     VoucherAdd logic for adding a voucher.
     """
-    def apply_voucher_to_basket(self, voucher):
+    def verify_and_apply_voucher(self, code):
         """
-        Validates and applies voucher on basket.
+        Verifies the voucher for the given code before applying it to the basket.
+
+        Raises:
+            VoucherException in case of an error.
+            RedirectException if a redirect is needed.
         """
+        self._verify_basket_not_empty(code)
+        self._verify_voucher_not_already_applied(code)
+
+        stock_record = self._get_stock_record()
+        voucher = self._get_voucher(code)
+
+        self._verify_email_confirmation(voucher, stock_record.product)
+        self._verify_enterprise_needs(voucher, code, stock_record)
+
         self.request.basket.clear_vouchers()
-        username = self.request.user and self.request.user.username
-        is_valid, message = validate_voucher(voucher, self.request.user, self.request.basket, self.request.site)
-        if not is_valid:
-            logger.warning('[Code Redemption Failure] The voucher is not valid for this basket. '
-                           'User: %s, Basket: %s, Code: %s, Message: %s',
-                           username, self.request.basket.id, voucher.code, message)
-            messages.error(self.request, message)
-            self.request.basket.vouchers.remove(voucher)
-            return
+        self._validate_voucher(voucher)
+        self._apply_voucher(voucher)
 
-        valid, message = apply_voucher_on_basket_and_check_discount(voucher, self.request, self.request.basket)
-        if not valid:
-            logger.warning('[Code Redemption Failure] The voucher could not be applied to this basket. '
-                           'User: %s, Basket: %s, Code: %s, Message: %s',
-                           username, self.request.basket.id, voucher.code, message)
-            messages.warning(self.request, message)
-            self.request.basket.vouchers.remove(voucher)
-        else:
-            messages.info(self.request, message)
-
-    def check_for_empty_basket_error(self, code):
-        """
-        Raises VoucherException if the basket is empty.
-        """
+    def _verify_basket_not_empty(self, code):
         username = self.request.user and self.request.user.username
         if self.request.basket.is_empty:
             logger.warning(
@@ -714,10 +712,7 @@ class VoucherAddLogicMixin(object):
             )
             raise VoucherException()
 
-    def check_for_already_applied_voucher_error(self, code):
-        """
-        Raises VoucherException if the voucher was already applied.
-        """
+    def _verify_voucher_not_already_applied(self, code):
         username = self.request.user and self.request.user.username
         if self.request.basket.contains_voucher(code):
             logger.warning(
@@ -725,48 +720,20 @@ class VoucherAddLogicMixin(object):
                 'User: %s, Basket: %s, Code: %s',
                 username, self.request.basket.id, code
             )
-            messages.error(self.request, _("You have already added coupon code '{code}' to your basket.").format(code=code))
+            messages.error(
+                self.request,
+                _("You have already added coupon code '{code}' to your basket.").format(code=code),
+            )
             raise VoucherException()
 
-    def get_voucher_from_code(self, code):
-        """
-        Returns voucher from code, or raises VoucherException if not found.
-        """
-        try:
-            voucher = self.voucher_model._default_manager.get(code=code)  # pylint: disable=protected-access
-            return voucher
-        except self.voucher_model.DoesNotExist:
-            messages.error(self.request,  _("Coupon code '{code}' does not exist.").format(code=code))
-            raise VoucherException()
-
-
-class VoucherAddView(VoucherAddLogicMixin, BaseVoucherAddView):  # pylint: disable=function-redefined
-    """
-    Deprecated: Adds a voucher to the basket.
-
-    Ensure any changes made here are also made to VoucherAddApiView.
-    """
-    def form_valid(self, form):
-        code = form.cleaned_data['code']
-        voucher = None
-
-        try:
-            self.check_for_empty_basket_error(code)
-            self.check_for_already_applied_voucher_error(code)
-            voucher = self.get_voucher_from_code(code)
-        except VoucherException:
-            return redirect_to_referrer(self.request, 'basket:summary')
-
-        product, stock_record = self._get_stock_record_and_product()
-
+    def _verify_email_confirmation(self, voucher, product):
         offer = voucher.best_offer
-        # TODO: ARCH-955: share this with VoucherAddApiView
         email_confirmation_response = render_email_confirmation_if_required(self.request, offer, product)
         if email_confirmation_response:
-            return email_confirmation_response
+            # TODO (ARCH-956) support this for the API
+            raise VoucherException(response=email_confirmation_response)
 
-        # TODO: how do we deal with this and the A/B experiment?
-        # TODO: ARCH-956: share this with VoucherAddApiView
+    def _verify_enterprise_needs(self, voucher, code, stock_record):
         if get_enterprise_customer_from_voucher(self.request.site, voucher) is not None:
             # The below lines only apply if the voucher that was entered is attached
             # to an EnterpriseCustomer. If that's the case, then rather than following
@@ -789,23 +756,71 @@ class VoucherAddView(VoucherAddLogicMixin, BaseVoucherAddView):  # pylint: disab
                     ),
                 }
             )
-            return HttpResponseRedirect(
+            redirect_response = HttpResponseRedirect(
                 '{path}?{params}'.format(
                     path=reverse('coupons:redeem'),
                     params=params
                 )
             )
+            raise RedirectException(response=redirect_response)
 
-        self.apply_voucher_to_basket(voucher)
-        return redirect_to_referrer(self.request, 'basket:summary')
+    def _validate_voucher(self, voucher):
+        username = self.request.user and self.request.user.username
+        is_valid, message = validate_voucher(voucher, self.request.user, self.request.basket, self.request.site)
+        if not is_valid:
+            logger.warning('[Code Redemption Failure] The voucher is not valid for this basket. '
+                           'User: %s, Basket: %s, Code: %s, Message: %s',
+                           username, self.request.basket.id, voucher.code, message)
+            messages.error(self.request, message)
+            self.request.basket.vouchers.remove(voucher)
+            raise VoucherException()
 
-    def _get_stock_record_and_product(self):
+    def _apply_voucher(self, voucher):
+        username = self.request.user and self.request.user.username
+        valid, message = apply_voucher_on_basket_and_check_discount(voucher, self.request, self.request.basket)
+        if not valid:
+            logger.warning('[Code Redemption Failure] The voucher could not be applied to this basket. '
+                           'User: %s, Basket: %s, Code: %s, Message: %s',
+                           username, self.request.basket.id, voucher.code, message)
+            messages.warning(self.request, message)
+            self.request.basket.vouchers.remove(voucher)
+        else:
+            messages.info(self.request, message)
+
+    def _get_stock_record(self):
         # TODO: for multiline baskets, select the StockRecord for the product associated
         # specifically with the code that was submitted.
         basket_lines = self.request.basket.all_lines()
-        stock_record = basket_lines[0].stockrecord
-        product = stock_record.product
-        return product, stock_record
+        return basket_lines[0].stockrecord
+
+    def _get_voucher(self, code):
+        try:
+            return self.voucher_model._default_manager.get(code=code)  # pylint: disable=protected-access
+        except self.voucher_model.DoesNotExist:
+            messages.error(self.request, _("Coupon code '{code}' does not exist.").format(code=code))
+            raise VoucherException()
+
+
+class VoucherAddView(VoucherAddLogicMixin, BaseVoucherAddView):  # pylint: disable=function-redefined
+    """
+    Deprecated: Adds a voucher to the basket.
+
+    Ensure any changes made here are also made to VoucherAddApiView.
+    """
+    def form_valid(self, form):
+        code = form.cleaned_data['code']
+
+        try:
+            self.verify_and_apply_voucher(code)
+        except RedirectException as e:
+            return e.response
+        except VoucherException as e:
+            # If a response is provided, return it.
+            # All other errors are passed via messages.
+            if e.response:
+                return e.response
+
+        return redirect_to_referrer(self.request, 'basket:summary')
 
 
 # TODO: ARCH-960: Remove "pragma: no cover"
@@ -831,19 +846,15 @@ class VoucherAddApiView(VoucherAddLogicMixin, PaymentApiLogicMixin, APIView):  #
         If unsuccessful, returns 400 with the errors and the same response as the payment api.
         """
         code = request.data.get('code')
+        code = code.strip()
 
         try:
-            self.check_for_empty_basket_error(code)
-            self.check_for_already_applied_voucher_error(code)
-            voucher = self.get_voucher_from_code(code)
+            self.verify_and_apply_voucher(code)
+        except RedirectException as e:
+            return Response({'redirect': e.response.url})
         except VoucherException:
             # errors are passed via messages object and handled during serialization
-            return self.get_payment_api_response()
-
-        # TODO: ARCH-955: implement render_email_confirmation_if_required check
-        # TODO: ARCH-956: implement get_enterprise_customer_from_voucher check
-
-        self.apply_voucher_to_basket(voucher)
+            pass
 
         return self.get_payment_api_response()
 
@@ -868,19 +879,15 @@ class VoucherRemoveApiView(PaymentApiLogicMixin, APIView):  # pragma: no cover
         # Implementation is a copy of django-oscar's VoucherRemoveView without redirect, and other minor changes.
         # See: https://github.com/django-oscar/django-oscar/blob/3ee66877a2dbd49b2a0838c369205f4ffbc2a391/src/oscar/apps/basket/views.py#L389-L414  pylint: disable=line-too-long
 
-        if not request.basket.id:
-            # Note: Comment is from original django-oscar code and no error was returned.
-            # Hacking attempt - the basket must be saved for it to have
-            # a voucher in it.
-            return self.get_payment_api_response()
-
-        try:
-            voucher = request.basket.vouchers.get(id=voucherid)
-        except ObjectDoesNotExist:
-            messages.error(self.request, _("No coupon found with id '%s'") % voucherid)
-            return self.get_payment_api_response()
-
-        request.basket.vouchers.remove(voucher)
-        self.remove_signal.send(sender=self, basket=request.basket, voucher=voucher)
+        # Note: This comment is from original django-oscar code.
+        # Hacking attempt - the basket must be saved for it to have a voucher in it.
+        if self.request.basket.id:
+            try:
+                voucher = request.basket.vouchers.get(id=voucherid)
+            except ObjectDoesNotExist:
+                messages.error(self.request, _("No coupon found with id '%s'") % voucherid)
+            else:
+                self.request.basket.vouchers.remove(voucher)
+                self.remove_signal.send(sender=self, basket=self.request.basket, voucher=voucher)
 
         return self.get_payment_api_response()

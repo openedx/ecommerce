@@ -3,18 +3,18 @@ Utilities for sending flash messages via JSON responses.
 
 Since django-oscar uses django flash messages, we have decided to continue to use flash messages for consistency,
 even in the new backend-for-frontend APIs.  Only when finally creating the response do we convert from the flash
-messages to a dict (usable in a JSON response).
+messages to a list of dicts (usable in a JSON response).
 
 Example list of serialized messages::
 
     [
         {
             'code': 'some-message-code',
-            'type': 'error',  # debug|info|success|warning|error
+            'message_type': 'error',  # debug|info|success|warning|error
             'developer_message': 'Some message for developers.',
         },
         {
-            'type': 'info',
+            'message_type': 'info',
             'user_message': 'Some message to users.',
         },
     ]
@@ -28,12 +28,14 @@ BEFORE:
 
 AFTER:
 
-    # For legacy mako template views, the HTML message will still be used.  For new JSON API views, the HTML
-    # message will be passed as the `developer_message` and the code will be retrieved from the ``extra_tags``.
+    # For legacy mako template views, the HTML message will still be used and passed as the `user_message`.
+    # For new JSON API views, the HTML message will be passed as the `developer_message` and the code will be
+    # retrieved from the ``extra_tags``.
     messages.error(self.request, '<strong>My bold error</strong>', extra_tags='safe my-bold-error')
 
 Here is the template that django-oscar provides to display the flash messages:
-- https://github.com/django-oscar/django-oscar/blob/ea28ecfcf63565816e1b26ba068943d6f179a6e8/src/oscar/templates/oscar/partials/alert_messages.html
+- https://github.com/django-oscar/django-oscar/blob/ea28ecfcf63565816e1b26ba068943d6f179a6e8
+  /src/oscar/templates/oscar/partials/alert_messages.html
 
 """
 from __future__ import absolute_import
@@ -46,34 +48,33 @@ from rest_framework import status
 logger = logging.getLogger(__name__)
 
 
-def get_response_status_from_messages(messages):
+def get_response_status(messages):
     """
-    Returns 400 status if any error messages found, and 200 otherwise.
+    Returns 400 status if any error messages are found, and 200 otherwise.
     """
-    if any(message['type'] == 'error' for message in messages):
+    if any(message['message_type'] == 'error' for message in messages):
         return status.HTTP_400_BAD_REQUEST
-    else:
-        return status.HTTP_200_OK
+    return status.HTTP_200_OK
 
 
-def get_serialized_messages(request):
+def serialize(request):
     """
-    Returns the django flash messages serialized as a dict.
+    Returns Django's flash messages serialized as a list of dicts.
     """
     return [
-        _get_serialized_message(message)
+        _serialize_message(message)
         for message in get_messages(request)
     ]
 
 
-def _get_serialized_message(message):
+def _serialize_message(message):
     serialized_message = {
-        'type': message.level_tag,
+        'message_type': message.level_tag,
     }
     code = _get_message_code(message)
     if code:
-        # message codes are used for HTML-formatted messages that will be constructed client-side.
-        # returning the message as `developer_message` to ensure it doesn't get displayed on the client.
+        # Message codes are used for HTML-formatted messages that will be constructed client-side.
+        # Returning the message as `developer_message` to ensure it doesn't get displayed on the client.
         serialized_message.update({
             'code': code,
             'developer_message': message.message,
@@ -88,7 +89,7 @@ def _get_message_code(message):
     Returns the message code from the extra_tags of a flash message.
 
     Arguments:
-         message: A flash message
+        message: A flash message
 
     """
     if not message.extra_tags:
@@ -99,27 +100,25 @@ def _get_message_code(message):
     cleaned_extra_tags = [
         tag
         for tag in extra_tags_list
-        # strip extra_tags used as classes
+        # strip extra_tags used as classes by Oscar
         if tag not in ['safe', 'noicon', 'block']
     ]
     if cleaned_extra_tags:
         code = cleaned_extra_tags[0]
         if len(cleaned_extra_tags) > 1:  # pragma: no cover
             logger.warning(
-                'Message "{message}" has too many unknown extra_tags: [{cleaned_extra_tags}]. Only one is expected.'
-                ' Using [{code}] as the message code.'.format(
-                    message=message.message,
-                    cleaned_extra_tags=cleaned_extra_tags,
-                    code=code,
-                )
+                'Message "%s" has too many unknown extra_tags: [%s]. Only one is expected.'
+                ' Using [%s] as the message code.',
+                message=message.message,
+                cleaned_extra_tags=cleaned_extra_tags,
+                code=code,
             )
         return code
     else:
-        if 'safe' in extra_tags_list:
+        if 'safe' in extra_tags_list:  # pragma: no cover
             logger.warning(
-                'Message "{message}" uses the `safe` extra_tag which indicates it includes HTML. An additional'
-                'extra_tag is required to provide the message code for the microfrontend client.'.format(
-                    message=message.message,
-                )
+                'Message "%s" uses the `safe` extra_tag which indicates it includes HTML. An additional'
+                'extra_tag is required to provide the message code for the microfrontend client.',
+                message.message,
             )
     return None
