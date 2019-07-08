@@ -628,7 +628,7 @@ class PaymentApiLogicMixin(BasketLogicMixin):
         if context['is_enrollment_code_purchase']:
             response['order_total'] = context['order_total'].incl_tax  # TODO: ARCH-967: Remove "pragma: no cover"
         else:
-            response['order_total'] = self.request.basket.total_incl_tax_excl_discounts
+            response['order_total'] = self.request.basket.total_incl_tax
 
     def _add_offers(self, response):
         response['offers'] = [
