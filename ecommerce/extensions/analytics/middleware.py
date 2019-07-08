@@ -18,7 +18,7 @@ class TrackingMiddleware(object):
         3) updates the user if necessary.
 
     Side effect:
-        If the LMS user_id cannot be found, writes custom metric: 'ecommerce_missing_lms_user_id_middleware'
+        If the LMS user_id cannot be found, writes custom metrics to record this fact.
 
     """
 
