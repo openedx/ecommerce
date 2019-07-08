@@ -440,6 +440,7 @@ class CybersourceNotificationTestsMixin(CybersourceMixin):
             self.client.post(self.path, notification)
 
             # Validate that a new order exists in the correct state
+            
             order = Order.objects.get(basket=self.basket)
             self.assertIsNotNone(order, 'No order was created for the basket after payment.')
             self.assertEqual(order.status, ORDER.OPEN)
