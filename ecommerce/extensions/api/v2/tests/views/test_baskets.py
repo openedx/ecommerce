@@ -532,6 +532,15 @@ class BasketCalculateViewTests(ProgramTestMixin, ThrottlingMixin, TestCase):
         self.assertEqual(response.status_code, 200)
 
     @httpretty.activate
+    def test_basket_calculate_missing_lms_user_id(self):
+        """Verify a staff user with a missing LMS user id succeeds"""
+        user = self.create_user(lms_user_id=None)
+        self.request.user = user
+        self.client.login(username=user.username, password=self.password)
+        response = self.client.get(self.url + '&username={username}'.format(username=user.username))
+        self.assertEqual(response.status_code, 200)
+
+    @httpretty.activate
     @mock.patch('ecommerce.programs.conditions.ProgramCourseRunSeatsCondition._get_lms_resource_for_user')
     def test_basket_calculate_by_staff_user_other_username(self, mock_get_lms_resource_for_user):
         """Verify a staff user passing a valid username gets a response about the other user"""

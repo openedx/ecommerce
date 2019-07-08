@@ -4,7 +4,6 @@ from __future__ import absolute_import
 import logging
 
 from django.contrib.auth import get_user_model
-from edx_django_utils import monitoring as monitoring_utils
 from oscar.core.loading import get_model
 from rest_framework import generics, status
 from rest_framework.exceptions import ParseError
@@ -71,8 +70,10 @@ class RefundCreateView(generics.CreateAPIView):
         Returns:
             refunds (list): List of refunds created
 
-        Side effect:
-            If the LMS user_id cannot be found, writes custom metric: 'ecommerce_missing_lms_user_id_refund'
+         Side effects:
+            If the given user does not have an LMS user id, tries to find it. If found, adds the id to the user and
+            saves the user. If the id cannot be found, writes the custom metric
+            'ecommerce_missing_lms_user_id_refund'.
         """
 
         course_id = request.data.get('course_id')
@@ -91,15 +92,14 @@ class RefundCreateView(generics.CreateAPIView):
         except User.DoesNotExist:
             raise BadRequestException('User "{}" does not exist.'.format(username))
 
-        if not user.lms_user_id_with_metric(usage='refund'):
-            requested_by = None
-            if request.user.is_authenticated():
-                requested_by = request.user.id
-            # TODO: Change this to an error once we can successfully get the id from social auth and the db.
-            # See REVMI-249 and REVMI-269
-            monitoring_utils.set_custom_metric('ecommerce_missing_lms_user_id_refund', user.id)
-            logger.warn(u'Could not find lms_user_id for user %s when processing refund requested by %s',
-                        user.id, requested_by)
+        # If the user does not already have an LMS user id, add it
+        requested_by = None
+        if request.user.is_authenticated():
+            requested_by = request.user.id
+        called_from = u'refund processing for user {user_id} requested by {requested_by}'.format(
+            user_id=user.id,
+            requested_by=requested_by)
+        user.add_lms_user_id('ecommerce_missing_lms_user_id_refund', called_from)
 
         # Try and create a refund for the passed in order
         if entitlement_uuid:

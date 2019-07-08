@@ -545,8 +545,57 @@ class User(AbstractUser):
 
         # Could not find the lms_user_id
         monitoring_utils.set_custom_metric('ecommerce_missing_lms_user_id', self.id)
-        log.warn(u'Could not find lms_user_id for user %s for %s', self.id, usage, exc_info=True)
+        log.warn(u'Could not find lms_user_id with metric for user %s for %s', self.id, usage, exc_info=True)
         return None
+
+    def add_lms_user_id(self, missing_metric_key, called_from):
+        """
+        If this user does not already have an LMS user id, look for the id in social auth. If the id can be found,
+        add it to the user and save the user.
+
+        The LMS user_id may already be present for the user. It may have been added from the jwt (see the
+        EDX_DRF_EXTENSIONS.JWT_PAYLOAD_USER_ATTRIBUTE_MAPPING settings) or by a previous call to this method.
+
+        Arguments:
+            missing_metric_key (String): Key name for metric that will be created if the LMS user id cannot be found.
+            called_from (String): Descriptive string describing the caller. This will be included in log messages.
+
+        Side effect:
+            If the LMS id cannot be found, writes custom metric with the value of missing_metric_key.
+        """
+        if not self.lms_user_id:
+            # Check for the LMS user id in social auth
+            lms_user_id_social_auth, social_auth_id = self._get_lms_user_id_from_social_auth()
+            if lms_user_id_social_auth:
+                self.lms_user_id = lms_user_id_social_auth
+                self.save()
+                log.info(u'Saving lms_user_id from social auth with id %s for user %s. Called from %s', social_auth_id,
+                         self.id, called_from)
+            else:
+                monitoring_utils.set_custom_metric(missing_metric_key, self.id)
+                error_msg = u'Could not find lms_user_id for user {user_id}. Called from {called_from}'.format(
+                    user_id=self.id, called_from=called_from)
+                log.error(error_msg, exc_info=True)
+
+    def _get_lms_user_id_from_social_auth(self):
+        """
+        Find the LMS user_id passed through social auth. Because a single user_id can be associated with multiple
+        provider/uid combinations, start by checking the most recently saved social auth entry.
+
+        Returns:
+            (lms_user_id, social_auth_id): a tuple containing the LMS user id and the id of the social auth entry
+                where the LMS user id was found. Returns None, None if the LMS user id was not found.
+        """
+        try:
+            auth_entries = self.social_auth.order_by('-id')
+            if auth_entries:
+                for auth_entry in auth_entries:
+                    lms_user_id_social_auth = auth_entry.extra_data.get(u'user_id')
+                    if lms_user_id_social_auth:
+                        return lms_user_id_social_auth, auth_entry.id
+        except Exception:  # pylint: disable=broad-except
+            log.warn(u'Exception retrieving lms_user_id from social_auth for user %s.', self.id, exc_info=True)
+        return None, None
 
     def get_full_name(self):
         return self.full_name or super(User, self).get_full_name()
