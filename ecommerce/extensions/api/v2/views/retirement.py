@@ -21,8 +21,7 @@ class EcommerceIdView(APIView):
 
      Side effects:
         If the given user does not have an LMS user id, tries to find it. If found, adds the id to the user and
-        saves the user. If the id cannot be found, writes the custom metric
-        'ecommerce_missing_lms_user_retirement'.
+        saves the user. If the id cannot be found, writes custom metrics to record this fact.
     """
     authentication_classes = (JwtAuthentication, )
     permission_classes = (permissions.IsAuthenticated, permissions.IsAdminUser)
@@ -40,7 +39,7 @@ class EcommerceIdView(APIView):
 
             # If the user does not already have an LMS user id, add it
             called_from = u'retirement API'
-            user.add_lms_user_id('ecommerce_missing_lms_user_retirement', called_from)
+            user.add_lms_user_id('ecommerce_missing_lms_user_id_retirement', called_from)
 
             return Response(
                 {

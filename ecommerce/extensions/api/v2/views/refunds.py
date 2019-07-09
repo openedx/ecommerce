@@ -72,8 +72,7 @@ class RefundCreateView(generics.CreateAPIView):
 
          Side effects:
             If the given user does not have an LMS user id, tries to find it. If found, adds the id to the user and
-            saves the user. If the id cannot be found, writes the custom metric
-            'ecommerce_missing_lms_user_id_refund'.
+            saves the user. If the id cannot be found, writes custom metrics to record this fact.
         """
 
         course_id = request.data.get('course_id')

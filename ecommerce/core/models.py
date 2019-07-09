@@ -561,7 +561,8 @@ class User(AbstractUser):
             called_from (String): Descriptive string describing the caller. This will be included in log messages.
 
         Side effect:
-            If the LMS id cannot be found, writes custom metric with the value of missing_metric_key.
+            If the LMS id cannot be found, writes 2 custom metrics: 'ecommerce_missing_lms_user_id' and also another
+            with the value of missing_metric_key.
         """
         if not self.lms_user_id:
             # Check for the LMS user id in social auth
@@ -572,6 +573,7 @@ class User(AbstractUser):
                 log.info(u'Saving lms_user_id from social auth with id %s for user %s. Called from %s', social_auth_id,
                          self.id, called_from)
             else:
+                monitoring_utils.set_custom_metric('ecommerce_missing_lms_user_id', self.id)
                 monitoring_utils.set_custom_metric(missing_metric_key, self.id)
                 error_msg = u'Could not find lms_user_id for user {user_id}. Called from {called_from}'.format(
                     user_id=self.id, called_from=called_from)

@@ -423,8 +423,7 @@ class BasketCalculateView(generics.GenericAPIView):
 
          Side effects:
             If the basket owner does not have an LMS user id, tries to find it. If found, adds the id to the user and
-            saves the user. If the id cannot be found, writes the custom metric
-            'ecommerce_missing_lms_user_calculate_basket_total'.
+            saves the user. If the id cannot be found, writes custom metrics to record this fact.
        """
         DEFAULT_REQUEST_CACHE.set(TEMPORARY_BASKET_CACHE_KEY, True)
 
@@ -492,7 +491,7 @@ class BasketCalculateView(generics.GenericAPIView):
         # If we have a basket owner, ensure they have an LMS user id
         if basket_owner:
             called_from = u'calculation of basket total'
-            basket_owner.add_lms_user_id('ecommerce_missing_lms_user_calculate_basket_total', called_from)
+            basket_owner.add_lms_user_id('ecommerce_missing_lms_user_id_calculate_basket_total', called_from)
 
         cache_key = None
         if use_default_basket:
