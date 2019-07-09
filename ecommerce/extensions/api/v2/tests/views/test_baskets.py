@@ -102,17 +102,12 @@ class BasketCreateViewTests(BasketCreationMixin, ThrottlingMixin, TransactionTes
 
     @ddt.data(
         ([FREE_SKU], False, None, False),
-        ([FREE_SKU], True, None, False),
-        ([FREE_SKU, ALTERNATE_FREE_SKU], True, None, False),
-        ([PAID_SKU], False, None, True),
-        ([PAID_SKU], True, None, True),
-        ([PAID_SKU], True, Cybersource.NAME, True),
-        ([PAID_SKU, ALTERNATE_PAID_SKU], True, None, True),
-        ([FREE_SKU, PAID_SKU], True, None, True),
     )
     @ddt.unpack
     def test_basket_creation_and_checkout(self, skus, checkout, payment_processor_name, requires_payment):
         """Test that a variety of product combinations can be added to the basket and purchased."""
+        print('### before')
+        self.assertTrue(False)
         self.assert_successful_basket_creation(skus, checkout, payment_processor_name, requires_payment)
 
     @ddt.data(

@@ -35,6 +35,7 @@ Applicator = get_class('offer.applicator', 'Applicator')
 Basket = get_model('basket', 'Basket')
 Benefit = get_model('offer', 'Benefit')
 Catalog = get_model('catalogue', 'Catalog')
+Category = get_model('catalogue', 'Category')
 Selector = get_class('partner.strategy', 'Selector')
 ShippingEventType = get_model('order', 'ShippingEventType')
 Order = get_model('order', 'Order')
@@ -135,20 +136,34 @@ class BasketCreationMixin(UserMixin, JwtMixin):
 
     def setUp(self):
         super(BasketCreationMixin, self).setUp()
+        print('### In BasketCreationMixin.setUp')
 
         self.user = self.create_user()
 
+        categories = Category.objects.all()
+        print('### length before product_class: ' + str(len(categories)))
         product_class = factories.ProductClassFactory(
             name=u'Áutomobilé',
             requires_shipping=False,
             track_stock=False
         )
+
+        categories = Category.objects.all()
+        print('### length before base_product: ' + str(len(categories)))
+        cat = Category.objects.order_by('-id').first()
+        print('### last cat before base_product: ' + str(cat.id) + ', ' + str(cat.path) + ', ' + str(cat.depth) + ', ' + str(cat.numchild) + ', ' + str(cat.name) + ', ' + str(cat.description) + ', ' + str(cat.slug))
         self.base_product = factories.ProductFactory(
             structure='parent',
             title=u'Lamborghinï Gallardœ',
             product_class=product_class,
             stockrecords=None,
         )
+
+        categories = Category.objects.all()
+        print('### length before free_product: ' + str(len(categories)))
+        cat = Category.objects.order_by('-id').first()
+        print('### last cat before free_product: ' + str(cat.id) + ', ' + str(cat.path) + ', ' + str(cat.depth) + ', ' + str(cat.numchild) + ', ' + str(cat.name) + ', ' + str(cat.description) + ', ' + str(cat.slug))
+
         self.free_product = factories.ProductFactory(
             structure='child',
             parent=self.base_product,
@@ -156,6 +171,8 @@ class BasketCreationMixin(UserMixin, JwtMixin):
             stockrecords__partner_sku=self.FREE_SKU,
             stockrecords__price_excl_tax=Decimal('0.00'),
         )
+        categories = Category.objects.all()
+        print('### length before set_jwt_cookie: ' + str(len(categories)))
         self.set_jwt_cookie(SYSTEM_ENTERPRISE_OPERATOR_ROLE, ALL_ACCESS_CONTEXT)
 
     def create_basket(self, skus=None, checkout=None, payment_processor_name=None, auth=True, token=None):
@@ -193,6 +210,7 @@ class BasketCreationMixin(UserMixin, JwtMixin):
     ):
         """Verify that basket creation succeeded."""
         # Ideally, we'd use Oscar's ShippingEventTypeFactory here, but it's not exposed/public.
+        print('### in assert')
         ShippingEventType.objects.get_or_create(name=SHIPPING_EVENT_NAME)
 
         with patch('ecommerce.extensions.analytics.utils.audit_log') as mock_audit_log:
