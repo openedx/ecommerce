@@ -1365,19 +1365,31 @@ class VoucherRemoveApiViewTests(BasketLogicTestMixin, TestCase):
         valid, _ = apply_voucher_on_basket_and_check_discount(voucher, self.request, basket)
         self.assertTrue(valid)
 
+        path = reverse('bff:payment:v0:payment')
+        response = self.client.get(path)
+        self.assert_expected_response(
+            basket,
+            response=response,
+            currency=u'GBP',
+            certificate_type=None,
+            voucher=voucher,
+            title=product.title,
+            product_type=product.get_product_class().name,
+            discount_value=100,
+            discount_type=Benefit.PERCENTAGE,
+            summary_price=9.99,
+        )
+
         path = reverse('bff:payment:v0:removevoucher', kwargs={'voucherid': voucher.id})
         response = self.client.delete(path)
 
-        self.assertEqual(response.status_code, 200)
-
-        # TODO (ARCH-960) - get this working, still seems to have discount applied
-        # self.assert_expected_response(
-        #     basket,
-        #     response=response,
-        #     currency=u'GBP',
-        #     certificate_type=None,
-        #     voucher=voucher,
-        #     title=product.title,
-        #     product_type=product.get_product_class().name,
-        #     summary_price=9.99,
-        # )
+        self.assert_expected_response(
+            basket,
+            response=response,
+            currency=u'GBP',
+            certificate_type=None,
+            voucher=voucher,
+            title=product.title,
+            product_type=product.get_product_class().name,
+            summary_price=9.99,
+        )

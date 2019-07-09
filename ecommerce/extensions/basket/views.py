@@ -37,6 +37,7 @@ from ecommerce.extensions.analytics.utils import (
 from ecommerce.extensions.basket import message_utils
 from ecommerce.extensions.basket.constants import EMAIL_OPT_IN_ATTRIBUTE
 from ecommerce.extensions.basket.exceptions import BadRequestException, RedirectException, VoucherException
+from ecommerce.extensions.basket.middleware import BasketMiddleware
 from ecommerce.extensions.basket.utils import (
     add_utm_params_to_url,
     apply_voucher_on_basket_and_check_discount,
@@ -53,6 +54,7 @@ from ecommerce.extensions.payment.constants import (
 )
 from ecommerce.extensions.payment.forms import PaymentForm
 
+Basket = get_model('basket', 'basket')
 BasketAttribute = get_model('basket', 'BasketAttribute')
 BasketAttributeType = get_model('basket', 'BasketAttributeType')
 Benefit = get_model('offer', 'Benefit')
@@ -60,6 +62,7 @@ logger = logging.getLogger(__name__)
 Product = get_model('catalogue', 'Product')
 StockRecord = get_model('partner', 'StockRecord')
 Voucher = get_model('voucher', 'Voucher')
+Selector = get_class('partner.strategy', 'Selector')
 
 
 def _redirect_to_payment_microfrontend_if_configured(request):
@@ -859,8 +862,7 @@ class VoucherAddApiView(VoucherAddLogicMixin, PaymentApiLogicMixin, APIView):  #
         return self.get_payment_api_response()
 
 
-# TODO: ARCH-960: Remove "pragma: no cover"
-class VoucherRemoveApiView(PaymentApiLogicMixin, APIView):  # pragma: no cover
+class VoucherRemoveApiView(PaymentApiLogicMixin, APIView):
     """
     Api for removing voucher from a basket.
 
@@ -890,4 +892,18 @@ class VoucherRemoveApiView(PaymentApiLogicMixin, APIView):  # pragma: no cover
                 self.request.basket.vouchers.remove(voucher)
                 self.remove_signal.send(sender=self, basket=self.request.basket, voucher=voucher)
 
+        self._reload_basket()
         return self.get_payment_api_response()
+
+    def _reload_basket(self):
+        """
+        We need to reload the basket in order for the removal to take effect. There may be a better
+        way than doing this.  If so, please update this code.
+        """
+        strategy = Selector().strategy(request=self.request, user=self.request.user)
+        self.request.strategy = strategy
+        self.request._basket_cache = None  # pylint: disable=protected-access
+        basket_middleware = BasketMiddleware()
+        self.request.basket = basket_middleware.get_basket(self.request)
+        self.request.basket.strategy = self.request.strategy
+        basket_middleware.apply_offers_to_basket(self.request, self.request.basket)
