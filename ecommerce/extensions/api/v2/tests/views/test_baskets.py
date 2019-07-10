@@ -43,6 +43,7 @@ from ecommerce.tests.testcases import TestCase, TransactionTestCase
 Basket = get_model('basket', 'Basket')
 BasketAttributeType = get_model('basket', 'BasketAttributeType')
 Benefit = get_model('offer', 'Benefit')
+Category = get_model('catalogue', 'Category')
 ConditionalOffer = get_model('offer', 'ConditionalOffer')
 Condition = get_model('offer', 'Condition')
 Order = get_model('order', 'Order')
@@ -72,6 +73,13 @@ class BasketCreateViewTests(BasketCreationMixin, ThrottlingMixin, TransactionTes
     def setUp(self):
         super(BasketCreateViewTests, self).setUp()
 
+        print('### In BasketCreateViewTests.setUp, after super')
+
+        categories = Category.objects.all()
+        print('### length before paid_product: ' + str(len(categories)))
+        cat = Category.objects.order_by('-id').first()
+        if cat is not None:
+            print('### last cat before paid_product: ' + str(cat.id) + ', ' + str(cat.path) + ', ' + str(cat.depth) + ', ' + str(cat.numchild) + ', ' + str(cat.name) + ', ' + str(cat.description) + ', ' + str(cat.slug))
         self.paid_product = factories.ProductFactory(
             structure='child',
             parent=self.base_product,
@@ -80,6 +88,12 @@ class BasketCreateViewTests(BasketCreationMixin, ThrottlingMixin, TransactionTes
             stockrecords__price_excl_tax=Decimal('180000.00'),
             stockrecords__partner__short_code='oscr',
         )
+
+        categories = Category.objects.all()
+        print('### length before papier: ' + str(len(categories)))
+        cat = Category.objects.order_by('-id').first()
+        if cat is not None:
+            print('### last cat before papier: ' + str(cat.id) + ', ' + str(cat.path) + ', ' + str(cat.depth) + ', ' + str(cat.numchild) + ', ' + str(cat.name) + ', ' + str(cat.description) + ', ' + str(cat.slug))
         factories.ProductFactory(
             structure='child',
             parent=self.base_product,
@@ -106,7 +120,7 @@ class BasketCreateViewTests(BasketCreationMixin, ThrottlingMixin, TransactionTes
     @ddt.unpack
     def test_basket_creation_and_checkout(self, skus, checkout, payment_processor_name, requires_payment):
         """Test that a variety of product combinations can be added to the basket and purchased."""
-        print('### before')
+        print('### In test_basket_creation_and_checkout')
         self.assertTrue(False)
         self.assert_successful_basket_creation(skus, checkout, payment_processor_name, requires_payment)
 

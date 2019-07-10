@@ -151,7 +151,8 @@ class BasketCreationMixin(UserMixin, JwtMixin):
         categories = Category.objects.all()
         print('### length before base_product: ' + str(len(categories)))
         cat = Category.objects.order_by('-id').first()
-        print('### last cat before base_product: ' + str(cat.id) + ', ' + str(cat.path) + ', ' + str(cat.depth) + ', ' + str(cat.numchild) + ', ' + str(cat.name) + ', ' + str(cat.description) + ', ' + str(cat.slug))
+        if cat is not None:
+            print('### last cat before base_product: ' + str(cat.id) + ', ' + str(cat.path) + ', ' + str(cat.depth) + ', ' + str(cat.numchild) + ', ' + str(cat.name) + ', ' + str(cat.description) + ', ' + str(cat.slug))
         self.base_product = factories.ProductFactory(
             structure='parent',
             title=u'Lamborghinï Gallardœ',
@@ -162,7 +163,8 @@ class BasketCreationMixin(UserMixin, JwtMixin):
         categories = Category.objects.all()
         print('### length before free_product: ' + str(len(categories)))
         cat = Category.objects.order_by('-id').first()
-        print('### last cat before free_product: ' + str(cat.id) + ', ' + str(cat.path) + ', ' + str(cat.depth) + ', ' + str(cat.numchild) + ', ' + str(cat.name) + ', ' + str(cat.description) + ', ' + str(cat.slug))
+        if cat is not None:
+            print('### last cat before free_product: ' + str(cat.id) + ', ' + str(cat.path) + ', ' + str(cat.depth) + ', ' + str(cat.numchild) + ', ' + str(cat.name) + ', ' + str(cat.description) + ', ' + str(cat.slug))
 
         self.free_product = factories.ProductFactory(
             structure='child',
