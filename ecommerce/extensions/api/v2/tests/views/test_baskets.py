@@ -79,7 +79,7 @@ class BasketCreateViewTests(BasketCreationMixin, ThrottlingMixin, TransactionTes
         print('### length before paid_product: ' + str(len(categories)))
         cat = Category.objects.order_by('-id').first()
         if cat is not None:
-            print('### last cat before paid_product: ' + str(cat.id) + ', ' + str(cat.path) + ', ' + str(cat.depth) + ', ' + str(cat.numchild) + ', ' + str(cat.name) + ', ' + str(cat.description) + ', ' + str(cat.slug))
+            print('### last cat before paid_product: id=' + str(cat.id) + ', path=' + str(cat.path) + ', depth=' + str(cat.depth) + ', numchild=' + str(cat.numchild) + ', name=' + str(cat.name) + ', desc=' + str(cat.description) + ', slug=' + str(cat.slug))
         self.paid_product = factories.ProductFactory(
             structure='child',
             parent=self.base_product,
@@ -93,7 +93,7 @@ class BasketCreateViewTests(BasketCreationMixin, ThrottlingMixin, TransactionTes
         print('### length before papier: ' + str(len(categories)))
         cat = Category.objects.order_by('-id').first()
         if cat is not None:
-            print('### last cat before papier: ' + str(cat.id) + ', ' + str(cat.path) + ', ' + str(cat.depth) + ', ' + str(cat.numchild) + ', ' + str(cat.name) + ', ' + str(cat.description) + ', ' + str(cat.slug))
+            print('### last cat before papier: id=' + str(cat.id) + ', path=' + str(cat.path) + ', depth=' + str(cat.depth) + ', numchild=' + str(cat.numchild) + ', name=' + str(cat.name) + ', desc=' + str(cat.description) + ', slug=' + str(cat.slug))
         factories.ProductFactory(
             structure='child',
             parent=self.base_product,
