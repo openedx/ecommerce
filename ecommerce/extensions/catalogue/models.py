@@ -25,7 +25,6 @@ from ecommerce.core.constants import (
     SEAT_PRODUCT_CLASS_NAME
 )
 from ecommerce.core.utils import log_message_and_raise_validation_error
-from ecommerce.journals.constants import JOURNAL_PRODUCT_CLASS_NAME  # TODO: journals dependency
 
 
 class CreateSafeHistoricalRecords(HistoricalRecords):
@@ -83,11 +82,6 @@ class Product(AbstractProduct):
     @property
     def is_course_entitlement_product(self):
         return self.get_product_class().name == COURSE_ENTITLEMENT_PRODUCT_CLASS_NAME
-
-    # TODO: journals dependency
-    @property
-    def is_journal_product(self):
-        return self.get_product_class().name == JOURNAL_PRODUCT_CLASS_NAME
 
     @property
     def is_coupon_product(self):

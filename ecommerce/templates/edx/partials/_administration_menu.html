@@ -13,9 +13,5 @@
     <a {% if admin == "enterprise_offers" %}class="selected"{% endif %} href="{% url 'enterprise:offers:list' %}">
       {% trans "Enterprise Offers" %}
     </a>
-    <!-- # TODO: journal dependency -->
-    <a {% if admin == "journal_offers" %}class="selected"{% endif %} href="{% url 'journals:offers:list' %}">
-      {% trans "Journal Bundle Offers" %}
-    </a>
   </div>
 </nav>

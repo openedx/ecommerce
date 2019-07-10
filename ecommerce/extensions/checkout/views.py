@@ -16,7 +16,6 @@ from ecommerce.core.url_utils import (
     get_lms_courseware_url,
     get_lms_dashboard_url,
     get_lms_explore_courses_url,
-    get_lms_journal_dashboard_url,
     get_lms_program_dashboard_url
 )
 from ecommerce.enterprise.utils import has_enterprise_offer
@@ -216,8 +215,6 @@ class ReceiptResponseView(ThankYouView):
         program_uuid = get_program_uuid(order)
         if program_uuid:
             order_dashboard_url = get_lms_program_dashboard_url(program_uuid)
-        elif order.is_journal_order:
-            order_dashboard_url = get_lms_journal_dashboard_url()
         else:
             order_dashboard_url = get_lms_dashboard_url()
         return {'order_dashboard_url': order_dashboard_url}

@@ -14,7 +14,6 @@ from oscar.test import factories
 
 from ecommerce.core.url_utils import (
     get_lms_courseware_url,
-    get_lms_journal_dashboard_url,
     get_lms_program_dashboard_url
 )
 from ecommerce.coupons.tests.mixins import DiscoveryMockMixin
@@ -23,7 +22,6 @@ from ecommerce.extensions.checkout.exceptions import BasketNotFreeError
 from ecommerce.extensions.checkout.utils import get_receipt_page_url
 from ecommerce.extensions.checkout.views import ReceiptResponseView
 from ecommerce.extensions.refund.tests.mixins import RefundTestMixin
-from ecommerce.journals.constants import JOURNAL_PRODUCT_CLASS_NAME
 from ecommerce.tests.mixins import LmsApiMockMixin
 from ecommerce.tests.testcases import TestCase
 
@@ -391,26 +389,6 @@ class ReceiptResponseViewTests(DiscoveryMockMixin, LmsApiMockMixin, RefundTestMi
         response = self._get_receipt_response(order.number)
         context_data = {
             'order_dashboard_url': self.site.siteconfiguration.build_lms_url('dashboard')
-        }
-
-        self.assertEqual(response.status_code, 200)
-        self.assertDictContainsSubset(context_data, response.context_data)
-
-    @httpretty.activate
-    def test_journal_dashboard_link_for_journal_purchase(self):
-        """
-        The dashboard link at the bottom of the receipt for a journal purchase
-        should point to the user journal dashboard."""
-        order = self._create_order_for_receipt(self.user)
-
-        # modify the order's product_class such that it behaves like it has a journal product
-        product_class = order.basket.lines.first().product.get_product_class()
-        product_class.name = JOURNAL_PRODUCT_CLASS_NAME
-        product_class.save()
-
-        response = self._get_receipt_response(order.number)
-        context_data = {
-            'order_dashboard_url': get_lms_journal_dashboard_url(),
         }
 
         self.assertEqual(response.status_code, 200)

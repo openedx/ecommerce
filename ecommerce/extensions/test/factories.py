@@ -23,9 +23,6 @@ from ecommerce.enterprise.benefits import BENEFIT_MAP as ENTERPRISE_BENEFIT_MAP
 from ecommerce.enterprise.benefits import EnterpriseAbsoluteDiscountBenefit, EnterprisePercentageDiscountBenefit
 from ecommerce.enterprise.conditions import AssignableEnterpriseCustomerCondition, EnterpriseCustomerCondition
 from ecommerce.extensions.offer.models import OFFER_PRIORITY_ENTERPRISE, OFFER_PRIORITY_VOUCHER, OfferAssignment
-# TODO: journals dependency
-from ecommerce.journals.benefits import JournalBundleAbsoluteDiscountBenefit, JournalBundlePercentageDiscountBenefit
-from ecommerce.journals.conditions import JournalBundleCondition
 from ecommerce.programs.benefits import AbsoluteDiscountBenefitWithoutRange, PercentageDiscountBenefitWithoutRange
 from ecommerce.programs.conditions import ProgramCourseRunSeatsCondition
 from ecommerce.programs.custom import class_path
@@ -273,41 +270,3 @@ class OfferAssignmentFactory(factory.DjangoModelFactory):
 
     class Meta(object):
         model = OfferAssignment
-
-
-# TODO: journals dependency
-class JournalAbsoluteDiscountBenefitFactory(BenefitFactory):
-    range = None
-    type = ''
-    value = 10
-    proxy_class = class_path(JournalBundleAbsoluteDiscountBenefit)
-
-
-# TODO: journals dependency
-class JournalPercentageDiscountBenefitFactory(BenefitFactory):
-    range = None
-    type = ''
-    value = 10
-    proxy_class = class_path(JournalBundlePercentageDiscountBenefit)
-
-
-# TODO: journals dependency
-class JournalConditionFactory(ConditionFactory):
-    range = None
-    type = ''
-    value = None
-    journal_bundle_uuid = factory.LazyFunction(uuid.uuid4)
-    proxy_class = class_path(JournalBundleCondition)
-
-    class Meta(object):
-        model = JournalBundleCondition
-
-
-# TODO: journals dependency
-class JournalBundleOfferFactory(ConditionalOfferFactory):
-    benefit = factory.SubFactory(JournalPercentageDiscountBenefitFactory)
-    condition = factory.SubFactory(JournalConditionFactory)
-    max_basket_applications = 1
-    offer_type = ConditionalOffer.SITE
-    priority = OFFER_PRIORITY_ENTERPRISE
-    status = ConditionalOffer.OPEN

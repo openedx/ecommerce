@@ -74,13 +74,6 @@ class ProductTests(CouponMixin, DiscoveryTestMixin, TestCase):
         enrollment_code.refresh_from_db()
         self.assertNotEqual(enrollment_code.expires, expiration_datetime)
 
-    # TODO: journals dependency
-    def test_journal_product_attribute(self):
-        """Verify journal product class."""
-        note = 'Some other test note.'
-        coupon = self._create_coupon_product_with_attributes(note)
-        self.assertFalse(coupon.is_journal_product)
-
     def test_create_product_with_note(self):
         """Verify creating a product with valid note value creates product."""
         note = 'Some test note.'

@@ -67,7 +67,6 @@ urlpatterns = AUTH_URLS + WELL_KNOWN_URLS + [
     url(r'^bff/', include('ecommerce.bff.urls', namespace='bff')),
     url(r'^programs/', include('ecommerce.programs.urls', namespace='programs')),
     url(r'^enterprise/', include('ecommerce.enterprise.urls', namespace='enterprise')),
-    url(r'^journals/', include('ecommerce.journals.urls', namespace='journals')),  # TODO: journals dependency
 ]
 
 # Install Oscar extension URLs

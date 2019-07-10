@@ -6,7 +6,8 @@ from django.db import migrations
 from oscar.core.loading import get_model
 from oscar.core.utils import slugify
 
-from ecommerce.journals.constants import JOURNAL_PRODUCT_CLASS_NAME
+# journals app was removed so this constant was added to the migration retroactively.
+JOURNAL_PRODUCT_CLASS_NAME = 'Journal'
 
 Category = get_model("catalogue", "Category")
 Product = get_model('catalogue', 'Product')

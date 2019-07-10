@@ -71,10 +71,6 @@ def get_lms_dashboard_url():
     return site_configuration.student_dashboard_url
 
 
-def get_lms_journal_dashboard_url():
-    return get_lms_url('journals')
-
-
 def get_lms_program_dashboard_url(uuid):
     site_configuration = _get_site_configuration()
     return site_configuration.build_program_dashboard_url(uuid)
