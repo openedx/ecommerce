@@ -12,6 +12,7 @@ import jwt
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.sites.models import Site
+from django.db.migrations.recorder import MigrationRecorder
 from django.urls import reverse
 from django.utils.timezone import now
 from edx_django_utils.cache import TieredCache
@@ -137,6 +138,14 @@ class BasketCreationMixin(UserMixin, JwtMixin):
     def setUp(self):
         super(BasketCreationMixin, self).setUp()
         print('### In BasketCreationMixin.setUp')
+
+        all_migrations = MigrationRecorder.Migration.objects.all()
+        print('### length of all migrations: ' + str(len(all_migrations)))
+        catalogue_migrations = MigrationRecorder.Migration.objects.filter(app='catalogue')
+        print('### length of catalogue migrations: ' + str(len(catalogue_migrations)))
+        cat_migration = MigrationRecorder.Migration.objects.filter(app='catalogue').order_by('-id').first()
+        if cat_migration is not None:
+            print('### last cat migration: ' + str(cat_migration.name))
 
         self.user = self.create_user()
 
