@@ -50,7 +50,7 @@ class BasketCreateViewTests(BasketCreationMixin, ThrottlingMixin, TransactionTes
         print('### In BasketCreateViewTests.setUp, after super')
 
         categories = Category.objects.all()
-        print('### length before paid_product: ' + str(len(categories)))
+        print('### categories length before paid_product: ' + str(len(categories)))
         cat = Category.objects.order_by('-id').first()
         if cat is not None:
             print('### last cat before paid_product: id=' + str(cat.id) + ', path=' + str(cat.path) + ', depth=' + str(cat.depth) + ', numchild=' + str(cat.numchild) + ', name=' + str(cat.name) + ', desc=' + str(cat.description) + ', slug=' + str(cat.slug))
@@ -64,7 +64,7 @@ class BasketCreateViewTests(BasketCreationMixin, ThrottlingMixin, TransactionTes
         )
 
         categories = Category.objects.all()
-        print('### length before papier: ' + str(len(categories)))
+        print('### categories length before papier: ' + str(len(categories)))
         cat = Category.objects.order_by('-id').first()
         if cat is not None:
             print('### last cat before papier: id=' + str(cat.id) + ', path=' + str(cat.path) + ', depth=' + str(cat.depth) + ', numchild=' + str(cat.numchild) + ', name=' + str(cat.name) + ', desc=' + str(cat.description) + ', slug=' + str(cat.slug))
@@ -95,7 +95,6 @@ class BasketCreateViewTests(BasketCreationMixin, ThrottlingMixin, TransactionTes
     def test_basket_creation_and_checkout(self, skus, checkout, payment_processor_name, requires_payment):
         """Test that a variety of product combinations can be added to the basket and purchased."""
         print('### In test_basket_creation_and_checkout')
-        self.assertTrue(False)
         self.assert_successful_basket_creation(skus, checkout, payment_processor_name, requires_payment)
 
     def test_product_objects_missing(self):
@@ -109,7 +108,6 @@ class BasketCreateViewTests(BasketCreationMixin, ThrottlingMixin, TransactionTes
                 api_exceptions.PRODUCT_OBJECTS_MISSING_USER_MESSAGE
             )
         )
-        self.assertTrue(False)
 
     def _bad_request_dict(self, developer_message, user_message):
         bad_request_dict = {

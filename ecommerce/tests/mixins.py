@@ -4,6 +4,7 @@ from __future__ import absolute_import
 
 import datetime
 import json
+import logging
 import re
 from decimal import Decimal
 
@@ -41,12 +42,15 @@ Selector = get_class('partner.strategy', 'Selector')
 ShippingEventType = get_model('order', 'ShippingEventType')
 Order = get_model('order', 'Order')
 Partner = get_model('partner', 'Partner')
+Product = get_model('catalogue', 'Product')
 ProductAttribute = get_model('catalogue', 'ProductAttribute')
 ProductClass = get_model('catalogue', 'ProductClass')
 User = get_user_model()
 Voucher = get_model('voucher', 'Voucher')
 
 CONTENT_TYPE = 'application/json'
+
+log = logging.getLogger(__name__)
 
 
 class UserMixin(object):
@@ -158,10 +162,24 @@ class BasketCreationMixin(UserMixin, JwtMixin):
         )
 
         categories = Category.objects.all()
-        print('### length before base_product: ' + str(len(categories)))
+        print('### categories length before filter check: ' + str(len(categories)))
+
+        # When all unit tests are run, the Categories table will be empty at this point. However, if only a single
+        # test is run, Categories will have been populated by migrations (in particular, see
+        # ecommerce/extensions/catalogue/migrations/0002_auto_20150223_1052.py). This will lead to a conflicting path
+        # when the second ProductFactory is created below, unless Categories is cleared out.
+        initial_category = Category.objects.filter(path='0001').first()
+        if initial_category is not None:
+            log.warn('Deleting all Category objects so as to avoid conflicting paths (which are required to be unique)')
+            Category.objects.all().delete()
+
+        categories = Category.objects.all()
+        print('### categories length before base_product: ' + str(len(categories)))
         cat = Category.objects.order_by('-id').first()
         if cat is not None:
             print('### last cat before base_product: id=' + str(cat.id) + ', path=' + str(cat.path) + ', depth=' + str(cat.depth) + ', numchild=' + str(cat.numchild) + ', name=' + str(cat.name) + ', desc=' + str(cat.description) + ', slug=' + str(cat.slug))
+        products = Product.objects.all()
+        print('### products length before base_product: ' + str(len(products)))
         self.base_product = factories.ProductFactory(
             structure='parent',
             title=u'Lamborghinï Gallardœ',
@@ -170,10 +188,12 @@ class BasketCreationMixin(UserMixin, JwtMixin):
         )
 
         categories = Category.objects.all()
-        print('### length before free_product: ' + str(len(categories)))
+        print('### categories length before free_product: ' + str(len(categories)))
         cat = Category.objects.order_by('-id').first()
         if cat is not None:
             print('### last cat before free_product: id=' + str(cat.id) + ', path=' + str(cat.path) + ', depth=' + str(cat.depth) + ', numchild=' + str(cat.numchild) + ', name=' + str(cat.name) + ', desc=' + str(cat.description) + ', slug=' + str(cat.slug))
+        products = Product.objects.all()
+        print('### products length before free_product: ' + str(len(products)))
 
         self.free_product = factories.ProductFactory(
             structure='child',
@@ -183,7 +203,9 @@ class BasketCreationMixin(UserMixin, JwtMixin):
             stockrecords__price_excl_tax=Decimal('0.00'),
         )
         categories = Category.objects.all()
-        print('### length before set_jwt_cookie: ' + str(len(categories)))
+        print('### categories length before set_jwt_cookie: ' + str(len(categories)))
+        products = Product.objects.all()
+        print('### products length before set_jwt_cookie: ' + str(len(products)))
         self.set_jwt_cookie(SYSTEM_ENTERPRISE_OPERATOR_ROLE, ALL_ACCESS_CONTEXT)
 
     def create_basket(self, skus=None, checkout=None, payment_processor_name=None, auth=True, token=None):
