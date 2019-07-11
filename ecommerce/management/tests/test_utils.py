@@ -16,6 +16,7 @@ from ecommerce.extensions.payment.processors.paypal import Paypal
 from ecommerce.extensions.test.factories import create_basket, prepare_voucher
 from ecommerce.management.utils import FulfillFrozenBaskets, refund_basket_transactions
 from ecommerce.tests.factories import UserFactory
+from ecommerce.tests.mixins import BasketCreationMixin
 from ecommerce.tests.testcases import TestCase
 
 Free = get_class('shipping.methods', 'Free')
@@ -35,7 +36,8 @@ class RefundBasketTransactionsTests(TestCase):
     def test_success(self):
         product_price = 100
         percentage_discount = 10
-        product = ProductFactory(stockrecords__price_excl_tax=product_price)
+        category = BasketCreationMixin.get_or_create_catalog_category()
+        product = ProductFactory(stockrecords__price_excl_tax=product_price, categories__category=category)
         voucher, product = prepare_voucher(_range=RangeFactory(products=[product]), benefit_value=percentage_discount)
         self.request.user = UserFactory()
         basket = prepare_basket(self.request, [product], voucher)
@@ -210,8 +212,9 @@ class FulfillFrozenBasketsTests(TestCase):
     def test_with_expired_voucher(self):
         """ Test creates order when called with basket with expired voucher"""
         basket = create_basket()
+        category = BasketCreationMixin.get_or_create_catalog_category()
         product = ProductFactory(stockrecords__price_excl_tax=100, stockrecords__partner=self.partner,
-                                 stockrecords__price_currency='USD')
+                                 stockrecords__price_currency='USD', categories__category=category)
         voucher, product = prepare_voucher(code='TEST101', _range=RangeFactory(products=[product]))
         self.request.user = UserFactory()
         basket.add_product(product)

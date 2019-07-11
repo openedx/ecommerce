@@ -38,7 +38,7 @@ from ecommerce.extensions.test.factories import (
 )
 from ecommerce.invoice.models import Invoice
 from ecommerce.tests.factories import SiteConfigurationFactory, UserFactory
-from ecommerce.tests.mixins import BusinessIntelligenceMixin
+from ecommerce.tests.mixins import BasketCreationMixin, BusinessIntelligenceMixin
 from ecommerce.tests.testcases import TestCase
 
 LOGGER_NAME = 'ecommerce.extensions.analytics.utils'
@@ -352,7 +352,9 @@ class EdxOrderPlacementMixinTests(BusinessIntelligenceMixin, PaymentEventsMixin,
     def test_place_free_order(self, __):
         """ Verify an order is placed and the basket is submitted. """
         basket = create_basket(empty=True)
-        basket.add_product(ProductFactory(stockrecords__price_excl_tax=0))
+        category = BasketCreationMixin.get_or_create_catalog_category()
+        product = ProductFactory(stockrecords__price_excl_tax=0, categories__category=category)
+        basket.add_product(product)
         order = EdxOrderPlacementMixin().place_free_order(basket)
 
         self.assertIsNotNone(order)

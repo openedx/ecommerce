@@ -14,6 +14,7 @@ from ecommerce.core.constants import (
 )
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.tests.factories import PartnerFactory
+from ecommerce.tests.mixins import BasketCreationMixin
 
 logger = logging.getLogger(__name__)
 
@@ -74,9 +75,10 @@ class DiscoveryTestMixin(object):
         return course, seat
 
     def create_entitlement_product(self, course_uuid=None, certificate_type='verified'):
+        category = BasketCreationMixin.get_or_create_catalog_category()
         entitlement = factories.ProductFactory(
             product_class=self.entitlement_product_class, stockrecords__partner=PartnerFactory(),
-            stockrecords__price_currency='USD'
+            stockrecords__price_currency='USD', categories__category=category
         )
         entitlement.attr.UUID = course_uuid if course_uuid else uuid4()
         entitlement.attr.certificate_type = certificate_type

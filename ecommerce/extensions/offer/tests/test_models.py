@@ -16,6 +16,7 @@ from slumber.exceptions import SlumberBaseException
 from ecommerce.coupons.tests.mixins import CouponMixin, DiscoveryMockMixin
 from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
 from ecommerce.tests.factories import UserFactory
+from ecommerce.tests.mixins import BasketCreationMixin
 from ecommerce.tests.testcases import TestCase
 
 Catalog = get_model('catalogue', 'Catalog')
@@ -346,7 +347,8 @@ class ConditionalOfferTests(DiscoveryTestMixin, DiscoveryMockMixin, TestCase):
             domain1=self.valid_domain,
             domain2=self.valid_sub_domain
         )
-        self.product = factories.ProductFactory()
+        category = BasketCreationMixin.get_or_create_catalog_category()
+        self.product = factories.ProductFactory(categories__category=category)
         _range = factories.RangeFactory(products=[self.product, ])
 
         self.offer = ConditionalOffer.objects.create(
@@ -553,7 +555,9 @@ class BenefitTests(DiscoveryTestMixin, DiscoveryMockMixin, TestCase):
         basket = factories.BasketFactory(site=self.site, owner=self.user)
         entitlement_product = self.create_entitlement_product()
         course, seat = self.create_course_and_seat()
-        no_certificate_product = factories.ProductFactory(stockrecords__price_currency='USD')
+        category = BasketCreationMixin.get_or_create_catalog_category()
+        no_certificate_product = factories.ProductFactory(stockrecords__price_currency='USD',
+                                                          categories__category=category)
 
         basket.add_product(entitlement_product)
         basket.add_product(seat)

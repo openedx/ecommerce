@@ -13,6 +13,7 @@ from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
 from ecommerce.extensions.catalogue.utils import create_coupon_product, generate_sku, get_or_create_catalog
 from ecommerce.tests.factories import ProductFactory
+from ecommerce.tests.mixins import BasketCreationMixin
 from ecommerce.tests.testcases import TestCase
 
 Benefit = get_model('offer', 'Benefit')
@@ -41,7 +42,8 @@ class UtilsTests(DiscoveryTestMixin, TestCase):
 
     def test_generate_sku_with_unexpected_product_class(self):
         """Verify the method raises an exception for unsupported product class."""
-        product = ProductFactory()
+        category = BasketCreationMixin.get_or_create_catalog_category()
+        product = ProductFactory(categories__category=category)
         with self.assertRaises(Exception):
             generate_sku(product, self.partner)
 

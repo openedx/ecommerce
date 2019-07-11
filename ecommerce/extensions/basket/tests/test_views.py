@@ -49,7 +49,7 @@ from ecommerce.extensions.payment.forms import PaymentForm
 from ecommerce.extensions.payment.tests.processors import DummyProcessor
 from ecommerce.extensions.test.factories import create_order, prepare_voucher
 from ecommerce.tests.factories import ProductFactory, SiteConfigurationFactory, StockRecordFactory
-from ecommerce.tests.mixins import ApiMockMixin, LmsApiMockMixin
+from ecommerce.tests.mixins import ApiMockMixin, BasketCreationMixin, LmsApiMockMixin
 from ecommerce.tests.testcases import TestCase
 
 Applicator = get_class('offer.applicator', 'Applicator')
@@ -99,7 +99,8 @@ class BasketAddItemsViewTests(
 
     def test_add_multiple_products_to_basket(self):
         """ Verify the basket accepts multiple products. """
-        products = ProductFactory.create_batch(3, stockrecords__partner=self.partner)
+        category = BasketCreationMixin.get_or_create_catalog_category()
+        products = ProductFactory.create_batch(3, stockrecords__partner=self.partner, categories__category=category)
         response = self._get_response([product.stockrecords.first().partner_sku for product in products])
         self.assertEqual(response.status_code, 303)
 
@@ -174,7 +175,8 @@ class BasketAddItemsViewTests(
     @ddt.data(Voucher.SINGLE_USE, Voucher.MULTI_USE)
     def test_add_multiple_products_and_use_voucher(self, usage):
         """ Verify the basket accepts multiple products and a single use voucher. """
-        products = ProductFactory.create_batch(3, stockrecords__partner=self.partner)
+        category = BasketCreationMixin.get_or_create_catalog_category()
+        products = ProductFactory.create_batch(3, stockrecords__partner=self.partner, categories__category=category)
         product_range = factories.RangeFactory(products=products)
         voucher, __ = prepare_voucher(_range=product_range, usage=usage)
 

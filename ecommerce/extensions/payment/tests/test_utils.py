@@ -16,6 +16,7 @@ from six.moves.urllib.parse import urlencode
 from ecommerce.core.models import User
 from ecommerce.extensions.payment.models import SDNCheckFailure
 from ecommerce.extensions.payment.utils import SDNClient, clean_field_value, middle_truncate
+from ecommerce.tests.mixins import BasketCreationMixin
 from ecommerce.tests.testcases import TestCase
 
 
@@ -129,8 +130,9 @@ class SDNCheckTests(TestCase):
     def test_deactivate_user(self):
         """ Verify an SDN failure is logged. """
         response = {'description': 'Bad dude.'}
-        product1 = factories.ProductFactory(stockrecords__partner__short_code='first')
-        product2 = factories.ProductFactory(stockrecords__partner__short_code='second')
+        category = BasketCreationMixin.get_or_create_catalog_category()
+        product1 = factories.ProductFactory(stockrecords__partner__short_code='first', categories__category=category)
+        product2 = factories.ProductFactory(stockrecords__partner__short_code='second', categories__category=category)
         basket = factories.BasketFactory(owner=self.user, site=self.site_configuration.site)
         basket.add(product1)
         basket.add(product2)
