@@ -141,15 +141,6 @@ class BasketCreationMixin(UserMixin, JwtMixin):
 
     def setUp(self):
         super(BasketCreationMixin, self).setUp()
-        print('### In BasketCreationMixin.setUp')
-
-        all_migrations = MigrationRecorder.Migration.objects.all()
-        print('### length of all migrations: ' + str(len(all_migrations)))
-        catalogue_migrations = MigrationRecorder.Migration.objects.filter(app='catalogue')
-        print('### length of catalogue migrations: ' + str(len(catalogue_migrations)))
-        cat_migration = MigrationRecorder.Migration.objects.filter(app='catalogue').order_by('-id').first()
-        if cat_migration is not None:
-            print('### last cat migration: ' + str(cat_migration.name))
 
         self.user = self.create_user()
 
@@ -175,30 +166,22 @@ class BasketCreationMixin(UserMixin, JwtMixin):
 
         categories = Category.objects.all()
         print('### categories length before base_product: ' + str(len(categories)))
-        cat = Category.objects.order_by('-id').first()
+        cat = Category.objects.first()
         if cat is not None:
-            print('### last cat before base_product: id=' + str(cat.id) + ', path=' + str(cat.path) + ', depth=' + str(cat.depth) + ', numchild=' + str(cat.numchild) + ', name=' + str(cat.name) + ', desc=' + str(cat.description) + ', slug=' + str(cat.slug))
+            print('### found a cat: id=' + str(cat.id) + ', path=' + str(cat.path) + ', depth=' + str(cat.depth) + ', numchild=' + str(cat.numchild) + ', name=' + str(cat.name) + ', desc=' + str(cat.description) + ', slug=' + str(cat.slug))
+        else:
+            print('### could not find a cat, creating one')
+            cat = factories.CategoryFactory()
         self.base_product = factories.ProductFactory(
             structure='parent',
             title=u'Lamborghinï Gallardœ',
             product_class=product_class,
             stockrecords=None,
+            categories__category=cat,
         )
 
         categories = Category.objects.all()
         print('### categories length before free_product: ' + str(len(categories)))
-        cat = Category.objects.order_by('-id').first()
-        if cat is not None:
-            print('### last cat before free_product: id=' + str(cat.id) + ', path=' + str(cat.path) + ', depth=' + str(cat.depth) + ', numchild=' + str(cat.numchild) + ', name=' + str(cat.name) + ', desc=' + str(cat.description) + ', slug=' + str(cat.slug))
-
-        categories = self.base_product.categories
-        cat = None
-        if categories is not None:
-            print('### categories from base_product is not none')
-            cat = categories.first()
-            print('### cat from base_product: id=' + str(cat.id) + ', path=' + str(cat.path) + ', depth=' + str(cat.depth) + ', numchild=' + str(cat.numchild) + ', name=' + str(cat.name) + ', desc=' + str(cat.description) + ', slug=' + str(cat.slug))
-        else:
-            print('###cat from base_product is none')
 
         self.free_product = factories.ProductFactory(
             structure='child',
@@ -206,6 +189,7 @@ class BasketCreationMixin(UserMixin, JwtMixin):
             title='Cardboard Cutout',
             stockrecords__partner_sku=self.FREE_SKU,
             stockrecords__price_excl_tax=Decimal('0.00'),
+            categories__category=cat,
         )
         categories = Category.objects.all()
         print('### categories length before set_jwt_cookie: ' + str(len(categories)))
