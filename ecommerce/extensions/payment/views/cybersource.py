@@ -119,7 +119,8 @@ class CybersourceSubmitView(BasePaymentSubmitView):
             'payment_method': 'card',
             'unsigned_field_names': ','.join(Cybersource.PCI_FIELDS),
             'bill_to_email': user.email,
-            'device_fingerprint_id': request.session.session_key,
+            # Fall back to order number when there is no session key (JWT auth)
+            'device_fingerprint_id': request.session.session_key or basket.order_number,
         }
 
         for source, destination in six.iteritems(self.FIELD_MAPPINGS):
