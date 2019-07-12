@@ -5,10 +5,9 @@ from django.test import LiveServerTestCase as DjangoLiveServerTestCase
 from django.test import TestCase as DjangoTestCase
 from django.test import TransactionTestCase as DjangoTransactionTestCase
 from edx_django_utils.cache import TieredCache
-
-from ecommerce.tests.mixins import SiteMixin, TestServerUrlMixin, UserMixin
 from oscar.test.factories import CategoryFactory
 
+from ecommerce.tests.mixins import SiteMixin, TestServerUrlMixin, UserMixin
 
 # When all unit tests are run, the catalog category table will sometimes be empty. However, if only a single test
 # is run, Category will have been populated by migrations (in particular, see
