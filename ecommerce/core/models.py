@@ -4,6 +4,7 @@ import datetime
 import hashlib
 import logging
 
+import waffle
 from dateutil.parser import parse
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
@@ -24,7 +25,8 @@ from six.moves.urllib.parse import urljoin, urlsplit, urlunsplit
 from slumber.exceptions import HttpNotFoundError, SlumberBaseException
 
 from analytics import Client as SegmentClient
-from ecommerce.core.constants import ALL_ACCESS_CONTEXT
+from ecommerce.core.constants import ALL_ACCESS_CONTEXT, ALLOW_MISSING_LMS_USER_ID
+from ecommerce.core.exceptions import MissingLmsUserIdException
 from ecommerce.core.utils import log_message_and_raise_validation_error
 from ecommerce.extensions.payment.exceptions import ProcessorNotFoundError
 from ecommerce.extensions.payment.helpers import get_processor_class, get_processor_class_by_name
@@ -582,7 +584,7 @@ class User(AbstractUser):
                          self.id, called_from)
             else:
                 # Could not find the LMS user id
-                if allow_missing:
+                if allow_missing or waffle.switch_is_active(ALLOW_MISSING_LMS_USER_ID):
                     monitoring_utils.set_custom_metric('ecommerce_missing_lms_user_id_allowed', self.id)
                     monitoring_utils.set_custom_metric(missing_metric_key + '_allowed', self.id)
 
@@ -596,6 +598,8 @@ class User(AbstractUser):
                     error_msg = u'Could not find lms_user_id for user {user_id}. Called from {called_from}'.format(
                         user_id=self.id, called_from=called_from)
                     log.error(error_msg, exc_info=True)
+
+                    raise MissingLmsUserIdException(error_msg)
 
     def _get_lms_user_id_from_social_auth(self):
         """

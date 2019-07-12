@@ -10,6 +10,7 @@ from rest_framework.exceptions import ParseError
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 
+from ecommerce.core.exceptions import MissingLmsUserIdException
 from ecommerce.extensions.api import serializers
 from ecommerce.extensions.api.exceptions import BadRequestException
 from ecommerce.extensions.api.permissions import CanActForUser
@@ -91,14 +92,17 @@ class RefundCreateView(generics.CreateAPIView):
         except User.DoesNotExist:
             raise BadRequestException('User "{}" does not exist.'.format(username))
 
-        # If the user does not already have an LMS user id, add it
-        requested_by = None
-        if request.user.is_authenticated():
-            requested_by = request.user.id
-        called_from = u'refund processing for user {user_id} requested by {requested_by}'.format(
-            user_id=user.id,
-            requested_by=requested_by)
-        user.add_lms_user_id('ecommerce_missing_lms_user_id_refund', called_from)
+        # Ensure the user has an LMS user id
+        try:
+            requested_by = None
+            if request.user.is_authenticated():
+                requested_by = request.user.id
+            called_from = u'refund processing for user {user_id} requested by {requested_by}'.format(
+                user_id=user.id,
+                requested_by=requested_by)
+            user.add_lms_user_id('ecommerce_missing_lms_user_id_refund', called_from)
+        except MissingLmsUserIdException:
+            raise BadRequestException('User {} does not have an LMS user id.'.format(user.id))
 
         # Try and create a refund for the passed in order
         if entitlement_uuid:

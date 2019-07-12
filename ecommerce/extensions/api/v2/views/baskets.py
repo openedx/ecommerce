@@ -18,6 +18,7 @@ from rest_framework.exceptions import PermissionDenied
 from rest_framework.permissions import DjangoModelPermissions, IsAuthenticated
 from rest_framework.response import Response
 
+from ecommerce.core.exceptions import MissingLmsUserIdException
 from ecommerce.core.utils import get_cache_key
 from ecommerce.enterprise.entitlements import get_entitlement_voucher
 from ecommerce.extensions.analytics.utils import audit_log
@@ -361,6 +362,17 @@ class BasketCalculateView(generics.GenericAPIView):
     throttle_classes = (ServiceUserThrottle,)
     MARKETING_USER = 'marketing_site_worker'
 
+    def _report_bad_request(self, developer_message, user_message):
+        """Log error and create a response containing conventional error messaging."""
+        logger.error(developer_message)
+        return Response(
+            {
+                'developer_message': developer_message,
+                'user_message': user_message
+            },
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
     def _calculate_temporary_basket_atomic(self, user, request, products, voucher, skus, code):
         response = None
         try:
@@ -489,9 +501,15 @@ class BasketCalculateView(generics.GenericAPIView):
             basket_owner = None
 
         # If we have a basket owner, ensure they have an LMS user id
-        if basket_owner:
-            called_from = u'calculation of basket total'
-            basket_owner.add_lms_user_id('ecommerce_missing_lms_user_id_calculate_basket_total', called_from)
+        try:
+            if basket_owner:
+                called_from = u'calculation of basket total'
+                basket_owner.add_lms_user_id('ecommerce_missing_lms_user_id_calculate_basket_total', called_from)
+        except MissingLmsUserIdException:
+            return self._report_bad_request(
+                api_exceptions.LMS_USER_ID_NOT_FOUND_DEVELOPER_MESSAGE.format(user_id=basket_owner.id),
+                api_exceptions.LMS_USER_ID_NOT_FOUND_USER_MESSAGE
+            )
 
         cache_key = None
         if use_default_basket:

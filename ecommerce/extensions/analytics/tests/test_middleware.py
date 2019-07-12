@@ -3,7 +3,10 @@ from __future__ import absolute_import
 from django.test.client import RequestFactory
 from social_django.models import UserSocialAuth
 from testfixtures import LogCapture
+from waffle.testutils import override_switch
 
+from ecommerce.core.constants import ALLOW_MISSING_LMS_USER_ID
+from ecommerce.core.exceptions import MissingLmsUserIdException
 from ecommerce.core.models import User
 from ecommerce.extensions.analytics import middleware
 from ecommerce.tests.testcases import TestCase
@@ -110,13 +113,26 @@ class TrackingMiddlewareTests(TestCase):
         self.assertEqual(initial_lms_user_id, same_user.lms_user_id)
 
     def test_no_lms_user_id(self):
-        """ Test that middleware logs a missing LMS user_id. """
+        """ Test that middleware raises an exception for a missing LMS user_id. """
+        user = self.create_user(lms_user_id=None)
+        same_user = User.objects.get(id=user.id)
+
+        with self.assertRaises(MissingLmsUserIdException):
+            self._process_request(same_user)
+
+        same_user = User.objects.get(id=user.id)
+        self.assertIsNone(same_user.lms_user_id)
+
+    @override_switch(ALLOW_MISSING_LMS_USER_ID, active=True)
+    def test_no_lms_user_id_allow_missing(self):
+        """ Test that middleware logs a missing LMS user_id if the switch is on. """
         user = self.create_user(lms_user_id=None)
         expected = [
             (
                 self.MODEL_LOGGER_NAME,
-                'ERROR',
-                'Could not find lms_user_id for user {}. Called from middleware with request path: /, referrer: None'
+                'INFO',
+                'Could not find lms_user_id for user {}. Missing lms_user_id is allowed. Called from middleware with '
+                'request path: /, referrer: None'
                 .format(user.id)
             ),
         ]
@@ -129,7 +145,8 @@ class TrackingMiddlewareTests(TestCase):
         same_user = User.objects.get(id=user.id)
         self.assertIsNone(same_user.lms_user_id)
 
-    def test_lms_user_id_exception(self):
+    @override_switch(ALLOW_MISSING_LMS_USER_ID, active=True)
+    def test_lms_user_id_exception_allow_missing(self):
         """ Test that middleware logs an exception when looking for the LMS user_id. """
         user = self.create_user(lms_user_id=None)
         UserSocialAuth.objects.create(user=user, provider='edx-oauth2', extra_data=None)

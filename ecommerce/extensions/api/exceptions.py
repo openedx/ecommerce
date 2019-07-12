@@ -17,6 +17,9 @@ PRODUCT_NOT_FOUND_USER_MESSAGE = _("We couldn't find one of the products you're 
 PRODUCT_UNAVAILABLE_DEVELOPER_MESSAGE = u"Product with SKU [{sku}] is [{availability}]"
 PRODUCT_UNAVAILABLE_USER_MESSAGE = _("One of the products you're trying to order is unavailable.")
 
+LMS_USER_ID_NOT_FOUND_DEVELOPER_MESSAGE = u'Could not find lms_user_id for user [{user_id}]'
+LMS_USER_ID_NOT_FOUND_USER_MESSAGE = _("We couldn't find enough information about you to perform the calculation.")
+
 
 class ApiError(Exception):
     """Standard error raised by the API."""
