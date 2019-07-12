@@ -677,13 +677,7 @@ class BasketUtilsTransactionTests(TransactionTestCase):
         self.site_configuration.utm_cookie_name = 'test.edx.utm'
         toggle_switch(DISABLE_REPEAT_ORDER_CHECK_SWITCH_NAME, False)
         BasketAttributeType.objects.get_or_create(name=BUNDLE)
-        if Option.objects.first() is None:
-            # Course entitlement does not exist, so create it
-            course_entitlement_option = Option()
-            course_entitlement_option.name = 'Course Entitlement'
-            course_entitlement_option.code = 'course_entitlement'
-            course_entitlement_option.type = Option.OPTIONAL
-            course_entitlement_option.save()
+        Option.objects.get_or_create(name='Course Entitlement', code='course_entitlement', type=Option.OPTIONAL)
 
     def _setup_request_cookie(self):
         utm_campaign = 'test-campaign'
