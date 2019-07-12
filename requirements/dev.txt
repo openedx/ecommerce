@@ -54,7 +54,7 @@ django-tables2==1.16.0    # via django-oscar
 django-threadlocals==0.10
 django-treebeard==4.3     # via django-oscar
 django-waffle==0.14.0
-django-webtest==1.9.6
+django-webtest==1.9.7
 django-widget-tweaks==1.4.5  # via django-oscar
 django==1.11.22
 django_extensions==1.9.9
@@ -67,12 +67,12 @@ drf-extensions==0.3.1
 edx-auth-backends==2.0.1
 edx-django-release-util==0.3.1
 edx-django-sites-extensions==2.4.0
-edx-django-utils==1.0.5
-edx-drf-extensions==2.3.1
+edx-django-utils==2.0.0
+edx-drf-extensions==2.3.3
 edx-ecommerce-worker==0.7.2
 edx-i18n-tools==0.4.8
 edx-opaque-keys==1.0.1
-edx-rbac==1.0.1
+edx-rbac==1.0.2
 edx-rest-api-client==1.9.2
 edx-sphinx-theme==1.0.2
 enum34==1.1.6             # via astroid, cryptography
@@ -187,4 +187,4 @@ webob==1.8.5              # via webtest
 webtest==2.0.33           # via django-webtest
 wrapt==1.11.2             # via astroid
 zeep==3.4.0
-zipp==0.5.1               # via importlib-metadata
+zipp==0.5.2               # via importlib-metadata
