@@ -79,7 +79,7 @@ validate_js:
 	$(NODE_BIN)/gulp lint
 
 validate_python: clean
-	DISABLE_MIGRATIONS=1 PATH=$$PATH:$(NODE_BIN) REUSE_DB=1 coverage run --branch --source=ecommerce ./manage.py test ecommerce \
+	DISABLE_MIGRATIONS=1 PATH=$$PATH:$(NODE_BIN) REUSE_DB=1 coverage run --branch --source=ecommerce ./manage.py test ecommerce.coupons.tests.test_views:CouponOfferViewTests \
 	--settings=ecommerce.settings.test --with-ignore-docstrings --logging-level=DEBUG
 	coverage report
 
