@@ -11,11 +11,17 @@ Example list of serialized messages::
         {
             'code': 'some-message-code',
             'message_type': 'error',  # debug|info|success|warning|error
-            'developer_message': 'Some message for developers.',
+        },
+        {
+            'code': 'some-message-code-with-arg',
+            'message_type': 'error',  # debug|info|success|warning|error
+            'data': {
+                'some_key': 'You can use this value in your message!'
+            }
         },
         {
             'message_type': 'info',
-            'user_message': 'Some message to users.',
+            'user_message': 'Some message to users.'
         },
     ]
 
@@ -29,9 +35,12 @@ BEFORE:
 AFTER:
 
     # For legacy mako template views, the HTML message will still be used and passed as the `user_message`.
-    # For new JSON API views, the HTML message will be passed as the `developer_message` and the code will be
-    # retrieved from the ``extra_tags``.
+    # For new JSON API views, the HTML message will be suppressed and the code will be retrieved from the
+    # ``extra_tags``.
     messages.error(self.request, '<strong>My bold error</strong>', extra_tags='safe my-bold-error')
+
+    # To add additional data for the message, use:
+    add_message_data('my-bold-error', 'some_key', 'You can use this value in your message!')
 
 Here is the template that django-oscar provides to display the flash messages:
 - https://github.com/django-oscar/django-oscar/blob/ea28ecfcf63565816e1b26ba068943d6f179a6e8
@@ -43,9 +52,11 @@ from __future__ import absolute_import
 import logging
 
 from django.contrib.messages import get_messages
+from edx_django_utils.cache import RequestCache
 from rest_framework import status
 
 logger = logging.getLogger(__name__)
+MESSAGE_DATA_CACHE_NAMESPACE = 'message_utils.message_data'
 
 
 def get_response_status(messages):
@@ -67,6 +78,24 @@ def serialize(request):
     ]
 
 
+def add_message_data(code, key, value):
+    """
+    Adds additional data to be included with a message when serialized.
+
+    Arguments:
+        code: The message code.
+        key: A snake_cased key for the additional data.
+        value: The value of the additional data.  Note: must be serializable.
+    """
+    message_data_cache = _get_message_data_cache(code)
+    message_data_cache[key] = value
+
+
+def _get_message_data_cache(code):
+    message_namespace = MESSAGE_DATA_CACHE_NAMESPACE + "." + code
+    return RequestCache(message_namespace).data
+
+
 def _serialize_message(message):
     serialized_message = {
         'message_type': message.level_tag,
@@ -74,11 +103,15 @@ def _serialize_message(message):
     code = _get_message_code(message)
     if code:
         # Message codes are used for HTML-formatted messages that will be constructed client-side.
-        # Returning the message as `developer_message` to ensure it doesn't get displayed on the client.
         serialized_message.update({
             'code': code,
-            'developer_message': message.message,
         })
+        message_data_cache = _get_message_data_cache(code)
+        if message_data_cache:
+            serialized_message['data'] = message_data_cache
+        # else created to turn off test coverage, because there aren't yet real uses of code without data.
+        else:  # pragma: no cover
+            pass
     else:
         serialized_message['user_message'] = message.message
     return serialized_message
