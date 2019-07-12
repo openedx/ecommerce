@@ -35,7 +35,6 @@ Applicator = get_class('offer.applicator', 'Applicator')
 Basket = get_model('basket', 'Basket')
 Benefit = get_model('offer', 'Benefit')
 Catalog = get_model('catalogue', 'Catalog')
-Category = get_model('catalogue', 'Category')
 Selector = get_class('partner.strategy', 'Selector')
 ShippingEventType = get_model('order', 'ShippingEventType')
 Order = get_model('order', 'Order')
@@ -144,14 +143,11 @@ class BasketCreationMixin(UserMixin, JwtMixin):
             requires_shipping=False,
             track_stock=False
         )
-
-        category = self.get_or_create_catalog_category()
         self.base_product = factories.ProductFactory(
             structure='parent',
             title=u'Lamborghinï Gallardœ',
             product_class=product_class,
             stockrecords=None,
-            categories__category=category,
         )
         self.free_product = factories.ProductFactory(
             structure='child',
@@ -159,7 +155,6 @@ class BasketCreationMixin(UserMixin, JwtMixin):
             title='Cardboard Cutout',
             stockrecords__partner_sku=self.FREE_SKU,
             stockrecords__price_excl_tax=Decimal('0.00'),
-            categories__category=category,
         )
         self.set_jwt_cookie(SYSTEM_ENTERPRISE_OPERATOR_ROLE, ALL_ACCESS_CONTEXT)
 
@@ -229,20 +224,6 @@ class BasketCreationMixin(UserMixin, JwtMixin):
             else:
                 self.assertIsNone(response.data['order'])
                 self.assertIsNone(response.data['payment_data'])
-
-    @staticmethod
-    def get_or_create_catalog_category():
-        """Get or create a catalog category.
-
-        When all unit tests are run, the catalog category table will sometimes be empty. However, if only a single test
-        is run, Category will have been populated by migrations (in particular, see
-        ecommerce/extensions/catalogue/migrations/0002_auto_20150223_1052.py). This can lead to conflicting paths
-        if a test creates more than one ProductFactory, since the CategoryFactory will attempt to reuse the path 0001.
-        To avoid this, return an existing Category or create one if none exist. """
-        category = Category.objects.first()
-        if category is not None:
-            return category
-        return factories.CategoryFactory()
 
 
 class BusinessIntelligenceMixin(object):

@@ -17,7 +17,6 @@ from ecommerce.extensions.api.serializers import ProductSerializer
 from ecommerce.extensions.api.v2.tests.views import JSON_CONTENT_TYPE, ProductSerializerMixin
 from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
 from ecommerce.tests.factories import PartnerFactory, ProductFactory
-from ecommerce.tests.mixins import BasketCreationMixin
 from ecommerce.tests.testcases import TestCase
 
 Benefit = get_model('offer', 'Benefit')
@@ -44,8 +43,7 @@ class ProductViewSetBase(ProductSerializerMixin, DiscoveryTestMixin, TestCase):
 class ProductViewSetTests(ProductViewSetBase):
     def test_list(self):
         """The list endpoint should return only products with current site's partner."""
-        category = BasketCreationMixin.get_or_create_catalog_category()
-        ProductFactory.create_batch(3, stockrecords__partner=PartnerFactory(), categories__category=category)
+        ProductFactory.create_batch(3, stockrecords__partner=PartnerFactory())
 
         response = self.client.get(PRODUCT_LIST_PATH)
         self.assertEqual(Product.objects.count(), 5)

@@ -72,7 +72,6 @@ class BasketCreateViewTests(BasketCreationMixin, ThrottlingMixin, TransactionTes
     def setUp(self):
         super(BasketCreateViewTests, self).setUp()
 
-        category = BasketCreationMixin.get_or_create_catalog_category()
         self.paid_product = factories.ProductFactory(
             structure='child',
             parent=self.base_product,
@@ -80,7 +79,6 @@ class BasketCreateViewTests(BasketCreationMixin, ThrottlingMixin, TransactionTes
             stockrecords__partner_sku=self.PAID_SKU,
             stockrecords__price_excl_tax=Decimal('180000.00'),
             stockrecords__partner__short_code='oscr',
-            categories__category=category,
         )
         factories.ProductFactory(
             structure='child',
@@ -89,7 +87,6 @@ class BasketCreateViewTests(BasketCreationMixin, ThrottlingMixin, TransactionTes
             stockrecords__partner_sku=self.ALTERNATE_FREE_SKU,
             stockrecords__price_excl_tax=Decimal('0.00'),
             stockrecords__partner__short_code='otto',
-            categories__category=category,
         )
         factories.ProductFactory(
             structure='child',
@@ -98,7 +95,6 @@ class BasketCreateViewTests(BasketCreationMixin, ThrottlingMixin, TransactionTes
             stockrecords__partner_sku=self.ALTERNATE_PAID_SKU,
             stockrecords__price_excl_tax=Decimal('240000.00'),
             stockrecords__partner__short_code='dummy',
-            categories__category=category,
         )
         # Ensure that the basket attribute type exists for these tests
         basket_attribute_type, _ = BasketAttributeType.objects.get_or_create(name=EMAIL_OPT_IN_ATTRIBUTE)
@@ -402,9 +398,7 @@ class BasketDestroyViewTests(TestCase):
 class BasketCalculateViewTests(ProgramTestMixin, ThrottlingMixin, TestCase):
     def setUp(self):
         super(BasketCalculateViewTests, self).setUp()
-        category = BasketCreationMixin.get_or_create_catalog_category()
-        self.products = ProductFactory.create_batch(3, stockrecords__partner=self.partner, categories=[],
-                                                    categories__category=category)
+        self.products = ProductFactory.create_batch(3, stockrecords__partner=self.partner, categories=[])
         self.path = reverse('api:v2:baskets:calculate')
         self.range = factories.RangeFactory(includes_all_products=True)
         self.product_total = sum(product.stockrecords.first().price_excl_tax for product in self.products)

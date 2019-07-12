@@ -34,7 +34,6 @@ from ecommerce.extensions.order.utils import UserAlreadyPlacedOrder
 from ecommerce.extensions.partner.models import StockRecord
 from ecommerce.extensions.test.factories import create_order, prepare_voucher
 from ecommerce.referrals.models import Referral
-from ecommerce.tests.mixins import BasketCreationMixin
 from ecommerce.tests.testcases import TestCase, TransactionTestCase
 
 Benefit = get_model('offer', 'Benefit')
@@ -77,8 +76,7 @@ class BasketUtilsTests(DiscoveryTestMixin, BasketMixin, TestCase):
     def test_prepare_basket_with_voucher(self):
         """ Verify a basket is returned and contains a voucher and the voucher is applied. """
         # Prepare a product with price of 100 and a voucher with 10% discount for that product.
-        category = BasketCreationMixin.get_or_create_catalog_category()
-        product = ProductFactory(stockrecords__price_excl_tax=100, categories__category=category)
+        product = ProductFactory(stockrecords__price_excl_tax=100)
         new_range = RangeFactory(products=[product])
         voucher, __ = prepare_voucher(_range=new_range, benefit_value=10)
 
@@ -114,8 +112,7 @@ class BasketUtilsTests(DiscoveryTestMixin, BasketMixin, TestCase):
 
     def test_multiple_vouchers(self):
         """ Verify only the last entered voucher is contained in the basket. """
-        category = BasketCreationMixin.get_or_create_catalog_category()
-        product = ProductFactory(stockrecords__price_excl_tax=100, categories__category=category)
+        product = ProductFactory(stockrecords__price_excl_tax=100)
         new_range = RangeFactory(products=[product, ])
         voucher1, __ = prepare_voucher(code='TEST1', _range=new_range, benefit_value=10)
         basket = prepare_basket(self.request, [product], voucher1)
@@ -130,8 +127,7 @@ class BasketUtilsTests(DiscoveryTestMixin, BasketMixin, TestCase):
 
     def test_prepare_basket_without_voucher(self):
         """ Verify a basket is returned and does not contain a voucher. """
-        category = BasketCreationMixin.get_or_create_catalog_category()
-        product = ProductFactory(categories__category=category)
+        product = ProductFactory()
         basket = prepare_basket(self.request, [product])
         self.assertIsNotNone(basket)
         self.assertEqual(basket.status, Basket.OPEN)
@@ -142,9 +138,8 @@ class BasketUtilsTests(DiscoveryTestMixin, BasketMixin, TestCase):
 
     def test_prepare_basket_with_multiple_products(self):
         """ Verify a basket is returned and only contains a single product. """
-        category = BasketCreationMixin.get_or_create_catalog_category()
-        product1 = ProductFactory(stockrecords__partner__short_code='test1', categories__category=category)
-        product2 = ProductFactory(stockrecords__partner__short_code='test2', categories__category=category)
+        product1 = ProductFactory(stockrecords__partner__short_code='test1')
+        product2 = ProductFactory(stockrecords__partner__short_code='test2')
         prepare_basket(self.request, [product1])
         basket = prepare_basket(self.request, [product2])
         self.assertIsNotNone(basket)
@@ -156,8 +151,7 @@ class BasketUtilsTests(DiscoveryTestMixin, BasketMixin, TestCase):
     def test_prepare_basket_calls_attribution_method(self):
         """ Verify a basket is returned and referral method called. """
         with mock.patch('ecommerce.extensions.basket.utils.attribute_cookie_data') as mock_attr_method:
-            category = BasketCreationMixin.get_or_create_catalog_category()
-            product = ProductFactory(categories__category=category)
+            product = ProductFactory()
             basket = prepare_basket(self.request, [product])
             mock_attr_method.assert_called_with(basket, self.request)
 
@@ -385,8 +379,7 @@ class BasketUtilsTests(DiscoveryTestMixin, BasketMixin, TestCase):
         """
         Test prepare_basket updates or creates a basket attribute for the associated bundle
         """
-        category = BasketCreationMixin.get_or_create_catalog_category()
-        product = ProductFactory(categories__category=category)
+        product = ProductFactory()
         request = self.request
         basket = prepare_basket(request, [product])
         with self.assertRaises(BasketAttribute.DoesNotExist):
@@ -400,8 +393,7 @@ class BasketUtilsTests(DiscoveryTestMixin, BasketMixin, TestCase):
         """
         Test prepare_basket clears vouchers for a bundle
         """
-        category = BasketCreationMixin.get_or_create_catalog_category()
-        product = ProductFactory(stockrecords__price_excl_tax=100, categories__category=category)
+        product = ProductFactory(stockrecords__price_excl_tax=100)
         new_range = RangeFactory(products=[product, ])
         voucher, __ = prepare_voucher(_range=new_range, benefit_value=10)
 
@@ -438,8 +430,7 @@ class BasketUtilsTests(DiscoveryTestMixin, BasketMixin, TestCase):
         """
         Test `prepare_basket` with enterprise catalog.
         """
-        category = BasketCreationMixin.get_or_create_catalog_category()
-        product = ProductFactory(categories__category=category)
+        product = ProductFactory()
         request = self.request
         expected_enterprise_catalog_uuid = str(uuid4())
         request.GET = {'catalog': expected_enterprise_catalog_uuid}
@@ -512,9 +503,7 @@ class BasketUtilsTests(DiscoveryTestMixin, BasketMixin, TestCase):
         """
         voucher_start_time = now() - datetime.timedelta(days=5)
         voucher_end_time = now() - datetime.timedelta(days=3)
-        category = BasketCreationMixin.get_or_create_catalog_category()
-        product = ProductFactory(stockrecords__partner__short_code='test1', stockrecords__price_excl_tax=100,
-                                 categories__category=category)
+        product = ProductFactory(stockrecords__partner__short_code='test1', stockrecords__price_excl_tax=100)
         expired_voucher, __ = prepare_voucher(start_datetime=voucher_start_time, end_datetime=voucher_end_time)
 
         basket = prepare_basket(self.request, [product], expired_voucher)
@@ -530,9 +519,7 @@ class BasketUtilsTests(DiscoveryTestMixin, BasketMixin, TestCase):
             an argument, even when there is also a valid voucher already on
             the basket.
         """
-        category = BasketCreationMixin.get_or_create_catalog_category()
-        product = ProductFactory(stockrecords__partner__short_code='test1', stockrecords__price_excl_tax=100,
-                                 categories__category=category)
+        product = ProductFactory(stockrecords__partner__short_code='test1', stockrecords__price_excl_tax=100)
         new_range = RangeFactory(products=[product])
         new_voucher, __ = prepare_voucher(code='xyz', _range=new_range, benefit_value=10)
         existing_voucher, __ = prepare_voucher(code='test', _range=new_range, benefit_value=50)
@@ -554,9 +541,7 @@ class BasketUtilsTests(DiscoveryTestMixin, BasketMixin, TestCase):
         """
         voucher_start_time = now() - datetime.timedelta(days=5)
         voucher_end_time = now() - datetime.timedelta(days=3)
-        category = BasketCreationMixin.get_or_create_catalog_category()
-        product = ProductFactory(stockrecords__partner__short_code='xyz', stockrecords__price_excl_tax=100,
-                                 categories__category=category)
+        product = ProductFactory(stockrecords__partner__short_code='xyz', stockrecords__price_excl_tax=100)
         expired_voucher, __ = prepare_voucher(start_datetime=voucher_start_time, end_datetime=voucher_end_time)
 
         basket = BasketFactory(owner=self.request.user, site=self.request.site)
@@ -573,9 +558,7 @@ class BasketUtilsTests(DiscoveryTestMixin, BasketMixin, TestCase):
         Tests that prepare_basket removes an existing basket voucher that is not
         valid for the product and used to purchase that product.
         """
-        category = BasketCreationMixin.get_or_create_catalog_category()
-        product = ProductFactory(stockrecords__partner__short_code='xyz', stockrecords__price_excl_tax=100,
-                                 categories__category=category)
+        product = ProductFactory(stockrecords__partner__short_code='xyz', stockrecords__price_excl_tax=100)
         invalid_range_voucher, __ = prepare_voucher()
         basket = BasketFactory(owner=self.request.user, site=self.request.site)
 
@@ -591,9 +574,7 @@ class BasketUtilsTests(DiscoveryTestMixin, BasketMixin, TestCase):
         Tests that prepare_basket applies an existing basket voucher that is valid
         for multiple products when used to purchase any of those products.
         """
-        category = BasketCreationMixin.get_or_create_catalog_category()
-        product = ProductFactory(stockrecords__partner__short_code='test1', stockrecords__price_excl_tax=100,
-                                 categories__category=category)
+        product = ProductFactory(stockrecords__partner__short_code='test1', stockrecords__price_excl_tax=100)
 
         new_range = RangeFactory(products=[product])
         voucher, __ = prepare_voucher(_range=new_range, benefit_value=10)
@@ -628,9 +609,7 @@ class BasketUtilsTests(DiscoveryTestMixin, BasketMixin, TestCase):
         does not apply voucher and returns the correct values.
         """
         basket = BasketFactory(owner=self.request.user, site=self.request.site)
-        category = BasketCreationMixin.get_or_create_catalog_category()
-        product = ProductFactory(stockrecords__partner__short_code='test1', stockrecords__price_excl_tax=100,
-                                 categories__category=category)
+        product = ProductFactory(stockrecords__partner__short_code='test1', stockrecords__price_excl_tax=100)
         voucher, __ = prepare_voucher()
         basket.add_product(product, 1)
         applied, msg = apply_voucher_on_basket_and_check_discount(voucher, self.request, basket)
@@ -658,9 +637,7 @@ class BasketUtilsTests(DiscoveryTestMixin, BasketMixin, TestCase):
         containing a valid voucher it only checks the new voucher.
         """
         basket = BasketFactory(owner=self.request.user, site=self.request.site)
-        category = BasketCreationMixin.get_or_create_catalog_category()
-        product = ProductFactory(stockrecords__partner__short_code='test1', stockrecords__price_excl_tax=10,
-                                 categories__category=category)
+        product = ProductFactory(stockrecords__partner__short_code='test1', stockrecords__price_excl_tax=10)
         invalid_voucher, __ = prepare_voucher(code='TEST1')
         valid_voucher, __ = prepare_voucher(code='TEST2', _range=RangeFactory(products=[product]))
         basket.add_product(product, 1)
@@ -701,8 +678,7 @@ class BasketUtilsTransactionTests(TransactionTestCase):
         does not prevent a basket from being created.
         """
         self._setup_request_cookie()
-        category = BasketCreationMixin.get_or_create_catalog_category()
-        product = ProductFactory(categories__category=category)
+        product = ProductFactory()
         existing_basket = Basket.get_basket(self.request.user, self.request.site)
         existing_referral = Referral(basket=existing_basket, site=self.request.site)
         # Let's save an existing referral object to force the duplication happen in database
