@@ -220,7 +220,7 @@ class BasketLogicMixin(object):
                     context_updates['display_verification_message'] = True
             elif product.is_enrollment_code_product:
                 line_data, course = self._get_course_data(product)
-                self._set_message_for_enrollment_code(product, course)
+                self._set_single_enrollment_code_warning_if_needed(product, course)
                 context_updates['is_enrollment_code_purchase'] = True
                 context_updates['show_voucher_form'] = False
             else:
@@ -389,7 +389,7 @@ class BasketLogicMixin(object):
             return None
 
     @newrelic.agent.function_trace()
-    def _set_message_for_enrollment_code(self, product, course):
+    def _set_single_enrollment_code_warning_if_needed(self, product, course):
         assert product.is_enrollment_code_product
 
         if self.request.basket.num_items == 1:
@@ -399,6 +399,7 @@ class BasketLogicMixin(object):
             else:
                 course_about_url = get_lms_course_about_url(course_key=course_key)
 
+            message_code = 'single-enrollment-code-warning'
             messages.info(
                 self.request,
                 _(
@@ -413,8 +414,9 @@ class BasketLogicMixin(object):
                     link_start='<a href="{course_about}">'.format(course_about=course_about_url),
                     link_end='</a>'
                 ),
-                extra_tags='safe enrollment-code-product-info'
+                extra_tags='safe ' + message_code
             )
+            message_utils.add_message_data(message_code, 'course_about_url', course_about_url)
 
     @newrelic.agent.function_trace()
     def _is_id_verification_required(self, product):
@@ -891,6 +893,7 @@ class VoucherRemoveApiView(PaymentApiLogicMixin, APIView):
             else:
                 self.request.basket.vouchers.remove(voucher)
                 self.remove_signal.send(sender=self, basket=self.request.basket, voucher=voucher)
+                messages.info(request, _("Coupon code '%s' was removed from your basket.") % voucher.code)
 
         self._reload_basket()
         return self.get_payment_api_response()

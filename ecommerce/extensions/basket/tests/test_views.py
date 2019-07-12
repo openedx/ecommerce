@@ -18,7 +18,7 @@ from django.contrib.messages import get_messages
 from django.http import HttpResponseRedirect
 from django.test import override_settings
 from django.urls import reverse
-from edx_django_utils.cache import TieredCache
+from edx_django_utils.cache import RequestCache, TieredCache
 from oscar.apps.basket.forms import BasketVoucherForm
 from oscar.core.loading import get_class, get_model
 from oscar.test import factories
@@ -466,6 +466,7 @@ class PaymentApiViewTests(BasketLogicTestMixin, BasketMixin, DiscoveryMockMixin,
 
     def setUp(self):
         super(PaymentApiViewTests, self).setUp()
+        RequestCache.clear_all_namespaces()
         self.user = self.create_user()
         self.client.login(username=self.user.username, password=self.password)
         self.course = CourseFactory(name='PaymentApiViewTests', partner=self.partner)
@@ -496,15 +497,12 @@ class PaymentApiViewTests(BasketLogicTestMixin, BasketMixin, DiscoveryMockMixin,
 
         expected_message = {
             'message_type': 'info',
-            'code': 'enrollment-code-product-info',
-            'developer_message': (
-                u'<strong>Purchasing just for yourself?</strong><p>If you are purchasing a single '
-                u'code for someone else, please continue with checkout. However, if you are the '
-                u'learner <a href="http://lms.testserver.fake/courses/{course_id}/about">go '
-                u'back</a> to enroll directly.</p>'.format(
+            'code': 'single-enrollment-code-warning',
+            'data': {
+                'course_about_url': 'http://lms.testserver.fake/courses/{course_id}/about'.format(
                     course_id=course.id,
                 )
-            ),
+            }
         }
         self.assert_expected_response(
             basket,
@@ -1383,6 +1381,10 @@ class VoucherRemoveApiViewTests(BasketLogicTestMixin, TestCase):
         path = reverse('bff:payment:v0:removevoucher', kwargs={'voucherid': voucher.id})
         response = self.client.delete(path)
 
+        messages = [{
+            'message_type': u'info',
+            'user_message': u"Coupon code '{code}' was removed from your basket.".format(code=voucher.code),
+        }]
         self.assert_expected_response(
             basket,
             response=response,
@@ -1392,4 +1394,5 @@ class VoucherRemoveApiViewTests(BasketLogicTestMixin, TestCase):
             title=product.title,
             product_type=product.get_product_class().name,
             summary_price=9.99,
+            messages=messages,
         )
