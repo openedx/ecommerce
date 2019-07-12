@@ -4,9 +4,10 @@
 #
 #    make upgrade
 #
--e git+https://github.com/edx/analytics-python.git@1.2.11#egg=analytics-python==1.2.11
+-e 'git+https://github.com/edx/analytics-python.git@1.2.11#egg=analytics-python==1.2.11 ; python_version == "2.7"'
 alabaster==0.7.12         # via sphinx
 amqp==1.4.9               # via kombu
+analytics-python==1.2.9 ; python_version >= "3"
 anyjson==0.3.3            # via kombu
 appdirs==1.4.3            # via zeep
 asn1crypto==0.24.0        # via cryptography
@@ -82,8 +83,8 @@ filelock==3.0.12          # via tox
 freezegun==0.3.12
 funcsigs==1.0.2           # via mock
 future==0.17.1            # via pyjwkest
-futures==3.3.0            # via isort
-gevent==1.0.2
+futures==3.2.0 ; python_version == "2.7"
+gevent==1.0.2 ; python_version == "2.7"
 greenlet==0.4.15          # via gevent
 httpretty==0.9.6
 idna==2.8                 # via requests
@@ -140,9 +141,10 @@ pylint==1.9.5
 pymongo==3.8.0            # via edx-opaque-keys
 pyopenssl==19.0.0         # via ndg-httpsclient, paypalrestsdk
 pyparsing==2.4.0          # via packaging
-pysqlite==2.8.3
+pysqlite==2.8.3 ; python_version == "2.7"
 python-dateutil==2.8.0
 python-openid==2.2.5 ; python_version == "2.7"
+python3-openid==3.1.0 ; python_version >= "3"
 python-slugify==1.2.6     # via transifex-client
 pytz==2016.10
 pyyaml==5.1.1             # via edx-django-release-util, edx-i18n-tools
