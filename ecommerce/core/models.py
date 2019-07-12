@@ -525,17 +525,18 @@ class User(AbstractUser):
         except Exception:  # pylint: disable=broad-except
             return None
 
-    def lms_user_id_with_metric(self, usage=None):
+    def lms_user_id_with_metric(self, usage=None, allow_missing=False):
         """
         Returns the LMS user_id, or None if not found. Also sets a metric with the result.
 
         Arguments:
             usage (string): Optional. A description of how the returned id will be used. This will be included in log
                 messages if the LMS user id cannot be found.
+            allow_missing (boolean): True if the LMS user id is allowed to be missing. This affects the log messages
+                and custom metrics. Defaults to False.
 
         Side effect:
-            If found, writes custom metric: 'ecommerce_found_lms_user_id'
-            If not found, writes custom metric: 'ecommerce_missing_lms_user_id'
+            Writes custom metric.
         """
         # Read the lms_user_id from the ecommerce_user.
         lms_user_id = self.lms_user_id
@@ -544,11 +545,17 @@ class User(AbstractUser):
             return lms_user_id
 
         # Could not find the lms_user_id
-        monitoring_utils.set_custom_metric('ecommerce_missing_lms_user_id', self.id)
-        log.warn(u'Could not find lms_user_id with metric for user %s for %s', self.id, usage, exc_info=True)
+        if allow_missing:
+            monitoring_utils.set_custom_metric('ecommerce_missing_lms_user_id_allowed', self.id)
+            log.info(u'Could not find lms_user_id with metric for user %s for %s. Missing lms_user_id is allowed.',
+                     self.id, usage, exc_info=True)
+        else:
+            monitoring_utils.set_custom_metric('ecommerce_missing_lms_user_id', self.id)
+            log.warn(u'Could not find lms_user_id with metric for user %s for %s.', self.id, usage, exc_info=True)
+
         return None
 
-    def add_lms_user_id(self, missing_metric_key, called_from):
+    def add_lms_user_id(self, missing_metric_key, called_from, allow_missing=False):
         """
         If this user does not already have an LMS user id, look for the id in social auth. If the id can be found,
         add it to the user and save the user.
@@ -559,10 +566,11 @@ class User(AbstractUser):
         Arguments:
             missing_metric_key (String): Key name for metric that will be created if the LMS user id cannot be found.
             called_from (String): Descriptive string describing the caller. This will be included in log messages.
+            allow_missing (boolean): True if the LMS user id is allowed to be missing. This affects the log messages
+                and custom metrics. Defaults to False.
 
         Side effect:
-            If the LMS id cannot be found, writes 2 custom metrics: 'ecommerce_missing_lms_user_id' and also another
-            with the value of missing_metric_key.
+            If the LMS id cannot be found, writes custom metrics.
         """
         if not self.lms_user_id:
             # Check for the LMS user id in social auth
@@ -573,11 +581,21 @@ class User(AbstractUser):
                 log.info(u'Saving lms_user_id from social auth with id %s for user %s. Called from %s', social_auth_id,
                          self.id, called_from)
             else:
-                monitoring_utils.set_custom_metric('ecommerce_missing_lms_user_id', self.id)
-                monitoring_utils.set_custom_metric(missing_metric_key, self.id)
-                error_msg = u'Could not find lms_user_id for user {user_id}. Called from {called_from}'.format(
-                    user_id=self.id, called_from=called_from)
-                log.error(error_msg, exc_info=True)
+                # Could not find the LMS user id
+                if allow_missing:
+                    monitoring_utils.set_custom_metric('ecommerce_missing_lms_user_id_allowed', self.id)
+                    monitoring_utils.set_custom_metric(missing_metric_key + '_allowed', self.id)
+
+                    error_msg = u'Could not find lms_user_id for user {user_id}. Missing lms_user_id is allowed. ' \
+                                u'Called from {called_from}'.format(user_id=self.id, called_from=called_from)
+                    log.info(error_msg, exc_info=True)
+                else:
+                    monitoring_utils.set_custom_metric('ecommerce_missing_lms_user_id', self.id)
+                    monitoring_utils.set_custom_metric(missing_metric_key, self.id)
+
+                    error_msg = u'Could not find lms_user_id for user {user_id}. Called from {called_from}'.format(
+                        user_id=self.id, called_from=called_from)
+                    log.error(error_msg, exc_info=True)
 
     def _get_lms_user_id_from_social_auth(self):
         """

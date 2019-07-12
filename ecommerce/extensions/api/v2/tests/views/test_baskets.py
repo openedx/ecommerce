@@ -533,11 +533,9 @@ class BasketCalculateViewTests(ProgramTestMixin, ThrottlingMixin, TestCase):
 
     @httpretty.activate
     def test_basket_calculate_missing_lms_user_id(self):
-        """Verify a staff user with a missing LMS user id succeeds"""
-        user = self.create_user(lms_user_id=None)
-        self.request.user = user
-        self.client.login(username=user.username, password=self.password)
-        response = self.client.get(self.url + '&username={username}'.format(username=user.username))
+        """Verify a staff user passing a username for a user with a missing LMS user id succeeds"""
+        user_without_id = self.create_user(lms_user_id=None)
+        response = self.client.get(self.url + '&username={username}'.format(username=user_without_id.username))
         self.assertEqual(response.status_code, 200)
 
     @httpretty.activate

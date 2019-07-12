@@ -164,10 +164,12 @@ class RefundCreateViewTests(RefundTestMixin, AccessTokenMixin, JwtMixin, TestCas
 
     def test_refund_lms_user_id(self):
         """
-        View should create a refund when user has an LMS user id.
+        View should create a refund when a staff user requests it on behalf of another user (who has an LMS user id).
         """
+        self.client.logout()
+        staff_user = self.create_user(is_staff=True)
         user_with_id = self.create_user()
-        self.client.login(username=user_with_id.username, password=self.password)
+        self.client.login(username=staff_user.username, password=self.password)
 
         data = self._get_data(user_with_id.username, self.course_id)
         response = self.client.post(self.path, data, JSON_CONTENT_TYPE)
@@ -175,10 +177,13 @@ class RefundCreateViewTests(RefundTestMixin, AccessTokenMixin, JwtMixin, TestCas
 
     def test_refund_missing_lms_user_id(self):
         """
-        View should create a refund even if the LMS user id is missing.
+        View should create a refund when a staff user requests it on behalf of another user (who does not have an LMS
+        user id).
         """
+        self.client.logout()
+        staff_user = self.create_user(is_staff=True)
         user_without_id = self.create_user(lms_user_id=None)
-        self.client.login(username=user_without_id.username, password=self.password)
+        self.client.login(username=staff_user.username, password=self.password)
 
         data = self._get_data(user_without_id.username, self.course_id)
         expected_logs = [
@@ -186,7 +191,7 @@ class RefundCreateViewTests(RefundTestMixin, AccessTokenMixin, JwtMixin, TestCas
                 self.MODEL_LOGGER_NAME,
                 'ERROR',
                 'Could not find lms_user_id for user {}. Called from refund processing for user {} requested by {}'
-                .format(user_without_id.id, user_without_id.id, user_without_id.id)
+                .format(user_without_id.id, user_without_id.id, staff_user.id)
             ),
         ]
 
