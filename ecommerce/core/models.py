@@ -586,8 +586,8 @@ class User(AbstractUser):
                     monitoring_utils.set_custom_metric('ecommerce_missing_lms_user_id_allowed', self.id)
                     monitoring_utils.set_custom_metric(missing_metric_key + '_allowed', self.id)
 
-                    error_msg = u'Could not find lms_user_id for user {user_id}. Missing lms_user_id is allowed. ' \
-                                u'Called from {called_from}'.format(user_id=self.id, called_from=called_from)
+                    error_msg = (u'Could not find lms_user_id for user {user_id}. Missing lms_user_id is allowed. '
+                                 u'Called from {called_from}'.format(user_id=self.id, called_from=called_from))
                     log.info(error_msg, exc_info=True)
                 else:
                     monitoring_utils.set_custom_metric('ecommerce_missing_lms_user_id', self.id)
