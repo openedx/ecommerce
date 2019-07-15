@@ -182,24 +182,6 @@ class CybersourceSubmitViewTests(CybersourceMixin, TestCase):
         self.assertIn(field, errors)
 
 
-class CybersourceSubmitAPIViewTests(CybersourceSubmitViewTests):
-    path = reverse('cybersource:api_submit')
-
-    def setUp(self):  # pylint: disable=useless-super-delegation
-        super(CybersourceSubmitAPIViewTests, self).setUp()
-
-    def test_login_required(self):
-        """ Verify the view returns 401 for unauthenticated users. """
-        self.client.logout()
-        response = self.client.post(self.path)
-        self.assertEqual(response.status_code, 401)
-
-    @freeze_time('2016-01-01')
-    def test_valid_request(self):
-        """ Verify the view returns the CyberSource parameters if the request is valid. """
-        super(CybersourceSubmitAPIViewTests, self).test_valid_request()
-
-
 @ddt.ddt
 class CybersourceInterstitialViewTests(CybersourceNotificationTestsMixin, TestCase):
     """ Test interstitial view for Cybersource Payments. """
