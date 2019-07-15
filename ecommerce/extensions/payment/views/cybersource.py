@@ -153,22 +153,6 @@ class CybersourceSubmitView(BasePaymentSubmitView):
         return response
 
 
-class CybersourceSubmitAPIView(APIView, CybersourceSubmitView):
-    # DRF APIView wrapper which allows clients to use
-    # JWT authentication when making Cybersource submit
-    # requests.
-    permission_classes = (permissions.IsAuthenticated,)
-
-    def post(self, request):
-        logger.info(
-            '%s called for basket [%d]. It is in the [%s] state.',
-            self.__class__.__name__,
-            request.basket.id,
-            request.basket.status
-        )
-        return super(CybersourceSubmitAPIView, self).post(request)
-
-
 class CybersourceNotificationMixin(CyberSourceProcessorMixin, OrderCreationMixin):
     # Disable atomicity for the view. Otherwise, we'd be unable to commit to the database
     # until the request had concluded; Django will refuse to commit when an atomic() block

@@ -12,7 +12,6 @@ CYBERSOURCE_URLS = [
     url(r'^apple-pay/', include(CYBERSOURCE_APPLE_PAY_URLS, namespace='apple_pay')),
     url(r'^redirect/$', cybersource.CybersourceInterstitialView.as_view(), name='redirect'),
     url(r'^submit/$', cybersource.CybersourceSubmitView.as_view(), name='submit'),
-    url(r'^api-submit/$', cybersource.CybersourceSubmitAPIView.as_view(), name='api_submit'),
 ]
 
 PAYPAL_URLS = [
