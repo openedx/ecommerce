@@ -568,8 +568,9 @@ class User(AbstractUser):
         Arguments:
             missing_metric_key (String): Key name for metric that will be created if the LMS user id cannot be found.
             called_from (String): Descriptive string describing the caller. This will be included in log messages.
-            allow_missing (boolean): True if the LMS user id is allowed to be missing. This affects the log messages
-                and custom metrics. Defaults to False.
+            allow_missing (boolean): True if the LMS user id is allowed to be missing. This affects the log messages,
+            custom metrics, and (in combination with the allow_missing_lms_user_id switch), whether an
+            MissingLmsUserIdException is raised. Defaults to False.
 
         Side effect:
             If the LMS id cannot be found, writes custom metrics.
