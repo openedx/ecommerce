@@ -39,13 +39,13 @@ class EcommerceIdView(APIView):
 
             # If the user does not already have an LMS user id, add it
             called_from = u'retirement API'
-            user.add_lms_user_id('ecommerce_missing_lms_user_id_retirement', called_from)
+            user.add_lms_user_id('ecommerce_missing_lms_user_id_retirement', called_from, allow_missing=True)
 
             return Response(
                 {
                     'id': user.pk,
                     'ecommerce_tracking_id': ECOM_TRACKING_ID_FMT.format(user.pk),
-                    'lms_user_id': user.lms_user_id_with_metric(usage='retirement API')
+                    'lms_user_id': user.lms_user_id_with_metric(usage='retirement API', allow_missing=True)
                 }
             )
         except User.DoesNotExist:
