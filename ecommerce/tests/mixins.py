@@ -366,7 +366,7 @@ class ApiMockMixin(object):
 
 
 class LmsApiMockMixin(object):
-    """ Mocks for the LMS API reponses. """
+    """ Mocks for the LMS API responses. """
 
     def mock_course_api_response(self, course=None):
         """ Helper function to register an API endpoint for the course information. """
@@ -419,7 +419,7 @@ class LmsApiMockMixin(object):
         httpretty.register_uri(httpretty.GET, url, body=json.dumps(eligibility_data), content_type=CONTENT_TYPE)
 
     def mock_verification_status_api(self, site, user, status=200, is_verified=True):
-        """ Mock verification API endpoint. Returns verfication status data. """
+        """ Mock verification API endpoint. Returns verification status data. """
         verification_data = {
             'status': 'approved',
             'expiration_datetime': (now() + datetime.timedelta(days=1)).isoformat(),

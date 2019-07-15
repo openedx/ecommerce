@@ -185,7 +185,7 @@ class CouponOfferViewTests(ApiMockMixin, CouponMixin, DiscoveryTestMixin, Enterp
 
     def test_expired_voucher(self):
         """ Verify proper response is returned for expired vouchers. """
-        code = FuzzyText().fuzz()
+        code = FuzzyText().fuzz().upper()
         start_datetime = now() - datetime.timedelta(days=20)
         end_datetime = now() - datetime.timedelta(days=10)
         prepare_voucher(code=code, start_datetime=start_datetime, end_datetime=end_datetime)
@@ -196,7 +196,7 @@ class CouponOfferViewTests(ApiMockMixin, CouponMixin, DiscoveryTestMixin, Enterp
 
     def test_no_product(self):
         """ Verify an error is returned for voucher with no product. """
-        code = FuzzyText().fuzz()
+        code = FuzzyText().fuzz().upper()
         no_product_range = RangeFactory()
         prepare_voucher(code=code, _range=no_product_range)
         url = format_url(path=self.path, params={'code': code})
@@ -398,7 +398,7 @@ class CouponRedeemViewTests(CouponMixin, DiscoveryTestMixin, LmsApiMockMixin, En
 
     def test_invalid_voucher_code(self):
         """ Verify an error is returned when voucher does not exist. """
-        code = FuzzyText().fuzz()
+        code = FuzzyText().fuzz().upper()
         url = format_url(base=self.redeem_url, params={'code': code, 'sku': self.stock_record.partner_sku})
         response = self.client.get(url)
         msg = 'No voucher found with code {code}'.format(code=code)
@@ -415,7 +415,7 @@ class CouponRedeemViewTests(CouponMixin, DiscoveryTestMixin, LmsApiMockMixin, En
         """ Verify an error is returned for expired coupon. """
         start_datetime = now() - datetime.timedelta(days=20)
         end_datetime = now() - datetime.timedelta(days=10)
-        code = FuzzyText().fuzz()
+        code = FuzzyText().fuzz().upper()
         __, product = prepare_voucher(code=code, start_datetime=start_datetime, end_datetime=end_datetime)
 
         url = format_url(base=self.redeem_url, params={
