@@ -132,6 +132,12 @@ router.register(r'catalogs', catalog_views.CatalogViewSet, base_name='catalog') 
               parents_query_lookups=['stockrecords__catalogs'])
 router.register(r'coupons', coupon_views.CouponViewSet, base_name='coupons')
 router.register(r'enterprise/coupons', enterprise_views.EnterpriseCouponViewSet, base_name='enterprise-coupons')
+router.register(
+    r'enterprise/offer_assignment_summary',
+    enterprise_views.OfferAssignmentSummaryViewSet,
+    base_name='enterprise-offer-assignment-summary',
+)
+
 router.register(r'courses', course_views.CourseViewSet, base_name='course') \
     .register(r'products', product_views.ProductViewSet,
               base_name='course-product', parents_query_lookups=['course_id'])

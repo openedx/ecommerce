@@ -11,7 +11,7 @@ from rest_framework import generics, serializers, status
 from rest_framework.decorators import detail_route, list_route
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.viewsets import ViewSet
+from rest_framework.viewsets import ModelViewSet, ViewSet
 from six.moves.urllib.parse import urlparse  # pylint: disable=import-error, relative-import
 from slumber.exceptions import SlumberHttpBaseException
 
@@ -32,6 +32,7 @@ from ecommerce.extensions.api.serializers import (
     EnterpriseCouponOverviewListSerializer,
     NotAssignedCodeUsageSerializer,
     NotRedeemedCodeUsageSerializer,
+    OfferAssignmentSummarySerializer,
     PartialRedeemedCodeUsageSerializer,
     RedeemedCodeUsageSerializer
 )
@@ -113,6 +114,49 @@ class EnterpriseCustomerCatalogsViewSet(ViewSet):
             )
 
         return Response(catalog)
+
+
+class OfferAssignmentSummaryViewSet(ModelViewSet):
+    """
+    Viewset to return OfferAssignment coupon data.
+    """
+
+    permission_classes = (IsAuthenticated, IsAdminUser,)
+
+    serializer_class = OfferAssignmentSummarySerializer
+    pagination_class = DatatablesDefaultPagination
+    http_method_names = ['get', 'head']
+
+    def get_queryset(self):
+        """
+        Return a list of dictionaries to be serialized.
+
+        Each dictionary contains one offerAssignment object, and the count of
+        how many total offerAssignment objects the DB returned with the same
+        code, as a way of "rolling up" offerAssignments a user has.
+        """
+        user_email = self.request.query_params.get('user_email')
+        queryset = OfferAssignment.objects.filter(
+            user_email=user_email,
+            status__in=[OFFER_ASSIGNED, OFFER_ASSIGNMENT_EMAIL_PENDING],
+        ).select_related(
+            'offer__benefit',
+            'offer__condition',
+        )
+        offer_assignments_with_counts = {}
+        for offer_assignment in queryset:
+            if offer_assignment.code not in offer_assignments_with_counts:
+                # Note that we can get away with just dropping in the first
+                # offerAssignment object of particular code that we see
+                # because most of the data we are returning lives on related
+                # objects that each of these offerAssignments share (e.g. the benefit)
+                offer_assignments_with_counts[offer_assignment.code] = {
+                    'count': 1,
+                    'obj': offer_assignment,
+                }
+            else:
+                offer_assignments_with_counts[offer_assignment.code]['count'] += 1
+        return offer_assignments_with_counts.values()
 
 
 class EnterpriseCouponViewSet(CouponViewSet):

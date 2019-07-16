@@ -57,6 +57,7 @@ Voucher = get_model('voucher', 'Voucher')
 VoucherApplication = get_model('voucher', 'VoucherApplication')
 
 ENTERPRISE_COUPONS_LINK = reverse('api:v2:enterprise-coupons-list')
+OFFER_ASSIGNMENT_SUMMARY_LINK = reverse('api:v2:enterprise-offer-assignment-summary-list')
 
 
 class TestEnterpriseCustomerView(EnterpriseServiceMockMixin, TestCase):
@@ -2036,3 +2037,180 @@ class EnterpriseCouponViewSetRbacTests(
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         response = response.json()
         assert response == ['Invalid code_filter specified: invalid-filter']
+
+
+class OfferAssignmentSummaryViewSetTests(
+        CouponMixin,
+        DiscoveryTestMixin,
+        DiscoveryMockMixin,
+        JwtMixin,
+        ThrottlingMixin,
+        TestCase):
+    """
+    Test the enterprise coupon order functionality with role based access control.
+    """
+    def setUp(self):
+        super(OfferAssignmentSummaryViewSetTests, self).setUp()
+        self.user = self.create_user(is_staff=True, email='test@example.com')
+        self.client.login(username=self.user.username, password=self.password)
+
+        self.enterprise_customer = {'name': 'test enterprise', 'id': str(uuid4()).decode('utf-8')}
+
+        self.course = CourseFactory(id='course-v1:test-org+course+run', partner=self.partner)
+        self.verified_seat = self.course.create_or_update_seat('verified', False, 100)
+        self.enterprise_slug = 'batman'
+
+        # Create coupons
+        self.coupon1 = self.create_coupon(
+            benefit_type=Benefit.PERCENTAGE,
+            benefit_value=40,
+            enterprise_customer=self.enterprise_customer['id'],
+            enterprise_customer_catalog='aaaaaaaa-2c44-487b-9b6a-24eee973f9a4',
+            code='AAAAA',
+        )
+        self.coupon2 = self.create_coupon(
+            max_uses=2,
+            voucher_type=Voucher.MULTI_USE,
+            benefit_type=Benefit.FIXED,
+            benefit_value=13.37,
+            enterprise_customer=self.enterprise_customer['id'],
+            enterprise_customer_catalog='bbbbbbbb-2c44-487b-9b6a-24eee973f9a4',
+        )
+        self.coupon3 = self.create_coupon(
+            max_uses=7,
+            voucher_type=Voucher.MULTI_USE_PER_CUSTOMER,
+            benefit_type=Benefit.FIXED,
+            benefit_value=444,
+            enterprise_customer=self.enterprise_customer['id'],
+            enterprise_customer_catalog='cccccccc-2c44-487b-9b6a-24eee973f9a4',
+        )
+        # Prepare permissions for hitting assignment endpoint
+        self.role = EcommerceFeatureRole.objects.get(name=ENTERPRISE_COUPON_ADMIN_ROLE)
+        EcommerceFeatureRoleAssignment.objects.get_or_create(
+            role=self.role,
+            user=self.user,
+            enterprise_id=self.enterprise_customer['id']
+        )
+        self.set_jwt_cookie(
+            system_wide_role=SYSTEM_ENTERPRISE_ADMIN_ROLE, context=self.enterprise_customer['id']
+        )
+        patcher = mock.patch('ecommerce.extensions.api.v2.utils.send_mail')
+        self.send_mail_patcher = patcher.start()
+        self.addCleanup(patcher.stop)
+
+        # Assign codes using the assignment endpoint
+        self.assign_user_to_code(self.coupon1.id, [self.user.email], ['AAAAA'])
+        self.assign_user_to_code(self.coupon2.id, [self.user.email], [])
+        self.assign_user_to_code(self.coupon3.id, [self.user.email], [])
+        self.assign_user_to_code(self.coupon3.id, [self.user.email], [])
+
+        # Revoke a code too, for testing the view's filter
+        self.revoke_code_from_user(
+            self.coupon3.id,
+            self.user.email,
+            self.coupon3.coupon_vouchers.first().vouchers.first().code
+        )
+
+    def get_response(self, method, path, data=None):
+        """
+        Helper method for sending requests and returning the response.
+        """
+        enterprise_id = ''
+        enterprise_name = 'ToyX'
+        if data and isinstance(data, dict) and data.get('enterprise_customer'):
+            enterprise_id = data['enterprise_customer']['id']
+            enterprise_name = data['enterprise_customer']['name']
+
+        with mock.patch('ecommerce.extensions.voucher.utils.get_enterprise_customer') as patch1:
+            with mock.patch('ecommerce.extensions.api.v2.utils.get_enterprise_customer') as patch2:
+                patch1.return_value = patch2.return_value = {
+                    'name': enterprise_name,
+                    'enterprise_customer_uuid': enterprise_id,
+                    'slug': self.enterprise_slug,
+                }
+                if method == 'GET':
+                    return self.client.get(path)
+                elif method == 'POST':
+                    return self.client.post(path, json.dumps(data), 'application/json')
+                elif method == 'PUT':
+                    return self.client.put(path, json.dumps(data), 'application/json')
+        return None
+
+    def assign_user_to_code(self, coupon_id, emails, codes):
+        with mock.patch('ecommerce.extensions.offer.utils.send_offer_assignment_email.delay'):
+            self.get_response(
+                'POST',
+                '/api/v2/enterprise/coupons/{}/assign/'.format(coupon_id),
+                {'template': 'Test template', 'emails': emails, 'codes': codes}
+            )
+
+    def revoke_code_from_user(self, coupon_id, email, code):
+        with mock.patch('ecommerce.extensions.offer.utils.send_offer_update_email.delay'):
+            self.get_response(
+                'POST',
+                '/api/v2/enterprise/coupons/{}/revoke/'.format(coupon_id),
+                {'assignments': [{'email': email, 'code': code}]}
+            )
+
+    def test_view_returns_appropriate_data(self):
+        """
+        View should return the appropriate data for given user_email.
+        """
+        oa_code1 = OfferAssignment.objects.get(
+            user_email=self.user.email,
+            offer__vouchers__coupon_vouchers__coupon__id=self.coupon1.id
+        ).code
+        oa_code2 = OfferAssignment.objects.get(
+            user_email=self.user.email,
+            offer__vouchers__coupon_vouchers__coupon__id=self.coupon2.id
+        ).code
+        oa_code3 = OfferAssignment.objects.filter(
+            user_email=self.user.email,
+            offer__vouchers__coupon_vouchers__coupon__id=self.coupon3.id
+        ).last().code
+
+        response = self.client.get(
+            OFFER_ASSIGNMENT_SUMMARY_LINK,
+            data={'user_email': self.user.email}
+        ).json()
+
+        assert response['count'] == 3
+        # To get the code to verify our response, filter using the coupon
+        # id these offerAssignments were created for
+        for result in response['results']:
+            if result['code'] == oa_code1:
+                assert result['benefit_value'] == 40
+                assert result['usage_type'] == 'Percentage'
+                assert result['redemptions_remaining'] == 1
+                assert result['catalog'] == 'aaaaaaaa-2c44-487b-9b6a-24eee973f9a4'
+            elif result['code'] == oa_code2:
+                assert result['benefit_value'] == 13.37
+                assert result['usage_type'] == 'Absolute'
+                assert result['redemptions_remaining'] == 1
+                assert result['catalog'] == 'bbbbbbbb-2c44-487b-9b6a-24eee973f9a4'
+            elif result['code'] == oa_code3:
+                assert result['benefit_value'] == 444
+                assert result['usage_type'] == 'Absolute'
+                assert result['redemptions_remaining'] == 7
+                assert result['catalog'] == 'cccccccc-2c44-487b-9b6a-24eee973f9a4'
+            else:  # To test if response has something in it it shouldn't
+                assert False
+
+    def test_view_does_not_return_inappropriate_data(self):
+        """
+        View should not return data if user with given user_email does
+        not have codes assigned.
+        """
+        response = self.client.get(
+            OFFER_ASSIGNMENT_SUMMARY_LINK,
+            data={'user_email': 'lolimsofake@imagination.com'}
+        ).json()
+        assert response['count'] == 0
+
+    def test_view_does_not_return_data_without_query_param(self):
+        """
+        View should not return any data when query param for user_email
+        is not provided.
+        """
+        response = self.client.get(OFFER_ASSIGNMENT_SUMMARY_LINK).json()
+        assert response['count'] == 0
