@@ -19,7 +19,9 @@ from oscar.test import factories
 from oscar.test.factories import BasketFactory
 from rest_framework.throttling import UserRateThrottle
 from six.moves import range
+from waffle.testutils import override_switch
 
+from ecommerce.core.constants import ALLOW_MISSING_LMS_USER_ID
 from ecommerce.courses.models import Course
 from ecommerce.extensions.api import exceptions as api_exceptions
 from ecommerce.extensions.api.tests.test_authentication import AccessTokenMixin
@@ -533,7 +535,15 @@ class BasketCalculateViewTests(ProgramTestMixin, ThrottlingMixin, TestCase):
 
     @httpretty.activate
     def test_basket_calculate_missing_lms_user_id(self):
-        """Verify a staff user passing a username for a user with a missing LMS user id succeeds"""
+        """Verify a staff user passing a username for a user with a missing LMS user id fails"""
+        user_without_id = self.create_user(lms_user_id=None)
+        response = self.client.get(self.url + '&username={username}'.format(username=user_without_id.username))
+        self.assertEqual(response.status_code, 400)
+
+    @override_switch(ALLOW_MISSING_LMS_USER_ID, active=True)
+    @httpretty.activate
+    def test_basket_calculate_missing_lms_user_id_allow_missing(self):
+        """Verify a staff user passing a username for a user with a missing LMS user id succeeds if the switch is on"""
         user_without_id = self.create_user(lms_user_id=None)
         response = self.client.get(self.url + '&username={username}'.format(username=user_without_id.username))
         self.assertEqual(response.status_code, 200)

@@ -9,7 +9,9 @@ from django.urls import reverse
 from oscar.core.loading import get_model
 from rest_framework import status
 from testfixtures import LogCapture
+from waffle.testutils import override_switch
 
+from ecommerce.core.constants import ALLOW_MISSING_LMS_USER_ID
 from ecommerce.extensions.api.serializers import RefundSerializer
 from ecommerce.extensions.api.tests.test_authentication import AccessTokenMixin
 from ecommerce.extensions.api.v2.tests.views import JSON_CONTENT_TYPE
@@ -177,8 +179,8 @@ class RefundCreateViewTests(RefundTestMixin, AccessTokenMixin, JwtMixin, TestCas
 
     def test_refund_missing_lms_user_id(self):
         """
-        View should create a refund when a staff user requests it on behalf of another user (who does not have an LMS
-        user id).
+        View should not create a refund when a staff user requests it on behalf of another user (who does not have an
+        LMS user id).
         """
         self.client.logout()
         staff_user = self.create_user(is_staff=True)
@@ -198,7 +200,23 @@ class RefundCreateViewTests(RefundTestMixin, AccessTokenMixin, JwtMixin, TestCas
         with LogCapture(self.MODEL_LOGGER_NAME) as log:
             response = self.client.post(self.path, data, JSON_CONTENT_TYPE)
             log.check_present(*expected_logs)
-            self.assert_ok_response(response)
+            self.assert_bad_request_response(response,
+                                             'User {} does not have an LMS user id.'.format(user_without_id.id))
+
+    @override_switch(ALLOW_MISSING_LMS_USER_ID, active=True)
+    def test_refund_missing_lms_user_id_allow_missing(self):
+        """
+        View should create a refund even if the LMS user id is missing if the switch is on.
+        """
+        self.client.logout()
+        staff_user = self.create_user(is_staff=True)
+        user_without_id = self.create_user(lms_user_id=None)
+        self.client.login(username=staff_user.username, password=self.password)
+
+        data = self._get_data(user_without_id.username, self.course_id)
+
+        response = self.client.post(self.path, data, JSON_CONTENT_TYPE)
+        self.assert_ok_response(response)
 
     def test_valid_entitlement_order(self):
         """
