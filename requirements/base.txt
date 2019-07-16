@@ -54,7 +54,7 @@ edx-auth-backends==2.0.1
 edx-django-release-util==0.3.1
 edx-django-sites-extensions==2.4.0
 edx-django-utils==1.0.5
-edx-drf-extensions==2.3.1
+edx-drf-extensions==2.3.4
 edx-ecommerce-worker==0.7.2
 edx-opaque-keys==1.0.1
 edx-rbac==1.0.1
