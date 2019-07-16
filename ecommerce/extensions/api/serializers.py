@@ -2,6 +2,7 @@
 from __future__ import absolute_import, unicode_literals
 
 import logging
+from collections import OrderedDict
 from datetime import timedelta
 from decimal import Decimal
 
@@ -816,6 +817,27 @@ class CouponListSerializer(serializers.ModelSerializer):
     class Meta(object):
         model = Product
         fields = ('category', 'client', 'code', 'id', 'title', 'date_created')
+
+
+class OfferAssignmentSummarySerializer(serializers.BaseSerializer):  # pylint: disable=abstract-method
+    """
+    Serializer for OfferAssignment endpoint.
+    """
+
+    def to_representation(self, instance):
+        representation = OrderedDict()
+
+        offer_assignment = instance['obj']
+        representation['usage_type'] = get_benefit_type(offer_assignment.offer.benefit)
+        representation['benefit_value'] = offer_assignment.offer.benefit.value
+
+        representation['redemptions_remaining'] = instance['count']
+        representation['code'] = offer_assignment.code
+        representation['catalog'] = offer_assignment.offer.condition.enterprise_customer_catalog_uuid
+        representation['coupon_start_date'] = offer_assignment.offer.vouchers.first().start_datetime
+        representation['coupon_end_date'] = offer_assignment.offer.vouchers.first().end_datetime
+
+        return representation
 
 
 class EnterpriseCouponOverviewListSerializer(serializers.ModelSerializer):
