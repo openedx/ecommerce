@@ -3,6 +3,8 @@ from __future__ import absolute_import
 
 import logging
 
+from django.db import transaction
+from django.utils.decorators import method_decorator
 from oscar.core.loading import get_class, get_model
 from rest_framework import filters, status, viewsets
 from rest_framework.decorators import detail_route
@@ -21,6 +23,7 @@ Order = get_model('order', 'Order')
 post_checkout = get_class('checkout.signals', 'post_checkout')
 
 
+@method_decorator(transaction.non_atomic_requests, name='dispatch')
 class OrderViewSet(viewsets.ReadOnlyModelViewSet):
     lookup_field = 'number'
     permission_classes = (IsAuthenticated, IsStaffOrOwner, DjangoModelPermissions,)
@@ -57,7 +60,13 @@ class OrderViewSet(viewsets.ReadOnlyModelViewSet):
         email_opt_in = request.query_params.get('email_opt_in', False) == 'True'
 
         logger.info('Attempting fulfillment of order [%s]...', order.number)
-        post_checkout.send(sender=post_checkout, order=order, request=request, email_opt_in=email_opt_in)
+        with transaction.atomic():
+            post_checkout.send(
+                sender=post_checkout,
+                order=order,
+                request=request,
+                email_opt_in=email_opt_in,
+            )
 
         if order.is_fulfillable:
             logger.warning('Fulfillment of order [%s] failed!', order.number)
