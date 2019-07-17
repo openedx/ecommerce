@@ -474,6 +474,7 @@ class PaymentApiResponseTestMixin(BasketLogicTestMixin):
                     u'certificate_type': certificate_type,
                     u'image_url': image_url,
                     u'sku': line.product.stockrecords.first().partner_sku,
+                    u'course_key': str(getattr(line, 'course_key', '')),
                     u'title': title,
                 } for line in basket.lines.all()
             ]
