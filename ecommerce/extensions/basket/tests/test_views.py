@@ -319,8 +319,12 @@ class BasketAddItemsViewTests(
 
 class BasketLogicTestMixin(object):
     """ Helper functions for Basket API and BasketSummaryView tests. """
-    def create_basket_and_add_product(self, product):
+    def create_empty_basket(self):
         basket = factories.BasketFactory(owner=self.user, site=self.site)
+        return basket
+
+    def create_basket_and_add_product(self, product):
+        basket = self.create_empty_basket()
         basket.add_product(product, 1)
         return basket
 
@@ -394,7 +398,7 @@ class BasketLogicTestMixin(object):
             u'offers': offers,
             u'coupons': coupons,
             u'messages': messages if messages else [],
-            u'is_free_basket': True if discount_value == 100 else False,
+            u'is_free_basket': True if order_total == 0 else False,
             u'show_coupon_form': show_coupon_form,
             u'switch_message': switch_message,
             u'summary_discounts': summary_discounts,
@@ -458,19 +462,51 @@ class BasketLogicTestMixin(object):
                 ))
 
 
+class PaymentApiResponseTestMixin(BasketLogicTestMixin):
+    """
+    Helpers for all payment api bff endpoints which return the complete payment api response.
+    """
+    def assert_empty_basket_response(
+            self,
+            basket,
+            response=None,
+            messages=None,
+            status_code=200,
+    ):
+        self.assert_expected_response(
+            basket=basket,
+            response=response,
+            messages=messages,
+            status_code=status_code,
+            currency=None,
+            order_total=0,
+            show_coupon_form=False,
+            summary_price=0,
+        )
+
+    def clear_message_utils(self):
+        # The message_utils uses the request cache, so call this from setUp
+        RequestCache.clear_all_namespaces()
+
+
 @ddt.ddt
 @httpretty.activate
-class PaymentApiViewTests(BasketLogicTestMixin, BasketMixin, DiscoveryMockMixin, EnterpriseServiceMockMixin, TestCase):
+class PaymentApiViewTests(PaymentApiResponseTestMixin, BasketMixin, DiscoveryMockMixin, EnterpriseServiceMockMixin, TestCase):
     """ PaymentApiViewTests basket api tests. """
     path = reverse('bff:payment:v0:payment')
     maxDiff = None
 
     def setUp(self):
         super(PaymentApiViewTests, self).setUp()
-        RequestCache.clear_all_namespaces()
+        self.clear_message_utils()
         self.user = self.create_user()
         self.client.login(username=self.user.username, password=self.password)
         self.course = CourseFactory(name='PaymentApiViewTests', partner=self.partner)
+
+    def test_empty_basket(self):
+        """ Verify empty basket is returned. """
+        basket = self.create_empty_basket()
+        self.assert_empty_basket_response(basket=basket)
 
     @ddt.data('verified', 'professional', 'credit')
     def test_seat_type(self, certificate_type):
@@ -1357,10 +1393,97 @@ class VoucherAddViewTests(VoucherAddMixin, TestCase):
 
 
 @httpretty.activate
-class VoucherAddApiViewTests(BasketLogicTestMixin, VoucherAddMixin, TestCase):
+class QuantityApiViewTests(PaymentApiResponseTestMixin, BasketMixin, DiscoveryMockMixin, TestCase):
+    """ QuantityApiViewTests basket api tests. """
+    path = reverse('bff:payment:v0:quantity')
+    maxDiff = None
+
+    def setUp(self):
+        super(QuantityApiViewTests, self).setUp()
+        self.clear_message_utils()
+        self.user = self.create_user()
+        self.client.login(username=self.user.username, password=self.password)
+
+    def prepare_enrollment_code_basket(self):
+        course, __, enrollment_code = self.prepare_course_seat_and_enrollment_code(seat_price=100)
+        basket = self.create_basket_and_add_product(enrollment_code)
+        self.mock_course_runs_endpoint(self.site_configuration.discovery_api_url, course_run=course)
+        return course, basket
+
+    def test_response_success(self):
+        """ Verify a successful response is returned. """
+        _, basket = self.prepare_enrollment_code_basket()
+        response = self.client.post(self.path, data={'quantity': 5})
+
+        expected_message = {
+            'message_type': 'info',
+            'code': 'quantity-update-success-message',
+        }
+        self.assert_expected_response(
+            basket,
+            product_type=u'Enrollment Code',
+            response=response,
+            show_coupon_form=False,
+            messages=[expected_message],
+            switch_message='Click here to just purchase an enrollment for yourself',
+            order_total=500,
+            summary_quantity=5,
+            summary_subtotal=500,
+        )
+
+    def test_empty_basket_error(self):
+        """ Verify empty basket error is returned. """
+        basket = self.create_empty_basket()
+        response = self.client.post(self.path, data={'quantity': 5})
+
+        self.assert_empty_basket_response(
+            basket=basket,
+            response=response,
+            status_code=400,
+        )
+
+    def test_response_validation_error(self):
+        """ Verify a validation error is returned. """
+        course, basket = self.prepare_enrollment_code_basket()
+        response = self.client.post(self.path, data={'quantity': -1})
+
+        expected_messages = [
+            {
+                'message_type': 'warning',
+                'user_message': "Your cart couldn't be updated. Please correct any validation errors below.",
+            },
+            {
+                'message_type': 'info',
+                'code': 'single-enrollment-code-warning',
+                'data': {
+                    'course_about_url': 'http://lms.testserver.fake/courses/{course_id}/about'.format(
+                        course_id=course.id,
+                    )
+                }
+            }
+        ]
+        self.assert_expected_response(
+            basket,
+            product_type=u'Enrollment Code',
+            response=response,
+            show_coupon_form=False,
+            status_code=400,
+            messages=expected_messages,
+            switch_message='Click here to just purchase an enrollment for yourself',
+            summary_quantity=1,
+            summary_subtotal=100,
+        )
+
+
+@httpretty.activate
+class VoucherAddApiViewTests(PaymentApiResponseTestMixin, VoucherAddMixin, TestCase):
     """ VoucherAddApiViewTests basket api tests. """
     path = reverse('bff:payment:v0:addvoucher')
     maxDiff = None
+
+    def setUp(self):
+        super(PaymentApiResponseTestMixin, self).setUp()
+        self.clear_message_utils()
 
     def assert_response(self, product, summary_price=9.99, **kwargs):
         response = self._get_response()
@@ -1383,14 +1506,25 @@ class VoucherAddApiViewTests(BasketLogicTestMixin, VoucherAddMixin, TestCase):
     def _get_response(self):
         return self.client.post(self.path, {'code': COUPON_CODE})
 
+    def test_empty_basket_error(self):
+        """ Verify empty basket error is returned. """
+        response = self._get_response()
+
+        self.assert_empty_basket_response(
+            basket=self.basket,
+            response=response,
+            status_code=400,
+        )
+
 
 @httpretty.activate
-class VoucherRemoveApiViewTests(BasketLogicTestMixin, TestCase):
+class VoucherRemoveApiViewTests(PaymentApiResponseTestMixin, TestCase):
     """ VoucherRemoveApiViewTests basket api tests. """
     maxDiff = None
 
     def setUp(self):
         super(VoucherRemoveApiViewTests, self).setUp()
+        self.clear_message_utils()
         self.user = self.create_user()
         self.client.login(username=self.user.username, password=self.password)
 
@@ -1435,4 +1569,22 @@ class VoucherRemoveApiViewTests(BasketLogicTestMixin, TestCase):
             product_type=product.get_product_class().name,
             summary_price=9.99,
             messages=messages,
+        )
+
+    def test_empty_basket_error(self):
+        """ Verify empty basket error is returned. """
+        basket = self.create_empty_basket()
+
+        path = reverse('bff:payment:v0:removevoucher', kwargs={'voucherid': 1})
+        response = self.client.delete(path)
+
+        messages = [{
+            'message_type': 'error',
+             'user_message': "No coupon found with id '1'"
+        }]
+        self.assert_empty_basket_response(
+            basket=basket,
+            response=response,
+            messages=messages,
+            status_code=400,
         )
