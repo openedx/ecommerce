@@ -4,6 +4,8 @@ from __future__ import absolute_import
 import logging
 
 from django.contrib.auth import get_user_model
+from django.db import transaction
+from django.utils.decorators import method_decorator
 from oscar.core.loading import get_model
 from rest_framework import generics, status
 from rest_framework.exceptions import ParseError
@@ -142,6 +144,7 @@ class RefundProcessView(generics.UpdateAPIView):
     queryset = Refund.objects.all()
     serializer_class = serializers.RefundSerializer
 
+    @method_decorator(transaction.non_atomic_requests)
     def update(self, request, *args, **kwargs):
         APPROVE = 'approve'
         DENY = 'deny'
@@ -152,14 +155,15 @@ class RefundProcessView(generics.UpdateAPIView):
         if action not in (APPROVE, DENY, APPROVE_PAYMENT_ONLY):
             raise ParseError('The action [{}] is not valid.'.format(action))
 
-        refund = self.get_object()
-        result = False
+        with transaction.atomic():
+            refund = self.get_object()
+            result = False
 
-        if action in (APPROVE, APPROVE_PAYMENT_ONLY):
-            revoke_fulfillment = action == APPROVE
-            result = refund.approve(revoke_fulfillment=revoke_fulfillment)
-        elif action == DENY:
-            result = refund.deny()
+            if action in (APPROVE, APPROVE_PAYMENT_ONLY):
+                revoke_fulfillment = action == APPROVE
+                result = refund.approve(revoke_fulfillment=revoke_fulfillment)
+            elif action == DENY:
+                result = refund.deny()
 
         http_status = status.HTTP_200_OK if result else status.HTTP_500_INTERNAL_SERVER_ERROR
         serializer = self.get_serializer(refund)
