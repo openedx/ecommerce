@@ -119,7 +119,8 @@ class CybersourceSubmitView(BasePaymentSubmitView):
             'payment_method': 'card',
             'unsigned_field_names': ','.join(Cybersource.PCI_FIELDS),
             'bill_to_email': user.email,
-            'device_fingerprint_id': request.session.session_key,
+            # Fall back to order number when there is no session key (JWT auth)
+            'device_fingerprint_id': request.session.session_key or basket.order_number,
         }
 
         for source, destination in six.iteritems(self.FIELD_MAPPINGS):
@@ -150,6 +151,22 @@ class CybersourceSubmitView(BasePaymentSubmitView):
         basket.freeze()
 
         return response
+
+
+class CybersourceSubmitAPIView(APIView, CybersourceSubmitView):
+    # DRF APIView wrapper which allows clients to use
+    # JWT authentication when making Cybersource submit
+    # requests.
+    permission_classes = (permissions.IsAuthenticated,)
+
+    def post(self, request):
+        logger.info(
+            '%s called for basket [%d]. It is in the [%s] state.',
+            self.__class__.__name__,
+            request.basket.id,
+            request.basket.status
+        )
+        return super(CybersourceSubmitAPIView, self).post(request)
 
 
 class CybersourceNotificationMixin(CyberSourceProcessorMixin, OrderCreationMixin):
