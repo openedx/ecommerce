@@ -271,6 +271,7 @@ class BasketLogicMixin(object):
                 line_data = {
                     'product_title': product.title,
                     'image_url': None,
+                    'course_key': None,
                     'product_description': product.description
                 }
 
@@ -677,6 +678,7 @@ class PaymentApiLogicMixin(BasketLogicMixin):
     def _add_products(self, response, lines_data):
         response['products'] = [
             {
+                'course_key': str(getattr(line_data, 'course_key', '')),
                 'sku': line_data['sku'],
                 'title': line_data['product_title'],
                 'product_type': line_data['line'].product.get_product_class().name,
