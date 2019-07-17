@@ -1000,7 +1000,7 @@ class BasketSummaryViewTests(EnterpriseServiceMockMixin, DiscoveryTestMixin, Dis
 
 
 @httpretty.activate
-class VoucherAddMixin(LmsApiMockMixin):
+class VoucherAddMixin(LmsApiMockMixin, DiscoveryMockMixin):
     def setUp(self):
         super(VoucherAddMixin, self).setUp()
         self.user = self.create_user()
@@ -1182,6 +1182,50 @@ class VoucherAddMixin(LmsApiMockMixin):
         )
         self.assert_response_redirect(expected_redirect_url)
 
+    def assert_account_activation_rendered(self):
+        expected_redirect_url = reverse('offers:email_confirmation')
+        self.assert_response_redirect(expected_redirect_url)
+
+    def test_activation_required_for_inactive_user(self):
+        self.mock_access_token_response()
+        self.mock_account_api(self.request, self.user.username, data={'is_active': False})
+        __, product = prepare_voucher(code=COUPON_CODE)
+        self.basket.add_product(product)
+        self.assert_account_activation_rendered()
+
+    def test_activation_required_for_inactive_user_email_domain_offer(self):
+        self.mock_access_token_response()
+        self.mock_account_api(self.request, self.user.username, data={'is_active': False})
+        self.site.siteconfiguration.require_account_activation = False
+        self.site.siteconfiguration.save()
+        email_domain = self.user.email.split('@')[1]
+        __, product = prepare_voucher(code=COUPON_CODE, email_domains=email_domain)
+        self.basket.add_product(product)
+        self.assert_account_activation_rendered()
+
+    def test_activation_not_required_for_inactive_user_when_disabled_for_site(self):
+        self.mock_access_token_response()
+        self.mock_account_api(self.request, self.user.username, data={'is_active': False})
+        self.site.siteconfiguration.require_account_activation = False
+        self.site.siteconfiguration.save()
+        voucher, product = prepare_voucher(code=COUPON_CODE)
+        self.basket.add_product(product)
+        messages = [{
+            'message_type': 'info',
+            'user_message': u"Coupon code '{code}' added to basket.".format(code=COUPON_CODE),
+        }]
+        self.assert_response(
+            product=product,
+            discount_value=100,
+            voucher=voucher,
+            messages=messages,
+        )
+
+    def test_account_activation_rendered(self):
+        with self.assertTemplateUsed('edx/email_confirmation_required.html'):
+            response = self.client.get(reverse('offers:email_confirmation'))
+            self.assertIn(u'An email has been sent to {}'.format(self.user.email), response.content)
+
 
 @httpretty.activate
 class VoucherAddViewTests(VoucherAddMixin, TestCase):
@@ -1284,36 +1328,6 @@ class VoucherAddViewTests(VoucherAddMixin, TestCase):
         self.client.post(reverse('basket:vouchers-remove', kwargs={'pk': voucher.id}))
         self.assert_basket_discounts([site_offer])
 
-    def assert_account_activation_rendered(self):
-        with self.assertTemplateUsed('edx/email_confirmation_required.html'):
-            self.view.form_valid(self.form)
-
-    def test_activation_required_for_inactive_user(self):
-        self.mock_access_token_response()
-        self.mock_account_api(self.request, self.user.username, data={'is_active': False})
-        __, product = prepare_voucher(code=COUPON_CODE)
-        self.basket.add_product(product)
-        self.assert_account_activation_rendered()
-
-    def test_activation_required_for_inactive_user_email_domain_offer(self):
-        self.mock_access_token_response()
-        self.mock_account_api(self.request, self.user.username, data={'is_active': False})
-        self.site.siteconfiguration.require_account_activation = False
-        self.site.siteconfiguration.save()
-        email_domain = self.user.email.split('@')[1]
-        __, product = prepare_voucher(code=COUPON_CODE, email_domains=email_domain)
-        self.basket.add_product(product)
-        self.assert_account_activation_rendered()
-
-    def test_activation_not_required_for_inactive_user(self):
-        self.mock_access_token_response()
-        self.mock_account_api(self.request, self.user.username, data={'is_active': False})
-        self.site.siteconfiguration.require_account_activation = False
-        self.site.siteconfiguration.save()
-        __, product = prepare_voucher(code=COUPON_CODE)
-        self.basket.add_product(product)
-        self.assert_form_valid_message("Coupon code '{code}' added to basket.".format(code=COUPON_CODE))
-
 
 @httpretty.activate
 class VoucherAddApiViewTests(BasketLogicTestMixin, VoucherAddMixin, TestCase):
@@ -1352,7 +1366,6 @@ class VoucherRemoveApiViewTests(BasketLogicTestMixin, TestCase):
         super(VoucherRemoveApiViewTests, self).setUp()
         self.user = self.create_user()
         self.client.login(username=self.user.username, password=self.password)
-        self.course = CourseFactory(name='VoucherRemoveApiViewTests', partner=self.partner)
 
     def test_response_success(self):
         """ Verify a successful response is returned. """

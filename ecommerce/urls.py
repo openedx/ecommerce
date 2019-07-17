@@ -57,16 +57,17 @@ urlpatterns = AUTH_URLS + WELL_KNOWN_URLS + [
     url(r'^auto_auth/$', core_views.AutoAuth.as_view(), name='auto_auth'),
     url(r'^api-auth/', include(AUTH_URLS, namespace='rest_framework')),
     url(r'^api-docs/', get_swagger_view(title='Ecommerce API'), name='api_docs'),
+    url(r'^bff/', include('ecommerce.bff.urls', namespace='bff')),
     url(r'^courses/', include('ecommerce.courses.urls', namespace='courses')),
     url(r'^credit/', include('ecommerce.credit.urls', namespace='credit')),
     url(r'^coupons/', include('ecommerce.coupons.urls', namespace='coupons')),
+    url(r'^enterprise/', include('ecommerce.enterprise.urls', namespace='enterprise')),
     url(r'^health/$', core_views.health, name='health'),
     url(r'^i18n/', include('django.conf.urls.i18n')),
     url(r'^jsi18n/$', JavaScriptCatalog.as_view(packages=['courses']), name='javascript-catalog'),
     url(r'^management/', include('ecommerce.management.urls', namespace='management')),
-    url(r'^bff/', include('ecommerce.bff.urls', namespace='bff')),
+    url(r'^offers/', include('ecommerce.extensions.offer.urls', namespace='offers')),
     url(r'^programs/', include('ecommerce.programs.urls', namespace='programs')),
-    url(r'^enterprise/', include('ecommerce.enterprise.urls', namespace='enterprise')),
     url(r'^journals/', include('ecommerce.journals.urls', namespace='journals')),  # TODO: journals dependency
 ]
 

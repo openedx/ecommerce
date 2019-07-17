@@ -33,7 +33,7 @@ from ecommerce.extensions.api import exceptions
 from ecommerce.extensions.basket.utils import prepare_basket
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
 from ecommerce.extensions.checkout.utils import get_receipt_page_url
-from ecommerce.extensions.offer.utils import render_email_confirmation_if_required
+from ecommerce.extensions.offer.utils import get_redirect_to_email_confirmation_if_required
 from ecommerce.extensions.order.exceptions import AlreadyPlacedOrderException
 from ecommerce.extensions.voucher.utils import get_voucher_and_products_from_code
 
@@ -186,7 +186,7 @@ class CouponRedeemView(EdxOrderPlacementMixin, View):
                            'User: %s, Offer: %s, Code: %s', request.user.username, offer.id, voucher.code)
             return render(request, template_name, {'error': _('You are not eligible to use this coupon.')})
 
-        email_confirmation_response = render_email_confirmation_if_required(request, offer, product)
+        email_confirmation_response = get_redirect_to_email_confirmation_if_required(request, offer, product)
         if email_confirmation_response:
             return email_confirmation_response
 

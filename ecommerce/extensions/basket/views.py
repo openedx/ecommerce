@@ -45,7 +45,7 @@ from ecommerce.extensions.basket.utils import (
     prepare_basket,
     validate_voucher
 )
-from ecommerce.extensions.offer.utils import format_benefit_value, render_email_confirmation_if_required
+from ecommerce.extensions.offer.utils import format_benefit_value, get_redirect_to_email_confirmation_if_required
 from ecommerce.extensions.order.exceptions import AlreadyPlacedOrderException
 from ecommerce.extensions.partner.shortcuts import get_partner_for_site
 from ecommerce.extensions.payment.constants import (
@@ -733,10 +733,9 @@ class VoucherAddLogicMixin(object):
 
     def _verify_email_confirmation(self, voucher, product):
         offer = voucher.best_offer
-        email_confirmation_response = render_email_confirmation_if_required(self.request, offer, product)
-        if email_confirmation_response:
-            # TODO (ARCH-956) support this for the API
-            raise VoucherException(response=email_confirmation_response)
+        redirect_response = get_redirect_to_email_confirmation_if_required(self.request, offer, product)
+        if redirect_response:
+            raise RedirectException(response=redirect_response)
 
     def _verify_enterprise_needs(self, voucher, code, stock_record):
         if get_enterprise_customer_from_voucher(self.request.site, voucher) is not None:
@@ -819,11 +818,9 @@ class VoucherAddView(VoucherAddLogicMixin, BaseVoucherAddView):  # pylint: disab
             self.verify_and_apply_voucher(code)
         except RedirectException as e:
             return e.response
-        except VoucherException as e:
-            # If a response is provided, return it.
-            # All other errors are passed via messages.
-            if e.response:
-                return e.response
+        except VoucherException:
+            # errors are passed via messages object
+            pass
 
         return redirect_to_referrer(self.request, 'basket:summary')
 
