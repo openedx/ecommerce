@@ -204,7 +204,7 @@ class BasketLogicMixin(object):
             'order_details_msg': None,
             'partner_sku': None,
             'switch_link_text': None,
-            'show_voucher_form': True,
+            'show_voucher_form': bool(lines),
             'is_enrollment_code_purchase': False
         }
 
@@ -568,7 +568,7 @@ class PaymentApiLogicMixin(BasketLogicMixin):
     """
     Business logic for the various Payment APIs.
     """
-    def get_payment_api_response(self):
+    def get_payment_api_response(self, status=None):
         """
         Serializes the payment api response.
         """
@@ -577,15 +577,24 @@ class PaymentApiLogicMixin(BasketLogicMixin):
         context['order_total'] = self._get_order_total()
         context.update(self.process_totals(context))
 
-        response = self._serialize_context(context, lines_data)
-        self._add_messages(response, context)
-        return Response(response, status=self._get_response_status(response))
+        data = self._serialize_context(context, lines_data)
+        self._add_messages(data, context)
+        response_status = status if status else self._get_response_status(data)
+        return Response(data, status=response_status)
+
+    def reload_basket(self):
+        """
+        After basket updates, we need to reload the basket to ensure everything is up to date.
+        """
+        self.request.basket = get_model('basket', 'Basket').objects.get(id=self.request.basket.id)
+        self.request.basket.strategy = self.request.strategy
+        BasketMiddleware().apply_offers_to_basket(self.request, self.request.basket)
 
     def _get_order_total(self):
         """
         Return the order_total in preparation for call to process_totals.
         See https://github.com/django-oscar/django-oscar/blob/1.5.4/src/oscar/apps/basket/views.py#L92-L132
-        for reference in how this is calculated by Oscar.
+        for reference in how this is calculated by django-oscar.
         """
         shipping_charge = Price('USD', excl_tax=Decimal(0), tax=Decimal(0))
         return OrderTotalCalculator().calculate(self.request.basket, shipping_charge)
@@ -680,6 +689,72 @@ class PaymentApiView(PaymentApiLogicMixin, APIView):
             return self.get_payment_api_response()
         except RedirectException as e:
             return Response({'redirect': e.response.url})
+
+
+class QuantityAPIView(APIView, View, PaymentApiLogicMixin):
+    """
+    API to handle bulk code purchasing by setting the quantity.
+
+    Note: DRF APIView wrapper allows clients to use JWT authentication
+
+    """
+    permission_classes = (IsAuthenticated,)
+    http_method_names = ['post', 'options']
+
+    def post(self, request):
+        """
+        Updates quantity for a basket.
+
+        Note: This only works for single-product baskets.
+
+        """
+        if request.basket.is_empty:
+            return self.get_payment_api_response(status=400)
+
+        # NOTE: Ideally, we'd inherit FormView; but that doesn't work with APIView
+        form = self._get_basket_line_form()
+        if form.is_valid():
+            form.save()
+            return self._form_valid(form)
+
+        return self._form_invalid()
+
+    def _get_basket_line_form(self):
+        """ Retrieves form for the first line. """
+        basket_lines = self.request.basket.all_lines()
+        assert basket_lines
+        form_kwargs = {
+            'data': self.request.data,
+            'strategy': self.request.strategy,
+            'instance': basket_lines[0]
+        }
+        return BasketLineForm(**form_kwargs)
+
+    def _form_valid(self, form):
+        """
+        The following code was adapted from django-oscar's BasketView.formset_valid.
+
+        Changes from BasketView.formset_valid:
+        - Does not duplicate `save_for_later` related functionality.
+        - Similar to is_ajax() branch of BasketView.formset_valid, but this code actually works.
+        - Offers messaging was dropped.  These messages contain HTML, but no message code (see BasketMessageGenerator).
+
+        """
+        self.reload_basket()
+        # Note: the original message included HTML, so the client should build its own success message
+        messages.info(self.request, _('quantity successfully updated'), extra_tags='quantity-update-success-message')
+
+        return self.get_payment_api_response()
+
+    def _form_invalid(self):
+        """
+        The following code was adapted from django-oscar's BasketView.formset_invalid.
+        """
+        messages.warning(
+            self.request,
+            _("Your basket couldn't be updated. Please correct any validation errors below.")
+        )
+        return self.get_payment_api_response(status=400)
 
 
 class VoucherAddLogicMixin(object):
@@ -828,8 +903,7 @@ class VoucherAddView(VoucherAddLogicMixin, BaseVoucherAddView):  # pylint: disab
         return redirect_to_referrer(self.request, 'basket:summary')
 
 
-# TODO: ARCH-960: Remove "pragma: no cover"
-class VoucherAddApiView(VoucherAddLogicMixin, PaymentApiLogicMixin, APIView):  # pragma: no cover
+class VoucherAddApiView(VoucherAddLogicMixin, PaymentApiLogicMixin, APIView):
     """
     Api for adding voucher to a basket.
 
@@ -838,7 +912,7 @@ class VoucherAddApiView(VoucherAddLogicMixin, PaymentApiLogicMixin, APIView):  #
     permission_classes = (IsAuthenticated,)
     voucher_model = get_model('voucher', 'voucher')
 
-    def post(self, request):  # pylint: disable=unused-argument
+    def post(self, request):
         """
         Adds voucher to a basket using the voucher's code.
 
@@ -855,13 +929,14 @@ class VoucherAddApiView(VoucherAddLogicMixin, PaymentApiLogicMixin, APIView):  #
 
         try:
             self.verify_and_apply_voucher(code)
+            status = 200
         except RedirectException as e:
             return Response({'redirect': e.response.url})
         except VoucherException:
             # errors are passed via messages object and handled during serialization
-            pass
+            status = 400
 
-        return self.get_payment_api_response()
+        return self.get_payment_api_response(status=status)
 
 
 class VoucherRemoveApiView(PaymentApiLogicMixin, APIView):
@@ -895,18 +970,5 @@ class VoucherRemoveApiView(PaymentApiLogicMixin, APIView):
                 self.remove_signal.send(sender=self, basket=self.request.basket, voucher=voucher)
                 messages.info(request, _("Coupon code '%s' was removed from your basket.") % voucher.code)
 
-        self._reload_basket()
+        self.reload_basket()
         return self.get_payment_api_response()
-
-    def _reload_basket(self):
-        """
-        We need to reload the basket in order for the removal to take effect. There may be a better
-        way than doing this.  If so, please update this code.
-        """
-        strategy = Selector().strategy(request=self.request, user=self.request.user)
-        self.request.strategy = strategy
-        self.request._basket_cache = None  # pylint: disable=protected-access
-        basket_middleware = BasketMiddleware()
-        self.request.basket = basket_middleware.get_basket(self.request)
-        self.request.basket.strategy = self.request.strategy
-        basket_middleware.apply_offers_to_basket(self.request, self.request.basket)

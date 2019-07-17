@@ -34,8 +34,8 @@ BEFORE:
 
 AFTER:
 
-    # For legacy mako template views, the HTML message will still be used and passed as the `user_message`.
-    # For new JSON API views, the HTML message will be suppressed and the code will be retrieved from the
+    # For legacy mako template views, HTML messages can be used with the "safe" extra_tags.
+    # For new JSON API views, the HTML message will be suppressed and the message code will be retrieved from the
     # ``extra_tags``.
     messages.error(self.request, '<strong>My bold error</strong>', extra_tags='safe my-bold-error')
 
@@ -142,9 +142,9 @@ def _get_message_code(message):
             logger.warning(
                 'Message "%s" has too many unknown extra_tags: [%s]. Only one is expected.'
                 ' Using [%s] as the message code.',
-                message=message.message,
-                cleaned_extra_tags=cleaned_extra_tags,
-                code=code,
+                message.message,
+                cleaned_extra_tags,
+                code,
             )
         return code
     else:
