@@ -52,16 +52,11 @@ ENTERPRISE_CUSTOMER_CATALOG = 'abc18838-adcb-41d5-abec-b28be5bfcc13'
 
 
 def format_url(base='', path='', params=None, disable_button=False):
-    params = six.moves.urllib.parse.urlencode(params)
-    url = '{base}{path}{params}'.format(
-        base=base,
-        path=path,
-        params='?{params}'.format(params=params) if params else ''
-    )
-    if disable_button:
-        url = url + '&back_button=disable' if params else '?back_button=disable'
-
-    return url
+    if params:
+        if disable_button:
+            params['back_button'] = 'disable'
+        return '{base}{path}?{params}'.format(base=base, path=path, params=six.moves.urllib.parse.urlencode(params))
+    return '{base}{path}'.format(base=base, path=path)
 
 
 class CouponAppViewTests(TestCase):
