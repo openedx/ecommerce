@@ -11,6 +11,7 @@ import six.moves.urllib.error  # pylint: disable=import-error
 import six.moves.urllib.parse  # pylint: disable=import-error
 import six.moves.urllib.request  # pylint: disable=import-error
 from django.conf import settings
+from django.http import HttpResponseRedirect
 from django.urls import reverse
 from django.utils.timezone import now
 from factory.fuzzy import FuzzyText
@@ -661,6 +662,13 @@ class CouponRedeemViewTests(CouponMixin, DiscoveryTestMixin, LmsApiMockMixin, En
         msg = 'You are not eligible to use this coupon.'
         self.assertEqual(response.context['error'], msg)
 
+    def assert_redirected_to_email_confirmation(self, response):
+        expected_redirect_url = '/offers/email_confirmation/?{}'.format(
+            six.moves.urllib.parse.urlencode({'course_id': self.course.id})
+        )
+        self.assertIsInstance(response, HttpResponseRedirect)
+        self.assertIn(expected_redirect_url, response.url)
+
     @httpretty.activate
     def test_inactive_user_rejection(self):
         """ Verify that a user who hasn't activated the account is rejected. """
@@ -669,11 +677,10 @@ class CouponRedeemViewTests(CouponMixin, DiscoveryTestMixin, LmsApiMockMixin, En
         self.mock_access_token_response()
 
         response = self.client.get(self.redeem_url_with_params())
-        self.assertEqual(response.context['course_name'], self.course.name)
-        self.assertEqual(response.context['user_email'], self.user.email)
+        self.assert_redirected_to_email_confirmation(response)
 
     @httpretty.activate
-    def test_active_user_requirement_disabled(self):
+    def test_inactive_user_requirement_disabled(self):
         """
         Verify that a user who hasn't activated their account is redirected to the basket view
         when the account activation requirement has been disabled.
@@ -688,7 +695,7 @@ class CouponRedeemViewTests(CouponMixin, DiscoveryTestMixin, LmsApiMockMixin, En
         self.assert_redemption_page_redirects(expected_url)
 
     @httpretty.activate
-    def test_active_user_email_domain_restricted_coupon_redemption(self):
+    def test_inactive_user_email_domain_restricted_coupon_redemption(self):
         """
         Verify that a user must activate their account before being allowed
         to redeem an email domain-restricted coupon.
@@ -699,9 +706,7 @@ class CouponRedeemViewTests(CouponMixin, DiscoveryTestMixin, LmsApiMockMixin, En
         self.create_coupon(catalog=self.catalog, code=COUPON_CODE, benefit_value=5, email_domains=email_domain)
 
         response = self.client.get(self.redeem_url_with_params())
-        self.assertIn('edx/email_confirmation_required.html', [t.name for t in response.templates])
-        self.assertEqual(response.context['course_name'], self.course.name)
-        self.assertEqual(response.context['user_email'], self.user.email)
+        self.assert_redirected_to_email_confirmation(response)
 
 
 @ddt.ddt
