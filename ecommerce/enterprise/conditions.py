@@ -7,7 +7,8 @@ from oscar.core.loading import get_model
 from requests.exceptions import ConnectionError, Timeout
 from slumber.exceptions import SlumberHttpBaseException
 
-from ecommerce.enterprise.api import catalog_contains_course_runs, fetch_enterprise_learner_data
+from ecommerce.enterprise.api import catalog_contains_course_runs
+from ecommerce.enterprise.utils import get_enterprise_id_for_user
 from ecommerce.extensions.basket.utils import ENTERPRISE_CATALOG_ATTRIBUTE_TYPE
 from ecommerce.extensions.offer.constants import OFFER_ASSIGNMENT_REVOKED, OFFER_REDEEMED
 from ecommerce.extensions.offer.mixins import ConditionWithoutRangeMixin, SingleItemConsumptionConditionMixin
@@ -76,9 +77,8 @@ class EnterpriseCustomerCondition(ConditionWithoutRangeMixin, SingleItemConsumpt
             course_run_ids.append(course.id)
 
         courses_in_basket = ','.join(course_run_ids)
-        learner_data = {}
         try:
-            learner_data = fetch_enterprise_learner_data(basket.site, basket.owner)['results'][0]
+            learner_enterprise_customer_id = get_enterprise_id_for_user(basket.site, basket.owner)
         except (ConnectionError, KeyError, SlumberHttpBaseException, Timeout) as exc:
             logger.exception('[Code Redemption Failure] Unable to apply enterprise offer because '
                              'we failed to retrieve enterprise learner data for the user. '
@@ -98,14 +98,13 @@ class EnterpriseCustomerCondition(ConditionWithoutRangeMixin, SingleItemConsumpt
                     basket.owner)
                 return False
 
-        if (learner_data and 'enterprise_customer' in learner_data and
-                enterprise_customer != learner_data['enterprise_customer']['uuid']):
+        if learner_enterprise_customer_id and enterprise_customer != learner_enterprise_customer_id:
             # Learner is not linked to the EnterpriseCustomer associated with this condition.
             if offer.offer_type == ConditionalOffer.VOUCHER:
                 logger.warning('[Code Redemption Failure] Unable to apply enterprise offer because Learner\'s '
                                'enterprise (%s) does not match this conditions\'s enterprise (%s). '
                                'User: %s, Offer: %s, Enterprise: %s, Catalog: %s, Courses: %s',
-                               learner_data['enterprise_customer']['uuid'],
+                               learner_enterprise_customer_id,
                                enterprise_customer,
                                username,
                                offer.id,

@@ -6,6 +6,7 @@ from uuid import uuid4
 import ddt
 import httpretty
 import mock
+from django.test import RequestFactory
 from oscar.core.loading import get_model
 from oscar.test.factories import BasketFactory
 from six.moves import range, zip
@@ -42,6 +43,13 @@ class EnterpriseCustomerConditionTests(EnterpriseServiceMockMixin, DiscoveryTest
         self.test_product = ProductFactory(stockrecords__price_excl_tax=10, categories=[])
         self.course_run = CourseFactory(partner=self.partner)
         self.course_run.create_or_update_seat('verified', True, Decimal(100))
+
+        request = RequestFactory()
+        request.COOKIES = {}
+        mock_crum_get_current_request = mock.patch('ecommerce.enterprise.utils.crum.get_current_request')
+        self.mock_crum_get_current_request = mock_crum_get_current_request.start()
+        self.mock_crum_get_current_request.return_value = request
+        self.addCleanup(mock_crum_get_current_request.stop)
 
     def test_name(self):
         """ The name should contain the EnterpriseCustomer's name. """
