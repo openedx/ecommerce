@@ -4,10 +4,10 @@ import itertools
 
 import mock
 import six
+from analytics import Client
 from edx_django_utils.cache import DEFAULT_REQUEST_CACHE
 from oscar.core.loading import get_class, get_model
 
-from analytics import Client
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.extensions.analytics.utils import parse_tracking_context, translate_basket_line_for_segment
 from ecommerce.extensions.api.v2.tests.views.mixins import CatalogMixin
@@ -16,13 +16,13 @@ from ecommerce.extensions.basket.models import Basket
 from ecommerce.extensions.basket.tests.mixins import BasketMixin
 from ecommerce.extensions.test.factories import create_basket
 from ecommerce.tests.factories import SiteConfigurationFactory, UserFactory
-from ecommerce.tests.testcases import TestCase
+from ecommerce.tests.testcases import TransactionTestCase
 
 Basket = get_model('basket', 'Basket')
 OrderNumberGenerator = get_class('order.utils', 'OrderNumberGenerator')
 
 
-class BasketTests(CatalogMixin, BasketMixin, TestCase):
+class BasketTests(CatalogMixin, BasketMixin, TransactionTestCase):
     def assert_basket_state(self, basket, status, user, site):
         """ Verify the given basket's properties. """
         self.assertEqual(basket.status, status)

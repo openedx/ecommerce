@@ -4,10 +4,9 @@
 #
 #    make upgrade
 #
--e 'git+https://github.com/edx/analytics-python.git@1.2.11#egg=analytics-python==1.2.11 ; python_version == "2.7"'
 alabaster==0.7.12         # via sphinx
 amqp==1.4.9               # via kombu
-analytics-python==1.2.9 ; python_version >= "3"
+analytics-python==1.2.9
 anyjson==0.3.3            # via kombu
 appdirs==1.4.3            # via zeep
 asn1crypto==0.24.0        # via cryptography
@@ -84,8 +83,6 @@ freezegun==0.3.12
 funcsigs==1.0.2           # via mock
 future==0.17.1            # via pyjwkest
 futures==3.3.0 ; python_version == "2.7"
-gevent==1.0.2 ; python_version == "2.7"
-greenlet==0.4.15          # via gevent
 httpretty==0.9.6
 idna==2.8                 # via requests
 imagesize==1.1.0          # via sphinx

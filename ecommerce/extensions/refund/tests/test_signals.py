@@ -7,11 +7,11 @@ from ecommerce.extensions.analytics.utils import ECOM_TRACKING_ID_FMT
 from ecommerce.extensions.refund.api import create_refunds
 from ecommerce.extensions.refund.tests.mixins import RefundTestMixin
 from ecommerce.tests.factories import UserFactory
-from ecommerce.tests.testcases import TestCase
+from ecommerce.tests.testcases import TransactionTestCase
 
 
 @patch.object(SegmentClient, 'track')
-class RefundTrackingTests(RefundTestMixin, TestCase):
+class RefundTrackingTests(RefundTestMixin, TransactionTestCase):
     """Tests verifying the behavior of refund tracking."""
 
     def setUp(self):
