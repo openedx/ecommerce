@@ -131,6 +131,7 @@ class RefundCreateView(generics.CreateAPIView):
         return Response([], status=status.HTTP_200_OK)
 
 
+@method_decorator(transaction.non_atomic_requests, name='dispatch')
 class RefundProcessView(generics.UpdateAPIView):
     """Process--approve or deny--refunds.
 
@@ -144,7 +145,6 @@ class RefundProcessView(generics.UpdateAPIView):
     queryset = Refund.objects.all()
     serializer_class = serializers.RefundSerializer
 
-    @method_decorator(transaction.non_atomic_requests)
     def update(self, request, *args, **kwargs):
         APPROVE = 'approve'
         DENY = 'deny'
