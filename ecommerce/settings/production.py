@@ -50,6 +50,10 @@ ALLOWED_HOSTS = ['*']
 # the values read from disk should UPDATE the pre-configured dicts.
 DICT_UPDATE_KEYS = ('JWT_AUTH',)
 
+# Set empty defaults for the logging override settings
+LOGGING_ROOT_OVERRIDES = {}
+LOGGING_SUBSECTION_OVERRIDES = {}
+
 CONFIG_FILE = get_env_setting('ECOMMERCE_CFG')
 with codecs.open(CONFIG_FILE, encoding='utf-8') as f:
     config_from_yaml = yaml.load(f)
@@ -75,6 +79,23 @@ DB_OVERRIDES = dict(
 
 for override, value in six.iteritems(DB_OVERRIDES):
     DATABASES['default'][override] = value
+
+for key, value in LOGGING_ROOT_OVERRIDES.items():
+    if value is None:
+        del LOGGING[key]
+    else:
+        LOGGING[key] = value
+
+for section, overrides in LOGGING_SUBSECTION_OVERRIDES.items():
+    if overrides is None:
+        del LOGGING[section]
+    else:
+        for key, value in overrides.items():
+            if value is None:
+                del LOGGING[section][key]
+            else:
+                LOGGING[section][key] = value
+
 
 
 # PAYMENT PROCESSOR OVERRIDES
