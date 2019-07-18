@@ -6,6 +6,8 @@ from itertools import chain
 import waffle
 from oscar.apps.offer.applicator import Applicator
 from oscar.core.loading import get_model
+from requests.exceptions import ConnectionError, Timeout
+from slumber.exceptions import SlumberHttpBaseException
 
 from ecommerce.enterprise.utils import get_enterprise_id_for_user
 from ecommerce.extensions.offer.constants import CUSTOM_APPLICATOR_LOG_FLAG
@@ -92,7 +94,15 @@ class CustomApplicator(Applicator):
         """
         Return enterprise offers filtered by the user's enterprise, if it exists.
         """
-        enterprise_id = get_enterprise_id_for_user(site, user)
+        enterprise_id = None
+
+        try:
+            enterprise_id = get_enterprise_id_for_user(site, user)
+        except (ConnectionError, KeyError, SlumberHttpBaseException, Timeout) as exc:
+            logger.exception('[CustomApplicator] Unable to get enterprise offers because '
+                             'we failed to retrieve enterprise learner data for the user. '
+                             'User: %s, Message: %s', user.username, exc)
+
         if enterprise_id:
             ConditionalOffer = get_model('offer', 'ConditionalOffer')
             offers = ConditionalOffer.active.filter(

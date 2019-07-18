@@ -271,13 +271,13 @@ class EnterpriseUtilsTests(EnterpriseServiceMockMixin, TestCase):
     @patch('ecommerce.enterprise.utils.get_enterprise_id_for_current_request_user_from_jwt')
     def test_get_enterprise_id_for_user_fetch_errors(self, mock_get_jwt_uuid, mock_fetch):
         """
-        Verify if that learner data fetch errors, get_enterprise_id_for_user
-        returns None
+        Verify if that learner data fetch errors, get_enterprise_id_for_user raises expected exception
         """
         mock_get_jwt_uuid.return_value = None
         mock_fetch.side_effect = [KeyError]
 
-        assert get_enterprise_id_for_user('some-site', self.learner) is None
+        with self.assertRaises(KeyError):
+            get_enterprise_id_for_user('some-site', self.learner)
 
     @patch('ecommerce.enterprise.utils.fetch_enterprise_learner_data')
     @patch('ecommerce.enterprise.utils.get_enterprise_id_for_current_request_user_from_jwt')
