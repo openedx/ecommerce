@@ -16,9 +16,8 @@ mock-django
 nose-ignore-docstring
 pycodestyle
 pylint
-pysqlite ; python_version == "2.7"                 # DB-API 2.0 interface for SQLite 3.x (used as the relational database for most tests)
+pysqlite ; python_version == "2.7"  # DB-API 2.0 interface for SQLite 3.x (used as the relational database for most tests)
 responses
 selenium
 testfixtures                # Provides a LogCapture utility used by several tests
 tox
-

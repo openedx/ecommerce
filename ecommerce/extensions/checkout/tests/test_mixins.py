@@ -39,7 +39,7 @@ from ecommerce.extensions.test.factories import (
 from ecommerce.invoice.models import Invoice
 from ecommerce.tests.factories import SiteConfigurationFactory, UserFactory
 from ecommerce.tests.mixins import BusinessIntelligenceMixin
-from ecommerce.tests.testcases import TestCase
+from ecommerce.tests.testcases import TransactionTestCase
 
 LOGGER_NAME = 'ecommerce.extensions.analytics.utils'
 Basket = get_model('basket', 'Basket')
@@ -57,7 +57,7 @@ Voucher = get_model('voucher', 'Voucher')
 
 @ddt.ddt
 @mock.patch.object(SegmentClient, 'track')
-class EdxOrderPlacementMixinTests(BusinessIntelligenceMixin, PaymentEventsMixin, RefundTestMixin, TestCase):
+class EdxOrderPlacementMixinTests(BusinessIntelligenceMixin, PaymentEventsMixin, RefundTestMixin, TransactionTestCase):
     """
     Tests validating generic behaviors of the EdxOrderPlacementMixin.
     """
@@ -66,6 +66,10 @@ class EdxOrderPlacementMixinTests(BusinessIntelligenceMixin, PaymentEventsMixin,
         super(EdxOrderPlacementMixinTests, self).setUp()
         self.user = UserFactory(lms_user_id=61710)
         self.order = self.create_order(status=ORDER.OPEN)
+
+        # Ensure that the basket attribute type exists for these tests
+        self.basket_attribute_type, _ = BasketAttributeType.objects.get_or_create(
+            name=EMAIL_OPT_IN_ATTRIBUTE)
 
     def test_handle_payment_logging(self, __):
         """
@@ -334,7 +338,7 @@ class EdxOrderPlacementMixinTests(BusinessIntelligenceMixin, PaymentEventsMixin,
         """
         BasketAttribute.objects.get_or_create(
             basket=self.order.basket,
-            attribute_type=BasketAttributeType.objects.get(name=EMAIL_OPT_IN_ATTRIBUTE),
+            attribute_type=self.basket_attribute_type,
             value_text=expected_opt_in,
         )
 

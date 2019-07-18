@@ -6,6 +6,7 @@ import logging
 
 import six  # pylint: disable=ungrouped-imports
 import waffle
+from analytics import Client as SegmentClient
 from dateutil.parser import parse
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
@@ -25,7 +26,6 @@ from simple_history.models import HistoricalRecords
 from six.moves.urllib.parse import urljoin, urlsplit
 from slumber.exceptions import HttpNotFoundError, SlumberBaseException
 
-from analytics import Client as SegmentClient
 from ecommerce.core.constants import ALL_ACCESS_CONTEXT, ALLOW_MISSING_LMS_USER_ID
 from ecommerce.core.exceptions import MissingLmsUserIdException
 from ecommerce.core.utils import log_message_and_raise_validation_error
