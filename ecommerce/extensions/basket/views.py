@@ -67,6 +67,7 @@ from ecommerce.extensions.payment.forms import PaymentForm
 Basket = get_model('basket', 'basket')
 BasketAttribute = get_model('basket', 'BasketAttribute')
 BasketAttributeType = get_model('basket', 'BasketAttributeType')
+ConditionalOffer = get_model('offer', 'ConditionalOffer')
 Benefit = get_model('offer', 'Benefit')
 logger = logging.getLogger(__name__)
 Product = get_model('catalogue', 'Product')
@@ -703,11 +704,13 @@ class PaymentApiLogicMixin(BasketLogicMixin):
         response['offers'] = [
             {
                 'provider': offer.condition.enterprise_customer_name,
+                'name': offer.name,
                 'benefit_type': get_benefit_type(offer.benefit) if offer.benefit else None,
                 'benefit_value': get_quantized_benefit_value(offer.benefit) if offer.benefit else None,
             }
             for offer in self.request.basket.applied_offers().values()
-            if offer.condition.enterprise_customer_name
+            if (offer.condition.enterprise_customer_name or
+                (offer.condition.name and offer.offer_type == ConditionalOffer.SITE))
         ]
 
     def _add_coupons(self, response, context):
