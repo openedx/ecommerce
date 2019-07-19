@@ -620,6 +620,9 @@ EDX_DRF_EXTENSIONS = {
         'tracking_context': 'tracking_context',
         'user_id': 'lms_user_id',
     },
+    'JWT_PAYLOAD_MERGEABLE_USER_ATTRIBUTES': (
+        'tracking_context',
+    ),
     "OAUTH2_USER_INFO_URL": "http://127.0.0.1:8000/oauth2/user_info"
 }
 
