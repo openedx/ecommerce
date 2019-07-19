@@ -77,6 +77,7 @@ class EnterpriseCustomerCondition(ConditionWithoutRangeMixin, SingleItemConsumpt
             course_run_ids.append(course.id)
 
         courses_in_basket = ','.join(course_run_ids)
+        learner_enterprise_customer_id = None
         try:
             learner_enterprise_customer_id = get_enterprise_id_for_user(basket.site, basket.owner)
         except (ConnectionError, KeyError, SlumberHttpBaseException, Timeout) as exc:

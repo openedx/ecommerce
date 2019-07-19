@@ -171,3 +171,14 @@ class CustomApplicatorTests(TestCase):
             assert not enterprise_offers
         else:
             assert enterprise_offers.count() == num_expected_offers
+
+    def test_get_enterprise_offers_with_exception(self):
+        """ Verify get_enterprise_offers returns [] on exception inside `get_enterprise_id_for_user`"""
+        with mock.patch('ecommerce.extensions.offer.applicator.get_enterprise_id_for_user') as mock_ent_id:
+            mock_ent_id.side_effect = IndexError
+            enterprise_offers = self.applicator.get_enterprise_offers(
+                'some-site',
+                self.user
+            )
+
+            assert enterprise_offers == []

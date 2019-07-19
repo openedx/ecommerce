@@ -603,9 +603,4 @@ def get_enterprise_id_for_user(site, user):
                           'User: %s, Exception: %s', user, exc)
         raise
 
-    try:
-        return enterprise_learner_response['results'][0]['enterprise_customer']['uuid']
-    except IndexError:
-        pass
-
-    return None
+    return enterprise_learner_response['results'][0]['enterprise_customer']['uuid']

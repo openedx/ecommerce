@@ -284,13 +284,14 @@ class EnterpriseUtilsTests(EnterpriseServiceMockMixin, TestCase):
     def test_get_enterprise_id_for_user_no_uuid_in_response(self, mock_get_jwt_uuid, mock_fetch):
         """
         Verify if learner data fetch is successful but does not include uuid field,
-        None is returned
+        IndexError is raised
         """
         mock_get_jwt_uuid.return_value = None
         mock_fetch.return_value = {
             'results': []
         }
-        assert get_enterprise_id_for_user('some-site', self.learner) is None
+        with self.assertRaises(IndexError):
+            get_enterprise_id_for_user('some-site', self.learner)
 
     def test_get_enterprise_customer_catalogs(self):
         """

@@ -98,7 +98,7 @@ class CustomApplicator(Applicator):
 
         try:
             enterprise_id = get_enterprise_id_for_user(site, user)
-        except (ConnectionError, KeyError, SlumberHttpBaseException, Timeout) as exc:
+        except (ConnectionError, KeyError, IndexError, SlumberHttpBaseException, Timeout) as exc:
             logger.exception('[CustomApplicator] Unable to get enterprise offers because '
                              'we failed to retrieve enterprise learner data for the user. '
                              'User: %s, Message: %s', user.username, exc)

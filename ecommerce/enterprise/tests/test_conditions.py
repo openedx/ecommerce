@@ -149,11 +149,16 @@ class EnterpriseCustomerConditionTests(EnterpriseServiceMockMixin, DiscoveryTest
         )
         self.assertFalse(self.condition.is_satisfied(offer, basket))
 
-    def setup_enterprise_coupon_data(self, mock_learner_api=True, use_new_enterprise=False):
+    def setup_enterprise_coupon_data(
+            self,
+            mock_learner_api=True,
+            use_new_enterprise=False,
+            offer_type=ConditionalOffer.VOUCHER
+    ):
         offer = factories.EnterpriseOfferFactory(
             partner=self.partner,
             condition=self.condition,
-            offer_type=ConditionalOffer.VOUCHER
+            offer_type=offer_type
         )
         basket = BasketFactory(site=self.site, owner=self.user)
         basket.add_product(self.course_run.seat_products[0])
@@ -193,6 +198,12 @@ class EnterpriseCustomerConditionTests(EnterpriseServiceMockMixin, DiscoveryTest
         """ Ensure the condition returns true for a coupon with an enterprise conditional offer. """
         offer, basket = self.setup_enterprise_coupon_data(mock_learner_api=False)
         self.assertTrue(self.condition.is_satisfied(offer, basket))
+
+    @httpretty.activate
+    def test_is_satisfied_with_get_enterprise_id_for_user_exception(self):
+        """ Ensure the condition returns False when IndexError exception occurs in `get_enterprise_id_for_user`. """
+        offer, basket = self.setup_enterprise_coupon_data(mock_learner_api=False, offer_type=ConditionalOffer.SITE)
+        self.assertFalse(self.condition.is_satisfied(offer, basket))
 
     @httpretty.activate
     def test_is_satisfied_no_course_product_for_voucher_offer(self):
