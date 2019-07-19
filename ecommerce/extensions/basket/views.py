@@ -715,7 +715,7 @@ class QuantityAPIView(APIView, View, PaymentApiLogicMixin):
         form = self._get_basket_line_form()
         if form.is_valid():
             form.save()
-            return self._form_valid(form)
+            return self._form_valid()
 
         return self._form_invalid()
 
@@ -730,7 +730,7 @@ class QuantityAPIView(APIView, View, PaymentApiLogicMixin):
         }
         return BasketLineForm(**form_kwargs)
 
-    def _form_valid(self, form):
+    def _form_valid(self):
         """
         The following code was adapted from django-oscar's BasketView.formset_valid.
 
