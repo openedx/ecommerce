@@ -491,7 +491,8 @@ class PaymentApiResponseTestMixin(BasketLogicTestMixin):
 
 @ddt.ddt
 @httpretty.activate
-class PaymentApiViewTests(PaymentApiResponseTestMixin, BasketMixin, DiscoveryMockMixin, EnterpriseServiceMockMixin, TestCase):
+class PaymentApiViewTests(PaymentApiResponseTestMixin, BasketMixin, DiscoveryMockMixin,
+                          EnterpriseServiceMockMixin, TestCase):
     """ PaymentApiViewTests basket api tests. """
     path = reverse('bff:payment:v0:payment')
     maxDiff = None
@@ -1482,7 +1483,7 @@ class VoucherAddApiViewTests(PaymentApiResponseTestMixin, VoucherAddMixin, TestC
     maxDiff = None
 
     def setUp(self):
-        super(PaymentApiResponseTestMixin, self).setUp()
+        super(VoucherAddApiViewTests, self).setUp()
         self.clear_message_utils()
 
     def assert_response(self, product, summary_price=9.99, **kwargs):
@@ -1580,7 +1581,7 @@ class VoucherRemoveApiViewTests(PaymentApiResponseTestMixin, TestCase):
 
         messages = [{
             'message_type': 'error',
-             'user_message': "No coupon found with id '1'"
+            'user_message': "No coupon found with id '1'"
         }]
         self.assert_empty_basket_response(
             basket=basket,
