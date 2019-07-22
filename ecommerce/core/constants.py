@@ -38,6 +38,8 @@ SYSTEM_ENTERPRISE_ADMIN_ROLE = 'enterprise_admin'
 SYSTEM_ENTERPRISE_LEARNER_ROLE = 'enterprise_learner'
 SYSTEM_ENTERPRISE_OPERATOR_ROLE = 'enterprise_openedx_operator'
 
+STUDENT_SUPPORT_ADMIN_ROLE = 'student_support_admin'
+
 # Context to give access to all resources
 ALL_ACCESS_CONTEXT = '*'
 
