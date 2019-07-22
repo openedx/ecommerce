@@ -10,6 +10,7 @@ from collections import OrderedDict
 from functools import reduce  # pylint: disable=redefined-builtin
 
 import crum
+import six  # pylint: disable=ungrouped-imports
 import waffle
 from django.conf import settings
 from django.urls import reverse
@@ -78,13 +79,13 @@ def get_enterprise_customer(site, uuid):
     Return a single enterprise customer
     """
     resource = 'enterprise-customer'
-    cache_key = '{site_domain}_{partner_code}_{resource}_{enterprise_uuid}'.format(
+    cache_key = u'{site_domain}_{partner_code}_{resource}_{enterprise_uuid}'.format(
         site_domain=site.domain,
         partner_code=site.siteconfiguration.partner.short_code,
         resource=resource,
         enterprise_uuid=uuid,
     )
-    cache_key = hashlib.md5(cache_key).hexdigest()
+    cache_key = hashlib.md5(cache_key.encode('utf-8')).hexdigest()
     cached_response = TieredCache.get_cached_response(cache_key)
     if cached_response.is_found:
         return cached_response.value
@@ -210,14 +211,14 @@ def get_enterprise_customer_catalogs(site, endpoint_request_url, enterprise_cust
     """
     resource = 'enterprise_catalogs'
     partner_code = site.siteconfiguration.partner.short_code
-    cache_key = '{site_domain}_{partner_code}_{resource}_{uuid}_{page}'.format(
+    cache_key = u'{site_domain}_{partner_code}_{resource}_{uuid}_{page}'.format(
         site_domain=site.domain,
         partner_code=partner_code,
         resource=resource,
         uuid=enterprise_customer_uuid,
         page=page,
     )
-    cache_key = hashlib.md5(cache_key).hexdigest()
+    cache_key = hashlib.md5(cache_key.encode('utf-8')).hexdigest()
 
     cached_response = TieredCache.get_cached_response(cache_key)
     if cached_response.is_found:
@@ -455,11 +456,11 @@ def get_enterprise_customer_data_sharing_consent_token(access_token, course_id, 
     Enterprise Customer combination.
     """
     consent_token_hmac = hmac.new(
-        str(access_token),
-        '{course_id}_{enterprise_customer_uuid}'.format(
+        six.text_type(access_token).encode('utf-8'),
+        u'{course_id}_{enterprise_customer_uuid}'.format(
             course_id=course_id,
             enterprise_customer_uuid=enterprise_customer_uuid,
-        ),
+        ).encode('utf-8'),
         digestmod=hashlib.sha256,
     )
     return consent_token_hmac.hexdigest()
@@ -547,7 +548,7 @@ def get_enterprise_catalog(site, enterprise_catalog, limit, page, endpoint_reque
     """
     resource = 'enterprise_catalogs'
     partner_code = site.siteconfiguration.partner.short_code
-    cache_key = '{site_domain}_{partner_code}_{resource}_{catalog}_{limit}_{page}'.format(
+    cache_key = u'{site_domain}_{partner_code}_{resource}_{catalog}_{limit}_{page}'.format(
         site_domain=site.domain,
         partner_code=partner_code,
         resource=resource,
@@ -555,7 +556,7 @@ def get_enterprise_catalog(site, enterprise_catalog, limit, page, endpoint_reque
         limit=limit,
         page=page
     )
-    cache_key = hashlib.md5(cache_key).hexdigest()
+    cache_key = hashlib.md5(cache_key.encode('utf-8')).hexdigest()
 
     cached_response = TieredCache.get_cached_response(cache_key)
     if cached_response.is_found:

@@ -91,7 +91,7 @@ class AssignmentEmailStatusTests(TestCase):
             (log_name, 'ERROR', log_data),
         )
         self.assertEqual(response.status_code, status_code)
-        self.assertDictEqual(response_data, json.loads(response.content))
+        self.assertDictEqual(response_data, response.json())
 
     @ddt.data(
         (
@@ -128,7 +128,7 @@ class AssignmentEmailStatusTests(TestCase):
         response_data['offer_assignment_id'] = offer_assignment.id
         response = self.client.post(self.path, data=json.dumps(post_data), content_type='application/json')
         self.assertEqual(response.status_code, status_code)
-        self.assertDictEqual(response_data, json.loads(response.content))
+        self.assertDictEqual(response_data, response.json())
         updated_offer_assignment = OfferAssignment.objects.get(id=offer_assignment.id)
         self.assertEqual(updated_offer_assignment.status, OFFER_ASSIGNED)
 
@@ -196,7 +196,7 @@ class AssignmentEmailBounceTests(TestCase):
             (self.log_name, 'ERROR', log_data),
         )
         self.assertEqual(response.status_code, status_code)
-        self.assertDictEqual(response_data, json.loads(response.content))
+        self.assertDictEqual(response_data, response.json())
 
     @ddt.data(
         (
@@ -233,6 +233,6 @@ class AssignmentEmailBounceTests(TestCase):
                 response = self.client.post(self.path, data=json.dumps(post_data), content_type='application/json')
         log.check_present()
         self.assertEqual(response.status_code, status_code)
-        self.assertDictEqual(response_data, json.loads(response.content))
+        self.assertDictEqual(response_data, response.json())
         updated_offer_assignment = OfferAssignment.objects.get(id=offer_assignment.id)
         self.assertEqual(updated_offer_assignment.status, OFFER_ASSIGNMENT_EMAIL_BOUNCED)

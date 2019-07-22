@@ -52,7 +52,7 @@ class ProvidersViewSetTest(TestCase):
             path=self.path, provider=self.provider
         ))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertDictEqual(json.loads(response.content), ProviderSerializer(self.data).data)
+        self.assertDictEqual(response.json(), ProviderSerializer(self.data).data)
 
     @httpretty.activate
     def test_getting_provider_with_many_true(self):
@@ -64,7 +64,7 @@ class ProvidersViewSetTest(TestCase):
             path=self.path, provider=self.provider
         ))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertListEqual(json.loads(response.content), ProviderSerializer(data, many=True).data)
+        self.assertListEqual(response.json(), ProviderSerializer(data, many=True).data)
 
     def test_invalid_provider(self):
         """Verify endpoint response is empty for invalid provider."""
@@ -72,4 +72,4 @@ class ProvidersViewSetTest(TestCase):
             path=self.path, provider='invalid-provider'
         ))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.content, '')
+        self.assertEqual(response.content.decode('utf-8'), '')

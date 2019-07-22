@@ -43,7 +43,7 @@ class OrderListViewTests(AccessTokenMixin, ThrottlingMixin, TestCase):
         """ Verifies that the view responded successfully with an empty result list. """
         self.assertEqual(response.status_code, 200)
 
-        content = json.loads(response.content)
+        content = response.json()
         self.assertEqual(content['count'], 0)
         self.assertEqual(content['results'], [])
 
@@ -72,7 +72,7 @@ class OrderListViewTests(AccessTokenMixin, ThrottlingMixin, TestCase):
         create_order(site=site, user=self.user)
         response = self.client.get(self.path, HTTP_AUTHORIZATION=self.token)
         self.assertEqual(response.status_code, 200)
-        content = json.loads(response.content)
+        content = json.loads(response.content.decode('utf-8'))
 
         self.assertEqual(Order.objects.count(), 2)
         self.assertEqual(content['count'], 1)
@@ -82,7 +82,7 @@ class OrderListViewTests(AccessTokenMixin, ThrottlingMixin, TestCase):
         order_2 = create_order(site=self.site, user=self.user)
         response = self.client.get(self.path, HTTP_AUTHORIZATION=self.token)
         self.assertEqual(response.status_code, 200)
-        content = json.loads(response.content)
+        content = json.loads(response.content.decode('utf-8'))
 
         self.assertEqual(content['count'], 2)
         self.assertEqual(content['results'][0]['number'], six.text_type(order_2.number))
@@ -97,7 +97,7 @@ class OrderListViewTests(AccessTokenMixin, ThrottlingMixin, TestCase):
 
         order = create_order(site=self.site, user=self.user)
         response = self.client.get(self.path, HTTP_AUTHORIZATION=self.token)
-        content = json.loads(response.content)
+        content = json.loads(response.content.decode('utf-8'))
         self.assertEqual(content['count'], 1)
         self.assertEqual(content['results'][0]['number'], six.text_type(order.number))
 
@@ -112,7 +112,7 @@ class OrderListViewTests(AccessTokenMixin, ThrottlingMixin, TestCase):
         order = create_order(site=self.site, user=self.user)
 
         response = self.client.get(self.path, HTTP_AUTHORIZATION=self.generate_jwt_token_header(admin_user))
-        content = json.loads(response.content)
+        content = json.loads(response.content.decode('utf-8'))
         self.assertEqual(content['count'], 1)
         self.assertEqual(content['results'][0]['number'], six.text_type(order.number))
 
@@ -122,7 +122,7 @@ class OrderListViewTests(AccessTokenMixin, ThrottlingMixin, TestCase):
         order = create_order(site=self.site, user=admin_user)
 
         response = self.client.get(self.path, HTTP_AUTHORIZATION=self.generate_jwt_token_header(admin_user))
-        content = json.loads(response.content)
+        content = json.loads(response.content.decode('utf-8'))
         self.assertEqual(content['count'], 1)
         self.assertEqual(content['results'][0]['number'], six.text_type(order.number))
         self.assertEqual(content['results'][0]['user']['email'], admin_user.email)
@@ -169,7 +169,7 @@ class OrderListViewTests(AccessTokenMixin, ThrottlingMixin, TestCase):
         second_order = create_order(site=self.site, user=self.user)
         response = self.client.get(self.path, HTTP_AUTHORIZATION=self.token)
         self.assertEqual(response.status_code, 200)
-        content = json.loads(response.content)
+        content = json.loads(response.content.decode('utf-8'))
 
         self.assertEqual(Order.objects.count(), 2)
         self.assertEqual(content['count'], 2)
@@ -195,7 +195,7 @@ class OrderListViewTests(AccessTokenMixin, ThrottlingMixin, TestCase):
 
         response = self.client.get(self.path, HTTP_AUTHORIZATION=self.token)
         self.assertEqual(response.status_code, 200)
-        content = json.loads(response.content)
+        content = json.loads(response.content.decode('utf-8'))
 
         self.assertEqual(content['count'], 2)
         self.assertEqual(content['results'][0]['number'], six.text_type(second_order.number))

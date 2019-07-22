@@ -58,7 +58,7 @@ def get_catalog_course_runs(site, query, limit=None, offset=None):
     """
     api_resource_name = 'course_runs'
     partner_code = site.siteconfiguration.partner.short_code
-    cache_key = '{site_domain}_{partner_code}_{resource}_{query}_{limit}_{offset}'.format(
+    cache_key = u'{site_domain}_{partner_code}_{resource}_{query}_{limit}_{offset}'.format(
         site_domain=site.domain,
         partner_code=partner_code,
         resource=api_resource_name,
@@ -66,7 +66,7 @@ def get_catalog_course_runs(site, query, limit=None, offset=None):
         limit=limit,
         offset=offset
     )
-    cache_key = hashlib.md5(cache_key).hexdigest()
+    cache_key = hashlib.md5(cache_key.encode('utf-8')).hexdigest()
 
     cached_response = TieredCache.get_cached_response(cache_key)
     if cached_response.is_found:

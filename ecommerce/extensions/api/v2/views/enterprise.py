@@ -2,6 +2,7 @@ from __future__ import absolute_import, unicode_literals
 
 import logging
 
+import six
 from django.core.exceptions import ValidationError
 from django.shortcuts import get_object_or_404
 from edx_rbac.decorators import permission_required
@@ -12,7 +13,7 @@ from rest_framework.decorators import detail_route, list_route
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet, ViewSet
-from six.moves.urllib.parse import urlparse  # pylint: disable=import-error, relative-import
+from six.moves.urllib.parse import urlparse  # pylint: disable=import-error, ungrouped-imports
 from slumber.exceptions import SlumberHttpBaseException
 
 from ecommerce.core.constants import COUPON_PRODUCT_CLASS_NAME, DEFAULT_CATALOG_PAGE_SIZE
@@ -109,7 +110,7 @@ class EnterpriseCustomerCatalogsViewSet(ViewSet):
                 exc
             )
             return Response(
-                {'error': 'Unable to retrieve enterprise catalog. Exception: {}'.format(exc.message)},
+                {'error': 'Unable to retrieve enterprise catalog. Exception: {}'.format(six.text_type(exc))},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 

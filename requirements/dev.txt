@@ -143,6 +143,7 @@ pyopenssl==19.0.0         # via ndg-httpsclient, paypalrestsdk
 pyparsing==2.4.2          # via packaging
 pysqlite==2.8.3 ; python_version == "2.7"
 python-dateutil==2.8.0
+python-memcached==1.58
 python-openid==2.2.5 ; python_version == "2.7"
 python3-openid==3.1.0 ; python_version >= "3"
 python-slugify==1.2.6     # via transifex-client

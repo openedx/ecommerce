@@ -200,7 +200,7 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
             try:
                 course_seat_types = prepare_course_seat_types(course_seat_types)
             except (AttributeError, TypeError) as exception:
-                validation_message = 'Invalid course seat types data: {}'.format(exception.message)
+                validation_message = 'Invalid course seat types data: {}'.format(six.text_type(exception))
                 raise ValidationError(validation_message)
 
         try:

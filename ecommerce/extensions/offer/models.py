@@ -218,7 +218,7 @@ class ConditionalOffer(AbstractConditionalOffer):
                         log_message_and_raise_validation_error(error_message)
 
                     # - all encoded domain levels must match given regex expression
-                    if not re.match(r'^([a-z0-9-]+)$', domain_part.encode('idna')):
+                    if not re.match(r'^([a-z0-9-]+)$', domain_part.encode('idna').decode()):
                         log_message_and_raise_validation_error(error_message)
 
     def clean_max_global_applications(self):
