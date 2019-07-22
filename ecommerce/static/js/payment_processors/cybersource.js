@@ -139,7 +139,13 @@ define([
                 self = this;
 
             if (window.ApplePaySession && self.applePayConfig.enabled) {
-                promise = ApplePaySession.canMakePaymentsWithActiveCard(self.applePayConfig.merchantIdentifier);
+                promise = new Promise(function(resolve, reject) {
+                    if (ApplePaySession.canMakePayments()) {
+                        resolve();
+                    }
+                    reject();
+                });
+
                 promise.then(
                     function(canMakePayments) {
                         var applePayBtn = document.getElementById('applePayBtn');
