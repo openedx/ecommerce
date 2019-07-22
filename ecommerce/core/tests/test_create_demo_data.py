@@ -1,11 +1,11 @@
 from __future__ import absolute_import
 
 import sys
-from StringIO import StringIO
 
 import httpretty
 import mock
 from django.core.management import call_command
+from django.utils.six import StringIO
 
 from ecommerce.courses.models import Course
 from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin

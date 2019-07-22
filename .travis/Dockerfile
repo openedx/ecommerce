@@ -4,6 +4,8 @@ RUN apt-get update && \
     apt-get install --no-install-recommends -y \
         firefox \
         xvfb \
+        python3-dev \
+        libsqlite3-dev \
     # Remove firefox but leave its dependencies, and then download and install a working version of firefox.
     # Note: wget only required for firefox retrieval.
         wget \
