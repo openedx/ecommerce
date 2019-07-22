@@ -1,7 +1,5 @@
 from __future__ import absolute_import
 
-import json
-
 import ddt
 import httpretty
 import mock
@@ -56,7 +54,7 @@ class CatalogViewSetTest(CatalogMixin, DiscoveryMockMixin, ApiMockMixin, TestCas
         self.assertEqual(Catalog.objects.count(), 2)
         response = self.client.get(self.catalog_list_path)
         expected_data = self.serialize_catalog(self.catalog)
-        response_data = json.loads(response.content)
+        response_data = response.json()
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response_data['count'], 1)
         self.assertListEqual(response_data['results'], [expected_data])
@@ -71,7 +69,7 @@ class CatalogViewSetTest(CatalogMixin, DiscoveryMockMixin, ApiMockMixin, TestCas
         path = reverse('api:v2:catalog-detail', kwargs={'pk': self.catalog.id})
         response = self.client.get(path)
         self.assertEqual(response.status_code, 200)
-        self.assertDictEqual(json.loads(response.content), self.serialize_catalog(self.catalog))
+        self.assertDictEqual(response.json(), self.serialize_catalog(self.catalog))
 
     def test_catalog_products(self):
         """Verify the endpoint returns all products associated with a specific catalog."""
@@ -80,7 +78,7 @@ class CatalogViewSetTest(CatalogMixin, DiscoveryMockMixin, ApiMockMixin, TestCas
             kwargs={'parent_lookup_stockrecords__catalogs': self.catalog.id}
         )
         response = self.client.get(path)
-        response_data = json.loads(response.content)
+        response_data = response.json()
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response_data['count'], 0)
         self.assertListEqual(response_data['results'], [])
@@ -88,7 +86,7 @@ class CatalogViewSetTest(CatalogMixin, DiscoveryMockMixin, ApiMockMixin, TestCas
         self.catalog.stock_records.add(self.stock_record)
 
         response = self.client.get(path)
-        response_data = json.loads(response.content)
+        response_data = response.json()
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response_data['count'], 1)
 
@@ -105,7 +103,7 @@ class CatalogViewSetTest(CatalogMixin, DiscoveryMockMixin, ApiMockMixin, TestCas
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(
-            json.loads(response.content)['seats'][0],
+            response.json()['seats'][0],
             ProductSerializer(seat, context={'request': response.wsgi_request}).data
         )
 
@@ -183,7 +181,7 @@ class PartnerCatalogViewSetTest(CatalogMixin, TestCase):
         response = self.client.get(self.url)
         expected_data = self.serialize_catalog(self.catalog)
         self.assertEqual(response.status_code, 200)
-        self.assertListEqual(json.loads(response.content)['results'], [expected_data])
+        self.assertListEqual(response.json()['results'], [expected_data])
 
     def test_staff_authorization_catalog_api(self):
         response = self.client.get(self.url)
@@ -216,4 +214,4 @@ class PartnerCatalogViewSetTest(CatalogMixin, TestCase):
             'previous': None,
             'results': []
         }
-        self.assertDictEqual(json.loads(response.content), expected)
+        self.assertDictEqual(response.json(), expected)

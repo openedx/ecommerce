@@ -40,13 +40,13 @@ class RefundCreateViewTests(RefundTestMixin, AccessTokenMixin, JwtMixin, TestCas
     def assert_bad_request_response(self, response, detail):
         """ Assert the response has status code 406 and the appropriate detail message. """
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        data = json.loads(response.content)
+        data = response.json()
         self.assertEqual(data, {'detail': detail})
 
     def assert_ok_response(self, response):
         """ Assert the response has HTTP status 200 and no data. """
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(json.loads(response.content), [])
+        self.assertEqual(response.json(), [])
 
     def _get_data(self, username=None, course_id=None, order_number=None, entitlement_uuid=None):
         data = {}
@@ -157,7 +157,7 @@ class RefundCreateViewTests(RefundTestMixin, AccessTokenMixin, JwtMixin, TestCas
         refund = Refund.objects.latest()
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(json.loads(response.content), [refund.id])
+        self.assertEqual(response.json(), [refund.id])
         self.assert_refund_matches_order(refund, order)
 
         # A second call should result in no additional refunds being created
@@ -232,7 +232,7 @@ class RefundCreateViewTests(RefundTestMixin, AccessTokenMixin, JwtMixin, TestCas
         refund = Refund.objects.latest()
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(json.loads(response.content), [refund.id])
+        self.assertEqual(response.json(), [refund.id])
         self.assert_refund_matches_order(refund, order)
 
         # A second call should result in no additional refunds being created

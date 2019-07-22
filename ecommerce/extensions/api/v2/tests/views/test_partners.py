@@ -1,7 +1,5 @@
 from __future__ import absolute_import
 
-import json
-
 from django.urls import reverse
 from oscar.core.loading import get_model
 
@@ -44,8 +42,8 @@ class PartnerViewTest(TestCase):
         expected_data.append(dummy_partner_data)
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(json.loads(response.content)['results']), 2)
-        self.assertListEqual(json.loads(response.content)['results'], expected_data)
+        self.assertEqual(len(response.json()['results']), 2)
+        self.assertListEqual(response.json()['results'], expected_data)
 
     def test_get_partner_detail(self):
         """Verify the endpoint returns the details for a specific partner."""
@@ -53,7 +51,7 @@ class PartnerViewTest(TestCase):
         response = self.client.get(url)
         expected_data = self.serialize_partner(self.partner)
         self.assertEqual(response.status_code, 200)
-        self.assertDictEqual(json.loads(response.content), expected_data)
+        self.assertDictEqual(response.json(), expected_data)
 
     def test_access_partner_api(self):
         """Verify the API endpoint requires staff permissions."""
@@ -78,4 +76,4 @@ class PartnerViewTest(TestCase):
             'previous': None,
             'results': []
         }
-        self.assertDictEqual(json.loads(response.content), expected)
+        self.assertDictEqual(response.json(), expected)

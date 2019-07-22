@@ -279,7 +279,7 @@ class BasketCreateViewTests(BasketCreationMixin, ThrottlingMixin, TransactionTes
 
         # Validate the response status and content
         self.assertEqual(response.status_code, 500)
-        actual = json.loads(response.content)
+        actual = response.json()
         expected = {
             'developer_message': 'Test message'
         }
@@ -314,7 +314,7 @@ class BasketViewSetTests(AccessTokenMixin, ThrottlingMixin, TestCase):
         response = self.client.get(self.path, HTTP_AUTHORIZATION=self.token)
 
         self.assertEqual(response.status_code, 200)
-        content = json.loads(response.content)
+        content = response.json()
         self.assertEqual(content['count'], 1)
         self.assertEqual(content['results'][0]['id'], basket.id)
 
@@ -334,7 +334,7 @@ class BasketViewSetTests(AccessTokenMixin, ThrottlingMixin, TestCase):
         response = self.client.get(self.path, HTTP_AUTHORIZATION=self.token)
 
         self.assertEqual(response.status_code, 200)
-        content = json.loads(response.content)
+        content = response.json()
         self.assertEqual(content['results'][0]['id'], basket.id)
         self.assertEqual(content['results'][0]['status'], basket.status)
         self.assertIsNotNone(content['results'][0]['vouchers'])
@@ -349,11 +349,11 @@ class BasketViewSetTests(AccessTokenMixin, ThrottlingMixin, TestCase):
 
         with mock.patch('ecommerce.extensions.api.serializers.VoucherSerializer', side_effect=ValueError):
             response = self.client.get(self.path, HTTP_AUTHORIZATION=self.token)
-            self.assertIsNone(json.loads(response.content)['results'][0]['vouchers'])
+            self.assertIsNone(response.json()['results'][0]['vouchers'])
 
         with mock.patch('ecommerce.extensions.api.serializers.VoucherSerializer', side_effect=AttributeError):
             response = self.client.get(self.path, HTTP_AUTHORIZATION=self.token)
-            self.assertIsNone(json.loads(response.content)['results'][0]['vouchers'])
+            self.assertIsNone(response.json()['results'][0]['vouchers'])
 
 
 class OrderByBasketRetrieveViewTests(OrderDetailViewTestMixin, TestCase):

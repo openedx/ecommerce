@@ -1,7 +1,5 @@
 from __future__ import absolute_import
 
-import json
-
 from django.conf import settings
 from django.test import override_settings
 from django.urls import reverse
@@ -48,7 +46,7 @@ class PaymentProcessorListViewTests(TestCase):
         """ DRY helper. """
         response = self.client.get(reverse('api:v2:payment:list_processors'), HTTP_AUTHORIZATION=self.token)
         self.assertEqual(response.status_code, 200)
-        self.assertSetEqual(set(json.loads(response.content)), set(expected))
+        self.assertSetEqual(set(response.json()), set(expected))
 
     def test_permission(self):
         """Ensure authentication is required to access the view. """

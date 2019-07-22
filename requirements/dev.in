@@ -12,3 +12,5 @@ ptvsd
 
 # For devserver code reloading
 pyinotify==0.9.6 # This breaks OSX virtualenv installation
+
+python-memcached==1.58

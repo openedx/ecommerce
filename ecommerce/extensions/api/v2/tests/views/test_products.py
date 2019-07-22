@@ -50,14 +50,14 @@ class ProductViewSetTests(ProductViewSetBase):
         self.assertEqual(response.status_code, 200)
         results = [self.serialize_product(p) for p in self.course.products.all()]
         expected = {'count': 2, 'next': None, 'previous': None, 'results': results}
-        self.assertDictEqual(json.loads(response.content), expected)
+        self.assertDictEqual(response.json(), expected)
 
         # If no products exist, the view should return an empty result set.
         Product.objects.all().delete()
         response = self.client.get(PRODUCT_LIST_PATH)
         self.assertEqual(response.status_code, 200)
         expected = {'count': 0, 'next': None, 'previous': None, 'results': []}
-        self.assertDictEqual(json.loads(response.content), expected)
+        self.assertDictEqual(response.json(), expected)
 
     def test_retrieve(self):
         """ Verify a single product is returned. """
@@ -68,7 +68,7 @@ class ProductViewSetTests(ProductViewSetBase):
         path = reverse('api:v2:product-detail', kwargs={'pk': self.seat.id})
         response = self.client.get(path)
         self.assertEqual(response.status_code, 200)
-        self.assertDictEqual(json.loads(response.content), self.serialize_product(self.seat))
+        self.assertDictEqual(response.json(), self.serialize_product(self.seat))
 
     def test_destroy(self):
         """ Verify the view does NOT allow products to be destroyed. """
@@ -89,7 +89,7 @@ class ProductViewSetTests(ProductViewSetBase):
 
         product = Product.objects.get(id=self.seat.id)
         self.assertEqual(product.title, data['title'])
-        self.assertDictEqual(json.loads(response.content), self.serialize_product(product))
+        self.assertDictEqual(response.json(), self.serialize_product(product))
 
     def test_list_for_course(self):
         """ Verify the view supports listing products for a single course. """
@@ -102,7 +102,7 @@ class ProductViewSetTests(ProductViewSetBase):
         self.assertEqual(response.status_code, 200)
         results = [self.serialize_product(p) for p in self.course.products.all()]
         expected = {'count': 2, 'next': None, 'previous': None, 'results': results}
-        self.assertDictEqual(json.loads(response.content), expected)
+        self.assertDictEqual(response.json(), expected)
 
     def test_get_partner_products(self):
         """Verify the endpoint returns the list of products associated with a
@@ -115,7 +115,7 @@ class ProductViewSetTests(ProductViewSetBase):
         response = self.client.get(url)
         expected_data = self.serialize_product(self.seat)
         self.assertEqual(response.status_code, 200)
-        self.assertListEqual(json.loads(response.content)['results'], [expected_data])
+        self.assertListEqual(response.json()['results'], [expected_data])
 
     def test_no_partner_product(self):
         """Verify the endpoint returns an empty list if no products are
@@ -134,7 +134,7 @@ class ProductViewSetTests(ProductViewSetBase):
             'previous': None,
             'results': []
         }
-        self.assertDictEqual(json.loads(response.content), expected)
+        self.assertDictEqual(response.json(), expected)
 
 
 @ddt.ddt
@@ -199,7 +199,7 @@ class ProductViewSetCouponTests(CouponMixin, ProductViewSetBase):
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
 
-        response_data = json.loads(response.content)
+        response_data = response.json()
         voucher = response_data['attribute_values'][0]['value'][0]
         self.assertEqual(voucher['name'], 'Test coupon')
         self.assertEqual(voucher['usage'], Voucher.SINGLE_USE)
@@ -211,12 +211,12 @@ class ProductViewSetCouponTests(CouponMixin, ProductViewSetBase):
         self.create_coupon(partner=self.partner)
         response = self.client.get(PRODUCT_LIST_PATH)
         self.assertEqual(response.status_code, 200)
-        response_data = json.loads(response.content)
+        response_data = response.json()
         self.assertEqual(response_data['count'], 3)
 
         filtered_url = '{}?product_class=CoUpOn'.format(PRODUCT_LIST_PATH)
         response = self.client.get(filtered_url)
         self.assertEqual(response.status_code, 200)
-        response_data = json.loads(response.content)
+        response_data = response.json()
         self.assertEqual(response_data['count'], 1)
         self.assertEqual(response_data['results'][0]['product_class'], COUPON_PRODUCT_CLASS_NAME)

@@ -49,7 +49,7 @@ class SDNCheckViewSetTests(TestCase):
             with mock.patch.object(User, 'deactivate_account', return_value=True):
                 response = self.make_request()
                 self.assertTrue(sdn_validator_mock.called)
-                self.assertEqual(json.loads(response.content)['hits'], hits)
+                self.assertEqual(response.json()['hits'], hits)
 
     def test_user_logged_out(self):
         """User is logged out after an SDN match."""
@@ -65,4 +65,4 @@ class SDNCheckViewSetTests(TestCase):
         with mock.patch.object(SDNClient, 'search') as sdn_validator_mock:
             sdn_validator_mock.side_effect = side_effect
             response = self.make_request()
-            self.assertEqual(json.loads(response.content)['hits'], 0)
+            self.assertEqual(response.json()['hits'], 0)

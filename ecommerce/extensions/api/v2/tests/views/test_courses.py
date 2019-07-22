@@ -81,7 +81,8 @@ class CourseViewSetTests(ProductSerializerMixin, DiscoveryTestMixin, TestCase):
             'email': email,
             'iss': settings.JWT_AUTH['JWT_ISSUERS'][0]['ISSUER']
         }
-        auth_header = "JWT {token}".format(token=jwt.encode(payload, settings.JWT_AUTH['JWT_SECRET_KEY']))
+        auth_header = "JWT {token}".format(
+            token=jwt.encode(payload, settings.JWT_AUTH['JWT_SECRET_KEY']).decode('utf-8'))
         self.assertFalse(User.objects.filter(username=username).exists())
 
         response = self.client.get(
@@ -102,12 +103,12 @@ class CourseViewSetTests(ProductSerializerMixin, DiscoveryTestMixin, TestCase):
 
         response = self.client.get(self.list_path)
         self.assertEqual(response.status_code, 200)
-        self.assertListEqual(json.loads(response.content)['results'], [self.serialize_course(self.course)])
+        self.assertListEqual(response.json()['results'], [self.serialize_course(self.course)])
 
         # If no Courses exist, the view should return an empty results list.
         Course.objects.all().delete()
         response = self.client.get(self.list_path)
-        self.assertDictEqual(json.loads(response.content), {'count': 0, 'next': None, 'previous': None, 'results': []})
+        self.assertDictEqual(response.json(), {'count': 0, 'next': None, 'previous': None, 'results': []})
 
     def test_create(self):
         """ Verify the view can create a new Course."""
@@ -147,12 +148,12 @@ class CourseViewSetTests(ProductSerializerMixin, DiscoveryTestMixin, TestCase):
         path = reverse('api:v2:course-detail', kwargs={'pk': self.course.id})
         response = self.client.get(path)
         self.assertEqual(response.status_code, 200)
-        self.assertDictEqual(json.loads(response.content), self.serialize_course(self.course))
+        self.assertDictEqual(response.json(), self.serialize_course(self.course))
 
         # Verify nested products can be included
         response = self.client.get(path + '?include_products=true')
         self.assertEqual(response.status_code, 200)
-        self.assertDictEqual(json.loads(response.content), self.serialize_course(self.course, include_products=True))
+        self.assertDictEqual(response.json(), self.serialize_course(self.course, include_products=True))
 
     def test_update(self):
         """ Verify the view updates the information of existing courses. """
@@ -167,7 +168,7 @@ class CourseViewSetTests(ProductSerializerMixin, DiscoveryTestMixin, TestCase):
         # Reload the Course
         self.course = Course.objects.get(id=course_id)
         self.assertEqual(self.course.name, name)
-        self.assertDictEqual(json.loads(response.content), self.serialize_course(self.course))
+        self.assertDictEqual(response.json(), self.serialize_course(self.course))
 
     def test_destroy(self):
         """ Verify the view does NOT allow courses to be destroyed. """
@@ -179,7 +180,7 @@ class CourseViewSetTests(ProductSerializerMixin, DiscoveryTestMixin, TestCase):
 
     def assert_publish_response(self, response, status_code, msg):
         self.assertEqual(response.status_code, status_code)
-        self.assertDictEqual(json.loads(response.content), {'status': msg.format(course_id=self.course.id)})
+        self.assertDictEqual(response.json(), {'status': msg.format(course_id=self.course.id)})
 
     def test_publish(self):
         """ Verify the view publishes course data to LMS. """

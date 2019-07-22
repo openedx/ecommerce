@@ -224,7 +224,7 @@ class TestEnterpriseCustomerCatalogsViewSet(EnterpriseServiceMockMixin, TestCase
             ),
         )
 
-        self.assertJSONEqual(result.content, updated_response)
+        self.assertJSONEqual(result.content.decode('utf-8'), updated_response)
 
     @httpretty.activate
     def test_retrieve_customer_catalog(self):
@@ -253,7 +253,7 @@ class TestEnterpriseCustomerCatalogsViewSet(EnterpriseServiceMockMixin, TestCase
                 self.enterprise_catalog
             ),
         )
-        self.assertJSONEqual(response.content, response_with_updated_urls)
+        self.assertJSONEqual(response.content.decode('utf-8'), response_with_updated_urls)
 
     def test_retrieve_customer_catalog_with_exception(self):
         """
@@ -271,7 +271,7 @@ class TestEnterpriseCustomerCatalogsViewSet(EnterpriseServiceMockMixin, TestCase
                 response = self.client.get(url)
                 self.assertEqual(response.status_code, status.HTTP_500_INTERNAL_SERVER_ERROR)
                 self.assertJSONEqual(
-                    response.content,
+                    response.content.decode('utf-8'),
                     {'error': 'Unable to retrieve enterprise catalog. Exception: Insecure connection'}
                 )
                 self.assertTrue(mock_logger.exception.called)
@@ -304,8 +304,8 @@ class EnterpriseCouponViewSetRbacTests(
             'start_datetime': str(now() - datetime.timedelta(days=10)),
             'title': 'Tešt Enterprise čoupon',
             'voucher_type': Voucher.SINGLE_USE,
-            'enterprise_customer': {'name': 'test enterprise', 'id': str(uuid4()).decode('utf-8')},
-            'enterprise_customer_catalog': str(uuid4()).decode('utf-8'),
+            'enterprise_customer': {'name': 'test enterprise', 'id': six.text_type(uuid4())},
+            'enterprise_customer_catalog': six.text_type(uuid4()),
             'notify_email': 'batman@gotham.comics',
         }
 
@@ -392,7 +392,7 @@ class EnterpriseCouponViewSetRbacTests(
         """
         response = self.get_response(method, path, data)
         if response:
-            return json.loads(response.content)
+            return json.loads(response.content.decode('utf-8'))
         return None
 
     def assert_new_codes_email(self):
@@ -421,7 +421,7 @@ class EnterpriseCouponViewSetRbacTests(
 
         response = self.client.get(ENTERPRISE_COUPONS_LINK)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        coupon_data = json.loads(response.content)['results']
+        coupon_data = json.loads(response.content.decode('utf-8'))['results']
         self.assertEqual(len(coupon_data), 1)
         self.assertEqual(coupon_data[0]['title'], self.data['title'])
         self.assertEqual(coupon_data[0]['client'], self.data['enterprise_customer']['name'])
@@ -806,7 +806,7 @@ class EnterpriseCouponViewSetRbacTests(
             'GET',
             '/api/v2/enterprise/coupons/{}/codes.csv?code_filter={}'.format(coupon_id, VOUCHER_REDEEMED)
         )
-        csv_content = response.content.split('\r\n')
+        csv_content = response.content.decode('utf-8').split('\r\n')
         csv_header = csv_content[0]
         # Strip out first row (headers) and last row (extra csv line)
         csv_data = csv_content[1:-1]
@@ -2090,7 +2090,7 @@ class OfferAssignmentSummaryViewSetTests(
         self.user = self.create_user(is_staff=True, email='test@example.com')
         self.client.login(username=self.user.username, password=self.password)
 
-        self.enterprise_customer = {'name': 'test enterprise', 'id': str(uuid4()).decode('utf-8')}
+        self.enterprise_customer = {'name': 'test enterprise', 'id': six.text_type(uuid4())}
 
         self.course = CourseFactory(id='course-v1:test-org+course+run', partner=self.partner)
         self.verified_seat = self.course.create_or_update_seat('verified', False, 100)

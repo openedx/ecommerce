@@ -504,7 +504,7 @@ def _generate_code_string(length):
         raise ValueError("Voucher code length must be a positive number.")
 
     h = hashlib.sha256()
-    h.update(uuid.uuid4().get_bytes())
+    h.update(uuid.uuid4().bytes)
     voucher_code = base64.b32encode(h.digest())[0:length]
     if Voucher.objects.filter(code__iexact=voucher_code).exists():
         return _generate_code_string(length)
@@ -923,7 +923,7 @@ def get_cached_voucher(code):
         Voucher.DoesNotExist: When no vouchers with provided code exist.
     """
     voucher_code = 'voucher_{code}'.format(code=code)
-    cache_key = hashlib.md5(voucher_code).hexdigest()
+    cache_key = hashlib.md5(voucher_code.encode('utf-8')).hexdigest()
     voucher_cached_response = TieredCache.get_cached_response(cache_key)
     if voucher_cached_response.is_found:
         return voucher_cached_response.value

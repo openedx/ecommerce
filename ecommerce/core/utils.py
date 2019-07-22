@@ -45,9 +45,9 @@ def get_cache_key(**kwargs):
     Returns:
          An MD5 encoded key uniquely identified by the key word arguments.
     """
-    key = '__'.join(['{}:{}'.format(item, value) for item, value in six.iteritems(kwargs)])
+    key = '__'.join([u'{}:{}'.format(item, value) for item, value in six.iteritems(kwargs)])
 
-    return hashlib.md5(key).hexdigest()
+    return hashlib.md5(key.encode('utf-8')).hexdigest()
 
 
 def deprecated_traverse_pagination(response, endpoint):

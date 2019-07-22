@@ -608,8 +608,8 @@ class AtomicPublicationSerializer(serializers.Serializer):  # pylint: disable=ab
                     raise Exception(resp_message)
 
         except Exception as e:  # pylint: disable=broad-except
-            logger.exception(u'Failed to save and publish [%s]: [%s]', course_id, e.message)
-            return False, e, e.message
+            logger.exception(u'Failed to save and publish [%s]: [%s]', course_id, six.text_type(e))
+            return False, e, six.text_type(e)
 
 
 class PartnerSerializer(serializers.ModelSerializer):
