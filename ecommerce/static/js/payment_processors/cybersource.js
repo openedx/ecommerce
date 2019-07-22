@@ -139,11 +139,12 @@ define([
                 self = this;
 
             if (window.ApplePaySession && self.applePayConfig.enabled) {
-                promise = new Promise(function(resolve, reject) {
+                /* istanbul ignore next */
+                promise = new Promise(function(resolve) {
                     if (ApplePaySession.canMakePayments()) {
-                        resolve();
+                        resolve(true);
                     }
-                    reject();
+                    resolve(false);
                 });
 
                 promise.then(
