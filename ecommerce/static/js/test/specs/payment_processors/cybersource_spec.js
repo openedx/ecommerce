@@ -61,7 +61,7 @@ define(
                     // eslint-disable-next-line no-param-reassign
                     CyberSource.applePayConfig = cyberSourceConfig.applePay;
                     $applePayBtn = $('#applePayBtn');
-                    ApplePaySession.stubCanMakePaymentsWithActiveCard = true;
+                    ApplePaySession.stubCanMakePayments = true;
                     ApplePaySession.STATUS_SUCCESS = 0;
                     ApplePaySession.STATUS_FAILURE = 1;
                     expect($applePayBtn).toBeInDOM();
@@ -81,7 +81,7 @@ define(
                     );
 
                     it('should not display the Apple Pay button if the user has not setup Apple Pay', function(done) {
-                        ApplePaySession.stubCanMakePaymentsWithActiveCard = false;
+                        ApplePaySession.stubCanMakePayments = false;
                         CyberSource.initializeApplePay().then(function() {
                             expect($applePayBtn).toBeHidden();
                             done();
