@@ -140,7 +140,7 @@ class Command(BaseCommand):
     def validate_order_refunds(self, order, refunds, payments):
         refund_total = refunds.aggregate(total=Sum('amount')).get('total')
         payment_total = payments.aggregate(total=Sum('amount')).get('total')
-        if refund_total > payment_total:
+        if refund_total is not None and refund_total > payment_total:
             self.REFUND_AMOUNT_EXCEEDED.append(
                 (order, refunds)
             )

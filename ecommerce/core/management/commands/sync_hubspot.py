@@ -220,7 +220,7 @@ class Command(BaseCommand):
         except (HttpClientError, HttpServerError) as ex:
             self.stderr.write(
                 'An error occurred while installing hubspot ecommerce bridge for site {site}, {message}'.format(
-                    site=site_configuration.site.domain, message=ex.message
+                    site=site_configuration.site.domain, message=ex
                 )
             )
         return status
@@ -247,7 +247,7 @@ class Command(BaseCommand):
         except (HttpClientError, HttpServerError) as ex:
             self.stderr.write(
                 'An error occurred while defining hubspot ecommerce settings for site {site}, {message}'.format(
-                    site=site_configuration.site.domain, message=ex.message
+                    site=site_configuration.site.domain, message=ex
                 )
             )
         return status
@@ -420,7 +420,7 @@ class Command(BaseCommand):
         except (HttpClientError, HttpServerError) as ex:
             self.stderr.write(
                 'An error occurred while upserting {object_type} for site {site}: {message}'.format(
-                    object_type=object_type, site=site_configuration.site.domain, message=ex.message
+                    object_type=object_type, site=site_configuration.site.domain, message=ex
                 )
             )
 
@@ -447,7 +447,7 @@ class Command(BaseCommand):
         except (HttpClientError, HttpServerError) as ex:
             self.stderr.write(
                 'An error occurred while getting the error syncing message for site {site}: {message} '.format(
-                    site=site_configuration.site.domain, message=ex.message
+                    site=site_configuration.site.domain, message=ex
                 )
             )
 

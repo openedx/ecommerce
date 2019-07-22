@@ -4,6 +4,7 @@ import datetime
 import hashlib
 import logging
 
+import six  # pylint: disable=ungrouped-imports
 import waffle
 from dateutil.parser import parse
 from django.conf import settings
@@ -250,7 +251,7 @@ class SiteConfiguration(models.Model):
                     self.site.id,
                     name
                 )
-                raise ValidationError(exc.message)
+                raise ValidationError(six.text_type(exc))
 
     def _clean_client_side_payment_processor(self):
         """
@@ -705,7 +706,7 @@ class User(AbstractUser):
         """
         try:
             cache_key = 'verification_status_{username}'.format(username=self.username)
-            cache_key = hashlib.md5(cache_key).hexdigest()
+            cache_key = hashlib.md5(cache_key.encode('utf-8')).hexdigest()
             verification_cached_response = TieredCache.get_cached_response(cache_key)
             if verification_cached_response.is_found:
                 return verification_cached_response.value

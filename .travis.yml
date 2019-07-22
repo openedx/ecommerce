@@ -53,12 +53,11 @@ matrix:
         - docker exec ecommerce_testing /edx/app/ecommerce/ecommerce/.travis/run_coverage.sh
         - codecov
 
-    - python: 3.6
-      env: TESTNAME=test-python-3.6 TOXENV=py36
+    - python: 3.5
+      env: TESTNAME=test-python-3.5
       install:
-        - pip install tox==3.12.1
+        - docker exec -t ecommerce_testing bash -c 'cd /edx/app/ecommerce/ecommerce/ && pip install tox==3.13.2'
       script:
-        - tox
+        - docker exec -t ecommerce_testing bash -c 'cd /edx/app/ecommerce/ecommerce/ && PATH=$PATH:/edx/app/ecommerce/nodeenvs/ecommerce/bin:/snap/bin TOXENV=py35 tox'
   allow_failures:
-    - env: TESTNAME=test-python-3.6 TOXENV=py36
-
+    - env: TESTNAME=test-python-3.5

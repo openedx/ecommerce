@@ -1,8 +1,6 @@
 """Tests of the service health endpoint."""
 from __future__ import absolute_import
 
-import json
-
 import mock
 from django.conf import settings
 from django.contrib.auth import get_user, get_user_model
@@ -56,7 +54,7 @@ class HealthTests(TestCase):
                 'database_status': database_status,
             }
         }
-        self.assertDictEqual(json.loads(response.content), expected_data)
+        self.assertDictEqual(response.json(), expected_data)
 
 
 class AutoAuthTests(TestCase):

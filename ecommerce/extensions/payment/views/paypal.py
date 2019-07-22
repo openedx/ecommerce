@@ -3,7 +3,6 @@ from __future__ import absolute_import, unicode_literals
 
 import logging
 import os
-from cStringIO import StringIO
 
 import waffle
 from django.core.exceptions import MultipleObjectsReturned
@@ -12,6 +11,7 @@ from django.db import transaction
 from django.http import Http404, HttpResponse, HttpResponseBadRequest
 from django.shortcuts import redirect
 from django.utils.decorators import method_decorator
+from django.utils.six import StringIO
 from django.views.generic import View
 from edx_rest_api_client.client import EdxRestApiClient
 from edx_rest_api_client.exceptions import SlumberHttpBaseException

@@ -46,7 +46,7 @@ django-threadlocals==0.10
 django-treebeard==4.3     # via django-oscar
 django-waffle==0.14.0
 django-widget-tweaks==1.4.5  # via django-oscar
-django==1.11.22
+django==1.11.23
 django_extensions==1.9.9
 djangorestframework-csv==2.1.0
 djangorestframework-datatables==0.5.0
@@ -57,7 +57,7 @@ edx-auth-backends==2.0.1
 edx-django-release-util==0.3.1
 edx-django-sites-extensions==2.4.0
 edx-django-utils==2.0.0
-edx-drf-extensions==2.3.7
+edx-drf-extensions==2.3.8
 edx-ecommerce-worker==0.7.2
 edx-opaque-keys==1.0.1
 edx-rbac==1.0.2
@@ -78,7 +78,7 @@ jinja2==2.10.1            # via coreschema
 jsonfield==1.0.3
 kombu==3.0.37             # via celery
 libsass==0.9.2
-lxml==4.3.4               # via premailer, zeep
+lxml==4.4.0               # via premailer, zeep
 markdown==2.6.9
 markupsafe==1.1.1         # via jinja2
 mock==2.0.0               # via django-oscar
@@ -96,7 +96,7 @@ pillow==6.1.0             # via django-oscar
 premailer==2.9.2
 psutil==1.2.1             # via edx-django-utils, edx-drf-extensions
 purl==1.5                 # via django-oscar
-pyasn1==0.4.5             # via ndg-httpsclient
+pyasn1==0.4.6             # via ndg-httpsclient
 pycountry==17.1.8
 pycparser==2.19           # via cffi
 pycryptodomex==3.8.2      # via pyjwkest
@@ -110,7 +110,7 @@ python-memcached==1.58
 python-openid==2.2.5 ; python_version == "2.7"
 python3-openid==3.1.0 ; python_version >= "3"
 pytz==2016.10
-pyyaml==5.1.1
+pyyaml==5.1.2
 rcssmin==1.0.6            # via django-compressor
 redis==2.10.6
 requests-oauthlib==1.2.0  # via social-auth-core
