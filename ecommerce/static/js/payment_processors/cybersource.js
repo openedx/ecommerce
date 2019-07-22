@@ -139,7 +139,7 @@ define([
                 self = this;
 
             if (window.ApplePaySession && self.applePayConfig.enabled) {
-                /* istanbul ignore next */
+                // eslint-disable-next-line no-undef
                 promise = new Promise(function(resolve) {
                     if (ApplePaySession.canMakePayments()) {
                         resolve(true);
