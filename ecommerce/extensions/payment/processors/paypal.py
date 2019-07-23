@@ -21,7 +21,7 @@ from ecommerce.core.url_utils import get_ecommerce_url
 from ecommerce.extensions.payment.constants import PAYPAL_LOCALES
 from ecommerce.extensions.payment.models import PaypalProcessorConfiguration, PaypalWebProfile
 from ecommerce.extensions.payment.processors import BasePaymentProcessor, HandledProcessorResponse
-from ecommerce.extensions.payment.utils import middle_truncate
+from ecommerce.extensions.payment.utils import get_basket_program_uuid, middle_truncate
 
 logger = logging.getLogger(__name__)
 
@@ -107,6 +107,22 @@ class Paypal(BasePaymentProcessor):
             logger.warning("Creating PayPal WebProfile resulted in exception. Will continue without one.")
             return None
 
+    def get_courseid_title(self, line):
+        """
+        Get CourseID & Title from basket item
+
+        Arguments:
+            line: basket item
+
+        Returns:
+             Concatenated string containing course id & title if exists.
+        """
+        courseid = ''
+        line_course = line.product.course
+        if line_course:
+            courseid = "{}|".format(line_course.id)
+        return courseid + line.product.title
+
     def get_transaction_parameters(self, basket, request=None, use_client_side_checkout=False, **kwargs):
         """
         Create a new PayPal payment.
@@ -125,6 +141,8 @@ class Paypal(BasePaymentProcessor):
             GatewayError: Indicates a general error or unexpected behavior on the part of PayPal which prevented
                 a payment from being created.
         """
+        # PayPal requires that item names be at most 127 characters long.
+        PAYPAL_FREE_FORM_FIELD_MAX_SIZE = 127
         return_url = urljoin(get_ecommerce_url(), reverse('paypal:execute'))
         data = {
             'intent': 'sale',
@@ -140,12 +158,18 @@ class Paypal(BasePaymentProcessor):
                     'total': six.text_type(basket.total_incl_tax),
                     'currency': basket.currency,
                 },
+                # Paypal allows us to send additional transaction related data in 'description' & 'custom' field
+                # Free form field, max length 127 characters
+                # description : program_id:<program_id>
+                'description': "program_id:{}".format(get_basket_program_uuid(basket)),
                 'item_list': {
                     'items': [
                         {
                             'quantity': line.quantity,
                             # PayPal requires that item names be at most 127 characters long.
-                            'name': middle_truncate(line.product.title, 127),
+                            # for courseid we're using 'name' field along with title,
+                            # concatenated field will be 'courseid|title'
+                            'name': middle_truncate(self.get_courseid_title(line), PAYPAL_FREE_FORM_FIELD_MAX_SIZE),
                             # PayPal requires that the sum of all the item prices (where price = price * quantity)
                             # equals to the total amount set in amount['total'].
                             'price': six.text_type(line.line_price_incl_tax_incl_discounts / line.quantity),

@@ -141,6 +141,14 @@ class PaypalTests(PaypalMixin, PaymentProcessorTestCaseMixin, TestCase):
         self.assertEqual(last_request_body['redirect_urls']['return_url'], expected)
 
     @responses.activate
+    def test_get_courseid_title(self):
+        for line in self.basket.all_lines():
+            self.assertEqual(
+                'a/b/c|Seat in Demo Course with test-certificate-type certificate',
+                self.processor.get_courseid_title(line)
+            )
+
+    @responses.activate
     def test_get_transaction_parameters_with_retry(self):
         """Verify the processor returns the appropriate parameters required to complete a transaction after a retry"""
         response_error = self.get_payment_creation_error_response_mock()
