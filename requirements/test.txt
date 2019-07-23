@@ -14,7 +14,7 @@ astroid==1.6.6            # via pylint
 attrs==19.1.0             # via zeep
 babel==2.7.0              # via django-oscar, django-phonenumber-field
 backports.functools-lru-cache==1.5  # via astroid, isort, pylint, soupsieve
-beautifulsoup4==4.7.1     # via webtest
+beautifulsoup4==4.8.0     # via webtest
 billiard==3.3.0.23        # via celery
 cached-property==1.5.1    # via zeep
 celery==3.1.26.post2      # via edx-ecommerce-worker
@@ -66,7 +66,7 @@ edx-auth-backends==2.0.1
 edx-django-release-util==0.3.1
 edx-django-sites-extensions==2.4.0
 edx-django-utils==2.0.0
-edx-drf-extensions==2.3.6
+edx-drf-extensions==2.3.7
 edx-ecommerce-worker==0.7.2
 edx-opaque-keys==1.0.1
 edx-rbac==1.0.2
@@ -131,7 +131,7 @@ pyjwt==1.7.1              # via djangorestframework-jwt, edx-auth-backends, edx-
 pylint==1.9.5
 pymongo==3.8.0            # via edx-opaque-keys
 pyopenssl==19.0.0         # via ndg-httpsclient, paypalrestsdk
-pyparsing==2.4.0          # via packaging
+pyparsing==2.4.1          # via packaging
 pysqlite==2.8.3 ; python_version == "2.7"
 python-dateutil==2.8.0
 python-openid==2.2.5 ; python_version == "2.7"
