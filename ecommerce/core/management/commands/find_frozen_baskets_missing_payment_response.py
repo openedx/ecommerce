@@ -23,7 +23,7 @@ from ecommerce_worker.fulfillment.v1.tasks import fulfill_order
 from django.core.management.base import BaseCommand, CommandError
 from django.db.models import Q, Subquery
 from oscar.core.loading import get_class, get_model
-from ecommerce.extensions.fulfillment import api as fulfillment_api
+from ecommerce.extensions.partner.strategy import DefaultStrategy
 #post_checkout = get_class('checkout.signals', 'post_checkout')
 
 logger = logging.getLogger(__name__)
@@ -34,8 +34,7 @@ PaymentProcessorResponse = get_model('payment', 'PaymentProcessorResponse')
 NoShippingRequired = get_class('shipping.methods', 'NoShippingRequired')
 OrderTotalCalculator = get_class('checkout.calculators', 'OrderTotalCalculator')
 Country = get_model('address', 'Country')
-#OrderCreator = get_class('order.utils', 'OrderCreator')
-from ecommerce.extensions.partner.strategy import DefaultStrategy
+OrderCreator = get_class('order.utils', 'OrderCreator')
 
 
 DEFAULT_START_DELTA_DAYS = 50
@@ -113,7 +112,7 @@ class CybersourceAPIClient(object):
 
         return message_body
 
-    def post_request_search_headers(self):
+    def get_search_headers(self):
 
         headers = {
             'Accept-Encoding': '*',
@@ -148,7 +147,7 @@ class CybersourceAPIClient(object):
 
         self.get_signature = base64.b64encode(hash_value.digest()).decode("utf-8")
 
-    def request_transaction_headers(self):
+    def get_transaction_headers(self):
 
         headers = {
             'Accept-Encoding': '*',
@@ -175,11 +174,15 @@ class CybersourceAPIClient(object):
 
 
 def check_cs_search_transaction(client, basket, message_body):
+    """
+    Hit Cybersource transaction search api to get meta details
+    regarding a transaction.
+    """
 
     try:
         response = requests.post('https://{host}/tss/v2/searches'.format(host=client.host),
                                  data=message_body,
-                                 headers=client.post_request_search_headers())
+                                 headers=client.get_search_headers())
     except Exception as e:
         logger.exception(u'Exception occurred while fetching detail for Order Number from Search api: [%s]: [%s]',
                          basket.order_number, e.message)
@@ -197,9 +200,13 @@ def check_cs_search_transaction(client, basket, message_body):
 
 
 def _process_search_transaction(transaction_response, basket, client):
+    """Hit Cybersource transaction api to get details of a transaction."""
 
     application_summary = transaction_response['_embedded']['transactionSummaries'][0]['applicationInformation']
     href = transaction_response['_embedded']['transactionSummaries'][0]['_links']['transactionDetail']['href']
+
+    if not application_summary or not href:
+        return
 
     success = False
     if 'applications' in application_summary:
@@ -218,7 +225,7 @@ def _process_search_transaction(transaction_response, basket, client):
         try:
             # fetching transaction detail
             response = requests.get('https://{host}{path}'.format(host=client.host, path=url.path),
-                                    headers=client.request_transaction_headers())
+                                    headers=client.get_transaction_headers())
         except Exception as e:
             logger.exception(u'Exception occurred while fetching transaction detail for Order Number' 
                              u'from Transaction api: [%s]: [%s]', basket.order_number, e.message)
@@ -317,12 +324,18 @@ def _process_successful_order(order_detail, basket):
                       'status': 'Open'
                       }
 
+        basket.strategy = DefaultStrategy()
         with transaction.atomic():
             order = Order(**order_data)
             order.save()
 
+            for line in basket.all_lines():
+                OrderCreator().create_line_models(order, line)
+                OrderCreator().update_stock_records(line)
+            basket.submit()
+
             logger.info(u"Order Number: {order_number} created successfully."
-                    .format(order_number=basket.order_number))
+                        .format(order_number=basket.order_number))
 
             basket.submit()
 
@@ -419,17 +432,22 @@ class Command(BaseCommand):
         frozen_baskets = Basket.objects.filter(status='Frozen', date_submitted=None)
         frozen_baskets = frozen_baskets.filter(Q(date_created__gte=start, date_created__lt=end) |
                                                Q(date_merged__gte=start, date_merged__lt=end))
-        frozen_baskets_missing_payment_response = frozen_baskets.exclude(id__in=
-                                                Subquery(PaymentProcessorResponse.objects.values_list('basket_id')))
+        frozen_baskets_missing_payment_response = \
+            frozen_baskets.exclude(id__in=Subquery(PaymentProcessorResponse.objects.values_list('basket_id')))
 
         if not frozen_baskets_missing_payment_response:
             logger.info(u"No frozen baskets, missing payment response found")
         else:
             logger.info(u"Frozen baskets missing payment response found, checking with Cybersource..")
             frozen_baskets = set()
+            orders_ids = []
             for basket in frozen_baskets_missing_payment_response:
                 logger.info(u"Basket ID " + str(basket.id) + u" Order Number " + basket.order_number)
                 frozen_baskets.add(basket)
+                orders_ids.append(basket.order_number)
+
+            ids = ','.join(orders_ids)
+            logger.info(u"Checking Cybersource for orders: [{orders}]".format(orders=ids))
 
             self.check_transaction_from_cybersource(frozen_baskets, cs_config)
 
