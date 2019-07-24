@@ -17,6 +17,7 @@ from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext as _
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import View
+from edx_rest_api_client.client import EdxRestApiClient
 from oscar.apps.partner import strategy
 from oscar.apps.payment.exceptions import GatewayError, PaymentError, TransactionDeclined, UserCancelled
 from oscar.core.loading import get_class, get_model
@@ -25,10 +26,12 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from ecommerce.core.url_utils import get_lms_url
 from ecommerce.extensions.api.serializers import OrderSerializer
 from ecommerce.extensions.basket.utils import basket_add_organization_attribute
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
 from ecommerce.extensions.checkout.utils import get_receipt_page_url
+from ecommerce.extensions.offer.constants import DYNAMIC_DISCOUNT_FLAG
 from ecommerce.extensions.payment.exceptions import (
     AuthorizationError,
     DuplicateReferenceNumber,
@@ -210,6 +213,24 @@ class CybersourceNotificationMixin(CyberSourceProcessorMixin, OrderCreationMixin
             basket_id = int(basket_id)
             basket = Basket.objects.get(id=basket_id)
             basket.strategy = strategy.Default()
+            # TODO: Remove as a part of REVMI-124 as this is a hacky solution
+            # The problem is that orders are being created after payment processing, and the discount is not
+            # saved in the database, so it needs to be calculated again in order to save the correct info to the
+            # order. REVMI-124 will create the order before payment processing, when we have the discount context.
+            if waffle.flag_is_active(self.request, DYNAMIC_DISCOUNT_FLAG):
+                try:
+                    discount_lms_url = get_lms_url('/api/discounts/')
+                    lms_discount_client = EdxRestApiClient(discount_lms_url, jwt=basket.owner.access_token)
+                    ck = basket.lines.first().product.course_id
+                    response = lms_discount_client.course(ck).get()
+                    self.request.POST = self.request.POST.copy()
+                    self.request.POST['discount_jwt'] = response.get('jwt')
+                except (requests.exceptions.HTTPError, requests.exceptions.Timeout) as error:
+                    logger.warning(
+                        'Failed to get discount jwt from LMS. [%s] returned [%s]',
+                        discount_lms_url,
+                        error.response)
+            # End TODO
             Applicator().apply(basket, basket.owner, self.request)
             return basket
         except (ValueError, ObjectDoesNotExist):

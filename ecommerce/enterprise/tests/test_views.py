@@ -130,9 +130,12 @@ class EnterpriseOfferCreateViewTests(EnterpriseServiceMockMixin, ViewTestMixin, 
             'benefit_type': Benefit.PERCENTAGE,
             'benefit_value': expected_benefit_value,
         }
-        response = self.client.post(self.path, data, follow=False)
-        enterprise_offer = ConditionalOffer.objects.get()
 
+        existing_offer_ids = list(ConditionalOffer.objects.all().values_list('id', flat=True))
+        response = self.client.post(self.path, data, follow=False)
+        conditional_offers = ConditionalOffer.objects.exclude(id__in=existing_offer_ids)
+        enterprise_offer = conditional_offers.first()
+        self.assertEqual(conditional_offers.count(), 1)
         self.assertRedirects(response, reverse('enterprise:offers:edit', kwargs={'pk': enterprise_offer.pk}))
         self.assertIsNone(enterprise_offer.start_datetime)
         self.assertIsNone(enterprise_offer.end_datetime)
