@@ -125,8 +125,11 @@ class ProgramOfferCreateViewTests(ProgramTestMixin, ViewTestMixin, TestCase):
             'benefit_type': Benefit.PERCENTAGE,
             'benefit_value': expected_benefit_value,
         }
+        existing_offer_ids = list(ConditionalOffer.objects.all().values_list('id', flat=True))
         response = self.client.post(self.path, data, follow=False)
-        program_offer = ConditionalOffer.objects.get()
+        conditional_offers = ConditionalOffer.objects.exclude(id__in=existing_offer_ids)
+        program_offer = conditional_offers.first()
+        self.assertEqual(conditional_offers.count(), 1)
 
         self.assertRedirects(response, reverse('programs:offers:edit', kwargs={'pk': program_offer.pk}))
         self.assertIsNone(program_offer.start_datetime)

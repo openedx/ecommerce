@@ -84,7 +84,7 @@ class JournalBundleOfferUpdateViewTests(TestCase, TieredCacheMixin):
 
     def test_post(self, mock_discovery_call_post, mock_discovery_call_update):
         """ The journal bundle offer should be updated. """
-
+        journal_offer_id = self.journal_offer.id
         mock_discovery_call_post.return_value = {"title": "test-journal"}
         mock_discovery_call_update.return_value = _get_mocked_endpoint()
         expected_benefit_value = 55
@@ -96,11 +96,12 @@ class JournalBundleOfferUpdateViewTests(TestCase, TieredCacheMixin):
         response = self.client.post(self.path, data, follow=False)
         self.assertRedirects(response, self.path)
 
-        updated_journal_offer = ConditionalOffer.objects.get()
+        updated_journal_offer = ConditionalOffer.objects.get(id=journal_offer_id)
         self.assertEqual(updated_journal_offer.benefit.value, expected_benefit_value)
 
     def test_post_with_invalid_data(self, mock_discovery_call_post, mock_discovery_call_update):
         """ The journal bundle offer should not be updated with invalid data. """
+        journal_offer_id = self.journal_offer.id
         mock_discovery_call_post.return_value = {"title": "test-journal"}
         mock_discovery_call_update.return_value = _get_mocked_endpoint()
         expected_benefit_value = 20
@@ -111,7 +112,7 @@ class JournalBundleOfferUpdateViewTests(TestCase, TieredCacheMixin):
             "benefit_value": expected_benefit_value,
         }
         self.client.post(self.path, data, follow=False)
-        self.assertNotEqual(ConditionalOffer.objects.get().benefit.value, expected_benefit_value)
+        self.assertNotEqual(ConditionalOffer.objects.get(id=journal_offer_id).benefit.value, expected_benefit_value)
 
 
 class JournalBundleOfferCreateViewTests(ViewTestMixin, TestCase):
@@ -132,8 +133,11 @@ class JournalBundleOfferCreateViewTests(ViewTestMixin, TestCase):
             'benefit_type': Benefit.PERCENTAGE,
             'benefit_value': expected_benefit_value,
         }
+        existing_offer_ids = list(ConditionalOffer.objects.all().values_list('id', flat=True))
         response = self.client.post(self.path, data)
-        journal_offer = ConditionalOffer.objects.get()
+        conditional_offers = ConditionalOffer.objects.exclude(id__in=existing_offer_ids)
+        journal_offer = conditional_offers.first()
+        self.assertEqual(conditional_offers.count(), 1)
         self.assertIsNone(journal_offer.start_datetime)
         self.assertIsNone(journal_offer.end_datetime)
         self.assertEqual(journal_offer.benefit.value, expected_benefit_value)

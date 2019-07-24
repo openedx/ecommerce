@@ -9,7 +9,7 @@ require([
         $(document).ready(function() {
             // TODO: Change to responsive javascript after this site turns into a MFE
             var oldUrl, indexOfFragment, discountString, newUrl;
-            if (!window.location.href.split('discount_jwt=')[1]) {
+            if (window.courseKey !== undefined && !window.location.href.split('discount_jwt=')[1]) {
                 $.ajax({
                     url: window.lmsUrlRoot + '/api/discounts/course/' + window.courseKey,
                     xhrFields: {
