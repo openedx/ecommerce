@@ -48,6 +48,7 @@ from ecommerce.extensions.basket.utils import (
 from ecommerce.extensions.offer.utils import (
     format_benefit_value,
     get_benefit_type,
+    get_quantized_benefit_value,
     get_redirect_to_email_confirmation_if_required
 )
 from ecommerce.extensions.order.exceptions import AlreadyPlacedOrderException
@@ -187,7 +188,7 @@ class BasketLogicMixin(object):
     """
 
     @newrelic.agent.function_trace()
-    def process_basket_lines(self, lines):
+    def process_basket_lines(self, lines, should_format_benefit_value=False):
         """
         Processes the basket lines and extracts information for the view's context.
         In addition determines whether:
@@ -239,13 +240,11 @@ class BasketLogicMixin(object):
 
             line_data.update({
                 'sku': product.stockrecords.first().partner_sku,
-                'benefit_value': self._get_benefit_value(line),
-                'raw_benefit_value': self._get_raw_benefit_value(line),
-                'benefit_type': self._get_benefit_type(line),
                 'enrollment_code': product.is_enrollment_code_product,
                 'line': line,
                 'seat_type': self._get_certificate_type_display_value(product),
             })
+            line_data.update(self._get_benefit_data(line, should_format_benefit_value))
             lines_data.append(line_data)
 
         return context_updates, lines_data
@@ -431,35 +430,26 @@ class BasketLogicMixin(object):
             product.attr.certificate_type != 'credit'
         )
 
-    @newrelic.agent.function_trace()
-    def _get_benefit_value(self, line):
-        if line.has_discount:
-            applied_offer_values = list(self.request.basket.applied_offers().values())
-            if applied_offer_values:
-                benefit = applied_offer_values[0].benefit
-                return format_benefit_value(benefit)
-        return None
+    def _get_benefit_data(self, line, should_format_value):
+        benefit = self._get_benefit(line)
+        return {
+            'benefit_value': self._get_benefit_value(benefit, should_format_value) if benefit else None,
+            'benefit_type': get_benefit_type(benefit) if benefit else None,
+        }
 
     @newrelic.agent.function_trace()
-    def _get_raw_benefit_value(self, line):
+    def _get_benefit(self, line):
         if line.has_discount:
             applied_offer_values = list(self.request.basket.applied_offers().values())
             if applied_offer_values:
-                decimal_value = Decimal(str(applied_offer_values[0].benefit.value))
-                if decimal_value == decimal_value.to_integral():
-                    decimal_value_no_exponent = decimal_value.quantize(Decimal(1))
-                else:
-                    decimal_value_no_exponent = decimal_value.normalize()
-                return decimal_value_no_exponent
+                return applied_offer_values[0].benefit
         return None
 
-    @newrelic.agent.function_trace()
-    def _get_benefit_type(self, line):
-        if line.has_discount:
-            applied_offer_values = list(self.request.basket.applied_offers().values())
-            if applied_offer_values:
-                return get_benefit_type(applied_offer_values[0].benefit)
-        return None
+    def _get_benefit_value(self, benefit, should_format_value):
+        if should_format_value:
+            return format_benefit_value(benefit)
+        else:
+            return get_quantized_benefit_value(benefit)
 
     @newrelic.agent.function_trace()
     def _get_certificate_type(self, product):
@@ -509,7 +499,7 @@ class BasketSummaryView(BasketLogicMixin, BasketView):
         lines = context.get('line_list', [])
         site_configuration = self.request.site.siteconfiguration
 
-        context_updates, lines_data = self.process_basket_lines(lines)
+        context_updates, lines_data = self.process_basket_lines(lines, format_benefit_value=True)
         context.update(context_updates)
         context.update(self.process_totals(context))
 
