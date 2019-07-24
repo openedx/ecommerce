@@ -22,6 +22,7 @@ from oscar.test.factories import create_product, create_stockrecord, get_class, 
 from ecommerce.enterprise.benefits import BENEFIT_MAP as ENTERPRISE_BENEFIT_MAP
 from ecommerce.enterprise.benefits import EnterpriseAbsoluteDiscountBenefit, EnterprisePercentageDiscountBenefit
 from ecommerce.enterprise.conditions import AssignableEnterpriseCustomerCondition, EnterpriseCustomerCondition
+from ecommerce.extensions.offer.dynamic_conditional_offer import DynamicPercentageDiscountBenefit
 from ecommerce.extensions.offer.models import OFFER_PRIORITY_ENTERPRISE, OFFER_PRIORITY_VOUCHER, OfferAssignment
 # TODO: journals dependency
 from ecommerce.journals.benefits import JournalBundleAbsoluteDiscountBenefit, JournalBundlePercentageDiscountBenefit
@@ -311,3 +312,10 @@ class JournalBundleOfferFactory(ConditionalOfferFactory):
     offer_type = ConditionalOffer.SITE
     priority = OFFER_PRIORITY_ENTERPRISE
     status = ConditionalOffer.OPEN
+
+
+class DynamicPercentageDiscountBenefitFactory(BenefitFactory):
+    range = None
+    type = ''
+    value = 1
+    proxy_class = class_path(DynamicPercentageDiscountBenefit)

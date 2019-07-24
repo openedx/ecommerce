@@ -1,6 +1,8 @@
 """ Tests of the Payment Views. """
 from __future__ import absolute_import, unicode_literals
 
+from decimal import Decimal
+
 import ddt
 import mock
 import responses
@@ -10,7 +12,9 @@ from oscar.apps.order.exceptions import UnableToPlaceOrder
 from oscar.apps.payment.exceptions import PaymentError
 from oscar.core.loading import get_class, get_model
 from oscar.test import factories
+from requests.exceptions import HTTPError
 from testfixtures import LogCapture
+from waffle.testutils import override_flag
 
 from ecommerce.core.constants import ENROLLMENT_CODE_PRODUCT_CLASS_NAME, ENROLLMENT_CODE_SWITCH
 from ecommerce.core.models import BusinessClient
@@ -18,6 +22,8 @@ from ecommerce.core.tests import toggle_switch
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.extensions.basket.utils import basket_add_organization_attribute
 from ecommerce.extensions.checkout.utils import get_receipt_page_url
+from ecommerce.extensions.offer.constants import DYNAMIC_DISCOUNT_FLAG
+from ecommerce.extensions.offer.tests.test_dynamic_conditional_offer import _mock_jwt_decode_handler
 from ecommerce.extensions.payment.processors.paypal import Paypal
 from ecommerce.extensions.payment.tests.mixins import PaymentEventsMixin, PaypalMixin
 from ecommerce.extensions.payment.views.paypal import PaypalPaymentExecutionView
@@ -47,8 +53,8 @@ class PaypalPaymentExecutionViewTests(PaypalMixin, PaymentEventsMixin, TestCase)
 
     def setUp(self):
         super(PaypalPaymentExecutionViewTests, self).setUp()
-
-        self.basket = create_basket(owner=UserFactory(), site=self.site)
+        self.price = '100.0'
+        self.basket = create_basket(owner=UserFactory(), site=self.site, price=self.price)
         self.basket.freeze()
 
         self.processor = Paypal(self.site)
@@ -357,6 +363,80 @@ class PaypalPaymentExecutionViewTests(PaypalMixin, PaymentEventsMixin, TestCase)
             self.processor.error_url,
             fetch_redirect_response=False
         )
+
+    # TODO: Remove as a part of REVMI-124 as this tests a hacky solution
+    # The problem is that orders are being created after payment processing, and the discount is not
+    # saved in the database, so it needs to be calculated again in order to save the correct info to the
+    # order. REVMI-124 will create the order before payment processing, when we have the discount context.
+    @override_flag(DYNAMIC_DISCOUNT_FLAG, active=True)
+    @responses.activate
+    @mock.patch.object(PaymentProcessorResponse.objects, 'get')
+    @mock.patch('ecommerce.extensions.payment.views.paypal.EdxRestApiClient', side_effect=HTTPError)
+    def test_add_dynamic_discount_to_request_error(self, mocked_client, basket_object):  # pylint: disable=unused-argument
+        """
+        Verify that we fail gracefully when the lms doesn't return a discount jwt
+        """
+        basket_object.return_value.basket = self.basket
+        logger_name = 'ecommerce.extensions.payment.views.paypal'
+        with LogCapture(logger_name) as logger:
+            self.mock_oauth2_response()
+
+            # Create payment records
+            self.mock_payment_creation_response(self.basket)
+            self.processor.get_transaction_parameters(self.basket, request=self.request)
+
+            # Make sure that we properly respond to the error
+            self._assert_error_page_redirect()
+            logger.check(
+                (
+                    logger_name,
+                    'INFO',
+                    'Payment [{payment_id}] approved by payer [{payer_id}]'.format(
+                        payment_id=self.PAYMENT_ID,
+                        payer_id=self.PAYER_ID
+                    )
+                ),
+                (
+                    logger_name,
+                    'WARNING',
+                    'Failed to get discount jwt from LMS. [http://lms.testserver.fake/api/discounts/] returned [None]'
+                ),
+            )
+
+    @override_flag(DYNAMIC_DISCOUNT_FLAG, active=True)
+    @responses.activate
+    @mock.patch.object(PaymentProcessorResponse.objects, 'get')
+    @mock.patch('ecommerce.extensions.payment.views.paypal.EdxRestApiClient')
+    @mock.patch('ecommerce.extensions.offer.dynamic_conditional_offer.jwt_decode_handler')
+    def test_add_discount_to_request(self, jwt_decode_handler, mocked_client, basket_object):
+        """
+        Verify that we fail gracefully when the lms doesn't return a discount jwt
+        """
+        # The applicator will attempt to decode a jwt
+        jwt_decode_handler.side_effect = _mock_jwt_decode_handler
+
+        # Mock the call to lms
+        expected_discount_percent = 15
+        expected_discount_jwt = {'discount_applicable': True, 'discount_percent': expected_discount_percent}
+        mocked_client.return_value.course.return_value.get.return_value = {
+            'discount_applicable': True,
+            'jwt': expected_discount_jwt
+        }
+
+        basket_object.return_value.basket = self.basket
+
+        self.mock_oauth2_response()
+
+        # Create payment records
+        self.mock_payment_creation_response(self.basket)
+        self.processor.get_transaction_parameters(self.basket, request=self.request)
+
+        with mock.patch.object(PaypalPaymentExecutionView, 'handle_payment') as fake_handle_payment:
+            self.client.get(reverse('paypal:execute'), self.RETURN_DATA)
+            self.assertTrue(fake_handle_payment.called)
+            self.assertTrue(Order.objects.get().total_incl_tax,
+                            Decimal(self.price) * (Decimal(expected_discount_percent) / Decimal(100.0)))
+    # End TODO
 
 
 @mock.patch('ecommerce.extensions.payment.views.paypal.call_command')
