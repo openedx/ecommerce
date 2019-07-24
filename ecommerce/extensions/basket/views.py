@@ -45,7 +45,11 @@ from ecommerce.extensions.basket.utils import (
     prepare_basket,
     validate_voucher
 )
-from ecommerce.extensions.offer.utils import format_benefit_value, get_benefit_type, get_redirect_to_email_confirmation_if_required
+from ecommerce.extensions.offer.utils import (
+    format_benefit_value,
+    get_benefit_type,
+    get_redirect_to_email_confirmation_if_required
+)
 from ecommerce.extensions.order.exceptions import AlreadyPlacedOrderException
 from ecommerce.extensions.partner.shortcuts import get_partner_for_site
 from ecommerce.extensions.payment.constants import (
@@ -442,7 +446,10 @@ class BasketLogicMixin(object):
             applied_offer_values = list(self.request.basket.applied_offers().values())
             if applied_offer_values:
                 decimal_value = Decimal(str(applied_offer_values[0].benefit.value))
-                decimal_value_no_exponent = decimal_value.quantize(Decimal(1)) if decimal_value == decimal_value.to_integral() else decimal_value.normalize()
+                if decimal_value == decimal_value.to_integral():
+                    decimal_value_no_exponent = decimal_value.quantize(Decimal(1))
+                else:
+                    decimal_value_no_exponent = decimal_value.normalize()
                 return decimal_value_no_exponent
         return None
 
