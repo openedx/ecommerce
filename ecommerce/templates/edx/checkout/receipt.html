@@ -126,8 +126,6 @@
                                 {% blocktrans trimmed with type=discount.offer.offer_type enterprise_name=discount.offer.condition.enterprise_customer_name %}
                                     Discount of type {{ type }} provided by {{ enterprise_name }}
                                 {% endblocktrans %}
-                            {% elif discount.offer.condition.name == 'dynamic_discount_condition' %}
-                              {% trans "Discount for your first upgrade" %}
                             {% else %}
                                 {% blocktrans trimmed with type=discount.offer.offer_type %}
                                     Discount of type {{ type }} is provided.
