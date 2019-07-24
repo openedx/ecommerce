@@ -337,87 +337,6 @@ class BasketLogicTestMixin(object):
         Applicator().apply(basket)
         return voucher
 
-    def assert_expected_response(
-            self,
-            basket,
-            url=None,
-            response=None,
-            status_code=200,
-            product_type=u'Seat',
-            currency=u'USD',
-            discount_value=0,
-            discount_type=Benefit.FIXED,
-            certificate_type=u'verified',
-            summary_price=100,
-            voucher=None,
-            offer_provider=None,
-            switch_message=None,
-            show_coupon_form=True,
-            image_url=None,
-            title=None,
-            messages=None,
-            summary_discounts=None,
-            **kwargs
-    ):
-        if response is None:
-            response = self.client.get(url if url else self.path)
-        self.assertEqual(response.status_code, status_code)
-
-        if discount_type == Benefit.FIXED:
-            benefit_value = u'${}.00'.format(discount_value)
-            if summary_discounts is None:
-                summary_discounts = discount_value
-        else:
-            benefit_value = u'{}%'.format(discount_value)
-            if summary_discounts is None:
-                summary_discounts = summary_price * (float(discount_value) / 100)
-
-        order_total = round(summary_price - summary_discounts, 2)
-
-        if discount_value:
-            coupons = [{
-                'benefit_value': benefit_value,
-                'code': u'COUPONTEST',
-                'id': voucher.id,
-            }]
-        else:
-            coupons = []
-
-        if offer_provider:
-            offers = [{
-                'benefit_value': benefit_value,
-                'provider': offer_provider,
-            }]
-        else:
-            offers = []
-
-        expected_response = {
-            u'basket_id': basket.id,
-            u'currency': currency,
-            u'offers': offers,
-            u'coupons': coupons,
-            u'messages': messages if messages else [],
-            u'is_free_basket': True if order_total == 0 else False,
-            u'show_coupon_form': show_coupon_form,
-            u'switch_message': switch_message,
-            u'summary_discounts': summary_discounts,
-            u'summary_price': summary_price,
-            u'order_total': order_total,
-            u'products': [
-                {
-                    u'product_type': product_type,
-                    u'certificate_type': certificate_type,
-                    u'image_url': image_url,
-                    u'sku': line.product.stockrecords.first().partner_sku,
-                    u'title': title,
-                } for line in basket.lines.all()
-            ]
-        }
-        if kwargs:
-            expected_response.update(**kwargs)
-
-        self.assertDictEqual(expected_response, response.json())
-
     @contextmanager
     def assert_events_fired_to_segment(self, basket):
         with mock.patch('ecommerce.extensions.basket.views.track_segment_event', return_value=(True, '')) as mock_track:
@@ -483,6 +402,85 @@ class PaymentApiResponseTestMixin(BasketLogicTestMixin):
             summary_price=0,
         )
 
+    def assert_expected_response(
+            self,
+            basket,
+            url=None,
+            response=None,
+            status_code=200,
+            product_type=u'Seat',
+            currency=u'USD',
+            discount_value=0,
+            discount_type=Benefit.FIXED,
+            certificate_type=u'verified',
+            summary_price=100,
+            voucher=None,
+            offer_provider=None,
+            show_coupon_form=True,
+            image_url=None,
+            title=None,
+            messages=None,
+            summary_discounts=None,
+            **kwargs
+    ):
+        if response is None:
+            response = self.client.get(url if url else self.path)
+        self.assertEqual(response.status_code, status_code)
+
+        if discount_type == Benefit.FIXED:
+            benefit_value = u'${}.00'.format(discount_value)
+            if summary_discounts is None:
+                summary_discounts = discount_value
+        else:
+            benefit_value = u'{}%'.format(discount_value)
+            if summary_discounts is None:
+                summary_discounts = summary_price * (float(discount_value) / 100)
+
+        order_total = round(summary_price - summary_discounts, 2)
+
+        if discount_value:
+            coupons = [{
+                'benefit_value': benefit_value,
+                'code': u'COUPONTEST',
+                'id': voucher.id,
+            }]
+        else:
+            coupons = []
+
+        if offer_provider:
+            offers = [{
+                'benefit_value': benefit_value,
+                'provider': offer_provider,
+            }]
+        else:
+            offers = []
+
+        expected_response = {
+            u'basket_id': basket.id,
+            u'currency': currency,
+            u'offers': offers,
+            u'coupons': coupons,
+            u'messages': messages if messages else [],
+            u'is_free_basket': True if order_total == 0 else False,
+            u'show_coupon_form': show_coupon_form,
+            u'summary_discounts': summary_discounts,
+            u'summary_price': summary_price,
+            u'order_total': order_total,
+            u'products': [
+                {
+                    u'product_type': product_type,
+                    u'certificate_type': certificate_type,
+                    u'image_url': image_url,
+                    u'sku': line.product.stockrecords.first().partner_sku,
+                    u'title': title,
+                } for line in basket.lines.all()
+            ]
+        }
+        if kwargs:
+            expected_response.update(**kwargs)
+
+        self.assertDictEqual(expected_response, response.json())
+
     def clear_message_utils(self):
         # The message_utils uses the request cache, so call this from setUp
         RequestCache.clear_all_namespaces()
@@ -524,7 +522,6 @@ class PaymentApiViewTests(PaymentApiResponseTestMixin, BasketMixin, DiscoveryMoc
                 certificate_type=certificate_type,
                 image_url=u'/path/to/image.jpg',
                 title=u'PaymentApiViewTests',
-                switch_message='Click here to purchase multiple seats in this course',
             )
 
     def test_enrollment_code_type(self):
@@ -546,7 +543,6 @@ class PaymentApiViewTests(PaymentApiResponseTestMixin, BasketMixin, DiscoveryMoc
             product_type=u'Enrollment Code',
             show_coupon_form=False,
             messages=[expected_message],
-            switch_message='Click here to just purchase an enrollment for yourself',
             summary_quantity=1,
             summary_subtotal=100,
         )
@@ -590,7 +586,6 @@ class PaymentApiViewTests(PaymentApiResponseTestMixin, BasketMixin, DiscoveryMoc
             discount_value=discount_value,
             discount_type=Benefit.PERCENTAGE,
             voucher=voucher,
-            switch_message=u'Click here to purchase multiple seats in this course',
         )
 
     @httpretty.activate
@@ -626,7 +621,6 @@ class PaymentApiViewTests(PaymentApiResponseTestMixin, BasketMixin, DiscoveryMoc
             url=url,
             status_code=400,
             messages=[expected_message],
-            switch_message=u'Click here to purchase multiple seats in this course',
         )
 
     def test_segment_exception_log(self):
@@ -1399,7 +1393,6 @@ class QuantityApiViewTests(PaymentApiResponseTestMixin, BasketMixin, DiscoveryMo
             response=response,
             show_coupon_form=False,
             messages=[expected_message],
-            switch_message='Click here to just purchase an enrollment for yourself',
             order_total=500,
             summary_quantity=5,
             summary_subtotal=500,
@@ -1427,6 +1420,10 @@ class QuantityApiViewTests(PaymentApiResponseTestMixin, BasketMixin, DiscoveryMo
                 'user_message': "Your cart couldn't be updated. Please correct any validation errors below.",
             },
             {
+                'message_type': 'warning',
+                'user_message': 'Ensure this value is greater than or equal to 0.',
+            },
+            {
                 'message_type': 'info',
                 'code': 'single-enrollment-code-warning',
                 'data': {
@@ -1443,7 +1440,6 @@ class QuantityApiViewTests(PaymentApiResponseTestMixin, BasketMixin, DiscoveryMo
             show_coupon_form=False,
             status_code=400,
             messages=expected_messages,
-            switch_message='Click here to just purchase an enrollment for yourself',
             summary_quantity=1,
             summary_subtotal=100,
         )
