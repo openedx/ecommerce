@@ -5,6 +5,7 @@ import logging
 import os
 from cStringIO import StringIO
 
+import waffle
 from django.core.exceptions import MultipleObjectsReturned
 from django.core.management import call_command
 from django.db import transaction
@@ -12,13 +13,17 @@ from django.http import Http404, HttpResponse, HttpResponseBadRequest
 from django.shortcuts import redirect
 from django.utils.decorators import method_decorator
 from django.views.generic import View
+from edx_rest_api_client.client import EdxRestApiClient
 from oscar.apps.partner import strategy
 from oscar.apps.payment.exceptions import PaymentError
 from oscar.core.loading import get_class, get_model
+from requests.exceptions import HTTPError, Timeout
 
+from ecommerce.core.url_utils import get_lms_url
 from ecommerce.extensions.basket.utils import basket_add_organization_attribute
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
 from ecommerce.extensions.checkout.utils import get_receipt_page_url
+from ecommerce.extensions.offer.constants import DYNAMIC_DISCOUNT_FLAG
 from ecommerce.extensions.payment.processors.paypal import Paypal
 
 logger = logging.getLogger(__name__)
@@ -66,6 +71,19 @@ class PaypalPaymentExecutionView(EdxOrderPlacementMixin, View):
                 transaction_id=payment_id
             ).basket
             basket.strategy = strategy.Default()
+            # TODO: Remove as a part of REVMI-124 as this is a hacky solution
+            # The problem is that orders are being created after payment processing, and the discount is not
+            # saved in the database, so it needs to be calculated again in order to save the correct info to the
+            # order. REVMI-124 will create the order before payment processing, when we have the discount context.
+            if waffle.flag_is_active(self.request, DYNAMIC_DISCOUNT_FLAG):
+                discount_lms_url = get_lms_url('/api/discounts/')
+                lms_discount_client = EdxRestApiClient(discount_lms_url, jwt=basket.owner.access_token)
+                ck = basket.lines.first().product.course_id
+                response = lms_discount_client.course(ck).get()
+                self.request.GET = self.request.GET.copy()
+                self.request.GET['discount_jwt'] = response.get('jwt')
+            # END TODO
+
             Applicator().apply(basket, basket.owner, self.request)
 
             basket_add_organization_attribute(basket, self.request.GET)
@@ -73,6 +91,13 @@ class PaypalPaymentExecutionView(EdxOrderPlacementMixin, View):
         except MultipleObjectsReturned:
             logger.warning(u"Duplicate payment ID [%s] received from PayPal.", payment_id)
             return None
+        # TODO: Remove as a part of REVMI-124 - continued
+        except (HTTPError, Timeout) as error:
+            logger.warning(
+                'Failed to get discount jwt from LMS. [%s] returned [%s]',
+                discount_lms_url,
+                error.response)
+        # END TODO
         except Exception:  # pylint: disable=broad-except
             logger.exception(u"Unexpected error during basket retrieval while executing PayPal payment.")
             return None
