@@ -451,7 +451,7 @@ class BasketLogicMixin(object):
         if line.has_discount:
             applied_offer_values = list(self.request.basket.applied_offers().values())
             if applied_offer_values:
-                return get_benefit_type(benefit)
+                return get_benefit_type(applied_offer_values[0].benefit)
         return None
 
     @newrelic.agent.function_trace()
