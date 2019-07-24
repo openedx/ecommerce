@@ -442,7 +442,7 @@ class BasketLogicMixin(object):
             applied_offer_values = list(self.request.basket.applied_offers().values())
             if applied_offer_values:
                 decimal_value = Decimal(str(applied_offer_values[0].benefit.value))
-                decimal_value_no_exponent = decimal_value.quantize(Decimal(1)) if decimal == decimal.to_integral() else decimal.normalize()
+                decimal_value_no_exponent = decimal_value.quantize(Decimal(1)) if decimal_value == decimal_value.to_integral() else decimal_value.normalize()
                 return decimal_value_no_exponent
         return None
 
