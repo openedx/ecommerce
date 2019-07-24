@@ -45,7 +45,7 @@ from ecommerce.extensions.basket.utils import (
     prepare_basket,
     validate_voucher
 )
-from ecommerce.extensions.offer.utils import format_benefit_value, get_redirect_to_email_confirmation_if_required
+from ecommerce.extensions.offer.utils import format_benefit_value, get_benefit_type, get_redirect_to_email_confirmation_if_required
 from ecommerce.extensions.order.exceptions import AlreadyPlacedOrderException
 from ecommerce.extensions.partner.shortcuts import get_partner_for_site
 from ecommerce.extensions.payment.constants import (
@@ -236,6 +236,8 @@ class BasketLogicMixin(object):
             line_data.update({
                 'sku': product.stockrecords.first().partner_sku,
                 'benefit_value': self._get_benefit_value(line),
+                'raw_benefit_value': self._get_raw_benefit_value(line),
+                'benefit_type': self._get_benefit_type(line),
                 'enrollment_code': product.is_enrollment_code_product,
                 'line': line,
                 'seat_type': self._get_certificate_type_display_value(product),
@@ -432,6 +434,24 @@ class BasketLogicMixin(object):
             if applied_offer_values:
                 benefit = applied_offer_values[0].benefit
                 return format_benefit_value(benefit)
+        return None
+
+    @newrelic.agent.function_trace()
+    def _get_raw_benefit_value(self, line):
+        if line.has_discount:
+            applied_offer_values = list(self.request.basket.applied_offers().values())
+            if applied_offer_values:
+                decimal_value = Decimal(str(applied_offer_values[0].benefit.value))
+                decimal_value_no_exponent = decimal_value.quantize(Decimal(1)) if decimal == decimal.to_integral() else decimal.normalize()
+                return decimal_value_no_exponent
+        return None
+
+    @newrelic.agent.function_trace()
+    def _get_benefit_type(self, line):
+        if line.has_discount:
+            applied_offer_values = list(self.request.basket.applied_offers().values())
+            if applied_offer_values:
+                return get_benefit_type(benefit)
         return None
 
     @newrelic.agent.function_trace()
