@@ -19,8 +19,6 @@ from ecommerce.tests.testcases import TestCase
 
 BasketAttribute = get_model('basket', 'BasketAttribute')
 BasketAttributeType = get_model('basket', 'BasketAttributeType')
-ConditionalOffer = get_model('offer', 'ConditionalOffer')
-
 BUNDLE = 'bundle_identifier'
 LOGGER_NAME = 'ecommerce.extensions.offer.applicator'
 
@@ -66,9 +64,8 @@ class CustomApplicatorTests(TestCase):
 
     def test_get_offers_without_bundle(self):
         """ Verify that all non bundle offers are returned if no bundle id is given. """
-        offers_in_db = list(ConditionalOffer.active.filter(offer_type=ConditionalOffer.SITE))
         ProgramOfferFactory()
-        site_offers = ConditionalOfferFactory.create_batch(3) + offers_in_db
+        site_offers = ConditionalOfferFactory.create_batch(3)
 
         self.applicator.get_program_offers = mock.Mock()
 
@@ -97,8 +94,7 @@ class CustomApplicatorTests(TestCase):
     @override_flag(CUSTOM_APPLICATOR_LOG_FLAG, active=True)
     def test_log_is_fired_when_get_offers_without_bundle(self):
         """ Verify that logs are fired when no bundle id is given but offers are being applied"""
-        existing_offers = list(ConditionalOffer.active.filter(offer_type=ConditionalOffer.SITE))
-        site_offers = ConditionalOfferFactory.create_batch(3) + existing_offers
+        site_offers = ConditionalOfferFactory.create_batch(3)
 
         self.applicator.get_program_offers = mock.Mock()
 
@@ -117,7 +113,6 @@ class CustomApplicatorTests(TestCase):
 
     def test_get_site_offers(self):
         """ Verify get_site_offers returns correct objects based on filter"""
-        existing_offers = list(ConditionalOffer.active.filter(offer_type=ConditionalOffer.SITE))
 
         uuid = uuid4()
         for _ in range(2):
@@ -132,7 +127,8 @@ class CustomApplicatorTests(TestCase):
                 enterprise_customer_uuid=None
             )
             ConditionalOfferFactory(condition=condition)
-        assert self.applicator.get_site_offers().count() == 3 + len(existing_offers)
+
+        assert self.applicator.get_site_offers().count() == 3
 
     @ddt.data(
         (uuid4(), 2),
