@@ -75,8 +75,8 @@ def _redirect_to_payment_microfrontend_if_configured(request):
                 request.site.siteconfiguration.payment_microfrontend_url,
                 list(request.GET.items()),
             )
-            return HttpResponseRedirect(url)
-    return None
+            redirect_response = HttpResponseRedirect(url)
+            raise RedirectException(response=redirect_response)
 
 
 class BasketAddItemsView(View):
@@ -101,7 +101,7 @@ class BasketAddItemsView(View):
             except AlreadyPlacedOrderException:
                 return render(request, 'edx/error.html', {'error': _('You have already purchased these products')})
 
-            self._redirect_to_microfrontend_if_needed(request, products)
+            _redirect_to_payment_microfrontend_if_configured(request)
             url = add_utm_params_to_url(reverse('basket:summary'), list(self.request.GET.items()))
             return HttpResponseRedirect(url, status=303)
 
@@ -166,15 +166,6 @@ class BasketAddItemsView(View):
             )
             if code_redemption_redirect:
                 raise RedirectException(response=code_redemption_redirect)
-
-    def _redirect_to_microfrontend_if_needed(self, request, products):
-        if self._is_single_course_purchase(products):
-            redirect_response = _redirect_to_payment_microfrontend_if_configured(request)
-            if redirect_response:
-                raise RedirectException(response=redirect_response)
-
-    def _is_single_course_purchase(self, products):
-        return len(products) == 1 and products[0].is_seat_product
 
 
 class BasketLogicMixin(object):
@@ -470,7 +461,7 @@ class BasketSummaryView(BasketLogicMixin, BasketView):
         try:
             self.fire_segment_events(request, basket)
             self.verify_enterprise_needs(basket)
-            self._redirect_to_microfrontend_if_needed(request, basket)
+            _redirect_to_payment_microfrontend_if_configured(request)
         except RedirectException as e:
             return e.response
 
@@ -549,19 +540,6 @@ class BasketSummaryView(BasketLogicMixin, BasketView):
                   'site configuration [{sc}]'.format(processor=site_configuration.client_side_payment_processor,
                                                      sc=site_configuration.id)
             raise SiteConfigurationError(msg)
-
-    def _redirect_to_microfrontend_if_needed(self, request, basket):
-        if self._is_single_course_purchase(basket):
-            redirect_response = _redirect_to_payment_microfrontend_if_configured(request)
-            if redirect_response:
-                raise RedirectException(response=redirect_response)
-
-    def _is_single_course_purchase(self, basket):
-        return (
-            basket.num_items == 1 and
-            basket.lines.count() == 1 and
-            basket.lines.first().product.is_seat_product
-        )
 
 
 class PaymentApiLogicMixin(BasketLogicMixin):
