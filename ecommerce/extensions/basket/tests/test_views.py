@@ -363,20 +363,18 @@ class BasketLogicTestMixin(object):
             response = self.client.get(url if url else self.path)
         self.assertEqual(response.status_code, status_code)
 
-        if discount_type == Benefit.FIXED:
-            benefit_value = u'${}.00'.format(discount_value)
-            if summary_discounts is None:
+        if summary_discounts is None:
+            if discount_type == Benefit.FIXED:
                 summary_discounts = discount_value
-        else:
-            benefit_value = u'{}%'.format(discount_value)
-            if summary_discounts is None:
+            else:
                 summary_discounts = summary_price * (float(discount_value) / 100)
 
         order_total = round(summary_price - summary_discounts, 2)
 
         if discount_value:
             coupons = [{
-                'benefit_value': benefit_value,
+                'benefit_type': discount_type,
+                'benefit_value': discount_value,
                 'code': u'COUPONTEST',
                 'id': voucher.id,
             }]
@@ -385,7 +383,8 @@ class BasketLogicTestMixin(object):
 
         if offer_provider:
             offers = [{
-                'benefit_value': benefit_value,
+                'benefit_type': discount_type,
+                'benefit_value': discount_value,
                 'provider': offer_provider,
             }]
         else:
