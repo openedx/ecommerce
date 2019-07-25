@@ -5,6 +5,7 @@ import re
 
 import six
 from django.conf import settings
+from django.core.exceptions import ImproperlyConfigured
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from django_extensions.db.models import TimeStampedModel
@@ -305,8 +306,11 @@ class ConditionalOffer(AbstractConditionalOffer):
 
             return is_satisfied
 
-        return super(ConditionalOffer, self).is_condition_satisfied(basket)  # pylint: disable=bad-super-call
-
+        try:
+            return super(ConditionalOffer, self).is_condition_satisfied(basket)  # pylint: disable=bad-super-call
+        except ImproperlyConfigured as err:
+            logger.error('Improperly configured ConditionalOffer, id=%s. %s', self.id, err.message)
+            return False
 
 def validate_credit_seat_type(course_seat_types):
     if not isinstance(course_seat_types, six.string_types):
