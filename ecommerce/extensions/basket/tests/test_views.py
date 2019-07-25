@@ -147,8 +147,8 @@ class BasketAddItemsViewTests(
         self.assertRedirects(response, expected_url, status_code=expected_status_code, fetch_redirect_response=False)
 
     @override_flag(ENABLE_MICROFRONTEND_FOR_BASKET_PAGE_FLAG_NAME, active=True)
-    def test_no_microfrontend_for_enrollment_code_seat(self):
-        self.configure_redirect_to_microfrontend()
+    def test_microfrontend_for_enrollment_code_seat(self):
+        microfrontend_url = self.configure_redirect_to_microfrontend()
 
         course, __, enrollment_code = self.prepare_course_seat_and_enrollment_code()
         basket = factories.BasketFactory(owner=self.user, site=self.site)
@@ -156,8 +156,7 @@ class BasketAddItemsViewTests(
         self.mock_course_runs_endpoint(self.site_configuration.discovery_api_url, course_run=course)
 
         response = self._get_response(enrollment_code.stockrecords.first().partner_sku)
-        expected_url = self.get_full_url(reverse('basket:summary'))
-        self.assertRedirects(response, expected_url, status_code=303)
+        self.assertRedirects(response, microfrontend_url, status_code=302, fetch_redirect_response=False)
 
     def test_add_multiple_products_no_skus_provided(self):
         """ Verify the Bad request exception is thrown when no skus are provided. """
@@ -706,13 +705,13 @@ class BasketSummaryViewTests(EnterpriseServiceMockMixin, DiscoveryTestMixin, Dis
 
     @override_flag(ENABLE_MICROFRONTEND_FOR_BASKET_PAGE_FLAG_NAME, active=True)
     def test_microfrontend_for_enrollment_code_seat_type(self):
-        self.configure_redirect_to_microfrontend()
+        microfrontend_url = self.configure_redirect_to_microfrontend()
 
         course, __, enrollment_code = self.prepare_course_seat_and_enrollment_code()
         self.create_basket_and_add_product(enrollment_code)
         self.mock_course_runs_endpoint(self.site_configuration.discovery_api_url, course_run=course)
         response = self.client.get(self.path)
-        self.assertEqual(response.status_code, 200)
+        self.assertRedirects(response, microfrontend_url, status_code=302, fetch_redirect_response=False)
 
     @ddt.data(
         (Benefit.PERCENTAGE, 100),
