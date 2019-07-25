@@ -578,7 +578,7 @@ class PaymentApiLogicMixin(BasketLogicMixin):
         context.update(self.process_totals(context))
 
         data = self._serialize_context(context, lines_data)
-        self._add_messages(data, context)
+        self._add_messages(data)
         response_status = status if status else self._get_response_status(data)
         return Response(data, status=response_status)
 
@@ -663,9 +663,8 @@ class PaymentApiLogicMixin(BasketLogicMixin):
             if response['show_coupon_form'] and self.request.basket.contains_a_voucher
         ]
 
-    def _add_messages(self, response, context):
+    def _add_messages(self, response):
         response['messages'] = message_utils.serialize(self.request)
-        response['switch_message'] = context['switch_link_text']
 
     def _get_response_status(self, response):
         return message_utils.get_response_status(response['messages'])
@@ -717,7 +716,7 @@ class QuantityAPIView(APIView, View, PaymentApiLogicMixin):
             form.save()
             return self._form_valid()
 
-        return self._form_invalid()
+        return self._form_invalid(form)
 
     def _get_basket_line_form(self):
         """ Retrieves form for the first line. """
@@ -746,7 +745,16 @@ class QuantityAPIView(APIView, View, PaymentApiLogicMixin):
 
         return self.get_payment_api_response()
 
-    def _form_invalid(self):
+    def _get_clean_error_messages(self, errors):
+        msgs = []
+        for error in errors:
+            msgs.append(error.as_text())
+        # The removal of '*' may not be needed. It was copied from a different view (BasketAddView) in django-oscar.
+        # See https://github.com/django-oscar/django-oscar/blob/3ee66877a2dbd49b2a0838c369205f4ffbc2a391/src/oscar/apps/basket/views.py#L261-L265  pylint: disable=line-too-long
+        clean_msgs = [m.replace('* ', '') for m in msgs if m.startswith('* ')]
+        return ",".join(clean_msgs)
+
+    def _form_invalid(self, form):
         """
         The following code was adapted from django-oscar's BasketView.formset_invalid.
         """
@@ -754,6 +762,10 @@ class QuantityAPIView(APIView, View, PaymentApiLogicMixin):
             self.request,
             _("Your basket couldn't be updated. Please correct any validation errors below.")
         )
+        if form.errors:
+            messages.warning(self.request, self._get_clean_error_messages(form.errors.values()))
+        else:  # pragma: no cover
+            pass
         return self.get_payment_api_response(status=400)
 
 
