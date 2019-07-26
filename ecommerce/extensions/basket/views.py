@@ -57,9 +57,11 @@ from ecommerce.extensions.order.exceptions import AlreadyPlacedOrderException
 from ecommerce.extensions.partner.shortcuts import get_partner_for_site
 from ecommerce.extensions.payment.constants import (
     CLIENT_SIDE_CHECKOUT_FLAG_NAME,
-    ENABLE_MICROFRONTEND_FOR_BASKET_PAGE_FLAG_NAME
+    ENABLE_MICROFRONTEND_FOR_BASKET_PAGE_FLAG_NAME,
+    PAYMENTS_MFE_BUCKET,
 )
 from ecommerce.extensions.payment.forms import PaymentForm
+from ecommerce.extensions.experimentation.stable_bucketing import stable_bucketing_hash_group
 
 Basket = get_model('basket', 'basket')
 BasketAttribute = get_model('basket', 'BasketAttribute')
@@ -73,13 +75,55 @@ Selector = get_class('partner.strategy', 'Selector')
 
 
 def _get_payment_microfrontend_url_if_configured(request):
-    if waffle.flag_is_active(request, ENABLE_MICROFRONTEND_FOR_BASKET_PAGE_FLAG_NAME):
-        if (
-                request.site.siteconfiguration.enable_microfrontend_for_basket_page and
-                request.site.siteconfiguration.payment_microfrontend_url
-        ):
-            return request.site.siteconfiguration.payment_microfrontend_url
-    return None
+    if use_payment_microfrontend(request):
+        return request.site.siteconfiguration.payment_microfrontend_url
+    else:
+        return None
+
+
+def force_payment_microfrontend(request):
+    """
+    Return whether the user for the current request should be forced into the payments MFE bucket.
+    """
+    return waffle.flag_is_active(request, FORCE_MICROFRONTEND_FOR_BASKET_PAGE_FLAG_NAME)
+
+
+def use_payment_microfrontend(request):
+    """
+    Return whether the current request should use the payments MFE.
+    """
+    if (
+            request.site.siteconfiguration.enable_microfrontend_for_basket_page and
+            request.site.siteconfiguration.payment_microfrontend_url
+    ):
+        payments_mfe_forced = force_payment_microfrontend(request)
+        if payments_mfe_forced:
+            bucket = PAYMENTS_MFE_BUCKET
+        else:
+            bucket = stable_bucketing_hash_group("payments-mfe", 2, request.user.username)
+
+        payment_microfrontend_flag_enabled = waffle.flag_is_active(request, ENABLE_MICROFRONTEND_FOR_BASKET_PAGE_FLAG_NAME)
+
+        track_segment_event(
+            request.site,
+            request.user,
+            'edx.bi.experiment.user.bucketed',
+            {
+                'bucket': bucket,
+                'experiment': 'payments-mfe',
+                'forcedIntoBucket': payments_mfe_forced,
+                'paymentsMfeEnabled': payment_microfrontend_flag_enabled,
+            },
+        )
+        return payments_mfe_forced or (bucket == PAYMENTS_MFE_BUCKET and payment_microfrontend_flag_enabled)
+    else:
+        return False
+
+
+def _redirect_to_payment_microfrontend_if_configured(request):
+    """
+    Redirect the current request to the payments MFE.
+    """
 
 
 class BasketAddItemsView(View):
