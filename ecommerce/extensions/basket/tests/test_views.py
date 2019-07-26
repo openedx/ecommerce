@@ -143,8 +143,7 @@ class BasketAddItemsViewTests(
         expect_microfrontend = enable_redirect and set_url
         expected_url = microfrontend_url if expect_microfrontend else '/basket/'
         expected_url += '?utm_source=test'
-        expected_status_code = 302 if expect_microfrontend else 303
-        self.assertRedirects(response, expected_url, status_code=expected_status_code, fetch_redirect_response=False)
+        self.assertRedirects(response, expected_url, status_code=303, fetch_redirect_response=False)
 
     @override_flag(ENABLE_MICROFRONTEND_FOR_BASKET_PAGE_FLAG_NAME, active=True)
     def test_microfrontend_for_enrollment_code_seat(self):
@@ -156,7 +155,7 @@ class BasketAddItemsViewTests(
         self.mock_course_runs_endpoint(self.site_configuration.discovery_api_url, course_run=course)
 
         response = self._get_response(enrollment_code.stockrecords.first().partner_sku)
-        self.assertRedirects(response, microfrontend_url, status_code=302, fetch_redirect_response=False)
+        self.assertRedirects(response, microfrontend_url, status_code=303, fetch_redirect_response=False)
 
     def test_add_multiple_products_no_skus_provided(self):
         """ Verify the Bad request exception is thrown when no skus are provided. """
@@ -701,6 +700,16 @@ class BasketSummaryViewTests(EnterpriseServiceMockMixin, DiscoveryTestMixin, Dis
         self.create_basket_and_add_product(seat)
         response = self.client.get(self.path)
         self.assertRedirects(response, microfrontend_url, status_code=302, fetch_redirect_response=False)
+
+    @override_flag(ENABLE_MICROFRONTEND_FOR_BASKET_PAGE_FLAG_NAME, active=True)
+    def test_microfrontend_with_consent_failed_param(self):
+        microfrontend_url = self.configure_redirect_to_microfrontend()
+
+        params = 'consent_failed=THISISACOUPONCODE'
+        url = '{}?{}'.format(self.path, params)
+        response = self.client.get(url)
+        expected_redirect_url = '{}?{}'.format(microfrontend_url, params)
+        self.assertRedirects(response, expected_redirect_url, status_code=302, fetch_redirect_response=False)
 
     @override_flag(ENABLE_MICROFRONTEND_FOR_BASKET_PAGE_FLAG_NAME, active=True)
     def test_microfrontend_for_enrollment_code_seat_type(self):

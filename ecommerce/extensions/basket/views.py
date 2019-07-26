@@ -70,18 +70,14 @@ Voucher = get_model('voucher', 'Voucher')
 Selector = get_class('partner.strategy', 'Selector')
 
 
-def _redirect_to_payment_microfrontend_if_configured(request):
+def _get_payment_microfrontend_url_if_configured(request):
     if waffle.flag_is_active(request, ENABLE_MICROFRONTEND_FOR_BASKET_PAGE_FLAG_NAME):
         if (
                 request.site.siteconfiguration.enable_microfrontend_for_basket_page and
                 request.site.siteconfiguration.payment_microfrontend_url
         ):
-            url = add_utm_params_to_url(
-                request.site.siteconfiguration.payment_microfrontend_url,
-                list(request.GET.items()),
-            )
-            redirect_response = HttpResponseRedirect(url)
-            raise RedirectException(response=redirect_response)
+            return request.site.siteconfiguration.payment_microfrontend_url
+    return None
 
 
 class BasketAddItemsView(View):
@@ -106,9 +102,7 @@ class BasketAddItemsView(View):
             except AlreadyPlacedOrderException:
                 return render(request, 'edx/error.html', {'error': _('You have already purchased these products')})
 
-            _redirect_to_payment_microfrontend_if_configured(request)
-            url = add_utm_params_to_url(reverse('basket:summary'), list(self.request.GET.items()))
-            return HttpResponseRedirect(url, status=303)
+            return self._redirect_response_to_basket_or_payment(request)
 
         except BadRequestException as e:
             return HttpResponseBadRequest(e.message)
@@ -171,6 +165,13 @@ class BasketAddItemsView(View):
             )
             if code_redemption_redirect:
                 raise RedirectException(response=code_redemption_redirect)
+
+    def _redirect_response_to_basket_or_payment(self, request):
+        redirect_url = _get_payment_microfrontend_url_if_configured(request)
+        if not redirect_url:
+            redirect_url = reverse('basket:summary')
+        redirect_url = add_utm_params_to_url(redirect_url, list(self.request.GET.items()))
+        return HttpResponseRedirect(redirect_url, status=303)
 
 
 class BasketLogicMixin(object):
@@ -464,11 +465,26 @@ class BasketSummaryView(BasketLogicMixin, BasketView):
         try:
             self.fire_segment_events(request, basket)
             self.verify_enterprise_needs(basket)
-            _redirect_to_payment_microfrontend_if_configured(request)
+            self._redirect_to_payment_microfrontend_if_configured(request)
         except RedirectException as e:
             return e.response
 
         return super(BasketSummaryView, self).get(request, *args, **kwargs)
+
+    def _redirect_to_payment_microfrontend_if_configured(self, request):
+        microfrontend_url = _get_payment_microfrontend_url_if_configured(request)
+        if microfrontend_url:
+            # For now, the enterprise consent form validation is communicated via
+            # a URL parameter, which must be forwarded via this redirect.
+            consent_failed_param_to_forward = request.GET.get(CONSENT_FAILED_PARAM)
+            if consent_failed_param_to_forward:
+                microfrontend_url = '{}?{}={}'.format(
+                    microfrontend_url,
+                    CONSENT_FAILED_PARAM,
+                    consent_failed_param_to_forward,
+                )
+            redirect_response = HttpResponseRedirect(microfrontend_url)
+            raise RedirectException(response=redirect_response)
 
     @newrelic.agent.function_trace()
     def _add_to_context_data(self, context):
