@@ -140,7 +140,7 @@ pyjwt==1.7.1              # via djangorestframework-jwt, edx-auth-backends, edx-
 pylint==1.9.5
 pymongo==3.8.0            # via edx-opaque-keys
 pyopenssl==19.0.0         # via ndg-httpsclient, paypalrestsdk
-pyparsing==2.4.1          # via packaging
+pyparsing==2.4.1.1        # via packaging
 pysqlite==2.8.3 ; python_version == "2.7"
 python-dateutil==2.8.0
 python-openid==2.2.5 ; python_version == "2.7"
