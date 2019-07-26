@@ -45,7 +45,12 @@ from ecommerce.extensions.basket.utils import (
     prepare_basket,
     validate_voucher
 )
-from ecommerce.extensions.offer.utils import format_benefit_value, get_redirect_to_email_confirmation_if_required
+from ecommerce.extensions.offer.utils import (
+    format_benefit_value,
+    get_benefit_type,
+    get_quantized_benefit_value,
+    get_redirect_to_email_confirmation_if_required
+)
 from ecommerce.extensions.order.exceptions import AlreadyPlacedOrderException
 from ecommerce.extensions.partner.shortcuts import get_partner_for_site
 from ecommerce.extensions.payment.constants import (
@@ -243,17 +248,15 @@ class BasketLogicMixin(object):
         # Currently only one voucher per basket is supported.
         try:
             applied_voucher = self.request.basket.vouchers.first()
-            total_benefit = (
-                format_benefit_value(applied_voucher.best_offer.benefit)
-                if applied_voucher else None
-            )
+            total_benefit_object = applied_voucher.best_offer.benefit if applied_voucher else None
         # TODO This ValueError handling no longer seems to be required and could probably be removed
         except ValueError:  # pragma: no cover
-            total_benefit = None
+            total_benefit_object = None
 
         num_of_items = self.request.basket.num_items
         return {
-            'total_benefit': total_benefit,
+            'total_benefit_object': total_benefit_object,
+            'total_benefit': format_benefit_value(total_benefit_object) if total_benefit_object else None,
             'free_basket': context['order_total'].incl_tax == 0,
             'line_price': (self.request.basket.total_incl_tax_excl_discounts / num_of_items) if num_of_items > 0 else 0,
         }
@@ -623,7 +626,8 @@ class PaymentApiLogicMixin(BasketLogicMixin):
         response['offers'] = [
             {
                 'provider': offer.condition.enterprise_customer_name,
-                'benefit_value': format_benefit_value(offer.benefit),
+                'benefit_type': get_benefit_type(offer.benefit) if offer.benefit else None,
+                'benefit_value': get_quantized_benefit_value(offer.benefit) if offer.benefit else None,
             }
             for offer in self.request.basket.applied_offers().values()
             if offer.condition.enterprise_customer_name
@@ -631,11 +635,13 @@ class PaymentApiLogicMixin(BasketLogicMixin):
 
     def _add_coupons(self, response, context):
         response['show_coupon_form'] = context['show_voucher_form']
+        benefit = context['total_benefit_object']
         response['coupons'] = [
             {
                 'id': voucher.id,
                 'code': voucher.code,
-                'benefit_value': context['total_benefit'],
+                'benefit_type': get_benefit_type(benefit) if benefit else None,
+                'benefit_value': get_quantized_benefit_value(benefit) if benefit else None,
             }
             for voucher in self.request.basket.vouchers.all()
             if response['show_coupon_form'] and self.request.basket.contains_a_voucher

@@ -64,6 +64,13 @@ def get_benefit_type(benefit):
     return _type
 
 
+def get_quantized_benefit_value(benefit):
+    """
+    Returns the rounded value of the given benefit, without any decimal points.
+    """
+    return _remove_exponent_and_trailing_zeros(Decimal(str(benefit.value)))
+
+
 def format_benefit_value(benefit):
     """
     Format benefit value for display based on the benefit type
@@ -74,7 +81,7 @@ def format_benefit_value(benefit):
     Returns:
         benefit_value (str): String value containing formatted benefit value and type.
     """
-    benefit_value = _remove_exponent_and_trailing_zeros(Decimal(str(benefit.value)))
+    benefit_value = get_quantized_benefit_value(benefit)
     benefit_type = get_benefit_type(benefit)
 
     if benefit_type == Benefit.PERCENTAGE:
