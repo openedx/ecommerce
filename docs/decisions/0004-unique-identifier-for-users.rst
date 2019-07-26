@@ -25,6 +25,12 @@ In addition, middleware now checks to see if the user is missing an LMS user id.
 retrieves it from the user's social auth. If multiple social auth rows are found for the user, the most recently
 saved row is used.
 
+To back-fill the LMS user id for existing users, run the `import_user_ids <https://github.com/edx/ecommerce/blob/master/ecommerce/core/management/commands/import_user_ids.py>`_
+management command.
+
+New users receive an LMS user id in the ecommerce database as part of the JWT and/or social auth flow once they login
+via the LMS and interact with ecommerce by, for example, adding a course to their basket.
+
 Consequences
 ------------
 
@@ -32,8 +38,9 @@ The LMS user id is expected to be be present for every user is Ecommerce's datab
 analytics data that is sent out from Ecommerce.
 
 Requests that are sent to Ecommerce are expected to include the LMS user id. If they do not include the id, the
-creator of the request is responsible for ensuring that Ecommerce already knows the LMS user id for the user. In the
-future, requests to Ecommerce will be rejected if Ecommerce cannot find a LMS user id for the affected user(s).
+creator of the request is responsible for ensuring that Ecommerce already knows the LMS user id for the user. Requests
+to Ecommerce will be rejected and a MissingLmsUserIdException will be raised if Ecommerce cannot find a LMS user id for
+the affected user(s), unless the *allow_missing_lms_user_id* waffle switch is enabled.
 
 References
 ----------
