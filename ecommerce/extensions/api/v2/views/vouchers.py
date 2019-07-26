@@ -83,7 +83,7 @@ class VoucherViewSet(NonDestroyableModelViewSet):
         try:
             offers_data = self.get_offers(request, voucher)
         except (ConnectionError, SlumberBaseException, Timeout):
-            logger.error('Could not connect to Discovery Service.')
+            logger.exception('Could not connect to Discovery Service.')
             return Response(status=status.HTTP_400_BAD_REQUEST)
         except Product.DoesNotExist:
             logger.error('Could not locate product for voucher with code %s.', code)
