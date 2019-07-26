@@ -45,6 +45,28 @@ class LMSPublisher(object):
             'expires': self.get_seat_expiration(seat),
         }
 
+    @staticmethod
+    def _merge_modes_with_lms_modes(new_modes, commerce_api_client):
+        """
+        Given a list of new enrollment modes, GET existing enrollments modes
+        from the LMS, and return merged list of enrollment modes.
+
+        New enrollment modes take precendence over existing ones.
+
+        Arguments:
+            new_modes: list
+            commerce_api_client
+
+        Returns: list
+        """
+        lms_data = commerce_api_client.courses(course_id).get()
+        lms_modes = input_data.get('modes')
+        if not lms_modes:
+            return new_modes
+        modes_by_slug = {slug: mode for mode in lms_modes}
+        modes_by_slug.update({slug: mode for mode in new_modes})
+        return modes_by_slug.values()
+
     def publish(self, course):
         """ Publish course commerce data to LMS.
 
@@ -90,15 +112,16 @@ class LMSPublisher(object):
                 logger.exception('Failed to publish CreditCourse for [%s] to LMS.', course_id)
                 return error_message
 
+
         try:
+            commerce_api_client = site.siteconfiguration.commerce_api_client
+            merged_modes = self._merge_modes_with_lms_modes(modes, commerce_api_client)
             data = {
                 'id': course_id,
                 'name': name,
                 'verification_deadline': verification_deadline,
-                'modes': modes,
+                'modes': merged_modes,
             }
-
-            commerce_api_client = site.siteconfiguration.commerce_api_client
             commerce_api_client.courses(course_id).put(data=data)
             logger.info('Successfully published commerce data for [%s].', course_id)
             return None
