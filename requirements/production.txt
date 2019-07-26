@@ -4,9 +4,8 @@
 #
 #    make upgrade
 #
--e 'git+https://github.com/edx/analytics-python.git@1.2.11#egg=analytics-python==1.2.11 ; python_version == "2.7"'
+-e git+https://github.com/edx/analytics-python.git@1.2.11#egg=analytics-python==1.2.11 ; python_version == "2.7" ; python_version == "2.7"
 amqp==1.4.9               # via kombu
-analytics-python==1.2.9 ; python_version >= "3"
 anyjson==0.3.3            # via kombu
 appdirs==1.4.3            # via zeep
 asn1crypto==0.24.0        # via cryptography
@@ -108,7 +107,6 @@ pyopenssl==19.0.0         # via ndg-httpsclient, paypalrestsdk
 python-dateutil==2.8.0
 python-memcached==1.58
 python-openid==2.2.5 ; python_version == "2.7"
-python3-openid==3.1.0 ; python_version >= "3"
 pytz==2016.10
 pyyaml==5.1.1
 rcssmin==1.0.6            # via django-compressor
