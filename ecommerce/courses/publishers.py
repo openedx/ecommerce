@@ -46,7 +46,7 @@ class LMSPublisher(object):
         }
 
     @staticmethod
-    def _merge_modes_with_lms_modes(new_modes, commerce_api_client):
+    def _merge_modes_with_lms_modes(lms_course_resource, new_modes):
         """
         Given a list of new enrollment modes, GET existing enrollments modes
         from the LMS, and return merged list of enrollment modes.
@@ -54,18 +54,17 @@ class LMSPublisher(object):
         New enrollment modes take precendence over existing ones.
 
         Arguments:
+            lms_course_resource: Slumber resource
             new_modes: list
-            commerce_api_client
 
         Returns: list
         """
-        lms_data = commerce_api_client.courses(course_id).get()
-        lms_modes = input_data.get('modes')
+        lms_modes = lms_course_resource.get().get('modes')
         if not lms_modes:
             return new_modes
-        modes_by_slug = {slug: mode for mode in lms_modes}
-        modes_by_slug.update({slug: mode for mode in new_modes})
-        return modes_by_slug.values()
+        modes_by_name = {mode['name']: mode for mode in lms_modes}
+        modes_by_name.update({mode['name']: mode for mode in new_modes})
+        return modes_by_name.values()
 
     def publish(self, course):
         """ Publish course commerce data to LMS.
@@ -112,17 +111,17 @@ class LMSPublisher(object):
                 logger.exception('Failed to publish CreditCourse for [%s] to LMS.', course_id)
                 return error_message
 
-
         try:
             commerce_api_client = site.siteconfiguration.commerce_api_client
-            merged_modes = self._merge_modes_with_lms_modes(modes, commerce_api_client)
+            lms_course_resource = commerce_api_client.courses(course_id)
+            merged_modes = self._merge_modes_with_lms_modes(lms_course_resource, modes)
             data = {
                 'id': course_id,
                 'name': name,
                 'verification_deadline': verification_deadline,
                 'modes': merged_modes,
             }
-            commerce_api_client.courses(course_id).put(data=data)
+            lms_course_resource.put(data=data)
             logger.info('Successfully published commerce data for [%s].', course_id)
             return None
         except SlumberHttpBaseException as e:  # pylint: disable=bare-except
