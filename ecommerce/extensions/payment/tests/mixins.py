@@ -146,7 +146,7 @@ class CybersourceMixin(PaymentEventsMixin):
                 basket_id=self.basket.id, response_id=ppr_id, order_number=notification['req_reference_number']
             )
 
-            logger.check(
+            logger.check_present(
                 (
                     logger_name,
                     'INFO',
@@ -543,7 +543,7 @@ class CybersourceNotificationTestsMixin(CybersourceMixin):
             with LogCapture(logger_name) as lc:
                 self.client.post(self.path, notification)
 
-                lc.check(
+                lc.check_present(
                     (logger_name, 'ERROR', error_message)
                 )
 
@@ -692,7 +692,7 @@ class CybersourceNotificationTestsMixin(CybersourceMixin):
         with LogCapture(logger_name) as cybersource_logger:
             self.client.post(self.path, notification)
             if mock_value:
-                cybersource_logger.check(
+                cybersource_logger.check_present(
                     (
                         logger_name,
                         'INFO',
@@ -707,7 +707,7 @@ class CybersourceNotificationTestsMixin(CybersourceMixin):
                     )
                 )
             else:
-                cybersource_logger.check(
+                cybersource_logger.check_present(
                     (
                         logger_name,
                         'INFO',
