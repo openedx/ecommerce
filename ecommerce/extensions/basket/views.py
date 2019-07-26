@@ -101,14 +101,22 @@ class BasketAddItemsView(View):
             except AlreadyPlacedOrderException:
                 return render(request, 'edx/error.html', {'error': _('You have already purchased these products')})
 
-            _redirect_to_payment_microfrontend_if_configured(request)
-            url = add_utm_params_to_url(reverse('basket:summary'), list(self.request.GET.items()))
-            return HttpResponseRedirect(url, status=303)
+            return self._redirect_to_payment_mfe_or_basket_page(request)
 
         except BadRequestException as e:
             return HttpResponseBadRequest(e.message)
         except RedirectException as e:
             return e.response
+
+    def _redirect_to_payment_mfe_or_basket_page(self, request):
+        """
+        Raises RedirectException to redirect to payment microfrontend or basket page.
+        """
+        _redirect_to_payment_microfrontend_if_configured(request)
+
+        url = add_utm_params_to_url(reverse('basket:summary'), list(request.GET.items()))
+        redirect_response = HttpResponseRedirect(url, status=303)
+        raise RedirectException(response=redirect_response)
 
     def _get_skus(self, request):
         skus = [escape(sku) for sku in request.GET.getlist('sku')]
