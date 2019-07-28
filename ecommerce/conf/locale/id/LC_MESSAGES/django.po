@@ -4,6 +4,7 @@
 # This file is distributed under the GNU AFFERO GENERAL PUBLIC LICENSE.
 # 
 # Translators:
+# Aprisa Chrysantina <aprisa.chrysantina@gmail.com>, 2019
 # Romandito Mahendrayudha <romandito@gmail.com>, 2016
 # Yayang Dwijayani Panggi <yygdepe@gmail.com>, 2016
 msgid ""
@@ -11,8 +12,8 @@ msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: openedx-translation@googlegroups.com\n"
 "POT-Creation-Date: 2018-03-26 16:41-0400\n"
-"PO-Revision-Date: 2018-09-26 23:35+0000\n"
-"Last-Translator: Yonathan Fransiscus <leonord.lim@gmail.com>\n"
+"PO-Revision-Date: 2019-07-28 18:07+0000\n"
+"Last-Translator: Aprisa Chrysantina <aprisa.chrysantina@gmail.com>\n"
 "Language-Team: Indonesian (http://www.transifex.com/open-edx/edx-platform/language/id/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -22,15 +23,15 @@ msgstr ""
 
 #: ecommerce/core/admin.py:21
 msgid "Personal info"
-msgstr ""
+msgstr "Informasi Pribadi"
 
 #: ecommerce/core/admin.py:22
 msgid "Permissions"
-msgstr ""
+msgstr "Izin"
 
 #: ecommerce/core/admin.py:24
 msgid "Important dates"
-msgstr ""
+msgstr "Tanggal penting"
 
 #. Translators: "Waffle" is the name of a third-party library. It should not
 #. be translated
@@ -44,145 +45,145 @@ msgstr ""
 
 #: ecommerce/core/models.py:40
 msgid "LMS base url for custom site/microsite"
-msgstr ""
+msgstr "Url dasar LMS untuk situs kustom/situs mikro"
 
 #: ecommerce/core/models.py:41
 msgid "Root URL of this site's LMS (e.g. https://courses.stage.edx.org)"
-msgstr ""
+msgstr "Root URL untuk LMS situs ini (contoh https://courses.stage.edx.org)"
 
 #: ecommerce/core/models.py:46
 msgid "Path to custom site theme"
-msgstr ""
+msgstr "Path ke tema situs kustom"
 
 #: ecommerce/core/models.py:53
 msgid "Payment processors"
-msgstr ""
+msgstr "Prosesor pembayaran"
 
 #: ecommerce/core/models.py:54
 msgid "Comma-separated list of processor names: 'cybersource,paypal'"
-msgstr ""
+msgstr "Comma-separated list of processor names: 'cybersource,paypal'"
 
 #: ecommerce/core/models.py:60
 msgid "Client-side payment processor"
-msgstr ""
+msgstr "Prosesor pembayaran sisi klien"
 
 #: ecommerce/core/models.py:61
 msgid "Processor that will be used for client-side payments"
-msgstr ""
+msgstr "Prosesor yang akan digunakan untuk pembayaran dari sisi klien"
 
 #: ecommerce/core/models.py:67
 msgid "OAuth settings"
-msgstr ""
+msgstr "Pengaturan OAuth"
 
 #: ecommerce/core/models.py:68
 msgid "JSON string containing OAuth backend settings."
-msgstr ""
+msgstr "String JSON yang berisi pengaturan backend OAuth."
 
 #: ecommerce/core/models.py:74
 msgid "Segment key"
-msgstr ""
+msgstr "Kunci segmen"
 
 #: ecommerce/core/models.py:75
 msgid "Segment write/API key."
-msgstr ""
+msgstr "Segment write/API key."
 
 #: ecommerce/core/models.py:81
 msgid "From email"
-msgstr ""
+msgstr "Dari email"
 
 #: ecommerce/core/models.py:82
 msgid "Address from which emails are sent."
-msgstr ""
+msgstr "Alamat asal pengiriman email."
 
 #: ecommerce/core/models.py:88
 msgid "Enable enrollment codes"
-msgstr ""
+msgstr "Aktifkan kode pendaftaran"
 
 #: ecommerce/core/models.py:89
 msgid "Enable the creation of enrollment codes."
-msgstr ""
+msgstr "Aktifkan pembuatan kode pendaftaran."
 
 #: ecommerce/core/models.py:94
 msgid "Payment support email"
-msgstr ""
+msgstr "Email dukungan pembayaran"
 
 #: ecommerce/core/models.py:95
 msgid "Contact email for payment support issues."
-msgstr ""
+msgstr "Email untuk permasalahan terkait pembayaran"
 
 #: ecommerce/core/models.py:101
 msgid "Payment support url"
-msgstr ""
+msgstr "Url dukungan pembayaran"
 
 #: ecommerce/core/models.py:102
 msgid "URL for payment support issues."
-msgstr ""
+msgstr "URL untuk masalah terkait pembayaran."
 
 #: ecommerce/core/models.py:107
 msgid "UTM Cookie Name"
-msgstr ""
+msgstr "Nama Cookie UTM"
 
 #: ecommerce/core/models.py:108
 msgid "Name of cookie storing UTM data."
-msgstr ""
+msgstr "Nama cookie penyimpanan data UTM."
 
 #: ecommerce/core/models.py:114
 msgid "Affiliate Cookie Name"
-msgstr ""
+msgstr "Nama Cookie Afiliasi"
 
 #: ecommerce/core/models.py:115
 msgid "Name of cookie storing affiliate data."
-msgstr ""
+msgstr "Nama cookie penyimpanan data afiliasi."
 
 #: ecommerce/core/models.py:121
 msgid "Send refund email notification"
-msgstr ""
+msgstr "Kirimkan email notifikasi refund"
 
 #: ecommerce/core/models.py:126
 msgid "Enable SDN check"
-msgstr ""
+msgstr "Aktifkan pemeriksaan SDN"
 
 #: ecommerce/core/models.py:127
 msgid "Enable SDN check at checkout."
-msgstr ""
+msgstr "Aktifkan pemeriksaan SDN saat checkout."
 
 #: ecommerce/core/models.py:131
 msgid "US Treasury SDN API URL"
-msgstr ""
+msgstr "URL API SDN Treasury US"
 
 #: ecommerce/core/models.py:136
 msgid "US Treasury SDN API key"
-msgstr ""
+msgstr "Kunci API SDN Treasury US"
 
 #: ecommerce/core/models.py:141
 msgid "SDN lists"
-msgstr ""
+msgstr "Daftar SDN"
 
 #: ecommerce/core/models.py:142
 msgid "A comma-separated list of Treasury OFAC lists to check against."
-msgstr ""
+msgstr "Daftar terpisah koma untuk OFAC Treasury untuk pemeriksaan."
 
 #: ecommerce/core/models.py:147
 msgid "Require Account Activation"
-msgstr ""
+msgstr "Memerlukan Aktivasi Akun"
 
 #: ecommerce/core/models.py:148
 msgid ""
 "Require users to activate their account before allowing them to redeem a "
 "coupon."
-msgstr ""
+msgstr "Mengharuskan pengguna untuk mengaktivasi akun mereka sebelum menukar kupon."
 
 #: ecommerce/core/models.py:152
 msgid "Optimizely snippet source URL"
-msgstr ""
+msgstr "Optimizely snippet source URL"
 
 #: ecommerce/core/models.py:153
 msgid "This script will be loaded on every page."
-msgstr ""
+msgstr "Script akan diload di setiap halaman."
 
 #: ecommerce/core/models.py:158 ecommerce/extensions/partner/models.py:9
 msgid "Enable Sailthru Reporting"
-msgstr ""
+msgstr "Aktifkan Pelaporan Sailthru"
 
 #: ecommerce/core/models.py:159
 msgid "Determines if purchases should be reported to Sailthru."
@@ -211,11 +212,11 @@ msgstr ""
 #. Translators: Do not translate "Apple Pay"
 #: ecommerce/core/models.py:181
 msgid "Enable Apple Pay"
-msgstr ""
+msgstr "Aktifkan Apple Pay"
 
 #: ecommerce/core/models.py:185
 msgid "Enable Partial Program Offer"
-msgstr ""
+msgstr "Aktifkan Penawaran Program Parsial"
 
 #: ecommerce/core/models.py:186
 msgid ""
@@ -225,90 +226,90 @@ msgstr ""
 
 #: ecommerce/core/models.py:449
 msgid "Full Name"
-msgstr ""
+msgstr "Nama Lengkap"
 
 #: ecommerce/core/models.py:594 ecommerce/extensions/basket/models.py:94
 #: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:56
 #: ecommerce/templates/oscar/dashboard/offers/summary.html:10
 msgid "Name"
-msgstr ""
+msgstr "Nama"
 
 #: ecommerce/coupons/views.py:68 ecommerce/coupons/views.py:117
 msgid "Coupon does not exist."
-msgstr ""
+msgstr "Kupon tidak ditemukan"
 
 #: ecommerce/coupons/views.py:73
 msgid "This coupon code is not yet valid."
-msgstr ""
+msgstr "Kode kupon ini belum valid."
 
 #: ecommerce/coupons/views.py:75
 msgid "This coupon code has expired."
-msgstr ""
+msgstr "Kode kupon ini telah kadaluarsa."
 
 #: ecommerce/coupons/views.py:87
 #, python-brace-format
 msgid "Product [{product}] not available for purchase."
-msgstr ""
+msgstr "Produk [{product}] tidak dapat dibeli."
 
 #: ecommerce/coupons/views.py:92
 msgid "This coupon code is no longer available."
-msgstr ""
+msgstr "Kode kupon ini sudah tidak tersedia."
 
 #: ecommerce/coupons/views.py:112
 msgid "This coupon code is invalid."
-msgstr ""
+msgstr "Kode kupon ini tidak valid."
 
 #: ecommerce/coupons/views.py:119
 msgid "The voucher is not applicable to your current basket."
-msgstr ""
+msgstr "Voucher tidak dapat digunakan untuk barang di dalam keranjang Anda."
 
 #: ecommerce/coupons/views.py:129
 msgid "Welcome to edX"
-msgstr ""
+msgstr "Selamat datang di edX"
 
 #: ecommerce/coupons/views.py:130
 msgid ""
 "Please choose from the courses selected by your organization to start "
 "learning."
-msgstr ""
+msgstr "Silakan pilih kursus yang disediakan organisasi Anda untuk mulai belajar."
 
 #: ecommerce/coupons/views.py:160
 msgid "Code not provided."
-msgstr ""
+msgstr "Kode tidak tersedia."
 
 #: ecommerce/coupons/views.py:162
 msgid "SKU not provided."
-msgstr ""
+msgstr "SKU tidak tersedia."
 
 #: ecommerce/coupons/views.py:173
 msgid "The product does not exist."
-msgstr ""
+msgstr "Produk tidak ditemukan."
 
 #: ecommerce/coupons/views.py:181
 msgid "You are not eligible to use this coupon."
-msgstr ""
+msgstr "Anda tidak dapat menggunakan kupon ini."
 
 #: ecommerce/coupons/views.py:196
 msgid "Couldn't find a matching Enterprise Customer for this coupon."
-msgstr ""
+msgstr "Tidak dapat menemukan Pelanggan Enterprise untuk kupon ini."
 
 #: ecommerce/coupons/views.py:218
 msgid "Invalid data sharing consent token provided."
-msgstr ""
+msgstr "Token consent data sharing tidak valid."
 
 #: ecommerce/coupons/views.py:237
 #, python-brace-format
 msgid "You have already purchased {course} seat."
-msgstr ""
+msgstr "Anda telah membeli {course}."
 
 #: ecommerce/coupons/views.py:250
 #, python-brace-format
 msgid "A discount has been applied, courtesy of {enterprise_customer_name}."
-msgstr ""
+msgstr "Diskon dari {enterprise_customer_name} telah diaplikasikan."
 
 #: ecommerce/coupons/views.py:258
 msgid "This coupon code is not valid for this course. Try a different course."
-msgstr ""
+msgstr "Kode kupon ini tidak valid untuk kursus ini. Coba kursus lainnya."
 
 #: ecommerce/courses/models.py:31 ecommerce/extensions/basket/models.py:14
 #: ecommerce/extensions/offer/models.py:131
@@ -316,43 +317,43 @@ msgstr ""
 #: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:65
 #: ecommerce/templates/oscar/dashboard/offers/summary.html:14
 msgid "Site"
-msgstr ""
+msgstr "Situs"
 
 #: ecommerce/courses/models.py:37
 msgid ""
 "Last date/time on which verification for this product can be submitted."
-msgstr ""
+msgstr "Tanggal/waktu terakhir untuk verifikasi produk ini."
 
 #: ecommerce/courses/publishers.py:61
 #, python-brace-format
 msgid "Failed to publish commerce data for {course_id} to LMS."
-msgstr ""
+msgstr "Gagal menerbitkan data komersial untuk {course_id} ke LMS."
 
 #: ecommerce/courses/utils.py:88
 msgid "Audit"
-msgstr ""
+msgstr "Audit"
 
 #: ecommerce/courses/utils.py:89
 msgid "Credit"
-msgstr ""
+msgstr "Kredit"
 
 #: ecommerce/courses/utils.py:90
 msgid "Honor"
-msgstr ""
+msgstr "Kehormatan"
 
 #: ecommerce/courses/utils.py:91
 msgid "Professional"
-msgstr ""
+msgstr "Profesional"
 
 #: ecommerce/courses/utils.py:92
 msgid "Verified"
-msgstr ""
+msgstr "Terverifikasi"
 
 #: ecommerce/credit/views.py:42
 msgid ""
 "An error has occurred. We could not confirm that you are eligible for course"
 " credit. Try the transaction again."
-msgstr ""
+msgstr "Terjadi kesalahan. Kami tidak dapat mengkonfirmasi apakah Anda berhak mendapatkan kredit kursus ini. Mohon ulangi transaksi."
 
 #: ecommerce/credit/views.py:63
 #, python-brace-format
@@ -361,58 +362,58 @@ msgid ""
 "currently enrolled in the course, please try again after all grading is "
 "complete. If you need additional assistance, please contact the {site_name} "
 "Support Team."
-msgstr ""
+msgstr "Kredit tidak tersedia untuk \"{course_name}\". Jika Anda telah terdaftar dalam kursus, silakan coba kembali setelah semua penilaian selesai. Jika Anda memerlukan bantuan tambahan, silakan hubungi Tim Bantuan {site_name}."
 
 #: ecommerce/credit/views.py:77
 msgid ""
 "An error has occurred. We could not confirm that the institution you "
 "selected offers this course credit. Try the transaction again."
-msgstr ""
+msgstr "Terjadi kesalahan. Kami tidak dapat mengkonfirmasi bahwa institusi yang Anda pilih menawarkan kredit kursus ini. Mohon ulangi transaksi."
 
 #: ecommerce/enterprise/benefits.py:21
 #, python-format
 msgid "%d%% enterprise discount"
-msgstr ""
+msgstr "%d%% diskon enterprise"
 
 #: ecommerce/enterprise/benefits.py:33
 #, python-brace-format
 msgid "{value} fixed-price enterprise discount"
-msgstr ""
+msgstr "{value} diskon enterprise harga tetap"
 
 #: ecommerce/enterprise/constants.py:13 ecommerce/invoice/models.py:22
 #: ecommerce/programs/constants.py:13
 msgid "Percentage"
-msgstr ""
+msgstr "Persentase"
 
 #: ecommerce/enterprise/constants.py:14 ecommerce/programs/constants.py:14
 msgid "Absolute"
-msgstr ""
+msgstr "Absolut"
 
 #: ecommerce/enterprise/forms.py:21
 #: ecommerce/enterprise/templates/enterprise/enterpriseoffer_list.html:30
 msgid "Enterprise Customer UUID"
-msgstr ""
+msgstr "UUID Pelanggan Enterprise"
 
 #: ecommerce/enterprise/forms.py:22
 #: ecommerce/enterprise/templates/enterprise/enterpriseoffer_list.html:31
 msgid "Enterprise Customer Catalog UUID"
-msgstr ""
+msgstr "UUID Katalog Pelanggan Enterprise"
 
 #: ecommerce/enterprise/forms.py:23 ecommerce/programs/forms.py:20
 msgid "Discount Type"
-msgstr ""
+msgstr "Jenis Diskon"
 
 #: ecommerce/enterprise/forms.py:25 ecommerce/programs/forms.py:22
 msgid "Discount Value"
-msgstr ""
+msgstr "Jumlah Diskon"
 
 #: ecommerce/enterprise/forms.py:38 ecommerce/programs/forms.py:32
 msgid "Start Date"
-msgstr ""
+msgstr "Tanggal Mulai"
 
 #: ecommerce/enterprise/forms.py:39 ecommerce/programs/forms.py:33
 msgid "End Date"
-msgstr ""
+msgstr "Tanggal Berakhir"
 
 #: ecommerce/enterprise/forms.py:77
 msgid "An offer already exists for this Enterprise & Catalog combination."
@@ -468,7 +469,7 @@ msgstr ""
 #: ecommerce/templates/oscar/dashboard/offers/summary.html:30
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:693
 msgid "Edit"
-msgstr ""
+msgstr "Ubah"
 
 #: ecommerce/enterprise/templates/enterprise/enterpriseoffer_form.html:34
 #: ecommerce/programs/templates/programs/programoffer_form.html:34
@@ -489,7 +490,7 @@ msgstr ""
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:321
 #: ecommerce/templates/oscar/dashboard/partials/refund_action_modal.html:20
 msgid "Cancel"
-msgstr ""
+msgstr "Batal"
 
 #: ecommerce/enterprise/templates/enterprise/enterpriseoffer_form.html:72
 #: ecommerce/enterprise/templates/enterprise/enterpriseoffer_list.html:62
@@ -510,7 +511,7 @@ msgstr ""
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:627
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:679
 msgid "Type"
-msgstr ""
+msgstr "Ketik"
 
 #: ecommerce/enterprise/templates/enterprise/enterpriseoffer_list.html:33
 #: ecommerce/programs/templates/programs/programoffer_list.html:32
@@ -520,12 +521,12 @@ msgstr ""
 #: ecommerce/enterprise/templates/enterprise/enterpriseoffer_list.html:34
 #: ecommerce/programs/templates/programs/programoffer_list.html:33
 msgid "Start"
-msgstr ""
+msgstr "Mulai"
 
 #: ecommerce/enterprise/templates/enterprise/enterpriseoffer_list.html:35
 #: ecommerce/programs/templates/programs/programoffer_list.html:34
 msgid "End"
-msgstr ""
+msgstr "Selesai"
 
 #: ecommerce/enterprise/utils.py:113
 #, python-brace-format
@@ -566,30 +567,30 @@ msgstr ""
 
 #: ecommerce/extensions/api/exceptions.py:7
 msgid "You can't check out with an empty basket."
-msgstr ""
+msgstr "Anda tidak dapat checkout dengan keranjang kosong."
 
 #: ecommerce/extensions/api/exceptions.py:10
 msgid ""
 "We couldn't locate the identification code necessary to find one of your "
 "products."
-msgstr ""
+msgstr "Kami tidak dapat menemukan kode identifikasi yang diperlukan untuk salah satu produk Anda."
 
 #: ecommerce/extensions/api/exceptions.py:13
 msgid "We couldn't find one of the products you're looking for."
-msgstr ""
+msgstr "Kami tidak dapat menemukan produk yang Anda cari."
 
 #: ecommerce/extensions/api/exceptions.py:16
 msgid "One of the products you're trying to order is unavailable."
-msgstr ""
+msgstr "Satu dari produk yang ingin Anda pesan tidak tersedia."
 
 #: ecommerce/extensions/api/serializers.py:337
 msgid "Products must have a certificate type."
-msgstr ""
+msgstr "Produk harus memiliki jenis sertifikat."
 
 #: ecommerce/extensions/api/serializers.py:340
 #: ecommerce/extensions/api/serializers.py:371
 msgid "Products must have a price."
-msgstr ""
+msgstr "Produk harus memiliki harga."
 
 #: ecommerce/extensions/api/serializers.py:347
 msgid "You need to provide a course UUID to create Course Entitlements."
@@ -618,20 +619,20 @@ msgstr ""
 
 #: ecommerce/extensions/api/serializers.py:652
 msgid "Discount code"
-msgstr ""
+msgstr "Kode diskon"
 
 #: ecommerce/extensions/api/serializers.py:666
 msgid "ACTIVE"
-msgstr ""
+msgstr "AKTIF"
 
 #: ecommerce/extensions/api/serializers.py:666
 msgid "INACTIVE"
-msgstr ""
+msgstr "TIDAK AKTIF"
 
 #: ecommerce/extensions/api/v2/views/baskets.py:363
 #: ecommerce/extensions/basket/views.py:57
 msgid "No SKUs provided."
-msgstr ""
+msgstr "SKU tidak ditemukan."
 
 #: ecommerce/extensions/api/v2/views/baskets.py:373
 #: ecommerce/extensions/basket/views.py:61
@@ -642,21 +643,21 @@ msgstr ""
 #: ecommerce/extensions/basket/models.py:83
 #, python-brace-format
 msgid "{id} - {status} basket (owner: {owner}, lines: {num_lines})"
-msgstr ""
+msgstr "{id} - {status} keranjang (owner: {owner}, lines: {num_lines})"
 
 #: ecommerce/extensions/basket/models.py:106
 #: ecommerce/extensions/payment/models.py:18
 #: ecommerce/templates/oscar/basket/basket.html:8
 msgid "Basket"
-msgstr ""
+msgstr "Keranjang"
 
 #: ecommerce/extensions/basket/models.py:108
 msgid "Attribute Type"
-msgstr ""
+msgstr "Jenis Atribut"
 
 #: ecommerce/extensions/basket/models.py:110
 msgid "Text Attribute"
-msgstr ""
+msgstr "Atribut Teks"
 
 #: ecommerce/extensions/basket/utils.py:82
 msgid ""
@@ -693,23 +694,23 @@ msgstr ""
 msgid ""
 "After you complete your order you will be able to select course dates from "
 "your dashboard."
-msgstr ""
+msgstr "Setelah menyelesaikan pesanan Anda, Anda dapat memilih tanggal kursus dari dashboard Anda."
 
 #: ecommerce/extensions/basket/views.py:226
 msgid ""
 "After you complete your order you will be automatically enrolled in the "
 "verified track of the course."
-msgstr ""
+msgstr "Setelah menyelesaikan pesanan Anda, Anda akan terdaftar secara otomatis di jalur terverifikasi kursus."
 
 #: ecommerce/extensions/basket/views.py:230
 msgid "After you complete your order you will receive credit for your course."
-msgstr ""
+msgstr "Setelah menyelesaikan pesanan Anda, Anda akan menerima kredit untuk kursus Anda."
 
 #: ecommerce/extensions/basket/views.py:233
 msgid ""
 "After you complete your order you will be automatically enrolled in the "
 "course."
-msgstr ""
+msgstr "Setelah menyelesaikan pesanan Anda, Anda secara otomatis akan terdaftar dalam kursus."
 
 #: ecommerce/extensions/basket/views.py:239
 #, python-brace-format
@@ -783,14 +784,14 @@ msgstr ""
 #: ecommerce/templates/oscar/dashboard/refunds/refund_list.html:59
 #: ecommerce/templates/oscar/dashboard/users/detail.html:40
 msgid "Username"
-msgstr ""
+msgstr "Nama Pengguna"
 
 #: ecommerce/extensions/dashboard/forms.py:8
 #: ecommerce/templates/oscar/dashboard/orders/order_list.html:73
 #: ecommerce/templates/oscar/dashboard/refunds/refund_list.html:60
 #: ecommerce/templates/oscar/dashboard/users/detail.html:48
 msgid "Email"
-msgstr ""
+msgstr "Surel"
 
 #: ecommerce/extensions/dashboard/orders/views.py:72
 #, python-brace-format
@@ -830,7 +831,7 @@ msgstr ""
 #: ecommerce/templates/oscar/dashboard/refunds/refund_list.html:58
 #: ecommerce/templates/oscar/dashboard/users/detail.html:142
 msgid "Status"
-msgstr ""
+msgstr "Status"
 
 #: ecommerce/extensions/dashboard/users/views.py:47
 msgid "Failed to retrieve enrollment data."
@@ -860,7 +861,7 @@ msgstr ""
 #: ecommerce/extensions/voucher/utils.py:220 ecommerce/programs/forms.py:19
 #: ecommerce/programs/templates/programs/programoffer_list.html:30
 msgid "Program UUID"
-msgstr ""
+msgstr "UUID Program"
 
 #: ecommerce/extensions/offer/utils.py:64
 #, python-brace-format
@@ -895,11 +896,11 @@ msgstr ""
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:191
 #: ecommerce/templates/oscar/dashboard/orders/line_detail.html:73
 msgid "Partner"
-msgstr ""
+msgstr "Mitra"
 
 #: ecommerce/extensions/partner/models.py:15 ecommerce/settings/_oscar.py:222
 msgid "Partners"
-msgstr ""
+msgstr "Mitra"
 
 #: ecommerce/extensions/payment/constants.py:9
 msgid "American Express"
@@ -935,7 +936,7 @@ msgstr ""
 
 #: ecommerce/extensions/payment/forms.py:109
 msgid "Organization (required)"
-msgstr ""
+msgstr "Organisasi (wajib diisi)"
 
 #: ecommerce/extensions/payment/forms.py:125
 #: ecommerce/extensions/payment/forms.py:215
@@ -946,23 +947,23 @@ msgstr ""
 
 #: ecommerce/extensions/payment/forms.py:128
 msgid "First Name (required)"
-msgstr ""
+msgstr "Nama Depan (wajib diisi)"
 
 #: ecommerce/extensions/payment/forms.py:129
 msgid "Last Name (required)"
-msgstr ""
+msgstr "Nama Akhir (wajib diisi)"
 
 #: ecommerce/extensions/payment/forms.py:130
 msgid "Address (required)"
-msgstr ""
+msgstr "Alamat (wajib diisi)"
 
 #: ecommerce/extensions/payment/forms.py:131
 msgid "Suite/Apartment Number"
-msgstr ""
+msgstr "Nomer Rumah/Apartemen"
 
 #: ecommerce/extensions/payment/forms.py:132
 msgid "City (required)"
-msgstr ""
+msgstr "Kota (wajib diisi)"
 
 #: ecommerce/extensions/payment/forms.py:135
 msgid "State/Province"
@@ -970,17 +971,17 @@ msgstr ""
 
 #: ecommerce/extensions/payment/forms.py:136
 msgid "Zip/Postal Code"
-msgstr ""
+msgstr "Kode Pos"
 
 #: ecommerce/extensions/payment/forms.py:137
 msgid "Country (required)"
-msgstr ""
+msgstr "Negara (wajib diisi)"
 
 #: ecommerce/extensions/payment/forms.py:164
 #: ecommerce/extensions/payment/forms.py:166
 #: ecommerce/extensions/payment/forms.py:190
 msgid "This field is required."
-msgstr ""
+msgstr "Kolom ini wajib diisi."
 
 #: ecommerce/extensions/payment/forms.py:177
 #, python-brace-format
@@ -994,7 +995,7 @@ msgstr ""
 
 #: ecommerce/extensions/payment/models.py:17
 msgid "Transaction ID"
-msgstr ""
+msgstr "ID transaksi"
 
 #: ecommerce/extensions/payment/models.py:26
 msgid "Payment Processor Response"
@@ -1028,12 +1029,12 @@ msgstr ""
 
 #: ecommerce/extensions/refund/models.py:67
 msgid "Order"
-msgstr ""
+msgstr "Pesanan"
 
 #: ecommerce/extensions/refund/models.py:68
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:678
 msgid "User"
-msgstr ""
+msgstr "Pengguna"
 
 #: ecommerce/extensions/refund/models.py:69
 msgid "Total Credit (excl. tax)"
@@ -1042,7 +1043,7 @@ msgstr ""
 #: ecommerce/extensions/refund/models.py:70
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:198
 msgid "Currency"
-msgstr ""
+msgstr "Mata uang"
 
 #: ecommerce/extensions/refund/models.py:296
 msgid "Refund"
@@ -1067,7 +1068,7 @@ msgstr ""
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:138
 #: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html:104
 msgid "Quantity"
-msgstr ""
+msgstr "Kuantitas"
 
 #: ecommerce/extensions/voucher/tests/test_utils.py:176
 #: ecommerce/extensions/voucher/utils.py:70
@@ -1091,7 +1092,7 @@ msgstr ""
 #: ecommerce/extensions/voucher/utils.py:89
 #: ecommerce/extensions/voucher/utils.py:132
 msgid "Enrollment"
-msgstr ""
+msgstr "Pendaftaran"
 
 #: ecommerce/extensions/voucher/tests/test_utils.py:339
 #: ecommerce/extensions/voucher/tests/test_utils.py:347
@@ -1109,11 +1110,11 @@ msgstr ""
 #: ecommerce/extensions/voucher/utils.py:70
 #: ecommerce/templates/oscar/dashboard/users/detail.html:52
 msgid "Active"
-msgstr ""
+msgstr "Aktif"
 
 #: ecommerce/extensions/voucher/utils.py:213
 msgid "Code"
-msgstr ""
+msgstr "Kode"
 
 #: ecommerce/extensions/voucher/utils.py:214
 msgid "Coupon Name"
@@ -1133,12 +1134,12 @@ msgstr ""
 
 #: ecommerce/extensions/voucher/utils.py:218
 msgid "URL"
-msgstr ""
+msgstr "URL"
 
 #: ecommerce/extensions/voucher/utils.py:219
 #: ecommerce/templates/oscar/dashboard/partials/enrollment_table.html:8
 msgid "Course ID"
-msgstr ""
+msgstr "ID Kursus"
 
 #: ecommerce/extensions/voucher/utils.py:221
 msgid "Catalog Query"
@@ -1150,26 +1151,26 @@ msgstr ""
 
 #: ecommerce/extensions/voucher/utils.py:223
 msgid "Organization"
-msgstr ""
+msgstr "Lembaga"
 
 #: ecommerce/extensions/voucher/utils.py:224
 msgid "Client"
-msgstr ""
+msgstr "Klien"
 
 #: ecommerce/extensions/voucher/utils.py:225
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:124
 msgid "Category"
-msgstr ""
+msgstr "Kategori"
 
 #: ecommerce/extensions/voucher/utils.py:226
 msgid "Note"
-msgstr ""
+msgstr "Catatan"
 
 #: ecommerce/extensions/voucher/utils.py:227
 #: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:50
 #: ecommerce/templates/oscar/basket/partials/hosted_checkout_basket.html:62
 msgid "Price"
-msgstr ""
+msgstr "Harga"
 
 #: ecommerce/extensions/voucher/utils.py:228
 msgid "Invoiced Amount"
@@ -1177,7 +1178,7 @@ msgstr ""
 
 #: ecommerce/extensions/voucher/utils.py:229
 msgid "Discount Percentage"
-msgstr ""
+msgstr "Persentase Diskon"
 
 #: ecommerce/extensions/voucher/utils.py:230
 msgid "Discount Amount"
@@ -1186,7 +1187,7 @@ msgstr ""
 #: ecommerce/extensions/voucher/utils.py:232
 #: ecommerce/templates/oscar/dashboard/users/detail.html:138
 msgid "Order Number"
-msgstr ""
+msgstr "Nomor Pesanan"
 
 #: ecommerce/extensions/voucher/utils.py:233
 msgid "Redeemed By Username"
@@ -1261,7 +1262,7 @@ msgstr ""
 
 #: ecommerce/management/templates/management/index.html:7
 msgid "Management View"
-msgstr ""
+msgstr "Tampilan Manajemen"
 
 #: ecommerce/management/templates/management/index.html:26
 msgid "Refund Transactions"
@@ -1270,7 +1271,7 @@ msgstr ""
 #: ecommerce/management/views.py:51
 #, python-brace-format
 msgid "{action} is not a valid action."
-msgstr ""
+msgstr "{action} tidak valid."
 
 #: ecommerce/programs/benefits.py:25
 #, python-brace-format
@@ -1375,7 +1376,7 @@ msgstr ""
 #: ecommerce/templates/oscar/dashboard/refunds/refund_list.html:30
 #: ecommerce/templates/oscar/dashboard/users/detail.html:20
 msgid "Dashboard"
-msgstr ""
+msgstr "Dashboard"
 
 #: ecommerce/settings/_oscar.py:184
 msgid "Catalogue"
@@ -1455,7 +1456,7 @@ msgstr ""
 
 #: ecommerce/settings/_oscar.py:260
 msgid "Reports"
-msgstr ""
+msgstr "Laporkan"
 
 #: ecommerce/settings/base.py:84
 msgid "English"
@@ -1481,21 +1482,21 @@ msgstr ""
 #: ecommerce/templates/coupons/offer.html:5
 #: ecommerce/templates/edx/email_confirmation_required.html:4
 msgid "Redeem"
-msgstr ""
+msgstr "Tukar Kupon"
 
 #: ecommerce/templates/coupons/coupon_app.html:5
 msgid "Coupon Codes"
-msgstr ""
+msgstr "Kode Kupon"
 
 #: ecommerce/templates/coupons/offer.html:18
 msgid ""
 "Earn a verified certificate in one of our popular courses to advance your "
 "career, showcase your accomplishments or enhance your college application."
-msgstr ""
+msgstr "Dapatkan sertifikat terverifikasi dari salah satu kursus kami untuk mendorong karir Anda, memamerkan pencapaian Anda, atau membantu aplikasi kuliah Anda."
 
 #: ecommerce/templates/coupons/offer.html:22
 msgid "Why buy a verified certificate?"
-msgstr ""
+msgstr "Mengapa membeli sertifikat terverifikasi?"
 
 #: ecommerce/templates/coupons/offer.html:27
 msgid ""
@@ -1504,13 +1505,13 @@ msgid ""
 "university's logo, as well as signatures from faculty members involved with "
 "the course. There is also a URL that can be used to verify the authenticity "
 "of the certificate."
-msgstr ""
+msgstr "Sertifikat yang terverifikasi (secara digital) mengkonfirmasi bahwa pengguna telah menyelesaikan kursus pada tanggal tertentu. Sertifikat ini meliputi logo edX dan logo universitas, juga tanda tangan terkait dari universitas tersebut. Terdapat URL yang dapat digunakan untuk memverifikasi keaslian sertifikat."
 
 #: ecommerce/templates/coupons/offer.html:30
 msgid ""
 "A verified certificate demonstrates to future employers that you've mastered"
 " the course material."
-msgstr ""
+msgstr "Sertifikat terverifikasi menunjukkan kepada calon kolega Anda bahwa Anda telah menguasai materi kursus tersebut."
 
 #: ecommerce/templates/coupons/offer.html:32
 msgid ""
@@ -1522,40 +1523,40 @@ msgstr ""
 msgid ""
 "You're twelve times more likely to complete the course if you're working "
 "toward a verified certificate."
-msgstr ""
+msgstr "Anda 12 kali lebih mungkin untuk menyelesaikan kursus jika Anda menggunakan jalur sertifikat terverifikasi."
 
 #: ecommerce/templates/courses/course_app.html:5
 #: ecommerce/templates/edx/partials/_administration_menu.html:5
 msgid "Courses"
-msgstr ""
+msgstr "Kursus"
 
 #: ecommerce/templates/courses/course_app.html:25
 #, python-format
 msgid "%(platform_name)s Course Administration Tool"
-msgstr ""
+msgstr "%(platform_name)s Perangkat Administrasi Kursus"
 
 #: ecommerce/templates/courses/menu_options.html:8
 msgid "Student Dashboard"
-msgstr ""
+msgstr "Dashboard Peserta"
 
 #: ecommerce/templates/courses/menu_options.html:11
 msgid "Course Admin Tool"
-msgstr ""
+msgstr "Perangkat Admin Kursus"
 
 #: ecommerce/templates/courses/menu_options.html:14
 msgid "E-Commerce Dashboard"
-msgstr ""
+msgstr "Dashboard E-Commerce"
 
 #: ecommerce/templates/customer/email_base.html:188
 #, python-format
 msgid "Copyright © %(year)s %(platform_name)s. All rights reserved."
-msgstr ""
+msgstr "Hak Cipta © %(year)s %(platform_name)s. Semua hak cipta dilindungi undang-undang."
 
 #: ecommerce/templates/customer/emails/commtype_course_purchased_body.html:9
 #: ecommerce/templates/customer/emails/commtype_course_purchased_body.txt:4
 #, python-format
 msgid "Hi %(full_name)s,"
-msgstr ""
+msgstr "Hai %(full_name)s,"
 
 #: ecommerce/templates/customer/emails/commtype_course_purchased_body.html:11
 #: ecommerce/templates/customer/emails/commtype_course_purchased_body.txt:6
@@ -1564,7 +1565,7 @@ msgid ""
 "Thank you for purchasing %(course_title)s. The charge below will appear on "
 "your next credit or debit card statement with a company name of "
 "%(platform_name)s."
-msgstr ""
+msgstr "Terima kasih sudah membeli %(course_title)s. Tagihan berikut akan muncul di pernyataan kartu kredit atau debit Anda dengan nama institusi %(platform_name)s."
 
 #: ecommerce/templates/customer/emails/commtype_course_purchased_body.html:13
 #: ecommerce/templates/customer/emails/commtype_course_purchased_body.txt:8
@@ -1572,7 +1573,7 @@ msgstr ""
 msgid ""
 "You can access your course and complete your verification (if required) on "
 "your %(platform_name)s dashboard. "
-msgstr ""
+msgstr "Anda dapat mengakses dan melengkapi verifikasi (jika diperlukan) di dashboard %(platform_name)s Anda."
 
 #: ecommerce/templates/customer/emails/commtype_course_purchased_body.html:14
 #: ecommerce/templates/customer/emails/commtype_course_purchased_body.txt:9
@@ -1610,7 +1611,7 @@ msgstr ""
 
 #: ecommerce/templates/customer/emails/commtype_course_purchased_body.txt:15
 msgid "The edX team"
-msgstr ""
+msgstr "Tim IndonesiaX"
 
 #: ecommerce/templates/customer/emails/commtype_course_purchased_subject.txt:2
 msgid "Order Placed"
@@ -1765,13 +1766,13 @@ msgstr ""
 #: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html:45
 #: ecommerce/templates/customer/emails/commtype_order_with_csv_body.txt:18
 msgid "By purchasing, you and your organization agree to the following terms:"
-msgstr ""
+msgstr "Dengan membeli, Anda dan organisasi Anda menyetujui persyaratan berikut:"
 
 #: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html:47
 #: ecommerce/templates/customer/emails/commtype_order_with_csv_body.txt:20
 msgid ""
 "Each code is valid for the one course covered and can be used only one time."
-msgstr ""
+msgstr "Setiap kode valid untuk satu kursus dan hanya dapat digunakan satu kali."
 
 #: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html:48
 #: ecommerce/templates/customer/emails/commtype_order_with_csv_body.txt:21
@@ -1783,19 +1784,19 @@ msgstr ""
 msgid ""
 "Each code will expire in one year from date of purchase or, if earlier, once"
 " the course is closed."
-msgstr ""
+msgstr "Setiap kode akan kadaluarsa satu tahun dari tanggal pembelian, atau jika sebelumnya, saat kursus ditutup."
 
 #: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html:50
 #: ecommerce/templates/customer/emails/commtype_order_with_csv_body.txt:23
 msgid ""
 "If a course is not designated as self-paced, you should confirm that a "
 "course run is available before expiration."
-msgstr ""
+msgstr "Jika kursus tidak didesain untuk belajar mandiri, Anda harus mengkonfirmasi bahwa kursus yang berjalan tersedia sebelum kadaluarsa."
 
 #: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html:51
 #: ecommerce/templates/customer/emails/commtype_order_with_csv_body.txt:24
 msgid "You may not resell codes to third parties."
-msgstr ""
+msgstr "Anda tidak boleh menjual ulang kode ke pihak ketiga."
 
 #: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html:52
 #: ecommerce/templates/customer/emails/commtype_order_with_csv_body.txt:25
@@ -1831,7 +1832,7 @@ msgstr ""
 
 #: ecommerce/templates/edx/base_menu.html:7
 msgid "Sign Out"
-msgstr ""
+msgstr "Keluar"
 
 #: ecommerce/templates/edx/checkout/receipt.html:11
 #, python-format
@@ -1901,7 +1902,7 @@ msgstr ""
 #: ecommerce/templates/edx/checkout/receipt.html:103
 #: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:58
 msgid "Subtotal"
-msgstr ""
+msgstr "Subtotal"
 
 #: ecommerce/templates/edx/checkout/receipt.html:118
 #, python-format
@@ -1932,7 +1933,7 @@ msgstr ""
 
 #: ecommerce/templates/edx/checkout/receipt.html:173
 msgid "Go to Dashboard"
-msgstr ""
+msgstr "Menuju Kontrol panel"
 
 #: ecommerce/templates/edx/checkout/receipt.html:179
 msgid "Find more courses"
@@ -1964,7 +1965,7 @@ msgstr ""
 
 #: ecommerce/templates/edx/credit/_provider_detail.html:8
 msgid "Select"
-msgstr ""
+msgstr "Pilih"
 
 #: ecommerce/templates/edx/credit/_provider_detail.html:16
 msgid "Credits: "
@@ -2015,50 +2016,50 @@ msgstr ""
 
 #: ecommerce/templates/edx/credit/checkout.html:46
 msgid "Price:"
-msgstr ""
+msgstr "Harga:"
 
 #: ecommerce/templates/edx/credit/checkout.html:50
 msgid "Discount:"
-msgstr ""
+msgstr "Diskon:"
 
 #: ecommerce/templates/edx/credit/checkout.html:55
 #: ecommerce/templates/oscar/basket/partials/hosted_checkout_basket.html:122
 msgid "Total:"
-msgstr ""
+msgstr "Jumlah"
 
 #: ecommerce/templates/edx/credit/checkout.html:84
 msgid "You deserve it."
-msgstr ""
+msgstr "Anda pantas mendapatkannya."
 
 #: ecommerce/templates/edx/credit/checkout.html:87
 msgid ""
 "The hard work is over - you passed the course! Now get the credit you "
 "deserve to start or complete a degree."
-msgstr ""
+msgstr "Kerja keras telah berakhir - Anda telah lulus dari kursus ini! Dapatkan kredit Anda untuk memulai atau menyelesaikan gelar Anda."
 
 #: ecommerce/templates/edx/credit/checkout.html:93
 msgid "It's affordable."
-msgstr ""
+msgstr "Harganya terjangkau."
 
 #: ecommerce/templates/edx/credit/checkout.html:96
 msgid ""
 "The credit offered through edX generally costs less than the same credit at "
 "most institutions."
-msgstr ""
+msgstr "Kredit yang diberikan melalui edX umumnya lebih murah daripada kredit yang sama di institusi lain."
 
 #: ecommerce/templates/edx/credit/checkout.html:102
 msgid "It opens doors."
-msgstr ""
+msgstr "Membuka kesempatan."
 
 #: ecommerce/templates/edx/credit/checkout.html:105
 msgid ""
 "Many of today's most in-demand jobs require a college degree. Start your "
 "path to success!"
-msgstr ""
+msgstr "Saat ini sebagian besar pekerjaan paling laris membutuhkan gelar sarjana. Mulai langkah Anda menuju sukses!"
 
 #: ecommerce/templates/edx/credit/checkout.html:113
 msgid "Questions?"
-msgstr ""
+msgstr "Pertanyaan?"
 
 #: ecommerce/templates/edx/credit/checkout.html:116
 #, python-format
@@ -2066,57 +2067,57 @@ msgid ""
 "\n"
 "                    Please read %(link_start)sour FAQs to view common questions about our certificates.%(link_end)s\n"
 "                "
-msgstr ""
+msgstr "\n                    Silakan baca %(link_start)sFAQ kami untuk melihat pertanyaan yang paling sering terkait sertifikat.%(link_end)s\n                "
 
 #: ecommerce/templates/edx/email_confirmation_required.html:16
 msgid "You are enrolling in: "
-msgstr ""
+msgstr "Anda mendaftar pada:"
 
 #: ecommerce/templates/edx/email_confirmation_required.html:23
 #, python-format
 msgid ""
 "An email has been sent to %(user_email)s with a link for you to activate "
 "your account."
-msgstr ""
+msgstr "Email telah dikirimkan ke %(user_email)s dengan tautan untuk mengaktivasi akun Anda."
 
 #: ecommerce/templates/edx/email_confirmation_required.html:25
 msgid "Why activate?"
-msgstr ""
+msgstr "Mengapa harus aktivasi?"
 
 #: ecommerce/templates/edx/email_confirmation_required.html:27
 msgid ""
 "We ask you to activate your account to ensure it is really you creating the "
 "account and to prevent fraud."
-msgstr ""
+msgstr "Kami meminta Anda untuk mengaktivasi akun Anda untuk memastikan bahwa memang Anda yang membuat akun ini dan untuk mencegah penyalahgunaan."
 
 #: ecommerce/templates/edx/error.html:16
 msgid "If you need assistance, contact edX support."
-msgstr ""
+msgstr "Jika Anda memerlukan bantuan, hubungi bantuan edX."
 
 #: ecommerce/templates/edx/partials/_administration_menu.html:6
 msgid "Coupons"
-msgstr ""
+msgstr "Kupon"
 
 #: ecommerce/templates/edx/partials/_base_navbar.html:10
 msgid "Toggle navigation"
-msgstr ""
+msgstr "Alihkan navigasi"
 
 #: ecommerce/templates/edx/partials/_base_navbar.html:25
 msgid "Dashboard for:"
-msgstr ""
+msgstr "Dashboard untuk:"
 
 #: ecommerce/templates/edx/partials/_base_navbar.html:32
 msgid "Toggle Dropdown"
-msgstr ""
+msgstr "Alihkan Dropdown"
 
 #: ecommerce/templates/edx/partials/_base_navbar.html:40
 #: ecommerce/templates/edx/partials/_base_navbar.html:41
 msgid "Login"
-msgstr ""
+msgstr "Masuk"
 
 #: ecommerce/templates/edx/partials/_staff_navbar.html:9
 msgid "E-Commerce Course Administration"
-msgstr ""
+msgstr "Administrasi Kursus E-Commerce"
 
 #: ecommerce/templates/edx/partials/_staff_navbar.html:14
 msgid "E-Commerce Coupon Administration"
@@ -2128,7 +2129,7 @@ msgstr ""
 
 #: ecommerce/templates/oscar/basket/basket.html:37
 msgid "Your basket is empty"
-msgstr ""
+msgstr "Keranjang Anda kosong"
 
 #: ecommerce/templates/oscar/basket/basket.html:46
 #, python-format
@@ -2137,11 +2138,11 @@ msgid ""
 "                                If you attempted to make a purchase, you have not been charged. Return to your %(dashboard_link_start)sdashboard%(link_end)s to try\n"
 "                                again, or %(support_link_start)scontact %(platform_name)s Support%(link_end)s.\n"
 "                            "
-msgstr ""
+msgstr "\n                                Jika Anda bermaksud untuk melakukan pembelian, Anda belum membayar. Kembali ke %(dashboard_link_start)sdashboard Anda%(link_end)s untuk mencoba\n                                kembali, atau %(support_link_start)shubungi %(platform_name)s Bantuan%(link_end)s.\n                            "
 
 #: ecommerce/templates/oscar/basket/messages/new_total.html:6
 msgid "Your basket is now empty"
-msgstr ""
+msgstr "Keranjang Anda sekarang kosong"
 
 #: ecommerce/templates/oscar/basket/messages/new_total.html:9
 #: ecommerce/templates/oscar/basket/messages/new_total.html:14
@@ -2151,54 +2152,54 @@ msgid ""
 "            %(strong_start)sWe’ve updated your quantity.%(strong_end)s\n"
 "            %(paragraph_start)sYour cart includes %(num_items)s enrollment codes at a total cost of %(total)s, that you will receive via email.%(paragraph_end)s\n"
 "        "
-msgstr ""
+msgstr "\n            %(strong_start)sKami telah memperbarui jumlah Anda.%(strong_end)s\n            %(paragraph_start)sKeranjang Anda berisi %(num_items)s kode pendaftaran sejumlah %(total)s, yang akan Anda terima melalui email.%(paragraph_end)s\n        "
 
 #: ecommerce/templates/oscar/basket/messages/new_total.html:24
 msgid "View basket"
-msgstr ""
+msgstr "Lihat keranjang"
 
 #: ecommerce/templates/oscar/basket/messages/new_total.html:25
 msgid "Checkout now"
-msgstr ""
+msgstr "Checkout sekarang"
 
 #: ecommerce/templates/oscar/basket/partials/add_voucher_form.html:11
 msgid "Applying..."
-msgstr ""
+msgstr "Mengaplikasikan..."
 
 #: ecommerce/templates/oscar/basket/partials/add_voucher_form.html:16
 msgid "Apply"
-msgstr ""
+msgstr "Aplikasikan"
 
 #: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:16
 msgid "in your cart"
-msgstr ""
+msgstr "dalam keranjang Anda"
 
 #: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:17
 msgid "Your purchase contains the following"
-msgstr ""
+msgstr "Pembelian Anda berisi"
 
 #: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:36
 #: ecommerce/templates/oscar/basket/partials/hosted_checkout_basket.html:56
 msgid "Updating..."
-msgstr ""
+msgstr "Memperbarui..."
 
 #: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:36
 #: ecommerce/templates/oscar/basket/partials/hosted_checkout_basket.html:56
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:516
 msgid "Update"
-msgstr ""
+msgstr "Pembaruan"
 
 #: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:47
 msgid "summary"
-msgstr ""
+msgstr "ringkasan"
 
 #: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:54
 msgid "Quanity"
-msgstr ""
+msgstr "Jumlah"
 
 #: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:64
 msgid "Discounts applied"
-msgstr ""
+msgstr "Diskon diaplikasikan"
 
 #: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:74
 #, python-format
@@ -2206,7 +2207,7 @@ msgid ""
 "\n"
 "                                    %(benefit)s discount provided by %(enterprise_customer_name)s.\n"
 "                                "
-msgstr ""
+msgstr "\n                                   diskon %(benefit)s disediakan oleh %(enterprise_customer_name)s.\n                                "
 
 #: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:90
 #, python-format
@@ -2214,82 +2215,82 @@ msgid ""
 "\n"
 "                                        Coupon %(voucher_code)s applied for %(total_benefit)s off\n"
 "                                    "
-msgstr ""
+msgstr "\n                                        Kupon %(voucher_code)s diaplikasikan untuk diskon %(total_benefit)s \n                                    "
 
 #: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:95
 msgid "Remove coupon"
-msgstr ""
+msgstr "Batalkan kupon"
 
 #: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:104
 msgid "Add coupon code"
-msgstr ""
+msgstr "Tambahkan kode kupon"
 
 #: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:104
 msgid "(optional)"
-msgstr ""
+msgstr "(opsional)"
 
 #: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:113
 msgid "TOTAL"
-msgstr ""
+msgstr "TOTAL"
 
 #: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:120
 msgid "order details"
-msgstr ""
+msgstr "Rincian pesanan"
 
 #: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:135
 msgid "select payment method"
-msgstr ""
+msgstr "pilih metode pembayaran"
 
 #: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:137
 msgid "Pay with a Credit Card"
-msgstr ""
+msgstr "Bayar dengan Kartu Kredit"
 
 #: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:148
 msgid "Pay with PayPal"
-msgstr ""
+msgstr "Bayar dengan PayPal"
 
 #: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:157
 msgid "Pay with Apple Pay"
-msgstr ""
+msgstr "Bayar dengan Apple Pay"
 
 #: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:172
 msgid "card holder information"
-msgstr ""
+msgstr "informasi pemegang kartu"
 
 #: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:183
 msgid "billing information"
-msgstr ""
+msgstr "informasi tagihan"
 
 #: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:185
 msgid "Credit cards"
-msgstr ""
+msgstr "Kartu Kredit"
 
 #: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:192
 msgid "Card Number (required)"
-msgstr ""
+msgstr "Nomer Kartu (wajib diisi)"
 
 #: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:192
 #: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:202
 msgid "Secure"
-msgstr ""
+msgstr "Aman"
 
 #: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:195
 msgid "Credit card icon"
-msgstr ""
+msgstr "Ikon kartu kredit"
 
 #: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:201
 msgid "Security Code (required)"
-msgstr ""
+msgstr "Kode Keamanan (wajib diisi)"
 
 #: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:205
 msgid "Help with CVV"
-msgstr ""
+msgstr "Bantuan terkait CVV"
 
 #: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:208
 msgid ""
 "The three last digits in the signature area on the back of your card. For "
 "American Express, it is the four digits on the front of the card."
-msgstr ""
+msgstr "Tiga digit terakhir di area tanda tangan di balik kartu Anda. Untuk American Express, empat digit terakhir di bagian depan kartu."
 
 #: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:215
 msgid "Expiration (required)"
@@ -2307,7 +2308,7 @@ msgstr ""
 #: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:256
 #: ecommerce/templates/oscar/basket/partials/hosted_checkout_basket.html:147
 msgid "Place Order"
-msgstr ""
+msgstr "Konfirmasi Pesanan"
 
 #: ecommerce/templates/oscar/basket/partials/hosted_checkout_basket.html:22
 msgid "Earn a valuable certificate to showcase the skills you learn in"
@@ -2335,12 +2336,12 @@ msgstr ""
 
 #: ecommerce/templates/oscar/basket/partials/hosted_checkout_basket.html:159
 msgid "Checkout"
-msgstr ""
+msgstr "Checkout"
 
 #. Translators: Do NOT translate the name PayPal.
 #: ecommerce/templates/oscar/basket/partials/hosted_checkout_basket.html:162
 msgid "Checkout with PayPal"
-msgstr ""
+msgstr "Checkout dengan PayPal"
 
 #: ecommerce/templates/oscar/basket/partials/hosted_checkout_basket.html:176
 msgid ""
@@ -2357,7 +2358,7 @@ msgstr ""
 
 #: ecommerce/templates/oscar/basket/partials/hosted_checkout_basket.html:184
 msgid "Have questions?"
-msgstr ""
+msgstr "Punya pertanyaan?"
 
 #: ecommerce/templates/oscar/basket/partials/hosted_checkout_basket.html:185
 msgid "Please read our FAQs to view common questions about our certificates."
@@ -2393,7 +2394,7 @@ msgstr ""
 #: ecommerce/templates/oscar/checkout/cancel_checkout.html:6
 #: ecommerce/templates/oscar/checkout/cancel_checkout.html:15
 msgid "Checkout Cancelled"
-msgstr ""
+msgstr "Pemeriksaan Batal"
 
 #: ecommerce/templates/oscar/checkout/cancel_checkout.html:17
 #, python-format
@@ -2407,7 +2408,7 @@ msgstr ""
 #: ecommerce/templates/oscar/checkout/error.html:6
 #: ecommerce/templates/oscar/checkout/error.html:17
 msgid "Checkout Error"
-msgstr ""
+msgstr "Terjadi kesalahan saat checkout"
 
 #: ecommerce/templates/oscar/checkout/error.html:18
 msgid "An error has occurred with your payment."
@@ -2478,7 +2479,7 @@ msgstr ""
 #: ecommerce/templates/oscar/dashboard/refunds/refund_list.html:62
 #: ecommerce/templates/oscar/dashboard/users/detail.html:99
 msgid "Actions"
-msgstr ""
+msgstr "Tindakan"
 
 #: ecommerce/templates/oscar/dashboard/catalogue/category_row_actions.html:12
 msgid "Edit category"
@@ -2497,7 +2498,7 @@ msgstr ""
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:269
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:698
 msgid "Delete"
-msgstr ""
+msgstr "Hapus"
 
 #: ecommerce/templates/oscar/dashboard/catalogue/messages/product_saved.html:10
 #, python-format
@@ -2578,7 +2579,7 @@ msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:79
 msgid "Images"
-msgstr ""
+msgstr "Gambar-gambar"
 
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:82
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:186
@@ -2644,7 +2645,7 @@ msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:254
 msgid "Title"
-msgstr ""
+msgstr "Judul"
 
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:256
 msgid "Stock records"
@@ -2668,13 +2669,13 @@ msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:323
 msgid "or"
-msgstr ""
+msgstr "atau"
 
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:325
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:329
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:332
 msgid "Saving..."
-msgstr ""
+msgstr "Sedang menyimpan ..."
 
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:326
 msgid "Save and add another variant"
@@ -2686,7 +2687,7 @@ msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:333
 msgid "Save"
-msgstr ""
+msgstr "Simpan"
 
 #: ecommerce/templates/oscar/dashboard/index.html:27
 msgid "Store Statistics (Last 24 Hours)"
@@ -2803,7 +2804,7 @@ msgstr ""
 #: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:99
 #: ecommerce/templates/oscar/dashboard/orders/order_list.html:68
 msgid "Order number"
-msgstr ""
+msgstr "Jumlah pesanan"
 
 #: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:100
 msgid "Order date"
@@ -2816,7 +2817,7 @@ msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:102
 msgid "Cost"
-msgstr ""
+msgstr "Biaya"
 
 #: ecommerce/templates/oscar/dashboard/offers/summary.html:4
 msgid "Offer summary"
@@ -2843,7 +2844,7 @@ msgstr ""
 #: ecommerce/templates/oscar/dashboard/orders/line_detail.html:37
 msgctxt "Product title"
 msgid "Title"
-msgstr ""
+msgstr "Judul"
 
 #: ecommerce/templates/oscar/dashboard/orders/line_detail.html:43
 msgid "Product Type"
@@ -2889,7 +2890,7 @@ msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/orders/line_detail.html:106
 msgid "State"
-msgstr ""
+msgstr "Kondisi"
 
 #: ecommerce/templates/oscar/dashboard/orders/line_detail.html:118
 #: ecommerce/templates/oscar/dashboard/orders/line_detail.html:149
@@ -2925,7 +2926,7 @@ msgstr ""
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:677
 #: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html:163
 msgid "Date"
-msgstr ""
+msgstr "Tanggal"
 
 #: ecommerce/templates/oscar/dashboard/orders/line_detail.html:157
 msgid "Payment events"
@@ -2954,12 +2955,12 @@ msgstr ""
 #: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html:49
 #: ecommerce/templates/oscar/dashboard/users/detail.html:44
 msgid "Full name"
-msgstr ""
+msgstr "Nama Lengkap"
 
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:50
 #: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html:50
 msgid "Email address"
-msgstr ""
+msgstr "Alamat email"
 
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:59
 #: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html:59
@@ -2977,7 +2978,7 @@ msgstr ""
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:70
 #: ecommerce/templates/oscar/dashboard/orders/order_list.html:74
 msgid "Date of purchase"
-msgstr ""
+msgstr "Tanggal pembelian"
 
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:71
 msgid "Time of purchase"
@@ -2990,7 +2991,7 @@ msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:96
 msgid "Order Details"
-msgstr ""
+msgstr "Rincian Pesanan"
 
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:104
 msgid "Order contents"
@@ -3003,7 +3004,7 @@ msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:113
 msgid "Payment"
-msgstr ""
+msgstr "Pembayaran"
 
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:116
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:621
@@ -3013,7 +3014,7 @@ msgstr ""
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:119
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:671
 msgid "Notes"
-msgstr ""
+msgstr "Catatan"
 
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:127
 msgid "Items ordered"
@@ -3056,7 +3057,7 @@ msgstr ""
 #: ecommerce/templates/oscar/dashboard/refunds/refund_list.html:90
 #: ecommerce/templates/oscar/dashboard/users/detail.html:155
 msgid "View"
-msgstr ""
+msgstr "Tampilkan"
 
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:206
 msgid "Basket total (excl. discounts)"
@@ -3171,7 +3172,7 @@ msgstr ""
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:632
 #: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html:165
 msgid "Amount"
-msgstr ""
+msgstr "Jumlah"
 
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:465
 #: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html:180
@@ -3213,7 +3214,7 @@ msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:525
 msgid "Instructions"
-msgstr ""
+msgstr "Panduan"
 
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:538
 msgid "Billing address"
@@ -3226,7 +3227,7 @@ msgstr ""
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:555
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:591
 msgid "Source"
-msgstr ""
+msgstr "Sumber"
 
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:556
 msgid "Allocation"
@@ -3271,7 +3272,7 @@ msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:681
 msgid "Admin"
-msgstr ""
+msgstr "Admin"
 
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:706
 msgid "No notes available."
@@ -3291,7 +3292,7 @@ msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/orders/order_list.html:60
 msgid "Download"
-msgstr ""
+msgstr "Unduh"
 
 #: ecommerce/templates/oscar/dashboard/orders/order_list.html:69
 msgid "Total inc tax"
@@ -3306,7 +3307,7 @@ msgstr ""
 #: ecommerce/templates/oscar/dashboard/refunds/refund_list.html:78
 #: ecommerce/templates/oscar/dashboard/refunds/refund_list.html:85
 msgid "Deleted"
-msgstr ""
+msgstr "Terhapus"
 
 #: ecommerce/templates/oscar/dashboard/orders/order_list.html:149
 msgid "No orders found."
@@ -3315,11 +3316,11 @@ msgstr ""
 #: ecommerce/templates/oscar/dashboard/partials/enrollment_table.html:4
 #: ecommerce/templates/oscar/dashboard/users/detail.html:123
 msgid "Enrollments"
-msgstr ""
+msgstr "Pendaftaran"
 
 #: ecommerce/templates/oscar/dashboard/partials/enrollment_table.html:9
 msgid "Mode"
-msgstr ""
+msgstr "Mode"
 
 #: ecommerce/templates/oscar/dashboard/partials/enrollment_table.html:10
 msgid "Active?"
@@ -3351,7 +3352,7 @@ msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/partials/refund_action_modal.html:21
 msgid "Confirm"
-msgstr ""
+msgstr "Konfirmasi"
 
 #: ecommerce/templates/oscar/dashboard/partials/refund_buttons.html:5
 msgid "Approve Credit and Revoke"
@@ -3381,7 +3382,7 @@ msgstr ""
 #: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html:70
 #: ecommerce/templates/oscar/dashboard/refunds/refund_list.html:61
 msgid "Created"
-msgstr ""
+msgstr "Telah Dibuat"
 
 #: ecommerce/templates/oscar/dashboard/partials/refund_table.html:31
 #: ecommerce/templates/oscar/dashboard/refunds/refund_list.html:104
@@ -3392,7 +3393,7 @@ msgstr ""
 #: ecommerce/templates/oscar/dashboard/partials/search_form.html:25
 #: ecommerce/templates/oscar/dashboard/partials/search_form.html:45
 msgid "Search"
-msgstr ""
+msgstr "Cari"
 
 #: ecommerce/templates/oscar/dashboard/partials/search_form.html:26
 #: ecommerce/templates/oscar/dashboard/partials/search_form.html:34
@@ -3401,7 +3402,7 @@ msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/partials/search_form.html:44
 msgid "Close"
-msgstr ""
+msgstr "Tutup"
 
 #: ecommerce/templates/oscar/dashboard/partials/search_form.html:45
 msgid "Searching..."
@@ -3443,7 +3444,7 @@ msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/users/detail.html:36
 msgid "General"
-msgstr ""
+msgstr "Umum"
 
 #: ecommerce/templates/oscar/dashboard/users/detail.html:54
 msgid "Yes,No"
@@ -3460,7 +3461,7 @@ msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/users/detail.html:62
 msgid "Staff"
-msgstr ""
+msgstr "Staf"
 
 #: ecommerce/templates/oscar/dashboard/users/detail.html:66
 msgid "Last login"
@@ -3502,7 +3503,7 @@ msgstr ""
 #: ecommerce/templates/oscar/dashboard/users/detail.html:126
 #: ecommerce/templates/oscar/dashboard/users/detail.html:214
 msgid "Reviews"
-msgstr ""
+msgstr "Tinjauan"
 
 #: ecommerce/templates/oscar/dashboard/users/detail.html:139
 msgid "Num items"
@@ -3514,7 +3515,7 @@ msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/users/detail.html:141
 msgid "Date placed"
-msgstr ""
+msgstr "Tanggal dimasukkan"
 
 #: ecommerce/templates/oscar/dashboard/users/detail.html:160
 msgid "This customer has not placed any orders yet."
@@ -3530,16 +3531,16 @@ msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/users/detail.html:218
 msgid "Score"
-msgstr ""
+msgstr "Skor"
 
 #: ecommerce/templates/oscar/dashboard/users/detail.html:219
 msgctxt "Product review title"
 msgid "Title"
-msgstr ""
+msgstr "Judul"
 
 #: ecommerce/templates/oscar/dashboard/users/detail.html:220
 msgid "Body"
-msgstr ""
+msgstr "Badan"
 
 #: ecommerce/templates/oscar/dashboard/users/detail.html:221
 msgid "Date created"
