@@ -386,6 +386,12 @@ class SiteConfiguration(models.Model):
         return self.build_enterprise_service_url('grant_data_sharing_permissions')
 
     @property
+    def payment_domain_name(self):
+        if self.enable_microfrontend_for_basket_page:
+            return urlsplit(self.payment_microfrontend_url).netloc
+        return self.site.domain
+
+    @property
     def access_token(self):
         """ Returns an access token for this site's service user.
 

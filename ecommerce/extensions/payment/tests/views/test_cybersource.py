@@ -1,6 +1,7 @@
 """ Tests of the Payment Views. """
 from __future__ import absolute_import, unicode_literals
 
+import itertools
 import json
 
 import ddt
@@ -14,6 +15,7 @@ from oscar.apps.payment.exceptions import TransactionDeclined
 from oscar.core.loading import get_class, get_model
 from oscar.test import factories
 from testfixtures import LogCapture
+from waffle.testutils import override_flag
 
 from ecommerce.core.constants import ENROLLMENT_CODE_PRODUCT_CLASS_NAME, ENROLLMENT_CODE_SWITCH
 from ecommerce.core.models import BusinessClient
@@ -23,6 +25,7 @@ from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.extensions.api.serializers import OrderSerializer
 from ecommerce.extensions.basket.utils import basket_add_organization_attribute
 from ecommerce.extensions.order.constants import PaymentEventTypeName
+from ecommerce.extensions.payment.constants import ENABLE_MICROFRONTEND_FOR_BASKET_PAGE_FLAG_NAME
 from ecommerce.extensions.payment.exceptions import InvalidBasketError, InvalidSignatureError
 from ecommerce.extensions.payment.processors.cybersource import Cybersource
 from ecommerce.extensions.payment.tests.mixins import CybersourceMixin, CybersourceNotificationTestsMixin
@@ -355,6 +358,26 @@ class CybersourceInterstitialViewTests(CybersourceNotificationTestsMixin, TestCa
 @ddt.ddt
 class ApplePayStartSessionViewTests(LoginMixin, TestCase):
     url = reverse('cybersource:apple_pay:start_session')
+    payment_microfrontend_domain = 'payment-mfe.org'
+
+    def _call_to_apple_pay_and_assert_response(self, status, body, request_from_mfe=False, expected_mfe=False):
+        url = 'https://apple-pay-gateway.apple.com/paymentservices/startSession'
+        body = json.dumps(body)
+        responses.add(responses.POST, url, body=body, status=status, content_type=JSON)
+
+        post_data = {'url': url}
+        if request_from_mfe:
+            post_data.update({'is_payment_microfrontend': True})
+
+        response = self.client.post(self.url, json.dumps(post_data), JSON)
+        self.assertEqual(response.status_code, status)
+        self.assertEqual(response.content, body)
+
+        expected_domain_name = self.payment_microfrontend_domain if expected_mfe else 'testserver.fake'
+        self.assertEqual(
+            json.loads(responses.calls[0].request.body)['domainName'],
+            expected_domain_name,
+        )
 
     @ddt.data(
         (200, {'foo': 'bar'}),
@@ -364,13 +387,23 @@ class ApplePayStartSessionViewTests(LoginMixin, TestCase):
     @responses.activate
     def test_post(self, status, body):
         """ The view should POST to the given URL and return the response. """
-        url = 'https://apple-pay-gateway.apple.com/paymentservices/startSession'
-        body = json.dumps(body)
-        responses.add(responses.POST, url, body=body, status=status, content_type=JSON)
+        self._call_to_apple_pay_and_assert_response(status, body)
 
-        response = self.client.post(self.url, json.dumps({'url': url}), JSON)
-        self.assertEqual(response.status_code, status)
-        self.assertEqual(response.content, body)
+    @override_flag(ENABLE_MICROFRONTEND_FOR_BASKET_PAGE_FLAG_NAME, active=True)
+    @responses.activate
+    @ddt.data(*itertools.product((True, False), (True, False)))
+    @ddt.unpack
+    def test_with_microfrontend(self, request_from_mfe, enable_microfrontend):
+        self.site.siteconfiguration.enable_microfrontend_for_basket_page = enable_microfrontend
+        self.site.siteconfiguration.payment_microfrontend_url = 'http://{}'.format(self.payment_microfrontend_domain)
+        self.site.siteconfiguration.save()
+
+        self._call_to_apple_pay_and_assert_response(
+            200,
+            {'foo': 'bar'},
+            request_from_mfe,
+            request_from_mfe and enable_microfrontend,
+        )
 
     def test_post_without_url(self):
         """ The view should return HTTP 400 if no url parameter is posted. """
