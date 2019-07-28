@@ -422,13 +422,25 @@ class ApplePayStartSessionView(CyberSourceProcessorMixin, APIView):
 
     def post(self, request):
         url = request.data.get('url')
-
         if not url:
             raise ValidationError({'error': 'url is required'})
 
+        # The domain name sent to Apple Pay needs to match the domain name of the frontend.
+        # We use a URL parameter to indicate whether the new Payment microfrontend was used to
+        # make this request - since the use of the new microfrontend is request-specific - depends
+        # on the state of the waffle toggle, the user's A/B test bucket, and user's toggle choice.
+        #
+        # As an alternative implementation, one can look at the domain of the requesting client,
+        # instead of relying on this boolean URL parameter. We are going with a URL parameter since
+        # it is simplest for testing at this time.
+        if request.data.get('is_payment_microfrontend'):
+            domain_name = request.site.siteconfiguration.payment_domain_name
+        else:
+            domain_name = request.site.domain
+
         data = {
             'merchantIdentifier': self.payment_processor.apple_pay_merchant_identifier,
-            'domainName': request.site.domain,
+            'domainName': domain_name,
             'displayName': request.site.name,
         }
 
