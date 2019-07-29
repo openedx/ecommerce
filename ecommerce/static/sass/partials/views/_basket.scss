@@ -338,7 +338,7 @@
     }
 
     #payment-processor {
-        $payment-button-width: 120px;
+        $payment-button-width: 200px;
 
         // Stripe payment request button
         #payment-request-button {
@@ -358,6 +358,16 @@
 
             &.payment-processor-paypal {
                 background-image: url('/static/images/paypal_logo.png');
+
+                &:focus {
+                    outline: dotted 1px #000;
+                }
+            }
+
+            &.payment-processor-authorizenet {
+                color: black;
+                background-image: url('/static/images/credit_card_options.png');
+
 
                 &:focus {
                     outline: dotted 1px #000;

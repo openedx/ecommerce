@@ -1,0 +1,10 @@
+{% load compress %} {% load static %}
+<script type="text/javascript">
+  window.AuthorizeNetConfig = {
+      postUrl: '{% url 'authorizenet:execute' %}',
+  }
+</script>
+<script
+  src="{% static 'js/views/authorizenet.js' %}"
+  type="text/javascript"
+></script>

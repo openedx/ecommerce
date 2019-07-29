@@ -515,7 +515,7 @@ define([
                     if ($('#card-number').val()) {
                         BasketPage.detectCreditCard();
                     }
-                    if (!document.getElementById('payment_iframe')) {
+                    if (!document.getElementById('payment_iframe') && !document.getElementById('add_payment')) {
                         BasketPage.cardInfoValidation(e);
                     }
                     BasketPage.cardHolderInfoValidation(e);

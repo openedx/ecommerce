@@ -51,6 +51,10 @@ PAYMENT_PROCESSOR_CONFIG = {
             'merchant_account_id': environ.get('BLUEFIN_ACCOUNT_ID'),
             'api_access_key': environ.get('BLUEFIN_API_KEY'),
             'post_api_url': 'https://cert.payconex.net/api/qsapi/3.8',
+        },
+        'authorizenet': {
+            'cancel_checkout_path': PAYMENT_PROCESSOR_CANCEL_PATH,
+
         }
     },
 }

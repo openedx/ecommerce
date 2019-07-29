@@ -81,6 +81,13 @@ bluefin_dict = {
 
 PAYMENT_PROCESSOR_CONFIG['edx'].update({'bluefin': bluefin_dict})
 
+authorizenet_dict = {
+    'cancel_checkout_path': PAYMENT_PROCESSOR_CANCEL_PATH,
+}
+
+PAYMENT_PROCESSOR_CONFIG['edx'].update({'authorizenet': authorizenet_dict})
+
+
 for __, configs in PAYMENT_PROCESSOR_CONFIG.iteritems():
     for __, config in configs.iteritems():
         config.update({
