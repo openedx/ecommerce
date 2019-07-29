@@ -58,6 +58,7 @@ from ecommerce.extensions.partner.shortcuts import get_partner_for_site
 from ecommerce.extensions.payment.constants import (
     CLIENT_SIDE_CHECKOUT_FLAG_NAME,
     ENABLE_MICROFRONTEND_FOR_BASKET_PAGE_FLAG_NAME,
+    FORCE_MICROFRONTEND_FOR_BASKET_PAGE_FLAG_NAME,
     PAYMENTS_MFE_BUCKET,
 )
 from ecommerce.extensions.payment.forms import PaymentForm
@@ -102,7 +103,10 @@ def use_payment_microfrontend(request):
         else:
             bucket = stable_bucketing_hash_group("payments-mfe", 2, request.user.username)
 
-        payment_microfrontend_flag_enabled = waffle.flag_is_active(request, ENABLE_MICROFRONTEND_FOR_BASKET_PAGE_FLAG_NAME)
+        payment_microfrontend_flag_enabled = waffle.flag_is_active(
+            request,
+            ENABLE_MICROFRONTEND_FOR_BASKET_PAGE_FLAG_NAME
+        )
 
         track_segment_event(
             request.site,
@@ -118,12 +122,6 @@ def use_payment_microfrontend(request):
         return payments_mfe_forced or (bucket == PAYMENTS_MFE_BUCKET and payment_microfrontend_flag_enabled)
     else:
         return False
-
-
-def _redirect_to_payment_microfrontend_if_configured(request):
-    """
-    Redirect the current request to the payments MFE.
-    """
 
 
 class BasketAddItemsView(View):
