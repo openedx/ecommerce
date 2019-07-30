@@ -137,7 +137,7 @@ class BasketAddItemsViewTests(
     @ddt.data(*itertools.product((True, False), (True, False)))
     @ddt.unpack
     @override_flag(ENABLE_MICROFRONTEND_FOR_BASKET_PAGE_FLAG_NAME, active=True)
-    @override_flag(FORCE_MICROFRONTEND_FOR_BASKET_PAGE_FLAG_NAME, active=True)
+    @override_flag(FORCE_MICROFRONTEND_BUCKET_FLAG_NAME, active=True)
     def test_microfrontend_for_single_course_purchase_if_configured(self, enable_redirect, set_url):
         microfrontend_url = self.configure_redirect_to_microfrontend(enable_redirect, set_url)
         response = self._get_response(self.stock_record.partner_sku, utm_source='test')
@@ -148,7 +148,7 @@ class BasketAddItemsViewTests(
         self.assertRedirects(response, expected_url, status_code=303, fetch_redirect_response=False)
 
     @override_flag(ENABLE_MICROFRONTEND_FOR_BASKET_PAGE_FLAG_NAME, active=True)
-    @override_flag(FORCE_MICROFRONTEND_FOR_BASKET_PAGE_FLAG_NAME, active=True)
+    @override_flag(FORCE_MICROFRONTEND_BUCKET_FLAG_NAME, active=True)
     def test_microfrontend_for_enrollment_code_seat(self):
         microfrontend_url = self.configure_redirect_to_microfrontend()
 

@@ -59,7 +59,7 @@ from ecommerce.extensions.partner.shortcuts import get_partner_for_site
 from ecommerce.extensions.payment.constants import (
     CLIENT_SIDE_CHECKOUT_FLAG_NAME,
     ENABLE_MICROFRONTEND_FOR_BASKET_PAGE_FLAG_NAME,
-    FORCE_MICROFRONTEND_FOR_BASKET_PAGE_FLAG_NAME,
+    FORCE_MICROFRONTEND_BUCKET_FLAG_NAME,
     PAYMENT_MFE_BUCKET
 )
 from ecommerce.extensions.payment.forms import PaymentForm
@@ -82,12 +82,12 @@ def _get_payment_microfrontend_url_if_configured(request):
         return None
 
 
-def _force_payment_microfrontend(request):
+def _force_payment_microfrontend_bucket(request):
     """
     Return whether the user for the current request should be forced into
-    the payment MFE bucket (and therefor to the payment MFE page).
+    the payment MFE bucket.
     """
-    return waffle.flag_is_active(request, FORCE_MICROFRONTEND_FOR_BASKET_PAGE_FLAG_NAME)
+    return waffle.flag_is_active(request, FORCE_MICROFRONTEND_BUCKET_FLAG_NAME)
 
 
 def _use_payment_microfrontend(request):
@@ -99,8 +99,8 @@ def _use_payment_microfrontend(request):
             request.site.siteconfiguration.payment_microfrontend_url
     ):
         # Force the user into the MFE bucket for testing
-        payment_mfe_forced = _force_payment_microfrontend(request)
-        if payment_mfe_forced:
+        payment_mfe_bucket_forced = _force_payment_microfrontend_bucket(request)
+        if payment_mfe_bucket_forced:
             bucket = PAYMENT_MFE_BUCKET
         else:
             # Bucket 50% of users to use the payment MFE for A/B testing.
@@ -118,11 +118,11 @@ def _use_payment_microfrontend(request):
             {
                 'bucket': bucket,
                 'experiment': 'payment-mfe',
-                'forcedIntoBucket': payment_mfe_forced,
+                'forcedIntoBucket': payment_mfe_bucket_forced,
                 'paymentMfeEnabled': payment_microfrontend_flag_enabled,
             },
         )
-        return payment_mfe_forced or (bucket == PAYMENT_MFE_BUCKET and payment_microfrontend_flag_enabled)
+        return bucket == PAYMENT_MFE_BUCKET and payment_microfrontend_flag_enabled
     else:
         return False
 

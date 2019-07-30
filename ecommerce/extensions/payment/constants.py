@@ -62,7 +62,7 @@ ENABLE_MICROFRONTEND_FOR_BASKET_PAGE_FLAG_NAME = 'enable_microfrontend_for_baske
 # .. toggle_warnings: See enable_microfrontend_for_basket_page
 # .. toggle_tickets: DEPR-42
 # .. toggle_status: supported
-FORCE_MICROFRONTEND_FOR_BASKET_PAGE_FLAG_NAME = 'force_microfrontend_for_basket_page'
+FORCE_MICROFRONTEND_BUCKET_FLAG_NAME = 'force_microfrontend_bucket'
 
 # Bucket id for users being bucketed into the Payment MFE
 PAYMENT_MFE_BUCKET = 1
