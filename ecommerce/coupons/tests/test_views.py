@@ -584,7 +584,7 @@ class CouponRedeemViewTests(CouponMixin, DiscoveryTestMixin, LmsApiMockMixin, En
     @httpretty.activate
     def test_enterprise_customer_successful_redemption_message(self):
         """ Verify the info message appears on successful redemption. """
-        expected_message = '<i class="fa fa-info-circle"></i> A discount has been applied, courtesy of BigEnterprise.'
+        expected_message = 'A discount has been applied, courtesy of BigEnterprise.'
 
         # Setting benefit value to a low amount to ensure the basket is not free,
         # and calls to the checkout page do not redirect away from the checkout page.

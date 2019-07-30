@@ -266,7 +266,6 @@ class CouponRedeemView(EdxOrderPlacementMixin, View):
                 message = _('A discount has been applied, courtesy of {enterprise_customer_name}.').format(
                     enterprise_customer_name=enterprise_customer.get('name')
                 )
-                message = '<i class="fa fa-info-circle"></i> {}'.format(message)
                 messages.info(self.request, message, extra_tags='safe')
             else:
                 messages.warning(
