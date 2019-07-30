@@ -45,6 +45,7 @@ from ecommerce.extensions.basket.utils import (
     prepare_basket,
     validate_voucher
 )
+from ecommerce.extensions.experimentation.stable_bucketing import stable_bucketing_hash_group
 from ecommerce.extensions.offer.constants import DYNAMIC_DISCOUNT_FLAG
 from ecommerce.extensions.offer.dynamic_conditional_offer import get_percentage_from_request
 from ecommerce.extensions.offer.utils import (
@@ -59,10 +60,9 @@ from ecommerce.extensions.payment.constants import (
     CLIENT_SIDE_CHECKOUT_FLAG_NAME,
     ENABLE_MICROFRONTEND_FOR_BASKET_PAGE_FLAG_NAME,
     FORCE_MICROFRONTEND_FOR_BASKET_PAGE_FLAG_NAME,
-    PAYMENT_MFE_BUCKET,
+    PAYMENT_MFE_BUCKET
 )
 from ecommerce.extensions.payment.forms import PaymentForm
-from ecommerce.extensions.experimentation.stable_bucketing import stable_bucketing_hash_group
 
 Basket = get_model('basket', 'basket')
 BasketAttribute = get_model('basket', 'BasketAttribute')
