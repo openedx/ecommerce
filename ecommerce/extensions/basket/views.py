@@ -9,7 +9,7 @@ import dateutil.parser
 import newrelic.agent
 import waffle
 from django.http import HttpResponseBadRequest, HttpResponseRedirect
-from django.shortcuts import redirect, render
+from django.shortcuts import render
 from django.utils.html import escape
 from django.utils.translation import ugettext as _
 from opaque_keys.edx.keys import CourseKey
@@ -25,7 +25,7 @@ from six.moves.urllib.parse import urlencode
 from slumber.exceptions import SlumberBaseException
 
 from ecommerce.core.exceptions import SiteConfigurationError
-from ecommerce.core.url_utils import get_lms_course_about_url, get_lms_url
+from ecommerce.core.url_utils import absolute_redirect, get_lms_course_about_url, get_lms_url
 from ecommerce.courses.utils import get_certificate_type_display_value, get_course_info_from_catalog
 from ecommerce.enterprise.entitlements import get_enterprise_code_redemption_redirect
 from ecommerce.enterprise.utils import CONSENT_FAILED_PARAM, get_enterprise_customer_from_voucher, has_enterprise_offer
@@ -301,7 +301,9 @@ class BasketLogicMixin(object):
             )
 
         if has_enterprise_offer(basket) and basket.total_incl_tax == Decimal(0):
-            raise RedirectException(response=redirect('checkout:free-checkout'))
+            raise RedirectException(
+                response=absolute_redirect(self.request, 'checkout:free-checkout'),
+            )
 
     @newrelic.agent.function_trace()
     def _get_course_data(self, product):
@@ -860,9 +862,11 @@ class VoucherAddLogicMixin(object):
                 }
             )
             redirect_response = HttpResponseRedirect(
-                '{path}?{params}'.format(
-                    path=reverse('coupons:redeem'),
-                    params=params
+                self.request.build_absolute_uri(
+                    '{path}?{params}'.format(
+                        path=reverse('coupons:redeem'),
+                        params=params
+                    )
                 )
             )
             raise RedirectException(response=redirect_response)

@@ -29,7 +29,7 @@ from waffle.testutils import override_flag
 
 from ecommerce.core.exceptions import SiteConfigurationError
 from ecommerce.core.tests import toggle_switch
-from ecommerce.core.url_utils import get_lms_url
+from ecommerce.core.url_utils import absolute_url, get_lms_url
 from ecommerce.coupons.tests.mixins import CouponMixin, DiscoveryMockMixin
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.enterprise.tests.mixins import EnterpriseServiceMockMixin
@@ -242,7 +242,8 @@ class BasketAddItemsViewTests(
                 sku=sku
             )
         )
-        expected_url = reverse('coupons:redeem') + '?code=FAKECODE&sku={sku}&failure_url={failure_url}'.format(
+        expected_url = absolute_url(self.request, 'coupons:redeem')
+        expected_url += '?code=FAKECODE&sku={sku}&failure_url={failure_url}'.format(
             sku=sku,
             failure_url=expected_failure_url,
         )
@@ -598,7 +599,7 @@ class PaymentApiViewTests(PaymentApiResponseTestMixin, BasketMixin, DiscoveryMoc
 
         response = self.client.get(self.path)
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.data['redirect'], reverse('checkout:free-checkout'))
+        self.assertEqual(response.data['redirect'], absolute_url(self.request, 'checkout:free-checkout'))
 
     def test_failed_enterprise_consent_message(self):
         seat = self.create_seat(self.course)
@@ -1045,7 +1046,11 @@ class BasketSummaryViewTests(EnterpriseServiceMockMixin, DiscoveryTestMixin, Dis
         self.prepare_enterprise_offer(enterprise_customer_name='Foo Enterprise')
 
         response = self.client.get(self.path)
-        self.assertRedirects(response, reverse('checkout:free-checkout'), fetch_redirect_response=False)
+        self.assertRedirects(
+            response,
+            absolute_url(self.request, 'checkout:free-checkout'),
+            fetch_redirect_response=False,
+        )
 
     @override_settings(PAYMENT_PROCESSORS=['ecommerce.extensions.payment.tests.processors.DummyProcessor'])
     @ddt.data(100, 50)
@@ -1240,7 +1245,7 @@ class VoucherAddMixin(LmsApiMockMixin, DiscoveryMockMixin):
             u'failure_url=http%3A%2F%2F{domain}%2Fbasket%2F%3Fconsent_failed%3D{code}'
             u'&code=COUPONTEST'
         ).format(
-            coupons_redeem_base_url=reverse('coupons:redeem'),
+            coupons_redeem_base_url=absolute_url(self.request, 'coupons:redeem'),
             sku=stock_record.partner_sku,
             code=COUPON_CODE,
             domain=self.site.domain,
@@ -1248,7 +1253,7 @@ class VoucherAddMixin(LmsApiMockMixin, DiscoveryMockMixin):
         self.assert_response_redirect(expected_redirect_url)
 
     def assert_account_activation_rendered(self):
-        expected_redirect_url = reverse('offers:email_confirmation')
+        expected_redirect_url = absolute_url(self.request, 'offers:email_confirmation')
         self.assert_response_redirect(expected_redirect_url)
 
     def test_activation_required_for_inactive_user(self):

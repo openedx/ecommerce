@@ -10,7 +10,6 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
 from django.http import JsonResponse
 from django.shortcuts import redirect
-from django.urls import reverse
 from django.utils.decorators import method_decorator
 from django.utils.functional import cached_property
 from django.utils.safestring import mark_safe
@@ -26,7 +25,7 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from ecommerce.core.url_utils import get_lms_url
+from ecommerce.core.url_utils import absolute_redirect, get_lms_url
 from ecommerce.extensions.api.serializers import OrderSerializer
 from ecommerce.extensions.basket.utils import basket_add_organization_attribute
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
@@ -396,9 +395,9 @@ class CybersourceInterstitialView(CybersourceNotificationMixin, View):
 
             messages.error(request, mark_safe(message))
 
-            return redirect(reverse('basket:summary'))
+            return absolute_redirect(request, 'basket:summary')
         except:  # pylint: disable=bare-except
-            return redirect(reverse('payment_error'))
+            return absolute_redirect(request, 'payment_error')
 
         try:
             order = self.create_order(request, basket, self._get_billing_address(notification))
@@ -406,7 +405,7 @@ class CybersourceInterstitialView(CybersourceNotificationMixin, View):
 
             return self.redirect_to_receipt_page(notification)
         except:  # pylint: disable=bare-except
-            return redirect(reverse('payment_error'))
+            return absolute_redirect(request, 'payment_error')
 
     def redirect_to_receipt_page(self, notification):
         receipt_page_url = get_receipt_page_url(
