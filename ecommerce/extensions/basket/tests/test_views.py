@@ -44,7 +44,8 @@ from ecommerce.extensions.offer.utils import format_benefit_value
 from ecommerce.extensions.order.utils import UserAlreadyPlacedOrder
 from ecommerce.extensions.payment.constants import (
     CLIENT_SIDE_CHECKOUT_FLAG_NAME,
-    ENABLE_MICROFRONTEND_FOR_BASKET_PAGE_FLAG_NAME
+    ENABLE_MICROFRONTEND_FOR_BASKET_PAGE_FLAG_NAME,
+    FORCE_MICROFRONTEND_BUCKET_FLAG_NAME
 )
 from ecommerce.extensions.payment.forms import PaymentForm
 from ecommerce.extensions.payment.tests.processors import DummyProcessor
