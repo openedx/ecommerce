@@ -113,7 +113,13 @@ class TestSeatPayment(object):
 
         # Add the item to the basket and start the checkout process
         selenium.get(EcommerceHelpers.build_url(
-            '/basket/add/?sku={}&dwft_enable_microfrontend_for_basket_page={}'.format(sku, waffle_flag_enabled)
+            '/basket/add/?sku={}'
+            '&dwft_enable_microfrontend_for_basket_page={}'
+            '&dwft_force_microfrontend_bucket={}'.format(
+                sku,
+                waffle_flag_enabled,
+                waffle_flag_enabled,
+            )
         ))
 
         # Wait till the selector is visible
