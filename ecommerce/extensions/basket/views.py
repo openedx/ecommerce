@@ -59,7 +59,7 @@ from ecommerce.extensions.payment.constants import (
     CLIENT_SIDE_CHECKOUT_FLAG_NAME,
     ENABLE_MICROFRONTEND_FOR_BASKET_PAGE_FLAG_NAME,
     FORCE_MICROFRONTEND_FOR_BASKET_PAGE_FLAG_NAME,
-    PAYMENTS_MFE_BUCKET,
+    PAYMENT_MFE_BUCKET,
 )
 from ecommerce.extensions.payment.forms import PaymentForm
 from ecommerce.extensions.experimentation.stable_bucketing import stable_bucketing_hash_group
@@ -76,32 +76,35 @@ Selector = get_class('partner.strategy', 'Selector')
 
 
 def _get_payment_microfrontend_url_if_configured(request):
-    if use_payment_microfrontend(request):
+    if _use_payment_microfrontend(request):
         return request.site.siteconfiguration.payment_microfrontend_url
     else:
         return None
 
 
-def force_payment_microfrontend(request):
+def _force_payment_microfrontend(request):
     """
-    Return whether the user for the current request should be forced into the payments MFE bucket.
+    Return whether the user for the current request should be forced into
+    the payment MFE bucket (and therefor to the payment MFE page).
     """
     return waffle.flag_is_active(request, FORCE_MICROFRONTEND_FOR_BASKET_PAGE_FLAG_NAME)
 
 
-def use_payment_microfrontend(request):
+def _use_payment_microfrontend(request):
     """
-    Return whether the current request should use the payments MFE.
+    Return whether the current request should use the payment MFE.
     """
     if (
             request.site.siteconfiguration.enable_microfrontend_for_basket_page and
             request.site.siteconfiguration.payment_microfrontend_url
     ):
-        payments_mfe_forced = force_payment_microfrontend(request)
-        if payments_mfe_forced:
-            bucket = PAYMENTS_MFE_BUCKET
+        # Force the user into the MFE bucket for testing
+        payment_mfe_forced = _force_payment_microfrontend(request)
+        if payment_mfe_forced:
+            bucket = PAYMENT_MFE_BUCKET
         else:
-            bucket = stable_bucketing_hash_group("payments-mfe", 2, request.user.username)
+            # Bucket 50% of users to use the payment MFE for A/B testing.
+            bucket = stable_bucketing_hash_group("payment-mfe", 2, request.user.username)
 
         payment_microfrontend_flag_enabled = waffle.flag_is_active(
             request,
@@ -114,12 +117,12 @@ def use_payment_microfrontend(request):
             'edx.bi.experiment.user.bucketed',
             {
                 'bucket': bucket,
-                'experiment': 'payments-mfe',
-                'forcedIntoBucket': payments_mfe_forced,
-                'paymentsMfeEnabled': payment_microfrontend_flag_enabled,
+                'experiment': 'payment-mfe',
+                'forcedIntoBucket': payment_mfe_forced,
+                'paymentMfeEnabled': payment_microfrontend_flag_enabled,
             },
         )
-        return payments_mfe_forced or (bucket == PAYMENTS_MFE_BUCKET and payment_microfrontend_flag_enabled)
+        return payment_mfe_forced or (bucket == PAYMENT_MFE_BUCKET and payment_microfrontend_flag_enabled)
     else:
         return False
 

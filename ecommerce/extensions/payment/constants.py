@@ -54,18 +54,18 @@ ENABLE_MICROFRONTEND_FOR_BASKET_PAGE_FLAG_NAME = 'enable_microfrontend_for_baske
 # .. toggle_name: force_microfrontend_for_basket_page
 # .. toggle_type: waffle_flag
 # .. toggle_default: False
-# .. toggle_description: Supports testing of a new micro-frontend-based implementation of the basket page.
+# .. toggle_description: Supports manual testing of a new micro-frontend-based implementation of the basket page.
 # .. toggle_category: micro-frontend
 # .. toggle_use_cases: testing, open_edx
 # .. toggle_creation_date: 2019-07-29
-# .. toggle_expiration_date: 2020-12-31
-# .. toggle_warnings: Also set SiteConfiguration for enable_microfrontend_for_basket_page and payment_microfrontend_url.
+# .. toggle_expiration_date: 2019-12-31
+# .. toggle_warnings: See enable_microfrontend_for_basket_page
 # .. toggle_tickets: DEPR-42
 # .. toggle_status: supported
 FORCE_MICROFRONTEND_FOR_BASKET_PAGE_FLAG_NAME = 'force_microfrontend_for_basket_page'
 
-# Bucket id for users being bucketed into the Payments MFE
-PAYMENTS_MFE_BUCKET = 1
+# Bucket id for users being bucketed into the Payment MFE
+PAYMENT_MFE_BUCKET = 1
 
 # Paypal only supports 4 languages, which are prioritized by country.
 # https://developer.paypal.com/docs/classic/api/locale_codes/
