@@ -18,6 +18,7 @@ from django.utils.translation import ugettext as _
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import View
 from edx_rest_api_client.client import EdxRestApiClient
+from edx_rest_api_client.exceptions import SlumberHttpBaseException
 from oscar.apps.partner import strategy
 from oscar.apps.payment.exceptions import GatewayError, PaymentError, TransactionDeclined, UserCancelled
 from oscar.core.loading import get_class, get_model
@@ -217,7 +218,7 @@ class CybersourceNotificationMixin(CyberSourceProcessorMixin, OrderCreationMixin
             # The problem is that orders are being created after payment processing, and the discount is not
             # saved in the database, so it needs to be calculated again in order to save the correct info to the
             # order. REVMI-124 will create the order before payment processing, when we have the discount context.
-            if waffle.flag_is_active(self.request, DYNAMIC_DISCOUNT_FLAG):
+            if waffle.flag_is_active(self.request, DYNAMIC_DISCOUNT_FLAG) and basket.lines.count() == 1:
                 try:
                     discount_lms_url = get_lms_url('/api/discounts/')
                     lms_discount_client = EdxRestApiClient(discount_lms_url, jwt=basket.owner.access_token)
@@ -230,7 +231,7 @@ class CybersourceNotificationMixin(CyberSourceProcessorMixin, OrderCreationMixin
                         discount_lms_url,
                         response,
                         basket.id)
-                except (requests.exceptions.HTTPError, requests.exceptions.Timeout) as error:
+                except (SlumberHttpBaseException, requests.exceptions.Timeout) as error:
                     logger.warning(
                         'Failed to get discount jwt from LMS. [%s] returned [%s]',
                         discount_lms_url,

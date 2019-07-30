@@ -8,11 +8,11 @@ import mock
 import responses
 from django.test.client import RequestFactory
 from django.urls import reverse
+from edx_rest_api_client.exceptions import SlumberHttpBaseException
 from oscar.apps.order.exceptions import UnableToPlaceOrder
 from oscar.apps.payment.exceptions import PaymentError
 from oscar.core.loading import get_class, get_model
 from oscar.test import factories
-from requests.exceptions import HTTPError
 from testfixtures import LogCapture
 from waffle.testutils import override_flag
 
@@ -371,11 +371,13 @@ class PaypalPaymentExecutionViewTests(PaypalMixin, PaymentEventsMixin, TestCase)
     @override_flag(DYNAMIC_DISCOUNT_FLAG, active=True)
     @responses.activate
     @mock.patch.object(PaymentProcessorResponse.objects, 'get')
-    @mock.patch('ecommerce.extensions.payment.views.paypal.EdxRestApiClient', side_effect=HTTPError)
-    def test_add_dynamic_discount_to_request_error(self, mocked_client, basket_object):  # pylint: disable=unused-argument
+    @mock.patch('ecommerce.extensions.payment.views.paypal.EdxRestApiClient')
+    def test_add_dynamic_discount_to_request_error(self, mocked_client, basket_object):
         """
         Verify that we fail gracefully when the lms doesn't return a discount jwt
         """
+        error_response = '<Response [401]>'
+        mocked_client.side_effect = SlumberHttpBaseException(response=error_response)
         basket_object.return_value.basket = self.basket
         logger_name = 'ecommerce.extensions.payment.views.paypal'
         with LogCapture(logger_name) as logger:
@@ -387,7 +389,7 @@ class PaypalPaymentExecutionViewTests(PaypalMixin, PaymentEventsMixin, TestCase)
 
             # Make sure that we properly respond to the error
             self._assert_error_page_redirect()
-            logger.check(
+            logger.check_present(
                 (
                     logger_name,
                     'INFO',
@@ -399,7 +401,8 @@ class PaypalPaymentExecutionViewTests(PaypalMixin, PaymentEventsMixin, TestCase)
                 (
                     logger_name,
                     'WARNING',
-                    'Failed to get discount jwt from LMS. [http://lms.testserver.fake/api/discounts/] returned [None]'
+                    ('Failed to get discount jwt from LMS. '
+                     '[http://lms.testserver.fake/api/discounts/] returned [{error}]').format(error=error_response)
                 ),
             )
 
