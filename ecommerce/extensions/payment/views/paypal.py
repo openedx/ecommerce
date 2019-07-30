@@ -14,10 +14,11 @@ from django.shortcuts import redirect
 from django.utils.decorators import method_decorator
 from django.views.generic import View
 from edx_rest_api_client.client import EdxRestApiClient
+from edx_rest_api_client.exceptions import SlumberHttpBaseException
 from oscar.apps.partner import strategy
 from oscar.apps.payment.exceptions import PaymentError
 from oscar.core.loading import get_class, get_model
-from requests.exceptions import HTTPError, Timeout
+from requests.exceptions import Timeout
 
 from ecommerce.core.url_utils import get_lms_url
 from ecommerce.extensions.basket.utils import basket_add_organization_attribute
@@ -75,7 +76,7 @@ class PaypalPaymentExecutionView(EdxOrderPlacementMixin, View):
             # The problem is that orders are being created after payment processing, and the discount is not
             # saved in the database, so it needs to be calculated again in order to save the correct info to the
             # order. REVMI-124 will create the order before payment processing, when we have the discount context.
-            if waffle.flag_is_active(self.request, DYNAMIC_DISCOUNT_FLAG):
+            if waffle.flag_is_active(self.request, DYNAMIC_DISCOUNT_FLAG) and basket.lines.count() == 1:
                 discount_lms_url = get_lms_url('/api/discounts/')
                 lms_discount_client = EdxRestApiClient(discount_lms_url, jwt=basket.owner.access_token)
                 ck = basket.lines.first().product.course_id
@@ -92,7 +93,7 @@ class PaypalPaymentExecutionView(EdxOrderPlacementMixin, View):
             logger.warning(u"Duplicate payment ID [%s] received from PayPal.", payment_id)
             return None
         # TODO: Remove as a part of REVMI-124 - continued
-        except (HTTPError, Timeout) as error:
+        except (SlumberHttpBaseException, Timeout) as error:
             logger.warning(
                 'Failed to get discount jwt from LMS. [%s] returned [%s]',
                 discount_lms_url,
