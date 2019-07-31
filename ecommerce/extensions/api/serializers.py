@@ -835,10 +835,14 @@ class EnterpriseCouponOverviewListSerializer(serializers.ModelSerializer):
         """
         Return number of available assignments.
         """
+        all_slots_available = []
         vouchers = coupon.attr.coupon_vouchers.vouchers.all()
-        return sum([
-            voucher.slots_available_for_assignment for voucher in vouchers if voucher.slots_available_for_assignment > 0
-        ])
+        for voucher in vouchers:
+            voucher_slots_available = voucher.slots_available_for_assignment
+            if voucher_slots_available > 0:
+                all_slots_available.append(voucher_slots_available)
+
+        return sum(all_slots_available)
 
     def get_errors(self, coupon):
         """
