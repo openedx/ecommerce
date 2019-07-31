@@ -1391,7 +1391,7 @@ class CouponCodeMixin(object):
         return OfferAssignment.objects.filter(
             code=code,
             user_email=email,
-            status__in=[OFFER_ASSIGNED, OFFER_ASSIGNMENT_EMAIL_PENDING]
+            status__in=[OFFER_ASSIGNED, OFFER_ASSIGNMENT_EMAIL_PENDING, OFFER_ASSIGNMENT_EMAIL_BOUNCED]
         )
 
 

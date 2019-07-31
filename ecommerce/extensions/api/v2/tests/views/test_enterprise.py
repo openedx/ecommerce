@@ -1668,6 +1668,42 @@ class EnterpriseCouponViewSetRbacTests(
         for offer_assignment in OfferAssignment.objects.filter(user_email=email):
             assert offer_assignment.status == OFFER_ASSIGNMENT_REVOKED
 
+    def test_coupon_codes_revoke_success_with_bounced_email(self):
+        """Test revoking codes from users when the offer assignment has bounced email status."""
+        email = 'test1@example.com'
+        coupon_post_data = dict(
+            self.data,
+            voucher_type=Voucher.ONCE_PER_CUSTOMER,
+            quantity=1,
+            max_uses=1,
+        )
+        coupon = self.get_response('POST', ENTERPRISE_COUPONS_LINK, coupon_post_data)
+        coupon = coupon.json()
+        coupon_id = coupon['coupon_id']
+        with mock.patch('ecommerce.extensions.offer.utils.send_offer_assignment_email.delay'):
+            self.get_response(
+                'POST',
+                '/api/v2/enterprise/coupons/{}/assign/'.format(coupon_id),
+                {'template': 'Test template', 'emails': [email]}
+            )
+
+        offer_assignment = OfferAssignment.objects.filter(user_email=email).first()
+        offer_assignment.status = OFFER_ASSIGNMENT_EMAIL_BOUNCED
+        offer_assignment.save()
+
+        payload = {'assignments': [{'email': email, 'code': offer_assignment.code}]}
+        with mock.patch('ecommerce.extensions.offer.utils.send_offer_update_email.delay'):
+            response = self.get_response(
+                'POST',
+                '/api/v2/enterprise/coupons/{}/revoke/'.format(coupon_id),
+                payload
+            )
+
+        response = response.json()
+        assert response == [{'code': offer_assignment.code, 'email': email, 'detail': 'success'}]
+        for offer_assignment in OfferAssignment.objects.filter(user_email=email):
+            assert offer_assignment.status == OFFER_ASSIGNMENT_REVOKED
+
     def test_coupon_codes_revoke_invalid_request(self):
         """Test that revoke fails when the request format is incorrect."""
         email = 'test1@example.com'
