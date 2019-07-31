@@ -600,7 +600,7 @@ class CouponRedeemViewTests(CouponMixin, DiscoveryTestMixin, LmsApiMockMixin, En
         response = self.client.get(self.redeem_url_with_params(code=code), follow=True)
         messages = []
         messages += response.context['messages']
-        self.assertEqual(messages[0].tags, 'safe info')
+        self.assertEqual(messages[0].tags, 'info')
         self.assertEqual(messages[0].message, expected_message)
 
     @httpretty.activate

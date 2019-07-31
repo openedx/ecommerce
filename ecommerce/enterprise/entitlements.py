@@ -271,9 +271,11 @@ def get_enterprise_code_redemption_redirect(request, products, skus, failure_vie
                 ])
             )
             return HttpResponseRedirect(
-                '{path}?{params}'.format(
-                    path=reverse('coupons:redeem'),
-                    params=params
+                request.build_absolute_uri(
+                    '{path}?{params}'.format(
+                        path=reverse('coupons:redeem'),
+                        params=params
+                    )
                 )
             )
 

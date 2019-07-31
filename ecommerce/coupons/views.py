@@ -16,7 +16,7 @@ from django.utils.translation import ugettext as _
 from django.views.generic import TemplateView, View
 from oscar.core.loading import get_class, get_model
 
-from ecommerce.core.url_utils import get_ecommerce_url
+from ecommerce.core.url_utils import absolute_redirect, get_ecommerce_url
 from ecommerce.core.views import StaffOnlyMixin
 from ecommerce.coupons.decorators import login_required_for_credit
 from ecommerce.coupons.utils import is_voucher_applied
@@ -259,21 +259,21 @@ class CouponRedeemView(EdxOrderPlacementMixin, View):
                 return HttpResponseRedirect(get_receipt_page_url(site_configuration, order.number))
             except:  # pylint: disable=bare-except
                 logger.exception('Failed to create a free order for basket [%d]', basket.id)
-                return HttpResponseRedirect(reverse('checkout:error'))
+                return absolute_redirect(self.request, 'checkout:error')
 
         if enterprise_customer:
             if is_voucher_applied(basket, voucher):
                 message = _('A discount has been applied, courtesy of {enterprise_customer_name}.').format(
                     enterprise_customer_name=enterprise_customer.get('name')
                 )
-                messages.info(self.request, message, extra_tags='safe')
+                messages.info(self.request, message)
             else:
                 messages.warning(
                     self.request,
                     _('This coupon code is not valid for this course. Try a different course.'))
                 self.request.basket.vouchers.remove(voucher)
 
-        return HttpResponseRedirect(reverse('basket:summary'))
+        return absolute_redirect(self.request, 'basket:summary')
 
 
 class EnrollmentCodeCsvView(View):

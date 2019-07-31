@@ -5,12 +5,12 @@ import logging
 from decimal import Decimal
 
 from django.conf import settings
-from django.shortcuts import redirect
 from django.utils.translation import ugettext_lazy as _
 from ecommerce_worker.sailthru.v1.tasks import send_offer_assignment_email, send_offer_update_email
 from oscar.core.loading import get_model
 from six.moves.urllib.parse import urlencode
 
+from ecommerce.core.url_utils import absolute_redirect
 from ecommerce.extensions.checkout.utils import add_currency
 
 logger = logging.getLogger(__name__)
@@ -115,7 +115,7 @@ def get_redirect_to_email_confirmation_if_required(request, offer, product):
     """
     require_account_activation = request.site.siteconfiguration.require_account_activation or offer.email_domains
     if require_account_activation and not request.user.account_details(request).get('is_active'):
-        response = redirect('offers:email_confirmation')
+        response = absolute_redirect(request, 'offers:email_confirmation')
         course_id = product.course and product.course.id
         if course_id:
             response['Location'] += '?{params}'.format(params=urlencode({'course_id': course_id}))
