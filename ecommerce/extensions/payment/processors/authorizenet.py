@@ -11,13 +11,11 @@ from ecommerce.extensions.payment.processors import (
     BaseClientSidePaymentProcessor,
     HandledProcessorResponse
 )
-import json
 from ecommerce.core.url_utils import get_ecommerce_url
+from ecommerce.core.url_utils import get_lms_dashboard_url
 from urlparse import urljoin
 
 import os, sys
-import imp
-
 from authorizenet import apicontractsv1
 from authorizenet.apicontrollers import *
 from decimal import *
@@ -61,8 +59,7 @@ class AuthorizeNet(BaseClientSidePaymentProcessor):
 
     def get_transaction_parameters(self, basket, request=None, use_client_side_checkout=True, **kwargs):
         self.basket = basket
-        return_url = urljoin(get_ecommerce_url(), reverse('authorizenet:execute'))
-        communictaor_url = urljoin(get_ecommerce_url(), reverse('authorizenet:communicator'))
+        return_url = get_lms_dashboard_url()
 
         merchantAuth = apicontractsv1.merchantAuthenticationType()
         merchantAuth.name = "78f4r3PmQH"
@@ -74,14 +71,6 @@ class AuthorizeNet(BaseClientSidePaymentProcessor):
 
         setting2 = apicontractsv1.settingType()
         setting2.settingName = apicontractsv1.settingNameEnum.hostedPaymentReturnOptions
-        # setting2_configrations = {
-        #     'showReceipt': false
-        #     'url': return_url,
-        #     'urlText': 'Continue',
-        #     'cancelUrl': self.cancel_url,
-        #     'cancelUrlText': 'Cancel'
-        # }
-
         setting2_configrations = {
             'showReceipt': False,
             'url': return_url,
@@ -91,14 +80,9 @@ class AuthorizeNet(BaseClientSidePaymentProcessor):
         }
         setting2.settingValue = json.dumps(setting2_configrations)
 
-        setting3 = apicontractsv1.settingType()
-        setting3.settingName = apicontractsv1.settingNameEnum.hostedPaymentIFrameCommunicatorUrl
-        setting3.settingValue = json.dumps({'url': communictaor_url})
-
         settings = apicontractsv1.ArrayOfSetting()
         settings.setting.append(setting1)
         settings.setting.append(setting2)
-        settings.setting.append(setting3)
 
         order = apicontractsv1.orderType()
         order.invoiceNumber = basket.order_number

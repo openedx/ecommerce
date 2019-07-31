@@ -19,8 +19,8 @@ from oscar.core.loading import get_class, get_model
 
 from ecommerce.extensions.basket.utils import basket_add_organization_attribute
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
-from ecommerce.extensions.checkout.utils import get_receipt_page_url
 from ecommerce.extensions.payment.processors.authorizenet import AuthorizeNet
+from ecommerce.core.url_utils import get_lms_dashboard_url
 
 from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse
@@ -43,9 +43,6 @@ from django.shortcuts import render
 @csrf_exempt
 def testView(request):
     return HttpResponse('')
-
-def render_communicator(request):
-    return render(request,'payment/authorizenet-communicator.html')
 
 class AuthorizeNetPaymentView(EdxOrderPlacementMixin, View):
     """Execute an approved authorizenet payment and place an order for paid products as appropriate."""
@@ -74,63 +71,26 @@ class AuthorizeNetPaymentView(EdxOrderPlacementMixin, View):
             duplicate payment_id received or any other exception occurred.
 
         """
-        try:
-            basket = PaymentProcessorResponse.objects.get(
-                processor_name=self.payment_processor.NAME,
-                transaction_id=payment_id
-            ).basket
-            basket.strategy = strategy.Default()
-            Applicator().apply(basket, basket.owner, self.request)
+        # try:
+        #     basket = PaymentProcessorResponse.objects.get(
+        #         processor_name=self.payment_processor.NAME,
+        #         transaction_id=payment_id
+        #     ).basket
+        #     basket.strategy = strategy.Default()
+        #     Applicator().apply(basket, basket.owner, self.request)
 
-            basket_add_organization_attribute(basket, self.request.GET)
-            return basket
-        except MultipleObjectsReturned:
-            logger.warning(u"Duplicate payment ID [%s] received from PayPal.", payment_id)
-            return None
-        except Exception:  # pylint: disable=broad-except
-            logger.exception(u"Unexpected error during basket retrieval while executing PayPal payment.")
-            return None
+        #     basket_add_organization_attribute(basket, self.request.GET)
+        #     return basket
+        # except MultipleObjectsReturned:
+        #     logger.warning(u"Duplicate payment ID [%s] received from PayPal.", payment_id)
+        #     return None
+        # except Exception:  # pylint: disable=broad-except
+        #     logger.exception(u"Unexpected error during basket retrieval while executing PayPal payment.")
+        #     return None
 
     def get(self, request):
         """Handle an incoming user returned to us by AuthorizeNet after approving payment."""
         pass
-        # data = self.payment_processor.record_response()
-        # logger.info(u"Payment approved by authorizenet)
-
-        # if not basket:
-        #     return redirect(self.payment_processor.error_url)
-
-        # receipt_url = get_receipt_page_url(
-        #     order_number=basket.order_number,
-        #     site_configuration=basket.site.siteconfiguration
-        # )
-
-        # try:
-        #     with transaction.atomic():
-        #         try:
-        #             self.handle_payment({}, basket)
-        #         except PaymentError:
-        #             return redirect(self.payment_processor.error_url)
-        # except:  # pylint: disable=bare-except
-        #     logger.exception('Attempts to handle payment for basket [%d] failed.', basket.id)
-        #     return redirect(receipt_url)
-
-        # self.call_handle_order_placement(basket, request)
-        # return redirect(receipt_url)
-
-    def post(self, request):
-        """Handle an incoming user returned to us by AuthorizeNet after approving payment."""
-        basket_id = request.POST.get('basket')
-        try:
-            basket = request.user.baskets.get(id=basket_id)
-        except ObjectDoesNotExist:
-            return HttpResponseBadRequest('Basket [{}] not found.'.format(basket_id))
-
-        basket.strategy = strategy.Default()
-        Applicator().apply(basket, basket.owner, self.request)
-        
-        response = self.payment_processor.get_transaction_parameters(basket)
-        return JsonResponse(response)
 
     def call_handle_order_placement(self, basket, request):
         pass

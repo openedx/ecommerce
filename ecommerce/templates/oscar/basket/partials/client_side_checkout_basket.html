@@ -129,17 +129,6 @@
 </div>
 
 
-<div id="iframe_holder" class="center-block" style="width:90%;max-width: 1000px">
-	<iframe id="add_payment" class="embed-responsive-item panel" name="add_payment" width="100%" height="1000px" frameborder="0" scrolling="yes" hidden="true">
-	</iframe>
-</div>
-
-<form id="send_token" action="" method="post" target="add_payment">
-	<input type="hidden" name="token" value="Replace with form token from getHostedPaymentPageResponse" />
-</form>
-
-
-
 <form id="paymentForm" class="payment-form form-horizontal" method="post" aria-live="polite">
     {% csrf_token %}
 
@@ -204,7 +193,6 @@
         </div>
         {% endif %}
         <div class="form-input-elements placeholder">
-            {% if client_side_payment_processor.NAME != "authorizenet" %}
             <div role="region" {% if not free_basket %}aria-labelledby="billing-information-region"{% endif %}>
                 {% if not free_basket %}
                     <h2 id="billing-information-region" class="title">{% trans "billing information" %}</h2>
@@ -262,7 +250,7 @@
                     </div>
                 </div>
                 {% endif %}
-                {% endif %}
+
                 <div class="payment-button col-sm-6 col-sm-offset-6 col-xs-12">
                 {% if free_basket %}
                     <a href="{% url 'checkout:free-checkout' %}"

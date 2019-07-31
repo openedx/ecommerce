@@ -31,7 +31,6 @@ BLUEFIN_URLS = [
 
 AUTHORIZENET_URLS = [
     url(r'^execute/$', authorizenet.AuthorizeNetPaymentView.as_view(), name='execute'),
-    url(r'^communicator', authorizenet.render_communicator, name='communicator'),
 ]
 
 urlpatterns = [
