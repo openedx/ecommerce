@@ -268,12 +268,9 @@ class CouponRedeemView(EdxOrderPlacementMixin, View):
                 )
                 messages.info(self.request, message)
             else:
-                # Display a generic message to the user if a condition-specific
-                # message has not already been added by an unsatified Condition class.
-                if not messages.get_messages(self.request):
-                    messages.warning(
-                        self.request,
-                        _('This coupon code is not valid for this course. Try a different course.'))
+                messages.warning(
+                    self.request,
+                    _('This coupon code is not valid for this course. Try a different course.'))
                 self.request.basket.vouchers.remove(voucher)
 
         return absolute_redirect(self.request, 'basket:summary')

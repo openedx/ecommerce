@@ -6,8 +6,6 @@ from uuid import uuid4
 import ddt
 import httpretty
 import mock
-from django.contrib.messages.storage.fallback import FallbackStorage
-from django.test import RequestFactory
 from oscar.core.loading import get_model
 from oscar.test.factories import BasketFactory
 from six.moves import range, zip
@@ -310,12 +308,6 @@ class AssignableEnterpriseCustomerConditionTests(EnterpriseServiceMockMixin, Cou
         super(AssignableEnterpriseCustomerConditionTests, self).setUp()
         self.condition = factories.AssignableEnterpriseCustomerConditionFactory()
 
-        # Prepare Django messages mock
-        self.request = RequestFactory().get('/')
-        setattr(self.request, 'session', 'session')
-        messages = FallbackStorage(self.request)
-        setattr(self.request, '_messages', messages)
-
     def create_data(self, voucher_type, max_uses, assignments):
         """
         Create vouchers, offers and offer assignments.
@@ -375,7 +367,6 @@ class AssignableEnterpriseCustomerConditionTests(EnterpriseServiceMockMixin, Cou
                     assignment.status = OFFER_REDEEMED
                     assignment.save()
 
-    @mock.patch('crum.get_current_request')
     @mock.patch.object(EnterpriseCustomerCondition, 'is_satisfied', mock.Mock(return_value=True))
     @ddt.data(
         (0, 'test1@example.com', OFFER_ASSIGNMENT_EMAIL_PENDING, True),
@@ -383,11 +374,10 @@ class AssignableEnterpriseCustomerConditionTests(EnterpriseServiceMockMixin, Cou
         (0, 'test1@example.com', OFFER_ASSIGNMENT_REVOKED, True),
     )
     @ddt.unpack
-    def test_is_satisfied(self, num_orders, email, offer_status, condition_result, mock_request):
+    def test_is_satisfied(self, num_orders, email, offer_status, condition_result):
         """
         Ensure that condition returns expected result.
         """
-        mock_request.return_value = self.request
         voucher = factories.VoucherFactory(usage=Voucher.SINGLE_USE, num_orders=num_orders)
         enterprise_offer = factories.EnterpriseOfferFactory(max_global_applications=None)
         voucher.offers.add(enterprise_offer)
@@ -402,9 +392,8 @@ class AssignableEnterpriseCustomerConditionTests(EnterpriseServiceMockMixin, Cou
 
         assert self.condition.is_satisfied(enterprise_offer, basket) == condition_result
 
-    @mock.patch('crum.get_current_request')
     @mock.patch.object(EnterpriseCustomerCondition, 'is_satisfied', mock.Mock(return_value=True))
-    def test_is_satisfied_with_different_users(self, mock_request):
+    def test_is_satisfied_with_different_users(self):
         """
         Ensure that condition returns expected result when wrong user is try to redeem the voucher.
 
@@ -413,7 +402,6 @@ class AssignableEnterpriseCustomerConditionTests(EnterpriseServiceMockMixin, Cou
         # test2@example.com try to redeem `ASD` code
         # `is_satisfied` should return False
         """
-        mock_request.return_value = self.request
         voucher1 = factories.VoucherFactory(usage=Voucher.SINGLE_USE, code='ASD')
         voucher2 = factories.VoucherFactory(usage=Voucher.SINGLE_USE, code='ZXC')
 
@@ -429,7 +417,6 @@ class AssignableEnterpriseCustomerConditionTests(EnterpriseServiceMockMixin, Cou
 
         assert self.condition.is_satisfied(enterprise_offers[1], basket) is False
 
-    @mock.patch('crum.get_current_request')
     @mock.patch.object(EnterpriseCustomerCondition, 'is_satisfied', mock.Mock(return_value=True))
     @ddt.data(
         (
@@ -564,13 +551,11 @@ class AssignableEnterpriseCustomerConditionTests(EnterpriseServiceMockMixin, Cou
             max_uses,
             assignments,
             wrong_assignments,
-            check_correct_assignments,
-            mock_request
+            check_correct_assignments
     ):
         """
         Ensure that condition returns expected result for all types of voucher assignments.
         """
-        mock_request.return_value = self.request
         self.create_data(voucher_type, max_uses, assignments)
 
         # for correct assignments we will also update status in OfferAssignment Model
@@ -580,9 +565,8 @@ class AssignableEnterpriseCustomerConditionTests(EnterpriseServiceMockMixin, Cou
             self.assert_condition(voucher_type, assignments, True)
         self.assert_condition(voucher_type, wrong_assignments, False)
 
-    @mock.patch('crum.get_current_request')
     @mock.patch.object(EnterpriseCustomerCondition, 'is_satisfied', mock.Mock(return_value=True))
-    def test_is_satisfied_when_owner_has_no_assignment(self, mock_request):
+    def test_is_satisfied_when_owner_has_no_assignment(self):
         """
         Ensure that condition returns expected result the basket owner has no assignments.
 
@@ -590,7 +574,6 @@ class AssignableEnterpriseCustomerConditionTests(EnterpriseServiceMockMixin, Cou
         # assignments(2) exist for other users, voucher has some redemptions(num_orders = 2)
         # basket owner is allowed to redeem the voucher
         """
-        mock_request.return_value = self.request
         code = 'TA7WCQD3T4C7GHZ4'
         num_orders = 2
         max_global_applications = 7
@@ -607,14 +590,12 @@ class AssignableEnterpriseCustomerConditionTests(EnterpriseServiceMockMixin, Cou
 
         assert self.condition.is_satisfied(enterprise_offer, basket) is True
 
-    @mock.patch('crum.get_current_request')
     @mock.patch.object(EnterpriseCustomerCondition, 'is_satisfied', mock.Mock(return_value=True))
-    def test_is_satisfied_when_user_has_no_assignment(self, mock_request):
+    def test_is_satisfied_when_user_has_no_assignment(self):
         """
         Ensure that condition returns expected result when code has assignments
         but user has no assignments and free slots are available.
         """
-        mock_request.return_value = self.request
         voucher_code = 'NWW3BEOKOY5GITFH'
         voucher_type, max_uses, assignments = (
             Voucher.MULTI_USE,
@@ -648,18 +629,16 @@ class AssignableEnterpriseCustomerConditionTests(EnterpriseServiceMockMixin, Cou
         # no redemption available
         self.assert_condition(voucher_type, user_with_no_assignment, False)
 
-    @mock.patch('crum.get_current_request')
     @mock.patch.object(EnterpriseCustomerCondition, 'is_satisfied', mock.Mock(return_value=True))
     @ddt.data(
         (0, True),
         (1, False),
     )
     @ddt.unpack
-    def test_is_satisfied_when_no_code_assignments_exists(self, num_orders, redemptions_available, mock_request):
+    def test_is_satisfied_when_no_code_assignments_exists(self, num_orders, redemptions_available):
         """
         Ensure that condition returns expected result when code has no assignments.
         """
-        mock_request.return_value = self.request
         enterprise_offer = factories.EnterpriseOfferFactory()
         voucher = factories.VoucherFactory(usage=Voucher.SINGLE_USE, code='AAA', num_orders=num_orders)
         voucher.offers.add(enterprise_offer)
