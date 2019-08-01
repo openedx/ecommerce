@@ -8,7 +8,6 @@ import hashlib
 import hmac
 import base64
 import pytz
-import os
 
 
 from django.conf import settings
@@ -24,7 +23,6 @@ from django.core.management.base import BaseCommand, CommandError
 from django.db.models import Q, Subquery
 from oscar.core.loading import get_class, get_model
 from ecommerce.extensions.partner.strategy import DefaultStrategy
-#post_checkout = get_class('checkout.signals', 'post_checkout')
 
 logger = logging.getLogger(__name__)
 Basket = get_model('basket', 'Basket')
@@ -37,9 +35,8 @@ Country = get_model('address', 'Country')
 OrderCreator = get_class('order.utils', 'OrderCreator')
 
 
-DEFAULT_START_DELTA_DAYS = 50
-DEFAULT_END_DELTA_DAYS = 30
-
+DEFAULT_START_DELTA_HOUR = 4
+DEFAULT_END_DELTA_HOUR = 0
 
 CS_CONFIG = settings.CS_API_CONFIG
 API_KEY_ID = CS_CONFIG.get('API_KEY_ID', None)
@@ -202,8 +199,24 @@ def check_cs_search_transaction(client, basket, message_body):
 def _process_search_transaction(transaction_response, basket, client):
     """Hit Cybersource transaction api to get details of a transaction."""
 
-    application_summary = transaction_response['_embedded']['transactionSummaries'][0]['applicationInformation']
-    href = transaction_response['_embedded']['transactionSummaries'][0]['_links']['transactionDetail']['href']
+    try:
+        transaction_summaries = transaction_response['_embedded']['transactionSummaries']
+        if not transaction_summaries:
+            return
+
+        if len(transaction_summaries) == 0:
+            logger.info(u"No summary info found from CyberSource "
+                        u"Transaction Search api for Order Number: " + basket.order_number)
+            return
+
+        summary = transaction_summaries[0]
+        application_summary = summary.get('applicationInformation', None)
+        href = summary['_links']['transactionDetail']['href']
+
+    except KeyError:
+        logger.exception(u"Some information was not found in meta from CyberSource "
+                    u"Transaction Search api for Order Number: " + basket.order_number)
+        raise
 
     if not application_summary or not href:
         return
@@ -238,6 +251,8 @@ def _process_search_transaction(transaction_response, basket, client):
 
 
 def _process_transaction_details(transaction, basket):
+    """Processes details for a transaction."""
+
     application_summary = transaction['applicationInformation']
 
     if '100' == str(application_summary['reasonCode']):
@@ -293,9 +308,6 @@ def _process_successful_order(order_detail, basket):
             last_name=order_detail['last_name'],
             line1=order_detail['address'],
 
-            # # Address line 2 is optional
-            # line2=cybersource_response.get('req_bill_to_address_line2', ''),
-
             # Oscar uses line4 for city
             line4='city',
             # Postal code is optional
@@ -308,43 +320,42 @@ def _process_successful_order(order_detail, basket):
         billing_info.save()
 
         site = basket.site
-        order_data = {'basket': basket,
-                      'number': basket.order_number,
-                      'site': site,
-                      'partner': site.siteconfiguration.partner,
-                      'currency': order_detail['currency'],
-                      'total_incl_tax': order_detail['total_amount'],
-                      'total_excl_tax': order_detail['total_amount'],
-                      'shipping_incl_tax': shipping_charge.incl_tax,
-                      'shipping_excl_tax': shipping_charge.excl_tax,
-                      'shipping_method': shipping_method.name,
-                      'shipping_code': shipping_method.code,
-                      'user_id': user.id,
-                      'billing_address': billing_info,
-                      'status': 'Open'
-                      }
+        order_data = {
+            'basket': basket,
+            'number': basket.order_number,
+            'site': site,
+            'partner': site.siteconfiguration.partner,
+            'currency': order_detail['currency'],
+            'total_incl_tax': order_detail['total_amount'],
+            'total_excl_tax': order_detail['total_amount'],
+            'shipping_incl_tax': shipping_charge.incl_tax,
+            'shipping_excl_tax': shipping_charge.excl_tax,
+            'shipping_method': shipping_method.name,
+            'shipping_code': shipping_method.code,
+            'user_id': user.id,
+            'billing_address': billing_info,
+            'status': 'Open'
+        }
 
         basket.strategy = DefaultStrategy()
         with transaction.atomic():
             order = Order(**order_data)
-            order.save()
+            #order.save()
 
             for line in basket.all_lines():
                 OrderCreator().create_line_models(order, line)
                 OrderCreator().update_stock_records(line)
-            basket.submit()
+            #basket.submit()
 
             logger.info(u"Order Number: {order_number} created successfully."
                         .format(order_number=basket.order_number))
 
-            basket.submit()
-
             logger.info(u'Requesting fulfillment of order [%s].', order.number)
-            fulfill_order.delay(
-                order.number,
-                site_code=order.site.siteconfiguration.partner.short_code,
-                email_opt_in=False
-            )
+            # fulfill_order.delay(
+            #     order.number,
+            #     site_code=order.site.siteconfiguration.partner.short_code,
+            #     email_opt_in=False
+            # )
     else:
         logger.info(u"Order Number: {order_number} already exist, skipping order creation."
                     .format(order_number=basket.order_number))
@@ -365,14 +376,12 @@ class Command(BaseCommand):
     This management command is responsible for checking the frozen baskets
     for which the payment form was submitted to Cybersource. It would
     fetch transaction details for all such frozen baskets and would try to create
-    orders for all successful transactions.
+    and fulfill such orders for all successful transactions.
 
-    start-delta : Days before now to start looking at frozen baskets that are missing
+    start-delta : Hours before now to start looking at frozen baskets that are missing
                   payment response
-    end-delta : Days before now to end looking at frozen baskets that are missing payment
-                response. 
-    end-delta cannot be greater than start-delta
-
+    end-delta : Hours before now to end looking at frozen baskets that are missing payment
+                response. end-delta cannot be greater than start-delta
     Example:
         $ ... find_frozen_baskets_missing_payment_response --start-delta 240 --end-delta 60
 
@@ -384,16 +393,16 @@ class Command(BaseCommand):
             dest='start_delta',
             action='store',
             type=int,
-            default=DEFAULT_START_DELTA_DAYS,
-            help='Days before now to start looking at baskets.'
+            default=DEFAULT_START_DELTA_HOUR,
+            help='Hour before now to start looking at baskets.'
         )
         parser.add_argument(
             '--end-delta',
             dest='end_delta',
             action='store',
             type=int,
-            default=DEFAULT_END_DELTA_DAYS,
-            help='Days before now to end looking at baskets.'
+            default=DEFAULT_END_DELTA_HOUR,
+            help='Hour before now to end looking at baskets.'
         )
 
     def handle(self, *args, **options):
@@ -449,9 +458,9 @@ class Command(BaseCommand):
             ids = ','.join(orders_ids)
             logger.info(u"Checking Cybersource for orders: [{orders}]".format(orders=ids))
 
-            self.check_transaction_from_cybersource(frozen_baskets, cs_config)
+            self._check_transaction_from_cybersource(frozen_baskets, cs_config)
 
-    def check_transaction_from_cybersource(self, frozen_baskets, cs_config):
+    def _check_transaction_from_cybersource(self, frozen_baskets, cs_config):
 
         client = CybersourceAPIClient(cs_config)
 
