@@ -3,9 +3,6 @@ from __future__ import absolute_import, unicode_literals
 import logging
 from uuid import UUID
 
-import crum
-from django.contrib import messages
-from django.utils.translation import ugettext as _
 from oscar.core.loading import get_model
 from requests.exceptions import ConnectionError, Timeout
 from slumber.exceptions import SlumberHttpBaseException
@@ -232,14 +229,6 @@ class AssignableEnterpriseCustomerCondition(EnterpriseCustomerCondition):
         # basket owner can redeem the voucher if free slots are avialable
         if voucher.slots_available_for_assignment:
             return True
-
-        messages.warning(
-            crum.get_current_request(),
-            _('This code is not valid with your email. '
-              'Please login with the correct email assigned '
-              'to the code or contact your Learning Manager '
-              'for additional questions.'),
-        )
 
         logger.warning('[Code Redemption Failure] Unable to apply enterprise offer because '
                        'the voucher has not been assigned to this user and their are no remaining available uses. '
