@@ -698,6 +698,7 @@ class BasketSummaryViewTests(EnterpriseServiceMockMixin, DiscoveryTestMixin, Dis
         self.assertEqual(line_data['seat_type'], enrollment_code.attr.seat_type.capitalize())
 
     @override_flag(ENABLE_MICROFRONTEND_FOR_BASKET_PAGE_FLAG_NAME, active=True)
+    @override_flag(FORCE_MICROFRONTEND_BUCKET_FLAG_NAME, active=True)
     def test_microfrontend_for_single_course_purchase(self):
         microfrontend_url = self.configure_redirect_to_microfrontend()
 
@@ -707,6 +708,7 @@ class BasketSummaryViewTests(EnterpriseServiceMockMixin, DiscoveryTestMixin, Dis
         self.assertRedirects(response, microfrontend_url, status_code=302, fetch_redirect_response=False)
 
     @override_flag(ENABLE_MICROFRONTEND_FOR_BASKET_PAGE_FLAG_NAME, active=True)
+    @override_flag(FORCE_MICROFRONTEND_BUCKET_FLAG_NAME, active=True)
     def test_microfrontend_with_consent_failed_param(self):
         microfrontend_url = self.configure_redirect_to_microfrontend()
 
@@ -717,6 +719,7 @@ class BasketSummaryViewTests(EnterpriseServiceMockMixin, DiscoveryTestMixin, Dis
         self.assertRedirects(response, expected_redirect_url, status_code=302, fetch_redirect_response=False)
 
     @override_flag(ENABLE_MICROFRONTEND_FOR_BASKET_PAGE_FLAG_NAME, active=True)
+    @override_flag(FORCE_MICROFRONTEND_BUCKET_FLAG_NAME, active=True)
     def test_microfrontend_for_enrollment_code_seat_type(self):
         microfrontend_url = self.configure_redirect_to_microfrontend()
 
