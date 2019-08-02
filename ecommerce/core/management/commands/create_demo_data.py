@@ -13,7 +13,7 @@ Partner = get_model('partner', 'Partner')
 
 
 class Command(BaseCommand):
-    help = 'Create demo data. This should only be run in development environments!'
+    help = 'Create demo course, its seats and publishes it to LMS. This should only be run in development environments!'
 
     def add_arguments(self, parser):
         parser.add_argument(
