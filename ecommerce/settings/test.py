@@ -172,3 +172,10 @@ BROKER_BACKEND = 'memory'
 #SAILTHRU settings
 SAILTHRU_KEY = 'abc123'
 SAILTHRU_SECRET = 'top_secret'
+
+CS_API_CONFIG={
+    'host': 'apitest.cybersource.com',
+    'merchant_id': 'test_merchant',
+    'API_KEY_ID': '11abcd11-d11e-123c-test-111a11a1d1f1',
+    'API_KEY_SECRET': 'AAAAAAA+2222222222222/nx1+Obf/BBBBBBBBBBBBB='
+}

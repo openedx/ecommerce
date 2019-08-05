@@ -38,19 +38,14 @@ OrderCreator = get_class('order.utils', 'OrderCreator')
 DEFAULT_START_DELTA_HOUR = 4
 DEFAULT_END_DELTA_HOUR = 0
 
-CS_CONFIG = settings.CS_API_CONFIG
-API_KEY_ID = CS_CONFIG.get('API_KEY_ID', None)
-API_KEY_SECRET = CS_CONFIG.get('API_KEY_SECRET', None)
-HOST = CS_CONFIG.get('host', None)
-MERCHANT_ID = CS_CONFIG.get('merchant_id', None)
 
 
 class CSConfiguration(object):
-    def __init__(self, api_key_id, api_key_secret, host, merchant_id):
-        self.key = api_key_id
-        self.secret_key = api_key_secret
-        self.host = host
-        self.merchant_id = merchant_id
+    def __init__(self, config):
+        self.key = config['API_KEY_ID']
+        self.secret_key = config['API_KEY_SECRET']
+        self.host = config['HOST']
+        self.merchant_id = config['MERCHANT_ID']
 
 
 class CybersourceAPIClient(object):
@@ -201,10 +196,8 @@ def _process_search_transaction(transaction_response, basket, client):
 
     try:
         transaction_summaries = transaction_response['_embedded']['transactionSummaries']
-        if not transaction_summaries:
-            return
 
-        if len(transaction_summaries) == 0:
+        if not transaction_summaries or len(transaction_summaries) == 0:
             logger.info(u"No summary info found from CyberSource "
                         u"Transaction Search api for Order Number: " + basket.order_number)
             return
@@ -241,7 +234,7 @@ def _process_search_transaction(transaction_response, basket, client):
                                     headers=client.get_transaction_headers())
         except Exception as e:
             logger.exception(u'Exception occurred while fetching transaction detail for Order Number' 
-                             u'from Transaction api: [%s]: [%s]', basket.order_number, e.message)
+                             u'from Transaction api: [%s]: %s', basket.order_number, e.message)
             raise
 
         transaction_detail = json.loads(response.content)
@@ -253,7 +246,12 @@ def _process_search_transaction(transaction_response, basket, client):
 def _process_transaction_details(transaction, basket):
     """Processes details for a transaction."""
 
-    application_summary = transaction['applicationInformation']
+    application_summary = transaction.get('applicationInformation', None)
+
+    if not application_summary:
+        logger.info(u"Application summary information missing from transaction detail response "
+                    u"for Order Number: " + basket.order_number)
+        return
 
     if '100' == str(application_summary['reasonCode']):
         logger.info(u"Successfully found transaction information from CyberSource "
@@ -314,8 +312,8 @@ def _process_successful_order(order_detail, basket):
             postcode=order_detail['zip'],
             # State is optional
             state='state',
-            country=Country.objects.get(
-                iso_3166_1_a2=order_detail['country']))
+            country=Country.objects.get(iso_3166_1_a2=order_detail['country'])
+        )
 
         billing_info.save()
 
@@ -340,26 +338,24 @@ def _process_successful_order(order_detail, basket):
         basket.strategy = DefaultStrategy()
         with transaction.atomic():
             order = Order(**order_data)
-            #order.save()
-
+            order.save()
             for line in basket.all_lines():
                 OrderCreator().create_line_models(order, line)
                 OrderCreator().update_stock_records(line)
-            #basket.submit()
+            basket.submit()
 
             logger.info(u"Order Number: {order_number} created successfully."
                         .format(order_number=basket.order_number))
 
             logger.info(u'Requesting fulfillment of order [%s].', order.number)
-            # fulfill_order.delay(
-            #     order.number,
-            #     site_code=order.site.siteconfiguration.partner.short_code,
-            #     email_opt_in=False
-            # )
+            fulfill_order.delay(
+                order.number,
+                site_code=order.site.siteconfiguration.partner.short_code,
+                email_opt_in=False
+            )
     else:
         logger.info(u"Order Number: {order_number} already exist, skipping order creation."
                     .format(order_number=basket.order_number))
-
 
 
 class InvalidTimeRange(Exception):
@@ -418,27 +414,29 @@ class Command(BaseCommand):
 
         try:
             if end_delta > start_delta:
-                raise InvalidTimeRange('Invalid time range')
+                raise InvalidTimeRange(u"Invalid time range")
         except InvalidTimeRange:
-            logger.exception('Incorrect Time Range')
-            raise
+            logger.exception(u"Incorrect time range given.")
+            return
 
-        start = datetime.now(pytz.utc) - timedelta(days=start_delta)
-        end = datetime.now(pytz.utc) - timedelta(days=end_delta)
+        start = datetime.now(pytz.utc) - timedelta(hours=start_delta)
+        end = datetime.now(pytz.utc) - timedelta(hours=end_delta)
 
         self.find_frozen_baskets_missing_payment_response(start, end)
 
     def find_frozen_baskets_missing_payment_response(self, start, end):
         """ Find baskets that are Frozen and missing payment response """
 
-        if not API_KEY_ID or not API_KEY_SECRET:
+        config = self._get_configuration()
+
+        if not config['API_KEY_ID'] or not config['API_KEY_SECRET']:
             raise CommandError(u"Missing API Key ID/KeySecret in configuration")
-        if not HOST or not MERCHANT_ID:
+        if not config['HOST'] or not config['MERCHANT_ID']:
             raise CommandError(u"Missing API HOST/MERCHANT ID in configuration")
 
-        cs_config = CSConfiguration(API_KEY_ID, API_KEY_SECRET, HOST, MERCHANT_ID)
-
+        cs_config = CSConfiguration(config)
         frozen_baskets = Basket.objects.filter(status='Frozen', date_submitted=None)
+
         frozen_baskets = frozen_baskets.filter(Q(date_created__gte=start, date_created__lt=end) |
                                                Q(date_merged__gte=start, date_merged__lt=end))
         frozen_baskets_missing_payment_response = \
@@ -474,3 +472,14 @@ class Command(BaseCommand):
 
             except Exception as e:
                 continue
+
+    def _get_configuration(self):
+
+        CS_CONFIG = settings.CS_API_CONFIG
+
+        return {
+            'API_KEY_ID': CS_CONFIG.get('API_KEY_ID', None),
+            'API_KEY_SECRET': CS_CONFIG.get('API_KEY_SECRET', None),
+            'HOST': CS_CONFIG.get('host', None),
+            'MERCHANT_ID': CS_CONFIG.get('merchant_id', None),
+        }
