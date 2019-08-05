@@ -23,7 +23,14 @@ from ecommerce.enterprise.benefits import BENEFIT_MAP as ENTERPRISE_BENEFIT_MAP
 from ecommerce.enterprise.benefits import EnterpriseAbsoluteDiscountBenefit, EnterprisePercentageDiscountBenefit
 from ecommerce.enterprise.conditions import AssignableEnterpriseCustomerCondition, EnterpriseCustomerCondition
 from ecommerce.extensions.offer.dynamic_conditional_offer import DynamicPercentageDiscountBenefit
-from ecommerce.extensions.offer.models import OFFER_PRIORITY_ENTERPRISE, OFFER_PRIORITY_VOUCHER, OfferAssignment
+from ecommerce.extensions.offer.models import (
+    OFFER_PRIORITY_ENTERPRISE,
+    OFFER_PRIORITY_MANUAL_ORDER,
+    OFFER_PRIORITY_VOUCHER,
+    OfferAssignment
+)
+from ecommerce.extensions.order.benefits import ManualEnrollmentOrderDiscountBenefit
+from ecommerce.extensions.order.conditions import ManualEnrollmentOrderDiscountCondition
 # TODO: journals dependency
 from ecommerce.journals.benefits import JournalBundleAbsoluteDiscountBenefit, JournalBundlePercentageDiscountBenefit
 from ecommerce.journals.conditions import JournalBundleCondition
@@ -256,6 +263,30 @@ class AssignableEnterpriseCustomerConditionFactory(ConditionFactory):
 
     class Meta(object):
         model = AssignableEnterpriseCustomerCondition
+
+
+class ManualEnrollmentOrderDiscountConditionFactory(ConditionFactory):
+    proxy_class = class_path(ManualEnrollmentOrderDiscountCondition)
+
+    class Meta(object):
+        model = ManualEnrollmentOrderDiscountCondition
+
+
+class ManualEnrollmentOrderDiscountBenefitFactory(BenefitFactory):
+    range = None
+    type = ''
+    value = 100
+    max_affected_items = 1
+    proxy_class = class_path(ManualEnrollmentOrderDiscountBenefit)
+
+
+class ManualEnrollmentOrderOfferFactory(ConditionalOfferFactory):
+    benefit = factory.SubFactory(ManualEnrollmentOrderDiscountBenefitFactory)
+    condition = factory.SubFactory(ManualEnrollmentOrderDiscountConditionFactory)
+    max_basket_applications = None
+    offer_type = ConditionalOffer.USER
+    priority = OFFER_PRIORITY_MANUAL_ORDER
+    status = ConditionalOffer.OPEN
 
 
 class EnterpriseOfferFactory(ConditionalOfferFactory):

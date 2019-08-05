@@ -6,24 +6,31 @@ import ddt
 import httpretty
 import mock
 import six
+from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Permission
 from django.test import RequestFactory, override_settings
 from django.urls import reverse
 from oscar.core.loading import get_class, get_model
+from rest_framework import status
 
+from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.extensions.api.serializers import OrderSerializer
 from ecommerce.extensions.api.tests.test_authentication import AccessTokenMixin
 from ecommerce.extensions.api.v2.tests.views import OrderDetailViewTestMixin
+from ecommerce.extensions.checkout.exceptions import BasketNotFreeError
 from ecommerce.extensions.fulfillment.signals import SHIPPING_EVENT_NAME
-from ecommerce.extensions.fulfillment.status import ORDER
+from ecommerce.extensions.fulfillment.status import LINE, ORDER
 from ecommerce.extensions.test.factories import create_order
 from ecommerce.tests.factories import SiteConfigurationFactory
 from ecommerce.tests.mixins import ThrottlingMixin
 from ecommerce.tests.testcases import TestCase
 
+Basket = get_model('basket', 'Basket')
 Order = get_model('order', 'Order')
+Product = get_model('catalogue', 'Product')
 ShippingEventType = get_model('order', 'ShippingEventType')
 post_checkout = get_class('checkout.signals', 'post_checkout')
+User = get_user_model()
 
 
 @ddt.ddt
@@ -344,3 +351,144 @@ class OrderDetailViewTests(OrderDetailViewTestMixin, TestCase):
     @property
     def url(self):
         return reverse('api:v2:order-detail', kwargs={'number': self.order.number})
+
+
+class ManualCourseEnrollmentOrderViewSetTests(TestCase):
+    """
+    Test the `ManualCourseEnrollmentOrderViewSet` functionality.
+    """
+    def setUp(self):
+        super(ManualCourseEnrollmentOrderViewSetTests, self).setUp()
+        self.url = reverse('api:v2:manual-course-enrollment-order-list')
+        self.user = self.create_user(is_staff=True)
+        self.client.login(username=self.user.username, password=self.password)
+        self.course = CourseFactory(id='course-v1:MAX+CX+Course', partner=self.partner)
+        self.course_price = 50
+        self.course.create_or_update_seat(
+            certificate_type='verified',
+            id_verification_required=True,
+            price=self.course_price
+        )
+        self.course.create_or_update_seat(
+            certificate_type='audit',
+            id_verification_required=False,
+            price=0
+        )
+        self.post_data = {
+            "lms_user_id": 11,
+            "username": "ma",
+            "email": "ma@example.com",
+            "course_run_key": self.course.id
+        }
+
+    def build_jwt_header(self, user):
+        """
+        Return header for the JWT auth.
+        """
+        return {'HTTP_AUTHORIZATION': self.generate_jwt_token_header(user)}
+
+    def post_order(self, data, user):
+        """
+        Make HTTP POST request and return the JSON response.
+        """
+        data = json.dumps(data)
+        headers = self.build_jwt_header(user)
+        response = self.client.post(self.url, data, content_type='application/json', **headers)
+        return response.status_code, response.json()
+
+    def test_auth(self):
+        """
+        Test that endpoint only works with the staff user
+        """
+        # Test unauthenticated access
+        response = self.client.post(self.url)
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+
+        # Test non-staff user
+        non_staff_user = self.create_user(is_staff=False)
+        status_code, __ = self.post_order(self.post_data, non_staff_user)
+        assert status_code == status.HTTP_403_FORBIDDEN
+
+        # Test staff user
+        status_code, __ = self.post_order(self.post_data, self.user)
+        assert status_code == status.HTTP_201_CREATED
+
+    def test_bad_request(self):
+        """"
+        Test that HTTP 400 is returned if expected data is not present in request.
+        """
+        response_status, response_data = self.post_order({}, self.user)
+
+        assert response_status == status.HTTP_400_BAD_REQUEST
+        assert response_data == {
+            'detail': "Missing required request data: 'lms_user_id', 'username', 'email', 'course_run_key'"
+        }
+
+    def test_create_manual_order(self):
+        """"
+        Test that manual enrollment order can be created with expected data.
+        """
+        response_status, response_data = self.post_order(self.post_data, self.user)
+
+        assert response_status == status.HTTP_201_CREATED
+
+        # verify learner user is created
+        user = User.objects.get(
+            username=self.post_data['username'],
+            email=self.post_data['email'],
+            lms_user_id=self.post_data['lms_user_id']
+        )
+
+        # get created order
+        order = Order.objects.get(number=response_data['order_number'])
+
+        # verify basket owner is correct
+        basket = Basket.objects.get(id=order.basket_id)
+        assert basket.owner == user
+
+        # verify order is created with expected data
+        assert order.status == ORDER.COMPLETE
+        assert order.total_incl_tax == 0
+        assert order.lines.count() == 1
+        line = order.lines.first()
+        assert line.status == LINE.COMPLETE
+        assert line.line_price_before_discounts_incl_tax == self.course_price
+        product = Product.objects.get(id=line.product.id)
+        assert product.course_id == self.course.id
+
+    def test_create_manual_order_with_incorrect_course(self):
+        """"
+        Test that manual enrollment order endpoint returns expected error response if course is incorrect.
+        """
+        post_data = dict(self.post_data, course_run_key='course-v1:MAX+ABC+Course')
+        response_status, response_data = self.post_order(post_data, self.user)
+        assert response_status == status.HTTP_400_BAD_REQUEST
+        assert response_data['detail'] == 'course not found'
+
+    def test_create_manual_order_idempotence(self):
+        """"
+        Test that manual enrollment order endpoint does not create multiple orders if called multiple
+        times with same data.
+        """
+        response_status, response_data = self.post_order(self.post_data, self.user)
+        assert response_status == status.HTTP_201_CREATED
+        existing_order_number = response_data['order_number']
+
+        response_status, response_data = self.post_order(self.post_data, self.user)
+        assert response_status == status.HTTP_200_OK
+        assert response_data['detail'] == 'Order already exists'
+        assert response_data['order_number'] == existing_order_number
+
+    @mock.patch(
+        'ecommerce.extensions.api.v2.views.orders.EdxOrderPlacementMixin.place_free_order',
+        new_callable=mock.PropertyMock,
+        side_effect=BasketNotFreeError
+    )
+    def test_create_manual_order_exception(self, __):
+        """"
+        Test that manual enrollment order endpoint returns expected error if an error occurred in
+        `place_free_order`.
+        """
+        response_status, response_data = self.post_order(self.post_data, self.user)
+        assert response_status == status.HTTP_400_BAD_REQUEST
+        assert response_data['detail'] == 'Failed to create free order'

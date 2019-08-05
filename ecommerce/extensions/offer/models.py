@@ -33,6 +33,7 @@ from ecommerce.extensions.offer.constants import (
 
 OFFER_PRIORITY_ENTERPRISE = 10
 OFFER_PRIORITY_VOUCHER = 20
+OFFER_PRIORITY_MANUAL_ORDER = 100
 
 logger = logging.getLogger(__name__)
 
