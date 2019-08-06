@@ -3,20 +3,17 @@ Tests for Django management command to verify ecommerce transactions.
 """
 from __future__ import absolute_import
 
-import datetime
-import pytz
 import json
+
 from django.core.management import call_command
+from django.core.management.base import CommandError
 from django.test.utils import override_settings
-from ecommerce.tests.testcases import TestCase
-from mock import patch, Mock
+from mock import Mock, patch
+from oscar.core.loading import get_class, get_model
 from testfixtures import LogCapture
 
-from django.core.management.base import CommandError
-from oscar.core.loading import get_class, get_model
 from ecommerce.extensions.basket.tests.mixins import BasketMixin
-from ecommerce.extensions.test.factories import create_order
-
+from ecommerce.tests.testcases import TestCase
 
 Basket = get_model('basket', 'Basket')
 Order = get_model('order', 'Order')

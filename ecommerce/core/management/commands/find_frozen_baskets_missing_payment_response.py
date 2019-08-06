@@ -1,27 +1,25 @@
 """ Django management command to find frozen baskets missing payment response. """
 
-import logging
-import requests
-import json
+import base64
 import datetime
 import hashlib
 import hmac
-import base64
-import pytz
-
-
-from django.conf import settings
-from django.db import transaction
+import json
+import logging
 from datetime import datetime, timedelta
 from email.utils import formatdate
-from datetime import datetime
 from time import mktime
 from urlparse import urlparse
 
-from ecommerce_worker.fulfillment.v1.tasks import fulfill_order
+import pytz
+import requests
+from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
+from django.db import transaction
 from django.db.models import Q, Subquery
+from ecommerce_worker.fulfillment.v1.tasks import fulfill_order
 from oscar.core.loading import get_class, get_model
+
 from ecommerce.extensions.partner.strategy import DefaultStrategy
 
 logger = logging.getLogger(__name__)
@@ -379,7 +377,7 @@ class Command(BaseCommand):
     end-delta : Hours before now to end looking at frozen baskets that are missing payment
                 response. end-delta cannot be greater than start-delta
     Example:
-        $ ... find_frozen_baskets_missing_payment_response --start-delta 240 --end-delta 60
+        $ ... find_frozen_baskets_missing_payment_response --start-delta 4 --end-delta 0
 
     """
 
