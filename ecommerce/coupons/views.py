@@ -256,7 +256,13 @@ class CouponRedeemView(EdxOrderPlacementMixin, View):
         if basket.total_excl_tax == 0:
             try:
                 order = self.place_free_order(basket)
-                return HttpResponseRedirect(get_receipt_page_url(site_configuration, order.number))
+                return HttpResponseRedirect(
+                    get_receipt_page_url(
+                        site_configuration,
+                        order.number,
+                        disable_back_button=True,
+                    ),
+                )
             except:  # pylint: disable=bare-except
                 logger.exception('Failed to create a free order for basket [%d]', basket.id)
                 return absolute_redirect(self.request, 'checkout:error')
