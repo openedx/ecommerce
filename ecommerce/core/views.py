@@ -13,7 +13,7 @@ from django.http import Http404, JsonResponse
 from django.shortcuts import redirect
 from django.utils.decorators import method_decorator
 from django.views.generic import View
-
+from rest_framework import views
 from ecommerce.core.constants import Status
 
 try:
@@ -108,7 +108,7 @@ class StaffOnlyMixin(object):
         return super(StaffOnlyMixin, self).dispatch(request, *args, **kwargs)
 
 
-class LogoutView(EdxOAuth2LogoutView):
+class LogoutView(EdxOAuth2LogoutView, views.APIView):
     """ Logout view that redirects the user to the LMS logout page. """
 
     def get_redirect_url(self, *args, **kwargs):
