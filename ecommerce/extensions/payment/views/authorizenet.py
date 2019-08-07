@@ -40,11 +40,7 @@ PaymentProcessorResponse = get_model('payment', 'PaymentProcessorResponse')
 from django.shortcuts import render
 
 
-@csrf_exempt
-def testView(request):
-    return HttpResponse('')
-
-class AuthorizeNetPaymentView(EdxOrderPlacementMixin, View):
+class AuthorizeNetNotificationView(EdxOrderPlacementMixin, View):
     """Execute an approved authorizenet payment and place an order for paid products as appropriate."""
 
     @property
@@ -57,9 +53,9 @@ class AuthorizeNetPaymentView(EdxOrderPlacementMixin, View):
     # at the time fulfillment is attempted, asynchronous order fulfillment tasks will fail.
     @method_decorator(transaction.non_atomic_requests)
     def dispatch(self, request, *args, **kwargs):
-        return super(AuthorizeNetPaymentView, self).dispatch(request, *args, **kwargs)
+        return super(AuthorizeNetNotificationView, self).dispatch(request, *args, **kwargs)
 
-    def _get_basket(self, payment_id):
+    def _get_basket(self, basket_id):
         """
         Retrieve a basket using a payment ID.
 
@@ -71,53 +67,135 @@ class AuthorizeNetPaymentView(EdxOrderPlacementMixin, View):
             duplicate payment_id received or any other exception occurred.
 
         """
-        # try:
-        #     basket = PaymentProcessorResponse.objects.get(
-        #         processor_name=self.payment_processor.NAME,
-        #         transaction_id=payment_id
-        #     ).basket
-        #     basket.strategy = strategy.Default()
-        #     Applicator().apply(basket, basket.owner, self.request)
+        if not basket_id:
+            return None
 
-        #     basket_add_organization_attribute(basket, self.request.GET)
-        #     return basket
-        # except MultipleObjectsReturned:
-        #     logger.warning(u"Duplicate payment ID [%s] received from PayPal.", payment_id)
-        #     return None
-        # except Exception:  # pylint: disable=broad-except
-        #     logger.exception(u"Unexpected error during basket retrieval while executing PayPal payment.")
-        #     return None
+        try:
+            basket_id = int(basket_id)
+            basket = Basket.objects.get(id=basket_id)
+            basket.strategy = strategy.Default()
+            Applicator().apply(basket, basket.owner, self.request)
+            return basket
+        except (ValueError, ObjectDoesNotExist):
+            return None
+
+    def _get_billing_address(self, transaction_billing, order_number):
+        """
+        Arguments:
+        Returns:
+
+        """
+        try:
+            import pdb; pdb.set_trace()
+            billing_address = BillingAddress(
+                first_name=str(transaction_billing.firstName),
+                last_name=str(transaction_billing.lastName),
+                line1=str(transaction_billing.address),
+                line4=str(transaction_billing.city),  # Oscar uses line4 for city
+                state=str(transaction_billing.state),
+                country=Country.objects.get(
+                    iso_3166_1_a2__iexact=transaction_billing.country
+                )
+            )
+
+        except Exception:  # pylint: disable=broad-except
+            logger.exception(
+                'An error occurred while parsing the billing address for \
+                    basket [%d]. No billing address will be stored for \
+                        the resulting order [%s].',
+                basket.id,
+                order_number)
+            billing_address = None
+        
+        return billing_address
 
     def get(self, request):
+        self.post(request)
+
+    def post(self, request):
         """Handle an incoming user returned to us by AuthorizeNet after approving payment."""
-        pass
+        notification = ""
 
-    def call_handle_order_placement(self, basket, request):
-        pass
-        # try:
-        #     shipping_method = NoShippingRequired()
-        #     shipping_charge = shipping_method.calculate(basket)
-        #     order_total = OrderTotalCalculator().calculate(basket, shipping_charge)
+        if notification.get("eventType") != "net.authorize.payment.authcapture.created":
+            return HttpResponse("")
 
-        #     user = basket.owner
-        #     # Given a basket, order number generation is idempotent. Although we've already
-        #     # generated this order number once before, it's faster to generate it again
-        #     # than to retrieve an invoice number from PayPal.
-        #     order_number = basket.order_number
+        notification_Id = notification.get("notificationId")
+        payload = notification.get("payload")
 
-        #     order = self.handle_order_placement(
-        #         order_number=order_number,
-        #         user=user,
-        #         basket=basket,
-        #         shipping_address=None,
-        #         shipping_method=shipping_method,
-        #         shipping_charge=shipping_charge,
-        #         billing_address=None,
-        #         order_total=order_total,
-        #         request=request
-        #     )
-        #     self.handle_post_order(order)
+        if payload.get("responseCode") != 1:
+            logger.info(
+                'Received Authorizenet declined transaction notification.',
+            )
+            return HttpResponse("")
 
-        # except Exception:  # pylint: disable=broad-except
-        #     self.log_order_placement_exception(basket.order_number, basket.id)
+        try:
+            transaction_id = payload.get("id")
+            if not transaction_id:
+                logger.info(
+                    'Recieve Authorizenet Notification without transaction_id',
+                )
+                return HttpResponse("")
 
+            transaction_details = self.payment_processor.get_transaction_detail(transaction_id)
+            order_number = str(transaction_details.transaction.order.invoiceNumber)
+            basket_id = OrderNumberGenerator().basket_id(order_number)
+
+            logger.info(
+                'Received Authorizenet payment notification for transaction [%s], associated with basket [%d].',
+                transaction_id,
+                basket_id
+            )
+
+            basket = self._get_basket(basket_id)
+
+            if not basket:
+                logger.error('Received Authorizenet payment notification for non-existent basket [%s].', basket_id)
+                raise InvalidBasketError
+
+            if basket.status != Basket.FROZEN:
+                logger.info(
+                    'Received CyberSource payment notification for basket [%d] which is in a non-frozen state, [%s]',
+                    basket.id, basket.status
+                )
+        finally:
+            # Store the response in the database regardless of its authenticity.
+            ppr = self.payment_processor.record_processor_response(
+                notification, transaction_id=notification_Id, basket=basket
+            )
+
+        try:
+            self.handle_payment(transaction_details, basket)
+        except Exception:
+            logger.exception('An error occurred while processing the Authorizenet \
+                payment for basket [%d].', basket.id)
+            return ""
+
+        self._call_handle_order_placement(basket, request, transaction_details)
+        return HttpResponse("")
+
+    def _call_handle_order_placement(self, basket, request, transaction_details):
+        try:
+            shipping_method = NoShippingRequired()
+            shipping_charge = shipping_method.calculate(basket)
+            order_total = OrderTotalCalculator().calculate(basket, shipping_charge)
+
+            user = basket.owner
+            order_number = str(transaction_details.transaction.order.invoiceNumber)
+
+            billing_address = self._get_billing_address(transaction_details.transaction.billTo, order_number)
+
+            order = self.handle_order_placement(
+                order_number=order_number,
+                user=user,
+                basket=basket,
+                shipping_address=None,
+                shipping_method=shipping_method,
+                shipping_charge=shipping_charge,
+                billing_address=billing_address,
+                order_total=order_total,
+                request=request
+            )
+            self.handle_post_order(order)
+
+        except Exception:  # pylint: disable=broad-except
+            self.log_order_placement_exception(basket.order_number, basket.id)
