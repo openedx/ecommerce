@@ -2,36 +2,19 @@
 from __future__ import absolute_import, unicode_literals
 
 import logging
-import requests
 import json
-from oscar.apps.payment.exceptions import TransactionDeclined
+from decimal import *
+from authorizenet import apicontractsv1
+from authorizenet.apicontrollers import *
 from oscar.core.loading import get_model
-
+from oscar.apps.payment.exceptions import GatewayError
 from ecommerce.extensions.payment.processors import (
     BaseClientSidePaymentProcessor,
     HandledProcessorResponse
 )
-from ecommerce.core.url_utils import get_ecommerce_url
-from ecommerce.core.url_utils import get_lms_dashboard_url
-from urlparse import urljoin
-from oscar.apps.payment.exceptions import GatewayError
-
-import os, sys
-from authorizenet import apicontractsv1
-from authorizenet.apicontrollers import *
-from decimal import *
-
-from django.urls import reverse
+from ecommerce.core.url_utils import get_ecommerce_url, get_lms_dashboard_url
 
 logger = logging.getLogger(__name__)
-
-BillingAddress = get_model('order', 'BillingAddress')
-Country = get_model('address', 'Country')
-PaymentEvent = get_model('order', 'PaymentEvent')
-PaymentEventType = get_model('order', 'PaymentEventType')
-PaymentProcessorResponse = get_model('payment', 'PaymentProcessorResponse')
-Source = get_model('payment', 'Source')
-SourceType = get_model('payment', 'SourceType')
 
 
 class AuthorizeNet(BaseClientSidePaymentProcessor):
@@ -43,13 +26,15 @@ class AuthorizeNet(BaseClientSidePaymentProcessor):
 
     def __init__(self, site):
         """
-        Constructs a new instance of the AuthorizeNet processor.
+            Constructs a new instance of the AuthorizeNet processor.
 
-        Raises:
-            KeyError: If no settings configured for this payment processor.
+            Raises:
+                KeyError: If no settings configured for this payment processor.
         """
         super(AuthorizeNet, self).__init__(site)
-        # self.basket = None
+        configuration = self.configuration
+        self.merchant_auth_name = configuration['merchant_auth_name']
+        self.transaction_key = configuration['transaction_key']
 
     @property
     def cancel_url(self):
@@ -59,9 +44,17 @@ class AuthorizeNet(BaseClientSidePaymentProcessor):
         return str((basket.total_incl_tax * 100).to_integral_value())
 
     def get_transaction_detail(self, transaction_id):
+        """
+            Return a complete transaction details from authorizenet transaction id.
+
+            Arguments:
+                transaction_id: transaction id received from Authorizenet Notification.
+            Returns:
+                Complete transaction detail
+        """
         merchantAuth = apicontractsv1.merchantAuthenticationType()
-        merchantAuth.name = "78f4r3PmQH"
-        merchantAuth.transactionKey = "5a2Paz7V84y8aGXj"
+        merchantAuth.name = self.merchant_auth_name
+        merchantAuth.transactionKey = self.transaction_key
 
         transactionDetailsRequest = apicontractsv1.getTransactionDetailsRequest()
         transactionDetailsRequest.merchantAuthentication = merchantAuth
@@ -73,34 +66,48 @@ class AuthorizeNet(BaseClientSidePaymentProcessor):
         transactionDetailsResponse = transactionDetailsController.getresponse()
         if transactionDetailsResponse is not None:
             if transactionDetailsResponse.messages.resultCode == apicontractsv1.messageTypeEnum.Ok:
-                print('Successfully got transaction details!')
-                print('Transaction Id : %s' % transactionDetailsResponse.transaction.transId)
-                print('Transaction Type : %s' % transactionDetailsResponse.transaction.transactionType)
-                print('Transaction Status : %s' % transactionDetailsResponse.transaction.transactionStatus)
-                print('Auth Amount : %.2f' % transactionDetailsResponse.transaction.authAmount)
-                print('Settle Amount : %.2f' % transactionDetailsResponse.transaction.settleAmount)
+                logger.info('Successfully got Authorizenet transaction details')
 
                 if transactionDetailsResponse.messages is not None:
-                    print('Message Code : %s' % transactionDetailsResponse.messages.message[0]['code'].text)
-                    print('Message Text : %s' % transactionDetailsResponse.messages.message[0]['text'].text)
+                    logger.info('Message Code : %s' % transactionDetailsResponse.messages.message[0]['code'].text)
+                    logger.info('Message Text : %s' % transactionDetailsResponse.messages.message[0]['text'].text)
             else:
                 if transactionDetailsResponse.messages is not None:
-                    print('Failed to get transaction details.\nCode:%s \nText:%s' % (transactionDetailsResponse.messages.message[0]['code'].text,transactionDetailsResponse.messages.message[0]['text'].text))
+                    logger.error('Failed to get transaction details.\nCode:%s \nText:%s' % (
+                        transactionDetailsResponse.messages.message[0]['code'].text,
+                        transactionDetailsResponse.messages.message[0]['text'].text)
+                    )
 
         return transactionDetailsResponse
 
     def get_transaction_parameters(self, basket, request=None, use_client_side_checkout=True, **kwargs):
+        """
+            Create a new Authorizenet payment.
+
+        Arguments:
+            basket (Basket): The basket of products being purchased.
+            request (Request, optional): A Request object which is used to construct Authorizenet's `return_url`.
+            use_client_side_checkout (bool, optional): This value is not used.
+            **kwargs: Additional parameters; not used by this method.
+
+        Returns:
+            dict: Authorizenet-specific parameters required to complete a transaction. Must contain a URL
+                to which users can be directed in order to approve a newly created payment.
+
+        Raises:
+            GatewayError: Indicates a general error or unexpected behavior on the part of Authorizenet which prevented
+                a payment from being created.
+        """
         self.basket = basket
         return_url = get_lms_dashboard_url()
 
         merchantAuth = apicontractsv1.merchantAuthenticationType()
-        merchantAuth.name = "78f4r3PmQH"
-        merchantAuth.transactionKey = "5a2Paz7V84y8aGXj"
+        merchantAuth.name = self.merchant_auth_name
+        merchantAuth.transactionKey = self.transaction_key
 
         setting1 = apicontractsv1.settingType()
         setting1.settingName = apicontractsv1.settingNameEnum.hostedPaymentButtonOptions
         setting1.settingValue = json.dumps({'text': 'Pay'})
-
 
         setting2 = apicontractsv1.settingType()
         setting2.settingName = apicontractsv1.settingNameEnum.hostedPaymentReturnOptions
@@ -184,6 +191,17 @@ class AuthorizeNet(BaseClientSidePaymentProcessor):
         return parameters
 
     def handle_processor_response(self, transaction_response, basket=None):
+        """
+            Execute an approved Authorizenet transaction.
+            This method completes the transaction flow on edx side.
+
+            Arguments:
+                transaction_response: Transaction details received from authorizenet after successfull payment
+                basket (Basket): Basket being purchased via the payment processor.
+
+            Returns:
+                HandledProcessorResponse
+        """
         transaction_id = transaction_response.transaction.transId
         self.record_processor_response(transaction_response, transaction_id=transaction_id, basket=basket)
         logger.info("Successfully executed Authorizenet payment [%s] for basket [%d].", transaction_id, basket.id)
@@ -202,4 +220,7 @@ class AuthorizeNet(BaseClientSidePaymentProcessor):
 
     def issue_credit(
             self, order_number, basket, reference_number, amount, currency):
+        """
+            Refund a Authorizenet payment transaction
+        """
         pass

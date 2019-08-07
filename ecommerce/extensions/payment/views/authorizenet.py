@@ -2,29 +2,16 @@
 from __future__ import unicode_literals
 
 import logging
-import os
-from cStringIO import StringIO
-from django.http import JsonResponse
-
-from django.core.exceptions import MultipleObjectsReturned
-from django.core.management import call_command
 from django.db import transaction
-from django.http import Http404, HttpResponse, HttpResponseBadRequest
-from django.shortcuts import redirect
-from django.utils.decorators import method_decorator
+from django.http import HttpResponse
 from django.views.generic import View
 from oscar.apps.partner import strategy
-from oscar.apps.payment.exceptions import PaymentError
+from django.utils.decorators import method_decorator
 from oscar.core.loading import get_class, get_model
-
-from ecommerce.extensions.basket.utils import basket_add_organization_attribute
+from oscar.apps.payment.exceptions import TransactionDeclined
+from ecommerce.core.url_utils import get_lms_dashboard_url
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
 from ecommerce.extensions.payment.processors.authorizenet import AuthorizeNet
-from ecommerce.core.url_utils import get_lms_dashboard_url
-
-from django.views.decorators.csrf import csrf_exempt
-from django.http import HttpResponse
-
 
 logger = logging.getLogger(__name__)
 
@@ -37,11 +24,9 @@ OrderNumberGenerator = get_class('order.utils', 'OrderNumberGenerator')
 OrderTotalCalculator = get_class('checkout.calculators', 'OrderTotalCalculator')
 PaymentProcessorResponse = get_model('payment', 'PaymentProcessorResponse')
 
-from django.shortcuts import render
-
 
 class AuthorizeNetNotificationView(EdxOrderPlacementMixin, View):
-    """Execute an approved authorizenet payment and place an order for paid products as appropriate."""
+    """Execute an approved authorizenet payment and place an order for paid products."""
 
     @property
     def payment_processor(self):
@@ -57,15 +42,12 @@ class AuthorizeNetNotificationView(EdxOrderPlacementMixin, View):
 
     def _get_basket(self, basket_id):
         """
-        Retrieve a basket using a payment ID.
+            Retrieve a basket using a basket Id.
 
-        Arguments:
-            payment_id: payment_id received from PayPal.
-
-        Returns:
-            It will return related basket or log exception and return None if
-            duplicate payment_id received or any other exception occurred.
-
+            Arguments:
+                payment_id: payment_id received from PayPal.
+            Returns:
+                It will return related basket
         """
         if not basket_id:
             return None
@@ -79,22 +61,26 @@ class AuthorizeNetNotificationView(EdxOrderPlacementMixin, View):
         except (ValueError, ObjectDoesNotExist):
             return None
 
-    def _get_billing_address(self, transaction_billing, order_number):
+    def _get_billing_address(self, transaction_bill, order_number):
         """
-        Arguments:
-        Returns:
+            Prepare and return a billing address object from transaction billimg information.
 
+            Arguments:
+                transaction_bill: bill information from authorizenet transaction response.
+                order_number: related order number
+            Returns:
+                It will return billing object
         """
         try:
             import pdb; pdb.set_trace()
             billing_address = BillingAddress(
-                first_name=str(transaction_billing.firstName),
-                last_name=str(transaction_billing.lastName),
-                line1=str(transaction_billing.address),
-                line4=str(transaction_billing.city),  # Oscar uses line4 for city
-                state=str(transaction_billing.state),
+                first_name=str(transaction_bill.firstName),
+                last_name=str(transaction_bill.lastName),
+                line1=str(transaction_bill.address),
+                line4=str(transaction_bill.city),  # Oscar uses line4 for city
+                state=str(transaction_bill.state),
                 country=Country.objects.get(
-                    iso_3166_1_a2__iexact=transaction_billing.country
+                    iso_3166_1_a2__iexact=transaction_bill.country
                 )
             )
 
@@ -106,15 +92,43 @@ class AuthorizeNetNotificationView(EdxOrderPlacementMixin, View):
                 basket.id,
                 order_number)
             billing_address = None
-        
         return billing_address
 
-    def get(self, request):
-        self.post(request)
+    def _call_handle_order_placement(self, basket, request, transaction_details):
+        """
+            Handle order placement for approved transaction.
+        """
+        try:
+            shipping_method = NoShippingRequired()
+            shipping_charge = shipping_method.calculate(basket)
+            order_total = OrderTotalCalculator().calculate(basket, shipping_charge)
+
+            user = basket.owner
+            order_number = str(transaction_details.transaction.order.invoiceNumber)
+
+            billing_address = self._get_billing_address(transaction_details.transaction.billTo, order_number)
+
+            order = self.handle_order_placement(
+                order_number=order_number,
+                user=user,
+                basket=basket,
+                shipping_address=None,
+                shipping_method=shipping_method,
+                shipping_charge=shipping_charge,
+                billing_address=billing_address,
+                order_total=order_total,
+                request=request
+            )
+            self.handle_post_order(order)
+
+        except Exception:  # pylint: disable=broad-except
+            self.log_order_placement_exception(basket.order_number, basket.id)
 
     def post(self, request):
-        """Handle an incoming user returned to us by AuthorizeNet after approving payment."""
-        notification = ""
+        """
+            Handle an incoming user returned to us by AuthorizeNet after approving payment.
+        """
+        notification = request.POST
 
         if notification.get("eventType") != "net.authorize.payment.authcapture.created":
             return HttpResponse("")
@@ -123,7 +137,7 @@ class AuthorizeNetNotificationView(EdxOrderPlacementMixin, View):
         payload = notification.get("payload")
 
         if payload.get("responseCode") != 1:
-            logger.info(
+            logger.error(
                 'Received Authorizenet declined transaction notification.',
             )
             return HttpResponse("")
@@ -154,11 +168,11 @@ class AuthorizeNetNotificationView(EdxOrderPlacementMixin, View):
 
             if basket.status != Basket.FROZEN:
                 logger.info(
-                    'Received CyberSource payment notification for basket [%d] which is in a non-frozen state, [%s]',
+                    'Received Authorizenet payment notification for basket [%d] which is in a non-frozen state, [%s]',
                     basket.id, basket.status
                 )
         finally:
-            # Store the response in the database regardless of its authenticity.
+            # Store the notification in the database regardless of its authenticity.
             ppr = self.payment_processor.record_processor_response(
                 notification, transaction_id=notification_Id, basket=basket
             )
@@ -172,30 +186,3 @@ class AuthorizeNetNotificationView(EdxOrderPlacementMixin, View):
 
         self._call_handle_order_placement(basket, request, transaction_details)
         return HttpResponse("")
-
-    def _call_handle_order_placement(self, basket, request, transaction_details):
-        try:
-            shipping_method = NoShippingRequired()
-            shipping_charge = shipping_method.calculate(basket)
-            order_total = OrderTotalCalculator().calculate(basket, shipping_charge)
-
-            user = basket.owner
-            order_number = str(transaction_details.transaction.order.invoiceNumber)
-
-            billing_address = self._get_billing_address(transaction_details.transaction.billTo, order_number)
-
-            order = self.handle_order_placement(
-                order_number=order_number,
-                user=user,
-                basket=basket,
-                shipping_address=None,
-                shipping_method=shipping_method,
-                shipping_charge=shipping_charge,
-                billing_address=billing_address,
-                order_total=order_total,
-                request=request
-            )
-            self.handle_post_order(order)
-
-        except Exception:  # pylint: disable=broad-except
-            self.log_order_placement_exception(basket.order_number, basket.id)

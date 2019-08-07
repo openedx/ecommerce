@@ -82,7 +82,8 @@ bluefin_dict = {
 PAYMENT_PROCESSOR_CONFIG['edx'].update({'bluefin': bluefin_dict})
 
 authorizenet_dict = {
-    'cancel_checkout_path': PAYMENT_PROCESSOR_CANCEL_PATH,
+    'merchant_auth_name': config_from_yaml.get('AUTHORIZENET_AUTH_NAME'),
+    'transaction_key': config_from_yaml.get('AUTHORIZENET_TRANSACTION_KEY'),
 }
 
 PAYMENT_PROCESSOR_CONFIG['edx'].update({'authorizenet': authorizenet_dict})

@@ -143,6 +143,11 @@ PAYMENT_PROCESSOR_CONFIG = {
             'merchant_account_id': None,
             'api_access_key': None,
             'post_api_url': None,
+        },
+        'authorizenet': {
+            'cancel_checkout_path': PAYMENT_PROCESSOR_CANCEL_PATH,
+            'merchant_auth_name': None,
+            'transaction_key': None
         }
     },
 }
