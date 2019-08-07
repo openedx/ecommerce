@@ -679,7 +679,7 @@ class PaymentApiLogicMixin(BasketLogicMixin):
     def _add_products(self, response, lines_data):
         response['products'] = [
             {
-                'course_key': str(getattr(line_data, 'course_key', '')),
+                'course_key': getattr(line_data['line'].product.attr, 'course_key', None),
                 'sku': line_data['sku'],
                 'title': line_data['product_title'],
                 'product_type': line_data['line'].product.get_product_class().name,
