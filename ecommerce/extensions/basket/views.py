@@ -24,6 +24,7 @@ from six.moves import range, zip
 from six.moves.urllib.parse import urlencode
 from slumber.exceptions import SlumberBaseException
 
+from ecommerce.core.authentication import IsAuthenticatedOrLoginRequired
 from ecommerce.core.exceptions import SiteConfigurationError
 from ecommerce.core.url_utils import absolute_redirect, get_lms_course_about_url, get_lms_url
 from ecommerce.courses.utils import get_certificate_type_display_value, get_course_info_from_catalog
@@ -77,7 +78,7 @@ Selector = get_class('partner.strategy', 'Selector')
 
 
 def _get_payment_microfrontend_url_if_configured(request):
-    if _use_payment_microfrontend(request):
+    if use_payment_microfrontend(request):
         return request.site.siteconfiguration.payment_microfrontend_url
     else:
         return None
@@ -91,7 +92,7 @@ def _force_payment_microfrontend_bucket(request):
     return waffle.flag_is_active(request, FORCE_MICROFRONTEND_BUCKET_FLAG_NAME)
 
 
-def _use_payment_microfrontend(request):
+def use_payment_microfrontend(request):
     """
     Return whether the current request should use the payment MFE.
     """
@@ -128,11 +129,13 @@ def _use_payment_microfrontend(request):
         return False
 
 
-class BasketAddItemsView(View):
+class BasketAddItemsView(APIView):
     """
     View that adds multiple products to a user's basket.
     An additional coupon code can be supplied so the offer is applied to the basket.
     """
+    permission_classes = (IsAuthenticatedOrLoginRequired,)
+
     def get(self, request):
         try:
             skus = self._get_skus(request)
