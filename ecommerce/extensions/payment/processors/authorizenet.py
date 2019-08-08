@@ -3,9 +3,12 @@ from __future__ import absolute_import, unicode_literals
 
 import logging
 import json
-from decimal import *
+from decimal import Decimal
 from authorizenet import apicontractsv1
-from authorizenet.apicontrollers import *
+from authorizenet.apicontrollers import (
+    getHostedPaymentPageController,
+    getTransactionDetailsController
+)
 from oscar.core.loading import get_model
 from oscar.apps.payment.exceptions import GatewayError
 from ecommerce.extensions.payment.processors import (
@@ -40,9 +43,6 @@ class AuthorizeNet(BaseClientSidePaymentProcessor):
     @property
     def cancel_url(self):
         return get_ecommerce_url(self.configuration['cancel_checkout_path'])
-
-    def _get_basket_amount(self, basket):
-        return str((basket.total_incl_tax * 100).to_integral_value())
 
     def _get_authorizenet_payment_settings(self):
         """
@@ -93,33 +93,33 @@ class AuthorizeNet(BaseClientSidePaymentProcessor):
             Returns:
                 Complete transaction detail
         """
-        merchantAuth = apicontractsv1.merchantAuthenticationType()
-        merchantAuth.name = self.merchant_auth_name
-        merchantAuth.transactionKey = self.transaction_key
+        merchant_auth = apicontractsv1.merchantAuthenticationType()
+        merchant_auth.name = self.merchant_auth_name
+        merchant_auth.transactionKey = self.transaction_key
 
-        transactionDetailsRequest = apicontractsv1.getTransactionDetailsRequest()
-        transactionDetailsRequest.merchantAuthentication = merchantAuth
-        transactionDetailsRequest.transId = transaction_id
+        transaction_details_request = apicontractsv1.getTransactionDetailsRequest()
+        transaction_details_request.merchantAuthentication = merchant_auth
+        transaction_details_request.transId = transaction_id
 
-        transactionDetailsController = getTransactionDetailsController(transactionDetailsRequest)
-        transactionDetailsController.execute()
+        transaction_details_controller = getTransactionDetailsController(transaction_details_request)
+        transaction_details_controller.execute()
 
-        transactionDetailsResponse = transactionDetailsController.getresponse()
-        if transactionDetailsResponse is not None:
-            if transactionDetailsResponse.messages.resultCode == apicontractsv1.messageTypeEnum.Ok:
+        transaction_details_response = transaction_details_controller.getresponse()
+        if transaction_details_response is not None:
+            if transaction_details_response.messages.resultCode == apicontractsv1.messageTypeEnum.Ok:
                 logger.info('Successfully got Authorizenet transaction details')
 
-                if transactionDetailsResponse.messages is not None:
-                    logger.info('Message Code : %s' % transactionDetailsResponse.messages.message[0]['code'].text)
-                    logger.info('Message Text : %s' % transactionDetailsResponse.messages.message[0]['text'].text)
+                if transaction_details_response.messages is not None:
+                    logger.info('Message Code : %s' % transaction_details_response.messages.message[0]['code'].text)
+                    logger.info('Message Text : %s' % transaction_details_response.messages.message[0]['text'].text)
             else:
-                if transactionDetailsResponse.messages is not None:
+                if transaction_details_response.messages is not None:
                     logger.error('Failed to get transaction details.\nCode:%s \nText:%s' % (
-                        transactionDetailsResponse.messages.message[0]['code'].text,
-                        transactionDetailsResponse.messages.message[0]['text'].text)
+                        transaction_details_response.messages.message[0]['code'].text,
+                        transaction_details_response.messages.message[0]['text'].text)
                     )
 
-        return transactionDetailsResponse
+        return transaction_details_response
 
     def get_transaction_parameters(self, basket, request=None, use_client_side_checkout=True, **kwargs):
         """
@@ -141,53 +141,53 @@ class AuthorizeNet(BaseClientSidePaymentProcessor):
         """
         self.basket = basket
 
-        merchantAuth = apicontractsv1.merchantAuthenticationType()
-        merchantAuth.name = self.merchant_auth_name
-        merchantAuth.transactionKey = self.transaction_key
+        merchant_auth = apicontractsv1.merchantAuthenticationType()
+        merchant_auth.name = self.merchant_auth_name
+        merchant_auth.transactionKey = self.transaction_key
 
         settings = self._get_authorizenet_payment_settings()
         order = apicontractsv1.orderType()
         order.invoiceNumber = basket.order_number
         order.description = "upgrade to verified"
 
-        transactionrequest = apicontractsv1.transactionRequestType()
-        transactionrequest.transactionType = "authCaptureTransaction"
-        transactionrequest.amount = unicode(basket.total_incl_tax)
-        transactionrequest.order = order
+        transaction_request = apicontractsv1.transactionRequestType()
+        transaction_request.transactionType = "authCaptureTransaction"
+        transaction_request.amount = unicode(basket.total_incl_tax)
+        transaction_request.order = order
 
         line_items_list = self._get_authorizenet_lineitems(basket)
-        paymentPageRequest = apicontractsv1.getHostedPaymentPageRequest()
-        paymentPageRequest.merchantAuthentication = merchantAuth
-        paymentPageRequest.transactionRequest = transactionrequest
-        paymentPageRequest.hostedPaymentSettings = settings
-        transactionrequest.lineItems = line_items_list
+        payment_page_request = apicontractsv1.getHostedPaymentPageRequest()
+        payment_page_request.merchantAuthentication = merchant_auth
+        payment_page_request.transactionRequest = transaction_request
+        payment_page_request.hostedPaymentSettings = settings
+        transaction_request.lineItems = line_items_list
 
-        paymentPageController = getHostedPaymentPageController(paymentPageRequest)
-        paymentPageController.execute()
+        payment_page_controller = getHostedPaymentPageController(payment_page_request)
+        payment_page_controller.execute()
 
-        paymentPageResponse = paymentPageController.getresponse()
+        payment_page_response = payment_page_controller.getresponse()
         authorize_form_token = ""
 
-        if paymentPageResponse is not None:
-            if paymentPageResponse.messages.resultCode == apicontractsv1.messageTypeEnum.Ok:
+        if payment_page_response is not None:
+            if payment_page_response.messages.resultCode == apicontractsv1.messageTypeEnum.Ok:
                 logger.info(
                     "%s [%d].",
                     "Successfully got hosted payment page for basket",
                     basket.id,
                     exc_info=True
                 )
-                authorize_form_token = str(paymentPageResponse.token)
+                authorize_form_token = str(payment_page_response.token)
 
             else:
                 logger.error('Failed to get authorizenet payment token.')
-                if paymentPageResponse.messages is not None:
+                if payment_page_response.messages is not None:
                     logger.error(
                         '\nCode:%s \nText:%s' % (
-                            paymentPageResponse.messages.message[0]['code'].text,
-                            paymentPageResponse.messages.message[0]['text'].text
+                            payment_page_response.messages.message[0]['code'].text,
+                            payment_page_response.messages.message[0]['text'].text
                         )
                     )
-                raise GatewayError(paymentPageResponse.messages.message[0]['text'].text)
+                raise GatewayError(payment_page_response.messages.message[0]['text'].text)
         else:
             logger.error(
                 "%s [%d].",

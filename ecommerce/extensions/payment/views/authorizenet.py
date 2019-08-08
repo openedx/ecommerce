@@ -125,6 +125,7 @@ class AuthorizeNetNotificationView(EdxOrderPlacementMixin, View):
         except Exception:  # pylint: disable=broad-except
             self.log_order_placement_exception(basket.order_number, basket.id)
 
+
     def post(self, request):
         """
             Handle an incoming user returned to us by AuthorizeNet after approving payment.
