@@ -68,7 +68,8 @@ def get_quantized_benefit_value(benefit):
     """
     Returns the rounded value of the given benefit, without any decimal points.
     """
-    return _remove_exponent_and_trailing_zeros(Decimal(str(benefit.value)))
+    value = getattr(benefit.proxy(), 'benefit_class_value', benefit.value)
+    return _remove_exponent_and_trailing_zeros(Decimal(str(value)))
 
 
 def format_benefit_value(benefit):
