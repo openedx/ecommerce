@@ -26,7 +26,9 @@ PaymentProcessorResponse = get_model('payment', 'PaymentProcessorResponse')
 
 
 class AuthorizeNetNotificationView(EdxOrderPlacementMixin, View):
-    """Execute an approved authorizenet payment and place an order for paid products."""
+    """
+        Execute an approved authorizenet payment and place an order for paid products.
+    """
 
     @property
     def payment_processor(self):
@@ -72,7 +74,6 @@ class AuthorizeNetNotificationView(EdxOrderPlacementMixin, View):
                 It will return billing object
         """
         try:
-            import pdb; pdb.set_trace()
             billing_address = BillingAddress(
                 first_name=str(transaction_bill.firstName),
                 last_name=str(transaction_bill.lastName),
@@ -182,7 +183,7 @@ class AuthorizeNetNotificationView(EdxOrderPlacementMixin, View):
         except Exception:
             logger.exception('An error occurred while processing the Authorizenet \
                 payment for basket [%d].', basket.id)
-            return ""
+            return HttpResponse("")
 
         self._call_handle_order_placement(basket, request, transaction_details)
         return HttpResponse("")

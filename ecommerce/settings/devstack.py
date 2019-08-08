@@ -54,9 +54,10 @@ PAYMENT_PROCESSOR_CONFIG = {
         },
         'authorizenet': {
             'mode': 'sandbox',
+            'redirect_url': "https://test.authorize.net/payment/payment",
             'cancel_checkout_path': PAYMENT_PROCESSOR_CANCEL_PATH,
             'merchant_auth_name': "78f4r3PmQH",
-            'transaction_key': "5a2Paz7V84y8aGXj"
+            'transaction_key': "5a2Paz7V84y8aGXj",
         }
     },
 }

@@ -147,7 +147,8 @@ PAYMENT_PROCESSOR_CONFIG = {
         'authorizenet': {
             'cancel_checkout_path': PAYMENT_PROCESSOR_CANCEL_PATH,
             'merchant_auth_name': None,
-            'transaction_key': None
+            'transaction_key': None,
+            'redirect_url': None
         }
     },
 }

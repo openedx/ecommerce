@@ -35,6 +35,7 @@ class AuthorizeNet(BaseClientSidePaymentProcessor):
         configuration = self.configuration
         self.merchant_auth_name = configuration['merchant_auth_name']
         self.transaction_key = configuration['transaction_key']
+        self.autorizenet_redirect_url = configuration['redirect_url']
 
     @property
     def cancel_url(self):
@@ -42,6 +43,46 @@ class AuthorizeNet(BaseClientSidePaymentProcessor):
 
     def _get_basket_amount(self, basket):
         return str((basket.total_incl_tax * 100).to_integral_value())
+
+    def _get_authorizenet_payment_settings(self):
+        """
+            return authorizenet required settings
+        """
+        return_url = get_lms_dashboard_url()
+
+        payment_button_setting = apicontractsv1.settingType()
+        payment_button_setting.settingName = apicontractsv1.settingNameEnum.hostedPaymentButtonOptions
+        payment_button_setting.settingValue = json.dumps({'text': 'Pay'})
+
+        payment_return_setting = apicontractsv1.settingType()
+        payment_return_setting.settingName = apicontractsv1.settingNameEnum.hostedPaymentReturnOptions
+        payment_return_configrations = {
+            'url': return_url,
+            'urlText': 'Continue',
+            'cancelUrl': self.cancel_url,
+            'cancelUrlText': 'Cancel'
+        }
+        payment_return_setting.settingValue = json.dumps(payment_return_configrations)
+
+        settings = apicontractsv1.ArrayOfSetting()
+        settings.setting.append(payment_button_setting)
+        settings.setting.append(payment_return_setting)
+        return settings
+
+    def _get_authorizenet_lineitems(self, basket):
+        """
+            return authorizenet lineitems
+        """
+        line_items_list = apicontractsv1.ArrayOfLineItem()
+        for line in basket.all_lines():
+            line_item = apicontractsv1.lineItemType()
+            line_item.itemId = line.product.course_id
+            line_item.name = line.product.course_id
+            line_item.description = line.product.title
+            line_item.quantity = line.quantity
+            line_item.unitPrice = unicode(line.line_price_incl_tax_incl_discounts / line.quantity)
+            line_items_list.lineItem.append(line_item)
+        return line_items_list
 
     def get_transaction_detail(self, transaction_id):
         """
@@ -99,31 +140,12 @@ class AuthorizeNet(BaseClientSidePaymentProcessor):
                 a payment from being created.
         """
         self.basket = basket
-        return_url = get_lms_dashboard_url()
 
         merchantAuth = apicontractsv1.merchantAuthenticationType()
         merchantAuth.name = self.merchant_auth_name
         merchantAuth.transactionKey = self.transaction_key
 
-        setting1 = apicontractsv1.settingType()
-        setting1.settingName = apicontractsv1.settingNameEnum.hostedPaymentButtonOptions
-        setting1.settingValue = json.dumps({'text': 'Pay'})
-
-        setting2 = apicontractsv1.settingType()
-        setting2.settingName = apicontractsv1.settingNameEnum.hostedPaymentReturnOptions
-        setting2_configrations = {
-            'showReceipt': False,
-            'url': return_url,
-            'urlText': 'Continue',
-            'cancelUrl': self.cancel_url,
-            'cancelUrlText': 'Cancel'
-        }
-        setting2.settingValue = json.dumps(setting2_configrations)
-
-        settings = apicontractsv1.ArrayOfSetting()
-        settings.setting.append(setting1)
-        settings.setting.append(setting2)
-
+        settings = self._get_authorizenet_payment_settings()
         order = apicontractsv1.orderType()
         order.invoiceNumber = basket.order_number
         order.description = "upgrade to verified"
@@ -133,16 +155,7 @@ class AuthorizeNet(BaseClientSidePaymentProcessor):
         transactionrequest.amount = unicode(basket.total_incl_tax)
         transactionrequest.order = order
 
-        line_items_list = apicontractsv1.ArrayOfLineItem()
-        for line in basket.all_lines():
-            line_item = apicontractsv1.lineItemType()
-            line_item.itemId = line.product.course_id
-            line_item.name = line.product.course_id
-            line_item.description = line.product.title
-            line_item.quantity = line.quantity
-            line_item.unitPrice = unicode(line.line_price_incl_tax_incl_discounts / line.quantity)
-            line_items_list.lineItem.append(line_item)
-
+        line_items_list = self._get_authorizenet_lineitems(basket)
         paymentPageRequest = apicontractsv1.getHostedPaymentPageRequest()
         paymentPageRequest.merchantAuthentication = merchantAuth
         paymentPageRequest.transactionRequest = transactionrequest
@@ -185,7 +198,7 @@ class AuthorizeNet(BaseClientSidePaymentProcessor):
             raise GatewayError('Authorizenet payment creation failure: unable to get Authorizenet form token')
 
         parameters = {
-            'payment_page_url': 'https://test.authorize.net/payment/payment',
+            'payment_page_url': self.autorizenet_redirect_url,
             'token': authorize_form_token
         }
         return parameters
