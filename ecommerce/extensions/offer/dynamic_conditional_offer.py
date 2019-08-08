@@ -11,6 +11,7 @@ from ecommerce.extensions.offer.constants import DYNAMIC_DISCOUNT_FLAG
 from ecommerce.extensions.offer.mixins import (
     BenefitWithoutRangeMixin,
     ConditionWithoutRangeMixin,
+    PercentageBenefitMixin,
     SingleItemConsumptionConditionMixin
 )
 
@@ -41,7 +42,7 @@ def get_percentage_from_request():
     return None
 
 
-class DynamicPercentageDiscountBenefit(BenefitWithoutRangeMixin, PercentageDiscountBenefit):
+class DynamicPercentageDiscountBenefit(BenefitWithoutRangeMixin, PercentageDiscountBenefit, PercentageBenefitMixin):
     """Dynamic Percentage Discount Benefit without an attached range."""
 
     class Meta(object):
@@ -52,6 +53,10 @@ class DynamicPercentageDiscountBenefit(BenefitWithoutRangeMixin, PercentageDisco
     def name(self):
         return 'dynamic_discount_benefit'
 
+    @property
+    def benefit_class_value(self):
+        return get_percentage_from_request()
+
     def apply(self, basket, condition, offer, discount_percent=None,  # pylint: disable=unused-argument
               max_total_discount=None):
         """
@@ -61,7 +66,7 @@ class DynamicPercentageDiscountBenefit(BenefitWithoutRangeMixin, PercentageDisco
         """
         if not waffle.flag_is_active(crum.get_current_request(), DYNAMIC_DISCOUNT_FLAG):
             return ZERO_DISCOUNT
-        percent = get_percentage_from_request()
+        percent = self.benefit_class_value
         if percent:
             application_result = super(DynamicPercentageDiscountBenefit, self).apply(
                 basket,
