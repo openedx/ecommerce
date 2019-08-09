@@ -24,7 +24,7 @@ from six.moves import range, zip
 from six.moves.urllib.parse import urlencode
 from slumber.exceptions import SlumberBaseException
 
-from ecommerce.core.authentication import IsAuthenticatedOrLoginRequired
+from ecommerce.core.authentication import LoginRequired
 from ecommerce.core.exceptions import SiteConfigurationError
 from ecommerce.core.url_utils import absolute_redirect, get_lms_course_about_url, get_lms_url
 from ecommerce.courses.utils import get_certificate_type_display_value, get_course_info_from_catalog
@@ -134,7 +134,7 @@ class BasketAddItemsView(APIView):
     View that adds multiple products to a user's basket.
     An additional coupon code can be supplied so the offer is applied to the basket.
     """
-    permission_classes = (IsAuthenticatedOrLoginRequired,)
+    permission_classes = (LoginRequired,)
 
     def get(self, request):
         try:
