@@ -46,3 +46,4 @@ six
 stripe==1.70.0
 unicodecsv
 zeep==2.1.1
+authorizenet==1.1.3

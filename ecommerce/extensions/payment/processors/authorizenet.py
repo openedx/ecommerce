@@ -80,7 +80,7 @@ class AuthorizeNet(BaseClientSidePaymentProcessor):
             line_item.name = line.product.course_id
             line_item.description = line.product.title
             line_item.quantity = line.quantity
-            line_item.unitPrice = unicode(line.line_price_incl_tax_incl_discounts / line.quantity)
+            line_item.unitPrice = line.line_price_incl_tax_incl_discounts / line.quantity
             line_items_list.lineItem.append(line_item)
         return line_items_list
 
@@ -220,7 +220,7 @@ class AuthorizeNet(BaseClientSidePaymentProcessor):
         logger.info("Successfully executed Authorizenet payment [%s] for basket [%d].", transaction_id, basket.id)
 
         currency = basket.currency
-        total = Decimal(float(transaction_response.transaction.settleAmount))
+        total = float(transaction_response.transaction.settleAmount)
         card_info = transaction_response.transaction.payment.creditCard
 
         return HandledProcessorResponse(

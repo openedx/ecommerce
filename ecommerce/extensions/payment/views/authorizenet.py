@@ -55,7 +55,6 @@ class AuthorizeNetNotificationView(EdxOrderPlacementMixin, View):
             return None
 
         try:
-            basket_id = int(basket_id)
             basket = Basket.objects.get(id=basket_id)
             basket.strategy = strategy.Default()
             Applicator().apply(basket, basket.owner, self.request)
@@ -125,7 +124,6 @@ class AuthorizeNetNotificationView(EdxOrderPlacementMixin, View):
         except Exception:  # pylint: disable=broad-except
             self.log_order_placement_exception(basket.order_number, basket.id)
 
-
     def post(self, request):
         """
             Handle an incoming user returned to us by AuthorizeNet after approving payment.
@@ -133,7 +131,7 @@ class AuthorizeNetNotificationView(EdxOrderPlacementMixin, View):
         notification = request.POST
 
         if notification.get("eventType") != "net.authorize.payment.authcapture.created":
-            return HttpResponse("")
+            return HttpResponse(status=204)
 
         notification_Id = notification.get("notificationId")
         payload = notification.get("payload")
@@ -142,7 +140,7 @@ class AuthorizeNetNotificationView(EdxOrderPlacementMixin, View):
             logger.error(
                 'Received Authorizenet declined transaction notification.',
             )
-            return HttpResponse("")
+            return HttpResponse(status=204)
 
         try:
             transaction_id = payload.get("id")
@@ -150,7 +148,7 @@ class AuthorizeNetNotificationView(EdxOrderPlacementMixin, View):
                 logger.info(
                     'Recieve Authorizenet Notification without transaction_id',
                 )
-                return HttpResponse("")
+                return HttpResponse(status=204)
 
             transaction_details = self.payment_processor.get_transaction_detail(transaction_id)
             order_number = str(transaction_details.transaction.order.invoiceNumber)
@@ -184,7 +182,7 @@ class AuthorizeNetNotificationView(EdxOrderPlacementMixin, View):
         except Exception:
             logger.exception('An error occurred while processing the Authorizenet \
                 payment for basket [%d].', basket.id)
-            return HttpResponse("")
+            return HttpResponse(status=204)
 
         self._call_handle_order_placement(basket, request, transaction_details)
-        return HttpResponse("")
+        return HttpResponse(status=200)
