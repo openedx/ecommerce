@@ -12,6 +12,7 @@ from django.http import HttpResponseBadRequest, HttpResponseRedirect
 from django.shortcuts import render
 from django.utils.html import escape
 from django.utils.translation import ugettext as _
+from edx_rest_framework_extensions.permissions import LoginRequired
 from opaque_keys.edx.keys import CourseKey
 from oscar.apps.basket.views import VoucherAddView as BaseVoucherAddView
 from oscar.apps.basket.views import *  # pylint: disable=wildcard-import, unused-wildcard-import
@@ -24,7 +25,6 @@ from six.moves import range, zip
 from six.moves.urllib.parse import urlencode
 from slumber.exceptions import SlumberBaseException
 
-from ecommerce.core.authentication import LoginRequired
 from ecommerce.core.exceptions import SiteConfigurationError
 from ecommerce.core.url_utils import absolute_redirect, get_lms_course_about_url, get_lms_url
 from ecommerce.courses.utils import get_certificate_type_display_value, get_course_info_from_catalog
