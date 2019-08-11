@@ -12,6 +12,7 @@ from django.http import HttpResponseBadRequest, HttpResponseRedirect
 from django.shortcuts import render
 from django.utils.html import escape
 from django.utils.translation import ugettext as _
+from edx_rest_framework_extensions.permissions import LoginRedirectIfUnauthenticated
 from opaque_keys.edx.keys import CourseKey
 from oscar.apps.basket.views import VoucherAddView as BaseVoucherAddView
 from oscar.apps.basket.views import *  # pylint: disable=wildcard-import, unused-wildcard-import
@@ -128,11 +129,13 @@ def _use_payment_microfrontend(request):
         return False
 
 
-class BasketAddItemsView(View):
+class BasketAddItemsView(APIView):
     """
     View that adds multiple products to a user's basket.
     An additional coupon code can be supplied so the offer is applied to the basket.
     """
+    permission_classes = (LoginRedirectIfUnauthenticated,)
+
     def get(self, request):
         try:
             skus = self._get_skus(request)
