@@ -38,10 +38,23 @@ CYBERSOURCE_CARD_TYPE_MAP = {
 
 CLIENT_SIDE_CHECKOUT_FLAG_NAME = 'enable_client_side_checkout'
 
-# .. toggle_name: enable_jwt_auth_login_required
+# .. toggle_name: enable_lms_login_for_login_required
 # .. toggle_type: waffle_flag
 # .. toggle_default: False
-# .. toggle_description: Supports staged rollout of Jwt Authentication + Login Required capability.
+# .. toggle_description: Supports staged rollout of redirecting to LMS login for Jwt Authentication with Login Required.
+# .. toggle_category: micro-frontend
+# .. toggle_use_cases: incremental_release
+# .. toggle_creation_date: 2019-08-09
+# .. toggle_expiration_date: 2020-12-31
+# .. toggle_warnings: See enable_jwt_auth_with_login_required
+# .. toggle_tickets: DEPR-42
+# .. toggle_status: supported
+ENABLE_LMS_LOGIN_FOR_LOGIN_REQUIRED_FLAG_NAME = 'enable_lms_login_for_login_required'
+
+# .. toggle_name: enable_jwt_auth_with_login_required
+# .. toggle_type: waffle_flag
+# .. toggle_default: False
+# .. toggle_description: Supports staged rollout of Jwt Authentication with Login Required capability.
 # .. toggle_category: micro-frontend
 # .. toggle_use_cases: incremental_release
 # .. toggle_creation_date: 2019-08-09
@@ -49,7 +62,7 @@ CLIENT_SIDE_CHECKOUT_FLAG_NAME = 'enable_client_side_checkout'
 # .. toggle_warnings:
 # .. toggle_tickets: DEPR-42
 # .. toggle_status: supported
-ENABLE_JWT_AUTH_LOGIN_REQUIRED_FLAG_NAME = 'enable_jwt_auth_login_required'
+ENABLE_JWT_AUTH_WITH_LOGIN_REQUIRED_FLAG_NAME = 'enable_jwt_auth_with_login_required'
 
 # .. toggle_name: enable_microfrontend_for_basket_page
 # .. toggle_type: waffle_flag
