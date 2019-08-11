@@ -5,7 +5,7 @@
 # 
 # Translators:
 # adem ÖZGÜR <admozgur@gmail.com>, 2015
-# Ali Işıngör <ali@artistanbul.io>, 2017-2018
+# Ali Işıngör <ali@artistanbul.io>, 2017-2019
 # ali selek <aliselek01@gmail.com>, 2015
 # Bilal Oğuz marifet <bilalmarifet@gmail.com>, 2016
 # Emrah Emirtekin <eemirtekin@gmail.com>, 2015
@@ -16,8 +16,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-04-05 11:00+0000\n"
-"PO-Revision-Date: 2018-05-29 16:24+0000\n"
+"POT-Creation-Date: 2019-03-26 17:16+0000\n"
+"PO-Revision-Date: 2019-04-18 10:08+0000\n"
 "Last-Translator: Ali Işıngör <ali@artistanbul.io>\n"
 "Language-Team: Turkish (Turkey) (http://www.transifex.com/open-edx/edx-platform/language/tr_TR/)\n"
 "MIME-Version: 1.0\n"
@@ -27,53 +27,60 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
 #: ecommerce/static/js/models/coupon_model.js:33
+#: ecommerce/static/js/models/enterprise_coupon_model.js:15
 msgid "This field is required."
 msgstr "Bu alan gerekli."
 
 #: ecommerce/static/js/models/coupon_model.js:34
+#: ecommerce/static/js/models/enterprise_coupon_model.js:16
 msgid "This value must be a number."
 msgstr "Bu değer bir rakam olmalı."
 
 #: ecommerce/static/js/models/coupon_model.js:35
+#: ecommerce/static/js/models/enterprise_coupon_model.js:17
 msgid "This value must be a date."
 msgstr "Bu değer bir tarih olmalı."
 
 #: ecommerce/static/js/models/coupon_model.js:36
 msgid "At least one seat type must be selected."
-msgstr ""
+msgstr "En az bir oturum türü seçilmeli."
 
-#: ecommerce/static/js/models/coupon_model.js:82
+#: ecommerce/static/js/models/coupon_model.js:71
 msgid "This field must be empty or contain 1-16 alphanumeric characters."
 msgstr "Bu alan boş bırakılmalı ya da 1-16 alfanümerik karakter içermeli."
 
-#: ecommerce/static/js/models/coupon_model.js:86
-msgid "A valid course ID is required"
-msgstr "Geçerli bir kurs kimliği gereklidir"
-
-#: ecommerce/static/js/models/coupon_model.js:106
+#: ecommerce/static/js/models/coupon_model.js:80
 #, javascript-format
 msgid "Email domain {%s} is invalid."
 msgstr "{%s} e-posta alan adı geçersiz."
 
-#: ecommerce/static/js/models/coupon_model.js:124
+#: ecommerce/static/js/models/coupon_model.js:97
 msgid "Must occur after start date"
 msgstr "Başlangıç tarihinden sonra gerçekleşmeli"
 
-#: ecommerce/static/js/models/coupon_model.js:154
+#: ecommerce/static/js/models/coupon_model.js:127
 msgid "Max uses for multi-use coupons must be higher than 2."
 msgstr "Çok kullanımlı kuponların maksimum kullanım sayısı 2'den fazla olmalı."
 
-#: ecommerce/static/js/models/coupon_model.js:166
-msgid "A valid Program UUID is required."
-msgstr "Geçerli bir Program UUID'si gerekiyor."
-
-#: ecommerce/static/js/models/coupon_model.js:190
+#: ecommerce/static/js/models/coupon_model.js:151
 msgid "Must occur before end date"
 msgstr "Bitiş tarihinden önce gerçekleşmelidir"
 
+#: ecommerce/static/js/models/coupon_model.js:173
+msgid "A valid course ID is required"
+msgstr "Geçerli bir kurs kimliği gereklidir"
+
+#: ecommerce/static/js/models/coupon_model.js:189
+msgid "Enterprise Customer must be set if Enterprise Customer Catalog is set"
+msgstr ""
+
+#: ecommerce/static/js/models/coupon_model.js:196
+msgid "A valid Program UUID is required."
+msgstr "Geçerli bir Program UUID'si gerekiyor."
+
 #: ecommerce/static/js/models/course_model.js:54
 msgid "You must select a course type."
-msgstr "Kurs tipinizi seçmelisiniz."
+msgstr "Ders tipinizi seçmelisiniz."
 
 #: ecommerce/static/js/models/course_model.js:60
 msgid "You must choose if an honor seat should be created."
@@ -171,6 +178,10 @@ msgstr "Lütfen geçerli bir kredi sağlayıcısı seçiniz."
 msgid "All credit seats must designate a number of credit hours."
 msgstr "Tüm kredi yerleri kredi saatlerinin sayısını belirlemelidir."
 
+#: ecommerce/static/js/models/enterprise_coupon_model.js:18
+msgid "This value must be a valid email."
+msgstr "Bu değer geçerli bir e-posta olmalı."
+
 #: ecommerce/static/js/pages/basket_page.js:27
 msgid "Problem occurred during checkout. Please contact support."
 msgstr "Ödeme sırasında bir hata gerçekleşti. Lütfen destek ekibiyle iletişime geçin."
@@ -212,14 +223,17 @@ msgid "State/Province (required)"
 msgstr "Şehir (gerekli)"
 
 #: ecommerce/static/js/pages/coupon_create_page.js:12
+#: ecommerce/static/js/pages/enterprise_coupon_create_page.js:12
 msgid "Create New Coupon"
 msgstr "Yeni kupon oluştur"
 
 #: ecommerce/static/js/pages/coupon_detail_page.js:13
+#: ecommerce/static/js/pages/enterprise_coupon_detail_page.js:13
 msgid "View Coupon"
 msgstr "Kupon göster"
 
 #: ecommerce/static/js/pages/coupon_edit_page.js:13
+#: ecommerce/static/js/pages/enterprise_coupon_edit_page.js:13
 msgid "Edit Coupon"
 msgstr "Kuponu düzenle"
 
@@ -243,6 +257,10 @@ msgstr "Dersi Düzenle"
 msgid "Courses"
 msgstr "Dersler"
 
+#: ecommerce/static/js/pages/enterprise_coupon_list_page.js:12
+msgid "Enterprise Coupon Codes"
+msgstr "Kurumsal Kupon Kodları"
+
 #: ecommerce/static/js/pages/offer_page.js:14
 msgid "Redeem"
 msgstr ""
@@ -259,7 +277,7 @@ msgid ""
 "Apple Pay is not available at this time. Please try another payment method."
 msgstr "Apple Pay şu an için mevcut değil. Lütfen diğer bir ödeme yöntemini deneyiniz."
 
-#: ecommerce/static/js/payment_processors/cybersource.js:249
+#: ecommerce/static/js/payment_processors/cybersource.js:248
 msgid ""
 "An error occurred while processing your payment. You have NOT been charged. "
 "Please try again, or select another payment method."
@@ -280,90 +298,97 @@ msgid "Trailing comma not allowed."
 msgstr ""
 
 #: ecommerce/static/js/views/coupon_detail_view.js:107
-#: ecommerce/static/js/views/coupon_form_view.js:60
+#: ecommerce/static/js/views/coupon_form_view.js:62
+#: ecommerce/static/js/views/enterprise_coupon_form_view.js:29
 msgid "Can be used once by one customer"
 msgstr "Bir müşteri tarafından bir kez kullanılabilir"
 
 #: ecommerce/static/js/views/coupon_detail_view.js:109
-#: ecommerce/static/js/views/coupon_form_view.js:68
+#: ecommerce/static/js/views/coupon_form_view.js:70
+#: ecommerce/static/js/views/enterprise_coupon_form_view.js:37
 msgid "Can be used multiple times by multiple customers"
 msgstr "Birden fazla müşteri tarafından çok kez kullanılabilir"
 
 #: ecommerce/static/js/views/coupon_detail_view.js:111
-#: ecommerce/static/js/views/coupon_form_view.js:64
+#: ecommerce/static/js/views/coupon_form_view.js:66
+#: ecommerce/static/js/views/enterprise_coupon_form_view.js:33
 msgid "Can be used once by multiple customers"
 msgstr "Birden fazla müşteri için bir kez kullanılabilir"
 
-#: ecommerce/static/js/views/coupon_form_view.js:49
+#: ecommerce/static/js/views/coupon_form_view.js:51
 msgid "Enrollment Code"
 msgstr "Kayıt Kodu"
 
-#: ecommerce/static/js/views/coupon_form_view.js:53
+#: ecommerce/static/js/views/coupon_form_view.js:55
 msgid "Discount Code"
 msgstr "İndirim kodu"
 
-#: ecommerce/static/js/views/coupon_form_view.js:768
+#: ecommerce/static/js/views/coupon_form_view.js:789
 msgid "Save Changes"
 msgstr "Değişikleri Kaydet"
 
-#: ecommerce/static/js/views/coupon_form_view.js:783
+#: ecommerce/static/js/views/coupon_form_view.js:804
 msgid "Create Coupon"
 msgstr "Kupon Oluştur"
 
-#: ecommerce/static/js/views/coupon_list_view.js:47
+#: ecommerce/static/js/views/coupon_list_view.js:34
+#: ecommerce/static/js/views/enterprise_coupon_list_view.js:23
+msgid "Name"
+msgstr "İsim"
+
+#: ecommerce/static/js/views/coupon_list_view.js:41
+#: ecommerce/static/js/views/enterprise_coupon_list_view.js:30
+msgid "Created"
+msgstr "Oluşturma"
+
+#: ecommerce/static/js/views/coupon_list_view.js:45
+msgid "Custom Code"
+msgstr "Özel Kod"
+
+#: ecommerce/static/js/views/coupon_list_view.js:49
+#: ecommerce/static/js/views/enterprise_coupon_list_view.js:38
+msgid "Client"
+msgstr "Müşteri"
+
+#: ecommerce/static/js/views/coupon_list_view.js:53
+msgid "Category"
+msgstr "Kategori"
+
+#: ecommerce/static/js/views/coupon_list_view.js:57
+#: ecommerce/static/js/views/enterprise_coupon_list_view.js:50
+msgid "Coupon Report"
+msgstr "Kupon Raporu"
+
+#: ecommerce/static/js/views/coupon_list_view.js:82
 #: ecommerce/static/js/views/course_list_view.js:37
 msgid "Search..."
 msgstr "Ara..."
 
-#: ecommerce/static/js/views/coupon_list_view.js:57
+#: ecommerce/static/js/views/coupon_list_view.js:92
 #: ecommerce/static/js/views/course_list_view.js:47
 msgid "Next"
 msgstr "Sonraki"
 
-#: ecommerce/static/js/views/coupon_list_view.js:58
+#: ecommerce/static/js/views/coupon_list_view.js:93
 #: ecommerce/static/js/views/course_list_view.js:48
 msgid "Previous"
 msgstr "Önceki"
 
 #. Translators: _START_, _END_, and _TOTAL_ are placeholders. Do NOT translate
 #. them.
-#: ecommerce/static/js/views/coupon_list_view.js:62
+#: ecommerce/static/js/views/coupon_list_view.js:97
 msgid "Displaying _START_ to _END_ of _TOTAL_ coupons"
 msgstr ""
 
 #. Translators: _MAX_ is a placeholder. Do NOT translate it.
-#: ecommerce/static/js/views/coupon_list_view.js:65
+#: ecommerce/static/js/views/coupon_list_view.js:100
 msgid "(filtered from _MAX_ total coupons)"
 msgstr ""
 
 #. Translators: _MENU_ is a placeholder. Do NOT translate it.
-#: ecommerce/static/js/views/coupon_list_view.js:68
+#: ecommerce/static/js/views/coupon_list_view.js:103
 msgid "Display _MENU_ coupons"
 msgstr "_MENU_ kuponlarını göster"
-
-#: ecommerce/static/js/views/coupon_list_view.js:74
-msgid "Name"
-msgstr "İsim"
-
-#: ecommerce/static/js/views/coupon_list_view.js:81
-msgid "Created"
-msgstr "Oluşturma"
-
-#: ecommerce/static/js/views/coupon_list_view.js:85
-msgid "Custom Code"
-msgstr "Özel Kod"
-
-#: ecommerce/static/js/views/coupon_list_view.js:89
-msgid "Client"
-msgstr "Müşteri"
-
-#: ecommerce/static/js/views/coupon_list_view.js:93
-msgid "Category"
-msgstr "Kategori"
-
-#: ecommerce/static/js/views/coupon_list_view.js:97
-msgid "Coupon Report"
-msgstr "Kupon Raporu"
 
 #: ecommerce/static/js/views/course_form_view.js:55
 msgid "Free (Audit)"
@@ -403,7 +428,7 @@ msgstr " _START_ to _END_ of _TOTAL_ dersini görüntüleme"
 #. Translators: _MAX_ is a placeholder. Do NOT translate it.
 #: ecommerce/static/js/views/course_list_view.js:55
 msgid "(filtered from _MAX_ total courses)"
-msgstr "(_MAX_ toplam derslerden filtrenen)"
+msgstr "(_MAX_ toplam dersten filtrelenen)"
 
 #. Translators: _MENU_ is a placeholder. Do NOT translate it.
 #: ecommerce/static/js/views/course_list_view.js:58
@@ -420,30 +445,47 @@ msgstr "Son değiştirilme"
 
 #: ecommerce/static/js/views/dynamic_catalog_view.js:74
 msgid "Seat title"
-msgstr ""
+msgstr "Oturum başlığı"
 
 #: ecommerce/static/js/views/dynamic_catalog_view.js:78
 msgid "Seat type"
+msgstr "Oturum türü"
+
+#: ecommerce/static/js/views/enterprise_coupon_detail_view.js:28
+#: ecommerce/static/js/views/enterprise_coupon_form_view.js:41
+msgid "Can be used multiple times by one customer"
+msgstr "Bir müşteri tarafından çok kez kullanılabilir"
+
+#: ecommerce/static/js/views/enterprise_coupon_list_view.js:34
+msgid "Status"
+msgstr "Durum"
+
+#: ecommerce/static/js/views/enterprise_coupon_list_view.js:42
+msgid "Enterprise Customer"
+msgstr "Kurumsal Müşteri"
+
+#: ecommerce/static/js/views/enterprise_coupon_list_view.js:46
+msgid "Enterprise Customer Catalog"
 msgstr ""
 
-#: ecommerce/static/js/views/form_view.js:69
+#: ecommerce/static/js/views/form_view.js:71
 msgid "A course with the specified ID already exists."
 msgstr "Belirtilen No'lu ders zaten mevcut."
 
-#: ecommerce/static/js/views/form_view.js:79
-#: ecommerce/static/js/views/form_view.js:172
+#: ecommerce/static/js/views/form_view.js:81
+#: ecommerce/static/js/views/form_view.js:174
 msgid "Error!"
 msgstr "Hata!"
 
-#: ecommerce/static/js/views/form_view.js:125
+#: ecommerce/static/js/views/form_view.js:127
 msgid "Saving..."
 msgstr "Kaydediliyor..."
 
-#: ecommerce/static/js/views/form_view.js:134
+#: ecommerce/static/js/views/form_view.js:136
 msgid "Please complete all required fields."
 msgstr "Lütfen tüm gerekli alanları tamamlayın."
 
-#: ecommerce/static/js/views/form_view.js:159
+#: ecommerce/static/js/views/form_view.js:161
 msgid "An error occurred while saving the data."
 msgstr "Veriyi kaydederken bir hata oluştu."
 
