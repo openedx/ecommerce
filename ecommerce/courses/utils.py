@@ -25,7 +25,7 @@ def mode_for_product(product):
     return mode
 
 
-def get_course_info_from_catalog(site, product):
+def get_course_info_from_catalog(site, product, fields=None):
     """ Get course or course_run information from Discovery Service and cache """
     if product.is_course_entitlement_product:
         key = product.attr.UUID
@@ -41,10 +41,14 @@ def get_course_info_from_catalog(site, product):
     if course_cached_response.is_found:
         return course_cached_response.value
 
+    params = {}
+    if fields:
+        params['fields'] = ','.join(fields)
     if product.is_course_entitlement_product:
-        course = api.courses(key).get()
+        course = api.courses(key).get(**params)
     else:
-        course = api.course_runs(key).get(partner=partner_short_code)
+        params['partner'] = partner_short_code
+        course = api.course_runs(key).get(**params)
 
     TieredCache.set_all_tiers(cache_key, course, settings.COURSES_API_CACHE_TIMEOUT)
     return course

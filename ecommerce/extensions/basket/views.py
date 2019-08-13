@@ -377,7 +377,8 @@ class BasketLogicMixin(object):
             course_data['course_key'] = CourseKey.from_string(product.attr.course_key)
 
         try:
-            course = get_course_info_from_catalog(self.request.site, product)
+            course_fields = ['title', 'image', 'short_description', 'start', 'end',]
+            course = get_course_info_from_catalog(self.request.site, product, fields=course_fields)
             try:
                 course_data['image_url'] = course['image']['src']
             except (KeyError, TypeError):
