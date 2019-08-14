@@ -39,6 +39,7 @@ jsonfield==1.0.3
 libsass==0.9.2
 markdown==2.6.9
 mysqlclient<1.5
+newrelic<5                          # Not a direct dependency (e.g. via edx-django-utils), but v5 requires python>3.4
 ndg-httpsclient
 path.py==7.2
 paypalrestsdk
