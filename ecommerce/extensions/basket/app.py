@@ -17,7 +17,7 @@ class BasketApplication(app.BasketApplication):
             url(r'^vouchers/add/$', self.add_voucher_view.as_view(), name='vouchers-add'),
             url(r'^vouchers/(?P<pk>\d+)/remove/$', self.remove_voucher_view.as_view(), name='vouchers-remove'),
             url(r'^saved/$', login_required(self.saved_view.as_view()), name='saved'),
-            url(r'^add/$', login_required(self.basket_add_items_view.as_view()), name='basket-add'),
+            url(r'^add/$', self.basket_add_items_view.as_view(), name='basket-add'),
         ]
         return self.post_process_urls(urls)
 

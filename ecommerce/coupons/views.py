@@ -14,7 +14,9 @@ from django.utils.decorators import method_decorator
 from django.utils.text import slugify
 from django.utils.translation import ugettext as _
 from django.views.generic import TemplateView, View
+from edx_rest_framework_extensions.permissions import LoginRedirectIfUnauthenticated
 from oscar.core.loading import get_class, get_model
+from rest_framework.views import APIView
 
 from ecommerce.core.url_utils import absolute_redirect, get_ecommerce_url
 from ecommerce.core.views import StaffOnlyMixin
@@ -140,10 +142,10 @@ class CouponOfferView(TemplateView):
         return super(CouponOfferView, self).get(request, *args, **kwargs)
 
 
-class CouponRedeemView(EdxOrderPlacementMixin, View):
+class CouponRedeemView(EdxOrderPlacementMixin, APIView):
+    permission_classes = (LoginRedirectIfUnauthenticated,)
 
     @method_decorator(set_enterprise_cookie)
-    @method_decorator(login_required)
     def get(self, request):  # pylint: disable=too-many-statements
         """
         Looks up the passed code and adds the matching product to a basket,
