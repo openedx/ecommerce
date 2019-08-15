@@ -38,7 +38,8 @@ define([
 
                     history.back();
 
-                    setTimeout(function() { expect(window.alert).toHaveBeenCalled(); }, 3000);
+                    // This just confirms that there was no full page reload from hitting the back button
+                    expect(location.hash).toEqual('');
                 });
 
                 it('should trigger track purchase', function() {
