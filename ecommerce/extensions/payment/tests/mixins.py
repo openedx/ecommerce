@@ -660,8 +660,7 @@ class CybersourceNotificationTestsMixin(CybersourceMixin):
 
         expected_redirect = get_receipt_page_url(
             self.site.siteconfiguration,
-            order_number=notification.get('req_reference_number'),
-            disable_back_button=True,
+            order_number=notification.get('req_reference_number')
         )
 
         self.assertRedirects(response, expected_redirect, fetch_redirect_response=False)

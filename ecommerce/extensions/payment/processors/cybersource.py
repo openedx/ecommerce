@@ -185,8 +185,7 @@ class Cybersource(ApplePayMixin, BaseClientSidePaymentProcessor):
                 order_number=basket.order_number,
                 override_url=site.siteconfiguration.build_ecommerce_url(
                     reverse('cybersource:redirect')
-                ),
-                disable_back_button=True,
+                )
             ),
             'override_custom_cancel_page': self.cancel_page_url,
         }

@@ -51,9 +51,7 @@ define([
                 orderId = $el.data('order-id'),
                 totalAmount = $el.data('total-amount');
 
-            if ($el.data('back-button')) {
-                disableBackButton();
-            }
+            disableBackButton();
 
             if (orderId) {
                 trackPurchase(orderId, totalAmount, currency);
