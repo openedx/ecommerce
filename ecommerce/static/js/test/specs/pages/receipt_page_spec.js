@@ -22,23 +22,14 @@ define([
             });
 
             describe('onReady', function() {
-                it('should not disable the back button if default values are used for data-back-button', function() {
-                    ReceiptPage.onReady();
-
-                    expect(location.hash).toEqual('');
-                });
-
-                it('should disable the back button if value of data-back-button is set', function() {
-                    var receiptPage = document.getElementById('receipt-container');
-                    receiptPage.setAttribute('data-back-button', 1);
-
+                it('should disable the back button by manipulating the fragment', function() {
                     ReceiptPage.onReady();
 
                     expect(location.hash).toContain('#');
 
                     history.back();
 
-                    setTimeout(function() { expect(window.alert).toHaveBeenCalled(); }, 3000);
+                    expect(location.hash).toContain('#');
                 });
 
                 it('should trigger track purchase', function() {

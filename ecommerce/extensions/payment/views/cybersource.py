@@ -411,8 +411,7 @@ class CybersourceInterstitialView(CybersourceNotificationMixin, View):
     def redirect_to_receipt_page(self, notification):
         receipt_page_url = get_receipt_page_url(
             self.request.site.siteconfiguration,
-            order_number=notification.get('req_reference_number'),
-            disable_back_button=True,
+            order_number=notification.get('req_reference_number')
         )
 
         return redirect(receipt_page_url)

@@ -74,8 +74,7 @@ class FreeCheckoutView(EdxOrderPlacementMixin, RedirectView):
             else:
                 receipt_path = get_receipt_page_url(
                     order_number=order.number,
-                    site_configuration=order.site.siteconfiguration,
-                    disable_back_button=True,
+                    site_configuration=order.site.siteconfiguration
                 )
                 url = site.siteconfiguration.build_lms_url(receipt_path)
         else:
@@ -180,8 +179,7 @@ class ReceiptResponseView(ThankYouView):
         context.update(self.get_show_verification_banner_context(context))
         context.update({
             'explore_courses_url': get_lms_explore_courses_url(),
-            'has_enrollment_code_product': has_enrollment_code_product,
-            'disable_back_button': self.request.GET.get('disable_back_button', 0),
+            'has_enrollment_code_product': has_enrollment_code_product
         })
         return context
 
