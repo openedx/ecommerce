@@ -218,18 +218,15 @@ class CybersourceNotificationMixin(CyberSourceProcessorMixin, OrderCreationMixin
             # saved in the database, so it needs to be calculated again in order to save the correct info to the
             # order. REVMI-124 will create the order before payment processing, when we have the discount context.
             if waffle.flag_is_active(self.request, DYNAMIC_DISCOUNT_FLAG) and basket.lines.count() == 1:
+                discount_lms_url = get_lms_url('/api/discounts/')
+                lms_discount_client = EdxRestApiClient(discount_lms_url,
+                                                       jwt=self.request.site.siteconfiguration.access_token)
+                ck = basket.lines.first().product.course_id
+                user_id = self.request.user.id
                 try:
-                    discount_lms_url = get_lms_url('/api/discounts/')
-                    lms_discount_client = EdxRestApiClient(discount_lms_url, jwt=basket.owner.access_token)
-                    ck = basket.lines.first().product.course_id
-                    response = lms_discount_client.course(ck).get()
+                    response = lms_discount_client.user(user_id).course(ck).get()
                     self.request.POST = self.request.POST.copy()
                     self.request.POST['discount_jwt'] = response.get('jwt')
-                    logger.info(
-                        'Received discount info from lms. [%s] returned [%s]. Basket id is [%s]',
-                        discount_lms_url,
-                        response,
-                        basket.id)
                 except (SlumberHttpBaseException, requests.exceptions.Timeout) as error:
                     logger.warning(
                         'Failed to get discount jwt from LMS. [%s] returned [%s]',

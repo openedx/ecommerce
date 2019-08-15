@@ -78,11 +78,19 @@ class PaypalPaymentExecutionView(EdxOrderPlacementMixin, View):
             # order. REVMI-124 will create the order before payment processing, when we have the discount context.
             if waffle.flag_is_active(self.request, DYNAMIC_DISCOUNT_FLAG) and basket.lines.count() == 1:
                 discount_lms_url = get_lms_url('/api/discounts/')
-                lms_discount_client = EdxRestApiClient(discount_lms_url, jwt=basket.owner.access_token)
+                lms_discount_client = EdxRestApiClient(discount_lms_url,
+                                                       jwt=self.request.site.siteconfiguration.access_token)
                 ck = basket.lines.first().product.course_id
-                response = lms_discount_client.course(ck).get()
-                self.request.GET = self.request.GET.copy()
-                self.request.GET['discount_jwt'] = response.get('jwt')
+                user_id = self.request.user.id
+                try:
+                    response = lms_discount_client.user(user_id).course(ck).get()
+                    self.request.GET = self.request.GET.copy()
+                    self.request.GET['discount_jwt'] = response.get('jwt')
+                except (SlumberHttpBaseException, Timeout) as error:
+                    logger.warning(
+                        'Failed to get discount jwt from LMS. [%s] returned [%s]',
+                        discount_lms_url,
+                        error.response)
             # END TODO
 
             Applicator().apply(basket, basket.owner, self.request)
@@ -92,13 +100,6 @@ class PaypalPaymentExecutionView(EdxOrderPlacementMixin, View):
         except MultipleObjectsReturned:
             logger.warning(u"Duplicate payment ID [%s] received from PayPal.", payment_id)
             return None
-        # TODO: Remove as a part of REVMI-124 - continued
-        except (SlumberHttpBaseException, Timeout) as error:
-            logger.warning(
-                'Failed to get discount jwt from LMS. [%s] returned [%s]',
-                discount_lms_url,
-                error.response)
-        # END TODO
         except Exception:  # pylint: disable=broad-except
             logger.exception(u"Unexpected error during basket retrieval while executing PayPal payment.")
             return None
