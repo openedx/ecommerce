@@ -3,7 +3,7 @@
 {% load offer_tags %}
 {% load static %}
 
-{% block title %}{% trans "Program Offers" %}{% endblock %}
+{% block title %}{% trans "Program Offers" as tmsg %}{{ tmsg | force_escape }}{% endblock %}
 
 {% block navbar %}
   {% include "edx/partials/_staff_navbar.html" %}
@@ -17,21 +17,21 @@
         {% trans "Program Offers" %}
         <div class="pull-right">
           <a href="{% url 'programs:offers:new' %}"
-             class="btn btn-primary btn-small">{% trans "Create Program Offer" %}</a>
+             class="btn btn-primary btn-small">{% trans "Create Program Offer" as tmsg %}{{ tmsg | force_escape }}</a>
         </div>
       </h1>
     </div>
 
     <table id="offerTable" class="copy copy-base table table-striped table-bordered" cellspacing="0">
-      <caption class="sr-only">{% trans "Current program offers" %}</caption>
+      <caption class="sr-only">{% trans "Current program offers" as tmsg %}{{ tmsg | force_escape }}</caption>
       <thead>
       <tr>
-        <th>{% trans 'Program Title' %}</th>
-        <th>{% trans 'Program UUID' %}</th>
-        <th>{% trans 'Type' %}</th>
-        <th>{% trans 'Value' %}</th>
-        <th>{% trans 'Start' %}</th>
-        <th>{% trans 'End' %}</th>
+        <th>{% trans 'Program Title' as tmsg %}{{ tmsg | force_escape }}</th>
+        <th>{% trans 'Program UUID' as tmsg %}{{ tmsg | force_escape }}</th>
+        <th>{% trans 'Type' as tmsg %}{{ tmsg | force_escape }}</th>
+        <th>{% trans 'Value' as tmsg %}{{ tmsg | force_escape }}</th>
+        <th>{% trans 'Start' as tmsg %}{{ tmsg | force_escape }}</th>
+        <th>{% trans 'End' as tmsg %}{{ tmsg | force_escape }}</th>
       </tr>
       </thead>
       <tbody>
@@ -55,7 +55,13 @@
     <div class="container">
       <div class="row">
         <div class="col-xs-12 text-right">
-          <em>{% blocktrans %}{{ platform_name }} Program Offer Administration Tool{% endblocktrans %}</em>
+          <em>
+            {% filter force_escape %}
+              {% blocktrans %}
+                {{ platform_name }} Program Offer Administration Tool
+              {% endblocktrans %}
+            {% endfilter %}
+          </em>
         </div>
       </div>
     </div>

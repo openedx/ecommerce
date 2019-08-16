@@ -7,7 +7,7 @@
 {% block body_class %}{{ block.super }} orders{% endblock %}
 
 {% block title %}
-  {% blocktrans with number=order.number %}Order {{ number }}{% endblocktrans %} | {{ block.super }}
+  {% filter force_escape %}{% blocktrans with number=order.number %}Order {{ number }}{% endblocktrans %} {% endfilter %} | {{ block.super }}
 {% endblock %}
 
 {% block extrascripts %}
@@ -26,28 +26,28 @@
 {% block breadcrumbs %}
     <ul class="breadcrumb">
         <li>
-            <a href="{% url 'dashboard:index' %}">{% trans "Dashboard" %}</a>
+            <a href="{% url 'dashboard:index' %}">{% trans "Dashboard" as tmsg %}{{ tmsg | force_escape }}</a>
         </li>
         <li>
-            <a href="{% url 'dashboard:order-list' %}">{% trans "Orders" %}</a>
+            <a href="{% url 'dashboard:order-list' %}">{% trans "Orders" as tmsg %}{{ tmsg | force_escape }}</a>
         </li>
         <li class="active">#{{ order.number }}</li>
     </ul>
 {% endblock %}
 
 {% block headertext %}
-  {% blocktrans with number=order.number %}Order #{{ number }}{% endblocktrans %}
+  {% filter force_escape %}{% blocktrans with number=order.number %}Order #{{ number }}{% endblocktrans %}{% endfilter %}
 {% endblock %}
 
 {% block dashboard_content %}
   {% block customer_information %}
       <table class="table  table-bordered table-hover">
-          <caption><i class="icon-group icon-large"></i>{% trans "Customer Information" %}</caption>
+          <caption><i class="icon-group icon-large"></i>{% trans "Customer Information" as tmsg %}{{ tmsg | force_escape }}</caption>
           {% if order.user %}
               <tr>
-                  <th>{% trans "Username" %}</th>
-                  <th>{% trans "Full name" %}</th>
-                  <th>{% trans "Email address" %}</th>
+                  <th>{% trans "Username" as tmsg %}{{ tmsg | force_escape }}</th>
+                  <th>{% trans "Full name" as tmsg %}{{ tmsg | force_escape }}</th>
+                  <th>{% trans "Email address" as tmsg %}{{ tmsg | force_escape }}</th>
               </tr>
               <tr>
                   <td><a href="{% url 'dashboard:user-detail' pk=order.user.id %}">{{ order.user.username }}</a></td>
@@ -56,7 +56,7 @@
               </tr>
           {% else %}
               <tr>
-                  <td>{% trans "Customer has deleted their account." %}</td>
+                  <td>{% trans "Customer has deleted their account." as tmsg %}{{ tmsg | force_escape }}</td>
               </tr>
           {% endif %}
       </table>
@@ -64,12 +64,12 @@
 
   {% block order_information %}
       <table class="table table-striped table-bordered table-hover">
-          <caption><i class="icon-shopping-cart icon-large"></i>{% trans "Order information" %}</caption>
+          <caption><i class="icon-shopping-cart icon-large"></i>{% trans "Order information" as tmsg %}{{ tmsg | force_escape }}</caption>
           <tr>
-              <th>{% trans "Order Total" %}</th>
-              <th>{% trans "Date of purchase" %}</th>
-              <th>{% trans "Time of purchase" %}</th>
-              <th>{% trans "Status" %}</th>
+              <th>{% trans "Order Total" as tmsg %}{{ tmsg | force_escape }}</th>
+              <th>{% trans "Date of purchase" as tmsg %}{{ tmsg | force_escape }}</th>
+              <th>{% trans "Time of purchase" as tmsg %}{{ tmsg | force_escape }}</th>
+              <th>{% trans "Status" as tmsg %}{{ tmsg | force_escape }}</th>
               {% if order.is_fulfillable  %}
                   <th> Actions </th>
               {% endif %}
@@ -82,7 +82,7 @@
               {% if order.is_fulfillable  %}
                   <td>
                       <a class="btn btn-warning" data-order-number="{{ order.number }}"
-                         data-action="retry-fulfillment">{% trans "Retry Fulfillment" %}</a>
+                         data-action="retry-fulfillment">{% trans "Retry Fulfillment" as tmsg %}{{ tmsg | force_escape }}</a>
                   </td>
               {% endif %}
           </tr>
@@ -93,7 +93,7 @@
   {% endblock additional_order_information %}
 
     <div class="sub-header">
-        <h2>{% trans "Order Details" %}</h2>
+        <h2>{% trans "Order Details" as tmsg %}{{ tmsg | force_escape }}</h2>
     </div>
 
     <div class="tabbable dashboard">
@@ -101,22 +101,22 @@
         <ul class="nav nav-tabs">
           {% block nav_tabs %}
               <li class="{% if active_tab == 'lines' %}active{% endif %}"><a href="#lines"
-                                                                             data-toggle="tab">{% trans "Order contents" %}</a>
+                                                                             data-toggle="tab">{% trans "Order contents" as tmsg%}{{ tmsg | force_escape }}</a>
               </li>
               <li class="{% if active_tab == 'refunds' %}active{% endif %}"><a href="#refunds"
-                                                                               data-toggle="tab">{% trans "Refunds" %}</a>
+                                                                               data-toggle="tab">{% trans "Refunds" as tmsg %}{{ tmsg | force_escape }}</a>
               </li>
               <li class="{% if active_tab == 'shipping' %}active{% endif %}"><a href="#shipping"
-                                                                                data-toggle="tab">{% trans "Shipping" %}</a>
+                                                                                data-toggle="tab">{% trans "Shipping" as tmsg %}{{ tmsg | force_escape }}</a>
               </li>
               <li class="{% if active_tab == 'payment' %}active{% endif %}"><a href="#payment"
-                                                                               data-toggle="tab">{% trans "Payment" %}</a>
+                                                                               data-toggle="tab">{% trans "Payment" as tmsg %}{{ tmsg | force_escape }}</a>
               </li>
               <li class="{% if active_tab == 'discounts' %}active{% endif %}"><a href="#discounts"
-                                                                                 data-toggle="tab">{% trans "Discounts" %}</a>
+                                                                                 data-toggle="tab">{% trans "Discounts" as tmsg %}{{ tmsg | force_escape }}</a>
               </li>
               <li class="{% if active_tab == 'notes' %}active{% endif %}"><a href="#notes"
-                                                                             data-toggle="tab">{% trans "Notes" %}</a>
+                                                                             data-toggle="tab">{% trans "Notes" as tmsg %}{{ tmsg | force_escape }}</a>
               </li>
           {% endblock nav_tabs %}
         </ul>
@@ -124,7 +124,7 @@
         <div class="tab-content">
             <div class="tab-pane {% if active_tab == 'lines' %}active{% endif %}" id="lines">
                 <div class="table-header">
-                    <h3>{% trans "Items ordered" %}</h3>
+                    <h3>{% trans "Items ordered" as tmsg %}{{ tmsg | force_escape }}</h3>
                 </div>
                 <form id="order_lines_form" action="." method="post" class="form-inline">
                   {% csrf_token %}
@@ -134,17 +134,17 @@
                           <tr>
                               <th></th>
                               <th></th>
-                              <th>{% trans "Line ID" %}</th>
-                              <th>{% trans "Quantity" %}</th>
-                              <th>{% trans "Product" %}</th>
-                              <th>{% trans "UPC" %}</th>
-                              <th>{% trans "Status" %}</th>
-                              <th>{% trans "Supplier" %}</th>
-                              <th>{% trans "Supplier SKU" %}</th>
-                              <th>{% trans "Est. dispatch date" %}</th>
-                              <th>{% trans "Price excl tax (before discounts)" %}</th>
-                              <th>{% trans "Price inc tax (before discounts)" %}</th>
-                              <th>{% trans "Actions" %}</th>
+                              <th>{% trans "Line ID" as tmsg %}{{ tmsg | force_escape }}</th>
+                              <th>{% trans "Quantity" as tmsg %}{{ tmsg | force_escape }}</th>
+                              <th>{% trans "Product" as tmsg %}{{ tmsg | force_escape }}</th>
+                              <th>{% trans "UPC" as tmsg %}{{ tmsg | force_escape }}</th>
+                              <th>{% trans "Status" as tmsg %}{{ tmsg | force_escape }}</th>
+                              <th>{% trans "Supplier" as tmsg %}{{ tmsg | force_escape }}</th>
+                              <th>{% trans "Supplier SKU" as tmsg %}{{ tmsg | force_escape }}</th>
+                              <th>{% trans "Est. dispatch date" as tmsg %}{{ tmsg | force_escape }}</th>
+                              <th>{% trans "Price excl tax (before discounts)" as tmsg %}{{ tmsg | force_escape }}</th>
+                              <th>{% trans "Price inc tax (before discounts)" as tmsg %}{{ tmsg | force_escape }}</th>
+                              <th>{% trans "Actions" as tmsg %}{{ tmsg | force_escape }}</th>
                           </tr>
                           </thead>
                           <tbody>
@@ -185,14 +185,14 @@
                                     {{ line.line_price_before_discounts_incl_tax|currency:order.currency }}</td>
                                   <td>
                                       <a href="{% url 'dashboard:order-line-detail' number=order.number line_id=line.id %}"
-                                         class="btn btn-info">{% trans "View" %}</a>
+                                         class="btn btn-info">{% trans "View" as tmsg %}{{ tmsg | force_escape }}</a>
                                   </td>
                               </tr>
                           {% endfor %}
 
                           <tr>
                               <td colspan="9"></td>
-                              <th>{% trans "Discount" %}</th>
+                              <th>{% trans "Discount" as tmsg %}{{ tmsg | force_escape }}</th>
                               <td style="text-align: right">
                                 {{ order.total_discount_excl_tax|currency:order.currency }}</td>
                               <td style="text-align: right">
@@ -203,7 +203,7 @@
                             {% if discounts %}
                                 <tr>
                                     <td colspan="9"></td>
-                                    <th>{% trans "Basket total (excl. discounts)" %}</th>
+                                    <th>{% trans "Basket total (excl. discounts)" as tmsg %}{{ tmsg | force_escape }}</th>
                                     <td style="text-align: right">
                                       {{ order.basket_total_before_discounts_excl_tax|currency:order.currency }}</td>
                                     <td style="text-align: right">
@@ -214,7 +214,7 @@
                                   <tr>
                                       <td colspan="9"></td>
                                       <td>
-                                          <span class="label label-success">{% trans "Discount" %}</span>
+                                          <span class="label label-success">{% trans "Discount" as tmsg %}{{ tmsg | force_escape }}</span>
                                         {{ discount.offer_name }}
                                       </td>
                                       <td style="text-align: right"></td>
@@ -224,7 +224,7 @@
                               {% endfor %}
                                 <tr>
                                     <td colspan="9"></td>
-                                    <th>{% trans "Basket total (inc. discounts)" %}</th>
+                                    <th>{% trans "Basket total (inc. discounts)" as tmsg %}{{ tmsg | force_escape }}</th>
                                     <th style="text-align: right">
                                       {{ order.basket_total_excl_tax|currency:order.currency }}</th>
                                     <th style="text-align: right">
@@ -234,7 +234,7 @@
                             {% else %}
                                 <tr>
                                     <td colspan="9"></td>
-                                    <th>{% trans "Basket total" %}</th>
+                                    <th>{% trans "Basket total" as tmsg %}{{ tmsg | force_escape }}</th>
                                     <th style="text-align: right">
                                       {{ order.basket_total_excl_tax|currency:order.currency }}</th>
                                     <th style="text-align: right">
@@ -247,7 +247,7 @@
                           {% if order.has_shipping_discounts %}
                               <tr>
                                   <td colspan="9"></td>
-                                  <td>{% trans "Shipping total (excl. discounts)" %}</td>
+                                  <td>{% trans "Shipping total (excl. discounts)" as tmsg %}{{ tmsg | force_escape }}</td>
                                   <td style="text-align: right">
                                     {{ order.shipping_before_discounts_excl_tax|currency:order.currency }}</td>
                                   <td style="text-align: right">
@@ -258,7 +258,7 @@
                                 <tr>
                                     <td colspan="9"></td>
                                     <td>
-                                        <span class="label label-success">{% trans "Discount" %}</span>
+                                        <span class="label label-success">{% trans "Discount" as tmsg %}{{ tmsg | force_escape }}</span>
                                       {{ discount.offer_name }}
                                     </td>
                                     <td></td>
@@ -268,7 +268,7 @@
                             {% endfor %}
                               <tr>
                                   <td colspan="9"></td>
-                                  <th>{% trans "Shipping total (inc. discounts)" %}</th>
+                                  <th>{% trans "Shipping total (inc. discounts)" as tmsg %}{{ tmsg | force_escape }}</th>
                                   <th style="text-align: right">
                                     {{ order.shipping_excl_tax|currency:order.currency }}</th>
                                   <th style="text-align: right">
@@ -278,7 +278,7 @@
                           {% else %}
                               <tr>
                                   <td colspan="9"></td>
-                                  <th>{% trans "Shipping total" %}</th>
+                                  <th>{% trans "Shipping total" as tmsg %}{{ tmsg | force_escape }}</th>
                                   <th style="text-align: right">
                                     {{ order.shipping_excl_tax|currency:order.currency }}</th>
                                   <th style="text-align: right">
@@ -289,7 +289,7 @@
 
                           <tr>
                               <td colspan="9"></td>
-                              <th>{% trans "Order total" %}</th>
+                              <th>{% trans "Order total" as tmsg %}{{ tmsg | force_escape }}</th>
                               <th style="text-align: right">{{ order.total_excl_tax|currency:order.currency }}</th>
                               <th style="text-align: right">{{ order.total_incl_tax|currency:order.currency }}</th>
                               <td></td>
@@ -305,17 +305,17 @@
                   {% endcomment %}
                   {% block line_actions %}
                       <div class="well">
-                          <h3>{% trans "With selected lines" %}:</h3>
+                          <h3>{% trans "With selected lines" as tmsg %}{{ tmsg | force_escape }}:</h3>
 
                           <div class="control-group">
                               <div class="controls">
                                   <label class="radio inline">
                                       <input type="radio" name="line_action"
-                                             value="change_line_statuses"/> {% trans "Change line status to" %}
+                                             value="change_line_statuses"/> {% trans "Change line status to" as tmsg %}{{ tmsg | force_escape }}
                                   </label>
                                   <label class="radio inline">
                                       <select name="new_status">
-                                          <option value=""> -- {% trans "choose new status" %} --</option>
+                                          <option value=""> -- {% trans "choose new status" as tmsg %}{{ tmsg | force_escape }} --</option>
                                         {% for status in line_statuses %}
                                             <option>{{ status }}</option>
                                         {% endfor %}
@@ -327,18 +327,18 @@
                               <div class="controls">
                                   <label class="radio inline">
                                       <input type="radio" name="line_action"
-                                             value="create_shipping_event"/> {% trans "Create shipping event" %}
+                                             value="create_shipping_event"/> {% trans "Create shipping event" as tmsg %}{{ tmsg | force_escape }}
                                   </label>
                                   <label class="radio inline">
                                       <select name="shipping_event_type">
-                                          <option value=""> -- {% trans "choose event type" %} --</option>
+                                          <option value=""> -- {% trans "choose event type" as tmsg %}{{ tmsg | force_escape }} --</option>
                                         {% for event_type in shipping_event_types %}
                                             <option value="{{ event_type.code }}">{{ event_type.name }}</option>
                                         {% endfor %}
                                       </select>
                                   </label>
                                   <label class="radio inline">
-                                    {% trans "with reference" %} <input type="text" name="reference" value=""/>
+                                    {% trans "with reference" as tmsg %}{{ tmsg | force_escape }} <input type="text" name="reference" value=""/>
                                   </label>
                               </div>
                           </div>
@@ -346,18 +346,18 @@
                               <div class="controls">
                                   <label class="radio inline">
                                       <input type="radio" name="line_action"
-                                             value="create_payment_event"/> {% trans "Create payment event" %}
+                                             value="create_payment_event"/> {% trans "Create payment event" as tmsg %}{{ tmsg | force_escape }}
                                   </label>
                                   <label class="radio inline">
                                       <select name="payment_event_type">
-                                          <option value=""> -- {% trans "choose event type" %} --</option>
+                                          <option value=""> -- {% trans "choose event type" as tmsg %}{{ tmsg | force_escape }} --</option>
                                         {% for event_type in payment_event_types %}
                                             <option value="{{ event_type.code }}">{{ event_type.name }}</option>
                                         {% endfor %}
                                       </select>
                                   </label>
                                   <label class="radio inline">
-                                    {% trans "with amount" %} <input type="text" name="amount" value=""/>
+                                    {% trans "with amount" as tmsg %}{{ tmsg | force_escape }} <input type="text" name="amount" value=""/>
                                   </label>
                               </div>
                           </div>
@@ -365,11 +365,11 @@
                               <div class="controls">
                                   <label class="radio inline">
                                       <input type="radio" name="line_action"
-                                             value="create_refund"/> {% trans "Create refund" %}
+                                             value="create_refund"/> {% trans "Create refund" as tmsg %}{{ tmsg | force_escape }}
                                   </label>
                               </div>
                           </div>
-                          <input type="submit" value="{% trans "Go!" %}" class="btn btn-primary"/>
+                          <input type="submit" value="{% trans "Go!" as tmsg %}{{ tmsg | force_escape }}" class="btn btn-primary"/>
                       </div>
                   {% endblock line_actions %}
                 </form>
@@ -378,13 +378,13 @@
                   {% csrf_token %}
                   {% block order_actions %}
                       <div class="well">
-                          <h3><i class="icon-warning"></i> {% trans "Change order status" %}:</h3>
+                          <h3><i class="icon-warning"></i> {% trans "Change order status" as tmsg %}{{ tmsg | force_escape }}:</h3>
                         {% if order_status_form.has_choices %}
                           {% include "partials/form_fields.html" with form=order_status_form %}
                             <input type="hidden" value="change_order_status" name="order_action"/>
-                            <input type="submit" value="{% trans "Change status" %}" class="btn btn-primary"/>
+                            <input type="submit" value="{% trans "Change status" as tmsg %}{{ tmsg | force_escape }}" class="btn btn-primary"/>
                         {% else %}
-                          {% trans "This order can't have its status changed." %}
+                          {% trans "This order can't have its status changed." as tmsg %}{{ tmsg | force_escape }}
                         {% endif %}
                       </div>
                   {% endblock %}
@@ -392,17 +392,17 @@
 
               {% block shipping_events %}
                   <div class="table-header">
-                      <h3>{% trans "Shipping Events" %}</h3>
+                      <h3>{% trans "Shipping Events" as tmsg %}{{ tmsg | force_escape }}</h3>
                   </div>
                 {% with events=order.shipping_events.all %}
                     <table class="table table-striped table-bordered table-hover">
                       {% if events %}
                           <thead>
                           <tr>
-                              <th>{% trans "Date" %}</th>
-                              <th>{% trans "Event" %}</th>
-                              <th>{% trans "Lines" %}</th>
-                              <th>{% trans "Reference" %}</th>
+                              <th>{% trans "Date" as tmsg %}{{ tmsg | force_escape }}</th>
+                              <th>{% trans "Event" as tmsg %}{{ tmsg | force_escape }}</th>
+                              <th>{% trans "Lines" as tmsg %}{{ tmsg | force_escape }}</th>
+                              <th>{% trans "Reference" as tmsg %}{{ tmsg | force_escape }}</th>
                           </tr>
                           </thead>
                           <tbody>
@@ -414,9 +414,11 @@
                                     <td>
                                       {% for line_qty in event.line_quantities.all %}
                                           <a href="{% url 'dashboard:order-line-detail' number=order.number line_id=line_qty.line.id %}">
+                                          {% filter force_escape %}
                                             {% blocktrans with title=line_qty.line.title event_qty=line_qty.quantity total_qty=line_qty.line.quantity %}
                                               {{ title }} (quantity {{ event_qty }}/{{ total_qty }})
                                             {% endblocktrans %}
+                                          {% endfilter %}
                                           </a>
                                       {% endfor %}
                                     </td>
@@ -428,7 +430,7 @@
                       {% else %}
                           <tbody>
                           <tr>
-                              <td>{% trans "No shipping events." %}</td>
+                              <td>{% trans "No shipping events." as tmsg %}{{ tmsg | force_escape }}</td>
                           </tr>
                           </tbody>
                       {% endif %}
@@ -438,18 +440,18 @@
 
               {% block payment_events %}
                   <div class="table-header">
-                      <h3>{% trans "Payment Events" %}</h3>
+                      <h3>{% trans "Payment Events" as tmsg %}{{ tmsg | force_escape }}</h3>
                   </div>
                 {% with events=order.payment_events.all %}
                     <table class="table table-striped table-bordered table-hover">
                       {% if events %}
                           <thead>
                           <tr>
-                              <th>{% trans "Date" %}</th>
-                              <th>{% trans "Event" %}</th>
-                              <th>{% trans "Amount" %}</th>
-                              <th>{% trans "Lines" %}</th>
-                              <th>{% trans "Reference" %}</th>
+                              <th>{% trans "Date" as tmsg %}{{ tmsg | force_escape }}</th>
+                              <th>{% trans "Event" as tmsg %}{{ tmsg | force_escape }}</th>
+                              <th>{% trans "Amount" as tmsg %}{{ tmsg | force_escape }}</th>
+                              <th>{% trans "Lines" as tmsg %}{{ tmsg | force_escape }}</th>
+                              <th>{% trans "Reference" as tmsg %}{{ tmsg | force_escape }}</th>
                           </tr>
                           </thead>
                           <tbody>
@@ -461,7 +463,7 @@
                                     <td>{{ event.amount|currency:order.currency }}</td>
                                     <td>
                                       {% for line_qty in event.line_quantities.all %}
-                                        {% trans "Product:" %} {{ line_qty.line.title }} - {% trans "quantity" %}
+                                        {% trans "Product:" as tmsg %}{{ tmsg | force_escape }} {{ line_qty.line.title }} - {% trans "quantity" as tmsg %}{{ tmsg | force_escape }}
                                         {{ line_qty.quantity }}</br>
                                       {% endfor %}
                                     </td>
@@ -473,7 +475,7 @@
                       {% else %}
                           <tbody>
                           <tr>
-                              <td>{% trans "No payment events." %}</td>
+                              <td>{% trans "No payment events." as tmsg %}{{ tmsg | force_escape }}</td>
                           </tr>
                           </tbody>
                       {% endif %}
@@ -485,43 +487,43 @@
             <div class="tab-pane {% if active_tab == 'shipping' %}active{% endif %}" id="shipping">
               {% block tab_shipping %}
                   <div class="table-header">
-                      <h3>{% trans "Shipping" %}</h3>
+                      <h3>{% trans "Shipping" as tmsg %}{{ tmsg | force_escape }}</h3>
                   </div>
                   <table class="table table-striped table-bordered table-hover">
                       <tbody>
                       <tr>
-                          <th>{% trans "Method name" %}</th>
+                          <th>{% trans "Method name" as tmsg %}{{ tmsg | force_escape }}</th>
                           <td>{{ order.shipping_method }}</td>
                       </tr>
                       <tr>
-                          <th>{% trans "Method code" %}</th>
+                          <th>{% trans "Method code" as tmsg %}{{ tmsg | force_escape }}</th>
                           <td>{{ order.shipping_code|upper }}</td>
                       </tr>
                       <tr>
-                          <th>{% trans "Charge (incl tax)" %}</th>
+                          <th>{% trans "Charge (incl tax)" as tmsg %}{{ tmsg | force_escape }}</th>
                           <td>{{ order.shipping_incl_tax|currency:order.currency }}</td>
                       </tr>
                       <tr>
-                          <th>{% trans "Charge (excl tax)" %}</th>
+                          <th>{% trans "Charge (excl tax)" as tmsg %}{{ tmsg | force_escape }}</th>
                           <td>{{ order.shipping_excl_tax|currency:order.currency }}</td>
                       </tr>
                       <tr>
-                          <th>{% trans "Address" %}</th>
+                          <th>{% trans "Address" as tmsg %}{{ tmsg | force_escape }}</th>
                           <td>
                             {% for field in order.shipping_address.active_address_fields %}
                               {{ field }}<br/>
                             {% endfor %}
                               <a class="btn" href="{% url 'dashboard:order-shipping-address' order.number %}">
-                                {% trans "Update" %}
+                                {% trans "Update" as tmsg %}{{ tmsg | force_escape }}
                               </a>
                           </td>
                       </tr>
                       <tr>
-                          <th>{% trans "Phone" %}</th>
+                          <th>{% trans "Phone" as tmsg %}{{ tmsg | force_escape }}</th>
                           <td>{{ order.shipping_address.phone_number|default:"-" }}</td>
                       </tr>
                       <tr>
-                          <th>{% trans "Instructions" %}</th>
+                          <th>{% trans "Instructions" as tmsg %}{{ tmsg | force_escape }}</th>
                           <td>{{ order.shipping_address.notes|default:"-"|linebreaks }}</td>
                       </tr>
                       </tbody>
@@ -534,7 +536,7 @@
 
                 {% if order.billing_address %}
                     <div class="sub-header">
-                        <h3>{% trans "Billing address" %}</h3>
+                        <h3>{% trans "Billing address" as tmsg %}{{ tmsg | force_escape }}</h3>
                     </div>
                     <p>
                       {% for field in order.billing_address.active_address_fields %}
@@ -545,17 +547,17 @@
 
                 {% with sources=order.sources.all %}
                     <div class="table-header">
-                        <h3>{% trans "Payment sources" %}</h3>
+                        <h3>{% trans "Payment sources" as tmsg %}{{ tmsg | force_escape }}</h3>
                     </div>
                   {% if sources %}
                       <table class="table table-striped table-bordered table-hover">
                           <thead>
                           <tr>
-                              <th>{% trans "Source" %}</th>
-                              <th>{% trans "Allocation" %}</th>
-                              <th>{% trans "Amount debited" %}</th>
-                              <th>{% trans "Amount refunded" %}</th>
-                              <th>{% trans "Reference" %}</th>
+                              <th>{% trans "Source" as tmsg %}{{ tmsg | force_escape }}</th>
+                              <th>{% trans "Allocation" as tmsg %}{{ tmsg | force_escape }}</th>
+                              <th>{% trans "Amount debited" as tmsg %}{{ tmsg | force_escape }}</th>
+                              <th>{% trans "Amount refunded" as tmsg %}{{ tmsg | force_escape }}</th>
+                              <th>{% trans "Reference" as tmsg %}{{ tmsg | force_escape }}</th>
                           </tr>
                           </thead>
                           <tbody>
@@ -573,7 +575,7 @@
                   {% else %}
                       <table class="table table-striped table-bordered table-hover">
                           <tr>
-                              <td>{% trans "No payment sources found for this order." %}</td>
+                              <td>{% trans "No payment sources found for this order." as tmsg %}{{ tmsg | force_escape }}</td>
                           </tr>
                       </table>
                   {% endif %}
@@ -582,16 +584,16 @@
                 {% block payment_transactions %}
                   {% if payment_transactions %}
                       <div class="table-header">
-                          <h3>{% trans "Transactions" %}</h3>
+                          <h3>{% trans "Transactions" as tmsg %}{{ tmsg | force_escape }}</h3>
                       </div>
                       <table class="table table-striped table-bordered table-hover">
                           <thead>
                           <tr>
-                              <th>{% trans "Source" %}</th>
-                              <th>{% trans "Amount" %}</th>
-                              <th>{% trans "Reference" %}</th>
-                              <th>{% trans "Status" %}</th>
-                              <th>{% trans "Date" %}</th>
+                              <th>{% trans "Source" as tmsg %}{{ tmsg | force_escape }}</th>
+                              <th>{% trans "Amount" as tmsg %}{{ tmsg | force_escape }}</th>
+                              <th>{% trans "Reference" as tmsg %}{{ tmsg | force_escape }}</th>
+                              <th>{% trans "Status" as tmsg %}{{ tmsg | force_escape }}</th>
+                              <th>{% trans "Date" as tmsg %}{{ tmsg | force_escape }}</th>
                           </tr>
                           </thead>
                           <tbody>
@@ -617,18 +619,18 @@
 
                 {% with discounts=order.discounts.all %}
                     <div class="table-header">
-                        <h3>{% trans "Discounts" %}</h3>
+                        <h3>{% trans "Discounts" as tmsg %}{{ tmsg | force_escape }}</h3>
                     </div>
                   {% if discounts %}
                       <table class="table table-striped table-bordered table-hover">
                           <thead>
                           <tr>
-                              <th>{% trans "Type" %}</th>
-                              <th>{% trans "Voucher" %}</th>
-                              <th>{% trans "Offer name" %}</th>
-                              <th>{% trans "Frequency" %}</th>
-                              <th>{% trans "Message" %}</th>
-                              <th>{% trans "Amount" %}</th>
+                              <th>{% trans "Type" as tmsg %}{{ tmsg | force_escape }}</th>
+                              <th>{% trans "Voucher" as tmsg %}{{ tmsg | force_escape }}</th>
+                              <th>{% trans "Offer name" as tmsg %}{{ tmsg | force_escape }}</th>
+                              <th>{% trans "Frequency" as tmsg %}{{ tmsg | force_escape }}</th>
+                              <th>{% trans "Message" as tmsg %}{{ tmsg | force_escape }}</th>
+                              <th>{% trans "Amount" as tmsg %}{{ tmsg | force_escape }}</th>
                           </tr>
                           </thead>
                           <tbody>
@@ -655,7 +657,7 @@
                   {% else %}
                       <table class="table table-striped table-bordered table-hover">
                           <tr>
-                              <td>{% trans "No discounts were applied to this order." %}</td>
+                              <td>{% trans "No discounts were applied to this order." as tmsg %}{{ tmsg | force_escape }}</td>
                           </tr>
                       </table>
                   {% endif %}
@@ -667,17 +669,17 @@
             <div class="tab-pane {% if active_tab == 'notes' %}active{% endif %}" id="notes">
               {% block tab_notes %}
                   <div class="table-header">
-                      <h3>{% trans "Notes" %}</h3>
+                      <h3>{% trans "Notes" as tmsg %}{{ tmsg | force_escape }}</h3>
                   </div>
                 {% with notes=order.notes.all %}
                     <table class="table table-striped table-bordered table-hover">
                       {% if notes %}
                           <tr>
-                              <th>{% trans "Date" %}</th>
-                              <th>{% trans "User" %}</th>
-                              <th>{% trans "Type" %}</th>
-                              <th>{% trans "Message" %}</th>
-                              <th>{% trans "Admin" %}</th>
+                              <th>{% trans "Date" as tmsg %}{{ tmsg | force_escape }}</th>
+                              <th>{% trans "User" as tmsg %}{{ tmsg | force_escape }}</th>
+                              <th>{% trans "Type" as tmsg %}{{ tmsg | force_escape }}</th>
+                              <th>{% trans "Message" as tmsg %}{{ tmsg | force_escape }}</th>
+                              <th>{% trans "Admin" as tmsg %}{{ tmsg | force_escape }}</th>
                           </tr>
                         {% for note in notes %}
                             <tr>
@@ -689,12 +691,12 @@
                                   {% if note.is_editable %}
                                       &nbsp;
                                       <a href="{% url 'dashboard:order-detail-note' number=order.number note_id=note.id %}#notes"
-                                         class="btn btn-info">{% trans "Edit" %}</a>
+                                         class="btn btn-info">{% trans "Edit" as tmsg %}{{ tmsg | force_escape }}</a>
                                       <form action="." method="post" class="pull-left flat">
                                         {% csrf_token %}
                                           <input type="hidden" name="order_action" value="delete_note"/>
                                           <input type="hidden" name="note_id" value="{{ note.id }}"/>
-                                          <input type="submit" value="{% trans "Delete" %}" class="btn btn-danger"/>
+                                          <input type="submit" value="{% trans "Delete" as tmsg %}{{ tmsg | force_escape }}" class="btn btn-danger"/>
                                       </form>
                                   {% endif %}
                                 </td>
@@ -702,7 +704,7 @@
                         {% endfor %}
                       {% else %}
                           <tr>
-                              <td>{% trans "No notes available." %}</td>
+                              <td>{% trans "No notes available." as tmsg %}{{ tmsg | force_escape }}</td>
                           </tr>
                       {% endif %}
                     </table>
@@ -713,8 +715,8 @@
                       <input type="hidden" value="save_note" name="order_action"/>
                     {% include "partials/form_fields.html" with form=note_form %}
                       <div class="form-actions">
-                          <input type="submit" value="{% trans "Save note" %}" class="btn btn-primary"/>
-                        {% trans "Notes are only editable for 5 minutes after being saved." %}
+                          <input type="submit" value="{% trans "Save note" as tmsg %}{{ tmsg | force_escape }}" class="btn btn-primary"/>
+                        {% trans "Notes are only editable for 5 minutes after being saved." as tmsg %}{{ tmsg | force_escape }}
                       </div>
                   </form>
               {% endblock %}

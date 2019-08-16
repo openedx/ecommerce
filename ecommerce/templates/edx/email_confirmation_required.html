@@ -1,7 +1,7 @@
 {% extends 'edx/base.html' %}
 {% load i18n %}
 
-{% block title %}{% trans "Redeem" %}{% endblock %}
+{% block title %}{% trans "Redeem" as tmsg %}{{ tmsg | force_escape }}{% endblock %}
 
 {% block navbar %}
     {% include 'edx/partials/_student_navbar.html' %}
@@ -13,18 +13,20 @@
         <div class="container">
             <div class="enrollment-message-container">
                 <h2 class="enrollment-message">
-                  {% trans "You are enrolling in: " %}
+                  {% trans "You are enrolling in: " as tmsg %}{{ tmsg | force_escape }}
                   <span class="course-title">{{ course_name }}</span>
                 </h2>
             </div>
             <div class="instruction">
                 <p class="instruction-info">
                     <i class="fa fa-envelope-o" aria-hidden="true"></i>
-                    {% blocktrans %}An email has been sent to {{ user_email }} with a link for you to activate your account.{% endblocktrans %}
+                    {% filter force_escape %}
+                        {% blocktrans %}An email has been sent to {{ user_email }} with a link for you to activate your account.{% endblocktrans %}
+                    {% endfilter %}
                 </p>
-              <h3 class="activate">{% trans "Why activate?" %}</h3>
+              <h3 class="activate">{% trans "Why activate?" as tmsg %}{{ tmsg | force_escape }}</h3>
               <div class="activate-info">
-                  {% trans "We ask you to activate your account to ensure it is really you creating the account and to prevent fraud." %}
+                  {% trans "We ask you to activate your account to ensure it is really you creating the account and to prevent fraud." as tmsg %}{{ tmsg | force_escape }}
               <div>
             </div>
         </div>

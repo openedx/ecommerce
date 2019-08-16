@@ -185,7 +185,9 @@
                                     <td align="left" valign="top" style="font-size: 10px; color: #767676; font-style: italic;">
                                         <br>
                                         {% now 'Y' as year %}
+                                        {% filter force_escape %}
                                         {% blocktrans %}Copyright © {{ year }} {{ platform_name }}. All rights reserved.{% endblocktrans %}
+                                        {% endfilter %}
                                     </td>
                                 </tr>
                                 <tr>

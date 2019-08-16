@@ -3,9 +3,10 @@
 {% load core_extras %}
 {% load static %}
 {% load i18n %}
+{% load django_markup %}
 
 {% block title %}
-    {% blocktrans with course_name=course.name %}Purchase Credit for {{ course_name }}{% endblocktrans %}
+    {% filter force_escape %}{% blocktrans with course_name=course.name %}Purchase Credit for {{ course_name }}{% endblocktrans %}{% endfilter %}
 {% endblock title %}
 
 {% block content %}
@@ -22,16 +23,20 @@
                             {% captureas course_name %}
                                 <span class="course-title">{{ course.name }}</span>
                             {% endcaptureas %}
-                            {% blocktrans %}
-                                Purchase Credit for {{ course_name }}
-                            {% endblocktrans %}
+                            {% filter force_escape %}
+                                {% blocktrans %}
+                                    Purchase Credit for {{ course_name }}
+                                {% endblocktrans %}
+                            {% endfilter %}
                         </h3>
                 <span>
-                    {% blocktrans with date=deadline|date %}
-                        Congratulations! You are eligible to purchase academic course credit for this course.
-                        You must purchase your credit before {{ date }}.
-                        Select one of the following institutions to purchase your credit.
-                    {% endblocktrans %}
+                    {% filter force_escape %}
+                        {% blocktrans with date=deadline|date %}
+                            Congratulations! You are eligible to purchase academic course credit for this course.
+                            You must purchase your credit before {{ date }}.
+                            Select one of the following institutions to purchase your credit.
+                        {% endblocktrans %}
+                    {% endfilter %}
                 </span>
                     </div>
                     </div>
@@ -43,16 +48,16 @@
                             <div class="row center-block text-right">
                                 {% if code %}
                                 <div class="col-sm-2 col-sm-offset-10 price text-left">
-                                    <span>{% trans "Price:" %}</span>
+                                    <span>{% trans "Price:" as tmsg %}{{ tmsg | force_escape }}</span>
                                     <span class="pull-right">$<span class="price"></span></span>
                                 </div>
                                 <div class="col-sm-2 col-sm-offset-10 discount text-left">
-                                    <span>{% trans "Discount:" %} </span>
+                                    <span>{% trans "Discount:" as tmsg %}{{ tmsg | force_escape }} </span>
                                     <span class="pull-right"><span class="discount"></span></span>
                                 </div>
                                 {% endif %}
                                 <div class="col-sm-2 col-sm-offset-10  total-price text-left">
-                                    <span>{% trans "Total:" %} <span>
+                                    <span>{% trans "Total:" as tmsg %}{{ tmsg | force_escape }} <span>
                                     <span class="pull-right">$<span class="total-price"></span></span>
                                 </div>
                             </div>
@@ -81,28 +86,28 @@
 
                     <div class="col-md-4">
                         <div class="advantages">
-                            <strong>{% trans "You deserve it." %}</strong>
+                            <strong>{% trans "You deserve it." as tmsg %}{{ tmsg | force_escape }}</strong>
 
                             <p>
-                                {% trans "The hard work is over - you passed the course! Now get the credit you deserve to start or complete a degree." %}
+                                {% trans "The hard work is over - you passed the course! Now get the credit you deserve to start or complete a degree." as tmsg %}{{ tmsg | force_escape }}
                             </p>
                         </div>
                     </div>
                     <div class="col-md-4">
                         <div class="advantages">
-                            <strong>{% trans "It's affordable." %}</strong>
+                            <strong>{% trans "It's affordable." as tmsg %}{{ tmsg | force_escape }}</strong>
 
                             <p>
-                                {% trans "The credit offered through edX generally costs less than the same credit at most institutions." %}
+                                {% trans "The credit offered through edX generally costs less than the same credit at most institutions." as tmsg %}{{ tmsg | force_escape }}
                             </p>
                         </div>
                     </div>
                     <div class="col-md-4">
                         <div class="advantages">
-                            <strong>{% trans "It opens doors." %}</strong>
+                            <strong>{% trans "It opens doors." as tmsg %}{{ tmsg | force_escape }}</strong>
 
                             <p>
-                                {% trans "Many of today's most in-demand jobs require a college degree. Start your path to success!" %}
+                                {% trans "Many of today's most in-demand jobs require a college degree. Start your path to success!" as tmsg %}{{ tmsg | force_escape }}
                             </p>
                         </div>
                     </div>
@@ -110,12 +115,13 @@
             </div>
 
             <div class="row center-block">
-                <strong>{% trans "Questions?" %}</strong>
+                <strong>{% trans "Questions?" as tmsg %}{{ tmsg | force_escape }}</strong>
             </div>
             <div class="row center-block">
-                {% blocktrans with link_start='<a href="https://www.edx.org/gfa">' link_end='</a>' %}
-                    Please read {{ link_start }}our FAQs to view common questions about our certificates.{{ link_end }}
+                {% blocktrans asvar tmsg  %}
+                    Please read {link_start}our FAQs to view common questions about our certificates.{link_end}
                 {% endblocktrans %}
+                {% interpolate_html tmsg link_start='<a href="https://www.edx.org/gfa">'|safe link_end='</a>'|safe %}
             </div>
         </div>
 

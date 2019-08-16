@@ -5,13 +5,13 @@
 
 {% block additional_options %}
     <li class="{{ additional_class }}">
-        <a class="nav-link" href="{{ lms_dashboard_url }}">{% trans "Student Dashboard" %}</a>
+        <a class="nav-link" href="{{ lms_dashboard_url }}">{% trans "Student Dashboard" as tmsg %}{{ tmsg | force_escape }}</a>
     </li>
     <li class="{{ additional_class }}">
-        <a class="nav-link" href="{% url 'courses:app' '' %}">{% trans "Course Admin Tool" %}</a>
+        <a class="nav-link" href="{% url 'courses:app' '' %}">{% trans "Course Admin Tool" as tmsg %}{{ tmsg | force_escape }}</a>
     </li>
     <li class="{{ additional_class }}"
-        ><a class="nav-link" href="{% url 'dashboard:index' %}">{% trans "E-Commerce Dashboard" %}</a>
+        ><a class="nav-link" href="{% url 'dashboard:index' %}">{% trans "E-Commerce Dashboard" as tmsg %}{{ tmsg | force_escape }}</a>
     </li>
     <li class="divider {{ additional_class }}"></li>
 {% endblock additional_options %}

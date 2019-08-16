@@ -8,12 +8,12 @@
             <button type="submit"
                     id="apply-voucher-button"
                     class="btn btn-default"
-                    data-loading-text="{% trans 'Applying...' %}"
+                    data-loading-text="{% trans 'Applying...' as tmsg %}{{ tmsg | force_escape }}"
                     data-track-type="click"
                     data-track-event="edx.bi.ecommerce.basket.voucher_applied"
                     data-track-category="voucher-application"
                     data-voucher-code="{{ voucher_code }}">
-                {% trans "Apply" %}
+                {% trans "Apply" as tmsg %}{{ tmsg | force_escape }}
             </button>
         </div>
     </form>

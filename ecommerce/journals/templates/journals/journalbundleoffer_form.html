@@ -5,11 +5,13 @@
 
 {% block title %}
   {% if editing %}
+    {% filter force_escape %}
     {% blocktrans trimmed with journal_bundle_title=journal_bundle.title %}
-      Edit Journal Bundle Offer: {{ journal_bundle_title }}
+        Edit Journal Bundle Offer: {{ journal_bundle_title }}
     {% endblocktrans %}
+    {% endfilter %}
   {% else %}
-    {% trans "Create Journal Bundle Offer" %}
+    {% trans "Create Journal Bundle Offer" as tmsg %}{{ tmsg | force_escape }}
   {% endif %}
 {% endblock title %}
 
@@ -25,13 +27,13 @@
 {% block content %}
   <div class="container">
     <ol class="breadcrumb">
-      <li><a href="{% url 'journals:offers:list' %}">{% trans "Journal Bundle Offers" %}</a> </li>
+      <li><a href="{% url 'journals:offers:list' %}">{% trans "Journal Bundle Offers" as tmsg %}{{ tmsg | force_escape}}</a> </li>
 
       {% if editing %}
         <li>{{ journal_bundle.title }}</li>
-        <li>{% trans "Edit" %}</li>
+        <li>{% trans "Edit" as tmsg %}{{ tmsg | force_escape }}</li>
       {% else %}
-        <li>{% trans "Create" %}</li>
+        <li>{% trans "Create" as tmsg %}{{ tmsg | force_escape }}</li>
       {% endif %}
     </ol>
 
@@ -40,9 +42,9 @@
     <div class="page-header">
       <h1 class="hd-1 emphasized">
         {% if editing %}
-          {% trans "Edit Journal Bundle Offer" %}
+          {% trans "Edit Journal Bundle Offer" as tmsg %}{{ tmsg | force_escape }}
         {% else %}
-          {% trans "Create Journal Bundle Offer" %}
+          {% trans "Create Journal Bundle Offer" as tmsg %}{{ tmsg | force_escape }}
         {% endif %}
       </h1>
     </div>
@@ -53,11 +55,11 @@
 
       <div class="form-actions">
         {% if editing %}
-          <input type="submit" class="btn btn-primary" value={% trans "Save Changes" %}>
+          <input type="submit" class="btn btn-primary" value={% trans "Save Changes" as tmsg %}{{ tmsg | force_escape }}>
         {% else %}
-          <input type="submit" class="btn btn-primary" value={% trans "Create Journal Bundle Offer" %}>
+          <input type="submit" class="btn btn-primary" value={% trans "Create Journal Bundle Offer" as tmsg %}{{ tmsg | force_escape }}>
         {% endif %}
-        <a class="btn btn-default" href="{% url 'journals:offers:list' %}">{% trans "Cancel" %}</a>
+        <a class="btn btn-default" href="{% url 'journals:offers:list' %}">{% trans "Cancel" as tmsg%}{{ tmsg | force_escape }}</a>
       </div>
     </form>
   </div>
@@ -68,7 +70,13 @@
     <div class="container">
       <div class="row">
         <div class="col-xs-12 text-right">
-          <em>{% blocktrans %}{{ platform_name }} Journal Bundle Offer Administration Tool{% endblocktrans %}</em>
+          <em>
+            {% filter force_escape %}
+              {% blocktrans %}
+                {{ platform_name }} Journal Bundle Offer Administration Tool
+              {% endblocktrans %}
+            {% endfilter %}
+          </em>
         </div>
       </div>
     </div>

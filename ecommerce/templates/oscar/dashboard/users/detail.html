@@ -17,10 +17,10 @@
 {% block breadcrumbs %}
     <ul class="breadcrumb">
         <li>
-            <a href="{% url 'dashboard:index' %}">{% trans "Dashboard" %}</a>
+            <a href="{% url 'dashboard:index' %}">{% trans "Dashboard" as tmsg %}{{ tmsg | force_escape }}</a>
         </li>
         <li>
-            <a href="{% url 'dashboard:users-index' %}">{% trans "Customers" %}</a>
+            <a href="{% url 'dashboard:users-index' %}">{% trans "Customers" as tmsg %}{{ tmsg | force_escape }}</a>
         </li>
         <li class="active">{{ customer.username }}</li>
     </ul>
@@ -33,70 +33,70 @@
       {% block user_general_info %}
           <div class="">
               <div class="table-header">
-                  <h2>{% trans "General" %}</h2>
+                  <h2>{% trans "General" as tmsg %}{{ tmsg | force_escape }}</h2>
               </div>
               <table class="table table-bordered">
                   <tr>
-                      <th>{% trans "Username" %}</th>
+                      <th>{% trans "Username" as tmsg %}{{ tmsg | force_escape }}</th>
                       <td>{{ customer.username|default:"-" }}</td>
                   </tr>
                   <tr>
-                      <th>{% trans "Full name" %}</th>
+                      <th>{% trans "Full name" as tmsg %}{{ tmsg | force_escape }}</th>
                       <td>{{ customer.get_full_name|default:"-" }}</td>
                   </tr>
                   <tr>
-                      <th>{% trans "Email" %}</th>
+                      <th>{% trans "Email" as tmsg %}{{ tmsg | force_escape }}</th>
                       <td>{{ customer.email }}</td>
                   </tr>
                   <tr>
-                      <th>{% trans "Active" %}?</th>
+                      <th>{% trans "Active" as tmsg %}{{ tmsg | force_escape }}?</th>
                       <td>
                         {{ customer.is_active|yesno:_("Yes,No") }}
                       </td>
                   </tr>
                   <tr>
-                      <th>{% trans "Superuser" %}?</th>
+                      <th>{% trans "Superuser" as tmsg %}{{ tmsg | force_escape }}?</th>
                       <td>{{ customer.is_superuser|yesno:_("True,False") }}</td>
                   </tr>
                   <tr>
-                      <th>{% trans "Staff" %}?</th>
+                      <th>{% trans "Staff" as tmsg %}{{ tmsg | force_escape }}?</th>
                       <td>{{ customer.is_staff|yesno:_("True,False") }}</td>
                   </tr>
                   <tr>
-                      <th>{% trans "Last login" %}</th>
+                      <th>{% trans "Last login" as tmsg %}{{ tmsg | force_escape }}</th>
                       <td>{{ customer.last_login }}</td>
                   </tr>
                   <tr>
-                      <th>{% trans "Date joined" %}</th>
+                      <th>{% trans "Date joined" as tmsg %}{{ tmsg | force_escape }}</th>
                       <td>{{ customer.date_joined }}</td>
                   </tr>
                 {% if customer.userrecord %}
                   {% with record=customer.userrecord %}
                       <tr>
-                          <th>{% trans "Products viewed" %}</th>
+                          <th>{% trans "Products viewed" as tmsg %}{{ tmsg | force_escape }}</th>
                           <td>{{ record.num_product_views|default:0 }}</td>
                       </tr>
                       <tr>
-                          <th>{% trans "Number of orders" %}</th>
+                          <th>{% trans "Number of orders" as tmsg %}{{ tmsg | force_escape }}</th>
                           <td>{{ record.num_orders|default:0 }}</td>
                       </tr>
                       <tr>
-                          <th>{% trans "Number of ordered items" %}</th>
+                          <th>{% trans "Number of ordered items" as tmsg %}{{ tmsg | force_escape }}</th>
                           <td>{{ record.num_order_items|default:0 }}</td>
                       </tr>
                       <tr>
-                          <th>{% trans "Total spent" %}</th>
+                          <th>{% trans "Total spent" as tmsg %}{{ tmsg | force_escape }}</th>
                           <td>{{ record.total_spent|default:0|currency }}</td>
                       </tr>
                   {% endwith %}
                 {% endif %}
                   <tr>
-                      <th>{% trans "Reviews written" %}</th>
+                      <th>{% trans "Reviews written" as tmsg %}{{ tmsg | force_escape }}</th>
                       <td>{{ customer.reviews.count }}</td>
                   </tr>
                 {% if customer.email %}
                     <tr>
-                        <th>{% trans "Actions" %}</th>
+                        <th>{% trans "Actions" as tmsg %}{{ tmsg | force_escape }}</th>
                         <td>
                             <form id="password_reset_form"
                                   action="{% url 'dashboard:user-password-reset' pk=customer.id %}" method="post"
@@ -104,7 +104,7 @@
                               {% csrf_token %}
                               {% include 'partials/form_fields.html' %}
                                 <button type="submit"
-                                        class="btn btn-primary btn-large">{% trans 'Send password reset email' %}</button>
+                                        class="btn btn-primary btn-large">{% trans 'Send password reset email' as tmsg %}{{ tmsg | force_escape }}</button>
                             </form>
                         </td>
                     </tr>
@@ -117,13 +117,13 @@
           <div class="tabbable dashboard">
             {% block tab_nav %}
                 <ul class="nav nav-tabs">
-                    <li class="active"><a href="#user_orders" data-toggle="tab">{% trans "Orders" %}</a></li>
-                    <li><a href="#user_refunds" data-toggle="tab">{% trans "Refunds" %}</a></li>
+                    <li class="active"><a href="#user_orders" data-toggle="tab">{% trans "Orders" as tmsg %}{{ tmsg | force_escape }}</a></li>
+                    <li><a href="#user_refunds" data-toggle="tab">{% trans "Refunds" as tmsg %}{{ tmsg | force_escape }}</a></li>
                   {% switch "user_enrollments_on_dashboard" %}
-                      <li><a href="#user_enrollments" data-toggle="tab">{% trans "Enrollments" %}</a></li>
+                      <li><a href="#user_enrollments" data-toggle="tab">{% trans "Enrollments" as tmsg %}{{ tmsg | force_escape }}</a></li>
                   {% endswitch %}
-                    <li><a href="#user_addresses" data-toggle="tab">{% trans "Addresses" %}</a></li>
-                    <li><a href="#user_reviews" data-toggle="tab">{% trans "Reviews" %}</a></li>
+                    <li><a href="#user_addresses" data-toggle="tab">{% trans "Addresses" as tmsg %}{{ tmsg | force_escape }}</a></li>
+                    <li><a href="#user_reviews" data-toggle="tab">{% trans "Reviews" as tmsg %}{{ tmsg | force_escape }}</a></li>
                 </ul>
             {% endblock %}
 
@@ -131,15 +131,15 @@
                 {% block user_orders %}
                     <div id="user_orders" class="tab-pane active">
                         <table class="table table-striped table-bordered table-hover">
-                            <caption>{% trans "Orders" %}</caption>
+                            <caption>{% trans "Orders" as tmsg %}{{ tmsg | force_escape }}</caption>
                           {% with orders=customer.orders.all %}
                             {% if orders %}
                                 <tr>
-                                    <th>{% trans "Order Number" %}</th>
-                                    <th>{% trans "Num items" %}</th>
-                                    <th>{% trans "Total value" %}</th>
-                                    <th>{% trans "Date placed" %}</th>
-                                    <th>{% trans "Status" %}</th>
+                                    <th>{% trans "Order Number" as tmsg %}{{ tmsg | force_escape }}</th>
+                                    <th>{% trans "Num items" as tmsg %}{{ tmsg | force_escape }}</th>
+                                    <th>{% trans "Total value" as tmsg %}{{ tmsg | force_escape }}</th>
+                                    <th>{% trans "Date placed" as tmsg %}{{ tmsg | force_escape }}</th>
+                                    <th>{% trans "Status" as tmsg %}{{ tmsg | force_escape }}</th>
                                     <th></th>
                                 </tr>
                               {% for order in orders %}
@@ -152,12 +152,12 @@
                                       <td>{{ order.date_placed|date }}</td>
                                       <td>{{ order.status|default:"-" }}</td>
                                       <td><a href="{% url 'dashboard:order-detail' number=order.number %}"
-                                             class="btn btn-info">{% trans "View" %}</a></td>
+                                             class="btn btn-info">{% trans "View" as tmsg %}{{ tmsg | force_escape }}</a></td>
                                   </tr>
                               {% endfor %}
                             {% else %}
                                 <tr>
-                                    <td>{% trans "This customer has not placed any orders yet." %}</td>
+                                    <td>{% trans "This customer has not placed any orders yet." as tmsg %}{{ tmsg | force_escape }}</td>
                                 </tr>
                             {% endif %}
                           {% endwith %}
@@ -183,7 +183,7 @@
 
                 {% block user_addresses %}
                     <div id="user_addresses" class="tab-pane">
-                        <h2>{% trans "Addresses" %}</h2>
+                        <h2>{% trans "Addresses" as tmsg %}{{ tmsg | force_escape }}</h2>
 
                         <div class="row-fluid">
                           {% for address in customer.addresses.all %}
@@ -202,7 +202,7 @@
                               {% endif %}
                             {% endif %}
                             {% empty %}
-                              <p>{% trans "This customer has not saved any addresses." %}</p>
+                              <p>{% trans "This customer has not saved any addresses." as tmsg %}{{ tmsg | force_escape }}</p>
                           {% endfor %}
                             </div>
                     </div>
@@ -211,14 +211,14 @@
                 {% block user_reviews %}
                     <div id="user_reviews" class="tab-pane">
                         <table class="table table-striped table-bordered table-hover">
-                            <caption>{% trans "Reviews" %}</caption>
+                            <caption>{% trans "Reviews" as tmsg %}{{ tmsg | force_escape }}</caption>
                           {% if customer.reviews.count %}
                               <tr>
-                                  <th>{% trans "Product ID" %}</th>
-                                  <th>{% trans "Score" %}</th>
-                                  <th>{% trans "Title" context "Product review title" %}</th>
-                                  <th>{% trans "Body" %}</th>
-                                  <th>{% trans "Date created" %}</th>
+                                  <th>{% trans "Product ID" as tmsg %}{{ tmsg | force_escape }}</th>
+                                  <th>{% trans "Score" as tmsg %}{{ tmsg | force_escape }}</th>
+                                  <th>{% trans "Title" context "Product review title" as tmsg %}{{ tmsg | force_escape }}</th>
+                                  <th>{% trans "Body" as tmsg %}{{ tmsg | force_escape }}</th>
+                                  <th>{% trans "Date created" as tmsg %}{{ tmsg | force_escape }}</th>
                               </tr>
                             {% for review in customer.reviews.all %}
                                 <tr>
@@ -231,7 +231,7 @@
                             {% endfor %}
                           {% else %}
                               <tr>
-                                  <td>{% trans "This customer has not written any reviews yet." %}</td>
+                                  <td>{% trans "This customer has not written any reviews yet." as tmsg %}{{ tmsg | force_escape }}</td>
                               </tr>
                           {% endif %}
                         </table>

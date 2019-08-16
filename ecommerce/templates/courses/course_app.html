@@ -2,7 +2,7 @@
 {% load i18n %}
 {% load static %}
 
-{% block title %}{% trans "Courses" %}{% endblock %}
+{% block title %}{% trans "Courses" as tmsg %}{{ tmsg | force_escape }}{% endblock %}
 
 {% block stylesheets %}
     <link rel="stylesheet" href="{% static 'bower_components/pikaday/css/pikaday.css' %}" type="text/x-scss">
@@ -22,7 +22,13 @@
         <div class="container">
             <div class="row">
                 <div class="col-xs-12 text-right">
-                    <em>{% blocktrans %}{{ platform_name }} Course Administration Tool{% endblocktrans %}</em>
+                    <em>
+                        {% filter force_escape %}
+                            {% blocktrans %}
+                                {{ platform_name }} Course Administration Tool
+                            {% endblocktrans %}
+                        {% endfilter %}
+                    </em>
                 </div>
             </div>
         </div>

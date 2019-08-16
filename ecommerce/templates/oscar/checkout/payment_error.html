@@ -1,9 +1,10 @@
 {% extends 'edx/base.html' %}
 {% load i18n %}
+{% load django_markup %}
 {% load static %}
 
 {% block title %}
-    {% trans "Payment Failed" %}
+    {% trans "Payment Failed" as tmsg %}{{ tmsg | force_escape }}
 {% endblock title %}
 
 {% block navbar %}
@@ -12,26 +13,26 @@
 
 {% block content %}
   <div class="container content-wrapper receipt-cancel-error">
-    <h1>{% trans "Payment Failed" %}</h1>
+    <h1>{% trans "Payment Failed" as tmsg %}{{ tmsg | force_escape }}</h1>
     <p>
-      {% blocktrans trimmed %}
-        An error occurred while processing your payment. <strong>You have not been charged.</strong>
-      {% endblocktrans %}</p>
-
-    <p>
-      {% with "<a class='nav-link' href='https://support.edx.org/hc'>"|safe as start_link %}
-        {% blocktrans trimmed with end_link="</a>"|safe %}
-          Please wait a few minutes and then try again. For help, check our {{ start_link }}Help Center{{ end_link }}.
-        {% endblocktrans %}
-      {% endwith %}
+      {% blocktrans trimmed asvar tmsg %}
+        An error occurred while processing your payment. {strong_start}You have not been charged.{strong_end}
+      {% endblocktrans %}
+      {% interpolate_html tmsg strong_start="<strong>"|safe strong_end="</strong>"|safe %}
     </p>
 
     <p>
-      {% with "<a class='nav-link' href='"|add:dashboard_url|add:"'>"|safe as start_link %}
-        {% blocktrans trimmed with end_link="</a>"|safe %}
-          To try again, return to your {{ start_link }}dashboard{{ end_link }}.
-        {% endblocktrans %}
-      {% endwith %}
+      {% blocktrans trimmed asvar tmsg %}
+        Please wait a few minutes and then try again. For help, check our {start_link}Help Center{end_link}.
+      {% endblocktrans %}
+      {% interpolate_html tmsg start_link="<a class='nav-link' href='https://support.edx.org/hc'>"|safe end_link="</a>"|safe %}
+    </p>
+
+    <p>
+      {% blocktrans trimmed asvar tmsg %}
+        To try again, return to your {start_link}dashboard{end_link}.
+      {% endblocktrans %}
+      {% interpolate_html tmsg start_link="<a class='nav-link' href='"|add:dashboard_url|add:"'>"|safe end_link="</a>"|safe %}
     </p>
   </div>
 {% endblock content %}

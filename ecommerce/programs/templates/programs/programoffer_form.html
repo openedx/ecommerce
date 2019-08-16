@@ -5,11 +5,13 @@
 
 {% block title %}
   {% if editing %}
-    {% blocktrans trimmed with program_title=program.title %}
-      Edit Program Offer: {{ program_title }}
-    {% endblocktrans %}
+    {% filter force_escape %}
+      {% blocktrans trimmed with program_title=program.title %}
+        Edit Program Offer: {{ program_title }}
+      {% endblocktrans %}
+    {% endfilter%}
   {% else %}
-    {% trans "Create Program Offer" %}
+    {% trans "Create Program Offer" as tmsg %}{{ tmsg | force_escape }}
   {% endif %}
 {% endblock %}
 
@@ -25,13 +27,13 @@
 {% block content %}
   <div class="container">
     <ol class="breadcrumb">
-      <li><a href="{% url 'programs:offers:list' %}">{% trans "Program Offers" %}</a></li>
+      <li><a href="{% url 'programs:offers:list' %}">{% trans "Program Offers" as tmsg %}{{ tmsg | force_escape }}</a></li>
 
       {% if editing %}
         <li>{{ program.title }}</li>
-        <li>{% trans "Edit" %}</li>
+        <li>{% trans "Edit" as tmsg %}{{ tmsg | force_escape }}</li>
       {% else %}
-        <li>{% trans "Create" %}</li>
+        <li>{% trans "Create" as tmsg %}{{ tmsg | force_escape }}</li>
       {% endif %}
     </ol>
 
@@ -40,9 +42,9 @@
     <div class="page-header">
       <h1 class="hd-1 emphasized">
         {% if editing %}
-          {% trans "Edit Program Offer" %}
+          {% trans "Edit Program Offer" as tmsg%}{{ tmsg | force_escape }}
         {% else %}
-          {% trans "Create Program Offer" %}
+          {% trans "Create Program Offer" as tmsg %}{{ tmsg | force_escape }}
         {% endif %}
       </h1>
     </div>
@@ -53,11 +55,11 @@
 
       <div class="form-actions">
         <input type="submit" class="btn btn-primary" value="{% if editing %}
-            {% trans "Save Changes" %}
+            {% trans "Save Changes" as tmsg %}{{ tmsg | force_escape }}
           {% else %}
-            {% trans "Create Program Offer" %}
+            {% trans "Create Program Offer" as tmsg %}{{ tmsg | force_escape }}
           {% endif %}">
-        <a class="btn btn-default" href="{% url 'programs:offers:list' %}">{% trans "Cancel" %}</a>
+        <a class="btn btn-default" href="{% url 'programs:offers:list' %}">{% trans "Cancel" as tmsg %}{{ tmsg | force_escape }}</a>
       </div>
 
     </form>
@@ -69,7 +71,13 @@
     <div class="container">
       <div class="row">
         <div class="col-xs-12 text-right">
-          <em>{% blocktrans %}{{ platform_name }} Program Offer Administration Tool{% endblocktrans %}</em>
+          <em>
+            {% filter force_escape %}
+              {% blocktrans %}
+                {{ platform_name }} Program Offer Administration Tool
+              {% endblocktrans %}
+            {% endfilter %}
+          </em>
         </div>
       </div>
     </div>

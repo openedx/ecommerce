@@ -2,7 +2,7 @@
 {% load i18n %}
 {% load static %}
 
-{% block title %}{% trans "Coupon Codes" %}{% endblock %}
+{% block title %}{% trans "Coupon Codes" as tmsg %}{{ tmsg | force_escape }}{% endblock %}
 
 {% block stylesheets %}
     <link rel="stylesheet" href="{% static 'bower_components/pikaday/css/pikaday.css' %}" type="text/x-scss">
