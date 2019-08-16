@@ -4,7 +4,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>{% trans "Management View" %}</title>
+    <title>{% trans "Management View" as tmsg %}{{ tmsg | force_escape }}</title>
 </head>
 <body>
 {% if messages %}
@@ -23,7 +23,7 @@
     {% csrf_token %}
     <textarea rows="10" cols="80" name="basket_ids"></textarea><br>
     <input type="hidden" name="action" value="refund_basket_transactions">
-    <input type="submit" value="{% trans "Refund Transactions" %}">
+    <input type="submit" value="{% trans "Refund Transactions" as tmsg %}{{ tmsg | force_escape }}">
 </form>
 
 <h1>Create Orders for Baskets</h1>

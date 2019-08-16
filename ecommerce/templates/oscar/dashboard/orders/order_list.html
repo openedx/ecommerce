@@ -8,7 +8,7 @@
 {% block body_class %}{{ block.super }} orders{% endblock %}
 
 {% block title %}
-  {% trans "Orders" %} | {{ block.super }}
+  {% trans "Orders" as tmsg %}{{ tmsg | force_escape }} | {{ block.super }}
 {% endblock %}
 
 {% block extrascripts %}
@@ -27,15 +27,15 @@
 {% block breadcrumbs %}
     <ul class="breadcrumb">
         <li>
-            <a href="{% url 'dashboard:index' %}">{% trans "Dashboard" %}</a>
+            <a href="{% url 'dashboard:index' %}">{% trans "Dashboard" as tmsg %}{{ tmsg | force_escape }}</a>
         </li>
-        <li class="active">{% trans "Orders" %}</li>
+        <li class="active">{% trans "Orders" as tmsg %}{{ tmsg | force_escape }}</li>
     </ul>
 {% endblock %}
 
 {% block header %}
     <div class="page-header">
-        <h1>{% trans "Orders" %}</h1>
+        <h1>{% trans "Orders" as tmsg %}{{ tmsg | force_escape }}</h1>
     </div>
 {% endblock header %}
 
@@ -55,9 +55,9 @@
 
                     <div class="pull-right">
                         <div class="form-inline">
-                            <label>{% trans "Download selected orders as a CSV" %}</label>
+                            <label>{% trans "Download selected orders as a CSV" as tmsg %}{{ tmsg | force_escape }}</label>
                             <button type="submit" class="btn btn-primary" name="action"
-                                    value="download_selected_orders">{% trans "Download" %}</button>
+                                    value="download_selected_orders">{% trans "Download" as tmsg %}{{ tmsg | force_escape }}</button>
                         </div>
                     </div>
                 </caption>
@@ -65,13 +65,13 @@
                 <thead>
                 <tr>
                     <th></th>
-                    <th>{% anchor 'number' _("Order number") %}</th>
-                    <th>{% anchor 'total_incl_tax' _("Total inc tax") %}</th>
-                    <th>{% trans "Number of items" %}</th>
-                    <th>{% trans "Status" %}</th>
-                    <th>{% trans "Username" %}</th>
-                    <th>{% trans "Email" %}</th>
-                    <th>{% trans "Date of purchase" %}</th>
+                    <th>{% anchor 'number' _("Order number") as tmsg %}{{ tmsg | force_escape }}</th>
+                    <th>{% anchor 'total_incl_tax' _("Total inc tax") as tmsg %}{{ tmsg | force_escape }}</th>
+                    <th>{% trans "Number of items" as tmsg %}{{ tmsg | force_escape }}</th>
+                    <th>{% trans "Status" as tmsg %}{{ tmsg | force_escape }}</th>
+                    <th>{% trans "Username" as tmsg %}{{ tmsg | force_escape }}</th>
+                    <th>{% trans "Email" as tmsg %}{{ tmsg | force_escape }}</th>
+                    <th>{% trans "Date of purchase" as tmsg %}{{ tmsg | force_escape }}</th>
                     <th></th>
                 </tr>
                 </thead>
@@ -89,23 +89,23 @@
                             {% if order.user %}
                                 <a href="{% url 'dashboard:user-detail' pk=order.user.id %}">{{ order.user.username }}</a>
                             {% else %}
-                                &lt;{% trans "Deleted" %}&gt;
+                                &lt;{% trans "Deleted" as tmsg %}{{ tmsg | force_escape }}&gt;
                             {% endif %}
                         </td>
                         <td>
                           {% if order.user %}
                             <a href="{% url 'dashboard:user-detail' pk=order.user.id %}">{{ order.user.email }}</a>
                           {% else %}
-                            &lt;{% trans "Deleted" %}&gt;
+                            &lt;{% trans "Deleted" as tmsg %}{{ tmsg | force_escape }}&gt;
                           {% endif %}
                         </td>
                         <td>{{ order.date_placed }}</td>
                         <td>
                             <a class="btn btn-info"
-                               href="{% url 'dashboard:order-detail' number=order.number %}">{% trans "View" %}</a>
+                               href="{% url 'dashboard:order-detail' number=order.number %}">{% trans "View" as tmsg %}{{ tmsg | force_escape }}</a>
                           {% if order.is_fulfillable %}
                               <a class="btn btn-warning" data-order-number="{{ order.number }}"
-                                 data-action="retry-fulfillment">{% trans "Retry Fulfillment" %}</a>
+                                 data-action="retry-fulfillment">{% trans "Retry Fulfillment" as tmsg %}{{ tmsg | force_escape }}</a>
                           {% endif %}
                         </td>
                     </tr>
@@ -116,13 +116,13 @@
 
         {% block order_actions %}
             <div class="well">
-                <h3><i class="icon-warning"></i> {% trans "Change order status" %}:</h3>
+                <h3><i class="icon-warning"></i> {% trans "Change order status" as tmsg %}{{ tmsg | force_escape }}:</h3>
               {% if order_statuses %}
                   <div class="control-group">
                       <div class="controls">
 
                           <select name="new_status">
-                              <option value=""> -- {% trans "choose new status" %} --</option>
+                              <option value=""> -- {% trans "choose new status" as tmsg %}{{ tmsg | force_escape }} --</option>
                             {% for status in order_statuses %}
                                 <option>{{ status }}</option>
                             {% endfor %}
@@ -131,9 +131,9 @@
                       </div>
                   </div>
                   <button type="submit" name="action" value="change_order_statuses"
-                          class="btn btn-primary">{% trans "Change status" %}</button>
+                          class="btn btn-primary">{% trans "Change status" as tmsg %}{{ tmsg | force_escape }}</button>
               {% else %}
-                {% trans "This order can't have its status changed." %}
+                {% trans "This order can't have its status changed." as tmsg %}{{ tmsg | force_escape }}
               {% endif %}
             </div>
         {% endblock %}
@@ -146,7 +146,7 @@
       <table class="table table-striped table-bordered">
           <caption><i class="icon-shopping-cart icon-large"></i>{{ queryset_description }}</caption>
           <tr>
-              <td>{% trans "No orders found." %}</td>
+              <td>{% trans "No orders found." as tmsg %}{{ tmsg | force_escape }}</td>
           </tr>
       </table>
   {% endif %}

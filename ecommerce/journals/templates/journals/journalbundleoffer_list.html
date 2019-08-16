@@ -3,7 +3,7 @@
 {% load offer_tags %}
 {% load static %}
 
-{% block title %}{% trans "Journal Bundle Offers" %}{% endblock %}
+{% block title %}{% trans "Journal Bundle Offers" as tmsg %}{{ tmsg | force_escape }}{% endblock %}
 
 {% block navbar %}
   {% include "edx/partials/_staff_navbar.html" %}
@@ -17,21 +17,21 @@
         {% trans "Journal Bundle Offers" %}
         <div class="pull-right">
           <a href="{% url 'journals:offers:new' %}"
-             class="btn btn-primary btn-small">{% trans "Create Journal Bundle Offer" %}</a>
+             class="btn btn-primary btn-small">{% trans "Create Journal Bundle Offer" as tmsg %}{{ tmsg | force_escape}}</a>
         </div>
       </h1>
     </div>
 
     <table id="offerTable" class="copy copy-base table table-striped table-bordered" cellspacing="0">
-      <caption class="sr-only">{% trans "Current journal bundle offers" %}</caption>
+      <caption class="sr-only">{% trans "Current journal bundle offers" as tmsg %}{{ tmsg | force_escape }}</caption>
       <thead>
       <tr>
-        <th>{% trans 'Journal Bundle Title' %}</th>
-        <th>{% trans 'Bundle UUID' %}</th>
-        <th>{% trans 'Type' %}</th>
-        <th>{% trans 'Value' %}</th>
-        <th>{% trans 'Start' %}</th>
-        <th>{% trans 'End' %}</th>
+        <th>{% trans 'Journal Bundle Title' as tmsg %}{{ tmsg | force_escape }}</th>
+        <th>{% trans 'Bundle UUID' as tmsg %}{{ tmsg | force_escape }}</th>
+        <th>{% trans 'Type' as tmsg %}{{ tmsg | force_escape }}</th>
+        <th>{% trans 'Value' as tmsg %}{{ tmsg | force_escape }}</th>
+        <th>{% trans 'Start' as tmsg %}{{ tmsg | force_escape }}</th>
+        <th>{% trans 'End' as tmsg %}{{ tmsg | force_escape }}</th>
       </tr>
       </thead>
       <tbody>
@@ -55,7 +55,13 @@
     <div class="container">
       <div class="row">
         <div class="col-xs-12 text-right">
-          <em>{% blocktrans %}{{ platform_name }} Journal Bundle Offer Administration Tool{% endblocktrans %}</em>
+          <em>
+            {% filter force_escape %}
+              {% blocktrans %}
+                {{ platform_name }} Journal Bundle Offer Administration Tool
+              {% endblocktrans %}
+            {% endfilter %}
+          </em>
         </div>
       </div>
     </div>

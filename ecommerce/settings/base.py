@@ -305,6 +305,7 @@ DJANGO_APPS = [
     # edx-drf-extensions
     'csrf.apps.CsrfAppConfig',  # Enables frontend apps to retrieve CSRF tokens.
     'rules.apps.AutodiscoverRulesConfig',
+    'xss_utils'
 ]
 
 # Apps specific to this project go here.

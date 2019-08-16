@@ -1,9 +1,10 @@
 {% extends 'edx/base.html' %}
 {% load core_extras %}
 {% load i18n %}
+{% load django_markup %}
 
 {% block title %}
-  {% trans "Order Not Found" %}
+  {% trans "Order Not Found" as tmsg %}{{ tmsg | force_escape }}
 {% endblock title %}
 
 {% block navbar %}
@@ -15,11 +16,11 @@
     <div id="error-container">
       <div class="error-message container">
           <h3 class="title">
-            <span class="sr">{% blocktrans %} {{ error_summary }} {% endblocktrans %}</span>
+            <span class="sr">{% filter force_escape %}{% blocktrans %} {{ error_summary }} {% endblocktrans %}{% endfilter %}</span>
             {{ error_summary }}
           </h3>
           <div class="copy">
-            <p>{% trans "The specified order could not be located. Please ensure that the URL is correct, and try again." %}</p>
+            <p>{% trans "The specified order could not be located. Please ensure that the URL is correct, and try again." as tmsg %}{{ tmsg | force_escape }}</p>
             <br/>
           </div>
           <div class="msg">
@@ -27,11 +28,11 @@
               {% captureas link_start %}
                 <a href="{{ order_history_url }}">
               {% endcaptureas %}
-
-              {% blocktrans with link_end="</a>" %}
-                You may also view your previous orders on the {{ link_start }}Account Settings{{ link_end }}
+              {% blocktrans asvar tmsg %}
+                You may also view your previous orders on the {link_start}{order_history_url}{link_middle}{link_end}Account Settings{link_end}
                 page.
               {% endblocktrans %}
+              {% interpolate_html tmsg link_start='<a href="'|safe link_middle='">'|safe link_end='</a>'|safe order_history_url=order_history_url|safe %}
             </p>
           </div>
         </div>

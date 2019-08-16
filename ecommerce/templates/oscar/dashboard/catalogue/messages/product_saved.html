@@ -7,36 +7,48 @@
 
         {% if creating %}
             {% if product.title %}
-                {% blocktrans %}
-                    Created product variant '{{ name }}'.
-                {% endblocktrans %}
+                {% filter force_escape %}
+                    {% blocktrans %}
+                        Created product variant '{{ name }}'.
+                    {% endblocktrans %}
+                {% endfilter %}
             {% else %}
-                {% blocktrans %}
-                    Created variant of '{{ parent_name }}'.
-                {% endblocktrans %}
+                {% filter force_escape %}
+                    {% blocktrans %}
+                        Created variant of '{{ parent_name }}'.
+                    {% endblocktrans %}
+                {% endfilter %}
             {% endif %}
         {% else %}
             {% if product.title %}
-                {% blocktrans %}
-                    Updated product variant '{{ name }}'.
-                {% endblocktrans %}
+                {% filter force_escape %}
+                    {% blocktrans %}
+                        Updated product variant '{{ name }}'.
+                    {% endblocktrans %}
+                {% endfilter %}
             {% else %}
-                {% blocktrans %}
-                    Updated a variant of '{{ parent_name }}'.
-                {% endblocktrans %}
+                {% filter force_escape %}
+                    {% blocktrans %}
+                        Updated a variant of '{{ parent_name }}'.
+                    {% endblocktrans %}
+                {% endfilter %}
             {% endif %}
         {% endif %}
 
     {% else %}
 
         {% if creating %}
-            {% blocktrans %}
-                Created product '{{ name }}'.
-            {% endblocktrans %}
+            {% filter force_escape %}
+                {% blocktrans %}
+                    Created product '{{ name }}'.
+                {% endblocktrans %}
+            {% endfilter %}
         {% else %}
-            {% blocktrans %}
-                Updated product '{{ name }}'.
-            {% endblocktrans %}
+            {% filter force_escape %}
+                {% blocktrans %}
+                    Updated product '{{ name }}'.
+                {% endblocktrans %}
+            {% endfilter %}
         {% endif %}
 
     {% endif %}
@@ -45,5 +57,5 @@
 </p>
 
 <p>
-    <a href="{% url 'dashboard:catalogue-product' pk=product.pk %}{% querystring %}" class="btn btn-success">{% trans "Edit again" %}</a>
+    <a href="{% url 'dashboard:catalogue-product' pk=product.pk %}{% querystring %}" class="btn btn-success">{% trans "Edit again" as tmsg %}{{ tmsg | force_escape }}</a>
 </p>

@@ -3,7 +3,7 @@
 {% load offer_tags %}
 {% load static %}
 
-{% block title %}{% trans "Enterprise Offers" %}{% endblock %}
+{% block title %}{% trans "Enterprise Offers" as tmsg %}{{ tmsg | force_escape }}{% endblock %}
 
 {% block navbar %}
   {% include "edx/partials/_staff_navbar.html" %}
@@ -17,22 +17,22 @@
         {% trans "Enterprise Offers" %}
         <div class="pull-right">
           <a href="{% url 'enterprise:offers:new' %}"
-             class="btn btn-primary btn-small">{% trans "Create Enterprise Offer" %}</a>
+             class="btn btn-primary btn-small">{% trans "Create Enterprise Offer" as tmsg %}{{ tmsg | force_escape }}</a>
         </div>
       </h1>
     </div>
 
     <table id="offerTable" class="copy copy-base table table-striped table-bordered" cellspacing="0">
-      <caption class="sr-only">{% trans "Current enterprise offers" %}</caption>
+      <caption class="sr-only">{% trans "Current enterprise offers" as tmsg %}{{ tmsg | force_escape }}</caption>
       <thead>
       <tr>
-        <th>{% trans 'Enterprise Customer Name' %}</th>
-        <th>{% trans 'Enterprise Customer UUID' %}</th>
-        <th>{% trans 'Enterprise Customer Catalog UUID' %}</th>
-        <th>{% trans 'Type' %}</th>
-        <th>{% trans 'Value' %}</th>
-        <th>{% trans 'Start' %}</th>
-        <th>{% trans 'End' %}</th>
+        <th>{% trans 'Enterprise Customer Name' as tmsg %}{{ tmsg | force_escape }}</th>
+        <th>{% trans 'Enterprise Customer UUID' as tmsg %}{{ tmsg | force_escape }}</th>
+        <th>{% trans 'Enterprise Customer Catalog UUID' as tmsg %}{{ tmsg | force_escape }}</th>
+        <th>{% trans 'Type' as tmsg %}{{ tmsg | force_escape }}</th>
+        <th>{% trans 'Value' as tmsg %}{{ tmsg | force_escape }}</th>
+        <th>{% trans 'Start' as tmsg %}{{ tmsg | force_escape }}</th>
+        <th>{% trans 'End' as tmsg %}{{ tmsg | force_escape }}</th>
       </tr>
       </thead>
       <tbody>
@@ -59,7 +59,13 @@
     <div class="container">
       <div class="row">
         <div class="col-xs-12 text-right">
-          <em>{% blocktrans %}{{ platform_name }} Enterprise Offer Administration Tool{% endblocktrans %}</em>
+          <em>
+            {% filter force_escape %}
+              {% blocktrans %}
+                {{ platform_name }} Enterprise Offer Administration Tool
+              {% endblocktrans %}
+            {% endfilter %}
+          </em>
         </div>
       </div>
     </div>

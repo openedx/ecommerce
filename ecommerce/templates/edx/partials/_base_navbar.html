@@ -7,7 +7,7 @@
     <div class="navbar-header">
       <button id="hamburger-button" class="navbar-toggle collapsed" data-toggle="collapse"
               data-target="#main-navbar-collapse" type="button" aria-expanded="false">
-        <span class="sr-only">{% trans "Toggle navigation" %}</span>
+        <span class="sr-only">{% trans "Toggle navigation" as tmsg %}{{ tmsg | force_escape }}</span>
         <span aria-hidden="true" class="icon-bar"></span>
         <span aria-hidden="true" class="icon-bar"></span>
         <span aria-hidden="true" class="icon-bar"></span>
@@ -22,14 +22,14 @@
             <button type="button" class="btn btn-default hidden-xs main-btn nav-button"
                     onclick="window.open('{{ lms_dashboard_url }}');">
               <i class="icon fa fa-home" aria-hidden="true"></i>
-              <span class="sr-only">{% trans "Dashboard for:" %}</span>
+              <span class="sr-only">{% trans "Dashboard for:" as tmsg %}{{ tmsg | force_escape }}</span>
               {{ user.username }}
             </button>
             <button type="button" class="btn btn-default dropdown-toggle hidden-xs nav-button"
                     data-toggle="dropdown"
                     aria-haspopup="true">
               <span class="caret"></span>
-              <span class="sr-only">{% trans "Toggle Dropdown" %}</span>
+              <span class="sr-only">{% trans "Toggle Dropdown" as tmsg %}{{ tmsg | force_escape }}</span>
             </button>
             <ul class="dropdown-menu" aria-expanded="false">
               {% block dropdown_menu %}{% endblock dropdown_menu %}
@@ -37,8 +37,8 @@
               {% block small_dropdown_menu %}{% endblock small_dropdown_menu %}
           </li>
         {% else %}
-          <a class="btn btn-primary navbar-btn hidden-xs" href="{% url 'login' %}">{% trans "Login" %}</a>
-          <li class="visible-xs"><a class="nav-link" href="{% url 'login' %}">{% trans "Login" %}</a></li>
+          <a class="btn btn-primary navbar-btn hidden-xs" href="{% url 'login' %}">{% trans "Login" as tmsg %}{{ tmsg | force_escape }}</a>
+          <li class="visible-xs"><a class="nav-link" href="{% url 'login' %}">{% trans "Login" as tmsg %}{{ tmsg | force_escape }}</a></li>
           </a>
         {% endif %}
       </ul>

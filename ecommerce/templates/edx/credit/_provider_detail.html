@@ -5,7 +5,7 @@
         <div class="col-xs-2 text-center">
             <label class="radio-button">
                 <input type="radio" name="provider"/>
-                <span>{% trans "Select" %}</span>
+                <span>{% trans "Select" as tmsg %}{{ tmsg | force_escape }}</span>
             </label>
         </div>
 
@@ -13,8 +13,8 @@
             <h3 class="title">{{ provider.display_name }}</h3>
 
             <p>
-                <strong>{% trans "Credits: " %}</strong> {{ provider.credit_hours }}<br>
-                <strong>{% trans "Price: " %}</strong> ${{ provider.price }}
+                <strong>{% trans "Credits: " as tmsg %}{{ tmsg | force_escape }}</strong> {{ provider.credit_hours }}<br>
+                <strong>{% trans "Price: " as tmsg %}{{ tmsg | force_escape }}</strong> ${{ provider.price }}
             </p>
 
             <p>
@@ -23,9 +23,11 @@
 
             <button class="btn-link show-instructions" data-toggle="collapse"
                     data-target="#fulfillment-instructions-{{ provider.id|lower }}">
-                {% blocktrans with display_name=provider.display_name %}
-                    Learn more about {{ display_name }} credit?
-                {% endblocktrans %}
+                {% filter force_escape %}
+                    {% blocktrans with display_name=provider.display_name %}
+                        Learn more about {{ display_name }} credit?
+                    {% endblocktrans %}
+                {% endfilter %}
             </button>
 
             <div class="collapse" id="fulfillment-instructions-{{ provider.id|lower }}">
@@ -41,9 +43,11 @@
     <div class="row">
         <div class="col-xs-8 col-xs-offset-2">
             <small>
-                {% blocktrans with date=deadline|date %}
-                    Credit available until {{ date }}
-                {% endblocktrans %}
+                {% filter force_escape %}
+                    {% blocktrans with date=deadline|date %}
+                        Credit available until {{ date }}
+                    {% endblocktrans %}
+                {% endfilter %}
             </small>
         </div>
     </div>

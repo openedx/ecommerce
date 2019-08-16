@@ -4,4 +4,4 @@
 {% block additional_options %}
 {% endblock additional_options %}
 
-<li class="{{ additional_class }}"><a class="nav-link" href="{% url 'logout' %}">{% trans "Sign Out" %}</a></li>
+<li class="{{ additional_class }}"><a class="nav-link" href="{% url 'logout' %}">{% trans "Sign Out" as tmsg %}{{ tmsg | force_escape }}</a></li>

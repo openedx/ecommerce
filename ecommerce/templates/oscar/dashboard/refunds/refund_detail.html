@@ -7,7 +7,9 @@
 {% block body_class %}{{ block.super }} refunds{% endblock %}
 
 {% block title %}
-    {% blocktrans with id=refund.id %}Refund #{{ id }}{% endblocktrans %} | {{ block.super }}
+    {% filter force_escape %}
+        {% blocktrans with id=refund.id %}Refund #{{ id }}{% endblocktrans %} | {{ block.super }}
+    {% endfilter %}
 {% endblock title %}
 
 {% block extrascripts %}
@@ -26,28 +28,30 @@
 {% block breadcrumbs %}
 <ul class="breadcrumb">
     <li>
-        <a href="{% url 'dashboard:index' %}">{% trans "Dashboard" %}</a>
+        <a href="{% url 'dashboard:index' %}">{% trans "Dashboard" as tmsg %}{{ tmsg | force_escape }}</a>
     </li>
     <li>
-        <a href="{% url 'dashboard:refunds:list' %}">{% trans "Refunds" %}</a>
+        <a href="{% url 'dashboard:refunds:list' %}">{% trans "Refunds" as tmsg %}{{ tmsg | force_escape }}</a>
     </li>
     <li class="active">#{{ refund.id }}</li>
 </ul>
 {% endblock breadcrumbs %}
 
 {% block headertext %}
+    {% filter force_escape %}
     {% blocktrans with id=refund.id %}Refund #{{ id }}{% endblocktrans %}
+    {% endfilter %}
 {% endblock headertext %}
 
 {% block dashboard_content %}
     {% block customer_information %}
     <table class="table table-bordered table-hover">
-        <caption><i class="icon-group icon-large"></i>{% trans "Customer Information" %}</caption>
+        <caption><i class="icon-group icon-large"></i>{% trans "Customer Information" as tmsg %}{{ tmsg | force_escape }}</caption>
         {% if refund.user %}
             <tr>
-                <th>{% trans "Username" %}</th>
-                <th>{% trans "Full name" %}</th>
-                <th>{% trans "Email address" %}</th>
+                <th>{% trans "Username" as tmsg %}{{ tmsg | force_escape }}</th>
+                <th>{% trans "Full name" as tmsg %}{{ tmsg | force_escape }}</th>
+                <th>{% trans "Email address" as tmsg %}{{ tmsg | force_escape }}</th>
             </tr>
             <tr>
                 <td><a href="{% url 'dashboard:user-detail' pk=refund.user.id %}">{{ refund.user.username }}</a></td>
@@ -56,7 +60,7 @@
             </tr>
         {% else %}
             <tr>
-                <td>{% trans "Customer has deleted their account." %}</td>
+                <td>{% trans "Customer has deleted their account." as tmsg %}{{ tmsg | force_escape }}</td>
             </tr>
         {% endif %}
     </table>
@@ -64,13 +68,13 @@
 
     {% block refund_overview %}
     <table class="table table-striped table-bordered table-hover">
-        <caption><i class="icon-shopping-cart icon-large"></i>{% trans "Refund Overview" %}</caption>
+        <caption><i class="icon-shopping-cart icon-large"></i>{% trans "Refund Overview" as tmsg %}{{ tmsg | force_escape }}</caption>
         <tr>
-            <th>{% trans "Total Credit" %}</th>
-            <th>{% trans "Created" %}</th>
-            <th>{% trans "Status" %}</th>
-            <th>{% trans "Associated Order" %}</th>
-            <th>{% trans "Actions" %}</th>
+            <th>{% trans "Total Credit" as tmsg %}{{ tmsg | force_escape }}</th>
+            <th>{% trans "Created" as tmsg %}{{ tmsg | force_escape }}</th>
+            <th>{% trans "Status" as tmsg %}{{ tmsg | force_escape }}</th>
+            <th>{% trans "Associated Order" as tmsg %}{{ tmsg | force_escape }}</th>
+            <th>{% trans "Actions" as tmsg %}{{ tmsg | force_escape }}</th>
         </tr>
         <tr data-refund-id="{{ refund.id }}">
             <td>{{ refund.total_credit_excl_tax|currency:refund.currency }}</td>
@@ -90,7 +94,7 @@
     {% include "dashboard/partials/refund_action_modal.html" %}
 
     <div class="table-header">
-        <h3>{% trans "Refund Items" %}</h3>
+        <h3>{% trans "Refund Items" as tmsg %}{{ tmsg | force_escape }}</h3>
     </div>
 
     <form id="refund_lines_form" action="." method="post" class="form-inline">
@@ -99,15 +103,15 @@
         <table class="table table-striped table-bordered table-hover">
             <thead>
                 <tr>
-                    <th>{% trans "Refund Line ID" %}</th>
-                    <th>{% trans "Associated Order Line" %}</th>
-                    <th>{% trans "Quantity" %}</th>
-                    <th>{% trans "Product" %}</th>
-                    <th>{% trans "UPC" %}</th>
-                    <th>{% trans "Status" %}</th>
-                    <th>{% trans "Supplier" %}</th>
-                    <th>{% trans "Supplier SKU" %}</th>
-                    <th>{% trans "Credit (excl. tax)" %}</th>
+                    <th>{% trans "Refund Line ID" as tmsg %}{{ tmsg | force_escape }}</th>
+                    <th>{% trans "Associated Order Line" as tmsg %}{{ tmsg | force_escape }}</th>
+                    <th>{% trans "Quantity" as tmsg %}{{ tmsg | force_escape }}</th>
+                    <th>{% trans "Product" as tmsg %}{{ tmsg | force_escape }}</th>
+                    <th>{% trans "UPC" as tmsg %}{{ tmsg | force_escape }}</th>
+                    <th>{% trans "Status" as tmsg %}{{ tmsg | force_escape }}</th>
+                    <th>{% trans "Supplier" as tmsg %}{{ tmsg | force_escape }}</th>
+                    <th>{% trans "Supplier SKU" as tmsg %}{{ tmsg | force_escape }}</th>
+                    <th>{% trans "Credit (excl. tax)" as tmsg %}{{ tmsg | force_escape }}</th>
                 </tr>
             </thead>
             <tbody>
@@ -141,7 +145,7 @@
 
                 <tr>
                     <td colspan="7"></td>
-                    <th>{% trans "Total Credit" %}</th>
+                    <th>{% trans "Total Credit" as tmsg %}{{ tmsg | force_escape }}</th>
                     <th style="text-align: right">{{ refund.total_credit_excl_tax|currency:refund.currency }}</th>
                 </tr>
             </tbody>
@@ -152,7 +156,7 @@
 
     {% block payment_events %}
     <div class="table-header">
-        <h3>{% trans "Payment Events" %}</h3>
+        <h3>{% trans "Payment Events" as tmsg %}{{ tmsg | force_escape }}</h3>
     </div>
 
     {% with events=refund.order.payment_events.all %}
@@ -160,12 +164,12 @@
         {% if events %}
         <thead>
             <tr>
-                <th>{% trans "Date" %}</th>
-                <th>{% trans "Event" %}</th>
-                <th>{% trans "Amount" %}</th>
-                <th>{% trans "Lines" %}</th>
-                <th>{% trans "Processor" %}</th>
-                <th>{% trans "Reference" %}</th>
+                <th>{% trans "Date" as tmsg %}{{ tmsg | force_escape }}</th>
+                <th>{% trans "Event" as tmsg %}{{ tmsg | force_escape }}</th>
+                <th>{% trans "Amount" as tmsg %}{{ tmsg | force_escape }}</th>
+                <th>{% trans "Lines" as tmsg %}{{ tmsg | force_escape }}</th>
+                <th>{% trans "Processor" as tmsg %}{{ tmsg | force_escape }}</th>
+                <th>{% trans "Reference" as tmsg %}{{ tmsg | force_escape }}</th>
             </tr>
         </thead>
         <tbody>
@@ -177,7 +181,7 @@
                 <td>{{ event.amount|currency:refund.order.currency }}</td>
                 <td>
                     {% for line_qty in event.line_quantities.all %}
-                    {% trans "Product:" %} {{ line_qty.line.title }}. {% trans "Quantity:" %} {{ line_qty.quantity }}.</br>
+                    {% trans "Product:" as tmsg %}{{ tmsg | force_escape }} {{ line_qty.line.title }}. {% trans "Quantity:" as tmsg %}{{ tmsg | force_escape }} {{ line_qty.quantity }}.</br>
                     {% endfor %}
                 </td>
                 <td>{{ event.processor_name }}</td>
@@ -189,7 +193,7 @@
         {% else %}
         <tbody>
             <tr>
-                <td>{% trans "No payment events." %}</td>
+                <td>{% trans "No payment events." as tmsg %}{{ tmsg | force_escape }}</td>
             </tr>
         </tbody>
         {% endif %}
