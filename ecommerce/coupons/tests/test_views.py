@@ -368,7 +368,13 @@ class CouponRedeemViewTests(CouponMixin, DiscoveryTestMixin, LmsApiMockMixin, En
 
         order = Order.objects.first()
         receipt_page_url = get_receipt_page_url(self.site.siteconfiguration)
-        expected_url = format_url(base=receipt_page_url, params={'order_number': order.number})
+        expected_url = format_url(
+            base=receipt_page_url,
+            params={
+                'order_number': order.number,
+                'disable_back_button': 1,
+            },
+        )
 
         self.assertRedirects(response, expected_url, status_code=302, fetch_redirect_response=False)
 
