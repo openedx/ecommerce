@@ -119,7 +119,7 @@ path.py==7.2
 pathlib2==2.3.4           # via importlib-metadata
 paypalrestsdk==1.13.1
 pbr==5.4.2                # via mock, stevedore
-phonenumberslite==8.10.16  # via django-phonenumber-field
+phonenumberslite==8.10.17  # via django-phonenumber-field
 pillow==6.1.0             # via django-oscar
 pluggy==0.12.0            # via tox
 polib==1.1.0              # via edx-i18n-tools
@@ -168,7 +168,7 @@ snowballstemmer==1.9.0    # via sphinx
 social-auth-app-django==1.2.0  # via edx-auth-backends
 social-auth-core[openidconnect]==1.7.0  # via edx-auth-backends, social-auth-app-django
 sorl-thumbnail==12.5.0    # via django-oscar
-soupsieve==1.9.2          # via beautifulsoup4
+soupsieve==1.9.3          # via beautifulsoup4
 sphinx==1.5.3
 sqlparse==0.3.0           # via django-debug-toolbar
 stevedore==1.30.1         # via edx-opaque-keys
@@ -183,7 +183,7 @@ unicodecsv==0.14.1
 unidecode==0.4.21         # via django-oscar, python-slugify
 uritemplate==3.0.0        # via coreapi
 urllib3==1.23             # via requests, selenium, transifex-client
-virtualenv==16.7.2        # via tox
+virtualenv==16.7.3        # via tox
 waitress==1.3.0           # via webtest
 webob==1.8.5              # via webtest
 webtest==2.0.33           # via django-webtest
