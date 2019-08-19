@@ -22,33 +22,62 @@ class TestSeatPayment(object):
         """ Returns a course run data dict. """
         return DiscoveryApi().get_course_run('verified')
 
-    def checkout_with_credit_card(self, selenium, address):
-        """ Submits the credit card form hosted by the E-Commerce Service. """
-        billing_information = {
-            'id_first_name': 'Ed',
-            'id_last_name': 'Xavier',
-            'id_address_line1': address['line1'],
-            'id_address_line2': address['line2'],
-            'id_city': address['city'],
-            'id_postal_code': address['postal_code'],
-            'card-number': '4111111111111111',
-            'card-cvn': '123'
-        }
+    def checkout_with_credit_card(self, selenium, address, is_new_payment_page):
+        """
+        Submits the credit card form hosted by the E-Commerce Service.
+
+        Arguments:
+            is_new_payment_page (bool): True to test the new payment page, False to test the older basket page.
+        """
+        if is_new_payment_page:
+            billing_information = {
+                'firstName': 'Ed',
+                'lastName': 'Xavier',
+                'address': address['line1'],
+                'unit': address['line2'],
+                'city': address['city'],
+                'postalCode': address['postal_code'],
+                'cardNumber': '4111111111111111',
+                'securityCode': '123'
+            }
+        else:
+            billing_information = {
+                'id_first_name': 'Ed',
+                'id_last_name': 'Xavier',
+                'id_address_line1': address['line1'],
+                'id_address_line2': address['line2'],
+                'id_city': address['city'],
+                'id_postal_code': address['postal_code'],
+                'card-number': '4111111111111111',
+                'card-cvn': '123'
+            }
 
         country = address['country']
         state = address['state'] or ''
 
         card_expiry_year = str(datetime.datetime.now().year + 3)
-        select_fields = [
-            ('id_country', country),
-            ('card-expiry-month', '12'),
-            ('card-expiry-year', card_expiry_year),
-        ]
+        if is_new_payment_page:
+            select_fields = [
+                ('country', country),
+                ('cardExpirationMonth', '12'),
+                ('cardExpirationYear', card_expiry_year),
+            ]
 
-        if country in ('US', 'CA',):
-            select_fields.append(('id_state', state,))
+            if country in ('US', 'CA',):
+                select_fields.append(('state', state,))
+            else:
+                billing_information['state'] = state
         else:
-            billing_information['id_state'] = state
+            select_fields = [
+                ('id_country', country),
+                ('card-expiry-month', '12'),
+                ('card-expiry-year', card_expiry_year),
+            ]
+
+            if country in ('US', 'CA',):
+                select_fields.append(('id_state', state,))
+            else:
+                billing_information['id_state'] = state
 
         # Select the appropriate <option> elements
         for selector, value in select_fields:
@@ -61,7 +90,10 @@ class TestSeatPayment(object):
             selenium.find_element_by_id(field).send_keys(value)
 
         # Click the payment button
-        selenium.find_element_by_id('payment-button').click()
+        if is_new_payment_page:
+            selenium.find_element_by_id('placeOrderButton').click()
+        else:
+            selenium.find_element_by_id('payment-button').click()
 
     def assert_browser_on_receipt_page(self, selenium):
         WebDriverWait(selenium, 20).until(
@@ -99,17 +131,21 @@ class TestSeatPayment(object):
                 log.info('Checking again in 0.5 seconds.')
                 time.sleep(0.5)
 
-    def add_item_to_basket(self, selenium, sku, new_payment_page):
+    def add_item_to_basket(self, selenium, sku, is_new_payment_page):
         """
         Arguments:
-            new_payment_page (bool): True to test the new payment page, False to test the older basket page.
+            is_new_payment_page (bool): True to test the new payment page, False to test the older basket page.
         """
-        if new_payment_page:
-            waffle_flag_enabled = 1
+        if is_new_payment_page:
+            microfrontend_waffle_flag_enabled = 1
             page_css_selector = ".page__payment"
         else:
-            waffle_flag_enabled = 0
+            microfrontend_waffle_flag_enabled = 0
             page_css_selector = ".basket-client-side"
+
+        # Note: although not intuitive, the waffle flag `force_microfrontend_bucket` must be enabled to allow the
+        #   waffle flag `enable_microfrontend_for_basket_page` to function.
+        force_microfrontend_bucket_flag_enabled = 1
 
         # Add the item to the basket and start the checkout process
         selenium.get(EcommerceHelpers.build_url(
@@ -117,8 +153,8 @@ class TestSeatPayment(object):
             '&dwft_enable_microfrontend_for_basket_page={}'
             '&dwft_force_microfrontend_bucket={}'.format(
                 sku,
-                waffle_flag_enabled,
-                waffle_flag_enabled,
+                microfrontend_waffle_flag_enabled,
+                force_microfrontend_bucket_flag_enabled,
             )
         ))
 
@@ -144,14 +180,16 @@ class TestSeatPayment(object):
                 break
         return verified_seat
 
-    def test_verified_seat_payment_with_credit_card_basket_page(self, selenium):
+    def verified_seat_payment_with_credit_card(self, selenium, is_new_payment_page):
         """
-        Using the basket page, validates users can add a verified seat to the cart and
-        checkout with a credit card.
+        Validates users can add a verified seat to the cart and checkout with a credit card.
+
+        Arguments:
+            is_new_payment_page (bool): True to test the new payment page, False to test the older basket page.
 
         This test requires 'disable_repeat_order_check' waffle switch turned off on stage, to run.
+
         """
-        new_payment_page = False
         LmsHelpers.login(selenium)
 
         # Get the course run we want to purchase
@@ -159,10 +197,29 @@ class TestSeatPayment(object):
         verified_seat = self.get_verified_seat(course_run)
 
         for address in (ADDRESS_US, ADDRESS_FR,):
-            self.add_item_to_basket(selenium, verified_seat['sku'], new_payment_page)
-            self.checkout_with_credit_card(selenium, address)
+            self.add_item_to_basket(selenium, verified_seat['sku'], is_new_payment_page)
+            self.checkout_with_credit_card(selenium, address, is_new_payment_page)
             self.assert_browser_on_receipt_page(selenium)
 
             course_run_key = course_run['key']
             self.assert_user_enrolled_in_course_run(LMS_USERNAME, course_run_key)
             assert self.refund_orders_for_course_run(course_run_key)
+
+    def test_verified_seat_payment_with_credit_card_basket_page(self, selenium):
+        """
+        Using the basket page, validates users can add a verified seat to the cart and
+        checkout with a credit card.
+
+        This test requires 'disable_repeat_order_check' waffle switch turned off on stage, to run.
+        """
+        self.verified_seat_payment_with_credit_card(selenium, is_new_payment_page=False)
+
+    def test_verified_seat_payment_with_credit_card_payment_page(self, selenium):
+        """
+        Using the payment microfrontend page, validates users can add a verified seat to the cart and
+        checkout with a credit card.
+
+        This test requires 'disable_repeat_order_check' waffle switch turned off on stage, to run.
+        - Note: Waffle switch warning copied from existing test without being verified.
+        """
+        self.verified_seat_payment_with_credit_card(selenium, is_new_payment_page=True)
