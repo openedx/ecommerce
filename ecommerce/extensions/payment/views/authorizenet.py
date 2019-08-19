@@ -5,6 +5,7 @@ import logging
 from django.db import transaction
 from django.http import HttpResponse
 from django.views.generic import View
+from django.shortcuts import redirect
 from oscar.apps.partner import strategy
 from django.utils.decorators import method_decorator
 from oscar.core.loading import get_class, get_model
@@ -186,3 +187,12 @@ class AuthorizeNetNotificationView(EdxOrderPlacementMixin, View):
 
         self._call_handle_order_placement(basket, request, transaction_details)
         return HttpResponse(status=200)
+
+
+def handle_redirection(request):
+    course_id = request.GET.get('course')
+    lms_dashboard = get_lms_dashboard_url()
+    data = "{}#{}".format( course_id, request.user.username)
+    encoded_data = data.encode('base64', 'strict')
+    redirect_url = '{}?transaction=true&data={}'.format(lms_dashboard, encoded_data)
+    return redirect(redirect_url)

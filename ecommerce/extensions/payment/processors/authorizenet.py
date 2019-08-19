@@ -4,6 +4,7 @@ from __future__ import absolute_import, unicode_literals
 import logging
 import json
 from decimal import Decimal
+from django.urls import reverse
 from authorizenet import apicontractsv1
 from authorizenet.apicontrollers import (
     getHostedPaymentPageController,
@@ -44,12 +45,15 @@ class AuthorizeNet(BaseClientSidePaymentProcessor):
     def cancel_url(self):
         return get_ecommerce_url(self.configuration['cancel_checkout_path'])
 
-    def _get_authorizenet_payment_settings(self):
+    def _get_authorizenet_payment_settings(self, basket):
         """
             return authorizenet required settings
         """
-        return_url = get_lms_dashboard_url()
+        course_id = basket.all_lines()[0].product.course_id
+        redirect_url = reverse('authorizenet:redirect')
+        ecommerce_base_url = get_ecommerce_url()
 
+        return_url = '{}{}?course={}'.format(ecommerce_base_url, redirect_url, course_id)
         payment_button_setting = apicontractsv1.settingType()
         payment_button_setting.settingName = apicontractsv1.settingNameEnum.hostedPaymentButtonOptions
         payment_button_setting.settingValue = json.dumps({'text': 'Pay'})
@@ -86,7 +90,7 @@ class AuthorizeNet(BaseClientSidePaymentProcessor):
 
     def get_transaction_detail(self, transaction_id):
         """
-            Return a complete transaction details from authorizenet transaction id.
+            Return complete transaction details using authorizenet transaction id.
 
             Arguments:
                 transaction_id: transaction id received from Authorizenet Notification.
@@ -139,13 +143,12 @@ class AuthorizeNet(BaseClientSidePaymentProcessor):
             GatewayError: Indicates a general error or unexpected behavior on the part of Authorizenet which prevented
                 a payment from being created.
         """
-        self.basket = basket
 
         merchant_auth = apicontractsv1.merchantAuthenticationType()
         merchant_auth.name = self.merchant_auth_name
         merchant_auth.transactionKey = self.transaction_key
 
-        settings = self._get_authorizenet_payment_settings()
+        settings = self._get_authorizenet_payment_settings(basket)
         order = apicontractsv1.orderType()
         order.invoiceNumber = basket.order_number
         order.description = "upgrade to verified"
