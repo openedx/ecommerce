@@ -1,5 +1,8 @@
 Payment Processors
 ##################
+
+.. warning:: As of 8/2019, with the introduction of the Payment microfrontend (MFE), the payment processors can no longer be enabled or disabled for the frontend as documented below. At this time, CyberSource, Paypal, and Apple Pay processing is baked into the Payment MFE.
+
 Payment processors/gateways handle the acceptance/validation of payment data--credit cards, wallet payments, etc.--and
 transfer of funds from learners to merchants. At edx.org, we use CyberSource to accept credit card payments, and PayPal
 to accept PayPal payments (made from either the learner's PayPal account, bank account, or credit card). The codebase
