@@ -2205,10 +2205,7 @@ class OfferAssignmentSummaryViewSetTests(
             offer__vouchers__coupon_vouchers__coupon__id=self.coupon3.id
         ).last().code
 
-        response = self.client.get(
-            OFFER_ASSIGNMENT_SUMMARY_LINK,
-            data={'user_email': self.user.email}
-        ).json()
+        response = self.client.get(OFFER_ASSIGNMENT_SUMMARY_LINK).json()
 
         assert response['count'] == 3
         # To get the code to verify our response, filter using the coupon
@@ -2231,22 +2228,3 @@ class OfferAssignmentSummaryViewSetTests(
                 assert result['catalog'] == 'cccccccc-2c44-487b-9b6a-24eee973f9a4'
             else:  # To test if response has something in it it shouldn't
                 assert False
-
-    def test_view_does_not_return_inappropriate_data(self):
-        """
-        View should not return data if user with given user_email does
-        not have codes assigned.
-        """
-        response = self.client.get(
-            OFFER_ASSIGNMENT_SUMMARY_LINK,
-            data={'user_email': 'lolimsofake@imagination.com'}
-        ).json()
-        assert response['count'] == 0
-
-    def test_view_does_not_return_data_without_query_param(self):
-        """
-        View should not return any data when query param for user_email
-        is not provided.
-        """
-        response = self.client.get(OFFER_ASSIGNMENT_SUMMARY_LINK).json()
-        assert response['count'] == 0
