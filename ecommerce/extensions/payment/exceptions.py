@@ -54,3 +54,7 @@ class PCIViolation(PaymentError):
 class InvalidBasketError(PaymentError):
     """ Payment was made for an invalid basket. """
     pass
+
+class MissingTransactionDetailError(PaymentError):
+    """ Unable to get Authorizenet transaction detail using a transaction_id received through notification. """
+    pass

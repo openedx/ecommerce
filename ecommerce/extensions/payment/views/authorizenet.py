@@ -9,6 +9,10 @@ from django.shortcuts import redirect
 from oscar.apps.partner import strategy
 from django.utils.decorators import method_decorator
 from oscar.core.loading import get_class, get_model
+from ecommerce.extensions.payment.exceptions import (
+    InvalidBasketError,
+    MissingTransactionDetailError
+)
 from oscar.apps.payment.exceptions import TransactionDeclined
 from ecommerce.core.url_utils import get_lms_dashboard_url
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
@@ -48,7 +52,7 @@ class AuthorizeNetNotificationView(EdxOrderPlacementMixin, View):
             Retrieve a basket using a basket Id.
 
             Arguments:
-                payment_id: payment_id received from PayPal.
+                payment_id: payment_id received from Authorizenet.
             Returns:
                 It will return related basket
         """
@@ -63,7 +67,7 @@ class AuthorizeNetNotificationView(EdxOrderPlacementMixin, View):
         except (ValueError, ObjectDoesNotExist):
             return None
 
-    def _get_billing_address(self, transaction_bill, order_number):
+    def _get_billing_address(self, transaction_bill, order_number, basket):
         """
             Prepare and return a billing address object from transaction billimg information.
 
@@ -75,11 +79,11 @@ class AuthorizeNetNotificationView(EdxOrderPlacementMixin, View):
         """
         try:
             billing_address = BillingAddress(
-                first_name=str(transaction_bill.firstName),
-                last_name=str(transaction_bill.lastName),
-                line1=str(transaction_bill.address),
-                line4=str(transaction_bill.city),  # Oscar uses line4 for city
-                state=str(transaction_bill.state),
+                first_name=str(getattr(transaction_bill, 'firstName', '')),
+                last_name=str(getattr(transaction_bill, 'lastName', '')),
+                line1=str(getattr(transaction_bill, 'address', '')),
+                line4=str(getattr(transaction_bill, 'city', '')),  # Oscar uses line4 for city
+                state=str(getattr(transaction_bill, 'state', '')),
                 country=Country.objects.get(
                     iso_3166_1_a2__iexact=transaction_bill.country
                 )
@@ -107,7 +111,8 @@ class AuthorizeNetNotificationView(EdxOrderPlacementMixin, View):
             user = basket.owner
             order_number = str(transaction_details.transaction.order.invoiceNumber)
 
-            billing_address = self._get_billing_address(transaction_details.transaction.billTo, order_number)
+            billing_address = self._get_billing_address(
+                transaction_details.transaction.billTo, order_number, basket)
 
             order = self.handle_order_placement(
                 order_number=order_number,
@@ -152,6 +157,11 @@ class AuthorizeNetNotificationView(EdxOrderPlacementMixin, View):
                 return HttpResponse(status=204)
 
             transaction_details = self.payment_processor.get_transaction_detail(transaction_id)
+
+            if not transaction_details:
+                logger.error('Unable to get Authorizenet transaction detail using transaction_id [%s].', transaction_id)
+                raise MissingTransactionDetailError
+
             order_number = str(transaction_details.transaction.order.invoiceNumber)
             basket_id = OrderNumberGenerator().basket_id(order_number)
 

@@ -151,7 +151,6 @@ class AuthorizeNet(BaseClientSidePaymentProcessor):
         settings = self._get_authorizenet_payment_settings(basket)
         order = apicontractsv1.orderType()
         order.invoiceNumber = basket.order_number
-        order.description = "upgrade to verified"
 
         transaction_request = apicontractsv1.transactionRequestType()
         transaction_request.transactionType = "authCaptureTransaction"
@@ -219,7 +218,10 @@ class AuthorizeNet(BaseClientSidePaymentProcessor):
                 HandledProcessorResponse
         """
         transaction_id = transaction_response.transaction.transId
-        self.record_processor_response(transaction_response, transaction_id=transaction_id, basket=basket)
+        transaction_dict = json.dumps(
+            transaction_response, default=lambda o: o.__dict__ if getattr(o, '__dict__') else str(o))
+
+        self.record_processor_response(transaction_dict, transaction_id=transaction_id, basket=basket)
         logger.info("Successfully executed Authorizenet payment [%s] for basket [%d].", transaction_id, basket.id)
 
         currency = basket.currency

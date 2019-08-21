@@ -134,3 +134,17 @@ def send_course_purchase_email(sender, order=None, **kwargs):  # pylint: disable
 
         else:
             logger.info('Currently support receipt emails for order with one item.')
+
+@receiver(post_checkout, dispatch_uid='send_course_purchased_email')
+@silence_exceptions("Failed to send course puchased email.")
+def send_course_purchase_email(sender, order=None, **kwargs):  # pylint: disable=unused-argument
+    """Send course purchased email when a course is purchased."""
+    product = order.lines.first().product
+    send_notification(
+        order.user,
+        'COURSE_PURCHASED',
+        {
+            'course_title': product.title,
+        },
+        order.site
+    )

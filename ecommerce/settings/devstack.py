@@ -13,6 +13,13 @@ LOGGING['handlers']['local'] = {
     'class': 'logging.NullHandler',
 }
 
+# Email configurations
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'SUPPORT_EMAIL'
+EMAIL_HOST_PASSWORD = 'PASSWORD'
+
 SOCIAL_AUTH_REDIRECT_IS_HTTPS = False
 SESSION_COOKIE_SECURE = False
 
