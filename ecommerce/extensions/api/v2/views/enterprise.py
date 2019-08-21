@@ -3,7 +3,10 @@ from __future__ import absolute_import, unicode_literals
 import logging
 
 import six
+from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
+from django.db.models import Q
+from django.http import Http404
 from django.shortcuts import get_object_or_404
 from edx_rbac.decorators import permission_required
 from oscar.core.loading import get_model
@@ -31,6 +34,7 @@ from ecommerce.extensions.api.serializers import (
     CouponSerializer,
     EnterpriseCouponListSerializer,
     EnterpriseCouponOverviewListSerializer,
+    EnterpriseCouponSearchSerializer,
     NotAssignedCodeUsageSerializer,
     NotRedeemedCodeUsageSerializer,
     OfferAssignmentSummarySerializer,
@@ -63,8 +67,10 @@ Order = get_model('order', 'Order')
 Line = get_model('basket', 'Line')
 OfferAssignment = get_model('offer', 'OfferAssignment')
 Product = get_model('catalogue', 'Product')
+ProductClass = get_model('catalogue', 'ProductClass')
 Voucher = get_model('voucher', 'Voucher')
 VoucherApplication = get_model('voucher', 'VoucherApplication')
+User = get_user_model()
 
 DEPRECATED_COUPON_CATEGORIES = ['Bulk Enrollment']
 
@@ -427,6 +433,55 @@ class EnterpriseCouponViewSet(CouponViewSet):
         return VoucherApplication.objects.filter(
             id__in=redeemed_voucher_application_ids
         ).values('voucher__code', 'user__email').distinct().order_by('user__email')
+
+    @list_route(url_path=r'(?P<enterprise_id>.+)/search', permission_classes=[IsAuthenticated])
+    @permission_required('enterprise.can_view_coupon', fn=lambda request, enterprise_id: enterprise_id)
+    def search(self, request, enterprise_id):     # pylint: disable=unused-argument
+        """
+        Return coupon information based on query param values provided.
+        """
+        user_email = self.request.query_params.get('user_email', None)
+        if not user_email:
+            raise Http404("No user_email query parameter provided.")
+
+        # We want vouchers associated with this enterprise. Note:
+        # self.get_queryset() here filters (coupon) products out for
+        # the enterprise_id value handed to this view
+        enterprise_vouchers = Voucher.objects.filter(
+            coupon_vouchers__coupon__in=self.get_queryset()
+        )
+
+        # We want vouchers with OfferAssignments related to the user
+        offer_assignments = OfferAssignment.objects.filter(
+            user_email=user_email,
+        )
+        vouchers_from_offer_assignments = Q(
+            offers__offerassignment__in=offer_assignments
+        )
+        # We want vouchers with VoucherApplications related to the user
+        user = User.objects.get(email=user_email)
+        voucher_applications = VoucherApplication.objects.filter(
+            user=user
+        )
+        vouchers_from_voucher_applications = Q(
+            applications__in=voucher_applications
+        )
+        # Filter vouchers using these Qs
+        enterprise_vouchers = enterprise_vouchers.filter(
+            vouchers_from_offer_assignments | vouchers_from_voucher_applications
+        ).distinct().prefetch_related(
+            'coupon_vouchers__coupon',
+            'applications',
+            'applications__order__lines__product__course',
+        )
+
+        page = self.paginate_queryset(enterprise_vouchers)
+        serializer = EnterpriseCouponSearchSerializer(
+            page,
+            many=True,
+            context={'user': user}
+        )
+        return self.get_paginated_response(serializer.data)
 
     @list_route(url_path=r'(?P<enterprise_id>.+)/overview', permission_classes=[IsAuthenticated])
     @permission_required('enterprise.can_view_coupon', fn=lambda request, enterprise_id: enterprise_id)
