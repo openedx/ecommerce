@@ -379,7 +379,7 @@ class EnterpriseCouponViewSetRbacTests(
                     'slug': self.enterprise_slug,
                 }
                 if method == 'GET':
-                    return self.client.get(path)
+                    return self.client.get(path, data=data)
                 elif method == 'POST':
                     return self.client.post(path, json.dumps(data), 'application/json')
                 elif method == 'PUT':
@@ -967,6 +967,114 @@ class EnterpriseCouponViewSetRbacTests(
             '/api/v2/enterprise/coupons/{}/codes/?code_filter={}'.format(coupon.id, VOUCHER_NOT_ASSIGNED)
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_permission_search_404(self):
+        """
+        Test that we get a 404 if no email is handed to us
+        """
+        response = self.get_response(
+            'GET',
+            reverse(
+                'api:v2:enterprise-coupons-(?P<enterprise-id>.+)/search-list',
+                kwargs={'enterprise_id': self.data['enterprise_customer']['id']}
+            )
+        )
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_permission_search_403(self):
+        """
+        Test that we get implicit access via role assignment
+        """
+        self.set_jwt_cookie(
+            system_wide_role='incorrect-role', context=self.data['enterprise_customer']['id']
+        )
+        EcommerceFeatureRoleAssignment.objects.all().delete()
+        response = self.get_response(
+            'GET',
+            reverse(
+                'api:v2:enterprise-coupons-(?P<enterprise-id>.+)/search-list',
+                kwargs={'enterprise_id': self.data['enterprise_customer']['id']}
+            )
+        )
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_permission_search_200(self):
+        """
+        Test that we get implicit access via role assignment
+        """
+        # Create coupons
+        coupon1 = self.create_coupon(
+            benefit_type=Benefit.PERCENTAGE,
+            benefit_value=40,
+            enterprise_customer=self.data['enterprise_customer']['id'],
+            enterprise_customer_catalog='aaaaaaaa-2c44-487b-9b6a-24eee973f9a4',
+            code='AAAAA',
+        )
+        coupon2 = self.create_coupon(
+            max_uses=2,
+            voucher_type=Voucher.MULTI_USE,
+            benefit_type=Benefit.FIXED,
+            benefit_value=13.37,
+            enterprise_customer=self.data['enterprise_customer']['id'],
+            enterprise_customer_catalog='bbbbbbbb-2c44-487b-9b6a-24eee973f9a4',
+        )
+        coupon3 = self.create_coupon(
+            max_uses=2,
+            voucher_type=Voucher.MULTI_USE,
+            benefit_type=Benefit.FIXED,
+            benefit_value=12345,
+            enterprise_customer=self.data['enterprise_customer']['id'],
+            enterprise_customer_catalog='dddddddd-2c44-487b-9b6a-24eee973f9a4',
+        )
+        coupon_with_other_enterprise = self.create_coupon(
+            max_uses=7,
+            voucher_type=Voucher.MULTI_USE_PER_CUSTOMER,
+            benefit_type=Benefit.FIXED,
+            benefit_value=444,
+            enterprise_customer='cccccccc-cccc-cccc-cccc-24eee973f9a4',
+            enterprise_customer_catalog='cccccccc-2c44-487b-9b6a-24eee973f9a4',
+        )
+        # Assign codes using the assignment endpoint
+        self.assign_user_to_code(coupon1.id, [self.user.email], ['AAAAA'])
+        self.assign_user_to_code(coupon2.id, [self.user.email], [])
+        self.assign_user_to_code(coupon2.id, [self.user.email], [])
+        self.assign_user_to_code(coupon_with_other_enterprise.id, [self.user.email], [])
+
+        # Redeem a voucher without using the assignment endpoint
+        self.use_voucher(coupon3.coupon_vouchers.first().vouchers.first(), self.user)
+
+        response = self.get_response(
+            'GET',
+            reverse(
+                'api:v2:enterprise-coupons-(?P<enterprise-id>.+)/search-list',
+                kwargs={'enterprise_id': self.data['enterprise_customer']['id']}
+            ),
+            data={'user_email': self.user.email}
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        voucher1 = coupon1.coupon_vouchers.first().vouchers.first()
+        voucher2 = coupon2.coupon_vouchers.first().vouchers.first()
+        voucher3 = coupon3.coupon_vouchers.first().vouchers.first()
+
+        for voucher in response.json()['results']:
+            if voucher['id'] == voucher1.id:
+                assert len(voucher['redemptions_and_assignments']) == 1
+                assert voucher['redemptions_and_assignments'][0]['code'] == voucher1.code
+                assert voucher['redemptions_and_assignments'][0]['course_key'] is None
+            elif voucher['id'] == voucher2.id:
+                assert len(voucher['redemptions_and_assignments']) == 2
+                assert voucher['redemptions_and_assignments'][0]['code'] == voucher2.code
+                assert voucher['redemptions_and_assignments'][0]['course_key'] is None
+                assert voucher['redemptions_and_assignments'][1]['course_key'] is None
+            elif voucher['id'] == voucher3.id:
+                assert len(voucher['redemptions_and_assignments']) == 1
+                assert voucher['redemptions_and_assignments'][0]['code'] == voucher3.code
+                course_key = coupon3.coupon_vouchers.first().vouchers.first(
+                ).applications.first().order.lines.first().product.course.id
+                assert voucher['redemptions_and_assignments'][0]['course_key'] == course_key
+            else:
+                assert False
 
     def test_implicit_permission_incorrect_role(self):
         """
