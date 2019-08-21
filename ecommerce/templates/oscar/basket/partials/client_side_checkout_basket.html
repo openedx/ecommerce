@@ -139,11 +139,9 @@
             <div role="region" aria-labelledby="payment-method-region">
                 <h2 id="payment-method-region" class="title">{% trans "select payment method" %}</h2>
                   <div id="payment-processor" class="payment-buttons col-sm-12" data-basket-id="{{ basket.id }}">
-                      {% if client_side_payment_processor.NAME != "authorizenet" %}
                       <a href="#payment-information" class="payment-button credit-card" title="{% trans "Pay with a Credit Card" %}" role="button">
                           <img src="/static/images/credit_card_options.png">
                       </a>
-                      {% endif %}
                       {# Translators: Do NOT translate the name PayPal. #}
                       <button data-track-type="click"
                               data-track-event="edx.bi.ecommerce.basket.payment_selected"
@@ -184,7 +182,6 @@
             </div>
         </div>
         {% endif %}
-        {% if client_side_payment_processor.NAME != "authorizenet" %}
         <div id="card-holder-information" class="form-input-elements placeholder row">
             <div role="region" aria-labelledby="card-holder-information-region">
                 <h2 id="card-holder-information-region" class="title">{% trans "card holder information" %}</h2>
@@ -195,9 +192,7 @@
             </div>
         </div>
         {% endif %}
-        {% endif %}
         <div class="form-input-elements placeholder">
-            {% if client_side_payment_processor.NAME != "authorizenet" %}
             <div role="region" {% if not free_basket %}aria-labelledby="billing-information-region"{% endif %}>
                 {% if not free_basket %}
                     <h2 id="billing-information-region" class="title">{% trans "billing information" %}</h2>
@@ -278,7 +273,6 @@
                 {% endif %}
                 </div>
             </div>
-            {% endif %}
         </div>
     </div>
 </form>
