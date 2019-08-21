@@ -121,7 +121,7 @@ class OfferAssignmentSummaryViewSet(ModelViewSet):
     Viewset to return OfferAssignment coupon data.
     """
 
-    permission_classes = (IsAuthenticated, IsAdminUser,)
+    permission_classes = (IsAuthenticated,)
 
     serializer_class = OfferAssignmentSummarySerializer
     pagination_class = DatatablesDefaultPagination
@@ -135,9 +135,8 @@ class OfferAssignmentSummaryViewSet(ModelViewSet):
         how many total offerAssignment objects the DB returned with the same
         code, as a way of "rolling up" offerAssignments a user has.
         """
-        user_email = self.request.query_params.get('user_email')
         queryset = OfferAssignment.objects.filter(
-            user_email=user_email,
+            user_email=self.request.user.email,
             status__in=[OFFER_ASSIGNED, OFFER_ASSIGNMENT_EMAIL_PENDING],
         ).select_related(
             'offer__benefit',
