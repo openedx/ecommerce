@@ -20,6 +20,7 @@ from ecommerce.core.url_utils import get_ecommerce_url, get_lms_dashboard_url
 
 logger = logging.getLogger(__name__)
 
+AUTH_CAPTURE_TRANSACTION_TYPE = "authCaptureTransaction"
 
 class AuthorizeNet(BaseClientSidePaymentProcessor):
     NAME = 'authorizenet'
@@ -153,7 +154,7 @@ class AuthorizeNet(BaseClientSidePaymentProcessor):
         order.invoiceNumber = basket.order_number
 
         transaction_request = apicontractsv1.transactionRequestType()
-        transaction_request.transactionType = "authCaptureTransaction"
+        transaction_request.transactionType = AUTH_CAPTURE_TRANSACTION_TYPE
         transaction_request.amount = unicode(basket.total_incl_tax)
         transaction_request.order = order
 

@@ -29,6 +29,7 @@ OrderNumberGenerator = get_class('order.utils', 'OrderNumberGenerator')
 OrderTotalCalculator = get_class('checkout.calculators', 'OrderTotalCalculator')
 PaymentProcessorResponse = get_model('payment', 'PaymentProcessorResponse')
 
+NOTIFICATION_TYPE_AUTH_CAPTURE_CREATED = "net.authorize.payment.authcapture.created"
 
 class AuthorizeNetNotificationView(EdxOrderPlacementMixin, View):
     """
@@ -136,26 +137,27 @@ class AuthorizeNetNotificationView(EdxOrderPlacementMixin, View):
         """
         notification = request.POST
 
-        if notification.get("eventType") != "net.authorize.payment.authcapture.created":
+        if notification.get("eventType") != NOTIFICATION_TYPE_AUTH_CAPTURE_CREATED:
             return HttpResponse(status=204)
 
-        notification_Id = notification.get("notificationId")
+        notification_id = notification.get("notificationId")
         payload = notification.get("payload")
 
         if payload.get("responseCode") != 1:
+            message = "Declined" if payload.get("responseCode") == 2 else "Error"
             logger.error(
-                'Received Authorizenet declined transaction notification.',
+                'Received Authorizenet [%s] transaction notification with notification_id [%s].', message, notification_id
             )
-            return HttpResponse(status=204)
+            return HttpResponse(status=200)
+
+        transaction_id = payload.get("id")
+        if not transaction_id:
+            logger.error(
+                'Recieved Authorizenet transaction notification without transaction_id',
+            )
+            return HttpResponse(status=400)
 
         try:
-            transaction_id = payload.get("id")
-            if not transaction_id:
-                logger.info(
-                    'Recieve Authorizenet Notification without transaction_id',
-                )
-                return HttpResponse(status=204)
-
             transaction_details = self.payment_processor.get_transaction_detail(transaction_id)
 
             if not transaction_details:
@@ -183,9 +185,8 @@ class AuthorizeNetNotificationView(EdxOrderPlacementMixin, View):
                     basket.id, basket.status
                 )
         finally:
-            # Store the notification in the database regardless of its authenticity.
-            ppr = self.payment_processor.record_processor_response(
-                notification, transaction_id=notification_Id, basket=basket
+            self.payment_processor.record_processor_response(
+                notification, transaction_id=notification_id, basket=basket
             )
 
         try:
