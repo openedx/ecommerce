@@ -249,4 +249,75 @@ class AuthorizeNet(BaseClientSidePaymentProcessor):
         """
             Refund a AuthorizeNet payment transaction
         """
-        pass
+        paymnet_response = PaymentProcessorResponse.objects.filter(
+            processor_name=self.NAME,
+            transaction_id=reference_number
+        ).latest('created')
+
+        if not paymnet_response:
+            msg = 'AuthorizeNet issue credit error for order [{}]. Unable to get payment reponse and transaction details.'.format(
+                order_number)
+            logger.exception(msg)
+            raise GatewayError(msg)
+
+        reference_transaction_details = json.loads(paymnet_response.response)
+        transaction_card_info = reference_transaction_details.get('transaction', {}).get('payment', {}).get('creditCard', {})
+
+        if not transaction_card_info:
+            msg = 'AuthorizeNet issue credit error for order [{}]. Unable to get card-information from transaction details.'.format(
+                order_number)
+            logger.exception(msg)
+            raise GatewayError(msg)
+
+        merchant_auth = apicontractsv1.merchantAuthenticationType()
+        merchant_auth.name = self.merchant_auth_name
+        merchant_auth.transactionKey = self.transaction_key
+
+        credit_card = apicontractsv1.creditCardType()
+        credit_card.cardNumber = transaction_card_info.get('cardNumber', "")[-4:]
+        credit_card.expirationDate = transaction_card_info.get('expirationDate', "")
+
+        payment = apicontractsv1.paymentType()
+        payment.creditCard = credit_card
+
+        transaction_request = apicontractsv1.transactionRequestType()
+        transaction_request.transactionType = "refundTransaction"
+        transaction_request.amount = amount
+
+        transaction_request.refTransId = reference_number # set refTransId to transId of a settled transaction
+        transaction_request.payment = payment
+
+        create_transaction_request = apicontractsv1.createTransactionRequest()
+        create_transaction_request.merchantAuthentication = merchant_auth
+
+        create_transaction_request.transactionRequest = transaction_request
+        create_transaction_controller = createTransactionController(create_transaction_request)
+        create_transaction_controller.execute()
+
+        response = create_transaction_controller.getresponse()
+        if response is not None:
+            if response.messages.resultCode == "Ok":
+                if hasattr(response.transactionResponse, 'messages') == True:
+                    logger.info('Message Code: %s' % response.transactionResponse.messages.message[0].code)
+                    logger.info('Description: %s' % response.transactionResponse.messages.message[0].description)
+
+                    refund_transaction_id = response.transactionResponse.transId
+                    self.record_processor_response(response, transaction_id=refund_transaction_id, basket=basket)
+                    return refund_transaction_id
+                else:
+                    logger.error('AuthorizeNet issue credit request failed.')
+                    if hasattr(response.transactionResponse, 'errors') == True:
+                        logger.error('Error Code:  %s' % str(response.transactionResponse.errors.error[0].errorCode))
+                        logger.error('Error message: %s' % response.transactionResponse.errors.error[0].errorText)
+            else:
+                logger.error('AuthorizeNet issue credit request failed.')
+                if hasattr(response, 'transactionResponse') == True and hasattr(response.transactionResponse, 'errors') == True:
+                    logger.error('Error Code: %s' % str(response.transactionResponse.errors.error[0].errorCode))
+                    logger.error('Error message: %s' % response.transactionResponse.errors.error[0].errorText)
+                else:
+                    logger.error('Error Code: %s' % response.messages.message[0]['code'].text)
+                    logger.error('Error message: %s' % response.messages.message[0]['text'].text)
+
+        msg = 'An error occurred while attempting to issue a credit (via Authorizenet) for order [{}].'.format(order_number)
+        logger.exception(msg)
+        raise GatewayError(msg)
