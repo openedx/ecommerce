@@ -51,7 +51,7 @@ class AuthorizeNet(BaseClientSidePaymentProcessor):
 
     def _get_authorizenet_payment_settings(self, basket):
         """
-            return authorizenet required settings
+            return AuthorizeNet required settings
         """
         course_id = basket.all_lines()[0].product.course_id
         course_id_hash = base64.b64encode(course_id.encode())
@@ -81,7 +81,7 @@ class AuthorizeNet(BaseClientSidePaymentProcessor):
 
     def _get_authorizenet_lineitems(self, basket):
         """
-            return authorizenet lineitems
+            return AuthorizeNet lineitems
         """
         line_items_list = apicontractsv1.ArrayOfLineItem()
         for line in basket.all_lines():
@@ -96,10 +96,10 @@ class AuthorizeNet(BaseClientSidePaymentProcessor):
 
     def get_transaction_detail(self, transaction_id):
         """
-            Return complete transaction details using authorizenet transaction id.
+            Return complete transaction details using AuthorizeNet transaction id.
 
             Arguments:
-                transaction_id: transaction id received from Authorizenet Notification.
+                transaction_id: transaction id received from AuthorizeNet Notification.
             Returns:
                 Complete transaction detail
         """
@@ -132,20 +132,20 @@ class AuthorizeNet(BaseClientSidePaymentProcessor):
 
     def get_transaction_parameters(self, basket, request=None, use_client_side_checkout=True, **kwargs):
         """
-            Create a new Authorizenet payment.
+            Create a new AuthorizeNet payment.
 
         Arguments:
             basket (Basket): The basket of products being purchased.
-            request (Request, optional): A Request object which is used to construct Authorizenet's `return_url`.
+            request (Request, optional): A Request object which is used to construct AuthorizeNet's `return_url`.
             use_client_side_checkout (bool, optional): This value is not used.
             **kwargs: Additional parameters; not used by this method.
 
         Returns:
-            dict: Authorizenet-specific parameters required to complete a transaction. Must contain a URL
+            dict: AuthorizeNet-specific parameters required to complete a transaction. Must contain a URL
                 to which users can be directed in order to approve a newly created payment.
 
         Raises:
-            GatewayError: Indicates a general error or unexpected behavior on the part of Authorizenet which prevented
+            GatewayError: Indicates a general error or unexpected behavior on the part of AuthorizeNet which prevented
                 a payment from being created.
         """
 
@@ -189,7 +189,7 @@ class AuthorizeNet(BaseClientSidePaymentProcessor):
                 authorize_form_token = str(payment_page_response.token)
 
             else:
-                logger.error('Failed to get authorizenet payment token.')
+                logger.error('Failed to get AuthorizeNet payment token.')
                 if payment_page_response.messages is not None:
                     logger.error(
                         '\nCode:%s \nText:%s' % (
@@ -201,11 +201,11 @@ class AuthorizeNet(BaseClientSidePaymentProcessor):
         else:
             logger.error(
                 "%s [%d].",
-                "Failed to create Authorizenet payment for basket",
+                "Failed to create AuthorizeNet payment for basket",
                 basket.id,
                 exc_info=True
             )
-            raise GatewayError('Authorizenet payment creation failure: unable to get Authorizenet form token')
+            raise GatewayError('AuthorizeNet payment creation failure: unable to get AuthorizeNet form token')
 
         parameters = {
             'payment_page_url': self.autorizenet_redirect_url,
@@ -215,11 +215,11 @@ class AuthorizeNet(BaseClientSidePaymentProcessor):
 
     def handle_processor_response(self, transaction_response, basket=None):
         """
-            Execute an approved Authorizenet transaction.
+            Execute an approved AuthorizeNet transaction.
             This method completes the transaction flow on edx side.
 
             Arguments:
-                transaction_response: Transaction details received from authorizenet after successfull payment
+                transaction_response: Transaction details received from authorizeNet after successfull payment
                 basket (Basket): Basket being purchased via the payment processor.
 
             Returns:
@@ -230,7 +230,7 @@ class AuthorizeNet(BaseClientSidePaymentProcessor):
             transaction_response, default=lambda o: o.__dict__ if getattr(o, '__dict__') else str(o))
 
         self.record_processor_response(transaction_dict, transaction_id=transaction_id, basket=basket)
-        logger.info("Successfully executed Authorizenet payment [%s] for basket [%d].", transaction_id, basket.id)
+        logger.info("Successfully executed AuthorizeNet payment [%s] for basket [%d].", transaction_id, basket.id)
 
         currency = basket.currency
         total = float(transaction_response.transaction.settleAmount)
@@ -247,6 +247,6 @@ class AuthorizeNet(BaseClientSidePaymentProcessor):
     def issue_credit(
             self, order_number, basket, reference_number, amount, currency):
         """
-            Refund a Authorizenet payment transaction
+            Refund a AuthorizeNet payment transaction
         """
         pass
