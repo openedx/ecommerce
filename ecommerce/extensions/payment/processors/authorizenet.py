@@ -1,6 +1,7 @@
 """ AuthorizeNet payment processor. """
 from __future__ import absolute_import, unicode_literals
 
+import base64
 import logging
 import json
 from decimal import Decimal
@@ -8,7 +9,8 @@ from django.urls import reverse
 from authorizenet import apicontractsv1
 from authorizenet.apicontrollers import (
     getHostedPaymentPageController,
-    getTransactionDetailsController
+    getTransactionDetailsController,
+    createTransactionController
 )
 from oscar.core.loading import get_model
 from oscar.apps.payment.exceptions import GatewayError
@@ -19,6 +21,7 @@ from ecommerce.extensions.payment.processors import (
 from ecommerce.core.url_utils import get_ecommerce_url, get_lms_dashboard_url
 
 logger = logging.getLogger(__name__)
+PaymentProcessorResponse = get_model('payment', 'PaymentProcessorResponse')
 
 AUTH_CAPTURE_TRANSACTION_TYPE = "authCaptureTransaction"
 
@@ -51,10 +54,12 @@ class AuthorizeNet(BaseClientSidePaymentProcessor):
             return authorizenet required settings
         """
         course_id = basket.all_lines()[0].product.course_id
+        course_id_hash = base64.b64encode(course_id.encode())
+
         redirect_url = reverse('authorizenet:redirect')
         ecommerce_base_url = get_ecommerce_url()
 
-        return_url = '{}{}?course={}'.format(ecommerce_base_url, redirect_url, course_id)
+        return_url = '{}{}?course={}'.format(ecommerce_base_url, redirect_url, course_id_hash)
         payment_button_setting = apicontractsv1.settingType()
         payment_button_setting.settingName = apicontractsv1.settingNameEnum.hostedPaymentButtonOptions
         payment_button_setting.settingValue = json.dumps({'text': 'Pay'})
@@ -123,7 +128,6 @@ class AuthorizeNet(BaseClientSidePaymentProcessor):
                         transaction_details_response.messages.message[0]['code'].text,
                         transaction_details_response.messages.message[0]['text'].text)
                     )
-
         return transaction_details_response
 
     def get_transaction_parameters(self, basket, request=None, use_client_side_checkout=True, **kwargs):
@@ -179,6 +183,9 @@ class AuthorizeNet(BaseClientSidePaymentProcessor):
                     basket.id,
                     exc_info=True
                 )
+                if payment_page_response.messages is not None:
+                    logger.info('Message Code : %s' % payment_page_response.messages.message[0]['code'].text)
+                    logger.info('Message Text : %s' % payment_page_response.messages.message[0]['text'].text)
                 authorize_form_token = str(payment_page_response.token)
 
             else:

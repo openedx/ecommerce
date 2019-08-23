@@ -73,7 +73,6 @@ for override, value in DB_OVERRIDES.iteritems():
     DATABASES['default'][override] = value
 
 # EMAIL CONFIGURATIONS
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = config_from_yaml.get('EMAIL_SUPPORT_ID')

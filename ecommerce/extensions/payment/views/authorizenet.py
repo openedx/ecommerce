@@ -1,6 +1,8 @@
 """ Views for interacting with the payment processor. """
 from __future__ import unicode_literals
 
+import base64
+import json
 import logging
 from django.db import transaction
 from django.http import HttpResponse
@@ -197,13 +199,36 @@ class AuthorizeNetNotificationView(EdxOrderPlacementMixin, View):
             return HttpResponse(status=204)
 
         self._call_handle_order_placement(basket, request, transaction_details)
-        return HttpResponse(status=200)
+        response = HttpResponse(status=200)
+        course_id = course_id = basket.all_lines()[0].product.course_id
+        pending_transactions_hash = request.COOKIES.get('pendingTransactionHash')
+        if pending_transactions_hash:
+            pending_transactions_courses = base64.b64decode(pending_transactions_hash)
+            pending_courses_list = json.loads(pending_transactions_courses)
+            if course_id in pending_courses_list:
+                pending_courses_list.remove(course_id)
+                encoded_courses = base64.b64encode(json.dumps(pending_courses_list).encode())
+                response.set_cookie('pendingTransactionHash', encoded_courses)
+        return response
 
 
 def handle_redirection(request):
-    course_id = request.GET.get('course')
+    import pdb; pdb.set_trace()
     lms_dashboard = get_lms_dashboard_url()
-    data = "{}#{}".format( course_id, request.user.username)
-    encoded_data = data.encode('base64', 'strict')
-    redirect_url = '{}?transaction=true&data={}'.format(lms_dashboard, encoded_data)
-    return redirect(redirect_url)
+    response = redirect(lms_dashboard)
+
+    course_id_hash = request.GET.get('course')
+    if course_id_hash:
+        course_id = base64.b64decode(course_id_hash)
+        pending_transactions_hash = request.COOKIES.get('pendingTransactionHash')
+        if pending_transactions_hash:
+            pending_transactions_courses = base64.b64decode(pending_transactions_hash)
+            pending_courses_list = json.loads(pending_transactions_courses)
+            pending_courses_list.append(course_id)
+        else:
+            pending_courses_list = [course_id]
+
+        encoded_data = base64.b64encode(json.dumps(pending_courses_list).encode())
+        response.set_cookie('pendingTransactionHash', encoded_data)
+
+    return response
