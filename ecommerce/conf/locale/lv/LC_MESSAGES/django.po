@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: openedx-translation@googlegroups.com\n"
 "POT-Creation-Date: 2018-03-26 16:41-0400\n"
-"PO-Revision-Date: 2018-09-17 07:55+0000\n"
+"PO-Revision-Date: 2019-07-09 10:27+0000\n"
 "Last-Translator: LTMC Latvijas Tiesnešu mācību centrs <ltmc.training@gmail.com>\n"
 "Language-Team: Latvian (http://www.transifex.com/open-edx/edx-platform/language/lv/)\n"
 "MIME-Version: 1.0\n"
@@ -1962,7 +1962,7 @@ msgstr ""
 
 #: ecommerce/templates/edx/credit/_provider_detail.html:8
 msgid "Select"
-msgstr ""
+msgstr "Atlasīt"
 
 #: ecommerce/templates/edx/credit/_provider_detail.html:16
 msgid "Credits: "
@@ -2560,7 +2560,7 @@ msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:59
 msgid "Sections"
-msgstr ""
+msgstr "Segmenti"
 
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:71
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:101
@@ -3261,7 +3261,7 @@ msgstr ""
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:631
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:680
 msgid "Message"
-msgstr ""
+msgstr "Ziņojums"
 
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:659
 msgid "No discounts were applied to this order."
