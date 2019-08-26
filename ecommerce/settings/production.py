@@ -72,14 +72,6 @@ DB_OVERRIDES = dict(
 for override, value in DB_OVERRIDES.iteritems():
     DATABASES['default'][override] = value
 
-# EMAIL CONFIGURATIONS
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_USE_TLS = True
-EMAIL_HOST_USER = config_from_yaml.get('EMAIL_SUPPORT_ID')
-EMAIL_HOST_PASSWORD = config_from_yaml.get('EMAIL_SUPPORT_PASSWORD')
-# END EMAIL CONFIGURATIONS
-
 # PAYMENT PROCESSOR OVERRIDES
 bluefin_dict = {
     'merchant_account_id': config_from_yaml.get('BLUEFIN_ACCOUNT_ID'),

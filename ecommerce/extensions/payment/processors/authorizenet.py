@@ -12,6 +12,11 @@ from authorizenet.apicontrollers import (
     getTransactionDetailsController,
     createTransactionController
 )
+from ecommerce.extensions.payment.exceptions import (
+    RefundError,
+    PaymentProcessorResponseNotFound,
+    MissingProcessorResponseCardInfo
+)
 from oscar.core.loading import get_model
 from oscar.apps.payment.exceptions import GatewayError
 from ecommerce.extensions.payment.processors import (
@@ -51,7 +56,9 @@ class AuthorizeNet(BaseClientSidePaymentProcessor):
 
     def _get_authorizenet_payment_settings(self, basket):
         """
-            return AuthorizeNet required settings
+            return AuthorizeNet_sdk Setting Instance containing required transaction settings to control the
+            receipt page urls and buttons. Visit https://developer.authorize.net/api/reference/features/accept_hosted.html
+            for detailed information.
         """
         course_id = basket.all_lines()[0].product.course_id
         course_id_hash = base64.b64encode(course_id.encode())
@@ -60,6 +67,8 @@ class AuthorizeNet(BaseClientSidePaymentProcessor):
         ecommerce_base_url = get_ecommerce_url()
 
         return_url = '{}{}?course={}'.format(ecommerce_base_url, redirect_url, course_id_hash)
+
+        # Create Authorizenet Settings object
         payment_button_setting = apicontractsv1.settingType()
         payment_button_setting.settingName = apicontractsv1.settingNameEnum.hostedPaymentButtonOptions
         payment_button_setting.settingValue = json.dumps({'text': 'Pay'})
@@ -81,7 +90,7 @@ class AuthorizeNet(BaseClientSidePaymentProcessor):
 
     def _get_authorizenet_lineitems(self, basket):
         """
-            return AuthorizeNet lineitems
+            return AuthorizeNet_sdk lineItem List Instance containing all items received from basket.
         """
         line_items_list = apicontractsv1.ArrayOfLineItem()
         for line in basket.all_lines():
@@ -96,7 +105,8 @@ class AuthorizeNet(BaseClientSidePaymentProcessor):
 
     def get_transaction_detail(self, transaction_id):
         """
-            Return complete transaction details using AuthorizeNet transaction id.
+            Return complete transaction details using AuthorizeNet transaction id. For more information
+            visit https://developer.authorize.net/api/reference/#transaction-reporting-get-transaction-details
 
             Arguments:
                 transaction_id: transaction id received from AuthorizeNet Notification.
@@ -132,7 +142,11 @@ class AuthorizeNet(BaseClientSidePaymentProcessor):
 
     def get_transaction_parameters(self, basket, request=None, use_client_side_checkout=True, **kwargs):
         """
-            Create a new AuthorizeNet payment.
+            Create a new AuthorizeNet payment form token.
+
+            Visit following links for more information and detail
+            https://developer.authorize.net/api/reference/#accept-suite-get-an-accept-payment-page
+            https://developer.authorize.net/api/reference/features/accept_hosted.html (redirection method)
 
         Arguments:
             basket (Basket): The basket of products being purchased.
@@ -247,7 +261,9 @@ class AuthorizeNet(BaseClientSidePaymentProcessor):
     def issue_credit(
             self, order_number, basket, reference_number, amount, currency):
         """
-            Refund a AuthorizeNet payment transaction
+            Refund a AuthorizeNet payment for settled transactions.
+            For more Authorizenet Refund API information, visit
+            https://developer.authorize.net/api/reference/#payment-transactions-refund-a-transaction
         """
         paymnet_response = PaymentProcessorResponse.objects.filter(
             processor_name=self.NAME,
@@ -258,7 +274,7 @@ class AuthorizeNet(BaseClientSidePaymentProcessor):
             msg = 'AuthorizeNet issue credit error for order [{}]. Unable to get payment reponse and transaction details.'.format(
                 order_number)
             logger.exception(msg)
-            raise GatewayError(msg)
+            raise PaymentProcessorResponseNotFound(msg)
 
         reference_transaction_details = json.loads(paymnet_response.response)
         transaction_card_info = reference_transaction_details.get('transaction', {}).get('payment', {}).get('creditCard', {})
@@ -267,7 +283,7 @@ class AuthorizeNet(BaseClientSidePaymentProcessor):
             msg = 'AuthorizeNet issue credit error for order [{}]. Unable to get card-information from transaction details.'.format(
                 order_number)
             logger.exception(msg)
-            raise GatewayError(msg)
+            raise MissingProcessorResponseCardInfo(msg)
 
         merchant_auth = apicontractsv1.merchantAuthenticationType()
         merchant_auth.name = self.merchant_auth_name
@@ -320,4 +336,4 @@ class AuthorizeNet(BaseClientSidePaymentProcessor):
 
         msg = 'An error occurred while attempting to issue a credit (via Authorizenet) for order [{}].'.format(order_number)
         logger.exception(msg)
-        raise GatewayError(msg)
+        raise  RefundError(msg)

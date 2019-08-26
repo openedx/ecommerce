@@ -102,7 +102,6 @@ class AuthorizeNetNotificationView(EdxOrderPlacementMixin, View):
         try:
             basket = Basket.objects.get(id=basket_id)
             basket.strategy = strategy.Default()
-            Applicator().apply(basket, basket.owner, self.request)
             return basket
         except (ValueError, ObjectDoesNotExist):
             return None

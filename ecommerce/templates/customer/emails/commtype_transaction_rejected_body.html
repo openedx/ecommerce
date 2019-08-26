@@ -8,7 +8,9 @@
         <!--/message HTML content -->
         <p>{% blocktrans %}Hi {{full_name}},{% endblocktrans %}</p>
         <br>
-        <p>{% blocktrans with course_title=course_title transaction_status=transaction_status %}Your transaction for {{course_title}} has been rejected with status {{transaction_status}}.{% endblocktrans %}</p>
+        <p>{% blocktrans with course_title=course_title transaction_status=transaction_status %}Your transaction for {{course_title}} has been rejected with status {{transaction_status}}.Please try again with a different payment option or a different Card{% endblocktrans %}</p>
+        <br>
+        <p>{% blocktrans %} In case of payment has already been deducted, kindly contact {{platform_name}} support for a refund. {% endblocktrans %}</p>
         <br>
         <p>{% blocktrans %}To explore more great courses, visit the {{platform_name}} website. More courses are added every day!{% endblocktrans %}</p>
         <br>
