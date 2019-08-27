@@ -51,22 +51,24 @@ class AuthorizeNetNotificationView(EdxOrderPlacementMixin, View):
     def dispatch(self, request, *args, **kwargs):
         return super(AuthorizeNetNotificationView, self).dispatch(request, *args, **kwargs)
 
-    def _prepare_response_with_course_id(self, pending_transactions_hash, course_id, response):
+    def _prepare_response_with_course_id(self, request, course_id=None):
         """
-            Update transaction cookie after receiving transaction notification.
+            Prapare and return response with transaction cookie
 
             Arguments:
-                pending_transactions_hash: ecrypted pending transactions courses list received from cookie.
                 course_id: relevant course id for which transaction was performed
-                response: http response
         """
-        if pending_transactions_hash:
+        response = HttpResponse(status=200)
+        pending_transactions_hash = request.COOKIES.get('pendingTransactionHash')
+
+        if course_id and pending_transactions_hash:
             pending_transactions_courses = base64.b64decode(pending_transactions_hash)
             pending_courses_list = json.loads(pending_transactions_courses)
             if course_id in pending_courses_list:
                 pending_courses_list.remove(course_id)
                 encoded_courses = base64.b64encode(json.dumps(pending_courses_list).encode())
                 response.set_cookie('pendingTransactionHash', encoded_courses)
+        return response
 
     def _send_transaction_declined_email(self, basket, transaction_status, course_title):
         """
@@ -173,13 +175,15 @@ class AuthorizeNetNotificationView(EdxOrderPlacementMixin, View):
         """
             Handle an incoming user returned to us by AuthorizeNet after approving payment.
         """
+        course_id = None
         notification = request.POST
-
         if notification.get("eventType") != NOTIFICATION_TYPE_AUTH_CAPTURE_CREATED:
+            logger.error('Received AuthroizeNet notifciation with event_type [%s]. Currently, We are not handling \
+            such type of notifications.', notification.get("eventType"))
             return HttpResponse(status=204)
 
         notification_id = notification.get("notificationId")
-        payload = notification.get("payload")
+        payload = notification.get("payload", {})
 
         transaction_id = payload.get("id")
         if not transaction_id:
@@ -215,37 +219,35 @@ class AuthorizeNetNotificationView(EdxOrderPlacementMixin, View):
                     'Received AuthorizeNet payment notification for basket [%d] which is in a non-frozen state, [%s]',
                     basket.id, basket.status
                 )
-        finally:
+
             self.payment_processor.record_processor_response(
                 notification, transaction_id=notification_id, basket=basket
             )
+
             product = basket.all_lines()[0].product
+            course_id = product.course_id
             if payload.get("responseCode") != 1:
                 transaction_status = "Declined" if payload.get("responseCode") == 2 else "Error"
                 logger.error(
-                    'AuthorizeNet transaction of transaction_id [%s] associated with basket [%s] has been rejected with status: [%s].',
+                    'AuthorizeNet transaction of transaction_id [%s] associated with basket [%s] has \
+                    been rejected with status: [%s].',
                     transaction_id,
                     basket_id,
                     transaction_status
                 )
                 course_title = product.title
                 self._send_transaction_declined_email(basket, transaction_status, course_title)
+
             else:
                 with transaction.atomic():
-                    try:
-                        self.handle_payment(transaction_details, basket)
-                    except Exception:
-                        logger.exception('An error occurred while processing the AuthorizeNet \
-                            payment for basket [%d].', basket.id)
-                        return HttpResponse(status=204)
+                    self.handle_payment(transaction_details, basket)
+                    self._call_handle_order_placement(basket, request, transaction_details)
 
-        self._call_handle_order_placement(basket, request, transaction_details)
-        response = HttpResponse(status=200)
-        course_id = product.course_id
-        pending_transactions_hash = request.COOKIES.get('pendingTransactionHash')
-        self._prepare_response_with_course_id(pending_transactions_hash, course_id, response)
-        return response
-
+        except Exception:
+            logger.exception('An error occurred while processing the AuthorizeNet \
+                payment for basket [%d].', basket.id)
+        finally:
+            return self._prepare_response_with_course_id(request, course_id)
 
 def handle_redirection(request):
     """

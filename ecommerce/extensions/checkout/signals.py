@@ -106,7 +106,7 @@ def send_course_purchase_email(sender, order=None, **kwargs):  # pylint: disable
 
             credit_provider_id = getattr(product.attr, 'credit_provider', None)
             if not credit_provider_id:
-                if product_mode == 'verified':
+                if product_mode != 'credit':
                     # send course purchase email for verified courses
                     send_notification(
                         order.user,
