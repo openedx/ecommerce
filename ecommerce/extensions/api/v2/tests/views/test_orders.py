@@ -353,6 +353,7 @@ class OrderDetailViewTests(OrderDetailViewTestMixin, TestCase):
         return reverse('api:v2:order-detail', kwargs={'number': self.order.number})
 
 
+@ddt.ddt
 class ManualCourseEnrollmentOrderViewSetTests(TestCase):
     """
     Test the `ManualCourseEnrollmentOrderViewSet` functionality.
@@ -387,13 +388,17 @@ class ManualCourseEnrollmentOrderViewSetTests(TestCase):
         """
         return {'HTTP_AUTHORIZATION': self.generate_jwt_token_header(user)}
 
-    def post_order(self, data, user):
+    def get_response(self, path, data, user, method='POST'):
         """
         Make HTTP POST request and return the JSON response.
         """
         data = json.dumps(data)
         headers = self.build_jwt_header(user)
-        response = self.client.post(self.url, data, content_type='application/json', **headers)
+        if method == 'POST':
+            response = self.client.post(path, data, content_type='application/json', **headers)
+        elif  method == 'PUT':
+            response = self.client.put(path, data, content_type='application/json', **headers)
+
         return response.status_code, response.json()
 
     def test_auth(self):
@@ -406,29 +411,75 @@ class ManualCourseEnrollmentOrderViewSetTests(TestCase):
 
         # Test non-staff user
         non_staff_user = self.create_user(is_staff=False)
-        status_code, __ = self.post_order(self.post_data, non_staff_user)
+        status_code, __ = self.get_response(self.url, self.post_data, non_staff_user)
         assert status_code == status.HTTP_403_FORBIDDEN
 
         # Test staff user
-        status_code, __ = self.post_order(self.post_data, self.user)
+        status_code, __ = self.get_response(self.url, self.post_data, self.user)
         assert status_code == status.HTTP_201_CREATED
 
     def test_bad_request(self):
         """"
         Test that HTTP 400 is returned if expected data is not present in request.
         """
-        response_status, response_data = self.post_order({}, self.user)
+        response_status, response_data = self.get_response(self.url, {}, self.user)
 
         assert response_status == status.HTTP_400_BAD_REQUEST
         assert response_data == {
             'detail': "Missing required request data: 'lms_user_id', 'username', 'email', 'course_run_key'"
         }
 
+    def test_update_manual_order(self):
+        """"
+        Test that manual enrollment order can be failed as expected.
+        """
+        # create an order
+        response_status, completed_order_response_data = self.get_response(self.url, self.post_data, self.user)
+        assert response_status == status.HTTP_201_CREATED
+
+        # fail the order
+        url = reverse('api:v2:manual-course-enrollment-order-fail', kwargs={'pk': completed_order_response_data['id']})
+        data = {
+            'reason': 'Learner Course Enrollment Failed'
+        }
+        response_status, failed_order_response_data = self.get_response(url, data, self.user, method='PUT')
+
+        # verify failed order id and order_number are same as original completed order
+        assert response_status == status.HTTP_200_OK
+        assert failed_order_response_data['id'] == completed_order_response_data['id']
+        assert failed_order_response_data['order_number'] == completed_order_response_data['order_number']
+
+        # verify failed order
+        order = Order.objects.get(id=failed_order_response_data['id'])
+        assert order.status == ORDER.FULFILLMENT_ERROR
+        assert order.lines.count() == 1
+        assert order.lines.first().status == LINE.FULFILLMENT_SERVER_ERROR
+        assert order.notes.count() == 1
+        assert order.notes.first().message == data['reason']
+
+    @ddt.unpack
+    @ddt.data(
+        (0, '', 'Incorrect reason for order update'),
+        (1, 'Learner Course Enrollment Failed', 'Either order does not exist or order is not completed')
+    )
+    def test_update_order_bad_request(self, order_id, order_fail_reason, response_message):
+        """"
+        Test that manual enrollment order fail endpoint returns bad request on incorrect request data.
+        """
+        # fail the order
+        url = reverse('api:v2:manual-course-enrollment-order-fail', kwargs={'pk': order_id})
+        data = {
+            'reason': order_fail_reason
+        }
+        response_status, failed_order_response_data = self.get_response(url, data, self.user, method='PUT')
+        assert response_status == status.HTTP_400_BAD_REQUEST
+        assert failed_order_response_data['detail'] == response_message
+
     def test_create_manual_order(self):
         """"
         Test that manual enrollment order can be created with expected data.
         """
-        response_status, response_data = self.post_order(self.post_data, self.user)
+        response_status, response_data = self.get_response(self.url, self.post_data, self.user)
 
         assert response_status == status.HTTP_201_CREATED
 
@@ -441,6 +492,7 @@ class ManualCourseEnrollmentOrderViewSetTests(TestCase):
 
         # get created order
         order = Order.objects.get(number=response_data['order_number'])
+        assert order == Order.objects.get(id=response_data['id'])
 
         # verify basket owner is correct
         basket = Basket.objects.get(id=order.basket_id)
@@ -461,7 +513,7 @@ class ManualCourseEnrollmentOrderViewSetTests(TestCase):
         Test that manual enrollment order endpoint returns expected error response if course is incorrect.
         """
         post_data = dict(self.post_data, course_run_key='course-v1:MAX+ABC+Course')
-        response_status, response_data = self.post_order(post_data, self.user)
+        response_status, response_data = self.get_response(self.url, post_data, self.user)
         assert response_status == status.HTTP_400_BAD_REQUEST
         assert response_data['detail'] == 'course not found'
 
@@ -470,14 +522,18 @@ class ManualCourseEnrollmentOrderViewSetTests(TestCase):
         Test that manual enrollment order endpoint does not create multiple orders if called multiple
         times with same data.
         """
-        response_status, response_data = self.post_order(self.post_data, self.user)
+        response_status, response_data = self.get_response(self.url, self.post_data, self.user)
         assert response_status == status.HTTP_201_CREATED
         existing_order_number = response_data['order_number']
+        existing_order_id = response_data['id']
 
-        response_status, response_data = self.post_order(self.post_data, self.user)
+        response_status, response_data = self.get_response(self.url, self.post_data, self.user)
         assert response_status == status.HTTP_200_OK
         assert response_data['detail'] == 'Order already exists'
         assert response_data['order_number'] == existing_order_number
+        assert response_data['id'] == existing_order_id
+
+        assert Order.objects.get(number=response_data['order_number']) == Order.objects.get(id=response_data['id'])
 
     @mock.patch(
         'ecommerce.extensions.api.v2.views.orders.EdxOrderPlacementMixin.place_free_order',
@@ -489,6 +545,6 @@ class ManualCourseEnrollmentOrderViewSetTests(TestCase):
         Test that manual enrollment order endpoint returns expected error if an error occurred in
         `place_free_order`.
         """
-        response_status, response_data = self.post_order(self.post_data, self.user)
+        response_status, response_data = self.get_response(self.url, self.post_data, self.user)
         assert response_status == status.HTTP_400_BAD_REQUEST
         assert response_data['detail'] == 'Failed to create free order'

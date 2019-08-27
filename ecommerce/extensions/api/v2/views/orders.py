@@ -98,12 +98,14 @@ class ManualCourseEnrollmentOrderViewSet(EdxOrderPlacementMixin, ViewSet):
     """
         **Use Cases**
 
-            API to create basket/order for learners manually enrolled in to
-            a course but they have paid the course price outside of the ecommerce.
+            API to
+            * create an order for learners manually enrolled in to a course but
+              they have paid the course price outside of the ecommerce.
+            * mark an existing `completed` order as failed.
 
         **Behavior**
 
-            Implements POST action only.
+            Implements POST and PUT actions.
 
             POST /api/v2/manual_course_enrollment_order/
             >>> {
@@ -115,13 +117,77 @@ class ManualCourseEnrollmentOrderViewSet(EdxOrderPlacementMixin, ViewSet):
 
             Success Response
             >>> {
+            >>>     "id": 13,
+            >>>     "order_number": "EDX-100189"
+            >>> }
+
+            PUT /api/v2/manual_course_enrollment_order/13/fail
+            >>> {
+            >>>     "reason": "Course Enrollment Failed"
+            >>> }
+
+            Success Response
+            >>> {
+            >>>     "id": 13,
             >>>     "order_number": "EDX-100189"
             >>> }
     """
 
     authentication_classes = (JwtAuthentication,)
     permission_classes = (IsAuthenticated, IsAdminUser)
-    http_method_names = ['post']
+    http_method_names = ['post', 'put']
+
+    @detail_route(methods=['put'])
+    def fail(self, request, pk):
+        """
+        PUT /api/v2/manual_course_enrollment_order/13/fail
+
+        Requires a JSON object of the following format:
+        >>> {
+        >>>     "reason": "Enrollment Failed"
+        >>> }
+
+        Request Body:
+        *reason*
+            Reason for the failure of order.
+        """
+        reason = request.data.get('reason')
+
+        logger.info(
+            '[Manual Order Update] Request received. RequestUser: %s, OrderId: %s, Reason: %s',
+            request.user.username, pk, reason
+        )
+
+        if not reason:
+            return Response({'detail': 'Incorrect reason for order update'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            # only update the `completed` order, dosen't make sense to fail a non-completed order
+            order = Order.objects.get(pk=pk, status=ORDER.COMPLETE)
+        except Order.DoesNotExist:
+            return Response(
+                {'detail': 'Either order does not exist or order is not completed'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        order.notes.create(message=reason, note_type='Error')
+
+        # setting the `line` and order status forcefully instad of using `set_status` because
+        # oscar does not allow to change the status of completed `order` or `line`
+        for line in order.lines.all():
+            line.status = LINE.FULFILLMENT_SERVER_ERROR
+            line.save()
+
+        order.status = ORDER.FULFILLMENT_ERROR
+        order.save()
+
+        return Response(
+            {
+                'id': order.id,
+                'order_number': order.number,
+            },
+            status=status.HTTP_200_OK
+        )
 
     def create(self, request):
         """
@@ -174,9 +240,11 @@ class ManualCourseEnrollmentOrderViewSet(EdxOrderPlacementMixin, ViewSet):
         # check if an order already exists with the requested data
         order_line = OrderLine.objects.filter(product=seat_product, order__user=learner_user, status=LINE.COMPLETE)
         if order_line.exists():
+            order = Order.objects.get(id=order_line.first().order_id)
             return Response(
                 {
-                    'order_number': Order.objects.get(id=order_line.first().order_id).number,
+                    'id': order.id,
+                    'order_number': order.number,
                     'detail': 'Order already exists'
                 },
                 status=status.HTTP_200_OK
@@ -210,7 +278,8 @@ class ManualCourseEnrollmentOrderViewSet(EdxOrderPlacementMixin, ViewSet):
         )
 
         response = {
-            'order_number': order.number
+            'id': order.id,
+            'order_number': order.number,
         }
         return Response(response, status=status.HTTP_201_CREATED)
 
