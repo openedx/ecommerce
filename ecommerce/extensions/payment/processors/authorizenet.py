@@ -58,7 +58,7 @@ class AuthorizeNet(BaseClientSidePaymentProcessor):
         """
             return AuthorizeNet_sdk Setting Instance containing required transaction settings to control the
             receipt page urls and buttons. Visit https://developer.authorize.net/api/reference/features/accept_hosted.html
-            for detailed information.
+            for more detail.
         """
         course_id = basket.all_lines()[0].product.course_id
         course_id_hash = base64.b64encode(course_id.encode())
@@ -90,7 +90,7 @@ class AuthorizeNet(BaseClientSidePaymentProcessor):
 
     def _get_authorizenet_lineitems(self, basket):
         """
-            return AuthorizeNet_sdk lineItem List Instance containing all items received from basket.
+            return AuthorizeNet_sdk lineItem List Instance containing all items data received from basket.
         """
         line_items_list = apicontractsv1.ArrayOfLineItem()
         for line in basket.all_lines():
@@ -229,8 +229,8 @@ class AuthorizeNet(BaseClientSidePaymentProcessor):
 
     def handle_processor_response(self, transaction_response, basket=None):
         """
-            Execute an approved AuthorizeNet transaction.
-            This method completes the transaction flow on edx side.
+            Execute an approved AuthorizeNet transaction. This method will record payment processor
+            response for future usage.
 
             Arguments:
                 transaction_response: Transaction details received from authorizeNet after successfull payment
@@ -261,9 +261,8 @@ class AuthorizeNet(BaseClientSidePaymentProcessor):
     def issue_credit(
             self, order_number, basket, reference_number, amount, currency):
         """
-            Refund a AuthorizeNet payment for settled transactions.
-            For more Authorizenet Refund API information, visit
-            https://developer.authorize.net/api/reference/#payment-transactions-refund-a-transaction
+            Refund a AuthorizeNet payment for settled transactions.For more Authorizenet Refund API information,
+            visit https://developer.authorize.net/api/reference/#payment-transactions-refund-a-transaction
         """
         paymnet_response = PaymentProcessorResponse.objects.filter(
             processor_name=self.NAME,

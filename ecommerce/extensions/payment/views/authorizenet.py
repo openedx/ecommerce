@@ -1,4 +1,5 @@
-""" Views for interacting with the payment processor. """
+""" View for interacting with the payment processor. """
+
 from __future__ import unicode_literals
 
 import base64
@@ -53,10 +54,16 @@ class AuthorizeNetNotificationView(EdxOrderPlacementMixin, View):
 
     def _prepare_response_with_course_id(self, request, course_id=None):
         """
-            Prapare and return response with transaction cookie
+            Prepare and return a response with a transaction cookie. Transaction cookie contains
+            encrypted courses-list of all pending courses for which transaction has been performed
+            but notification is yet to be received. This cookie will be used at LMS-side to display
+            waiting alert to the user.
+            We need to update that cookie and should remove course_id from that list as transaction
+            notification has been received.
 
             Arguments:
                 course_id: relevant course id for which transaction was performed
+                request: Http request.
         """
         response = HttpResponse(status=200)
         pending_transactions_hash = request.COOKIES.get('pendingTransactionHash')
@@ -72,7 +79,8 @@ class AuthorizeNetNotificationView(EdxOrderPlacementMixin, View):
 
     def _send_transaction_declined_email(self, basket, transaction_status, course_title):
         """
-            send email in case of transcation notification with decilened/error status.
+            send email to the user after receiving a transcation notification with
+            decilened/error status.
 
             Arguments:
                 basket: transaction relevant basket.
@@ -110,7 +118,7 @@ class AuthorizeNetNotificationView(EdxOrderPlacementMixin, View):
 
     def _get_billing_address(self, transaction_bill, order_number, basket):
         """
-            Prepare and return a billing address object from transaction billimg information.
+            Prepare and return a billing address object using transaction billing information.
 
             Arguments:
                 transaction_bill: bill information from AuthorizeNet transaction response.
@@ -142,7 +150,7 @@ class AuthorizeNetNotificationView(EdxOrderPlacementMixin, View):
 
     def _call_handle_order_placement(self, basket, request, transaction_details):
         """
-            Handle order placement for approved transaction.
+            Handle order placement for approved transactions.
         """
         try:
             shipping_method = NoShippingRequired()
@@ -173,7 +181,10 @@ class AuthorizeNetNotificationView(EdxOrderPlacementMixin, View):
 
     def post(self, request):
         """
-            Handle an incoming user returned to us by AuthorizeNet after approving payment.
+            This view will be called by AuthorizeNet to handle notifications and order placement.
+            It should return 200 (to Authorizenet) after receiving a notification so they’ll know
+            that notification has been received at our end otherwise they will send it again and
+            again after the particular interval.
         """
         course_id = None
         notification = request.POST
@@ -251,7 +262,11 @@ class AuthorizeNetNotificationView(EdxOrderPlacementMixin, View):
 
 def handle_redirection(request):
     """
-        Handle AuthorizeNet redirection after transcation form.
+        Handle AuthorizeNet redirection. This view will be called when a user clicks on continue button
+        from AuthorizeNet receipt page. It will handle Transaction cookie. Transaction cookie contains
+        encrypted courses-list of all pending courses for which transaction has been performed but
+        notification is yet to be received. This cookie will be used at LMS-side to display waiting
+        alert to the user.
     """
     lms_dashboard = get_lms_dashboard_url()
     response = redirect(lms_dashboard)
