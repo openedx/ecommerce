@@ -81,7 +81,7 @@ class PaypalPaymentExecutionView(EdxOrderPlacementMixin, View):
                 lms_discount_client = EdxRestApiClient(discount_lms_url,
                                                        jwt=self.request.site.siteconfiguration.access_token)
                 ck = basket.lines.first().product.course_id
-                user_id = self.request.user.id
+                user_id = self.request.user.lms_user_id
                 try:
                     response = lms_discount_client.user(user_id).course(ck).get()
                     self.request.GET = self.request.GET.copy()

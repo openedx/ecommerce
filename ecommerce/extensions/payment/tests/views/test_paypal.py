@@ -55,7 +55,8 @@ class PaypalPaymentExecutionViewTests(PaypalMixin, PaymentEventsMixin, TestCase)
     def setUp(self):
         super(PaypalPaymentExecutionViewTests, self).setUp()
         self.price = '100.0'
-        self.basket = create_basket(owner=UserFactory(), site=self.site, price=self.price)
+        self.user = self.create_user()
+        self.basket = create_basket(owner=self.user, site=self.site, price=self.price)
         self.basket.freeze()
 
         self.processor = Paypal(self.site)
@@ -388,6 +389,9 @@ class PaypalPaymentExecutionViewTests(PaypalMixin, PaymentEventsMixin, TestCase)
 
         basket_object.return_value.basket = self.basket
 
+        # login the user
+        self.client.login(username=self.user.username, password=self.password)
+
         self.mock_oauth2_response()
         self.mock_payment_creation_response(self.basket)
         self.processor.get_transaction_parameters(self.basket, request=self.request)
@@ -424,7 +428,7 @@ class PaypalPaymentExecutionViewTests(PaypalMixin, PaymentEventsMixin, TestCase)
     @mock.patch.object(PaypalPaymentExecutionView, 'handle_payment')
     def test_add_discount_to_request(self, fake_handle_payment, jwt_decode_handler, mocked_client, basket_object):
         """
-        Verify that we fail gracefully when the lms doesn't return a discount jwt
+        Verify that we correctly add the discount to the order
         """
         # The applicator will attempt to decode a jwt
         jwt_decode_handler.side_effect = _mock_jwt_decode_handler
@@ -436,6 +440,9 @@ class PaypalPaymentExecutionViewTests(PaypalMixin, PaymentEventsMixin, TestCase)
             'discount_applicable': True,
             'jwt': expected_discount_jwt
         }
+
+        # login the user
+        self.client.login(username=self.user.username, password=self.password)
 
         basket_object.return_value.basket = self.basket
 
