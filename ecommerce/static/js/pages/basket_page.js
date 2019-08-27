@@ -544,10 +544,15 @@ define([
                         deferred = new $.Deferred(),
                         promise = deferred.promise(),
                         paymentProcessor = $btn.data('processor-name'),
+                        discountJwt = $btn.closest('#paymentForm').find('input[name="discount_jwt"]'),
                         data = {
                             basket_id: basketId,
                             payment_processor: paymentProcessor
                         };
+
+                    if (discountJwt.length === 1) {
+                        data.discount_jwt = discountJwt.val();
+                    }
 
                     Utils.disableElementWhileRunning($btn, function() {
                         return promise;
