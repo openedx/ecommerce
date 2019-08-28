@@ -1,8 +1,11 @@
 from __future__ import absolute_import
 
 from django.contrib import messages
+from django.contrib.auth.models import AnonymousUser
 from django.urls import reverse
 
+from ecommerce.core.constants import ORDER_MANAGER_ROLE
+from ecommerce.core.models import EcommerceFeatureRole, EcommerceFeatureRoleAssignment
 from ecommerce.core.tests import toggle_switch
 from ecommerce.extensions.refund.constants import REFUND_LIST_VIEW_SWITCH
 from ecommerce.tests.factories import UserFactory
@@ -17,6 +20,13 @@ class RefundAdminTests(TestCase):
         super(RefundAdminTests, self).setUp()
         self.user = UserFactory(is_staff=True, is_superuser=True, password=self.password)
         self.client.login(username=self.user.username, password=self.password)
+        self.role = EcommerceFeatureRole.objects.get(name=ORDER_MANAGER_ROLE)
+
+    def has_perm(self, user):
+        """ Checks admin permission for Refund module """
+        return user.has_perm('refund.add_refund') and \
+            user.has_perm('refund.change_refund') and \
+            user.has_perm('refund.delete_refund')
 
     def test_changelist_view_enable_switch(self):
         """ Default template will load on the list page, if the switch is enabled. """
@@ -35,3 +45,28 @@ class RefundAdminTests(TestCase):
         message = list(response.context['messages'])[0]
         self.assertEqual(message.level, messages.WARNING)
         self.assertEqual(message.message, msg)
+
+    def test_explicit_access(self):
+        """
+        Staff user can add, delete and change Refund model from django admin if
+        they are assigned `ORDER_MANAGER_ROLE`
+        """
+        self.user.is_superuser = False
+        EcommerceFeatureRoleAssignment.objects.get_or_create(role=self.role, user=self.user)
+        self.assertTrue(self.has_perm(self.user))
+
+    def test_no_explicit_access(self):
+        """
+        Staff user cannot add, delete and change Refund model from django admin if
+        they are not assigned `ORDER_MANAGER_ROLE`
+        """
+        self.user.is_superuser = False
+        self.assertFalse(self.has_perm(self.user))
+
+    def test_anonymous_user(self):
+        """
+        Test that if an Anonymous or unauthenticated user tries to access refund admin module
+        permission is denied
+        """
+        user = AnonymousUser()
+        self.assertFalse(self.has_perm(user))
