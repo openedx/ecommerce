@@ -83,15 +83,12 @@ Payment Processors
 
 As of 8/2019, the initial implementation of the Payment MFE no longer allows the payment processors to be pluggable on the frontend. This can be revisited when and if necessary.
 
-UTC handling
-~~~~~~~~~~~~
+Absolute Redirects
+~~~~~~~~~~~~~~~~~~
 
-TODO
+The Payment MFE is currently hosted using a different subdomain than the ecommerce backend service. Payment MFE calls to the ecommerce backend that result in a redirect from the ecommerce service need to use an absolute url, rather than a relative url, in order to avoid redirecting to the Payment MFE when you actually want to redirect to the ecommerce service.
 
-Django's reverse calls
-~~~~~~~~~~~~~~~~~~~~~~
-
-TODO: Handling Django’s reverse calls (relative URLs) with Split frontends
+Django's reverse call returns a relative url by default. Instead, you can use the `absolute_redirect method`_ to appropriately redirect to the ecommerce service in these cases.
 
 Consequences
 ------------
@@ -110,5 +107,6 @@ References
 
 .. _edX REST API Conventions: https://openedx.atlassian.net/wiki/spaces/AC/pages/18350757/edX+REST+API+Conventions#edXRESTAPIConventions-5.Errors
 .. _edX REST API Trichotomy: https://openedx.atlassian.net/wiki/spaces/AC/pages/790036554/REST+API+Trichotomy+Proposal
-.. _`edX's Feature-driven APIs`: https://openedx.atlassian.net/wiki/spaces/AC/pages/790036554/REST+API+Trichotomy+Proposal
+.. _edX's Feature-driven APIs: https://openedx.atlassian.net/wiki/spaces/AC/pages/790036554/REST+API+Trichotomy+Proposal
 .. _frontend-app-payment documentation: https://github.com/edx/frontend-app-payment/blob/master/README.rst
+.. _absolute_redirect method: https://github.com/edx/ecommerce/blob/1b102573c86027a713d216702add61d5c63b8a40/ecommerce/core/url_utils.py#L122-L123
