@@ -52,31 +52,6 @@ class AuthorizeNetNotificationView(EdxOrderPlacementMixin, View):
     def dispatch(self, request, *args, **kwargs):
         return super(AuthorizeNetNotificationView, self).dispatch(request, *args, **kwargs)
 
-    def _prepare_response_with_course_id(self, request, course_id=None):
-        """
-            Prepare and return a response with a transaction cookie. Transaction cookie contains
-            encrypted courses-list of all pending courses for which transaction has been performed
-            but notification is yet to be received. This cookie will be used at LMS-side to display
-            waiting alert to the user.
-            We need to update that cookie and should remove course_id from that list as transaction
-            notification has been received.
-
-            Arguments:
-                course_id: relevant course id for which transaction was performed
-                request: Http request.
-        """
-        response = HttpResponse(status=200)
-        pending_transactions_hash = request.COOKIES.get('pendingTransactionHash')
-
-        if course_id and pending_transactions_hash:
-            pending_transactions_courses = base64.b64decode(pending_transactions_hash)
-            pending_courses_list = json.loads(pending_transactions_courses)
-            if course_id in pending_courses_list:
-                pending_courses_list.remove(course_id)
-                encoded_courses = base64.b64encode(json.dumps(pending_courses_list).encode())
-                response.set_cookie('pendingTransactionHash', encoded_courses)
-        return response
-
     def _send_transaction_declined_email(self, basket, transaction_status, course_title):
         """
             send email to the user after receiving a transcation notification with
@@ -182,7 +157,7 @@ class AuthorizeNetNotificationView(EdxOrderPlacementMixin, View):
     def post(self, request):
         """
             This view will be called by AuthorizeNet to handle notifications and order placement.
-            It should return 200 (to Authorizenet) after receiving a notification so they’ll know
+            It should return 200 (to Authorizenet) after receiving a notification so they'll know
             that notification has been received at our end otherwise they will send it again and
             again after the particular interval.
         """
@@ -258,13 +233,13 @@ class AuthorizeNetNotificationView(EdxOrderPlacementMixin, View):
             logger.exception('An error occurred while processing the AuthorizeNet \
                 payment for basket [%d].', basket.id)
         finally:
-            return self._prepare_response_with_course_id(request, course_id)
+            return HttpResponse(status=200)
 
 def handle_redirection(request):
     """
         Handle AuthorizeNet redirection. This view will be called when a user clicks on continue button
-        from AuthorizeNet receipt page. It will handle Transaction cookie. Transaction cookie contains
-        encrypted courses-list of all pending courses for which transaction has been performed but
+        from AuthorizeNet receipt page. It will handle Transaction cookie named as "pendingTransactionCourse".
+        Transaction cookie should contain encrypted course id for which transaction has been performed butq
         notification is yet to be received. This cookie will be used at LMS-side to display waiting
         alert to the user.
     """
@@ -273,15 +248,6 @@ def handle_redirection(request):
 
     course_id_hash = request.GET.get('course')
     if course_id_hash:
-        course_id = base64.b64decode(course_id_hash)
-        pending_transactions_hash = request.COOKIES.get('pendingTransactionHash')
-        if pending_transactions_hash:
-            pending_transactions_courses = base64.b64decode(pending_transactions_hash)
-            pending_courses_list = json.loads(pending_transactions_courses)
-            pending_courses_list.append(course_id)
-        else:
-            pending_courses_list = [course_id]
+        response.set_cookie('pendingTransactionCourse', course_id_hash)
 
-        encoded_data = base64.b64encode(json.dumps(pending_courses_list).encode())
-        response.set_cookie('pendingTransactionHash', encoded_data)
     return response
