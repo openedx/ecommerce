@@ -61,10 +61,10 @@ PAYMENT_PROCESSOR_CONFIG = {
         },
         'authorizenet': {
             'mode': 'sandbox',
-            'redirect_url': "https://test.authorize.net/payment/payment",
+            'redirect_url': environ.get('AUTHORIZENET_REDIRECT_URL'),
             'cancel_checkout_path': PAYMENT_PROCESSOR_CANCEL_PATH,
-            'merchant_auth_name': "78f4r3PmQH",
-            'transaction_key': "5a2Paz7V84y8aGXj",
+            'merchant_auth_name': environ.get('AUTHORIZENET_MERCHANT_AUTH_NAME'),
+            'transaction_key': environ.get('AUTHORIZENET_TRANSACTION_KEY'),
         }
     },
 }
