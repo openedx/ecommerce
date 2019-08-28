@@ -4,6 +4,7 @@ import waffle
 from django.contrib import admin, messages
 from django.utils.translation import ugettext_lazy as _
 from oscar.core.loading import get_model
+from rules.contrib.admin import ObjectPermissionsModelAdmin
 
 from ecommerce.extensions.refund.constants import REFUND_LIST_VIEW_SWITCH
 
@@ -19,7 +20,7 @@ class RefundLineInline(admin.TabularInline):
 
 
 @admin.register(Refund)
-class RefundAdmin(admin.ModelAdmin):
+class RefundAdmin(ObjectPermissionsModelAdmin):
     list_display = ('id', 'order', 'user', 'status', 'total_credit_excl_tax', 'currency', 'created', 'modified',)
     list_filter = ('status',)
     show_full_result_count = False
