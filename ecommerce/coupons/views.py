@@ -33,7 +33,7 @@ from ecommerce.enterprise.utils import (
     get_enterprise_customer_from_voucher
 )
 from ecommerce.extensions.api import exceptions
-from ecommerce.extensions.basket.utils import prepare_basket
+from ecommerce.extensions.basket.utils import prepare_basket, redirect_url_to_basket_or_payment
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
 from ecommerce.extensions.checkout.utils import get_receipt_page_url
 from ecommerce.extensions.offer.utils import get_redirect_to_email_confirmation_if_required
@@ -285,7 +285,11 @@ class CouponRedeemView(EdxOrderPlacementMixin, APIView):
                         _('This coupon code is not valid for this course. Try a different course.'))
                 self.request.basket.vouchers.remove(voucher)
 
-        return absolute_redirect(self.request, 'basket:summary')
+        # The coupon_redeem_redirect query param is used to communicate to the Payment MFE that it may redirect
+        # and should not display the payment form before making that determination.
+        # TODO: It would be cleaner if the user could be redirected to their final destination up front.
+        redirect_url = redirect_url_to_basket_or_payment(self.request) + "?coupon_redeem_redirect=1"
+        return HttpResponseRedirect(redirect_url)
 
 
 class EnrollmentCodeCsvView(View):
