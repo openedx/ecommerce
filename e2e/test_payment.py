@@ -157,16 +157,6 @@ class TestSeatPayment(object):
         #   waffle flag `enable_microfrontend_for_basket_page` to function.
         force_microfrontend_bucket_flag_enabled = 1
 
-        raise Exception(EcommerceHelpers.build_url(
-            '/basket/add/?sku={}'
-            '&dwft_enable_microfrontend_for_basket_page={}'
-            '&dwft_force_microfrontend_bucket={}'.format(
-                sku,
-                microfrontend_waffle_flag_enabled,
-                force_microfrontend_bucket_flag_enabled,
-            ))
-        )
-
         # Add the item to the basket and start the checkout process
         selenium.get(EcommerceHelpers.build_url(
             '/basket/add/?sku={}'
@@ -217,14 +207,17 @@ class TestSeatPayment(object):
         course_run = self.get_verified_course_run()
         verified_seat = self.get_verified_seat(course_run)
 
-        for address in addresses:
-            self.add_item_to_basket(selenium, verified_seat['sku'], is_new_payment_page)
-            self.checkout_with_credit_card(selenium, address, is_new_payment_page)
-            self.assert_browser_on_receipt_page(selenium)
+        try:
+            for address in addresses:
+                self.add_item_to_basket(selenium, verified_seat['sku'], is_new_payment_page)
+                self.checkout_with_credit_card(selenium, address, is_new_payment_page)
+                self.assert_browser_on_receipt_page(selenium)
 
-            course_run_key = course_run['key']
-            self.assert_user_enrolled_in_course_run(LMS_USERNAME, course_run_key)
-            assert self.refund_orders_for_course_run(course_run_key)
+                course_run_key = course_run['key']
+                self.assert_user_enrolled_in_course_run(LMS_USERNAME, course_run_key)
+                assert self.refund_orders_for_course_run(course_run_key)
+        except:
+            raise Exception(selenium.page_source)
 
     def test_verified_seat_payment_with_credit_card_basket_page(self, selenium):
         """
