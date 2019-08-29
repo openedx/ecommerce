@@ -157,6 +157,16 @@ class TestSeatPayment(object):
         #   waffle flag `enable_microfrontend_for_basket_page` to function.
         force_microfrontend_bucket_flag_enabled = 1
 
+        raise Exception(EcommerceHelpers.build_url(
+            '/basket/add/?sku={}'
+            '&dwft_enable_microfrontend_for_basket_page={}'
+            '&dwft_force_microfrontend_bucket={}'.format(
+                sku,
+                microfrontend_waffle_flag_enabled,
+                force_microfrontend_bucket_flag_enabled,
+            ))
+        )
+
         # Add the item to the basket and start the checkout process
         selenium.get(EcommerceHelpers.build_url(
             '/basket/add/?sku={}'
