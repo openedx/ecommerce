@@ -58,40 +58,31 @@ class TestSeatPayment(object):
         card_expiry_year = str(datetime.datetime.now().year + 3)
         if is_new_payment_page:
             select_fields = [
-                (By.ID, 'country', country),
-                (By.ID, 'cardExpirationMonth', '12'),
-                (By.ID, 'cardExpirationYear', card_expiry_year),
+                ('country', country),
+                ('cardExpirationMonth', '12'),
+                ('cardExpirationYear', card_expiry_year),
             ]
 
             if country in ('US', 'CA',):
-                # Ensure the state field has time to switch from text to select field for certain countries
-                # Note: This is still flaky.  Also tried xpath './/select[@id='state']'.
-                select_fields.append((By.XPATH, ".//label[@for='state']/following-sibling::select", state))
+                select_fields.append(('state', state,))
             else:
                 billing_information['state'] = state
         else:
             select_fields = [
-                (By.ID, 'id_country', country),
-                (By.ID, 'card-expiry-month', '12'),
-                (By.ID, 'card-expiry-year', card_expiry_year),
+                ('id_country', country),
+                ('card-expiry-month', '12'),
+                ('card-expiry-year', card_expiry_year),
             ]
 
             if country in ('US', 'CA',):
-                select_fields.append((By.ID, 'id_state', state))
+                select_fields.append(('id_state', state,))
             else:
                 billing_information['id_state'] = state
 
         # Select the appropriate <option> elements
-        for locator_type, selector, value in select_fields:
+        for selector, value in select_fields:
             if value:
-                try:
-                    element = WebDriverWait(selenium, 30).until(
-                        EC.presence_of_element_located((locator_type, selector))
-                    )
-                except:
-                    raise Exception('Timeout exception with locator (%s, %s).' % (locator_type, selector))
-
-                select = Select(element)
+                select = Select(selenium.find_element_by_id(selector))
                 select.select_by_value(value)
 
         # Fill in the text fields
@@ -105,8 +96,7 @@ class TestSeatPayment(object):
             selenium.find_element_by_id('payment-button').click()
 
     def assert_browser_on_receipt_page(self, selenium):
-        # Long delay is possible due to SSO which starts with the receipt page.
-        WebDriverWait(selenium, 45).until(
+        WebDriverWait(selenium, 20).until(
             EC.visibility_of_element_located((By.ID, 'receipt-container'))
         )
 
@@ -190,13 +180,12 @@ class TestSeatPayment(object):
                 break
         return verified_seat
 
-    def verified_seat_payment_with_credit_card(self, selenium, is_new_payment_page, addresses):
+    def verified_seat_payment_with_credit_card(self, selenium, is_new_payment_page):
         """
         Validates users can add a verified seat to the cart and checkout with a credit card.
 
         Arguments:
             is_new_payment_page (bool): True to test the new payment page, False to test the older basket page.
-            addresses (tuple): Addresses to test.
 
         This test requires 'disable_repeat_order_check' waffle switch turned off on stage, to run.
 
@@ -207,7 +196,7 @@ class TestSeatPayment(object):
         course_run = self.get_verified_course_run()
         verified_seat = self.get_verified_seat(course_run)
 
-        for address in addresses:
+        for address in (ADDRESS_US, ADDRESS_FR,):
             self.add_item_to_basket(selenium, verified_seat['sku'], is_new_payment_page)
             self.checkout_with_credit_card(selenium, address, is_new_payment_page)
             self.assert_browser_on_receipt_page(selenium)
@@ -223,11 +212,7 @@ class TestSeatPayment(object):
 
         This test requires 'disable_repeat_order_check' waffle switch turned off on stage, to run.
         """
-        self.verified_seat_payment_with_credit_card(
-            selenium,
-            is_new_payment_page=False,
-            addresses=(ADDRESS_US, ADDRESS_FR,)
-        )
+        self.verified_seat_payment_with_credit_card(selenium, is_new_payment_page=False)
 
     def test_verified_seat_payment_with_credit_card_payment_page(self, selenium):
         """
@@ -237,9 +222,4 @@ class TestSeatPayment(object):
         This test requires 'disable_repeat_order_check' waffle switch turned off on stage, to run.
         - Note: Waffle switch warning copied from existing test without being verified.
         """
-        self.verified_seat_payment_with_credit_card(
-            selenium,
-            is_new_payment_page=True,
-            # TODO: restore ADDRESS_US test when it is no longer flaky
-            addresses=(ADDRESS_FR,)
-        )
+        self.verified_seat_payment_with_credit_card(selenium, is_new_payment_page=True)
