@@ -560,7 +560,7 @@ class CybersourceNotificationTestsMixin(CybersourceMixin):
         self._assert_processing_failure(notification, msg, 'INFO')
 
     def test_invalid_order_id(self):
-        """ Verify the view redirects to the error page when the order id is invalid. """
+        """ Verify the view logs and redirects to the error page when the order id is invalid. """
         notification = self.generate_notification(
             self.basket,
             req_reference_number='invalid-order-id'
@@ -586,7 +586,7 @@ class CybersourceNotificationTestsMixin(CybersourceMixin):
             )
 
     def test_unexpected_validate_notification_error(self):
-        """ Verify the view redirects to the error page when the payment unexpectedly fails. """
+        """ Verify the view logs and redirects to the error page when the payment unexpectedly fails. """
         notification = self.generate_notification(self.basket)
 
         logger_name = self.CYBERSOURCE_VIEW_LOGGER_NAME
@@ -611,36 +611,8 @@ class CybersourceNotificationTestsMixin(CybersourceMixin):
                     ),
                 )
 
-    def test_handle_post_order_exception(self):
-        """ Verify the view redirects to the error page when handle_post_order fails. """
-        notification = self.generate_notification(
-            self.basket,
-            billing_address=self.billing_address,
-        )
-
-        logger_name = self.CYBERSOURCE_VIEW_LOGGER_NAME
-        with mock.patch.object(self.view, 'handle_post_order', side_effect=Exception):
-            with LogCapture(logger_name) as cybersource_logger:
-                response = self.client.post(self.path, notification)
-                self.assertRedirects(response, self.get_full_url(reverse('payment_error')))
-
-                cybersource_logger.check_present(
-                    (
-                        logger_name,
-                        'ERROR',
-                        (
-                            'Error when handling post order for transaction [{}], associated with order [{}] and '
-                            'basket [{}].'.format(
-                                notification.get('transaction_id'),
-                                self.basket.order_number,
-                                self.basket.id,
-                            )
-                        )
-                    ),
-                )
-
     def test_missing_billing_address(self):
-        """ Verify the view redirects to the error page when the billing address is missing. """
+        """ Verify the view logs and redirects to the error page when the billing info is missing. """
         notification = self.generate_notification(self.basket)
 
         logger_name = self.CYBERSOURCE_VIEW_LOGGER_NAME
@@ -653,9 +625,7 @@ class CybersourceNotificationTestsMixin(CybersourceMixin):
                     logger_name,
                     'ERROR',
                     (
-                        # TODO: Update this once we know what this should be
-                        'There should be an error for transaction [{}], associated with order [{}] and '
-                        'basket [{}].'.format(
+                        'Error processing order for transaction [{}], with order [{}] and basket [{}].'.format(
                             notification.get('transaction_id'),
                             self.basket.order_number,
                             self.basket.id,

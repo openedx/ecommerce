@@ -443,17 +443,12 @@ class CybersourceInterstitialView(CybersourceNotificationMixin, View):
 
         try:
             order = self.create_order(request, basket, self._get_billing_address(notification))
-        except:  # pylint: disable=bare-except
-            # logging handled by create_order
-            return absolute_redirect(request, 'payment_error')
-
-        try:
             self.handle_post_order(order)
             return self.redirect_to_receipt_page(notification)
         except:  # pylint: disable=bare-except
             transaction_id, order_number, basket_id = self.get_ids_from_notification(notification)
             logger.exception(
-                'Error when handling post order for transaction [%s], associated with order [%s] and basket [%d].',
+                'Error processing order for transaction [%s], with order [%s] and basket [%d].',
                 transaction_id,
                 order_number,
                 basket_id
