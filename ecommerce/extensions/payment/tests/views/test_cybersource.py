@@ -223,21 +223,34 @@ class CybersourceInterstitialViewTests(CybersourceNotificationTestsMixin, TestCa
             billing_address=self.billing_address,
         )
 
+        logger_name = self.CYBERSOURCE_VIEW_LOGGER_NAME
         with mock.patch.object(self.view, 'validate_notification', side_effect=TransactionDeclined):
-            response = self.client.post(self.path, notification)
+            with LogCapture(logger_name) as cybersource_logger:
+                response = self.client.post(self.path, notification)
 
-            self.assertRedirects(
-                response,
-                self.get_full_url(path=reverse('basket:summary')),
-                status_code=302,
-                fetch_redirect_response=False
-            )
+                self.assertRedirects(
+                    response,
+                    self.get_full_url(path=reverse('basket:summary')),
+                    status_code=302,
+                    fetch_redirect_response=False
+                )
 
-            new_basket = Basket.objects.get(status='Open')
-            merged_basket_count = Basket.objects.filter(status='Merged').count()
+                new_basket = Basket.objects.get(status='Open')
+                merged_basket_count = Basket.objects.filter(status='Merged').count()
 
-            self.assertEqual(list(new_basket.lines.all()), old_lines)
-            self.assertEqual(merged_basket_count, 1)
+                self.assertEqual(list(new_basket.lines.all()), old_lines)
+                self.assertEqual(merged_basket_count, 1)
+
+                cybersource_logger.check_present(
+                    (
+                        logger_name,
+                        'INFO',
+                        'Created new basket [{}] from old basket [{}] for declined transaction.'.format(
+                            new_basket.id,
+                            self.basket.id,
+                        )
+                    ),
+                )
 
     @ddt.data(InvalidSignatureError, InvalidBasketError, Exception)
     def test_invalid_payment_error(self, error_class):
