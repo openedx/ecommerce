@@ -1,4 +1,4 @@
-""" Django management command to find frozen baskets missing payment response. """
+""" Django management command to find_frozen_baskets_and_fulfill orders. """
 
 import base64
 import datetime
@@ -20,10 +20,13 @@ from django.db.models import Q, Subquery
 from ecommerce_worker.fulfillment.v1.tasks import fulfill_order
 from oscar.core.loading import get_class, get_model
 
+from ecommerce.extensions.basket.constants import EMAIL_OPT_IN_ATTRIBUTE
 from ecommerce.extensions.partner.strategy import DefaultStrategy
 
 logger = logging.getLogger(__name__)
 Basket = get_model('basket', 'Basket')
+BasketAttribute = get_model('basket', 'BasketAttribute')
+BasketAttributeType = get_model('basket', 'BasketAttributeType')
 Order = get_model('order', 'Order')
 BillingAddress = get_model('order', 'BillingAddress')
 PaymentProcessorResponse = get_model('payment', 'PaymentProcessorResponse')
@@ -60,6 +63,11 @@ class CybersourceAPIClient(object):
         self.post_signature = ''
         self.get_signature = ''
 
+        self.post_signature_header = "host: {host}\ndate: {date}\n(request-target): post /tss/v2/searches\n" \
+                                     "digest: {digest}\nv-c-merchant-id: {merchant_id}"
+        self.get_signature_header = "host: {host}\ndate: {date}\n(request-target): get {path}\n" \
+                                    "v-c-merchant-id: {merchant_id}"
+
     def generate_digest(self, message_body):
 
         hashobj = hashlib.sha256()
@@ -70,9 +78,8 @@ class CybersourceAPIClient(object):
         self.digest = 'SHA-256=' + hashdigest.decode("utf-8")
 
     def generate_post_signature(self):
-        signature_header = \
-        "host: {host}\ndate: {date}\n(request-target): post /tss/v2/searches\ndigest: {digest}\nv-c-merchant-id: {merchant_id}"
-        sig_value_string = signature_header.format(
+
+        sig_value_string = self.post_signature_header.format(
             host=self.host,
             date=self.date_str,
             digest=self.digest,
@@ -121,9 +128,8 @@ class CybersourceAPIClient(object):
         return headers
 
     def generate_get_signature(self, path):
-        signature_header = \
-        "host: {host}\ndate: {date}\n(request-target): get {path}\nv-c-merchant-id: {merchant_id}"
-        sig_value_string = signature_header.format(
+
+        sig_value_string = self.get_signature_header.format(
             host=self.host,
             date=self.date_str,
             path=path,
@@ -346,10 +352,20 @@ def _process_successful_order(order_detail, basket):
                         .format(order_number=basket.order_number))
 
             logger.info(u'Requesting fulfillment of order [%s].', order.number)
+
+            # Check for the user's email opt in preference, defaulting to false if it hasn't been set
+            try:
+                email_opt_in = BasketAttribute.objects.get(
+                    basket=order.basket,
+                    attribute_type=BasketAttributeType.objects.get(name=EMAIL_OPT_IN_ATTRIBUTE),
+                ).value_text == 'True'
+            except BasketAttribute.DoesNotExist:
+                email_opt_in = False
+
             fulfill_order.delay(
                 order.number,
                 site_code=order.site.siteconfiguration.partner.short_code,
-                email_opt_in=False
+                email_opt_in=email_opt_in
             )
     else:
         logger.info(u"Order Number: {order_number} already exist, skipping order creation."
@@ -377,7 +393,7 @@ class Command(BaseCommand):
     end-delta : Hours before now to end looking at frozen baskets that are missing payment
                 response. end-delta cannot be greater than start-delta
     Example:
-        $ ... find_frozen_baskets_missing_payment_response --start-delta 4 --end-delta 0
+        $ ... find_frozen_baskets_and_fulfill --start-delta 4 --end-delta 0
 
     """
 
@@ -420,9 +436,9 @@ class Command(BaseCommand):
         start = datetime.now(pytz.utc) - timedelta(hours=start_delta)
         end = datetime.now(pytz.utc) - timedelta(hours=end_delta)
 
-        self.find_frozen_baskets_missing_payment_response(start, end)
+        self.find_frozen_baskets_and_fulfill(start, end)
 
-    def find_frozen_baskets_missing_payment_response(self, start, end):
+    def find_frozen_baskets_and_fulfill(self, start, end):
         """ Find baskets that are Frozen and missing payment response """
 
         config = self._get_configuration()
