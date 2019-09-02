@@ -111,7 +111,7 @@ class LMSPublisherTests(DiscoveryTestMixin, TestCase):
         last_request = httpretty.last_request()
 
         # Verify the data passed to the API was correct.
-        actual = json.loads(last_request.body)
+        actual = json.loads(last_request.body.decode('utf-8'))
         expected = {
             'id': self.course.id,
             'name': self.course.name,
