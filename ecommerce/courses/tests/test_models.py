@@ -28,7 +28,7 @@ class CourseTests(DiscoveryTestMixin, TestCase):
         """Verify the __unicode__ method returns the Course ID."""
         course_id = u'edx/Demo_Course/DemoX'
         course = CourseFactory(id=course_id, partner=self.partner)
-        self.assertEqual(six.text_type(course), course_id)
+        self.assertEqual(six.text_type(course.id), course_id)
 
     def test_seat_products(self):
         """
