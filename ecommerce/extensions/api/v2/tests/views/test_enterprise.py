@@ -1044,7 +1044,6 @@ class EnterpriseCouponViewSetRbacTests(
         assert results[0]['redemptions_and_assignments'][0]['code'] == voucher1.code
         assert results[0]['redemptions_and_assignments'][0]['course_key'] is None
 
-
     def test_permission_search_200(self):
         """
         Test that we get implicit access via role assignment
