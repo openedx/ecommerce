@@ -251,7 +251,7 @@ class CybersourceNotificationMixin(CyberSourceProcessorMixin, OrderCreationMixin
         try:
             basket_id = OrderNumberGenerator().basket_id(order_number)
         except:  # pylint: disable=bare-except
-            logger.error(
+            logger.exception(
                 'Error generating basket_id from CyberSource notification with transaction [%s] and order [%s].',
                 transaction_id,
                 order_number,
@@ -283,9 +283,12 @@ class CybersourceNotificationMixin(CyberSourceProcessorMixin, OrderCreationMixin
                 basket = self._get_basket(basket_id)
 
                 if not basket:
-                    logger.error('Received CyberSource payment notification for non-existent basket [%s].', basket_id)
+                    error_message = (
+                        'Received CyberSource payment notification for non-existent basket [%s].' % basket_id
+                    )
+                    logger.error(error_message)
                     unhandled_exception_logging = False
-                    raise InvalidBasketError
+                    raise InvalidBasketError(error_message)
 
                 if basket.status != Basket.FROZEN:
                     # We don't know how serious this situation is at this point, hence
