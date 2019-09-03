@@ -15,7 +15,8 @@ from authorizenet.apicontrollers import (
 from ecommerce.extensions.payment.exceptions import (
     RefundError,
     PaymentProcessorResponseNotFound,
-    MissingProcessorResponseCardInfo
+    MissingProcessorResponseCardInfo,
+    MissingTransactionDetailError
 )
 from oscar.core.loading import get_model
 from oscar.apps.payment.exceptions import GatewayError
@@ -24,11 +25,13 @@ from ecommerce.extensions.payment.processors import (
     HandledProcessorResponse
 )
 from ecommerce.core.url_utils import get_ecommerce_url, get_lms_dashboard_url
+from ecommerce.extensions.payment.utils import LxmlObjectJsonEncoder
 
 logger = logging.getLogger(__name__)
 PaymentProcessorResponse = get_model('payment', 'PaymentProcessorResponse')
 
 AUTH_CAPTURE_TRANSACTION_TYPE = "authCaptureTransaction"
+
 
 class AuthorizeNet(BaseClientSidePaymentProcessor):
     NAME = 'authorizenet'
@@ -133,11 +136,14 @@ class AuthorizeNet(BaseClientSidePaymentProcessor):
                     logger.info('Message Code : %s' % transaction_details_response.messages.message[0]['code'].text)
                     logger.info('Message Text : %s' % transaction_details_response.messages.message[0]['text'].text)
             else:
+                logger.error(
+                    'Unable to get Authorizenet transaction detail using transaction_id [%s].', transaction_id)
                 if transaction_details_response.messages is not None:
                     logger.error('Failed to get transaction details.\nCode:%s \nText:%s' % (
                         transaction_details_response.messages.message[0]['code'].text,
                         transaction_details_response.messages.message[0]['text'].text)
                     )
+                raise MissingTransactionDetailError
         return transaction_details_response
 
     def get_transaction_parameters(self, basket, request=None, use_client_side_checkout=True, **kwargs):
@@ -240,8 +246,7 @@ class AuthorizeNet(BaseClientSidePaymentProcessor):
                 HandledProcessorResponse
         """
         transaction_id = transaction_response.transaction.transId
-        transaction_dict = json.dumps(
-            transaction_response, default=lambda o: o.__dict__ if getattr(o, '__dict__') else str(o))
+        transaction_dict = LxmlObjectJsonEncoder().encode(transaction_response)
 
         self.record_processor_response(transaction_dict, transaction_id=transaction_id, basket=basket)
         logger.info("Successfully executed AuthorizeNet payment [%s] for basket [%d].", transaction_id, basket.id)
@@ -264,18 +269,18 @@ class AuthorizeNet(BaseClientSidePaymentProcessor):
             Refund a AuthorizeNet payment for settled transactions.For more Authorizenet Refund API information,
             visit https://developer.authorize.net/api/reference/#payment-transactions-refund-a-transaction
         """
-        paymnet_response = PaymentProcessorResponse.objects.filter(
-            processor_name=self.NAME,
-            transaction_id=reference_number
-        ).latest('created')
-
-        if not paymnet_response:
+        try:
+            paymnet_response = PaymentProcessorResponse.objects.filter(
+                processor_name=self.NAME,
+                transaction_id=reference_number
+            ).latest('created')
+            reference_transaction_details = json.loads(paymnet_response.response)
+        except:
             msg = 'AuthorizeNet issue credit error for order [{}]. Unable to get payment reponse and transaction details.'.format(
                 order_number)
             logger.exception(msg)
             raise PaymentProcessorResponseNotFound(msg)
 
-        reference_transaction_details = json.loads(paymnet_response.response)
         transaction_card_info = reference_transaction_details.get('transaction', {}).get('payment', {}).get('creditCard', {})
 
         if not transaction_card_info:
@@ -317,7 +322,9 @@ class AuthorizeNet(BaseClientSidePaymentProcessor):
                     logger.info('Description: %s' % response.transactionResponse.messages.message[0].description)
 
                     refund_transaction_id = response.transactionResponse.transId
-                    self.record_processor_response(response, transaction_id=refund_transaction_id, basket=basket)
+                    refund_transaction_dict = LxmlObjectJsonEncoder().encode(response)
+
+                    self.record_processor_response(refund_transaction_dict, transaction_id=refund_transaction_id, basket=basket)
                     return refund_transaction_id
                 else:
                     logger.error('AuthorizeNet issue credit request failed.')
