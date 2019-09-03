@@ -51,3 +51,7 @@ LMS_PASSWORD = os.environ.get('LMS_PASSWORD')
 ENROLLMENT_API_URL = os.environ.get('ENROLLMENT_API_URL', LMS_URL_ROOT + '/api/enrollment/v1')
 BASIC_AUTH_USERNAME = os.environ.get('BASIC_AUTH_USERNAME')
 BASIC_AUTH_PASSWORD = os.environ.get('BASIC_AUTH_PASSWORD')
+
+# TODO: Set these environment variables in the right place.
+os.environ.set('SELENIUM_DRIVER_LOG_DIR', os.path.join(os.environ.get('WORKSPACE'), 'log'))
+os.environ.set('SCREENSHOT_DIR', os.path.join(os.environ.get('WORKSPACE'), 'log'))
