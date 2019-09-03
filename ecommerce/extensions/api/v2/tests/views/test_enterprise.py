@@ -1000,7 +1000,7 @@ class EnterpriseCouponViewSetRbacTests(
 
     def test_search_user_does_not_exist(self):
         """
-        Test that 200 with empty results is returned if we cant find the user/
+        Test that 200 with empty results is returned if we cant find the user
         """
         response = self.get_response(
             'GET',
@@ -1012,6 +1012,38 @@ class EnterpriseCouponViewSetRbacTests(
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         assert response.json()['results'] == []
+
+    def test_search_user_does_not_exist_but_has_offer_assignment(self):
+        """
+        Test that 200 with populated results is returned if we cant find the user,
+        but an offerAssignment exists with the user email specified
+        """
+        coupon1 = self.create_coupon(
+            benefit_type=Benefit.PERCENTAGE,
+            benefit_value=40,
+            enterprise_customer=self.data['enterprise_customer']['id'],
+            enterprise_customer_catalog='aaaaaaaa-2c44-487b-9b6a-24eee973f9a4',
+            code='AAAAA',
+        )
+        voucher1 = coupon1.coupon_vouchers.first().vouchers.first()
+        self.assign_user_to_code(coupon1.id, ['iHaveNoUser@object.com'], ['AAAAA'])
+
+        response = self.get_response(
+            'GET',
+            reverse(
+                'api:v2:enterprise-coupons-(?P<enterprise-id>.+)/search-list',
+                kwargs={'enterprise_id': self.data['enterprise_customer']['id']}
+            ),
+            data={'user_email': 'iHaveNoUser@object.com'}
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        results = response.json()['results']
+        assert len(results) == 1
+        assert results[0]['id'] == voucher1.id
+        assert results[0]['redemptions_and_assignments'][0]['code'] == voucher1.code
+        assert results[0]['redemptions_and_assignments'][0]['course_key'] is None
+
 
     def test_permission_search_200(self):
         """
