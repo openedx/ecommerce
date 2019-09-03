@@ -13,6 +13,13 @@ LOGGING['handlers']['local'] = {
     'class': 'logging.NullHandler',
 }
 
+# Email configurations
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'SUPPORT_EMAIL'
+EMAIL_HOST_PASSWORD = 'PASSWORD'
+
 SOCIAL_AUTH_REDIRECT_IS_HTTPS = False
 SESSION_COOKIE_SECURE = False
 
@@ -51,6 +58,13 @@ PAYMENT_PROCESSOR_CONFIG = {
             'merchant_account_id': environ.get('BLUEFIN_ACCOUNT_ID'),
             'api_access_key': environ.get('BLUEFIN_API_KEY'),
             'post_api_url': 'https://cert.payconex.net/api/qsapi/3.8',
+        },
+        'authorizenet': {
+            'mode': 'sandbox',
+            'redirect_url': environ.get('AUTHORIZENET_REDIRECT_URL'),
+            'cancel_checkout_path': PAYMENT_PROCESSOR_CANCEL_PATH,
+            'merchant_auth_name': environ.get('AUTHORIZENET_MERCHANT_AUTH_NAME'),
+            'transaction_key': environ.get('AUTHORIZENET_TRANSACTION_KEY'),
         }
     },
 }

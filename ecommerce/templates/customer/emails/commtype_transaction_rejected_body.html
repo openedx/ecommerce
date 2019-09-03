@@ -1,0 +1,37 @@
+{% extends 'customer/email_base.html' %}
+{% load i18n %}
+{% block body %}
+<!-- Message Body -->
+<tr>
+    <td class="container-padding" bgcolor="#ffffff" style="background-color: #ffffff; padding-left: 30px; padding-right: 30px; font-size: 13px; line-height: 20px; font-family: Open Sans, sans-serif; color: #333; border-radius: 5px;" align="left">
+        <br>
+        <!--/message HTML content -->
+        <p>{% blocktrans %}Hi {{full_name}},{% endblocktrans %}</p>
+        <br>
+        <p>{% blocktrans with course_title=course_title transaction_status=transaction_status %}Your transaction for {{course_title}} has been rejected with status {{transaction_status}}.Please try again with a different payment option or a different Card{% endblocktrans %}</p>
+        <br>
+        <p>{% blocktrans %} In case of payment has already been deducted, kindly contact {{platform_name}} support for a refund. {% endblocktrans %}</p>
+        <br>
+        <p>{% blocktrans %}To explore more great courses, visit the {{platform_name}} website. More courses are added every day!{% endblocktrans %}</p>
+        <br>
+        <p>{% trans "Thank you!" %}</p>
+        <p>{% blocktrans %}{{platform_name}} team {% endblocktrans %}</p>
+        <!--/message HTML content -->
+        <br><br>
+    </td>
+</tr>
+
+<tr>
+    <td class="footer-padding" style="padding-left: 30px; padding-right: 30px; font-size: 13px; line-height: 20px; font-family: Open Sans, sans-serif; color: #002D40; background-color: #f3f3f3;" align="left">
+        <!--footer content -->
+        <br>
+        <p>{% blocktrans with course_title=course_title platform_name=platform_name %}You are receiving this email because you have tried to purchase a seat in the {{platform_name}} course {{course_title}}.{% endblocktrans %}</p>
+        <br>
+        <!--/ end footer content -->
+    </td>
+</tr>
+<!--/100% wrapper-->
+<br>
+<br>
+{% endblock body %}
+

@@ -79,7 +79,15 @@ bluefin_dict = {
     'post_api_url': 'https://cert.payconex.net/api/qsapi/3.8',
 }
 
+authorizenet_dict = {
+    'merchant_auth_name': config_from_yaml.get('AUTHORIZENET_AUTH_NAME'),
+    'transaction_key': config_from_yaml.get('AUTHORIZENET_TRANSACTION_KEY'),
+    'redirect_url': config_from_yaml.get('AUTHORIZENET_REDIRECT_URL')
+}
+
 PAYMENT_PROCESSOR_CONFIG['edx'].update({'bluefin': bluefin_dict})
+PAYMENT_PROCESSOR_CONFIG['edx'].update({'authorizenet': authorizenet_dict})
+
 
 for __, configs in PAYMENT_PROCESSOR_CONFIG.iteritems():
     for __, config in configs.iteritems():

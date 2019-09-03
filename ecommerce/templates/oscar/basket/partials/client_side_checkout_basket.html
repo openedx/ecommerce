@@ -153,6 +153,16 @@
                               title="{% trans "Pay with PayPal" %}"
                               type="button">
                       </button>
+                      <button data-track-type="click"
+                              data-track-event="edx.bi.ecommerce.basket.payment_selected"
+                              data-track-category="checkout"
+                              data-track-payment-method="authorizenet"
+                              data-processor-name="authorizenet"
+                              class="btn payment-button payment-processor-authorizenet"
+                              value="authorizenet"
+                              title="{% trans "Pay with Authorize Net" %}"
+                              type="button">
+                      </button>
                       <button id="applePayBtn" lang="{{ LANGUAGE_CODE|default:"en-us" }}" style="display:none"
                               data-track-type="click"
                               data-track-event="edx.bi.ecommerce.basket.payment_selected"

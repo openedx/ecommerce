@@ -104,6 +104,7 @@ PAYMENT_PROCESSORS = (
     'ecommerce.extensions.payment.processors.paypal.Paypal',
     'ecommerce.extensions.payment.processors.stripe.Stripe',
     'ecommerce.extensions.payment.processors.bluefin.Bluefin',
+    'ecommerce.extensions.payment.processors.authorizenet.AuthorizeNet',
 )
 
 PAYMENT_PROCESSOR_RECEIPT_PATH = '/checkout/receipt/'
@@ -142,6 +143,12 @@ PAYMENT_PROCESSOR_CONFIG = {
             'merchant_account_id': None,
             'api_access_key': None,
             'post_api_url': None,
+        },
+        'authorizenet': {
+            'cancel_checkout_path': PAYMENT_PROCESSOR_CANCEL_PATH,
+            'merchant_auth_name': None,
+            'transaction_key': None,
+            'redirect_url': None
         }
     },
 }

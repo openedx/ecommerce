@@ -8,6 +8,7 @@ from ecommerce.courses.utils import mode_for_product
 from ecommerce.extensions.analytics.utils import silence_exceptions, track_segment_event
 from ecommerce.extensions.checkout.utils import get_credit_provider_details, get_receipt_page_url
 from ecommerce.notifications.notifications import send_notification
+from ecommerce.courses.utils import  mode_for_product
 from ecommerce.programs.utils import get_program
 
 BasketAttribute = get_model('basket', 'BasketAttribute')
@@ -101,13 +102,28 @@ def send_course_purchase_email(sender, order=None, **kwargs):  # pylint: disable
         # We do not currently support email sending for orders with more than one item.
         if len(order.lines.all()) == ORDER_LINE_COUNT:
             product = order.lines.first().product
+            product_mode = mode_for_product(product)
+
             credit_provider_id = getattr(product.attr, 'credit_provider', None)
             if not credit_provider_id:
-                logger.error(
-                    'Failed to send credit receipt notification. Credit seat product [%s] has no provider.', product.id
-                )
-                return
+                if product_mode != 'credit':
+                    # send course purchase email for verified courses
+                    send_notification(
+                        order.user,
+                        'COURSE_PURCHASED',
+                        {
+                            'course_title': product.title,
+                        },
+                        order.site
+                    )
+                else:
+                    logger.error(
+                        'Failed to send credit receipt notification. Credit seat product [%s] has no provider.', product.id
+                    )
+                    return
+
             elif product.is_seat_product:
+                # send course purchase email for "credit" courses
                 provider_data = get_credit_provider_details(
                     access_token=order.site.siteconfiguration.access_token,
                     credit_provider_id=credit_provider_id,

@@ -1,0 +1,15 @@
+{% load i18n %}
+{% trans "Payment rejected for: " %}{{course_title}}
+
+{% blocktrans %}Hi {{full_name}},{% endblocktrans %}
+
+{% blocktrans with course_title=course_title transaction_status=transaction_status %}Your Transaction for course {{course_title}} has been rejected with status: {{transaction_status}}. Please try again with a different payment option or a different Card.{% endblocktrans %}
+{% blocktrans %} In case of payment has already been deducted, kindly contact {{platform_name}} support for a refund. {% endblocktrans %}
+
+{% blocktrans %}To explore more great courses, visit the {{platform_name}} website. More courses are added every day!{% endblocktrans %}
+
+{% trans "Thank you!" %}
+
+{% blocktrans %}{{platform_name}} team{% endblocktrans %}
+
+{% trans "The edX team" %}
