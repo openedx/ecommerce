@@ -443,15 +443,6 @@ class EnterpriseCouponViewSet(CouponViewSet):
         user_email = self.request.query_params.get('user_email', None)
         if not user_email:
             raise Http404("No user_email query parameter provided.")
-        try:
-            user = User.objects.get(email=user_email)
-        except ObjectDoesNotExist:
-            page = self.paginate_queryset(Voucher.objects.none())
-            serializer = EnterpriseCouponSearchSerializer(
-                page,
-                many=True,
-            )
-            return self.get_paginated_response(serializer.data)
 
         # We want vouchers associated with this enterprise. Note:
         # self.get_queryset() here filters (coupon) products out for
@@ -460,24 +451,39 @@ class EnterpriseCouponViewSet(CouponViewSet):
             coupon_vouchers__coupon__in=self.get_queryset()
         )
 
-        # We want vouchers with OfferAssignments related to the user
+        # We want vouchers with OfferAssignments related to the user email
         offer_assignments = OfferAssignment.objects.filter(
             user_email=user_email,
         )
         vouchers_from_offer_assignments = Q(
             offers__offerassignment__in=offer_assignments
         )
+
+        # Offers can be assigned to a user email even if the user doesnt exist
+        try:
+            user = User.objects.get(email=user_email)
+        except ObjectDoesNotExist:
+            user = None
+
         # We want vouchers with VoucherApplications related to the user
-        voucher_applications = VoucherApplication.objects.filter(
-            user=user
-        )
-        vouchers_from_voucher_applications = Q(
-            applications__in=voucher_applications
-        )
+        # only if the user exists
+        if user is not None:
+            voucher_applications = VoucherApplication.objects.filter(
+                user=user
+            )
+            vouchers_from_voucher_applications = Q(
+                applications__in=voucher_applications
+            )
+            enterprise_vouchers = enterprise_vouchers.filter(
+                vouchers_from_offer_assignments | vouchers_from_voucher_applications
+            )
+        else:
+            enterprise_vouchers = enterprise_vouchers.filter(
+                vouchers_from_offer_assignments
+            )
+
         # Filter vouchers using these Qs
-        enterprise_vouchers = enterprise_vouchers.filter(
-            vouchers_from_offer_assignments | vouchers_from_voucher_applications
-        ).distinct().prefetch_related(
+        enterprise_vouchers = enterprise_vouchers.distinct().prefetch_related(
             'coupon_vouchers__coupon',
             'applications',
             'applications__order__lines__product__course',
@@ -487,7 +493,10 @@ class EnterpriseCouponViewSet(CouponViewSet):
         serializer = EnterpriseCouponSearchSerializer(
             page,
             many=True,
-            context={'user': user}
+            context={
+                'user': user,
+                'user_email': user_email,
+            }
         )
         return self.get_paginated_response(serializer.data)
 
