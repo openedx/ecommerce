@@ -4,7 +4,7 @@ import logging
 
 import six
 from django.contrib.auth import get_user_model
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.db.models import Q
 from django.http import Http404
 from django.shortcuts import get_object_or_404
@@ -443,6 +443,15 @@ class EnterpriseCouponViewSet(CouponViewSet):
         user_email = self.request.query_params.get('user_email', None)
         if not user_email:
             raise Http404("No user_email query parameter provided.")
+        try:
+            user = User.objects.get(email=user_email)
+        except ObjectDoesNotExist:
+            page = self.paginate_queryset(Voucher.objects.none())
+            serializer = EnterpriseCouponSearchSerializer(
+                page,
+                many=True,
+            )
+            return self.get_paginated_response(serializer.data)
 
         # We want vouchers associated with this enterprise. Note:
         # self.get_queryset() here filters (coupon) products out for
@@ -459,7 +468,6 @@ class EnterpriseCouponViewSet(CouponViewSet):
             offers__offerassignment__in=offer_assignments
         )
         # We want vouchers with VoucherApplications related to the user
-        user = User.objects.get(email=user_email)
         voucher_applications = VoucherApplication.objects.filter(
             user=user
         )
