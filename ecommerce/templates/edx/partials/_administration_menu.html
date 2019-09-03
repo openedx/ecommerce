@@ -13,9 +13,5 @@
     <a {% if admin == "enterprise_offers" %}class="selected"{% endif %} href="{% url 'enterprise:offers:list' %}">
       {% trans "Enterprise Offers" as tmsg %}{{ tmsg | force_escape }}
     </a>
-    <!-- # TODO: journal dependency -->
-    <a {% if admin == "journal_offers" %}class="selected"{% endif %} href="{% url 'journals:offers:list' %}">
-      {% trans "Journal Bundle Offers" as tmsg %}{{ tmsg | force_escape }}
-    </a>
   </div>
 </nav>
