@@ -101,12 +101,18 @@ class Voucher(AbstractVoucher):
     @property
     def enterprise_offer(self):
         try:
-            return self.offers.get(condition__enterprise_customer_uuid__isnull=False)
+            return self.offers.select_related(
+                'benefit',
+                'condition',
+            ).get(condition__enterprise_customer_uuid__isnull=False)
         except ObjectDoesNotExist:
             return None
         except MultipleObjectsReturned:
             logger.exception('There is more than one enterprise offer associated with voucher %s!', self.id)
-            return self.offers.filter(condition__enterprise_customer_uuid__isnull=False)[0]
+            return self.offers.select_related(
+                'benefit',
+                'condition',
+            ).filter(condition__enterprise_customer_uuid__isnull=False)[0]
 
     @property
     def best_offer(self):
@@ -125,9 +131,20 @@ class Voucher(AbstractVoucher):
 
         # Find the number of OfferAssignments that already exist that are not redeemed or revoked.
         # Redeemed OfferAssignments are excluded in favor of using num_orders on this voucher.
-        num_assignments = enterprise_offer.offerassignment_set.filter(code=self.code).exclude(
-            status__in=[OFFER_REDEEMED, OFFER_ASSIGNMENT_REVOKED]).count()
+        num_assignments = enterprise_offer.offerassignment_set.select_related(
+            'offer',
+            'offer__condition',
+            'offer__benefit'
+        ).filter(code=self.code).exclude(
+            status__in=[OFFER_REDEEMED, OFFER_ASSIGNMENT_REVOKED]
+        ).count()
 
+        return self.calculate_available_slots(enterprise_offer, num_assignments)
+
+    def calculate_available_slots(self, enterprise_offer, num_assignments):
+        """
+        Calculate the number of available slots left for this voucher.
+        """
         # If this a Single use or Multi use per customer voucher,
         # it must have no orders or existing assignments to be assigned.
         if self.usage in (self.SINGLE_USE, self.MULTI_USE_PER_CUSTOMER):
