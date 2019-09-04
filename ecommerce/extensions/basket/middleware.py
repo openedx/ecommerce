@@ -72,6 +72,8 @@ class BasketMiddleware(OscarBasketMiddleware):
         request._basket_cache = basket
         if request._basket_cache is not None:
             monitoring_utils.set_custom_metric('basket_id', request._basket_cache.id)
+        else:  # pragma: no cover
+            pass
 
         return basket
 
