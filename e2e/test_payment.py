@@ -219,6 +219,8 @@ class TestSeatPayment(object):
                 assert self.refund_orders_for_course_run(course_run_key)
 
         except Exception as exception:
+            current_url = None
+            page_source = None
             try:
                 current_url = selenium.current_url
             except:
