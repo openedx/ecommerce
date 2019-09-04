@@ -933,16 +933,17 @@ class EnterpriseCouponSearchSerializer(serializers.ModelSerializer):
         """
         representation = super(EnterpriseCouponSearchSerializer, self).to_representation(instance)
 
-        user = self.context.get('user')
-
         redemptions_and_assignments = []
-        for application in instance.applications.filter(user_id=user.id):
-            redemption_data = {}
-            redemption_data['course_title'] = application.order.lines.first().product.course.name
-            redemption_data['course_key'] = application.order.lines.first().product.course.id
-            redemption_data['redeemed_date'] = application.date_created
-            redemption_data['code'] = instance.code
-            redemptions_and_assignments.append(redemption_data)
+
+        user = self.context.get('user')
+        if user:
+            for application in instance.applications.filter(user_id=user.id):
+                redemption_data = {}
+                redemption_data['course_title'] = application.order.lines.first().product.course.name
+                redemption_data['course_key'] = application.order.lines.first().product.course.id
+                redemption_data['redeemed_date'] = application.date_created
+                redemption_data['code'] = instance.code
+                redemptions_and_assignments.append(redemption_data)
         # OAs that do not have VoucherApplications are the ones that signify an
         # assignment without a redemption. We want to have record of this in
         # our response
@@ -950,7 +951,7 @@ class EnterpriseCouponSearchSerializer(serializers.ModelSerializer):
         offer_assignments = OfferAssignment.objects.filter(
             no_voucher_application,
             code=instance.code,
-            user_email=user.email,
+            user_email=self.context.get('user_email'),
             status__in=[OFFER_ASSIGNED, OFFER_ASSIGNMENT_EMAIL_PENDING],
         ).distinct()
         for offer_assignment in offer_assignments:
