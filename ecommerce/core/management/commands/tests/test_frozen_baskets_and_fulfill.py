@@ -24,7 +24,7 @@ Country = get_model('address', 'Country')
 OrderCreator = get_class('order.utils', 'OrderCreator')
 SiteConfiguration = get_model('core', 'SiteConfiguration')
 
-LOGGER_NAME = 'ecommerce.core.management.commands.find_frozen_baskets_missing_payment_response'
+LOGGER_NAME = 'ecommerce.core.management.commands.find_frozen_baskets_and_fulfill'
 
 
 class FrozenBasketMissingResponseTest(BasketMixin, TestCase):
@@ -135,7 +135,7 @@ class FrozenBasketMissingResponseTest(BasketMixin, TestCase):
     def test_invalid_configuration(self):
 
         with self.assertRaises(CommandError) as cm:
-            call_command('find_frozen_baskets_missing_payment_response', *self.commands_args)
+            call_command('find_frozen_baskets_and_fulfill', *self.commands_args)
         exception = cm.exception
         self.assertIn(u"Missing API Key ID/KeySecret in configuration", exception.message)
 
@@ -145,7 +145,7 @@ class FrozenBasketMissingResponseTest(BasketMixin, TestCase):
         self.basket.save()
 
         with LogCapture(LOGGER_NAME) as l:
-            call_command('find_frozen_baskets_missing_payment_response', *self.commands_args)
+            call_command('find_frozen_baskets_and_fulfill', *self.commands_args)
             l.check(
                 (LOGGER_NAME, 'INFO', u"No frozen baskets, missing payment response found")
             )
@@ -161,7 +161,7 @@ class FrozenBasketMissingResponseTest(BasketMixin, TestCase):
         ]
 
         with LogCapture(LOGGER_NAME) as l:
-            call_command('find_frozen_baskets_missing_payment_response', *self.commands_args)
+            call_command('find_frozen_baskets_and_fulfill', *self.commands_args)
             l.check_present(
                 (
                     LOGGER_NAME, 'ERROR',
@@ -173,14 +173,14 @@ class FrozenBasketMissingResponseTest(BasketMixin, TestCase):
 
         with LogCapture(LOGGER_NAME) as l:
             with patch(
-                    'ecommerce.core.management.commands.find_frozen_baskets_missing_payment_response.requests') as mock_requests:
+                    'ecommerce.core.management.commands.find_frozen_baskets_and_fulfill.requests') as mock_requests:
 
                 post_response = Mock()
                 post_response.status_code = 201
                 post_response.content = json.dumps(self.search_transaction)
                 mock_requests.post.return_value = post_response
 
-                call_command('find_frozen_baskets_missing_payment_response', *self.commands_args)
+                call_command('find_frozen_baskets_and_fulfill', *self.commands_args)
                 l.check(
                     (
                         LOGGER_NAME, 'INFO',
@@ -211,14 +211,14 @@ class FrozenBasketMissingResponseTest(BasketMixin, TestCase):
 
         with LogCapture(LOGGER_NAME) as l:
             with patch(
-                    'ecommerce.core.management.commands.find_frozen_baskets_missing_payment_response.requests') as mock_requests:
+                    'ecommerce.core.management.commands.find_frozen_baskets_and_fulfill.requests') as mock_requests:
 
                 post_response = Mock()
                 post_response.status_code = 404
                 post_response.content = {}
                 mock_requests.post.return_value = post_response
 
-                call_command('find_frozen_baskets_missing_payment_response', *self.commands_args)
+                call_command('find_frozen_baskets_and_fulfill', *self.commands_args)
                 l.check(
                     (
                         LOGGER_NAME, 'INFO',
@@ -243,14 +243,14 @@ class FrozenBasketMissingResponseTest(BasketMixin, TestCase):
 
         with LogCapture(LOGGER_NAME) as l:
             with patch(
-                    'ecommerce.core.management.commands.find_frozen_baskets_missing_payment_response.requests') as mock_requests:
+                    'ecommerce.core.management.commands.find_frozen_baskets_and_fulfill.requests') as mock_requests:
 
                 post_response = Mock()
                 post_response.status_code = 201
                 post_response.content = json.dumps({})
                 mock_requests.post.return_value = post_response
 
-                call_command('find_frozen_baskets_missing_payment_response', *self.commands_args)
+                call_command('find_frozen_baskets_and_fulfill', *self.commands_args)
 
                 l.check_present(
                     (
@@ -266,7 +266,7 @@ class FrozenBasketMissingResponseTest(BasketMixin, TestCase):
 
         with LogCapture(LOGGER_NAME) as l:
             with patch(
-                    'ecommerce.core.management.commands.find_frozen_baskets_missing_payment_response.requests') as mock_requests:
+                    'ecommerce.core.management.commands.find_frozen_baskets_and_fulfill.requests') as mock_requests:
 
                 post_response = Mock()
                 post_response.status_code = 201
@@ -277,7 +277,7 @@ class FrozenBasketMissingResponseTest(BasketMixin, TestCase):
                 })
                 mock_requests.post.return_value = post_response
 
-                call_command('find_frozen_baskets_missing_payment_response', *self.commands_args)
+                call_command('find_frozen_baskets_and_fulfill', *self.commands_args)
 
                 l.check_present(
                     (
@@ -287,8 +287,8 @@ class FrozenBasketMissingResponseTest(BasketMixin, TestCase):
                     ),
                 )
 
-    @patch('ecommerce.core.management.commands.find_frozen_baskets_missing_payment_response.fulfill_order')
-    @patch('ecommerce.core.management.commands.find_frozen_baskets_missing_payment_response.requests')
+    @patch('ecommerce.core.management.commands.find_frozen_baskets_and_fulfill.fulfill_order')
+    @patch('ecommerce.core.management.commands.find_frozen_baskets_and_fulfill.requests')
     def test_cybsersource_transaction_detail_response_success(self, mock_requests, mock_fullfill_order):
 
         with LogCapture(LOGGER_NAME) as l:
@@ -303,7 +303,7 @@ class FrozenBasketMissingResponseTest(BasketMixin, TestCase):
             get_response.content = json.dumps(self.transaction_detail)
             mock_requests.get.return_value = get_response
 
-            call_command('find_frozen_baskets_missing_payment_response', *self.commands_args)
+            call_command('find_frozen_baskets_and_fulfill', *self.commands_args)
             l.check_present(
                 (
                     LOGGER_NAME, 'INFO',
@@ -336,7 +336,7 @@ class FrozenBasketMissingResponseTest(BasketMixin, TestCase):
 
         with LogCapture(LOGGER_NAME) as l:
             with patch(
-                    'ecommerce.core.management.commands.find_frozen_baskets_missing_payment_response.requests') as mock_requests:
+                    'ecommerce.core.management.commands.find_frozen_baskets_and_fulfill.requests') as mock_requests:
 
                 post_response = Mock()
                 post_response.status_code = 201
@@ -362,7 +362,7 @@ class FrozenBasketMissingResponseTest(BasketMixin, TestCase):
                 mock_requests.get.return_value = get_response
 
 
-                call_command('find_frozen_baskets_missing_payment_response', *self.commands_args)
+                call_command('find_frozen_baskets_and_fulfill', *self.commands_args)
                 l.check_present(
                     (
                         LOGGER_NAME, 'INFO',
@@ -376,7 +376,7 @@ class FrozenBasketMissingResponseTest(BasketMixin, TestCase):
 
         with LogCapture(LOGGER_NAME) as l:
             with patch(
-                    'ecommerce.core.management.commands.find_frozen_baskets_missing_payment_response.requests') as mock_requests:
+                    'ecommerce.core.management.commands.find_frozen_baskets_and_fulfill.requests') as mock_requests:
 
                 post_response = Mock()
                 post_response.status_code = 201
@@ -390,7 +390,7 @@ class FrozenBasketMissingResponseTest(BasketMixin, TestCase):
                 mock_requests.get.return_value = get_response
 
 
-                call_command('find_frozen_baskets_missing_payment_response', *self.commands_args)
+                call_command('find_frozen_baskets_and_fulfill', *self.commands_args)
                 l.check_present(
                     (
                         LOGGER_NAME, 'INFO',
@@ -403,7 +403,7 @@ class FrozenBasketMissingResponseTest(BasketMixin, TestCase):
 
         with LogCapture(LOGGER_NAME) as l:
             with patch(
-                    'ecommerce.core.management.commands.find_frozen_baskets_missing_payment_response.requests') as mock_requests:
+                    'ecommerce.core.management.commands.find_frozen_baskets_and_fulfill.requests') as mock_requests:
 
                 post_response = Mock()
                 post_response.status_code = 201
@@ -419,7 +419,7 @@ class FrozenBasketMissingResponseTest(BasketMixin, TestCase):
                 mock_requests.get.return_value = get_response
 
 
-                call_command('find_frozen_baskets_missing_payment_response', *self.commands_args)
+                call_command('find_frozen_baskets_and_fulfill', *self.commands_args)
                 l.check_present(
                     (
                         LOGGER_NAME, 'INFO',
@@ -432,7 +432,7 @@ class FrozenBasketMissingResponseTest(BasketMixin, TestCase):
 
         with LogCapture(LOGGER_NAME) as l:
             with patch(
-                    'ecommerce.core.management.commands.find_frozen_baskets_missing_payment_response.requests') as mock_requests:
+                    'ecommerce.core.management.commands.find_frozen_baskets_and_fulfill.requests') as mock_requests:
                 post_response = Mock()
                 post_response.status_code = 201
                 post_response.content = json.dumps(self.search_transaction)
@@ -443,7 +443,7 @@ class FrozenBasketMissingResponseTest(BasketMixin, TestCase):
                 exception_msg = 'exception msg'
                 mock_requests.get.side_effect = Exception(exception_msg)
 
-                call_command('find_frozen_baskets_missing_payment_response', *self.commands_args)
+                call_command('find_frozen_baskets_and_fulfill', *self.commands_args)
                 l.check_present(
                     (
                         LOGGER_NAME, 'ERROR',
