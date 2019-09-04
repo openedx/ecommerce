@@ -265,8 +265,6 @@ class CybersourceNotificationMixin(CyberSourceProcessorMixin, OrderCreationMixin
         # safely assumed to have originated from CyberSource.
         basket = None
         transaction_id = None
-        order_number = None
-        basket_id = None
         notification = notification or {}
         unhandled_exception_logging = True
 
