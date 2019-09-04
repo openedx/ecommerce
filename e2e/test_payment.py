@@ -239,19 +239,6 @@ class TestSeatPayment(object):
             )
             raise Exception(exception_message)
 
-    def test_verified_seat_payment_with_credit_card_basket_page(self, selenium):
-        """
-        Using the basket page, validates users can add a verified seat to the cart and
-        checkout with a credit card.
-
-        This test requires 'disable_repeat_order_check' waffle switch turned off on stage, to run.
-        """
-        self.verified_seat_payment_with_credit_card(
-            selenium,
-            is_new_payment_page=False,
-            addresses=(ADDRESS_US, ADDRESS_FR,)
-        )
-
     def test_verified_seat_payment_with_credit_card_payment_page(self, selenium):
         """
         Using the payment microfrontend page, validates users can add a verified seat to the cart and
