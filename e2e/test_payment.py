@@ -226,12 +226,17 @@ class TestSeatPayment(object):
             except:
                 pass
             try:
-                page_source = selenium.page_source
+                # Use innerHTML to get dynamically injected HTML as well as server-side HTML.
+                page_source = selenium.execute_script(
+                    "return document.documentElement.innerHTML.toLowerCase()"
+                )
             except:
                 pass
-            exception_message = exception.message + '\n\n' + \
-                'Failing URL: ' + current_url + '\n\n' + \
-                'Failing HTML: ' + page_source + '\n\n'
+            exception_message = u'{}\n\nFailing URL: {}\n\nFailing HTML: {}'.format(
+                exception.message,
+                current_url,
+                page_source,
+            )
             raise Exception(exception_message)
 
     def test_verified_seat_payment_with_credit_card_basket_page(self, selenium):
