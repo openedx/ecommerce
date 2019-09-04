@@ -218,6 +218,8 @@ class TestSeatPayment(object):
                 self.assert_user_enrolled_in_course_run(LMS_USERNAME, course_run_key)
                 assert self.refund_orders_for_course_run(course_run_key)
 
+            raise Exception('Forced failure')
+
         except Exception as exception:
             current_url = None
             page_source = None
