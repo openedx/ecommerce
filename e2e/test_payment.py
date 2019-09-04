@@ -207,27 +207,22 @@ class TestSeatPayment(object):
         course_run = self.get_verified_course_run()
         verified_seat = self.get_verified_seat(course_run)
 
-        for address in addresses:
-            self.add_item_to_basket(selenium, verified_seat['sku'], is_new_payment_page)
-            self.checkout_with_credit_card(selenium, address, is_new_payment_page)
-            self.assert_browser_on_receipt_page(selenium)
+        try:
 
-            course_run_key = course_run['key']
-            self.assert_user_enrolled_in_course_run(LMS_USERNAME, course_run_key)
-            assert self.refund_orders_for_course_run(course_run_key)
+            for address in addresses:
+                self.add_item_to_basket(selenium, verified_seat['sku'], is_new_payment_page)
+                self.checkout_with_credit_card(selenium, address, is_new_payment_page)
+                self.assert_browser_on_receipt_page(selenium)
 
-    def test_verified_seat_payment_with_credit_card_basket_page(self, selenium):
-        """
-        Using the basket page, validates users can add a verified seat to the cart and
-        checkout with a credit card.
+                course_run_key = course_run['key']
+                self.assert_user_enrolled_in_course_run(LMS_USERNAME, course_run_key)
+                assert self.refund_orders_for_course_run(course_run_key)
 
-        This test requires 'disable_repeat_order_check' waffle switch turned off on stage, to run.
-        """
-        self.verified_seat_payment_with_credit_card(
-            selenium,
-            is_new_payment_page=False,
-            addresses=(ADDRESS_US, ADDRESS_FR,)
-        )
+        except Exception as exception:
+            exception_message = exception.message + '\n\n' + \
+                'Failing URL: ' + selenium.current_url + '\n\n' + \
+                'Failing HTML: ' + selenium.page_source + '\n\n'
+            raise Exception(exception_message)
 
     def test_verified_seat_payment_with_credit_card_payment_page(self, selenium):
         """
