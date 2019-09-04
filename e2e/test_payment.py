@@ -219,9 +219,17 @@ class TestSeatPayment(object):
                 assert self.refund_orders_for_course_run(course_run_key)
 
         except Exception as exception:
+            try:
+                current_url = selenium.current_url
+            except:
+                pass
+            try:
+                page_source = selenium.page_source
+            except:
+                pass
             exception_message = exception.message + '\n\n' + \
-                'Failing URL: ' + selenium.current_url + '\n\n' + \
-                'Failing HTML: ' + selenium.page_source + '\n\n'
+                'Failing URL: ' + current_url + '\n\n' + \
+                'Failing HTML: ' + page_source + '\n\n'
             raise Exception(exception_message)
 
     def test_verified_seat_payment_with_credit_card_basket_page(self, selenium):
