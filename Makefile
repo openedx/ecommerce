@@ -107,7 +107,7 @@ fast_diff_coverage:
 	diff-cover coverage.xml --compare-branch=$(DIFF_COVER_BASE_BRANCH)
 
 e2e:
-	pytest e2e --junitxml=e2e/xunit.xml
+	pytest e2e --html=log/html_report.html --junitxml=e2e/xunit.xml
 
 extract_translations:
 	python manage.py makemessages -l en -v1 -d django --ignore="docs/*" --ignore="src/*" --ignore="i18n/*" --ignore="assets/*" --ignore="node_modules/*" --ignore="ecommerce/static/bower_components/*" --ignore="ecommerce/static/build/*"
