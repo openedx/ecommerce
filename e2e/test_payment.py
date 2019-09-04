@@ -222,7 +222,7 @@ class TestSeatPayment(object):
             exception_message = exception.message + '\n\n' + \
                 'Failing URL: ' + selenium.current_url + '\n\n' + \
                 'Failing HTML: ' + selenium.page_source + '\n\n'
-            raise Exception(exception_message, exception)
+            raise Exception(exception_message)
 
     def test_verified_seat_payment_with_credit_card_basket_page(self, selenium):
         """
