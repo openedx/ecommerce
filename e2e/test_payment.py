@@ -207,22 +207,14 @@ class TestSeatPayment(object):
         course_run = self.get_verified_course_run()
         verified_seat = self.get_verified_seat(course_run)
 
-        try:
+        for address in addresses:
+            self.add_item_to_basket(selenium, verified_seat['sku'], is_new_payment_page)
+            self.checkout_with_credit_card(selenium, address, is_new_payment_page)
+            self.assert_browser_on_receipt_page(selenium)
 
-            for address in addresses:
-                self.add_item_to_basket(selenium, verified_seat['sku'], is_new_payment_page)
-                self.checkout_with_credit_card(selenium, address, is_new_payment_page)
-                self.assert_browser_on_receipt_page(selenium)
-
-                course_run_key = course_run['key']
-                self.assert_user_enrolled_in_course_run(LMS_USERNAME, course_run_key)
-                assert self.refund_orders_for_course_run(course_run_key)
-
-        except Exception as exception:
-            exception_message = exception.message + '\n\n' + \
-                'Failing URL: ' + selenium.current_url + '\n\n' + \
-                'Failing HTML: ' + selenium.page_source + '\n\n'
-            raise Exception(exception_message, exception)
+            course_run_key = course_run['key']
+            self.assert_user_enrolled_in_course_run(LMS_USERNAME, course_run_key)
+            assert self.refund_orders_for_course_run(course_run_key)
 
     def test_verified_seat_payment_with_credit_card_basket_page(self, selenium):
         """
