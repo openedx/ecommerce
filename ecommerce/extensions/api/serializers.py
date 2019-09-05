@@ -11,7 +11,7 @@ import waffle
 from dateutil.parser import parse
 from django.contrib.auth import get_user_model
 from django.db import transaction
-from django.db.models import Q
+from django.db.models import Count, Q, Sum
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 from oscar.core.loading import get_class, get_model
@@ -844,29 +844,31 @@ class EnterpriseCouponOverviewListSerializer(serializers.ModelSerializer):
     """
     Serializer for Enterprise Coupons list overview.
     """
-    end_date = serializers.SerializerMethodField()
-    errors = serializers.SerializerMethodField()
-    max_uses = serializers.SerializerMethodField()
-    num_codes = serializers.SerializerMethodField()
-    num_unassigned = serializers.SerializerMethodField()
-    num_uses = serializers.SerializerMethodField()
-    start_date = serializers.SerializerMethodField()
-    usage_limitation = serializers.SerializerMethodField()
-
-    def get_num_unassigned(self, coupon):
+    def _get_num_unassigned(self, vouchers):
         """
         Return number of available assignments.
         """
-        all_slots_available = []
-        vouchers = coupon.attr.coupon_vouchers.vouchers.all()
+        all_slots_available = 0
+        enterprise_offer = vouchers.first().enterprise_offer
+
+        assignments = OfferAssignment.objects.filter(code__in=vouchers.values_list('code', flat=True)).exclude(
+            status__in=[OFFER_REDEEMED, OFFER_ASSIGNMENT_REVOKED]
+        ).values('code').annotate(num_assignments=Count('code')).order_by('code')
+
+        vouchers_num_assignments = {item['code']: item['num_assignments'] for item in assignments}
+
         for voucher in vouchers:
-            voucher_slots_available = voucher.slots_available_for_assignment
+            num_assignments = vouchers_num_assignments.get(voucher.code, 0)
+            voucher_slots_available = voucher.calculate_available_slots(
+                enterprise_offer.max_global_applications,
+                num_assignments
+            )
             if voucher_slots_available > 0:
-                all_slots_available.append(voucher_slots_available)
+                all_slots_available += voucher_slots_available
 
-        return sum(all_slots_available)
+        return all_slots_available
 
-    def get_errors(self, coupon):
+    def _get_errors(self, coupon):
         """
         Returns a list of OfferAssignment errors associated with coupon.
         """
@@ -878,9 +880,9 @@ class EnterpriseCouponOverviewListSerializer(serializers.ModelSerializer):
         return OfferAssignmentSerializer(offer_assignments_with_error, many=True).data
 
     # Max number of codes available (Maximum Coupon Usage).
-    def get_max_uses(self, obj):
-        voucher_usage = retrieve_voucher_usage(obj)
-        offer = retrieve_offer(obj)
+    def _get_max_uses(self, voucher, voucher_usage, voucher_count):
+        offer = voucher.best_offer
+
         max_uses_per_code = None
         if voucher_usage == Voucher.SINGLE_USE:
             max_uses_per_code = 1
@@ -889,36 +891,33 @@ class EnterpriseCouponOverviewListSerializer(serializers.ModelSerializer):
         else:
             max_uses_per_code = OFFER_MAX_USES_DEFAULT
 
-        return max_uses_per_code * retrieve_quantity(obj)
+        return max_uses_per_code * voucher_count
 
-    # Redemption count.
-    def get_num_uses(self, obj):
-        vouchers = retrieve_all_vouchers(obj)
-        num_uses = 0
-        for voucher in vouchers:
-            num_uses += voucher.num_orders
-        return num_uses
+    def to_representation(self, coupon):  # pylint: disable=arguments-differ
+        representation = super(EnterpriseCouponOverviewListSerializer, self).to_representation(coupon)
 
-    # Number of codes.
-    def get_num_codes(self, obj):
-        return retrieve_quantity(obj)
+        vouchers = coupon.attr.coupon_vouchers.vouchers.all()
+        voucher = vouchers.first()
+        usage = voucher.usage
+        count = vouchers.count()
+        num_orders = vouchers.aggregate(Sum('num_orders'))
 
-    # Usage Limitation (Maximum # of usages per code).
-    def get_usage_limitation(self, obj):
-        return retrieve_voucher_usage(obj)
+        data = {
+            'start_date': voucher.start_datetime,
+            'end_date': voucher.end_datetime,
+            'num_uses': num_orders['num_orders__sum'],
+            'usage_limitation': usage,
+            'num_codes': count,
+            'max_uses': self._get_max_uses(voucher, usage, count),
+            'num_unassigned': self._get_num_unassigned(vouchers),
+            'errors': self._get_errors(coupon),
+        }
 
-    def get_start_date(self, obj):
-        return retrieve_start_date(obj)
-
-    def get_end_date(self, obj):
-        return retrieve_end_date(obj)
+        return dict(representation, **data)
 
     class Meta(object):
         model = Product
-        fields = (
-            'end_date', 'errors', 'id', 'max_uses', 'num_codes', 'num_unassigned',
-            'num_uses', 'start_date', 'title', 'usage_limitation'
-        )
+        fields = ('id', 'title')
 
 
 class EnterpriseCouponSearchSerializer(serializers.ModelSerializer):
