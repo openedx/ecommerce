@@ -510,7 +510,7 @@ class EnterpriseCouponViewSet(CouponViewSet):
             enterprise_vouchers = enterprise_vouchers.filter(
                 vouchers_from_offer_assignments
             )
-        # Filter and vouchers using these Qs
+
         return enterprise_vouchers.distinct().prefetch_related(
             'coupon_vouchers__coupon',
             'applications',
@@ -555,6 +555,7 @@ class EnterpriseCouponViewSet(CouponViewSet):
                 redemption_data['course_key'] = None
                 redemption_data['redeemed_date'] = None
                 redemptions_and_assignments.append(redemption_data)
+
         return redemptions_and_assignments
 
     @list_route(url_path=r'(?P<enterprise_id>.+)/overview', permission_classes=[IsAuthenticated])
