@@ -174,8 +174,7 @@ class FrozenBasketMissingResponseTest(BasketMixin, TestCase):
     def test_cybersource_transaction_search_response_success(self):
 
         with LogCapture(LOGGER_NAME) as log:
-            with patch(
-                    'ecommerce.core.management.commands.find_frozen_baskets_and_fulfill.requests') as mock_requests:
+            with patch('ecommerce.core.management.commands.find_frozen_baskets_and_fulfill.requests') as mock_requests:
 
                 post_response = Mock()
                 post_response.status_code = 201
@@ -212,9 +211,7 @@ class FrozenBasketMissingResponseTest(BasketMixin, TestCase):
     def test_cybersource_transaction_search_response_404(self):
 
         with LogCapture(LOGGER_NAME) as log:
-            with patch(
-                    'ecommerce.core.management.commands.find_frozen_baskets_and_fulfill.requests') as mock_requests:
-
+            with patch('ecommerce.core.management.commands.find_frozen_baskets_and_fulfill.requests') as mock_requests:
                 post_response = Mock()
                 post_response.status_code = 404
                 post_response.content = {}
@@ -244,9 +241,7 @@ class FrozenBasketMissingResponseTest(BasketMixin, TestCase):
     def test_cybersource_transaction_search_information_missing(self):
 
         with LogCapture(LOGGER_NAME) as log:
-            with patch(
-                    'ecommerce.core.management.commands.find_frozen_baskets_and_fulfill.requests') as mock_requests:
-
+            with patch('ecommerce.core.management.commands.find_frozen_baskets_and_fulfill.requests') as mock_requests:
                 post_response = Mock()
                 post_response.status_code = 201
                 post_response.content = json.dumps({})
@@ -267,8 +262,7 @@ class FrozenBasketMissingResponseTest(BasketMixin, TestCase):
     def test_cybersource_transaction_search_summary_info_missing(self):
 
         with LogCapture(LOGGER_NAME) as log:
-            with patch(
-                    'ecommerce.core.management.commands.find_frozen_baskets_and_fulfill.requests') as mock_requests:
+            with patch('ecommerce.core.management.commands.find_frozen_baskets_and_fulfill.requests') as mock_requests:
 
                 post_response = Mock()
                 post_response.status_code = 201
@@ -336,8 +330,7 @@ class FrozenBasketMissingResponseTest(BasketMixin, TestCase):
     def test_cybsersource_transaction_detail_response_failure(self):
 
         with LogCapture(LOGGER_NAME) as log:
-            with patch(
-                    'ecommerce.core.management.commands.find_frozen_baskets_and_fulfill.requests') as mock_requests:
+            with patch('ecommerce.core.management.commands.find_frozen_baskets_and_fulfill.requests') as mock_requests:
 
                 post_response = Mock()
                 post_response.status_code = 201
@@ -375,8 +368,7 @@ class FrozenBasketMissingResponseTest(BasketMixin, TestCase):
     def test_cybsersource_transaction_detail_application_summary_info_missing(self):
 
         with LogCapture(LOGGER_NAME) as log:
-            with patch(
-                    'ecommerce.core.management.commands.find_frozen_baskets_and_fulfill.requests') as mock_requests:
+            with patch('ecommerce.core.management.commands.find_frozen_baskets_and_fulfill.requests') as mock_requests:
 
                 post_response = Mock()
                 post_response.status_code = 201
@@ -401,8 +393,7 @@ class FrozenBasketMissingResponseTest(BasketMixin, TestCase):
     def test_cybsersource_transaction_response_order_info_missing(self):
 
         with LogCapture(LOGGER_NAME) as log:
-            with patch(
-                    'ecommerce.core.management.commands.find_frozen_baskets_and_fulfill.requests') as mock_requests:
+            with patch('ecommerce.core.management.commands.find_frozen_baskets_and_fulfill.requests') as mock_requests:
 
                 post_response = Mock()
                 post_response.status_code = 201
@@ -429,8 +420,8 @@ class FrozenBasketMissingResponseTest(BasketMixin, TestCase):
     def test_cybsersource_transaction_detail_raise_exception(self):
 
         with LogCapture(LOGGER_NAME) as log:
-            with patch(
-                    'ecommerce.core.management.commands.find_frozen_baskets_and_fulfill.requests') as mock_requests:
+            with patch('ecommerce.core.management.commands.find_frozen_baskets_and_fulfill.requests') as mock_requests:
+
                 post_response = Mock()
                 post_response.status_code = 201
                 post_response.content = json.dumps(self.search_transaction)
@@ -478,7 +469,7 @@ class FrozenBasketMissingResponseTest(BasketMixin, TestCase):
         expected_digest = 'SHA-256=sGjC9lhI3WACG0aC7Y6IMCIaqCcRZYCPyllYbcTFEYQ='
         self.assertEquals(expected_digest, client.digest)
 
-    @patch('ecommerce.core.management.commands.find_frozen_baskets_and_fulfill.CybersourceAPIClient.get_time_iso_format')
+    @patch('ecommerce.core.management.commands.find_frozen_baskets_and_fulfill.CybersourceAPIClient.get_time_iso_format') # pylint: disable=line-too-long
     def test_generate_get_signature(self, iso_date):
 
         iso_date.return_value = 'Wed, 04 Sep 2019 14:08:55 GMT'

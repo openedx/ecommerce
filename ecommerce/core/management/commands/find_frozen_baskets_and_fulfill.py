@@ -1,12 +1,11 @@
 """ Django management command to find_frozen_baskets_and_fulfill orders. """
 
 import base64
-import datetime
 import hashlib
 import hmac
 import json
 import logging
-from datetime import datetime, timedelta
+from datetime import (datetime, timedelta)
 from email.utils import formatdate
 from time import mktime
 from urlparse import urlparse
@@ -167,209 +166,6 @@ class CybersourceAPIClient(object):
         return date
 
 
-def check_cs_search_transaction(client, basket, message_body):
-    """
-    Hit Cybersource transaction search api to get meta details
-    regarding a transaction.
-    """
-
-    try:
-        response = requests.post('https://{host}/tss/v2/searches'.format(host=client.host),
-                                 data=message_body,
-                                 headers=client.get_search_headers())
-    except Exception as e:
-        logger.exception(u'Exception occurred while fetching detail for Order Number from Search api: [%s]: [%s]',
-                         basket.order_number, e.message)
-        raise
-
-    if 201 == response.status_code:
-        logger.info(u"Response from CyberSource Transaction Search api successful for Order Number " +
-                    basket.order_number)
-        search_transaction_response = json.loads(response.content)
-        _process_search_transaction(search_transaction_response, basket, client)
-    else:
-        logger.info(u"Response from CyberSource Transaction Search api unsuccessful for Order Number " +
-                    basket.order_number)
-    return
-
-
-def _process_search_transaction(transaction_response, basket, client):
-    """Hit Cybersource transaction api to get details of a transaction."""
-
-    try:
-        transaction_summaries = transaction_response['_embedded']['transactionSummaries']
-
-        if not transaction_summaries or len(transaction_summaries) == 0:
-            logger.info(u"No summary info found from CyberSource "
-                        u"Transaction Search api for Order Number: " + basket.order_number)
-            return
-
-        summary = transaction_summaries[0]
-        application_summary = summary.get('applicationInformation', None)
-        href = summary['_links']['transactionDetail']['href']
-
-    except KeyError:
-        logger.exception(u"Some information was not found in meta from CyberSource "
-                         u"Transaction Search api for Order Number: " + basket.order_number)
-        raise
-
-    if not application_summary or not href:
-        return
-
-    success = False
-    if 'applications' in application_summary:
-        for app in application_summary['applications']:
-            if 'ics_bill' == app['name'] and '100' == app['reasonCode']:
-                success = True
-                break
-    if success:
-        logger.info(u"Successfully found meta information from CyberSource "
-                    u"Transaction Search api for Order Number: " + basket.order_number)
-
-        href = href.replace(':-1', '')
-        url = urlparse(href)
-        client.generate_get_signature(url.path)
-
-        try:
-            # fetching transaction detail
-            response = requests.get('https://{host}{path}'.format(host=client.host, path=url.path),
-                                    headers=client.get_transaction_headers())
-        except Exception as e:
-            logger.exception(u'Exception occurred while fetching transaction detail for Order Number'
-                             u'from Transaction api: [%s]: %s', basket.order_number, e.message)
-            raise
-
-        transaction_detail = json.loads(response.content)
-        _process_transaction_details(transaction_detail, basket)
-
-    return
-
-
-def _process_transaction_details(transaction, basket):
-    """Processes details for a transaction."""
-
-    application_summary = transaction.get('applicationInformation', None)
-
-    if not application_summary:
-        logger.info(u"Application summary information missing from transaction detail response "
-                    u"for Order Number: " + basket.order_number)
-        return
-
-    if '100' == str(application_summary['reasonCode']):
-        logger.info(u"Successfully found transaction information from CyberSource "
-                    u"Transaction api for Order Number: " + basket.order_number)
-
-        order_detail = {}
-        order_information = transaction.get('orderInformation', None)
-
-        if not order_information:
-            logger.info(u"No order information found in transaction detail json "
-                        u"for Order Number: " + basket.order_number)
-            return
-
-        bill_to = order_information.get('billTo', {})
-
-        order_detail.update({
-            'first_name': bill_to.get('firstName', 'first_name'),
-            'last_name': bill_to.get('lastName', 'last_name'),
-            'address': bill_to.get('address1', 'address1'),
-            'zip': bill_to.get('postalCode', '12345'),
-            'country': bill_to.get('country', 'US'),
-        })
-
-        amount_details = order_information.get('amountDetails', {})
-
-        order_detail.update({
-            'currency': amount_details.get('currency', 'USD'),
-            'total_amount': amount_details.get('totalAmount', 0),
-            'tax_amount': amount_details.get('taxAmount', 0),
-        })
-
-        _process_successful_order(order_detail, basket)
-    else:
-        logger.info(u"CS Transaction information shows unsucccessful transaction logged for Order Number " +
-                    basket.order_number)
-
-
-def _process_successful_order(order_detail, basket):
-    logger.info(u"Processing Order Number: {order_number} for order creation."
-                .format(order_number=basket.order_number))
-
-    if not Order.objects.filter(number=basket.order_number).exists():
-        logger.info(u"Order Number: {order_number} doesn't exist, creating it."
-                    .format(order_number=basket.order_number))
-
-        shipping_method = NoShippingRequired()
-        shipping_charge = shipping_method.calculate(basket)
-        user = basket.owner
-
-        billing_info = BillingAddress(
-            first_name=order_detail['first_name'],
-            last_name=order_detail['last_name'],
-            line1=order_detail['address'],
-
-            # Oscar uses line4 for city
-            line4='city',
-            # Postal code is optional
-            postcode=order_detail['zip'],
-            # State is optional
-            state='state',
-            country=Country.objects.get(iso_3166_1_a2=order_detail['country'])
-        )
-
-        billing_info.save()
-
-        site = basket.site
-        order_data = {
-            'basket': basket,
-            'number': basket.order_number,
-            'site': site,
-            'partner': site.siteconfiguration.partner,
-            'currency': order_detail['currency'],
-            'total_incl_tax': order_detail['total_amount'],
-            'total_excl_tax': order_detail['total_amount'],
-            'shipping_incl_tax': shipping_charge.incl_tax,
-            'shipping_excl_tax': shipping_charge.excl_tax,
-            'shipping_method': shipping_method.name,
-            'shipping_code': shipping_method.code,
-            'user_id': user.id,
-            'billing_address': billing_info,
-            'status': 'Open'
-        }
-
-        basket.strategy = DefaultStrategy()
-        with transaction.atomic():
-            order = Order(**order_data)
-            order.save()
-            for line in basket.all_lines():
-                OrderCreator().create_line_models(order, line)
-                OrderCreator().update_stock_records(line)
-            basket.submit()
-
-            logger.info(u"Order Number: {order_number} created successfully."
-                        .format(order_number=basket.order_number))
-
-            logger.info(u'Requesting fulfillment of order [%s].', order.number)
-
-            # Check for the user's email opt in preference, defaulting to false if it hasn't been set
-            try:
-                email_opt_in = BasketAttribute.objects.get(
-                    basket=order.basket,
-                    attribute_type=BasketAttributeType.objects.get(name=EMAIL_OPT_IN_ATTRIBUTE),
-                ).value_text == 'True'
-            except BasketAttribute.DoesNotExist:
-                email_opt_in = False
-
-            fulfill_order.delay(
-                order.number,
-                site_code=order.site.siteconfiguration.partner.short_code,
-                email_opt_in=email_opt_in
-            )
-    else:
-        logger.info(u"Order Number: {order_number} already exist, skipping order creation."
-                    .format(order_number=basket.order_number))
-
-
 class InvalidTimeRange(Exception):
     """
     Exception raised explicitly when End Time is prior to Start Time
@@ -480,7 +276,7 @@ class Command(BaseCommand):
                 client.generate_digest(message_body)
                 client.generate_post_signature()
 
-                check_cs_search_transaction(client, fb, message_body)
+                self._check_cs_search_transaction(client, fb, message_body)
 
             except Exception as e:
                 continue
@@ -495,3 +291,198 @@ class Command(BaseCommand):
             'HOST': CS_CONFIG.get('host', None),
             'MERCHANT_ID': CS_CONFIG.get('merchant_id', None),
         }
+
+    def _check_cs_search_transaction(self, client, basket, message_body):
+        """
+        Hit Cybersource transaction search api to get meta details
+        regarding a transaction.
+        """
+
+        try:
+            response = requests.post('https://{host}/tss/v2/searches'.format(host=client.host),
+                                     data=message_body,
+                                     headers=client.get_search_headers())
+        except Exception as e:
+            logger.exception(u'Exception occurred while fetching detail for Order Number from Search api: [%s]: [%s]',
+                             basket.order_number, e.message)
+            raise
+
+        if response.status_code == 201:
+            logger.info(u"Response from CyberSource Transaction Search api successful for Order Number " +
+                        basket.order_number)
+            search_transaction_response = json.loads(response.content)
+            self._process_search_transaction(search_transaction_response, basket, client)
+        else:
+            logger.info(u"Response from CyberSource Transaction Search api unsuccessful for Order Number " +
+                        basket.order_number)
+        return
+
+    def _process_search_transaction(self, transaction_response, basket, client):
+        """Hit Cybersource transaction api to get details of a transaction."""
+
+        try:
+            transaction_summaries = transaction_response['_embedded']['transactionSummaries']
+
+            transaction_record_count = len(transaction_summaries)
+            if not transaction_summaries or transaction_record_count == 0:
+                logger.info(u"No summary info found from CyberSource "
+                            u"Transaction Search api for Order Number: " + basket.order_number)
+                return
+
+            summary = transaction_summaries[0]
+            application_summary = summary.get('applicationInformation', None)
+            href = summary['_links']['transactionDetail']['href']
+
+        except KeyError:
+            logger.exception(u"Some information was not found in meta from CyberSource "
+                             u"Transaction Search api for Order Number: " + basket.order_number)
+            raise
+
+        if not application_summary or not href:
+            return
+
+        success = False
+        if 'applications' in application_summary:
+            for app in application_summary['applications']:
+                if app['name'] == 'ics_bill' and app['reasonCode'] == '100':
+                    success = True
+                    break
+        if success:
+            logger.info(u"Successfully found meta information from CyberSource "
+                        u"Transaction Search api for Order Number: " + basket.order_number)
+
+            href = href.replace(':-1', '')
+            url = urlparse(href)
+            client.generate_get_signature(url.path)
+
+            try:
+                # fetching transaction detail
+                response = requests.get('https://{host}{path}'.format(host=client.host, path=url.path),
+                                        headers=client.get_transaction_headers())
+            except Exception as e:
+                logger.exception(u'Exception occurred while fetching transaction detail for Order Number'
+                                 u'from Transaction api: [%s]: %s', basket.order_number, e.message)
+                raise
+
+            transaction_detail = json.loads(response.content)
+            self._process_transaction_details(transaction_detail, basket)
+
+        return
+
+    def _process_transaction_details(self, transaction, basket):
+        """Processes details for a transaction."""
+
+        application_summary = transaction.get('applicationInformation', None)
+
+        if not application_summary:
+            logger.info(u"Application summary information missing from transaction detail response "
+                        u"for Order Number: " + basket.order_number)
+            return
+
+        if str(application_summary['reasonCode']) == '100':
+            logger.info(u"Successfully found transaction information from CyberSource "
+                        u"Transaction api for Order Number: " + basket.order_number)
+
+            order_detail = {}
+            order_information = transaction.get('orderInformation', None)
+
+            if not order_information:
+                logger.info(u"No order information found in transaction detail json "
+                            u"for Order Number: " + basket.order_number)
+                return
+
+            bill_to = order_information.get('billTo', {})
+
+            order_detail.update({
+                'first_name': bill_to.get('firstName', 'first_name'),
+                'last_name': bill_to.get('lastName', 'last_name'),
+                'address': bill_to.get('address1', 'address1'),
+                'zip': bill_to.get('postalCode', '12345'),
+                'country': bill_to.get('country', 'US'),
+            })
+
+            amount_details = order_information.get('amountDetails', {})
+
+            order_detail.update({
+                'currency': amount_details.get('currency', 'USD'),
+                'total_amount': amount_details.get('totalAmount', 0),
+                'tax_amount': amount_details.get('taxAmount', 0),
+            })
+
+            self._process_successful_order(order_detail, basket)
+        else:
+            logger.info(u"CS Transaction information shows unsucccessful transaction logged for Order Number " +
+                        basket.order_number)
+
+    def _process_successful_order(self, order_detail, basket):
+        logger.info(u"Processing Order Number: {order_number} for order creation."
+                    .format(order_number=basket.order_number))
+
+        if not Order.objects.filter(number=basket.order_number).exists():
+            logger.info(u"Order Number: {order_number} doesn't exist, creating it."
+                        .format(order_number=basket.order_number))
+
+            shipping_method = NoShippingRequired()
+            shipping_charge = shipping_method.calculate(basket)
+            user = basket.owner
+
+            billing_info = BillingAddress(
+                first_name=order_detail['first_name'],
+                last_name=order_detail['last_name'],
+                line1=order_detail['address'],
+
+                # Oscar uses line4 for city
+                line4='city',
+                # Postal code is optional
+                postcode=order_detail['zip'],
+                # State is optional
+                state='state',
+                country=Country.objects.get(iso_3166_1_a2=order_detail['country'])
+            )
+
+            billing_info.save()
+
+            site = basket.site
+            order_data = {
+                'basket': basket,
+                'number': basket.order_number,
+                'site': site,
+                'partner': site.siteconfiguration.partner,
+                'currency': order_detail['currency'],
+                'total_incl_tax': order_detail['total_amount'],
+                'total_excl_tax': order_detail['total_amount'],
+                'shipping_incl_tax': shipping_charge.incl_tax,
+                'shipping_excl_tax': shipping_charge.excl_tax,
+                'shipping_method': shipping_method.name,
+                'shipping_code': shipping_method.code,
+                'user_id': user.id,
+                'billing_address': billing_info,
+                'status': 'Open'
+            }
+
+            basket.strategy = DefaultStrategy()
+            with transaction.atomic():
+                order = Order(**order_data)
+                order.save()
+                for line in basket.all_lines():
+                    OrderCreator().create_line_models(order, line)
+                    OrderCreator().update_stock_records(line)
+                basket.submit()
+
+                logger.info(u"Order Number: {order_number} created successfully."
+                            .format(order_number=basket.order_number))
+
+                logger.info(u'Requesting fulfillment of order [%s].', order.number)
+
+                # Check for the user's email opt in preference, defaulting to false if it hasn't been set
+                try:
+                    email_opt_in = BasketAttribute.objects.get(
+                        basket=order.basket,
+                        attribute_type=BasketAttributeType.objects.get(name=EMAIL_OPT_IN_ATTRIBUTE),
+                    ).value_text == 'True'
+                except BasketAttribute.DoesNotExist:
+                    email_opt_in = False
+
+        else:
+            logger.info(u"Order Number: {order_number} already exist, skipping order creation."
+                        .format(order_number=basket.order_number))
