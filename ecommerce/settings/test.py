@@ -175,7 +175,8 @@ SAILTHRU_SECRET = 'top_secret'
 
 CS_API_CONFIG={
     'host': 'apitest.cybersource.com',
+    'search_uri': '/tss/v2/searches',
     'merchant_id': 'test_merchant',
-    'API_KEY_ID': '11abcd11-d11e-123c-test-111a11a1d1f1',
-    'API_KEY_SECRET': 'AAAAAAA+2222222222222/nx1+Obf/BBBBBBBBBBBBB='
+    'api_key_id': '11abcd11-d11e-123c-test-111a11a1d1f1',
+    'api_secret_key': 'AAAAAAA+2222222222222/nx1+Obf/BBBBBBBBBBBBB='
 }

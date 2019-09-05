@@ -133,7 +133,7 @@ class FrozenBasketMissingResponseTest(BasketMixin, TestCase):
         self.basket.save()
 
     @override_settings(CS_API_CONFIG={'host': 'apitest.cybersource.com', 'merchant_id': 'test_merchant',
-                                      'API_KEY_ID': None, 'API_KEY_SECRET': None})
+                                      'api_key_id': None, 'api_secret_key': None})
     def test_invalid_configuration(self):
 
         with self.assertRaises(CommandError) as cm:
@@ -443,14 +443,9 @@ class FrozenBasketMissingResponseTest(BasketMixin, TestCase):
 
     def test_generate_digest_successful(self):
 
-        cs_config = CSConfiguration({
-            'API_KEY_ID': 'key',
-            'API_KEY_SECRET': 'secret',
-            'HOST': 'host',
-            'MERCHANT_ID': 'merchant_id',
-        })
-
+        cs_config = CSConfiguration()
         client = CybersourceAPIClient(cs_config)
+        
         test_message_body = {
             "offset": "0",
             "timezone": "America/Chicago",
@@ -474,15 +469,7 @@ class FrozenBasketMissingResponseTest(BasketMixin, TestCase):
 
         iso_date.return_value = 'Wed, 04 Sep 2019 14:08:55 GMT'
 
-        cs_test_config = settings.CS_API_CONFIG
-
-        cs_config = CSConfiguration({
-            'API_KEY_ID': cs_test_config.get('API_KEY_ID', None),
-            'API_KEY_SECRET': cs_test_config.get('API_KEY_SECRET', None),
-            'HOST': cs_test_config.get('host', None),
-            'MERCHANT_ID': cs_test_config.get('merchant_id', None),
-        })
-
+        cs_config = CSConfiguration()
         client = CybersourceAPIClient(cs_config)
         expected_get_signature = 'hDHBq05Ozw7RqFasaPP+CUkU2T6fORfQZ6QR5Ka3RB8='
         client.generate_get_signature('/tss/v2/transactions/{trans_id}'.format(trans_id='1111124987811111304004'))
