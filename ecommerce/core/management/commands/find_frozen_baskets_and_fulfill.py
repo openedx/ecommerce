@@ -40,7 +40,6 @@ DEFAULT_START_DELTA_HOUR = 4
 DEFAULT_END_DELTA_HOUR = 0
 
 
-
 class CSConfiguration(object):
     def __init__(self, config):
         self.key = config['API_KEY_ID']
@@ -165,7 +164,6 @@ class CybersourceAPIClient(object):
         now = datetime.now()
         stamp = mktime(now.timetuple())
         date = str(formatdate(timeval=stamp, localtime=False, usegmt=True))
-
         return date
 
 
@@ -212,7 +210,7 @@ def _process_search_transaction(transaction_response, basket, client):
 
     except KeyError:
         logger.exception(u"Some information was not found in meta from CyberSource "
-                    u"Transaction Search api for Order Number: " + basket.order_number)
+                         u"Transaction Search api for Order Number: " + basket.order_number)
         raise
 
     if not application_summary or not href:
@@ -237,7 +235,7 @@ def _process_search_transaction(transaction_response, basket, client):
             response = requests.get('https://{host}{path}'.format(host=client.host, path=url.path),
                                     headers=client.get_transaction_headers())
         except Exception as e:
-            logger.exception(u'Exception occurred while fetching transaction detail for Order Number' 
+            logger.exception(u'Exception occurred while fetching transaction detail for Order Number'
                              u'from Transaction api: [%s]: %s', basket.order_number, e.message)
             raise
 

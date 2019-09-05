@@ -5,6 +5,7 @@ from __future__ import absolute_import
 
 import json
 
+from django.conf import settings
 from django.core.management import call_command
 from django.core.management.base import CommandError
 from django.test.utils import override_settings
@@ -12,6 +13,7 @@ from mock import Mock, patch
 from oscar.core.loading import get_class, get_model
 from testfixtures import LogCapture
 
+from ecommerce.core.management.commands.find_frozen_baskets_and_fulfill import CSConfiguration, CybersourceAPIClient
 from ecommerce.extensions.basket.tests.mixins import BasketMixin
 from ecommerce.tests.testcases import TestCase
 
@@ -38,12 +40,12 @@ class FrozenBasketMissingResponseTest(BasketMixin, TestCase):
         self.end_delta = 0
 
         Country.objects.create(iso_3166_1_a2='AE',
-                              iso_3166_1_a3='ARE',
-                              iso_3166_1_numeric=784,
-                              printable_name='United Arab Emirates',
-                              name='',
-                              display_order=0,
-                              is_shipping_country=True)
+                               iso_3166_1_a3='ARE',
+                               iso_3166_1_numeric=784,
+                               printable_name='United Arab Emirates',
+                               name='',
+                               display_order=0,
+                               is_shipping_country=True)
 
         self.commands_args = [
             '--start-delta={}'.format(self.start_delta),
@@ -144,9 +146,9 @@ class FrozenBasketMissingResponseTest(BasketMixin, TestCase):
         self.basket.status = Basket.OPEN
         self.basket.save()
 
-        with LogCapture(LOGGER_NAME) as l:
+        with LogCapture(LOGGER_NAME) as log:
             call_command('find_frozen_baskets_and_fulfill', *self.commands_args)
-            l.check(
+            log.check(
                 (LOGGER_NAME, 'INFO', u"No frozen baskets, missing payment response found")
             )
 
@@ -160,9 +162,9 @@ class FrozenBasketMissingResponseTest(BasketMixin, TestCase):
             '--end-delta={}'.format(self.end_delta)
         ]
 
-        with LogCapture(LOGGER_NAME) as l:
+        with LogCapture(LOGGER_NAME) as log:
             call_command('find_frozen_baskets_and_fulfill', *self.commands_args)
-            l.check_present(
+            log.check_present(
                 (
                     LOGGER_NAME, 'ERROR',
                     u"Incorrect time range given."
@@ -171,7 +173,7 @@ class FrozenBasketMissingResponseTest(BasketMixin, TestCase):
 
     def test_cybersource_transaction_search_response_success(self):
 
-        with LogCapture(LOGGER_NAME) as l:
+        with LogCapture(LOGGER_NAME) as log:
             with patch(
                     'ecommerce.core.management.commands.find_frozen_baskets_and_fulfill.requests') as mock_requests:
 
@@ -181,7 +183,7 @@ class FrozenBasketMissingResponseTest(BasketMixin, TestCase):
                 mock_requests.post.return_value = post_response
 
                 call_command('find_frozen_baskets_and_fulfill', *self.commands_args)
-                l.check(
+                log.check(
                     (
                         LOGGER_NAME, 'INFO',
                         u"Frozen baskets missing payment response found, checking with Cybersource.."
@@ -197,7 +199,7 @@ class FrozenBasketMissingResponseTest(BasketMixin, TestCase):
                     (
                         LOGGER_NAME, 'INFO',
                         u"Response from CyberSource Transaction Search api successful for Order Number {}".format(
-                         self.basket.order_number)
+                            self.basket.order_number)
                     ),
                     (
                         LOGGER_NAME, 'INFO',
@@ -209,7 +211,7 @@ class FrozenBasketMissingResponseTest(BasketMixin, TestCase):
 
     def test_cybersource_transaction_search_response_404(self):
 
-        with LogCapture(LOGGER_NAME) as l:
+        with LogCapture(LOGGER_NAME) as log:
             with patch(
                     'ecommerce.core.management.commands.find_frozen_baskets_and_fulfill.requests') as mock_requests:
 
@@ -219,7 +221,7 @@ class FrozenBasketMissingResponseTest(BasketMixin, TestCase):
                 mock_requests.post.return_value = post_response
 
                 call_command('find_frozen_baskets_and_fulfill', *self.commands_args)
-                l.check(
+                log.check(
                     (
                         LOGGER_NAME, 'INFO',
                         u"Frozen baskets missing payment response found, checking with Cybersource.."
@@ -235,13 +237,13 @@ class FrozenBasketMissingResponseTest(BasketMixin, TestCase):
                     (
                         LOGGER_NAME, 'INFO',
                         u"Response from CyberSource Transaction Search api unsuccessful for Order Number {}".format(
-                        self.basket.order_number)
+                            self.basket.order_number)
                     ),
                 )
 
     def test_cybersource_transaction_search_information_missing(self):
 
-        with LogCapture(LOGGER_NAME) as l:
+        with LogCapture(LOGGER_NAME) as log:
             with patch(
                     'ecommerce.core.management.commands.find_frozen_baskets_and_fulfill.requests') as mock_requests:
 
@@ -252,7 +254,7 @@ class FrozenBasketMissingResponseTest(BasketMixin, TestCase):
 
                 call_command('find_frozen_baskets_and_fulfill', *self.commands_args)
 
-                l.check_present(
+                log.check_present(
                     (
                         LOGGER_NAME, 'ERROR',
                         u"Some information was not found in meta from CyberSource "
@@ -264,7 +266,7 @@ class FrozenBasketMissingResponseTest(BasketMixin, TestCase):
 
     def test_cybersource_transaction_search_summary_info_missing(self):
 
-        with LogCapture(LOGGER_NAME) as l:
+        with LogCapture(LOGGER_NAME) as log:
             with patch(
                     'ecommerce.core.management.commands.find_frozen_baskets_and_fulfill.requests') as mock_requests:
 
@@ -279,7 +281,7 @@ class FrozenBasketMissingResponseTest(BasketMixin, TestCase):
 
                 call_command('find_frozen_baskets_and_fulfill', *self.commands_args)
 
-                l.check_present(
+                log.check_present(
                     (
                         LOGGER_NAME, 'INFO',
                         u"No summary info found from CyberSource "
@@ -291,7 +293,7 @@ class FrozenBasketMissingResponseTest(BasketMixin, TestCase):
     @patch('ecommerce.core.management.commands.find_frozen_baskets_and_fulfill.requests')
     def test_cybsersource_transaction_detail_response_success(self, mock_requests, mock_fullfill_order):
 
-        with LogCapture(LOGGER_NAME) as l:
+        with LogCapture(LOGGER_NAME) as log:
 
             post_response = Mock()
             post_response.status_code = 201
@@ -304,7 +306,7 @@ class FrozenBasketMissingResponseTest(BasketMixin, TestCase):
             mock_requests.get.return_value = get_response
 
             call_command('find_frozen_baskets_and_fulfill', *self.commands_args)
-            l.check_present(
+            log.check_present(
                 (
                     LOGGER_NAME, 'INFO',
                     u"Successfully found transaction information from CyberSource "
@@ -312,18 +314,18 @@ class FrozenBasketMissingResponseTest(BasketMixin, TestCase):
                 ),
                 (
                     LOGGER_NAME, 'INFO',
-                    u"Processing Order Number: {order_number} for order creation."
-                        .format(order_number=self.basket.order_number)
+                    u"Processing Order Number: {order_number} for order creation.".format(
+                        order_number=self.basket.order_number)
                 ),
                 (
                     LOGGER_NAME, 'INFO',
-                    u"Order Number: {order_number} doesn't exist, creating it."
-                        .format(order_number=self.basket.order_number)
+                    u"Order Number: {order_number} doesn't exist, creating it.".format(
+                        order_number=self.basket.order_number)
                 ),
                 (
                     LOGGER_NAME, 'INFO',
-                    u"Order Number: {order_number} created successfully."
-                        .format(order_number=self.basket.order_number)
+                    u"Order Number: {order_number} created successfully.".format(
+                        order_number=self.basket.order_number)
                 ),
             )
 
@@ -331,10 +333,9 @@ class FrozenBasketMissingResponseTest(BasketMixin, TestCase):
             self.assertEqual(basket.status, Basket.SUBMITTED)
             self.assertTrue(Order.objects.filter(number=basket.order_number).exists())
 
-
     def test_cybsersource_transaction_detail_response_failure(self):
 
-        with LogCapture(LOGGER_NAME) as l:
+        with LogCapture(LOGGER_NAME) as log:
             with patch(
                     'ecommerce.core.management.commands.find_frozen_baskets_and_fulfill.requests') as mock_requests:
 
@@ -345,9 +346,9 @@ class FrozenBasketMissingResponseTest(BasketMixin, TestCase):
 
                 get_response = Mock()
                 get_response.status_code = 200
-                self.transaction_detail['applicationInformation']= {
+                self.transaction_detail['applicationInformation'] = {
                     "reasonCode": "102",
-                    'applications':[
+                    'applications': [
                         {
                             "name": "ics_auth",
                             "reasonCode": "102",
@@ -361,9 +362,8 @@ class FrozenBasketMissingResponseTest(BasketMixin, TestCase):
                 get_response.content = json.dumps(self.transaction_detail)
                 mock_requests.get.return_value = get_response
 
-
                 call_command('find_frozen_baskets_and_fulfill', *self.commands_args)
-                l.check_present(
+                log.check_present(
                     (
                         LOGGER_NAME, 'INFO',
                         u"CS Transaction information shows unsucccessful transaction logged for Order Number " +
@@ -374,7 +374,7 @@ class FrozenBasketMissingResponseTest(BasketMixin, TestCase):
 
     def test_cybsersource_transaction_detail_application_summary_info_missing(self):
 
-        with LogCapture(LOGGER_NAME) as l:
+        with LogCapture(LOGGER_NAME) as log:
             with patch(
                     'ecommerce.core.management.commands.find_frozen_baskets_and_fulfill.requests') as mock_requests:
 
@@ -389,9 +389,8 @@ class FrozenBasketMissingResponseTest(BasketMixin, TestCase):
                 get_response.content = json.dumps(self.transaction_detail)
                 mock_requests.get.return_value = get_response
 
-
                 call_command('find_frozen_baskets_and_fulfill', *self.commands_args)
-                l.check_present(
+                log.check_present(
                     (
                         LOGGER_NAME, 'INFO',
                         u"Application summary information missing from transaction detail response "
@@ -401,7 +400,7 @@ class FrozenBasketMissingResponseTest(BasketMixin, TestCase):
 
     def test_cybsersource_transaction_response_order_info_missing(self):
 
-        with LogCapture(LOGGER_NAME) as l:
+        with LogCapture(LOGGER_NAME) as log:
             with patch(
                     'ecommerce.core.management.commands.find_frozen_baskets_and_fulfill.requests') as mock_requests:
 
@@ -418,9 +417,8 @@ class FrozenBasketMissingResponseTest(BasketMixin, TestCase):
                 get_response.content = json.dumps(self.transaction_detail)
                 mock_requests.get.return_value = get_response
 
-
                 call_command('find_frozen_baskets_and_fulfill', *self.commands_args)
-                l.check_present(
+                log.check_present(
                     (
                         LOGGER_NAME, 'INFO',
                         u"No order information found in transaction detail json "
@@ -430,7 +428,7 @@ class FrozenBasketMissingResponseTest(BasketMixin, TestCase):
 
     def test_cybsersource_transaction_detail_raise_exception(self):
 
-        with LogCapture(LOGGER_NAME) as l:
+        with LogCapture(LOGGER_NAME) as log:
             with patch(
                     'ecommerce.core.management.commands.find_frozen_baskets_and_fulfill.requests') as mock_requests:
                 post_response = Mock()
@@ -444,10 +442,58 @@ class FrozenBasketMissingResponseTest(BasketMixin, TestCase):
                 mock_requests.get.side_effect = Exception(exception_msg)
 
                 call_command('find_frozen_baskets_and_fulfill', *self.commands_args)
-                l.check_present(
+                log.check_present(
                     (
                         LOGGER_NAME, 'ERROR',
-                        u'Exception occurred while fetching transaction detail for Order Number' 
-                             u'from Transaction api: [{}]: {}'.format(self.basket.order_number, exception_msg)
+                        u'Exception occurred while fetching transaction detail for Order Number'
+                        u'from Transaction api: [{}]: {}'.format(self.basket.order_number, exception_msg)
                     ),
                 )
+
+    def test_generate_digest_successful(self):
+
+        cs_config = CSConfiguration({
+            'API_KEY_ID': 'key',
+            'API_KEY_SECRET': 'secret',
+            'HOST': 'host',
+            'MERCHANT_ID': 'merchant_id',
+        })
+
+        client = CybersourceAPIClient(cs_config)
+        test_message_body = {
+            "offset": "0",
+            "timezone": "America/Chicago",
+            "query": "clientReferenceInformation.code:EDX-100002",
+            "name": "TSSsearch",
+            "limit": "1",
+            "save": "false",
+            "sort": "id:desc, submitTimeUtc:desc"
+        }
+
+        message_body = json.dumps(test_message_body)
+        message_body = message_body.replace(' ', '')
+
+        client.generate_digest(message_body)
+
+        expected_digest = 'SHA-256=sGjC9lhI3WACG0aC7Y6IMCIaqCcRZYCPyllYbcTFEYQ='
+        self.assertEquals(expected_digest, client.digest)
+
+    @patch('ecommerce.core.management.commands.find_frozen_baskets_and_fulfill.CybersourceAPIClient.get_time_iso_format')
+    def test_generate_get_signature(self, iso_date):
+
+        iso_date.return_value = 'Wed, 04 Sep 2019 14:08:55 GMT'
+
+        cs_test_config = settings.CS_API_CONFIG
+
+        cs_config = CSConfiguration({
+            'API_KEY_ID': cs_test_config.get('API_KEY_ID', None),
+            'API_KEY_SECRET': cs_test_config.get('API_KEY_SECRET', None),
+            'HOST': cs_test_config.get('host', None),
+            'MERCHANT_ID': cs_test_config.get('merchant_id', None),
+        })
+
+        client = CybersourceAPIClient(cs_config)
+        expected_get_signature = 'hDHBq05Ozw7RqFasaPP+CUkU2T6fORfQZ6QR5Ka3RB8='
+        client.generate_get_signature('/tss/v2/transactions/{trans_id}'.format(trans_id='1111124987811111304004'))
+
+        self.assertEquals(client.get_signature, expected_get_signature)
