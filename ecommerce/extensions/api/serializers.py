@@ -921,57 +921,20 @@ class EnterpriseCouponOverviewListSerializer(serializers.ModelSerializer):
         )
 
 
-class EnterpriseCouponSearchSerializer(serializers.ModelSerializer):
+class EnterpriseCouponSearchSerializer(serializers.Serializer):  # pylint: disable=abstract-method
     """
     Serializer for enterprise coupon search endpoint.
     """
 
     def to_representation(self, instance):
         """
-        Collect all redemption data if available for couponvouchers associated
-        with the coupon being serialized.
+        Transform redemption/assignment data gathered by view into a serialized
+        representation to hand back in response.
         """
         representation = super(EnterpriseCouponSearchSerializer, self).to_representation(instance)
-
-        redemptions_and_assignments = []
-
-        user = self.context.get('user')
-        if user:
-            for application in instance.applications.filter(user_id=user.id):
-                redemption_data = {}
-                redemption_data['course_title'] = application.order.lines.first().product.course.name
-                redemption_data['course_key'] = application.order.lines.first().product.course.id
-                redemption_data['redeemed_date'] = application.date_created
-                redemption_data['code'] = instance.code
-                redemptions_and_assignments.append(redemption_data)
-        # OAs that do not have VoucherApplications are the ones that signify an
-        # assignment without a redemption. We want to have record of this in
-        # our response
-        no_voucher_application = Q(voucher_application__isnull=True)
-        offer_assignments = OfferAssignment.objects.filter(
-            no_voucher_application,
-            code=instance.code,
-            user_email=self.context.get('user_email'),
-            status__in=[OFFER_ASSIGNED, OFFER_ASSIGNMENT_EMAIL_PENDING],
-        ).distinct()
-        for offer_assignment in offer_assignments:
-            redemption_data = {}
-            redemption_data['course_title'] = None
-            redemption_data['course_key'] = None
-            redemption_data['redeemed_date'] = None
-            redemption_data['code'] = offer_assignment.code
-            redemptions_and_assignments.append(redemption_data)
-
-        representation['redemptions_and_assignments'] = redemptions_and_assignments
-        representation['coupon_id'] = instance.coupon_vouchers.first().coupon.id
-        representation['coupon_name'] = instance.coupon_vouchers.first().coupon.title
+        for k, v in instance.items():
+            representation[k] = v
         return representation
-
-    class Meta(object):
-        model = Voucher
-        fields = (
-            'id',
-        )
 
 
 class EnterpriseCouponListSerializer(serializers.ModelSerializer):

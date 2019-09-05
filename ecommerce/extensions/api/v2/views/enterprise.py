@@ -444,29 +444,58 @@ class EnterpriseCouponViewSet(CouponViewSet):
         if not user_email:
             raise Http404("No user_email query parameter provided.")
 
+        try:
+            user = User.objects.get(email=user_email)
+        except ObjectDoesNotExist:
+            user = None
+
+        enterprise_vouchers = self._collect_enterprise_vouchers_for_search(
+            user_email,
+            user,
+        )
+
+        redemptions_and_assignments = self._form_search_response_data_from_vouchers(
+            enterprise_vouchers,
+            user_email,
+            user,
+        )
+
+        page = self.paginate_queryset(redemptions_and_assignments)
+        serializer = EnterpriseCouponSearchSerializer(
+            page,
+            many=True,
+        )
+        return self.get_paginated_response(serializer.data)
+
+    def _collect_enterprise_vouchers_for_search(self, user_email, user):
+        """
+        Gather vouchers based on offerAssignments and voucherApplications
+        associated with the user (and enterprise specified in request url)
+
+        Returns queryset of Voucher objects, with related tables prefetched.
+        """
+
         # We want vouchers associated with this enterprise. Note:
         # self.get_queryset() here filters (coupon) products out for
         # the enterprise_id value handed to this view
         enterprise_vouchers = Voucher.objects.filter(
             coupon_vouchers__coupon__in=self.get_queryset()
         )
-
         # We want vouchers with OfferAssignments related to the user email
+        # that do not have a voucher_application (aka they have been assigned
+        # but not redeemed)
+        no_voucher_application = Q(voucher_application__isnull=True)
         offer_assignments = OfferAssignment.objects.filter(
+            no_voucher_application,
             user_email=user_email,
+            status__in=[OFFER_ASSIGNED, OFFER_ASSIGNMENT_EMAIL_PENDING],
         )
         vouchers_from_offer_assignments = Q(
             offers__offerassignment__in=offer_assignments
         )
-
-        # Offers can be assigned to a user email even if the user doesnt exist
-        try:
-            user = User.objects.get(email=user_email)
-        except ObjectDoesNotExist:
-            user = None
-
-        # We want vouchers with VoucherApplications related to the user
-        # only if the user exists
+        # We also want vouchers with VoucherApplications related to the user
+        # but only if the user exists (there is a chance it does not, as code
+        # assignment only requires an email, and not an account on the system)
         if user is not None:
             voucher_applications = VoucherApplication.objects.filter(
                 user=user
@@ -481,24 +510,52 @@ class EnterpriseCouponViewSet(CouponViewSet):
             enterprise_vouchers = enterprise_vouchers.filter(
                 vouchers_from_offer_assignments
             )
-
-        # Filter vouchers using these Qs
-        enterprise_vouchers = enterprise_vouchers.distinct().prefetch_related(
+        # Filter and vouchers using these Qs
+        return enterprise_vouchers.distinct().prefetch_related(
             'coupon_vouchers__coupon',
             'applications',
             'applications__order__lines__product__course',
         )
 
-        page = self.paginate_queryset(enterprise_vouchers)
-        serializer = EnterpriseCouponSearchSerializer(
-            page,
-            many=True,
-            context={
-                'user': user,
-                'user_email': user_email,
+    def _form_search_response_data_from_vouchers(self, vouchers, user_email, user):
+        """
+        Build a list of dictionaries that contains the relevant information
+        for each voucher_application (redemption) or offer_assignment (assignment).
+
+        Returns a list of dictionaries to be handed to the serializer for
+        construction of pagination.
+        """
+
+        redemptions_and_assignments = []
+        for voucher in vouchers:
+            coupon_data = {
+                'coupon_id': voucher.coupon_vouchers.first().coupon.id,
+                'coupon_name': voucher.coupon_vouchers.first().coupon.title,
+                'code': voucher.code,
+                'voucher_id': voucher.id,
             }
-        )
-        return self.get_paginated_response(serializer.data)
+            if user is not None:
+                for application in voucher.applications.filter(user_id=user.id):
+                    redemption_data = dict(coupon_data)
+                    redemption_data['course_title'] = application.order.lines.first().product.course.name
+                    redemption_data['course_key'] = application.order.lines.first().product.course.id
+                    redemption_data['redeemed_date'] = application.date_created
+                    redemptions_and_assignments.append(redemption_data)
+
+            no_voucher_application = Q(voucher_application__isnull=True)
+            offer_assignments = OfferAssignment.objects.filter(
+                no_voucher_application,
+                code=voucher.code,
+                user_email=user_email,
+                status__in=[OFFER_ASSIGNED, OFFER_ASSIGNMENT_EMAIL_PENDING],
+            ).distinct()
+            for _ in offer_assignments:
+                redemption_data = dict(coupon_data)
+                redemption_data['course_title'] = None
+                redemption_data['course_key'] = None
+                redemption_data['redeemed_date'] = None
+                redemptions_and_assignments.append(redemption_data)
+        return redemptions_and_assignments
 
     @list_route(url_path=r'(?P<enterprise_id>.+)/overview', permission_classes=[IsAuthenticated])
     @permission_required('enterprise.can_view_coupon', fn=lambda request, enterprise_id: enterprise_id)
