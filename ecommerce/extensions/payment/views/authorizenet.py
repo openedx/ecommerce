@@ -7,20 +7,20 @@ import json
 import logging
 from django.db import transaction
 from django.http import HttpResponse
-from django.views.generic import View
 from django.shortcuts import redirect
 from oscar.apps.partner import strategy
+from rest_framework.views import APIView
 from django.utils.decorators import method_decorator
 from oscar.core.loading import get_class, get_model
-from ecommerce.extensions.payment.exceptions import (
-    InvalidBasketError,
-    MissingTransactionDetailError
-)
+from django.views.decorators.csrf import csrf_exempt
+from django.core.exceptions import ObjectDoesNotExist
 from oscar.apps.payment.exceptions import TransactionDeclined
 from ecommerce.core.url_utils import get_lms_dashboard_url
 from ecommerce.notifications.notifications import send_notification
+from ecommerce.extensions.payment.exceptions import InvalidBasketError
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
 from ecommerce.extensions.payment.processors.authorizenet import AuthorizeNet
+
 
 logger = logging.getLogger(__name__)
 
@@ -35,7 +35,8 @@ PaymentProcessorResponse = get_model('payment', 'PaymentProcessorResponse')
 
 NOTIFICATION_TYPE_AUTH_CAPTURE_CREATED = "net.authorize.payment.authcapture.created"
 
-class AuthorizeNetNotificationView(EdxOrderPlacementMixin, View):
+
+class AuthorizeNetNotificationView(EdxOrderPlacementMixin, APIView):
     """
         Execute an approved AuthorizeNet payment and place an order for paid products.
     """
@@ -49,6 +50,7 @@ class AuthorizeNetNotificationView(EdxOrderPlacementMixin, View):
     # is active, since that would break atomicity. Without an order present in the database
     # at the time fulfillment is attempted, asynchronous order fulfillment tasks will fail.
     @method_decorator(transaction.non_atomic_requests)
+    @csrf_exempt
     def dispatch(self, request, *args, **kwargs):
         return super(AuthorizeNetNotificationView, self).dispatch(request, *args, **kwargs)
 
@@ -114,12 +116,11 @@ class AuthorizeNetNotificationView(EdxOrderPlacementMixin, View):
             )
 
         except Exception:  # pylint: disable=broad-except
-            logger.exception(
-                'An error occurred while parsing the billing address for \
-                    basket [%d]. No billing address will be stored for \
-                        the resulting order [%s].',
-                basket.id,
-                order_number)
+            exception_msg = (
+                'An error occurred while parsing the billing address for basket [%d]. '
+                'No billing address will be stored for the resulting order [%s].'
+            )
+            logger.exception(exception_msg, basket.id, order_number)
             billing_address = None
         return billing_address
 
@@ -162,10 +163,13 @@ class AuthorizeNetNotificationView(EdxOrderPlacementMixin, View):
             again after the particular interval.
         """
         course_id = None
-        notification = request.POST
+        notification = request.data
         if notification.get("eventType") != NOTIFICATION_TYPE_AUTH_CAPTURE_CREATED:
-            logger.error('Received AuthroizeNet notifciation with event_type [%s]. Currently, We are not handling \
-            such type of notifications.', notification.get("eventType"))
+            error_meassage = (
+                'Received AuthroizeNet notifciation with event_type [%s]. Currently, '
+                'We are not handling such type of notifications.'
+            )
+            logger.error(error_meassage, notification.get("eventType"))
             return HttpResponse(status=204)
 
         notification_id = notification.get("notificationId")
@@ -180,11 +184,6 @@ class AuthorizeNetNotificationView(EdxOrderPlacementMixin, View):
 
         try:
             transaction_details = self.payment_processor.get_transaction_detail(transaction_id)
-
-            if not transaction_details:
-                logger.error('Unable to get Authorizenet transaction detail using transaction_id [%s].', transaction_id)
-                raise MissingTransactionDetailError
-
             order_number = str(transaction_details.transaction.order.invoiceNumber)
             basket_id = OrderNumberGenerator().basket_id(order_number)
 
@@ -214,13 +213,11 @@ class AuthorizeNetNotificationView(EdxOrderPlacementMixin, View):
             course_id = product.course_id
             if payload.get("responseCode") != 1:
                 transaction_status = "Declined" if payload.get("responseCode") == 2 else "Error"
-                logger.error(
-                    'AuthorizeNet transaction of transaction_id [%s] associated with basket [%s] has \
-                    been rejected with status: [%s].',
-                    transaction_id,
-                    basket_id,
-                    transaction_status
+                error_message = (
+                    'AuthorizeNet transaction of transaction_id [%s] associated with basket [%s] has '
+                    'been rejected with status: [%s].'
                 )
+                logger.error(error_message, transaction_id, basket_id, transaction_status)
                 course_title = product.title
                 self._send_transaction_declined_email(basket, transaction_status, course_title)
 
@@ -230,8 +227,10 @@ class AuthorizeNetNotificationView(EdxOrderPlacementMixin, View):
                     self._call_handle_order_placement(basket, request, transaction_details)
 
         except Exception:
-            logger.exception('An error occurred while processing the AuthorizeNet \
-                payment for basket [%d].', basket.id)
+            logger.exception(
+                'An error occurred while processing the AuthorizeNet payment for transaction_id [%s].',
+                transaction_id
+            )
         finally:
             return HttpResponse(status=200)
 
