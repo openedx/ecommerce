@@ -928,13 +928,10 @@ class EnterpriseCouponSearchSerializer(serializers.Serializer):  # pylint: disab
 
     def to_representation(self, instance):
         """
-        Transform redemption/assignment data gathered by view into a serialized
+        Return the data gathered by view for the serialized
         representation to hand back in response.
         """
-        representation = super(EnterpriseCouponSearchSerializer, self).to_representation(instance)
-        for k, v in instance.items():
-            representation[k] = v
-        return representation
+        return instance
 
 
 class EnterpriseCouponListSerializer(serializers.ModelSerializer):
