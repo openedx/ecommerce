@@ -235,6 +235,7 @@ class AuthorizeNetNotificationView(EdxOrderPlacementMixin, APIView):
         finally:
             return HttpResponse(status=200)
 
+
 def handle_redirection(request):
     """
         Handle AuthorizeNet redirection. This view will be called when a user clicks on continue button
@@ -245,7 +246,7 @@ def handle_redirection(request):
     """
     lms_dashboard = get_lms_dashboard_url()
     response = redirect(lms_dashboard)
-    domain = settings.get('ECOMMERCE_COOKIE_DOMAIN')
+    domain = settings.ECOMMERCE_COOKIE_DOMAIN
     course_id_hash = request.GET.get('course')
     if course_id_hash:
         response.set_cookie('pendingTransactionCourse', course_id_hash, domain=domain)
