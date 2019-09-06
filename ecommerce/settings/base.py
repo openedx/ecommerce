@@ -662,10 +662,11 @@ SYSTEM_TO_FEATURE_ROLE_MAPPING = {
 
 # CYBERSOURCE API CONFIGURATION
 CS_API_CONFIG = {
-    'host': 'apitest.cybersource.com',
-    'merchant_id': 'edx_org',
-    'API_KEY_ID': os.environ.get('API_KEY_ID', None),
-    'API_KEY_SECRET': os.environ.get('API_KEY_SECRET', None)
+    'host': os.environ.get('CYBSERSOURCE_API_ROOT', None),
+    'merchant_id': os.environ.get('EDX_MERCHANT_ID', None),
+    'search_uri': '/tss/v2/searches',
+    'api_key_id': os.environ.get('API_KEY_ID', None),
+    'api_secret_key': os.environ.get('API_SECRET_KEY', None)
 }
 # END CYBSERSOURCE API CONFIGURATION
 

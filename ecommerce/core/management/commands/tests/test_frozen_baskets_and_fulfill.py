@@ -5,7 +5,6 @@ from __future__ import absolute_import
 
 import json
 
-from django.conf import settings
 from django.core.management import call_command
 from django.core.management.base import CommandError
 from django.test.utils import override_settings
@@ -445,7 +444,7 @@ class FrozenBasketMissingResponseTest(BasketMixin, TestCase):
 
         cs_config = CSConfiguration()
         client = CybersourceAPIClient(cs_config)
-        
+
         test_message_body = {
             "offset": "0",
             "timezone": "America/Chicago",
@@ -464,7 +463,7 @@ class FrozenBasketMissingResponseTest(BasketMixin, TestCase):
         expected_digest = 'SHA-256=sGjC9lhI3WACG0aC7Y6IMCIaqCcRZYCPyllYbcTFEYQ='
         self.assertEquals(expected_digest, client.digest)
 
-    @patch('ecommerce.core.management.commands.find_frozen_baskets_and_fulfill.CybersourceAPIClient.get_time_iso_format') # pylint: disable=line-too-long
+    @patch('ecommerce.core.management.commands.find_frozen_baskets_and_fulfill.CybersourceAPIClient.get_time_iso_format')  # pylint: disable=line-too-long
     def test_generate_get_signature(self, iso_date):
 
         iso_date.return_value = 'Wed, 04 Sep 2019 14:08:55 GMT'

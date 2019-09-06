@@ -5,7 +5,7 @@ import hashlib
 import hmac
 import json
 import logging
-from datetime import (datetime, timedelta)
+from datetime import datetime, timedelta
 from email.utils import formatdate
 from time import mktime
 from urlparse import urlparse
@@ -40,18 +40,18 @@ DEFAULT_END_DELTA_HOUR = 0
 
 
 class CSConfiguration(object):
-    
+
     def __init__(self):
-        
+
         cs_config = settings.CS_API_CONFIG
-        
+
         self.key = cs_config.get('api_key_id', None)
         self.secret_key = cs_config.get('api_secret_key', None)
         self.host = cs_config.get('host', None)
         self.merchant_id = cs_config.get('merchant_id', None)
         self.search_uri = cs_config.get('search_uri', None)
-        
-        
+
+
 class CybersourceAPIClient(object):
 
     def __init__(self, cs_config):
@@ -247,7 +247,7 @@ class Command(BaseCommand):
             raise CommandError(u"Missing API Key ID/KeySecret in configuration")
         if not cs_config.host or not cs_config.merchant_id:
             raise CommandError(u"Missing API HOST/MERCHANT ID in configuration")
-        
+
         frozen_baskets = Basket.objects.filter(status='Frozen', date_submitted=None)
 
         frozen_baskets = frozen_baskets.filter(Q(date_created__gte=start, date_created__lt=end) |
@@ -476,7 +476,7 @@ class Command(BaseCommand):
                     ).value_text == 'True'
                 except BasketAttribute.DoesNotExist:
                     email_opt_in = False
-                    
+
                 fulfill_order.delay(
                     order.number,
                     site_code=order.site.siteconfiguration.partner.short_code,
