@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 import base64
 import json
 import logging
+from django.conf import settings
 from django.db import transaction
 from django.http import HttpResponse
 from django.shortcuts import redirect
@@ -244,9 +245,9 @@ def handle_redirection(request):
     """
     lms_dashboard = get_lms_dashboard_url()
     response = redirect(lms_dashboard)
-
+    domain = settings.get('ECOMMERCE_COOKIE_DOMAIN')
     course_id_hash = request.GET.get('course')
     if course_id_hash:
-        response.set_cookie('pendingTransactionCourse', course_id_hash)
+        response.set_cookie('pendingTransactionCourse', course_id_hash, domain=domain)
 
     return response

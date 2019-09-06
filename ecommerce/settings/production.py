@@ -80,7 +80,7 @@ bluefin_dict = {
 }
 
 authorizenet_dict = {
-    'merchant_auth_name': config_from_yaml.get('AUTHORIZENET_AUTH_NAME'),
+    'merchant_auth_name': config_from_yaml.get('AUTHORIZENET_MERCHANT_AUTH_NAME'),
     'transaction_key': config_from_yaml.get('AUTHORIZENET_TRANSACTION_KEY'),
     'redirect_url': config_from_yaml.get('AUTHORIZENET_REDIRECT_URL')
 }
@@ -99,3 +99,4 @@ for __, configs in PAYMENT_PROCESSOR_CONFIG.iteritems():
 # END PAYMENT PROCESSOR OVERRIDES
 
 ENTERPRISE_API_URL = urljoin(ENTERPRISE_SERVICE_URL, 'api/v1/')
+ECOMMERCE_COOKIE_DOMAIN = "ucsd.edu"
