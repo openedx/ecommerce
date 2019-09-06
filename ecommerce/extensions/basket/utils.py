@@ -15,7 +15,7 @@ from oscar.apps.basket.signals import voucher_addition
 from oscar.core.loading import get_class, get_model
 from six.moves.urllib.parse import unquote, urlencode
 
-from ecommerce.core.url_utils import absolute_redirect
+from ecommerce.core.url_utils import absolute_url
 from ecommerce.courses.utils import mode_for_product
 from ecommerce.extensions.analytics.utils import track_segment_event
 from ecommerce.extensions.experimentation.stable_bucketing import stable_bucketing_hash_group
@@ -49,7 +49,7 @@ logger = logging.getLogger(__name__)
 def redirect_url_to_basket_or_payment(request):
     redirect_url = get_payment_microfrontend_url_if_configured(request)
     if not redirect_url:
-        redirect_url = absolute_redirect(request, 'basket:summary')
+        redirect_url = absolute_url(request, 'basket:summary')
     return redirect_url
 
 

@@ -464,7 +464,7 @@ class CouponRedeemViewTests(CouponMixin, DiscoveryTestMixin, LmsApiMockMixin, En
         self.mock_access_token_response()
 
         self.create_coupon(catalog=self.catalog, code=COUPON_CODE, benefit_value=5)
-        expected_url = self.get_full_url(path=reverse('basket:summary'))
+        expected_url = self.get_full_url(path=reverse('basket:summary')) + '?coupon_redeem_redirect=1'
         self.assert_redemption_page_redirects(expected_url)
 
     @httpretty.activate
