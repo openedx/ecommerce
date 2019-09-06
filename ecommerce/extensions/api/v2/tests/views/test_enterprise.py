@@ -3,6 +3,7 @@ from __future__ import absolute_import, unicode_literals
 
 import datetime
 import json
+from collections import Counter
 from uuid import uuid4
 
 import ddt
@@ -1040,9 +1041,9 @@ class EnterpriseCouponViewSetRbacTests(
 
         results = response.json()['results']
         assert len(results) == 1
-        assert results[0]['id'] == voucher1.id
-        assert results[0]['redemptions_and_assignments'][0]['code'] == voucher1.code
-        assert results[0]['redemptions_and_assignments'][0]['course_key'] is None
+        assert results[0]['voucher_id'] == voucher1.id
+        assert results[0]['code'] == voucher1.code
+        assert results[0]['course_key'] is None
 
     def test_permission_search_200(self):
         """
@@ -1098,27 +1099,39 @@ class EnterpriseCouponViewSetRbacTests(
             data={'user_email': self.user.email}
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-
+        results = response.json()['results']
         voucher1 = coupon1.coupon_vouchers.first().vouchers.first()
         voucher2 = coupon2.coupon_vouchers.first().vouchers.first()
         voucher3 = coupon3.coupon_vouchers.first().vouchers.first()
 
-        for voucher in response.json()['results']:
-            if voucher['id'] == voucher1.id:
-                assert len(voucher['redemptions_and_assignments']) == 1
-                assert voucher['redemptions_and_assignments'][0]['code'] == voucher1.code
-                assert voucher['redemptions_and_assignments'][0]['course_key'] is None
-            elif voucher['id'] == voucher2.id:
-                assert len(voucher['redemptions_and_assignments']) == 2
-                assert voucher['redemptions_and_assignments'][0]['code'] == voucher2.code
-                assert voucher['redemptions_and_assignments'][0]['course_key'] is None
-                assert voucher['redemptions_and_assignments'][1]['course_key'] is None
-            elif voucher['id'] == voucher3.id:
-                assert len(voucher['redemptions_and_assignments']) == 1
-                assert voucher['redemptions_and_assignments'][0]['code'] == voucher3.code
-                course_key = coupon3.coupon_vouchers.first().vouchers.first(
-                ).applications.first().order.lines.first().product.course.id
-                assert voucher['redemptions_and_assignments'][0]['course_key'] == course_key
+        # assert counts are right
+        assign_redeem_counts = Counter(item['coupon_id'] for item in results)
+        assert assign_redeem_counts[coupon1.id] == 1
+        assert assign_redeem_counts[coupon2.id] == 2
+        assert assign_redeem_counts[coupon3.id] == 1
+
+        # assert values for each are right
+        for item in results:
+            if item['voucher_id'] == voucher1.id:
+                assert item['coupon_id'] == coupon1.id
+                assert item['coupon_name'] == coupon1.title
+                assert item['code'] == voucher1.code
+                assert item['course_key'] is None
+                assert item['course_title'] is None
+            elif item['voucher_id'] == voucher2.id:
+                assert item['coupon_id'] == coupon2.id
+                assert item['coupon_name'] == coupon2.title
+                assert item['code'] == voucher2.code
+                assert item['course_key'] is None
+                assert item['course_title'] is None
+            elif item['voucher_id'] == voucher3.id:
+                assert item['coupon_id'] == coupon3.id
+                assert item['coupon_name'] == coupon3.title
+                assert item['code'] == voucher3.code
+                course = coupon3.coupon_vouchers.first().vouchers.first(
+                ).applications.first().order.lines.first().product.course
+                assert item['course_key'] == course.id
+                assert item['course_title'] == course.name
             else:
                 assert False
 
