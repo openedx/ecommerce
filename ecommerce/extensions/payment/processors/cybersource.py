@@ -317,11 +317,11 @@ class Cybersource(ApplePayMixin, BaseClientSidePaymentProcessor):
                 else:
                     raise ExcessivePaymentForOrderError
 
-        # Raise an exception if the authorized amount differs from the requested amount.
-        # Note (CCB): We should never reach this point in production since partial authorization is disabled
-        # for our account, and should remain that way until we have a proper solution to allowing users to
-        # complete authorization for the entire order
-        if response['auth_amount'] and response['auth_amount'] != response['req_amount']:
+        if 'auth_amount' in response and response['auth_amount'] and response['auth_amount'] != response['req_amount']:
+            # Raise an exception if the authorized amount differs from the requested amount.
+            # Note (CCB): We should never reach this point in production since partial authorization is disabled
+            # for our account, and should remain that way until we have a proper solution to allowing users to
+            # complete authorization for the entire order
             raise PartialAuthorizationError
 
         currency = response['req_currency']
