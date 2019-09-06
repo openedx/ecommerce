@@ -27,6 +27,7 @@ class ConditionAdminExtended(ConditionAdmin):
 class ConditionalOfferAdminExtended(ConditionalOfferAdmin):
     list_display = ('name', 'offer_type', 'start_datetime', 'end_datetime',
                     'condition', 'benefit', 'total_discount', 'partner')
+    raw_id_fields = ('benefit', 'condition',)
     fieldsets = (
         (None, {
             'fields': ('name', 'description', 'partner', 'offer_type', 'condition',

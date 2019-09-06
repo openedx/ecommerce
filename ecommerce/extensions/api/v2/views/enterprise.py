@@ -4,7 +4,7 @@ import logging
 
 import six
 from django.contrib.auth import get_user_model
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.db.models import Q
 from django.http import Http404
 from django.shortcuts import get_object_or_404
@@ -451,25 +451,39 @@ class EnterpriseCouponViewSet(CouponViewSet):
             coupon_vouchers__coupon__in=self.get_queryset()
         )
 
-        # We want vouchers with OfferAssignments related to the user
+        # We want vouchers with OfferAssignments related to the user email
         offer_assignments = OfferAssignment.objects.filter(
             user_email=user_email,
         )
         vouchers_from_offer_assignments = Q(
             offers__offerassignment__in=offer_assignments
         )
+
+        # Offers can be assigned to a user email even if the user doesnt exist
+        try:
+            user = User.objects.get(email=user_email)
+        except ObjectDoesNotExist:
+            user = None
+
         # We want vouchers with VoucherApplications related to the user
-        user = User.objects.get(email=user_email)
-        voucher_applications = VoucherApplication.objects.filter(
-            user=user
-        )
-        vouchers_from_voucher_applications = Q(
-            applications__in=voucher_applications
-        )
+        # only if the user exists
+        if user is not None:
+            voucher_applications = VoucherApplication.objects.filter(
+                user=user
+            )
+            vouchers_from_voucher_applications = Q(
+                applications__in=voucher_applications
+            )
+            enterprise_vouchers = enterprise_vouchers.filter(
+                vouchers_from_offer_assignments | vouchers_from_voucher_applications
+            )
+        else:
+            enterprise_vouchers = enterprise_vouchers.filter(
+                vouchers_from_offer_assignments
+            )
+
         # Filter vouchers using these Qs
-        enterprise_vouchers = enterprise_vouchers.filter(
-            vouchers_from_offer_assignments | vouchers_from_voucher_applications
-        ).distinct().prefetch_related(
+        enterprise_vouchers = enterprise_vouchers.distinct().prefetch_related(
             'coupon_vouchers__coupon',
             'applications',
             'applications__order__lines__product__course',
@@ -479,7 +493,10 @@ class EnterpriseCouponViewSet(CouponViewSet):
         serializer = EnterpriseCouponSearchSerializer(
             page,
             many=True,
-            context={'user': user}
+            context={
+                'user': user,
+                'user_email': user_email,
+            }
         )
         return self.get_paginated_response(serializer.data)
 
