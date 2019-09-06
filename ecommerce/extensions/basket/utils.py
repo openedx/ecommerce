@@ -56,8 +56,8 @@ def redirect_url_to_basket_or_payment(request):
 def get_payment_microfrontend_url_if_configured(request):
     if _use_payment_microfrontend(request):
         return request.site.siteconfiguration.payment_microfrontend_url
-    else:
-        return None
+
+    return None
 
 
 def _force_payment_microfrontend_bucket(request):
