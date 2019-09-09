@@ -33,7 +33,7 @@ from ecommerce.enterprise.utils import (
     get_enterprise_customer_from_voucher
 )
 from ecommerce.extensions.api import exceptions
-from ecommerce.extensions.basket.utils import prepare_basket, get_payment_microfrontend_or_basket_url
+from ecommerce.extensions.basket.utils import get_payment_microfrontend_or_basket_url, prepare_basket
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
 from ecommerce.extensions.checkout.utils import get_receipt_page_url
 from ecommerce.extensions.offer.utils import get_redirect_to_email_confirmation_if_required
