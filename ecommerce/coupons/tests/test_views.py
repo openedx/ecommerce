@@ -464,8 +464,7 @@ class CouponRedeemViewTests(CouponMixin, DiscoveryTestMixin, LmsApiMockMixin, En
         self.mock_access_token_response()
 
         self.create_coupon(catalog=self.catalog, code=COUPON_CODE, benefit_value=5)
-        expected_url = self.get_full_url(path=reverse('basket:summary')) + '?coupon_redeem_redirect=1'
-        self.assert_redemption_page_redirects(expected_url)
+        self.assert_redemption_page_redirects(self.get_coupon_redeem_success_expected_redirect_url())
 
     @httpretty.activate
     def test_basket_redirect_enrollment_code(self):
@@ -732,8 +731,7 @@ class CouponRedeemViewTests(CouponMixin, DiscoveryTestMixin, LmsApiMockMixin, En
         self.mock_access_token_response()
 
         self.create_coupon(catalog=self.catalog, code=COUPON_CODE, benefit_value=5)
-        expected_url = self.get_full_url(path=reverse('basket:summary'))
-        self.assert_redemption_page_redirects(expected_url)
+        self.assert_redemption_page_redirects(self.get_coupon_redeem_success_expected_redirect_url())
 
     @httpretty.activate
     def test_inactive_user_email_domain_restricted_coupon_redemption(self):
@@ -748,6 +746,9 @@ class CouponRedeemViewTests(CouponMixin, DiscoveryTestMixin, LmsApiMockMixin, En
 
         response = self.client.get(self.redeem_url_with_params())
         self.assert_redirected_to_email_confirmation(response)
+
+    def get_coupon_redeem_success_expected_redirect_url(self):
+        return self.get_full_url(path=reverse('basket:summary')) + '?coupon_redeem_redirect=1'
 
 
 @ddt.ddt
