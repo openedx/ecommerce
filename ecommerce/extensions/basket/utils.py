@@ -15,10 +15,18 @@ from oscar.apps.basket.signals import voucher_addition
 from oscar.core.loading import get_class, get_model
 from six.moves.urllib.parse import unquote, urlencode
 
+from ecommerce.core.url_utils import absolute_url
 from ecommerce.courses.utils import mode_for_product
+from ecommerce.extensions.analytics.utils import track_segment_event
+from ecommerce.extensions.experimentation.stable_bucketing import stable_bucketing_hash_group
 from ecommerce.extensions.offer.constants import CUSTOM_APPLICATOR_USE_FLAG
 from ecommerce.extensions.order.exceptions import AlreadyPlacedOrderException
 from ecommerce.extensions.order.utils import UserAlreadyPlacedOrder
+from ecommerce.extensions.payment.constants import (
+    ENABLE_MICROFRONTEND_FOR_BASKET_PAGE_FLAG_NAME,
+    FORCE_MICROFRONTEND_BUCKET_FLAG_NAME,
+    PAYMENT_MFE_BUCKET
+)
 from ecommerce.extensions.payment.utils import embargo_check
 from ecommerce.referrals.models import Referral
 
@@ -36,6 +44,65 @@ Refund = get_model('refund', 'Refund')
 Voucher = get_model('voucher', 'Voucher')
 
 logger = logging.getLogger(__name__)
+
+
+def get_payment_microfrontend_or_basket_url(request):
+    url = get_payment_microfrontend_url_if_configured(request)
+    if not url:
+        url = absolute_url(request, 'basket:summary')
+    return url
+
+
+def get_payment_microfrontend_url_if_configured(request):
+    if _use_payment_microfrontend(request):
+        return request.site.siteconfiguration.payment_microfrontend_url
+
+    return None
+
+
+def _force_payment_microfrontend_bucket(request):
+    """
+    Return whether the user for the current request should be forced into
+    the payment MFE bucket.
+    """
+    return waffle.flag_is_active(request, FORCE_MICROFRONTEND_BUCKET_FLAG_NAME)
+
+
+def _use_payment_microfrontend(request):
+    """
+    Return whether the current request should use the payment MFE.
+    """
+    if (
+            request.site.siteconfiguration.enable_microfrontend_for_basket_page and
+            request.site.siteconfiguration.payment_microfrontend_url
+    ):
+        # Force the user into the MFE bucket for testing
+        payment_mfe_bucket_forced = _force_payment_microfrontend_bucket(request)
+        if payment_mfe_bucket_forced:
+            bucket = PAYMENT_MFE_BUCKET
+        else:
+            # Bucket 50% of users to use the payment MFE for A/B testing.
+            bucket = stable_bucketing_hash_group("payment-mfe", 2, request.user.username)
+
+        payment_microfrontend_flag_enabled = waffle.flag_is_active(
+            request,
+            ENABLE_MICROFRONTEND_FOR_BASKET_PAGE_FLAG_NAME
+        )
+
+        track_segment_event(
+            request.site,
+            request.user,
+            'edx.bi.experiment.user.bucketed',
+            {
+                'bucket': bucket,
+                'experiment': 'payment-mfe',
+                'forcedIntoBucket': payment_mfe_bucket_forced,
+                'paymentMfeEnabled': payment_microfrontend_flag_enabled,
+            },
+        )
+        return bucket == PAYMENT_MFE_BUCKET and payment_microfrontend_flag_enabled
+    else:
+        return False
 
 
 @newrelic.agent.function_trace()
@@ -250,7 +317,7 @@ def _record_utm_basket_attribution(referral, request):
       Attribute this user's basket to UTM data, if applicable.
     """
     utm_cookie_name = request.site.siteconfiguration.utm_cookie_name
-    utm_cookie = request.COOKIES.get(utm_cookie_name, "{}")
+    utm_cookie = request.COOKIES.get(utm_cookie_name, "{}") if utm_cookie_name else {}
     utm = json.loads(utm_cookie)
 
     for attr_name in ['utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content']:
