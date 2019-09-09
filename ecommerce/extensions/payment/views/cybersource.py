@@ -264,6 +264,7 @@ class CybersourceNotificationMixin(CyberSourceProcessorMixin, OrderCreationMixin
         # This validation is performed in the handle_payment method. After that method succeeds, the response can be
         # safely assumed to have originated from CyberSource.
         basket = None
+        transaction_id = None
         notification = notification or {}
         unhandled_exception_logging = True
 

@@ -1,5 +1,6 @@
 from __future__ import absolute_import
 
+import mock
 from django.conf import settings
 from django.contrib.auth.models import AnonymousUser
 from django.test.client import RequestFactory
@@ -41,11 +42,13 @@ class BasketMiddlewareTests(TestCase):
         self.assertEqual(None, cookie_basket)
         self.assertIn("oscar_open_basket", request.cookies_to_delete)
 
-    def test_get_basket_with_single_existing_basket(self):
+    @mock.patch('edx_django_utils.monitoring.set_custom_metric')
+    def test_get_basket_with_single_existing_basket(self, mock_set_custom_metric):
         """ If the user already has one open basket, verify the middleware returns the basket. """
         self.request.user = self.create_user()
         basket = BasketFactory(owner=self.request.user, site=self.site)
         self.assertEqual(basket, self.middleware.get_basket(self.request))
+        mock_set_custom_metric.assert_called_with('basket_id', basket.id)
 
     def test_get_basket_with_multiple_existing_baskets(self):
         """ If the user already has multiple open baskets, verify the middleware merges the existing
@@ -71,7 +74,8 @@ class BasketMiddlewareTests(TestCase):
         self.assertEqual(siteless_basket, actual)
         self.assertEqual(siteless_basket.status, Basket.OPEN)
 
-    def test_get_basket_cache(self):
+    @mock.patch('edx_django_utils.monitoring.set_custom_metric')
+    def test_get_basket_cache(self, mock_set_custom_metric):
         """ Verify subsequent calls to the method utilize the middleware's memoization/caching. """
         # pylint: disable=protected-access
         self.request.user = self.create_user()
@@ -80,6 +84,7 @@ class BasketMiddlewareTests(TestCase):
         self.middleware.get_basket(self.request)
         self.assertEqual(self.request._basket_cache, basket)
         self.assertEqual(self.middleware.get_basket(self.request), self.request._basket_cache)
+        mock_set_custom_metric.assert_called_with('basket_id', basket.id)
 
     def test_get_basket_with_anonymous_user(self):
         """ Verify a new basket is created for anonymous users without cookies. """

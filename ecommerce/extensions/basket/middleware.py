@@ -2,6 +2,7 @@ from __future__ import absolute_import
 
 import newrelic.agent
 import waffle
+from edx_django_utils import monitoring as monitoring_utils
 from oscar.apps.basket.middleware import BasketMiddleware as OscarBasketMiddleware
 from oscar.core.loading import get_class, get_model
 
@@ -31,6 +32,7 @@ class BasketMiddleware(OscarBasketMiddleware):
         """ Return the open basket for this request """
         # pylint: disable=protected-access
         if request._basket_cache is not None:
+            monitoring_utils.set_custom_metric('basket_id', request._basket_cache.id)
             return request._basket_cache
 
         manager = Basket.open
@@ -68,6 +70,10 @@ class BasketMiddleware(OscarBasketMiddleware):
 
         # Cache basket instance for the duration of this request
         request._basket_cache = basket
+        if request._basket_cache is not None:
+            monitoring_utils.set_custom_metric('basket_id', request._basket_cache.id)
+        else:  # pragma: no cover
+            pass
 
         return basket
 
