@@ -43,9 +43,9 @@ from ecommerce.extensions.basket.utils import (
     add_utm_params_to_url,
     apply_voucher_on_basket_and_check_discount,
     get_basket_switch_data,
+    get_payment_microfrontend_or_basket_url,
     get_payment_microfrontend_url_if_configured,
     prepare_basket,
-    get_payment_microfrontend_or_basket_url,
     validate_voucher
 )
 from ecommerce.extensions.offer.constants import DYNAMIC_DISCOUNT_FLAG
