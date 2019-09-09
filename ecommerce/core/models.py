@@ -22,7 +22,7 @@ from edx_rest_api_client.client import EdxRestApiClient
 from jsonfield.fields import JSONField
 from requests.exceptions import ConnectionError, Timeout
 from simple_history.models import HistoricalRecords
-from six.moves.urllib.parse import urljoin, urlsplit, urlunsplit
+from six.moves.urllib.parse import urljoin, urlsplit
 from slumber.exceptions import HttpNotFoundError, SlumberBaseException
 
 from analytics import Client as SegmentClient
@@ -31,7 +31,6 @@ from ecommerce.core.exceptions import MissingLmsUserIdException
 from ecommerce.core.utils import log_message_and_raise_validation_error
 from ecommerce.extensions.payment.exceptions import ProcessorNotFoundError
 from ecommerce.extensions.payment.helpers import get_processor_class, get_processor_class_by_name
-from ecommerce.journals.constants import JOURNAL_DISCOVERY_API_PATH  # TODO: journals dependency
 
 log = logging.getLogger(__name__)
 
@@ -184,12 +183,6 @@ class SiteConfiguration(models.Model):
         verbose_name=_('Discovery API URL'),
         null=False,
         blank=False,
-    )
-    # TODO: journals dependency
-    journals_api_url = models.URLField(
-        verbose_name=_('Journals Service API URL'),
-        null=True,
-        blank=True
     )
     enable_apple_pay = models.BooleanField(
         # Translators: Do not translate "Apple Pay"
@@ -430,26 +423,6 @@ class SiteConfiguration(models.Model):
         """
 
         return EdxRestApiClient(self.discovery_api_url, jwt=self.access_token)
-
-    # TODO: journals dependency
-    @cached_property
-    def journal_discovery_api_client(self):
-        """
-        Returns an Journal API client to access the Discovery service.
-
-        Returns:
-            EdxRestApiClient: The client to access the Journal API in the Discovery service.
-        """
-        split_url = urlsplit(self.discovery_api_url)
-        journal_discovery_url = urlunsplit([
-            split_url.scheme,
-            split_url.netloc,
-            JOURNAL_DISCOVERY_API_PATH,
-            split_url.query,
-            split_url.fragment
-        ])
-
-        return EdxRestApiClient(journal_discovery_url, jwt=self.access_token)
 
     @cached_property
     def embargo_api_client(self):

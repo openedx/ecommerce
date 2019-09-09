@@ -80,7 +80,6 @@ FULFILLMENT_MODULES = [
     'ecommerce.extensions.fulfillment.modules.EnrollmentCodeFulfillmentModule',
     'ecommerce.extensions.fulfillment.modules.CourseEntitlementFulfillmentModule',
     'ecommerce.extensions.fulfillment.modules.DonationsFromCheckoutTestFulfillmentModule',
-    'ecommerce.journals.fulfillment.modules.JournalFulfillmentModule'  # TODO: journals dependency
 ]
 
 HAYSTACK_CONNECTIONS = {
