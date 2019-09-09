@@ -4,6 +4,7 @@ import json
 import logging
 from functools import wraps
 
+from django.db import transaction
 from six.moves.urllib.parse import urlunsplit  # pylint: disable=import-error
 
 from ecommerce.courses.utils import mode_for_product
@@ -171,7 +172,9 @@ def track_segment_event(site, user, event, properties):
             'url': page,
         }
     }
-    return site.siteconfiguration.segment_client.track(user_tracking_id, event, properties, context=context)
+    return transaction.on_commit(
+        lambda: site.siteconfiguration.segment_client.track(user_tracking_id, event, properties,
+                                                            context=context))
 
 
 def translate_basket_line_for_segment(line):

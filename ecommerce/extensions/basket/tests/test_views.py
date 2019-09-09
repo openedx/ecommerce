@@ -116,7 +116,8 @@ class BasketAddItemsViewTests(
             [product.stockrecords.first().partner_sku for product in products],
             utm_source='test',
         )
-        self.assertEqual(response.url, '/basket/?utm_source=test')
+        expected_url = self.get_full_url(reverse('basket:summary')) + '?utm_source=test'
+        self.assertEqual(response.url, expected_url)
 
     def test_redirect_to_basket_summary(self):
         """
@@ -144,7 +145,7 @@ class BasketAddItemsViewTests(
         response = self._get_response(self.stock_record.partner_sku, utm_source='test')
 
         expect_microfrontend = enable_redirect and set_url
-        expected_url = microfrontend_url if expect_microfrontend else '/basket/'
+        expected_url = microfrontend_url if expect_microfrontend else self.get_full_url(reverse('basket:summary'))
         expected_url += '?utm_source=test'
         self.assertRedirects(response, expected_url, status_code=303, fetch_redirect_response=False)
 

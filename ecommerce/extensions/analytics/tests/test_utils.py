@@ -4,10 +4,10 @@ import json
 
 import ddt
 import mock
+from analytics import Client
 from django.contrib.auth.models import AnonymousUser
 from django.test.client import RequestFactory
 
-from analytics import Client
 from ecommerce.core.models import User  # pylint: disable=unused-import
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.extensions.analytics.utils import (
