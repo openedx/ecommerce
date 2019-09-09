@@ -8,10 +8,12 @@ Note:
 
 from __future__ import absolute_import
 
+from django.utils.deprecation import MiddlewareMixin
+
 from ecommerce.theming.models import SiteTheme
 
 
-class CurrentSiteThemeMiddleware(object):
+class CurrentSiteThemeMiddleware(MiddlewareMixin, object):
     """
     Middleware that sets `site_theme` attribute to request object.
     """
@@ -20,7 +22,7 @@ class CurrentSiteThemeMiddleware(object):
         request.site_theme = SiteTheme.get_theme(request.site)
 
 
-class ThemePreviewMiddleware(object):
+class ThemePreviewMiddleware(MiddlewareMixin, object):
     """
     Middleware for previewing themes. This middleware should be added after
     CurrentSiteThemeMiddleware and SessionMiddleware.

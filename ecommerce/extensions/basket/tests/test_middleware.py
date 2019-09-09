@@ -3,6 +3,7 @@ from __future__ import absolute_import
 import mock
 from django.conf import settings
 from django.contrib.auth.models import AnonymousUser
+from django.http import HttpResponse
 from django.test.client import RequestFactory
 from oscar.core.loading import get_model
 from oscar.test.factories import BasketFactory
@@ -14,13 +15,17 @@ Basket = get_model('basket', 'Basket')
 
 
 class BasketMiddlewareTests(TestCase):
+    @staticmethod
+    def get_response_for_test(request=None):  # pylint: disable=unused-argument
+        return HttpResponse()
+
     def setUp(self):
         super(BasketMiddlewareTests, self).setUp()
-        self.middleware = middleware.BasketMiddleware()
+        self.middleware = middleware.BasketMiddleware(self.get_response_for_test)
         self.request = RequestFactory().get('/')
         self.request.user = AnonymousUser()
         self.request.site = self.site
-        self.middleware.process_request(self.request)
+        self.middleware(self.request)
 
     def test_basket_is_attached_to_request(self):
         self.assertTrue(hasattr(self.request, 'basket'))

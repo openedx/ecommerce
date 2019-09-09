@@ -473,6 +473,25 @@ def validate_voucher(voucher, user, basket, request_site):
     return True, ''
 
 
+def apply_offers_on_basket(request, basket):
+    """
+    Applies offers on a basket.
+
+    Adapted from `apply_offer_to_basket` in Oscar's `BasketMiddleware`, as
+    trying to directly call the Middleware seems to cause issues with the new
+    Django 1.11 style middleware.
+
+    Args:
+        request (Request): Request object
+        basket (Basket): basket object on which the offers will be applied
+    """
+    if not basket.is_empty:
+        if waffle.flag_is_active(request, CUSTOM_APPLICATOR_USE_FLAG):  # pragma: no cover
+            CustomApplicator().apply(basket, request.user, request)
+        else:
+            Applicator().apply(basket, request.user, request)
+
+
 @newrelic.agent.function_trace()
 def apply_voucher_on_basket_and_check_discount(voucher, request, basket):
     """

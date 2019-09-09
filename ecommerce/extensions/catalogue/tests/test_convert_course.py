@@ -27,7 +27,7 @@ class ConvertCourseTest(DiscoveryTestMixin, TestCase):
         course = CourseFactory(partner=self.partner)
         seat_to_convert = course.create_or_update_seat(initial_cert_type, False, 0)
         stock_record = StockRecord.objects.get(product=seat_to_convert)
-        order_line = OrderLineFactory(stockrecord=stock_record, product=seat_to_convert)
+        order_line = OrderLineFactory(stockrecord=stock_record, product=seat_to_convert, partner_sku='test_sku')
 
         old_stock_record_sku = stock_record.partner_sku
         old_order_line_sku = order_line.partner_sku

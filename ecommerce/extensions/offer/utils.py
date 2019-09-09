@@ -14,7 +14,6 @@ from ecommerce.core.url_utils import absolute_redirect
 from ecommerce.extensions.checkout.utils import add_currency
 
 logger = logging.getLogger(__name__)
-Benefit = get_model('offer', 'Benefit')
 
 
 def _remove_exponent_and_trailing_zeros(decimal):
@@ -82,6 +81,8 @@ def format_benefit_value(benefit):
     Returns:
         benefit_value (str): String value containing formatted benefit value and type.
     """
+    Benefit = get_model('offer', 'Benefit')
+
     benefit_value = get_quantized_benefit_value(benefit)
     benefit_type = get_benefit_type(benefit)
 

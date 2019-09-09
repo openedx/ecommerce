@@ -784,7 +784,7 @@ class EnrollmentCodeCsvViewTests(TestCase):
         voucher = VoucherFactory()
         order = OrderFactory(user=self.user)
         product = ProductFactory(title=product_title, categories=[])
-        line = OrderLineFactory(order=order, product=product)
+        line = OrderLineFactory(order=order, product=product, partner_sku='test_sku')
         order_line_vouchers = OrderLineVouchers.objects.create(line=line)
         order_line_vouchers.vouchers.add(voucher)
 

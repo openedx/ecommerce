@@ -571,7 +571,7 @@ class EnterpriseCouponViewSetRbacTests(
         Mark voucher as used by provided user
         """
         order = factories.OrderFactory()
-        order_line = factories.OrderLineFactory(product=self.verified_seat)
+        order_line = factories.OrderLineFactory(product=self.verified_seat, partner_sku='test_sku')
         order.lines.add(order_line)
         voucher.record_usage(order, user)
         voucher.offers.first().record_usage(discount={'freq': 1, 'discount': 1})

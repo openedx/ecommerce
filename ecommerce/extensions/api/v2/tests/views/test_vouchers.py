@@ -176,7 +176,7 @@ class VoucherViewSetTests(DiscoveryMockMixin, DiscoveryTestMixin, LmsApiMockMixi
         self.assertEqual(len(offers), 2)
 
         order = OrderFactory(user=self.user)
-        order.lines.add(OrderLineFactory(product=products[0]))
+        order.lines.add(OrderLineFactory(product=products[0], partner_sku='test_sku'))
         offers = VoucherViewSet().get_offers(request=request, voucher=voucher)['results']
         self.assertEqual(len(offers), 1)
 

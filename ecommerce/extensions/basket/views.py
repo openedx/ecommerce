@@ -16,6 +16,7 @@ from django.utils.html import escape
 from django.utils.translation import ugettext as _
 from edx_rest_framework_extensions.permissions import LoginRedirectIfUnauthenticated
 from opaque_keys.edx.keys import CourseKey
+from oscar.apps.basket.signals import voucher_removal
 from oscar.apps.basket.views import VoucherAddView as BaseVoucherAddView
 from oscar.apps.basket.views import *  # pylint: disable=wildcard-import, unused-wildcard-import
 from oscar.core.prices import Price
@@ -38,9 +39,9 @@ from ecommerce.extensions.analytics.utils import (
 from ecommerce.extensions.basket import message_utils
 from ecommerce.extensions.basket.constants import EMAIL_OPT_IN_ATTRIBUTE
 from ecommerce.extensions.basket.exceptions import BadRequestException, RedirectException, VoucherException
-from ecommerce.extensions.basket.middleware import BasketMiddleware
 from ecommerce.extensions.basket.utils import (
     add_utm_params_to_url,
+    apply_offers_on_basket,
     apply_voucher_on_basket_and_check_discount,
     get_basket_switch_data,
     get_payment_microfrontend_or_basket_url,
@@ -591,7 +592,7 @@ class PaymentApiLogicMixin(BasketLogicMixin):
         """
         self.request.basket = get_model('basket', 'Basket').objects.get(id=self.request.basket.id)
         self.request.basket.strategy = self.request.strategy
-        BasketMiddleware().apply_offers_to_basket(self.request, self.request.basket)
+        apply_offers_on_basket(self.request, self.request.basket)
 
     def _get_order_total(self):
         """
@@ -967,7 +968,7 @@ class VoucherRemoveApiView(PaymentApiLogicMixin, APIView):
     """
     permission_classes = (IsAuthenticated,)
     voucher_model = get_model('voucher', 'voucher')
-    remove_signal = signals.voucher_removal
+    remove_signal = voucher_removal
 
     def delete(self, request, voucherid):  # pylint: disable=unused-argument
         """
