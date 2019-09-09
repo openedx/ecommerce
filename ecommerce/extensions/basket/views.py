@@ -45,7 +45,7 @@ from ecommerce.extensions.basket.utils import (
     get_basket_switch_data,
     get_payment_microfrontend_url_if_configured,
     prepare_basket,
-    redirect_url_to_basket_or_payment,
+    get_payment_microfrontend_or_basket_url,
     validate_voucher
 )
 from ecommerce.extensions.offer.constants import DYNAMIC_DISCOUNT_FLAG
@@ -162,7 +162,7 @@ class BasketAddItemsView(APIView):
                 raise RedirectException(response=code_redemption_redirect)
 
     def _redirect_response_to_basket_or_payment(self, request):
-        redirect_url = redirect_url_to_basket_or_payment(request)
+        redirect_url = get_payment_microfrontend_or_basket_url(request)
         redirect_url = add_utm_params_to_url(redirect_url, list(self.request.GET.items()))
         return HttpResponseRedirect(redirect_url, status=303)
 

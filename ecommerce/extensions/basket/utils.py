@@ -46,11 +46,11 @@ Voucher = get_model('voucher', 'Voucher')
 logger = logging.getLogger(__name__)
 
 
-def redirect_url_to_basket_or_payment(request):
-    redirect_url = get_payment_microfrontend_url_if_configured(request)
-    if not redirect_url:
-        redirect_url = absolute_url(request, 'basket:summary')
-    return redirect_url
+def get_payment_microfrontend_or_basket_url(request):
+    url = get_payment_microfrontend_url_if_configured(request)
+    if not url:
+        url = absolute_url(request, 'basket:summary')
+    return url
 
 
 def get_payment_microfrontend_url_if_configured(request):
