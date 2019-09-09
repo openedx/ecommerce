@@ -17,5 +17,5 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(remove_journals),
+        migrations.RunPython(remove_journals, migrations.RunPython.noop),
     ]
