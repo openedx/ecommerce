@@ -317,7 +317,7 @@ def _record_utm_basket_attribution(referral, request):
       Attribute this user's basket to UTM data, if applicable.
     """
     utm_cookie_name = request.site.siteconfiguration.utm_cookie_name
-    utm_cookie = request.COOKIES.get(utm_cookie_name, "{}") if utm_cookie_name else {}
+    utm_cookie = request.COOKIES.get(utm_cookie_name, "{}") if utm_cookie_name else "{}"
     utm = json.loads(utm_cookie)
 
     for attr_name in ['utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content']:
