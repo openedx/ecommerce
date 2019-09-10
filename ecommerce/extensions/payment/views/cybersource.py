@@ -16,6 +16,7 @@ from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext as _
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import View
+from edx_django_utils import monitoring as monitoring_utils
 from edx_rest_api_client.client import EdxRestApiClient
 from edx_rest_api_client.exceptions import SlumberHttpBaseException
 from oscar.apps.partner import strategy
@@ -223,7 +224,7 @@ class CybersourceNotificationMixin(CyberSourceProcessorMixin, OrderCreationMixin
                 lms_discount_client = EdxRestApiClient(discount_lms_url,
                                                        jwt=self.request.site.siteconfiguration.access_token)
                 ck = basket.lines.first().product.course_id
-                user_id = self.request.user.lms_user_id
+                user_id = basket.owner.lms_user_id
                 try:
                     response = lms_discount_client.user(user_id).course(ck).get()
                     self.request.POST = self.request.POST.copy()
@@ -264,6 +265,7 @@ class CybersourceNotificationMixin(CyberSourceProcessorMixin, OrderCreationMixin
         # This validation is performed in the handle_payment method. After that method succeeds, the response can be
         # safely assumed to have originated from CyberSource.
         basket = None
+        transaction_id = None
         notification = notification or {}
         unhandled_exception_logging = True
 
@@ -304,6 +306,7 @@ class CybersourceNotificationMixin(CyberSourceProcessorMixin, OrderCreationMixin
                 ppr = self.payment_processor.record_processor_response(
                     notification, transaction_id=transaction_id, basket=basket
                 )
+                self._set_payment_response_custom_metrics(basket, notification, order_number, ppr, transaction_id)
 
             # Explicitly delimit operations which will be rolled back if an exception occurs.
             with transaction.atomic():
@@ -371,6 +374,20 @@ class CybersourceNotificationMixin(CyberSourceProcessorMixin, OrderCreationMixin
 
         return basket
 
+    def _set_payment_response_custom_metrics(self, basket, notification, order_number, ppr, transaction_id):
+        # IMPORTANT: Do not set metric for the entire `notification`, because it includes PII.
+        #   It is accessible using the `payment_response_record_id` if needed.
+        monitoring_utils.set_custom_metric('payment_response_processor_name', 'cybersource')
+        monitoring_utils.set_custom_metric('payment_response_basket_id', basket.id)
+        monitoring_utils.set_custom_metric('payment_response_order_number', order_number)
+        monitoring_utils.set_custom_metric('payment_response_transaction_id', transaction_id)
+        monitoring_utils.set_custom_metric('payment_response_record_id', ppr.id)
+        # For reason_code, see https://support.cybersource.com/s/article/What-does-this-response-code-mean#code_table
+        reason_code = notification.get("reason_code", "not-found")
+        monitoring_utils.set_custom_metric('payment_response_reason_code', reason_code)
+        payment_response_message = notification.get("message", 'Unknown Error')
+        monitoring_utils.set_custom_metric('payment_response_message', payment_response_message)
+
     def _log_cybersource_payment_failure(
             self, exception, basket, order_number, transaction_id, notification, ppr,
             message_prefix=None, logger_function=None
@@ -392,17 +409,26 @@ class CybersourceNotificationMixin(CyberSourceProcessorMixin, OrderCreationMixin
 
 
 class CybersourceInterstitialView(CybersourceNotificationMixin, View):
-    """ Interstitial view for Cybersource Payments. """
+    """
+    Interstitial view for Cybersource Payments.
+
+    Side effect:
+        Sets the custom metric ``payment_response_validation`` to one of the following:
+            'success', 'redirect-to-receipt', 'redirect-to-payment-page', 'redirect-to-error-page'
+
+    """
 
     def post(self, request, *args, **kwargs):  # pylint: disable=unused-argument
         """Process a CyberSource merchant notification and place an order for paid products as appropriate."""
         notification = request.POST.dict()
         try:
             basket = self.validate_notification(notification)
+            monitoring_utils.set_custom_metric('payment_response_validation', 'success')
         except DuplicateReferenceNumber:
             # CyberSource has told us that they've declined an attempt to pay
             # for an existing order. If this happens, we can redirect the browser
             # to the receipt page for the existing order.
+            monitoring_utils.set_custom_metric('payment_response_validation', 'redirect-to-receipt')
             return self.redirect_to_receipt_page(notification)
         except TransactionDeclined:
             # Declined transactions are the most common cause of errors during payment
@@ -435,6 +461,7 @@ class CybersourceInterstitialView(CybersourceNotificationMixin, View):
 
             messages.error(request, mark_safe(message))
 
+            monitoring_utils.set_custom_metric('payment_response_validation', 'redirect-to-payment-page')
             # TODO:
             # 1. TransactionDeclined message may be mishandled by Payment MFE since it contains HTML.
             # 2. There are sometimes messages from CyberSource that would make a more helpful message for users.
@@ -442,6 +469,7 @@ class CybersourceInterstitialView(CybersourceNotificationMixin, View):
             return absolute_redirect(request, 'basket:summary')
         except:  # pylint: disable=bare-except
             # logging handled by validate_notification, because not all exceptions are problematic
+            monitoring_utils.set_custom_metric('payment_response_validation', 'redirect-to-error-page')
             return absolute_redirect(request, 'payment_error')
 
         try:

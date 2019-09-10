@@ -43,10 +43,11 @@ from ecommerce.extensions.basket.utils import (
     add_utm_params_to_url,
     apply_voucher_on_basket_and_check_discount,
     get_basket_switch_data,
+    get_payment_microfrontend_or_basket_url,
+    get_payment_microfrontend_url_if_configured,
     prepare_basket,
     validate_voucher
 )
-from ecommerce.extensions.experimentation.stable_bucketing import stable_bucketing_hash_group
 from ecommerce.extensions.offer.constants import DYNAMIC_DISCOUNT_FLAG
 from ecommerce.extensions.offer.dynamic_conditional_offer import get_percentage_from_request
 from ecommerce.extensions.offer.utils import (
@@ -57,12 +58,7 @@ from ecommerce.extensions.offer.utils import (
 )
 from ecommerce.extensions.order.exceptions import AlreadyPlacedOrderException
 from ecommerce.extensions.partner.shortcuts import get_partner_for_site
-from ecommerce.extensions.payment.constants import (
-    CLIENT_SIDE_CHECKOUT_FLAG_NAME,
-    ENABLE_MICROFRONTEND_FOR_BASKET_PAGE_FLAG_NAME,
-    FORCE_MICROFRONTEND_BUCKET_FLAG_NAME,
-    PAYMENT_MFE_BUCKET
-)
+from ecommerce.extensions.payment.constants import CLIENT_SIDE_CHECKOUT_FLAG_NAME
 from ecommerce.extensions.payment.forms import PaymentForm
 
 Basket = get_model('basket', 'basket')
@@ -75,58 +71,6 @@ Product = get_model('catalogue', 'Product')
 StockRecord = get_model('partner', 'StockRecord')
 Voucher = get_model('voucher', 'Voucher')
 Selector = get_class('partner.strategy', 'Selector')
-
-
-def _get_payment_microfrontend_url_if_configured(request):
-    if _use_payment_microfrontend(request):
-        return request.site.siteconfiguration.payment_microfrontend_url
-    else:
-        return None
-
-
-def _force_payment_microfrontend_bucket(request):
-    """
-    Return whether the user for the current request should be forced into
-    the payment MFE bucket.
-    """
-    return waffle.flag_is_active(request, FORCE_MICROFRONTEND_BUCKET_FLAG_NAME)
-
-
-def _use_payment_microfrontend(request):
-    """
-    Return whether the current request should use the payment MFE.
-    """
-    if (
-            request.site.siteconfiguration.enable_microfrontend_for_basket_page and
-            request.site.siteconfiguration.payment_microfrontend_url
-    ):
-        # Force the user into the MFE bucket for testing
-        payment_mfe_bucket_forced = _force_payment_microfrontend_bucket(request)
-        if payment_mfe_bucket_forced:
-            bucket = PAYMENT_MFE_BUCKET
-        else:
-            # Bucket 50% of users to use the payment MFE for A/B testing.
-            bucket = stable_bucketing_hash_group("payment-mfe", 2, request.user.username)
-
-        payment_microfrontend_flag_enabled = waffle.flag_is_active(
-            request,
-            ENABLE_MICROFRONTEND_FOR_BASKET_PAGE_FLAG_NAME
-        )
-
-        track_segment_event(
-            request.site,
-            request.user,
-            'edx.bi.experiment.user.bucketed',
-            {
-                'bucket': bucket,
-                'experiment': 'payment-mfe',
-                'forcedIntoBucket': payment_mfe_bucket_forced,
-                'paymentMfeEnabled': payment_microfrontend_flag_enabled,
-            },
-        )
-        return bucket == PAYMENT_MFE_BUCKET and payment_microfrontend_flag_enabled
-    else:
-        return False
 
 
 class BasketAddItemsView(APIView):
@@ -218,9 +162,7 @@ class BasketAddItemsView(APIView):
                 raise RedirectException(response=code_redemption_redirect)
 
     def _redirect_response_to_basket_or_payment(self, request):
-        redirect_url = _get_payment_microfrontend_url_if_configured(request)
-        if not redirect_url:
-            redirect_url = reverse('basket:summary')
+        redirect_url = get_payment_microfrontend_or_basket_url(request)
         redirect_url = add_utm_params_to_url(redirect_url, list(self.request.GET.items()))
         return HttpResponseRedirect(redirect_url, status=303)
 
@@ -536,7 +478,7 @@ class BasketSummaryView(BasketLogicMixin, BasketView):
         return super(BasketSummaryView, self).get(request, *args, **kwargs)
 
     def _redirect_to_payment_microfrontend_if_configured(self, request):
-        microfrontend_url = _get_payment_microfrontend_url_if_configured(request)
+        microfrontend_url = get_payment_microfrontend_url_if_configured(request)
         if microfrontend_url:
             # For now, the enterprise consent form validation is communicated via
             # a URL parameter, which must be forwarded via this redirect.
