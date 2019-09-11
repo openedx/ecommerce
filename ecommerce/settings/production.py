@@ -17,15 +17,6 @@ PROTOCOL = 'https'
 COMPRESS_ENABLED = True
 COMPRESS_OFFLINE = True
 
-# Email configuration
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EDXAPP_EMAIL_HOST = "smtp.ucsd.edu"
-EDXAPP_EMAIL_PORT = 587
-EDXAPP_EMAIL_USE_TLS = True
-EDXAPP_EMAIL_HOST_USER = "its-openedx-smtp"
-EDXAPP_DEFAULT_FROM_EMAIL = config_from_yaml.get('ECOMMERCE_DEFAULT_FROM_EMAIL')
-EDXAPP_EMAIL_HOST_PASSWORD = config_from_yaml.get('ECOMMERCE_EMAIL_HOST_PASSWORD')
-
 # Minify CSS
 COMPRESS_CSS_FILTERS += [
     'compressor.filters.cssmin.CSSMinFilter',
@@ -77,6 +68,15 @@ DB_OVERRIDES = dict(
 
 for override, value in DB_OVERRIDES.iteritems():
     DATABASES['default'][override] = value
+
+# Email configuration
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EDXAPP_EMAIL_HOST = "smtp.ucsd.edu"
+EDXAPP_EMAIL_PORT = 587
+EDXAPP_EMAIL_USE_TLS = True
+EDXAPP_EMAIL_HOST_USER = "its-openedx-smtp"
+EDXAPP_DEFAULT_FROM_EMAIL = config_from_yaml.get('ECOMMERCE_DEFAULT_FROM_EMAIL')
+EDXAPP_EMAIL_HOST_PASSWORD = config_from_yaml.get('ECOMMERCE_EMAIL_HOST_PASSWORD')
 
 # PAYMENT PROCESSOR OVERRIDES
 bluefin_dict = {
