@@ -1,7 +1,5 @@
 from __future__ import absolute_import
 
-import json
-
 import stripe
 from django.conf import settings
 from django.urls import reverse
@@ -46,7 +44,7 @@ class StripeSubmitViewTests(PaymentEventsMixin, TestCase):
             order_number,
             disable_back_button=True,
         )
-        assert json.loads(response.content) == {'url': receipt_url}
+        assert response.json() == {'url': receipt_url}
 
     def assert_order_created(self, basket, billing_address, card_type, label):
         order = Order.objects.get(number=basket.order_number, total_incl_tax=basket.total_incl_tax)
@@ -95,7 +93,7 @@ class StripeSubmitViewTests(PaymentEventsMixin, TestCase):
                 response = self.client.post(self.path, data)
 
         assert response.status_code == 400
-        assert response.content == '{}'
+        assert response.content.decode('utf-8') == '{}'
 
     def test_billing_address_error(self):
         basket = self.create_basket()

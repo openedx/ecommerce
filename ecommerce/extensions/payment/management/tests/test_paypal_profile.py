@@ -1,12 +1,12 @@
 from __future__ import absolute_import
 
 import json
-from cStringIO import StringIO
 
 import ddt
 import mock
 from django.core.management import call_command
 from django.core.management.base import CommandError
+from django.utils.six import StringIO
 
 from ecommerce.extensions.payment.models import PaypalWebProfile
 from ecommerce.tests.testcases import TestCase

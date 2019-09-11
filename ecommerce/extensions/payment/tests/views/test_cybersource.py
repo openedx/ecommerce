@@ -109,7 +109,7 @@ class CybersourceSubmitViewTests(CybersourceMixin, TestCase):
             'error': error_msg,
             'field_errors': {'basket': error_msg}
         }
-        self.assertDictEqual(json.loads(response.content), expected)
+        self.assertDictEqual(response.json(), expected)
 
     def test_missing_basket(self):
         """ Verify the view returns an HTTP 400 status if the basket is missing. """
@@ -140,7 +140,7 @@ class CybersourceSubmitViewTests(CybersourceMixin, TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response['content-type'], JSON)
 
-        actual = json.loads(response.content)['form_fields']
+        actual = response.json()['form_fields']
         transaction_uuid = actual['transaction_uuid']
         extra_parameters = {
             'payment_method': 'card',
@@ -181,7 +181,7 @@ class CybersourceSubmitViewTests(CybersourceMixin, TestCase):
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response['content-type'], JSON)
 
-        errors = json.loads(response.content)['field_errors']
+        errors = response.json()['field_errors']
         self.assertIn(field, errors)
 
 
@@ -384,11 +384,11 @@ class ApplePayStartSessionViewTests(LoginMixin, TestCase):
 
         response = self.client.post(self.url, json.dumps(post_data), JSON)
         self.assertEqual(response.status_code, status)
-        self.assertEqual(response.content, body)
+        self.assertEqual(response.content.decode('utf-8'), body)
 
         expected_domain_name = self.payment_microfrontend_domain if expected_mfe else 'testserver.fake'
         self.assertEqual(
-            json.loads(responses.calls[0].request.body)['domainName'],
+            json.loads(responses.calls[0].request.body.decode('utf-8'))['domainName'],
             expected_domain_name,
         )
 

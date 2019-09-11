@@ -293,7 +293,8 @@ class PaypalTests(PaypalMixin, PaymentProcessorTestCaseMixin, TestCase):
         self.processor.get_transaction_parameters(self.basket, request=self.request)
         payment_creation_payload = mock_payment.call_args[0][0]
         self.assertNotIn('experience_profile_id', payment_creation_payload)
-        self.assertRaises(Exception('MissingConfig Exception'))
+        with self.assertRaises(Exception) as ex:
+            self.assertEqual(ex.message, 'MissingConfig Exception')
 
         msg = 'Creating PayPal WebProfile resulted in exception. Will continue without one.'
         mock_logger.warning.assert_any_call(msg)

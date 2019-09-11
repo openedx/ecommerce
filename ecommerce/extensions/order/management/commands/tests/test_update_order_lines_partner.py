@@ -1,6 +1,7 @@
 from __future__ import absolute_import
 
 import ddt
+import six
 from django.core.management import call_command
 from django.core.management.base import CommandError
 from mock import patch
@@ -28,8 +29,12 @@ class UpdateOrderLinePartnerTests(TestCase):
 
     def test_partner_required(self):
         """Test that command raises partner required error."""
+        if six.PY3:
+            err_msg = 'Error: the following arguments are required: --partner'
+        else:
+            err_msg = 'Error: argument --partner is required'
         self.assert_error_log(
-            'Error: argument --partner is required',
+            err_msg,
             'sku12345'
         )
 
