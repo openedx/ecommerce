@@ -1,6 +1,7 @@
 from __future__ import absolute_import
 
 from django.db import models
+from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
 from edx_django_utils.cache import DEFAULT_REQUEST_CACHE
 from oscar.apps.basket.abstract_models import AbstractBasket
@@ -13,6 +14,7 @@ OrderNumberGenerator = get_class('order.utils', 'OrderNumberGenerator')
 Selector = get_class('partner.strategy', 'Selector')
 
 
+@python_2_unicode_compatible
 class Basket(AbstractBasket):
     site = models.ForeignKey(
         'sites.Site', verbose_name=_("Site"), null=True, blank=True, default=None, on_delete=models.SET_NULL
@@ -92,8 +94,8 @@ class Basket(AbstractBasket):
         for v in self.vouchers.all():
             self.vouchers.remove(v)
 
-    def __unicode__(self):
-        return _(u"{id} - {status} basket (owner: {owner}, lines: {num_lines})").format(
+    def __str__(self):
+        return _("{id} - {status} basket (owner: {owner}, lines: {num_lines})").format(
             id=self.id,
             status=self.status,
             owner=self.owner,

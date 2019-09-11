@@ -467,7 +467,7 @@ class Cybersource(ApplePayMixin, BaseClientSidePaymentProcessor):
             }
             encrypted_payment = {
                 'descriptor': 'RklEPUNPTU1PTi5BUFBMRS5JTkFQUC5QQVlNRU5U',
-                'data': base64.b64encode(json.dumps(payment_token['paymentData'])),
+                'data': base64.b64encode(json.dumps(payment_token['paymentData']).encode('utf-8')),
                 'encoding': 'Base64',
             }
             card = {

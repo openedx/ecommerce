@@ -162,7 +162,7 @@ class EnrollmentFulfillmentModuleTests(ProgramTestMixin, DiscoveryTestMixin, Ful
         self.assertEqual(LINE.COMPLETE, line.status)
 
         last_request = httpretty.last_request()
-        actual_body = json.loads(last_request.body)
+        actual_body = json.loads(last_request.body.decode('utf-8'))
         actual_headers = last_request.headers
 
         expected_body = {
@@ -263,7 +263,7 @@ class EnrollmentFulfillmentModuleTests(ProgramTestMixin, DiscoveryTestMixin, Ful
             )
 
         last_request = httpretty.last_request()
-        actual_body = json.loads(last_request.body)
+        actual_body = json.loads(last_request.body.decode('utf-8'))
         actual_headers = last_request.headers
 
         expected_body = {
@@ -369,7 +369,7 @@ class EnrollmentFulfillmentModuleTests(ProgramTestMixin, DiscoveryTestMixin, Ful
 
         self.assertEqual(LINE.COMPLETE, line.status)
 
-        actual = json.loads(httpretty.last_request().body)
+        actual = json.loads(httpretty.last_request().body.decode('utf-8'))
         expected = {
             'user': self.order.user.username,
             'is_active': True,

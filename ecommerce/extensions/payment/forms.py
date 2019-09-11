@@ -93,8 +93,7 @@ class PaymentForm(forms.Form):
                 css_class='form-item col-md-6'
             )
         )
-
-        for bound_field in self:
+        for bound_field in list(self):
             # https://www.w3.org/WAI/tutorials/forms/validation/#validating-required-input
             if hasattr(bound_field, 'field') and bound_field.field.required:
                 # Translators: This is a string added next to the name of the required

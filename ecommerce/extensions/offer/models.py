@@ -224,7 +224,7 @@ class ConditionalOffer(AbstractConditionalOffer):
 
     def clean_max_global_applications(self):
         if self.max_global_applications is not None:
-            if self.max_global_applications < 1 or not isinstance(self.max_global_applications, six.integer_types):
+            if not isinstance(self.max_global_applications, six.integer_types) or self.max_global_applications < 1:
                 log_message_and_raise_validation_error(
                     'Failed to create ConditionalOffer. max_global_applications field must be a positive number.'
                 )

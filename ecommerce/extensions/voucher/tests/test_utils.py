@@ -667,7 +667,7 @@ class UtilTests(CouponMixin, DiscoveryMockMixin, DiscoveryTestMixin, LmsApiMockM
         voucher.record_usage(order, self.user)
         field_names, rows = generate_coupon_report([query_coupon.attr.coupon_vouchers])
 
-        expected_redemed_course_ids = '{}, {}'.format(course1, course2)
+        expected_redemed_course_ids = '{}, {}'.format(course1.id, course2.id)
         self.assertEqual(rows[-1]['Redeemed For Course IDs'], expected_redemed_course_ids)
         self.assertEqual(rows[-1].get('Redeemed For Course ID'), None)
         self.assertIn('Redeemed For Course ID', field_names)

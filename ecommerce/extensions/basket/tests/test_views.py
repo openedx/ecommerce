@@ -166,13 +166,13 @@ class BasketAddItemsViewTests(
         """ Verify the Bad request exception is thrown when no skus are provided. """
         response = self.client.get(self.path)
         self.assertEqual(response.status_code, 400)
-        self.assertEqual(response.content, 'No SKUs provided.')
+        self.assertEqual(response.content.decode('utf-8'), 'No SKUs provided.')
 
     def test_add_multiple_products_no_available_products(self):
         """ Verify the Bad request exception is thrown when no skus are provided. """
         response = self.client.get(self.path, data=[('sku', 1), ('sku', 2)])
         self.assertEqual(response.status_code, 400)
-        self.assertEqual(response.content, 'Products with SKU(s) [1, 2] do not exist.')
+        self.assertEqual(response.content.decode('utf-8'), 'Products with SKU(s) [1, 2] do not exist.')
 
     @ddt.data(Voucher.SINGLE_USE, Voucher.MULTI_USE)
     def test_add_multiple_products_and_use_voucher(self, usage):
@@ -275,7 +275,7 @@ class BasketAddItemsViewTests(
         expected_content = 'No product is available to buy.'
         response = self._get_response(self.stock_record.partner_sku)
         self.assertEqual(response.status_code, 400)
-        self.assertEqual(response.content, expected_content)
+        self.assertEqual(response.content.decode('utf-8'), expected_content)
 
     def test_with_both_unavailable_and_available_products(self):
         """ Verify the basket ignores unavailable products and continue with available products. """
@@ -850,8 +850,8 @@ class BasketSummaryViewTests(EnterpriseServiceMockMixin, DiscoveryTestMixin, Dis
             self.course, discovery_api_url=self.site_configuration.discovery_api_url
         )
 
-        cache_key = 'courses_api_detail_{}{}'.format(self.course.id, self.partner.short_code)
-        cache_key = hashlib.md5(cache_key).hexdigest()
+        cache_key = u'courses_api_detail_{}{}'.format(self.course.id, self.partner.short_code)
+        cache_key = hashlib.md5(cache_key.encode('utf-8')).hexdigest()
         course_before_cached_response = TieredCache.get_cached_response(cache_key)
         self.assertFalse(course_before_cached_response.is_found)
 
@@ -1249,9 +1249,8 @@ class VoucherAddMixin(LmsApiMockMixin, DiscoveryMockMixin):
 
         stock_record = Selector().strategy().fetch_for_product(product).stockrecord
         expected_redirect_url = (
-            u'{coupons_redeem_base_url}?sku={sku}&'
+            u'{coupons_redeem_base_url}?code=COUPONTEST&sku={sku}&'
             u'failure_url=http%3A%2F%2F{domain}%2Fbasket%2F%3Fconsent_failed%3D{code}'
-            u'&code=COUPONTEST'
         ).format(
             coupons_redeem_base_url=absolute_url(self.request, 'coupons:redeem'),
             sku=stock_record.partner_sku,
@@ -1302,7 +1301,7 @@ class VoucherAddMixin(LmsApiMockMixin, DiscoveryMockMixin):
     def test_account_activation_rendered(self):
         with self.assertTemplateUsed('edx/email_confirmation_required.html'):
             response = self.client.get(reverse('offers:email_confirmation'))
-            self.assertIn(u'An email has been sent to {}'.format(self.user.email), response.content)
+            self.assertIn(u'An email has been sent to {}'.format(self.user.email), response.content.decode('utf-8'))
 
 
 @httpretty.activate

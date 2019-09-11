@@ -77,6 +77,6 @@ class CouponReportCSVViewTest(CouponMixin, DiscoveryTestMixin, LmsApiMockMixin, 
         StockRecord.objects.get(product=self.coupon1).delete()
         request = RequestFactory().get('')
         response = CouponReportCSVView().get(request, self.coupon1.id)
-        self.assertEqual(response.content,
+        self.assertEqual(response.content.decode('utf-8'),
                          'Failed to find a matching stock record for coupon, report download canceled.')
         self.assertEqual(response.status_code, 404)
