@@ -12,7 +12,6 @@ from django.http import JsonResponse
 from django.shortcuts import redirect
 from django.utils.decorators import method_decorator
 from django.utils.functional import cached_property
-from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext as _
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import View
@@ -450,22 +449,13 @@ class CybersourceInterstitialView(CybersourceNotificationMixin, View):
                 old_basket_id,
             )
 
-            message = _(
-                'An error occurred while processing your payment. You have not been charged. '
-                'Please double-check the information you provided and try again. '
-                'For help, {link_start}contact support{link_end}.'
-            ).format(
-                link_start='<a href="{}">'.format(request.site.siteconfiguration.payment_support_url),
-                link_end='</a>',
-            )
-
-            messages.error(request, mark_safe(message))
+            messages.error(self.request, _('transation declined'), extra_tags='transaction-declined-message')
 
             monitoring_utils.set_custom_metric('payment_response_validation', 'redirect-to-payment-page')
             # TODO:
-            # 1. TransactionDeclined message may be mishandled by Payment MFE since it contains HTML.
-            # 2. There are sometimes messages from CyberSource that would make a more helpful message for users.
-            # 3. We could have similar handling of other exceptions like UserCancelled and AuthorizationError
+            # 1. There are sometimes messages from CyberSource that would make a more helpful message for users.
+            # 2. We could have similar handling of other exceptions like UserCancelled and AuthorizationError
+
             return absolute_redirect(request, 'basket:summary')
         except:  # pylint: disable=bare-except
             # logging handled by validate_notification, because not all exceptions are problematic
