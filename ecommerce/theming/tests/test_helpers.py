@@ -37,7 +37,7 @@ class TestHelpers(TestCase):
             Theme('test-theme-3', 'test-theme-3', theme_dirs[1]),
         ]
         actual_themes = get_themes()
-        self.assertItemsEqual(expected_themes, actual_themes)
+        six.assertCountEqual(self, expected_themes, actual_themes)
 
     def test_get_themes_with_theming_disabled(self):
         """
@@ -45,7 +45,7 @@ class TestHelpers(TestCase):
         """
         with override_settings(ENABLE_COMPREHENSIVE_THEMING=False):
             actual_themes = get_themes()
-            self.assertItemsEqual([], actual_themes)
+            six.assertCountEqual(self, [], actual_themes)
 
     @with_comprehensive_theme('test-theme')
     def test_current_theme_path(self):
@@ -155,7 +155,7 @@ class TestHelpers(TestCase):
             themes_dir / "test-theme" / "templates" / "oscar",
         ]
         actual_theme_dirs = get_current_theme().template_dirs
-        self.assertItemsEqual(expected_theme_dirs, actual_theme_dirs)
+        six.assertCountEqual(self, expected_theme_dirs, actual_theme_dirs)
 
     def test_get_all_theme_template_dirs(self):
         """
@@ -172,7 +172,7 @@ class TestHelpers(TestCase):
             themes_dirs[1] / "test-theme-3" / "templates" / "oscar",
         ]
         actual_theme_dirs = get_all_theme_template_dirs()
-        self.assertItemsEqual(expected_theme_dirs, actual_theme_dirs)
+        six.assertCountEqual(self, expected_theme_dirs, actual_theme_dirs)
 
     def test_get_theme_base_dir(self):
         """
