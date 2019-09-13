@@ -162,7 +162,7 @@ class OfferAssignmentSummaryViewSet(ModelViewSet):
                 }
             else:
                 offer_assignments_with_counts[offer_assignment.code]['count'] += 1
-        return offer_assignments_with_counts.values()
+        return list(offer_assignments_with_counts.values())
 
 
 class EnterpriseCouponViewSet(CouponViewSet):
