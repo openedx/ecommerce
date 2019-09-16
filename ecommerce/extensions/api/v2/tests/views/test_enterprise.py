@@ -63,19 +63,16 @@ OFFER_ASSIGNMENT_SUMMARY_LINK = reverse('api:v2:enterprise-offer-assignment-summ
 
 class TestEnterpriseCustomerView(EnterpriseServiceMockMixin, TestCase):
 
-    dummy_enterprise_customer_data = {
-        'results': [
-            {
-                'name': 'Starfleet Academy',
-                'uuid': '5113b17bf79f4b5081cf3be0009bc96f',
-                'hypothetical_private_info': 'seriously, very private',
-            },
-            {
-                'name': 'Millennium Falcon',
-                'uuid': 'd1fb990fa2784a52a44cca1118ed3993',
-            }
-        ]
-    }
+    dummy_enterprise_customer_data = [
+        {
+            'name': 'Starfleet Academy',
+            'uuid': '5113b17bf79f4b5081cf3be0009bc96f',
+        },
+        {
+            'name': 'Millennium Falcon',
+            'uuid': 'd1fb990fa2784a52a44cca1118ed3993',
+        }
+    ]
 
     @mock.patch('ecommerce.enterprise.utils.EdxRestApiClient')
     @httpretty.activate
@@ -86,8 +83,10 @@ class TestEnterpriseCustomerView(EnterpriseServiceMockMixin, TestCase):
             instance,
             'enterprise-customer',
             mock.MagicMock(
-                get=mock.MagicMock(
-                    return_value=self.dummy_enterprise_customer_data
+                basic_list=mock.MagicMock(
+                    get=mock.MagicMock(
+                        return_value=self.dummy_enterprise_customer_data
+                    )
                 )
             ),
         )
@@ -103,18 +102,7 @@ class TestEnterpriseCustomerView(EnterpriseServiceMockMixin, TestCase):
         self.assertEqual(result.status_code, status.HTTP_200_OK)
         self.assertJSONEqual(
             result.content.decode('utf-8'),
-            {
-                'results': [
-                    {
-                        'name': 'Millennium Falcon',
-                        'id': 'd1fb990fa2784a52a44cca1118ed3993'
-                    },
-                    {
-                        'name': 'Starfleet Academy',
-                        'id': '5113b17bf79f4b5081cf3be0009bc96f'
-                    }  # Note that the private information from the API has been stripped
-                ]
-            }
+            self.dummy_enterprise_customer_data
         )
 
 

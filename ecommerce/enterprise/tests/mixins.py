@@ -1,6 +1,5 @@
 from __future__ import absolute_import
 
-import copy
 import json
 from uuid import uuid4
 
@@ -28,6 +27,9 @@ class EnterpriseServiceMockMixin(object):
     ENTERPRISE_CUSTOMER_URL = '{}enterprise-customer/'.format(
         settings.ENTERPRISE_API_URL,
     )
+    ENTERPRISE_CUSTOMER_BASIC_LIST_URL = '{}enterprise-customer/basic_list/'.format(
+        settings.ENTERPRISE_API_URL,
+    )
     ENTERPRISE_LEARNER_URL = '{}enterprise-learner/'.format(
         settings.ENTERPRISE_API_URL,
     )
@@ -47,47 +49,22 @@ class EnterpriseServiceMockMixin(object):
         """
         Helper function to register the enterprise customer API endpoint.
         """
-        enterprise_customer_data = {
-            'uuid': str(uuid4()),
-            'name': "Enterprise Customer 1",
-            'catalog': 0,
-            'active': True,
-            'site': {
-                'domain': 'example.com',
-                'name': 'example.com'
+        enterprise_customer_api_response = [
+            {
+                'uuid': str(uuid4()),
+                'name': "Enterprise Customer 1",
             },
-            'enable_data_sharing_consent': True,
-            'enforce_data_sharing_consent': 'at_login',
-            'branding_configuration': {
-                'enterprise_customer': 'cf246b88-d5f6-4908-a522-fc307e0b0c59',
-                'logo': 'https://open.edx.org/sites/all/themes/edx_open/logo.png'
+            {
+                'uuid': str(uuid4()),
+                'name': "Enterprise Customer 2",
             },
-            'enterprise_customer_entitlements': [
-                {
-                    'enterprise_customer': 'cf246b88-d5f6-4908-a522-fc307e0b0c59',
-                    'entitlement_id': 0
-                }
-            ],
-            'contact_email': "administrator@enterprisecustomer.com",
-        }
-
-        enterprise_customer2_data = copy.deepcopy(enterprise_customer_data)
-        enterprise_customer2_data['uuid'] = str(uuid4())
-        enterprise_customer2_data['name'] = 'Enterprise Customer 2'
-
-        enterprise_customer_api_response = {
-            'results':
-                [
-                    enterprise_customer_data,
-                    enterprise_customer2_data
-                ]
-        }
+        ]
 
         enterprise_customer_api_response_json = json.dumps(enterprise_customer_api_response)
         self.mock_access_token_response()
         httpretty.register_uri(
             method=httpretty.GET,
-            uri=self.ENTERPRISE_CUSTOMER_URL,
+            uri=self.ENTERPRISE_CUSTOMER_BASIC_LIST_URL,
             body=enterprise_customer_api_response_json,
             content_type='application/json'
         )

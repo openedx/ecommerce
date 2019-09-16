@@ -81,8 +81,7 @@ class EnterpriseCustomerViewSet(generics.GenericAPIView):
     queryset = ''
 
     def get(self, request):
-        site = request.site
-        return Response(data={'results': get_enterprise_customers(site)})
+        return Response(get_enterprise_customers(request))
 
 
 class EnterpriseCustomerCatalogsViewSet(ViewSet):
