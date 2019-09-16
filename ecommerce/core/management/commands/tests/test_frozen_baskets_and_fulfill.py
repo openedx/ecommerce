@@ -284,7 +284,7 @@ class FrozenBasketMissingResponseTest(BasketMixin, TestCase):
 
     @patch('ecommerce.core.management.commands.find_frozen_baskets_and_fulfill.fulfill_order')
     @patch('ecommerce.core.management.commands.find_frozen_baskets_and_fulfill.requests')
-    def test_cybsersource_transaction_detail_response_success(self, mock_requests, mock_fullfill_order):
+    def test_cybsersource_transaction_detail_response_success(self, mock_requests, mock_fullfill_order):  # pylint: disable=unused-argument
 
         with LogCapture(LOGGER_NAME) as log:
 
@@ -461,7 +461,7 @@ class FrozenBasketMissingResponseTest(BasketMixin, TestCase):
         client.generate_digest(message_body)
 
         expected_digest = 'SHA-256=sGjC9lhI3WACG0aC7Y6IMCIaqCcRZYCPyllYbcTFEYQ='
-        self.assertEquals(expected_digest, client.digest)
+        self.assertEqual(expected_digest, client.digest)
 
     @patch('ecommerce.core.management.commands.find_frozen_baskets_and_fulfill.CybersourceAPIClient.get_time_iso_format')  # pylint: disable=line-too-long
     def test_generate_get_signature(self, iso_date):
@@ -473,4 +473,4 @@ class FrozenBasketMissingResponseTest(BasketMixin, TestCase):
         expected_get_signature = 'hDHBq05Ozw7RqFasaPP+CUkU2T6fORfQZ6QR5Ka3RB8='
         client.generate_get_signature('/tss/v2/transactions/{trans_id}'.format(trans_id='1111124987811111304004'))
 
-        self.assertEquals(client.get_signature, expected_get_signature)
+        self.assertEqual(client.get_signature, expected_get_signature)

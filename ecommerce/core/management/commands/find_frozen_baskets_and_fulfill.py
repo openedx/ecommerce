@@ -267,7 +267,7 @@ class Command(BaseCommand):
                 orders_ids.append(basket.order_number)
 
             ids = ','.join(orders_ids)
-            logger.info(u"Checking Cybersource for orders: [{orders}]".format(orders=ids))
+            logger.info(u"Checking Cybersource for orders: [%s]", ids)
 
             self._check_transaction_from_cybersource(frozen_baskets, cs_config)
 
@@ -283,7 +283,7 @@ class Command(BaseCommand):
 
                 self._check_cs_search_transaction(client, fb, message_body)
 
-            except Exception as e:
+            except Exception as e:  # pylint: disable=broad-except, unused-variable
                 continue
 
     def _check_cs_search_transaction(self, client, basket, message_body):
@@ -296,7 +296,7 @@ class Command(BaseCommand):
             response = requests.post('https://{host}{path}'.format(host=client.host, path=client.search_uri),
                                      data=message_body,
                                      headers=client.get_search_headers())
-        except Exception as e:
+        except Exception as e:  # pylint: disable=broad-except
             logger.exception(u'Exception occurred while fetching detail for Order Number from Search api: [%s]: [%s]',
                              basket.order_number, e.message)
             raise
@@ -363,7 +363,7 @@ class Command(BaseCommand):
 
         return
 
-    def _process_transaction_details(self, transaction, basket):
+    def _process_transaction_details(self, transaction, basket):  # pylint: disable=redefined-outer-name
         """Processes details for a transaction."""
 
         application_summary = transaction.get('applicationInformation', None)
@@ -409,12 +409,10 @@ class Command(BaseCommand):
                         basket.order_number)
 
     def _process_successful_order(self, order_detail, basket):
-        logger.info(u"Processing Order Number: {order_number} for order creation."
-                    .format(order_number=basket.order_number))
+        logger.info(u"Processing Order Number: %s for order creation.", basket.order_number)
 
         if not Order.objects.filter(number=basket.order_number).exists():
-            logger.info(u"Order Number: {order_number} doesn't exist, creating it."
-                        .format(order_number=basket.order_number))
+            logger.info(u"Order Number: %s doesn't exist, creating it.", basket.order_number)
 
             shipping_method = NoShippingRequired()
             shipping_charge = shipping_method.calculate(basket)
@@ -463,8 +461,7 @@ class Command(BaseCommand):
                     OrderCreator().update_stock_records(line)
                 basket.submit()
 
-                logger.info(u"Order Number: {order_number} created successfully."
-                            .format(order_number=basket.order_number))
+                logger.info(u"Order Number: %s created successfully.", basket.order_number)
 
                 logger.info(u'Requesting fulfillment of order [%s].', order.number)
 
@@ -484,5 +481,4 @@ class Command(BaseCommand):
                 )
 
         else:
-            logger.info(u"Order Number: {order_number} already exist, skipping order creation."
-                        .format(order_number=basket.order_number))
+            logger.info(u"Order Number: %s already exist, skipping order creation.", basket.order_number)
