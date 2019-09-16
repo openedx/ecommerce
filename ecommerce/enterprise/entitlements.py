@@ -11,6 +11,7 @@ from __future__ import absolute_import
 
 import logging
 from collections import OrderedDict
+from decimal import Decimal
 
 from django.conf import settings
 from django.http import HttpResponseRedirect
@@ -22,10 +23,11 @@ from six.moves.urllib.parse import urlencode
 from slumber.exceptions import SlumberBaseException
 
 from ecommerce.core.constants import COUPON_PRODUCT_CLASS_NAME
+from ecommerce.core.url_utils import absolute_redirect
 from ecommerce.core.utils import get_cache_key
 from ecommerce.coupons.views import voucher_is_valid
 from ecommerce.enterprise import api as enterprise_api
-from ecommerce.enterprise.utils import CONSENT_FAILED_PARAM, is_enterprise_feature_enabled
+from ecommerce.enterprise.utils import CONSENT_FAILED_PARAM, has_enterprise_offer, is_enterprise_feature_enabled
 from ecommerce.extensions.api.serializers import retrieve_all_vouchers
 
 logger = logging.getLogger(__name__)
@@ -234,49 +236,58 @@ def get_enterprise_code_redemption_redirect(request, products, skus, failure_vie
         HttpResponseRedirect: A redirect to the CouponRedeemView if an Enterprise entitlement voucher
                               needs to be applied to the basket, otherwise None.
     """
+    # Find and apply the enterprise entitlement on the learner basket. First, check two things:
+
+    # 1. The `consent_failed` URL parameter is falsey, or missing, meaning that we haven't already
+    # attempted to apply an Enterprise voucher at least once, but the user rejected consent. Failing
+    # to make that check would result in the user being repeatedly prompted to grant consent for the
+    # same coupon they already declined consent on.
     consent_failed = request.GET.get(CONSENT_FAILED_PARAM, False)
-    if not consent_failed and len(products) == 1 and len(skus) == 1:
-        # Find and apply the enterprise entitlement on the learner basket. First, check two things:
-        # 1. The `consent_failed` URL parameter is falsey, or missing, meaning that we haven't already
-        # attempted to apply an Enterprise voucher at least once, but the user rejected consent. Failing
-        # to make that check would result in the user being repeatedly prompted to grant consent for the
-        # same coupon they already declined consent on.
-        # 2. We are working with a single item basket. Enterprise entitlements do not yet support
-        # multiple item baskets.
-        voucher = get_entitlement_voucher(request, products[0])
-        if voucher is not None:
-            sku = skus[0]
-            params = urlencode(
-                OrderedDict([
-                    ('code', voucher.code),
-                    ('sku', sku),
-                    # The basket views do not handle getting data sharing consent. However, the coupon redemption
-                    # view does. By adding the `failure_url` parameter, we're informing that view that, in the
-                    # event required consent for a coupon can't be collected, the user ought to be directed
-                    # back to basket view, with the `consent_failed` parameter applied so that
-                    # we know not to try to apply the enterprise coupon again.
-                    (
-                        'failure_url', request.build_absolute_uri(
-                            '{path}?{params}'.format(
-                                path=reverse(failure_view),
-                                params=urlencode(
-                                    OrderedDict([
-                                        (CONSENT_FAILED_PARAM, True),
-                                        ('sku', sku),
-                                    ])
-                                )
+    if consent_failed:
+        return None
+
+    # 2. We are working with a single item basket. Enterprise entitlements do not yet support
+    # multiple item baskets.
+    if len(products) != 1 or len(skus) != 1:
+        return None
+
+    voucher = get_entitlement_voucher(request, products[0])
+    if voucher is not None:
+        sku = skus[0]
+        params = urlencode(
+            OrderedDict([
+                ('code', voucher.code),
+                ('sku', sku),
+                # The basket views do not handle getting data sharing consent. However, the coupon redemption
+                # view does. By adding the `failure_url` parameter, we're informing that view that, in the
+                # event required consent for a coupon can't be collected, the user ought to be directed
+                # back to basket view, with the `consent_failed` parameter applied so that
+                # we know not to try to apply the enterprise coupon again.
+                (
+                    'failure_url', request.build_absolute_uri(
+                        '{path}?{params}'.format(
+                            path=reverse(failure_view),
+                            params=urlencode(
+                                OrderedDict([
+                                    (CONSENT_FAILED_PARAM, True),
+                                    ('sku', sku),
+                                ])
                             )
-                        ),
+                        )
                     ),
-                ])
-            )
-            return HttpResponseRedirect(
-                request.build_absolute_uri(
-                    '{path}?{params}'.format(
-                        path=reverse('coupons:redeem'),
-                        params=params
-                    )
+                ),
+            ])
+        )
+        return HttpResponseRedirect(
+            request.build_absolute_uri(
+                '{path}?{params}'.format(
+                    path=reverse('coupons:redeem'),
+                    params=params
                 )
             )
+        )
+
+    if has_enterprise_offer(request.basket) and request.basket.total_incl_tax == Decimal(0):
+        return absolute_redirect(request, 'checkout:free-checkout')
 
     return None
