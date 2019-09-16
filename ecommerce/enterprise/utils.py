@@ -25,7 +25,6 @@ from six.moves.urllib.parse import urlencode
 from slumber.exceptions import SlumberHttpBaseException
 
 from ecommerce.core.constants import SYSTEM_ENTERPRISE_LEARNER_ROLE
-from ecommerce.core.utils import deprecated_traverse_pagination
 from ecommerce.enterprise.api import fetch_enterprise_learner_data
 from ecommerce.enterprise.exceptions import EnterpriseDoesNotExist
 from ecommerce.extensions.offer.models import OFFER_PRIORITY_ENTERPRISE
@@ -117,21 +116,11 @@ def get_enterprise_customer(site, uuid):
     return enterprise_customer_response
 
 
-def get_enterprise_customers(site):
-    resource = 'enterprise-customer'
-    client = get_enterprise_api_client(site)
-    endpoint = getattr(client, resource)
-    response = endpoint.get()
-    return sorted(
-        [
-            {
-                'name': each['name'],
-                'id': each['uuid'],
-            }
-            for each in deprecated_traverse_pagination(response, endpoint)
-        ],
-        key=lambda k: k['name'].lower()
-    )
+def get_enterprise_customers(request):
+    client = get_enterprise_api_client(request.site)
+    enterprise_customer_client = getattr(client, 'enterprise-customer')
+    response = enterprise_customer_client.basic_list.get(**request.GET)
+    return response
 
 
 def update_paginated_response(endpoint_request_url, data):

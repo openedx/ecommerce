@@ -47,7 +47,7 @@ class EnterpriseUtilsTests(EnterpriseServiceMockMixin, TestCase):
         """
         self.mock_access_token_response()
         self.mock_enterprise_customer_list_api_get()
-        response = get_enterprise_customers(self.site)
+        response = get_enterprise_customers(self.request)
         self.assertEqual(response[0]['name'], "Enterprise Customer 1")
         self.assertEqual(response[1]['name'], "Enterprise Customer 2")
 
