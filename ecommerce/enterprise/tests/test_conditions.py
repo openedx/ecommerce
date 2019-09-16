@@ -331,6 +331,7 @@ class AssignableEnterpriseCustomerConditionTests(EnterpriseServiceMockMixin, Cou
             voucher.save()
 
         data = {'codes': codes, 'emails': emails}
+        logger.debug("Saving coupon assignments with codes %r and emails %r", codes, emails)
         serializer = CouponCodeAssignmentSerializer(data=data, context={'coupon': coupon})
         if serializer.is_valid():
             serializer.save()
