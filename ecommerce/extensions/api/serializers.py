@@ -1204,12 +1204,10 @@ class CouponCodeAssignmentSerializer(serializers.Serializer):  # pylint: disable
             offer = available_assignments[code]['offer']
             email = next(email_iterator) if voucher_usage_type == Voucher.MULTI_USE_PER_CUSTOMER else None
             for _ in range(available_assignments[code]['num_slots']):
-                user_email = email or next(email_iterator)
-                logger.debug("Creating OfferAssignment(offer=%r, code=%r, user_email=%r)", offer, code, user_email)
                 new_offer_assignment = OfferAssignment.objects.create(
                     offer=offer,
                     code=code,
-                    user_email=user_email,
+                    user_email=email or next(email_iterator),
                 )
                 offer_assignments.append(new_offer_assignment)
                 # Start async email task. For MULTI_USE_PER_CUSTOMER, a single email is sent
