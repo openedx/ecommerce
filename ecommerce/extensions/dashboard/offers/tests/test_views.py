@@ -50,7 +50,7 @@ class OfferWizardTests(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response['Location'], reverse('dashboard:offer-condition'))
 
-        # Set the restrictions on the offer
+        # Set the conditions on the offer
         restrictions_url = reverse('dashboard:offer-restrictions')
         data = {
             'range': offer_range.id,
@@ -65,8 +65,11 @@ class OfferWizardTests(TestCase):
         response = self.client.get(metadata_url)
         self.assertEqual(response.status_code, 200)
 
-        # Finish saving the offer
-        data = {}
+        # Finish saving the offer by setting the restrictions
+        data = {
+            'priority': 0,
+            'exclusive': True
+        }
         response = self.client.post(restrictions_url, data)
         self.assertEqual(response.status_code, 302)
 

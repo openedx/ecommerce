@@ -31,7 +31,7 @@ class ConditionalOfferAdminExtended(ConditionalOfferAdmin):
     fieldsets = (
         (None, {
             'fields': ('name', 'description', 'partner', 'offer_type', 'condition',
-                       'benefit', 'start_datetime', 'end_datetime', 'priority')
+                       'benefit', 'start_datetime', 'end_datetime', 'priority', 'exclusive')
         }),
         ('Usage', {
             'fields': ('total_discount', 'num_orders')

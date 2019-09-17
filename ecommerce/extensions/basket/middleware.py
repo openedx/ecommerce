@@ -1,19 +1,25 @@
 from __future__ import absolute_import
 
 import newrelic.agent
-import waffle
 from edx_django_utils import monitoring as monitoring_utils
 from oscar.apps.basket.middleware import BasketMiddleware as OscarBasketMiddleware
 from oscar.core.loading import get_class, get_model
 
-from ecommerce.extensions.offer.constants import CUSTOM_APPLICATOR_USE_FLAG
+from ecommerce.extensions.basket.utils import apply_offers_on_basket
 
 Applicator = get_class('offer.applicator', 'Applicator')
 Basket = get_model('basket', 'basket')
 CustomApplicator = get_class('offer.applicator', 'CustomApplicator')
 
 
-class BasketMiddleware(OscarBasketMiddleware):
+class BasketMiddleware(OscarBasketMiddleware, object):
+    """
+    Custom Basket Middleware that overrides Oscar's Basket Middleware
+
+    Must subclass `object` to use `super` now that `BasketMiddleware` has been
+    rewritten in Django 1.11 style
+    """
+
     def get_cookie_key(self, request):
         """
         Returns the cookie name to use for storing a cookie basket.
@@ -79,8 +85,4 @@ class BasketMiddleware(OscarBasketMiddleware):
 
     @newrelic.agent.function_trace()
     def apply_offers_to_basket(self, request, basket):
-        if not basket.is_empty:
-            if waffle.flag_is_active(request, CUSTOM_APPLICATOR_USE_FLAG):  # pragma: no cover
-                CustomApplicator().apply(basket, request.user, request)
-            else:
-                Applicator().apply(basket, request.user, request)
+        apply_offers_on_basket(request, basket)
