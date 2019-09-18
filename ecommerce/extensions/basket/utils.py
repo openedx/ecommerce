@@ -14,7 +14,7 @@ from django.utils.translation import ugettext_lazy as _
 from oscar.apps.basket.signals import voucher_addition
 from oscar.core.loading import get_class, get_model
 from six.moves.urllib.parse import unquote, urlencode
-
+from ecommerce.extensions.basket.utils import get_payment_microfrontend_or_basket_url
 from ecommerce.core.url_utils import absolute_url
 from ecommerce.courses.utils import mode_for_product
 from ecommerce.extensions.analytics.utils import track_segment_event
@@ -49,7 +49,7 @@ logger = logging.getLogger(__name__)
 def get_payment_microfrontend_or_basket_url(request):
     url = get_payment_microfrontend_url_if_configured(request)
     if not url:
-        url = absolute_url(request, 'basket:summary')
+        url = absolute_url(request, get_payment_microfrontend_or_basket_url(self.request))
     return url
 
 

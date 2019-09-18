@@ -846,8 +846,8 @@ class VoucherAddLogicMixin(object):
                     'sku': stock_record.partner_sku,
                     'failure_url': self.request.build_absolute_uri(
                         '{path}?{params}'.format(
-                            path=reverse('basket:summary'),
-                            params=urlencode(
+                            path=reverse(get_payment_microfrontend_or_basket_url(self.request)),
+                            params=six.moves.urllib.parse.urlencode(
                                 {
                                     CONSENT_FAILED_PARAM: code
                                 }
@@ -920,7 +920,7 @@ class VoucherAddView(VoucherAddLogicMixin, BaseVoucherAddView):  # pylint: disab
             # errors are passed via messages object
             pass
 
-        return redirect_to_referrer(self.request, 'basket:summary')
+        return redirect_to_referrer(self.request, get_payment_microfrontend_or_basket_url(self.request))
 
 
 class VoucherAddApiView(VoucherAddLogicMixin, PaymentApiLogicMixin, APIView):

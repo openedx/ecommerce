@@ -11,7 +11,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import RedirectView, TemplateView
 from oscar.apps.checkout.views import *  # pylint: disable=wildcard-import, unused-wildcard-import
 from oscar.core.loading import get_class, get_model
-
+from ecommerce.extensions.basket.utils import get_payment_microfrontend_or_basket_url
 from ecommerce.core.url_utils import (
     get_lms_courseware_url,
     get_lms_dashboard_url,
@@ -80,7 +80,7 @@ class FreeCheckoutView(EdxOrderPlacementMixin, RedirectView):
         else:
             # If a user's basket is empty redirect the user to the basket summary
             # page which displays the appropriate message for empty baskets.
-            url = reverse('basket:summary')
+            url = reverse(get_payment_microfrontend_or_basket_url(self.request))
         return url
 
 
