@@ -229,11 +229,31 @@ class CybersourceNotificationMixin(CyberSourceProcessorMixin, OrderCreationMixin
                     response = lms_discount_client.user(user_id).course(ck).get()
                     self.request.POST = self.request.POST.copy()
                     self.request.POST['discount_jwt'] = response.get('jwt')
+                    logger.info(
+                        """Received discount jwt from LMS with
+                        url: [%s],
+                        user_id: [%s],
+                        course_id: [%s],
+                        and basket_id: [%s]
+                        returned [%s]""",
+                        discount_lms_url,
+                        str(user_id),
+                        ck,
+                        basket.id,
+                        response)
                 except (SlumberHttpBaseException, requests.exceptions.Timeout) as error:
                     logger.warning(
-                        'Failed to get discount jwt from LMS. [%s] returned [%s]',
+                        """Failed to receive discount jwt from LMS with 
+                        url: [%s],
+                        user_id: [%s],
+                        course_id: [%s],
+                        and basket_id: [%s]
+                        returned [%s]""",
                         discount_lms_url,
-                        error.response)
+                        str(user_id),
+                        ck,
+                        basket.id,
+                        vars(error.response))
             # End TODO
             Applicator().apply(basket, basket.owner, self.request)
             logger.info(
