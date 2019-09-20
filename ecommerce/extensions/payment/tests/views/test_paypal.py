@@ -17,7 +17,11 @@ from oscar.test import factories
 from testfixtures import LogCapture
 from waffle.testutils import override_flag
 
-from ecommerce.core.constants import ENROLLMENT_CODE_PRODUCT_CLASS_NAME, ENROLLMENT_CODE_SWITCH
+from ecommerce.core.constants import (
+    ENROLLMENT_CODE_PRODUCT_CLASS_NAME,
+    ENROLLMENT_CODE_SWITCH,
+    SEAT_PRODUCT_CLASS_NAME
+)
 from ecommerce.core.models import BusinessClient, SiteConfiguration
 from ecommerce.core.tests import toggle_switch
 from ecommerce.courses.tests.factories import CourseFactory
@@ -41,6 +45,7 @@ PaymentEvent = get_model('order', 'PaymentEvent')
 PaymentEventType = get_model('order', 'PaymentEventType')
 PaymentProcessorResponse = get_model('payment', 'PaymentProcessorResponse')
 Product = get_model('catalogue', 'Product')
+ProductClass = get_model('catalogue', 'ProductClass')
 Selector = get_class('partner.strategy', 'Selector')
 SourceType = get_model('payment', 'SourceType')
 
@@ -56,7 +61,10 @@ class PaypalPaymentExecutionViewTests(PaypalMixin, PaymentEventsMixin, TestCase)
         super(PaypalPaymentExecutionViewTests, self).setUp()
         self.price = '100.0'
         self.user = self.create_user()
-        self.basket = create_basket(owner=self.user, site=self.site, price=self.price)
+        self.seat_product_class, __ = ProductClass.objects.get_or_create(name=SEAT_PRODUCT_CLASS_NAME)
+        self.basket = create_basket(
+            owner=self.user, site=self.site, price=self.price, product_class=self.seat_product_class
+        )
         self.basket.freeze()
 
         self.processor = Paypal(self.site)
