@@ -96,6 +96,13 @@ class DynamicDiscountCondition(ConditionWithoutRangeMixin, SingleItemConsumption
         """
         if not waffle.flag_is_active(crum.get_current_request(), DYNAMIC_DISCOUNT_FLAG):
             return False
+
+        if basket.num_items > 1:
+            return False
+
+        if not basket.lines.first().product.is_seat_product:
+            return False
+
         decoded_jwt_discount = get_decoded_jwt_discount_from_request()
         if decoded_jwt_discount:
             return decoded_jwt_discount.get('discount_applicable')
