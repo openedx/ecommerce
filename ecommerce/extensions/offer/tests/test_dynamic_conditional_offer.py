@@ -102,3 +102,13 @@ class DynamicConditionTests(TestCase):
             self.assertTrue(self.condition.is_satisfied(self.offer, self.basket))
         else:
             self.assertFalse(self.condition.is_satisfied(self.offer, self.basket))
+
+    @override_flag(DYNAMIC_DISCOUNT_FLAG, active=True)
+    @patch('crum.get_current_request')
+    def test_is_satisfied_quantity_more_than_1(self, request):   # pylint: disable=unused-argument
+        """
+        This discount should not apply if are buying more than one of the same course.
+        """
+        product = ProductFactory(stockrecords__price_excl_tax=10, categories=[])
+        self.basket.add_product(product, quantity=2)
+        self.assertFalse(self.condition.is_satisfied(self.offer, self.basket))

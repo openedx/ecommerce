@@ -96,6 +96,11 @@ class DynamicDiscountCondition(ConditionWithoutRangeMixin, SingleItemConsumption
         """
         if not waffle.flag_is_active(crum.get_current_request(), DYNAMIC_DISCOUNT_FLAG):
             return False
+
+        # Do not apply offer to bulk purchases or when purchasing more than one course
+        if basket.num_items > 1:
+            return False
+
         decoded_jwt_discount = get_decoded_jwt_discount_from_request()
         if decoded_jwt_discount:
             return decoded_jwt_discount.get('discount_applicable')
