@@ -170,7 +170,7 @@ class PaymentForm(forms.Form):
                 try:
                     # TODO: Remove the if statement once https://bitbucket.org/flyingcircus/pycountry/issues/13394/
                     # is fixed.
-                    if not pycountry.subdivisions.get(code=code):
+                    if not pycountry.subdivisions.get(code=code) and code not in ('US-AA', 'US-AE', 'US-AP'):
                         raise KeyError
                 except KeyError:
                     msg = _('{state} is not a valid state/province in {country}.').format(state=state, country=country)
