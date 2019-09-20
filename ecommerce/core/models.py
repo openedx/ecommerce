@@ -481,6 +481,7 @@ class User(AbstractUser):
 
     full_name = models.CharField(_('Full Name'), max_length=255, blank=True, null=True)
     tracking_context = JSONField(blank=True, null=True)
+    email = models.EmailField(max_length=254, verbose_name='email address', blank=True, db_index=True)
     lms_user_id = models.IntegerField(
         null=True,
         blank=True,
