@@ -1,6 +1,5 @@
 from __future__ import absolute_import
 
-import json
 import logging
 import re
 
@@ -85,7 +84,7 @@ def middle_truncate(string, chars):
     if chars < indicator_length:
         raise ValueError
 
-    slice_size = (chars - indicator_length) / 2
+    slice_size = (chars - indicator_length) // 2
     start, end = string[:slice_size], string[-slice_size:]
     truncated = u'{start}{indicator}{end}'.format(start=start, indicator=indicator, end=end)
 
@@ -191,7 +190,7 @@ class SDNClient(object):
             )
             raise requests.exceptions.HTTPError('Unable to connect to SDN API')
 
-        return json.loads(response.content)
+        return response.json()
 
     def deactivate_user(self, basket, name, city, country, search_results):
         """ Deactivates a user account.

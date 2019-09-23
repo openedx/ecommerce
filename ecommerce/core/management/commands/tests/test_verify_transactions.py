@@ -34,7 +34,7 @@ class VerifyTransactionsTest(TestCase):
         self.seat_product_class, __ = ProductClass.objects.get_or_create(name=SEAT_PRODUCT_CLASS_NAME)
         self.order = OrderFactory(total_incl_tax=90, date_placed=self.timestamp)
         self.product = ProductFactory(product_class=self.seat_product_class, categories=None)
-        self.line = OrderLineFactory(order=self.order, product=self.product)
+        self.line = OrderLineFactory(order=self.order, product=self.product, partner_sku='test_sku')
         self.line.save()
         self.product.save()
         self.order.save()

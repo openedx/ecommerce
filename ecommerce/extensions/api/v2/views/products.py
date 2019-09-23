@@ -82,7 +82,7 @@ class ProductViewSet(NestedViewSetMixin, NonDestroyableModelViewSet):
                 'title': data.get('title'),
             }
 
-            missing_values = [k for k, v in product_creation_fields.items() if v is None]
+            missing_values = [k for k, v in sorted(list(product_creation_fields.items())) if v is None]
             if missing_values:
                 return self.missing_values_response(missing_values)
             entitlement = create_or_update_course_entitlement(**product_creation_fields)

@@ -2,7 +2,7 @@ from __future__ import absolute_import
 
 import sys
 
-from six.moves import builtins
+from six import moves
 
 
 def query_yes_no(question, default="yes"):
@@ -28,10 +28,11 @@ def query_yes_no(question, default="yes"):
 
     while True:
         sys.stdout.write(question + prompt)
-        choice = builtins.raw_input().lower()
+        choice = moves.input().lower()
         if default is not None and choice == '':
             return valid[default]
         elif choice in valid:
             return valid[choice]
         else:
-            sys.stdout.write("Please respond with one of the following ({}).\n".format(', '.join(list(valid.keys()))))
+            sys.stdout.write("Please respond with one of the following ({}).\n"
+                             .format(', '.join(sorted(list(valid.keys())))))

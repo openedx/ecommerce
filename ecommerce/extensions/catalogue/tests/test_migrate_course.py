@@ -188,7 +188,8 @@ class MigratedCourseTests(CourseMigrationTestMixin, TestCase):
             migrated_course = MigratedCourse(self.course_id, self.site.domain)
             migrated_course.load_from_lms()
         except Exception as ex:  # pylint: disable=broad-except
-            self.assertEqual(ex.message, 'Aborting migration. No name is available for {}.'.format(self.course_id))
+            self.assertEqual(six.text_type(ex),
+                             'Aborting migration. No name is available for {}.'.format(self.course_id))
 
         # Verify the Course Structure API was called.
         last_request = httpretty.last_request()

@@ -1,6 +1,7 @@
 from __future__ import absolute_import, unicode_literals
 
 from django.db import models
+from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
 from django_extensions.db.models import TimeStampedModel
 from jsonfield import JSONField
@@ -49,6 +50,7 @@ class PaypalProcessorConfiguration(SingletonModel):
         verbose_name = "Paypal Processor Configuration"
 
 
+@python_2_unicode_compatible
 class SDNCheckFailure(TimeStampedModel):
     """ Record of SDN check failure. """
     full_name = models.CharField(max_length=255)
@@ -59,7 +61,7 @@ class SDNCheckFailure(TimeStampedModel):
     products = models.ManyToManyField('catalogue.Product', related_name='sdn_failures')
     sdn_check_response = JSONField()
 
-    def __unicode__(self):
+    def __str__(self):
         return 'SDN check failure [{username}]'.format(
             username=self.username
         )

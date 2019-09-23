@@ -2,11 +2,13 @@
 from __future__ import absolute_import, unicode_literals
 
 import logging
+from collections import OrderedDict
 from datetime import datetime
 from decimal import Decimal
 
 import dateutil.parser
 import newrelic.agent
+import six
 import waffle
 from django.http import HttpResponseBadRequest, HttpResponseRedirect
 from django.shortcuts import render
@@ -14,6 +16,7 @@ from django.utils.html import escape
 from django.utils.translation import ugettext as _
 from edx_rest_framework_extensions.permissions import LoginRedirectIfUnauthenticated
 from opaque_keys.edx.keys import CourseKey
+from oscar.apps.basket.signals import voucher_removal
 from oscar.apps.basket.views import VoucherAddView as BaseVoucherAddView
 from oscar.apps.basket.views import *  # pylint: disable=wildcard-import, unused-wildcard-import
 from oscar.core.prices import Price
@@ -21,8 +24,6 @@ from requests.exceptions import ConnectionError, Timeout
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from six.moves import range, zip
-from six.moves.urllib.parse import urlencode
 from slumber.exceptions import SlumberBaseException
 
 from ecommerce.core.exceptions import SiteConfigurationError
@@ -38,9 +39,9 @@ from ecommerce.extensions.analytics.utils import (
 from ecommerce.extensions.basket import message_utils
 from ecommerce.extensions.basket.constants import EMAIL_OPT_IN_ATTRIBUTE
 from ecommerce.extensions.basket.exceptions import BadRequestException, RedirectException, VoucherException
-from ecommerce.extensions.basket.middleware import BasketMiddleware
 from ecommerce.extensions.basket.utils import (
     add_utm_params_to_url,
+    apply_offers_on_basket,
     apply_voucher_on_basket_and_check_discount,
     get_basket_switch_data,
     get_payment_microfrontend_or_basket_url,
@@ -100,7 +101,7 @@ class BasketAddItemsView(APIView):
             return self._redirect_response_to_basket_or_payment(request)
 
         except BadRequestException as e:
-            return HttpResponseBadRequest(e.message)
+            return HttpResponseBadRequest(six.text_type(e))
         except RedirectException as e:
             return e.response
 
@@ -254,7 +255,7 @@ class BasketLogicMixin(object):
         discount_percent = None
         if waffle.flag_is_active(self.request, DYNAMIC_DISCOUNT_FLAG):
             applied_offers = self.request.basket.applied_offers().values()
-            if len(applied_offers) == 1 and applied_offers[0].condition.name == 'dynamic_discount_condition':
+            if len(applied_offers) == 1 and list(applied_offers)[0].condition.name == 'dynamic_discount_condition':
                 discount_jwt = self.request.GET.get('discount_jwt')
                 discount_percent = get_percentage_from_request()
         return {
@@ -520,7 +521,7 @@ class BasketSummaryView(BasketLogicMixin, BasketView):
             context.update(payment_processors_data)
 
         context.update({
-            'formset_lines_data': list(zip(formset, lines_data)),
+            'formset_lines_data': list(six.moves.zip(formset, lines_data)),
             'homepage_url': get_lms_url(''),
             'min_seat_quantity': 1,
             'max_seat_quantity': 100,
@@ -549,7 +550,7 @@ class BasketSummaryView(BasketLogicMixin, BasketView):
             return {
                 'client_side_payment_processor': payment_processor,
                 'enable_client_side_checkout': True,
-                'months': list(range(1, 13)),
+                'months': list(six.moves.range(1, 13)),
                 'payment_form': PaymentForm(
                     user=self.request.user,
                     request=self.request,
@@ -558,7 +559,7 @@ class BasketSummaryView(BasketLogicMixin, BasketView):
                 ),
                 'paypal_enabled': 'paypal' in (p.NAME for p in payment_processors),
                 # Assumption is that the credit card duration is 15 years
-                'years': list(range(current_year, current_year + 16)),
+                'years': list(six.moves.range(current_year, current_year + 16)),
             }
         else:
             msg = 'Unable to load client-side payment processor [{processor}] for ' \
@@ -591,7 +592,7 @@ class PaymentApiLogicMixin(BasketLogicMixin):
         """
         self.request.basket = get_model('basket', 'Basket').objects.get(id=self.request.basket.id)
         self.request.basket.strategy = self.request.strategy
-        BasketMiddleware().apply_offers_to_basket(self.request, self.request.basket)
+        apply_offers_on_basket(self.request, self.request.basket)
 
     def _get_order_total(self):
         """
@@ -840,21 +841,21 @@ class VoucherAddLogicMixin(object):
             # the standard redemption flow, we kick the user out to the `redeem` flow.
             # This flow will handle any additional information that needs to be gathered
             # due to the fact that the voucher is attached to an Enterprise Customer.
-            params = urlencode(
-                {
-                    'code': code,
-                    'sku': stock_record.partner_sku,
-                    'failure_url': self.request.build_absolute_uri(
+            params = six.moves.urllib.parse.urlencode(
+                OrderedDict([
+                    ('code', code),
+                    ('sku', stock_record.partner_sku),
+                    ('failure_url', self.request.build_absolute_uri(
                         '{path}?{params}'.format(
-                            path=reverse(get_payment_microfrontend_or_basket_url(self.request)),
+                            path=reverse('basket:summary'),
                             params=six.moves.urllib.parse.urlencode(
                                 {
                                     CONSENT_FAILED_PARAM: code
                                 }
                             )
                         )
-                    ),
-                }
+                    ))
+                ])
             )
             redirect_response = HttpResponseRedirect(
                 self.request.build_absolute_uri(
@@ -967,7 +968,7 @@ class VoucherRemoveApiView(PaymentApiLogicMixin, APIView):
     """
     permission_classes = (IsAuthenticated,)
     voucher_model = get_model('voucher', 'voucher')
-    remove_signal = signals.voucher_removal
+    remove_signal = voucher_removal
 
     def delete(self, request, voucherid):  # pylint: disable=unused-argument
         """

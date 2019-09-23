@@ -3,6 +3,7 @@ Tests for Management commands of comprehensive theming.
 """
 from __future__ import absolute_import
 
+import six
 from django.conf import settings
 from django.core.management import CommandError, call_command
 from django.test import TestCase, override_settings
@@ -110,7 +111,7 @@ class TestUpdateAssets(TestCase):
         ]
 
         returned_dirs = get_sass_directories(themes=self.themes, system=True)
-        self.assertItemsEqual(expected_directories, returned_dirs)
+        six.assertCountEqual(self, expected_directories, returned_dirs)
 
     def test_get_sass_directories_with_no_themes(self):
         """
@@ -126,7 +127,7 @@ class TestUpdateAssets(TestCase):
         ]
 
         returned_dirs = get_sass_directories(themes=[], system=True)
-        self.assertItemsEqual(expected_directories, returned_dirs)
+        six.assertCountEqual(self, expected_directories, returned_dirs)
 
     def test_non_existent_sass_dir_error(self):
         """

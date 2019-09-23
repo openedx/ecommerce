@@ -87,7 +87,7 @@ class RefundListViewTests(RefundViewTestMixin, TestCase):
         response = self.client.get('{path}?username={username}'.format(
             path=self.path,
             # Cut the configured username in half, then invert the fragment's casing.
-            username=self.username[:len(self.username) / 2].swapcase()
+            username=self.username[:len(self.username) // 2].swapcase()
         ))
         self.assert_successful_response(response, [new_refund])
 

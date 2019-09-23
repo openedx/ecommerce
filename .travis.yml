@@ -58,6 +58,6 @@ matrix:
       install:
         - docker exec -t ecommerce_testing bash -c 'cd /edx/app/ecommerce/ecommerce/ && pip install tox==3.13.2'
       script:
-        - docker exec -t ecommerce_testing bash -c 'cd /edx/app/ecommerce/ecommerce/ && PATH=$PATH:/edx/app/ecommerce/nodeenvs/ecommerce/bin:/snap/bin TOXENV=py35 tox'
+        - docker exec -t ecommerce_testing bash -c 'cd /edx/app/ecommerce/ecommerce/ && PATH=$PATH:/edx/app/ecommerce/nodeenvs/ecommerce/bin:/snap/bin TOXENV=py35 TRAVIS=1 tox'
   allow_failures:
     - env: TESTNAME=test-python-3.5
