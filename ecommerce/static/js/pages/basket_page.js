@@ -468,7 +468,11 @@ define([
                                 Washington: 'WA',
                                 'West Virginia': 'WV',
                                 Wisconsin: 'WI',
-                                Wyoming: 'WY'
+                                Wyoming: 'WY',
+                                'Armed Forces Americas': 'AA',
+                                'Armed Forces Europe': 'AE',
+                                'Armed Forces Pacific': 'AP'
+
                             },
                             CA: {
                                 Alberta: 'AB',

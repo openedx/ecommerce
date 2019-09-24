@@ -31,6 +31,8 @@ CARD_TYPES = {
     },
 }
 
+US_MILITARY_ADDRESS = ['AA', 'AE', 'AP']
+
 CARD_TYPE_CHOICES = ((key, value['display_name']) for key, value in six.iteritems(CARD_TYPES))
 CYBERSOURCE_CARD_TYPE_MAP = {
     value['cybersource_code']: key for key, value in six.iteritems(CARD_TYPES) if 'cybersource_code' in value
