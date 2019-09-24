@@ -18,6 +18,7 @@ Basket = get_model('basket', 'Basket')
 
 
 def country_choices():
+    # TODO: Remove pycountry library once White Label ends, country list is done on Payment MFE.
     """ Returns a tuple of tuples, each containing an ISO 3166 country code and the country name. """
     countries = sorted(
         [(country.alpha_2, country.name) for country in pycountry.countries],
@@ -163,19 +164,6 @@ class PaymentForm(forms.Form):
                     raise ValidationError({'state': _('This field is required.')})
                 if not address_line1:
                     raise ValidationError({'address_line1': _('This field is required.')})
-
-            if state:
-                code = '{country}-{state}'.format(country=country, state=state)
-
-                try:
-                    # TODO: Remove the if statement once https://bitbucket.org/flyingcircus/pycountry/issues/13394/
-                    # is fixed.
-                    if not pycountry.subdivisions.get(code=code) and code not in ('US-AA', 'US-AE', 'US-AP'):
-                        raise KeyError
-                except KeyError:
-                    msg = _('{state} is not a valid state/province in {country}.').format(state=state, country=country)
-                    logger.debug(msg)
-                    raise ValidationError({'state': msg})
 
             # Ensure the postal code is present, and limited to 9 characters
             postal_code = cleaned_data.get('postal_code')

@@ -86,9 +86,6 @@ class PaymentFormTests(TestCase):
     def test_state_validation_for_north_america(self, country, valid_state):
         """ Verify the state field is limited to 2 characters when the country is set to the U.S. or Canada. """
         self.assert_form_valid(country=country, state=valid_state)
-        self.assert_form_not_valid(country=country, state='ZZ')
-        self.assert_form_not_valid(country=country, state=None)
-        self.assert_form_not_valid(country=country, state='')
 
         data = self._generate_data(country=country)
         data.pop('state', None)
@@ -133,12 +130,9 @@ class PaymentFormTests(TestCase):
         switch.active = True
         switch.save()
         self.assert_form_valid(country='US', state='CA')
-        self.assert_form_not_valid(country='US', state='ZZ')
-        self.assert_form_valid(country='US', state=None)
-        self.assert_form_valid(country='US', state=None, address_line1=None)
+        self.assert_form_valid(country='US', address_line1=None)
         switch.active = False
         switch.save()
-        self.assert_form_not_valid(country='US', state=None)
         self.assert_form_not_valid(country='US', state='CA', address_line1=None)
 
     # Temporarily add this test for codecov for the feature flag added for this test
