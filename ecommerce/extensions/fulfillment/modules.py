@@ -28,7 +28,8 @@ from ecommerce.courses.models import Course
 from ecommerce.courses.utils import mode_for_product
 from ecommerce.enterprise.utils import (
     get_enterprise_customer_uuid_from_voucher,
-    get_or_create_enterprise_customer_user
+    get_or_create_enterprise_customer_user,
+    has_enterprise_offer
 )
 from ecommerce.extensions.analytics.utils import audit_log, parse_tracking_context
 from ecommerce.extensions.api.v2.views.coupons import CouponViewSet
@@ -215,6 +216,9 @@ class EnrollmentFulfillmentModule(BaseFulfillmentModule):
         for discount in order.discounts.all():
             if discount.voucher:
                 enterprise_customer_uuid = get_enterprise_customer_uuid_from_voucher(discount.voucher)
+
+            if has_enterprise_offer(order.basket):
+                enterprise_customer_uuid = discount.offer.condition.enterprise_customer_uuid
 
             if enterprise_customer_uuid is not None:
                 data['linked_enterprise_customer'] = str(enterprise_customer_uuid)
