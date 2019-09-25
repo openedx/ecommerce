@@ -18,28 +18,29 @@ class Command(BaseCommand):
     DATE = '2019-06-29'
     HISTORY_USER_ID = 'NULL'
     HISTORY_CHANGE_REASON = 'initial history population'
-    TABLE_MAPPING = {
-        'offer_benefit': 'offer_historicalbenefit',
-        'offer_range': 'offer_historicalrange',
-        'offer_rangeproduct': 'offer_historicalrangeproduct',
-        'offer_condition': 'offer_historicalcondition',
-        'offer_offerassignment': 'offer_historicalofferassignment',
-        'catalogue_product': 'catalogue_historicalproduct',
-        'catalogue_productattributevalue': 'catalogue_historicalproductattributevalue',
-        'order_order': 'order_historicalorder',
-        'order_line': 'order_historicalline',
-        'partner_stockrecord': 'partner_historicalstockrecord',
-        'refund_refund': 'refund_historicalrefund',
-        'refund_refundline': 'refund_historicalrefundline',
-        'invoice_invoice': 'invoice_historicalinvoice',
-        'core_businessclient': 'core_historicalbusinessclient',
-        'catalogue_category': 'catalogue_historicalcategory',
-        'catalogue_option': 'catalogue_historicaloption',
-        'catalogue_productclass': 'catalogue_historicalproductclass',
-        'catalogue_productcategory': 'catalogue_historicalproductcategory',
-        'catalogue_productattribute': 'catalogue_historicalproductattribute',
-        'partner_partner': 'partner_historicalpartner',
-    }
+    TABLES = [
+        {'name': 'offer_benefit', 'exclude_column': None},
+        {'name': 'offer_range', 'exclude_column': 'slug'},
+        {'name': 'offer_rangeproduct', 'exclude_column': None},
+        {'name': 'offer_condition', 'exclude_column': None},
+        {'name': 'offer_conditionaloffer', 'exclude_column': 'slug'},
+        {'name': 'offer_offerassignment', 'exclude_column': None},
+        {'name': 'catalogue_product', 'exclude_column': None},
+        {'name': 'catalogue_productattributevalue', 'exclude_column': None},
+        {'name': 'order_order', 'exclude_column': None},
+        {'name': 'order_line', 'exclude_column': None},
+        {'name': 'partner_stockrecord', 'exclude_column': None},
+        {'name': 'refund_refund', 'exclude_column': None},
+        {'name': 'refund_refundline', 'exclude_column': None},
+        {'name': 'invoice_invoice', 'exclude_column': None},
+        {'name': 'core_businessclient', 'exclude_column': None},
+        {'name': 'catalogue_category', 'exclude_column': 'slug'},
+        {'name': 'catalogue_option', 'exclude_column': 'code'},
+        {'name': 'catalogue_productclass', 'exclude_column': 'slug'},
+        {'name': 'catalogue_productcategory', 'exclude_column': None},
+        {'name': 'catalogue_productattribute', 'exclude_column': None},
+        {'name': 'partner_partner', 'exclude_column': 'code'},
+    ]
 
     def add_arguments(self, parser):
         super(Command, self).add_arguments(parser)
@@ -63,7 +64,11 @@ class Command(BaseCommand):
         increment = options['batchsize']
         sleep_between = options['sleep_between']
 
-        for table, historical_table in self.TABLE_MAPPING.items():
+        for table_info in self.TABLES:
+            table = table_info['name']
+            historical_table = "_historical".join(table.rsplit('_', 1))
+            exclude_column = table_info['exclude_column']
+
             with connection.cursor() as cursor:
                 # pylint: disable=all
                 query = """
@@ -93,9 +98,9 @@ class Command(BaseCommand):
                 cursor.execute(query)
                 columns = [column[0] for column in cursor.fetchall()]
                 # We don't record the AutoSlugField fields in the historical model.
-                for column_name in ['slug', 'code']:
-                    if column_name in columns:
-                        columns.remove(column_name)
+                if exclude_column in columns:
+                    log.info("Excluding column %s", exclude_column)
+                    columns.remove(exclude_column)
                 # Quote column names to make sure reserved words do not throw an exception.
                 columns = ['`{}`'.format(c) for c in columns]
             while True:
