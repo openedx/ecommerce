@@ -21,7 +21,8 @@ from rest_framework import status
 
 from ecommerce.core.constants import (
     DONATIONS_FROM_CHECKOUT_TESTS_PRODUCT_TYPE_NAME,
-    ENROLLMENT_CODE_PRODUCT_CLASS_NAME
+    ENROLLMENT_CODE_PRODUCT_CLASS_NAME,
+    ISO_8601_FORMAT
 )
 from ecommerce.core.url_utils import get_lms_enrollment_api_url, get_lms_entitlement_api_url
 from ecommerce.courses.models import Course
@@ -304,6 +305,11 @@ class EnrollmentFulfillmentModule(BaseFulfillmentModule):
                         'namespace': 'order',
                         'name': 'order_number',
                         'value': order.number
+                    },
+                    {
+                        'namespace': 'order',
+                        'name': 'date_placed',
+                        'value': order.date_placed.strftime(ISO_8601_FORMAT)
                     }
                 ]
             }
