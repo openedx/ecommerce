@@ -8,9 +8,11 @@ from django.conf import settings
 from django.http.response import HttpResponse
 from edx_django_utils.cache import TieredCache
 from mock import patch
-from oscar.test.factories import VoucherFactory
+from oscar.core.loading import get_class
+from oscar.test.factories import BasketFactory, VoucherFactory
 
 from ecommerce.core.constants import SYSTEM_ENTERPRISE_ADMIN_ROLE, SYSTEM_ENTERPRISE_LEARNER_ROLE
+from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.enterprise.tests.mixins import EnterpriseServiceMockMixin
 from ecommerce.enterprise.utils import (
     CUSTOMER_CATALOGS_DEFAULT_RESPONSE,
@@ -18,6 +20,7 @@ from ecommerce.enterprise.utils import (
     get_enterprise_catalog,
     get_enterprise_customer,
     get_enterprise_customer_catalogs,
+    get_enterprise_customer_from_enterprise_offer,
     get_enterprise_customer_uuid,
     get_enterprise_customers,
     get_enterprise_id_for_current_request_user_from_jwt,
@@ -26,8 +29,16 @@ from ecommerce.enterprise.utils import (
     set_enterprise_customer_cookie,
     update_paginated_response
 )
-from ecommerce.extensions.test.factories import prepare_voucher
+from ecommerce.extensions.partner.strategy import DefaultStrategy
+from ecommerce.extensions.test.factories import (
+    EnterpriseOfferFactory,
+    EnterprisePercentageDiscountBenefitFactory,
+    prepare_voucher
+)
+from ecommerce.tests.factories import PartnerFactory
 from ecommerce.tests.testcases import TestCase
+
+Applicator = get_class('offer.applicator', 'Applicator')
 
 TEST_ENTERPRISE_CUSTOMER_UUID = 'cf246b88-d5f6-4908-a522-fc307e0b0c59'
 
@@ -370,3 +381,36 @@ class EnterpriseUtilsTests(EnterpriseServiceMockMixin, TestCase):
             previous=expected_previous
         )
         self.assertEqual(expected_response, updated_response)
+
+    @ddt.data(0, 100)
+    def test_get_enterprise_customer_from_enterprise_offer(self, discount_value):
+        """
+        Verify that "get_enterprise_customer_from_enterprise_offer" returns `None` if expected conditions are not met.
+        """
+        course = CourseFactory(name='EnterpriseConsentErrorTest', partner=PartnerFactory())
+        product = course.create_or_update_seat('verified', False, 50)
+
+        benefit = EnterprisePercentageDiscountBenefitFactory(value=discount_value)
+        offer = EnterpriseOfferFactory(benefit=benefit)
+        # set wrong priority to invalidate the condition in util
+        offer.priority = 111
+
+        self.mock_enterprise_learner_api(
+            learner_id=self.learner.id,
+            enterprise_customer_uuid=str(offer.condition.enterprise_customer_uuid),
+            course_run_id=course.id,
+        )
+
+        self.mock_catalog_contains_course_runs(
+            [course.id],
+            str(offer.condition.enterprise_customer_uuid),
+            enterprise_customer_catalog_uuid=str(offer.condition.enterprise_customer_catalog_uuid),
+            contains_content=True,
+        )
+
+        basket = BasketFactory(site=self.site, owner=self.create_user())
+        basket.add_product(product)
+        basket.strategy = DefaultStrategy()
+        Applicator().apply_offers(basket, [offer])
+
+        self.assertIsNone(get_enterprise_customer_from_enterprise_offer(basket))
