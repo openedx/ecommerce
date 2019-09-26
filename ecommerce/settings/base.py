@@ -406,6 +406,9 @@ LOGGING = {
         },
     }
 }
+
+LOGGING_ROOT_OVERRIDES = {}
+LOGGING_SUBSECTION_OVERRIDES = {}
 # END LOGGING CONFIGURATION
 
 
@@ -436,6 +439,11 @@ JWT_AUTH = {
         {
             'AUDIENCE': 'SET-ME-PLEASE',
             'ISSUER': 'http://127.0.0.1:8000/oauth2',
+            'SECRET_KEY': 'SET-ME-PLEASE'
+        },
+        {
+            'AUDIENCE': 'SET-ME-PLEASE',
+            'ISSUER': 'ecommerce_worker',
             'SECRET_KEY': 'SET-ME-PLEASE'
         }
     ],
@@ -530,6 +538,7 @@ TEST_RUNNER = 'django.test.runner.DiscoverRunner'
 # Detailed information at: https://docs.djangoproject.com/en/dev/ref/settings/
 SESSION_COOKIE_NAME = 'ecommerce_sessionid'
 CSRF_COOKIE_NAME = 'ecommerce_csrftoken'
+CSRF_COOKIE_SECURE = False
 LANGUAGE_COOKIE_NAME = 'openedx-language-preference'
 SESSION_COOKIE_SECURE = False
 # END COOKIE CONFIGURATION
@@ -633,6 +642,7 @@ EDX_DRF_EXTENSIONS = {
 # Enrollment codes voucher end datetime used for setting the end dates for vouchers
 # created for the Enrollment code products.
 ENROLLMENT_CODE_EXIPRATION_DATE = datetime.datetime.now() + datetime.timedelta(weeks=520)
+ENROLLMENT_FULFILLMENT_TIMEOUT = 7
 
 # Affiliate cookie key
 AFFILIATE_COOKIE_KEY = 'affiliate_id'
@@ -740,6 +750,7 @@ SOCIAL_AUTH_EDX_OIDC_PUBLIC_URL_ROOT = 'http://127.0.0.1:8000/oauth2'
 SOCIAL_AUTH_EDX_OIDC_ISSUER = 'http://127.0.0.1:8000/oauth2'
 
 CORS_ORIGIN_WHITELIST = []
+CORS_URLS_REGEX = ''
 
 ECOMMERCE_PAYMENT_PROCESSOR_CONFIG = {
     'edx': {
@@ -790,3 +801,5 @@ BACKEND_SERVICE_EDX_OAUTH2_SECRET = "ecommerce-backend-service-secret"
 BACKEND_SERVICE_EDX_OAUTH2_PROVIDER_URL = "http://127.0.0.1:8000/oauth2"
 EXTRA_APPS = []
 API_ROOT = None
+# Needed to link to the payment micro-frontend
+PAYMENT_MICROFRONTEND_URL = None
