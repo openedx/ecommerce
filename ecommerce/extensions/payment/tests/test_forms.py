@@ -159,7 +159,10 @@ class PaymentFormTests(TestCase):
         self.assertEqual(actual, expected)
 
     def test_organization_field_in_form(self):
-        """ Verify the field 'organization' is present in the form when the basket has an enrollment code product. """
+        """
+        Verify the field 'organization' and 'purchased_for_organization' is present in the form
+        when the basket has an enrollment code product.
+        """
         __, __, enrollment_code = self.prepare_course_seat_and_enrollment_code()
         basket = self.create_basket_and_add_product(enrollment_code)
         self.request.basket = basket
@@ -176,6 +179,7 @@ class PaymentFormTests(TestCase):
         }
         form = PaymentForm(user=self.user, data=data, request=self.request)
         self.assertTrue('organization' in form.fields)
+        self.assertTrue('purchaser' in form.fields)
 
     def test_organization_field_not_in_form(self):
         """
@@ -199,3 +203,4 @@ class PaymentFormTests(TestCase):
         }
         form = PaymentForm(user=self.user, data=data, request=self.request)
         self.assertFalse('organization' in form.fields)
+        self.assertFalse('purchaser' in form.fields)

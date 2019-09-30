@@ -18,6 +18,7 @@ from six.moves.urllib.parse import unquote, urlencode
 from ecommerce.core.url_utils import absolute_url
 from ecommerce.courses.utils import mode_for_product
 from ecommerce.extensions.analytics.utils import track_segment_event
+from ecommerce.extensions.basket.constants import PURCHASER_BEHALF_ATTRIBUTE
 from ecommerce.extensions.experimentation.stable_bucketing import stable_bucketing_hash_group
 from ecommerce.extensions.offer.constants import CUSTOM_APPLICATOR_USE_FLAG
 from ecommerce.extensions.order.exceptions import AlreadyPlacedOrderException
@@ -338,8 +339,8 @@ def _record_utm_basket_attribution(referral, request):
 @newrelic.agent.function_trace()
 def basket_add_organization_attribute(basket, request_data):
     """
-    Add organization attribute on basket, if organization value is provided
-    in basket data.
+    Adds the organization, and purchased_on_behalf attribute on basket, if organization value is provided
+    in basket data. The purchased_on_behalf is not required if there is an organization value present.
 
     Arguments:
         basket(Basket): order basket
@@ -348,6 +349,7 @@ def basket_add_organization_attribute(basket, request_data):
     """
     # Name of business client is being passed as "organization" from basket page
     business_client = request_data.get(ORGANIZATION_ATTRIBUTE_TYPE)
+    purchaser = request_data.get(PURCHASER_BEHALF_ATTRIBUTE)
 
     if business_client:
         organization_attribute, __ = BasketAttributeType.objects.get_or_create(name=ORGANIZATION_ATTRIBUTE_TYPE)
@@ -355,6 +357,13 @@ def basket_add_organization_attribute(basket, request_data):
             basket=basket,
             attribute_type=organization_attribute,
             value_text=business_client.strip()
+        )
+    if purchaser:
+        purchaser_attribute, __ = BasketAttributeType.objects.get_or_create(name=PURCHASER_BEHALF_ATTRIBUTE)
+        BasketAttribute.objects.get_or_create(
+            basket=basket,
+            attribute_type=purchaser_attribute,
+            value_text=purchaser
         )
 
 
