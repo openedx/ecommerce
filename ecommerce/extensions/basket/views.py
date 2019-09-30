@@ -29,7 +29,6 @@ from slumber.exceptions import SlumberBaseException
 from ecommerce.core.exceptions import SiteConfigurationError
 from ecommerce.core.url_utils import absolute_redirect, get_lms_course_about_url, get_lms_url
 from ecommerce.courses.utils import get_certificate_type_display_value, get_course_info_from_catalog
-from ecommerce.enterprise.entitlements import get_enterprise_code_redemption_redirect
 from ecommerce.enterprise.utils import CONSENT_FAILED_PARAM, get_enterprise_customer_from_voucher, has_enterprise_offer
 from ecommerce.extensions.analytics.utils import (
     prepare_analytics_data,
@@ -89,7 +88,6 @@ class BasketAddItemsView(APIView):
 
             logger.info('Starting payment flow for user [%s] for products [%s].', request.user.username, skus)
 
-            self._redirect_for_enterprise_entitlement_if_needed(request, voucher, products, skus)
             available_products = self._get_available_products(request, products)
             self._set_email_preference_on_basket(request)
 
@@ -145,22 +143,6 @@ class BasketAddItemsView(APIView):
             attribute_type=BasketAttributeType.objects.get(name=EMAIL_OPT_IN_ATTRIBUTE),
             defaults={'value_text': request.GET.get('email_opt_in') == 'true'},
         )
-
-    def _redirect_for_enterprise_entitlement_if_needed(self, request, voucher, products, skus):
-        """
-        If there is an Enterprise entitlement available for this basket,
-        we redirect to the CouponRedeemView to apply the discount to the
-        basket and handle the data sharing consent requirement.
-        """
-        if voucher is None:
-            code_redemption_redirect = get_enterprise_code_redemption_redirect(
-                request,
-                products,
-                skus,
-                'basket:basket-add'
-            )
-            if code_redemption_redirect:
-                raise RedirectException(response=code_redemption_redirect)
 
     def _redirect_response_to_basket_or_payment(self, request):
         redirect_url = get_payment_microfrontend_or_basket_url(request)

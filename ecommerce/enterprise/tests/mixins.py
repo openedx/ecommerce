@@ -163,12 +163,6 @@ class EnterpriseServiceMockMixin(object):
                 'enterprise_customer': 'cf246b88-d5f6-4908-a522-fc307e0b0c59',
                 'logo': 'https://open.edx.org/sites/all/themes/edx_open/logo.png'
             },
-            'enterprise_customer_entitlements': [
-                {
-                    'enterprise_customer': 'cf246b88-d5f6-4908-a522-fc307e0b0c59',
-                    'entitlement_id': 0
-                }
-            ],
             'contact_email': contact_email,
         }
         enterprise_customer_api_response_json = json.dumps(enterprise_customer_api_response)
@@ -202,7 +196,6 @@ class EnterpriseServiceMockMixin(object):
     def mock_enterprise_learner_api(
             self,
             catalog_id=1,
-            entitlement_id=1,
             learner_id=1,
             enterprise_customer_uuid='cf246b88-d5f6-4908-a522-fc307e0b0c59',
             consent_enabled=True,
@@ -233,13 +226,7 @@ class EnterpriseServiceMockMixin(object):
                         'branding_configuration': {
                             'enterprise_customer': enterprise_customer_uuid,
                             'logo': 'https://open.edx.org/sites/all/themes/edx_open/logo.png'
-                        },
-                        'enterprise_customer_entitlements': [
-                            {
-                                'enterprise_customer': enterprise_customer_uuid,
-                                'entitlement_id': entitlement_id
-                            }
-                        ]
+                        }
                     },
                     'user_id': 5,
                     'user': {
@@ -352,58 +339,8 @@ class EnterpriseServiceMockMixin(object):
                             'site': {
                                 'domain': 'example.com',
                                 'name': 'example.com'
-                            },
-                            'enterprise_customer_entitlements': [
-                                {
-                                    'enterprise_customer': 'cf246b88-d5f6-4908-a522-fc307e0b0c59',
-                                    'entitlement_id': 1
-                                }
-                            ]
-                        },
-                    }
-                }
-            ],
-            'next': None,
-            'start': 0,
-            'previous': None
-        }
-        enterprise_learner_api_response_json = json.dumps(enterprise_learner_api_response)
-
-        self.mock_access_token_response()
-        httpretty.register_uri(
-            method=httpretty.GET,
-            uri=self.ENTERPRISE_LEARNER_URL,
-            body=enterprise_learner_api_response_json,
-            content_type='application/json'
-        )
-
-    def mock_enterprise_learner_api_for_learner_with_invalid_entitlements_response(self):
-        """
-        Helper function to register enterprise learner API endpoint for a
-        learner with partial invalid API response structure for the enterprise
-        customer entitlements.
-        """
-        enterprise_learner_api_response = {
-            'count': 0,
-            'num_pages': 1,
-            'current_page': 1,
-            'results': [
-                {
-                    'enterprise_customer': {
-                        'uuid': 'cf246b88-d5f6-4908-a522-fc307e0b0c59',
-                        'name': 'BigEnterprise',
-                        'catalog': 1,
-                        'active': True,
-                        'site': {
-                            'domain': 'example.com',
-                            'name': 'example.com'
-                        },
-                        'invalid-unexpected-enterprise_customer_entitlements-key': [
-                            {
-                                'enterprise_customer': 'cf246b88-d5f6-4908-a522-fc307e0b0c59',
-                                'entitlement_id': 1
                             }
-                        ]
+                        },
                     }
                 }
             ],
@@ -442,45 +379,6 @@ class EnterpriseServiceMockMixin(object):
             method=httpretty.GET,
             uri=self.ENTERPRISE_LEARNER_URL,
             status=500,
-        )
-
-    def mock_learner_entitlements_api_failure(self, learner_id, status=500):
-        """
-        Helper function to return 500 error while accessing learner entitlements api endpoint.
-        """
-        self.mock_access_token_response()
-        httpretty.register_uri(
-            method=httpretty.GET,
-            uri='{base_url}{learner_id}/entitlements/'.format(
-                base_url=self.ENTERPRISE_LEARNER_URL, learner_id=learner_id,
-            ),
-            responses=[
-                httpretty.Response(body='{}', content_type='application/json', status=status)
-            ]
-        )
-
-    def mock_enterprise_learner_entitlements_api(self, learner_id=1, entitlement_id=1, require_consent=False):
-        """
-        Helper function to register enterprise learner entitlements API endpoint.
-        """
-        enterprise_learner_entitlements_api_response = {
-            'entitlements': [
-                {
-                    'entitlement_id': entitlement_id,
-                    'requires_consent': require_consent,
-                }
-            ]
-        }
-        learner_entitlements_json = json.dumps(enterprise_learner_entitlements_api_response)
-
-        self.mock_access_token_response()
-        httpretty.register_uri(
-            method=httpretty.GET,
-            uri='{base_url}{learner_id}/entitlements/'.format(
-                base_url=self.ENTERPRISE_LEARNER_URL, learner_id=learner_id,
-            ),
-            body=learner_entitlements_json,
-            content_type='application/json'
         )
 
     def mock_enterprise_course_enrollment_api(
