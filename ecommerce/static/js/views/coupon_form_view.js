@@ -751,10 +751,7 @@ define([
                         catalogId = this.model.get('course_catalog');
                         this.model.set('course_catalog', ecommerce.coupons.catalogs.get(catalogId));
                     }
-                    if (_.isString(enterpriseCustomer)) {
-                        // API returns a string value for enterprise customer
-                        this.model.set('enterprise_customer', {id: enterpriseCustomer});
-                    } else if (_.isUndefined(enterpriseCustomer) || _.isNull(enterpriseCustomer)) {
+                    if (_.isUndefined(enterpriseCustomer) || _.isNull(enterpriseCustomer)) {
                         this.formGroup('#enterprise-customer').remove();
                     }
                     if (this.model.get('program_uuid')) {

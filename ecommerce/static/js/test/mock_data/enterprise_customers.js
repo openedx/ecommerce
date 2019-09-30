@@ -15,5 +15,24 @@ define([], function() {
             name: 'Millenium Falcon'
         }
     ];
+    customers.fetch = function(params) {
+        var input;
+        if (params) {
+            input = params.data.startswith;
+            return customers.filter(function(customer) { return customer.name.includes(input); });
+        }
+        return customers;
+    };
+    customers.findWhere = function(params) {
+        var foundCustomer = customers.find(function(customer) {
+            return customer.name === params.name;
+        });
+        if (foundCustomer) {
+            foundCustomer.toJSON = function() {
+                return foundCustomer;
+            };
+        }
+        return foundCustomer;
+    };
     return customers;
 });

@@ -32,7 +32,7 @@ define([
             describe('edit enrollment code', function() {
                 beforeEach(function() {
                     enrollmentCodeData.course_catalog = MockCatalogs;
-                    enrollmentCodeData.enterprise_customer = MockCustomers[0].id;
+                    enrollmentCodeData.enterprise_customer = MockCustomers[0];
                     model = Coupon.findOrCreate(enrollmentCodeData, {parse: true});
                     model.updateSeatData();
                     view = new CouponCreateEditView({model: model, editing: true}).render();

@@ -50,7 +50,7 @@ define([
                 view.$('[name=start_date]').val('2015-01-01T00:00').trigger('change');
                 view.$('[name=end_date]').val('2016-01-01T00:00').trigger('change');
                 view.$('[name=category]').val('4').trigger('change');
-                view.$('[name=enterprise_customer]').val('42a30ade47834489a607cd0f52ba13cf').trigger('change');
+                view.$('[name=enterprise_customer]').val('Battlestar Galactica').trigger('change');
                 view.$('[name=enterprise_customer_catalog]').val('869d26dd-2c44-487b-9b6a-24eee973f9a4').trigger(
                     'change'
                 );
@@ -80,7 +80,7 @@ define([
                             MockCustomerCatalogs.results
                         )
                     };
-                    enterpriseCouponModelData.enterprise_customer = MockCustomers[0].id;
+                    enterpriseCouponModelData.enterprise_customer = MockCustomers[0];
                     model = EnterpriseCoupon.findOrCreate(enterpriseCouponModelData, {parse: true});
                     view = new EnterpriseCouponCreateEditView({model: model, editing: true}).render();
                 });
@@ -97,7 +97,7 @@ define([
                     expect(voucherType.val()).toEqual(model.get('voucher_type'));
                     expect(view.$el.find('[name=quantity]').val()).toEqual(model.get('quantity').toString());
                     expect(view.$el.find('[name=enterprise_customer]').val()).toEqual(
-                        model.get('enterprise_customer').id
+                        model.get('enterprise_customer').name
                     );
                     expect(view.$el.find('[name=enterprise_customer_catalog]').val()).toEqual(
                         model.get('enterprise_customer_catalog')

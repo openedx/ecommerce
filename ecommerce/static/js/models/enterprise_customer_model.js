@@ -7,7 +7,10 @@ define([
         'use strict';
 
         return Backbone.RelationalModel.extend({
-            urlRoot: '/api/v2/enterprise/customers'
+            urlRoot: '/api/v2/enterprise/customers',
+            label: function() {
+                return this.get('name');
+            }
         });
     }
 );

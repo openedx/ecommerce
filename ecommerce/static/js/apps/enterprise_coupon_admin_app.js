@@ -37,8 +37,7 @@ require([
             ecommerce.coupons.enterprise_customer_catalogs = new EnterpriseCustomerCatalogsCollection();
 
             $.when(
-                ecommerce.coupons.categories.fetch(),
-                ecommerce.coupons.enterprise_customers.fetch()
+                ecommerce.coupons.categories.fetch()
             ).always(startApp());
         });
     }

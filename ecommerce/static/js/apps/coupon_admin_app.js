@@ -38,9 +38,8 @@ require([
             ecommerce.coupons.enterprise_customers = new EnterpriseCustomerCollection();
 
             $.when(ecommerce.coupons.categories.fetch(),
-                ecommerce.coupons.catalogs.fetch(),
-                ecommerce.coupons.enterprise_customers.fetch()).always(
-                    startApp());
+                ecommerce.coupons.catalogs.fetch()
+            ).always(startApp());
         });
     }
 );
