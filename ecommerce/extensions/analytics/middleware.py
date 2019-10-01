@@ -27,6 +27,15 @@ class TrackingMiddleware(MiddlewareMixin, object):
     def process_request(self, request):
         user = request.user
         if user.is_authenticated():
+            # If the user does not already have an LMS user id, add it
+            called_from = u'middleware with request path: {request}, referrer: {referrer}'.format(
+                request=request.get_full_path(),
+                referrer=request.META.get('HTTP_REFERER'))
+            user.add_lms_user_id('ecommerce_missing_lms_user_id_middleware', called_from)
+
+    def process_response(self, request, response):
+        user = request.user
+        if user.is_authenticated():
             tracking_context = user.tracking_context or {}
 
             # Check for the GA client id
@@ -37,8 +46,14 @@ class TrackingMiddleware(MiddlewareMixin, object):
                 user.tracking_context = tracking_context
                 user.save()
 
-            # If the user does not already have an LMS user id, add it
-            called_from = u'middleware with request path: {request}, referrer: {referrer}'.format(
-                request=request.get_full_path(),
-                referrer=request.META.get('HTTP_REFERER'))
-            user.add_lms_user_id('ecommerce_missing_lms_user_id_middleware', called_from)
+            # Temp logging to check whether we get a user from the request and where the user came from
+            request_path = request.get_full_path()
+            referrer = request.META.get('HTTP_REFERER')
+            logger.info(
+                u'Tracking middleware received a user with ga_client_id: %s from request: %s with referrer: %s',
+                tracking_context.get('ga_client_id'),
+                request_path,
+                referrer
+            )
+
+        return response

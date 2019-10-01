@@ -28,9 +28,16 @@ class TrackingMiddlewareTests(TestCase):
         request.user = user
         self.middleware.process_request(request)
 
+    def _process_response(self, user):
+        request = self.request_factory.get('/')
+        request.user = user
+
+        response = self.client.get('/')
+        self.middleware.process_response(request, response)
+
     def _assert_ga_client_id(self, ga_client_id):
         self.request_factory.cookies['_ga'] = 'GA1.2.{}'.format(ga_client_id)
-        self._process_request(self.user)
+        self._process_response(self.user)
         expected_client_id = self.user.tracking_context.get('ga_client_id')
         self.assertEqual(ga_client_id, expected_client_id)
 
