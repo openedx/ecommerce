@@ -116,6 +116,20 @@ class PaymentForm(forms.Form):
                         css_class='row'
                     )
                     self.helper.layout.fields.insert(list(self.fields.keys()).index('last_name') + 1, organization_div)
+                    # Purchased on behalf of an enterprise or for personal use
+                    self.fields['purchaser'] = forms.BooleanField(
+                        required=False,
+                        label=_('I am purchasing on behalf of my employer or other professional organization')
+                    )
+                    purchaser_div = Div(
+                        Div(
+                            Div('purchaser'),
+                            HTML('<p class="help-block"></p>'),
+                            css_class='form-item col-md-12'
+                        ),
+                        css_class='row'
+                    )
+                    self.helper.layout.fields.insert(list(self.fields.keys()).index('organization') + 1, purchaser_div)
 
     basket = forms.ModelChoiceField(
         queryset=Basket.objects.all(),
