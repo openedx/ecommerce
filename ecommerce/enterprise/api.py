@@ -14,59 +14,6 @@ from ecommerce.core.utils import get_cache_key
 logger = logging.getLogger(__name__)
 
 
-def fetch_enterprise_learner_entitlements(site, learner_id):
-    """
-    Fetch enterprise learner entitlements along-with data sharing consent requirement.
-
-    Arguments:
-        site (Site): site instance.
-        learner_id (int): Primary key identifier for the enterprise learner.
-
-    Example:
-        >>> from django.contrib.sites.shortcuts import get_current_site
-        >>> site  = get_current_site()
-        >>> fetch_enterprise_learner_entitlements(site, 1)
-        [
-            {
-                "requires_consent": False,
-                "entitlement_id": 1
-            },
-        ]
-
-    Returns:
-         (list): Containing dicts of the following structure
-            {
-                "requires_consent": True,
-                "entitlement_id": 1
-            }
-
-    Raises:
-        ConnectionError: requests exception "ConnectionError", raised if if ecommerce is unable to connect
-            to enterprise api server.
-        SlumberBaseException: base slumber exception "SlumberBaseException", raised if API response contains
-            http error status like 4xx, 5xx etc.
-        Timeout: requests exception "Timeout", raised if enterprise API is taking too long for returning
-            a response. This exception is raised for both connection timeout and read timeout.
-    """
-    resource_url = 'enterprise-learner/{learner_id}/entitlements'.format(learner_id=learner_id)
-    cache_key = get_cache_key(
-        site_domain=site.domain,
-        partner_code=site.siteconfiguration.partner.short_code,
-        resource=resource_url,
-        learner_id=learner_id
-    )
-
-    entitlements_cached_response = TieredCache.get_cached_response(cache_key)
-    if entitlements_cached_response.is_found:
-        return entitlements_cached_response.value
-
-    api = site.siteconfiguration.enterprise_api_client
-    entitlements = getattr(api, resource_url).get()
-
-    TieredCache.set_all_tiers(cache_key, entitlements, settings.ENTERPRISE_API_CACHE_TIMEOUT)
-    return entitlements
-
-
 def fetch_enterprise_learner_data(site, user):
     """
     Fetch information related to enterprise and its entitlements from the Enterprise
@@ -101,13 +48,7 @@ def fetch_enterprise_learner_data(site, user):
                             "branding_configuration": {
                                 "enterprise_customer": "cf246b88-d5f6-4908-a522-fc307e0b0c59",
                                 "logo": "https://open.edx.org/sites/all/themes/edx_open/logo.png"
-                            },
-                            "enterprise_customer_entitlements": [
-                                {
-                                    "enterprise_customer": "cf246b88-d5f6-4908-a522-fc307e0b0c59",
-                                    "entitlement_id": 69
-                                }
-                            ]
+                            }
                         },
                         "user_id": 5,
                         "user": {

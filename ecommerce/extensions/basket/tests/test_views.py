@@ -33,7 +33,6 @@ from ecommerce.core.url_utils import absolute_url, get_lms_url
 from ecommerce.coupons.tests.mixins import CouponMixin, DiscoveryMockMixin
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.enterprise.tests.mixins import EnterpriseServiceMockMixin
-from ecommerce.entitlements.utils import create_or_update_course_entitlement
 from ecommerce.extensions.analytics.utils import translate_basket_line_for_segment
 from ecommerce.extensions.basket.constants import EMAIL_OPT_IN_ATTRIBUTE
 from ecommerce.extensions.basket.tests.mixins import BasketMixin
@@ -230,40 +229,6 @@ class BasketAddItemsViewTests(
         basket = response.wsgi_request.basket
         self.assertEqual(response.status_code, 303)
         self.assertEqual(basket.lines.count(), len(products) - 1)
-
-    @mock.patch('ecommerce.enterprise.entitlements.get_entitlement_voucher')
-    def test_with_entitlement_voucher(self, mock_get_entitlement_voucher):
-        """
-        The view ought to redirect to the coupon redemption flow, which is consent-aware.
-        """
-        voucher = mock_get_entitlement_voucher.return_value
-        voucher.code = 'FAKECODE'
-        sku = self.stock_record.partner_sku
-
-        response = self._get_response(sku)
-        expected_failure_url = (
-            'http%3A%2F%2Ftestserver.fake%2Fbasket%2Fadd%2F%3Fconsent_failed%3DTrue%26sku%3D{sku}'.format(
-                sku=sku
-            )
-        )
-        expected_url = absolute_url(self.request, 'coupons:redeem')
-        expected_url += '?code=FAKECODE&sku={sku}&failure_url={failure_url}'.format(
-            sku=sku,
-            failure_url=expected_failure_url,
-        )
-        self.assertRedirects(response, expected_url)
-
-    @mock.patch('ecommerce.enterprise.entitlements.get_entitlement_voucher')
-    def test_with_entitlement_voucher_consent_failed(self, mock_get_entitlement_voucher):
-        """
-        Since consent has already failed, we ought to follow the standard flow, rather than looping forever.
-        """
-        voucher = mock_get_entitlement_voucher.return_value
-        voucher.code = 'FAKECODE'
-        self.mock_course_runs_endpoint(self.site_configuration.discovery_api_url, course_run=self.course)
-        response = self._get_response(self.stock_record.partner_sku, consent_failed='true')
-        expected_url = self.get_full_url(reverse('basket:summary'))
-        self.assertRedirects(response, expected_url, status_code=303)
 
     def test_no_available_product(self):
         """ The view should return HTTP 400 if the product is not available for purchase. """
@@ -549,34 +514,6 @@ class PaymentApiViewTests(PaymentApiResponseTestMixin, BasketMixin, DiscoveryMoc
             messages=[expected_message],
             summary_quantity=1,
             summary_subtotal=100,
-        )
-
-    def test_entitlement_type(self):
-        basket = factories.BasketFactory(owner=self.user, site=self.site)
-        product = create_or_update_course_entitlement(
-            'verified', 100, self.partner, 'foo-bar', 'Foo Bar Entitlement',
-        )
-        basket.add_product(product, 1)
-
-        self.assert_expected_response(
-            basket,
-            product_type=u'Course Entitlement',
-        )
-
-    @ddt.data(50, 100)
-    def test_discounted_entitlement_type(self, discount_value):
-        basket = factories.BasketFactory(owner=self.user, site=self.site)
-        product = create_or_update_course_entitlement(
-            'verified', 100, self.partner, 'foo-bar', 'Foo Bar Entitlement',
-        )
-        basket.add_product(product, 1)
-        voucher = self.create_and_apply_benefit_to_basket(basket, product, Benefit.FIXED, discount_value)
-
-        self.assert_expected_response(
-            basket,
-            product_type=u'Course Entitlement',
-            discount_value=discount_value,
-            voucher=voucher,
         )
 
     @ddt.data(50, 100)
@@ -920,14 +857,6 @@ class BasketSummaryViewTests(EnterpriseServiceMockMixin, DiscoveryTestMixin, Dis
         )
         self.assert_order_details_in_context(seat)
         self.assert_order_details_in_context(enrollment_code)
-
-    def test_order_details_entitlement_msg(self):
-        """Verify the order details message is displayed for course entitlements."""
-
-        product = create_or_update_course_entitlement(
-            'verified', 100, self.partner, 'foo-bar', 'Foo Bar Entitlement')
-
-        self.assert_order_details_in_context(product)
 
     @override_flag(CLIENT_SIDE_CHECKOUT_FLAG_NAME, active=True)
     @override_settings(PAYMENT_PROCESSORS=['ecommerce.extensions.payment.tests.processors.DummyProcessor'])

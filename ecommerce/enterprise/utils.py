@@ -11,7 +11,6 @@ from functools import reduce  # pylint: disable=redefined-builtin
 
 import crum
 import six  # pylint: disable=ungrouped-imports
-import waffle
 from django.conf import settings
 from django.urls import reverse
 from django.utils.translation import ugettext as _
@@ -44,23 +43,6 @@ CUSTOMER_CATALOGS_DEFAULT_RESPONSE = {
     'previous': None,
     'results': [],
 }
-
-
-def is_enterprise_feature_enabled():
-    """
-    Returns boolean indicating whether enterprise feature is enabled or
-    disabled.
-
-    Example:
-        >> is_enterprise_feature_enabled()
-        True
-
-    Returns:
-         (bool): True if enterprise feature is enabled else False
-
-    """
-    is_enterprise_enabled = waffle.switch_is_active(settings.ENABLE_ENTERPRISE_ON_RUNTIME_SWITCH)
-    return is_enterprise_enabled
 
 
 def get_enterprise_api_client(site):
