@@ -41,11 +41,7 @@ from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
 from ecommerce.extensions.offer.constants import DYNAMIC_DISCOUNT_FLAG
 from ecommerce.extensions.offer.utils import format_benefit_value
 from ecommerce.extensions.order.utils import UserAlreadyPlacedOrder
-from ecommerce.extensions.payment.constants import (
-    CLIENT_SIDE_CHECKOUT_FLAG_NAME,
-    ENABLE_MICROFRONTEND_FOR_BASKET_PAGE_FLAG_NAME,
-    FORCE_MICROFRONTEND_BUCKET_FLAG_NAME
-)
+from ecommerce.extensions.payment.constants import CLIENT_SIDE_CHECKOUT_FLAG_NAME
 from ecommerce.extensions.payment.forms import PaymentForm
 from ecommerce.extensions.payment.tests.processors import DummyProcessor
 from ecommerce.extensions.test.factories import create_order, prepare_voucher
@@ -137,8 +133,6 @@ class BasketAddItemsViewTests(
 
     @ddt.data(*itertools.product((True, False), (True, False)))
     @ddt.unpack
-    @override_flag(ENABLE_MICROFRONTEND_FOR_BASKET_PAGE_FLAG_NAME, active=True)
-    @override_flag(FORCE_MICROFRONTEND_BUCKET_FLAG_NAME, active=True)
     def test_microfrontend_for_single_course_purchase_if_configured(self, enable_redirect, set_url):
         microfrontend_url = self.configure_redirect_to_microfrontend(enable_redirect, set_url)
         response = self._get_response(self.stock_record.partner_sku, utm_source='test')
@@ -148,8 +142,6 @@ class BasketAddItemsViewTests(
         expected_url += '?utm_source=test'
         self.assertRedirects(response, expected_url, status_code=303, fetch_redirect_response=False)
 
-    @override_flag(ENABLE_MICROFRONTEND_FOR_BASKET_PAGE_FLAG_NAME, active=True)
-    @override_flag(FORCE_MICROFRONTEND_BUCKET_FLAG_NAME, active=True)
     def test_microfrontend_for_enrollment_code_seat(self):
         microfrontend_url = self.configure_redirect_to_microfrontend()
 
@@ -636,8 +628,6 @@ class BasketSummaryViewTests(EnterpriseServiceMockMixin, DiscoveryTestMixin, Dis
         line_data = response.context['formset_lines_data'][0][1]
         self.assertEqual(line_data['seat_type'], enrollment_code.attr.seat_type.capitalize())
 
-    @override_flag(ENABLE_MICROFRONTEND_FOR_BASKET_PAGE_FLAG_NAME, active=True)
-    @override_flag(FORCE_MICROFRONTEND_BUCKET_FLAG_NAME, active=True)
     def test_microfrontend_for_single_course_purchase(self):
         microfrontend_url = self.configure_redirect_to_microfrontend()
 
@@ -646,8 +636,6 @@ class BasketSummaryViewTests(EnterpriseServiceMockMixin, DiscoveryTestMixin, Dis
         response = self.client.get(self.path)
         self.assertRedirects(response, microfrontend_url, status_code=302, fetch_redirect_response=False)
 
-    @override_flag(ENABLE_MICROFRONTEND_FOR_BASKET_PAGE_FLAG_NAME, active=True)
-    @override_flag(FORCE_MICROFRONTEND_BUCKET_FLAG_NAME, active=True)
     def test_microfrontend_with_consent_failed_param(self):
         microfrontend_url = self.configure_redirect_to_microfrontend()
 
@@ -657,8 +645,6 @@ class BasketSummaryViewTests(EnterpriseServiceMockMixin, DiscoveryTestMixin, Dis
         expected_redirect_url = '{}?{}'.format(microfrontend_url, params)
         self.assertRedirects(response, expected_redirect_url, status_code=302, fetch_redirect_response=False)
 
-    @override_flag(ENABLE_MICROFRONTEND_FOR_BASKET_PAGE_FLAG_NAME, active=True)
-    @override_flag(FORCE_MICROFRONTEND_BUCKET_FLAG_NAME, active=True)
     def test_microfrontend_for_enrollment_code_seat_type(self):
         microfrontend_url = self.configure_redirect_to_microfrontend()
 
