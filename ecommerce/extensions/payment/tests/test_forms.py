@@ -10,6 +10,7 @@ from waffle.models import Switch
 from ecommerce.core.constants import ENROLLMENT_CODE_PRODUCT_CLASS_NAME, ENROLLMENT_CODE_SWITCH
 from ecommerce.core.tests import toggle_switch
 from ecommerce.courses.tests.factories import CourseFactory
+from ecommerce.extensions.basket.constants import PURCHASER_BEHALF_ATTRIBUTE
 from ecommerce.extensions.payment.forms import PaymentForm
 from ecommerce.extensions.test.factories import create_basket
 from ecommerce.tests.testcases import TestCase
@@ -179,7 +180,7 @@ class PaymentFormTests(TestCase):
         }
         form = PaymentForm(user=self.user, data=data, request=self.request)
         self.assertTrue('organization' in form.fields)
-        self.assertTrue('purchaser' in form.fields)
+        self.assertTrue(PURCHASER_BEHALF_ATTRIBUTE in form.fields)
 
     def test_organization_field_not_in_form(self):
         """
@@ -203,4 +204,4 @@ class PaymentFormTests(TestCase):
         }
         form = PaymentForm(user=self.user, data=data, request=self.request)
         self.assertFalse('organization' in form.fields)
-        self.assertFalse('purchaser' in form.fields)
+        self.assertFalse(PURCHASER_BEHALF_ATTRIBUTE in form.fields)
