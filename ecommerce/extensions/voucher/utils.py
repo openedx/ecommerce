@@ -47,6 +47,7 @@ Range = get_model('offer', 'Range')
 StockRecord = get_model('partner', 'StockRecord')
 Voucher = get_model('voucher', 'Voucher')
 VoucherApplication = get_model('voucher', 'VoucherApplication')
+VoucherOffer = get_model('voucher', 'Voucher_offers')
 
 
 def _add_redemption_course_ids(new_row_to_append, header_row, redemption_course_ids):
@@ -547,6 +548,62 @@ def create_new_voucher(code, end_datetime, name, start_datetime, voucher_type):
     return voucher
 
 
+def create_vouchers_and_attach_offers(
+        code,
+        end_datetime,
+        enterprise_customer,
+        enterprise_offers,
+        name,
+        offers,
+        quantity,
+        start_datetime,
+        voucher_type
+):
+    """
+    Create vouchers and attach offers with them.
+
+    Arguments:
+        code (str): Code associated with vouchers. Defaults to None.
+        end_datetime (datetime): End date for voucher offer.
+        enterprise_customer (str): UUID of an EnterpriseCustomer attached to this voucher
+        enterprise_offers (ConditionalOffer): List of enterprise offers.
+        name (str): Voucher name.
+        offers (ConditionalOffer): List of offers.
+        quantity (int): Number of vouchers to be created.
+        start_datetime (datetime): Start date for voucher offer.
+        voucher_type (str): Type of voucher.
+
+    Returns:
+        List[Voucher]
+    """
+    vouchers = []
+    voucher_offers = []
+    enterprise_voucher_offers = []
+    for i in range(quantity):
+        voucher = create_new_voucher(
+            end_datetime=end_datetime,
+            start_datetime=start_datetime,
+            voucher_type=voucher_type,
+            code=code,
+            name=name
+        )
+        voucher_offers.append(
+            VoucherOffer(voucher=voucher, conditionaloffer=offers[i] if len(offers) > 1 else offers[0])
+        )
+        if enterprise_customer and enterprise_offers:
+            enterprise_voucher_offers.append(
+                VoucherOffer(
+                    voucher=voucher,
+                    conditionaloffer=enterprise_offers[i] if len(enterprise_offers) > 1 else enterprise_offers[0]
+                )
+            )
+        vouchers.append(voucher)
+
+    VoucherOffer.objects.bulk_create(voucher_offers)
+    VoucherOffer.objects.bulk_create(enterprise_voucher_offers)
+    return vouchers
+
+
 def validate_voucher_fields(
         max_uses,
         voucher_type,
@@ -640,19 +697,17 @@ def create_enterprise_vouchers(
         )
         offers.append(offer)
 
-    vouchers = []
-    for i in range(quantity):
-        voucher = create_new_voucher(
-            end_datetime=end_datetime,
-            start_datetime=start_datetime,
-            voucher_type=voucher_type,
-            code=code,
-            name=name
-        )
-        voucher.offers.add(offers[i] if len(offers) > 1 else offers[0])
-        vouchers.append(voucher)
-
-    return vouchers
+    return create_vouchers_and_attach_offers(
+        code,
+        end_datetime,
+        enterprise_customer,
+        [],
+        name,
+        offers,
+        quantity,
+        start_datetime,
+        voucher_type
+    )
 
 
 def create_vouchers(
@@ -678,7 +733,7 @@ def create_vouchers(
         site=None,
 ):
     """
-    Create vouchers.
+    Create offers and vouchers.
 
     Arguments:
         benefit_type (str): Type of benefit associated with vouchers.
@@ -707,7 +762,6 @@ def create_vouchers(
         List[Voucher]
     """
     logger.info("Creating [%d] vouchers product [%s]", quantity, coupon.id)
-    vouchers = []
     offers = []
     enterprise_offers = []
 
@@ -783,20 +837,17 @@ def create_vouchers(
             )
             enterprise_offers.append(enterprise_offer)
 
-    for i in range(quantity):
-        voucher = create_new_voucher(
-            end_datetime=end_datetime,
-            start_datetime=start_datetime,
-            voucher_type=voucher_type,
-            code=code,
-            name=name
-        )
-        voucher.offers.add(offers[i] if len(offers) > 1 else offers[0])
-        if enterprise_customer:
-            voucher.offers.add(enterprise_offers[i] if len(enterprise_offers) > 1 else enterprise_offers[0])
-        vouchers.append(voucher)
-
-    return vouchers
+    return create_vouchers_and_attach_offers(
+        code,
+        end_datetime,
+        enterprise_customer,
+        enterprise_offers,
+        name,
+        offers,
+        quantity,
+        start_datetime,
+        voucher_type
+    )
 
 
 def get_voucher_discount_info(benefit, price):
