@@ -358,7 +358,8 @@ def basket_add_organization_attribute(basket, request_data):
             attribute_type=organization_attribute,
             value_text=business_client.strip()
         )
-    if purchaser:
+        # Also add the 'purchaser' attribute to the carts of all business client purchases. This way we can track
+        # how many people read/paid attention to the checkbox during purchases.
         purchaser_attribute, __ = BasketAttributeType.objects.get_or_create(name=PURCHASER_BEHALF_ATTRIBUTE)
         BasketAttribute.objects.get_or_create(
             basket=basket,
