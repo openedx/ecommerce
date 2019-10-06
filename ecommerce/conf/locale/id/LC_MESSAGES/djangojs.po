@@ -4,13 +4,15 @@
 # This file is distributed under the GNU AFFERO GENERAL PUBLIC LICENSE.
 # 
 # Translators:
+# Aprisa Chrysantina <aprisa.chrysantina@gmail.com>, 2019
+# Stefania Trabucchi <stefania.trabucchi@abstract-technology.de>, 2019
 msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-04-05 11:00+0000\n"
-"PO-Revision-Date: 2018-07-02 12:21+0000\n"
-"Last-Translator: Untag Pranata <untag@unzypsoft.com>\n"
+"POT-Creation-Date: 2019-03-26 17:16+0000\n"
+"PO-Revision-Date: 2019-09-16 13:40+0000\n"
+"Last-Translator: Stefania Trabucchi <stefania.trabucchi@abstract-technology.de>\n"
 "Language-Team: Indonesian (http://www.transifex.com/open-edx/edx-platform/language/id/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -19,468 +21,510 @@ msgstr ""
 "Plural-Forms: nplurals=1; plural=0;\n"
 
 #: ecommerce/static/js/models/coupon_model.js:33
+#: ecommerce/static/js/models/enterprise_coupon_model.js:15
 msgid "This field is required."
-msgstr ""
+msgstr "Kolom ini wajib diisi."
 
 #: ecommerce/static/js/models/coupon_model.js:34
+#: ecommerce/static/js/models/enterprise_coupon_model.js:16
 msgid "This value must be a number."
-msgstr ""
+msgstr "Harus diisi dengan angka."
 
 #: ecommerce/static/js/models/coupon_model.js:35
+#: ecommerce/static/js/models/enterprise_coupon_model.js:17
 msgid "This value must be a date."
-msgstr ""
+msgstr "Harus diisi dengan tanggal."
 
 #: ecommerce/static/js/models/coupon_model.js:36
 msgid "At least one seat type must be selected."
-msgstr ""
+msgstr "Setidaknya satu posisi harus dipilih."
 
-#: ecommerce/static/js/models/coupon_model.js:82
+#: ecommerce/static/js/models/coupon_model.js:71
 msgid "This field must be empty or contain 1-16 alphanumeric characters."
-msgstr ""
+msgstr "Kolom ini harus dikosongi atau berisi 1-16 karakter alfanumerik."
 
-#: ecommerce/static/js/models/coupon_model.js:86
-msgid "A valid course ID is required"
-msgstr ""
-
-#: ecommerce/static/js/models/coupon_model.js:106
+#: ecommerce/static/js/models/coupon_model.js:80
 #, javascript-format
 msgid "Email domain {%s} is invalid."
-msgstr ""
+msgstr "Domain email {%s} invalid."
 
-#: ecommerce/static/js/models/coupon_model.js:124
+#: ecommerce/static/js/models/coupon_model.js:97
 msgid "Must occur after start date"
-msgstr ""
+msgstr "Harus terjadi setelah tanggal mulai"
 
-#: ecommerce/static/js/models/coupon_model.js:154
+#: ecommerce/static/js/models/coupon_model.js:127
 msgid "Max uses for multi-use coupons must be higher than 2."
-msgstr ""
+msgstr "Penggunaan maksimal untuk kupon multi-use harus lebih besar dari 2."
 
-#: ecommerce/static/js/models/coupon_model.js:166
-msgid "A valid Program UUID is required."
-msgstr ""
-
-#: ecommerce/static/js/models/coupon_model.js:190
+#: ecommerce/static/js/models/coupon_model.js:151
 msgid "Must occur before end date"
-msgstr ""
+msgstr "Harus terjadi sebelum tanggal akhir"
+
+#: ecommerce/static/js/models/coupon_model.js:173
+msgid "A valid course ID is required"
+msgstr "Harus ada ID kursus yang valid"
+
+#: ecommerce/static/js/models/coupon_model.js:189
+msgid "Enterprise Customer must be set if Enterprise Customer Catalog is set"
+msgstr "Kustomer Enterprise harus disetel jika Katalog Kustomer Enterprise dipilih"
+
+#: ecommerce/static/js/models/coupon_model.js:196
+msgid "A valid Program UUID is required."
+msgstr "Harus ada UUID Program yang valid."
 
 #: ecommerce/static/js/models/course_model.js:54
 msgid "You must select a course type."
-msgstr ""
+msgstr "Anda harus memilih tipe kursus."
 
 #: ecommerce/static/js/models/course_model.js:60
 msgid "You must choose if an honor seat should be created."
-msgstr ""
+msgstr "Anda harus memilih apakah posisi kehormatan harus dibuat."
 
 #: ecommerce/static/js/models/course_model.js:77
 msgid "The verification deadline must occur AFTER the upgrade deadline."
-msgstr ""
+msgstr "Tenggat waktu verifikasi harus terjadi SETELAH tenggat waktu upgrade."
 
 #: ecommerce/static/js/models/course_model.js:86
 msgid "Product validation failed."
-msgstr ""
+msgstr "Validasi produk gagal."
 
 #: ecommerce/static/js/models/course_model.js:94
 #: ecommerce/static/js/views/dynamic_catalog_view.js:70
 msgid "Course ID"
-msgstr ""
+msgstr "ID Kursus"
 
 #: ecommerce/static/js/models/course_model.js:95
 msgid "Course Name"
-msgstr ""
+msgstr "Nama Kursus"
 
 #: ecommerce/static/js/models/course_model.js:96
 #: ecommerce/static/js/views/course_list_view.js:72
 msgid "Course Type"
-msgstr ""
+msgstr "Jenis Kursus"
 
 #: ecommerce/static/js/models/course_model.js:97
 msgid "Verification Deadline"
-msgstr ""
+msgstr "Verifikasi Tenggat Waktu"
 
 #: ecommerce/static/js/models/course_model.js:98
 msgid "Include Honor Seat"
-msgstr ""
+msgstr "Masukkan Posisi Kehormatan"
 
 #: ecommerce/static/js/models/course_seats/course_seat.js:28
 msgid "All course seats must have a price."
-msgstr ""
+msgstr "Semua posisi dalam kursus harus memiliki harga."
 
 #: ecommerce/static/js/models/course_seats/course_seat.js:45
 msgid "Verified seats must have an upgrade deadline."
-msgstr ""
+msgstr "Posisi terverifikasi harus memiliki tenggat waktu upgrade."
 
 #: ecommerce/static/js/models/course_seats/course_seat.js:53
 msgid "The upgrade deadline must occur BEFORE the verification deadline."
-msgstr ""
+msgstr "Tenggat waktu upgrade harus terjadi SEBELUM tenggat waktu verifikasi."
 
 #: ecommerce/static/js/models/course_seats/course_seat.js:84
 #: ecommerce/static/js/views/course_form_view.js:60
 msgid "Verified"
-msgstr ""
+msgstr "Terverifikasi"
 
 #: ecommerce/static/js/models/course_seats/course_seat.js:86
 #: ecommerce/static/js/views/course_form_view.js:71
 msgid "Credit"
-msgstr ""
+msgstr "Kredit"
 
 #: ecommerce/static/js/models/course_seats/course_seat.js:89
 msgid "Professional"
-msgstr ""
+msgstr "Profesional"
 
 #: ecommerce/static/js/models/course_seats/course_seat.js:91
 msgid "Honor"
-msgstr ""
+msgstr "Kehormatan"
 
 #: ecommerce/static/js/models/course_seats/course_seat.js:93
 msgid "Audit"
-msgstr ""
+msgstr "Audit"
 
 #: ecommerce/static/js/models/course_seats/course_seat.js:101
 msgid "Verified Certificate"
-msgstr ""
+msgstr "Sertifikat Terverifikasi"
 
 #: ecommerce/static/js/models/course_seats/course_seat.js:105
 msgid "Professional Certificate"
-msgstr ""
+msgstr "Sertifikat Profesional"
 
 #: ecommerce/static/js/models/course_seats/course_seat.js:108
 msgid "Honor Certificate"
-msgstr ""
+msgstr "Sertifikat Kehormatan"
 
 #: ecommerce/static/js/models/course_seats/course_seat.js:111
 msgid "No Certificate"
-msgstr ""
+msgstr "Tanpa Sertifikat"
 
 #: ecommerce/static/js/models/course_seats/credit_seat.js:26
 msgid "All credit seats must have a credit provider."
-msgstr ""
+msgstr "Semua posisi kredit harus memiliki penyedia kredit"
 
 #: ecommerce/static/js/models/course_seats/credit_seat.js:30
 msgid "Please select a valid credit provider."
-msgstr ""
+msgstr "Silakan pilih penyedia kredit yang valid"
 
 #: ecommerce/static/js/models/course_seats/credit_seat.js:39
 msgid "All credit seats must designate a number of credit hours."
-msgstr ""
+msgstr "Semua posisi kredit harus menuliskan jumlah jam kredit."
+
+#: ecommerce/static/js/models/enterprise_coupon_model.js:18
+msgid "This value must be a valid email."
+msgstr "Harus diisi dengan email yang valid."
 
 #: ecommerce/static/js/pages/basket_page.js:27
 msgid "Problem occurred during checkout. Please contact support."
-msgstr ""
+msgstr "Gagal melakukan checkout. Silakan hubungi Dukungan."
 
 #: ecommerce/static/js/pages/basket_page.js:101
 msgid "This field is required"
-msgstr ""
+msgstr "Kolom ini harus diisi"
 
 #: ecommerce/static/js/pages/basket_page.js:136
 msgid "Invalid card number"
-msgstr ""
+msgstr "Nomer kartu tidak valid"
 
 #: ecommerce/static/js/pages/basket_page.js:138
 msgid "Unsupported card type"
-msgstr ""
+msgstr "Jenis kartu tidak berlaku"
 
 #: ecommerce/static/js/pages/basket_page.js:140
 msgid "Invalid security number"
-msgstr ""
+msgstr "Nomer keamanan salah"
 
 #: ecommerce/static/js/pages/basket_page.js:145
 msgid "Invalid month"
-msgstr ""
+msgstr "Bulan tidak valid"
 
 #: ecommerce/static/js/pages/basket_page.js:147
 msgid "Invalid year"
-msgstr ""
+msgstr "Tahun tidak valid"
 
 #: ecommerce/static/js/pages/basket_page.js:149
 msgid "Card expired"
-msgstr ""
+msgstr "Kartu telah kadaluarsa"
 
 #: ecommerce/static/js/pages/basket_page.js:485
 msgid "<Choose state/province>"
-msgstr ""
+msgstr "<Choose state/province>"
 
 #: ecommerce/static/js/pages/basket_page.js:486
 msgid "State/Province (required)"
-msgstr ""
+msgstr "Provinsi (wajib diisi)"
 
 #: ecommerce/static/js/pages/coupon_create_page.js:12
+#: ecommerce/static/js/pages/enterprise_coupon_create_page.js:12
 msgid "Create New Coupon"
-msgstr ""
+msgstr "Buat Kupon Baru"
 
 #: ecommerce/static/js/pages/coupon_detail_page.js:13
+#: ecommerce/static/js/pages/enterprise_coupon_detail_page.js:13
 msgid "View Coupon"
-msgstr ""
+msgstr "Lihat Kupon"
 
 #: ecommerce/static/js/pages/coupon_edit_page.js:13
+#: ecommerce/static/js/pages/enterprise_coupon_edit_page.js:13
 msgid "Edit Coupon"
-msgstr ""
+msgstr "Edit Kupon"
 
 #: ecommerce/static/js/pages/coupon_list_page.js:12
 msgid "Coupon Codes"
-msgstr ""
+msgstr "Kode Kupon"
 
 #: ecommerce/static/js/pages/course_create_page.js:12
 msgid "Create New Course"
-msgstr ""
+msgstr "Buat Kursus Baru"
 
 #: ecommerce/static/js/pages/course_detail_page.js:13
 msgid "View Course"
-msgstr ""
+msgstr "Lihat Kursus"
 
 #: ecommerce/static/js/pages/course_edit_page.js:13
 msgid "Edit Course"
-msgstr ""
+msgstr "Edit Kursus"
 
 #: ecommerce/static/js/pages/course_list_page.js:12
 msgid "Courses"
-msgstr ""
+msgstr "Kursus"
+
+#: ecommerce/static/js/pages/enterprise_coupon_list_page.js:12
+msgid "Enterprise Coupon Codes"
+msgstr "Kode Kupon Enterprise"
 
 #: ecommerce/static/js/pages/offer_page.js:14
 msgid "Redeem"
-msgstr ""
+msgstr "Tukar Kupon"
 
 #: ecommerce/static/js/pages/receipt_page.js:21
 msgid ""
 "Caution! Using the back button on this page may cause you to be charged "
 "again."
-msgstr ""
+msgstr "Perhatian! Metode pembayaran Anda dapat dikenakan biaya lagi jika Anda mengeklik tombol kembali pada halaman ini."
 
 #. Translators: Do not translate "Apple Pay".
 #: ecommerce/static/js/payment_processors/cybersource.js:218
 msgid ""
 "Apple Pay is not available at this time. Please try another payment method."
-msgstr ""
+msgstr "Apple Pay tidak tersedia saat ini. Silakan pilih metode pembayaran lain."
 
-#: ecommerce/static/js/payment_processors/cybersource.js:249
+#: ecommerce/static/js/payment_processors/cybersource.js:248
 msgid ""
 "An error occurred while processing your payment. You have NOT been charged. "
 "Please try again, or select another payment method."
-msgstr ""
+msgstr "Terjadi kesalahan saat memproses pembayaran Anda. Anda belum dikenakan biaya. Silakan coba kembali, atau pilih metode pembayaran lainnya."
 
 #: ecommerce/static/js/payment_processors/stripe.js:71
 msgid ""
 "An error occurred while attempting to process your payment. You have not "
 "been charged. Please check your payment details, and try again."
-msgstr ""
+msgstr "Terjadi kesalahan saat mencoba memproses pembayaran Anda. Anda belum dikenakan biaya. Silakan periksa rincian pembayaran Anda, dan coba kembali."
 
 #: ecommerce/static/js/payment_processors/stripe.js:110
 msgid "An error occurred while processing your payment. Please try again."
-msgstr ""
+msgstr "Terjadi kesalahan saat memproses pembayaran Anda. Silakan coba kembali."
 
 #: ecommerce/static/js/utils/utils.js:184
 msgid "Trailing comma not allowed."
-msgstr ""
+msgstr "Koma di akhir tidak diperkenankan."
 
 #: ecommerce/static/js/views/coupon_detail_view.js:107
-#: ecommerce/static/js/views/coupon_form_view.js:60
+#: ecommerce/static/js/views/coupon_form_view.js:62
+#: ecommerce/static/js/views/enterprise_coupon_form_view.js:29
 msgid "Can be used once by one customer"
-msgstr ""
+msgstr "Dapat digunakan satu kali oleh satu kustomer"
 
 #: ecommerce/static/js/views/coupon_detail_view.js:109
-#: ecommerce/static/js/views/coupon_form_view.js:68
+#: ecommerce/static/js/views/coupon_form_view.js:70
+#: ecommerce/static/js/views/enterprise_coupon_form_view.js:37
 msgid "Can be used multiple times by multiple customers"
-msgstr ""
+msgstr "Dapat digunakan beberapa kali oleh beberapa kustomer"
 
 #: ecommerce/static/js/views/coupon_detail_view.js:111
-#: ecommerce/static/js/views/coupon_form_view.js:64
+#: ecommerce/static/js/views/coupon_form_view.js:66
+#: ecommerce/static/js/views/enterprise_coupon_form_view.js:33
 msgid "Can be used once by multiple customers"
-msgstr ""
+msgstr "Dapat digunakan sekali oleh beberapa kustomer"
 
-#: ecommerce/static/js/views/coupon_form_view.js:49
+#: ecommerce/static/js/views/coupon_form_view.js:51
 msgid "Enrollment Code"
-msgstr ""
+msgstr "Kode Pendaftaran"
 
-#: ecommerce/static/js/views/coupon_form_view.js:53
+#: ecommerce/static/js/views/coupon_form_view.js:55
 msgid "Discount Code"
-msgstr ""
+msgstr "Kode Diskon"
 
-#: ecommerce/static/js/views/coupon_form_view.js:768
+#: ecommerce/static/js/views/coupon_form_view.js:789
 msgid "Save Changes"
-msgstr ""
+msgstr "Simpan Perubahan"
 
-#: ecommerce/static/js/views/coupon_form_view.js:783
+#: ecommerce/static/js/views/coupon_form_view.js:804
 msgid "Create Coupon"
-msgstr ""
+msgstr "Buat Kupon"
 
-#: ecommerce/static/js/views/coupon_list_view.js:47
-#: ecommerce/static/js/views/course_list_view.js:37
-msgid "Search..."
-msgstr ""
+#: ecommerce/static/js/views/coupon_list_view.js:34
+#: ecommerce/static/js/views/enterprise_coupon_list_view.js:23
+msgid "Name"
+msgstr "Nama"
+
+#: ecommerce/static/js/views/coupon_list_view.js:41
+#: ecommerce/static/js/views/enterprise_coupon_list_view.js:30
+msgid "Created"
+msgstr "Telah dibuat"
+
+#: ecommerce/static/js/views/coupon_list_view.js:45
+msgid "Custom Code"
+msgstr "Kode Kustom"
+
+#: ecommerce/static/js/views/coupon_list_view.js:49
+#: ecommerce/static/js/views/enterprise_coupon_list_view.js:38
+msgid "Client"
+msgstr "Klien"
+
+#: ecommerce/static/js/views/coupon_list_view.js:53
+msgid "Category"
+msgstr "Kategori"
 
 #: ecommerce/static/js/views/coupon_list_view.js:57
+#: ecommerce/static/js/views/enterprise_coupon_list_view.js:50
+msgid "Coupon Report"
+msgstr "Laporan Kupon"
+
+#: ecommerce/static/js/views/coupon_list_view.js:82
+#: ecommerce/static/js/views/course_list_view.js:37
+msgid "Search..."
+msgstr "Cari"
+
+#: ecommerce/static/js/views/coupon_list_view.js:92
 #: ecommerce/static/js/views/course_list_view.js:47
 msgid "Next"
-msgstr ""
+msgstr "Selanjutnya"
 
-#: ecommerce/static/js/views/coupon_list_view.js:58
+#: ecommerce/static/js/views/coupon_list_view.js:93
 #: ecommerce/static/js/views/course_list_view.js:48
 msgid "Previous"
-msgstr ""
+msgstr "Sebelumnya"
 
 #. Translators: _START_, _END_, and _TOTAL_ are placeholders. Do NOT translate
 #. them.
-#: ecommerce/static/js/views/coupon_list_view.js:62
+#: ecommerce/static/js/views/coupon_list_view.js:97
 msgid "Displaying _START_ to _END_ of _TOTAL_ coupons"
-msgstr ""
+msgstr "Menampilkan _START_ to _END_ of _TOTAL_ kupon"
 
 #. Translators: _MAX_ is a placeholder. Do NOT translate it.
-#: ecommerce/static/js/views/coupon_list_view.js:65
+#: ecommerce/static/js/views/coupon_list_view.js:100
 msgid "(filtered from _MAX_ total coupons)"
-msgstr ""
+msgstr "(difilter dari _MAX_ total kupon)"
 
 #. Translators: _MENU_ is a placeholder. Do NOT translate it.
-#: ecommerce/static/js/views/coupon_list_view.js:68
+#: ecommerce/static/js/views/coupon_list_view.js:103
 msgid "Display _MENU_ coupons"
-msgstr ""
-
-#: ecommerce/static/js/views/coupon_list_view.js:74
-msgid "Name"
-msgstr ""
-
-#: ecommerce/static/js/views/coupon_list_view.js:81
-msgid "Created"
-msgstr ""
-
-#: ecommerce/static/js/views/coupon_list_view.js:85
-msgid "Custom Code"
-msgstr ""
-
-#: ecommerce/static/js/views/coupon_list_view.js:89
-msgid "Client"
-msgstr ""
-
-#: ecommerce/static/js/views/coupon_list_view.js:93
-msgid "Category"
-msgstr ""
-
-#: ecommerce/static/js/views/coupon_list_view.js:97
-msgid "Coupon Report"
-msgstr ""
+msgstr "Tampilkan _MENU_ kupon"
 
 #: ecommerce/static/js/views/course_form_view.js:55
 msgid "Free (Audit)"
-msgstr ""
+msgstr "Bebas (Audit)"
 
 #: ecommerce/static/js/views/course_form_view.js:56
 msgid "Free audit track. No certificate."
-msgstr ""
+msgstr "Jalur audit bebas. Tanpa sertifikat."
 
 #: ecommerce/static/js/views/course_form_view.js:61
 msgid ""
 "Paid certificate track with initial verification and Verified Certificate"
-msgstr ""
+msgstr "Jalur sertifikat berbayar dengan verifikasi awal dan Sertifikat Terverifikasi"
 
 #: ecommerce/static/js/views/course_form_view.js:65
 msgid "Professional Education"
-msgstr ""
+msgstr "Pendidikan Profesional"
 
 #: ecommerce/static/js/views/course_form_view.js:66
 msgid ""
 "Paid certificate track with initial verification and Professional Education "
 "Certificate"
-msgstr ""
+msgstr "Jalur sertifikat berbayar dengan verifikasi awal dan Sertifikat Pendidikan Profesional"
 
 #: ecommerce/static/js/views/course_form_view.js:72
 msgid ""
 "Paid certificate track with initial verification and Verified Certificate, "
 "and option to purchase credit"
-msgstr ""
+msgstr "Jalur sertifikat berbayar dengan verifikasi awal dan Sertifikat Terverifikasi, dan opsi untuk membeli kredit"
 
 #. Translators: _START_, _END_, and _TOTAL_ are placeholders. Do NOT translate
 #. them.
 #: ecommerce/static/js/views/course_list_view.js:52
 msgid "Displaying _START_ to _END_ of _TOTAL_ courses"
-msgstr ""
+msgstr "Menampilkan _START_ to _END_ of _TOTAL_ kursus"
 
 #. Translators: _MAX_ is a placeholder. Do NOT translate it.
 #: ecommerce/static/js/views/course_list_view.js:55
 msgid "(filtered from _MAX_ total courses)"
-msgstr ""
+msgstr "(difilter dari _MAX_ total kursus)"
 
 #. Translators: _MENU_ is a placeholder. Do NOT translate it.
 #: ecommerce/static/js/views/course_list_view.js:58
 msgid "Display _MENU_ courses"
-msgstr ""
+msgstr "Tampilkan _MENU_ kursus"
 
 #: ecommerce/static/js/views/course_list_view.js:64
 msgid "Course"
-msgstr ""
+msgstr "Kursus"
 
 #: ecommerce/static/js/views/course_list_view.js:79
 msgid "Last Edited"
-msgstr ""
+msgstr "Terakhir Diedit"
 
 #: ecommerce/static/js/views/dynamic_catalog_view.js:74
 msgid "Seat title"
-msgstr ""
+msgstr "Titel Posisi"
 
 #: ecommerce/static/js/views/dynamic_catalog_view.js:78
 msgid "Seat type"
-msgstr ""
+msgstr "Tipe posisi"
 
-#: ecommerce/static/js/views/form_view.js:69
+#: ecommerce/static/js/views/enterprise_coupon_detail_view.js:28
+#: ecommerce/static/js/views/enterprise_coupon_form_view.js:41
+msgid "Can be used multiple times by one customer"
+msgstr "Dapat digunakan beberapa kali oleh satu kustomer"
+
+#: ecommerce/static/js/views/enterprise_coupon_list_view.js:34
+msgid "Status"
+msgstr "Status"
+
+#: ecommerce/static/js/views/enterprise_coupon_list_view.js:42
+msgid "Enterprise Customer"
+msgstr "Kustomer Enterprise"
+
+#: ecommerce/static/js/views/enterprise_coupon_list_view.js:46
+msgid "Enterprise Customer Catalog"
+msgstr "Katalog Kustomer Enterprise"
+
+#: ecommerce/static/js/views/form_view.js:71
 msgid "A course with the specified ID already exists."
-msgstr ""
+msgstr "Kursus dengan ID yang disebutkan telah tersedia."
 
-#: ecommerce/static/js/views/form_view.js:79
-#: ecommerce/static/js/views/form_view.js:172
+#: ecommerce/static/js/views/form_view.js:81
+#: ecommerce/static/js/views/form_view.js:174
 msgid "Error!"
-msgstr ""
+msgstr "Error!"
 
-#: ecommerce/static/js/views/form_view.js:125
+#: ecommerce/static/js/views/form_view.js:127
 msgid "Saving..."
-msgstr ""
+msgstr "Sedang menyimpan ..."
 
-#: ecommerce/static/js/views/form_view.js:134
+#: ecommerce/static/js/views/form_view.js:136
 msgid "Please complete all required fields."
-msgstr ""
+msgstr "Silakan lengkapi semua kolom yang wajib diisi."
 
-#: ecommerce/static/js/views/form_view.js:159
+#: ecommerce/static/js/views/form_view.js:161
 msgid "An error occurred while saving the data."
-msgstr ""
+msgstr "Terjadi kesalahan saat menyimpan data."
 
 #: ecommerce/static/js/views/offer_view.js:198
 msgid "Ellipsis"
-msgstr ""
+msgstr "Elipsis"
 
 #: ecommerce/static/js/views/offer_view.js:205
 msgid "Load the records for page "
-msgstr ""
+msgstr "Memuat rekord halaman ini"
 
 #: ecommerce/static/js/views/offer_view.js:212
 msgid "Load the records for the next page"
-msgstr ""
+msgstr "Memuat rekord halaman Selanjutnya"
 
 #: ecommerce/static/js/views/offer_view.js:220
 msgid "Load the records for the previous page"
-msgstr ""
+msgstr "Memuat rekord halaman sebelumnya"
 
 #: ecommerce/static/js/views/provider_selection_view.js:33
 msgid "Select"
-msgstr ""
+msgstr "Pilih"
 
 #: ecommerce/static/js/views/provider_selection_view.js:34
 msgid "Selected"
-msgstr ""
+msgstr "Terpilih"
 
 #: ecommerce/static/vendor-extensions/oscar/js/order_actions.js:21
 msgid "Order %(order_number)s has been fulfilled."
-msgstr ""
+msgstr "Pesanan %(order_number)s telah terpenuhi."
 
 #: ecommerce/static/vendor-extensions/oscar/js/order_actions.js:27
 msgid "Failed to fulfill order %(order_number)s: %(error)s"
-msgstr ""
+msgstr "Gagal memenuhi pesanan %(order_number)s: %(error)s"
 
 #: ecommerce/static/vendor-extensions/oscar/js/refund_list.js:24
 msgid "Refund #%(refund_id)s has been processed."
-msgstr ""
+msgstr "Refund #%(refund_id)s telah diproses."
 
 #: ecommerce/static/vendor-extensions/oscar/js/refund_list.js:33
 msgid "Error"
-msgstr ""
+msgstr "Kesalahan"
 
 #: ecommerce/static/vendor-extensions/oscar/js/refund_list.js:36
 msgid ""
 "Failed to process refund #%(refund_id)s: %(error)s. Please try again, or "
 "contact the E-Commerce Development Team."
-msgstr ""
+msgstr "Gagal memproses refund #%(refund_id)s: %(error)s. Silakan coba kembali, atau hubungi Tim Pengembangan E-Commerce."
