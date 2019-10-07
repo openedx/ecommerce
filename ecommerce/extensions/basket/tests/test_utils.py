@@ -33,8 +33,8 @@ from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
 from ecommerce.extensions.order.constants import DISABLE_REPEAT_ORDER_CHECK_SWITCH_NAME
 from ecommerce.extensions.order.exceptions import AlreadyPlacedOrderException
 from ecommerce.extensions.order.utils import UserAlreadyPlacedOrder
-from ecommerce.extensions.payment.constants import DISABLE_MICROFRONTEND_FOR_BASKET_PAGE_FLAG_NAME
 from ecommerce.extensions.partner.models import StockRecord
+from ecommerce.extensions.payment.constants import DISABLE_MICROFRONTEND_FOR_BASKET_PAGE_FLAG_NAME
 from ecommerce.extensions.test.factories import create_order, prepare_voucher
 from ecommerce.referrals.models import Referral
 from ecommerce.tests.testcases import TestCase, TransactionTestCase
@@ -655,11 +655,11 @@ class BasketUtilsTests(DiscoveryTestMixin, BasketMixin, TestCase):
     )
     @ddt.unpack
     def test_disable_microfrontend_for_basket_page_flag(
-        self,
-        microfrontend_enabled,
-        payment_microfrontend_url,
-        disable_microfrontend_flag_active,
-        expected_result
+            self,
+            microfrontend_enabled,
+            payment_microfrontend_url,
+            disable_microfrontend_flag_active,
+            expected_result
     ):
         """
         Verify that the `disable_microfrontend_for_basket_page_flag` correctly disables the microfrontend url retrieval
