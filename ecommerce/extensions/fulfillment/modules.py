@@ -5,12 +5,12 @@ in an Order.
 """
 from __future__ import absolute_import
 
+import abc
 import datetime
 import json
 import logging
 import urllib
 
-import abc
 import requests
 import six
 from django.conf import settings
@@ -569,43 +569,40 @@ class EnrollmentCodeFulfillmentModule(BaseFulfillmentModule):
                 basket=order.basket,
                 attribute_type=BasketAttributeType.objects.get(name=PURCHASER_BEHALF_ATTRIBUTE))
             enterprise_purchase = basket_attrib_purchaser.value_text == "True"
-        except (BasketAttribute.DoesNotExist, BasketAttributeType.DoesNotExist) as e:
-            logger.exception("Error occurred attempting to retrieve Basket Attribute '{}' from current basket".format(
-                PURCHASER_BEHALF_ATTRIBUTE))
+        except (BasketAttribute.DoesNotExist, BasketAttributeType.DoesNotExist):
+            logger.exception("Error occurred attempting to retrieve Basket Attribute '%s' from current basket",
+                             PURCHASER_BEHALF_ATTRIBUTE)
 
         # if this is an Enterprise purchase then transmit information about the order over to HubSpot
         if enterprise_purchase:
-            self.send_fulfillment_data_to_hubspot(order, lines)
+            self.send_fulfillment_data_to_hubspot(order)
 
         self.send_email(order)
         logger.info("Finished fulfilling 'Enrollment code' product types for order [%s]", order.number)
         return order, lines
 
-    def send_fulfillment_data_to_hubspot(self, order, lines):
+    def send_fulfillment_data_to_hubspot(self, order):
         """ Added as part of ENT-2317. Sends fulfillment data to the HubSpot Form API with info about the purchase.
 
             Args:
                 order (Order): The Order associated with the lines to be fulfilled.
-                lines (List of Lines): Order Lines, associated with purchased products in an Order. These should only
-                    be 'Coupon' products.
         """
         try:
             headers = {"Content-Type": 'application/x-www-form-urlencoded'}
             # Build the URI for the HubSpot Forms API. See more here:
             # https://developers.hubspot.com/docs/methods/forms/submit_form which takes the form from
             # 'https://forms.hubspot.com/uploads/form/v2/{portal_id}/{form_id}?&'
-            endpoint = "{}{}/{}?&".format(settings.HUBSPOT_FORMS_API_URI, settings.HUBSPOT_PORTAL_ID,
-                                           settings.HUBSPOT_SALES_LEAD_FORM_GUID)
-            data = self.get_fulfillment_data(order, lines)
+            endpoint = "{}{}/{}?&".format(
+                settings.HUBSPOT_FORMS_API_URI, settings.HUBSPOT_PORTAL_ID, settings.HUBSPOT_SALES_LEAD_FORM_GUID)
+            data = self.get_fulfillment_data(order)
 
-            logger.debug("Sending request to endpoint '{}' with data '{}' and headers '{}'".format(
-                endpoint, data, headers))
-            response = requests.post(url = endpoint, data = data, headers = headers)
-            logger.info("Result: {}".format(response.status_code))
-        except:
+            logger.debug("Sending request to endpoint '%s' with data '%s' and headers '%s'", endpoint, data, headers)
+            response = requests.post(url=endpoint, data=data, headers=headers)
+            logger.info("Result: %d", response.status_code)
+        except Exception:
             logger.exception("Error occurred attempting to submit order fulfillment data to HubSpot")
 
-    def get_fulfillment_data(self, order, lines):
+    def get_fulfillment_data(self, order):
         """ Added as part of ENT-2317. Retrieves any data needed to build the URL Encoded request body for the HubSpot
         API Forms request we will be submitting. Information we will be sending to HubSpot includes:
             - First and Last name
@@ -618,8 +615,6 @@ class EnrollmentCodeFulfillmentModule(BaseFulfillmentModule):
 
             Args:
                 order (Order): The Order associated with the lines to be fulfilled.
-                lines (List of Lines): Order Lines, associated with purchased products in an Order. These should only
-                    be 'Coupon' products.
 
             Returns:
                 A URl encoded string that will be the body of the request are sending to HubSpot containing
@@ -629,7 +624,7 @@ class EnrollmentCodeFulfillmentModule(BaseFulfillmentModule):
 
         # need to do this to be able to grab the organization/company name, this isn't available in the order/lines
         organization = ""
-        try :
+        try:
             organization = BasketAttribute.objects.get(
                 basket=order.basket,
                 attribute_type=BasketAttributeType.objects.get(name="organization"))
@@ -642,16 +637,14 @@ class EnrollmentCodeFulfillmentModule(BaseFulfillmentModule):
         if order.billing_address.line2:
             street_address = "{}, {}".format(order.billing_address.line1, order.billing_address.line2)
 
-        """
-        When filling our our order page and selecting "United States" the string that gets populated in
-        order.billing_address.country.name is 'United States of America'. This will cause the mailing country to not
-        be populated on the HubSpot side in the form submission as 'United States of America' does not appear to
-        match what HubSpot is looking for. I did some digging in the form attributes and it looks like the HubSpot
-        side may be looking for 'United States'.
-
-        I tested the theory below and changed it from 'United States of America' to 'United States' and the mailing
-        country was populated in the contact on form submission.
-        """
+        # When filling our our order page and selecting "United States" the string that gets populated in
+        # order.billing_address.country.name is 'United States of America'. This will cause the mailing country to not
+        # be populated on the HubSpot side in the form submission as 'United States of America' does not appear to
+        # match what HubSpot is looking for. I did some digging in the form attributes and it looks like the HubSpot
+        # side may be looking for 'United States'.
+        #
+        # I tested the theory below and changed it from 'United States of America' to 'United States' and the mailing
+        # country was populated in the contact on form submission.
         country_name = order.billing_address.country.name
         if country_name == 'United States of America':
             country_name = 'United States'
