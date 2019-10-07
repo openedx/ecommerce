@@ -599,7 +599,7 @@ class EnrollmentCodeFulfillmentModule(BaseFulfillmentModule):
             logger.debug("Sending request to endpoint '%s' with data '%s' and headers '%s'", endpoint, data, headers)
             response = requests.post(url=endpoint, data=data, headers=headers)
             logger.info("Result: %d", response.status_code)
-        except Exception:
+        except Exception:  # pylint: disable=broad-except
             logger.exception("Error occurred attempting to submit order fulfillment data to HubSpot")
 
     def get_fulfillment_data(self, order):
@@ -629,7 +629,7 @@ class EnrollmentCodeFulfillmentModule(BaseFulfillmentModule):
                 basket=order.basket,
                 attribute_type=BasketAttributeType.objects.get(name="organization"))
         except BasketAttribute.DoesNotExist:
-            logger.error("Error occurred attempting to retrieve organization from from current basket")
+            logger.exception("Error occurred attempting to retrieve organization from from current basket")
 
         # need to build out the address accordingly
         street_address = order.billing_address.line1

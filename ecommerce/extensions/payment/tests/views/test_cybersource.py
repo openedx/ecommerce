@@ -23,6 +23,7 @@ from ecommerce.core.tests import toggle_switch
 from ecommerce.core.url_utils import get_lms_url
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.extensions.api.serializers import OrderSerializer
+from ecommerce.extensions.basket.constants import PURCHASER_BEHALF_ATTRIBUTE
 from ecommerce.extensions.basket.utils import basket_add_organization_attribute
 from ecommerce.extensions.order.constants import PaymentEventTypeName
 from ecommerce.extensions.payment.constants import ENABLE_MICROFRONTEND_FOR_BASKET_PAGE_FLAG_NAME
@@ -311,7 +312,8 @@ class CybersourceInterstitialViewTests(CybersourceNotificationTestsMixin, TestCa
             billing_address=self.billing_address,
         )
         request_data.update({'organization': 'Dummy Business Client'})
-        # Manually add organization attribute on the basket for testing
+        request_data.update({PURCHASER_BEHALF_ATTRIBUTE: "False"})
+        # Manually add organization and purchaser attributes on the basket for testing
         basket_add_organization_attribute(self.basket, request_data)
 
         response = self.client.post(self.path, request_data)
