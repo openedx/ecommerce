@@ -24,7 +24,7 @@ class TrackingMiddleware(MiddlewareMixin, object):
 
     """
 
-    def process_request(self, request):
+    def process_view(self, request, view_func, view_args, view_kwargs):  # pylint: disable=unused-argument
         user = request.user
         if user.is_authenticated():
             tracking_context = user.tracking_context or {}
