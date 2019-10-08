@@ -634,8 +634,30 @@ class EnrollmentCodeFulfillmentModuleTests(DiscoveryTestMixin, TestCase):
                                 "state=State&" \
                                 "{}"\
             .format(course_name_data, course_id_data, customer_email_data)
-        generated_request_body = EnrollmentCodeFulfillmentModule().get_fulfillment_data(order)
+        generated_request_body = EnrollmentCodeFulfillmentModule().get_order_fulfillment_data_for_hubspot(order)
         self.assertEqual(expected_request_body, generated_request_body)
+
+    def test_determine_if_enterprise_purchase_expect_true(self):
+        # add organization and purchaser attributes manually to the basket for testing purposes
+        basket_data = {
+            'organization': 'Dummy Business Client',
+            PURCHASER_BEHALF_ATTRIBUTE: 'True'
+        }
+        basket_add_organization_attribute(self.order.basket, basket_data)
+
+        purchased_by_organization = EnrollmentCodeFulfillmentModule().determine_if_enterprise_purchase(self.order)
+        self.assertEqual(True, purchased_by_organization)
+
+    def test_determine_if_enterprise_purchase_expect_false(self):
+        # add organization and purchaser attributes manually to the basket for testing purposes
+        basket_data = {
+            'organization': 'Dummy Business Client',
+            PURCHASER_BEHALF_ATTRIBUTE: 'False'
+        }
+        basket_add_organization_attribute(self.order.basket, basket_data)
+
+        purchased_by_organization = EnrollmentCodeFulfillmentModule().determine_if_enterprise_purchase(self.order)
+        self.assertEqual(False, purchased_by_organization)
 
 
 class EntitlementFulfillmentModuleTests(FulfillmentTestMixin, TestCase):

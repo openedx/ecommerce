@@ -562,6 +562,26 @@ class EnrollmentCodeFulfillmentModule(BaseFulfillmentModule):
 
             line.set_status(LINE.COMPLETE)
 
+        # if this is an Enterprise purchase then transmit information about the order over to HubSpot
+        if self.determine_if_enterprise_purchase(order):
+            self.send_fulfillment_data_to_hubspot(order)
+
+        self.send_email(order)
+        logger.info("Finished fulfilling 'Enrollment code' product types for order [%s]", order.number)
+        return order, lines
+
+    def determine_if_enterprise_purchase(self, order):
+        """ Added as part of ENT-2317. Inspects the order/basket to determine if the purchaser checked the "purchased
+        on behalf of my company" checkbox at time of purchase, which drives whether we should send this order
+         information over to HubSpot.
+
+            Args:
+                order (Order): The Order associated with the lines to be fulfilled.
+
+            Returns:
+                A boolean reflecting whether or not this purchase was made on behalf of a company or organization driven
+                by the value of the associated attribute for the order/basket in question.
+        """
         enterprise_purchase = False
         try:
             # extract basket info needed to determine if purchase was made on behalf of an Enterprise
@@ -573,13 +593,7 @@ class EnrollmentCodeFulfillmentModule(BaseFulfillmentModule):
             logger.exception("Error occurred attempting to retrieve Basket Attribute '%s' from current basket",
                              PURCHASER_BEHALF_ATTRIBUTE)
 
-        # if this is an Enterprise purchase then transmit information about the order over to HubSpot
-        if enterprise_purchase:
-            self.send_fulfillment_data_to_hubspot(order)
-
-        self.send_email(order)
-        logger.info("Finished fulfilling 'Enrollment code' product types for order [%s]", order.number)
-        return order, lines
+        return enterprise_purchase
 
     def send_fulfillment_data_to_hubspot(self, order):
         """ Added as part of ENT-2317. Sends fulfillment data to the HubSpot Form API with info about the purchase.
@@ -594,15 +608,17 @@ class EnrollmentCodeFulfillmentModule(BaseFulfillmentModule):
             # 'https://forms.hubspot.com/uploads/form/v2/{portal_id}/{form_id}?&'
             endpoint = "{}{}/{}?&".format(
                 settings.HUBSPOT_FORMS_API_URI, settings.HUBSPOT_PORTAL_ID, settings.HUBSPOT_SALES_LEAD_FORM_GUID)
-            data = self.get_fulfillment_data(order)
+            data = self.get_order_fulfillment_data_for_hubspot(order)
 
             logger.debug("Sending request to endpoint '%s' with data '%s' and headers '%s'", endpoint, data, headers)
-            response = requests.post(url=endpoint, data=data, headers=headers)
-            logger.info("Result: %d", response.status_code)
+            response = requests.post(url=endpoint, data=data, headers=headers, timeout=5)
+            logger.debug("HubSpot response: %d", response.status_code)
+        except Timeout:
+            logger.error("Request to HubSpot timed out")
         except Exception:  # pylint: disable=broad-except
             logger.exception("Error occurred attempting to submit order fulfillment data to HubSpot")
 
-    def get_fulfillment_data(self, order):
+    def get_order_fulfillment_data_for_hubspot(self, order):
         """ Added as part of ENT-2317. Retrieves any data needed to build the URL Encoded request body for the HubSpot
         API Forms request we will be submitting. Information we will be sending to HubSpot includes:
             - First and Last name
@@ -617,7 +633,7 @@ class EnrollmentCodeFulfillmentModule(BaseFulfillmentModule):
                 order (Order): The Order associated with the lines to be fulfilled.
 
             Returns:
-                A URl encoded string that will be the body of the request are sending to HubSpot containing
+                A URL encoded string that will be the body of the request are sending to HubSpot containing
                 fulfillment data about the order that was just processed.
         """
         logger.info("Gathering fulfillment data for submission to HubSpot")
