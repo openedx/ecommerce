@@ -3,6 +3,7 @@ from __future__ import absolute_import
 
 import datetime
 import json
+import urllib
 import uuid
 
 import ddt
@@ -24,9 +25,12 @@ from ecommerce.core.constants import (
 )
 from ecommerce.core.url_utils import get_lms_enrollment_api_url, get_lms_entitlement_api_url
 from ecommerce.coupons.tests.mixins import CouponMixin
+from ecommerce.courses.models import Course
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.courses.utils import mode_for_product
 from ecommerce.entitlements.utils import create_or_update_course_entitlement
+from ecommerce.extensions.basket.constants import PURCHASER_BEHALF_ATTRIBUTE
+from ecommerce.extensions.basket.utils import basket_add_organization_attribute
 from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
 from ecommerce.extensions.fulfillment.modules import (
     CouponFulfillmentModule,
@@ -577,6 +581,61 @@ class EnrollmentCodeFulfillmentModuleTests(DiscoveryTestMixin, TestCase):
         line = self.order.lines.first()
         with self.assertRaises(NotImplementedError):
             EnrollmentCodeFulfillmentModule().revoke_line(line)
+
+    def test_get_fulfillment_data(self):
+        enrollment_code = Product.objects.get(product_class__name=ENROLLMENT_CODE_PRODUCT_CLASS_NAME)
+        user = UserFactory()
+        basket = factories.BasketFactory(owner=user, site=self.site)
+        basket.add_product(enrollment_code, self.QUANTITY)
+
+        # add organization and purchaser attributes manually to the basket for testing purposes
+        basket_data = {
+            'organization': 'Dummy Business Client',
+            PURCHASER_BEHALF_ATTRIBUTE: 'True'
+        }
+        basket_add_organization_attribute(basket, basket_data)
+
+        # add some additional data the billing address to exercise some of the code paths in the unit we are testing
+        billing_address = factories.BillingAddressFactory()
+        billing_address.line2 = 'Suite 321'
+        billing_address.line4 = "City"
+        billing_address.state = "State"
+        billing_address.country.name = "United States of America"
+
+        # create new order adding in the additional billing address info
+        order = create_order(number=2, basket=basket, user=user, billing_address=billing_address)
+
+        # extract some of the course info we need to build our "expected" string for comparisons later
+        product = order.lines.first().product
+        course = Course.objects.get(id=product.attr.course_key)
+
+        course_name_data = urllib.urlencode({
+            'ecommerce_course_name': course.name
+        })
+
+        course_id_data = urllib.urlencode({
+            'ecommerce_course_id': course.id
+        })
+
+        customer_email_data = urllib.urlencode({
+            'email': user.email
+        })
+
+        expected_request_body = "firstname=John&" \
+                                "lastname=Doe&" \
+                                "company=Dummy+Business+Client&" \
+                                "{}&" \
+                                "{}&" \
+                                "deal_value=250.00&" \
+                                "address=Streetname%2C+Suite+321&" \
+                                "bulk_purchase_quantity=5&" \
+                                "city=City&" \
+                                "country=United+States&" \
+                                "state=State&" \
+                                "{}"\
+            .format(course_name_data, course_id_data, customer_email_data)
+        generated_request_body = EnrollmentCodeFulfillmentModule().get_fulfillment_data(order)
+        self.assertEqual(expected_request_body, generated_request_body)
 
 
 class EntitlementFulfillmentModuleTests(FulfillmentTestMixin, TestCase):
