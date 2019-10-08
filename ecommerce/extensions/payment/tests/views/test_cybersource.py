@@ -15,7 +15,6 @@ from oscar.apps.payment.exceptions import TransactionDeclined
 from oscar.core.loading import get_class, get_model
 from oscar.test import factories
 from testfixtures import LogCapture
-from waffle.testutils import override_flag
 
 from ecommerce.core.constants import ENROLLMENT_CODE_PRODUCT_CLASS_NAME, ENROLLMENT_CODE_SWITCH
 from ecommerce.core.models import BusinessClient
@@ -25,7 +24,6 @@ from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.extensions.api.serializers import OrderSerializer
 from ecommerce.extensions.basket.utils import basket_add_organization_attribute
 from ecommerce.extensions.order.constants import PaymentEventTypeName
-from ecommerce.extensions.payment.constants import ENABLE_MICROFRONTEND_FOR_BASKET_PAGE_FLAG_NAME
 from ecommerce.extensions.payment.exceptions import InvalidBasketError, InvalidSignatureError
 from ecommerce.extensions.payment.processors.cybersource import Cybersource
 from ecommerce.extensions.payment.tests.mixins import CybersourceMixin, CybersourceNotificationTestsMixin
@@ -402,7 +400,6 @@ class ApplePayStartSessionViewTests(LoginMixin, TestCase):
         """ The view should POST to the given URL and return the response. """
         self._call_to_apple_pay_and_assert_response(status, body)
 
-    @override_flag(ENABLE_MICROFRONTEND_FOR_BASKET_PAGE_FLAG_NAME, active=True)
     @responses.activate
     @ddt.data(*itertools.product((True, False), (True, False)))
     @ddt.unpack
