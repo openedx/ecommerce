@@ -12,6 +12,7 @@ import six
 import waffle
 from django.http import HttpResponseBadRequest, HttpResponseRedirect
 from django.shortcuts import render
+from django.urls import reverse
 from django.utils.html import escape
 from django.utils.translation import ugettext as _
 from edx_rest_framework_extensions.permissions import LoginRedirectIfUnauthenticated
@@ -29,7 +30,14 @@ from slumber.exceptions import SlumberBaseException
 from ecommerce.core.exceptions import SiteConfigurationError
 from ecommerce.core.url_utils import absolute_redirect, get_lms_course_about_url, get_lms_url
 from ecommerce.courses.utils import get_certificate_type_display_value, get_course_info_from_catalog
-from ecommerce.enterprise.utils import CONSENT_FAILED_PARAM, get_enterprise_customer_from_voucher, has_enterprise_offer
+from ecommerce.enterprise.utils import (
+    CONSENT_FAILED_PARAM,
+    construct_enterprise_course_consent_url,
+    enterprise_customer_user_needs_consent,
+    get_enterprise_customer_from_enterprise_offer,
+    get_enterprise_customer_from_voucher,
+    has_enterprise_offer
+)
 from ecommerce.extensions.analytics.utils import (
     prepare_analytics_data,
     track_segment_event,
@@ -276,9 +284,35 @@ class BasketLogicMixin(object):
             )
 
         if has_enterprise_offer(basket) and basket.total_incl_tax == Decimal(0):
+            self._redirect_for_enterprise_data_sharing_consent(basket)
+
             raise RedirectException(
                 response=absolute_redirect(self.request, 'checkout:free-checkout'),
             )
+
+    def _redirect_for_enterprise_data_sharing_consent(self, basket):
+        """
+        Redirect to LMS to get data sharing consent from learner.
+        """
+        # check if basket contains only a single product of type seat
+        if basket.lines.count() == 1 and basket.lines.first().product.is_seat_product:
+            enterprise_custmer_uuid = get_enterprise_customer_from_enterprise_offer(basket)
+            product = basket.lines.first().product
+            course = product.course
+            if enterprise_custmer_uuid is not None and enterprise_customer_user_needs_consent(
+                    self.request.site,
+                    enterprise_custmer_uuid,
+                    course.id,
+                    self.request.user.username,
+            ):
+                redirect_url = construct_enterprise_course_consent_url(
+                    self.request,
+                    product.course.id,
+                    enterprise_custmer_uuid
+                )
+                raise RedirectException(
+                    response=HttpResponseRedirect(redirect_url)
+                )
 
     @newrelic.agent.function_trace()
     def _get_course_data(self, product):

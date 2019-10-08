@@ -515,7 +515,7 @@ class EnterpriseServiceMockMixin(object):
             condition = EnterpriseCustomerConditionFactory(enterprise_customer_name=enterprise_customer_name)
         else:
             condition = EnterpriseCustomerConditionFactory()
-        EnterpriseOfferFactory(partner=self.partner, benefit=benefit, condition=condition)
+        enterprise_offer = EnterpriseOfferFactory(partner=self.partner, benefit=benefit, condition=condition)
         self.mock_enterprise_learner_api(
             learner_id=self.user.id,
             enterprise_customer_uuid=str(condition.enterprise_customer_uuid),
@@ -526,6 +526,7 @@ class EnterpriseServiceMockMixin(object):
             condition.enterprise_customer_uuid,
             enterprise_customer_catalog_uuid=condition.enterprise_customer_catalog_uuid,
         )
+        return enterprise_offer
 
     def mock_with_access_to(self,
                             enterprise_id,

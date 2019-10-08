@@ -33,6 +33,7 @@ from ecommerce.core.url_utils import absolute_url, get_lms_url
 from ecommerce.coupons.tests.mixins import CouponMixin, DiscoveryMockMixin
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.enterprise.tests.mixins import EnterpriseServiceMockMixin
+from ecommerce.enterprise.utils import construct_enterprise_course_consent_url
 from ecommerce.extensions.analytics.utils import translate_basket_line_for_segment
 from ecommerce.extensions.basket.constants import EMAIL_OPT_IN_ATTRIBUTE
 from ecommerce.extensions.basket.tests.mixins import BasketMixin
@@ -529,7 +530,14 @@ class PaymentApiViewTests(PaymentApiResponseTestMixin, BasketMixin, DiscoveryMoc
         """
         self.course_run.create_or_update_seat('verified', True, Decimal(10))
         self.create_basket_and_add_product(self.course_run.seat_products[0])
-        self.prepare_enterprise_offer()
+        enterprise_offer = self.prepare_enterprise_offer()
+
+        opts = {
+            'ec_uuid': str(enterprise_offer.condition.enterprise_customer_uuid),
+            'course_id': self.course_run.seat_products[0].course_id,
+            'username': self.user.username,
+        }
+        self.mock_consent_get(**opts)
 
         response = self.client.get(self.path)
         self.assertEqual(response.status_code, 200)
@@ -558,6 +566,51 @@ class PaymentApiViewTests(PaymentApiResponseTestMixin, BasketMixin, DiscoveryMoc
 
     def test_segment_exception_log(self):
         self.verify_exception_logged_on_segment_error()
+
+    @httpretty.activate
+    def test_enterprise_offer_free_basket_redirect_to_dsc(self):
+        """
+        Verify redirect to Data Sharing Consent page if basket is free
+        and an Enterprise-related offer is applied and Enterprise customer
+        required the consent.
+        """
+        self.course_run.create_or_update_seat('verified', True, Decimal(10))
+        self.create_basket_and_add_product(self.course_run.seat_products[0])
+        enterprise_offer = self.prepare_enterprise_offer()
+
+        opts = {
+            'ec_uuid': str(enterprise_offer.condition.enterprise_customer_uuid),
+            'course_id': self.course_run.seat_products[0].course_id,
+            'username': self.user.username,
+            'required': True
+        }
+        self.mock_consent_response(**opts)
+
+        response = self.client.get(self.path)
+        self.assertEqual(response.status_code, 200)
+
+        expected_redirect_url = construct_enterprise_course_consent_url(
+            self.request,
+            self.course_run.seat_products[0].course_id,
+            str(enterprise_offer.condition.enterprise_customer_uuid)
+        )
+        self.assertEqual(response.data['redirect'], expected_redirect_url)
+
+    def test_enterprise_offer_free_basket_with_wrong_basket(self):
+        """
+        Verify that we don't redirect to Data Sharing Consent page if basket is free
+        and an Enterprise-related offer is applied but basket contains more than 1 products.
+        """
+        seat1 = self.create_seat(self.course, seat_price=100, cert_type='verified')
+        seat2 = self.create_seat(self.course_run, seat_price=100, cert_type='verified')
+        basket = self.create_basket_and_add_product(seat1)
+        basket.add(seat2)
+        self.prepare_enterprise_offer()
+
+        response = self.client.get(self.path)
+        self.assertEqual(response.status_code, 200)
+
+        self.assertEqual(response.data['redirect'], absolute_url(self.request, 'checkout:free-checkout'))
 
 
 @httpretty.activate
@@ -966,7 +1019,14 @@ class BasketSummaryViewTests(EnterpriseServiceMockMixin, DiscoveryTestMixin, Dis
     def test_enterprise_free_basket_redirect(self):
         self.course_run.create_or_update_seat('verified', True, Decimal(100))
         self.create_basket_and_add_product(self.course_run.seat_products[0])
-        self.prepare_enterprise_offer(enterprise_customer_name='Foo Enterprise')
+        enterprise_offer = self.prepare_enterprise_offer(enterprise_customer_name='Foo Enterprise')
+
+        opts = {
+            'ec_uuid': str(enterprise_offer.condition.enterprise_customer_uuid),
+            'course_id': self.course_run.seat_products[0].course_id,
+            'username': self.user.username,
+        }
+        self.mock_consent_get(**opts)
 
         response = self.client.get(self.path)
         self.assertRedirects(
