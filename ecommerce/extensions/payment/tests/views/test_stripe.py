@@ -11,6 +11,7 @@ from ecommerce.core.constants import ENROLLMENT_CODE_PRODUCT_CLASS_NAME, ENROLLM
 from ecommerce.core.models import BusinessClient
 from ecommerce.core.tests import toggle_switch
 from ecommerce.courses.tests.factories import CourseFactory
+from ecommerce.extensions.basket.constants import PURCHASER_BEHALF_ATTRIBUTE
 from ecommerce.extensions.basket.utils import basket_add_organization_attribute
 from ecommerce.extensions.checkout.utils import get_receipt_page_url
 from ecommerce.extensions.order.constants import PaymentEventTypeName
@@ -162,6 +163,7 @@ class StripeSubmitViewTests(PaymentEventsMixin, TestCase):
 
         data = self.generate_form_data(basket.id)
         data.update({'organization': 'Dummy Business Client'})
+        data.update({PURCHASER_BEHALF_ATTRIBUTE: 'False'})
 
         # Manually add organization attribute on the basket for testing
         basket_add_organization_attribute(basket, data)

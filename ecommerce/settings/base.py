@@ -801,5 +801,11 @@ BACKEND_SERVICE_EDX_OAUTH2_SECRET = "ecommerce-backend-service-secret"
 BACKEND_SERVICE_EDX_OAUTH2_PROVIDER_URL = "http://127.0.0.1:8000/oauth2"
 EXTRA_APPS = []
 API_ROOT = None
+
 # Needed to link to the payment micro-frontend
 PAYMENT_MICROFRONTEND_URL = None
+
+# For Enterprise purchases to send purchase information to HubSpot for marketing leads
+HUBSPOT_FORMS_API_URI = "SET-ME-PLEASE"
+HUBSPOT_PORTAL_ID = "SET-ME-PLEASE"
+HUBSPOT_SALES_LEAD_FORM_GUID = "SET-ME-PLEASE"

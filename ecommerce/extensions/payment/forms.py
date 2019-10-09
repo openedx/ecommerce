@@ -11,6 +11,8 @@ from django.core.exceptions import ValidationError
 from django.utils.translation import ugettext_lazy as _
 from oscar.core.loading import get_class, get_model
 
+from ecommerce.extensions.basket.constants import PURCHASER_BEHALF_ATTRIBUTE
+
 logger = logging.getLogger(__name__)
 
 Applicator = get_class('offer.applicator', 'Applicator')
@@ -117,13 +119,13 @@ class PaymentForm(forms.Form):
                     )
                     self.helper.layout.fields.insert(list(self.fields.keys()).index('last_name') + 1, organization_div)
                     # Purchased on behalf of an enterprise or for personal use
-                    self.fields['purchaser'] = forms.BooleanField(
+                    self.fields[PURCHASER_BEHALF_ATTRIBUTE] = forms.BooleanField(
                         required=False,
                         label=_('I am purchasing on behalf of my employer or other professional organization')
                     )
                     purchaser_div = Div(
                         Div(
-                            Div('purchaser'),
+                            Div(PURCHASER_BEHALF_ATTRIBUTE),
                             HTML('<p class="help-block"></p>'),
                             css_class='form-item col-md-12'
                         ),

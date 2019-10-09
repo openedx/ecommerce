@@ -25,6 +25,7 @@ from ecommerce.core.constants import (
 from ecommerce.core.models import BusinessClient, SiteConfiguration
 from ecommerce.core.tests import toggle_switch
 from ecommerce.courses.tests.factories import CourseFactory
+from ecommerce.extensions.basket.constants import PURCHASER_BEHALF_ATTRIBUTE
 from ecommerce.extensions.basket.utils import basket_add_organization_attribute
 from ecommerce.extensions.checkout.utils import get_receipt_page_url
 from ecommerce.extensions.offer.constants import DYNAMIC_DISCOUNT_FLAG
@@ -168,6 +169,7 @@ class PaypalPaymentExecutionViewTests(PaypalMixin, PaymentEventsMixin, TestCase)
 
         # Manually add organization attribute on the basket for testing
         self.RETURN_DATA.update({'organization': 'Dummy Business Client'})
+        self.RETURN_DATA.update({PURCHASER_BEHALF_ATTRIBUTE: 'False'})
         basket_add_organization_attribute(self.basket, self.RETURN_DATA)
 
         response = self.client.get(reverse('paypal:execute'), self.RETURN_DATA)
