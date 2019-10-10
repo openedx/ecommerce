@@ -309,7 +309,7 @@ class Cybersource(ApplePayMixin, BaseClientSidePaymentProcessor):
                     'review': AuthorizationError,
                 }.get(decision, InvalidCybersourceDecision)
 
-        transaction_id = response.get('transaction_id', None)  # Error Notifications does not include a transaction id.
+        transaction_id = response.get('transaction_id', '')  # Error Notifications do not include a transaction id.
         if transaction_id and decision == 'accept':
             if Order.objects.filter(number=response['req_reference_number']).exists():
                 if PaymentProcessorResponse.objects.filter(transaction_id=transaction_id).exists():
