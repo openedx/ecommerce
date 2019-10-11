@@ -258,13 +258,16 @@ class ReceiptResponseView(ThankYouView):
 
     def add_message_if_enterprise_user(self, request):
         learner_data = fetch_enterprise_learner_data(request.site, request.user)
-        if (learner_data.get('results') and
-                learner_data['results'][0]['enterprise_customer']['enable_learner_portal'] and
-                learner_data['results'][0]['enterprise_customer']['learner_portal_hostname']):
-            message = (
-                'Your company has a dedicated page where you can see all of your sponsored courses. '
-                'Go to <a href="{hostname}">{hostname}</a>.'.format(
-                    hostname=learner_data['results'][0]['enterprise_customer']['learner_portal_hostname']
+        learner_data_results = learner_data.get('results')
+        if learner_data_results:
+            enterprise_customer = learner_data_results[0]['enterprise_customer']
+            enable_learner_portal = enterprise_customer['enable_learner_portal']
+            learner_portal_hostname = enterprise_customer['learner_portal_hostname']
+            if enable_learner_portal and learner_portal_hostname:
+                message = (
+                    'Your company has a dedicated page where you can see all of your sponsored courses. '
+                    'Go to <a href="{hostname}">{hostname}</a>.'.format(
+                        hostname=learner_portal_hostname
+                    )
                 )
-            )
-            messages.add_message(request, messages.INFO, message, extra_tags='safe')
+                messages.add_message(request, messages.INFO, message, extra_tags='safe')
