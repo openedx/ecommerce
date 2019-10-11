@@ -3,6 +3,7 @@ from __future__ import absolute_import, unicode_literals
 
 from decimal import Decimal
 
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import Http404
 from django.shortcuts import get_object_or_404
@@ -18,6 +19,7 @@ from ecommerce.core.url_utils import (
     get_lms_explore_courses_url,
     get_lms_program_dashboard_url
 )
+from ecommerce.enterprise.api import fetch_enterprise_learner_data
 from ecommerce.enterprise.utils import has_enterprise_offer
 from ecommerce.extensions.checkout.exceptions import BasketNotFreeError
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
@@ -153,7 +155,9 @@ class ReceiptResponseView(ThankYouView):
 
     def get(self, request, *args, **kwargs):
         try:
-            return super(ReceiptResponseView, self).get(request, *args, **kwargs)
+            response = super(ReceiptResponseView, self).get(request, *args, **kwargs)
+            self.add_message_if_enterprise_user(request)
+            return response
         except Http404:
             self.template_name = 'edx/checkout/receipt_not_found.html'
             context = {
@@ -251,3 +255,16 @@ class ReceiptResponseView(ThankYouView):
             'show_verification_banner': verification_url and not user_verified
         })
         return context
+
+    def add_message_if_enterprise_user(self, request):
+        learner_data = fetch_enterprise_learner_data(request.site, request.user)
+        if (learner_data.get('results') and
+                learner_data['results'][0]['enterprise_customer']['enable_learner_portal'] and
+                learner_data['results'][0]['enterprise_customer']['learner_portal_hostname']):
+            message = (
+                'Your company has a dedicated page where you can see all of your sponsored courses. '
+                'Go to <a href="{hostname}">{hostname}</a>.'.format(
+                    hostname=learner_data['results'][0]['enterprise_customer']['learner_portal_hostname']
+                )
+            )
+            messages.add_message(request, messages.INFO, message, extra_tags='safe')

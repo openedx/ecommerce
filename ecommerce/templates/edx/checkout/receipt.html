@@ -24,6 +24,14 @@
   {% include 'edx/partials/_student_navbar.html' %}
 {% endblock navbar %}
 
+{{ 'hey im in the template\n\n\n\n\n\n\n\n\n\n\n\n' }}
+{{ messages }}
+
+
+
+
+
+
 {% block content %}
   <div id="receipt-container"
        class="receipt container content-container"
@@ -31,6 +39,8 @@
        data-order-id="{{ order.number }}"
        data-total-amount="{{ order.total_incl_tax | unlocalize }}"
        data-back-button="{{ disable_back_button | default:0 }}">
+       {% include 'partials/alert_messages.html' %}
+
       <h2 class="thank-you">{% trans "Thank you for your order!" as tmsg %}{{ tmsg | force_escape }}</h2>
 
       <div class="list-info">
