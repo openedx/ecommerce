@@ -156,14 +156,14 @@ class ReceiptResponseView(ThankYouView):
     def get(self, request, *args, **kwargs):
         try:
             response = super(ReceiptResponseView, self).get(request, *args, **kwargs)
-            self.add_message_if_enterprise_user(request)
-            return response
         except Http404:
             self.template_name = 'edx/checkout/receipt_not_found.html'
             context = {
                 'order_history_url': request.site.siteconfiguration.build_lms_url('account/settings'),
             }
             return self.render_to_response(context=context, status=404)
+        self.add_message_if_enterprise_user(request)
+        return response
 
     def get_context_data(self, **kwargs):  # pylint: disable=arguments-differ
         context = super(ReceiptResponseView, self).get_context_data(**kwargs)
