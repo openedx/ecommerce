@@ -354,6 +354,7 @@ class ReceiptResponseViewTests(DiscoveryMockMixin, LmsApiMockMixin, RefundTestMi
     @httpretty.activate
     def test_get_receipt_for_existing_order_as_staff_user(self, mock_learner_data):
         """ Staff users can preview Receipts for all Orders."""
+        mock_learner_data.return_value = self.non_enterprise_learner_data
         staff_user = self.create_user(is_staff=True)
         order = self._create_order_for_receipt(staff_user)
         response = self._visit_receipt_page_with_another_user(order, staff_user)
