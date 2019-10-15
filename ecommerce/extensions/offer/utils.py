@@ -2,6 +2,7 @@
 from __future__ import absolute_import
 
 import logging
+import string  # pylint: disable=W0402
 from decimal import Decimal
 
 from django.conf import settings
@@ -149,12 +150,13 @@ def send_assigned_offer_email(
     """
 
     email_subject = settings.OFFER_ASSIGNMENT_EMAIL_DEFAULT_SUBJECT
-    email_body = template.format(
+    placeholder_dict = SafeDict(
         REDEMPTIONS_REMAINING=redemptions_remaining,
         USER_EMAIL=learner_email,
         CODE=code,
         EXPIRATION_DATE=code_expiration_date
     )
+    email_body = format_email(template, placeholder_dict)
     send_offer_assignment_email.delay(learner_email, offer_assignment_id, email_subject, email_body)
 
 
@@ -170,11 +172,11 @@ def send_revoked_offer_email(template, learner_email, code):
     """
 
     email_subject = settings.OFFER_REVOKE_EMAIL_DEFAULT_SUBJECT
-
-    email_body = template.format(
+    placeholder_dict = SafeDict(
         USER_EMAIL=learner_email,
         CODE=code,
     )
+    email_body = format_email(template, placeholder_dict)
     send_offer_update_email.delay(learner_email, email_subject, email_body)
 
 
@@ -202,11 +204,36 @@ def send_assigned_offer_reminder_email(
     """
 
     email_subject = settings.OFFER_ASSIGNMENT_EMAIL_REMINDER_DEFAULT_SUBJECT
-    email_body = template.format(
+    placeholder_dict = SafeDict(
         REDEEMED_OFFER_COUNT=redeemed_offer_count,
         TOTAL_OFFER_COUNT=total_offer_count,
         USER_EMAIL=learner_email,
         CODE=code,
         EXPIRATION_DATE=code_expiration_date
     )
+    email_body = format_email(template, placeholder_dict)
     send_offer_update_email.delay(learner_email, email_subject, email_body)
+
+
+def format_email(template, placeholder_dict):
+    """
+    Arguments:
+        template (String): Email template
+        placeholder_dict (SafeDict): Safe dictionary of placeholders and their values
+
+    Apply placeholders to the email template.
+
+    Safely handle placeholders in the template without matching tokens (just emit the placeholders). We do this because
+    learner admins can modify the email template, and sometimes they add extra placeholders that we aren't expecting.
+
+    Reference: https://stackoverflow.com/questions/17215400/python-format-string-unused-named-arguments
+    """
+    return string.Formatter().vformat(template, (), placeholder_dict)
+
+
+class SafeDict(dict):
+    """
+    Safely handle missing placeholder values.
+    """
+    def __missing__(self, key):
+        return '{' + key + '}'
