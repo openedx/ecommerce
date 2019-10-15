@@ -5,6 +5,7 @@ from uuid import uuid4
 
 import ddt
 import httpretty
+import six
 from django.core.exceptions import ValidationError
 from edx_django_utils.cache import TieredCache
 from mock import patch
@@ -145,7 +146,7 @@ class RangeTests(CouponMixin, DiscoveryTestMixin, DiscoveryMockMixin, TestCase):
             self.range.contains_product(seat)
 
         expected_exception_message = 'Unable to connect to Discovery Service for catalog contains endpoint.'
-        self.assertEqual(err.exception.message, expected_exception_message)
+        self.assertEqual(six.text_type(err.exception), expected_exception_message)
         # Verify that there only one call for the course discovery API for
         # checking if course exists in course runs against the course catalog.
         self._assert_num_requests(2)
@@ -383,7 +384,7 @@ class ConditionalOfferTests(DiscoveryTestMixin, DiscoveryMockMixin, TestCase):
         _range = factories.RangeFactory(
             products=[self.product, ],
             course_seat_types='verified',
-            enterprise_customer=str(uuid4()).decode('utf-8'),
+            enterprise_customer=str(uuid4()),
             catalog_query='*:*'
         )
         benefit = factories.BenefitFactory(range=_range)

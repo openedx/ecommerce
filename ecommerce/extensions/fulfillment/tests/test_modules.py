@@ -3,11 +3,13 @@ from __future__ import absolute_import
 
 import datetime
 import json
+import urllib
 import uuid
 
 import ddt
 import httpretty
 import mock
+from django.conf import settings
 from django.test import override_settings
 from oscar.core.loading import get_class, get_model
 from oscar.test import factories
@@ -19,13 +21,17 @@ from ecommerce.core.constants import (
     COURSE_ENTITLEMENT_PRODUCT_CLASS_NAME,
     DONATIONS_FROM_CHECKOUT_TESTS_PRODUCT_TYPE_NAME,
     ENROLLMENT_CODE_PRODUCT_CLASS_NAME,
+    ISO_8601_FORMAT,
     SEAT_PRODUCT_CLASS_NAME
 )
 from ecommerce.core.url_utils import get_lms_enrollment_api_url, get_lms_entitlement_api_url
 from ecommerce.coupons.tests.mixins import CouponMixin
+from ecommerce.courses.models import Course
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.courses.utils import mode_for_product
 from ecommerce.entitlements.utils import create_or_update_course_entitlement
+from ecommerce.extensions.basket.constants import PURCHASER_BEHALF_ATTRIBUTE
+from ecommerce.extensions.basket.utils import basket_add_organization_attribute
 from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
 from ecommerce.extensions.fulfillment.modules import (
     CouponFulfillmentModule,
@@ -162,7 +168,7 @@ class EnrollmentFulfillmentModuleTests(ProgramTestMixin, DiscoveryTestMixin, Ful
         self.assertEqual(LINE.COMPLETE, line.status)
 
         last_request = httpretty.last_request()
-        actual_body = json.loads(last_request.body)
+        actual_body = json.loads(last_request.body.decode('utf-8'))
         actual_headers = last_request.headers
 
         expected_body = {
@@ -177,6 +183,11 @@ class EnrollmentFulfillmentModuleTests(ProgramTestMixin, DiscoveryTestMixin, Ful
                     'namespace': 'order',
                     'name': 'order_number',
                     'value': self.order.number
+                },
+                {
+                    'namespace': 'order',
+                    'name': 'date_placed',
+                    'value': self.order.date_placed.strftime(ISO_8601_FORMAT)
                 }
             ]
         }
@@ -263,7 +274,7 @@ class EnrollmentFulfillmentModuleTests(ProgramTestMixin, DiscoveryTestMixin, Ful
             )
 
         last_request = httpretty.last_request()
-        actual_body = json.loads(last_request.body)
+        actual_body = json.loads(last_request.body.decode('utf-8'))
         actual_headers = last_request.headers
 
         expected_body = {
@@ -369,7 +380,7 @@ class EnrollmentFulfillmentModuleTests(ProgramTestMixin, DiscoveryTestMixin, Ful
 
         self.assertEqual(LINE.COMPLETE, line.status)
 
-        actual = json.loads(httpretty.last_request().body)
+        actual = json.loads(httpretty.last_request().body.decode('utf-8'))
         expected = {
             'user': self.order.user.username,
             'is_active': True,
@@ -382,6 +393,11 @@ class EnrollmentFulfillmentModuleTests(ProgramTestMixin, DiscoveryTestMixin, Ful
                     'namespace': 'order',
                     'name': 'order_number',
                     'value': self.order.number
+                },
+                {
+                    'namespace': 'order',
+                    'name': 'date_placed',
+                    'value': self.order.date_placed.strftime(ISO_8601_FORMAT)
                 },
                 {
                     'namespace': 'credit',
@@ -525,6 +541,30 @@ class EnrollmentCodeFulfillmentModuleTests(DiscoveryTestMixin, TestCase):
     """ Test Enrollment code fulfillment. """
     QUANTITY = 5
 
+    def create_order_with_billing_address(self):
+        """ Creates an order object with a bit of extra information for HubSpot unit tests"""
+        enrollment_code = Product.objects.get(product_class__name=ENROLLMENT_CODE_PRODUCT_CLASS_NAME)
+        user = UserFactory()
+        basket = factories.BasketFactory(owner=user, site=self.site)
+        basket.add_product(enrollment_code, self.QUANTITY)
+
+        # add organization and purchaser attributes manually to the basket for testing purposes
+        basket_data = {
+            'organization': 'Dummy Business Client',
+            PURCHASER_BEHALF_ATTRIBUTE: 'True'
+        }
+        basket_add_organization_attribute(basket, basket_data)
+
+        # add some additional data the billing address to exercise some of the code paths in the unit we are testing
+        billing_address = factories.BillingAddressFactory()
+        billing_address.line2 = 'Suite 321'
+        billing_address.line4 = "City"
+        billing_address.state = "State"
+        billing_address.country.name = "United States of America"
+
+        # create new order adding in the additional billing address info
+        return create_order(number=2, basket=basket, user=user, billing_address=billing_address)
+
     def setUp(self):
         super(EnrollmentCodeFulfillmentModuleTests, self).setUp()
         course = CourseFactory(partner=self.partner)
@@ -566,6 +606,153 @@ class EnrollmentCodeFulfillmentModuleTests(DiscoveryTestMixin, TestCase):
         line = self.order.lines.first()
         with self.assertRaises(NotImplementedError):
             EnrollmentCodeFulfillmentModule().revoke_line(line)
+
+    def test_get_fulfillment_data(self):
+        """ Test for gathering data to send to HubSpot """
+        order = self.create_order_with_billing_address()
+
+        # extract some of the course info we need to build our "expected" string for comparisons later
+        product = order.lines.first().product
+        course = Course.objects.get(id=product.attr.course_key)
+
+        course_name_data = urllib.urlencode({
+            'ecommerce_course_name': course.name
+        })
+
+        course_id_data = urllib.urlencode({
+            'ecommerce_course_id': course.id
+        })
+
+        customer_email_data = urllib.urlencode({
+            'email': order.basket.owner.email
+        })
+
+        expected_request_body = "firstname=John&" \
+                                "lastname=Doe&" \
+                                "company=Dummy+Business+Client&" \
+                                "{}&" \
+                                "{}&" \
+                                "deal_value=250.00&" \
+                                "address=Streetname%2C+Suite+321&" \
+                                "bulk_purchase_quantity=5&" \
+                                "city=City&" \
+                                "country=United+States&" \
+                                "state=State&" \
+                                "{}"\
+            .format(course_name_data, course_id_data, customer_email_data)
+        generated_request_body = EnrollmentCodeFulfillmentModule().get_order_fulfillment_data_for_hubspot(order)
+        self.assertEqual(expected_request_body, generated_request_body)
+
+    def test_determine_if_enterprise_purchase_expect_true(self):
+        """ Test for being able to retrieve 'purchased_behalf_of' attribute from Basket and the checkbox is checked. """
+        # add organization and purchaser attributes manually to the basket for testing purposes
+        basket_data = {
+            'organization': 'Dummy Business Client',
+            PURCHASER_BEHALF_ATTRIBUTE: 'True'
+        }
+        basket_add_organization_attribute(self.order.basket, basket_data)
+
+        purchased_by_organization = EnrollmentCodeFulfillmentModule().determine_if_enterprise_purchase(self.order)
+        self.assertEqual(True, purchased_by_organization)
+
+    def test_determine_if_enterprise_purchase_expect_false(self):
+        """ Test for being able to retrieve 'purchased_behalf_of' attribute value from Basket and the checkbox is
+        not checked. """
+        # add organization and purchaser attributes manually to the basket for testing purposes
+        basket_data = {
+            'organization': 'Dummy Business Client',
+            PURCHASER_BEHALF_ATTRIBUTE: 'False'
+        }
+        basket_add_organization_attribute(self.order.basket, basket_data)
+
+        purchased_by_organization = EnrollmentCodeFulfillmentModule().determine_if_enterprise_purchase(self.order)
+        self.assertEqual(False, purchased_by_organization)
+
+    def test_determine_if_enterprise_purchase_no_organization(self):
+        """ Test for ensuring we send back a usable value if 'purchased_behalf_of' attribute is missing from Basket
+        for some reason. """
+        purchased_by_organization = EnrollmentCodeFulfillmentModule().determine_if_enterprise_purchase(self.order)
+        self.assertEqual(False, purchased_by_organization)
+
+    @httpretty.activate
+    def test_send_to_hubspot_happy_path(self):
+        """ Test for constructing and sending the HubSpot request. Verifies expected logs are appearing. """
+        order = self.create_order_with_billing_address()
+
+        # set the HubSpot specific settings with values that make it look close to a real world configuration
+        settings.HUBSPOT_FORMS_API_URI = "https://forms.hubspot.com/uploads/form/v2/"
+        settings.HUBSPOT_PORTAL_ID = "0"
+        settings.HUBSPOT_SALES_LEAD_FORM_GUID = "00000000-1111-2222-3333-4444444444444444"
+
+        hubspot_url = "{}{}/{}?&".format(
+            settings.HUBSPOT_FORMS_API_URI,
+            settings.HUBSPOT_PORTAL_ID,
+            settings.HUBSPOT_SALES_LEAD_FORM_GUID)
+
+        httpretty.register_uri(
+            httpretty.POST,
+            hubspot_url,
+            content_type='application/x-www-form-urlencoded',
+            status=204
+        )
+
+        logger_name = "ecommerce.extensions.fulfillment.modules"
+        with LogCapture(logger_name) as logger:
+            response = EnrollmentCodeFulfillmentModule().send_fulfillment_data_to_hubspot(order)
+            # verify we built the uri correctly
+            self.assertEqual(response.url, hubspot_url)
+            # verify that the expected logs were generated
+            logger.check_present(
+                (
+                    logger_name,
+                    'INFO',
+                    'Gathering fulfillment data for submission to HubSpot for order [{}]'.format(order.number)
+                ),
+                (
+                    logger_name,
+                    'INFO',
+                    'Sending data to HubSpot for order [{}]'.format(order.number)
+                ),
+                (
+                    logger_name,
+                    'DEBUG',
+                    'HubSpot response: 204'
+                )
+            )
+
+    @mock.patch('requests.post', mock.Mock(side_effect=Timeout))
+    def test_send_to_hubspot_timeout(self):
+        """ Test to simulate a timeout occurring when sending data to HubSpot. Verifies expected logs appear. """
+        order = self.create_order_with_billing_address()
+
+        logger_name = "ecommerce.extensions.fulfillment.modules"
+        with LogCapture(logger_name) as logger:
+            EnrollmentCodeFulfillmentModule().send_fulfillment_data_to_hubspot(order)
+            # verify that the expected logs were generated
+            logger.check_present(
+                (
+                    logger_name,
+                    'ERROR',
+                    'Timeout occurred attempting to send data to HubSpot for order [{}]'.format(order.number)
+                )
+            )
+
+    @mock.patch('requests.post', mock.Mock(side_effect=ConnectionError))
+    def test_send_to_hubspot_error(self):
+        """ Test to simulate some other error occurring when sending data to HubSpot. Verifies expected logs appear. """
+        order = self.create_order_with_billing_address()
+
+        logger_name = "ecommerce.extensions.fulfillment.modules"
+        with LogCapture(logger_name) as logger:
+            EnrollmentCodeFulfillmentModule().send_fulfillment_data_to_hubspot(order)
+            # verify that the expected logs were generated
+            logger.check_present(
+                (
+                    logger_name,
+                    'ERROR',
+                    'Error occurred attempting to send data to HubSpot for order [{}]'.format(order.number)
+                )
+            )
 
 
 class EntitlementFulfillmentModuleTests(FulfillmentTestMixin, TestCase):

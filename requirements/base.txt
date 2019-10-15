@@ -14,7 +14,7 @@ babel==2.7.0              # via django-oscar, django-phonenumber-field
 billiard==3.3.0.23        # via celery
 cached-property==1.5.1    # via zeep
 celery==3.1.26.post2      # via edx-ecommerce-worker
-certifi==2019.6.16        # via requests
+certifi==2019.9.11        # via requests
 cffi==1.12.3              # via cryptography
 chardet==3.0.4            # via requests
 coreapi==2.3.3
@@ -28,22 +28,22 @@ django-compressor==2.2
 django-cors-headers==3.0.2
 django-crispy-forms==1.7.2
 django-crum==0.7.3        # via edx-rbac
-django-extra-views==0.10.0  # via django-oscar
+django-extra-views==0.11.0  # via django-oscar
 django-filter==1.0.4
 django-haystack==2.8.1    # via django-oscar
 django-libsass==0.5
 django-model-utils==3.2.0  # via edx-rbac
-django-oscar==1.5.4
-django-phonenumber-field==1.3.0  # via django-oscar
+django-oscar==1.6.7
+django-phonenumber-field==2.0.1  # via django-oscar
 django-rest-swagger==2.2.0
 django-simple-history==2.7.3
 django-solo==1.1.3
-django-tables2==1.16.0    # via django-oscar
+django-tables2==1.21.2    # via django-oscar
 django-threadlocals==0.10
 django-treebeard==4.3     # via django-oscar
 django-waffle==0.14.0
 django-widget-tweaks==1.4.5  # via django-oscar
-django==1.11.23
+django==1.11.24
 django_extensions==1.9.9
 djangorestframework-csv==2.1.0
 djangorestframework-datatables==0.5.0
@@ -54,14 +54,14 @@ edx-auth-backends==2.0.2
 edx-django-release-util==0.3.1
 edx-django-sites-extensions==2.4.0
 edx-django-utils==2.0.0
-edx-drf-extensions==2.4.0
+edx-drf-extensions==2.4.1
 edx-ecommerce-worker==0.7.2
 edx-opaque-keys==1.0.1
-edx-rbac==1.0.2
+edx-rbac==1.0.3
 edx-rest-api-client==1.9.2
 enum34==1.1.6             # via cryptography
 factory-boy==2.12.0       # via django-oscar
-faker==2.0.0              # via factory-boy
+faker==2.0.1              # via factory-boy
 funcsigs==1.0.2           # via mock
 future==0.17.1            # via pyjwkest
 idna==2.8                 # via requests
@@ -83,16 +83,16 @@ oauthlib==3.1.0           # via requests-oauthlib, social-auth-core
 openapi-codec==1.3.2      # via django-rest-swagger
 path.py==7.2
 paypalrestsdk==1.13.1
-pbr==5.4.2                # via mock, stevedore
-phonenumberslite==8.10.17  # via django-phonenumber-field
+pbr==5.4.3                # via mock, stevedore
+phonenumbers==8.10.18     # via django-oscar, django-phonenumber-field
 pillow==6.1.0             # via django-oscar
 premailer==2.9.2
 psutil==1.2.1             # via edx-django-utils, edx-drf-extensions
 purl==1.5                 # via django-oscar
-pyasn1==0.4.6             # via ndg-httpsclient
+pyasn1==0.4.7             # via ndg-httpsclient
 pycountry==17.1.8
 pycparser==2.19           # via cffi
-pycryptodomex==3.8.2      # via pyjwkest
+pycryptodomex==3.9.0      # via pyjwkest
 pygments==2.4.2
 pyjwkest==1.3.2           # via edx-drf-extensions, social-auth-core
 pyjwt==1.7.1              # via djangorestframework-jwt, edx-auth-backends, edx-rest-api-client, social-auth-core
@@ -100,7 +100,6 @@ pymongo==3.9.0            # via edx-opaque-keys
 pyopenssl==19.0.0         # via ndg-httpsclient, paypalrestsdk
 python-dateutil==2.8.0
 python-openid==2.2.5 ; python_version == "2.7"
-python3-openid==3.1.0 ; python_version >= "3"
 pytz==2016.10
 pyyaml==5.1.2             # via edx-django-release-util
 rcssmin==1.0.6            # via django-compressor
@@ -111,19 +110,19 @@ rest-condition==1.0.3     # via edx-drf-extensions
 rjsmin==1.0.12            # via django-compressor
 rules==2.1
 sailthru-client==2.2.3
-semantic-version==2.6.0   # via edx-drf-extensions
+semantic-version==2.8.2   # via edx-drf-extensions
 simplejson==3.16.0        # via django-rest-swagger, sailthru-client
 six==1.12.0
 slumber==0.7.1            # via edx-rest-api-client
 social-auth-app-django==1.2.0  # via edx-auth-backends
 social-auth-core[openidconnect]==1.7.0  # via edx-auth-backends, social-auth-app-django
-sorl-thumbnail==12.5.0    # via django-oscar
-stevedore==1.30.1         # via edx-opaque-keys
+sorl-thumbnail==12.4.1    # via django-oscar
+stevedore==1.31.0         # via edx-opaque-keys
 stripe==1.70.0
 text-unidecode==1.2       # via faker
-typing==3.7.4             # via django-extensions
+typing==3.7.4.1           # via django-extensions
 unicodecsv==0.14.1
-unidecode==0.4.21         # via django-oscar
+unidecode==1.0.23         # via django-oscar
 uritemplate==3.0.0        # via coreapi
 urllib3==1.25.3           # via requests
 xss-utils==0.1.1

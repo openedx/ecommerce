@@ -100,7 +100,8 @@ class CouponUtilsTests(CouponMixin, DiscoveryTestMixin, TestCase):
         _hash = ' '.join((
             six.text_type(coupon.id),
             str(self.partner.id)
-        ))
+        )).encode('utf-8')
+
         digest = md5(_hash.lower()).hexdigest()[-7:]
         expected = digest.upper()
         actual = generate_sku(coupon, self.partner)

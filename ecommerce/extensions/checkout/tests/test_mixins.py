@@ -21,7 +21,7 @@ from ecommerce.extensions.analytics.utils import (
     parse_tracking_context,
     translate_basket_line_for_segment
 )
-from ecommerce.extensions.basket.constants import EMAIL_OPT_IN_ATTRIBUTE
+from ecommerce.extensions.basket.constants import EMAIL_OPT_IN_ATTRIBUTE, PURCHASER_BEHALF_ATTRIBUTE
 from ecommerce.extensions.basket.utils import basket_add_organization_attribute
 from ecommerce.extensions.checkout.exceptions import BasketNotFreeError
 from ecommerce.extensions.checkout.mixins import OFFER_ASSIGNED, OFFER_REDEEMED, EdxOrderPlacementMixin
@@ -195,8 +195,11 @@ class EdxOrderPlacementMixinTests(BusinessIntelligenceMixin, PaymentEventsMixin,
         basket = BasketFactory(owner=user, site=self.site)
         basket.add_product(enrollment_code, quantity=1)
         order = create_order(number=1, basket=basket, user=user)
-        request_data = {'organization': 'Dummy Business Client'}
-        # Manually add organization attribute on the basket for testing
+        request_data = {
+            'organization': 'Dummy Business Client',
+            PURCHASER_BEHALF_ATTRIBUTE: 'False',
+        }
+        # Manually add organization and purchaser attributes on the basket for testing
         basket_add_organization_attribute(basket, request_data)
 
         EdxOrderPlacementMixin().handle_post_order(order)
@@ -219,8 +222,11 @@ class EdxOrderPlacementMixinTests(BusinessIntelligenceMixin, PaymentEventsMixin,
         basket = BasketFactory(owner=user, site=self.site)
         basket.add_product(verified_product, quantity=1)
         order = create_order(number=1, basket=basket, user=user)
-        request_data = {'organization': 'Dummy Business Client'}
-        # Manually add organization attribute on the basket for testing
+        request_data = {
+            'organization': 'Dummy Business Client',
+            PURCHASER_BEHALF_ATTRIBUTE: 'False',
+        }
+        # Manually add organization and purchaser attributes on the basket for testing
         basket_add_organization_attribute(basket, request_data)
 
         EdxOrderPlacementMixin().handle_post_order(order)

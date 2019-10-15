@@ -33,7 +33,7 @@ from ecommerce.core.url_utils import absolute_url, get_lms_url
 from ecommerce.coupons.tests.mixins import CouponMixin, DiscoveryMockMixin
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.enterprise.tests.mixins import EnterpriseServiceMockMixin
-from ecommerce.entitlements.utils import create_or_update_course_entitlement
+from ecommerce.enterprise.utils import construct_enterprise_course_consent_url
 from ecommerce.extensions.analytics.utils import translate_basket_line_for_segment
 from ecommerce.extensions.basket.constants import EMAIL_OPT_IN_ATTRIBUTE
 from ecommerce.extensions.basket.tests.mixins import BasketMixin
@@ -42,11 +42,7 @@ from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
 from ecommerce.extensions.offer.constants import DYNAMIC_DISCOUNT_FLAG
 from ecommerce.extensions.offer.utils import format_benefit_value
 from ecommerce.extensions.order.utils import UserAlreadyPlacedOrder
-from ecommerce.extensions.payment.constants import (
-    CLIENT_SIDE_CHECKOUT_FLAG_NAME,
-    ENABLE_MICROFRONTEND_FOR_BASKET_PAGE_FLAG_NAME,
-    FORCE_MICROFRONTEND_BUCKET_FLAG_NAME
-)
+from ecommerce.extensions.payment.constants import CLIENT_SIDE_CHECKOUT_FLAG_NAME
 from ecommerce.extensions.payment.forms import PaymentForm
 from ecommerce.extensions.payment.tests.processors import DummyProcessor
 from ecommerce.extensions.test.factories import create_order, prepare_voucher
@@ -138,8 +134,6 @@ class BasketAddItemsViewTests(
 
     @ddt.data(*itertools.product((True, False), (True, False)))
     @ddt.unpack
-    @override_flag(ENABLE_MICROFRONTEND_FOR_BASKET_PAGE_FLAG_NAME, active=True)
-    @override_flag(FORCE_MICROFRONTEND_BUCKET_FLAG_NAME, active=True)
     def test_microfrontend_for_single_course_purchase_if_configured(self, enable_redirect, set_url):
         microfrontend_url = self.configure_redirect_to_microfrontend(enable_redirect, set_url)
         response = self._get_response(self.stock_record.partner_sku, utm_source='test')
@@ -149,8 +143,6 @@ class BasketAddItemsViewTests(
         expected_url += '?utm_source=test'
         self.assertRedirects(response, expected_url, status_code=303, fetch_redirect_response=False)
 
-    @override_flag(ENABLE_MICROFRONTEND_FOR_BASKET_PAGE_FLAG_NAME, active=True)
-    @override_flag(FORCE_MICROFRONTEND_BUCKET_FLAG_NAME, active=True)
     def test_microfrontend_for_enrollment_code_seat(self):
         microfrontend_url = self.configure_redirect_to_microfrontend()
 
@@ -166,13 +158,13 @@ class BasketAddItemsViewTests(
         """ Verify the Bad request exception is thrown when no skus are provided. """
         response = self.client.get(self.path)
         self.assertEqual(response.status_code, 400)
-        self.assertEqual(response.content, 'No SKUs provided.')
+        self.assertEqual(response.content.decode('utf-8'), 'No SKUs provided.')
 
     def test_add_multiple_products_no_available_products(self):
         """ Verify the Bad request exception is thrown when no skus are provided. """
         response = self.client.get(self.path, data=[('sku', 1), ('sku', 2)])
         self.assertEqual(response.status_code, 400)
-        self.assertEqual(response.content, 'Products with SKU(s) [1, 2] do not exist.')
+        self.assertEqual(response.content.decode('utf-8'), 'Products with SKU(s) [1, 2] do not exist.')
 
     @ddt.data(Voucher.SINGLE_USE, Voucher.MULTI_USE)
     def test_add_multiple_products_and_use_voucher(self, usage):
@@ -231,40 +223,6 @@ class BasketAddItemsViewTests(
         self.assertEqual(response.status_code, 303)
         self.assertEqual(basket.lines.count(), len(products) - 1)
 
-    @mock.patch('ecommerce.enterprise.entitlements.get_entitlement_voucher')
-    def test_with_entitlement_voucher(self, mock_get_entitlement_voucher):
-        """
-        The view ought to redirect to the coupon redemption flow, which is consent-aware.
-        """
-        voucher = mock_get_entitlement_voucher.return_value
-        voucher.code = 'FAKECODE'
-        sku = self.stock_record.partner_sku
-
-        response = self._get_response(sku)
-        expected_failure_url = (
-            'http%3A%2F%2Ftestserver.fake%2Fbasket%2Fadd%2F%3Fconsent_failed%3DTrue%26sku%3D{sku}'.format(
-                sku=sku
-            )
-        )
-        expected_url = absolute_url(self.request, 'coupons:redeem')
-        expected_url += '?code=FAKECODE&sku={sku}&failure_url={failure_url}'.format(
-            sku=sku,
-            failure_url=expected_failure_url,
-        )
-        self.assertRedirects(response, expected_url)
-
-    @mock.patch('ecommerce.enterprise.entitlements.get_entitlement_voucher')
-    def test_with_entitlement_voucher_consent_failed(self, mock_get_entitlement_voucher):
-        """
-        Since consent has already failed, we ought to follow the standard flow, rather than looping forever.
-        """
-        voucher = mock_get_entitlement_voucher.return_value
-        voucher.code = 'FAKECODE'
-        self.mock_course_runs_endpoint(self.site_configuration.discovery_api_url, course_run=self.course)
-        response = self._get_response(self.stock_record.partner_sku, consent_failed='true')
-        expected_url = self.get_full_url(reverse('basket:summary'))
-        self.assertRedirects(response, expected_url, status_code=303)
-
     def test_no_available_product(self):
         """ The view should return HTTP 400 if the product is not available for purchase. """
         product = self.stock_record.product
@@ -275,7 +233,7 @@ class BasketAddItemsViewTests(
         expected_content = 'No product is available to buy.'
         response = self._get_response(self.stock_record.partner_sku)
         self.assertEqual(response.status_code, 400)
-        self.assertEqual(response.content, expected_content)
+        self.assertEqual(response.content.decode('utf-8'), expected_content)
 
     def test_with_both_unavailable_and_available_products(self):
         """ Verify the basket ignores unavailable products and continue with available products. """
@@ -551,34 +509,6 @@ class PaymentApiViewTests(PaymentApiResponseTestMixin, BasketMixin, DiscoveryMoc
             summary_subtotal=100,
         )
 
-    def test_entitlement_type(self):
-        basket = factories.BasketFactory(owner=self.user, site=self.site)
-        product = create_or_update_course_entitlement(
-            'verified', 100, self.partner, 'foo-bar', 'Foo Bar Entitlement',
-        )
-        basket.add_product(product, 1)
-
-        self.assert_expected_response(
-            basket,
-            product_type=u'Course Entitlement',
-        )
-
-    @ddt.data(50, 100)
-    def test_discounted_entitlement_type(self, discount_value):
-        basket = factories.BasketFactory(owner=self.user, site=self.site)
-        product = create_or_update_course_entitlement(
-            'verified', 100, self.partner, 'foo-bar', 'Foo Bar Entitlement',
-        )
-        basket.add_product(product, 1)
-        voucher = self.create_and_apply_benefit_to_basket(basket, product, Benefit.FIXED, discount_value)
-
-        self.assert_expected_response(
-            basket,
-            product_type=u'Course Entitlement',
-            discount_value=discount_value,
-            voucher=voucher,
-        )
-
     @ddt.data(50, 100)
     def test_discounted_seat_type(self, discount_value):
         seat = self.create_seat(self.course, seat_price=100)
@@ -600,7 +530,14 @@ class PaymentApiViewTests(PaymentApiResponseTestMixin, BasketMixin, DiscoveryMoc
         """
         self.course_run.create_or_update_seat('verified', True, Decimal(10))
         self.create_basket_and_add_product(self.course_run.seat_products[0])
-        self.prepare_enterprise_offer()
+        enterprise_offer = self.prepare_enterprise_offer()
+
+        opts = {
+            'ec_uuid': str(enterprise_offer.condition.enterprise_customer_uuid),
+            'course_id': self.course_run.seat_products[0].course_id,
+            'username': self.user.username,
+        }
+        self.mock_consent_get(**opts)
 
         response = self.client.get(self.path)
         self.assertEqual(response.status_code, 200)
@@ -629,6 +566,51 @@ class PaymentApiViewTests(PaymentApiResponseTestMixin, BasketMixin, DiscoveryMoc
 
     def test_segment_exception_log(self):
         self.verify_exception_logged_on_segment_error()
+
+    @httpretty.activate
+    def test_enterprise_offer_free_basket_redirect_to_dsc(self):
+        """
+        Verify redirect to Data Sharing Consent page if basket is free
+        and an Enterprise-related offer is applied and Enterprise customer
+        required the consent.
+        """
+        self.course_run.create_or_update_seat('verified', True, Decimal(10))
+        self.create_basket_and_add_product(self.course_run.seat_products[0])
+        enterprise_offer = self.prepare_enterprise_offer()
+
+        opts = {
+            'ec_uuid': str(enterprise_offer.condition.enterprise_customer_uuid),
+            'course_id': self.course_run.seat_products[0].course_id,
+            'username': self.user.username,
+            'required': True
+        }
+        self.mock_consent_response(**opts)
+
+        response = self.client.get(self.path)
+        self.assertEqual(response.status_code, 200)
+
+        expected_redirect_url = construct_enterprise_course_consent_url(
+            self.request,
+            self.course_run.seat_products[0].course_id,
+            str(enterprise_offer.condition.enterprise_customer_uuid)
+        )
+        self.assertEqual(response.data['redirect'], expected_redirect_url)
+
+    def test_enterprise_offer_free_basket_with_wrong_basket(self):
+        """
+        Verify that we don't redirect to Data Sharing Consent page if basket is free
+        and an Enterprise-related offer is applied but basket contains more than 1 products.
+        """
+        seat1 = self.create_seat(self.course, seat_price=100, cert_type='verified')
+        seat2 = self.create_seat(self.course_run, seat_price=100, cert_type='verified')
+        basket = self.create_basket_and_add_product(seat1)
+        basket.add(seat2)
+        self.prepare_enterprise_offer()
+
+        response = self.client.get(self.path)
+        self.assertEqual(response.status_code, 200)
+
+        self.assertEqual(response.data['redirect'], absolute_url(self.request, 'checkout:free-checkout'))
 
 
 @httpretty.activate
@@ -699,8 +681,6 @@ class BasketSummaryViewTests(EnterpriseServiceMockMixin, DiscoveryTestMixin, Dis
         line_data = response.context['formset_lines_data'][0][1]
         self.assertEqual(line_data['seat_type'], enrollment_code.attr.seat_type.capitalize())
 
-    @override_flag(ENABLE_MICROFRONTEND_FOR_BASKET_PAGE_FLAG_NAME, active=True)
-    @override_flag(FORCE_MICROFRONTEND_BUCKET_FLAG_NAME, active=True)
     def test_microfrontend_for_single_course_purchase(self):
         microfrontend_url = self.configure_redirect_to_microfrontend()
 
@@ -709,8 +689,6 @@ class BasketSummaryViewTests(EnterpriseServiceMockMixin, DiscoveryTestMixin, Dis
         response = self.client.get(self.path)
         self.assertRedirects(response, microfrontend_url, status_code=302, fetch_redirect_response=False)
 
-    @override_flag(ENABLE_MICROFRONTEND_FOR_BASKET_PAGE_FLAG_NAME, active=True)
-    @override_flag(FORCE_MICROFRONTEND_BUCKET_FLAG_NAME, active=True)
     def test_microfrontend_with_consent_failed_param(self):
         microfrontend_url = self.configure_redirect_to_microfrontend()
 
@@ -720,8 +698,6 @@ class BasketSummaryViewTests(EnterpriseServiceMockMixin, DiscoveryTestMixin, Dis
         expected_redirect_url = '{}?{}'.format(microfrontend_url, params)
         self.assertRedirects(response, expected_redirect_url, status_code=302, fetch_redirect_response=False)
 
-    @override_flag(ENABLE_MICROFRONTEND_FOR_BASKET_PAGE_FLAG_NAME, active=True)
-    @override_flag(FORCE_MICROFRONTEND_BUCKET_FLAG_NAME, active=True)
     def test_microfrontend_for_enrollment_code_seat_type(self):
         microfrontend_url = self.configure_redirect_to_microfrontend()
 
@@ -850,8 +826,8 @@ class BasketSummaryViewTests(EnterpriseServiceMockMixin, DiscoveryTestMixin, Dis
             self.course, discovery_api_url=self.site_configuration.discovery_api_url
         )
 
-        cache_key = 'courses_api_detail_{}{}'.format(self.course.id, self.partner.short_code)
-        cache_key = hashlib.md5(cache_key).hexdigest()
+        cache_key = u'courses_api_detail_{}{}'.format(self.course.id, self.partner.short_code)
+        cache_key = hashlib.md5(cache_key.encode('utf-8')).hexdigest()
         course_before_cached_response = TieredCache.get_cached_response(cache_key)
         self.assertFalse(course_before_cached_response.is_found)
 
@@ -920,14 +896,6 @@ class BasketSummaryViewTests(EnterpriseServiceMockMixin, DiscoveryTestMixin, Dis
         )
         self.assert_order_details_in_context(seat)
         self.assert_order_details_in_context(enrollment_code)
-
-    def test_order_details_entitlement_msg(self):
-        """Verify the order details message is displayed for course entitlements."""
-
-        product = create_or_update_course_entitlement(
-            'verified', 100, self.partner, 'foo-bar', 'Foo Bar Entitlement')
-
-        self.assert_order_details_in_context(product)
 
     @override_flag(CLIENT_SIDE_CHECKOUT_FLAG_NAME, active=True)
     @override_settings(PAYMENT_PROCESSORS=['ecommerce.extensions.payment.tests.processors.DummyProcessor'])
@@ -1051,7 +1019,14 @@ class BasketSummaryViewTests(EnterpriseServiceMockMixin, DiscoveryTestMixin, Dis
     def test_enterprise_free_basket_redirect(self):
         self.course_run.create_or_update_seat('verified', True, Decimal(100))
         self.create_basket_and_add_product(self.course_run.seat_products[0])
-        self.prepare_enterprise_offer(enterprise_customer_name='Foo Enterprise')
+        enterprise_offer = self.prepare_enterprise_offer(enterprise_customer_name='Foo Enterprise')
+
+        opts = {
+            'ec_uuid': str(enterprise_offer.condition.enterprise_customer_uuid),
+            'course_id': self.course_run.seat_products[0].course_id,
+            'username': self.user.username,
+        }
+        self.mock_consent_get(**opts)
 
         response = self.client.get(self.path)
         self.assertRedirects(
@@ -1249,9 +1224,8 @@ class VoucherAddMixin(LmsApiMockMixin, DiscoveryMockMixin):
 
         stock_record = Selector().strategy().fetch_for_product(product).stockrecord
         expected_redirect_url = (
-            u'{coupons_redeem_base_url}?sku={sku}&'
+            u'{coupons_redeem_base_url}?code=COUPONTEST&sku={sku}&'
             u'failure_url=http%3A%2F%2F{domain}%2Fbasket%2F%3Fconsent_failed%3D{code}'
-            u'&code=COUPONTEST'
         ).format(
             coupons_redeem_base_url=absolute_url(self.request, 'coupons:redeem'),
             sku=stock_record.partner_sku,
@@ -1302,7 +1276,7 @@ class VoucherAddMixin(LmsApiMockMixin, DiscoveryMockMixin):
     def test_account_activation_rendered(self):
         with self.assertTemplateUsed('edx/email_confirmation_required.html'):
             response = self.client.get(reverse('offers:email_confirmation'))
-            self.assertIn(u'An email has been sent to {}'.format(self.user.email), response.content)
+            self.assertIn(u'An email has been sent to {}'.format(self.user.email), response.content.decode('utf-8'))
 
 
 @httpretty.activate

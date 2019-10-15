@@ -309,7 +309,7 @@ class Cybersource(ApplePayMixin, BaseClientSidePaymentProcessor):
                     'review': AuthorizationError,
                 }.get(decision, InvalidCybersourceDecision)
 
-        transaction_id = response.get('transaction_id', None)  # Error Notifications does not include a transaction id.
+        transaction_id = response.get('transaction_id', '')  # Error Notifications do not include a transaction id.
         if transaction_id and decision == 'accept':
             if Order.objects.filter(number=response['req_reference_number']).exists():
                 if PaymentProcessorResponse.objects.filter(transaction_id=transaction_id).exists():
@@ -467,7 +467,7 @@ class Cybersource(ApplePayMixin, BaseClientSidePaymentProcessor):
             }
             encrypted_payment = {
                 'descriptor': 'RklEPUNPTU1PTi5BUFBMRS5JTkFQUC5QQVlNRU5U',
-                'data': base64.b64encode(json.dumps(payment_token['paymentData'])),
+                'data': base64.b64encode(json.dumps(payment_token['paymentData']).encode('utf-8')),
                 'encoding': 'Base64',
             }
             card = {

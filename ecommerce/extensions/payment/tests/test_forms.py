@@ -10,6 +10,7 @@ from waffle.models import Switch
 from ecommerce.core.constants import ENROLLMENT_CODE_PRODUCT_CLASS_NAME, ENROLLMENT_CODE_SWITCH
 from ecommerce.core.tests import toggle_switch
 from ecommerce.courses.tests.factories import CourseFactory
+from ecommerce.extensions.basket.constants import PURCHASER_BEHALF_ATTRIBUTE
 from ecommerce.extensions.payment.forms import PaymentForm
 from ecommerce.extensions.test.factories import create_basket
 from ecommerce.tests.testcases import TestCase
@@ -86,9 +87,6 @@ class PaymentFormTests(TestCase):
     def test_state_validation_for_north_america(self, country, valid_state):
         """ Verify the state field is limited to 2 characters when the country is set to the U.S. or Canada. """
         self.assert_form_valid(country=country, state=valid_state)
-        self.assert_form_not_valid(country=country, state='ZZ')
-        self.assert_form_not_valid(country=country, state=None)
-        self.assert_form_not_valid(country=country, state='')
 
         data = self._generate_data(country=country)
         data.pop('state', None)
@@ -133,12 +131,9 @@ class PaymentFormTests(TestCase):
         switch.active = True
         switch.save()
         self.assert_form_valid(country='US', state='CA')
-        self.assert_form_not_valid(country='US', state='ZZ')
-        self.assert_form_valid(country='US', state=None)
-        self.assert_form_valid(country='US', state=None, address_line1=None)
+        self.assert_form_valid(country='US', address_line1=None)
         switch.active = False
         switch.save()
-        self.assert_form_not_valid(country='US', state=None)
         self.assert_form_not_valid(country='US', state='CA', address_line1=None)
 
     # Temporarily add this test for codecov for the feature flag added for this test
@@ -165,7 +160,10 @@ class PaymentFormTests(TestCase):
         self.assertEqual(actual, expected)
 
     def test_organization_field_in_form(self):
-        """ Verify the field 'organization' is present in the form when the basket has an enrollment code product. """
+        """
+        Verify the field 'organization' and 'purchased_for_organization' is present in the form
+        when the basket has an enrollment code product.
+        """
         __, __, enrollment_code = self.prepare_course_seat_and_enrollment_code()
         basket = self.create_basket_and_add_product(enrollment_code)
         self.request.basket = basket
@@ -182,6 +180,7 @@ class PaymentFormTests(TestCase):
         }
         form = PaymentForm(user=self.user, data=data, request=self.request)
         self.assertTrue('organization' in form.fields)
+        self.assertTrue(PURCHASER_BEHALF_ATTRIBUTE in form.fields)
 
     def test_organization_field_not_in_form(self):
         """
@@ -205,3 +204,4 @@ class PaymentFormTests(TestCase):
         }
         form = PaymentForm(user=self.user, data=data, request=self.request)
         self.assertFalse('organization' in form.fields)
+        self.assertFalse(PURCHASER_BEHALF_ATTRIBUTE in form.fields)

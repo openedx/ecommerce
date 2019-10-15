@@ -83,7 +83,7 @@ class LMSPublisher(object):
                     'Failed to publish CreditCourse for [%s] to LMS. Status was [%d]. Body was [%s].',
                     course_id,
                     e.response.status_code,
-                    e.content
+                    e.content.decode('utf-8')
                 )
                 return error_message
             except:  # pylint: disable=bare-except
@@ -107,9 +107,9 @@ class LMSPublisher(object):
                 'Failed to publish commerce data for [%s] to LMS. Status was [%d]. Body was [%s].',
                 course_id,
                 e.response.status_code,
-                e.content
+                e.content.decode('utf-8')
             )
-            return self._parse_error(e.content, error_message)
+            return self._parse_error(e.content.decode('utf-8'), error_message)
         except Exception:  # pylint: disable=broad-except
             logger.exception('Failed to publish commerce data for [%s] to LMS.', course_id)
             return error_message

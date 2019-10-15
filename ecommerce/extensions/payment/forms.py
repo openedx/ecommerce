@@ -11,6 +11,8 @@ from django.core.exceptions import ValidationError
 from django.utils.translation import ugettext_lazy as _
 from oscar.core.loading import get_class, get_model
 
+from ecommerce.extensions.basket.constants import PURCHASER_BEHALF_ATTRIBUTE
+
 logger = logging.getLogger(__name__)
 
 Applicator = get_class('offer.applicator', 'Applicator')
@@ -18,6 +20,7 @@ Basket = get_model('basket', 'Basket')
 
 
 def country_choices():
+    # TODO: Remove pycountry library once White Label ends, country list is done on Payment MFE.
     """ Returns a tuple of tuples, each containing an ISO 3166 country code and the country name. """
     countries = sorted(
         [(country.alpha_2, country.name) for country in pycountry.countries],
@@ -93,8 +96,7 @@ class PaymentForm(forms.Form):
                 css_class='form-item col-md-6'
             )
         )
-
-        for bound_field in self:
+        for bound_field in list(self):
             # https://www.w3.org/WAI/tutorials/forms/validation/#validating-required-input
             if hasattr(bound_field, 'field') and bound_field.field.required:
                 # Translators: This is a string added next to the name of the required
@@ -116,6 +118,20 @@ class PaymentForm(forms.Form):
                         css_class='row'
                     )
                     self.helper.layout.fields.insert(list(self.fields.keys()).index('last_name') + 1, organization_div)
+                    # Purchased on behalf of an enterprise or for personal use
+                    self.fields[PURCHASER_BEHALF_ATTRIBUTE] = forms.BooleanField(
+                        required=False,
+                        label=_('I am purchasing on behalf of my employer or other professional organization')
+                    )
+                    purchaser_div = Div(
+                        Div(
+                            Div(PURCHASER_BEHALF_ATTRIBUTE),
+                            HTML('<p class="help-block"></p>'),
+                            css_class='form-item col-md-12'
+                        ),
+                        css_class='row'
+                    )
+                    self.helper.layout.fields.insert(list(self.fields.keys()).index('organization') + 1, purchaser_div)
 
     basket = forms.ModelChoiceField(
         queryset=Basket.objects.all(),
@@ -164,19 +180,6 @@ class PaymentForm(forms.Form):
                     raise ValidationError({'state': _('This field is required.')})
                 if not address_line1:
                     raise ValidationError({'address_line1': _('This field is required.')})
-
-            if state:
-                code = '{country}-{state}'.format(country=country, state=state)
-
-                try:
-                    # TODO: Remove the if statement once https://bitbucket.org/flyingcircus/pycountry/issues/13394/
-                    # is fixed.
-                    if not pycountry.subdivisions.get(code=code):
-                        raise KeyError
-                except KeyError:
-                    msg = _('{state} is not a valid state/province in {country}.').format(state=state, country=country)
-                    logger.debug(msg)
-                    raise ValidationError({'state': msg})
 
             # Ensure the postal code is present, and limited to 9 characters
             postal_code = cleaned_data.get('postal_code')

@@ -108,6 +108,8 @@ class UtilTests(CouponMixin, DiscoveryMockMixin, DiscoveryTestMixin, LmsApiMockM
         )
         self.entitlement_coupon_vouchers = CouponVouchers.objects.filter(coupon=self.entitlement_coupon)
 
+        self.partner_sku = 'test_sku'
+
         self.data = {
             'benefit_type': Benefit.PERCENTAGE,
             'benefit_value': 100.00,
@@ -197,9 +199,9 @@ class UtilTests(CouponMixin, DiscoveryMockMixin, DiscoveryTestMixin, LmsApiMockM
         """
         order = OrderFactory(number=order_num)
         if add_entitlement:
-            order_line = OrderLineFactory(product=self.entitlement)
+            order_line = OrderLineFactory(product=self.entitlement, partner_sku=self.partner_sku)
             order.lines.add(order_line)
-        order_line = OrderLineFactory(product=self.verified_seat)
+        order_line = OrderLineFactory(product=self.verified_seat, partner_sku=self.partner_sku)
         order.lines.add(order_line)
         voucher.record_usage(order, user)
         voucher.offers.first().record_usage(discount={'freq': 1, 'discount': 1})
@@ -657,17 +659,23 @@ class UtilTests(CouponMixin, DiscoveryMockMixin, DiscoveryTestMixin, LmsApiMockM
         course2 = CourseFactory()
         order = OrderFactory(number='TESTORDER')
         order.lines.add(
-            OrderLineFactory(product=course1.create_or_update_seat('verified', False, 101))
+            OrderLineFactory(
+                product=course1.create_or_update_seat('verified', False, 101),
+                partner_sku=self.partner_sku
+            )
         )
         order.lines.add(
-            OrderLineFactory(product=course2.create_or_update_seat('verified', False, 110))
+            OrderLineFactory(
+                product=course2.create_or_update_seat('verified', False, 110),
+                partner_sku=self.partner_sku
+            )
         )
         query_coupon = self.create_catalog_coupon(catalog_query='*:*')
         voucher = query_coupon.attr.coupon_vouchers.vouchers.first()
         voucher.record_usage(order, self.user)
         field_names, rows = generate_coupon_report([query_coupon.attr.coupon_vouchers])
 
-        expected_redemed_course_ids = '{}, {}'.format(course1, course2)
+        expected_redemed_course_ids = '{}, {}'.format(course1.id, course2.id)
         self.assertEqual(rows[-1]['Redeemed For Course IDs'], expected_redemed_course_ids)
         self.assertEqual(rows[-1].get('Redeemed For Course ID'), None)
         self.assertIn('Redeemed For Course ID', field_names)

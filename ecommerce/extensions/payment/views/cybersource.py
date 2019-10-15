@@ -12,7 +12,6 @@ from django.http import JsonResponse
 from django.shortcuts import redirect
 from django.utils.decorators import method_decorator
 from django.utils.functional import cached_property
-from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext as _
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import View
@@ -219,7 +218,7 @@ class CybersourceNotificationMixin(CyberSourceProcessorMixin, OrderCreationMixin
             # The problem is that orders are being created after payment processing, and the discount is not
             # saved in the database, so it needs to be calculated again in order to save the correct info to the
             # order. REVMI-124 will create the order before payment processing, when we have the discount context.
-            if waffle.flag_is_active(self.request, DYNAMIC_DISCOUNT_FLAG) and basket.lines.count() == 1:
+            if waffle.flag_is_active(self.request, DYNAMIC_DISCOUNT_FLAG) and basket.lines.count() == 1:  # pragma: no cover  pylint: disable=line-too-long
                 discount_lms_url = get_lms_url('/api/discounts/')
                 lms_discount_client = EdxRestApiClient(discount_lms_url,
                                                        jwt=self.request.site.siteconfiguration.access_token)
@@ -229,11 +228,31 @@ class CybersourceNotificationMixin(CyberSourceProcessorMixin, OrderCreationMixin
                     response = lms_discount_client.user(user_id).course(ck).get()
                     self.request.POST = self.request.POST.copy()
                     self.request.POST['discount_jwt'] = response.get('jwt')
+                    logger.info(
+                        """Received discount jwt from LMS with
+                        url: [%s],
+                        user_id: [%s],
+                        course_id: [%s],
+                        and basket_id: [%s]
+                        returned [%s]""",
+                        discount_lms_url,
+                        str(user_id),
+                        ck,
+                        basket.id,
+                        response)
                 except (SlumberHttpBaseException, requests.exceptions.Timeout) as error:
                     logger.warning(
-                        'Failed to get discount jwt from LMS. [%s] returned [%s]',
+                        """Failed to receive discount jwt from LMS with
+                        url: [%s],
+                        user_id: [%s],
+                        course_id: [%s],
+                        and basket_id: [%s]
+                        returned [%s]""",
                         discount_lms_url,
-                        error.response)
+                        str(user_id),
+                        ck,
+                        basket.id,
+                        vars(error.response) if hasattr(error, 'response') else '')
             # End TODO
             Applicator().apply(basket, basket.owner, self.request)
             logger.info(
@@ -450,22 +469,13 @@ class CybersourceInterstitialView(CybersourceNotificationMixin, View):
                 old_basket_id,
             )
 
-            message = _(
-                'An error occurred while processing your payment. You have not been charged. '
-                'Please double-check the information you provided and try again. '
-                'For help, {link_start}contact support{link_end}.'
-            ).format(
-                link_start='<a href="{}">'.format(request.site.siteconfiguration.payment_support_url),
-                link_end='</a>',
-            )
-
-            messages.error(request, mark_safe(message))
+            messages.error(self.request, _('transation declined'), extra_tags='transaction-declined-message')
 
             monitoring_utils.set_custom_metric('payment_response_validation', 'redirect-to-payment-page')
             # TODO:
-            # 1. TransactionDeclined message may be mishandled by Payment MFE since it contains HTML.
-            # 2. There are sometimes messages from CyberSource that would make a more helpful message for users.
-            # 3. We could have similar handling of other exceptions like UserCancelled and AuthorizationError
+            # 1. There are sometimes messages from CyberSource that would make a more helpful message for users.
+            # 2. We could have similar handling of other exceptions like UserCancelled and AuthorizationError
+
             return absolute_redirect(request, 'basket:summary')
         except:  # pylint: disable=bare-except
             # logging handled by validate_notification, because not all exceptions are problematic

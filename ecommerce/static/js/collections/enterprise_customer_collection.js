@@ -1,13 +1,14 @@
 /* istanbul ignore next */
 define([
-    'collections/paginated_collection',
+    'backbone',
     'models/enterprise_customer_model'
 ],
-    function(PaginatedCollection,
-              EnterpriseCustomer) {
+    function(
+        Backbone,
+        EnterpriseCustomer) {
         'use strict';
 
-        return PaginatedCollection.extend({
+        return Backbone.Collection.extend({
             model: EnterpriseCustomer,
             url: '/api/v2/enterprise/customers'
         });

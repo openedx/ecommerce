@@ -11,8 +11,6 @@ from ecommerce.enterprise.utils import get_enterprise_id_for_user
 from ecommerce.extensions.offer.constants import CUSTOM_APPLICATOR_LOG_FLAG
 
 logger = logging.getLogger(__name__)
-BasketAttribute = get_model('basket', 'BasketAttribute')
-BasketAttributeType = get_model('basket', 'BasketAttributeType')
 BUNDLE = 'bundle_identifier'
 
 
@@ -39,6 +37,9 @@ class CustomApplicator(Applicator):
             list of Offer: A sorted list of all the offers that apply to the
                 basket.
         """
+        BasketAttribute = get_model('basket', 'BasketAttribute')
+        BasketAttributeType = get_model('basket', 'BasketAttributeType')
+
         bundle_attributes = BasketAttribute.objects.filter(
             basket=basket,
             attribute_type=BasketAttributeType.objects.get(name=BUNDLE)

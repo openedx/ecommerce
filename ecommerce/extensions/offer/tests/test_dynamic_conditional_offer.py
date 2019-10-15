@@ -8,6 +8,7 @@ from oscar.core.loading import get_model
 from oscar.test.factories import BasketFactory
 from waffle.testutils import override_flag
 
+from ecommerce.core.constants import SEAT_PRODUCT_CLASS_NAME
 from ecommerce.extensions.offer.constants import DYNAMIC_DISCOUNT_FLAG
 from ecommerce.extensions.test.factories import DynamicPercentageDiscountBenefitFactory
 from ecommerce.extensions.test.mixins import BenefitTestMixin
@@ -18,6 +19,7 @@ from ecommerce.tests.testcases import TestCase
 Condition = get_model('offer', 'Condition')
 ConditionalOffer = get_model('offer', 'ConditionalOffer')
 LOGGER_NAME = 'ecommerce.programs.conditions'
+ProductClass = get_model('catalogue', 'ProductClass')
 
 
 def _mock_jwt_decode_handler(jwt):
@@ -53,8 +55,12 @@ class DynamicPercentageDiscountBenefitTests(BenefitTestMixin, TestCase):
         mock_kwargs = {'method': request_type, request_type: {'discount_jwt': discount_jwt}}
         request.return_value = Mock(**mock_kwargs)
         basket = BasketFactory(site=self.site, owner=self.create_user())
-
-        product = ProductFactory(categories=[], stockrecords__price_currency='USD')
+        seat_product_class, __ = ProductClass.objects.get_or_create(name=SEAT_PRODUCT_CLASS_NAME)
+        product = ProductFactory(
+            product_class=seat_product_class,
+            categories=[],
+            stockrecords__price_currency='USD'
+        )
         basket.add_product(product)
         Applicator().apply(basket)
 
@@ -82,6 +88,7 @@ class DynamicConditionTests(TestCase):
             proxy_class='ecommerce.extensions.offer.dynamic_conditional_offer.DynamicDiscountCondition').proxy()
         self.offer = ConditionalOffer.objects.get(name='dynamic_conditional_offer')
         self.basket = BasketFactory(site=self.site, owner=self.create_user())
+        self.seat_product_class, __ = ProductClass.objects.get_or_create(name=SEAT_PRODUCT_CLASS_NAME)
 
     def test_name(self):
         self.assertTrue(self.condition.name == 'dynamic_discount_condition')
@@ -95,10 +102,31 @@ class DynamicConditionTests(TestCase):
         {'discount_applicable': False, 'discount_percent': 15},
         None,)
     def test_is_satisfied_true(self, discount_jwt, jwt_decode_handler, request):   # pylint: disable=unused-argument
-        request.return_value = Mock(method='GET', GET={'discount_jwt': discount_jwt})
-        product = ProductFactory(stockrecords__price_excl_tax=10, categories=[])
+        product = ProductFactory(product_class=self.seat_product_class, stockrecords__price_excl_tax=10, categories=[])
         self.basket.add_product(product)
+
+        request.return_value = Mock(method='GET', GET={'discount_jwt': discount_jwt})
         if discount_jwt and discount_jwt.get('discount_applicable') is True:
             self.assertTrue(self.condition.is_satisfied(self.offer, self.basket))
         else:
             self.assertFalse(self.condition.is_satisfied(self.offer, self.basket))
+
+    @override_flag(DYNAMIC_DISCOUNT_FLAG, active=True)
+    @patch('crum.get_current_request')
+    def test_is_satisfied_quantity_more_than_1(self, request):   # pylint: disable=unused-argument
+        """
+        This discount should not apply if are buying more than one of the same course.
+        """
+        product = ProductFactory(stockrecords__price_excl_tax=10, categories=[])
+        self.basket.add_product(product, quantity=2)
+        self.assertFalse(self.condition.is_satisfied(self.offer, self.basket))
+
+    @override_flag(DYNAMIC_DISCOUNT_FLAG, active=True)
+    @patch('crum.get_current_request')
+    def test_is_satisfied_not_seat_product(self, request):   # pylint: disable=unused-argument
+        """
+        This discount should not apply if are not purchasing a seat product.
+        """
+        product = ProductFactory(stockrecords__price_excl_tax=10, categories=[])
+        self.basket.add_product(product)
+        self.assertFalse(self.condition.is_satisfied(self.offer, self.basket))

@@ -15,7 +15,6 @@ from oscar.apps.payment.exceptions import TransactionDeclined
 from oscar.core.loading import get_class, get_model
 from oscar.test import factories
 from testfixtures import LogCapture
-from waffle.testutils import override_flag
 
 from ecommerce.core.constants import ENROLLMENT_CODE_PRODUCT_CLASS_NAME, ENROLLMENT_CODE_SWITCH
 from ecommerce.core.models import BusinessClient
@@ -23,9 +22,9 @@ from ecommerce.core.tests import toggle_switch
 from ecommerce.core.url_utils import get_lms_url
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.extensions.api.serializers import OrderSerializer
+from ecommerce.extensions.basket.constants import PURCHASER_BEHALF_ATTRIBUTE
 from ecommerce.extensions.basket.utils import basket_add_organization_attribute
 from ecommerce.extensions.order.constants import PaymentEventTypeName
-from ecommerce.extensions.payment.constants import ENABLE_MICROFRONTEND_FOR_BASKET_PAGE_FLAG_NAME
 from ecommerce.extensions.payment.exceptions import InvalidBasketError, InvalidSignatureError
 from ecommerce.extensions.payment.processors.cybersource import Cybersource
 from ecommerce.extensions.payment.tests.mixins import CybersourceMixin, CybersourceNotificationTestsMixin
@@ -109,7 +108,7 @@ class CybersourceSubmitViewTests(CybersourceMixin, TestCase):
             'error': error_msg,
             'field_errors': {'basket': error_msg}
         }
-        self.assertDictEqual(json.loads(response.content), expected)
+        self.assertDictEqual(response.json(), expected)
 
     def test_missing_basket(self):
         """ Verify the view returns an HTTP 400 status if the basket is missing. """
@@ -140,7 +139,7 @@ class CybersourceSubmitViewTests(CybersourceMixin, TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response['content-type'], JSON)
 
-        actual = json.loads(response.content)['form_fields']
+        actual = response.json()['form_fields']
         transaction_uuid = actual['transaction_uuid']
         extra_parameters = {
             'payment_method': 'card',
@@ -181,7 +180,7 @@ class CybersourceSubmitViewTests(CybersourceMixin, TestCase):
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response['content-type'], JSON)
 
-        errors = json.loads(response.content)['field_errors']
+        errors = response.json()['field_errors']
         self.assertIn(field, errors)
 
 
@@ -311,7 +310,8 @@ class CybersourceInterstitialViewTests(CybersourceNotificationTestsMixin, TestCa
             billing_address=self.billing_address,
         )
         request_data.update({'organization': 'Dummy Business Client'})
-        # Manually add organization attribute on the basket for testing
+        request_data.update({PURCHASER_BEHALF_ATTRIBUTE: "False"})
+        # Manually add organization and purchaser attributes on the basket for testing
         basket_add_organization_attribute(self.basket, request_data)
 
         response = self.client.post(self.path, request_data)
@@ -384,11 +384,11 @@ class ApplePayStartSessionViewTests(LoginMixin, TestCase):
 
         response = self.client.post(self.url, json.dumps(post_data), JSON)
         self.assertEqual(response.status_code, status)
-        self.assertEqual(response.content, body)
+        self.assertEqual(response.content.decode('utf-8'), body)
 
         expected_domain_name = self.payment_microfrontend_domain if expected_mfe else 'testserver.fake'
         self.assertEqual(
-            json.loads(responses.calls[0].request.body)['domainName'],
+            json.loads(responses.calls[0].request.body.decode('utf-8'))['domainName'],
             expected_domain_name,
         )
 
@@ -402,7 +402,6 @@ class ApplePayStartSessionViewTests(LoginMixin, TestCase):
         """ The view should POST to the given URL and return the response. """
         self._call_to_apple_pay_and_assert_response(status, body)
 
-    @override_flag(ENABLE_MICROFRONTEND_FOR_BASKET_PAGE_FLAG_NAME, active=True)
     @responses.activate
     @ddt.data(*itertools.product((True, False), (True, False)))
     @ddt.unpack

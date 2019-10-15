@@ -5,12 +5,14 @@ from __future__ import absolute_import
 
 import logging
 
+from django.utils.deprecation import MiddlewareMixin
+
 from ecommerce.extensions.analytics.utils import get_google_analytics_client_id
 
 logger = logging.getLogger(__name__)
 
 
-class TrackingMiddleware(object):
+class TrackingMiddleware(MiddlewareMixin, object):
     """
     Middleware that:
         1) parses the `_ga` cookie to find the GA client id and adds this to the user's tracking_context
@@ -22,7 +24,7 @@ class TrackingMiddleware(object):
 
     """
 
-    def process_request(self, request):
+    def process_view(self, request, view_func, view_args, view_kwargs):  # pylint: disable=unused-argument
         user = request.user
         if user.is_authenticated():
             tracking_context = user.tracking_context or {}

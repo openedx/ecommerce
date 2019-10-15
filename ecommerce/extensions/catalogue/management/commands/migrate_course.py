@@ -112,7 +112,7 @@ class MigratedCourse(object):
         except Exception as e:  # pylint: disable=broad-except
             logger.warning(
                 'Calling Commerce API failed with: [%s]. Falling back to Course Structure API.',
-                e.message
+                six.text_type(e)
             )
             course_name, course_verification_deadline = self._query_course_structure_api()
 

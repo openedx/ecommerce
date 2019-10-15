@@ -101,7 +101,7 @@ class VoucherTests(TestCase):
         verified_seat = course.create_or_update_seat('verified', False, 100)
 
         order = OrderFactory()
-        order_line = OrderLineFactory(product=verified_seat)
+        order_line = OrderLineFactory(product=verified_seat, partner_sku='test_sku')
         order.lines.add(order_line)
         voucher.record_usage(order, user)
         voucher.offers.first().record_usage(discount={'freq': 1, 'discount': 1})

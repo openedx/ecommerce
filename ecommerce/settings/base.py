@@ -214,8 +214,8 @@ TEMPLATES = [
 
 
 # MIDDLEWARE CONFIGURATION
-# See: https://docs.djangoproject.com/en/dev/ref/settings/#middleware-classes
-MIDDLEWARE_CLASSES = (
+# See: https://docs.djangoproject.com/en/1.11/ref/settings/#middleware
+MIDDLEWARE = (
     'corsheaders.middleware.CorsMiddleware',
     'edx_django_utils.cache.middleware.RequestCacheMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -230,9 +230,9 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.sites.middleware.CurrentSiteMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'waffle.middleware.WaffleMiddleware',
+    'ecommerce.extensions.analytics.middleware.TrackingMiddleware',
     # NOTE: The overridden BasketMiddleware relies on request.site. This middleware
     # MUST appear AFTER CurrentSiteMiddleware.
-    'ecommerce.extensions.analytics.middleware.TrackingMiddleware',
     'ecommerce.extensions.basket.middleware.BasketMiddleware',
     'django.contrib.flatpages.middleware.FlatpageFallbackMiddleware',
     'social_django.middleware.SocialAuthExceptionMiddleware',
@@ -405,6 +405,9 @@ LOGGING = {
         },
     }
 }
+
+LOGGING_ROOT_OVERRIDES = {}
+LOGGING_SUBSECTION_OVERRIDES = {}
 # END LOGGING CONFIGURATION
 
 
@@ -435,6 +438,11 @@ JWT_AUTH = {
         {
             'AUDIENCE': 'SET-ME-PLEASE',
             'ISSUER': 'http://127.0.0.1:8000/oauth2',
+            'SECRET_KEY': 'SET-ME-PLEASE'
+        },
+        {
+            'AUDIENCE': 'SET-ME-PLEASE',
+            'ISSUER': 'ecommerce_worker',
             'SECRET_KEY': 'SET-ME-PLEASE'
         }
     ],
@@ -529,6 +537,7 @@ TEST_RUNNER = 'django.test.runner.DiscoverRunner'
 # Detailed information at: https://docs.djangoproject.com/en/dev/ref/settings/
 SESSION_COOKIE_NAME = 'ecommerce_sessionid'
 CSRF_COOKIE_NAME = 'ecommerce_csrftoken'
+CSRF_COOKIE_SECURE = False
 LANGUAGE_COOKIE_NAME = 'openedx-language-preference'
 SESSION_COOKIE_SECURE = False
 # END COOKIE CONFIGURATION
@@ -592,7 +601,7 @@ COURSE_CATALOG_API_URL = 'http://localhost:8008/api/v1/'
 BLACK_LIST_COUPON_COURSE_MODES = [u'audit', u'honor']
 
 # Theme settings
-# enable or disbale comprehensive theming
+# enable or disable comprehensive theming
 ENABLE_COMPREHENSIVE_THEMING = True
 
 # name for waffle switch to use for disabling theming on runtime.
@@ -632,6 +641,7 @@ EDX_DRF_EXTENSIONS = {
 # Enrollment codes voucher end datetime used for setting the end dates for vouchers
 # created for the Enrollment code products.
 ENROLLMENT_CODE_EXIPRATION_DATE = datetime.datetime.now() + datetime.timedelta(weeks=520)
+ENROLLMENT_FULFILLMENT_TIMEOUT = 7
 
 # Affiliate cookie key
 AFFILIATE_COOKIE_KEY = 'affiliate_id'
@@ -666,7 +676,7 @@ if os.environ.get('ENABLE_DJANGO_TOOLBAR', False):
         'debug_toolbar',
     ]
 
-    MIDDLEWARE_CLASSES += (
+    MIDDLEWARE += (
         'debug_toolbar.middleware.DebugToolbarMiddleware',
     )
 
@@ -689,36 +699,11 @@ NEW_CODES_EMAIL_CONFIG = {
     '''
 }
 
-OFFER_ASSIGNMENT_EMAIL_DEFAULT_TEMPLATE = '''
-    Your learning manager has provided you with a new access code to take a course at edX.
-    You may redeem this code for {REDEMPTIONS_REMAINING} courses.
-
-    edX login: {USER_EMAIL}
-    Access Code: {CODE}
-    Expiration date: {EXPIRATION_DATE}
-
-    You can insert the access code at check out under "coupon code" for applicable courses.
-
-    For any questions, please reach out to your Learning Manager.
-'''
 OFFER_ASSIGNMENT_EMAIL_DEFAULT_SUBJECT = 'New edX course assignment'
 OFFER_REVOKE_EMAIL_DEFAULT_SUBJECT = 'edX Course Assignment Revoked'
-
-OFFER_ASSIGNMENT_EMAIL_REMINDER_DEFAULT_TEMPLATE = '''
-    This is a reminder email that your learning manager has provided you with a access code to take a course at edX.
-    You have redeemed this code {REDEEMED_OFFER_COUNT} of times out of {TOTAL_OFFER_COUNT} number of available course redemptions.
-
-    edX login: {USER_EMAIL}
-    Access Code: {CODE}
-    Expiration date: {EXPIRATION_DATE}
-
-    You can insert the access code at check out under "coupon code" for applicable courses.
-
-    For any questions, please reach out to your Learning Manager.
-'''
 OFFER_ASSIGNMENT_EMAIL_REMINDER_DEFAULT_SUBJECT = 'Reminder on edX course assignment'
 
-#SAILTHRU settings
+# SAILTHRU settings
 SAILTHRU_KEY = 'sailthru key here'
 SAILTHRU_SECRET = 'sailthru secret here'
 
@@ -739,6 +724,7 @@ SOCIAL_AUTH_EDX_OIDC_PUBLIC_URL_ROOT = 'http://127.0.0.1:8000/oauth2'
 SOCIAL_AUTH_EDX_OIDC_ISSUER = 'http://127.0.0.1:8000/oauth2'
 
 CORS_ORIGIN_WHITELIST = []
+CORS_URLS_REGEX = ''
 
 ECOMMERCE_PAYMENT_PROCESSOR_CONFIG = {
     'edx': {
@@ -789,3 +775,11 @@ BACKEND_SERVICE_EDX_OAUTH2_SECRET = "ecommerce-backend-service-secret"
 BACKEND_SERVICE_EDX_OAUTH2_PROVIDER_URL = "http://127.0.0.1:8000/oauth2"
 EXTRA_APPS = []
 API_ROOT = None
+
+# Needed to link to the payment micro-frontend
+PAYMENT_MICROFRONTEND_URL = None
+
+# For Enterprise purchases to send purchase information to HubSpot for marketing leads
+HUBSPOT_FORMS_API_URI = "SET-ME-PLEASE"
+HUBSPOT_PORTAL_ID = "SET-ME-PLEASE"
+HUBSPOT_SALES_LEAD_FORM_GUID = "SET-ME-PLEASE"

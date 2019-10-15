@@ -9,6 +9,7 @@ import abc
 import datetime
 import json
 import logging
+import urllib
 
 import requests
 import six
@@ -21,23 +22,28 @@ from rest_framework import status
 
 from ecommerce.core.constants import (
     DONATIONS_FROM_CHECKOUT_TESTS_PRODUCT_TYPE_NAME,
-    ENROLLMENT_CODE_PRODUCT_CLASS_NAME
+    ENROLLMENT_CODE_PRODUCT_CLASS_NAME,
+    ISO_8601_FORMAT
 )
 from ecommerce.core.url_utils import get_lms_enrollment_api_url, get_lms_entitlement_api_url
 from ecommerce.courses.models import Course
 from ecommerce.courses.utils import mode_for_product
+from ecommerce.enterprise.conditions import BasketAttributeType
 from ecommerce.enterprise.utils import (
     get_enterprise_customer_uuid_from_voucher,
     get_or_create_enterprise_customer_user
 )
 from ecommerce.extensions.analytics.utils import audit_log, parse_tracking_context
 from ecommerce.extensions.api.v2.views.coupons import CouponViewSet
+from ecommerce.extensions.basket.constants import PURCHASER_BEHALF_ATTRIBUTE
+from ecommerce.extensions.basket.models import BasketAttribute
 from ecommerce.extensions.checkout.utils import get_receipt_page_url
 from ecommerce.extensions.fulfillment.status import LINE
 from ecommerce.extensions.voucher.models import OrderLineVouchers
 from ecommerce.extensions.voucher.utils import create_vouchers
 from ecommerce.notifications.notifications import send_notification
 
+BasketAttributeType = get_model('basket', 'BasketAttributeType')
 Benefit = get_model('offer', 'Benefit')
 Option = get_model('catalogue', 'Option')
 Product = get_model('catalogue', 'Product')
@@ -304,6 +310,11 @@ class EnrollmentFulfillmentModule(BaseFulfillmentModule):
                         'namespace': 'order',
                         'name': 'order_number',
                         'value': order.number
+                    },
+                    {
+                        'namespace': 'order',
+                        'name': 'date_placed',
+                        'value': order.date_placed.strftime(ISO_8601_FORMAT)
                     }
                 ]
             }
@@ -551,9 +562,136 @@ class EnrollmentCodeFulfillmentModule(BaseFulfillmentModule):
 
             line.set_status(LINE.COMPLETE)
 
+        # if this is an Enterprise purchase then transmit information about the order over to HubSpot
+        if self.determine_if_enterprise_purchase(order):
+            self.send_fulfillment_data_to_hubspot(order)
+
         self.send_email(order)
         logger.info("Finished fulfilling 'Enrollment code' product types for order [%s]", order.number)
         return order, lines
+
+    def determine_if_enterprise_purchase(self, order):
+        """ Added as part of ENT-2317. Inspects the order/basket to determine if the purchaser checked the "purchased
+        on behalf of my company" checkbox at time of purchase, which drives whether we should send this order
+         information over to HubSpot.
+
+            Args:
+                order (Order): The Order associated with the lines to be fulfilled.
+
+            Returns:
+                A boolean reflecting whether or not this purchase was made on behalf of a company or organization driven
+                by the value of the associated attribute for the order/basket in question.
+        """
+        enterprise_purchase = False
+        try:
+            # extract basket info needed to determine if purchase was made on behalf of an Enterprise
+            basket_attrib_purchaser = BasketAttribute.objects.get(
+                basket=order.basket,
+                attribute_type=BasketAttributeType.objects.get(name=PURCHASER_BEHALF_ATTRIBUTE))
+            enterprise_purchase = basket_attrib_purchaser.value_text == "True"
+        except (BasketAttribute.DoesNotExist, BasketAttributeType.DoesNotExist):
+            logger.exception("Error occurred attempting to retrieve Basket Attribute '%s' from basket for order [%s]",
+                             PURCHASER_BEHALF_ATTRIBUTE, order.number)
+
+        return enterprise_purchase
+
+    def send_fulfillment_data_to_hubspot(self, order):
+        """ Added as part of ENT-2317. Sends fulfillment data to the HubSpot Form API with info about the purchase.
+
+            Args:
+                order (Order): The Order associated with the lines to be fulfilled.
+
+            Returns:
+                The response from the requests call. Primarily being used for unit testing.
+        """
+        response = ""
+        try:
+            headers = {"Content-Type": 'application/x-www-form-urlencoded'}
+            # Build the URI for the HubSpot Forms API. See more here:
+            # https://developers.hubspot.com/docs/methods/forms/submit_form which takes the form from
+            # 'https://forms.hubspot.com/uploads/form/v2/{portal_id}/{form_id}?&'
+            endpoint = "{}{}/{}?&".format(
+                settings.HUBSPOT_FORMS_API_URI, settings.HUBSPOT_PORTAL_ID, settings.HUBSPOT_SALES_LEAD_FORM_GUID)
+            data = self.get_order_fulfillment_data_for_hubspot(order)
+
+            logger.info("Sending data to HubSpot for order [%s]", order.number)
+            response = requests.post(url=endpoint, data=data, headers=headers, timeout=1)
+            logger.debug("HubSpot response: %d", response.status_code)
+        except Timeout:
+            logger.error("Timeout occurred attempting to send data to HubSpot for order [%s]", order.number)
+        except Exception:  # pylint: disable=broad-except
+            logger.exception("Error occurred attempting to send data to HubSpot for order [%s]", order.number)
+
+        return response
+
+    def get_order_fulfillment_data_for_hubspot(self, order):
+        """ Added as part of ENT-2317. Retrieves any data needed to build the URL Encoded request body for the HubSpot
+        API Forms request we will be submitting. Information we will be sending to HubSpot includes:
+            - First and Last name
+            - Email
+            - Course Number and Name purchased
+            - Quantity purchased
+            - Total dollar amount
+            - Company/Organization
+            - Address
+
+            Args:
+                order (Order): The Order associated with the lines to be fulfilled.
+
+            Returns:
+                A URL encoded string that will be the body of the request are sending to HubSpot containing
+                fulfillment data about the order that was just processed.
+        """
+        logger.info("Gathering fulfillment data for submission to HubSpot for order [%s]", order.number)
+
+        # need to do this to be able to grab the organization/company name, this isn't available in the order/lines
+        organization = ""
+        try:
+            organization = BasketAttribute.objects.get(
+                basket=order.basket,
+                attribute_type=BasketAttributeType.objects.get(name="organization"))
+        except (BasketAttribute.DoesNotExist, BasketAttributeType.DoesNotExist):
+            logger.exception("Error occurred attempting to retrieve Basket Attribute 'organization' from basket for "
+                             "order [%s]", order.number)
+
+        # need to build out the address accordingly
+        street_address = order.billing_address.line1
+        # check if 'line2' is empty, if not then make sure we include that in the address info
+        if order.billing_address.line2:
+            street_address = "{}, {}".format(order.billing_address.line1, order.billing_address.line2)
+
+        # When filling our our order page and selecting "United States" the string that gets populated in
+        # order.billing_address.country.name is 'United States of America'. This will cause the mailing country to not
+        # be populated on the HubSpot side in the form submission as 'United States of America' does not appear to
+        # match what HubSpot is looking for. I did some digging in the form attributes and it looks like the HubSpot
+        # side may be looking for 'United States'.
+        #
+        # I tested the theory below and changed it from 'United States of America' to 'United States' and the mailing
+        # country was populated in the contact on form submission.
+        country_name = order.billing_address.country.name
+        if country_name == 'United States of America':
+            country_name = 'United States'
+
+        # get course name and number purchased from order information
+        product = order.lines.first().product
+        course = Course.objects.get(id=product.attr.course_key)
+
+        data = urllib.urlencode({
+            'firstname': order.billing_address.first_name,
+            'lastname': order.billing_address.last_name,
+            'email': order.basket.owner.email,
+            'address': street_address,
+            'city': order.billing_address.line4,
+            'state': order.billing_address.state,
+            'country': country_name,
+            'company': organization.value_text,
+            'deal_value': order.basket.total_incl_tax,
+            'ecommerce_course_name': course.name,
+            'ecommerce_course_id': course.id,
+            'bulk_purchase_quantity': order.num_items
+        })
+
+        return data
 
     def revoke_line(self, line):
         """ Revokes the specified line.

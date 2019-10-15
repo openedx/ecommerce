@@ -23,14 +23,14 @@ class TrackingMiddlewareTests(TestCase):
         self.request_factory = RequestFactory()
         self.user = self.create_user()
 
-    def _process_request(self, user):
+    def _process_view(self, user):
         request = self.request_factory.get('/')
         request.user = user
-        self.middleware.process_request(request)
+        self.middleware.process_view(request, None, None, None)
 
     def _assert_ga_client_id(self, ga_client_id):
         self.request_factory.cookies['_ga'] = 'GA1.2.{}'.format(ga_client_id)
-        self._process_request(self.user)
+        self._process_view(self.user)
         expected_client_id = self.user.tracking_context.get('ga_client_id')
         self.assertEqual(ga_client_id, expected_client_id)
 
@@ -55,7 +55,7 @@ class TrackingMiddlewareTests(TestCase):
         same_user = User.objects.get(id=user.id)
         self.assertIsNone(same_user.lms_user_id)
 
-        self._process_request(same_user)
+        self._process_view(same_user)
         same_user = User.objects.get(id=user.id)
         self.assertEqual(same_user.lms_user_id, lms_user_id)
 
@@ -87,7 +87,7 @@ class TrackingMiddlewareTests(TestCase):
         ]
         same_user = User.objects.get(id=user.id)
         with LogCapture(self.MODEL_LOGGER_NAME) as log:
-            self._process_request(same_user)
+            self._process_view(same_user)
             log.check_present(*expected)
 
         same_user = User.objects.get(id=user.id)
@@ -108,7 +108,7 @@ class TrackingMiddlewareTests(TestCase):
         same_user = User.objects.get(id=user.id)
         self.assertEqual(initial_lms_user_id, same_user.lms_user_id)
 
-        self._process_request(same_user)
+        self._process_view(same_user)
         same_user = User.objects.get(id=user.id)
         self.assertEqual(initial_lms_user_id, same_user.lms_user_id)
 
@@ -118,7 +118,7 @@ class TrackingMiddlewareTests(TestCase):
         same_user = User.objects.get(id=user.id)
 
         with self.assertRaises(MissingLmsUserIdException):
-            self._process_request(same_user)
+            self._process_view(same_user)
 
         same_user = User.objects.get(id=user.id)
         self.assertIsNone(same_user.lms_user_id)
@@ -139,7 +139,7 @@ class TrackingMiddlewareTests(TestCase):
 
         same_user = User.objects.get(id=user.id)
         with LogCapture(self.MODEL_LOGGER_NAME) as log:
-            self._process_request(same_user)
+            self._process_view(same_user)
             log.check_present(*expected)
 
         same_user = User.objects.get(id=user.id)
@@ -160,7 +160,7 @@ class TrackingMiddlewareTests(TestCase):
 
         same_user = User.objects.get(id=user.id)
         with LogCapture(self.MODEL_LOGGER_NAME) as log:
-            self._process_request(same_user)
+            self._process_view(same_user)
             log.check_present(*expected)
 
         same_user = User.objects.get(id=user.id)

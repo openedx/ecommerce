@@ -11,7 +11,6 @@ from functools import reduce  # pylint: disable=redefined-builtin
 
 import crum
 import six  # pylint: disable=ungrouped-imports
-import waffle
 from django.conf import settings
 from django.urls import reverse
 from django.utils.translation import ugettext as _
@@ -25,7 +24,7 @@ from six.moves.urllib.parse import urlencode
 from slumber.exceptions import SlumberHttpBaseException
 
 from ecommerce.core.constants import SYSTEM_ENTERPRISE_LEARNER_ROLE
-from ecommerce.core.utils import deprecated_traverse_pagination
+from ecommerce.core.url_utils import absolute_url, get_lms_dashboard_url
 from ecommerce.enterprise.api import fetch_enterprise_learner_data
 from ecommerce.enterprise.exceptions import EnterpriseDoesNotExist
 from ecommerce.extensions.offer.models import OFFER_PRIORITY_ENTERPRISE
@@ -45,23 +44,6 @@ CUSTOMER_CATALOGS_DEFAULT_RESPONSE = {
     'previous': None,
     'results': [],
 }
-
-
-def is_enterprise_feature_enabled():
-    """
-    Returns boolean indicating whether enterprise feature is enabled or
-    disabled.
-
-    Example:
-        >> is_enterprise_feature_enabled()
-        True
-
-    Returns:
-         (bool): True if enterprise feature is enabled else False
-
-    """
-    is_enterprise_enabled = waffle.switch_is_active(settings.ENABLE_ENTERPRISE_ON_RUNTIME_SWITCH)
-    return is_enterprise_enabled
 
 
 def get_enterprise_api_client(site):
@@ -117,21 +99,11 @@ def get_enterprise_customer(site, uuid):
     return enterprise_customer_response
 
 
-def get_enterprise_customers(site):
-    resource = 'enterprise-customer'
-    client = get_enterprise_api_client(site)
-    endpoint = getattr(client, resource)
-    response = endpoint.get()
-    return sorted(
-        [
-            {
-                'name': each['name'],
-                'id': each['uuid'],
-            }
-            for each in deprecated_traverse_pagination(response, endpoint)
-        ],
-        key=lambda k: k['name'].lower()
-    )
+def get_enterprise_customers(request):
+    client = get_enterprise_api_client(request.site)
+    enterprise_customer_client = getattr(client, 'enterprise-customer')
+    response = enterprise_customer_client.basic_list.get(**request.GET)
+    return response
 
 
 def update_paginated_response(endpoint_request_url, data):
@@ -268,6 +240,7 @@ def get_enterprise_customer_consent_failed_context_data(request, voucher):
         request.site,
         voucher
     )
+
     if not enterprise_customer:
         return {'error': _('There is no Enterprise Customer associated with SKU {sku}.').format(
             sku=consent_failed_sku
@@ -610,3 +583,45 @@ def get_enterprise_id_for_user(site, user):
         pass
 
     return None
+
+
+def get_enterprise_customer_from_enterprise_offer(basket):
+    """
+    Return enterprise customer uuid if the basket has an Enterprise-related offer applied.
+
+    Arguments:
+        basket (Basket): The basket object.
+
+    Returns:
+        boolean: uuid if the basket has an Enterprise-related offer applied, None otherwise.
+    """
+    for offer in basket.offer_discounts:
+        if offer['offer'].priority == OFFER_PRIORITY_ENTERPRISE:
+            return str(offer['offer'].condition.enterprise_customer_uuid)
+    return None
+
+
+def construct_enterprise_course_consent_url(request, course_id, enterprise_customer_uuid):
+    """
+    Construct the URL that should be used for redirecting the user to the Enterprise service for
+    collecting consent.
+    """
+    site = request.site
+    failure_url = '{base}?{params}'.format(
+        base=get_lms_dashboard_url(),
+        params=urlencode({
+            'enterprise_customer': enterprise_customer_uuid,
+            CONSENT_FAILED_PARAM: course_id
+        }),
+    )
+    request_params = {
+        'course_id': course_id,
+        'enterprise_customer_uuid': enterprise_customer_uuid,
+        'next': absolute_url(request, 'checkout:free-checkout'),
+        'failure_url': failure_url,
+    }
+    redirect_url = '{base}?{params}'.format(
+        base=site.siteconfiguration.enterprise_grant_data_sharing_url,
+        params=urlencode(request_params)
+    )
+    return redirect_url

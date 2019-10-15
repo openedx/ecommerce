@@ -103,33 +103,6 @@ class EnterpriseAPITests(EnterpriseServiceMockMixin, DiscoveryTestMixin, TestCas
         enterprise_api.fetch_enterprise_learner_data(self.request.site, self.learner)
         self._assert_num_requests(expected_number_of_requests)
 
-    def test_fetch_enterprise_learner_entitlements(self):
-        """
-        Verify that method "fetch_enterprise_learner_data" returns a proper
-        response for the enterprise learner.
-        """
-        # API should be hit only twice in this test case,
-        # once by `fetch_enterprise_learner_data` and once by `fetch_enterprise_learner_entitlements`.
-        expected_number_of_requests = 3
-
-        self.mock_access_token_response()
-        self.mock_enterprise_learner_api()
-        enterprise_learners = enterprise_api.fetch_enterprise_learner_data(self.request.site, self.learner)
-
-        enterprise_learner_id = enterprise_learners['results'][0]['id']
-        self.mock_enterprise_learner_entitlements_api(enterprise_learner_id)
-        enterprise_api.fetch_enterprise_learner_entitlements(self.request.site, enterprise_learner_id)
-
-        # Verify the API was hit just two times, once by `fetch_enterprise_learner_data`
-        # and once by `fetch_enterprise_learner_entitlements`
-        self._assert_num_requests(expected_number_of_requests)
-
-        # Now fetch the enterprise learner entitlements again and verify that there was
-        # no actual call to Enterprise API, as the data will be taken from
-        # the cache
-        enterprise_api.fetch_enterprise_learner_entitlements(self.request.site, enterprise_learner_id)
-        self._assert_num_requests(expected_number_of_requests)
-
     @ddt.data(
         (True, None),
         (True, 'fake-uuid'),

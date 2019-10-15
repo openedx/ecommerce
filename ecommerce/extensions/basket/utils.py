@@ -17,16 +17,11 @@ from six.moves.urllib.parse import unquote, urlencode
 
 from ecommerce.core.url_utils import absolute_url
 from ecommerce.courses.utils import mode_for_product
-from ecommerce.extensions.analytics.utils import track_segment_event
-from ecommerce.extensions.experimentation.stable_bucketing import stable_bucketing_hash_group
+from ecommerce.extensions.basket.constants import PURCHASER_BEHALF_ATTRIBUTE
 from ecommerce.extensions.offer.constants import CUSTOM_APPLICATOR_USE_FLAG
 from ecommerce.extensions.order.exceptions import AlreadyPlacedOrderException
 from ecommerce.extensions.order.utils import UserAlreadyPlacedOrder
-from ecommerce.extensions.payment.constants import (
-    ENABLE_MICROFRONTEND_FOR_BASKET_PAGE_FLAG_NAME,
-    FORCE_MICROFRONTEND_BUCKET_FLAG_NAME,
-    PAYMENT_MFE_BUCKET
-)
+from ecommerce.extensions.payment.constants import DISABLE_MICROFRONTEND_FOR_BASKET_PAGE_FLAG_NAME
 from ecommerce.extensions.payment.utils import embargo_check
 from ecommerce.referrals.models import Referral
 
@@ -60,49 +55,15 @@ def get_payment_microfrontend_url_if_configured(request):
     return None
 
 
-def _force_payment_microfrontend_bucket(request):
-    """
-    Return whether the user for the current request should be forced into
-    the payment MFE bucket.
-    """
-    return waffle.flag_is_active(request, FORCE_MICROFRONTEND_BUCKET_FLAG_NAME)
-
-
 def _use_payment_microfrontend(request):
     """
     Return whether the current request should use the payment MFE.
     """
-    if (
-            request.site.siteconfiguration.enable_microfrontend_for_basket_page and
-            request.site.siteconfiguration.payment_microfrontend_url
-    ):
-        # Force the user into the MFE bucket for testing
-        payment_mfe_bucket_forced = _force_payment_microfrontend_bucket(request)
-        if payment_mfe_bucket_forced:
-            bucket = PAYMENT_MFE_BUCKET
-        else:
-            # Bucket 50% of users to use the payment MFE for A/B testing.
-            bucket = stable_bucketing_hash_group("payment-mfe", 2, request.user.username)
-
-        payment_microfrontend_flag_enabled = waffle.flag_is_active(
-            request,
-            ENABLE_MICROFRONTEND_FOR_BASKET_PAGE_FLAG_NAME
-        )
-
-        track_segment_event(
-            request.site,
-            request.user,
-            'edx.bi.experiment.user.bucketed',
-            {
-                'bucket': bucket,
-                'experiment': 'payment-mfe',
-                'forcedIntoBucket': payment_mfe_bucket_forced,
-                'paymentMfeEnabled': payment_microfrontend_flag_enabled,
-            },
-        )
-        return bucket == PAYMENT_MFE_BUCKET and payment_microfrontend_flag_enabled
-    else:
-        return False
+    return (
+        request.site.siteconfiguration.enable_microfrontend_for_basket_page and
+        request.site.siteconfiguration.payment_microfrontend_url and
+        not waffle.flag_is_active(request, DISABLE_MICROFRONTEND_FOR_BASKET_PAGE_FLAG_NAME)
+    )
 
 
 @newrelic.agent.function_trace()
@@ -338,8 +299,8 @@ def _record_utm_basket_attribution(referral, request):
 @newrelic.agent.function_trace()
 def basket_add_organization_attribute(basket, request_data):
     """
-    Add organization attribute on basket, if organization value is provided
-    in basket data.
+    Adds the organization, and purchased_on_behalf attribute on basket, if organization value is provided
+    in basket data. The purchased_on_behalf is not required if there is an organization value present.
 
     Arguments:
         basket(Basket): order basket
@@ -348,6 +309,7 @@ def basket_add_organization_attribute(basket, request_data):
     """
     # Name of business client is being passed as "organization" from basket page
     business_client = request_data.get(ORGANIZATION_ATTRIBUTE_TYPE)
+    purchaser = request_data.get(PURCHASER_BEHALF_ATTRIBUTE)
 
     if business_client:
         organization_attribute, __ = BasketAttributeType.objects.get_or_create(name=ORGANIZATION_ATTRIBUTE_TYPE)
@@ -355,6 +317,14 @@ def basket_add_organization_attribute(basket, request_data):
             basket=basket,
             attribute_type=organization_attribute,
             value_text=business_client.strip()
+        )
+        # Also add the 'purchaser' attribute to the carts of all business client purchases. This way we can track
+        # how many people read/paid attention to the checkbox during purchases.
+        purchaser_attribute, __ = BasketAttributeType.objects.get_or_create(name=PURCHASER_BEHALF_ATTRIBUTE)
+        BasketAttribute.objects.get_or_create(
+            basket=basket,
+            attribute_type=purchaser_attribute,
+            value_text=purchaser
         )
 
 
@@ -471,6 +441,25 @@ def validate_voucher(voucher, user, basket, request_site):
         return False, message
 
     return True, ''
+
+
+def apply_offers_on_basket(request, basket):
+    """
+    Applies offers on a basket.
+
+    Adapted from `apply_offer_to_basket` in Oscar's `BasketMiddleware`, as
+    trying to directly call the Middleware seems to cause issues with the new
+    Django 1.11 style middleware.
+
+    Args:
+        request (Request): Request object
+        basket (Basket): basket object on which the offers will be applied
+    """
+    if not basket.is_empty:
+        if waffle.flag_is_active(request, CUSTOM_APPLICATOR_USE_FLAG):  # pragma: no cover
+            CustomApplicator().apply(basket, request.user, request)
+        else:
+            Applicator().apply(basket, request.user, request)
 
 
 @newrelic.agent.function_trace()

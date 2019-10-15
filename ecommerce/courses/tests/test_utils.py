@@ -64,8 +64,8 @@ class UtilsTests(DiscoveryTestMixin, DiscoveryMockMixin, TestCase):
             key = product.attr.UUID
             self.mock_course_detail_endpoint(product, discovery_api_url=self.site_configuration.discovery_api_url)
 
-        cache_key = 'courses_api_detail_{}{}'.format(key, self.partner.short_code)
-        cache_key = hashlib.md5(cache_key).hexdigest()
+        cache_key = u'courses_api_detail_{}{}'.format(key, self.partner.short_code)
+        cache_key = hashlib.md5(cache_key.encode('utf-8')).hexdigest()
         course_cached_response = TieredCache.get_cached_response(cache_key)
         self.assertFalse(course_cached_response.is_found)
 
@@ -137,8 +137,8 @@ class GetCourseCatalogUtilTests(DiscoveryMockMixin, TestCase):
         Helper method to validate the response from the method
         "get_course_catalogs".
         """
-        cache_key = '{}.catalog.api.data'.format(self.request.site.domain)
-        cache_key = hashlib.md5(cache_key).hexdigest()
+        cache_key = u'{}.catalog.api.data'.format(self.request.site.domain)
+        cache_key = hashlib.md5(cache_key.encode('utf-8')).hexdigest()
         course_catalogs_cached_response = TieredCache.get_cached_response(cache_key)
         self.assertFalse(course_catalogs_cached_response.is_found)
 
@@ -160,8 +160,8 @@ class GetCourseCatalogUtilTests(DiscoveryMockMixin, TestCase):
         self.mock_catalog_detail_endpoint(self.site_configuration.discovery_api_url)
 
         catalog_id = 1
-        cache_key = '{}.catalog.api.data.{}'.format(self.request.site.domain, catalog_id)
-        cache_key = hashlib.md5(cache_key).hexdigest()
+        cache_key = u'{}.catalog.api.data.{}'.format(self.request.site.domain, catalog_id)
+        cache_key = hashlib.md5(cache_key.encode('utf-8')).hexdigest()
         course_catalogs_cached_response = TieredCache.get_cached_response(cache_key)
         self.assertFalse(course_catalogs_cached_response.is_found)
 
