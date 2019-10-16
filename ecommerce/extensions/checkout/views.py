@@ -268,8 +268,7 @@ class ReceiptResponseView(ThankYouView):
                     'Your company, {enterprise_customer_name}, has a dedicated page where '
                     'you can see all of your sponsored courses. '
                     'Go to <a href="{hostname}">{hostname}</a>.'
-                )
-                message = message.format(
+                ).format(
                     enterprise_customer_name=enterprise_customer['name'],
                     hostname=learner_portal_hostname
                 )
