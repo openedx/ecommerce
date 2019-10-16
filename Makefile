@@ -79,12 +79,12 @@ validate_js:
 	$(NODE_BIN)/gulp lint
 
 validate_python: clean
-	DISABLE_MIGRATIONS=1 PATH=$$PATH:$(NODE_BIN) REUSE_DB=1 coverage run --branch --source=ecommerce ./manage.py test ecommerce \
+	DISABLE_MIGRATIONS=1 PATH=$$PATH:$(NODE_BIN) REUSE_DB=0 coverage run --branch --source=ecommerce ./manage.py test ecommerce \
 	--settings=ecommerce.settings.test --with-ignore-docstrings --logging-level=DEBUG
 	coverage report
 
 fast_validate_python: clean quality
-	REUSE_DB=1 DISABLE_ACCEPTANCE_TESTS=True ./manage.py test ecommerce \
+	REUSE_DB=0 DISABLE_ACCEPTANCE_TESTS=True ./manage.py test ecommerce \
 	--settings=ecommerce.settings.test --processes=4 --with-ignore-docstrings --logging-level=DEBUG
 
 validate: validate_python validate_js quality
