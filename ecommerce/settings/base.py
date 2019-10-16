@@ -636,7 +636,8 @@ EDX_DRF_EXTENSIONS = {
     'JWT_PAYLOAD_MERGEABLE_USER_ATTRIBUTES': (
         'tracking_context',
     ),
-    "OAUTH2_USER_INFO_URL": "http://127.0.0.1:8000/oauth2/user_info"
+    'OAUTH2_USER_INFO_URL': 'http://127.0.0.1:8000/oauth2/user_info',
+    'ENABLE_SET_REQUEST_USER_FOR_JWT_COOKIE': True,
 }
 
 # Enrollment codes voucher end datetime used for setting the end dates for vouchers
