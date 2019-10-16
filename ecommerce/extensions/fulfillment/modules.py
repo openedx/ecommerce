@@ -642,12 +642,6 @@ class EnrollmentCodeFulfillmentModule(BaseFulfillmentModule):
                 A URL encoded string that will be the body of the request are sending to HubSpot containing
                 fulfillment data about the order that was just processed.
         """
-        # Debug code for an issue we ran into on Stage. This will be removed.
-        try:
-            logger.info("Basket strategy: [%s]", order.basket.strategy)
-        except:  # pylint: disable=bare-except
-            logger.exception("Error occurred attempting to retrieve Basket 'Strategy' from order [%s]", order.number)
-
         logger.info("Gathering fulfillment data for submission to HubSpot for order [%s]", order.number)
 
         # need to do this to be able to grab the organization/company name, this isn't available in the order/lines
