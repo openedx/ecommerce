@@ -192,6 +192,7 @@ class ReceiptResponseViewTests(DiscoveryMockMixin, LmsApiMockMixin, RefundTestMi
         self.enterprise_learner_data_no_portal = {
             'results': [{
                 'enterprise_customer': {
+                    'name': 'Test Company',
                     'enable_learner_portal': False,
                     'learner_portal_hostname': ''
                 }
@@ -200,6 +201,7 @@ class ReceiptResponseViewTests(DiscoveryMockMixin, LmsApiMockMixin, RefundTestMi
         self.enterprise_learner_data_with_portal = {
             'results': [{
                 'enterprise_customer': {
+                    'name': 'Test Company',
                     'enable_learner_portal': True,
                     'learner_portal_hostname': 'https://www.edx.org'
                 }
@@ -481,7 +483,7 @@ class ReceiptResponseViewTests(DiscoveryMockMixin, LmsApiMockMixin, RefundTestMi
         response_messages = list(response.context['messages'])
 
         expected_message = (
-            'Your company has a dedicated page where you can see all of '
+            'Your company, Test Company, has a dedicated page where you can see all of '
             'your sponsored courses. Go to <a href="https://www.edx.org">'
             'https://www.edx.org</a>.'
         )

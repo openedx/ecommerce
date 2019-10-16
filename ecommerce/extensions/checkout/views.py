@@ -265,9 +265,12 @@ class ReceiptResponseView(ThankYouView):
             learner_portal_hostname = enterprise_customer['learner_portal_hostname']
             if enable_learner_portal and learner_portal_hostname:
                 message = (
-                    'Your company has a dedicated page where you can see all of your sponsored courses. '
-                    'Go to <a href="{hostname}">{hostname}</a>.'.format(
-                        hostname=learner_portal_hostname
-                    )
+                    'Your company, {enterprise_customer_name}, has a dedicated page where '
+                    'you can see all of your sponsored courses. '
+                    'Go to <a href="{hostname}">{hostname}</a>.'
+                )
+                message = message.format(
+                    enterprise_customer_name=enterprise_customer['name'],
+                    hostname=learner_portal_hostname
                 )
                 messages.add_message(request, messages.INFO, message, extra_tags='safe')
