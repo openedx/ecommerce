@@ -91,7 +91,7 @@ class BasketAddItemsView(APIView):
 
     def get(self, request):
         # Send time when this view is called - https://openedx.atlassian.net/browse/REV-984
-        properties = { emitted_at: time.time() }
+        properties = {'emitted_at': time.time()}
         track_segment_event(request.site, request.user, 'Basket Add Items View Called', properties)
 
         try:
