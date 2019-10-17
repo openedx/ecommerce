@@ -2,6 +2,7 @@
 from __future__ import absolute_import, unicode_literals
 
 import logging
+import time
 from collections import OrderedDict
 from datetime import datetime
 from decimal import Decimal
@@ -89,6 +90,10 @@ class BasketAddItemsView(APIView):
     permission_classes = (LoginRedirectIfUnauthenticated,)
 
     def get(self, request):
+        # Send time when this view is called - https://openedx.atlassian.net/browse/REV-984
+        properties = {'emitted_at': time.time()}
+        track_segment_event(request.site, request.user, 'Basket Add Items View Called', properties)
+
         try:
             skus = self._get_skus(request)
             products = self._get_products(request, skus)
