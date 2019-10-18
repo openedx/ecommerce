@@ -53,6 +53,15 @@ ALL_ACCESS_CONTEXT = '*'
 # .. toggle_status: supported
 ALLOW_MISSING_LMS_USER_ID = 'allow_missing_lms_user_id'
 
+# .. toggle_name: hubspot_forms_integration_enabled
+# .. toggle_implementation: WaffleSwitch
+# .. toggle_default: False
+# .. toggle_description: Toggle for allowing order data for Enterprise purchases to be transmitted to Hubspot
+# .. toggle_use_cases: open_edx
+# .. toggle_tickets: ENT-2317
+# .. toggle_status: supported
+HUBSPOT_FORMS_INTEGRATION_ENABLE = "hubspot_forms_integration_enable"
+
 
 class Status(object):
     """Health statuses."""

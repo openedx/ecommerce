@@ -13,6 +13,7 @@ import urllib
 
 import requests
 import six
+import waffle
 from django.conf import settings
 from django.urls import reverse
 from edx_rest_api_client.client import EdxRestApiClient
@@ -23,6 +24,7 @@ from rest_framework import status
 from ecommerce.core.constants import (
     DONATIONS_FROM_CHECKOUT_TESTS_PRODUCT_TYPE_NAME,
     ENROLLMENT_CODE_PRODUCT_CLASS_NAME,
+    HUBSPOT_FORMS_INTEGRATION_ENABLE,
     ISO_8601_FORMAT
 )
 from ecommerce.core.url_utils import get_lms_enrollment_api_url, get_lms_entitlement_api_url
@@ -562,8 +564,9 @@ class EnrollmentCodeFulfillmentModule(BaseFulfillmentModule):
 
             line.set_status(LINE.COMPLETE)
 
-        # if this is an Enterprise purchase then transmit information about the order over to HubSpot
-        if self.determine_if_enterprise_purchase(order):
+        # if the HubSpot integration is enabled and this is an Enterprise purchase then transmit information about the
+        # order over to HubSpot
+        if waffle.switch_is_active(HUBSPOT_FORMS_INTEGRATION_ENABLE) and self.determine_if_enterprise_purchase(order):
             self.send_fulfillment_data_to_hubspot(order)
 
         self.send_email(order)
