@@ -267,9 +267,10 @@ class ReceiptResponseView(ThankYouView):
                 message = (
                     'Your company, {enterprise_customer_name}, has a dedicated page where '
                     'you can see all of your sponsored courses. '
-                    'Go to <a href="{hostname}">{hostname}</a>.'
+                    'Go to <a href="{scheme}://{hostname}">your portal</a>.'
                 ).format(
                     enterprise_customer_name=enterprise_customer['name'],
-                    hostname=learner_portal_hostname
+                    hostname=learner_portal_hostname,
+                    scheme=request.scheme
                 )
                 messages.add_message(request, messages.INFO, message, extra_tags='safe')
