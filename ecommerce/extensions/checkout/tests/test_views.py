@@ -203,7 +203,7 @@ class ReceiptResponseViewTests(DiscoveryMockMixin, LmsApiMockMixin, RefundTestMi
                 'enterprise_customer': {
                     'name': 'Test Company',
                     'enable_learner_portal': True,
-                    'learner_portal_hostname': 'https://www.edx.org'
+                    'learner_portal_hostname': 'www.edx.org'
                 }
             }]
         }
@@ -484,8 +484,8 @@ class ReceiptResponseViewTests(DiscoveryMockMixin, LmsApiMockMixin, RefundTestMi
 
         expected_message = (
             'Your company, Test Company, has a dedicated page where you can see all of '
-            'your sponsored courses. Go to <a href="https://www.edx.org">'
-            'https://www.edx.org</a>.'
+            'your sponsored courses. Go to <a href="http://www.edx.org">'
+            'your learner portal</a>.'
         )
         actual_message = str(response_messages[0])
 
