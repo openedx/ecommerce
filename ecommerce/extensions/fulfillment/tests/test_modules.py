@@ -3,7 +3,6 @@ from __future__ import absolute_import
 
 import datetime
 import json
-import urllib
 import uuid
 
 import ddt
@@ -14,6 +13,7 @@ from django.test import override_settings
 from oscar.core.loading import get_class, get_model
 from oscar.test import factories
 from requests.exceptions import ConnectionError, Timeout
+from six.moves.urllib.parse import urlencode
 from testfixtures import LogCapture
 from waffle.testutils import override_switch
 
@@ -638,15 +638,15 @@ class EnrollmentCodeFulfillmentModuleTests(DiscoveryTestMixin, TestCase):
         product = order.lines.first().product
         course = Course.objects.get(id=product.attr.course_key)
 
-        course_name_data = urllib.urlencode({
+        course_name_data = urlencode({
             'ecommerce_course_name': course.name
         })
 
-        course_id_data = urllib.urlencode({
+        course_id_data = urlencode({
             'ecommerce_course_id': course.id
         })
 
-        customer_email_data = urllib.urlencode({
+        customer_email_data = urlencode({
             'email': order.basket.owner.email
         })
 
