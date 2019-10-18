@@ -1,6 +1,6 @@
 from __future__ import absolute_import
 
-import urllib
+from six.moves.urllib.parse import urlencode
 
 import pytest
 import requests
@@ -30,7 +30,7 @@ class TestHubSpotFormsApi(object):
         headers = {"Content-Type": 'application/x-www-form-urlencoded'}
         endpoint = "{}{}/{}?&".format(
             HUBSPOT_FORMS_API_URI, HUBSPOT_PORTAL_ID, HUBSPOT_SALES_LEAD_FORM_GUID)
-        data = urllib.urlencode({
+        data = urlencode({
             'firstname': 'John',
             'lastname': 'Doe',
             'email': 'ecommerce_test_0@example.com',

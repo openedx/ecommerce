@@ -9,7 +9,7 @@ import abc
 import datetime
 import json
 import logging
-import urllib
+from six.moves.urllib.parse import urlencode
 
 import requests
 import six
@@ -679,7 +679,7 @@ class EnrollmentCodeFulfillmentModule(BaseFulfillmentModule):
         product = order.lines.first().product
         course = Course.objects.get(id=product.attr.course_key)
 
-        data = urllib.urlencode({
+        data = urlencode({
             'firstname': order.billing_address.first_name,
             'lastname': order.billing_address.last_name,
             'email': order.email,
