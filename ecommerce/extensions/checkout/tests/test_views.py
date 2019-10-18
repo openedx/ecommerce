@@ -485,7 +485,7 @@ class ReceiptResponseViewTests(DiscoveryMockMixin, LmsApiMockMixin, RefundTestMi
         expected_message = (
             'Your company, Test Company, has a dedicated page where you can see all of '
             'your sponsored courses. Go to <a href="http://www.edx.org">'
-            'your portal</a>.'
+            'your learner portal</a>.'
         )
         actual_message = str(response_messages[0])
 
