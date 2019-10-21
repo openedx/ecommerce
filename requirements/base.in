@@ -1,7 +1,7 @@
 analytics-python
 coreapi
 django<2.0
-django-compressor==2.2
+django-compressor
 django-cors-headers                 #  Used to allow to configure CORS headers for cross-domain requests
 django-crispy-forms
 django_extensions==1.9.9
