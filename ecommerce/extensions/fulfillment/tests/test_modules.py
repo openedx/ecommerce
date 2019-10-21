@@ -15,12 +15,14 @@ from oscar.core.loading import get_class, get_model
 from oscar.test import factories
 from requests.exceptions import ConnectionError, Timeout
 from testfixtures import LogCapture
+from waffle.testutils import override_switch
 
 from ecommerce.core.constants import (
     COUPON_PRODUCT_CLASS_NAME,
     COURSE_ENTITLEMENT_PRODUCT_CLASS_NAME,
     DONATIONS_FROM_CHECKOUT_TESTS_PRODUCT_TYPE_NAME,
     ENROLLMENT_CODE_PRODUCT_CLASS_NAME,
+    HUBSPOT_FORMS_INTEGRATION_ENABLE,
     ISO_8601_FORMAT,
     SEAT_PRODUCT_CLASS_NAME
 )
@@ -565,6 +567,27 @@ class EnrollmentCodeFulfillmentModuleTests(DiscoveryTestMixin, TestCase):
         # create new order adding in the additional billing address info
         return create_order(number=2, basket=basket, user=user, billing_address=billing_address)
 
+    def add_required_attributes_to_basket(self, order, purchased_by_org):
+        """ Utility method that will setup Basket with attributes needed for unit tests """
+        # add organization and purchaser attributes manually to the basket for testing purposes
+        basket_data = {
+            'organization': 'Dummy Business Client',
+            PURCHASER_BEHALF_ATTRIBUTE: '{}'.format(purchased_by_org)
+        }
+        basket_add_organization_attribute(order.basket, basket_data)
+
+    def set_hubspot_settings(self):
+        # set the HubSpot specific settings with values that make it look close to a real world configuration
+        settings.HUBSPOT_FORMS_API_URI = "https://forms.hubspot.com/uploads/form/v2/"
+        settings.HUBSPOT_PORTAL_ID = "0"
+        settings.HUBSPOT_SALES_LEAD_FORM_GUID = "00000000-1111-2222-3333-4444444444444444"
+
+    def format_hubspot_request_url(self):
+        return "{}{}/{}?&".format(
+            settings.HUBSPOT_FORMS_API_URI,
+            settings.HUBSPOT_PORTAL_ID,
+            settings.HUBSPOT_SALES_LEAD_FORM_GUID)
+
     def setUp(self):
         super(EnrollmentCodeFulfillmentModuleTests, self).setUp()
         course = CourseFactory(partner=self.partner)
@@ -645,26 +668,14 @@ class EnrollmentCodeFulfillmentModuleTests(DiscoveryTestMixin, TestCase):
 
     def test_determine_if_enterprise_purchase_expect_true(self):
         """ Test for being able to retrieve 'purchased_behalf_of' attribute from Basket and the checkbox is checked. """
-        # add organization and purchaser attributes manually to the basket for testing purposes
-        basket_data = {
-            'organization': 'Dummy Business Client',
-            PURCHASER_BEHALF_ATTRIBUTE: 'True'
-        }
-        basket_add_organization_attribute(self.order.basket, basket_data)
-
+        self.add_required_attributes_to_basket(self.order, True)
         purchased_by_organization = EnrollmentCodeFulfillmentModule().determine_if_enterprise_purchase(self.order)
         self.assertEqual(True, purchased_by_organization)
 
     def test_determine_if_enterprise_purchase_expect_false(self):
         """ Test for being able to retrieve 'purchased_behalf_of' attribute value from Basket and the checkbox is
         not checked. """
-        # add organization and purchaser attributes manually to the basket for testing purposes
-        basket_data = {
-            'organization': 'Dummy Business Client',
-            PURCHASER_BEHALF_ATTRIBUTE: 'False'
-        }
-        basket_add_organization_attribute(self.order.basket, basket_data)
-
+        self.add_required_attributes_to_basket(self.order, False)
         purchased_by_organization = EnrollmentCodeFulfillmentModule().determine_if_enterprise_purchase(self.order)
         self.assertEqual(False, purchased_by_organization)
 
@@ -679,16 +690,8 @@ class EnrollmentCodeFulfillmentModuleTests(DiscoveryTestMixin, TestCase):
         """ Test for constructing and sending the HubSpot request. Verifies expected logs are appearing. """
         order = self.create_order_with_billing_address()
 
-        # set the HubSpot specific settings with values that make it look close to a real world configuration
-        settings.HUBSPOT_FORMS_API_URI = "https://forms.hubspot.com/uploads/form/v2/"
-        settings.HUBSPOT_PORTAL_ID = "0"
-        settings.HUBSPOT_SALES_LEAD_FORM_GUID = "00000000-1111-2222-3333-4444444444444444"
-
-        hubspot_url = "{}{}/{}?&".format(
-            settings.HUBSPOT_FORMS_API_URI,
-            settings.HUBSPOT_PORTAL_ID,
-            settings.HUBSPOT_SALES_LEAD_FORM_GUID)
-
+        self.set_hubspot_settings()
+        hubspot_url = self.format_hubspot_request_url()
         httpretty.register_uri(
             httpretty.POST,
             hubspot_url,
@@ -751,6 +754,83 @@ class EnrollmentCodeFulfillmentModuleTests(DiscoveryTestMixin, TestCase):
                     logger_name,
                     'ERROR',
                     'Error occurred attempting to send data to HubSpot for order [{}]'.format(order.number)
+                )
+            )
+
+    @httpretty.activate
+    @override_switch(HUBSPOT_FORMS_INTEGRATION_ENABLE, active=True)
+    def test_fulfill_product_hubspot_waffle_switch_enabled(self):
+        """ Test that verifies if the HubSpot feature is enabled and the order contains the right information we
+            will try and transmit this data to HubSpot.
+        """
+        order = self.create_order_with_billing_address()
+        self.add_required_attributes_to_basket(order, True)
+
+        self.set_hubspot_settings()
+        hubspot_url = self.format_hubspot_request_url()
+        httpretty.register_uri(
+            httpretty.POST,
+            hubspot_url,
+            content_type='application/x-www-form-urlencoded',
+            status=204
+        )
+
+        logger_name = "ecommerce.extensions.fulfillment.modules"
+        with LogCapture(logger_name) as logger:
+            lines = self.order.lines.all()
+            EnrollmentCodeFulfillmentModule().fulfill_product(order, lines)
+            logger.check_present(
+                (
+                    logger_name,
+                    'INFO',
+                    'Attempting to fulfill \'Enrollment Code\' product types for order [{}]'.format(order.number)
+                ),
+                (
+                    logger_name,
+                    'INFO',
+                    'Gathering fulfillment data for submission to HubSpot for order [{}]'.format(order.number)
+                ),
+                (
+                    logger_name,
+                    'INFO',
+                    'Sending data to HubSpot for order [{}]'.format(order.number)
+                ),
+                (
+                    logger_name,
+                    'DEBUG',
+                    'HubSpot response: 204'
+                ),
+                (
+                    logger_name,
+                    'INFO',
+                    'Finished fulfilling \'Enrollment code\' product types for order [{}]'.format(order.number)
+                )
+            )
+
+    @override_switch(HUBSPOT_FORMS_INTEGRATION_ENABLE, active=False)
+    def test_fulfill_product_hubspot_waffle_switch_disabled(self):
+        """ Test that verifies if the HubSpot feature is disabled but the order contains the right information we do not
+        transmit this data to HubSpot
+        """
+        order = self.create_order_with_billing_address()
+        self.add_required_attributes_to_basket(order, True)
+
+        # HubSpot feature flag is disabled and we should _not_ try to send the order data to HubSpot. Verify logs look
+        # as we would expect.
+        logger_name = "ecommerce.extensions.fulfillment.modules"
+        with LogCapture(logger_name) as logger:
+            lines = self.order.lines.all()
+            EnrollmentCodeFulfillmentModule().fulfill_product(order, lines)
+            logger.check_present(
+                (
+                    logger_name,
+                    'INFO',
+                    'Attempting to fulfill \'Enrollment Code\' product types for order [{}]'.format(order.number)
+                ),
+                (
+                    logger_name,
+                    'INFO',
+                    'Finished fulfilling \'Enrollment code\' product types for order [{}]'.format(order.number)
                 )
             )
 
