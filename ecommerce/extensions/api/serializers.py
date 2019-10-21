@@ -1312,7 +1312,11 @@ class CouponCodeAssignmentSerializer(serializers.Serializer):  # pylint: disable
             )
         except Exception as exc:  # pylint: disable=broad-except
             logger.exception(
-                '[Offer Assignment] Email for offer_assignment_id: %d raised exception: %r', assigned_offer.id, exc)
+                '[Offer Assignment] Email for offer_assignment_id: %d with template \'%s\' raised exception: %r',
+                assigned_offer.id,
+                template,
+                exc
+            )
 
 
 class CouponCodeRevokeRemindBulkSerializer(serializers.ListSerializer):  # pylint: disable=abstract-method
@@ -1438,7 +1442,8 @@ class CouponCodeRevokeSerializer(CouponCodeMixin, serializers.Serializer):  # py
                     code=code
                 )
         except Exception as exc:  # pylint: disable=broad-except
-            logger.exception('Encountered error when revoking code %s for user %s', code, email)
+            logger.exception('[Offer Revocation] Encountered error when revoking code %s for user %s with '
+                             'template \'%s\'', code, email, template)
             detail = six.text_type(exc)
 
         validated_data['detail'] = detail
@@ -1520,11 +1525,21 @@ class CouponCodeRemindSerializer(CouponCodeMixin, serializers.Serializer):  # py
         Schedule async task to send email to the learner who has been assigned the code.
         """
         code_expiration_date = assigned_offer.created + timedelta(days=365)
-        send_assigned_offer_reminder_email(
-            template=template,
-            learner_email=assigned_offer.user_email,
-            code=assigned_offer.code,
-            redeemed_offer_count=redeemed_offer_count,
-            total_offer_count=total_offer_count,
-            code_expiration_date=code_expiration_date.strftime('%d %B, %Y')
-        )
+        try:
+            send_assigned_offer_reminder_email(
+                template=template,
+                learner_email=assigned_offer.user_email,
+                code=assigned_offer.code,
+                redeemed_offer_count=redeemed_offer_count,
+                total_offer_count=total_offer_count,
+                code_expiration_date=code_expiration_date.strftime('%d %B, %Y')
+            )
+        except Exception as exc:  # pylint: disable=broad-except
+            # Log the exception here to help diagnose any template issues, then raise it for backwards compatibility
+            logger.exception(
+                '[Offer Reminder] Email for offer_assignment_id: %d with template \'%s\' raised exception: %r',
+                assigned_offer.id,
+                template,
+                exc
+            )
+            raise
