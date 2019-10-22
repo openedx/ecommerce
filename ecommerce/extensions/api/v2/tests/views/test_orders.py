@@ -375,10 +375,20 @@ class ManualCourseEnrollmentOrderViewSetTests(TestCase):
             price=0
         )
         self.post_data = {
-            "lms_user_id": 11,
-            "username": "ma",
-            "email": "ma@example.com",
-            "course_run_key": self.course.id
+            "enrollments": [
+                {
+                    "lms_user_id": 11,
+                    "username": "ma",
+                    "email": "ma@example.com",
+                    "course_run_key": self.course.id
+                },
+                {
+                    "lms_user_id": 12,
+                    "username": "ma2",
+                    "email": "ma2@example.com",
+                    "course_run_key": self.course.id
+                }
+            ]
         }
 
     def build_jwt_header(self, user):
@@ -400,84 +410,164 @@ class ManualCourseEnrollmentOrderViewSetTests(TestCase):
         """
         Test that endpoint only works with the staff user
         """
+        post_data = self.generate_post_data(1)
         # Test unauthenticated access
         response = self.client.post(self.url)
-        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
         # Test non-staff user
         non_staff_user = self.create_user(is_staff=False)
-        status_code, __ = self.post_order(self.post_data, non_staff_user)
-        assert status_code == status.HTTP_403_FORBIDDEN
+        status_code, __ = self.post_order(post_data, non_staff_user)
+        self.assertEqual(status_code, status.HTTP_403_FORBIDDEN)
 
         # Test staff user
-        status_code, __ = self.post_order(self.post_data, self.user)
-        assert status_code == status.HTTP_201_CREATED
+        status_code, __ = self.post_order(post_data, self.user)
+        self.assertEqual(status_code, status.HTTP_200_OK)
 
     def test_bad_request(self):
-        """"
-        Test that HTTP 400 is returned if expected data is not present in request.
+        """
+        Test that HTTP 400 is return if `enrollments` key isn't in request
         """
         response_status, response_data = self.post_order({}, self.user)
 
-        assert response_status == status.HTTP_400_BAD_REQUEST
-        assert response_data == {
-            'detail': "Missing required request data: 'lms_user_id', 'username', 'email', 'course_run_key'"
-        }
+        self.assertEqual(response_status, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response_data, {
+            "status": "failure",
+            "detail": "Invalid data. No `enrollments` field."
+        })
+
+    def test_missing_enrollment_data(self):
+        """"
+        Test that orders are marked as failures if expected data is not present in enrollment.
+        """
+
+        # Single enrollment with no enrollment details
+        post_data = {"enrollments": [{}]}
+        _, response_data = self.post_order(post_data, self.user)
+
+        self.assertEqual(response_data, {
+            "orders": [{
+                "status": "failure",
+                "detail": "Missing required enrollment data: 'lms_user_id', 'username', 'email', 'course_run_key'"
+            }]
+        })
 
     def test_create_manual_order(self):
         """"
         Test that manual enrollment order can be created with expected data.
         """
-        response_status, response_data = self.post_order(self.post_data, self.user)
+        post_data = self.generate_post_data(2)
+        response_status, response_data = self.post_order(post_data, self.user)
 
-        assert response_status == status.HTTP_201_CREATED
+        self.assertEqual(response_status, status.HTTP_200_OK)
 
-        # verify learner user is created
-        user = User.objects.get(
-            username=self.post_data['username'],
-            email=self.post_data['email'],
-            lms_user_id=self.post_data['lms_user_id']
-        )
+        orders = response_data.get("orders")
+        self.assertEqual(len(orders), 2)
 
-        # get created order
-        order = Order.objects.get(number=response_data['order_number'])
+        for response_order in orders:
+            user = User.objects.get(
+                username=response_order['username'],
+                email=response_order['email'],
+                lms_user_id=response_order['lms_user_id']
+            )
 
-        # verify basket owner is correct
-        basket = Basket.objects.get(id=order.basket_id)
-        assert basket.owner == user
+            # get created order
+            order = Order.objects.get(number=response_order['detail'])
 
-        # verify order is created with expected data
-        assert order.status == ORDER.COMPLETE
-        assert order.total_incl_tax == 0
-        assert order.lines.count() == 1
-        line = order.lines.first()
-        assert line.status == LINE.COMPLETE
-        assert line.line_price_before_discounts_incl_tax == self.course_price
-        product = Product.objects.get(id=line.product.id)
-        assert product.course_id == self.course.id
+            # verify basket owner is correct
+            basket = Basket.objects.get(id=order.basket_id)
+
+            self.assertEqual(basket.owner, user)
+
+            # verify order is created with expected data
+            self.assertEqual(order.status, ORDER.COMPLETE)
+            self.assertEqual(order.total_incl_tax, 0)
+            self.assertEqual(order.lines.count(), 1)
+            line = order.lines.first()
+            self.assertEqual(line.status, LINE.COMPLETE)
+            self.assertEqual(line.line_price_before_discounts_incl_tax, self.course_price)
+            product = Product.objects.get(id=line.product.id)
+            self.assertEqual(product.course_id, self.course.id)
 
     def test_create_manual_order_with_incorrect_course(self):
         """"
         Test that manual enrollment order endpoint returns expected error response if course is incorrect.
         """
-        post_data = dict(self.post_data, course_run_key='course-v1:MAX+ABC+Course')
-        response_status, response_data = self.post_order(post_data, self.user)
-        assert response_status == status.HTTP_400_BAD_REQUEST
-        assert response_data['detail'] == 'course not found'
+        post_data = self.generate_post_data(1)
+        post_data["enrollments"][0]["course_run_key"] = "course-v1:MAX+ABC+Course"
+
+        _, response_data = self.post_order(post_data, self.user)
+        self.assertEqual(response_data["orders"][0]["detail"], "Course not found")
 
     def test_create_manual_order_idempotence(self):
         """"
         Test that manual enrollment order endpoint does not create multiple orders if called multiple
         times with same data.
         """
-        response_status, response_data = self.post_order(self.post_data, self.user)
-        assert response_status == status.HTTP_201_CREATED
-        existing_order_number = response_data['order_number']
+        post_data = self.generate_post_data(1)
+        response_status, response_data = self.post_order(post_data, self.user)
+        self.assertEqual(response_status, status.HTTP_200_OK)
+        existing_order_number = response_data["orders"][0]["detail"]
 
-        response_status, response_data = self.post_order(self.post_data, self.user)
-        assert response_status == status.HTTP_200_OK
-        assert response_data['detail'] == 'Order already exists'
-        assert response_data['order_number'] == existing_order_number
+        response_status, response_data = self.post_order(post_data, self.user)
+        self.assertEqual(response_status, status.HTTP_200_OK)
+        self.assertEqual(response_data["orders"][0]["detail"], existing_order_number)
+
+    def test_bulk_all_correct(self):
+        """
+        Test that endpoint correctly handles correct bulk enrollments
+        """
+        post_data = self.generate_post_data(3)
+        response_status, response_data = self.post_order(post_data, self.user)
+        self.assertEqual(response_status, status.HTTP_200_OK)
+        for index, enrollment in enumerate(post_data["enrollments"]):
+            order_number = response_data["orders"][index]["detail"]
+            self.assertEqual(
+                dict(enrollment, status="success", detail=order_number),
+                response_data["orders"][index]
+            )
+
+    def test_bulk_all_failure(self):
+        """
+        Test that endpoint correctly handles invalid bulk enrollments
+        """
+        post_data = self.generate_post_data(3)
+        # Replace course run key of all enrollments with invalid course
+        post_data["enrollments"] = [
+            dict(enrollment, course_run_key="course-v1:MAX+ABC+Course")
+            for enrollment in post_data["enrollments"]
+        ]
+        response_status, response_data = self.post_order(post_data, self.user)
+        self.assertEqual(response_status, status.HTTP_200_OK)
+        for index, enrollment in enumerate(post_data["enrollments"]):
+            self.assertEqual(
+                dict(enrollment, status="failure", detail="Course not found"),
+                response_data["orders"][index]
+            )
+
+    def test_bulk_mixed_success(self):
+        """
+        Test that endpoint correctly handles a mix of correct and invalid bulk enrollments
+        """
+        post_data = self.generate_post_data(3)
+        # Replace course run key for first enrollment only
+        post_data["enrollments"][0]["course_run_key"] = "course-v1:MAX+ABC+Course"
+        response_status, response_data = self.post_order(post_data, self.user)
+        self.assertEqual(response_status, status.HTTP_200_OK)
+        for index, enrollment in enumerate(post_data["enrollments"]):
+            if index == 0:
+                # Order should fail because missing enrollment
+                self.assertEqual(
+                    dict(enrollment, status="failure", detail="Course not found"),
+                    response_data["orders"][index]
+                )
+            else:
+                # Order should succeed
+                order_number = response_data["orders"][index]["detail"]
+                self.assertEqual(
+                    dict(enrollment, status="success", detail=order_number),
+                    response_data["orders"][index]
+                )
 
     @mock.patch(
         'ecommerce.extensions.api.v2.views.orders.EdxOrderPlacementMixin.place_free_order',
@@ -489,6 +579,21 @@ class ManualCourseEnrollmentOrderViewSetTests(TestCase):
         Test that manual enrollment order endpoint returns expected error if an error occurred in
         `place_free_order`.
         """
-        response_status, response_data = self.post_order(self.post_data, self.user)
-        assert response_status == status.HTTP_400_BAD_REQUEST
-        assert response_data['detail'] == 'Failed to create free order'
+        post_data = self.generate_post_data(1)
+        _, response_data = self.post_order(post_data, self.user)
+        order = response_data["orders"][0]
+        self.assertEqual(order["status"], "failure")
+        self.assertEqual(order["detail"], "Failed to create free order")
+
+    def generate_post_data(self, enrollment_count):
+        return {
+            "enrollments": [
+                {
+                    "lms_user_id": 10 + count,
+                    "username": "ma{}".format(count),
+                    "email": "ma{}@example.com".format(count),
+                    "course_run_key": self.course.id
+                }
+                for count in range(enrollment_count)
+            ]
+        }
