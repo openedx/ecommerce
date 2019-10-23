@@ -13,9 +13,8 @@ services:
       MYSQL_PASSWORD: "password"
       MYSQL_DATABASE: "ecommerce"
   ecommerce:
-    image: edxops/ecommerce:test
+    image: edxops/ecommerce:latest
     container_name: ecommerce_testing
-    build: .
     volumes:
       - ..:/edx/app/ecommerce/ecommerce
       - $HOME/.cache/pip:/edx/app/ecommerce/.cache/pip
