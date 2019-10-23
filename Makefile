@@ -117,7 +117,7 @@ dummy_translations:
 	cd ecommerce && i18n_tool dummy
 
 compile_translations:
-	python manage.py compilemessages
+	cd ecommerce && python ../manage.py compilemessages
 
 fake_translations: extract_translations dummy_translations compile_translations
 
