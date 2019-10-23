@@ -1,5 +1,6 @@
 -r base.in
 
+bok_choy
 coverage
 ddt
 diff-cover

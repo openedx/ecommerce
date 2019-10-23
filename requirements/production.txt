@@ -15,7 +15,7 @@ boto==2.49.0              # via django-ses
 cached-property==1.5.1    # via zeep
 celery==3.1.26.post2      # via edx-ecommerce-worker
 certifi==2019.9.11        # via requests
-cffi==1.13.0              # via cryptography
+cffi==1.13.1              # via cryptography
 chardet==3.0.4            # via requests
 coreapi==2.3.3
 coreschema==0.0.4         # via coreapi
@@ -27,7 +27,7 @@ django-appconf==1.0.3     # via django-compressor
 django-compressor==2.3
 django-cors-headers==3.0.2
 django-crispy-forms==1.8.0
-django-crum==0.7.3        # via edx-rbac
+django-crum==0.7.4        # via edx-rbac
 django-extra-views==0.11.0  # via django-oscar
 django-filter==1.0.4
 django-haystack==2.8.1    # via django-oscar
@@ -88,7 +88,7 @@ path.py==7.2
 paypalrestsdk==1.13.1
 pbr==5.4.3                # via mock, stevedore
 phonenumbers==8.10.21     # via django-oscar, django-phonenumber-field
-pillow==6.2.0             # via django-oscar
+pillow==6.2.1             # via django-oscar
 premailer==2.9.2
 psutil==1.2.1             # via edx-django-utils, edx-drf-extensions
 purl==1.5                 # via django-oscar
