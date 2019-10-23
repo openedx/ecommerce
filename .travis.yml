@@ -22,47 +22,31 @@ addons:
 before_install:
   - docker-compose -f ./.travis/docker-compose-travis.yml up -d
 
+install:
+  - docker exec -t ecommerce_testing bash -c '
+      cd /edx/app/ecommerce/ecommerce/ &&
+      pip install tox
+    '
+script:
+  - docker exec -t
+      -e TRAVIS=1
+      -e TOXENV=$TOXENV
+      ecommerce_testing
+      bash -c '
+      cd /edx/app/ecommerce/ecommerce/ &&
+      PATH=$PATH:/edx/app/ecommerce/nodeenvs/ecommerce/bin:/snap/bin
+      tox
+    '
+
 matrix:
   include:
     - python: 2.7
-      env: TESTNAME=quality-and-js
-      install:
-        - docker exec -t ecommerce_testing bash -c 'source /edx/app/ecommerce/ecommerce_env && cd /edx/app/ecommerce/ecommerce/ && make requirements'
-      script:
-        - docker exec -t ecommerce_testing bash -c 'source /edx/app/ecommerce/ecommerce_env && cd /edx/app/ecommerce/ecommerce/docs && make html'
-        - docker exec -t ecommerce_testing bash -c 'source /edx/app/ecommerce/ecommerce_env && cd /edx/app/ecommerce/ecommerce/ && DJANGO_SETTINGS_MODULE=ecommerce.settings.test make check_translations_up_to_date'
-        - docker exec -t ecommerce_testing bash -c 'source /edx/app/ecommerce/ecommerce_env && cd /edx/app/ecommerce/ecommerce/ && DJANGO_SETTINGS_MODULE=ecommerce.settings.devstack make validate_translations'
-        - docker exec -t ecommerce_testing bash -c 'source /edx/app/ecommerce/ecommerce_env && cd /edx/app/ecommerce/ecommerce/ && DJANGO_SETTINGS_MODULE=ecommerce.settings.test make clean_static'
-        - docker exec -t ecommerce_testing bash -c 'source /edx/app/ecommerce/ecommerce_env && cd /edx/app/ecommerce/ecommerce/ && DJANGO_SETTINGS_MODULE=ecommerce.settings.test make static'
-        - docker exec -t ecommerce_testing bash -c 'source /edx/app/ecommerce/ecommerce_env && cd /edx/app/ecommerce/ecommerce/ && DJANGO_SETTINGS_MODULE=ecommerce.settings.test make run_check_isort'
-        - docker exec -t ecommerce_testing bash -c 'source /edx/app/ecommerce/ecommerce_env && cd /edx/app/ecommerce/ecommerce/ && DJANGO_SETTINGS_MODULE=ecommerce.settings.test make run_pycodestyle'
-        - docker exec -t ecommerce_testing bash -c 'source /edx/app/ecommerce/ecommerce_env && cd /edx/app/ecommerce/ecommerce/ && DJANGO_SETTINGS_MODULE=ecommerce.settings.test make run_pylint'
-        - docker exec -t ecommerce_testing bash -c 'source /edx/app/ecommerce/ecommerce_env && cd /edx/app/ecommerce/ecommerce/ && DJANGO_SETTINGS_MODULE=ecommerce.settings.test xvfb-run make validate_js'
-
+      env: TESTNAME=quality-and-js TOXENV=quality
     - python: 2.7
-      env: TESTNAME=test-python
-      install:
-        - docker exec -t ecommerce_testing bash -c 'source /edx/app/ecommerce/ecommerce_env && cd /edx/app/ecommerce/ecommerce/ && make requirements'
-      script:
-        - docker exec -t ecommerce_testing bash -c 'source /edx/app/ecommerce/ecommerce_env && cd /edx/app/ecommerce/ecommerce/docs && make html'
-        - docker exec -t ecommerce_testing bash -c 'source /edx/app/ecommerce/ecommerce_env && cd /edx/app/ecommerce/ecommerce/ && DJANGO_SETTINGS_MODULE=ecommerce.settings.test make clean_static'
-        - docker exec -t ecommerce_testing bash -c 'source /edx/app/ecommerce/ecommerce_env && cd /edx/app/ecommerce/ecommerce/ && DJANGO_SETTINGS_MODULE=ecommerce.settings.test make static'
-        - docker exec -t ecommerce_testing bash -c 'source /edx/app/ecommerce/ecommerce_env && cd /edx/app/ecommerce/ecommerce/ && DJANGO_SETTINGS_MODULE=ecommerce.settings.test TRAVIS=1 xvfb-run make validate_python'
+      env: TESTNAME=test-python TOXENV=py27
+    - python: 3.5
+      env: TESTNAME=test-python-3.5 TOXENV=py35
       after_success:
         - pip install -U codecov
         - docker exec ecommerce_testing /edx/app/ecommerce/ecommerce/.travis/run_coverage.sh
         - codecov
-
-    - python: 3.5
-      env: TESTNAME=test-python-3.5
-      install:
-        - docker exec -t ecommerce_testing bash -c 'cd /edx/app/ecommerce/ecommerce/ && pip install tox==3.13.2'
-      script:
-        - docker exec -t ecommerce_testing bash \
-          -c 'cd /edx/app/ecommerce/ecommerce/ && \
-              PATH=$PATH:/edx/app/ecommerce/nodeenvs/ecommerce/bin:/snap/bin \
-              TOXENV=py35 \
-              TRAVIS=1 \
-              tox'
-  allow_failures:
-    - env: TESTNAME=test-python-3.5
