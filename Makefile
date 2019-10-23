@@ -58,10 +58,10 @@ clean_static:
 	rm -rf assets/* ecommerce/static/build/*
 
 run_check_isort:
-	VIRTUAL_ENV=/edx/app/ecommerce/ecommerce_env isort --check-only --recursive --diff e2e/ ecommerce/
+	isort --check-only --recursive --diff e2e/ ecommerce/
 
 run_isort:
-	VIRTUAL_ENV=/edx/app/ecommerce/ecommerce_env isort --recursive e2e/ ecommerce/
+	isort --recursive e2e/ ecommerce/
 
 run_pycodestyle:
 	pycodestyle --config=.pycodestyle ecommerce e2e
