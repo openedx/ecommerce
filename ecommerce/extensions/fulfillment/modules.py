@@ -9,7 +9,6 @@ import abc
 import datetime
 import json
 import logging
-from six.moves.urllib.parse import urlencode
 
 import requests
 import six
@@ -20,6 +19,7 @@ from edx_rest_api_client.client import EdxRestApiClient
 from oscar.core.loading import get_model
 from requests.exceptions import ConnectionError, Timeout  # pylint: disable=ungrouped-imports
 from rest_framework import status
+from six.moves.urllib.parse import urlencode
 
 from ecommerce.core.constants import (
     DONATIONS_FROM_CHECKOUT_TESTS_PRODUCT_TYPE_NAME,
