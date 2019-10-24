@@ -97,17 +97,7 @@ these models, which are used for multi-tenancy.
 
   .. code-block:: bash
 
-      $ DISABLE_ACCEPTANCE_TESTS=True ./manage.py test ecommerce.courses.tests.test_utils:UtilsTests.test_get_course_info_from_catalog_cached --settings=ecommerce.settings.test --with-ignore-docstrings --logging-level=DEBUG
-
-  Note: ``DISABLE_MIGRATIONS`` is broken as of June 2019.
-
-  Setting the ``DISABLE_MIGRATIONS`` variable significantly decreases the time
-  needed to run tests by creating the test database directly from Django model
-  definitions as opposed to applying the defined migrations.
-
-  .. code-block:: bash
-
-      $ DISABLE_MIGRATIONS=1 DISABLE_ACCEPTANCE_TESTS=True ./manage.py test ecommerce.courses.tests.test_utils:UtilsTests.test_get_course_info_from_catalog_cached --settings=ecommerce.settings.test --with-ignore-docstrings --logging-level=DEBUG
+      $ tox -e py35-tests -- ecommerce.courses.tests.test_utils:UtilsTests.test_get_course_info_from_catalog_cached
 
 To debug when running tests using ``manage.py``, you may need to use the
 following instead of ``pdb`` directly, or nosetests may hang while creating

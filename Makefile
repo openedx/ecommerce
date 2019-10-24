@@ -1,5 +1,6 @@
 NODE_BIN=./node_modules/.bin
 DIFF_COVER_BASE_BRANCH=master
+PYTHON_ENV=py27
 
 help:
 	@echo '                                                                                     		'
@@ -44,32 +45,31 @@ production-requirements: requirements.js
 	pip install -r requirements.txt --exists-action w
 
 migrate:
-	python manage.py migrate --noinput
+	tox -e $(PYTHON_ENV)-migrate
 
 serve:
-	python manage.py runserver 0.0.0.0:8002
+	tox -e $(PYTHON_ENV)-serve
 
 clean:
 	find . -name '*.pyc' -delete
-	coverage erase
 	rm -rf coverage htmlcov
 
 clean_static:
 	rm -rf assets/* ecommerce/static/build/*
 
 run_check_isort:
-	isort --check-only --recursive --diff e2e/ ecommerce/
+	tox -e $(PYTHON_ENV)-check_isort
 
 run_isort:
-	isort --recursive e2e/ ecommerce/
+	tox -e $(PYTHON_ENV)-run_isort
 
 run_pycodestyle:
-	pycodestyle --config=.pycodestyle ecommerce e2e
+	tox -e $(PYTHON_ENV)-pycodestyle
 
 run_pep8: run_pycodestyle
 
 run_pylint:
-	pylint -j 0 --rcfile=pylintrc ecommerce e2e
+	tox -e $(PYTHON_ENV)-pylint
 
 quality: run_check_isort run_pycodestyle run_pylint
 
@@ -79,45 +79,39 @@ validate_js:
 	$(NODE_BIN)/gulp lint
 
 validate_python: clean
-	PATH=$$PATH:$(NODE_BIN) coverage run --branch --source=ecommerce ./manage.py test ecommerce \
-	--settings=ecommerce.settings.test --with-ignore-docstrings --logging-level=DEBUG
-	coverage report
+	tox -e $(PYTHON_ENV)-tests
 
-fast_validate_python: clean quality
-	REUSE_DB=1 DISABLE_ACCEPTANCE_TESTS=True ./manage.py test ecommerce \
-	--settings=ecommerce.settings.test --processes=4 --with-ignore-docstrings --logging-level=DEBUG
+fast_validate_python: clean
+	DISABLE_ACCEPTANCE_TESTS=True tox -e $(PYTHON_ENV)-tests
 
 validate: validate_python validate_js quality
 
 theme_static:
-	python manage.py update_assets --skip-collect
+	tox -e $(PYTHON_ENV)-theme_static
 
 static: requirements.js theme_static
 	$(NODE_BIN)/r.js -o build.js
-	python manage.py collectstatic --noinput
-	python manage.py compress --force
+	tox -e $(PYTHON_ENV)-static
 
 html_coverage:
-	coverage html && open htmlcov/index.html
+	tox -e $(PYTHON_ENV)-coverage_html
 
 diff_coverage: validate fast_diff_coverage
 
 fast_diff_coverage:
-	coverage xml
-	diff-cover coverage.xml --compare-branch=$(DIFF_COVER_BASE_BRANCH)
+	tox -e $(PYTHON_ENV)-fast_diff_coverage
 
 e2e:
 	pytest e2e --html=log/html_report.html --junitxml=e2e/xunit.xml
 
 extract_translations:
-	python manage.py makemessages -l en -v1 -d django --ignore="docs/*" --ignore="src/*" --ignore="i18n/*" --ignore="assets/*" --ignore="node_modules/*" --ignore="ecommerce/static/bower_components/*" --ignore="ecommerce/static/build/*"
-	python manage.py makemessages -l en -v1 -d djangojs --ignore="docs/*" --ignore="src/*" --ignore="i18n/*" --ignore="assets/*" --ignore="node_modules/*" --ignore="ecommerce/static/bower_components/*" --ignore="ecommerce/static/build/*"
+	tox -e $(PYTHON_ENV)-extract_translations
 
 dummy_translations:
-	cd ecommerce && i18n_tool dummy
+	tox -e $(PYTHON_ENV)-dummy_translations
 
 compile_translations:
-	cd ecommerce && python ../manage.py compilemessages
+	tox -e $(PYTHON_ENV)-compile_translations
 
 fake_translations: extract_translations dummy_translations compile_translations
 
@@ -131,13 +125,13 @@ update_translations: pull_translations fake_translations
 
 # extract_translations should be called before this command can detect changes
 detect_changed_source_translations:
-	cd ecommerce && i18n_tool changed
+	tox -e $(PYTHON_ENV)-detect_changed_translations
 
 check_translations_up_to_date: fake_translations detect_changed_source_translations
 
 # Validate translations
 validate_translations:
-	cd ecommerce && i18n_tool validate -v
+	tox -e $(PYTHON_ENV)-validate_translations
 
 export CUSTOM_COMPILE_COMMAND = make upgrade
 upgrade: ## update the requirements/*.txt files with the latest packages satisfying requirements/*.in

@@ -23,29 +23,31 @@ before_install:
   - docker-compose -f ./.travis/docker-compose-travis.yml up -d
 
 install:
-  - docker exec -t ecommerce_testing bash -c '
+  - docker exec -t ecommerce_testing bash -c "
       cd /edx/app/ecommerce/ecommerce/ &&
       pip install tox
-    '
+    "
 script:
-  - docker exec -t
-      -e TRAVIS=1
-      -e TOXENV=$TOXENV
-      ecommerce_testing
-      bash -c '
+  - docker exec -t -e TRAVIS=1 ecommerce_testing bash -c "
       cd /edx/app/ecommerce/ecommerce/ &&
-      PATH=$PATH:/edx/app/ecommerce/nodeenvs/ecommerce/bin:/snap/bin
-      tox
-    '
+      PATH=\$PATH:/edx/app/ecommerce/nodeenvs/ecommerce/bin:/snap/bin
+      make $TARGETS
+    "
 
 matrix:
   include:
     - python: 2.7
-      env: TESTNAME=quality-and-js TOXENV=quality
+      env:
+        TESTNAME=quality-and-js
+        TARGETS="check_translations_up_to_date validate_translations clean_static static quality validate_js"
     - python: 2.7
-      env: TESTNAME=test-python TOXENV=py27
+      env: TESTNAME=test-python TARGETS="clean_static static validate_python"
     - python: 3.5
-      env: TESTNAME=test-python-3.5 TOXENV=py35
+      env:
+        TESTNAME=quality-and-js-.3.5
+        TARGETS="PYTHON_ENV=py35 check_translations_up_to_date validate_translations clean_static static quality validate_js"
+    - python: 3.5
+      env: TESTNAME=test-python-3.5 TARGETS="PYTHON_ENV=py35 clean_static static validate_python"
       after_success:
         - pip install -U codecov
         - docker exec ecommerce_testing /edx/app/ecommerce/ecommerce/.travis/run_coverage.sh
