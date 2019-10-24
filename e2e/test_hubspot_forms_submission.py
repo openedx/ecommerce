@@ -1,10 +1,9 @@
 from __future__ import absolute_import
 
+import requests
 from six.moves.urllib.parse import urlencode
 
 import pytest
-import requests
-
 from e2e.config import HUBSPOT_FORMS_API_URI, HUBSPOT_PORTAL_ID, HUBSPOT_SALES_LEAD_FORM_GUID
 
 

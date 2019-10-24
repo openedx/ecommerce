@@ -1,8 +1,8 @@
 from __future__ import absolute_import
 
-import pytest
 import requests
 
+import pytest
 from e2e.config import ECOMMERCE_TEST_WEB_SECURITY
 from e2e.helpers import EcommerceHelpers
 
