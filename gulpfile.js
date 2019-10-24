@@ -50,5 +50,5 @@ var gulp = require('gulp'),
         gulp.watch(paths.spec, ['test', 'lint']);
     });
 
-    gulp.task('default', ['test']);
+    gulp.task('default', gulp.series('test'));
 }());
