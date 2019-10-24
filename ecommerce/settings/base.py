@@ -694,7 +694,7 @@ NEW_CODES_EMAIL_CONFIG = {
         This message is to inform you that a new order has been processed for your organization. Please visit the
         following page, in your Admin Dashboard, to find new codes ready for use.
 
-        https://portal.edx.org/{enterprise_slug}/admin/codes
+        https://portal.edx.org/{enterprise_slug}/admin/coupons
 
         Having trouble accessing your codes? Please contact edX Enterprise Support at customersuccess@edx.org.
         Thank you.
