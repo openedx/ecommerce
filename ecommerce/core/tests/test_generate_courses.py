@@ -6,6 +6,7 @@ import ddt
 import httpretty
 import mock
 from django.core.management import CommandError, call_command
+from six import assertRaisesRegex
 
 from ecommerce.courses.models import Course
 from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
@@ -19,7 +20,7 @@ class GenerateCoursesTests(DiscoveryTestMixin, TestCase):
         """
         Test that providing an invalid JSON object will raise the appropriate command error
         """
-        with self.assertRaisesRegexp(CommandError, "Invalid JSON object"):
+        with assertRaisesRegex(self, CommandError, "Invalid JSON object"):
             arg = 'invalid_json'
             call_command("generate_courses", arg)
 
@@ -27,7 +28,7 @@ class GenerateCoursesTests(DiscoveryTestMixin, TestCase):
         """
         Test that missing the courses key will raise the appropriate command error
         """
-        with self.assertRaisesRegexp(CommandError, "JSON object is missing courses list"):
+        with assertRaisesRegex(self, CommandError, "JSON object is missing courses list"):
             arg = ('{}')
             call_command("generate_courses", arg)
 

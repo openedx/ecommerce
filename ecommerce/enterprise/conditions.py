@@ -7,7 +7,8 @@ import crum
 from django.contrib import messages
 from django.utils.translation import ugettext as _
 from oscar.core.loading import get_model
-from requests.exceptions import ConnectionError, Timeout
+from requests.exceptions import ConnectionError as ReqConnectionError
+from requests.exceptions import Timeout
 from slumber.exceptions import SlumberHttpBaseException
 
 from ecommerce.enterprise.api import catalog_contains_course_runs, fetch_enterprise_learner_data
@@ -82,7 +83,7 @@ class EnterpriseCustomerCondition(ConditionWithoutRangeMixin, SingleItemConsumpt
         learner_data = {}
         try:
             learner_data = fetch_enterprise_learner_data(basket.site, basket.owner)['results'][0]
-        except (ConnectionError, KeyError, SlumberHttpBaseException, Timeout) as exc:
+        except (ReqConnectionError, KeyError, SlumberHttpBaseException, Timeout) as exc:
             logger.exception('[Code Redemption Failure] Unable to apply enterprise offer because '
                              'we failed to retrieve enterprise learner data for the user. '
                              'User: %s, Offer: %s, Message: %s, Enterprise: %s, Catalog: %s, Courses: %s',
@@ -133,7 +134,7 @@ class EnterpriseCustomerCondition(ConditionWithoutRangeMixin, SingleItemConsumpt
             catalog_contains_course = catalog_contains_course_runs(
                 basket.site, course_run_ids, enterprise_customer, enterprise_customer_catalog_uuid=enterprise_catalog
             )
-        except (ConnectionError, KeyError, SlumberHttpBaseException, Timeout) as exc:
+        except (ReqConnectionError, KeyError, SlumberHttpBaseException, Timeout) as exc:
             logger.exception('[Code Redemption Failure] Unable to apply enterprise offer because '
                              'we failed to check if course_runs exist in the catalog. '
                              'User: %s, Offer: %s, Message: %s, Enterprise: %s, Catalog: %s, Courses: %s',

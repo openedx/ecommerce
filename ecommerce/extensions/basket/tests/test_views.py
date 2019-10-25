@@ -22,7 +22,8 @@ from edx_django_utils.cache import RequestCache, TieredCache
 from oscar.apps.basket.forms import BasketVoucherForm
 from oscar.core.loading import get_class, get_model
 from oscar.test import factories
-from requests.exceptions import ConnectionError, Timeout
+from requests.exceptions import ConnectionError as ReqConnectionError
+from requests.exceptions import Timeout
 from slumber.exceptions import SlumberBaseException
 from testfixtures import LogCapture
 from waffle.testutils import override_flag
@@ -633,7 +634,7 @@ class BasketSummaryViewTests(EnterpriseServiceMockMixin, DiscoveryTestMixin, Dis
 
         toggle_switch(settings.PAYMENT_PROCESSOR_SWITCH_PREFIX + DummyProcessor.NAME, True)
 
-    @ddt.data(ConnectionError, SlumberBaseException, Timeout)
+    @ddt.data(ReqConnectionError, SlumberBaseException, Timeout)
     def test_course_api_failure(self, error):
         """ Verify a connection error and timeout are logged when they happen. """
         seat = self.create_seat(self.course)

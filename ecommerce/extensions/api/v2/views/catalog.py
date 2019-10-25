@@ -3,7 +3,8 @@ from __future__ import absolute_import
 import logging
 
 from oscar.core.loading import get_model
-from requests.exceptions import ConnectionError, Timeout
+from requests.exceptions import ConnectionError as ReqConnectionError
+from requests.exceptions import Timeout
 from rest_framework import status
 from rest_framework.decorators import list_route
 from rest_framework.exceptions import ValidationError
@@ -90,7 +91,7 @@ class CatalogViewSet(NestedViewSetMixin, ReadOnlyModelViewSet):
                 'seats': seats
             }
             return Response(data=data)
-        except (ConnectionError, SlumberBaseException, Timeout):
+        except (ReqConnectionError, SlumberBaseException, Timeout):
             logger.error('Unable to connect to Catalog API.')
             return Response(status=status.HTTP_400_BAD_REQUEST)
 

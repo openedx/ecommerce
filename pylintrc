@@ -66,6 +66,11 @@ disable=
 # We can decide if names are invalid on our own
     invalid-name,
 
+# We use isort for import order, so we can ignore
+# the pylint import errors, since they conflict at times.
+    wrong-import-order,
+    ungrouped-imports,
+
 [REPORTS]
 
 # Set the output format. Available formats are text, parseable, colorized, msvs

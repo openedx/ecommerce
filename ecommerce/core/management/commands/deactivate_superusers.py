@@ -19,7 +19,7 @@ class Command(BaseCommand):
         all_superusers = User.objects.filter(is_superuser=True)
         superusers_count = all_superusers.count()
         if not superusers_count:
-            logger.warn('No superusers found, falling back.')
+            logger.warning('No superusers found, falling back.')
             return
         updated_users = all_superusers.update(is_superuser=False)
         logger.info('Successfully Updated [%s] users', updated_users)

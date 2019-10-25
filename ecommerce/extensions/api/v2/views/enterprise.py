@@ -10,7 +10,8 @@ from django.http import Http404
 from django.shortcuts import get_object_or_404
 from edx_rbac.decorators import permission_required
 from oscar.core.loading import get_model
-from requests.exceptions import ConnectionError, Timeout
+from requests.exceptions import ConnectionError as ReqConnectionError
+from requests.exceptions import Timeout
 from rest_framework import generics, serializers, status
 from rest_framework.decorators import detail_route, list_route
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
@@ -108,7 +109,7 @@ class EnterpriseCustomerCatalogsViewSet(ViewSet):
                 page=request.GET.get('page', '1'),
                 endpoint_request_url=endpoint_request_url
             )
-        except (ConnectionError, SlumberHttpBaseException, Timeout) as exc:
+        except (ReqConnectionError, SlumberHttpBaseException, Timeout) as exc:
             logger.exception(
                 'Unable to retrieve catalog for enterprise customer! customer: %s, Exception: %s',
                 kwargs.get('enterprise_catalog_uuid'),

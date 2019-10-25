@@ -7,7 +7,8 @@ from django.conf import settings
 from edx_django_utils.cache import TieredCache
 from oscar.apps.offer import utils as oscar_utils
 from oscar.core.loading import get_model
-from requests.exceptions import ConnectionError, Timeout
+from requests.exceptions import ConnectionError as ReqConnectionError
+from requests.exceptions import Timeout
 from slumber.exceptions import HttpNotFoundError, SlumberBaseException
 
 from ecommerce.core.utils import deprecated_traverse_pagination, get_cache_key
@@ -59,7 +60,7 @@ class ProgramCourseRunSeatsCondition(SingleItemConsumptionConditionMixin, Condit
         try:
             data_list = endpoint.get(user=user) or []
             TieredCache.set_all_tiers(cache_key, data_list, settings.LMS_API_CACHE_TIMEOUT)
-        except (ConnectionError, SlumberBaseException, Timeout) as exc:
+        except (ReqConnectionError, SlumberBaseException, Timeout) as exc:
             logger.error('Failed to retrieve %s : %s', resource_name, str(exc))
             data_list = []
         return data_list

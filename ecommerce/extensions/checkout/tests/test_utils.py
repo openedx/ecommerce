@@ -6,7 +6,8 @@ import ddt
 import httpretty
 import mock
 import requests
-from requests import ConnectionError, Timeout
+from requests import ConnectionError as ReqConnectionError
+from requests import Timeout
 
 from ecommerce.extensions.checkout.utils import get_credit_provider_details
 from ecommerce.tests.testcases import TestCase
@@ -62,7 +63,7 @@ class UtilTests(TestCase):
         )
         self.assertEqual(provider_data, None)
 
-    @ddt.data(ConnectionError, Timeout)
+    @ddt.data(ReqConnectionError, Timeout)
     def test_exceptions(self, exception):
         """ Verify the function returns None when a request exception is raised. """
         with mock.patch.object(requests, 'get', mock.Mock(side_effect=exception)):

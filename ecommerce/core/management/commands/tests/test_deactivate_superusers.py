@@ -47,7 +47,7 @@ class DeactivateSuperUsersTest(TestCase):
 
         with mock.patch(self.LOGGER) as patched_log:
             call_command(self.command)
-            patched_log.warn.assert_called_once_with('No superusers found, falling back.')
+            patched_log.warning.assert_called_once_with('No superusers found, falling back.')
 
     def test_superuser_factory_lms_user_id(self):
         """

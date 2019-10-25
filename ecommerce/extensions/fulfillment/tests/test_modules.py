@@ -12,7 +12,8 @@ from django.conf import settings
 from django.test import override_settings
 from oscar.core.loading import get_class, get_model
 from oscar.test import factories
-from requests.exceptions import ConnectionError, Timeout
+from requests.exceptions import ConnectionError as ReqConnectionError
+from requests.exceptions import Timeout
 from six import assertCountEqual
 from six.moves.urllib.parse import urlencode
 from testfixtures import LogCapture
@@ -229,7 +230,7 @@ class EnrollmentFulfillmentModuleTests(ProgramTestMixin, DiscoveryTestMixin, Ful
         EnrollmentFulfillmentModule().fulfill_product(self.order, list(self.order.lines.all()))
         self.assertEqual(LINE.FULFILLMENT_CONFIGURATION_ERROR, self.order.lines.all()[0].status)
 
-    @mock.patch('requests.post', mock.Mock(side_effect=ConnectionError))
+    @mock.patch('requests.post', mock.Mock(side_effect=ReqConnectionError))
     def test_enrollment_module_network_error(self):
         """Test that lines receive a network error status if a fulfillment request experiences a network error."""
         EnrollmentFulfillmentModule().fulfill_product(self.order, list(self.order.lines.all()))
@@ -434,7 +435,7 @@ class EnrollmentFulfillmentModuleTests(ProgramTestMixin, DiscoveryTestMixin, Ful
         try:
             # pylint: disable=protected-access
             EnrollmentFulfillmentModule()._post_to_enrollment_api(data=data, user=self.user, usage='test enrollment')
-        except ConnectionError as exp:
+        except ReqConnectionError as exp:
             # Check that the enrollment request object has the analytics header
             # 'x-edx-ga-client-id' and 'x-forwarded-for'.
             self.assertEqual(exp.request.headers.get('x-edx-ga-client-id'), self.user.tracking_context['ga_client_id'])
@@ -742,7 +743,7 @@ class EnrollmentCodeFulfillmentModuleTests(DiscoveryTestMixin, TestCase):
                 )
             )
 
-    @mock.patch('requests.post', mock.Mock(side_effect=ConnectionError))
+    @mock.patch('requests.post', mock.Mock(side_effect=ReqConnectionError))
     def test_send_to_hubspot_error(self):
         """ Test to simulate some other error occurring when sending data to HubSpot. Verifies expected logs appear. """
         order = self.create_order_with_billing_address()
@@ -986,7 +987,7 @@ class EntitlementFulfillmentModuleTests(FulfillmentTestMixin, TestCase):
 
         line = self.order.lines.first()
         with mock.patch('edx_rest_api_client.client.EdxRestApiClient',
-                        side_effect=ConnectionError):
+                        side_effect=ReqConnectionError):
             with LogCapture(logger_name) as logger:
                 CourseEntitlementFulfillmentModule().fulfill_product(self.order, list(self.order.lines.all()))
                 self.assertEqual(LINE.FULFILLMENT_NETWORK_ERROR, self.order.lines.all()[0].status)

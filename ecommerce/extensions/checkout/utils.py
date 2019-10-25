@@ -9,7 +9,8 @@ from babel.numbers import format_currency as default_format_currency
 from django.conf import settings
 from django.urls import reverse
 from django.utils.translation import get_language, to_locale
-from requests.exceptions import ConnectionError, Timeout
+from requests.exceptions import ConnectionError as ReqConnectionError
+from requests.exceptions import Timeout
 from slumber.exceptions import SlumberHttpBaseException
 
 logger = logging.getLogger(__name__)
@@ -26,7 +27,7 @@ def get_credit_provider_details(credit_provider_id, site_configuration):
     """
     try:
         return site_configuration.credit_api_client.providers(credit_provider_id).get()
-    except (ConnectionError, SlumberHttpBaseException, Timeout):
+    except (ReqConnectionError, SlumberHttpBaseException, Timeout):
         logger.exception('Failed to retrieve credit provider details for provider [%s].', credit_provider_id)
         return None
 

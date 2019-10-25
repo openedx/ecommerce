@@ -7,7 +7,7 @@ import httpretty
 from edx_django_utils.cache import TieredCache
 from mock import patch
 from opaque_keys.edx.keys import CourseKey
-from requests.exceptions import ConnectionError
+from requests.exceptions import ConnectionError as ReqConnectionError
 
 from ecommerce.coupons.tests.mixins import DiscoveryMockMixin
 from ecommerce.courses.tests.factories import CourseFactory
@@ -218,7 +218,7 @@ class GetCourseCatalogUtilTests(DiscoveryMockMixin, TestCase):
         Verify that method "get_course_catalogs" raises exception in case
         the Course Discovery API fails to return data.
         """
-        exception = ConnectionError
+        exception = ReqConnectionError
         self.mock_access_token_response()
         self.mock_discovery_api_failure(exception, self.site_configuration.discovery_api_url)
 

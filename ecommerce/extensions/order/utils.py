@@ -10,7 +10,8 @@ from edx_rest_api_client.client import EdxRestApiClient
 from edx_rest_api_client.exceptions import HttpNotFoundError
 from oscar.apps.order.utils import OrderCreator as OscarOrderCreator
 from oscar.core.loading import get_model
-from requests.exceptions import ConnectionError, ConnectTimeout  # pylint: disable=ungrouped-imports
+from requests.exceptions import ConnectionError as ReqConnectionError  # pylint: disable=ungrouped-imports
+from requests.exceptions import ConnectTimeout
 from threadlocals.threadlocals import get_current_request
 
 from ecommerce.core.url_utils import get_lms_entitlement_api_url
@@ -197,7 +198,7 @@ class UserAlreadyPlacedOrder(object):
                 try:
                     if not UserAlreadyPlacedOrder.is_entitlement_expired(entitlement_uuid, site):
                         return True
-                except (ConnectTimeout, ConnectionError, HttpNotFoundError):
+                except (ConnectTimeout, ReqConnectionError, HttpNotFoundError):
                     logger.exception(
                         'Unable to get entitlement info [%s] due to a network problem',
                         entitlement_uuid

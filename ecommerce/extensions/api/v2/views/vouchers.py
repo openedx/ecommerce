@@ -11,7 +11,8 @@ from django.shortcuts import get_object_or_404
 from django.utils.timezone import now
 from opaque_keys.edx.keys import CourseKey
 from oscar.core.loading import get_model
-from requests.exceptions import ConnectionError, Timeout
+from requests.exceptions import ConnectionError as ReqConnectionError
+from requests.exceptions import Timeout
 from rest_framework import filters, status
 from rest_framework.decorators import list_route
 from rest_framework.response import Response
@@ -82,7 +83,7 @@ class VoucherViewSet(NonDestroyableModelViewSet):
 
         try:
             offers_data = self.get_offers(request, voucher)
-        except (ConnectionError, SlumberBaseException, Timeout):
+        except (ReqConnectionError, SlumberBaseException, Timeout):
             logger.exception('Could not connect to Discovery Service.')
             return Response(status=status.HTTP_400_BAD_REQUEST)
         except Product.DoesNotExist:

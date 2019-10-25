@@ -2,9 +2,10 @@ from __future__ import absolute_import
 
 from selenium.common.exceptions import NoSuchElementException
 
-import pytest
 from e2e.config import LMS_URL_ROOT, MARKETING_URL_ROOT
 from e2e.helpers import EcommerceHelpers, LmsHelpers
+
+import pytest  # isort:skip
 
 
 def test_login_and_logout(selenium):

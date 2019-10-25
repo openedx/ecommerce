@@ -13,7 +13,8 @@ from django.utils.timezone import now
 from opaque_keys.edx.keys import CourseKey
 from oscar.core.loading import get_model
 from oscar.test.factories import BenefitFactory, OrderFactory, OrderLineFactory, ProductFactory, RangeFactory
-from requests.exceptions import ConnectionError, Timeout
+from requests.exceptions import ConnectionError as ReqConnectionError
+from requests.exceptions import Timeout
 from rest_framework import status
 from rest_framework.test import APIRequestFactory
 from six.moves import range
@@ -304,7 +305,7 @@ class VoucherViewOffersEndpointTests(DiscoveryMockMixin, CouponMixin, DiscoveryT
         response = self.endpointView(request)
         self.assertEqual(response.status_code, 404)
 
-    @ddt.data((ConnectionError,), (Timeout,), (SlumberBaseException,))
+    @ddt.data((ReqConnectionError,), (Timeout,), (SlumberBaseException,))
     @ddt.unpack
     def test_voucher_offers_listing_api_exception_caught(self, exception):
         """ Verify the endpoint returns status 400 Bad Request when ConnectionError occurs """

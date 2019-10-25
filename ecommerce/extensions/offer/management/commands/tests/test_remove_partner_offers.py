@@ -31,7 +31,7 @@ class RemovePartnerOffersTests(TestCase):
             err_msg = 'Error: the following arguments are required: --partner'
         else:
             err_msg = 'Error: argument --partner is required'
-        with self.assertRaisesRegexp(CommandError, err_msg):
+        with six.assertRaisesRegex(self, CommandError, err_msg):
             call_command('remove_partner_offers')
 
     def test_no_offer_found(self):

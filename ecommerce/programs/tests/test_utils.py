@@ -5,7 +5,8 @@ import uuid
 import ddt
 import httpretty
 import mock
-from requests.exceptions import ConnectionError, Timeout
+from requests.exceptions import ConnectionError as ReqConnectionError
+from requests.exceptions import Timeout
 from slumber.exceptions import HttpNotFoundError, SlumberBaseException
 from testfixtures import LogCapture
 
@@ -38,7 +39,7 @@ class UtilTests(ProgramTestMixin, TestCase):
         self.assertEqual(get_program(self.program_uuid, self.site.siteconfiguration), data)
 
     @httpretty.activate
-    @ddt.data(ConnectionError, SlumberBaseException, Timeout)
+    @ddt.data(ReqConnectionError, SlumberBaseException, Timeout)
     def test_get_program_failure(self, exc):  # pylint: disable=unused-argument
         """
         The method should log errors in retrieving program data

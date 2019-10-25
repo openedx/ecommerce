@@ -11,7 +11,8 @@ from edx_django_utils.cache import TieredCache
 from mock import patch
 from oscar.core.loading import get_model
 from oscar.test import factories
-from requests.exceptions import ConnectionError, Timeout
+from requests.exceptions import ConnectionError as ReqConnectionError
+from requests.exceptions import Timeout
 from slumber.exceptions import SlumberBaseException
 
 from ecommerce.coupons.tests.mixins import CouponMixin, DiscoveryMockMixin
@@ -126,7 +127,7 @@ class RangeTests(CouponMixin, DiscoveryTestMixin, DiscoveryMockMixin, TestCase):
         # checking if course exists in course runs against the course catalog.
         self._assert_num_requests(2)
 
-    @ddt.data(ConnectionError, SlumberBaseException, Timeout)
+    @ddt.data(ReqConnectionError, SlumberBaseException, Timeout)
     def test_course_catalog_query_range_contains_product_for_failure(self, error):
         """
         Verify that the method "contains_product" raises exception if the
