@@ -39,9 +39,9 @@ matrix:
     - python: 2.7
       env:
         TESTNAME=quality-and-js
-        TARGETS="check_translations_up_to_date validate_translations clean_static static quality validate_js"
+        TARGETS="PYTHON_ENV=py27 check_translations_up_to_date validate_translations clean_static static quality validate_js"
     - python: 2.7
-      env: TESTNAME=test-python TARGETS="clean_static static validate_python"
+      env: TESTNAME=test-python TARGETS="PYTHON_ENV=py27 clean_static static validate_python"
     - python: 3.5
       env:
         TESTNAME=quality-and-js-.3.5
