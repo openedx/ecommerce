@@ -1,6 +1,6 @@
 NODE_BIN=./node_modules/.bin
 DIFF_COVER_BASE_BRANCH=master
-PYTHON_ENV=py27
+PYTHON_ENV=py35
 
 help:
 	@echo '                                                                                     		'
