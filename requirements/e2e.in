@@ -1,0 +1,8 @@
+# Packages required to run e2e tests
+edx-rest-api-client
+pytest
+pytest-random-order
+pytest-selenium
+pytest-timeout
+python-dotenv
+selenium

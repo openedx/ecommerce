@@ -38,7 +38,6 @@ requirements.js:
 	$(NODE_BIN)/bower install --allow-root
 
 requirements: requirements.js
-	pip install -r e2e/requirements.txt --exists-action w
 	pip install -r requirements/dev.txt --exists-action w
 
 production-requirements: requirements.js
@@ -139,6 +138,7 @@ upgrade: ## update the requirements/*.txt files with the latest packages satisfy
 	pip-compile --upgrade -o requirements/pip_tools.txt requirements/pip_tools.in
 	pip-compile --upgrade -o requirements/base.txt requirements/base.in
 	pip-compile --upgrade -o requirements/docs.txt requirements/docs.in
+	pip-compile --upgrade -o requirements/e2e.txt requirements/e2e.in
 	pip-compile --upgrade -o requirements/dev.txt requirements/dev.in
 	pip-compile --upgrade -o requirements/production.txt requirements/production.in
 	pip-compile --upgrade -o requirements/test.txt requirements/test.in
