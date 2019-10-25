@@ -2,7 +2,8 @@ from __future__ import absolute_import
 
 import logging
 
-from requests.exceptions import ConnectionError, Timeout
+from requests.exceptions import ConnectionError as ReqConnectionError
+from requests.exceptions import Timeout
 from slumber.exceptions import HttpNotFoundError, SlumberBaseException
 
 from ecommerce.programs.api import ProgramsApiClient
@@ -33,7 +34,7 @@ def get_program(program_uuid, siteconfiguration):
     except HttpNotFoundError:
         msg = 'No program data found for {}'.format(program_uuid)
         log.debug(msg)
-    except (ConnectionError, SlumberBaseException, Timeout):
+    except (ReqConnectionError, SlumberBaseException, Timeout):
         msg = 'Failed to retrieve program details for {}'.format(program_uuid)
         log.debug(msg)
 

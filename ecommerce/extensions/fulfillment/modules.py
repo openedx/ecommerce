@@ -17,7 +17,8 @@ from django.conf import settings
 from django.urls import reverse
 from edx_rest_api_client.client import EdxRestApiClient
 from oscar.core.loading import get_model
-from requests.exceptions import ConnectionError, Timeout  # pylint: disable=ungrouped-imports
+from requests.exceptions import ConnectionError as ReqConnectionError  # pylint: disable=ungrouped-imports
+from requests.exceptions import Timeout
 from rest_framework import status
 from six.moves.urllib.parse import urlencode
 
@@ -361,7 +362,7 @@ class EnrollmentFulfillmentModule(BaseFulfillmentModule):
                     )
                     order.notes.create(message=reason, note_type='Error')
                     line.set_status(LINE.FULFILLMENT_SERVER_ERROR)
-            except ConnectionError:
+            except ReqConnectionError:
                 logger.error(
                     "Unable to fulfill line [%d] of order [%s] due to a network problem", line.id, order.number
                 )
@@ -815,7 +816,7 @@ class CourseEntitlementFulfillmentModule(BaseFulfillmentModule):
                     mode=mode,
                     user_id=order.user.id,
                 )
-            except (Timeout, ConnectionError):
+            except (Timeout, ReqConnectionError):
                 logger.exception(
                     'Unable to fulfill line [%d] of order [%s] due to a network problem', line.id, order.number
                 )

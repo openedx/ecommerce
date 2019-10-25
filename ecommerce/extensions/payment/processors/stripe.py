@@ -71,12 +71,17 @@ class Stripe(ApplePayMixin, BaseClientSidePaymentProcessor):
             self.record_processor_response(charge, transaction_id=transaction_id, basket=basket)
             logger.info('Successfully created Stripe charge [%s] for basket [%d].', transaction_id, basket.id)
         except stripe.error.CardError as ex:
-            msg = 'Stripe payment for basket [%d] declined with HTTP status [%d]'
+            base_message = "Stripe payment for basket [%d] declined with HTTP status [%d]"
+            exception_format_string = "{}: %s".format(base_message)
             body = ex.json_body
-
-            logger.exception(msg + ': %s', basket.id, ex.http_status, body)
+            logger.exception(
+                exception_format_string,
+                basket.id,
+                ex.http_status,
+                body
+            )
             self.record_processor_response(body, basket=basket)
-            raise TransactionDeclined(msg, basket.id, ex.http_status)
+            raise TransactionDeclined(base_message, basket.id, ex.http_status)
 
         total = basket.total_incl_tax
         card_number = charge.source.last4

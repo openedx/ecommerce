@@ -17,7 +17,8 @@ from oscar.apps.offer.abstract_models import (
     AbstractRangeProduct
 )
 from oscar.core.loading import get_model
-from requests.exceptions import ConnectionError, Timeout
+from requests.exceptions import ConnectionError as ReqConnectionError
+from requests.exceptions import Timeout
 from simple_history.models import HistoricalRecords
 from slumber.exceptions import SlumberBaseException
 from threadlocals.threadlocals import get_current_request
@@ -425,7 +426,7 @@ class Range(AbstractRange):
 
             TieredCache.set_all_tiers(cache_key, response, settings.COURSES_API_CACHE_TIMEOUT)
             return response
-        except (ConnectionError, SlumberBaseException, Timeout) as exc:
+        except (ReqConnectionError, SlumberBaseException, Timeout) as exc:
             logger.exception('[Code Redemption Failure] Unable to connect to the Discovery Service '
                              'for catalog contains endpoint. '
                              'Product: %s, Message: %s, Range: %s', product.id, exc, self.id)

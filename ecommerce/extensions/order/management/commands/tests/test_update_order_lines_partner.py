@@ -24,7 +24,7 @@ class UpdateOrderLinePartnerTests(TestCase):
 
     def assert_error_log(self, error_msg, *args):
         """Helper to call command and assert error log."""
-        with self.assertRaisesRegexp(CommandError, error_msg):
+        with six.assertRaisesRegex(self, CommandError, error_msg):
             call_command('update_order_lines_partner', *args)
 
     def test_partner_required(self):

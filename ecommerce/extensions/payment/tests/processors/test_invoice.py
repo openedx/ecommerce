@@ -74,7 +74,7 @@ class InvoiceTests(PaymentProcessorTestCaseMixin, TestCase):
         self.assertEqual(invoice.business_client, business_client)
         serialized_invoice = InvoiceSerializer(invoice).data
         for data in invoice_data:
-            if data is 'payment_date':
+            if data == 'payment_date':
                 self.assertEqual(invoice.payment_date.isoformat(), invoice_data[data])
             else:
                 self.assertEqual(serialized_invoice[data], invoice_data[data])

@@ -21,7 +21,8 @@ from edx_django_utils.cache import TieredCache
 from edx_rbac.models import UserRole, UserRoleAssignment
 from edx_rest_api_client.client import EdxRestApiClient
 from jsonfield.fields import JSONField
-from requests.exceptions import ConnectionError, Timeout
+from requests.exceptions import ConnectionError as ReqConnectionError
+from requests.exceptions import Timeout
 from simple_history.models import HistoricalRecords
 from six.moves.urllib.parse import urljoin, urlsplit
 from slumber.exceptions import HttpNotFoundError, SlumberBaseException
@@ -534,7 +535,7 @@ class User(AbstractUser):
                      self.id, usage, exc_info=True)
         else:
             monitoring_utils.set_custom_metric('ecommerce_missing_lms_user_id', self.id)
-            log.warn(u'Could not find lms_user_id with metric for user %s for %s.', self.id, usage, exc_info=True)
+            log.warning(u'Could not find lms_user_id with metric for user %s for %s.', self.id, usage, exc_info=True)
 
         return None
 
@@ -600,7 +601,7 @@ class User(AbstractUser):
                     if lms_user_id_social_auth:
                         return lms_user_id_social_auth, auth_entry.id
         except Exception:  # pylint: disable=broad-except
-            log.warn(u'Exception retrieving lms_user_id from social_auth for user %s.', self.id, exc_info=True)
+            log.warning(u'Exception retrieving lms_user_id from social_auth for user %s.', self.id, exc_info=True)
         return None, None
 
     def get_full_name(self):
@@ -627,7 +628,7 @@ class User(AbstractUser):
             )
             response = api.accounts(self.username).get()
             return response
-        except (ConnectionError, SlumberBaseException, Timeout):
+        except (ReqConnectionError, SlumberBaseException, Timeout):
             log.exception(
                 'Failed to retrieve account details for [%s]',
                 self.username
@@ -657,7 +658,7 @@ class User(AbstractUser):
         try:
             api = site_configuration.credit_api_client
             response = api.eligibility().get(**query_strings)
-        except (ConnectionError, SlumberBaseException, Timeout):  # pragma: no cover
+        except (ReqConnectionError, SlumberBaseException, Timeout):  # pragma: no cover
             log.exception(
                 'Failed to retrieve eligibility details for [%s] in course [%s]',
                 self.username,
@@ -696,7 +697,7 @@ class User(AbstractUser):
         except HttpNotFoundError:
             log.debug('No verification data found for [%s]', self.username)
             return False
-        except (ConnectionError, SlumberBaseException, Timeout):
+        except (ReqConnectionError, SlumberBaseException, Timeout):
             msg = 'Failed to retrieve verification status details for [{username}]'.format(username=self.username)
             log.warning(msg)
             return False

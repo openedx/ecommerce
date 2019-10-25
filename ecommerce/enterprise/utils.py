@@ -18,7 +18,8 @@ from edx_django_utils.cache import TieredCache
 from edx_rest_api_client.client import EdxRestApiClient
 from edx_rest_framework_extensions.auth.jwt.cookies import get_decoded_jwt
 from oscar.core.loading import get_model
-from requests.exceptions import ConnectionError, Timeout
+from requests.exceptions import ConnectionError as ReqConnectionError
+from requests.exceptions import Timeout
 from six.moves.urllib.parse import urlparse  # pylint: disable=import-error, relative-import
 from six.moves.urllib.parse import urlencode
 from slumber.exceptions import SlumberHttpBaseException
@@ -78,7 +79,7 @@ def get_enterprise_customer(site, uuid):
 
     try:
         response = client.get()
-    except (ConnectionError, SlumberHttpBaseException, Timeout):
+    except (ReqConnectionError, SlumberHttpBaseException, Timeout):
         return None
 
     enterprise_customer_response = {
@@ -202,7 +203,7 @@ def get_enterprise_customer_catalogs(site, endpoint_request_url, enterprise_cust
     try:
         response = endpoint.get(enterprise_customer=enterprise_customer_uuid, page=page)
         response = update_paginated_response(endpoint_request_url, response)
-    except (ConnectionError, SlumberHttpBaseException, Timeout) as exc:
+    except (ReqConnectionError, SlumberHttpBaseException, Timeout) as exc:
         logging.exception(
             'Unable to retrieve catalogs for enterprise customer! customer: %s, Exception: %s',
             enterprise_customer_uuid,
@@ -572,7 +573,7 @@ def get_enterprise_id_for_user(site, user):
 
     try:
         enterprise_learner_response = fetch_enterprise_learner_data(site, user)
-    except (ConnectionError, KeyError, SlumberHttpBaseException, Timeout) as exc:
+    except (ReqConnectionError, KeyError, SlumberHttpBaseException, Timeout) as exc:
         logging.exception('Unable to retrieve enterprise learner data for the user!'
                           'User: %s, Exception: %s', user, exc)
         return None

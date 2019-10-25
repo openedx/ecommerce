@@ -5,7 +5,8 @@ import httpretty
 import mock
 from django.urls import reverse
 from oscar.core.loading import get_model
-from requests.exceptions import ConnectionError, Timeout
+from requests.exceptions import ConnectionError as ReqConnectionError
+from requests.exceptions import Timeout
 from slumber.exceptions import SlumberBaseException
 
 from ecommerce.coupons.tests.mixins import DiscoveryMockMixin
@@ -122,7 +123,7 @@ class CatalogViewSetTest(CatalogMixin, DiscoveryMockMixin, ApiMockMixin, TestCas
         response = self.client.get(url)
         self.assertEqual(response.status_code, 400)
 
-    @ddt.data(ConnectionError, SlumberBaseException, Timeout)
+    @ddt.data(ReqConnectionError, SlumberBaseException, Timeout)
     def test_preview_catalog_course_discovery_service_not_available(self, exc_class):
         """Test catalog query preview when course discovery is not available."""
         url = '{path}?query=foo&seat_types=bar'.format(path=reverse('api:v2:catalog-preview-list'))
@@ -154,7 +155,7 @@ class CatalogViewSetTest(CatalogMixin, DiscoveryMockMixin, ApiMockMixin, TestCas
         data.
         """
         self.mock_access_token_response()
-        self.mock_discovery_api_failure(ConnectionError, self.site_configuration.discovery_api_url)
+        self.mock_discovery_api_failure(ReqConnectionError, self.site_configuration.discovery_api_url)
 
         response = self.client.get(reverse('api:v2:catalog-course-catalogs-list'))
 

@@ -6,7 +6,7 @@ from django.conf import settings
 from edx_django_utils.cache import TieredCache
 from mock import patch
 from oscar.core.loading import get_model
-from requests.exceptions import ConnectionError
+from requests.exceptions import ConnectionError as ReqConnectionError
 
 from ecommerce.core.tests import toggle_switch
 from ecommerce.core.utils import get_cache_key
@@ -156,5 +156,5 @@ class EnterpriseAPITests(EnterpriseServiceMockMixin, DiscoveryTestMixin, TestCas
             raise_exception=True,
         )
 
-        with self.assertRaises(ConnectionError):
+        with self.assertRaises(ReqConnectionError):
             self._assert_contains_course_runs(False, [self.course_run.id], 'fake-uuid', 'fake-uuid')

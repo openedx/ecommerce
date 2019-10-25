@@ -10,7 +10,7 @@ from django.contrib.sites.models import Site
 from django.core.exceptions import ValidationError
 from django.test import override_settings
 from edx_rest_api_client.auth import SuppliedJwtAuth
-from requests.exceptions import ConnectionError
+from requests.exceptions import ConnectionError as ReqConnectionError
 from social_django.models import UserSocialAuth
 from testfixtures import LogCapture
 
@@ -179,7 +179,7 @@ class UserTests(DiscoveryTestMixin, LmsApiMockMixin, TestCase):
     def test_no_user_details(self):
         """ Verify False is returned when there is a connection error. """
         user = self.create_user()
-        with self.assertRaises(ConnectionError):
+        with self.assertRaises(ReqConnectionError):
             self.assertFalse(user.account_details(self.request))
 
     def prepare_credit_eligibility_info(self, eligible=True):
@@ -250,12 +250,12 @@ class UserTests(DiscoveryTestMixin, LmsApiMockMixin, TestCase):
         """Verify an error is logged if an exception happens."""
 
         def callback(*args):  # pylint: disable=unused-argument
-            raise ConnectionError
+            raise ReqConnectionError
 
         user = self.create_user()
         self.mock_deactivation_api(self.request, user.username, response=callback)
 
-        with self.assertRaises(ConnectionError):
+        with self.assertRaises(ReqConnectionError):
             with mock.patch('ecommerce.core.models.log.exception') as mock_logger:
                 user.deactivate_account(self.request.site.siteconfiguration)
                 self.assertTrue(mock_logger.called)
