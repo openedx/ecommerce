@@ -33,19 +33,6 @@ Benefit = get_model('offer', 'Benefit')
 
 @ddt.ddt
 class UtilTests(DiscoveryTestMixin, TestCase):
-    _ASSIGNMENT_EMAIL_TEMPLATE = '''
-        Your learning manager has provided you with a new access code to take a course at edX.
-        You may redeem this code for {REDEMPTIONS_REMAINING} courses.
-
-        edX login: {USER_EMAIL}
-        Access Code: {CODE}
-        Expiration date: {EXPIRATION_DATE}
-
-        You can insert the access code at check out under "coupon code" for applicable courses.
-
-        For any questions, please reach out to your Learning Manager.
-    '''
-
     _REMINDER_EMAIL_TEMPLATE = '''
         This is a reminder email that your learning manager has provided you with a access code to take a course at edX.
         You have redeemed this code {REDEEMED_OFFER_COUNT} of times out of {TOTAL_OFFER_COUNT} number of available course redemptions.
@@ -59,14 +46,10 @@ class UtilTests(DiscoveryTestMixin, TestCase):
         For any questions, please reach out to your Learning Manager.
     '''
 
-    _REVOKE_ASSIGNMENT_EMAIL_TEMPLATE = '''
-        Your learning manager has revoked {CODE} and it is no longer assigned to your edX account {USER_EMAIL}.
-        '''
-
     _BROKEN_EMAIL_TEMPLATE = '''
         Text
-        {DOES_NOT_EXIST}
-        code: {CODE}
+        {DOES_NOT_EXIST} {USER_EMAIL}
+        code: {CODE} {CODE}
         {}
         { abc d }
         More text.
@@ -121,7 +104,8 @@ class UtilTests(DiscoveryTestMixin, TestCase):
     @mock.patch('ecommerce.extensions.offer.utils.send_offer_assignment_email')
     @ddt.data(
         (
-            _ASSIGNMENT_EMAIL_TEMPLATE,
+            'hi',
+            'bye',
             {
                 'offer_assignment_id': 555,
                 'learner_email': 'johndoe@unknown.com',
@@ -131,31 +115,22 @@ class UtilTests(DiscoveryTestMixin, TestCase):
             },
             None,
         ),
-        (
-            _BROKEN_EMAIL_TEMPLATE,
-            {
-                'offer_assignment_id': 123,
-                'learner_email': 'anotherdoe@unknown.com',
-                'code': 'ABCD1234',
-                'redemptions_remaining': 2,
-                'code_expiration_date': '2020-12-19'
-            },
-            None,
-        ),
     )
     @ddt.unpack
     def test_send_assigned_offer_email(
             self,
-            template,
+            greeting,
+            closing,
             tokens,
             side_effect,
             mock_sailthru_task,
     ):
         """ Test that the offer assignment email message is sent to async task. """
-        email_subject = settings.OFFER_ASSIGNMENT_EMAIL_DEFAULT_SUBJECT
+        email_subject = settings.OFFER_ASSIGNMENT_EMAIL_SUBJECT
         mock_sailthru_task.delay.side_effect = side_effect
         send_assigned_offer_email(
-            template,
+            greeting,
+            closing,
             tokens.get('offer_assignment_id'),
             tokens.get('learner_email'),
             tokens.get('code'),
@@ -172,7 +147,8 @@ class UtilTests(DiscoveryTestMixin, TestCase):
     @mock.patch('ecommerce.extensions.offer.utils.send_offer_update_email')
     @ddt.data(
         (
-            _REMINDER_EMAIL_TEMPLATE,
+            'hi',
+            'bye',
             {
                 'learner_email': 'johndoe@unknown.com',
                 'code': 'GIL7RUEOU7VHBH7Q',
@@ -182,22 +158,12 @@ class UtilTests(DiscoveryTestMixin, TestCase):
             },
             None,
         ),
-        (
-            _BROKEN_EMAIL_TEMPLATE,
-            {
-                'offer_assignment_id': 456,
-                'learner_email': 'other@unknown.com',
-                'code': 'QWERTY8',
-                'redemptions_remaining': 3,
-                'code_expiration_date': '2021-12-19'
-            },
-            None,
-        ),
     )
     @ddt.unpack
     def test_send_assigned_offer_reminder_email(
             self,
-            template,
+            greeting,
+            closing,
             tokens,
             side_effect,
             mock_sailthru_task,
@@ -205,10 +171,11 @@ class UtilTests(DiscoveryTestMixin, TestCase):
         """
         Test that the offer assignment reminder email message is sent to the async task in ecommerce-worker.
         """
-        email_subject = settings.OFFER_ASSIGNMENT_EMAIL_REMINDER_DEFAULT_SUBJECT
+        email_subject = settings.OFFER_REMINDER_EMAIL_SUBJECT
         mock_sailthru_task.delay.side_effect = side_effect
         send_assigned_offer_reminder_email(
-            template,
+            greeting,
+            closing,
             tokens.get('learner_email'),
             tokens.get('code'),
             tokens.get('redeemed_offer_count'),
@@ -224,18 +191,11 @@ class UtilTests(DiscoveryTestMixin, TestCase):
     @mock.patch('ecommerce.extensions.offer.utils.send_offer_update_email')
     @ddt.data(
         (
-            _REVOKE_ASSIGNMENT_EMAIL_TEMPLATE,
+            'hi',
+            'bye',
             {
                 'learner_email': 'johndoe@unknown.com',
                 'code': 'GIL7RUEOU7VHBH7Q',
-            },
-            None,
-        ),
-        (
-            _BROKEN_EMAIL_TEMPLATE,
-            {
-                'learner_email': 'tester@unknown.com',
-                'code': 'PUMPKINS',
             },
             None,
         ),
@@ -243,7 +203,8 @@ class UtilTests(DiscoveryTestMixin, TestCase):
     @ddt.unpack
     def test_send_offer_revoked_email(
             self,
-            template,
+            greeting,
+            closing,
             tokens,
             side_effect,
             mock_sailthru_task,
@@ -251,10 +212,11 @@ class UtilTests(DiscoveryTestMixin, TestCase):
         """
         Test that the offer revocation email message is sent to the async task in ecommerce-worker.
         """
-        email_subject = settings.OFFER_REVOKE_EMAIL_DEFAULT_SUBJECT
+        email_subject = settings.OFFER_REVOKE_EMAIL_SUBJECT
         mock_sailthru_task.delay.side_effect = side_effect
         send_revoked_offer_email(
-            template,
+            greeting,
+            closing,
             tokens.get('learner_email'),
             tokens.get('code'),
         )
@@ -266,7 +228,9 @@ class UtilTests(DiscoveryTestMixin, TestCase):
 
     @ddt.data(
         (
-            _ASSIGNMENT_EMAIL_TEMPLATE,
+            settings.OFFER_ASSIGNMENT_EMAIL_TEMPLATE,
+            'hi ',
+            'bye ',
             {
                 'learner_email': 'johndoe@unknown.com',
                 'code': 'GIL7RUEOU7VHBH7Q',
@@ -279,6 +243,8 @@ class UtilTests(DiscoveryTestMixin, TestCase):
     def test_format_assigned_offer_email(
             self,
             template,
+            greeting,
+            closing,
             tokens,
     ):
         """
@@ -290,16 +256,20 @@ class UtilTests(DiscoveryTestMixin, TestCase):
             CODE=tokens.get('code'),
             EXPIRATION_DATE=tokens.get('code_expiration_date'),
         )
-        email = format_email(template, placeholder_dict)
+        email = format_email(template, placeholder_dict, greeting, closing)
         self.assertTrue(str(tokens.get('redemptions_remaining')) in email)
         self.assertTrue(tokens.get('learner_email') in email)
         self.assertTrue(tokens.get('code') in email)
         self.assertTrue(tokens.get('code_expiration_date') in email)
+        self.assertTrue(greeting in email)
+        self.assertTrue(closing in email)
 
     def test_format_assigned_offer_broken_email(self):
         """
         Test that the assigned offer email message is formatted correctly if the template is broken.
         """
+        greeting = 'hi {CODE} '
+        closing = ' bye {CODE}'
         code = 'GIL7RUEOU7VHBH7Q'
         placeholder_dict = SafeDict(
             REDEMPTIONS_REMAINING=500,
@@ -307,17 +277,43 @@ class UtilTests(DiscoveryTestMixin, TestCase):
             CODE=code,
             EXPIRATION_DATE='2018-12-19',
         )
-        email = format_email(self._BROKEN_EMAIL_TEMPLATE, placeholder_dict)
+        email = format_email(self._BROKEN_EMAIL_TEMPLATE, placeholder_dict, greeting, closing)
+        self.assertTrue('{DOES_NOT_EXIST}' in email)
+        self.assertTrue(code in email)
+
+        # Compare strings, ignoring whitespace differences
+        expected_email = """
+            hi {CODE} Text
+            {DOES_NOT_EXIST} johndoe@unknown.com
+            code: GIL7RUEOU7VHBH7Q GIL7RUEOU7VHBH7Q
+            {}
+            { abc d }
+            More text. bye {CODE}
+            """
+        self.assertEqual(email.split(), expected_email.split())
+
+    def test_format_assigned_offer_no_greeting(self):
+        """
+        Test that the assigned offer email message is formatted correctly if there is no greeting or closing.
+        """
+        code = 'ABC7RUEOU7VHBH7Q'
+        placeholder_dict = SafeDict(
+            REDEMPTIONS_REMAINING=499,
+            USER_EMAIL='johndoe2@unknown.com',
+            CODE=code,
+            EXPIRATION_DATE='2018-12-19',
+        )
+        email = format_email(self._BROKEN_EMAIL_TEMPLATE, placeholder_dict, None, None)
         self.assertTrue('{DOES_NOT_EXIST}' in email)
         self.assertTrue(code in email)
 
         # Compare strings, ignoring whitespace differences
         expected_email = """
             Text
-            {DOES_NOT_EXIST}
-            code: GIL7RUEOU7VHBH7Q
+            {DOES_NOT_EXIST} johndoe2@unknown.com
+            code: ABC7RUEOU7VHBH7Q ABC7RUEOU7VHBH7Q
             {}
             { abc d }
-            More text.
+            More text. 
             """
         self.assertEqual(email.split(), expected_email.split())

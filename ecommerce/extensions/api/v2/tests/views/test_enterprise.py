@@ -59,6 +59,8 @@ VoucherApplication = get_model('voucher', 'VoucherApplication')
 
 ENTERPRISE_COUPONS_LINK = reverse('api:v2:enterprise-coupons-list')
 OFFER_ASSIGNMENT_SUMMARY_LINK = reverse('api:v2:enterprise-offer-assignment-summary-list')
+TEMPLATE_GREETING = 'hello there '
+TEMPLATE_CLOSING = ' kind regards'
 
 
 class TestEnterpriseCustomerView(EnterpriseServiceMockMixin, TestCase):
@@ -551,7 +553,13 @@ class EnterpriseCouponViewSetRbacTests(
             self.get_response(
                 'POST',
                 '/api/v2/enterprise/coupons/{}/assign/'.format(coupon_id),
-                {'emails': emails, 'codes': [voucher.code], 'template': 'Test template'}
+                {
+                    'emails': emails,
+                    'codes': [voucher.code],
+                    'template': 'Test template',
+                    'template_greeting': TEMPLATE_GREETING,
+                    'template_closing': TEMPLATE_CLOSING
+                }
             )
 
     def use_voucher(self, voucher, user):
@@ -603,7 +611,13 @@ class EnterpriseCouponViewSetRbacTests(
             self.get_response(
                 'POST',
                 '/api/v2/enterprise/coupons/{}/assign/'.format(coupon_id),
-                {'template': 'Test template', 'emails': emails, 'codes': codes}
+                {
+                    'template': 'Test template',
+                    'template_greeting': TEMPLATE_GREETING,
+                    'template_closing': TEMPLATE_CLOSING,
+                    'emails': emails,
+                    'codes': codes
+                }
             )
 
     @ddt.data(
@@ -1567,7 +1581,12 @@ class EnterpriseCouponViewSetRbacTests(
             response = self.get_response(
                 'POST',
                 '/api/v2/enterprise/coupons/{}/assign/'.format(coupon_id),
-                {'template': 'Test template', 'emails': emails}
+                {
+                    'template': 'Test template',
+                    'template_greeting': TEMPLATE_GREETING,
+                    'template_closing': TEMPLATE_CLOSING,
+                    'emails': emails
+                }
             )
         response = response.json()
         assert mock_send_email.call_count == len(emails)
@@ -1601,7 +1620,13 @@ class EnterpriseCouponViewSetRbacTests(
             response = self.get_response(
                 'POST',
                 '/api/v2/enterprise/coupons/{}/assign/'.format(coupon_id),
-                {'template': 'Test template', 'emails': emails, 'codes': codes_param}
+                {
+                    'template': 'Test template',
+                    'template_greeting': TEMPLATE_GREETING,
+                    'template_closing': TEMPLATE_CLOSING,
+                    'emails': emails,
+                    'codes': codes_param
+                }
             )
         response = response.json()
         assert mock_send_email.call_count == len(emails)
@@ -1633,7 +1658,12 @@ class EnterpriseCouponViewSetRbacTests(
             response = self.get_response(
                 'POST',
                 '/api/v2/enterprise/coupons/{}/assign/'.format(coupon_id),
-                {'template': 'Test template', 'emails': emails}
+                {
+                    'template': 'Test template',
+                    'template_greeting': TEMPLATE_GREETING,
+                    'template_closing': TEMPLATE_CLOSING,
+                    'emails': emails
+                }
             )
         response = response.json()
         assert mock_send_email.call_count == len(emails)
@@ -1669,7 +1699,12 @@ class EnterpriseCouponViewSetRbacTests(
             response = self.get_response(
                 'POST',
                 '/api/v2/enterprise/coupons/{}/assign/'.format(coupon_id),
-                {'template': 'Test template', 'emails': emails}
+                {
+                    'template': 'Test template',
+                    'template_greeting': TEMPLATE_GREETING,
+                    'template_closing': TEMPLATE_CLOSING,
+                    'emails': emails
+                }
             )
         response = response.json()
         assert mock_send_email.call_count == len(emails)
@@ -1695,7 +1730,12 @@ class EnterpriseCouponViewSetRbacTests(
             response = self.get_response(
                 'POST',
                 '/api/v2/enterprise/coupons/{}/assign/'.format(coupon_id),
-                {'template': 'Test template', 'emails': [email]}
+                {
+                    'template': 'Test template',
+                    'template_greeting': TEMPLATE_GREETING,
+                    'template_closing': TEMPLATE_CLOSING,
+                    'emails': [email]
+                }
             )
         response = response.json()
         assert mock_send_email.call_count == 1
@@ -1718,7 +1758,12 @@ class EnterpriseCouponViewSetRbacTests(
             response = self.get_response(
                 'POST',
                 '/api/v2/enterprise/coupons/{}/assign/'.format(coupon_id),
-                {'template': 'Test template', 'emails': [email]}
+                {
+                    'template': 'Test template',
+                    'template_greeting': TEMPLATE_GREETING,
+                    'template_closing': TEMPLATE_CLOSING,
+                    'emails': [email]
+                }
             )
         response = response.json()
         assert mock_send_email.call_count == 1
@@ -1740,7 +1785,12 @@ class EnterpriseCouponViewSetRbacTests(
             response = self.get_response(
                 'POST',
                 '/api/v2/enterprise/coupons/{}/assign/'.format(coupon_id),
-                {'template': 'Test template', 'emails': emails}
+                {
+                    'template': 'Test template',
+                    'template_greeting': TEMPLATE_GREETING,
+                    'template_closing': TEMPLATE_CLOSING,
+                    'emails': emails
+                }
             )
         response = response.json()
         assert response['non_field_errors'] == ['Not enough available codes for assignment!']
@@ -1766,7 +1816,12 @@ class EnterpriseCouponViewSetRbacTests(
             response = self.get_response(
                 'POST',
                 '/api/v2/enterprise/coupons/{}/assign/'.format(coupon_id),
-                {'template': 'Test template', 'emails': emails}
+                {
+                    'template': 'Test template',
+                    'template_greeting': TEMPLATE_GREETING,
+                    'template_closing': TEMPLATE_CLOSING,
+                    'emails': emails
+                }
             )
         response = response.json()
         assert mock_send_email.call_count == len(emails)
@@ -1787,9 +1842,9 @@ class EnterpriseCouponViewSetRbacTests(
 
     @ddt.data(
         (Voucher.SINGLE_USE, 2, None, True),
-        (Voucher.MULTI_USE_PER_CUSTOMER, 2, 3, False),
+        (Voucher.MULTI_USE_PER_CUSTOMER, 2, 3, True),
         (Voucher.MULTI_USE, 1, None, True),
-        (Voucher.ONCE_PER_CUSTOMER, 2, 2, False),
+        (Voucher.ONCE_PER_CUSTOMER, 2, 2, True),
     )
     @ddt.unpack
     def test_coupon_codes_revoke_success(self, voucher_type, quantity, max_uses, send_email):
@@ -1803,7 +1858,12 @@ class EnterpriseCouponViewSetRbacTests(
             self.get_response(
                 'POST',
                 '/api/v2/enterprise/coupons/{}/assign/'.format(coupon_id),
-                {'template': 'Test template', 'emails': [email]}
+                {
+                    'template': 'Test template',
+                    'template_greeting': TEMPLATE_GREETING,
+                    'template_closing': TEMPLATE_CLOSING,
+                    'emails': [email]
+                }
             )
 
         offer_assignment = OfferAssignment.objects.filter(user_email=email).first()
@@ -1839,7 +1899,12 @@ class EnterpriseCouponViewSetRbacTests(
             self.get_response(
                 'POST',
                 '/api/v2/enterprise/coupons/{}/assign/'.format(coupon_id),
-                {'template': 'Test template', 'emails': [email]}
+                {
+                    'template': 'Test template',
+                    'template_greeting': TEMPLATE_GREETING,
+                    'template_closing': TEMPLATE_CLOSING,
+                    'emails': [email]
+                }
             )
 
         offer_assignment = OfferAssignment.objects.filter(user_email=email).first()
@@ -1870,7 +1935,12 @@ class EnterpriseCouponViewSetRbacTests(
         response = self.get_response(
             'POST',
             '/api/v2/enterprise/coupons/{}/revoke/'.format(coupon_id),
-            {'template': 'Test template', 'assignments': {'email': email, 'code': 'RANDOMCODE'}}
+            {
+                'template': 'Test template',
+                'template_greeting': TEMPLATE_GREETING,
+                'template_closing': TEMPLATE_CLOSING,
+                'assignments': {'email': email, 'code': 'RANDOMCODE'}
+            }
         )
 
         response = response.json()
@@ -1887,7 +1957,12 @@ class EnterpriseCouponViewSetRbacTests(
         response = self.get_response(
             'POST',
             '/api/v2/enterprise/coupons/{}/revoke/'.format(coupon_id),
-            {'template': 'Test template', 'assignments': [{'email': email, 'code': 'RANDOMCODE'}]}
+            {
+                'template': 'Test template',
+                'template_greeting': TEMPLATE_GREETING,
+                'template_closing': TEMPLATE_CLOSING,
+                'assignments': [{'email': email, 'code': 'RANDOMCODE'}]
+            }
         )
 
         response = response.json()
@@ -1912,7 +1987,12 @@ class EnterpriseCouponViewSetRbacTests(
         response = self.get_response(
             'POST',
             '/api/v2/enterprise/coupons/{}/revoke/'.format(coupon_id),
-            {'template': 'Test template', 'assignments': [{'email': email, 'code': voucher.code}]}
+            {
+                'template': 'Test template',
+                'template_greeting': TEMPLATE_GREETING,
+                'template_closing': TEMPLATE_CLOSING,
+                'assignments': [{'email': email, 'code': voucher.code}]
+            }
         )
 
         response = response.json()
@@ -1936,7 +2016,12 @@ class EnterpriseCouponViewSetRbacTests(
             self.get_response(
                 'POST',
                 '/api/v2/enterprise/coupons/{}/assign/'.format(coupon_id),
-                {'template': 'Test template', 'emails': [email]}
+                {
+                    'template': 'Test template',
+                    'template_greeting': TEMPLATE_GREETING,
+                    'template_closing': TEMPLATE_CLOSING,
+                    'emails': [email]
+                }
             )
 
         offer_assignment = OfferAssignment.objects.filter(user_email=email).first()
@@ -1947,7 +2032,12 @@ class EnterpriseCouponViewSetRbacTests(
             response = self.get_response(
                 'POST',
                 '/api/v2/enterprise/coupons/{}/revoke/'.format(coupon_id),
-                {'template': 'Test template', 'assignments': [{'email': email, 'code': offer_assignment.code}]}
+                {
+                    'template': 'Test template',
+                    'template_greeting': TEMPLATE_GREETING,
+                    'template_closing': TEMPLATE_CLOSING,
+                    'assignments': [{'email': email, 'code': offer_assignment.code}]
+                }
             )
 
         response = response.json()
@@ -1967,7 +2057,12 @@ class EnterpriseCouponViewSetRbacTests(
             self.get_response(
                 'POST',
                 '/api/v2/enterprise/coupons/{}/assign/'.format(coupon_id),
-                {'template': 'Test template', 'emails': emails}
+                {
+                    'template': 'Test template',
+                    'template_greeting': TEMPLATE_GREETING,
+                    'template_closing': TEMPLATE_CLOSING,
+                    'emails': emails
+                }
             )
 
         offer_assignment = OfferAssignment.objects.filter(user_email__in=emails).first()
@@ -1975,10 +2070,15 @@ class EnterpriseCouponViewSetRbacTests(
             response = self.get_response(
                 'POST',
                 '/api/v2/enterprise/coupons/{}/revoke/'.format(coupon_id),
-                {'template': 'Test template', 'assignments': [
-                    {'email': offer_assignment.user_email, 'code': offer_assignment.code},
-                    {'email': 'test3@example.com', 'code': 'RANDOMCODE'},
-                ]}
+                {
+                    'template': 'Test template',
+                    'template_greeting': TEMPLATE_GREETING,
+                    'template_closing': TEMPLATE_CLOSING,
+                    'assignments': [
+                        {'email': offer_assignment.user_email, 'code': offer_assignment.code},
+                        {'email': 'test3@example.com', 'code': 'RANDOMCODE'},
+                    ]
+                }
             )
 
         response = response.json()
@@ -2013,7 +2113,12 @@ class EnterpriseCouponViewSetRbacTests(
             self.get_response(
                 'POST',
                 '/api/v2/enterprise/coupons/{}/assign/'.format(coupon_id),
-                {'template': 'Test template', 'emails': [email]}
+                {
+                    'template': 'Test template',
+                    'template_greeting': TEMPLATE_GREETING,
+                    'template_closing': TEMPLATE_CLOSING,
+                    'emails': [email]
+                }
             )
         offer_assignment = OfferAssignment.objects.filter(user_email=email).first()
         payload = {'assignments': [{'email': email, 'code': offer_assignment.code}]}
@@ -2038,7 +2143,12 @@ class EnterpriseCouponViewSetRbacTests(
         response = self.get_response(
             'POST',
             '/api/v2/enterprise/coupons/{}/remind/'.format(coupon_id),
-            {'template': 'Test template', 'assignments': [{'email': email, 'code': 'RANDOMCODE'}]}
+            {
+                'template': 'Test template',
+                'template_greeting': TEMPLATE_GREETING,
+                'template_closing': TEMPLATE_CLOSING,
+                'assignments': [{'email': email, 'code': 'RANDOMCODE'}]
+            }
         )
 
         response = response.json()
@@ -2062,7 +2172,12 @@ class EnterpriseCouponViewSetRbacTests(
         response = self.get_response(
             'POST',
             '/api/v2/enterprise/coupons/{}/remind/'.format(coupon_id),
-            {'template': 'Test template', 'assignments': [{'email': email, 'code': voucher.code}]}
+            {
+                'template': 'Test template',
+                'template_greeting': TEMPLATE_GREETING,
+                'template_closing': TEMPLATE_CLOSING,
+                'assignments': [{'email': email, 'code': voucher.code}]
+            }
         )
 
         response = response.json()
@@ -2086,7 +2201,12 @@ class EnterpriseCouponViewSetRbacTests(
             self.get_response(
                 'POST',
                 '/api/v2/enterprise/coupons/{}/assign/'.format(coupon_id),
-                {'template': 'Test template', 'emails': [email]}
+                {
+                    'template': 'Test template',
+                    'template_greeting': TEMPLATE_GREETING,
+                    'template_closing': TEMPLATE_CLOSING,
+                    'emails': [email]
+                }
             )
         offer_assignment = OfferAssignment.objects.filter(user_email=email).first()
         with mock.patch(
@@ -2096,7 +2216,12 @@ class EnterpriseCouponViewSetRbacTests(
             response = self.get_response(
                 'POST',
                 '/api/v2/enterprise/coupons/{}/remind/'.format(coupon_id),
-                {'template': 'Test template', 'assignments': [{'email': email, 'code': offer_assignment.code}]}
+                {
+                    'template': 'Test template',
+                    'template_greeting': TEMPLATE_GREETING,
+                    'template_closing': TEMPLATE_CLOSING,
+                    'assignments': [{'email': email, 'code': offer_assignment.code}]
+                }
             )
         response = response.json()
         assert response == [{'email': email, 'code': offer_assignment.code, 'detail': 'email_dispatch_failed'}]
@@ -2113,17 +2238,27 @@ class EnterpriseCouponViewSetRbacTests(
             self.get_response(
                 'POST',
                 '/api/v2/enterprise/coupons/{}/assign/'.format(coupon_id),
-                {'template': 'Test template', 'emails': emails}
+                {
+                    'template': 'Test template',
+                    'template_greeting': TEMPLATE_GREETING,
+                    'template_closing': TEMPLATE_CLOSING,
+                    'emails': emails
+                }
             )
         offer_assignment = OfferAssignment.objects.filter(user_email__in=emails).first()
         with mock.patch('ecommerce.extensions.offer.utils.send_offer_update_email.delay') as mock_send_email:
             response = self.get_response(
                 'POST',
                 '/api/v2/enterprise/coupons/{}/remind/'.format(coupon_id),
-                {'template': 'Test template', 'assignments': [
-                    {'email': offer_assignment.user_email, 'code': offer_assignment.code},
-                    {'email': 'test3@example.com', 'code': 'RANDOMCODE'},
-                ]}
+                {
+                    'template': 'Test template',
+                    'template_greeting': TEMPLATE_GREETING,
+                    'template_closing': TEMPLATE_CLOSING,
+                    'assignments': [
+                        {'email': offer_assignment.user_email, 'code': offer_assignment.code},
+                        {'email': 'test3@example.com', 'code': 'RANDOMCODE'},
+                    ]
+                }
             )
 
         response = response.json()
@@ -2156,7 +2291,12 @@ class EnterpriseCouponViewSetRbacTests(
             response = self.get_response(
                 'POST',
                 '/api/v2/enterprise/coupons/{}/remind/'.format(coupon_id),
-                {'template': 'Test template', 'code_filter': VOUCHER_NOT_REDEEMED}
+                {
+                    'template': 'Test template',
+                    'template_greeting': TEMPLATE_GREETING,
+                    'template_closing': TEMPLATE_CLOSING,
+                    'code_filter': VOUCHER_NOT_REDEEMED
+                }
             )
         response = response.json()
         assert response == [
@@ -2188,7 +2328,12 @@ class EnterpriseCouponViewSetRbacTests(
             response = self.get_response(
                 'POST',
                 '/api/v2/enterprise/coupons/{}/remind/'.format(coupon_id),
-                {'template': 'Test template', 'code_filter': VOUCHER_PARTIAL_REDEEMED}
+                {
+                    'template': 'Test template',
+                    'template_greeting': TEMPLATE_GREETING,
+                    'template_closing': TEMPLATE_CLOSING,
+                    'code_filter': VOUCHER_PARTIAL_REDEEMED
+                }
             )
         response = response.json()
         assert response == [
@@ -2207,7 +2352,11 @@ class EnterpriseCouponViewSetRbacTests(
         response = self.get_response(
             'POST',
             '/api/v2/enterprise/coupons/{}/remind/'.format(coupon_id),
-            {'template': 'Test template'}
+            {
+                'template': 'Test template',
+                'template_greeting': TEMPLATE_GREETING,
+                'template_closing': TEMPLATE_CLOSING,
+            }
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         response = response.json()
@@ -2223,7 +2372,12 @@ class EnterpriseCouponViewSetRbacTests(
         response = self.get_response(
             'POST',
             '/api/v2/enterprise/coupons/{}/remind/'.format(coupon_id),
-            {'template': 'Test template', 'code_filter': 'invalid-filter'}
+            {
+                'template': 'Test template',
+                'template_greeting': TEMPLATE_GREETING,
+                'template_closing': TEMPLATE_CLOSING,
+                'code_filter': 'invalid-filter'
+            }
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         response = response.json()
@@ -2332,7 +2486,13 @@ class OfferAssignmentSummaryViewSetTests(
             self.get_response(
                 'POST',
                 '/api/v2/enterprise/coupons/{}/assign/'.format(coupon_id),
-                {'template': 'Test template', 'emails': emails, 'codes': codes}
+                {
+                    'template': 'Test template',
+                    'template_greeting': TEMPLATE_GREETING,
+                    'template_closing': TEMPLATE_CLOSING,
+                    'emails': emails,
+                    'codes': codes
+                }
             )
 
     def revoke_code_from_user(self, coupon_id, email, code):

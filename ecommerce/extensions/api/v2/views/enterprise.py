@@ -186,7 +186,7 @@ class EnterpriseCouponViewSet(CouponViewSet):
         return CouponSerializer
 
     def validate_access_for_enterprise(self, request_data):
-        # Bypass old-style coupons in enterprise veiw.
+        # Bypass old-style coupons in enterprise view.
         pass
 
     @staticmethod
@@ -589,10 +589,11 @@ class EnterpriseCouponViewSet(CouponViewSet):
         Assign users by email to codes within the Coupon.
         """
         coupon = self.get_object()
-        template = request.data.pop('template')
+        greeting = request.data.pop('template_greeting', '')
+        closing = request.data.pop('template_closing', '')
         serializer = CouponCodeAssignmentSerializer(
             data=request.data,
-            context={'coupon': coupon, 'template': template}
+            context={'coupon': coupon, 'greeting': greeting, 'closing': closing}
         )
         if serializer.is_valid():
             serializer.save()
@@ -606,11 +607,12 @@ class EnterpriseCouponViewSet(CouponViewSet):
         Revoke users by email from codes within the Coupon.
         """
         coupon = self.get_object()
-        email_template = request.data.pop('template', None)
+        greeting = request.data.pop('template_greeting', '')
+        closing = request.data.pop('template_closing', '')
         serializer = CouponCodeRevokeSerializer(
             data=request.data.get('assignments'),
             many=True,
-            context={'coupon': coupon, 'template': email_template}
+            context={'coupon': coupon, 'greeting': greeting, 'closing': closing}
         )
         if serializer.is_valid():
             serializer.save()
@@ -625,9 +627,8 @@ class EnterpriseCouponViewSet(CouponViewSet):
         Remind users of pending offer assignments by email.
         """
         coupon = self.get_object()
-        email_template = request.data.pop('template', None)
-        if not email_template:
-            log_message_and_raise_validation_error(str('Template is required.'))
+        greeting = request.data.pop('template_greeting', '')
+        closing = request.data.pop('template_closing', '')
 
         if request.data.get('assignments'):
             assignments = request.data.get('assignments')
@@ -657,7 +658,7 @@ class EnterpriseCouponViewSet(CouponViewSet):
         serializer = CouponCodeRemindSerializer(
             data=assignments,
             many=True,
-            context={'coupon': coupon, 'template': email_template}
+            context={'coupon': coupon, 'greeting': greeting, 'closing': closing}
         )
         if serializer.is_valid():
             serializer.save()
