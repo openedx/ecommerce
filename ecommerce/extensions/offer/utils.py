@@ -249,7 +249,7 @@ def format_email(template, placeholder_dict, greeting, closing):
         greeting = ''
     if closing is None:
         closing = ''
-    email_body = string.Formatter().vformat(template, (), placeholder_dict)
+    email_body = string.Formatter().vformat(template, SafeTuple(), placeholder_dict)
     return greeting + email_body + closing
 
 
@@ -259,3 +259,11 @@ class SafeDict(dict):
     """
     def __missing__(self, key):
         return '{' + key + '}'
+
+
+class SafeTuple(tuple):
+    """
+    Safely handle missing unnamed placegholder values in python3.
+    """
+    def __getitem__(self, value):
+        return '{}'

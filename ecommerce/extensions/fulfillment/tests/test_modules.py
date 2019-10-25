@@ -13,6 +13,7 @@ from django.test import override_settings
 from oscar.core.loading import get_class, get_model
 from oscar.test import factories
 from requests.exceptions import ConnectionError, Timeout
+from six import assertCountEqual
 from six.moves.urllib.parse import urlencode
 from testfixtures import LogCapture
 from waffle.testutils import override_switch
@@ -650,21 +651,22 @@ class EnrollmentCodeFulfillmentModuleTests(DiscoveryTestMixin, TestCase):
             'email': order.basket.owner.email
         })
 
-        expected_request_body = "firstname=John&" \
-                                "lastname=Doe&" \
-                                "company=Dummy+Business+Client&" \
-                                "{}&" \
-                                "{}&" \
-                                "deal_value=250.00&" \
-                                "address=Streetname%2C+Suite+321&" \
-                                "bulk_purchase_quantity=5&" \
-                                "city=City&" \
-                                "country=United+States&" \
-                                "state=State&" \
-                                "{}"\
-            .format(course_name_data, course_id_data, customer_email_data)
+        expected_request_entries = [
+            "firstname=John",
+            "lastname=Doe",
+            "company=Dummy+Business+Client",
+            course_name_data,
+            course_id_data,
+            "deal_value=250.00",
+            "address=Streetname%2C+Suite+321",
+            "bulk_purchase_quantity=5",
+            "city=City",
+            "country=United+States",
+            "state=State",
+            customer_email_data,
+        ]
         generated_request_body = EnrollmentCodeFulfillmentModule().get_order_fulfillment_data_for_hubspot(order)
-        self.assertEqual(expected_request_body, generated_request_body)
+        assertCountEqual(self, expected_request_entries, generated_request_body.split('&'))
 
     def test_determine_if_enterprise_purchase_expect_true(self):
         """ Test for being able to retrieve 'purchased_behalf_of' attribute from Basket and the checkbox is checked. """
