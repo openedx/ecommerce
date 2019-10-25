@@ -1,4 +1,5 @@
 -r test.in
+-r e2e.in
 -r docs.in
 
 django-debug-toolbar

@@ -9,4 +9,4 @@
 -r ../dev.txt
 -r ../production.txt
 -r ../test.txt
--r ../../e2e/requirements.txt
+-r ../e2e.txt
