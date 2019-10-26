@@ -132,7 +132,10 @@ class CourseAppViewTests(TestCase):
 
         response = self.client.get(self.path)
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.context['credit_providers'], provider_json)
+        self.assertEqual(
+            json.loads(response.context['credit_providers']),
+            json.loads(provider_json),
+        )
 
     @httpretty.activate
     def test_credit_providers_in_context_cached(self):
@@ -154,7 +157,10 @@ class CourseAppViewTests(TestCase):
 
             response = self.client.get(self.path)
             self.assertEqual(response.status_code, 200)
-            self.assertEqual(response.context['credit_providers'], provider_json)
+            self.assertEqual(
+                json.loads(response.context['credit_providers']),
+                json.loads(provider_json),
+            )
             self.assertEqual(mocked_set_all_tiers.call_count, 2)
 
     @httpretty.activate
