@@ -18,7 +18,7 @@ msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: openedx-translation@googlegroups.com\n"
 "POT-Creation-Date: 2018-03-26 16:41-0400\n"
-"PO-Revision-Date: 2019-01-29 19:28+0000\n"
+"PO-Revision-Date: 2019-09-04 16:48+0000\n"
 "Last-Translator: Katerina Ligkovanli <kaligova@gmail.com>\n"
 "Language-Team: Greek (http://www.transifex.com/open-edx/edx-platform/language/el/)\n"
 "MIME-Version: 1.0\n"
@@ -2065,7 +2065,7 @@ msgstr ""
 
 #: ecommerce/templates/edx/credit/checkout.html:113
 msgid "Questions?"
-msgstr ""
+msgstr "Ερωτήσεις;"
 
 #: ecommerce/templates/edx/credit/checkout.html:116
 #, python-format
@@ -2364,7 +2364,7 @@ msgstr ""
 
 #: ecommerce/templates/oscar/basket/partials/hosted_checkout_basket.html:184
 msgid "Have questions?"
-msgstr ""
+msgstr "Έχετε ερωτήσεις;"
 
 #: ecommerce/templates/oscar/basket/partials/hosted_checkout_basket.html:185
 msgid "Please read our FAQs to view common questions about our certificates."
