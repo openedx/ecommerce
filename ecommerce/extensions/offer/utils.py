@@ -127,7 +127,8 @@ def get_redirect_to_email_confirmation_if_required(request, offer, product):
 
 
 def send_assigned_offer_email(
-        template,
+        greeting,
+        closing,
         offer_assignment_id,
         learner_email,
         code,
@@ -135,8 +136,10 @@ def send_assigned_offer_email(
         code_expiration_date):
     """
     Arguments:
-        *template*
-            The email template with placeholders that will receive the following tokens
+        *email_greeting*
+            The email greeting (prefix)
+        *email_closing*
+            The email closing (suffix)
         *offer_assignment_id*
             Primary key of the entry in the offer_assignment model.
         *learner_email*
@@ -149,39 +152,49 @@ def send_assigned_offer_email(
             Date till code is valid.
     """
 
-    email_subject = settings.OFFER_ASSIGNMENT_EMAIL_DEFAULT_SUBJECT
+    email_subject = settings.OFFER_ASSIGNMENT_EMAIL_SUBJECT
+    email_template = settings.OFFER_ASSIGNMENT_EMAIL_TEMPLATE
     placeholder_dict = SafeDict(
         REDEMPTIONS_REMAINING=redemptions_remaining,
         USER_EMAIL=learner_email,
         CODE=code,
         EXPIRATION_DATE=code_expiration_date
     )
-    email_body = format_email(template, placeholder_dict)
+    email_body = format_email(email_template, placeholder_dict, greeting, closing)
     send_offer_assignment_email.delay(learner_email, offer_assignment_id, email_subject, email_body)
 
 
-def send_revoked_offer_email(template, learner_email, code):
+def send_revoked_offer_email(
+        greeting,
+        closing,
+        learner_email,
+        code
+):
     """
     Arguments:
-        *template*
-            The email template with placeholders that will receive the following tokens
+        *email_greeting*
+            The email greeting (prefix)
+        *email_closing*
+            The email closing (suffix)
         *learner_email*
             Email of the customer who will receive the code.
         *code*
             Code for the user.
     """
 
-    email_subject = settings.OFFER_REVOKE_EMAIL_DEFAULT_SUBJECT
+    email_subject = settings.OFFER_REVOKE_EMAIL_SUBJECT
+    email_template = settings.OFFER_REVOKE_EMAIL_TEMPLATE
     placeholder_dict = SafeDict(
         USER_EMAIL=learner_email,
         CODE=code,
     )
-    email_body = format_email(template, placeholder_dict)
+    email_body = format_email(email_template, placeholder_dict, greeting, closing)
     send_offer_update_email.delay(learner_email, email_subject, email_body)
 
 
 def send_assigned_offer_reminder_email(
-        template,
+        greeting,
+        closing,
         learner_email,
         code,
         redeemed_offer_count,
@@ -189,8 +202,10 @@ def send_assigned_offer_reminder_email(
         code_expiration_date):
     """
     Arguments:
-       *template*
-           The email template with placeholders that will receive the following tokens
+        *email_greeting*
+            The email greeting (prefix)
+        *email_closing*
+            The email closing (suffix)
        *learner_email*
            Email of the customer who will receive the code.
        *code*
@@ -203,7 +218,8 @@ def send_assigned_offer_reminder_email(
            Date till code is valid.
     """
 
-    email_subject = settings.OFFER_ASSIGNMENT_EMAIL_REMINDER_DEFAULT_SUBJECT
+    email_subject = settings.OFFER_REMINDER_EMAIL_SUBJECT
+    email_template = settings.OFFER_REMINDER_EMAIL_TEMPLATE
     placeholder_dict = SafeDict(
         REDEEMED_OFFER_COUNT=redeemed_offer_count,
         TOTAL_OFFER_COUNT=total_offer_count,
@@ -211,24 +227,30 @@ def send_assigned_offer_reminder_email(
         CODE=code,
         EXPIRATION_DATE=code_expiration_date
     )
-    email_body = format_email(template, placeholder_dict)
+    email_body = format_email(email_template, placeholder_dict, greeting, closing)
     send_offer_update_email.delay(learner_email, email_subject, email_body)
 
 
-def format_email(template, placeholder_dict):
+def format_email(template, placeholder_dict, greeting, closing):
     """
     Arguments:
-        template (String): Email template
+        template (String): Email template body
         placeholder_dict (SafeDict): Safe dictionary of placeholders and their values
+        greeting (String): Email greeting (prefix)
+        closing (String): Email closing (suffix)
 
     Apply placeholders to the email template.
 
-    Safely handle placeholders in the template without matching tokens (just emit the placeholders). We do this because
-    learner admins can modify the email template, and sometimes they add extra placeholders that we aren't expecting.
+    Safely handle placeholders in the template without matching tokens (just emit the placeholders).
 
     Reference: https://stackoverflow.com/questions/17215400/python-format-string-unused-named-arguments
     """
-    return string.Formatter().vformat(template, (), placeholder_dict)
+    if greeting is None:
+        greeting = ''
+    if closing is None:
+        closing = ''
+    email_body = string.Formatter().vformat(template, (), placeholder_dict)
+    return greeting + email_body + closing
 
 
 class SafeDict(dict):

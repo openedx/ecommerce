@@ -21,6 +21,8 @@ class CouponCodeSerializerTests(CouponMixin, TestCase):
     """ Test for coupon code serializers. """
     LOGGER_NAME = 'ecommerce.extensions.api.serializers'
     TEMPLATE = 'Text {PARAM} is fun'
+    GREETING = 'Hello '
+    CLOSING = ' Bye'
 
     def setUp(self):
         super(CouponCodeSerializerTests, self).setUp()
@@ -51,14 +53,19 @@ class CouponCodeSerializerTests(CouponMixin, TestCase):
             (
                 self.LOGGER_NAME,
                 'ERROR',
-                '[Offer Assignment] Email for offer_assignment_id: {} with template \'{}\' raised exception: '
-                'Exception(\'Ignore me - assignment\',)'.format(self.offer_assignment.id, self.TEMPLATE)
+                '[Offer Assignment] Email for offer_assignment_id: {} with greeting \'{}\' and closing \'{}\' raised '
+                'exception: Exception(\'Ignore me - assignment\',)'.format(
+                    self.offer_assignment.id,
+                    self.GREETING,
+                    self.CLOSING,
+                )
             ),
         ]
 
         with LogCapture(self.LOGGER_NAME) as log:
             serializer._trigger_email_sending_task(  # pylint: disable=protected-access
-                template=self.TEMPLATE,
+                greeting=self.GREETING,
+                closing=self.CLOSING,
                 assigned_offer=self.offer_assignment,
                 voucher_usage_type=Voucher.MULTI_USE_PER_CUSTOMER
             )
@@ -73,22 +80,27 @@ class CouponCodeSerializerTests(CouponMixin, TestCase):
             (
                 self.LOGGER_NAME,
                 'ERROR',
-                '[Offer Reminder] Email for offer_assignment_id: {} with template \'{}\' raised exception: '
-                'Exception(\'Ignore me - reminder\',)'.format(self.offer_assignment.id, self.TEMPLATE)
+                '[Offer Reminder] Email for offer_assignment_id: {} with greeting \'{}\' and closing \'{}\' raised '
+                'exception: Exception(\'Ignore me - reminder\',)'.format(
+                    self.offer_assignment.id,
+                    self.GREETING,
+                    self.CLOSING,
+                )
             ),
         ]
 
         with self.assertRaises(Exception):
             with LogCapture(self.LOGGER_NAME) as log:
                 serializer._trigger_email_sending_task(  # pylint: disable=protected-access
-                    template=self.TEMPLATE,
+                    greeting=self.GREETING,
+                    closing=self.CLOSING,
                     assigned_offer=self.offer_assignment,
                     redeemed_offer_count=3,
                     total_offer_count=5,
                 )
         log.check_present(*expected)
 
-    def test_send_revocation_email_error_no_template(self):
+    def test_send_revocation_email_error_no_greeting(self):
         """ Test that we log an appropriate message if the code revocation email cannot be sent. """
         serializer = CouponCodeRevokeSerializer(data=self.data, context={'coupon': self.coupon})
 
@@ -96,8 +108,13 @@ class CouponCodeSerializerTests(CouponMixin, TestCase):
             (
                 self.LOGGER_NAME,
                 'ERROR',
-                '[Offer Revocation] Encountered error when revoking code {} for user {} with template \'{}\''.format(
-                    None, None, None)
+                '[Offer Revocation] Encountered error when revoking code {} for user {} with greeting {} and '
+                'closing {}'.format(
+                    None,
+                    None,
+                    None,
+                    None
+                )
             ),
         ]
         with LogCapture(self.LOGGER_NAME) as log:
@@ -115,7 +132,8 @@ class CouponCodeSerializerTests(CouponMixin, TestCase):
         }
         context = {
             'coupon': self.coupon,
-            'template': self.TEMPLATE,
+            'greeting': self.GREETING,
+            'closing': self.CLOSING,
         }
         serializer = CouponCodeRevokeSerializer(data=self.data, context=context)
 
@@ -123,8 +141,13 @@ class CouponCodeSerializerTests(CouponMixin, TestCase):
             (
                 self.LOGGER_NAME,
                 'ERROR',
-                '[Offer Revocation] Encountered error when revoking code {} for user {} with template \'{}\''.format(
-                    self.code, self.email, self.TEMPLATE)
+                '[Offer Revocation] Encountered error when revoking code {} for user {} with greeting \'{}\' and '
+                'closing \'{}\''.format(
+                    self.code,
+                    self.email,
+                    self.GREETING,
+                    self.CLOSING,
+                )
             ),
         ]
         with LogCapture(self.LOGGER_NAME) as log:

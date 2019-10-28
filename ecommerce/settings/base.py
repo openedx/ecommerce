@@ -701,9 +701,28 @@ NEW_CODES_EMAIL_CONFIG = {
     '''
 }
 
-OFFER_ASSIGNMENT_EMAIL_DEFAULT_SUBJECT = 'New edX course assignment'
-OFFER_REVOKE_EMAIL_DEFAULT_SUBJECT = 'edX Course Assignment Revoked'
-OFFER_ASSIGNMENT_EMAIL_REMINDER_DEFAULT_SUBJECT = 'Reminder on edX course assignment'
+OFFER_ASSIGNMENT_EMAIL_TEMPLATE = '''
+You may redeem this code for {REDEMPTIONS_REMAINING} course(s).
+
+edX Login: {USER_EMAIL}
+Access Code: {CODE}
+Expiration Date: {EXPIRATION_DATE}
+'''
+OFFER_ASSIGNMENT_EMAIL_SUBJECT = 'New edX course assignment'
+
+OFFER_REVOKE_EMAIL_TEMPLATE = '''
+Your learning manager has revoked {CODE} and it is no longer assigned to your edX account {USER_EMAIL}.
+'''
+OFFER_REVOKE_EMAIL_SUBJECT = 'edX Course Assignment Revoked'
+
+OFFER_REMINDER_EMAIL_TEMPLATE = '''
+You have redeemed this code {REDEEMED_OFFER_COUNT} time(s) out of {TOTAL_OFFER_COUNT} available course redemptions.
+
+edX Login: {USER_EMAIL}
+Access Code: {CODE}
+Expiration Date: {EXPIRATION_DATE}
+'''
+OFFER_REMINDER_EMAIL_SUBJECT = 'Reminder on edX course assignment'
 
 # SAILTHRU settings
 SAILTHRU_KEY = 'sailthru key here'
