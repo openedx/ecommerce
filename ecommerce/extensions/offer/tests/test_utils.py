@@ -257,12 +257,12 @@ class UtilTests(DiscoveryTestMixin, TestCase):
             EXPIRATION_DATE=tokens.get('code_expiration_date'),
         )
         email = format_email(template, placeholder_dict, greeting, closing)
-        self.assertTrue(str(tokens.get('redemptions_remaining')) in email)
-        self.assertTrue(tokens.get('learner_email') in email)
-        self.assertTrue(tokens.get('code') in email)
-        self.assertTrue(tokens.get('code_expiration_date') in email)
-        self.assertTrue(greeting in email)
-        self.assertTrue(closing in email)
+        self.assertIn(str(tokens.get('redemptions_remaining')), email)
+        self.assertIn(tokens.get('learner_email'), email)
+        self.assertIn(tokens.get('code'), email)
+        self.assertIn(tokens.get('code_expiration_date'), email)
+        self.assertIn(greeting, email)
+        self.assertIn(closing, email)
 
     def test_format_assigned_offer_broken_email(self):
         """
@@ -278,8 +278,8 @@ class UtilTests(DiscoveryTestMixin, TestCase):
             EXPIRATION_DATE='2018-12-19',
         )
         email = format_email(self._BROKEN_EMAIL_TEMPLATE, placeholder_dict, greeting, closing)
-        self.assertTrue('{DOES_NOT_EXIST}' in email)
-        self.assertTrue(code in email)
+        self.assertIn('{DOES_NOT_EXIST}', email)
+        self.assertIn(code, email)
 
         # Compare strings, ignoring whitespace differences
         expected_email = """
@@ -304,8 +304,8 @@ class UtilTests(DiscoveryTestMixin, TestCase):
             EXPIRATION_DATE='2018-12-19',
         )
         email = format_email(self._BROKEN_EMAIL_TEMPLATE, placeholder_dict, None, None)
-        self.assertTrue('{DOES_NOT_EXIST}' in email)
-        self.assertTrue(code in email)
+        self.assertIn('{DOES_NOT_EXIST}', email)
+        self.assertIn(code, email)
 
         # Compare strings, ignoring whitespace differences
         expected_email = """
@@ -314,6 +314,6 @@ class UtilTests(DiscoveryTestMixin, TestCase):
             code: ABC7RUEOU7VHBH7Q ABC7RUEOU7VHBH7Q
             {}
             { abc d }
-            More text. 
+            More text.
             """
         self.assertEqual(email.split(), expected_email.split())

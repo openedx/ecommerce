@@ -1316,7 +1316,7 @@ class CouponCodeAssignmentSerializer(serializers.Serializer):  # pylint: disable
             )
         except Exception as exc:  # pylint: disable=broad-except
             logger.exception(
-                '[Offer Assignment] Email for offer_assignment_id: %d with greeting \'%s\' and closing \'%s\' raised '
+                '[Offer Assignment] Email for offer_assignment_id: %d with greeting %r and closing %r raised '
                 'exception: %r',
                 assigned_offer.id,
                 greeting,
@@ -1450,7 +1450,7 @@ class CouponCodeRevokeSerializer(CouponCodeMixin, serializers.Serializer):  # py
             )
         except Exception as exc:  # pylint: disable=broad-except
             logger.exception('[Offer Revocation] Encountered error when revoking code %s for user %s with '
-                             'greeting \'%s\' and closing \'%s\'', code, email, greeting, closing)
+                             'greeting %r and closing %r', code, email, greeting, closing)
             detail = six.text_type(exc)
 
         validated_data['detail'] = detail
@@ -1547,7 +1547,7 @@ class CouponCodeRemindSerializer(CouponCodeMixin, serializers.Serializer):  # py
         except Exception as exc:  # pylint: disable=broad-except
             # Log the exception here to help diagnose any template issues, then raise it for backwards compatibility
             logger.exception(
-                '[Offer Reminder] Email for offer_assignment_id: %d with greeting \'%s\' and closing \'%s\' raised '
+                '[Offer Reminder] Email for offer_assignment_id: %d with greeting %r and closing %r raised '
                 'exception: %r',
                 assigned_offer.id,
                 greeting,

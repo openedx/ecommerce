@@ -108,8 +108,8 @@ class CouponCodeSerializerTests(CouponMixin, TestCase):
             (
                 self.LOGGER_NAME,
                 'ERROR',
-                '[Offer Revocation] Encountered error when revoking code {} for user {} with greeting \'{}\' and '
-                'closing \'{}\''.format(
+                '[Offer Revocation] Encountered error when revoking code {} for user {} with greeting {} and '
+                'closing {}'.format(
                     None,
                     None,
                     None,
