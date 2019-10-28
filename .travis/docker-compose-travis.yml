@@ -36,4 +36,4 @@ services:
       DB_USER: "ecomm001"
       DJANGO_SETTINGS_MODULE: "ecommerce.settings.test"
       JASMINE_HOSTNAME: "localhost"
-      JASMINE_WEB_DRIVER: "Firefox"
+      JASMINE_WEB_DRIVER: "FirefoxHeadless"
