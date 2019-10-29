@@ -1,6 +1,6 @@
--r test.in
--r e2e.in
--r docs.in
+-r test.txt
+-r docs.txt
+-r e2e.txt
 
 django-debug-toolbar
 

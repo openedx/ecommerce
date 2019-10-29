@@ -111,7 +111,7 @@ rules==2.1
 sailthru-client==2.2.3
 semantic-version==2.8.2   # via edx-drf-extensions
 simplejson==3.16.0        # via django-rest-swagger, sailthru-client
-six==1.12.0
+six==1.11.0
 slumber==0.7.1            # via edx-rest-api-client
 social-auth-app-django==1.2.0  # via edx-auth-backends
 social-auth-core[openidconnect]==1.7.0  # via edx-auth-backends, social-auth-app-django
@@ -123,6 +123,6 @@ typing==3.7.4.1           # via django-extensions
 unicodecsv==0.14.1
 unidecode==1.0.23         # via django-oscar
 uritemplate==3.0.0        # via coreapi
-urllib3==1.25.6           # via requests
+urllib3==1.23
 xss-utils==0.1.1
 zeep==3.4.0

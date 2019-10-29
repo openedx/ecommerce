@@ -1,4 +1,6 @@
--r base.in
+-r pins.txt
+-r base.txt
+-r tox.txt
 
 bok_choy
 coverage
@@ -21,4 +23,3 @@ pysqlite ; python_version == "2.7"  # DB-API 2.0 interface for SQLite 3.x (used 
 responses
 selenium
 testfixtures                # Provides a LogCapture utility used by several tests
-tox
