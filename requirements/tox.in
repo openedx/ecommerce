@@ -1,0 +1,3 @@
+-r pins.txt
+
+tox

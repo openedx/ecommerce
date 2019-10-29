@@ -1,3 +1,5 @@
+-r pins.txt
+
 analytics-python
 coreapi
 django<2.0
@@ -41,7 +43,7 @@ pygments
 python-dateutil
 python-openid ; python_version == "2.7"
 python3-openid ; python_version >= "3"
-pytz==2016.10
+pytz
 requests
 rules
 sailthru-client==2.2.3

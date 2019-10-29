@@ -40,13 +40,16 @@ requirements.js:
 requirements: requirements.js
 	pip install -r requirements/dev.txt --exists-action w
 
+requirements.tox:
+	pip install -r requirements/tox.txt --exists-action w
+
 production-requirements: requirements.js
 	pip install -r requirements.txt --exists-action w
 
-migrate:
+migrate: requirements.tox
 	tox -e $(PYTHON_ENV)-migrate
 
-serve:
+serve: requirements.tox
 	tox -e $(PYTHON_ENV)-serve
 
 clean:
@@ -56,18 +59,18 @@ clean:
 clean_static:
 	rm -rf assets/* ecommerce/static/build/*
 
-run_check_isort:
+run_check_isort: requirements.tox
 	tox -e $(PYTHON_ENV)-check_isort
 
-run_isort:
+run_isort: requirements.tox
 	tox -e $(PYTHON_ENV)-run_isort
 
-run_pycodestyle:
+run_pycodestyle: requirements.tox
 	tox -e $(PYTHON_ENV)-pycodestyle
 
 run_pep8: run_pycodestyle
 
-run_pylint:
+run_pylint: requirements.tox
 	tox -e $(PYTHON_ENV)-pylint
 
 quality: run_check_isort run_pycodestyle run_pylint
@@ -77,39 +80,39 @@ validate_js:
 	$(NODE_BIN)/gulp test
 	$(NODE_BIN)/gulp lint
 
-validate_python: clean
+validate_python: clean requirements.tox
 	tox -e $(PYTHON_ENV)-tests
 
-fast_validate_python: clean
+fast_validate_python: clean requirements.tox
 	DISABLE_ACCEPTANCE_TESTS=True tox -e $(PYTHON_ENV)-tests
 
 validate: validate_python validate_js quality
 
-theme_static:
+theme_static: requirements.tox
 	tox -e $(PYTHON_ENV)-theme_static
 
-static: requirements.js theme_static
+static: requirements.js theme_static requirements.tox
 	$(NODE_BIN)/r.js -o build.js
 	tox -e $(PYTHON_ENV)-static
 
-html_coverage:
+html_coverage: requirements.tox
 	tox -e $(PYTHON_ENV)-coverage_html
 
 diff_coverage: validate fast_diff_coverage
 
-fast_diff_coverage:
+fast_diff_coverage: requirements.tox
 	tox -e $(PYTHON_ENV)-fast_diff_coverage
 
 e2e:
 	pytest e2e --html=log/html_report.html --junitxml=e2e/xunit.xml
 
-extract_translations:
+extract_translations: requirements.tox
 	tox -e $(PYTHON_ENV)-extract_translations
 
-dummy_translations:
+dummy_translations: requirements.tox
 	tox -e $(PYTHON_ENV)-dummy_translations
 
-compile_translations:
+compile_translations: requirements.tox
 	tox -e $(PYTHON_ENV)-compile_translations
 
 fake_translations: extract_translations dummy_translations compile_translations
@@ -123,25 +126,26 @@ push_translations:
 update_translations: pull_translations fake_translations
 
 # extract_translations should be called before this command can detect changes
-detect_changed_source_translations:
+detect_changed_source_translations: requirements.tox
 	tox -e $(PYTHON_ENV)-detect_changed_translations
 
 check_translations_up_to_date: fake_translations detect_changed_source_translations
 
 # Validate translations
-validate_translations:
+validate_translations: requirements.tox
 	tox -e $(PYTHON_ENV)-validate_translations
 
 export CUSTOM_COMPILE_COMMAND = make upgrade
 upgrade: ## update the requirements/*.txt files with the latest packages satisfying requirements/*.in
 	pip install -q -r requirements/pip_tools.txt
 	pip-compile --upgrade -o requirements/pip_tools.txt requirements/pip_tools.in
+	pip-compile --upgrade -o requirements/tox.txt requirements/tox.in
 	pip-compile --upgrade -o requirements/base.txt requirements/base.in
 	pip-compile --upgrade -o requirements/docs.txt requirements/docs.in
 	pip-compile --upgrade -o requirements/e2e.txt requirements/e2e.in
+	pip-compile --upgrade -o requirements/test.txt requirements/test.in
 	pip-compile --upgrade -o requirements/dev.txt requirements/dev.in
 	pip-compile --upgrade -o requirements/production.txt requirements/production.in
-	pip-compile --upgrade -o requirements/test.txt requirements/test.in
 
 # Targets in a Makefile which do not produce an output file with the same name as the target name
 .PHONY: help requirements migrate serve clean validate_python quality validate_js validate html_coverage e2e \
