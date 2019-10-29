@@ -1,0 +1,3 @@
+# Bridge the gap between the old and new dependency locations
+
+-r ../requirements/e2e.txt
