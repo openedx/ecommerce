@@ -104,7 +104,7 @@ fast_diff_coverage: requirements.tox
 	tox -e $(PYTHON_ENV)-fast_diff_coverage
 
 e2e:
-	pytest e2e --html=log/html_report.html --junitxml=e2e/xunit.xml
+	tox -e $(PYTHON_ENV)-e2e
 
 extract_translations: requirements.tox
 	tox -e $(PYTHON_ENV)-extract_translations
