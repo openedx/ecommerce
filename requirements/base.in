@@ -1,6 +1,7 @@
 -r pins.txt
 
 analytics-python
+bleach
 coreapi
 django<2.0
 django-compressor

@@ -1,6 +1,7 @@
 """Offer Utility Methods. """
 from __future__ import absolute_import
 
+import bleach
 import logging
 import string  # pylint: disable=W0402
 from decimal import Decimal
@@ -249,6 +250,9 @@ def format_email(template, placeholder_dict, greeting, closing):
         greeting = ''
     if closing is None:
         closing = ''
+    
+    greeting = bleach.clean(greeting)
+    closing = bleach.clean(closing)
     email_body = string.Formatter().vformat(template, SafeTuple(), placeholder_dict)
     return greeting + email_body + closing
 
@@ -263,7 +267,7 @@ class SafeDict(dict):
 
 class SafeTuple(tuple):
     """
-    Safely handle missing unnamed placegholder values in python3.
+    Safely handle missing unnamed placeholder values in python3.
     """
     def __getitem__(self, value):
         return '{}'
