@@ -18,6 +18,7 @@ pytz==2016.10
 scandir==1.10.0           # via pathlib2
 six==1.11.0
 toml==0.10.0              # via tox
+tox-battery==0.5.1
 tox==3.14.0
 urllib3==1.23
 virtualenv==16.7.7        # via tox
