@@ -150,7 +150,7 @@ class CourseAppViewTests(TestCase):
 
             response = self.client.get(self.path)
             self.assertEqual(response.status_code, 200)
-            self.assertEqual(response.context['credit_providers'], provider_json)
+            self.assertEqual(json.loads(response.context['credit_providers']), json.loads(provider_json))
 
             # Assert set_all_tiers calls, 1 for access token and 1 for credit providers.
             self.assertEqual(mocked_set_all_tiers.call_count, 2)
