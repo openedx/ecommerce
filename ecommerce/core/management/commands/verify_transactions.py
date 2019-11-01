@@ -48,7 +48,6 @@ PaymentEventTypeName = get_class('order.constants', 'PaymentEventTypeName')
 
 DEFAULT_START_DELTA_TIME = 240
 DEFAULT_END_DELTA_TIME = 60
-DEFAULT_THRESHOLD = 3
 VALID_PRODUCT_CLASS_NAMES = [SEAT_PRODUCT_CLASS_NAME, COURSE_ENTITLEMENT_PRODUCT_CLASS_NAME]
 
 
@@ -81,11 +80,12 @@ class Command(BaseCommand):
         )
         parser.add_argument(
             '--threshold',
+            metavar='N',
             action='store',
             dest='end_delta',
-            type=int,
-            default=DEFAULT_THRESHOLD,
-            help='Number of anomolies to trigger failure.'
+            type=float,
+            default=0,
+            help='Anomoly threshold to trigger failure.  If N is between 0 and 1, this will be the fraction of total orders; N >= 1 will be an integer number of errors'
         )
 
     def handle(self, *args, **options):
@@ -121,8 +121,16 @@ class Command(BaseCommand):
         self.clean_orders()
         (error_count, exit_errors) = self.compile_errors()
 
-        if error_count > options['threshold']:
+        threshold = max(options['threshold'], 0)
+        if threshold == 0 or threshold >= 1:
+            flunk = error_count > int(threshold)
+        else:
+            flunk = float(error_count) / orders.count() > threshold
+
+        if flunk:
             raise CommandError("Errors in transactions: {errors}".format(errors=exit_errors))
+        if exit_errors:
+            logger.warning("Errors in transactions below threshold (%s): %s", threshold, exit_errors)
 
     def validate_order_payments(self, order, payments):
         # If a coupon is used to purchase a product for the full price, there will be no PaymentEvent
