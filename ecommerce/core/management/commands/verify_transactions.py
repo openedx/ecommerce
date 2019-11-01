@@ -65,7 +65,6 @@ class Command(BaseCommand):
         parser.add_argument(
             '--start-delta',
             action='store',
-            dest='start_delta',
             type=int,
             default=DEFAULT_START_DELTA_TIME,
             help='Minutes before now to start looking at orders.'
@@ -73,7 +72,6 @@ class Command(BaseCommand):
         parser.add_argument(
             '--end-delta',
             action='store',
-            dest='end_delta',
             type=int,
             default=DEFAULT_END_DELTA_TIME,
             help='Minutes before now to end looking at orders.'
@@ -82,10 +80,10 @@ class Command(BaseCommand):
             '--threshold',
             metavar='N',
             action='store',
-            dest='end_delta',
             type=float,
             default=0,
-            help='Anomoly threshold to trigger failure.  If N is between 0 and 1, this will be the fraction of total orders; N >= 1 will be an integer number of errors'
+            help='Anomoly threshold to trigger failure.  If N is between 0 and 1, this will be the ' +
+            'fraction of total orders; N >= 1 will be an integer number of errors'
         )
 
     def handle(self, *args, **options):
@@ -130,7 +128,7 @@ class Command(BaseCommand):
         if flunk:
             raise CommandError("Errors in transactions: {errors}".format(errors=exit_errors))
         if exit_errors:
-            logger.warning("Errors in transactions below threshold (%s): %s", threshold, exit_errors)
+            logger.warning("Errors in transactions below threshold (%f): %s", threshold, exit_errors)
 
     def validate_order_payments(self, order, payments):
         # If a coupon is used to purchase a product for the full price, there will be no PaymentEvent
