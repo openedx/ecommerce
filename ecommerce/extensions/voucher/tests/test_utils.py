@@ -188,7 +188,7 @@ class UtilTests(CouponMixin, DiscoveryMockMixin, DiscoveryTestMixin, LmsApiMockM
             course_seat_types=course_seat_types,
         )
 
-    def use_voucher(self, order_num, voucher, user, add_entitlement=False):
+    def use_voucher(self, order_num, voucher, user, add_entitlement=False, product=None):
         """
         Mark voucher as used by provided users
 
@@ -201,7 +201,8 @@ class UtilTests(CouponMixin, DiscoveryMockMixin, DiscoveryTestMixin, LmsApiMockM
         if add_entitlement:
             order_line = OrderLineFactory(product=self.entitlement, partner_sku=self.partner_sku)
             order.lines.add(order_line)
-        order_line = OrderLineFactory(product=self.verified_seat, partner_sku=self.partner_sku)
+        product = product if product else self.verified_seat
+        order_line = OrderLineFactory(product=product, partner_sku=self.partner_sku)
         order.lines.add(order_line)
         voucher.record_usage(order, user)
         voucher.offers.first().record_usage(discount={'freq': 1, 'discount': 1})
@@ -505,6 +506,21 @@ class UtilTests(CouponMixin, DiscoveryMockMixin, DiscoveryTestMixin, LmsApiMockM
         __, rows = generate_coupon_report([coupon_voucher])
         voucher = coupon_voucher.vouchers.first()
         self.assert_report_first_row(rows[0], dynamic_coupon, voucher)
+
+    def test_generate_coupon_report_with_deleted_product(self):
+        """ Verify the coupon report contains correct data for coupon with fixed benefit type. """
+        course = CourseFactory(id='course-v1:del-org+course+run', partner=self.partner)
+        professional_seat = course.create_or_update_seat('professional', False, 100)
+        query_coupon = self.create_catalog_coupon(catalog_query='course:*')
+
+        vouchers = query_coupon.attr.coupon_vouchers.vouchers.all()
+        first_voucher = vouchers.first()
+        self.use_voucher('TESTORDER1', first_voucher, self.user, product=professional_seat)
+        professional_seat.delete()
+
+        __, rows = generate_coupon_report([query_coupon.attr.coupon_vouchers])
+        self.assert_report_first_row(rows[0], query_coupon, first_voucher)
+        self.assertDictContainsSubset({'Redeemed For Course ID': 'Unknown'}, rows[2])
 
     def test_report_for_inactive_coupons(self):
         """ Verify the coupon report show correct status for inactive coupons. """

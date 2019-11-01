@@ -228,19 +228,25 @@ def _get_voucher_info_for_coupon_report(voucher):
     return coupon_data
 
 
-def _get_line_id(line):
+def _get_redemption_course_ids(voucher_application):
     """
-    Return unique id of line
+    Return list of course ids where voucher is applied
     Args:
-        line: line in application orders
+        voucher_application: voucher application object
 
     Returns:
-         if product is entitlement product then uuid
-         else course_id.
+         list of course ids where voucher is applied.
     """
-    if line.product.is_course_entitlement_product:
-        return line.product.attr.UUID
-    return line.product.course_id
+    redemption_course_ids = []
+    for line in voucher_application.order.lines.all():
+        if line.product:
+            if line.product.is_course_entitlement_product:
+                redemption_course_ids.append(line.product.attr.UUID)
+            else:
+                redemption_course_ids.append(line.product.course_id)
+        else:
+            redemption_course_ids.append('Unknown')
+    return redemption_course_ids
 
 
 def generate_coupon_report(coupon_vouchers):
@@ -305,11 +311,8 @@ def generate_coupon_report(coupon_vouchers):
                     voucher=voucher).prefetch_related('user', 'order__lines')
 
                 for application in voucher_applications:
-                    redemption_course_ids = []
+                    redemption_course_ids = _get_redemption_course_ids(application)
                     redemption_user_username = application.user.username
-
-                    for line in application.order.lines.all():
-                        redemption_course_ids.append(_get_line_id(line))
 
                     new_row = row.copy()
                     _add_redemption_course_ids(new_row, rows[0], redemption_course_ids)
