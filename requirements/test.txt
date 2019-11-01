@@ -76,7 +76,7 @@ faker==2.0.3
 filelock==3.0.12
 freezegun==0.3.12
 funcsigs==1.0.2
-future==0.18.1
+future==0.18.2
 futures==3.3.0 ; python_version == "2.7"
 httpretty==0.9.7
 idna==2.8
@@ -112,7 +112,7 @@ path.py==7.2
 pathlib2==2.3.5
 paypalrestsdk==1.13.1
 pbr==5.4.3
-phonenumbers==8.10.21
+phonenumbers==8.10.22
 pillow==6.2.1
 pluggy==0.13.0
 premailer==2.9.2
