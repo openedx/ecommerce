@@ -81,12 +81,12 @@ class VerifyTransactionsTest(TestCase):
         self.assertIn(str(self.order.id), exception)
 
         try:
-            call_command('verify_transactions', '--threshold=1') # allow 1 anomoly
+            call_command('verify_transactions', '--threshold=1')  # allow 1 anomoly
         except CommandError as e:
             self.fail("Failed to verify transactions when no failure was expected. {}".format(e))
 
         try:
-            call_command('verify_transactions', '--threshold=0.25') # 1-in-4 should be just on the line
+            call_command('verify_transactions', '--threshold=0.25')  # 1-in-4 should be just on the line
         except CommandError as e:
             self.fail("Failed to verify transactions when no failure was expected. {}".format(e))
 
