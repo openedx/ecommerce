@@ -65,7 +65,6 @@ class Command(BaseCommand):
         parser.add_argument(
             '--start-delta',
             action='store',
-            dest='start_delta',
             type=int,
             default=DEFAULT_START_DELTA_TIME,
             help='Minutes before now to start looking at orders.'
@@ -73,10 +72,18 @@ class Command(BaseCommand):
         parser.add_argument(
             '--end-delta',
             action='store',
-            dest='end_delta',
             type=int,
             default=DEFAULT_END_DELTA_TIME,
             help='Minutes before now to end looking at orders.'
+        )
+        parser.add_argument(
+            '--threshold',
+            metavar='N',
+            action='store',
+            type=float,
+            default=0,
+            help='Anomoly threshold to trigger failure.  If N is between 0 and 1, this will be the ' +
+            'fraction of total orders; N >= 1 will be an integer number of errors'
         )
 
     def handle(self, *args, **options):
@@ -110,10 +117,18 @@ class Command(BaseCommand):
             self.validate_order_refunds(order, refunds, payments)
 
         self.clean_orders()
-        exit_errors = self.compile_errors()
+        (error_count, exit_errors) = self.compile_errors()
 
-        if exit_errors:
+        threshold = max(options['threshold'], 0)
+        if threshold == 0 or threshold >= 1:
+            flunk = error_count > int(threshold)
+        else:
+            flunk = float(error_count) / orders.count() > threshold
+
+        if flunk:
             raise CommandError("Errors in transactions: {errors}".format(errors=exit_errors))
+        if exit_errors:
+            logger.warning("Errors in transactions below threshold (%f): %s", threshold, exit_errors)
 
     def validate_order_payments(self, order, payments):
         # If a coupon is used to purchase a product for the full price, there will be no PaymentEvent
@@ -146,21 +161,25 @@ class Command(BaseCommand):
             )
 
     def compile_errors(self):
+        error_count = 0
         exit_errors = {}
         if self.ORDER_PAYMENT_TOTALS_MISMATCH:
+            error_count += len(self.ORDER_PAYMENT_TOTALS_MISMATCH)
             exit_errors["totals_mismatch"] = "Order totals mismatch with payments received. " \
                                              + self.error_msg(self.ORDER_PAYMENT_TOTALS_MISMATCH)
         if self.ORDERS_WITHOUT_PAYMENTS:
+            error_count += len(self.ORDERS_WITHOUT_PAYMENTS)
             exit_errors["orders_no_pay"] = "The following orders are without payments " \
                                            + self.error_msg(self.ORDERS_WITHOUT_PAYMENTS)
         if self.MULTI_PAYMENT_ON_ORDER:
+            error_count += len(self.MULTI_PAYMENT_ON_ORDER)
             exit_errors["multi_pay_on_order"] = "The following orders had multiple payments " \
                                                 + self.error_msg(self.MULTI_PAYMENT_ON_ORDER)
-
         if self.REFUND_AMOUNT_EXCEEDED:
+            error_count += len(self.REFUND_AMOUNT_EXCEEDED)
             exit_errors["refund_amount_exceeded"] = "The following orders had excessive refunds " \
                                                     + self.error_msg(self.REFUND_AMOUNT_EXCEEDED)
-        return exit_errors
+        return (error_count, exit_errors)
 
     def error_msg(self, errors):
         msg = ""

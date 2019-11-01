@@ -57,6 +57,45 @@ class VerifyTransactionsTest(TestCase):
         except CommandError as e:
             self.fail("Failed to verify transactions when no errors were expected. {}".format(e))
 
+    def test_threshold(self):
+        """Test verify_transactions only fails if there are too many anomolies"""
+        for i in range(3):
+            # Create some "good" orders w/ payments
+            order = OrderFactory(total_incl_tax=50 + i, date_placed=self.timestamp)
+            line = OrderLineFactory(order=order, product=self.product, partner_sku='test_sku')
+            payment = PaymentEventFactory(
+                order=order,
+                amount=50 + i,
+                event_type_id=self.payevent.id,
+                date_created=self.timestamp
+            )
+            payment.save()
+            line.save()
+            order.save()
+
+        # self.order fixture should still have no payment
+        with self.assertRaises(CommandError) as cm:
+            call_command('verify_transactions')
+        exception = six.text_type(cm.exception)
+        self.assertIn("The following orders are without payments", exception)
+        self.assertIn(str(self.order.id), exception)
+
+        try:
+            call_command('verify_transactions', '--threshold=1')  # allow 1 anomoly
+        except CommandError as e:
+            self.fail("Failed to verify transactions when no failure was expected. {}".format(e))
+
+        try:
+            call_command('verify_transactions', '--threshold=0.25')  # 1-in-4 should be just on the line
+        except CommandError as e:
+            self.fail("Failed to verify transactions when no failure was expected. {}".format(e))
+
+        with self.assertRaises(CommandError) as cm:
+            call_command('verify_transactions', '--threshold=0.2')
+        exception = six.text_type(cm.exception)
+        self.assertIn("The following orders are without payments", exception)
+        self.assertIn(str(self.order.id), exception)
+
     def test_no_errors(self):
         """Test verify_transactions with order and payment of same amount."""
         payment = PaymentEventFactory(order=self.order,
