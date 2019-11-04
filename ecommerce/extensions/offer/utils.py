@@ -1,11 +1,11 @@
 """Offer Utility Methods. """
 from __future__ import absolute_import
 
-import bleach
 import logging
 import string  # pylint: disable=W0402
 from decimal import Decimal
 
+import bleach
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 from ecommerce_worker.sailthru.v1.tasks import send_offer_assignment_email, send_offer_update_email
