@@ -250,7 +250,7 @@ def format_email(template, placeholder_dict, greeting, closing):
         greeting = ''
     if closing is None:
         closing = ''
-    
+
     greeting = bleach.clean(greeting)
     closing = bleach.clean(closing)
     email_body = string.Formatter().vformat(template, SafeTuple(), placeholder_dict)
