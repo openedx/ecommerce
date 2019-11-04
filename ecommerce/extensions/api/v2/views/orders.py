@@ -107,15 +107,42 @@ class ManualCourseEnrollmentOrderViewSet(EdxOrderPlacementMixin, ViewSet):
 
             POST /api/v2/manual_course_enrollment_order/
             >>> {
-            >>>     "lms_user_id": 111,
-            >>>     "username": "me",
-            >>>     "email": "me@example.com",
-            >>>     "course_run_key": "course-v1:TestX+Test100+2019_T1"
+            >>>     "enrollments": [
+            >>>         {
+            >>>             "lms_user_id": 111,
+            >>>             "username": "me",
+            >>>             "email": "me@example.com",
+            >>>             "course_run_key": "course-v1:TestX+Test100+2019_T1"
+            >>>         },
+            >>>         {
+            >>>             "lms_user_id": 123,
+            >>>             "username": "metoo",
+            >>>             "email": "metoo@example.com",
+            >>>             "course_run_key": ""
+            >>>         },
+            >>>     ]
             >>> }
 
-            Success Response
+            Response
             >>> {
-            >>>     "order_number": "EDX-100189"
+            >>>     "orders": [
+            >>>         {
+            >>>             "lms_user_id": 111,
+            >>>             "username": "me",
+            >>>             "email": "me@example.com",
+            >>>             "course_run_key": "course-v1:TestX+Test100+2019_T1",
+            >>>             "status": "success",
+            >>>             "detail": "EDX-123456"
+            >>>         },
+            >>>         {
+            >>>             "lms_user_id": 123,
+            >>>             "username": "metoo",
+            >>>             "email": "metoo@example.com",
+            >>>             "course_run_key": ""
+            >>>             "status": "failure",
+            >>>             "detail": "Missing required enrollmment data: `course_run_key`"
+            >>>         },
+            >>>     ]
             >>> }
     """
 
@@ -123,19 +150,11 @@ class ManualCourseEnrollmentOrderViewSet(EdxOrderPlacementMixin, ViewSet):
     permission_classes = (IsAuthenticated, IsAdminUser)
     http_method_names = ['post']
 
+    SUCCESS, FAILURE = "success", "failure"
+
     def create(self, request):
         """
-        POST /api/v2/manual_course_enrollment_order/
-
-        Requires a JSON object of the following format:
-        >>> {
-        >>>     "lms_user_id": 111,
-        >>>     "username": "me",
-        >>>     "email": "me@example.com",
-        >>>     "course_run_key": "course-v1:TestX+Test100+2019_T1"
-        >>> }
-
-        Request Body:
+        Will recieve enrollments in the format specified in the class definition.
         *lms_user_id*
             LMS user id.
         *username*
@@ -145,17 +164,56 @@ class ManualCourseEnrollmentOrderViewSet(EdxOrderPlacementMixin, ViewSet):
         *course_run_key*
             Course in which learner is enrolled.
         """
+
         try:
-            lms_user_id, learner_username, learner_email, course_run_key = self._get_required_request_data(request)
+            enrollments = request.data["enrollments"]
+        except KeyError:
+            return Response(
+                {
+                    "status": "failure",
+                    "detail": "Invalid data. No `enrollments` field."
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        orders = []
+        for enrollment in enrollments:
+            orders.append(self._create_single_order(enrollment, request.user, request.site))
+
+        return Response({"orders": orders}, status=status.HTTP_200_OK)
+
+    def _create_single_order(self, enrollment, request_user, request_site):
+        """
+            Creates an order from a single enrollment.
+            Params:
+                `enrollment`: <dict> with fields:
+                    "lms_user_id": <int>,
+                    "username": <string>,
+                    "email": <string>,
+                    "course_run_key": <string>
+                `request_user`: <User>
+                `request_site`: <Site>
+            Returns:
+                `enrollment` from above with the additional fields:
+                    "status": <string> ("success" or "failure")
+                    "detail": <string> (order number if success, otherwise failure reason)
+        """
+        try:
+            (
+                lms_user_id,
+                learner_username,
+                learner_email,
+                course_run_key,
+            ) = self._get_required_enrollment_data(enrollment)
         except ValidationError as ex:
-            return Response({'detail': ex.message}, status=status.HTTP_400_BAD_REQUEST)
+            return dict(enrollment, status=self.FAILURE, detail=ex.message)
 
         logger.info(
             '[Manual Order Creation] Request received. User: %s, Email: %s, Course: %s, RequestUser: %s',
             learner_username,
             learner_email,
             course_run_key,
-            request.user.username,
+            request_user.username,
         )
 
         learner_user = self._get_learner_user(lms_user_id, learner_username, learner_email)
@@ -163,7 +221,7 @@ class ManualCourseEnrollmentOrderViewSet(EdxOrderPlacementMixin, ViewSet):
         try:
             course = Course.objects.get(id=course_run_key)
         except Course.DoesNotExist:
-            return Response({'detail': 'course not found'}, status=status.HTTP_400_BAD_REQUEST)
+            return dict(enrollment, status=self.FAILURE, detail="Course not found")
 
         seat_product = course.seat_products.filter(
             attributes__name='certificate_type'
@@ -174,15 +232,13 @@ class ManualCourseEnrollmentOrderViewSet(EdxOrderPlacementMixin, ViewSet):
         # check if an order already exists with the requested data
         order_line = OrderLine.objects.filter(product=seat_product, order__user=learner_user, status=LINE.COMPLETE)
         if order_line.exists():
-            return Response(
-                {
-                    'order_number': Order.objects.get(id=order_line.first().order_id).number,
-                    'detail': 'Order already exists'
-                },
-                status=status.HTTP_200_OK
+            return dict(
+                enrollment,
+                status=self.SUCCESS,
+                detail=Order.objects.get(id=order_line.first().order_id).number
             )
 
-        basket = Basket.create_basket(request.site, learner_user)
+        basket = Basket.create_basket(request_site, learner_user)
         basket.add_product(seat_product)
 
         discount_offer = self._get_or_create_discount_offer()
@@ -198,7 +254,7 @@ class ManualCourseEnrollmentOrderViewSet(EdxOrderPlacementMixin, ViewSet):
                 basket.id,
                 seat_product.id,
             )
-            return Response({'detail': 'Failed to create free order'}, status=status.HTTP_400_BAD_REQUEST)
+            return dict(enrollment, status=self.FAILURE, detail="Failed to create free order")
 
         logger.info(
             '[Manual Order Creation] Order completed. User: %s, Course: %s, Basket: %s, Order: %s, Product: %s',
@@ -208,35 +264,31 @@ class ManualCourseEnrollmentOrderViewSet(EdxOrderPlacementMixin, ViewSet):
             seat_product.id,
             order.number,
         )
+        return dict(enrollment, status=self.SUCCESS, detail=order.number)
 
-        response = {
-            'order_number': order.number
-        }
-        return Response(response, status=status.HTTP_201_CREATED)
-
-    def _get_required_request_data(self, request):
+    def _get_required_enrollment_data(self, enrollment):
         """
-        Return required parameters from incoming request.
+        Return required parameters from incoming enrollment.
 
         Raises:
-            ValidationError: If any required parameter is not present in request.
+            ValidationError: If any required parameter is not present in enrollment.
         """
-        lms_user_id = request.data.get('lms_user_id')
-        learner_username = request.data.get('username')
-        learner_email = request.data.get('email')
-        course_run_key = request.data.get('course_run_key')
+        lms_user_id = enrollment.get('lms_user_id')
+        learner_username = enrollment.get('username')
+        learner_email = enrollment.get('email')
+        course_run_key = enrollment.get('course_run_key')
         if not (lms_user_id and learner_username and learner_email and course_run_key):
-            request_parameters_state = [
+            enrollment_parameters_state = [
                 ("'lms_user_id'", bool(lms_user_id)),
                 ("'username'", bool(learner_username)),
                 ("'email'", bool(learner_email)),
                 ("'course_run_key'", bool(course_run_key)),
             ]
-            missing_params = ', '.join(name for name, present in request_parameters_state if not present)
+            missing_params = ', '.join(name for name, present in enrollment_parameters_state if not present)
             logger.error(
-                '[Manual Order Creation Failure] Missing required request data. Message: %s', missing_params
+                '[Manual Order Creation Failure] Missing required enrollment data. Message: %s', missing_params
             )
-            raise ValidationError('Missing required request data: {}'.format(missing_params))
+            raise ValidationError('Missing required enrollment data: {}'.format(missing_params))
 
         return lms_user_id, learner_username, learner_email, course_run_key
 
