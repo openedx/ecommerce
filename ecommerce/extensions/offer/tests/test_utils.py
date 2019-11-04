@@ -33,19 +33,6 @@ Benefit = get_model('offer', 'Benefit')
 
 @ddt.ddt
 class UtilTests(DiscoveryTestMixin, TestCase):
-    _REMINDER_EMAIL_TEMPLATE = '''
-        This is a reminder email that your learning manager has provided you with a access code to take a course at edX.
-        You have redeemed this code {REDEEMED_OFFER_COUNT} of times out of {TOTAL_OFFER_COUNT} number of available course redemptions.
-
-        edX login: {USER_EMAIL}
-        Access Code: {CODE}
-        Expiration date: {EXPIRATION_DATE}
-
-        You can insert the access code at check out under "coupon code" for applicable courses.
-
-        For any questions, please reach out to your Learning Manager.
-    '''
-
     _BROKEN_EMAIL_TEMPLATE = '''
         Text
         {DOES_NOT_EXIST} {USER_EMAIL}
@@ -65,6 +52,7 @@ class UtilTests(DiscoveryTestMixin, TestCase):
 
         self.percentage_benefit = BenefitFactory(type=Benefit.PERCENTAGE, range=self._range, value=35.00)
         self.value_benefit = BenefitFactory(type=Benefit.FIXED, range=self._range, value=self.seat_price - 10)
+        self.assertEqual.__self__.maxDiff = None
 
     def test_format_benefit_value(self):
         """ format_benefit_value(benefit) should format benefit value based on benefit type """
@@ -268,8 +256,8 @@ class UtilTests(DiscoveryTestMixin, TestCase):
         """
         Test that the assigned offer email message is formatted correctly if the template is broken.
         """
-        greeting = 'hi {CODE} '
-        closing = ' bye {CODE}'
+        greeting = 'hi {CODE} <h1>there</h1>\n'
+        closing = '\nbye {CODE}, <h3>come back soon!</h3>'
         code = 'GIL7RUEOU7VHBH7Q'
         placeholder_dict = SafeDict(
             REDEMPTIONS_REMAINING=500,
@@ -283,12 +271,14 @@ class UtilTests(DiscoveryTestMixin, TestCase):
 
         # Compare strings, ignoring whitespace differences
         expected_email = """
-            hi {CODE} Text
+            hi {CODE} &lt;h1&gt;there&lt;/h1&gt;
+            Text
             {DOES_NOT_EXIST} johndoe@unknown.com
             code: GIL7RUEOU7VHBH7Q GIL7RUEOU7VHBH7Q
             {}
             { abc d }
-            More text. bye {CODE}
+            More text.
+            bye {CODE}, &lt;h3&gt;come back soon!&lt;/h3&gt;
             """
         self.assertEqual(email.split(), expected_email.split())
 

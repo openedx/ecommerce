@@ -5,6 +5,7 @@ import logging
 import string  # pylint: disable=W0402
 from decimal import Decimal
 
+import bleach
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 from ecommerce_worker.sailthru.v1.tasks import send_offer_assignment_email, send_offer_update_email
@@ -249,6 +250,9 @@ def format_email(template, placeholder_dict, greeting, closing):
         greeting = ''
     if closing is None:
         closing = ''
+
+    greeting = bleach.clean(greeting)
+    closing = bleach.clean(closing)
     email_body = string.Formatter().vformat(template, SafeTuple(), placeholder_dict)
     return greeting + email_body + closing
 
@@ -263,7 +267,7 @@ class SafeDict(dict):
 
 class SafeTuple(tuple):
     """
-    Safely handle missing unnamed placegholder values in python3.
+    Safely handle missing unnamed placeholder values in python3.
     """
     def __getitem__(self, value):
         return '{}'
