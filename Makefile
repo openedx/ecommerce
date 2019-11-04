@@ -33,7 +33,7 @@ help:
 	@echo '                                                                                     		'
 
 requirements.js:
-	npm install
+	npm ci
 	# Allow root for Docker
 	$(NODE_BIN)/bower install --allow-root
 
