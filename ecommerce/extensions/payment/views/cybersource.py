@@ -8,7 +8,7 @@ import waffle
 from django.contrib import messages
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
-from django.http import JsonResponse
+from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import redirect
 from django.utils.decorators import method_decorator
 from django.utils.functional import cached_property
@@ -28,7 +28,10 @@ from rest_framework.views import APIView
 
 from ecommerce.core.url_utils import absolute_redirect, get_lms_url
 from ecommerce.extensions.api.serializers import OrderSerializer
-from ecommerce.extensions.basket.utils import basket_add_organization_attribute
+from ecommerce.extensions.basket.utils import (
+    basket_add_organization_attribute,
+    get_payment_microfrontend_or_basket_url
+)
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
 from ecommerce.extensions.checkout.utils import get_receipt_page_url
 from ecommerce.extensions.offer.constants import DYNAMIC_DISCOUNT_FLAG
@@ -476,7 +479,9 @@ class CybersourceInterstitialView(CybersourceNotificationMixin, View):
             # 1. There are sometimes messages from CyberSource that would make a more helpful message for users.
             # 2. We could have similar handling of other exceptions like UserCancelled and AuthorizationError
 
-            return absolute_redirect(request, 'basket:summary')
+            redirect_url = get_payment_microfrontend_or_basket_url(self.request)
+            return HttpResponseRedirect(redirect_url)
+
         except:  # pylint: disable=bare-except
             # logging handled by validate_notification, because not all exceptions are problematic
             monitoring_utils.set_custom_metric('payment_response_validation', 'redirect-to-error-page')
