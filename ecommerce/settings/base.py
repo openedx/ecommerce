@@ -711,7 +711,7 @@ Expiration Date: {EXPIRATION_DATE}
 OFFER_ASSIGNMENT_EMAIL_SUBJECT = 'New edX course assignment'
 
 OFFER_REVOKE_EMAIL_TEMPLATE = '''
-Your learning manager has revoked {CODE} and it is no longer assigned to your edX account {USER_EMAIL}.
+Your Learning Manager has revoked access code {CODE} and it is no longer assigned to your edX account {USER_EMAIL}.
 '''
 OFFER_REVOKE_EMAIL_SUBJECT = 'edX Course Assignment Revoked'
 
