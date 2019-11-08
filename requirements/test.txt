@@ -66,7 +66,7 @@ edx-auth-backends==2.0.2
 edx-django-release-util==0.3.1
 edx-django-sites-extensions==2.4.0
 edx-django-utils==2.0.1
-edx-drf-extensions==2.4.2
+edx-drf-extensions==2.4.4
 edx-ecommerce-worker==0.7.2
 edx-opaque-keys==2.0.0
 edx-rbac==1.0.3
@@ -82,7 +82,7 @@ futures==3.3.0 ; python_version == "2.7"
 httpretty==0.9.7
 idna==2.8
 importlib-metadata==0.23
-inflect==3.0.1            # via jinja2-pluralize
+inflect==3.0.2            # via jinja2-pluralize
 ipaddress==1.0.23
 isodate==0.6.0
 isort==4.3.21
@@ -101,7 +101,7 @@ mccabe==0.6.1             # via pylint
 mock-django==0.6.10
 mock==2.0.0
 more-itertools==5.0.0
-mysqlclient==1.4.4
+mysqlclient==1.4.5
 ndg-httpsclient==0.5.1
 newrelic==4.20.1.121
 nose-ignore-docstring==0.2
@@ -131,14 +131,14 @@ pyjwt==1.7.1
 pylint==1.9.5
 pymongo==3.9.0
 pyopenssl==19.0.0
-pyparsing==2.4.2
+pyparsing==2.4.4
 pysqlite==2.8.3 ; python_version == "2.7"
 python-dateutil==2.8.1
 python-openid==2.2.5 ; python_version == "2.7"
 pytz==2016.10
 pyyaml==5.1.2
 rcssmin==1.0.6
-requests-oauthlib==1.2.0
+requests-oauthlib==1.3.0
 requests-toolbelt==0.9.1
 requests==2.22.0
 responses==0.10.6
