@@ -27,10 +27,10 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
-"Report-Msgid-Bugs-To: openedx-translation@googlegroups.com\n"
-"POT-Creation-Date: 2018-03-26 16:41-0400\n"
-"PO-Revision-Date: 2019-01-25 06:48+0000\n"
-"Last-Translator: abby li <yc.li@eliteu.cn>\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2019-11-10 20:12+0000\n"
+"PO-Revision-Date: 2019-11-03 20:15+0000\n"
+"Last-Translator: Yue Fang <yfang@juilliard.edu>\n"
 "Language-Team: Chinese (China) (http://www.transifex.com/open-edx/edx-platform/language/zh_CN/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -38,21 +38,21 @@ msgstr ""
 "Language: zh_CN\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
-#: ecommerce/core/admin.py:21
+#: ecommerce/core/admin.py:25
 msgid "Personal info"
 msgstr "个人信息"
 
-#: ecommerce/core/admin.py:22
+#: ecommerce/core/admin.py:26
 msgid "Permissions"
 msgstr "权限"
 
-#: ecommerce/core/admin.py:24
+#: ecommerce/core/admin.py:28
 msgid "Important dates"
 msgstr "重要数据"
 
 #. Translators: "Waffle" is the name of a third-party library. It should not
 #. be translated
-#: ecommerce/core/admin.py:31
+#: ecommerce/core/admin.py:35
 #, python-brace-format
 msgid ""
 "User administration has been disabled due to the load on the database. This "
@@ -60,319 +60,365 @@ msgid ""
 " Be careful when re-activating this switch!"
 msgstr "由于数据库的负载，用户管理功能已停用。可通过激活{switch_name}Waffle按钮修复此功能，重新激活时请谨慎！"
 
-#: ecommerce/core/models.py:40
+#: ecommerce/core/models.py:49
 msgid "LMS base url for custom site/microsite"
 msgstr "供自定义站点/微站点使用的LMS基本URL"
 
-#: ecommerce/core/models.py:41
+#: ecommerce/core/models.py:50
 msgid "Root URL of this site's LMS (e.g. https://courses.stage.edx.org)"
 msgstr "此网站 LMS 的根 URL（例如 https://courses.stage.edx.org）"
 
-#: ecommerce/core/models.py:46
+#: ecommerce/core/models.py:55
 msgid "Path to custom site theme"
 msgstr "定制站点主题路径"
 
-#: ecommerce/core/models.py:53
+#: ecommerce/core/models.py:62
 msgid "Payment processors"
 msgstr "付款处理器"
 
-#: ecommerce/core/models.py:54
+#: ecommerce/core/models.py:63
 msgid "Comma-separated list of processor names: 'cybersource,paypal'"
 msgstr "使用逗号分隔的处理器列表: “cybersource,paypal”"
 
-#: ecommerce/core/models.py:60
+#: ecommerce/core/models.py:69
 msgid "Client-side payment processor"
 msgstr "客户端支付处理程序"
 
-#: ecommerce/core/models.py:61
+#: ecommerce/core/models.py:70
 msgid "Processor that will be used for client-side payments"
 msgstr "用于客户端支付的处理程序"
 
-#: ecommerce/core/models.py:67
+#: ecommerce/core/models.py:76
 msgid "OAuth settings"
 msgstr "OAuth 设置"
 
-#: ecommerce/core/models.py:68
+#: ecommerce/core/models.py:77
 msgid "JSON string containing OAuth backend settings."
 msgstr "包含了 OAuth 后端设置的 JSON 名称。"
 
-#: ecommerce/core/models.py:74
+#: ecommerce/core/models.py:83
 msgid "Segment key"
 msgstr "分段密钥"
 
-#: ecommerce/core/models.py:75
+#: ecommerce/core/models.py:84
 msgid "Segment write/API key."
 msgstr "分段写入/API 密钥。"
 
-#: ecommerce/core/models.py:81
+#: ecommerce/core/models.py:90
 msgid "From email"
 msgstr "来自电子邮件"
 
-#: ecommerce/core/models.py:82
+#: ecommerce/core/models.py:91
 msgid "Address from which emails are sent."
 msgstr "发件人邮箱。"
 
-#: ecommerce/core/models.py:88
+#: ecommerce/core/models.py:97
 msgid "Enable enrollment codes"
 msgstr "启用选课码"
 
-#: ecommerce/core/models.py:89
+#: ecommerce/core/models.py:98
 msgid "Enable the creation of enrollment codes."
 msgstr "启用选课码的创建。"
 
-#: ecommerce/core/models.py:94
+#: ecommerce/core/models.py:103
 msgid "Payment support email"
 msgstr "付款支持邮件"
 
-#: ecommerce/core/models.py:95
+#: ecommerce/core/models.py:104
 msgid "Contact email for payment support issues."
 msgstr "用于处理付款支持问题的电子邮件联系人。"
 
-#: ecommerce/core/models.py:101
+#: ecommerce/core/models.py:110
 msgid "Payment support url"
 msgstr "支付支持URL地址"
 
-#: ecommerce/core/models.py:102
+#: ecommerce/core/models.py:111
 msgid "URL for payment support issues."
 msgstr "用于处理支付支持问题的URL。"
 
-#: ecommerce/core/models.py:107
+#: ecommerce/core/models.py:116
 msgid "UTM Cookie Name"
 msgstr "UTM Cookie名称"
 
-#: ecommerce/core/models.py:108
+#: ecommerce/core/models.py:117
 msgid "Name of cookie storing UTM data."
 msgstr "储存UTM数据的cookie名称。"
 
-#: ecommerce/core/models.py:114
+#: ecommerce/core/models.py:123
 msgid "Affiliate Cookie Name"
 msgstr "从属Cookie名称"
 
-#: ecommerce/core/models.py:115
+#: ecommerce/core/models.py:124
 msgid "Name of cookie storing affiliate data."
 msgstr "储存从属数据的cookie名称。"
 
-#: ecommerce/core/models.py:121
+#: ecommerce/core/models.py:130
 msgid "Send refund email notification"
 msgstr "发送退款邮件通知"
 
-#: ecommerce/core/models.py:126
+#: ecommerce/core/models.py:135
 msgid "Enable SDN check"
 msgstr "启用SDN检查"
 
-#: ecommerce/core/models.py:127
+#: ecommerce/core/models.py:136
 msgid "Enable SDN check at checkout."
 msgstr "在退出时启用SDN检查。"
 
-#: ecommerce/core/models.py:131
+#: ecommerce/core/models.py:140
 msgid "US Treasury SDN API URL"
 msgstr "美国财政部SDN API URL地址"
 
-#: ecommerce/core/models.py:136
+#: ecommerce/core/models.py:145
 msgid "US Treasury SDN API key"
 msgstr "美国财政部SDN API 密钥"
 
-#: ecommerce/core/models.py:141
+#: ecommerce/core/models.py:150
 msgid "SDN lists"
 msgstr "SDN列表"
 
-#: ecommerce/core/models.py:142
+#: ecommerce/core/models.py:151
 msgid "A comma-separated list of Treasury OFAC lists to check against."
 msgstr "财政部OFAC列表使用逗号隔开，以便核对。"
 
-#: ecommerce/core/models.py:147
+#: ecommerce/core/models.py:156
 msgid "Require Account Activation"
 msgstr "需要激活账号"
 
-#: ecommerce/core/models.py:148
+#: ecommerce/core/models.py:157
 msgid ""
 "Require users to activate their account before allowing them to redeem a "
 "coupon."
 msgstr "在获得兑换优惠券的权限前，用户需要激活账号。"
 
-#: ecommerce/core/models.py:152
+#: ecommerce/core/models.py:161
 msgid "Optimizely snippet source URL"
 msgstr "Optimizely片段源URL"
 
-#: ecommerce/core/models.py:153
+#: ecommerce/core/models.py:162
 msgid "This script will be loaded on every page."
 msgstr "将在每个页面上载入该脚本。"
 
-#: ecommerce/core/models.py:158 ecommerce/extensions/partner/models.py:9
+#: ecommerce/core/models.py:167 ecommerce/extensions/partner/models.py:16
 msgid "Enable Sailthru Reporting"
 msgstr "启用Sailthru报告"
 
-#: ecommerce/core/models.py:159
+#: ecommerce/core/models.py:168
 msgid "Determines if purchases should be reported to Sailthru."
 msgstr "确定是否将购买汇报至Sailthru。"
 
-#: ecommerce/core/models.py:163
+#: ecommerce/core/models.py:172
 msgid "Base Cookie Domain"
 msgstr "基础Cookie域名"
 
-#: ecommerce/core/models.py:164
+#: ecommerce/core/models.py:173
 msgid "Base cookie domain used to share cookies across services."
 msgstr "用于跨服务共享cookies的基础cookie域名。"
 
-#: ecommerce/core/models.py:170
+#: ecommerce/core/models.py:179
 msgid "Enable embargo check"
 msgstr "启用禁令检查"
 
-#: ecommerce/core/models.py:171
+#: ecommerce/core/models.py:180
 msgid "Enable embargo check at checkout."
 msgstr "在检验时启用禁令检查。"
 
-#: ecommerce/core/models.py:175
+#: ecommerce/core/models.py:184
 msgid "Discovery API URL"
 msgstr "Discovery API URL地址"
 
 #. Translators: Do not translate "Apple Pay"
-#: ecommerce/core/models.py:181
+#: ecommerce/core/models.py:190
 msgid "Enable Apple Pay"
 msgstr "启用Apple Pay"
 
-#: ecommerce/core/models.py:185
+#: ecommerce/core/models.py:194
 msgid "Enable Partial Program Offer"
 msgstr "启用部分课程申请方案"
 
-#: ecommerce/core/models.py:186
+#: ecommerce/core/models.py:195
 msgid ""
 "Enable the application of program offers to remaining unenrolled or "
 "unverified courses"
 msgstr "启用剩余未报名或未认证课程申请方案应用程序"
 
-#: ecommerce/core/models.py:449
+#: ecommerce/core/models.py:200
+msgid "Hubspot Portal Secret Key"
+msgstr ""
+
+#: ecommerce/core/models.py:201
+msgid "Secret key for Hubspot portal authentication"
+msgstr ""
+
+#: ecommerce/core/models.py:206
+msgid "Enable Microfrontend for Basket Page"
+msgstr ""
+
+#: ecommerce/core/models.py:207
+msgid ""
+"Use the microfrontend implementation of the basket page instead of the "
+"server-side template"
+msgstr ""
+
+#: ecommerce/core/models.py:212
+msgid "Payment Microfrontend URL"
+msgstr ""
+
+#: ecommerce/core/models.py:213
+msgid ""
+"URL for the Payment Microfrontend (used if Enable Microfrontend for Basket "
+"Page is set)"
+msgstr ""
+
+#: ecommerce/core/models.py:483
 msgid "Full Name"
 msgstr "全名"
 
-#: ecommerce/core/models.py:594 ecommerce/extensions/basket/models.py:94
-#: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:56
+#: ecommerce/core/models.py:489
+msgid "LMS user id"
+msgstr ""
+
+#: ecommerce/core/models.py:733 ecommerce/extensions/basket/models.py:109
+#: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:54
 #: ecommerce/templates/oscar/dashboard/offers/summary.html:10
 msgid "Name"
 msgstr " 名字"
 
-#: ecommerce/coupons/views.py:68 ecommerce/coupons/views.py:117
+#: ecommerce/core/models.py:735 ecommerce/extensions/offer/models.py:479
+msgid "EnterpriseCustomer UUID"
+msgstr "企业客户UUID"
+
+#: ecommerce/core/models.py:736 ecommerce/extensions/offer/models.py:357
+msgid "UUID for an EnterpriseCustomer from the Enterprise Service."
+msgstr "来自企业服务的企业客户UUID。"
+
+#: ecommerce/coupons/views.py:71 ecommerce/coupons/views.py:120
 msgid "Coupon does not exist."
 msgstr "优惠券不存在。"
 
-#: ecommerce/coupons/views.py:73
+#: ecommerce/coupons/views.py:76
 msgid "This coupon code is not yet valid."
 msgstr "此优惠券码尚未生效。"
 
-#: ecommerce/coupons/views.py:75
+#: ecommerce/coupons/views.py:78
 msgid "This coupon code has expired."
 msgstr "此优惠券码已过期。"
 
-#: ecommerce/coupons/views.py:87
+#: ecommerce/coupons/views.py:90
 #, python-brace-format
 msgid "Product [{product}] not available for purchase."
 msgstr "产品[{product}]不可购买。"
 
-#: ecommerce/coupons/views.py:92
+#: ecommerce/coupons/views.py:95
 msgid "This coupon code is no longer available."
 msgstr "此优惠券码已无法使用。"
 
-#: ecommerce/coupons/views.py:112
+#: ecommerce/coupons/views.py:115
 msgid "This coupon code is invalid."
 msgstr "优惠码无效"
 
-#: ecommerce/coupons/views.py:119
+#: ecommerce/coupons/views.py:122
 msgid "The voucher is not applicable to your current basket."
 msgstr "此优惠凭证不适用于您当前的购物车。"
 
-#: ecommerce/coupons/views.py:129
+#: ecommerce/coupons/views.py:132
 msgid "Welcome to edX"
 msgstr "欢迎进入edX"
 
-#: ecommerce/coupons/views.py:130
+#: ecommerce/coupons/views.py:133
 msgid ""
 "Please choose from the courses selected by your organization to start "
 "learning."
 msgstr "请从您的所属组织已挑选的课程进行选择并开始学习。"
 
-#: ecommerce/coupons/views.py:160
+#: ecommerce/coupons/views.py:163
 msgid "Code not provided."
 msgstr "未提供选课码。"
 
-#: ecommerce/coupons/views.py:162
+#: ecommerce/coupons/views.py:165
 msgid "SKU not provided."
 msgstr "未提供SKU。"
 
-#: ecommerce/coupons/views.py:173
+#: ecommerce/coupons/views.py:176
 msgid "The product does not exist."
 msgstr "此产品不存在。"
 
-#: ecommerce/coupons/views.py:181
+#: ecommerce/coupons/views.py:190
 msgid "You are not eligible to use this coupon."
 msgstr "您不符合使用此优惠券的资格。"
 
-#: ecommerce/coupons/views.py:196
+#: ecommerce/coupons/views.py:205
 msgid "Couldn't find a matching Enterprise Customer for this coupon."
 msgstr "无法找到与此优惠券匹配的企业客户。"
 
-#: ecommerce/coupons/views.py:218
+#: ecommerce/coupons/views.py:212
+msgid ""
+"This coupon code is not valid for entitlement course product. Try a "
+"different course."
+msgstr ""
+
+#: ecommerce/coupons/views.py:237
 msgid "Invalid data sharing consent token provided."
 msgstr "提供的数据共享批准标记无效。"
 
-#: ecommerce/coupons/views.py:237
+#: ecommerce/coupons/views.py:256
 #, python-brace-format
 msgid "You have already purchased {course} seat."
 msgstr "您已购买了{course}座席。"
 
-#: ecommerce/coupons/views.py:250
+#: ecommerce/coupons/views.py:275
 #, python-brace-format
 msgid "A discount has been applied, courtesy of {enterprise_customer_name}."
 msgstr "已经由{enterprise_customer_name}为您打折。"
 
-#: ecommerce/coupons/views.py:258
+#: ecommerce/coupons/views.py:285
 msgid "This coupon code is not valid for this course. Try a different course."
 msgstr "此优惠券码对此课程无效，请尝试其他课程。"
 
-#: ecommerce/courses/models.py:31 ecommerce/extensions/basket/models.py:14
-#: ecommerce/extensions/offer/models.py:131
-#: ecommerce/extensions/payment/models.py:58
-#: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:65
+#: ecommerce/courses/models.py:33 ecommerce/extensions/basket/models.py:20
+#: ecommerce/extensions/offer/models.py:167
+#: ecommerce/extensions/payment/models.py:60
+#: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:63
 #: ecommerce/templates/oscar/dashboard/offers/summary.html:14
 msgid "Site"
 msgstr "站点"
 
-#: ecommerce/courses/models.py:37
+#: ecommerce/courses/models.py:40
 msgid ""
 "Last date/time on which verification for this product can be submitted."
 msgstr "本产品认证的提交截止日期／时间"
 
-#: ecommerce/courses/publishers.py:61
+#: ecommerce/courses/publishers.py:62
 #, python-brace-format
 msgid "Failed to publish commerce data for {course_id} to LMS."
 msgstr "向LMS发布发课程{course_id}的商用数据失败。"
 
-#: ecommerce/courses/utils.py:88
+#: ecommerce/courses/utils.py:95
 msgid "Audit"
 msgstr "旁听"
 
-#: ecommerce/courses/utils.py:89
+#: ecommerce/courses/utils.py:96
 msgid "Credit"
 msgstr "学分"
 
-#: ecommerce/courses/utils.py:90
+#: ecommerce/courses/utils.py:97
 msgid "Honor"
 msgstr "荣誉"
 
-#: ecommerce/courses/utils.py:91
+#: ecommerce/courses/utils.py:98
 msgid "Professional"
 msgstr "专业"
 
-#: ecommerce/courses/utils.py:92
+#: ecommerce/courses/utils.py:99
 msgid "Verified"
 msgstr "已经过身份认证的"
 
-#: ecommerce/credit/views.py:42
+#: ecommerce/credit/views.py:39
 msgid ""
 "An error has occurred. We could not confirm that you are eligible for course"
 " credit. Try the transaction again."
 msgstr "出现了一个错误。我们无法确认您有资格获得课程学分。请重新尝试。"
 
-#: ecommerce/credit/views.py:63
+#: ecommerce/credit/views.py:60
 #, python-brace-format
 msgid ""
 "Credit is not currently available for \"{course_name}\". If you are "
@@ -381,139 +427,151 @@ msgid ""
 "Support Team."
 msgstr "学分当前不适用于“{course_name}”。如果您当前报读了该课程，请在所有分级完成之后再次尝试。如需其它帮助，请联系 {site_name} 支持团队。 "
 
-#: ecommerce/credit/views.py:77
+#: ecommerce/credit/views.py:74
 msgid ""
 "An error has occurred. We could not confirm that the institution you "
 "selected offers this course credit. Try the transaction again."
 msgstr "出现了一个错误。我们无法确认您选择的院校提供这门课的学分。请重新尝试。"
 
-#: ecommerce/enterprise/benefits.py:21
+#: ecommerce/enterprise/benefits.py:24
 #, python-format
 msgid "%d%% enterprise discount"
 msgstr "%d%%企业折扣"
 
-#: ecommerce/enterprise/benefits.py:33
+#: ecommerce/enterprise/benefits.py:36
 #, python-brace-format
 msgid "{value} fixed-price enterprise discount"
 msgstr "{value}固定价格的企业折扣"
 
-#: ecommerce/enterprise/constants.py:13 ecommerce/invoice/models.py:22
-#: ecommerce/programs/constants.py:13
+#: ecommerce/enterprise/benefits.py:45 ecommerce/invoice/models.py:25
+#: ecommerce/programs/constants.py:15
 msgid "Percentage"
 msgstr "百分比"
 
-#: ecommerce/enterprise/constants.py:14 ecommerce/programs/constants.py:14
+#: ecommerce/enterprise/benefits.py:46 ecommerce/programs/constants.py:16
 msgid "Absolute"
 msgstr "绝对的"
 
-#: ecommerce/enterprise/forms.py:21
+#: ecommerce/enterprise/conditions.py:239
+msgid ""
+"This code is not valid with your email. Please login with the correct email "
+"assigned to the code or contact your Learning Manager for additional "
+"questions."
+msgstr ""
+
+#: ecommerce/enterprise/forms.py:22
 #: ecommerce/enterprise/templates/enterprise/enterpriseoffer_list.html:30
 msgid "Enterprise Customer UUID"
 msgstr "企业客户UUID"
 
-#: ecommerce/enterprise/forms.py:22
+#: ecommerce/enterprise/forms.py:23
 #: ecommerce/enterprise/templates/enterprise/enterpriseoffer_list.html:31
 msgid "Enterprise Customer Catalog UUID"
 msgstr "企业客户目录UUID"
 
-#: ecommerce/enterprise/forms.py:23 ecommerce/programs/forms.py:20
+#: ecommerce/enterprise/forms.py:24 ecommerce/programs/forms.py:22
 msgid "Discount Type"
 msgstr "折扣类型"
 
-#: ecommerce/enterprise/forms.py:25 ecommerce/programs/forms.py:22
+#: ecommerce/enterprise/forms.py:26 ecommerce/programs/forms.py:24
 msgid "Discount Value"
 msgstr "折扣值"
 
-#: ecommerce/enterprise/forms.py:38 ecommerce/programs/forms.py:32
+#: ecommerce/enterprise/forms.py:39 ecommerce/programs/forms.py:34
 msgid "Start Date"
 msgstr "开始日期"
 
-#: ecommerce/enterprise/forms.py:39 ecommerce/programs/forms.py:33
+#: ecommerce/enterprise/forms.py:40 ecommerce/programs/forms.py:35
 msgid "End Date"
 msgstr "结束日期"
 
-#: ecommerce/enterprise/forms.py:77
+#: ecommerce/enterprise/forms.py:78
 msgid "An offer already exists for this Enterprise & Catalog combination."
 msgstr "已存在企业和目录组合的方案。"
 
-#: ecommerce/enterprise/forms.py:80 ecommerce/programs/forms.py:70
+#: ecommerce/enterprise/forms.py:81 ecommerce/programs/forms.py:72
 msgid "Percentage discounts cannot be greater than 100%."
 msgstr "折扣百分比不能大于100%。"
 
-#: ecommerce/enterprise/forms.py:83 ecommerce/programs/forms.py:73
+#: ecommerce/enterprise/forms.py:84 ecommerce/programs/forms.py:75
 msgid "A start date must be specified when specifying an end date."
 msgstr "若设置结束日期，则必须设置开始日期。"
 
-#: ecommerce/enterprise/forms.py:86 ecommerce/programs/forms.py:76
+#: ecommerce/enterprise/forms.py:87 ecommerce/programs/forms.py:78
 msgid "The start date must occur before the end date."
 msgstr "开始日期必须早于结束日期。"
 
-#: ecommerce/enterprise/forms.py:98
-#, python-brace-format
-msgid "Discount provided by {enterprise_customer_name}."
-msgstr "由{enterprise_customer_name}提供的折扣。"
+#: ecommerce/enterprise/forms.py:104
+msgid "Discount of type {} provided by {} for {}."
+msgstr ""
 
-#: ecommerce/enterprise/templates/enterprise/enterpriseoffer_form.html:8
+#: ecommerce/enterprise/templates/enterprise/enterprise_coupon_app.html:5
+msgid "Enterprise Coupon Codes"
+msgstr ""
+
+#: ecommerce/enterprise/templates/enterprise/enterpriseoffer_form.html:9
 #, python-format
 msgid "Edit Enterprise Offer: %(enterprise_customer_name)s"
 msgstr "编辑企业方案：%(enterprise_customer_name)s"
 
-#: ecommerce/enterprise/templates/enterprise/enterpriseoffer_form.html:12
-#: ecommerce/enterprise/templates/enterprise/enterpriseoffer_form.html:45
-#: ecommerce/enterprise/templates/enterprise/enterpriseoffer_form.html:58
+#: ecommerce/enterprise/templates/enterprise/enterpriseoffer_form.html:14
+#: ecommerce/enterprise/templates/enterprise/enterpriseoffer_form.html:47
+#: ecommerce/enterprise/templates/enterprise/enterpriseoffer_form.html:60
 #: ecommerce/enterprise/templates/enterprise/enterpriseoffer_list.html:20
 msgid "Create Enterprise Offer"
 msgstr "创建企业方案"
 
-#: ecommerce/enterprise/templates/enterprise/enterpriseoffer_form.html:28
+#: ecommerce/enterprise/templates/enterprise/enterpriseoffer_form.html:30
 #: ecommerce/enterprise/templates/enterprise/enterpriseoffer_list.html:6
 #: ecommerce/enterprise/templates/enterprise/enterpriseoffer_list.html:17
-#: ecommerce/templates/edx/partials/_administration_menu.html:11
+#: ecommerce/templates/edx/partials/_administration_menu.html:14
 msgid "Enterprise Offers"
 msgstr "企业方案"
 
-#: ecommerce/enterprise/templates/enterprise/enterpriseoffer_form.html:32
-#: ecommerce/programs/templates/programs/programoffer_form.html:32
+#: ecommerce/enterprise/templates/enterprise/enterpriseoffer_form.html:34
+#: ecommerce/programs/templates/programs/programoffer_form.html:34
 #: ecommerce/templates/oscar/dashboard/catalogue/product_row_actions.html:11
-#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:266
-#: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:58
-#: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:71
-#: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:76
-#: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:87
+#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:268
+#: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:56
+#: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:69
+#: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:74
+#: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:85
 #: ecommerce/templates/oscar/dashboard/offers/summary.html:9
 #: ecommerce/templates/oscar/dashboard/offers/summary.html:19
 #: ecommerce/templates/oscar/dashboard/offers/summary.html:25
 #: ecommerce/templates/oscar/dashboard/offers/summary.html:30
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html:693
+#: ecommerce/templates/oscar/dashboard/orders/order_detail.html:695
 msgid "Edit"
 msgstr "编辑"
 
-#: ecommerce/enterprise/templates/enterprise/enterpriseoffer_form.html:34
-#: ecommerce/programs/templates/programs/programoffer_form.html:34
+#: ecommerce/enterprise/templates/enterprise/enterpriseoffer_form.html:36
+#: ecommerce/programs/templates/programs/programoffer_form.html:36
 msgid "Create"
 msgstr "创建"
 
-#: ecommerce/enterprise/templates/enterprise/enterpriseoffer_form.html:43
+#: ecommerce/enterprise/templates/enterprise/enterpriseoffer_form.html:45
 msgid "Edit Enterprise Offer"
 msgstr "编辑企业方案"
 
-#: ecommerce/enterprise/templates/enterprise/enterpriseoffer_form.html:56
-#: ecommerce/programs/templates/programs/programoffer_form.html:56
+#: ecommerce/enterprise/templates/enterprise/enterpriseoffer_form.html:58
+#: ecommerce/programs/templates/programs/programoffer_form.html:58
 msgid "Save Changes"
 msgstr "保存更改"
 
-#: ecommerce/enterprise/templates/enterprise/enterpriseoffer_form.html:60
-#: ecommerce/programs/templates/programs/programoffer_form.html:60
-#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:321
+#: ecommerce/enterprise/templates/enterprise/enterpriseoffer_form.html:62
+#: ecommerce/programs/templates/programs/programoffer_form.html:62
+#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:323
 #: ecommerce/templates/oscar/dashboard/partials/refund_action_modal.html:20
 msgid "Cancel"
 msgstr "取消"
 
-#: ecommerce/enterprise/templates/enterprise/enterpriseoffer_form.html:72
-#: ecommerce/enterprise/templates/enterprise/enterpriseoffer_list.html:62
+#: ecommerce/enterprise/templates/enterprise/enterpriseoffer_form.html:76
 #, python-format
-msgid "%(platform_name)s Enterprise Offer Administration Tool"
-msgstr "%(platform_name)s企业方案管理工具"
+msgid ""
+"\n"
+"              %(platform_name)s Enterprise Offer Administration Tool\n"
+"              "
+msgstr ""
 
 #: ecommerce/enterprise/templates/enterprise/enterpriseoffer_list.html:26
 msgid "Current enterprise offers"
@@ -525,8 +583,8 @@ msgstr "企业客户名称"
 
 #: ecommerce/enterprise/templates/enterprise/enterpriseoffer_list.html:32
 #: ecommerce/programs/templates/programs/programoffer_list.html:31
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html:627
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html:679
+#: ecommerce/templates/oscar/dashboard/orders/order_detail.html:629
+#: ecommerce/templates/oscar/dashboard/orders/order_detail.html:681
 msgid "Type"
 msgstr "类型"
 
@@ -545,84 +603,97 @@ msgstr "开始"
 msgid "End"
 msgstr "结束"
 
-#: ecommerce/enterprise/utils.py:113
+#: ecommerce/enterprise/templates/enterprise/enterpriseoffer_list.html:64
+#, python-format
+msgid ""
+"\n"
+"                %(platform_name)s Enterprise Offer Administration Tool\n"
+"              "
+msgstr ""
+
+#: ecommerce/enterprise/utils.py:237
 #, python-brace-format
 msgid "SKU {sku} does not exist."
 msgstr "SKU{sku}不存在。"
 
-#: ecommerce/enterprise/utils.py:121
+#: ecommerce/enterprise/utils.py:246
 #, python-brace-format
 msgid "There is no Enterprise Customer associated with SKU {sku}."
 msgstr "不存在任何与SKU{sku}相关联的企业客户。"
 
-#: ecommerce/enterprise/utils.py:129
+#: ecommerce/enterprise/utils.py:254
 #, python-brace-format
 msgid ""
 "If you have concerns about sharing your data, please contact your "
 "administrator at {enterprise}."
 msgstr "如果您对共享数据有顾虑，请联系您在{enterprise}的管理员。"
 
-#: ecommerce/enterprise/utils.py:132
+#: ecommerce/enterprise/utils.py:257
 #, python-brace-format
 msgid ""
 "If you have concerns about sharing your data, please contact your "
 "administrator at {enterprise} at {contact_info}."
 msgstr "如果您对共享数据有顾虑，请联系您在{enterprise}的管理员，联系方式为{contact_info}。"
 
-#: ecommerce/enterprise/utils.py:138
+#: ecommerce/enterprise/utils.py:263
 #, python-brace-format
 msgid "Enrollment in {course_name} was not complete."
 msgstr "未完成{course_name}的注册。"
 
-#: ecommerce/enterprise/views.py:37
+#: ecommerce/enterprise/views.py:39
 msgid "Enterprise offer updated!"
 msgstr "企业方案已更新！"
 
-#: ecommerce/enterprise/views.py:60
+#: ecommerce/enterprise/views.py:62
 msgid "Enterprise offer created!"
 msgstr "企业方案已创建！"
 
-#: ecommerce/extensions/api/exceptions.py:7
+#: ecommerce/extensions/api/exceptions.py:9
 msgid "You can't check out with an empty basket."
 msgstr "购物车为空，无法结账"
 
-#: ecommerce/extensions/api/exceptions.py:10
+#: ecommerce/extensions/api/exceptions.py:12
 msgid ""
 "We couldn't locate the identification code necessary to find one of your "
 "products."
 msgstr "我们因无法定位到必要的识别码而无法找到您的一个产品。"
 
-#: ecommerce/extensions/api/exceptions.py:13
+#: ecommerce/extensions/api/exceptions.py:15
 msgid "We couldn't find one of the products you're looking for."
 msgstr "我们无法找到您所寻找的产品。"
 
-#: ecommerce/extensions/api/exceptions.py:16
+#: ecommerce/extensions/api/exceptions.py:18
 msgid "One of the products you're trying to order is unavailable."
 msgstr "您订购的商品中有一件暂缺。"
 
-#: ecommerce/extensions/api/serializers.py:337
+#: ecommerce/extensions/api/exceptions.py:21
+msgid ""
+"We couldn't find enough information about you to perform the calculation."
+msgstr ""
+
+#: ecommerce/extensions/api/serializers.py:442
 msgid "Products must have a certificate type."
 msgstr "产品必须拥有一种证书类型。"
 
-#: ecommerce/extensions/api/serializers.py:340
-#: ecommerce/extensions/api/serializers.py:371
+#: ecommerce/extensions/api/serializers.py:445
+#: ecommerce/extensions/api/serializers.py:480
 msgid "Products must have a price."
 msgstr "请务必为产品定价。"
 
-#: ecommerce/extensions/api/serializers.py:347
+#: ecommerce/extensions/api/serializers.py:452
 msgid "You need to provide a course UUID to create Course Entitlements."
 msgstr "您需要提供一个课程的UUID以创建课程权限。"
 
-#: ecommerce/extensions/api/serializers.py:367
+#: ecommerce/extensions/api/serializers.py:476
 msgid "Products must indicate whether ID verification is required."
 msgstr "产品中须明确是否需要用户ID验证。"
 
-#: ecommerce/extensions/api/serializers.py:432
+#: ecommerce/extensions/api/serializers.py:542
 #, python-brace-format
 msgid "Invalid product class [{product_class}] requested."
 msgstr "请求的产品类别[{product_class}]无效"
 
-#: ecommerce/extensions/api/serializers.py:463
+#: ecommerce/extensions/api/serializers.py:574
 #, python-brace-format
 msgid ""
 "Course [{course_id}] was not published to LMS because the switch "
@@ -630,75 +701,171 @@ msgid ""
 " been saved."
 msgstr "课程[{course_id}]未发布到LMS，因为[publish_course_modes_to_lms]开关已关闭。为了避免出现无效的最小存货单位，数据未保存。"
 
-#: ecommerce/extensions/api/serializers.py:651
-msgid "Enrollment code"
-msgstr "选课码"
-
-#: ecommerce/extensions/api/serializers.py:652
-msgid "Discount code"
-msgstr "折扣码"
-
-#: ecommerce/extensions/api/serializers.py:666
+#: ecommerce/extensions/api/serializers.py:960
+#: ecommerce/extensions/api/serializers.py:1039
 msgid "ACTIVE"
 msgstr "已激活的"
 
-#: ecommerce/extensions/api/serializers.py:666
+#: ecommerce/extensions/api/serializers.py:960
+#: ecommerce/extensions/api/serializers.py:1039
 msgid "INACTIVE"
 msgstr "未激活的"
 
-#: ecommerce/extensions/api/v2/views/baskets.py:363
-#: ecommerce/extensions/basket/views.py:57
+#: ecommerce/extensions/api/serializers.py:1023
+msgid "Enrollment code"
+msgstr "选课码"
+
+#: ecommerce/extensions/api/serializers.py:1024
+msgid "Discount code"
+msgstr "折扣码"
+
+#: ecommerce/extensions/api/v2/views/baskets.py:445
+#: ecommerce/extensions/basket/views.py:123
 msgid "No SKUs provided."
 msgstr "未提供SKU。"
 
-#: ecommerce/extensions/api/v2/views/baskets.py:373
-#: ecommerce/extensions/basket/views.py:61
+#: ecommerce/extensions/api/v2/views/baskets.py:456
+#: ecommerce/extensions/basket/views.py:130
 #, python-brace-format
 msgid "Products with SKU(s) [{skus}] do not exist."
 msgstr "不存在带有SKU(s) [{skus}]的产品。"
 
-#: ecommerce/extensions/basket/models.py:83
+#: ecommerce/extensions/api/v2/views/baskets.py:467
+msgid "Provide username or is_anonymous query param, but not both"
+msgstr ""
+
+#: ecommerce/extensions/api/v2/views/products.py:53
+#, python-brace-format
+msgid "Product API only supports {http_method} for {product_class} products."
+msgstr ""
+
+#: ecommerce/extensions/api/v2/views/products.py:68
+#, python-brace-format
+msgid "Missing or bad value for: [{name}]."
+msgstr ""
+
+#: ecommerce/extensions/basket/models.py:98
 #, python-brace-format
 msgid "{id} - {status} basket (owner: {owner}, lines: {num_lines})"
 msgstr "{id} - {status} 网上订单（所有者：{owner}，行数：{num_lines}）"
 
-#: ecommerce/extensions/basket/models.py:106
-#: ecommerce/extensions/payment/models.py:18
-#: ecommerce/templates/oscar/basket/basket.html:8
+#: ecommerce/extensions/basket/models.py:121
+#: ecommerce/extensions/payment/models.py:19
+#: ecommerce/templates/oscar/basket/basket.html:9
 msgid "Basket"
 msgstr "购物车"
 
-#: ecommerce/extensions/basket/models.py:108
+#: ecommerce/extensions/basket/models.py:123
 msgid "Attribute Type"
 msgstr "属性类型"
 
-#: ecommerce/extensions/basket/models.py:110
+#: ecommerce/extensions/basket/models.py:125
 msgid "Text Attribute"
 msgstr "文本属性"
 
-#: ecommerce/extensions/basket/utils.py:82
+#: ecommerce/extensions/basket/utils.py:114
 msgid ""
 "Due to export controls, we cannot allow you to access this course at this "
 "time."
 msgstr "由于导出限制，您暂时无法访问此课程。"
 
-#: ecommerce/extensions/basket/utils.py:127
+#: ecommerce/extensions/basket/utils.py:179
 msgid "Click here to just purchase an enrollment for yourself"
 msgstr "点击此处即可自行购买选课"
 
-#: ecommerce/extensions/basket/utils.py:130
+#: ecommerce/extensions/basket/utils.py:182
 msgid "Click here to purchase multiple seats in this course"
 msgstr "点击此处可购买此课程的多个座席"
 
-#: ecommerce/extensions/basket/views.py:90
-msgid "No product is available to buy."
-msgstr "无尚可购买的产品。"
+#: ecommerce/extensions/basket/utils.py:410
+#, python-brace-format
+msgid "Coupon code '{code}' has expired."
+msgstr "优惠券码“{code}”已失效。"
 
-#: ecommerce/extensions/basket/views.py:96
+#: ecommerce/extensions/basket/utils.py:414
+#, python-brace-format
+msgid "Coupon code '{code}' is not active."
+msgstr "优惠券码“{code}”未激活。"
+
+#: ecommerce/extensions/basket/utils.py:420
+#, python-brace-format
+msgid "Coupon code '{code}' is not available. {msg}"
+msgstr ""
+
+#: ecommerce/extensions/basket/utils.py:426
+#, python-brace-format
+msgid "Coupon code '{code}' is not valid for this basket."
+msgstr "此优惠券码“{code}”在该购物车内无效。"
+
+#: ecommerce/extensions/basket/utils.py:439
+#, python-brace-format
+msgid ""
+"Coupon code '{code}' is not valid for this basket for a bundled purchase."
+msgstr ""
+
+#: ecommerce/extensions/basket/utils.py:500
+#, python-brace-format
+msgid "Coupon code '{code}' added to basket."
+msgstr "优惠券码“{code}”已添加至购物车中。"
+
+#: ecommerce/extensions/basket/utils.py:503
+#, python-brace-format
+msgid "Basket does not qualify for coupon code {code}."
+msgstr ""
+
+#: ecommerce/extensions/basket/views.py:111
 msgid "You have already purchased these products"
 msgstr "您已购买这些产品"
 
-#: ecommerce/extensions/basket/views.py:168
+#: ecommerce/extensions/basket/views.py:147
+msgid "No product is available to buy."
+msgstr "无尚可购买的产品。"
+
+#: ecommerce/extensions/basket/views.py:287
+#, python-brace-format
+msgid "Could not apply the code '{code}'; it requires data sharing consent."
+msgstr "无法使用“{code}'”；需要得到数据共享授权。"
+
+#: ecommerce/extensions/basket/views.py:375
+msgid ""
+"After you complete your order you will be able to select course dates from "
+"your dashboard."
+msgstr "完成订单后，您便可以在面板上选择课程日期。"
+
+#: ecommerce/extensions/basket/views.py:381
+msgid ""
+"After you complete your order you will be automatically enrolled in the "
+"verified track of the course."
+msgstr "完成订单后，您将被自动记录在已经过身份认证的课程类别上。"
+
+#: ecommerce/extensions/basket/views.py:385
+msgid "After you complete your order you will receive credit for your course."
+msgstr "完成订单后，您将收到课程学分。"
+
+#: ecommerce/extensions/basket/views.py:388
+msgid ""
+"After you complete your order you will be automatically enrolled in the "
+"course."
+msgstr "完成订单后，您将立即加入此课程。"
+
+#: ecommerce/extensions/basket/views.py:392
+#, python-brace-format
+msgid ""
+"{paragraph_start}By purchasing, you and your organization agree to the "
+"following terms:{paragraph_end} {ul_start} {li_start}Each code is valid for "
+"the one course covered and can be used only one time.{li_end} {li_start}You "
+"are responsible for distributing codes to your learners in your "
+"organization.{li_end} {li_start}Each code will expire in one year from date "
+"of purchase or, if earlier, once the course is closed.{li_end} {li_start}If "
+"a course is not designated as self-paced, you should confirm that a course "
+"run is available before expiration. {li_end} {li_start}You may not resell "
+"codes to third parties.{li_end} {li_start}All edX for Business Sales are "
+"final and not eligible for refunds.{li_end}{ul_end} {paragraph_start}You "
+"will receive an email at {user_email} with your enrollment code(s). "
+"{paragraph_end}"
+msgstr ""
+
+#: ecommerce/extensions/basket/views.py:430
 #, python-brace-format
 msgid ""
 "{strong_start}Purchasing just for yourself?{strong_end}{paragraph_start}If "
@@ -707,192 +874,161 @@ msgid ""
 "enroll directly.{paragraph_end}"
 msgstr "{strong_start}是否只为自己购买？{strong_end}{paragraph_start}若是替他人购买，请继续下单。而如果您是学员 {link_start}，则请返回{link_end}并直接选课。{paragraph_end}"
 
-#: ecommerce/extensions/basket/views.py:221
+#: ecommerce/extensions/basket/views.py:776
+msgid "quantity successfully updated"
+msgstr ""
+
+#: ecommerce/extensions/basket/views.py:795
 msgid ""
-"After you complete your order you will be able to select course dates from "
-"your dashboard."
-msgstr "完成订单后，您便可以在面板上选择课程日期。"
+"Your basket couldn't be updated. Please correct any validation errors below."
+msgstr ""
 
-#: ecommerce/extensions/basket/views.py:226
-msgid ""
-"After you complete your order you will be automatically enrolled in the "
-"verified track of the course."
-msgstr "完成订单后，您将被自动记录在已经过身份认证的课程类别上。"
-
-#: ecommerce/extensions/basket/views.py:230
-msgid "After you complete your order you will receive credit for your course."
-msgstr "完成订单后，您将收到课程学分。"
-
-#: ecommerce/extensions/basket/views.py:233
-msgid ""
-"After you complete your order you will be automatically enrolled in the "
-"course."
-msgstr "完成订单后，您将立即加入此课程。"
-
-#: ecommerce/extensions/basket/views.py:239
-#, python-brace-format
-msgid ""
-"{paragraph_start}By purchasing, you and your organization agree to the "
-"following terms:{paragraph_end} {ul_start} {li_start}Each code is valid for "
-"the one course covered and can be used only one time.{li_end} {li_start}You "
-"are responsible for distributing codes to your learners.{li_end} "
-"{li_start}Each code will expire in one year from date of purchase or, if "
-"earlier, once the course is closed.{li_end} {li_start}If a course is not "
-"designated as self-paced, you should confirm that a course run is available "
-"before expiration. {li_end} {li_start}You may not resell codes to third "
-"parties.{li_end} {ul_end} {strong_start}All sales final. No "
-"refunds.{strong_end} {paragraph_start}You will receive an email at "
-"{user_email} with your enrollment code(s). {paragraph_end}"
-msgstr "{paragraph_start}通过购买，您和您所属的组织同意以下条款：{paragraph_end}{ul_start} {li_start}每个选课码对所涵盖的一门课程有效，并且只能使用一次。{li_end} {li_start}您负责将选课码分发给您的学员。{li_end} {li_start}从购买日期起，每个课程码有效期为一年，若课程被关闭，课程码也将提前失效。{li_end} {li_start}若课程未被指定为自定进度，则应当在课程到期前确认开课时间。{li_end} {li_start}您不能将选课码转售至第三方。{li_end} {ul_end} {strong_start}所有订单付款成功。不得退款。{strong_end} {paragraph_start}您将在{user_email}收到一封电子邮件和您的选课码（或多个）。{paragraph_end}"
-
-#: ecommerce/extensions/basket/views.py:363
-#, python-brace-format
-msgid "Could not apply the code '{code}'; it requires data sharing consent."
-msgstr "无法使用“{code}'”；需要得到数据共享授权。"
-
-#: ecommerce/extensions/basket/views.py:417
-#, python-brace-format
-msgid "Coupon code '{code}' has expired."
-msgstr "优惠券码“{code}”已失效。"
-
-#: ecommerce/extensions/basket/views.py:424
-#, python-brace-format
-msgid "Coupon code '{code}' is not active."
-msgstr "优惠券码“{code}”未激活。"
-
-#: ecommerce/extensions/basket/views.py:431
-#, python-brace-format
-msgid "Coupon code '{code}' has already been redeemed."
-msgstr "优惠券码“{code}”已兑换。"
-
-#: ecommerce/extensions/basket/views.py:441
-#: ecommerce/extensions/basket/views.py:455
-#, python-brace-format
-msgid "Coupon code '{code}' is not valid for this basket."
-msgstr "此优惠券码“{code}”在该购物车内无效。"
-
-#: ecommerce/extensions/basket/views.py:479
-msgid "Your basket does not qualify for a coupon code discount."
-msgstr "您的购物车无法使用优惠券码打折。"
-
-#: ecommerce/extensions/basket/views.py:484
-#, python-brace-format
-msgid "Coupon code '{code}' added to basket."
-msgstr "优惠券码“{code}”已添加至购物车中。"
-
-#: ecommerce/extensions/basket/views.py:494
+#: ecommerce/extensions/basket/views.py:849
 #, python-brace-format
 msgid "You have already added coupon code '{code}' to your basket."
 msgstr "您已将优惠券码“{code}”添加至购物车中。"
 
-#: ecommerce/extensions/basket/views.py:502
+#: ecommerce/extensions/basket/views.py:925
 #, python-brace-format
 msgid "Coupon code '{code}' does not exist."
 msgstr "优惠券码“{code}”不存在。"
 
-#: ecommerce/extensions/catalogue/models.py:21
+#: ecommerce/extensions/basket/views.py:1010
+#, python-format
+msgid "No coupon found with id '%s'"
+msgstr ""
+
+#: ecommerce/extensions/basket/views.py:1014
+#, python-format
+msgid "Coupon code '%s' was removed from your basket."
+msgstr ""
+
+#: ecommerce/extensions/catalogue/models.py:69
 msgid "Last date/time on which this product can be purchased."
 msgstr "购买此产品的截止日期／时间"
 
-#: ecommerce/extensions/dashboard/forms.py:7
+#: ecommerce/extensions/dashboard/forms.py:9
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:48
 #: ecommerce/templates/oscar/dashboard/orders/order_list.html:72
-#: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html:48
+#: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html:52
 #: ecommerce/templates/oscar/dashboard/refunds/refund_list.html:59
 #: ecommerce/templates/oscar/dashboard/users/detail.html:40
 msgid "Username"
 msgstr "用户名"
 
-#: ecommerce/extensions/dashboard/forms.py:8
+#: ecommerce/extensions/dashboard/forms.py:10
 #: ecommerce/templates/oscar/dashboard/orders/order_list.html:73
 #: ecommerce/templates/oscar/dashboard/refunds/refund_list.html:60
 #: ecommerce/templates/oscar/dashboard/users/detail.html:48
 msgid "Email"
 msgstr "邮箱"
 
-#: ecommerce/extensions/dashboard/orders/views.py:72
+#: ecommerce/extensions/dashboard/orders/views.py:75
 #, python-brace-format
 msgid ""
 "{link_start}Refund #{refund_id}{link_end} created! Click "
 "{link_start}here{link_end} to view it."
 msgstr "{link_start}退款#{refund_id}{link_end} 已创建！点击 {link_start}这里{link_end} 查看。"
 
-#: ecommerce/extensions/dashboard/orders/views.py:76
+#: ecommerce/extensions/dashboard/orders/views.py:79
 msgid ""
 "A refund cannot be created for these lines. They may have already been "
 "refunded."
 msgstr "这些商品不支持退款。针对这些商品的退款操作可能已经完成。"
 
-#: ecommerce/extensions/dashboard/refunds/config.py:8
+#: ecommerce/extensions/dashboard/refunds/config.py:10
 msgid "Refunds Dashboard"
 msgstr "退款界面"
 
-#: ecommerce/extensions/dashboard/refunds/forms.py:13
+#: ecommerce/extensions/dashboard/refunds/forms.py:15
 #: ecommerce/templates/oscar/dashboard/partials/refund_table.html:9
 #: ecommerce/templates/oscar/dashboard/refunds/refund_list.html:55
 msgid "Refund ID"
 msgstr "退款ID"
 
-#: ecommerce/extensions/dashboard/refunds/forms.py:14
-#: ecommerce/extensions/refund/models.py:72
-#: ecommerce/extensions/refund/models.py:304
-#: ecommerce/extensions/voucher/utils.py:231
-#: ecommerce/templates/oscar/dashboard/orders/line_detail.html:70
+#: ecommerce/extensions/dashboard/refunds/forms.py:16
+#: ecommerce/extensions/refund/models.py:74
+#: ecommerce/extensions/refund/models.py:309
+#: ecommerce/extensions/voucher/utils.py:224
+#: ecommerce/extensions/voucher/utils.py:277
+#: ecommerce/extensions/voucher/utils.py:317
+#: ecommerce/templates/oscar/dashboard/orders/line_detail.html:71
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:72
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:141
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html:594
+#: ecommerce/templates/oscar/dashboard/orders/order_detail.html:596
 #: ecommerce/templates/oscar/dashboard/orders/order_list.html:71
 #: ecommerce/templates/oscar/dashboard/partials/refund_table.html:13
-#: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html:71
-#: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html:107
+#: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html:75
+#: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html:111
 #: ecommerce/templates/oscar/dashboard/refunds/refund_list.html:58
 #: ecommerce/templates/oscar/dashboard/users/detail.html:142
 msgid "Status"
 msgstr "状态"
 
-#: ecommerce/extensions/dashboard/users/views.py:47
+#: ecommerce/extensions/dashboard/users/views.py:49
 msgid "Failed to retrieve enrollment data."
 msgstr "无法提取选课数据"
 
-#: ecommerce/extensions/offer/models.py:282
+#: ecommerce/extensions/offer/models.py:352
 msgid "Course Catalog ID from the Discovery Service."
 msgstr "来自Discovery服务的课程目录ID"
 
-#: ecommerce/extensions/offer/models.py:287
-msgid "UUID for an EnterpriseCustomer from the Enterprise Service."
-msgstr "来自企业服务的企业客户UUID。"
+#: ecommerce/extensions/offer/models.py:363
+msgid "UUID for an EnterpriseCustomerCatalog from the Enterprise Service."
+msgstr ""
 
-#: ecommerce/extensions/offer/models.py:389
-msgid "EnterpriseCustomer UUID"
-msgstr "企业客户UUID"
-
-#: ecommerce/extensions/offer/models.py:396
+#: ecommerce/extensions/offer/models.py:486
 msgid "EnterpriseCustomer Name"
 msgstr "企业客户名称"
 
-#: ecommerce/extensions/offer/models.py:401
+#: ecommerce/extensions/offer/models.py:491
 msgid "EnterpriseCustomerCatalog UUID"
 msgstr "企业客户目录UUID"
 
-#: ecommerce/extensions/offer/models.py:403
-#: ecommerce/extensions/voucher/utils.py:220 ecommerce/programs/forms.py:19
+#: ecommerce/extensions/offer/models.py:496
+#: ecommerce/extensions/voucher/utils.py:53
+#: ecommerce/extensions/voucher/utils.py:192
+#: ecommerce/extensions/voucher/utils.py:266
+#: ecommerce/extensions/voucher/utils.py:325
+#: ecommerce/extensions/voucher/utils.py:334
+#: ecommerce/extensions/voucher/utils.py:340 ecommerce/programs/forms.py:21
 #: ecommerce/programs/templates/programs/programoffer_list.html:30
 msgid "Program UUID"
 msgstr "程序UUID"
 
-#: ecommerce/extensions/offer/utils.py:64
+#: ecommerce/extensions/offer/models.py:503
+msgid "Email to user pending."
+msgstr ""
+
+#: ecommerce/extensions/offer/models.py:504
+msgid "Code successfully assigned to user."
+msgstr ""
+
+#: ecommerce/extensions/offer/models.py:505
+msgid "Code has been redeemed by user."
+msgstr ""
+
+#: ecommerce/extensions/offer/models.py:506
+msgid "Email to user bounced."
+msgstr ""
+
+#: ecommerce/extensions/offer/models.py:507
+msgid "Code has been revoked for this user."
+msgstr ""
+
+#: ecommerce/extensions/offer/utils.py:92
 #, python-brace-format
 msgid "{benefit_value}%"
 msgstr "{benefit_value}%"
 
-#: ecommerce/extensions/offer/utils.py:67
+#: ecommerce/extensions/offer/utils.py:95
 #, python-brace-format
 msgid "${benefit_value}"
 msgstr "${benefit_value}"
 
 #. Translators: "Waffle" is the name of a third-party library. It should not
 #. be translated
-#: ecommerce/extensions/order/admin.py:29
+#: ecommerce/extensions/order/admin.py:32
 #, python-brace-format
 msgid ""
 "Order administration has been disabled due to the load on the database. This"
@@ -900,22 +1036,27 @@ msgid ""
 "switch. Be careful when re-activating this switch!"
 msgstr "由于数据库的负载，订单管理功能已停用。可通过激活{switch_name}Waffle按钮来重新开启此功能，重新激活此按钮时请谨慎！"
 
-#: ecommerce/extensions/order/models.py:22
-#: ecommerce/extensions/payment/models.py:16
+#: ecommerce/extensions/order/benefits.py:22
+#, python-format
+msgid "%d%% discount for manual course enrollment order"
+msgstr ""
+
+#: ecommerce/extensions/order/models.py:31
+#: ecommerce/extensions/payment/models.py:17
 msgid "Payment Processor"
 msgstr "付款处理器"
 
-#: ecommerce/extensions/partner/admin.py:26
+#: ecommerce/extensions/partner/admin.py:28
 msgid "Click 'Save and Continue Editing' to add stock records"
 msgstr "单击'Save and Continue Editing'按钮添加新的库存记录。"
 
-#: ecommerce/extensions/partner/models.py:14
-#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:191
-#: ecommerce/templates/oscar/dashboard/orders/line_detail.html:73
+#: ecommerce/extensions/partner/models.py:24
+#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:193
+#: ecommerce/templates/oscar/dashboard/orders/line_detail.html:74
 msgid "Partner"
 msgstr "合作伙伴"
 
-#: ecommerce/extensions/partner/models.py:15 ecommerce/settings/_oscar.py:222
+#: ecommerce/extensions/partner/models.py:25 ecommerce/settings/_oscar.py:223
 msgid "Partners"
 msgstr "合作伙伴"
 
@@ -939,90 +1080,90 @@ msgstr "Visa"
 msgid "We don't support the payment option you selected."
 msgstr "我们不支持您所选择的付款方式。"
 
-#: ecommerce/extensions/payment/forms.py:28
+#: ecommerce/extensions/payment/forms.py:31
 msgid "Choose country"
 msgstr "选择国家"
 
 #. Translators: This is a string added next to the name of the required
 #. fields on the payment form. For example, the first name field is
 #. required, so this would read "First name (required)".
-#: ecommerce/extensions/payment/forms.py:103
+#: ecommerce/extensions/payment/forms.py:105
 #, python-brace-format
 msgid "{label} (required)"
 msgstr "{label}（必填项）"
 
-#: ecommerce/extensions/payment/forms.py:109
+#: ecommerce/extensions/payment/forms.py:111
 msgid "Organization (required)"
 msgstr "组织（必填项）"
 
-#: ecommerce/extensions/payment/forms.py:125
-#: ecommerce/extensions/payment/forms.py:215
-#: ecommerce/extensions/payment/views/__init__.py:96
+#: ecommerce/extensions/payment/forms.py:124
+msgid ""
+"I am purchasing on behalf of my employer or other professional organization"
+msgstr ""
+
+#: ecommerce/extensions/payment/forms.py:141
+#: ecommerce/extensions/payment/forms.py:218
+#: ecommerce/extensions/payment/views/__init__.py:98
 msgid ""
 "There was a problem retrieving your basket. Refresh the page to try again."
 msgstr "获取您的购物车时出现问题，请刷新页面并重试。"
 
-#: ecommerce/extensions/payment/forms.py:128
+#: ecommerce/extensions/payment/forms.py:144
 msgid "First Name (required)"
 msgstr "名（必填项）"
 
-#: ecommerce/extensions/payment/forms.py:129
+#: ecommerce/extensions/payment/forms.py:145
 msgid "Last Name (required)"
 msgstr "姓（必填项）"
 
-#: ecommerce/extensions/payment/forms.py:130
+#: ecommerce/extensions/payment/forms.py:146
 msgid "Address (required)"
 msgstr "地址（必填项）"
 
-#: ecommerce/extensions/payment/forms.py:131
+#: ecommerce/extensions/payment/forms.py:147
 msgid "Suite/Apartment Number"
 msgstr "套间/公寓编号"
 
-#: ecommerce/extensions/payment/forms.py:132
+#: ecommerce/extensions/payment/forms.py:148
 msgid "City (required)"
 msgstr "城市（必填项）"
 
-#: ecommerce/extensions/payment/forms.py:135
+#: ecommerce/extensions/payment/forms.py:151
 msgid "State/Province"
 msgstr "州/省"
 
-#: ecommerce/extensions/payment/forms.py:136
+#: ecommerce/extensions/payment/forms.py:152
 msgid "Zip/Postal Code"
 msgstr "邮编"
 
-#: ecommerce/extensions/payment/forms.py:137
+#: ecommerce/extensions/payment/forms.py:153
 msgid "Country (required)"
 msgstr "国家（必填项）"
 
-#: ecommerce/extensions/payment/forms.py:164
-#: ecommerce/extensions/payment/forms.py:166
-#: ecommerce/extensions/payment/forms.py:190
+#: ecommerce/extensions/payment/forms.py:180
+#: ecommerce/extensions/payment/forms.py:182
+#: ecommerce/extensions/payment/forms.py:193
 msgid "This field is required."
 msgstr "此项必填。"
 
-#: ecommerce/extensions/payment/forms.py:177
-#, python-brace-format
-msgid "{state} is not a valid state/province in {country}."
-msgstr "{country}中不存在{state}州/省。"
-
-#: ecommerce/extensions/payment/forms.py:196
+#: ecommerce/extensions/payment/forms.py:199
 msgid ""
 "Postal codes for the U.S. and Canada are limited to nine (9) characters."
 msgstr "美国和加拿大的邮编不得超过9（九）个字符。"
 
-#: ecommerce/extensions/payment/models.py:17
+#: ecommerce/extensions/payment/models.py:18
 msgid "Transaction ID"
 msgstr "交易ID"
 
-#: ecommerce/extensions/payment/models.py:26
+#: ecommerce/extensions/payment/models.py:27
 msgid "Payment Processor Response"
 msgstr "付款处理器响应"
 
-#: ecommerce/extensions/payment/models.py:27
+#: ecommerce/extensions/payment/models.py:28
 msgid "Payment Processor Responses"
 msgstr "付款处理器响应"
 
-#: ecommerce/extensions/payment/models.py:44
+#: ecommerce/extensions/payment/models.py:45
 msgid ""
 "Number of times to retry failing Paypal client actions (e.g., payment "
 "creation, payment execution)"
@@ -1032,248 +1173,327 @@ msgstr "Paypal客户端操作失败可重试次数（例如：创建支付、执
 #. to indicate that truncation has occurred. For example, if a title may only
 #. be at most 11 characters long, "A Very Long Title" (17 characters) would be
 #. truncated to "A Ve...itle".
-#: ecommerce/extensions/payment/utils.py:44
+#: ecommerce/extensions/payment/utils.py:81
 msgid "..."
 msgstr "..."
 
-#: ecommerce/extensions/payment/views/cybersource.py:311
+#: ecommerce/extensions/payment/views/cybersource.py:472
+msgid "transation declined"
+msgstr ""
+
+#. Translators: "Waffle" is the name of a third-party library. It should not
+#. be translated
+#: ecommerce/extensions/refund/admin.py:35
 #, python-brace-format
 msgid ""
-"An error occurred while processing your payment. You have not been charged. "
-"Please double-check the information you provided and try again. For help, "
-"{link_start}contact support{link_end}."
-msgstr "处理您的支付时发生错误，款项尚未扣除。请复核您的信息并重试，如需帮助，请{link_start}联系支持服务{link_end}。"
+"Refund administration has been disabled due to the load on the database. "
+"This functionality can be restored by activating the {switch_name} Waffle "
+"switch. Be careful when re-activating this switch!"
+msgstr ""
 
-#: ecommerce/extensions/refund/models.py:67
+#: ecommerce/extensions/refund/models.py:69
 msgid "Order"
 msgstr "订单"
 
-#: ecommerce/extensions/refund/models.py:68
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html:678
+#: ecommerce/extensions/refund/models.py:70
+#: ecommerce/templates/oscar/dashboard/orders/order_detail.html:680
 msgid "User"
 msgstr "用户"
 
-#: ecommerce/extensions/refund/models.py:69
+#: ecommerce/extensions/refund/models.py:71
 msgid "Total Credit (excl. tax)"
 msgstr "总学分 (不含税)"
 
-#: ecommerce/extensions/refund/models.py:70
-#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:198
+#: ecommerce/extensions/refund/models.py:72
+#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:200
 msgid "Currency"
 msgstr "货币"
 
-#: ecommerce/extensions/refund/models.py:296
+#: ecommerce/extensions/refund/models.py:301
 msgid "Refund"
 msgstr "退款"
 
-#: ecommerce/extensions/refund/models.py:299
+#: ecommerce/extensions/refund/models.py:304
 msgid "Order Line"
 msgstr "命令行"
 
-#: ecommerce/extensions/refund/models.py:301
+#: ecommerce/extensions/refund/models.py:306
 msgid "Line Credit (excl. tax)"
 msgstr "行信贷 (不含税)"
 
-#: ecommerce/extensions/refund/models.py:302
-#: ecommerce/templates/edx/checkout/receipt.html:80
+#: ecommerce/extensions/refund/models.py:307
+#: ecommerce/templates/edx/checkout/receipt.html:88
 #: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:30
-#: ecommerce/templates/oscar/basket/partials/hosted_checkout_basket.html:42
-#: ecommerce/templates/oscar/dashboard/orders/line_detail.html:49
-#: ecommerce/templates/oscar/dashboard/orders/line_detail.html:107
-#: ecommerce/templates/oscar/dashboard/orders/line_detail.html:132
-#: ecommerce/templates/oscar/dashboard/orders/line_detail.html:163
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:51
+#: ecommerce/templates/oscar/basket/partials/hosted_checkout_basket.html:43
+#: ecommerce/templates/oscar/dashboard/orders/line_detail.html:50
+#: ecommerce/templates/oscar/dashboard/orders/line_detail.html:108
+#: ecommerce/templates/oscar/dashboard/orders/line_detail.html:133
+#: ecommerce/templates/oscar/dashboard/orders/line_detail.html:164
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:138
-#: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html:104
+#: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html:108
 msgid "Quantity"
 msgstr "数量"
 
-#: ecommerce/extensions/voucher/tests/test_utils.py:176
-#: ecommerce/extensions/voucher/utils.py:70
-#: ecommerce/extensions/voucher/utils.py:271
+#: ecommerce/extensions/voucher/models.py:36
+msgid "Can be used once by one customer"
+msgstr ""
+
+#: ecommerce/extensions/voucher/models.py:37
+msgid "Can be used multiple times by multiple customers"
+msgstr ""
+
+#: ecommerce/extensions/voucher/models.py:38
+msgid "Can only be used once per customer"
+msgstr ""
+
+#: ecommerce/extensions/voucher/models.py:39
+msgid "Can be used multiple times by one customer"
+msgstr ""
+
+#: ecommerce/extensions/voucher/models.py:41
+msgid "Usage"
+msgstr ""
+
+#: ecommerce/extensions/voucher/models.py:53
+msgid "This voucher is assigned to another user."
+msgstr ""
+
+#: ecommerce/extensions/voucher/tests/test_utils.py:211
+#: ecommerce/extensions/voucher/utils.py:77
+#: ecommerce/extensions/voucher/utils.py:317
 msgid "Redeemed"
 msgstr "已兑换"
 
-#: ecommerce/extensions/voucher/tests/test_utils.py:338
-#: ecommerce/extensions/voucher/tests/test_utils.py:343
-#: ecommerce/extensions/voucher/utils.py:89
-#: ecommerce/extensions/voucher/utils.py:132
-#: ecommerce/templates/edx/checkout/receipt.html:112
+#: ecommerce/extensions/voucher/tests/test_utils.py:375
+#: ecommerce/extensions/voucher/tests/test_utils.py:380
+#: ecommerce/extensions/voucher/utils.py:96
+#: ecommerce/extensions/voucher/utils.py:163
+#: ecommerce/templates/edx/checkout/receipt.html:120
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:195
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:217
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:261
 msgid "Discount"
 msgstr "折扣"
 
-#: ecommerce/extensions/voucher/tests/test_utils.py:338
-#: ecommerce/extensions/voucher/tests/test_utils.py:343
-#: ecommerce/extensions/voucher/utils.py:89
-#: ecommerce/extensions/voucher/utils.py:132
+#: ecommerce/extensions/voucher/tests/test_utils.py:375
+#: ecommerce/extensions/voucher/tests/test_utils.py:380
+#: ecommerce/extensions/voucher/utils.py:96
+#: ecommerce/extensions/voucher/utils.py:163
 msgid "Enrollment"
 msgstr "选课"
 
-#: ecommerce/extensions/voucher/tests/test_utils.py:339
-#: ecommerce/extensions/voucher/tests/test_utils.py:347
-#: ecommerce/extensions/voucher/utils.py:90
-#: ecommerce/extensions/voucher/utils.py:136
+#: ecommerce/extensions/voucher/tests/test_utils.py:376
+#: ecommerce/extensions/voucher/tests/test_utils.py:384
+#: ecommerce/extensions/voucher/utils.py:97
+#: ecommerce/extensions/voucher/utils.py:167
 #, python-brace-format
 msgid "{percentage} %"
 msgstr "{percentage} %"
 
-#: ecommerce/extensions/voucher/tests/test_utils.py:470
-#: ecommerce/extensions/voucher/utils.py:72
+#: ecommerce/extensions/voucher/tests/test_utils.py:525
+#: ecommerce/extensions/voucher/utils.py:79
 msgid "Inactive"
 msgstr "未激活的"
 
-#: ecommerce/extensions/voucher/utils.py:70
+#: ecommerce/extensions/voucher/utils.py:53
+#: ecommerce/extensions/voucher/utils.py:194
+#: ecommerce/extensions/voucher/utils.py:267
+#: ecommerce/extensions/voucher/utils.py:328
+#: ecommerce/extensions/voucher/utils.py:331
+#: ecommerce/extensions/voucher/utils.py:336
+msgid "Catalog Query"
+msgstr "目录查询"
+
+#: ecommerce/extensions/voucher/utils.py:55
+#: ecommerce/extensions/voucher/utils.py:281
+#: ecommerce/extensions/voucher/utils.py:339
+msgid "Redeemed For Course IDs"
+msgstr "已兑换课程ID"
+
+#: ecommerce/extensions/voucher/utils.py:57
+#: ecommerce/extensions/voucher/utils.py:280
+#: ecommerce/extensions/voucher/utils.py:330
+#: ecommerce/extensions/voucher/utils.py:338
+msgid "Redeemed For Course ID"
+msgstr "已兑换课程ID"
+
+#: ecommerce/extensions/voucher/utils.py:77
 #: ecommerce/templates/oscar/dashboard/users/detail.html:52
 msgid "Active"
 msgstr "活跃的"
 
-#: ecommerce/extensions/voucher/utils.py:213
+#: ecommerce/extensions/voucher/utils.py:173
+#: ecommerce/extensions/voucher/utils.py:221
+#: ecommerce/extensions/voucher/utils.py:259
 msgid "Code"
 msgstr "代码"
 
-#: ecommerce/extensions/voucher/utils.py:214
+#: ecommerce/extensions/voucher/utils.py:173
+msgid "This row applies to all vouchers"
+msgstr ""
+
+#: ecommerce/extensions/voucher/utils.py:174
+#: ecommerce/extensions/voucher/utils.py:271
+#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:126
+msgid "Category"
+msgstr "分类"
+
+#: ecommerce/extensions/voucher/utils.py:175
+#: ecommerce/extensions/voucher/utils.py:284
+msgid "Coupon Expiry Date"
+msgstr "优惠券有效期"
+
+#: ecommerce/extensions/voucher/utils.py:176
+#: ecommerce/extensions/voucher/utils.py:260
 msgid "Coupon Name"
 msgstr "优惠券名称"
 
-#: ecommerce/extensions/voucher/utils.py:215
-msgid "Maximum Coupon Usage"
-msgstr "优惠券使用上限"
+#: ecommerce/extensions/voucher/utils.py:177
+#: ecommerce/extensions/voucher/utils.py:283
+msgid "Coupon Start Date"
+msgstr "优惠券开始日期"
 
-#: ecommerce/extensions/voucher/utils.py:216
-msgid "Redemption Count"
-msgstr "兑换计数"
-
-#: ecommerce/extensions/voucher/utils.py:217
+#: ecommerce/extensions/voucher/utils.py:178
+#: ecommerce/extensions/voucher/utils.py:263
 msgid "Coupon Type"
 msgstr "优惠券类型"
 
-#: ecommerce/extensions/voucher/utils.py:218
-msgid "URL"
-msgstr "URL"
+#: ecommerce/extensions/voucher/utils.py:179
+#: ecommerce/extensions/voucher/utils.py:282
+msgid "Create Date"
+msgstr "创建日期"
 
-#: ecommerce/extensions/voucher/utils.py:219
+#: ecommerce/extensions/voucher/utils.py:180
+#: ecommerce/extensions/voucher/utils.py:275
+msgid "Discount Percentage"
+msgstr "折扣率"
+
+#: ecommerce/extensions/voucher/utils.py:181
+#: ecommerce/extensions/voucher/utils.py:276
+msgid "Discount Amount"
+msgstr "折扣金额"
+
+#: ecommerce/extensions/voucher/utils.py:182
+#: ecommerce/extensions/voucher/utils.py:285
+msgid "Email Domains"
+msgstr "电子邮件域名"
+
+#: ecommerce/extensions/voucher/utils.py:183
+#: ecommerce/extensions/voucher/utils.py:274
+msgid "Invoiced Amount"
+msgstr "已开票金额"
+
+#: ecommerce/extensions/voucher/utils.py:184
+#: ecommerce/extensions/voucher/utils.py:272
+msgid "Note"
+msgstr "笔记"
+
+#: ecommerce/extensions/voucher/utils.py:185
+#: ecommerce/extensions/voucher/utils.py:273
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:50
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:61
+#: ecommerce/templates/oscar/basket/partials/hosted_checkout_basket.html:63
+msgid "Price"
+msgstr "价格"
+
+#: ecommerce/extensions/voucher/utils.py:189
+#: ecommerce/extensions/voucher/utils.py:265
+#: ecommerce/extensions/voucher/utils.py:326
+#: ecommerce/extensions/voucher/utils.py:332
 #: ecommerce/templates/oscar/dashboard/partials/enrollment_table.html:8
 msgid "Course ID"
 msgstr "课程编号"
 
-#: ecommerce/extensions/voucher/utils.py:221
-msgid "Catalog Query"
-msgstr "目录查询"
-
-#: ecommerce/extensions/voucher/utils.py:222
-msgid "Course Seat Types"
-msgstr "课程座席类型"
-
-#: ecommerce/extensions/voucher/utils.py:223
+#: ecommerce/extensions/voucher/utils.py:190
+#: ecommerce/extensions/voucher/utils.py:269
+#: ecommerce/extensions/voucher/utils.py:327
+#: ecommerce/extensions/voucher/utils.py:333
 msgid "Organization"
 msgstr "组织"
 
-#: ecommerce/extensions/voucher/utils.py:224
+#: ecommerce/extensions/voucher/utils.py:195
+#: ecommerce/extensions/voucher/utils.py:268
+#: ecommerce/extensions/voucher/utils.py:329
+#: ecommerce/extensions/voucher/utils.py:337
+msgid "Course Seat Types"
+msgstr "课程座席类型"
+
+#: ecommerce/extensions/voucher/utils.py:222
+#: ecommerce/extensions/voucher/utils.py:261
+#: ecommerce/extensions/voucher/utils.py:320
+msgid "Maximum Coupon Usage"
+msgstr "优惠券使用上限"
+
+#: ecommerce/extensions/voucher/utils.py:223
+#: ecommerce/extensions/voucher/utils.py:262
+#: ecommerce/extensions/voucher/utils.py:321
+msgid "Redemption Count"
+msgstr "兑换计数"
+
+#: ecommerce/extensions/voucher/utils.py:225
+#: ecommerce/extensions/voucher/utils.py:264
+msgid "URL"
+msgstr "URL"
+
+#: ecommerce/extensions/voucher/utils.py:270
+#: ecommerce/extensions/voucher/utils.py:293
 msgid "Client"
 msgstr "客户端"
 
-#: ecommerce/extensions/voucher/utils.py:225
-#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:124
-msgid "Category"
-msgstr "分类"
-
-#: ecommerce/extensions/voucher/utils.py:226
-msgid "Note"
-msgstr "笔记"
-
-#: ecommerce/extensions/voucher/utils.py:227
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:50
-#: ecommerce/templates/oscar/basket/partials/hosted_checkout_basket.html:62
-msgid "Price"
-msgstr "价格"
-
-#: ecommerce/extensions/voucher/utils.py:228
-msgid "Invoiced Amount"
-msgstr "已开票金额"
-
-#: ecommerce/extensions/voucher/utils.py:229
-msgid "Discount Percentage"
-msgstr "折扣率"
-
-#: ecommerce/extensions/voucher/utils.py:230
-msgid "Discount Amount"
-msgstr "折扣金额"
-
-#: ecommerce/extensions/voucher/utils.py:232
+#: ecommerce/extensions/voucher/utils.py:278
+#: ecommerce/extensions/voucher/utils.py:298
+#: ecommerce/extensions/voucher/utils.py:318
 #: ecommerce/templates/oscar/dashboard/users/detail.html:138
 msgid "Order Number"
 msgstr "订单号"
 
-#: ecommerce/extensions/voucher/utils.py:233
+#: ecommerce/extensions/voucher/utils.py:279
+#: ecommerce/extensions/voucher/utils.py:298
+#: ecommerce/extensions/voucher/utils.py:319
 msgid "Redeemed By Username"
 msgstr "按用户名兑换"
 
-#: ecommerce/extensions/voucher/utils.py:234
-msgid "Redeemed For Course ID"
-msgstr "已兑换课程ID"
-
-#: ecommerce/extensions/voucher/utils.py:235
-msgid "Redeemed For Course IDs"
-msgstr "已兑换课程ID"
-
-#: ecommerce/extensions/voucher/utils.py:236
-msgid "Create Date"
-msgstr "创建日期"
-
-#: ecommerce/extensions/voucher/utils.py:237
-msgid "Coupon Start Date"
-msgstr "优惠券开始日期"
-
-#: ecommerce/extensions/voucher/utils.py:238
-msgid "Coupon Expiry Date"
-msgstr "优惠券有效期"
-
-#: ecommerce/extensions/voucher/utils.py:239
-msgid "Email Domains"
-msgstr "电子邮件域名"
-
-#: ecommerce/extensions/voucher/utils.py:534
+#: ecommerce/extensions/voucher/utils.py:730
 #, python-brace-format
 msgid "Range for coupon [{coupon_id}]"
 msgstr "优惠券 [{coupon_id}] 范围"
 
-#: ecommerce/extensions/voucher/views.py:29
+#: ecommerce/extensions/voucher/views.py:32
 #, python-brace-format
 msgid "Coupon Report for {coupon_name}"
 msgstr "{coupon_name}优惠券使用报告"
 
-#: ecommerce/extensions/voucher/views.py:38
+#: ecommerce/extensions/voucher/views.py:41
 msgid ""
 "Failed to find a matching stock record for coupon, report download canceled."
 msgstr "寻求与优惠券匹配的储存记录失败，已取消报告下载。"
 
-#: ecommerce/invoice/models.py:10
+#: ecommerce/invoice/models.py:13
 msgid "Not Paid"
 msgstr "未付款"
 
-#: ecommerce/invoice/models.py:11
+#: ecommerce/invoice/models.py:14
 msgid "Paid"
 msgstr "已付款"
 
-#: ecommerce/invoice/models.py:15
+#: ecommerce/invoice/models.py:18
 msgid "Prepaid"
 msgstr "已预付"
 
-#: ecommerce/invoice/models.py:16
+#: ecommerce/invoice/models.py:19
 msgid "Postpaid"
 msgstr "邮资已付"
 
-#: ecommerce/invoice/models.py:17
+#: ecommerce/invoice/models.py:20
 msgid "Bulk purchase"
 msgstr "批量购买"
 
-#: ecommerce/invoice/models.py:18
+#: ecommerce/invoice/models.py:21
 msgid "Not applicable"
 msgstr "不适用"
 
-#: ecommerce/invoice/models.py:23
+#: ecommerce/invoice/models.py:26
 msgid "Fixed"
 msgstr "已修复"
 
@@ -1285,58 +1505,61 @@ msgstr "管理视图"
 msgid "Refund Transactions"
 msgstr "退款转账记录"
 
-#: ecommerce/management/views.py:51
+#: ecommerce/management/views.py:53
 #, python-brace-format
 msgid "{action} is not a valid action."
 msgstr "{action}不是有效的动作。"
 
-#: ecommerce/programs/benefits.py:25
+#: ecommerce/programs/benefits.py:27
 #, python-brace-format
 msgid "{value}% program discount"
 msgstr "{value}%的课程申请折扣"
 
-#: ecommerce/programs/benefits.py:42
+#: ecommerce/programs/benefits.py:44
 #, python-brace-format
 msgid "{value} fixed-price program discount"
 msgstr "{value}固定价格的课程申请折扣"
 
-#: ecommerce/programs/forms.py:67
+#: ecommerce/programs/forms.py:69
 msgid "An offer already exists for this program."
 msgstr "此课程申请已存在方案。"
 
-#: ecommerce/programs/forms.py:86
+#: ecommerce/programs/forms.py:88
 #, python-brace-format
 msgid "Discount for the {program_title} {program_type} Program"
 msgstr "{program_title} {program_type}课程申请的折扣"
 
-#: ecommerce/programs/templates/programs/programoffer_form.html:8
+#: ecommerce/programs/templates/programs/programoffer_form.html:9
 #, python-format
 msgid "Edit Program Offer: %(program_title)s"
 msgstr "编辑课程方案申请：%(program_title)s"
 
-#: ecommerce/programs/templates/programs/programoffer_form.html:12
-#: ecommerce/programs/templates/programs/programoffer_form.html:45
-#: ecommerce/programs/templates/programs/programoffer_form.html:58
+#: ecommerce/programs/templates/programs/programoffer_form.html:14
+#: ecommerce/programs/templates/programs/programoffer_form.html:47
+#: ecommerce/programs/templates/programs/programoffer_form.html:60
 #: ecommerce/programs/templates/programs/programoffer_list.html:20
 msgid "Create Program Offer"
 msgstr "创建课程申请方案"
 
-#: ecommerce/programs/templates/programs/programoffer_form.html:28
+#: ecommerce/programs/templates/programs/programoffer_form.html:30
 #: ecommerce/programs/templates/programs/programoffer_list.html:6
 #: ecommerce/programs/templates/programs/programoffer_list.html:17
-#: ecommerce/templates/edx/partials/_administration_menu.html:8
+#: ecommerce/templates/edx/partials/_administration_menu.html:11
 msgid "Program Offers"
 msgstr "课程申请方案"
 
-#: ecommerce/programs/templates/programs/programoffer_form.html:43
+#: ecommerce/programs/templates/programs/programoffer_form.html:45
 msgid "Edit Program Offer"
 msgstr "编辑课程申请方案"
 
-#: ecommerce/programs/templates/programs/programoffer_form.html:72
-#: ecommerce/programs/templates/programs/programoffer_list.html:58
+#: ecommerce/programs/templates/programs/programoffer_form.html:76
+#: ecommerce/programs/templates/programs/programoffer_list.html:60
 #, python-format
-msgid "%(platform_name)s Program Offer Administration Tool"
-msgstr "%(platform_name)s课程申请方案管理工具"
+msgid ""
+"\n"
+"                %(platform_name)s Program Offer Administration Tool\n"
+"              "
+msgstr ""
 
 #: ecommerce/programs/templates/programs/programoffer_list.html:26
 msgid "Current program offers"
@@ -1346,11 +1569,11 @@ msgstr "当前课程申请方案"
 msgid "Program Title"
 msgstr "课程申请标题"
 
-#: ecommerce/programs/views.py:36
+#: ecommerce/programs/views.py:38
 msgid "Program offer updated!"
 msgstr "课程申请已更新！"
 
-#: ecommerce/programs/views.py:59
+#: ecommerce/programs/views.py:61
 msgid "Program offer created!"
 msgstr "课程申请已创建！"
 
@@ -1382,53 +1605,53 @@ msgstr "UTM内容"
 msgid "UTM Created At"
 msgstr "UTM创建于"
 
-#: ecommerce/settings/_oscar.py:179
-#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:17
+#: ecommerce/settings/_oscar.py:180
+#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:18
 #: ecommerce/templates/oscar/dashboard/index.html:22
-#: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:14
-#: ecommerce/templates/oscar/dashboard/orders/line_detail.html:13
+#: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:12
+#: ecommerce/templates/oscar/dashboard/orders/line_detail.html:14
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:29
 #: ecommerce/templates/oscar/dashboard/orders/order_list.html:30
-#: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html:29
+#: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html:31
 #: ecommerce/templates/oscar/dashboard/refunds/refund_list.html:30
 #: ecommerce/templates/oscar/dashboard/users/detail.html:20
 msgid "Dashboard"
 msgstr "主控面板"
 
-#: ecommerce/settings/_oscar.py:184
+#: ecommerce/settings/_oscar.py:185
 msgid "Catalogue"
 msgstr "目录"
 
-#: ecommerce/settings/_oscar.py:188
-#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:11
-#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:20
+#: ecommerce/settings/_oscar.py:189
+#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:12
+#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:21
 msgid "Products"
 msgstr "产品"
 
-#: ecommerce/settings/_oscar.py:192
+#: ecommerce/settings/_oscar.py:193
 msgid "Product Types"
 msgstr "产品类型"
 
-#: ecommerce/settings/_oscar.py:196
-#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:73
+#: ecommerce/settings/_oscar.py:197
+#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:75
 msgid "Categories"
 msgstr "类别"
 
-#: ecommerce/settings/_oscar.py:200
+#: ecommerce/settings/_oscar.py:201
 msgid "Ranges"
 msgstr "范围"
 
-#: ecommerce/settings/_oscar.py:204
+#: ecommerce/settings/_oscar.py:205
 msgid "Low stock alerts"
 msgstr "低库存提示"
 
-#: ecommerce/settings/_oscar.py:210
+#: ecommerce/settings/_oscar.py:211
 msgid "Fulfillment"
 msgstr "实现"
 
-#: ecommerce/settings/_oscar.py:214
+#: ecommerce/settings/_oscar.py:215
 #: ecommerce/templates/oscar/dashboard/index.html:33
-#: ecommerce/templates/oscar/dashboard/orders/line_detail.html:16
+#: ecommerce/templates/oscar/dashboard/orders/line_detail.html:17
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:32
 #: ecommerce/templates/oscar/dashboard/orders/order_list.html:11
 #: ecommerce/templates/oscar/dashboard/orders/order_list.html:32
@@ -1438,14 +1661,14 @@ msgstr "实现"
 msgid "Orders"
 msgstr "订单"
 
-#: ecommerce/settings/_oscar.py:218
+#: ecommerce/settings/_oscar.py:219
 msgid "Statistics"
 msgstr "统计数据"
 
-#: ecommerce/settings/_oscar.py:226
+#: ecommerce/settings/_oscar.py:227
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:107
 #: ecommerce/templates/oscar/dashboard/partials/refund_table.html:5
-#: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html:32
+#: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html:34
 #: ecommerce/templates/oscar/dashboard/refunds/refund_list.html:11
 #: ecommerce/templates/oscar/dashboard/refunds/refund_list.html:32
 #: ecommerce/templates/oscar/dashboard/refunds/refund_list.html:38
@@ -1453,37 +1676,37 @@ msgstr "统计数据"
 msgid "Refunds"
 msgstr "退款"
 
-#: ecommerce/settings/_oscar.py:232 ecommerce/settings/_oscar.py:236
+#: ecommerce/settings/_oscar.py:233 ecommerce/settings/_oscar.py:237
 #: ecommerce/templates/oscar/dashboard/users/detail.html:23
 msgid "Customers"
 msgstr "客户"
 
-#: ecommerce/settings/_oscar.py:240
+#: ecommerce/settings/_oscar.py:241
 msgid "Stock alert requests"
 msgstr "库存提示请求"
 
-#: ecommerce/settings/_oscar.py:246 ecommerce/settings/_oscar.py:250
-#: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:17
+#: ecommerce/settings/_oscar.py:247 ecommerce/settings/_oscar.py:251
+#: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:15
 msgid "Offers"
 msgstr "报价"
 
-#: ecommerce/settings/_oscar.py:254
+#: ecommerce/settings/_oscar.py:255
 msgid "Vouchers"
 msgstr "票券"
 
-#: ecommerce/settings/_oscar.py:260
+#: ecommerce/settings/_oscar.py:261
 msgid "Reports"
 msgstr "报告"
 
-#: ecommerce/settings/base.py:84
+#: ecommerce/settings/base.py:88
 msgid "English"
 msgstr "英语"
 
-#: ecommerce/settings/base.py:85
+#: ecommerce/settings/base.py:89
 msgid "Spanish"
 msgstr "西班牙语"
 
-#: ecommerce/settings/base.py:86
+#: ecommerce/settings/base.py:90
 msgid "Spanish (Latin American)"
 msgstr "西班牙语（拉丁美洲）"
 
@@ -1547,10 +1770,13 @@ msgstr "若您以取得认证证书为目标，那么您修完此课程的可能
 msgid "Courses"
 msgstr "课程"
 
-#: ecommerce/templates/courses/course_app.html:25
+#: ecommerce/templates/courses/course_app.html:27
 #, python-format
-msgid "%(platform_name)s Course Administration Tool"
-msgstr "%(platform_name)s管理人员工具界面"
+msgid ""
+"\n"
+"                                %(platform_name)s Course Administration Tool\n"
+"                            "
+msgstr ""
 
 #: ecommerce/templates/courses/menu_options.html:8
 msgid "Student Dashboard"
@@ -1564,7 +1790,7 @@ msgstr "课程管理工具"
 msgid "E-Commerce Dashboard"
 msgstr "电子商务控制面板"
 
-#: ecommerce/templates/customer/email_base.html:188
+#: ecommerce/templates/customer/email_base.html:189
 #, python-format
 msgid "Copyright © %(year)s %(platform_name)s. All rights reserved."
 msgstr "版权 © %(year)s %(platform_name)s。保留所有权利。"
@@ -1648,13 +1874,13 @@ msgstr "查看付款信息"
 
 #: ecommerce/templates/customer/emails/commtype_credit_receipt_body.html:55
 #: ecommerce/templates/customer/emails/commtype_credit_receipt_body.txt:4
-#: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html:24
+#: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html:25
 #: ecommerce/templates/customer/emails/commtype_order_with_csv_body.txt:5
 #, python-format
 msgid "Dear %(full_name)s,"
 msgstr "亲爱的 %(full_name)s："
 
-#: ecommerce/templates/customer/emails/commtype_credit_receipt_body.html:59
+#: ecommerce/templates/customer/emails/commtype_credit_receipt_body.html:60
 #, python-format
 msgid ""
 "\n"
@@ -1662,7 +1888,7 @@ msgid ""
 "                        "
 msgstr "\n                            感谢您从 %(credit_provider)s 购买了 %(course_title)s 的 %(credit_hours)s 个学分时。费用将以公司名称为 \"%(platform_name)s\" 显示在的您的信用卡或借记卡账单上。"
 
-#: ecommerce/templates/customer/emails/commtype_credit_receipt_body.html:65
+#: ecommerce/templates/customer/emails/commtype_credit_receipt_body.html:67
 #: ecommerce/templates/customer/emails/commtype_credit_receipt_body.txt:8
 #, python-format
 msgid ""
@@ -1672,7 +1898,7 @@ msgid ""
 " %(platform_name)s dashboard."
 msgstr "要得到您的课程学分，您还必须在 %(credit_provider)s 网站上申请学分。要获得申请 %(credit_provider)s 学分的网站链接，或查看您的学分申请状态，请前往您的 %(platform_name)s 控制面板。"
 
-#: ecommerce/templates/customer/emails/commtype_credit_receipt_body.html:69
+#: ecommerce/templates/customer/emails/commtype_credit_receipt_body.html:71
 #: ecommerce/templates/customer/emails/commtype_credit_receipt_body.txt:10
 #, python-format
 msgid ""
@@ -1680,18 +1906,18 @@ msgid ""
 "website. We add new courses frequently!"
 msgstr "要探索其他提供学分的课程，请访问网站 %(platform_name)s 。我们经常增加新课程！"
 
-#: ecommerce/templates/customer/emails/commtype_credit_receipt_body.html:72
+#: ecommerce/templates/customer/emails/commtype_credit_receipt_body.html:74
 #: ecommerce/templates/customer/emails/commtype_credit_receipt_body.txt:15
 msgid "Thank you. We hope you enjoyed your course!"
 msgstr "谢谢。我们希望您喜欢您的课程！"
 
-#: ecommerce/templates/customer/emails/commtype_credit_receipt_body.html:73
+#: ecommerce/templates/customer/emails/commtype_credit_receipt_body.html:75
 #: ecommerce/templates/customer/emails/commtype_credit_receipt_body.txt:16
 #, python-format
 msgid "The %(platform_name)s team"
 msgstr "%(platform_name)s 团队"
 
-#: ecommerce/templates/customer/emails/commtype_credit_receipt_body.html:85
+#: ecommerce/templates/customer/emails/commtype_credit_receipt_body.html:88
 #, python-format
 msgid ""
 "\n"
@@ -1726,11 +1952,11 @@ msgstr "您收到此信息是因为您购买了 %(platform_name)s 课程 %(cours
 msgid "Order Receipt"
 msgstr "订单收据"
 
-#: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html:13
+#: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html:14
 msgid "For Business"
 msgstr "作商业用途"
 
-#: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html:25
+#: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html:26
 #: ecommerce/templates/customer/emails/commtype_order_with_csv_body.txt:6
 #, python-format
 msgid ""
@@ -1738,84 +1964,86 @@ msgid ""
 "ready to learn with edX:"
 msgstr "感谢您购买%(course_name)s使用权，赶紧让您的小组准备开启edX学习之旅吧："
 
-#: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html:27
-#, python-format
+#: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html:29
+#, python-brace-format
 msgid ""
-"Download and save the %(link_start)s%(download_csv_link)s%(link_middle)s "
-"enrollment code file.%(link_end)s"
-msgstr "下载并保存%(link_start)s%(download_csv_link)s%(link_middle)s选课码文件。%(link_end)s"
+"\n"
+"                                Download and save the {link_start}{download_csv_link}{link_middle} enrollment code file.{link_end}\n"
+"                            "
+msgstr ""
 
-#: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html:28
+#: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html:34
 #: ecommerce/templates/customer/emails/commtype_order_with_csv_body.txt:9
 msgid "Distribute one code per learner before the expiration date."
 msgstr "在有效期内为每位学员分配一个课程码。"
 
-#: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html:29
+#: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html:35
 #: ecommerce/templates/customer/emails/commtype_order_with_csv_body.txt:10
 msgid "Pro tip: Track which code is associated with which person."
 msgstr "专业提示：跟踪与具体某位学员相关联的选课码。"
 
-#: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html:30
+#: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html:36
 #: ecommerce/templates/customer/emails/commtype_order_with_csv_body.txt:11
 msgid "Learners sign-in/register with edX and enroll for the course."
 msgstr "学员登录/注册edX并报读此课程。"
 
-#: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html:32
-#, python-format
+#: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html:39
+#, python-brace-format
 msgid ""
-"To view your payment information, log in to see your Order History, under "
-"%(link_start)s%(order_history_url)s%(link_middle)sAccount "
-"Settings%(link_end)s"
-msgstr "如需查看您的支付信息，请登录并在%(link_start)s%(order_history_url)s%(link_middle)s账号设置%(link_end)s中查看您的订单历史记录。"
+"\n"
+"                            To view your payment information, log in to see your Order History, under {link_start}{order_history_url}{link_middle}Account Settings{link_end}.\n"
+"                        "
+msgstr ""
 
-#: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html:33
-#, python-format
+#: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html:45
+#, python-brace-format
 msgid ""
-"For more information and assistance, contact "
-"%(link_start)sinfo@edx.org.%(link_end)s"
-msgstr "如需更多信息和帮助，请联系%(link_start)sinfo@edx.org。%(link_end)s"
+"\n"
+"                            For more information and assistance, check our {link_start}Help Center{link_end}\n"
+"                        "
+msgstr ""
 
-#: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html:34
+#: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html:50
 #: ecommerce/templates/customer/emails/commtype_order_with_csv_body.txt:16
 msgid "Thank You"
 msgstr "谢谢"
 
-#: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html:45
+#: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html:61
 #: ecommerce/templates/customer/emails/commtype_order_with_csv_body.txt:18
 msgid "By purchasing, you and your organization agree to the following terms:"
 msgstr "购买即表示您和您所属的组织同意以下条款："
 
-#: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html:47
+#: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html:63
 #: ecommerce/templates/customer/emails/commtype_order_with_csv_body.txt:20
 msgid ""
 "Each code is valid for the one course covered and can be used only one time."
 msgstr "每个选课码仅对某一课程有效，且仅限使用一次。"
 
-#: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html:48
+#: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html:64
 #: ecommerce/templates/customer/emails/commtype_order_with_csv_body.txt:21
 msgid "You are responsible for distributing codes to your learners."
 msgstr "由您负责为学员分配选课码。"
 
-#: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html:49
+#: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html:65
 #: ecommerce/templates/customer/emails/commtype_order_with_csv_body.txt:22
 msgid ""
 "Each code will expire in one year from date of purchase or, if earlier, once"
 " the course is closed."
 msgstr "从购买日期起，每个课程码有效期为一年，若课程被关闭，课程码也将提前失效。"
 
-#: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html:50
+#: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html:66
 #: ecommerce/templates/customer/emails/commtype_order_with_csv_body.txt:23
 msgid ""
 "If a course is not designated as self-paced, you should confirm that a "
 "course run is available before expiration."
 msgstr "若课程并非自行制定学习进度，则建议您在课程码有效期内确定开课时间。"
 
-#: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html:51
+#: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html:67
 #: ecommerce/templates/customer/emails/commtype_order_with_csv_body.txt:24
 msgid "You may not resell codes to third parties."
 msgstr "请勿将选课码转售至第三方。"
 
-#: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html:52
+#: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html:68
 #: ecommerce/templates/customer/emails/commtype_order_with_csv_body.txt:25
 msgid "All sales final. No refunds."
 msgstr "一经售出，不得退款"
@@ -1851,134 +2079,149 @@ msgstr "%(partner_name)s：订单确认：[%(order_number)s]"
 msgid "Sign Out"
 msgstr "退出"
 
-#: ecommerce/templates/edx/checkout/receipt.html:11
+#: ecommerce/templates/edx/checkout/receipt.html:13
 #, python-format
 msgid "Receipt for %(order_number)s"
 msgstr "%(order_number)s的收据"
 
-#: ecommerce/templates/edx/checkout/receipt.html:30
+#: ecommerce/templates/edx/checkout/receipt.html:36
 msgid "Thank you for your order!"
 msgstr "感谢您的订购！"
 
-#: ecommerce/templates/edx/checkout/receipt.html:40
-#, python-format
+#: ecommerce/templates/edx/checkout/receipt.html:46
+#, python-brace-format
 msgid ""
 "Your order is complete. You will receive a confirmation message and your "
-"enrollment codes(s) at %(link_start)s%(email)s%(link_end)s. If you need a "
-"receipt, you can print this page."
-msgstr "您的订单已完成。您将在%(link_start)s%(email)s%(link_end)s中收到一条确认信息及您的选课码（或多个）。如需收据，请打印此页面。"
+"enrollment code(s) at {link_start}{email}{link_end}. If you need a receipt, "
+"you can print this page."
+msgstr ""
 
-#: ecommerce/templates/edx/checkout/receipt.html:45
-#, python-format
+#: ecommerce/templates/edx/checkout/receipt.html:52
+#, python-brace-format
 msgid ""
 "Your order is complete. If you need a receipt, you can print this page. You "
 "will also receive a confirmation message with this information at "
-"%(link_start)s%(email)s%(link_end)s."
-msgstr "您的订单已完成，如需收据，请打印此页面。此信息和您订单的确认信息将发送至%(link_start)s%(email)s%(link_end)s。"
+"{link_start}{email}{link_end}."
+msgstr ""
 
-#: ecommerce/templates/edx/checkout/receipt.html:64
+#: ecommerce/templates/edx/checkout/receipt.html:72
 msgid "Order Number:"
 msgstr "订单编号："
 
-#: ecommerce/templates/edx/checkout/receipt.html:67
+#: ecommerce/templates/edx/checkout/receipt.html:75
 msgid "Payment Method:"
 msgstr "支付方式："
 
-#: ecommerce/templates/edx/checkout/receipt.html:70
+#: ecommerce/templates/edx/checkout/receipt.html:78
 msgid "Order Date:"
 msgstr "订单日期："
 
-#: ecommerce/templates/edx/checkout/receipt.html:76
+#: ecommerce/templates/edx/checkout/receipt.html:84
 msgid "Order Information"
 msgstr "订单信息"
 
-#: ecommerce/templates/edx/checkout/receipt.html:81
-#: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:61
+#: ecommerce/templates/edx/checkout/receipt.html:89
+#: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:59
 #: ecommerce/templates/oscar/dashboard/offers/summary.html:12
 msgid "Description"
 msgstr "描述"
 
-#: ecommerce/templates/edx/checkout/receipt.html:82
-#: ecommerce/templates/oscar/basket/partials/hosted_checkout_basket.html:38
+#: ecommerce/templates/edx/checkout/receipt.html:90
+#: ecommerce/templates/oscar/basket/partials/hosted_checkout_basket.html:39
 msgid "Item Price"
 msgstr "项目价格"
 
-#: ecommerce/templates/edx/checkout/receipt.html:86
-#: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html:180
+#: ecommerce/templates/edx/checkout/receipt.html:94
+#: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html:184
 msgid "Quantity:"
 msgstr "数量:"
 
-#: ecommerce/templates/edx/checkout/receipt.html:88
+#: ecommerce/templates/edx/checkout/receipt.html:96
 msgid "Description:"
 msgstr "描述："
 
-#: ecommerce/templates/edx/checkout/receipt.html:97
+#: ecommerce/templates/edx/checkout/receipt.html:105
 msgid "Item Price:"
 msgstr "项目价格："
 
-#: ecommerce/templates/edx/checkout/receipt.html:103
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:58
+#: ecommerce/templates/edx/checkout/receipt.html:111
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:52
 msgid "Subtotal"
 msgstr "小计"
 
-#: ecommerce/templates/edx/checkout/receipt.html:118
+#: ecommerce/templates/edx/checkout/receipt.html:127
 #, python-format
 msgid "%(voucher_discount_amount)s off"
 msgstr "优惠%(voucher_discount_amount)s"
 
-#: ecommerce/templates/edx/checkout/receipt.html:132
+#: ecommerce/templates/edx/checkout/receipt.html:137
+#, python-format
+msgid "Discount of type %(type)s provided by %(enterprise_name)s"
+msgstr ""
+
+#: ecommerce/templates/edx/checkout/receipt.html:142
+msgid "Discount for your first upgrade"
+msgstr ""
+
+#: ecommerce/templates/edx/checkout/receipt.html:145
+#, python-format
+msgid "Discount of type %(type)s is provided."
+msgstr ""
+
+#: ecommerce/templates/edx/checkout/receipt.html:159
 #, python-format
 msgid "Courtesy of %(enterprise_name)s."
 msgstr "由%(enterprise_name)s赠送。"
 
-#: ecommerce/templates/edx/checkout/receipt.html:144
+#: ecommerce/templates/edx/checkout/receipt.html:172
 msgid "Total"
 msgstr "共计"
 
-#: ecommerce/templates/edx/checkout/receipt.html:155
+#: ecommerce/templates/edx/checkout/receipt.html:179
 msgid "Get Your Course Credit"
 msgstr "获取您的课程学分"
 
-#: ecommerce/templates/edx/checkout/receipt.html:157
-#, python-format
+#: ecommerce/templates/edx/checkout/receipt.html:181
+#, python-brace-format
 msgid ""
 "To receive academic credit for this course, you must apply for credit at the"
 " organization that offers the credit. You can find a link to the "
-"organization’s website on your %(link_start)sdashboard%(link_end)s, next to "
-"the course name."
-msgstr "如需获取此课程的学分，您必须向提供学分的组织申请学分。您可以在此课程名称旁边的%(link_start)s面板%(link_end)s中寻找此组织的网站链接。"
+"organization’s website on your "
+"{link_start}{lms_dashboard_url}{link_middle}dashboard{link_end}, next to the"
+" course name."
+msgstr ""
 
-#: ecommerce/templates/edx/checkout/receipt.html:173
-msgid "Go to Dashboard"
-msgstr "前往面板"
+#: ecommerce/templates/edx/checkout/receipt.html:200
+msgid "Go to dashboard"
+msgstr ""
 
-#: ecommerce/templates/edx/checkout/receipt.html:179
+#: ecommerce/templates/edx/checkout/receipt.html:204
 msgid "Find more courses"
 msgstr "寻找更多课程"
 
-#: ecommerce/templates/edx/checkout/receipt_not_found.html:6
+#: ecommerce/templates/edx/checkout/receipt_not_found.html:7
 msgid "Order Not Found"
 msgstr "未找到订单"
 
-#: ecommerce/templates/edx/checkout/receipt_not_found.html:18
+#: ecommerce/templates/edx/checkout/receipt_not_found.html:19
 #, python-format
 msgid " %(error_summary)s "
 msgstr " %(error_summary)s "
 
-#: ecommerce/templates/edx/checkout/receipt_not_found.html:22
+#: ecommerce/templates/edx/checkout/receipt_not_found.html:23
 msgid ""
 "The specified order could not be located. Please ensure that the URL is "
 "correct, and try again."
 msgstr "无法找到该订单，请检查URL地址并重试。"
 
 #: ecommerce/templates/edx/checkout/receipt_not_found.html:31
-#, python-format
+#, python-brace-format
 msgid ""
 "\n"
-"                You may also view your previous orders on the %(link_start)sAccount Settings%(link_end)s\n"
+"                You may also view your previous orders on the {link_start}{order_history_url}{link_middle}{link_end}Account Settings{link_end}\n"
 "                page.\n"
 "              "
-msgstr "\n您也可以在%(link_start)s账号设置%(link_end)s页面上查看之前的订单。\n              "
+msgstr ""
 
 #: ecommerce/templates/edx/credit/_provider_detail.html:8
 msgid "Select"
@@ -1992,116 +2235,116 @@ msgstr "学分："
 msgid "Price: "
 msgstr "价格："
 
-#: ecommerce/templates/edx/credit/_provider_detail.html:26
+#: ecommerce/templates/edx/credit/_provider_detail.html:27
 #, python-format
 msgid ""
 "\n"
-"                    Learn more about %(display_name)s credit?\n"
-"                "
-msgstr "\n                    想了解更多关于 %(display_name)s 学分的信息？"
+"                        Learn more about %(display_name)s credit?\n"
+"                    "
+msgstr ""
 
-#: ecommerce/templates/edx/credit/_provider_detail.html:44
+#: ecommerce/templates/edx/credit/_provider_detail.html:47
 #, python-format
 msgid ""
 "\n"
-"                    Credit available until %(date)s\n"
-"                "
-msgstr "\n                    在 %(date)s前可获得学分                    "
+"                        Credit available until %(date)s\n"
+"                    "
+msgstr ""
 
-#: ecommerce/templates/edx/credit/checkout.html:8
+#: ecommerce/templates/edx/credit/checkout.html:9
 #, python-format
 msgid "Purchase Credit for %(course_name)s"
 msgstr "购买 %(course_name)s 的学分"
 
-#: ecommerce/templates/edx/credit/checkout.html:25
+#: ecommerce/templates/edx/credit/checkout.html:27
 #, python-format
 msgid ""
 "\n"
-"                                Purchase Credit for %(course_name)s\n"
-"                            "
-msgstr "\n                                购买 %(course_name)s\n 的学分"
+"                                    Purchase Credit for %(course_name)s\n"
+"                                "
+msgstr ""
 
-#: ecommerce/templates/edx/credit/checkout.html:30
+#: ecommerce/templates/edx/credit/checkout.html:34
 #, python-format
 msgid ""
 "\n"
-"                        Congratulations! You are eligible to purchase academic course credit for this course.\n"
-"                        You must purchase your credit before %(date)s.\n"
-"                        Select one of the following institutions to purchase your credit.\n"
-"                    "
-msgstr "\n                        恭喜！您有资格购买此课程的学术课程学分。\n您必须在 %(date)s 之前购买您的学分。\n选择以下其中一个机构来购买您的学分。"
+"                            Congratulations! You are eligible to purchase academic course credit for this course.\n"
+"                            You must purchase your credit before %(date)s.\n"
+"                            Select one of the following institutions to purchase your credit.\n"
+"                        "
+msgstr ""
 
-#: ecommerce/templates/edx/credit/checkout.html:46
+#: ecommerce/templates/edx/credit/checkout.html:51
 msgid "Price:"
 msgstr "价格："
 
-#: ecommerce/templates/edx/credit/checkout.html:50
+#: ecommerce/templates/edx/credit/checkout.html:55
 msgid "Discount:"
 msgstr "折扣："
 
-#: ecommerce/templates/edx/credit/checkout.html:55
-#: ecommerce/templates/oscar/basket/partials/hosted_checkout_basket.html:122
+#: ecommerce/templates/edx/credit/checkout.html:60
+#: ecommerce/templates/oscar/basket/partials/hosted_checkout_basket.html:127
 msgid "Total:"
 msgstr "总共:"
 
-#: ecommerce/templates/edx/credit/checkout.html:84
+#: ecommerce/templates/edx/credit/checkout.html:89
 msgid "You deserve it."
 msgstr "这是您努力的结果。"
 
-#: ecommerce/templates/edx/credit/checkout.html:87
+#: ecommerce/templates/edx/credit/checkout.html:92
 msgid ""
 "The hard work is over - you passed the course! Now get the credit you "
 "deserve to start or complete a degree."
 msgstr "苦尽甘来——您通过了本门课程！现在就来获取您应得的学分，开始或完成您的学位。"
 
-#: ecommerce/templates/edx/credit/checkout.html:93
+#: ecommerce/templates/edx/credit/checkout.html:98
 msgid "It's affordable."
 msgstr "价格实惠。"
 
-#: ecommerce/templates/edx/credit/checkout.html:96
+#: ecommerce/templates/edx/credit/checkout.html:101
 msgid ""
 "The credit offered through edX generally costs less than the same credit at "
 "most institutions."
 msgstr "通过 edX 提供的学分通常比大多数机构提供的相同学分价格更实惠。"
 
-#: ecommerce/templates/edx/credit/checkout.html:102
+#: ecommerce/templates/edx/credit/checkout.html:107
 msgid "It opens doors."
 msgstr "它能带来新的机会。"
 
-#: ecommerce/templates/edx/credit/checkout.html:105
+#: ecommerce/templates/edx/credit/checkout.html:110
 msgid ""
 "Many of today's most in-demand jobs require a college degree. Start your "
 "path to success!"
 msgstr "如今炙手可热的工作大多需要一个大学学位。在这里开启您的成功之路吧！"
 
-#: ecommerce/templates/edx/credit/checkout.html:113
+#: ecommerce/templates/edx/credit/checkout.html:118
 msgid "Questions?"
 msgstr "有疑问？"
 
-#: ecommerce/templates/edx/credit/checkout.html:116
-#, python-format
+#: ecommerce/templates/edx/credit/checkout.html:121
+#, python-brace-format
 msgid ""
 "\n"
-"                    Please read %(link_start)sour FAQs to view common questions about our certificates.%(link_end)s\n"
+"                    Please read {link_start}our FAQs to view common questions about our certificates.{link_end}\n"
 "                "
-msgstr "\n                    请阅读 %(link_start)s 我们的常见问题解答，以查看有关我们的证书的常见问题。%(link_end)s"
+msgstr ""
 
 #: ecommerce/templates/edx/email_confirmation_required.html:16
 msgid "You are enrolling in: "
 msgstr "您正在选课："
 
-#: ecommerce/templates/edx/email_confirmation_required.html:23
+#: ecommerce/templates/edx/email_confirmation_required.html:24
 #, python-format
 msgid ""
 "An email has been sent to %(user_email)s with a link for you to activate "
 "your account."
 msgstr "已发送邮件至%(user_email)s，内含用于激活账号的链接。"
 
-#: ecommerce/templates/edx/email_confirmation_required.html:25
+#: ecommerce/templates/edx/email_confirmation_required.html:27
 msgid "Why activate?"
 msgstr "为何需要激活？"
 
-#: ecommerce/templates/edx/email_confirmation_required.html:27
+#: ecommerce/templates/edx/email_confirmation_required.html:29
 msgid ""
 "We ask you to activate your account to ensure it is really you creating the "
 "account and to prevent fraud."
@@ -2114,6 +2357,10 @@ msgstr "如需帮助，请联系edX客服。"
 #: ecommerce/templates/edx/partials/_administration_menu.html:6
 msgid "Coupons"
 msgstr "优惠券"
+
+#: ecommerce/templates/edx/partials/_administration_menu.html:8
+msgid "Enterprise Coupons"
+msgstr ""
 
 #: ecommerce/templates/edx/partials/_base_navbar.html:10
 msgid "Toggle navigation"
@@ -2144,38 +2391,38 @@ msgstr "电子商务优惠券管理"
 msgid "E-Commerce Program Offers Administration"
 msgstr "电子商务课程申请方案管理"
 
-#: ecommerce/templates/oscar/basket/basket.html:37
+#: ecommerce/templates/oscar/basket/basket.html:48
 msgid "Your basket is empty"
 msgstr "您的购物车是空的"
 
-#: ecommerce/templates/oscar/basket/basket.html:46
-#, python-format
+#: ecommerce/templates/oscar/basket/basket.html:49
+#, python-brace-format
 msgid ""
 "\n"
-"                                If you attempted to make a purchase, you have not been charged. Return to your %(dashboard_link_start)sdashboard%(link_end)s to try\n"
-"                                again, or %(support_link_start)scontact %(platform_name)s Support%(link_end)s.\n"
+"                                If you attempted to make a purchase, you have not been charged. Return to your {link_start}{link_middle}{homepage_url}dashboard{link_end} to try\n"
+"                                again, or {link_start}{homepage_url}{link_middle}contact {platform_name} Support{link_end}.\n"
 "                            "
-msgstr "\n若您的购买订单尚未扣除款项，请返回%(dashboard_link_start)s面板%(link_end)s 重试\n ， 或 %(support_link_start)s联系%(platform_name)s 支持服务 %(link_end)s。\n                            "
+msgstr ""
 
-#: ecommerce/templates/oscar/basket/messages/new_total.html:6
+#: ecommerce/templates/oscar/basket/messages/new_total.html:7
 msgid "Your basket is now empty"
 msgstr "您的购物车是空的"
 
-#: ecommerce/templates/oscar/basket/messages/new_total.html:9
-#: ecommerce/templates/oscar/basket/messages/new_total.html:14
-#, python-format
+#: ecommerce/templates/oscar/basket/messages/new_total.html:10
+#: ecommerce/templates/oscar/basket/messages/new_total.html:16
+#, python-brace-format
 msgid ""
 "\n"
-"            %(strong_start)sWe’ve updated your quantity.%(strong_end)s\n"
-"            %(paragraph_start)sYour cart includes %(num_items)s enrollment codes at a total cost of %(total)s, that you will receive via email.%(paragraph_end)s\n"
-"        "
-msgstr "\n            %(strong_start)s已更新您的数额。%(strong_end)s\n            %(paragraph_start)s您的购物车中有 %(num_items)s 个选课码，总金额为 %(total)s，将通过邮件形式给您发送%(paragraph_end)s。\n        "
+"                {strong_start}We’ve updated your quantity.{strong_end}\n"
+"                {paragraph_start}Your cart includes {num_items} enrollment codes at a total cost of {total}, that you will receive via email.{paragraph_end}\n"
+"            "
+msgstr ""
 
-#: ecommerce/templates/oscar/basket/messages/new_total.html:24
+#: ecommerce/templates/oscar/basket/messages/new_total.html:27
 msgid "View basket"
 msgstr "查看购物车"
 
-#: ecommerce/templates/oscar/basket/messages/new_total.html:25
+#: ecommerce/templates/oscar/basket/messages/new_total.html:28
 msgid "Checkout now"
 msgstr "立即结算"
 
@@ -2196,13 +2443,13 @@ msgid "Your purchase contains the following"
 msgstr "您购买的商品如下："
 
 #: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:36
-#: ecommerce/templates/oscar/basket/partials/hosted_checkout_basket.html:56
+#: ecommerce/templates/oscar/basket/partials/hosted_checkout_basket.html:57
 msgid "Updating..."
 msgstr "正在更新…"
 
 #: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:36
-#: ecommerce/templates/oscar/basket/partials/hosted_checkout_basket.html:56
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html:516
+#: ecommerce/templates/oscar/basket/partials/hosted_checkout_basket.html:57
+#: ecommerce/templates/oscar/dashboard/orders/order_detail.html:518
 msgid "Update"
 msgstr "更新"
 
@@ -2210,15 +2457,11 @@ msgstr "更新"
 msgid "summary"
 msgstr "总计"
 
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:54
-msgid "Quanity"
-msgstr "数额"
-
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:64
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:68
 msgid "Discounts applied"
 msgstr "已打折"
 
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:74
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:80
 #, python-format
 msgid ""
 "\n"
@@ -2226,7 +2469,15 @@ msgid ""
 "                                "
 msgstr "\n                                    %(benefit)s折扣由%(enterprise_customer_name)s提供。\n                                "
 
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:90
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:87
+#, python-format
+msgid ""
+"\n"
+"                                    %(benefit)s%% discount for your first upgrade applied.\n"
+"                            "
+msgstr ""
+
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:104
 #, python-format
 msgid ""
 "\n"
@@ -2234,104 +2485,104 @@ msgid ""
 "                                    "
 msgstr "\n                                        已使用优惠券%(voucher_code)s抵扣%(total_benefit)s\n                                    "
 
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:95
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:110
 msgid "Remove coupon"
 msgstr "移除优惠券"
 
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:104
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:119
 msgid "Add coupon code"
 msgstr "添加优惠券码"
 
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:104
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:119
 msgid "(optional)"
 msgstr "（可选项）"
 
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:113
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:128
 msgid "TOTAL"
 msgstr "共计"
 
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:120
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:135
 msgid "order details"
 msgstr "订单详情"
 
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:135
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:153
 msgid "select payment method"
 msgstr "选择支付方式"
 
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:137
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:155
 msgid "Pay with a Credit Card"
 msgstr "信用卡支付"
 
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:148
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:166
 msgid "Pay with PayPal"
 msgstr "Paypal支付"
 
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:157
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:175
 msgid "Pay with Apple Pay"
 msgstr "Apple Pay支付"
 
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:172
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:190
 msgid "card holder information"
 msgstr "持卡人信息"
 
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:183
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:201
 msgid "billing information"
 msgstr "账单信息"
 
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:185
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:203
 msgid "Credit cards"
 msgstr "信用卡"
 
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:192
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:210
 msgid "Card Number (required)"
 msgstr "卡号（必填项）"
 
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:192
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:202
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:210
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:220
 msgid "Secure"
 msgstr "安全的"
 
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:195
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:213
 msgid "Credit card icon"
 msgstr "信用卡图标"
 
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:201
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:219
 msgid "Security Code (required)"
 msgstr "安全码（必填项）"
 
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:205
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:223
 msgid "Help with CVV"
 msgstr "通过CVV辅助"
 
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:208
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:226
 msgid ""
 "The three last digits in the signature area on the back of your card. For "
 "American Express, it is the four digits on the front of the card."
 msgstr "在卡背面签名处的后三位数字上。若是American Express，则在卡正面的后四位数字上。"
 
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:215
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:233
 msgid "Expiration (required)"
 msgstr "到期时间（必填项）"
 
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:219
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:237
 msgid "Month"
 msgstr "月"
 
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:229
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:247
 msgid "Year"
 msgstr "年"
 
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:246
-#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:256
-#: ecommerce/templates/oscar/basket/partials/hosted_checkout_basket.html:147
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:264
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:274
+#: ecommerce/templates/oscar/basket/partials/hosted_checkout_basket.html:152
 msgid "Place Order"
 msgstr "下订单"
 
-#: ecommerce/templates/oscar/basket/partials/hosted_checkout_basket.html:22
+#: ecommerce/templates/oscar/basket/partials/hosted_checkout_basket.html:23
 msgid "Earn a valuable certificate to showcase the skills you learn in"
 msgstr "获取宝贵的证书，并展现您所习得的技能"
 
-#: ecommerce/templates/oscar/basket/partials/hosted_checkout_basket.html:68
+#: ecommerce/templates/oscar/basket/partials/hosted_checkout_basket.html:70
 #, python-format
 msgid ""
 "\n"
@@ -2339,49 +2590,51 @@ msgid ""
 "                                        "
 msgstr "\n抵扣 %(benefit_value)s\n                                        "
 
-#: ecommerce/templates/oscar/basket/partials/hosted_checkout_basket.html:95
+#: ecommerce/templates/oscar/basket/partials/hosted_checkout_basket.html:99
 #, python-format
 msgid ""
 "\n"
-"                                        Coupon code %(voucher_code)s applied\n"
-"                                    "
-msgstr "\n优惠券码%(voucher_code)s 已使用\n                                    "
+"                                            Coupon code %(voucher_code)s applied\n"
+"                                        "
+msgstr ""
 
-#: ecommerce/templates/oscar/basket/partials/hosted_checkout_basket.html:111
+#: ecommerce/templates/oscar/basket/partials/hosted_checkout_basket.html:116
 msgid "Apply a coupon code"
 msgstr "使用优惠券码"
 
-#: ecommerce/templates/oscar/basket/partials/hosted_checkout_basket.html:159
+#: ecommerce/templates/oscar/basket/partials/hosted_checkout_basket.html:164
 msgid "Checkout"
 msgstr "结算"
 
 #. Translators: Do NOT translate the name PayPal.
-#: ecommerce/templates/oscar/basket/partials/hosted_checkout_basket.html:162
+#: ecommerce/templates/oscar/basket/partials/hosted_checkout_basket.html:167
 msgid "Checkout with PayPal"
 msgstr "使用PayPal结算"
 
-#: ecommerce/templates/oscar/basket/partials/hosted_checkout_basket.html:176
+#: ecommerce/templates/oscar/basket/partials/hosted_checkout_basket.html:181
+#, python-brace-format
 msgid ""
-"<strong>Note:</strong> To earn a verified certificate, you must verify your "
-"identity with a <strong>webcam</strong> and a <strong>government-issued "
-"photo ID</strong>. "
-msgstr "<strong>注意：</strong>如需获取认证证书，您必须使用<strong>网络摄像头</strong>和<strong>政府签发的身份证件</strong>来进行身份认证。"
-
-#: ecommerce/templates/oscar/basket/partials/hosted_checkout_basket.html:178
-msgid ""
-"<strong>Note:</strong> To complete your enrollment, select Checkout or "
-"Checkout with PayPal."
-msgstr "<strong>注意：</strong>请选择“结算”或“使用Paypal结算”来完成选课。"
+"{strong_start}Note:{strong_end} To earn a verified certificate, you must "
+"verify your identity with a {strong_start}webcam{strong_end} and a "
+"{strong_start}government-issued photo ID{strong_end}. "
+msgstr ""
 
 #: ecommerce/templates/oscar/basket/partials/hosted_checkout_basket.html:184
+#, python-brace-format
+msgid ""
+"{strong_start}Note:{strong_end} To complete your enrollment, select Checkout"
+" or Checkout with PayPal."
+msgstr ""
+
+#: ecommerce/templates/oscar/basket/partials/hosted_checkout_basket.html:191
 msgid "Have questions?"
 msgstr "有任何问题吗？"
 
-#: ecommerce/templates/oscar/basket/partials/hosted_checkout_basket.html:185
+#: ecommerce/templates/oscar/basket/partials/hosted_checkout_basket.html:192
 msgid "Please read our FAQs to view common questions about our certificates."
 msgstr "请阅读我们的FAQ，以查看有关我们的证书的常见问题。"
 
-#: ecommerce/templates/oscar/basket/partials/seat_type.html:5
+#: ecommerce/templates/oscar/basket/partials/seat_type.html:6
 #, python-format
 msgid ""
 "\n"
@@ -2389,90 +2642,95 @@ msgid ""
 "    "
 msgstr "\n        %(seat_type)s证书\n    "
 
-#: ecommerce/templates/oscar/checkout/_verification_data.html:4
+#: ecommerce/templates/oscar/checkout/_verification_data.html:5
 msgid "Verify Your Identity"
 msgstr "认证您的身份"
 
-#: ecommerce/templates/oscar/checkout/_verification_data.html:6
+#: ecommerce/templates/oscar/checkout/_verification_data.html:7
+#, python-brace-format
 msgid ""
 "To receive a verified certificate, you have to verify your identity using "
-"your <strong>webcam</strong> and an <strong>official government-issued photo"
-" identification</strong> before the verification deadline."
-msgstr "如需获得认证证书，您必须在认证截止日期前使用<strong>网络摄像头</strong>和<strong>政府签发的正式身份证明</strong>进行身份认证。"
+"your {strong_start}webcam{strong_end} and an {strong_start}official "
+"government-issued photo identification{strong_end} before the verification "
+"deadline."
+msgstr ""
 
-#: ecommerce/templates/oscar/checkout/_verification_data.html:21
+#: ecommerce/templates/oscar/checkout/_verification_data.html:23
 msgid "Verify Now"
 msgstr "立即认证"
 
-#: ecommerce/templates/oscar/checkout/_verification_data.html:30
+#: ecommerce/templates/oscar/checkout/_verification_data.html:32
 msgid "Go to my dashboard and verify later"
 msgstr "前往我的面板，随后进行认证"
 
-#: ecommerce/templates/oscar/checkout/cancel_checkout.html:6
-#: ecommerce/templates/oscar/checkout/cancel_checkout.html:15
+#: ecommerce/templates/oscar/checkout/cancel_checkout.html:7
+#: ecommerce/templates/oscar/checkout/cancel_checkout.html:16
 msgid "Checkout Cancelled"
 msgstr "结算已取消"
 
-#: ecommerce/templates/oscar/checkout/cancel_checkout.html:17
-#, python-format
+#: ecommerce/templates/oscar/checkout/cancel_checkout.html:18
+#, python-brace-format
 msgid ""
 "\n"
-"            Your transaction has been cancelled. If you feel an error has occurred, contact %(start_link)s\n"
-"            %(payment_support_email)s%(end_link)s.\n"
-"            "
-msgstr "\n          您的交易已被取消。若认为此处发生了错误，请联系 %(start_link)s\n            %(payment_support_email)s%(end_link)s。\n            "
+"        Your transaction has been cancelled. If you feel an error has occurred, contact {start_link}\n"
+"        {payment_support_email}{end_link}.\n"
+"        "
+msgstr ""
 
-#: ecommerce/templates/oscar/checkout/error.html:6
-#: ecommerce/templates/oscar/checkout/error.html:17
+#: ecommerce/templates/oscar/checkout/error.html:7
+#: ecommerce/templates/oscar/checkout/error.html:18
 msgid "Checkout Error"
 msgstr "结算出错"
 
-#: ecommerce/templates/oscar/checkout/error.html:18
+#: ecommerce/templates/oscar/checkout/error.html:19
 msgid "An error has occurred with your payment."
 msgstr "支付过程中发生错误。"
 
-#: ecommerce/templates/oscar/checkout/error.html:18
+#: ecommerce/templates/oscar/checkout/error.html:19
 msgid "You have not been charged."
 msgstr "您的款项尚未扣除。"
 
-#: ecommerce/templates/oscar/checkout/error.html:20
-#, python-format
+#: ecommerce/templates/oscar/checkout/error.html:21
+#, python-brace-format
 msgid ""
 "\n"
-"                    Please try to submit your payment again. If this problem persists, please refer to our %(start_link)s\n"
-"                    Payments FAQ %(end_link)s for troubleshooting tips.\n"
+"                    Please try to submit your payment again. If this problem persists, please refer to our {start_link}\n"
+"                    Payments FAQ {end_link} for troubleshooting tips.\n"
 "                    "
-msgstr "\n                   请再次提交支付。如果问题依旧存在，请在我们的 %(start_link)s\n                    支付FAQ%(end_link)s 中寻求故障诊断提示。\n                    "
+msgstr ""
 
-#: ecommerce/templates/oscar/checkout/payment_error.html:6
-#: ecommerce/templates/oscar/checkout/payment_error.html:15
+#: ecommerce/templates/oscar/checkout/payment_error.html:7
+#: ecommerce/templates/oscar/checkout/payment_error.html:16
 msgid "Payment Failed"
 msgstr "支付失败"
 
-#: ecommerce/templates/oscar/checkout/payment_error.html:17
+#: ecommerce/templates/oscar/checkout/payment_error.html:18
+#, python-brace-format
 msgid ""
-"An error occurred while processing your payment. <strong>You have not been "
-"charged.</strong>"
-msgstr " 处理您的支付时发生错误，<strong>您的款项尚未扣除。</strong>"
+"An error occurred while processing your payment. {strong_start}You have not "
+"been charged.{strong_end}"
+msgstr ""
 
-#: ecommerce/templates/oscar/checkout/payment_error.html:23
-#, python-format
+#: ecommerce/templates/oscar/checkout/payment_error.html:25
+#, python-brace-format
 msgid ""
-"Please wait a few minutes and then try again. For help, contact "
-"%(start_link)s%(payment_support_email)s%(end_link)s."
-msgstr "请稍等几分钟后重试，如需帮助，请联系%(start_link)s%(payment_support_email)s%(end_link)s。"
+"Please wait a few minutes and then try again. For help, check our "
+"{start_link}Help Center{end_link}."
+msgstr ""
 
-#: ecommerce/templates/oscar/checkout/payment_error.html:31
-#, python-format
-msgid "To try again, return to your %(start_link)sdashboard%(end_link)s."
-msgstr "如需重试，请返回您的%(start_link)s面板%(end_link)s。"
+#: ecommerce/templates/oscar/checkout/payment_error.html:32
+#, python-brace-format
+msgid "To try again, return to your {start_link}dashboard{end_link}."
+msgstr ""
 
-#. Translators: SDN is an acronym for Specially Designated Nationals
-#: ecommerce/templates/oscar/checkout/sdn_failure.html:7
-msgid "SDN Check Failure"
-msgstr "SDN检查失败"
+#: ecommerce/templates/oscar/checkout/sdn_failure.html:9
+msgid ""
+"\n"
+"      SDN Check Failure\n"
+"    "
+msgstr ""
 
-#: ecommerce/templates/oscar/checkout/sdn_failure.html:20
+#: ecommerce/templates/oscar/checkout/sdn_failure.html:26
 msgid ""
 "Unfortunately, your account profile or payment information appears to match "
 "one or more records on a U.S. Treasury Department sanctions list. This means"
@@ -2480,19 +2738,19 @@ msgid ""
 "suspend your learner account."
 msgstr "非常遗憾，由于您的账户资料或支付信息出现在美国财政部制裁列表中，我们无法完成您的交易/为您提供服务并必须停用您的学员账号。"
 
-#: ecommerce/templates/oscar/checkout/sdn_failure.html:29
-#, python-format
+#: ecommerce/templates/oscar/checkout/sdn_failure.html:35
+#, python-brace-format
 msgid ""
 "If you have questions regarding clearing a match, please contact "
-"%(ofac_email_link)s ofac.reconsideration@treasury.gov%(end_link)s for "
+"{ofac_email_link} ofac.reconsideration@treasury.gov{end_link} for "
 "information about options for clearing a match. Your account will be "
 "suspended until this matter is resolved satisfactorily."
-msgstr "如果您对清除匹配项有疑问，请联系%(ofac_email_link)sofac.reconsideration@treasury.gov%(end_link)s了解清除匹配项的事宜。您的账号将一直被停用，直至此问题得到妥善解决。"
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/catalogue/category_row_actions.html:6
 #: ecommerce/templates/oscar/dashboard/catalogue/product_row_actions.html:6
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:147
-#: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html:73
+#: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html:77
 #: ecommerce/templates/oscar/dashboard/refunds/refund_list.html:62
 #: ecommerce/templates/oscar/dashboard/users/detail.html:99
 msgid "Actions"
@@ -2512,197 +2770,197 @@ msgstr "编辑子项目"
 
 #: ecommerce/templates/oscar/dashboard/catalogue/category_row_actions.html:27
 #: ecommerce/templates/oscar/dashboard/catalogue/product_row_actions.html:14
-#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:269
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html:698
+#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:271
+#: ecommerce/templates/oscar/dashboard/orders/order_detail.html:700
 msgid "Delete"
 msgstr "删除"
 
-#: ecommerce/templates/oscar/dashboard/catalogue/messages/product_saved.html:10
+#: ecommerce/templates/oscar/dashboard/catalogue/messages/product_saved.html:11
 #, python-format
 msgid ""
 "\n"
-"                    Created product variant '%(name)s'.\n"
+"                        Created product variant '%(name)s'.\n"
+"                    "
+msgstr ""
+
+#: ecommerce/templates/oscar/dashboard/catalogue/messages/product_saved.html:17
+#, python-format
+msgid ""
+"\n"
+"                        Created variant of '%(parent_name)s'.\n"
+"                    "
+msgstr ""
+
+#: ecommerce/templates/oscar/dashboard/catalogue/messages/product_saved.html:25
+#, python-format
+msgid ""
+"\n"
+"                        Updated product variant '%(name)s'.\n"
+"                    "
+msgstr ""
+
+#: ecommerce/templates/oscar/dashboard/catalogue/messages/product_saved.html:31
+#, python-format
+msgid ""
+"\n"
+"                        Updated a variant of '%(parent_name)s'.\n"
+"                    "
+msgstr ""
+
+#: ecommerce/templates/oscar/dashboard/catalogue/messages/product_saved.html:42
+#, python-format
+msgid ""
+"\n"
+"                    Created product '%(name)s'.\n"
 "                "
-msgstr "\n                    已创建产品变量 '%(name)s'。\n                "
-
-#: ecommerce/templates/oscar/dashboard/catalogue/messages/product_saved.html:14
-#, python-format
-msgid ""
-"\n"
-"                    Created variant of '%(parent_name)s'.\n"
-"                "
-msgstr "\n                    已创建 '%(parent_name)s' 的变量。\n                "
-
-#: ecommerce/templates/oscar/dashboard/catalogue/messages/product_saved.html:20
-#, python-format
-msgid ""
-"\n"
-"                    Updated product variant '%(name)s'.\n"
-"                "
-msgstr "\n                    已更新产品变量 '%(name)s'。\n                "
-
-#: ecommerce/templates/oscar/dashboard/catalogue/messages/product_saved.html:24
-#, python-format
-msgid ""
-"\n"
-"                    Updated a variant of '%(parent_name)s'.\n"
-"                "
-msgstr "\n                    已更新 '%(parent_name)s' 的变量。\n                "
-
-#: ecommerce/templates/oscar/dashboard/catalogue/messages/product_saved.html:33
-#, python-format
-msgid ""
-"\n"
-"                Created product '%(name)s'.\n"
-"            "
-msgstr "\n                已创建产品 '%(name)s'。\n            "
-
-#: ecommerce/templates/oscar/dashboard/catalogue/messages/product_saved.html:37
-#, python-format
-msgid ""
-"\n"
-"                Updated product '%(name)s'.\n"
-"            "
-msgstr "\n                已更新产品 '%(name)s'。\n            "
+msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/catalogue/messages/product_saved.html:48
+#, python-format
+msgid ""
+"\n"
+"                    Updated product '%(name)s'.\n"
+"                "
+msgstr ""
+
+#: ecommerce/templates/oscar/dashboard/catalogue/messages/product_saved.html:60
 msgid "Edit again"
 msgstr "再次编辑"
 
-#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:44
-#, python-format
+#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:45
+#, python-brace-format
 msgid ""
 "\n"
 "                            You are currently editing a product variant of\n"
-"                            <a href=\"%(parent_url)s\">%(title)s</a>.\n"
+"                            {start_anchor}{title}{end_anchor}.\n"
 "                        "
-msgstr "\n                            您当前正在编辑\n                            <a href=\"%(parent_url)s\">%(title)s</a> 的产品变量。\n                        "
+msgstr ""
 
-#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:59
+#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:61
 msgid "Sections"
 msgstr "章节"
 
-#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:71
-#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:101
-#: ecommerce/templates/oscar/dashboard/orders/line_detail.html:33
+#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:73
+#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:103
+#: ecommerce/templates/oscar/dashboard/orders/line_detail.html:34
 msgid "Product details"
 msgstr "产品详细信息"
 
-#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:76
-#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:144
-#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:255
+#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:78
+#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:146
+#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:257
 msgid "Attributes"
 msgstr "属性"
 
-#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:79
+#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:81
 msgid "Images"
 msgstr "图片"
 
-#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:82
-#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:186
+#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:84
+#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:188
 msgid "Stock and pricing"
 msgstr "库存及定价"
 
-#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:85
-#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:246
+#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:87
+#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:248
 msgid "Variants"
 msgstr "变量"
 
-#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:88
+#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:90
 msgid "Upselling"
 msgstr "追加销售"
 
-#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:146
+#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:148
 msgid "Product Type:"
 msgstr "产品类型："
 
-#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:167
+#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:169
 msgid "Upload, change or remove images"
 msgstr "上传、更改或删除图片"
 
-#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:192
+#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:194
 msgid "SKU"
 msgstr "SKU"
 
-#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:194
+#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:196
 msgid "Num in stock"
 msgstr "库存量"
 
-#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:195
+#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:197
 msgid "Num allocated"
 msgstr "分配量"
 
-#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:196
+#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:198
 msgid "Low stock threshold"
 msgstr "低库存"
 
-#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:199
+#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:201
 msgid "Cost price"
 msgstr "成本价"
 
-#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:200
+#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:202
 msgid "Price (excl tax)"
 msgstr "价格 (不含税)"
 
-#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:201
+#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:203
 msgid "Retail price"
 msgstr "零售价"
 
-#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:202
+#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:204
 msgid "Delete?"
 msgstr "是否删除？"
 
-#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:247
+#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:249
 msgid "Adding..."
 msgstr "正在添加…"
 
-#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:249
+#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:251
 msgid "Add variant"
 msgstr "添加变量"
 
-#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:254
+#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:256
 msgid "Title"
 msgstr "标题"
 
-#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:256
+#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:258
 msgid "Stock records"
 msgstr "库存记录"
 
-#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:278
+#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:280
 msgid "This product does not have any variants."
 msgstr "此产品没有任何变量。"
 
-#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:280
+#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:282
 msgid "One can't add variants to this product at this point."
 msgstr "目前无法向此产品添加变量。"
 
-#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:282
+#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:284
 msgid "This is likely because this product still has stock records."
 msgstr "可能由于此产品仍有库存记录。"
 
-#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:298
+#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:300
 msgid "Recommended products"
 msgstr "推荐产品"
 
-#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:323
+#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:325
 msgid "or"
 msgstr "或者"
 
-#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:325
-#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:329
-#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:332
+#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:327
+#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:331
+#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:334
 msgid "Saving..."
 msgstr "正在保存…"
 
-#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:326
+#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:328
 msgid "Save and add another variant"
 msgstr "保存并添加另一变量"
 
-#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:330
+#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:332
 msgid "Save and continue editing"
 msgstr "保存并继续编辑"
 
-#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:333
+#: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:335
 msgid "Save"
 msgstr "保存"
 
@@ -2741,98 +2999,95 @@ msgstr "已激活优惠凭证"
 
 #: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:6
 #, python-format
-msgid ""
-"\n"
-"        %(name)s | Offers\n"
-"    "
-msgstr "\n%(name)s | 方案"
+msgid "%(name)s | Offers "
+msgstr ""
 
-#: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:27
+#: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:25
 msgid "Reinstating..."
 msgstr "正在恢复..."
 
-#: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:27
+#: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:25
 msgid "Reinstate offer"
 msgstr "恢复方案"
 
-#: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:28
+#: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:26
 msgid "Suspending..."
 msgstr "正在暂停..."
 
-#: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:28
+#: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:26
 msgid "Suspend offer"
 msgstr "暂停方案"
 
-#: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:29
+#: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:27
 msgid "Delete offer"
 msgstr "删除方案"
 
-#: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:40
+#: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:38
 msgid "Offer currently available"
 msgstr "当前可获得的方案"
 
-#: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:41
+#: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:39
 msgid "Offer not available due to restrictions!"
 msgstr "由于限制而无法获取方案！"
 
-#: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:43
+#: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:41
 msgid "Total cost:"
 msgstr "总成本："
 
-#: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:44
+#: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:42
 msgid "Number of orders:"
 msgstr "订单数量："
 
-#: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:45
+#: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:43
 msgid "Number of uses:"
 msgstr "使用次数："
 
-#: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:50
+#: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:48
 msgid "Date created:"
 msgstr "创建日期："
 
-#: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:51
+#: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:49
 msgid "Offer details"
 msgstr "方案详情"
 
-#: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:69
+#: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:67
 #: ecommerce/templates/oscar/dashboard/offers/summary.html:20
 msgid "Incentive"
 msgstr "动机"
 
-#: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:74
+#: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:72
 #: ecommerce/templates/oscar/dashboard/offers/summary.html:26
 msgid "Condition"
 msgstr "条件"
 
-#: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:79
+#: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:77
 #: ecommerce/templates/oscar/dashboard/offers/summary.html:31
 msgid "Restrictions"
 msgstr "限制条件"
 
-#: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:94
+#: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:92
 msgid "Export to CSV"
 msgstr "导出至CSV"
 
-#: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:95
+#: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:93
 msgid "Orders that used this offer"
 msgstr "使用此方案的订单"
 
-#: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:99
+#: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:97
 #: ecommerce/templates/oscar/dashboard/orders/order_list.html:68
 msgid "Order number"
 msgstr "订单号"
 
-#: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:100
+#: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:98
 msgid "Order date"
 msgstr "订单日期"
 
-#: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:101
+#: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:99
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:292
 msgid "Order total"
 msgstr "订单总计"
 
-#: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:102
+#: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:100
 msgid "Cost"
 msgstr "成本"
 
@@ -2840,7 +3095,7 @@ msgstr "成本"
 msgid "Offer summary"
 msgstr "方案总结"
 
-#: ecommerce/templates/oscar/dashboard/orders/line_detail.html:5
+#: ecommerce/templates/oscar/dashboard/orders/line_detail.html:6
 #, python-format
 msgid ""
 "\n"
@@ -2848,108 +3103,108 @@ msgid ""
 "    "
 msgstr "\n        订单号 %(number)s - 行号 %(id)s\n    "
 
-#: ecommerce/templates/oscar/dashboard/orders/line_detail.html:21
+#: ecommerce/templates/oscar/dashboard/orders/line_detail.html:22
 #, python-format
 msgid "Line #%(id)s"
 msgstr "行号 #%(id)s"
 
-#: ecommerce/templates/oscar/dashboard/orders/line_detail.html:26
+#: ecommerce/templates/oscar/dashboard/orders/line_detail.html:27
 #, python-format
 msgid "Order #%(number)s - Line #%(id)s"
 msgstr "订单号 %(number)s - 行号 %(id)s"
 
-#: ecommerce/templates/oscar/dashboard/orders/line_detail.html:37
+#: ecommerce/templates/oscar/dashboard/orders/line_detail.html:38
 msgctxt "Product title"
 msgid "Title"
 msgstr "标题"
 
-#: ecommerce/templates/oscar/dashboard/orders/line_detail.html:43
+#: ecommerce/templates/oscar/dashboard/orders/line_detail.html:44
 msgid "Product Type"
 msgstr "产品类型"
 
-#: ecommerce/templates/oscar/dashboard/orders/line_detail.html:46
+#: ecommerce/templates/oscar/dashboard/orders/line_detail.html:47
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:140
-#: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html:106
+#: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html:110
 msgid "UPC"
 msgstr "通用产品代码"
 
-#: ecommerce/templates/oscar/dashboard/orders/line_detail.html:53
+#: ecommerce/templates/oscar/dashboard/orders/line_detail.html:54
 msgid "Product Options"
 msgstr "产品选项"
 
-#: ecommerce/templates/oscar/dashboard/orders/line_detail.html:66
+#: ecommerce/templates/oscar/dashboard/orders/line_detail.html:67
 msgid "Partner details"
 msgstr "合作方详细信息"
 
-#: ecommerce/templates/oscar/dashboard/orders/line_detail.html:76
+#: ecommerce/templates/oscar/dashboard/orders/line_detail.html:77
 msgid "Partner SKU"
 msgstr "合作方SKU"
 
-#: ecommerce/templates/oscar/dashboard/orders/line_detail.html:82
+#: ecommerce/templates/oscar/dashboard/orders/line_detail.html:83
 msgid "Shipping details"
 msgstr "运送详情"
 
-#: ecommerce/templates/oscar/dashboard/orders/line_detail.html:86
+#: ecommerce/templates/oscar/dashboard/orders/line_detail.html:87
 msgid "Partner reference number"
 msgstr "合作方参考编号"
 
-#: ecommerce/templates/oscar/dashboard/orders/line_detail.html:89
+#: ecommerce/templates/oscar/dashboard/orders/line_detail.html:90
 msgid "Partner notes"
 msgstr "合作伙伴注意事项"
 
-#: ecommerce/templates/oscar/dashboard/orders/line_detail.html:92
+#: ecommerce/templates/oscar/dashboard/orders/line_detail.html:93
 msgid "Estimate dispatch date"
 msgstr "预计发货日期"
 
-#: ecommerce/templates/oscar/dashboard/orders/line_detail.html:101
+#: ecommerce/templates/oscar/dashboard/orders/line_detail.html:102
 msgid "Shipping status"
 msgstr "运送状态"
 
-#: ecommerce/templates/oscar/dashboard/orders/line_detail.html:106
+#: ecommerce/templates/oscar/dashboard/orders/line_detail.html:107
 msgid "State"
 msgstr "州"
 
-#: ecommerce/templates/oscar/dashboard/orders/line_detail.html:118
-#: ecommerce/templates/oscar/dashboard/orders/line_detail.html:149
+#: ecommerce/templates/oscar/dashboard/orders/line_detail.html:119
+#: ecommerce/templates/oscar/dashboard/orders/line_detail.html:150
 msgid "No shipping events have occurred."
 msgstr "未出现邮寄事项。"
 
-#: ecommerce/templates/oscar/dashboard/orders/line_detail.html:126
+#: ecommerce/templates/oscar/dashboard/orders/line_detail.html:127
 msgid "Shipping events"
 msgstr "邮寄事项"
 
-#: ecommerce/templates/oscar/dashboard/orders/line_detail.html:131
-#: ecommerce/templates/oscar/dashboard/orders/line_detail.html:162
+#: ecommerce/templates/oscar/dashboard/orders/line_detail.html:132
+#: ecommerce/templates/oscar/dashboard/orders/line_detail.html:163
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:404
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html:450
-#: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html:164
+#: ecommerce/templates/oscar/dashboard/orders/order_detail.html:452
+#: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html:168
 msgid "Event"
 msgstr "事项"
 
-#: ecommerce/templates/oscar/dashboard/orders/line_detail.html:133
+#: ecommerce/templates/oscar/dashboard/orders/line_detail.html:134
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:406
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html:453
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html:559
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html:593
-#: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html:168
+#: ecommerce/templates/oscar/dashboard/orders/order_detail.html:455
+#: ecommerce/templates/oscar/dashboard/orders/order_detail.html:561
+#: ecommerce/templates/oscar/dashboard/orders/order_detail.html:595
+#: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html:172
 msgid "Reference"
 msgstr "参考"
 
-#: ecommerce/templates/oscar/dashboard/orders/line_detail.html:134
-#: ecommerce/templates/oscar/dashboard/orders/line_detail.html:164
+#: ecommerce/templates/oscar/dashboard/orders/line_detail.html:135
+#: ecommerce/templates/oscar/dashboard/orders/line_detail.html:165
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:403
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html:449
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html:595
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html:677
-#: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html:163
+#: ecommerce/templates/oscar/dashboard/orders/order_detail.html:451
+#: ecommerce/templates/oscar/dashboard/orders/order_detail.html:597
+#: ecommerce/templates/oscar/dashboard/orders/order_detail.html:679
+#: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html:167
 msgid "Date"
 msgstr "日期"
 
-#: ecommerce/templates/oscar/dashboard/orders/line_detail.html:157
+#: ecommerce/templates/oscar/dashboard/orders/line_detail.html:158
 msgid "Payment events"
 msgstr "付款事项"
 
-#: ecommerce/templates/oscar/dashboard/orders/line_detail.html:178
+#: ecommerce/templates/oscar/dashboard/orders/line_detail.html:179
 msgid "No payment events have occurred."
 msgstr "未出现付款事项。"
 
@@ -2964,23 +3219,23 @@ msgid "Order #%(number)s"
 msgstr "订单#%(number)s"
 
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:45
-#: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html:45
+#: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html:49
 msgid "Customer Information"
 msgstr "客户信息"
 
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:49
-#: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html:49
+#: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html:53
 #: ecommerce/templates/oscar/dashboard/users/detail.html:44
 msgid "Full name"
 msgstr "全名"
 
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:50
-#: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html:50
+#: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html:54
 msgid "Email address"
 msgstr "邮箱"
 
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:59
-#: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html:59
+#: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html:63
 msgid "Customer has deleted their account."
 msgstr "客户已经删除了他们的账号。"
 
@@ -3015,7 +3270,7 @@ msgid "Order contents"
 msgstr "订单内容"
 
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:110
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html:489
+#: ecommerce/templates/oscar/dashboard/orders/order_detail.html:491
 msgid "Shipping"
 msgstr "邮寄"
 
@@ -3024,12 +3279,12 @@ msgid "Payment"
 msgstr "付款"
 
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:116
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html:621
+#: ecommerce/templates/oscar/dashboard/orders/order_detail.html:623
 msgid "Discounts"
 msgstr "折扣"
 
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:119
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html:671
+#: ecommerce/templates/oscar/dashboard/orders/order_detail.html:673
 msgid "Notes"
 msgstr "笔记"
 
@@ -3042,17 +3297,17 @@ msgid "Line ID"
 msgstr "行ID"
 
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:139
-#: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html:105
+#: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html:109
 msgid "Product"
 msgstr "产品"
 
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:142
-#: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html:108
+#: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html:112
 msgid "Supplier"
 msgstr "供应商"
 
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:143
-#: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html:109
+#: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html:113
 msgid "Supplier SKU"
 msgstr "供应商SKU"
 
@@ -3162,12 +3417,12 @@ msgid "Shipping Events"
 msgstr "邮寄事项"
 
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:405
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html:452
-#: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html:166
+#: ecommerce/templates/oscar/dashboard/orders/order_detail.html:454
+#: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html:170
 msgid "Lines"
 msgstr "行"
 
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html:418
+#: ecommerce/templates/oscar/dashboard/orders/order_detail.html:419
 #, python-format
 msgid ""
 "\n"
@@ -3175,131 +3430,131 @@ msgid ""
 "                                            "
 msgstr "\n%(title)s (数量 %(event_qty)s/%(total_qty)s)\n "
 
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html:432
+#: ecommerce/templates/oscar/dashboard/orders/order_detail.html:434
 msgid "No shipping events."
 msgstr "没有邮寄事项。"
 
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html:442
-#: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html:155
+#: ecommerce/templates/oscar/dashboard/orders/order_detail.html:444
+#: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html:159
 msgid "Payment Events"
 msgstr "付款事项"
 
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html:451
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html:592
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html:632
-#: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html:165
+#: ecommerce/templates/oscar/dashboard/orders/order_detail.html:453
+#: ecommerce/templates/oscar/dashboard/orders/order_detail.html:594
+#: ecommerce/templates/oscar/dashboard/orders/order_detail.html:634
+#: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html:169
 msgid "Amount"
 msgstr "量"
 
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html:465
-#: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html:180
+#: ecommerce/templates/oscar/dashboard/orders/order_detail.html:467
+#: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html:184
 msgid "Product:"
 msgstr "产品:"
 
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html:465
+#: ecommerce/templates/oscar/dashboard/orders/order_detail.html:467
 msgid "quantity"
 msgstr "数量"
 
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html:477
-#: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html:192
+#: ecommerce/templates/oscar/dashboard/orders/order_detail.html:479
+#: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html:196
 msgid "No payment events."
 msgstr "无付款事项。"
 
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html:494
+#: ecommerce/templates/oscar/dashboard/orders/order_detail.html:496
 msgid "Method name"
 msgstr "方法名称"
 
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html:498
+#: ecommerce/templates/oscar/dashboard/orders/order_detail.html:500
 msgid "Method code"
 msgstr "方法代码"
 
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html:502
+#: ecommerce/templates/oscar/dashboard/orders/order_detail.html:504
 msgid "Charge (incl tax)"
 msgstr "费用(含税)"
 
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html:506
+#: ecommerce/templates/oscar/dashboard/orders/order_detail.html:508
 msgid "Charge (excl tax)"
 msgstr "费用(不含税)"
 
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html:510
+#: ecommerce/templates/oscar/dashboard/orders/order_detail.html:512
 msgid "Address"
 msgstr "地址"
 
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html:521
+#: ecommerce/templates/oscar/dashboard/orders/order_detail.html:523
 msgid "Phone"
 msgstr "电话"
 
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html:525
+#: ecommerce/templates/oscar/dashboard/orders/order_detail.html:527
 msgid "Instructions"
 msgstr "指令"
 
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html:538
+#: ecommerce/templates/oscar/dashboard/orders/order_detail.html:540
 msgid "Billing address"
 msgstr "账单地址"
 
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html:549
+#: ecommerce/templates/oscar/dashboard/orders/order_detail.html:551
 msgid "Payment sources"
 msgstr "付款来源"
 
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html:555
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html:591
+#: ecommerce/templates/oscar/dashboard/orders/order_detail.html:557
+#: ecommerce/templates/oscar/dashboard/orders/order_detail.html:593
 msgid "Source"
 msgstr "源"
 
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html:556
+#: ecommerce/templates/oscar/dashboard/orders/order_detail.html:558
 msgid "Allocation"
 msgstr "分配"
 
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html:557
+#: ecommerce/templates/oscar/dashboard/orders/order_detail.html:559
 msgid "Amount debited"
 msgstr "金额记入借方"
 
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html:558
+#: ecommerce/templates/oscar/dashboard/orders/order_detail.html:560
 msgid "Amount refunded"
 msgstr "退还金额"
 
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html:577
+#: ecommerce/templates/oscar/dashboard/orders/order_detail.html:579
 msgid "No payment sources found for this order."
 msgstr "未发现这个订单的付款来源。"
 
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html:586
+#: ecommerce/templates/oscar/dashboard/orders/order_detail.html:588
 msgid "Transactions"
 msgstr "交易"
 
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html:628
+#: ecommerce/templates/oscar/dashboard/orders/order_detail.html:630
 msgid "Voucher"
 msgstr "优惠券"
 
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html:629
+#: ecommerce/templates/oscar/dashboard/orders/order_detail.html:631
 msgid "Offer name"
 msgstr "促销名称"
 
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html:630
+#: ecommerce/templates/oscar/dashboard/orders/order_detail.html:632
 msgid "Frequency"
 msgstr "频率"
 
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html:631
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html:680
+#: ecommerce/templates/oscar/dashboard/orders/order_detail.html:633
+#: ecommerce/templates/oscar/dashboard/orders/order_detail.html:682
 msgid "Message"
 msgstr "消息"
 
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html:659
+#: ecommerce/templates/oscar/dashboard/orders/order_detail.html:661
 msgid "No discounts were applied to this order."
 msgstr "此订单未使用任何折扣。"
 
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html:681
+#: ecommerce/templates/oscar/dashboard/orders/order_detail.html:683
 msgid "Admin"
 msgstr "管理"
 
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html:706
+#: ecommerce/templates/oscar/dashboard/orders/order_detail.html:708
 msgid "No notes available."
 msgstr "无笔记。"
 
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html:717
+#: ecommerce/templates/oscar/dashboard/orders/order_detail.html:719
 msgid "Save note"
 msgstr "保存笔记"
 
-#: ecommerce/templates/oscar/dashboard/orders/order_detail.html:718
+#: ecommerce/templates/oscar/dashboard/orders/order_detail.html:720
 msgid "Notes are only editable for 5 minutes after being saved."
 msgstr "笔记只在保存后5分钟内可编辑。"
 
@@ -3389,14 +3644,14 @@ msgid "Number of Items"
 msgstr "项目数量"
 
 #: ecommerce/templates/oscar/dashboard/partials/refund_table.html:11
-#: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html:69
-#: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html:144
+#: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html:73
+#: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html:148
 #: ecommerce/templates/oscar/dashboard/refunds/refund_list.html:56
 msgid "Total Credit"
 msgstr "总学分"
 
 #: ecommerce/templates/oscar/dashboard/partials/refund_table.html:12
-#: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html:70
+#: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html:74
 #: ecommerce/templates/oscar/dashboard/refunds/refund_list.html:61
 msgid "Created"
 msgstr "创建"
@@ -3425,37 +3680,37 @@ msgstr "关闭"
 msgid "Searching..."
 msgstr "搜索中"
 
-#: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html:10
-#: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html:39
+#: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html:11
+#: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html:42
 #, python-format
 msgid "Refund #%(id)s"
 msgstr "退款# %(id)s"
 
-#: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html:67
+#: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html:71
 msgid "Refund Overview"
 msgstr "退款概述"
 
-#: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html:72
+#: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html:76
 msgid "Associated Order"
 msgstr "相关的订单"
 
-#: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html:93
+#: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html:97
 msgid "Refund Items"
 msgstr "退款项目"
 
-#: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html:102
+#: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html:106
 msgid "Refund Line ID"
 msgstr "退款行ID"
 
-#: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html:103
+#: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html:107
 msgid "Associated Order Line"
 msgstr "有关命令行"
 
-#: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html:110
+#: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html:114
 msgid "Credit (excl. tax)"
 msgstr "学分(不含税)"
 
-#: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html:167
+#: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html:171
 msgid "Processor"
 msgstr "处理器"
 
@@ -3567,6 +3822,6 @@ msgstr "创建日期"
 msgid "This customer has not written any reviews yet."
 msgstr "这个客户还没有写任何评论。"
 
-#: ecommerce/urls.py:41
+#: ecommerce/urls.py:43
 msgid "E-Commerce Service Administration"
 msgstr "电子商务服务管理"

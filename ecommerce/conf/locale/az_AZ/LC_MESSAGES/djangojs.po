@@ -1,0 +1,524 @@
+# #-#-#-#-#  django.po (ecommerce)  #-#-#-#-#
+# edX translation file
+# Copyright (C) 2018 edX
+# This file is distributed under the GNU AFFERO GENERAL PUBLIC LICENSE.
+# 
+# Translators:
+msgid ""
+msgstr ""
+"Project-Id-Version: edx-platform\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2019-11-10 20:12+0000\n"
+"PO-Revision-Date: 2019-11-10 20:12+0000\n"
+"Last-Translator: edx_transifex_bot <i18n-working-group+edx-transifex-bot@edx.org>\n"
+"Language-Team: Azerbaijani (Azerbaijan) (http://www.transifex.com/open-edx/edx-platform/language/az_AZ/)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: az_AZ\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: ecommerce/static/js/models/coupon_model.js:33
+#: ecommerce/static/js/models/enterprise_coupon_model.js:15
+msgid "This field is required."
+msgstr ""
+
+#: ecommerce/static/js/models/coupon_model.js:34
+#: ecommerce/static/js/models/enterprise_coupon_model.js:16
+msgid "This value must be a number."
+msgstr ""
+
+#: ecommerce/static/js/models/coupon_model.js:35
+#: ecommerce/static/js/models/enterprise_coupon_model.js:17
+msgid "This value must be a date."
+msgstr ""
+
+#: ecommerce/static/js/models/coupon_model.js:36
+msgid "At least one seat type must be selected."
+msgstr ""
+
+#: ecommerce/static/js/models/coupon_model.js:71
+msgid "This field must be empty or contain 1-16 alphanumeric characters."
+msgstr ""
+
+#: ecommerce/static/js/models/coupon_model.js:80
+#, javascript-format
+msgid "Email domain {%s} is invalid."
+msgstr ""
+
+#: ecommerce/static/js/models/coupon_model.js:97
+msgid "Must occur after start date"
+msgstr ""
+
+#: ecommerce/static/js/models/coupon_model.js:127
+msgid "Max uses for multi-use coupons must be higher than 2."
+msgstr ""
+
+#: ecommerce/static/js/models/coupon_model.js:151
+msgid "Must occur before end date"
+msgstr ""
+
+#: ecommerce/static/js/models/coupon_model.js:173
+msgid "A valid course ID is required"
+msgstr ""
+
+#: ecommerce/static/js/models/coupon_model.js:187
+msgid "A valid Program UUID is required."
+msgstr ""
+
+#: ecommerce/static/js/models/course_model.js:54
+msgid "You must select a course type."
+msgstr ""
+
+#: ecommerce/static/js/models/course_model.js:60
+msgid "You must choose if an honor seat should be created."
+msgstr ""
+
+#: ecommerce/static/js/models/course_model.js:77
+msgid "The verification deadline must occur AFTER the upgrade deadline."
+msgstr ""
+
+#: ecommerce/static/js/models/course_model.js:86
+msgid "Product validation failed."
+msgstr ""
+
+#: ecommerce/static/js/models/course_model.js:94
+#: ecommerce/static/js/views/dynamic_catalog_view.js:70
+msgid "Course ID"
+msgstr ""
+
+#: ecommerce/static/js/models/course_model.js:95
+msgid "Course Name"
+msgstr ""
+
+#: ecommerce/static/js/models/course_model.js:96
+#: ecommerce/static/js/views/course_list_view.js:77
+msgid "Course Type"
+msgstr ""
+
+#: ecommerce/static/js/models/course_model.js:97
+msgid "Verification Deadline"
+msgstr ""
+
+#: ecommerce/static/js/models/course_model.js:98
+msgid "Include Honor Seat"
+msgstr ""
+
+#: ecommerce/static/js/models/course_seats/course_seat.js:28
+msgid "All course seats must have a price."
+msgstr ""
+
+#: ecommerce/static/js/models/course_seats/course_seat.js:45
+msgid "Verified seats must have an upgrade deadline."
+msgstr ""
+
+#: ecommerce/static/js/models/course_seats/course_seat.js:53
+msgid "The upgrade deadline must occur BEFORE the verification deadline."
+msgstr ""
+
+#: ecommerce/static/js/models/course_seats/course_seat.js:84
+#: ecommerce/static/js/views/course_form_view.js:60
+msgid "Verified"
+msgstr ""
+
+#: ecommerce/static/js/models/course_seats/course_seat.js:86
+#: ecommerce/static/js/views/course_form_view.js:71
+msgid "Credit"
+msgstr ""
+
+#: ecommerce/static/js/models/course_seats/course_seat.js:89
+msgid "Professional"
+msgstr ""
+
+#: ecommerce/static/js/models/course_seats/course_seat.js:91
+msgid "Honor"
+msgstr ""
+
+#: ecommerce/static/js/models/course_seats/course_seat.js:93
+msgid "Audit"
+msgstr ""
+
+#: ecommerce/static/js/models/course_seats/course_seat.js:101
+msgid "Verified Certificate"
+msgstr ""
+
+#: ecommerce/static/js/models/course_seats/course_seat.js:105
+msgid "Professional Certificate"
+msgstr ""
+
+#: ecommerce/static/js/models/course_seats/course_seat.js:108
+msgid "Honor Certificate"
+msgstr ""
+
+#: ecommerce/static/js/models/course_seats/course_seat.js:111
+msgid "No Certificate"
+msgstr ""
+
+#: ecommerce/static/js/models/course_seats/credit_seat.js:26
+msgid "All credit seats must have a credit provider."
+msgstr ""
+
+#: ecommerce/static/js/models/course_seats/credit_seat.js:30
+msgid "Please select a valid credit provider."
+msgstr ""
+
+#: ecommerce/static/js/models/course_seats/credit_seat.js:39
+msgid "All credit seats must designate a number of credit hours."
+msgstr ""
+
+#: ecommerce/static/js/models/enterprise_coupon_model.js:18
+msgid "This value must be a valid email."
+msgstr ""
+
+#: ecommerce/static/js/pages/basket_page.js:27
+msgid "Problem occurred during checkout. Please contact support."
+msgstr ""
+
+#: ecommerce/static/js/pages/basket_page.js:101
+msgid "This field is required"
+msgstr ""
+
+#: ecommerce/static/js/pages/basket_page.js:145
+msgid "Invalid card number"
+msgstr ""
+
+#: ecommerce/static/js/pages/basket_page.js:147
+msgid "Unsupported card type"
+msgstr ""
+
+#: ecommerce/static/js/pages/basket_page.js:149
+msgid "Invalid security number"
+msgstr ""
+
+#: ecommerce/static/js/pages/basket_page.js:154
+msgid "Invalid month"
+msgstr ""
+
+#: ecommerce/static/js/pages/basket_page.js:156
+msgid "Invalid year"
+msgstr ""
+
+#: ecommerce/static/js/pages/basket_page.js:158
+msgid "Card expired"
+msgstr ""
+
+#: ecommerce/static/js/pages/basket_page.js:503
+msgid "<Choose state/province>"
+msgstr ""
+
+#: ecommerce/static/js/pages/basket_page.js:504
+msgid "State/Province (required)"
+msgstr ""
+
+#: ecommerce/static/js/pages/coupon_create_page.js:12
+#: ecommerce/static/js/pages/enterprise_coupon_create_page.js:12
+msgid "Create New Coupon"
+msgstr ""
+
+#: ecommerce/static/js/pages/coupon_detail_page.js:13
+#: ecommerce/static/js/pages/enterprise_coupon_detail_page.js:13
+msgid "View Coupon"
+msgstr ""
+
+#: ecommerce/static/js/pages/coupon_edit_page.js:13
+#: ecommerce/static/js/pages/enterprise_coupon_edit_page.js:13
+msgid "Edit Coupon"
+msgstr ""
+
+#: ecommerce/static/js/pages/coupon_list_page.js:10
+msgid "Coupon Codes"
+msgstr ""
+
+#: ecommerce/static/js/pages/course_create_page.js:12
+msgid "Create New Course"
+msgstr ""
+
+#: ecommerce/static/js/pages/course_detail_page.js:13
+msgid "View Course"
+msgstr ""
+
+#: ecommerce/static/js/pages/course_edit_page.js:13
+msgid "Edit Course"
+msgstr ""
+
+#: ecommerce/static/js/pages/course_list_page.js:10
+msgid "Courses"
+msgstr ""
+
+#: ecommerce/static/js/pages/enterprise_coupon_list_page.js:10
+msgid "Enterprise Coupon Codes"
+msgstr ""
+
+#: ecommerce/static/js/pages/offer_page.js:14
+msgid "Redeem"
+msgstr ""
+
+#: ecommerce/static/js/pages/receipt_page.js:21
+msgid ""
+"Caution! Using the back button on this page may cause you to be charged "
+"again."
+msgstr ""
+
+#. Translators: Do not translate "Apple Pay".
+#: ecommerce/static/js/payment_processors/cybersource.js:225
+msgid ""
+"Apple Pay is not available at this time. Please try another payment method."
+msgstr ""
+
+#: ecommerce/static/js/payment_processors/cybersource.js:255
+msgid ""
+"An error occurred while processing your payment. You have NOT been charged. "
+"Please try again, or select another payment method."
+msgstr ""
+
+#: ecommerce/static/js/payment_processors/stripe.js:71
+msgid ""
+"An error occurred while attempting to process your payment. You have not "
+"been charged. Please check your payment details, and try again."
+msgstr ""
+
+#: ecommerce/static/js/payment_processors/stripe.js:110
+msgid "An error occurred while processing your payment. Please try again."
+msgstr ""
+
+#: ecommerce/static/js/utils/utils.js:184
+msgid "Trailing comma not allowed."
+msgstr ""
+
+#: ecommerce/static/js/views/coupon_detail_view.js:108
+#: ecommerce/static/js/views/coupon_form_view.js:62
+#: ecommerce/static/js/views/enterprise_coupon_form_view.js:29
+msgid "Can be used once by one customer"
+msgstr ""
+
+#: ecommerce/static/js/views/coupon_detail_view.js:110
+#: ecommerce/static/js/views/coupon_form_view.js:70
+#: ecommerce/static/js/views/enterprise_coupon_form_view.js:37
+msgid "Can be used multiple times by multiple customers"
+msgstr ""
+
+#: ecommerce/static/js/views/coupon_detail_view.js:112
+#: ecommerce/static/js/views/coupon_form_view.js:66
+#: ecommerce/static/js/views/enterprise_coupon_form_view.js:33
+msgid "Can be used once by multiple customers"
+msgstr ""
+
+#: ecommerce/static/js/views/coupon_form_view.js:51
+msgid "Enrollment Code"
+msgstr ""
+
+#: ecommerce/static/js/views/coupon_form_view.js:55
+msgid "Discount Code"
+msgstr ""
+
+#: ecommerce/static/js/views/coupon_form_view.js:770
+msgid "Save Changes"
+msgstr ""
+
+#: ecommerce/static/js/views/coupon_form_view.js:785
+msgid "Create Coupon"
+msgstr ""
+
+#: ecommerce/static/js/views/coupon_list_view.js:35
+#: ecommerce/static/js/views/enterprise_coupon_list_view.js:24
+msgid "Name"
+msgstr ""
+
+#: ecommerce/static/js/views/coupon_list_view.js:42
+#: ecommerce/static/js/views/enterprise_coupon_list_view.js:31
+msgid "Created"
+msgstr ""
+
+#: ecommerce/static/js/views/coupon_list_view.js:49
+msgid "Custom Code"
+msgstr ""
+
+#: ecommerce/static/js/views/coupon_list_view.js:55
+#: ecommerce/static/js/views/enterprise_coupon_list_view.js:44
+msgid "Client"
+msgstr ""
+
+#: ecommerce/static/js/views/coupon_list_view.js:61
+msgid "Category"
+msgstr ""
+
+#: ecommerce/static/js/views/coupon_list_view.js:67
+#: ecommerce/static/js/views/enterprise_coupon_list_view.js:62
+msgid "Coupon Report"
+msgstr ""
+
+#: ecommerce/static/js/views/coupon_list_view.js:80
+#: ecommerce/static/js/views/course_list_view.js:25
+msgid "Search..."
+msgstr ""
+
+#: ecommerce/static/js/views/coupon_list_view.js:107
+#: ecommerce/static/js/views/course_list_view.js:52
+msgid "Next"
+msgstr ""
+
+#: ecommerce/static/js/views/coupon_list_view.js:108
+#: ecommerce/static/js/views/course_list_view.js:53
+msgid "Previous"
+msgstr ""
+
+#. Translators: _START_, _END_, and _TOTAL_ are placeholders. Do NOT translate
+#. them.
+#: ecommerce/static/js/views/coupon_list_view.js:112
+msgid "Displaying _START_ to _END_ of _TOTAL_ coupons"
+msgstr ""
+
+#. Translators: _MAX_ is a placeholder. Do NOT translate it.
+#: ecommerce/static/js/views/coupon_list_view.js:115
+msgid "(filtered from _MAX_ total coupons)"
+msgstr ""
+
+#. Translators: _MENU_ is a placeholder. Do NOT translate it.
+#: ecommerce/static/js/views/coupon_list_view.js:118
+msgid "Display _MENU_ coupons"
+msgstr ""
+
+#: ecommerce/static/js/views/course_form_view.js:55
+msgid "Free (Audit)"
+msgstr ""
+
+#: ecommerce/static/js/views/course_form_view.js:56
+msgid "Free audit track. No certificate."
+msgstr ""
+
+#: ecommerce/static/js/views/course_form_view.js:61
+msgid ""
+"Paid certificate track with initial verification and Verified Certificate"
+msgstr ""
+
+#: ecommerce/static/js/views/course_form_view.js:65
+msgid "Professional Education"
+msgstr ""
+
+#: ecommerce/static/js/views/course_form_view.js:66
+msgid ""
+"Paid certificate track with initial verification and Professional Education "
+"Certificate"
+msgstr ""
+
+#: ecommerce/static/js/views/course_form_view.js:72
+msgid ""
+"Paid certificate track with initial verification and Verified Certificate, "
+"and option to purchase credit"
+msgstr ""
+
+#. Translators: _START_, _END_, and _TOTAL_ are placeholders. Do NOT translate
+#. them.
+#: ecommerce/static/js/views/course_list_view.js:57
+msgid "Displaying _START_ to _END_ of _TOTAL_ courses"
+msgstr ""
+
+#. Translators: _MAX_ is a placeholder. Do NOT translate it.
+#: ecommerce/static/js/views/course_list_view.js:60
+msgid "(filtered from _MAX_ total courses)"
+msgstr ""
+
+#. Translators: _MENU_ is a placeholder. Do NOT translate it.
+#: ecommerce/static/js/views/course_list_view.js:63
+msgid "Display _MENU_ courses"
+msgstr ""
+
+#: ecommerce/static/js/views/course_list_view.js:69
+msgid "Course"
+msgstr ""
+
+#: ecommerce/static/js/views/course_list_view.js:86
+msgid "Last Edited"
+msgstr ""
+
+#: ecommerce/static/js/views/dynamic_catalog_view.js:74
+msgid "Seat title"
+msgstr ""
+
+#: ecommerce/static/js/views/dynamic_catalog_view.js:78
+msgid "Seat type"
+msgstr ""
+
+#: ecommerce/static/js/views/enterprise_coupon_detail_view.js:28
+#: ecommerce/static/js/views/enterprise_coupon_form_view.js:41
+msgid "Can be used multiple times by one customer"
+msgstr ""
+
+#: ecommerce/static/js/views/enterprise_coupon_list_view.js:38
+msgid "Status"
+msgstr ""
+
+#: ecommerce/static/js/views/enterprise_coupon_list_view.js:50
+msgid "Enterprise Customer"
+msgstr ""
+
+#: ecommerce/static/js/views/enterprise_coupon_list_view.js:56
+msgid "Enterprise Customer Catalog"
+msgstr ""
+
+#: ecommerce/static/js/views/form_view.js:71
+msgid "A course with the specified ID already exists."
+msgstr ""
+
+#: ecommerce/static/js/views/form_view.js:81
+#: ecommerce/static/js/views/form_view.js:174
+msgid "Error!"
+msgstr ""
+
+#: ecommerce/static/js/views/form_view.js:127
+msgid "Saving..."
+msgstr ""
+
+#: ecommerce/static/js/views/form_view.js:136
+msgid "Please complete all required fields."
+msgstr ""
+
+#: ecommerce/static/js/views/form_view.js:161
+msgid "An error occurred while saving the data."
+msgstr ""
+
+#: ecommerce/static/js/views/offer_view.js:198
+msgid "Ellipsis"
+msgstr ""
+
+#: ecommerce/static/js/views/offer_view.js:205
+msgid "Load the records for page "
+msgstr ""
+
+#: ecommerce/static/js/views/offer_view.js:212
+msgid "Load the records for the next page"
+msgstr ""
+
+#: ecommerce/static/js/views/offer_view.js:220
+msgid "Load the records for the previous page"
+msgstr ""
+
+#: ecommerce/static/js/views/provider_selection_view.js:33
+msgid "Select"
+msgstr ""
+
+#: ecommerce/static/js/views/provider_selection_view.js:34
+msgid "Selected"
+msgstr ""
+
+#: ecommerce/static/vendor-extensions/oscar/js/order_actions.js:21
+msgid "Order %(order_number)s has been fulfilled."
+msgstr ""
+
+#: ecommerce/static/vendor-extensions/oscar/js/order_actions.js:27
+msgid "Failed to fulfill order %(order_number)s: %(error)s"
+msgstr ""
+
+#: ecommerce/static/vendor-extensions/oscar/js/refund_list.js:24
+msgid "Refund #%(refund_id)s has been processed."
+msgstr ""
+
+#: ecommerce/static/vendor-extensions/oscar/js/refund_list.js:33
+msgid "Error"
+msgstr ""
+
+#: ecommerce/static/vendor-extensions/oscar/js/refund_list.js:36
+msgid ""
+"Failed to process refund #%(refund_id)s: %(error)s. Please try again, or "
+"contact the E-Commerce Development Team."
+msgstr ""
