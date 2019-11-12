@@ -5,6 +5,7 @@ import logging
 import six
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
+from django.core.validators import validate_email
 from django.db.models import Q
 from django.http import Http404
 from django.shortcuts import get_object_or_404
@@ -434,9 +435,6 @@ class EnterpriseCouponViewSet(CouponViewSet):
             id__in=redeemed_voucher_application_ids
         ).values('voucher__code', 'user__email').distinct().order_by('user__email')
 
-    """
-    TODO: Need to add a more robust check to check if search parameter is an email or a code
-    """
     @list_route(url_path=r'(?P<enterprise_id>.+)/search', permission_classes=[IsAuthenticated])
     @permission_required('enterprise.can_view_coupon', fn=lambda request, enterprise_id: enterprise_id)
     def search(self, request, enterprise_id):     # pylint: disable=unused-argument
@@ -446,9 +444,12 @@ class EnterpriseCouponViewSet(CouponViewSet):
         search_parameter = self.request.query_params.get('search_parameter', None)
         if not search_parameter:
             raise Http404("No search query parameter provided.")
-
         # Check if we received an email or a code in search
-        is_email = '@' in str(search_parameter)
+        try:
+            is_email = True
+            validate_email(search_parameter)
+        except ValidationError:
+            is_email = False
         try:
             user = User.objects.get(email=search_parameter)
         except ObjectDoesNotExist:
