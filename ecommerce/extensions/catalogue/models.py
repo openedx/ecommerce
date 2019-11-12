@@ -62,6 +62,9 @@ class CreateSafeHistoricalRecords(HistoricalRecords):
 
 
 class Product(AbstractProduct):
+    contract_info = models.OneToOneField(
+        'payment.ContractInfo', null=True, blank=True, related_name='contract'
+    )
     course = models.ForeignKey(
         'courses.Course', null=True, blank=True, related_name='products', on_delete=models.CASCADE
     )

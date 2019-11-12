@@ -69,6 +69,19 @@ class SDNCheckFailure(TimeStampedModel):
     class Meta(object):
         verbose_name = 'SDN Check Failure'
 
+@python_2_unicode_compatible
+class ContractInfo(TimeStampedModel):
+    """ Record of contract details for a particular customer transaction """
+    PERCENTAGE = 'Percentage'
+    FIXED = 'Absolute'
+    DISCOUNT_TYPE_CHOICES = [
+        (PERCENTAGE, _('Percentage')),
+        (FIXED, _('Absolute')), 
+    ]
+    amount_paid = models.IntegerField(null=True)
+    discount = models.IntegerField(null=True)
+    discount_type = models.CharField(max_length=255, choices=DISCOUNT_TYPE_CHOICES, default=PERCENTAGE)
+
 
 # noinspection PyUnresolvedReferences
 from oscar.apps.payment.models import *  # noqa isort:skip pylint: disable=ungrouped-imports, wildcard-import,unused-wildcard-import,wrong-import-position,wrong-import-order
