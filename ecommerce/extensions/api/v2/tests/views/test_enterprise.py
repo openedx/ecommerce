@@ -1011,7 +1011,22 @@ class EnterpriseCouponViewSetRbacTests(
                 'api:v2:enterprise-coupons-(?P<enterprise-id>.+)/search-list',
                 kwargs={'enterprise_id': self.data['enterprise_customer']['id']}
             ),
-            data={'user_email': 'iamsofake@notreal.com'}
+            data={'search_parameter': 'iamsofake@notreal.com'}
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        assert response.json()['results'] == []
+
+    def test_search_code_does_not_exist(self):
+        """
+        Test that 200 with empty results is returned if we cant find the code
+        """
+        response = self.get_response(
+            'GET',
+            reverse(
+                'api:v2:enterprise-coupons-(?P<enterprise-id>.+)/search-list',
+                kwargs={'enterprise_id': self.data['enterprise_customer']['id']}
+            ),
+            data={'search_parameter': '3456QWTERF46PS1R'}
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         assert response.json()['results'] == []
@@ -1037,7 +1052,66 @@ class EnterpriseCouponViewSetRbacTests(
                 'api:v2:enterprise-coupons-(?P<enterprise-id>.+)/search-list',
                 kwargs={'enterprise_id': self.data['enterprise_customer']['id']}
             ),
-            data={'user_email': 'iHaveNoUser@object.com'}
+            data={'search_parameter': 'iHaveNoUser@object.com'}
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        results = response.json()['results']
+        assert len(results) == 1
+        assert results[0]['voucher_id'] == voucher1.id
+        assert results[0]['code'] == voucher1.code
+        assert results[0]['course_key'] is None
+
+    def test_search_code_with_offer_assignment(self):
+        """
+        Test that 200 with populated results is returned if search is made by code,
+        and code has offer_assignment
+        """
+        coupon1 = self.create_coupon(
+            benefit_type=Benefit.PERCENTAGE,
+            benefit_value=40,
+            enterprise_customer=self.data['enterprise_customer']['id'],
+            enterprise_customer_catalog='aaaaaaaa-2c44-487b-9b6a-24eee973f9a4',
+            code='ABCDEFGH1234567',
+        )
+        voucher1 = coupon1.coupon_vouchers.first().vouchers.first()
+        self.assign_user_to_code(coupon1.id, ['iHaveNoUser@object.com'], ['ABCDEFGH1234567'])
+
+        response = self.get_response(
+            'GET',
+            reverse(
+                'api:v2:enterprise-coupons-(?P<enterprise-id>.+)/search-list',
+                kwargs={'enterprise_id': self.data['enterprise_customer']['id']}
+            ),
+            data={'search_parameter': 'ABCDEFGH1234567'}
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        results = response.json()['results']
+        assert len(results) == 1
+        assert results[0]['voucher_id'] == voucher1.id
+        assert results[0]['code'] == voucher1.code
+        assert results[0]['course_key'] is None
+
+    def test_search_code_without_offer_assignment(self):
+        """
+        Test that 200 with populated results is returned if an unassigned code is searched
+        """
+        coupon1 = self.create_coupon(
+            benefit_type=Benefit.PERCENTAGE,
+            benefit_value=40,
+            enterprise_customer=self.data['enterprise_customer']['id'],
+            enterprise_customer_catalog='aaaaaaaa-2c44-487b-9b6a-24eee973f9a4',
+            code='ABCDEFGH1234567',
+        )
+        voucher1 = coupon1.coupon_vouchers.first().vouchers.first()
+        response = self.get_response(
+            'GET',
+            reverse(
+                'api:v2:enterprise-coupons-(?P<enterprise-id>.+)/search-list',
+                kwargs={'enterprise_id': self.data['enterprise_customer']['id']}
+            ),
+            data={'search_parameter': 'ABCDEFGH1234567'}
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -1098,7 +1172,7 @@ class EnterpriseCouponViewSetRbacTests(
                 'api:v2:enterprise-coupons-(?P<enterprise-id>.+)/search-list',
                 kwargs={'enterprise_id': self.data['enterprise_customer']['id']}
             ),
-            data={'user_email': self.user.email}
+            data={'search_parameter': self.user.email}
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         results = response.json()['results']
