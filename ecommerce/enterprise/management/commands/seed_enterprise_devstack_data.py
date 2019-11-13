@@ -30,57 +30,98 @@ class Command(BaseCommand):
     Example usage:
         $ ./manage.py seed_enterprise_devstack_data
     """
+    coupon = None
+    site = None
+    headers = {}
+    enterprise_customer = None
+    enterprise_catalog = None
     help = 'Seeds an enterprise coupon for an existing enterprise customer.'
 
-    def _get_access_token(self, site):
+    def add_arguments(self, parser):
+        parser.add_argument(
+            '--enterprise-customer',
+            action='store',
+            dest='enterprise_customer',
+            default=0,
+            help='UUID of an existing enterprise customer.',
+            type=str,
+        )
+
+    def _get_access_token(self):
         """ Returns an access token and expiration date from the OAuth provider.
 
         Returns:
             (str, datetime)
         """
         LOGGER.info('\nFetching access token for site...')
-        oauth2_provider_url = site.oauth_settings.get('SOCIAL_AUTH_EDX_OIDC_URL_ROOT')
-        key = site.oauth_settings.get('BACKEND_SERVICE_EDX_OAUTH2_KEY')
-        secret = site.oauth_settings.get('BACKEND_SERVICE_EDX_OAUTH2_SECRET')
+        oauth2_provider_url = self.site.oauth_settings.get('SOCIAL_AUTH_EDX_OIDC_URL_ROOT')
+        key = self.site.oauth_settings.get('BACKEND_SERVICE_EDX_OAUTH2_KEY')
+        secret = self.site.oauth_settings.get('BACKEND_SERVICE_EDX_OAUTH2_SECRET')
         oauth_access_token_url = oauth2_provider_url + '/access_token/'
         return EdxRestApiClient.get_oauth_access_token(
             oauth_access_token_url, key, secret, token_type='jwt'
         )
 
-    def _get_site(self):
+    def _get_default_site(self):
         """ Returns the default site configuration """
-        return SiteConfiguration.objects.first()
+        if not self.site:
+            self.site = SiteConfiguration.objects.first()
+        return self.site
 
-    def _get_headers(self, site):
+    def _get_headers(self):
         """
         Returns a headers dict containing the authenticated JWT access token
         """
-        access_token, __ = self._get_access_token(site)
-        return {'Authorization': 'JWT ' + access_token}
+        if not self.headers:
+            access_token, __ = self._get_access_token()
+            self.headers = {'Authorization': 'JWT ' + access_token}
+        return self.headers
 
-    def _get_enterprise_customer(self, url, headers):
+    def _get_enterprise_customer(self, url, enterprise_customer_uuid):
         """ Returns an enterprise customer """
         LOGGER.info('\nFetching an enterprise customer...')
-        response = requests.get(url, headers=headers)
-        return response.json().get('results')[0]
+        try:
+            response = requests.get(
+                url,
+                params={'uuid': enterprise_customer_uuid} if enterprise_customer_uuid else None,
+                headers=self.headers,
+            )
+            self.enterprise_customer = response.json().get('results')[0]
+            return self.enterprise_customer
+        except IndexError:
+            LOGGER.error('No enterprise customer found.')
+            return None
 
-    def _get_enterprise_catalog(self, url, enterprise_customer, headers):
+    def _get_enterprise_catalog(self, url):
         """
         Returns a catalog associated with a specified enterprise customer
         """
-        LOGGER.info('\nFetching catalog for enterprise customer (%s)...', enterprise_customer.get('uuid'))
-        response = requests.get(
-            url,
-            params={'enterprise_customer': enterprise_customer.get('uuid')},
-            headers=headers,
-        )
-        return response.json().get('results')[0]
+        if not self.enterprise_customer:
+            LOGGER.error('An enterprise customer was not specified.')
+            return None
+    
+        LOGGER.info('\nFetching catalog for enterprise customer (%s)...', self.enterprise_customer.get('uuid'))
+        try:
+            response = requests.get(
+                url,
+                params={'enterprise_customer': self.enterprise_customer.get('uuid')},
+                headers=self.headers,
+            )
+            self.enterprise_catalog = response.json().get('results')[0]
+            return self.enterprise_catalog
+        except IndexError:
+            LOGGER.error('No catalog found for enterprise (%s)', self.enterprise_customer.get('uuid'))
+            return None
 
-    def _create_coupon(self, url, ecommerce_api_url, enterprise_customer, enterprise_catalog, headers):
+    def _create_coupon(self, url, ecommerce_api_url):
         """
         Creates and returns a coupon associated with the specified
         enterprise customer and catalog
         """
+        if not self.enterprise_customer or not self.enterprise_catalog:
+            LOGGER.error('An enterprise customer and/or catalog was not specified.')
+            return None
+
         LOGGER.info('\nCreating an enterprise coupon...')
         category = Category.objects.get(slug='bulk-enrollment-upon-redemption')
         request_obj = {
@@ -102,10 +143,10 @@ class Command(BaseCommand):
             "tax_deduction": "No",
             "title": "Test Enterprise Coupon 1",
             "enterprise_customer": {
-                'id': enterprise_customer.get('uuid'),
-                'name': enterprise_customer.get('name'),
+                'id': self.enterprise_customer.get('uuid'),
+                'name': self.enterprise_customer.get('name'),
             },
-            "enterprise_customer_catalog": enterprise_catalog.get('uuid'),
+            "enterprise_customer_catalog": self.enterprise_catalog.get('uuid'),
             "start_date": str(now() - datetime.timedelta(days=10)),
             "end_date": str(now() + datetime.timedelta(days=10)),
             "max_uses": 10,
@@ -116,14 +157,16 @@ class Command(BaseCommand):
             "end_datetime": str(now() + datetime.timedelta(days=10)),
             "benefit_value": 100
         }
-        response = requests.post(url, json=request_obj, headers=headers)
-        return response.json()
+        response = requests.post(url, json=request_obj, headers=self.headers)
+        self.coupon = response.json()
+        return self.coupon
 
     def handle(self, *args, **options):
         """
         Entry point for managment command execution.
         """
-        site = self._get_site()
+        site = self._get_default_site()
+        enterprise_customer_uuid = options['enterprise_customer']
 
         ecommerce_api_url = site.build_ecommerce_url() + '/api/v2'
         enterprise_api_url = site.enterprise_api_url
@@ -133,26 +176,23 @@ class Command(BaseCommand):
         enterprise_coupons_request_url = ecommerce_api_url + '/enterprise/coupons/'
 
         # Set up request headers with JWT access token
-        headers = self._get_headers(site)
+        self._get_headers()
 
         # Fetch enterprise customer
-        enterprise_customer = self._get_enterprise_customer(url=enterprise_customer_request_url, headers=headers)
-
-        # Fetch enterprise customer catalog
-        enterprise_catalog = self._get_enterprise_catalog(
-            url=enterprise_catalog_request_url,
-            enterprise_customer=enterprise_customer,
-            headers=headers,
+        self._get_enterprise_customer(
+            url=enterprise_customer_request_url,
+            enterprise_customer_uuid=enterprise_customer_uuid,
         )
 
-        # Create a new enterprise coupon associated with the
-        # above enterprise customer/catalog
-        coupon = self._create_coupon(
-            url=enterprise_coupons_request_url,
-            ecommerce_api_url=ecommerce_api_url,
-            enterprise_customer=enterprise_customer,
-            enterprise_catalog=enterprise_catalog,
-            headers=headers,
-        )
+        if self.enterprise_customer:
+            # Fetch enterprise customer catalog
+            self._get_enterprise_catalog(url=enterprise_catalog_request_url)
 
-        LOGGER.info('\nEnterprise coupon successfully created: %s', coupon)
+        if self.enterprise_catalog:
+            # Create a new enterprise coupon associated with the
+            # above enterprise customer/catalog
+            self._create_coupon(
+                url=enterprise_coupons_request_url,
+                ecommerce_api_url=ecommerce_api_url,
+            )
+            LOGGER.info('\nEnterprise coupon successfully created: %s', self.coupon)
