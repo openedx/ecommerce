@@ -42,7 +42,7 @@ class Command(BaseCommand):
             '--enterprise-customer',
             action='store',
             dest='enterprise_customer',
-            default=0,
+            default=None,
             help='UUID of an existing enterprise customer.',
             type=str,
         )
@@ -72,10 +72,8 @@ class Command(BaseCommand):
         """
         Returns a headers dict containing the authenticated JWT access token
         """
-        if not self.headers:
-            access_token, __ = self._get_access_token()
-            self.headers = {'Authorization': 'JWT ' + access_token}
-        return self.headers
+        access_token, __ = self._get_access_token()
+        self.headers = {'Authorization': 'JWT ' + access_token}
 
     def _get_enterprise_customer(self, url, enterprise_customer_uuid):
         """ Returns an enterprise customer """
@@ -87,10 +85,8 @@ class Command(BaseCommand):
                 headers=self.headers,
             )
             self.enterprise_customer = response.json().get('results')[0]
-            return self.enterprise_customer
         except IndexError:
             LOGGER.error('No enterprise customer found.')
-            return None
 
     def _get_enterprise_catalog(self, url):
         """
@@ -98,7 +94,6 @@ class Command(BaseCommand):
         """
         if not self.enterprise_customer:
             LOGGER.error('An enterprise customer was not specified.')
-            return None
     
         LOGGER.info('\nFetching catalog for enterprise customer (%s)...', self.enterprise_customer.get('uuid'))
         try:
@@ -108,10 +103,8 @@ class Command(BaseCommand):
                 headers=self.headers,
             )
             self.enterprise_catalog = response.json().get('results')[0]
-            return self.enterprise_catalog
         except IndexError:
             LOGGER.error('No catalog found for enterprise (%s)', self.enterprise_customer.get('uuid'))
-            return None
 
     def _create_coupon(self, url, ecommerce_api_url):
         """
@@ -120,7 +113,6 @@ class Command(BaseCommand):
         """
         if not self.enterprise_customer or not self.enterprise_catalog:
             LOGGER.error('An enterprise customer and/or catalog was not specified.')
-            return None
 
         LOGGER.info('\nCreating an enterprise coupon...')
         category = Category.objects.get(slug='bulk-enrollment-upon-redemption')
@@ -159,17 +151,16 @@ class Command(BaseCommand):
         }
         response = requests.post(url, json=request_obj, headers=self.headers)
         self.coupon = response.json()
-        return self.coupon
 
     def handle(self, *args, **options):
         """
         Entry point for managment command execution.
         """
-        site = self._get_default_site()
         enterprise_customer_uuid = options['enterprise_customer']
+        self.site = SiteConfiguration.objects.first()
 
-        ecommerce_api_url = site.build_ecommerce_url() + '/api/v2'
-        enterprise_api_url = site.enterprise_api_url
+        ecommerce_api_url = self.site.build_ecommerce_url() + '/api/v2'
+        enterprise_api_url = self.site.enterprise_api_url
 
         enterprise_customer_request_url = enterprise_api_url + 'enterprise-customer/'
         enterprise_catalog_request_url = enterprise_api_url + 'enterprise_catalogs/'
