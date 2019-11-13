@@ -62,12 +62,6 @@ class Command(BaseCommand):
             oauth_access_token_url, key, secret, token_type='jwt'
         )
 
-    def _get_default_site(self):
-        """ Returns the default site configuration """
-        if not self.site:
-            self.site = SiteConfiguration.objects.first()
-        return self.site
-
     def _get_headers(self):
         """
         Returns a headers dict containing the authenticated JWT access token
