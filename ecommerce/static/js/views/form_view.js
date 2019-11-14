@@ -176,9 +176,14 @@ define([
 
                 if (this.editing && _.has(this, 'editableAttributes')) {
                     editableAttributes = this.model.pick(this.editableAttributes);
+                    console.log("model server state:")
+                    console.log(this.modelServerState);
+                    console.log(editableAttributes);
+                    console.log("hullo");
                     changedAttributes = _.omit(editableAttributes, function(value, key) {
                         return value === this.modelServerState[key];
                     }, this);
+                    console.log(changedAttributes);
 
                     this.model.save(
                         changedAttributes,

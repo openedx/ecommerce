@@ -29,7 +29,9 @@ define([
                 max_uses: 1,
                 price: 0,
                 quantity: 1,
-                enterprise_catalog_url: '/api/v2/enterprise/customer_catalogs/'
+                enterprise_catalog_url: '/api/v2/enterprise/customer_catalogs/',
+                contract_discount_type: 'Percentage',
+                contract_discount_value: null,
             },
 
             couponValidation: {
@@ -40,6 +42,8 @@ define([
                     required: false
                 }
             },
+
+            contract_discount_value: {required: true},
 
             initialize: function() {
                 this.on('change:payment_information', this.updatePaymentInformation);
