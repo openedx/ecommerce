@@ -6,7 +6,7 @@
 -e git+https://github.com/edx/analytics-python.git@1.2.11#egg=analytics-python==1.2.11
 
 coreapi
-django==1.11.15
+django==1.11.26
 django-compressor==2.2
 django-cors-headers                 #  Used to allow to configure CORS headers for cross-domain requests
 django-crispy-forms
