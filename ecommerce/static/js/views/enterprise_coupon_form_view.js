@@ -104,6 +104,9 @@ define([
                 },
                 'input[name=contract_discount_value]': {
                     observe: 'contract_discount_value',
+                    setOptions: {
+                        validate: true
+                    },
                     onSet: function(val) {
                         if (val === '') {
                             return null;
@@ -216,20 +219,21 @@ define([
             },
 
             render: function() {
-
-                if (this.editing) {
-                    console.log("get the contract_discount_type from somewhere");
-                    // if this.model.get('contract_discount_type') {
-                    //     this.model.set({
-                    //     contract_discount_type: 'Percentage',
-                    // })
-                    // }c
-                } else {
-                    this.model.set({
-                        contract_discount_type: 'Percentage',
-                        contract_discount_value: null,
-                    })
-                }
+                console.log("this is the render of coupon form view:")
+                console.log(this.model);
+                // if (this.editing) {
+                //     console.log("get the contract_discount_type from somewhere");
+                //     // if this.model.get('contract_discount_type') {
+                //     //     this.model.set({
+                //     //     contract_discount_type: 'Percentage',
+                //     // })
+                //     // }c
+                // } else {
+                //     this.model.set({
+                //         contract_discount_type: 'Percentage',
+                //         contract_discount_value: null,
+                //     })
+                // }
 
                 if (this.$('[name=contract_discount_type]:checked').val() === 'Percentage') {
                     this.setLimitToElement(this.$('[name=contract_discount_value]'), 100, 1);

@@ -40,10 +40,9 @@ define([
                 notify_email: {
                     pattern: 'email',
                     required: false
-                }
+                },
+                contract_discount_value: {required: true},
             },
-
-            contract_discount_value: {required: true},
 
             initialize: function() {
                 this.on('change:payment_information', this.updatePaymentInformation);
