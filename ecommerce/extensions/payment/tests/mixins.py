@@ -159,6 +159,7 @@ class CybersourceMixin(PaymentEventsMixin):
         Generates a dict containing the API reply fields expected to be received
         from CyberSource.
         """
+        
         reason_code = kwargs.get('reason_code', '100')
         req_reference_number = kwargs.get('req_reference_number', basket.order_number)
         total = six.text_type(basket.total_incl_tax)
