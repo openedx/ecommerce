@@ -154,11 +154,11 @@ class Command(BaseCommand):
         enterprise_customer_uuid = options['enterprise_customer']
         self.site = SiteConfiguration.objects.first()
 
-        ecommerce_api_url = self.site.build_ecommerce_url() + '/api/v2'
+        ecommerce_api_url = '{}/api/v2'.format(self.site.build_ecommerce_url())
         enterprise_api_url = self.site.enterprise_api_url
 
-        enterprise_customer_request_url = enterprise_api_url + 'enterprise-customer/'
-        enterprise_catalog_request_url = enterprise_api_url + 'enterprise_catalogs/'
+        enterprise_customer_request_url = '{}enterprise-customer/'.format(enterprise_api_url)
+        enterprise_catalog_request_url = '{}enterprise_catalogs/'.format(enterprise_api_url)
 
         # Set up request headers with JWT access token
         self.headers = self._get_headers()
