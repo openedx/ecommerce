@@ -1,23 +1,23 @@
 # encoding: utf-8
 """
-Contains the tests for creating an coupon associated with
-an enterprise customer and catalog.
+Contains the tests for creating an coupon associated with enterprise customer and catalog.
 """
 
 from __future__ import absolute_import, unicode_literals
 
-from mock import patch, Mock
-from django.utils.timezone import now
 from uuid import uuid4
 
-from django.core.management import CommandError, call_command
-from factory.django import get_model
-from ecommerce.tests.factories import SiteConfigurationFactory
+from django.core.management import call_command
+from django.utils.timezone import now
+from mock import Mock, patch
+from oscar.core.loading import get_model
 
 from ecommerce.enterprise.management.commands.seed_enterprise_devstack_data import Command as seed_command
+from ecommerce.tests.factories import SiteConfigurationFactory
 from ecommerce.tests.testcases import TransactionTestCase
 
 SiteConfiguration = get_model('core', 'SiteConfiguration')
+
 
 class SeedEnterpriseDevstackDataTests(TransactionTestCase):
     """
@@ -27,7 +27,7 @@ class SeedEnterpriseDevstackDataTests(TransactionTestCase):
 
     def setUp(self):
         """
-        TODO
+        Set up initial data (e.g., site configuration) prior to running tests
         """
         super(SeedEnterpriseDevstackDataTests, self).setUp()
         SiteConfigurationFactory.create()
@@ -37,9 +37,9 @@ class SeedEnterpriseDevstackDataTests(TransactionTestCase):
     @patch.object(seed_command, '_get_enterprise_catalog')
     @patch.object(seed_command, '_get_enterprise_customer')
     @patch.object(seed_command, '_get_access_token')
-    def test_create_enterprise_coupon_successfully_with_enterprise_customer(self, mock_access_token, mock_ent_customer, mock_ent_catalog, mock_coupon_post):
+    def test_ent_coupon_creation(self, mock_access_token, mock_ent_customer, mock_ent_catalog, mock_coupon_post):
         """
-        Verify a coupon is created for an enterprise customer/catalog.
+        Verify a coupon is created for an enterprise customer/catalog
         """
         mock_coupon_post_res = {'data': 'some data'}
 

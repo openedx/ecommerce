@@ -87,7 +87,7 @@ class Command(BaseCommand):
         """
         if not self.enterprise_customer:
             logger.error('An enterprise customer was not specified.')
-    
+
         logger.info('\nFetching catalog for enterprise customer (%s)...', self.enterprise_customer.get('uuid'))
         try:
             response = requests.get(
@@ -108,7 +108,7 @@ class Command(BaseCommand):
             logger.error('An enterprise customer and/or catalog was not specified.')
 
         logger.info('\nCreating an enterprise coupon...')
-        category = Category.objects.get(slug='bulk-enrollment-upon-redemption')
+        category, __ = Category.objects.get_or_create(slug='bulk-enrollment-upon-redemption')
         request_obj = {
             "category": {
                 "id": category.id,
