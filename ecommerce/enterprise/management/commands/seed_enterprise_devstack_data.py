@@ -109,7 +109,7 @@ class Command(BaseCommand):
             logger.error('An enterprise customer and/or catalog was not specified.')
 
         logger.info('\nCreating an enterprise coupon...')
-        category = Category.objects.first()
+        category = Category.objects.get(name='coupons')
         request_obj = {
             "category": {
                 "id": category.id,
