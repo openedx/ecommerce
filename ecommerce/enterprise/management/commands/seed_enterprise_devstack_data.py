@@ -69,7 +69,7 @@ class Command(BaseCommand):
         access_token, __ = self._get_access_token()
         return {'Authorization': 'JWT ' + access_token}
 
-    def _get_enterprise_customer(self, url, enterprise_customer_uuid = None):
+    def _get_enterprise_customer(self, url, enterprise_customer_uuid=None):
         """ Returns an enterprise customer """
         logger.info('\nFetching an enterprise customer...')
         try:
