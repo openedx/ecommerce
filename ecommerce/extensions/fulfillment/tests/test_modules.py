@@ -46,7 +46,6 @@ from ecommerce.extensions.fulfillment.modules import (
 )
 from ecommerce.extensions.fulfillment.status import LINE
 from ecommerce.extensions.fulfillment.tests.mixins import FulfillmentTestMixin
-from ecommerce.extensions.test.factories import create_order
 from ecommerce.extensions.voucher.models import OrderLineVouchers
 from ecommerce.extensions.voucher.utils import create_vouchers
 from ecommerce.programs.tests.mixins import ProgramTestMixin
@@ -90,7 +89,7 @@ class EnrollmentFulfillmentModuleTests(ProgramTestMixin, DiscoveryTestMixin, Ful
 
         basket = factories.BasketFactory(owner=self.user, site=self.site)
         basket.add_product(self.seat, 1)
-        self.order = create_order(number=1, basket=basket, user=self.user)
+        self.order = self.generate_open_order(number=1, basket=basket, user=self.user)
 
     # pylint: disable=attribute-defined-outside-init
     def create_seat_and_order(self, certificate_type='test-certificate-type', provider=None):
@@ -108,7 +107,7 @@ class EnrollmentFulfillmentModuleTests(ProgramTestMixin, DiscoveryTestMixin, Ful
 
         basket = factories.BasketFactory(owner=self.user, site=self.site)
         basket.add_product(self.seat, 1)
-        self.order = create_order(number=2, basket=basket, user=self.user)
+        self.order = self.generate_open_order(number=2, basket=basket, user=self.user)
 
     def prepare_basket_with_voucher(self, program_uuid=None):
         catalog = Catalog.objects.create(partner=self.partner)
@@ -473,7 +472,7 @@ class CouponFulfillmentModuleTest(CouponMixin, FulfillmentTestMixin, TestCase):
         user = UserFactory()
         basket = factories.BasketFactory(owner=user, site=self.site)
         basket.add_product(coupon, 1)
-        self.order = create_order(number=1, basket=basket, user=user)
+        self.order = self.generate_open_order(number=1, basket=basket, user=user)
 
     def test_supports_line(self):
         """Test that a line containing Coupon returns True."""
@@ -516,7 +515,7 @@ class DonationsFromCheckoutTestFulfillmentModuleTest(FulfillmentTestMixin, TestC
         basket = factories.BasketFactory(owner=user, site=self.site)
         factories.create_stockrecord(donation, num_in_stock=2, price_excl_tax=10)
         basket.add_product(donation, 1)
-        self.order = create_order(number=1, basket=basket, user=user)
+        self.order = self.generate_open_order(number=1, basket=basket, user=user)
 
     def test_supports_line(self):
         """Test that a line containing Coupon returns True."""
@@ -541,7 +540,7 @@ class DonationsFromCheckoutTestFulfillmentModuleTest(FulfillmentTestMixin, TestC
         self.assertTrue(DonationsFromCheckoutTestFulfillmentModule().revoke_line(line))
 
 
-class EnrollmentCodeFulfillmentModuleTests(DiscoveryTestMixin, TestCase):
+class EnrollmentCodeFulfillmentModuleTests(DiscoveryTestMixin, FulfillmentTestMixin, TestCase):
     """ Test Enrollment code fulfillment. """
     QUANTITY = 5
 
@@ -567,7 +566,7 @@ class EnrollmentCodeFulfillmentModuleTests(DiscoveryTestMixin, TestCase):
         billing_address.country.name = "United States of America"
 
         # create new order adding in the additional billing address info
-        return create_order(number=2, basket=basket, user=user, billing_address=billing_address)
+        return self.generate_open_order(number=2, basket=basket, user=user, billing_address=billing_address)
 
     def add_required_attributes_to_basket(self, order, purchased_by_org):
         """ Utility method that will setup Basket with attributes needed for unit tests """
@@ -598,7 +597,7 @@ class EnrollmentCodeFulfillmentModuleTests(DiscoveryTestMixin, TestCase):
         user = UserFactory()
         basket = factories.BasketFactory(owner=user, site=self.site)
         basket.add_product(enrollment_code, self.QUANTITY)
-        self.order = create_order(number=1, basket=basket, user=user)
+        self.order = self.generate_open_order(number=1, basket=basket, user=user)
 
     def test_supports_line(self):
         """Test that support_line returns True for Enrollment code lines."""
@@ -606,7 +605,7 @@ class EnrollmentCodeFulfillmentModuleTests(DiscoveryTestMixin, TestCase):
         supports_line = EnrollmentCodeFulfillmentModule().supports_line(line)
         self.assertTrue(supports_line)
 
-        order = create_order()
+        order = self.generate_open_order()
         unsupported_line = order.lines.first()
         supports_line = EnrollmentCodeFulfillmentModule().supports_line(unsupported_line)
         self.assertFalse(supports_line)
@@ -849,7 +848,7 @@ class EntitlementFulfillmentModuleTests(FulfillmentTestMixin, TestCase):
         basket = factories.BasketFactory(owner=self.user, site=self.site)
         basket.add_product(self.course_entitlement, 1)
         self.entitlement_option = Option.objects.get(name='Course Entitlement')
-        self.order = create_order(number=1, basket=basket, user=self.user)
+        self.order = self.generate_open_order(number=1, basket=basket, user=self.user)
         self.logger_name = 'ecommerce.extensions.fulfillment.modules'
         self.return_data = {
             "user": "honor",
@@ -865,7 +864,7 @@ class EntitlementFulfillmentModuleTests(FulfillmentTestMixin, TestCase):
         supports_line = CourseEntitlementFulfillmentModule().supports_line(line)
         self.assertTrue(supports_line)
 
-        order = create_order()
+        order = self.generate_open_order()
         unsupported_line = order.lines.first()
         supports_line = CourseEntitlementFulfillmentModule().supports_line(unsupported_line)
         self.assertFalse(supports_line)
@@ -920,7 +919,6 @@ class EntitlementFulfillmentModuleTests(FulfillmentTestMixin, TestCase):
 
         httpretty.register_uri(httpretty.DELETE, get_lms_entitlement_api_url() +
                                'entitlements/111-222-333/', status=200, body={}, content_type='application/json')
-
         line = self.order.lines.first()
 
         # Fulfill order first to ensure we have all the line attributes set

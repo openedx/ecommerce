@@ -18,7 +18,6 @@ from oscar.core.loading import get_model
 from oscar.test import factories
 
 from ecommerce.courses.tests.factories import CourseFactory
-from ecommerce.extensions.order.models import Order
 from ecommerce.extensions.payment.exceptions import (
     ExcessivePaymentForOrderError,
     InvalidCybersourceDecision,
@@ -258,7 +257,6 @@ class CybersourceTests(CybersourceMixin, PaymentProcessorTestCaseMixin, TestCase
         self.client.post(reverse('cybersource:redirect'), notification)
 
         self.assertTrue(PaymentProcessorResponse.objects.filter(basket=self.basket).exists())
-        self.assertTrue(Order.objects.filter(basket=self.basket).exists())
 
         # handle_processor_response should raise RedundantPaymentNotificationError for same transaction ID
         self.assertRaises(RedundantPaymentNotificationError, self.processor.handle_processor_response, notification,

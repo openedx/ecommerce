@@ -31,6 +31,7 @@ from ecommerce.extensions.api.serializers import OrderSerializer
 from ecommerce.extensions.basket.utils import basket_add_organization_attribute
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
 from ecommerce.extensions.checkout.utils import get_receipt_page_url
+from ecommerce.extensions.fulfillment.status import ORDER
 from ecommerce.extensions.offer.constants import DYNAMIC_DISCOUNT_FLAG
 from ecommerce.extensions.payment.exceptions import (
     AuthorizationError,
@@ -94,7 +95,7 @@ class OrderCreationMixin(EdxOrderPlacementMixin):
             raise
 
 
-class CybersourceSubmitView(BasePaymentSubmitView):
+class CybersourceSubmitView(BasePaymentSubmitView, OrderCreationMixin):
     """ Starts CyberSource payment process.
 
     This view is intended to be called asynchronously by the payment form. The view expects POST data containing a
@@ -110,6 +111,19 @@ class CybersourceSubmitView(BasePaymentSubmitView):
         'first_name': 'bill_to_forename',
         'last_name': 'bill_to_surname',
     }
+
+    def _call_create_order(self, data, request):
+        billing_address = BillingAddress(
+            first_name=data['first_name'],
+            last_name=data['last_name'],
+            line1=data.get('address_line1', ''),
+            line2=data.get('address_line2', ''),
+            line4=data.get('city', ''),
+            postcode=data.get('postal_code', ''),
+            state=data.get('state', ''),
+            country=Country.objects.get(iso_3166_1_a2=data['country']),
+        )
+        self.create_order(request, request.basket, billing_address)
 
     def form_valid(self, form):
         data = form.cleaned_data
@@ -151,8 +165,9 @@ class CybersourceSubmitView(BasePaymentSubmitView):
 
         basket_add_organization_attribute(basket, data)
 
-        # Freeze the basket since the user is paying for it now.
+        # Freeze the basket and create the order since the user is paying now
         basket.freeze()
+        self._call_create_order(data=data, request=request)
 
         return response
 
@@ -182,29 +197,6 @@ class CybersourceNotificationMixin(CyberSourceProcessorMixin, OrderCreationMixin
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
         return super(CybersourceNotificationMixin, self).dispatch(request, *args, **kwargs)
-
-    def _get_billing_address(self, cybersource_response):
-        field = 'req_bill_to_address_line1'
-        # Address line 1 is optional if flag is enabled
-        line1 = (cybersource_response.get(field, '')
-                 if waffle.switch_is_active('optional_location_fields')
-                 else cybersource_response[field])
-        return BillingAddress(
-            first_name=cybersource_response['req_bill_to_forename'],
-            last_name=cybersource_response['req_bill_to_surname'],
-            line1=line1,
-
-            # Address line 2 is optional
-            line2=cybersource_response.get('req_bill_to_address_line2', ''),
-
-            # Oscar uses line4 for city
-            line4=cybersource_response['req_bill_to_address_city'],
-            # Postal code is optional
-            postcode=cybersource_response.get('req_bill_to_address_postal_code', ''),
-            # State is optional
-            state=cybersource_response.get('req_bill_to_address_state', ''),
-            country=Country.objects.get(
-                iso_3166_1_a2=cybersource_response['req_bill_to_address_country']))
 
     def _get_basket(self, basket_id):
         if not basket_id:
@@ -287,6 +279,7 @@ class CybersourceNotificationMixin(CyberSourceProcessorMixin, OrderCreationMixin
         transaction_id = None
         notification = notification or {}
         unhandled_exception_logging = True
+        mark_order_as_failed = False
 
         try:
 
@@ -309,6 +302,7 @@ class CybersourceNotificationMixin(CyberSourceProcessorMixin, OrderCreationMixin
                     )
                     logger.error(error_message)
                     unhandled_exception_logging = False
+                    mark_order_as_failed = True
                     raise InvalidBasketError(error_message)
 
                 if basket.status != Basket.FROZEN:
@@ -320,6 +314,7 @@ class CybersourceNotificationMixin(CyberSourceProcessorMixin, OrderCreationMixin
                         ' [%s]',
                         basket.id, basket.status
                     )
+                    mark_order_as_failed = True
             finally:
                 # Store the response in the database regardless of its authenticity.
                 ppr = self.payment_processor.record_processor_response(
@@ -337,6 +332,7 @@ class CybersourceNotificationMixin(CyberSourceProcessorMixin, OrderCreationMixin
                         logger_function=logger.info,
                     )
                     unhandled_exception_logging = False
+                    mark_order_as_failed = True
                     raise
                 except DuplicateReferenceNumber:
                     logger.info(
@@ -346,6 +342,7 @@ class CybersourceNotificationMixin(CyberSourceProcessorMixin, OrderCreationMixin
                         order_number
                     )
                     unhandled_exception_logging = False
+                    mark_order_as_failed = True
                     raise
                 except RedundantPaymentNotificationError:
                     logger.info(
@@ -355,6 +352,7 @@ class CybersourceNotificationMixin(CyberSourceProcessorMixin, OrderCreationMixin
                         order_number
                     )
                     unhandled_exception_logging = False
+                    mark_order_as_failed = True
                     raise
                 except ExcessivePaymentForOrderError:
                     logger.info(
@@ -365,6 +363,7 @@ class CybersourceNotificationMixin(CyberSourceProcessorMixin, OrderCreationMixin
                         order_number
                     )
                     unhandled_exception_logging = False
+                    mark_order_as_failed = True
                     raise
                 except InvalidSignatureError as exception:
                     self._log_cybersource_payment_failure(
@@ -372,12 +371,14 @@ class CybersourceNotificationMixin(CyberSourceProcessorMixin, OrderCreationMixin
                         message_prefix='CyberSource response was invalid.',
                     )
                     unhandled_exception_logging = False
+                    mark_order_as_failed = True
                     raise
                 except (PaymentError, Exception) as exception:
                     self._log_cybersource_payment_failure(
                         exception, basket, order_number, transaction_id, notification, ppr,
                     )
                     unhandled_exception_logging = False
+                    mark_order_as_failed = True
                     raise
 
         except:  # pylint: disable=bare-except
@@ -390,6 +391,11 @@ class CybersourceNotificationMixin(CyberSourceProcessorMixin, OrderCreationMixin
                     basket_id
                 )
             raise
+        finally:
+            if mark_order_as_failed:
+                # Set Order to failed
+                order = Order.objects.get(number=basket.order_number)
+                order.set_status(ORDER.PAYMENT_FAILED)
 
         return basket
 
@@ -438,10 +444,10 @@ class CybersourceInterstitialView(CybersourceNotificationMixin, View):
     """
 
     def post(self, request, *args, **kwargs):  # pylint: disable=unused-argument
-        """Process a CyberSource merchant notification and place an order for paid products as appropriate."""
+        """Process a CyberSource merchant notification."""
         notification = request.POST.dict()
         try:
-            basket = self.validate_notification(notification)
+            self.validate_notification(notification)
             monitoring_utils.set_custom_metric('payment_response_validation', 'success')
         except DuplicateReferenceNumber:
             # CyberSource has told us that they've declined an attempt to pay
@@ -482,19 +488,7 @@ class CybersourceInterstitialView(CybersourceNotificationMixin, View):
             monitoring_utils.set_custom_metric('payment_response_validation', 'redirect-to-error-page')
             return absolute_redirect(request, 'payment_error')
 
-        try:
-            order = self.create_order(request, basket, self._get_billing_address(notification))
-            self.handle_post_order(order)
-            return self.redirect_to_receipt_page(notification)
-        except:  # pylint: disable=bare-except
-            transaction_id, order_number, basket_id = self.get_ids_from_notification(notification)
-            logger.exception(
-                'Error processing order for transaction [%s], with order [%s] and basket [%d].',
-                transaction_id,
-                order_number,
-                basket_id
-            )
-            return absolute_redirect(request, 'payment_error')
+        return self.redirect_to_receipt_page(notification)
 
     def redirect_to_receipt_page(self, notification):
         receipt_page_url = get_receipt_page_url(
@@ -589,12 +583,12 @@ class CybersourceApplePayAuthorizationView(CyberSourceProcessorMixin, OrderCreat
                 'Failed to authorize Apple Pay payment. An error occurred while parsing the billing address.')
             raise ValidationError({'error': 'billing_address_invalid'})
 
+        order = self.create_order(request, basket, billing_address)
         try:
             self.handle_payment(None, basket)
         except GatewayError:
             return Response({'error': 'payment_failed'}, status=status.HTTP_502_BAD_GATEWAY)
 
-        order = self.create_order(request, basket, billing_address)
         return Response(OrderSerializer(order, context={'request': request}).data, status=status.HTTP_201_CREATED)
 
     def handle_payment(self, response, basket):

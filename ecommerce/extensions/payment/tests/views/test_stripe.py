@@ -18,7 +18,7 @@ from ecommerce.extensions.order.constants import PaymentEventTypeName
 from ecommerce.extensions.payment.constants import STRIPE_CARD_TYPE_MAP
 from ecommerce.extensions.payment.processors.stripe import Stripe
 from ecommerce.extensions.payment.tests.mixins import PaymentEventsMixin
-from ecommerce.extensions.test.factories import create_basket
+from ecommerce.extensions.test.factories import create_basket, create_order
 from ecommerce.invoice.models import Invoice
 from ecommerce.tests.testcases import TestCase
 

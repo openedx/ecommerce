@@ -61,6 +61,7 @@ def create_basket(owner=None, site=None, empty=False, price='10.00', product_cla
             product = create_product()
         create_stockrecord(product, num_in_stock=2, price_excl_tax=D(price))
         basket.add_product(product)
+
     return basket
 
 
@@ -92,7 +93,6 @@ def create_order(number=None, basket=None, user=None, shipping_address=None,  # 
         billing_address=billing_address,
         total=total,
         **kwargs)
-    basket.set_as_submitted()
     return order
 
 

@@ -20,6 +20,7 @@ from zeep.wsse import UsernameToken
 from ecommerce.core.constants import ISO_8601_FORMAT
 from ecommerce.core.url_utils import get_ecommerce_url
 from ecommerce.extensions.checkout.utils import get_receipt_page_url
+from ecommerce.extensions.fulfillment.status import ORDER
 from ecommerce.extensions.payment.constants import APPLE_PAY_CYBERSOURCE_CARD_TYPE_MAP, CYBERSOURCE_CARD_TYPE_MAP
 from ecommerce.extensions.payment.exceptions import (
     AuthorizationError,
@@ -298,7 +299,7 @@ class Cybersource(ApplePayMixin, BaseClientSidePaymentProcessor):
                 else:
                     logger.info(
                         'Received duplicate CyberSource payment notification for basket [%d] which is not associated '
-                        'with any existing order. Continuing to validation and order creation processes.',
+                        'with any existing order. Continuing to validation.',
                         basket.id,
                     )
             else:
@@ -311,7 +312,8 @@ class Cybersource(ApplePayMixin, BaseClientSidePaymentProcessor):
 
         transaction_id = response.get('transaction_id', '')  # Error Notifications do not include a transaction id.
         if transaction_id and decision == 'accept':
-            if Order.objects.filter(number=response['req_reference_number']).exists():
+            # Raise an error if there is an existing order with the same number which is already open
+            if Order.objects.filter(number=response['req_reference_number'], status=ORDER.OPEN).exists():
                 if PaymentProcessorResponse.objects.filter(transaction_id=transaction_id).exists():
                     raise RedundantPaymentNotificationError
                 else:

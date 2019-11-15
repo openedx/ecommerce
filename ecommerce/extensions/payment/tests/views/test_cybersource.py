@@ -8,7 +8,6 @@ import ddt
 import mock
 import responses
 from django.conf import settings
-from django.test.client import RequestFactory
 from django.urls import reverse
 from freezegun import freeze_time
 from oscar.apps.payment.exceptions import TransactionDeclined
@@ -24,11 +23,12 @@ from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.extensions.api.serializers import OrderSerializer
 from ecommerce.extensions.basket.constants import PURCHASER_BEHALF_ATTRIBUTE
 from ecommerce.extensions.basket.utils import basket_add_organization_attribute
+from ecommerce.extensions.fulfillment.status import ORDER
 from ecommerce.extensions.order.constants import PaymentEventTypeName
 from ecommerce.extensions.payment.exceptions import InvalidBasketError, InvalidSignatureError
 from ecommerce.extensions.payment.processors.cybersource import Cybersource
 from ecommerce.extensions.payment.tests.mixins import CybersourceMixin, CybersourceNotificationTestsMixin
-from ecommerce.extensions.payment.views.cybersource import CybersourceInterstitialView, OrderCreationMixin
+from ecommerce.extensions.payment.views.cybersource import CybersourceInterstitialView
 from ecommerce.extensions.test.factories import create_basket, create_order
 from ecommerce.invoice.models import Invoice
 from ecommerce.tests.testcases import TestCase
@@ -36,6 +36,7 @@ from ecommerce.tests.testcases import TestCase
 JSON = 'application/json'
 
 Basket = get_model('basket', 'Basket')
+Country = get_model('address', 'Country')
 Order = get_model('order', 'Order')
 OrderNumberGenerator = get_class('order.utils', 'OrderNumberGenerator')
 PaymentEvent = get_model('order', 'PaymentEvent')
@@ -57,11 +58,13 @@ class LoginMixin(object):
 @ddt.ddt
 class CybersourceSubmitViewTests(CybersourceMixin, TestCase):
     path = reverse('cybersource:submit')
+    # FIXME-BB: Add tests here
 
     def setUp(self):
         super(CybersourceSubmitViewTests, self).setUp()
         self.user = self.create_user()
         self.client.login(username=self.user.username, password=self.password)
+        Country.objects.get_or_create(iso_3166_1_a2='US')
 
     def _generate_data(self, basket_id):
         return {
@@ -275,20 +278,16 @@ class CybersourceInterstitialViewTests(CybersourceNotificationTestsMixin, TestCa
             response.context
         )
 
-    def test_successful_order(self):
-        """ Verify the view redirects to the Receipt page when the Order has been successfully placed. """
-        # The basket should not have an associated order if no payment was made.
-        self.assertFalse(Order.objects.filter(basket=self.basket).exists())
-
+    def test_successful_post(self):
+        """ Verify the view redirects to the Receipt page on a successful post. """
         notification = self.generate_notification(
             self.basket,
             billing_address=self.billing_address,
         )
         response = self.client.post(self.path, notification)
-        self.assertTrue(Order.objects.filter(basket=self.basket).exists())
         self.assertEqual(response.status_code, 302)
 
-    def test_successful_order_for_bulk_purchase(self):
+    def test_successful_post_for_bulk_purchases(self):
         """
         Verify the view redirects to the Receipt page when the Order has been
         successfully placed for bulk purchase and also that the order is linked
@@ -301,9 +300,7 @@ class CybersourceInterstitialViewTests(CybersourceNotificationTestsMixin, TestCa
         enrollment_code = Product.objects.get(product_class__name=ENROLLMENT_CODE_PRODUCT_CLASS_NAME)
         self.basket = create_basket(owner=self.user, site=self.site)
         self.basket.add_product(enrollment_code, quantity=1)
-
-        # The basket should not have an associated order if no payment was made.
-        self.assertFalse(Order.objects.filter(basket=self.basket).exists())
+        create_order(user=self.user, site=self.site, basket=self.basket, status=ORDER.OPEN)
 
         request_data = self.generate_notification(
             self.basket,
@@ -315,57 +312,12 @@ class CybersourceInterstitialViewTests(CybersourceNotificationTestsMixin, TestCa
         basket_add_organization_attribute(self.basket, request_data)
 
         response = self.client.post(self.path, request_data)
-        self.assertTrue(Order.objects.filter(basket=self.basket).exists())
         self.assertEqual(response.status_code, 302)
 
         # Now verify that a new business client has been created and current
-        # order is now linked with that client through Invoice model.
-        order = Order.objects.filter(basket=self.basket).first()
+        # basket is now linked with that client through Invoice model.
         business_client = BusinessClient.objects.get(name=request_data['organization'])
-        assert Invoice.objects.get(order=order).business_client == business_client
-
-    def test_order_creation_error(self):
-        """ Verify the view redirects to the Payment error page when an error occurred during Order creation. """
-        notification = self.generate_notification(
-            self.basket,
-            billing_address=self.billing_address,
-        )
-        with mock.patch.object(self.view, 'create_order', side_effect=Exception):
-            response = self.client.post(self.path, notification)
-            self.assertRedirects(response, self.get_full_url(path=reverse('payment_error')), status_code=302)
-
-    def test_duplicate_order_attempt_logging(self):
-        """
-        Verify that attempts at creation of a duplicate order are logged correctly
-        """
-        prior_order = create_order()
-        dummy_request = RequestFactory(SERVER_NAME='testserver.fake').get('')
-        dummy_mixin = OrderCreationMixin()
-        dummy_mixin.payment_processor = Cybersource(self.site)
-
-        with LogCapture(self.DUPLICATE_ORDER_LOGGER_NAME) as lc:
-            with self.assertRaises(ValueError):
-                dummy_mixin.create_order(dummy_request, prior_order.basket, None)
-                lc.check(
-                    (
-                        self.DUPLICATE_ORDER_LOGGER_NAME,
-                        'ERROR',
-                        self.get_duplicate_order_error_message(payment_processor='Cybersource', order=prior_order)
-                    ),
-                )
-
-    def test_order_creation_after_duplicate_reference_number_error(self):
-        """ Verify view creates the order if there is no existing order in case of DuplicateReferenceNumber """
-        self.assertFalse(Order.objects.filter(basket=self.basket).exists())
-        notification = self.generate_notification(
-            self.basket,
-            billing_address=self.billing_address,
-            decision='error',
-            reason_code='104',
-        )
-        response = self.client.post(self.path, notification)
-        self.assertTrue(Order.objects.filter(basket=self.basket).exists())
-        self.assertEqual(response.status_code, 302)
+        assert Invoice.objects.get(basket=self.basket).business_client == business_client
 
 
 @ddt.ddt
@@ -472,7 +424,7 @@ class CybersourceApplePayAuthorizationViewTests(LoginMixin, CybersourceMixin, Te
 
     @responses.activate
     def test_post(self):
-        """ The view should authorize and settle payment at CyberSource, and create an order. """
+        """ The view should create an order, then authorize and settle payment at CyberSource. """
         data = self.generate_post_data()
         basket = create_basket(owner=self.user, site=self.site)
         basket.strategy = Selector().strategy()

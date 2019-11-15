@@ -51,12 +51,6 @@ class StripeSubmitView(EdxOrderPlacementMixin, BasePaymentSubmitView):
                 order_number)
             billing_address = None
 
-        try:
-            self.handle_payment(token, basket)
-        except Exception:  # pylint: disable=broad-except
-            logger.exception('An error occurred while processing the Stripe payment for basket [%d].', basket.id)
-            return JsonResponse({}, status=400)
-
         shipping_method = NoShippingRequired()
         shipping_charge = shipping_method.calculate(basket)
         order_total = OrderTotalCalculator().calculate(basket, shipping_charge)
@@ -73,6 +67,12 @@ class StripeSubmitView(EdxOrderPlacementMixin, BasePaymentSubmitView):
             request=self.request
         )
         self.handle_post_order(order)
+
+        try:
+            self.handle_payment(token, basket)
+        except Exception:  # pylint: disable=broad-except
+            logger.exception('An error occurred while processing the Stripe payment for basket [%d].', basket.id)
+            return JsonResponse({}, status=400)
 
         receipt_url = get_receipt_page_url(
             site_configuration=self.request.site.siteconfiguration,

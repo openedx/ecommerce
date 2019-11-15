@@ -10,10 +10,14 @@ class FulfillmentTestMixin(object):
 
     Inheriting classes should have a `create_user` method.
     """
-    def generate_open_order(self, product_class=None):
+    def generate_open_order(self, product_class=None, user=None, **kwargs):
         """ Returns an open order, ready to be fulfilled. """
-        user = self.create_user()
-        return create_order(user=user, status=ORDER.OPEN, product_class=product_class)
+        if not user:
+            user = self.create_user()
+        order = create_order(user=user, status=ORDER.OPEN, product_class=product_class, **kwargs)
+        for line in order.lines.all():
+            line.set_status(LINE.OPEN)
+        return order
 
     def assert_order_fulfilled(self, order):
         """

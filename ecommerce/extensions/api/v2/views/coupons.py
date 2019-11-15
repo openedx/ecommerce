@@ -24,6 +24,7 @@ from ecommerce.extensions.api.serializers import CategorySerializer, CouponListS
 from ecommerce.extensions.basket.utils import prepare_basket
 from ecommerce.extensions.catalogue.utils import create_coupon_product, get_or_create_catalog
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
+from ecommerce.extensions.fulfillment.status import ORDER
 from ecommerce.extensions.payment.processors.invoice import InvoicePayment
 from ecommerce.extensions.voucher.models import CouponVouchers
 from ecommerce.extensions.voucher.utils import (
@@ -313,6 +314,10 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
             shipping_method=order_metadata['shipping_method'],
             user=basket.owner
         )
+
+        # TODO: Not sure why we should have to do this here. I expected this to be handled in the later payment stuff
+        order.set_status(ORDER.OPEN)
+        self.handle_successful_order(order)
 
         # Invoice payment processor invocation.
         payment_processor = InvoicePayment

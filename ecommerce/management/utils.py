@@ -171,10 +171,8 @@ class FulfillFrozenBaskets(EdxOrderPlacementMixin):
                 card_type=card_type
             )
 
-            # Record Payment and try to place order
+            # Place order and then record the payment for it
             try:
-                self.record_payment(basket=basket, handled_processor_response=handled_response)
-
                 shipping_method = NoShippingRequired()
                 shipping_charge = shipping_method.calculate(basket)
                 order_total = OrderTotalCalculator().calculate(basket, shipping_charge)
@@ -195,6 +193,7 @@ class FulfillFrozenBaskets(EdxOrderPlacementMixin):
                     billing_address=None,
                     order_total=order_total,
                 )
+                self.record_payment(basket=basket, handled_processor_response=handled_response)
                 logger.info('Successfully created order for basket %d', basket.id)
                 return True
             except:  # pylint: disable=bare-except

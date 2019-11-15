@@ -6,6 +6,8 @@ class ORDER(object):
     COMPLETE = 'Complete'
     FULFILLMENT_ERROR = 'Fulfillment Error'
     OPEN = 'Open'
+    PENDING = 'Pending'
+    PAYMENT_FAILED = 'Payment Failed'
 
 
 class LINE(object):
@@ -16,3 +18,5 @@ class LINE(object):
     FULFILLMENT_TIMEOUT_ERROR = 'Fulfillment Timeout Error'
     FULFILLMENT_SERVER_ERROR = 'Fulfillment Server Error'
     OPEN = 'Open'
+    PENDING = 'Pending'
+    PAYMENT_FAILED = 'Payment Failed'

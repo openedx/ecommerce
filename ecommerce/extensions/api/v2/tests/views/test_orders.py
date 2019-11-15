@@ -20,6 +20,7 @@ from ecommerce.extensions.api.v2.tests.views import OrderDetailViewTestMixin
 from ecommerce.extensions.checkout.exceptions import BasketNotFreeError
 from ecommerce.extensions.fulfillment.signals import SHIPPING_EVENT_NAME
 from ecommerce.extensions.fulfillment.status import LINE, ORDER
+from ecommerce.extensions.fulfillment.tests.mixins import FulfillmentTestMixin
 from ecommerce.extensions.test.factories import create_order
 from ecommerce.tests.factories import SiteConfigurationFactory
 from ecommerce.tests.mixins import ThrottlingMixin
@@ -211,7 +212,7 @@ class OrderListViewTests(AccessTokenMixin, ThrottlingMixin, TestCase):
 
 @ddt.ddt
 @override_settings(ECOMMERCE_SERVICE_WORKER_USERNAME='test-service-user')
-class OrderFulfillViewTests(TestCase):
+class OrderFulfillViewTests(FulfillmentTestMixin, TestCase):
     def setUp(self):
         super(OrderFulfillViewTests, self).setUp()
         ShippingEventType.objects.get_or_create(name=SHIPPING_EVENT_NAME)
@@ -224,7 +225,7 @@ class OrderFulfillViewTests(TestCase):
 
         self.client.login(username=self.user.username, password=self.password)
 
-        self.order = create_order(site=self.site, user=self.user)
+        self.order = self.generate_open_order(site=self.site, user=self.user)
         self.url = reverse('api:v2:order-fulfill', kwargs={'number': self.order.number})
 
     def _put_to_view(self):
@@ -275,7 +276,7 @@ class OrderFulfillViewTests(TestCase):
         able to modify orders on behalf of other users.
         """
         customer = self.create_user(username='customer')
-        customer_order = create_order(site=self.site, user=customer)
+        customer_order = self.generate_open_order(site=self.site, user=customer)
         self.url = reverse('api:v2:order-fulfill', kwargs={'number': customer_order.number})
 
         self._assert_fulfillment_success()

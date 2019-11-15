@@ -28,6 +28,7 @@ from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.extensions.basket.constants import PURCHASER_BEHALF_ATTRIBUTE
 from ecommerce.extensions.basket.utils import basket_add_organization_attribute
 from ecommerce.extensions.checkout.utils import get_receipt_page_url
+from ecommerce.extensions.fulfillment.status import ORDER
 from ecommerce.extensions.offer.constants import DYNAMIC_DISCOUNT_FLAG
 from ecommerce.extensions.offer.tests.test_dynamic_conditional_offer import _mock_jwt_decode_handler
 from ecommerce.extensions.payment.processors.paypal import Paypal
@@ -65,6 +66,9 @@ class PaypalPaymentExecutionViewTests(PaypalMixin, PaymentEventsMixin, TestCase)
         self.seat_product_class, __ = ProductClass.objects.get_or_create(name=SEAT_PRODUCT_CLASS_NAME)
         self.basket = create_basket(
             owner=self.user, site=self.site, price=self.price, product_class=self.seat_product_class
+        )
+        self.order = create_order(
+            user=self.user, site=self.site, product_class=self.seat_product_class, basket=self.basket
         )
         self.basket.freeze()
 
@@ -156,10 +160,12 @@ class PaypalPaymentExecutionViewTests(PaypalMixin, PaymentEventsMixin, TestCase)
 
         course = CourseFactory(partner=self.partner)
         course.create_or_update_seat('verified', True, 50, create_enrollment_code=True)
-        self.basket = create_basket(owner=UserFactory(), site=self.site)
+        owner = UserFactory()
+        self.basket = create_basket(owner=owner, site=self.site)
         enrollment_code = Product.objects.get(product_class__name=ENROLLMENT_CODE_PRODUCT_CLASS_NAME)
         factories.create_stockrecord(enrollment_code, num_in_stock=2, price_excl_tax='10.00')
         self.basket.add_product(enrollment_code, quantity=1)
+        create_order(basket=self.basket, user=owner, site=self.site)
 
         # Create a payment record the view can use to retrieve a basket
         self.mock_payment_creation_response(self.basket)
@@ -284,25 +290,6 @@ class PaypalPaymentExecutionViewTests(PaypalMixin, PaymentEventsMixin, TestCase)
                                side_effect=KeyError) as fake_handle_order_placement:
             self._assert_order_placement_failure(self.basket.id)
             self.assertTrue(fake_handle_order_placement.called)
-
-    def test_duplicate_order_attempt_logging(self):
-        """
-        Verify that attempts at creation of a duplicate order are logged correctly
-        """
-        prior_order = create_order()
-        dummy_view = PaypalPaymentExecutionView()
-        self.request.site = self.site
-        dummy_view.request = self.request
-
-        with LogCapture(self.DUPLICATE_ORDER_LOGGER_NAME) as lc:
-            dummy_view.call_handle_order_placement(prior_order.basket, self.request)
-            lc.check(
-                (
-                    self.DUPLICATE_ORDER_LOGGER_NAME,
-                    'ERROR',
-                    self.get_duplicate_order_error_message(payment_processor='Paypal', order=prior_order)
-                ),
-            )
 
     @responses.activate
     def test_payment_error_with_duplicate_payment_id(self):

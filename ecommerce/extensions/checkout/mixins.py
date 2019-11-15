@@ -21,6 +21,7 @@ from ecommerce.extensions.basket.constants import EMAIL_OPT_IN_ATTRIBUTE
 from ecommerce.extensions.basket.utils import ORGANIZATION_ATTRIBUTE_TYPE
 from ecommerce.extensions.checkout.exceptions import BasketNotFreeError
 from ecommerce.extensions.customer.utils import Dispatcher
+from ecommerce.extensions.fulfillment.status import ORDER
 from ecommerce.extensions.offer.constants import OFFER_ASSIGNED, OFFER_ASSIGNMENT_REVOKED, OFFER_REDEEMED
 from ecommerce.extensions.order.constants import PaymentEventTypeName
 from ecommerce.invoice.models import Invoice
@@ -112,6 +113,15 @@ class EdxOrderPlacementMixin(six.with_metaclass(abc.ABCMeta, OrderPlacementMixin
             user_id=basket.owner.id
         )
 
+        # Mark order as open, basket as submitted, and handle order once we successfully receive payment
+        with transaction.atomic():
+            order = Order.objects.get(number=basket.order_number)
+            order.set_status(ORDER.OPEN)
+            basket.submit()
+            # Need to find how to pass the request in here
+            self.handle_successful_order(order=order)
+            self.handle_post_order(order=order)
+
     def handle_order_placement(self,
                                order_number,
                                user,
@@ -124,11 +134,13 @@ class EdxOrderPlacementMixin(six.with_metaclass(abc.ABCMeta, OrderPlacementMixin
                                request=None,
                                **kwargs):  # pylint: disable=arguments-differ
         """
-        Place an order and mark the corresponding basket as submitted.
+        Place an order.
 
         Differs from the superclass' method by wrapping order placement
-        and basket submission in a transaction. Should be used only in
-        the context of an exception handler.
+        in a transaction. Should be used only in the context of an exception
+        handler.
+
+        FIXME-BB: Order placement probably should not be atomic now, right?
         """
         with transaction.atomic():
             order = self.place_order(
@@ -144,9 +156,7 @@ class EdxOrderPlacementMixin(six.with_metaclass(abc.ABCMeta, OrderPlacementMixin
                 **kwargs
             )
 
-            basket.submit()
-
-        return self.handle_successful_order(order, request)
+        return order
 
     def handle_successful_order(self, order, request=None):  # pylint: disable=arguments-differ
         """Send a signal so that receivers can perform relevant tasks (e.g., fulfill the order)."""
@@ -229,6 +239,11 @@ class EdxOrderPlacementMixin(six.with_metaclass(abc.ABCMeta, OrderPlacementMixin
             shipping_method=order_metadata['shipping_method'],
             user=basket.owner
         )
+        order.set_status(ORDER.OPEN)
+        self.handle_successful_order(order, request)
+
+        # Mark basket as submitted once order is placed
+        basket.submit()
 
         return order
 

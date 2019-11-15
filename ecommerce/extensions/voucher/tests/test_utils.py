@@ -31,6 +31,7 @@ from ecommerce.extensions.api import exceptions
 from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
 from ecommerce.extensions.fulfillment.modules import CouponFulfillmentModule
 from ecommerce.extensions.fulfillment.status import LINE
+from ecommerce.extensions.fulfillment.tests.mixins import FulfillmentTestMixin
 from ecommerce.extensions.offer.models import OFFER_PRIORITY_VOUCHER
 from ecommerce.extensions.test.factories import create_order, prepare_voucher
 from ecommerce.extensions.voucher.utils import (
@@ -61,7 +62,7 @@ VOUCHER_CODE_LENGTH = 1
 
 @ddt.ddt
 @httpretty.activate
-class UtilTests(CouponMixin, DiscoveryMockMixin, DiscoveryTestMixin, LmsApiMockMixin, TestCase):
+class UtilTests(CouponMixin, DiscoveryMockMixin, DiscoveryTestMixin, LmsApiMockMixin, FulfillmentTestMixin, TestCase):
     course_id = 'edX/DemoX/Demo_Course'
     certificate_type = 'test-certificate-type'
     provider = None
@@ -614,7 +615,7 @@ class UtilTests(CouponMixin, DiscoveryMockMixin, DiscoveryTestMixin, LmsApiMockM
 
         # Verify that the voucher now has been applied and usage number decreased.
         basket = self.apply_voucher(self.user, self.site, voucher)
-        order = create_order(basket=basket, user=self.user)
+        order = self.generate_open_order(basket=basket, user=self.user)
         lines = order.lines.all()
         order, completed_lines = CouponFulfillmentModule().fulfill_product(order, lines)
         self.assertEqual(completed_lines[0].status, LINE.COMPLETE)

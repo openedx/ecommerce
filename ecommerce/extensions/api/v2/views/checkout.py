@@ -10,18 +10,48 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from ecommerce.extensions.api.serializers import CheckoutSerializer
+from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
 from ecommerce.extensions.payment.exceptions import ProcessorNotFoundError
 from ecommerce.extensions.payment.helpers import get_processor_class_by_name
 
 Applicator = get_class('offer.applicator', 'Applicator')
+NoShippingRequired = get_class('shipping.methods', 'NoShippingRequired')
+OrderTotalCalculator = get_class('checkout.calculators', 'OrderTotalCalculator')
 logger = logging.getLogger(__name__)
 
 
-class CheckoutView(APIView):
+class CheckoutView(EdxOrderPlacementMixin, APIView):
     """
-    Freezes a basket, and returns the information necessary to start the payment process.
+    Freezes a basket, places a pending order, and returns the information necessary to start the payment process.
     """
     permission_classes = (IsAuthenticated,)
+
+    def _call_handle_order_placement(self, basket, request):
+        """
+        Handles order placement for the checkout view.
+
+        This logic was adapted from the `call_handle_order_placement` method previously used only for paypal. It
+        remains to be seen whether the `None` billing address is acceptable in the general case.
+        """
+        shipping_method = NoShippingRequired()
+        shipping_charge = shipping_method.calculate(basket)
+        order_total = OrderTotalCalculator().calculate(basket, shipping_charge)
+        user = basket.owner
+        order_number = basket.order_number
+        try:
+            self.handle_order_placement(
+                order_number=order_number,
+                user=user,
+                basket=basket,
+                shipping_address=None,
+                shipping_method=shipping_method,
+                shipping_charge=shipping_charge,
+                billing_address=None,
+                order_total=order_total,
+                request=request
+            )
+        except Exception:  # pylint: disable=broad-except
+            self.log_order_placement_exception(order_number, basket.id)
 
     def post(self, request):
         basket_id = request.data['basket_id']
@@ -45,6 +75,9 @@ class CheckoutView(APIView):
         basket.strategy = request.strategy
         Applicator().apply(basket, request.user, request)
         basket.freeze()
+
+        # Initiate the order prior to payment
+        self._call_handle_order_placement(basket=basket, request=request)
 
         # Return the payment info
         try:

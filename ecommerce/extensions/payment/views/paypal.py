@@ -24,6 +24,7 @@ from ecommerce.core.url_utils import get_lms_url
 from ecommerce.extensions.basket.utils import basket_add_organization_attribute
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
 from ecommerce.extensions.checkout.utils import get_receipt_page_url
+from ecommerce.extensions.fulfillment.status import ORDER
 from ecommerce.extensions.offer.constants import DYNAMIC_DISCOUNT_FLAG
 from ecommerce.extensions.payment.processors.paypal import Paypal
 
@@ -34,6 +35,7 @@ Basket = get_model('basket', 'Basket')
 BillingAddress = get_model('order', 'BillingAddress')
 Country = get_model('address', 'Country')
 NoShippingRequired = get_class('shipping.methods', 'NoShippingRequired')
+Order = get_model('order', 'Order')
 OrderNumberGenerator = get_class('order.utils', 'OrderNumberGenerator')
 OrderTotalCalculator = get_class('checkout.calculators', 'OrderTotalCalculator')
 PaymentProcessorResponse = get_model('payment', 'PaymentProcessorResponse')
@@ -122,47 +124,24 @@ class PaypalPaymentExecutionView(EdxOrderPlacementMixin, View):
             disable_back_button=True,
         )
 
+        order = Order.objects.get(number=basket.order_number)
         try:
             with transaction.atomic():
                 try:
                     self.handle_payment(paypal_response, basket)
                 except PaymentError:
+                    order.set_status(ORDER.PAYMENT_FAILED)
                     return redirect(self.payment_processor.error_url)
         except:  # pylint: disable=bare-except
+            # FIXME-BB: Did it really fail? If so, why are we going to the receipt page?
+            order.set_status(ORDER.PAYMENT_FAILED)
             logger.exception('Attempts to handle payment for basket [%d] failed.', basket.id)
             return redirect(receipt_url)
 
-        self.call_handle_order_placement(basket, request)
-
+        # Set Order to Open on a successful payment
+        # FIXME-BB: Do we need to set the order to open here? Should be set to open in record_payment right?
+        order.set_status(ORDER.OPEN)
         return redirect(receipt_url)
-
-    def call_handle_order_placement(self, basket, request):
-        try:
-            shipping_method = NoShippingRequired()
-            shipping_charge = shipping_method.calculate(basket)
-            order_total = OrderTotalCalculator().calculate(basket, shipping_charge)
-
-            user = basket.owner
-            # Given a basket, order number generation is idempotent. Although we've already
-            # generated this order number once before, it's faster to generate it again
-            # than to retrieve an invoice number from PayPal.
-            order_number = basket.order_number
-
-            order = self.handle_order_placement(
-                order_number=order_number,
-                user=user,
-                basket=basket,
-                shipping_address=None,
-                shipping_method=shipping_method,
-                shipping_charge=shipping_charge,
-                billing_address=None,
-                order_total=order_total,
-                request=request
-            )
-            self.handle_post_order(order)
-
-        except Exception:  # pylint: disable=broad-except
-            self.log_order_placement_exception(basket.order_number, basket.id)
 
 
 class PaypalProfileAdminView(View):

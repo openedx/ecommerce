@@ -7,7 +7,7 @@ from oscar.core.loading import get_class, get_model
 from oscar.test.factories import ProductFactory, RangeFactory, create_order
 
 from ecommerce.extensions.basket.utils import prepare_basket
-from ecommerce.extensions.fulfillment.status import ORDER
+from ecommerce.extensions.fulfillment.status import LINE, ORDER
 from ecommerce.extensions.order.constants import PaymentEventTypeName
 from ecommerce.extensions.payment.constants import CARD_TYPES
 from ecommerce.extensions.payment.models import PaymentProcessorResponse
@@ -74,6 +74,9 @@ class FulfillFrozenBasketsTests(TestCase):
         """ Creates dummy order data for testing."""
         order = create_order()
         order.status = status
+        # Set every line to open as these tests rely on the old order status pipeline where lines defaulted to open
+        for line in order.lines.all():
+            line.set_status(LINE.OPEN)
         order.save()
         order.basket.freeze()
         return order.basket
