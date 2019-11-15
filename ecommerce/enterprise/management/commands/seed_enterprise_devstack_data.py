@@ -108,7 +108,7 @@ class Command(BaseCommand):
             logger.error('An enterprise customer and/or catalog was not specified.')
 
         logger.info('\nCreating an enterprise coupon...')
-        category, __ = Category.objects.get_or_create(slug='bulk-enrollment-upon-redemption')
+        category = Category.objects.get(slug='coupons')
         request_obj = {
             "category": {
                 "id": category.id,
