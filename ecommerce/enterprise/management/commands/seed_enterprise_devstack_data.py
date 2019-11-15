@@ -54,21 +54,22 @@ class Command(BaseCommand):
             (str, datetime)
         """
         logger.info('\nFetching access token for site...')
+        oauth2_provider_url = self.site.oauth_settings.get('SOCIAL_AUTH_EDX_OIDC_URL_ROOT')
         key = self.site.oauth_settings.get('BACKEND_SERVICE_EDX_OAUTH2_KEY')
         secret = self.site.oauth_settings.get('BACKEND_SERVICE_EDX_OAUTH2_SECRET')
-        oauth_access_token_url = self.site.oauth2_provider_url + '/access_token/'
+        oauth_access_token_url = oauth2_provider_url + '/access_token/'
         return EdxRestApiClient.get_oauth_access_token(
             oauth_access_token_url, key, secret, token_type='jwt'
         )
 
     def _get_headers(self):
         """
-        Returns a headers dict containing the authenticated JWT access token
+        Returns a dict containing the authenticated JWT access token
         """
         access_token, __ = self._get_access_token()
         return {'Authorization': 'JWT ' + access_token}
 
-    def _get_enterprise_customer(self, url, enterprise_customer_uuid):
+    def _get_enterprise_customer(self, url, enterprise_customer_uuid = None):
         """ Returns an enterprise customer """
         logger.info('\nFetching an enterprise customer...')
         try:
@@ -99,7 +100,7 @@ class Command(BaseCommand):
         except IndexError:
             logger.error('No catalog found for enterprise (%s)', self.enterprise_customer.get('uuid'))
 
-    def _create_coupon(self, url, ecommerce_api_url):
+    def _create_coupon(self, ecommerce_api_url):
         """
         Creates and returns a coupon associated with the specified
         enterprise customer and catalog
@@ -108,7 +109,7 @@ class Command(BaseCommand):
             logger.error('An enterprise customer and/or catalog was not specified.')
 
         logger.info('\nCreating an enterprise coupon...')
-        category = Category.objects.get(slug='coupons')
+        category = Category.objects.first()
         request_obj = {
             "category": {
                 "id": category.id,
@@ -142,6 +143,7 @@ class Command(BaseCommand):
             "end_datetime": str(now() + datetime.timedelta(days=10)),
             "benefit_value": 100
         }
+        url = '{}/enterprise/coupons/'.format(ecommerce_api_url)
         response = requests.post(url, json=request_obj, headers=self.headers)
         return response.json()
 
@@ -157,7 +159,6 @@ class Command(BaseCommand):
 
         enterprise_customer_request_url = enterprise_api_url + 'enterprise-customer/'
         enterprise_catalog_request_url = enterprise_api_url + 'enterprise_catalogs/'
-        enterprise_coupons_request_url = ecommerce_api_url + '/enterprise/coupons/'
 
         # Set up request headers with JWT access token
         self.headers = self._get_headers()
@@ -177,8 +178,5 @@ class Command(BaseCommand):
         if self.enterprise_catalog:
             # Create a new enterprise coupon associated with the
             # above enterprise customer/catalog
-            self.coupon = self._create_coupon(
-                url=enterprise_coupons_request_url,
-                ecommerce_api_url=ecommerce_api_url,
-            )
+            self.coupon = self._create_coupon(ecommerce_api_url=ecommerce_api_url)
             logger.info('\nEnterprise coupon successfully created: %s', self.coupon)
