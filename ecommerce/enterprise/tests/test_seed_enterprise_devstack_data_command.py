@@ -7,6 +7,7 @@ from __future__ import absolute_import, unicode_literals
 
 from uuid import uuid4
 
+from django.core.management import call_command
 from django.utils.timezone import now
 from mock import Mock, patch
 from oscar.core.loading import get_model
@@ -131,3 +132,39 @@ class SeedEnterpriseDevstackDataTests(TransactionTestCase):
         result = self.command.create_coupon(ecommerce_api_url)
         mock_request.assert_called()
         assert expected == result
+
+    @patch('requests.post')
+    @patch.object(seed_command, 'get_enterprise_catalog')
+    @patch.object(seed_command, 'get_enterprise_customer')
+    @patch.object(seed_command, 'get_access_token')
+    def test_ent_coupon_creation(self, mock_access_token, mock_ent_customer, mock_ent_catalog, mock_coupon_post):
+        """
+        Verify a coupon is created for an enterprise customer/catalog
+        """
+        expected = {'data': 'some data'}
+        # create return values for mocked methods
+        mock_access_token.return_value = (self.access_token, now())
+        mock_ent_customer.return_value = {
+            'results': [
+                {
+                    'uuid': self.ent_customer_uuid,
+                    'name': 'Test Enterprise',
+                    'slug': 'test-enterprise',
+                }
+            ]
+        }
+        mock_ent_catalog.return_value = {
+            'results': [
+                {
+                    'uuid': self.ent_catalog_uuid,
+                    'title': 'Test Enterprise Catalog',
+                    'enterprise_customer': self.ent_customer_uuid,
+                }
+            ]
+        }
+        mock_coupon_post.return_value = Mock(
+            status_code=200,
+            json=lambda: expected,
+        )
+        call_command('seed_enterprise_devstack_data')
+        mock_coupon_post.assert_called()
