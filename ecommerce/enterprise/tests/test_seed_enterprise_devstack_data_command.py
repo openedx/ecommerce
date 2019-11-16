@@ -113,7 +113,7 @@ class SeedEnterpriseDevstackDataTests(TransactionTestCase):
 
         result = self.command.get_enterprise_customer(url=url)
         mock_request.assert_called_with(url, headers={}, params=None)
-        assert result == None
+        assert result is None
 
     @patch('requests.get')
     def test_get_enterprise_catalog(self, mock_request):
@@ -157,7 +157,7 @@ class SeedEnterpriseDevstackDataTests(TransactionTestCase):
         )
         result = self.command.get_enterprise_catalog(url=url)
         mock_request.assert_called_with(url, headers={}, params={'enterprise_customer': self.ent_customer_uuid})
-        assert result == None
+        assert result is None
 
     @patch('requests.post')
     def test_create_coupon(self, mock_request):
