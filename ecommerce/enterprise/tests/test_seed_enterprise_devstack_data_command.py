@@ -65,7 +65,7 @@ class SeedEnterpriseDevstackDataTests(TransactionTestCase):
             oauth_settings.get('BACKEND_SERVICE_EDX_OAUTH2_SECRET'),
             token_type='jwt',
         )
-        assert expected == result
+        assert result == expected
 
     @patch.object(seed_command, 'get_access_token')
     def test_get_headers(self, mock_get_access_token):
@@ -73,7 +73,7 @@ class SeedEnterpriseDevstackDataTests(TransactionTestCase):
         expected = {'Authorization': 'JWT {}'.format(self.access_token)}
         mock_get_access_token.return_value = (self.access_token, now())
         result = self.command.get_headers()
-        assert expected == result
+        assert result == expected
 
     @patch('requests.get')
     def test_get_enterprise_customer(self, mock_request):
@@ -88,7 +88,7 @@ class SeedEnterpriseDevstackDataTests(TransactionTestCase):
         # NOT specifying an enterprise customer uuid
         result = self.command.get_enterprise_customer(url=url)
         mock_request.assert_called_with(url, headers={}, params=None)
-        assert expected == result
+        assert result == expected
 
         # specifying an enterprise customer uuid
         result = self.command.get_enterprise_customer(
@@ -97,7 +97,7 @@ class SeedEnterpriseDevstackDataTests(TransactionTestCase):
         mock_request.assert_called_with(
             url, headers={}, params={'uuid': self.ent_customer_uuid},
         )
-        assert expected == result
+        assert result == expected
 
     @patch('requests.get')
     def test_get_enterprise_customer_index_error(self, mock_request):
@@ -113,7 +113,7 @@ class SeedEnterpriseDevstackDataTests(TransactionTestCase):
 
         result = self.command.get_enterprise_customer(url=url)
         mock_request.assert_called_with(url, headers={}, params=None)
-        assert if result is None
+        assert result == None
 
     @patch('requests.get')
     def test_get_enterprise_catalog(self, mock_request):
@@ -131,7 +131,7 @@ class SeedEnterpriseDevstackDataTests(TransactionTestCase):
             headers={},
             params={'enterprise_customer': self.ent_customer_uuid},
         )
-        assert expected == result
+        assert result == expected
 
     @patch('requests.get')
     def test_get_enterprise_catalog_no_customer(self, mock_request):
@@ -157,7 +157,7 @@ class SeedEnterpriseDevstackDataTests(TransactionTestCase):
         )
         result = self.command.get_enterprise_catalog(url=url)
         mock_request.assert_called_with(url, headers={}, params={'enterprise_customer': self.ent_customer_uuid})
-        assert if result is None
+        assert result == None
 
     @patch('requests.post')
     def test_create_coupon(self, mock_request):
@@ -173,7 +173,7 @@ class SeedEnterpriseDevstackDataTests(TransactionTestCase):
         )
         result = self.command.create_coupon(ecommerce_api_url=ecommerce_api_url)
         mock_request.assert_called()
-        assert expected == result
+        assert result == expected
 
     @patch('requests.post')
     def test_create_coupon_no_customer(self, mock_request):
