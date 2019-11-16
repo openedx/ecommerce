@@ -38,6 +38,7 @@ class Command(BaseCommand):
     help = 'Seeds an enterprise coupon for an existing enterprise customer.'
 
     def add_arguments(self, parser):
+        """ Adds argument(s) to the the command """
         parser.add_argument(
             '--enterprise-customer',
             action='store',
@@ -48,9 +49,8 @@ class Command(BaseCommand):
         )
 
     def get_access_token(self):
-        """ Returns an access token and expiration date from the OAuth provider.
-
-        Returns:
+        """ 
+        Returns an access token and expiration date from the OAuth provider:
             (str, datetime)
         """
         logger.info('\nFetching access token for site...')
@@ -81,6 +81,7 @@ class Command(BaseCommand):
             return response.json().get('results')[0]
         except IndexError:
             logger.error('No enterprise customer found.')
+            return None
 
     def get_enterprise_catalog(self, url):
         """
@@ -88,6 +89,7 @@ class Command(BaseCommand):
         """
         if not self.enterprise_customer:
             logger.error('An enterprise customer was not specified.')
+            return None
 
         logger.info('\nFetching catalog for enterprise customer (%s)...', self.enterprise_customer.get('uuid'))
         try:
@@ -99,6 +101,7 @@ class Command(BaseCommand):
             return response.json().get('results')[0]
         except IndexError:
             logger.error('No catalog found for enterprise (%s)', self.enterprise_customer.get('uuid'))
+            return None
 
     def create_coupon(self, ecommerce_api_url):
         """
@@ -107,6 +110,7 @@ class Command(BaseCommand):
         """
         if not self.enterprise_customer or not self.enterprise_catalog:
             logger.error('An enterprise customer and/or catalog was not specified.')
+            return None
 
         logger.info('\nCreating an enterprise coupon...')
         category = Category.objects.get(name='coupons')

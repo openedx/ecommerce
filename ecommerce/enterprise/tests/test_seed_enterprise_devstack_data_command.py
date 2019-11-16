@@ -69,7 +69,7 @@ class SeedEnterpriseDevstackDataTests(TransactionTestCase):
 
     @patch.object(seed_command, 'get_access_token')
     def test_get_headers(self, mock_get_access_token):
-        """ Verify get_headers returns the correct value """
+        """ Verify `get_headers` returns the correct value """
         expected = {'Authorization': 'JWT {}'.format(self.access_token)}
         mock_get_access_token.return_value = (self.access_token, now())
         result = self.command.get_headers()
@@ -77,7 +77,7 @@ class SeedEnterpriseDevstackDataTests(TransactionTestCase):
 
     @patch('requests.get')
     def test_get_enterprise_customer(self, mock_request):
-        """ Verify get_enterprise_customer returns the correct value """
+        """ Verify `get_enterprise_customer` returns the correct value """
         url = '{}enterprise-customer/'.format(self.command.site.enterprise_api_url)
         expected = {'uuid': self.ent_customer_uuid}
         mock_request.return_value = Mock(
@@ -100,8 +100,24 @@ class SeedEnterpriseDevstackDataTests(TransactionTestCase):
         assert expected == result
 
     @patch('requests.get')
+    def test_get_enterprise_customer_index_error(self, mock_request):
+        """
+        Verify `get_enterprise_customer` returns the correct value and
+        does not make a request
+        """
+        url = '{}enterprise-customer/'.format(self.command.site.enterprise_api_url)
+        mock_request.return_value = Mock(
+            status_code=200,
+            json=lambda: {'results': []},
+        )
+
+        result = self.command.get_enterprise_customer(url=url)
+        mock_request.assert_called_with(url, headers={}, params=None)
+        assert None == result
+
+    @patch('requests.get')
     def test_get_enterprise_catalog(self, mock_request):
-        """ Verify get_enterprise_catalog returns the correct value """
+        """ Verify `get_enterprise_catalog` returns the correct value """
         url = '{}enterprise_catalogs/'.format(self.command.site.enterprise_api_url)
         self.command.enterprise_customer = {'uuid': self.ent_customer_uuid}
         expected = {'uuid': self.ent_catalog_uuid}
@@ -117,9 +133,35 @@ class SeedEnterpriseDevstackDataTests(TransactionTestCase):
         )
         assert expected == result
 
+    @patch('requests.get')
+    def test_get_enterprise_catalog_no_customer(self, mock_request):
+        """
+        Verify `get_enterprise_catalog` does not make a request when
+        there is no enterprise customer
+        """
+        url = '{}enterprise_catalogs/'.format(self.command.site.enterprise_api_url)
+        self.command.get_enterprise_catalog(url=url)
+        mock_request.assert_not_called()
+
+    @patch('requests.get')
+    def test_get_enterprise_catalog_index_error(self, mock_request):
+        """
+        Verify `get_enterprise_catalog` returns the correct value when
+        there is no catalog returned
+        """
+        url = '{}enterprise_catalogs/'.format(self.command.site.enterprise_api_url)
+        self.command.enterprise_customer = {'uuid': self.ent_customer_uuid}
+        mock_request.return_value = Mock(
+            status_code=200,
+            json=lambda: {'results': []},
+        )
+        result = self.command.get_enterprise_catalog(url=url)
+        mock_request.assert_called_with(url, headers={}, params={'enterprise_customer': self.ent_customer_uuid})
+        assert None == result
+
     @patch('requests.post')
     def test_create_coupon(self, mock_request):
-        """ Verify create_coupon returns the correct value """
+        """ Verify `create_coupon` returns the correct value """
         ecommerce_api_url = self.command.site.build_ecommerce_url() + '/api/v2'
         self.command.enterprise_customer = {'uuid': self.ent_customer_uuid}
         self.command.enterprise_catalog = {'uuid': self.ent_catalog_uuid}
@@ -129,17 +171,33 @@ class SeedEnterpriseDevstackDataTests(TransactionTestCase):
             status_code=200,
             json=lambda: expected,
         )
-        result = self.command.create_coupon(ecommerce_api_url)
+        result = self.command.create_coupon(ecommerce_api_url=ecommerce_api_url)
         mock_request.assert_called()
         assert expected == result
+
+    @patch('requests.post')
+    def test_create_coupon_no_customer(self, mock_request):
+        """ Verify `create_coupon` returns the correct value """
+        ecommerce_api_url = self.command.site.build_ecommerce_url() + '/api/v2'
+        self.command.create_coupon(ecommerce_api_url=ecommerce_api_url)
+        mock_request.assert_not_called()
+
+    @patch('requests.post')
+    def test_create_coupon_no_catalog(self, mock_request):
+        """ Verify `create_coupon` returns the correct value """
+        ecommerce_api_url = self.command.site.build_ecommerce_url() + '/api/v2'
+        self.command.enterprise_customer = {'uuid': self.ent_customer_uuid}
+        self.command.create_coupon(ecommerce_api_url=ecommerce_api_url)
+        mock_request.assert_not_called()
 
     @patch('requests.post')
     @patch.object(seed_command, 'get_enterprise_catalog')
     @patch.object(seed_command, 'get_enterprise_customer')
     @patch.object(seed_command, 'get_access_token')
-    def test_ent_coupon_creation(self, mock_access_token, mock_ent_customer, mock_ent_catalog, mock_coupon_post):
+    def test_handle(self, mock_access_token, mock_ent_customer, mock_ent_catalog, mock_coupon_post):
         """
-        Verify a coupon is created for an enterprise customer/catalog
+        Verify the entry point of the command without any args,
+        and makes a POST request to create a coupon
         """
         expected = {'data': 'some data'}
         # create return values for mocked methods
@@ -167,4 +225,46 @@ class SeedEnterpriseDevstackDataTests(TransactionTestCase):
             json=lambda: expected,
         )
         call_command('seed_enterprise_devstack_data')
+        mock_coupon_post.assert_called()
+
+    @patch('requests.post')
+    @patch.object(seed_command, 'get_enterprise_catalog')
+    @patch.object(seed_command, 'get_enterprise_customer')
+    @patch.object(seed_command, 'get_access_token')
+    def test_handle_ent_customer_arg(self, mock_access_token, mock_ent_customer, mock_ent_catalog, mock_coupon_post):
+        """
+        Verify the entry point of the command uses the `--enterprise-customer` arg,
+        and makes a POST request to create a coupon
+        """
+        expected = {'data': 'some data'}
+        # create return values for mocked methods
+        mock_access_token.return_value = (self.access_token, now())
+        mock_ent_customer.return_value = {
+            'results': [
+                {
+                    'uuid': self.ent_customer_uuid,
+                    'name': 'Test Enterprise',
+                    'slug': 'test-enterprise',
+                }
+            ]
+        }
+        mock_ent_catalog.return_value = {
+            'results': [
+                {
+                    'uuid': self.ent_catalog_uuid,
+                    'title': 'Test Enterprise Catalog',
+                    'enterprise_customer': self.ent_customer_uuid,
+                }
+            ]
+        }
+        mock_coupon_post.return_value = Mock(
+            status_code=200,
+            json=lambda: expected,
+        )
+        call_command('seed_enterprise_devstack_data', '--enterprise-customer={}'.format(self.ent_customer_uuid))
+        url = '{}enterprise-customer/'.format(self.command.site.enterprise_api_url)
+        mock_ent_customer.assert_called_with(
+            enterprise_customer_uuid=self.ent_customer_uuid,
+            url=url,
+        )
         mock_coupon_post.assert_called()
