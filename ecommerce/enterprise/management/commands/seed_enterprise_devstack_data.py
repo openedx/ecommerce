@@ -49,7 +49,7 @@ class Command(BaseCommand):
         )
 
     def get_access_token(self):
-        """ 
+        """
         Returns an access token and expiration date from the OAuth provider:
             (str, datetime)
         """
