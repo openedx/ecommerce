@@ -1,11 +1,15 @@
 """HTTP endpoints for interacting with payments."""
 from __future__ import absolute_import
 
+import logging
+
 from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_extensions.cache.decorators import cache_response
 
 from ecommerce.extensions.api import serializers
+
+LOG = logging.getLogger(__name__)
 
 PAYMENT_PROCESSOR_CACHE_KEY = 'PAYMENT_PROCESSOR_LIST'
 PAYMENT_PROCESSOR_CACHE_TIMEOUT = 60 * 30
@@ -29,7 +33,11 @@ class PaymentProcessorListView(generics.ListAPIView):
         cache_errors=False,
     )
     def get(self, request, *args, **kwargs):
-        return super(PaymentProcessorListView, self).get(request, *args, **kwargs)
+        try:
+            return super(PaymentProcessorListView, self).get(request, *args, **kwargs)
+        except:  # pylint: disable=broad-except
+            LOG.exception("PaymentProcessorListView failed with %r, *%r, **%r", request, args, kwargs)
+            raise
 
     def get_queryset(self):
         """Fetch the list of payment processor classes based on Django settings."""
