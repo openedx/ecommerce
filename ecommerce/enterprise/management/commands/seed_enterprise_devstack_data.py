@@ -5,8 +5,8 @@ from __future__ import absolute_import, unicode_literals
 
 import datetime
 import logging
-import requests
 
+import requests
 from django.core.management.base import BaseCommand
 from django.utils.timezone import now
 from edx_rest_api_client.client import EdxRestApiClient
