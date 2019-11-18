@@ -2,6 +2,7 @@ from __future__ import absolute_import
 
 import waffle
 from django.contrib import admin, messages
+from django.core.exceptions import ValidationError
 from django.utils.translation import ugettext_lazy as _
 from oscar.core.loading import get_model
 from rules.contrib.admin import ObjectPermissionsModelAdmin
@@ -41,3 +42,20 @@ class RefundAdmin(ObjectPermissionsModelAdmin):
 
         queryset = super(RefundAdmin, self).get_queryset(request)
         return queryset
+
+    def get_object(self, request, object_id, from_field=None):
+        """
+        Return an instance matching the field and value provided, the primary
+        key is used if no field is provided. Return ``None`` if no match is
+        found or the object_id fails validation.
+        """
+        if not waffle.switch_is_active(REFUND_LIST_VIEW_SWITCH):
+            # pylint: disable=protected-access
+            field = Refund._meta.pk if from_field is None else Refund._meta.get_field(from_field)
+            try:
+                object_id = field.to_python(object_id)
+                return Refund.objects.get(**{field.name: object_id})
+            except (Refund.DoesNotExist, ValidationError, ValueError):
+                return None
+
+        return super(RefundAdmin, self).get_object(request, object_id, from_field=from_field)
