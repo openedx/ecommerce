@@ -69,8 +69,8 @@ class SDNCheckFailure(TimeStampedModel):
     class Meta(object):
         verbose_name = 'SDN Check Failure'
 
-@python_2_unicode_compatible
-class ContractInfo(TimeStampedModel):
+
+class EnterpriseContractMetadata(TimeStampedModel):
     """ Record of contract details for a particular customer transaction """
     PERCENTAGE = 'Percentage'
     FIXED = 'Absolute'
