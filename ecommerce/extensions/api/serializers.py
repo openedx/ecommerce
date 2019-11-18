@@ -999,6 +999,20 @@ class CouponSerializer(ProductPaymentInfoMixin, serializers.ModelSerializer):
     seats = serializers.SerializerMethodField()
     start_date = serializers.SerializerMethodField()
     voucher_type = serializers.SerializerMethodField()
+    contract_discount_value = serializers.SerializerMethodField()
+    contract_discount_type = serializers.SerializerMethodField()
+
+    def get_contract_discount_value(self, obj):
+        try:
+            return obj.attr.enterprise_contract_metadata.discount
+        except AttributeError:
+            return None
+
+    def get_contract_discount_type(self, obj):
+        try:
+            return obj.attr.enterprise_contract_metadata.discount_type
+        except AttributeError:
+            return None
 
     def get_benefit_type(self, obj):
         return retrieve_benefit(obj).type or getattr(retrieve_benefit(obj).proxy(), 'benefit_class_type', None)
@@ -1143,6 +1157,7 @@ class CouponSerializer(ProductPaymentInfoMixin, serializers.ModelSerializer):
             'email_domains', 'end_date', 'enterprise_customer', 'enterprise_customer_catalog',
             'id', 'last_edited', 'max_uses', 'note', 'notify_email', 'num_uses', 'payment_information',
             'program_uuid', 'price', 'quantity', 'seats', 'start_date', 'title', 'voucher_type',
+            'contract_discount_value', 'contract_discount_type',
         )
 
 
