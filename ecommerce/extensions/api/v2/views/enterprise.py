@@ -45,6 +45,7 @@ from ecommerce.extensions.api.serializers import (
 from ecommerce.extensions.api.v2.utils import get_enterprise_from_product, send_new_codes_notification_email
 from ecommerce.extensions.api.v2.views.coupons import CouponViewSet
 from ecommerce.extensions.catalogue.utils import (
+    attach_contract_metadata_to_coupon_product,
     attach_vouchers_to_coupon_product,
     create_coupon_product_and_stockrecord
 )
@@ -226,6 +227,12 @@ class EnterpriseCouponViewSet(CouponViewSet):
             cleaned_voucher_data.get('notify_email'),
             cleaned_voucher_data['enterprise_customer']
         )
+        attach_contract_metadata_to_coupon_product(
+            coupon_product,
+            cleaned_voucher_data['contract_discount_type'],
+            cleaned_voucher_data['contract_discount_value'],
+        )
+
         return coupon_product
 
     def update_range_data(self, request_data, vouchers):
