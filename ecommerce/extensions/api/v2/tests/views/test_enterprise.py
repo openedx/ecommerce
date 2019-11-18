@@ -31,6 +31,7 @@ from ecommerce.core.constants import (
 from ecommerce.core.models import EcommerceFeatureRole, EcommerceFeatureRoleAssignment
 from ecommerce.core.url_utils import get_ecommerce_url
 from ecommerce.coupons.tests.mixins import CouponMixin, DiscoveryMockMixin
+from ecommerce.coupons.utils import is_coupon_available
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.enterprise.benefits import BENEFIT_MAP as ENTERPRISE_BENEFIT_MAP
 from ecommerce.enterprise.conditions import AssignableEnterpriseCustomerCondition
@@ -337,7 +338,8 @@ class EnterpriseCouponViewSetRbacTests(
             'num_uses': 0,
             'start_date': self.get_coupon_voucher_start_date(coupon),
             'title': coupon.title,
-            'usage_limitation': 'Single use'
+            'usage_limitation': 'Single use',
+            'available': is_coupon_available(coupon),
         }
 
     def get_coupon_voucher_start_date(self, coupon):
@@ -2382,6 +2384,27 @@ class EnterpriseCouponViewSetRbacTests(
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         response = response.json()
         assert response == ['Invalid code_filter specified: invalid-filter']
+
+    @mock.patch('ecommerce.extensions.offer.utils.send_offer_assignment_email.delay', mock.Mock(return_value=None))
+    def test_unavailable_coupon_codes_assignment(self):
+        """Test assigning codes from an unavailable coupon returns expected error reponse."""
+        start_datetime = self.data['start_datetime']
+        coupon_post_data = dict(self.data, end_datetime=start_datetime)
+        coupon = self.get_response('POST', ENTERPRISE_COUPONS_LINK, coupon_post_data)
+        coupon_id = coupon.json()['coupon_id']
+
+        response = self.get_response(
+            'POST',
+            '/api/v2/enterprise/coupons/{}/assign/'.format(coupon_id),
+            {
+                'template': 'Test template',
+                'template_greeting': TEMPLATE_GREETING,
+                'template_closing': TEMPLATE_CLOSING,
+                'emails': ['test@edx.org']
+            }
+        )
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert response.json() == {'error': 'Coupon is not available for code assignment'}
 
 
 class OfferAssignmentSummaryViewSetTests(

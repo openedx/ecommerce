@@ -27,6 +27,7 @@ from ecommerce.core.constants import (
     SEAT_PRODUCT_CLASS_NAME
 )
 from ecommerce.core.url_utils import get_ecommerce_url
+from ecommerce.coupons.utils import is_coupon_available
 from ecommerce.courses.models import Course
 from ecommerce.entitlements.utils import create_or_update_course_entitlement
 from ecommerce.extensions.offer.constants import (
@@ -911,6 +912,7 @@ class EnterpriseCouponOverviewListSerializer(serializers.ModelSerializer):
             'max_uses': self._get_max_uses(voucher, usage, count),
             'num_unassigned': self._get_num_unassigned(vouchers),
             'errors': self._get_errors(coupon),
+            'available': is_coupon_available(coupon),
         }
 
         return dict(representation, **data)
