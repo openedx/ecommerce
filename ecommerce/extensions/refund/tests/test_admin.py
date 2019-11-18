@@ -8,6 +8,7 @@ from ecommerce.core.constants import ORDER_MANAGER_ROLE
 from ecommerce.core.models import EcommerceFeatureRole, EcommerceFeatureRoleAssignment
 from ecommerce.core.tests import toggle_switch
 from ecommerce.extensions.refund.constants import REFUND_LIST_VIEW_SWITCH
+from ecommerce.extensions.refund.tests.factories import RefundFactory
 from ecommerce.tests.factories import UserFactory
 from ecommerce.tests.testcases import TestCase
 
@@ -45,6 +46,15 @@ class RefundAdminTests(TestCase):
         message = list(response.context['messages'])[0]
         self.assertEqual(message.level, messages.WARNING)
         self.assertEqual(message.message, msg)
+
+    def test_edit_view_with_disable_switch(self):
+        """ Test that edit refund page still works even if the switch is disabled. """
+        toggle_switch(REFUND_LIST_VIEW_SWITCH, False)
+        refund = RefundFactory()
+        edit_page_url = reverse('admin:refund_refund_change', args=(refund.id,))
+        response = self.client.get(edit_page_url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, refund.order.number)
 
     def test_explicit_access(self):
         """
