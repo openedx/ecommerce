@@ -461,6 +461,18 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
             coupon.attr.notify_email = request_data.get('notify_email')
             coupon.save()
 
+        discount = request_data.get('contract_discount_value')
+        if discount is not None:
+            discount_type = request_data.get('contract_discount_type')
+            try:
+                contract_metadata = coupon.attr.enterprise_contract_metadata
+            except AttributeError:
+                contract_metadata = EnterpriseContractMetadata()
+                coupon.attr.enterprise_contract_metadata = contract_metadata
+            contract_metadata.discount = discount
+            contract_metadata.discount_type = discount_type
+            contract_metadata.save()
+
     def update_offer_data(self, request_data, vouchers, site):
         """
         Remove all offers from the vouchers and add a new offer
