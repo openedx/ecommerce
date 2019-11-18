@@ -231,6 +231,48 @@ class SeedEnterpriseDevstackDataTests(TransactionTestCase):
     @patch.object(seed_command, 'get_enterprise_catalog')
     @patch.object(seed_command, 'get_enterprise_customer')
     @patch.object(seed_command, 'get_access_token')
+    def test_handle_no_customer(self, mock_access_token, mock_ent_customer, mock_ent_catalog, mock_coupon_post):
+        """
+        Verify the entry point of the command without any args,
+        makes a POST request to create a coupon, but returns
+        no enterprise customer
+        """
+        # create return values for mocked methods
+        mock_access_token.return_value = (self.access_token, now())
+        mock_ent_customer.return_value = None
+        call_command('seed_enterprise_devstack_data')
+        mock_ent_catalog.assert_not_called()
+        mock_coupon_post.assert_not_called()
+
+    @patch('requests.post')
+    @patch.object(seed_command, 'get_enterprise_catalog')
+    @patch.object(seed_command, 'get_enterprise_customer')
+    @patch.object(seed_command, 'get_access_token')
+    def test_handle_no_catalog(self, mock_access_token, mock_ent_customer, mock_ent_catalog, mock_coupon_post):
+        """
+        Verify the entry point of the command without any args,
+        makes a POST request to create a coupon, but returns
+        no enterprise catalog
+        """
+        # create return values for mocked methods
+        mock_access_token.return_value = (self.access_token, now())
+        mock_ent_customer.return_value = {
+            'results': [
+                {
+                    'uuid': self.ent_customer_uuid,
+                    'name': 'Test Enterprise',
+                    'slug': 'test-enterprise',
+                }
+            ]
+        }
+        mock_ent_catalog.return_value = None
+        call_command('seed_enterprise_devstack_data')
+        mock_coupon_post.assert_not_called()
+
+    @patch('requests.post')
+    @patch.object(seed_command, 'get_enterprise_catalog')
+    @patch.object(seed_command, 'get_enterprise_customer')
+    @patch.object(seed_command, 'get_access_token')
     def test_handle_ent_customer_arg(self, mock_access_token, mock_ent_customer, mock_ent_catalog, mock_coupon_post):
         """
         Verify the entry point of the command uses the `--enterprise-customer` arg,
