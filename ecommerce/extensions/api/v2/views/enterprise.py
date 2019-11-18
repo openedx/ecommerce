@@ -22,6 +22,7 @@ from slumber.exceptions import SlumberHttpBaseException
 
 from ecommerce.core.constants import COUPON_PRODUCT_CLASS_NAME, DEFAULT_CATALOG_PAGE_SIZE
 from ecommerce.core.utils import log_message_and_raise_validation_error
+from ecommerce.coupons.utils import is_coupon_available
 from ecommerce.enterprise.utils import (
     get_enterprise_catalog,
     get_enterprise_customer_catalogs,
@@ -590,6 +591,13 @@ class EnterpriseCouponViewSet(CouponViewSet):
         Assign users by email to codes within the Coupon.
         """
         coupon = self.get_object()
+
+        if not is_coupon_available(coupon):
+            return Response(
+                {'error': 'Coupon is not available for code assignment'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
         greeting = request.data.pop('template_greeting', '')
         closing = request.data.pop('template_closing', '')
         serializer = CouponCodeAssignmentSerializer(

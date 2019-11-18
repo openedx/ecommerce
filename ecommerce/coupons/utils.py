@@ -5,6 +5,7 @@ import hashlib
 import logging
 
 from django.conf import settings
+from django.utils import timezone
 from edx_django_utils.cache import TieredCache
 from oscar.core.loading import get_model
 from slumber.exceptions import HttpNotFoundError
@@ -172,3 +173,14 @@ def is_voucher_applied(basket, voucher):
         if discount['voucher'] and discount['voucher'] == voucher:
             return True
     return False
+
+
+def is_coupon_available(coupon):
+    """
+    Returns True if `coupon` is available, False otherwise.
+    """
+    voucher = coupon.attr.coupon_vouchers.vouchers.first()
+    start_datetime = voucher.start_datetime
+    end_datetime = voucher.end_datetime
+    current_datetime = timezone.now()
+    return start_datetime < current_datetime < end_datetime
