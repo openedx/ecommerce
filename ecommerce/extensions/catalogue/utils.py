@@ -9,6 +9,7 @@ from django.db.utils import IntegrityError
 from oscar.core.loading import get_model
 
 from ecommerce.core.constants import COUPON_PRODUCT_CLASS_NAME
+from ecommerce.extensions.payment.models import EnterpriseContractMetadata
 from ecommerce.extensions.voucher.models import CouponVouchers
 from ecommerce.extensions.voucher.utils import create_vouchers
 
@@ -42,7 +43,7 @@ def create_coupon_product(
         voucher_type,
         course_catalog,
         program_uuid,
-        site
+        site,
 ):
     """
     Creates a coupon product and a stock record for it.
@@ -70,6 +71,8 @@ def create_coupon_product(
         voucher_type (str): Voucher type
         program_uuid (str): Program UUID for the Coupon
         site (site): Site for which the Coupon is created.
+        contract_discount_type (str): Type of discount on contract (that a coupon is associated with)
+        contract_discount_value (int): Amount of discount of contract. Can be percent or fixed value
 
     Returns:
         A coupon Product object.
@@ -129,6 +132,15 @@ def create_coupon_product_and_stockrecord(title, category, partner, price):
         product=coupon_product
     )
     return coupon_product
+
+
+def attach_contract_metadata_to_coupon_product(coupon_product, contract_discount_type, contract_discount_value):
+    ecm = EnterpriseContractMetadata.objects.create(
+        discount=contract_discount_value,
+        discount_type=contract_discount_type,
+    )
+    coupon_product.attr.enterprise_contract_metadata = ecm
+    coupon_product.save()
 
 
 def attach_vouchers_to_coupon_product(coupon_product, vouchers, note, notify_email=None, enterprise_id=None):
