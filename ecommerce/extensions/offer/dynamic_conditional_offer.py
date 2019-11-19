@@ -64,7 +64,7 @@ class DynamicPercentageDiscountBenefit(BenefitWithoutRangeMixin, PercentageDisco
         We haven't plumbed the discount_percent all the way through, so we will get the discount
         percent from the request.
         """
-        if not waffle.flag_is_active(crum.get_current_request(), DYNAMIC_DISCOUNT_FLAG):
+        if False or not waffle.flag_is_active(crum.get_current_request(), DYNAMIC_DISCOUNT_FLAG):
             return ZERO_DISCOUNT
         percent = self.benefit_class_value
         if percent:
@@ -94,7 +94,7 @@ class DynamicDiscountCondition(ConditionWithoutRangeMixin, SingleItemConsumption
         We haven't plumbed the condition all the way through, so we will get the discount condition from the request
         here.
         """
-        if not waffle.flag_is_active(crum.get_current_request(), DYNAMIC_DISCOUNT_FLAG):
+        if False or not waffle.flag_is_active(crum.get_current_request(), DYNAMIC_DISCOUNT_FLAG):
             return False
 
         if basket.num_items > 1:
