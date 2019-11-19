@@ -41,7 +41,10 @@ define([
                     pattern: 'email',
                     required: false
                 },
-                contract_discount_value: {required: true},
+                contract_discount_value: {
+                    required: true,
+                    pattern: 'number',
+                },
             },
 
             initialize: function() {

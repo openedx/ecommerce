@@ -173,12 +173,10 @@ define([
             },
 
             changeLimitForContractDiscountValue: function() {
-                console.log("i'm in changeLimitForContractDiscountValue");
-                var isContractDiscountPercentage = this.$('[name=contract_discount_type]:checked').val() === 'Percentage',
+                var isContractDiscountPercentage = this.$(
+                    '[name=contract_discount_type]:checked').val() === 'Percentage',
                     maxValue = isContractDiscountPercentage ? '100' : '';
-                console.log("isContractDiscountPercentage is: ");
-                console.log(isContractDiscountPercentage);
-                this.setLimitToElement(this.$('[name=contract_discount_type]'), maxValue, 1);
+                this.setLimitToElement(this.$('[name=contract_discount_value]'), maxValue, 0);
             },
 
             getEditableAttributes: function() {
@@ -219,21 +217,6 @@ define([
             },
 
             render: function() {
-                console.log("this is the render of coupon form view:")
-                console.log(this.model);
-                // if (this.editing) {
-                //     console.log("get the contract_discount_type from somewhere");
-                //     // if this.model.get('contract_discount_type') {
-                //     //     this.model.set({
-                //     //     contract_discount_type: 'Percentage',
-                //     // })
-                //     // }c
-                // } else {
-                //     this.model.set({
-                //         contract_discount_type: 'Percentage',
-                //         contract_discount_value: null,
-                //     })
-                // }
 
                 if (this.$('[name=contract_discount_type]:checked').val() === 'Percentage') {
                     this.setLimitToElement(this.$('[name=contract_discount_value]'), 100, 1);
