@@ -34,7 +34,7 @@ def remove_contract_metadata_attribute(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('catalogue', '0042_auto_20190913_1756')
+        ('catalogue', '0043_auto_20191115_2151')
     ]
     operations = [
         migrations.RunPython(create_contract_metadata_attribute, remove_contract_metadata_attribute)
