@@ -71,8 +71,6 @@ def create_coupon_product(
         voucher_type (str): Voucher type
         program_uuid (str): Program UUID for the Coupon
         site (site): Site for which the Coupon is created.
-        contract_discount_type (str): Type of discount on contract (that a coupon is associated with)
-        contract_discount_value (int): Amount of discount of contract. Can be percent or fixed value
 
     Returns:
         A coupon Product object.
