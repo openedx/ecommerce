@@ -24,6 +24,7 @@ from ecommerce.extensions.api.serializers import CategorySerializer, CouponListS
 from ecommerce.extensions.basket.utils import prepare_basket
 from ecommerce.extensions.catalogue.utils import create_coupon_product, get_or_create_catalog
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
+from ecommerce.extensions.payment.models import EnterpriseContractMetadata
 from ecommerce.extensions.payment.processors.invoice import InvoicePayment
 from ecommerce.extensions.voucher.models import CouponVouchers
 from ecommerce.extensions.voucher.utils import (
@@ -258,6 +259,8 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
             'voucher_type': voucher_type,
             'program_uuid': program_uuid,
             'notify_email': notify_email,
+            'contract_discount_type': request_data.get('contract_discount_type'),
+            'contract_discount_value': request_data.get('contract_discount_value'),
         }
 
     @classmethod
@@ -472,6 +475,7 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
             contract_metadata.discount = discount
             contract_metadata.discount_type = discount_type
             contract_metadata.save()
+            coupon.save()
 
     def update_offer_data(self, request_data, vouchers, site):
         """
