@@ -43,7 +43,7 @@ def create_coupon_product(
         voucher_type,
         course_catalog,
         program_uuid,
-        site,
+        site
 ):
     """
     Creates a coupon product and a stock record for it.
