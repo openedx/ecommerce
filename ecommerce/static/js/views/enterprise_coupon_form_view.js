@@ -217,11 +217,9 @@ define([
             },
 
             render: function() {
-
                 if (this.$('[name=contract_discount_type]:checked').val() === 'Percentage') {
-                    this.setLimitToElement(this.$('[name=contract_discount_value]'), 100, 1);
+                    this.setLimitToElement(this.$('[name=contract_discount_value]'), 100, 0);
                 }
-
                 this._super();
                 return this;
             }
