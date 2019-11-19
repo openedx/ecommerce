@@ -47,9 +47,6 @@ class CouponReportCSVView(StaffOnlyMixin, View):
         writer = csv.DictWriter(response, fieldnames=field_names)
         writer.writeheader()
         for row in rows:
-            for key, value in row.items():
-                if isinstance(row[key], six.text_type):
-                    row[key] = value.encode('utf-8')
             writer.writerow(row)
 
         return response
