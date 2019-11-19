@@ -91,7 +91,13 @@
         </div>
         <div class="info-item grid-item contract-discount-value">
             <div class="heading"><%= gettext('Contract discount value:') %></div>
-            <div class="value"><%= coupon.contract_discount_value %></div>
+            <div class="value">
+                <% if(coupon.contract_discount_type == 'Percentage') { %>
+                  <%= coupon.contract_discount_value %>%
+                <% } else { %>
+                  $<%= coupon.contract_discount_value %>
+                <%}%>
+            </div>
         </div>
         <div class="info-item grid-item invoice-type">
             <div class="heading"><%= gettext('Invoice Type:') %></div>
