@@ -113,7 +113,7 @@ define([
                         }
                         return val;
                     }
-                },
+                }
             },
 
             events: {
@@ -200,7 +200,7 @@ define([
                     'title',
                     'email_domains',
                     'contract_discount_value',
-                    'contract_discount_type',
+                    'contract_discount_type'
                 ];
             },
 
