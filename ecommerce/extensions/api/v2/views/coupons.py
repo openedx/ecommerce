@@ -472,7 +472,7 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
             except AttributeError:
                 contract_metadata = EnterpriseContractMetadata()
                 coupon.attr.enterprise_contract_metadata = contract_metadata
-            contract_metadata.discount = discount
+            contract_metadata.discount_value = discount
             contract_metadata.discount_type = discount_type
             contract_metadata.save()
             coupon.save()
