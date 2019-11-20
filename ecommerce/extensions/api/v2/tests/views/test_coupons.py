@@ -235,8 +235,8 @@ class CouponViewSetFunctionalTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             'stock_record_ids': [seat.stockrecords.first().id, other_seat.stockrecords.first().id],
             'title': 'Tešt čoupon',
             'voucher_type': Voucher.SINGLE_USE,
-            'contract_discount_type': EnterpriseContractMetadata.PERCENTAGE,
-            'contract_discount_value': '12.35',
+            'contract_discount_type': None,
+            'contract_discount_value': None,
         }
         self.response = self.get_response('POST', COUPONS_LINK, self.data)
         self.coupon = Product.objects.get(title=self.data['title'])
@@ -445,6 +445,8 @@ class CouponViewSetFunctionalTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             'title': 'Test Create Enterprise Coupon',
             'enterprise_customer': {'name': enterprise_name, 'id': enterprise_customer_id},
             'enterprise_customer_catalog': enterprise_catalog_id,
+            'contract_discount_value': '12.34',
+            'contract_discount_type': EnterpriseContractMetadata.PERCENTAGE,
         })
 
         return self.get_response('POST', post_url, self.data)
