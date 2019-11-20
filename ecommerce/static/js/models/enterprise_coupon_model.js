@@ -31,7 +31,7 @@ define([
                 quantity: 1,
                 enterprise_catalog_url: '/api/v2/enterprise/customer_catalogs/',
                 contract_discount_type: 'Percentage',
-                contract_discount_value: null,
+                contract_discount_value: null
             },
 
             couponValidation: {
@@ -43,8 +43,8 @@ define([
                 },
                 contract_discount_value: {
                     required: true,
-                    pattern: 'number',
-                },
+                    pattern: 'number'
+                }
             },
 
             initialize: function() {
