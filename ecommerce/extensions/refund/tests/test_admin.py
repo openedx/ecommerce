@@ -25,9 +25,16 @@ class RefundAdminTests(TestCase):
 
     def has_perm(self, user):
         """ Checks admin permission for Refund module """
-        return user.has_perm('refund.add_refund') and \
-            user.has_perm('refund.change_refund') and \
-            user.has_perm('refund.delete_refund')
+        order_manager_permissions = [
+            'refund.add_refund',
+            'refund.change_refund',
+            'refund.delete_refund',
+            'refundline.add_refundline',
+            'refundline.change_refundline',
+            'refundline.delete_refundline',
+        ]
+
+        return all(map(user.has_perm, order_manager_permissions))
 
     def test_changelist_view_enable_switch(self):
         """ Default template will load on the list page, if the switch is enabled. """
@@ -58,7 +65,7 @@ class RefundAdminTests(TestCase):
 
     def test_explicit_access(self):
         """
-        Staff user can add, delete and change Refund model from django admin if
+        Staff user can add, delete and change Refund and RefundLine model from django admin if
         they are assigned `ORDER_MANAGER_ROLE`
         """
         self.user.is_superuser = False
