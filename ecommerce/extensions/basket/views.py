@@ -375,7 +375,16 @@ class BasketLogicMixin(object):
                 'After you complete your order you will be able to select course dates from your dashboard.'
             )
         elif product.is_seat_product:
-            certificate_type = product.attr.certificate_type
+            try:
+                certificate_type = product.attr.certificate_type
+            except AttributeError:
+                logger.exception(
+                    "Failed to get certificate type from seat product: %r, %s, %s",
+                    product,
+                    product.id,
+                    product.is_seat_product
+                )
+                raise
             if certificate_type == 'verified':
                 return _(
                     'After you complete your order you will be automatically enrolled '
