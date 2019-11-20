@@ -25,6 +25,7 @@ from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.enterprise.conditions import AssignableEnterpriseCustomerCondition
 from ecommerce.extensions.api.v2.views.coupons import DEPRECATED_COUPON_CATEGORIES, CouponViewSet, ValidationError
 from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
+from ecommerce.extensions.payment.models import EnterpriseContractMetadata
 from ecommerce.extensions.voucher.models import CouponVouchers
 from ecommerce.invoice.models import Invoice
 from ecommerce.programs.constants import BENEFIT_MAP
@@ -127,6 +128,8 @@ class CouponViewSetTest(CouponMixin, DiscoveryTestMixin, TestCase):
             'voucher_type',
             'program_uuid',
             'notify_email',
+            'contract_discount_type',
+            'contract_discount_value',
         ]
         self.assertEqual(sorted(expected_cleaned_voucher_data_keys), sorted(cleaned_voucher_data.keys()))
 
@@ -232,6 +235,8 @@ class CouponViewSetFunctionalTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             'stock_record_ids': [seat.stockrecords.first().id, other_seat.stockrecords.first().id],
             'title': 'Tešt čoupon',
             'voucher_type': Voucher.SINGLE_USE,
+            'contract_discount_type': EnterpriseContractMetadata.PERCENTAGE,
+            'contract_discount_value': '12.35',
         }
         self.response = self.get_response('POST', COUPONS_LINK, self.data)
         self.coupon = Product.objects.get(title=self.data['title'])
