@@ -1,13 +1,10 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import
 
-from django.core.exceptions import ValidationError
 import six
+from django.core.exceptions import ValidationError
 
-from ecommerce.extensions.payment.models import (
-    EnterpriseContractMetadata,
-    SDNCheckFailure,
-)
+from ecommerce.extensions.payment.models import EnterpriseContractMetadata, SDNCheckFailure
 from ecommerce.tests.testcases import TestCase
 
 

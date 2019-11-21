@@ -45,8 +45,8 @@ from ecommerce.extensions.offer.constants import (
     VOUCHER_PARTIAL_REDEEMED,
     VOUCHER_REDEEMED
 )
-from ecommerce.invoice.models import Invoice
 from ecommerce.extensions.payment.models import EnterpriseContractMetadata
+from ecommerce.invoice.models import Invoice
 from ecommerce.programs.custom import class_path
 from ecommerce.tests.mixins import JwtMixin, ThrottlingMixin
 from ecommerce.tests.testcases import TestCase
