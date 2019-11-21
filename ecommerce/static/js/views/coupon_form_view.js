@@ -250,27 +250,10 @@ define([
                         };
                     }
                 },
-                'select[name=enterprise_customer]': {
+                'input[name=enterprise_customer]': {
                     observe: 'enterprise_customer',
-                    selectOptions: {
-                        collection: function() {
-                            return ecommerce.coupons.enterprise_customers;
-                        },
-                        defaultOption: {id: '', name: ''},
-                        labelPath: 'name',
-                        valuePath: 'id'
-                    },
-                    setOptions: {
-                        validate: true
-                    },
                     onGet: function(val) {
                         return _.isUndefined(val) || _.isNull(val) ? '' : val.id;
-                    },
-                    onSet: function(val) {
-                        return _.isEmpty(val) ? null : {
-                            id: val,
-                            name: $('select[name=enterprise_customer] option:selected').text()
-                        };
                     }
                 },
                 'input[name=program_uuid]': {
@@ -307,7 +290,6 @@ define([
                     'client',
                     'course_seat_types',
                     'course_catalog',
-                    'enterprise_customer',
                     'end_date',
                     'invoice_discount_type',
                     'invoice_discount_value',
@@ -772,12 +754,9 @@ define([
                     if (_.isString(enterpriseCustomer)) {
                         // API returns a string value for enterprise customer
                         this.model.set('enterprise_customer', {id: enterpriseCustomer});
+                    } else if (_.isUndefined(enterpriseCustomer) || _.isNull(enterpriseCustomer)) {
+                        this.formGroup('#enterprise-customer').remove();
                     }
-                    // This removes the enterprise_customer element if EnterpriseCustomer
-                    // is null, which will necessarily happen in the case we are solving for
-                    // } else if (_.isUndefined(enterpriseCustomer) || _.isNull(enterpriseCustomer)) {
-                    //     this.formGroup('#enterprise-customer').remove();
-                    // }
                     if (this.model.get('program_uuid')) {
                         this.$('.catalog-type input').attr('disabled', true);
                     }
