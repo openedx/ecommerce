@@ -1402,6 +1402,69 @@ class EnterpriseCouponViewSetRbacTests(
         for actual_result in overview_response['results']:
             self.assertIn(actual_result, expected_results)
 
+    def test_get_enterprise_coupon_overview_data_with_active_filter(self):
+        """
+        Test if we get correct enterprise coupon overview data with some inactive coupons.
+        """
+        enterprise_id = '85b08dde-0877-4474-a4e9-8408fe47ce88'
+        EcommerceFeatureRoleAssignment.objects.all().delete()
+        EcommerceFeatureRoleAssignment.objects.get_or_create(
+            role=self.role,
+            user=self.user,
+            enterprise_id=enterprise_id
+        )
+
+        active_coupon_titles = ['coupon-1', 'coupon-2', 'coupon-3']
+        inactive_coupon_titles = ['coupon-4', 'coupon-5']
+
+        # Create coupons.
+        for coupon_title in active_coupon_titles + inactive_coupon_titles:
+            data = dict(
+                self.data,
+                title=coupon_title,
+                enterprise_customer={'name': 'LOTRx', 'id': enterprise_id}
+            )
+            self.get_response('POST', ENTERPRISE_COUPONS_LINK, data)
+
+        # now set coupon inactive
+        for inactive_coupon_title in inactive_coupon_titles:
+            inactive_coupon = Product.objects.get(title=inactive_coupon_title)
+            inactive_coupon.attr.inactive = True
+            inactive_coupon.save()
+
+        overview_response = self.get_response_json(
+            'GET',
+            reverse(
+                'api:v2:enterprise-coupons-(?P<enterprise-id>.+)/overview-list',
+                kwargs={'enterprise_id': enterprise_id}
+            )
+        )
+
+        # Build expected results.
+        expected_results = []
+        for coupon_title in active_coupon_titles + inactive_coupon_titles:
+            expected_results.append(self.get_coupon_data(coupon_title))
+
+        # Verify that we get correct results.
+        self.assertEqual(overview_response['count'], len(expected_results))
+        for actual_result in overview_response['results']:
+            self.assertIn(actual_result, expected_results)
+
+        overview_response = self.get_response_json(
+            'GET',
+            reverse(
+                'api:v2:enterprise-coupons-(?P<enterprise-id>.+)/overview-list',
+                kwargs={'enterprise_id': enterprise_id},
+            ),
+            data={'filter': 'active'}
+        )
+        # Build expected results.
+        expected_results = [result for result in expected_results if result['title'] in active_coupon_titles]
+        # Verify that we get correct results.
+        self.assertEqual(overview_response['count'], len(expected_results))
+        for actual_result in overview_response['results']:
+            self.assertIn(actual_result, expected_results)
+
     @ddt.data(
         (
             '85b08dde-0877-4474-a4e9-8408fe47ce88',

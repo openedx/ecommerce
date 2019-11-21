@@ -181,7 +181,17 @@ class EnterpriseCouponViewSet(CouponViewSet):
         enterprise_id = self.kwargs.get('enterprise_id')
         if enterprise_id:
             filter_kwargs['attribute_values__value_text'] = enterprise_id
-        return Product.objects.filter(**filter_kwargs).distinct()
+
+        coupons = Product.objects.filter(**filter_kwargs)
+
+        if self.request.query_params.get('filter') == 'active':
+            active_coupon = ~Q(attributes__code='inactive') | Q(
+                attributes__code='inactive',
+                attribute_values__value_boolean=False
+            )
+            coupons = coupons.filter(active_coupon)
+
+        return coupons.distinct()
 
     def get_serializer_class(self):
         if self.action == 'list':
