@@ -87,6 +87,7 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options):
+        logger.info("Verify transactions with options: %r", options)
         self.ORDERS_WITHOUT_PAYMENTS = []
         self.MULTI_PAYMENT_ON_ORDER = []
         self.ORDER_PAYMENT_TOTALS_MISMATCH = []
@@ -99,14 +100,17 @@ class Command(BaseCommand):
 
         start = datetime.datetime.now(pytz.utc) - datetime.timedelta(minutes=start_delta)
         end = datetime.datetime.now(pytz.utc) - datetime.timedelta(minutes=end_delta)
+        logger.info("Start time: %s  --  End time: %s", start, end)
 
         orders = use_read_replica_if_available(
             Order.objects.all()
             .filter(date_placed__gte=start, date_placed__lt=end)
             .prefetch_related('payment_events__event_type')
         )
-
         logger.info("Number of orders to verify: %s", orders.count())
+        if orders.count() == 0:
+            logger.info("No orders, DONE")
+            return
 
         for order in orders:
             all_payment_events = order.payment_events
@@ -118,17 +122,21 @@ class Command(BaseCommand):
 
         self.clean_orders()
         (error_count, exit_errors) = self.compile_errors()
+        error_rate = float(error_count) / orders.count()
 
         threshold = max(options['threshold'], 0)
         if threshold == 0 or threshold >= 1:
-            flunk = error_count > int(threshold)
+            threshold = int(threshold)
+            flunk = error_count > threshold
         else:
-            flunk = float(error_count) / orders.count() > threshold
+            flunk = error_rate > threshold
+
+        logger.info("Summary: %d errors, %.1f %%", error_count, error_rate * 100.0)
 
         if flunk:
             raise CommandError("Errors in transactions: {errors}".format(errors=exit_errors))
         if exit_errors:
-            logger.warning("Errors in transactions below threshold (%f): %s", threshold, exit_errors)
+            logger.warning("Errors in transactions below threshold (%r): %s", threshold, exit_errors)
 
     def validate_order_payments(self, order, payments):
         # If a coupon is used to purchase a product for the full price, there will be no PaymentEvent
