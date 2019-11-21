@@ -482,7 +482,7 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
         if prepaid_invoice_amount is not None:
             attach_or_update_contract_metadata_on_coupon(
                 coupon,
-                prepaid_invoice_amount=prepaid_invoice_amount,
+                amount_paid=prepaid_invoice_amount,
             )
 
     def update_offer_data(self, request_data, vouchers, site):
