@@ -133,10 +133,12 @@ def create_coupon_product_and_stockrecord(title, category, partner, price):
 
 
 def attach_contract_metadata_to_coupon_product(coupon_product, contract_discount_type, contract_discount_value):
-    ecm = EnterpriseContractMetadata.objects.create(
+    ecm = EnterpriseContractMetadata(
         discount_value=contract_discount_value,
         discount_type=contract_discount_type,
     )
+    ecm.clean()
+    ecm.save()
     coupon_product.attr.enterprise_contract_metadata = ecm
     coupon_product.save()
 

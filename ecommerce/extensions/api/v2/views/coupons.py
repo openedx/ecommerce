@@ -474,6 +474,7 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
                 coupon.attr.enterprise_contract_metadata = contract_metadata
             contract_metadata.discount_value = discount
             contract_metadata.discount_type = discount_type
+            contract_metadata.clean()
             contract_metadata.save()
             coupon.save()
 
