@@ -45,7 +45,7 @@ from ecommerce.extensions.api.serializers import (
 from ecommerce.extensions.api.v2.utils import get_enterprise_from_product, send_new_codes_notification_email
 from ecommerce.extensions.api.v2.views.coupons import CouponViewSet
 from ecommerce.extensions.catalogue.utils import (
-    attach_contract_metadata_to_coupon_product,
+    attach_or_update_contract_metadata_on_coupon,
     attach_vouchers_to_coupon_product,
     create_coupon_product_and_stockrecord
 )
@@ -227,10 +227,11 @@ class EnterpriseCouponViewSet(CouponViewSet):
             cleaned_voucher_data.get('notify_email'),
             cleaned_voucher_data['enterprise_customer']
         )
-        attach_contract_metadata_to_coupon_product(
+        attach_or_update_contract_metadata_on_coupon(
             coupon_product,
-            cleaned_voucher_data['contract_discount_type'],
-            cleaned_voucher_data['contract_discount_value'],
+            discount_type=cleaned_voucher_data['contract_discount_type'],
+            discount_value=cleaned_voucher_data['contract_discount_value'],
+            amount_paid=cleaned_voucher_data['prepaid_invoice_amount'],
         )
 
         return coupon_product

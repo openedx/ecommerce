@@ -121,6 +121,7 @@ class CouponViewSetTest(CouponMixin, DiscoveryTestMixin, TestCase):
             'max_uses',
             'note',
             'partner',
+            'prepaid_invoice_amount',
             'price',
             'quantity',
             'start_datetime',
@@ -445,6 +446,7 @@ class CouponViewSetFunctionalTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
             'enterprise_customer_catalog': enterprise_catalog_id,
             'contract_discount_value': '12.34',
             'contract_discount_type': EnterpriseContractMetadata.PERCENTAGE,
+            'prepaid_invoice_amount': '200000',
         })
 
         return self.get_response('POST', post_url, self.data)
@@ -1148,6 +1150,7 @@ class CouponViewSetFunctionalTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
         coupon = Product.objects.get(id=response.json()['coupon_id'])
         assert coupon.attr.enterprise_contract_metadata.discount_value == Decimal('12.34000')
         assert coupon.attr.enterprise_contract_metadata.discount_type == 'Percentage'
+        assert coupon.attr.enterprise_contract_metadata.amount_paid == Decimal('200000.00')
 
     def test_update_coupon_with_contract_discount_metadata(self):
         """
@@ -1168,18 +1171,21 @@ class CouponViewSetFunctionalTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
         coupon = Product.objects.get(id=coupon_id)
         assert coupon.attr.enterprise_contract_metadata.discount_value == Decimal('12.34000')
         assert coupon.attr.enterprise_contract_metadata.discount_type == 'Percentage'
+        assert coupon.attr.enterprise_contract_metadata.amount_paid == Decimal('200000.00')
 
         dtype = EnterpriseContractMetadata.FIXED
         path = reverse('api:v2:enterprise-coupons-detail', kwargs={'pk': coupon_id})
         data = {
             'contract_discount_value': '1928374',
             'contract_discount_type': dtype,
+            'prepaid_invoice_amount': '99009900'
         }
         self.get_response('PUT', path, data)
 
         coupon.attr.enterprise_contract_metadata.refresh_from_db()
         assert coupon.attr.enterprise_contract_metadata.discount_value == Decimal('1928374.00')
         assert coupon.attr.enterprise_contract_metadata.discount_type == dtype
+        assert coupon.attr.enterprise_contract_metadata.amount_paid == Decimal('99009900.00')
 
 
 class CouponCategoriesListViewTests(TestCase):
