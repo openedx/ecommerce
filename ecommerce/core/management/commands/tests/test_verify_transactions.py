@@ -163,7 +163,7 @@ class VerifyTransactionsTest(TestCase):
         with self.assertRaises(CommandError) as cm:
             call_command('verify_transactions')
         exception = six.text_type(cm.exception)
-        self.assertIn("The following orders had multiple payments ", exception)
+        self.assertIn("The following orders had multiple payments", exception)
         self.assertIn(str(self.order.id), exception)
         self.assertIn(str(payment1.id), exception)
         self.assertIn(str(payment2.id), exception)
@@ -188,7 +188,7 @@ class VerifyTransactionsTest(TestCase):
         with self.assertRaises(CommandError) as cm:
             call_command('verify_transactions')
         exception = six.text_type(cm.exception)
-        self.assertIn("The following orders had multiple payments ", exception)
+        self.assertIn("The following orders had multiple payments", exception)
         self.assertIn(str(self.order.id), exception)
         self.assertIn(str(payment1.id), exception)
         self.assertIn(str(payment2.id), exception)
@@ -204,12 +204,11 @@ class VerifyTransactionsTest(TestCase):
         with self.assertRaises(CommandError) as cm:
             call_command('verify_transactions')
         exception = six.text_type(cm.exception)
-        self.assertIn("Order totals mismatch with payments received", exception)
+        self.assertIn("The following order totals mismatch payments received", exception)
         self.assertIn(str(self.order.id), exception)
         self.assertIn(str(payment.id), exception)
-        self.assertIn("Amount: 90.00", exception)
-        self.assertIn("Amount: 100.00", exception)
-        self.assertIn("Amount: 100.00", exception)
+        self.assertIn('"amount": 90.0', exception)
+        self.assertIn('"amount": 100.0', exception)
 
     def test_refund_exceeded(self):
         """Test verify_transactions with refund which exceed amount paid."""
@@ -229,5 +228,5 @@ class VerifyTransactionsTest(TestCase):
         self.assertIn("The following orders had excessive refunds", exception)
         self.assertIn(str(self.order.id), exception)
         self.assertIn(str(refund.id), exception)
-        self.assertIn("Amount: 90.00", exception)
-        self.assertIn("Amount: 100.00", exception)
+        self.assertIn('"amount": 90.0', exception)
+        self.assertIn('"amount": 100.0', exception)
