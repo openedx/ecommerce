@@ -2385,9 +2385,26 @@ class EnterpriseCouponViewSetRbacTests(
         response = response.json()
         assert response == ['Invalid code_filter specified: invalid-filter']
 
+    @ddt.data(
+        {
+            'action': 'assign',
+            'error': 'Coupon is not available for code assignment'
+        },
+        {
+            'action': 'revoke',
+            'error': 'Coupon is not available for code revoke'
+        },
+        {
+            'action': 'remind',
+            'error': 'Coupon is not available for code remind'
+        },
+    )
+    @ddt.unpack
     @mock.patch('ecommerce.extensions.offer.utils.send_offer_assignment_email.delay', mock.Mock(return_value=None))
-    def test_unavailable_coupon_codes_assignment(self):
-        """Test assigning codes from an unavailable coupon returns expected error reponse."""
+    def test_unavailable_coupon_code_actions(self, action, error):
+        """
+        Test `Assign/Remind/Revoke` codes from an unavailable coupon returns expected error reponse.
+        """
         start_datetime = self.data['start_datetime']
         coupon_post_data = dict(self.data, end_datetime=start_datetime)
         coupon = self.get_response('POST', ENTERPRISE_COUPONS_LINK, coupon_post_data)
@@ -2395,7 +2412,7 @@ class EnterpriseCouponViewSetRbacTests(
 
         response = self.get_response(
             'POST',
-            '/api/v2/enterprise/coupons/{}/assign/'.format(coupon_id),
+            '/api/v2/enterprise/coupons/{}/{action}/'.format(coupon_id, action=action),
             {
                 'template': 'Test template',
                 'template_greeting': TEMPLATE_GREETING,
@@ -2404,7 +2421,7 @@ class EnterpriseCouponViewSetRbacTests(
             }
         )
         assert response.status_code == status.HTTP_400_BAD_REQUEST
-        assert response.json() == {'error': 'Coupon is not available for code assignment'}
+        assert response.json() == {'error': error}
 
 
 class OfferAssignmentSummaryViewSetTests(
