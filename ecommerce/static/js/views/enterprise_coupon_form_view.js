@@ -113,6 +113,18 @@ define([
                         }
                         return val;
                     }
+                },
+                'input[name=prepaid_invoice_amount]': {
+                    observe: 'prepaid_invoice_amount',
+                    setOptions: {
+                        validate: true
+                    },
+                    onSet: function(val) {
+                        if (val === '') {
+                            return null;
+                        }
+                        return val;
+                    }
                 }
             },
 
@@ -200,7 +212,8 @@ define([
                     'title',
                     'email_domains',
                     'contract_discount_value',
-                    'contract_discount_type'
+                    'contract_discount_type',
+                    'prepaid_invoice_amount'
                 ];
             },
 
