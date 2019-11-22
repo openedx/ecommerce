@@ -30,6 +30,7 @@ Example output:
 from __future__ import absolute_import
 
 import datetime
+import json
 import logging
 
 import pytz
@@ -52,10 +53,7 @@ VALID_PRODUCT_CLASS_NAMES = [SEAT_PRODUCT_CLASS_NAME, COURSE_ENTITLEMENT_PRODUCT
 
 
 class Command(BaseCommand):
-    ORDERS_WITHOUT_PAYMENTS = None
-    MULTI_PAYMENT_ON_ORDER = None
-    ORDER_PAYMENT_TOTALS_MISMATCH = None
-    REFUND_AMOUNT_EXCEEDED = None
+    ERRORS_DICT = None
     PAID_EVENT_TYPE = None
     REFUNDED_EVENT_TYPE = None
 
@@ -87,10 +85,8 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options):
-        self.ORDERS_WITHOUT_PAYMENTS = []
-        self.MULTI_PAYMENT_ON_ORDER = []
-        self.ORDER_PAYMENT_TOTALS_MISMATCH = []
-        self.REFUND_AMOUNT_EXCEEDED = []
+        logger.info("Verify transactions with options: %r", options)
+        self.ERRORS_DICT = {}
         self.PAID_EVENT_TYPE = PaymentEventType.objects.get(name=PaymentEventTypeName.PAID)
         self.REFUNDED_EVENT_TYPE = PaymentEventType.objects.get(name=PaymentEventTypeName.REFUNDED)
 
@@ -99,127 +95,115 @@ class Command(BaseCommand):
 
         start = datetime.datetime.now(pytz.utc) - datetime.timedelta(minutes=start_delta)
         end = datetime.datetime.now(pytz.utc) - datetime.timedelta(minutes=end_delta)
+        logger.info("Start time: %s  --  End time: %s", start, end)
 
         orders = use_read_replica_if_available(
             Order.objects.all()
             .filter(date_placed__gte=start, date_placed__lt=end)
             .prefetch_related('payment_events__event_type')
         )
-
         logger.info("Number of orders to verify: %s", orders.count())
+        if orders.count() == 0:
+            logger.info("No orders, DONE")
+            return
 
         for order in orders:
-            all_payment_events = order.payment_events
-            refunds = all_payment_events.filter(event_type=self.REFUNDED_EVENT_TYPE)
-            payments = all_payment_events.filter(event_type=self.PAID_EVENT_TYPE)
+            self.validate_order(order)
 
-            self.validate_order_payments(order, payments)
-            self.validate_order_refunds(order, refunds, payments)
-
-        self.clean_orders()
-        (error_count, exit_errors) = self.compile_errors()
+        # FIXME: it is possible for an order to have more than one error, so this really should
+        # count "unique orders with errors", not number of errors
+        error_count = sum([len(v["errors"]) for v in self.ERRORS_DICT.values()])
+        exit_errors = json.dumps(self.ERRORS_DICT)
+        error_rate = float(error_count) / orders.count()
 
         threshold = max(options['threshold'], 0)
         if threshold == 0 or threshold >= 1:
-            flunk = error_count > int(threshold)
+            threshold = int(threshold)
+            flunk = error_count > threshold
         else:
-            flunk = float(error_count) / orders.count() > threshold
+            flunk = error_rate > threshold
+
+        logger.info("Summary: %d errors, %.1f %%", error_count, error_rate * 100.0)
 
         if flunk:
             raise CommandError("Errors in transactions: {errors}".format(errors=exit_errors))
-        if exit_errors:
-            logger.warning("Errors in transactions below threshold (%f): %s", threshold, exit_errors)
+        if self.ERRORS_DICT:
+            logger.warning("Errors in transactions within threshold (%r): %s", threshold, exit_errors)
 
-    def validate_order_payments(self, order, payments):
+    def validate_order(self, order):
+        all_payment_events = order.payment_events
+        refunds = all_payment_events.filter(event_type=self.REFUNDED_EVENT_TYPE)
+        payments = all_payment_events.filter(event_type=self.PAID_EVENT_TYPE)
+
         # If a coupon is used to purchase a product for the full price, there will be no PaymentEvent
         # so we must also verify that order had a price > 0.
         if payments.count() == 0:
-            if order.total_incl_tax > 0:
-                self.ORDERS_WITHOUT_PAYMENTS.append(
-                    (order, None)
+            if self.order_requires_payment(order) and order.total_incl_tax > 0:
+                self.add_error(
+                    "orders_no_payment",
+                    "The following orders are without payments",
+                    order
                 )
-            return
 
         # We do not support multi-payment today, so flag this for review.
-        if payments.count() > 1:
-            self.MULTI_PAYMENT_ON_ORDER.append(
-                (order, payments)
+        elif payments.count() > 1:
+            self.add_error(
+                "orders_multi_payment",
+                "The following orders had multiple payments",
+                order,
+                payments
             )
 
         # If the payment total and the order total do not match, flag for review.
-        if payments.aggregate(total=Sum('amount')).get('total') != order.total_incl_tax:
-            self.ORDER_PAYMENT_TOTALS_MISMATCH.append(
-                (order, payments)
+        elif payments.aggregate(total=Sum('amount')).get('total') != order.total_incl_tax:
+            # FIXME: validate_order should be changed to log _all_ errors related to an order
+            self.add_error(
+                "orders_mismatched_totals",
+                "The following order totals mismatch payments received",
+                order,
+                payments
             )
 
-    def validate_order_refunds(self, order, refunds, payments):
         refund_total = refunds.aggregate(total=Sum('amount')).get('total')
         payment_total = payments.aggregate(total=Sum('amount')).get('total')
         if refund_total is not None and refund_total > payment_total:
-            self.REFUND_AMOUNT_EXCEEDED.append(
-                (order, refunds)
+            self.add_error(
+                "orders_refund_exceeded",
+                "The following orders had excessive refunds",
+                order,
+                refunds
             )
 
-    def compile_errors(self):
-        error_count = 0
-        exit_errors = {}
-        if self.ORDER_PAYMENT_TOTALS_MISMATCH:
-            error_count += len(self.ORDER_PAYMENT_TOTALS_MISMATCH)
-            exit_errors["totals_mismatch"] = "Order totals mismatch with payments received. " \
-                                             + self.error_msg(self.ORDER_PAYMENT_TOTALS_MISMATCH)
-        if self.ORDERS_WITHOUT_PAYMENTS:
-            error_count += len(self.ORDERS_WITHOUT_PAYMENTS)
-            exit_errors["orders_no_pay"] = "The following orders are without payments " \
-                                           + self.error_msg(self.ORDERS_WITHOUT_PAYMENTS)
-        if self.MULTI_PAYMENT_ON_ORDER:
-            error_count += len(self.MULTI_PAYMENT_ON_ORDER)
-            exit_errors["multi_pay_on_order"] = "The following orders had multiple payments " \
-                                                + self.error_msg(self.MULTI_PAYMENT_ON_ORDER)
-        if self.REFUND_AMOUNT_EXCEEDED:
-            error_count += len(self.REFUND_AMOUNT_EXCEEDED)
-            exit_errors["refund_amount_exceeded"] = "The following orders had excessive refunds " \
-                                                    + self.error_msg(self.REFUND_AMOUNT_EXCEEDED)
-        return (error_count, exit_errors)
+    def add_error(self, tag, msg, order, payments=None):
+        if tag not in self.ERRORS_DICT:
+            self.ERRORS_DICT[tag] = {"message": msg, "errors": []}
+        self.ERRORS_DICT[tag]["errors"].append(self.error_dict(order, payments))
 
-    def error_msg(self, errors):
-        msg = ""
-        for order, payments in errors:
-            order_str = "Order(Id: {order_id}, Number: {num}, Amount: {amount}) \n".format(
-                order_id=order.id,
-                num=order.number,
-                amount=order.total_incl_tax
-            )
-            payment_str = ""
+    def error_dict(self, order, payments=None):
+        d = {}
+        d["order"] = {
+            "order_id": order.id,
+            "order_number": order.number,
+            "amount": float(order.total_incl_tax),
+        }
+        if payments:
+            d["payments"] = [
+                {
+                    "payment_id": p.id,
+                    "processor": p.processor_name,
+                    "amount": float(p.amount),
+                    "type": p.event_type.name,
+                }
+                for p in payments
+            ]
+        return d
 
-            if payments:
-                for payment in payments:
-                    payment_str += "Payment(Id: {payment_id}, Processor: {processor}, " \
-                        "Amount: {amount}, Type:{type} \n" \
-                        .format(
-                            payment_id=payment.id,
-                            processor=payment.processor_name,
-                            amount=payment.amount,
-                            type=payment.event_type.name
-                        )
-            msg += order_str
-            msg += payment_str
-        return msg
-
-    def clean_orders(self):
+    def order_requires_payment(self, order):
         # We only expect immediate payments for Seats and Entitlements.
         # Filter out orders that were flagged as being without payment for other product types
-        cleaned_orders_without_payments = [
-            (o, p) for o, p in self.ORDERS_WITHOUT_PAYMENTS if self.valid_order_without_payment(o)
-        ]
-        self.ORDERS_WITHOUT_PAYMENTS = cleaned_orders_without_payments
-
-    def valid_order_without_payment(self, order):
-        valid = False
+        # FIXME: there are better ways to do this
         for line in order.lines.all():
-            if self.verifiable_product(line.product):
-                valid = True
-
-        return valid
-
-    def verifiable_product(self, product):
-        return product.get_product_class().name in VALID_PRODUCT_CLASS_NAMES
+            name = line.product.get_product_class().name
+            if name in VALID_PRODUCT_CLASS_NAMES:
+                return True
+        return False
