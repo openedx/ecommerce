@@ -1011,7 +1011,7 @@ class CouponSerializer(ProductPaymentInfoMixin, serializers.ModelSerializer):
 
     def get_contract_discount_value(self, obj):
         try:
-            return obj.attr.enterprise_contract_metadata.discount
+            return obj.attr.enterprise_contract_metadata.discount_value
         except AttributeError:
             return None
 
