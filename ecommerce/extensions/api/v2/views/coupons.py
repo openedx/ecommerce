@@ -470,20 +470,14 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
             coupon.save()
 
         discount_value = request_data.get('contract_discount_value')
-        if discount_value is not None:
-            discount_type = request_data.get('contract_discount_type')
-            attach_or_update_contract_metadata_on_coupon(
-                coupon,
-                discount_type=discount_type,
-                discount_value=discount_value,
-            )
-
+        discount_type = request_data.get('contract_discount_type')
         prepaid_invoice_amount = request_data.get('prepaid_invoice_amount')
-        if prepaid_invoice_amount is not None:
-            attach_or_update_contract_metadata_on_coupon(
-                coupon,
-                amount_paid=prepaid_invoice_amount,
-            )
+        attach_or_update_contract_metadata_on_coupon(
+            coupon,
+            discount_type=discount_type,
+            discount_value=discount_value,
+            amount_paid=prepaid_invoice_amount,
+        )
 
     def update_offer_data(self, request_data, vouchers, site):
         """
