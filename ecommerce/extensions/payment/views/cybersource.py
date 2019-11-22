@@ -472,7 +472,7 @@ class CybersourceInterstitialView(CybersourceNotificationMixin, View):
                 old_basket_id,
             )
 
-            messages.error(self.request, _('transation declined'), extra_tags='transaction-declined-message')
+            messages.error(self.request, _('transaction declined'), extra_tags='transaction-declined-message')
 
             monitoring_utils.set_custom_metric('payment_response_validation', 'redirect-to-payment-page')
             # TODO:
