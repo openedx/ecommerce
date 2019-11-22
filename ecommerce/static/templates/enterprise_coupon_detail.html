@@ -92,14 +92,18 @@
         <div class="info-item grid-item contract-discount-value">
             <div class="heading"><%= gettext('Contract discount value:') %></div>
             <div class="value">
-                <% if(coupon.contract_discount_type == 'Percentage') { %>
+                <% if(coupon.contract_discount_value && coupon.contract_discount_type == 'Percentage') { %>
                     <%= coupon.contract_discount_value %>%
                 <% } else if(coupon.contract_discount_type == 'Absolute') { %>
-                    $<%= coupon.contract_discount_value %>
+                    $<%= coupon.contract_discount_value && coupon.contract_discount_value %>
                 <% } else { %>
                     -
                 <%}%>
             </div>
+        </div>
+        <div class="info-item grid-item prepaid-invoice-amount">
+            <div class="heading"><%= gettext('Prepaid Invoice Amount:') %></div>
+            <div class="value">$<%= coupon.prepaid_invoice_amount %></div>
         </div>
         <div class="info-item grid-item invoice-type">
             <div class="heading"><%= gettext('Invoice Type:') %></div>
