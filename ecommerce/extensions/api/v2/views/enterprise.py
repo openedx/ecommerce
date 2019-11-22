@@ -14,6 +14,7 @@ from requests.exceptions import ConnectionError as ReqConnectionError
 from requests.exceptions import Timeout
 from rest_framework import generics, serializers, status
 from rest_framework.decorators import detail_route, list_route
+from rest_framework.exceptions import ValidationError as DRFValidationError
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet, ViewSet
@@ -584,6 +585,13 @@ class EnterpriseCouponViewSet(CouponViewSet):
         serializer = self.get_serializer(page, many=True)
         return self.get_paginated_response(serializer.data)
 
+    def _validate_coupon_availablity(self, coupon, message):
+        """
+        Raise ValidationError with specified message if coupon is not available.
+        """
+        if not is_coupon_available(coupon):
+            raise DRFValidationError({'error': message})
+
     @detail_route(methods=['post'], permission_classes=[IsAuthenticated])
     @permission_required('enterprise.can_assign_coupon', fn=lambda request, pk: get_enterprise_from_product(pk))
     def assign(self, request, pk):  # pylint: disable=unused-argument
@@ -591,13 +599,7 @@ class EnterpriseCouponViewSet(CouponViewSet):
         Assign users by email to codes within the Coupon.
         """
         coupon = self.get_object()
-
-        if not is_coupon_available(coupon):
-            return Response(
-                {'error': 'Coupon is not available for code assignment'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
+        self._validate_coupon_availablity(coupon, 'Coupon is not available for code assignment')
         greeting = request.data.pop('template_greeting', '')
         closing = request.data.pop('template_closing', '')
         serializer = CouponCodeAssignmentSerializer(
@@ -616,6 +618,7 @@ class EnterpriseCouponViewSet(CouponViewSet):
         Revoke users by email from codes within the Coupon.
         """
         coupon = self.get_object()
+        self._validate_coupon_availablity(coupon, 'Coupon is not available for code revoke')
         greeting = request.data.pop('template_greeting', '')
         closing = request.data.pop('template_closing', '')
         serializer = CouponCodeRevokeSerializer(
@@ -636,6 +639,7 @@ class EnterpriseCouponViewSet(CouponViewSet):
         Remind users of pending offer assignments by email.
         """
         coupon = self.get_object()
+        self._validate_coupon_availablity(coupon, 'Coupon is not available for code remind')
         greeting = request.data.pop('template_greeting', '')
         closing = request.data.pop('template_closing', '')
 
