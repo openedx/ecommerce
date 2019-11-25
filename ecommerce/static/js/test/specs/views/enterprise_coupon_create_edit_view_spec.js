@@ -52,6 +52,8 @@ define([
                 view.$('[name=enterprise_customer_catalog]').val('869d26dd-2c44-487b-9b6a-24eee973f9a4').trigger(
                     'change'
                 );
+                view.$('[name=contract_discount_value]').val(30).trigger('change');
+                view.$('[name=prepaid_invoice_amount]').val(10000).trigger('change');
                 view.$('#not-applicable').prop('checked', true).trigger('change');
                 view.formView.submit($.Event('click'));
                 expect(model.isValid()).toBe(true);
@@ -99,6 +101,12 @@ define([
                     );
                     expect(view.$el.find('[name=enterprise_customer_catalog]').val()).toEqual(
                         model.get('enterprise_customer_catalog')
+                    );
+                    expect(view.$el.find('[name=contract_discount_value]').val()).toEqual(
+                        model.get('contract_discount_value').toString()
+                    );
+                    expect(view.$el.find('[name=prepaid_invoice_amount]').val()).toEqual(
+                        model.get('prepaid_invoice_amount').toString()
                     );
                 });
 
