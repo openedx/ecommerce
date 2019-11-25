@@ -28,7 +28,6 @@ from ecommerce.extensions.catalogue.utils import (
     get_or_create_catalog
 )
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
-from ecommerce.extensions.payment.models import EnterpriseContractMetadata
 from ecommerce.extensions.payment.processors.invoice import InvoicePayment
 from ecommerce.extensions.voucher.models import CouponVouchers
 from ecommerce.extensions.voucher.utils import (
