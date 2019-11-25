@@ -25,7 +25,7 @@ from ecommerce.extensions.basket.utils import prepare_basket
 from ecommerce.extensions.catalogue.utils import (
     attach_or_update_contract_metadata_on_coupon,
     create_coupon_product,
-    get_or_create_catalog,
+    get_or_create_catalog
 )
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
 from ecommerce.extensions.payment.models import EnterpriseContractMetadata
