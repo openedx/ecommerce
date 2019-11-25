@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ecommerce\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-03-26 17:16+0000\n"
+"POT-Creation-Date: 2019-12-03 14:18+0000\n"
 "PO-Revision-Date: 2018-03-30 17:16-0500\n"
 "Last-Translator: Muhammad Ayub khan <ayubkhan@edx.org>\n"
 "Language-Team: openedx-translation <openedx-translation@googlegroups.com>\n"
@@ -67,12 +67,6 @@ msgstr "Müst öççür ßéföré énd däté Ⱡ'σяєм ιρѕυм ∂σłσ
 #: ecommerce/static/js/models/coupon_model.js
 msgid "A valid course ID is required"
 msgstr "À välïd çöürsé ÌD ïs réqüïréd Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢#"
-
-#: ecommerce/static/js/models/coupon_model.js
-msgid "Enterprise Customer must be set if Enterprise Customer Catalog is set"
-msgstr ""
-"Éntérprïsé Çüstömér müst ßé sét ïf Éntérprïsé Çüstömér Çätälög ïs sét Ⱡ'σяєм"
-" ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя #"
 
 #: ecommerce/static/js/models/coupon_model.js
 msgid "A valid Program UUID is required."
@@ -139,7 +133,6 @@ msgstr ""
 "ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя α#"
 
 #: ecommerce/static/js/models/course_seats/course_seat.js
-#: ecommerce/static/js/views/course_form_view.js
 msgid "Verified"
 msgstr "Vérïfïéd Ⱡ'σяєм ιρѕυм ∂#"
 
@@ -443,11 +436,25 @@ msgstr ""
 "Fréé äüdït träçk. Nö çértïfïçäté. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тє#"
 
 #: ecommerce/static/js/views/course_form_view.js
+msgid "Verified and Audit"
+msgstr "Vérïfïéd änd Àüdït Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт#"
+
+#: ecommerce/static/js/views/course_form_view.js
+#: ecommerce/static/js/views/course_form_view.js
 msgid ""
-"Paid certificate track with initial verification and Verified Certificate"
+"Paid certificate track with initial verification and Verified Certificate."
 msgstr ""
-"Päïd çértïfïçäté träçk wïth ïnïtïäl vérïfïçätïön änd Vérïfïéd Çértïfïçäté "
-"Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя#"
+"Päïd çértïfïçäté träçk wïth ïnïtïäl vérïfïçätïön änd Vérïfïéd Çértïfïçäté. "
+"Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυ#"
+
+#: ecommerce/static/js/views/course_form_view.js
+msgid "Also includes the free audit track."
+msgstr ""
+"Àlsö ïnçlüdés thé fréé äüdït träçk. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєт#"
+
+#: ecommerce/static/js/views/course_form_view.js
+msgid "Verified Only"
+msgstr "Vérïfïéd Önlý Ⱡ'σяєм ιρѕυм ∂σłσя ѕι#"
 
 #: ecommerce/static/js/views/course_form_view.js
 msgid "Professional Education"

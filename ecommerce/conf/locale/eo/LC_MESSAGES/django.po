@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ecommerce\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-03-26 17:16+0000\n"
+"POT-Creation-Date: 2019-12-03 14:18+0000\n"
 "PO-Revision-Date: 2018-03-30 17:16-0500\n"
 "Last-Translator: Muhammad Ayub khan <ayubkhan@edx.org>\n"
 "Language-Team: openedx-translation <openedx-translation@googlegroups.com>\n"
@@ -243,10 +243,6 @@ msgstr ""
 msgid "Discovery API URL"
 msgstr "Dïsçövérý ÀPÌ ÛRL Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмє#"
 
-#: ecommerce/core/models.py
-msgid "Journals Service API URL"
-msgstr "Jöürnäls Sérvïçé ÀPÌ ÛRL Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢ση#"
-
 #. Translators: Do not translate "Apple Pay"
 #: ecommerce/core/models.py
 msgid "Enable Apple Pay"
@@ -275,8 +271,38 @@ msgstr ""
 "¢σηѕє¢тєтυя #"
 
 #: ecommerce/core/models.py
+msgid "Enable Microfrontend for Basket Page"
+msgstr ""
+"Énäßlé Mïçröfrönténd för Bäskét Pägé Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
+"¢σηѕє¢тєтυ#"
+
+#: ecommerce/core/models.py
+msgid ""
+"Use the microfrontend implementation of the basket page instead of the "
+"server-side template"
+msgstr ""
+"Ûsé thé mïçröfrönténd ïmpléméntätïön öf thé ßäskét pägé ïnstéäd öf thé "
+"sérvér-sïdé témpläté Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢ση#"
+
+#: ecommerce/core/models.py
+msgid "Payment Microfrontend URL"
+msgstr "Päýmént Mïçröfrönténd ÛRL Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕ#"
+
+#: ecommerce/core/models.py
+msgid ""
+"URL for the Payment Microfrontend (used if Enable Microfrontend for Basket "
+"Page is set)"
+msgstr ""
+"ÛRL för thé Päýmént Mïçröfrönténd (üséd ïf Énäßlé Mïçröfrönténd för Bäskét "
+"Pägé ïs sét) Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє#"
+
+#: ecommerce/core/models.py
 msgid "Full Name"
 msgstr "Füll Nämé Ⱡ'σяєм ιρѕυм ∂σł#"
+
+#: ecommerce/core/models.py
+msgid "LMS user id"
+msgstr "LMS üsér ïd Ⱡ'σяєм ιρѕυм ∂σłσя #"
 
 #: ecommerce/core/models.py ecommerce/extensions/basket/models.py
 #: ecommerce/templates/oscar/dashboard/offers/offer_detail.html
@@ -365,6 +391,14 @@ msgid "Couldn't find a matching Enterprise Customer for this coupon."
 msgstr ""
 "Çöüldn't fïnd ä mätçhïng Éntérprïsé Çüstömér för thïs çöüpön. Ⱡ'σяєм ιρѕυм "
 "∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя α#"
+
+#: ecommerce/coupons/views.py
+msgid ""
+"This coupon code is not valid for entitlement course product. Try a "
+"different course."
+msgstr ""
+"Thïs çöüpön çödé ïs nöt välïd för éntïtlémént çöürsé prödüçt. Trý ä "
+"dïfférént çöürsé. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢#"
 
 #: ecommerce/coupons/views.py
 msgid "Invalid data sharing consent token provided."
@@ -478,15 +512,30 @@ msgstr ""
 "{value} fïxéd-prïçé éntérprïsé dïsçöünt Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
 "¢σηѕє¢тєт#"
 
-#: ecommerce/enterprise/benefits.py ecommerce/invoice/models.py
-#: ecommerce/journals/benefit_constants.py ecommerce/programs/constants.py
+#: ecommerce/enterprise/benefits.py ecommerce/extensions/payment/models.py
+#: ecommerce/invoice/models.py ecommerce/programs/constants.py
 msgid "Percentage"
 msgstr "Pérçéntägé Ⱡ'σяєм ιρѕυм ∂σłσ#"
 
-#: ecommerce/enterprise/benefits.py ecommerce/journals/benefit_constants.py
+#: ecommerce/enterprise/benefits.py ecommerce/extensions/payment/models.py
 #: ecommerce/programs/constants.py
 msgid "Absolute"
 msgstr "Àßsölüté Ⱡ'σяєм ιρѕυм ∂#"
+
+#: ecommerce/enterprise/conditions.py
+msgid ""
+"This code is not valid with your email. Please login with the correct email "
+"assigned to the code or contact your Learning Manager for additional "
+"questions."
+msgstr ""
+"Thïs çödé ïs nöt välïd wïth ýöür émäïl. Pléäsé lögïn wïth thé çörréçt émäïl "
+"ässïgnéd tö thé çödé ör çöntäçt ýöür Léärnïng Mänägér för äddïtïönäl "
+"qüéstïöns. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя α∂ιριѕι¢ιηg єłιт, ѕє∂ ∂σ"
+" єιυѕмσ∂ тємρσя ιη¢ι∂ι∂υηт υт łαвσяє єт ∂σłσяє мαgηα αłιqυα. υт єηιм α∂ "
+"мιηιм νєηιαм, qυιѕ ησѕтяυ∂ єχєя¢ιтαтιση υłłαм¢σ łαвσяιѕ ηιѕι υт αłιqυιρ єχ "
+"єα ¢σммσ∂σ ¢σηѕєqυαт. ∂υιѕ αυтє ιяυяє ∂σłσя ιη яєρяєнєη∂єяιт ιη νσłυρтαтє "
+"νєłιт єѕѕє ¢ιłłυм ∂σłσяє єυ ƒυgιαт ηυłłα ραяιαтυя. єχ¢єρтєυя ѕιηт σ¢¢αє¢αт "
+"¢υρι∂αтαт ηση ρяσι∂єηт, ѕυηт ιη ¢υłρα qυι σƒƒι¢ια ∂єѕєяυηт мσł#"
 
 #: ecommerce/enterprise/forms.py
 #: ecommerce/enterprise/templates/enterprise/enterpriseoffer_list.html
@@ -499,23 +548,19 @@ msgid "Enterprise Customer Catalog UUID"
 msgstr ""
 "Éntérprïsé Çüstömér Çätälög ÛÛÌD Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тє#"
 
-#: ecommerce/enterprise/forms.py ecommerce/journals/forms.py
-#: ecommerce/programs/forms.py
+#: ecommerce/enterprise/forms.py ecommerce/programs/forms.py
 msgid "Discount Type"
 msgstr "Dïsçöünt Týpé Ⱡ'σяєм ιρѕυм ∂σłσя ѕι#"
 
-#: ecommerce/enterprise/forms.py ecommerce/journals/forms.py
-#: ecommerce/programs/forms.py
+#: ecommerce/enterprise/forms.py ecommerce/programs/forms.py
 msgid "Discount Value"
 msgstr "Dïsçöünt Välüé Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт#"
 
-#: ecommerce/enterprise/forms.py ecommerce/journals/forms.py
-#: ecommerce/programs/forms.py
+#: ecommerce/enterprise/forms.py ecommerce/programs/forms.py
 msgid "Start Date"
 msgstr "Stärt Däté Ⱡ'σяєм ιρѕυм ∂σłσ#"
 
-#: ecommerce/enterprise/forms.py ecommerce/journals/forms.py
-#: ecommerce/programs/forms.py
+#: ecommerce/enterprise/forms.py ecommerce/programs/forms.py
 msgid "End Date"
 msgstr "Énd Däté Ⱡ'σяєм ιρѕυм ∂#"
 
@@ -525,8 +570,7 @@ msgstr ""
 "Àn öffér älréädý éxïsts för thïs Éntérprïsé & Çätälög çömßïnätïön. Ⱡ'σяєм "
 "ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя #"
 
-#: ecommerce/enterprise/forms.py ecommerce/journals/forms.py
-#: ecommerce/programs/forms.py
+#: ecommerce/enterprise/forms.py ecommerce/programs/forms.py
 msgid "Percentage discounts cannot be greater than 100%."
 msgstr ""
 "Pérçéntägé dïsçöünts çännöt ßé gréätér thän 100%. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт "
@@ -576,7 +620,6 @@ msgid "Enterprise Offers"
 msgstr "Éntérprïsé Öfférs Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмє#"
 
 #: ecommerce/enterprise/templates/enterprise/enterpriseoffer_form.html
-#: ecommerce/journals/templates/journals/journalbundleoffer_form.html
 #: ecommerce/programs/templates/programs/programoffer_form.html
 #: ecommerce/templates/oscar/dashboard/catalogue/product_row_actions.html
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html
@@ -593,7 +636,6 @@ msgid "Edit"
 msgstr "Édït Ⱡ'σяєм ι#"
 
 #: ecommerce/enterprise/templates/enterprise/enterpriseoffer_form.html
-#: ecommerce/journals/templates/journals/journalbundleoffer_form.html
 #: ecommerce/programs/templates/programs/programoffer_form.html
 msgid "Create"
 msgstr "Çréäté Ⱡ'σяєм ιρѕυ#"
@@ -603,13 +645,11 @@ msgid "Edit Enterprise Offer"
 msgstr "Édït Éntérprïsé Öffér Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, #"
 
 #: ecommerce/enterprise/templates/enterprise/enterpriseoffer_form.html
-#: ecommerce/journals/templates/journals/journalbundleoffer_form.html
 #: ecommerce/programs/templates/programs/programoffer_form.html
 msgid "Save Changes"
 msgstr "Sävé Çhängés Ⱡ'σяєм ιρѕυм ∂σłσя ѕ#"
 
 #: ecommerce/enterprise/templates/enterprise/enterpriseoffer_form.html
-#: ecommerce/journals/templates/journals/journalbundleoffer_form.html
 #: ecommerce/programs/templates/programs/programoffer_form.html
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html
 #: ecommerce/templates/oscar/dashboard/partials/refund_action_modal.html
@@ -617,12 +657,15 @@ msgid "Cancel"
 msgstr "Çänçél Ⱡ'σяєм ιρѕυ#"
 
 #: ecommerce/enterprise/templates/enterprise/enterpriseoffer_form.html
-#: ecommerce/enterprise/templates/enterprise/enterpriseoffer_list.html
 #, python-format
-msgid "%(platform_name)s Enterprise Offer Administration Tool"
+msgid ""
+"\n"
+"              %(platform_name)s Enterprise Offer Administration Tool\n"
+"              "
 msgstr ""
-"%(platform_name)s Éntérprïsé Öffér Àdmïnïsträtïön Tööl Ⱡ'σяєм ιρѕυм ∂σłσя "
-"ѕιт αмєт, ¢σηѕє¢тєтυя#"
+"\n"
+"              %(platform_name)s Éntérprïsé Öffér Àdmïnïsträtïön Tööl\n"
+"               Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя #"
 
 #: ecommerce/enterprise/templates/enterprise/enterpriseoffer_list.html
 msgid "Current enterprise offers"
@@ -633,7 +676,6 @@ msgid "Enterprise Customer Name"
 msgstr "Éntérprïsé Çüstömér Nämé Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢ση#"
 
 #: ecommerce/enterprise/templates/enterprise/enterpriseoffer_list.html
-#: ecommerce/journals/templates/journals/journalbundleoffer_list.html
 #: ecommerce/programs/templates/programs/programoffer_list.html
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html
@@ -641,22 +683,30 @@ msgid "Type"
 msgstr "Týpé Ⱡ'σяєм ι#"
 
 #: ecommerce/enterprise/templates/enterprise/enterpriseoffer_list.html
-#: ecommerce/journals/templates/journals/journalbundleoffer_list.html
 #: ecommerce/programs/templates/programs/programoffer_list.html
 msgid "Value"
 msgstr "Välüé Ⱡ'σяєм ιρѕ#"
 
 #: ecommerce/enterprise/templates/enterprise/enterpriseoffer_list.html
-#: ecommerce/journals/templates/journals/journalbundleoffer_list.html
 #: ecommerce/programs/templates/programs/programoffer_list.html
 msgid "Start"
 msgstr "Stärt Ⱡ'σяєм ιρѕ#"
 
 #: ecommerce/enterprise/templates/enterprise/enterpriseoffer_list.html
-#: ecommerce/journals/templates/journals/journalbundleoffer_list.html
 #: ecommerce/programs/templates/programs/programoffer_list.html
 msgid "End"
 msgstr "Énd Ⱡ'σяєм#"
+
+#: ecommerce/enterprise/templates/enterprise/enterpriseoffer_list.html
+#, python-format
+msgid ""
+"\n"
+"                %(platform_name)s Enterprise Offer Administration Tool\n"
+"              "
+msgstr ""
+"\n"
+"                %(platform_name)s Éntérprïsé Öffér Àdmïnïsträtïön Tööl\n"
+"               Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя#"
 
 #: ecommerce/enterprise/utils.py
 #, python-brace-format
@@ -729,6 +779,13 @@ msgid "One of the products you're trying to order is unavailable."
 msgstr ""
 "Öné öf thé prödüçts ýöü'ré trýïng tö ördér ïs ünäväïläßlé. Ⱡ'σяєм ιρѕυм "
 "∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя α#"
+
+#: ecommerce/extensions/api/exceptions.py
+msgid ""
+"We couldn't find enough information about you to perform the calculation."
+msgstr ""
+"Wé çöüldn't fïnd énöügh ïnförmätïön äßöüt ýöü tö pérförm thé çälçülätïön. "
+"Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя#"
 
 #: ecommerce/extensions/api/serializers.py
 msgid "Products must have a certificate type."
@@ -881,17 +938,25 @@ msgstr ""
 
 #: ecommerce/extensions/basket/utils.py
 #, python-brace-format
-msgid "Coupon code '{code}' has already been redeemed."
+msgid "Coupon code '{code}' is not available. {msg}"
 msgstr ""
-"Çöüpön çödé '{code}' häs älréädý ßéén rédééméd. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт,"
-" ¢σηѕє¢тєтυя #"
+"Çöüpön çödé '{code}' ïs nöt äväïläßlé. {msg} Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
+"¢σηѕє¢тєтυя#"
 
-#: ecommerce/extensions/basket/utils.py ecommerce/extensions/basket/utils.py
+#: ecommerce/extensions/basket/utils.py
 #, python-brace-format
 msgid "Coupon code '{code}' is not valid for this basket."
 msgstr ""
 "Çöüpön çödé '{code}' ïs nöt välïd för thïs ßäskét. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт "
 "αмєт, ¢σηѕє¢тєтυя α#"
+
+#: ecommerce/extensions/basket/utils.py
+#, python-brace-format
+msgid ""
+"Coupon code '{code}' is not valid for this basket for a bundled purchase."
+msgstr ""
+"Çöüpön çödé '{code}' ïs nöt välïd för thïs ßäskét för ä ßündléd pürçhäsé. "
+"Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя #"
 
 #: ecommerce/extensions/basket/utils.py
 #, python-brace-format
@@ -908,32 +973,21 @@ msgstr ""
 " ¢σηѕє¢тєтυя #"
 
 #: ecommerce/extensions/basket/views.py
-msgid "No product is available to buy."
-msgstr "Nö prödüçt ïs äväïläßlé tö ßüý. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢т#"
-
-#: ecommerce/extensions/basket/views.py
 msgid "You have already purchased these products"
 msgstr ""
 "Ýöü hävé älréädý pürçhäséd thésé prödüçts Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
 "¢σηѕє¢тєтυя #"
 
 #: ecommerce/extensions/basket/views.py
+msgid "No product is available to buy."
+msgstr "Nö prödüçt ïs äväïläßlé tö ßüý. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢т#"
+
+#: ecommerce/extensions/basket/views.py
 #, python-brace-format
-msgid ""
-"{strong_start}Purchasing just for yourself?{strong_end}{paragraph_start}If "
-"you are purchasing a single code for someone else, please continue with "
-"checkout. However, if you are the learner {link_start}go back{link_end} to "
-"enroll directly.{paragraph_end}"
+msgid "Could not apply the code '{code}'; it requires data sharing consent."
 msgstr ""
-"{strong_start}Pürçhäsïng jüst för ýöürsélf?{strong_end}{paragraph_start}Ìf "
-"ýöü äré pürçhäsïng ä sïnglé çödé för söméöné élsé, pléäsé çöntïnüé wïth "
-"çhéçköüt. Höwévér, ïf ýöü äré thé léärnér {link_start}gö ßäçk{link_end} tö "
-"énröll dïréçtlý.{paragraph_end} Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя "
-"α∂ιριѕι¢ιηg єłιт, ѕє∂ ∂σ єιυѕмσ∂ тємρσя ιη¢ι∂ι∂υηт υт łαвσяє єт ∂σłσяє мαgηα"
-" αłιqυα. υт єηιм α∂ мιηιм νєηιαм, qυιѕ ησѕтяυ∂ єχєя¢ιтαтιση υłłαм¢σ łαвσяιѕ "
-"ηιѕι υт αłιqυιρ єχ єα ¢σммσ∂σ ¢σηѕєqυαт. ∂υιѕ αυтє ιяυяє ∂σłσя ιη "
-"яєρяєнєη∂єяιт ιη νσłυρтαтє νєłιт єѕѕє ¢ιłłυм ∂σłσяє єυ ƒυgιαт ηυłłα "
-"ραяιαтυя. єχ¢єρтєυя ѕιηт σ¢¢αє¢αт ¢υρι∂αтαт ηση#"
+"Çöüld nöt äpplý thé çödé '{code}'; ït réqüïrés dätä shärïng çönsént. Ⱡ'σяєм "
+"ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя α#"
 
 #: ecommerce/extensions/basket/views.py
 msgid ""
@@ -996,10 +1050,32 @@ msgstr ""
 
 #: ecommerce/extensions/basket/views.py
 #, python-brace-format
-msgid "Could not apply the code '{code}'; it requires data sharing consent."
+msgid ""
+"{strong_start}Purchasing just for yourself?{strong_end}{paragraph_start}If "
+"you are purchasing a single code for someone else, please continue with "
+"checkout. However, if you are the learner {link_start}go back{link_end} to "
+"enroll directly.{paragraph_end}"
 msgstr ""
-"Çöüld nöt äpplý thé çödé '{code}'; ït réqüïrés dätä shärïng çönsént. Ⱡ'σяєм "
-"ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя α#"
+"{strong_start}Pürçhäsïng jüst för ýöürsélf?{strong_end}{paragraph_start}Ìf "
+"ýöü äré pürçhäsïng ä sïnglé çödé för söméöné élsé, pléäsé çöntïnüé wïth "
+"çhéçköüt. Höwévér, ïf ýöü äré thé léärnér {link_start}gö ßäçk{link_end} tö "
+"énröll dïréçtlý.{paragraph_end} Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя "
+"α∂ιριѕι¢ιηg єłιт, ѕє∂ ∂σ єιυѕмσ∂ тємρσя ιη¢ι∂ι∂υηт υт łαвσяє єт ∂σłσяє мαgηα"
+" αłιqυα. υт єηιм α∂ мιηιм νєηιαм, qυιѕ ησѕтяυ∂ єχєя¢ιтαтιση υłłαм¢σ łαвσяιѕ "
+"ηιѕι υт αłιqυιρ єχ єα ¢σммσ∂σ ¢σηѕєqυαт. ∂υιѕ αυтє ιяυяє ∂σłσя ιη "
+"яєρяєнєη∂єяιт ιη νσłυρтαтє νєłιт єѕѕє ¢ιłłυм ∂σłσяє єυ ƒυgιαт ηυłłα "
+"ραяιαтυя. єχ¢єρтєυя ѕιηт σ¢¢αє¢αт ¢υρι∂αтαт ηση#"
+
+#: ecommerce/extensions/basket/views.py
+msgid "quantity successfully updated"
+msgstr "qüäntïtý süççéssfüllý üpdätéd Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢#"
+
+#: ecommerce/extensions/basket/views.py
+msgid ""
+"Your basket couldn't be updated. Please correct any validation errors below."
+msgstr ""
+"Ýöür ßäskét çöüldn't ßé üpdätéd. Pléäsé çörréçt äný välïdätïön érrörs ßélöw."
+" Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυ#"
 
 #: ecommerce/extensions/basket/views.py
 #, python-brace-format
@@ -1013,6 +1089,18 @@ msgstr ""
 msgid "Coupon code '{code}' does not exist."
 msgstr ""
 "Çöüpön çödé '{code}' döés nöt éxïst. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тє#"
+
+#: ecommerce/extensions/basket/views.py
+#, python-format
+msgid "No coupon found with id '%s'"
+msgstr "Nö çöüpön föünd wïth ïd '%s' Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢#"
+
+#: ecommerce/extensions/basket/views.py
+#, python-format
+msgid "Coupon code '%s' was removed from your basket."
+msgstr ""
+"Çöüpön çödé '%s' wäs rémövéd fröm ýöür ßäskét. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
+"¢σηѕє¢тєтυя α#"
 
 #: ecommerce/extensions/catalogue/models.py
 msgid "Last date/time on which this product can be purchased."
@@ -1115,10 +1203,6 @@ msgid "Program UUID"
 msgstr "Prögräm ÛÛÌD Ⱡ'σяєм ιρѕυм ∂σłσя ѕ#"
 
 #: ecommerce/extensions/offer/models.py
-msgid "JournalBundle UUID"
-msgstr "JöürnälBündlé ÛÛÌD Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт#"
-
-#: ecommerce/extensions/offer/models.py
 msgid "Email to user pending."
 msgstr "Émäïl tö üsér péndïng. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢#"
 
@@ -1168,6 +1252,13 @@ msgstr ""
 "єχєя¢ιтαтιση υłłαм¢σ łαвσяιѕ ηιѕι υт αłιqυιρ єχ єα ¢σммσ∂σ ¢σηѕєqυαт. ∂υιѕ "
 "αυтє ιяυяє ∂σłσя ιη яєρяєнєη∂єяιт ιη νσłυρтαтє νєłιт єѕѕє ¢ιłłυм ∂σłσяє єυ "
 "ƒυgιαт ηυłłα ραяιαтυя. єχ¢єρтєυя ѕιηт σ¢¢αє¢αт ¢υρι∂αтαт ηση ρяσι∂є#"
+
+#: ecommerce/extensions/order/benefits.py
+#, python-format
+msgid "%d%% discount for manual course enrollment order"
+msgstr ""
+"%d%% dïsçöünt för mänüäl çöürsé énröllmént ördér Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт "
+"αмєт, ¢σηѕє¢тєтυя α#"
 
 #: ecommerce/extensions/order/models.py ecommerce/extensions/payment/models.py
 msgid "Payment Processor"
@@ -1227,6 +1318,13 @@ msgstr "{label} (réqüïréd) Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт#"
 msgid "Organization (required)"
 msgstr "Örgänïzätïön (réqüïréd) Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σ#"
 
+#: ecommerce/extensions/payment/forms.py
+msgid ""
+"I am purchasing on behalf of my employer or other professional organization"
+msgstr ""
+"Ì äm pürçhäsïng ön ßéhälf öf mý émplöýér ör öthér pröféssïönäl örgänïzätïön "
+"Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυ#"
+
 #: ecommerce/extensions/payment/forms.py ecommerce/extensions/payment/forms.py
 #: ecommerce/extensions/payment/views/__init__.py
 msgid ""
@@ -1273,13 +1371,6 @@ msgid "This field is required."
 msgstr "Thïs fïéld ïs réqüïréd. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σ#"
 
 #: ecommerce/extensions/payment/forms.py
-#, python-brace-format
-msgid "{state} is not a valid state/province in {country}."
-msgstr ""
-"{state} ïs nöt ä välïd stäté/prövïnçé ïn {country}. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт "
-"αмєт, ¢σηѕє¢тєтυя #"
-
-#: ecommerce/extensions/payment/forms.py
 msgid ""
 "Postal codes for the U.S. and Canada are limited to nine (9) characters."
 msgstr ""
@@ -1306,6 +1397,24 @@ msgstr ""
 "Nümßér öf tïmés tö rétrý fäïlïng Päýpäl çlïént äçtïöns (é.g., päýmént "
 "çréätïön, päýmént éxéçütïön) Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт,#"
 
+#: ecommerce/extensions/payment/models.py
+msgid "More than 10 digits before the decimal not allowed for fixed value."
+msgstr ""
+"Möré thän 10 dïgïts ßéföré thé déçïmäl nöt ällöwéd för fïxéd välüé. Ⱡ'σяєм "
+"ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя #"
+
+#: ecommerce/extensions/payment/models.py
+msgid "More than 2 digits after the decimal not allowed for fixed value."
+msgstr ""
+"Möré thän 2 dïgïts äftér thé déçïmäl nöt ällöwéd för fïxéd välüé. Ⱡ'σяєм "
+"ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя α#"
+
+#: ecommerce/extensions/payment/models.py
+msgid "Percentage greater than 100 not allowed."
+msgstr ""
+"Pérçéntägé gréätér thän 100 nöt ällöwéd. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
+"¢σηѕє¢тєтυя#"
+
 #. Translators: This is a string placed in the middle of a truncated string
 #. to indicate that truncation has occurred. For example, if a title may only
 #. be at most 11 characters long, "A Very Long Title" (17 characters) would be
@@ -1315,20 +1424,8 @@ msgid "..."
 msgstr "... Ⱡ'σяєм#"
 
 #: ecommerce/extensions/payment/views/cybersource.py
-#, python-brace-format
-msgid ""
-"An error occurred while processing your payment. You have not been charged. "
-"Please double-check the information you provided and try again. For help, "
-"{link_start}contact support{link_end}."
-msgstr ""
-"Àn érrör öççürréd whïlé pröçéssïng ýöür päýmént. Ýöü hävé nöt ßéén çhärgéd. "
-"Pléäsé döüßlé-çhéçk thé ïnförmätïön ýöü prövïdéd änd trý ägäïn. För hélp, "
-"{link_start}çöntäçt süppört{link_end}. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
-"¢σηѕє¢тєтυя α∂ιριѕι¢ιηg єłιт, ѕє∂ ∂σ єιυѕмσ∂ тємρσя ιη¢ι∂ι∂υηт υт łαвσяє єт "
-"∂σłσяє мαgηα αłιqυα. υт єηιм α∂ мιηιм νєηιαм, qυιѕ ησѕтяυ∂ єχєя¢ιтαтιση "
-"υłłαм¢σ łαвσяιѕ ηιѕι υт αłιqυιρ єχ єα ¢σммσ∂σ ¢σηѕєqυαт. ∂υιѕ αυтє ιяυяє "
-"∂σłσя ιη яєρяєнєη∂єяιт ιη νσłυρтαтє νєłιт єѕѕє ¢ιłłυм ∂σłσяє єυ ƒυgιαт ηυłłα"
-" ραяιαтυя. єχ¢єρтєυя ѕιηт σ¢¢αє¢αт ¢υρι∂αтαт ηση ρяσι∂єηт, ѕυηт ιη ¢υłρα qυ#"
+msgid "transaction declined"
+msgstr "tränsäçtïön déçlïnéd Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, #"
 
 #. Translators: "Waffle" is the name of a third-party library. It should not
 #. be translated
@@ -1419,10 +1516,10 @@ msgid "Usage"
 msgstr "Ûsägé Ⱡ'σяєм ιρѕ#"
 
 #: ecommerce/extensions/voucher/models.py
-msgid "This voucher is only available to another user"
+msgid "This voucher is assigned to another user."
 msgstr ""
-"Thïs vöüçhér ïs önlý äväïläßlé tö änöthér üsér Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
-"¢σηѕє¢тєтυя α#"
+"Thïs vöüçhér ïs ässïgnéd tö änöthér üsér. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
+"¢σηѕє¢тєтυя #"
 
 #: ecommerce/extensions/voucher/tests/test_utils.py
 #: ecommerce/extensions/voucher/utils.py ecommerce/extensions/voucher/utils.py
@@ -1630,93 +1727,6 @@ msgstr "Nöt äpplïçäßlé Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт#"
 msgid "Fixed"
 msgstr "Fïxéd Ⱡ'σяєм ιρѕ#"
 
-#: ecommerce/journals/benefits.py
-#, python-format
-msgid "%d%% journal bundle discount"
-msgstr "%d%% jöürnäl ßündlé dïsçöünt Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢#"
-
-#: ecommerce/journals/benefits.py
-#, python-format
-msgid "%d fixed-price journal bundle discount"
-msgstr ""
-"%d fïxéd-prïçé jöürnäl ßündlé dïsçöünt Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
-"¢σηѕє¢тєтυя#"
-
-#: ecommerce/journals/forms.py
-msgid "Journal Bundle UUID"
-msgstr "Jöürnäl Bündlé ÛÛÌD Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт,#"
-
-#: ecommerce/journals/forms.py
-msgid "An offer already exists for this journal bundle"
-msgstr ""
-"Àn öffér älréädý éxïsts för thïs jöürnäl ßündlé Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт,"
-" ¢σηѕє¢тєтυя α#"
-
-#: ecommerce/journals/forms.py
-msgid "A start date must be specified when specifying an end date"
-msgstr ""
-"À stärt däté müst ßé spéçïfïéd whén spéçïfýïng än énd däté Ⱡ'σяєм ιρѕυм "
-"∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя α#"
-
-#: ecommerce/journals/forms.py
-msgid "The start date must occur before the end date"
-msgstr ""
-"Thé stärt däté müst öççür ßéföré thé énd däté Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
-"¢σηѕє¢тєтυя #"
-
-#: ecommerce/journals/templates/journals/journalbundleoffer_form.html
-#, python-format
-msgid "Edit Journal Bundle Offer: %(journal_bundle_title)s"
-msgstr ""
-"Édït Jöürnäl Bündlé Öffér: %(journal_bundle_title)s Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт "
-"αмєт, ¢σηѕє¢т#"
-
-#: ecommerce/journals/templates/journals/journalbundleoffer_form.html
-#: ecommerce/journals/templates/journals/journalbundleoffer_form.html
-#: ecommerce/journals/templates/journals/journalbundleoffer_form.html
-#: ecommerce/journals/templates/journals/journalbundleoffer_list.html
-msgid "Create Journal Bundle Offer"
-msgstr "Çréäté Jöürnäl Bündlé Öffér Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє#"
-
-#: ecommerce/journals/templates/journals/journalbundleoffer_form.html
-#: ecommerce/journals/templates/journals/journalbundleoffer_list.html
-#: ecommerce/journals/templates/journals/journalbundleoffer_list.html
-#: ecommerce/templates/edx/partials/_administration_menu.html
-msgid "Journal Bundle Offers"
-msgstr "Jöürnäl Bündlé Öfférs Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, #"
-
-#: ecommerce/journals/templates/journals/journalbundleoffer_form.html
-msgid "Edit Journal Bundle Offer"
-msgstr "Édït Jöürnäl Bündlé Öffér Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕ#"
-
-#: ecommerce/journals/templates/journals/journalbundleoffer_form.html
-#: ecommerce/journals/templates/journals/journalbundleoffer_list.html
-#, python-format
-msgid "%(platform_name)s Journal Bundle Offer Administration Tool"
-msgstr ""
-"%(platform_name)s Jöürnäl Bündlé Öffér Àdmïnïsträtïön Tööl Ⱡ'σяєм ιρѕυм "
-"∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя #"
-
-#: ecommerce/journals/templates/journals/journalbundleoffer_list.html
-msgid "Current journal bundle offers"
-msgstr "Çürrént jöürnäl ßündlé öfférs Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢#"
-
-#: ecommerce/journals/templates/journals/journalbundleoffer_list.html
-msgid "Journal Bundle Title"
-msgstr "Jöürnäl Bündlé Tïtlé Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, #"
-
-#: ecommerce/journals/templates/journals/journalbundleoffer_list.html
-msgid "Bundle UUID"
-msgstr "Bündlé ÛÛÌD Ⱡ'σяєм ιρѕυм ∂σłσя #"
-
-#: ecommerce/journals/views.py
-msgid "Journal Bundle offer updated!"
-msgstr "Jöürnäl Bündlé öffér üpdätéd! Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢#"
-
-#: ecommerce/journals/views.py
-msgid "Journal Bundle offer created!"
-msgstr "Jöürnäl Bündlé öffér çréätéd! Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢#"
-
 #: ecommerce/management/templates/management/index.html
 msgid "Management View"
 msgstr "Mänägémént Vïéw Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт α#"
@@ -1781,10 +1791,14 @@ msgstr "Édït Prögräm Öffér Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αм
 #: ecommerce/programs/templates/programs/programoffer_form.html
 #: ecommerce/programs/templates/programs/programoffer_list.html
 #, python-format
-msgid "%(platform_name)s Program Offer Administration Tool"
+msgid ""
+"\n"
+"                %(platform_name)s Program Offer Administration Tool\n"
+"              "
 msgstr ""
-"%(platform_name)s Prögräm Öffér Àdmïnïsträtïön Tööl Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт "
-"αмєт, ¢σηѕє¢тєтυ#"
+"\n"
+"                %(platform_name)s Prögräm Öffér Àdmïnïsträtïön Tööl\n"
+"               Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя #"
 
 #: ecommerce/programs/templates/programs/programoffer_list.html
 msgid "Current program offers"
@@ -2017,10 +2031,14 @@ msgstr "Çöürsés Ⱡ'σяєм ιρѕυм #"
 
 #: ecommerce/templates/courses/course_app.html
 #, python-format
-msgid "%(platform_name)s Course Administration Tool"
+msgid ""
+"\n"
+"                                %(platform_name)s Course Administration Tool\n"
+"                            "
 msgstr ""
-"%(platform_name)s Çöürsé Àdmïnïsträtïön Tööl Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
-"¢σηѕє¢т#"
+"\n"
+"                                %(platform_name)s Çöürsé Àdmïnïsträtïön Tööl\n"
+"                             Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢ση#"
 
 #: ecommerce/templates/courses/menu_options.html
 msgid "Student Dashboard"
@@ -2051,13 +2069,12 @@ msgstr "Hï %(full_name)s, Ⱡ'σяєм ιρѕυм #"
 #: ecommerce/templates/customer/emails/commtype_course_purchased_body.txt
 #, python-format
 msgid ""
-"Thank you for purchasing %(course_title)s. The charge below will appear on "
-"your next credit or debit card statement with a company name of "
-"%(platform_name)s."
+"Thank you for purchasing %(course_title)s. A charge will appear on your "
+"credit or debit card statement with a company name of \"%(platform_name)s\"."
 msgstr ""
-"Thänk ýöü för pürçhäsïng %(course_title)s. Thé çhärgé ßélöw wïll äppéär ön "
-"ýöür néxt çrédït ör déßït çärd stätémént wïth ä çömpäný nämé öf "
-"%(platform_name)s. Ⱡ'#"
+"Thänk ýöü för pürçhäsïng %(course_title)s. À çhärgé wïll äppéär ön ýöür "
+"çrédït ör déßït çärd stätémént wïth ä çömpäný nämé öf \"%(platform_name)s\"."
+" Ⱡ'σяєм ιρѕυм#"
 
 #: ecommerce/templates/customer/emails/commtype_course_purchased_body.html
 #: ecommerce/templates/customer/emails/commtype_course_purchased_body.txt
@@ -2078,6 +2095,11 @@ msgid ""
 msgstr ""
 "Tö éxplöré öthér gréät çöürsés, vïsït thé %(platform_name)s wéßsïté. Möré "
 "çöürsés äré äddéd évérý däý! Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє#"
+
+#: ecommerce/templates/customer/emails/commtype_course_purchased_body.html
+#: ecommerce/templates/customer/emails/commtype_credit_receipt_body.html
+msgid "View Payment Information"
+msgstr "Vïéw Päýmént Ìnförmätïön Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢ση#"
 
 #: ecommerce/templates/customer/emails/commtype_course_purchased_body.html
 #: ecommerce/templates/customer/emails/commtype_course_purchased_body.txt
@@ -2106,6 +2128,13 @@ msgid "Receipt Confirmation for: "
 msgstr "Réçéïpt Çönfïrmätïön för:  Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕ#"
 
 #: ecommerce/templates/customer/emails/commtype_course_purchased_body.txt
+#: ecommerce/templates/customer/emails/commtype_credit_receipt_body.txt
+msgid "To view your payment information, visit the following website."
+msgstr ""
+"Tö vïéw ýöür päýmént ïnförmätïön, vïsït thé föllöwïng wéßsïté. Ⱡ'σяєм ιρѕυм "
+"∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя α#"
+
+#: ecommerce/templates/customer/emails/commtype_course_purchased_body.txt
 #, python-format
 msgid "%(platform_name)s team"
 msgstr "%(platform_name)s téäm Ⱡ'σяєм ιρѕυм ∂#"
@@ -2125,10 +2154,6 @@ msgstr "Päýmént Çönfïrmätïön Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт
 #: ecommerce/templates/customer/emails/commtype_credit_receipt_body.html
 msgid "Payment confirmation for:"
 msgstr "Päýmént çönfïrmätïön för: Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕ#"
-
-#: ecommerce/templates/customer/emails/commtype_credit_receipt_body.html
-msgid "View Payment Information"
-msgstr "Vïéw Päýmént Ìnförmätïön Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢ση#"
 
 #: ecommerce/templates/customer/emails/commtype_credit_receipt_body.html
 #: ecommerce/templates/customer/emails/commtype_credit_receipt_body.txt
@@ -2224,12 +2249,6 @@ msgstr ""
 "ηση ρяσι∂єηт, ѕυηт ιη ¢υłρα qυι σƒƒι¢ια ∂єѕєяυηт мσłłιт αηι#"
 
 #: ecommerce/templates/customer/emails/commtype_credit_receipt_body.txt
-msgid "To view your payment information, visit the following website."
-msgstr ""
-"Tö vïéw ýöür päýmént ïnförmätïön, vïsït thé föllöwïng wéßsïté. Ⱡ'σяєм ιρѕυм "
-"∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя α#"
-
-#: ecommerce/templates/customer/emails/commtype_credit_receipt_body.txt
 #, python-format
 msgid ""
 "You received this message because you purchased credit hours for "
@@ -2258,14 +2277,15 @@ msgstr ""
 "réädý tö léärn wïth édX: Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢#"
 
 #: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html
-#, python-format
+#, python-brace-format
 msgid ""
-"Download and save the %(link_start)s%(download_csv_link)s%(link_middle)s "
-"enrollment code file.%(link_end)s"
+"\n"
+"                                Download and save the {link_start}{download_csv_link}{link_middle} enrollment code file.{link_end}\n"
+"                            "
 msgstr ""
-"Döwnlöäd änd sävé thé %(link_start)s%(download_csv_link)s%(link_middle)s "
-"énröllmént çödé fïlé.%(link_end)s Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя "
-"α#"
+"\n"
+"                                Döwnlöäd änd sävé thé {link_start}{download_csv_link}{link_middle} énröllmént çödé fïlé.{link_end}\n"
+"                             Ⱡ'σяєм ιρѕυм #"
 
 #: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html
 #: ecommerce/templates/customer/emails/commtype_order_with_csv_body.txt
@@ -2289,25 +2309,26 @@ msgstr ""
 "∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя α#"
 
 #: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html
-#, python-format
+#, python-brace-format
 msgid ""
-"To view your payment information, log in to see your Order History, under "
-"%(link_start)s%(order_history_url)s%(link_middle)sAccount "
-"Settings%(link_end)s."
+"\n"
+"                            To view your payment information, log in to see your Order History, under {link_start}{order_history_url}{link_middle}Account Settings{link_end}.\n"
+"                        "
 msgstr ""
-"Tö vïéw ýöür päýmént ïnförmätïön, lög ïn tö séé ýöür Ördér Hïstörý, ündér "
-"%(link_start)s%(order_history_url)s%(link_middle)sÀççöünt "
-"Séttïngs%(link_end)s. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αм#"
+"\n"
+"                            Tö vïéw ýöür päýmént ïnförmätïön, lög ïn tö séé ýöür Ördér Hïstörý, ündér {link_start}{order_history_url}{link_middle}Àççöünt Séttïngs{link_end}.\n"
+"                         Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя α∂ιριѕι¢ιηg єłιт, ѕє∂ ∂σ єιυѕмσ∂ тємρσя ιη¢ι∂ι∂υηт υт łαвσяє єт ∂σłσяє мαgηα αłιqυα. υт єηιм α∂ мιηιм νєηιαм, qυιѕ ησѕтяυ∂ єχєя¢ιтαтιση υłłαм¢σ łαвσяιѕ ηιѕι υт αłιqυιρ єχ єα ¢σммσ∂σ ¢σηѕєqυαт. ∂υιѕ αυтє ιяυяє ∂σłσя ιη яєρяєнєη∂єяιт ιη νσłυρтαтє νєłιт єѕѕє ¢ιłłυм ∂σłσяє єυ ƒυgιαт ηυłłα ραяιαтυя. єχ¢єρтєυя ѕιηт σ¢¢αє¢αт ¢υρι∂αтαт ηση ρяσι∂єηт, ѕυηт ιη ¢υłρα qυι σƒƒι¢ια ∂єѕєяυηт #"
 
 #: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html
-#, python-format
+#, python-brace-format
 msgid ""
-"For more information and assistance, contact "
-"%(link_start)sinfo@edx.org.%(link_end)s"
+"\n"
+"                            For more information and assistance, check our {link_start}Help Center{link_end}\n"
+"                        "
 msgstr ""
-"För möré ïnförmätïön änd ässïstänçé, çöntäçt "
-"%(link_start)sïnfö@édx.örg.%(link_end)s Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
-"¢σηѕє¢тєтυя α#"
+"\n"
+"                            För möré ïnförmätïön änd ässïstänçé, çhéçk öür {link_start}Hélp Çéntér{link_end}\n"
+"                         Ⱡ'σяєм ιρѕυм #"
 
 #: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html
 #: ecommerce/templates/customer/emails/commtype_order_with_csv_body.txt
@@ -2415,15 +2436,15 @@ msgid "Thank you for your order!"
 msgstr "Thänk ýöü för ýöür ördér! Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕ#"
 
 #: ecommerce/templates/edx/checkout/receipt.html
-#, python-format
+#, python-brace-format
 msgid ""
 "Your order is complete. You will receive a confirmation message and your "
-"enrollment code(s) at %(link_start)s%(email)s%(link_end)s. If you need a "
-"receipt, you can print this page."
+"enrollment code(s) at {link_start}{email}{link_end}. If you need a receipt, "
+"you can print this page."
 msgstr ""
 "Ýöür ördér ïs çömplété. Ýöü wïll réçéïvé ä çönfïrmätïön méssägé änd ýöür "
-"énröllmént çödé(s) ät %(link_start)s%(email)s%(link_end)s. Ìf ýöü nééd ä "
-"réçéïpt, ýöü çän prïnt thïs pägé. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя "
+"énröllmént çödé(s) ät {link_start}{email}{link_end}. Ìf ýöü nééd ä réçéïpt, "
+"ýöü çän prïnt thïs pägé. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя "
 "α∂ιριѕι¢ιηg єłιт, ѕє∂ ∂σ єιυѕмσ∂ тємρσя ιη¢ι∂ι∂υηт υт łαвσяє єт ∂σłσяє мαgηα"
 " αłιqυα. υт єηιм α∂ мιηιм νєηιαм, qυιѕ ησѕтяυ∂ єχєя¢ιтαтιση υłłαм¢σ łαвσяιѕ "
 "ηιѕι υт αłιqυιρ єχ єα ¢σммσ∂σ ¢σηѕєqυαт. ∂υιѕ αυтє ιяυяє ∂σłσя ιη "
@@ -2432,21 +2453,21 @@ msgstr ""
 "σƒƒι¢ια ∂єѕєяυηт мσłłι#"
 
 #: ecommerce/templates/edx/checkout/receipt.html
-#, python-format
+#, python-brace-format
 msgid ""
 "Your order is complete. If you need a receipt, you can print this page. You "
 "will also receive a confirmation message with this information at "
-"%(link_start)s%(email)s%(link_end)s."
+"{link_start}{email}{link_end}."
 msgstr ""
 "Ýöür ördér ïs çömplété. Ìf ýöü nééd ä réçéïpt, ýöü çän prïnt thïs pägé. Ýöü "
 "wïll älsö réçéïvé ä çönfïrmätïön méssägé wïth thïs ïnförmätïön ät "
-"%(link_start)s%(email)s%(link_end)s. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
-"¢σηѕє¢тєтυя α∂ιριѕι¢ιηg єłιт, ѕє∂ ∂σ єιυѕмσ∂ тємρσя ιη¢ι∂ι∂υηт υт łαвσяє єт "
-"∂σłσяє мαgηα αłιqυα. υт єηιм α∂ мιηιм νєηιαм, qυιѕ ησѕтяυ∂ єχєя¢ιтαтιση "
-"υłłαм¢σ łαвσяιѕ ηιѕι υт αłιqυιρ єχ єα ¢σммσ∂σ ¢σηѕєqυαт. ∂υιѕ αυтє ιяυяє "
-"∂σłσя ιη яєρяєнєη∂єяιт ιη νσłυρтαтє νєłιт єѕѕє ¢ιłłυм ∂σłσяє єυ ƒυgιαт ηυłłα"
-" ραяιαтυя. єχ¢єρтєυя ѕιηт σ¢¢αє¢αт ¢υρι∂αтαт ηση ρяσι∂єηт, ѕυηт ιη ¢υłρα qυι"
-" σƒƒι¢ια ∂єѕєяυηт мσłłιт#"
+"{link_start}{email}{link_end}. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя "
+"α∂ιριѕι¢ιηg єłιт, ѕє∂ ∂σ єιυѕмσ∂ тємρσя ιη¢ι∂ι∂υηт υт łαвσяє єт ∂σłσяє мαgηα"
+" αłιqυα. υт єηιм α∂ мιηιм νєηιαм, qυιѕ ησѕтяυ∂ єχєя¢ιтαтιση υłłαм¢σ łαвσяιѕ "
+"ηιѕι υт αłιqυιρ єχ єα ¢σммσ∂σ ¢σηѕєqυαт. ∂υιѕ αυтє ιяυяє ∂σłσя ιη "
+"яєρяєнєη∂єяιт ιη νσłυρтαтє νєłιт єѕѕє ¢ιłłυм ∂σłσяє єυ ƒυgιαт ηυłłα "
+"ραяιαтυя. єχ¢єρтєυя ѕιηт σ¢¢αє¢αт ¢υρι∂αтαт ηση ρяσι∂єηт, ѕυηт ιη ¢υłρα qυι "
+"σƒƒι¢ια ∂єѕєяυηт мσłłιт#"
 
 #: ecommerce/templates/edx/checkout/receipt.html
 msgid "Order Number:"
@@ -2506,6 +2527,10 @@ msgstr ""
 " ѕιт αмєт, ¢σηѕє¢тєтυ#"
 
 #: ecommerce/templates/edx/checkout/receipt.html
+msgid "Discount for your first upgrade"
+msgstr "Dïsçöünt för ýöür fïrst üpgrädé Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢т#"
+
+#: ecommerce/templates/edx/checkout/receipt.html
 #, python-format
 msgid "Discount of type %(type)s is provided."
 msgstr ""
@@ -2526,21 +2551,23 @@ msgid "Get Your Course Credit"
 msgstr "Gét Ýöür Çöürsé Çrédït Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢#"
 
 #: ecommerce/templates/edx/checkout/receipt.html
-#, python-format
+#, python-brace-format
 msgid ""
 "To receive academic credit for this course, you must apply for credit at the"
 " organization that offers the credit. You can find a link to the "
-"organization’s website on your %(link_start)sdashboard%(link_end)s, next to "
-"the course name."
+"organization’s website on your "
+"{link_start}{lms_dashboard_url}{link_middle}dashboard{link_end}, next to the"
+" course name."
 msgstr ""
 "Tö réçéïvé äçädémïç çrédït för thïs çöürsé, ýöü müst äpplý för çrédït ät thé"
 " örgänïzätïön thät öfférs thé çrédït. Ýöü çän fïnd ä lïnk tö thé "
-"örgänïzätïön’s wéßsïté ön ýöür %(link_start)sdäshßöärd%(link_end)s, néxt tö "
-"thé çöürsé nämé. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя α∂ιριѕι¢ιηg єłιт, "
-"ѕє∂ ∂σ єιυѕмσ∂ тємρσя ιη¢ι∂ι∂υηт υт łαвσяє єт ∂σłσяє мαgηα αłιqυα. υт єηιм "
-"α∂ мιηιм νєηιαм, qυιѕ ησѕтяυ∂ єχєя¢ιтαтιση υłłαм¢σ łαвσяιѕ ηιѕι υт αłιqυιρ "
-"єχ єα ¢σммσ∂σ ¢σηѕєqυαт. ∂υιѕ αυтє ιяυяє ∂σłσя ιη яєρяєнєη∂єяιт ιη νσłυρтαтє"
-" νєłιт єѕѕє ¢ιłłυм ∂σłσяє єυ ƒυgιαт ηυłłα ραяιαтυя. єχ#"
+"örgänïzätïön’s wéßsïté ön ýöür "
+"{link_start}{lms_dashboard_url}{link_middle}däshßöärd{link_end}, néxt tö thé"
+" çöürsé nämé. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя α∂ιριѕι¢ιηg єłιт, ѕє∂"
+" ∂σ єιυѕмσ∂ тємρσя ιη¢ι∂ι∂υηт υт łαвσяє єт ∂σłσяє мαgηα αłιqυα. υт єηιм α∂ "
+"мιηιм νєηιαм, qυιѕ ησѕтяυ∂ єχєя¢ιтαтιση υłłαм¢σ łαвσяιѕ ηιѕι υт αłιqυιρ єχ "
+"єα ¢σммσ∂σ ¢σηѕєqυαт. ∂υιѕ αυтє ιяυяє ∂σłσя ιη яєρяєнєη∂єяιт ιη νσłυρтαтє "
+"νєłιт єѕѕє ¢ιłłυм ∂σłσяє єυ ƒυgιαт ηυłłα ρα#"
 
 #: ecommerce/templates/edx/checkout/receipt.html
 msgid "Go to dashboard"
@@ -2568,17 +2595,17 @@ msgstr ""
 "çörréçt, änd trý ägäïn. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢#"
 
 #: ecommerce/templates/edx/checkout/receipt_not_found.html
-#, python-format
+#, python-brace-format
 msgid ""
 "\n"
-"                You may also view your previous orders on the %(link_start)sAccount Settings%(link_end)s\n"
+"                You may also view your previous orders on the {link_start}{order_history_url}{link_middle}{link_end}Account Settings{link_end}\n"
 "                page.\n"
 "              "
 msgstr ""
 "\n"
-"                Ýöü mäý älsö vïéw ýöür prévïöüs ördérs ön thé %(link_start)sÀççöünt Séttïngs%(link_end)s\n"
+"                Ýöü mäý älsö vïéw ýöür prévïöüs ördérs ön thé {link_start}{order_history_url}{link_middle}{link_end}Àççöünt Séttïngs{link_end}\n"
 "                pägé.\n"
-"               Ⱡ'σяєм ιρѕ#"
+"               Ⱡ#"
 
 #: ecommerce/templates/edx/credit/_provider_detail.html
 msgid "Select"
@@ -2596,23 +2623,23 @@ msgstr "Prïçé:  Ⱡ'σяєм ιρѕυм #"
 #, python-format
 msgid ""
 "\n"
-"                    Learn more about %(display_name)s credit?\n"
-"                "
+"                        Learn more about %(display_name)s credit?\n"
+"                    "
 msgstr ""
 "\n"
-"                    Léärn möré äßöüt %(display_name)s çrédït?\n"
-"                 Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя #"
+"                        Léärn möré äßöüt %(display_name)s çrédït?\n"
+"                     Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυ#"
 
 #: ecommerce/templates/edx/credit/_provider_detail.html
 #, python-format
 msgid ""
 "\n"
-"                    Credit available until %(date)s\n"
-"                "
+"                        Credit available until %(date)s\n"
+"                    "
 msgstr ""
 "\n"
-"                    Çrédït äväïläßlé üntïl %(date)s\n"
-"                 Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя α#"
+"                        Çrédït äväïläßlé üntïl %(date)s\n"
+"                     Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя#"
 
 #: ecommerce/templates/edx/credit/checkout.html
 #, python-format
@@ -2623,27 +2650,27 @@ msgstr "Pürçhäsé Çrédït för %(course_name)s Ⱡ'σяєм ιρѕυм ∂�
 #, python-format
 msgid ""
 "\n"
-"                                Purchase Credit for %(course_name)s\n"
-"                            "
+"                                    Purchase Credit for %(course_name)s\n"
+"                                "
 msgstr ""
 "\n"
-"                                Pürçhäsé Çrédït för %(course_name)s\n"
-"                             Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢#"
+"                                    Pürçhäsé Çrédït för %(course_name)s\n"
+"                                 Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σ#"
 
 #: ecommerce/templates/edx/credit/checkout.html
 #, python-format
 msgid ""
 "\n"
-"                        Congratulations! You are eligible to purchase academic course credit for this course.\n"
-"                        You must purchase your credit before %(date)s.\n"
-"                        Select one of the following institutions to purchase your credit.\n"
-"                    "
+"                            Congratulations! You are eligible to purchase academic course credit for this course.\n"
+"                            You must purchase your credit before %(date)s.\n"
+"                            Select one of the following institutions to purchase your credit.\n"
+"                        "
 msgstr ""
 "\n"
-"                        Çöngrätülätïöns! Ýöü äré élïgïßlé tö pürçhäsé äçädémïç çöürsé çrédït för thïs çöürsé.\n"
-"                        Ýöü müst pürçhäsé ýöür çrédït ßéföré %(date)s.\n"
-"                        Séléçt öné öf thé föllöwïng ïnstïtütïöns tö pürçhäsé ýöür çrédït.\n"
-"                     Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя α∂ιριѕι¢ιηg єłιт, ѕє∂ ∂σ єιυѕмσ∂ тємρσя ιη¢ι∂ι∂υηт υт łαвσяє єт ∂σłσяє мαgηα αłιqυα. υт єηιм α∂ мιηιм νєηιαм, qυιѕ ησѕтяυ∂ єχєя¢ιтαтιση υłłαм¢σ łαвσяιѕ ηιѕι υт#"
+"                            Çöngrätülätïöns! Ýöü äré élïgïßlé tö pürçhäsé äçädémïç çöürsé çrédït för thïs çöürsé.\n"
+"                            Ýöü müst pürçhäsé ýöür çrédït ßéföré %(date)s.\n"
+"                            Séléçt öné öf thé föllöwïng ïnstïtütïöns tö pürçhäsé ýöür çrédït.\n"
+"                         Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя α∂ιριѕι¢ιηg єłιт, ѕє∂ ∂σ єιυѕмσ∂ тємρσя ιη¢ι∂ι∂υηт υт łαвσяє єт ∂σłσяє мαgηα αłιqυα. υт єηιм α∂ мιηιм νєηιαм, qυιѕ ησѕтяυ∂ єχ#"
 
 #: ecommerce/templates/edx/credit/checkout.html
 msgid "Price:"
@@ -2699,14 +2726,14 @@ msgid "Questions?"
 msgstr "Qüéstïöns? Ⱡ'σяєм ιρѕυм ∂σłσ#"
 
 #: ecommerce/templates/edx/credit/checkout.html
-#, python-format
+#, python-brace-format
 msgid ""
 "\n"
-"                    Please read %(link_start)sour FAQs to view common questions about our certificates.%(link_end)s\n"
+"                    Please read {link_start}our FAQs to view common questions about our certificates.{link_end}\n"
 "                "
 msgstr ""
 "\n"
-"                    Pléäsé réäd %(link_start)söür FÀQs tö vïéw çömmön qüéstïöns äßöüt öür çértïfïçätés.%(link_end)s\n"
+"                    Pléäsé réäd {link_start}öür FÀQs tö vïéw çömmön qüéstïöns äßöüt öür çértïfïçätés.{link_end}\n"
 "                 Ⱡ'σяєм ιρѕυм ∂σłσ#"
 
 #: ecommerce/templates/edx/email_confirmation_required.html
@@ -2786,17 +2813,17 @@ msgid "Your basket is empty"
 msgstr "Ýöür ßäskét ïs émptý Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, #"
 
 #: ecommerce/templates/oscar/basket/basket.html
-#, python-format
+#, python-brace-format
 msgid ""
 "\n"
-"                                If you attempted to make a purchase, you have not been charged. Return to your %(dashboard_link_start)sdashboard%(link_end)s to try\n"
-"                                again, or %(support_link_start)scontact %(platform_name)s Support%(link_end)s.\n"
+"                                If you attempted to make a purchase, you have not been charged. Return to your {link_start}{link_middle}{homepage_url}dashboard{link_end} to try\n"
+"                                again, or {link_start}{homepage_url}{link_middle}contact {platform_name} Support{link_end}.\n"
 "                            "
 msgstr ""
 "\n"
-"                                Ìf ýöü ättémptéd tö mäké ä pürçhäsé, ýöü hävé nöt ßéén çhärgéd. Rétürn tö ýöür %(dashboard_link_start)sdäshßöärd%(link_end)s tö trý\n"
-"                                ägäïn, ör %(support_link_start)sçöntäçt %(platform_name)s Süppört%(link_end)s.\n"
-"                             Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя α∂ιριѕι¢ιηg єłιт, ѕє∂ ∂σ єιυѕмσ∂ тємρσя ιη¢ι∂ι∂υηт υт łαвσяє єт ∂σłσяє мαgηα αłιqυα. υт єηιм α∂ мιηιм νєηιαм, qυιѕ ησѕтяυ∂ єχєя¢ιтαтιση υłłαм¢σ łαвσяιѕ ηιѕι υт αłιqυιρ єχ єα ¢σммσ∂σ ¢σηѕєqυαт. ∂υιѕ αυтє ιяυяє ∂σłσя ιη яєρяєнєη∂єяιт ιη νσłυρтαтє νєłιт єѕѕє ¢ιłłυм ∂σł#"
+"                                Ìf ýöü ättémptéd tö mäké ä pürçhäsé, ýöü hävé nöt ßéén çhärgéd. Rétürn tö ýöür {link_start}{link_middle}{homepage_url}däshßöärd{link_end} tö trý\n"
+"                                ägäïn, ör {link_start}{homepage_url}{link_middle}çöntäçt {platform_name} Süppört{link_end}.\n"
+"                             Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя α∂ιριѕι¢ιηg єłιт, ѕє∂ ∂σ єιυѕмσ∂ тємρσя ιη¢ι∂ι∂υηт υт łαвσяє єт ∂σłσяє мαgηα αłιqυα. υт єηιм α∂ мιηιм νєηιαм, qυιѕ ησѕтяυ∂ єχєя¢ιтαтιση υłłαм¢σ łαвσяιѕ ηιѕι υт αłιqυιρ єχ єα ¢σммσ∂σ ¢σηѕєqυαт. ∂υιѕ αυтє ιяυяє ∂σłσя ιη яєρяєнєη∂єяιт ιη νσłυρтαтє#"
 
 #: ecommerce/templates/oscar/basket/messages/new_total.html
 msgid "Your basket is now empty"
@@ -2804,17 +2831,17 @@ msgstr "Ýöür ßäskét ïs nöw émptý Ⱡ'σяєм ιρѕυм ∂σłσя �
 
 #: ecommerce/templates/oscar/basket/messages/new_total.html
 #: ecommerce/templates/oscar/basket/messages/new_total.html
-#, python-format
+#, python-brace-format
 msgid ""
 "\n"
-"            %(strong_start)sWe’ve updated your quantity.%(strong_end)s\n"
-"            %(paragraph_start)sYour cart includes %(num_items)s enrollment codes at a total cost of %(total)s, that you will receive via email.%(paragraph_end)s\n"
-"        "
+"                {strong_start}We’ve updated your quantity.{strong_end}\n"
+"                {paragraph_start}Your cart includes {num_items} enrollment codes at a total cost of {total}, that you will receive via email.{paragraph_end}\n"
+"            "
 msgstr ""
 "\n"
-"            %(strong_start)sWé’vé üpdätéd ýöür qüäntïtý.%(strong_end)s\n"
-"            %(paragraph_start)sÝöür çärt ïnçlüdés %(num_items)s énröllmént çödés ät ä tötäl çöst öf %(total)s, thät ýöü wïll réçéïvé vïä émäïl.%(paragraph_end)s\n"
-"         Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя α∂ιριѕι¢ιηg єłιт, ѕє∂ ∂σ єιυѕмσ∂ тємρσя ιη¢ι∂ι∂υηт υт łαвσяє єт ∂σłσяє мαgηα αłιqυα. υт єηιм α∂ мιηιм νєηιαм, qυιѕ ησѕтяυ∂ єχєя¢ιтαтιση υłłαм¢σ łαвσяιѕ ηιѕι υт αłιqυιρ єχ єα ¢σммσ∂σ ¢σηѕєqυαт. ∂υιѕ αυтє ιяυяє ∂σłσя ιη яєρяєнєη∂єяιт ιη νσłυρтαтє νєłιт єѕѕє ¢ιłłυм ∂σłσяє єυ ƒυgιαт ηυłłα ραяιαтυя. єχ¢єρтєυя ѕιηт σ¢¢αє¢αт ¢υρι∂αтαт ηση ρяσι∂єηт, ѕυηт ιη ¢υłρα qυι#"
+"                {strong_start}Wé’vé üpdätéd ýöür qüäntïtý.{strong_end}\n"
+"                {paragraph_start}Ýöür çärt ïnçlüdés {num_items} énröllmént çödés ät ä tötäl çöst öf {total}, thät ýöü wïll réçéïvé vïä émäïl.{paragraph_end}\n"
+"             Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя α∂ιριѕι¢ιηg єłιт, ѕє∂ ∂σ єιυѕмσ∂ тємρσя ιη¢ι∂ι∂υηт υт łαвσяє єт ∂σłσяє мαgηα αłιqυα. υт єηιм α∂ мιηιм νєηιαм, qυιѕ ησѕтяυ∂ єχєя¢ιтαтιση υłłαм¢σ łαвσяιѕ ηιѕι υт αłιqυιρ єχ єα ¢σммσ∂σ ¢σηѕєqυαт. ∂υιѕ αυтє ιяυяє ∂σłσя ιη яєρяєнєη∂єяιт ιη νσłυρтαтє νєłιт єѕѕє ¢ιłłυм ∂σłσяє єυ ƒυgιαт ηυłłα ραяιαтυя. єχ¢єρтєυя ѕιηт σ¢¢αє¢αт ¢υρι∂αтαт ηση ρяσι∂єηт, ѕ#"
 
 #: ecommerce/templates/oscar/basket/messages/new_total.html
 msgid "View basket"
@@ -2871,6 +2898,17 @@ msgstr ""
 "\n"
 "                                    %(benefit)s dïsçöünt prövïdéd ßý %(enterprise_customer_name)s.\n"
 "                                 Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт#"
+
+#: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html
+#, python-format
+msgid ""
+"\n"
+"                                    %(benefit)s%% discount for your first upgrade applied.\n"
+"                            "
+msgstr ""
+"\n"
+"                                    %(benefit)s%% dïsçöünt för ýöür fïrst üpgrädé äpplïéd.\n"
+"                             Ⱡ'σяєм ιρѕυм ∂σłσя#"
 
 #: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html
 #, python-format
@@ -3005,12 +3043,12 @@ msgstr ""
 #, python-format
 msgid ""
 "\n"
-"                                        Coupon code %(voucher_code)s applied\n"
-"                                    "
+"                                            Coupon code %(voucher_code)s applied\n"
+"                                        "
 msgstr ""
 "\n"
-"                                        Çöüpön çödé %(voucher_code)s äpplïéd\n"
-"                                     Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмє#"
+"                                            Çöüpön çödé %(voucher_code)s äpplïéd\n"
+"                                         Ⱡ'σяєм ιρѕυм ∂σłσя ѕ#"
 
 #: ecommerce/templates/oscar/basket/partials/hosted_checkout_basket.html
 msgid "Apply a coupon code"
@@ -3026,28 +3064,30 @@ msgid "Checkout with PayPal"
 msgstr "Çhéçköüt wïth PäýPäl Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, #"
 
 #: ecommerce/templates/oscar/basket/partials/hosted_checkout_basket.html
+#, python-brace-format
 msgid ""
-"<strong>Note:</strong> To earn a verified certificate, you must verify your "
-"identity with a <strong>webcam</strong> and a <strong>government-issued "
-"photo ID</strong>. "
+"{strong_start}Note:{strong_end} To earn a verified certificate, you must "
+"verify your identity with a {strong_start}webcam{strong_end} and a "
+"{strong_start}government-issued photo ID{strong_end}. "
 msgstr ""
-"<strong>Nöté:</strong> Tö éärn ä vérïfïéd çértïfïçäté, ýöü müst vérïfý ýöür "
-"ïdéntïtý wïth ä <strong>wéßçäm</strong> änd ä <strong>gövérnmént-ïssüéd "
-"phötö ÌD</strong>.  Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя α∂ιριѕι¢ιηg "
-"єłιт, ѕє∂ ∂σ єιυѕмσ∂ тємρσя ιη¢ι∂ι∂υηт υт łαвσяє єт ∂σłσяє мαgηα αłιqυα. υт "
-"єηιм α∂ мιηιм νєηιαм, qυιѕ ησѕтяυ∂ єχєя¢ιтαтιση υłłαм¢σ łαвσяιѕ ηιѕι υт "
-"αłιqυιρ єχ єα ¢σммσ∂σ ¢σηѕєqυαт. ∂υιѕ αυтє ιяυяє ∂σłσя ιη яєρяєнєη∂єяιт ιη "
-"νσłυρтαтє νєłιт єѕѕє ¢ιłłυм ∂σłσяє єυ ƒυgιαт ηυłłα ραяιαтυя. єχ¢єρтєυя ѕιηт "
-"σ¢¢αє¢αт ¢υρι∂αтαт ηση ρяσι∂єηт, ѕυηт ιη ¢υłρα qυι σƒƒι¢ια ∂єѕєяυηт мσłłιт "
-"αηιм ι∂ єѕт łαвσяυм#"
+"{strong_start}Nöté:{strong_end} Tö éärn ä vérïfïéd çértïfïçäté, ýöü müst "
+"vérïfý ýöür ïdéntïtý wïth ä {strong_start}wéßçäm{strong_end} änd ä "
+"{strong_start}gövérnmént-ïssüéd phötö ÌD{strong_end}.  Ⱡ'σяєм ιρѕυм ∂σłσя "
+"ѕιт αмєт, ¢σηѕє¢тєтυя α∂ιριѕι¢ιηg єłιт, ѕє∂ ∂σ єιυѕмσ∂ тємρσя ιη¢ι∂ι∂υηт υт "
+"łαвσяє єт ∂σłσяє мαgηα αłιqυα. υт єηιм α∂ мιηιм νєηιαм, qυιѕ ησѕтяυ∂ "
+"єχєя¢ιтαтιση υłłαм¢σ łαвσяιѕ ηιѕι υт αłιqυιρ єχ єα ¢σммσ∂σ ¢σηѕєqυαт. ∂υιѕ "
+"αυтє ιяυяє ∂σłσя ιη яєρяєнєη∂єяιт ιη νσłυρтαтє νєłιт єѕѕє ¢ιłłυм ∂σłσяє єυ "
+"ƒυgιαт ηυłłα ραяιαтυя. єχ¢єρтєυя ѕιηт σ¢¢αє¢αт ¢υρι∂αтαт ηση ρяσι∂єηт, ѕυηт "
+"ιη ¢υłρα qυι σƒƒι¢ια ∂єѕєяυηт мσłłιт αηιм ι∂ єѕт łαвσяυм#"
 
 #: ecommerce/templates/oscar/basket/partials/hosted_checkout_basket.html
+#, python-brace-format
 msgid ""
-"<strong>Note:</strong> To complete your enrollment, select Checkout or "
-"Checkout with PayPal."
+"{strong_start}Note:{strong_end} To complete your enrollment, select Checkout"
+" or Checkout with PayPal."
 msgstr ""
-"<strong>Nöté:</strong> Tö çömplété ýöür énröllmént, séléçt Çhéçköüt ör "
-"Çhéçköüt wïth PäýPäl. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тє#"
+"{strong_start}Nöté:{strong_end} Tö çömplété ýöür énröllmént, séléçt Çhéçköüt"
+" ör Çhéçköüt wïth PäýPäl. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тє#"
 
 #: ecommerce/templates/oscar/basket/partials/hosted_checkout_basket.html
 msgid "Have questions?"
@@ -3075,20 +3115,22 @@ msgid "Verify Your Identity"
 msgstr "Vérïfý Ýöür Ìdéntïtý Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, #"
 
 #: ecommerce/templates/oscar/checkout/_verification_data.html
+#, python-brace-format
 msgid ""
 "To receive a verified certificate, you have to verify your identity using "
-"your <strong>webcam</strong> and an <strong>official government-issued photo"
-" identification</strong> before the verification deadline."
+"your {strong_start}webcam{strong_end} and an {strong_start}official "
+"government-issued photo identification{strong_end} before the verification "
+"deadline."
 msgstr ""
 "Tö réçéïvé ä vérïfïéd çértïfïçäté, ýöü hävé tö vérïfý ýöür ïdéntïtý üsïng "
-"ýöür <strong>wéßçäm</strong> änd än <strong>öffïçïäl gövérnmént-ïssüéd phötö"
-" ïdéntïfïçätïön</strong> ßéföré thé vérïfïçätïön déädlïné. Ⱡ'σяєм ιρѕυм "
-"∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя α∂ιριѕι¢ιηg єłιт, ѕє∂ ∂σ єιυѕмσ∂ тємρσя "
-"ιη¢ι∂ι∂υηт υт łαвσяє єт ∂σłσяє мαgηα αłιqυα. υт єηιм α∂ мιηιм νєηιαм, qυιѕ "
-"ησѕтяυ∂ єχєя¢ιтαтιση υłłαм¢σ łαвσяιѕ ηιѕι υт αłιqυιρ єχ єα ¢σммσ∂σ "
-"¢σηѕєqυαт. ∂υιѕ αυтє ιяυяє ∂σłσя ιη яєρяєнєη∂єяιт ιη νσłυρтαтє νєłιт єѕѕє "
-"¢ιłłυм ∂σłσяє єυ ƒυgιαт ηυłłα ραяιαтυя. єχ¢єρтєυя ѕιηт σ¢¢αє¢αт ¢υρι∂αтαт "
-"ηση ρяσι∂є#"
+"ýöür {strong_start}wéßçäm{strong_end} änd än {strong_start}öffïçïäl "
+"gövérnmént-ïssüéd phötö ïdéntïfïçätïön{strong_end} ßéföré thé vérïfïçätïön "
+"déädlïné. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя α∂ιριѕι¢ιηg єłιт, ѕє∂ ∂σ "
+"єιυѕмσ∂ тємρσя ιη¢ι∂ι∂υηт υт łαвσяє єт ∂σłσяє мαgηα αłιqυα. υт єηιм α∂ мιηιм"
+" νєηιαм, qυιѕ ησѕтяυ∂ єχєя¢ιтαтιση υłłαм¢σ łαвσяιѕ ηιѕι υт αłιqυιρ єχ єα "
+"¢σммσ∂σ ¢σηѕєqυαт. ∂υιѕ αυтє ιяυяє ∂σłσя ιη яєρяєнєη∂єяιт ιη νσłυρтαтє νєłιт"
+" єѕѕє ¢ιłłυм ∂σłσяє єυ ƒυgιαт ηυłłα ραяιαтυя. єχ¢єρтєυя ѕιηт σ¢¢αє¢αт "
+"¢υρι∂αтαт ηση ρяσι∂є#"
 
 #: ecommerce/templates/oscar/checkout/_verification_data.html
 msgid "Verify Now"
@@ -3105,17 +3147,17 @@ msgid "Checkout Cancelled"
 msgstr "Çhéçköüt Çänçélléd Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт#"
 
 #: ecommerce/templates/oscar/checkout/cancel_checkout.html
-#, python-format
+#, python-brace-format
 msgid ""
 "\n"
-"            Your transaction has been cancelled. If you feel an error has occurred, contact %(start_link)s\n"
-"            %(payment_support_email)s%(end_link)s.\n"
-"            "
+"        Your transaction has been cancelled. If you feel an error has occurred, contact {start_link}\n"
+"        {payment_support_email}{end_link}.\n"
+"        "
 msgstr ""
 "\n"
-"            Ýöür tränsäçtïön häs ßéén çänçélléd. Ìf ýöü féél än érrör häs öççürréd, çöntäçt %(start_link)s\n"
-"            %(payment_support_email)s%(end_link)s.\n"
-"             Ⱡ'σ#"
+"        Ýöür tränsäçtïön häs ßéén çänçélléd. Ìf ýöü féél än érrör häs öççürréd, çöntäçt {start_link}\n"
+"        {payment_support_email}{end_link}.\n"
+"         Ⱡ'σяєм ιρѕυм ∂#"
 
 #: ecommerce/templates/oscar/checkout/error.html
 #: ecommerce/templates/oscar/checkout/error.html
@@ -3133,16 +3175,16 @@ msgid "You have not been charged."
 msgstr "Ýöü hävé nöt ßéén çhärgéd. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕ#"
 
 #: ecommerce/templates/oscar/checkout/error.html
-#, python-format
+#, python-brace-format
 msgid ""
 "\n"
-"                    Please try to submit your payment again. If this problem persists, please refer to our %(start_link)s\n"
-"                    Payments FAQ %(end_link)s for troubleshooting tips.\n"
+"                    Please try to submit your payment again. If this problem persists, please refer to our {start_link}\n"
+"                    Payments FAQ {end_link} for troubleshooting tips.\n"
 "                    "
 msgstr ""
 "\n"
-"                    Pléäsé trý tö süßmït ýöür päýmént ägäïn. Ìf thïs prößlém pérsïsts, pléäsé référ tö öür %(start_link)s\n"
-"                    Päýménts FÀQ %(end_link)s för tröüßléshöötïng tïps.\n"
+"                    Pléäsé trý tö süßmït ýöür päýmént ägäïn. Ìf thïs prößlém pérsïsts, pléäsé référ tö öür {start_link}\n"
+"                    Päýménts FÀQ {end_link} för tröüßléshöötïng tïps.\n"
 "                     Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя α∂ιριѕι¢ιηg єłιт, ѕє∂ ∂σ єιυѕмσ∂ тємρσя ιη¢ι∂ι∂υηт υт łαвσяє єт ∂σłσяє мαgηα αłιqυα. υт єηιм α∂ мιηιм νєηιαм, qυιѕ ησѕтяυ∂ єχєя¢ιтαтιση υłłαм¢σ łαвσяιѕ ηιѕι υт αłιqυιρ єχ єα ¢σммσ∂σ ¢σηѕєqυαт. ∂υιѕ αυтє ιяυяє ∂σłσя ιη яєρяєнєη∂єяιт ιη νσłυρтαтє νєłιт єѕѕє ¢ιłłυм ∂σłσяє єυ ƒυgιαт ηυłłα ραяιαтυя. єχ¢єρтєυя ѕιηт σ¢¢αє¢αт ¢υρι∂αт#"
 
 #: ecommerce/templates/oscar/checkout/payment_error.html
@@ -3151,34 +3193,39 @@ msgid "Payment Failed"
 msgstr "Päýmént Fäïléd Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт#"
 
 #: ecommerce/templates/oscar/checkout/payment_error.html
+#, python-brace-format
 msgid ""
-"An error occurred while processing your payment. <strong>You have not been "
-"charged.</strong>"
+"An error occurred while processing your payment. {strong_start}You have not "
+"been charged.{strong_end}"
 msgstr ""
-"Àn érrör öççürréd whïlé pröçéssïng ýöür päýmént. <strong>Ýöü hävé nöt ßéén "
-"çhärgéd.</strong> Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тє#"
+"Àn érrör öççürréd whïlé pröçéssïng ýöür päýmént. {strong_start}Ýöü hävé nöt "
+"ßéén çhärgéd.{strong_end} Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тє#"
 
 #: ecommerce/templates/oscar/checkout/payment_error.html
-#, python-format
+#, python-brace-format
 msgid ""
-"Please wait a few minutes and then try again. For help, contact "
-"%(start_link)s%(payment_support_email)s%(end_link)s."
+"Please wait a few minutes and then try again. For help, check our "
+"{start_link}Help Center{end_link}."
 msgstr ""
-"Pléäsé wäït ä féw mïnütés änd thén trý ägäïn. För hélp, çöntäçt "
-"%(start_link)s%(payment_support_email)s%(end_link)s. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт "
-"αмєт, ¢σηѕє¢тєтυ#"
+"Pléäsé wäït ä féw mïnütés änd thén trý ägäïn. För hélp, çhéçk öür "
+"{start_link}Hélp Çéntér{end_link}. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢т#"
 
 #: ecommerce/templates/oscar/checkout/payment_error.html
-#, python-format
-msgid "To try again, return to your %(start_link)sdashboard%(end_link)s."
+#, python-brace-format
+msgid "To try again, return to your {start_link}dashboard{end_link}."
 msgstr ""
-"Tö trý ägäïn, rétürn tö ýöür %(start_link)sdäshßöärd%(end_link)s. Ⱡ'σяєм "
-"ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя #"
+"Tö trý ägäïn, rétürn tö ýöür {start_link}däshßöärd{end_link}. Ⱡ'σяєм ιρѕυм "
+"∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя #"
 
-#. Translators: SDN is an acronym for Specially Designated Nationals
 #: ecommerce/templates/oscar/checkout/sdn_failure.html
-msgid "SDN Check Failure"
-msgstr "SDN Çhéçk Fäïlüré Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмє#"
+msgid ""
+"\n"
+"      SDN Check Failure\n"
+"    "
+msgstr ""
+"\n"
+"      SDN Çhéçk Fäïlüré\n"
+"     Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢#"
 
 #: ecommerce/templates/oscar/checkout/sdn_failure.html
 msgid ""
@@ -3196,15 +3243,15 @@ msgstr ""
 "ηιѕι υт αłιqυιρ єχ єα ¢σммσ∂σ ¢σηѕєqυαт. ∂υιѕ αυтє ιяυяє ∂σłσя ιη яєρ#"
 
 #: ecommerce/templates/oscar/checkout/sdn_failure.html
-#, python-format
+#, python-brace-format
 msgid ""
 "If you have questions regarding clearing a match, please contact "
-"%(ofac_email_link)s ofac.reconsideration@treasury.gov%(end_link)s for "
+"{ofac_email_link} ofac.reconsideration@treasury.gov{end_link} for "
 "information about options for clearing a match. Your account will be "
 "suspended until this matter is resolved satisfactorily."
 msgstr ""
 "Ìf ýöü hävé qüéstïöns régärdïng çléärïng ä mätçh, pléäsé çöntäçt "
-"%(ofac_email_link)s öfäç.réçönsïdérätïön@tréäsürý.göv%(end_link)s för "
+"{ofac_email_link} öfäç.réçönsïdérätïön@tréäsürý.göv{end_link} för "
 "ïnförmätïön äßöüt öptïöns för çléärïng ä mätçh. Ýöür äççöünt wïll ßé "
 "süspéndéd üntïl thïs mättér ïs résölvéd sätïsfäçtörïlý. Ⱡ'σяєм ιρѕυм ∂σłσя "
 "ѕιт αмєт, ¢σηѕє¢тєтυя α∂ιριѕι¢ιηg єłιт, ѕє∂ ∂σ єιυѕмσ∂ тємρσя ιη¢ι∂ι∂υηт υт "
@@ -3244,83 +3291,83 @@ msgstr "Délété Ⱡ'σяєм ιρѕυ#"
 #, python-format
 msgid ""
 "\n"
-"                    Created product variant '%(name)s'.\n"
-"                "
+"                        Created product variant '%(name)s'.\n"
+"                    "
 msgstr ""
 "\n"
-"                    Çréätéd prödüçt värïänt '%(name)s'.\n"
-"                 Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя #"
+"                        Çréätéd prödüçt värïänt '%(name)s'.\n"
+"                     Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυ#"
 
 #: ecommerce/templates/oscar/dashboard/catalogue/messages/product_saved.html
 #, python-format
 msgid ""
 "\n"
-"                    Created variant of '%(parent_name)s'.\n"
+"                        Created variant of '%(parent_name)s'.\n"
+"                    "
+msgstr ""
+"\n"
+"                        Çréätéd värïänt öf '%(parent_name)s'.\n"
+"                     Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя#"
+
+#: ecommerce/templates/oscar/dashboard/catalogue/messages/product_saved.html
+#, python-format
+msgid ""
+"\n"
+"                        Updated product variant '%(name)s'.\n"
+"                    "
+msgstr ""
+"\n"
+"                        Ûpdätéd prödüçt värïänt '%(name)s'.\n"
+"                     Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυ#"
+
+#: ecommerce/templates/oscar/dashboard/catalogue/messages/product_saved.html
+#, python-format
+msgid ""
+"\n"
+"                        Updated a variant of '%(parent_name)s'.\n"
+"                    "
+msgstr ""
+"\n"
+"                        Ûpdätéd ä värïänt öf '%(parent_name)s'.\n"
+"                     Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя#"
+
+#: ecommerce/templates/oscar/dashboard/catalogue/messages/product_saved.html
+#, python-format
+msgid ""
+"\n"
+"                    Created product '%(name)s'.\n"
 "                "
 msgstr ""
 "\n"
-"                    Çréätéd värïänt öf '%(parent_name)s'.\n"
+"                    Çréätéd prödüçt '%(name)s'.\n"
 "                 Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя α#"
 
 #: ecommerce/templates/oscar/dashboard/catalogue/messages/product_saved.html
 #, python-format
 msgid ""
 "\n"
-"                    Updated product variant '%(name)s'.\n"
+"                    Updated product '%(name)s'.\n"
 "                "
 msgstr ""
 "\n"
-"                    Ûpdätéd prödüçt värïänt '%(name)s'.\n"
-"                 Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя #"
-
-#: ecommerce/templates/oscar/dashboard/catalogue/messages/product_saved.html
-#, python-format
-msgid ""
-"\n"
-"                    Updated a variant of '%(parent_name)s'.\n"
-"                "
-msgstr ""
-"\n"
-"                    Ûpdätéd ä värïänt öf '%(parent_name)s'.\n"
+"                    Ûpdätéd prödüçt '%(name)s'.\n"
 "                 Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя α#"
-
-#: ecommerce/templates/oscar/dashboard/catalogue/messages/product_saved.html
-#, python-format
-msgid ""
-"\n"
-"                Created product '%(name)s'.\n"
-"            "
-msgstr ""
-"\n"
-"                Çréätéd prödüçt '%(name)s'.\n"
-"             Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя α#"
-
-#: ecommerce/templates/oscar/dashboard/catalogue/messages/product_saved.html
-#, python-format
-msgid ""
-"\n"
-"                Updated product '%(name)s'.\n"
-"            "
-msgstr ""
-"\n"
-"                Ûpdätéd prödüçt '%(name)s'.\n"
-"             Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя α#"
 
 #: ecommerce/templates/oscar/dashboard/catalogue/messages/product_saved.html
 msgid "Edit again"
 msgstr "Édït ägäïn Ⱡ'σяєм ιρѕυм ∂σłσ#"
 
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html
-#, python-format
+#, python-brace-format
 msgid ""
 "\n"
 "                            You are currently editing a product variant of\n"
-"                            <a href=\"%(parent_url)s\">%(title)s</a>.\n"
+"                            {start_anchor}{title}{end_anchor}.\n"
 "                        "
 msgstr ""
 "\n"
 "                            Ýöü äré çürréntlý édïtïng ä prödüçt värïänt öf\n"
-"                            <a href=\"%(parent_url)s\">%(title)s</a>.\n"
+"                            {start_anchor}{title}{end_anchor}.\n"
 "                         Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя α∂ιριѕι¢ιηg єłιт, ѕє∂ ∂σ єιυѕмσ∂ тємρσя ιη¢ι∂ι∂υηт υт łαвσяє єт ∂σłσяє мαgηα αłιqυα. υт єηιм α∂ мιηιм νєηιαм, qυιѕ ησѕтяυ∂ єχєя¢ιтαтιση υłłαм¢σ łαвσяιѕ ηιѕι υт αłιqυιρ єχ єα ¢σммσ∂σ ¢σηѕєqυαт. ∂υιѕ αυтє ιяυяє ∂σłσя ιη яєρяєнєη∂єяιт ιη νσłυρтαтє νєłιт єѕѕє ¢ιłłυм ∂σłσяє єυ ƒυgιαт ηυłłα ραяιαтυя. єχ¢єρтєυя ѕιηт σ¢¢αє¢αт ¢υρι∂αтαт ηση ρяσι∂єηт, ѕυηт ιη ¢υłρα qυι σƒƒι¢ια ∂єѕєяυηт мσłłιт αηιм ι∂ єѕт łα#"
 
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html
@@ -3493,14 +3540,8 @@ msgstr "Àçtïvé Vöüçhérs Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт α#"
 
 #: ecommerce/templates/oscar/dashboard/offers/offer_detail.html
 #, python-format
-msgid ""
-"\n"
-"        %(name)s | Offers\n"
-"    "
-msgstr ""
-"\n"
-"        %(name)s | Öfférs\n"
-"     Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕ#"
+msgid "%(name)s | Offers "
+msgstr "%(name)s | Öfférs  Ⱡ'σяєм ιρѕυм ∂σłσя ѕι#"
 
 #: ecommerce/templates/oscar/dashboard/offers/offer_detail.html
 msgid "Reinstating..."
