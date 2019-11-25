@@ -43,6 +43,8 @@ define([
             });
 
             it('should submit enterprise coupon form with valid fields', function() {
+                view.$('[name=contract_discount_value]').val(30).trigger('change');
+                view.$('[name=prepaid_invoice_amount]').val(10000).trigger('change');
                 view.$('[name=title]').val('Test Enrollment').trigger('change');
                 view.$('[name=code_type]').val('Enrollment code').trigger('change');
                 view.$('[name=start_date]').val('2015-01-01T00:00').trigger('change');
@@ -52,8 +54,6 @@ define([
                 view.$('[name=enterprise_customer_catalog]').val('869d26dd-2c44-487b-9b6a-24eee973f9a4').trigger(
                     'change'
                 );
-                view.$('[name=contract_discount_value]').val(30).trigger('change');
-                view.$('[name=prepaid_invoice_amount]').val(10000).trigger('change');
                 view.$('#not-applicable').prop('checked', true).trigger('change');
                 view.formView.submit($.Event('click'));
                 expect(model.isValid()).toBe(true);
