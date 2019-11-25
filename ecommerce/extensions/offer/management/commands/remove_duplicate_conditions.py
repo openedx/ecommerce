@@ -38,9 +38,7 @@ class Command(BaseCommand):
             id_count__gt=1,
             value__isnull=False,
             proxy_class__isnull=False,
-            enterprise_customer_uuid__isnull=False,
-            enterprise_customer_name__isnull=False,
-            enterprise_customer_catalog_uuid__isnull=False
+            enterprise_customer_name__isnull=False
         )
 
     def handle(self, *args, **options):
