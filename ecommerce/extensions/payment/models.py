@@ -79,7 +79,7 @@ class EnterpriseContractMetadata(TimeStampedModel):
     FIXED = 'Absolute'
     DISCOUNT_TYPE_CHOICES = [
         (PERCENTAGE, _('Percentage')),
-        (FIXED, _('Absolute')), 
+        (FIXED, _('Absolute')),
     ]
     amount_paid = models.DecimalField(null=True, decimal_places=2, max_digits=12)
     discount_value = models.DecimalField(null=True, decimal_places=5, max_digits=15)
@@ -98,7 +98,6 @@ class EnterpriseContractMetadata(TimeStampedModel):
                 self._validate_fixed_value()
             else:
                 self._validate_percentage_value()
-
 
     def _validate_fixed_value(self):
         before_decimal, __, after_decimal = str(self.discount_value).partition('.')
