@@ -306,7 +306,7 @@ class VoucherViewSet(NonDestroyableModelViewSet):
                     course_info=course_info,
                     credit_provider_price=None,
                     multiple_credit_providers=False,
-                    is_verified=(course.type == 'verified'),
+                    is_verified=(course.type == 'verified' or course.type == 'verified-only'),
                     product=product,
                     stock_record=stock_record,
                     voucher=voucher

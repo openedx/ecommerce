@@ -31,6 +31,9 @@ define([
                     view.model.set('type', 'verified');
                     expect(view.getActiveCourseTypes()).toEqual(['verified', 'credit']);
 
+                    view.model.set('type', 'verified-only');
+                    expect(view.getActiveCourseTypes()).toEqual(['verified-only', 'credit']);
+
                     view.model.set('type', 'professional');
                     expect(view.getActiveCourseTypes()).toEqual(['professional']);
 
@@ -38,7 +41,8 @@ define([
                     expect(view.getActiveCourseTypes()).toEqual(['credit']);
 
                     view.model.set('type', 'default');
-                    expect(view.getActiveCourseTypes()).toEqual(['audit', 'verified', 'professional', 'credit']);
+                    expect(view.getActiveCourseTypes()).toEqual(
+                        ['audit', 'verified', 'verified-only', 'professional', 'credit']);
                 });
             });
         });

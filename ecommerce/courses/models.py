@@ -99,8 +99,12 @@ class Course(models.Model):
             return 'credit'
         elif 'professional' in seat_types or 'no-id-professional' in seat_types:
             return 'professional'
-        elif 'verified' in seat_types:
+        # This is checking for the Verified and Audit case, but Audit has no certificate type
+        # so it is returned as the empty string.
+        elif 'verified' in seat_types and '' in seat_types:
             return 'verified'
+        elif 'verified' in seat_types:
+            return 'verified-only'
         return 'audit'
 
     @property

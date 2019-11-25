@@ -304,17 +304,20 @@ class CourseTests(DiscoveryTestMixin, TestCase):
         course = CourseFactory(id='a/b/c', name='Test Course', partner=self.partner)
         self.assertEqual(course.type, 'audit')
 
-        course.create_or_update_seat('audit', False, 0)
+        audit_seat = course.create_or_update_seat('', False, 0)
         self.assertEqual(course.type, 'audit')
 
         course.create_or_update_seat('verified', True, 10)
         self.assertEqual(course.type, 'verified')
 
-        seat = course.create_or_update_seat('professional', True, 100)
+        audit_seat.delete()
+        self.assertEqual(course.type, 'verified-only')
+
+        professional_seat = course.create_or_update_seat('professional', True, 100)
         self.assertEqual(course.type, 'professional')
 
-        seat.delete()
-        self.assertEqual(course.type, 'verified')
+        professional_seat.delete()
+        self.assertEqual(course.type, 'verified-only')
         course.create_or_update_seat('no-id-professional', False, 100)
         self.assertEqual(course.type, 'professional')
 
