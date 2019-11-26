@@ -127,6 +127,10 @@ class EnterpriseOfferForm(forms.ModelForm):
         enterprise_customer_catalog_uuid = self.cleaned_data['enterprise_customer_catalog_uuid']
         site = self.request.site
 
+        contract_discount_value = self.cleaned_data['contract_discount_value']
+        contract_discount_type = self.cleaned_data['contract_discount_type']
+        prepaid_invoice_amount = self.cleaned_data['prepaid_invoice_amount']
+
         enterprise_customer = get_enterprise_customer(site, enterprise_customer_uuid)
         enterprise_customer_name = enterprise_customer['name']
 
@@ -149,6 +153,16 @@ class EnterpriseOfferForm(forms.ModelForm):
         self.instance.priority = OFFER_PRIORITY_ENTERPRISE
 
         if commit:
+            ecm = self.instance.enterprise_contract_metadata
+            if ecm is None:
+                ecm = EnterpriseContractMetadata()
+            ecm.discount_value = contract_discount_value
+            ecm.discount_type = contract_discount_type
+            ecm.amount_paid = prepaid_invoice_amount
+            ecm.clean()
+            ecm.save()
+            self.instance.enterprise_contract_metadata = ecm
+
             benefit = getattr(self.instance, 'benefit', Benefit())
             benefit.proxy_class = class_path(BENEFIT_MAP[self.cleaned_data['benefit_type']])
             benefit.value = self.cleaned_data['benefit_value']
