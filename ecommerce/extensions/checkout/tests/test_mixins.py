@@ -506,3 +506,47 @@ class EdxOrderPlacementMixinTests(BusinessIntelligenceMixin, PaymentEventsMixin,
         assert OfferAssignment.objects.filter(
             offer=enterprise_offer, code=voucher.code, user_email=basket.owner.email, status=OFFER_REDEEMED
         ).count() == 1
+
+    def test_create_offer_assignments_for_updated_max_uses(self, __):
+        """
+        Verify the `create_assignments_for_multi_use_per_customer` works as expected for
+        `MULTI_USE_PER_CUSTOMER` when `max_global_applications` is updated for existing voucher.
+        """
+        coupon_max_global_applications = 1
+        enterprise_offer = EnterpriseOfferFactory(max_global_applications=coupon_max_global_applications)
+        voucher = VoucherFactory(usage=Voucher.MULTI_USE_PER_CUSTOMER)
+        voucher.offers.add(enterprise_offer)
+        basket = create_basket(owner=self.user, site=self.site)
+        basket.vouchers.add(voucher)
+        order = create_order(user=self.user, basket=basket)
+
+        assert OfferAssignment.objects.all().count() == 0
+
+        EdxOrderPlacementMixin().create_assignments_for_multi_use_per_customer(order)
+        EdxOrderPlacementMixin().update_assigned_voucher_offer_assignment(order)
+
+        assert OfferAssignment.objects.all().count() == coupon_max_global_applications
+        assert OfferAssignment.objects.filter(
+            offer=enterprise_offer, code=voucher.code, user_email=basket.owner.email, status=OFFER_REDEEMED
+        ).count() == 1
+
+        # update max_global_applications
+        coupon_new_max_global_applications = 5
+        enterprise_offer.max_global_applications = coupon_new_max_global_applications
+        enterprise_offer.save()
+
+        assert voucher.enterprise_offer.max_global_applications == coupon_new_max_global_applications
+
+        EdxOrderPlacementMixin().create_assignments_for_multi_use_per_customer(order)
+
+        assert OfferAssignment.objects.all().count() == coupon_new_max_global_applications
+        assert OfferAssignment.objects.filter(
+            offer=enterprise_offer, code=voucher.code, user_email=basket.owner.email, status=OFFER_ASSIGNED
+        ).count() == 4
+        assert OfferAssignment.objects.filter(
+            offer=enterprise_offer, code=voucher.code, user_email=basket.owner.email, status=OFFER_REDEEMED
+        ).count() == 1
+
+        # call once again to verify nothing is created because all available slots are assigned
+        EdxOrderPlacementMixin().create_assignments_for_multi_use_per_customer(order)
+        assert OfferAssignment.objects.all().count() == coupon_new_max_global_applications
