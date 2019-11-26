@@ -152,16 +152,24 @@ class EnterpriseOfferForm(forms.ModelForm):
         self.instance.partner = site.siteconfiguration.partner
         self.instance.priority = OFFER_PRIORITY_ENTERPRISE
 
+
+        print("\n\n\n\n\n\n\n\n------------------------")
         if commit:
             ecm = self.instance.enterprise_contract_metadata
+            print(ecm)
             if ecm is None:
                 ecm = EnterpriseContractMetadata()
+            print(ecm)
             ecm.discount_value = contract_discount_value
             ecm.discount_type = contract_discount_type
             ecm.amount_paid = prepaid_invoice_amount
             ecm.clean()
             ecm.save()
             self.instance.enterprise_contract_metadata = ecm
+            print(self.instance.enterprise_contract_metadata)
+            print(self.instance.enterprise_contract_metadata.discount_value)
+            print(self.instance.enterprise_contract_metadata.discount_type)
+            print(self.instance.enterprise_contract_metadata.amount_paid)
 
             benefit = getattr(self.instance, 'benefit', Benefit())
             benefit.proxy_class = class_path(BENEFIT_MAP[self.cleaned_data['benefit_type']])
