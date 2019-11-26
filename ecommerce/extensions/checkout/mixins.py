@@ -330,9 +330,15 @@ class EdxOrderPlacementMixin(six.with_metaclass(abc.ABCMeta, OrderPlacementMixin
 
         if voucher.usage == voucher.MULTI_USE_PER_CUSTOMER:
             user_email = basket.owner.email
-            if not OfferAssignment.objects.filter(code=voucher.code, user_email=user_email).exists():
+
+            existing_offer_assignments = OfferAssignment.objects.filter(
+                code=voucher.code, user_email=user_email
+            ).count()
+
+            if existing_offer_assignments < offer.max_global_applications:
+                offer_assignments_available = offer.max_global_applications - existing_offer_assignments
                 assignments = [
                     OfferAssignment(offer=offer, code=voucher.code, user_email=user_email, status=OFFER_ASSIGNED)
-                    for __ in range(offer.max_global_applications)
+                    for __ in range(offer_assignments_available)
                 ]
                 OfferAssignment.objects.bulk_create(assignments)
