@@ -11,6 +11,7 @@ from ecommerce.enterprise.benefits import BENEFIT_MAP, BENEFIT_TYPE_CHOICES
 from ecommerce.enterprise.conditions import EnterpriseCustomerCondition
 from ecommerce.enterprise.utils import get_enterprise_customer
 from ecommerce.extensions.offer.models import OFFER_PRIORITY_ENTERPRISE
+from ecommerce.extensions.payment.models import EnterpriseContractMetadata
 from ecommerce.programs.custom import class_path, create_condition
 
 Benefit = get_model('offer', 'Benefit')
@@ -25,12 +26,21 @@ class EnterpriseOfferForm(forms.ModelForm):
     benefit_value = forms.DecimalField(
         required=True, decimal_places=2, max_digits=12, min_value=0, label=_('Discount Value')
     )
+    contract_discount_type = forms.ChoiceField(
+        required=False, choices=EnterpriseContractMetadata.DISCOUNT_TYPE_CHOICES, label=_('Contract Discount Type')
+    )
+    contract_discount_value = forms.DecimalField(
+        required=False, decimal_places=5, max_digits=15, min_value=0, label=_('Contract Discount')
+    )
+    prepaid_invoice_amount = forms.DecimalField(
+        required=False, decimal_places=5, max_digits=15, min_value=0, label=_('Prepaid Invoice Amount')
+    )
 
     class Meta(object):
         model = ConditionalOffer
         fields = [
             'enterprise_customer_uuid', 'enterprise_customer_catalog_uuid', 'start_datetime', 'end_datetime',
-            'benefit_type', 'benefit_value'
+            'benefit_type', 'benefit_value', 'contract_discount_type', 'contract_discount_value', 'prepaid_invoice_amount',
         ]
         help_texts = {
             'end_datetime': '',
