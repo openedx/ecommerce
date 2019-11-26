@@ -163,6 +163,7 @@ class EnterpriseOfferCreateViewTests(EnterpriseServiceMockMixin, ViewTestMixin, 
             expected_prepaid_invoice_amount
         )
 
+
 class EnterpriseCouponAppViewTests(TestCase):
     path = reverse('enterprise:coupons', args=[''])
 
