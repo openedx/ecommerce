@@ -30,8 +30,11 @@ logger = logging.getLogger(__name__)
 Basket = get_model('basket', 'Basket')
 BasketAttribute = get_model('basket', 'BasketAttribute')
 BasketAttributeType = get_model('basket', 'BasketAttributeType')
+NoShippingRequired = get_class('shipping.methods', 'NoShippingRequired')
 OfferAssignment = get_model('offer', 'OfferAssignment')
 Order = get_model('order', 'Order')
+OrderNumberGenerator = get_class('order.utils', 'OrderNumberGenerator')
+OrderTotalCalculator = get_class('checkout.calculators', 'OrderTotalCalculator')
 post_checkout = get_class('checkout.signals', 'post_checkout')
 PaymentEvent = get_model('order', 'PaymentEvent')
 PaymentEventType = get_model('order', 'PaymentEventType')
@@ -49,6 +52,39 @@ class EdxOrderPlacementMixin(six.with_metaclass(abc.ABCMeta, OrderPlacementMixin
                                   'already exists. Basket id: [%d].'
     order_placement_failure_msg = 'Order Failure: %s payment was received, but an order for basket [%d] ' \
                                   'could not be placed.'
+
+    def create_order(self, request, basket, billing_address):
+        # Emma: this is moved from an old OrderCreationMixin class which was only in use by
+        # CybersourceInterstitialView and CybersourceApplePayAuthorizationView. Not for Paypal.
+        # Paypal has a different codepath for creating orders.
+
+        order_number = OrderNumberGenerator().order_number(basket)
+        try:
+            # Note (CCB): In the future, if we do end up shipping physical products, we will need to
+            # properly implement shipping methods. For more, see
+            # http://django-oscar.readthedocs.org/en/latest/howto/how_to_configure_shipping.html.
+            shipping_method = NoShippingRequired()
+            shipping_charge = shipping_method.calculate(basket)
+
+            # Note (CCB): This calculation assumes the payment processor has not sent a partial authorization,
+            # thus we use the amounts stored in the database rather than those received from the payment processor.
+            order_total = OrderTotalCalculator().calculate(basket, shipping_charge)
+            user = basket.owner
+
+            return self.handle_order_placement(
+                order_number,
+                user,
+                basket,
+                None,
+                shipping_method,
+                shipping_charge,
+                billing_address,
+                order_total,
+                request=request
+            )
+        except Exception:  # pylint: disable=broad-except
+            self.log_order_placement_exception(order_number, basket.id)
+            raise
 
     def add_payment_event(self, event):  # pylint: disable = arguments-differ
         """ Record a payment event for creation once the order is placed. """

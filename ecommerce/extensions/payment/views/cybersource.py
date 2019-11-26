@@ -66,37 +66,6 @@ class CyberSourceProcessorMixin(object):
         return Cybersource(self.request.site)
 
 
-class OrderCreationMixin(EdxOrderPlacementMixin):
-    def create_order(self, request, basket, billing_address):
-        order_number = OrderNumberGenerator().order_number(basket)
-        try:
-            # Note (CCB): In the future, if we do end up shipping physical products, we will need to
-            # properly implement shipping methods. For more, see
-            # http://django-oscar.readthedocs.org/en/latest/howto/how_to_configure_shipping.html.
-            shipping_method = NoShippingRequired()
-            shipping_charge = shipping_method.calculate(basket)
-
-            # Note (CCB): This calculation assumes the payment processor has not sent a partial authorization,
-            # thus we use the amounts stored in the database rather than those received from the payment processor.
-            order_total = OrderTotalCalculator().calculate(basket, shipping_charge)
-            user = basket.owner
-
-            return self.handle_order_placement(
-                order_number,
-                user,
-                basket,
-                None,
-                shipping_method,
-                shipping_charge,
-                billing_address,
-                order_total,
-                request=request
-            )
-        except Exception:  # pylint: disable=broad-except
-            self.log_order_placement_exception(order_number, basket.id)
-            raise
-
-
 class CybersourceSubmitView(BasePaymentSubmitView):
     """ Starts CyberSource payment process.
 
@@ -176,7 +145,7 @@ class CybersourceSubmitAPIView(APIView, CybersourceSubmitView):
         return super(CybersourceSubmitAPIView, self).post(request)
 
 
-class CybersourceInterstitialView(CyberSourceProcessorMixin, OrderCreationMixin, View):
+class CybersourceInterstitialView(CyberSourceProcessorMixin, EdxOrderPlacementMixin, View):
     """
     Interstitial view for Cybersource Payments.
 
@@ -545,7 +514,7 @@ class ApplePayStartSessionView(CyberSourceProcessorMixin, APIView):
         return JsonResponse(response.json(), status=response.status_code)
 
 
-class CybersourceApplePayAuthorizationView(CyberSourceProcessorMixin, OrderCreationMixin, APIView):
+class CybersourceApplePayAuthorizationView(CyberSourceProcessorMixin, EdxOrderPlacementMixin, APIView):
     permission_classes = (permissions.IsAuthenticated,)
 
     def _get_billing_address(self, apple_pay_payment_contact):
