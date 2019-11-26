@@ -31,7 +31,6 @@ from ecommerce.extensions.offer.constants import (
     OFFER_ASSIGNMENT_REVOKED,
     OFFER_REDEEMED
 )
-#from ecommerce.extensions.payment.models import EnterpriseContractMetadata
 
 OFFER_PRIORITY_ENTERPRISE = 10
 OFFER_PRIORITY_VOUCHER = 20
