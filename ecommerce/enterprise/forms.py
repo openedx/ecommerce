@@ -75,6 +75,9 @@ class EnterpriseOfferForm(forms.ModelForm):
         end_datetime = cleaned_data.get('end_datetime')
         enterprise_customer_uuid = cleaned_data.get('enterprise_customer_uuid')
         enterprise_customer_catalog_uuid = cleaned_data.get('enterprise_customer_catalog_uuid')
+        contract_discount_type = cleaned_data.get('contract_discount_type')
+        contract_discount_value = cleaned_data.get('contract_discount_value')
+        prepaid_invoice_amount = cleaned_data.get('prepaid_invoice_amount')
 
         if not self.instance.pk and enterprise_customer_uuid and enterprise_customer_catalog_uuid:
             enterprise_offer_exists = ConditionalOffer.objects.filter(
@@ -95,6 +98,27 @@ class EnterpriseOfferForm(forms.ModelForm):
 
         if start_datetime and end_datetime and start_datetime > end_datetime:
             self.add_error('start_datetime', _('The start date must occur before the end date.'))
+
+        if contract_discount_value is not None:
+            if contract_discount_type == EnterpriseContractMetadata.PERCENTAGE and contract_discount_value > 100:
+                self.add_error('contract_discount_value', _('Percentage discounts cannot be greater than 100%.'))
+            elif contract_discount_type == EnterpriseContractMetadata.FIXED:
+                before_decimal, __, after_decimal = str(contract_discount_value).partition('.')
+                if len(before_decimal) > 10:
+                    self.add_error('contract_discount_value', _(
+                        'More than 10 digits before the decimal '
+                        'not allowed for absolute value.'
+                    ))
+                if len(after_decimal) > 2:
+                    self.add_error('contract_discount_value', _(
+                        'More than 2 digits after the decimal '
+                        'not allowed for absolute value.'
+                    ))
+                if prepaid_invoice_amount is None:
+                    self.add_error('prepaid_invoice_amount', _(
+                        'This field is required when contract '
+                        'discount type is absolute.'
+                    ))
 
         return cleaned_data
 
