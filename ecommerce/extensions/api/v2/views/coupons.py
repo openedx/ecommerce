@@ -22,7 +22,11 @@ from ecommerce.extensions.api import data as data_api
 from ecommerce.extensions.api.filters import ProductFilter
 from ecommerce.extensions.api.serializers import CategorySerializer, CouponListSerializer, CouponSerializer
 from ecommerce.extensions.basket.utils import prepare_basket
-from ecommerce.extensions.catalogue.utils import create_coupon_product, get_or_create_catalog
+from ecommerce.extensions.catalogue.utils import (
+    attach_or_update_contract_metadata_on_coupon,
+    create_coupon_product,
+    get_or_create_catalog
+)
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
 from ecommerce.extensions.payment.processors.invoice import InvoicePayment
 from ecommerce.extensions.voucher.models import CouponVouchers
@@ -258,6 +262,9 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
             'voucher_type': voucher_type,
             'program_uuid': program_uuid,
             'notify_email': notify_email,
+            'contract_discount_type': request_data.get('contract_discount_type'),
+            'contract_discount_value': request_data.get('contract_discount_value'),
+            'prepaid_invoice_amount': request_data.get('prepaid_invoice_amount'),
         }
 
     @classmethod
@@ -460,6 +467,17 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
         if 'notify_email' in request_data:
             coupon.attr.notify_email = request_data.get('notify_email')
             coupon.save()
+
+        discount_value = request_data.get('contract_discount_value')
+        prepaid_invoice_amount = request_data.get('prepaid_invoice_amount')
+        if discount_value is not None or prepaid_invoice_amount is not None:
+            discount_type = request_data.get('contract_discount_type')
+            attach_or_update_contract_metadata_on_coupon(
+                coupon,
+                discount_type=discount_type,
+                discount_value=discount_value,
+                amount_paid=prepaid_invoice_amount,
+            )
 
     def update_offer_data(self, request_data, vouchers, site):
         """

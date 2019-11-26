@@ -9,6 +9,7 @@ from django.db.utils import IntegrityError
 from oscar.core.loading import get_model
 
 from ecommerce.core.constants import COUPON_PRODUCT_CLASS_NAME
+from ecommerce.extensions.payment.models import EnterpriseContractMetadata
 from ecommerce.extensions.voucher.models import CouponVouchers
 from ecommerce.extensions.voucher.utils import create_vouchers
 
@@ -129,6 +130,31 @@ def create_coupon_product_and_stockrecord(title, category, partner, price):
         product=coupon_product
     )
     return coupon_product
+
+
+def attach_or_update_contract_metadata_on_coupon(coupon, **update_kwargs):
+    """
+    Creates a enterprise_contract_metadata object and assigns it as an attr
+    of the coupon product if it does not exist.
+
+    If enterprise_contract_metadata attr exists, uses kwargs provided to
+    update the existing object.
+
+    Expected kwargs based on model:
+    contract_discount_type, contract_discount_value, prepaid_invoice_amount
+    """
+    try:
+        contract_metadata = coupon.attr.enterprise_contract_metadata
+    except AttributeError:
+        contract_metadata = EnterpriseContractMetadata()
+        coupon.attr.enterprise_contract_metadata = contract_metadata
+
+    for key, value in update_kwargs.items():
+        setattr(contract_metadata, key, value)
+
+    contract_metadata.clean()
+    contract_metadata.save()
+    coupon.save()
 
 
 def attach_vouchers_to_coupon_product(coupon_product, vouchers, note, notify_email=None, enterprise_id=None):

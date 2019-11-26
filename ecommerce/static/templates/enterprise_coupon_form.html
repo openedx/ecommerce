@@ -60,6 +60,29 @@
         </div>
 
         <div class="form-group">
+            <label for="contract-discount-value"><%= gettext('Discount on contract') %> *</label>
+            <div class="input-group">
+                <div class="contract-discount-addon input-group-addon"></div>
+                <input id="contract-discount-value" type="number" step="0.01" class="form-control contract-discount-value" name="contract_discount_value">
+            </div>
+            <div class="form-inline contract-discount-type">
+                <input id="contract-discount-percent" type="radio" name="contract_discount_type" value="Percentage">
+                <label for="contract-discount-percent" class="normal-font-weight"><%= gettext('Percent') %></label>
+                <input id="contract-discount-fixed" type="radio" name="contract_discount_type" value="Absolute">
+                <label for="contract-discount-fixed" class="normal-font-weight"><%= gettext('Fixed ($USD)') %></label>
+            </div>
+            <p class="help-block"></p>
+        </div>
+
+        <div class="form-group">
+            <label for="prepaid-invoice-amount"><%= gettext('Prepaid invoice amount') %> *</label>
+            <div class="input-group">
+                <div class="prepaid-invoice-amount-addon input-group-addon"></div>
+                <input id="prepaid-invoice-amount" type="number" step="0.01" class="form-control prepaid-invoice-amount" name="prepaid_invoice_amount">
+            </div>
+        </div>
+
+        <div class="form-group">
             <label for="benefit-value"><%= gettext('Discount Value') %> *</label>
             <div class="input-group">
                 <div class="benefit-addon input-group-addon"></div>

@@ -46,6 +46,7 @@ from ecommerce.extensions.offer.constants import (
     VOUCHER_PARTIAL_REDEEMED,
     VOUCHER_REDEEMED
 )
+from ecommerce.extensions.payment.models import EnterpriseContractMetadata
 from ecommerce.invoice.models import Invoice
 from ecommerce.programs.custom import class_path
 from ecommerce.tests.mixins import JwtMixin, ThrottlingMixin
@@ -299,6 +300,8 @@ class EnterpriseCouponViewSetRbacTests(
             'enterprise_customer': {'name': 'test enterprise', 'id': six.text_type(uuid4())},
             'enterprise_customer_catalog': six.text_type(uuid4()),
             'notify_email': 'batman@gotham.comics',
+            'contract_discount_type': EnterpriseContractMetadata.PERCENTAGE,
+            'contract_discount_value': '12.35',
         }
 
         self.course = CourseFactory(id='course-v1:test-org+course+run', partner=self.partner)

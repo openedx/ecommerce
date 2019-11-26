@@ -92,6 +92,39 @@ define([
                     onSet: function(val) {
                         return val === '' ? null : val;
                     }
+                },
+                'input[name=contract_discount_type]': {
+                    observe: 'contract_discount_type'
+                },
+                '.contract-discount-addon': {
+                    observe: 'contract_discount_type',
+                    onGet: function(val) {
+                        return this.toggleDollarPercentIcon(val);
+                    }
+                },
+                'input[name=contract_discount_value]': {
+                    observe: 'contract_discount_value',
+                    setOptions: {
+                        validate: true
+                    },
+                    onSet: function(val) {
+                        if (val === '') {
+                            return null;
+                        }
+                        return val;
+                    }
+                },
+                'input[name=prepaid_invoice_amount]': {
+                    observe: 'prepaid_invoice_amount',
+                    setOptions: {
+                        validate: true
+                    },
+                    onSet: function(val) {
+                        if (val === '') {
+                            return null;
+                        }
+                        return val;
+                    }
                 }
             },
 
@@ -99,6 +132,7 @@ define([
                 // catch value after autocomplete
                 'change [name=benefit_type]': 'changeLimitForBenefitValue',
                 'change [name=invoice_discount_type]': 'changeLimitForInvoiceDiscountValue',
+                'change [name=contract_discount_type]': 'changeLimitForContractDiscountValue',
                 'change [name=invoice_type]': 'toggleInvoiceFields',
                 'change [name=tax_deduction]': 'toggleTaxDeductedSourceField',
                 'click .external-link': 'routeToLink',
@@ -150,6 +184,13 @@ define([
                 this.$('select[name=enterprise_customer_catalog]').attr('disabled', disable);
             },
 
+            changeLimitForContractDiscountValue: function() {
+                var isContractDiscountPercentage = this.$(
+                    '[name=contract_discount_type]:checked').val() === 'Percentage',
+                    maxValue = isContractDiscountPercentage ? '100' : '';
+                this.setLimitToElement(this.$('[name=contract_discount_value]'), maxValue, 0);
+            },
+
             getEditableAttributes: function() {
                 return [
                     'benefit_value',
@@ -169,7 +210,10 @@ define([
                     'start_date',
                     'tax_deducted_source',
                     'title',
-                    'email_domains'
+                    'email_domains',
+                    'contract_discount_value',
+                    'contract_discount_type',
+                    'prepaid_invoice_amount'
                 ];
             },
 
@@ -183,6 +227,14 @@ define([
 
             cancelButtonClicked: function() {
                 this.model.set(this._initAttributes);
+            },
+
+            render: function() {
+                if (this.$('[name=contract_discount_type]:checked').val() === 'Percentage') {
+                    this.setLimitToElement(this.$('[name=contract_discount_value]'), 100, 0);
+                }
+                this._super();
+                return this;
             }
         });
     }
