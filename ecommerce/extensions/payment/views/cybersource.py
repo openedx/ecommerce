@@ -176,7 +176,16 @@ class CybersourceSubmitAPIView(APIView, CybersourceSubmitView):
         return super(CybersourceSubmitAPIView, self).post(request)
 
 
-class CybersourceNotificationMixin(CyberSourceProcessorMixin, OrderCreationMixin):
+class CybersourceInterstitialView(CyberSourceProcessorMixin, OrderCreationMixin, View):
+    """
+    Interstitial view for Cybersource Payments.
+
+    Side effect:
+        Sets the custom metric ``payment_response_validation`` to one of the following:
+            'success', 'redirect-to-receipt', 'redirect-to-payment-page', 'redirect-to-error-page'
+
+    """
+
     # Disable atomicity for the view. Otherwise, we'd be unable to commit to the database
     # until the request had concluded; Django will refuse to commit when an atomic() block
     # is active, since that would break atomicity. Without an order present in the database
@@ -184,7 +193,7 @@ class CybersourceNotificationMixin(CyberSourceProcessorMixin, OrderCreationMixin
     @method_decorator(transaction.non_atomic_requests)
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
-        return super(CybersourceNotificationMixin, self).dispatch(request, *args, **kwargs)
+        return super(CybersourceInterstitialView, self).dispatch(request, *args, **kwargs)
 
     def _get_billing_address(self, cybersource_response):
         field = 'req_bill_to_address_line1'
@@ -428,17 +437,6 @@ class CybersourceNotificationMixin(CyberSourceProcessorMixin, OrderCreationMixin
             notification.get("message", "Unknown Error"),
             ppr.id
         )
-
-
-class CybersourceInterstitialView(CybersourceNotificationMixin, View):
-    """
-    Interstitial view for Cybersource Payments.
-
-    Side effect:
-        Sets the custom metric ``payment_response_validation`` to one of the following:
-            'success', 'redirect-to-receipt', 'redirect-to-payment-page', 'redirect-to-error-page'
-
-    """
 
     def post(self, request, *args, **kwargs):  # pylint: disable=unused-argument
         """Process a CyberSource merchant notification and place an order for paid products as appropriate."""
