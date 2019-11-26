@@ -68,16 +68,12 @@ class EnterpriseOfferUpdateView(EnterpriseOfferProcessFormViewMixin, UpdateView)
 
     def get_context_data(self, **kwargs):
         context = super(EnterpriseOfferUpdateView, self).get_context_data(**kwargs)
-        print("\n\n\n in get context daya")
-        print(type(self.object))
-        print(self.object.enterprise_contract_metadata.discount_value)
         context.update({
             'editing': True,
             'enterprise_customer': get_enterprise_customer(
                 self.request.site,
                 self.object.condition.enterprise_customer_uuid
-            ),
-            'contract_discount_value': self.object.enterprise_contract_metadata.discount_value
+            )
         })
         return context
 

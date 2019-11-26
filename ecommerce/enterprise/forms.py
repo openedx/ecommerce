@@ -60,6 +60,9 @@ class EnterpriseOfferForm(forms.ModelForm):
                 'enterprise_customer_catalog_uuid': instance.condition.enterprise_customer_catalog_uuid,
                 'benefit_type': instance.benefit.proxy().benefit_class_type,
                 'benefit_value': instance.benefit.value,
+                'contract_discount_type': instance.enterprise_contract_metadata.discount_type,
+                'contract_discount_value': instance.enterprise_contract_metadata.discount_value,
+                'prepaid_invoice_amount': instance.enterprise_contract_metadata.amount_paid,
             })
         super(EnterpriseOfferForm, self).__init__(data, files, auto_id, prefix, initial, error_class, label_suffix,
                                                   empty_permitted, instance)
