@@ -67,6 +67,7 @@ define([
                         .toEqual(enterpriseCouponData.enterprise_customer_catalog);
                     expect(ajaxData.notify_email).toEqual(enterpriseCouponData.notify_email);
                     expect(ajaxData.contract_discount_value).toEqual(enterpriseCouponData.contract_discount_value);
+                    expect(ajaxData.prepaid_invoice_amount).toEqual(enterpriseCouponData.prepaid_invoice_amount);
                 });
 
                 it('should call Coupon model when saved', function() {
