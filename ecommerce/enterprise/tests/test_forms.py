@@ -10,6 +10,7 @@ from ecommerce.enterprise.benefits import BENEFIT_MAP
 from ecommerce.enterprise.forms import EnterpriseOfferForm
 from ecommerce.enterprise.tests.mixins import EnterpriseServiceMockMixin
 from ecommerce.extensions.offer.models import OFFER_PRIORITY_ENTERPRISE
+from ecommerce.extensions.payment.models import EnterpriseContractMetadata
 from ecommerce.extensions.test import factories
 from ecommerce.programs.custom import class_path
 from ecommerce.tests.testcases import TestCase
@@ -19,6 +20,13 @@ ConditionalOffer = get_model('offer', 'ConditionalOffer')
 
 
 class EnterpriseOfferFormTests(EnterpriseServiceMockMixin, TestCase):
+
+    def setUp(self):
+        super(EnterpriseOfferFormTests, self).setUp()
+        self.contract_discount_type = EnterpriseContractMetadata.PERCENTAGE
+        self.contract_discount_value = 74
+        self.prepaid_invoice_amount = 998990
+
     def generate_data(self, **kwargs):
         data = {
             'enterprise_customer_uuid': uuid.uuid4(),
@@ -26,13 +34,17 @@ class EnterpriseOfferFormTests(EnterpriseServiceMockMixin, TestCase):
             'enterprise_customer_catalog_uuid': uuid.uuid4(),
             'benefit_type': Benefit.PERCENTAGE,
             'benefit_value': 22,
+            'contract_discount_type': self.contract_discount_type,
+            'contract_discount_value': self.contract_discount_value,
+            'prepaid_invoice_amount': self.prepaid_invoice_amount,
         }
         data.update(**kwargs)
         return data
 
     def assert_enterprise_offer_conditions(self, offer, enterprise_customer_uuid, enterprise_customer_name,
                                            enterprise_customer_catalog_uuid, expected_benefit_value,
-                                           expected_benefit_type, expected_name):
+                                           expected_benefit_type, expected_name, expected_contract_discount_type,
+                                           expected_contract_discount_value, expected_prepaid_invoice_amount):
         """ Assert the given offer's parameters match the expected values. """
         self.assertEqual(str(offer.name), expected_name)
         self.assertEqual(offer.offer_type, ConditionalOffer.SITE)
@@ -45,6 +57,18 @@ class EnterpriseOfferFormTests(EnterpriseServiceMockMixin, TestCase):
         self.assertEqual(offer.condition.enterprise_customer_catalog_uuid, enterprise_customer_catalog_uuid)
         self.assertEqual(offer.benefit.proxy_class, class_path(BENEFIT_MAP[expected_benefit_type]))
         self.assertEqual(offer.benefit.value, expected_benefit_value)
+        self.assertEqual(
+            offer.enterprise_contract_metadata.discount_type,
+            expected_contract_discount_type
+        )
+        self.assertEqual(
+            offer.enterprise_contract_metadata.discount_value,
+            expected_contract_discount_value
+        )
+        self.assertEqual(
+            offer.enterprise_contract_metadata.amount_paid,
+            expected_prepaid_invoice_amount
+        )
 
     def assert_form_errors(self, data, expected_errors):
         """ Assert that form validation fails with the expected errors. """
@@ -55,6 +79,12 @@ class EnterpriseOfferFormTests(EnterpriseServiceMockMixin, TestCase):
     def test_init(self):
         """ The constructor should pull initial data from the passed-in instance. """
         enterprise_offer = factories.EnterpriseOfferFactory()
+        ecm = EnterpriseContractMetadata(
+            discount_value=25,
+            discount_type=EnterpriseContractMetadata.PERCENTAGE,
+            amount_paid=12345
+        )
+        enterprise_offer.enterprise_contract_metadata = ecm
         form = EnterpriseOfferForm(instance=enterprise_offer)
         self.assertEqual(
             form['enterprise_customer_uuid'].value(),
@@ -66,6 +96,9 @@ class EnterpriseOfferFormTests(EnterpriseServiceMockMixin, TestCase):
         )
         self.assertEqual(form['benefit_type'].value(), enterprise_offer.benefit.proxy().benefit_class_type)
         self.assertEqual(form['benefit_value'].value(), enterprise_offer.benefit.value)
+        self.assertEqual(form['contract_discount_type'].value(), EnterpriseContractMetadata.PERCENTAGE)
+        self.assertEqual(form['contract_discount_value'].value(), 25)
+        self.assertEqual(form['prepaid_invoice_amount'].value(), 12345)
 
     def test_clean_percentage(self):
         """ If a percentage benefit type is specified, the benefit value must never be greater than 100. """
@@ -107,7 +140,10 @@ class EnterpriseOfferFormTests(EnterpriseServiceMockMixin, TestCase):
 
     @httpretty.activate
     def test_save_create(self):
-        """ A new ConditionalOffer, Benefit, and Condition should be created. """
+        """
+        A new ConditionalOffer, Benefit, Condition, and
+        EnterpriseContractMetadata should be created.
+        """
         data = self.generate_data()
         self.mock_specific_enterprise_customer_api(data['enterprise_customer_uuid'])
         form = EnterpriseOfferForm(request=self.request, data=data)
@@ -125,6 +161,9 @@ class EnterpriseOfferFormTests(EnterpriseServiceMockMixin, TestCase):
                 data['enterprise_customer_name'][:48],
                 data['enterprise_customer_catalog_uuid']
             ),
+            data['contract_discount_type'],
+            data['contract_discount_value'],
+            data['prepaid_invoice_amount'],
         )
 
     @httpretty.activate
@@ -149,12 +188,21 @@ class EnterpriseOfferFormTests(EnterpriseServiceMockMixin, TestCase):
             'Discount of type Site provided by Spánish Enterprise for {}.'.format(
                 data['enterprise_customer_catalog_uuid']
             ),
+            data['contract_discount_type'],
+            data['contract_discount_value'],
+            data['prepaid_invoice_amount'],
         )
 
     @httpretty.activate
     def test_save_edit(self):
         """ Previously-created ConditionalOffer, Benefit, and Condition instances should be updated. """
         offer = factories.EnterpriseOfferFactory()
+        ecm = EnterpriseContractMetadata(
+            discount_value=self.contract_discount_value,
+            discount_type=self.contract_discount_type,
+            amount_paid=self.prepaid_invoice_amount,
+        )
+        offer.enterprise_contract_metadata = ecm
         data = self.generate_data(
             enterprise_customer_uuid=offer.condition.enterprise_customer_uuid,
             benefit_type=Benefit.FIXED
@@ -177,6 +225,9 @@ class EnterpriseOfferFormTests(EnterpriseServiceMockMixin, TestCase):
                 data['enterprise_customer_name'][:48],
                 data['enterprise_customer_catalog_uuid']
             ),
+            data['contract_discount_type'],
+            data['contract_discount_value'],
+            data['prepaid_invoice_amount'],
         )
 
     @httpretty.activate
@@ -211,6 +262,9 @@ class EnterpriseOfferFormTests(EnterpriseServiceMockMixin, TestCase):
                 data['enterprise_customer_name'][:48],
                 data['enterprise_customer_catalog_uuid']
             ),
+            data['contract_discount_type'],
+            data['contract_discount_value'],
+            data['prepaid_invoice_amount'],
         )
 
     def test_create_when_conditional_offer_with_uuid_exists(self):
