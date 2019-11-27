@@ -170,13 +170,6 @@ class EnterpriseOfferFormTests(EnterpriseServiceMockMixin, TestCase):
         The contract discount value, when the contract discount type is an
         absolute value, should not have more digits before/after the decimal.
         """
-        # too many digits before decimal
-        data = self.generate_data(
-            contract_discount_type=EnterpriseContractMetadata.FIXED,
-            contract_discount_value=10000000000.10,
-        )
-        self.assert_form_errors(data, {'contract_discount_value': ['More than 10 digits before the decimal not allowed for absolute value.']})
-
         # too many digits after decimal
         data = self.generate_data(
             contract_discount_type=EnterpriseContractMetadata.FIXED,

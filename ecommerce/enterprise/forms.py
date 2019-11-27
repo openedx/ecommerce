@@ -138,11 +138,6 @@ class EnterpriseOfferForm(forms.ModelForm):
                 self.add_error('contract_discount_value', _('Percentage discounts cannot be greater than 100%.'))
             elif contract_discount_type == EnterpriseContractMetadata.FIXED:
                 before_decimal, __, after_decimal = str(contract_discount_value).partition('.')
-                if len(before_decimal) > 10:
-                    self.add_error('contract_discount_value', _(
-                        'More than 10 digits before the decimal '
-                        'not allowed for absolute value.'
-                    ))
                 if len(after_decimal) > 2:
                     self.add_error('contract_discount_value', _(
                         'More than 2 digits after the decimal '
