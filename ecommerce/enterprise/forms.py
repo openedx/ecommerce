@@ -2,6 +2,7 @@
 # TODO: Refactor this to consolidate it with `ecommerce.programs.forms`.
 from __future__ import absolute_import
 
+from django.core.validators import RegexValidator
 from django import forms
 from django.forms.utils import ErrorList
 from django.utils.translation import ugettext_lazy as _
@@ -50,19 +51,46 @@ class EnterpriseOfferForm(forms.ModelForm):
             'end_datetime': _('End Date'),
         }
 
+    def _prep_contract_metadata(self, enterprise_contract_metadata):
+        """
+        Reconciles the way we store the data with how we serve up the form.
+
+        Reduces trailing decimals for Absolute contract_discount_value case.
+        Sets all contract metadata fields for preexisting offers that do not
+        have a contract metadata object existing.
+
+        Returns a tuple: discount_type, discount_value, and invoice_amount
+        """
+        if enterprise_contract_metadata is None:
+            return (None, None, None)
+
+        contract_discount_type = enterprise_contract_metadata.discount_type
+        prepaid_invoice_amount = enterprise_contract_metadata.amount_paid
+
+        contract_discount_value = enterprise_contract_metadata.discount_value
+        before_decimal, dec, after_decimal = str(contract_discount_value).partition('.')
+        if contract_discount_type == EnterpriseContractMetadata.FIXED and len(after_decimal) > 2:
+            after_decimal = after_decimal[0:2]
+            contract_discount_value = before_decimal + dec + after_decimal
+
+        return (contract_discount_type, contract_discount_value, prepaid_invoice_amount)
+
     def __init__(self, data=None, files=None, auto_id='id_%s', prefix=None, initial=None, error_class=ErrorList,
                  label_suffix=None, empty_permitted=False, instance=None, request=None, is_editing=None):
         initial = initial or {}
         self.request = request
         if instance:
+            contract_discount_type, contract_discount_value, prepaid_invoice_amount = self._prep_contract_metadata(
+                instance.enterprise_contract_metadata
+            )
             initial.update({
                 'enterprise_customer_uuid': instance.condition.enterprise_customer_uuid,
                 'enterprise_customer_catalog_uuid': instance.condition.enterprise_customer_catalog_uuid,
                 'benefit_type': instance.benefit.proxy().benefit_class_type,
                 'benefit_value': instance.benefit.value,
-                'contract_discount_type': instance.enterprise_contract_metadata.discount_type,
-                'contract_discount_value': instance.enterprise_contract_metadata.discount_value,
-                'prepaid_invoice_amount': instance.enterprise_contract_metadata.amount_paid,
+                'contract_discount_type': contract_discount_type,
+                'contract_discount_value': contract_discount_value,
+                'prepaid_invoice_amount': prepaid_invoice_amount,
             })
         super(EnterpriseOfferForm, self).__init__(data, files, auto_id, prefix, initial, error_class, label_suffix,
                                                   empty_permitted, instance)
