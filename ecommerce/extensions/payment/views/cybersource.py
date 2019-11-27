@@ -566,7 +566,7 @@ class CybersourceApplePayAuthorizationView(CyberSourceProcessorMixin, EdxOrderPl
         except GatewayError:
             return Response({'error': 'payment_failed'}, status=status.HTTP_502_BAD_GATEWAY)
 
-        order = self.create_order(request, basket, billing_address)
+        order = self.create_order(request, basket, billing_address=billing_address)
         return Response(OrderSerializer(order, context={'request': request}).data, status=status.HTTP_201_CREATED)
 
     def handle_payment(self, response, basket):

@@ -294,8 +294,8 @@ class PaypalPaymentExecutionViewTests(PaypalMixin, PaymentEventsMixin, TestCase)
         self.request.site = self.site
         dummy_view.request = self.request
 
-        with LogCapture(self.DUPLICATE_ORDER_LOGGER_NAME) as lc:
-            dummy_view.call_handle_order_placement(prior_order.basket, self.request)
+        with LogCapture(self.DUPLICATE_ORDER_LOGGER_NAME) as lc, self.assertRaises(Exception):
+            dummy_view.create_order(request=self.request, basket=prior_order.basket)
             lc.check(
                 (
                     self.DUPLICATE_ORDER_LOGGER_NAME,
