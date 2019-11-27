@@ -70,10 +70,8 @@ class EnterpriseOfferFormTests(EnterpriseServiceMockMixin, TestCase):
             expected_prepaid_invoice_amount
         )
 
-    def assert_form_errors(self, data, expected_errors, form=None):
+    def assert_form_errors(self, data, expected_errors):
         """ Assert that form validation fails with the expected errors. """
-        if not form:
-            form = EnterpriseOfferForm(data=data)
         self.assertFalse(form.is_valid())
         self.assertEqual(form.errors, expected_errors)
 
@@ -102,14 +100,20 @@ class EnterpriseOfferFormTests(EnterpriseServiceMockMixin, TestCase):
         self.assertEqual(form['prepaid_invoice_amount'].value(), 12345)
 
     def test_contract_metadata_required_on_create(self):
-        """ The constructor should pull initial data from the passed-in instance. """
+        """
+        Contract metadata should be required on create, specifically the
+        contract discount type and value fields.
+        """
         enterprise_offer = factories.EnterpriseOfferFactory()
         form = EnterpriseOfferForm(instance=enterprise_offer, is_editing=False)
         self.assertTrue(form['contract_discount_type'].field.required)
         self.assertTrue(form['contract_discount_value'].field.required)
 
     def test_contract_metadata_not_required_on_edit(self):
-        """ The constructor should pull initial data from the passed-in instance. """
+        """
+        Contract metadata should NOT be required on edit, specifically the
+        contract discount type and value fields.
+        """
         enterprise_offer = factories.EnterpriseOfferFactory()
         form = EnterpriseOfferForm(instance=enterprise_offer, is_editing=True)
         self.assertFalse(form['contract_discount_type'].field.required)
