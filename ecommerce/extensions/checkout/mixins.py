@@ -53,12 +53,11 @@ class EdxOrderPlacementMixin(six.with_metaclass(abc.ABCMeta, OrderPlacementMixin
     order_placement_failure_msg = 'Order Failure: %s payment was received, but an order for basket [%d] ' \
                                   'could not be placed.'
 
-    def create_order(self, request, basket, billing_address):
+    def create_order(self, request, basket, billing_address=None):
         # Emma: this is moved from an old OrderCreationMixin class which was only in use by
         # CybersourceInterstitialView and CybersourceApplePayAuthorizationView. Not for Paypal.
         # Paypal has a different codepath for creating orders.
 
-        order_number = OrderNumberGenerator().order_number(basket)
         try:
             # Note (CCB): In the future, if we do end up shipping physical products, we will need to
             # properly implement shipping methods. For more, see
@@ -69,19 +68,24 @@ class EdxOrderPlacementMixin(six.with_metaclass(abc.ABCMeta, OrderPlacementMixin
             # Note (CCB): This calculation assumes the payment processor has not sent a partial authorization,
             # thus we use the amounts stored in the database rather than those received from the payment processor.
             order_total = OrderTotalCalculator().calculate(basket, shipping_charge)
-            user = basket.owner
 
-            return self.handle_order_placement(
-                order_number,
-                user,
-                basket,
-                None,
-                shipping_method,
-                shipping_charge,
-                billing_address,
-                order_total,
+            user = basket.owner
+            order_number = basket.order_number
+
+            order = self.handle_order_placement(
+                order_number=order_number,
+                user=user,
+                basket=basket,
+                shipping_address=None,
+                shipping_method=shipping_method,
+                shipping_charge=shipping_charge,
+                billing_address=billing_address,
+                order_total=order_total,
                 request=request
             )
+
+            return order
+
         except Exception:  # pylint: disable=broad-except
             self.log_order_placement_exception(order_number, basket.id)
             raise

@@ -132,37 +132,19 @@ class PaypalPaymentExecutionView(EdxOrderPlacementMixin, View):
             logger.exception('Attempts to handle payment for basket [%d] failed.', basket.id)
             return redirect(receipt_url)
 
-        self.call_handle_order_placement(basket, request)
-
-        return redirect(receipt_url)
-
-    def call_handle_order_placement(self, basket, request):
         try:
-            shipping_method = NoShippingRequired()
-            shipping_charge = shipping_method.calculate(basket)
-            order_total = OrderTotalCalculator().calculate(basket, shipping_charge)
+            order = self.create_order(request, basket)
+        except Exception:  # pylint: disable=broad-except
+            # any errors here will be logged in the create_order method. If we wanted any
+            # Paypal specific logging for this error, we would do that here.
+            return redirect(receipt_url)
 
-            user = basket.owner
-            # Given a basket, order number generation is idempotent. Although we've already
-            # generated this order number once before, it's faster to generate it again
-            # than to retrieve an invoice number from PayPal.
-            order_number = basket.order_number
-
-            order = self.handle_order_placement(
-                order_number=order_number,
-                user=user,
-                basket=basket,
-                shipping_address=None,
-                shipping_method=shipping_method,
-                shipping_charge=shipping_charge,
-                billing_address=None,
-                order_total=order_total,
-                request=request
-            )
+        try:
             self.handle_post_order(order)
-
         except Exception:  # pylint: disable=broad-except
             self.log_order_placement_exception(basket.order_number, basket.id)
+
+        return redirect(receipt_url)
 
 
 class PaypalProfileAdminView(View):

@@ -645,7 +645,7 @@ class CybersourceNotificationTestsMixin(CybersourceMixin):
             def check_notification_address(notification, expected_address):
                 self.client.post(self.path, notification)
                 self.assertTrue(mock_placement_handler.called)
-                actual_address = mock_placement_handler.call_args[0][6]
+                actual_address = mock_placement_handler.call_args[1]['billing_address']
                 self.assertEqual(actual_address.summary, expected_address.summary)
 
             cybersource_key = 'req_bill_to_address_{}'.format(field_name)
