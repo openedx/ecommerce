@@ -51,7 +51,7 @@ class EnterpriseOfferForm(forms.ModelForm):
         }
 
     def __init__(self, data=None, files=None, auto_id='id_%s', prefix=None, initial=None, error_class=ErrorList,
-                 label_suffix=None, empty_permitted=False, instance=None, request=None):
+                 label_suffix=None, empty_permitted=False, instance=None, request=None, is_editing=None):
         initial = initial or {}
         self.request = request
         if instance:
@@ -70,6 +70,10 @@ class EnterpriseOfferForm(forms.ModelForm):
         date_ui_class = {'class': 'add-pikaday'}
         self.fields['start_datetime'].widget.attrs.update(date_ui_class)
         self.fields['end_datetime'].widget.attrs.update(date_ui_class)
+
+        if not is_editing:
+            self.fields['contract_discount_type'].required = True
+            self.fields['contract_discount_value'].required = True
 
     def clean(self):
         cleaned_data = super(EnterpriseOfferForm, self).clean()
