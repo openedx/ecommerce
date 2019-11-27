@@ -70,9 +70,10 @@ class EnterpriseOfferFormTests(EnterpriseServiceMockMixin, TestCase):
             expected_prepaid_invoice_amount
         )
 
-    def assert_form_errors(self, data, expected_errors):
+    def assert_form_errors(self, data, expected_errors, form=None):
         """ Assert that form validation fails with the expected errors. """
-        form = EnterpriseOfferForm(data=data)
+        if not form:
+            form = EnterpriseOfferForm(data=data)
         self.assertFalse(form.is_valid())
         self.assertEqual(form.errors, expected_errors)
 
@@ -99,6 +100,20 @@ class EnterpriseOfferFormTests(EnterpriseServiceMockMixin, TestCase):
         self.assertEqual(form['contract_discount_type'].value(), EnterpriseContractMetadata.PERCENTAGE)
         self.assertEqual(form['contract_discount_value'].value(), 25)
         self.assertEqual(form['prepaid_invoice_amount'].value(), 12345)
+
+    def test_contract_metadata_required_on_create(self):
+        """ The constructor should pull initial data from the passed-in instance. """
+        enterprise_offer = factories.EnterpriseOfferFactory()
+        form = EnterpriseOfferForm(instance=enterprise_offer, is_editing=False)
+        self.assertTrue(form['contract_discount_type'].field.required)
+        self.assertTrue(form['contract_discount_value'].field.required)
+
+    def test_contract_metadata_not_required_on_edit(self):
+        """ The constructor should pull initial data from the passed-in instance. """
+        enterprise_offer = factories.EnterpriseOfferFactory()
+        form = EnterpriseOfferForm(instance=enterprise_offer, is_editing=True)
+        self.assertFalse(form['contract_discount_type'].field.required)
+        self.assertFalse(form['contract_discount_value'].field.required)
 
     def test_clean_percentage(self):
         """ If a percentage benefit type is specified, the benefit value must never be greater than 100. """
@@ -137,6 +152,45 @@ class EnterpriseOfferFormTests(EnterpriseServiceMockMixin, TestCase):
                 ]
             }
         )
+
+    def test_clean_with_invalid_contract_value_percentage(self):
+        """
+        The contract discount value, when the contract discount type is a
+        percentage, should not be greater than 100.
+        """
+        data = self.generate_data(contract_discount_value=120)
+        self.assert_form_errors(data, {'contract_discount_value': ['Percentage discounts cannot be greater than 100%.']})
+
+    def test_clean_with_invalid_contract_value_absolute(self):
+        """
+        The contract discount value, when the contract discount type is an
+        absolute value, should not have more digits before/after the decimal.
+        """
+        # too many digits before decimal
+        data = self.generate_data(
+            contract_discount_type=EnterpriseContractMetadata.FIXED,
+            contract_discount_value=10000000000.10,
+        )
+        self.assert_form_errors(data, {'contract_discount_value': ['More than 10 digits before the decimal not allowed for absolute value.']})
+
+        # too many digits after decimal
+        data = self.generate_data(
+            contract_discount_type=EnterpriseContractMetadata.FIXED,
+            contract_discount_value=10000.12345,
+        )
+        self.assert_form_errors(data, {'contract_discount_value': ['More than 2 digits after the decimal not allowed for absolute value.']})
+
+    def test_clean_with_missing_prepaid_invoice_amount(self):
+        """
+        The prepaid invoice amount is required when the contract discount
+        type is an absolute value.
+        """
+        data = self.generate_data(
+            contract_discount_type=EnterpriseContractMetadata.FIXED,
+            contract_discount_value=10000,
+            prepaid_invoice_amount=None,
+        )
+        self.assert_form_errors(data, {'prepaid_invoice_amount': ['This field is required when contract discount type is absolute.']})
 
     @httpretty.activate
     def test_save_create(self):
