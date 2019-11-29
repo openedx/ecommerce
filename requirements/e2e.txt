@@ -6,7 +6,7 @@
 #
 atomicwrites==1.3.0       # via pytest
 attrs==19.3.0             # via pytest
-certifi==2019.9.11        # via requests
+certifi==2019.11.28       # via requests
 chardet==3.0.4            # via requests
 configparser==4.0.2       # via importlib-metadata
 contextlib2==0.6.0.post1  # via importlib-metadata
@@ -17,12 +17,12 @@ importlib-metadata==0.23  # via pluggy, pytest
 more-itertools==5.0.0     # via pytest, zipp
 packaging==19.2           # via pytest
 pathlib2==2.3.5           # via importlib-metadata, pytest
-pluggy==0.13.0            # via pytest
+pluggy==0.13.1            # via pytest
 py==1.8.0                 # via pytest
 pyjwt==1.7.1              # via edx-rest-api-client
-pyparsing==2.4.2          # via packaging
+pyparsing==2.4.5          # via packaging
 pytest-base-url==1.4.1    # via pytest-selenium
-pytest-html==1.22.0       # via pytest-selenium
+pytest-html==1.22.1       # via pytest-selenium
 pytest-metadata==1.8.0    # via pytest-html
 pytest-randomly==1.2.3
 pytest-selenium==1.17.0
