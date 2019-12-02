@@ -72,6 +72,7 @@ class EnterpriseOfferFormTests(EnterpriseServiceMockMixin, TestCase):
 
     def assert_form_errors(self, data, expected_errors):
         """ Assert that form validation fails with the expected errors. """
+        form = EnterpriseOfferForm(data=data)
         self.assertFalse(form.is_valid())
         self.assertEqual(form.errors, expected_errors)
 
@@ -163,7 +164,10 @@ class EnterpriseOfferFormTests(EnterpriseServiceMockMixin, TestCase):
         percentage, should not be greater than 100.
         """
         data = self.generate_data(contract_discount_value=120)
-        self.assert_form_errors(data, {'contract_discount_value': ['Percentage discounts cannot be greater than 100%.']})
+        self.assert_form_errors(
+            data,
+            {'contract_discount_value': ['Percentage discounts cannot be greater than 100%.']},
+        )
 
     def test_clean_with_invalid_contract_value_absolute(self):
         """
@@ -175,7 +179,10 @@ class EnterpriseOfferFormTests(EnterpriseServiceMockMixin, TestCase):
             contract_discount_type=EnterpriseContractMetadata.FIXED,
             contract_discount_value=10000.12345,
         )
-        self.assert_form_errors(data, {'contract_discount_value': ['More than 2 digits after the decimal not allowed for absolute value.']})
+        self.assert_form_errors(
+            data,
+            {'contract_discount_value': ['More than 2 digits after the decimal not allowed for absolute value.']},
+        )
 
     def test_clean_with_missing_prepaid_invoice_amount(self):
         """
@@ -187,7 +194,10 @@ class EnterpriseOfferFormTests(EnterpriseServiceMockMixin, TestCase):
             contract_discount_value=10000,
             prepaid_invoice_amount=None,
         )
-        self.assert_form_errors(data, {'prepaid_invoice_amount': ['This field is required when contract discount type is absolute.']})
+        self.assert_form_errors(
+            data,
+            {'prepaid_invoice_amount': ['This field is required when contract discount type is absolute.']},
+        )
 
     @httpretty.activate
     def test_save_create(self):

@@ -39,8 +39,9 @@ class EnterpriseOfferForm(forms.ModelForm):
     class Meta(object):
         model = ConditionalOffer
         fields = [
-            'enterprise_customer_uuid', 'enterprise_customer_catalog_uuid', 'start_datetime', 'end_datetime',
-            'benefit_type', 'benefit_value', 'contract_discount_type', 'contract_discount_value', 'prepaid_invoice_amount',
+            'enterprise_customer_uuid', 'enterprise_customer_catalog_uuid', 'start_datetime',
+            'end_datetime', 'benefit_type', 'benefit_value', 'contract_discount_type',
+            'contract_discount_value', 'prepaid_invoice_amount',
         ]
         help_texts = {
             'end_datetime': '',
@@ -137,7 +138,7 @@ class EnterpriseOfferForm(forms.ModelForm):
             if contract_discount_type == EnterpriseContractMetadata.PERCENTAGE and contract_discount_value > 100:
                 self.add_error('contract_discount_value', _('Percentage discounts cannot be greater than 100%.'))
             elif contract_discount_type == EnterpriseContractMetadata.FIXED:
-                before_decimal, __, after_decimal = str(contract_discount_value).partition('.')
+                __, __, after_decimal = str(contract_discount_value).partition('.')
                 if len(after_decimal) > 2:
                     self.add_error('contract_discount_value', _(
                         'More than 2 digits after the decimal '
