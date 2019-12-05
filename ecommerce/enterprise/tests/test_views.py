@@ -124,11 +124,17 @@ class EnterpriseOfferCreateViewTests(EnterpriseServiceMockMixin, ViewTestMixin, 
         expected_ec_catalog_uuid = uuid.uuid4()
         self.mock_specific_enterprise_customer_api(expected_ec_uuid)
         expected_benefit_value = 10
+        expected_discount_value = 2000
+        expected_discount_type = 'Absolute'
+        expected_prepaid_invoice_amount = 12345
         data = {
             'enterprise_customer_uuid': expected_ec_uuid,
             'enterprise_customer_catalog_uuid': expected_ec_catalog_uuid,
             'benefit_type': Benefit.PERCENTAGE,
             'benefit_value': expected_benefit_value,
+            'contract_discount_value': expected_discount_value,
+            'contract_discount_type': expected_discount_type,
+            'prepaid_invoice_amount': expected_prepaid_invoice_amount,
         }
 
         existing_offer_ids = list(ConditionalOffer.objects.all().values_list('id', flat=True))
@@ -144,6 +150,18 @@ class EnterpriseOfferCreateViewTests(EnterpriseServiceMockMixin, ViewTestMixin, 
         self.assertEqual(enterprise_offer.benefit.type, '')
         self.assertEqual(enterprise_offer.benefit.value, expected_benefit_value)
         self.assertEqual(enterprise_offer.benefit.proxy_class, class_path(EnterprisePercentageDiscountBenefit))
+        self.assertEqual(
+            enterprise_offer.enterprise_contract_metadata.discount_value,
+            expected_discount_value
+        )
+        self.assertEqual(
+            enterprise_offer.enterprise_contract_metadata.discount_type,
+            expected_discount_type
+        )
+        self.assertEqual(
+            enterprise_offer.enterprise_contract_metadata.amount_paid,
+            expected_prepaid_invoice_amount
+        )
 
 
 class EnterpriseCouponAppViewTests(TestCase):

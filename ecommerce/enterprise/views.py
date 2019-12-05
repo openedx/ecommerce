@@ -62,9 +62,19 @@ class EnterpriseOfferCreateView(EnterpriseOfferProcessFormViewMixin, CreateView)
     success_message = _('Enterprise offer created!')
     template_name = 'enterprise/enterpriseoffer_form.html'
 
+    def get_form_kwargs(self):
+        kwargs = super(EnterpriseOfferCreateView, self).get_form_kwargs()
+        kwargs.update({'is_editing': False})
+        return kwargs
+
 
 class EnterpriseOfferUpdateView(EnterpriseOfferProcessFormViewMixin, UpdateView):
     template_name = 'enterprise/enterpriseoffer_form.html'
+
+    def get_form_kwargs(self):
+        kwargs = super(EnterpriseOfferUpdateView, self).get_form_kwargs()
+        kwargs.update({'is_editing': True})
+        return kwargs
 
     def get_context_data(self, **kwargs):
         context = super(EnterpriseOfferUpdateView, self).get_context_data(**kwargs)

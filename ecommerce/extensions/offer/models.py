@@ -171,6 +171,11 @@ class ConditionalOffer(AbstractConditionalOffer):
     # Do not record the slug field in the history table because AutoSlugField is not compatible with
     # django-simple-history.  Background: https://github.com/edx/course-discovery/pull/332
     history = HistoricalRecords(excluded_fields=['slug'])
+    enterprise_contract_metadata = models.OneToOneField(
+        'payment.EnterpriseContractMetadata',
+        on_delete=models.CASCADE,
+        null=True,
+    )
 
     def save(self, *args, **kwargs):
         self.clean()
