@@ -110,7 +110,7 @@ class EnrollmentFulfillmentModuleTests(ProgramTestMixin, DiscoveryTestMixin, Ful
         basket.add_product(self.seat, 1)
         self.order = create_order(number=2, basket=basket, user=self.user)
 
-    def prepare_basket_with_voucher(self, program_uuid=None):
+    def prepare_basket_with_voucher(self, program_uuid=None, enterprise_customer=None):
         catalog = Catalog.objects.create(partner=self.partner)
 
         coupon_product_class, _ = ProductClass.objects.get_or_create(name=COUPON_PRODUCT_CLASS_NAME)
@@ -128,7 +128,7 @@ class EnrollmentFulfillmentModuleTests(ProgramTestMixin, DiscoveryTestMixin, Ful
             catalog=catalog,
             coupon=coupon,
             end_datetime=datetime.datetime.now() + datetime.timedelta(days=30),
-            enterprise_customer=None,
+            enterprise_customer=enterprise_customer,
             enterprise_customer_catalog=None,
             name="Test Voucher",
             quantity=10,
@@ -217,6 +217,73 @@ class EnrollmentFulfillmentModuleTests(ProgramTestMixin, DiscoveryTestMixin, Ful
         __, lines = EnrollmentFulfillmentModule().fulfill_product(self.order, list(self.order.lines.all()))
         # No exceptions should be raised and the order should be fulfilled
         self.assertEqual(lines[0].status, 'Complete')
+
+    @httpretty.activate
+    def test_enrollment_module_fulfill_order_with_discount_chris_voucher(self):
+        """
+        __ FILL ME IN __
+        """
+        httpretty.register_uri(httpretty.POST, get_lms_enrollment_api_url(), status=200, body='{}', content_type=JSON)
+        self.create_seat_and_order(certificate_type='credit', provider='MIT')
+        
+        enterprise_customer = uuid.uuid4()
+        #self.prepare_basket_with_voucher(enterprise_customer=enterprise_customer)
+
+
+
+        catalog = Catalog.objects.create(partner=self.partner)
+
+        coupon_product_class, _ = ProductClass.objects.get_or_create(name=COUPON_PRODUCT_CLASS_NAME)
+        coupon = factories.create_product(
+            product_class=coupon_product_class,
+            title='Test product'
+        )
+
+        stock_record = StockRecord.objects.filter(product=self.seat).first()
+        catalog.stock_records.add(stock_record)
+
+        vouchers = create_vouchers(
+            benefit_type=Benefit.PERCENTAGE,
+            benefit_value=100.00,
+            catalog=catalog,
+            coupon=coupon,
+            end_datetime=datetime.datetime.now() + datetime.timedelta(days=30),
+            enterprise_customer=enterprise_customer,
+            enterprise_customer_catalog=None,
+            name="Test Voucher",
+            quantity=10,
+            start_datetime=datetime.datetime.now(),
+            voucher_type=Voucher.SINGLE_USE,
+        )
+        self.order.discounts.create(voucher=vouchers[0])
+        Applicator().apply_offers(self.order.basket, vouchers[0].offers.all())
+
+        print(self.order.discounts.all())
+        d = self.order.discounts.first()
+        #print(dir(d))
+        print(d.voucher)
+        #d.save()
+
+
+
+        print("okay going into the fullfillment code now")
+        __, lines = EnrollmentFulfillmentModule().fulfill_product(self.order, list(self.order.lines.all()))
+        # No exceptions should be raised and the order should be fulfilled
+        self.assertEqual(lines[0].status, 'Complete')
+
+
+        assert False
+
+
+
+
+
+
+
+
+
+
+
 
     @override_settings(EDX_API_KEY=None)
     def test_enrollment_module_not_configured(self):

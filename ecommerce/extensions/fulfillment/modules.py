@@ -42,6 +42,7 @@ from ecommerce.extensions.basket.constants import PURCHASER_BEHALF_ATTRIBUTE
 from ecommerce.extensions.basket.models import BasketAttribute
 from ecommerce.extensions.checkout.utils import get_receipt_page_url
 from ecommerce.extensions.fulfillment.status import LINE
+from ecommerce.extensions.payment.models import EnterpriseContractMetadata
 from ecommerce.extensions.voucher.models import OrderLineVouchers
 from ecommerce.extensions.voucher.utils import create_vouchers
 from ecommerce.notifications.notifications import send_notification
@@ -221,11 +222,17 @@ class EnrollmentFulfillmentModule(BaseFulfillmentModule):
         """
         # Collect the EnterpriseCustomer UUID from the coupon, if any.
         enterprise_customer_uuid = None
+        print("bbz")
+        print(order.discounts.all())
         for discount in order.discounts.all():
+            print("in the for llop")
             if discount.voucher:
+                assert False
+                print("in discounbt.voucher")
                 enterprise_customer_uuid = get_enterprise_customer_uuid_from_voucher(discount.voucher)
 
             if enterprise_customer_uuid is not None:
+                print("enterprise_customer_uuid is not None!!! hooray!!")
                 data['linked_enterprise_customer'] = str(enterprise_customer_uuid)
                 break
 
@@ -255,6 +262,51 @@ class EnrollmentFulfillmentModule(BaseFulfillmentModule):
             A supported list of unmodified lines associated with "Seat" products.
         """
         return [line for line in lines if self.supports_line(line)]
+
+    def _calculate_effective_discount_percentage(self, contract_metadata):
+        if contract_metadata.discount_type == EnterpriseContractMetadata.PERCENTAGE:
+            return contract_metadata.discount_value
+        return contract_metadata.discount_value / (contract_metadata.discount_value + contract_metadata.amount_paid)
+
+    def _calculate_enterprise_customer_cost(self, line, effective_discount_percentage):
+        pass
+        # enterprise_customer_cost = list_price_of_enrollment * (1 - effective_discount_percentage)
+        return line.unit_price_excl_tax * (Decimal('1.00') - effective_discount_percentage)
+    def _locate_contract_metadata(self, order, line):
+        print("zzz")
+        print(order)
+        print(dir(order))
+
+        print(order.basket.total_excl_tax)
+        print(type(order.basket.total_excl_tax))
+        print(line)
+        print(dir(line))
+        print(line.unit_price_excl_tax)
+        
+        print(order.discounts.all())        
+        #print(data['linked_enterprise_customer'])
+
+        for discount in order.discounts.all():
+            print("in discount for loop")
+            if discount.voucher and get_enterprise_customer_uuid_from_voucher(discount.voucher):
+                print("in the if")
+                coupon = discount.voucher.coupon_vouchers.first().coupons.first()
+                print(coupon)
+
+
+    def _update_orderline_with_enterprise_discount_metadata(self, data, order, line):
+
+        contract_metadata = self._locate_contract_metadata(order, line)
+        effective_discount_percentage = self._calculate_effective_discount_percentage(
+            contract_metadata
+        )
+        enterprise_customer_cost = self._calculate_enterprise_customer_cost(
+            line,
+            effective_discount_percentage
+        )
+        line.effective_discount_percentage = effective_discount_percentage
+        line.enterprise_customer_cost = enterprise_customer_cost
+        line.save()
 
     def fulfill_product(self, order, lines, email_opt_in=False):
         """ Fulfills the purchase of a 'seat' by enrolling the associated student.
@@ -331,7 +383,10 @@ class EnrollmentFulfillmentModule(BaseFulfillmentModule):
                 )
             try:
                 self._add_enterprise_data_to_enrollment_api_post(data, order)
+                print(data)
+                if data.get('linked_enterprise_customer'):
 
+                    self._update_orderline_with_enterprise_discount_metadata(data, order, line)
                 # Post to the Enrollment API. The LMS will take care of posting a new EnterpriseCourseEnrollment to
                 # the Enterprise service if the user+course has a corresponding EnterpriseCustomerUser.
                 response = self._post_to_enrollment_api(data, user=order.user, usage='fulfill enrollment')

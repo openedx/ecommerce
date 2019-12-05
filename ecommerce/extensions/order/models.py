@@ -25,6 +25,8 @@ class Order(AbstractOrder):
 
 class Line(AbstractLine):
     history = HistoricalRecords()
+    effective_discount_percentage = models.DecimalField(max_digits=8, decimal_places=5, null=True)
+    enterprise_customer_cost = models.DecimalField(max_digits=12, decimal_places=2, null=True)
 
 
 class PaymentEvent(AbstractPaymentEvent):
