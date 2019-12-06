@@ -7,19 +7,19 @@
 configparser==4.0.2       # via importlib-metadata
 contextlib2==0.6.0.post1  # via importlib-metadata
 filelock==3.0.12          # via tox
-importlib-metadata==0.23  # via pluggy, tox
+importlib-metadata==1.2.0  # via pluggy, tox
 more-itertools==5.0.0     # via zipp
 packaging==19.2           # via tox
 pathlib2==2.3.5           # via importlib-metadata
-pluggy==0.13.0            # via tox
+pluggy==0.13.1            # via tox
 py==1.8.0                 # via tox
-pyparsing==2.4.2          # via packaging
+pyparsing==2.4.5          # via packaging
 pytz==2016.10
 scandir==1.10.0           # via pathlib2
 six==1.11.0
 toml==0.10.0              # via tox
 tox-battery==0.5.1
-tox==3.14.0
+tox==3.14.2
 urllib3==1.23
-virtualenv==16.7.7        # via tox
+virtualenv==16.7.8        # via tox
 zipp==0.6.0               # via importlib-metadata
