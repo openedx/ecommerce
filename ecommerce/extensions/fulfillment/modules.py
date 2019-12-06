@@ -230,7 +230,6 @@ class EnrollmentFulfillmentModule(BaseFulfillmentModule):
             if enterprise_customer_uuid is not None:
                 data['linked_enterprise_customer'] = str(enterprise_customer_uuid)
                 break
-
         # If an EnterpriseCustomer UUID is associated with the coupon, create an EnterpriseCustomerUser
         # on the Enterprise service if one doesn't already exist.
         if enterprise_customer_uuid is not None:
@@ -312,8 +311,9 @@ class EnrollmentFulfillmentModule(BaseFulfillmentModule):
                 if contract_metadata is not None:
                     return contract_metadata
             # If there is an enterprise offer
-            if discount.offer.enterprise_contract_metadata:
+            if discount.offer and discount.offer.enterprise_contract_metadata:
                 return discount.offer.enterprise_contract_metadata
+
         return None
 
     def _update_orderline_with_enterprise_discount_metadata(self, order, line):
@@ -424,8 +424,7 @@ class EnrollmentFulfillmentModule(BaseFulfillmentModule):
                 )
             try:
                 self._add_enterprise_data_to_enrollment_api_post(data, order)
-                if data.get('linked_enterprise_customer'):
-                    self._update_orderline_with_enterprise_discount_metadata(order, line)
+                self._update_orderline_with_enterprise_discount_metadata(order, line)
                 # Post to the Enrollment API. The LMS will take care of posting a new EnterpriseCourseEnrollment to
                 # the Enterprise service if the user+course has a corresponding EnterpriseCustomerUser.
                 response = self._post_to_enrollment_api(data, user=order.user, usage='fulfill enrollment')
