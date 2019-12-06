@@ -2,7 +2,7 @@ from __future__ import absolute_import
 
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
-from oscar.apps.order.abstract_models import AbstractLine, AbstractOrder, AbstractPaymentEvent
+from oscar.apps.order.abstract_models import AbstractLine, AbstractOrder, AbstractOrderDiscount, AbstractPaymentEvent
 from simple_history.models import HistoricalRecords
 
 from ecommerce.extensions.fulfillment.status import ORDER
@@ -21,6 +21,10 @@ class Order(AbstractOrder):
     def contains_coupon(self):
         """ Return a boolean if the order contains a Coupon. """
         return any(line.product.is_coupon_product for line in self.basket.all_lines())
+
+
+class OrderDiscount(AbstractOrderDiscount):
+    history = HistoricalRecords()
 
 
 class Line(AbstractLine):

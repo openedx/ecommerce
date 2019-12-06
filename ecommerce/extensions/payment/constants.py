@@ -32,6 +32,11 @@ CARD_TYPES = {
 }
 
 CARD_TYPE_CHOICES = ((key, value['display_name']) for key, value in six.iteritems(CARD_TYPES))
+
+# In Python 3.5 dicts aren't ordered so having this unsorted causes new migrations to happen on almost every
+# run of makemigrations. Sorting fixes that. This can be removed in Python 3.6+.
+CARD_TYPE_CHOICES = sorted(CARD_TYPE_CHOICES, key=lambda tup: tup[0])
+
 CYBERSOURCE_CARD_TYPE_MAP = {
     value['cybersource_code']: key for key, value in six.iteritems(CARD_TYPES) if 'cybersource_code' in value
 }
