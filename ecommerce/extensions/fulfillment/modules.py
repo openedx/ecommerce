@@ -7,6 +7,7 @@ from __future__ import absolute_import
 
 import abc
 import datetime
+from decimal import Decimal
 import json
 import logging
 
@@ -222,17 +223,11 @@ class EnrollmentFulfillmentModule(BaseFulfillmentModule):
         """
         # Collect the EnterpriseCustomer UUID from the coupon, if any.
         enterprise_customer_uuid = None
-        print("bbz")
-        print(order.discounts.all())
         for discount in order.discounts.all():
-            print("in the for llop")
             if discount.voucher:
-                assert False
-                print("in discounbt.voucher")
                 enterprise_customer_uuid = get_enterprise_customer_uuid_from_voucher(discount.voucher)
 
             if enterprise_customer_uuid is not None:
-                print("enterprise_customer_uuid is not None!!! hooray!!")
                 data['linked_enterprise_customer'] = str(enterprise_customer_uuid)
                 break
 
@@ -264,39 +259,85 @@ class EnrollmentFulfillmentModule(BaseFulfillmentModule):
         return [line for line in lines if self.supports_line(line)]
 
     def _calculate_effective_discount_percentage(self, contract_metadata):
+        """
+        Returns the effective discount percentage on a contract.
+
+        Args:
+            contract_metadata:  EnterpriseContractMetadata object
+
+        Returns:
+            A Decimal() object.
+        """
         if contract_metadata.discount_type == EnterpriseContractMetadata.PERCENTAGE:
             return contract_metadata.discount_value
         return contract_metadata.discount_value / (contract_metadata.discount_value + contract_metadata.amount_paid)
 
     def _calculate_enterprise_customer_cost(self, line, effective_discount_percentage):
-        pass
-        # enterprise_customer_cost = list_price_of_enrollment * (1 - effective_discount_percentage)
+        """
+        Calculates the enterprise customer cost on a particular line item.
+
+        Args:
+            line: Line object (NOTE: line.unit_price_excl_tax is a Decmial())
+            effective_discount_percentage: A Decimal() object
+
+        Returns:
+            A Decimal() object.
+        """
         return line.unit_price_excl_tax * (Decimal('1.00') - effective_discount_percentage)
-    def _locate_contract_metadata(self, order, line):
-        print("zzz")
-        print(order)
-        print(dir(order))
 
-        print(order.basket.total_excl_tax)
-        print(type(order.basket.total_excl_tax))
-        print(line)
-        print(dir(line))
-        print(line.unit_price_excl_tax)
+    def _locate_contract_metadata(self, order):
+        """
+        Locates an EnterpriseContractMetadata object associated with an order.
         
-        print(order.discounts.all())        
-        #print(data['linked_enterprise_customer'])
+        The contract metadata can live on the `attr` of a coupon product in the
+        case of a coupon being redeemed (`mycoupon.attr.enterprise_contract_metadata`)
 
+        -OR-
+
+        The contract metadata can live on the conditional offer associated with
+        the discount (that is associated with the order) in the case of an
+        enterprise offer
+
+        Args:
+            order: An Order object
+
+        Returns:
+            A EnterpriseContractMetadata object if one is found, else None.
+        """
         for discount in order.discounts.all():
-            print("in discount for loop")
+            # If a coupon is being redeemed
             if discount.voucher and get_enterprise_customer_uuid_from_voucher(discount.voucher):
-                print("in the if")
-                coupon = discount.voucher.coupon_vouchers.first().coupons.first()
-                print(coupon)
+                coupon = discount.voucher.coupon_vouchers.first().coupon
+                contract_metadata = getattr(coupon.attr, 'enterprise_contract_metadata', None)
+                if contract_metadata is not None:
+                    return contract_metadata
+            # If there is an enterprise offer
+            if discount.offer.enterprise_contract_metadata:
+                return discount.offer.enterprise_contract_metadata
+        return None
 
+    def _update_orderline_with_enterprise_discount_metadata(self, order, line):
+        """
+        Updates an orderline with calculated discount metrics if applicable
 
-    def _update_orderline_with_enterprise_discount_metadata(self, data, order, line):
+        Args:
+            order: An Order object
+            line: A Line object
 
-        contract_metadata = self._locate_contract_metadata(order, line)
+        Returns:
+            Nothing
+
+        Side effect:
+            Saves a line object if effective_discount_percentage and
+            enterprise_customer_cost can be calculated.
+
+        """
+        contract_metadata = self._locate_contract_metadata(order)
+
+        if contract_metadata is None:
+            logger.info("No enterprise contract metadata found for order [%s]", order.number)
+            return
+
         effective_discount_percentage = self._calculate_effective_discount_percentage(
             contract_metadata
         )
@@ -383,10 +424,8 @@ class EnrollmentFulfillmentModule(BaseFulfillmentModule):
                 )
             try:
                 self._add_enterprise_data_to_enrollment_api_post(data, order)
-                print(data)
                 if data.get('linked_enterprise_customer'):
-
-                    self._update_orderline_with_enterprise_discount_metadata(data, order, line)
+                    self._update_orderline_with_enterprise_discount_metadata(order, line)
                 # Post to the Enrollment API. The LMS will take care of posting a new EnterpriseCourseEnrollment to
                 # the Enterprise service if the user+course has a corresponding EnterpriseCustomerUser.
                 response = self._post_to_enrollment_api(data, user=order.user, usage='fulfill enrollment')
