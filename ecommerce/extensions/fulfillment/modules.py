@@ -311,6 +311,14 @@ class EnrollmentFulfillmentModule(BaseFulfillmentModule):
                 if contract_metadata is not None:
                     return contract_metadata
             # If there is an enterprise offer
+            if discount.offer:
+                assert False
+                # print(dir(discount.voucher.coupon_vouchers.first()))
+                # print(discount.voucher.coupon_vouchers.first().coupon)
+                # print(order.discounts.all())
+                # print(discount)
+                # print(discount.offer)
+                # print()
             if discount.offer and discount.offer.enterprise_contract_metadata:
                 return discount.offer.enterprise_contract_metadata
 
