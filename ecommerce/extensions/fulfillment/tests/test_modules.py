@@ -232,9 +232,10 @@ class EnrollmentFulfillmentModuleTests(ProgramTestMixin, DiscoveryTestMixin, Ful
     @httpretty.activate
     def test_enrollment_module_fulfill_order_enterprise_discount_calculation(self):
         """
-        Enrollment fulfillment module should properly assign calculated values
-        to an order line if contract metadata exists during the enterprise_offer
-        flow.
+        Verify an orderline is updated with calculated enterprise discount data
+        if a product is fulfilled with an enterprise offer for an enterprise
+        customer and that enterprise offer has `enterprise_contract_metadata`
+        associated with it.
         """
         httpretty.register_uri(httpretty.POST, get_lms_enrollment_api_url(), status=200, body='{}', content_type=JSON)
         self.create_seat_and_order(certificate_type='credit', provider='MIT')
@@ -266,8 +267,42 @@ class EnrollmentFulfillmentModuleTests(ProgramTestMixin, DiscoveryTestMixin, Ful
 
         # No exceptions should be raised and the order should be fulfilled
         self.assertEqual(lines[0].status, 'Complete')
-        assert lines[0].effective_discount_percentage is not None
-        assert lines[0].enterprise_customer_cost is not None
+        self.assertIsInstance(lines[0].effective_discount_percentage, Decimal)
+        self.assertIsInstance(lines[0].enterprise_customer_cost, Decimal)
+
+    @httpretty.activate
+    def test_enrollment_module_fulfill_order_no_enterprise_discount_calculation(self):
+        """
+        Verify an orderline is NOT updated with calculated enterprise discount data
+        if a product is fulfilled with an enterprise offer for an enterprise
+        customer and that enterprise offer has NO `enterprise_contract_metadata`
+        associated with it.
+        """
+        httpretty.register_uri(httpretty.POST, get_lms_enrollment_api_url(), status=200, body='{}', content_type=JSON)
+        self.create_seat_and_order(certificate_type='credit', provider='MIT')
+        discount = self.order.discounts.create()
+
+        benefit = EnterprisePercentageDiscountBenefitFactory.create()
+        condition = EnterpriseCustomerConditionFactory.create()
+        offer = ConditionalOfferFactory.create(
+            benefit_id=benefit.id,
+            condition_id=condition.id,
+        )
+        discount.offer_id = offer.id
+        discount.save()
+        self.order.refresh_from_db()
+
+        with mock.patch.object(Range, 'contains_product') as mock_contains:
+            mock_contains.return_value = True
+            with mock.patch.object(EnterpriseCustomerCondition, 'is_satisfied') as mock_satisfied:
+                mock_satisfied.return_value = True
+                Applicator().apply_offers(self.order.basket, [offer])
+            __, lines = EnrollmentFulfillmentModule().fulfill_product(self.order, list(self.order.lines.all()))
+
+        # No exceptions should be raised and the order should be fulfilled
+        self.assertEqual(lines[0].status, 'Complete')
+        assert lines[0].effective_discount_percentage is None
+        assert lines[0].enterprise_customer_cost is None
 
     @override_settings(EDX_API_KEY=None)
     def test_enrollment_module_not_configured(self):
