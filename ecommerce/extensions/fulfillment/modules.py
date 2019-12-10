@@ -287,7 +287,7 @@ class EnrollmentFulfillmentModule(BaseFulfillmentModule):
     def _locate_contract_metadata(self, order):
         """
         Locates an EnterpriseContractMetadata object associated with an order.
-        
+
         The contract metadata can live on the `attr` of a coupon product in the
         case of a coupon being redeemed (`mycoupon.attr.enterprise_contract_metadata`)
 
@@ -309,17 +309,11 @@ class EnrollmentFulfillmentModule(BaseFulfillmentModule):
                 coupon = discount.voucher.coupon_vouchers.first().coupon
                 contract_metadata = getattr(coupon.attr, 'enterprise_contract_metadata', None)
                 if contract_metadata is not None:
+                    logger.info("Using contract_metadata on coupon product for order [%s]", order.number)
                     return contract_metadata
             # If there is an enterprise offer
-            if discount.offer:
-                assert False
-                # print(dir(discount.voucher.coupon_vouchers.first()))
-                # print(discount.voucher.coupon_vouchers.first().coupon)
-                # print(order.discounts.all())
-                # print(discount)
-                # print(discount.offer)
-                # print()
             if discount.offer and discount.offer.enterprise_contract_metadata:
+                logger.info("Using contract_metadata on conditional offer for order [%s]", order.number)
                 return discount.offer.enterprise_contract_metadata
 
         return None
@@ -341,10 +335,9 @@ class EnrollmentFulfillmentModule(BaseFulfillmentModule):
 
         """
         contract_metadata = self._locate_contract_metadata(order)
-
         if contract_metadata is None:
-            logger.info("No enterprise contract metadata found for order [%s]", order.number)
             return
+        logger.info("Enterprise contract metadata found for order [%s]", order.number)
 
         effective_discount_percentage = self._calculate_effective_discount_percentage(
             contract_metadata
@@ -433,6 +426,7 @@ class EnrollmentFulfillmentModule(BaseFulfillmentModule):
             try:
                 self._add_enterprise_data_to_enrollment_api_post(data, order)
                 self._update_orderline_with_enterprise_discount_metadata(order, line)
+
                 # Post to the Enrollment API. The LMS will take care of posting a new EnterpriseCourseEnrollment to
                 # the Enterprise service if the user+course has a corresponding EnterpriseCustomerUser.
                 response = self._post_to_enrollment_api(data, user=order.user, usage='fulfill enrollment')
