@@ -66,7 +66,7 @@ LOGGER_NAME = 'ecommerce.extensions.analytics.utils'
 
 Applicator = get_class('offer.applicator', 'Applicator')
 Benefit = get_model('offer', 'Benefit')
-Catalog = get_model('offer', 'ConditionalOffer')
+Catalog = get_model('catalogue', 'Catalog')
 ConditionalOffer = get_model('offer', 'ConditionalOffer')
 OrderDiscount = get_model('order', 'OrderDiscount')
 Option = get_model('catalogue', 'Option')
