@@ -2,9 +2,9 @@
 from __future__ import absolute_import
 
 import datetime
-from decimal import Decimal
 import json
 import uuid
+from decimal import Decimal
 
 import ddt
 import httpretty
@@ -51,9 +51,9 @@ from ecommerce.extensions.fulfillment.tests.mixins import FulfillmentTestMixin
 from ecommerce.extensions.payment.models import EnterpriseContractMetadata
 from ecommerce.extensions.test.factories import (
     ConditionalOfferFactory,
-    create_order,
-    EnterprisePercentageDiscountBenefitFactory,
     EnterpriseCustomerConditionFactory,
+    EnterprisePercentageDiscountBenefitFactory,
+    create_order
 )
 from ecommerce.extensions.voucher.models import OrderLineVouchers
 from ecommerce.extensions.voucher.utils import create_vouchers

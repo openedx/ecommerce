@@ -7,9 +7,9 @@ from __future__ import absolute_import
 
 import abc
 import datetime
-from decimal import Decimal
 import json
 import logging
+from decimal import Decimal
 
 import requests
 import six
