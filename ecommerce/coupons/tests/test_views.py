@@ -507,7 +507,8 @@ class CouponRedeemViewTests(CouponMixin, DiscoveryTestMixin, LmsApiMockMixin, En
 
     def prepare_enterprise_data(self, benefit_value=100, consent_enabled=True, consent_provided=False, course_id=None,
                                 catalog=None, enterprise_customer_catalog=None, contract_discount_value=None,
-                                contract_discount_type=EnterpriseContractMetadata.PERCENTAGE, prepaid_invoice_amount=None):
+                                contract_discount_type=EnterpriseContractMetadata.PERCENTAGE,
+                                prepaid_invoice_amount=None):
         """Creates an enterprise coupon and mocks enterprise endpoints."""
         code, coupon = self.create_coupon_and_get_code(
             benefit_value=benefit_value,
