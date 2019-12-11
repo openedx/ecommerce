@@ -54,6 +54,28 @@ class PaypalPaymentExecutionView(EdxOrderPlacementMixin, View):
     def dispatch(self, request, *args, **kwargs):
         return super(PaypalPaymentExecutionView, self).dispatch(request, *args, **kwargs)
 
+    def _add_dynamic_discount_to_request(self, basket):
+        # TODO: Remove as a part of REVMI-124 as this is a hacky solution
+        # The problem is that orders are being created after payment processing, and the discount is not
+        # saved in the database, so it needs to be calculated again in order to save the correct info to the
+        # order. REVMI-124 will create the order before payment processing, when we have the discount context.
+        if waffle.flag_is_active(self.request, DYNAMIC_DISCOUNT_FLAG) and basket.lines.count() == 1:
+            discount_lms_url = get_lms_url('/api/discounts/')
+            lms_discount_client = EdxRestApiClient(discount_lms_url,
+                                                   jwt=self.request.site.siteconfiguration.access_token)
+            ck = basket.lines.first().product.course_id
+            user_id = basket.owner.lms_user_id
+            try:
+                response = lms_discount_client.user(user_id).course(ck).get()
+                self.request.GET = self.request.GET.copy()
+                self.request.GET['discount_jwt'] = response.get('jwt')
+            except (SlumberHttpBaseException, Timeout) as error:
+                logger.warning(
+                    'Failed to get discount jwt from LMS. [%s] returned [%s]',
+                    discount_lms_url,
+                    error.response)
+            # END TODO
+
     def _get_basket(self, payment_id):
         """
         Retrieve a basket using a payment ID.
@@ -72,25 +94,12 @@ class PaypalPaymentExecutionView(EdxOrderPlacementMixin, View):
                 transaction_id=payment_id
             ).basket
             basket.strategy = strategy.Default()
+
             # TODO: Remove as a part of REVMI-124 as this is a hacky solution
             # The problem is that orders are being created after payment processing, and the discount is not
             # saved in the database, so it needs to be calculated again in order to save the correct info to the
             # order. REVMI-124 will create the order before payment processing, when we have the discount context.
-            if waffle.flag_is_active(self.request, DYNAMIC_DISCOUNT_FLAG) and basket.lines.count() == 1:
-                discount_lms_url = get_lms_url('/api/discounts/')
-                lms_discount_client = EdxRestApiClient(discount_lms_url,
-                                                       jwt=self.request.site.siteconfiguration.access_token)
-                ck = basket.lines.first().product.course_id
-                user_id = basket.owner.lms_user_id
-                try:
-                    response = lms_discount_client.user(user_id).course(ck).get()
-                    self.request.GET = self.request.GET.copy()
-                    self.request.GET['discount_jwt'] = response.get('jwt')
-                except (SlumberHttpBaseException, Timeout) as error:
-                    logger.warning(
-                        'Failed to get discount jwt from LMS. [%s] returned [%s]',
-                        discount_lms_url,
-                        error.response)
+            self._add_dynamic_discount_to_request(basket)
             # END TODO
 
             Applicator().apply(basket, basket.owner, self.request)

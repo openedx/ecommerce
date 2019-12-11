@@ -187,6 +187,48 @@ class CybersourceInterstitialView(CyberSourceProcessorMixin, EdxOrderPlacementMi
             country=Country.objects.get(
                 iso_3166_1_a2=cybersource_response['req_bill_to_address_country']))
 
+    def _add_dynamic_discount_to_request(self, basket):
+        # TODO: Remove as a part of REVMI-124 as this is a hacky solution
+        # The problem is that orders are being created after payment processing, and the discount is not
+        # saved in the database, so it needs to be calculated again in order to save the correct info to the
+        # order. REVMI-124 will create the order before payment processing, when we have the discount context.
+        if waffle.flag_is_active(self.request, DYNAMIC_DISCOUNT_FLAG) and basket.lines.count() == 1:  # pragma: no cover  pylint: disable=line-too-long
+            discount_lms_url = get_lms_url('/api/discounts/')
+            lms_discount_client = EdxRestApiClient(discount_lms_url,
+                                                   jwt=self.request.site.siteconfiguration.access_token)
+            ck = basket.lines.first().product.course_id
+            user_id = basket.owner.lms_user_id
+            try:
+                response = lms_discount_client.user(user_id).course(ck).get()
+                self.request.POST = self.request.POST.copy()
+                self.request.POST['discount_jwt'] = response.get('jwt')
+                logger.info(
+                    """Received discount jwt from LMS with
+                    url: [%s],
+                    user_id: [%s],
+                    course_id: [%s],
+                    and basket_id: [%s]
+                    returned [%s]""",
+                    discount_lms_url,
+                    str(user_id),
+                    ck,
+                    basket.id,
+                    response)
+            except (SlumberHttpBaseException, requests.exceptions.Timeout) as error:
+                logger.warning(
+                    """Failed to receive discount jwt from LMS with
+                    url: [%s],
+                    user_id: [%s],
+                    course_id: [%s],
+                    and basket_id: [%s]
+                    returned [%s]""",
+                    discount_lms_url,
+                    str(user_id),
+                    ck,
+                    basket.id,
+                    vars(error.response) if hasattr(error, 'response') else '')
+            # End TODO
+
     def _get_basket(self, basket_id):
         if not basket_id:
             return None
@@ -195,46 +237,14 @@ class CybersourceInterstitialView(CyberSourceProcessorMixin, EdxOrderPlacementMi
             basket_id = int(basket_id)
             basket = Basket.objects.get(id=basket_id)
             basket.strategy = strategy.Default()
+
             # TODO: Remove as a part of REVMI-124 as this is a hacky solution
             # The problem is that orders are being created after payment processing, and the discount is not
             # saved in the database, so it needs to be calculated again in order to save the correct info to the
             # order. REVMI-124 will create the order before payment processing, when we have the discount context.
-            if waffle.flag_is_active(self.request, DYNAMIC_DISCOUNT_FLAG) and basket.lines.count() == 1:  # pragma: no cover  pylint: disable=line-too-long
-                discount_lms_url = get_lms_url('/api/discounts/')
-                lms_discount_client = EdxRestApiClient(discount_lms_url,
-                                                       jwt=self.request.site.siteconfiguration.access_token)
-                ck = basket.lines.first().product.course_id
-                user_id = basket.owner.lms_user_id
-                try:
-                    response = lms_discount_client.user(user_id).course(ck).get()
-                    self.request.POST = self.request.POST.copy()
-                    self.request.POST['discount_jwt'] = response.get('jwt')
-                    logger.info(
-                        """Received discount jwt from LMS with
-                        url: [%s],
-                        user_id: [%s],
-                        course_id: [%s],
-                        and basket_id: [%s]
-                        returned [%s]""",
-                        discount_lms_url,
-                        str(user_id),
-                        ck,
-                        basket.id,
-                        response)
-                except (SlumberHttpBaseException, requests.exceptions.Timeout) as error:
-                    logger.warning(
-                        """Failed to receive discount jwt from LMS with
-                        url: [%s],
-                        user_id: [%s],
-                        course_id: [%s],
-                        and basket_id: [%s]
-                        returned [%s]""",
-                        discount_lms_url,
-                        str(user_id),
-                        ck,
-                        basket.id,
-                        vars(error.response) if hasattr(error, 'response') else '')
+            self._add_dynamic_discount_to_request(basket)
             # End TODO
+
             Applicator().apply(basket, basket.owner, self.request)
             logger.info(
                 'Applicator applied, basket id: [%s]',
