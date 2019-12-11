@@ -607,7 +607,7 @@ class CouponRedeemViewTests(CouponMixin, DiscoveryTestMixin, LmsApiMockMixin, En
 
         self.request.user = self.user
         self.client.get(self.redeem_url_with_params(code=code, consent_token=consent_token))
-        
+
         # Assert our orderline has attributes updated with some decimal value
         orderline = Order.objects.first().lines.last()
         self.assertIsInstance(orderline.effective_discount_percentage, Decimal)
@@ -635,7 +635,7 @@ class CouponRedeemViewTests(CouponMixin, DiscoveryTestMixin, LmsApiMockMixin, En
 
         self.request.user = self.user
         self.client.get(self.redeem_url_with_params(code=code, consent_token=consent_token))
-        
+
         # Assert our orderline has nothing set for enterprise discount fields
         orderline = Order.objects.first().lines.last()
         assert orderline.effective_discount_percentage is None
