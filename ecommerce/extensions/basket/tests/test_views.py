@@ -1393,16 +1393,16 @@ class QuantityApiViewTests(PaymentApiResponseTestMixin, BasketMixin, DiscoveryMo
         self.clear_message_utils()
         self.user = self.create_user()
         self.client.login(username=self.user.username, password=self.password)
+        self.course, self.seat, self.enrollment_code = self.prepare_course_seat_and_enrollment_code(seat_price=100)
 
     def prepare_enrollment_code_basket(self):
-        course, __, enrollment_code = self.prepare_course_seat_and_enrollment_code(seat_price=100)
-        basket = self.create_basket_and_add_product(enrollment_code)
-        self.mock_course_runs_endpoint(self.site_configuration.discovery_api_url, course_run=course)
-        return course, basket
+        basket = self.create_basket_and_add_product(self.enrollment_code)
+        self.mock_course_runs_endpoint(self.site_configuration.discovery_api_url, course_run=self.course)
+        return basket
 
     def test_response_success(self):
         """ Verify a successful response is returned. """
-        _, basket = self.prepare_enrollment_code_basket()
+        basket = self.prepare_enrollment_code_basket()
         response = self.client.post(self.path, data={'quantity': 5})
 
         expected_message = {
@@ -1433,7 +1433,7 @@ class QuantityApiViewTests(PaymentApiResponseTestMixin, BasketMixin, DiscoveryMo
 
     def test_response_validation_error(self):
         """ Verify a validation error is returned. """
-        course, basket = self.prepare_enrollment_code_basket()
+        basket = self.prepare_enrollment_code_basket()
         response = self.client.post(self.path, data={'quantity': -1})
 
         expected_messages = [
@@ -1450,7 +1450,7 @@ class QuantityApiViewTests(PaymentApiResponseTestMixin, BasketMixin, DiscoveryMo
                 'code': 'single-enrollment-code-warning',
                 'data': {
                     'course_about_url': 'http://lms.testserver.fake/courses/{course_id}/about'.format(
-                        course_id=course.id,
+                        course_id=self.course.id,
                     )
                 }
             }
@@ -1464,6 +1464,20 @@ class QuantityApiViewTests(PaymentApiResponseTestMixin, BasketMixin, DiscoveryMo
             messages=expected_messages,
             summary_quantity=1,
             summary_subtotal=100,
+        )
+
+    def test_with_seat_product(self):
+        """ Verify that basket error is returned for seat product
+        and quantity is not updated. """
+        basket = self.create_basket_and_add_product(self.seat)
+        response = self.client.post(self.path, data={'quantity': 2})
+
+        self.assert_expected_response(
+            basket,
+            product_type=u'Seat',
+            response=response,
+            show_coupon_form=True,
+            status_code=400,
         )
 
 

@@ -751,22 +751,30 @@ class QuantityAPIView(APIView, View, PaymentApiLogicMixin):
         if request.basket.is_empty:
             return self.get_payment_api_response(status=400)
 
+        basket_line = self._get_first_basket_line()
+        if not basket_line.product.is_enrollment_code_product:
+            return self.get_payment_api_response(status=400)
+
         # NOTE: Ideally, we'd inherit FormView; but that doesn't work with APIView
-        form = self._get_basket_line_form()
+        form = self._get_basket_line_form(basket_line)
         if form.is_valid():
             form.save()
             return self._form_valid()
 
         return self._form_invalid(form)
 
-    def _get_basket_line_form(self):
-        """ Retrieves form for the first line. """
+    def _get_first_basket_line(self):
+        """ Get first line from basket. """
         basket_lines = self.request.basket.all_lines()
         assert basket_lines
+        return basket_lines[0]
+
+    def _get_basket_line_form(self, basket_line):
+        """ Retrieves form for the first line. """
         form_kwargs = {
             'data': self.request.data,
             'strategy': self.request.strategy,
-            'instance': basket_lines[0]
+            'instance': basket_line
         }
         return BasketLineForm(**form_kwargs)
 
