@@ -260,6 +260,9 @@ class EnrollmentFulfillmentModule(BaseFulfillmentModule):
     def _calculate_effective_discount_percentage(self, contract_metadata):
         """
         Returns the effective discount percentage on a contract.
+        EnterpriseContractMetadata holds the value as a whole number,
+        but on the orderline, we need to represent it as a decimaled
+        percent (.23 instead of 23)
 
         Args:
             contract_metadata:  EnterpriseContractMetadata object
@@ -268,21 +271,23 @@ class EnrollmentFulfillmentModule(BaseFulfillmentModule):
             A Decimal() object.
         """
         if contract_metadata.discount_type == EnterpriseContractMetadata.PERCENTAGE:
-            return contract_metadata.discount_value
+            return contract_metadata.discount_value * Decimal('.01')
         return contract_metadata.discount_value / (contract_metadata.discount_value + contract_metadata.amount_paid)
 
-    def _calculate_enterprise_customer_cost(self, line, effective_discount_percentage):
+    def _calculate_enterprise_customer_cost(self, list_price, effective_discount_percentage):
         """
-        Calculates the enterprise customer cost on a particular line item.
+        Calculates the enterprise customer cost on a particular line item list price.
 
         Args:
-            line: Line object (NOTE: line.unit_price_excl_tax is a Decmial())
-            effective_discount_percentage: A Decimal() object
+            list_price: a Decimal object
+            effective_discount_percentage: A Decimal() object. Is expected to
+                be a decimaled percent (as in, .45 (representing 45 percent))
 
         Returns:
             A Decimal() object.
         """
-        return line.unit_price_excl_tax * (Decimal('1.00') - effective_discount_percentage)
+        cost = list_price * (Decimal('1.00000') - effective_discount_percentage)
+        return cost.quantize(Decimal('.00001'))  # Round to 5 decimal places.
 
     def _locate_contract_metadata(self, order):
         """
@@ -343,7 +348,7 @@ class EnrollmentFulfillmentModule(BaseFulfillmentModule):
             contract_metadata
         )
         enterprise_customer_cost = self._calculate_enterprise_customer_cost(
-            line,
+            line.unit_price_excl_tax,
             effective_discount_percentage
         )
         line.effective_discount_percentage = effective_discount_percentage
