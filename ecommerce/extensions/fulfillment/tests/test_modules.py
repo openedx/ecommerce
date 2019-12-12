@@ -267,8 +267,8 @@ class EnrollmentFulfillmentModuleTests(ProgramTestMixin, DiscoveryTestMixin, Ful
 
         # No exceptions should be raised and the order should be fulfilled
         self.assertEqual(lines[0].status, 'Complete')
-        self.assertIsInstance(lines[0].effective_discount_percentage, Decimal)
-        self.assertIsInstance(lines[0].enterprise_customer_cost, Decimal)
+        self.assertIsInstance(lines[0].effective_contract_discount_percentage, Decimal)
+        self.assertIsInstance(lines[0].effective_contract_discounted_price, Decimal)
 
     @httpretty.activate
     def test_enrollment_module_fulfill_order_no_enterprise_discount_calculation(self):
@@ -301,8 +301,8 @@ class EnrollmentFulfillmentModuleTests(ProgramTestMixin, DiscoveryTestMixin, Ful
 
         # No exceptions should be raised and the order should be fulfilled
         self.assertEqual(lines[0].status, 'Complete')
-        assert lines[0].effective_discount_percentage is None
-        assert lines[0].enterprise_customer_cost is None
+        assert lines[0].effective_contract_discount_percentage is None
+        assert lines[0].effective_contract_discounted_price is None
 
     @override_settings(EDX_API_KEY=None)
     def test_enrollment_module_not_configured(self):
@@ -560,6 +560,7 @@ class EnrollmentFulfillmentModuleTests(ProgramTestMixin, DiscoveryTestMixin, Ful
             discount_value=Decimal('12.3456'),
             amount_paid=Decimal('12000.00')
         )
+        # pylint: disable=protected-access
         actual = module._calculate_effective_discount_percentage(ecm)
         expected = Decimal('.123456')
         self.assertEqual(actual, expected)
@@ -575,6 +576,7 @@ class EnrollmentFulfillmentModuleTests(ProgramTestMixin, DiscoveryTestMixin, Ful
             discount_value=Decimal('12.3456'),
             amount_paid=Decimal('12000.00')
         )
+        # pylint: disable=protected-access
         actual = module._calculate_effective_discount_percentage(ecm)
         expected = Decimal('12.3456') / (Decimal('12.3456') + Decimal('12000.00'))
         self.assertEqual(actual, expected)
@@ -586,6 +588,7 @@ class EnrollmentFulfillmentModuleTests(ProgramTestMixin, DiscoveryTestMixin, Ful
         module = EnrollmentFulfillmentModule()
         list_price = Decimal('199.00')
         effective_discount_percentage = Decimal('0.001027742658353086344768502165')
+        # pylint: disable=protected-access
         actual = module._calculate_enterprise_customer_cost(
             list_price,
             effective_discount_percentage,
