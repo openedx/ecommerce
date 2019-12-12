@@ -1016,7 +1016,7 @@ class EnterpriseCouponViewSetRbacTests(
                 'api:v2:enterprise-coupons-(?P<enterprise-id>.+)/search-list',
                 kwargs={'enterprise_id': self.data['enterprise_customer']['id']}
             ),
-            data={'search_parameter': 'iamsofake@notreal.com'}
+            data={'user_email': 'iamsofake@notreal.com'}
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         assert response.json()['results'] == []
@@ -1031,7 +1031,7 @@ class EnterpriseCouponViewSetRbacTests(
                 'api:v2:enterprise-coupons-(?P<enterprise-id>.+)/search-list',
                 kwargs={'enterprise_id': self.data['enterprise_customer']['id']}
             ),
-            data={'search_parameter': '3456QWTERF46PS1R'}
+            data={'user_code': '3456QWTERF46PS1R'}
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         assert response.json()['results'] == []
@@ -1057,7 +1057,7 @@ class EnterpriseCouponViewSetRbacTests(
                 'api:v2:enterprise-coupons-(?P<enterprise-id>.+)/search-list',
                 kwargs={'enterprise_id': self.data['enterprise_customer']['id']}
             ),
-            data={'search_parameter': 'iHaveNoUser@object.com'}
+            data={'user_email': 'iHaveNoUser@object.com'}
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -1088,7 +1088,7 @@ class EnterpriseCouponViewSetRbacTests(
                 'api:v2:enterprise-coupons-(?P<enterprise-id>.+)/search-list',
                 kwargs={'enterprise_id': self.data['enterprise_customer']['id']}
             ),
-            data={'search_parameter': 'ABCDEFGH1234567'}
+            data={'user_code': 'ABCDEFGH1234567'}
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -1116,7 +1116,7 @@ class EnterpriseCouponViewSetRbacTests(
                 'api:v2:enterprise-coupons-(?P<enterprise-id>.+)/search-list',
                 kwargs={'enterprise_id': self.data['enterprise_customer']['id']}
             ),
-            data={'search_parameter': 'ABCDEFGH1234567'}
+            data={'user_code': 'ABCDEFGH1234567'}
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -1177,7 +1177,7 @@ class EnterpriseCouponViewSetRbacTests(
                 'api:v2:enterprise-coupons-(?P<enterprise-id>.+)/search-list',
                 kwargs={'enterprise_id': self.data['enterprise_customer']['id']}
             ),
-            data={'search_parameter': self.user.email}
+            data={'user_email': self.user.email}
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         results = response.json()['results']

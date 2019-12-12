@@ -5,7 +5,6 @@ import logging
 import six
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
-from django.core.validators import validate_email
 from django.db.models import Q
 from django.http import Http404
 from django.shortcuts import get_object_or_404
@@ -451,31 +450,25 @@ class EnterpriseCouponViewSet(CouponViewSet):
         """
         Return coupon information based on query param values provided.
         """
-        search_parameter = self.request.query_params.get('search_parameter', None)
-        if not search_parameter:
+        user_email = self.request.query_params.get('user_email', None)
+        user_code = self.request.query_params.get('user_code', None)
+        if not (user_email or user_code):
             raise Http404("No search query parameter provided.")
-        # Check if we received an email or a code in search
         try:
-            is_email = True
-            validate_email(search_parameter)
-        except ValidationError:
-            is_email = False
-        try:
-            user = User.objects.get(email=search_parameter)
+            user = User.objects.get(email=user_email)
         except ObjectDoesNotExist:
             user = None
 
         enterprise_vouchers = self._collect_enterprise_vouchers_for_search(
-            search_parameter,
+            user_email,
             user,
-            is_email
+            user_code
         )
 
         redemptions_and_assignments = self._form_search_response_data_from_vouchers(
             enterprise_vouchers,
-            search_parameter,
+            user_email,
             user,
-            is_email
         )
 
         page = self.paginate_queryset(redemptions_and_assignments)
@@ -485,7 +478,7 @@ class EnterpriseCouponViewSet(CouponViewSet):
         )
         return self.get_paginated_response(serializer.data)
 
-    def _collect_enterprise_vouchers_for_search(self, search_parameter, user, is_email):
+    def _collect_enterprise_vouchers_for_search(self, user_email, user, user_code):
         """
         Gather vouchers based on offerAssignments and voucherApplications
         associated with the user (and enterprise specified in request url)
@@ -499,8 +492,8 @@ class EnterpriseCouponViewSet(CouponViewSet):
             coupon_vouchers__coupon__in=self.get_queryset()
         )
         # When search is made by code, only one voucher will exist so return it directly
-        if not is_email:
-            voucher = enterprise_vouchers.filter(code=search_parameter)
+        if not user_email:
+            voucher = enterprise_vouchers.filter(code=user_code)
             return voucher
         # We want vouchers with OfferAssignments related to the user email
         # that do not have a voucher_application (aka they have been assigned
@@ -508,7 +501,7 @@ class EnterpriseCouponViewSet(CouponViewSet):
         no_voucher_application = Q(voucher_application__isnull=True)
         offer_assignments = OfferAssignment.objects.filter(
             no_voucher_application,
-            user_email=search_parameter,
+            user_email=user_email,
             status__in=[OFFER_ASSIGNED, OFFER_ASSIGNMENT_EMAIL_PENDING],
         )
         vouchers_from_offer_assignments = Q(
@@ -538,7 +531,7 @@ class EnterpriseCouponViewSet(CouponViewSet):
             'applications__order__lines__product__course',
         )
 
-    def _form_search_response_data_from_vouchers(self, vouchers, search_parameter, user, is_email):
+    def _form_search_response_data_from_vouchers(self, vouchers, user_email, user):
         """
         Build a list of dictionaries that contains the relevant information
         for each voucher_application (redemption) or offer_assignment (assignment).
@@ -568,15 +561,15 @@ class EnterpriseCouponViewSet(CouponViewSet):
                 'code': voucher.code,
                 'status__in': [OFFER_ASSIGNED, OFFER_ASSIGNMENT_EMAIL_PENDING],
             }
-            if is_email:
-                filter_kwargs['user_email'] = search_parameter
+            if user_email:
+                filter_kwargs['user_email'] = user_email
             offer_assignments = OfferAssignment.objects.filter(
                 no_voucher_application,
                 **filter_kwargs).distinct()
             coupon_data['is_assigned'] = offer_assignments.count()
             # For the case when an unassigned voucher code is searched
             if offer_assignments.count() == 0:
-                if not is_email:
+                if not user_email:
                     redemption_data = dict(coupon_data)
                     redemption_data['course_title'] = None
                     redemption_data['course_key'] = None
