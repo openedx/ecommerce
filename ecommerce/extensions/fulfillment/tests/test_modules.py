@@ -4,6 +4,7 @@ from __future__ import absolute_import
 import datetime
 import json
 import uuid
+from decimal import Decimal
 
 import ddt
 import httpretty
@@ -33,6 +34,7 @@ from ecommerce.coupons.tests.mixins import CouponMixin
 from ecommerce.courses.models import Course
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.courses.utils import mode_for_product
+from ecommerce.enterprise.conditions import EnterpriseCustomerCondition
 from ecommerce.entitlements.utils import create_or_update_course_entitlement
 from ecommerce.extensions.basket.constants import PURCHASER_BEHALF_ATTRIBUTE
 from ecommerce.extensions.basket.utils import basket_add_organization_attribute
@@ -46,7 +48,13 @@ from ecommerce.extensions.fulfillment.modules import (
 )
 from ecommerce.extensions.fulfillment.status import LINE
 from ecommerce.extensions.fulfillment.tests.mixins import FulfillmentTestMixin
-from ecommerce.extensions.test.factories import create_order
+from ecommerce.extensions.payment.models import EnterpriseContractMetadata
+from ecommerce.extensions.test.factories import (
+    ConditionalOfferFactory,
+    EnterpriseCustomerConditionFactory,
+    EnterprisePercentageDiscountBenefitFactory,
+    create_order
+)
 from ecommerce.extensions.voucher.models import OrderLineVouchers
 from ecommerce.extensions.voucher.utils import create_vouchers
 from ecommerce.programs.tests.mixins import ProgramTestMixin
@@ -59,10 +67,13 @@ LOGGER_NAME = 'ecommerce.extensions.analytics.utils'
 Applicator = get_class('offer.applicator', 'Applicator')
 Benefit = get_model('offer', 'Benefit')
 Catalog = get_model('catalogue', 'Catalog')
+ConditionalOffer = get_model('offer', 'ConditionalOffer')
+OrderDiscount = get_model('order', 'OrderDiscount')
 Option = get_model('catalogue', 'Option')
 Product = get_model('catalogue', 'Product')
 ProductAttribute = get_model('catalogue', 'ProductAttribute')
 ProductClass = get_model('catalogue', 'ProductClass')
+Range = get_model('offer', 'Range')
 StockRecord = get_model('partner', 'StockRecord')
 Voucher = get_model('voucher', 'Voucher')
 
@@ -217,6 +228,81 @@ class EnrollmentFulfillmentModuleTests(ProgramTestMixin, DiscoveryTestMixin, Ful
         __, lines = EnrollmentFulfillmentModule().fulfill_product(self.order, list(self.order.lines.all()))
         # No exceptions should be raised and the order should be fulfilled
         self.assertEqual(lines[0].status, 'Complete')
+
+    @httpretty.activate
+    def test_enrollment_module_fulfill_order_enterprise_discount_calculation(self):
+        """
+        Verify an orderline is updated with calculated enterprise discount data
+        if a product is fulfilled with an enterprise offer for an enterprise
+        customer and that enterprise offer has `enterprise_contract_metadata`
+        associated with it.
+        """
+        httpretty.register_uri(httpretty.POST, get_lms_enrollment_api_url(), status=200, body='{}', content_type=JSON)
+        self.create_seat_and_order(certificate_type='credit', provider='MIT')
+        discount = self.order.discounts.create()
+
+        benefit = EnterprisePercentageDiscountBenefitFactory.create()
+        condition = EnterpriseCustomerConditionFactory.create()
+        offer = ConditionalOfferFactory.create(
+            benefit_id=benefit.id,
+            condition_id=condition.id,
+        )
+        ecm = EnterpriseContractMetadata.objects.create(
+            discount_type=EnterpriseContractMetadata.FIXED,
+            discount_value=Decimal('200.00'),
+            amount_paid=Decimal('500.00')
+        )
+        offer.enterprise_contract_metadata = ecm
+        offer.save()
+        discount.offer_id = offer.id
+        discount.save()
+        self.order.refresh_from_db()
+
+        with mock.patch.object(Range, 'contains_product') as mock_contains:
+            mock_contains.return_value = True
+            with mock.patch.object(EnterpriseCustomerCondition, 'is_satisfied') as mock_satisfied:
+                mock_satisfied.return_value = True
+                Applicator().apply_offers(self.order.basket, [offer])
+            __, lines = EnrollmentFulfillmentModule().fulfill_product(self.order, list(self.order.lines.all()))
+
+        # No exceptions should be raised and the order should be fulfilled
+        self.assertEqual(lines[0].status, 'Complete')
+        self.assertIsInstance(lines[0].effective_contract_discount_percentage, Decimal)
+        self.assertIsInstance(lines[0].effective_contract_discounted_price, Decimal)
+
+    @httpretty.activate
+    def test_enrollment_module_fulfill_order_no_enterprise_discount_calculation(self):
+        """
+        Verify an orderline is NOT updated with calculated enterprise discount data
+        if a product is fulfilled with an enterprise offer for an enterprise
+        customer and that enterprise offer has NO `enterprise_contract_metadata`
+        associated with it.
+        """
+        httpretty.register_uri(httpretty.POST, get_lms_enrollment_api_url(), status=200, body='{}', content_type=JSON)
+        self.create_seat_and_order(certificate_type='credit', provider='MIT')
+        discount = self.order.discounts.create()
+
+        benefit = EnterprisePercentageDiscountBenefitFactory.create()
+        condition = EnterpriseCustomerConditionFactory.create()
+        offer = ConditionalOfferFactory.create(
+            benefit_id=benefit.id,
+            condition_id=condition.id,
+        )
+        discount.offer_id = offer.id
+        discount.save()
+        self.order.refresh_from_db()
+
+        with mock.patch.object(Range, 'contains_product') as mock_contains:
+            mock_contains.return_value = True
+            with mock.patch.object(EnterpriseCustomerCondition, 'is_satisfied') as mock_satisfied:
+                mock_satisfied.return_value = True
+                Applicator().apply_offers(self.order.basket, [offer])
+            __, lines = EnrollmentFulfillmentModule().fulfill_product(self.order, list(self.order.lines.all()))
+
+        # No exceptions should be raised and the order should be fulfilled
+        self.assertEqual(lines[0].status, 'Complete')
+        assert lines[0].effective_contract_discount_percentage is None
+        assert lines[0].effective_contract_discounted_price is None
 
     @override_settings(EDX_API_KEY=None)
     def test_enrollment_module_not_configured(self):
@@ -462,6 +548,53 @@ class EnrollmentFulfillmentModuleTests(ProgramTestMixin, DiscoveryTestMixin, Ful
         __, lines = EnrollmentFulfillmentModule().fulfill_product(self.order, list(self.order.lines.all()))
         # No exceptions should be raised and the order should be fulfilled
         self.assertEqual(lines[0].status, 'Complete')
+
+    def test_calculate_effective_discount_percentage_percentage(self):
+        """
+        Test correct values for discount percentage are evaluated when discount
+        type is PERCENTAGE.
+        """
+        module = EnrollmentFulfillmentModule()
+        ecm = EnterpriseContractMetadata(
+            discount_type=EnterpriseContractMetadata.PERCENTAGE,
+            discount_value=Decimal('12.3456'),
+            amount_paid=Decimal('12000.00')
+        )
+        # pylint: disable=protected-access
+        actual = module._calculate_effective_discount_percentage(ecm)
+        expected = Decimal('.123456')
+        self.assertEqual(actual, expected)
+
+    def test_calculate_effective_discount_percentage_fixed(self):
+        """
+        Test correct values for discount percentage are evaluated when discount
+        type is FIXED.
+        """
+        module = EnrollmentFulfillmentModule()
+        ecm = EnterpriseContractMetadata(
+            discount_type=EnterpriseContractMetadata.FIXED,
+            discount_value=Decimal('12.3456'),
+            amount_paid=Decimal('12000.00')
+        )
+        # pylint: disable=protected-access
+        actual = module._calculate_effective_discount_percentage(ecm)
+        expected = Decimal('12.3456') / (Decimal('12.3456') + Decimal('12000.00'))
+        self.assertEqual(actual, expected)
+
+    def test_calculate_enterprise_customer_cost(self):
+        """
+        Test correct values for discount percentage are evaluated and rounded.
+        """
+        module = EnrollmentFulfillmentModule()
+        list_price = Decimal('199.00')
+        effective_discount_percentage = Decimal('0.001027742658353086344768502165')
+        # pylint: disable=protected-access
+        actual = module._calculate_enterprise_customer_cost(
+            list_price,
+            effective_discount_percentage,
+        )
+        expected = Decimal('198.79548')
+        self.assertEqual(actual, expected)
 
 
 class CouponFulfillmentModuleTest(CouponMixin, FulfillmentTestMixin, TestCase):

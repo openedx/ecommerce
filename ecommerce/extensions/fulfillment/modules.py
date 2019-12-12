@@ -9,6 +9,7 @@ import abc
 import datetime
 import json
 import logging
+from decimal import Decimal
 
 import requests
 import six
@@ -42,6 +43,7 @@ from ecommerce.extensions.basket.constants import PURCHASER_BEHALF_ATTRIBUTE
 from ecommerce.extensions.basket.models import BasketAttribute
 from ecommerce.extensions.checkout.utils import get_receipt_page_url
 from ecommerce.extensions.fulfillment.status import LINE
+from ecommerce.extensions.payment.models import EnterpriseContractMetadata
 from ecommerce.extensions.voucher.models import OrderLineVouchers
 from ecommerce.extensions.voucher.utils import create_vouchers
 from ecommerce.notifications.notifications import send_notification
@@ -228,7 +230,6 @@ class EnrollmentFulfillmentModule(BaseFulfillmentModule):
             if enterprise_customer_uuid is not None:
                 data['linked_enterprise_customer'] = str(enterprise_customer_uuid)
                 break
-
         # If an EnterpriseCustomer UUID is associated with the coupon, create an EnterpriseCustomerUser
         # on the Enterprise service if one doesn't already exist.
         if enterprise_customer_uuid is not None:
@@ -255,6 +256,104 @@ class EnrollmentFulfillmentModule(BaseFulfillmentModule):
             A supported list of unmodified lines associated with "Seat" products.
         """
         return [line for line in lines if self.supports_line(line)]
+
+    def _calculate_effective_discount_percentage(self, contract_metadata):
+        """
+        Returns the effective discount percentage on a contract.
+        EnterpriseContractMetadata holds the value as a whole number,
+        but on the orderline, we need to represent it as a decimaled
+        percent (.23 instead of 23)
+
+        Args:
+            contract_metadata:  EnterpriseContractMetadata object
+
+        Returns:
+            A Decimal() object.
+        """
+        if contract_metadata.discount_type == EnterpriseContractMetadata.PERCENTAGE:
+            return contract_metadata.discount_value * Decimal('.01')
+        return contract_metadata.discount_value / (contract_metadata.discount_value + contract_metadata.amount_paid)
+
+    def _calculate_enterprise_customer_cost(self, list_price, effective_discount_percentage):
+        """
+        Calculates the enterprise customer cost on a particular line item list price.
+
+        Args:
+            list_price: a Decimal object
+            effective_discount_percentage: A Decimal() object. Is expected to
+                be a decimaled percent (as in, .45 (representing 45 percent))
+
+        Returns:
+            A Decimal() object.
+        """
+        cost = list_price * (Decimal('1.00000') - effective_discount_percentage)
+        return cost.quantize(Decimal('.00001'))  # Round to 5 decimal places.
+
+    def _locate_contract_metadata(self, order):
+        """
+        Locates an EnterpriseContractMetadata object associated with an order.
+
+        The contract metadata can live on the `attr` of a coupon product in the
+        case of a coupon being redeemed (`mycoupon.attr.enterprise_contract_metadata`)
+
+        -OR-
+
+        The contract metadata can live on the conditional offer associated with
+        the discount (that is associated with the order) in the case of an
+        enterprise offer
+
+        Args:
+            order: An Order object
+
+        Returns:
+            A EnterpriseContractMetadata object if one is found, else None.
+        """
+        for discount in order.discounts.all():
+            # If a coupon is being redeemed
+            if discount.voucher and get_enterprise_customer_uuid_from_voucher(discount.voucher):
+                coupon = discount.voucher.coupon_vouchers.first().coupon
+                contract_metadata = getattr(coupon.attr, 'enterprise_contract_metadata', None)
+                if contract_metadata is not None:
+                    logger.info("Using contract_metadata on coupon product for order [%s]", order.number)
+                    return contract_metadata
+            # If there is an enterprise offer
+            if discount.offer and discount.offer.enterprise_contract_metadata:
+                logger.info("Using contract_metadata on conditional offer for order [%s]", order.number)
+                return discount.offer.enterprise_contract_metadata
+
+        return None
+
+    def _update_orderline_with_enterprise_discount_metadata(self, order, line):
+        """
+        Updates an orderline with calculated discount metrics if applicable
+
+        Args:
+            order: An Order object
+            line: A Line object
+
+        Returns:
+            Nothing
+
+        Side effect:
+            Saves a line object if effective_discount_percentage and
+            enterprise_customer_cost can be calculated.
+
+        """
+        contract_metadata = self._locate_contract_metadata(order)
+        if contract_metadata is None:
+            return
+        logger.info("Enterprise contract metadata found for order [%s]", order.number)
+
+        effective_discount_percentage = self._calculate_effective_discount_percentage(
+            contract_metadata
+        )
+        enterprise_customer_cost = self._calculate_enterprise_customer_cost(
+            line.unit_price_excl_tax,
+            effective_discount_percentage
+        )
+        line.effective_contract_discount_percentage = effective_discount_percentage
+        line.effective_contract_discounted_price = enterprise_customer_cost
+        line.save()
 
     def fulfill_product(self, order, lines, email_opt_in=False):
         """ Fulfills the purchase of a 'seat' by enrolling the associated student.
@@ -331,6 +430,7 @@ class EnrollmentFulfillmentModule(BaseFulfillmentModule):
                 )
             try:
                 self._add_enterprise_data_to_enrollment_api_post(data, order)
+                self._update_orderline_with_enterprise_discount_metadata(order, line)
 
                 # Post to the Enrollment API. The LMS will take care of posting a new EnterpriseCourseEnrollment to
                 # the Enterprise service if the user+course has a corresponding EnterpriseCustomerUser.

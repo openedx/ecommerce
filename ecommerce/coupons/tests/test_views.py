@@ -2,6 +2,7 @@
 from __future__ import absolute_import
 
 import datetime
+from decimal import Decimal
 
 import ddt
 import httpretty
@@ -31,6 +32,7 @@ from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
 from ecommerce.extensions.checkout.utils import get_receipt_page_url
 from ecommerce.extensions.order.utils import UserAlreadyPlacedOrder
+from ecommerce.extensions.payment.models import EnterpriseContractMetadata
 from ecommerce.extensions.test.factories import prepare_voucher
 from ecommerce.tests.mixins import ApiMockMixin, LmsApiMockMixin
 from ecommerce.tests.testcases import TestCase
@@ -42,6 +44,7 @@ Catalog = get_model('catalogue', 'Catalog')
 Course = get_model('courses', 'Course')
 Product = get_model('catalogue', 'Product')
 Order = get_model('order', 'Order')
+OrderLine = get_model('order', 'Line')
 OrderLineVouchers = get_model('voucher', 'OrderLineVouchers')
 StockRecord = get_model('partner', 'StockRecord')
 Voucher = get_model('voucher', 'Voucher')
@@ -342,7 +345,10 @@ class CouponRedeemViewTests(CouponMixin, DiscoveryTestMixin, LmsApiMockMixin, En
             enterprise_customer=None,
             enterprise_customer_catalog=None,
             course_id=None,
-            catalog=None
+            catalog=None,
+            contract_discount_value=None,
+            contract_discount_type=EnterpriseContractMetadata.PERCENTAGE,
+            prepaid_invoice_amount=None,
     ):
         """ Creates coupon and returns code. """
         coupon = self.create_coupon(
@@ -354,6 +360,13 @@ class CouponRedeemViewTests(CouponMixin, DiscoveryTestMixin, LmsApiMockMixin, En
             enterprise_customer_catalog=enterprise_customer_catalog,
         )
         coupon.course_id = course_id
+        if contract_discount_value is not None:
+            ecm = EnterpriseContractMetadata.objects.create(
+                discount_type=contract_discount_type,
+                discount_value=contract_discount_value,
+                amount_paid=prepaid_invoice_amount,
+            )
+            coupon.attr.enterprise_contract_metadata = ecm
         coupon.save()
         coupon_code = coupon.attr.coupon_vouchers.vouchers.first().code
         self.assertEqual(Voucher.objects.filter(code=coupon_code).count(), 1)
@@ -493,7 +506,9 @@ class CouponRedeemViewTests(CouponMixin, DiscoveryTestMixin, LmsApiMockMixin, En
             self.assertTrue(mock_logger.called)
 
     def prepare_enterprise_data(self, benefit_value=100, consent_enabled=True, consent_provided=False, course_id=None,
-                                catalog=None, enterprise_customer_catalog=None):
+                                catalog=None, enterprise_customer_catalog=None, contract_discount_value=None,
+                                contract_discount_type=EnterpriseContractMetadata.PERCENTAGE,
+                                prepaid_invoice_amount=None):
         """Creates an enterprise coupon and mocks enterprise endpoints."""
         code, coupon = self.create_coupon_and_get_code(
             benefit_value=benefit_value,
@@ -501,7 +516,10 @@ class CouponRedeemViewTests(CouponMixin, DiscoveryTestMixin, LmsApiMockMixin, En
             enterprise_customer=ENTERPRISE_CUSTOMER,
             course_id=course_id,
             catalog=catalog,
-            enterprise_customer_catalog=enterprise_customer_catalog
+            enterprise_customer_catalog=enterprise_customer_catalog,
+            contract_discount_type=contract_discount_type,
+            contract_discount_value=contract_discount_value,
+            prepaid_invoice_amount=prepaid_invoice_amount,
         )
         self.request.user = self.user
         self.mock_consent_response(
@@ -564,6 +582,65 @@ class CouponRedeemViewTests(CouponMixin, DiscoveryTestMixin, LmsApiMockMixin, En
         self.mock_enterprise_learner_api_for_learner_with_no_enterprise()
         response = self.client.get(self.redeem_url_with_params(code=code))
         self.assertEqual(response.context['error'], 'Couldn\'t find a matching Enterprise Customer for this coupon.')
+
+    @httpretty.activate
+    def test_enterprise_contract_metadata_create_on_coupon_redemption(self):
+        """
+        Verify an orderline is updated with calculated enterprise discount data
+        if a product is fulfilled with a coupon for an enterprise customer and
+        that coupon has `enterprise_contract_metadata` associated with it.
+        """
+        code, _ = self.prepare_enterprise_data(
+            enterprise_customer_catalog=ENTERPRISE_CUSTOMER_CATALOG,
+            contract_discount_type=EnterpriseContractMetadata.FIXED,
+            contract_discount_value=Decimal('1337.00'),
+            prepaid_invoice_amount=Decimal('2000.00'),
+        )
+        self.mock_assignable_enterprise_condition_calls(ENTERPRISE_CUSTOMER_CATALOG)
+        self.mock_enterprise_learner_api_for_learner_with_no_enterprise()
+        self.mock_enterprise_learner_post_api()
+
+        consent_token = get_enterprise_customer_data_sharing_consent_token(
+            self.request.user.access_token,
+            self.course.id,
+            ENTERPRISE_CUSTOMER
+        )
+
+        self.request.user = self.user
+        self.client.get(self.redeem_url_with_params(code=code, consent_token=consent_token))
+
+        # Assert our orderline has attributes updated with some decimal value
+        orderline = Order.objects.first().lines.last()
+        self.assertIsInstance(orderline.effective_contract_discount_percentage, Decimal)
+        self.assertIsInstance(orderline.effective_contract_discounted_price, Decimal)
+
+    @httpretty.activate
+    def test_enterprise_contract_metadata_not_created(self):
+        """
+        Verify an orderline is NOT updated with calculated enterprise discount data
+        if a product is fulfilled with a coupon for an enterprise customer but
+        that coupon has NO `enterprise_contract_metadata` associated with it.
+        """
+        code, _ = self.prepare_enterprise_data(
+            enterprise_customer_catalog=ENTERPRISE_CUSTOMER_CATALOG,
+        )
+        self.mock_assignable_enterprise_condition_calls(ENTERPRISE_CUSTOMER_CATALOG)
+        self.mock_enterprise_learner_api_for_learner_with_no_enterprise()
+        self.mock_enterprise_learner_post_api()
+
+        consent_token = get_enterprise_customer_data_sharing_consent_token(
+            self.request.user.access_token,
+            self.course.id,
+            ENTERPRISE_CUSTOMER
+        )
+
+        self.request.user = self.user
+        self.client.get(self.redeem_url_with_params(code=code, consent_token=consent_token))
+
+        # Assert our orderline has nothing set for enterprise discount fields
+        orderline = Order.objects.first().lines.last()
+        assert orderline.effective_contract_discount_percentage is None
+        assert orderline.effective_contract_discounted_price is None
 
     @httpretty.activate
     def test_enterprise_customer_successful_redemption(self):

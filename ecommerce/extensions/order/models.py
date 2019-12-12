@@ -25,6 +25,8 @@ class Order(AbstractOrder):
 
 class Line(AbstractLine):
     history = HistoricalRecords()
+    effective_contract_discount_percentage = models.DecimalField(max_digits=8, decimal_places=5, null=True)
+    effective_contract_discounted_price = models.DecimalField(max_digits=12, decimal_places=2, null=True)
 
 
 class PaymentEvent(AbstractPaymentEvent):
