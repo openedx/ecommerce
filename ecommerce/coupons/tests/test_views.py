@@ -611,8 +611,8 @@ class CouponRedeemViewTests(CouponMixin, DiscoveryTestMixin, LmsApiMockMixin, En
 
         # Assert our orderline has attributes updated with some decimal value
         orderline = Order.objects.first().lines.last()
-        self.assertIsInstance(orderline.effective_discount_percentage, Decimal)
-        self.assertIsInstance(orderline.enterprise_customer_cost, Decimal)
+        self.assertIsInstance(orderline.effective_contract_discount_percentage, Decimal)
+        self.assertIsInstance(orderline.effective_contract_discounted_price, Decimal)
 
     @httpretty.activate
     def test_enterprise_contract_metadata_not_created(self):
@@ -639,8 +639,8 @@ class CouponRedeemViewTests(CouponMixin, DiscoveryTestMixin, LmsApiMockMixin, En
 
         # Assert our orderline has nothing set for enterprise discount fields
         orderline = Order.objects.first().lines.last()
-        assert orderline.effective_discount_percentage is None
-        assert orderline.enterprise_customer_cost is None
+        assert orderline.effective_contract_discount_percentage is None
+        assert orderline.effective_contract_discounted_price is None
 
     @httpretty.activate
     def test_enterprise_customer_successful_redemption(self):

@@ -351,8 +351,8 @@ class EnrollmentFulfillmentModule(BaseFulfillmentModule):
             line.unit_price_excl_tax,
             effective_discount_percentage
         )
-        line.effective_discount_percentage = effective_discount_percentage
-        line.enterprise_customer_cost = enterprise_customer_cost
+        line.effective_contract_discount_percentage = effective_discount_percentage
+        line.effective_contract_discounted_price = enterprise_customer_cost
         line.save()
 
     def fulfill_product(self, order, lines, email_opt_in=False):
