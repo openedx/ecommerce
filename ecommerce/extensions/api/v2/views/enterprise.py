@@ -451,8 +451,8 @@ class EnterpriseCouponViewSet(CouponViewSet):
         Return coupon information based on query param values provided.
         """
         user_email = self.request.query_params.get('user_email', None)
-        user_code = self.request.query_params.get('user_code', None)
-        if not (user_email or user_code):
+        voucher_code = self.request.query_params.get('voucher_code', None)
+        if not (user_email or voucher_code):
             raise Http404("No search query parameter provided.")
         try:
             user = User.objects.get(email=user_email)
@@ -462,7 +462,7 @@ class EnterpriseCouponViewSet(CouponViewSet):
         enterprise_vouchers = self._collect_enterprise_vouchers_for_search(
             user_email,
             user,
-            user_code
+            voucher_code
         )
 
         redemptions_and_assignments = self._form_search_response_data_from_vouchers(
@@ -478,13 +478,14 @@ class EnterpriseCouponViewSet(CouponViewSet):
         )
         return self.get_paginated_response(serializer.data)
 
-    def _collect_enterprise_vouchers_for_search(self, user_email, user, user_code):
+    def _collect_enterprise_vouchers_for_search(self, user_email, user, voucher_code):
         """
         Gather vouchers based on offerAssignments and voucherApplications
         associated with the user (and enterprise specified in request url)
 
         Returns queryset of Voucher objects, with related tables prefetched.
         """
+
         # We want vouchers associated with this enterprise. Note:
         # self.get_queryset() here filters (coupon) products out for
         # the enterprise_id value handed to this view
@@ -493,7 +494,7 @@ class EnterpriseCouponViewSet(CouponViewSet):
         )
         # When search is made by code, only one voucher will exist so return it directly
         if not user_email:
-            voucher = enterprise_vouchers.filter(code=user_code)
+            voucher = enterprise_vouchers.filter(code=voucher_code)
             return voucher
         # We want vouchers with OfferAssignments related to the user email
         # that do not have a voucher_application (aka they have been assigned
@@ -570,20 +571,21 @@ class EnterpriseCouponViewSet(CouponViewSet):
             # For the case when an unassigned voucher code is searched
             if offer_assignments.count() == 0:
                 if not user_email:
-                    redemption_data = dict(coupon_data)
-                    redemption_data['course_title'] = None
-                    redemption_data['course_key'] = None
-                    redemption_data['redeemed_date'] = None
+                    redemption_data = self._prepare_redemption_data(coupon_data)
                     redemptions_and_assignments.append(redemption_data)
             else:
                 for offer_assignment in offer_assignments:
-                    redemption_data = dict(coupon_data)
-                    redemption_data['course_title'] = None
-                    redemption_data['course_key'] = None
-                    redemption_data['redeemed_date'] = None
-                    redemption_data['user_email'] = offer_assignment.user_email
+                    redemption_data = self._prepare_redemption_data(coupon_data, offer_assignment)
                     redemptions_and_assignments.append(redemption_data)
         return redemptions_and_assignments
+
+    def _prepare_redemption_data(self, coupon_data, offer_assignment=None):
+        redemption_data = dict(coupon_data)
+        redemption_data['course_title'] = None
+        redemption_data['course_key'] = None
+        redemption_data['redeemed_date'] = None
+        redemption_data['user_email'] = offer_assignment.user_email if offer_assignment else None
+        return redemption_data
 
     @list_route(url_path=r'(?P<enterprise_id>.+)/overview', permission_classes=[IsAuthenticated])
     @permission_required('enterprise.can_view_coupon', fn=lambda request, enterprise_id: enterprise_id)

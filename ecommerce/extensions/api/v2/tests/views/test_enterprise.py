@@ -1031,7 +1031,7 @@ class EnterpriseCouponViewSetRbacTests(
                 'api:v2:enterprise-coupons-(?P<enterprise-id>.+)/search-list',
                 kwargs={'enterprise_id': self.data['enterprise_customer']['id']}
             ),
-            data={'user_code': '3456QWTERF46PS1R'}
+            data={'voucher_code': '3456QWTERF46PS1R'}
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         assert response.json()['results'] == []
@@ -1088,7 +1088,7 @@ class EnterpriseCouponViewSetRbacTests(
                 'api:v2:enterprise-coupons-(?P<enterprise-id>.+)/search-list',
                 kwargs={'enterprise_id': self.data['enterprise_customer']['id']}
             ),
-            data={'user_code': 'ABCDEFGH1234567'}
+            data={'voucher_code': 'ABCDEFGH1234567'}
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -1116,7 +1116,7 @@ class EnterpriseCouponViewSetRbacTests(
                 'api:v2:enterprise-coupons-(?P<enterprise-id>.+)/search-list',
                 kwargs={'enterprise_id': self.data['enterprise_customer']['id']}
             ),
-            data={'user_code': 'ABCDEFGH1234567'}
+            data={'voucher_code': 'ABCDEFGH1234567'}
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
