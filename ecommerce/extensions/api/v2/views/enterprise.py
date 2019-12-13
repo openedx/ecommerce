@@ -541,6 +541,17 @@ class EnterpriseCouponViewSet(CouponViewSet):
         construction of pagination.
         """
 
+        def _prepare_redemption_data(coupon_data, offer_assignment=None):
+            """
+            Prepares redemption data for the received voucher in coupon_data
+            """
+            redemption_data = dict(coupon_data)
+            redemption_data['course_title'] = None
+            redemption_data['course_key'] = None
+            redemption_data['redeemed_date'] = None
+            redemption_data['user_email'] = offer_assignment.user_email if offer_assignment else None
+            redemptions_and_assignments.append(redemption_data)
+
         redemptions_and_assignments = []
         for voucher in vouchers:
             coupon_data = {
@@ -571,21 +582,11 @@ class EnterpriseCouponViewSet(CouponViewSet):
             # For the case when an unassigned voucher code is searched
             if offer_assignments.count() == 0:
                 if not user_email:
-                    redemption_data = self._prepare_redemption_data(coupon_data)
-                    redemptions_and_assignments.append(redemption_data)
+                    _prepare_redemption_data(coupon_data)
             else:
                 for offer_assignment in offer_assignments:
-                    redemption_data = self._prepare_redemption_data(coupon_data, offer_assignment)
-                    redemptions_and_assignments.append(redemption_data)
+                    _prepare_redemption_data(coupon_data, offer_assignment)
         return redemptions_and_assignments
-
-    def _prepare_redemption_data(self, coupon_data, offer_assignment=None):
-        redemption_data = dict(coupon_data)
-        redemption_data['course_title'] = None
-        redemption_data['course_key'] = None
-        redemption_data['redeemed_date'] = None
-        redemption_data['user_email'] = offer_assignment.user_email if offer_assignment else None
-        return redemption_data
 
     @list_route(url_path=r'(?P<enterprise_id>.+)/overview', permission_classes=[IsAuthenticated])
     @permission_required('enterprise.can_view_coupon', fn=lambda request, enterprise_id: enterprise_id)
