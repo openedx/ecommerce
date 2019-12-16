@@ -5,6 +5,7 @@ import logging
 import six
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
+from django.core.validators import validate_email
 from django.db.models import Q
 from django.http import Http404
 from django.shortcuts import get_object_or_404
@@ -450,24 +451,31 @@ class EnterpriseCouponViewSet(CouponViewSet):
         """
         Return coupon information based on query param values provided.
         """
-        user_email = self.request.query_params.get('user_email', None)
-        if not user_email:
-            raise Http404("No user_email query parameter provided.")
-
+        search_parameter = self.request.query_params.get('search_parameter', None)
+        if not search_parameter:
+            raise Http404("No search query parameter provided.")
+        # Check if we received an email or a code in search
         try:
-            user = User.objects.get(email=user_email)
+            is_email = True
+            validate_email(search_parameter)
+        except ValidationError:
+            is_email = False
+        try:
+            user = User.objects.get(email=search_parameter)
         except ObjectDoesNotExist:
             user = None
 
         enterprise_vouchers = self._collect_enterprise_vouchers_for_search(
-            user_email,
+            search_parameter,
             user,
+            is_email
         )
 
         redemptions_and_assignments = self._form_search_response_data_from_vouchers(
             enterprise_vouchers,
-            user_email,
+            search_parameter,
             user,
+            is_email
         )
 
         page = self.paginate_queryset(redemptions_and_assignments)
@@ -477,27 +485,30 @@ class EnterpriseCouponViewSet(CouponViewSet):
         )
         return self.get_paginated_response(serializer.data)
 
-    def _collect_enterprise_vouchers_for_search(self, user_email, user):
+    def _collect_enterprise_vouchers_for_search(self, search_parameter, user, is_email):
         """
         Gather vouchers based on offerAssignments and voucherApplications
         associated with the user (and enterprise specified in request url)
 
         Returns queryset of Voucher objects, with related tables prefetched.
         """
-
         # We want vouchers associated with this enterprise. Note:
         # self.get_queryset() here filters (coupon) products out for
         # the enterprise_id value handed to this view
         enterprise_vouchers = Voucher.objects.filter(
             coupon_vouchers__coupon__in=self.get_queryset()
         )
+        # When search is made by code, only one voucher will exist so return it directly
+        if not is_email:
+            voucher = enterprise_vouchers.filter(code=search_parameter)
+            return voucher
         # We want vouchers with OfferAssignments related to the user email
         # that do not have a voucher_application (aka they have been assigned
         # but not redeemed)
         no_voucher_application = Q(voucher_application__isnull=True)
         offer_assignments = OfferAssignment.objects.filter(
             no_voucher_application,
-            user_email=user_email,
+            user_email=search_parameter,
             status__in=[OFFER_ASSIGNED, OFFER_ASSIGNMENT_EMAIL_PENDING],
         )
         vouchers_from_offer_assignments = Q(
@@ -527,7 +538,7 @@ class EnterpriseCouponViewSet(CouponViewSet):
             'applications__order__lines__product__course',
         )
 
-    def _form_search_response_data_from_vouchers(self, vouchers, user_email, user):
+    def _form_search_response_data_from_vouchers(self, vouchers, search_parameter, user, is_email):
         """
         Build a list of dictionaries that contains the relevant information
         for each voucher_application (redemption) or offer_assignment (assignment).
@@ -553,19 +564,32 @@ class EnterpriseCouponViewSet(CouponViewSet):
                     redemptions_and_assignments.append(redemption_data)
 
             no_voucher_application = Q(voucher_application__isnull=True)
+            filter_kwargs = {
+                'code': voucher.code,
+                'status__in': [OFFER_ASSIGNED, OFFER_ASSIGNMENT_EMAIL_PENDING],
+            }
+            if is_email:
+                filter_kwargs['user_email'] = search_parameter
             offer_assignments = OfferAssignment.objects.filter(
                 no_voucher_application,
-                code=voucher.code,
-                user_email=user_email,
-                status__in=[OFFER_ASSIGNED, OFFER_ASSIGNMENT_EMAIL_PENDING],
-            ).distinct()
-            for _ in offer_assignments:
-                redemption_data = dict(coupon_data)
-                redemption_data['course_title'] = None
-                redemption_data['course_key'] = None
-                redemption_data['redeemed_date'] = None
-                redemptions_and_assignments.append(redemption_data)
-
+                **filter_kwargs).distinct()
+            coupon_data['is_assigned'] = offer_assignments.count()
+            # For the case when an unassigned voucher code is searched
+            if offer_assignments.count() == 0:
+                if not is_email:
+                    redemption_data = dict(coupon_data)
+                    redemption_data['course_title'] = None
+                    redemption_data['course_key'] = None
+                    redemption_data['redeemed_date'] = None
+                    redemptions_and_assignments.append(redemption_data)
+            else:
+                for offer_assignment in offer_assignments:
+                    redemption_data = dict(coupon_data)
+                    redemption_data['course_title'] = None
+                    redemption_data['course_key'] = None
+                    redemption_data['redeemed_date'] = None
+                    redemption_data['user_email'] = offer_assignment.user_email
+                    redemptions_and_assignments.append(redemption_data)
         return redemptions_and_assignments
 
     @list_route(url_path=r'(?P<enterprise_id>.+)/overview', permission_classes=[IsAuthenticated])
