@@ -451,9 +451,9 @@ class EnterpriseCouponViewSet(CouponViewSet):
         Return coupon information based on query param values provided.
         """
         user_email = self.request.query_params.get('user_email', None)
-        if not user_email:
-            raise Http404("No user_email query parameter provided.")
-
+        voucher_code = self.request.query_params.get('voucher_code', None)
+        if not (user_email or voucher_code):
+            raise Http404("No search query parameter provided.")
         try:
             user = User.objects.get(email=user_email)
         except ObjectDoesNotExist:
@@ -462,6 +462,7 @@ class EnterpriseCouponViewSet(CouponViewSet):
         enterprise_vouchers = self._collect_enterprise_vouchers_for_search(
             user_email,
             user,
+            voucher_code
         )
 
         redemptions_and_assignments = self._form_search_response_data_from_vouchers(
@@ -477,7 +478,7 @@ class EnterpriseCouponViewSet(CouponViewSet):
         )
         return self.get_paginated_response(serializer.data)
 
-    def _collect_enterprise_vouchers_for_search(self, user_email, user):
+    def _collect_enterprise_vouchers_for_search(self, user_email, user, voucher_code):
         """
         Gather vouchers based on offerAssignments and voucherApplications
         associated with the user (and enterprise specified in request url)
@@ -491,6 +492,10 @@ class EnterpriseCouponViewSet(CouponViewSet):
         enterprise_vouchers = Voucher.objects.filter(
             coupon_vouchers__coupon__in=self.get_queryset()
         )
+        # When search is made by code, only one voucher will exist so return it directly
+        if not user_email:
+            voucher = enterprise_vouchers.filter(code=voucher_code)
+            return voucher
         # We want vouchers with OfferAssignments related to the user email
         # that do not have a voucher_application (aka they have been assigned
         # but not redeemed)
@@ -536,6 +541,17 @@ class EnterpriseCouponViewSet(CouponViewSet):
         construction of pagination.
         """
 
+        def _prepare_redemption_data(coupon_data, offer_assignment=None):
+            """
+            Prepares redemption data for the received voucher in coupon_data
+            """
+            redemption_data = dict(coupon_data)
+            redemption_data['course_title'] = None
+            redemption_data['course_key'] = None
+            redemption_data['redeemed_date'] = None
+            redemption_data['user_email'] = offer_assignment.user_email if offer_assignment else None
+            redemptions_and_assignments.append(redemption_data)
+
         redemptions_and_assignments = []
         for voucher in vouchers:
             coupon_data = {
@@ -553,19 +569,23 @@ class EnterpriseCouponViewSet(CouponViewSet):
                     redemptions_and_assignments.append(redemption_data)
 
             no_voucher_application = Q(voucher_application__isnull=True)
+            filter_kwargs = {
+                'code': voucher.code,
+                'status__in': [OFFER_ASSIGNED, OFFER_ASSIGNMENT_EMAIL_PENDING],
+            }
+            if user_email:
+                filter_kwargs['user_email'] = user_email
             offer_assignments = OfferAssignment.objects.filter(
                 no_voucher_application,
-                code=voucher.code,
-                user_email=user_email,
-                status__in=[OFFER_ASSIGNED, OFFER_ASSIGNMENT_EMAIL_PENDING],
-            ).distinct()
-            for _ in offer_assignments:
-                redemption_data = dict(coupon_data)
-                redemption_data['course_title'] = None
-                redemption_data['course_key'] = None
-                redemption_data['redeemed_date'] = None
-                redemptions_and_assignments.append(redemption_data)
-
+                **filter_kwargs).distinct()
+            coupon_data['is_assigned'] = offer_assignments.count()
+            # For the case when an unassigned voucher code is searched
+            if offer_assignments.count() == 0:
+                if not user_email:
+                    _prepare_redemption_data(coupon_data)
+            else:
+                for offer_assignment in offer_assignments:
+                    _prepare_redemption_data(coupon_data, offer_assignment)
         return redemptions_and_assignments
 
     @list_route(url_path=r'(?P<enterprise_id>.+)/overview', permission_classes=[IsAuthenticated])
