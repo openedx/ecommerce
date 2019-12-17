@@ -581,21 +581,6 @@ class EnrollmentFulfillmentModuleTests(ProgramTestMixin, DiscoveryTestMixin, Ful
         expected = Decimal('12.3456') / (Decimal('12.3456') + Decimal('12000.00'))
         self.assertEqual(actual, expected)
 
-    def test_calculate_enterprise_customer_cost(self):
-        """
-        Test correct values for discount percentage are evaluated and rounded.
-        """
-        module = EnrollmentFulfillmentModule()
-        list_price = Decimal('199.00')
-        effective_discount_percentage = Decimal('0.001027742658353086344768502165')
-        # pylint: disable=protected-access
-        actual = module._calculate_enterprise_customer_cost(
-            list_price,
-            effective_discount_percentage,
-        )
-        expected = Decimal('198.79548')
-        self.assertEqual(actual, expected)
-
 
 class CouponFulfillmentModuleTest(CouponMixin, FulfillmentTestMixin, TestCase):
     """ Test coupon fulfillment. """

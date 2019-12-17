@@ -1,6 +1,7 @@
 from __future__ import absolute_import
 
 import json
+from decimal import Decimal
 
 import ddt
 import httpretty
@@ -353,6 +354,7 @@ class OrderDetailViewTests(OrderDetailViewTestMixin, TestCase):
         return reverse('api:v2:order-detail', kwargs={'number': self.order.number})
 
 
+@ddt.ddt
 class ManualCourseEnrollmentOrderViewSetTests(TestCase):
     """
     Test the `ManualCourseEnrollmentOrderViewSet` functionality.
@@ -380,13 +382,15 @@ class ManualCourseEnrollmentOrderViewSetTests(TestCase):
                     "lms_user_id": 11,
                     "username": "ma",
                     "email": "ma@example.com",
-                    "course_run_key": self.course.id
+                    "course_run_key": self.course.id,
+                    "discount_percentage": 50.0
                 },
                 {
                     "lms_user_id": 12,
                     "username": "ma2",
                     "email": "ma2@example.com",
-                    "course_run_key": self.course.id
+                    "course_run_key": self.course.id,
+                    "discount_percentage": 100.0
                 }
             ]
         }
@@ -452,11 +456,38 @@ class ManualCourseEnrollmentOrderViewSetTests(TestCase):
             }]
         })
 
+    @ddt.unpack
+    @ddt.data(
+        (0.0, True),
+        (50.0, True),
+        (100.0, True),
+        (-1.0, False),
+        (100.001, False),
+        (50, False),
+    )
+    def test_create_manual_order_with_discount_percentage(self, discount_percentage, is_valid):
+        """"
+        Test that orders with valid and invalid discount percentages.
+        """
+
+        post_data = self.generate_post_data(1, discount_percentage=discount_percentage)
+        _, response_data = self.post_order(post_data, self.user)
+        if is_valid:
+            self.assertEqual(len(response_data.get("orders")), 1)
+            self.assertEqual(response_data.get('orders')[0]['status'], "success")
+        else:
+            self.assertEqual(response_data.get('orders')[0]['status'], "failure")
+            self.assertEqual(
+                response_data.get('orders')[0]['detail'],
+                "Discount percentage should be a float from 0 to 100."
+            )
+
     def test_create_manual_order(self):
         """"
         Test that manual enrollment order can be created with expected data.
         """
-        post_data = self.generate_post_data(2)
+        discount_percentage = 50.0
+        post_data = self.generate_post_data(2, discount_percentage=discount_percentage)
         response_status, response_data = self.post_order(post_data, self.user)
 
         self.assertEqual(response_status, status.HTTP_200_OK)
@@ -484,7 +515,19 @@ class ManualCourseEnrollmentOrderViewSetTests(TestCase):
             self.assertEqual(order.total_incl_tax, 0)
             self.assertEqual(order.lines.count(), 1)
             line = order.lines.first()
+
+            # verify line has the correct 'effective_contract_discount_percentage' and
+            # line_effective_contract_discounted_price values
+            line_effective_discount_percentage = None
+            if discount_percentage:
+                line_effective_discount_percentage = Decimal('0.01') * Decimal(discount_percentage)
+            line_effective_contract_discounted_price = line.unit_price_excl_tax * (
+                Decimal('1.00000') - line_effective_discount_percentage
+            ).quantize(Decimal('.00001')) if line_effective_discount_percentage else None
+
             self.assertEqual(line.status, LINE.COMPLETE)
+            self.assertEqual(line.effective_contract_discount_percentage, line_effective_discount_percentage)
+            self.assertEqual(line.effective_contract_discounted_price, line_effective_contract_discounted_price)
             self.assertEqual(line.line_price_before_discounts_incl_tax, self.course_price)
             product = Product.objects.get(id=line.product.id)
             self.assertEqual(product.course_id, self.course.id)
@@ -585,14 +628,15 @@ class ManualCourseEnrollmentOrderViewSetTests(TestCase):
         self.assertEqual(order["status"], "failure")
         self.assertEqual(order["detail"], "Failed to create free order")
 
-    def generate_post_data(self, enrollment_count):
+    def generate_post_data(self, enrollment_count, discount_percentage=0.0):
         return {
             "enrollments": [
                 {
                     "lms_user_id": 10 + count,
                     "username": "ma{}".format(count),
                     "email": "ma{}@example.com".format(count),
-                    "course_run_key": self.course.id
+                    "course_run_key": self.course.id,
+                    "discount_percentage": discount_percentage
                 }
                 for count in range(enrollment_count)
             ]

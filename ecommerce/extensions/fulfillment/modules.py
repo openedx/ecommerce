@@ -43,6 +43,7 @@ from ecommerce.extensions.basket.constants import PURCHASER_BEHALF_ATTRIBUTE
 from ecommerce.extensions.basket.models import BasketAttribute
 from ecommerce.extensions.checkout.utils import get_receipt_page_url
 from ecommerce.extensions.fulfillment.status import LINE
+from ecommerce.extensions.fulfillment.utils import get_enterprise_customer_cost_for_line
 from ecommerce.extensions.payment.models import EnterpriseContractMetadata
 from ecommerce.extensions.voucher.models import OrderLineVouchers
 from ecommerce.extensions.voucher.utils import create_vouchers
@@ -274,21 +275,6 @@ class EnrollmentFulfillmentModule(BaseFulfillmentModule):
             return contract_metadata.discount_value * Decimal('.01')
         return contract_metadata.discount_value / (contract_metadata.discount_value + contract_metadata.amount_paid)
 
-    def _calculate_enterprise_customer_cost(self, list_price, effective_discount_percentage):
-        """
-        Calculates the enterprise customer cost on a particular line item list price.
-
-        Args:
-            list_price: a Decimal object
-            effective_discount_percentage: A Decimal() object. Is expected to
-                be a decimaled percent (as in, .45 (representing 45 percent))
-
-        Returns:
-            A Decimal() object.
-        """
-        cost = list_price * (Decimal('1.00000') - effective_discount_percentage)
-        return cost.quantize(Decimal('.00001'))  # Round to 5 decimal places.
-
     def _locate_contract_metadata(self, order):
         """
         Locates an EnterpriseContractMetadata object associated with an order.
@@ -347,7 +333,7 @@ class EnrollmentFulfillmentModule(BaseFulfillmentModule):
         effective_discount_percentage = self._calculate_effective_discount_percentage(
             contract_metadata
         )
-        enterprise_customer_cost = self._calculate_enterprise_customer_cost(
+        enterprise_customer_cost = get_enterprise_customer_cost_for_line(
             line.unit_price_excl_tax,
             effective_discount_percentage
         )
