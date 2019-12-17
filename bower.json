@@ -11,6 +11,7 @@
   ],
   "dependencies": {
     "backbone": "~1.2.1",
+    "backbone-autocomplete": "https://github.com/martindrapeau/Backbone-Widgets.git",
     "backbone-relational": "~0.9.0",
     "backbone-route-filter": "~0.1.2",
     "backbone-super": "~1.0.4",

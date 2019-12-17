@@ -1,6 +1,7 @@
 require.config({
     baseUrl: '/static/',
     paths: {
+        autocomplete: 'bower_components/backbone-autocomplete/jquery.backbone.widgets',
         backbone: 'bower_components/backbone/backbone',
         'backbone.relational': 'bower_components/backbone-relational/backbone-relational',
         'backbone.route-filter': 'bower_components/backbone-route-filter/backbone-route-filter',
@@ -46,6 +47,10 @@ require.config({
         },
         pikaday: {
             deps: ['moment']
+        },
+        autocomplete: {
+            deps: ['jquery'],
+            exports: 'autocomplete'
         }
     }
 });

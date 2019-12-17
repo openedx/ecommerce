@@ -1079,14 +1079,18 @@ class CouponSerializer(ProductPaymentInfoMixin, serializers.ModelSerializer):
         return retrieve_end_date(obj)
 
     def get_enterprise_customer(self, obj):
-        """ Get the Enterprise Customer UUID attached to a coupon. """
+        """ Get the Enterprise Customer attached to a coupon. """
         offer_range = retrieve_range(obj)
         offer_condition = retrieve_condition(obj)
         if offer_range and offer_range.enterprise_customer:
-            return offer_range.enterprise_customer
+            return {
+                'id': offer_range.enterprise_customer,
+            }
         elif offer_condition.enterprise_customer_uuid:
-            return offer_condition.enterprise_customer_uuid
-
+            return {
+                'id': offer_condition.enterprise_customer_uuid,
+                'name': offer_condition.enterprise_customer_name,
+            }
         return None
 
     def get_enterprise_customer_catalog(self, obj):
