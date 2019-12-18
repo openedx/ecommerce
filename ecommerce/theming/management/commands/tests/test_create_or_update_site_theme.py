@@ -5,8 +5,8 @@ from __future__ import absolute_import
 
 from django.contrib.sites.models import Site
 from django.core.management import CommandError, call_command
-from django.test import TestCase
 
+from ecommerce.tests.testcases import TestCase
 from ecommerce.theming.models import SiteTheme
 
 

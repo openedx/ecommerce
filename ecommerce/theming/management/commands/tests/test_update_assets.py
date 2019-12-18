@@ -6,10 +6,11 @@ from __future__ import absolute_import
 import six
 from django.conf import settings
 from django.core.management import CommandError, call_command
-from django.test import TestCase, override_settings
+from django.test import override_settings
 from mock import Mock, patch
 from path import Path
 
+from ecommerce.tests.testcases import TestCase
 from ecommerce.theming.helpers import get_themes
 from ecommerce.theming.management.commands.update_assets import (
     SYSTEM_SASS_PATHS,

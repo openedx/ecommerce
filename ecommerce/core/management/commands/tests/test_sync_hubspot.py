@@ -7,7 +7,6 @@ from datetime import datetime, timedelta
 
 from django.core.management import call_command
 from django.core.management.base import CommandError
-from django.test import TestCase
 from django.utils.six import StringIO
 from factory.django import get_model
 from mock import patch
@@ -16,6 +15,7 @@ from slumber.exceptions import HttpClientError
 from ecommerce.core.management.commands.sync_hubspot import Command as sync_command
 from ecommerce.extensions.test.factories import create_basket, create_order
 from ecommerce.tests.factories import SiteConfigurationFactory, UserFactory
+from ecommerce.tests.testcases import TestCase
 
 SiteConfiguration = get_model('core', 'SiteConfiguration')
 Basket = get_model('basket', 'Basket')
