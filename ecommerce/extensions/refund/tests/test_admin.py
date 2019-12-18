@@ -29,9 +29,9 @@ class RefundAdminTests(TestCase):
             'refund.add_refund',
             'refund.change_refund',
             'refund.delete_refund',
-            'refundline.add_refundline',
-            'refundline.change_refundline',
-            'refundline.delete_refundline',
+            'refund.add_refundline',
+            'refund.change_refundline',
+            'refund.delete_refundline',
         ]
 
         return all(map(user.has_perm, order_manager_permissions))
