@@ -14,6 +14,7 @@ from six.moves.urllib.parse import urlencode
 
 from ecommerce.core.url_utils import absolute_redirect
 from ecommerce.extensions.checkout.utils import add_currency
+from ecommerce.extensions.offer.constants import OFFER_ASSIGNED
 
 logger = logging.getLogger(__name__)
 
@@ -271,3 +272,26 @@ class SafeTuple(tuple):
     """
     def __getitem__(self, value):
         return '{}'
+
+
+def update_assignments_for_multi_use_per_customer(voucher):
+    """
+    Update `OfferAssignment` records for MULTI_USE_PER_CUSTOMER coupon type when max_uses changes for a coupon.
+    """
+    if voucher.usage == voucher.MULTI_USE_PER_CUSTOMER:
+        OfferAssignment = get_model('offer', 'OfferAssignment')
+
+        offer = voucher.enterprise_offer
+        existing_offer_assignments = OfferAssignment.objects.filter(code=voucher.code, offer=offer).count()
+
+        if existing_offer_assignments == 0:
+            return
+
+        if existing_offer_assignments < offer.max_global_applications:
+            user_email = OfferAssignment.objects.filter(code=voucher.code, offer=offer).first().user_email
+            offer_assignments_available = offer.max_global_applications - existing_offer_assignments
+            assignments = [
+                OfferAssignment(offer=offer, code=voucher.code, user_email=user_email, status=OFFER_ASSIGNED)
+                for __ in range(offer_assignments_available)
+            ]
+            OfferAssignment.objects.bulk_create(assignments)

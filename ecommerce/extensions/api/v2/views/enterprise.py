@@ -60,6 +60,7 @@ from ecommerce.extensions.offer.constants import (
     VOUCHER_PARTIAL_REDEEMED,
     VOUCHER_REDEEMED
 )
+from ecommerce.extensions.offer.utils import update_assignments_for_multi_use_per_customer
 from ecommerce.extensions.voucher.utils import (
     create_enterprise_vouchers,
     update_voucher_offer,
@@ -296,6 +297,7 @@ class EnterpriseCouponViewSet(CouponViewSet):
             voucher.offers.add(updated_enterprise_offer)
             if updated_orginal_offer:
                 voucher.offers.add(updated_orginal_offer)
+            update_assignments_for_multi_use_per_customer(voucher)
 
         if coupon_was_migrated:
             super(EnterpriseCouponViewSet, self).update_range_data(request_data, vouchers)

@@ -2500,6 +2500,98 @@ class EnterpriseCouponViewSetRbacTests(
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert response.json() == {'error': error}
 
+    def test_update_multi_user_per_customer_coupon(self):
+        """
+        Test that correct offer assignments were created when a `MULTI_USE_PER_CUSTOMER` coupon is updated.
+        """
+        assert OfferAssignment.objects.count() == 0
+
+        coupon_data = dict(self.data, **{'voucher_type': Voucher.MULTI_USE_PER_CUSTOMER, 'max_uses': 1})
+        response = self.get_response('POST', ENTERPRISE_COUPONS_LINK, coupon_data)
+
+        # verify that no offer assignment should be created
+        assert OfferAssignment.objects.count() == 0
+
+        coupon = Product.objects.get(id=response.json()['coupon_id'])
+        voucher1, voucher2 = coupon.attr.coupon_vouchers.vouchers.all()
+
+        # create offer assignment for voucher1 only
+        OfferAssignment.objects.create(
+            code=voucher1.code,
+            offer=voucher1.enterprise_offer,
+            user_email='v1@example.com',
+        )
+
+        # update coupon with new max_uses, this will update the assignments for `MULTI_USE_PER_CUSTOMER` coupon only
+        new_max_uses = 5
+        self.get_response(
+            'PUT',
+            reverse('api:v2:enterprise-coupons-detail', kwargs={'pk': coupon.id}),
+            data={
+                'max_uses': new_max_uses
+            }
+        )
+
+        # verify new assignment were created for voucher1
+        voucher1_assignments = OfferAssignment.objects.filter(
+            code=voucher1.code,
+            offer=voucher1.enterprise_offer,
+            user_email='v1@example.com',
+        ).count()
+        assert voucher1_assignments == new_max_uses
+
+        # verify no assignments were created for voucher2
+        voucher2_assignments = OfferAssignment.objects.filter(
+            code=voucher2.code,
+        ).count()
+        assert voucher2_assignments == 0
+
+    @ddt.data(
+        Voucher.SINGLE_USE,
+        Voucher.MULTI_USE,
+        Voucher.ONCE_PER_CUSTOMER,
+    )
+    def test_update_non_multi_user_per_customer_coupon(self, voucher_type):
+        """
+        Test that no offer assignments were created when a non `MULTI_USE_PER_CUSTOMER` coupon is updated.
+        """
+        assert OfferAssignment.objects.count() == 0
+
+        max_uses = None if voucher_type == Voucher.SINGLE_USE else 1
+        coupon_data = dict(self.data, **{'voucher_type': voucher_type, 'max_uses': max_uses})
+        response = self.get_response('POST', ENTERPRISE_COUPONS_LINK, coupon_data)
+        coupon = Product.objects.get(id=response.json()['coupon_id'])
+        vouchers = coupon.attr.coupon_vouchers.vouchers.all()
+
+        # create 1 assignment for each voucher
+        for index, voucher in enumerate(vouchers):
+            OfferAssignment.objects.create(
+                code=voucher.code,
+                offer=voucher.enterprise_offer,
+                user_email='v{}@example.com'.format(index),
+            )
+
+        # update coupon with new max_uses, this should not create assignments for non `MULTI_USE_PER_CUSTOMER` coupon
+        new_max_uses = 5
+        self.get_response(
+            'PUT',
+            reverse('api:v2:enterprise-coupons-detail', kwargs={'pk': coupon.id}),
+            data={
+                'max_uses': new_max_uses
+            }
+        )
+
+        # verify that no assignment is created upon coupon update
+        coupon = Product.objects.get(id=coupon.id)
+        vouchers = coupon.attr.coupon_vouchers.vouchers.all()
+        for index, voucher in enumerate(vouchers):
+            assignments = OfferAssignment.objects.filter(
+                code=voucher.code,
+                offer=voucher.enterprise_offer,
+                user_email='v{}@example.com'.format(index),
+            ).count()
+            assert assignments == 1
+
 
 class OfferAssignmentSummaryViewSetTests(
         CouponMixin,
