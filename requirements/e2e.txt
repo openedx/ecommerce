@@ -28,7 +28,7 @@ pytest-randomly==1.2.3
 pytest-selenium==1.17.0
 pytest-timeout==1.3.3
 pytest-variables==1.9.0   # via pytest-selenium
-pytest==4.6.7
+pytest==4.6.8
 python-dotenv==0.10.3
 pytz==2016.10
 requests==2.22.0          # via edx-rest-api-client, pytest-base-url, pytest-selenium, slumber
