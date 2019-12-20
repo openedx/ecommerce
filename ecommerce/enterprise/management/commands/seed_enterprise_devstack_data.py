@@ -54,7 +54,7 @@ class Command(BaseCommand):
             (str, datetime)
         """
         logger.info('\nFetching access token for site...')
-        oauth2_provider_url = self.site.oauth_settings.get('SOCIAL_AUTH_EDX_OIDC_URL_ROOT')
+        oauth2_provider_url = self.site.oauth_settings.get('BACKEND_SERVICE_EDX_OAUTH2_PROVIDER_URL')
         key = self.site.oauth_settings.get('BACKEND_SERVICE_EDX_OAUTH2_KEY')
         secret = self.site.oauth_settings.get('BACKEND_SERVICE_EDX_OAUTH2_SECRET')
         oauth_access_token_url = oauth2_provider_url + '/access_token/'
