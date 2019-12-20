@@ -70,38 +70,29 @@ class Command(BaseCommand):
                             type=str,
                             default='',
                             help='Payment processor used for client-side payments')
-        parser.add_argument('--client-id',
-                            action='store',
-                            dest='client_id',
-                            type=str,
-                            required=True,
-                            help='client ID')
-        parser.add_argument('--client-secret',
-                            action='store',
-                            dest='client_secret',
-                            type=str,
-                            required=True,
-                            help='client secret')
-        # TODO: Post-DOP-removal, make the next four params required - and remove the previous two params.
         parser.add_argument('--sso-client-id',
                             action='store',
                             dest='sso_client_id',
                             type=str,
+                            required=True,
                             help='SSO client ID for individual user auth')
         parser.add_argument('--sso-client-secret',
                             action='store',
                             dest='sso_client_secret',
                             type=str,
+                            required=True,
                             help='SSO client secret for individual user auth')
         parser.add_argument('--backend-service-client-id',
                             action='store',
                             dest='backend_service_client_id',
                             type=str,
+                            required=True,
                             help='Backend-service client ID for IDA-to-IDA auth')
         parser.add_argument('--backend-service-client-secret',
                             action='store',
                             dest='backend_service_client_secret',
                             type=str,
+                            required=True,
                             help='Backend-service client secret for IDA-to-IDA auth')
         parser.add_argument('--segment-key',
                             action='store',
@@ -165,8 +156,6 @@ class Command(BaseCommand):
         partner_name = options.get('partner_name')
         lms_url_root = options.get('lms_url_root')
         lms_public_url_root = options.get('lms_public_url_root')
-        client_id = options.get('client_id')
-        client_secret = options.get('client_secret')
         sso_client_id = options.get('sso_client_id')
         sso_client_secret = options.get('sso_client_secret')
         backend_service_client_id = options.get('backend_service_client_id')
@@ -204,12 +193,6 @@ class Command(BaseCommand):
             'SOCIAL_AUTH_EDX_OAUTH2_URL_ROOT': lms_url_root,
             'SOCIAL_AUTH_EDX_OAUTH2_LOGOUT_URL': '{lms_url_root}/logout'.format(lms_url_root=lms_url_root),
             'SOCIAL_AUTH_EDX_OAUTH2_ISSUERS': [lms_url_root],
-            # NOTE: These settings are deprecated and will be removed in a future release.
-            'SOCIAL_AUTH_EDX_OIDC_URL_ROOT': '{lms_url_root}/oauth2'.format(lms_url_root=lms_url_root),
-            'SOCIAL_AUTH_EDX_OIDC_KEY': client_id,
-            'SOCIAL_AUTH_EDX_OIDC_SECRET': client_secret,
-            'SOCIAL_AUTH_EDX_OIDC_ID_TOKEN_DECRYPTION_KEY': client_secret,
-            'SOCIAL_AUTH_EDX_OIDC_ISSUERS': [lms_url_root]
         }
 
         if lms_public_url_root:

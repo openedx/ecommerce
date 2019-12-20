@@ -26,7 +26,7 @@ class SeedEnterpriseDevstackDataTests(TransactionTestCase):
     """
     logger = 'ecommerce.enterprise.management.commands.seed_enterprise_devstack_data.logger'
     site_oauth_settings = {
-        'SOCIAL_AUTH_EDX_OIDC_URL_ROOT': 'http://edx.devstack.lms:18000/oauth2',
+        'BACKEND_SERVICE_EDX_OAUTH2_PROVIDER_URL': 'http://edx.devstack.lms:18000/oauth2',
         'BACKEND_SERVICE_EDX_OAUTH2_KEY': 'ecommerce-backend-service-key',
         'BACKEND_SERVICE_EDX_OAUTH2_SECRET': 'ecommerce-backend-service-secret',
     }
@@ -60,7 +60,7 @@ class SeedEnterpriseDevstackDataTests(TransactionTestCase):
         result = self.command.get_access_token()
         oauth_settings = self.command.site.oauth_settings
         mock_api_client.assert_called_with(
-            '{}/access_token/'.format(oauth_settings.get('SOCIAL_AUTH_EDX_OIDC_URL_ROOT')),
+            '{}/access_token/'.format(oauth_settings.get('BACKEND_SERVICE_EDX_OAUTH2_PROVIDER_URL')),
             oauth_settings.get('BACKEND_SERVICE_EDX_OAUTH2_KEY'),
             oauth_settings.get('BACKEND_SERVICE_EDX_OAUTH2_SECRET'),
             token_type='jwt',

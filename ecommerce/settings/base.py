@@ -473,12 +473,6 @@ AUTO_AUTH_USERNAME_PREFIX = 'AUTO_AUTH_'
 
 AUTHENTICATION_BACKENDS = ('auth_backends.backends.EdXOAuth2',) + AUTHENTICATION_BACKENDS
 
-# NOTE: This old auth backend is retained as a temporary fallback in order to
-# support old browser sessions that were established using OIDC.  After a few
-# days, we should be safe to remove this line, along with deleting the rest of
-# the OIDC/DOP settings and keys in the ecommerce site configurations.
-AUTHENTICATION_BACKENDS += ('auth_backends.backends.EdXOpenIdConnect',)
-
 SOCIAL_AUTH_STRATEGY = 'ecommerce.social_auth.strategies.CurrentSiteDjangoStrategy'
 
 # Set these to the correct values for your OAuth2 provider
@@ -734,14 +728,7 @@ ECOMMERCE_URL_ROOT = "http://localhost:8002"
 OSCAR_FROM_EMAIL = 'oscar@example.com'
 PLATFORM_NAME = 'Your Platform Name Here'
 SESSION_EXPIRE_AT_BROWSER_CLOSE = False
-SOCIAL_AUTH_EDX_OIDC_KEY = 'ecommerce-key'
-SOCIAL_AUTH_EDX_OIDC_SECRET = 'ecommerce-secret'
-SOCIAL_AUTH_EDX_OIDC_URL_ROOT = 'http://127.0.0.1:8000/oauth2'
-SOCIAL_AUTH_EDX_OIDC_LOGOUT_URL = 'http://127.0.0.1:8000/logout'
-SOCIAL_AUTH_EDX_OIDC_ID_TOKEN_DECRYPTION_KEY = SOCIAL_AUTH_EDX_OIDC_SECRET
 SOCIAL_AUTH_REDIRECT_IS_HTTPS = False
-SOCIAL_AUTH_EDX_OIDC_PUBLIC_URL_ROOT = 'http://127.0.0.1:8000/oauth2'
-SOCIAL_AUTH_EDX_OIDC_ISSUER = 'http://127.0.0.1:8000/oauth2'
 
 CORS_ORIGIN_WHITELIST = []
 CORS_URLS_REGEX = ''

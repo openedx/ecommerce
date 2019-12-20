@@ -23,8 +23,6 @@ class CreateOrUpdateSiteCommandTests(TestCase):
         self.lms_public_url_root = 'http://public.fake.server'
         self.payment_processors = 'cybersource,paypal'
         self.client_side_payment_processor = 'cybersource'
-        self.client_id = 'ecommerce-key'
-        self.client_secret = 'ecommerce-secret'
         self.sso_client_id = 'sso_ecommerce-key'
         self.sso_client_secret = 'sso_ecommerce-secret'
         self.backend_service_client_id = 'backend_service_ecommerce-key'
@@ -44,26 +42,6 @@ class CreateOrUpdateSiteCommandTests(TestCase):
         self.assertEqual(site_configuration.lms_url_root, self.lms_url_root)
         self.assertEqual(site_configuration.payment_processors, self.payment_processors)
         self.assertEqual(site_configuration.client_side_payment_processor, self.client_side_payment_processor)
-        self.assertEqual(
-            site_configuration.oauth_settings['SOCIAL_AUTH_EDX_OIDC_KEY'],
-            self.client_id,
-        )
-        self.assertEqual(
-            site_configuration.oauth_settings['SOCIAL_AUTH_EDX_OIDC_SECRET'],
-            self.client_secret,
-        )
-        self.assertEqual(
-            site_configuration.oauth_settings['SOCIAL_AUTH_EDX_OIDC_URL_ROOT'],
-            'http://fake.server/oauth2',
-        )
-        self.assertEqual(
-            site_configuration.oauth_settings['SOCIAL_AUTH_EDX_OIDC_ID_TOKEN_DECRYPTION_KEY'],
-            self.client_secret,
-        )
-        self.assertEqual(
-            site_configuration.oauth_settings['SOCIAL_AUTH_EDX_OIDC_ISSUERS'],
-            [self.lms_url_root],
-        )
         self.assertEqual(
             site_configuration.oauth_settings['SOCIAL_AUTH_EDX_OAUTH2_ISSUERS'],
             [self.lms_url_root],
@@ -109,14 +87,12 @@ class CreateOrUpdateSiteCommandTests(TestCase):
                       site_domain,
                       partner_code,
                       lms_url_root,
-                      client_id,
-                      client_secret,
+                      sso_client_id,
+                      sso_client_secret,
+                      backend_service_client_id,
+                      backend_service_client_secret,
                       from_email,
                       lms_public_url_root=None,
-                      sso_client_id=None,
-                      sso_client_secret=None,
-                      backend_service_client_id=None,
-                      backend_service_client_secret=None,
                       site_id=None,
                       site_name=None,
                       partner_name=None,
@@ -138,8 +114,10 @@ class CreateOrUpdateSiteCommandTests(TestCase):
             '--site-domain={site_domain}'.format(site_domain=site_domain),
             '--partner-code={partner_code}'.format(partner_code=partner_code),
             '--lms-url-root={lms_url_root}'.format(lms_url_root=lms_url_root),
-            '--client-id={client_id}'.format(client_id=client_id),
-            '--client-secret={client_secret}'.format(client_secret=client_secret),
+            '--sso-client-id={}'.format(sso_client_id),
+            '--sso-client-secret={}'.format(sso_client_secret),
+            '--backend-service-client-id={}'.format(backend_service_client_id),
+            '--backend-service-client-secret={}'.format(backend_service_client_secret),
             '--from-email={from_email}'.format(from_email=from_email)
         ]
 
@@ -190,15 +168,6 @@ class CreateOrUpdateSiteCommandTests(TestCase):
                 discovery_api_url=discovery_api_url
             ))
 
-        if sso_client_id:
-            command_args.append('--sso-client-id={}'.format(sso_client_id))
-        if sso_client_secret:
-            command_args.append('--sso-client-secret={}'.format(sso_client_secret))
-        if backend_service_client_id:
-            command_args.append('--backend-service-client-id={}'.format(backend_service_client_id))
-        if backend_service_client_secret:
-            command_args.append('--backend-service-client-secret={}'.format(backend_service_client_secret))
-
         call_command(self.command_name, *command_args)
 
     def test_create_site(self):
@@ -211,8 +180,10 @@ class CreateOrUpdateSiteCommandTests(TestCase):
             lms_url_root=self.lms_url_root,
             client_side_payment_processor=self.client_side_payment_processor,
             payment_processors=self.payment_processors,
-            client_id=self.client_id,
-            client_secret=self.client_secret,
+            sso_client_id=self.sso_client_id,
+            sso_client_secret=self.sso_client_secret,
+            backend_service_client_id=self.backend_service_client_id,
+            backend_service_client_secret=self.backend_service_client_secret,
             segment_key=self.segment_key,
             from_email=self.from_email,
             discovery_api_url=self.discovery_api_url,
@@ -241,8 +212,10 @@ class CreateOrUpdateSiteCommandTests(TestCase):
             lms_url_root=self.lms_url_root,
             payment_processors=self.payment_processors,
             client_side_payment_processor=self.client_side_payment_processor,
-            client_id=self.client_id,
-            client_secret=self.client_secret,
+            sso_client_id=self.sso_client_id,
+            sso_client_secret=self.sso_client_secret,
+            backend_service_client_id=self.backend_service_client_id,
+            backend_service_client_secret=self.backend_service_client_secret,
             segment_key=self.segment_key,
             from_email=self.from_email,
             enable_enrollment_codes=True,
@@ -286,8 +259,6 @@ class CreateOrUpdateSiteCommandTests(TestCase):
             lms_public_url_root=self.lms_public_url_root,
             payment_processors=self.payment_processors,
             client_side_payment_processor=self.client_side_payment_processor,
-            client_id=self.client_id,
-            client_secret=self.client_secret,
             sso_client_id=self.sso_client_id,
             sso_client_secret=self.sso_client_secret,
             backend_service_client_id=self.backend_service_client_id,
@@ -337,15 +308,25 @@ class CreateOrUpdateSiteCommandTests(TestCase):
         ['--site-id=1', '--site-domain=fake.server', '--partner-name=fake_partner',
          '--theme-scss-path=site/sass/css/', '--payment-processors=cybersource',
          '--segment-key=abc', '--partner-code=fake_partner', '--lms-url-root=lms.test.fake',
-         '--client-id=1'],
+         '--sso-client-id=1'],
         ['--site-id=1', '--site-domain=fake.server', '--partner-name=fake_partner',
          '--theme-scss-path=site/sass/css/', '--payment-processors=cybersource',
          '--segment-key=abc', '--partner-code=fake_partner', '--lms-url-root=lms.test.fake',
-         '--client-id=1', '--client-secret=secret'],
+         '--sso-client-id=1', '--sso-client-secret=secret'],
         ['--site-id=1', '--site-domain=fake.server', '--partner-name=fake_partner',
          '--theme-scss-path=site/sass/css/', '--payment-processors=cybersource',
          '--segment-key=abc', '--partner-code=fake_partner', '--lms-url-root=lms.test.fake',
-         '--client-id=1', '--client-secret=secret', '--from-email=test@example.fake']
+         '--sso-client-id=1', '--sso-client-secret=secret', '--backend-service-client-id=1'],
+        ['--site-id=1', '--site-domain=fake.server', '--partner-name=fake_partner',
+         '--theme-scss-path=site/sass/css/', '--payment-processors=cybersource',
+         '--segment-key=abc', '--partner-code=fake_partner', '--lms-url-root=lms.test.fake',
+         '--sso-client-id=1', '--sso-client-secret=secret', '--backend-service-client-id=1',
+         '--backend-service-client-secret=secret'],
+        ['--site-id=1', '--site-domain=fake.server', '--partner-name=fake_partner',
+         '--theme-scss-path=site/sass/css/', '--payment-processors=cybersource',
+         '--segment-key=abc', '--partner-code=fake_partner', '--lms-url-root=lms.test.fake',
+         '--sso-client-id=1', '--sso-client-secret=secret', '--backend-service-client-id=1',
+         '--backend-service-client-secret=secret', '--from-email=test@example.fake'],
     )
     def test_missing_arguments(self, command_args):
         """ Verify CommandError is raised when required arguments are missing """

@@ -51,23 +51,13 @@ class UpdateSiteOauthSettingsCommandTests(TestCase):
     def _create_test_site_configuration(self, site):
         """
         Create a fake partner and site configuration for testing.
-
-        This fake site configuration only contains old OIDC (DOP) OAUTH settings.
         """
-        original_oauth_settings = {
-            'SOCIAL_AUTH_EDX_OIDC_URL_ROOT': '{}/oauth2'.format(self.lms_url_root),
-            'SOCIAL_AUTH_EDX_OIDC_KEY': self.client_id,
-            'SOCIAL_AUTH_EDX_OIDC_SECRET': self.client_secret,
-            'SOCIAL_AUTH_EDX_OIDC_ID_TOKEN_DECRYPTION_KEY': self.client_secret,
-            'SOCIAL_AUTH_EDX_OIDC_ISSUERS': [self.lms_url_root],
-        }
         partner = Partner.objects.create(code=self.partner)
         site_configuration = SiteConfiguration.objects.create(
             site=site,
             partner=partner,
             lms_url_root=self.lms_url_root,
             payment_processors=self.payment_processors,
-            oauth_settings=original_oauth_settings,
             discovery_api_url=self.discovery_api_url,
         )
         return site_configuration
@@ -95,28 +85,6 @@ class UpdateSiteOauthSettingsCommandTests(TestCase):
 
         # Spot check that nothing on the site object changed.
         self.assertEqual(site.domain, site_domain)
-
-        # Confirm that all the old OIDC (DOP) settings persisted.
-        self.assertEqual(
-            site_configuration.oauth_settings['SOCIAL_AUTH_EDX_OIDC_KEY'],
-            self.client_id,
-        )
-        self.assertEqual(
-            site_configuration.oauth_settings['SOCIAL_AUTH_EDX_OIDC_SECRET'],
-            self.client_secret,
-        )
-        self.assertEqual(
-            site_configuration.oauth_settings['SOCIAL_AUTH_EDX_OIDC_URL_ROOT'],
-            'http://fake.server/oauth2',
-        )
-        self.assertEqual(
-            site_configuration.oauth_settings['SOCIAL_AUTH_EDX_OIDC_ID_TOKEN_DECRYPTION_KEY'],
-            self.client_secret,
-        )
-        self.assertEqual(
-            site_configuration.oauth_settings['SOCIAL_AUTH_EDX_OIDC_ISSUERS'],
-            [self.lms_url_root],
-        )
 
         # Confirm that all the new OAUTH2 (DOT) settings were added.
         self.assertEqual(
