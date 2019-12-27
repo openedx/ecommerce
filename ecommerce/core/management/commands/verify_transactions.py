@@ -83,6 +83,11 @@ class Command(BaseCommand):
             help='Anomoly threshold to trigger failure.  If N is between 0 and 1, this will be the ' +
             'fraction of total orders; N >= 1 will be an integer number of errors'
         )
+        parser.add_argument(
+            '--support',
+            action='store_true',
+            help='Support for mismatched orders'
+        )
 
     def handle(self, *args, **options):
         logger.info("Verify transactions with options: %r", options)
@@ -92,6 +97,7 @@ class Command(BaseCommand):
 
         start_delta = options['start_delta']
         end_delta = options['end_delta']
+        support = options['support']
 
         start = datetime.datetime.now(pytz.utc) - datetime.timedelta(minutes=start_delta)
         end = datetime.datetime.now(pytz.utc) - datetime.timedelta(minutes=end_delta)
@@ -129,6 +135,7 @@ class Command(BaseCommand):
             raise CommandError("Errors in transactions: {errors}".format(errors=exit_errors))
         if self.ERRORS_DICT:
             logger.warning("Errors in transactions within threshold (%r): %s", threshold, exit_errors)
+
 
     def validate_order(self, order):
         all_payment_events = order.payment_events
