@@ -5,7 +5,9 @@ class ORDER(object):
     """Constants representing all known order statuses. """
     COMPLETE = 'Complete'
     FULFILLMENT_ERROR = 'Fulfillment Error'
+    PAYMENT_ERROR = 'Payment Error'
     OPEN = 'Open'
+    PENDING = 'Pending'
 
 
 class LINE(object):
