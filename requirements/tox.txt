@@ -13,7 +13,7 @@ packaging==19.2           # via tox
 pathlib2==2.3.5           # via importlib-metadata
 pluggy==0.13.1            # via tox
 py==1.8.0                 # via tox
-pyparsing==2.4.5          # via packaging
+pyparsing==2.4.6          # via packaging
 pytz==2016.10
 scandir==1.10.0           # via pathlib2
 six==1.11.0
