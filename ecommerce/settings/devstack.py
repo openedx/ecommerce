@@ -30,6 +30,17 @@ PAYMENT_PROCESSOR_CONFIG = {
         "cancel_url": get_lms_url("/commerce/checkout/cancel/"),
         "error_url": get_lms_url("/commerce/checkout/error/"),
     },
+    "paybox_system": {
+        "PBX_SITE": "foo.com",
+        "PBX_RANG": 1,
+        "PBX_IDENTIFIANT": "foo",
+        "PBX_REPONDRE_A": "foo@bar.com",
+        "private_key": "fake-private-key",
+        "payment_page_url": "https://preprod-tpeweb.paybox.com/cgi/MYchoix_pagepaiement.cgi",
+        "receipt_page_url": get_lms_url("/commerce/checkout/receipt/"),
+        "error_page_url": get_lms_url("/commerce/checkout/error/"),
+        "cancel_page_url": get_lms_url("/commerce/checkout/cancel/"),
+    },
 }
 # END OF PAYMENT PROCESSING
 
