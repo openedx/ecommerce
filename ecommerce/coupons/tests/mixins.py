@@ -488,7 +488,7 @@ class CouponMixin(SiteMixin):
                 course_catalog=course_catalog,
                 course_seat_types=course_seat_types,
                 email_domains=email_domains,
-                end_datetime=end_datetime or datetime.datetime(2020, 1, 1),
+                end_datetime=end_datetime or (datetime.datetime.now() + datetime.timedelta(days=500)),
                 enterprise_customer=enterprise_customer,
                 enterprise_customer_catalog=enterprise_customer_catalog,
                 max_uses=max_uses,
