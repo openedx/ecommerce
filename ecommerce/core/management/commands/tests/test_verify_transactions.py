@@ -9,13 +9,13 @@ import pytz
 import six
 from django.core.management import call_command
 from django.core.management.base import CommandError
-from django.test import TestCase
 from oscar.core.loading import get_class, get_model
 from oscar.test.factories import OrderFactory, OrderLineFactory, ProductFactory
 
 from ecommerce.core.constants import SEAT_PRODUCT_CLASS_NAME
 from ecommerce.core.management.commands.tests.factories import PaymentEventFactory
 from ecommerce.core.management.commands.verify_transactions import DEFAULT_END_DELTA_TIME, DEFAULT_START_DELTA_TIME
+from ecommerce.tests.testcases import TestCase
 
 PaymentEventType = get_model('order', 'PaymentEventType')
 PaymentEventTypeName = get_class('order.constants', 'PaymentEventTypeName')

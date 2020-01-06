@@ -23,6 +23,7 @@ from oscar.test import factories
 from oscar.test.utils import RequestFactory
 from social_django.models import UserSocialAuth
 from threadlocals.threadlocals import set_thread_variable
+from waffle.models import Flag
 
 from ecommerce.core.constants import ALL_ACCESS_CONTEXT, SYSTEM_ENTERPRISE_ADMIN_ROLE, SYSTEM_ENTERPRISE_OPERATOR_ROLE
 from ecommerce.core.url_utils import get_lms_url
@@ -443,3 +444,17 @@ class LmsApiMockMixin(object):
             username=username
         )
         httpretty.register_uri(httpretty.POST, url, body=response, content_type=CONTENT_TYPE)
+
+
+class TestWaffleFlagMixin(object):
+    """ Updates or creates a waffle flag and activates to True. Turns on any waffle flag to all tests
+    without requiring the addition of the flag in individual methods/classes """
+    def setUp(self):
+        super(TestWaffleFlagMixin, self).setUp()
+        # Note: if you are adding a waffle flag and need to have unit tests
+        # run with the flag on, import and add the flag to the list below.
+        # Note 2: Flags should be temporary, pls link the ticket to remove
+        # the flag from this mixin with the PR that added the flag.
+        waffle_flags_list = []
+        for flag_name in waffle_flags_list:
+            Flag.objects.update_or_create(name=flag_name, defaults={'everyone': True})

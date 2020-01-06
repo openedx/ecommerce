@@ -8,7 +8,7 @@ import os
 
 from django.contrib.sites.models import Site
 from django.core.management import CommandError, call_command
-from django.test import TestCase
+from django.test import TestCase as DjangoTestCase
 from oscar.core.loading import get_model
 
 from ecommerce.core.models import SiteConfiguration
@@ -20,7 +20,8 @@ Partner = get_model('partner', 'Partner')
 SITES = ["dummy"]
 
 
-class TestCreateSitesAndPartners(TestCase):
+# Our internal TestCase adds a site during setUp, therefore we will use the DjangoTestCase here.
+class TestCreateSitesAndPartners(DjangoTestCase):
     """
     Test django management command for creating Sites, SiteThemes, SiteConfigurations and Partners.
     """

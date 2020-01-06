@@ -6,9 +6,9 @@ from __future__ import absolute_import
 import mock
 from django.apps import apps
 from django.core.management import call_command
-from django.test import TestCase
 
 from ecommerce.core.management.commands.tests.factories import SuperUserFactory
+from ecommerce.tests.testcases import TestCase
 
 User = apps.get_model('core', 'User')
 
