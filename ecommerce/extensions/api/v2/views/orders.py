@@ -2,6 +2,7 @@
 from __future__ import absolute_import
 
 import logging
+from decimal import Decimal
 
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
@@ -24,6 +25,7 @@ from ecommerce.extensions.api.permissions import IsStaffOrOwner
 from ecommerce.extensions.api.throttles import ServiceUserThrottle
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
 from ecommerce.extensions.fulfillment.status import LINE, ORDER
+from ecommerce.extensions.fulfillment.utils import get_enterprise_customer_cost_for_line
 from ecommerce.extensions.offer.models import OFFER_PRIORITY_MANUAL_ORDER
 from ecommerce.extensions.order.benefits import ManualEnrollmentOrderDiscountBenefit
 from ecommerce.extensions.order.conditions import ManualEnrollmentOrderDiscountCondition
@@ -191,6 +193,7 @@ class ManualCourseEnrollmentOrderViewSet(EdxOrderPlacementMixin, ViewSet):
                     "username": <string>,
                     "email": <string>,
                     "course_run_key": <string>
+                    "discount_percentage": <string>
                 `request_user`: <User>
                 `request_site`: <Site>
             Returns:
@@ -204,16 +207,19 @@ class ManualCourseEnrollmentOrderViewSet(EdxOrderPlacementMixin, ViewSet):
                 learner_username,
                 learner_email,
                 course_run_key,
-            ) = self._get_required_enrollment_data(enrollment)
+                discount_percentage,
+            ) = self._get_enrollment_data(enrollment)
         except ValidationError as ex:
             return dict(enrollment, status=self.FAILURE, detail=ex.message)
 
         logger.info(
-            '[Manual Order Creation] Request received. User: %s, Email: %s, Course: %s, RequestUser: %s',
+            '[Manual Order Creation] Request received. User: %s, Email: %s, Course: %s, RequestUser: %s, '
+            'Discount Percentage: %s',
             learner_username,
             learner_email,
             course_run_key,
             request_user.username,
+            discount_percentage,
         )
 
         learner_user = self._get_learner_user(lms_user_id, learner_username, learner_email)
@@ -232,10 +238,12 @@ class ManualCourseEnrollmentOrderViewSet(EdxOrderPlacementMixin, ViewSet):
         # check if an order already exists with the requested data
         order_line = OrderLine.objects.filter(product=seat_product, order__user=learner_user, status=LINE.COMPLETE)
         if order_line.exists():
+            order = Order.objects.get(id=order_line.first().order_id)
+            self._update_orderline_with_enterprise_discount(order, discount_percentage)
             return dict(
                 enrollment,
                 status=self.SUCCESS,
-                detail=Order.objects.get(id=order_line.first().order_id).number
+                detail=order.number
             )
 
         basket = Basket.create_basket(request_site, learner_user)
@@ -245,6 +253,7 @@ class ManualCourseEnrollmentOrderViewSet(EdxOrderPlacementMixin, ViewSet):
         Applicator().apply_offers(basket, [discount_offer])
         try:
             order = self.place_free_order(basket)
+            self._update_orderline_with_enterprise_discount(order, discount_percentage)
         except:  # pylint: disable=bare-except
             logger.exception(
                 '[Manual Order Creation Failure] Failed to place the order. User: %s, Course: %s, Basket: %s, '
@@ -266,9 +275,46 @@ class ManualCourseEnrollmentOrderViewSet(EdxOrderPlacementMixin, ViewSet):
         )
         return dict(enrollment, status=self.SUCCESS, detail=order.number)
 
-    def _get_required_enrollment_data(self, enrollment):
+    def _update_orderline_with_enterprise_discount(self, order, discount_percentage):
         """
-        Return required parameters from incoming enrollment.
+        Updates an orderline with calculated discount metrics if applicable
+
+        Args:
+            order: An Order object
+            discount_percentage: Discounted percentage for manual order.
+
+        Returns:
+            Nothing
+
+        Side effect:
+            Saves a line object if discount_percentage is not zero.
+        """
+        if not discount_percentage:
+            return
+
+        # we need to represent discount_percentage as a decimaled percent (.23 instead of 23)
+        discount = Decimal(discount_percentage)
+        effective_discount_percentage = discount * Decimal('.01')
+        for line in order.lines.all():
+            line.effective_contract_discount_percentage = effective_discount_percentage
+            line.effective_contract_discounted_price = get_enterprise_customer_cost_for_line(
+                line.unit_price_excl_tax,
+                effective_discount_percentage
+            )
+            line.save()
+
+    def _get_enrollment_data(self, enrollment):
+        """
+        Return parameters from incoming enrollment.
+
+        Required Parameters:
+            lms_user_id:  User's platform id.
+            learner_username:  User's username.
+            learner_email:  User's email.
+            course_run_key:  Course key.
+
+        Optional Parameters:
+            discount_percentage: Discounted percentage for manual enrollment.
 
         Raises:
             ValidationError: If any required parameter is not present in enrollment.
@@ -277,6 +323,7 @@ class ManualCourseEnrollmentOrderViewSet(EdxOrderPlacementMixin, ViewSet):
         learner_username = enrollment.get('username')
         learner_email = enrollment.get('email')
         course_run_key = enrollment.get('course_run_key')
+        discount_percentage = enrollment.get('discount_percentage', 0.0)
         if not (lms_user_id and learner_username and learner_email and course_run_key):
             enrollment_parameters_state = [
                 ("'lms_user_id'", bool(lms_user_id)),
@@ -289,8 +336,9 @@ class ManualCourseEnrollmentOrderViewSet(EdxOrderPlacementMixin, ViewSet):
                 '[Manual Order Creation Failure] Missing required enrollment data. Message: %s', missing_params
             )
             raise ValidationError('Missing required enrollment data: {}'.format(missing_params))
-
-        return lms_user_id, learner_username, learner_email, course_run_key
+        if not isinstance(discount_percentage, float) or (discount_percentage < 0.0 or discount_percentage > 100.0):
+            raise ValidationError('Discount percentage should be a float from 0 to 100.')
+        return lms_user_id, learner_username, learner_email, course_run_key, discount_percentage
 
     def _get_learner_user(self, lms_user_id, learner_username, learner_email):
         """
