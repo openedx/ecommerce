@@ -147,6 +147,10 @@ class AtomicPublicationTests(DiscoveryTestMixin, TestCase):
                             'name': 'certificate_type',
                             'value': 'verified'
                         },
+                        {
+                            'name': 'id_verification_required',
+                            'value': True
+                        },
                     ]
                 },
             ]
@@ -433,7 +437,7 @@ class AtomicPublicationTests(DiscoveryTestMixin, TestCase):
         self.assertEqual(response.status_code, 400)
         self.assertEqual(
             response.data.get('products')[0],
-            u'Products must have a certificate type.'
+            u'Products must indicate whether ID verification is required.'
         )
         self.assert_course_does_not_exist(self.course_id)
 
@@ -453,8 +457,24 @@ class AtomicPublicationTests(DiscoveryTestMixin, TestCase):
         )
         self.assert_course_does_not_exist(self.course_id)
 
-    def test_missing_entitlement_price(self):
+    def test_missing_entitlement_type(self):
         """Verify that submitting entitlement data without a price yields a 400."""
+        for product in self.data['products']:
+            if product['product_class'] == COURSE_ENTITLEMENT_PRODUCT_CLASS_NAME:
+                product.pop('certificate_type')
+                break
+
+        response = self.client.post(self.create_path, json.dumps(self.data), JSON_CONTENT_TYPE)
+        self.assertEqual(response.status_code, 400)
+
+        self.assertEqual(
+            response.data.get('products')[0],
+            u'Products must have a certificate type.'
+        )
+        self.assert_course_does_not_exist(self.course_id)
+
+    def test_missing_entitlement_price(self):
+        """Verify that submitting entitlement data without a certificate_type yields a 400."""
         for product in self.data['products']:
             if product['product_class'] == COURSE_ENTITLEMENT_PRODUCT_CLASS_NAME:
                 product.pop('price')

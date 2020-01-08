@@ -18,7 +18,7 @@ ProductClass = get_model('catalogue', 'ProductClass')
 StockRecord = get_model('partner', 'StockRecord')
 
 
-def create_parent_course_entitlement(name, UUID):
+def create_parent_course_entitlement(name, UUID, id_verification_required):
     """ Create the parent course entitlement product if it does not already exist. """
     parent, created = Product.objects.get_or_create(
         structure=Product.PARENT,
@@ -31,6 +31,7 @@ def create_parent_course_entitlement(name, UUID):
         },
     )
     parent.attr.UUID = UUID
+    parent.attr.id_verification_required = id_verification_required
     parent.attr.save()
 
     if created:
@@ -60,11 +61,13 @@ def create_or_update_course_entitlement(certificate_type, price, partner, UUID, 
     """ Create or Update Course Entitlement Products """
     certificate_type = certificate_type.lower()
     UUID = six.text_type(UUID)
+    created = False
 
     try:
-        parent_entitlement, __ = create_parent_course_entitlement(title, UUID)
+        parent_entitlement, __ = create_parent_course_entitlement(title, UUID, id_verification_required)
         course_entitlement = get_entitlement(UUID, certificate_type)
     except Product.DoesNotExist:
+        created = True
         course_entitlement = Product()
 
     course_entitlement.structure = Product.CHILD
@@ -73,6 +76,10 @@ def create_or_update_course_entitlement(certificate_type, price, partner, UUID, 
     course_entitlement.attr.certificate_type = certificate_type
     course_entitlement.attr.UUID = UUID
     course_entitlement.attr.id_verification_required = id_verification_required
+    # If we're working with a brand new Product, don't try and save attr as it will create as expected, but we do need
+    # to explicitly call the save() method when performing an update, as they get ignored by Product().save()
+    if not created:
+        course_entitlement.attr.save()
     course_entitlement.parent = parent_entitlement
     course_entitlement.save()
 

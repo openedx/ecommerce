@@ -80,6 +80,8 @@ class ProductViewSet(NestedViewSetMixin, NonDestroyableModelViewSet):
                 'partner': request.site.siteconfiguration.partner,
                 'UUID': data.get('uuid'),
                 'title': data.get('title'),
+                # Default id_verification_required to false to prevent breaking API change
+                'id_verification_required': data.get('id_verification_required', False)
             }
 
             missing_values = [k for k, v in sorted(list(product_creation_fields.items())) if v is None]

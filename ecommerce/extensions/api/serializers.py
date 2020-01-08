@@ -445,6 +445,9 @@ class EntitlementProductHelper(object):
         if 'price' not in product:
             raise serializers.ValidationError(_(u"Products must have a price."))
 
+        if attrs.get('id_verification_required') is None:
+            raise serializers.ValidationError(_(u"Products must indicate whether ID verification is required."))
+
     @staticmethod
     def save(partner, course, uuid, product):
         attrs = _flatten(product['attribute_values'])
@@ -454,6 +457,7 @@ class EntitlementProductHelper(object):
 
         # Extract arguments required for Seat creation, deserializing as necessary.
         certificate_type = attrs.get('certificate_type')
+        id_verification_required = attrs.get('id_verification_required', False)
         price = Decimal(product['price'])
 
         entitlement = create_or_update_course_entitlement(
@@ -461,7 +465,8 @@ class EntitlementProductHelper(object):
             price,
             partner,
             uuid,
-            course.name
+            course.name,
+            id_verification_required=id_verification_required,
         )
 
         # As a convenience to our caller, provide the SKU in the returned product serialization.
