@@ -1,0 +1,23 @@
+{% load compress %}
+{% load static %}
+
+{# NOTE: We use Stripe v2 for credit card payments since v3 requires using Elements, which would force us #}
+{# to make a custom payment form just for Stripe. Using v2 allows us to continue using the same payment form #}
+{# regardless of the backend processor. v3 is used for Apple Pay and the Payment Request API. #}
+<script type="text/javascript" src="https://js.stripe.com/v2/"></script>
+<script type="text/javascript" src="https://js.stripe.com/v3/"></script>
+<script type="text/javascript">
+    window.StripeConfig = {
+        postUrl: '{% url 'stripe:submit' %}',
+        publishableKey: '{{ client_side_payment_processor.publishable_key }}',
+        country: '{{ client_side_payment_processor.country }}',
+        paymentRequest: {
+            currency: '{{ basket.currency|lower }}',
+            label: '{{ platform_name }}',
+            // NOTE: Stripe expects the currency sub-unit (e.g. cents instead of dollars).
+            // widthratio is used to avoid having to write extra code for multiplication.
+            total: {% widthratio order_total.incl_tax 1 100 %}
+        }
+    }
+</script>
+<script src="{% static 'js/views/stripe.js' %}" type="text/javascript"></script>

@@ -1,0 +1,35 @@
+{% load i18n %}
+{% load currency_filters %}
+
+<table class="table table-striped table-bordered table-hover">
+    <caption>{% trans "Refunds" as tmsg %}{{ tmsg | force_escape }}</caption>
+
+  {% if refunds %}
+      <tr>
+          <th>{% trans "Refund ID" as tmsg %}{{ tmsg | force_escape }}</th>
+          <th>{% trans "Number of Items" as tmsg %}{{ tmsg | force_escape }}</th>
+          <th>{% trans "Total Credit" as tmsg %}{{ tmsg | force_escape }}</th>
+          <th>{% trans "Created" as tmsg %}{{ tmsg | force_escape }}</th>
+          <th>{% trans "Status" as tmsg %}{{ tmsg | force_escape }}</th>
+          <th></th>
+      </tr>
+    {% for refund in refunds %}
+        <tr>
+            <td>
+                <a href="{% url 'dashboard:refunds:detail' refund.id %}">{{ refund.id }}</a>
+            </td>
+            <td>{{ refund.num_items }}</td>
+            <td>{{ refund.total_credit_excl_tax|currency:refund.currency }}</td>
+            <td>{{ refund.created }}</td>
+            <td>{{ refund.status|default:"-" }}</td>
+            <td><a href="{% url 'dashboard:refunds:detail' refund.id %}"
+                   class="btn btn-info">{% trans "View" as tmsg %}{{ tmsg | force_escape }}</a></td>
+        </tr>
+    {% endfor %}
+  {% else %}
+      <tr>
+          <td>{% trans "No refunds found." as tmsg %}{{ tmsg | force_escape }}</td>
+      </tr>
+  {% endif %}
+
+</table>

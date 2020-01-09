@@ -1,0 +1,17 @@
+<header class="pldoc-header-site">
+    {% if page.title == "Home" %}
+    <h1 class="pldoc-header-site-title">
+        <a class="pldoc-link title-name" href="{{ site.baseurl }}">
+            {{ site.title }}
+        </a>
+        <span class="title-description copy copy-base">{{ site.tagline }}</span>
+    </h1>
+    {% else %}
+    <h2 class="pldoc-header-site-title">
+        <a class="pldoc-link title-name" href="{{ site.baseurl }}">
+            {{ site.title }}
+        </a>
+        <span class="title-description copy copy-base">{{ site.tagline }}</span>
+    </h2>
+    {% endif %}
+</header>

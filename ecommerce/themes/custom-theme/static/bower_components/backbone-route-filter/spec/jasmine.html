@@ -1,0 +1,23 @@
+<!doctype html>
+<html>
+<head>
+    <title>Jasmine Spec Runner</title>
+    <link rel="stylesheet" type="text/css" href="support/jasmine/jasmine.css">
+    <script type="text/javascript" src="support/jasmine/jasmine.js"></script>
+    <script type="text/javascript" src="support/jasmine/jasmine-html.js"></script>
+    <script type="text/javascript" src="vendor/jquery.js"></script>
+    <script type="text/javascript" src="vendor/underscore.js"></script>
+    <script type="text/javascript" src="vendor/backbone.js"></script>
+    <script type="text/javascript" src="../backbone-route-filter.js"></script>
+    <script type="text/javascript" src="backbone-route-filter-spec.js"></script>
+</head>
+<body>
+<script type="text/javascript">
+    var environment = jasmine.getEnv(),
+            reporter = new jasmine.HtmlReporter();
+
+    environment.addReporter(reporter);
+    environment.execute();
+</script>
+</body>
+</html>

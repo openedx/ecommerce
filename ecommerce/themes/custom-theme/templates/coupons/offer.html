@@ -1,0 +1,46 @@
+{% extends 'edx/base.html' %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}{% trans "Redeem" as tmsg %}{{ tmsg | force_escape }}{% endblock %}
+
+{% block navbar %}
+    {% include 'edx/partials/_student_navbar.html' %}
+{% endblock navbar %}
+
+{% block content %}
+    <div id="offer">
+        <div class="container">
+            <div class="row">
+                <div id="offerApp" data-offer-app-page-heading="{{ offer_app_page_heading }}" data-offer-app-page-heading-message="{{ offer_app_page_heading_message }}">
+                </div>
+                <section class="verified-info col-xs-12 col-md-4 col-lg-12 hidden">
+                    <p class="earn-verified-certificate col-xs-12 col-lg-5 pull-left-lg">{% trans "Earn a verified certificate in one of our popular courses to advance your career, showcase your accomplishments or enhance your college application." as tmsg %}{{ tmsg | force_escape }}</p>
+
+                    <div class="verified-certificate-info clearfix">
+                        <h3 class="verified-certificate-info-header col-xs-12 col-sm-7 col-md-12 col-lg-4 pull-right-lg pull-right-sm">
+                            {% trans "Why buy a verified certificate?" as tmsg %}{{ tmsg | force_escape }}</h3>
+
+                        <div class="col-xs-12 col-sm-5 col-md-12 col-lg-3 pull-left-lg pull-left-sm">
+                            <img class="img-responsive"
+                                 src="{% static "images/example-certificate-verified.png" %}"
+                                 alt="{% trans "A verified certificate (digital) confirming that a user has completed the course on a specified date. The certificate includes edX's logo and the university's logo, as well as signatures from faculty members involved with the course. There is also a URL that can be used to verify the authenticity of the certificate." as tmsg %}{{ tmsg | force_escape }}"/>
+                        </div>
+                        <div class="col-xs-12 col-sm-7 col-md-12 col-lg-4 pull-right-lg">
+                            <p>{% trans "A verified certificate demonstrates to future employers that you've mastered the course material." as tmsg %}{{ tmsg | force_escape }}</p>
+
+                            <p>{% trans "The certificate is officially signed and stamped by the institution that offers the course." as tmsg %}{{ tmsg | force_escape }}</p>
+
+                            <p>{% trans "You're twelve times more likely to complete the course if you're working toward a verified certificate." as tmsg %}{{ tmsg | force_escape }}</p>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascript %}
+    <script src="{% static 'js/apps/coupon_offer_app.js' %}"></script>
+    <script src="{% static 'js/apps/offer_app.js' %}"></script>
+{% endblock javascript %}

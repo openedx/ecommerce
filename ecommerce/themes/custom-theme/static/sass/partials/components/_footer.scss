@@ -1,0 +1,18 @@
+html,
+body {
+  height: 100%;
+  /* The html and body elements cannot have any padding or margin. */
+}
+
+/* Set the fixed height of the footer here */
+footer.footer {
+  height: $footer-height;
+  margin-top: $footer-margin;
+  border-top: $navbar-border-bottom-width solid palette(secondary, base);
+  padding-top: 8px;
+  background-color: $footer-bg;
+
+  .container{
+    background-color: transparent;
+  }
+}

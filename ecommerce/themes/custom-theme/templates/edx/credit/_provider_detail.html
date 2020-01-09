@@ -1,0 +1,54 @@
+{% load i18n %}
+
+<div class="row center-block provider" data-sku="{{ provider.sku }}" data-price="{{ provider.price }}" data-new-price="{{ provider.new_price }}" data-discount="{{ provider.discount}}">
+    <div class="row">
+        <div class="col-xs-2 text-center">
+            <label class="radio-button">
+                <input type="radio" name="provider"/>
+                <span>{% trans "Select" as tmsg %}{{ tmsg | force_escape }}</span>
+            </label>
+        </div>
+
+        <div class="col-sm-8 col-xs-10">
+            <h3 class="title">{{ provider.display_name }}</h3>
+
+            <p>
+                <strong>{% trans "Credits: " as tmsg %}{{ tmsg | force_escape }}</strong> {{ provider.credit_hours }}<br>
+                <strong>{% trans "Price: " as tmsg %}{{ tmsg | force_escape }}</strong> ${{ provider.price }}
+            </p>
+
+            <p>
+                {{ provider.description }}
+            </p>
+
+            <button class="btn-link show-instructions" data-toggle="collapse"
+                    data-target="#fulfillment-instructions-{{ provider.id|lower }}">
+                {% filter force_escape %}
+                    {% blocktrans with display_name=provider.display_name %}
+                        Learn more about {{ display_name }} credit?
+                    {% endblocktrans %}
+                {% endfilter %}
+            </button>
+
+            <div class="collapse" id="fulfillment-instructions-{{ provider.id|lower }}">
+                {{ provider.fulfillment_instructions|safe }}
+            </div>
+        </div>
+        <div class="col-sm-2 col-xs-2 hidden-xs">
+            <img alt="{{ provider.display_name }}" class="img-responsive provider-image"
+                 src="{{ provider.thumbnail_url }}">
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-xs-8 col-xs-offset-2">
+            <small>
+                {% filter force_escape %}
+                    {% blocktrans with date=deadline|date %}
+                        Credit available until {{ date }}
+                    {% endblocktrans %}
+                {% endfilter %}
+            </small>
+        </div>
+    </div>
+</div>

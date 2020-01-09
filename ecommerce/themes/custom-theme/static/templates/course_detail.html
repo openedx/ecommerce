@@ -1,0 +1,44 @@
+<div class="container">
+    <ol class="breadcrumb">
+        <li><a href="/courses/"><%= gettext('Courses') %></a></li>
+        <li class="active"><%= course['name'] %></li>
+    </ol>
+    <div class="page-header">
+        <h1 class="hd-1 emphasized">
+            <span class="course-name"><%= course['name'] %></span>
+
+            <div class="pull-right">
+                <a class="btn btn-primary btn-small" href="/courses/<%= course['id'] %>/edit/">
+                    <%= gettext('Edit Course') %>
+                </a>
+            </div>
+        </h1>
+    </div>
+
+    <div class="course-information">
+        <h3 class="hd-3 de-emphasized"><%= gettext('Course Information') %></h3>
+
+        <div class="info-item">
+            <div class="heading"><%= gettext('Course ID') %></div>
+            <div class="course-id"><%= course['id'] %></div>
+        </div>
+        <div class="info-item">
+            <div class="heading"><%= gettext('Course Type') %></div>
+            <div class="course-type"><%= courseType %></div>
+            <span class="help-block">
+                <%- gettext('NOTE: Courses formerly of type "Honor" now display as "Audit", but continue to function as before so long as they have an "Honor Seat" below') %>
+            </span>
+        </div>
+
+        <% if(verificationDeadline) { %>
+        <div class="info-item">
+            <div class="heading"><%= gettext('Verification Deadline') %></div>
+            <div class="course-verification-deadline"><%= verificationDeadline %></div>
+        </div>
+        <% } %>
+    </div>
+
+    <h3 class="hd-3 de-emphasized"><%= gettext('Course Seats') %></h3>
+
+    <div class="course-seats"></div>
+</div>

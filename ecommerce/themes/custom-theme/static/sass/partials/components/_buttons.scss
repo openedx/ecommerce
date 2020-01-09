@@ -1,0 +1,14 @@
+// buttons
+// --------------------------------------------------
+
+.btn:focus {
+    // Disable Bootstrap default dotted outline
+    outline:inherit;
+}
+
+// Use the Pattern Library's decoration (border-bottom)
+.btn-link {
+    &:focus, &:hover {
+        text-decoration: none;
+    }
+}

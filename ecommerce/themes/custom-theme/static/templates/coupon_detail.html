@@ -1,0 +1,135 @@
+<div class="container">
+    <ol class="breadcrumb">
+        <li><a href="/coupons/"><%= gettext('Coupons') %></a></li>
+        <li class="active"><%= coupon.title %></li>
+    </ol>
+    <div class="page-header">
+        <h1 class="hd-1 emphasized">
+            <span class="coupon-title"><%= coupon.title %></span>
+
+            <div class="pull-right">
+                <a class="btn btn-primary btn-small" href="/coupons/<%= coupon.id %>/edit/" id="CouponEdit">
+                    <%= gettext('Edit Coupon') %>
+                </a>
+            </div>
+        </h1>
+        <h3 class="hd-3">
+            <span class="coupon-type"><%= coupon.coupon_type %></span>
+        </h3>
+    </div>
+    <div class="coupon-information">
+        <div class="heading"><%= gettext('Code Status:') %>
+            <span class="code-status value <% if(coupon.code_status == 'ACTIVE') { %>active <% } %>"><%= coupon.code_status %></span>
+            <div class="pull-right">
+                <%= gettext('Last edit:') %>
+                <span><%= lastEdited %></span>
+            </div>
+        </div>
+        <div class="info-item grid-item category">
+            <div class="heading"><%= gettext('Category') %></div>
+            <div class="value"><%= category %></div><br />
+        </div>
+        <% if(coupon.note) {%>
+        <div class="info-item grid-item note">
+            <div class="heading"><%= gettext('Note') %></div>
+            <div class="value"><%= coupon.note %></div><br />
+        </div>
+        <%}%>
+        <div class="info-item grid-item discount-value">
+            <div class="heading"><%= gettext('Discount Value:') %></div>
+            <div class="value"><%= discountValue %></div>
+        </div>
+        <% if (coupon.seats) {%>
+        <div class="info-item grid-item course-info">
+            <div class="heading"><%= gettext('Valid for courses:') %></div>
+        </div>
+        <%}%>
+        <% if(coupon.catalog_query) {%>
+        <div class="info-item grid-item catalog-query">
+            <div class="heading"><%= gettext('Catalog Query:') %></div>
+            <div class="value"><%= coupon.catalog_query %></div>
+        </div>
+        <%}%>
+        <% if(courseCatalogName) {%>
+        <div class="info-item grid-item catalog-name">
+            <div class="heading"><%= gettext('Catalog:') %></div>
+            <div class="value"><%= courseCatalogName %></div>
+        </div>
+        <%}%>
+        <div class="info-item grid-item date-info">
+            <div class="start-date-info">
+                <div class="heading"><%= gettext('Valid from:') %></div>
+                <div class="value"><%= startDateTime %></div>
+            </div>
+            <div class="end-date-info">
+                <div class="heading"><%= gettext('Valid until:') %></div>
+                <div class="value"><%= endDateTime %></div>
+            </div>
+        </div>
+        <% if(courseSeatType) {%>
+        <div class="info-item grid-item seat-types">
+            <div class="heading"><%= gettext('Seat Types:') %></div>
+            <div class="value"><%= courseSeatType %></div>
+            <div class="catalog_buttons"></div>
+        </div>
+        <%}%>
+        <% if(emailDomains) {%>
+        <div class="info-item grid-item email-domains">
+            <div class="heading"><%= gettext('Email Domains:') %></div>
+            <div class="value"><%= emailDomains %></div>
+        </div>
+        <%}%>
+        <div class="info-item grid-item usage-limitations">
+            <div class="heading"><%= gettext('Usage Limitations:') %></div>
+            <div class="value"><%= usage %></div>
+        </div>
+        <% if(coupon.max_uses) {%>
+        <div class="info-item grid-item max-uses">
+            <div class="heading"><%= gettext('Maximum Uses:') %></div>
+            <div class="value"><%= coupon.max_uses %></div>
+        </div>
+        <%}%>
+        <div class="info-item grid-item codes">
+            <div class="heading"><%= gettext('Download Voucher(s):') %></div>
+            <a href="/<%= coupon.id %>/" class="btn btn-primary btn-small pull-left voucher-report-button"><%= gettext('Download') %></a>
+        </div>
+        <div class="info-item grid-item client-info">
+            <div class="heading"><%= gettext('Client:') %></div>
+            <div class="value"><%= coupon.client %></div>
+        </div>
+        <div class="info-item grid-item invoice-type">
+            <div class="heading"><%= gettext('Invoice Type:') %></div>
+            <div class="value"><%= invoice_type %></div>
+        </div>
+        <% if(invoice_number) {%>
+        <div class="info-item grid-item invoice-number">
+            <div class="heading"><%= gettext('Invoice Number:') %></div>
+            <div class="value"><%= invoice_number %></div>
+        </div>
+        <%}%>
+        <% if(price) {%>
+        <div class="info-item grid-item invoiced-amount">
+            <div class="heading"><%= gettext('Invoiced Amount:') %></div>
+            <div class="value"><%= price %></div>
+        </div>
+        <%}%>
+        <% if(invoice_discount_value) {%>
+        <div class="info-item grid-item invoice-discount-value">
+            <div class="heading"><%= gettext('Invoice Discount Value:') %></div>
+            <div class="value"><%= invoice_discount_value %></div>
+        </div>
+        <%}%>
+        <% if(invoice_payment_date) {%>
+        <div class="info-item grid-item invoice-payment-date">
+            <div class="heading"><%= gettext('Invoice Payment Date:') %></div>
+            <div class="value"><%= invoice_payment_date %></div>
+        </div>
+        <%}%>
+        <% if(tax_deducted_source_value) {%>
+        <div class="info-item grid-item tax-deducted-source-value">
+            <div class="heading"><%= gettext('Tax Deducted Source:') %></div>
+            <div class="value"><%= tax_deducted_source_value %></div>
+        </div>
+        <%}%>
+    </div>
+</div>

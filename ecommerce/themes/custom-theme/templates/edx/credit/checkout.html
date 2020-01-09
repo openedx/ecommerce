@@ -1,0 +1,134 @@
+{% extends 'edx/base.html' %}
+
+{% load core_extras %}
+{% load static %}
+{% load i18n %}
+{% load django_markup %}
+
+{% block title %}
+    {% filter force_escape %}{% blocktrans with course_name=course.name %}Purchase Credit for {{ course_name }}{% endblocktrans %}{% endfilter %}
+{% endblock title %}
+
+{% block content %}
+    <div class="credit-checkout-page">
+        <div class="container credit-checkout">
+            <div class="row center-block course-details">
+                {% if error %}
+                    <div class="alert alert-danger error-message" role="alert">
+                        {{ error }}
+                    </div>
+                {% else %}
+                    <div class="col-sm-11">
+                        <h3 class="title">
+                            {% captureas course_name %}
+                                <span class="course-title">{{ course.name }}</span>
+                            {% endcaptureas %}
+                            {% filter force_escape %}
+                                {% blocktrans %}
+                                    Purchase Credit for {{ course_name }}
+                                {% endblocktrans %}
+                            {% endfilter %}
+                        </h3>
+                <span>
+                    {% filter force_escape %}
+                        {% blocktrans with date=deadline|date %}
+                            Congratulations! You are eligible to purchase academic course credit for this course.
+                            You must purchase your credit before {{ date }}.
+                            Select one of the following institutions to purchase your credit.
+                        {% endblocktrans %}
+                    {% endfilter %}
+                </span>
+                    </div>
+                    </div>
+                    <div class="provider-container">
+                        <div class="row center-block provider-details">
+                            {% for provider in providers %}
+                                {% include "edx/credit/_provider_detail.html" %}
+                            {% endfor %}
+                            <div class="row center-block text-right">
+                                {% if code %}
+                                <div class="col-sm-2 col-sm-offset-10 price text-left">
+                                    <span>{% trans "Price:" as tmsg %}{{ tmsg | force_escape }}</span>
+                                    <span class="pull-right">$<span class="price"></span></span>
+                                </div>
+                                <div class="col-sm-2 col-sm-offset-10 discount text-left">
+                                    <span>{% trans "Discount:" as tmsg %}{{ tmsg | force_escape }} </span>
+                                    <span class="pull-right"><span class="discount"></span></span>
+                                </div>
+                                {% endif %}
+                                <div class="col-sm-2 col-sm-offset-10  total-price text-left">
+                                    <span>{% trans "Total:" as tmsg %}{{ tmsg | force_escape }} <span>
+                                    <span class="pull-right">$<span class="total-price"></span></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="payment-buttons" class="row checkout-controls center-block text-right">
+                            <a data-track-type="click"
+                               data-track-event="edx.bi.ecommerce.credit.payment_selected"
+                               data-course-id="{{ course.id }}"
+                               class="btn btn-primary payment-button"
+                               href="/basket/add/?code={{code}}&sku=">
+                               Checkout
+                            </a>
+                        </div>
+                    </div>
+                {% endif %}
+
+            <div class="advatanges-panel well">
+                <div class="row center-block">
+                    <div class="col-md-12">
+                        <img class="cap-image" src="{% static "images/cap.png" %}" alt=""/>
+                        <strong>Earn Academic Credit for Your Accomplishments</strong>
+                    </div>
+                </div>
+
+                <div class="row center-block ">
+
+                    <div class="col-md-4">
+                        <div class="advantages">
+                            <strong>{% trans "You deserve it." as tmsg %}{{ tmsg | force_escape }}</strong>
+
+                            <p>
+                                {% trans "The hard work is over - you passed the course! Now get the credit you deserve to start or complete a degree." as tmsg %}{{ tmsg | force_escape }}
+                            </p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="advantages">
+                            <strong>{% trans "It's affordable." as tmsg %}{{ tmsg | force_escape }}</strong>
+
+                            <p>
+                                {% trans "The credit offered through edX generally costs less than the same credit at most institutions." as tmsg %}{{ tmsg | force_escape }}
+                            </p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="advantages">
+                            <strong>{% trans "It opens doors." as tmsg %}{{ tmsg | force_escape }}</strong>
+
+                            <p>
+                                {% trans "Many of today's most in-demand jobs require a college degree. Start your path to success!" as tmsg %}{{ tmsg | force_escape }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row center-block">
+                <strong>{% trans "Questions?" as tmsg %}{{ tmsg | force_escape }}</strong>
+            </div>
+            <div class="row center-block">
+                {% blocktrans asvar tmsg  %}
+                    Please read {link_start}our FAQs to view common questions about our certificates.{link_end}
+                {% endblocktrans %}
+                {% interpolate_html tmsg link_start='<a href="https://www.edx.org/gfa">'|safe link_end='</a>'|safe %}
+            </div>
+        </div>
+
+        <form id="payment-processor-form"></form>
+    </div>
+{% endblock content %}
+
+{% block javascript %}
+    <script src="{% static 'js/apps/credit_checkout.js' %}"></script>
+{% endblock %}

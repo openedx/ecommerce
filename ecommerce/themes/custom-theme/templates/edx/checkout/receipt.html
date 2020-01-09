@@ -1,0 +1,210 @@
+{% extends 'edx/base.html' %}
+{% load core_extras %}
+{% load currency_filters %}
+{% load i18n %}
+{% load django_markup %}
+{% load l10n %}
+{% load offer_tags %}
+{% load static %}
+{% load enterprise %}
+
+{% block title %}
+  {% filter force_escape %}
+  {% blocktrans trimmed with order_number=order.number %}
+    Receipt for {{ order_number }}
+  {% endblocktrans %}
+  {% endfilter %}
+{% endblock title %}
+
+{% block javascript %}
+  <script src="{% static 'js/apps/order_receipt_app.js' %}"></script>
+{% endblock javascript %}
+
+{% block navbar %}
+  {% include 'edx/partials/_student_navbar.html' %}
+{% endblock navbar %}
+
+{% block content %}
+  <div id="receipt-container"
+       class="receipt container content-container"
+       data-currency="{{ order.currency }}"
+       data-order-id="{{ order.number }}"
+       data-total-amount="{{ order.total_incl_tax | unlocalize }}"
+       data-back-button="{{ disable_back_button | default:0 }}">
+       {% include 'partials/alert_messages.html' %}
+
+      <h2 class="thank-you">{% trans "Thank you for your order!" as tmsg %}{{ tmsg | force_escape }}</h2>
+
+      <div class="list-info">
+        <div class="info-item payment-info row">
+          <div class="copy col-md-8">
+            <div class="confirm-message">
+              {% captureas link_start %}
+                <a href="mailto:{{ order.user.email }}">
+              {% endcaptureas %}
+              {% if has_enrollment_code_product %}
+                  {% blocktrans trimmed asvar tmsg %}
+                      Your order is complete. You will receive a confirmation message and your enrollment code(s) at
+                      {link_start}{email}{link_end}. If you need a receipt, you can print this page.
+                  {% endblocktrans %}
+                  {% interpolate_html tmsg email=order.user.email|safe link_end="</a>"|safe link_start=link_start|safe %}
+              {% else %}
+                  {% blocktrans trimmed asvar tmsg %}
+                      Your order is complete. If you need a receipt, you can print this page.
+                      You will also receive a confirmation message with this information at
+                      {link_start}{email}{link_end}.
+                  {% endblocktrans %}
+                {% interpolate_html tmsg email=order.user.email|safe link_end="</a>"|safe link_start=link_start|safe %}
+              {% endif %}
+            </div>
+
+            {% if order.billing_address %}
+              <address class="billing-address">
+                {% for field in order.billing_address.active_address_fields %}
+                  {{ field }}<br/>
+                {% endfor %}
+              </address>
+            {% endif %}
+          </div>
+
+          <div class="order-headers order-summary col-md-4">
+            <dl>
+              <dt>{% trans "Order Number:" as tmsg %}{{ tmsg | force_escape }}</dt>
+              <dd>{{ order.number }}</dd>
+              {% if payment_method %}
+                <dt>{% trans "Payment Method:" as tmsg %}{{ tmsg | force_escape }}</dt>
+                <dd>{{ payment_method }}</dd>
+              {% endif %}
+              <dt>{% trans "Order Date:" as tmsg %}{{ tmsg | force_escape }}</dt>
+              <dd>{{ order.date_placed|date:"E d, Y" }}</dd>
+            </dl>
+          </div>
+        </div>
+
+        <h2>{% trans "Order Information" as tmsg %}{{ tmsg | force_escape }}</h2>
+        <div class="table">
+          <dl class="order-lines">
+            <div class="header">
+              <dt aria-hidden="true">{% trans "Quantity" as tmsg %}{{ tmsg | force_escape }}</dt>
+              <dt aria-hidden="true">{% trans "Description" as tmsg %}{{ tmsg | force_escape }}</dt>
+              <dt aria-hidden="true">{% trans "Item Price" as tmsg %}{{ tmsg | force_escape }}</dt>
+            </div>
+            {% for line in order.lines.all %}
+              <div class="order-line-data">
+                <dt class="quantity sr">{% trans "Quantity:" as tmsg %}{{ tmsg | force_escape }}</dt>
+                <dd class="quantity">{{ line.quantity }}</dd>
+                <dt class="course-description sr">{% trans "Description:" as tmsg %}{{ tmsg | force_escape }}</dt>
+                <dd class="course-description">
+                  <span>{{ line.title }}</span>
+                  {% if line.product.course %}
+                    <p class="course-description-subtitle" data-course-id="{{ line.product.course.id }}">
+                      {{ line.product.course.id|course_organization }}
+                    </p>
+                  {% endif %}
+                </dd>
+                <dt class="line-price sr">{% trans "Item Price:" as tmsg %}{{ tmsg | force_escape }}</dt>
+                <dd class="line-price price">{{ line.unit_price_incl_tax|currency:order.currency }}</dd>
+              </div>
+            {% endfor %}
+          </dl>
+          <div class="order-total">
+            <div class="description">{% trans "Subtotal" as tmsg %}{{ tmsg | force_escape }}</div>
+            <div class="price">{{ order.total_before_discounts_incl_tax|currency:order.currency }}</div>
+          </div>
+
+          {% with discounts=order.basket_discounts %}
+            {% if discounts %}
+              {% for discount in discounts %}
+                <div class="order-total">
+                  <div class="description">
+                    <span class="label label-success">{% trans "Discount" as tmsg %}{{ tmsg | force_escape }}</span>
+
+                    {% if discount.voucher_code %}
+                      {% with voucher=discount.voucher %}
+                        <span class="discount">{{ voucher.code }}</span>
+                        <span class="discount">
+                          {% filter force_escape %}
+                            {% blocktrans trimmed with voucher_code=voucher.code voucher_discount_amount=voucher.benefit|benefit_discount %}
+                              {{ voucher_discount_amount }} off
+                            {% endblocktrans %}
+                          {% endfilter %}
+                        </span>
+                      {% endwith %}
+                    {% else %}
+                        <span class="discount">
+                            {% if offer.condition.enterprise_customer_name %}
+                              {% filter force_escape %}
+                                {% blocktrans trimmed with type=discount.offer.offer_type enterprise_name=discount.offer.condition.enterprise_customer_name %}
+                                    Discount of type {{ type }} provided by {{ enterprise_name }}
+                                {% endblocktrans %}
+                              {% endfilter %}
+                            {% elif discount.offer.condition.name == 'dynamic_discount_condition' %}
+                              {% trans "Discount for your first upgrade" as tmsg %}{{ tmsg | force_escape }}
+                            {% else %}
+                              {% filter force_escape %}
+                                {% blocktrans trimmed with type=discount.offer.offer_type %}
+                                    Discount of type {{ type }} is provided.
+                                {% endblocktrans %}
+                              {% endfilter %}
+                            {% endif %}
+                        </span>
+                    {% endif %}
+
+                  </div>
+                  <div class="price">-{{ discount.amount|currency:order.currency }}</div>
+                  {% enterprise_customer_for_voucher discount.voucher as enterprise_customer %}
+                  {% if enterprise_customer %}
+                      <div class="enterprise-customer">
+                        {% filter force_escape %}
+                          {% blocktrans trimmed with enterprise_name=enterprise_customer.name %}
+                              Courtesy of {{ enterprise_name }}.
+                          {% endblocktrans %}
+                        {% endfilter %}
+                      </div>
+                  {%  endif %}
+                </div>
+              {% endfor %}
+
+            {% endif %}
+          {% endwith %}
+
+          <div class="order-total">
+            <div class="description">{% trans "Total" as tmsg %}{{ tmsg | force_escape }}</div>
+            <div class="price">{{ order.total_incl_tax|currency:order.currency }}</div>
+          </div>
+        </div>
+
+        {% if display_credit_messaging %}
+          <div class="nav-wizard row">
+            <p class="header">{% trans "Get Your Course Credit" as tmsg %}{{ tmsg | force_escape }}</p>
+            <p class="message">
+              {% blocktrans trimmed asvar tmsg %}
+                To receive academic credit for this course, you must apply for credit at the organization that offers the credit.
+                You can find a link to the organization’s website on your {link_start}{lms_dashboard_url}{link_middle}dashboard{link_end}, next to the course name.
+              {% endblocktrans %}
+              {% interpolate_html tmsg link_start='<a href="'|safe link_middle='">'|safe link_end='</a>'|safe lms_dashboard_url=lms_dashboard_url|safe %}
+            </p>
+          </div>
+        {% endif %}
+      </div>
+
+      {% if not has_enrollment_code_product and show_verification_banner  %}
+        <div class="nav-wizard row">
+            {% include 'oscar/checkout/_verification_data.html' %}
+        </div>
+      {% endif %}
+      <div id="cta-nav-links" class="row">
+        <div class="col-xs-12 text-right">
+          {% if not show_verification_banner %}
+          <a class="dashboard-link nav-link" href="{{ order_dashboard_url }}">
+            {% trans "Go to dashboard" as tmsg %}{{ tmsg | force_escape }}
+          </a>
+          {% endif %}
+          <a class="find-more-courses-link nav-link" href="{{ explore_courses_url }}">
+            {% trans "Find more courses" as tmsg %}{{ tmsg | force_escape }}
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock content %}

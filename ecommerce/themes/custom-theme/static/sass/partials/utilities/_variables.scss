@@ -1,0 +1,60 @@
+// config: variables
+// ====================
+// NOTE: these variables override Bootstrap-centric variables.
+
+// FontAwesome font directory
+$fa-font-path: "/static/bower_components/fontawesome/fonts";
+
+// UX Pattern Library font directory
+$font-path: '/static/bower_components/edx-ux-pattern-library/_src/pattern-library/fonts';
+
+// Use asset paths relative to Bootstrap SASS files.
+$bootstrap-sass-asset-helper: true;
+
+// body
+$body-bg: darken(white, 2%);
+
+// borders
+$border-radius-base: 3px;
+$border-radius-large: 3px;
+$border-radius-small: 3px;
+
+// typography
+$font-family-sans-serif: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+$font-family-monospace: 'Bitstream Vera Sans Mono', Consolas, Courier, monospace;
+
+// navbar
+$navbar-default-bg: white;
+$navbar-height: 74px;
+$navbar-border-bottom-width: 4px;
+
+// Footer
+$footer-bg: $body-bg;
+$footer-height: 37px;
+$footer-margin: $footer-height;
+
+// Miscellaneous
+$container-bg: white;
+$breadcrumb-bg: white;
+$gray-color: #414141;
+
+// Offer landing page
+$gray-transparent: rgba(255, 255, 255, 0.5);
+$offer-page-blue: #0075b4;
+$offer-page-light-grey: #b1b2b4;
+$offer-page-price-blue: #0ea6ec;
+$offer-page-white: white;
+$offer-page-gray: gray;
+$dark-blue-shadow: rgba(12, 87, 126, 0.75);
+$silver-background: #fafafa;
+$pagination-blue: #337ab7;
+$pagination-dark-blue: #23527c;
+$pagination-silver: #eeeeee;
+$pagination-darker-silver: #ddd;
+
+$small-input-width: 174px;
+$input-addon-width: 40px;
+
+$coupon-grid-item-height: 75px;
+
+$container-padding-top: 60px;

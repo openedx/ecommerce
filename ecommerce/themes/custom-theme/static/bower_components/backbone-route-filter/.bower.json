@@ -1,0 +1,18 @@
+{
+  "name": "backbone-route-filter",
+  "version": "0.1.3",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/fantactuka/backbone-route-filter.git"
+  },
+  "homepage": "https://github.com/fantactuka/backbone-route-filter",
+  "_release": "0.1.3",
+  "_resolution": {
+    "type": "version",
+    "tag": "v0.1.3",
+    "commit": "8ecadafb0542117e294ffa7a6abd1acc2e266a94"
+  },
+  "_source": "https://github.com/fantactuka/backbone-route-filter.git",
+  "_target": "~0.1.2",
+  "_originalSource": "backbone-route-filter"
+}

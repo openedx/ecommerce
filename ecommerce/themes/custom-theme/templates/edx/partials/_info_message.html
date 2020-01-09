@@ -1,0 +1,11 @@
+{% if info %}
+    <div id="info-message">
+        <div class="container">
+            <i class="fa fa-info-circle" aria-hidden="true"></i>
+            <div class="depth depth message-info-content">
+                <h3>{{ info.title }}</h3>
+                {{ info.message }}
+            </div>
+        </div>
+    </div>
+{% endif %}

@@ -1,0 +1,81 @@
+<div class="fields">
+    <div class="form-group">
+        <label class="hd-4" for="id"><%= gettext('Course ID') %></label>
+        <% if(editing){ %>
+        <input type="hidden" name="id" value="<%= id %>">
+
+        <div class="course-id"><%= id %></div>
+        <% } else { %>
+        <input type="text" class="form-control" name="id" placeholder="e.g. course-v1:edX+DemoX+Demo_Course">
+
+        <p class="help-block"></p>
+        <% } %>
+    </div>
+
+    <!-- TODO: Hide this field and get the data from an API. -->
+    <div class="form-group">
+        <label class="hd-4" for="name"><%= gettext('Course Name') %></label>
+        <input type="text" class="form-control" name="name" placeholder="e.g. edX Demonstration Course">
+
+        <p class="help-block"></p>
+    </div>
+
+    <div class="form-group">
+        <label class="hd-4" for="courseType"><%= gettext('Course Type') %></label>
+
+        <p class="help-block"></p>
+        <!-- Radio fields will be appended here. -->
+        <div class="course-types"></div>
+    </div>
+</div>
+
+<div class="form-group course-seats">
+    <label class="hd-4"><%= gettext('Course Seats') %></label>
+
+    <div class="course-seat empty"><em><%= gettext('Select a course type.') %></em></div>
+</div>
+
+<div class="fields">
+    <div class="form-group verification-deadline hidden">
+        <label class="hd-4" for="verificationDeadline"><%= gettext('Verification Deadline') %></label>
+
+        <div class="input-group">
+            <div class="input-group-addon"><i class="fa fa-calendar" aria-hidden="true"></i></div>
+            <input id="verificationDeadline" name="verification_deadline" class="form-control add-pikaday"
+                   aria-describedby="verificationDeadlineHelpBlock">
+        </div>
+        <!-- NOTE: This help-block is here for validation messages. -->
+        <span class="help-block"></span>
+        <span id="verificationDeadlineHelpBlock" class="help-block">
+            <%= gettext('After this date/time, students can no longer submit photos for ID verification.') %>
+        </span>
+        <span class="help-block">
+            <em>(<%- gettext('Change the verification deadline for this course. The default deadline is the course end date and time.') %>)</em>
+        </span>
+    </div>
+</div>
+
+<div class="fields">
+    <div class="form-group honor-mode hidden">
+        <label class="hd-4" for="honorMode"><%- gettext('Include Honor Seat') %></label>
+
+        <div class="input-group">
+            <label class="radio-inline">
+                <input type="radio" name="honor_mode" value="true" aria-describedby="honorModeHelpBlock"> Yes
+            </label>
+            <label class="radio-inline">
+                <input type="radio" name="honor_mode" value="false" aria-describedby="honorModeHelpBlock"> No
+            </label>
+            <!-- NOTE: This help-block is here for validation messages. -->
+            <span class="help-block"></span>
+            <span id="honorModeHelpBlock" class="help-block">
+                <%- gettext('Include an Honor Seat with this course') %>
+            </span>
+        </div>
+    </div>
+</div>
+
+<div class="form-actions">
+    <button type="submit" class="btn btn-primary"><%= gettext(editing ? 'Save Changes' : 'Create Course') %></button>
+    <a class="btn btn-default" href="/courses/<% if(id){ print(id + '/'); } %>"><%= gettext('Cancel') %></a>
+</div>

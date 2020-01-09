@@ -1,0 +1,8 @@
+{
+  "name": "backbone-route-filter",
+  "version": "0.1.3",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/fantactuka/backbone-route-filter.git"
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "globals" : {
+    "Backbone"   : false,
+    "_"          : false,
+    "$"          : false,
+    "it"         : false,
+    "xit"        : false,
+    "describe"   : false,
+    "xdescribe"  : false,
+    "beforeEach" : false,
+    "afterEach"  : false,
+    "expect"     : false,
+    "jasmine"    : false,
+    "spyOn"      : false,
+    "setTimeout" : false,
+    "waitsFor"   : false
+  }
+}

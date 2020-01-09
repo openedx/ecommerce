@@ -1,0 +1,50 @@
+{
+  "name": "backbone-route-filter",
+  "title": "Backbone Route Filter",
+  "description": "Before and after sync/async filters for backbone router.",
+  "main": "./backbone-route-filter.js",
+  "homepage": "https://github.com/fantactuka/backbone-route-filter",
+  "version": "0.1.3",
+  "author": {
+    "name": "fantactuka",
+    "url": "https://github.com/fantactuka"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/fantactuka/backbone-route-filter.git"
+  },
+  "keywords": [
+    "backbone",
+    "router",
+    "filter"
+  ],
+  "bugs": {
+    "url": "https://github.com/fantactuka/backbone-route-filter/issues"
+  },
+  "licenses": [
+    {
+      "type": "MIT",
+      "url": "https://github.com/fantactuka/backbone-route-filter/blob/master/LICENSE"
+    }
+  ],
+  "scripts": {
+    "test": "grunt test"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "grunt": "1.0.1",
+    "grunt-contrib-jshint": "1.1.0",
+    "grunt-contrib-qunit": "1.3.0",
+    "grunt-contrib-uglify": "2.2.0",
+    "grunt-exec": "2.0.0",
+    "grunt-karma": "2.0.0",
+    "grunt-version": "1.1.1",
+    "jasmine-core": "2.5.2",
+    "karma": "1.5.0",
+    "karma-chrome-launcher": "2.0.0",
+    "karma-coverage": "1.1.1",
+    "karma-growl-reporter": "1.0.0",
+    "karma-jasmine": "1.1.0",
+    "karma-phantomjs-launcher": "1.0.4"
+  }
+}

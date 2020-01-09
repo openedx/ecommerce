@@ -1,0 +1,34 @@
+{% load i18n %}
+{% load django_markup %}
+
+<div class="col-md-9">
+  <p class="header">{% trans "Verify Your Identity" as tmsg %}{{ tmsg | force_escape }}</p>
+  <p class="message">
+    {% blocktrans trimmed asvar tmsg %}
+      To receive a verified certificate, you have to verify your identity using your {strong_start}webcam{strong_end} and
+      an {strong_start}official government-issued photo identification{strong_end} before the verification deadline.
+    {% endblocktrans %}
+    {% interpolate_html tmsg strong_start="<strong>"|safe strong_end="</strong>"|safe %}
+  </p>
+</div>
+
+<div id="verify_choices" class="right col-md-3">
+  <div id="verify_now">
+    <a id="verify_now_button"
+       class="next action-primary"
+       data-track-category="verification"
+       data-track-event="edx.bi.user.verification.immediate"
+       data-track-type="click"
+       href="{{ verification_url }}">
+       {% trans "Verify Now" as tmsg %}{{ tmsg | force_escape }}
+    </a>
+  </div>
+  <a id="verify_later_button"
+    class="dashboard-link"
+    data-track-category="verification"
+    data-track-event="edx.bi.user.verification.immediate"
+    data-track-type="click"
+    href="{{ order_dashboard_url }}">
+    {% trans "Go to my dashboard and verify later" as tmsg %}{{ tmsg | force_escape }}
+  </a>
+</div>

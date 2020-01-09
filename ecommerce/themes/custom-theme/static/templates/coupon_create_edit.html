@@ -1,0 +1,18 @@
+<div class="container">
+    <ol class="breadcrumb">
+        <li><a href="/coupons/"><%= gettext('Coupon Codes') %></a></li>
+        <% if(editing){ %>
+            <li><a href="/coupons/<%= id %>/"><%= title %></a></li>
+            <li class="active"><%= gettext('Edit') %></li>
+        <% } else { %>
+            <li class="active"><%= gettext('Create') %></li>
+        <% } %>
+    </ol>
+    <div class="page-header">
+        <h1 class="hd-1 emphasized">
+            <%= gettext(editing ? 'Edit Coupon' : 'Create New Coupon') %>
+        </h1>
+    </div>
+
+    <div class="coupon-form-outer"></div>
+</div>

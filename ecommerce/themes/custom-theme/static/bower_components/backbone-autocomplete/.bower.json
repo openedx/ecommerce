@@ -1,0 +1,13 @@
+{
+  "name": "backbone-autocomplete",
+  "homepage": "https://github.com/martindrapeau/Backbone-Widgets",
+  "_release": "986ab2940c",
+  "_resolution": {
+    "type": "branch",
+    "branch": "master",
+    "commit": "986ab2940c28a3d502ac4361f4387ad247535178"
+  },
+  "_source": "https://github.com/martindrapeau/Backbone-Widgets.git",
+  "_target": "*",
+  "_originalSource": "https://github.com/martindrapeau/Backbone-Widgets.git"
+}

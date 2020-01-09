@@ -1,0 +1,487 @@
+.receipt {
+    margin-bottom: 20px;
+
+    padding-top: 20px;
+
+    background-color: #ffffff;
+    font-family: $font-family-sans-serif;
+    line-height: 1em;
+
+    .action-primary {
+        background: palette(primary, base) none repeat scroll 0 0;
+        border: 0 none;
+        box-shadow: 0 2px 1px 0 palette(primary, dark);
+        color: #fff;
+        text-decoration: none;
+
+        &:hover, &:focus {
+            background: palette(primary, accent) none repeat scroll 0 0;
+            color: #fff;
+            text-decoration: none;
+        }
+    }
+
+    .content-container {
+        padding: 15px 30px 40px;
+    }
+
+    .copy {
+        > div {
+            margin-bottom: 15px;
+            line-height: 22px;
+        }
+
+        .billing-address {
+            margin-top: 35px;
+            margin-bottom: 35px;
+        }
+    }
+
+    #error-container {
+        padding: 15px;
+        background: #fbf4f7 none repeat scroll 0 0;
+        border-bottom: 4px solid #b20610;
+
+        .error-message {
+            background: inherit;
+
+            .title {
+                margin-bottom: 5px;
+                font-weight: 600;
+            }
+        }
+    }
+
+    .info-item {
+        overflow: hidden;
+    }
+
+    .payment-info {
+        margin-bottom: spacing-vertical(small);
+    }
+
+    .is-ready {
+        background: #e8f6fc none repeat scroll 0 0;
+    }
+
+    .nav-link, a {
+        color: #0079bc;
+        border-bottom: none;
+        text-decoration: none !important;
+
+        &:active, &:hover, &:focus {
+            border-bottom: 1px dotted #0079bc;
+        }
+    }
+
+    .nav-wizard {
+        padding: 15px 20px;
+        margin: 0;
+        overflow: hidden;
+        border-top: 4px solid rgb(255, 192, 31);
+        box-shadow: 0 1px 1px 2px rgba(0, 0, 0, 0.2);
+
+        .header {
+            margin: 0;
+            padding: 10px 0;
+            color: #434242;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .message {
+            color: #434242;
+            font-weight: 500;
+            line-height: 1.4em;
+        }
+
+        #verify_now {
+            margin-bottom: 10px;
+        }
+
+        #verify_choices {
+            margin-bottom: 10px;
+            padding-top: 10px;
+            text-align: center;
+        }
+
+        #verify_now_button {
+            display: block;
+            width: 100%;
+            margin: 0 auto;
+            padding: 13px 35px;
+            text-align: center;
+
+            &:hover {
+                text-decoration: none;
+            }
+        }
+    }
+
+    .confirm-message {
+        font-size: 18px;
+    }
+
+    h2 {
+        margin-bottom: 10px;
+        color: rgb(0, 121, 188);
+    }
+
+    p {
+        margin: 0;
+    }
+
+    .thank-you {
+        font-size: 38px;
+    }
+
+    .price {
+        padding-right: 0;
+
+        font-size: 16px;
+        font-weight: bold;
+        text-align: right;
+    }
+
+    #cta-nav-links {
+        margin: 40px 0;
+
+        .nav-link {
+            font-size: 16px;
+        }
+
+        .dashboard-link {
+            margin-right: 40px;
+        }
+    }
+
+    .dashboard-link {
+        line-height: 20px;
+        font-size: 13px;
+    }
+
+    .order-summary {
+        dt {
+            font-weight: 500;
+        }
+
+        dd {
+            margin-bottom: 20px;
+            color: rgb(29, 29, 29);
+            font-size: 18px;
+        }
+    }
+
+    .order-headers {
+        color: rgb(0, 121, 188);
+        font-size: 22px;
+    }
+
+    .order-line-data {
+        color: rgb(29, 29, 29);
+        font-size: 20px;
+
+        > td {
+            padding-bottom: 1.5em;
+            padding-top: 1.25em;
+            line-height: 1.5em !important;
+        }
+    }
+
+    p, address {
+        color: #6f7074;
+    }
+
+    /* Styling for the provider area; uses edX Pattern Library utils */
+    .report-receipt-provider {
+        @include clearfix;
+        margin: 0 0 20px 0;
+        padding: 15px 20px;
+        border: 1px solid rgb(221,221,221);
+        border-radius: 3px;
+        box-shadow: 0 1px 2px 1px rgba(0,0,0,0.1);
+        background: rgb(255,255,255);
+
+        .provider-wrapper {
+            @include float(left);
+            padding: 10px;
+
+            .provider-info {
+                margin-bottom: 20px;
+                font-weight: 600;
+            }
+        }
+
+        .provider-buttons-logos {
+            padding: 10px;
+            @include text-align(center);
+
+            .provider-logo img {
+                max-width: 160px;
+                margin-bottom: 10px;
+            }
+        }
+    }
+
+    .summary {
+        td:first-child {
+            padding: 8px 0 0 0;
+        }
+    }
+
+    .summary-description {
+        font-weight: bold;
+    }
+
+
+    .table {
+        dl {
+            margin: 0;
+        }
+
+        .header, .order-line-data {
+            dt, dd {
+                padding: 10px 10px 5px 10px;
+
+                &:not(:last-child) {
+                    float: left;
+
+                    border-right: 2px solid rgb(235, 235, 235);
+                }
+
+                &:last-child {
+                    display: inline-block;
+
+                    width: 15%;
+                }
+            }
+
+            dt:last-child {
+                text-align: center;
+            }
+
+            dd {
+                height: 100px;
+            }
+        }
+
+        .header {
+            background-color: rgb(249, 249, 249);
+
+            dt {
+                border-bottom: 2px solid rgb(235, 235, 235);
+
+                font-size: 16px;
+
+                &:first-child {
+                    width: 10%;
+                }
+
+                &:nth-child(2) {
+                    width: 75%;
+                }
+            }
+        }
+
+        .order-line-data {
+            &:not(:last-child) {
+                border-bottom: 2px solid rgb(235, 235, 235);
+            }
+
+            &:last-child {
+                border-bottom: 4px solid;
+            }
+
+            dd {
+                font-size: 16px;
+
+                &:nth-child(2) {
+                    width: 10%;
+                }
+
+                &:nth-child(4) {
+                    width: 75%;
+                }
+
+                &.line-price {
+                    padding-right: 5%;
+                }
+            }
+        }
+
+        .order-total {
+            margin-left: 50%;
+
+            padding: 20px 0;
+
+            &:not(:last-child) {
+                border-bottom: 2px solid rgb(235, 235, 235);
+            }
+
+            .description {
+                width: 62.5%;
+
+                font-weight: bold;
+
+                p {
+                    padding-top: 5px;
+
+                    font-size: 15px;
+                    font-weight: normal;
+                }
+
+                .discount {
+                    line-height: 1.5em;
+                }
+            }
+
+            .description, .price {
+                display: inline-block;
+            }
+
+            .price {
+                float: right;
+
+                margin-right: 10%;
+
+                color: black;
+            }
+
+            .enterprise-customer {
+                font-weight: 300;
+                padding-top: 12px;
+            }
+        }
+    }
+
+    .wrapper-content-main {
+        margin-bottom: 20px;
+    }
+}
+
+/* Medium devices (laptop, 1200px and lower) */
+@media (max-width: $screen-md-max) {
+    .discount {
+        display: block;
+        margin-top: 10px;
+    }
+}
+
+/* Small devices (tablets, 992px and lower) */
+@media (max-width: $screen-sm-max) {
+    .receipt {
+        .sr {
+            position: static;
+
+            width: auto;
+            height: auto;
+
+            font-size: 16px;
+        }
+
+        .thank-you {
+            text-align: center;
+        }
+
+        .order-summary {
+            border-top: 2px solid rgb(235, 235, 235);
+            border-bottom: 2px solid rgb(235, 235, 235);
+
+            padding: 10px 0;
+
+            background-color: rgb(249, 249, 249);
+
+            dt, dd {
+                padding-left: 10px;
+
+                font-size: 16px;
+            }
+
+            dt {
+                float: left;
+
+                color: black;
+                font-weight: bold;
+            }
+
+            dd {
+                display: flex;
+            }
+        }
+
+        .table {
+            border-top: 4px solid rgb(235, 235, 235);
+
+            .header {
+                display: none;
+
+                dt {
+                    border-bottom: none;
+                }
+            }
+
+            .order-line-data {
+                padding-top: 10px;
+
+                &:not(:last-child) {
+                    border-bottom: none;
+                }
+
+                &:last-child {
+                    border-bottom: 2px solid;
+                }
+
+                dt, dd {
+                    &:not(:last-child) {
+                        float: none;
+
+                        border-right: none;
+                    }
+                }
+
+                dd {
+                    display: inline-block;
+
+                    height: auto;
+
+                    &:nth-child(2), &:nth-child(4) {
+                        width: auto;
+                    }
+
+                    &.course-description {
+                        padding: 0 10px;
+                    }
+
+                    &.line-price {
+                        font-weight: normal;
+                    }
+                }
+
+                dt {
+                    display: inline;
+                    float: left;
+                }
+
+                .quantity, .line-price {
+                    display: inline;
+                }
+
+                .course-description {
+                    display: block;
+
+                    width: auto;
+                }
+            }
+
+            .order-total {
+                margin-left: 0;
+
+                padding: 20px 10px;
+
+                .price {
+                    margin-right: 0;
+                }
+            }
+        }
+    }
+}

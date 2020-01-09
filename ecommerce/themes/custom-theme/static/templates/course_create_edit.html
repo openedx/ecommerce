@@ -1,0 +1,18 @@
+<div class="container">
+    <ol class="breadcrumb">
+        <li><a href="/courses/"><%= gettext('Courses') %></a></li>
+        <% if(editing){ %>
+            <li><a href="/courses/<%= id %>/"><%= name %></a></li>
+            <li class="active"><%= gettext('Edit') %></li>
+        <% } else { %>
+            <li class="active"><%= gettext('Create') %></li>
+        <% } %>
+    </ol>
+    <div class="page-header">
+        <h1 class="hd-1 emphasized">
+            <%= gettext(editing ? 'Edit Course' : 'Create New Course') %>
+        </h1>
+    </div>
+
+    <div class="course-form-outer"></div>
+</div>

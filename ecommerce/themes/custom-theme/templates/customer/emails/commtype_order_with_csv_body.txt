@@ -1,0 +1,26 @@
+{% load i18n %}
+{% trans "Order confirmation for: " %}{{order_number}}
+
+
+{% blocktrans %}Dear {{full_name}},{% endblocktrans %}
+{% blocktrans %}Thank you for purchasing access to {{course_name}}. Let's get your group ready to learn with edX:{% endblocktrans %}
+
+{% blocktrans %}Please visit {{download_csv_link}} to download and save the enrollment code file.{% endblocktrans %}
+{% trans "Distribute one code per learner before the expiration date." %}
+{% trans "Pro tip: Track which code is associated with which person." %}
+{% trans "Learners sign-in/register with edX and enroll for the course." %}
+
+{% blocktrans %}To view your payment information, log in to see your Order History, under Account Settings at {{order_history_url}}.{% endblocktrans %}
+{% blocktrans %}For more information and assistance, contact info@edx.org.{% endblocktrans %}
+
+{% trans "Thank You" %}
+
+{% trans "By purchasing, you and your organization agree to the following terms:" %}
+
+{% trans "Each code is valid for the one course covered and can be used only one time." %}
+{% trans "You are responsible for distributing codes to your learners."%}
+{% trans "Each code will expire in one year from date of purchase or, if earlier, once the course is closed."%}
+{% trans "If a course is not designated as self-paced, you should confirm that a course run is available before expiration."%}
+{% trans "You may not resell codes to third parties."%}
+{% trans "All sales final. No refunds."%}
+

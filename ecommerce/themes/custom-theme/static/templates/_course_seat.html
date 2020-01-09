@@ -1,0 +1,17 @@
+<div class="row course-seat">
+    <div class="col-sm-12">
+        <div class="seat-type"><%= seat.getSeatTypeDisplayName() %></div>
+    </div>
+    <div class="col-sm-4">
+        <div class="seat-price"><%= gettext('Price:') + ' $' + Number(seat.get('price')).toLocaleString() %></div>
+        <% var expires = seat.get('expires');
+        if(expires) {
+        print(gettext('Upgrade Deadline:') + ' ' + moment.utc(expires).format('lll z'));
+        }
+        %>
+    </div>
+    <div class="col-sm-4 seat-certificate-type">
+        <%= seat.getCertificateDisplayName() %>
+    </div>
+    <div class="col-sm-4 seat-additional-info"></div>
+</div>

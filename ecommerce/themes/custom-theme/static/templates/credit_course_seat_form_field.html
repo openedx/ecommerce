@@ -1,0 +1,36 @@
+<div class="col-sm-12">
+    <div class="seat-type"><%= gettext('Credit') %></div>
+</div>
+
+<div class="col-sm-4 col-sm-offset-4 seat-certificate-type">
+    <%= gettext('Verified Certificate') %>
+</div>
+
+<div class="col-md-10">
+    <input type="hidden" name="certificate_type" value="credit">
+    <input type="hidden" name="id_verification_required" value="true">
+
+    <div class="form-group">
+        <table class="table table-striped credit-seats">
+            <thead>
+                <tr>
+                    <th id="credit-provider-label"><%= gettext('Credit Provider') %></th>
+                    <th id="price-label"><%= gettext('Price (USD)') %></th>
+                    <th id="credit-hours-label"><%= gettext('Credit Hours') %></th>
+                    <th id="expires-label"><%= gettext('Upgrade Deadline') %></th>
+                    <th>
+                        <button class="add-seat btn btn-primary">
+                            <span class="sr"><%= gettext('Add course seat') %></span>
+                            <i class="fa fa-plus" aria-hidden="true"></i>
+                        </button>
+                    </th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+        <!-- NOTE: This help-block is here for validation messages. -->
+        <span class="help-block" aria-live="polite"></span>
+    </div>
+</div>
+
+<div class="col-sm-4 seat-additional-info"></div>

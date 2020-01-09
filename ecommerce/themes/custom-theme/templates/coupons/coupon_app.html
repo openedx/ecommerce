@@ -1,0 +1,22 @@
+{% extends 'edx/base.html' %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}{% trans "Coupon Codes" as tmsg %}{{ tmsg | force_escape }}{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="{% static 'bower_components/pikaday/css/pikaday.css' %}" type="text/x-scss">
+{% endblock %}
+
+{% block navbar %}
+    {% include "edx/partials/_staff_navbar.html" %}
+    {% include "edx/partials/_administration_menu.html" %}
+{% endblock navbar %}
+
+{% block content %}
+    <div id="app" class="container"></div>
+{% endblock %}
+
+{% block javascript %}
+    <script src="{% static 'js/apps/coupon_admin_app.js' %}"></script>
+{% endblock %}

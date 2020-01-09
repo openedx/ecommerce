@@ -1,0 +1,42 @@
+<div class="col-sm-12">
+    <div class="seat-type"><%= gettext('Verified') %></div>
+</div>
+<div class="col-sm-4">
+    <input type="hidden" name="certificate_type" value="verified">
+    <input type="hidden" name="id_verification_required" value="true">
+
+    <div class="seat-price">
+        <div class="form-group">
+            <label for="price"><%= gettext('Price (in USD)') %></label>
+
+            <div class="input-group">
+                <div class="input-group-addon">$</div>
+                <input type="number" class="form-control" name="price" id="price" min="5" step="1" pattern="\d+"
+                       value="<%= price %>">
+            </div>
+            <!-- NOTE: This help-block is here for validation messages. -->
+            <span class="help-block"></span>
+        </div>
+    </div>
+
+    <div class="expires">
+        <div class="form-group">
+            <label for="expires"><%= gettext('Upgrade Deadline') %></label>
+
+            <div class="input-group">
+                <div class="input-group-addon"><i class="fa fa-calendar" aria-hidden="true"></i></div>
+                <input id="expires" name="expires" class="form-control add-pikaday"
+                       aria-describedby="expiresHelpBlock">
+            </div>
+            <!-- NOTE: This help-block is here for validation messages. -->
+            <span class="help-block"></span>
+        <span id="expiresHelpBlock" class="help-block">
+            <%= gettext('After this date/time, students can no longer enroll in this track.') %>
+        </span>
+        </div>
+    </div>
+</div>
+<div class="col-sm-4 seat-certificate-type">
+    <%= gettext('Verified Certificate') %>
+</div>
+<div class="col-sm-4 seat-additional-info"></div>

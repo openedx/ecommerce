@@ -1,0 +1,47 @@
+{% extends 'edx/base.html' %}
+
+{% load i18n %}
+{% load django_markup %}
+
+{% block title %}
+  {# Translators: SDN is an acronym for Specially Designated Nationals #}
+  {% filter force_escape %}
+    {% blocktrans %}
+      SDN Check Failure
+    {% endblocktrans %}
+  {% endfilter %}
+  {% endblock %}
+
+{% block navbar %}
+  {% include 'edx/partials/_student_navbar.html' %}
+{% endblock navbar %}
+
+{% block content %}
+  <div id="error-message">
+    <div class="container">
+      <div class="depth depth-2 message-error-content">
+        <h3>SDN Check Failure</h3>
+        <p>
+          {% filter force_escape %}
+            {% blocktrans trimmed %}
+              Unfortunately, your account profile or payment information appears to match one or more records on a U.S.
+              Treasury Department sanctions list. This means we cannot complete your transaction or provide you with
+              services and must suspend your learner account.
+            {% endblocktrans %}
+          {% endfilter %}
+        </p>
+
+        <p>
+          {% blocktrans trimmed asvar tmsg %}
+            If you have questions regarding clearing a match, please contact {ofac_email_link}
+            ofac.reconsideration@treasury.gov{end_link} for information about options for clearing a match. Your
+            account will be suspended until this matter is resolved satisfactorily.
+          {% endblocktrans %}
+          {% interpolate_html tmsg ofac_email_link="<a class='nav-link'|safe href='mailto:ofac.reconsideration@treasury.gov'>"|safe end_link="</a>"|safe %}
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <iframe style="visibility: hidden" sandbox="allow-forms allow-same-origin allow-scripts" src="{{ logout_url }}"></iframe>
+{% endblock %}

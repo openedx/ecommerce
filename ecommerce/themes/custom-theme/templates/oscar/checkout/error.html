@@ -1,0 +1,30 @@
+{% extends 'edx/base.html' %}
+{% load i18n %}
+{% load django_markup %}
+{% load static %}
+
+{% block title %}
+    {% trans "Checkout Error" as tmsg %}{{ tmsg | force_escape }}
+{% endblock %}
+
+{% block navbar %}
+    {% include 'edx/partials/_student_navbar.html' %}
+{% endblock %}
+
+{% block content %}
+    <div id="error-message">
+        <div class="container">
+            <div class="depth depth-2 message-error-content">
+                <h1>{% trans "Checkout Error" as tmsg %}{{ tmsg | force_escape }}</h1>
+                <p>{% trans "An error has occurred with your payment." as tmsg %}{{ tmsg | force_escape }} <b>{% trans "You have not been charged." as tmsg %}{{ tmsg | force_escape }}</b></p>
+                <p>
+                    {% blocktrans asvar tmsg %}
+                    Please try to submit your payment again. If this problem persists, please refer to our {start_link}
+                    Payments FAQ {end_link} for troubleshooting tips.
+                    {% endblocktrans %}
+                    {% interpolate_html tmsg start_link="<a class='nav-link' href='https://support.edx.org/hc/en-us/articles/115000914088-Why-is-my-upgrade-payment-failing-'>"|safe end_link="</a>"|safe %}
+                </p>
+            </div>
+        </div>
+    </div>
+{% endblock %}

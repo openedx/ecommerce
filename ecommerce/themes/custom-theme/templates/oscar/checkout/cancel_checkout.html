@@ -1,0 +1,26 @@
+{% extends 'edx/base.html' %}
+{% load i18n %}
+{% load django_markup %}
+{% load static %}
+
+{% block title %}
+    {% trans "Checkout Cancelled" as tmsg %}{{ tmsg | force_escape }}
+{% endblock title %}
+
+{% block navbar %}
+    {% include 'edx/partials/_student_navbar.html' %}
+{% endblock navbar %}
+
+{% block content %}
+<div class="container content-wrapper receipt-cancel-error">
+    <h1>{% trans "Checkout Cancelled" as tmsg %}{{ tmsg | force_escape }}</h1>
+    <p>
+        {% blocktrans asvar tmsg %}
+        Your transaction has been cancelled. If you feel an error has occurred, contact {start_link}
+        {payment_support_email}{end_link}.
+        {% endblocktrans %}
+        {% interpolate_html tmsg start_link="<a class='nav-link' href='mailto:"|add:payment_support_email|add:"'>"|safe end_link="</a>"|safe payment_support_email=payment_support_email|safe %}
+
+    </p>
+</div>
+{% endblock content %}

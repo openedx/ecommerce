@@ -1,0 +1,17 @@
+{% load i18n %}
+
+<nav class="administration-navbar">
+  <div class="container">
+    <a {% if admin == "course" %}class="selected"{% endif %} href="{% url 'courses:app' '' %}">{% trans "Courses" as tmsg %}{{ tmsg | force_escape }}</a>
+    <a {% if admin == "coupon" %}class="selected"{% endif %} href="{% url 'coupons:app' '' %}">{% trans "Coupons" as tmsg %}{{ tmsg | force_escape }}</a>
+    <a {% if admin == "enterprise_coupons" %}class="selected"{% endif %} href="{% url 'enterprise:coupons' '' %}">
+      {% trans "Enterprise Coupons" as tmsg %}{{ tmsg | force_escape }}
+    </a>
+    <a {% if admin == "program_offers" %}class="selected"{% endif %} href="{% url 'programs:offers:list' %}">
+      {% trans "Program Offers" as tmsg %}{{ tmsg | force_escape }}
+    </a>
+    <a {% if admin == "enterprise_offers" %}class="selected"{% endif %} href="{% url 'enterprise:offers:list' %}">
+      {% trans "Enterprise Offers" as tmsg %}{{ tmsg | force_escape }}
+    </a>
+  </div>
+</nav>

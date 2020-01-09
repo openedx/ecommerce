@@ -1,0 +1,143 @@
+// navbar
+// --------------------------------------------------
+
+.navbar-default {
+  .navbar-nav {
+    nav-link, li > a {
+      &:hover,
+      &:focus {
+        color: white;
+        outline: inherit;
+        background-color: #337ab7;
+        border-bottom-color: transparent;
+      }
+    }
+  }
+}
+
+.navbar {
+  margin-bottom: 0;
+
+  // Remove default Bootstrap navbar border styling
+  border: none;
+  border-radius: 0;
+
+  // Add our own border
+  border-bottom: $navbar-border-bottom-width solid palette(primary, accent);
+
+  // Vertically center the logo
+  .navbar-brand {
+    &:active,
+    &:focus,
+    &:hover {
+      border: none;
+    }
+
+    .navbar-brand-logo {
+      @include center-vertically;
+    }
+
+    .navbar-brand-app {
+      @include center-vertically;
+      top: 0;
+      display: inline-block;
+      color: palette(primary, accent);
+      font-weight: 600;
+    }
+  }
+
+  .navbar-toggle {
+
+    &:hover,
+    &:focus {
+      color: white;
+      border-color: #337ab7;
+      background-color: #337ab7;
+
+      > .icon-bar {
+        background-color: white;
+      }
+    }
+  }
+}
+
+.administration-navbar {
+  padding: 10px;
+  border-bottom: 2px solid #cacaca;
+
+  background-color: #f6f6f6;
+  height: 50px;
+
+  font-size: 18px;
+  font-weight: 600;
+
+  .container {
+    background-color: #f6f6f6;
+  }
+
+  div a {
+    padding: 10px;
+    border-bottom: none;
+
+    color: #0ea6ec;
+
+    &.selected,
+    &:active,
+    &:focus,
+    &:hover {
+      border-bottom: 4px solid #0ea6ec;
+
+      color: black;
+    }
+  }
+}
+
+@media (min-width: $grid-float-breakpoint-max) {
+  .navbar {
+    // Display the user menu as a .navbar-btn when not collapsed to handle vertical centering.
+    .user-menu {
+      @include navbar-vertical-align($input-height-base);
+    }
+  }
+}
+
+.user-menu {
+  > .nav-button {
+    border-color: palette(grayscale, light);
+    color: palette(grayscale, dark);
+
+    &:hover,
+    &:focus {
+      color: palette(grayscale, white-t);
+
+      > .icon {
+        color: palette(grayscale, white-t);
+      }
+    }
+  }
+
+  .main-btn {
+    font-weight: bold;
+    color: palette(grayscale, x-dark);
+
+    .icon {
+      display: inline-block;
+      float: left;
+      margin: 2px 6px -3px 3px;
+      font-size: 1.2em;
+      color: palette(grayscale, base);
+    }
+  }
+}
+
+.dropdown-menu {
+  .nav-link {
+    // Disables default link behavior of pattern library on menu items
+    transition: none;
+
+    &:hover,
+    &:focus {
+      border-bottom-color: transparent;
+    }
+  }
+}

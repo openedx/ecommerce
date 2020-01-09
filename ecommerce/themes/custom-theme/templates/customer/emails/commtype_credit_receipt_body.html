@@ -1,0 +1,101 @@
+{% extends 'customer/email_base.html' %}
+{% load i18n %}
+{% block body %}
+
+    <tr>
+        <table class="cn-body">
+            <!-- Message header -->
+            <tr align="left" class="cn-img-wrapper">
+                <td colspan="2" align="left" class="cn-img-wrapper cn-full-width" style="font-size: 20px; vertical-align: middle; padding-left: 20px; color: #127eb1;">
+                    <img src="http://gallery.mailchimp.com/1822a33c054dc20e223ca40e2/images/logo_web_edx_studio01aad778f34f.png"
+                        height="30" alt="{platform_name} Logo" border="0" hspace="0" vspace="0"
+                        class="platform-img">
+                    {% trans "Payment Confirmation" as tmsg %}{{ tmsg | force_escape }}
+                </td>
+            </tr>
+
+            <tr>
+                <td class="cn-content-clear" colspan="2"></td>
+            </tr>
+
+            <!-- Message sub-header -->
+            <tr class="force-col" valign="middle" style="background-color: #f3f3f3;">
+                <td style="padding: 20px;">
+                    <table border="0" cellspacing="0" cellpadding="0" width="280" align="left" class="col-2">
+                        <tr>
+                            <td align="left" valign="top" style="font-size:13px; line-height: 20px; color: #aaaaaa;">
+                                {% trans "Payment confirmation for:" as tmsg %}{{ tmsg | force_escape }}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td align="left" valign="top" style="line-height: 26px; font-size:24px; color: #002D40;">
+                                {{ course_title }}
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+                <td style="padding: 20px;">
+                    <table border="0" cellspacing="0" cellpadding="10" width="100" align="right" class="col-2">
+                        <tr>
+                            <td align="center" valign="middle"
+                                style="font-size:13px; background-color: #127eb1; border-radius: 5px; box-shadow: 0 2px #002D40;">
+                                <a href="{{ receipt_page_url }}" style="color: #ffffff; text-decoration: none;">
+                                    {% trans "View Payment Information" as tmsg %}{{ tmsg | force_escape }}
+                                </a>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            <tr>
+
+            <!-- Message Body -->
+            <tr class="cn-content cn-full-width">
+                <td colspan="2">
+                    <p>
+                        {% filter force_escape %}{% blocktrans %}Dear {{full_name}},{% endblocktrans %}{% endfilter %}
+                    </p>
+
+                    <p>
+                        {% filter force_escape %}
+                        {% blocktrans with credit_hours=credit_hours credit_provider=credit_provider course_title=course_title platform_name=platform_name %}
+                            Thank you for purchasing {{credit_hours}} credit hours from {{credit_provider}} for {{course_title}}. A charge will appear on your credit or debit card statement with a company name of "{{platform_name}}".
+                        {% endblocktrans %}
+                        {% endfilter %}
+                    </p>
+
+                    <p>
+                        {% filter force_escape %}{% blocktrans %}To receive your course credit, you must also request credit at the {{credit_provider}} website. For a link to request credit from {{credit_provider}}, or to see the status of your credit request, go to your {{platform_name}} dashboard.{% endblocktrans %}{% endfilter %}
+                    </p>
+
+                    <p>
+                        {% filter force_escape %}{% blocktrans %}To explore other credit-eligible courses, visit the {{platform_name}} website. We add new courses frequently!{% endblocktrans %}{% endfilter %}
+                    </p>
+
+                    <p>{% trans "Thank you. We hope you enjoyed your course!" as tmsg %}{{ tmsg | force_escape }}</p>
+                    <p>{% filter force_escape %}{% blocktrans %}The {{platform_name}} team{% endblocktrans %}{% endfilter %}</p>
+                </td>
+            </tr>
+
+            <tr>
+                <td class="cn-content-clear cn-footer" colspan="2"></td>
+            </tr>
+
+            <!-- Footer content -->
+            <tr class="cn-full-width">
+                <td class="cn-footer-content" colspan="2">
+                    <p>
+                        {% filter force_escape %}
+                        {% blocktrans with course_title=course_title platform_name=platform_name %}
+                            You received this message because you purchased credit hours for {{course_title}}, an {{platform_name}} course.
+                        {% endblocktrans %}
+                        {% endfilter %}
+                    </p>
+                </td>
+            </tr>
+
+            <!-- Empty base footer -->
+            {% block footer %}{% endblock footer %}
+        </table>
+    </tr>
+
+{% endblock body %}

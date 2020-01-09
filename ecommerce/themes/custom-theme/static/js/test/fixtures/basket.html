@@ -1,0 +1,77 @@
+<div id="line-price" class="amount row">
+    <span class="price">$123.45</span>
+</div>
+
+<div id="line-discount" class="amount row">
+  <span class="price">$56.78</span>
+</div>
+
+<div id="basket-total" class="row">
+    <span class="price">$9.10</span>
+</div>
+
+<div id="voucher-1" class="amount row">
+    <span class="voucher">$123.45</span>
+</div>
+
+<div id="voucher-2" class="amount row">
+  <span class="voucher">$56.78</span>
+</div>
+
+<div id="voucher-3" class="row">
+    <span class="voucher">$9.10</span>
+</div>
+
+<div aria-labelledby="order-details-region"></div>
+
+<div class="spinner">
+  <input class="quantity" id="input-quantity-field" min="1" max="10" name="form-0-quantity" type="number" value="1">
+
+  <div class="input-group-btn-vertical">
+    <button class="btn btn-primary" type="button">
+      <i class="fa fa-caret-up"></i>
+    </button>
+    <button class="btn btn-primary" type="button">
+      <i class="fa fa-caret-down"></i>
+    </button>
+  </div>
+</div>
+<button id="quantity-update" class="update-button quantity-update" type="submit" data-loading-text="Updating...">Update</button>
+<div id="error-msg"></div>
+
+<div id="voucher_form_container">
+  <input id="id_code">
+  <a id="voucher_form_cancel"></a>
+</div>
+
+<div id="voucher_form_link"><a href=""></a></div>
+
+<button id="card-cvn-help" aria-haspopup="true" aria-controls="cvvtooltip" aria-expanded="false">
+</button>
+<div id="cvvtooltip" style="display:none;">
+</div>
+
+<button type="submit"
+        class="apply_voucher"
+        data-track-type="click"
+        data-track-event="edx.bi.ecommerce.basket.voucher_applied"
+        data-voucher-code="ABCDEF">
+</button>
+
+<div class="payment-buttons">
+  <button data-track-type="click"
+          data-track-event="edx.bi.ecommerce.basket.payment_selected"
+          data-track-category="cybersource"
+          data-processor-name="cybersource"
+          class="btn btn-success payment-button"
+          value="cybersource"
+          id="cybersource">
+  </button>
+</div>
+<div>
+  <input type="number" id="card-number">
+  <img class="card-type-icon" src>
+  <p class="validation-error"></p>
+</div>
+
+<script type="text/javascript">var initModelData = {};</script>

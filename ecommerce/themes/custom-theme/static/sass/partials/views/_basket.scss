@@ -1,0 +1,705 @@
+.basket {
+    .alert {
+        position: relative;
+
+        .alertinner {
+            padding-left: 0;
+
+            p {
+                margin-bottom: 0;
+            }
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 50%;
+            right: 10px;
+
+            -webkit-transform: translateY(-50%);
+            -ms-transform: translateY(-50%);
+            transform: translateY(-50%);
+        }
+    }
+
+    .container {
+        padding: 25px 20px 30px 20px;
+
+        .alertinner p:last-child {
+            display: none;
+        }
+
+        #basket_totals,
+        .price {
+            @include float(right);
+        }
+
+        .basket-items {
+            margin-top: 20px;
+            border-bottom: 1px solid #ddd;
+
+            .certificate_type {
+                font-weight: bold;
+            }
+
+            .row {
+                padding-bottom: 30px;
+
+                .product-title,
+                .old-price,
+                .price {
+                    margin: 0;
+
+                    font-size: 20px;
+                    font-weight: bold;
+                }
+
+                .product-description {
+                    font-size: 14px;
+                }
+
+                .product-prices {
+                    @include text-align(right);
+                }
+
+                .checkout-quantity {
+                    .input-group {
+                        display: inline;
+                    }
+
+                    .quantity {
+                        display: inline-block;
+                        width: 35%;
+                        padding: 3px;
+                    }
+
+                    button.update-button {
+                        display: inline-block;
+                        vertical-align: top;
+                        margin-left: 5px;
+                        width: 40%;
+                    }
+                }
+
+                .product-image img {
+                    margin: 0 auto;
+                    width: 100%;
+                }
+
+                .benefit {
+                    display: inline-block;
+                    font-size: 20px;
+                }
+
+                .old-price,
+                .price {
+                    display: inline-block;
+                }
+
+                .old-price {
+                    color: gray;
+                    text-decoration: line-through;
+                }
+
+                .price {
+                    padding: 0 0 0 15px;
+                }
+
+                .remove-code {
+                    display: none;
+                }
+
+                .discount {
+                    display: inline-block;
+                    margin-right: 30px;
+                    & > div {
+                        margin-right: 10px;
+                    }
+                }
+            }
+
+            input[type=number]::-webkit-inner-spin-button,
+            input[type=number]::-webkit-outer-spin-button {
+                -webkit-appearance: none;
+                margin: 0;
+            }
+
+            .input-group-btn-vertical {
+                position: relative;
+                white-space: nowrap;
+                width: 30px;
+                vertical-align: middle;
+                display: table-cell;
+                @include float(left);
+
+                .btn {
+                    display: block;
+                    float: none;
+                    width: 100%;
+                    max-width: 100%;
+                    padding: 8px;
+                    margin-left: -1px;
+                    position: relative;
+                    border-radius: 0;
+                    &:first-child {
+                        border-top-right-radius: 4px;
+                    }
+                    &:last-child {
+                        margin-top: -2px;
+                        border-bottom-right-radius: 4px;
+                    }
+                }
+
+                i {
+                    position: absolute;
+                    top: 0;
+                    left: 10px;
+                }
+            }
+
+            .product-price-label {
+                font-weight: normal;
+                font-size: 0.84rem;
+                + span {
+                    display: inline-block;
+                    margin-top: 8px;
+                }
+            }
+        }
+
+        .total, #summary {
+            padding-top: 20px;
+            margin-bottom: 1.25rem;
+
+            p.offer, p.voucher {
+                @include float(left);
+
+                margin: 0 20px;
+                color: gray;
+            }
+
+            span {
+                padding: 0;
+            }
+
+            .remove-voucher {
+                border: none;
+                background: none;
+                padding: 0;
+                font-size: 14px;
+                color: red;
+            }
+
+            .use-voucher {
+                @include float(left);
+
+                p {
+                    margin-bottom: 0;
+                }
+
+                #id_code {
+                    border: 1px solid #c8c8c8;
+                    border-radius: 4px;
+                    padding: 4.5px 12px;
+                }
+            }
+
+            #basket_totals {
+                @include text-align(right);
+
+                color: #337ab7;
+                font-size: 18px;
+                font-weight: bold;
+            }
+
+            #voucher_form_container {
+                display: none;
+            }
+        }
+
+        .checkout-button {
+            @include float(right);
+        }
+
+        .basket-switch-link {
+            padding: 10px 10px 10px 0px;
+        }
+
+        .payment-buttons {
+            .payment-button {
+                border-color: #1E8142;
+                padding: spacing-vertical(small) spacing-horizontal(mid-large);
+                background: #1E8142;
+                color: #fcfcfc;
+                font-size: 18px;
+
+                &:hover,
+                &.is-hovered,
+                &:focus,
+                &.is-focused {
+                    border-color: #25B85A;
+                    background: #25B85A;
+                }
+            }
+
+            @supports (-webkit-appearance: -apple-pay-button) {
+                .apple-pay-button {
+                    display: inline-block;
+                    -webkit-appearance: -apple-pay-button;
+                }
+                .apple-pay-button-black {
+                    -apple-pay-button-style: black;
+                }
+                .apple-pay-button-white {
+                    -apple-pay-button-style: white;
+                }
+
+                .apple-pay-button-white-with-line {
+                    -apple-pay-button-style: white-outline;
+                }
+            }
+            @supports not (-webkit-appearance: -apple-pay-button) {
+                .apple-pay-button {
+                    display: inline-block;
+                    background-size: 100% 60%;
+                    background-repeat: no-repeat;
+                    background-position: 50% 50%;
+                    border-radius: 5px;
+                    padding: 0px;
+                    box-sizing: border-box;
+                    min-width: 200px;
+                    min-height: 32px;
+                    max-height: 64px;
+                }
+                .apple-pay-button-black {
+                    background-image: -webkit-named-image(apple-pay-logo-white);
+                    background-color: black;
+                }
+                .apple-pay-button-white {
+                    background-image: -webkit-named-image(apple-pay-logo-black);
+                    background-color: white;
+                }
+                .apple-pay-button-white-with-line {
+                    background-image: -webkit-named-image(apple-pay-logo-black);
+                    background-color: white;
+                    border: .5px solid black;
+                }
+            }
+        }
+
+        .verification-note {
+            margin-top: 20px;
+        }
+
+        .help {
+            margin-top: 20px;
+        }
+    }
+
+    .discounted {
+        color: green;
+    }
+
+    #apply-voucher-button,
+    #payment-button {
+        background: #065683;
+        color: white;
+
+        &:hover,
+        &.is-hovered,
+        &:focus,
+        &.is-focused {
+            border-color: #0075b4;
+            background: #0075b4;
+        }
+    }
+}
+
+.basket-client-side {
+    .title {
+        color: #337ab7;
+        font-size: 16px;
+        font-weight: bold;
+        text-transform: capitalize;
+    }
+
+    #payment-method-information {
+        padding-top: 0;
+    }
+
+    .placeholder {
+        padding: 20px 0;
+    }
+
+    .help-block {
+        margin-top: 0;
+        margin-bottom: 0;
+        min-height: 25px;
+        color: red;
+    }
+
+    #payment-processor {
+        $payment-button-width: 120px;
+
+        // Stripe payment request button
+        #payment-request-button {
+            display: inline-block;
+            width: $payment-button-width;
+        }
+
+        .payment-button {
+            border: 1px solid palette(grayscale, base);
+            border-radius: 5px;
+            background-position: center center;
+            background-repeat: no-repeat;
+            background-color: #fff;
+            width: $payment-button-width;
+            height: 50px;
+            vertical-align: top;
+
+            &.payment-processor-paypal {
+                background-image: url('/static/images/paypal_logo.png');
+
+                &:focus {
+                    outline: dotted 1px #000;
+                }
+            }
+
+            &.credit-card {
+                @include float(left);
+                border: 1px solid palette(grayscale, base);
+                border-radius: 5px;
+                height: 50px;
+                border-bottom: 4px solid #337ab7;
+                width: 150px;
+                line-height: 40px;
+                padding: 0;
+                // NOTE: We are assuming a layout of credit card, PayPal, Apple Pay.
+                // The Apple Pay button has a margin equaly to 1/10th the button's height,
+                // so we are replicating that margin here for the credit card button.
+                @include margin-right(5px);
+            }
+        }
+    }
+
+    #card-holder-information {
+        padding-top: 0;
+    }
+
+    .container {
+        #messages {
+            .alert-error {
+                color: #d2322d;
+            }
+
+            .alert-error {
+                background-color: #f2dede;
+                border-color: #ebccd1;
+                color: #a94442;
+            }
+        }
+
+        .payment-form {
+            .row {
+                margin: 0;
+            }
+
+            #payment-information {
+                border-left: 1px solid palette(grayscale, base);
+
+                h2 {
+                    padding-left: 15px;
+                }
+
+                .credit-card-list {
+                    padding-left: 15px;
+                    margin-top: -20px;
+                }
+
+                .form-input-elements {
+                    input, select {
+                        border: 1px solid $gray-color;
+                        border-radius: 0;
+                        color: $gray-color;
+                    }
+
+                    div:not(.payment-button) {
+                        margin: 0;
+
+                        label {
+                            color: $gray-color;
+                            font-weight: normal;
+                        }
+                    }
+
+                    .asteriskField {
+                        display: none;
+                    }
+
+                    #expiration-label {
+                        width: 100%;
+                        padding-left: 15px;
+                        text-align: left;
+                    }
+
+                    #payment-button {
+                        margin-top: 20px;
+                    }
+
+                    #card-cvn-help {
+                        border: none;
+                        padding: 0;
+                        background: white;
+                    }
+
+                    #cvvtooltip {
+                        top: 29px;
+                        left: 20%;
+                    }
+
+                    .fa-lock {
+                        position: relative;
+                        @include float(right);
+                        top: -25px;
+                        right: 10%;
+                        margin-right: -5%;
+                    }
+
+                    .card-type-icon {
+                        position: relative;
+                        @include float(right);
+                        top: -30px;
+                        right: 28%;
+                        margin-right: -15%;
+                    }
+                }
+            }
+        }
+
+        #summary {
+            padding-top: 0;
+
+            .row {
+                margin: 0;
+            }
+
+            .quantity-group {
+                padding-left: 0;
+
+                .max-quantity {
+                    font-size: 10px;
+                    color: #4a4a4a;
+                    font-weight: 600;
+                    margin: 0 0 0 85px;
+                    display: block;
+                }
+
+                #error-msg {
+                  font-size: 12px;
+                  color: red;
+                  margin: 5px 0 5px 85px;
+                }
+
+                .error-state {
+                  border-color: red;
+                }
+            }
+
+            .quantity-label {
+                display: inline-block;
+                padding-right: 10px;
+                vertical-align: top;
+                margin: 5px 0 0;
+            }
+
+            .checkout-quantity {
+                display: inline-block;
+            }
+
+            .spinner {
+                width: 80px;
+                float: left;
+                padding-right: 10px;
+            }
+
+            .quantity-update {
+                width: 80px;
+                float: left;
+            }
+
+            fieldset > legend {
+                padding-top: 20px;
+            }
+
+            .description {
+                @include float(left);
+            }
+
+            .price {
+                text-align: right;
+                padding-right: 20px;
+            }
+
+            .row {
+                padding-bottom: 20px;
+            }
+
+            .amount {
+                padding-bottom: 20px;
+                color: $gray-color;
+                font-size: 18px;
+            }
+
+            #basket-total {
+                font-size: 18px;
+                font-weight: bold;
+            }
+
+            #voucher-information {
+                .use-voucher {
+                    padding: 0;
+
+                    label {
+                        color: $gray-color;
+                        font-size: 16px;
+                        font-weight: normal;
+
+                        span {
+                            font-size: 14px;
+                        }
+                    }
+
+                    #id_code {
+                        width: 180px;
+                        border: 1px solid $gray-color;
+                    }
+
+                    > button {
+                        padding-left: 0;
+                        border: 0;
+                        background-color: white;
+                        color: #337ab7;
+                    }
+                }
+
+                .voucher {
+                    @include float(left);
+                    font-size: 14px;
+                    margin: 0 10px 0 0;
+                    line-height: 24px;
+                }
+            }
+
+            #voucher_form_container {
+                display: block;
+            }
+
+            .product {
+                padding: 0;
+
+                .product-image {
+                    padding-left: 0;
+
+                    img {
+                        width: 100%;
+                        max-width: 150px;
+                        max-height: 150px;
+                    }
+                }
+
+                .product-information {
+                    padding-left: 0;
+
+                    .product-name {
+                        margin-bottom: 0;
+                        font-weight: bold;
+                    }
+
+                    #seat-type {
+                        color: palette(grayscale, base);
+                    }
+                }
+            }
+
+            .remove-voucher {
+                color: #337ab7;
+            }
+
+            #order-details {
+                margin: 50px 0;
+            }
+
+            .price-disclaimer {
+                font-style: italic;
+            }
+        }
+    }
+}
+
+/* Small devices (tablets, 992px and lower) */
+@media (max-width: $screen-md-min - 1) {
+    .basket {
+        .container {
+            .basket-items {
+                .product-price-label {
+                    font-size: 20px;
+                    font-weight: bold;
+                    margin: 0px 20px 20px 0px;
+                }
+            }
+        }
+    }
+}
+
+/* extra Small devices (phones, 768px and lower) */
+@media (max-width: $screen-xs-max) {
+    .basket .container {
+        .payment-buttons {
+            .payment-button {
+                width: 100%;
+                margin-bottom: 2px;
+            }
+        }
+
+        .form-group {
+            margin-bottom: 0;
+            vertical-align: middle;
+            display: inline-block;
+        }
+
+        .product-prices {
+            margin-top: 30px;
+        }
+
+        .total p.voucher {
+            margin: 0;
+        }
+    }
+
+    .basket-client-side .container {
+        padding: 20px 0 0 0;
+
+        .row {
+            margin-left: 0;
+            margin-right: 0;
+        }
+
+        .form-group {
+            display: block;
+        }
+
+        .payment-form #payment-information {
+            padding-left: 0;
+            padding-right: 0;
+            border-left: none;
+        }
+
+        #summary .product {
+            .product-image {
+                img {
+                    max-width: 100%;
+                    max-height: 100%;
+                }
+            }
+        }
+    }
+}

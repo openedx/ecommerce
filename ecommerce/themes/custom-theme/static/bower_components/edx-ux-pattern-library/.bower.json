@@ -1,0 +1,35 @@
+{
+  "name": "edx-ux-pattern-library",
+  "authors": [
+    "edX UX Team <ux@edx.org>"
+  ],
+  "description": "Vendor components and packages used in the edX Pattern Library",
+  "main": "index.html",
+  "license": "GNU AFFERO GENERAL PUBLIC LICENSE",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components"
+  ],
+  "dependencies": {
+    "bourbon": "~4.2.3",
+    "susy": "~2.2.5",
+    "bi-app-sass": "*",
+    "breakpoint-sass": "~2.6.1",
+    "svg4everybody": "~1.0.0",
+    "requirejs-plugins": "~1.0.3"
+  },
+  "resolutions": {
+    "jquery": "~2.1.3"
+  },
+  "homepage": "https://github.com/edx/ux-pattern-library",
+  "_release": "82fa1c823b",
+  "_resolution": {
+    "type": "commit",
+    "commit": "82fa1c823bc322ba8b0742f0c546a89b0c69e952"
+  },
+  "_source": "https://github.com/edx/ux-pattern-library.git",
+  "_target": "82fa1c823bc322ba8b0742f0c546a89b0c69e952",
+  "_originalSource": "https://github.com/edx/ux-pattern-library.git"
+}

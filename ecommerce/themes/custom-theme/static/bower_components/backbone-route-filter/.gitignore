@@ -1,0 +1,7 @@
+.idea
+.grunt
+.DS_Store
+*.log
+*.iml
+node_modules
+coverage

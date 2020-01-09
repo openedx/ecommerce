@@ -1,0 +1,134 @@
+// Oscar - views - credit checkout dashboard page
+// ====================
+// Table of Contents
+// * +Dashboard - Course Item
+// * +Dashboard - Partner Item
+// * +Dashboard - Purchase Credit Buttons
+// ====================
+
+.credit-checkout {
+  padding-bottom: 30px;
+
+  .title {
+    color: $text-color;
+
+    span.course-title {
+      color: $brand-primary;
+    }
+  }
+
+  .advatanges-panel .course-image,
+  .provider-details .provider-image {
+    width: 200px;
+  }
+
+  .advatanges-panel,
+  .provider-details {
+    padding: 20px 0;
+
+    .radio-button {
+      padding-top: 30px;
+      cursor: pointer;
+
+      span {
+        display: block;
+      }
+    }
+
+    .provider {
+      border: 1px solid $gray-light;
+      border-radius: 5px;
+      margin-bottom: 10px;
+      padding: 5px;
+    }
+
+    .selected {
+      background: $gray-lighter;
+    }
+  }
+
+  .provider-details {
+    border-bottom: 1px solid $gray-light;
+
+    .show-instructions {
+      padding-left: initial;
+      margin-bottom: 5px;
+    }
+  }
+
+  .deadline-date {
+    margin-bottom: 20px;
+  }
+
+  .discount {
+    border-bottom: 1px solid $gray-color;
+  }
+
+  .total-price {
+    font-weight: bold;
+    color: $brand-primary;
+  }
+
+  .checkout-controls {
+    margin-top: 10px;
+
+    .payment-button {
+      background-color: $brand-success;
+      border-color: $brand-success;
+      margin-bottom: 15px;
+    }
+  }
+
+  div.advantages p {
+    color: $gray;
+  }
+
+  .payment-button {
+    width: 100%;
+    margin-bottom: 2px;
+  }
+}
+
+.advatanges-panel {
+  background-color: $gray-lighter;
+  .row {
+    .col-md-4 {
+      .advantages {
+        background-color: white;
+        padding: 10px 15px;
+        margin-bottom: 15px;
+      }
+    }
+  }
+}
+
+.course-details {
+  border-bottom: 1px solid $gray-light;
+}
+
+.cap-image {
+  max-width: 20px;
+  margin-bottom: 5px;
+}
+
+/* Small devices (tablets, 768px and up) */
+@media (min-width: $screen-sm-min) {
+  .credit-checkout {
+    .payment-button {
+      width: 49%;
+    }
+
+    .course-details {
+      border-bottom: none;
+    }
+  }
+}
+
+/* Medium devices (desktops, 992px and up) */
+@media (min-width: $screen-xs) {
+  .credit-checkout {
+    .payment-button {
+      width: auto;
+    }
+  }
+}

@@ -1,0 +1,89 @@
+{# Base template for edX-specific pages. #}
+
+{% load compress %}
+{% load core_extras %}
+{% load i18n %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang={{ LANGUAGE_CODE }}>
+<head>
+    <link rel="shortcut icon" href="{% static 'images/favicon.ico' %}"/>
+    <link rel="apple-touch-icon" href="{% static 'images/touch-icon.png' %}">
+    <link rel="apple-touch-icon" sizes="120x120" href="{% static 'images/touch-icon-2x.png' %}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{% static 'images/touch-icon-3x.png' %}">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{% endblock title %}</title>
+
+    {% compress css %}
+        {% if main_css %}
+            <link rel="stylesheet" href="{{ main_css }}" type="text/x-scss">
+        {% else %}
+            <link rel="stylesheet" href="{% static 'css/base/main.css' %}" type="text/x-scss">
+        {% endif %}
+    {% endcompress %}
+
+    {% compress css %}
+        {# This block is separated to better support browser caching. #}
+        {% block stylesheets %}
+        {% endblock %}
+    {% endcompress %}
+</head>
+<body>
+{% block skip_link %}
+{% endblock skip_link %}
+
+{% block navbar %}
+    {% include 'edx/partials/_staff_navbar.html' %}
+{% endblock navbar %}
+
+{% block info_message %}
+    {% include 'edx/partials/_info_message.html' %}
+{% endblock info_message %}
+
+{% block content %}
+{% endblock content %}
+
+{% block footer %}
+  {% include 'edx/footer.html' %}
+{% endblock footer %}
+
+{# Translation support for JavaScript strings. #}
+<script type="text/javascript" src="{% url 'javascript-catalog' %}"></script>
+
+<script type="text/javascript">
+    var initModelData = {{ analytics_data|safe }};
+</script>
+
+{% compress js %}
+    <script src="{% static 'bower_components/requirejs/require.js' %}"></script>
+    <script src="{% static 'js/config.js' %}"></script>
+
+     Note: django-compressor does not recognize the data-main attribute. Load the main script separately.
+    <script src="{% static 'js/common.js' %}"></script>
+{% endcompress %}
+
+{% if optimizely_snippet_src %}
+  <script src="{{ optimizely_snippet_src }}"></script>
+{% endif %}
+
+{% comment %}
+    TODO: Remove once this has a MFE, and asking the lms if there is a discount happens in it
+    This was added in order to have the basket page run javascript with context variables. Such javascript
+    cannot be compressed as the variables will change.
+{% endcomment %}
+{% block pre_app_js %}
+{% endblock %}
+
+{% compress js %}
+    {# Note: This block is purposely separated from the one above so that browsers cache the common JS instead of
+    downloading a single, large file for each page. #}
+    {% block javascript %}
+    {% endblock javascript %}
+{% endcompress %}
+
+{% block post_js %}
+{% endblock %}
+</body>
+</html>

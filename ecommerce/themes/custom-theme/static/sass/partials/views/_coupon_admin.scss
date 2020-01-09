@@ -1,0 +1,181 @@
+.coupon-create-edit-view {
+    .normal-font-weight {
+        font-weight: normal;
+    }
+
+    .benefit-addon {
+        width: $input-addon-width;
+    }
+
+    .invoice-discount-value,
+    .benefit-value {
+        width: $small-input-width;
+    }
+
+    .tax-deducted-source-value {
+        width: $input-addon-width + $small-input-width;
+    }
+
+    .hidden.help-block {
+        display: block !important; // !important to override hidden class
+    }
+
+    .help-block {
+        margin: 0;
+        height: 23px;
+    }
+
+    .catalog-type {
+        padding-top: 30px;
+        height: 61px;
+
+        label {
+            padding: 0 10px;
+        }
+    }
+
+    .catalog-query {
+        margin-bottom: 10px;
+
+        &.editing {
+            margin-bottom: 30px;
+        }
+
+        button {
+            margin-top: 10px;
+            margin-right: 10px;
+        }
+
+        textarea {
+            height: 140px;
+        }
+    }
+
+    .fields {
+        .form-group {
+            margin-bottom: 1.24rem;
+        }
+    }
+
+    .fields {
+        .course-seat-types {
+            margin-bottom: 55px;
+            height: 154px;
+
+            .form-inline label {
+                margin-bottom: 10px;
+                padding-right: 10px;
+            }
+        }
+
+        .credit-radio {
+            width: 100%;
+        }
+    }
+}
+
+@media(max-width: $screen-md-max) {
+    .invoice-type > div {
+        width: 100%;
+    }
+}
+
+.coupon-detail-view {
+    .coupon-information {
+        .heading {
+            padding-bottom: 50px;
+            color: gray;
+        }
+
+        .info-item {
+            .heading {
+                border-bottom: 1px solid #eeeeee;
+
+                padding-bottom: 5px;
+            }
+
+            .value {
+                padding-top: 10px;
+            }
+        }
+
+        .value {
+            color: black;
+            font-weight: bold;
+
+            span {
+                color: gray;
+
+                font-weight: normal;
+            }
+        }
+
+        .code-status {
+            &.active {
+                color: green;
+            }
+
+            @include padding-left(10px);
+        }
+
+        .grid-item {
+            @include float(left);
+
+            @include margin-right(2%);
+            margin-bottom: 50px;
+            width: 48%;
+            height: $coupon-grid-item-height;
+        }
+
+        .total-paid {
+            @include margin-right(50%);
+        }
+
+        .date-info.single-course {
+            margin-right: 50%;
+        }
+
+        .start-date-info,
+        .end-date-info {
+            @include float(left);
+            width: 50%;
+        }
+
+        #vouchersTable_wrapper {
+            margin-top: 50px;
+            margin-bottom: 50px;
+        }
+
+        .codes {
+            .heading {
+                margin-bottom: 10px;
+            }
+        }
+
+        .catalog-query {
+            height: auto;
+            min-height: $coupon-grid-item-height;
+        }
+    }
+}
+
+.catalog_buttons {
+    margin-bottom: 34px;
+}
+
+#catalogModal {
+    .modal-dialog {
+        margin-top: 100px;
+
+        width: 75%;
+    }
+
+    .modal-header {
+        border: none;
+
+        .modal-title {
+            text-align: center;
+            font-weight: 800;
+        }
+    }
+}

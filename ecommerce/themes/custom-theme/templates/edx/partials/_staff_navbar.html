@@ -1,0 +1,34 @@
+{% extends 'edx/partials/_base_navbar.html' %}
+{% load i18n %}
+{% load static %}
+
+{% block navbar_brand %}
+    {% if admin == "course" %}
+        <a class="navbar-brand" href="{% url 'courses:app' '' %}">
+            <img class="navbar-brand-logo" alt="{{ platform_name }} logo" src="{% static 'images/default-logo.png' %}"/>
+            <div class="navbar-brand-app">{% trans "E-Commerce Course Administration" as tmsg %}{{ tmsg | force_escape }}</div>
+        </a>
+    {% elif admin == "coupon" %}
+        <a class="navbar-brand" href="{% url 'coupons:app' '' %}">
+            <img class="navbar-brand-logo" alt="{{ platform_name }} logo" src="{% static 'images/default-logo.png' %}"/>
+            <div class="navbar-brand-app">{% trans "E-Commerce Coupon Administration" as tmsg %}{{ tmsg | force_escape }}</div>
+        </a>
+    {% elif admin == "program_offers" %}
+        <a class="navbar-brand" href="{% url 'programs:offers:list' %}">
+            <img class="navbar-brand-logo" alt="{{ platform_name }} logo" src="{% static 'images/default-logo.png' %}"/>
+            <div class="navbar-brand-app">{% trans "E-Commerce Program Offers Administration" as tmsg %}{{ tmsg | force_escape }}</div>
+        </a>
+    {% else %}
+        <h1 class="navbar-brand">
+            <img class="navbar-brand-logo" alt="{{ platform_name }} logo" src="{% static 'images/default-logo.png' %}"/>
+        </h1>
+    {% endif %}
+{% endblock navbar_brand %}
+
+{% block dropdown_menu %}
+  {% include "courses/menu_options.html" %}
+{% endblock dropdown_menu %}
+
+{% block small_dropdown_menu %}
+  {% include "courses/menu_options.html" with additional_class="visible-xs" %}
+{% endblock small_dropdown_menu %}

@@ -1,0 +1,61 @@
+{% load i18n %}
+{% load django_tables2 %}
+
+<p>
+{% with name=product.title parent_name=product.parent.title %}
+    {% if product.is_child %}
+
+        {% if creating %}
+            {% if product.title %}
+                {% filter force_escape %}
+                    {% blocktrans %}
+                        Created product variant '{{ name }}'.
+                    {% endblocktrans %}
+                {% endfilter %}
+            {% else %}
+                {% filter force_escape %}
+                    {% blocktrans %}
+                        Created variant of '{{ parent_name }}'.
+                    {% endblocktrans %}
+                {% endfilter %}
+            {% endif %}
+        {% else %}
+            {% if product.title %}
+                {% filter force_escape %}
+                    {% blocktrans %}
+                        Updated product variant '{{ name }}'.
+                    {% endblocktrans %}
+                {% endfilter %}
+            {% else %}
+                {% filter force_escape %}
+                    {% blocktrans %}
+                        Updated a variant of '{{ parent_name }}'.
+                    {% endblocktrans %}
+                {% endfilter %}
+            {% endif %}
+        {% endif %}
+
+    {% else %}
+
+        {% if creating %}
+            {% filter force_escape %}
+                {% blocktrans %}
+                    Created product '{{ name }}'.
+                {% endblocktrans %}
+            {% endfilter %}
+        {% else %}
+            {% filter force_escape %}
+                {% blocktrans %}
+                    Updated product '{{ name }}'.
+                {% endblocktrans %}
+            {% endfilter %}
+        {% endif %}
+
+    {% endif %}
+{% endwith %}
+
+</p>
+
+<p>
+    <a href="{% url 'dashboard:catalogue-product' pk=product.pk %}{% querystring %}" class="btn btn-success">{% trans "Edit again" as tmsg %}{{ tmsg | force_escape }}</a>
+</p>

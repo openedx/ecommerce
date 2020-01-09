@@ -1,0 +1,81 @@
+i.fa {
+  margin-right: 8px;
+}
+
+#error-message .container {
+  padding-top: $container-padding-top;
+  padding-bottom: spacing-vertical(small);
+}
+
+.message-error-content {
+  border-top: 4px solid #B20610;
+
+  h3 {
+    margin-bottom: 10px;
+    font-weight: bold;
+  }
+}
+
+#info-message {
+  background-color: #0075b4;
+
+  .container {
+    background: none;
+    color: white;
+
+    h3 {
+      margin-bottom: 0;
+      font-weight: bold;
+      color: white;
+    }
+
+    i.fa-info-circle {
+      font-size: 2.5em;
+      float: left;
+      padding-top: 20px;
+    }
+  }
+}
+
+.message-info-content {
+  margin-left: 40px;
+}
+
+.account-activation-message {
+
+  .enrollment-message-container {
+    margin-bottom: 30px;
+  }
+
+  h2 {
+    font-size: 1rem;
+    font-weight: bold;
+  }
+  .course-title {
+    display: block;
+    font-weight: 100;
+    font-size: 24px;
+  }
+
+  .instruction {
+    padding-bottom: 3em;
+  }
+
+  .instruction-info {
+    font-size: 24px;
+    font-weight: 100;
+    color: #57595a;
+    margin-bottom: 30px;
+  }
+  .fa.fa-envelope-o {
+    color: #b92167;
+    font-size: 26px;
+    margin-right: 8px;
+  }
+
+  .activate {
+    font-size: 1rem;
+    font-weight: bold;
+    margin: 0;
+  }
+}

@@ -1,0 +1,38 @@
+Backbone JS Widgets
+-------------------
+
+>> What is it?
+Simple jQuery plugins that use Backbone JS.
+
+
+Autocomplete Widget
+-------------------
+Turns a simple input into a useful auto-complete. Provide the Backbone collection and let the plugin do the rest.
+Constructs a UL on the fly and positions it right below the input. Your user can navigate with arrow keys or use the mouse.
+
+Demo here: http://www.planbox.com/blog/news/updates/jquery-autocomplete-plugin-for-backbone-js.html
+
+Example:
+$(document).ready(function() {
+	var collection = new Backbone.Collection([
+		{id:"AB", name:"Alberta"},
+		{id:"BC", name:"British Columbia"},
+		{id:"MB", name:"Manitoba"},
+		// ...
+		{id:"AP", name:"Armed Forces Pacific"}
+	]);
+
+	$('#states_provinces').autocomplete({
+		collection: collection,
+		attr: 'name',
+		noCase: true,
+		ul_class: 'autocomplete shadow',
+		ul_css: {'z-index':1234}
+	});
+});
+
+
+Resources
+---------
+Backbone JS: https://github.com/documentcloud/backbone
+jQuery Plugins/Authoring: http://docs.jquery.com/Plugins/Authoring

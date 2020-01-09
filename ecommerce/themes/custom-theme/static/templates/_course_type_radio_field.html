@@ -1,0 +1,12 @@
+<div class="radio <% if(disabled) { %> disabled <% } %>" <% if(disabled) { %>aria-disabled="true" <% } %> >
+    <label>
+        <input type="radio" name="type" id="courseType<%= type %>" value="<%= type %>"
+               aria-describedby="courseType<%= type %>HelpBlock"
+               <% if(disabled) { print('disabled="disabled"'); } %>
+               <% if(checked) { print('checked'); } %>>
+        <div class="course-type-display-name"><%= displayName %></div>
+        <span id="courseType<%= type %>HelpBlock" class="help-block">
+            <%= helpText %>
+        </span>
+    </label>
+</div>

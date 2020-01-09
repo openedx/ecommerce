@@ -1,0 +1,39 @@
+// utilities
+// --------------------
+@import 'utilities/developer';    // developer-friendly file: add rough/WIP styling that needs UI triage
+@import 'utilities/variables';
+@import 'utilities/mixins';
+
+// vendor
+// --------------------
+@import '../../bower_components/bootstrap-sass/assets/stylesheets/bootstrap';
+@import '../../bower_components/bootstrapaccessibilityplugin/plugins/css/bootstrap-accessibility';
+@import '../../bower_components/datatables/media/css/dataTables.bootstrap';
+@import '../../bower_components/fontawesome/scss/font-awesome';
+@import '../../vendor/dataTables/dataTables.fontAwesome';
+
+// pattern library
+// --------------------
+@import '_pattern_library';
+
+// base overrides
+// --------------------
+@import 'base';
+
+// components
+// --------------------
+@import 'components/buttons';
+@import 'components/navbar';
+@import 'components/footer';
+
+// views
+// --------------------
+@import 'views/basket';
+@import 'views/credit';
+@import 'views/course_admin';
+@import 'views/coupon_admin';
+@import 'views/coupon_offer';
+@import 'views/error';
+@import 'views/receipt';
+
+@import "default";

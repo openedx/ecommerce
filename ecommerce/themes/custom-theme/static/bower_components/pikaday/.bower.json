@@ -1,0 +1,45 @@
+{
+  "name": "pikaday-time",
+  "description": "Time support added to pikaday",
+  "keywords": [
+    "datepicker",
+    "calendar",
+    "date",
+    "time",
+    "datetime"
+  ],
+  "main": [
+    "./pikaday.js",
+    "./css/pikaday.css"
+  ],
+  "dependencies": {},
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "components",
+    "examples",
+    "css/site.css",
+    "component.json",
+    "index.html",
+    "package.json"
+  ],
+  "license": [
+    "BSD",
+    "MIT"
+  ],
+  "homepage": "https://github.com/owenmead/Pikaday",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/owenmead/Pikaday.git"
+  },
+  "version": "1.4.0",
+  "_release": "1.4.0",
+  "_resolution": {
+    "type": "version",
+    "tag": "1.4.0",
+    "commit": "b1f8d0796a3664f0e2402805a6ec534e96a740c1"
+  },
+  "_source": "https://github.com/owenmead/Pikaday.git",
+  "_target": "1.4.0",
+  "_originalSource": "https://github.com/owenmead/Pikaday.git"
+}

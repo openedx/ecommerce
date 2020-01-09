@@ -1,0 +1,18 @@
+{% load i18n %}
+{% trans "Payment confirmation for: " %}{{course_title}}
+
+{% blocktrans %}Dear {{full_name}},{% endblocktrans %}
+
+{% blocktrans with credit_hours=credit_hours credit_provider=credit_provider course_title=course_title platform_name=platform_name %}Thank you for purchasing {{credit_hours}} credit hours from {{credit_provider}} for {{course_title}}. A charge will appear on your credit or debit card statement with a company name of "{{platform_name}}".{% endblocktrans %}
+
+{% blocktrans %}To receive your course credit, you must also request credit at the {{credit_provider}} website. For a link to request credit from {{credit_provider}}, or to see the status of your credit request, go to your {{platform_name}} dashboard.{% endblocktrans %}
+
+{% blocktrans %}To explore other credit-eligible courses, visit the {{platform_name}} website. We add new courses frequently!{% endblocktrans %}
+
+{% trans "To view your payment information, visit the following website." %}
+{{receipt_page_url}}
+
+{% trans "Thank you. We hope you enjoyed your course!" %}
+{% blocktrans %}The {{platform_name}} team{% endblocktrans %}
+
+{% blocktrans with course_title=course_title platform_name=platform_name %}You received this message because you purchased credit hours for {{course_title}}, an {{platform_name}} course.{% endblocktrans %}

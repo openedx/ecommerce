@@ -1,0 +1,38 @@
+<div class="row">
+    <div class="col-sm-12">
+        <div class="seat-type"><%= creditSeats[0].getSeatTypeDisplayName() %></div>
+    </div>
+
+    <div class="col-sm-4 col-sm-offset-4 seat-certificate-type">
+        <%= creditSeats[0].getCertificateDisplayName() %>
+    </div>
+
+    <div class="col-md-8">
+        <table class="table table-striped credit-seats">
+            <thead>
+                <tr>
+                    <th><%= gettext('Credit Provider') %></th>
+                    <th><%= gettext('Price (USD)') %></th>
+                    <th><%= gettext('Credit Hours') %></th>
+                    <th><%= gettext('Upgrade Deadline') %></th>
+                </tr>
+            </thead>
+            <tbody>
+                <% _.each(creditSeats, function (seat) { %>
+                    <tr class="course-seat">
+                        <td class="seat-credit-provider"><%= seat.get('credit_provider_display_name') %></td>
+                        <td class="seat-price"><%= '$' +  Number(seat.get('price')).toLocaleString() %></td>
+                        <td class="seat-credit-hours"><%= seat.get('credit_hours') %></td>
+                        <td class="seat-expires"><% var expires = seat.get('expires');
+                            if (expires) {
+                                print(moment.utc(expires).format('lll z'));
+                            }
+                        %></td>
+                    </tr>
+                <% }); %>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="col-sm-4 seat-additional-info"></div>
+</div>

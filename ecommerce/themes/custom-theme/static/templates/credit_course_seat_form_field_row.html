@@ -1,0 +1,43 @@
+<td class="credit-provider">
+    <div class="input-group">
+        <div class="input-group-addon">
+            <i class="fa fa-building-o" aria-hidden="true"></i>
+        </div>
+        <select class="form-control" id="credit_provider" name="credit_provider"
+                aria-labelledby="credit-provider-label">
+        </select>
+    </div>
+</td>
+<td class="price">
+    <div class="input-group">
+        <div class="input-group-addon">$</div>
+        <input type="number" class="form-control" id="price" name="price" aria-labelledby="price-label"
+            min="5" step="1" pattern="\d+" value="<%= price %>">
+    </div>
+</td>
+<td class="credit-hours">
+    <div class="input-group">
+        <div class="input-group-addon">
+            <i class="fa fa-clock-o" aria-hidden="true"></i>
+        </div>
+        <input type="number" class="form-control" id="credit_hours" name="credit_hours"
+            aria-labelledby="credit-hours-label" min="0" step="1" pattern="\d+">
+    </div>
+</td>
+<td class="expires">
+    <div class="input-group">
+        <div class="input-group-addon">
+            <i class="fa fa-calendar" aria-hidden="true"></i>
+        </div>
+        <input class="form-control add-pikaday" id="expires" name="expires"
+            aria-labelledby="expires-label">
+    </div>
+</td>
+<% if (isRemovable) { %>
+<td>
+    <button class="remove-seat btn btn-danger">
+        <span class="sr"><%= gettext('Delete course seat') %></span>
+        <i class="fa fa-trash" aria-hidden="true"></i>
+    </button>
+</td>
+<% } %>

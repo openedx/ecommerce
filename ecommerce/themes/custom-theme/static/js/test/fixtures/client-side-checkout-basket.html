@@ -1,0 +1,68 @@
+<div id="messages"></div>
+
+<div id="paymentForm" class="payment-form">
+  <button id="applePayBtn" lang="en" style="display:none"
+          data-track-type="click"
+          data-track-event="edx.bi.ecommerce.basket.payment_selected"
+          data-track-category="checkout"
+          class="payment-button apple-pay-button-with-text apple-pay-button-black-with-text apple-pay-button-with-text"
+          title="Pay with Apple Pay" type="button">
+    <span class="text"></span>
+    <span class="logo"></span>
+  </button>
+  <fieldset>
+    <input type="hidden" name="sdn-check" value="enabled">
+    <div class="form-item">
+      <div><input name="first_name"></div>
+      <p class="help-block"></p></div>
+    <div class="form-item">
+      <div><input name="last_name"></div>
+      <p class="help-block"></p></div>
+    <div class="form-item">
+      <div><input name="address_line1"></div>
+      <p class="help-block"></p></div>
+    <div class="form-item">
+      <div><input name="city"></div>
+      <p class="help-block"></p></div>
+    <div class="form-item">
+      <div>
+        <select name="country">
+          <option value="">Choose country</option>
+          <option value="US">United States</option>
+          <option value="DS">Death Star</option>
+        </select>
+      </div>
+      <p class="help-block"></p>
+    </div>
+    <div class="form-item">
+      <div>
+        <select name="state">
+          <option value="">Choose state</option>
+          <option value="NY">New York</option>
+        </select>
+      </div>
+      <p class="help-block"></p>
+    </div>
+  </fieldset>
+  <div><input id="card-number">
+    <p class="help-block"></p>
+  </div>
+  <div>
+    <input id="card-cvn">
+    <p class="help-block"></p>
+  </div>
+  <div>
+    <select id="card-expiry-month">
+      <option value="99">99</option>
+    </select>
+    <p class="help-block"></p>
+  </div>
+  <div>
+    <select id="card-expiry-year">
+      <option value="2015">2015</option>
+    </select>
+    <p class="help-block"></p>
+  </div>
+
+  <button id="payment-button">Pay</button>
+</div>

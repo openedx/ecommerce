@@ -1,0 +1,14 @@
+{
+  "name": "bi-app-sass",
+  "version": "1.1.0",
+  "homepage": "https://github.com/anasnakawa/bi-app-sass",
+  "_release": "1.1.0",
+  "_resolution": {
+    "type": "version",
+    "tag": "1.1.0",
+    "commit": "2532812516ed5611b3791401df2ae2e92dc7114a"
+  },
+  "_source": "https://github.com/anasnakawa/bi-app-sass.git",
+  "_target": "*",
+  "_originalSource": "bi-app-sass"
+}

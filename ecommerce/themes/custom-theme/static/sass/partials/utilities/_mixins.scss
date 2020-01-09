@@ -1,0 +1,49 @@
+// Sets the logo background and scales it to a given height.
+@mixin brand-logo($width, $height, $scaled-height:"") {
+  display: inline-block;
+
+  @if $scaled-height != "" {
+    $scale: $scaled-height / $height;
+    $width: $width * $scale;
+    $height: $scaled-height;
+  }
+  width: $width;
+  height: $height;
+  margin-right: 10px;
+}
+
+// Vertically center an element
+@mixin center-vertically {
+  position: relative;
+  top: 50%;
+  -webkit-transform: translateY(-50%);
+  -ms-transform: translateY(-50%);
+  transform: translateY(-50%);
+  vertical-align: middle;
+}
+
+// Truncate overflow text with ellipses in multi-line format
+@mixin multiline-ellipsis($lineHeight: 1.2em, $lineCount: 1){
+  overflow: hidden;
+  width: 100%;
+  position: relative;
+  line-height: $lineHeight;
+  max-height: $lineHeight * $lineCount;
+  margin-right: -1em;
+  padding-right: 1em;
+  &:before {
+    content: '...';
+    position: absolute;
+    right: 0;
+    bottom: 0;
+  }
+  &:after {
+    content: '';
+    position: absolute;
+    right: 0;
+    width: 1em;
+    height: 1em;
+    margin-top: 0.2em;
+    background: white;
+  }
+}

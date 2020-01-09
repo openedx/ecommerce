@@ -1,0 +1,13 @@
+<div class="col-sm-12">
+    <div class="seat-type"><%= gettext('Honor') %></div>
+</div>
+<div class="col-sm-4">
+    <span class="price-label"><%= gettext('Price (in USD)') %>:</span> <span class="seat-price">$0.00</span>
+    <input type="hidden" name="price" value="0">
+    <input type="hidden" name="certificate_type" value="honor">
+    <input type="hidden" name="id_verification_required" value="false">
+</div>
+<div class="col-sm-4 seat-certificate-type">
+    <%= gettext('Honor Certificate') %>
+</div>
+<div class="col-sm-4 seat-additional-info"></div>

@@ -1,0 +1,16 @@
+{% extends 'edx/partials/_base_navbar.html' %}
+{% load static %}
+
+{% block navbar_brand %}
+    <h1 class="navbar-brand">
+        <img class="navbar-brand-logo" alt="{{ platform_name }} logo" src="{% static 'images/default-logo.png' %}"/>
+    </h1>
+{% endblock navbar_brand %}
+
+{% block dropdown_menu %}
+  {% include "edx/base_menu.html" %}
+{% endblock dropdown_menu %}
+
+{% block small_dropdown_menu %}
+  {% include "edx/base_menu.html" with additional_class="visible-xs" %}
+{% endblock small_dropdown_menu %}

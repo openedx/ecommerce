@@ -1,0 +1,16 @@
+{% load i18n %}
+
+{% if refund.can_approve %}
+<button type="button" class="btn btn-success" data-refund-id="{{ refund.id }}" data-decision="approve" data-action="process-refund">
+    {% trans "Approve Credit and Revoke" as tmsg %}{{ tmsg | force_escape }}
+</button>
+<button type="button" class="btn btn-info" data-refund-id="{{ refund.id }}" data-decision="approve_payment_only" data-action="process-refund">
+    {% trans "Approve Credit Only" as tmsg %}{{ tmsg | force_escape }}
+</button>
+{% endif %}
+
+{% if refund.can_deny %}
+<button type="button" class="btn btn-danger" data-refund-id="{{ refund.id }}" data-decision="deny" data-action="process-refund">
+    {% trans "Deny" as tmsg %}{{ tmsg | force_escape }}
+</button>
+{% endif %}

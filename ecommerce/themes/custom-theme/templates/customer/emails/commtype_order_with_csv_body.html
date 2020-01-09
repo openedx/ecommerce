@@ -1,0 +1,78 @@
+{% extends 'customer/email_base.html' %}
+{% load i18n %}
+{% load django_markup %}
+{% block body %}
+
+    <tr>
+        <table class="cn-body">
+            <!-- Message header -->
+            <tr align="left" class="cn-img-wrapper">
+                <td colspan="2" align="left" class="cn-img-wrapper cn-full-width" style="font-size: 20px; vertical-align: middle; padding-left: 2px; color: #127eb1;">
+                    <img src="http://gallery.mailchimp.com/1822a33c054dc20e223ca40e2/images/logo_web_edx_studio01aad778f34f.png"
+                        height="30" alt="{{partner_name}} Logo" border="0" hspace="0" vspace="0"
+                        class="platform-img">
+                    {% trans "For Business" as tmsg %}{{ tmsg | force_escape }}
+                </td>
+            </tr>
+
+            <tr>
+                <td class="cn-content-clear" colspan="2"></td>
+            </tr>
+
+            <!-- Message Body -->
+            <tr class="cn-content cn-full-width">
+                <td colspan="2" class="cn-content-msg">
+                    <p>{% filter force_escape %}{% blocktrans %}Dear {{full_name}},{% endblocktrans %}{% endfilter %}</p>
+                    <p>{% filter force_escape %}{% blocktrans %}Thank you for purchasing access to {{course_name}}. Let's get your group ready to learn with edX:{% endblocktrans %}{% endfilter %}</p>
+                    <ol>
+                        <li>
+                            {% blocktrans asvar tmsg %}
+                                Download and save the {link_start}{download_csv_link}{link_middle} enrollment code file.{link_end}
+                            {% endblocktrans %}
+                            {% interpolate_html tmsg link_start='<a href="'|safe link_middle='">'|safe link_end='</a>'|safe download_csv_link=download_csv_link|safe %}
+                        </li>
+                        <li>{% trans "Distribute one code per learner before the expiration date." as tmsg %}{{ tmsg | force_escape }}</li>
+                        <li>{% trans "Pro tip: Track which code is associated with which person." as tmsg %}{{ tmsg | force_escape }}</li>
+                        <li>{% trans "Learners sign-in/register with edX and enroll for the course." as tmsg %}{{ tmsg | force_escape }}</li>
+                    </ol>
+                    <p>
+                        {% blocktrans asvar tmsg %}
+                            To view your payment information, log in to see your Order History, under {link_start}{order_history_url}{link_middle}Account Settings{link_end}.
+                        {% endblocktrans %}
+                        {% interpolate_html tmsg link_start='<a href="'|safe link_middle='">'|safe link_end='</a>'|safe order_history_url=order_history_url|safe %}
+                    </p>
+                    <p>
+                        {% blocktrans asvar tmsg %}
+                            For more information and assistance, check our {link_start}Help Center{link_end}
+                        {% endblocktrans %}
+                        {% interpolate_html tmsg link_start='<a href="https://support.edx.org/hc">'|safe link_end='</a>'|safe %}
+                    </p>
+                    <p>{% trans "Thank You" as tmsg %}{{ tmsg | force_escape }}</p>
+                </td>
+            </tr>
+
+            <tr>
+                <td class="cn-content-clear cn-footer" colspan="2"></td>
+            </tr>
+
+            <!-- Footer content -->
+            <tr class="cn-full-width">
+                <td class="cn-footer-content" colspan="2">
+                    <p>{% trans "By purchasing, you and your organization agree to the following terms:" as tmsg %}{{ tmsg | force_escape }}</p>
+                    <ul>
+                        <li>{% trans "Each code is valid for the one course covered and can be used only one time." as tmsg %}{{ tmsg | force_escape }}</li>
+                        <li>{% trans "You are responsible for distributing codes to your learners." as tmsg %}{{ tmsg | force_escape }}</li>
+                        <li>{% trans "Each code will expire in one year from date of purchase or, if earlier, once the course is closed." as tmsg %}{{ tmsg | force_escape }}</li>
+                        <li>{% trans "If a course is not designated as self-paced, you should confirm that a course run is available before expiration." as tmsg %}{{ tmsg | force_escape }}</li>
+                        <li>{% trans "You may not resell codes to third parties." as tmsg %}{{ tmsg | force_escape }}</li>
+                        <li>{% trans "All sales final. No refunds." as tmsg %}{{ tmsg | force_escape }}</li>
+                    </ul>
+                </td>
+            </tr>
+
+            <!-- Empty base footer -->
+            {% block footer %}{% endblock footer %}
+        </table>
+    </tr>
+
+{% endblock body %}

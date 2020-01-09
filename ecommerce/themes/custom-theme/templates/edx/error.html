@@ -1,0 +1,20 @@
+{% extends 'edx/base.html' %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}{% endblock %}
+
+{% block navbar %}
+    {% include 'edx/partials/_student_navbar.html' %}
+{% endblock navbar %}
+
+{% block content %}
+    <div id="error-message">
+        <div class="container">
+            <div class="depth depth-2 message-error-content">
+                <h3>{{ error }}</h3>
+                {% trans "If you need assistance, contact edX support." as tmsg %}{{ tmsg | force_escape }}
+            </div>
+        </div>
+    </div>
+{% endblock %}
