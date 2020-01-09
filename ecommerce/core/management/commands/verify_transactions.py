@@ -86,18 +86,20 @@ class Command(BaseCommand):
         parser.add_argument(
             '--support',
             action='store_true',
-            help='Support for mismatched orders'
+            help='Mismatched orders to go to Support'
         )
 
     def handle(self, *args, **options):
         logger.info("Verify transactions with options: %r", options)
+
         self.ERRORS_DICT = {}
         self.PAID_EVENT_TYPE = PaymentEventType.objects.get(name=PaymentEventTypeName.PAID)
         self.REFUNDED_EVENT_TYPE = PaymentEventType.objects.get(name=PaymentEventTypeName.REFUNDED)
 
+        support = options['support']
         start_delta = options['start_delta']
         end_delta = options['end_delta']
-        support = options['support']
+        threshold = max(options['threshold'], 0)
 
         start = datetime.datetime.now(pytz.utc) - datetime.timedelta(minutes=start_delta)
         end = datetime.datetime.now(pytz.utc) - datetime.timedelta(minutes=end_delta)
@@ -113,29 +115,69 @@ class Command(BaseCommand):
             logger.info("No orders, DONE")
             return
 
-        for order in orders:
-            self.validate_order(order)
+        if support:
+            self.handle_support(orders)
+        else:
+            self.handle_alert(orders, threshold)
 
+    def process_errors(self, orders):
         # FIXME: it is possible for an order to have more than one error, so this really should
         # count "unique orders with errors", not number of errors
         error_count = sum([len(v["errors"]) for v in self.ERRORS_DICT.values()])
         exit_errors = json.dumps(self.ERRORS_DICT)
         error_rate = float(error_count) / orders.count()
 
-        threshold = max(options['threshold'], 0)
+        logger.info("Summary: %d errors, %.1f %%", error_count, error_rate * 100.0)
+
+        return error_count, exit_errors, error_rate
+
+    def handle_alert(self, orders, threshold):
+        for order in orders:
+            self.validate_order(order)
+
+        error_count, exit_errors, error_rate = self.process_errors(orders)
+
         if threshold == 0 or threshold >= 1:
             threshold = int(threshold)
             flunk = error_count > threshold
         else:
             flunk = error_rate > threshold
 
-        logger.info("Summary: %d errors, %.1f %%", error_count, error_rate * 100.0)
-
         if flunk:
             raise CommandError("Errors in transactions: {errors}".format(errors=exit_errors))
         if self.ERRORS_DICT:
             logger.warning("Errors in transactions within threshold (%r): %s", threshold, exit_errors)
 
+    def handle_support(self, orders):
+        for order in orders:
+            all_payment_events = order.payment_events
+            payments = all_payment_events.filter(event_type=self.PAID_EVENT_TYPE)
+
+            # If the payment total and the order total do not match, flag for review.
+            if payments.aggregate(total=Sum('amount')).get('total') != order.total_incl_tax:
+                mismatch_total = float(payments.aggregate(total=Sum('amount')).get('total') - order.total_incl_tax)
+                # FIXME: validate_order should be changed to log _all_ errors related to an order
+                # If payment amount > order amount, a refund is required from Support
+                if mismatch_total > 0:
+                    error_dict = {
+                        "order_number": order.number,
+                        "order_id": order.id,
+                        "order_amount": float(order.total_incl_tax),
+                        # Assuming just one payment since we do not support multi-payment
+                        "payment_id": payments[0].id,
+                        "payment_amount": float(payments[0].amount),
+                        "user_email": order.guest_email,
+                        "refund_amount": mismatch_total
+                    }
+                    self.add_error(
+                        "orders_mismatched_totals_support",
+                        "There was a mismatch in the totals in the following order that require a refund",
+                        error_dict=error_dict,
+                    )
+
+        error_count, exit_errors, error_rate = self.process_errors(orders)
+        if error_count and error_rate > 0:
+            raise CommandError("Errors in transactions: {errors}".format(errors=exit_errors))
 
     def validate_order(self, order):
         all_payment_events = order.payment_events
@@ -181,12 +223,15 @@ class Command(BaseCommand):
                 refunds
             )
 
-    def add_error(self, tag, msg, order, payments=None):
+    def add_error(self, tag, msg, order=None, payments=None, error_dict=None):
         if tag not in self.ERRORS_DICT:
             self.ERRORS_DICT[tag] = {"message": msg, "errors": []}
-        self.ERRORS_DICT[tag]["errors"].append(self.error_dict(order, payments))
+        if error_dict:
+            self.ERRORS_DICT[tag]["errors"].append(error_dict)
+        else:
+            self.ERRORS_DICT[tag]["errors"].append(self.create_error_dict(order, payments))
 
-    def error_dict(self, order, payments=None):
+    def create_error_dict(self, order, payments=None):
         d = {}
         d["order"] = {
             "order_id": order.id,

@@ -5,6 +5,7 @@ from __future__ import absolute_import
 
 import datetime
 
+import ddt
 import pytz
 import six
 from django.core.management import call_command
@@ -22,6 +23,7 @@ PaymentEventTypeName = get_class('order.constants', 'PaymentEventTypeName')
 ProductClass = get_model('catalogue', 'ProductClass')
 
 
+@ddt.ddt
 class VerifyTransactionsTest(TestCase):
 
     def setUp(self):
@@ -194,10 +196,11 @@ class VerifyTransactionsTest(TestCase):
         self.assertIn(str(payment2.id), exception)
         self.assertIn(str(payment3.id), exception)
 
-    def test_totals_mismatch(self):
-        """ Verify errors thrown when payment and order totals don't match."""
+    @ddt.data(80, 100)
+    def test_totals_mismatch(self, amount):
+        """ Verify errors thrown when payment and order totals don't match """
         payment = PaymentEventFactory(order=self.order,
-                                      amount=100,
+                                      amount=amount,
                                       event_type_id=self.payevent.id,
                                       date_created=self.timestamp)
         payment.save()
@@ -208,7 +211,27 @@ class VerifyTransactionsTest(TestCase):
         self.assertIn(str(self.order.id), exception)
         self.assertIn(str(payment.id), exception)
         self.assertIn('"amount": 90.0', exception)
-        self.assertIn('"amount": 100.0', exception)
+        self.assertIn('"amount": {}'.format(amount), exception)
+
+    def test_totals_mismatch_support(self):
+        """ Verify errors thrown when payment amount is greater
+        than order amount and a refund is required from Support """
+        payment = PaymentEventFactory(order=self.order,
+                                      amount=100,
+                                      event_type_id=self.payevent.id,
+                                      date_created=self.timestamp)
+        payment.save()
+        with self.assertRaises(CommandError) as cm:
+            call_command('verify_transactions', '--support')
+        exception = six.text_type(cm.exception)
+        self.assertTrue(payment.amount != self.order.total_incl_tax)
+        self.assertIn("There was a mismatch in the totals in the following order that require a refund", exception)
+        self.assertIn("orders_mismatched_totals_support", exception)
+        self.assertIn(str(self.order.id), exception)
+        self.assertIn(str(payment.id), exception)
+        self.assertIn('"order_amount": 90.0', exception)
+        self.assertIn('"payment_amount": 100.0', exception)
+        self.assertIn('"refund_amount": 10.0', exception)
 
     def test_refund_exceeded(self):
         """Test verify_transactions with refund which exceed amount paid."""
