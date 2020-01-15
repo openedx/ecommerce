@@ -5,6 +5,7 @@ from __future__ import absolute_import
 
 import datetime
 
+import ddt
 import pytz
 import six
 from django.core.management import call_command
@@ -22,6 +23,7 @@ PaymentEventTypeName = get_class('order.constants', 'PaymentEventTypeName')
 ProductClass = get_model('catalogue', 'ProductClass')
 
 
+@ddt.ddt
 class VerifyTransactionsTest(TestCase):
 
     def setUp(self):
@@ -40,7 +42,7 @@ class VerifyTransactionsTest(TestCase):
         self.order.save()
 
     def test_time_window(self):
-        """Test verify_transactions only examines the correct time window"""
+        """ Test verify_transactions only examines the correct time window """
         with self.assertRaises(CommandError) as cm:
             call_command('verify_transactions')
         exception = six.text_type(cm.exception)
@@ -58,7 +60,7 @@ class VerifyTransactionsTest(TestCase):
             self.fail("Failed to verify transactions when no errors were expected. {}".format(e))
 
     def test_threshold(self):
-        """Test verify_transactions only fails if there are too many anomolies"""
+        """ Test verify_transactions only fails if there are too many anomolies """
         for i in range(3):
             # Create some "good" orders w/ payments
             order = OrderFactory(total_incl_tax=50 + i, date_placed=self.timestamp)
@@ -97,7 +99,7 @@ class VerifyTransactionsTest(TestCase):
         self.assertIn(str(self.order.id), exception)
 
     def test_no_errors(self):
-        """Test verify_transactions with order and payment of same amount."""
+        """ Test verify_transactions with order and payment of same amount """
         payment = PaymentEventFactory(order=self.order,
                                       amount=90,
                                       event_type_id=self.payevent.id,
@@ -114,7 +116,7 @@ class VerifyTransactionsTest(TestCase):
             self.fail("Failed to verify transactions when no errors were expected. {}".format(e))
 
     def test_zero_dollar_order(self):
-        """Verify zero dollar orders are not flagged as errors."""
+        """ Verify zero dollar orders are not flagged as errors """
         total_incl_tax_before = self.order.total_incl_tax
         self.order.total_incl_tax = 0
         self.order.save()
@@ -127,7 +129,7 @@ class VerifyTransactionsTest(TestCase):
             self.order.save()
 
     def test_no_payment_for_valid_product_order(self):
-        """Verify errors are thrown when there are valid product orders without payments."""
+        """ Verify errors are thrown when there are valid product orders without payments """
         with self.assertRaises(CommandError) as cm:
             call_command('verify_transactions')
         exception = six.text_type(cm.exception)
@@ -135,7 +137,7 @@ class VerifyTransactionsTest(TestCase):
         self.assertIn(str(self.order.id), exception)
 
     def test_no_payment_for_filtered_product_order(self):
-        """Verify errors are not thrown when there are filtered product orders without payments."""
+        """ Verify errors are not thrown when there are filtered product orders without payments """
         new_product_class, __ = ProductClass.objects.get_or_create(name="Test Product Class")
         self.product.product_class = new_product_class
         self.product.save()
@@ -149,7 +151,7 @@ class VerifyTransactionsTest(TestCase):
             self.product.save()
 
     def test_two_same_payments_for_order(self):
-        """ Verify that errors are thrown when their are multiple payments on an order."""
+        """ Verify that errors are thrown when their are multiple payments on an order """
         payment1 = PaymentEventFactory(order=self.order,
                                        amount=90,
                                        event_type_id=self.payevent.id,
@@ -169,7 +171,7 @@ class VerifyTransactionsTest(TestCase):
         self.assertIn(str(payment2.id), exception)
 
     def test_multiple_payments_for_order(self):
-        """ Verify that errors are thrown when their are multiple payments on an order."""
+        """ Verify that errors are thrown when their are multiple payments on an order """
         payment1 = PaymentEventFactory(order=self.order,
                                        amount=90,
                                        event_type_id=self.payevent.id,
@@ -194,10 +196,11 @@ class VerifyTransactionsTest(TestCase):
         self.assertIn(str(payment2.id), exception)
         self.assertIn(str(payment3.id), exception)
 
-    def test_totals_mismatch(self):
-        """ Verify errors thrown when payment and order totals don't match."""
+    @ddt.data(80, 100)
+    def test_totals_mismatch(self, amount):
+        """ Verify errors thrown when payment and order totals don't match """
         payment = PaymentEventFactory(order=self.order,
-                                      amount=100,
+                                      amount=amount,
                                       event_type_id=self.payevent.id,
                                       date_created=self.timestamp)
         payment.save()
@@ -208,10 +211,30 @@ class VerifyTransactionsTest(TestCase):
         self.assertIn(str(self.order.id), exception)
         self.assertIn(str(payment.id), exception)
         self.assertIn('"amount": 90.0', exception)
-        self.assertIn('"amount": 100.0', exception)
+        self.assertIn('"amount": {}'.format(amount), exception)
+
+    def test_totals_mismatch_support(self):
+        """ Verify errors thrown when payment amount is greater
+        than order amount and a refund is required from Support """
+        payment = PaymentEventFactory(order=self.order,
+                                      amount=100,
+                                      event_type_id=self.payevent.id,
+                                      date_created=self.timestamp)
+        payment.save()
+        with self.assertRaises(CommandError) as cm:
+            call_command('verify_transactions', '--support')
+        exception = six.text_type(cm.exception)
+        self.assertTrue(payment.amount != self.order.total_incl_tax)
+        self.assertIn("There was a mismatch in the totals in the following order that require a refund", exception)
+        self.assertIn("orders_mismatched_totals_support", exception)
+        self.assertIn(str(self.order.id), exception)
+        self.assertIn(str(payment.id), exception)
+        self.assertIn('"order_amount": 90.0', exception)
+        self.assertIn('"payment_amount": 100.0', exception)
+        self.assertIn('"refund_amount": 10.0', exception)
 
     def test_refund_exceeded(self):
-        """Test verify_transactions with refund which exceed amount paid."""
+        """ Test verify_transactions with refund which exceed amount paid """
         payment = PaymentEventFactory(order=self.order,
                                       amount=90,
                                       event_type_id=self.payevent.id,
