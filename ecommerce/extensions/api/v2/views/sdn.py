@@ -33,8 +33,8 @@ class SDNCheckViewSet(APIView):
 
         if site_configuration.enable_sdn_check:
             sdn_check = SDNClient(
-                api_url=site_configuration.sdn_api_url,
-                api_key=site_configuration.sdn_api_key,
+                api_url=site_configuration.sdn_api_url_v1,
+                api_key=site_configuration.sdn_api_key_v1,
                 sdn_list=site_configuration.sdn_api_list
             )
             try:
