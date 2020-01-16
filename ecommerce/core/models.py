@@ -137,12 +137,22 @@ class SiteConfiguration(models.Model):
         default=False
     )
     sdn_api_url = models.CharField(
-        verbose_name=_('US Treasury SDN API URL'),
+        verbose_name=_('[Deprecated] US Treasury SDN API URL'),
         max_length=255,
         blank=True
     )
     sdn_api_key = models.CharField(
-        verbose_name=_('US Treasury SDN API key'),
+        verbose_name=_('[Deprecated] US Treasury SDN API key'),
+        max_length=255,
+        blank=True
+    )
+    sdn_api_url_v1 = models.CharField(
+        verbose_name=_('US Treasury SDN API v1 URL'),
+        max_length=255,
+        blank=True
+    )
+    sdn_api_key_v1 = models.CharField(
+        verbose_name=_('US Treasury SDN API v1 key'),
         max_length=255,
         blank=True
     )
