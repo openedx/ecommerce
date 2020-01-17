@@ -50,16 +50,16 @@ class SDNCheckTests(TestCase):
         self.city = 'Top-secret lair'
         self.country = 'EL'
         self.user = self.create_user(full_name=self.name)
+        self.sdn_api_url = 'http://sdn-test.fake/'
+        self.sdn_api_key = 'fake-key'
         self.site_configuration = self.site.siteconfiguration
         self.site_configuration.enable_sdn_check = True
-        self.site_configuration.sdn_api_url = 'http://sdn-test.fake/'
-        self.site_configuration.sdn_api_key = 'fake-key'
         self.site_configuration.sdn_api_list = 'SDN,TEST'
         self.site_configuration.save()
 
         self.sdn_validator = SDNClient(
-            self.site_configuration.sdn_api_url,
-            self.site_configuration.sdn_api_key,
+            self.sdn_api_url,
+            self.sdn_api_key,
             self.site_configuration.sdn_api_list
         )
 
@@ -67,14 +67,14 @@ class SDNCheckTests(TestCase):
         """ Mock the SDN check API endpoint response. """
         params = urlencode({
             'sources': self.site_configuration.sdn_api_list,
-            'api_key': self.site_configuration.sdn_api_key,
+            'api_key': self.sdn_api_key,
             'type': 'individual',
             'name': six.text_type(self.name).encode('utf-8'),
             'address': six.text_type(self.city).encode('utf-8'),
             'countries': self.country
         })
         sdn_check_url = '{api_url}?{params}'.format(
-            api_url=self.site_configuration.sdn_api_url,
+            api_url=self.sdn_api_url,
             params=params
         )
 

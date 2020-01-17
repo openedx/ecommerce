@@ -164,7 +164,6 @@ class SDNClient(object):
         """
         params = urlencode({
             'sources': self.sdn_list,
-            'api_key': self.api_key,
             'type': 'individual',
             'name': six.text_type(name).encode('utf-8'),
             # We are using the city as the address parameter value as indicated in the documentation:
@@ -176,9 +175,14 @@ class SDNClient(object):
             api_url=self.api_url,
             params=params
         )
+        auth_header = {'Authorization': 'Bearer {}'.format(self.api_key)}
 
         try:
-            response = requests.get(sdn_check_url, timeout=settings.SDN_CHECK_REQUEST_TIMEOUT)
+            response = requests.get(
+                sdn_check_url,
+                headers=auth_header,
+                timeout=settings.SDN_CHECK_REQUEST_TIMEOUT
+            )
         except requests.exceptions.Timeout:
             logger.warning('Connection to US Treasury SDN API timed out for [%s].', name)
             raise
