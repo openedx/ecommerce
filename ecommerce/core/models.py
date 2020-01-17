@@ -146,16 +146,6 @@ class SiteConfiguration(models.Model):
         max_length=255,
         blank=True
     )
-    sdn_api_url_v1 = models.CharField(
-        verbose_name=_('US Treasury SDN API v1 URL'),
-        max_length=255,
-        blank=True
-    )
-    sdn_api_key_v1 = models.CharField(
-        verbose_name=_('US Treasury SDN API v1 key'),
-        max_length=255,
-        blank=True
-    )
     sdn_api_list = models.CharField(
         verbose_name=_('SDN lists'),
         help_text=_('A comma-separated list of Treasury OFAC lists to check against.'),
