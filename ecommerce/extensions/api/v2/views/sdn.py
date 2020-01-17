@@ -1,6 +1,7 @@
 """API endpoint for performing an SDN check on users."""
 from __future__ import absolute_import
 
+from django.conf import settings
 from django.contrib.auth import logout
 from oscar.core.loading import get_model
 from requests.exceptions import HTTPError, Timeout
@@ -33,8 +34,8 @@ class SDNCheckViewSet(APIView):
 
         if site_configuration.enable_sdn_check:
             sdn_check = SDNClient(
-                api_url=site_configuration.sdn_api_url_v1,
-                api_key=site_configuration.sdn_api_key_v1,
+                api_url=settings.SDN_CHECK_API_URL,
+                api_key=settings.SDN_CHECK_API_KEY,
                 sdn_list=site_configuration.sdn_api_list
             )
             try:
