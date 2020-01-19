@@ -2,20 +2,21 @@
 # edX translation file
 # Copyright (C) 2018 edX
 # This file is distributed under the GNU AFFERO GENERAL PUBLIC LICENSE.
-# EdX Team <info@edx.org>, 2018.
-#
+# 
+# Translators:
 msgid ""
 msgstr ""
-"Project-Id-Version: ecommerce\n"
+"Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-12-03 14:18+0000\n"
-"PO-Revision-Date: 2018-03-30 17:16-0500\n"
-"Last-Translator: Muhammad Ayub khan <ayubkhan@edx.org>\n"
-"Language-Team: openedx-translation <openedx-translation@googlegroups.com>\n"
-"Language: en\n"
+"POT-Creation-Date: 2020-01-19 20:12+0000\n"
+"PO-Revision-Date: 2020-01-19 20:13+0000\n"
+"Last-Translator: edx_transifex_bot <i18n-working-group+edx-transifex-bot@edx.org>\n"
+"Language-Team: English (http://www.transifex.com/open-edx/edx-platform/language/en/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Language: en\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #: ecommerce/core/admin.py:25
 msgid "Personal info"
@@ -29,13 +30,14 @@ msgstr ""
 msgid "Important dates"
 msgstr ""
 
-#. Translators: "Waffle" is the name of a third-party library. It should not be translated
+#. Translators: "Waffle" is the name of a third-party library. It should not
+#. be translated
 #: ecommerce/core/admin.py:35
 #, python-brace-format
 msgid ""
 "User administration has been disabled due to the load on the database. This "
-"functionality can be restored by activating the {switch_name} Waffle switch. "
-"Be careful when re-activating this switch!"
+"functionality can be restored by activating the {switch_name} Waffle switch."
+" Be careful when re-activating this switch!"
 msgstr ""
 
 #: ecommerce/core/models.py:49
@@ -143,11 +145,11 @@ msgid "Enable SDN check at checkout."
 msgstr ""
 
 #: ecommerce/core/models.py:140
-msgid "US Treasury SDN API URL"
+msgid "[Deprecated] US Treasury SDN API URL"
 msgstr ""
 
 #: ecommerce/core/models.py:145
-msgid "US Treasury SDN API key"
+msgid "[Deprecated] US Treasury SDN API key"
 msgstr ""
 
 #: ecommerce/core/models.py:150
@@ -261,11 +263,11 @@ msgstr ""
 msgid "Name"
 msgstr ""
 
-#: ecommerce/core/models.py:735 ecommerce/extensions/offer/models.py:479
+#: ecommerce/core/models.py:735 ecommerce/extensions/offer/models.py:484
 msgid "EnterpriseCustomer UUID"
 msgstr ""
 
-#: ecommerce/core/models.py:736 ecommerce/extensions/offer/models.py:357
+#: ecommerce/core/models.py:736 ecommerce/extensions/offer/models.py:362
 msgid "UUID for an EnterpriseCustomer from the Enterprise Service."
 msgstr ""
 
@@ -361,7 +363,8 @@ msgid "Site"
 msgstr ""
 
 #: ecommerce/courses/models.py:40
-msgid "Last date/time on which verification for this product can be submitted."
+msgid ""
+"Last date/time on which verification for this product can be submitted."
 msgstr ""
 
 #: ecommerce/courses/publishers.py:62
@@ -391,8 +394,8 @@ msgstr ""
 
 #: ecommerce/credit/views.py:39
 msgid ""
-"An error has occurred. We could not confirm that you are eligible for course "
-"credit. Try the transaction again."
+"An error has occurred. We could not confirm that you are eligible for course"
+" credit. Try the transaction again."
 msgstr ""
 
 #: ecommerce/credit/views.py:60
@@ -427,7 +430,8 @@ msgid "Percentage"
 msgstr ""
 
 #: ecommerce/enterprise/benefits.py:46
-#: ecommerce/extensions/payment/models.py:82 ecommerce/programs/constants.py:16
+#: ecommerce/extensions/payment/models.py:82
+#: ecommerce/programs/constants.py:16
 msgid "Absolute"
 msgstr ""
 
@@ -438,49 +442,70 @@ msgid ""
 "questions."
 msgstr ""
 
-#: ecommerce/enterprise/forms.py:22
+#: ecommerce/enterprise/forms.py:23
 #: ecommerce/enterprise/templates/enterprise/enterpriseoffer_list.html:30
 msgid "Enterprise Customer UUID"
 msgstr ""
 
-#: ecommerce/enterprise/forms.py:23
+#: ecommerce/enterprise/forms.py:24
 #: ecommerce/enterprise/templates/enterprise/enterpriseoffer_list.html:31
 msgid "Enterprise Customer Catalog UUID"
 msgstr ""
 
-#: ecommerce/enterprise/forms.py:24 ecommerce/programs/forms.py:22
+#: ecommerce/enterprise/forms.py:25 ecommerce/programs/forms.py:22
 msgid "Discount Type"
 msgstr ""
 
-#: ecommerce/enterprise/forms.py:26 ecommerce/programs/forms.py:24
+#: ecommerce/enterprise/forms.py:27 ecommerce/programs/forms.py:24
 msgid "Discount Value"
 msgstr ""
 
-#: ecommerce/enterprise/forms.py:39 ecommerce/programs/forms.py:34
+#: ecommerce/enterprise/forms.py:30
+msgid "Contract Discount Type"
+msgstr ""
+
+#: ecommerce/enterprise/forms.py:33
+msgid "Contract Discount"
+msgstr ""
+
+#: ecommerce/enterprise/forms.py:36
+msgid "Prepaid Invoice Amount"
+msgstr ""
+
+#: ecommerce/enterprise/forms.py:50 ecommerce/programs/forms.py:34
 msgid "Start Date"
 msgstr ""
 
-#: ecommerce/enterprise/forms.py:40 ecommerce/programs/forms.py:35
+#: ecommerce/enterprise/forms.py:51 ecommerce/programs/forms.py:35
 msgid "End Date"
 msgstr ""
 
-#: ecommerce/enterprise/forms.py:78
+#: ecommerce/enterprise/forms.py:126
 msgid "An offer already exists for this Enterprise & Catalog combination."
 msgstr ""
 
-#: ecommerce/enterprise/forms.py:81 ecommerce/programs/forms.py:72
+#: ecommerce/enterprise/forms.py:129 ecommerce/enterprise/forms.py:139
+#: ecommerce/programs/forms.py:72
 msgid "Percentage discounts cannot be greater than 100%."
 msgstr ""
 
-#: ecommerce/enterprise/forms.py:84 ecommerce/programs/forms.py:75
+#: ecommerce/enterprise/forms.py:132 ecommerce/programs/forms.py:75
 msgid "A start date must be specified when specifying an end date."
 msgstr ""
 
-#: ecommerce/enterprise/forms.py:87 ecommerce/programs/forms.py:78
+#: ecommerce/enterprise/forms.py:135 ecommerce/programs/forms.py:78
 msgid "The start date must occur before the end date."
 msgstr ""
 
-#: ecommerce/enterprise/forms.py:104
+#: ecommerce/enterprise/forms.py:144
+msgid "More than 2 digits after the decimal not allowed for absolute value."
+msgstr ""
+
+#: ecommerce/enterprise/forms.py:149
+msgid "This field is required when contract discount type is absolute."
+msgstr ""
+
+#: ecommerce/enterprise/forms.py:172
 msgid "Discount of type {} provided by {} for {}."
 msgstr ""
 
@@ -676,8 +701,8 @@ msgstr ""
 #, python-brace-format
 msgid ""
 "Course [{course_id}] was not published to LMS because the switch "
-"[publish_course_modes_to_lms] is disabled. To avoid ghost SKUs, data has not "
-"been saved."
+"[publish_course_modes_to_lms] is disabled. To avoid ghost SKUs, data has not"
+" been saved."
 msgstr ""
 
 #: ecommerce/extensions/api/serializers.py:962
@@ -833,14 +858,15 @@ msgid ""
 "{paragraph_start}By purchasing, you and your organization agree to the "
 "following terms:{paragraph_end} {ul_start} {li_start}Each code is valid for "
 "the one course covered and can be used only one time.{li_end} {li_start}You "
-"are responsible for distributing codes to your learners in your organization."
-"{li_end} {li_start}Each code will expire in one year from date of purchase "
-"or, if earlier, once the course is closed.{li_end} {li_start}If a course is "
-"not designated as self-paced, you should confirm that a course run is "
-"available before expiration. {li_end} {li_start}You may not resell codes to "
-"third parties.{li_end} {li_start}All edX for Business Sales are final and "
-"not eligible for refunds.{li_end}{ul_end} {paragraph_start}You will receive "
-"an email at {user_email} with your enrollment code(s). {paragraph_end}"
+"are responsible for distributing codes to your learners in your "
+"organization.{li_end} {li_start}Each code will expire in one year from date "
+"of purchase or, if earlier, once the course is closed.{li_end} {li_start}If "
+"a course is not designated as self-paced, you should confirm that a course "
+"run is available before expiration. {li_end} {li_start}You may not resell "
+"codes to third parties.{li_end} {li_start}All edX for Business Sales are "
+"final and not eligible for refunds.{li_end}{ul_end} {paragraph_start}You "
+"will receive an email at {user_email} with your enrollment code(s). "
+"{paragraph_end}"
 msgstr ""
 
 #: ecommerce/extensions/basket/views.py:439
@@ -852,31 +878,31 @@ msgid ""
 "enroll directly.{paragraph_end}"
 msgstr ""
 
-#: ecommerce/extensions/basket/views.py:785
+#: ecommerce/extensions/basket/views.py:793
 msgid "quantity successfully updated"
 msgstr ""
 
-#: ecommerce/extensions/basket/views.py:804
+#: ecommerce/extensions/basket/views.py:812
 msgid ""
 "Your basket couldn't be updated. Please correct any validation errors below."
 msgstr ""
 
-#: ecommerce/extensions/basket/views.py:858
+#: ecommerce/extensions/basket/views.py:866
 #, python-brace-format
 msgid "You have already added coupon code '{code}' to your basket."
 msgstr ""
 
-#: ecommerce/extensions/basket/views.py:934
+#: ecommerce/extensions/basket/views.py:942
 #, python-brace-format
 msgid "Coupon code '{code}' does not exist."
 msgstr ""
 
-#: ecommerce/extensions/basket/views.py:1019
+#: ecommerce/extensions/basket/views.py:1027
 #, python-format
 msgid "No coupon found with id '%s'"
 msgstr ""
 
-#: ecommerce/extensions/basket/views.py:1023
+#: ecommerce/extensions/basket/views.py:1031
 #, python-format
 msgid "Coupon code '%s' was removed from your basket."
 msgstr ""
@@ -904,8 +930,8 @@ msgstr ""
 #: ecommerce/extensions/dashboard/orders/views.py:75
 #, python-brace-format
 msgid ""
-"{link_start}Refund #{refund_id}{link_end} created! Click {link_start}"
-"here{link_end} to view it."
+"{link_start}Refund #{refund_id}{link_end} created! Click "
+"{link_start}here{link_end} to view it."
 msgstr ""
 
 #: ecommerce/extensions/dashboard/orders/views.py:79
@@ -947,23 +973,23 @@ msgstr ""
 msgid "Failed to retrieve enrollment data."
 msgstr ""
 
-#: ecommerce/extensions/offer/models.py:352
+#: ecommerce/extensions/offer/models.py:357
 msgid "Course Catalog ID from the Discovery Service."
 msgstr ""
 
-#: ecommerce/extensions/offer/models.py:363
+#: ecommerce/extensions/offer/models.py:368
 msgid "UUID for an EnterpriseCustomerCatalog from the Enterprise Service."
 msgstr ""
 
-#: ecommerce/extensions/offer/models.py:486
+#: ecommerce/extensions/offer/models.py:491
 msgid "EnterpriseCustomer Name"
 msgstr ""
 
-#: ecommerce/extensions/offer/models.py:491
+#: ecommerce/extensions/offer/models.py:496
 msgid "EnterpriseCustomerCatalog UUID"
 msgstr ""
 
-#: ecommerce/extensions/offer/models.py:496
+#: ecommerce/extensions/offer/models.py:501
 #: ecommerce/extensions/voucher/utils.py:54
 #: ecommerce/extensions/voucher/utils.py:193
 #: ecommerce/extensions/voucher/utils.py:273
@@ -974,43 +1000,44 @@ msgstr ""
 msgid "Program UUID"
 msgstr ""
 
-#: ecommerce/extensions/offer/models.py:503
+#: ecommerce/extensions/offer/models.py:508
 msgid "Email to user pending."
 msgstr ""
 
-#: ecommerce/extensions/offer/models.py:504
+#: ecommerce/extensions/offer/models.py:509
 msgid "Code successfully assigned to user."
 msgstr ""
 
-#: ecommerce/extensions/offer/models.py:505
+#: ecommerce/extensions/offer/models.py:510
 msgid "Code has been redeemed by user."
 msgstr ""
 
-#: ecommerce/extensions/offer/models.py:506
+#: ecommerce/extensions/offer/models.py:511
 msgid "Email to user bounced."
 msgstr ""
 
-#: ecommerce/extensions/offer/models.py:507
+#: ecommerce/extensions/offer/models.py:512
 msgid "Code has been revoked for this user."
 msgstr ""
 
-#: ecommerce/extensions/offer/utils.py:92
+#: ecommerce/extensions/offer/utils.py:93
 #, python-brace-format
 msgid "{benefit_value}%"
 msgstr ""
 
-#: ecommerce/extensions/offer/utils.py:95
+#: ecommerce/extensions/offer/utils.py:96
 #, python-brace-format
 msgid "${benefit_value}"
 msgstr ""
 
-#. Translators: "Waffle" is the name of a third-party library. It should not be translated
+#. Translators: "Waffle" is the name of a third-party library. It should not
+#. be translated
 #: ecommerce/extensions/order/admin.py:32
 #, python-brace-format
 msgid ""
-"Order administration has been disabled due to the load on the database. This "
-"functionality can be restored by activating the {switch_name} Waffle switch. "
-"Be careful when re-activating this switch!"
+"Order administration has been disabled due to the load on the database. This"
+" functionality can be restored by activating the {switch_name} Waffle "
+"switch. Be careful when re-activating this switch!"
 msgstr ""
 
 #: ecommerce/extensions/order/benefits.py:22
@@ -1018,7 +1045,7 @@ msgstr ""
 msgid "%d%% discount for manual course enrollment order"
 msgstr ""
 
-#: ecommerce/extensions/order/models.py:31
+#: ecommerce/extensions/order/models.py:37
 #: ecommerce/extensions/payment/models.py:20
 msgid "Payment Processor"
 msgstr ""
@@ -1033,7 +1060,7 @@ msgstr ""
 msgid "Partner"
 msgstr ""
 
-#: ecommerce/extensions/partner/models.py:25 ecommerce/settings/_oscar.py:223
+#: ecommerce/extensions/partner/models.py:25 ecommerce/settings/_oscar.py:225
 msgid "Partners"
 msgstr ""
 
@@ -1166,11 +1193,12 @@ msgstr ""
 msgid "..."
 msgstr ""
 
-#: ecommerce/extensions/payment/views/cybersource.py:475
+#: ecommerce/extensions/payment/views/cybersource.py:452
 msgid "transaction declined"
 msgstr ""
 
-#. Translators: "Waffle" is the name of a third-party library. It should not be translated
+#. Translators: "Waffle" is the name of a third-party library. It should not
+#. be translated
 #: ecommerce/extensions/refund/admin.py:36
 #, python-brace-format
 msgid ""
@@ -1593,7 +1621,7 @@ msgstr ""
 msgid "UTM Created At"
 msgstr ""
 
-#: ecommerce/settings/_oscar.py:180
+#: ecommerce/settings/_oscar.py:182
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:18
 #: ecommerce/templates/oscar/dashboard/index.html:22
 #: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:12
@@ -1606,38 +1634,38 @@ msgstr ""
 msgid "Dashboard"
 msgstr ""
 
-#: ecommerce/settings/_oscar.py:185
+#: ecommerce/settings/_oscar.py:187
 msgid "Catalogue"
 msgstr ""
 
-#: ecommerce/settings/_oscar.py:189
+#: ecommerce/settings/_oscar.py:191
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:12
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:21
 msgid "Products"
 msgstr ""
 
-#: ecommerce/settings/_oscar.py:193
+#: ecommerce/settings/_oscar.py:195
 msgid "Product Types"
 msgstr ""
 
-#: ecommerce/settings/_oscar.py:197
+#: ecommerce/settings/_oscar.py:199
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:75
 msgid "Categories"
 msgstr ""
 
-#: ecommerce/settings/_oscar.py:201
+#: ecommerce/settings/_oscar.py:203
 msgid "Ranges"
 msgstr ""
 
-#: ecommerce/settings/_oscar.py:205
+#: ecommerce/settings/_oscar.py:207
 msgid "Low stock alerts"
 msgstr ""
 
-#: ecommerce/settings/_oscar.py:211
+#: ecommerce/settings/_oscar.py:213
 msgid "Fulfillment"
 msgstr ""
 
-#: ecommerce/settings/_oscar.py:215
+#: ecommerce/settings/_oscar.py:217
 #: ecommerce/templates/oscar/dashboard/index.html:33
 #: ecommerce/templates/oscar/dashboard/orders/line_detail.html:17
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:32
@@ -1649,11 +1677,11 @@ msgstr ""
 msgid "Orders"
 msgstr ""
 
-#: ecommerce/settings/_oscar.py:219
+#: ecommerce/settings/_oscar.py:221
 msgid "Statistics"
 msgstr ""
 
-#: ecommerce/settings/_oscar.py:227
+#: ecommerce/settings/_oscar.py:229
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:107
 #: ecommerce/templates/oscar/dashboard/partials/refund_table.html:5
 #: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html:34
@@ -1664,25 +1692,25 @@ msgstr ""
 msgid "Refunds"
 msgstr ""
 
-#: ecommerce/settings/_oscar.py:233 ecommerce/settings/_oscar.py:237
+#: ecommerce/settings/_oscar.py:235 ecommerce/settings/_oscar.py:239
 #: ecommerce/templates/oscar/dashboard/users/detail.html:23
 msgid "Customers"
 msgstr ""
 
-#: ecommerce/settings/_oscar.py:241
+#: ecommerce/settings/_oscar.py:243
 msgid "Stock alert requests"
 msgstr ""
 
-#: ecommerce/settings/_oscar.py:247 ecommerce/settings/_oscar.py:251
+#: ecommerce/settings/_oscar.py:249 ecommerce/settings/_oscar.py:253
 #: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:15
 msgid "Offers"
 msgstr ""
 
-#: ecommerce/settings/_oscar.py:255
+#: ecommerce/settings/_oscar.py:257
 msgid "Vouchers"
 msgstr ""
 
-#: ecommerce/settings/_oscar.py:261
+#: ecommerce/settings/_oscar.py:263
 msgid "Reports"
 msgstr ""
 
@@ -1737,8 +1765,8 @@ msgstr ""
 
 #: ecommerce/templates/coupons/offer.html:30
 msgid ""
-"A verified certificate demonstrates to future employers that you've mastered "
-"the course material."
+"A verified certificate demonstrates to future employers that you've mastered"
+" the course material."
 msgstr ""
 
 #: ecommerce/templates/coupons/offer.html:32
@@ -1762,8 +1790,7 @@ msgstr ""
 #, python-format
 msgid ""
 "\n"
-"                                %(platform_name)s Course Administration "
-"Tool\n"
+"                                %(platform_name)s Course Administration Tool\n"
 "                            "
 msgstr ""
 
@@ -1878,10 +1905,7 @@ msgstr ""
 #, python-format
 msgid ""
 "\n"
-"                            Thank you for purchasing %(credit_hours)s credit "
-"hours from %(credit_provider)s for %(course_title)s. A charge will appear on "
-"your credit or debit card statement with a company name of "
-"\"%(platform_name)s\".\n"
+"                            Thank you for purchasing %(credit_hours)s credit hours from %(credit_provider)s for %(course_title)s. A charge will appear on your credit or debit card statement with a company name of \"%(platform_name)s\".\n"
 "                        "
 msgstr ""
 
@@ -1891,8 +1915,8 @@ msgstr ""
 msgid ""
 "To receive your course credit, you must also request credit at the "
 "%(credit_provider)s website. For a link to request credit from "
-"%(credit_provider)s, or to see the status of your credit request, go to your "
-"%(platform_name)s dashboard."
+"%(credit_provider)s, or to see the status of your credit request, go to your"
+" %(platform_name)s dashboard."
 msgstr ""
 
 #: ecommerce/templates/customer/emails/commtype_credit_receipt_body.html:71
@@ -1918,8 +1942,7 @@ msgstr ""
 #, python-format
 msgid ""
 "\n"
-"                            You received this message because you purchased "
-"credit hours for %(course_title)s, an %(platform_name)s course.\n"
+"                            You received this message because you purchased credit hours for %(course_title)s, an %(platform_name)s course.\n"
 "                        "
 msgstr ""
 
@@ -1962,8 +1985,7 @@ msgstr ""
 #, python-brace-format
 msgid ""
 "\n"
-"                                Download and save the {link_start}"
-"{download_csv_link}{link_middle} enrollment code file.{link_end}\n"
+"                                Download and save the {link_start}{download_csv_link}{link_middle} enrollment code file.{link_end}\n"
 "                            "
 msgstr ""
 
@@ -1986,9 +2008,7 @@ msgstr ""
 #, python-brace-format
 msgid ""
 "\n"
-"                            To view your payment information, log in to see "
-"your Order History, under {link_start}{order_history_url}{link_middle}"
-"Account Settings{link_end}.\n"
+"                            To view your payment information, log in to see your Order History, under {link_start}{order_history_url}{link_middle}Account Settings{link_end}.\n"
 "                        "
 msgstr ""
 
@@ -1996,8 +2016,7 @@ msgstr ""
 #, python-brace-format
 msgid ""
 "\n"
-"                            For more information and assistance, check our "
-"{link_start}Help Center{link_end}\n"
+"                            For more information and assistance, check our {link_start}Help Center{link_end}\n"
 "                        "
 msgstr ""
 
@@ -2025,8 +2044,8 @@ msgstr ""
 #: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html:65
 #: ecommerce/templates/customer/emails/commtype_order_with_csv_body.txt:22
 msgid ""
-"Each code will expire in one year from date of purchase or, if earlier, once "
-"the course is closed."
+"Each code will expire in one year from date of purchase or, if earlier, once"
+" the course is closed."
 msgstr ""
 
 #: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html:66
@@ -2182,10 +2201,11 @@ msgstr ""
 #: ecommerce/templates/edx/checkout/receipt.html:181
 #, python-brace-format
 msgid ""
-"To receive academic credit for this course, you must apply for credit at the "
-"organization that offers the credit. You can find a link to the "
-"organization’s website on your {link_start}{lms_dashboard_url}{link_middle}"
-"dashboard{link_end}, next to the course name."
+"To receive academic credit for this course, you must apply for credit at the"
+" organization that offers the credit. You can find a link to the "
+"organization’s website on your "
+"{link_start}{lms_dashboard_url}{link_middle}dashboard{link_end}, next to the"
+" course name."
 msgstr ""
 
 #: ecommerce/templates/edx/checkout/receipt.html:200
@@ -2215,8 +2235,7 @@ msgstr ""
 #, python-brace-format
 msgid ""
 "\n"
-"                You may also view your previous orders on the {link_start}"
-"{order_history_url}{link_middle}{link_end}Account Settings{link_end}\n"
+"                You may also view your previous orders on the {link_start}{order_history_url}{link_middle}{link_end}Account Settings{link_end}\n"
 "                page.\n"
 "              "
 msgstr ""
@@ -2266,11 +2285,9 @@ msgstr ""
 #, python-format
 msgid ""
 "\n"
-"                            Congratulations! You are eligible to purchase "
-"academic course credit for this course.\n"
+"                            Congratulations! You are eligible to purchase academic course credit for this course.\n"
 "                            You must purchase your credit before %(date)s.\n"
-"                            Select one of the following institutions to "
-"purchase your credit.\n"
+"                            Select one of the following institutions to purchase your credit.\n"
 "                        "
 msgstr ""
 
@@ -2325,8 +2342,7 @@ msgstr ""
 #, python-brace-format
 msgid ""
 "\n"
-"                    Please read {link_start}our FAQs to view common "
-"questions about our certificates.{link_end}\n"
+"                    Please read {link_start}our FAQs to view common questions about our certificates.{link_end}\n"
 "                "
 msgstr ""
 
@@ -2400,11 +2416,8 @@ msgstr ""
 #, python-brace-format
 msgid ""
 "\n"
-"                                If you attempted to make a purchase, you "
-"have not been charged. Return to your {link_start}{link_middle}{homepage_url}"
-"dashboard{link_end} to try\n"
-"                                again, or {link_start}{homepage_url}"
-"{link_middle}contact {platform_name} Support{link_end}.\n"
+"                                If you attempted to make a purchase, you have not been charged. Return to your {link_start}{link_middle}{homepage_url}dashboard{link_end} to try\n"
+"                                again, or {link_start}{homepage_url}{link_middle}contact {platform_name} Support{link_end}.\n"
 "                            "
 msgstr ""
 
@@ -2418,9 +2431,7 @@ msgstr ""
 msgid ""
 "\n"
 "                {strong_start}We’ve updated your quantity.{strong_end}\n"
-"                {paragraph_start}Your cart includes {num_items} enrollment "
-"codes at a total cost of {total}, that you will receive via email."
-"{paragraph_end}\n"
+"                {paragraph_start}Your cart includes {num_items} enrollment codes at a total cost of {total}, that you will receive via email.{paragraph_end}\n"
 "            "
 msgstr ""
 
@@ -2471,8 +2482,7 @@ msgstr ""
 #, python-format
 msgid ""
 "\n"
-"                                    %(benefit)s discount provided by "
-"%(enterprise_customer_name)s.\n"
+"                                    %(benefit)s discount provided by %(enterprise_customer_name)s.\n"
 "                                "
 msgstr ""
 
@@ -2480,8 +2490,7 @@ msgstr ""
 #, python-format
 msgid ""
 "\n"
-"                                    %(benefit)s%% discount for your first "
-"upgrade applied.\n"
+"                                    %(benefit)s%% discount for your first upgrade applied.\n"
 "                            "
 msgstr ""
 
@@ -2489,8 +2498,7 @@ msgstr ""
 #, python-format
 msgid ""
 "\n"
-"                                        Coupon %(voucher_code)s applied for "
-"%(total_benefit)s off\n"
+"                                        Coupon %(voucher_code)s applied for %(total_benefit)s off\n"
 "                                    "
 msgstr ""
 
@@ -2603,8 +2611,7 @@ msgstr ""
 #, python-format
 msgid ""
 "\n"
-"                                            Coupon code %(voucher_code)s "
-"applied\n"
+"                                            Coupon code %(voucher_code)s applied\n"
 "                                        "
 msgstr ""
 
@@ -2632,8 +2639,8 @@ msgstr ""
 #: ecommerce/templates/oscar/basket/partials/hosted_checkout_basket.html:184
 #, python-brace-format
 msgid ""
-"{strong_start}Note:{strong_end} To complete your enrollment, select Checkout "
-"or Checkout with PayPal."
+"{strong_start}Note:{strong_end} To complete your enrollment, select Checkout"
+" or Checkout with PayPal."
 msgstr ""
 
 #: ecommerce/templates/oscar/basket/partials/hosted_checkout_basket.html:191
@@ -2682,8 +2689,7 @@ msgstr ""
 #, python-brace-format
 msgid ""
 "\n"
-"        Your transaction has been cancelled. If you feel an error has "
-"occurred, contact {start_link}\n"
+"        Your transaction has been cancelled. If you feel an error has occurred, contact {start_link}\n"
 "        {payment_support_email}{end_link}.\n"
 "        "
 msgstr ""
@@ -2705,8 +2711,7 @@ msgstr ""
 #, python-brace-format
 msgid ""
 "\n"
-"                    Please try to submit your payment again. If this problem "
-"persists, please refer to our {start_link}\n"
+"                    Please try to submit your payment again. If this problem persists, please refer to our {start_link}\n"
 "                    Payments FAQ {end_link} for troubleshooting tips.\n"
 "                    "
 msgstr ""
@@ -2745,8 +2750,8 @@ msgstr ""
 #: ecommerce/templates/oscar/checkout/sdn_failure.html:26
 msgid ""
 "Unfortunately, your account profile or payment information appears to match "
-"one or more records on a U.S. Treasury Department sanctions list. This means "
-"we cannot complete your transaction or provide you with services and must "
+"one or more records on a U.S. Treasury Department sanctions list. This means"
+" we cannot complete your transaction or provide you with services and must "
 "suspend your learner account."
 msgstr ""
 
@@ -3438,8 +3443,7 @@ msgstr ""
 #, python-format
 msgid ""
 "\n"
-"                                              %(title)s (quantity "
-"%(event_qty)s/%(total_qty)s)\n"
+"                                              %(title)s (quantity %(event_qty)s/%(total_qty)s)\n"
 "                                            "
 msgstr ""
 
@@ -3621,7 +3625,8 @@ msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/partials/refund_action_modal.html:11
 msgid ""
-"Are you sure you want to issue a full refund and revoke student's enrollment?"
+"Are you sure you want to issue a full refund and revoke student's "
+"enrollment?"
 msgstr ""
 
 #: ecommerce/templates/oscar/dashboard/partials/refund_action_modal.html:14
