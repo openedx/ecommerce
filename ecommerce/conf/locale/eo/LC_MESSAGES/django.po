@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ecommerce\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-12-03 14:18+0000\n"
+"POT-Creation-Date: 2020-01-20 09:29+0000\n"
 "PO-Revision-Date: 2018-03-30 17:16-0500\n"
 "Last-Translator: Muhammad Ayub khan <ayubkhan@edx.org>\n"
 "Language-Team: openedx-translation <openedx-translation@googlegroups.com>\n"
@@ -171,12 +171,16 @@ msgid "Enable SDN check at checkout."
 msgstr "Énäßlé SDN çhéçk ät çhéçköüt. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢#"
 
 #: ecommerce/core/models.py
-msgid "US Treasury SDN API URL"
-msgstr "ÛS Tréäsürý SDN ÀPÌ ÛRL Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σ#"
+msgid "[Deprecated] US Treasury SDN API URL"
+msgstr ""
+"[Dépréçätéd] ÛS Tréäsürý SDN ÀPÌ ÛRL Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
+"¢σηѕє¢тєтυ#"
 
 #: ecommerce/core/models.py
-msgid "US Treasury SDN API key"
-msgstr "ÛS Tréäsürý SDN ÀPÌ kéý Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σ#"
+msgid "[Deprecated] US Treasury SDN API key"
+msgstr ""
+"[Dépréçätéd] ÛS Tréäsürý SDN ÀPÌ kéý Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
+"¢σηѕє¢тєтυ#"
 
 #: ecommerce/core/models.py
 msgid "SDN lists"
@@ -556,6 +560,18 @@ msgstr "Dïsçöünt Týpé Ⱡ'σяєм ιρѕυм ∂σłσя ѕι#"
 msgid "Discount Value"
 msgstr "Dïsçöünt Välüé Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт#"
 
+#: ecommerce/enterprise/forms.py
+msgid "Contract Discount Type"
+msgstr "Çönträçt Dïsçöünt Týpé Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢#"
+
+#: ecommerce/enterprise/forms.py
+msgid "Contract Discount"
+msgstr "Çönträçt Dïsçöünt Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмє#"
+
+#: ecommerce/enterprise/forms.py
+msgid "Prepaid Invoice Amount"
+msgstr "Prépäïd Ìnvöïçé Àmöünt Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢#"
+
 #: ecommerce/enterprise/forms.py ecommerce/programs/forms.py
 msgid "Start Date"
 msgstr "Stärt Däté Ⱡ'σяєм ιρѕυм ∂σłσ#"
@@ -570,7 +586,8 @@ msgstr ""
 "Àn öffér älréädý éxïsts för thïs Éntérprïsé & Çätälög çömßïnätïön. Ⱡ'σяєм "
 "ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя #"
 
-#: ecommerce/enterprise/forms.py ecommerce/programs/forms.py
+#: ecommerce/enterprise/forms.py ecommerce/enterprise/forms.py
+#: ecommerce/programs/forms.py
 msgid "Percentage discounts cannot be greater than 100%."
 msgstr ""
 "Pérçéntägé dïsçöünts çännöt ßé gréätér thän 100%. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт "
@@ -587,6 +604,18 @@ msgid "The start date must occur before the end date."
 msgstr ""
 "Thé stärt däté müst öççür ßéföré thé énd däté. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
 "¢σηѕє¢тєтυя α#"
+
+#: ecommerce/enterprise/forms.py
+msgid "More than 2 digits after the decimal not allowed for absolute value."
+msgstr ""
+"Möré thän 2 dïgïts äftér thé déçïmäl nöt ällöwéd för äßsölüté välüé. Ⱡ'σяєм "
+"ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя #"
+
+#: ecommerce/enterprise/forms.py
+msgid "This field is required when contract discount type is absolute."
+msgstr ""
+"Thïs fïéld ïs réqüïréd whén çönträçt dïsçöünt týpé ïs äßsölüté. Ⱡ'σяєм ιρѕυм"
+" ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя α#"
 
 #: ecommerce/enterprise/forms.py
 msgid "Discount of type {} provided by {} for {}."
