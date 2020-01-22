@@ -88,9 +88,18 @@ class Command(BaseCommand):
             action='store_true',
             help='Mismatched orders to go to Support'
         )
+        parser.add_argument(
+            '--make-test',
+            action='store_true',
+            help='Set up a test transaction that should fail'
+        )
 
     def handle(self, *args, **options):
         logger.info("Verify transactions with options: %r", options)
+
+        if options['make_test']:
+            self.make_test(*args, **options)
+            return
 
         self.ERRORS_DICT = {}
         self.PAID_EVENT_TYPE = PaymentEventType.objects.get(name=PaymentEventTypeName.PAID)
@@ -259,3 +268,31 @@ class Command(BaseCommand):
             if name in VALID_PRODUCT_CLASS_NAMES:
                 return True
         return False
+
+    def make_test(self, *args, **options):
+        from oscar.test.factories import OrderFactory, OrderLineFactory, ProductFactory
+        from ecommerce.core.management.commands.tests.factories import PaymentEventFactory
+        ProductClass = get_model('catalogue', 'ProductClass')
+
+        # Timestamp in the middle of the time window
+        # time_delta = (options['start_delta'] + options['end_delta']) / 2
+        # Timestamp just inside the window
+        time_delta = (options['end_delta'] + 1)
+        timestamp = datetime.datetime.now(pytz.utc) - datetime.timedelta(minutes=time_delta)
+
+        payevent, __ = PaymentEventType.objects.get_or_create(name=PaymentEventTypeName.PAID)
+        refundevent, __ = PaymentEventType.objects.get_or_create(name=PaymentEventTypeName.REFUNDED)
+        seat_product_class, __ = ProductClass.objects.get_or_create(name=SEAT_PRODUCT_CLASS_NAME)
+        order = OrderFactory(total_incl_tax=90, date_placed=timestamp)
+        product = ProductFactory(product_class=seat_product_class, categories=None)
+        line = OrderLineFactory(order=order, product=product, partner_sku='test_sku')
+        payment = PaymentEventFactory(
+            order=order,
+            amount=100,
+            event_type_id=payevent.id,
+            date_created=timestamp
+        )
+        line.save()
+        product.save()
+        order.save()
+        payment.save()
