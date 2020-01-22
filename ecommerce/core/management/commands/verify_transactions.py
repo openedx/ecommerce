@@ -154,8 +154,8 @@ class Command(BaseCommand):
             payments = all_payment_events.filter(event_type=self.PAID_EVENT_TYPE)
 
             # If the payment total and the order total do not match, flag for review.
-            if payments.aggregate(total=Sum('amount')).get('total') != order.total_incl_tax:
-                mismatch_total = float(payments.aggregate(total=Sum('amount')).get('total') - order.total_incl_tax)
+            if payments.count() == 1 and payments[0].amount != order.total_incl_tax:
+                mismatch_total = float(payments[0].amount - order.total_incl_tax)
                 # FIXME: validate_order should be changed to log _all_ errors related to an order
                 # If payment amount > order amount, a refund is required from Support
                 if mismatch_total > 0:
