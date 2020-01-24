@@ -71,8 +71,8 @@ class Migration(migrations.Migration):
                 ('total_credit_excl_tax', models.DecimalField(verbose_name='Total Credit (excl. tax)', max_digits=12, decimal_places=2)),
                 ('currency', models.CharField(default=oscar.core.utils.get_default_currency, max_length=12, verbose_name='Currency')),
                 ('status', models.CharField(max_length=255, verbose_name='Status')),
-                ('order', models.ForeignKey(related_name='refunds', verbose_name='Order', to='order.Order')),
-                ('user', models.ForeignKey(related_name='refunds', verbose_name='User', to=settings.AUTH_USER_MODEL)),
+                ('order', models.ForeignKey(related_name='refunds', verbose_name='Order', to='order.Order', on_delete=models.CASCADE)),
+                ('user', models.ForeignKey(related_name='refunds', verbose_name='User', to=settings.AUTH_USER_MODEL, on_delete=models.CASCADE)),
             ],
             options={
                 'ordering': ('-modified', '-created'),
@@ -90,8 +90,8 @@ class Migration(migrations.Migration):
                 ('line_credit_excl_tax', models.DecimalField(verbose_name='Line Credit (excl. tax)', max_digits=12, decimal_places=2)),
                 ('quantity', models.PositiveIntegerField(default=1, verbose_name='Quantity')),
                 ('status', models.CharField(max_length=255, verbose_name='Status')),
-                ('order_line', models.ForeignKey(related_name='refund_lines', verbose_name='Order Line', to='order.Line')),
-                ('refund', models.ForeignKey(related_name='lines', verbose_name='Refund', to='refund.Refund')),
+                ('order_line', models.ForeignKey(related_name='refund_lines', verbose_name='Order Line', to='order.Line', on_delete=models.CASCADE)),
+                ('refund', models.ForeignKey(related_name='lines', verbose_name='Refund', to='refund.Refund', on_delete=models.CASCADE)),
             ],
             options={
                 'ordering': ('-modified', '-created'),

@@ -15,6 +15,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='range',
             name='catalog',
-            field=models.ForeignKey(related_name='ranges', blank=True, to='catalogue.Catalog', null=True),
+            field=models.ForeignKey(related_name='ranges', blank=True, to='catalogue.Catalog', null=True, on_delete=models.CASCADE),
         ),
     ]

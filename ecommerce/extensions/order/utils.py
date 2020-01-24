@@ -108,7 +108,7 @@ class OrderCreator(OscarOrderCreator):
             order_data['shipping_address'] = shipping_address
         if billing_address:
             order_data['billing_address'] = billing_address
-        if user and user.is_authenticated():
+        if user and user.is_authenticated:
             order_data['user_id'] = user.id
         if status:
             order_data['status'] = status

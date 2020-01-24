@@ -96,7 +96,7 @@ class RefundCreateView(generics.CreateAPIView):
 
         # Ensure the user has an LMS user id
         try:
-            if request.user.is_authenticated():
+            if request.user.is_authenticated:
                 requested_by = request.user.id
             else:  # pragma: no cover
                 requested_by = None

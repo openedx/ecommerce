@@ -16,7 +16,7 @@ class Migration(migrations.Migration):
             name='OrderLineVouchers',
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('line', models.ForeignKey(related_name='order_line_vouchers', to='order.Line')),
+                ('line', models.ForeignKey(related_name='order_line_vouchers', to='order.Line', on_delete=models.CASCADE)),
                 ('vouchers', models.ManyToManyField(related_name='order_line_vouchers', to='voucher.Voucher', blank=True)),
             ],
         ),

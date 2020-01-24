@@ -16,7 +16,7 @@ class Migration(migrations.Migration):
             name='CouponVouchers',
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('coupon', models.ForeignKey(related_name='coupon_vouchers', to='catalogue.Product')),
+                ('coupon', models.ForeignKey(related_name='coupon_vouchers', to='catalogue.Product', on_delete=models.CASCADE)),
                 ('vouchers', models.ManyToManyField(related_name='coupon_vouchers', to='voucher.Voucher', blank=True)),
             ],
         ),

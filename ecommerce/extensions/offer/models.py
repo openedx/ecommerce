@@ -164,9 +164,9 @@ class ConditionalOffer(AbstractConditionalOffer):
     UPDATABLE_OFFER_FIELDS = ['email_domains', 'max_uses']
     email_domains = models.CharField(max_length=255, blank=True, null=True)
     site = models.ForeignKey(
-        'sites.Site', verbose_name=_('Site'), null=True, blank=True, default=None
+        'sites.Site', verbose_name=_('Site'), null=True, blank=True, default=None, on_delete=models.CASCADE
     )
-    partner = models.ForeignKey('partner.Partner', null=True, blank=True)
+    partner = models.ForeignKey('partner.Partner', null=True, blank=True, on_delete=models.CASCADE)
 
     # Do not record the slug field in the history table because AutoSlugField is not compatible with
     # django-simple-history.  Background: https://github.com/edx/course-discovery/pull/332
@@ -512,7 +512,7 @@ class OfferAssignment(TimeStampedModel):
         (OFFER_ASSIGNMENT_REVOKED, _("Code has been revoked for this user.")),
     )
 
-    offer = models.ForeignKey('offer.ConditionalOffer')
+    offer = models.ForeignKey('offer.ConditionalOffer', on_delete=models.CASCADE)
     code = models.CharField(max_length=128)
     user_email = models.EmailField()
     status = models.CharField(
@@ -523,7 +523,7 @@ class OfferAssignment(TimeStampedModel):
     voucher_application = models.ForeignKey(
         'voucher.VoucherApplication',
         null=True,
-        blank=True
+        blank=True, on_delete=models.CASCADE
     )
     history = HistoricalRecords()
 

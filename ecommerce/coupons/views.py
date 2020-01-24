@@ -78,7 +78,7 @@ def voucher_is_valid(voucher, products, request):
             return False, _('This coupon code has expired.')
 
     # We want to display the offer page to all users, including anonymous.
-    if request.user.is_authenticated():
+    if request.user.is_authenticated:
         avail, msg = voucher.is_available_to_user(request.user)
         if not avail:
             voucher_msg = msg.replace('voucher', 'coupon')

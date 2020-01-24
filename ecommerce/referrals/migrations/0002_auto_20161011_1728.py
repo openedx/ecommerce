@@ -15,7 +15,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='referral',
             name='site',
-            field=models.ForeignKey(to='sites.Site', null=True),
+            field=models.ForeignKey(to='sites.Site', null=True, on_delete=models.CASCADE),
             preserve_default=False,
         ),
         migrations.AddField(
