@@ -4,6 +4,7 @@
 # This file is distributed under the GNU AFFERO GENERAL PUBLIC LICENSE.
 # 
 # Translators:
+# Translators:
 # Anthony Mangano <amangano@edx.org>, 2017
 # itskawsar <itskawsar@gmail.com>, 2015
 # Masud Ahmed <masud.ahmed92@gmail.com>, 2017
@@ -12,7 +13,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-01-19 20:12+0000\n"
+"POT-Creation-Date: 2020-01-26 20:12+0000\n"
 "PO-Revision-Date: 2020-01-19 20:13+0000\n"
 "Last-Translator: edx_transifex_bot <i18n-working-group+edx-transifex-bot@edx.org>\n"
 "Language-Team: Bengali (Bangladesh) (http://www.transifex.com/open-edx/edx-platform/language/bn_BD/)\n"

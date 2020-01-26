@@ -4,6 +4,7 @@
 # This file is distributed under the GNU AFFERO GENERAL PUBLIC LICENSE.
 # 
 # Translators:
+# Translators:
 # kmooc <shevious@gmail.com>, 2015
 # Jong-Dae Park <jdpark7@gmail.com>, 2015
 # 이상은 <sl4557a@gmail.com>, 2015
@@ -11,7 +12,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-01-19 20:12+0000\n"
+"POT-Creation-Date: 2020-01-26 20:12+0000\n"
 "PO-Revision-Date: 2020-01-19 20:13+0000\n"
 "Last-Translator: edx_transifex_bot <i18n-working-group+edx-transifex-bot@edx.org>\n"
 "Language-Team: Korean (Korea) (http://www.transifex.com/open-edx/edx-platform/language/ko_KR/)\n"
