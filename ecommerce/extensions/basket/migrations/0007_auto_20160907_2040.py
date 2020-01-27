@@ -28,12 +28,12 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='basketattribute',
             name='attribute_type',
-            field=models.ForeignKey(verbose_name='Attribute Type', to='basket.BasketAttributeType'),
+            field=models.ForeignKey(verbose_name='Attribute Type', to='basket.BasketAttributeType', on_delete=models.CASCADE),
         ),
         migrations.AddField(
             model_name='basketattribute',
             name='basket',
-            field=models.ForeignKey(verbose_name='Basket', to='basket.Basket'),
+            field=models.ForeignKey(verbose_name='Basket', to='basket.Basket', on_delete=models.CASCADE),
         ),
         migrations.AlterUniqueTogether(
             name='basketattribute',

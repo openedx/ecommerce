@@ -20,8 +20,8 @@ class Migration(migrations.Migration):
                 ('lms_url_root', models.URLField(help_text="Root URL of this site's LMS (e.g. https://courses.stage.edx.org)", verbose_name='LMS base url for custom site/microsite')),
                 ('theme_scss_path', models.CharField(help_text='Path to scss files of the custom site theme', max_length=255, verbose_name='Path to custom site theme')),
                 ('payment_processors', models.CharField(help_text="Comma-separated list of processor names: 'cybersource,paypal'", max_length=255, verbose_name='Payment processors')),
-                ('partner', models.ForeignKey(to='partner.Partner')),
-                ('site', models.ForeignKey(to='sites.Site')),
+                ('partner', models.ForeignKey(to='partner.Partner', on_delete=models.CASCADE)),
+                ('site', models.ForeignKey(to='sites.Site', on_delete=models.CASCADE)),
             ],
         ),
         migrations.AlterUniqueTogether(

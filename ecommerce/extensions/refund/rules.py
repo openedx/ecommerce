@@ -17,7 +17,7 @@ def request_user_has_refund_access(user):
     Returns:
         boolean: whether the request user has access or not
     """
-    if user.is_authenticated():
+    if user.is_authenticated:
         return user_has_access_via_database(
             user,
             ORDER_MANAGER_ROLE,

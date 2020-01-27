@@ -15,7 +15,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='product',
             name='course',
-            field=models.ForeignKey(related_name='products', blank=True, to='courses.Course', null=True),
+            field=models.ForeignKey(related_name='products', blank=True, to='courses.Course', null=True, on_delete=models.CASCADE),
             preserve_default=True,
         ),
     ]

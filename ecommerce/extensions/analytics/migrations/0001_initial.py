@@ -55,7 +55,7 @@ class Migration(migrations.Migration):
                 ('num_order_items', models.PositiveIntegerField(default=0, db_index=True, verbose_name='Order Items')),
                 ('total_spent', models.DecimalField(default=Decimal('0.00'), max_digits=12, decimal_places=2, verbose_name='Total Spent')),
                 ('date_last_order', models.DateTimeField(blank=True, verbose_name='Last Order Date', null=True)),
-                ('user', models.OneToOneField(verbose_name='User', to=settings.AUTH_USER_MODEL)),
+                ('user', models.OneToOneField(verbose_name='User', to=settings.AUTH_USER_MODEL, on_delete=models.CASCADE)),
             ],
             options={
                 'verbose_name_plural': 'User records',
@@ -70,7 +70,7 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('query', models.CharField(max_length=255, db_index=True, verbose_name='Search term')),
                 ('date_created', models.DateTimeField(auto_now_add=True, verbose_name='Date Created')),
-                ('user', models.ForeignKey(verbose_name='User', to=settings.AUTH_USER_MODEL)),
+                ('user', models.ForeignKey(verbose_name='User', to=settings.AUTH_USER_MODEL, on_delete=models.CASCADE)),
             ],
             options={
                 'verbose_name_plural': 'User search queries',

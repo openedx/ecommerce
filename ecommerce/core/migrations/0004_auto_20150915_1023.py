@@ -14,6 +14,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='siteconfiguration',
             name='site',
-            field=models.OneToOneField(to='sites.Site'),
+            field=models.OneToOneField(to='sites.Site', on_delete=models.CASCADE),
         ),
     ]
