@@ -5,19 +5,19 @@
 #    make upgrade
 #
 alabaster==0.7.12         # via sphinx
-babel==2.7.0              # via sphinx
+babel==2.8.0              # via sphinx
 certifi==2019.11.28       # via requests
 chardet==3.0.4            # via requests
-docutils==0.15.2          # via sphinx
+docutils==0.16            # via sphinx
 edx-sphinx-theme==1.0.2
 idna==2.8                 # via requests
-imagesize==1.1.0          # via sphinx
-jinja2==2.10.3            # via sphinx
+imagesize==1.2.0          # via sphinx
+jinja2==2.11.0            # via sphinx
 markupsafe==1.1.1         # via jinja2
 pygments==2.5.2           # via sphinx
 pytz==2016.10
 requests==2.22.0          # via sphinx
-six==1.11.0
+six==1.14.0               # via edx-sphinx-theme, sphinx
 snowballstemmer==2.0.0    # via sphinx
 sphinx==1.5.3
-urllib3==1.23
+urllib3==1.25.8           # via requests

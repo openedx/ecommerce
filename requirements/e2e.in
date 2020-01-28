@@ -1,9 +1,9 @@
 -r pins.txt
 
 # Packages required to run e2e tests
-edx-rest-api-client
+edx-rest-api-client<2.0.0
 pytest
-pytest-randomly < 2.0.0  # Pin below 2.0 until we're on python 3
+pytest-randomly
 pytest-selenium
 pytest-timeout
 python-dotenv

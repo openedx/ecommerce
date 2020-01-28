@@ -4,39 +4,33 @@
 #
 #    make upgrade
 #
-atomicwrites==1.3.0       # via pytest
 attrs==19.3.0             # via pytest
 certifi==2019.11.28       # via requests
 chardet==3.0.4            # via requests
-configparser==4.0.2       # via importlib-metadata
-contextlib2==0.6.0.post1  # via importlib-metadata
 edx-rest-api-client==1.9.2
-funcsigs==1.0.2           # via pytest
 idna==2.8                 # via requests
-importlib-metadata==1.3.0  # via pluggy, pytest
-more-itertools==5.0.0     # via pytest, zipp
-packaging==19.2           # via pytest
-pathlib2==2.3.5           # via importlib-metadata, pytest
+importlib-metadata==1.4.0  # via pluggy, pytest, pytest-randomly
+more-itertools==8.1.0     # via pytest
+packaging==20.1           # via pytest
+pathlib2==2.3.5           # via pytest
 pluggy==0.13.1            # via pytest
-py==1.8.0                 # via pytest
+py==1.8.1                 # via pytest
 pyjwt==1.7.1              # via edx-rest-api-client
-pyparsing==2.4.5          # via packaging
+pyparsing==2.4.6          # via packaging
 pytest-base-url==1.4.1    # via pytest-selenium
 pytest-html==1.22.1       # via pytest-selenium
 pytest-metadata==1.8.0    # via pytest-html
-pytest-randomly==1.2.3
+pytest-randomly==3.2.1
 pytest-selenium==1.17.0
-pytest-timeout==1.3.3
+pytest-timeout==1.3.4
 pytest-variables==1.9.0   # via pytest-selenium
-pytest==4.6.7
-python-dotenv==0.10.3
+pytest==5.3.4
+python-dotenv==0.10.5
 pytz==2016.10
 requests==2.22.0          # via edx-rest-api-client, pytest-base-url, pytest-selenium, slumber
-scandir==1.10.0           # via pathlib2
 selenium==3.141.0
-six==1.11.0
+six==1.14.0               # via packaging, pathlib2
 slumber==0.7.1            # via edx-rest-api-client
-typing==3.7.4.1           # via python-dotenv
-urllib3==1.23
-wcwidth==0.1.7            # via pytest
-zipp==0.6.0               # via importlib-metadata
+urllib3==1.25.8           # via requests, selenium
+wcwidth==0.1.8            # via pytest
+zipp==1.1.0               # via importlib-metadata

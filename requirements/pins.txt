@@ -1,3 +1,1 @@
 pytz==2016.10  # Pinned to preserve the status quo
-six==1.11.0  # Pinned because transifex-client==0.13.6 pins it
-urllib3<1.24  # Pinned because transifex-client==0.13.6 pins it

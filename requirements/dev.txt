@@ -144,6 +144,7 @@ pyopenssl==19.1.0
 pyparsing==2.4.5
 pysqlite==2.8.3 ; python_version == "2.7"
 pytest-base-url==1.4.1
+pytest-django==3.8.0
 pytest-html==1.22.1
 pytest-metadata==1.8.0
 pytest-randomly==1.2.3
