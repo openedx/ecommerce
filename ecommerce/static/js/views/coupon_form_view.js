@@ -123,7 +123,10 @@ define([
                     }
                 },
                 'input[name=benefit_value]': {
-                    observe: 'benefit_value'
+                    observe: 'benefit_value',
+                    onSet: function(val) {
+                        return parseInt(val, 10);
+                    }
                 },
                 'input[name=quantity]': {
                     observe: 'quantity'
