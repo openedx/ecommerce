@@ -67,7 +67,7 @@ djangorestframework==3.6.4
 docutils==0.15.2
 drf-extensions==0.3.1
 edx-auth-backends==2.0.2
-edx-django-release-util==0.3.2
+edx-django-release-util==0.3.5
 edx-django-sites-extensions==2.4.2
 edx-django-utils==2.0.2
 edx-drf-extensions==2.4.5
