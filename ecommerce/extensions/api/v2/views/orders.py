@@ -115,12 +115,16 @@ class ManualCourseEnrollmentOrderViewSet(EdxOrderPlacementMixin, ViewSet):
             >>>             "username": "me",
             >>>             "email": "me@example.com",
             >>>             "course_run_key": "course-v1:TestX+Test100+2019_T1"
+            >>>             "enterprise_customer_name": "an-enterprise-customer",
+            >>>             "enterprise_customer_uuid": "394a5ce5-6ff4-4b2b-bea1-a273c6920ae1",
             >>>         },
             >>>         {
             >>>             "lms_user_id": 123,
             >>>             "username": "metoo",
             >>>             "email": "metoo@example.com",
             >>>             "course_run_key": ""
+            >>>             "enterprise_customer_name": "an-enterprise-customer",
+            >>>             "enterprise_customer_uuid": "394a5ce5-6ff4-4b2b-bea1-a273c6920ae1",
             >>>         },
             >>>     ]
             >>> }
@@ -133,6 +137,8 @@ class ManualCourseEnrollmentOrderViewSet(EdxOrderPlacementMixin, ViewSet):
             >>>             "username": "me",
             >>>             "email": "me@example.com",
             >>>             "course_run_key": "course-v1:TestX+Test100+2019_T1",
+            >>>             "enterprise_customer_name": "an-enterprise-customer",
+            >>>             "enterprise_customer_uuid": "394a5ce5-6ff4-4b2b-bea1-a273c6920ae1",
             >>>             "status": "success",
             >>>             "detail": "EDX-123456"
             >>>         },
@@ -141,6 +147,8 @@ class ManualCourseEnrollmentOrderViewSet(EdxOrderPlacementMixin, ViewSet):
             >>>             "username": "metoo",
             >>>             "email": "metoo@example.com",
             >>>             "course_run_key": ""
+            >>>             "enterprise_customer_name": "an-enterprise-customer",
+            >>>             "enterprise_customer_uuid": "394a5ce5-6ff4-4b2b-bea1-a273c6920ae1",
             >>>             "status": "failure",
             >>>             "detail": "Missing required enrollmment data: `course_run_key`"
             >>>         },
@@ -194,6 +202,8 @@ class ManualCourseEnrollmentOrderViewSet(EdxOrderPlacementMixin, ViewSet):
                     "email": <string>,
                     "course_run_key": <string>
                     "discount_percentage": <string>
+                    "enterprise_customer_name": <string>,
+                    "enterprise_customer_uuid": <string>,
                 `request_user`: <User>
                 `request_site`: <Site>
             Returns:
@@ -249,7 +259,9 @@ class ManualCourseEnrollmentOrderViewSet(EdxOrderPlacementMixin, ViewSet):
         basket = Basket.create_basket(request_site, learner_user)
         basket.add_product(seat_product)
 
-        discount_offer = self._get_or_create_discount_offer()
+        enterprise_customer_name = enrollment.get('enterprise_customer_name')
+        enterprise_customer_uuid = enrollment.get('enterprise_customer_uuid')
+        discount_offer = self._get_or_create_discount_offer(enterprise_customer_name, enterprise_customer_uuid)
         Applicator().apply_offers(basket, [discount_offer])
         try:
             order = self.place_free_order(basket)
@@ -354,11 +366,15 @@ class ManualCourseEnrollmentOrderViewSet(EdxOrderPlacementMixin, ViewSet):
 
         return learner_user
 
-    def _get_or_create_discount_offer(self):
+    def _get_or_create_discount_offer(self, enterprise_customer_name, enterprise_customer_uuid):
         """
-        Get or Create 100% discount offer for `Manual Enrollemnt Order`.
+        Get or Create 100% discount offer for `Manual Enrollment Order`.
         """
-        condition, __ = Condition.objects.get_or_create(proxy_class=class_path(ManualEnrollmentOrderDiscountCondition))
+        condition, __ = Condition.objects.get_or_create(
+            proxy_class=class_path(ManualEnrollmentOrderDiscountCondition),
+            enterprise_customer_name=enterprise_customer_name,
+            enterprise_customer_uuid=enterprise_customer_uuid,
+        )
 
         benefit, _ = Benefit.objects.get_or_create(
             proxy_class=class_path(ManualEnrollmentOrderDiscountBenefit),
@@ -374,7 +390,7 @@ class ManualCourseEnrollmentOrderViewSet(EdxOrderPlacementMixin, ViewSet):
         }
 
         offer, __ = ConditionalOffer.objects.get_or_create(
-            name='Manual Course Enrollment Order Offer',
+            name='Manual Course Enrollment Order Offer for enterprise {}'.format(enterprise_customer_uuid),
             defaults=offer_kwargs
         )
 
