@@ -1,14 +1,13 @@
 from __future__ import absolute_import
 
 import os
-from unittest import skipIf
+from unittest import skipIf, SkipTest
 
 import six
 from bok_choy.browser import browser
 from django.contrib.messages import constants as MSG
 from django.test import override_settings
 from django.urls import reverse
-from nose.plugins.skip import SkipTest
 from oscar.core.loading import get_model
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.support.wait import WebDriverWait
