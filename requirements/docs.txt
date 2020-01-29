@@ -5,6 +5,7 @@
 #    make upgrade
 #
 alabaster==0.7.12         # via sphinx
+astroid==1.6.6
 babel==2.8.0              # via sphinx
 certifi==2019.11.28       # via requests
 chardet==3.0.4            # via requests
@@ -12,12 +13,20 @@ docutils==0.16            # via sphinx
 edx-sphinx-theme==1.0.2
 idna==2.8                 # via requests
 imagesize==1.2.0          # via sphinx
+isort==4.3.21             # via pylint
 jinja2==2.11.0            # via sphinx
+lazy-object-proxy==1.4.3  # via astroid
 markupsafe==1.1.1         # via jinja2
+mccabe==0.6.1             # via pylint
 pygments==2.5.2           # via sphinx
+pylint==1.9.5
+python-slugify==4.0.0     # via transifex-client
 pytz==2016.10
-requests==2.22.0          # via sphinx
-six==1.14.0               # via edx-sphinx-theme, sphinx
+requests==2.22.0          # via sphinx, transifex-client
+six==1.14.0               # via astroid, edx-sphinx-theme, pylint, sphinx, transifex-client
 snowballstemmer==2.0.0    # via sphinx
 sphinx==1.5.3
-urllib3==1.25.8           # via requests
+text-unidecode==1.3       # via python-slugify
+transifex-client==0.13.4
+urllib3==1.25.8           # via requests, transifex-client
+wrapt==1.11.2             # via astroid

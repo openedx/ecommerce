@@ -1,1 +1,6 @@
 pytz==2016.10  # Pinned to preserve the status quo
+# transifex-client 0.13.5 and 0.13.6 needlessly pin six and urllib3, 0.13.7 does so for python-slugify
+#   https://github.com/transifex/transifex-client/issues/252
+transifex-client==0.13.4
+astroid==1.6.6  # Pinned for python2 support
+pylint==1.9.5   # Pinned for python2 support

@@ -4,16 +4,30 @@
 #
 #    make upgrade
 #
+astroid==1.6.6
+certifi==2019.11.28       # via requests
+chardet==3.0.4            # via requests
 filelock==3.0.12          # via tox
+idna==2.8                 # via requests
 importlib-metadata==1.5.0  # via pluggy, tox
+isort==4.3.21             # via pylint
+lazy-object-proxy==1.4.3  # via astroid
+mccabe==0.6.1             # via pylint
 packaging==20.1           # via tox
 pluggy==0.13.1            # via tox
 py==1.8.1                 # via tox
+pylint==1.9.5
 pyparsing==2.4.6          # via packaging
+python-slugify==4.0.0     # via transifex-client
 pytz==2016.10
-six==1.14.0               # via packaging, tox
+requests==2.22.0          # via transifex-client
+six==1.14.0               # via astroid, packaging, pylint, tox, transifex-client
+text-unidecode==1.3       # via python-slugify
 toml==0.10.0              # via tox
 tox-battery==0.5.2
 tox==3.14.3
+transifex-client==0.13.4
+urllib3==1.25.8           # via requests, transifex-client
 virtualenv==16.7.9        # via tox
+wrapt==1.11.2             # via astroid
 zipp==1.1.0               # via importlib-metadata
