@@ -1,7 +1,7 @@
 """ Contains all the available statuses for Orders and Order Lines """
 
 
-class ORDER(object):
+class ORDER:
     """Constants representing all known order statuses. """
     COMPLETE = 'Complete'
     FULFILLMENT_ERROR = 'Fulfillment Error'
@@ -10,7 +10,7 @@ class ORDER(object):
     PENDING = 'Pending'
 
 
-class LINE(object):
+class LINE:
     """Constants representing all known line statuses. """
     COMPLETE = 'Complete'
     FULFILLMENT_CONFIGURATION_ERROR = 'Fulfillment Configuration Error'

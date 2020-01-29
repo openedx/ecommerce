@@ -147,11 +147,10 @@ def _get_message_code(message):
                 code,
             )
         return code
-    else:
-        if 'safe' in extra_tags_list:  # pragma: no cover
-            logger.warning(
-                'Message "%s" uses the `safe` extra_tag which indicates it includes HTML. An additional'
-                'extra_tag is required to provide the message code for the microfrontend client.',
-                message.message,
-            )
+    if 'safe' in extra_tags_list:  # pragma: no cover
+        logger.warning(
+            'Message "%s" uses the `safe` extra_tag which indicates it includes HTML. An additional'
+            'extra_tag is required to provide the message code for the microfrontend client.',
+            message.message,
+        )
     return None

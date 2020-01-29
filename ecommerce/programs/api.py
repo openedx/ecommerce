@@ -8,7 +8,7 @@ from edx_django_utils.cache import TieredCache
 logger = logging.getLogger(__name__)
 
 
-class ProgramsApiClient(object):
+class ProgramsApiClient:
     """ Client for the Programs API.
 
     This client is designed to cache the data retrieved from the Programs API to

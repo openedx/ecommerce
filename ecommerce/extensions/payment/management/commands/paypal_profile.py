@@ -87,8 +87,7 @@ class Command(BaseCommand):
         result = profile.create()
         if not result:
             raise CommandError("Could not create web profile: {}".format(profile.error))
-        else:
-            log.info("Created profile `%s` (id=%s).", profile.name, profile.id)
+        log.info("Created profile `%s` (id=%s).", profile.name, profile.id)
         return profile
 
     def _do_update(self, profile_id, profile_data):

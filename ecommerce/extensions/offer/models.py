@@ -156,8 +156,7 @@ class Benefit(AbstractBenefit):
                         applicable_lines.remove(metadata['line'])
 
             return [(line.product.stockrecords.first().price_excl_tax, line) for line in applicable_lines]
-        else:
-            return super(Benefit, self).get_applicable_lines(offer, basket, range=range)  # pylint: disable=bad-super-call
+        return super(Benefit, self).get_applicable_lines(offer, basket, range=range)  # pylint: disable=bad-super-call
 
 
 class ConditionalOffer(AbstractConditionalOffer):

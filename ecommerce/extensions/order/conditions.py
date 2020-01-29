@@ -19,7 +19,7 @@ class ManualEnrollmentOrderDiscountCondition(
         SingleItemConsumptionConditionMixin,
         Condition
 ):
-    class Meta(object):
+    class Meta:
         app_label = 'order'
         proxy = True
 

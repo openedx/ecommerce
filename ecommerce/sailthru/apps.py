@@ -11,4 +11,4 @@ class SailthruAppConfig(AppConfig):
         super(SailthruAppConfig, self).ready()
 
         # noinspection PyUnresolvedReferences
-        import ecommerce.sailthru.signals  # pylint: disable=unused-variable
+        import ecommerce.sailthru.signals  # pylint: disable=unused-import, import-outside-toplevel

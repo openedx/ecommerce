@@ -19,7 +19,7 @@ class Partner(AbstractPartner):
 
     history = HistoricalRecords(excluded_fields=['code'])
 
-    class Meta(object):
+    class Meta:
         # Model name that will appear in the admin panel
         verbose_name = _('Partner')
         verbose_name_plural = _('Partners')

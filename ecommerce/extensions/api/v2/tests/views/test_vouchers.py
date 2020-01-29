@@ -221,34 +221,41 @@ class VoucherViewSetTests(DiscoveryMockMixin, DiscoveryTestMixin, LmsApiMockMixi
         expired_seat = CourseFactory(partner=self.partner).create_or_update_seat('professional', False, 100)
         future_enrollment_seat = CourseFactory(partner=self.partner).create_or_update_seat('professional', False, 100)
 
-        course_discovery_results = [{
-            'key': no_enrollment_end_seat.attr.course_key,
-            'enrollment_end': None,
-            'enrollment_start': str(now() - datetime.timedelta(days=1)),
-        }, {
-            'key': no_enrollment_start_seat.attr.course_key,
-            'enrollment_start': None,
-            'enrollment_end': None,
-        }, {
-            'key': valid_seat.attr.course_key,
-            'enrollment_end': str(now() + datetime.timedelta(days=1)),
-            'enrollment_start': str(now() - datetime.timedelta(days=1)),
-        }, {
-            'key': expired_enrollment_seat.attr.course_key,
-            'enrollment_end': str(now() - datetime.timedelta(days=1)),
-            'enrollment_start': str(now() - datetime.timedelta(days=1)),
-        }, {
-            'key': expired_seat.attr.course_key,
-            'enrollment_end': None,
-            'enrollment_start': str(now() - datetime.timedelta(days=1)),
-            'end': str(now() - datetime.timedelta(days=1)),
-        }, {
-            'key': future_enrollment_seat.attr.course_key,
-            'enrollment_end': None,
-            'enrollment_start': str(now() + datetime.timedelta(days=1)),
-        }]
+        course_discovery_results = [
+            {
+                'key': no_enrollment_end_seat.attr.course_key,
+                'enrollment_end': None,
+                'enrollment_start': str(now() - datetime.timedelta(days=1)),
+            },
+            {
+                'key': no_enrollment_start_seat.attr.course_key,
+                'enrollment_start': None,
+                'enrollment_end': None,
+            },
+            {
+                'key': valid_seat.attr.course_key,
+                'enrollment_end': str(now() + datetime.timedelta(days=1)),
+                'enrollment_start': str(now() - datetime.timedelta(days=1)),
+            },
+            {
+                'key': expired_enrollment_seat.attr.course_key,
+                'enrollment_end': str(now() - datetime.timedelta(days=1)),
+                'enrollment_start': str(now() - datetime.timedelta(days=1)),
+            },
+            {
+                'key': expired_seat.attr.course_key,
+                'enrollment_end': None,
+                'enrollment_start': str(now() - datetime.timedelta(days=1)),
+                'end': str(now() - datetime.timedelta(days=1)),
+            },
+            {
+                'key': future_enrollment_seat.attr.course_key,
+                'enrollment_end': None,
+                'enrollment_start': str(now() + datetime.timedelta(days=1)),
+            }
+        ]
 
-        products, __, __ = VoucherViewSet().retrieve_course_objects(course_discovery_results, 'professional')
+        products, _, __ = VoucherViewSet().retrieve_course_objects(course_discovery_results, 'professional')
         self.assertIn(no_enrollment_end_seat, products)
         self.assertIn(no_enrollment_start_seat, products)
         self.assertIn(valid_seat, products)
@@ -314,9 +321,8 @@ class VoucherViewOffersEndpointTests(DiscoveryMockMixin, CouponMixin, DiscoveryT
         voucher, __ = prepare_voucher(_range=new_range, benefit_value=10)
 
         with mock.patch(
-            'ecommerce.extensions.api.v2.views.vouchers.VoucherViewSet.get_offers',
-            mock.Mock(side_effect=exception)
-        ):
+                'ecommerce.extensions.api.v2.views.vouchers.VoucherViewSet.get_offers',
+                mock.Mock(side_effect=exception)):
             request = self.prepare_offers_listing_request(voucher.code)
             response = self.endpointView(request)
 
@@ -329,9 +335,8 @@ class VoucherViewOffersEndpointTests(DiscoveryMockMixin, CouponMixin, DiscoveryT
         voucher, __ = prepare_voucher(_range=new_range)
 
         with mock.patch(
-            'ecommerce.extensions.api.v2.views.vouchers.VoucherViewSet.get_offers',
-            mock.Mock(side_effect=Http404)
-        ):
+                'ecommerce.extensions.api.v2.views.vouchers.VoucherViewSet.get_offers',
+                mock.Mock(side_effect=Http404)):
             request = self.prepare_offers_listing_request(voucher.code)
             response = self.endpointView(request)
 

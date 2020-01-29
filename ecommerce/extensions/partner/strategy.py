@@ -35,9 +35,9 @@ class CourseSeatAvailabilityPolicyMixin(strategy.StockRequired):
 
 class DefaultStrategy(strategy.UseFirstStockRecord, CourseSeatAvailabilityPolicyMixin,
                       strategy.NoTax, strategy.Structured):
-    pass
+    """ Default Strategy """
 
 
-class Selector(object):
+class Selector:
     def strategy(self, request=None, user=None, **kwargs):  # pylint: disable=unused-argument
         return DefaultStrategy(request if hasattr(request, 'user') else None)

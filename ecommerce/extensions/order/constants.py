@@ -1,4 +1,4 @@
-class PaymentEventTypeName(object):
+class PaymentEventTypeName:
     PAID = 'Paid'
     REFUNDED = 'Refunded'
 

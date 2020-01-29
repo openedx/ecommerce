@@ -31,8 +31,7 @@ def query_yes_no(question, default="yes"):
         choice = moves.input().lower()
         if default is not None and choice == '':
             return valid[default]
-        elif choice in valid:
+        if choice in valid:
             return valid[choice]
-        else:
-            sys.stdout.write("Please respond with one of the following ({}).\n"
-                             .format(', '.join(sorted(list(valid.keys())))))
+        sys.stdout.write("Please respond with one of the following ({}).\n"
+                         .format(', '.join(sorted(list(valid.keys())))))

@@ -85,7 +85,7 @@ class Course(models.Model):
 
         if mode == 'no-id-professional':
             return 'professional'
-        elif mode == 'audit':
+        if mode == 'audit':
             # Historically, users enrolled in an 'audit' mode have not received a certificate.
             return ''
 
@@ -97,13 +97,13 @@ class Course(models.Model):
         seat_types = [getattr(seat.attr, 'certificate_type', '').lower() for seat in self.seat_products]
         if 'credit' in seat_types:
             return 'credit'
-        elif 'professional' in seat_types or 'no-id-professional' in seat_types:
+        if 'professional' in seat_types or 'no-id-professional' in seat_types:
             return 'professional'
         # This is checking for the Verified and Audit case, but Audit has no certificate type
         # so it is returned as the empty string.
-        elif 'verified' in seat_types and '' in seat_types:
+        if 'verified' in seat_types and '' in seat_types:
             return 'verified'
-        elif 'verified' in seat_types:
+        if 'verified' in seat_types:
             return 'verified-only'
         return 'audit'
 

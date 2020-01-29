@@ -26,7 +26,7 @@ logger = logging.getLogger(__name__)
 
 
 class EnterpriseCustomerCondition(ConditionWithoutRangeMixin, SingleItemConsumptionConditionMixin, Condition):
-    class Meta(object):
+    class Meta:
         app_label = 'enterprise'
         proxy = True
 
@@ -198,7 +198,7 @@ class EnterpriseCustomerCondition(ConditionWithoutRangeMixin, SingleItemConsumpt
 
 class AssignableEnterpriseCustomerCondition(EnterpriseCustomerCondition):
     """An enterprise condition that can be redeemed by one or more assigned users."""
-    class Meta(object):
+    class Meta:
         app_label = 'enterprise'
         proxy = True
 

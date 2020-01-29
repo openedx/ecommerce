@@ -60,7 +60,7 @@ OrderTotalCalculator = get_class('checkout.calculators', 'OrderTotalCalculator')
 PaymentProcessorResponse = get_model('payment', 'PaymentProcessorResponse')
 
 
-class CyberSourceProcessorMixin(object):
+class CyberSourceProcessorMixin:
     @cached_property
     def payment_processor(self):
         return Cybersource(self.request.site)
@@ -405,6 +405,7 @@ class CybersourceInterstitialView(CyberSourceProcessorMixin, EdxOrderPlacementMi
         """ Logs standard payment response as exception log unless logger_function supplied. """
         message_prefix = message_prefix + ' ' if message_prefix else ''
         logger_function = logger_function if logger_function else logger.exception
+        # pylint: disable=logging-not-lazy
         logger_function(
             message_prefix +
             'CyberSource payment failed due to [%s] for transaction [%s], order [%s], and basket [%d]. '

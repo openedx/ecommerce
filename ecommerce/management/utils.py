@@ -117,7 +117,7 @@ class FulfillFrozenBaskets(EdxOrderPlacementMixin):
             return None
 
         # Check and log if multiple payment notifications found
-        unique_transaction_ids = set([response.transaction_id for response in successful_transaction])
+        unique_transaction_ids = {response.transaction_id for response in successful_transaction}
         if len(unique_transaction_ids) > 1:
             logger.warning('Basket %d has more than one successful transaction id, using the first one', basket.id)
         return successful_transaction[0]

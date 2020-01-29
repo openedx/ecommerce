@@ -141,9 +141,8 @@ class Voucher(AbstractVoucher):
             if self.num_orders or num_assignments:
                 return 0
             return max_global_applications or 1
-        else:
-            offer_max_uses = max_global_applications or OFFER_MAX_USES_DEFAULT
-            return offer_max_uses - (self.num_orders + num_assignments)
+        offer_max_uses = max_global_applications or OFFER_MAX_USES_DEFAULT
+        return offer_max_uses - (self.num_orders + num_assignments)
 
 
 from oscar.apps.voucher.models import *  # noqa isort:skip pylint: disable=wildcard-import,unused-wildcard-import,wrong-import-position,wrong-import-order,ungrouped-imports

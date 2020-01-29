@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 
 
 class ProgramCourseRunSeatsCondition(SingleItemConsumptionConditionMixin, Condition):
-    class Meta(object):
+    class Meta:
         app_label = 'programs'
         proxy = True
 
@@ -39,7 +39,7 @@ class ProgramCourseRunSeatsCondition(SingleItemConsumptionConditionMixin, Condit
             for course in program['courses']:
                 for course_run in course['course_runs']:
                     program_skus.update(
-                        set([seat['sku'] for seat in course_run['seats'] if seat['type'] in applicable_seat_types])
+                        {seat['sku'] for seat in course_run['seats'] if seat['type'] in applicable_seat_types}
                     )
                 for entitlement in course['entitlements']:
                     if entitlement['mode'].lower() in applicable_seat_types:
@@ -113,7 +113,7 @@ class ProgramCourseRunSeatsCondition(SingleItemConsumptionConditionMixin, Condit
         Returns:
             bool
         """
-        basket_skus = set([line.stockrecord.partner_sku for line in basket.all_lines()])
+        basket_skus = {line.stockrecord.partner_sku for line in basket.all_lines()}
         try:
             program = get_program(self.program_uuid, basket.site.siteconfiguration)
         except (HttpNotFoundError, SlumberBaseException, Timeout):
@@ -144,7 +144,7 @@ class ProgramCourseRunSeatsCondition(SingleItemConsumptionConditionMixin, Condit
             # Get all of the SKUs that can satisfy this course
             skus = set()
             for course_run in course['course_runs']:
-                skus.update(set([seat['sku'] for seat in course_run['seats'] if seat['type'] in applicable_seat_types]))
+                skus.update({seat['sku'] for seat in course_run['seats'] if seat['type'] in applicable_seat_types})
             for entitlement in course['entitlements']:
                 if entitlement['mode'].lower() in applicable_seat_types:
                     skus.add(entitlement['sku'])

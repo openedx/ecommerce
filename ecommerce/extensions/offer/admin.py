@@ -44,7 +44,7 @@ class OfferAssignmentAdmin(admin.ModelAdmin):
     """
     Django admin model for `OfferAssignment`
     """
-    class Meta(object):
+    class Meta:
         model = OfferAssignment
 
     list_display = ('code', 'user_email', 'status', 'offer', 'voucher_application')
@@ -56,7 +56,7 @@ class OfferAssignmentEmailAttemptAdmin(admin.ModelAdmin):
     """
     Django admin model for `OfferAssignmentEmailAttempt`
     """
-    class Meta(object):
+    class Meta:
         model = OfferAssignmentEmailAttempt
 
     list_display = ('send_id', 'offer_assignment')

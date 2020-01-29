@@ -17,6 +17,7 @@ Selector = get_class('partner.strategy', 'Selector')
 
 
 class OrderDetailViewTestMixin(ThrottlingMixin):
+    @property
     def url(self):
         raise NotImplementedError
 
@@ -49,7 +50,7 @@ class OrderDetailViewTestMixin(ThrottlingMixin):
         self.assertEqual(response.status_code, 404)
 
 
-class ProductSerializerMixin(object):
+class ProductSerializerMixin:
     def serialize_product(self, product):
         """ Serializes a Product to a Python dict. """
         attribute_values = [

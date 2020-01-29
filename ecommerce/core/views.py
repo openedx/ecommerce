@@ -97,7 +97,7 @@ class AutoAuth(View):
         return redirect('/')
 
 
-class StaffOnlyMixin(object):
+class StaffOnlyMixin:
     """ Makes sure only staff users can access the view. """
 
     @method_decorator(login_required)

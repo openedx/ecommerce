@@ -11,7 +11,7 @@ PercentageDiscountBenefit = get_model('offer', 'PercentageDiscountBenefit')
 class ManualEnrollmentOrderDiscountBenefit(BenefitWithoutRangeMixin, PercentageBenefitMixin, PercentageDiscountBenefit):
     """ Manual course enrollment related PercentageDiscountBenefit without an attached range. """
 
-    class Meta(object):
+    class Meta:
         app_label = 'order'
         proxy = True
 

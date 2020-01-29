@@ -164,7 +164,7 @@ class BasketAddItemsView(APIView):
         return HttpResponseRedirect(redirect_url, status=303)
 
 
-class BasketLogicMixin(object):
+class BasketLogicMixin:
     """
     Business logic for determining basket contents and checkout/payment options.
     """
@@ -818,7 +818,7 @@ class QuantityAPIView(APIView, View, PaymentApiLogicMixin):
         return self.get_payment_api_response(status=400)
 
 
-class VoucherAddLogicMixin(object):
+class VoucherAddLogicMixin:
     """
     VoucherAdd logic for adding a voucher.
     """

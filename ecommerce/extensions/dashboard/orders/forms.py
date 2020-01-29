@@ -6,4 +6,4 @@ from ecommerce.extensions.dashboard.forms import UserFormMixin
 
 
 class OrderSearchForm(UserFormMixin, CoreOrderSearchForm):
-    pass
+    """ Order Search Form. """

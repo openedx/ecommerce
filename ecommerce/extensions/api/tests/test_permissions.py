@@ -8,7 +8,7 @@ from ecommerce.extensions.api.permissions import CanActForUser
 from ecommerce.tests.testcases import TestCase
 
 
-class PermissionsTestMixin(object):
+class PermissionsTestMixin:
     def get_request(self, user=None, data=None):
         request = APIRequestFactory().post('/', data)
 

@@ -61,9 +61,8 @@ class TestThemeStorage(TestCase):
         """
         asset = "images/default-logo.png"
         with patch(
-            "ecommerce.theming.storage.get_current_theme",
-            return_value=Theme(self.enabled_theme, self.enabled_theme, get_theme_base_dir(self.enabled_theme)),
-        ):
+                "ecommerce.theming.storage.get_current_theme",
+                return_value=Theme(self.enabled_theme, self.enabled_theme, get_theme_base_dir(self.enabled_theme))):
             asset_url = self.storage.url(asset)
             # remove hash key from file url
             expected_url = self.storage.base_url + self.enabled_theme + "/" + asset
@@ -76,9 +75,8 @@ class TestThemeStorage(TestCase):
         """
         asset = "images/default-logo.png"
         with patch(
-            "ecommerce.theming.storage.get_current_theme",
-            return_value=Theme(self.enabled_theme, self.enabled_theme, get_theme_base_dir(self.enabled_theme)),
-        ):
+                "ecommerce.theming.storage.get_current_theme",
+                return_value=Theme(self.enabled_theme, self.enabled_theme, get_theme_base_dir(self.enabled_theme))):
             returned_path = self.storage.path(asset)
             expected_path = self.themes_dir / self.enabled_theme / "static" / asset
 

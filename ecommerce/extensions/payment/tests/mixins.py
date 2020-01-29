@@ -44,7 +44,7 @@ SourceType = get_model('payment', 'SourceType')
 post_checkout = get_class('checkout.signals', 'post_checkout')
 
 
-class PaymentEventsMixin(object):
+class PaymentEventsMixin:
 
     DUPLICATE_ORDER_LOGGER_NAME = 'ecommerce.extensions.checkout.mixins'
 
@@ -512,10 +512,9 @@ class CybersourceNotificationTestsMixin(CybersourceMixin):
 
         # Verify that anticipated errors are handled gracefully.
         with mock.patch.object(
-            self.view,
-            'handle_order_placement',
-            side_effect=exception
-        ) as fake_handle_order_placement:
+                self.view,
+                'handle_order_placement',
+                side_effect=exception) as fake_handle_order_placement:
             error_message = \
                 'Order Failure: {payment_processor} payment was received, but an order for basket [{basket_id}] ' \
                 'could not be placed.'.format(payment_processor='Cybersource', basket_id=self.basket.id)
@@ -640,7 +639,7 @@ class CybersourceNotificationTestsMixin(CybersourceMixin):
         """ Ensure notifications are handled properly with or without keys/values present for optional fields. """
 
         with mock.patch(
-            'ecommerce.extensions.payment.views.cybersource.{}.handle_order_placement'.format(self.view.__name__)
+                'ecommerce.extensions.payment.views.cybersource.{}.handle_order_placement'.format(self.view.__name__)
         ) as mock_placement_handler:
             def check_notification_address(notification, expected_address):
                 self.client.post(self.path, notification)
@@ -812,7 +811,7 @@ class CybersourceNotificationTestsMixin(CybersourceMixin):
             )
 
 
-class PaypalMixin(object):
+class PaypalMixin:
     """Mixin with helper methods for mocking PayPal API responses."""
     APPROVAL_URL = 'https://api.sandbox.paypal.com/fake-approval-url'
     EMAIL = 'test-buyer@paypal.com'

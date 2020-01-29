@@ -1,4 +1,5 @@
 language: python
+dist: latest
 
 branches:
   only:
@@ -36,18 +37,18 @@ script:
 
 matrix:
   include:
-    - python: 2.7
+    - python: 3.5
       env:
         TESTNAME=quality-and-js
-        TARGETS="PYTHON_ENV=py27 requirements.js check_translations_up_to_date validate_translations clean_static static quality validate_js"
-    - python: 2.7
-      env: TESTNAME=test-python TARGETS="PYTHON_ENV=py27 requirements.js clean_static static validate_python"
+        TARGETS="requirements.js check_translations_up_to_date validate_translations clean_static static quality validate_js"
     - python: 3.5
+      env: TESTNAME=test-python TARGETS="requirements.js clean_static static validate_python"
+    - python: 3.6
       env:
-        TESTNAME=quality-and-js-.3.5
-        TARGETS="PYTHON_ENV=py35 requirements.js check_translations_up_to_date validate_translations clean_static static quality validate_js"
-    - python: 3.5
-      env: TESTNAME=test-python-3.5 TARGETS="PYTHON_ENV=py35 requirements.js clean_static static validate_python"
+        TESTNAME=quality-and-js-.3.6
+        TARGETS="requirements.js check_translations_up_to_date validate_translations clean_static static quality validate_js"
+    - python: 3.6
+      env: TESTNAME=test-python-3.6 TARGETS="requirements.js clean_static static validate_python"
       after_success:
         - pip install -U codecov
         - docker exec ecommerce_testing /edx/app/ecommerce/ecommerce/.travis/run_coverage.sh

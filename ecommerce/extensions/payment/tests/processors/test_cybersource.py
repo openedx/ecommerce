@@ -99,9 +99,8 @@ class CybersourceTests(CybersourceMixin, PaymentProcessorTestCaseMixin, TestCase
 
         with override_settings(PAYMENT_PROCESSOR_CONFIG=payment_processor_config):
             with self.assertRaisesMessage(
-                AssertionError,
-                'CyberSource processor must be configured for Silent Order POST and/or Secure Acceptance'
-            ):
+                    AssertionError,
+                    'CyberSource processor must be configured for Silent Order POST and/or Secure Acceptance'):
                 self.processor_class(self.site)
 
     def test_get_transaction_parameters(self):

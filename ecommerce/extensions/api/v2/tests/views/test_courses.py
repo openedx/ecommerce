@@ -52,7 +52,7 @@ class CourseViewSetTests(ProductSerializerMixin, DiscoveryTestMixin, TestCase):
             'url': self.get_full_url(reverse('api:v2:course-detail', kwargs={'pk': course.id})),
             'products_url': products_url,
             'last_edited': last_edited,
-            'has_active_bulk_enrollment_code': True if enrollment_code else False
+            'has_active_bulk_enrollment_code': bool(enrollment_code)
         }
 
         if include_products:

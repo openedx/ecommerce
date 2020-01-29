@@ -17,7 +17,7 @@ from e2e.helpers import EcommerceHelpers, LmsHelpers
 log = logging.getLogger(__name__)
 
 
-class TestSeatPayment(object):
+class TestSeatPayment:
     def get_verified_course_run(self):
         """ Returns a course run data dict. """
         return DiscoveryApi().get_course_run('verified')

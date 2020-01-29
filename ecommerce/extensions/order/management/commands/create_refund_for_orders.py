@@ -21,7 +21,6 @@ class RefundError(Exception):
     """
     Raised when refund could not be processed.
     """
-    pass
 
 
 class Command(BaseCommand):

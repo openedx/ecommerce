@@ -24,7 +24,7 @@ class PaymentProcessorResponse(models.Model):
     response = JSONField()
     created = models.DateTimeField(auto_now_add=True, db_index=True)
 
-    class Meta(object):
+    class Meta:
         get_latest_by = 'created'
         index_together = ('processor_name', 'transaction_id')
         verbose_name = _('Payment Processor Response')
@@ -49,7 +49,7 @@ class PaypalProcessorConfiguration(SingletonModel):
         )
     )
 
-    class Meta(object):
+    class Meta:
         verbose_name = "Paypal Processor Configuration"
 
 
@@ -69,7 +69,7 @@ class SDNCheckFailure(TimeStampedModel):
             username=self.username
         )
 
-    class Meta(object):
+    class Meta:
         verbose_name = 'SDN Check Failure'
 
 

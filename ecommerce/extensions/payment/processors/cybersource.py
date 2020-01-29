@@ -295,12 +295,11 @@ class Cybersource(ApplePayMixin, BaseClientSidePaymentProcessor):
                 # the order creation process. to upgrade user in correct course mode.
                 if Order.objects.filter(number=response['req_reference_number']).exists():
                     raise DuplicateReferenceNumber
-                else:
-                    logger.info(
-                        'Received duplicate CyberSource payment notification for basket [%d] which is not associated '
-                        'with any existing order. Continuing to validation and order creation processes.',
-                        basket.id,
-                    )
+                logger.info(
+                    'Received duplicate CyberSource payment notification for basket [%d] which is not associated '
+                    'with any existing order. Continuing to validation and order creation processes.',
+                    basket.id,
+                )
             else:
                 raise {
                     'cancel': UserCancelled,
@@ -314,8 +313,7 @@ class Cybersource(ApplePayMixin, BaseClientSidePaymentProcessor):
             if Order.objects.filter(number=response['req_reference_number']).exists():
                 if PaymentProcessorResponse.objects.filter(transaction_id=transaction_id).exists():
                     raise RedundantPaymentNotificationError
-                else:
-                    raise ExcessivePaymentForOrderError
+                raise ExcessivePaymentForOrderError
 
         if 'auth_amount' in response and response['auth_amount'] and response['auth_amount'] != response['req_amount']:
             # Raise an exception if the authorized amount differs from the requested amount.
@@ -423,11 +421,10 @@ class Cybersource(ApplePayMixin, BaseClientSidePaymentProcessor):
 
         if response.decision == 'ACCEPT':
             return request_id
-        else:
-            raise GatewayError(
-                'Failed to issue CyberSource credit for order [{order_number}]. '
-                'Complete response has been recorded in entry [{response_id}]'.format(
-                    order_number=order_number, response_id=ppr.id))
+        raise GatewayError(
+            'Failed to issue CyberSource credit for order [{order_number}]. '
+            'Complete response has been recorded in entry [{response_id}]'.format(
+                order_number=order_number, response_id=ppr.id))
 
     def request_apple_pay_authorization(self, basket, billing_address, payment_token):
         """
@@ -528,9 +525,8 @@ class Cybersource(ApplePayMixin, BaseClientSidePaymentProcessor):
                 card_number='Apple Pay',
                 card_type=CYBERSOURCE_CARD_TYPE_MAP.get(card_type)
             )
-        else:
-            msg = ('CyberSource rejected an Apple Pay authorization request for basket [{basket_id}]. '
-                   'Complete response has been recorded in entry [{response_id}]')
-            msg = msg.format(basket_id=basket.id, response_id=ppr.id)
-            logger.warning(msg)
+        msg = ('CyberSource rejected an Apple Pay authorization request for basket [{basket_id}]. '
+               'Complete response has been recorded in entry [{response_id}]')
+        msg = msg.format(basket_id=basket.id, response_id=ppr.id)
+        logger.warning(msg)
         raise GatewayError(msg)

@@ -2,7 +2,7 @@
 
 
 class BadRequestException(Exception):
-    pass
+    """ Basket Bad Request Exception. """
 
 
 class RedirectException(Exception):
@@ -12,4 +12,4 @@ class RedirectException(Exception):
 
 
 class VoucherException(Exception):
-    pass
+    """ Voucher Exception. """

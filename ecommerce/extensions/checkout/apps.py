@@ -11,4 +11,4 @@ class CheckoutAppConfig(AppConfig):
         super(CheckoutAppConfig, self).ready()
 
         # noinspection PyUnresolvedReferences
-        import ecommerce.extensions.checkout.signals  # pylint: disable=unused-variable
+        import ecommerce.extensions.checkout.signals  # pylint: disable=unused-import, import-outside-toplevel

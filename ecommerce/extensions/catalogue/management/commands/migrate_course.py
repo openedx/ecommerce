@@ -17,7 +17,7 @@ from ecommerce.courses.models import Course
 logger = logging.getLogger(__name__)
 
 
-class MigratedCourse(object):
+class MigratedCourse:
     def __init__(self, course_id, site_domain):
         self.site = Site.objects.get(domain=site_domain)
         self.site_configuration = self.site.siteconfiguration

@@ -12,7 +12,7 @@ from ecommerce.core.models import SiteConfiguration
 
 
 class PartnerFactory(factory.DjangoModelFactory):
-    class Meta(object):
+    class Meta:
         model = get_model('partner', 'Partner')
         django_get_or_create = ('name',)
 
@@ -21,7 +21,7 @@ class PartnerFactory(factory.DjangoModelFactory):
 
 
 class SiteFactory(factory.DjangoModelFactory):
-    class Meta(object):
+    class Meta:
         model = Site
 
     domain = FuzzyText(suffix='.fake')
@@ -29,7 +29,7 @@ class SiteFactory(factory.DjangoModelFactory):
 
 
 class SiteConfigurationFactory(factory.DjangoModelFactory):
-    class Meta(object):
+    class Meta:
         model = SiteConfiguration
 
     lms_url_root = factory.LazyAttribute(lambda obj: "http://lms.testserver.fake")
@@ -49,7 +49,7 @@ class StockRecordFactory(OscarStockRecordFactory):
 
 
 class UserFactory(factory.DjangoModelFactory):
-    class Meta(object):
+    class Meta:
         model = get_model('core', 'User')
 
     username = factory.Sequence(lambda n: 'ecommerce_test_user %d' % n)

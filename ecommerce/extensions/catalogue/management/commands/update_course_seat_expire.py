@@ -113,8 +113,7 @@ class Command(BaseCommand):
                     throttling_attempts += 1
                     logger.info('Retrying [%d]...', throttling_attempts)
                     continue
-                else:
-                    raise
+                raise
             enrollment_info, next_page = _parse_response(response)
             course_enrollments.update(enrollment_info)
         return course_enrollments

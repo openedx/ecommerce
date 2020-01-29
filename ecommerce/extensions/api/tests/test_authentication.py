@@ -12,7 +12,7 @@ from ecommerce.extensions.api.authentication import BearerAuthentication
 from ecommerce.tests.testcases import TestCase
 
 
-class AccessTokenMixin(object):
+class AccessTokenMixin:
     DEFAULT_TOKEN = 'abc123'
     JSON = 'application/json'
 

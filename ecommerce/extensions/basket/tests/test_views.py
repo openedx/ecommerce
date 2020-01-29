@@ -279,7 +279,7 @@ class BasketAddItemsViewTests(
         self.assertEqual(basket_attribute.value_text, 'False')
 
 
-class BasketLogicTestMixin(object):
+class BasketLogicTestMixin:
     """ Helper functions for Basket API and BasketSummaryView tests. """
     def create_empty_basket(self):
         basket = factories.BasketFactory(owner=self.user, site=self.site)
@@ -423,7 +423,7 @@ class PaymentApiResponseTestMixin(BasketLogicTestMixin):
             u'offers': offers,
             u'coupons': coupons,
             u'messages': messages if messages else [],
-            u'is_free_basket': True if order_total == 0 else False,
+            u'is_free_basket': order_total == 0,
             u'show_coupon_form': show_coupon_form,
             u'summary_discounts': summary_discounts,
             u'summary_price': summary_price,

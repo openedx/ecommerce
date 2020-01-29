@@ -124,7 +124,7 @@ class BasketAttribute(models.Model):
     )
     value_text = models.TextField(_("Text Attribute"))
 
-    class Meta(object):
+    class Meta:
         unique_together = ('basket', 'attribute_type')
 
 

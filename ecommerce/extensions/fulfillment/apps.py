@@ -11,4 +11,4 @@ class FulfillmentAppConfig(AppConfig):
         super(FulfillmentAppConfig, self).ready()
 
         # noinspection PyUnresolvedReferences
-        import ecommerce.extensions.fulfillment.signals  # pylint: disable=unused-variable
+        import ecommerce.extensions.fulfillment.signals  # pylint: disable=unused-import, import-outside-toplevel

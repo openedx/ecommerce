@@ -153,7 +153,7 @@ def _flatten(attrs):
     return {attr['name']: attr['value'] for attr in attrs}
 
 
-class CouponMixin(object):
+class CouponMixin:
     """ Mixin class used for Coupon Serializers using model Product having COUPON Product Class"""
 
     def get_code_status(self, coupon):
@@ -194,14 +194,14 @@ class BillingAddressSerializer(serializers.ModelSerializer):
     """Serializes a Billing Address. """
     city = serializers.CharField(max_length=255, source='line4')
 
-    class Meta(object):
+    class Meta:
         model = BillingAddress
         fields = ('first_name', 'last_name', 'line1', 'line2', 'postcode', 'state', 'country', 'city')
 
 
 class UserSerializer(serializers.ModelSerializer):
     """Serializes user information. """
-    class Meta(object):
+    class Meta:
         model = User
         fields = ('email', 'username')
 
@@ -226,7 +226,7 @@ class ProductAttributeValueSerializer(serializers.ModelSerializer):
             return serializer.data
         return dictionary.value
 
-    class Meta(object):
+    class Meta:
         model = ProductAttributeValue
         fields = ('name', 'code', 'value',)
 
@@ -234,7 +234,7 @@ class ProductAttributeValueSerializer(serializers.ModelSerializer):
 class StockRecordSerializer(serializers.ModelSerializer):
     """ Serializer for stock record objects. """
 
-    class Meta(object):
+    class Meta:
         model = StockRecord
         fields = ('id', 'product', 'partner', 'partner_sku', 'price_currency', 'price_excl_tax',)
 
@@ -245,7 +245,7 @@ class PartialStockRecordSerializerForUpdate(StockRecordSerializer):
     Allowed fields to update are 'price_currency' and 'price_excl_tax'.
     """
 
-    class Meta(object):
+    class Meta:
         model = StockRecord
         fields = ('price_currency', 'price_excl_tax',)
 
@@ -274,7 +274,7 @@ class ProductSerializer(ProductPaymentInfoMixin, serializers.HyperlinkedModelSer
         info = self._get_info(product)
         return info.availability.is_available_to_buy
 
-    class Meta(object):
+    class Meta:
         model = Product
         fields = ('id', 'url', 'structure', 'product_class', 'title', 'price', 'expires', 'attribute_values',
                   'is_available_to_buy', 'stockrecords',)
@@ -287,7 +287,7 @@ class LineSerializer(serializers.ModelSerializer):
     """Serializer for parsing line item data."""
     product = ProductSerializer()
 
-    class Meta(object):
+    class Meta:
         model = Line
         fields = ('title', 'quantity', 'description', 'status', 'line_price_excl_tax', 'unit_price_excl_tax', 'product')
 
@@ -324,7 +324,7 @@ class OrderSerializer(serializers.ModelSerializer):
         except IndexError:
             return '0'
 
-    class Meta(object):
+    class Meta:
         model = Order
         fields = (
             'billing_address',
@@ -388,7 +388,7 @@ class BasketSerializer(serializers.ModelSerializer):
         # serializer = ProductSerializer(products, many=True, context={'request': self.context['request']})
         return serialized_data
 
-    class Meta(object):
+    class Meta:
         model = Basket
         fields = (
             'id',
@@ -413,7 +413,7 @@ class PaymentProcessorSerializer(serializers.Serializer):  # pylint: disable=abs
 class RefundSerializer(serializers.ModelSerializer):
     """ Serializer for Refund objects. """
 
-    class Meta(object):
+    class Meta:
         model = Refund
         fields = '__all__'
 
@@ -442,9 +442,9 @@ class CourseSerializer(serializers.HyperlinkedModelSerializer):
                        request=self.context['request'])
 
     def get_has_active_bulk_enrollment_code(self, obj):
-        return True if obj.enrollment_code_product else False
+        return bool(obj.enrollment_code_product)
 
-    class Meta(object):
+    class Meta:
         model = Course
         fields = (
             'id', 'url', 'name', 'verification_deadline', 'type',
@@ -455,7 +455,7 @@ class CourseSerializer(serializers.HyperlinkedModelSerializer):
         }
 
 
-class EntitlementProductHelper(object):
+class EntitlementProductHelper:
     @staticmethod
     def validate(product):
         attrs = _flatten(product['attribute_values'])
@@ -490,7 +490,7 @@ class EntitlementProductHelper(object):
         product['partner_sku'] = entitlement.stockrecords.first().partner_sku
 
 
-class SeatProductHelper(object):
+class SeatProductHelper:
     @staticmethod
     def validate(product):
         attrs = _flatten(product['attribute_values'])
@@ -626,8 +626,7 @@ class AtomicPublicationSerializer(serializers.Serializer):  # pylint: disable=ab
 
                 if published:
                     return created, None, None
-                else:
-                    raise Exception(resp_message)
+                raise Exception(resp_message)
 
         except Exception as e:  # pylint: disable=broad-except
             logger.exception(u'Failed to save and publish [%s]: [%s]', course_id, six.text_type(e))
@@ -653,7 +652,7 @@ class PartnerSerializer(serializers.ModelSerializer):
             request=self.context['request']
         )
 
-    class Meta(object):
+    class Meta:
         model = Partner
         fields = ('id', 'name', 'short_code', 'catalogs', 'products')
 
@@ -662,7 +661,7 @@ class CatalogSerializer(serializers.ModelSerializer):
     """ Serializer for Catalogs. """
     products = serializers.SerializerMethodField()
 
-    class Meta(object):
+    class Meta:
         model = Catalog
         fields = ('id', 'partner', 'name', 'products')
 
@@ -678,7 +677,7 @@ class BenefitSerializer(serializers.ModelSerializer):
     value = serializers.IntegerField()
     type = serializers.SerializerMethodField()
 
-    class Meta(object):
+    class Meta:
         model = Benefit
         fields = ('type', 'value')
 
@@ -703,7 +702,7 @@ class VoucherSerializer(serializers.ModelSerializer):
         url = get_ecommerce_url('/coupons/offer/')
         return '{url}?code={code}'.format(url=url, code=obj.code)
 
-    class Meta(object):
+    class Meta:
         model = Voucher
         fields = (
             'id', 'name', 'code', 'redeem_url', 'usage', 'start_datetime', 'end_datetime', 'num_basket_additions',
@@ -814,7 +813,7 @@ class CategorySerializer(serializers.ModelSerializer):
     # NOTE (CCB): We are explicitly ignoring child categories. They are not relevant to our current needs. Support
     # should be added later, if needed.
 
-    class Meta(object):
+    class Meta:
         model = Category
         fields = ('id', 'name',)
 
@@ -836,7 +835,7 @@ class CouponListSerializer(serializers.ModelSerializer):
             return retrieve_voucher(obj).code
         return None
 
-    class Meta(object):
+    class Meta:
         model = Product
         fields = ('category', 'client', 'code', 'id', 'title', 'date_created')
 
@@ -938,7 +937,7 @@ class EnterpriseCouponOverviewListSerializer(serializers.ModelSerializer):
 
         return dict(representation, **data)
 
-    class Meta(object):
+    class Meta:
         model = Product
         fields = ('id', 'title')
 
@@ -975,7 +974,7 @@ class EnterpriseCouponListSerializer(CouponMixin, serializers.ModelSerializer):
         offer_condition = retrieve_enterprise_condition(obj)
         return offer_condition and offer_condition.enterprise_customer_catalog_uuid
 
-    class Meta(object):
+    class Meta:
         model = Product
         fields = (
             'client',
@@ -1094,7 +1093,7 @@ class CouponSerializer(CouponMixin, ProductPaymentInfoMixin, serializers.ModelSe
             return {
                 'id': offer_range.enterprise_customer,
             }
-        elif offer_condition.enterprise_customer_uuid:
+        if offer_condition.enterprise_customer_uuid:
             return {
                 'id': offer_condition.enterprise_customer_uuid,
                 'name': offer_condition.enterprise_customer_name,
@@ -1107,7 +1106,7 @@ class CouponSerializer(CouponMixin, ProductPaymentInfoMixin, serializers.ModelSe
         offer_condition = retrieve_condition(obj)
         if offer_range and offer_range.enterprise_customer_catalog:
             return offer_range.enterprise_customer_catalog
-        elif offer_condition.enterprise_customer_catalog_uuid:
+        if offer_condition.enterprise_customer_catalog_uuid:
             return offer_condition.enterprise_customer_catalog_uuid
 
         return None
@@ -1177,7 +1176,7 @@ class CouponSerializer(CouponMixin, ProductPaymentInfoMixin, serializers.ModelSe
     def get_voucher_type(self, obj):
         return retrieve_voucher_usage(obj)
 
-    class Meta(object):
+    class Meta:
         model = Product
         fields = (
             'benefit_type', 'benefit_value', 'catalog_query', 'course_catalog', 'category',
@@ -1199,7 +1198,7 @@ class CheckoutSerializer(serializers.Serializer):  # pylint: disable=abstract-me
 
 
 class InvoiceSerializer(serializers.ModelSerializer):
-    class Meta(object):
+    class Meta:
         model = Invoice
         fields = '__all__'
 
@@ -1216,7 +1215,7 @@ class ProviderSerializer(serializers.Serializer):  # pylint: disable=abstract-me
 
 
 class OfferAssignmentSerializer(serializers.ModelSerializer):
-    class Meta(object):
+    class Meta:
         model = OfferAssignment
         fields = ('id', 'user_email', 'code')
 
@@ -1434,7 +1433,7 @@ class CouponCodeRevokeRemindBulkSerializer(serializers.ListSerializer):  # pylin
         return response
 
 
-class CouponCodeMixin(object):
+class CouponCodeMixin:
 
     def validate_coupon_has_code(self, coupon, code):
         """
@@ -1462,7 +1461,7 @@ class CouponCodeMixin(object):
 
 class CouponCodeRevokeSerializer(CouponCodeMixin, serializers.Serializer):  # pylint: disable=abstract-method
 
-    class Meta:  # pylint: disable=old-style-class
+    class Meta:
         list_serializer_class = CouponCodeRevokeRemindBulkSerializer
 
     code = serializers.CharField(required=True)
@@ -1516,7 +1515,7 @@ class CouponCodeRevokeSerializer(CouponCodeMixin, serializers.Serializer):  # py
 
 class CouponCodeRemindSerializer(CouponCodeMixin, serializers.Serializer):  # pylint: disable=abstract-method
 
-    class Meta:  # pylint: disable=old-style-class
+    class Meta:
         list_serializer_class = CouponCodeRevokeRemindBulkSerializer
 
     code = serializers.CharField(required=True)

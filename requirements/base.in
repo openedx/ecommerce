@@ -1,4 +1,4 @@
--r pins.txt
+-c pins.txt
 
 analytics-python
 bleach
@@ -51,5 +51,5 @@ sailthru-client==2.2.3
 six
 stripe==1.70.0
 unicodecsv
-xss-utils==0.1.1
+xss-utils
 zeep
