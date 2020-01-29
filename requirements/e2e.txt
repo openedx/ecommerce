@@ -14,7 +14,7 @@ importlib-metadata==1.5.0  # via pluggy, pytest, pytest-randomly
 isort==4.3.21             # via pylint
 lazy-object-proxy==1.4.3  # via astroid
 mccabe==0.6.1             # via pylint
-more-itertools==8.1.0     # via pytest
+more-itertools==8.2.0     # via pytest
 packaging==20.1           # via pytest
 pathlib2==2.3.5           # via pytest
 pluggy==0.13.1            # via pytest

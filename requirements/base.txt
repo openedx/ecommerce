@@ -72,7 +72,7 @@ jsonfield==1.0.3
 kombu==3.0.37             # via celery
 lazy-object-proxy==1.4.3  # via astroid
 libsass==0.9.2
-lxml==4.4.3               # via premailer, zeep
+lxml==4.5.0               # via premailer, zeep
 markdown==2.6.9
 markupsafe==1.1.1         # via jinja2
 mccabe==0.6.1             # via pylint
