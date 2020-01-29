@@ -3,7 +3,7 @@
 # Packages required to run e2e tests
 edx-rest-api-client
 pytest
-pytest-randomly < 2.0.0  # Pin below 2.0 until we're on python 3
+pytest-randomly
 pytest-selenium
 pytest-timeout
 python-dotenv

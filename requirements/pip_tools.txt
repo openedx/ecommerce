@@ -4,8 +4,24 @@
 #
 #    make upgrade
 #
+astroid==1.6.6            # via pylint
+certifi==2019.11.28       # via requests
+chardet==3.0.4            # via requests
 click==7.0                # via pip-tools
-pip-tools==4.3.0
+edx-rest-api-client==1.9.2
+idna==2.8                 # via requests
+isort==4.3.21             # via pylint
+lazy-object-proxy==1.4.3  # via astroid
+mccabe==0.6.1             # via pylint
+pip-tools==4.4.0
+pyjwt==1.7.1              # via edx-rest-api-client
+pylint==1.9.5
+python-slugify==4.0.0     # via transifex-client
 pytz==2016.10
-six==1.11.0
-urllib3==1.23
+requests==2.22.0          # via edx-rest-api-client, slumber, transifex-client
+six==1.14.0               # via astroid, pip-tools, pylint, transifex-client
+slumber==0.7.1            # via edx-rest-api-client
+text-unidecode==1.3       # via python-slugify
+transifex-client==0.13.4
+urllib3==1.25.8           # via requests, transifex-client
+wrapt==1.11.2             # via astroid
