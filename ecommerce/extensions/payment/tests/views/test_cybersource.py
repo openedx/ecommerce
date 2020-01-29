@@ -48,7 +48,7 @@ Source = get_model('payment', 'Source')
 post_checkout = get_class('checkout.signals', 'post_checkout')
 
 
-class LoginMixin(object):
+class LoginMixin:
     def setUp(self):
         super(LoginMixin, self).setUp()
         self.user = self.create_user()

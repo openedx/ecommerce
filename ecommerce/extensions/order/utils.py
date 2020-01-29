@@ -27,7 +27,7 @@ OrderLine = get_model('order', 'Line')
 RefundLine = get_model('refund', 'RefundLine')
 
 
-class OrderNumberGenerator(object):
+class OrderNumberGenerator:
     OFFSET = 100000
 
     def order_number(self, basket):
@@ -129,7 +129,7 @@ class OrderCreator(OscarOrderCreator):
         return order
 
 
-class UserAlreadyPlacedOrder(object):
+class UserAlreadyPlacedOrder:
     """
     Provides utils methods to check if user has already placed an order
     """

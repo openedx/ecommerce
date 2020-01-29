@@ -89,5 +89,4 @@ class ProductViewSet(NestedViewSetMixin, NonDestroyableModelViewSet):
 
             entitlement_data = self.serializer_class(entitlement, context={'request': request}).data
             return Response(entitlement_data, status=status.HTTP_201_CREATED)
-        else:
-            return self.invalid_product_response('POST')
+        return self.invalid_product_response('POST')

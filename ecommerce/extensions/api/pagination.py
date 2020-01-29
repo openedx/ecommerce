@@ -13,4 +13,4 @@ class PageNumberPagination(DatatablesPageNumberPagination):
 
 
 class DatatablesDefaultPagination(DefaultPagination, PageNumberPagination):
-    pass
+    """ Default Pagination for Datatables. """

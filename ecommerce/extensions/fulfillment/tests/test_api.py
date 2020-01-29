@@ -113,7 +113,7 @@ class FulfillmentApiTests(FulfillmentTestMixin, TestCase):
         refund = RefundFactory(status=REFUND.PAYMENT_REFUNDED)
         self.assertTrue(revoke_fulfillment_for_refund(refund))
         self.assertEqual(refund.status, REFUND.PAYMENT_REFUNDED)
-        self.assertEqual(set([line.status for line in refund.lines.all()]), {REFUND_LINE.COMPLETE})
+        self.assertEqual({line.status for line in refund.lines.all()}, {REFUND_LINE.COMPLETE})
 
     @override_settings(FULFILLMENT_MODULES=[])
     def test_suppress_revocation_for_zero_dollar_refund(self):
@@ -127,7 +127,7 @@ class FulfillmentApiTests(FulfillmentTestMixin, TestCase):
 
         self.assertTrue(revoke_fulfillment_for_refund(refund))
         self.assertEqual(refund.status, REFUND.PAYMENT_REFUNDED)
-        self.assertEqual(set([line.status for line in refund.lines.all()]), {REFUND_LINE.COMPLETE})
+        self.assertEqual({line.status for line in refund.lines.all()}, {REFUND_LINE.COMPLETE})
 
     @override_settings(FULFILLMENT_MODULES=['ecommerce.extensions.fulfillment.tests.modules.RevocationFailureModule'])
     def test_revoke_fulfillment_for_refund_revocation_error(self):
@@ -137,4 +137,4 @@ class FulfillmentApiTests(FulfillmentTestMixin, TestCase):
         refund = RefundFactory(status=REFUND.PAYMENT_REFUNDED)
         self.assertFalse(revoke_fulfillment_for_refund(refund))
         self.assertEqual(refund.status, REFUND.PAYMENT_REFUNDED)
-        self.assertEqual(set([line.status for line in refund.lines.all()]), {REFUND_LINE.REVOCATION_ERROR})
+        self.assertEqual({line.status for line in refund.lines.all()}, {REFUND_LINE.REVOCATION_ERROR})

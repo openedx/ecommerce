@@ -35,7 +35,7 @@ LOGGER_NAME = 'ecommerce.extensions.analytics.utils'
 REFUND_MODEL_LOGGER_NAME = 'ecommerce.extensions.refund.models'
 
 
-class StatusTestsMixin(object):
+class StatusTestsMixin:
     pipeline = None
 
     def _get_instance(self, **kwargs):
@@ -178,7 +178,7 @@ class RefundTests(RefundTestMixin, StatusTestsMixin, TestCase):
 
         # Verify that the refund has been successfully approved.
         self.assertEqual(refund.status, REFUND.COMPLETE)
-        self.assertEqual(set([line.status for line in refund.lines.all()]), {REFUND_LINE.COMPLETE})
+        self.assertEqual({line.status for line in refund.lines.all()}, {REFUND_LINE.COMPLETE})
 
         # Verify no notification is sent to the purchaser
         self.assertFalse(mock_notify.called)

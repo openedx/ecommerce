@@ -1,4 +1,4 @@
-class REFUND(object):
+class REFUND:
     OPEN = 'Open'
     DENIED = 'Denied'
     PAYMENT_REFUND_ERROR = 'Payment Refund Error'
@@ -7,7 +7,7 @@ class REFUND(object):
     COMPLETE = 'Complete'
 
 
-class REFUND_LINE(object):
+class REFUND_LINE:
     OPEN = 'Open'
     REVOCATION_ERROR = 'Revocation Error'
     DENIED = 'Denied'

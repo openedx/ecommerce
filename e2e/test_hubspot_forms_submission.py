@@ -8,7 +8,7 @@ from e2e.config import HUBSPOT_FORMS_API_URI, HUBSPOT_PORTAL_ID, HUBSPOT_SALES_L
 import pytest  # isort:skip
 
 
-class TestHubSpotFormsApi(object):
+class TestHubSpotFormsApi:
     """
     A quick integration test to determine that HubSpot's Forms API is continuing to work as we would expect. Make a post
     to the API with information like our live system would include. Verify that HubSpot received the info by checking

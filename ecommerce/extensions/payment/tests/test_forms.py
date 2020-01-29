@@ -164,7 +164,7 @@ class PaymentFormTests(TestCase):
         Verify the field 'organization' and 'purchased_for_organization' is present in the form
         when the basket has an enrollment code product.
         """
-        __, __, enrollment_code = self.prepare_course_seat_and_enrollment_code()
+        _, __, enrollment_code = self.prepare_course_seat_and_enrollment_code()
         basket = self.create_basket_and_add_product(enrollment_code)
         self.request.basket = basket
         data = {

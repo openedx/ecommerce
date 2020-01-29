@@ -363,7 +363,7 @@ class CourseTests(DiscoveryTestMixin, TestCase):
     @freeze_time('2017-01-01')
     def test_deactivate_enrollment_code(self):
         """Verify enrollment code expiration date is set in the past."""
-        course, __, __ = self.create_course_seat_and_enrollment_code()
+        course, _, __ = self.create_course_seat_and_enrollment_code()
         course.toggle_enrollment_code_status(False)
 
         ec_expires = now() - timedelta(days=365)

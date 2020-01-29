@@ -160,7 +160,7 @@ class BasketCreateView(EdxOrderPlacementMixin, generics.CreateAPIView):
 
             requested_products = request.data.get('products')
             if requested_products:
-                is_multi_product_basket = True if len(requested_products) > 1 else False
+                is_multi_product_basket = len(requested_products) > 1
                 for requested_product in requested_products:
                     # Ensure the requested products exist
                     sku = requested_product.get('sku')
@@ -465,7 +465,7 @@ class BasketCalculateView(generics.GenericAPIView):
         # validate query parameters
         if requested_username and is_anonymous:
             return HttpResponseBadRequest(_('Provide username or is_anonymous query param, but not both'))
-        elif not requested_username and not is_anonymous:
+        if not requested_username and not is_anonymous:
             logger.warning("Request to Basket Calculate must supply either username or is_anonymous query"
                            " param. Requesting user=%s. Future versions of this API will treat this "
                            "WARNING as an ERROR and raise an exception.", basket_owner.username)

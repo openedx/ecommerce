@@ -119,7 +119,7 @@ def prepare_basket(request, products, voucher=None):
             )
             return basket
 
-    is_multi_product_basket = True if len(products) > 1 else False
+    is_multi_product_basket = len(products) > 1
     for product in products:
         if product.is_enrollment_code_product or \
                 not UserAlreadyPlacedOrder.user_already_placed_order(user=request.user,

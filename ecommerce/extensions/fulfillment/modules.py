@@ -492,17 +492,15 @@ class EnrollmentFulfillmentModule(BaseFulfillmentModule):
                 )
 
                 return True
-            else:
-                # check if the error / message are something we can recover from.
-                data = response.json()
-                detail = data.get('message', '(No details provided.)')
-                if response.status_code == 400 and "Enrollment mode mismatch" in detail:
-                    # The user is currently enrolled in different mode than the one
-                    # we are refunding an order for.  Don't revoke that enrollment.
-                    logger.info('Skipping revocation for line [%d]: %s', line.id, detail)
-                    return True
-                else:
-                    logger.error('Failed to revoke fulfillment of Line [%d]: %s', line.id, detail)
+            # check if the error / message are something we can recover from.
+            data = response.json()
+            detail = data.get('message', '(No details provided.)')
+            if response.status_code == 400 and "Enrollment mode mismatch" in detail:
+                # The user is currently enrolled in different mode than the one
+                # we are refunding an order for.  Don't revoke that enrollment.
+                logger.info('Skipping revocation for line [%d]: %s', line.id, detail)
+                return True
+            logger.error('Failed to revoke fulfillment of Line [%d]: %s', line.id, detail)
         except Exception:  # pylint: disable=broad-except
             logger.exception('Failed to revoke fulfillment of Line [%d].', line.id)
 

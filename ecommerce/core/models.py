@@ -489,7 +489,7 @@ class User(AbstractUser):
         help_text=_(u'LMS user id'),
     )
 
-    class Meta(object):
+    class Meta:
         get_latest_by = 'date_joined'
         db_table = 'ecommerce_user'
 
@@ -724,7 +724,7 @@ class User(AbstractUser):
 
 
 class Client(User):
-    pass
+    """ Client Model. """
 
 
 class BusinessClient(models.Model):

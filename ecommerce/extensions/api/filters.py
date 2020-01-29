@@ -16,7 +16,7 @@ class ProductFilter(django_filters.FilterSet):
     def filter_product_class(self, queryset, name, value):  # pylint: disable=unused-argument
         return queryset.filter(Q(product_class__name__iexact=value) | Q(parent__product_class__name__iexact=value))
 
-    class Meta(object):
+    class Meta:
         model = Product
         fields = ('product_class', 'structure',)
 
@@ -26,6 +26,6 @@ class OrderFilter(django_filters.FilterSet):
 
     username = django_filters.CharFilter(name='user__username')
 
-    class Meta(object):
+    class Meta:
         model = Order
         fields = ('username',)

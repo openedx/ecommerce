@@ -38,7 +38,7 @@ class RefundFactory(factory.DjangoModelFactory):
         self.total_credit_excl_tax = sum([line.line_credit_excl_tax for line in self.lines.all()])
         self.save()
 
-    class Meta(object):
+    class Meta:
         model = get_model('refund', 'Refund')
 
 
@@ -52,5 +52,5 @@ class RefundLineFactory(factory.DjangoModelFactory):
         order = create_order()
         return order.lines.first()
 
-    class Meta(object):
+    class Meta:
         model = get_model('refund', 'RefundLine')

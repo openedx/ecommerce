@@ -22,7 +22,7 @@ from ecommerce.extensions.offer.models import OfferAssignment, OfferAssignmentEm
 logger = logging.getLogger(__name__)
 
 
-class OfferAssignmentEmailStatus(object):
+class OfferAssignmentEmailStatus:
     """
     Offer assignment email status enumeration
     """

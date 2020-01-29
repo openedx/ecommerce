@@ -8,7 +8,7 @@ class DummyProcessor(BaseClientSidePaymentProcessor):
     REFUND_TRANSACTION_ID = 'fake-refund'
 
     def get_transaction_parameters(self, basket, request=None, use_client_side_checkout=False, **kwargs):
-        pass
+        """ Get the transaction parameters for the processor. """
 
     def handle_processor_response(self, response, basket=None):
         return HandledProcessorResponse(
@@ -20,7 +20,7 @@ class DummyProcessor(BaseClientSidePaymentProcessor):
         )
 
     def is_signature_valid(self, response):
-        pass
+        """ Checks if transaction signature is valid. """
 
     def issue_credit(self, order_number, basket, reference_number, amount, currency):
         return self.REFUND_TRANSACTION_ID

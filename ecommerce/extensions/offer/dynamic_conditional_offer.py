@@ -45,7 +45,7 @@ def get_percentage_from_request():
 class DynamicPercentageDiscountBenefit(BenefitWithoutRangeMixin, PercentageDiscountBenefit, PercentageBenefitMixin):
     """Dynamic Percentage Discount Benefit without an attached range."""
 
-    class Meta(object):
+    class Meta:
         app_label = 'offers'
         proxy = True
 
@@ -80,7 +80,7 @@ class DynamicPercentageDiscountBenefit(BenefitWithoutRangeMixin, PercentageDisco
 
 class DynamicDiscountCondition(ConditionWithoutRangeMixin, SingleItemConsumptionConditionMixin, Condition):
     """Dynamic Percentage Discount Condition without an attached range. """
-    class Meta(object):
+    class Meta:
         app_label = 'offers'
         proxy = True
 

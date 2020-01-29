@@ -196,7 +196,7 @@ class EnterpriseCouponViewSet(CouponViewSet):
     def get_serializer_class(self):
         if self.action == 'list':
             return EnterpriseCouponListSerializer
-        elif self.action == 'overview':
+        if self.action == 'overview':
             return EnterpriseCouponOverviewListSerializer
         return CouponSerializer
 

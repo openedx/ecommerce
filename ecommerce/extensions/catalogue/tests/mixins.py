@@ -23,7 +23,7 @@ Product = get_model('catalogue', 'Product')
 ProductClass = get_model('catalogue', 'ProductClass')
 
 
-class DiscoveryTestMixin(object):
+class DiscoveryTestMixin:
     """
     Mixin for all tests involving the course catalog or course seats.
 

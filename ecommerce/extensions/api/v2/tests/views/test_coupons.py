@@ -247,14 +247,13 @@ class CouponViewSetFunctionalTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
     def get_response(self, method, path, data=None):
         """Helper method for sending requests and returning the response."""
         with mock.patch(
-            "ecommerce.extensions.voucher.utils.get_enterprise_customer",
-            mock.Mock(return_value={'name': 'Fake enterprise'})
-        ):
+                "ecommerce.extensions.voucher.utils.get_enterprise_customer",
+                mock.Mock(return_value={'name': 'Fake enterprise'})):
             if method == 'GET':
                 return self.client.get(path)
-            elif method == 'POST':
+            if method == 'POST':
                 return self.client.post(path, json.dumps(data), 'application/json')
-            elif method == 'PUT':
+            if method == 'PUT':
                 return self.client.put(path, json.dumps(data), 'application/json')
         return None
 
@@ -715,9 +714,8 @@ class CouponViewSetFunctionalTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
         benefit_value = Decimal(54)
 
         with mock.patch(
-            "ecommerce.extensions.voucher.utils.get_enterprise_customer",
-            mock.Mock(return_value={'name': 'Fake enterprise'})
-        ):
+                "ecommerce.extensions.voucher.utils.get_enterprise_customer",
+                mock.Mock(return_value={'name': 'Fake enterprise'})):
             CouponViewSet().update_offer_data(
                 request_data={'benefit_value': benefit_value},
                 vouchers=vouchers,

@@ -7,7 +7,7 @@ from ecommerce.extensions.refund.tests.factories import RefundFactory
 from ecommerce.tests.testcases import TestCase
 
 
-class RefundViewTestMixin(object):
+class RefundViewTestMixin:
     def setUp(self):
         super(RefundViewTestMixin, self).setUp()
         self.user = self.create_user(is_superuser=True, is_staff=True)

@@ -12,7 +12,7 @@ from ecommerce.extensions.analytics.utils import get_google_analytics_client_id
 logger = logging.getLogger(__name__)
 
 
-class TrackingMiddleware(MiddlewareMixin, object):
+class TrackingMiddleware(MiddlewareMixin):
     """
     Middleware that:
         1) parses the `_ga` cookie to find the GA client id and adds this to the user's tracking_context

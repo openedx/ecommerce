@@ -23,12 +23,10 @@ LMS_USER_ID_NOT_FOUND_USER_MESSAGE = _("We couldn't find enough information abou
 
 class ApiError(Exception):
     """Standard error raised by the API."""
-    pass
 
 
 class ProductNotFoundError(ApiError):
     """Raised when the provided SKU does not correspond to a product in the catalog."""
-    pass
 
 
 class BadRequestException(APIException):
@@ -39,4 +37,3 @@ class BadRequestException(APIException):
 class TemporaryBasketException(Exception):
     """Exception raised to force a transaction rollback so that the temporary basket
     is not saved to the database."""
-    pass

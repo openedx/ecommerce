@@ -9,4 +9,4 @@ class PaymentConfig(config.PaymentConfig):
     def ready(self):
         # Register signal handlers
         # noinspection PyUnresolvedReferences
-        import ecommerce.extensions.payment.signals  # pylint: disable=unused-variable
+        import ecommerce.extensions.payment.signals  # pylint: disable=unused-import, import-outside-toplevel

@@ -29,7 +29,7 @@ PaymentEventType = get_model('order', 'PaymentEventType')
 post_refund = get_class('refund.signals', 'post_refund')
 
 
-class StatusMixin(object):
+class StatusMixin:
     pipeline_setting = None
 
     @property
@@ -243,10 +243,10 @@ class Refund(StatusMixin, TimeStampedModel):
         if self.status == REFUND.COMPLETE:
             logger.info('Refund [%d] has already been completed. No additional action is required to approve.', self.id)
             return True
-        elif not self.can_approve:
+        if not self.can_approve:
             logger.warning('Refund [%d] has status set to [%s] and cannot be approved.', self.id, self.status)
             return False
-        elif self.status in (REFUND.OPEN, REFUND.PAYMENT_REFUND_ERROR):
+        if self.status in (REFUND.OPEN, REFUND.PAYMENT_REFUND_ERROR):
             try:
                 self._issue_credit()
                 self.set_status(REFUND.PAYMENT_REFUNDED)

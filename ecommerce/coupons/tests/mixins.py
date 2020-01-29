@@ -19,7 +19,7 @@ from ecommerce.tests.factories import PartnerFactory, UserFactory
 from ecommerce.tests.mixins import Applicator, Benefit, Catalog, ProductClass, SiteMixin, Voucher
 
 
-class DiscoveryMockMixin(object):
+class DiscoveryMockMixin:
     """ Mocks for the Discovery service response. """
     def setUp(self):
         super(DiscoveryMockMixin, self).setUp()
@@ -475,9 +475,8 @@ class CouponMixin(SiteMixin):
             quantity = 1
 
         with mock.patch(
-            "ecommerce.extensions.voucher.utils.get_enterprise_customer",
-            mock.Mock(return_value={'name': 'Fake enterprise'})
-        ):
+                "ecommerce.extensions.voucher.utils.get_enterprise_customer",
+                mock.Mock(return_value={'name': 'Fake enterprise'})):
             coupon = create_coupon_product(
                 benefit_type=benefit_type,
                 benefit_value=benefit_value,

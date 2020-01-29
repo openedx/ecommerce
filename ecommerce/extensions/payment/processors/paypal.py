@@ -204,30 +204,29 @@ class Paypal(BasePaymentProcessor):
                 payment.create()
                 if payment.success():
                     break
+                if i < available_attempts:
+                    logger.warning(
+                        u"Creating PayPal payment for basket [%d] was unsuccessful. Will retry.",
+                        basket.id,
+                        exc_info=True
+                    )
                 else:
-                    if i < available_attempts:
-                        logger.warning(
-                            u"Creating PayPal payment for basket [%d] was unsuccessful. Will retry.",
-                            basket.id,
-                            exc_info=True
-                        )
-                    else:
-                        error = self._get_error(payment)
-                        # pylint: disable=unsubscriptable-object
-                        entry = self.record_processor_response(
-                            error,
-                            transaction_id=error['debug_id'],
-                            basket=basket
-                        )
-                        logger.error(
-                            u"%s [%d], %s [%d].",
-                            "Failed to create PayPal payment for basket",
-                            basket.id,
-                            "PayPal's response recorded in entry",
-                            entry.id,
-                            exc_info=True
-                        )
-                        raise GatewayError(error)
+                    error = self._get_error(payment)
+                    # pylint: disable=unsubscriptable-object
+                    entry = self.record_processor_response(
+                        error,
+                        transaction_id=error['debug_id'],
+                        basket=basket
+                    )
+                    logger.error(
+                        u"%s [%d], %s [%d].",
+                        "Failed to create PayPal payment for basket",
+                        basket.id,
+                        "PayPal's response recorded in entry",
+                        entry.id,
+                        exc_info=True
+                    )
+                    raise GatewayError(error)
 
             except:  # pylint: disable=bare-except
                 if i < available_attempts:
@@ -395,11 +394,11 @@ class Paypal(BasePaymentProcessor):
             transaction_id = refund.id
             self.record_processor_response(refund.to_dict(), transaction_id=transaction_id, basket=basket)
             return transaction_id
-        else:
-            error = refund.error
-            entry = self.record_processor_response(error, transaction_id=error['debug_id'], basket=basket)
 
-            msg = "Failed to refund PayPal payment [{sale_id}]. " \
-                  "PayPal's response was recorded in entry [{response_id}].".format(sale_id=sale.id,
-                                                                                    response_id=entry.id)
-            raise GatewayError(msg)
+        error = refund.error
+        entry = self.record_processor_response(error, transaction_id=error['debug_id'], basket=basket)
+
+        msg = "Failed to refund PayPal payment [{sale_id}]. " \
+              "PayPal's response was recorded in entry [{response_id}].".format(sale_id=sale.id,
+                                                                                response_id=entry.id)
+        raise GatewayError(msg)

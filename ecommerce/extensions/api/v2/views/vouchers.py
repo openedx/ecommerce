@@ -42,7 +42,7 @@ class VoucherFilter(django_filters.FilterSet):
     """
     code = django_filters.CharFilter(name='code')
 
-    class Meta(object):
+    class Meta:
         model = Voucher
         fields = ('code',)
 
@@ -181,7 +181,7 @@ class VoucherViewSet(NonDestroyableModelViewSet):
                 # Omit credit seats for which the user is not eligible or which the user already bought.
                 if not request.user.is_eligible_for_credit(product.course_id, request.site.siteconfiguration):
                     continue
-                elif Order.objects.filter(user=request.user, lines__product=product).exists():
+                if Order.objects.filter(user=request.user, lines__product=product).exists():
                     continue
                 credit_seats = Product.objects.filter(parent=product.parent, attributes__name='credit_provider')
 

@@ -16,7 +16,7 @@ Product = get_model('catalogue', 'Product')
 StockRecord = get_model('partner', 'StockRecord')
 
 
-class LMSPublisher(object):
+class LMSPublisher:
     def get_seat_expiration(self, seat):
         if not seat.expires or 'professional' in getattr(seat.attr, 'certificate_type', ''):
             return None

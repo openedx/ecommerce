@@ -109,7 +109,7 @@ def embargo_check(user, site, products):
     """ Checks if the user has access to purchase products by calling the LMS embargo API.
 
     Args:
-        request (object): The current request
+        request : The current request
         products (list): A list of products to check access against
 
     Returns:
@@ -140,7 +140,7 @@ def embargo_check(user, site, products):
     return True
 
 
-class SDNClient(object):
+class SDNClient:
     """A utility class that handles SDN related operations."""
     def __init__(self, api_url, api_key, sdn_list):
         self.api_url = api_url

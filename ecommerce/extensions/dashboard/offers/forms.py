@@ -9,6 +9,6 @@ from oscar.core.loading import get_model
 class MetaDataForm(CoreMetaDataForm):
     site = ModelChoiceField(queryset=Site.objects.all(), required=True)
 
-    class Meta(object):
+    class Meta:
         model = get_model('offer', 'ConditionalOffer')
         fields = ('name', 'description', 'site')

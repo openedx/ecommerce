@@ -208,7 +208,7 @@ def is_theme_dir(_dir):
     return bool(os.path.isdir(_dir) and theme_sub_directories.intersection(os.listdir(_dir)))
 
 
-class Theme(object):
+class Theme:
     """
     class to encapsulate theme related information.
     """

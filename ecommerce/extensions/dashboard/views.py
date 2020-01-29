@@ -47,7 +47,7 @@ class ExtendedIndexView(IndexView):
         return stats
 
 
-class FilterFieldsMixin(object):
+class FilterFieldsMixin:
     def get_filter_fields(self):
         """ Returns a dictionary of fields with custom filters. """
         return {

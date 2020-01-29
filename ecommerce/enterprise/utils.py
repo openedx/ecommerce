@@ -20,7 +20,7 @@ from edx_rest_framework_extensions.auth.jwt.cookies import get_decoded_jwt
 from oscar.core.loading import get_model
 from requests.exceptions import ConnectionError as ReqConnectionError
 from requests.exceptions import Timeout
-from six.moves.urllib.parse import urlparse  # pylint: disable=import-error, relative-import
+from six.moves.urllib.parse import urlparse  # pylint: disable=import-error
 from six.moves.urllib.parse import urlencode
 from slumber.exceptions import SlumberHttpBaseException
 

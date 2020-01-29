@@ -74,7 +74,7 @@ def voucher_is_valid(voucher, products, request):
         now = timezone.now()
         if voucher.start_datetime > now:
             return False, _('This coupon code is not yet valid.')
-        elif voucher.end_datetime < now:  # pragma: no cover
+        if voucher.end_datetime < now:  # pragma: no cover
             return False, _('This coupon code has expired.')
 
     # We want to display the offer page to all users, including anonymous.

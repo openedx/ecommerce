@@ -40,9 +40,8 @@ class UserDetailView(CoreUserDetailView):
             status_code = response.status_code
             if status_code == 200:
                 return response.json()
-            else:
-                logger.warning(u'Failed to retrieve enrollments for [%s]. Enrollment API returned status code [%d].',
-                               username, status_code)
+            logger.warning(u'Failed to retrieve enrollments for [%s]. Enrollment API returned status code [%d].',
+                           username, status_code)
         except Exception:  # pylint: disable=broad-except
             logger.exception(u'An unexpected error occurred while retrieving enrollments for [%s].', username)
 

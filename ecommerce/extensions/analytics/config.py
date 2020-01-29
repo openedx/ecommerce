@@ -9,4 +9,4 @@ class AnalyticsConfig(config.AnalyticsConfig):
 
     def ready(self):
         if settings.INSTALL_DEFAULT_ANALYTICS_RECEIVERS:
-            from oscar.apps.analytics import receivers  # noqa pylint: disable=unused-variable
+            from oscar.apps.analytics import receivers  # pylint: disable=unused-import, import-outside-toplevel

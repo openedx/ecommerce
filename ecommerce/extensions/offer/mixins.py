@@ -7,7 +7,7 @@ from oscar.core.loading import get_model
 Benefit = get_model('offer', 'Benefit')
 
 
-class BenefitWithoutRangeMixin(object):
+class BenefitWithoutRangeMixin:
     """ Mixin for Benefits without an attached range.
 
     The range is only used for the name and description. We would prefer not
@@ -25,7 +25,7 @@ class BenefitWithoutRangeMixin(object):
         return sorted(line_tuples, key=operator.itemgetter(0))
 
 
-class ConditionWithoutRangeMixin(object):
+class ConditionWithoutRangeMixin:
     """ Mixin for Conditions without an attached range.
 
     The range is only used for the name and description. We would prefer not
@@ -41,17 +41,17 @@ class ConditionWithoutRangeMixin(object):
         return line.product.get_is_discountable()
 
 
-class AbsoluteBenefitMixin(object):
+class AbsoluteBenefitMixin:
     """ Mixin for fixed-amount Benefits. """
     benefit_class_type = Benefit.FIXED
 
 
-class PercentageBenefitMixin(object):
+class PercentageBenefitMixin:
     """ Mixin for percentage-based Benefits. """
     benefit_class_type = Benefit.PERCENTAGE
 
 
-class SingleItemConsumptionConditionMixin(object):
+class SingleItemConsumptionConditionMixin:
 
     def consume_items(self, offer, basket, affected_lines):  # pylint: disable=unused-argument
         """ Marks items within the basket lines as consumed so they can't be reused in other offers.
@@ -64,6 +64,6 @@ class SingleItemConsumptionConditionMixin(object):
             affected_lines (tuple[]): The lines that have been affected by the discount.
                 This should be list of tuples (line, discount, qty)
         """
-        for line, __, __ in affected_lines:
+        for line, _, __ in affected_lines:
             quantity_to_consume = min(line.quantity_without_discount, 1)
             line.consume(quantity_to_consume)

@@ -71,8 +71,7 @@ def _get_voucher_status(voucher, offer):
 
     datetime_now = datetime.datetime.now(pytz.UTC)
     not_expired = (
-        voucher.start_datetime < datetime_now and
-        voucher.end_datetime > datetime_now
+        voucher.end_datetime > datetime_now > voucher.start_datetime
     )
     if not_expired:
         status = _('Redeemed') if not offer.is_available() else _('Active')
@@ -115,9 +114,8 @@ def _get_course_id_and_organization(seat_stockrecord):
     """
     if seat_stockrecord.product.is_course_entitlement_product:
         return None, None
-    else:
-        course_id = seat_stockrecord.product.attr.course_key
-        course_organization = CourseKey.from_string(course_id).org
+    course_id = seat_stockrecord.product.attr.course_key
+    course_organization = CourseKey.from_string(course_id).org
     return course_id, course_organization
 
 
@@ -872,27 +870,25 @@ def get_voucher_discount_info(benefit, price):
             return {
                 'discount_percentage': benefit_value,
                 'discount_value': get_discount_value(discount_percentage=benefit_value, product_price=price),
-                'is_discounted': True if benefit.value < 100 else False
+                'is_discounted': benefit.value < 100
             }
+
+        discount_percentage = get_discount_percentage(discount_value=benefit_value, product_price=price)
+        if discount_percentage > 100:
+            discount_percentage = 100.00
+            discount_value = price
         else:
-            discount_percentage = get_discount_percentage(discount_value=benefit_value, product_price=price)
-            if discount_percentage > 100:
-                discount_percentage = 100.00
-                discount_value = price
-            else:
-                discount_percentage = discount_percentage
-                discount_value = benefit_value
-            return {
-                'discount_percentage': discount_percentage,
-                'discount_value': float(discount_value),
-                'is_discounted': True if discount_percentage < 100 else False,
-            }
-    else:
+            discount_value = benefit_value
         return {
-            'discount_percentage': 0.00,
-            'discount_value': 0.00,
-            'is_discounted': False
+            'discount_percentage': discount_percentage,
+            'discount_value': float(discount_value),
+            'is_discounted': discount_percentage < 100,
         }
+    return {
+        'discount_percentage': 0.00,
+        'discount_value': 0.00,
+        'is_discounted': False
+    }
 
 
 def update_voucher_with_enterprise_offer(offer, benefit_value, enterprise_customer, benefit_type=None,
@@ -1014,5 +1010,4 @@ def get_voucher_and_products_from_code(code):
     if products or has_catalog_configuration or is_enterprise:
         # List of products is empty in case of Multi-course coupon
         return voucher, products
-    else:
-        raise exceptions.ProductNotFoundError()
+    raise exceptions.ProductNotFoundError()

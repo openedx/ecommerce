@@ -27,7 +27,7 @@ Refund = get_model('refund', 'Refund')
 ShippingEventType = get_model('order', 'ShippingEventType')
 
 
-class OrderViewTestsMixin(object):
+class OrderViewTestsMixin:
     """
     Mixin for testing dashboard order views.
 

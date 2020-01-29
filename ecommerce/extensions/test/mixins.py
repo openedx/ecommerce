@@ -1,4 +1,4 @@
-class BenefitTestMixin(object):
+class BenefitTestMixin:
     factory_class = None
     name_format = ''
 

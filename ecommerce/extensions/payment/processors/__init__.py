@@ -148,7 +148,7 @@ class BaseClientSidePaymentProcessor(six.with_metaclass(abc.ABCMeta, BasePayment
         return 'payment/{}.html'.format(self.NAME)
 
 
-class ApplePayMixin(object):
+class ApplePayMixin:
     @cached_property
     def apple_pay_merchant_id_domain_association(self):
         """ Returns the Apple Pay merchant domain association contents that will be served at

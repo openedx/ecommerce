@@ -12,7 +12,7 @@ Basket = get_model('basket', 'basket')
 CustomApplicator = get_class('offer.applicator', 'CustomApplicator')
 
 
-class BasketMiddleware(OscarBasketMiddleware, object):
+class BasketMiddleware(OscarBasketMiddleware):
     """
     Custom Basket Middleware that overrides Oscar's Basket Middleware
 

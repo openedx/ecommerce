@@ -20,7 +20,7 @@ def raise_timeout(request, uri, headers):  # pylint: disable=unused-argument
     raise requests.Timeout('Connection timed out.')
 
 
-class EnterpriseServiceMockMixin(object):
+class EnterpriseServiceMockMixin:
     """
     Mocks for the Open edX service 'Enterprise Service' responses.
     """

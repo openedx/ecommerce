@@ -1,4 +1,4 @@
--r pins.txt
+-c pins.txt
 -r base.txt
 -r tox.txt
 

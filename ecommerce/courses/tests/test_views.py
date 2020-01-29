@@ -16,7 +16,7 @@ from ecommerce.tests.testcases import TestCase
 LOGGER_NAME = 'ecommerce.courses.views'
 
 
-class ManagementCommandViewMixin(object):
+class ManagementCommandViewMixin:
     def test_superuser_required(self):
         """ Verify the view is only accessible to superusers. """
         response = self.client.get(self.path)

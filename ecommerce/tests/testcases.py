@@ -16,7 +16,7 @@ from ecommerce.tests.mixins import SiteMixin, TestServerUrlMixin, TestWaffleFlag
 CategoryFactory.reset_sequence(1000)
 
 
-class TieredCacheMixin(object):
+class TieredCacheMixin:
     # TODO: Once the CacheIsolationMixin and CacheIsolationTestCase from edx-platform,
     # are moved to edx-django-utils, this can be replaced.
 
@@ -76,7 +76,6 @@ class LiveServerTestCase(TestServerUrlMixin, UserMixin, SiteMixin, TieredCacheMi
 
     This class guarantees that tests have a Site and Partner available.
     """
-    pass
 
 
 class TransactionTestCase(TestServerUrlMixin, UserMixin, SiteMixin, TieredCacheMixin, DjangoTransactionTestCase):
@@ -85,4 +84,3 @@ class TransactionTestCase(TestServerUrlMixin, UserMixin, SiteMixin, TieredCacheM
 
     This class guarantees that tests have a Site and Partner available.
     """
-    pass

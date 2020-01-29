@@ -70,8 +70,7 @@ class TestUpdateAssets(TestCase):
         """
         with override_settings(ENABLE_COMPREHENSIVE_THEMING=False):
             with patch(
-                "ecommerce.theming.management.commands.update_assets.get_sass_directories",
-            ) as mock_get_sass_dirs:
+                    "ecommerce.theming.management.commands.update_assets.get_sass_directories") as mock_get_sass_dirs:
 
                 # make sure update_assets skip theme sass if theming is disabled eben if called with 'themes=all'
                 call_command("update_assets", "--skip-collect", themes=["all"])

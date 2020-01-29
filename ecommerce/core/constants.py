@@ -63,13 +63,13 @@ ALLOW_MISSING_LMS_USER_ID = 'allow_missing_lms_user_id'
 HUBSPOT_FORMS_INTEGRATION_ENABLE = "hubspot_forms_integration_enable"
 
 
-class Status(object):
+class Status:
     """Health statuses."""
     OK = 'OK'
     UNAVAILABLE = 'UNAVAILABLE'
 
 
-class UnavailabilityMessage(object):
+class UnavailabilityMessage:
     """Messages to be logged when services are unavailable."""
     DATABASE = 'Unable to connect to database'
     LMS = 'Unable to connect to LMS'

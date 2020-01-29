@@ -4,7 +4,7 @@ from ecommerce.extensions.fulfillment.status import LINE, ORDER
 from ecommerce.extensions.test.factories import create_order
 
 
-class FulfillmentTestMixin(object):
+class FulfillmentTestMixin:
     """
     Mixin for fulfillment tests.
 

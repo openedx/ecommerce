@@ -44,7 +44,7 @@ class EcommerceUserAdmin(UserAdmin):
 
 @admin.register(BusinessClient)
 class BusinessClientAdmin(admin.ModelAdmin):
-    pass
+    """ Bussiness Client Admin. """
 
 
 @admin.register(EcommerceFeatureRoleAssignment)
@@ -52,7 +52,7 @@ class EcommerceFeatureRoleAssignmentAdmin(UserRoleAssignmentAdmin):
     """
     Admin site for EcommerceFeatureRoleAssignment model
     """
-    class Meta(object):
+    class Meta:
         """
         Meta class for EcommerceFeatureRoleAssignment admin model
         """

@@ -12,7 +12,7 @@ class EcommerceFeatureRoleAssignmentAdminForm(UserRoleAssignmentAdminForm):
     Admin form for EcommerceFeatureRoleAssignmentAdmin
     """
 
-    class Meta(object):
+    class Meta:
         """
         Meta class for EcommerceFeatureRoleAssignmentAdminForm.
         """

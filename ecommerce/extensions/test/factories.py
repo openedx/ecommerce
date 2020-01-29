@@ -216,7 +216,7 @@ class ProgramCourseRunSeatsConditionFactory(ConditionFactory):
     program_uuid = factory.LazyFunction(uuid.uuid4)
     proxy_class = class_path(ProgramCourseRunSeatsCondition)
 
-    class Meta(object):
+    class Meta:
         model = ProgramCourseRunSeatsCondition
 
 
@@ -251,21 +251,21 @@ class EnterpriseCustomerConditionFactory(ConditionFactory):
     enterprise_customer_catalog_uuid = factory.LazyFunction(uuid.uuid4)
     proxy_class = class_path(EnterpriseCustomerCondition)
 
-    class Meta(object):
+    class Meta:
         model = EnterpriseCustomerCondition
 
 
 class AssignableEnterpriseCustomerConditionFactory(ConditionFactory):
     proxy_class = class_path(AssignableEnterpriseCustomerCondition)
 
-    class Meta(object):
+    class Meta:
         model = AssignableEnterpriseCustomerCondition
 
 
 class ManualEnrollmentOrderDiscountConditionFactory(ConditionFactory):
     proxy_class = class_path(ManualEnrollmentOrderDiscountCondition)
 
-    class Meta(object):
+    class Meta:
         model = ManualEnrollmentOrderDiscountCondition
 
 
@@ -300,7 +300,7 @@ class OfferAssignmentFactory(factory.DjangoModelFactory):
     code = factory.Sequence(lambda n: 'VOUCHERCODE{number}'.format(number=n))
     user_email = factory.Sequence(lambda n: 'example_%s@example.com' % n)
 
-    class Meta(object):
+    class Meta:
         model = OfferAssignment
 
 
