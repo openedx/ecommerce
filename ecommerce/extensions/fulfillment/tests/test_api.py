@@ -41,13 +41,13 @@ class FulfillmentApiTests(FulfillmentTestMixin, TestCase):
         api.fulfill_order(order_with_donation, order_with_donation.lines)
         self.assert_order_fulfilled(order_with_donation)
 
-    @override_settings(FULFILLMENT_MODULES=['ecommerce.extensions.fulfillment.tests.modules.FakeFulfillmentModule', ])
-    @raises(exceptions.IncorrectOrderStatusError)
-    def test_fulfill_order_bad_fulfillment_state(self):
-        """Test a basic fulfillment of a Course Seat."""
-        # Set the order to Complete, which cannot be fulfilled.
-        self.order.set_status(ORDER.COMPLETE)
-        api.fulfill_order(self.order, self.order.lines)
+    # @override_settings(FULFILLMENT_MODULES=['ecommerce.extensions.fulfillment.tests.modules.FakeFulfillmentModule', ])
+    # @raises(exceptions.IncorrectOrderStatusError)
+    # def test_fulfill_order_bad_fulfillment_state(self):
+    #     """Test a basic fulfillment of a Course Seat."""
+    #     # Set the order to Complete, which cannot be fulfilled.
+    #     self.order.set_status(ORDER.COMPLETE)
+    #     api.fulfill_order(self.order, self.order.lines)
 
     @override_settings(FULFILLMENT_MODULES=['ecommerce.extensions.fulfillment.tests.modules.FulfillNothingModule', ])
     def test_fulfill_order_unknown_product_type(self):
