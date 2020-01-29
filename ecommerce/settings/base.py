@@ -66,6 +66,7 @@ DATABASES = {
         'HOST': 'localhost',
         'PORT': '',
         'ATOMIC_REQUESTS': True,
+        'CONN_MAX_AGE': 60,
     }
 }
 # END DATABASE CONFIGURATION
