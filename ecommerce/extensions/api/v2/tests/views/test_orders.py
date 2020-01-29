@@ -556,6 +556,69 @@ class ManualCourseEnrollmentOrderViewSetTests(TestCase):
                 str(response_order.get('enterprise_customer_uuid'))
             )
 
+
+    def test_update_manual_order(self):
+        """"
+        Test that manual enrollment order can be created with expected data.
+        """
+
+        enrollments_without_enterprise_post_data = {
+            "enrollments": [
+                {
+                    "lms_user_id": 11,
+                    "username": "ma",
+                    "email": "ma@example.com",
+                    "course_run_key": self.course.id,
+                },
+                {
+                    "lms_user_id": 12,
+                    "username": "ma2",
+                    "email": "ma2@example.com",
+                    "course_run_key": self.course.id,
+                },
+                {
+                    "lms_user_id": 13,
+                    "username": "ma3",
+                    "email": "ma3@example.com",
+                    "course_run_key": self.course.id,
+                },
+            ]
+        }
+
+        response_status, response_data = self.post_order(enrollments_without_enterprise_post_data, self.user)
+        self.assertEqual(response_status, status.HTTP_200_OK)
+
+        orders = response_data.get("orders")
+        self.assertEqual(len(orders), 3)
+        for response_order in orders:
+            # get created order
+            order = Order.objects.get(number=response_order['detail'])
+
+            # verify condition
+            condition = order.discounts.first().offer.condition
+            self.assertEqual(condition.enterprise_customer_name, response_order.get('enterprise_customer_name'))
+            self.assertEqual(
+                str(condition.enterprise_customer_uuid),
+                str(response_order.get('enterprise_customer_uuid'))
+            )
+
+        response_status, response_data = self.post_order(enrollments_without_enterprise_post_data, self.user)
+        self.assertEqual(response_status, status.HTTP_200_OK)
+
+        orders = response_data.get("orders")
+        self.assertEqual(len(orders), 3)
+        for response_order in orders:
+            # get created order
+            order = Order.objects.get(number=response_order['detail'])
+
+            # verify condition
+            condition = order.discounts.first().offer.condition
+            self.assertEqual(condition.enterprise_customer_name, response_order.get('enterprise_customer_name'))
+            self.assertEqual(
+                str(condition.enterprise_customer_uuid),
+                str(response_order.get('enterprise_customer_uuid'))
+            )
+
     def test_create_manual_order_with_incorrect_course(self):
         """"
         Test that manual enrollment order endpoint returns expected error response if course is incorrect.

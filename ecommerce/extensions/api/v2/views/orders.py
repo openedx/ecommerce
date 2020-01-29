@@ -158,9 +158,124 @@ class ManualCourseEnrollmentOrderViewSet(EdxOrderPlacementMixin, ViewSet):
 
     authentication_classes = (JwtAuthentication,)
     permission_classes = (IsAuthenticated, IsAdminUser)
-    http_method_names = ['post']
+    http_method_names = ['post', 'patch']
 
     SUCCESS, FAILURE = "success", "failure"
+
+    def partial_update(self, request, pk=None):
+        """
+            Adding this partial update method to back-populate enterprise customer data.
+
+            we might be removing this API after completion of this task.
+
+            EXAMPLE:
+                PATCH /api/v2/manual_course_enrollment_order/
+            >>> {
+            >>>     "enrollments": [
+            >>>         {
+            >>>             "lms_user_id": 111,
+            >>>             "username": "me",
+            >>>             "email": "me@example.com",
+            >>>             "course_run_key": "course-v1:TestX+Test100+2019_T1"
+            >>>             "enterprise_customer_name": "an-enterprise-customer",
+            >>>             "enterprise_customer_uuid": "394a5ce5-6ff4-4b2b-bea1-a273c6920ae1",
+            >>>         },
+            >>>         {
+            >>>             "lms_user_id": 123,
+            >>>             "username": "metoo",
+            >>>             "email": "metoo@example.com",
+            >>>             "course_run_key": ""
+            >>>             "enterprise_customer_name": "an-enterprise-customer",
+            >>>             "enterprise_customer_uuid": "394a5ce5-6ff4-4b2b-bea1-a273c6920ae1",
+            >>>         },
+            >>>     ]
+            >>> }
+
+            Response
+            >>> {
+            >>>     "orders": [
+            >>>         {
+            >>>             "lms_user_id": 111,
+            >>>             "username": "me",
+            >>>             "email": "me@example.com",
+            >>>             "course_run_key": "course-v1:TestX+Test100+2019_T1",
+            >>>             "enterprise_customer_name": "an-enterprise-customer",
+            >>>             "enterprise_customer_uuid": "394a5ce5-6ff4-4b2b-bea1-a273c6920ae1",
+            >>>             "status": "success",
+            >>>             "detail": "EDX-123456"
+
+            >>>         },
+            >>>         {
+            >>>             "lms_user_id": 123,
+            >>>             "username": "metoo",
+            >>>             "email": "metoo@example.com",
+            >>>             "course_run_key": ""
+            >>>             "enterprise_customer_name": "an-enterprise-customer",
+            >>>             "enterprise_customer_uuid": "394a5ce5-6ff4-4b2b-bea1-a273c6920ae1",
+            >>>             "status": "failure",
+            >>>             "detail": "Missing required enrollmment data: `course_run_key`"
+            >>>         },
+            >>>     ]
+            >>> }
+        """
+        try:
+            enrollments = request.data["enrollments"]
+        except KeyError:
+            return Response(
+                {
+                    "status": "failure",
+                    "detail": "Invalid data. No `enrollments` field."
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        orders = []
+        for enrollment in enrollments:
+            orders.append(self._update_single_order(enrollment, request.user))
+
+        return Response({"orders": orders}, status=status.HTTP_200_OK)
+
+    def _update_single_order(self, enrollment, request_user,):
+        try:
+            lms_user_id, learner_username, learner_email, course_run_key, _ = self._get_enrollment_data(enrollment)
+        except ValidationError as ex:
+            return dict(enrollment, status=self.FAILURE, detail=ex.message)
+        learner_user = self._get_learner_user(lms_user_id, learner_username, learner_email)
+
+        try:
+            course = Course.objects.get(id=course_run_key)
+        except Course.DoesNotExist:
+            return dict(enrollment, status=self.FAILURE, detail="Course not found")
+
+        seat_product = course.seat_products.filter(
+            attributes__name='certificate_type'
+        ).exclude(
+            attribute_values__value_text='audit'
+        ).first()
+
+        # check if an order already exists with the requested data
+        order_line = OrderLine.objects.filter(product=seat_product, order__user=learner_user, status=LINE.COMPLETE)
+        if order_line.exists():
+            order = order_line.first().order
+            condition = order.discounts.first().offer.condition
+            if (condition.proxy_class == class_path(ManualEnrollmentOrderDiscountCondition)
+                    and not condition.enterprise_customer_name
+                    and not condition.enterprise_customer_uuid):
+                condition.enterprise_customer_name = enrollment.get('enterprise_customer_name')
+                condition.enterprise_customer_uuid = enrollment.get('enterprise_customer_uuid')
+                condition.save()
+                return dict(
+                    enrollment,
+                    status=self.SUCCESS,
+                    detail=order.number
+                )
+        return dict(
+            enrollment,
+            status=self.FAILURE,
+            detail="irrelevant data to update"
+        )
+
+
 
     def create(self, request):
         """
