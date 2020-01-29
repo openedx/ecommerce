@@ -1,12 +1,11 @@
 from __future__ import absolute_import
 
 import os
-from unittest import skip
+from unittest import skip, SkipTest
 
 import ddt
 from bok_choy.browser import browser
 from django.urls import reverse
-from nose.plugins.skip import SkipTest
 from oscar.core.loading import get_model
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.support.wait import WebDriverWait

@@ -4,7 +4,7 @@ from __future__ import absolute_import
 import ddt
 from django.test.utils import override_settings
 from mock import patch
-from nose.tools import raises
+from pytest import raises
 from testfixtures import LogCapture
 
 from ecommerce.extensions.fulfillment import api, exceptions
