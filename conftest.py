@@ -6,14 +6,9 @@ database. If a test has database dependencies, that test will not pass.
 """
 from __future__ import absolute_import, print_function
 
-import django
+import pytest
 
 
-def pytest_configure(config):  # pylint: disable=unused-argument
-    print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-    print("! WARNING: Not all tests pass with pytest. Pytest does not create a !\n"
-          "! database. If a test has database dependencies, that test will not !\n"
-          "! pass.                                                             !")
-    print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-
-    django.setup()
+@pytest.fixture(autouse=True)
+def enable_db_access_for_all_tests(db):
+    pass
