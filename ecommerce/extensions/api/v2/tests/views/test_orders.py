@@ -376,24 +376,6 @@ class ManualCourseEnrollmentOrderViewSetTests(TestCase):
             id_verification_required=False,
             price=0
         )
-        self.post_data = {
-            "enrollments": [
-                {
-                    "lms_user_id": 11,
-                    "username": "ma",
-                    "email": "ma@example.com",
-                    "course_run_key": self.course.id,
-                    "discount_percentage": 50.0
-                },
-                {
-                    "lms_user_id": 12,
-                    "username": "ma2",
-                    "email": "ma2@example.com",
-                    "course_run_key": self.course.id,
-                    "discount_percentage": 100.0
-                }
-            ]
-        }
 
     def build_jwt_header(self, user):
         """
@@ -486,20 +468,70 @@ class ManualCourseEnrollmentOrderViewSetTests(TestCase):
         """"
         Test that manual enrollment order can be created with expected data.
         """
-        discount_percentage = 50.0
-        post_data = self.generate_post_data(2, discount_percentage=discount_percentage)
+        post_data = {
+            "enrollments": [
+                {
+                    "lms_user_id": 11,
+                    "username": "ma",
+                    "email": "ma@example.com",
+                    "course_run_key": self.course.id,
+                    "discount_percentage": 50.0,
+                },
+                {
+                    "lms_user_id": 12,
+                    "username": "ma2",
+                    "email": "ma2@example.com",
+                    "discount_percentage": 100.0,
+                    "course_run_key": self.course.id,
+                    "enterprise_customer_name": "an-enterprise-customer",
+                    "enterprise_customer_uuid": "394a5ce5-6ff4-4b2b-bea1-a273c6920ae1",
+                },
+                {
+                    "lms_user_id": 13,
+                    "username": "ma3",
+                    "email": "ma3@example.com",
+                    "course_run_key": self.course.id,
+                    "discount_percentage": 100.0,
+                    "enterprise_customer_name": "an-enterprise-customer",
+                    "enterprise_customer_uuid": "394a5ce5-6ff4-4b2b-bea1-a273c6920ae1",
+                },
+                {
+                    "lms_user_id": 14,
+                    "username": "ma4",
+                    "email": "ma4@example.com",
+                    "course_run_key": self.course.id,
+                    "discount_percentage": 100.0,
+                    "enterprise_customer_name": "another-enterprise-customer",
+                    "enterprise_customer_uuid": "394a5ce5-6ff4-4b2b-bea1-a273c6920ae2",
+                },
+                # to test if enterprise_customer_name updated for existing condition
+                {
+                    "lms_user_id": 15,
+                    "username": "ma5",
+                    "email": "ma5@example.com",
+                    "course_run_key": self.course.id,
+                    "discount_percentage": 100.0,
+                    "enterprise_customer_name": "another-enterprise-customer_with_new_name",
+                    "enterprise_customer_uuid": "394a5ce5-6ff4-4b2b-bea1-a273c6920ae2",
+                }
+            ]
+        }
+
         response_status, response_data = self.post_order(post_data, self.user)
+
+        expected_enrollments = post_data["enrollments"]
+        # updating customer name to latest one
+        expected_enrollments[3]['enterprise_customer_name'] = "another-enterprise-customer_with_new_name"
 
         self.assertEqual(response_status, status.HTTP_200_OK)
 
         orders = response_data.get("orders")
-        self.assertEqual(len(orders), 2)
-
-        for response_order in orders:
+        self.assertEqual(len(orders), len(expected_enrollments))
+        for response_order, expected_enrollment in zip(orders, expected_enrollments):
             user = User.objects.get(
-                username=response_order['username'],
-                email=response_order['email'],
-                lms_user_id=response_order['lms_user_id']
+                username=expected_enrollment['username'],
+                email=expected_enrollment['email'],
+                lms_user_id=expected_enrollment['lms_user_id']
             )
 
             # get created order
@@ -518,12 +550,10 @@ class ManualCourseEnrollmentOrderViewSetTests(TestCase):
 
             # verify line has the correct 'effective_contract_discount_percentage' and
             # line_effective_contract_discounted_price values
-            line_effective_discount_percentage = None
-            if discount_percentage:
-                line_effective_discount_percentage = Decimal('0.01') * Decimal(discount_percentage)
-            line_effective_contract_discounted_price = line.unit_price_excl_tax * (
-                Decimal('1.00000') - line_effective_discount_percentage
-            ).quantize(Decimal('.00001')) if line_effective_discount_percentage else None
+            discount_percentage = expected_enrollment['discount_percentage']
+            line_effective_discount_percentage = Decimal('0.01') * Decimal(discount_percentage)
+            line_effective_contract_discounted_price = line.unit_price_excl_tax \
+                * (Decimal('1.00000') - line_effective_discount_percentage).quantize(Decimal('.00001'))
 
             self.assertEqual(line.status, LINE.COMPLETE)
             self.assertEqual(line.effective_contract_discount_percentage, line_effective_discount_percentage)
@@ -531,6 +561,14 @@ class ManualCourseEnrollmentOrderViewSetTests(TestCase):
             self.assertEqual(line.line_price_before_discounts_incl_tax, self.course_price)
             product = Product.objects.get(id=line.product.id)
             self.assertEqual(product.course_id, self.course.id)
+
+            # verify condition
+            condition = order.discounts.first().offer.condition
+            self.assertEqual(condition.enterprise_customer_name, expected_enrollment.get('enterprise_customer_name'))
+            self.assertEqual(
+                str(condition.enterprise_customer_uuid),
+                str(expected_enrollment.get('enterprise_customer_uuid'))
+            )
 
     def test_create_manual_order_with_incorrect_course(self):
         """"
@@ -636,7 +674,9 @@ class ManualCourseEnrollmentOrderViewSetTests(TestCase):
                     "username": "ma{}".format(count),
                     "email": "ma{}@example.com".format(count),
                     "course_run_key": self.course.id,
-                    "discount_percentage": discount_percentage
+                    "discount_percentage": discount_percentage,
+                    "enterprise_customer_name": "customer_name",
+                    "enterprise_customer_uuid": "394a5ce5-6ff4-4b2b-bea1-a273c6920ae1",
                 }
                 for count in range(enrollment_count)
             ]
