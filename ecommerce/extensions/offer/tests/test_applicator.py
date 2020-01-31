@@ -49,7 +49,7 @@ class CustomApplicatorTests(TestCase):
             mock_get_jwt.return_value = {
                 'roles': ['{}:{}'.format(SYSTEM_ENTERPRISE_LEARNER_ROLE, uuid4())]
             }
-            offers = self.applicator.get_offers(self.basket, self.user)
+            offers = self.applicator._get_offers(self.basket, self.user)  # pylint: disable=protected-access
         self.assertEqual(offers, expected_offers)
 
     def test_get_offers_with_bundle(self):
@@ -70,11 +70,12 @@ class CustomApplicatorTests(TestCase):
         ProgramOfferFactory()
         site_offers = ConditionalOfferFactory.create_batch(3) + offers_in_db
 
-        self.applicator.get_program_offers = mock.Mock()
+        self.applicator._get_program_offers = mock.Mock()  # pylint: disable=protected-access
 
         self.assert_correct_offers(site_offers)
 
-        self.assertFalse(self.applicator.get_program_offers.called)  # Verify there was no attempt to match off a bundle
+        # Verify there was no attempt to match off a bundle
+        self.assertFalse(self.applicator._get_program_offers.called)  # pylint: disable=protected-access
 
     @override_flag(CUSTOM_APPLICATOR_LOG_FLAG, active=True)
     def test_log_is_fired_when_get_offers_with_bundle(self):
@@ -100,7 +101,7 @@ class CustomApplicatorTests(TestCase):
         existing_offers = list(ConditionalOffer.active.filter(offer_type=ConditionalOffer.SITE))
         site_offers = ConditionalOfferFactory.create_batch(3) + existing_offers
 
-        self.applicator.get_program_offers = mock.Mock()
+        self.applicator._get_program_offers = mock.Mock()  # pylint: disable=protected-access
 
         with LogCapture(LOGGER_NAME) as logger:
             self.assert_correct_offers(site_offers)
@@ -112,8 +113,8 @@ class CustomApplicatorTests(TestCase):
                         self.basket, None, self.user),
                 )
             )
-
-        self.assertFalse(self.applicator.get_program_offers.called)  # Verify there was no attempt to match off a bundle
+        # Verify there was no attempt to match off a bundle
+        self.assertFalse(self.applicator._get_program_offers.called)  # pylint: disable=protected-access
 
     def test_get_site_offers(self):
         """ Verify get_site_offers returns correct objects based on filter"""
@@ -166,7 +167,8 @@ class CustomApplicatorTests(TestCase):
 
         with mock.patch('ecommerce.extensions.offer.applicator.get_enterprise_id_for_user') as mock_ent_id:
             mock_ent_id.return_value = enterprise_id
-            enterprise_offers = self.applicator.get_enterprise_offers(
+            # pylint: disable=protected-access
+            enterprise_offers = self.applicator._get_enterprise_offers(
                 'some-site',
                 self.user
             )
