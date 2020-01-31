@@ -1,4 +1,21 @@
 <div class="row">
+    <% if(editing) {%>
+    <div class="fields col-md-12">
+        <div class="form-group">
+            <label><%= gettext('Status') %> *</label>
+            <div class="Status row">
+                <div class="form-inline col-md-3">
+                    <input id="active" type="radio" name="inactive" value="active">
+                    <label for="active" class="normal-font-weight"><%= gettext('Active') %></label>
+                </div>
+                <div class="form-inline col-md-3">
+                    <input id="inactive" type="radio" name="inactive" value="inactive">
+                    <label for="inactive" class="normal-font-weight"><%= gettext('Inactive') %></label>
+                </div>
+            </div>
+        </div>
+    </div>
+    <%}%>
     <div class="fields col-md-6">
         <div class="form-group">
             <label for="title"><%= gettext('Coupon Name') %> *</label>

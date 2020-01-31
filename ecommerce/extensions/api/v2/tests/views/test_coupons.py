@@ -739,6 +739,46 @@ class CouponViewSetFunctionalTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
         invoice = Invoice.objects.get(order__basket=basket)
         self.assertEqual(invoice.business_client.name, client_username)
 
+    def test_update_coupon_inactive(self):
+        """Test update inactive flag of Coupon, also test code_status"""
+        # test ACTIVE
+        data = {
+            'id': self.coupon.id,
+            'inactive': True
+        }
+        response_data = self.get_response_json(
+            'PUT',
+            reverse('api:v2:coupons-detail', kwargs={'pk': self.coupon.id}),
+            data=data
+        )
+        self.assertEqual(response_data['code_status'], 'INACTIVE')
+        self.assertEqual(response_data['inactive'], True)
+        self.assertEqual(self.coupon.attr.inactive, True)
+
+        # test INACTIVE
+        data['inactive'] = False
+        response_data = self.get_response_json(
+            'PUT',
+            reverse('api:v2:coupons-detail', kwargs={'pk': self.coupon.id}),
+            data=data
+        )
+        coupon = Product.objects.get(pk=self.coupon.id)  # fresh form db
+        self.assertEqual(response_data['code_status'], 'ACTIVE')
+        self.assertEqual(response_data['inactive'], False)
+        self.assertEqual(coupon.attr.inactive, False)
+
+        # test EXPIRED
+        data = {
+            'id': self.coupon.id,
+            'end_datetime': six.text_type(now() - datetime.timedelta(days=1))
+        }
+        response_data = self.get_response_json(
+            'PUT',
+            reverse('api:v2:coupons-detail', kwargs={'pk': self.coupon.id}),
+            data=data
+        )
+        self.assertEqual(response_data['code_status'], 'EXPIRED')
+
     def test_update_invoice_data(self):
         invoice = Invoice.objects.get(order__lines__product=self.coupon)
         self.assertEqual(invoice.discount_type, Invoice.PERCENTAGE)

@@ -153,6 +153,27 @@ def _flatten(attrs):
     return {attr['name']: attr['value'] for attr in attrs}
 
 
+class CouponMixin(object):
+    """ Mixin class used for Coupon Serializers using model Product having COUPON Product Class"""
+
+    def get_code_status(self, coupon):
+        """retrieve the code_status from coupon Product. """
+        start_date = retrieve_start_date(coupon)
+        end_date = retrieve_end_date(coupon)
+        current_datetime = timezone.now()
+        in_time_interval = start_date < current_datetime < end_date
+        try:
+            inactive = coupon.attr.inactive
+        except AttributeError:
+            inactive = False
+
+        if not in_time_interval:
+            return _('EXPIRED')
+        if inactive:
+            return _('INACTIVE')
+        return _('ACTIVE')
+
+
 class ProductPaymentInfoMixin(serializers.ModelSerializer):
     """ Mixin class used for retrieving price information from products. """
     price = serializers.SerializerMethodField()
@@ -935,7 +956,7 @@ class EnterpriseCouponSearchSerializer(serializers.Serializer):  # pylint: disab
         return instance
 
 
-class EnterpriseCouponListSerializer(serializers.ModelSerializer):
+class EnterpriseCouponListSerializer(CouponMixin, serializers.ModelSerializer):
     client = serializers.SerializerMethodField()
     enterprise_customer = serializers.SerializerMethodField()
     enterprise_customer_catalog = serializers.SerializerMethodField()
@@ -954,13 +975,6 @@ class EnterpriseCouponListSerializer(serializers.ModelSerializer):
         offer_condition = retrieve_enterprise_condition(obj)
         return offer_condition and offer_condition.enterprise_customer_catalog_uuid
 
-    def get_code_status(self, obj):
-        start_date = retrieve_start_date(obj)
-        end_date = retrieve_end_date(obj)
-        current_datetime = timezone.now()
-        in_time_interval = start_date < current_datetime < end_date
-        return _('ACTIVE') if in_time_interval else _('INACTIVE')
-
     class Meta(object):
         model = Product
         fields = (
@@ -974,7 +988,7 @@ class EnterpriseCouponListSerializer(serializers.ModelSerializer):
         )
 
 
-class CouponSerializer(ProductPaymentInfoMixin, serializers.ModelSerializer):
+class CouponSerializer(CouponMixin, ProductPaymentInfoMixin, serializers.ModelSerializer):
     """ Serializer for Coupons. """
     benefit_type = serializers.SerializerMethodField()
     benefit_value = serializers.SerializerMethodField()
@@ -990,6 +1004,7 @@ class CouponSerializer(ProductPaymentInfoMixin, serializers.ModelSerializer):
     enterprise_customer = serializers.SerializerMethodField()
     enterprise_customer_catalog = serializers.SerializerMethodField()
     end_date = serializers.SerializerMethodField()
+    inactive = serializers.SerializerMethodField()
     last_edited = serializers.SerializerMethodField()
     max_uses = serializers.SerializerMethodField()
     note = serializers.SerializerMethodField()
@@ -1054,13 +1069,6 @@ class CouponSerializer(ProductPaymentInfoMixin, serializers.ModelSerializer):
             return retrieve_voucher(obj).code
         return None
 
-    def get_code_status(self, obj):
-        start_date = retrieve_start_date(obj)
-        end_date = retrieve_end_date(obj)
-        current_datetime = timezone.now()
-        in_time_interval = start_date < current_datetime < end_date
-        return _('ACTIVE') if in_time_interval else _('INACTIVE')
-
     def get_course_seat_types(self, obj):
         seat_types = []
         offer_range = retrieve_range(obj)
@@ -1103,6 +1111,13 @@ class CouponSerializer(ProductPaymentInfoMixin, serializers.ModelSerializer):
             return offer_condition.enterprise_customer_catalog_uuid
 
         return None
+
+    def get_inactive(self, obj):
+        """ Get inactive attribute for Coupon Product"""
+        try:
+            return obj.attr.inactive
+        except AttributeError:
+            return False
 
     def get_last_edited(self, obj):
         return None, obj.date_updated
@@ -1168,7 +1183,7 @@ class CouponSerializer(ProductPaymentInfoMixin, serializers.ModelSerializer):
             'benefit_type', 'benefit_value', 'catalog_query', 'course_catalog', 'category',
             'client', 'code', 'code_status', 'coupon_type', 'course_seat_types',
             'email_domains', 'end_date', 'enterprise_customer', 'enterprise_customer_catalog',
-            'id', 'last_edited', 'max_uses', 'note', 'notify_email', 'num_uses', 'payment_information',
+            'id', 'inactive', 'last_edited', 'max_uses', 'note', 'notify_email', 'num_uses', 'payment_information',
             'program_uuid', 'price', 'quantity', 'seats', 'start_date', 'title', 'voucher_type',
             'contract_discount_value', 'contract_discount_type', 'prepaid_invoice_amount',
         )
