@@ -4,6 +4,7 @@
 # This file is distributed under the GNU AFFERO GENERAL PUBLIC LICENSE.
 # 
 # Translators:
+# Translators:
 # abby li <yc.li@eliteu.cn>, 2019
 # 759b81c7bb2252a11f36c89344f31007, 2016
 # Dandi Xu <dandi.xu.china@gmail.com>, 2015
@@ -28,8 +29,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-01-19 20:12+0000\n"
-"PO-Revision-Date: 2020-01-19 20:13+0000\n"
+"POT-Creation-Date: 2020-02-02 20:12+0000\n"
+"PO-Revision-Date: 2020-02-02 20:13+0000\n"
 "Last-Translator: edx_transifex_bot <i18n-working-group+edx-transifex-bot@edx.org>\n"
 "Language-Team: Chinese (China) (http://www.transifex.com/open-edx/edx-platform/language/zh_CN/)\n"
 "MIME-Version: 1.0\n"
@@ -695,29 +696,41 @@ msgid ""
 "We couldn't find enough information about you to perform the calculation."
 msgstr ""
 
-#: ecommerce/extensions/api/serializers.py:443
+#: ecommerce/extensions/api/serializers.py:171
+msgid "EXPIRED"
+msgstr ""
+
+#: ecommerce/extensions/api/serializers.py:173
+msgid "INACTIVE"
+msgstr "未激活的"
+
+#: ecommerce/extensions/api/serializers.py:174
+msgid "ACTIVE"
+msgstr "已激活的"
+
+#: ecommerce/extensions/api/serializers.py:464
 msgid "Products must have a certificate type."
 msgstr "产品必须拥有一种证书类型。"
 
-#: ecommerce/extensions/api/serializers.py:446
-#: ecommerce/extensions/api/serializers.py:481
+#: ecommerce/extensions/api/serializers.py:467
+#: ecommerce/extensions/api/serializers.py:502
 msgid "Products must have a price."
 msgstr "请务必为产品定价。"
 
-#: ecommerce/extensions/api/serializers.py:453
+#: ecommerce/extensions/api/serializers.py:474
 msgid "You need to provide a course UUID to create Course Entitlements."
 msgstr "您需要提供一个课程的UUID以创建课程权限。"
 
-#: ecommerce/extensions/api/serializers.py:477
+#: ecommerce/extensions/api/serializers.py:498
 msgid "Products must indicate whether ID verification is required."
 msgstr "产品中须明确是否需要用户ID验证。"
 
-#: ecommerce/extensions/api/serializers.py:543
+#: ecommerce/extensions/api/serializers.py:564
 #, python-brace-format
 msgid "Invalid product class [{product_class}] requested."
 msgstr "请求的产品类别[{product_class}]无效"
 
-#: ecommerce/extensions/api/serializers.py:575
+#: ecommerce/extensions/api/serializers.py:596
 #, python-brace-format
 msgid ""
 "Course [{course_id}] was not published to LMS because the switch "
@@ -725,21 +738,11 @@ msgid ""
 " been saved."
 msgstr "课程[{course_id}]未发布到LMS，因为[publish_course_modes_to_lms]开关已关闭。为了避免出现无效的最小存货单位，数据未保存。"
 
-#: ecommerce/extensions/api/serializers.py:962
-#: ecommerce/extensions/api/serializers.py:1062
-msgid "ACTIVE"
-msgstr "已激活的"
-
-#: ecommerce/extensions/api/serializers.py:962
-#: ecommerce/extensions/api/serializers.py:1062
-msgid "INACTIVE"
-msgstr "未激活的"
-
-#: ecommerce/extensions/api/serializers.py:1046
+#: ecommerce/extensions/api/serializers.py:1061
 msgid "Enrollment code"
 msgstr "选课码"
 
-#: ecommerce/extensions/api/serializers.py:1047
+#: ecommerce/extensions/api/serializers.py:1062
 msgid "Discount code"
 msgstr "折扣码"
 
@@ -1734,15 +1737,15 @@ msgstr "票券"
 msgid "Reports"
 msgstr "报告"
 
-#: ecommerce/settings/base.py:88
+#: ecommerce/settings/base.py:89
 msgid "English"
 msgstr "英语"
 
-#: ecommerce/settings/base.py:89
+#: ecommerce/settings/base.py:90
 msgid "Spanish"
 msgstr "西班牙语"
 
-#: ecommerce/settings/base.py:90
+#: ecommerce/settings/base.py:91
 msgid "Spanish (Latin American)"
 msgstr "西班牙语（拉丁美洲）"
 

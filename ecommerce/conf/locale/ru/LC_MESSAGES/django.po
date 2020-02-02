@@ -4,6 +4,7 @@
 # This file is distributed under the GNU AFFERO GENERAL PUBLIC LICENSE.
 # 
 # Translators:
+# Translators:
 # Alexey Yuriev <yurievac@gmail.com>, 2018
 # Ilya <i.batozskiy@gmail.com>, 2015
 # Liubov Fomicheva <liubov.nelapa@gmail.com>, 2015-2017
@@ -22,8 +23,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-01-19 20:12+0000\n"
-"PO-Revision-Date: 2020-01-19 20:13+0000\n"
+"POT-Creation-Date: 2020-02-02 20:12+0000\n"
+"PO-Revision-Date: 2020-02-02 20:13+0000\n"
 "Last-Translator: edx_transifex_bot <i18n-working-group+edx-transifex-bot@edx.org>\n"
 "Language-Team: Russian (http://www.transifex.com/open-edx/edx-platform/language/ru/)\n"
 "MIME-Version: 1.0\n"
@@ -689,29 +690,41 @@ msgid ""
 "We couldn't find enough information about you to perform the calculation."
 msgstr ""
 
-#: ecommerce/extensions/api/serializers.py:443
+#: ecommerce/extensions/api/serializers.py:171
+msgid "EXPIRED"
+msgstr ""
+
+#: ecommerce/extensions/api/serializers.py:173
+msgid "INACTIVE"
+msgstr "НЕАКТИВНЫЙ"
+
+#: ecommerce/extensions/api/serializers.py:174
+msgid "ACTIVE"
+msgstr "АКТИВНЫЙ"
+
+#: ecommerce/extensions/api/serializers.py:464
 msgid "Products must have a certificate type."
 msgstr "Продукты должны иметь тип сертификата."
 
-#: ecommerce/extensions/api/serializers.py:446
-#: ecommerce/extensions/api/serializers.py:481
+#: ecommerce/extensions/api/serializers.py:467
+#: ecommerce/extensions/api/serializers.py:502
 msgid "Products must have a price."
 msgstr "Продукт должен иметь цену."
 
-#: ecommerce/extensions/api/serializers.py:453
+#: ecommerce/extensions/api/serializers.py:474
 msgid "You need to provide a course UUID to create Course Entitlements."
 msgstr "Вам необходимо предоставить UUID курса, чтобы создать право на обучение в курсе."
 
-#: ecommerce/extensions/api/serializers.py:477
+#: ecommerce/extensions/api/serializers.py:498
 msgid "Products must indicate whether ID verification is required."
 msgstr "Продукты должны сообщать требуется ли проверка ID"
 
-#: ecommerce/extensions/api/serializers.py:543
+#: ecommerce/extensions/api/serializers.py:564
 #, python-brace-format
 msgid "Invalid product class [{product_class}] requested."
 msgstr "Запрос ошибочного класса продукта [{product_class}]"
 
-#: ecommerce/extensions/api/serializers.py:575
+#: ecommerce/extensions/api/serializers.py:596
 #, python-brace-format
 msgid ""
 "Course [{course_id}] was not published to LMS because the switch "
@@ -719,21 +732,11 @@ msgid ""
 " been saved."
 msgstr "Курс [{course_id}] не был опубликован в LMS, потому что переключатель [publish_course_modes_to_lms] не работает. Чтобы избежать появления несуществующих номеров SKU, данные не были сохранены."
 
-#: ecommerce/extensions/api/serializers.py:962
-#: ecommerce/extensions/api/serializers.py:1062
-msgid "ACTIVE"
-msgstr "АКТИВНЫЙ"
-
-#: ecommerce/extensions/api/serializers.py:962
-#: ecommerce/extensions/api/serializers.py:1062
-msgid "INACTIVE"
-msgstr "НЕАКТИВНЫЙ"
-
-#: ecommerce/extensions/api/serializers.py:1046
+#: ecommerce/extensions/api/serializers.py:1061
 msgid "Enrollment code"
 msgstr "Код регистрации"
 
-#: ecommerce/extensions/api/serializers.py:1047
+#: ecommerce/extensions/api/serializers.py:1062
 msgid "Discount code"
 msgstr "Код скидки"
 
@@ -1728,15 +1731,15 @@ msgstr "Ваучеры"
 msgid "Reports"
 msgstr "Отчёты"
 
-#: ecommerce/settings/base.py:88
+#: ecommerce/settings/base.py:89
 msgid "English"
 msgstr "Английский "
 
-#: ecommerce/settings/base.py:89
+#: ecommerce/settings/base.py:90
 msgid "Spanish"
 msgstr "Испанский"
 
-#: ecommerce/settings/base.py:90
+#: ecommerce/settings/base.py:91
 msgid "Spanish (Latin American)"
 msgstr "Испанский (Латинская Америка) "
 

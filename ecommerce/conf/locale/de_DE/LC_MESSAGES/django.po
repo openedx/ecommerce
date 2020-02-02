@@ -4,6 +4,7 @@
 # This file is distributed under the GNU AFFERO GENERAL PUBLIC LICENSE.
 # 
 # Translators:
+# Translators:
 # Stefania Trabucchi <stefania.trabucchi@abstract-technology.de>, 2018
 # Akif Vohra <akifvohra@gmail.com>, 2016
 # Alexander L. <alexander.lohberg@ufo-style.de>, 2016-2017
@@ -18,8 +19,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-01-19 20:12+0000\n"
-"PO-Revision-Date: 2020-01-19 20:13+0000\n"
+"POT-Creation-Date: 2020-02-02 20:12+0000\n"
+"PO-Revision-Date: 2020-02-02 20:13+0000\n"
 "Last-Translator: edx_transifex_bot <i18n-working-group+edx-transifex-bot@edx.org>\n"
 "Language-Team: German (Germany) (http://www.transifex.com/open-edx/edx-platform/language/de_DE/)\n"
 "MIME-Version: 1.0\n"
@@ -156,11 +157,11 @@ msgstr "SDN Prüfung an der Kasse aktivieren."
 
 #: ecommerce/core/models.py:140
 msgid "[Deprecated] US Treasury SDN API URL"
-msgstr ""
+msgstr "[Deprecated] US Treasury SDN API URL"
 
 #: ecommerce/core/models.py:145
 msgid "[Deprecated] US Treasury SDN API key"
-msgstr ""
+msgstr "[Deprecated] US Treasury SDN API Schlüssel"
 
 #: ecommerce/core/models.py:150
 msgid "SDN lists"
@@ -685,29 +686,41 @@ msgid ""
 "We couldn't find enough information about you to perform the calculation."
 msgstr "Wir konnten nicht genügend Informationen über Sie finden, um die Berechnung durchzuführen."
 
-#: ecommerce/extensions/api/serializers.py:443
+#: ecommerce/extensions/api/serializers.py:171
+msgid "EXPIRED"
+msgstr ""
+
+#: ecommerce/extensions/api/serializers.py:173
+msgid "INACTIVE"
+msgstr "INAKTIV"
+
+#: ecommerce/extensions/api/serializers.py:174
+msgid "ACTIVE"
+msgstr "AKTIV"
+
+#: ecommerce/extensions/api/serializers.py:464
 msgid "Products must have a certificate type."
 msgstr "Produkte müssen einen Zertifikattyp haben."
 
-#: ecommerce/extensions/api/serializers.py:446
-#: ecommerce/extensions/api/serializers.py:481
+#: ecommerce/extensions/api/serializers.py:467
+#: ecommerce/extensions/api/serializers.py:502
 msgid "Products must have a price."
 msgstr "Produkte müssen einen Preis haben."
 
-#: ecommerce/extensions/api/serializers.py:453
+#: ecommerce/extensions/api/serializers.py:474
 msgid "You need to provide a course UUID to create Course Entitlements."
 msgstr "Sie müssen eine Kurs-UUID angeben, um Kursberechtigungen zu erstellen."
 
-#: ecommerce/extensions/api/serializers.py:477
+#: ecommerce/extensions/api/serializers.py:498
 msgid "Products must indicate whether ID verification is required."
 msgstr "Produkte müssen anzeigen, ob eine ID Verifizierung benötigt wird. "
 
-#: ecommerce/extensions/api/serializers.py:543
+#: ecommerce/extensions/api/serializers.py:564
 #, python-brace-format
 msgid "Invalid product class [{product_class}] requested."
 msgstr "Ungültige Produktklasse [{product_class}] angefordert."
 
-#: ecommerce/extensions/api/serializers.py:575
+#: ecommerce/extensions/api/serializers.py:596
 #, python-brace-format
 msgid ""
 "Course [{course_id}] was not published to LMS because the switch "
@@ -715,21 +728,11 @@ msgid ""
 " been saved."
 msgstr "Kurs [{course_id}] wurde nicht im LMS veröffentlicht, da die Einstellung [publish_course_modes_to_lms] deaktiviert wurde. Um Geister SKUs zu vermeiden wurden die Eingaben nicht gespeichert."
 
-#: ecommerce/extensions/api/serializers.py:962
-#: ecommerce/extensions/api/serializers.py:1062
-msgid "ACTIVE"
-msgstr "AKTIV"
-
-#: ecommerce/extensions/api/serializers.py:962
-#: ecommerce/extensions/api/serializers.py:1062
-msgid "INACTIVE"
-msgstr "INAKTIV"
-
-#: ecommerce/extensions/api/serializers.py:1046
+#: ecommerce/extensions/api/serializers.py:1061
 msgid "Enrollment code"
 msgstr "Anmeldecode"
 
-#: ecommerce/extensions/api/serializers.py:1047
+#: ecommerce/extensions/api/serializers.py:1062
 msgid "Discount code"
 msgstr "Rabattcode"
 
@@ -1724,15 +1727,15 @@ msgstr "Gutscheine"
 msgid "Reports"
 msgstr "Meldungen"
 
-#: ecommerce/settings/base.py:88
+#: ecommerce/settings/base.py:89
 msgid "English"
 msgstr "Englisch"
 
-#: ecommerce/settings/base.py:89
+#: ecommerce/settings/base.py:90
 msgid "Spanish"
 msgstr "Spanisch"
 
-#: ecommerce/settings/base.py:90
+#: ecommerce/settings/base.py:91
 msgid "Spanish (Latin American)"
 msgstr "Spanisch (Südamerika)"
 

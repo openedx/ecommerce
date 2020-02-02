@@ -4,6 +4,7 @@
 # This file is distributed under the GNU AFFERO GENERAL PUBLIC LICENSE.
 # 
 # Translators:
+# Translators:
 # Albeiro Gonzalez <albeiro.gonzalez@edunext.co>, 2018-2019
 # AngelesAlvarez, 2019
 # Diego Rojas <diego.rojas@edunext.co>, 2017
@@ -18,7 +19,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-12-03 14:18+0000\n"
+"POT-Creation-Date: 2020-02-02 20:12+0000\n"
 "PO-Revision-Date: 2019-12-20 21:38+0000\n"
 "Last-Translator: Albeiro Gonzalez <albeiro.gonzalez@edunext.co>\n"
 "Language-Team: Spanish (Latin America) (http://www.transifex.com/open-edx/edx-platform/language/es_419/)\n"
@@ -296,19 +297,19 @@ msgstr "Coma al final no permitida."
 
 #: ecommerce/static/js/views/coupon_detail_view.js:108
 #: ecommerce/static/js/views/coupon_form_view.js:62
-#: ecommerce/static/js/views/enterprise_coupon_form_view.js:29
+#: ecommerce/static/js/views/enterprise_coupon_form_view.js:30
 msgid "Can be used once by one customer"
 msgstr "Puede ser usado una vez por un cliente"
 
 #: ecommerce/static/js/views/coupon_detail_view.js:110
 #: ecommerce/static/js/views/coupon_form_view.js:70
-#: ecommerce/static/js/views/enterprise_coupon_form_view.js:37
+#: ecommerce/static/js/views/enterprise_coupon_form_view.js:38
 msgid "Can be used multiple times by multiple customers"
 msgstr "Puede ser usado múltiples veces por múltiples clientes"
 
 #: ecommerce/static/js/views/coupon_detail_view.js:112
 #: ecommerce/static/js/views/coupon_form_view.js:66
-#: ecommerce/static/js/views/enterprise_coupon_form_view.js:33
+#: ecommerce/static/js/views/enterprise_coupon_form_view.js:34
 msgid "Can be used once by multiple customers"
 msgstr "Puede ser usado una vez por múltiples clientes"
 
@@ -462,7 +463,7 @@ msgid "Seat type"
 msgstr "Tipo de asiento"
 
 #: ecommerce/static/js/views/enterprise_coupon_detail_view.js:28
-#: ecommerce/static/js/views/enterprise_coupon_form_view.js:41
+#: ecommerce/static/js/views/enterprise_coupon_form_view.js:42
 msgid "Can be used multiple times by one customer"
 msgstr "Puede ser usado múltiples veces por un cliente"
 
