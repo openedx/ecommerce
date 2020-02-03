@@ -6,6 +6,7 @@ import json
 from collections import Counter
 from uuid import uuid4
 
+import bleach
 import ddt
 import httpretty
 import mock
@@ -55,6 +56,7 @@ from ecommerce.tests.testcases import TestCase
 Basket = get_model('basket', 'Basket')
 Benefit = get_model('offer', 'Benefit')
 OfferAssignment = get_model('offer', 'OfferAssignment')
+OfferAssignmentEmailTemplates = get_model('offer', 'OfferAssignmentEmailTemplates')
 Product = get_model('catalogue', 'Product')
 Voucher = get_model('voucher', 'Voucher')
 VoucherApplication = get_model('voucher', 'VoucherApplication')
@@ -2812,3 +2814,265 @@ class OfferAssignmentSummaryViewSetTests(
                 assert result['catalog'] == 'cccccccc-2c44-487b-9b6a-24eee973f9a4'
             else:  # To test if response has something in it it shouldn't
                 assert False
+
+
+@ddt.ddt
+class OfferAssignmentEmailTemplatesViewSetTests(JwtMixin, TestCase):
+    """
+    Test the enterprise offer assignment templates functionality with role based access control.
+    """
+    def setUp(self):
+        super(OfferAssignmentEmailTemplatesViewSetTests, self).setUp()
+        self.user = self.create_user(is_staff=True, email='test@example.com')
+        self.client.login(username=self.user.username, password=self.password)
+        self.enterprise = '5c0dd495-e726-46fa-a6a8-2d8d26c716c9'
+        self.url = reverse(
+            'api:v2:enterprise-offer-assignment-email-template-list',
+            kwargs={'enterprise_customer': self.enterprise}
+        )
+
+        self.enterprise_customer = {'name': 'test enterprise', 'id': self.enterprise}
+
+        # Prepare permissions for hitting the endpoint
+        self.role = EcommerceFeatureRole.objects.get(name=ENTERPRISE_COUPON_ADMIN_ROLE)
+        EcommerceFeatureRoleAssignment.objects.get_or_create(
+            role=self.role,
+            user=self.user,
+            enterprise_id=self.enterprise_customer['id']
+        )
+        self.set_jwt_cookie(
+            system_wide_role=SYSTEM_ENTERPRISE_ADMIN_ROLE, context=self.enterprise_customer['id']
+        )
+
+    def create_template_data(self, email_type, email_greeting, email_closing):
+        data = {
+            'email_type': email_type,
+            'email_greeting': email_greeting,
+            'email_closing': email_closing,
+        }
+        response = self.client.post(self.url, json.dumps(data), 'application/json')
+        assert response.status_code == status.HTTP_201_CREATED
+
+        return response.json()
+
+    def create_multiple_templates_data(self):
+        types = ['assign', 'assign', 'remind', 'remind', 'revoke', 'revoke']
+        greetings = ['GREETING 1', 'GREETING 2', 'GREETING 3', 'GREETING 4', 'GREETING 5', 'GREETING 6']
+        closings = ['CLOSING 1', 'CLOSING 2', 'CLOSING 3', 'CLOSING 4', 'CLOSING 5', 'CLOSING 6']
+
+        # create multiple templates of each email type for an enterprise
+        for email_type, email_greeting, email_closing in zip(types, greetings, closings):
+            self.create_template_data(email_type, email_greeting, email_closing)
+
+    def verify_template_data(self, template, email_type, email_greeting, email_closing, active):
+        assert template['enterprise_customer'] == self.enterprise
+        assert template['email_type'] == email_type
+        assert template['email_body'] == settings.OFFER_ASSIGNMEN_EMAIL_TEMPLATE_BODY_MAP[email_type]
+        assert template['email_greeting'] == email_greeting
+        assert template['email_closing'] == email_closing
+        assert template['active'] == active
+
+    def test_return_all_templates_for_enterprise(self):
+        """
+        Verify that view returns all(assign, remind, revoke) templates for an enterprise.
+        """
+        expected_template_data = [
+            {
+                'email_type': 'assign',
+                'email_greeting': 'GREETING 2',
+                'email_closing': 'CLOSING 2',
+                'active': True
+            },
+            {
+                'email_type': 'remind',
+                'email_greeting': 'GREETING 4',
+                'email_closing': 'CLOSING 4',
+                'active': True
+            },
+            {
+                'email_type': 'revoke',
+                'email_greeting': 'GREETING 6',
+                'email_closing': 'CLOSING 6',
+                'active': True
+            },
+            {
+                'email_type': 'assign',
+                'email_greeting': 'GREETING 1',
+                'email_closing': 'CLOSING 1',
+                'active': False
+            },
+            {
+                'email_type': 'remind',
+                'email_greeting': 'GREETING 3',
+                'email_closing': 'CLOSING 3',
+                'active': False
+            },
+            {
+                'email_type': 'revoke',
+                'email_greeting': 'GREETING 5',
+                'email_closing': 'CLOSING 5',
+                'active': False
+            },
+        ]
+
+        self.create_multiple_templates_data()
+
+        response = self.client.get(self.url)
+        assert response.status_code == status.HTTP_200_OK
+
+        recieved_template_data = response.json()['results']
+        assert len(recieved_template_data) == 6
+
+        # verify received templates data
+        for recieved_template, expected_template in zip(recieved_template_data, expected_template_data):
+            self.verify_template_data(
+                recieved_template,
+                expected_template['email_type'],
+                expected_template['email_greeting'],
+                expected_template['email_closing'],
+                expected_template['active'],
+            )
+
+    @ddt.data(
+        [
+            {
+                'email_type': 'assign',
+                'email_greeting': 'GREETING 2',
+                'email_closing': 'CLOSING 2',
+                'active': True
+            },
+            {
+                'email_type': 'assign',
+                'email_greeting': 'GREETING 1',
+                'email_closing': 'CLOSING 1',
+                'active': False
+            },
+        ],
+        [
+            {
+                'email_type': 'remind',
+                'email_greeting': 'GREETING 4',
+                'email_closing': 'CLOSING 4',
+                'active': True
+            },
+            {
+                'email_type': 'remind',
+                'email_greeting': 'GREETING 3',
+                'email_closing': 'CLOSING 3',
+                'active': False
+            },
+        ],
+        [
+            {
+                'email_type': 'revoke',
+                'email_greeting': 'GREETING 6',
+                'email_closing': 'CLOSING 6',
+                'active': True
+            },
+            {
+                'email_type': 'revoke',
+                'email_greeting': 'GREETING 5',
+                'email_closing': 'CLOSING 5',
+                'active': False
+            },
+        ],
+    )
+    def test_return_specific_templates_for_enterprise(self, expected_template_data):
+        """
+        Verify that view only returns specific type of templates for an enterprise if for a specific email_type.
+        """
+        self.create_multiple_templates_data()
+
+        email_type = expected_template_data[0]['email_type']
+        response = self.client.get('{}?email_type={}'.format(self.url, email_type))
+        assert response.status_code == status.HTTP_200_OK
+
+        recieved_template_data = response.json()['results']
+        assert len(recieved_template_data) == 2
+        for recieved_template, expected_template in zip(recieved_template_data, expected_template_data):
+            self.verify_template_data(
+                recieved_template,
+                expected_template['email_type'],
+                expected_template['email_greeting'],
+                expected_template['email_closing'],
+                expected_template['active'],
+            )
+
+    @ddt.data(
+        {
+            'email_type': 'assign',
+            'expected_email_greeting': 'GREETING 2',
+            'expected_email_closing': 'CLOSING 2',
+        },
+        {
+            'email_type': 'remind',
+            'expected_email_greeting': 'GREETING 4',
+            'expected_email_closing': 'CLOSING 4',
+        },
+        {
+            'email_type': 'revoke',
+            'expected_email_greeting': 'GREETING 6',
+            'expected_email_closing': 'CLOSING 6',
+        },
+    )
+    @ddt.unpack
+    def test_return_active_template_for_enterprise(self, email_type, expected_email_greeting, expected_email_closing):
+        """
+        Verify that view returns only a single active template for an enterprise for a specific email type.
+        """
+        self.create_multiple_templates_data()
+
+        response = self.client.get('{}?email_type={}&active=1'.format(self.url, email_type))
+        assert response.status_code == status.HTTP_200_OK
+
+        templates = response.json()['results']
+        assert len(templates) == 1
+        self.verify_template_data(templates[0], email_type, expected_email_greeting, expected_email_closing, True)
+
+    def test_retrieve_template_for_enterprise(self):
+        """
+        Verify that view's retreive action work as expected.
+        """
+        email_type = 'assign'
+        email_greeting = 'greeting'
+        email_closing = 'closing'
+
+        created_template = self.create_template_data(email_type, email_greeting, email_closing)
+
+        response = self.client.get('{}{}/'.format(self.url, created_template['id']))
+        assert response.status_code == status.HTTP_200_OK
+
+        received_template = response.json()
+        self.verify_template_data(received_template, email_type, email_greeting, email_closing, True)
+
+    @ddt.data('assign', 'remind', 'revoke')
+    def test_post(self, email_type):
+        """
+        Verify that view correctly performs HTTP POST.
+        """
+        templates = []
+
+        # make multiple POSTs to verify that active field for old templates of a specific email type is set to False
+        for __ in range(2):
+            email_greeting = 'GREETING {}'.format(uuid4().hex.upper()[0:6])
+            email_closing = 'CLOSING {}'.format(uuid4().hex.upper()[0:6])
+
+            template = self.create_template_data(email_type, email_greeting, email_closing)
+            self.verify_template_data(template, email_type, email_greeting, email_closing, True)
+
+            templates.append(template)
+
+        # verify that active is set to False for old template
+        assert OfferAssignmentEmailTemplates.objects.get(id=templates[0]['id']).active is False
+
+    @ddt.data('assign', 'remind', 'revoke')
+    def test_post_with_unsafe_data(self, email_type):
+        """
+        Verify that view correctly performs HTTP POST on unsafe data.
+        """
+        email_greeting = '<script>document.getElementById("greeting").innerHTML = "GREETING!";</script>'
+        email_closing = '<script>document.getElementById("closing").innerHTML = "CLOSING!";</script>'
+
+        template = self.create_template_data(email_type, email_greeting, email_closing)
+        assert template['email_greeting'] == bleach.clean(email_greeting)
+        assert template['email_closing'] == bleach.clean(email_closing)

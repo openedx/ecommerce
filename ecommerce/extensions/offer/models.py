@@ -539,4 +539,39 @@ class OfferAssignmentEmailAttempt(models.Model):
     send_id = models.CharField(max_length=255, unique=True)
 
 
+class OfferAssignmentEmailTemplates(TimeStampedModel):
+    ASSIGN, REMIND, REVOKE = ('assign', 'remind', 'revoke')
+    EMAIL_TEMPLATE_TYPES = (
+        (ASSIGN, _('Assign')),
+        (REMIND, _('Remind')),
+        (REVOKE, _('Revoke')),
+    )
+
+    enterprise_customer = models.UUIDField(help_text=_('UUID for an EnterpriseCustomer from the Enterprise Service.'))
+    email_type = models.CharField(
+        max_length=32,
+        choices=EMAIL_TEMPLATE_TYPES,
+        default=ASSIGN,
+    )
+    email_greeting = models.CharField(max_length=300)
+    email_closing = models.CharField(max_length=300)
+    active = models.BooleanField(
+        help_text=_('Make a particular template version active.'),
+        default=True,
+    )
+
+    class Meta:
+        ordering = ('enterprise_customer', '-active',)
+        indexes = [
+            models.Index(fields=['enterprise_customer', 'email_type'])
+        ]
+
+    def __unicode__(self):
+        return "{ec}-{email_type}-{active}".format(
+            ec=self.enterprise_customer,
+            email_type=self.email_type,
+            active=self.active
+        )
+
+
 from oscar.apps.offer.models import *  # noqa isort:skip pylint: disable=wildcard-import,unused-wildcard-import,wrong-import-position,wrong-import-order,ungrouped-imports

@@ -4,7 +4,7 @@ from django.conf.urls import include, url
 from rest_framework.urlpatterns import format_suffix_patterns
 from rest_framework_extensions.routers import ExtendedSimpleRouter
 
-from ecommerce.core.constants import COURSE_ID_PATTERN
+from ecommerce.core.constants import COURSE_ID_PATTERN, UUID_REGEX_PATTERN
 from ecommerce.extensions.api.v2.views import assignmentemail as assignment_email
 from ecommerce.extensions.api.v2.views import baskets as basket_views
 from ecommerce.extensions.api.v2.views import catalog as catalog_views
@@ -136,6 +136,11 @@ router.register(
     r'enterprise/offer_assignment_summary',
     enterprise_views.OfferAssignmentSummaryViewSet,
     base_name='enterprise-offer-assignment-summary',
+)
+router.register(
+    r'enterprise/offer-assignment-email-template/(?P<enterprise_customer>{})'.format(UUID_REGEX_PATTERN),
+    enterprise_views.OfferAssignmentEmailTemplatesViewSet,
+    base_name='enterprise-offer-assignment-email-template',
 )
 
 router.register(r'courses', course_views.CourseViewSet, base_name='course') \

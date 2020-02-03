@@ -12,7 +12,7 @@ from edx_rbac.decorators import permission_required
 from oscar.core.loading import get_model
 from requests.exceptions import ConnectionError as ReqConnectionError
 from requests.exceptions import Timeout
-from rest_framework import generics, serializers, status
+from rest_framework import filters, generics, serializers, status
 from rest_framework.decorators import detail_route, list_route
 from rest_framework.exceptions import ValidationError as DRFValidationError
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
@@ -40,6 +40,7 @@ from ecommerce.extensions.api.serializers import (
     EnterpriseCouponSearchSerializer,
     NotAssignedCodeUsageSerializer,
     NotRedeemedCodeUsageSerializer,
+    OfferAssignmentEmailTemplatesSerializer,
     OfferAssignmentSummarySerializer,
     PartialRedeemedCodeUsageSerializer,
     RedeemedCodeUsageSerializer
@@ -71,6 +72,7 @@ logger = logging.getLogger(__name__)
 Order = get_model('order', 'Order')
 Line = get_model('basket', 'Line')
 OfferAssignment = get_model('offer', 'OfferAssignment')
+OfferAssignmentEmailTemplates = get_model('offer', 'OfferAssignmentEmailTemplates')
 Product = get_model('catalogue', 'Product')
 ProductClass = get_model('catalogue', 'ProductClass')
 Voucher = get_model('voucher', 'Voucher')
@@ -718,3 +720,44 @@ class EnterpriseCouponViewSet(CouponViewSet):
             return Response(serializer.data, status=status.HTTP_200_OK)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class OfferAssignmentEmailTemplatesViewSet(ModelViewSet):
+    """
+    Viewset to CREATE/LIST email templates for OfferAssignment.
+    """
+    serializer_class = OfferAssignmentEmailTemplatesSerializer
+    permission_classes = (IsAuthenticated,)
+    filter_backends = (filters.DjangoFilterBackend,)
+    filter_fields = ('email_type', 'active')
+
+    http_method_names = ['get', 'head', 'options', 'post']
+
+    # TODO: Remove this overrided endpoint once https://openedx.atlassian.net/browse/ENT-2602 is completed
+    @permission_required(
+        'enterprise.can_assign_coupon',
+        fn=lambda request, *args, **kwargs: kwargs['enterprise_customer']
+    )
+    def list(self, request, *args, **kwargs):
+        return super(OfferAssignmentEmailTemplatesViewSet, self).list(request, *args, **kwargs)
+
+    # TODO: Remove this overrided endpoint once https://openedx.atlassian.net/browse/ENT-2602 is completed
+    @permission_required(
+        'enterprise.can_assign_coupon',
+        fn=lambda request, *args, **kwargs: kwargs['enterprise_customer']
+    )
+    def retrieve(self, request, *args, **kwargs):
+        return super(OfferAssignmentEmailTemplatesViewSet, self).retrieve(request, *args, **kwargs)
+
+    # TODO: Remove this overrided endpoint once https://openedx.atlassian.net/browse/ENT-2602 is completed
+    @permission_required(
+        'enterprise.can_assign_coupon',
+        fn=lambda request, *args, **kwargs: kwargs['enterprise_customer']
+    )
+    def create(self, request, *args, **kwargs):
+        return super(OfferAssignmentEmailTemplatesViewSet, self).create(request, *args, **kwargs)
+
+    def get_queryset(self):
+        return OfferAssignmentEmailTemplates.objects.filter(
+            enterprise_customer=self.kwargs.get('enterprise_customer')
+        )

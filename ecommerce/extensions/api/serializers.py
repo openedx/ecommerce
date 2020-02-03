@@ -6,9 +6,11 @@ from collections import OrderedDict
 from datetime import timedelta
 from decimal import Decimal
 
+import bleach
 import six  # pylint: disable=ungrouped-imports
 import waffle
 from dateutil.parser import parse
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.db import transaction
 from django.db.models import Count, Q, Sum
@@ -56,6 +58,7 @@ Catalog = get_model('catalogue', 'Catalog')
 Category = get_model('catalogue', 'Category')
 Line = get_model('order', 'Line')
 OfferAssignment = get_model('offer', 'OfferAssignment')
+OfferAssignmentEmailTemplates = get_model('offer', 'OfferAssignmentEmailTemplates')
 Order = get_model('order', 'Order')
 Partner = get_model('partner', 'Partner')
 Product = get_model('catalogue', 'Product')
@@ -859,6 +862,39 @@ class OfferAssignmentSummarySerializer(serializers.BaseSerializer):  # pylint: d
         representation['coupon_end_date'] = offer_assignment.offer.vouchers.first().end_datetime
 
         return representation
+
+
+class OfferAssignmentEmailTemplatesSerializer(serializers.ModelSerializer):
+    enterprise_customer = serializers.UUIDField(read_only=True)
+    email_body = serializers.SerializerMethodField()
+
+    class Meta:
+        model = OfferAssignmentEmailTemplates
+        fields = '__all__'
+
+    def create(self, validated_data):
+        enterprise_customer = self.context['view'].kwargs.get('enterprise_customer')
+        email_type = validated_data['email_type']
+        email_greeting = bleach.clean(validated_data['email_greeting'])
+        email_closing = bleach.clean(validated_data['email_closing'])
+
+        instance = OfferAssignmentEmailTemplates.objects.create(
+            enterprise_customer=enterprise_customer,
+            email_type=email_type,
+            email_greeting=email_greeting,
+            email_closing=email_closing,
+        )
+
+        # deactivate old templates for enterprise for this specific email type
+        OfferAssignmentEmailTemplates.objects.filter(
+            enterprise_customer=enterprise_customer,
+            email_type=email_type,
+        ).exclude(pk=instance.pk).update(active=False)
+
+        return instance
+
+    def get_email_body(self, obj):
+        return settings.OFFER_ASSIGNMEN_EMAIL_TEMPLATE_BODY_MAP[obj.email_type]
 
 
 class EnterpriseCouponOverviewListSerializer(serializers.ModelSerializer):
