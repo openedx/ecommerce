@@ -718,6 +718,12 @@ Expiration Date: {EXPIRATION_DATE}
 '''
 OFFER_REMINDER_EMAIL_SUBJECT = 'Reminder on edX course assignment'
 
+OFFER_ASSIGNMEN_EMAIL_TEMPLATE_BODY_MAP = {
+    'assign': OFFER_ASSIGNMENT_EMAIL_TEMPLATE,
+    'revoke': OFFER_REVOKE_EMAIL_TEMPLATE,
+    'remind': OFFER_REMINDER_EMAIL_TEMPLATE,
+}
+
 # SAILTHRU settings
 SAILTHRU_KEY = 'sailthru key here'
 SAILTHRU_SECRET = 'sailthru secret here'

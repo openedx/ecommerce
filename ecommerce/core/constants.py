@@ -7,6 +7,8 @@ ISO_8601_FORMAT = '%Y-%m-%dT%H:%M:%SZ'
 COURSE_ID_REGEX = r'[^/+]+(/|\+)[^/+]+(/|\+)[^/]+'
 COURSE_ID_PATTERN = r'(?P<course_id>{})'.format(COURSE_ID_REGEX)
 
+UUID_REGEX_PATTERN = r'[0-9a-fA-F]{8}-?[0-9a-fA-F]{4}-?4[0-9a-fA-F]{3}-?[89abAB][0-9a-fA-F]{3}-?[0-9a-fA-F]{12}'
+
 # Seat constants
 SEAT_PRODUCT_CLASS_NAME = 'Seat'
 
