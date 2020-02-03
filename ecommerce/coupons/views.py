@@ -209,7 +209,10 @@ class CouponRedeemView(EdxOrderPlacementMixin, APIView):
             return render(
                 request,
                 template_name,
-                {'error': _('This coupon code is not valid for entitlement course product. Try a different course.')}
+                {
+                    'error': _('This coupon is not valid for purchasing a program. Try using this on an individual '
+                               'course in the program. If you need assistance, contact edX support.')
+                }
             )
 
         if enterprise_customer is not None and enterprise_customer_user_needs_consent(

@@ -466,7 +466,8 @@ class CouponRedeemViewTests(CouponMixin, DiscoveryTestMixin, LmsApiMockMixin, En
         )
         self.assertEqual(
             response.context['error'],
-            'This coupon code is not valid for entitlement course product. Try a different course.'
+            'This coupon is not valid for purchasing a program. Try using this on an individual course in the program. '
+            'If you need assistance, contact edX support.'
         )
 
     @httpretty.activate
