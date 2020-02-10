@@ -4,7 +4,6 @@ from __future__ import absolute_import
 import ddt
 from django.test.utils import override_settings
 from mock import patch
-from nose.tools import raises
 from testfixtures import LogCapture
 
 from ecommerce.extensions.fulfillment import api, exceptions
@@ -42,12 +41,12 @@ class FulfillmentApiTests(FulfillmentTestMixin, TestCase):
         self.assert_order_fulfilled(order_with_donation)
 
     @override_settings(FULFILLMENT_MODULES=['ecommerce.extensions.fulfillment.tests.modules.FakeFulfillmentModule', ])
-    @raises(exceptions.IncorrectOrderStatusError)
     def test_fulfill_order_bad_fulfillment_state(self):
         """Test a basic fulfillment of a Course Seat."""
         # Set the order to Complete, which cannot be fulfilled.
         self.order.set_status(ORDER.COMPLETE)
-        api.fulfill_order(self.order, self.order.lines)
+        with self.assertRaises(exceptions.IncorrectOrderStatusError):
+            api.fulfill_order(self.order, self.order.lines)
 
     @override_settings(FULFILLMENT_MODULES=['ecommerce.extensions.fulfillment.tests.modules.FulfillNothingModule', ])
     def test_fulfill_order_unknown_product_type(self):
