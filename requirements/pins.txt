@@ -4,3 +4,6 @@ edx-rest-api-client<2.0.0 # Because of django incompatibility
 
 # jsonfield2 > 3.0.3 dropped support for python 3.5
 jsonfield2<=3.0.3
+
+# Was causing some tox issues locally.
+virtualenv==16.7.9

@@ -9,13 +9,6 @@ SITE_ID = 1
 PROTOCOL = 'http'
 ALLOWED_HOSTS = ['*']
 
-# TEST SETTINGS
-INSTALLED_APPS += (
-    'django_nose',
-)
-
-TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
-
 # Disable syslog logging since we usually do not have syslog enabled in test environments.
 LOGGING['handlers']['local'] = {'class': 'logging.NullHandler'}
 

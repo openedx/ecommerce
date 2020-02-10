@@ -59,10 +59,10 @@ edx-django-utils==3.0
 edx-drf-extensions==2.4.6
 edx-ecommerce-worker==0.7.2
 edx-opaque-keys==2.0.1
-edx-rbac==1.0.5
+edx-rbac==1.1.0
 edx-rest-api-client==1.9.2
 factory-boy==2.12.0       # via django-oscar
-faker==4.0.0              # via factory-boy
+faker==4.0.1              # via factory-boy
 future==0.18.2            # via pyjwkest
 gunicorn==19.7.1
 idna==2.8                 # via requests

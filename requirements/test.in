@@ -6,7 +6,6 @@ bok_choy
 coverage
 ddt
 diff-cover
-django-nose
 django-webtest
 factory-boy
 freezegun
@@ -16,9 +15,12 @@ isort
 lxml
 mock
 mock-django
-nose-ignore-docstring
 pycodestyle
 pylint
+pytest
+pytest-cov
+pytest-django
+pytest-django-ordering
 pysqlite ; python_version == "2.7"  # DB-API 2.0 interface for SQLite 3.x (used as the relational database for most tests)
 responses
 selenium
