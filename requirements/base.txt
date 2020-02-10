@@ -15,7 +15,7 @@ bleach==3.1.0
 cached-property==1.5.1    # via zeep
 celery==3.1.26.post2      # via edx-ecommerce-worker
 certifi==2019.11.28       # via requests
-cffi==1.13.2              # via cryptography
+cffi==1.14.0              # via cryptography
 chardet==3.0.4            # via requests
 coreapi==2.3.3
 coreschema==0.0.4         # via coreapi
@@ -23,7 +23,7 @@ cryptography==2.8         # via pyopenssl
 cssselect==1.1.0          # via premailer
 cssutils==1.0.2           # via premailer
 defusedxml==0.6.0         # via python3-openid, social-auth-core, zeep
-django-appconf==1.0.3     # via django-compressor
+git+https://github.com/django-compressor/django-appconf.git@5169ce2c92d9836e0b3ab3ec645727d9d5225d1a#egg=django-appconf
 django-compressor==2.4
 django-cors-headers==3.2.1
 django-crispy-forms==1.8.1
