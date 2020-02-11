@@ -19,8 +19,7 @@ from ecommerce.core.url_utils import (
     get_lms_explore_courses_url,
     get_lms_program_dashboard_url
 )
-from ecommerce.enterprise.api import fetch_enterprise_learner_data
-from ecommerce.enterprise.utils import has_enterprise_offer
+from ecommerce.enterprise.utils import has_enterprise_offer, get_enterprise_customer_for_user
 from ecommerce.extensions.checkout.exceptions import BasketNotFreeError
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
 from ecommerce.extensions.checkout.utils import get_receipt_page_url
@@ -257,10 +256,8 @@ class ReceiptResponseView(ThankYouView):
         return context
 
     def add_message_if_enterprise_user(self, request):
-        learner_data = fetch_enterprise_learner_data(request.site, request.user)
-        learner_data_results = learner_data.get('results')
-        if learner_data_results:
-            enterprise_customer = learner_data_results[0]['enterprise_customer']
+        enterprise_customer = get_enterprise_customer_for_user(request.site, request.user)
+        if enterprise_customer:
             enable_learner_portal = enterprise_customer['enable_learner_portal']
             learner_portal_hostname = enterprise_customer['learner_portal_hostname']
             if enable_learner_portal and learner_portal_hostname:

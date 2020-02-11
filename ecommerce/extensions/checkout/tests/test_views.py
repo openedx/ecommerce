@@ -189,16 +189,12 @@ class ReceiptResponseViewTests(DiscoveryMockMixin, LmsApiMockMixin, RefundTestMi
         self.user = self.create_user()
         self.client.login(username=self.user.username, password=self.password)
         # Note: actual response is far more rich. Just including the bits relevant to us
-        self.enterprise_learner_data_no_portal = {
-            'results': [{
-                'enterprise_customer': {
+        self.enterprise_customer_no_portal = {
                     'name': 'Test Company',
                     'enable_learner_portal': False,
                     'learner_portal_hostname': ''
                 }
-            }]
-        }
-        self.enterprise_learner_data_with_portal = {
+        self.enterprise_customer_with_portal = {
             'results': [{
                 'enterprise_customer': {
                     'name': 'Test Company',
@@ -269,10 +265,10 @@ class ReceiptResponseViewTests(DiscoveryMockMixin, LmsApiMockMixin, RefundTestMi
                                                    next=six.moves.urllib.parse.quote(self.path))
         self.assertRedirects(response, expected_url, target_status_code=302)
 
-    @patch('ecommerce.extensions.checkout.views.fetch_enterprise_learner_data')
-    def test_get_receipt_for_nonexisting_order(self, mock_learner_data):
+    @patch('ecommerce.extensions.checkout.views.get_enterprise_customer_for_user')
+    def test_get_receipt_for_nonexisting_order(self, mock_enterprise_customer):
         """ The view should return 404 status if the Order is not found. """
-        mock_learner_data.return_value = self.non_enterprise_learner_data
+        mock_enterprise_customer.return_value = self.non_enterprise_learner_data
         order_number = 'ABC123'
         response = self._get_receipt_response(order_number)
         self.assertEqual(response.status_code, 404)
@@ -303,11 +299,11 @@ class ReceiptResponseViewTests(DiscoveryMockMixin, LmsApiMockMixin, RefundTestMi
         payment_method = ReceiptResponseView().get_payment_method(order)
         self.assertEqual(payment_method, '{} {}'.format(source.card_type, source.label))
 
-    @patch('ecommerce.extensions.checkout.views.fetch_enterprise_learner_data')
+    @patch('ecommerce.extensions.checkout.views.get_enterprise_customer_for_user')
     @httpretty.activate
-    def test_get_receipt_for_existing_order(self, mock_learner_data):
+    def test_get_receipt_for_existing_order(self, mock_enterprise_customer):
         """ Order owner should be able to see the Receipt Page."""
-        mock_learner_data.return_value = self.non_enterprise_learner_data
+        mock_enterprise_customer.return_value = self.non_enterprise_learner_data
         order = self._create_order_for_receipt(self.user)
         response = self._get_receipt_response(order.number)
         context_data = {
@@ -319,12 +315,12 @@ class ReceiptResponseViewTests(DiscoveryMockMixin, LmsApiMockMixin, RefundTestMi
         self.assertEqual(response.status_code, 200)
         self.assertDictContainsSubset(context_data, response.context_data)
 
-    @patch('ecommerce.extensions.checkout.views.fetch_enterprise_learner_data')
+    @patch('ecommerce.extensions.checkout.views.get_enterprise_customer_for_user')
     @httpretty.activate
-    def test_get_receipt_for_existing_entitlement_order(self, mock_learner_data):
+    def test_get_receipt_for_existing_entitlement_order(self, mock_enterprise_customer):
         """ Order owner should be able to see the Receipt Page."""
 
-        mock_learner_data.return_value = self.non_enterprise_learner_data
+        mock_enterprise_customer.return_value = self.non_enterprise_learner_data
         order = self._create_order_for_receipt(self.user, entitlement=True, id_verification_required=True)
         response = self._get_receipt_response(order.number)
         context_data = {
@@ -336,12 +332,12 @@ class ReceiptResponseViewTests(DiscoveryMockMixin, LmsApiMockMixin, RefundTestMi
         self.assertEqual(response.status_code, 200)
         self.assertDictContainsSubset(context_data, response.context_data)
 
-    @patch('ecommerce.extensions.checkout.views.fetch_enterprise_learner_data')
+    @patch('ecommerce.extensions.checkout.views.get_enterprise_customer_for_user')
     @httpretty.activate
-    def test_get_receipt_for_entitlement_order_no_id_required(self, mock_learner_data):
+    def test_get_receipt_for_entitlement_order_no_id_required(self, mock_enterprise_customer):
         """ Order owner should be able to see the Receipt Page with no ID verification in context."""
 
-        mock_learner_data.return_value = self.non_enterprise_learner_data
+        mock_enterprise_customer.return_value = self.non_enterprise_learner_data
         order = self._create_order_for_receipt(self.user, entitlement=True, id_verification_required=False)
         response = self._get_receipt_response(order.number)
         context_data = {
@@ -352,11 +348,11 @@ class ReceiptResponseViewTests(DiscoveryMockMixin, LmsApiMockMixin, RefundTestMi
         self.assertEqual(response.status_code, 200)
         self.assertDictContainsSubset(context_data, response.context_data)
 
-    @patch('ecommerce.extensions.checkout.views.fetch_enterprise_learner_data')
+    @patch('ecommerce.extensions.checkout.views.get_enterprise_customer_for_user')
     @httpretty.activate
-    def test_get_receipt_for_existing_order_as_staff_user(self, mock_learner_data):
+    def test_get_receipt_for_existing_order_as_staff_user(self, mock_enterprise_customer):
         """ Staff users can preview Receipts for all Orders."""
-        mock_learner_data.return_value = self.non_enterprise_learner_data
+        mock_enterprise_customer.return_value = self.non_enterprise_learner_data
         staff_user = self.create_user(is_staff=True)
         order = self._create_order_for_receipt(staff_user)
         response = self._visit_receipt_page_with_another_user(order, staff_user)
@@ -368,11 +364,11 @@ class ReceiptResponseViewTests(DiscoveryMockMixin, LmsApiMockMixin, RefundTestMi
         self.assertEqual(response.status_code, 200)
         self.assertDictContainsSubset(context_data, response.context_data)
 
-    @patch('ecommerce.extensions.checkout.views.fetch_enterprise_learner_data')
+    @patch('ecommerce.extensions.checkout.views.get_enterprise_customer_for_user')
     @httpretty.activate
-    def test_get_receipt_for_existing_order_user_not_owner(self, mock_learner_data):
+    def test_get_receipt_for_existing_order_user_not_owner(self, mock_enterprise_customer):
         """ Users that don't own the Order shouldn't be able to see the Receipt. """
-        mock_learner_data.return_value = self.non_enterprise_learner_data
+        mock_enterprise_customer.return_value = self.non_enterprise_learner_data
         other_user = self.create_user()
         order = self._create_order_for_receipt(other_user)
         response = self._visit_receipt_page_with_another_user(order, other_user)
@@ -381,11 +377,11 @@ class ReceiptResponseViewTests(DiscoveryMockMixin, LmsApiMockMixin, RefundTestMi
         self.assertEqual(response.status_code, 404)
         self.assertDictContainsSubset(context_data, response.context_data)
 
-    @patch('ecommerce.extensions.checkout.views.fetch_enterprise_learner_data')
+    @patch('ecommerce.extensions.checkout.views.get_enterprise_customer_for_user')
     @httpretty.activate
-    def test_order_data_for_credit_seat(self, mock_learner_data):
+    def test_order_data_for_credit_seat(self, mock_enterprise_customer):
         """ Ensure that the context is updated with Order data. """
-        mock_learner_data.return_value = self.non_enterprise_learner_data
+        mock_enterprise_customer.return_value = self.non_enterprise_learner_data
         order = self.create_order(credit=True)
         self.mock_verification_status_api(
             self.site,
@@ -402,10 +398,10 @@ class ReceiptResponseViewTests(DiscoveryMockMixin, LmsApiMockMixin, RefundTestMi
         self.assertEqual(response.status_code, 200)
         self.assertTrue(response.context_data['display_credit_messaging'])
 
-    @patch('ecommerce.extensions.checkout.views.fetch_enterprise_learner_data')
+    @patch('ecommerce.extensions.checkout.views.get_enterprise_customer_for_user')
     @httpretty.activate
-    def test_order_value_unlocalized_for_tracking(self, mock_learner_data):
-        mock_learner_data.return_value = self.non_enterprise_learner_data
+    def test_order_value_unlocalized_for_tracking(self, mock_enterprise_customer):
+        mock_enterprise_customer.return_value = self.non_enterprise_learner_data
         order = self._create_order_for_receipt(self.user)
         self.client.cookies.load({settings.LANGUAGE_COOKIE_NAME: 'fr'})
         response = self._get_receipt_response(order.number)
@@ -414,14 +410,14 @@ class ReceiptResponseViewTests(DiscoveryMockMixin, LmsApiMockMixin, RefundTestMi
         order_value_string = 'data-total-amount="{}"'.format(order.total_incl_tax)
         self.assertContains(response, order_value_string)
 
-    @patch('ecommerce.extensions.checkout.views.fetch_enterprise_learner_data')
+    @patch('ecommerce.extensions.checkout.views.get_enterprise_customer_for_user')
     @httpretty.activate
-    def test_dashboard_link_for_course_purchase(self, mock_learner_data):
+    def test_dashboard_link_for_course_purchase(self, mock_enterprise_customer):
         """
         The dashboard link at the bottom of the receipt for a course purchase
         should point to the user dashboard.
         """
-        mock_learner_data.return_value = self.non_enterprise_learner_data
+        mock_enterprise_customer.return_value = self.non_enterprise_learner_data
         order = self._create_order_for_receipt(self.user)
         response = self._get_receipt_response(order.number)
         context_data = {
@@ -431,14 +427,14 @@ class ReceiptResponseViewTests(DiscoveryMockMixin, LmsApiMockMixin, RefundTestMi
         self.assertEqual(response.status_code, 200)
         self.assertDictContainsSubset(context_data, response.context_data)
 
-    @patch('ecommerce.extensions.checkout.views.fetch_enterprise_learner_data')
+    @patch('ecommerce.extensions.checkout.views.get_enterprise_customer_for_user')
     @httpretty.activate
-    def test_dashboard_link_for_bundle_purchase(self, mock_learner_data):
+    def test_dashboard_link_for_bundle_purchase(self, mock_enterprise_customer):
         """
         The dashboard link at the bottom of the receipt for a bundle purchase
         should point to the program dashboard.
         """
-        mock_learner_data.return_value = self.non_enterprise_learner_data
+        mock_enterprise_customer.return_value = self.non_enterprise_learner_data
         order = self._create_order_for_receipt(self.user)
         BasketAttribute.objects.update_or_create(
             basket=order.basket,
@@ -454,24 +450,24 @@ class ReceiptResponseViewTests(DiscoveryMockMixin, LmsApiMockMixin, RefundTestMi
         self.assertEqual(response.status_code, 200)
         self.assertDictContainsSubset(context_data, response.context_data)
 
-    @patch('ecommerce.extensions.checkout.views.fetch_enterprise_learner_data')
+    @patch('ecommerce.extensions.checkout.views.get_enterprise_customer_for_user')
     @httpretty.activate
-    def test_order_without_basket(self, mock_learner_data):
-        mock_learner_data.return_value = self.non_enterprise_learner_data
+    def test_order_without_basket(self, mock_enterprise_customer):
+        mock_enterprise_customer.return_value = self.non_enterprise_learner_data
         order = self.create_order()
         Basket.objects.filter(id=order.basket.id).delete()
         response = self._get_receipt_response(order.number)
         self.assertEqual(response.status_code, 200)
 
-    @patch('ecommerce.extensions.checkout.views.fetch_enterprise_learner_data')
+    @patch('ecommerce.extensions.checkout.views.get_enterprise_customer_for_user')
     @httpretty.activate
-    def test_enterprise_learner_dashboard_link_in_messages(self, mock_learner_data):
+    def test_enterprise_learner_dashboard_link_in_messages(self, mock_enterprise_customer):
         """
         The receipt page should include a message with a link to the enterprise
         learner portal for a learner if response from enterprise shows the portal
         is configured.
         """
-        mock_learner_data.return_value = self.enterprise_learner_data_with_portal
+        mock_enterprise_customer.return_value = self.enterprise_customer_with_portal
         order = self._create_order_for_receipt(self.user)
         BasketAttribute.objects.update_or_create(
             basket=order.basket,
@@ -493,15 +489,15 @@ class ReceiptResponseViewTests(DiscoveryMockMixin, LmsApiMockMixin, RefundTestMi
         self.assertEqual(len(response_messages), 1)
         self.assertEqual(expected_message, actual_message)
 
-    @patch('ecommerce.extensions.checkout.views.fetch_enterprise_learner_data')
+    @patch('ecommerce.extensions.checkout.views.get_enterprise_customer_for_user')
     @httpretty.activate
-    def test_no_enterprise_learner_dashboard_link_in_messages(self, mock_learner_data):
+    def test_no_enterprise_learner_dashboard_link_in_messages(self, mock_enterprise_customer):
         """
         The receipt page should NOT include a message with a link to the enterprise
         learner portal for a learner if response from enterprise shows the portal
         is not configured.
         """
-        mock_learner_data.return_value = self.enterprise_learner_data_no_portal
+        mock_enterprise_customer.return_value = self.enterprise_customer_no_portal
         order = self._create_order_for_receipt(self.user)
         BasketAttribute.objects.update_or_create(
             basket=order.basket,

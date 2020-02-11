@@ -626,3 +626,28 @@ def construct_enterprise_course_consent_url(request, course_id, enterprise_custo
         params=urlencode(request_params)
     )
     return redirect_url
+
+
+def get_enterprise_customer_for_user(site, user):
+    """
+    Return enterprise customer for the user.
+
+    Arguments:
+        site (Site): The site object.
+        user (User): user object
+
+    Returns:
+        enterprise_customer object if user belongs to any, None otherwise.
+    """
+    try:
+        enterprise_learner_response = fetch_enterprise_learner_data(site, user)
+    except (ReqConnectionError, KeyError, SlumberHttpBaseException, Timeout) as exc:
+        logging.exception('Exception while retrieving enterprise learner data for'
+                          'User: %s, Exception: %s', user, exc)
+        return None
+    try:
+        return enterprise_learner_response['results'][0]['enterprise_customer']
+    except IndexError:
+        pass
+
+    return None
