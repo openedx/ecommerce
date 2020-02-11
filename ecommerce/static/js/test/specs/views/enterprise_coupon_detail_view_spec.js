@@ -44,7 +44,7 @@ define([
                 expect(view.$('.category > .value').text()).toEqual(category);
                 expect(view.$('.discount-value > .value').text()).toEqual(view.discountValue());
                 expect(view.$('.enterprise-customer > .value').text()).toEqual(
-                    model.get('enterprise_customer')
+                    model.get('enterprise_customer').id
                 );
                 expect(
                     view.$('.enterprise-customer-catalog > .value > .enterprise-catalog-details-link').text()
