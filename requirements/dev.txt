@@ -88,7 +88,7 @@ isort==4.3.21
 itypes==1.1.0
 jinja2-pluralize==0.3.0
 jinja2==2.11.1
-jsonfield==1.0.3
+jsonfield2==3.0.3
 kombu==3.0.37
 lazy-object-proxy==1.4.3
 lazy==1.4
@@ -137,7 +137,7 @@ pyparsing==2.4.6
 pytest-base-url==1.4.1
 pytest-html==1.22.1
 pytest-metadata==1.8.0
-pytest-randomly==1.2.3
+pytest-randomly==3.2.1
 pytest-selenium==1.17.0
 pytest-timeout==1.3.4
 pytest-variables==1.9.0
