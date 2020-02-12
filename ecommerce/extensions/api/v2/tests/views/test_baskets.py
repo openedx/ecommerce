@@ -460,8 +460,11 @@ class BasketCalculateViewTests(ProgramTestMixin, ThrottlingMixin, TestCase):
         self.assertEqual(response.data, expected)
 
     @httpretty.activate
-    def test_basket_calculate_program_offer(self):
-        """ Verify successful basket calculation with a program offer """
+    def test_basket_calculate_program_offer_unrelated_bundle_id(self):
+        """
+        Test that if bundle id is present and skus do not belong to this bundle,
+        program offers do not apply
+        """
         offer = ProgramOfferFactory(
             site=self.site,
             benefit=PercentageDiscountBenefitWithoutRangeFactory(value=100)
@@ -470,10 +473,49 @@ class BasketCalculateViewTests(ProgramTestMixin, ThrottlingMixin, TestCase):
         self.mock_program_detail_endpoint(program_uuid, self.site_configuration.discovery_api_url)
         self.mock_user_data(self.user.username)
 
-        response = self.client.get(self.url)
+        response = self.client.get(self.url + '&bundle={}'.format(program_uuid))
         expected = {
             'total_incl_tax_excl_discounts': self.product_total,
             'total_incl_tax': self.product_total,
+            'currency': 'GBP'
+        }
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data, expected)
+
+    @httpretty.activate
+    def test_basket_calculate_program_offer_with_bundle_id(self):
+        """
+        Test that if a program offer is present and bundle id is provided,
+        then basket calculates program offer successfully
+        """
+        products, program_uuid = self._create_program_with_courses_and_offer()
+        url = self._generate_sku_url(products, self.user.username)
+        url += '&bundle={}'.format(program_uuid)
+
+        response = self.client.get(url)
+        expected = {
+            'total_incl_tax_excl_discounts': Decimal(40.00),
+            'total_incl_tax': Decimal(32.00),
+            'currency': 'GBP'
+        }
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data, expected)
+
+    @httpretty.activate
+    def test_basket_program_offer_with_no_bundle_id(self):
+        """
+        Test that if a program offer is present and bundle id is not provided,
+        then basket does not includes program offer
+        """
+        products, _ = self._create_program_with_courses_and_offer()
+        url = self._generate_sku_url(products, self.user.username)
+
+        response = self.client.get(url)
+        expected = {
+            'total_incl_tax_excl_discounts': Decimal(40.00),
+            'total_incl_tax': Decimal(40.00),
             'currency': 'GBP'
         }
 
@@ -636,7 +678,7 @@ class BasketCalculateViewTests(ProgramTestMixin, ThrottlingMixin, TestCase):
         different_user = self.create_user(username='different_user', is_staff=False)
 
         products = self._get_program_verified_seats(program)
-        url = self._generate_sku_url(products, username=different_user.username)
+        url = self._generate_sku_url(products, username=different_user.username) + '&bundle={}'.format(program_uuid)
         enrollment = [{'mode': 'verified', 'course_details': {'course_id': program['courses'][0]['key']}}]
         self.mock_user_data(different_user.username, owned_products=enrollment)
 
@@ -871,6 +913,30 @@ class BasketCalculateViewTests(ProgramTestMixin, ThrottlingMixin, TestCase):
             self.client.get(self.url + '&code={code}'.format(code=voucher.code))
             self.assertTrue(mock_logger.called)
 
+    def _create_program_with_courses_and_offer(self):
+        offer = ProgramOfferFactory(
+            site=self.site,
+            partner=self.site.siteconfiguration.partner,
+            benefit=PercentageDiscountBenefitWithoutRangeFactory(value=20)
+        )
+        program_uuid = offer.condition.program_uuid
+        program_data = self.mock_program_detail_endpoint(program_uuid, self.site_configuration.discovery_api_url)
+        self.mock_user_data(self.user.username)
+
+        sku_list = []
+        products = []
+        for course in program_data['courses']:
+            sku_list.append(course['entitlements'][0]['sku'])
+
+        for sku in sku_list:
+            products.append(
+                factories.ProductFactory(
+                    stockrecords__partner=self.partner,
+                    stockrecords__price_excl_tax=Decimal('10.00'),
+                    stockrecords__partner_sku=sku,
+                ))
+        return products, program_uuid
+
     def _setup_anonymous_basket_calculate(self):
         """
         Sets up anonymous basket calculate.
@@ -892,6 +958,7 @@ class BasketCalculateViewTests(ProgramTestMixin, ThrottlingMixin, TestCase):
         )
         products = self._get_program_verified_seats(program)
         url = self._generate_sku_url(products, username=None)
+        url += '&bundle={}'.format(program_uuid)
         return products, url
 
     def _generate_sku_url(self, products, username=None, add_query_params=True):

@@ -36,6 +36,7 @@ from ecommerce.extensions.payment.helpers import get_default_processor_class, ge
 
 Applicator = get_class('offer.applicator', 'Applicator')
 Basket = get_model('basket', 'Basket')
+CustomApplicator = get_class('offer.applicator', 'CustomApplicator')
 logger = logging.getLogger(__name__)
 Order = get_model('order', 'Order')
 OrderNumberGenerator = get_class('order.utils', 'OrderNumberGenerator')
@@ -381,6 +382,7 @@ class BasketCalculateView(generics.GenericAPIView):
             with transaction.atomic():
                 basket = Basket(owner=user, site=request.site)
                 basket.strategy = Selector().strategy(user=user, request=request)
+                bundle_id = request.GET.get('bundle')
 
                 for product in products:
                     basket.add_product(product, 1)
@@ -389,7 +391,7 @@ class BasketCalculateView(generics.GenericAPIView):
                     basket.vouchers.add(voucher)
 
                 # Calculate any discounts on the basket.
-                Applicator().apply(basket, user=user, request=request)
+                CustomApplicator().apply(basket, user=user, request=request, bundle_id=bundle_id)
 
                 discounts = []
                 if basket.offer_discounts:

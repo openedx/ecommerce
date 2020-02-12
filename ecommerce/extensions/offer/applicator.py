@@ -19,19 +19,29 @@ class CustomApplicator(Applicator):
     Custom applicator for applying offers to program baskets and voucher baskets.
     """
 
-    def get_offers(self, basket, user=None, request=None):
+    def apply(self, basket, user=None, request=None, bundle_id=None):  # pylint: disable=arguments-differ
+        """
+        Apply all relevant offers to the given basket.
+
+        Args:
+            basket (Basket): The basket to check for eligible vouchers/offers.
+            user (User): The user whose basket we are checking.
+            request (Request): The request is passed as sometimes the available offers
+                are dependent on the user (eg session-based offers).
+            bundle_id (int): (Optional) The bundle_id of the basket. This should only be
+                used in the case of a temporary basket which is not saved to the db, because
+                we get an error when trying to create the bundle_id BasketAttribute.
+        """
+        offers = self._get_offers(basket, user, request, bundle_id)
+        self.apply_offers(basket, offers)
+
+    def _get_offers(self, basket, user=None, request=None, bundle_id=None):
         """
         Returns all offers to apply to the basket.
 
         If the basket has a bundle, i.e. a program, gets only the site offers
         associated with that specific bundle, rather than all site offers.
         Otherwise, Gets the site offers not associated with a bundle.
-
-        Args:
-            basket (Basket): The basket to check for eligible
-                vouchers/offers.
-            user (User): The user whose basket we are checking.
-            request (Request): Request object.
 
         Returns:
             list of Offer: A sorted list of all the offers that apply to the
@@ -44,8 +54,10 @@ class CustomApplicator(Applicator):
             basket=basket,
             attribute_type=BasketAttributeType.objects.get(name=BUNDLE)
         )
-        if bundle_attributes.count() > 0:
-            program_offers = self.get_program_offers(bundle_attributes.first())
+        program_uuid = bundle_id if bundle_attributes.count() == 0 else bundle_attributes.first().value_text
+
+        if program_uuid:
+            program_offers = self._get_program_offers(program_uuid)
             site_offers = []
             if waffle.flag_is_active(request, CUSTOM_APPLICATOR_LOG_FLAG):
                 logger.warning(
@@ -65,7 +77,7 @@ class CustomApplicator(Applicator):
 
         # edX currently does not use user offers or session offers.
         # The default oscar implementations which return [] are here in case edX ever starts using these offers.
-        enterprise_offers = self.get_enterprise_offers(basket.site, user)
+        enterprise_offers = self._get_enterprise_offers(basket.site, user)
         user_offers = self.get_user_offers(user)
         session_offers = self.get_session_offers(request)
 
@@ -89,7 +101,7 @@ class CustomApplicator(Applicator):
         )
         return qs.select_related('condition', 'benefit')
 
-    def get_enterprise_offers(self, site, user):
+    def _get_enterprise_offers(self, site, user):
         """
         Return enterprise offers filtered by the user's enterprise, if it exists.
         """
@@ -104,18 +116,16 @@ class CustomApplicator(Applicator):
 
         return []
 
-    def get_program_offers(self, bundle_attribute):
+    def _get_program_offers(self, bundle_id):
         """
         Returns offers that apply to the program by matching the bundle id.
 
         Args:
-            bundle_attribute (BasketAttribute): The BasketAttribute object
-                associated with program bundling for this basket.
+            bundle_id: Bundle ID to get program bundling for this basket.
 
         Returns:
             list of Offer: List of all the offers applicable to the program.
         """
-        bundle_id = bundle_attribute.value_text
         ConditionalOffer = get_model('offer', 'ConditionalOffer')
         offers = ConditionalOffer.active.filter(offer_type=ConditionalOffer.SITE, condition__program_uuid=bundle_id)
 
