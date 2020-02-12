@@ -3,6 +3,7 @@ from __future__ import absolute_import
 import datetime
 import logging
 
+from django_extensions.db.models import TimeStampedModel
 from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
@@ -151,6 +152,14 @@ class Voucher(AbstractVoucher):
 
 class VoucherApplication(AbstractVoucherApplication):
     history = HistoricalRecords()
+
+
+class CopounTrace(TimeStampedModel):
+    user = models.ForeignKey('core.User', db_index=True)
+    course = models.ForeignKey('courses.Course', db_index=True)
+    coupon_code = models.CharField(max_length=128, db_index=True)
+    learner_enterprise_uuid = models.UUIDField()
+    message = models.TextField()
 
 
 from oscar.apps.voucher.models import *  # noqa isort:skip pylint: disable=wildcard-import,unused-wildcard-import,wrong-import-position,wrong-import-order,ungrouped-imports
