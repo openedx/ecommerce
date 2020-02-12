@@ -51,7 +51,7 @@ class OrderViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = serializers.OrderSerializer
     throttle_classes = (ServiceUserThrottle,)
     filter_backends = (filters.DjangoFilterBackend,)
-    filter_class = OrderFilter
+    filterset_class = OrderFilter
 
     def filter_queryset(self, queryset):
         queryset = super(OrderViewSet, self).filter_queryset(queryset)
