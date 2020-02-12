@@ -16,8 +16,8 @@ def toggle_switch(name, active):
     Returns:
         Switch: Waffle Switch
     """
-    switch, __ = Switch.objects.get_or_create(name=name,
-                                              defaults={'active': active})
+    switch, __ = Switch.objects.get_or_create(name=name, defaults={'active': active})
     switch.active = active
     switch.save()
+    switch.flush()
     return switch

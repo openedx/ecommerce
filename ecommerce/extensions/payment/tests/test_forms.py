@@ -130,10 +130,12 @@ class PaymentFormTests(TestCase):
         switch, __ = Switch.objects.get_or_create(name='optional_location_fields')
         switch.active = True
         switch.save()
+        switch.flush()
         self.assert_form_valid(country='US', state='CA')
         self.assert_form_valid(country='US', address_line1=None)
         switch.active = False
         switch.save()
+        switch.flush()
         self.assert_form_not_valid(country='US', state='CA', address_line1=None)
 
     # Temporarily add this test for codecov for the feature flag added for this test
