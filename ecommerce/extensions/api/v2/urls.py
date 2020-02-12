@@ -89,6 +89,7 @@ SDN_URLS = [
 
 ENTERPRISE_URLS = [
     url(r'^customers$', enterprise_views.EnterpriseCustomerViewSet.as_view(), name='enterprise_customers'),
+    url(r'^coupon_trace', enterprise_views.EnterpriseCouponTraceListView.as_view(), name='enterprise_coupon_trace'),
     url(
         r'^customer_catalogs$',
         enterprise_views.EnterpriseCustomerCatalogsViewSet.as_view({'get': 'get'}),
