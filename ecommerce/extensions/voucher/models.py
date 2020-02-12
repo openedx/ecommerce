@@ -176,7 +176,7 @@ class CouponTrace(TimeStampedModel):
 
         message = COUPON_ERRORS.get(coupon_error_code)
         if extended_message:
-            message = "{extended_message} -- {message}".format(extended_message=extended_message, message=message)
+            message = "{message} because {extended_message}".format(message=message, extended_message=extended_message)
 
         if not course:
             if basket.is_empty:

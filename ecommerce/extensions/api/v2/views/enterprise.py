@@ -42,7 +42,8 @@ from ecommerce.extensions.api.serializers import (
     NotRedeemedCodeUsageSerializer,
     OfferAssignmentSummarySerializer,
     PartialRedeemedCodeUsageSerializer,
-    RedeemedCodeUsageSerializer
+    RedeemedCodeUsageSerializer,
+    CouponTraceSerializer
 )
 from ecommerce.extensions.api.v2.utils import get_enterprise_from_product, send_new_codes_notification_email
 from ecommerce.extensions.api.v2.views.coupons import CouponViewSet
@@ -69,6 +70,7 @@ from ecommerce.extensions.voucher.utils import (
 
 logger = logging.getLogger(__name__)
 Order = get_model('order', 'Order')
+CouponTrace = get_model('voucher', 'CouponTrace')
 Line = get_model('basket', 'Line')
 OfferAssignment = get_model('offer', 'OfferAssignment')
 Product = get_model('catalogue', 'Product')
@@ -718,3 +720,20 @@ class EnterpriseCouponViewSet(CouponViewSet):
             return Response(serializer.data, status=status.HTTP_200_OK)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class EnterpriseCouponTraceListView(generics.ListAPIView):
+    model = CouponTrace
+    permission_classes = (IsAuthenticated,)
+    serializer_class = CouponTraceSerializer
+
+    def get_queryset(self):
+        coupon_code = self.request.query_params.get('coupon_code')
+        username = self.request.query_params.get('username')
+
+        queryset = self.model.objects.all()
+        if coupon_code:
+            queryset = queryset.filter(coupon_code__iexact=coupon_code)
+        if username:
+            queryset = queryset.filter(user__username__icontains=username)
+        return queryset

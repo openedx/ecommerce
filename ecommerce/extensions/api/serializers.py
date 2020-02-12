@@ -54,6 +54,7 @@ Benefit = get_model('offer', 'Benefit')
 BillingAddress = get_model('order', 'BillingAddress')
 Catalog = get_model('catalogue', 'Catalog')
 Category = get_model('catalogue', 'Category')
+CouponTrace = get_model('voucher', 'CouponTrace')
 Line = get_model('order', 'Line')
 OfferAssignment = get_model('offer', 'OfferAssignment')
 Order = get_model('order', 'Order')
@@ -203,7 +204,7 @@ class UserSerializer(serializers.ModelSerializer):
     """Serializes user information. """
     class Meta:
         model = User
-        fields = ('email', 'username')
+        fields = ('id', 'email', 'username', 'lms_user_id')
 
 
 class ProductAttributeValueSerializer(serializers.ModelSerializer):
@@ -417,6 +418,14 @@ class RefundSerializer(serializers.ModelSerializer):
         model = Refund
         fields = '__all__'
 
+
+class CouponTraceSerializer(serializers.ModelSerializer):
+    """ Serializer for Refund objects. """
+    user = UserSerializer()
+
+    class Meta:
+        model = CouponTrace
+        fields = '__all__'
 
 class CourseSerializer(serializers.HyperlinkedModelSerializer):
     id = serializers.RegexField(COURSE_ID_REGEX, max_length=255)
