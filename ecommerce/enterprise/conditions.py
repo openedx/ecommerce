@@ -15,6 +15,7 @@ from ecommerce.enterprise.api import catalog_contains_course_runs, fetch_enterpr
 from ecommerce.extensions.basket.utils import ENTERPRISE_CATALOG_ATTRIBUTE_TYPE
 from ecommerce.extensions.offer.constants import OFFER_ASSIGNMENT_REVOKED, OFFER_REDEEMED
 from ecommerce.extensions.offer.mixins import ConditionWithoutRangeMixin, SingleItemConsumptionConditionMixin
+from ecommerce.extensions.voucher.models import CouponTrace
 
 BasketAttribute = get_model('basket', 'BasketAttribute')
 BasketAttributeType = get_model('basket', 'BasketAttributeType')
@@ -67,6 +68,7 @@ class EnterpriseCustomerCondition(ConditionWithoutRangeMixin, SingleItemConsumpt
                 # Basket contains products not related to a course_run.
                 # Only log for non-site offers to avoid noise.
                 if offer.offer_type != ConditionalOffer.SITE:
+                    CouponTrace.create('ENT_COUPON_003', basket=basket, enterprise_customer_uuid=enterprise_customer)
                     logger.warning('[Code Redemption Failure] Unable to apply enterprise offer because '
                                    'the Basket contains a product not related to a course_run. '
                                    'User: %s, Offer: %s, Product: %s, Enterprise: %s, Catalog: %s',
@@ -84,6 +86,7 @@ class EnterpriseCustomerCondition(ConditionWithoutRangeMixin, SingleItemConsumpt
         try:
             learner_data = fetch_enterprise_learner_data(basket.site, basket.owner)['results'][0]
         except (ReqConnectionError, KeyError, SlumberHttpBaseException, Timeout) as exc:
+            CouponTrace.create('ENT_COUPON_004', basket=basket, enterprise_customer_uuid=enterprise_customer)
             logger.exception('[Code Redemption Failure] Unable to apply enterprise offer because '
                              'we failed to retrieve enterprise learner data for the user. '
                              'User: %s, Offer: %s, Message: %s, Enterprise: %s, Catalog: %s, Courses: %s',
@@ -96,6 +99,7 @@ class EnterpriseCustomerCondition(ConditionWithoutRangeMixin, SingleItemConsumpt
             return False
         except IndexError:
             if offer.offer_type == ConditionalOffer.SITE:
+                CouponTrace.create('ENT_COUPON_005', basket=basket, enterprise_customer_uuid=enterprise_customer)
                 logger.debug(
                     'Unable to apply enterprise site offer %s because no learner data was returned for user %s',
                     offer.id,
@@ -106,6 +110,7 @@ class EnterpriseCustomerCondition(ConditionWithoutRangeMixin, SingleItemConsumpt
                 enterprise_customer != learner_data['enterprise_customer']['uuid']):
             # Learner is not linked to the EnterpriseCustomer associated with this condition.
             if offer.offer_type == ConditionalOffer.VOUCHER:
+                CouponTrace.create('ENT_COUPON_006', basket=basket, enterprise_customer_uuid=enterprise_customer)
                 logger.warning('[Code Redemption Failure] Unable to apply enterprise offer because Learner\'s '
                                'enterprise (%s) does not match this conditions\'s enterprise (%s). '
                                'User: %s, Offer: %s, Enterprise: %s, Catalog: %s, Courses: %s',
@@ -124,6 +129,7 @@ class EnterpriseCustomerCondition(ConditionWithoutRangeMixin, SingleItemConsumpt
         catalog = self._get_enterprise_catalog_uuid_from_basket(basket)
         if catalog:
             if offer.condition.enterprise_customer_catalog_uuid != catalog:
+                CouponTrace.create('ENT_COUPON_007', basket=basket, enterprise_customer_uuid=enterprise_customer)
                 logger.warning('Unable to apply enterprise offer %s because '
                                'Enterprise catalog id on the basket (%s) '
                                'does not match the catalog for this condition (%s).',
@@ -135,6 +141,7 @@ class EnterpriseCustomerCondition(ConditionWithoutRangeMixin, SingleItemConsumpt
                 basket.site, course_run_ids, enterprise_customer, enterprise_customer_catalog_uuid=enterprise_catalog
             )
         except (ReqConnectionError, KeyError, SlumberHttpBaseException, Timeout) as exc:
+            CouponTrace.create('ENT_COUPON_008', basket=basket, enterprise_customer_uuid=enterprise_customer)
             logger.exception('[Code Redemption Failure] Unable to apply enterprise offer because '
                              'we failed to check if course_runs exist in the catalog. '
                              'User: %s, Offer: %s, Message: %s, Enterprise: %s, Catalog: %s, Courses: %s',
@@ -149,6 +156,7 @@ class EnterpriseCustomerCondition(ConditionWithoutRangeMixin, SingleItemConsumpt
         if not catalog_contains_course:
             # Basket contains course runs that do not exist in the EnterpriseCustomerCatalogs
             # associated with the EnterpriseCustomer.
+            CouponTrace.create('ENT_COUPON_009', basket=basket, enterprise_customer_uuid=enterprise_customer)
             logger.warning('[Code Redemption Failure] Unable to apply enterprise offer because '
                            'Enterprise catalog does not contain the course(s) in this basket. '
                            'User: %s, Offer: %s, Enterprise: %s, Catalog: %s, Courses: %s',
@@ -242,6 +250,7 @@ class AssignableEnterpriseCustomerCondition(EnterpriseCustomerCondition):
               'for additional questions.'),
         )
 
+        CouponTrace.create('ENT_COUPON_010', basket=basket, coupon_code=voucher.code)
         logger.warning('[Code Redemption Failure] Unable to apply enterprise offer because '
                        'the voucher has not been assigned to this user and their are no remaining available uses. '
                        'User: %s, Offer: %s, Enterprise: %s, Catalog: %s',

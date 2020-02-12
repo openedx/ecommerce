@@ -38,6 +38,7 @@ from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
 from ecommerce.extensions.checkout.utils import get_receipt_page_url
 from ecommerce.extensions.offer.utils import get_redirect_to_email_confirmation_if_required
 from ecommerce.extensions.order.exceptions import AlreadyPlacedOrderException
+from ecommerce.extensions.voucher.models import CouponTrace
 from ecommerce.extensions.voucher.utils import get_voucher_and_products_from_code
 
 Applicator = get_class('offer.applicator', 'Applicator')
@@ -177,6 +178,14 @@ class CouponRedeemView(EdxOrderPlacementMixin, APIView):
 
         valid_voucher, msg = voucher_is_valid(voucher, [product], request)
         if not valid_voucher:
+            CouponTrace.create(
+                'ENT_COUPON_000',
+                extended_message=msg,
+                coupon_code=code,
+                product=product,
+                user=request.user,
+                current_site=request.site
+            )
             logger.warning('[Code Redemption Failure] The voucher is not valid for this product. '
                            'User: %s, Product: %s, Code: %s, Message: %s',
                            request.user.username, product.id, voucher.code, msg)
@@ -184,6 +193,13 @@ class CouponRedeemView(EdxOrderPlacementMixin, APIView):
 
         offer = voucher.best_offer
         if not offer.is_email_valid(request.user.email):
+            CouponTrace.create(
+                'ENT_COUPON_001',
+                coupon_code=code,
+                product=product,
+                user=request.user,
+                current_site=request.site
+            )
             logger.warning('[Code Redemption Failure] Unable to apply offer because the user\'s email '
                            'does not meet the domain requirements. '
                            'User: %s, Offer: %s, Code: %s', request.user.username, offer.id, voucher.code)
@@ -231,6 +247,14 @@ class CouponRedeemView(EdxOrderPlacementMixin, APIView):
                 # If the consent token is set, then the user is returning from the consent view. Render out an error
                 # if the computed token doesn't match the one received from the redirect URL.
                 if received_consent_token != consent_token:
+                    CouponTrace.create(
+                        'ENT_COUPON_001',
+                        coupon_code=code,
+                        enterprise_customer_uuid=enterprise_customer['id'],
+                        product=product,
+                        user=request.user,
+                        current_site=request.site
+                    )
                     logger.warning('[Code Redemption Failure] Unable to complete code redemption because of '
                                    'invalid consent. User: %s, Offer: %s, Code: %s',
                                    request.user.username, offer.id, voucher.code)

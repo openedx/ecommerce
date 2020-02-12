@@ -12,8 +12,12 @@ from oscar.apps.voucher.abstract_models import (  # pylint: disable=ungrouped-im
     AbstractVoucherApplication
 )
 from simple_history.models import HistoricalRecords
+from oscar.apps.voucher.abstract_models import AbstractVoucher  # pylint: disable=ungrouped-imports
+from threadlocals.threadlocals import get_current_request
 
 from ecommerce.core.utils import log_message_and_raise_validation_error
+from ecommerce.enterprise.constants import COUPON_ERRORS
+from ecommerce.enterprise.utils import get_enterprise_id_for_user
 from ecommerce.extensions.offer.constants import OFFER_ASSIGNMENT_REVOKED, OFFER_MAX_USES_DEFAULT, OFFER_REDEEMED
 
 logger = logging.getLogger(__name__)
@@ -154,12 +158,50 @@ class VoucherApplication(AbstractVoucherApplication):
     history = HistoricalRecords()
 
 
-class CopounTrace(TimeStampedModel):
+class CouponTrace(TimeStampedModel):
     user = models.ForeignKey('core.User', db_index=True)
-    course = models.ForeignKey('courses.Course', db_index=True)
-    coupon_code = models.CharField(max_length=128, db_index=True)
+    course = models.ForeignKey('courses.Course', db_index=True)     # can be empty
+    coupon_code = models.CharField(max_length=128, db_index=True)   # can be empty
     learner_enterprise_uuid = models.UUIDField()
     message = models.TextField()
+
+    @classmethod
+    def create(cls, coupon_error_code, basket=None, extended_message=None, **kwargs):
+        # Need to add some unique identifier for same request
+        coupon_code = kwargs.get('coupon_code')
+        current_site = kwargs.get('current_site')
+        course = kwargs.get('product').course if kwargs.get('product') else None
+        enterprise_customer_uuid = kwargs.get('enterprise_customer_uuid')
+        user = basket.owner if basket and basket.owner else kwargs.get('user')
+
+        message = COUPON_ERRORS.get(coupon_error_code)
+        if extended_message:
+            message = "{extended_message} -- {message}".format(extended_message=extended_message, message=message)
+
+        if not course:
+            if basket.is_empty:
+                course = basket.all_lines()[0].product.course
+
+        if not current_site:
+            current_site = basket.site if basket and basket.site else get_current_request().site
+
+        if not user:
+            user = get_current_request.user
+
+        enterprise_customer_uuid = enterprise_customer_uuid if enterprise_customer_uuid else get_enterprise_id_for_user(
+            current_site,
+            user
+        )
+        if not coupon_code:
+            voucher = basket.vouchers.first()
+            coupon_code = voucher.code if voucher else None
+        cls(
+            user=user,
+            course=course,
+            coupon_code=coupon_code,
+            learner_enterprise_uuid=enterprise_customer_uuid,
+            message=message
+        ).save()
 
 
 from oscar.apps.voucher.models import *  # noqa isort:skip pylint: disable=wildcard-import,unused-wildcard-import,wrong-import-position,wrong-import-order,ungrouped-imports

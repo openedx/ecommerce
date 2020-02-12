@@ -23,6 +23,7 @@ from ecommerce.extensions.order.exceptions import AlreadyPlacedOrderException
 from ecommerce.extensions.order.utils import UserAlreadyPlacedOrder
 from ecommerce.extensions.payment.constants import DISABLE_MICROFRONTEND_FOR_BASKET_PAGE_FLAG_NAME
 from ecommerce.extensions.payment.utils import embargo_check
+from ecommerce.extensions.voucher.models import CouponTrace
 from ecommerce.referrals.models import Referral
 
 Applicator = get_class('offer.applicator', 'Applicator')
@@ -148,6 +149,7 @@ def prepare_basket(request, products, voucher=None):
         if is_valid:
             apply_voucher_on_basket_and_check_discount(voucher, request, basket)
         else:
+            CouponTrace.create('ENT_COUPON_011', basket=basket,  extended_message=message, user=request.user)
             logger.warning('[Code Redemption Failure] The voucher is not valid for this basket. '
                            'User: %s, Basket: %s, Code: %s, Message: %s',
                            request.user.username, request.basket.id, voucher.code, message)

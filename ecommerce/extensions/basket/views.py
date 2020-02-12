@@ -70,6 +70,7 @@ from ecommerce.extensions.order.exceptions import AlreadyPlacedOrderException
 from ecommerce.extensions.partner.shortcuts import get_partner_for_site
 from ecommerce.extensions.payment.constants import CLIENT_SIDE_CHECKOUT_FLAG_NAME
 from ecommerce.extensions.payment.forms import PaymentForm
+from ecommerce.extensions.voucher.models import CouponTrace
 
 Basket = get_model('basket', 'basket')
 BasketAttribute = get_model('basket', 'BasketAttribute')
@@ -846,6 +847,12 @@ class VoucherAddLogicMixin:
     def _verify_basket_not_empty(self, code):
         username = self.request.user and self.request.user.username
         if self.request.basket.is_empty:
+            CouponTrace.create(
+                'ENT_COUPON_0012',
+                coupon_code=code,
+                user=self.request.user,
+                current_site=self.request.site
+            )
             logger.warning(
                 '[Code Redemption Failure] User attempted to apply a code to an empty basket. '
                 'User: %s, Basket: %s, Code: %s',
@@ -856,6 +863,13 @@ class VoucherAddLogicMixin:
     def _verify_voucher_not_already_applied(self, code):
         username = self.request.user and self.request.user.username
         if self.request.basket.contains_voucher(code):
+            CouponTrace.create(
+                'ENT_COUPON_0013',
+                basket=self.request.basket,
+                coupon_code=code,
+                user=self.request.user,
+                current_site=self.request.site
+            )
             logger.warning(
                 '[Code Redemption Failure] User tried to apply a code that is already applied. '
                 'User: %s, Basket: %s, Code: %s',
@@ -910,6 +924,14 @@ class VoucherAddLogicMixin:
         username = self.request.user and self.request.user.username
         is_valid, message = validate_voucher(voucher, self.request.user, self.request.basket, self.request.site)
         if not is_valid:
+            CouponTrace.create(
+                'ENT_COUPON_014',
+                basket=self.request.basket,
+                coupon_code=voucher.code,
+                extended_message=message,
+                user=self.request.user,
+                current_site=self.request.site
+            )
             logger.warning('[Code Redemption Failure] The voucher is not valid for this basket. '
                            'User: %s, Basket: %s, Code: %s, Message: %s',
                            username, self.request.basket.id, voucher.code, message)
@@ -921,6 +943,14 @@ class VoucherAddLogicMixin:
         username = self.request.user and self.request.user.username
         valid, message = apply_voucher_on_basket_and_check_discount(voucher, self.request, self.request.basket)
         if not valid:
+            CouponTrace.create(
+                'ENT_COUPON_015',
+                basket=self.request.basket,
+                coupon_code=voucher.code,
+                extended_message=message,
+                user=self.request.user,
+                current_site=self.request.site
+            )
             logger.warning('[Code Redemption Failure] The voucher could not be applied to this basket. '
                            'User: %s, Basket: %s, Code: %s, Message: %s',
                            username, self.request.basket.id, voucher.code, message)

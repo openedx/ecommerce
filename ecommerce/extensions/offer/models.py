@@ -31,6 +31,7 @@ from ecommerce.extensions.offer.constants import (
     OFFER_ASSIGNMENT_REVOKED,
     OFFER_REDEEMED
 )
+from ecommerce.extensions.voucher.models import CouponTrace
 
 OFFER_PRIORITY_ENTERPRISE = 10
 OFFER_PRIORITY_VOUCHER = 20
@@ -134,6 +135,7 @@ class Benefit(AbstractBenefit):
                         partner=partner_code
                     )
                 except Exception as err:  # pylint: disable=bare-except
+                    CouponTrace.create('ENT_COUPON_016', basket=basket)
                     logger.exception(
                         '[Code Redemption Failure] Unable to apply benefit because we failed to query the '
                         'Discovery Service for catalog data. '
@@ -281,6 +283,7 @@ class ConditionalOffer(AbstractConditionalOffer):
         a check for if basket owners email domain is within the allowed email domains.
         """
         if basket.owner and not self.is_email_valid(basket.owner.email):
+            CouponTrace.create('ENT_COUPON_017', basket=basket)
             logger.warning('[Code Redemption Failure] Unable to apply offer because the user\'s email '
                            'does not meet the domain requirements. '
                            'User: %s, Offer: %s, Basket: %s', basket.owner.username, self.id, basket.id)
@@ -297,6 +300,7 @@ class ConditionalOffer(AbstractConditionalOffer):
             code = voucher and voucher.code
             username = basket.owner and basket.owner.username
             if voucher and num_lines > 1 and voucher.usage != Voucher.MULTI_USE:
+                CouponTrace.create('ENT_COUPON_018', basket=basket, coupon_code=code)
                 logger.warning('[Code Redemption Failure] Unable to apply offer because this Voucher '
                                'can only be used on single item baskets. '
                                'User: %s, Offer: %s, Basket: %s, Code: %s',
@@ -304,6 +308,7 @@ class ConditionalOffer(AbstractConditionalOffer):
                 return False
             is_satisfied = len(self.benefit.get_applicable_lines(self, basket)) == num_lines
             if not is_satisfied:
+                CouponTrace.create('ENT_COUPON_019', basket=basket, coupon_code=code)
                 logger.warning('[Code Redemption Failure] Unable to apply offer because this Voucher '
                                'is not valid for all courses in basket. '
                                'User: %s, Offer: %s, Basket: %s, Code: %s',
@@ -431,6 +436,13 @@ class Range(AbstractRange):
             TieredCache.set_all_tiers(cache_key, response, settings.COURSES_API_CACHE_TIMEOUT)
             return response
         except (ReqConnectionError, SlumberBaseException, Timeout) as exc:
+            CouponTrace.create(
+                'ENT_COUPON_020',
+                basket=request.basket,
+                user=request.user,
+                current_site=request.site,
+                product=product
+            )
             logger.exception('[Code Redemption Failure] Unable to connect to the Discovery Service '
                              'for catalog contains endpoint. '
                              'Product: %s, Message: %s, Range: %s', product.id, exc, self.id)
@@ -456,6 +468,14 @@ class Range(AbstractRange):
             )
 
         if not contains_product:
+            request = get_current_request()
+            CouponTrace.create(
+                'ENT_COUPON_021',
+                basket=request.basket,
+                user=request.user,
+                current_site=request.site,
+                product=product
+            )
             logger.warning('[Code Redemption Failure] Course catalog for Range does not contain the Product. '
                            'Product: %s, Range: %s', product.id, self.id)
 
