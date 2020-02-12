@@ -5,6 +5,7 @@
 #    make upgrade
 #
 appdirs==1.4.3            # via virtualenv
+distlib==0.3.0            # via virtualenv
 filelock==3.0.12          # via tox, virtualenv
 importlib-metadata==1.5.0  # via pluggy, tox, virtualenv
 importlib-resources==1.0.2  # via virtualenv
@@ -16,5 +17,5 @@ six==1.14.0               # via packaging, tox, virtualenv
 toml==0.10.0              # via tox
 tox-battery==0.5.2
 tox==3.14.3
-virtualenv==20.0.0        # via tox
+virtualenv==20.0.2        # via tox
 zipp==1.1.0               # via importlib-metadata

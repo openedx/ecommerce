@@ -30,6 +30,7 @@ cssutils==1.0.2
 ddt==1.2.2
 defusedxml==0.6.0
 diff-cover==2.6.0
+distlib==0.3.0
 git+https://github.com/django-compressor/django-appconf.git@5169ce2c92d9836e0b3ab3ec645727d9d5225d1a#egg=django-appconf
 django-compressor==2.4
 django-cors-headers==3.2.1
@@ -137,7 +138,7 @@ pyparsing==2.4.6
 pytest-base-url==1.4.1
 pytest-html==1.22.1
 pytest-metadata==1.8.0
-pytest-randomly==3.2.1
+pytest-randomly==1.2.3
 pytest-selenium==1.17.0
 pytest-timeout==1.3.4
 pytest-variables==1.9.0
@@ -170,7 +171,7 @@ sorl-thumbnail==12.4.1
 soupsieve==1.9.5
 sphinx==1.5.3
 sqlparse==0.3.0           # via django-debug-toolbar
-stevedore==1.31.0
+stevedore==1.32.0
 stripe==1.70.0
 testfixtures==6.12.0
 text-unidecode==1.3
@@ -184,7 +185,7 @@ unicodecsv==0.14.1
 unidecode==1.0.23
 uritemplate==3.0.1
 urllib3==1.25.8
-virtualenv==20.0.0
+virtualenv==20.0.2
 waitress==1.4.3
 wcwidth==0.1.8
 webencodings==0.5.1
