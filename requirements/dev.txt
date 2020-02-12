@@ -51,7 +51,7 @@ django-solo==1.1.3
 django-tables2==1.21.2
 django-threadlocals==0.10
 django-treebeard==4.3.1
-django-waffle==0.14.0
+django-waffle==0.19.0
 django-webtest==1.9.7
 django-widget-tweaks==1.4.5
 django==1.11.28
@@ -138,7 +138,7 @@ pyparsing==2.4.6
 pytest-base-url==1.4.1
 pytest-html==1.22.1
 pytest-metadata==1.8.0
-pytest-randomly==3.2.1
+pytest-randomly==1.2.3
 pytest-selenium==1.17.0
 pytest-timeout==1.3.4
 pytest-variables==1.9.0

@@ -4,9 +4,9 @@ from django.conf import settings
 from django.test import override_settings
 from django.urls import reverse
 from edx_django_utils.cache import TieredCache
-from waffle.models import Switch
 
 from ecommerce.core.models import SiteConfiguration
+from ecommerce.core.tests import toggle_switch
 from ecommerce.extensions.payment.tests.processors import AnotherDummyProcessor, DummyProcessor
 from ecommerce.tests.testcases import TestCase
 
@@ -17,8 +17,8 @@ class PaymentProcessorListViewTests(TestCase):
     def setUp(self):
         super(PaymentProcessorListViewTests, self).setUp()
         self.token = self.generate_jwt_token_header(self.create_user())
-        self.toggle_payment_processor(DummyProcessor.NAME, True)
-        self.toggle_payment_processor(AnotherDummyProcessor.NAME, True)
+        toggle_switch(settings.PAYMENT_PROCESSOR_SWITCH_PREFIX + DummyProcessor.NAME, True)
+        toggle_switch(settings.PAYMENT_PROCESSOR_SWITCH_PREFIX + AnotherDummyProcessor.NAME, True)
 
         site_config, __ = SiteConfiguration.objects.get_or_create(site__id=1)
 
@@ -35,12 +35,6 @@ class PaymentProcessorListViewTests(TestCase):
 
         # Clear the view cache
         TieredCache.dangerous_clear_all_tiers()
-
-    def toggle_payment_processor(self, processor, active):
-        """Set the given payment processor's Waffle switch."""
-        switch, __ = Switch.objects.get_or_create(name=settings.PAYMENT_PROCESSOR_SWITCH_PREFIX + processor)
-        switch.active = active
-        switch.save()
 
     def assert_processor_list_matches(self, expected):
         """ DRY helper. """
@@ -71,7 +65,7 @@ class PaymentProcessorListViewTests(TestCase):
     ])
     def test_processor_disabled(self):
         """  Tests that disabloing payment processor works """
-        self.toggle_payment_processor(DummyProcessor.NAME, False)
+        toggle_switch(settings.PAYMENT_PROCESSOR_SWITCH_PREFIX + DummyProcessor.NAME, False)
         self.assert_processor_list_matches([])
 
     @override_settings(PAYMENT_PROCESSORS=[
@@ -81,5 +75,5 @@ class PaymentProcessorListViewTests(TestCase):
     def test_waffle_switches_clear_cache(self):
         """ Tests that adding a new Switch resets processor cache """
         self.assert_processor_list_matches([DummyProcessor.NAME, AnotherDummyProcessor.NAME])
-        self.toggle_payment_processor(DummyProcessor.NAME, False)
+        toggle_switch(settings.PAYMENT_PROCESSOR_SWITCH_PREFIX + DummyProcessor.NAME, False)
         self.assert_processor_list_matches([AnotherDummyProcessor.NAME])
