@@ -171,7 +171,7 @@ class CouponTrace(TimeStampedModel):
     @classmethod
     def create(cls, coupon_error_code, basket=None, extended_message=None, **kwargs):
         from ecommerce.enterprise.utils import (
-            get_enterprise_id_for_user, get_enterprise_customer, get_enterprise_catalog_config
+            get_enterprise_id_for_user, get_enterprise_customer, get_enterprise_catalog_config, get_learner_enrollment
         )
 
         # Need to add some unique identifier for same request
@@ -179,6 +179,8 @@ class CouponTrace(TimeStampedModel):
         current_site = kwargs.get('current_site')
         course = kwargs.get('product').course if kwargs.get('product') else None
         user = basket.owner if basket and basket.owner else kwargs.get('user')
+
+        request = crum.get_current_request()
 
         message = COUPON_ERRORS.get(coupon_error_code)
         if extended_message:
@@ -188,10 +190,10 @@ class CouponTrace(TimeStampedModel):
             course = basket.all_lines()[0].product.course if basket.all_lines()[0].product else None
 
         if not current_site:
-            current_site = basket.site if basket and basket.site else crum.get_current_request().site
+            current_site = basket.site if basket and basket.site else request.site
 
         if not user:
-            user = crum.get_current_request().user
+            user = request.user
 
         enterprise_uuid, enterprise_catalog_uuid, coupon_end_datetime, coupon_code = cls.get_enterprise_coupon_data(
             basket, coupon_code
@@ -212,9 +214,14 @@ class CouponTrace(TimeStampedModel):
                 enterprise_catalog_uuid
             )['content_filter']
 
+        enrollment = {}
+        if course:
+            enrollment = get_learner_enrollment(request.site, request.user.username, course.id)
+
         metadata = {
             'coupon_end_datetime': coupon_end_datetime,
             'enterprise_catalog_content_filter': enterprise_catalog_content_filter,
+            'enrollment': enrollment
         }
 
         cls(

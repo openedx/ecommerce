@@ -28,7 +28,8 @@ from ecommerce.enterprise.utils import (
     get_enterprise_catalog,
     get_enterprise_customer_catalogs,
     get_enterprise_customers,
-    get_enterprise_catalog_config
+    get_enterprise_catalog_config,
+    get_learner_enrollment
 )
 from ecommerce.extensions.api.pagination import DatatablesDefaultPagination
 from ecommerce.extensions.api.serializers import (
@@ -737,4 +738,5 @@ class EnterpriseCouponTraceListView(generics.ListAPIView):
             queryset = queryset.filter(coupon_code__iexact=coupon_code)
         if username:
             queryset = queryset.filter(user__username__icontains=username)
+
         return queryset

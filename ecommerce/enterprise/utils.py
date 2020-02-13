@@ -11,6 +11,7 @@ from functools import reduce  # pylint: disable=redefined-builtin
 
 import crum
 import six  # pylint: disable=ungrouped-imports
+from requests import Session
 from django.conf import settings
 from django.urls import reverse
 from django.utils.translation import ugettext as _
@@ -25,7 +26,7 @@ from six.moves.urllib.parse import urlencode
 from slumber.exceptions import SlumberHttpBaseException
 
 from ecommerce.core.constants import SYSTEM_ENTERPRISE_LEARNER_ROLE
-from ecommerce.core.url_utils import absolute_url, get_lms_dashboard_url
+from ecommerce.core.url_utils import absolute_url, get_lms_dashboard_url, get_lms_enrollment_api_url
 from ecommerce.enterprise.api import fetch_enterprise_learner_data
 from ecommerce.enterprise.exceptions import EnterpriseDoesNotExist
 from ecommerce.extensions.offer.models import OFFER_PRIORITY_ENTERPRISE
@@ -54,6 +55,17 @@ def get_enterprise_api_client(site):
     return EdxRestApiClient(
         site.siteconfiguration.enterprise_api_url,
         jwt=site.siteconfiguration.access_token
+    )
+
+
+def get_lms_enrollment_api_client(site):
+    """
+    Constructs a REST client for to communicate with the Open edX Enterprise Service
+    """
+    session = Session()
+    session.headers = {"X-Edx-Api-Key": settings.EDX_API_KEY}
+    return EdxRestApiClient(
+        get_lms_enrollment_api_url(), append_slash=False, session=session
     )
 
 
@@ -562,7 +574,19 @@ def get_enterprise_catalog_config(site, catalog_uuid):
     response = enterprise_catalog_config_client.get(uuid=catalog_uuid)['results'][0]
     return {
         'content_filter': response['content_filter'],
-        'enabled_course_modes': response['enabled_course_modes'],
+        'enabled_course_modes':  response['enabled_course_modes'],
+    }
+
+
+def get_learner_enrollment(site, username, course_id):
+    client = get_lms_enrollment_api_client(site)
+    client = getattr(client, '{},{}'.format(username, course_id))
+    response = client.get()
+
+    return {
+        'created': response['created'],
+        'mode':  response['mode'],
+        'is_active':  response['is_active']
     }
 
 

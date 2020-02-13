@@ -422,10 +422,14 @@ class RefundSerializer(serializers.ModelSerializer):
 class CouponTraceSerializer(serializers.ModelSerializer):
     """ Serializer for Refund objects. """
     user = UserSerializer()
+    metadata = serializers.SerializerMethodField()
 
     class Meta:
         model = CouponTrace
         fields = '__all__'
+
+    def get_metadata(self, obj):
+        return dict(obj.metadata)
 
 class CourseSerializer(serializers.HyperlinkedModelSerializer):
     id = serializers.RegexField(COURSE_ID_REGEX, max_length=255)
