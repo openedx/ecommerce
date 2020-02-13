@@ -190,12 +190,8 @@ class CouponTrace(TimeStampedModel):
         if not user:
             user = crum.get_current_request().user
 
-        enterprise_customer_uuid = enterprise_customer_uuid if enterprise_customer_uuid else get_enterprise_id_for_user(
-            current_site,
-            user
-        )
-
-        learner_enterprise_name = get_enterprise_customer(current_site, enterprise_customer_uuid)['name']
+        learner_enterprise = get_enterprise_customer(current_site, enterprise_customer_uuid)
+        enterprise_customer_uuid = enterprise_customer_uuid if enterprise_customer_uuid else learner_enterprise['id']
 
         if not coupon_code:
             voucher = basket.vouchers.first()
@@ -205,7 +201,7 @@ class CouponTrace(TimeStampedModel):
             course=course,
             coupon_code=coupon_code,
             learner_enterprise_uuid=enterprise_customer_uuid,
-            learner_enterprise_name=learner_enterprise_name,
+            learner_enterprise_name=learner_enterprise['name'],
             message=message
         ).save()
 
