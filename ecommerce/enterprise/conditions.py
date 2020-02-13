@@ -15,7 +15,6 @@ from ecommerce.enterprise.api import catalog_contains_course_runs, fetch_enterpr
 from ecommerce.extensions.basket.utils import ENTERPRISE_CATALOG_ATTRIBUTE_TYPE
 from ecommerce.extensions.offer.constants import OFFER_ASSIGNMENT_REVOKED, OFFER_REDEEMED
 from ecommerce.extensions.offer.mixins import ConditionWithoutRangeMixin, SingleItemConsumptionConditionMixin
-from ecommerce.extensions.voucher.models import CouponTrace
 
 BasketAttribute = get_model('basket', 'BasketAttribute')
 BasketAttributeType = get_model('basket', 'BasketAttributeType')
@@ -23,6 +22,7 @@ Condition = get_model('offer', 'Condition')
 ConditionalOffer = get_model('offer', 'ConditionalOffer')
 OfferAssignment = get_model('offer', 'OfferAssignment')
 Voucher = get_model('voucher', 'Voucher')
+CouponTrace = get_model('voucher', 'CouponTrace')
 logger = logging.getLogger(__name__)
 
 

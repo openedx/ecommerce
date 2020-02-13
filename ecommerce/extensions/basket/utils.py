@@ -23,7 +23,6 @@ from ecommerce.extensions.order.exceptions import AlreadyPlacedOrderException
 from ecommerce.extensions.order.utils import UserAlreadyPlacedOrder
 from ecommerce.extensions.payment.constants import DISABLE_MICROFRONTEND_FOR_BASKET_PAGE_FLAG_NAME
 from ecommerce.extensions.payment.utils import embargo_check
-from ecommerce.extensions.voucher.models import CouponTrace
 from ecommerce.referrals.models import Referral
 
 Applicator = get_class('offer.applicator', 'Applicator')
@@ -38,6 +37,7 @@ StockRecord = get_model('partner', 'StockRecord')
 OrderLine = get_model('order', 'Line')
 Refund = get_model('refund', 'Refund')
 Voucher = get_model('voucher', 'Voucher')
+CouponTrace = get_model('voucher', 'CouponTrace')
 
 logger = logging.getLogger(__name__)
 

@@ -31,7 +31,6 @@ from ecommerce.extensions.offer.constants import (
     OFFER_ASSIGNMENT_REVOKED,
     OFFER_REDEEMED
 )
-from ecommerce.extensions.voucher.models import CouponTrace
 
 OFFER_PRIORITY_ENTERPRISE = 10
 OFFER_PRIORITY_VOUCHER = 20
@@ -40,6 +39,7 @@ OFFER_PRIORITY_MANUAL_ORDER = 100
 logger = logging.getLogger(__name__)
 
 Voucher = get_model('voucher', 'Voucher')
+CouponTrace = get_model('voucher', 'CouponTrace')
 
 
 class Benefit(AbstractBenefit):

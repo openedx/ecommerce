@@ -553,6 +553,15 @@ def get_enterprise_catalog(site, enterprise_catalog, limit, page, endpoint_reque
     return response
 
 
+def get_enterprise_catalog_config(site, catalog_uuid):
+    """
+    Get the EnterpriseCustomerCatalog config for a given catalog uuid.
+    """
+    client = get_enterprise_api_client(site)
+    enterprise_catalog_config_client = getattr(client, 'enterprise_catalog_config')
+    return enterprise_catalog_config_client.get(uuid=catalog_uuid)
+
+
 def get_enterprise_id_for_current_request_user_from_jwt():
     request = crum.get_current_request()
     decoded_jwt = get_decoded_jwt(request)

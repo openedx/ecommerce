@@ -70,7 +70,6 @@ from ecommerce.extensions.order.exceptions import AlreadyPlacedOrderException
 from ecommerce.extensions.partner.shortcuts import get_partner_for_site
 from ecommerce.extensions.payment.constants import CLIENT_SIDE_CHECKOUT_FLAG_NAME
 from ecommerce.extensions.payment.forms import PaymentForm
-from ecommerce.extensions.voucher.models import CouponTrace
 
 Basket = get_model('basket', 'basket')
 BasketAttribute = get_model('basket', 'BasketAttribute')
@@ -81,6 +80,7 @@ logger = logging.getLogger(__name__)
 Product = get_model('catalogue', 'Product')
 StockRecord = get_model('partner', 'StockRecord')
 Voucher = get_model('voucher', 'Voucher')
+CouponTrace = get_model('voucher', 'CouponTrace')
 Selector = get_class('partner.strategy', 'Selector')
 
 

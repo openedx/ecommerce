@@ -38,7 +38,6 @@ from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
 from ecommerce.extensions.checkout.utils import get_receipt_page_url
 from ecommerce.extensions.offer.utils import get_redirect_to_email_confirmation_if_required
 from ecommerce.extensions.order.exceptions import AlreadyPlacedOrderException
-from ecommerce.extensions.voucher.models import CouponTrace
 from ecommerce.extensions.voucher.utils import get_voucher_and_products_from_code
 
 Applicator = get_class('offer.applicator', 'Applicator')
@@ -47,6 +46,7 @@ Benefit = get_model('offer', 'Benefit')
 ConditionalOffer = get_model('offer', 'ConditionalOffer')
 logger = logging.getLogger(__name__)
 OrderLineVouchers = get_model('voucher', 'OrderLineVouchers')
+CouponTrace = get_model('voucher', 'CouponTrace')
 Order = get_model('order', 'Order')
 Product = get_model('catalogue', 'Product')
 Selector = get_class('partner.strategy', 'Selector')

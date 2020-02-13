@@ -27,7 +27,8 @@ from ecommerce.coupons.utils import is_coupon_available
 from ecommerce.enterprise.utils import (
     get_enterprise_catalog,
     get_enterprise_customer_catalogs,
-    get_enterprise_customers
+    get_enterprise_customers,
+    get_enterprise_catalog_config
 )
 from ecommerce.extensions.api.pagination import DatatablesDefaultPagination
 from ecommerce.extensions.api.serializers import (
@@ -728,6 +729,7 @@ class EnterpriseCouponTraceListView(generics.ListAPIView):
     serializer_class = CouponTraceSerializer
 
     def get_queryset(self):
+        # get_enterprise_catalog_config(current_site, 'enterprise_catalog_uuid')
         coupon_code = self.request.query_params.get('coupon_code')
         username = self.request.query_params.get('username')
 
