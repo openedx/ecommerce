@@ -16,13 +16,13 @@
     {% for refund in refunds %}
         <tr>
             <td>
-                <a href="{% url 'dashboard:refunds:detail' refund.id %}">{{ refund.id }}</a>
+                <a href="{% url 'dashboard:refunds-detail' refund.id %}">{{ refund.id }}</a>
             </td>
             <td>{{ refund.num_items }}</td>
             <td>{{ refund.total_credit_excl_tax|currency:refund.currency }}</td>
             <td>{{ refund.created }}</td>
             <td>{{ refund.status|default:"-" }}</td>
-            <td><a href="{% url 'dashboard:refunds:detail' refund.id %}"
+            <td><a href="{% url 'dashboard:refunds-detail' refund.id %}"
                    class="btn btn-info">{% trans "View" as tmsg %}{{ tmsg | force_escape }}</a></td>
         </tr>
     {% endfor %}

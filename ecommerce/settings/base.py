@@ -9,7 +9,6 @@ from os.path import abspath, basename, dirname, join, normpath
 from sys import path
 
 from django.utils.translation import ugettext_lazy as _
-from oscar import OSCAR_MAIN_TEMPLATE_DIR
 
 from ecommerce.core.constants import (
     ENTERPRISE_COUPON_ADMIN_ROLE,
@@ -179,9 +178,6 @@ TEMPLATES = [
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': (
             normpath(join(DJANGO_ROOT, 'templates')),
-            # Templates which override default Oscar templates
-            normpath(join(DJANGO_ROOT, 'templates/oscar')),
-            OSCAR_MAIN_TEMPLATE_DIR,
         ),
         'OPTIONS': {
             'loaders': [
@@ -200,7 +196,6 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
                 'django.template.context_processors.request',
                 'oscar.apps.search.context_processors.search_form',
-                'oscar.apps.promotions.context_processors.promotions',
                 'oscar.apps.checkout.context_processors.checkout',
                 'oscar.apps.customer.notifications.context_processors.notifications',
                 'oscar.core.context_processors.metadata',

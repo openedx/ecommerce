@@ -1,1 +1,1 @@
-default_app_config = 'ecommerce.extensions.catalogue.config.CatalogueConfig'  # pragma: no cover
+default_app_config = 'ecommerce.extensions.catalogue.apps.CatalogueConfig'  # pragma: no cover

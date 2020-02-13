@@ -31,7 +31,7 @@
        data-order-id="{{ order.number }}"
        data-total-amount="{{ order.total_incl_tax | unlocalize }}"
        data-back-button="{{ disable_back_button | default:0 }}">
-       {% include 'partials/alert_messages.html' %}
+       {% include 'oscar/partials/alert_messages.html' %}
 
       <h2 class="thank-you">{% trans "Thank you for your order!" as tmsg %}{{ tmsg | force_escape }}</h2>
 

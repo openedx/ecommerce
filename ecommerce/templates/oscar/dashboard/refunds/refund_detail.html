@@ -1,4 +1,4 @@
-{% extends 'dashboard/layout.html' %}
+{% extends 'oscar/dashboard/layout.html' %}
 {% load compress %}
 {% load static %}
 {% load currency_filters %}
@@ -31,7 +31,7 @@
         <a href="{% url 'dashboard:index' %}">{% trans "Dashboard" as tmsg %}{{ tmsg | force_escape }}</a>
     </li>
     <li>
-        <a href="{% url 'dashboard:refunds:list' %}">{% trans "Refunds" as tmsg %}{{ tmsg | force_escape }}</a>
+        <a href="{% url 'dashboard:refunds-list' %}">{% trans "Refunds" as tmsg %}{{ tmsg | force_escape }}</a>
     </li>
     <li class="active">#{{ refund.id }}</li>
 </ul>
@@ -84,14 +84,14 @@
                 <a href="{% url 'dashboard:order-detail' number=refund.order.number %}">{{ refund.order.number }}</a>
             </td>
             <td>
-                {% include "dashboard/partials/refund_buttons.html" %}
+                {% include "oscar/dashboard/partials/refund_buttons.html" %}
             </td>
         </tr>
     </table>
     {% endblock refund_overview %}
 
     {% block refund_details %}
-    {% include "dashboard/partials/refund_action_modal.html" %}
+    {% include "oscar/dashboard/partials/refund_action_modal.html" %}
 
     <div class="table-header">
         <h3>{% trans "Refund Items" as tmsg %}{{ tmsg | force_escape }}</h3>

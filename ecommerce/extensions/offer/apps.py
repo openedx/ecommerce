@@ -1,7 +1,7 @@
 from __future__ import absolute_import
 
-from oscar.apps.offer import config
+from oscar.apps.offer import apps
 
 
-class OfferConfig(config.OfferConfig):
+class OfferConfig(apps.OfferConfig):
     name = 'ecommerce.extensions.offer'

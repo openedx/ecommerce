@@ -68,7 +68,7 @@ class OrderDetailView(CoreOrderDetailView):
         if refund:
             data = {
                 'link_start': '<a href="{}" target="_blank">'.format(
-                    reverse('dashboard:refunds:detail', kwargs={'pk': refund.pk})),
+                    reverse('dashboard:refunds-detail', kwargs={'pk': refund.pk})),
                 'link_end': '</a>',
                 'refund_id': refund.pk
             }

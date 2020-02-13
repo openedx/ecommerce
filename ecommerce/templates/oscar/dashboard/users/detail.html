@@ -1,4 +1,4 @@
-{% extends 'dashboard/layout.html' %}
+{% extends 'oscar/dashboard/layout.html' %}
 {% load currency_filters %}
 {% load i18n %}
 {% load waffle_tags %}
@@ -102,7 +102,7 @@
                                   action="{% url 'dashboard:user-password-reset' pk=customer.id %}" method="post"
                                   class="form-horizontal">
                               {% csrf_token %}
-                              {% include 'partials/form_fields.html' %}
+                              {% include 'oscar/partials/form_fields.html' %}
                                 <button type="submit"
                                         class="btn btn-primary btn-large">{% trans 'Send password reset email' as tmsg %}{{ tmsg | force_escape }}</button>
                             </form>
@@ -168,14 +168,14 @@
 
                 {% block user_refunds %}
                     <div id="user_refunds" class="tab-pane">
-                      {% include "dashboard/partials/refund_table.html" with refunds=customer.refunds.all %}
+                      {% include "oscar/dashboard/partials/refund_table.html" with refunds=customer.refunds.all %}
                     </div>
                 {% endblock %}
 
                 {% switch "user_enrollments_on_dashboard" %}
                   {% block user_enrollments %}
                       <div id="user_enrollments" class="tab-pane">
-                        {% include "dashboard/partials/enrollment_table.html" with enrollments=enrollments %}
+                        {% include "oscar/dashboard/partials/enrollment_table.html" with enrollments=enrollments %}
                       </div>
                   {% endblock %}
                 {% endswitch %}

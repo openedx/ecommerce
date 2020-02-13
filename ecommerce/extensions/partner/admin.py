@@ -4,7 +4,7 @@ from django.utils.translation import ugettext_lazy as _
 from oscar.apps.partner.admin import *  # noqa pylint: disable=wildcard-import,unused-wildcard-import
 from oscar.core.loading import get_class
 
-Catalog = get_class('ecommerce.extensions.catalogue.models', 'Catalog')
+Catalog = get_class('catalogue.models', 'Catalog')
 
 admin.site.unregister((StockRecord, Partner,))
 

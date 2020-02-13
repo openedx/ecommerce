@@ -1,1 +1,1 @@
-default_app_config = 'ecommerce.extensions.dashboard.users.config.UsersDashboardConfig'
+default_app_config = 'ecommerce.extensions.dashboard.users.apps.UsersDashboardConfig'

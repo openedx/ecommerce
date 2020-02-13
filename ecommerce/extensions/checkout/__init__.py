@@ -1,1 +1,1 @@
-default_app_config = 'ecommerce.extensions.checkout.config.CheckoutConfig'  # pragma: no cover
+default_app_config = 'ecommerce.extensions.checkout.apps.CheckoutConfig'  # pragma: no cover

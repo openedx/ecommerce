@@ -1,4 +1,4 @@
-{% extends 'dashboard/layout.html' %}
+{% extends 'oscar/dashboard/layout.html' %}
 {% load i18n %}
 {% load compress %}
 {% load static %}
@@ -380,7 +380,7 @@
                       <div class="well">
                           <h3><i class="icon-warning"></i> {% trans "Change order status" as tmsg %}{{ tmsg | force_escape }}:</h3>
                         {% if order_status_form.has_choices %}
-                          {% include "partials/form_fields.html" with form=order_status_form %}
+                          {% include "oscar/partials/form_fields.html" with form=order_status_form %}
                             <input type="hidden" value="change_order_status" name="order_action"/>
                             <input type="submit" value="{% trans "Change status" as tmsg %}{{ tmsg | force_escape }}" class="btn btn-primary"/>
                         {% else %}
@@ -713,7 +713,7 @@
                   <form id="order_note_form" action=".?note={{ note_id }}" method="post" class="form-stacked">
                     {% csrf_token %}
                       <input type="hidden" value="save_note" name="order_action"/>
-                    {% include "partials/form_fields.html" with form=note_form %}
+                    {% include "oscar/partials/form_fields.html" with form=note_form %}
                       <div class="form-actions">
                           <input type="submit" value="{% trans "Save note" as tmsg %}{{ tmsg | force_escape }}" class="btn btn-primary"/>
                         {% trans "Notes are only editable for 5 minutes after being saved." as tmsg %}{{ tmsg | force_escape }}
@@ -724,7 +724,7 @@
 
           {% block extra_tabs %}
               <div class="tab-pane {% if active_tab == 'refunds' %}active{% endif %}" id="refunds">
-                {% include "dashboard/partials/refund_table.html" with refunds=order.refunds.all %}
+                {% include "oscar/dashboard/partials/refund_table.html" with refunds=order.refunds.all %}
               </div>
           {% endblock %}
         </div>

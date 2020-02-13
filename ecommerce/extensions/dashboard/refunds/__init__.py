@@ -1,1 +1,1 @@
-default_app_config = 'oscar.apps.dashboard.orders.config.OrdersDashboardConfig'
+default_app_config = 'ecommerce.extensions.dashboard.refunds.apps.RefundsDashboardConfig'

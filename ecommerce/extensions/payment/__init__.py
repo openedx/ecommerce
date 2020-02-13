@@ -1,1 +1,1 @@
-default_app_config = 'ecommerce.extensions.payment.config.PaymentConfig'    # pragma: no cover
+default_app_config = 'ecommerce.extensions.payment.apps.PaymentConfig'  # pragma: no cover

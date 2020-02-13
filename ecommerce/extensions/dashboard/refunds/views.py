@@ -15,7 +15,7 @@ class RefundListView(FilterFieldsMixin, ListView):
     """ Dashboard view to list refunds. """
     model = Refund
     context_object_name = 'refunds'
-    template_name = 'dashboard/refunds/refund_list.html'
+    template_name = 'oscar/dashboard/refunds/refund_list.html'
     paginate_by = 25
     form_class = RefundSearchForm
     form = None
@@ -55,4 +55,4 @@ class RefundListView(FilterFieldsMixin, ListView):
 class RefundDetailView(DetailView):
     model = Refund
     context_object_name = 'refund'
-    template_name = 'dashboard/refunds/refund_detail.html'
+    template_name = 'oscar/dashboard/refunds/refund_detail.html'
