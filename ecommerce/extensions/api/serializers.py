@@ -420,9 +420,10 @@ class RefundSerializer(serializers.ModelSerializer):
 
 
 class CouponTraceSerializer(serializers.ModelSerializer):
-    """ Serializer for Refund objects. """
+    """ Serializer for CouponTrace objects. """
     user = UserSerializer()
     metadata = serializers.SerializerMethodField()
+    last_24_hour_records = serializers.SerializerMethodField()
 
     class Meta:
         model = CouponTrace
@@ -430,6 +431,10 @@ class CouponTraceSerializer(serializers.ModelSerializer):
 
     def get_metadata(self, obj):
         return dict(obj.metadata)
+
+    def get_last_24_hour_records(self, obj):
+        return  CouponTrace.objects.filter(created__gt=timezone.now()-timedelta(hours=24)).count()
+
 
 class CourseSerializer(serializers.HyperlinkedModelSerializer):
     id = serializers.RegexField(COURSE_ID_REGEX, max_length=255)
