@@ -40,7 +40,7 @@ class VoucherFilter(django_filters.FilterSet):
     Filter for vouchers via query string parameters.
     Currently supports filtering via the voucher's code.
     """
-    code = django_filters.CharFilter(name='code')
+    code = django_filters.CharFilter(field_name='code')
 
     class Meta:
         model = Voucher
@@ -52,7 +52,7 @@ class VoucherViewSet(NonDestroyableModelViewSet):
     serializer_class = serializers.VoucherSerializer
     permission_classes = (IsOffersOrIsAuthenticatedAndStaff,)
     filter_backends = (filters.DjangoFilterBackend,)
-    filter_class = VoucherFilter
+    filterset_class = VoucherFilter
 
     def get_queryset(self):
         return Voucher.objects.filter(

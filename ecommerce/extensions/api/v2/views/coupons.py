@@ -57,7 +57,7 @@ DEPRECATED_COUPON_CATEGORIES = ['Bulk Enrollment']
 class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
     """ Coupon resource. """
     permission_classes = (IsAuthenticated, IsAdminUser)
-    filter_class = ProductFilter
+    filterset_class = ProductFilter
 
     def get_queryset(self):
         product_filter = Product.objects.filter(
