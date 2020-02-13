@@ -38,7 +38,7 @@ django-crum==0.7.5
 django-extra-views==0.11.0
 django-filter==1.0.4
 django-haystack==2.8.1
-django-libsass==0.5
+django-libsass==0.8
 django-model-utils==3.2.0
 django-nose==1.4.6
 django-oscar==1.6.7
@@ -105,7 +105,7 @@ packaging==20.1
 path.py==7.2
 paypalrestsdk==1.13.1
 pbr==5.4.4
-phonenumbers==8.11.3
+phonenumbers==8.11.4
 pillow==7.0.0
 pluggy==0.13.1
 premailer==2.9.2
@@ -159,7 +159,7 @@ unicodecsv==0.14.1
 unidecode==1.0.23
 uritemplate==3.0.1
 urllib3==1.25.8
-virtualenv==20.0.2
+virtualenv==20.0.3
 waitress==1.4.3           # via webtest
 webencodings==0.5.1
 webob==1.8.6              # via webtest

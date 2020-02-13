@@ -31,7 +31,7 @@ django-crum==0.7.5        # via edx-rbac
 django-extra-views==0.11.0  # via django-oscar
 django-filter==1.0.4
 django-haystack==2.8.1    # via django-oscar
-django-libsass==0.5
+django-libsass==0.8
 django-model-utils==3.2.0  # via edx-rbac
 django-oscar==1.6.7
 django-phonenumber-field==2.0.1  # via django-oscar
@@ -81,7 +81,7 @@ openapi-codec==1.3.2      # via django-rest-swagger
 path.py==7.2
 paypalrestsdk==1.13.1
 pbr==5.4.4                # via mock, stevedore
-phonenumbers==8.11.3      # via django-oscar, django-phonenumber-field
+phonenumbers==8.11.4      # via django-oscar, django-phonenumber-field
 pillow==7.0.0             # via django-oscar
 premailer==2.9.2
 psutil==1.2.1             # via edx-django-utils, edx-drf-extensions
