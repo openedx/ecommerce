@@ -5,6 +5,7 @@ import crum
 import datetime
 import logging
 
+from jsonfield.fields import JSONField
 from django_extensions.db.models import TimeStampedModel
 from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
 from django.db import models
@@ -160,21 +161,23 @@ class VoucherApplication(AbstractVoucherApplication):
 
 class CouponTrace(TimeStampedModel):
     user = models.ForeignKey('core.User', db_index=True)
-    course = models.ForeignKey('courses.Course', db_index=True)     # can be empty
-    coupon_code = models.CharField(max_length=128, db_index=True)   # can be empty
-    learner_enterprise_uuid = models.UUIDField()
-    learner_enterprise_name = models.CharField(max_length=256)
+    course = models.ForeignKey('courses.Course', db_index=True, blank=True, null=True)
+    coupon_code = models.CharField(max_length=128, db_index=True)
+    learner_enterprise_uuid = models.UUIDField(blank=True, null=True)
+    learner_enterprise_name = models.CharField(max_length=255, blank=True, null=True)
     message = models.TextField()
+    metadata = JSONField(default={}, blank=True, null=True)
 
     @classmethod
     def create(cls, coupon_error_code, basket=None, extended_message=None, **kwargs):
-        from ecommerce.enterprise.utils import get_enterprise_id_for_user, get_enterprise_customer
+        from ecommerce.enterprise.utils import (
+            get_enterprise_id_for_user, get_enterprise_customer, get_enterprise_catalog_config
+        )
 
         # Need to add some unique identifier for same request
         coupon_code = kwargs.get('coupon_code')
         current_site = kwargs.get('current_site')
         course = kwargs.get('product').course if kwargs.get('product') else None
-        enterprise_customer_uuid = kwargs.get('enterprise_customer_uuid')
         user = basket.owner if basket and basket.owner else kwargs.get('user')
 
         message = COUPON_ERRORS.get(coupon_error_code)
@@ -190,20 +193,59 @@ class CouponTrace(TimeStampedModel):
         if not user:
             user = crum.get_current_request().user
 
-        learner_enterprise = get_enterprise_customer(current_site, enterprise_customer_uuid)
-        enterprise_customer_uuid = enterprise_customer_uuid if enterprise_customer_uuid else learner_enterprise['id']
+        enterprise_uuid, enterprise_catalog_uuid, coupon_end_datetime, coupon_code = cls.get_enterprise_coupon_data(
+            basket, coupon_code
+        )
 
-        if not coupon_code:
-            voucher = basket.vouchers.first()
-            coupon_code = voucher.code if voucher else None
+        enterprise_customer_uuid = kwargs.get('enterprise_customer_uuid') or enterprise_uuid
+        enterprise_catalog_uuid = kwargs.get('enterprise_catalog_uuid') or enterprise_catalog_uuid
+
+        # fetch enterprise name
+        learner_enterprise = get_enterprise_customer(current_site, enterprise_customer_uuid)
+        learner_enterprise_name = learner_enterprise['name'] if learner_enterprise else None
+
+        # fetch enterprise catalog content filter
+        enterprise_catalog_content_filter = {}
+        if enterprise_catalog_uuid:
+            enterprise_catalog_content_filter = get_enterprise_catalog_config(
+                current_site, 'enterprise_catalog_uuid'
+            )['content_filter']
+
+        metadata = {
+            'coupon_end_datetime': coupon_end_datetime,
+            'enterprise_catalog_content_filter': enterprise_catalog_content_filter,
+        }
+
         cls(
             user=user,
             course=course,
             coupon_code=coupon_code,
             learner_enterprise_uuid=enterprise_customer_uuid,
-            learner_enterprise_name=learner_enterprise['name'],
-            message=message
+            learner_enterprise_name=learner_enterprise_name,
+            message=message,
+            metadata=metadata
         ).save()
 
+    @staticmethod
+    def get_enterprise_coupon_data(basket, coupon_code):
+        coupon_end_datetime = None
+        enterprise_customer_uuid = None
+        enterprise_customer_catalog_uuid = None
+
+        if not coupon_code:
+            voucher = basket.vouchers.first()
+            if voucher:
+                coupon_end_datetime = voucher.end_datetime
+                coupon_code = voucher.code
+        else:
+            voucher = Voucher.objects.get(coupon_code)
+            coupon_end_datetime = voucher.end_datetime
+
+        if voucher:
+            condition = voucher.enterprise_offer.condition
+            enterprise_customer_uuid = condition.enterprise_customer_uuid
+            enterprise_customer_catalog_uuid = condition.enterprise_customer_catalog_uuid
+
+        return enterprise_customer_uuid, enterprise_customer_catalog_uuid, coupon_end_datetime, coupon_code
 
 from oscar.apps.voucher.models import *  # noqa isort:skip pylint: disable=wildcard-import,unused-wildcard-import,wrong-import-position,wrong-import-order,ungrouped-imports

@@ -30,7 +30,7 @@ from ecommerce.enterprise.api import fetch_enterprise_learner_data
 from ecommerce.enterprise.exceptions import EnterpriseDoesNotExist
 from ecommerce.extensions.offer.models import OFFER_PRIORITY_ENTERPRISE
 
-ConditionalOffer = get_model('offer', 'ConditionalOffer')
+
 StockRecord = get_model('partner', 'StockRecord')
 Voucher = get_model('voucher', 'Voucher')
 CONSENT_FAILED_PARAM = 'consent_failed'
@@ -559,7 +559,12 @@ def get_enterprise_catalog_config(site, catalog_uuid):
     """
     client = get_enterprise_api_client(site)
     enterprise_catalog_config_client = getattr(client, 'enterprise_catalog_config')
-    return enterprise_catalog_config_client.get(uuid=catalog_uuid)
+    response = enterprise_catalog_config_client.get(uuid=catalog_uuid)
+
+    return {
+        'content_filter': response['content_filter'],
+        'enabled_course_modes': response['enabled_course_modes'],
+    }
 
 
 def get_enterprise_id_for_current_request_user_from_jwt():

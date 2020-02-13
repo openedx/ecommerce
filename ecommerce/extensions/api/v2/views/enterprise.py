@@ -729,7 +729,6 @@ class EnterpriseCouponTraceListView(generics.ListAPIView):
     serializer_class = CouponTraceSerializer
 
     def get_queryset(self):
-        # get_enterprise_catalog_config(current_site, 'enterprise_catalog_uuid')
         coupon_code = self.request.query_params.get('coupon_code')
         username = self.request.query_params.get('username')
 
