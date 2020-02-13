@@ -181,9 +181,8 @@ class CouponTrace(TimeStampedModel):
         if extended_message:
             message = "{message} because {extended_message}".format(message=message, extended_message=extended_message)
 
-        if not course:
-            if basket.is_empty:
-                course = basket.all_lines()[0].product.course
+        if not course and not basket.is_empty and basket.all_lines():
+            course = basket.all_lines()[0].product.course if basket.all_lines()[0].product else None
 
         if not current_site:
             current_site = basket.site if basket and basket.site else crum.get_current_request().site
