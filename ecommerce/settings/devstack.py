@@ -39,6 +39,7 @@ CORS_ORIGIN_WHITELIST = (
     'http://localhost:1996',
     'http://localhost:1998',
     'http://localhost:8734',
+    'http://localhost:8080',
 )
 CORS_ALLOW_HEADERS = corsheaders_default_headers + (
     'use-jwt-cookie',
