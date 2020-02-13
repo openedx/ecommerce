@@ -559,8 +559,7 @@ def get_enterprise_catalog_config(site, catalog_uuid):
     """
     client = get_enterprise_api_client(site)
     enterprise_catalog_config_client = getattr(client, 'enterprise_catalog_config')
-    response = enterprise_catalog_config_client.get(uuid=catalog_uuid)
-
+    response = enterprise_catalog_config_client.get(uuid=catalog_uuid)['results'][0]
     return {
         'content_filter': response['content_filter'],
         'enabled_course_modes': response['enabled_course_modes'],

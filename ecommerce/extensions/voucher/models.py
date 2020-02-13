@@ -208,7 +208,8 @@ class CouponTrace(TimeStampedModel):
         enterprise_catalog_content_filter = {}
         if enterprise_catalog_uuid:
             enterprise_catalog_content_filter = get_enterprise_catalog_config(
-                current_site, 'enterprise_catalog_uuid'
+                current_site,
+                enterprise_catalog_uuid
             )['content_filter']
 
         metadata = {
@@ -238,7 +239,7 @@ class CouponTrace(TimeStampedModel):
                 coupon_end_datetime = voucher.end_datetime
                 coupon_code = voucher.code
         else:
-            voucher = Voucher.objects.get(coupon_code)
+            voucher = Voucher.objects.get(code=coupon_code)
             coupon_end_datetime = voucher.end_datetime
 
         if voucher:
