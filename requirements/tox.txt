@@ -16,6 +16,6 @@ pyparsing==2.4.6          # via packaging
 six==1.14.0               # via packaging, tox, virtualenv
 toml==0.10.0              # via tox
 tox-battery==0.5.2
-tox==3.14.3
+tox==3.14.4
 virtualenv==20.0.3        # via tox
 zipp==1.1.0               # via importlib-metadata
