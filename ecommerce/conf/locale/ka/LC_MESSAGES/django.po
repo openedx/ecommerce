@@ -4,6 +4,7 @@
 # This file is distributed under the GNU AFFERO GENERAL PUBLIC LICENSE.
 # 
 # Translators:
+# Translators:
 # Anthony Mangano <amangano@edx.org>, 2017
 # Giorgi Goderdzishvili <biggeorgian@gmail.com>, 2016
 # Giorgi Goderdzishvili <biggeorgian@gmail.com>, 2017
@@ -12,8 +13,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-01-19 20:12+0000\n"
-"PO-Revision-Date: 2020-01-19 20:13+0000\n"
+"POT-Creation-Date: 2020-02-16 20:12+0000\n"
+"PO-Revision-Date: 2020-02-16 20:14+0000\n"
 "Last-Translator: edx_transifex_bot <i18n-working-group+edx-transifex-bot@edx.org>\n"
 "Language-Team: Georgian (http://www.transifex.com/open-edx/edx-platform/language/ka/)\n"
 "MIME-Version: 1.0\n"
@@ -267,11 +268,12 @@ msgstr ""
 msgid "Name"
 msgstr "სახელი"
 
-#: ecommerce/core/models.py:735 ecommerce/extensions/offer/models.py:484
+#: ecommerce/core/models.py:735 ecommerce/extensions/offer/models.py:483
 msgid "EnterpriseCustomer UUID"
 msgstr ""
 
-#: ecommerce/core/models.py:736 ecommerce/extensions/offer/models.py:362
+#: ecommerce/core/models.py:736 ecommerce/extensions/offer/models.py:361
+#: ecommerce/extensions/offer/models.py:550
 msgid "UUID for an EnterpriseCustomer from the Enterprise Service."
 msgstr ""
 
@@ -334,32 +336,33 @@ msgstr "თქვენ არ გაქვთ ამ კუპონის გ�
 msgid "Couldn't find a matching Enterprise Customer for this coupon."
 msgstr ""
 
-#: ecommerce/coupons/views.py:212
+#: ecommerce/coupons/views.py:213
 msgid ""
-"This coupon code is not valid for entitlement course product. Try a "
-"different course."
+"This coupon is not valid for purchasing a program. Try using this on an "
+"individual course in the program. If you need assistance, contact edX "
+"support."
 msgstr ""
 
-#: ecommerce/coupons/views.py:237
+#: ecommerce/coupons/views.py:240
 msgid "Invalid data sharing consent token provided."
 msgstr ""
 
-#: ecommerce/coupons/views.py:256
+#: ecommerce/coupons/views.py:259
 #, python-brace-format
 msgid "You have already purchased {course} seat."
 msgstr ""
 
-#: ecommerce/coupons/views.py:275
+#: ecommerce/coupons/views.py:278
 #, python-brace-format
 msgid "A discount has been applied, courtesy of {enterprise_customer_name}."
 msgstr ""
 
-#: ecommerce/coupons/views.py:285
+#: ecommerce/coupons/views.py:288
 msgid "This coupon code is not valid for this course. Try a different course."
 msgstr ""
 
 #: ecommerce/courses/models.py:33 ecommerce/extensions/basket/models.py:20
-#: ecommerce/extensions/offer/models.py:167
+#: ecommerce/extensions/offer/models.py:166
 #: ecommerce/extensions/payment/models.py:63
 #: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:63
 #: ecommerce/templates/oscar/dashboard/offers/summary.html:14
@@ -679,29 +682,41 @@ msgid ""
 "We couldn't find enough information about you to perform the calculation."
 msgstr ""
 
-#: ecommerce/extensions/api/serializers.py:443
+#: ecommerce/extensions/api/serializers.py:174
+msgid "EXPIRED"
+msgstr ""
+
+#: ecommerce/extensions/api/serializers.py:176
+msgid "INACTIVE"
+msgstr "არააქტიური"
+
+#: ecommerce/extensions/api/serializers.py:177
+msgid "ACTIVE"
+msgstr "აქტიური"
+
+#: ecommerce/extensions/api/serializers.py:467
 msgid "Products must have a certificate type."
 msgstr ""
 
-#: ecommerce/extensions/api/serializers.py:446
-#: ecommerce/extensions/api/serializers.py:481
+#: ecommerce/extensions/api/serializers.py:470
+#: ecommerce/extensions/api/serializers.py:505
 msgid "Products must have a price."
 msgstr "პროდუქტებს უნდა ჰქონდეთ ფასი."
 
-#: ecommerce/extensions/api/serializers.py:453
+#: ecommerce/extensions/api/serializers.py:477
 msgid "You need to provide a course UUID to create Course Entitlements."
 msgstr ""
 
-#: ecommerce/extensions/api/serializers.py:477
+#: ecommerce/extensions/api/serializers.py:501
 msgid "Products must indicate whether ID verification is required."
 msgstr "პროდუქტებმა უნდა მიუთითონ მოთხოვნილია თუ არა ID-ს დამოწმება."
 
-#: ecommerce/extensions/api/serializers.py:543
+#: ecommerce/extensions/api/serializers.py:567
 #, python-brace-format
 msgid "Invalid product class [{product_class}] requested."
 msgstr "მოთხოვნილია არასწორი პროდუქტის კლასი  [{product_class}]."
 
-#: ecommerce/extensions/api/serializers.py:575
+#: ecommerce/extensions/api/serializers.py:599
 #, python-brace-format
 msgid ""
 "Course [{course_id}] was not published to LMS because the switch "
@@ -709,36 +724,26 @@ msgid ""
 " been saved."
 msgstr "[{course_id}] კურსი არ გამოქვეყნდა LMS-ზე, რადგან გადამრთველი [publish_course_modes_to_lms] გამორთულია. არარსებული SKU-ს თავიდან აცილების მიზნით, მონაცემები არ არის შენახული."
 
-#: ecommerce/extensions/api/serializers.py:962
-#: ecommerce/extensions/api/serializers.py:1062
-msgid "ACTIVE"
-msgstr "აქტიური"
-
-#: ecommerce/extensions/api/serializers.py:962
-#: ecommerce/extensions/api/serializers.py:1062
-msgid "INACTIVE"
-msgstr "არააქტიური"
-
-#: ecommerce/extensions/api/serializers.py:1046
+#: ecommerce/extensions/api/serializers.py:1096
 msgid "Enrollment code"
 msgstr "ჩარიცხვის კოდი."
 
-#: ecommerce/extensions/api/serializers.py:1047
+#: ecommerce/extensions/api/serializers.py:1097
 msgid "Discount code"
 msgstr "ფასდაკლების კოდი"
 
-#: ecommerce/extensions/api/v2/views/baskets.py:445
+#: ecommerce/extensions/api/v2/views/baskets.py:447
 #: ecommerce/extensions/basket/views.py:123
 msgid "No SKUs provided."
 msgstr ""
 
-#: ecommerce/extensions/api/v2/views/baskets.py:456
+#: ecommerce/extensions/api/v2/views/baskets.py:458
 #: ecommerce/extensions/basket/views.py:130
 #, python-brace-format
 msgid "Products with SKU(s) [{skus}] do not exist."
 msgstr ""
 
-#: ecommerce/extensions/api/v2/views/baskets.py:467
+#: ecommerce/extensions/api/v2/views/baskets.py:469
 msgid "Provide username or is_anonymous query param, but not both"
 msgstr ""
 
@@ -957,9 +962,9 @@ msgstr "თნხის დაბრუნების ID"
 #: ecommerce/extensions/dashboard/refunds/forms.py:16
 #: ecommerce/extensions/refund/models.py:74
 #: ecommerce/extensions/refund/models.py:309
-#: ecommerce/extensions/voucher/utils.py:225
-#: ecommerce/extensions/voucher/utils.py:284
-#: ecommerce/extensions/voucher/utils.py:321
+#: ecommerce/extensions/voucher/utils.py:223
+#: ecommerce/extensions/voucher/utils.py:282
+#: ecommerce/extensions/voucher/utils.py:319
 #: ecommerce/templates/oscar/dashboard/orders/line_detail.html:71
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:72
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:141
@@ -973,55 +978,71 @@ msgstr "თნხის დაბრუნების ID"
 msgid "Status"
 msgstr "სტატუსი"
 
-#: ecommerce/extensions/dashboard/users/views.py:49
+#: ecommerce/extensions/dashboard/users/views.py:48
 msgid "Failed to retrieve enrollment data."
 msgstr "ვერ მოხერხდა ჩარიცხვის მონაცემების მოძიება."
 
-#: ecommerce/extensions/offer/models.py:357
+#: ecommerce/extensions/offer/models.py:356
 msgid "Course Catalog ID from the Discovery Service."
 msgstr ""
 
-#: ecommerce/extensions/offer/models.py:368
+#: ecommerce/extensions/offer/models.py:367
 msgid "UUID for an EnterpriseCustomerCatalog from the Enterprise Service."
 msgstr ""
 
-#: ecommerce/extensions/offer/models.py:491
+#: ecommerce/extensions/offer/models.py:490
 msgid "EnterpriseCustomer Name"
 msgstr ""
 
-#: ecommerce/extensions/offer/models.py:496
+#: ecommerce/extensions/offer/models.py:495
 msgid "EnterpriseCustomerCatalog UUID"
 msgstr ""
 
-#: ecommerce/extensions/offer/models.py:501
+#: ecommerce/extensions/offer/models.py:500
 #: ecommerce/extensions/voucher/utils.py:54
-#: ecommerce/extensions/voucher/utils.py:193
-#: ecommerce/extensions/voucher/utils.py:273
-#: ecommerce/extensions/voucher/utils.py:329
-#: ecommerce/extensions/voucher/utils.py:338
-#: ecommerce/extensions/voucher/utils.py:344 ecommerce/programs/forms.py:21
+#: ecommerce/extensions/voucher/utils.py:191
+#: ecommerce/extensions/voucher/utils.py:271
+#: ecommerce/extensions/voucher/utils.py:327
+#: ecommerce/extensions/voucher/utils.py:336
+#: ecommerce/extensions/voucher/utils.py:342 ecommerce/programs/forms.py:21
 #: ecommerce/programs/templates/programs/programoffer_list.html:30
 msgid "Program UUID"
 msgstr ""
 
-#: ecommerce/extensions/offer/models.py:508
+#: ecommerce/extensions/offer/models.py:507
 msgid "Email to user pending."
 msgstr ""
 
-#: ecommerce/extensions/offer/models.py:509
+#: ecommerce/extensions/offer/models.py:508
 msgid "Code successfully assigned to user."
 msgstr ""
 
-#: ecommerce/extensions/offer/models.py:510
+#: ecommerce/extensions/offer/models.py:509
 msgid "Code has been redeemed by user."
 msgstr ""
 
-#: ecommerce/extensions/offer/models.py:511
+#: ecommerce/extensions/offer/models.py:510
 msgid "Email to user bounced."
 msgstr ""
 
-#: ecommerce/extensions/offer/models.py:512
+#: ecommerce/extensions/offer/models.py:511
 msgid "Code has been revoked for this user."
+msgstr ""
+
+#: ecommerce/extensions/offer/models.py:545
+msgid "Assign"
+msgstr ""
+
+#: ecommerce/extensions/offer/models.py:546
+msgid "Remind"
+msgstr ""
+
+#: ecommerce/extensions/offer/models.py:547
+msgid "Revoke"
+msgstr ""
+
+#: ecommerce/extensions/offer/models.py:559
+msgid "Make a particular template version active."
 msgstr ""
 
 #: ecommerce/extensions/offer/utils.py:93
@@ -1197,7 +1218,7 @@ msgstr ""
 msgid "..."
 msgstr "..."
 
-#: ecommerce/extensions/payment/views/cybersource.py:452
+#: ecommerce/extensions/payment/views/cybersource.py:453
 msgid "transaction declined"
 msgstr ""
 
@@ -1255,40 +1276,40 @@ msgstr "საკრედიტო სტრიქონი (გადასა
 msgid "Quantity"
 msgstr "რაოდენობა"
 
-#: ecommerce/extensions/voucher/models.py:36
+#: ecommerce/extensions/voucher/models.py:40
 msgid "Can be used once by one customer"
 msgstr ""
 
-#: ecommerce/extensions/voucher/models.py:37
+#: ecommerce/extensions/voucher/models.py:41
 msgid "Can be used multiple times by multiple customers"
 msgstr ""
 
-#: ecommerce/extensions/voucher/models.py:38
+#: ecommerce/extensions/voucher/models.py:42
 msgid "Can only be used once per customer"
 msgstr ""
 
-#: ecommerce/extensions/voucher/models.py:39
+#: ecommerce/extensions/voucher/models.py:43
 msgid "Can be used multiple times by one customer"
 msgstr ""
 
-#: ecommerce/extensions/voucher/models.py:41
+#: ecommerce/extensions/voucher/models.py:45
 msgid "Usage"
 msgstr ""
 
-#: ecommerce/extensions/voucher/models.py:53
+#: ecommerce/extensions/voucher/models.py:57
 msgid "This voucher is assigned to another user."
 msgstr ""
 
 #: ecommerce/extensions/voucher/tests/test_utils.py:212
-#: ecommerce/extensions/voucher/utils.py:78
-#: ecommerce/extensions/voucher/utils.py:321
+#: ecommerce/extensions/voucher/utils.py:77
+#: ecommerce/extensions/voucher/utils.py:319
 msgid "Redeemed"
 msgstr "გამოყენებული"
 
 #: ecommerce/extensions/voucher/tests/test_utils.py:376
 #: ecommerce/extensions/voucher/tests/test_utils.py:381
-#: ecommerce/extensions/voucher/utils.py:97
-#: ecommerce/extensions/voucher/utils.py:164
+#: ecommerce/extensions/voucher/utils.py:96
+#: ecommerce/extensions/voucher/utils.py:162
 #: ecommerce/templates/edx/checkout/receipt.html:120
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:195
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:217
@@ -1298,183 +1319,183 @@ msgstr "ფასდაკლება"
 
 #: ecommerce/extensions/voucher/tests/test_utils.py:376
 #: ecommerce/extensions/voucher/tests/test_utils.py:381
-#: ecommerce/extensions/voucher/utils.py:97
-#: ecommerce/extensions/voucher/utils.py:164
+#: ecommerce/extensions/voucher/utils.py:96
+#: ecommerce/extensions/voucher/utils.py:162
 msgid "Enrollment"
 msgstr "ჩარიცხვა"
 
 #: ecommerce/extensions/voucher/tests/test_utils.py:377
 #: ecommerce/extensions/voucher/tests/test_utils.py:385
-#: ecommerce/extensions/voucher/utils.py:98
-#: ecommerce/extensions/voucher/utils.py:168
+#: ecommerce/extensions/voucher/utils.py:97
+#: ecommerce/extensions/voucher/utils.py:166
 #, python-brace-format
 msgid "{percentage} %"
 msgstr "{percentage} %"
 
 #: ecommerce/extensions/voucher/tests/test_utils.py:541
-#: ecommerce/extensions/voucher/utils.py:80
+#: ecommerce/extensions/voucher/utils.py:79
 msgid "Inactive"
 msgstr "არააქტიური"
 
 #: ecommerce/extensions/voucher/utils.py:54
-#: ecommerce/extensions/voucher/utils.py:195
-#: ecommerce/extensions/voucher/utils.py:274
-#: ecommerce/extensions/voucher/utils.py:332
-#: ecommerce/extensions/voucher/utils.py:335
-#: ecommerce/extensions/voucher/utils.py:340
+#: ecommerce/extensions/voucher/utils.py:193
+#: ecommerce/extensions/voucher/utils.py:272
+#: ecommerce/extensions/voucher/utils.py:330
+#: ecommerce/extensions/voucher/utils.py:333
+#: ecommerce/extensions/voucher/utils.py:338
 msgid "Catalog Query"
 msgstr "მოთხოვნათა კატალოგი"
 
 #: ecommerce/extensions/voucher/utils.py:56
-#: ecommerce/extensions/voucher/utils.py:288
-#: ecommerce/extensions/voucher/utils.py:343
+#: ecommerce/extensions/voucher/utils.py:286
+#: ecommerce/extensions/voucher/utils.py:341
 msgid "Redeemed For Course IDs"
 msgstr ""
 
 #: ecommerce/extensions/voucher/utils.py:58
-#: ecommerce/extensions/voucher/utils.py:287
-#: ecommerce/extensions/voucher/utils.py:334
-#: ecommerce/extensions/voucher/utils.py:342
+#: ecommerce/extensions/voucher/utils.py:285
+#: ecommerce/extensions/voucher/utils.py:332
+#: ecommerce/extensions/voucher/utils.py:340
 msgid "Redeemed For Course ID"
 msgstr " კურსის ID-სთვის გამოყენება"
 
-#: ecommerce/extensions/voucher/utils.py:78
+#: ecommerce/extensions/voucher/utils.py:77
 #: ecommerce/templates/oscar/dashboard/users/detail.html:52
 msgid "Active"
 msgstr "აქტიური"
 
-#: ecommerce/extensions/voucher/utils.py:174
-#: ecommerce/extensions/voucher/utils.py:222
-#: ecommerce/extensions/voucher/utils.py:266
+#: ecommerce/extensions/voucher/utils.py:172
+#: ecommerce/extensions/voucher/utils.py:220
+#: ecommerce/extensions/voucher/utils.py:264
 msgid "Code"
 msgstr "კოდი"
 
-#: ecommerce/extensions/voucher/utils.py:174
+#: ecommerce/extensions/voucher/utils.py:172
 msgid "This row applies to all vouchers"
 msgstr ""
 
-#: ecommerce/extensions/voucher/utils.py:175
-#: ecommerce/extensions/voucher/utils.py:278
+#: ecommerce/extensions/voucher/utils.py:173
+#: ecommerce/extensions/voucher/utils.py:276
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:126
 msgid "Category"
 msgstr "კატეგორია"
 
-#: ecommerce/extensions/voucher/utils.py:176
-#: ecommerce/extensions/voucher/utils.py:291
+#: ecommerce/extensions/voucher/utils.py:174
+#: ecommerce/extensions/voucher/utils.py:289
 msgid "Coupon Expiry Date"
 msgstr "კუპონის ვადის გასვლის თარიღი"
 
-#: ecommerce/extensions/voucher/utils.py:177
-#: ecommerce/extensions/voucher/utils.py:267
+#: ecommerce/extensions/voucher/utils.py:175
+#: ecommerce/extensions/voucher/utils.py:265
 msgid "Coupon Name"
 msgstr "კუპონის სახელი"
 
-#: ecommerce/extensions/voucher/utils.py:178
-#: ecommerce/extensions/voucher/utils.py:290
+#: ecommerce/extensions/voucher/utils.py:176
+#: ecommerce/extensions/voucher/utils.py:288
 msgid "Coupon Start Date"
 msgstr "კუპონის დაწყების თარიღი."
 
-#: ecommerce/extensions/voucher/utils.py:179
-#: ecommerce/extensions/voucher/utils.py:270
+#: ecommerce/extensions/voucher/utils.py:177
+#: ecommerce/extensions/voucher/utils.py:268
 msgid "Coupon Type"
 msgstr "კუპონის ტიპი"
 
-#: ecommerce/extensions/voucher/utils.py:180
-#: ecommerce/extensions/voucher/utils.py:289
+#: ecommerce/extensions/voucher/utils.py:178
+#: ecommerce/extensions/voucher/utils.py:287
 msgid "Create Date"
 msgstr "შექმნის თარიღი"
 
-#: ecommerce/extensions/voucher/utils.py:181
-#: ecommerce/extensions/voucher/utils.py:282
+#: ecommerce/extensions/voucher/utils.py:179
+#: ecommerce/extensions/voucher/utils.py:280
 msgid "Discount Percentage"
 msgstr "ფასდაკლების პროცენტი"
 
-#: ecommerce/extensions/voucher/utils.py:182
-#: ecommerce/extensions/voucher/utils.py:283
+#: ecommerce/extensions/voucher/utils.py:180
+#: ecommerce/extensions/voucher/utils.py:281
 msgid "Discount Amount"
 msgstr "ფასდაკლების რაოდენობა"
 
-#: ecommerce/extensions/voucher/utils.py:183
-#: ecommerce/extensions/voucher/utils.py:292
+#: ecommerce/extensions/voucher/utils.py:181
+#: ecommerce/extensions/voucher/utils.py:290
 msgid "Email Domains"
 msgstr "ელფოსტის დომენები"
 
-#: ecommerce/extensions/voucher/utils.py:184
-#: ecommerce/extensions/voucher/utils.py:281
+#: ecommerce/extensions/voucher/utils.py:182
+#: ecommerce/extensions/voucher/utils.py:279
 msgid "Invoiced Amount"
 msgstr "რაოდენობა ინვოისზე "
 
-#: ecommerce/extensions/voucher/utils.py:185
-#: ecommerce/extensions/voucher/utils.py:279
+#: ecommerce/extensions/voucher/utils.py:183
+#: ecommerce/extensions/voucher/utils.py:277
 msgid "Note"
 msgstr "შენიშვნა"
 
-#: ecommerce/extensions/voucher/utils.py:186
-#: ecommerce/extensions/voucher/utils.py:280
+#: ecommerce/extensions/voucher/utils.py:184
+#: ecommerce/extensions/voucher/utils.py:278
 #: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:50
 #: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:61
 #: ecommerce/templates/oscar/basket/partials/hosted_checkout_basket.html:63
 msgid "Price"
 msgstr "ფასი"
 
-#: ecommerce/extensions/voucher/utils.py:190
-#: ecommerce/extensions/voucher/utils.py:272
-#: ecommerce/extensions/voucher/utils.py:330
-#: ecommerce/extensions/voucher/utils.py:336
+#: ecommerce/extensions/voucher/utils.py:188
+#: ecommerce/extensions/voucher/utils.py:270
+#: ecommerce/extensions/voucher/utils.py:328
+#: ecommerce/extensions/voucher/utils.py:334
 #: ecommerce/templates/oscar/dashboard/partials/enrollment_table.html:8
 msgid "Course ID"
 msgstr "კურსის ID"
 
-#: ecommerce/extensions/voucher/utils.py:191
-#: ecommerce/extensions/voucher/utils.py:276
-#: ecommerce/extensions/voucher/utils.py:331
-#: ecommerce/extensions/voucher/utils.py:337
+#: ecommerce/extensions/voucher/utils.py:189
+#: ecommerce/extensions/voucher/utils.py:274
+#: ecommerce/extensions/voucher/utils.py:329
+#: ecommerce/extensions/voucher/utils.py:335
 msgid "Organization"
 msgstr "ორგანიზაცია"
 
-#: ecommerce/extensions/voucher/utils.py:196
-#: ecommerce/extensions/voucher/utils.py:275
-#: ecommerce/extensions/voucher/utils.py:333
-#: ecommerce/extensions/voucher/utils.py:341
+#: ecommerce/extensions/voucher/utils.py:194
+#: ecommerce/extensions/voucher/utils.py:273
+#: ecommerce/extensions/voucher/utils.py:331
+#: ecommerce/extensions/voucher/utils.py:339
 msgid "Course Seat Types"
 msgstr "კურსის ადგილების ტიპები"
 
-#: ecommerce/extensions/voucher/utils.py:223
-#: ecommerce/extensions/voucher/utils.py:268
-#: ecommerce/extensions/voucher/utils.py:324
+#: ecommerce/extensions/voucher/utils.py:221
+#: ecommerce/extensions/voucher/utils.py:266
+#: ecommerce/extensions/voucher/utils.py:322
 msgid "Maximum Coupon Usage"
 msgstr "კუპონის მაქსიმალური  გამოყენება"
 
-#: ecommerce/extensions/voucher/utils.py:224
-#: ecommerce/extensions/voucher/utils.py:269
-#: ecommerce/extensions/voucher/utils.py:325
+#: ecommerce/extensions/voucher/utils.py:222
+#: ecommerce/extensions/voucher/utils.py:267
+#: ecommerce/extensions/voucher/utils.py:323
 msgid "Redemption Count"
 msgstr "გამოყენების დათვლა"
 
-#: ecommerce/extensions/voucher/utils.py:226
-#: ecommerce/extensions/voucher/utils.py:271
+#: ecommerce/extensions/voucher/utils.py:224
+#: ecommerce/extensions/voucher/utils.py:269
 msgid "URL"
 msgstr "URL"
 
-#: ecommerce/extensions/voucher/utils.py:277
-#: ecommerce/extensions/voucher/utils.py:300
+#: ecommerce/extensions/voucher/utils.py:275
+#: ecommerce/extensions/voucher/utils.py:298
 msgid "Client"
 msgstr "კლიენტი"
 
-#: ecommerce/extensions/voucher/utils.py:285
-#: ecommerce/extensions/voucher/utils.py:305
-#: ecommerce/extensions/voucher/utils.py:322
+#: ecommerce/extensions/voucher/utils.py:283
+#: ecommerce/extensions/voucher/utils.py:303
+#: ecommerce/extensions/voucher/utils.py:320
 #: ecommerce/templates/oscar/dashboard/users/detail.html:138
 msgid "Order Number"
 msgstr "შეკვეთის ნომერი"
 
-#: ecommerce/extensions/voucher/utils.py:286
-#: ecommerce/extensions/voucher/utils.py:305
-#: ecommerce/extensions/voucher/utils.py:323
+#: ecommerce/extensions/voucher/utils.py:284
+#: ecommerce/extensions/voucher/utils.py:303
+#: ecommerce/extensions/voucher/utils.py:321
 msgid "Redeemed By Username"
 msgstr "გამოყენება მომხმარებლის სახელით"
 
-#: ecommerce/extensions/voucher/utils.py:787
+#: ecommerce/extensions/voucher/utils.py:785
 #, python-brace-format
 msgid "Range for coupon [{coupon_id}]"
 msgstr "რიგი კუპონისთვის [{coupon_id}]"
@@ -1718,15 +1739,15 @@ msgstr "ვაუჩერები"
 msgid "Reports"
 msgstr "მოხსენებები"
 
-#: ecommerce/settings/base.py:88
+#: ecommerce/settings/base.py:89
 msgid "English"
 msgstr ""
 
-#: ecommerce/settings/base.py:89
+#: ecommerce/settings/base.py:90
 msgid "Spanish"
 msgstr ""
 
-#: ecommerce/settings/base.py:90
+#: ecommerce/settings/base.py:91
 msgid "Spanish (Latin American)"
 msgstr ""
 
