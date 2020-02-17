@@ -7,7 +7,7 @@ django<2.0
 django-compressor
 django-cors-headers                 #  Used to allow to configure CORS headers for cross-domain requests
 django-crispy-forms
-django_extensions==1.9.9
+django_extensions
 django-filter
 django-libsass
 django-oscar<1.7
