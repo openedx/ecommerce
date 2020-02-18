@@ -24,7 +24,6 @@ from waffle.testutils import override_switch
 from ecommerce.core.constants import ALLOW_MISSING_LMS_USER_ID
 from ecommerce.courses.models import Course
 from ecommerce.extensions.api import exceptions as api_exceptions
-from ecommerce.extensions.api.tests.test_authentication import AccessTokenMixin
 from ecommerce.extensions.api.v2.tests.views import JSON_CONTENT_TYPE, OrderDetailViewTestMixin
 from ecommerce.extensions.api.v2.views.baskets import BasketCalculateView, BasketCreateView
 from ecommerce.extensions.basket.constants import EMAIL_OPT_IN_ATTRIBUTE
@@ -286,7 +285,7 @@ class BasketCreateViewTests(BasketCreationMixin, ThrottlingMixin, TransactionTes
         self.assertDictEqual(actual, expected)
 
 
-class BasketViewSetTests(AccessTokenMixin, ThrottlingMixin, TestCase):
+class BasketViewSetTests(ThrottlingMixin, TestCase):
 
     def setUp(self):
         super(BasketViewSetTests, self).setUp()
@@ -298,15 +297,6 @@ class BasketViewSetTests(AccessTokenMixin, ThrottlingMixin, TestCase):
         """ If the user is not authenticated, the view should return HTTP status 403. """
         response = self.client.get(self.path)
         self.assertEqual(response.status_code, 401)
-
-    @httpretty.activate
-    def test_oauth2_authentication(self):
-        """Verify clients can authenticate with OAuth 2.0."""
-        auth_header = 'Bearer {}'.format(self.DEFAULT_TOKEN)
-
-        self.mock_user_info_response(username=self.user.username)
-        response = self.client.get(self.path, HTTP_AUTHORIZATION=auth_header)
-        self.assertEqual(response.status_code, 200)
 
     def test_only_works_for_staff_users(self):
         """ Test view only return results when accessed by staff. """
