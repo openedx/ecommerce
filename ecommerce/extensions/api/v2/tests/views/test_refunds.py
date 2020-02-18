@@ -3,7 +3,6 @@ from __future__ import absolute_import
 import json
 
 import ddt
-import httpretty
 import mock
 from django.urls import reverse
 from oscar.core.loading import get_model

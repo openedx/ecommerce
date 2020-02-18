@@ -5,7 +5,6 @@ from datetime import datetime
 from decimal import Decimal
 
 import ddt
-import httpretty
 import mock
 import pytz
 import six
