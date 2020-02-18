@@ -11,6 +11,7 @@ from rest_framework import status
 from ecommerce.core.models import User
 from ecommerce.extensions.api.v2.tests.views import JSON_CONTENT_TYPE
 from ecommerce.extensions.payment.utils import SDNClient
+from ecommerce.extensions.test.factories import create_basket
 from ecommerce.tests.testcases import TestCase
 
 
@@ -24,6 +25,7 @@ class SDNCheckViewSetTests(TestCase):
         self.client.login(username=user.username, password=self.password)
         self.site.siteconfiguration.enable_sdn_check = True
         self.site.siteconfiguration.save()
+        self.basket = create_basket(owner=user, site=self.site)
 
     def make_request(self):
         """Make a POST request to the endpoint."""
@@ -32,7 +34,8 @@ class SDNCheckViewSetTests(TestCase):
             data=json.dumps({
                 'name': 'Tester',
                 'city': 'Testlandia',
-                'country': 'TE'
+                'country': 'TE',
+                'basket': self.basket.id,
             }),
             content_type=JSON_CONTENT_TYPE
         )

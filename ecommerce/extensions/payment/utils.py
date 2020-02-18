@@ -6,8 +6,10 @@ import re
 import requests
 import six  # pylint: disable=ungrouped-imports
 from django.conf import settings
+from django.contrib.auth import logout
 from django.utils.translation import ugettext_lazy as _
 from oscar.core.loading import get_model
+from requests.exceptions import HTTPError, Timeout
 from six.moves.urllib.parse import urlencode
 
 from ecommerce.core.constants import SEAT_PRODUCT_CLASS_NAME
@@ -138,6 +140,41 @@ def embargo_check(user, site, products):
             pass
 
     return True
+
+
+def checkSDN(request, name, city, country):
+    """
+    Performs an SDN check and returns hits of the user failures.
+    """
+    hit_count = 0
+
+    site_configuration = request.site.siteconfiguration
+    basket = Basket.get_basket(request.user, site_configuration.site)
+
+    if site_configuration.enable_sdn_check:
+        sdn_check = SDNClient(
+            api_url=settings.SDN_CHECK_API_URL,
+            api_key=settings.SDN_CHECK_API_KEY,
+            sdn_list=site_configuration.sdn_api_list
+        )
+        try:
+            response = sdn_check.search(name, city, country)
+            hit_count = response['total']
+            if hit_count > 0:
+                sdn_check.deactivate_user(
+                    basket,
+                    name,
+                    city,
+                    country,
+                    response
+                )
+                logout(request)
+        except (HTTPError, Timeout):
+            # If the SDN API endpoint is down or times out
+            # the user is allowed to make the purchase.
+            pass
+
+    return hit_count
 
 
 class SDNClient:

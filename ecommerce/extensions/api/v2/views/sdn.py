@@ -1,15 +1,16 @@
 """API endpoint for performing an SDN check on users."""
 from __future__ import absolute_import
 
-from django.conf import settings
-from django.contrib.auth import logout
+import logging
+
 from oscar.core.loading import get_model
-from requests.exceptions import HTTPError, Timeout
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from ecommerce.extensions.payment.utils import SDNClient
+from ecommerce.extensions.payment.utils import checkSDN
+
+logger = logging.getLogger(__name__)
 
 Basket = get_model('basket', 'Basket')
 
@@ -24,35 +25,18 @@ class SDNCheckViewSet(APIView):
         which performs an SDN check and returns whether the user passed
         or failed.
         """
-        name = request.data['name']
-        city = request.data['city']
-        country = request.data['country']
-        hits = 0
+        basket_id = request.basket.id
+        hit_count = checkSDN(request, request.data['name'], request.data['city'], request.data['country'])
 
-        site_configuration = request.site.siteconfiguration
-        basket = Basket.get_basket(request.user, site_configuration.site)
-
-        if site_configuration.enable_sdn_check:
-            sdn_check = SDNClient(
-                api_url=settings.SDN_CHECK_API_URL,
-                api_key=settings.SDN_CHECK_API_KEY,
-                sdn_list=site_configuration.sdn_api_list
+        if hit_count:
+            logger.info(
+                'SDNCheck Api called for basket [%d]. It received %d hit(s).',
+                basket_id,
+                hit_count,
             )
-            try:
-                response = sdn_check.search(name, city, country)
-                hits = response['total']
-                if hits > 0:
-                    sdn_check.deactivate_user(
-                        basket,
-                        name,
-                        city,
-                        country,
-                        response
-                    )
-                    logout(request)
-            except (HTTPError, Timeout):
-                # If the SDN API endpoint is down or times out
-                # the user is allowed to make the purchase.
-                pass
-
-        return Response({'hits': hits})
+        else:
+            logger.info(
+                'SDNCheck Api called for basket [%d]. It did not receive a hit.',
+                basket_id,
+            )
+        return Response({'hits': hit_count})
