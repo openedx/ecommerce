@@ -491,7 +491,6 @@ EXTRA_SCOPE = ['permissions']
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'edx_rest_framework_extensions.auth.jwt.authentication.JwtAuthentication',
-        'ecommerce.extensions.api.authentication.BearerAuthentication',
         'rest_framework.authentication.SessionAuthentication',
     ),
     'DEFAULT_PAGINATION_CLASS': 'ecommerce.extensions.api.pagination.PageNumberPagination',
