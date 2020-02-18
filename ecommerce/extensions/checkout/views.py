@@ -92,7 +92,7 @@ class CancelCheckoutView(TemplateView):
     payment processor page.
     """
 
-    template_name = 'checkout/cancel_checkout.html'
+    template_name = 'oscar/checkout/cancel_checkout.html'
 
     @method_decorator(csrf_exempt)
     def dispatch(self, *args, **kwargs):  # pylint: disable=arguments-differ
@@ -119,7 +119,7 @@ class CancelCheckoutView(TemplateView):
 class CheckoutErrorView(TemplateView):
     """ Displays an error page when checkout does not complete successfully. """
 
-    template_name = 'checkout/error.html'
+    template_name = 'oscar/checkout/error.html'
 
     @method_decorator(csrf_exempt)
     def dispatch(self, *args, **kwargs):  # pylint: disable=arguments-differ

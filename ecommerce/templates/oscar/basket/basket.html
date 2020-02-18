@@ -55,9 +55,9 @@
                     {% endblock %}
                 {% else %}
                     {% if enable_client_side_checkout %}
-                        {% include 'basket/partials/client_side_checkout_basket.html' %}
+                        {% include 'oscar/basket/partials/client_side_checkout_basket.html' %}
                     {% else %}
-                        {% include 'basket/partials/hosted_checkout_basket.html' %}
+                        {% include 'oscar/basket/partials/hosted_checkout_basket.html' %}
                     {% endif %}
                 {% endif %}
             </div>

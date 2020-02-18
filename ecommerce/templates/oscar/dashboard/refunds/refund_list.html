@@ -1,4 +1,4 @@
-{% extends 'dashboard/layout.html' %}
+{% extends 'oscar/dashboard/layout.html' %}
 {% load compress %}
 {% load static %}
 {% load currency_filters %}
@@ -40,10 +40,10 @@
 {% endblock header %}
 
 {% block dashboard_content %}
-  {% include "dashboard/partials/search_form.html" %}
+  {% include "oscar/dashboard/partials/search_form.html" %}
 
 {% if refunds %}
-    {% include "dashboard/partials/refund_action_modal.html" %}
+    {% include "oscar/dashboard/partials/refund_action_modal.html" %}
     {% block refund_list %}
         <table class="table table-striped table-bordered table-hover">
             <caption>
@@ -88,7 +88,7 @@
                     <td>{{ refund.created }}</td>
                     <td>
                         <a class="btn btn-info" href="{% url 'dashboard:refunds:detail' pk=refund.id %}">{% trans "View" as tmsg %}{{ tmsg | force_escape }}</a>
-                        {% include "dashboard/partials/refund_buttons.html" %}
+                        {% include "oscar/dashboard/partials/refund_buttons.html" %}
                     </td>
                 </tr>
             {% endfor %}
@@ -96,7 +96,7 @@
         </table>
     {% endblock refund_list %}
 
-    {% include "partials/pagination.html" %}
+    {% include "oscar/partials/pagination.html" %}
 {% else %}
     <table class="table table-striped table-bordered">
         <caption><i class="icon-repeat icon-large icon-flip-horizontal"></i>{{ queryset_description }}</caption>
