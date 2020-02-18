@@ -44,7 +44,7 @@ from ecommerce.extensions.payment.exceptions import (
     RedundantPaymentNotificationError
 )
 from ecommerce.extensions.payment.processors.cybersource import Cybersource
-from ecommerce.extensions.payment.utils import clean_field_value
+from ecommerce.extensions.payment.utils import checkSDN, clean_field_value
 from ecommerce.extensions.payment.views import BasePaymentSubmitView
 
 logger = logging.getLogger(__name__)
@@ -88,6 +88,29 @@ class CybersourceSubmitView(BasePaymentSubmitView):
         basket = data['basket']
         request = self.request
         user = request.user
+
+        hit_count = checkSDN(
+            request,
+            data['first_name'] + ' ' + data['last_name'],
+            data['city'],
+            data['country'])
+
+        if hit_count > 0:
+            logger.info(
+                'SDNCheck function called for basket [%d]. It received %d hit(s).',
+                request.basket.id,
+                hit_count,
+            )
+            response_to_return = {
+                'error': 'There was an error submitting the basket',
+                'sdn_check_failure': {'hit_count': hit_count}}
+
+            return JsonResponse(response_to_return, status=403)
+
+        logger.info(
+            'SDNCheck function called for basket [%d]. It did not receive a hit.',
+            request.basket.id,
+        )
 
         # Add extra parameters for Silent Order POST
         extra_parameters = {

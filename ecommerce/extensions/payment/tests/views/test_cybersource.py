@@ -8,6 +8,7 @@ import ddt
 import mock
 import responses
 from django.conf import settings
+from django.contrib.auth import get_user
 from django.test.client import RequestFactory
 from django.urls import reverse
 from freezegun import freeze_time
@@ -17,7 +18,7 @@ from oscar.test import factories
 from testfixtures import LogCapture
 
 from ecommerce.core.constants import ENROLLMENT_CODE_PRODUCT_CLASS_NAME, ENROLLMENT_CODE_SWITCH
-from ecommerce.core.models import BusinessClient
+from ecommerce.core.models import BusinessClient, User
 from ecommerce.core.tests import toggle_switch
 from ecommerce.core.url_utils import get_lms_url
 from ecommerce.courses.tests.factories import CourseFactory
@@ -29,6 +30,7 @@ from ecommerce.extensions.order.constants import PaymentEventTypeName
 from ecommerce.extensions.payment.exceptions import InvalidBasketError, InvalidSignatureError
 from ecommerce.extensions.payment.processors.cybersource import Cybersource
 from ecommerce.extensions.payment.tests.mixins import CybersourceMixin, CybersourceNotificationTestsMixin
+from ecommerce.extensions.payment.utils import SDNClient
 from ecommerce.extensions.payment.views.cybersource import CybersourceInterstitialView
 from ecommerce.extensions.test.factories import create_basket, create_order
 from ecommerce.invoice.models import Invoice
@@ -58,6 +60,7 @@ class LoginMixin:
 @ddt.ddt
 class CybersourceSubmitViewTests(CybersourceMixin, TestCase):
     path = reverse('cybersource:submit')
+    CYBERSOURCE_VIEW_LOGGER_NAME = 'ecommerce.extensions.payment.views.cybersource'
 
     def setUp(self):
         super(CybersourceSubmitViewTests, self).setUp()
@@ -129,6 +132,33 @@ class CybersourceSubmitViewTests(CybersourceMixin, TestCase):
         basket = factories.BasketFactory(owner=self.user, status=status)
         error_msg = 'There was a problem retrieving your basket. Refresh the page to try again.'
         self._assert_basket_error(basket.id, error_msg)
+
+    def test_sdn_check_match(self):
+        """Verify the endpoint returns an sdn check failure if the sdn check finds a hit."""
+        self.site.siteconfiguration.enable_sdn_check = True
+        self.site.siteconfiguration.save()
+
+        basket_id = self._create_valid_basket().id
+        data = self._generate_data(basket_id)
+        expected_response = {'error': 'There was an error submitting the basket', 'sdn_check_failure': {'hit_count': 1}}
+        logger_name = self.CYBERSOURCE_VIEW_LOGGER_NAME
+
+        with mock.patch.object(SDNClient, 'search', return_value={'total': 1}) as sdn_validator_mock:
+            with mock.patch.object(User, 'deactivate_account', return_value=True):
+                with LogCapture(logger_name) as cybersource_logger:
+                    response = self.client.post(self.path, data)
+                    self.assertTrue(sdn_validator_mock.called)
+                    self.assertEqual(response.json(), expected_response)
+                    self.assertEqual(response.status_code, 403)
+                    cybersource_logger.check_present(
+                        (
+                            logger_name,
+                            'INFO',
+                            'SDNCheck function called for basket [{}]. It received 1 hit(s).'.format(basket_id)
+                        ),
+                    )
+                    # Make sure user is logged out
+                    self.assertEqual(get_user(self.client).is_authenticated(), False)
 
     @freeze_time('2016-01-01')
     def test_valid_request(self):
