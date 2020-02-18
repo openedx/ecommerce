@@ -13,7 +13,6 @@ from waffle.testutils import override_switch
 
 from ecommerce.core.constants import ALLOW_MISSING_LMS_USER_ID
 from ecommerce.extensions.api.serializers import RefundSerializer
-from ecommerce.extensions.api.tests.test_authentication import AccessTokenMixin
 from ecommerce.extensions.api.v2.tests.views import JSON_CONTENT_TYPE
 from ecommerce.extensions.refund.status import REFUND
 from ecommerce.extensions.refund.tests.factories import RefundFactory, RefundLineFactory
@@ -26,7 +25,7 @@ Option = get_model('catalogue', 'Option')
 Refund = get_model('refund', 'Refund')
 
 
-class RefundCreateViewTests(RefundTestMixin, AccessTokenMixin, JwtMixin, TestCase):
+class RefundCreateViewTests(RefundTestMixin, JwtMixin, TestCase):
     MODEL_LOGGER_NAME = 'ecommerce.core.models'
     path = reverse('api:v2:refunds:create')
 
@@ -105,18 +104,6 @@ class RefundCreateViewTests(RefundTestMixin, AccessTokenMixin, JwtMixin, TestCas
 
         data = self._get_data(self.user.username, self.course_id)
         auth_header = 'JWT ' + self.generate_token({'username': self.user.username})
-
-        response = self.client.post(self.path, data, JSON_CONTENT_TYPE, HTTP_AUTHORIZATION=auth_header)
-        self.assert_ok_response(response)
-
-    @httpretty.activate
-    def test_oauth2_authentication(self):
-        """Verify clients can authenticate with OAuth 2.0."""
-        self.client.logout()
-
-        data = self._get_data(self.user.username, self.course_id)
-        auth_header = 'Bearer ' + self.DEFAULT_TOKEN
-        self.mock_user_info_response(username=self.user.username)
 
         response = self.client.post(self.path, data, JSON_CONTENT_TYPE, HTTP_AUTHORIZATION=auth_header)
         self.assert_ok_response(response)
