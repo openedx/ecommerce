@@ -103,11 +103,15 @@ class EnterpriseOfferUpdateViewTests(EnterpriseServiceMockMixin, ViewTestMixin, 
 
     def test_post(self):
         """ The enterprise offer should be updated. """
+        expected_discount_value = 2000
+        expected_discount_type = 'Absolute'
         data = {
             'enterprise_customer_uuid': self.enterprise_offer.condition.enterprise_customer_uuid,
             'enterprise_customer_catalog_uuid': self.enterprise_offer.condition.enterprise_customer_catalog_uuid,
             'benefit_type': self.enterprise_offer.benefit.proxy().benefit_class_type,
             'benefit_value': self.enterprise_offer.benefit.value,
+            'contract_discount_value': expected_discount_value,
+            'contract_discount_type': expected_discount_type,
         }
         response = self.client.post(self.path, data, follow=False)
         self.assertRedirects(response, self.path)

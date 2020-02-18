@@ -82,7 +82,7 @@ class EnterpriseContractMetadata(TimeStampedModel):
         (FIXED, _('Absolute')),
     ]
     amount_paid = models.DecimalField(null=True, decimal_places=2, max_digits=12)
-    discount_value = models.DecimalField(null=True, decimal_places=5, max_digits=15)
+    discount_value = models.DecimalField(null=False, default=0.0, decimal_places=5, max_digits=15)
     discount_type = models.CharField(max_length=255, choices=DISCOUNT_TYPE_CHOICES, default=PERCENTAGE)
 
     def clean(self):
