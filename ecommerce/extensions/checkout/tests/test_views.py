@@ -207,6 +207,7 @@ class ReceiptResponseViewTests(DiscoveryMockMixin, LmsApiMockMixin, RefundTestMi
                 }
             }]
         }
+
         self.non_enterprise_learner_data = {}
 
     def _get_receipt_response(self, order_number):
@@ -492,6 +493,27 @@ class ReceiptResponseViewTests(DiscoveryMockMixin, LmsApiMockMixin, RefundTestMi
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response_messages), 1)
         self.assertEqual(expected_message, actual_message)
+
+    @patch('ecommerce.extensions.checkout.views.fetch_enterprise_learner_data')
+    @httpretty.activate
+    def test_enterprise_not_enabled_for_learner_dashboard_link_in_messages(self, mock_learner_data):
+        """
+        The receipt page should not include a message with a link to the enterprise
+        learner portal for a learner if response from enterprise is empty results or error.
+        """
+        mock_learner_data.return_value = None
+        order = self._create_order_for_receipt(self.user)
+        BasketAttribute.objects.update_or_create(
+            basket=order.basket,
+            attribute_type=BasketAttributeType.objects.get(name='bundle_identifier'),
+            value_text='test_bundle'
+        )
+
+        response = self._get_receipt_response(order.number)
+        response_messages = list(response.context['messages'])
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response_messages), 0)
 
     @patch('ecommerce.extensions.checkout.views.fetch_enterprise_learner_data')
     @httpretty.activate
