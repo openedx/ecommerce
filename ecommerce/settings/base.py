@@ -9,7 +9,6 @@ from os.path import abspath, basename, dirname, join, normpath
 from sys import path
 
 from django.utils.translation import ugettext_lazy as _
-from oscar import OSCAR_MAIN_TEMPLATE_DIR
 
 from ecommerce.core.constants import (
     ENTERPRISE_COUPON_ADMIN_ROLE,
@@ -181,7 +180,6 @@ TEMPLATES = [
             normpath(join(DJANGO_ROOT, 'templates')),
             # Templates which override default Oscar templates
             normpath(join(DJANGO_ROOT, 'templates/oscar')),
-            OSCAR_MAIN_TEMPLATE_DIR,
         ),
         'OPTIONS': {
             'loaders': [
