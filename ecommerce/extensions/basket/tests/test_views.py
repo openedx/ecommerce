@@ -73,8 +73,8 @@ BUNDLE = 'bundle_identifier'
 
 
 @ddt.ddt
-class BasketAddItemsViewTests(
-        CouponMixin, DiscoveryTestMixin, DiscoveryMockMixin, LmsApiMockMixin, BasketMixin, TestCase):
+class BasketAddItemsViewTests(CouponMixin, DiscoveryTestMixin, DiscoveryMockMixin, LmsApiMockMixin, BasketMixin,
+                              EnterpriseServiceMockMixin, TestCase):
     """ BasketAddItemsView view tests. """
     path = reverse('basket:basket-add')
 
@@ -277,6 +277,25 @@ class BasketAddItemsViewTests(
             attribute_type=BasketAttributeType.objects.get(name=EMAIL_OPT_IN_ATTRIBUTE),
         )
         self.assertEqual(basket_attribute.value_text, 'False')
+
+    @httpretty.activate
+    def test_enterprise_free_basket_redirect(self):
+        """
+        Verify redirect to FreeCheckoutView when basket is free
+        and an Enterprise-related offer is applied.
+        """
+        enterprise_offer = self.prepare_enterprise_offer()
+
+        opts = {
+            'ec_uuid': str(enterprise_offer.condition.enterprise_customer_uuid),
+            'course_id': self.course.id,
+            'username': self.user.username,
+        }
+        self.mock_consent_get(**opts)
+
+        response = self._get_response(self.stock_record.partner_sku)
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, absolute_url(self.request, 'checkout:free-checkout'))
 
 
 class BasketLogicTestMixin:
