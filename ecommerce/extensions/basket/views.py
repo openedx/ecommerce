@@ -163,10 +163,7 @@ class BasketAddItemsView(APIView):
         redirect_url = get_payment_microfrontend_or_basket_url(request)
         redirect_url = add_utm_params_to_url(redirect_url, list(self.request.GET.items()))
         # If a user is eligible and bucketed, REV1074 experiment information will be added to their url
-        rev1074_flag = waffle.flag_is_active(self.request, 'REV1074.enable_experiment')
-        # trying to debug why i'm not seeing the expected logs, i'll revert this once I see what it logs
-        logger.info('REV1074: Flag is active: %s, Skus: %s', rev1074_flag, skus)
-        if rev1074_flag:  # pragma: no cover
+        if waffle.flag_is_active(self.request, 'REV1074.enable_experiment'):  # pragma: no cover
             if skus:
                 redirect_url = add_REV1074_information_to_url_if_eligible(redirect_url, request, skus[0])
         return HttpResponseRedirect(redirect_url, status=303)
