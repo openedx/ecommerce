@@ -34,9 +34,8 @@ from ecommerce.extensions.partner.shortcuts import get_partner_for_site
 from ecommerce.extensions.payment import exceptions as payment_exceptions
 from ecommerce.extensions.payment.helpers import get_default_processor_class, get_processor_class_by_name
 
-Applicator = get_class('offer.applicator', 'Applicator')
+Applicator = get_class('offer.applicator', 'CustomApplicator')
 Basket = get_model('basket', 'Basket')
-CustomApplicator = get_class('offer.applicator', 'CustomApplicator')
 logger = logging.getLogger(__name__)
 Order = get_model('order', 'Order')
 OrderNumberGenerator = get_class('order.utils', 'OrderNumberGenerator')
@@ -391,7 +390,7 @@ class BasketCalculateView(generics.GenericAPIView):
                     basket.vouchers.add(voucher)
 
                 # Calculate any discounts on the basket.
-                CustomApplicator().apply(basket, user=user, request=request, bundle_id=bundle_id)
+                Applicator().apply(basket, user=user, request=request, bundle_id=bundle_id)
 
                 discounts = []
                 if basket.offer_discounts:

@@ -9,6 +9,7 @@ from decimal import Decimal
 
 import httpretty
 import jwt
+from crum import set_current_request
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.sites.models import Site
@@ -32,7 +33,7 @@ from ecommerce.courses.utils import mode_for_product
 from ecommerce.extensions.fulfillment.signals import SHIPPING_EVENT_NAME
 from ecommerce.tests.factories import SiteConfigurationFactory, UserFactory
 
-Applicator = get_class('offer.applicator', 'Applicator')
+Applicator = get_class('offer.applicator', 'CustomApplicator')
 Basket = get_model('basket', 'Basket')
 Benefit = get_model('offer', 'Benefit')
 Catalog = get_model('catalogue', 'Catalog')
@@ -328,6 +329,8 @@ class SiteMixin:
         self.request.session = None
         self.request.site = self.site
         set_thread_variable('request', self.request)
+        set_current_request(self.request)
+        self.addCleanup(set_current_request)
 
     def mock_access_token_response(self, status=200, **token_data):
         """ Mock the response from the OAuth provider's access token endpoint. """

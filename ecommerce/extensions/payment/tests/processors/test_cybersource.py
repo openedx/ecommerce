@@ -115,14 +115,15 @@ class CybersourceTests(CybersourceMixin, PaymentProcessorTestCaseMixin, TestCase
 
     def test_get_transaction_parameters_with_program(self):
         """ Verify the processor returns parameters including Level 2/3 details. """
+        bundle_id = '12345678-1234-1234-1234-123456789abc'
         BasketAttribute.objects.update_or_create(
             basket=self.basket,
             attribute_type=BasketAttributeType.objects.get(name='bundle_identifier'),
-            value_text='test_bundle'
+            value_text=bundle_id
         )
         self.assert_correct_transaction_parameters(
             extra_parameters={
-                'merchant_defined_data1': 'program,test_bundle',
+                'merchant_defined_data1': 'program,{}'.format(bundle_id),
                 'merchant_defined_data2': 'course,a/b/c,audit'
             }
         )

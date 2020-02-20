@@ -51,7 +51,7 @@ from ecommerce.tests.factories import ProductFactory, SiteConfigurationFactory, 
 from ecommerce.tests.mixins import ApiMockMixin, LmsApiMockMixin
 from ecommerce.tests.testcases import TestCase
 
-Applicator = get_class('offer.applicator', 'Applicator')
+Applicator = get_class('offer.applicator', 'CustomApplicator')
 Basket = get_model('basket', 'Basket')
 BasketAttribute = get_model('basket', 'BasketAttribute')
 BasketAttributeType = get_model('basket', 'BasketAttributeType')
@@ -1179,7 +1179,7 @@ class VoucherAddMixin(LmsApiMockMixin, DiscoveryMockMixin):
         BasketAttribute.objects.update_or_create(
             basket=self.basket,
             attribute_type=BasketAttributeType.objects.get(name=BUNDLE),
-            value_text='test_bundle'
+            value_text='12345678-1234-1234-1234-123456789abc'
         )
         messages = [{
             'message_type': u'error',
@@ -1196,7 +1196,7 @@ class VoucherAddMixin(LmsApiMockMixin, DiscoveryMockMixin):
         new_product = factories.ProductFactory(categories=[], stockrecords__partner__short_code='second')
         self.basket.add_product(product)
         self.basket.add_product(new_product)
-        _set_basket_bundle_status('test-bundle', self.basket)
+        _set_basket_bundle_status('12345678-1234-1234-1234-123456789abc', self.basket)
         messages = [{
             'message_type': u'info',
             'user_message': u"Coupon code '{code}' added to basket.".format(code=voucher.code),

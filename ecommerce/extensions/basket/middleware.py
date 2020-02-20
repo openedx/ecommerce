@@ -3,13 +3,11 @@ from __future__ import absolute_import
 import newrelic.agent
 from edx_django_utils import monitoring as monitoring_utils
 from oscar.apps.basket.middleware import BasketMiddleware as OscarBasketMiddleware
-from oscar.core.loading import get_class, get_model
+from oscar.core.loading import get_model
 
 from ecommerce.extensions.basket.utils import apply_offers_on_basket
 
-Applicator = get_class('offer.applicator', 'Applicator')
 Basket = get_model('basket', 'basket')
-CustomApplicator = get_class('offer.applicator', 'CustomApplicator')
 
 
 class BasketMiddleware(OscarBasketMiddleware):

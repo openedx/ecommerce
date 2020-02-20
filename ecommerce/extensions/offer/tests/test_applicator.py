@@ -7,12 +7,9 @@ import mock
 from oscar.core.loading import get_model
 from oscar.test import factories
 from six.moves import range
-from testfixtures import LogCapture
-from waffle.testutils import override_flag
 
 from ecommerce.core.constants import SYSTEM_ENTERPRISE_LEARNER_ROLE
 from ecommerce.extensions.offer.applicator import CustomApplicator
-from ecommerce.extensions.offer.constants import CUSTOM_APPLICATOR_LOG_FLAG
 from ecommerce.extensions.test.factories import ConditionalOfferFactory, ConditionFactory, ProgramOfferFactory
 from ecommerce.tests.factories import UserFactory
 from ecommerce.tests.testcases import TestCase
@@ -67,54 +64,11 @@ class CustomApplicatorTests(TestCase):
     def test_get_offers_without_bundle(self):
         """ Verify that all non bundle offers are returned if no bundle id is given. """
         offers_in_db = list(ConditionalOffer.active.filter(offer_type=ConditionalOffer.SITE))
-        ProgramOfferFactory()
         site_offers = ConditionalOfferFactory.create_batch(3) + offers_in_db
+        ProgramOfferFactory()
 
-        self.applicator._get_program_offers = mock.Mock()  # pylint: disable=protected-access
-
+        # Verify that program offer was not returned without bundle_id
         self.assert_correct_offers(site_offers)
-
-        # Verify there was no attempt to match off a bundle
-        self.assertFalse(self.applicator._get_program_offers.called)  # pylint: disable=protected-access
-
-    @override_flag(CUSTOM_APPLICATOR_LOG_FLAG, active=True)
-    def test_log_is_fired_when_get_offers_with_bundle(self):
-        """ Verify that logs are fired when bundle id is given and offers are being applied"""
-        program_offers = [ProgramOfferFactory()]
-        bundle_id = program_offers[0].condition.program_uuid
-        self.create_bundle_attribute(bundle_id)
-
-        with LogCapture(LOGGER_NAME) as logger:
-            self.assert_correct_offers(program_offers)
-            logger.check(
-                (
-                    LOGGER_NAME,
-                    'WARNING',
-                    'CustomApplicator processed Basket [{}] from Request [{}] and User [{}] with a bundle.'.format(
-                        self.basket, None, self.user),
-                )
-            )
-
-    @override_flag(CUSTOM_APPLICATOR_LOG_FLAG, active=True)
-    def test_log_is_fired_when_get_offers_without_bundle(self):
-        """ Verify that logs are fired when no bundle id is given but offers are being applied"""
-        existing_offers = list(ConditionalOffer.active.filter(offer_type=ConditionalOffer.SITE))
-        site_offers = ConditionalOfferFactory.create_batch(3) + existing_offers
-
-        self.applicator._get_program_offers = mock.Mock()  # pylint: disable=protected-access
-
-        with LogCapture(LOGGER_NAME) as logger:
-            self.assert_correct_offers(site_offers)
-            logger.check(
-                (
-                    LOGGER_NAME,
-                    'WARNING',
-                    'CustomApplicator processed Basket [{}] from Request [{}] and User [{}] without a bundle.'.format(
-                        self.basket, None, self.user),
-                )
-            )
-        # Verify there was no attempt to match off a bundle
-        self.assertFalse(self.applicator._get_program_offers.called)  # pylint: disable=protected-access
 
     def test_get_site_offers(self):
         """ Verify get_site_offers returns correct objects based on filter"""

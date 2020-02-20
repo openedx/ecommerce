@@ -16,7 +16,7 @@ from ecommerce.extensions.payment.forms import PaymentForm
 
 logger = logging.getLogger(__name__)
 
-Applicator = get_class('offer.applicator', 'Applicator')
+Applicator = get_class('offer.applicator', 'CustomApplicator')
 Basket = get_model('basket', 'Basket')
 
 

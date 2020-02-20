@@ -1,6 +1,7 @@
 
 
 from decimal import Decimal
+from uuid import uuid4
 
 import ddt
 from mock import Mock, patch
@@ -8,7 +9,7 @@ from oscar.core.loading import get_model
 from oscar.test.factories import BasketFactory
 from waffle.testutils import override_flag
 
-from ecommerce.core.constants import SEAT_PRODUCT_CLASS_NAME
+from ecommerce.core.constants import SEAT_PRODUCT_CLASS_NAME, SYSTEM_ENTERPRISE_LEARNER_ROLE
 from ecommerce.extensions.offer.constants import DYNAMIC_DISCOUNT_FLAG
 from ecommerce.extensions.test.factories import DynamicPercentageDiscountBenefitFactory
 from ecommerce.extensions.test.mixins import BenefitTestMixin
@@ -26,6 +27,12 @@ def _mock_jwt_decode_handler(jwt):
     return jwt
 
 
+def _mock_get_decoded_jwt(request):     # pylint: disable=unused-argument
+    return {
+        'roles': ['{}:{}'.format(SYSTEM_ENTERPRISE_LEARNER_ROLE, uuid4())]
+    }
+
+
 @ddt.ddt
 class DynamicPercentageDiscountBenefitTests(BenefitTestMixin, TestCase):
     """
@@ -38,6 +45,8 @@ class DynamicPercentageDiscountBenefitTests(BenefitTestMixin, TestCase):
     @patch('crum.get_current_request')
     @patch('ecommerce.extensions.offer.dynamic_conditional_offer.jwt_decode_handler',
            side_effect=_mock_jwt_decode_handler)
+    @patch('ecommerce.enterprise.utils.get_decoded_jwt',
+           side_effect=_mock_get_decoded_jwt)
     @ddt.data(
         ('GET', 10),
         ('GET', 15),
@@ -48,7 +57,7 @@ class DynamicPercentageDiscountBenefitTests(BenefitTestMixin, TestCase):
         ('POST', 20),
         ('POST', None)
     )
-    def test_apply(self, discount_param, jwt_decode_handler, request):  # pylint: disable=unused-argument
+    def test_apply(self, discount_param, get_decoded_jwt, jwt_decode_handler, request):  # pylint: disable=unused-argument
         request_type = discount_param[0]
         discount_percent = discount_param[1]
         discount_jwt = {'discount_applicable': True, 'discount_percent': discount_percent}
