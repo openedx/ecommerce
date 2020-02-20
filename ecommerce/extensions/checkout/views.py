@@ -267,13 +267,13 @@ class ReceiptResponseView(ThankYouView):
             # If enterprise feature is enabled return all the enterprise_customer associated with user.
             learner_data = fetch_enterprise_learner_data(request.site, request.user)
         except (ReqConnectionError, KeyError, SlumberHttpBaseException, Timeout) as exc:
-            logging.exception('Exception while retrieving enterprise learner data for'
+            logging.exception('[enterprise learner message] Exception while retrieving enterprise learner data for'
                               'User: %s, Exception: %s', request.user, exc)
         if learner_data:
             try:
-                # If enterprise feature is enable and user is not associated to any enterprise
                 enterprise_customer = learner_data['results'][0]['enterprise_customer']
             except IndexError:
+                # If enterprise feature is enable and user is not associated to any enterprise
                 pass
 
         if enterprise_customer:
