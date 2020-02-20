@@ -4,6 +4,7 @@ from __future__ import absolute_import
 import logging
 from decimal import Decimal
 
+import dateutil
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.db import transaction
@@ -116,6 +117,7 @@ class ManualCourseEnrollmentOrderViewSet(EdxOrderPlacementMixin, ViewSet):
             >>>             "email": "me@example.com",
             >>>             "course_run_key": "course-v1:TestX+Test100+2019_T1",
             >>>             "discount_percentage": 75.0,
+            >>>             "date_placed": '2020-02-11T09:38:47.634561+00:00',  # optional param, only for old records.
             >>>             "sales_force_id": '252F0060L00000ppWfu',
             >>>             "enterprise_customer_name": "an-enterprise-customer",
             >>>             "enterprise_customer_uuid": "394a5ce5-6ff4-4b2b-bea1-a273c6920ae1",
@@ -124,7 +126,7 @@ class ManualCourseEnrollmentOrderViewSet(EdxOrderPlacementMixin, ViewSet):
             >>>             "lms_user_id": 123,
             >>>             "username": "metoo",
             >>>             "email": "metoo@example.com",
-            >>>             "course_run_key": ""
+            >>>             "course_run_key": "",
             >>>             "enterprise_customer_name": "an-enterprise-customer",
             >>>             "enterprise_customer_uuid": "394a5ce5-6ff4-4b2b-bea1-a273c6920ae1",
             >>>         },
@@ -140,21 +142,24 @@ class ManualCourseEnrollmentOrderViewSet(EdxOrderPlacementMixin, ViewSet):
             >>>             "email": "me@example.com",
             >>>             "course_run_key": "course-v1:TestX+Test100+2019_T1",
             >>>             "discount_percentage": 75.0,
+            >>>             "date_placed": '2020-02-11T09:38:47.634561+00:00',
             >>>             "sales_force_id": '252F0060L00000ppWfu',
             >>>             "enterprise_customer_name": "an-enterprise-customer",
             >>>             "enterprise_customer_uuid": "394a5ce5-6ff4-4b2b-bea1-a273c6920ae1",
             >>>             "status": "success",
-            >>>             "detail": "EDX-123456"
+            >>>             "detail": "EDX-123456",
+            >>>             "new_order_created": True,
             >>>         },
             >>>         {
             >>>             "lms_user_id": 123,
             >>>             "username": "metoo",
             >>>             "email": "metoo@example.com",
-            >>>             "course_run_key": ""
+            >>>             "course_run_key": "",
             >>>             "enterprise_customer_name": "an-enterprise-customer",
             >>>             "enterprise_customer_uuid": "394a5ce5-6ff4-4b2b-bea1-a273c6920ae1",
             >>>             "status": "failure",
-            >>>             "detail": "Missing required enrollmment data: `course_run_key`"
+            >>>             "detail": "Missing required enrollmment data: `course_run_key`",
+            >>>             "new_order_created": None,
             >>>         },
             >>>     ]
             >>> }
@@ -226,7 +231,7 @@ class ManualCourseEnrollmentOrderViewSet(EdxOrderPlacementMixin, ViewSet):
                 sales_force_id,
             ) = self._get_enrollment_data(enrollment)
         except ValidationError as ex:
-            return dict(enrollment, status=self.FAILURE, detail=ex.message)
+            return dict(enrollment, status=self.FAILURE, detail=ex.message, new_order_created=None)
 
         logger.info(
             '[Manual Order Creation] Request received. User: %s, Email: %s, Course: %s, RequestUser: %s, '
@@ -244,7 +249,7 @@ class ManualCourseEnrollmentOrderViewSet(EdxOrderPlacementMixin, ViewSet):
         try:
             course = Course.objects.get(id=course_run_key)
         except Course.DoesNotExist:
-            return dict(enrollment, status=self.FAILURE, detail="Course not found")
+            return dict(enrollment, status=self.FAILURE, detail="Course not found", new_order_created=None)
 
         seat_product = course.seat_products.filter(
             attributes__name='certificate_type'
@@ -260,7 +265,8 @@ class ManualCourseEnrollmentOrderViewSet(EdxOrderPlacementMixin, ViewSet):
             return dict(
                 enrollment,
                 status=self.SUCCESS,
-                detail=order.number
+                detail=order.number,
+                new_order_created=False
             )
 
         basket = Basket.create_basket(request_site, learner_user)
@@ -276,6 +282,7 @@ class ManualCourseEnrollmentOrderViewSet(EdxOrderPlacementMixin, ViewSet):
         Applicator().apply_offers(basket, [discount_offer])
         try:
             order = self.place_free_order(basket)
+            self._update_order_according_to_date_place(order, enrollment.get('date_placed'))
             self._update_orderline_with_enterprise_discount(order, discount_percentage)
         except:  # pylint: disable=bare-except
             logger.exception(
@@ -286,7 +293,7 @@ class ManualCourseEnrollmentOrderViewSet(EdxOrderPlacementMixin, ViewSet):
                 basket.id,
                 seat_product.id,
             )
-            return dict(enrollment, status=self.FAILURE, detail="Failed to create free order")
+            return dict(enrollment, status=self.FAILURE, detail="Failed to create free order", new_order_created=None)
 
         logger.info(
             '[Manual Order Creation] Order completed. User: %s, Course: %s, Basket: %s, Order: %s, Product: %s',
@@ -296,7 +303,7 @@ class ManualCourseEnrollmentOrderViewSet(EdxOrderPlacementMixin, ViewSet):
             seat_product.id,
             order.number,
         )
-        return dict(enrollment, status=self.SUCCESS, detail=order.number)
+        return dict(enrollment, status=self.SUCCESS, detail=order.number, new_order_created=True)
 
     def _update_orderline_with_enterprise_discount(self, order, discount_percentage):
         """
@@ -325,6 +332,38 @@ class ManualCourseEnrollmentOrderViewSet(EdxOrderPlacementMixin, ViewSet):
                 effective_discount_percentage
             )
             line.save()
+
+    def _update_order_according_to_date_place(self, order, date_placed):
+        """
+            This is a Single Time use functionality to created order records for old enrollments.
+            We will revert this PR after using it.
+        Args:
+            order: An Order object
+            date_placed: iso format datetime
+
+        Returns:
+            Nothing
+
+        """
+        if not date_placed:
+            return
+
+        date_placed = dateutil.parser.isoparse(date_placed)
+        order.date_placed = date_placed
+        order.save()
+
+        for line in order.lines.all():
+            old_stock = line.stockrecord.history.filter(history_date__lt=date_placed).order_by('-history_date').first()
+            stock_record = old_stock or line.stockrecord
+            price = stock_record.price_excl_tax or Decimal('0')
+            quantity = line.quantity
+            line.line_price_before_discounts_incl_tax = price * quantity
+            line.line_price_before_discounts_excl_tax = price * quantity
+            line.unit_price_incl_tax = price
+            line.unit_price_excl_tax = price
+            line.save()
+
+        logger.info('[Manual Order Back populate] Order completed. Order: %s', order.number,)
 
     def _get_enrollment_data(self, enrollment):
         """
