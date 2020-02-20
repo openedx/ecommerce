@@ -111,18 +111,18 @@ USER_MANAGEMENT_URLS = [
 ]
 
 urlpatterns = [
-    url(r'^baskets/', include(BASKET_URLS, namespace='baskets')),
-    url(r'^checkout/', include(CHECKOUT_URLS, namespace='checkout')),
-    url(r'^coupons/', include(COUPON_URLS, namespace='coupons')),
-    url(r'^enterprise/', include(ENTERPRISE_URLS, namespace='enterprise')),
-    url(r'^payment/', include(PAYMENT_URLS, namespace='payment')),
-    url(r'^providers/', include(PROVIDER_URLS, namespace='providers')),
-    url(r'^publication/', include(ATOMIC_PUBLICATION_URLS, namespace='publication')),
-    url(r'^refunds/', include(REFUND_URLS, namespace='refunds')),
-    url(r'^retirement/', include(RETIREMENT_URLS, namespace='retirement')),
-    url(r'^user_management/', include(USER_MANAGEMENT_URLS, namespace='user_management')),
-    url(r'^sdn/', include(SDN_URLS, namespace='sdn')),
-    url(r'^assignment-email/', include(ASSIGNMENT_EMAIL_URLS, namespace='assignment-email')),
+    url(r'^baskets/', include((BASKET_URLS, 'baskets'))),
+    url(r'^checkout/', include((CHECKOUT_URLS, 'checkout'))),
+    url(r'^coupons/', include((COUPON_URLS, 'coupons'))),
+    url(r'^enterprise/', include((ENTERPRISE_URLS, 'enterprise'))),
+    url(r'^payment/', include((PAYMENT_URLS, 'payment'))),
+    url(r'^providers/', include((PROVIDER_URLS, 'providers'))),
+    url(r'^publication/', include((ATOMIC_PUBLICATION_URLS, 'publication'))),
+    url(r'^refunds/', include((REFUND_URLS, 'refunds'))),
+    url(r'^retirement/', include((RETIREMENT_URLS, 'retirement'))),
+    url(r'^user_management/', include((USER_MANAGEMENT_URLS, 'user_management'))),
+    url(r'^sdn/', include((SDN_URLS, 'sdn'))),
+    url(r'^assignment-email/', include((ASSIGNMENT_EMAIL_URLS, 'assignment-email'))),
 ]
 
 router = ExtendedSimpleRouter()
