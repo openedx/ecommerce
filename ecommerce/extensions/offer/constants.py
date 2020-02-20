@@ -1,6 +1,3 @@
-CUSTOM_APPLICATOR_LOG_FLAG = 'enable_custom_applicator_logging'
-CUSTOM_APPLICATOR_USE_FLAG = 'enable_custom_applicator_use'
-
 DYNAMIC_DISCOUNT_FLAG = 'offer.dynamic_discount'
 
 # OfferAssignment status constants defined here to avoid circular dependency.

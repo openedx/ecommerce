@@ -21,7 +21,7 @@ from ecommerce.programs.tests.mixins import ProgramTestMixin
 from ecommerce.tests.factories import ProductFactory
 from ecommerce.tests.testcases import TestCase
 
-Applicator = get_class('offer.applicator', 'Applicator')
+Applicator = get_class('offer.applicator', 'CustomApplicator')
 BasketAttribute = get_model('basket', 'BasketAttribute')
 BasketAttributeType = get_model('basket', 'BasketAttributeType')
 Benefit = get_model('offer', 'Benefit')
@@ -284,14 +284,16 @@ class SignalTests(ProgramTestMixin, CouponMixin, TestCase):
         BasketAttribute.objects.update_or_create(
             basket=order.basket,
             attribute_type=BasketAttributeType.objects.get(name=BUNDLE),
-            value_text='test_bundle'
+            value_text='12345678-1234-1234-1234-123456789abc'
         )
 
         # Tracks a full bundle order
         with mock.patch('ecommerce.extensions.checkout.signals.get_program',
                         mock.Mock(return_value=self.mock_get_program_data(True))):
             track_completed_order(None, order)
-            properties = self._generate_event_properties(order, bundle_id='test_bundle', fullBundle=True)
+            properties = self._generate_event_properties(
+                order, bundle_id='12345678-1234-1234-1234-123456789abc', fullBundle=True
+            )
             mock_track.assert_called_once_with(order.site, order.user, 'Order Completed', properties)
 
         # Tracks a partial bundle order
@@ -299,7 +301,7 @@ class SignalTests(ProgramTestMixin, CouponMixin, TestCase):
                         mock.Mock(return_value=self.mock_get_program_data(False))):
             mock_track.reset_mock()
             track_completed_order(None, order)
-            properties = self._generate_event_properties(order, bundle_id='test_bundle')
+            properties = self._generate_event_properties(order, bundle_id='12345678-1234-1234-1234-123456789abc')
             mock_track.assert_called_once_with(order.site, order.user, 'Order Completed', properties)
 
     def test_track_completed_discounted_order_with_voucher(self):

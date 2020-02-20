@@ -64,7 +64,7 @@ from ecommerce.tests.testcases import TestCase
 JSON = 'application/json'
 LOGGER_NAME = 'ecommerce.extensions.analytics.utils'
 
-Applicator = get_class('offer.applicator', 'Applicator')
+Applicator = get_class('offer.applicator', 'CustomApplicator')
 Benefit = get_model('offer', 'Benefit')
 Catalog = get_model('catalogue', 'Catalog')
 ConditionalOffer = get_model('offer', 'ConditionalOffer')

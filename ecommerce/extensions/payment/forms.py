@@ -15,7 +15,7 @@ from ecommerce.extensions.basket.constants import PURCHASER_BEHALF_ATTRIBUTE
 
 logger = logging.getLogger(__name__)
 
-Applicator = get_class('offer.applicator', 'Applicator')
+Applicator = get_class('offer.applicator', 'CustomApplicator')
 Basket = get_model('basket', 'Basket')
 
 

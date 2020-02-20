@@ -30,7 +30,7 @@ from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
 from ecommerce.extensions.checkout.utils import get_receipt_page_url
 from ecommerce.extensions.payment.utils import get_program_uuid
 
-Applicator = get_class('offer.applicator', 'Applicator')
+Applicator = get_class('offer.applicator', 'CustomApplicator')
 Basket = get_model('basket', 'Basket')
 Order = get_model('order', 'Order')
 

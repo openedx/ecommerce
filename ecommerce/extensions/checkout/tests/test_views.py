@@ -36,7 +36,7 @@ class FreeCheckoutViewTests(EnterpriseServiceMockMixin, TestCase):
     def setUp(self):
         super(FreeCheckoutViewTests, self).setUp()
         self.user = self.create_user()
-        self.bundle_attribute_value = 'test_bundle'
+        self.bundle_attribute_value = '12345678-1234-1234-1234-123456789abc'
         self.client.login(username=self.user.username, password=self.password)
 
     def prepare_basket(self, price, bundle=False):
@@ -440,15 +440,18 @@ class ReceiptResponseViewTests(DiscoveryMockMixin, LmsApiMockMixin, RefundTestMi
         """
         mock_learner_data.return_value = self.non_enterprise_learner_data
         order = self._create_order_for_receipt(self.user)
+        bundle_id = '12345678-1234-1234-1234-123456789abc'
         BasketAttribute.objects.update_or_create(
             basket=order.basket,
             attribute_type=BasketAttributeType.objects.get(name='bundle_identifier'),
-            value_text='test_bundle'
+            value_text=bundle_id
         )
 
         response = self._get_receipt_response(order.number)
         context_data = {
-            'order_dashboard_url': self.site.siteconfiguration.build_lms_url('dashboard/programs/test_bundle')
+            'order_dashboard_url': self.site.siteconfiguration.build_lms_url(
+                'dashboard/programs/{}'.format(bundle_id)
+            )
         }
 
         self.assertEqual(response.status_code, 200)
@@ -476,7 +479,7 @@ class ReceiptResponseViewTests(DiscoveryMockMixin, LmsApiMockMixin, RefundTestMi
         BasketAttribute.objects.update_or_create(
             basket=order.basket,
             attribute_type=BasketAttributeType.objects.get(name='bundle_identifier'),
-            value_text='test_bundle'
+            value_text='12345678-1234-1234-1234-123456789abc'
         )
 
         response = self._get_receipt_response(order.number)
@@ -534,7 +537,7 @@ class ReceiptResponseViewTests(DiscoveryMockMixin, LmsApiMockMixin, RefundTestMi
         BasketAttribute.objects.update_or_create(
             basket=order.basket,
             attribute_type=BasketAttributeType.objects.get(name='bundle_identifier'),
-            value_text='test_bundle'
+            value_text='12345678-1234-1234-1234-123456789abc'
         )
 
         response = self._get_receipt_response(order.number)

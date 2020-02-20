@@ -13,7 +13,7 @@ from ecommerce.extensions.payment.processors import HandledProcessorResponse
 
 logger = logging.getLogger(__name__)
 
-Applicator = get_class('offer.applicator', 'Applicator')
+Applicator = get_class('offer.applicator', 'CustomApplicator')
 Basket = get_model('basket', 'Basket')
 EventHandler = get_class('order.processing', 'EventHandler')
 NoShippingRequired = get_class('shipping.methods', 'NoShippingRequired')

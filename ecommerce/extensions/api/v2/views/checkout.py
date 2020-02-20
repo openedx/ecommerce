@@ -13,7 +13,7 @@ from ecommerce.extensions.api.serializers import CheckoutSerializer
 from ecommerce.extensions.payment.exceptions import ProcessorNotFoundError
 from ecommerce.extensions.payment.helpers import get_processor_class_by_name
 
-Applicator = get_class('offer.applicator', 'Applicator')
+Applicator = get_class('offer.applicator', 'CustomApplicator')
 logger = logging.getLogger(__name__)
 
 
