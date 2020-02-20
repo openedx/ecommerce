@@ -386,9 +386,7 @@ class AtomicPublicationTests(DiscoveryTestMixin, TestCase):
         response = self.client.post(self.create_path, json.dumps(self.data), JSON_CONTENT_TYPE)
         self.assertEqual(response.status_code, 400)
         self.assertEqual(
-            response.data.get('uuid')[0],
-            u'"foo-bar" is not a valid UUID.'
-        )
+            str(response.data.get('uuid')[0]), 'Must be a valid UUID.')
         self.assert_course_does_not_exist(self.course_id)
 
     def test_invalid_product_class(self):

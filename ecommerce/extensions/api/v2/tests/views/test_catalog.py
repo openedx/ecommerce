@@ -100,7 +100,7 @@ class CatalogViewSetTest(CatalogMixin, DiscoveryMockMixin, ApiMockMixin, TestCas
         seat = self.course.create_or_update_seat('verified', False, 0)
         self.mock_course_runs_endpoint(self.site_configuration.discovery_api_url, course_run=self.course)
 
-        url = '{path}?query=id:course*&seat_types=verified'.format(path=reverse('api:v2:catalog-preview-list'))
+        url = '{path}?query=id:course*&seat_types=verified'.format(path=reverse('api:v2:catalog-preview'))
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(
@@ -119,14 +119,14 @@ class CatalogViewSetTest(CatalogMixin, DiscoveryMockMixin, ApiMockMixin, TestCas
     )
     def test_preview_with_invalid_parameters(self, querystring):
         """ Verify the endpoint returns HTTP 400 if the parameters are invalid. """
-        url = '{path}?{qs}'.format(path=reverse('api:v2:catalog-preview-list'), qs=querystring)
+        url = '{path}?{qs}'.format(path=reverse('api:v2:catalog-preview'), qs=querystring)
         response = self.client.get(url)
         self.assertEqual(response.status_code, 400)
 
     @ddt.data(ReqConnectionError, SlumberBaseException, Timeout)
     def test_preview_catalog_course_discovery_service_not_available(self, exc_class):
         """Test catalog query preview when course discovery is not available."""
-        url = '{path}?query=foo&seat_types=bar'.format(path=reverse('api:v2:catalog-preview-list'))
+        url = '{path}?query=foo&seat_types=bar'.format(path=reverse('api:v2:catalog-preview'))
 
         with mock.patch('ecommerce.coupons.utils.get_catalog_course_runs', side_effect=exc_class):
             response = self.client.get(url)
@@ -141,7 +141,7 @@ class CatalogViewSetTest(CatalogMixin, DiscoveryMockMixin, ApiMockMixin, TestCas
         self.mock_access_token_response()
         self.mock_discovery_api(catalogs, self.site_configuration.discovery_api_url)
 
-        response = self.client.get(reverse('api:v2:catalog-course-catalogs-list'))
+        response = self.client.get(reverse('api:v2:catalog-course-catalogs'))
         self.assertEqual(response.status_code, 200)
 
         actual = [catalog['name'] for catalog in response.data['results']]
@@ -157,7 +157,7 @@ class CatalogViewSetTest(CatalogMixin, DiscoveryMockMixin, ApiMockMixin, TestCas
         self.mock_access_token_response()
         self.mock_discovery_api_failure(ReqConnectionError, self.site_configuration.discovery_api_url)
 
-        response = self.client.get(reverse('api:v2:catalog-course-catalogs-list'))
+        response = self.client.get(reverse('api:v2:catalog-course-catalogs'))
 
         self.assertTrue(mock_exception.called)
         self.assertEqual(response.data.get('results'), [])

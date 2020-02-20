@@ -2,7 +2,7 @@ from __future__ import absolute_import
 
 from django.conf.urls import include, url
 from rest_framework.urlpatterns import format_suffix_patterns
-from rest_framework_extensions.routers import ExtendedSimpleRouter
+from rest_framework_extensions.routers import ExtendedSimpleRouter as SimpleRouter
 
 from ecommerce.core.constants import COURSE_ID_PATTERN, UUID_REGEX_PATTERN
 from ecommerce.extensions.api.v2.views import assignmentemail as assignment_email
@@ -125,42 +125,42 @@ urlpatterns = [
     url(r'^assignment-email/', include((ASSIGNMENT_EMAIL_URLS, 'assignment-email'))),
 ]
 
-router = ExtendedSimpleRouter()
-router.register(r'basket-details', basket_views.BasketViewSet, base_name='basket')
-router.register(r'catalogs', catalog_views.CatalogViewSet, base_name='catalog') \
-    .register(r'products', product_views.ProductViewSet, base_name='catalog-product',
+router = SimpleRouter()
+router.register(r'basket-details', basket_views.BasketViewSet, basename='basket')
+router.register(r'catalogs', catalog_views.CatalogViewSet, basename='catalog') \
+    .register(r'products', product_views.ProductViewSet, basename='catalog-product',
               parents_query_lookups=['stockrecords__catalogs'])
-router.register(r'coupons', coupon_views.CouponViewSet, base_name='coupons')
-router.register(r'enterprise/coupons', enterprise_views.EnterpriseCouponViewSet, base_name='enterprise-coupons')
+router.register(r'coupons', coupon_views.CouponViewSet, basename='coupons')
+router.register(r'enterprise/coupons', enterprise_views.EnterpriseCouponViewSet, basename='enterprise-coupons')
 router.register(
     r'enterprise/offer_assignment_summary',
     enterprise_views.OfferAssignmentSummaryViewSet,
-    base_name='enterprise-offer-assignment-summary',
+    basename='enterprise-offer-assignment-summary',
 )
 router.register(
     r'enterprise/offer-assignment-email-template/(?P<enterprise_customer>{})'.format(UUID_REGEX_PATTERN),
     enterprise_views.OfferAssignmentEmailTemplatesViewSet,
-    base_name='enterprise-offer-assignment-email-template',
+    basename='enterprise-offer-assignment-email-template',
 )
 
-router.register(r'courses', course_views.CourseViewSet, base_name='course') \
+router.register(r'courses', course_views.CourseViewSet, basename='course') \
     .register(r'products', product_views.ProductViewSet,
-              base_name='course-product', parents_query_lookups=['course_id'])
-router.register(r'orders', order_views.OrderViewSet, base_name='order')
+              basename='course-product', parents_query_lookups=['course_id'])
+router.register(r'orders', order_views.OrderViewSet, basename='order')
 router.register(
     r'manual_course_enrollment_order',
     order_views.ManualCourseEnrollmentOrderViewSet,
-    base_name='manual-course-enrollment-order'
+    basename='manual-course-enrollment-order'
 )
 router.register(r'partners', partner_views.PartnerViewSet) \
     .register(r'catalogs', catalog_views.CatalogViewSet,
-              base_name='partner-catalogs', parents_query_lookups=['partner_id'])
+              basename='partner-catalogs', parents_query_lookups=['partner_id'])
 router.register(r'partners', partner_views.PartnerViewSet) \
     .register(r'products', product_views.ProductViewSet,
-              base_name='partner-product', parents_query_lookups=['stockrecords__partner_id'])
-router.register(r'products', product_views.ProductViewSet, base_name='product')
-router.register(r'vouchers', voucher_views.VoucherViewSet, base_name='vouchers')
-router.register(r'stockrecords', stockrecords_views.StockRecordViewSet, base_name='stockrecords')
+              basename='partner-product', parents_query_lookups=['stockrecords__partner_id'])
+router.register(r'products', product_views.ProductViewSet, basename='product')
+router.register(r'vouchers', voucher_views.VoucherViewSet, basename='vouchers')
+router.register(r'stockrecords', stockrecords_views.StockRecordViewSet, basename='stockrecords')
 
 urlpatterns += router.urls
 urlpatterns = format_suffix_patterns(urlpatterns)
