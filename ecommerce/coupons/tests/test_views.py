@@ -236,9 +236,7 @@ class CouponOfferViewTests(ApiMockMixin, CouponMixin, DiscoveryTestMixin, Enterp
         self.client.logout()
         url = self.prepare_url_for_credit_seat()
         response = self.client.get(url)
-
-        testserver_login_url = self.get_full_url(reverse('login'))
-        expected_url = '{path}?next={next}'.format(path=testserver_login_url, next=six.moves.urllib.parse.quote(url))
+        expected_url = '{path}?next={next}'.format(path=reverse('login'), next=six.moves.urllib.parse.quote(url))
         self.assertRedirects(response, expected_url, target_status_code=302)
 
     def test_credit_seat_response(self):
