@@ -36,7 +36,8 @@ def _is_eligible_for_REV1074_experiment(request):
         # TODO: I don't think this check works yet
         getattr(request.basket, 'ENTERPRISE_CATALOG_ATTRIBUTE_TYPE', None) or
         # We do not want to include zero dollar purchases
-        request.basket.total_incl_tax == 0
+        request.basket.total_incl_tax == 0 or
+        str(request.user.username).startswith('test_') and str(request.user.email).endswith('example.com')
     )
     return not omit
 
