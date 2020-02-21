@@ -1,6 +1,7 @@
 """ Checkout related views. """
 from __future__ import absolute_import, unicode_literals
 
+import logging
 from decimal import Decimal
 
 from django.contrib import messages
@@ -12,6 +13,9 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import RedirectView, TemplateView
 from oscar.apps.checkout.views import *  # pylint: disable=wildcard-import, unused-wildcard-import
 from oscar.core.loading import get_class, get_model
+from requests.exceptions import ConnectionError as ReqConnectionError
+from requests.exceptions import Timeout
+from slumber.exceptions import SlumberHttpBaseException
 
 from ecommerce.core.url_utils import (
     get_lms_courseware_url,
@@ -257,10 +261,22 @@ class ReceiptResponseView(ThankYouView):
         return context
 
     def add_message_if_enterprise_user(self, request):
-        learner_data = fetch_enterprise_learner_data(request.site, request.user)
-        learner_data_results = learner_data.get('results')
-        if learner_data_results:
-            enterprise_customer = learner_data_results[0]['enterprise_customer']
+        enterprise_customer = None
+        learner_data = None
+        try:
+            # If enterprise feature is enabled return all the enterprise_customer associated with user.
+            learner_data = fetch_enterprise_learner_data(request.site, request.user)
+        except (ReqConnectionError, KeyError, SlumberHttpBaseException, Timeout) as exc:
+            logging.exception('[enterprise learner message] Exception while retrieving enterprise learner data for'
+                              'User: %s, Exception: %s', request.user, exc)
+        if learner_data:
+            try:
+                enterprise_customer = learner_data['results'][0]['enterprise_customer']
+            except IndexError:
+                # If enterprise feature is enable and user is not associated to any enterprise
+                pass
+
+        if enterprise_customer:
             enable_learner_portal = enterprise_customer['enable_learner_portal']
             learner_portal_hostname = enterprise_customer['learner_portal_hostname']
             if enable_learner_portal and learner_portal_hostname:
