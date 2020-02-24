@@ -13,7 +13,7 @@ PAYMENT_URLS = [
 ]
 
 urlpatterns = [
-    url(r'^v0/', include(PAYMENT_URLS, namespace='v0')),
+    url(r'^v0/', include((PAYMENT_URLS, 'v0'))),
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)

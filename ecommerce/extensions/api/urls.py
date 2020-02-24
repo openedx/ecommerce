@@ -3,5 +3,5 @@ from __future__ import absolute_import
 from django.conf.urls import include, url
 
 urlpatterns = [
-    url(r'^v2/', include('ecommerce.extensions.api.v2.urls', namespace='v2')),
+    url(r'^v2/', include(('ecommerce.extensions.api.v2.urls', 'v2'))),
 ]

@@ -11,6 +11,6 @@ OFFER_URLS = [
 ]
 
 urlpatterns = [
-    url(r'^offers/', include(OFFER_URLS, namespace='offers')),
+    url(r'^offers/', include((OFFER_URLS, 'offers'))),
     url(r'^coupons/(.*)$', views.EnterpriseCouponAppView.as_view(), name='coupons'),
 ]

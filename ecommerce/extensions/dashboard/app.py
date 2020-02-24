@@ -1,7 +1,7 @@
 from __future__ import absolute_import
 
 from auth_backends.urls import oauth2_urlpatterns
-from django.conf.urls import include, url
+from django.conf.urls import url
 from oscar.apps.dashboard import app
 from oscar.core.loading import get_class
 
@@ -19,20 +19,20 @@ class DashboardApplication(app.DashboardApplication):
     def get_urls(self):
         urls = [
             url(r'^$', self.index_view.as_view(), name='index'),
-            url(r'^catalogue/', include(self.catalogue_app.urls)),
-            url(r'^reports/', include(self.reports_app.urls)),
-            url(r'^orders/', include(self.orders_app.urls)),
-            url(r'^users/', include(self.users_app.urls)),
-            url(r'^content-blocks/', include(self.promotions_app.urls)),
-            url(r'^pages/', include(self.pages_app.urls)),
-            url(r'^partners/', include(self.partners_app.urls)),
-            url(r'^offers/', include(self.offers_app.urls)),
-            url(r'^ranges/', include(self.ranges_app.urls)),
-            url(r'^reviews/', include(self.reviews_app.urls)),
-            url(r'^vouchers/', include(self.vouchers_app.urls)),
-            url(r'^comms/', include(self.comms_app.urls)),
-            url(r'^shipping/', include(self.shipping_app.urls)),
-            url(r'^refunds/', include(self.refunds_app.urls)),
+            url(r'^catalogue/', self.catalogue_app.urls),
+            url(r'^reports/', self.reports_app.urls),
+            url(r'^orders/', self.orders_app.urls),
+            url(r'^users/', self.users_app.urls),
+            url(r'^content-blocks/', self.promotions_app.urls),
+            url(r'^pages/', self.pages_app.urls),
+            url(r'^partners/', self.partners_app.urls),
+            url(r'^offers/', self.offers_app.urls),
+            url(r'^ranges/', self.ranges_app.urls),
+            url(r'^reviews/', self.reviews_app.urls),
+            url(r'^vouchers/', self.vouchers_app.urls),
+            url(r'^comms/', self.comms_app.urls),
+            url(r'^shipping/', self.shipping_app.urls),
+            url(r'^refunds/', self.refunds_app.urls),
         ]
         urls += AUTH_URLS
         return self.post_process_urls(urls)
