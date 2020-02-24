@@ -34,7 +34,7 @@ from ecommerce.extensions.partner.shortcuts import get_partner_for_site
 from ecommerce.extensions.payment import exceptions as payment_exceptions
 from ecommerce.extensions.payment.helpers import get_default_processor_class, get_processor_class_by_name
 
-Applicator = get_class('offer.applicator', 'CustomApplicator')
+Applicator = get_class('offer.applicator', 'Applicator')
 Basket = get_model('basket', 'Basket')
 logger = logging.getLogger(__name__)
 Order = get_model('order', 'Order')

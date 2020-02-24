@@ -16,6 +16,7 @@ from oscar.test import factories
 from ecommerce.core.url_utils import get_lms_courseware_url, get_lms_program_dashboard_url
 from ecommerce.coupons.tests.mixins import DiscoveryMockMixin
 from ecommerce.enterprise.tests.mixins import EnterpriseServiceMockMixin
+from ecommerce.extensions.basket.tests.test_utils import TEST_BUNDLE_ID
 from ecommerce.extensions.checkout.exceptions import BasketNotFreeError
 from ecommerce.extensions.checkout.utils import get_receipt_page_url
 from ecommerce.extensions.checkout.views import ReceiptResponseView
@@ -36,7 +37,7 @@ class FreeCheckoutViewTests(EnterpriseServiceMockMixin, TestCase):
     def setUp(self):
         super(FreeCheckoutViewTests, self).setUp()
         self.user = self.create_user()
-        self.bundle_attribute_value = '12345678-1234-1234-1234-123456789abc'
+        self.bundle_attribute_value = TEST_BUNDLE_ID
         self.client.login(username=self.user.username, password=self.password)
 
     def prepare_basket(self, price, bundle=False):
@@ -439,7 +440,7 @@ class ReceiptResponseViewTests(DiscoveryMockMixin, LmsApiMockMixin, RefundTestMi
         """
         mock_learner_data.return_value = self.non_enterprise_learner_data
         order = self._create_order_for_receipt(self.user)
-        bundle_id = '12345678-1234-1234-1234-123456789abc'
+        bundle_id = TEST_BUNDLE_ID
         BasketAttribute.objects.update_or_create(
             basket=order.basket,
             attribute_type=BasketAttributeType.objects.get(name='bundle_identifier'),
@@ -478,7 +479,7 @@ class ReceiptResponseViewTests(DiscoveryMockMixin, LmsApiMockMixin, RefundTestMi
         BasketAttribute.objects.update_or_create(
             basket=order.basket,
             attribute_type=BasketAttributeType.objects.get(name='bundle_identifier'),
-            value_text='12345678-1234-1234-1234-123456789abc'
+            value_text=TEST_BUNDLE_ID
         )
 
         response = self._get_receipt_response(order.number)
@@ -536,7 +537,7 @@ class ReceiptResponseViewTests(DiscoveryMockMixin, LmsApiMockMixin, RefundTestMi
         BasketAttribute.objects.update_or_create(
             basket=order.basket,
             attribute_type=BasketAttributeType.objects.get(name='bundle_identifier'),
-            value_text='12345678-1234-1234-1234-123456789abc'
+            value_text=TEST_BUNDLE_ID
         )
 
         response = self._get_receipt_response(order.number)

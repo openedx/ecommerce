@@ -33,7 +33,7 @@ from ecommerce.courses.utils import mode_for_product
 from ecommerce.extensions.fulfillment.signals import SHIPPING_EVENT_NAME
 from ecommerce.tests.factories import SiteConfigurationFactory, UserFactory
 
-Applicator = get_class('offer.applicator', 'CustomApplicator')
+Applicator = get_class('offer.applicator', 'Applicator')
 Basket = get_model('basket', 'Basket')
 Benefit = get_model('offer', 'Benefit')
 Catalog = get_model('catalogue', 'Catalog')

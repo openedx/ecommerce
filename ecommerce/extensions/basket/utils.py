@@ -24,7 +24,7 @@ from ecommerce.extensions.payment.constants import DISABLE_MICROFRONTEND_FOR_BAS
 from ecommerce.extensions.payment.utils import embargo_check
 from ecommerce.referrals.models import Referral
 
-Applicator = get_class('offer.applicator', 'CustomApplicator')
+Applicator = get_class('offer.applicator', 'Applicator')
 Basket = get_model('basket', 'Basket')
 BasketAttribute = get_model('basket', 'BasketAttribute')
 BasketAttributeType = get_model('basket', 'BasketAttributeType')

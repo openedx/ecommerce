@@ -38,7 +38,7 @@ from ecommerce.extensions.test.factories import (
 from ecommerce.tests.factories import PartnerFactory
 from ecommerce.tests.testcases import TestCase
 
-Applicator = get_class('offer.applicator', 'CustomApplicator')
+Applicator = get_class('offer.applicator', 'Applicator')
 
 TEST_ENTERPRISE_CUSTOMER_UUID = 'cf246b88-d5f6-4908-a522-fc307e0b0c59'
 

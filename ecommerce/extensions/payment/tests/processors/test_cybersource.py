@@ -18,6 +18,7 @@ from oscar.core.loading import get_model
 from oscar.test import factories
 
 from ecommerce.courses.tests.factories import CourseFactory
+from ecommerce.extensions.basket.tests.test_utils import TEST_BUNDLE_ID
 from ecommerce.extensions.order.models import Order
 from ecommerce.extensions.payment.exceptions import (
     ExcessivePaymentForOrderError,
@@ -115,7 +116,7 @@ class CybersourceTests(CybersourceMixin, PaymentProcessorTestCaseMixin, TestCase
 
     def test_get_transaction_parameters_with_program(self):
         """ Verify the processor returns parameters including Level 2/3 details. """
-        bundle_id = '12345678-1234-1234-1234-123456789abc'
+        bundle_id = TEST_BUNDLE_ID
         BasketAttribute.objects.update_or_create(
             basket=self.basket,
             attribute_type=BasketAttributeType.objects.get(name='bundle_identifier'),

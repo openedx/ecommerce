@@ -14,7 +14,7 @@ from ecommerce.programs.tests.mixins import ProgramTestMixin
 from ecommerce.tests.mixins import LmsApiMockMixin
 from ecommerce.tests.testcases import TestCase
 
-Applicator = get_class('offer.applicator', 'CustomApplicator')
+Applicator = get_class('offer.applicator', 'Applicator')
 
 
 class ProgramOfferTests(LmsApiMockMixin, ProgramTestMixin, TestCase):

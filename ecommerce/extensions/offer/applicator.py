@@ -3,7 +3,7 @@ from __future__ import absolute_import
 import logging
 from itertools import chain
 
-from oscar.apps.offer.applicator import Applicator
+from oscar.apps.offer.applicator import Applicator as OscarApplicator
 from oscar.core.loading import get_model
 
 from ecommerce.enterprise.utils import get_enterprise_id_for_user
@@ -12,12 +12,12 @@ logger = logging.getLogger(__name__)
 BUNDLE = 'bundle_identifier'
 
 
-class CustomApplicator(Applicator):
+class Applicator(OscarApplicator):
     """
     Custom applicator for more intelligently applying offers to baskets.
 
     This applicator uses logic to prefilter the offers, rather than blindly
-    returning every offer, including onces that could never apply.
+    returning every offer, including ones that could never apply.
     """
 
     def apply(self, basket, user=None, request=None, bundle_id=None):  # pylint: disable=arguments-differ
@@ -33,10 +33,10 @@ class CustomApplicator(Applicator):
                 used in the case of a temporary basket which is not saved to the db, because
                 we get an error when trying to create the bundle_id BasketAttribute.
         """
-        offers = self._get_offers(basket, user, request, bundle_id)
+        offers = self.get_offers(basket, user, request, bundle_id)
         self.apply_offers(basket, offers)
 
-    def _get_offers(self, basket, user=None, request=None, bundle_id=None):
+    def get_offers(self, basket, user=None, request=None, bundle_id=None):  # pylint: disable=arguments-differ
         """
         Returns all offers to apply to the basket.
 

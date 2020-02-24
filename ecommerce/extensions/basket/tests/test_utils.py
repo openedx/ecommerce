@@ -47,6 +47,7 @@ BUNDLE = 'bundle_identifier'
 Option = get_model('catalogue', 'Option')
 Product = get_model('catalogue', 'Product')
 ProductClass = get_model('catalogue', 'ProductClass')
+TEST_BUNDLE_ID = '12345678-1234-1234-1234-123456789abc'
 
 
 def timeoutException():
@@ -387,10 +388,10 @@ class BasketUtilsTests(DiscoveryTestMixin, BasketMixin, TestCase):
         basket = prepare_basket(request, [product])
         with self.assertRaises(BasketAttribute.DoesNotExist):
             BasketAttribute.objects.get(basket=basket, attribute_type__name=BUNDLE)
-        request.GET = {'bundle': '12345678-1234-1234-1234-123456789abc'}
+        request.GET = {'bundle': TEST_BUNDLE_ID}
         basket = prepare_basket(request, [product])
         bundle_id = BasketAttribute.objects.get(basket=basket, attribute_type__name=BUNDLE).value_text
-        self.assertEqual(bundle_id, '12345678-1234-1234-1234-123456789abc')
+        self.assertEqual(bundle_id, TEST_BUNDLE_ID)
 
     def test_prepare_basket_with_bundle_voucher(self):
         """
@@ -403,7 +404,7 @@ class BasketUtilsTests(DiscoveryTestMixin, BasketMixin, TestCase):
         request = self.request
         basket = prepare_basket(request, [product], voucher)
         self.assertTrue(basket.vouchers.all())
-        request.GET = {'bundle': '12345678-1234-1234-1234-123456789abc'}
+        request.GET = {'bundle': TEST_BUNDLE_ID}
         basket = prepare_basket(request, [product])
         self.assertFalse(basket.vouchers.all())
 
@@ -413,12 +414,12 @@ class BasketUtilsTests(DiscoveryTestMixin, BasketMixin, TestCase):
         """
         product = ProductFactory(categories=[], stockrecords__partner__short_code='second')
         request = self.request
-        request.GET = {'bundle': '12345678-1234-1234-1234-123456789abc'}
+        request.GET = {'bundle': TEST_BUNDLE_ID}
         basket = prepare_basket(request, [product])
 
         # Verify that the bundle attribute exists for the basket when bundle is added to basket
         bundle_id = BasketAttribute.objects.get(basket=basket, attribute_type__name=BUNDLE).value_text
-        self.assertEqual(bundle_id, '12345678-1234-1234-1234-123456789abc')
+        self.assertEqual(bundle_id, TEST_BUNDLE_ID)
 
         # Verify that the attribute is deleted when a non-bundle product is added to the basket
         request.GET = {}
