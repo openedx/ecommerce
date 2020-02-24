@@ -27,6 +27,7 @@ from requests.exceptions import Timeout
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from six.moves.urllib.parse import urlparse
 from slumber.exceptions import SlumberBaseException
 
 from ecommerce.core.exceptions import SiteConfigurationError
@@ -492,10 +493,15 @@ class BasketAddItemsView(BasketLogicMixin, APIView):
     def _redirect_response_to_basket_or_payment(self, request, skus):
         redirect_url = get_payment_microfrontend_or_basket_url(request)
         # If a user is eligible and bucketed, REV1074 experiment information will be added to their url
-        if waffle.flag_is_active(self.request, 'REV1074.enable_experiment'):  # pragma: no cover
-            if skus:
-                redirect_url = add_REV1074_information_to_url_if_eligible(redirect_url, request, skus[0])
-        redirect_url = add_utm_params_to_url(redirect_url, list(self.request.GET.items()))
+        if waffle.flag_is_active(self.request, 'REV1074.enable_experiment') and skus:  # pragma: no cover
+            redirect_url = add_REV1074_information_to_url_if_eligible(redirect_url, request, skus[0])
+            redirect_url = add_utm_params_to_url(redirect_url, list(self.request.GET.items()))
+            basket = 'basket_id=' + str(request.basket.id)
+            has_params = urlparse(redirect_url).query
+            redirect_url += '&' + basket if has_params else '?' + basket
+        else:  # pragma: no cover
+            redirect_url = add_utm_params_to_url(redirect_url, list(self.request.GET.items()))
+
         return HttpResponseRedirect(redirect_url, status=303)
 
 
