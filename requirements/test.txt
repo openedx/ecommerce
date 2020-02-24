@@ -4,168 +4,168 @@
 #
 #    make upgrade
 #
-amqp==1.4.9
-analytics-python==1.2.9
-anyjson==0.3.3
-appdirs==1.4.3
+amqp==1.4.9               # via -r requirements/base.txt (line 7), kombu
+analytics-python==1.2.9   # via -r requirements/base.txt (line 8)
+anyjson==0.3.3            # via -r requirements/base.txt (line 9), kombu
+appdirs==1.4.3            # via -r requirements/base.txt (line 10), zeep
 astroid==2.3.3            # via pylint
-attrs==19.3.0
-babel==2.8.0
+attrs==19.3.0             # via -r requirements/base.txt (line 11), pytest, zeep
+babel==2.8.0              # via -r requirements/base.txt (line 12), django-oscar, django-phonenumber-field
 beautifulsoup4==4.8.2     # via webtest
-billiard==3.3.0.23
-bleach==3.1.1
-bok-choy==1.0.1
-cached-property==1.5.1
-celery==3.1.26.post2
-certifi==2019.11.28
-cffi==1.14.0
-chardet==3.0.4
-coreapi==2.3.3
-coreschema==0.0.4
-coverage==5.0.3
-cryptography==2.8
-cssselect==1.1.0
-cssutils==1.0.2
-ddt==1.2.2
-defusedxml==0.6.0
-diff-cover==2.6.0
-git+https://github.com/django-compressor/django-appconf.git@5169ce2c92d9836e0b3ab3ec645727d9d5225d1a#egg=django-appconf
-django-compressor==2.4
-django-cors-headers==3.2.1
-django-crispy-forms==1.8.1
-django-crum==0.7.5
-django-extensions==2.2.8
-django-extra-views==0.11.0
-django-filter==2.2.0
-django-haystack==2.8.1
-django-libsass==0.8
-django-model-utils==3.2.0
-django-oscar==1.6.7
-django-phonenumber-field==2.0.1
-django-rest-swagger==2.2.0
-django-simple-history==2.8.0
-django-solo==1.1.3
-django-tables2==1.21.2
-django-threadlocals==0.10
-django-treebeard==4.3.1
-django-waffle==0.20.0
-django-webtest==1.9.7
-django-widget-tweaks==1.4.5
-django==1.11.28
-djangorestframework-csv==2.1.0
-djangorestframework-datatables==0.5.1
-djangorestframework-jwt==1.11.0
-djangorestframework==3.6.4
-drf-extensions==0.3.1
-edx-auth-backends==3.0.2
-edx-django-release-util==0.3.6
-edx-django-sites-extensions==2.4.3
-edx-django-utils==3.0
-edx-drf-extensions==2.4.6
-edx-ecommerce-worker==0.7.2
-edx-opaque-keys==2.0.1
-edx-rbac==1.1.0
-edx-rest-api-client==1.9.2
-factory-boy==2.12.0
-faker==4.0.1
-filelock==3.0.12
-freezegun==0.3.15
-future==0.18.2
-httpretty==0.9.7
-idna==2.9
-importlib-metadata==1.5.0
+billiard==3.3.0.23        # via -r requirements/base.txt (line 13), celery
+bleach==3.1.1             # via -r requirements/base.txt (line 14)
+bok-choy==1.0.1           # via -r requirements/test.in (line 5)
+cached-property==1.5.1    # via -r requirements/base.txt (line 15), zeep
+celery==3.1.26.post2      # via -r requirements/base.txt (line 16), edx-ecommerce-worker
+certifi==2019.11.28       # via -r requirements/base.txt (line 17), requests
+cffi==1.14.0              # via -r requirements/base.txt (line 18), cryptography
+chardet==3.0.4            # via -r requirements/base.txt (line 19), requests
+coreapi==2.3.3            # via -r requirements/base.txt (line 20), django-rest-swagger, openapi-codec
+coreschema==0.0.4         # via -r requirements/base.txt (line 21), coreapi
+coverage==5.0.3           # via -r requirements/test.in (line 6), pytest-cov
+cryptography==2.8         # via -r requirements/base.txt (line 22), pyopenssl
+cssselect==1.1.0          # via -r requirements/base.txt (line 23), premailer
+cssutils==1.0.2           # via -r requirements/base.txt (line 24), premailer
+ddt==1.2.2                # via -r requirements/test.in (line 7)
+defusedxml==0.6.0         # via -r requirements/base.txt (line 25), python3-openid, social-auth-core, zeep
+diff-cover==2.6.0         # via -r requirements/test.in (line 8)
+git+https://github.com/django-compressor/django-appconf.git@5169ce2c92d9836e0b3ab3ec645727d9d5225d1a#egg=django-appconf  # via -r requirements/base.txt (line 26), django-compressor
+django-compressor==2.4    # via -r requirements/base.txt (line 27), django-libsass
+django-cors-headers==3.2.1  # via -r requirements/base.txt (line 28)
+django-crispy-forms==1.8.1  # via -r requirements/base.txt (line 29)
+django-crum==0.7.5        # via -r requirements/base.txt (line 30), edx-rbac
+django-extensions==2.2.8  # via -r requirements/base.txt (line 31)
+django-extra-views==0.11.0  # via -r requirements/base.txt (line 32), django-oscar
+django-filter==2.2.0      # via -r requirements/base.txt (line 33)
+django-haystack==2.8.1    # via -r requirements/base.txt (line 34), django-oscar
+django-libsass==0.8       # via -r requirements/base.txt (line 35)
+django-model-utils==3.2.0  # via -r requirements/base.txt (line 36), edx-rbac
+django-oscar==1.6.7       # via -r requirements/base.txt (line 37)
+django-phonenumber-field==2.0.1  # via -r requirements/base.txt (line 38), django-oscar
+django-rest-swagger==2.2.0  # via -r requirements/base.txt (line 39)
+django-simple-history==2.8.0  # via -r requirements/base.txt (line 40)
+django-solo==1.1.3        # via -r requirements/base.txt (line 41)
+django-tables2==1.21.2    # via -r requirements/base.txt (line 42), django-oscar
+django-threadlocals==0.10  # via -r requirements/base.txt (line 43)
+django-treebeard==4.3.1   # via -r requirements/base.txt (line 44), django-oscar
+django-waffle==0.20.0     # via -r requirements/base.txt (line 45), edx-django-utils, edx-drf-extensions
+django-webtest==1.9.7     # via -r requirements/test.in (line 9)
+django-widget-tweaks==1.4.5  # via -r requirements/base.txt (line 46), django-oscar
+django==1.11.28           # via -r requirements/base.txt (line 47), django-appconf, django-cors-headers, django-crum, django-extra-views, django-filter, django-haystack, django-model-utils, django-oscar, django-phonenumber-field, django-tables2, django-treebeard, edx-auth-backends, edx-django-release-util, edx-django-sites-extensions, edx-django-utils, edx-drf-extensions, edx-rbac, jsonfield2, mock-django, pytest-django-ordering, rest-condition, xss-utils
+djangorestframework-csv==2.1.0  # via -r requirements/base.txt (line 48)
+djangorestframework-datatables==0.5.1  # via -r requirements/base.txt (line 49)
+djangorestframework-jwt==1.11.0  # via -r requirements/base.txt (line 50), edx-drf-extensions
+djangorestframework==3.9.4  # via -r requirements/base.txt (line 51), django-rest-swagger, djangorestframework-csv, djangorestframework-datatables, drf-extensions, edx-drf-extensions, rest-condition
+drf-extensions==0.3.1     # via -r requirements/base.txt (line 52)
+edx-auth-backends==3.0.2  # via -r requirements/base.txt (line 53)
+edx-django-release-util==0.3.6  # via -r requirements/base.txt (line 54)
+edx-django-sites-extensions==2.4.3  # via -r requirements/base.txt (line 55)
+edx-django-utils==3.0     # via -r requirements/base.txt (line 56), edx-drf-extensions
+edx-drf-extensions==2.4.6  # via -r requirements/base.txt (line 57), edx-rbac
+edx-ecommerce-worker==0.7.2  # via -r requirements/base.txt (line 58)
+edx-opaque-keys==2.0.1    # via -r requirements/base.txt (line 59), edx-drf-extensions
+edx-rbac==1.1.0           # via -r requirements/base.txt (line 60)
+edx-rest-api-client==1.9.2  # via -c requirements/pins.txt (line 3), -r requirements/base.txt (line 61), edx-ecommerce-worker
+factory-boy==2.12.0       # via -r requirements/base.txt (line 62), -r requirements/test.in (line 10), django-oscar
+faker==4.0.1              # via -r requirements/base.txt (line 63), factory-boy
+filelock==3.0.12          # via -r requirements/tox.txt (line 7), tox
+freezegun==0.3.15         # via -r requirements/test.in (line 11)
+future==0.18.2            # via -r requirements/base.txt (line 64), pyjwkest
+httpretty==0.9.7          # via -r requirements/test.in (line 13)
+idna==2.9                 # via -r requirements/base.txt (line 65), requests
+importlib-metadata==1.5.0  # via -r requirements/tox.txt (line 8), inflect, pluggy, pytest, tox
 inflect==3.0.2            # via jinja2-pluralize
-isodate==0.6.0
-isort==4.3.21
-itypes==1.1.0
+isodate==0.6.0            # via -r requirements/base.txt (line 66), zeep
+isort==4.3.21             # via -r requirements/test.in (line 14), pylint
+itypes==1.1.0             # via -r requirements/base.txt (line 67), coreapi
 jinja2-pluralize==0.3.0   # via diff-cover
-jinja2==2.11.1
-jsonfield2==3.0.3
-kombu==3.0.37
+jinja2==2.11.1            # via -r requirements/base.txt (line 68), coreschema, diff-cover, jinja2-pluralize
+jsonfield2==3.0.3         # via -c requirements/pins.txt (line 6), -r requirements/base.txt (line 69)
+kombu==3.0.37             # via -r requirements/base.txt (line 70), celery
 lazy-object-proxy==1.4.3  # via astroid
 lazy==1.4                 # via bok-choy
-libsass==0.9.2
-lxml==4.5.0
-markdown==2.6.9
-markupsafe==1.1.1
+libsass==0.9.2            # via -r requirements/base.txt (line 71), django-libsass
+lxml==4.5.0               # via -r requirements/base.txt (line 72), -r requirements/test.in (line 15), premailer, zeep
+markdown==2.6.9           # via -r requirements/base.txt (line 73)
+markupsafe==1.1.1         # via -r requirements/base.txt (line 74), jinja2
 mccabe==0.6.1             # via pylint
-mock-django==0.6.10
-mock==2.0.0
+mock-django==0.6.10       # via -r requirements/test.in (line 17)
+mock==2.0.0               # via -r requirements/base.txt (line 75), -r requirements/test.in (line 16), django-oscar, mock-django
 more-itertools==8.2.0     # via pytest
-mysqlclient==1.4.6
-ndg-httpsclient==0.5.1
-newrelic==4.20.1.121
-oauthlib==3.1.0
-openapi-codec==1.3.2
-packaging==20.1
-path.py==7.2
+mysqlclient==1.4.6        # via -r requirements/base.txt (line 76)
+ndg-httpsclient==0.5.1    # via -r requirements/base.txt (line 77)
+newrelic==4.20.1.121      # via -r requirements/base.txt (line 78), edx-django-utils
+oauthlib==3.1.0           # via -r requirements/base.txt (line 79), requests-oauthlib, social-auth-core
+openapi-codec==1.3.2      # via -r requirements/base.txt (line 80), django-rest-swagger
+packaging==20.1           # via -r requirements/tox.txt (line 9), pytest, tox
+path.py==7.2              # via -r requirements/base.txt (line 81)
 pathlib2==2.3.5           # via pytest
-paypalrestsdk==1.13.1
-pbr==5.4.4
-phonenumbers==8.11.4
-pillow==7.0.0
-pluggy==0.13.1
-premailer==2.9.2
-psutil==1.2.1
-purl==1.5
-py==1.8.1
-pyasn1==0.4.8
-pycodestyle==2.5.0
-pycountry==17.1.8
-pycparser==2.19
-pycryptodomex==3.9.6
-pygments==2.5.2
-pyjwkest==1.3.2
-pyjwt==1.7.1
-pylint==2.4.4
-pymongo==3.10.1
-pyopenssl==19.1.0
-pyparsing==2.4.6
-pytest-cov==2.8.1
-pytest-django-ordering==1.2.0
-pytest-django==3.8.0
-pytest==5.3.5
-python-dateutil==2.8.1
-python3-openid==3.1.0 ; python_version >= "3"
-pytz==2016.10
-pyyaml==5.3
-rcssmin==1.0.6
-requests-oauthlib==1.3.0
-requests-toolbelt==0.9.1
-requests==2.23.0
-responses==0.10.9
-rest-condition==1.0.3
-rjsmin==1.1.0
-rules==2.2
-sailthru-client==2.2.3
-selenium==3.141.0
-semantic-version==2.8.4
-simplejson==3.17.0
-six==1.14.0
-slumber==0.7.1
-git+https://github.com/python-social-auth/social-app-django.git@c00d23c2b45c3317bd35b15ad1b959338689cef8#egg=social-auth-app-django
-social-auth-core==3.2.0
-sorl-thumbnail==12.4.1
-soupsieve==1.9.5          # via beautifulsoup4
-stevedore==1.32.0
-stripe==1.70.0
-testfixtures==6.13.1
-text-unidecode==1.3
-toml==0.10.0
-tox-battery==0.5.2
-tox==3.14.5
+paypalrestsdk==1.13.1     # via -r requirements/base.txt (line 82)
+pbr==5.4.4                # via -r requirements/base.txt (line 83), mock, stevedore
+phonenumbers==8.11.4      # via -r requirements/base.txt (line 84), django-oscar, django-phonenumber-field
+pillow==7.0.0             # via -r requirements/base.txt (line 85), django-oscar
+pluggy==0.13.1            # via -r requirements/tox.txt (line 10), diff-cover, pytest, tox
+premailer==2.9.2          # via -r requirements/base.txt (line 86)
+psutil==1.2.1             # via -r requirements/base.txt (line 87), edx-django-utils, edx-drf-extensions
+purl==1.5                 # via -r requirements/base.txt (line 88), django-oscar
+py==1.8.1                 # via -r requirements/tox.txt (line 11), pytest, tox
+pyasn1==0.4.8             # via -r requirements/base.txt (line 89), ndg-httpsclient
+pycodestyle==2.5.0        # via -r requirements/test.in (line 18)
+pycountry==17.1.8         # via -r requirements/base.txt (line 90)
+pycparser==2.19           # via -r requirements/base.txt (line 91), cffi
+pycryptodomex==3.9.7      # via -r requirements/base.txt (line 92), pyjwkest
+pygments==2.5.2           # via -r requirements/base.txt (line 93), diff-cover
+pyjwkest==1.3.2           # via -r requirements/base.txt (line 94), edx-drf-extensions
+pyjwt==1.7.1              # via -r requirements/base.txt (line 95), djangorestframework-jwt, edx-auth-backends, edx-rest-api-client, social-auth-core
+pylint==2.4.4             # via -r requirements/test.in (line 19)
+pymongo==3.10.1           # via -r requirements/base.txt (line 96), edx-opaque-keys
+pyopenssl==19.1.0         # via -r requirements/base.txt (line 97), ndg-httpsclient, paypalrestsdk
+pyparsing==2.4.6          # via -r requirements/tox.txt (line 12), packaging
+pytest-cov==2.8.1         # via -r requirements/test.in (line 21)
+pytest-django-ordering==1.2.0  # via -r requirements/test.in (line 23)
+pytest-django==3.8.0      # via -r requirements/test.in (line 22), pytest-django-ordering
+pytest==5.3.5             # via -r requirements/test.in (line 20), pytest-cov, pytest-django, pytest-django-ordering
+python-dateutil==2.8.1    # via -r requirements/base.txt (line 98), analytics-python, edx-drf-extensions, faker, freezegun
+python3-openid==3.1.0 ; python_version >= "3"  # via -r requirements/base.txt (line 99), social-auth-core
+pytz==2016.10             # via -c requirements/pins.txt (line 1), -r requirements/base.txt (line 100), babel, celery, django, zeep
+pyyaml==5.3               # via -r requirements/base.txt (line 101), edx-django-release-util
+rcssmin==1.0.6            # via -r requirements/base.txt (line 102), django-compressor
+requests-oauthlib==1.3.0  # via -r requirements/base.txt (line 103), social-auth-core
+requests-toolbelt==0.9.1  # via -r requirements/base.txt (line 104), zeep
+requests==2.23.0          # via -r requirements/base.txt (line 105), analytics-python, coreapi, edx-drf-extensions, edx-rest-api-client, paypalrestsdk, pyjwkest, requests-oauthlib, requests-toolbelt, responses, sailthru-client, slumber, social-auth-core, stripe, zeep
+responses==0.10.9         # via -r requirements/test.in (line 25)
+rest-condition==1.0.3     # via -r requirements/base.txt (line 106), edx-drf-extensions
+rjsmin==1.1.0             # via -r requirements/base.txt (line 107), django-compressor
+rules==2.2                # via -r requirements/base.txt (line 108)
+sailthru-client==2.2.3    # via -r requirements/base.txt (line 109)
+selenium==3.141.0         # via -r requirements/test.in (line 26), bok-choy
+semantic-version==2.8.4   # via -r requirements/base.txt (line 110), edx-drf-extensions
+simplejson==3.17.0        # via -r requirements/base.txt (line 111), django-rest-swagger, sailthru-client
+six==1.14.0               # via -r requirements/base.txt (line 112), -r requirements/tox.txt (line 13), analytics-python, astroid, bleach, bok-choy, cryptography, diff-cover, django-compressor, django-extensions, django-extra-views, django-simple-history, django-waffle, djangorestframework-csv, edx-auth-backends, edx-django-release-util, edx-drf-extensions, edx-opaque-keys, edx-rbac, freezegun, httpretty, isodate, libsass, mock, packaging, pathlib2, paypalrestsdk, purl, pyjwkest, pyopenssl, python-dateutil, responses, social-auth-app-django, social-auth-core, stevedore, tox, webtest, zeep
+slumber==0.7.1            # via -r requirements/base.txt (line 113), edx-rest-api-client
+git+https://github.com/python-social-auth/social-app-django.git@c00d23c2b45c3317bd35b15ad1b959338689cef8#egg=social-auth-app-django  # via -r requirements/base.txt (line 114), edx-auth-backends
+social-auth-core==3.2.0   # via -r requirements/base.txt (line 115), edx-auth-backends, social-auth-app-django
+sorl-thumbnail==12.4.1    # via -r requirements/base.txt (line 116), django-oscar
+soupsieve==2.0            # via beautifulsoup4
+stevedore==1.32.0         # via -r requirements/base.txt (line 117), edx-opaque-keys
+stripe==1.70.0            # via -r requirements/base.txt (line 118)
+testfixtures==6.13.1      # via -r requirements/test.in (line 27)
+text-unidecode==1.3       # via -r requirements/base.txt (line 119), faker
+toml==0.10.0              # via -r requirements/tox.txt (line 14), tox
+tox-battery==0.5.2        # via -r requirements/tox.txt (line 15)
+tox==3.14.5               # via -r requirements/tox.txt (line 16), tox-battery
 typed-ast==1.4.1          # via astroid
-unicodecsv==0.14.1
-unidecode==1.0.23
-uritemplate==3.0.1
-urllib3==1.25.8
-virtualenv==16.7.9
+unicodecsv==0.14.1        # via -r requirements/base.txt (line 120), djangorestframework-csv
+unidecode==1.0.23         # via -r requirements/base.txt (line 121), django-oscar
+uritemplate==3.0.1        # via -r requirements/base.txt (line 122), coreapi
+urllib3==1.25.8           # via -c requirements/pins.txt (line 2), -r requirements/base.txt (line 123), requests, selenium
+virtualenv==16.7.9        # via -c requirements/pins.txt (line 9), -r requirements/tox.txt (line 17), tox
 waitress==1.4.3           # via webtest
 wcwidth==0.1.8            # via pytest
-webencodings==0.5.1
+webencodings==0.5.1       # via -r requirements/base.txt (line 124), bleach
 webob==1.8.6              # via webtest
 webtest==2.0.34           # via django-webtest
 wrapt==1.11.2             # via astroid
-xss-utils==0.1.2
-zeep==3.4.0
-zipp==1.2.0
+xss-utils==0.1.2          # via -r requirements/base.txt (line 125)
+zeep==3.4.0               # via -r requirements/base.txt (line 126)
+zipp==1.2.0               # via -r requirements/tox.txt (line 18), importlib-metadata
