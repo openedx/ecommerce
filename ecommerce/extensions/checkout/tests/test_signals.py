@@ -14,6 +14,7 @@ from ecommerce.core.tests import toggle_switch
 from ecommerce.coupons.tests.mixins import CouponMixin
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.courses.utils import mode_for_product
+from ecommerce.extensions.basket.tests.test_utils import TEST_BUNDLE_ID
 from ecommerce.extensions.checkout.signals import send_course_purchase_email, track_completed_order
 from ecommerce.extensions.checkout.utils import get_receipt_page_url
 from ecommerce.extensions.test.factories import create_order, prepare_voucher
@@ -21,7 +22,7 @@ from ecommerce.programs.tests.mixins import ProgramTestMixin
 from ecommerce.tests.factories import ProductFactory
 from ecommerce.tests.testcases import TestCase
 
-Applicator = get_class('offer.applicator', 'CustomApplicator')
+Applicator = get_class('offer.applicator', 'Applicator')
 BasketAttribute = get_model('basket', 'BasketAttribute')
 BasketAttributeType = get_model('basket', 'BasketAttributeType')
 Benefit = get_model('offer', 'Benefit')
@@ -284,7 +285,7 @@ class SignalTests(ProgramTestMixin, CouponMixin, TestCase):
         BasketAttribute.objects.update_or_create(
             basket=order.basket,
             attribute_type=BasketAttributeType.objects.get(name=BUNDLE),
-            value_text='12345678-1234-1234-1234-123456789abc'
+            value_text=TEST_BUNDLE_ID
         )
 
         # Tracks a full bundle order
@@ -292,7 +293,7 @@ class SignalTests(ProgramTestMixin, CouponMixin, TestCase):
                         mock.Mock(return_value=self.mock_get_program_data(True))):
             track_completed_order(None, order)
             properties = self._generate_event_properties(
-                order, bundle_id='12345678-1234-1234-1234-123456789abc', fullBundle=True
+                order, bundle_id=TEST_BUNDLE_ID, fullBundle=True
             )
             mock_track.assert_called_once_with(order.site, order.user, 'Order Completed', properties)
 
@@ -301,7 +302,7 @@ class SignalTests(ProgramTestMixin, CouponMixin, TestCase):
                         mock.Mock(return_value=self.mock_get_program_data(False))):
             mock_track.reset_mock()
             track_completed_order(None, order)
-            properties = self._generate_event_properties(order, bundle_id='12345678-1234-1234-1234-123456789abc')
+            properties = self._generate_event_properties(order, bundle_id=TEST_BUNDLE_ID)
             mock_track.assert_called_once_with(order.site, order.user, 'Order Completed', properties)
 
     def test_track_completed_discounted_order_with_voucher(self):

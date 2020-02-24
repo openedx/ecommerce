@@ -9,7 +9,7 @@ from oscar.test import factories
 from six.moves import range
 
 from ecommerce.core.constants import SYSTEM_ENTERPRISE_LEARNER_ROLE
-from ecommerce.extensions.offer.applicator import CustomApplicator
+from ecommerce.extensions.offer.applicator import Applicator
 from ecommerce.extensions.test.factories import ConditionalOfferFactory, ConditionFactory, ProgramOfferFactory
 from ecommerce.tests.factories import UserFactory
 from ecommerce.tests.testcases import TestCase
@@ -23,11 +23,11 @@ LOGGER_NAME = 'ecommerce.extensions.offer.applicator'
 
 
 @ddt.ddt
-class CustomApplicatorTests(TestCase):
-    """ Tests for the Program Applicator. """
+class ApplicatorTests(TestCase):
+    """ Tests for the custom Applicator. """
 
     def setUp(self):
-        self.applicator = CustomApplicator()
+        self.applicator = Applicator()
         self.basket = factories.create_basket(empty=True)
         self.user = UserFactory()
 
@@ -46,7 +46,7 @@ class CustomApplicatorTests(TestCase):
             mock_get_jwt.return_value = {
                 'roles': ['{}:{}'.format(SYSTEM_ENTERPRISE_LEARNER_ROLE, uuid4())]
             }
-            offers = self.applicator._get_offers(self.basket, self.user)  # pylint: disable=protected-access
+            offers = self.applicator.get_offers(self.basket, self.user)  # pylint: disable=protected-access
         self.assertEqual(offers, expected_offers)
 
     def test_get_offers_with_bundle(self):

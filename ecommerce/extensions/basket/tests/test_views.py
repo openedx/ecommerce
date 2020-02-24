@@ -38,6 +38,7 @@ from ecommerce.enterprise.utils import construct_enterprise_course_consent_url
 from ecommerce.extensions.analytics.utils import translate_basket_line_for_segment
 from ecommerce.extensions.basket.constants import EMAIL_OPT_IN_ATTRIBUTE
 from ecommerce.extensions.basket.tests.mixins import BasketMixin
+from ecommerce.extensions.basket.tests.test_utils import TEST_BUNDLE_ID
 from ecommerce.extensions.basket.utils import _set_basket_bundle_status, apply_voucher_on_basket_and_check_discount
 from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
 from ecommerce.extensions.offer.constants import DYNAMIC_DISCOUNT_FLAG
@@ -51,7 +52,7 @@ from ecommerce.tests.factories import ProductFactory, SiteConfigurationFactory, 
 from ecommerce.tests.mixins import ApiMockMixin, LmsApiMockMixin
 from ecommerce.tests.testcases import TestCase
 
-Applicator = get_class('offer.applicator', 'CustomApplicator')
+Applicator = get_class('offer.applicator', 'Applicator')
 Basket = get_model('basket', 'Basket')
 BasketAttribute = get_model('basket', 'BasketAttribute')
 BasketAttributeType = get_model('basket', 'BasketAttributeType')
@@ -1161,7 +1162,7 @@ class VoucherAddMixin(LmsApiMockMixin, DiscoveryMockMixin):
         BasketAttribute.objects.update_or_create(
             basket=self.basket,
             attribute_type=BasketAttributeType.objects.get(name=BUNDLE),
-            value_text='12345678-1234-1234-1234-123456789abc'
+            value_text=TEST_BUNDLE_ID
         )
         messages = [{
             'message_type': u'error',
@@ -1178,7 +1179,7 @@ class VoucherAddMixin(LmsApiMockMixin, DiscoveryMockMixin):
         new_product = factories.ProductFactory(categories=[], stockrecords__partner__short_code='second')
         self.basket.add_product(product)
         self.basket.add_product(new_product)
-        _set_basket_bundle_status('12345678-1234-1234-1234-123456789abc', self.basket)
+        _set_basket_bundle_status(TEST_BUNDLE_ID, self.basket)
         messages = [{
             'message_type': u'info',
             'user_message': u"Coupon code '{code}' added to basket.".format(code=voucher.code),
