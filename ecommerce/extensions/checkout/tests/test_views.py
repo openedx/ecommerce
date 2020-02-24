@@ -194,8 +194,8 @@ class ReceiptResponseViewTests(DiscoveryMockMixin, LmsApiMockMixin, RefundTestMi
             'results': [{
                 'enterprise_customer': {
                     'name': 'Test Company',
+                    'slug': 'test-company',
                     'enable_learner_portal': False,
-                    'learner_portal_hostname': ''
                 }
             }]
         }
@@ -203,8 +203,8 @@ class ReceiptResponseViewTests(DiscoveryMockMixin, LmsApiMockMixin, RefundTestMi
             'results': [{
                 'enterprise_customer': {
                     'name': 'Test Company',
+                    'slug': 'test-company',
                     'enable_learner_portal': True,
-                    'learner_portal_hostname': 'www.edx.org'
                 }
             }]
         }
