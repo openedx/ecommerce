@@ -729,7 +729,7 @@ class OfferAssignmentEmailTemplatesViewSet(ModelViewSet):
     serializer_class = OfferAssignmentEmailTemplatesSerializer
     permission_classes = (IsAuthenticated,)
     filter_backends = (filters.DjangoFilterBackend,)
-    filter_fields = ('email_type', 'active')
+    filterset_fields = ('email_type', 'active')
 
     http_method_names = ['get', 'head', 'options', 'post']
 
