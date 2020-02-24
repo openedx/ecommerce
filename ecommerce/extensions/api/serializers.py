@@ -875,8 +875,8 @@ class OfferAssignmentEmailTemplatesSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         enterprise_customer = self.context['view'].kwargs.get('enterprise_customer')
         email_type = validated_data['email_type']
-        email_greeting = bleach.clean(validated_data['email_greeting'])
-        email_closing = bleach.clean(validated_data['email_closing'])
+        email_greeting = bleach.clean(validated_data.get('email_greeting', ''))
+        email_closing = bleach.clean(validated_data.get('email_closing', ''))
 
         instance = OfferAssignmentEmailTemplates.objects.create(
             enterprise_customer=enterprise_customer,

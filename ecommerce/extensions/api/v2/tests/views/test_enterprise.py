@@ -2844,14 +2844,16 @@ class OfferAssignmentEmailTemplatesViewSetTests(JwtMixin, TestCase):
             system_wide_role=SYSTEM_ENTERPRISE_ADMIN_ROLE, context=self.enterprise_customer['id']
         )
 
-    def create_template_data(self, email_type, email_greeting, email_closing):
-        data = {
-            'email_type': email_type,
-            'email_greeting': email_greeting,
-            'email_closing': email_closing,
-        }
+    def create_template_data(self, email_type, greeting=None, closing=None, status_code=status.HTTP_201_CREATED):
+
+        data = {'email_type': email_type}
+        if greeting:
+            data['email_greeting'] = greeting
+        if closing:
+            data['email_closing'] = closing
+
         response = self.client.post(self.url, json.dumps(data), 'application/json')
-        assert response.status_code == status.HTTP_201_CREATED
+        assert response.status_code == status_code
 
         return response.json()
 
@@ -3076,3 +3078,40 @@ class OfferAssignmentEmailTemplatesViewSetTests(JwtMixin, TestCase):
         template = self.create_template_data(email_type, email_greeting, email_closing)
         assert template['email_greeting'] == bleach.clean(email_greeting)
         assert template['email_closing'] == bleach.clean(email_closing)
+
+    @ddt.data('assign', 'remind', 'revoke')
+    def test_post_with_empty_template_values(self, email_type):
+        """
+        Verify that view correctly performs HTTP POST with empty template values.
+        """
+        email_greeting = ''
+        email_closing = ''
+
+        template = self.create_template_data(email_type, email_greeting, email_closing)
+        self.verify_template_data(template, email_type, email_greeting, email_closing, True)
+
+    @ddt.data('assign', 'remind', 'revoke')
+    def test_post_with_optional_fields(self, email_type):
+        """
+        Verify that view correctly performs HTTP POST with optional fields.
+        """
+        template = self.create_template_data(email_type, None, None)
+        self.verify_template_data(template, email_type, '', '', True)
+
+    @ddt.data('assign', 'remind', 'revoke')
+    def test_post_with_max_length_field_validation(self, email_type):
+        """
+        Verify that view HTTP POST return error email closing/greeting exceeds field max length.
+        """
+        email_greeting = "HI" * 160
+        email_closing = "HI" * 160
+
+        response = self.create_template_data(email_type, email_greeting, email_closing, status.HTTP_400_BAD_REQUEST)
+        assert response == {
+            "email_greeting": [
+                "Ensure this field has no more than 300 characters."
+            ],
+            "email_closing": [
+                "Ensure this field has no more than 300 characters."
+            ]
+        }

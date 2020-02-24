@@ -548,13 +548,9 @@ class OfferAssignmentEmailTemplates(TimeStampedModel):
     )
 
     enterprise_customer = models.UUIDField(help_text=_('UUID for an EnterpriseCustomer from the Enterprise Service.'))
-    email_type = models.CharField(
-        max_length=32,
-        choices=EMAIL_TEMPLATE_TYPES,
-        default=ASSIGN,
-    )
-    email_greeting = models.CharField(max_length=300)
-    email_closing = models.CharField(max_length=300)
+    email_type = models.CharField(max_length=32, choices=EMAIL_TEMPLATE_TYPES)
+    email_greeting = models.CharField(max_length=300, blank=True, null=True)
+    email_closing = models.CharField(max_length=300, blank=True, null=True)
     active = models.BooleanField(
         help_text=_('Make a particular template version active.'),
         default=True,
