@@ -4,6 +4,7 @@ from __future__ import absolute_import, unicode_literals
 import logging
 from decimal import Decimal
 
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import Http404
@@ -263,37 +264,36 @@ class ReceiptResponseView(ThankYouView):
         return context
 
     def add_message_if_enterprise_user(self, request):
-        enterprise_customer = None
-        learner_data = None
         try:
             # If enterprise feature is enabled return all the enterprise_customer associated with user.
             learner_data = fetch_enterprise_learner_data(request.site, request.user)
         except (ReqConnectionError, KeyError, SlumberHttpBaseException, Timeout) as exc:
             logging.exception('[enterprise learner message] Exception while retrieving enterprise learner data for'
                               'User: %s, Exception: %s', request.user, exc)
-        if learner_data:
-            try:
-                enterprise_customer = learner_data['results'][0]['enterprise_customer']
-            except IndexError:
-                # If enterprise feature is enable and user is not associated to any enterprise
-                pass
+            return None
 
-        if enterprise_customer:
-            enable_learner_portal = enterprise_customer['enable_learner_portal']
-            learner_portal_hostname = enterprise_customer['learner_portal_hostname']
-            if enable_learner_portal and learner_portal_hostname:
-                learner_portal_url = '{scheme}://{hostname}'.format(
-                    hostname=learner_portal_hostname,
-                    scheme=request.scheme
-                )
-                message = (
-                    'Your company, {enterprise_customer_name}, has a dedicated page where '
-                    'you can see all of your sponsored courses. '
-                    'Go to <a href="{url}">your learner portal</a>.'
-                ).format(
-                    enterprise_customer_name=enterprise_customer['name'],
-                    url=learner_portal_url
-                )
-                messages.add_message(request, messages.INFO, message, extra_tags='safe')
-                return learner_portal_url
+        try:
+            enterprise_customer = learner_data['results'][0]['enterprise_customer']
+        except (IndexError, KeyError):
+            # If enterprise feature is enabled and user is not associated to any enterprise
+            return None
+
+        enable_learner_portal = enterprise_customer.get('enable_learner_portal')
+        enterprise_learner_portal_slug = enterprise_customer.get('slug')
+        if enable_learner_portal and enterprise_learner_portal_slug:
+            learner_portal_url = '{scheme}://{hostname}/{slug}'.format(
+                scheme=request.scheme,
+                hostname=settings.ENTERPRISE_LEARNER_PORTAL_HOSTNAME,
+                slug=enterprise_learner_portal_slug,
+            )
+            message = (
+                'Your company, {enterprise_customer_name}, has a dedicated page where '
+                'you can see all of your sponsored courses. '
+                'Go to <a href="{url}">your learner portal</a>.'
+            ).format(
+                enterprise_customer_name=enterprise_customer['name'],
+                url=learner_portal_url
+            )
+            messages.add_message(request, messages.INFO, message, extra_tags='safe')
+            return learner_portal_url
         return None
