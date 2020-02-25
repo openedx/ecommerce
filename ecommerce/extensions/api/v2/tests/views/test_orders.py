@@ -481,7 +481,7 @@ class ManualCourseEnrollmentOrderViewSetTests(TestCase):
                     "lms_user_id": 12,
                     "username": "ma2",
                     "email": "ma2@example.com",
-                    "discount_percentage": 100.0,
+                    "discount_percentage": 0.0,
                     "course_run_key": self.course.id,
                     "enterprise_customer_name": "an-enterprise-customer",
                     "enterprise_customer_uuid": "394a5ce5-6ff4-4b2b-bea1-a273c6920ae1",
@@ -511,6 +511,15 @@ class ManualCourseEnrollmentOrderViewSetTests(TestCase):
                     "email": "ma5@example.com",
                     "course_run_key": self.course.id,
                     "discount_percentage": 100.0,
+                    "enterprise_customer_name": "another-enterprise-customer_with_new_name",
+                    "enterprise_customer_uuid": "394a5ce5-6ff4-4b2b-bea1-a273c6920ae2",
+                },
+                # If discount percentage is not set then effective_contract_discount_percentage should be NULL.
+                {
+                    "lms_user_id": 16,
+                    "username": "ma6",
+                    "email": "ma6@example.com",
+                    "course_run_key": self.course.id,
                     "enterprise_customer_name": "another-enterprise-customer_with_new_name",
                     "enterprise_customer_uuid": "394a5ce5-6ff4-4b2b-bea1-a273c6920ae2",
                 }
@@ -550,14 +559,18 @@ class ManualCourseEnrollmentOrderViewSetTests(TestCase):
 
             # verify line has the correct 'effective_contract_discount_percentage' and
             # line_effective_contract_discounted_price values
-            discount_percentage = expected_enrollment['discount_percentage']
-            line_effective_discount_percentage = Decimal('0.01') * Decimal(discount_percentage)
-            line_effective_contract_discounted_price = line.unit_price_excl_tax \
-                * (Decimal('1.00000') - line_effective_discount_percentage).quantize(Decimal('.00001'))
+            discount_percentage = expected_enrollment.get('discount_percentage')
+            if discount_percentage is None:
+                self.assertEqual(line.effective_contract_discount_percentage, None)
+                self.assertEqual(line.effective_contract_discounted_price, None)
+            else:
+                line_effective_discount_percentage = Decimal('0.01') * Decimal(discount_percentage)
+                line_effective_contract_discounted_price = line.unit_price_excl_tax \
+                    * (Decimal('1.00000') - line_effective_discount_percentage).quantize(Decimal('.00001'))
+                self.assertEqual(line.effective_contract_discount_percentage, line_effective_discount_percentage)
+                self.assertEqual(line.effective_contract_discounted_price, line_effective_contract_discounted_price)
 
             self.assertEqual(line.status, LINE.COMPLETE)
-            self.assertEqual(line.effective_contract_discount_percentage, line_effective_discount_percentage)
-            self.assertEqual(line.effective_contract_discounted_price, line_effective_contract_discounted_price)
             self.assertEqual(line.line_price_before_discounts_incl_tax, self.course_price)
             product = Product.objects.get(id=line.product.id)
             self.assertEqual(product.course_id, self.course.id)

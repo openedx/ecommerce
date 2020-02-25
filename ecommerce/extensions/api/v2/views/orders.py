@@ -303,7 +303,7 @@ class ManualCourseEnrollmentOrderViewSet(EdxOrderPlacementMixin, ViewSet):
         Side effect:
             Saves a line object if discount_percentage is not zero.
         """
-        if not discount_percentage:
+        if discount_percentage is None:
             return
 
         # we need to represent discount_percentage as a decimaled percent (.23 instead of 23)
@@ -337,7 +337,7 @@ class ManualCourseEnrollmentOrderViewSet(EdxOrderPlacementMixin, ViewSet):
         learner_username = enrollment.get('username')
         learner_email = enrollment.get('email')
         course_run_key = enrollment.get('course_run_key')
-        discount_percentage = enrollment.get('discount_percentage', 0.0)
+        discount_percentage = enrollment.get('discount_percentage')
         if not (lms_user_id and learner_username and learner_email and course_run_key):
             enrollment_parameters_state = [
                 ("'lms_user_id'", bool(lms_user_id)),
@@ -350,8 +350,9 @@ class ManualCourseEnrollmentOrderViewSet(EdxOrderPlacementMixin, ViewSet):
                 '[Manual Order Creation Failure] Missing required enrollment data. Message: %s', missing_params
             )
             raise ValidationError('Missing required enrollment data: {}'.format(missing_params))
-        if not isinstance(discount_percentage, float) or (discount_percentage < 0.0 or discount_percentage > 100.0):
-            raise ValidationError('Discount percentage should be a float from 0 to 100.')
+        if discount_percentage is not None:
+            if not isinstance(discount_percentage, float) or (discount_percentage < 0.0 or discount_percentage > 100.0):
+                raise ValidationError('Discount percentage should be a float from 0 to 100.')
         return lms_user_id, learner_username, learner_email, course_run_key, discount_percentage
 
     def _get_learner_user(self, lms_user_id, learner_username, learner_email):
