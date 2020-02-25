@@ -44,11 +44,11 @@ django-threadlocals==0.10  # via -r requirements/base.in (line 17)
 django-treebeard==4.3.1   # via django-oscar
 django-waffle==0.20.0     # via -r requirements/base.in (line 18), edx-django-utils, edx-drf-extensions
 django-widget-tweaks==1.4.5  # via django-oscar
-django==1.11.28           # via -r requirements/base.in (line 6), django-appconf, django-cors-headers, django-crum, django-extra-views, django-filter, django-haystack, django-model-utils, django-oscar, django-phonenumber-field, django-tables2, django-treebeard, edx-auth-backends, edx-django-release-util, edx-django-sites-extensions, edx-django-utils, edx-drf-extensions, edx-rbac, jsonfield2, rest-condition, xss-utils
+django==1.11.28           # via -r requirements/base.in (line 6), django-appconf, django-cors-headers, django-crum, django-extra-views, django-filter, django-haystack, django-model-utils, django-oscar, django-phonenumber-field, django-tables2, django-treebeard, djangorestframework, edx-auth-backends, edx-django-release-util, edx-django-sites-extensions, edx-django-utils, edx-drf-extensions, edx-rbac, jsonfield2, rest-condition, xss-utils
 djangorestframework-csv==2.1.0  # via -r requirements/base.in (line 20)
 djangorestframework-datatables==0.5.1  # via -r requirements/base.in (line 21)
 djangorestframework-jwt==1.11.0  # via -r requirements/base.in (line 22), edx-drf-extensions
-djangorestframework==3.9.4  # via -r requirements/base.in (line 19), django-rest-swagger, djangorestframework-csv, djangorestframework-datatables, drf-extensions, edx-drf-extensions, rest-condition
+djangorestframework==3.11.0  # via -r requirements/base.in (line 19), django-rest-swagger, djangorestframework-csv, djangorestframework-datatables, drf-extensions, edx-drf-extensions, rest-condition
 drf-extensions==0.4.0     # via -r requirements/base.in (line 23)
 edx-auth-backends==3.0.2  # via -r requirements/base.in (line 24)
 edx-django-release-util==0.3.6  # via -r requirements/base.in (line 25)
