@@ -81,8 +81,7 @@ class StripeSubmitViewTests(PaymentEventsMixin, TestCase):
     def test_login_required(self):
         self.client.logout()
         response = self.client.post(self.path)
-        expected_url = '{base}?next={path}'.format(base=self.get_full_url(path=reverse(settings.LOGIN_URL)),
-                                                   path=self.path)
+        expected_url = '{base}?next={path}'.format(base=reverse(settings.LOGIN_URL), path=self.path)
         self.assertRedirects(response, expected_url, fetch_redirect_response=False)
 
     def test_payment_error(self):

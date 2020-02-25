@@ -952,8 +952,7 @@ class BasketSummaryViewTests(EnterpriseServiceMockMixin, DiscoveryTestMixin, Dis
         """ The view should redirect to the login page if the user is not logged in. """
         self.client.logout()
         response = self.client.get(self.path)
-        testserver_login_url = self.get_full_url(reverse(settings.LOGIN_URL))
-        expected_url = '{path}?next={next}'.format(path=testserver_login_url,
+        expected_url = '{path}?next={next}'.format(path=reverse(settings.LOGIN_URL),
                                                    next=six.moves.urllib.parse.quote(self.path))
         self.assertRedirects(response, expected_url, target_status_code=302)
 

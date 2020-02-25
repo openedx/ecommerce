@@ -95,7 +95,7 @@ class CybersourceSubmitViewTests(CybersourceMixin, TestCase):
         """ Verify the view redirects anonymous users to the login page. """
         self.client.logout()
         response = self.client.post(self.path)
-        expected_url = '{base}?next={path}'.format(base=self.get_full_url(path=reverse(settings.LOGIN_URL)),
+        expected_url = '{base}?next={path}'.format(base=reverse(settings.LOGIN_URL),
                                                    path=self.path)
         self.assertRedirects(response, expected_url, fetch_redirect_response=False)
 
