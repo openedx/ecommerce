@@ -53,6 +53,7 @@ stripe==1.70.0
 unicodecsv
 xss-utils
 zeep
+django-tables2<2.0,>=1.19
 
 # Install from github
 git+https://github.com/django-compressor/django-appconf.git@5169ce2c92d9836e0b3ab3ec645727d9d5225d1a#egg=django-appconf
