@@ -12,7 +12,8 @@ from edx_rbac.decorators import permission_required
 from oscar.core.loading import get_model
 from requests.exceptions import ConnectionError as ReqConnectionError
 from requests.exceptions import Timeout
-from rest_framework import filters, generics, serializers, status
+from rest_framework import generics, serializers, status
+from django_filters import rest_framework as filters
 from rest_framework.decorators import detail_route, list_route
 from rest_framework.exceptions import ValidationError as DRFValidationError
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
