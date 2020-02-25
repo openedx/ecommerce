@@ -51,17 +51,17 @@ django-treebeard==4.3.1   # via -r requirements/base.txt (line 44), django-oscar
 django-waffle==0.20.0     # via -r requirements/base.txt (line 45), edx-django-utils, edx-drf-extensions
 django-webtest==1.9.7     # via -r requirements/test.in (line 9)
 django-widget-tweaks==1.4.5  # via -r requirements/base.txt (line 46), django-oscar
-django==1.11.28           # via -r requirements/base.txt (line 47), django-appconf, django-cors-headers, django-crum, django-extra-views, django-filter, django-haystack, django-model-utils, django-oscar, django-phonenumber-field, django-tables2, django-treebeard, edx-auth-backends, edx-django-release-util, edx-django-sites-extensions, edx-django-utils, edx-drf-extensions, edx-rbac, jsonfield2, mock-django, pytest-django-ordering, rest-condition, xss-utils
+django==1.11.28           # via -r requirements/base.txt (line 47), django-appconf, django-cors-headers, django-crum, django-extra-views, django-filter, django-haystack, django-model-utils, django-oscar, django-phonenumber-field, django-tables2, django-treebeard, djangorestframework, edx-auth-backends, edx-django-release-util, edx-django-sites-extensions, edx-django-utils, edx-drf-extensions, edx-rbac, jsonfield2, mock-django, pytest-django-ordering, rest-condition, xss-utils
 djangorestframework-csv==2.1.0  # via -r requirements/base.txt (line 48)
 djangorestframework-datatables==0.5.1  # via -r requirements/base.txt (line 49)
 djangorestframework-jwt==1.11.0  # via -r requirements/base.txt (line 50), edx-drf-extensions
-djangorestframework==3.9.4  # via -r requirements/base.txt (line 51), django-rest-swagger, djangorestframework-csv, djangorestframework-datatables, drf-extensions, edx-drf-extensions, rest-condition
+djangorestframework==3.11.0  # via -r requirements/base.txt (line 51), django-rest-swagger, djangorestframework-csv, djangorestframework-datatables, drf-extensions, edx-drf-extensions, rest-condition
 drf-extensions==0.3.1     # via -r requirements/base.txt (line 52)
 edx-auth-backends==3.0.2  # via -r requirements/base.txt (line 53)
 edx-django-release-util==0.3.6  # via -r requirements/base.txt (line 54)
 edx-django-sites-extensions==2.4.3  # via -r requirements/base.txt (line 55)
 edx-django-utils==3.0     # via -r requirements/base.txt (line 56), edx-drf-extensions
-edx-drf-extensions==2.4.6  # via -r requirements/base.txt (line 57), edx-rbac
+edx-drf-extensions==3.0.0  # via -r requirements/base.txt (line 57), edx-rbac
 edx-ecommerce-worker==0.7.2  # via -r requirements/base.txt (line 58)
 edx-opaque-keys==2.0.1    # via -r requirements/base.txt (line 59), edx-drf-extensions
 edx-rbac==1.1.0           # via -r requirements/base.txt (line 60)
@@ -133,7 +133,7 @@ rcssmin==1.0.6            # via -r requirements/base.txt (line 102), django-comp
 requests-oauthlib==1.3.0  # via -r requirements/base.txt (line 103), social-auth-core
 requests-toolbelt==0.9.1  # via -r requirements/base.txt (line 104), zeep
 requests==2.23.0          # via -r requirements/base.txt (line 105), analytics-python, coreapi, edx-drf-extensions, edx-rest-api-client, paypalrestsdk, pyjwkest, requests-oauthlib, requests-toolbelt, responses, sailthru-client, slumber, social-auth-core, stripe, zeep
-responses==0.10.9         # via -r requirements/test.in (line 25)
+responses==0.10.11        # via -r requirements/test.in (line 25)
 rest-condition==1.0.3     # via -r requirements/base.txt (line 106), edx-drf-extensions
 rjsmin==1.1.0             # via -r requirements/base.txt (line 107), django-compressor
 rules==2.2                # via -r requirements/base.txt (line 108)
@@ -149,7 +149,7 @@ sorl-thumbnail==12.4.1    # via -r requirements/base.txt (line 116), django-osca
 soupsieve==2.0            # via beautifulsoup4
 stevedore==1.32.0         # via -r requirements/base.txt (line 117), edx-opaque-keys
 stripe==1.70.0            # via -r requirements/base.txt (line 118)
-testfixtures==6.13.1      # via -r requirements/test.in (line 27)
+testfixtures==6.14.0      # via -r requirements/test.in (line 27)
 text-unidecode==1.3       # via -r requirements/base.txt (line 119), faker
 toml==0.10.0              # via -r requirements/tox.txt (line 14), tox
 tox-battery==0.5.2        # via -r requirements/tox.txt (line 15)
