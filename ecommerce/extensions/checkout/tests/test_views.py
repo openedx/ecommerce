@@ -582,7 +582,7 @@ class ReceiptResponseViewTests(DiscoveryMockMixin, LmsApiMockMixin, RefundTestMi
             value_text='test_bundle'
         )
         response = self._get_receipt_response(order.number)
-        expected_dashboard_url = self.site.siteconfiguration.build_lms_url('dashboard')
+        expected_dashboard_url = self.site.siteconfiguration.build_lms_url('dashboard/programs/test_bundle')
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.context_data['order_dashboard_url'], expected_dashboard_url)
