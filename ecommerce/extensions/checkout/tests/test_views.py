@@ -545,3 +545,47 @@ class ReceiptResponseViewTests(DiscoveryMockMixin, LmsApiMockMixin, RefundTestMi
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response_messages), 0)
+
+    @patch('ecommerce.extensions.checkout.views.fetch_enterprise_learner_data')
+    @httpretty.activate
+    def test_order_dashboard_url_points_to_enterprise_learner_portal(self, mock_learner_data):
+        """
+        The "Go to dashboard" link at the bottom of the receipt page should
+        point to the enterprise learner portal if the response from enterprise
+        shows the portal is configured
+        """
+        mock_learner_data.return_value = self.enterprise_learner_data_with_portal
+        order = self._create_order_for_receipt(self.user)
+        BasketAttribute.objects.update_or_create(
+            basket=order.basket,
+            attribute_type=BasketAttributeType.objects.get(name='bundle_identifier'),
+            value_text='test_bundle'
+        )
+        response = self._get_receipt_response(order.number)
+        expected_dashboard_url = \
+            "http://" + \
+            self.enterprise_learner_data_with_portal['results'][0]['enterprise_customer']['learner_portal_hostname']
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context_data['order_dashboard_url'], expected_dashboard_url)
+
+    @patch('ecommerce.extensions.checkout.views.fetch_enterprise_learner_data')
+    @httpretty.activate
+    def test_go_to_dashboard_points_to_lms_dashboard(self, mock_learner_data):
+        """
+        The "Go to dashboard" link at the bottom of the receipt page should
+        point to the lms dashboard if the response from enterprise
+        shows the portal is not configured
+        """
+        mock_learner_data.return_value = self.enterprise_learner_data_no_portal
+        order = self._create_order_for_receipt(self.user)
+        BasketAttribute.objects.update_or_create(
+            basket=order.basket,
+            attribute_type=BasketAttributeType.objects.get(name='bundle_identifier'),
+            value_text='test_bundle'
+        )
+        response = self._get_receipt_response(order.number)
+        expected_dashboard_url = self.site.siteconfiguration.build_lms_url('dashboard/programs/test_bundle')
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context_data['order_dashboard_url'], expected_dashboard_url)

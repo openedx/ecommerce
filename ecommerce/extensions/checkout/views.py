@@ -166,7 +166,9 @@ class ReceiptResponseView(ThankYouView):
                 'order_history_url': request.site.siteconfiguration.build_lms_url('account/settings'),
             }
             return self.render_to_response(context=context, status=404)
-        self.add_message_if_enterprise_user(request)
+        learner_portal_url = self.add_message_if_enterprise_user(request)
+        if learner_portal_url:
+            response.context_data['order_dashboard_url'] = learner_portal_url
         return response
 
     def get_context_data(self, **kwargs):  # pylint: disable=arguments-differ
@@ -280,13 +282,18 @@ class ReceiptResponseView(ThankYouView):
             enable_learner_portal = enterprise_customer['enable_learner_portal']
             learner_portal_hostname = enterprise_customer['learner_portal_hostname']
             if enable_learner_portal and learner_portal_hostname:
-                message = (
-                    'Your company, {enterprise_customer_name}, has a dedicated page where '
-                    'you can see all of your sponsored courses. '
-                    'Go to <a href="{scheme}://{hostname}">your learner portal</a>.'
-                ).format(
-                    enterprise_customer_name=enterprise_customer['name'],
+                learner_portal_url = '{scheme}://{hostname}'.format(
                     hostname=learner_portal_hostname,
                     scheme=request.scheme
                 )
+                message = (
+                    'Your company, {enterprise_customer_name}, has a dedicated page where '
+                    'you can see all of your sponsored courses. '
+                    'Go to <a href="{url}">your learner portal</a>.'
+                ).format(
+                    enterprise_customer_name=enterprise_customer['name'],
+                    url=learner_portal_url
+                )
                 messages.add_message(request, messages.INFO, message, extra_tags='safe')
+                return learner_portal_url
+        return None
