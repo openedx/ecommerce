@@ -560,7 +560,7 @@ class ReceiptResponseViewTests(DiscoveryMockMixin, LmsApiMockMixin, RefundTestMi
         )
         response = self._get_receipt_response(order.number)
         expected_dashboard_url = \
-            self.enterprise_learner_data_with_portal['results'][1]['enterprise_customer']['learner_portal_hostname']
+            self.enterprise_learner_data_with_portal['results'][0]['enterprise_customer']['learner_portal_hostname']
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.context_data['order_dashboard_url'], expected_dashboard_url)
