@@ -203,7 +203,7 @@ class ReceiptResponseViewTests(DiscoveryMockMixin, LmsApiMockMixin, RefundTestMi
                 'enterprise_customer': {
                     'name': 'Test Company',
                     'enable_learner_portal': True,
-                    'learner_portal_hostname': 'http://www.edx.org'
+                    'learner_portal_hostname': 'www.edx.org'
                 }
             }]
         }
@@ -560,6 +560,7 @@ class ReceiptResponseViewTests(DiscoveryMockMixin, LmsApiMockMixin, RefundTestMi
         )
         response = self._get_receipt_response(order.number)
         expected_dashboard_url = \
+            "http://" + \
             self.enterprise_learner_data_with_portal['results'][0]['enterprise_customer']['learner_portal_hostname']
 
         self.assertEqual(response.status_code, 200)
