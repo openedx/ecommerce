@@ -203,7 +203,7 @@ class ReceiptResponseViewTests(DiscoveryMockMixin, LmsApiMockMixin, RefundTestMi
                 'enterprise_customer': {
                     'name': 'Test Company',
                     'enable_learner_portal': True,
-                    'learner_portal_hostname': 'www.edx.org'
+                    'learner_portal_hostname': 'http://www.edx.org'
                 }
             }]
         }
