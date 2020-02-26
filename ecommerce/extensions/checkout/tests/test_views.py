@@ -545,7 +545,7 @@ class ReceiptResponseViewTests(DiscoveryMockMixin, LmsApiMockMixin, RefundTestMi
 
     @patch('ecommerce.extensions.checkout.views.fetch_enterprise_learner_data')
     @httpretty.activate
-    def test_go_to_dashboard_points_to_enterprise_learner_portal(self, mock_learner_data):
+    def test_order_dashboard_url_points_to_enterprise_learner_portal(self, mock_learner_data):
         """
         The "Go to dashboard" link at the bottom of the receipt page should
         point to the enterprise learner portal if the response from enterprise
