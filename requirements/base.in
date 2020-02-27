@@ -16,7 +16,7 @@ django-simple-history
 django-solo
 django-threadlocals
 django-waffle
-djangorestframework
+djangorestframework==3.9.4
 djangorestframework-csv
 djangorestframework-datatables
 djangorestframework-jwt
