@@ -487,9 +487,9 @@ class ReceiptResponseViewTests(DiscoveryMockMixin, LmsApiMockMixin, RefundTestMi
 
         expected_message = (
             'Your company, Test Company, has a dedicated page where you can see all of '
-            'your sponsored courses. Go to <a href="http://www.edx.org">'
+            'your sponsored courses. Go to <a href="http://{}/test-company">'
             'your learner portal</a>.'
-        )
+        ).format(settings.ENTERPRISE_LEARNER_PORTAL_HOSTNAME)
         actual_message = str(response_messages[0])
 
         self.assertEqual(response.status_code, 200)
@@ -564,7 +564,7 @@ class ReceiptResponseViewTests(DiscoveryMockMixin, LmsApiMockMixin, RefundTestMi
         response = self._get_receipt_response(order.number)
         expected_dashboard_url = \
             "http://" + \
-            self.enterprise_learner_data_with_portal['results'][0]['enterprise_customer']['learner_portal_hostname']
+            settings.ENTERPRISE_LEARNER_PORTAL_HOSTNAME
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.context_data['order_dashboard_url'], expected_dashboard_url)
