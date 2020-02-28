@@ -564,7 +564,8 @@ class ReceiptResponseViewTests(DiscoveryMockMixin, LmsApiMockMixin, RefundTestMi
         response = self._get_receipt_response(order.number)
         expected_dashboard_url = \
             "http://" + \
-            settings.ENTERPRISE_LEARNER_PORTAL_HOSTNAME
+            settings.ENTERPRISE_LEARNER_PORTAL_HOSTNAME + \
+            "/test-company"
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.context_data['order_dashboard_url'], expected_dashboard_url)
