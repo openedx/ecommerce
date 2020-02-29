@@ -48,7 +48,7 @@ module.exports = function(config) {
        'karma-requirejs',
        'karma-firefox-launcher',
        'karma-chrome-launcher',
-       'karma-coverage-allsources',
+       'karma-sabarivka-reporter',
        'karma-coverage',
        'karma-spec-reporter',
        'karma-selenium-webdriver-launcher',
@@ -71,7 +71,7 @@ module.exports = function(config) {
     // test results reporter to use
     // possible values: 'dots', 'progress'
     // available reporters: https://npmjs.org/browse/keyword/karma-reporter
-    reporters: ['spec', 'coverage-allsources', 'coverage'],
+    reporters: ['spec', 'sabarivka', 'coverage'],
 
     // web server port
     port: 9876,
