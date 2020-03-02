@@ -650,7 +650,7 @@ ENTERPRISE_SERVICE_URL = 'http://localhost:8000/enterprise/'
 # Cache enterprise response from Enterprise API.
 ENTERPRISE_API_CACHE_TIMEOUT = 300  # Value is in seconds
 
-ENTERPRISE_LEARNER_PORTAL_HOSTNAME = os.environ.get('ENTERPRISE_LEARNER_PORTAL_HOSTNAME', 'localhost:6734')
+ENTERPRISE_LEARNER_PORTAL_HOSTNAME = os.environ.get('ENTERPRISE_LEARNER_PORTAL_HOSTNAME', 'localhost:8734')
 
 # Name for waffle switch to use for enabling enterprise features on runtime.
 ENABLE_ENTERPRISE_ON_RUNTIME_SWITCH = 'enable_enterprise_on_runtime'
