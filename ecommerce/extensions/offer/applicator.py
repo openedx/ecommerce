@@ -18,6 +18,10 @@ class Applicator(OscarApplicator):
 
     This applicator uses logic to prefilter the offers, rather than blindly
     returning every offer, including ones that could never apply.
+
+    This extension Applicator will be used when you use the following:
+
+        Applicator = get_class('offer.applicator', 'Applicator')
     """
 
     def apply(self, basket, user=None, request=None, bundle_id=None):  # pylint: disable=arguments-differ
@@ -40,15 +44,14 @@ class Applicator(OscarApplicator):
         """
         Returns all offers to apply to the basket.
 
-        Does prefiltering to filter out offers that could never apply to a
-        particular basket. As an example, if the basket has a bundle,
-        i.e. a program, gets only the site offers associated with that specific bundle,
-        rather than all site offers. Otherwise, gets the site offers not associated
+        Does prefiltering to filter out offers that could never apply to a particular
+        basket. As an example, if the basket has a bundle ID or an enterprise customer
+        UUID, gets only the site offers associated with that specific bundle or enterprise
+        customer, rather than all site offers. Otherwise, gets the site offers not associated
         with a bundle.
 
         Returns:
-            list of Offer: A sorted list of all the offers that apply to the
-                basket.
+            list of Offer: A sorted list of all the offers that apply to the basket.
         """
         program_offers = self._get_program_offers(basket, bundle_id)
         enterprise_offers = self._get_enterprise_offers(basket.site, user)
