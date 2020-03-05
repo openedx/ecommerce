@@ -35,13 +35,14 @@ class EnterpriseOfferForm(forms.ModelForm):
     prepaid_invoice_amount = forms.DecimalField(
         required=False, decimal_places=5, max_digits=15, min_value=0, label=_('Prepaid Invoice Amount')
     )
+    sales_force_id = forms.CharField(max_length=30, required=False, label=_('Salesforce Opportunity ID'))
 
     class Meta:
         model = ConditionalOffer
         fields = [
             'enterprise_customer_uuid', 'enterprise_customer_catalog_uuid', 'start_datetime',
             'end_datetime', 'benefit_type', 'benefit_value', 'contract_discount_type',
-            'contract_discount_value', 'prepaid_invoice_amount',
+            'contract_discount_value', 'prepaid_invoice_amount', 'sales_force_id'
         ]
         help_texts = {
             'end_datetime': '',
@@ -155,6 +156,7 @@ class EnterpriseOfferForm(forms.ModelForm):
     def save(self, commit=True):
         enterprise_customer_uuid = self.cleaned_data['enterprise_customer_uuid']
         enterprise_customer_catalog_uuid = self.cleaned_data['enterprise_customer_catalog_uuid']
+        sales_force_id = self.cleaned_data['sales_force_id']
         site = self.request.site
 
         contract_discount_value = self.cleaned_data['contract_discount_value']
@@ -181,6 +183,7 @@ class EnterpriseOfferForm(forms.ModelForm):
         self.instance.max_basket_applications = 1
         self.instance.partner = site.siteconfiguration.partner
         self.instance.priority = OFFER_PRIORITY_ENTERPRISE
+        self.instance.sales_force_id = sales_force_id
 
         if commit:
             ecm = self.instance.enterprise_contract_metadata

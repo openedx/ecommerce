@@ -82,6 +82,7 @@ class CouponViewSetTest(CouponMixin, DiscoveryTestMixin, TestCase):
             'course_seat_types': None,
             'email_domains': None,
             'program_uuid': None,
+            'sales_force_id': None,
         }
 
     def test_clean_voucher_request_data(self):
@@ -100,6 +101,7 @@ class CouponViewSetTest(CouponMixin, DiscoveryTestMixin, TestCase):
             'category': {'name': self.category.name},
             'max_uses': 1,
             'notify_email': 'batman@gotham.comics',
+            'sales_force_id': 'salesforceid123',
         })
         view = CouponViewSet()
         cleaned_voucher_data = view.clean_voucher_request_data(self.coupon_data, self.site.siteconfiguration.partner)
@@ -131,6 +133,7 @@ class CouponViewSetTest(CouponMixin, DiscoveryTestMixin, TestCase):
             'notify_email',
             'contract_discount_type',
             'contract_discount_value',
+            'sales_force_id',
         ]
         self.assertEqual(sorted(expected_cleaned_voucher_data_keys), sorted(cleaned_voucher_data.keys()))
 
@@ -636,6 +639,18 @@ class CouponViewSetFunctionalTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
 
         new_coupon = Product.objects.get(id=self.coupon.id)
         self.assertEqual(new_coupon.attr.note, note)
+
+    def test_update_sales_force_id(self):
+        path = reverse('api:v2:coupons-detail', kwargs={'pk': self.coupon.id})
+        sales_force_id = 'otherSalesForceID123'
+        data = {
+            'id': self.coupon.id,
+            'sales_force_id': sales_force_id
+        }
+        self.get_response('PUT', path, data)
+
+        new_coupon = Product.objects.get(id=self.coupon.id)
+        self.assertEqual(new_coupon.attr.sales_force_id, sales_force_id)
 
     def test_update_dynamic_range_values(self):
         """ Verify dynamic range values are updated in case range has no catalog. """

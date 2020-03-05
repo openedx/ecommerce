@@ -19,8 +19,8 @@ ProductClass = get_model('catalogue', 'ProductClass')
 class ProductTests(CouponMixin, DiscoveryTestMixin, TestCase):
     COUPON_PRODUCT_TITLE = 'Some test title.'
 
-    def _create_coupon_product_with_attributes(self, note='note', notify_email=None):
-        """Helper method that creates a coupon product with note and notify_email attributes."""
+    def _create_coupon_product_with_attributes(self, note='note', notify_email=None, sales_force_id=None):
+        """Helper method that creates a coupon product with note, notify_email and sales_force_id attributes."""
         coupon_product = factories.ProductFactory(
             title=self.COUPON_PRODUCT_TITLE,
             product_class=self.coupon_product_class,
@@ -33,6 +33,8 @@ class ProductTests(CouponMixin, DiscoveryTestMixin, TestCase):
         coupon_product.attr.note = note
         if notify_email:
             coupon_product.attr.notify_email = notify_email
+        if sales_force_id:
+            coupon_product.attr.sales_force_id = sales_force_id
         coupon_product.save()
         return coupon_product
 
@@ -79,6 +81,12 @@ class ProductTests(CouponMixin, DiscoveryTestMixin, TestCase):
         note = 'Some test note.'
         coupon = self._create_coupon_product_with_attributes(note)
         self.assertEqual(coupon.attr.note, note)
+
+    def test_create_product_with_sales_force_id(self):
+        """Verify creating a product with sales_force_id."""
+        sales_force_id = 'salesforceid123'
+        coupon = self._create_coupon_product_with_attributes(sales_force_id=sales_force_id)
+        self.assertEqual(coupon.attr.sales_force_id, sales_force_id)
 
     @ddt.data(1, {'some': 'dict'}, ['array'])
     def test_incorrect_note_value_raises_exception(self, note):
