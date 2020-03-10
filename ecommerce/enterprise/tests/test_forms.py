@@ -106,19 +106,19 @@ class EnterpriseOfferFormTests(EnterpriseServiceMockMixin, TestCase):
         contract discount type and value fields.
         """
         enterprise_offer = factories.EnterpriseOfferFactory()
-        form = EnterpriseOfferForm(instance=enterprise_offer, is_editing=False)
+        form = EnterpriseOfferForm(instance=enterprise_offer)
         self.assertTrue(form['contract_discount_type'].field.required)
         self.assertTrue(form['contract_discount_value'].field.required)
 
-    def test_contract_metadata_not_required_on_edit(self):
+    def test_contract_metadata_required_on_edit(self):
         """
-        Contract metadata should NOT be required on edit, specifically the
+        Contract metadata should be required on edit, specifically the
         contract discount type and value fields.
         """
         enterprise_offer = factories.EnterpriseOfferFactory()
-        form = EnterpriseOfferForm(instance=enterprise_offer, is_editing=True)
-        self.assertFalse(form['contract_discount_type'].field.required)
-        self.assertFalse(form['contract_discount_value'].field.required)
+        form = EnterpriseOfferForm(instance=enterprise_offer)
+        self.assertTrue(form['contract_discount_type'].field.required)
+        self.assertTrue(form['contract_discount_value'].field.required)
 
     def test_clean_percentage(self):
         """ If a percentage benefit type is specified, the benefit value must never be greater than 100. """
