@@ -476,12 +476,14 @@ class ManualCourseEnrollmentOrderViewSetTests(TestCase):
                     "email": "ma@example.com",
                     "course_run_key": self.course.id,
                     "discount_percentage": 50.0,
+                    "sales_force_id": "dummy-sales_force_id",
                 },
                 {
                     "lms_user_id": 12,
                     "username": "ma2",
                     "email": "ma2@example.com",
                     "discount_percentage": 0.0,
+                    "sales_force_id": "",
                     "course_run_key": self.course.id,
                     "enterprise_customer_name": "an-enterprise-customer",
                     "enterprise_customer_uuid": "394a5ce5-6ff4-4b2b-bea1-a273c6920ae1",
@@ -492,6 +494,7 @@ class ManualCourseEnrollmentOrderViewSetTests(TestCase):
                     "email": "ma3@example.com",
                     "course_run_key": self.course.id,
                     "discount_percentage": 100.0,
+                    "sales_force_id": None,
                     "enterprise_customer_name": "an-enterprise-customer",
                     "enterprise_customer_uuid": "394a5ce5-6ff4-4b2b-bea1-a273c6920ae1",
                 },
@@ -560,6 +563,7 @@ class ManualCourseEnrollmentOrderViewSetTests(TestCase):
             # verify line has the correct 'effective_contract_discount_percentage' and
             # line_effective_contract_discounted_price values
             discount_percentage = expected_enrollment.get('discount_percentage')
+            sales_force_id = expected_enrollment.get('sales_force_id')
             if discount_percentage is None:
                 self.assertEqual(line.effective_contract_discount_percentage, None)
                 self.assertEqual(line.effective_contract_discounted_price, None)
@@ -576,7 +580,10 @@ class ManualCourseEnrollmentOrderViewSetTests(TestCase):
             self.assertEqual(product.course_id, self.course.id)
 
             # verify condition
-            condition = order.discounts.first().offer.condition
+            offer = order.discounts.first().offer
+            condition = offer.condition
+            if sales_force_id:
+                self.assertEqual(offer.sales_force_id, sales_force_id)
             self.assertEqual(condition.enterprise_customer_name, expected_enrollment.get('enterprise_customer_name'))
             self.assertEqual(
                 str(condition.enterprise_customer_uuid),
