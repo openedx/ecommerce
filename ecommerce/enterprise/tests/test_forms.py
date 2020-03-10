@@ -37,6 +37,7 @@ class EnterpriseOfferFormTests(EnterpriseServiceMockMixin, TestCase):
             'contract_discount_type': self.contract_discount_type,
             'contract_discount_value': self.contract_discount_value,
             'prepaid_invoice_amount': self.prepaid_invoice_amount,
+            'sales_force_id': 'salesforceid123'
         }
         data.update(**kwargs)
         return data
@@ -44,10 +45,12 @@ class EnterpriseOfferFormTests(EnterpriseServiceMockMixin, TestCase):
     def assert_enterprise_offer_conditions(self, offer, enterprise_customer_uuid, enterprise_customer_name,
                                            enterprise_customer_catalog_uuid, expected_benefit_value,
                                            expected_benefit_type, expected_name, expected_contract_discount_type,
-                                           expected_contract_discount_value, expected_prepaid_invoice_amount):
+                                           expected_contract_discount_value, expected_prepaid_invoice_amount,
+                                           expected_sales_force_id):
         """ Assert the given offer's parameters match the expected values. """
         self.assertEqual(str(offer.name), expected_name)
         self.assertEqual(offer.offer_type, ConditionalOffer.SITE)
+        self.assertEqual(offer.sales_force_id, expected_sales_force_id)
         self.assertEqual(offer.status, ConditionalOffer.OPEN)
         self.assertEqual(offer.max_basket_applications, 1)
         self.assertEqual(offer.partner, self.partner)
@@ -225,6 +228,7 @@ class EnterpriseOfferFormTests(EnterpriseServiceMockMixin, TestCase):
             data['contract_discount_type'],
             data['contract_discount_value'],
             data['prepaid_invoice_amount'],
+            data['sales_force_id'],
         )
 
     @httpretty.activate
@@ -252,6 +256,7 @@ class EnterpriseOfferFormTests(EnterpriseServiceMockMixin, TestCase):
             data['contract_discount_type'],
             data['contract_discount_value'],
             data['prepaid_invoice_amount'],
+            data['sales_force_id'],
         )
 
     @httpretty.activate
@@ -289,6 +294,7 @@ class EnterpriseOfferFormTests(EnterpriseServiceMockMixin, TestCase):
             data['contract_discount_type'],
             data['contract_discount_value'],
             data['prepaid_invoice_amount'],
+            data['sales_force_id'],
         )
 
     @httpretty.activate
@@ -326,6 +332,7 @@ class EnterpriseOfferFormTests(EnterpriseServiceMockMixin, TestCase):
             data['contract_discount_type'],
             data['contract_discount_value'],
             data['prepaid_invoice_amount'],
+            data['sales_force_id'],
         )
 
     def test_create_when_conditional_offer_with_uuid_exists(self):

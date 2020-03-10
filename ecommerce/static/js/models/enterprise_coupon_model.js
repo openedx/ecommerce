@@ -32,7 +32,8 @@ define([
                 enterprise_catalog_url: '/api/v2/enterprise/customer_catalogs/',
                 contract_discount_type: 'Percentage',
                 contract_discount_value: null,
-                prepaid_invoice_amount: null
+                prepaid_invoice_amount: null,
+                sales_force_id: null
             },
 
             couponValidation: {
@@ -40,6 +41,9 @@ define([
                 enterprise_customer_catalog: {required: true},
                 notify_email: {
                     pattern: 'email',
+                    required: false
+                },
+                sales_force_id: {
                     required: false
                 },
                 contract_discount_value: {
