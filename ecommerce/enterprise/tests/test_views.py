@@ -108,6 +108,9 @@ class EnterpriseOfferUpdateViewTests(EnterpriseServiceMockMixin, ViewTestMixin, 
             'enterprise_customer_catalog_uuid': self.enterprise_offer.condition.enterprise_customer_catalog_uuid,
             'benefit_type': self.enterprise_offer.benefit.proxy().benefit_class_type,
             'benefit_value': self.enterprise_offer.benefit.value,
+            'contract_discount_type': 'Absolute',
+            'contract_discount_value': 200,
+            'prepaid_invoice_amount': 2000,
         }
         response = self.client.post(self.path, data, follow=False)
         self.assertRedirects(response, self.path)

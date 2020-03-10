@@ -27,10 +27,10 @@ class EnterpriseOfferForm(forms.ModelForm):
         required=True, decimal_places=2, max_digits=12, min_value=0, label=_('Discount Value')
     )
     contract_discount_type = forms.ChoiceField(
-        required=False, choices=EnterpriseContractMetadata.DISCOUNT_TYPE_CHOICES, label=_('Contract Discount Type')
+        required=True, choices=EnterpriseContractMetadata.DISCOUNT_TYPE_CHOICES, label=_('Contract Discount Type')
     )
     contract_discount_value = forms.DecimalField(
-        required=False, decimal_places=5, max_digits=15, min_value=0, label=_('Contract Discount')
+        required=True, decimal_places=5, max_digits=15, min_value=0, label=_('Contract Discount')
     )
     prepaid_invoice_amount = forms.DecimalField(
         required=False, decimal_places=5, max_digits=15, min_value=0, label=_('Prepaid Invoice Amount')
@@ -77,7 +77,7 @@ class EnterpriseOfferForm(forms.ModelForm):
         return (contract_discount_type, contract_discount_value, prepaid_invoice_amount)
 
     def __init__(self, data=None, files=None, auto_id='id_%s', prefix=None, initial=None, error_class=ErrorList,
-                 label_suffix=None, empty_permitted=False, instance=None, request=None, is_editing=None):
+                 label_suffix=None, empty_permitted=False, instance=None, request=None):
         initial = initial or {}
         self.request = request
         if instance:
@@ -99,10 +99,6 @@ class EnterpriseOfferForm(forms.ModelForm):
         date_ui_class = {'class': 'add-pikaday'}
         self.fields['start_datetime'].widget.attrs.update(date_ui_class)
         self.fields['end_datetime'].widget.attrs.update(date_ui_class)
-
-        if not is_editing:
-            self.fields['contract_discount_type'].required = True
-            self.fields['contract_discount_value'].required = True
 
     def clean(self):
         cleaned_data = super(EnterpriseOfferForm, self).clean()
@@ -135,21 +131,20 @@ class EnterpriseOfferForm(forms.ModelForm):
         if start_datetime and end_datetime and start_datetime > end_datetime:
             self.add_error('start_datetime', _('The start date must occur before the end date.'))
 
-        if contract_discount_value is not None:
-            if contract_discount_type == EnterpriseContractMetadata.PERCENTAGE and contract_discount_value > 100:
-                self.add_error('contract_discount_value', _('Percentage discounts cannot be greater than 100%.'))
-            elif contract_discount_type == EnterpriseContractMetadata.FIXED:
-                __, ___, after_decimal = str(contract_discount_value).partition('.')
-                if len(after_decimal) > 2:
-                    self.add_error('contract_discount_value', _(
-                        'More than 2 digits after the decimal '
-                        'not allowed for absolute value.'
-                    ))
-                if prepaid_invoice_amount is None:
-                    self.add_error('prepaid_invoice_amount', _(
-                        'This field is required when contract '
-                        'discount type is absolute.'
-                    ))
+        if contract_discount_type == EnterpriseContractMetadata.PERCENTAGE and contract_discount_value > 100:
+            self.add_error('contract_discount_value', _('Percentage discounts cannot be greater than 100%.'))
+        elif contract_discount_type == EnterpriseContractMetadata.FIXED:
+            __, ___, after_decimal = str(contract_discount_value).partition('.')
+            if len(after_decimal) > 2:
+                self.add_error('contract_discount_value', _(
+                    'More than 2 digits after the decimal '
+                    'not allowed for absolute value.'
+                ))
+            if prepaid_invoice_amount is None:
+                self.add_error('prepaid_invoice_amount', _(
+                    'This field is required when contract '
+                    'discount type is absolute.'
+                ))
 
         return cleaned_data
 
