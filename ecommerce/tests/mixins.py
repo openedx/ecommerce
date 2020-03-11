@@ -87,7 +87,9 @@ class UserMixin:
         payload = {
             'username': user.username,
             'email': user.email,
-            'iss': settings.JWT_AUTH['JWT_ISSUERS'][0]['ISSUER']
+            'iss': settings.JWT_AUTH['JWT_ISSUERS'][0]['ISSUER'],
+            'exp': datetime.datetime.now(),
+            'iat': datetime.datetime.now(),
         }
         return "JWT {token}".format(token=jwt.encode(payload, secret).decode('utf-8'))
 
@@ -187,7 +189,6 @@ class BasketCreationMixin(UserMixin, JwtMixin):
                 data=json.dumps(request_data),
                 content_type=CONTENT_TYPE
             )
-
         return response
 
     def assert_successful_basket_creation(
