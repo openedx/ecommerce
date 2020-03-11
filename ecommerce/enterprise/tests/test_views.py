@@ -108,6 +108,9 @@ class EnterpriseOfferUpdateViewTests(EnterpriseServiceMockMixin, ViewTestMixin, 
             'enterprise_customer_catalog_uuid': self.enterprise_offer.condition.enterprise_customer_catalog_uuid,
             'benefit_type': self.enterprise_offer.benefit.proxy().benefit_class_type,
             'benefit_value': self.enterprise_offer.benefit.value,
+            'contract_discount_type': 'Absolute',
+            'contract_discount_value': 200,
+            'prepaid_invoice_amount': 2000,
         }
         response = self.client.post(self.path, data, follow=False)
         self.assertRedirects(response, self.path)
@@ -127,6 +130,7 @@ class EnterpriseOfferCreateViewTests(EnterpriseServiceMockMixin, ViewTestMixin, 
         expected_discount_value = 2000
         expected_discount_type = 'Absolute'
         expected_prepaid_invoice_amount = 12345
+        sales_force_id = 'salesforceid123'
         data = {
             'enterprise_customer_uuid': expected_ec_uuid,
             'enterprise_customer_catalog_uuid': expected_ec_catalog_uuid,
@@ -135,6 +139,7 @@ class EnterpriseOfferCreateViewTests(EnterpriseServiceMockMixin, ViewTestMixin, 
             'contract_discount_value': expected_discount_value,
             'contract_discount_type': expected_discount_type,
             'prepaid_invoice_amount': expected_prepaid_invoice_amount,
+            'sales_force_id': sales_force_id,
         }
 
         existing_offer_ids = list(ConditionalOffer.objects.all().values_list('id', flat=True))
@@ -145,6 +150,7 @@ class EnterpriseOfferCreateViewTests(EnterpriseServiceMockMixin, ViewTestMixin, 
         self.assertRedirects(response, reverse('enterprise:offers:edit', kwargs={'pk': enterprise_offer.pk}))
         self.assertIsNone(enterprise_offer.start_datetime)
         self.assertIsNone(enterprise_offer.end_datetime)
+        self.assertEqual(enterprise_offer.sales_force_id, sales_force_id)
         self.assertEqual(enterprise_offer.condition.enterprise_customer_uuid, expected_ec_uuid)
         self.assertEqual(enterprise_offer.condition.enterprise_customer_catalog_uuid, expected_ec_catalog_uuid)
         self.assertEqual(enterprise_offer.benefit.type, '')

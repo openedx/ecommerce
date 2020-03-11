@@ -43,7 +43,8 @@ def create_coupon_product(
         voucher_type,
         course_catalog,
         program_uuid,
-        site
+        site,
+        sales_force_id
 ):
     """
     Creates a coupon product and a stock record for it.
@@ -71,6 +72,7 @@ def create_coupon_product(
         voucher_type (str): Voucher type
         program_uuid (str): Program UUID for the Coupon
         site (site): Site for which the Coupon is created.
+        sales_force_id (str): Sales Force Opprtunity ID
 
     Returns:
         A coupon Product object.
@@ -110,7 +112,8 @@ def create_coupon_product(
         logger.exception('Failed to create vouchers for [%s] coupon.', coupon_product.title)
         raise
 
-    attach_vouchers_to_coupon_product(coupon_product, vouchers, note, enterprise_id=enterprise_customer)
+    attach_vouchers_to_coupon_product(coupon_product, vouchers, note, enterprise_id=enterprise_customer,
+                                      sales_force_id=sales_force_id)
 
     return coupon_product
 
@@ -157,13 +160,16 @@ def attach_or_update_contract_metadata_on_coupon(coupon, **update_kwargs):
     coupon.save()
 
 
-def attach_vouchers_to_coupon_product(coupon_product, vouchers, note, notify_email=None, enterprise_id=None):
+def attach_vouchers_to_coupon_product(coupon_product, vouchers, note, notify_email=None, enterprise_id=None,
+                                      sales_force_id=None):
     coupon_vouchers, __ = CouponVouchers.objects.get_or_create(coupon=coupon_product)
     coupon_vouchers.vouchers.add(*vouchers)
     coupon_product.attr.coupon_vouchers = coupon_vouchers
     coupon_product.attr.note = note
     if notify_email:
         coupon_product.attr.notify_email = notify_email
+    if sales_force_id:
+        coupon_product.attr.sales_force_id = sales_force_id
     if enterprise_id:
         coupon_product.attr.enterprise_customer_uuid = enterprise_id
     coupon_product.save()

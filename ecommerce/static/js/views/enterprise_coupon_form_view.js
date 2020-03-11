@@ -128,6 +128,12 @@ define([
                         }
                         return val;
                     }
+                },
+                'input[name=sales_force_id]': {
+                    observe: 'sales_force_id',
+                    onSet: function(val) {
+                        return val === '' ? null : val;
+                    }
                 }
             },
 
@@ -245,7 +251,8 @@ define([
                     'email_domains',
                     'contract_discount_value',
                     'contract_discount_type',
-                    'prepaid_invoice_amount'
+                    'prepaid_invoice_amount',
+                    'sales_force_id'
                 ];
             },
 

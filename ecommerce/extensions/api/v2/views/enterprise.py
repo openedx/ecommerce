@@ -240,7 +240,8 @@ class EnterpriseCouponViewSet(CouponViewSet):
             vouchers,
             cleaned_voucher_data['note'],
             cleaned_voucher_data.get('notify_email'),
-            cleaned_voucher_data['enterprise_customer']
+            cleaned_voucher_data['enterprise_customer'],
+            cleaned_voucher_data['sales_force_id']
         )
         attach_or_update_contract_metadata_on_coupon(
             coupon_product,

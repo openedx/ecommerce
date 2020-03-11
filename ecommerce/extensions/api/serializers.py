@@ -1054,6 +1054,7 @@ class CouponSerializer(CouponMixin, ProductPaymentInfoMixin, serializers.ModelSe
     contract_discount_value = serializers.SerializerMethodField()
     contract_discount_type = serializers.SerializerMethodField()
     prepaid_invoice_amount = serializers.SerializerMethodField()
+    sales_force_id = serializers.SerializerMethodField()
 
     def get_prepaid_invoice_amount(self, obj):
         try:
@@ -1173,6 +1174,13 @@ class CouponSerializer(CouponMixin, ProductPaymentInfoMixin, serializers.ModelSe
         except AttributeError:
             return None
 
+    def get_sales_force_id(self, obj):
+        """ Get the Sales Force Opportunity ID attached to the coupon. """
+        try:
+            return obj.attr.sales_force_id
+        except AttributeError:
+            return None
+
     def get_num_uses(self, obj):
         offer = retrieve_offer(obj)
         return offer.num_applications
@@ -1220,7 +1228,7 @@ class CouponSerializer(CouponMixin, ProductPaymentInfoMixin, serializers.ModelSe
             'email_domains', 'end_date', 'enterprise_customer', 'enterprise_customer_catalog',
             'id', 'inactive', 'last_edited', 'max_uses', 'note', 'notify_email', 'num_uses', 'payment_information',
             'program_uuid', 'price', 'quantity', 'seats', 'start_date', 'title', 'voucher_type',
-            'contract_discount_value', 'contract_discount_type', 'prepaid_invoice_amount',
+            'contract_discount_value', 'contract_discount_type', 'prepaid_invoice_amount', 'sales_force_id'
         )
 
 
