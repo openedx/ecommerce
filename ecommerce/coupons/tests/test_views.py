@@ -19,7 +19,7 @@ from factory.fuzzy import FuzzyText
 from oscar.core.loading import get_class, get_model
 from oscar.test.factories import OrderFactory, OrderLineFactory, ProductFactory, RangeFactory, VoucherFactory
 
-from ecommerce.core.url_utils import get_lms_url
+from ecommerce.core.url_utils import get_lms_url, get_lms_courseware_url
 from ecommerce.coupons.tests.mixins import CouponMixin, DiscoveryMockMixin
 from ecommerce.coupons.views import voucher_is_valid
 from ecommerce.enterprise.tests.mixins import EnterpriseServiceMockMixin
@@ -644,10 +644,7 @@ class CouponRedeemViewTests(CouponMixin, DiscoveryTestMixin, LmsApiMockMixin, En
     @httpretty.activate
     def test_enterprise_customer_successful_redemption(self):
         """ Verify the view redirects to LMS when valid consent is provided. """
-        code, _ = self.prepare_enterprise_data(
-            enterprise_customer_catalog=ENTERPRISE_CUSTOMER_CATALOG,
-            benefit_value=50
-        )
+        code, _ = self.prepare_enterprise_data(enterprise_customer_catalog=ENTERPRISE_CUSTOMER_CATALOG)
         self.mock_assignable_enterprise_condition_calls(ENTERPRISE_CUSTOMER_CATALOG)
         self.mock_enterprise_learner_api_for_learner_with_no_enterprise()
         self.mock_enterprise_learner_post_api()
@@ -658,10 +655,10 @@ class CouponRedeemViewTests(CouponMixin, DiscoveryTestMixin, LmsApiMockMixin, En
             ENTERPRISE_CUSTOMER
         )
 
-        self.assert_redirects_to_receipt_page(
-            code=code,
-            consent_token=consent_token
-        )
+        response = self.redeem_coupon(code=code, consent_token=consent_token)
+        courseware_url = get_lms_courseware_url(self.course.id)
+        self.assertRedirects(response, courseware_url, status_code=302, fetch_redirect_response=False)
+
         last_request = httpretty.last_request()
         self.assertEqual(last_request.path, '/api/enrollment/v1/enrollment')
         self.assertEqual(last_request.method, 'POST')
