@@ -19,7 +19,7 @@ from factory.fuzzy import FuzzyText
 from oscar.core.loading import get_class, get_model
 from oscar.test.factories import OrderFactory, OrderLineFactory, ProductFactory, RangeFactory, VoucherFactory
 
-from ecommerce.core.url_utils import get_lms_url, get_lms_courseware_url
+from ecommerce.core.url_utils import get_lms_courseware_url, get_lms_url
 from ecommerce.coupons.tests.mixins import CouponMixin, DiscoveryMockMixin
 from ecommerce.coupons.views import voucher_is_valid
 from ecommerce.enterprise.tests.mixins import EnterpriseServiceMockMixin

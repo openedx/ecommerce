@@ -266,14 +266,13 @@ class CouponRedeemView(EdxOrderPlacementMixin, APIView):
                     course_run_id = order.lines.all()[:1].get().product.course.id
                     url = get_lms_courseware_url(course_run_id)
                     return HttpResponseRedirect(url)
-                else:
-                    return HttpResponseRedirect(
-                        get_receipt_page_url(
-                            site_configuration,
-                            order.number,
-                            disable_back_button=True,
-                        ),
-                    )
+                return HttpResponseRedirect(
+                    get_receipt_page_url(
+                        site_configuration,
+                        order.number,
+                        disable_back_button=True,
+                    ),
+                )
             except:  # pylint: disable=bare-except
                 logger.exception('Failed to create a free order for basket [%d]', basket.id)
                 return absolute_redirect(self.request, 'checkout:error')
