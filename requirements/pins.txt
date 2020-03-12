@@ -7,5 +7,3 @@ jsonfield2<=3.0.3
 
 # Was causing some tox issues locally.
 virtualenv==16.7.9
-# Upgrading edx-drf-extensions major versions in separate PRs.
-edx-drf-extensions<4.0.0
