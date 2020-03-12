@@ -646,7 +646,7 @@ class CouponRedeemViewTests(CouponMixin, DiscoveryTestMixin, LmsApiMockMixin, En
         """ Verify the view redirects to LMS when valid consent is provided. """
         code, _ = self.prepare_enterprise_data(
             enterprise_customer_catalog=ENTERPRISE_CUSTOMER_CATALOG,
-            contract_discount_value=50
+            benefit_value=50
         )
         self.mock_assignable_enterprise_condition_calls(ENTERPRISE_CUSTOMER_CATALOG)
         self.mock_enterprise_learner_api_for_learner_with_no_enterprise()
