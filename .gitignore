@@ -93,6 +93,7 @@ docs/_build
 
 # Visual Studio Code
 .vscode
+test
 
 # Certificates
 *.cer
