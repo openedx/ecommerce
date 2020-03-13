@@ -263,7 +263,7 @@ class CouponRedeemView(EdxOrderPlacementMixin, APIView):
             try:
                 order = self.place_free_order(basket)
                 if enterprise_customer:
-                    course_run_id = order.lines.all()[:1].get().product.course.id
+                    course_run_id = order.lines.first().product.course.id
                     url = get_lms_courseware_url(course_run_id)
                     return HttpResponseRedirect(url)
                 return HttpResponseRedirect(
