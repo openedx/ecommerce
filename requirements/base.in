@@ -16,10 +16,9 @@ django-simple-history
 django-solo
 django-threadlocals
 django-waffle
-djangorestframework==3.6.4
+djangorestframework
 djangorestframework-csv
 djangorestframework-datatables
-djangorestframework-jwt
 drf-extensions==0.3.1
 edx-auth-backends
 edx-django-release-util

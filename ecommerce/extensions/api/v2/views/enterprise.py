@@ -8,11 +8,12 @@ from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.db.models import Q
 from django.http import Http404
 from django.shortcuts import get_object_or_404
+from django_filters.rest_framework import DjangoFilterBackend
 from edx_rbac.decorators import permission_required
 from oscar.core.loading import get_model
 from requests.exceptions import ConnectionError as ReqConnectionError
 from requests.exceptions import Timeout
-from rest_framework import filters, generics, serializers, status
+from rest_framework import generics, serializers, status
 from rest_framework.decorators import detail_route, list_route
 from rest_framework.exceptions import ValidationError as DRFValidationError
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
@@ -729,7 +730,7 @@ class OfferAssignmentEmailTemplatesViewSet(ModelViewSet):
     """
     serializer_class = OfferAssignmentEmailTemplatesSerializer
     permission_classes = (IsAuthenticated,)
-    filter_backends = (filters.DjangoFilterBackend,)
+    filter_backends = (DjangoFilterBackend,)
     filterset_fields = ('email_type', 'active')
 
     http_method_names = ['get', 'head', 'options', 'post']

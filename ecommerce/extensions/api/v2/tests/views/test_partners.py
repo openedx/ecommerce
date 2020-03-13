@@ -61,19 +61,3 @@ class PartnerViewTest(TestCase):
         url = reverse('api:v2:partner-list')
         response = self.client.get(url)
         self.assertEqual(response.status_code, 403)
-
-    def test_no_partner(self):
-        """Verify the endpoint returns an empty list of partners, if no
-        partners exist.
-        """
-        Partner.objects.all().delete()
-        url = reverse('api:v2:partner-list')
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, 200)
-        expected = {
-            'count': 0,
-            'next': None,
-            'previous': None,
-            'results': []
-        }
-        self.assertDictEqual(response.json(), expected)

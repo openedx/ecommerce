@@ -306,7 +306,7 @@ DJANGO_APPS = [
     # edx-drf-extensions
     'csrf.apps.CsrfAppConfig',  # Enables frontend apps to retrieve CSRF tokens.
     'rules.apps.AutodiscoverRulesConfig',
-    'xss_utils'
+    'xss_utils',
 ]
 
 # Apps specific to this project go here.
@@ -453,6 +453,7 @@ JWT_AUTH = {
     'JWT_PUBLIC_SIGNING_JWK_SET': None,
     'JWT_AUTH_COOKIE_HEADER_PAYLOAD': 'edx-jwt-cookie-header-payload',
     'JWT_AUTH_COOKIE_SIGNATURE': 'edx-jwt-cookie-signature',
+    'JWT_AUTH_HEADER_PREFIX': 'JWT',
 }
 
 # Service user for worker processes.
