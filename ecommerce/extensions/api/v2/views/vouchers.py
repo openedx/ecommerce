@@ -13,7 +13,7 @@ from opaque_keys.edx.keys import CourseKey
 from oscar.core.loading import get_model
 from requests.exceptions import ConnectionError as ReqConnectionError
 from requests.exceptions import Timeout
-from rest_framework import filters, status
+from rest_framework import status
 from rest_framework.decorators import list_route
 from rest_framework.response import Response
 from six.moves.urllib.parse import urlparse
@@ -51,7 +51,7 @@ class VoucherViewSet(NonDestroyableModelViewSet):
     """ View set for vouchers. """
     serializer_class = serializers.VoucherSerializer
     permission_classes = (IsOffersOrIsAuthenticatedAndStaff,)
-    filter_backends = (filters.DjangoFilterBackend,)
+    filter_backends = (django_filters.rest_framework.DjangoFilterBackend,)
     filterset_class = VoucherFilter
 
     def get_queryset(self):
