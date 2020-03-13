@@ -124,7 +124,7 @@ pyparsing==2.4.6          # via -r requirements/tox.txt, packaging
 pytest-cov==2.8.1         # via -r requirements/test.in
 pytest-django-ordering==1.2.0  # via -r requirements/test.in
 pytest-django==3.8.0      # via -r requirements/test.in, pytest-django-ordering
-pytest==5.3.5             # via -r requirements/test.in, pytest-cov, pytest-django, pytest-django-ordering
+pytest==5.4.0             # via -r requirements/test.in, pytest-cov, pytest-django, pytest-django-ordering
 python-dateutil==2.8.1    # via -r requirements/base.txt, analytics-python, edx-drf-extensions, faker, freezegun
 python3-openid==3.1.0 ; python_version >= "3"  # via -r requirements/base.txt, social-auth-core
 pytz==2016.10             # via -c requirements/pins.txt, -r requirements/base.txt, babel, celery, django, zeep
