@@ -1,6 +1,5 @@
 from __future__ import absolute_import, unicode_literals
 
-import datetime
 import json
 
 import jwt
@@ -80,9 +79,7 @@ class CourseViewSetTests(ProductSerializerMixin, DiscoveryTestMixin, TestCase):
             'administrator': True,
             'username': username,
             'email': email,
-            'iss': settings.JWT_AUTH['JWT_ISSUERS'][0]['ISSUER'],
-            'exp': datetime.datetime.now(),
-            'iat': datetime.datetime.now(),
+            'iss': settings.JWT_AUTH['JWT_ISSUERS'][0]['ISSUER']
         }
         auth_header = "JWT {token}".format(
             token=jwt.encode(payload, settings.JWT_AUTH['JWT_SECRET_KEY']).decode('utf-8'))

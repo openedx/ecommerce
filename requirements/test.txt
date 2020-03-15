@@ -50,7 +50,7 @@ django-threadlocals==0.10  # via -r requirements/base.txt
 django-treebeard==4.3.1   # via -r requirements/base.txt, django-oscar
 django-waffle==0.20.0     # via -r requirements/base.txt, edx-django-utils, edx-drf-extensions
 django-webtest==1.9.7     # via -r requirements/test.in
-django-widget-tweaks==1.4.6  # via -r requirements/base.txt, django-oscar
+django-widget-tweaks==1.4.8  # via -r requirements/base.txt, django-oscar
 django==1.11.29           # via -r requirements/base.txt, django-appconf, django-cors-headers, django-crum, django-extra-views, django-filter, django-haystack, django-model-utils, django-oscar, django-phonenumber-field, django-tables2, django-treebeard, edx-auth-backends, edx-django-release-util, edx-django-sites-extensions, edx-django-utils, edx-drf-extensions, edx-rbac, jsonfield2, mock-django, pytest-django-ordering, rest-condition, xss-utils
 djangorestframework-csv==2.1.0  # via -r requirements/base.txt
 djangorestframework-datatables==0.5.1  # via -r requirements/base.txt
@@ -61,13 +61,13 @@ edx-auth-backends==3.0.2  # via -r requirements/base.txt
 edx-django-release-util==0.3.6  # via -r requirements/base.txt
 edx-django-sites-extensions==2.4.3  # via -r requirements/base.txt
 edx-django-utils==3.0     # via -r requirements/base.txt, edx-drf-extensions
-edx-drf-extensions==2.4.6  # via -c requirements/pins.txt, -r requirements/base.txt, edx-rbac
+edx-drf-extensions==3.0.1  # via -c requirements/pins.txt, -r requirements/base.txt, edx-rbac
 edx-ecommerce-worker==0.7.2  # via -r requirements/base.txt
 edx-opaque-keys==2.0.1    # via -r requirements/base.txt, edx-drf-extensions
 edx-rbac==1.1.1           # via -r requirements/base.txt
 edx-rest-api-client==1.9.2  # via -c requirements/pins.txt, -r requirements/base.txt, edx-ecommerce-worker
 factory-boy==2.12.0       # via -r requirements/base.txt, -r requirements/test.in, django-oscar
-faker==4.0.1              # via -r requirements/base.txt, factory-boy
+faker==4.0.2              # via -r requirements/base.txt, factory-boy
 filelock==3.0.12          # via -r requirements/tox.txt, tox
 freezegun==0.3.15         # via -r requirements/test.in
 future==0.18.2            # via -r requirements/base.txt, pyjwkest
@@ -124,7 +124,7 @@ pyparsing==2.4.6          # via -r requirements/tox.txt, packaging
 pytest-cov==2.8.1         # via -r requirements/test.in
 pytest-django-ordering==1.2.0  # via -r requirements/test.in
 pytest-django==3.8.0      # via -r requirements/test.in, pytest-django-ordering
-pytest==5.3.5             # via -r requirements/test.in, pytest-cov, pytest-django, pytest-django-ordering
+pytest==5.3.5             # via -c requirements/pins.txt, -r requirements/test.in, pytest-cov, pytest-django, pytest-django-ordering
 python-dateutil==2.8.1    # via -r requirements/base.txt, analytics-python, edx-drf-extensions, faker, freezegun
 python3-openid==3.1.0 ; python_version >= "3"  # via -r requirements/base.txt, social-auth-core
 pytz==2016.10             # via -c requirements/pins.txt, -r requirements/base.txt, babel, celery, django, zeep
