@@ -642,8 +642,9 @@ class CouponRedeemViewTests(CouponMixin, DiscoveryTestMixin, LmsApiMockMixin, En
         assert orderline.effective_contract_discounted_price is None
 
     @httpretty.activate
-    def test_enterprise_customer_successful_redemption(self):
+    def test_enterprise_customer_successful_redemption_100_pct_coupon(self):
         """ Verify the view redirects to LMS when valid consent is provided. """
+        # prepare_enterprise_data creates a 100% off coupon unless otherwise specified with benefit_value
         code, _ = self.prepare_enterprise_data(enterprise_customer_catalog=ENTERPRISE_CUSTOMER_CATALOG)
         self.mock_assignable_enterprise_condition_calls(ENTERPRISE_CUSTOMER_CATALOG)
         self.mock_enterprise_learner_api_for_learner_with_no_enterprise()
