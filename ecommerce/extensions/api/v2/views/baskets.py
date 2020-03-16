@@ -518,12 +518,17 @@ class BasketCalculateView(generics.GenericAPIView):
                 skus=skus
             )
             cached_response = TieredCache.get_cached_response(cache_key)
+            logger.info('bundle debugging 1: Cache key [%s] site [%s] skus [%s] response [%s]',
+                        str(cache_key), str(request.site), str(skus), str(cached_response))
             if cached_response.is_found:
                 return Response(cached_response.value)
 
         response = self._calculate_temporary_basket_atomic(basket_owner, request, products, voucher, skus, code)
-
+        logger.info('bundle debugging 2: Cache key [%s] response [%s] skus [%s] timeout [%s]',
+                    str(cache_key), str(response), str(skus), str(settings.ANONYMOUS_BASKET_CALCULATE_CACHE_TIMEOUT))
         if response and use_default_basket:
+            logger.info('bundle debugging 3: setting cache: Cache key [%s] response [%s] skus [%s]',
+                        str(cache_key), str(response), str(skus))
             TieredCache.set_all_tiers(cache_key, response, settings.ANONYMOUS_BASKET_CALCULATE_CACHE_TIMEOUT)
 
         return Response(response)
