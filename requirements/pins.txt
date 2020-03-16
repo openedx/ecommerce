@@ -8,5 +8,8 @@ jsonfield2<=3.0.3
 # Was causing some tox issues locally.
 virtualenv==16.7.9
 
-# Needs fix to work in ecommerce.  See ARCHBOM-1036
-edx-drf-extensions<3.0.0
+# Upgrade to 4x of edx-drf-extensions will be handled in a follow-up PR.
+edx-drf-extensions<4.0.0
+
+# 5.4 introduces test order problems that need to be resolved.
+pytest<5.4.0

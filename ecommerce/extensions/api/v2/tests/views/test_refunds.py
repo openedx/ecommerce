@@ -1,6 +1,5 @@
 from __future__ import absolute_import
 
-import datetime
 import json
 
 import ddt
@@ -105,10 +104,7 @@ class RefundCreateViewTests(RefundTestMixin, AccessTokenMixin, JwtMixin, TestCas
         self.client.logout()
 
         data = self._get_data(self.user.username, self.course_id)
-        auth_header = 'JWT ' + self.generate_token({'username': self.user.username,
-                                                    'exp': datetime.datetime.now(),
-                                                    'iat': datetime.datetime.now(),
-                                                    })
+        auth_header = 'JWT ' + self.generate_token({'username': self.user.username})
 
         response = self.client.post(self.path, data, JSON_CONTENT_TYPE, HTTP_AUTHORIZATION=auth_header)
         self.assert_ok_response(response)

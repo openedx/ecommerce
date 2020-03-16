@@ -45,7 +45,7 @@ django-tables2==1.21.2    # via django-oscar
 django-threadlocals==0.10  # via -r requirements/base.in
 django-treebeard==4.3.1   # via django-oscar
 django-waffle==0.20.0     # via -r requirements/base.in, edx-django-utils, edx-drf-extensions
-django-widget-tweaks==1.4.6  # via django-oscar
+django-widget-tweaks==1.4.8  # via django-oscar
 django==1.11.29           # via -r requirements/base.in, django-appconf, django-cors-headers, django-crum, django-extra-views, django-filter, django-haystack, django-model-utils, django-oscar, django-phonenumber-field, django-tables2, django-treebeard, edx-auth-backends, edx-django-release-util, edx-django-sites-extensions, edx-django-utils, edx-drf-extensions, edx-rbac, jsonfield2, rest-condition, xss-utils
 djangorestframework-csv==2.1.0  # via -r requirements/base.in
 djangorestframework-datatables==0.5.1  # via -r requirements/base.in
@@ -56,13 +56,13 @@ edx-auth-backends==3.0.2  # via -r requirements/base.in
 edx-django-release-util==0.3.6  # via -r requirements/base.in
 edx-django-sites-extensions==2.4.3  # via -r requirements/base.in
 edx-django-utils==3.0     # via -r requirements/base.in, edx-drf-extensions
-edx-drf-extensions==2.4.6  # via -c requirements/pins.txt, -r requirements/base.in, edx-rbac
+edx-drf-extensions==3.0.1  # via -c requirements/pins.txt, -r requirements/base.in, edx-rbac
 edx-ecommerce-worker==0.7.2  # via -r requirements/base.in
 edx-opaque-keys==2.0.1    # via -r requirements/base.in, edx-drf-extensions
 edx-rbac==1.1.1           # via -r requirements/base.in
 edx-rest-api-client==1.9.2  # via -c requirements/pins.txt, -r requirements/base.in, edx-ecommerce-worker
 factory-boy==2.12.0       # via django-oscar
-faker==4.0.1              # via factory-boy
+faker==4.0.2              # via factory-boy
 future==0.18.2            # via pyjwkest
 gunicorn==19.7.1          # via -r requirements/production.in
 idna==2.9                 # via requests

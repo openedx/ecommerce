@@ -84,12 +84,21 @@ class UserMixin:
     def generate_jwt_token_header(self, user, secret=None):
         """Generate a valid JWT token header for authenticated requests."""
         secret = secret or settings.JWT_AUTH['JWT_SECRET_KEY']
+
+        # WARNING:
+        #   If any test that uses this function fails with an error about a missing 'exp' or 'iat' or
+        #     'is_restricted' claim in the payload, then do one of the following:
+        #
+        #   1. If Ecommerce's JWT_DECODE_HANDLER setting still points to a custom decoder inside Ecommerce,
+        #      then a bug was introduced and the setting is no longer respected. If this is the case, do not
+        #      add the claims to this test, and instead fix the bug. Or,
+        #   2. If Ecommerce is being updated to no longer use a custom JWT_DECODE_HANDLER from Ecommerce, but is
+        #      instead using the decode handler directly from edx-drf-extensions, any required claims can be
+        #      added to this test and this warning can be removed.
         payload = {
             'username': user.username,
             'email': user.email,
-            'iss': settings.JWT_AUTH['JWT_ISSUERS'][0]['ISSUER'],
-            'exp': datetime.datetime.now(),
-            'iat': datetime.datetime.now(),
+            'iss': settings.JWT_AUTH['JWT_ISSUERS'][0]['ISSUER']
         }
         return "JWT {token}".format(token=jwt.encode(payload, secret).decode('utf-8'))
 
@@ -189,6 +198,7 @@ class BasketCreationMixin(UserMixin, JwtMixin):
                 data=json.dumps(request_data),
                 content_type=CONTENT_TYPE
             )
+
         return response
 
     def assert_successful_basket_creation(
