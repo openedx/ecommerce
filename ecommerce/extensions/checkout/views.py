@@ -75,7 +75,7 @@ class FreeCheckoutView(EdxOrderPlacementMixin, RedirectView):
                 if program_uuid:
                     url = get_lms_program_dashboard_url(program_uuid)
                 else:
-                    course_run_id = order.lines.all()[:1].get().product.course.id
+                    course_run_id = order.lines.first().product.course.id
                     url = get_lms_courseware_url(course_run_id)
             else:
                 receipt_path = get_receipt_page_url(
