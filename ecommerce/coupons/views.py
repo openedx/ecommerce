@@ -19,7 +19,7 @@ from edx_rest_framework_extensions.permissions import LoginRedirectIfUnauthentic
 from oscar.core.loading import get_class, get_model
 from rest_framework.views import APIView
 
-from ecommerce.core.url_utils import absolute_redirect, get_ecommerce_url, get_lms_courseware_url
+from ecommerce.core.url_utils import absolute_redirect, get_ecommerce_url
 from ecommerce.core.views import StaffOnlyMixin
 from ecommerce.coupons.decorators import login_required_for_credit
 from ecommerce.coupons.utils import is_voucher_applied
@@ -262,10 +262,6 @@ class CouponRedeemView(EdxOrderPlacementMixin, APIView):
         if basket.total_excl_tax == 0:
             try:
                 order = self.place_free_order(basket)
-                if enterprise_customer:
-                    course_run_id = order.lines.first().product.course.id
-                    url = get_lms_courseware_url(course_run_id)
-                    return HttpResponseRedirect(url)
                 return HttpResponseRedirect(
                     get_receipt_page_url(
                         site_configuration,
