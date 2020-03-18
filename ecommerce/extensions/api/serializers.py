@@ -519,6 +519,10 @@ class SeatProductHelper:
         credit_provider = attrs.get('credit_provider')
         credit_hours = attrs.get('credit_hours')
         credit_hours = int(credit_hours) if credit_hours else None
+        sku = None
+        stockrecords = product.get('stockrecords', [])
+        if stockrecords:
+            sku = stockrecords[0].get('partner_sku')
 
         seat = course.create_or_update_seat(
             certificate_type,
@@ -527,7 +531,8 @@ class SeatProductHelper:
             expires=expires,
             credit_provider=credit_provider,
             credit_hours=credit_hours,
-            create_enrollment_code=create_enrollment_code
+            create_enrollment_code=create_enrollment_code,
+            sku=sku,
         )
 
         # As a convenience to our caller, provide the SKU in the returned product serialization.
