@@ -30,6 +30,8 @@ def get_cache_key(**kwargs):
     """
     Get MD5 encoded cache key for given arguments.
 
+    Note: This function will not work correctly if any of the arguments are dictionaries
+
     Here is the format of key before MD5 encryption.
         key1:value1__key2:value2 ...
 
@@ -45,7 +47,7 @@ def get_cache_key(**kwargs):
     Returns:
          An MD5 encoded key uniquely identified by the key word arguments.
     """
-    key = '__'.join([u'{}:{}'.format(item, value) for item, value in six.iteritems(kwargs)])
+    key = '__'.join([u'{}:{}'.format(item, value) for item, value in sorted(six.iteritems(kwargs))])
 
     return hashlib.md5(key.encode('utf-8')).hexdigest()
 
