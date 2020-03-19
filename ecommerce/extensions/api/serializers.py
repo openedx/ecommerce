@@ -527,7 +527,8 @@ class SeatProductHelper:
             expires=expires,
             credit_provider=credit_provider,
             credit_hours=credit_hours,
-            create_enrollment_code=create_enrollment_code
+            create_enrollment_code=create_enrollment_code,
+            product_id=product.get('id'),
         )
 
         # As a convenience to our caller, provide the SKU in the returned product serialization.
