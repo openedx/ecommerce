@@ -191,9 +191,7 @@ class AtomicPublicationTests(DiscoveryTestMixin, TestCase):
                 attrs['expires'] = EXPIRES if product['expires'] else None
                 attrs['price'] = Decimal(product['price'])
 
-                seat = course.create_or_update_seat(**attrs)
-                # Adding this in so if we run an update, the id is passed on
-                product['id'] = seat.id
+                course.create_or_update_seat(**attrs)
 
     def generate_update_payload(self):
         """ Returns dictionary representing the data payload sent for an update request. """
