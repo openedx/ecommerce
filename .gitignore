@@ -65,6 +65,7 @@ coverage.xml
 diff_*.html
 *.report
 report
+reports
 edx_ecommerce.log
 venv
 e2e.*.log

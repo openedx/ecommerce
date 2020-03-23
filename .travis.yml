@@ -40,13 +40,13 @@ matrix:
     - python: 3.5
       env:
         TESTNAME=quality-and-js
-        TARGETS="requirements.js check_translations_up_to_date validate_translations clean_static static quality validate_js"
+        TARGETS="requirements.js check_translations_up_to_date validate_translations clean_static static quality validate_js check_keywords"
     - python: 3.5
       env: TESTNAME=test-python TARGETS="requirements.js clean_static static validate_python"
     - python: 3.6
       env:
         TESTNAME=quality-and-js-.3.6
-        TARGETS="requirements.js check_translations_up_to_date validate_translations clean_static static quality validate_js"
+        TARGETS="requirements.js check_translations_up_to_date validate_translations clean_static static quality validate_js check_keywords"
     - python: 3.6
       env: TESTNAME=test-python-3.6 TARGETS="requirements.js clean_static static validate_python"
       after_success:
