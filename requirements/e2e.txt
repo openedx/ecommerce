@@ -31,5 +31,5 @@ selenium==3.141.0         # via -r requirements/e2e.in, pytest-selenium
 six==1.14.0               # via packaging, pathlib2
 slumber==0.7.1            # via edx-rest-api-client
 urllib3==1.25.8           # via -c requirements/pins.txt, requests, selenium
-wcwidth==0.1.8            # via pytest
+wcwidth==0.1.9            # via pytest
 zipp==1.2.0               # via importlib-metadata

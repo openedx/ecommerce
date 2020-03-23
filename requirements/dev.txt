@@ -61,10 +61,10 @@ docutils==0.16            # via -r requirements/docs.txt, sphinx
 drf-extensions==0.6.0     # via -r requirements/test.txt
 drf-jwt==1.14.0           # via -r requirements/test.txt, edx-drf-extensions
 edx-auth-backends==3.0.2  # via -r requirements/test.txt
-edx-django-release-util==0.3.6  # via -r requirements/test.txt
+edx-django-release-util==0.4.1  # via -r requirements/test.txt
 edx-django-sites-extensions==2.4.3  # via -r requirements/test.txt
 edx-django-utils==3.0     # via -r requirements/test.txt, edx-drf-extensions
-edx-drf-extensions==5.0.0  # via -r requirements/test.txt, edx-rbac
+edx-drf-extensions==5.0.2  # via -r requirements/test.txt, edx-rbac
 edx-ecommerce-worker==0.7.2  # via -r requirements/test.txt
 edx-i18n-tools==0.5.0     # via -r requirements/dev.in
 edx-opaque-keys==2.0.1    # via -r requirements/test.txt, edx-drf-extensions
@@ -108,7 +108,7 @@ path.py==7.2              # via -r requirements/test.txt, edx-i18n-tools
 pathlib2==2.3.5           # via -r requirements/e2e.txt, -r requirements/test.txt, pytest
 paypalrestsdk==1.13.1     # via -r requirements/test.txt
 pbr==5.4.4                # via -r requirements/test.txt, mock, stevedore
-phonenumbers==8.11.5      # via -r requirements/test.txt, django-oscar, django-phonenumber-field
+phonenumbers==8.12.0      # via -r requirements/test.txt, django-oscar, django-phonenumber-field
 pillow==7.0.0             # via -r requirements/test.txt, django-oscar
 pluggy==0.13.1            # via -r requirements/e2e.txt, -r requirements/test.txt, diff-cover, pytest, tox
 polib==1.1.0              # via edx-i18n-tools
@@ -184,7 +184,7 @@ uritemplate==3.0.1        # via -r requirements/test.txt, coreapi
 urllib3==1.25.8           # via -r requirements/docs.txt, -r requirements/e2e.txt, -r requirements/test.txt, requests, selenium, transifex-client
 virtualenv==16.7.9        # via -r requirements/test.txt, tox
 waitress==1.4.3           # via -r requirements/test.txt, webtest
-wcwidth==0.1.8            # via -r requirements/e2e.txt, -r requirements/test.txt, pytest
+wcwidth==0.1.9            # via -r requirements/e2e.txt, -r requirements/test.txt, pytest
 webencodings==0.5.1       # via -r requirements/test.txt, bleach
 webob==1.8.6              # via -r requirements/test.txt, webtest
 webtest==2.0.34           # via -r requirements/test.txt, django-webtest
