@@ -3,9 +3,9 @@ from __future__ import absolute_import
 
 import logging
 
-import django_filters
 from django.db.models import Q
 from django.utils.translation import ugettext_lazy as _
+from django_filters.rest_framework import DjangoFilterBackend
 from oscar.core.loading import get_model
 from rest_framework import status
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
@@ -25,7 +25,7 @@ Product = get_model('catalogue', 'Product')
 
 class ProductViewSet(NestedViewSetMixin, NonDestroyableModelViewSet):
     serializer_class = serializers.ProductSerializer
-    filter_backends = (django_filters.rest_framework.DjangoFilterBackend,)
+    filter_backends = (DjangoFilterBackend,)
     filterset_class = ProductFilter
     permission_classes = (IsAuthenticated, IsAdminUser,)
 

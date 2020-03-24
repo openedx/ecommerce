@@ -5,15 +5,15 @@ import logging
 from decimal import Decimal
 
 import dateutil
-import django_filters
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.utils.decorators import method_decorator
+from django_filters.rest_framework import DjangoFilterBackend
 from edx_rest_framework_extensions.auth.jwt.authentication import JwtAuthentication
 from oscar.core.loading import get_class, get_model
 from rest_framework import status, viewsets
-from rest_framework.decorators import action
+from rest_framework.decorators import detail_route
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.permissions import DjangoModelPermissions, IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
@@ -52,7 +52,7 @@ class OrderViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Order.objects.all()
     serializer_class = serializers.OrderSerializer
     throttle_classes = (ServiceUserThrottle,)
-    filter_backends = (django_filters.rest_framework.DjangoFilterBackend,)
+    filter_backends = (DjangoFilterBackend,)
     filterset_class = OrderFilter
 
     def filter_queryset(self, queryset):
@@ -70,7 +70,7 @@ class OrderViewSet(viewsets.ReadOnlyModelViewSet):
 
         return queryset.filter(partner=self.request.site.siteconfiguration.partner)
 
-    @action(detail=True, methods=['put', 'patch'])
+    @detail_route(methods=['put', 'patch'])
     def fulfill(self, request, number=None):  # pylint: disable=unused-argument
         """ Fulfill order """
         order = self.get_object()

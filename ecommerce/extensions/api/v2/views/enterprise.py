@@ -2,19 +2,19 @@ from __future__ import absolute_import, unicode_literals
 
 import logging
 
-import django_filters
 import six
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.db.models import Q
 from django.http import Http404
 from django.shortcuts import get_object_or_404
+from django_filters.rest_framework import DjangoFilterBackend
 from edx_rbac.decorators import permission_required
 from oscar.core.loading import get_model
 from requests.exceptions import ConnectionError as ReqConnectionError
 from requests.exceptions import Timeout
 from rest_framework import generics, serializers, status
-from rest_framework.decorators import action
+from rest_framework.decorators import detail_route, list_route
 from rest_framework.exceptions import ValidationError as DRFValidationError
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
@@ -316,7 +316,7 @@ class EnterpriseCouponViewSet(CouponViewSet):
         if coupon_was_migrated:
             super(EnterpriseCouponViewSet, self).update_range_data(request_data, vouchers)
 
-    @action(detail=True, url_path='codes', permission_classes=[IsAuthenticated])
+    @detail_route(url_path='codes', permission_classes=[IsAuthenticated])
     @permission_required(
         'enterprise.can_view_coupon', fn=lambda request, pk, format=None: get_enterprise_from_product(pk)
     )
@@ -460,7 +460,7 @@ class EnterpriseCouponViewSet(CouponViewSet):
             id__in=redeemed_voucher_application_ids
         ).values('voucher__code', 'user__email').distinct().order_by('user__email')
 
-    @action(detail=False, url_path=r'(?P<enterprise_id>.+)/search', permission_classes=[IsAuthenticated])
+    @list_route(url_path=r'(?P<enterprise_id>.+)/search', permission_classes=[IsAuthenticated])
     @permission_required('enterprise.can_view_coupon', fn=lambda request, enterprise_id: enterprise_id)
     def search(self, request, enterprise_id):     # pylint: disable=unused-argument
         """
@@ -604,7 +604,7 @@ class EnterpriseCouponViewSet(CouponViewSet):
                     _prepare_redemption_data(coupon_data, offer_assignment)
         return redemptions_and_assignments
 
-    @action(detail=False, url_path=r'(?P<enterprise_id>.+)/overview', permission_classes=[IsAuthenticated])
+    @list_route(url_path=r'(?P<enterprise_id>.+)/overview', permission_classes=[IsAuthenticated])
     @permission_required('enterprise.can_view_coupon', fn=lambda request, enterprise_id: enterprise_id)
     def overview(self, request, enterprise_id):     # pylint: disable=unused-argument
         """
@@ -636,7 +636,7 @@ class EnterpriseCouponViewSet(CouponViewSet):
         if not is_coupon_available(coupon):
             raise DRFValidationError({'error': message})
 
-    @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
+    @detail_route(methods=['post'], permission_classes=[IsAuthenticated])
     @permission_required('enterprise.can_assign_coupon', fn=lambda request, pk: get_enterprise_from_product(pk))
     def assign(self, request, pk):  # pylint: disable=unused-argument
         """
@@ -655,7 +655,7 @@ class EnterpriseCouponViewSet(CouponViewSet):
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
+    @detail_route(methods=['post'], permission_classes=[IsAuthenticated])
     @permission_required('enterprise.can_assign_coupon', fn=lambda request, pk: get_enterprise_from_product(pk))
     def revoke(self, request, pk):  # pylint: disable=unused-argument
         """
@@ -676,7 +676,7 @@ class EnterpriseCouponViewSet(CouponViewSet):
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
+    @detail_route(methods=['post'], permission_classes=[IsAuthenticated])
     @permission_required('enterprise.can_assign_coupon', fn=lambda request, pk: get_enterprise_from_product(pk))
     def remind(self, request, pk):  # pylint: disable=unused-argument
         """
@@ -730,8 +730,8 @@ class OfferAssignmentEmailTemplatesViewSet(ModelViewSet):
     """
     serializer_class = OfferAssignmentEmailTemplatesSerializer
     permission_classes = (IsAuthenticated,)
-    filter_backends = (django_filters.rest_framework.DjangoFilterBackend,)
-    filter_fields = ('email_type', 'active')
+    filter_backends = (DjangoFilterBackend,)
+    filterset_fields = ('email_type', 'active')
 
     http_method_names = ['get', 'head', 'options', 'post']
 
