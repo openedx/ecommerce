@@ -6,5 +6,12 @@
 #   - ModelName.field_name
 ---
 MYSQL:
+    - WishList.key
+    - AttributeOption.option
+    - KVStore.key
+    - Voucher.usage
+    - ShippingEvent.lines
+    - PaymentEvent.lines
+    - ProductAlert.key
 SNOWFLAKE:
 STITCH:
