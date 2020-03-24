@@ -6,7 +6,7 @@ from oscar.core.loading import get_model
 from requests.exceptions import ConnectionError as ReqConnectionError
 from requests.exceptions import Timeout
 from rest_framework import status
-from rest_framework.decorators import action
+from rest_framework.decorators import list_route
 from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
@@ -36,7 +36,7 @@ class CatalogViewSet(NestedViewSetMixin, ReadOnlyModelViewSet):
             partner=self.request.site.siteconfiguration.partner
         )
 
-    @action(detail=False)
+    @list_route()
     def preview(self, request):
         """ Preview the results of the catalog query.
 
@@ -95,7 +95,7 @@ class CatalogViewSet(NestedViewSetMixin, ReadOnlyModelViewSet):
             logger.error('Unable to connect to Catalog API.')
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
-    @action(detail=False)
+    @list_route()
     def course_catalogs(self, request):
         """
         Returns response with all course catalogs in the format:

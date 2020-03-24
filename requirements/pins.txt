@@ -13,3 +13,6 @@ pytest<5.4.0
 
 # BOM-1410 : drf-jwt 1.15.0 introduces migration issues.
 drf-jwt<1.15.0
+
+# drf-jwt requires drf version > 7.0
+djangorestframework<3.8.0

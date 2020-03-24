@@ -5,7 +5,7 @@ import waffle
 from django.db.models import Prefetch
 from oscar.core.loading import get_model
 from rest_framework import status
-from rest_framework.decorators import action
+from rest_framework.decorators import detail_route
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 
@@ -80,7 +80,7 @@ class CourseViewSet(NonDestroyableModelViewSet):
         context['include_products'] = bool(self.request.GET.get('include_products', False)) if self.request else False
         return context
 
-    @action(detail=True, methods=['post'])
+    @detail_route(methods=['post'])
     def publish(self, request, pk=None):  # pylint: disable=unused-argument
         """ Publish the course to LMS. """
         course = self.get_object()

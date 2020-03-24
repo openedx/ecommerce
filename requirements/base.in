@@ -6,7 +6,7 @@ coreapi
 django<2.0
 django-compressor
 django-cors-headers                 #  Used to allow to configure CORS headers for cross-domain requests
-django-crispy-forms<1.9.0
+django-crispy-forms
 django_extensions
 django-filter
 django-libsass
@@ -19,7 +19,7 @@ django-waffle
 djangorestframework
 djangorestframework-csv
 djangorestframework-datatables
-drf-extensions
+drf-extensions==0.3.1
 edx-auth-backends
 edx-django-release-util
 edx-django-utils

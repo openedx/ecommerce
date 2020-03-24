@@ -14,7 +14,7 @@ from oscar.core.loading import get_model
 from requests.exceptions import ConnectionError as ReqConnectionError
 from requests.exceptions import Timeout
 from rest_framework import status
-from rest_framework.decorators import action
+from rest_framework.decorators import list_route
 from rest_framework.response import Response
 from six.moves.urllib.parse import urlparse
 from slumber.exceptions import SlumberBaseException
@@ -35,7 +35,7 @@ StockRecord = get_model('partner', 'StockRecord')
 Voucher = get_model('voucher', 'Voucher')
 
 
-class VoucherFilter(django_filters.rest_framework.FilterSet):
+class VoucherFilter(django_filters.FilterSet):
     """
     Filter for vouchers via query string parameters.
     Currently supports filtering via the voucher's code.
@@ -59,7 +59,7 @@ class VoucherViewSet(NonDestroyableModelViewSet):
             coupon_vouchers__coupon__stockrecords__partner=self.request.site.siteconfiguration.partner
         )
 
-    @action(detail=False)
+    @list_route()
     def offers(self, request):
         """ Preview the courses offered by the voucher.
 
