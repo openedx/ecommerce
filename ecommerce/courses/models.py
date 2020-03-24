@@ -139,6 +139,7 @@ class Course(models.Model):
 
         return name
 
+    @transaction.atomic
     def create_or_update_seat(
             self,
             certificate_type,
