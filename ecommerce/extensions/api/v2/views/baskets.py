@@ -414,7 +414,7 @@ class BasketCalculateView(generics.GenericAPIView):
             raise
         return response
 
-    def get(self, request):  # pylint: disable=too-many-statements
+    def get(self, request):
         """ Calculate basket totals given a list of sku's
 
         Create a temporary basket add the sku's and apply an optional voucher code.
@@ -462,7 +462,6 @@ class BasketCalculateView(generics.GenericAPIView):
         is_anonymous = request.GET.get('is_anonymous', 'false').lower() == 'true'
 
         use_default_basket = is_anonymous
-        use_default_basket_case = 0
 
         # validate query parameters
         if requested_username and is_anonymous:
@@ -485,7 +484,6 @@ class BasketCalculateView(generics.GenericAPIView):
                     # doesn't yet have an account in ecommerce. These users have
                     # never purchased before.
                     use_default_basket = True
-                    use_default_basket_case = 1
             else:
                 return HttpResponseForbidden('Unauthorized user credentials')
 
@@ -495,7 +493,6 @@ class BasketCalculateView(generics.GenericAPIView):
             # TODO: LEARNER-5057: Remove this special case for the marketing user
             # once logs show no more requests with no parameters (see above).
             use_default_basket = True
-            use_default_basket_case = 2
 
         if use_default_basket:
             basket_owner = None
@@ -521,13 +518,17 @@ class BasketCalculateView(generics.GenericAPIView):
                 skus=skus
             )
             cached_response = TieredCache.get_cached_response(cache_key)
+            logger.info('bundle debugging 1: Cache key [%s] site [%s] skus [%s] response [%s]',
+                        str(cache_key), str(request.site), str(skus), str(cached_response))
             if cached_response.is_found:
                 return Response(cached_response.value)
 
         response = self._calculate_temporary_basket_atomic(basket_owner, request, products, voucher, skus, code)
+        logger.info('bundle debugging 2: Cache key [%s] response [%s] skus [%s] timeout [%s]',
+                    str(cache_key), str(response), str(skus), str(settings.ANONYMOUS_BASKET_CALCULATE_CACHE_TIMEOUT))
         if response and use_default_basket:
-            logger.info('bundle debugging 3: Cache key [%s] response [%s] skus [%s] case [%s]',
-                        str(cache_key), str(response), str(skus), str(use_default_basket_case))
+            logger.info('bundle debugging 3: setting cache: Cache key [%s] response [%s] skus [%s]',
+                        str(cache_key), str(response), str(skus))
             TieredCache.set_all_tiers(cache_key, response, settings.ANONYMOUS_BASKET_CALCULATE_CACHE_TIMEOUT)
 
         return Response(response)
