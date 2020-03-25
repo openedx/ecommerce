@@ -46,7 +46,6 @@ class CourseMigrationTestMixin(DiscoveryTestMixin):
     prices = {
         'honor': 0,
         'verified': 10,
-        'no-id-professional': 100,
         'professional': 1000,
         'audit': 0,
         'credit': 0,
