@@ -142,7 +142,9 @@ class MigratedCourse:
                         attribute_values__value_text=certificate_type
                     )
                 seat = self.course.seat_products.filter(certificate_type_query).first()
-                sku = seat and seat.stockrecords.first().partner_sku
+                stock_record = seat and seat.stockrecords.first()
+                if stock_record:
+                    sku = stock_record.partner_sku
             self.course.create_or_update_seat(
                 certificate_type, id_verification_required, price, expires=expires, remove_stale_modes=False, sku=sku
             )
