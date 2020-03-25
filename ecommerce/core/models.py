@@ -376,6 +376,11 @@ class SiteConfiguration(models.Model):
         return settings.ENTERPRISE_API_URL
 
     @property
+    def enterprise_catalog_api_url(self):
+        """ Returns the URL for the Enterprise Catalog service. """
+        return settings.ENTERPRISE_CATALOG_API_URL
+
+    @property
     def enterprise_grant_data_sharing_url(self):
         """ Returns the URL for the Enterprise data sharing permission view. """
         return self.build_enterprise_service_url('grant_data_sharing_permissions')
@@ -443,6 +448,20 @@ class SiteConfiguration(models.Model):
 
         """
         return EdxRestApiClient(self.enterprise_api_url, jwt=self.access_token)
+
+    @cached_property
+    def enterprise_catalog_api_client(self):
+        """
+        Returns a REST API client for the provided enterprise catalog service
+
+        Example:
+            site.siteconfiguration.enterprise_catalog_api_client.enterprise-catalog.get()
+
+        Returns:
+            EdxRestApiClient: The client to access the Enterprise Catalog service.
+
+        """
+        return EdxRestApiClient(self.enterprise_catalog_api_url, jwt=self.access_token)
 
     @cached_property
     def consent_api_client(self):

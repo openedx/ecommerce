@@ -6,12 +6,15 @@ from django.conf import settings
 from edx_django_utils.cache import TieredCache
 from mock import patch
 from oscar.core.loading import get_model
+from oscar.test.factories import BasketFactory
 from requests.exceptions import ConnectionError as ReqConnectionError
+from waffle.testutils import override_flag
 
 from ecommerce.core.tests import toggle_switch
 from ecommerce.core.utils import get_cache_key
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.enterprise import api as enterprise_api
+from ecommerce.enterprise.constants import USE_ENTERPRISE_CATALOG
 from ecommerce.enterprise.tests.mixins import EnterpriseServiceMockMixin
 from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
 from ecommerce.extensions.partner.strategy import DefaultStrategy
@@ -36,6 +39,8 @@ class EnterpriseAPITests(EnterpriseServiceMockMixin, DiscoveryTestMixin, TestCas
         self.request.user = self.learner
         self.request.site = self.site
         self.request.strategy = DefaultStrategy()
+
+        self.basket = BasketFactory(site=self.site, owner=self.learner, strategy=self.request.strategy)
 
     def tearDown(self):
         # Reset HTTPretty state (clean up registered urls and request history)
@@ -78,6 +83,7 @@ class EnterpriseAPITests(EnterpriseServiceMockMixin, DiscoveryTestMixin, TestCas
             course_run_ids,
             enterprise_customer_uuid,
             enterprise_customer_catalog_uuid=enterprise_customer_catalog_uuid,
+            request=self.request,
         )
 
         self.assertEqual(expected, actual)
@@ -117,11 +123,37 @@ class EnterpriseAPITests(EnterpriseServiceMockMixin, DiscoveryTestMixin, TestCas
         self.mock_catalog_contains_course_runs(
             [self.course_run.id],
             'fake-uuid',
+            self.site.siteconfiguration.enterprise_api_url,
             enterprise_customer_catalog_uuid=enterprise_customer_catalog_uuid,
             contains_content=expected,
         )
 
         self._assert_contains_course_runs(expected, [self.course_run.id], 'fake-uuid', enterprise_customer_catalog_uuid)
+
+    @ddt.data(
+        (True, None),
+        (True, 'fake-uuid'),
+        (False, None),
+        (False, 'fake-uuid'),
+    )
+    @ddt.unpack
+    def test_catalog_contains_course_runs_enterprise_catalog_service(self, expected, enterprise_customer_catalog_uuid):
+        """
+        Verify that `catalog_contains_course_runs` returns the appropriate
+        response when the  Enterprise Catalog service is hit instead of the base
+        Enterprise API.
+        """
+        with override_flag(USE_ENTERPRISE_CATALOG, active=True):
+            self.mock_catalog_contains_course_runs(
+                [self.course_run.id],
+                'fake-uuid',
+                self.site.siteconfiguration.enterprise_catalog_api_url,
+                enterprise_customer_catalog_uuid=enterprise_customer_catalog_uuid,
+                contains_content=expected,
+            )
+
+            self._assert_contains_course_runs(expected, [self.course_run.id], 'fake-uuid',
+                                              enterprise_customer_catalog_uuid)
 
     def test_catalog_contains_course_runs_cache_hit(self):
         """
@@ -130,6 +162,7 @@ class EnterpriseAPITests(EnterpriseServiceMockMixin, DiscoveryTestMixin, TestCas
         self.mock_catalog_contains_course_runs(
             [self.course_run.id],
             'fake-uuid',
+            self.site.siteconfiguration.enterprise_api_url,
             enterprise_customer_catalog_uuid=None,
             contains_content=True,
         )
@@ -151,6 +184,7 @@ class EnterpriseAPITests(EnterpriseServiceMockMixin, DiscoveryTestMixin, TestCas
         self.mock_catalog_contains_course_runs(
             [self.course_run.id],
             'fake-uuid',
+            self.site.siteconfiguration.enterprise_api_url,
             enterprise_customer_catalog_uuid='fake-uuid',
             contains_content=False,
             raise_exception=True,

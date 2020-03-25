@@ -5,11 +5,13 @@ from __future__ import absolute_import
 
 import logging
 
+import waffle
 from django.conf import settings
 from edx_django_utils.cache import TieredCache
 from six.moves.urllib.parse import urlencode
 
 from ecommerce.core.utils import get_cache_key
+from ecommerce.enterprise.constants import USE_ENTERPRISE_CATALOG
 
 logger = logging.getLogger(__name__)
 
@@ -109,7 +111,8 @@ def fetch_enterprise_learner_data(site, user):
     return response
 
 
-def catalog_contains_course_runs(site, course_run_ids, enterprise_customer_uuid, enterprise_customer_catalog_uuid=None):
+def catalog_contains_course_runs(site, course_run_ids, enterprise_customer_uuid, enterprise_customer_catalog_uuid=None,
+                                 request=None):
     """
     Determine if course runs are associated with the EnterpriseCustomer.
     """
@@ -134,6 +137,10 @@ def catalog_contains_course_runs(site, course_run_ids, enterprise_customer_uuid,
         return contains_content_cached_response.value
 
     api = site.siteconfiguration.enterprise_api_client
+    # Temporarily gate enterprise catalog api usage behind waffle flag
+    if request and waffle.flag_is_active(request, USE_ENTERPRISE_CATALOG):
+        api = site.siteconfiguration.enterprise_catalog_api_client
+
     endpoint = getattr(api, api_resource_name)(api_resource_id)
     contains_content = endpoint.contains_content_items.get(**query_params)['contains_content_items']
     TieredCache.set_all_tiers(cache_key, contains_content, settings.ENTERPRISE_API_CACHE_TIMEOUT)
