@@ -190,9 +190,8 @@ class AtomicPublicationTests(DiscoveryTestMixin, TestCase):
             else:
                 attrs['expires'] = EXPIRES if product['expires'] else None
                 attrs['price'] = Decimal(product['price'])
-                seat = course.create_or_update_seat(**attrs)
-                # The stockrecord partner sku is used for updates
-                product['stockrecords'] = [{'partner_sku': seat.stockrecords.first().partner_sku}]
+
+                course.create_or_update_seat(**attrs)
 
     def generate_update_payload(self):
         """ Returns dictionary representing the data payload sent for an update request. """
@@ -208,6 +207,7 @@ class AtomicPublicationTests(DiscoveryTestMixin, TestCase):
 
         # Strip course_id, which should be absent from PUT requests.
         updated_data.pop('id')
+
         return updated_data
 
     def assert_course_does_not_exist(self, course_id):

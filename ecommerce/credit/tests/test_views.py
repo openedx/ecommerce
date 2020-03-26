@@ -119,12 +119,12 @@ class CheckoutPageTest(DiscoveryTestMixin, TestCase, JwtMixin):
             u"this course credit."
         )
 
-    def _assert_success_checkout_page(self, sku=None):
+    def _assert_success_checkout_page(self):
         """ Verify that checkout page load successfully, and has necessary context. """
 
         # Create the credit seat
         self.course.create_or_update_seat(
-            'credit', True, self.price, self.provider, credit_hours=self.credit_hours, sku=sku
+            'credit', True, self.price, self.provider, credit_hours=self.credit_hours
         )
 
         self._enable_payment_providers()
@@ -201,7 +201,7 @@ class CheckoutPageTest(DiscoveryTestMixin, TestCase, JwtMixin):
         calls return successfully.
         """
         # Create the credit seat
-        credit_seat = self.course.create_or_update_seat(
+        self.course.create_or_update_seat(
             'credit', True, self.price, self.provider, credit_hours=self.credit_hours
         )
 
@@ -209,7 +209,7 @@ class CheckoutPageTest(DiscoveryTestMixin, TestCase, JwtMixin):
         self._mock_eligibility_api(body=self.eligibilities)
         self._mock_providers_api(body=self.provider_data)
 
-        self._assert_success_checkout_page(sku=credit_seat.stockrecords.first().partner_sku)
+        self._assert_success_checkout_page()
 
     @httpretty.activate
     def test_get_checkout_page_with_audit_seats(self):
@@ -217,7 +217,7 @@ class CheckoutPageTest(DiscoveryTestMixin, TestCase, JwtMixin):
         calls return successfully.
         """
         # Create the credit seat
-        credit_seat = self.course.create_or_update_seat(
+        self.course.create_or_update_seat(
             'credit', True, self.price, self.provider, credit_hours=self.credit_hours
         )
 
@@ -228,7 +228,7 @@ class CheckoutPageTest(DiscoveryTestMixin, TestCase, JwtMixin):
         self._mock_eligibility_api(body=self.eligibilities)
         self._mock_providers_api(body=self.provider_data)
 
-        self._assert_success_checkout_page(sku=credit_seat.stockrecords.first().partner_sku)
+        self._assert_success_checkout_page()
 
     @httpretty.activate
     def test_seat_unavailable(self):

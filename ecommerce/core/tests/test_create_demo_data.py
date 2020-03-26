@@ -1,16 +1,13 @@
 from __future__ import absolute_import
 
 import sys
-from datetime import datetime
 
 import httpretty
 import mock
-import pytz
 from django.core.management import call_command
 from django.utils.six import StringIO
 
 from ecommerce.courses.models import Course
-from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
 from ecommerce.tests.testcases import TestCase
 
@@ -36,29 +33,6 @@ class CreateDemoDataTests(DiscoveryTestMixin, TestCase):
         and publish that data to the LMS.
         """
         self.mock_access_token_response()
-
-        with mock.patch.object(Course, 'publish_to_lms', return_value=None) as mock_publish:
-            call_command('create_demo_data', '--partner={}'.format(self.partner.short_code))
-            mock_publish.assert_called_once_with()
-
-        self.assert_seats_created('course-v1:edX+DemoX+Demo_Course', 'edX Demonstration Course', 149)
-
-    @httpretty.activate
-    def test_handle_with_existing_course(self):
-        """ The command should create the demo course with audit and verified seats,
-        and publish that data to the LMS.
-        """
-        self.mock_access_token_response()
-
-        course = CourseFactory(
-            id='course-v1:edX+DemoX+Demo_Course',
-            name='edX Demonstration Course',
-            verification_deadline=datetime(year=2022, month=4, day=24, tzinfo=pytz.utc),
-            partner=self.partner
-        )
-
-        seat_attrs = {'certificate_type': '', 'expires': None, 'price': 0.00, 'id_verification_required': False}
-        course.create_or_update_seat(**seat_attrs)
 
         with mock.patch.object(Course, 'publish_to_lms', return_value=None) as mock_publish:
             call_command('create_demo_data', '--partner={}'.format(self.partner.short_code))

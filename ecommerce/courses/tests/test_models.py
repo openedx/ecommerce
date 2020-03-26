@@ -130,9 +130,7 @@ class CourseTests(DiscoveryTestMixin, TestCase):
 
         # Test seat update
         price = 10
-        course.create_or_update_seat(
-            certificate_type, id_verification_required, price, sku=seat.stockrecords.first().partner_sku
-        )
+        course.create_or_update_seat(certificate_type, id_verification_required, price)
 
         # Again, only two seats with one being the parent seat product.
         self.assertEqual(course.products.count(), 2)
@@ -201,7 +199,7 @@ class CourseTests(DiscoveryTestMixin, TestCase):
         certificate_type = 'credit'
         id_verification_required = True
         price = 10
-        credit_seat = course.create_or_update_seat(
+        course.create_or_update_seat(
             certificate_type,
             id_verification_required,
             price,
@@ -215,8 +213,7 @@ class CourseTests(DiscoveryTestMixin, TestCase):
             id_verification_required,
             price,
             credit_provider=credit_provider,
-            credit_hours=credit_hours,
-            sku=credit_seat.stockrecords.first().partner_sku,
+            credit_hours=credit_hours
         )
         self.assert_course_seat_valid(
             credit_seat,

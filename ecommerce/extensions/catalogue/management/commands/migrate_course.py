@@ -10,7 +10,6 @@ from django.conf import settings
 from django.contrib.sites.models import Site
 from django.core.management import BaseCommand
 from django.db import transaction
-from django.db.models import Q
 from edx_rest_api_client.client import EdxRestApiClient
 
 from ecommerce.courses.models import Course
@@ -129,24 +128,8 @@ class MigratedCourse:
             price = mode['min_price']
             expires = mode.get('expiration_datetime')
             expires = parse(expires) if expires else None
-            # Have to pass in the sku in case it is an update
-            sku = None
-            if self.course.seat_products.exists():
-                if certificate_type == Course.certificate_type_for_mode('audit'):
-                    # Yields a match if attribute names do not include 'certificate_type'.
-                    certificate_type_query = ~Q(attributes__name='certificate_type')
-                else:
-                    # Yields a match if attribute with name 'certificate_type' matches provided value.
-                    certificate_type_query = Q(
-                        attributes__name='certificate_type',
-                        attribute_values__value_text=certificate_type
-                    )
-                seat = self.course.seat_products.filter(certificate_type_query).first()
-                stock_record = seat and seat.stockrecords.first()
-                if stock_record:
-                    sku = stock_record.partner_sku
             self.course.create_or_update_seat(
-                certificate_type, id_verification_required, price, expires=expires, remove_stale_modes=False, sku=sku
+                certificate_type, id_verification_required, price, expires=expires, remove_stale_modes=False
             )
 
 

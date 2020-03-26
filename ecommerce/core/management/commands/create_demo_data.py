@@ -3,7 +3,6 @@ from __future__ import absolute_import
 import datetime
 
 from django.core.management.base import BaseCommand
-from django.db.models import Q
 from django.utils import timezone
 from oscar.core.loading import get_model
 from waffle.models import Flag
@@ -70,23 +69,8 @@ class Command(BaseCommand):
         })
 
         # Create the audit and verified seats
-        audit_sku = None
-        verified_sku = None
-        if course.seat_products.exists():
-            audit_seat = course.seat_products.filter(~Q(attributes__name='certificate_type')).first()
-            audit_stock_record = audit_seat and audit_seat.stockrecords.first()
-            if audit_stock_record:
-                audit_sku = audit_stock_record.partner_sku
-            verified_seat = course.seat_products.filter(attribute_values__value_text='verified').first()
-            verified_stock_record = verified_seat and verified_seat.stockrecords.first()
-            if verified_stock_record:
-                verified_sku = verified_stock_record.partner_sku
-
-        # Have to pass in the skus in case it is an update
-        course.create_or_update_seat('', False, 0, sku=audit_sku)
-        course.create_or_update_seat(
-            'verified', True, price, expires=expires, create_enrollment_code=True, sku=verified_sku
-        )
+        course.create_or_update_seat('', False, 0)
+        course.create_or_update_seat('verified', True, price, expires=expires, create_enrollment_code=True)
         self.stdout.write(
             self.style.SUCCESS('Created audit and verified seats for [{course_id}]'.format(course_id=course_id))
         )
