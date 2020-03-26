@@ -190,9 +190,9 @@ class Course(models.Model):
             logger.info(
                 'Course seat product with certificate type [%s] for [%s] does not exist. Attempted look up using sku '
                 '[%s]. Instantiated a new instance.',
-                sku,
                 certificate_type,
-                course_id
+                course_id,
+                sku
             )
 
         seat.course = self
