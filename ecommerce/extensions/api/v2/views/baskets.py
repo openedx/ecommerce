@@ -526,8 +526,9 @@ class BasketCalculateView(generics.GenericAPIView):
 
         response = self._calculate_temporary_basket_atomic(basket_owner, request, products, voucher, skus, code)
         if response and use_default_basket:
-            logger.info('bundle debugging 3: Cache key [%s] response [%s] skus [%s] case [%s]',
-                        str(cache_key), str(response), str(skus), str(use_default_basket_case))
+            logger.info('bundle debugging 3: request [%s] url [%s] Cache key [%s] response [%s] skus [%s] case [%s]',
+                        str(request), str(request._request), str(cache_key), str(response), str(skus),  # pylint: disable=protected-access
+                        str(use_default_basket_case))
             TieredCache.set_all_tiers(cache_key, response, settings.ANONYMOUS_BASKET_CALCULATE_CACHE_TIMEOUT)
 
         return Response(response)
