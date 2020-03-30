@@ -285,6 +285,52 @@ class CouponViewSetFunctionalTest(CouponMixin, DiscoveryTestMixin, DiscoveryMock
         coupon = Product.objects.get(title=self.data['title'])
         return self.get_response_json('GET', reverse('api:v2:coupons-detail', args=[coupon.id]))
 
+    @ddt.data(
+        (100, Benefit.PERCENTAGE, 'Enrollment code'),
+        (100, Benefit.FIXED, 'Discount code'),
+        (50, Benefit.PERCENTAGE, 'Discount code'),
+        (50, Benefit.FIXED, 'Discount code'),
+    )
+    @ddt.unpack
+    def test_regular_coupon_coupon_type(self, benefit_value, benefit_type, coupon_type):
+        """Test that the correct coupon_type is returned after a simple coupon creation"""
+        self.data.update({
+            'benefit_value': benefit_value,
+            'benefit_type': benefit_type,
+            'title': 'Test Coupon Type'
+        })
+        details_response = self._create_and_get_coupon_details()
+        self.assertEqual(details_response['coupon_type'], coupon_type)
+
+    @ddt.data(
+        (100, Benefit.PERCENTAGE, 'Enrollment code'),
+        (100, Benefit.FIXED, 'Discount code'),
+        (50, Benefit.PERCENTAGE, 'Discount code'),
+        (50, Benefit.FIXED, 'Discount code'),
+    )
+    @ddt.unpack
+    def test_enterprise_coupon_coupon_type(self, benefit_value, benefit_type, coupon_type):
+        """Test that the correct coupon_type is returned after an enterprise coupon is created"""
+        self.data.update({
+            'benefit_value': benefit_value,
+            'benefit_type': benefit_type
+        })
+        enterprise_customer_id = six.text_type(uuid4())
+        enterprise_catalog_id = six.text_type(uuid4())
+        enterprise_name = 'test enterprise'
+        response = self._create_enterprise_coupon(
+            enterprise_customer_id,
+            enterprise_catalog_id,
+            enterprise_name,
+            ENTERPRISE_COUPONS_LINK
+        )
+        coupon_id = response.json()['coupon_id']
+        details_response = self.get_response_json(
+            'GET',
+            reverse('api:v2:enterprise-coupons-detail', kwargs={'pk': coupon_id})
+        )
+        self.assertEqual(details_response['coupon_type'], coupon_type)
+
     def test_create_coupon_with_same_code_data(self):
         """
         Test creating discount coupon with same code again is invalid.
