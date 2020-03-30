@@ -34,7 +34,7 @@ class ExtendedIndexView(IndexView):
                 Sum('total_incl_tax')
             )['total_incl_tax__sum'] or D('0.00'),
 
-            'hourly_report_dict': self.get_hourly_report(hours=24),
+            'hourly_report_dict': self.get_hourly_report(orders_last_day, hours=24),
             'total_customers_last_day': User.objects.filter(
                 date_joined__gt=datetime_24hrs_ago,
             ).count(),

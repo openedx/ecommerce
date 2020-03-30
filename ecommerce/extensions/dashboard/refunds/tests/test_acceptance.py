@@ -219,7 +219,7 @@ class RefundListViewTests(RefundAcceptanceTestMixin, LiveServerTestCase):
 
     def setUp(self):
         super(RefundListViewTests, self).setUp()
-        self.path = reverse('dashboard:refunds:list')
+        self.path = reverse('dashboard:refunds-list')
 
 
 class RefundDetailViewTests(RefundAcceptanceTestMixin, LiveServerTestCase):
@@ -227,4 +227,4 @@ class RefundDetailViewTests(RefundAcceptanceTestMixin, LiveServerTestCase):
 
     def setUp(self):
         super(RefundDetailViewTests, self).setUp()
-        self.path = reverse('dashboard:refunds:detail', args=[self.refund.id])
+        self.path = reverse('dashboard:refunds-detail', args=[self.refund.id])

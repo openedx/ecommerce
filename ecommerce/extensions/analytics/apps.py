@@ -1,10 +1,10 @@
 from __future__ import absolute_import
 
 from django.conf import settings
-from oscar.apps.analytics import config
+from oscar.apps.analytics import apps
 
 
-class AnalyticsConfig(config.AnalyticsConfig):
+class AnalyticsConfig(apps.AnalyticsConfig):
     name = 'ecommerce.extensions.analytics'
 
     def ready(self):

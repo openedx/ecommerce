@@ -1,1 +1,1 @@
-default_app_config = 'ecommerce.extensions.basket.config.BasketConfig'  # pragma: no cover
+default_app_config = 'ecommerce.extensions.basket.apps.BasketConfig'  # pragma: no cover

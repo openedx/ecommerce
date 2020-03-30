@@ -16,3 +16,7 @@ drf-jwt<1.15.0
 
 # drf-jwt requires drf version > 7.0
 djangorestframework<3.8.0
+
+
+# causing tests failures
+httpretty==0.9.7

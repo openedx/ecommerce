@@ -1,20 +1,24 @@
 from __future__ import absolute_import
 
-from auth_backends.urls import oauth2_urlpatterns
+from django.apps import apps
 from django.conf.urls import url
-from oscar.apps.dashboard import app
+from oscar.apps.dashboard.apps import DashboardConfig as BaseDashboardConfig
 from oscar.core.loading import get_class
 
-from ecommerce.core.views import LogoutView
 
-# Note: Add ecommerce's logout override first to ensure it is registered by Django as the
-# actual logout view. Ecommerce's logout implementation supports different site configuration.
-AUTH_URLS = [url(r'^logout/$', LogoutView.as_view(), name='logout'), ] + oauth2_urlpatterns
+class DashboardConfig(BaseDashboardConfig):
+    name = 'ecommerce.extensions.dashboard'
 
-
-class DashboardApplication(app.DashboardApplication):
-    index_view = get_class('dashboard.views', 'ExtendedIndexView')
-    refunds_app = get_class('dashboard.refunds.app', 'application')
+    # pylint: disable=attribute-defined-outside-init, import-outside-toplevel
+    def ready(self):
+        super().ready()
+        from auth_backends.urls import oauth2_urlpatterns
+        from ecommerce.core.views import LogoutView
+        # Note: Add ecommerce's logout override first to ensure it is registered by Django as the
+        # actual logout view. Ecommerce's logout implementation supports different site configuration.
+        self.AUTH_URLS = [url(r'^logout/$', LogoutView.as_view(), name='logout'), ] + oauth2_urlpatterns
+        self.index_view = get_class('dashboard.views', 'ExtendedIndexView')
+        self.refunds_app = apps.get_app_config('refunds_dashboard')
 
     def get_urls(self):
         urls = [
@@ -23,7 +27,6 @@ class DashboardApplication(app.DashboardApplication):
             url(r'^reports/', self.reports_app.urls),
             url(r'^orders/', self.orders_app.urls),
             url(r'^users/', self.users_app.urls),
-            url(r'^content-blocks/', self.promotions_app.urls),
             url(r'^pages/', self.pages_app.urls),
             url(r'^partners/', self.partners_app.urls),
             url(r'^offers/', self.offers_app.urls),
@@ -34,8 +37,5 @@ class DashboardApplication(app.DashboardApplication):
             url(r'^shipping/', self.shipping_app.urls),
             url(r'^refunds/', self.refunds_app.urls),
         ]
-        urls += AUTH_URLS
+        urls += self.AUTH_URLS
         return self.post_process_urls(urls)
-
-
-application = DashboardApplication()

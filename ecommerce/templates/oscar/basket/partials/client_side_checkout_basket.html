@@ -5,7 +5,7 @@
 {% load widget_tweaks %}
 {% load static %}
 
-{% include 'partials/alert_messages.html' %}
+{% include 'oscar/partials/alert_messages.html' %}
 
 <div id="summary" class="col-sm-5">
     <form action="." method="post" class="row">
@@ -117,7 +117,7 @@
                         {% if voucher_form %}
                             <div class="use-voucher">
                                 <label for="id_code">{% trans "Add coupon code" as tmsg %}{{ tmsg |force_escape }} <span>{% trans "(optional)" as tmsg %}{{ tmsg | force_escape }}</span></label>
-                                {% include 'basket/partials/add_voucher_form.html' %}
+                                {% include 'oscar/basket/partials/add_voucher_form.html' %}
                             </div>
                         {% endif %}
                     {% endif %}

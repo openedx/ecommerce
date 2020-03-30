@@ -1,1 +1,1 @@
-default_app_config = 'ecommerce.extensions.offer.config.OfferConfig'
+default_app_config = 'ecommerce.extensions.offer.apps.OfferConfig'

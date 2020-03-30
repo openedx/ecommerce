@@ -212,7 +212,7 @@ class OrderDetailViewTests(DashboardViewTestMixin, OrderViewTestsMixin, RefundTe
         # Verify a message was passed for display
         data = {
             'link_start': '<a href="{}" target="_blank">'.format(
-                reverse('dashboard:refunds:detail', kwargs={'pk': refund.pk})),
+                reverse('dashboard:refunds-detail', kwargs={'pk': refund.pk})),
             'link_end': '</a>',
             'refund_id': refund.pk
         }

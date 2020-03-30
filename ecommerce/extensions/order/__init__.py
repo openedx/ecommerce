@@ -1,1 +1,1 @@
-default_app_config = 'ecommerce.extensions.order.config.OrderConfig'  # pragma: no cover
+default_app_config = 'ecommerce.extensions.order.apps.OrderConfig'  # pragma: no cover

@@ -10,7 +10,7 @@ django-crispy-forms
 django_extensions
 django-filter
 django-libsass
-django-oscar<1.7
+django-oscar
 django-rest-swagger
 django-simple-history
 django-solo
@@ -48,6 +48,7 @@ requests
 rules
 sailthru-client==2.2.3
 six
+sorl-thumbnail
 stripe==1.70.0
 unicodecsv
 xss-utils

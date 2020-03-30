@@ -1,1 +1,1 @@
-default_app_config = 'ecommerce.extensions.analytics.config.AnalyticsConfig'  # pragma: no cover
+default_app_config = 'ecommerce.extensions.analytics.apps.AnalyticsConfig'  # pragma: no cover

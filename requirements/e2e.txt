@@ -9,7 +9,7 @@ certifi==2019.11.28       # via requests
 chardet==3.0.4            # via requests
 edx-rest-api-client==1.9.2  # via -c requirements/pins.txt, -r requirements/e2e.in
 idna==2.9                 # via requests
-importlib-metadata==1.5.0  # via pluggy, pytest, pytest-randomly
+importlib-metadata==1.5.2  # via pluggy, pytest, pytest-randomly
 more-itertools==8.2.0     # via pytest
 packaging==20.3           # via pytest
 pathlib2==2.3.5           # via pytest
