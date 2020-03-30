@@ -58,3 +58,6 @@ zeep
 git+https://github.com/django-compressor/django-appconf.git@5169ce2c92d9836e0b3ab3ec645727d9d5225d1a#egg=django-appconf
 
 git+https://github.com/python-social-auth/social-app-django.git@c00d23c2b45c3317bd35b15ad1b959338689cef8#egg=social-auth-app-django
+
+# adds Django 2.1 support (still need Django 2.2 support)
+git+https://github.com/django-haystack/django-haystack.git@78b8b0ce7492ee14cfe8288461d4afe5d490c177#egg=django-haystack

@@ -31,7 +31,7 @@ django-crum==0.7.5        # via edx-rbac
 django-extensions==2.2.9  # via -r requirements/base.in
 django-extra-views==0.11.0  # via django-oscar
 django-filter==2.2.0      # via -r requirements/base.in
-django-haystack==2.8.1    # via django-oscar
+git+https://github.com/django-haystack/django-haystack.git@78b8b0ce7492ee14cfe8288461d4afe5d490c177#egg=django-haystack  # via -r requirements/base.in, django-oscar
 django-libsass==0.8       # via -r requirements/base.in
 django-model-utils==3.2.0  # via edx-rbac
 django-oscar==2.0.4       # via -r requirements/base.in
@@ -57,7 +57,7 @@ edx-django-utils==3.1     # via -r requirements/base.in, edx-drf-extensions
 edx-drf-extensions==5.0.2  # via -r requirements/base.in, edx-rbac
 edx-ecommerce-worker==0.7.2  # via -r requirements/base.in
 edx-opaque-keys==2.0.2    # via -r requirements/base.in, edx-drf-extensions
-edx-rbac==1.1.1           # via -r requirements/base.in
+edx-rbac==1.1.2           # via -r requirements/base.in
 edx-rest-api-client==1.9.2  # via -c requirements/pins.txt, -r requirements/base.in, edx-ecommerce-worker
 factory-boy==2.12.0       # via django-oscar
 faker==4.0.2              # via factory-boy
