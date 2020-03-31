@@ -512,13 +512,16 @@ class BasketCalculateView(generics.GenericAPIView):
             )
 
         cache_key = None
+        bundle_id = request.GET.get('bundle')
         if use_default_basket:
             # For an anonymous user we can directly get the cached price, because
             # there can't be any enrollments or entitlements.
+            # We want bundle_id to be in the cache_key, since calls without bundle_id will produce different results
             cache_key = get_cache_key(
-                site_comain=request.site,
+                site_domain=request.site,
                 resource_name='calculate',
-                skus=skus
+                skus=skus,
+                bundle_id=bundle_id
             )
             cached_response = TieredCache.get_cached_response(cache_key)
             logger.info('bundle debugging 2: request [%s] referrer [%s] url [%s] Cache key [%s] response [%s]'
