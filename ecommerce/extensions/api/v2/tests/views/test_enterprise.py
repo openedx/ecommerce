@@ -958,7 +958,7 @@ class EnterpriseCouponViewSetRbacTests(
         response = self.get_response(
             'GET',
             reverse(
-                'api:v2:enterprise-coupons-(?P<enterprise-id>.+)/overview-list',
+                'api:v2:enterprise-coupons-overview',
                 kwargs={'enterprise_id': self.data['enterprise_customer']['id']}
             )
         )
@@ -984,7 +984,7 @@ class EnterpriseCouponViewSetRbacTests(
         response = self.get_response(
             'GET',
             reverse(
-                'api:v2:enterprise-coupons-(?P<enterprise-id>.+)/search-list',
+                'api:v2:enterprise-coupons-search',
                 kwargs={'enterprise_id': self.data['enterprise_customer']['id']}
             )
         )
@@ -1001,7 +1001,7 @@ class EnterpriseCouponViewSetRbacTests(
         response = self.get_response(
             'GET',
             reverse(
-                'api:v2:enterprise-coupons-(?P<enterprise-id>.+)/search-list',
+                'api:v2:enterprise-coupons-search',
                 kwargs={'enterprise_id': self.data['enterprise_customer']['id']}
             )
         )
@@ -1014,7 +1014,7 @@ class EnterpriseCouponViewSetRbacTests(
         response = self.get_response(
             'GET',
             reverse(
-                'api:v2:enterprise-coupons-(?P<enterprise-id>.+)/search-list',
+                'api:v2:enterprise-coupons-search',
                 kwargs={'enterprise_id': self.data['enterprise_customer']['id']}
             ),
             data={'user_email': 'iamsofake@notreal.com'}
@@ -1029,7 +1029,7 @@ class EnterpriseCouponViewSetRbacTests(
         response = self.get_response(
             'GET',
             reverse(
-                'api:v2:enterprise-coupons-(?P<enterprise-id>.+)/search-list',
+                'api:v2:enterprise-coupons-search',
                 kwargs={'enterprise_id': self.data['enterprise_customer']['id']}
             ),
             data={'voucher_code': '3456QWTERF46PS1R'}
@@ -1055,7 +1055,7 @@ class EnterpriseCouponViewSetRbacTests(
         response = self.get_response(
             'GET',
             reverse(
-                'api:v2:enterprise-coupons-(?P<enterprise-id>.+)/search-list',
+                'api:v2:enterprise-coupons-search',
                 kwargs={'enterprise_id': self.data['enterprise_customer']['id']}
             ),
             data={'user_email': 'iHaveNoUser@object.com'}
@@ -1086,7 +1086,7 @@ class EnterpriseCouponViewSetRbacTests(
         response = self.get_response(
             'GET',
             reverse(
-                'api:v2:enterprise-coupons-(?P<enterprise-id>.+)/search-list',
+                'api:v2:enterprise-coupons-search',
                 kwargs={'enterprise_id': self.data['enterprise_customer']['id']}
             ),
             data={'voucher_code': 'ABCDEFGH1234567'}
@@ -1114,7 +1114,7 @@ class EnterpriseCouponViewSetRbacTests(
         response = self.get_response(
             'GET',
             reverse(
-                'api:v2:enterprise-coupons-(?P<enterprise-id>.+)/search-list',
+                'api:v2:enterprise-coupons-search',
                 kwargs={'enterprise_id': self.data['enterprise_customer']['id']}
             ),
             data={'voucher_code': 'ABCDEFGH1234567'}
@@ -1175,7 +1175,7 @@ class EnterpriseCouponViewSetRbacTests(
         response = self.get_response(
             'GET',
             reverse(
-                'api:v2:enterprise-coupons-(?P<enterprise-id>.+)/search-list',
+                'api:v2:enterprise-coupons-search',
                 kwargs={'enterprise_id': self.data['enterprise_customer']['id']}
             ),
             data={'user_email': self.user.email}
@@ -1230,7 +1230,7 @@ class EnterpriseCouponViewSetRbacTests(
         response = self.get_response(
             'GET',
             reverse(
-                'api:v2:enterprise-coupons-(?P<enterprise-id>.+)/overview-list',
+                'api:v2:enterprise-coupons-overview',
                 kwargs={'enterprise_id': self.data['enterprise_customer']['id']}
             )
         )
@@ -1254,7 +1254,7 @@ class EnterpriseCouponViewSetRbacTests(
         response = self.get_response(
             'GET',
             reverse(
-                'api:v2:enterprise-coupons-(?P<enterprise-id>.+)/overview-list',
+                'api:v2:enterprise-coupons-overview',
                 kwargs={'enterprise_id': self.data['enterprise_customer']['id']}
             )
         )
@@ -1271,7 +1271,7 @@ class EnterpriseCouponViewSetRbacTests(
         response = self.get_response(
             'GET',
             reverse(
-                'api:v2:enterprise-coupons-(?P<enterprise-id>.+)/overview-list',
+                'api:v2:enterprise-coupons-overview',
                 kwargs={'enterprise_id': self.data['enterprise_customer']['id']}
             )
         )
@@ -1291,7 +1291,7 @@ class EnterpriseCouponViewSetRbacTests(
         response = self.get_response(
             'GET',
             reverse(
-                'api:v2:enterprise-coupons-(?P<enterprise-id>.+)/overview-list',
+                'api:v2:enterprise-coupons-overview',
                 kwargs={'enterprise_id': self.data['enterprise_customer']['id']}
             )
         )
@@ -1310,7 +1310,7 @@ class EnterpriseCouponViewSetRbacTests(
         response = self.get_response(
             'GET',
             reverse(
-                'api:v2:enterprise-coupons-(?P<enterprise-id>.+)/overview-list',
+                'api:v2:enterprise-coupons-overview',
                 kwargs={'enterprise_id': self.data['enterprise_customer']['id']}
             )
         )
@@ -1338,7 +1338,7 @@ class EnterpriseCouponViewSetRbacTests(
         response = self.get_response(
             'GET',
             reverse(
-                'api:v2:enterprise-coupons-(?P<enterprise-id>.+)/overview-list',
+                'api:v2:enterprise-coupons-overview',
                 kwargs={'enterprise_id': self.data['enterprise_customer']['id']}
             )
         )
@@ -1391,7 +1391,7 @@ class EnterpriseCouponViewSetRbacTests(
         overview_response = self.get_response_json(
             'GET',
             reverse(
-                'api:v2:enterprise-coupons-(?P<enterprise-id>.+)/overview-list',
+                'api:v2:enterprise-coupons-overview',
                 kwargs={'enterprise_id': enterprise_id}
             )
         )
@@ -1436,7 +1436,7 @@ class EnterpriseCouponViewSetRbacTests(
         overview_response = self.get_response_json(
             'GET',
             reverse(
-                'api:v2:enterprise-coupons-(?P<enterprise-id>.+)/overview-list',
+                'api:v2:enterprise-coupons-overview',
                 kwargs={'enterprise_id': enterprise_id}
             )
         )
@@ -1454,7 +1454,7 @@ class EnterpriseCouponViewSetRbacTests(
         overview_response = self.get_response_json(
             'GET',
             reverse(
-                'api:v2:enterprise-coupons-(?P<enterprise-id>.+)/overview-list',
+                'api:v2:enterprise-coupons-overview',
                 kwargs={'enterprise_id': enterprise_id},
             ),
             data={'filter': 'active'}
@@ -1508,7 +1508,7 @@ class EnterpriseCouponViewSetRbacTests(
 
         # Build request URL with `coupon_id` query parameter
         base_url = reverse(
-            'api:v2:enterprise-coupons-(?P<enterprise-id>.+)/overview-list',
+            'api:v2:enterprise-coupons-overview',
             kwargs={'enterprise_id': enterprise_id}
         )
         coupon_id = expected_results[0].get('id')
@@ -1687,7 +1687,7 @@ class EnterpriseCouponViewSetRbacTests(
         coupon_overview_response = self.get_response_json(
             'GET',
             reverse(
-                'api:v2:enterprise-coupons-(?P<enterprise-id>.+)/overview-list',
+                'api:v2:enterprise-coupons-overview',
                 kwargs={'enterprise_id': enterprise_id}
             )
         )

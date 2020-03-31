@@ -147,7 +147,7 @@ class VoucherViewSetTests(DiscoveryMockMixin, DiscoveryTestMixin, LmsApiMockMixi
         return products, request, voucher
 
     def build_offers_url(self, voucher):
-        return '{path}?code={code}'.format(path=reverse('api:v2:vouchers-offers-list'), code=voucher.code)
+        return '{path}?code={code}'.format(path=reverse('api:v2:vouchers-offers'), code=voucher.code)
 
     @httpretty.activate
     def test_omitting_unavailable_seats(self):
