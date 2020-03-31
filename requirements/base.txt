@@ -57,7 +57,7 @@ edx-django-utils==3.1     # via -r requirements/base.in, edx-drf-extensions
 edx-drf-extensions==5.0.2  # via -r requirements/base.in, edx-rbac
 edx-ecommerce-worker==0.7.2  # via -r requirements/base.in
 edx-opaque-keys==2.0.2    # via -r requirements/base.in, edx-drf-extensions
-edx-rbac==1.1.1           # via -r requirements/base.in
+edx-rbac==1.1.2           # via -r requirements/base.in
 edx-rest-api-client==1.9.2  # via -c requirements/pins.txt, -r requirements/base.in, edx-ecommerce-worker
 factory-boy==2.12.0       # via django-oscar
 faker==4.0.2              # via factory-boy
