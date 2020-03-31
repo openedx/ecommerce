@@ -521,14 +521,19 @@ class BasketCalculateView(generics.GenericAPIView):
                 skus=skus
             )
             cached_response = TieredCache.get_cached_response(cache_key)
+            logger.info('bundle debugging 2: request [%s] referrer [%s] url [%s] Cache key [%s] response [%s]'
+                        'skus [%s] case [%s] basket_owner [%s]',
+                        str(request), str(request.META.get('HTTP_REFERER')), str(request._request), str(cache_key),  # pylint: disable=protected-access
+                        str(cached_response), str(skus), str(use_default_basket_case), str(basket_owner))
             if cached_response.is_found:
                 return Response(cached_response.value)
 
         response = self._calculate_temporary_basket_atomic(basket_owner, request, products, voucher, skus, code)
         if response and use_default_basket:
-            logger.info('bundle debugging 3: request [%s] url [%s] Cache key [%s] response [%s] skus [%s] case [%s]',
-                        str(request), str(request._request), str(cache_key), str(response), str(skus),  # pylint: disable=protected-access
-                        str(use_default_basket_case))
+            logger.info('bundle debugging 3: request [%s] referrer [%s] url [%s] Cache key [%s] response [%s]'
+                        'skus [%s] case [%s] basket_owner [%s]',
+                        str(request), str(request.META.get('HTTP_REFERER')), str(request._request), str(cache_key),  # pylint: disable=protected-access
+                        str(response), str(skus), str(use_default_basket_case), str(basket_owner))
             TieredCache.set_all_tiers(cache_key, response, settings.ANONYMOUS_BASKET_CALCULATE_CACHE_TIMEOUT)
 
         return Response(response)
