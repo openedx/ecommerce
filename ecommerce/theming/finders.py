@@ -57,6 +57,12 @@ class ThemeFilesFinder(BaseFinder):
 
         super(ThemeFilesFinder, self).__init__(*args, **kwargs)
 
+    def check(self, **kwargs):  # pylint: disable=unused-argument
+        """
+        Verifies the finder is configured correctly.
+        """
+        return []  # pragma: no cover
+
     def list(self, ignore_patterns):
         """
         List all files in all theme storages.

@@ -16,7 +16,8 @@ class PaymentProcessorResponseInline(admin.TabularInline):
     can_delete = False
     readonly_fields = ('id', 'processor_name', 'transaction_id', 'created', 'response')
 
-    def has_add_permission(self, request):
+    # TODO: Remove pylint disable after Django 2.2 upgrade
+    def has_add_permission(self, request, obj=None):  # pylint: disable=arguments-differ,unused-argument
         # Users are not allowed to add PaymentProcessorResponse objects
         return False
 
@@ -26,7 +27,8 @@ class BasketAttributeInLine(admin.TabularInline):
     readonly_fields = ('id', 'attribute_type', 'value_text',)
     extra = 0
 
-    def has_add_permission(self, request):
+    # TODO: Remove pylint disable after Django 2.2 upgrade
+    def has_add_permission(self, request, obj=None):  # pylint: disable=arguments-differ,unused-argument
         # Users are not allowed to add BasketAttribute objects
         return False
 
