@@ -1,17 +1,13 @@
 -r test.txt
 -r docs.txt
--r e2e.txt
 
 django-debug-toolbar
 
 # i18n
 transifex-client
-edx-i18n-tools
 
 # Visual Studio Code Debugger
 ptvsd
 
 # For devserver code reloading
 pyinotify==0.9.6 # This breaks OSX virtualenv installation
-
-python-memcached==1.58

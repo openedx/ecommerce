@@ -10,7 +10,7 @@ analytics-python==1.2.9   # via -r requirements/test.txt
 anyjson==0.3.3            # via -r requirements/test.txt, kombu
 appdirs==1.4.3            # via -r requirements/test.txt, zeep
 astroid==2.3.3            # via -r requirements/test.txt, pylint
-attrs==19.3.0             # via -r requirements/e2e.txt, -r requirements/test.txt, pytest, zeep
+attrs==19.3.0             # via -r requirements/test.txt, pytest, zeep
 babel==2.8.0              # via -r requirements/docs.txt, -r requirements/test.txt, django-oscar, django-phonenumber-field, sphinx
 beautifulsoup4==4.8.2     # via -r requirements/test.txt, webtest
 billiard==3.3.0.23        # via -r requirements/test.txt, celery
@@ -18,9 +18,9 @@ bleach==3.1.4             # via -r requirements/test.txt
 bok-choy==1.0.1           # via -r requirements/test.txt
 cached-property==1.5.1    # via -r requirements/test.txt, zeep
 celery==3.1.26.post2      # via -r requirements/test.txt, edx-ecommerce-worker
-certifi==2019.11.28       # via -r requirements/docs.txt, -r requirements/e2e.txt, -r requirements/test.txt, requests
+certifi==2019.11.28       # via -r requirements/docs.txt, -r requirements/test.txt, requests
 cffi==1.14.0              # via -r requirements/test.txt, cryptography
-chardet==3.0.4            # via -r requirements/docs.txt, -r requirements/e2e.txt, -r requirements/test.txt, requests
+chardet==3.0.4            # via -r requirements/docs.txt, -r requirements/test.txt, requests
 coreapi==2.3.3            # via -r requirements/test.txt, django-rest-swagger, openapi-codec
 coreschema==0.0.4         # via -r requirements/test.txt, coreapi
 coverage==5.0.4           # via -r requirements/test.txt, pytest-cov
@@ -66,10 +66,10 @@ edx-django-sites-extensions==2.4.3  # via -r requirements/test.txt
 edx-django-utils==3.1     # via -r requirements/test.txt, edx-drf-extensions
 edx-drf-extensions==5.0.2  # via -r requirements/test.txt, edx-rbac
 edx-ecommerce-worker==0.7.2  # via -r requirements/test.txt
-edx-i18n-tools==0.5.0     # via -r requirements/dev.in
+edx-i18n-tools==0.5.0     # via -r requirements/test.txt
 edx-opaque-keys==2.0.2    # via -r requirements/test.txt, edx-drf-extensions
 edx-rbac==1.1.2           # via -r requirements/test.txt
-edx-rest-api-client==1.9.2  # via -r requirements/e2e.txt, -r requirements/test.txt, edx-ecommerce-worker
+edx-rest-api-client==1.9.2  # via -r requirements/test.txt, edx-ecommerce-worker
 edx-sphinx-theme==1.0.2   # via -r requirements/docs.txt
 factory-boy==2.12.0       # via -r requirements/test.txt, django-oscar
 faker==4.0.2              # via -r requirements/test.txt, factory-boy
@@ -77,9 +77,9 @@ filelock==3.0.12          # via -r requirements/test.txt, tox
 freezegun==0.3.15         # via -r requirements/test.txt
 future==0.18.2            # via -r requirements/test.txt, pyjwkest
 httpretty==0.9.7          # via -r requirements/test.txt
-idna==2.9                 # via -r requirements/docs.txt, -r requirements/e2e.txt, -r requirements/test.txt, requests
+idna==2.9                 # via -r requirements/docs.txt, -r requirements/test.txt, requests
 imagesize==1.2.0          # via -r requirements/docs.txt, sphinx
-importlib-metadata==1.6.0  # via -r requirements/e2e.txt, -r requirements/test.txt, inflect, pluggy, pytest, pytest-randomly, tox
+importlib-metadata==1.6.0  # via -r requirements/test.txt, inflect, pluggy, pytest, pytest-randomly, tox
 inflect==3.0.2            # via -r requirements/test.txt, jinja2-pluralize
 isodate==0.6.0            # via -r requirements/test.txt, zeep
 isort==4.3.21             # via -r requirements/test.txt, pylint
@@ -97,26 +97,26 @@ markupsafe==1.1.1         # via -r requirements/docs.txt, -r requirements/test.t
 mccabe==0.6.1             # via -r requirements/test.txt, pylint
 mock-django==0.6.10       # via -r requirements/test.txt
 mock==3.0.5               # via -r requirements/test.txt, mock-django
-more-itertools==8.2.0     # via -r requirements/e2e.txt, -r requirements/test.txt, pytest
+more-itertools==8.2.0     # via -r requirements/test.txt, pytest
 mysqlclient==1.4.6        # via -r requirements/test.txt
 ndg-httpsclient==0.5.1    # via -r requirements/test.txt
 newrelic==4.20.1.121      # via -r requirements/test.txt, edx-django-utils
 oauthlib==3.1.0           # via -r requirements/test.txt, requests-oauthlib, social-auth-core
 openapi-codec==1.3.2      # via -r requirements/test.txt, django-rest-swagger
-packaging==20.3           # via -r requirements/e2e.txt, -r requirements/test.txt, pytest, tox
+packaging==20.3           # via -r requirements/test.txt, pytest, tox
 path.py==7.2              # via -r requirements/test.txt, edx-i18n-tools
-pathlib2==2.3.5           # via -r requirements/e2e.txt, -r requirements/test.txt, pytest
+pathlib2==2.3.5           # via -r requirements/test.txt, pytest
 paypalrestsdk==1.13.1     # via -r requirements/test.txt
 pbr==5.4.4                # via -r requirements/test.txt, stevedore
 phonenumbers==8.12.1      # via -r requirements/test.txt, django-oscar, django-phonenumber-field
-pillow==7.0.0             # via -r requirements/test.txt, django-oscar
-pluggy==0.13.1            # via -r requirements/e2e.txt, -r requirements/test.txt, diff-cover, pytest, tox
-polib==1.1.0              # via edx-i18n-tools
+pillow==7.1.0             # via -r requirements/test.txt, django-oscar
+pluggy==0.13.1            # via -r requirements/test.txt, diff-cover, pytest, tox
+polib==1.1.0              # via -r requirements/test.txt, edx-i18n-tools
 premailer==2.9.2          # via -r requirements/test.txt
 psutil==1.2.1             # via -r requirements/test.txt, edx-django-utils
 ptvsd==4.3.2              # via -r requirements/dev.in
 purl==1.5                 # via -r requirements/test.txt, django-oscar
-py==1.8.1                 # via -r requirements/e2e.txt, -r requirements/test.txt, pytest, tox
+py==1.8.1                 # via -r requirements/test.txt, pytest, tox
 pyasn1==0.4.8             # via -r requirements/test.txt, ndg-httpsclient
 pycodestyle==2.5.0        # via -r requirements/test.txt
 pycountry==17.1.8         # via -r requirements/test.txt
@@ -125,25 +125,25 @@ pycryptodomex==3.9.7      # via -r requirements/test.txt, pyjwkest
 pygments==2.6.1           # via -r requirements/docs.txt, -r requirements/test.txt, diff-cover, sphinx
 pyinotify==0.9.6          # via -r requirements/dev.in
 pyjwkest==1.4.2           # via -r requirements/test.txt, edx-drf-extensions
-pyjwt==1.7.1              # via -r requirements/e2e.txt, -r requirements/test.txt, drf-jwt, edx-auth-backends, edx-rest-api-client, social-auth-core
+pyjwt==1.7.1              # via -r requirements/test.txt, drf-jwt, edx-auth-backends, edx-rest-api-client, social-auth-core
 pylint==2.4.4             # via -r requirements/test.txt
 pymongo==3.10.1           # via -r requirements/test.txt, edx-opaque-keys
 pyopenssl==19.1.0         # via -r requirements/test.txt, ndg-httpsclient, paypalrestsdk
-pyparsing==2.4.6          # via -r requirements/e2e.txt, -r requirements/test.txt, packaging
-pytest-base-url==1.4.1    # via -r requirements/e2e.txt, pytest-selenium
+pyparsing==2.4.6          # via -r requirements/test.txt, packaging
+pytest-base-url==1.4.1    # via -r requirements/test.txt, pytest-selenium
 pytest-cov==2.8.1         # via -r requirements/test.txt
 pytest-django-ordering==1.2.0  # via -r requirements/test.txt
 pytest-django==3.9.0      # via -r requirements/test.txt, pytest-django-ordering
-pytest-html==1.22.1       # via -r requirements/e2e.txt, pytest-selenium
-pytest-metadata==1.8.0    # via -r requirements/e2e.txt, pytest-html
-pytest-randomly==3.2.1    # via -r requirements/e2e.txt
-pytest-selenium==1.17.0   # via -r requirements/e2e.txt
-pytest-timeout==1.3.4     # via -r requirements/e2e.txt
-pytest-variables==1.9.0   # via -r requirements/e2e.txt, pytest-selenium
-pytest==5.3.5             # via -r requirements/e2e.txt, -r requirements/test.txt, pytest-base-url, pytest-cov, pytest-django, pytest-django-ordering, pytest-html, pytest-metadata, pytest-randomly, pytest-selenium, pytest-timeout, pytest-variables
+pytest-html==1.22.1       # via -r requirements/test.txt, pytest-selenium
+pytest-metadata==1.8.0    # via -r requirements/test.txt, pytest-html
+pytest-randomly==3.2.1    # via -r requirements/test.txt
+pytest-selenium==1.17.0   # via -r requirements/test.txt
+pytest-timeout==1.3.4     # via -r requirements/test.txt
+pytest-variables==1.9.0   # via -r requirements/test.txt, pytest-selenium
+pytest==5.3.5             # via -r requirements/test.txt, pytest-base-url, pytest-cov, pytest-django, pytest-django-ordering, pytest-html, pytest-metadata, pytest-randomly, pytest-selenium, pytest-timeout, pytest-variables
 python-dateutil==2.8.1    # via -r requirements/test.txt, analytics-python, edx-drf-extensions, faker, freezegun
-python-dotenv==0.12.0     # via -r requirements/e2e.txt
-python-memcached==1.58    # via -r requirements/dev.in
+python-dotenv==0.12.0     # via -r requirements/test.txt
+python-memcached==1.58    # via -r requirements/test.txt
 python-slugify==1.2.6     # via transifex-client
 python3-openid==3.1.0 ; python_version >= "3"  # via -r requirements/test.txt, social-auth-core
 pytz==2016.10             # via -r requirements/docs.txt, -r requirements/test.txt, babel, celery, django, zeep
@@ -151,17 +151,17 @@ pyyaml==5.3.1             # via -r requirements/test.txt, edx-django-release-uti
 rcssmin==1.0.6            # via -r requirements/test.txt, django-compressor
 requests-oauthlib==1.3.0  # via -r requirements/test.txt, social-auth-core
 requests-toolbelt==0.9.1  # via -r requirements/test.txt, zeep
-requests==2.23.0          # via -r requirements/docs.txt, -r requirements/e2e.txt, -r requirements/test.txt, analytics-python, coreapi, edx-drf-extensions, edx-rest-api-client, paypalrestsdk, pyjwkest, pytest-base-url, pytest-selenium, requests-oauthlib, requests-toolbelt, responses, sailthru-client, slumber, social-auth-core, sphinx, stripe, transifex-client, zeep
+requests==2.23.0          # via -r requirements/docs.txt, -r requirements/test.txt, analytics-python, coreapi, edx-drf-extensions, edx-rest-api-client, paypalrestsdk, pyjwkest, pytest-base-url, pytest-selenium, requests-oauthlib, requests-toolbelt, responses, sailthru-client, slumber, social-auth-core, sphinx, stripe, transifex-client, zeep
 responses==0.10.12        # via -r requirements/test.txt
 rest-condition==1.0.3     # via -r requirements/test.txt, edx-drf-extensions
 rjsmin==1.1.0             # via -r requirements/test.txt, django-compressor
 rules==2.2                # via -r requirements/test.txt
 sailthru-client==2.2.3    # via -r requirements/test.txt
-selenium==3.141.0         # via -r requirements/e2e.txt, -r requirements/test.txt, bok-choy, pytest-selenium
+selenium==3.141.0         # via -r requirements/test.txt, bok-choy, pytest-selenium
 semantic-version==2.8.4   # via -r requirements/test.txt, edx-drf-extensions
 simplejson==3.17.0        # via -r requirements/test.txt, django-rest-swagger, sailthru-client
-six==1.14.0               # via -r requirements/docs.txt, -r requirements/e2e.txt, -r requirements/test.txt, analytics-python, astroid, bleach, bok-choy, cryptography, diff-cover, django-compressor, django-extensions, django-extra-views, django-simple-history, django-waffle, djangorestframework-csv, edx-auth-backends, edx-django-release-util, edx-drf-extensions, edx-i18n-tools, edx-opaque-keys, edx-rbac, edx-sphinx-theme, freezegun, httpretty, isodate, libsass, mock, packaging, pathlib2, paypalrestsdk, purl, pyjwkest, pyopenssl, python-dateutil, python-memcached, responses, social-auth-app-django, social-auth-core, sphinx, stevedore, tox, transifex-client, webtest, zeep
-slumber==0.7.1            # via -r requirements/e2e.txt, -r requirements/test.txt, edx-rest-api-client
+six==1.14.0               # via -r requirements/docs.txt, -r requirements/test.txt, analytics-python, astroid, bleach, bok-choy, cryptography, diff-cover, django-compressor, django-extensions, django-extra-views, django-simple-history, django-waffle, djangorestframework-csv, edx-auth-backends, edx-django-release-util, edx-drf-extensions, edx-i18n-tools, edx-opaque-keys, edx-rbac, edx-sphinx-theme, freezegun, httpretty, isodate, libsass, mock, packaging, pathlib2, paypalrestsdk, purl, pyjwkest, pyopenssl, python-dateutil, python-memcached, responses, social-auth-app-django, social-auth-core, sphinx, stevedore, tox, transifex-client, webtest, zeep
+slumber==0.7.1            # via -r requirements/test.txt, edx-rest-api-client
 snowballstemmer==2.0.0    # via -r requirements/docs.txt, sphinx
 git+https://github.com/python-social-auth/social-app-django.git@c00d23c2b45c3317bd35b15ad1b959338689cef8#egg=social-auth-app-django  # via -r requirements/test.txt, edx-auth-backends
 social-auth-core==3.3.2   # via -r requirements/test.txt, edx-auth-backends, social-auth-app-django
@@ -181,14 +181,14 @@ typed-ast==1.4.1          # via -r requirements/test.txt, astroid
 unicodecsv==0.14.1        # via -r requirements/test.txt, djangorestframework-csv
 unidecode==1.1.1          # via python-slugify
 uritemplate==3.0.1        # via -r requirements/test.txt, coreapi
-urllib3==1.25.8           # via -r requirements/docs.txt, -r requirements/e2e.txt, -r requirements/test.txt, requests, selenium, transifex-client
+urllib3==1.25.8           # via -r requirements/docs.txt, -r requirements/test.txt, requests, selenium, transifex-client
 virtualenv==16.7.9        # via -r requirements/test.txt, tox
 waitress==1.4.3           # via -r requirements/test.txt, webtest
-wcwidth==0.1.9            # via -r requirements/e2e.txt, -r requirements/test.txt, pytest
+wcwidth==0.1.9            # via -r requirements/test.txt, pytest
 webencodings==0.5.1       # via -r requirements/test.txt, bleach
 webob==1.8.6              # via -r requirements/test.txt, webtest
 webtest==2.0.34           # via -r requirements/test.txt, django-webtest
 wrapt==1.11.2             # via -r requirements/test.txt, astroid
 xss-utils==0.1.2          # via -r requirements/test.txt
 zeep==3.4.0               # via -r requirements/test.txt
-zipp==1.2.0               # via -r requirements/e2e.txt, -r requirements/test.txt, importlib-metadata
+zipp==1.2.0               # via -r requirements/test.txt, importlib-metadata

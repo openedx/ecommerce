@@ -1,6 +1,7 @@
 NODE_BIN=./node_modules/.bin
 DIFF_COVER_BASE_BRANCH=master
 PYTHON_ENV=py35
+DJANGO_ENV_VAR=$(if $(DJANGO_ENV),$(DJANGO_ENV),django111)
 
 help:
 	@echo ''
@@ -72,7 +73,7 @@ run_pycodestyle: requirements.tox
 run_pep8: run_pycodestyle
 
 run_pylint: requirements.tox
-	tox -e $(PYTHON_ENV)-pylint
+	tox -e $(PYTHON_ENV)-${DJANGO_ENV_VAR}-pylint
 
 quality: run_check_isort run_pycodestyle run_pylint
 
@@ -82,19 +83,19 @@ validate_js:
 	$(NODE_BIN)/gulp lint
 
 validate_python: clean requirements.tox
-	tox -e $(PYTHON_ENV)-tests
+	tox -e $(PYTHON_ENV)-${DJANGO_ENV_VAR}-tests
 
 fast_validate_python: clean requirements.tox
-	DISABLE_ACCEPTANCE_TESTS=True tox -e $(PYTHON_ENV)-tests
+	DISABLE_ACCEPTANCE_TESTS=True tox -e $(PYTHON_ENV)-${DJANGO_ENV_VAR}-tests
 
 validate: validate_python validate_js quality
 
 theme_static: requirements.tox
-	tox -e $(PYTHON_ENV)-theme_static
+	tox -e $(PYTHON_ENV)-${DJANGO_ENV_VAR}-theme_static
 
 static: requirements.js theme_static requirements.tox
 	$(NODE_BIN)/r.js -o build.js
-	tox -e $(PYTHON_ENV)-static
+	tox -e $(PYTHON_ENV)-${DJANGO_ENV_VAR}-static
 
 html_coverage: requirements.tox
 	tox -e $(PYTHON_ENV)-coverage_html
@@ -138,7 +139,7 @@ validate_translations: requirements.tox
 
 # Scan the Django models in all installed apps in this project for restricted field names
 check_keywords: requirements.tox
-	tox -e $(PYTHON_ENV)-check_keywords
+	tox -e $(PYTHON_ENV)-${DJANGO_ENV_VAR}-check_keywords
 
 export CUSTOM_COMPILE_COMMAND = make upgrade
 upgrade: ## update the requirements/*.txt files with the latest packages satisfying requirements/*.in
@@ -151,6 +152,9 @@ upgrade: ## update the requirements/*.txt files with the latest packages satisfy
 	pip-compile --rebuild --upgrade -o requirements/test.txt requirements/test.in
 	pip-compile --rebuild --upgrade -o requirements/dev.txt requirements/dev.in
 	pip-compile --rebuild --upgrade -o requirements/production.txt requirements/production.in
+	# Let tox control the Django version for tests
+	sed '/^[dD]jango==/d' requirements/test.txt > requirements/test.tmp
+	mv requirements/test.tmp requirements/test.txt
 
 # Targets in a Makefile which do not produce an output file with the same name as the target name
 .PHONY: help requirements migrate serve clean validate_python quality validate_js validate html_coverage e2e \

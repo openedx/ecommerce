@@ -32,24 +32,63 @@ script:
   - docker exec -t -e TRAVIS=1 ecommerce_testing bash -c "
       cd /edx/app/ecommerce/ecommerce/ &&
       PATH=\$PATH:/edx/app/ecommerce/nodeenvs/ecommerce/bin:/snap/bin
-      make $TARGETS
+      DJANGO_ENV=$DJANGO_ENV make $TARGETS
     "
 
 matrix:
   include:
     - python: 3.5
       env:
+        DJANGO_ENV=django111
         TESTNAME=quality-and-js
         TARGETS="requirements.js check_translations_up_to_date validate_translations clean_static static quality validate_js check_keywords"
     - python: 3.5
-      env: TESTNAME=test-python TARGETS="requirements.js clean_static static validate_python"
-    - python: 3.6
       env:
-        TESTNAME=quality-and-js-.3.6
+        DJANGO_ENV=django22
+        TESTNAME=quality-and-js
         TARGETS="requirements.js check_translations_up_to_date validate_translations clean_static static quality validate_js check_keywords"
-    - python: 3.6
-      env: TESTNAME=test-python-3.6 TARGETS="requirements.js clean_static static validate_python"
+    - python: 3.5
+      env:
+        DJANGO_ENV=django111
+        TESTNAME=test-python
+        TARGETS="requirements.js clean_static static validate_python"
       after_success:
         - pip install -U codecov
         - docker exec ecommerce_testing /edx/app/ecommerce/ecommerce/.travis/run_coverage.sh
         - codecov
+    - python: 3.5
+      env:
+        DJANGO_ENV=django20
+        TESTNAME=test-python
+        TARGETS="requirements.js clean_static static validate_python"
+    - python: 3.5
+      env:
+        DJANGO_ENV=django21
+        TESTNAME=test-python
+        TARGETS="requirements.js clean_static static validate_python"
+    - python: 3.5
+      env:
+        DJANGO_ENV=django22
+        TESTNAME=test-python
+        TARGETS="requirements.js clean_static static validate_python"
+  allow_failures:
+    - python: 3.5
+      env:
+        DJANGO_ENV=django22
+        TESTNAME=quality-and-js
+        TARGETS="requirements.js check_translations_up_to_date validate_translations clean_static static quality validate_js check_keywords"
+    - python: 3.5
+      env:
+        DJANGO_ENV=django20
+        TESTNAME=test-python
+        TARGETS="requirements.js clean_static static validate_python"
+    - python: 3.5
+      env:
+        DJANGO_ENV=django21
+        TESTNAME=test-python
+        TARGETS="requirements.js clean_static static validate_python"
+    - python: 3.5
+      env:
+        DJANGO_ENV=django22
+        TESTNAME=test-python
+        TARGETS="requirements.js clean_static static validate_python"
