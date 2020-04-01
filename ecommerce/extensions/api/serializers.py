@@ -82,7 +82,8 @@ def is_custom_code(obj):
 
 def is_enrollment_code(obj):
     benefit = retrieve_voucher(obj).benefit
-    return benefit.type == Benefit.PERCENTAGE and benefit.value == 100
+    benefit_type = get_benefit_type(benefit)
+    return benefit_type == Benefit.PERCENTAGE and benefit.value == 100
 
 
 def retrieve_benefit(obj):
