@@ -102,7 +102,7 @@ class ProductTests(CouponMixin, DiscoveryTestMixin, TestCase):
         coupon_product = self._create_coupon_product_with_attributes(notify_email=notify_email)
         self.assertEqual(coupon_product.attr.notify_email, notify_email)
 
-    @ddt.data('batman', 1, {'some': 'dict'}, ['array'])
+    @ddt.data('batman', {'some': 'dict'}, ['array'])
     def test_create_product_with_incorrect_notify_email(self, notify_email):
         """
         Verify creating product with invalid notify_email type raises ValidationError.

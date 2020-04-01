@@ -68,6 +68,9 @@ class Voucher(AbstractVoucher):
         super(Voucher, self).clean()  # pylint: disable=bad-super-call
 
     def clean_code(self):
+        if isinstance(self.code, bytes):
+            self.code = self.code.decode('utf-8')
+
         if not self.code:
             log_message_and_raise_validation_error('Failed to create Voucher. Voucher code must be set.')
         if not self.code.isalnum():
