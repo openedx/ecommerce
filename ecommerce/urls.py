@@ -21,7 +21,7 @@ from ecommerce.extensions.payment.views.apple_pay import ApplePayMerchantDomainA
 from ecommerce.extensions.urls import urlpatterns as extensions_patterns
 
 
-def handler403(_):
+def handler403(_, exception):  # pylint: disable=unused-argument
     """Redirect unauthorized users to the LMS student dashboard.
 
     Removing URLs isn't the most elegant way to hide Oscar's front-end from
