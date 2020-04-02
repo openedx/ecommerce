@@ -58,7 +58,7 @@ class FreeCheckoutViewTests(EnterpriseServiceMockMixin, TestCase):
     def test_empty_basket(self):
         """ Verify redirect to basket summary in case of empty basket. """
         response = self.client.get(self.path)
-        expected_url = self.get_full_url(reverse('basket:summary'))
+        expected_url = reverse('basket:summary')
         self.assertRedirects(response, expected_url)
 
     def test_non_free_basket(self):
