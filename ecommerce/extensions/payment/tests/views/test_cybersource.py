@@ -158,7 +158,7 @@ class CybersourceSubmitViewTests(CybersourceMixin, TestCase):
                         ),
                     )
                     # Make sure user is logged out
-                    self.assertEqual(get_user(self.client).is_authenticated(), False)
+                    self.assertEqual(get_user(self.client).is_authenticated, False)
 
     @freeze_time('2016-01-01')
     def test_valid_request(self):
