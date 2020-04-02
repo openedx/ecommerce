@@ -72,7 +72,7 @@ class FreeCheckoutViewTests(EnterpriseServiceMockMixin, TestCase):
     def test_enterprise_offer_program_redirect(self):
         """ Verify redirect to the program dashboard page. """
         self.prepare_basket(10, bundle=True)
-        self.prepare_enterprise_offer()
+        self.prepare_enterprise_offer(self.site.siteconfiguration.enterprise_api_url)
         self.assertEqual(Order.objects.count(), 0)
         response = self.client.get(self.path)
         self.assertEqual(Order.objects.count(), 1)
@@ -84,7 +84,7 @@ class FreeCheckoutViewTests(EnterpriseServiceMockMixin, TestCase):
     def test_enterprise_offer_course_redirect(self):
         """ Verify redirect to the courseware info page. """
         self.prepare_basket(10)
-        self.prepare_enterprise_offer()
+        self.prepare_enterprise_offer(self.site.siteconfiguration.enterprise_api_url)
         self.assertEqual(Order.objects.count(), 0)
         response = self.client.get(self.path)
         self.assertEqual(Order.objects.count(), 1)

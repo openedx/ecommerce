@@ -641,11 +641,13 @@ AFFILIATE_COOKIE_KEY = 'affiliate_id'
 
 CRISPY_TEMPLATE_PACK = 'bootstrap3'
 
-# ENTERPRISE APP CONFIGURATION
+# ENTERPRISE CONFIGURATION
 # URL for Enterprise service
 ENTERPRISE_SERVICE_URL = 'http://localhost:8000/enterprise/'
 # Cache enterprise response from Enterprise API.
 ENTERPRISE_API_CACHE_TIMEOUT = 300  # Value is in seconds
+
+ENTERPRISE_CATALOG_SERVICE_URL = 'http://localhost:18160/'
 
 ENTERPRISE_LEARNER_PORTAL_HOSTNAME = os.environ.get('ENTERPRISE_LEARNER_PORTAL_HOSTNAME', 'localhost:8734')
 
@@ -662,7 +664,7 @@ SYSTEM_TO_FEATURE_ROLE_MAPPING = {
     STUDENT_SUPPORT_ADMIN_ROLE: [ORDER_MANAGER_ROLE],
 }
 
-# END ENTERPRISE APP CONFIGURATION
+# END ENTERPRISE CONFIGURATION
 
 # DJANGO DEBUG TOOLBAR CONFIGURATION
 # http://django-debug-toolbar.readthedocs.org/en/latest/installation.html

@@ -481,7 +481,7 @@ class EnterpriseServiceMockMixin:
             required=False,
         )
 
-    def mock_catalog_contains_course_runs(self, course_run_ids, enterprise_customer_uuid,
+    def mock_catalog_contains_course_runs(self, course_run_ids, enterprise_customer_uuid, api_url,
                                           enterprise_customer_catalog_uuid=None, contains_content=True,
                                           raise_exception=False):
         self.mock_access_token_response()
@@ -490,7 +490,7 @@ class EnterpriseServiceMockMixin:
         httpretty.register_uri(
             method=httpretty.GET,
             uri='{}enterprise-customer/{}/contains_content_items/?{}'.format(
-                self.site.siteconfiguration.enterprise_api_url,
+                api_url,
                 enterprise_customer_uuid,
                 query_params
             ),
@@ -501,7 +501,7 @@ class EnterpriseServiceMockMixin:
             httpretty.register_uri(
                 method=httpretty.GET,
                 uri='{}enterprise_catalogs/{}/contains_content_items/?{}'.format(
-                    self.site.siteconfiguration.enterprise_api_url,
+                    api_url,
                     enterprise_customer_catalog_uuid,
                     query_params
                 ),
@@ -509,7 +509,7 @@ class EnterpriseServiceMockMixin:
                 content_type='application/json'
             )
 
-    def prepare_enterprise_offer(self, percentage_discount_value=100, enterprise_customer_name=None):
+    def prepare_enterprise_offer(self, api_url, percentage_discount_value=100, enterprise_customer_name=None):
         benefit = EnterprisePercentageDiscountBenefitFactory(value=percentage_discount_value)
         if enterprise_customer_name is not None:
             condition = EnterpriseCustomerConditionFactory(enterprise_customer_name=enterprise_customer_name)
@@ -524,6 +524,7 @@ class EnterpriseServiceMockMixin:
         self.mock_catalog_contains_course_runs(
             [self.course_run.id],
             condition.enterprise_customer_uuid,
+            api_url,
             enterprise_customer_catalog_uuid=condition.enterprise_customer_catalog_uuid,
         )
         return enterprise_offer

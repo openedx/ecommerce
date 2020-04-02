@@ -285,7 +285,7 @@ class BasketAddItemsViewTests(CouponMixin, DiscoveryTestMixin, DiscoveryMockMixi
         Verify redirect to FreeCheckoutView when basket is free
         and an Enterprise-related offer is applied.
         """
-        enterprise_offer = self.prepare_enterprise_offer()
+        enterprise_offer = self.prepare_enterprise_offer(self.site.siteconfiguration.enterprise_api_url)
 
         opts = {
             'ec_uuid': str(enterprise_offer.condition.enterprise_customer_uuid),
@@ -551,7 +551,7 @@ class PaymentApiViewTests(PaymentApiResponseTestMixin, BasketMixin, DiscoveryMoc
         """
         self.course_run.create_or_update_seat('verified', True, Decimal(10))
         self.create_basket_and_add_product(self.course_run.seat_products[0])
-        enterprise_offer = self.prepare_enterprise_offer()
+        enterprise_offer = self.prepare_enterprise_offer(self.site.siteconfiguration.enterprise_api_url)
 
         opts = {
             'ec_uuid': str(enterprise_offer.condition.enterprise_customer_uuid),
@@ -597,7 +597,7 @@ class PaymentApiViewTests(PaymentApiResponseTestMixin, BasketMixin, DiscoveryMoc
         """
         self.course_run.create_or_update_seat('verified', True, Decimal(10))
         self.create_basket_and_add_product(self.course_run.seat_products[0])
-        enterprise_offer = self.prepare_enterprise_offer()
+        enterprise_offer = self.prepare_enterprise_offer(self.site.siteconfiguration.enterprise_api_url)
 
         opts = {
             'ec_uuid': str(enterprise_offer.condition.enterprise_customer_uuid),
@@ -626,7 +626,7 @@ class PaymentApiViewTests(PaymentApiResponseTestMixin, BasketMixin, DiscoveryMoc
         seat2 = self.create_seat(self.course_run, seat_price=100, cert_type='verified')
         basket = self.create_basket_and_add_product(seat1)
         basket.add(seat2)
-        self.prepare_enterprise_offer()
+        self.prepare_enterprise_offer(self.site.siteconfiguration.enterprise_api_url)
 
         response = self.client.get(self.path)
         self.assertEqual(response.status_code, 200)
@@ -1039,7 +1039,8 @@ class BasketSummaryViewTests(EnterpriseServiceMockMixin, DiscoveryTestMixin, Dis
     def test_enterprise_free_basket_redirect(self):
         self.course_run.create_or_update_seat('verified', True, Decimal(100))
         self.create_basket_and_add_product(self.course_run.seat_products[0])
-        enterprise_offer = self.prepare_enterprise_offer(enterprise_customer_name='Foo Enterprise')
+        enterprise_offer = self.prepare_enterprise_offer(self.site.siteconfiguration.enterprise_api_url,
+                                                         enterprise_customer_name='Foo Enterprise')
 
         opts = {
             'ec_uuid': str(enterprise_offer.condition.enterprise_customer_uuid),

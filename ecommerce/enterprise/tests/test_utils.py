@@ -404,6 +404,7 @@ class EnterpriseUtilsTests(EnterpriseServiceMockMixin, TestCase):
         self.mock_catalog_contains_course_runs(
             [course.id],
             str(offer.condition.enterprise_customer_uuid),
+            self.site.siteconfiguration.enterprise_api_url,
             enterprise_customer_catalog_uuid=str(offer.condition.enterprise_customer_catalog_uuid),
             contains_content=True,
         )

@@ -111,7 +111,8 @@ class EnterpriseCustomerCondition(ConditionWithoutRangeMixin, SingleItemConsumpt
 
         try:
             catalog_contains_course = catalog_contains_course_runs(
-                basket.site, course_run_ids, enterprise_customer, enterprise_customer_catalog_uuid=enterprise_catalog
+                basket.site, course_run_ids, enterprise_customer, enterprise_customer_catalog_uuid=enterprise_catalog,
+                request=basket.strategy.request
             )
         except (ReqConnectionError, KeyError, SlumberHttpBaseException, Timeout) as exc:
             logger.exception('[Code Redemption Failure] Unable to apply enterprise offer because '
