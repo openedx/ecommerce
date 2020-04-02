@@ -462,7 +462,6 @@ class BasketCalculateView(generics.GenericAPIView):
         is_anonymous = request.GET.get('is_anonymous', 'false').lower() == 'true'
 
         use_default_basket = is_anonymous
-        use_default_basket_case = 0
 
         # validate query parameters
         if requested_username and is_anonymous:
@@ -485,7 +484,6 @@ class BasketCalculateView(generics.GenericAPIView):
                     # doesn't yet have an account in ecommerce. These users have
                     # never purchased before.
                     use_default_basket = True
-                    use_default_basket_case = 1
             else:
                 return HttpResponseForbidden('Unauthorized user credentials')
 
@@ -495,7 +493,6 @@ class BasketCalculateView(generics.GenericAPIView):
             # TODO: LEARNER-5057: Remove this special case for the marketing user
             # once logs show no more requests with no parameters (see above).
             use_default_basket = True
-            use_default_basket_case = 2
 
         if use_default_basket:
             basket_owner = None
@@ -524,19 +521,11 @@ class BasketCalculateView(generics.GenericAPIView):
                 bundle_id=bundle_id
             )
             cached_response = TieredCache.get_cached_response(cache_key)
-            logger.info('bundle debugging 2: request [%s] referrer [%s] url [%s] Cache key [%s] response [%s]'
-                        'skus [%s] case [%s] basket_owner [%s]',
-                        str(request), str(request.META.get('HTTP_REFERER')), str(request._request), str(cache_key),  # pylint: disable=protected-access
-                        str(cached_response), str(skus), str(use_default_basket_case), str(basket_owner))
             if cached_response.is_found:
                 return Response(cached_response.value)
 
         response = self._calculate_temporary_basket_atomic(basket_owner, request, products, voucher, skus, code)
         if response and use_default_basket:
-            logger.info('bundle debugging 3: request [%s] referrer [%s] url [%s] Cache key [%s] response [%s]'
-                        'skus [%s] case [%s] basket_owner [%s]',
-                        str(request), str(request.META.get('HTTP_REFERER')), str(request._request), str(cache_key),  # pylint: disable=protected-access
-                        str(response), str(skus), str(use_default_basket_case), str(basket_owner))
             TieredCache.set_all_tiers(cache_key, response, settings.ANONYMOUS_BASKET_CALCULATE_CACHE_TIMEOUT)
 
         return Response(response)
