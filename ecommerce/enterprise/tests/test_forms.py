@@ -90,12 +90,12 @@ class EnterpriseOfferFormTests(EnterpriseServiceMockMixin, TestCase):
         enterprise_offer.enterprise_contract_metadata = ecm
         form = EnterpriseOfferForm(instance=enterprise_offer)
         self.assertEqual(
-            form['enterprise_customer_uuid'].value(),
-            enterprise_offer.condition.enterprise_customer_uuid.hex
+            uuid.UUID(form['enterprise_customer_uuid'].value()),
+            enterprise_offer.condition.enterprise_customer_uuid
         )
         self.assertEqual(
-            form['enterprise_customer_catalog_uuid'].value(),
-            enterprise_offer.condition.enterprise_customer_catalog_uuid.hex
+            uuid.UUID(form['enterprise_customer_catalog_uuid'].value()),
+            enterprise_offer.condition.enterprise_customer_catalog_uuid
         )
         self.assertEqual(form['benefit_type'].value(), enterprise_offer.benefit.proxy().benefit_class_type)
         self.assertEqual(form['benefit_value'].value(), enterprise_offer.benefit.value)

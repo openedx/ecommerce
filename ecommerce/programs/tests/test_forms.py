@@ -49,7 +49,7 @@ class ProgramOfferFormTests(ProgramTestMixin, TestCase):
         """ The constructor should pull initial data from the passed-in instance. """
         program_offer = factories.ProgramOfferFactory()
         form = ProgramOfferForm(instance=program_offer)
-        self.assertEqual(form['program_uuid'].value(), program_offer.condition.program_uuid.hex)
+        self.assertEqual(uuid.UUID(form['program_uuid'].value()), program_offer.condition.program_uuid)
         self.assertEqual(form['benefit_type'].value(), program_offer.benefit.proxy().benefit_class_type)
         self.assertEqual(form['benefit_value'].value(), program_offer.benefit.value)
 
