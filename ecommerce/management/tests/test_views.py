@@ -40,9 +40,9 @@ class ManagementViewTests(TestCase):
 
     def test_invalid_action(self):
         """ Verify the view responds with an error message if an invalid action is posted. """
-        response = self.client.post(self.path, {'action': None})
+        response = self.client.post(self.path, {'action': ''})
         assert response.status_code == 200
-        self.assert_first_message(response, messages.ERROR, 'None is not a valid action.')
+        self.assert_first_message(response, messages.ERROR, ' is not a valid action.')
 
     def test_refund_basket_transactions(self):
         with mock.patch('ecommerce.management.utils.refund_basket_transactions') as mock_refund:
