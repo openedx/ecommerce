@@ -290,7 +290,10 @@ class EnrollmentFulfillmentModuleTests(ProgramTestMixin, DiscoveryTestMixin, Ful
         )
         discount.offer_id = offer.id
         discount.save()
+        basket_strategy = self.order.basket.strategy
         self.order.refresh_from_db()
+        # restore lost basket strategy after call to refresh_from_db
+        self.order.basket.strategy = basket_strategy
 
         with mock.patch.object(Range, 'contains_product') as mock_contains:
             mock_contains.return_value = True
