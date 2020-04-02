@@ -282,6 +282,7 @@ DJANGO_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.flatpages',
     'django.contrib.humanize',
+    'django.contrib.messages',
     'django.contrib.sessions',
     'django.contrib.sites',
     'django.contrib.staticfiles',
