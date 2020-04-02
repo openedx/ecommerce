@@ -50,6 +50,8 @@ class Command(BaseCommand):
                             help='Which direction to convert the courses. Options are honor_to_audit, or audit_to_'
                                  'honor.')
 
+        parser.add_argument('--access_token', type=str, help='Pass access_token')
+
     def handle(self, *args, **options):
         self.options = options  # pylint: disable=attribute-defined-outside-init
         course_ids = list(map(six.text_type, self.options.get('course_ids', [])))

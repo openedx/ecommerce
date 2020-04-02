@@ -508,6 +508,10 @@ def _generate_code_string(length):
     h = hashlib.sha256()
     h.update(uuid.uuid4().bytes)
     voucher_code = base64.b32encode(h.digest())[0:length]
+
+    if isinstance(voucher_code, bytes):
+        voucher_code = voucher_code.decode('utf-8')
+
     if Voucher.objects.filter(code__iexact=voucher_code).exists():
         return _generate_code_string(length)
 

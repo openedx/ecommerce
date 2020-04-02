@@ -168,6 +168,9 @@ class Command(BaseCommand):
                             default=None,
                             help='Domain for the ecommerce site providing the course.')
 
+        parser.add_argument('--access_token', type=str, help='Pass access_token')
+        parser.add_argument('--partner_short_code', type=str, help='Pass partner_short_code')
+
     def handle(self, *args, **options):
         course_ids = options.get('course_ids', [])
         site_domain = options.get('site_domain')
