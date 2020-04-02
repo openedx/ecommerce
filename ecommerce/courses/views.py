@@ -14,7 +14,6 @@ from requests import Timeout
 from slumber.exceptions import SlumberBaseException
 
 from ecommerce.core.views import StaffOnlyMixin
-from ecommerce.extensions.partner.shortcuts import get_partner_for_site
 
 logger = logging.getLogger(__name__)
 
@@ -70,7 +69,6 @@ class CourseMigrationView(View):
         course_ids = request.GET.get('course_ids')
         commit = request.GET.get('commit', False)
         commit = commit in ('1', 'true')
-        partner = get_partner_for_site(request)
 
         # Capture all output and logging
         out = StringIO()
@@ -99,8 +97,7 @@ class CourseMigrationView(View):
 
             course_ids = course_ids.split(',')
 
-            call_command('migrate_course', *course_ids, access_token=user.access_token, commit=commit,
-                         partner_short_code=partner.short_code, settings=os.environ['DJANGO_SETTINGS_MODULE'],
+            call_command('migrate_course', *course_ids, commit=commit, settings=os.environ['DJANGO_SETTINGS_MODULE'],
                          stdout=out, stderr=err)
 
             # Format the output for display
@@ -158,7 +155,7 @@ class ConvertCourseView(View):
             course_ids = course_ids.split(',')
 
             call_command(
-                'convert_course', *course_ids, access_token=user.access_token, commit=commit, partner=partner,
+                'convert_course', *course_ids, commit=commit, partner=partner,
                 settings=os.environ['DJANGO_SETTINGS_MODULE'], stdout=out, stderr=err, direction=direction
             )
 
