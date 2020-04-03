@@ -41,6 +41,7 @@ from ecommerce.enterprise.tests.mixins import EnterpriseServiceMockMixin
 from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
 from ecommerce.extensions.offer.constants import (
     OFFER_ASSIGNMENT_EMAIL_BOUNCED,
+    OFFER_ASSIGNMENT_EMAIL_TEMPLATE_FIELD_LIMIT,
     OFFER_ASSIGNMENT_REVOKED,
     VOUCHER_NOT_ASSIGNED,
     VOUCHER_NOT_REDEEMED,
@@ -2654,6 +2655,33 @@ class EnterpriseCouponViewSetRbacTests(
             ).count()
             assert assignments == 1
 
+    @ddt.data('assign', 'remind', 'revoke')
+    def test_email_template_field_limits(self, action):
+        """
+        Test `Assign/Remind/Revoke` gives an error if greeting and/or closing is above the allowed limit.
+        """
+        coupon = self.get_response('POST', ENTERPRISE_COUPONS_LINK, dict(self.data))
+        coupon_id = coupon.json()['coupon_id']
+
+        max_limit = OFFER_ASSIGNMENT_EMAIL_TEMPLATE_FIELD_LIMIT
+        response = self.get_response(
+            'POST',
+            '/api/v2/enterprise/coupons/{}/{action}/'.format(coupon_id, action=action),
+            {
+                'template': 'Test template',
+                'template_greeting': 'G' * (max_limit + 1),
+                'template_closing': 'C' * (max_limit + 1),
+                'emails': ['test@edx.org']
+            }
+        )
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert response.json() == {
+            'error': {
+                'email_greeting': 'Email greeting must be {} characters or less'.format(max_limit),
+                'email_closing': 'Email closing must be {} characters or less'.format(max_limit),
+            }
+        }
+
 
 class OfferAssignmentSummaryViewSetTests(
         CouponMixin,
@@ -3103,15 +3131,16 @@ class OfferAssignmentEmailTemplatesViewSetTests(JwtMixin, TestCase):
         """
         Verify that view HTTP POST return error email closing/greeting exceeds field max length.
         """
-        email_greeting = "HI" * 160
-        email_closing = "HI" * 160
+        max_limit = OFFER_ASSIGNMENT_EMAIL_TEMPLATE_FIELD_LIMIT
+        email_greeting = 'G' * (max_limit + 1)
+        email_closing = 'C' * (max_limit + 1)
 
         response = self.create_template_data(email_type, email_greeting, email_closing, status.HTTP_400_BAD_REQUEST)
         assert response == {
-            "email_greeting": [
-                "Ensure this field has no more than 300 characters."
+            'email_greeting': [
+                'Email greeting must be {} characters or less'.format(max_limit)
             ],
-            "email_closing": [
-                "Ensure this field has no more than 300 characters."
+            'email_closing': [
+                'Email closing must be {} characters or less'.format(max_limit)
             ]
         }
