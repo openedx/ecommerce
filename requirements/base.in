@@ -3,7 +3,7 @@
 analytics-python
 bleach
 coreapi
-django<2.0
+django<2.3
 django-compressor
 django-cors-headers                 #  Used to allow to configure CORS headers for cross-domain requests
 django-crispy-forms<1.9.0
