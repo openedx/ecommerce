@@ -62,7 +62,7 @@ class FreeCheckoutViewTests(EnterpriseServiceMockMixin, TestCase):
         self.assertRedirects(response, expected_url)
 
     def test_non_free_basket(self):
-        """ Verify an exception is raised when the URL is being accessed to with a non-free basket. """
+        """ Verify an exception is raised when the URL is being accessed to with a non-free basket """
         self.prepare_basket(10)
 
         with self.assertRaises(BasketNotFreeError):
