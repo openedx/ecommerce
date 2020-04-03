@@ -10,6 +10,7 @@ from django.db.models import Q
 from django.http import Http404
 from django.shortcuts import get_object_or_404
 from edx_rbac.decorators import permission_required
+from edx_rbac.mixins import PermissionRequiredMixin
 from oscar.core.loading import get_model
 from requests.exceptions import ConnectionError as ReqConnectionError
 from requests.exceptions import Timeout
@@ -57,6 +58,7 @@ from ecommerce.extensions.offer.constants import (
     OFFER_ASSIGNED,
     OFFER_ASSIGNMENT_EMAIL_BOUNCED,
     OFFER_ASSIGNMENT_EMAIL_PENDING,
+    OFFER_ASSIGNMENT_EMAIL_TEMPLATE_FIELD_LIMIT,
     VOUCHER_NOT_ASSIGNED,
     VOUCHER_NOT_REDEEMED,
     VOUCHER_PARTIAL_REDEEMED,
@@ -636,6 +638,22 @@ class EnterpriseCouponViewSet(CouponViewSet):
         if not is_coupon_available(coupon):
             raise DRFValidationError({'error': message})
 
+    def _validate_email_fields(self, greeting, closing):
+        """
+        Raise ValidationError if greeting and/or closing is above the allowed limit.
+        """
+        errors = {}
+        max_field_limit = OFFER_ASSIGNMENT_EMAIL_TEMPLATE_FIELD_LIMIT
+
+        if len(greeting) > max_field_limit:
+            errors['email_greeting'] = 'Email greeting must be {} characters or less'.format(max_field_limit)
+
+        if len(closing) > max_field_limit:
+            errors['email_closing'] = 'Email closing must be {} characters or less'.format(max_field_limit)
+
+        if errors:
+            raise DRFValidationError({'error': errors})
+
     @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
     @permission_required('enterprise.can_assign_coupon', fn=lambda request, pk: get_enterprise_from_product(pk))
     def assign(self, request, pk):  # pylint: disable=unused-argument
@@ -646,6 +664,7 @@ class EnterpriseCouponViewSet(CouponViewSet):
         self._validate_coupon_availablity(coupon, 'Coupon is not available for code assignment')
         greeting = request.data.pop('template_greeting', '')
         closing = request.data.pop('template_closing', '')
+        self._validate_email_fields(greeting, closing)
         serializer = CouponCodeAssignmentSerializer(
             data=request.data,
             context={'coupon': coupon, 'greeting': greeting, 'closing': closing}
@@ -665,6 +684,7 @@ class EnterpriseCouponViewSet(CouponViewSet):
         self._validate_coupon_availablity(coupon, 'Coupon is not available for code revoke')
         greeting = request.data.pop('template_greeting', '')
         closing = request.data.pop('template_closing', '')
+        self._validate_email_fields(greeting, closing)
         serializer = CouponCodeRevokeSerializer(
             data=request.data.get('assignments'),
             many=True,
@@ -686,7 +706,7 @@ class EnterpriseCouponViewSet(CouponViewSet):
         self._validate_coupon_availablity(coupon, 'Coupon is not available for code remind')
         greeting = request.data.pop('template_greeting', '')
         closing = request.data.pop('template_closing', '')
-
+        self._validate_email_fields(greeting, closing)
         if request.data.get('assignments'):
             assignments = request.data.get('assignments')
         else:
@@ -724,40 +744,20 @@ class EnterpriseCouponViewSet(CouponViewSet):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class OfferAssignmentEmailTemplatesViewSet(ModelViewSet):
+class OfferAssignmentEmailTemplatesViewSet(PermissionRequiredMixin, ModelViewSet):
     """
     Viewset to CREATE/LIST email templates for OfferAssignment.
     """
     serializer_class = OfferAssignmentEmailTemplatesSerializer
     permission_classes = (IsAuthenticated,)
+    permission_required = 'enterprise.can_assign_coupon'
     filter_backends = (django_filters.rest_framework.DjangoFilterBackend,)
     filter_fields = ('email_type', 'active')
 
     http_method_names = ['get', 'head', 'options', 'post']
 
-    # TODO: Remove this overrided endpoint once https://openedx.atlassian.net/browse/ENT-2602 is completed
-    @permission_required(
-        'enterprise.can_assign_coupon',
-        fn=lambda request, *args, **kwargs: kwargs['enterprise_customer']
-    )
-    def list(self, request, *args, **kwargs):
-        return super(OfferAssignmentEmailTemplatesViewSet, self).list(request, *args, **kwargs)
-
-    # TODO: Remove this overrided endpoint once https://openedx.atlassian.net/browse/ENT-2602 is completed
-    @permission_required(
-        'enterprise.can_assign_coupon',
-        fn=lambda request, *args, **kwargs: kwargs['enterprise_customer']
-    )
-    def retrieve(self, request, *args, **kwargs):
-        return super(OfferAssignmentEmailTemplatesViewSet, self).retrieve(request, *args, **kwargs)
-
-    # TODO: Remove this overrided endpoint once https://openedx.atlassian.net/browse/ENT-2602 is completed
-    @permission_required(
-        'enterprise.can_assign_coupon',
-        fn=lambda request, *args, **kwargs: kwargs['enterprise_customer']
-    )
-    def create(self, request, *args, **kwargs):
-        return super(OfferAssignmentEmailTemplatesViewSet, self).create(request, *args, **kwargs)
+    def get_permission_object(self):
+        return self.kwargs.get('enterprise_customer')
 
     def get_queryset(self):
         return OfferAssignmentEmailTemplates.objects.filter(

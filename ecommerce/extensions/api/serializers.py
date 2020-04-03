@@ -36,6 +36,7 @@ from ecommerce.extensions.offer.constants import (
     OFFER_ASSIGNED,
     OFFER_ASSIGNMENT_EMAIL_BOUNCED,
     OFFER_ASSIGNMENT_EMAIL_PENDING,
+    OFFER_ASSIGNMENT_EMAIL_TEMPLATE_FIELD_LIMIT,
     OFFER_ASSIGNMENT_REVOKED,
     OFFER_MAX_USES_DEFAULT,
     OFFER_REDEEMED
@@ -877,6 +878,20 @@ class OfferAssignmentEmailTemplatesSerializer(serializers.ModelSerializer):
     class Meta:
         model = OfferAssignmentEmailTemplates
         fields = '__all__'
+
+    def validate_email_greeting(self, value):
+        if len(value) > OFFER_ASSIGNMENT_EMAIL_TEMPLATE_FIELD_LIMIT:
+            raise serializers.ValidationError(
+                'Email greeting must be {} characters or less'.format(OFFER_ASSIGNMENT_EMAIL_TEMPLATE_FIELD_LIMIT)
+            )
+        return value
+
+    def validate_email_closing(self, value):
+        if len(value) > OFFER_ASSIGNMENT_EMAIL_TEMPLATE_FIELD_LIMIT:
+            raise serializers.ValidationError(
+                'Email closing must be {} characters or less'.format(OFFER_ASSIGNMENT_EMAIL_TEMPLATE_FIELD_LIMIT)
+            )
+        return value
 
     def create(self, validated_data):
         enterprise_customer = self.context['view'].kwargs.get('enterprise_customer')
