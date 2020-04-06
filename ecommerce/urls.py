@@ -64,7 +64,7 @@ urlpatterns = AUTH_URLS + WELL_KNOWN_URLS + [
     url(r'^enterprise/', include(('ecommerce.enterprise.urls', 'enterprise'))),
     url(r'^health/$', core_views.health, name='health'),
     url(r'^i18n/', include(('django.conf.urls.i18n'))),
-    url(r'^jsi18n/$', JavaScriptCatalog.as_view(packages=['courses']), name='javascript-catalog'),
+    url(r'^jsi18n/$', JavaScriptCatalog.as_view(), name='javascript-catalog'),
     url(r'^management/', include(('ecommerce.management.urls', 'management'))),
     url(r'^offers/', include(('ecommerce.extensions.offer.urls', 'offers'))),
     url(r'^programs/', include(('ecommerce.programs.urls', 'programs'))),
