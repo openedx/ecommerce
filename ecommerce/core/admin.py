@@ -7,7 +7,7 @@ from django.utils.translation import ugettext_lazy as _
 from edx_rbac.admin import UserRoleAssignmentAdmin
 
 from ecommerce.core.constants import USER_LIST_VIEW_SWITCH
-from ecommerce.core.forms import EcommerceFeatureRoleAssignmentAdminForm, EcommerceUserChangeForm
+from ecommerce.core.forms import EcommerceFeatureRoleAssignmentAdminForm
 from ecommerce.core.models import BusinessClient, EcommerceFeatureRoleAssignment, SiteConfiguration, User
 
 
@@ -19,7 +19,6 @@ class SiteConfigurationAdmin(admin.ModelAdmin):
 
 @admin.register(User)
 class EcommerceUserAdmin(UserAdmin):
-    form = EcommerceUserChangeForm
     list_display = ('username', 'email', 'full_name', 'first_name', 'last_name', 'is_staff')
     fieldsets = (
         (None, {'fields': ('username', 'password')}),
