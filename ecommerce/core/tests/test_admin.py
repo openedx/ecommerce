@@ -1,10 +1,8 @@
 from __future__ import absolute_import
 
-from django import forms
 from django.contrib import messages
 from django.urls import reverse
 
-from ecommerce.core.admin import EcommerceUserAdmin
 from ecommerce.core.constants import USER_LIST_VIEW_SWITCH
 from ecommerce.core.tests import toggle_switch
 from ecommerce.tests.factories import UserFactory
@@ -45,12 +43,3 @@ class UserAdminTests(TestCase):
         """
         self.assertIsNotNone(self.user.lms_user_id)
         self.assertEqual(UserFactory.lms_user_id, self.user.lms_user_id)
-
-    def test_user_admin_last_name(self):
-        """ Test that the user admin form preserves the 30 length limit for last_name. """
-        form = EcommerceUserAdmin.form(instance=self.user)
-        valid_last_name = "Valid last name"
-        form.fields['last_name'].clean(valid_last_name)
-        invalid_last_name = "x" * 31  # last name too long
-        with self.assertRaises(forms.ValidationError):
-            form.fields['last_name'].clean(invalid_last_name)
