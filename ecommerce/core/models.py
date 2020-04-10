@@ -499,6 +499,10 @@ class User(AbstractUser):
     Custom user model for use with python-social-auth via edx-auth-backends.
     """
 
+    # This preserves the 30 character limit on last_name, avoiding a large migration
+    # on the ecommerce_user table that would otherwise have come with Django 2.
+    # See https://docs.djangoproject.com/en/3.0/releases/2.0/#abstractuser-last-name-max-length-increased-to-150
+    last_name = models.CharField(_('last name'), max_length=30, blank=True)
     full_name = models.CharField(_('Full Name'), max_length=255, blank=True, null=True)
     tracking_context = JSONField(blank=True, null=True)
     email = models.EmailField(max_length=254, verbose_name='email address', blank=True, db_index=True)
