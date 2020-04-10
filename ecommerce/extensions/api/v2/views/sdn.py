@@ -25,18 +25,19 @@ class SDNCheckViewSet(APIView):
         which performs an SDN check and returns whether the user passed
         or failed.
         """
-        basket_id = request.basket.id
-        hit_count = checkSDN(request, request.data['name'], request.data['city'], request.data['country'])
+        # basket_id = request.basket.id
+        hit_count = False
+        # hit_count = checkSDN(request, request.data['name'], request.data['city'], request.data['country'])
 
-        if hit_count:
-            logger.info(
-                'SDNCheck Api called for basket [%d]. It received %d hit(s).',
-                basket_id,
-                hit_count,
-            )
-        else:
-            logger.info(
-                'SDNCheck Api called for basket [%d]. It did not receive a hit.',
-                basket_id,
-            )
+        # if hit_count:
+        #     logger.info(
+        #         'SDNCheck Api called for basket [%d]. It received %d hit(s).',
+        #         basket_id,
+        #         hit_count,
+        #     )
+        # else:
+        #     logger.info(
+        #         'SDNCheck Api called for basket [%d]. It did not receive a hit.',
+        #         basket_id,
+        #     )
         return Response({'hits': hit_count})
