@@ -3,6 +3,7 @@ from __future__ import absolute_import
 
 import uuid
 
+import ddt
 import httpretty
 from oscar.core.loading import get_model
 
@@ -19,6 +20,7 @@ Benefit = get_model('offer', 'Benefit')
 ConditionalOffer = get_model('offer', 'ConditionalOffer')
 
 
+@ddt.ddt
 class EnterpriseOfferFormTests(EnterpriseServiceMockMixin, TestCase):
 
     def setUp(self):
@@ -37,7 +39,9 @@ class EnterpriseOfferFormTests(EnterpriseServiceMockMixin, TestCase):
             'contract_discount_type': self.contract_discount_type,
             'contract_discount_value': self.contract_discount_value,
             'prepaid_invoice_amount': self.prepaid_invoice_amount,
-            'sales_force_id': 'salesforceid123'
+            'sales_force_id': 'salesforceid123',
+            'max_global_applications': 2,
+            'max_discount': 300,
         }
         data.update(**kwargs)
         return data
@@ -46,7 +50,8 @@ class EnterpriseOfferFormTests(EnterpriseServiceMockMixin, TestCase):
                                            enterprise_customer_catalog_uuid, expected_benefit_value,
                                            expected_benefit_type, expected_name, expected_contract_discount_type,
                                            expected_contract_discount_value, expected_prepaid_invoice_amount,
-                                           expected_sales_force_id):
+                                           expected_sales_force_id, expected_max_global_applications,
+                                           expected_max_discount):
         """ Assert the given offer's parameters match the expected values. """
         self.assertEqual(str(offer.name), expected_name)
         self.assertEqual(offer.offer_type, ConditionalOffer.SITE)
@@ -72,10 +77,12 @@ class EnterpriseOfferFormTests(EnterpriseServiceMockMixin, TestCase):
             offer.enterprise_contract_metadata.amount_paid,
             expected_prepaid_invoice_amount
         )
+        self.assertEqual(offer.max_global_applications, expected_max_global_applications)
+        self.assertEqual(offer.max_discount, expected_max_discount)
 
-    def assert_form_errors(self, data, expected_errors):
+    def assert_form_errors(self, data, expected_errors, instance=None):
         """ Assert that form validation fails with the expected errors. """
-        form = EnterpriseOfferForm(data=data)
+        form = EnterpriseOfferForm(data=data, instance=instance)
         self.assertFalse(form.is_valid())
         self.assertEqual(form.errors, expected_errors)
 
@@ -88,6 +95,8 @@ class EnterpriseOfferFormTests(EnterpriseServiceMockMixin, TestCase):
             amount_paid=12345
         )
         enterprise_offer.enterprise_contract_metadata = ecm
+        enterprise_offer.max_global_applications = 2
+        enterprise_offer.max_discount = 300
         form = EnterpriseOfferForm(instance=enterprise_offer)
         self.assertEqual(
             uuid.UUID(form['enterprise_customer_uuid'].value()),
@@ -102,6 +111,8 @@ class EnterpriseOfferFormTests(EnterpriseServiceMockMixin, TestCase):
         self.assertEqual(form['contract_discount_type'].value(), EnterpriseContractMetadata.PERCENTAGE)
         self.assertEqual(form['contract_discount_value'].value(), 25)
         self.assertEqual(form['prepaid_invoice_amount'].value(), 12345)
+        self.assertEqual(form['max_global_applications'].value(), 2)
+        self.assertEqual(form['max_discount'].value(), 300)
 
     def test_contract_metadata_required_on_create(self):
         """
@@ -229,6 +240,8 @@ class EnterpriseOfferFormTests(EnterpriseServiceMockMixin, TestCase):
             data['contract_discount_value'],
             data['prepaid_invoice_amount'],
             data['sales_force_id'],
+            data['max_global_applications'],
+            data['max_discount'],
         )
 
     @httpretty.activate
@@ -257,6 +270,8 @@ class EnterpriseOfferFormTests(EnterpriseServiceMockMixin, TestCase):
             data['contract_discount_value'],
             data['prepaid_invoice_amount'],
             data['sales_force_id'],
+            data['max_global_applications'],
+            data['max_discount'],
         )
 
     @httpretty.activate
@@ -295,6 +310,8 @@ class EnterpriseOfferFormTests(EnterpriseServiceMockMixin, TestCase):
             data['contract_discount_value'],
             data['prepaid_invoice_amount'],
             data['sales_force_id'],
+            data['max_global_applications'],
+            data['max_discount'],
         )
 
     @httpretty.activate
@@ -333,6 +350,8 @@ class EnterpriseOfferFormTests(EnterpriseServiceMockMixin, TestCase):
             data['contract_discount_value'],
             data['prepaid_invoice_amount'],
             data['sales_force_id'],
+            data['max_global_applications'],
+            data['max_discount'],
         )
 
     def test_create_when_conditional_offer_with_uuid_exists(self):
@@ -348,3 +367,119 @@ class EnterpriseOfferFormTests(EnterpriseServiceMockMixin, TestCase):
         )
         form = EnterpriseOfferForm(request=self.request, data=data)
         self.assertTrue(form.is_valid())
+
+    def test_offer_form_help_text_and_labels(self):
+        """
+        Verify that `help_text` and `label` are correct for `max_global_applications` and `max_fields` form fields.
+        """
+        data = self.generate_data()
+        factories.EnterpriseOfferFactory()
+        form = EnterpriseOfferForm(request=self.request, data=data)
+        self.assertEqual(form.fields['max_global_applications'].label, 'Enrollment Limit')
+        self.assertEqual(form.fields['max_discount'].label, 'Bookings Limit')
+        self.assertEqual(
+            form.fields['max_global_applications'].help_text,
+            'The maximum number of enrollments that can redeem this offer.'
+        )
+        self.assertEqual(
+            form.fields['max_discount'].help_text,
+            'The maximum USD dollar amount that can be redeemed by this offer.'
+        )
+        self.assertEqual(form.fields['max_discount'].widget.attrs['min'], 0)
+
+    def test_max_global_applications_clean(self):
+        """
+        Verify that `clean` for `max_global_applications` field is working as expected.
+        """
+        num_applications = 3
+        expected_errors = {
+            'max_global_applications': [
+                'Ensure new value must be greater than or equal to consumed({}) value.'.format(num_applications)
+            ]
+        }
+        # create an enterprise offer that can be used upto 5 times and has already been used 3 times
+        offer = factories.EnterpriseOfferFactory(max_global_applications=5, num_applications=num_applications)
+        # now try to update the offer with max_global_applications set to 2
+        # which is less than the number of times this offer has already been used
+        data = self.generate_data(max_global_applications=2)
+        self.assert_form_errors(data, expected_errors, instance=offer)
+
+    def test_max_discount_clean_with_negative_value(self):
+        """
+        Verify that `clean` for `max_discount` field raises correct error for negative values.
+        """
+        expected_errors = {
+            'max_discount': [
+                'Ensure this value is greater than or equal to 0.'
+            ]
+        }
+        data = self.generate_data(max_discount=-100)
+        self.assert_form_errors(data, expected_errors)
+
+    def test_max_discount_clean_with_incorrect_value(self):
+        """
+        Verify that `clean` for `max_discount` field raises correct error for values less than consumed discount.
+        """
+        total_discount = 400
+        expected_errors = {
+            'max_discount': [
+                'Ensure new value must be greater than or equal to consumed({}) value.'.format(total_discount)
+            ]
+        }
+        # create an enterprise offer that can provide max $500 discount and has already consumed $400
+        offer = factories.EnterpriseOfferFactory(max_discount=500, total_discount=total_discount)
+        # now try to update the offer with max_discount set to 300 which is less than the already consumed discount
+        data = self.generate_data(max_discount=300)
+        self.assert_form_errors(data, expected_errors, instance=offer)
+
+    @httpretty.activate
+    def test_offer_form_with_increased_values(self):
+        """
+        Verify that an existing enterprise offer can be updated with increased values.
+        """
+        data = self.generate_data(max_global_applications=40, max_discount=7000)
+        self.mock_specific_enterprise_customer_api(data['enterprise_customer_uuid'])
+
+        # create an enterprise offer with both max_global_applications and max_discount
+        factories.EnterpriseOfferFactory(
+            max_global_applications=30,
+            num_applications=10,
+            max_discount=5000,
+            total_discount=1000
+        )
+        # now try to update the offer with increased values
+        form = EnterpriseOfferForm(request=self.request, data=data)
+        self.assertTrue(form.is_valid())
+        offer = form.save()
+        self.assertEqual(offer.max_global_applications, data['max_global_applications'])
+        self.assertEqual(offer.max_discount, data['max_discount'])
+
+    @ddt.data(
+        {
+            'offer_data': {'max_global_applications': 30, 'num_applications': 20},
+            'offer_attr': 'num_applications',
+            'offer_value': 30
+        },
+        {
+            'offer_data': {'max_discount': 3000, 'total_discount': 2000},
+            'offer_attr': 'total_discount',
+            'offer_value': 3000
+        }
+    )
+    @ddt.unpack
+    def test_offer_availability(self, offer_data, offer_attr, offer_value):
+        """
+        Verify that enterprise offer has correct availability status based on
+        max_global_applications and max_discount values.
+        """
+        offer = factories.EnterpriseOfferFactory(**offer_data)
+
+        offer = ConditionalOffer.objects.get(id=offer.id)
+        self.assertTrue(offer.is_available())
+
+        # set new value to make the offer consumed
+        setattr(offer, offer_attr, offer_value)
+        offer.save()
+
+        offer = ConditionalOffer.objects.get(id=offer.id)
+        self.assertFalse(offer.is_available())

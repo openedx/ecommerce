@@ -2,6 +2,8 @@
 # TODO: Refactor this to consolidate it with `ecommerce.programs.forms`.
 from __future__ import absolute_import
 
+import decimal
+
 from django import forms
 from django.forms.utils import ErrorList
 from django.utils.translation import ugettext_lazy as _
@@ -42,14 +44,19 @@ class EnterpriseOfferForm(forms.ModelForm):
         fields = [
             'enterprise_customer_uuid', 'enterprise_customer_catalog_uuid', 'start_datetime',
             'end_datetime', 'benefit_type', 'benefit_value', 'contract_discount_type',
-            'contract_discount_value', 'prepaid_invoice_amount', 'sales_force_id'
+            'contract_discount_value', 'prepaid_invoice_amount', 'sales_force_id',
+            'max_global_applications', 'max_discount'
         ]
         help_texts = {
             'end_datetime': '',
+            'max_global_applications': _('The maximum number of enrollments that can redeem this offer.'),
+            'max_discount': _('The maximum USD dollar amount that can be redeemed by this offer.'),
         }
         labels = {
             'start_datetime': _('Start Date'),
             'end_datetime': _('End Date'),
+            'max_global_applications': _('Enrollment Limit'),
+            'max_discount': _('Bookings Limit'),
         }
 
     def _prep_contract_metadata(self, enterprise_contract_metadata):
@@ -99,6 +106,43 @@ class EnterpriseOfferForm(forms.ModelForm):
         date_ui_class = {'class': 'add-pikaday'}
         self.fields['start_datetime'].widget.attrs.update(date_ui_class)
         self.fields['end_datetime'].widget.attrs.update(date_ui_class)
+        # set the min attribute on input widget to enforce minimum value validation at frontend
+        self.fields['max_discount'].widget.attrs.update({'min': 0})
+
+    def clean_max_global_applications(self):
+        # validate against when decreasing the existing value
+        if self.instance.pk and self.instance.max_global_applications:
+            new_max_global_applications = self.cleaned_data.get('max_global_applications') or 0
+            if new_max_global_applications < self.instance.num_applications:
+                self.add_error(
+                    'max_global_applications',
+                    _(
+                        'Ensure new value must be greater than or equal to consumed({offer_enrollments}) value.'
+                    ).format(
+                        offer_enrollments=self.instance.num_applications
+                    )
+                )
+
+        return self.cleaned_data.get('max_global_applications')
+
+    def clean_max_discount(self):
+        max_discount = self.cleaned_data.get('max_discount')
+        # validate against non-decimal and negative values
+        if max_discount is not None and (isinstance(max_discount, decimal.Decimal) and max_discount < 0):
+            self.add_error('max_discount', _('Ensure this value is greater than or equal to 0.'))
+        elif self.instance.pk and self.instance.max_discount:  # validate against when decrease the existing value
+            new_max_discount = max_discount or 0
+            if new_max_discount < self.instance.total_discount:
+                self.add_error(
+                    'max_discount',
+                    _(
+                        'Ensure new value must be greater than or equal to consumed({consumed_discount}) value.'
+                    ).format(
+                        consumed_discount=self.instance.total_discount
+                    )
+                )
+
+        return max_discount
 
     def clean(self):
         cleaned_data = super(EnterpriseOfferForm, self).clean()
@@ -179,6 +223,9 @@ class EnterpriseOfferForm(forms.ModelForm):
         self.instance.partner = site.siteconfiguration.partner
         self.instance.priority = OFFER_PRIORITY_ENTERPRISE
         self.instance.sales_force_id = sales_force_id
+
+        self.instance.max_global_applications = self.cleaned_data.get('max_global_applications')
+        self.instance.max_discount = self.cleaned_data.get('max_discount')
 
         if commit:
             ecm = self.instance.enterprise_contract_metadata
