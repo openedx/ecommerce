@@ -4,6 +4,7 @@
 # This file is distributed under the GNU AFFERO GENERAL PUBLIC LICENSE.
 # 
 # Translators:
+# Translators:
 # e2f_HE c1 <e2f_HE_c1@outlook.com>, 2016-2017
 # da4b3b3e32ebb4f0ec5430359fde7fbb, 2016
 # qualityalltext <quality@alltext.co.il>, 2016-2017
@@ -13,7 +14,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-12-03 14:18+0000\n"
+"POT-Creation-Date: 2020-04-12 20:12+0000\n"
 "PO-Revision-Date: 2019-12-04 06:55+0000\n"
 "Last-Translator: Ned Batchelder <ned@edx.org>\n"
 "Language-Team: Hebrew (http://www.transifex.com/open-edx/edx-platform/language/he/)\n"
@@ -291,19 +292,19 @@ msgstr "הסימן נקודה-פסיק אינו מורשה."
 
 #: ecommerce/static/js/views/coupon_detail_view.js:108
 #: ecommerce/static/js/views/coupon_form_view.js:62
-#: ecommerce/static/js/views/enterprise_coupon_form_view.js:29
+#: ecommerce/static/js/views/enterprise_coupon_form_view.js:30
 msgid "Can be used once by one customer"
 msgstr "לקוח אחד יכול להשתמש בזה פעם אחת"
 
 #: ecommerce/static/js/views/coupon_detail_view.js:110
 #: ecommerce/static/js/views/coupon_form_view.js:70
-#: ecommerce/static/js/views/enterprise_coupon_form_view.js:37
+#: ecommerce/static/js/views/enterprise_coupon_form_view.js:38
 msgid "Can be used multiple times by multiple customers"
 msgstr "מספר לקוחות יכולים להשתמש בזה מספר פעמים"
 
 #: ecommerce/static/js/views/coupon_detail_view.js:112
 #: ecommerce/static/js/views/coupon_form_view.js:66
-#: ecommerce/static/js/views/enterprise_coupon_form_view.js:33
+#: ecommerce/static/js/views/enterprise_coupon_form_view.js:34
 msgid "Can be used once by multiple customers"
 msgstr "מספר לקוחות יכולים להשתמש בזה פעם אחת"
 
@@ -315,11 +316,11 @@ msgstr "קוד הרשמה"
 msgid "Discount Code"
 msgstr "קוד הנחה"
 
-#: ecommerce/static/js/views/coupon_form_view.js:770
+#: ecommerce/static/js/views/coupon_form_view.js:773
 msgid "Save Changes"
 msgstr "שמור שינויים"
 
-#: ecommerce/static/js/views/coupon_form_view.js:785
+#: ecommerce/static/js/views/coupon_form_view.js:788
 msgid "Create Coupon"
 msgstr "צור שובר"
 
@@ -457,7 +458,7 @@ msgid "Seat type"
 msgstr "סוג מושב"
 
 #: ecommerce/static/js/views/enterprise_coupon_detail_view.js:28
-#: ecommerce/static/js/views/enterprise_coupon_form_view.js:41
+#: ecommerce/static/js/views/enterprise_coupon_form_view.js:42
 msgid "Can be used multiple times by one customer"
 msgstr ""
 
