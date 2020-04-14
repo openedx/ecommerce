@@ -17,7 +17,7 @@ from ecommerce.tests.testcases import TestCase
 @ddt.ddt
 class SDNCheckViewSetTests(TestCase):
     PATH = reverse('api:v2:sdn:search')
-    # test comment
+    # test comment more
 
     def setUp(self):
         super(SDNCheckViewSetTests, self).setUp()
