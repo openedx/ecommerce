@@ -3,7 +3,6 @@ from __future__ import absolute_import, unicode_literals
 
 import logging
 from collections import OrderedDict
-from datetime import timedelta
 from decimal import Decimal
 
 import bleach
@@ -1407,7 +1406,8 @@ class CouponCodeAssignmentSerializer(serializers.Serializer):  # pylint: disable
         """
         Schedule async task to send email to the learner who has been assigned the code.
         """
-        code_expiration_date = assigned_offer.created + timedelta(days=365)
+        coupon = self.context.get('coupon')
+        code_expiration_date = retrieve_end_date(coupon)
         redemptions_remaining = (
             assigned_offer.offer.max_global_applications if voucher_usage_type == Voucher.MULTI_USE_PER_CUSTOMER else 1
         )
@@ -1640,7 +1640,8 @@ class CouponCodeRemindSerializer(CouponCodeMixin, serializers.Serializer):  # py
         """
         Schedule async task to send email to the learner who has been assigned the code.
         """
-        code_expiration_date = assigned_offer.created + timedelta(days=365)
+        coupon = self.context.get('coupon')
+        code_expiration_date = retrieve_end_date(coupon)
         try:
             send_assigned_offer_reminder_email(
                 greeting=greeting,
