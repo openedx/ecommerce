@@ -12,7 +12,7 @@ docutils==0.16            # via sphinx
 edx-sphinx-theme==1.0.2   # via -r requirements/docs.in
 idna==2.9                 # via requests
 imagesize==1.2.0          # via sphinx
-jinja2==2.11.1            # via sphinx
+jinja2==2.11.2            # via sphinx
 markupsafe==1.1.1         # via jinja2
 pygments==2.6.1           # via sphinx
 pytz==2016.10             # via -c requirements/pins.txt, babel
