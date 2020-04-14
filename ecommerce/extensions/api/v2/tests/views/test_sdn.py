@@ -13,11 +13,11 @@ from ecommerce.extensions.api.v2.tests.views import JSON_CONTENT_TYPE
 from ecommerce.extensions.payment.utils import SDNClient
 from ecommerce.extensions.test.factories import create_basket
 from ecommerce.tests.testcases import TestCase
-# test comment
 
 @ddt.ddt
 class SDNCheckViewSetTests(TestCase):
     PATH = reverse('api:v2:sdn:search')
+    # test comment
 
     def setUp(self):
         super(SDNCheckViewSetTests, self).setUp()
