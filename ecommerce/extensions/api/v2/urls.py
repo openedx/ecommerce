@@ -85,6 +85,8 @@ PROVIDER_URLS = [
 
 SDN_URLS = [
     url(r'^search/$', sdn_views.SDNCheckViewSet.as_view(), name='search')
+    #url(r'^search/$', cybersource.CybersourceSubmitAPIView.as_view(), name='search')
+    # url(r'^search/$', cybersource.CybersourceSubmitView.as_view(), name='search')
 ]
 
 ENTERPRISE_URLS = [
