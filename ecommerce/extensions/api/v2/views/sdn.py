@@ -16,7 +16,7 @@ Basket = get_model('basket', 'Basket')
 
 
 class SDNCheckViewSet(APIView):
-    """Performs an SDN check for a given user."""
+    """Performs an SDN check for a given user.   """
     permission_classes = (IsAuthenticated,)
 
     def post(self, request):
