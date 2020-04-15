@@ -1,10 +1,8 @@
 from __future__ import absolute_import
 
 from django.conf.urls import include, url
-from rest_framework.urlpatterns import format_suffix_patterns
-from rest_framework_extensions.routers import ExtendedSimpleRouter as SimpleRouter
-
 from ecommerce.core.constants import COURSE_ID_PATTERN, UUID_REGEX_PATTERN
+# from ecommerce.extensions.api.v2.views import sdn as sdn_views
 from ecommerce.extensions.api.v2.views import assignmentemail as assignment_email
 from ecommerce.extensions.api.v2.views import baskets as basket_views
 from ecommerce.extensions.api.v2.views import catalog as catalog_views
@@ -20,11 +18,12 @@ from ecommerce.extensions.api.v2.views import providers as provider_views
 from ecommerce.extensions.api.v2.views import publication as publication_views
 from ecommerce.extensions.api.v2.views import refunds as refund_views
 from ecommerce.extensions.api.v2.views import retirement as retirement_views
-# from ecommerce.extensions.api.v2.views import sdn as sdn_views
 from ecommerce.extensions.api.v2.views import stockrecords as stockrecords_views
 from ecommerce.extensions.api.v2.views import user_management as user_management_views
 from ecommerce.extensions.api.v2.views import vouchers as voucher_views
 from ecommerce.extensions.voucher.views import CouponReportCSVView
+from rest_framework.urlpatterns import format_suffix_patterns
+from rest_framework_extensions.routers import ExtendedSimpleRouter as SimpleRouter
 
 ORDER_NUMBER_PATTERN = r'(?P<number>[-\w]+)'
 BASKET_ID_PATTERN = r'(?P<basket_id>[\d]+)'
