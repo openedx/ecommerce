@@ -34,6 +34,7 @@ from ecommerce.extensions.payment.utils import get_program_uuid
 Applicator = get_class('offer.applicator', 'Applicator')
 Basket = get_model('basket', 'Basket')
 Order = get_model('order', 'Order')
+log = logging.getLogger(__name__)
 
 
 class FreeCheckoutView(EdxOrderPlacementMixin, RedirectView):
@@ -268,8 +269,8 @@ class ReceiptResponseView(ThankYouView):
             # If enterprise feature is enabled return all the enterprise_customer associated with user.
             learner_data = fetch_enterprise_learner_data(request.site, request.user)
         except (ReqConnectionError, KeyError, SlumberHttpBaseException, Timeout) as exc:
-            logging.exception('[enterprise learner message] Exception while retrieving enterprise learner data for'
-                              'User: %s, Exception: %s', request.user, exc)
+            log.info('[enterprise learner message] Exception while retrieving enterprise learner data for '
+                     'User: %s, Exception: %s', request.user, exc)
             return None
 
         try:
