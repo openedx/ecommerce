@@ -20,7 +20,7 @@ from ecommerce.extensions.api.v2.views import providers as provider_views
 from ecommerce.extensions.api.v2.views import publication as publication_views
 from ecommerce.extensions.api.v2.views import refunds as refund_views
 from ecommerce.extensions.api.v2.views import retirement as retirement_views
-from ecommerce.extensions.api.v2.views import sdn as sdn_views
+# from ecommerce.extensions.api.v2.views import sdn as sdn_views
 from ecommerce.extensions.api.v2.views import stockrecords as stockrecords_views
 from ecommerce.extensions.api.v2.views import user_management as user_management_views
 from ecommerce.extensions.api.v2.views import vouchers as voucher_views
@@ -83,11 +83,9 @@ PROVIDER_URLS = [
     url(r'^$', provider_views.ProviderViewSet.as_view(), name='list_providers')
 ]
 
-SDN_URLS = [
-    url(r'^search/$', sdn_views.SDNCheckViewSet.as_view(), name='search')
-    #url(r'^search/$', cybersource.CybersourceSubmitAPIView.as_view(), name='search')
-    # url(r'^search/$', cybersource.CybersourceSubmitView.as_view(), name='search')
-]
+# SDN_URLS = [
+#     url(r'^search/$', sdn_views.SDNCheckViewSet.as_view(), name='search')
+# ]
 
 ENTERPRISE_URLS = [
     url(r'^customers$', enterprise_views.EnterpriseCustomerViewSet.as_view(), name='enterprise_customers'),
@@ -123,7 +121,7 @@ urlpatterns = [
     url(r'^refunds/', include((REFUND_URLS, 'refunds'))),
     url(r'^retirement/', include((RETIREMENT_URLS, 'retirement'))),
     url(r'^user_management/', include((USER_MANAGEMENT_URLS, 'user_management'))),
-    url(r'^sdn/', include((SDN_URLS, 'sdn'))),
+    # url(r'^sdn/', include((SDN_URLS, 'sdn'))),
     url(r'^assignment-email/', include((ASSIGNMENT_EMAIL_URLS, 'assignment-email'))),
 ]
 
