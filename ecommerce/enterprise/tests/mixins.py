@@ -483,7 +483,7 @@ class EnterpriseServiceMockMixin:
 
     def mock_catalog_contains_course_runs(self, course_run_ids, enterprise_customer_uuid, api_url,
                                           enterprise_customer_catalog_uuid=None, contains_content=True,
-                                          raise_exception=False):
+                                          raise_exception=False, catalog_resource='enterprise_catalogs'):
         self.mock_access_token_response()
         query_params = urlencode({'course_run_ids': course_run_ids}, True)
         body = raise_timeout if raise_exception else json.dumps({'contains_content_items': contains_content})
@@ -500,8 +500,9 @@ class EnterpriseServiceMockMixin:
         if enterprise_customer_catalog_uuid:
             httpretty.register_uri(
                 method=httpretty.GET,
-                uri='{}enterprise_catalogs/{}/contains_content_items/?{}'.format(
+                uri='{}{}/{}/contains_content_items/?{}'.format(
                     api_url,
+                    catalog_resource,
                     enterprise_customer_catalog_uuid,
                     query_params
                 ),

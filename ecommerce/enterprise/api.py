@@ -123,6 +123,13 @@ def catalog_contains_course_runs(site, course_run_ids, enterprise_customer_uuid,
         api_resource_name = 'enterprise_catalogs'
         api_resource_id = enterprise_customer_catalog_uuid
 
+    api = site.siteconfiguration.enterprise_api_client
+    # Temporarily gate enterprise catalog api usage behind waffle flag
+    if request and waffle.flag_is_active(request, USE_ENTERPRISE_CATALOG):
+        api = site.siteconfiguration.enterprise_catalog_api_client
+        if enterprise_customer_catalog_uuid:
+            api_resource_name = 'enterprise-catalogs'
+
     cache_key = get_cache_key(
         site_domain=site.domain,
         resource='{resource}-{resource_id}-contains_content_items'.format(
@@ -135,11 +142,6 @@ def catalog_contains_course_runs(site, course_run_ids, enterprise_customer_uuid,
     contains_content_cached_response = TieredCache.get_cached_response(cache_key)
     if contains_content_cached_response.is_found:
         return contains_content_cached_response.value
-
-    api = site.siteconfiguration.enterprise_api_client
-    # Temporarily gate enterprise catalog api usage behind waffle flag
-    if request and waffle.flag_is_active(request, USE_ENTERPRISE_CATALOG):
-        api = site.siteconfiguration.enterprise_catalog_api_client
 
     endpoint = getattr(api, api_resource_name)(api_resource_id)
     contains_content = endpoint.contains_content_items.get(**query_params)['contains_content_items']
