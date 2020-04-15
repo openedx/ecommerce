@@ -574,8 +574,7 @@ def get_enterprise_id_for_user(site, user):
     try:
         enterprise_learner_response = fetch_enterprise_learner_data(site, user)
     except (AttributeError, ReqConnectionError, KeyError, SlumberHttpBaseException, Timeout) as exc:
-        logging.exception('Unable to retrieve enterprise learner data for the user!'
-                          'User: %s, Exception: %s', user, exc)
+        log.info('Unable to retrieve enterprise learner data for User: %s, Exception: %s', user, exc)
         return None
 
     try:
