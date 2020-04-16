@@ -2,7 +2,6 @@ from __future__ import absolute_import
 
 from django.conf.urls import include, url
 from ecommerce.core.constants import COURSE_ID_PATTERN, UUID_REGEX_PATTERN
-# from ecommerce.extensions.api.v2.views import sdn as sdn_views
 from ecommerce.extensions.api.v2.views import assignmentemail as assignment_email
 from ecommerce.extensions.api.v2.views import baskets as basket_views
 from ecommerce.extensions.api.v2.views import catalog as catalog_views
