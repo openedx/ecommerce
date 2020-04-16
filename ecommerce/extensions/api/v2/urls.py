@@ -27,7 +27,7 @@ from rest_framework_extensions.routers import ExtendedSimpleRouter as SimpleRout
 ORDER_NUMBER_PATTERN = r'(?P<number>[-\w]+)'
 BASKET_ID_PATTERN = r'(?P<basket_id>[\d]+)'
 
-# From edx-platform's lms/envs/common.py as of 2018-10-09
+# From edx-platform's lms/envs/common.py as of 2018-10-09 
 USERNAME_REGEX_PARTIAL = r'[\w .@_+-]+'
 USERNAME_PATTERN = r'(?P<username>{regex})'.format(regex=USERNAME_REGEX_PARTIAL)
 
