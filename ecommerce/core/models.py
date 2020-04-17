@@ -18,6 +18,7 @@ from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
 from edx_django_utils import monitoring as monitoring_utils
 from edx_django_utils.cache import TieredCache
+from edx_django_utils.cache.user import CachedAuthenticatedUserDetails
 from edx_rbac.models import UserRole, UserRoleAssignment
 from edx_rest_api_client.client import EdxRestApiClient
 from jsonfield.fields import JSONField
@@ -515,6 +516,15 @@ class User(AbstractUser):
     class Meta:
         get_latest_by = 'date_joined'
         db_table = 'ecommerce_user'
+
+    @property
+    def display_name(self):
+        return CachedAuthenticatedUserDetails(self.id).display_name
+
+    @display_name.setter
+    def display_name(self, value):
+        cached_user_details = CachedAuthenticatedUserDetails(self.id)
+        cached_user_details.set_cached_authenticated_user_details(value)
 
     @property
     def access_token(self):
