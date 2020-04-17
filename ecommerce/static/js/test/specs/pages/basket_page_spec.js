@@ -359,7 +359,6 @@ define([
                             'select[name=country]'
                         ];
 
-                        spyOn(BasketPage, 'sdnCheck');
                         _.each(requiredFields, function(field) {
                             $(field).val('');
                             $('#payment-button').click();
@@ -368,7 +367,6 @@ define([
                                 $(field).parentsUntil('form-item').find('~.help-block span').text()
                             ).toEqual('This field is required');
                             expect($('.payment-form').attr('data-has-error')).toEqual('true');
-                            expect(BasketPage.sdnCheck).not.toHaveBeenCalled();
                         });
                     });
 
@@ -381,41 +379,6 @@ define([
                                 'form-item'
                             ).find('~.help-block span').text()
                         ).toEqual('This field is required');
-                    });
-
-                    it('should perform the SDN check', function() {
-                        var firstName = 'Darth',
-                            lastName = 'Vader',
-                            city = 'Death Star',
-                            country = 'DS',
-                            args,
-                            ajaxData,
-                            event = $.Event('click'),
-                            testCaseData = {hits: 1};
-
-                        $('input[name=first_name]').val(firstName);
-                        $('input[name=last_name]').val(lastName);
-                        $('input[name=city]').val(city);
-                        $('select[name=country]').val(country);
-
-                        spyOn(Utils, 'redirect');
-                        spyOn(event, 'preventDefault');
-                        spyOn($, 'ajax').and.callFake(function(options) {
-                            options.success(testCaseData);
-                        });
-                        BasketPage.sdnCheck(event);
-
-                        expect($.ajax).toHaveBeenCalled();
-                        expect(event.preventDefault).toHaveBeenCalled();
-                        expect(Utils.redirect).toHaveBeenCalled();
-                        args = $.ajax.calls.argsFor(0)[0];
-                        ajaxData = JSON.parse(args.data);
-                        expect(args.method).toEqual('POST');
-                        expect(args.url).toEqual('/api/v2/sdn/search/');
-                        expect(args.contentType).toEqual('application/json; charset=utf-8');
-                        expect(ajaxData.name).toEqual(_s.sprintf('%s %s', firstName, lastName));
-                        expect(ajaxData.city).toEqual(city);
-                        expect(ajaxData.country).toEqual(country);
                     });
                 });
 
@@ -435,7 +398,6 @@ define([
                         // We are using moment here to get number of month instead of
                         // hard coding it, so that it conforms to js date time style.
                         spyOn(Date.prototype, 'getMonth').and.returnValue(thisMonth);
-                        spyOn(BasketPage, 'sdnCheck');
 
                         $('#card-number').val(validCardNumber);
                         $('#card-cvn').val(validCvn);
@@ -446,7 +408,6 @@ define([
                     function expectFormSubmitted(fieldName) {
                         expect($(fieldName + '~ .help-block').has('span').length).toEqual(0);
                         expect($('.payment-form').attr('data-has-error')).toEqual('false');
-                        expect(BasketPage.sdnCheck).not.toHaveBeenCalled();
                     }
 
                     it('should validate card number', function() {
