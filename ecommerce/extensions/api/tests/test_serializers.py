@@ -1,5 +1,7 @@
 from __future__ import absolute_import
 
+import datetime
+
 import mock
 from oscar.core.loading import get_model
 from testfixtures import LogCapture
@@ -32,7 +34,8 @@ class CouponCodeSerializerTests(CouponMixin, TestCase):
             code='serializeCouponTest',
             enterprise_customer='af4b351f-5f1c-4fc3-af41-48bb38fcb161',
             catalog=None,
-            enterprise_customer_catalog='8212a8d8-c6b1-4023-8754-4d687c43d72f'
+            enterprise_customer_catalog='8212a8d8-c6b1-4023-8754-4d687c43d72f',
+            end_datetime=(datetime.datetime.now() + datetime.timedelta(days=10))
         )
         self.code = self.coupon.attr.coupon_vouchers.vouchers.first().code
         self.email = 'serializeCoupon@test.org'
@@ -42,6 +45,49 @@ class CouponCodeSerializerTests(CouponMixin, TestCase):
             offer=self.offer_assignments[0],
             code=self.code,
             user_email=self.email,
+        )
+
+    @mock.patch('ecommerce.extensions.api.serializers.send_assigned_offer_email')
+    def test_send_assigned_offer_email_args(self, mock_assign_email):
+        """ Test that the code_expiration_date passed is equal to coupon batch end date """
+        serializer = CouponCodeAssignmentSerializer(data=self.data, context={'coupon': self.coupon})
+        serializer._trigger_email_sending_task(  # pylint: disable=protected-access
+            greeting=self.GREETING,
+            closing=self.CLOSING,
+            assigned_offer=self.offer_assignment,
+            voucher_usage_type=Voucher.MULTI_USE_PER_CUSTOMER
+        )
+        expected_expiration_date = self.coupon.attr.coupon_vouchers.vouchers.first().end_datetime
+        mock_assign_email.assert_called_with(
+            greeting=self.GREETING,
+            closing=self.CLOSING,
+            offer_assignment_id=self.offer_assignment.id,
+            learner_email=self.offer_assignment.user_email,
+            code=self.offer_assignment.code,
+            redemptions_remaining=mock.ANY,
+            code_expiration_date=expected_expiration_date.strftime('%d %B, %Y')
+        )
+
+    @mock.patch('ecommerce.extensions.api.serializers.send_assigned_offer_reminder_email')
+    def test_send_assigned_offer_reminder_email_args(self, mock_remind_email):
+        """ Test that the code_expiration_date passed is equal to coupon batch end date """
+        serializer = CouponCodeRemindSerializer(data=self.data, context={'coupon': self.coupon})
+        serializer._trigger_email_sending_task(  # pylint: disable=protected-access
+            greeting=self.GREETING,
+            closing=self.CLOSING,
+            assigned_offer=self.offer_assignment,
+            redeemed_offer_count=3,
+            total_offer_count=5,
+        )
+        expected_expiration_date = self.coupon.attr.coupon_vouchers.vouchers.first().end_datetime
+        mock_remind_email.assert_called_with(
+            greeting=self.GREETING,
+            closing=self.CLOSING,
+            learner_email=self.offer_assignment.user_email,
+            code=self.offer_assignment.code,
+            redeemed_offer_count=mock.ANY,
+            total_offer_count=mock.ANY,
+            code_expiration_date=expected_expiration_date.strftime('%d %B, %Y')
         )
 
     @mock.patch('ecommerce.extensions.api.serializers.send_assigned_offer_email')
