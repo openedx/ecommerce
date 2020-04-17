@@ -20,6 +20,9 @@ httpretty==0.9.7
 # jsonfield2 > 3.0.3 dropped support for python 3.5
 jsonfield2<=3.0.3
 
+# ARCHBOM-1141: pip-tools upgrade requires pip upgrade
+pip-tools<5.0.0
+
 # 5.4 introduces test order problems that need to be resolved.
 pytest<5.4.0
 
