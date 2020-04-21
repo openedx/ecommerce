@@ -1,12 +1,11 @@
 from __future__ import absolute_import, unicode_literals
 
-import hashlib
 import logging
 
-import six  # pylint: disable=ungrouped-imports
 import waffle
 from django.conf import settings
 from django.core.exceptions import ValidationError
+from edx_django_utils.cache import get_cache_key as get_django_cache_key
 from six.moves.urllib.parse import parse_qs, urlparse
 
 logger = logging.getLogger(__name__)
@@ -28,28 +27,9 @@ def log_message_and_raise_validation_error(message):
 
 def get_cache_key(**kwargs):
     """
-    Get MD5 encoded cache key for given arguments.
-
-    Note: This function will not work correctly if any of the arguments are dictionaries
-
-    Here is the format of key before MD5 encryption.
-        key1:value1__key2:value2 ...
-
-    Example:
-        >>> get_cache_key(site_domain="example.com", resource="catalogs")
-        # Here is key format for above call
-        # "site_domain:example.com__resource:catalogs"
-        a54349175618ff1659dee0978e3149ca
-
-    Arguments:
-        **kwargs: Key word arguments that need to be present in cache key.
-
-    Returns:
-         An MD5 encoded key uniquely identified by the key word arguments.
+    Wrapper method on edx_django_utils get_cache_key utility.
     """
-    key = '__'.join([u'{}:{}'.format(item, value) for item, value in sorted(six.iteritems(kwargs))])
-
-    return hashlib.md5(key.encode('utf-8')).hexdigest()
+    return get_django_cache_key(**kwargs)
 
 
 def deprecated_traverse_pagination(response, endpoint):
