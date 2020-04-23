@@ -566,7 +566,8 @@ define([
                 var maxUsesFieldSelector = '[name=max_uses]',
                     maxUsesModelValue = this.model.get('max_uses'),
                     multiUseMaxUsesValue = this.editing ? maxUsesModelValue : null,
-                    voucherType = this.model.get('voucher_type');
+                    voucherType = this.model.get('voucher_type'),
+                    numOfUses = this.model.get('num_uses');
                 if (!this.editing) {
                     this.emptyCodeField();
                 }
@@ -589,12 +590,12 @@ define([
                     if (voucherType === 'Multi-use') {
                         this.model.set('max_uses', multiUseMaxUsesValue);
                         if (this.editing) {
-                            this.setLimitToElement(this.$(maxUsesFieldSelector), '', multiUseMaxUsesValue);
+                            this.setLimitToElement(this.$(maxUsesFieldSelector), '', numOfUses);
                         } else {
                             this.setLimitToElement(this.$(maxUsesFieldSelector), '', 2);
                         }
                     } else if (this.editing) {
-                        this.setLimitToElement(this.$(maxUsesFieldSelector), '', maxUsesModelValue);
+                        this.setLimitToElement(this.$(maxUsesFieldSelector), '', numOfUses);
                     } else {
                         this.model.set('max_uses', 1);
                         this.setLimitToElement(this.$(maxUsesFieldSelector), '', 1);
