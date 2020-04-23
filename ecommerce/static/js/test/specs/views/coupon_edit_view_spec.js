@@ -195,15 +195,14 @@ define([
                     expect(formView.updateTotalValue).not.toHaveBeenCalled();
                 });
 
-                it('should verify multi-use max_uses field min attribute is set to model value', function() {
-                    expect(view.$('[name=max_uses]').attr('min')).toBe(view.model.get('max_uses'));
+                it('should verify multi-use max_uses field min attribute is set to num_uses.', function() {
+                    expect(view.$('[name=max_uses]').attr('min')).toBe(view.model.get('num_uses'));
                 });
 
-                it('should verify once-per-customer max_uses field min attribute is set to model value', function() {
+                it('should verify once-per-customer max_uses field min attribute is set to num_uses', function() {
                     view.model.set('voucher_type', 'Once per customer');
-                    view.model.set('max_uses', '3');
                     view.render();
-                    expect(view.$('[name=max_uses]').attr('min')).toBe(view.model.get('max_uses'));
+                    expect(view.$('[name=max_uses]').attr('min')).toBe(view.model.get('num_uses'));
                 });
             });
         });
