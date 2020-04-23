@@ -367,6 +367,7 @@ define([], function() {
             voucher_type: 'Multi-use',
             max_uses: '5',
             benefit_type: 'Percentage',
+            num_uses: '3',
             benefit_value: 100
         };
     return {
