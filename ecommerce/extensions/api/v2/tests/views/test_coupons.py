@@ -14,7 +14,6 @@ import six
 from django.test import RequestFactory
 from django.urls import reverse
 from django.utils.timezone import now
-from oscar.apps.catalogue.categories import create_from_breadcrumbs
 from oscar.core.loading import get_model
 from oscar.test import factories
 from rest_framework import status
@@ -50,6 +49,13 @@ Voucher = get_model('voucher', 'Voucher')
 
 COUPONS_LINK = reverse('api:v2:coupons-list')
 ENTERPRISE_COUPONS_LINK = reverse('api:v2:enterprise-coupons-list')
+COUPON_CATEGORY_NAME = 'Coupons'
+TEST_CATEGORIES = ['Financial Assistance', 'Partner No Rev - RAP', 'Geography Promotion', 'Marketing Partner Promotion',
+                   'Upsell Promotion', 'edX Employee Request', 'Course Promotion', 'Partner No Rev - ORAP',
+                   'Services-Other', 'Partner No Rev - Upon Redemption', 'Bulk Enrollment - Prepay', 'Support-Other',
+                   'ConnectEd', 'Marketing-Other', 'Affiliate Promotion', 'Retention Promotion',
+                   'Partner No Rev - Prepay', 'Paid Cohort', 'Bulk Enrollment - Integration', 'On-Campus Learners',
+                   'Security Disclosure Reward', 'Other', 'Customer Service', 'Bulk Enrollment - Upon Redemption']
 
 
 @httpretty.activate
@@ -1295,15 +1301,15 @@ class CouponCategoriesListViewTests(TestCase):
         super(CouponCategoriesListViewTests, self).setUp()
         self.user = self.create_user()
         self.client.login(username=self.user.username, password=self.password)
-        Category.objects.all().delete()
-        create_from_breadcrumbs('Coupons > Coupon test category')
 
     def test_category_list(self):
         """ Verify the endpoint returns successfully. """
-        response = self.client.get(self.path)
+        response = self.client.get(self.path + '?page_size=200')
         response_data = response.json()
-        self.assertEqual(response_data['count'], 1)
-        self.assertEqual(response_data['results'][0]['name'], 'Coupon test category')
+        self.assertEqual(response_data['count'], 24)
+        received_coupon_categories = {category['name'] for category in response_data['results']}
+        for category in TEST_CATEGORIES:
+            self.assertTrue(category in received_coupon_categories)
 
     def test_deprecated_category_filtering(self):
         """ Verify the endpoint doesn't return deprecated coupon categories. """
