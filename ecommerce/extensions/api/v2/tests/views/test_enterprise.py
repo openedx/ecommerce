@@ -2872,7 +2872,11 @@ class OfferAssignmentEmailTemplatesViewSetTests(JwtMixin, TestCase):
             system_wide_role=SYSTEM_ENTERPRISE_ADMIN_ROLE, context=self.enterprise_customer['id']
         )
 
-    def create_template_data(self, email_type, name, greeting=None, closing=None, status_code=status.HTTP_201_CREATED):
+    def create_template_data(
+            self, email_type, name, greeting=None, closing=None, status_code=None, method='POST', url=None
+    ):
+        status_code = status_code or status.HTTP_201_CREATED
+        api_endpoint = url or self.url
 
         data = {'email_type': email_type, 'name': name}
         if greeting:
@@ -2880,7 +2884,11 @@ class OfferAssignmentEmailTemplatesViewSetTests(JwtMixin, TestCase):
         if closing:
             data['email_closing'] = closing
 
-        response = self.client.post(self.url, json.dumps(data), 'application/json')
+        if method == 'POST':
+            response = self.client.post(api_endpoint, json.dumps(data), 'application/json')
+        elif method == 'PUT':
+            response = self.client.put(api_endpoint, json.dumps(data), 'application/json')
+
         assert response.status_code == status_code
 
         return response.json()
@@ -3179,3 +3187,27 @@ class OfferAssignmentEmailTemplatesViewSetTests(JwtMixin, TestCase):
                 'Email closing must be {} characters or less'.format(max_limit)
             ]
         }
+
+    @ddt.data('assign', 'remind', 'revoke')
+    def test_put(self, email_type):
+        """
+        Verify that view correctly performs HTTP PUT.
+        """
+        post_reponse = self.create_template_data(email_type, 'Awsome tmplate', 'GREETING 100', 'CLOSING 100')
+
+        # prepare http put url and data
+        api_put_url = '{}{}/'.format(self.url, post_reponse['id'])
+        updated_name = 'Awesome Template'
+        updated_greeting = 'I AM A GREETING'
+        updated_closing = 'I AM A CLOSING'
+
+        put_response = self.create_template_data(
+            email_type,
+            updated_name,
+            greeting=updated_greeting,
+            closing=updated_closing,
+            method='PUT',
+            url=api_put_url,
+            status_code=status.HTTP_200_OK,
+        )
+        self.verify_template_data(put_response, email_type, updated_greeting, updated_closing, True, updated_name)
