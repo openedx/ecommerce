@@ -4,6 +4,7 @@
 # This file is distributed under the GNU AFFERO GENERAL PUBLIC LICENSE.
 # 
 # Translators:
+# Translators:
 # Alexey Yuriev <yurievac@gmail.com>, 2018
 # Ilya <i.batozskiy@gmail.com>, 2015
 # Liubov Fomicheva <liubov.nelapa@gmail.com>, 2015-2017
@@ -22,8 +23,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-01-19 20:12+0000\n"
-"PO-Revision-Date: 2020-01-19 20:13+0000\n"
+"POT-Creation-Date: 2020-04-26 20:12+0000\n"
+"PO-Revision-Date: 2020-04-26 20:12+0000\n"
 "Last-Translator: edx_transifex_bot <i18n-working-group+edx-transifex-bot@edx.org>\n"
 "Language-Team: Russian (http://www.transifex.com/open-edx/edx-platform/language/ru/)\n"
 "MIME-Version: 1.0\n"
@@ -263,25 +264,30 @@ msgid ""
 "Page is set)"
 msgstr ""
 
-#: ecommerce/core/models.py:483
+#: ecommerce/core/models.py:505
+msgid "last name"
+msgstr ""
+
+#: ecommerce/core/models.py:506
 msgid "Full Name"
 msgstr "Полное имя"
 
-#: ecommerce/core/models.py:489
+#: ecommerce/core/models.py:512
 msgid "LMS user id"
 msgstr ""
 
-#: ecommerce/core/models.py:733 ecommerce/extensions/basket/models.py:109
+#: ecommerce/core/models.py:756 ecommerce/extensions/basket/models.py:109
 #: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:54
 #: ecommerce/templates/oscar/dashboard/offers/summary.html:10
 msgid "Name"
 msgstr "Имя"
 
-#: ecommerce/core/models.py:735 ecommerce/extensions/offer/models.py:484
+#: ecommerce/core/models.py:758 ecommerce/extensions/offer/models.py:485
 msgid "EnterpriseCustomer UUID"
 msgstr "ЗаказчикПредприятия  UUID"
 
-#: ecommerce/core/models.py:736 ecommerce/extensions/offer/models.py:362
+#: ecommerce/core/models.py:759 ecommerce/extensions/offer/models.py:363
+#: ecommerce/extensions/offer/models.py:552
 msgid "UUID for an EnterpriseCustomer from the Enterprise Service."
 msgstr "UUID для EnterpriseCustomer от Сервиса предприятия"
 
@@ -344,27 +350,28 @@ msgstr "Вы не имеете права использовать этот ку
 msgid "Couldn't find a matching Enterprise Customer for this coupon."
 msgstr "Не смог найти подходящего корпоративного клиента для этого купона."
 
-#: ecommerce/coupons/views.py:212
+#: ecommerce/coupons/views.py:213
 msgid ""
-"This coupon code is not valid for entitlement course product. Try a "
-"different course."
+"This coupon is not valid for purchasing a program. Try using this on an "
+"individual course in the program. If you need assistance, contact edX "
+"support."
 msgstr ""
 
-#: ecommerce/coupons/views.py:237
+#: ecommerce/coupons/views.py:240
 msgid "Invalid data sharing consent token provided."
 msgstr "Предоставлено недействительное свидетельство о согласии на обмен данными."
 
-#: ecommerce/coupons/views.py:256
+#: ecommerce/coupons/views.py:259
 #, python-brace-format
 msgid "You have already purchased {course} seat."
 msgstr "Вы уже купили место {course} "
 
-#: ecommerce/coupons/views.py:275
+#: ecommerce/coupons/views.py:278
 #, python-brace-format
 msgid "A discount has been applied, courtesy of {enterprise_customer_name}."
 msgstr "Скидка была применена благодаря {enterprise_customer_name}."
 
-#: ecommerce/coupons/views.py:285
+#: ecommerce/coupons/views.py:288
 msgid "This coupon code is not valid for this course. Try a different course."
 msgstr "Данный код купона недействителен для данного курса. Попробуй другой курс."
 
@@ -449,77 +456,115 @@ msgstr "Процент"
 msgid "Absolute"
 msgstr "действительный"
 
-#: ecommerce/enterprise/conditions.py:239
+#: ecommerce/enterprise/conditions.py:270
 msgid ""
 "This code is not valid with your email. Please login with the correct email "
 "assigned to the code or contact your Learning Manager for additional "
 "questions."
 msgstr ""
 
-#: ecommerce/enterprise/forms.py:23
+#: ecommerce/enterprise/forms.py:25
 #: ecommerce/enterprise/templates/enterprise/enterpriseoffer_list.html:30
 msgid "Enterprise Customer UUID"
 msgstr "Корпоративный клиент UUID"
 
-#: ecommerce/enterprise/forms.py:24
+#: ecommerce/enterprise/forms.py:26
 #: ecommerce/enterprise/templates/enterprise/enterpriseoffer_list.html:31
 msgid "Enterprise Customer Catalog UUID"
 msgstr "Каталог корпоративных клиентов UUID"
 
-#: ecommerce/enterprise/forms.py:25 ecommerce/programs/forms.py:22
+#: ecommerce/enterprise/forms.py:27 ecommerce/programs/forms.py:22
 msgid "Discount Type"
 msgstr "Тип скидки"
 
-#: ecommerce/enterprise/forms.py:27 ecommerce/programs/forms.py:24
+#: ecommerce/enterprise/forms.py:29 ecommerce/programs/forms.py:24
 msgid "Discount Value"
 msgstr " Стоимость со скидкой"
 
-#: ecommerce/enterprise/forms.py:30
+#: ecommerce/enterprise/forms.py:32
 msgid "Contract Discount Type"
 msgstr ""
 
-#: ecommerce/enterprise/forms.py:33
+#: ecommerce/enterprise/forms.py:35
 msgid "Contract Discount"
 msgstr ""
 
-#: ecommerce/enterprise/forms.py:36
+#: ecommerce/enterprise/forms.py:38
 msgid "Prepaid Invoice Amount"
 msgstr ""
 
-#: ecommerce/enterprise/forms.py:50 ecommerce/programs/forms.py:34
+#: ecommerce/enterprise/forms.py:40
+msgid "Salesforce Opportunity ID"
+msgstr ""
+
+#: ecommerce/enterprise/forms.py:52
+msgid "The maximum number of enrollments that can redeem this offer."
+msgstr ""
+
+#: ecommerce/enterprise/forms.py:53
+msgid "The maximum USD dollar amount that can be redeemed by this offer."
+msgstr ""
+
+#: ecommerce/enterprise/forms.py:56 ecommerce/programs/forms.py:34
 msgid "Start Date"
 msgstr "Дата начала"
 
-#: ecommerce/enterprise/forms.py:51 ecommerce/programs/forms.py:35
+#: ecommerce/enterprise/forms.py:57 ecommerce/programs/forms.py:35
 msgid "End Date"
 msgstr "Дата окончания"
 
-#: ecommerce/enterprise/forms.py:126
+#: ecommerce/enterprise/forms.py:58
+msgid "Enrollment Limit"
+msgstr ""
+
+#: ecommerce/enterprise/forms.py:59
+msgid "Bookings Limit"
+msgstr ""
+
+#: ecommerce/enterprise/forms.py:120
+#, python-brace-format
+msgid ""
+"Ensure new value must be greater than or equal to "
+"consumed({offer_enrollments}) value."
+msgstr ""
+
+#: ecommerce/enterprise/forms.py:132
+msgid "Ensure this value is greater than or equal to 0."
+msgstr ""
+
+#: ecommerce/enterprise/forms.py:139
+#, python-brace-format
+msgid ""
+"Ensure new value must be greater than or equal to "
+"consumed({consumed_discount}) value."
+msgstr ""
+
+#: ecommerce/enterprise/forms.py:167
 msgid "An offer already exists for this Enterprise & Catalog combination."
 msgstr "Предложение уже существует для этой комбинации Enterprise & Catalog."
 
-#: ecommerce/enterprise/forms.py:129 ecommerce/enterprise/forms.py:139
+#: ecommerce/enterprise/forms.py:170 ecommerce/enterprise/forms.py:179
 #: ecommerce/programs/forms.py:72
 msgid "Percentage discounts cannot be greater than 100%."
 msgstr "Процентная скидка не может превышать 100%."
 
-#: ecommerce/enterprise/forms.py:132 ecommerce/programs/forms.py:75
+#: ecommerce/enterprise/forms.py:173 ecommerce/programs/forms.py:75
 msgid "A start date must be specified when specifying an end date."
 msgstr "Дата начала должна быть указана при указании даты окончания."
 
-#: ecommerce/enterprise/forms.py:135 ecommerce/programs/forms.py:78
+#: ecommerce/enterprise/forms.py:176 ecommerce/programs/forms.py:78
 msgid "The start date must occur before the end date."
 msgstr "Дата начала должна наступить до даты окончания."
 
-#: ecommerce/enterprise/forms.py:144
+#: ecommerce/enterprise/forms.py:184
 msgid "More than 2 digits after the decimal not allowed for absolute value."
 msgstr ""
 
-#: ecommerce/enterprise/forms.py:149
+#: ecommerce/enterprise/forms.py:189
 msgid "This field is required when contract discount type is absolute."
 msgstr ""
 
-#: ecommerce/enterprise/forms.py:172
+#: ecommerce/enterprise/forms.py:213
 msgid "Discount of type {} provided by {} for {}."
 msgstr ""
 
@@ -689,29 +734,41 @@ msgid ""
 "We couldn't find enough information about you to perform the calculation."
 msgstr ""
 
-#: ecommerce/extensions/api/serializers.py:443
+#: ecommerce/extensions/api/serializers.py:175
+msgid "EXPIRED"
+msgstr ""
+
+#: ecommerce/extensions/api/serializers.py:177
+msgid "INACTIVE"
+msgstr "НЕАКТИВНЫЙ"
+
+#: ecommerce/extensions/api/serializers.py:178
+msgid "ACTIVE"
+msgstr "АКТИВНЫЙ"
+
+#: ecommerce/extensions/api/serializers.py:468
 msgid "Products must have a certificate type."
 msgstr "Продукты должны иметь тип сертификата."
 
-#: ecommerce/extensions/api/serializers.py:446
-#: ecommerce/extensions/api/serializers.py:481
+#: ecommerce/extensions/api/serializers.py:471
+#: ecommerce/extensions/api/serializers.py:506
 msgid "Products must have a price."
 msgstr "Продукт должен иметь цену."
 
-#: ecommerce/extensions/api/serializers.py:453
+#: ecommerce/extensions/api/serializers.py:478
 msgid "You need to provide a course UUID to create Course Entitlements."
 msgstr "Вам необходимо предоставить UUID курса, чтобы создать право на обучение в курсе."
 
-#: ecommerce/extensions/api/serializers.py:477
+#: ecommerce/extensions/api/serializers.py:502
 msgid "Products must indicate whether ID verification is required."
 msgstr "Продукты должны сообщать требуется ли проверка ID"
 
-#: ecommerce/extensions/api/serializers.py:543
+#: ecommerce/extensions/api/serializers.py:573
 #, python-brace-format
 msgid "Invalid product class [{product_class}] requested."
 msgstr "Запрос ошибочного класса продукта [{product_class}]"
 
-#: ecommerce/extensions/api/serializers.py:575
+#: ecommerce/extensions/api/serializers.py:605
 #, python-brace-format
 msgid ""
 "Course [{course_id}] was not published to LMS because the switch "
@@ -719,45 +776,35 @@ msgid ""
 " been saved."
 msgstr "Курс [{course_id}] не был опубликован в LMS, потому что переключатель [publish_course_modes_to_lms] не работает. Чтобы избежать появления несуществующих номеров SKU, данные не были сохранены."
 
-#: ecommerce/extensions/api/serializers.py:962
-#: ecommerce/extensions/api/serializers.py:1062
-msgid "ACTIVE"
-msgstr "АКТИВНЫЙ"
-
-#: ecommerce/extensions/api/serializers.py:962
-#: ecommerce/extensions/api/serializers.py:1062
-msgid "INACTIVE"
-msgstr "НЕАКТИВНЫЙ"
-
-#: ecommerce/extensions/api/serializers.py:1046
+#: ecommerce/extensions/api/serializers.py:1117
 msgid "Enrollment code"
 msgstr "Код регистрации"
 
-#: ecommerce/extensions/api/serializers.py:1047
+#: ecommerce/extensions/api/serializers.py:1118
 msgid "Discount code"
 msgstr "Код скидки"
 
-#: ecommerce/extensions/api/v2/views/baskets.py:445
-#: ecommerce/extensions/basket/views.py:123
+#: ecommerce/extensions/api/v2/views/baskets.py:446
+#: ecommerce/extensions/basket/views.py:454
 msgid "No SKUs provided."
 msgstr "SKUs не предоставлен"
 
-#: ecommerce/extensions/api/v2/views/baskets.py:456
-#: ecommerce/extensions/basket/views.py:130
+#: ecommerce/extensions/api/v2/views/baskets.py:457
+#: ecommerce/extensions/basket/views.py:461
 #, python-brace-format
 msgid "Products with SKU(s) [{skus}] do not exist."
 msgstr "Продукт с SKU(s) [{skus}] не существует."
 
-#: ecommerce/extensions/api/v2/views/baskets.py:467
+#: ecommerce/extensions/api/v2/views/baskets.py:468
 msgid "Provide username or is_anonymous query param, but not both"
 msgstr ""
 
-#: ecommerce/extensions/api/v2/views/products.py:53
+#: ecommerce/extensions/api/v2/views/products.py:54
 #, python-brace-format
 msgid "Product API only supports {http_method} for {product_class} products."
 msgstr ""
 
-#: ecommerce/extensions/api/v2/views/products.py:68
+#: ecommerce/extensions/api/v2/views/products.py:69
 #, python-brace-format
 msgid "Missing or bad value for: [{name}]."
 msgstr ""
@@ -781,92 +828,84 @@ msgstr "Тип атрибута"
 msgid "Text Attribute"
 msgstr "Текст атрибута"
 
-#: ecommerce/extensions/basket/utils.py:114
+#: ecommerce/extensions/basket/utils.py:112
 msgid ""
 "Due to export controls, we cannot allow you to access this course at this "
 "time."
 msgstr "В связи с экспортным контролем, мы не можем позволить вам получить доступ к этому курсу в данный момент."
 
-#: ecommerce/extensions/basket/utils.py:179
+#: ecommerce/extensions/basket/utils.py:177
 msgid "Click here to just purchase an enrollment for yourself"
 msgstr "Нажмите здесь, чтобы просто купить регистрацию для себя."
 
-#: ecommerce/extensions/basket/utils.py:182
+#: ecommerce/extensions/basket/utils.py:180
 msgid "Click here to purchase multiple seats in this course"
 msgstr "Нажмите здесь, чтобы приобрести несколько мест в этом курсе."
 
-#: ecommerce/extensions/basket/utils.py:410
+#: ecommerce/extensions/basket/utils.py:408
 #, python-brace-format
 msgid "Coupon code '{code}' has expired."
 msgstr "Код купона '{code}'   истек."
 
-#: ecommerce/extensions/basket/utils.py:414
+#: ecommerce/extensions/basket/utils.py:412
 #, python-brace-format
 msgid "Coupon code '{code}' is not active."
 msgstr "Код купона '{code}' не активен."
 
-#: ecommerce/extensions/basket/utils.py:420
+#: ecommerce/extensions/basket/utils.py:418
 #, python-brace-format
 msgid "Coupon code '{code}' is not available. {msg}"
 msgstr ""
 
-#: ecommerce/extensions/basket/utils.py:426
+#: ecommerce/extensions/basket/utils.py:424
 #, python-brace-format
 msgid "Coupon code '{code}' is not valid for this basket."
 msgstr "Код купона '{code} не действителен для этой корзины."
 
-#: ecommerce/extensions/basket/utils.py:439
+#: ecommerce/extensions/basket/utils.py:437
 #, python-brace-format
 msgid ""
 "Coupon code '{code}' is not valid for this basket for a bundled purchase."
 msgstr ""
 
-#: ecommerce/extensions/basket/utils.py:500
+#: ecommerce/extensions/basket/utils.py:492
 #, python-brace-format
 msgid "Coupon code '{code}' added to basket."
 msgstr "Код купона  '{code}' добавлен в корзину."
 
-#: ecommerce/extensions/basket/utils.py:503
+#: ecommerce/extensions/basket/utils.py:495
 #, python-brace-format
 msgid "Basket does not qualify for coupon code {code}."
 msgstr ""
 
-#: ecommerce/extensions/basket/views.py:111
-msgid "You have already purchased these products"
-msgstr "Вы уже приобрели эти продукты"
-
-#: ecommerce/extensions/basket/views.py:147
-msgid "No product is available to buy."
-msgstr "Продукт не доступен для покупки."
-
-#: ecommerce/extensions/basket/views.py:287
+#: ecommerce/extensions/basket/views.py:207
 #, python-brace-format
 msgid "Could not apply the code '{code}'; it requires data sharing consent."
 msgstr "Не смог применить код '{code}'; для этого требуется согласие на обмен данными."
 
-#: ecommerce/extensions/basket/views.py:375
+#: ecommerce/extensions/basket/views.py:295
 msgid ""
 "After you complete your order you will be able to select course dates from "
 "your dashboard."
 msgstr "После оформления заказа вы сможете выбрать даты курсов на панели инструментов."
 
-#: ecommerce/extensions/basket/views.py:390
+#: ecommerce/extensions/basket/views.py:310
 msgid ""
 "After you complete your order you will be automatically enrolled in the "
 "verified track of the course."
 msgstr "После выполнения заказа вы будете автоматически зачислены на верифицированную дорожку курса."
 
-#: ecommerce/extensions/basket/views.py:394
+#: ecommerce/extensions/basket/views.py:314
 msgid "After you complete your order you will receive credit for your course."
 msgstr "После оформления заказа вы получите зачетные единицы за курс."
 
-#: ecommerce/extensions/basket/views.py:397
+#: ecommerce/extensions/basket/views.py:317
 msgid ""
 "After you complete your order you will be automatically enrolled in the "
 "course."
 msgstr "После выполнения заказа вы будете автоматически зачислены на курс."
 
-#: ecommerce/extensions/basket/views.py:401
+#: ecommerce/extensions/basket/views.py:321
 #, python-brace-format
 msgid ""
 "{paragraph_start}By purchasing, you and your organization agree to the "
@@ -883,7 +922,7 @@ msgid ""
 "{paragraph_end}"
 msgstr ""
 
-#: ecommerce/extensions/basket/views.py:439
+#: ecommerce/extensions/basket/views.py:359
 #, python-brace-format
 msgid ""
 "{strong_start}Purchasing just for yourself?{strong_end}{paragraph_start}If "
@@ -892,31 +931,39 @@ msgid ""
 "enroll directly.{paragraph_end}"
 msgstr "{strong_start}Приобретаете только для себя?{strong_end}{paragraph_start}IЕсли вы покупаете один код для кого-то другого, пожалуйста, продолжайте оформлять заказ. Однако, если вы являетесь учеником {link_start}, возвращайтесь назад {link_end}, чтобы зарегистрироваться напрямую.{paragraph_end}"
 
-#: ecommerce/extensions/basket/views.py:793
+#: ecommerce/extensions/basket/views.py:437
+msgid "You have already purchased these products"
+msgstr "Вы уже приобрели эти продукты"
+
+#: ecommerce/extensions/basket/views.py:478
+msgid "No product is available to buy."
+msgstr "Продукт не доступен для покупки."
+
+#: ecommerce/extensions/basket/views.py:804
 msgid "quantity successfully updated"
 msgstr ""
 
-#: ecommerce/extensions/basket/views.py:812
+#: ecommerce/extensions/basket/views.py:823
 msgid ""
 "Your basket couldn't be updated. Please correct any validation errors below."
 msgstr ""
 
-#: ecommerce/extensions/basket/views.py:866
+#: ecommerce/extensions/basket/views.py:877
 #, python-brace-format
 msgid "You have already added coupon code '{code}' to your basket."
 msgstr "Вы уже добавили в корзину купон с кодом '{code}'"
 
-#: ecommerce/extensions/basket/views.py:942
+#: ecommerce/extensions/basket/views.py:953
 #, python-brace-format
 msgid "Coupon code '{code}' does not exist."
 msgstr "Купон с кодом  '{code}' не существует."
 
-#: ecommerce/extensions/basket/views.py:1027
+#: ecommerce/extensions/basket/views.py:1038
 #, python-format
 msgid "No coupon found with id '%s'"
 msgstr ""
 
-#: ecommerce/extensions/basket/views.py:1031
+#: ecommerce/extensions/basket/views.py:1042
 #, python-format
 msgid "Coupon code '%s' was removed from your basket."
 msgstr ""
@@ -954,7 +1001,7 @@ msgid ""
 "refunded."
 msgstr "Невозможно выполнить возврат денежных средств по этим позициям.  Возможно, средства уже были возвращены."
 
-#: ecommerce/extensions/dashboard/refunds/config.py:10
+#: ecommerce/extensions/dashboard/refunds/apps.py:13
 msgid "Refunds Dashboard"
 msgstr "Панель возврата денежных средств"
 
@@ -967,9 +1014,9 @@ msgstr "Идентификатор возврата"
 #: ecommerce/extensions/dashboard/refunds/forms.py:16
 #: ecommerce/extensions/refund/models.py:74
 #: ecommerce/extensions/refund/models.py:309
-#: ecommerce/extensions/voucher/utils.py:225
-#: ecommerce/extensions/voucher/utils.py:284
-#: ecommerce/extensions/voucher/utils.py:321
+#: ecommerce/extensions/voucher/utils.py:223
+#: ecommerce/extensions/voucher/utils.py:282
+#: ecommerce/extensions/voucher/utils.py:319
 #: ecommerce/templates/oscar/dashboard/orders/line_detail.html:71
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:72
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:141
@@ -983,55 +1030,71 @@ msgstr "Идентификатор возврата"
 msgid "Status"
 msgstr "Состояние"
 
-#: ecommerce/extensions/dashboard/users/views.py:49
+#: ecommerce/extensions/dashboard/users/views.py:48
 msgid "Failed to retrieve enrollment data."
 msgstr "Не удалось получить данные о регистрации."
 
-#: ecommerce/extensions/offer/models.py:357
+#: ecommerce/extensions/offer/models.py:358
 msgid "Course Catalog ID from the Discovery Service."
 msgstr "Каталог курсов ID от службы Discovery Service."
 
-#: ecommerce/extensions/offer/models.py:368
+#: ecommerce/extensions/offer/models.py:369
 msgid "UUID for an EnterpriseCustomerCatalog from the Enterprise Service."
 msgstr ""
 
-#: ecommerce/extensions/offer/models.py:491
+#: ecommerce/extensions/offer/models.py:492
 msgid "EnterpriseCustomer Name"
 msgstr "Имя ЗаказчикаПредприятия"
 
-#: ecommerce/extensions/offer/models.py:496
+#: ecommerce/extensions/offer/models.py:497
 msgid "EnterpriseCustomerCatalog UUID"
 msgstr "КаталогКорпоративныхКлиентов UUID"
 
-#: ecommerce/extensions/offer/models.py:501
+#: ecommerce/extensions/offer/models.py:502
 #: ecommerce/extensions/voucher/utils.py:54
-#: ecommerce/extensions/voucher/utils.py:193
-#: ecommerce/extensions/voucher/utils.py:273
-#: ecommerce/extensions/voucher/utils.py:329
-#: ecommerce/extensions/voucher/utils.py:338
-#: ecommerce/extensions/voucher/utils.py:344 ecommerce/programs/forms.py:21
+#: ecommerce/extensions/voucher/utils.py:191
+#: ecommerce/extensions/voucher/utils.py:271
+#: ecommerce/extensions/voucher/utils.py:327
+#: ecommerce/extensions/voucher/utils.py:336
+#: ecommerce/extensions/voucher/utils.py:342 ecommerce/programs/forms.py:21
 #: ecommerce/programs/templates/programs/programoffer_list.html:30
 msgid "Program UUID"
 msgstr "Программа UUID"
 
-#: ecommerce/extensions/offer/models.py:508
+#: ecommerce/extensions/offer/models.py:509
 msgid "Email to user pending."
 msgstr ""
 
-#: ecommerce/extensions/offer/models.py:509
+#: ecommerce/extensions/offer/models.py:510
 msgid "Code successfully assigned to user."
 msgstr ""
 
-#: ecommerce/extensions/offer/models.py:510
+#: ecommerce/extensions/offer/models.py:511
 msgid "Code has been redeemed by user."
 msgstr ""
 
-#: ecommerce/extensions/offer/models.py:511
+#: ecommerce/extensions/offer/models.py:512
 msgid "Email to user bounced."
 msgstr ""
 
-#: ecommerce/extensions/offer/models.py:512
+#: ecommerce/extensions/offer/models.py:513
 msgid "Code has been revoked for this user."
+msgstr ""
+
+#: ecommerce/extensions/offer/models.py:547
+msgid "Assign"
+msgstr ""
+
+#: ecommerce/extensions/offer/models.py:548
+msgid "Remind"
+msgstr ""
+
+#: ecommerce/extensions/offer/models.py:549
+msgid "Revoke"
+msgstr ""
+
+#: ecommerce/extensions/offer/models.py:557
+msgid "Make a particular template version active."
 msgstr ""
 
 #: ecommerce/extensions/offer/utils.py:93
@@ -1074,7 +1137,7 @@ msgstr "Нажмите 'Сохранить и продолжить редакт�
 msgid "Partner"
 msgstr "Партнёр"
 
-#: ecommerce/extensions/partner/models.py:25 ecommerce/settings/_oscar.py:225
+#: ecommerce/extensions/partner/models.py:25 ecommerce/settings/_oscar.py:249
 msgid "Partners"
 msgstr "Партнеры"
 
@@ -1203,11 +1266,11 @@ msgstr ""
 #. to indicate that truncation has occurred. For example, if a title may only
 #. be at most 11 characters long, "A Very Long Title" (17 characters) would be
 #. truncated to "A Ve...itle".
-#: ecommerce/extensions/payment/utils.py:81
+#: ecommerce/extensions/payment/utils.py:83
 msgid "..."
 msgstr "..."
 
-#: ecommerce/extensions/payment/views/cybersource.py:452
+#: ecommerce/extensions/payment/views/cybersource.py:476
 msgid "transaction declined"
 msgstr ""
 
@@ -1265,40 +1328,40 @@ msgstr "Итого (без налогов)"
 msgid "Quantity"
 msgstr "Количество"
 
-#: ecommerce/extensions/voucher/models.py:36
+#: ecommerce/extensions/voucher/models.py:40
 msgid "Can be used once by one customer"
 msgstr ""
 
-#: ecommerce/extensions/voucher/models.py:37
+#: ecommerce/extensions/voucher/models.py:41
 msgid "Can be used multiple times by multiple customers"
 msgstr ""
 
-#: ecommerce/extensions/voucher/models.py:38
+#: ecommerce/extensions/voucher/models.py:42
 msgid "Can only be used once per customer"
 msgstr ""
 
-#: ecommerce/extensions/voucher/models.py:39
+#: ecommerce/extensions/voucher/models.py:43
 msgid "Can be used multiple times by one customer"
 msgstr ""
 
-#: ecommerce/extensions/voucher/models.py:41
+#: ecommerce/extensions/voucher/models.py:45
 msgid "Usage"
 msgstr ""
 
-#: ecommerce/extensions/voucher/models.py:53
+#: ecommerce/extensions/voucher/models.py:57
 msgid "This voucher is assigned to another user."
 msgstr ""
 
 #: ecommerce/extensions/voucher/tests/test_utils.py:212
-#: ecommerce/extensions/voucher/utils.py:78
-#: ecommerce/extensions/voucher/utils.py:321
+#: ecommerce/extensions/voucher/utils.py:77
+#: ecommerce/extensions/voucher/utils.py:319
 msgid "Redeemed"
 msgstr "Использовать "
 
 #: ecommerce/extensions/voucher/tests/test_utils.py:376
 #: ecommerce/extensions/voucher/tests/test_utils.py:381
-#: ecommerce/extensions/voucher/utils.py:97
-#: ecommerce/extensions/voucher/utils.py:164
+#: ecommerce/extensions/voucher/utils.py:96
+#: ecommerce/extensions/voucher/utils.py:162
 #: ecommerce/templates/edx/checkout/receipt.html:120
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:195
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:217
@@ -1308,183 +1371,183 @@ msgstr "Скидка"
 
 #: ecommerce/extensions/voucher/tests/test_utils.py:376
 #: ecommerce/extensions/voucher/tests/test_utils.py:381
-#: ecommerce/extensions/voucher/utils.py:97
-#: ecommerce/extensions/voucher/utils.py:164
+#: ecommerce/extensions/voucher/utils.py:96
+#: ecommerce/extensions/voucher/utils.py:162
 msgid "Enrollment"
 msgstr "Регистрация на курс"
 
 #: ecommerce/extensions/voucher/tests/test_utils.py:377
 #: ecommerce/extensions/voucher/tests/test_utils.py:385
-#: ecommerce/extensions/voucher/utils.py:98
-#: ecommerce/extensions/voucher/utils.py:168
+#: ecommerce/extensions/voucher/utils.py:97
+#: ecommerce/extensions/voucher/utils.py:166
 #, python-brace-format
 msgid "{percentage} %"
 msgstr "{percentage} %"
 
 #: ecommerce/extensions/voucher/tests/test_utils.py:541
-#: ecommerce/extensions/voucher/utils.py:80
+#: ecommerce/extensions/voucher/utils.py:79
 msgid "Inactive"
 msgstr "Неактивный"
 
 #: ecommerce/extensions/voucher/utils.py:54
-#: ecommerce/extensions/voucher/utils.py:195
-#: ecommerce/extensions/voucher/utils.py:274
-#: ecommerce/extensions/voucher/utils.py:332
-#: ecommerce/extensions/voucher/utils.py:335
-#: ecommerce/extensions/voucher/utils.py:340
+#: ecommerce/extensions/voucher/utils.py:193
+#: ecommerce/extensions/voucher/utils.py:272
+#: ecommerce/extensions/voucher/utils.py:330
+#: ecommerce/extensions/voucher/utils.py:333
+#: ecommerce/extensions/voucher/utils.py:338
 msgid "Catalog Query"
 msgstr "запрос каталога"
 
 #: ecommerce/extensions/voucher/utils.py:56
-#: ecommerce/extensions/voucher/utils.py:288
-#: ecommerce/extensions/voucher/utils.py:343
+#: ecommerce/extensions/voucher/utils.py:286
+#: ecommerce/extensions/voucher/utils.py:341
 msgid "Redeemed For Course IDs"
 msgstr "Используется для идентификаторов курсов"
 
 #: ecommerce/extensions/voucher/utils.py:58
-#: ecommerce/extensions/voucher/utils.py:287
-#: ecommerce/extensions/voucher/utils.py:334
-#: ecommerce/extensions/voucher/utils.py:342
+#: ecommerce/extensions/voucher/utils.py:285
+#: ecommerce/extensions/voucher/utils.py:332
+#: ecommerce/extensions/voucher/utils.py:340
 msgid "Redeemed For Course ID"
 msgstr "Использованный для идентификатора курса"
 
-#: ecommerce/extensions/voucher/utils.py:78
+#: ecommerce/extensions/voucher/utils.py:77
 #: ecommerce/templates/oscar/dashboard/users/detail.html:52
 msgid "Active"
 msgstr "Активный"
 
-#: ecommerce/extensions/voucher/utils.py:174
-#: ecommerce/extensions/voucher/utils.py:222
-#: ecommerce/extensions/voucher/utils.py:266
+#: ecommerce/extensions/voucher/utils.py:172
+#: ecommerce/extensions/voucher/utils.py:220
+#: ecommerce/extensions/voucher/utils.py:264
 msgid "Code"
 msgstr "Код"
 
-#: ecommerce/extensions/voucher/utils.py:174
+#: ecommerce/extensions/voucher/utils.py:172
 msgid "This row applies to all vouchers"
 msgstr ""
 
-#: ecommerce/extensions/voucher/utils.py:175
-#: ecommerce/extensions/voucher/utils.py:278
+#: ecommerce/extensions/voucher/utils.py:173
+#: ecommerce/extensions/voucher/utils.py:276
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:126
 msgid "Category"
 msgstr "Тема"
 
-#: ecommerce/extensions/voucher/utils.py:176
-#: ecommerce/extensions/voucher/utils.py:291
+#: ecommerce/extensions/voucher/utils.py:174
+#: ecommerce/extensions/voucher/utils.py:289
 msgid "Coupon Expiry Date"
 msgstr "Дата заверешния действия купона"
 
-#: ecommerce/extensions/voucher/utils.py:177
-#: ecommerce/extensions/voucher/utils.py:267
+#: ecommerce/extensions/voucher/utils.py:175
+#: ecommerce/extensions/voucher/utils.py:265
 msgid "Coupon Name"
 msgstr "Наименование купона"
 
-#: ecommerce/extensions/voucher/utils.py:178
-#: ecommerce/extensions/voucher/utils.py:290
+#: ecommerce/extensions/voucher/utils.py:176
+#: ecommerce/extensions/voucher/utils.py:288
 msgid "Coupon Start Date"
 msgstr "Дата начала действия купона"
 
-#: ecommerce/extensions/voucher/utils.py:179
-#: ecommerce/extensions/voucher/utils.py:270
+#: ecommerce/extensions/voucher/utils.py:177
+#: ecommerce/extensions/voucher/utils.py:268
 msgid "Coupon Type"
 msgstr "Тип купона"
 
-#: ecommerce/extensions/voucher/utils.py:180
-#: ecommerce/extensions/voucher/utils.py:289
+#: ecommerce/extensions/voucher/utils.py:178
+#: ecommerce/extensions/voucher/utils.py:287
 msgid "Create Date"
 msgstr "Дата создания"
 
-#: ecommerce/extensions/voucher/utils.py:181
-#: ecommerce/extensions/voucher/utils.py:282
+#: ecommerce/extensions/voucher/utils.py:179
+#: ecommerce/extensions/voucher/utils.py:280
 msgid "Discount Percentage"
 msgstr "Процент скидки"
 
-#: ecommerce/extensions/voucher/utils.py:182
-#: ecommerce/extensions/voucher/utils.py:283
+#: ecommerce/extensions/voucher/utils.py:180
+#: ecommerce/extensions/voucher/utils.py:281
 msgid "Discount Amount"
 msgstr "Сумма скидки"
 
-#: ecommerce/extensions/voucher/utils.py:183
-#: ecommerce/extensions/voucher/utils.py:292
+#: ecommerce/extensions/voucher/utils.py:181
+#: ecommerce/extensions/voucher/utils.py:290
 msgid "Email Domains"
 msgstr "Домен электронной почты "
 
-#: ecommerce/extensions/voucher/utils.py:184
-#: ecommerce/extensions/voucher/utils.py:281
+#: ecommerce/extensions/voucher/utils.py:182
+#: ecommerce/extensions/voucher/utils.py:279
 msgid "Invoiced Amount"
 msgstr "Сумма счета-фактуры"
 
-#: ecommerce/extensions/voucher/utils.py:185
-#: ecommerce/extensions/voucher/utils.py:279
+#: ecommerce/extensions/voucher/utils.py:183
+#: ecommerce/extensions/voucher/utils.py:277
 msgid "Note"
 msgstr "Запись"
 
-#: ecommerce/extensions/voucher/utils.py:186
-#: ecommerce/extensions/voucher/utils.py:280
+#: ecommerce/extensions/voucher/utils.py:184
+#: ecommerce/extensions/voucher/utils.py:278
 #: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:50
 #: ecommerce/templates/oscar/basket/partials/client_side_checkout_basket.html:61
 #: ecommerce/templates/oscar/basket/partials/hosted_checkout_basket.html:63
 msgid "Price"
 msgstr "Цена"
 
-#: ecommerce/extensions/voucher/utils.py:190
-#: ecommerce/extensions/voucher/utils.py:272
-#: ecommerce/extensions/voucher/utils.py:330
-#: ecommerce/extensions/voucher/utils.py:336
+#: ecommerce/extensions/voucher/utils.py:188
+#: ecommerce/extensions/voucher/utils.py:270
+#: ecommerce/extensions/voucher/utils.py:328
+#: ecommerce/extensions/voucher/utils.py:334
 #: ecommerce/templates/oscar/dashboard/partials/enrollment_table.html:8
 msgid "Course ID"
 msgstr "Идентификатор курса"
 
-#: ecommerce/extensions/voucher/utils.py:191
-#: ecommerce/extensions/voucher/utils.py:276
-#: ecommerce/extensions/voucher/utils.py:331
-#: ecommerce/extensions/voucher/utils.py:337
+#: ecommerce/extensions/voucher/utils.py:189
+#: ecommerce/extensions/voucher/utils.py:274
+#: ecommerce/extensions/voucher/utils.py:329
+#: ecommerce/extensions/voucher/utils.py:335
 msgid "Organization"
 msgstr "Организация"
 
-#: ecommerce/extensions/voucher/utils.py:196
-#: ecommerce/extensions/voucher/utils.py:275
-#: ecommerce/extensions/voucher/utils.py:333
-#: ecommerce/extensions/voucher/utils.py:341
+#: ecommerce/extensions/voucher/utils.py:194
+#: ecommerce/extensions/voucher/utils.py:273
+#: ecommerce/extensions/voucher/utils.py:331
+#: ecommerce/extensions/voucher/utils.py:339
 msgid "Course Seat Types"
 msgstr "Типы посадочных мест на курсах"
 
-#: ecommerce/extensions/voucher/utils.py:223
-#: ecommerce/extensions/voucher/utils.py:268
-#: ecommerce/extensions/voucher/utils.py:324
+#: ecommerce/extensions/voucher/utils.py:221
+#: ecommerce/extensions/voucher/utils.py:266
+#: ecommerce/extensions/voucher/utils.py:322
 msgid "Maximum Coupon Usage"
 msgstr "Максимальное количество использованных купонов"
 
-#: ecommerce/extensions/voucher/utils.py:224
-#: ecommerce/extensions/voucher/utils.py:269
-#: ecommerce/extensions/voucher/utils.py:325
+#: ecommerce/extensions/voucher/utils.py:222
+#: ecommerce/extensions/voucher/utils.py:267
+#: ecommerce/extensions/voucher/utils.py:323
 msgid "Redemption Count"
 msgstr "Использовать подсчет"
 
-#: ecommerce/extensions/voucher/utils.py:226
-#: ecommerce/extensions/voucher/utils.py:271
+#: ecommerce/extensions/voucher/utils.py:224
+#: ecommerce/extensions/voucher/utils.py:269
 msgid "URL"
 msgstr "URL"
 
-#: ecommerce/extensions/voucher/utils.py:277
-#: ecommerce/extensions/voucher/utils.py:300
+#: ecommerce/extensions/voucher/utils.py:275
+#: ecommerce/extensions/voucher/utils.py:298
 msgid "Client"
 msgstr "Клиент"
 
-#: ecommerce/extensions/voucher/utils.py:285
-#: ecommerce/extensions/voucher/utils.py:305
-#: ecommerce/extensions/voucher/utils.py:322
+#: ecommerce/extensions/voucher/utils.py:283
+#: ecommerce/extensions/voucher/utils.py:303
+#: ecommerce/extensions/voucher/utils.py:320
 #: ecommerce/templates/oscar/dashboard/users/detail.html:138
 msgid "Order Number"
 msgstr "Номер заказа"
 
-#: ecommerce/extensions/voucher/utils.py:286
-#: ecommerce/extensions/voucher/utils.py:305
-#: ecommerce/extensions/voucher/utils.py:323
+#: ecommerce/extensions/voucher/utils.py:284
+#: ecommerce/extensions/voucher/utils.py:303
+#: ecommerce/extensions/voucher/utils.py:321
 msgid "Redeemed By Username"
 msgstr "Исправлено по имени пользователя"
 
-#: ecommerce/extensions/voucher/utils.py:787
+#: ecommerce/extensions/voucher/utils.py:785
 #, python-brace-format
 msgid "Range for coupon [{coupon_id}]"
 msgstr "Диапазон купонов на покупку [{coupon_id}]"
@@ -1635,7 +1698,7 @@ msgstr "Содержимое UTM"
 msgid "UTM Created At"
 msgstr "UTM создано в"
 
-#: ecommerce/settings/_oscar.py:182
+#: ecommerce/settings/_oscar.py:206
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:18
 #: ecommerce/templates/oscar/dashboard/index.html:22
 #: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:12
@@ -1648,38 +1711,38 @@ msgstr "UTM создано в"
 msgid "Dashboard"
 msgstr "Панель управления"
 
-#: ecommerce/settings/_oscar.py:187
+#: ecommerce/settings/_oscar.py:211
 msgid "Catalogue"
 msgstr "Каталог"
 
-#: ecommerce/settings/_oscar.py:191
+#: ecommerce/settings/_oscar.py:215
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:12
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:21
 msgid "Products"
 msgstr "Товары"
 
-#: ecommerce/settings/_oscar.py:195
+#: ecommerce/settings/_oscar.py:219
 msgid "Product Types"
 msgstr "Виды товаров"
 
-#: ecommerce/settings/_oscar.py:199
+#: ecommerce/settings/_oscar.py:223
 #: ecommerce/templates/oscar/dashboard/catalogue/product_update.html:75
 msgid "Categories"
 msgstr "Категории"
 
-#: ecommerce/settings/_oscar.py:203
+#: ecommerce/settings/_oscar.py:227
 msgid "Ranges"
 msgstr "Диапазон"
 
-#: ecommerce/settings/_oscar.py:207
+#: ecommerce/settings/_oscar.py:231
 msgid "Low stock alerts"
 msgstr "Оповещение о низких остатках"
 
-#: ecommerce/settings/_oscar.py:213
+#: ecommerce/settings/_oscar.py:237
 msgid "Fulfillment"
 msgstr "Выполнение"
 
-#: ecommerce/settings/_oscar.py:217
+#: ecommerce/settings/_oscar.py:241
 #: ecommerce/templates/oscar/dashboard/index.html:33
 #: ecommerce/templates/oscar/dashboard/orders/line_detail.html:17
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:32
@@ -1691,11 +1754,11 @@ msgstr "Выполнение"
 msgid "Orders"
 msgstr "Заказы"
 
-#: ecommerce/settings/_oscar.py:221
+#: ecommerce/settings/_oscar.py:245
 msgid "Statistics"
 msgstr "Статистика"
 
-#: ecommerce/settings/_oscar.py:229
+#: ecommerce/settings/_oscar.py:253
 #: ecommerce/templates/oscar/dashboard/orders/order_detail.html:107
 #: ecommerce/templates/oscar/dashboard/partials/refund_table.html:5
 #: ecommerce/templates/oscar/dashboard/refunds/refund_detail.html:34
@@ -1706,25 +1769,25 @@ msgstr "Статистика"
 msgid "Refunds"
 msgstr "Возврат денежных средств"
 
-#: ecommerce/settings/_oscar.py:235 ecommerce/settings/_oscar.py:239
+#: ecommerce/settings/_oscar.py:259 ecommerce/settings/_oscar.py:263
 #: ecommerce/templates/oscar/dashboard/users/detail.html:23
 msgid "Customers"
 msgstr "Заказчики"
 
-#: ecommerce/settings/_oscar.py:243
+#: ecommerce/settings/_oscar.py:267
 msgid "Stock alert requests"
 msgstr "Запрос оповещения"
 
-#: ecommerce/settings/_oscar.py:249 ecommerce/settings/_oscar.py:253
+#: ecommerce/settings/_oscar.py:273 ecommerce/settings/_oscar.py:277
 #: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:15
 msgid "Offers"
 msgstr "Предложения"
 
-#: ecommerce/settings/_oscar.py:257
+#: ecommerce/settings/_oscar.py:281
 msgid "Vouchers"
 msgstr "Ваучеры"
 
-#: ecommerce/settings/_oscar.py:263
+#: ecommerce/settings/_oscar.py:287
 msgid "Reports"
 msgstr "Отчёты"
 
@@ -1819,292 +1882,6 @@ msgstr "Инструменты администрирования курса"
 #: ecommerce/templates/courses/menu_options.html:14
 msgid "E-Commerce Dashboard"
 msgstr "Панель электронной коммерции"
-
-#: ecommerce/templates/customer/email_base.html:189
-#, python-format
-msgid "Copyright © %(year)s %(platform_name)s. All rights reserved."
-msgstr "Все права защищены, © %(platform_name)s, %(year)s."
-
-#: ecommerce/templates/customer/emails/commtype_course_purchased_body.html:9
-#: ecommerce/templates/customer/emails/commtype_course_purchased_body.txt:4
-#, python-format
-msgid "Hi %(full_name)s,"
-msgstr "Здравствуйте, %(full_name)s,"
-
-#: ecommerce/templates/customer/emails/commtype_course_purchased_body.html:11
-#: ecommerce/templates/customer/emails/commtype_course_purchased_body.txt:6
-#, python-format
-msgid ""
-"Thank you for purchasing %(course_title)s. A charge will appear on your "
-"credit or debit card statement with a company name of \"%(platform_name)s\"."
-msgstr ""
-
-#: ecommerce/templates/customer/emails/commtype_course_purchased_body.html:13
-#: ecommerce/templates/customer/emails/commtype_course_purchased_body.txt:8
-#, python-format
-msgid ""
-"You can access your course and complete your verification (if required) on "
-"your %(platform_name)s dashboard. "
-msgstr "Вы можете получить доступ к вашему курсу и завершить процесс верификации личности (если требуется) в панели управления %(platform_name)s. "
-
-#: ecommerce/templates/customer/emails/commtype_course_purchased_body.html:14
-#: ecommerce/templates/customer/emails/commtype_course_purchased_body.txt:9
-#, python-format
-msgid ""
-"To explore other great courses, visit the %(platform_name)s website. More "
-"courses are added every day!"
-msgstr "Чтобы посмотреть список всех доступных курсов, посетите %(platform_name)s. Новые курсы добавляются еженедельно!"
-
-#: ecommerce/templates/customer/emails/commtype_course_purchased_body.html:17
-#: ecommerce/templates/customer/emails/commtype_credit_receipt_body.html:43
-msgid "View Payment Information"
-msgstr "Просмотреть информацию об оплате"
-
-#: ecommerce/templates/customer/emails/commtype_course_purchased_body.html:20
-#: ecommerce/templates/customer/emails/commtype_course_purchased_body.txt:14
-msgid "Thank you. We hope you enjoy the course!"
-msgstr "Спасибо! Мы надеемся, курс вам понравится!"
-
-#: ecommerce/templates/customer/emails/commtype_course_purchased_body.html:21
-#, python-format
-msgid "%(platform_name)s team "
-msgstr "Команда %(platform_name)s"
-
-#: ecommerce/templates/customer/emails/commtype_course_purchased_body.html:31
-#, python-format
-msgid ""
-"You are receiving this email because you purchased a seat in the "
-"%(platform_name)s course %(course_title)s."
-msgstr "Вы получили это письмо, поскольку вы приобрели доступ %(platform_name)s к курсу %(course_title)s."
-
-#: ecommerce/templates/customer/emails/commtype_course_purchased_body.txt:2
-msgid "Receipt Confirmation for: "
-msgstr "Уведомление о получении:"
-
-#: ecommerce/templates/customer/emails/commtype_course_purchased_body.txt:11
-#: ecommerce/templates/customer/emails/commtype_credit_receipt_body.txt:12
-msgid "To view your payment information, visit the following website."
-msgstr "Чтобы просмотреть платежную информацию, зайдите на этот сайт."
-
-#: ecommerce/templates/customer/emails/commtype_course_purchased_body.txt:16
-#, python-format
-msgid "%(platform_name)s team"
-msgstr "Команда %(platform_name)s"
-
-#: ecommerce/templates/customer/emails/commtype_course_purchased_body.txt:18
-msgid "The edX team"
-msgstr "Команда edX"
-
-#: ecommerce/templates/customer/emails/commtype_course_purchased_subject.txt:2
-msgid "Order Placed"
-msgstr "Заказ размещен"
-
-#: ecommerce/templates/customer/emails/commtype_credit_receipt_body.html:13
-msgid "Payment Confirmation"
-msgstr "Подтверждение оплаты"
-
-#: ecommerce/templates/customer/emails/commtype_credit_receipt_body.html:27
-msgid "Payment confirmation for:"
-msgstr "Подтверждение оплаты для:"
-
-#: ecommerce/templates/customer/emails/commtype_credit_receipt_body.html:55
-#: ecommerce/templates/customer/emails/commtype_credit_receipt_body.txt:4
-#: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html:25
-#: ecommerce/templates/customer/emails/commtype_order_with_csv_body.txt:5
-#, python-format
-msgid "Dear %(full_name)s,"
-msgstr "Здравствуйте, %(full_name)s!"
-
-#: ecommerce/templates/customer/emails/commtype_credit_receipt_body.html:60
-#, python-format
-msgid ""
-"\n"
-"                            Thank you for purchasing %(credit_hours)s credit hours from %(credit_provider)s for %(course_title)s. A charge will appear on your credit or debit card statement with a company name of \"%(platform_name)s\".\n"
-"                        "
-msgstr "\n                            Спасибо за покупку %(credit_hours)s зачётных единиц %(credit_provider)s за курс %(course_title)s. Оплаченная сумма будет отображена в выписке вашей кредитной или дебетовой карты; название компании -  \"%(platform_name)s\".\n                        "
-
-#: ecommerce/templates/customer/emails/commtype_credit_receipt_body.html:67
-#: ecommerce/templates/customer/emails/commtype_credit_receipt_body.txt:8
-#, python-format
-msgid ""
-"To receive your course credit, you must also request credit at the "
-"%(credit_provider)s website. For a link to request credit from "
-"%(credit_provider)s, or to see the status of your credit request, go to your"
-" %(platform_name)s dashboard."
-msgstr "Чтобы получить зачётные единицы курса, вам необходимо запросить их на этом %(credit_provider)s сайте. Чтобы получить ссылку для запроса зачётных единиц у %(credit_provider)s, или для проверки статуса вашего запроса, зайдите на вашу панель управления %(platform_name)s."
-
-#: ecommerce/templates/customer/emails/commtype_credit_receipt_body.html:71
-#: ecommerce/templates/customer/emails/commtype_credit_receipt_body.txt:10
-#, python-format
-msgid ""
-"To explore other credit-eligible courses, visit the %(platform_name)s "
-"website. We add new courses frequently!"
-msgstr "Чтобы просмотреть другие курсы, для которых доступны зачётные единицы, зайдите на сайт %(platform_name)s. Мы добавляем новые курсы регулярно!"
-
-#: ecommerce/templates/customer/emails/commtype_credit_receipt_body.html:74
-#: ecommerce/templates/customer/emails/commtype_credit_receipt_body.txt:15
-msgid "Thank you. We hope you enjoyed your course!"
-msgstr "Спасибо! Мы надеемся, вам понравился курс."
-
-#: ecommerce/templates/customer/emails/commtype_credit_receipt_body.html:75
-#: ecommerce/templates/customer/emails/commtype_credit_receipt_body.txt:16
-#, python-format
-msgid "The %(platform_name)s team"
-msgstr "Команда %(platform_name)s"
-
-#: ecommerce/templates/customer/emails/commtype_credit_receipt_body.html:88
-#, python-format
-msgid ""
-"\n"
-"                            You received this message because you purchased credit hours for %(course_title)s, an %(platform_name)s course.\n"
-"                        "
-msgstr "\n                            Данным сообщением уведомляем, что вы купили зачётные единицы за курс %(course_title)s на %(platform_name)s.\n                        "
-
-#: ecommerce/templates/customer/emails/commtype_credit_receipt_body.txt:2
-msgid "Payment confirmation for: "
-msgstr "Подтверждение оплаты для:"
-
-#: ecommerce/templates/customer/emails/commtype_credit_receipt_body.txt:6
-#, python-format
-msgid ""
-"Thank you for purchasing %(credit_hours)s credit hours from "
-"%(credit_provider)s for %(course_title)s. A charge will appear on your "
-"credit or debit card statement with a company name of \"%(platform_name)s\"."
-msgstr "Спасибо за покупку %(credit_hours)s зачётных единиц от %(credit_provider)s для %(course_title)s. Сумма будет отображена в выписке вашей кредитной или дебетовой карты рядом с именем компании «%(platform_name)s»."
-
-#: ecommerce/templates/customer/emails/commtype_credit_receipt_body.txt:18
-#, python-format
-msgid ""
-"You received this message because you purchased credit hours for "
-"%(course_title)s, an %(platform_name)s course."
-msgstr "Вы получили это сообщение потому что купили зачётные единицы для %(course_title)s, %(platform_name)s курса."
-
-#: ecommerce/templates/customer/emails/commtype_credit_receipt_subject.txt:2
-msgid "Order Receipt"
-msgstr "Заказать счёт"
-
-#: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html:14
-msgid "For Business"
-msgstr "Для бизнеса"
-
-#: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html:26
-#: ecommerce/templates/customer/emails/commtype_order_with_csv_body.txt:6
-#, python-format
-msgid ""
-"Thank you for purchasing access to %(course_name)s. Let's get your group "
-"ready to learn with edX:"
-msgstr "Спасибо за покупку доступа к %(course_name)s. Давайте подготовим вашу группу к обучению с помощью EdX:"
-
-#: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html:29
-#, python-brace-format
-msgid ""
-"\n"
-"                                Download and save the {link_start}{download_csv_link}{link_middle} enrollment code file.{link_end}\n"
-"                            "
-msgstr ""
-
-#: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html:34
-#: ecommerce/templates/customer/emails/commtype_order_with_csv_body.txt:9
-msgid "Distribute one code per learner before the expiration date."
-msgstr "Распространяйте по одному коду на каждого учащегося до истечения срока годности."
-
-#: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html:35
-#: ecommerce/templates/customer/emails/commtype_order_with_csv_body.txt:10
-msgid "Pro tip: Track which code is associated with which person."
-msgstr "Подсказка: Отслеживайте код, связанный с конкретным человеком."
-
-#: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html:36
-#: ecommerce/templates/customer/emails/commtype_order_with_csv_body.txt:11
-msgid "Learners sign-in/register with edX and enroll for the course."
-msgstr "Студенты регистрируются в системе EdX и записываются на курс."
-
-#: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html:39
-#, python-brace-format
-msgid ""
-"\n"
-"                            To view your payment information, log in to see your Order History, under {link_start}{order_history_url}{link_middle}Account Settings{link_end}.\n"
-"                        "
-msgstr ""
-
-#: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html:45
-#, python-brace-format
-msgid ""
-"\n"
-"                            For more information and assistance, check our {link_start}Help Center{link_end}\n"
-"                        "
-msgstr ""
-
-#: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html:50
-#: ecommerce/templates/customer/emails/commtype_order_with_csv_body.txt:16
-msgid "Thank You"
-msgstr "Спасибо"
-
-#: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html:61
-#: ecommerce/templates/customer/emails/commtype_order_with_csv_body.txt:18
-msgid "By purchasing, you and your organization agree to the following terms:"
-msgstr "Осуществляя покупку, вы и ваша организация соглашаетесь со следующими условиями:"
-
-#: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html:63
-#: ecommerce/templates/customer/emails/commtype_order_with_csv_body.txt:20
-msgid ""
-"Each code is valid for the one course covered and can be used only one time."
-msgstr "Каждый код действителен для одного курса и может быть использован только один раз."
-
-#: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html:64
-#: ecommerce/templates/customer/emails/commtype_order_with_csv_body.txt:21
-msgid "You are responsible for distributing codes to your learners."
-msgstr "Вы несете ответственность за распространение кодексов среди учащихся."
-
-#: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html:65
-#: ecommerce/templates/customer/emails/commtype_order_with_csv_body.txt:22
-msgid ""
-"Each code will expire in one year from date of purchase or, if earlier, once"
-" the course is closed."
-msgstr "Срок действия каждого кода истекает через год с даты покупки или, если раньше, с момента закрытия курса."
-
-#: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html:66
-#: ecommerce/templates/customer/emails/commtype_order_with_csv_body.txt:23
-msgid ""
-"If a course is not designated as self-paced, you should confirm that a "
-"course run is available before expiration."
-msgstr "Если курс не обозначен как самостоятельный, вы должны подтвердить, что он доступен до истечения срока его действия."
-
-#: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html:67
-#: ecommerce/templates/customer/emails/commtype_order_with_csv_body.txt:24
-msgid "You may not resell codes to third parties."
-msgstr "Запрещается перепродавать коды третьим лицам."
-
-#: ecommerce/templates/customer/emails/commtype_order_with_csv_body.html:68
-#: ecommerce/templates/customer/emails/commtype_order_with_csv_body.txt:25
-msgid "All sales final. No refunds."
-msgstr "Все продажи завершены. Возврат денег не производится."
-
-#: ecommerce/templates/customer/emails/commtype_order_with_csv_body.txt:2
-msgid "Order confirmation for: "
-msgstr "Подтверждение заказа для: "
-
-#: ecommerce/templates/customer/emails/commtype_order_with_csv_body.txt:8
-#, python-format
-msgid ""
-"Please visit %(download_csv_link)s to download and save the enrollment code "
-"file."
-msgstr "Посетите наш сайт %(download_csv_link)s чтобы скачать и сохранить файл с регистрационным кодом."
-
-#: ecommerce/templates/customer/emails/commtype_order_with_csv_body.txt:13
-#, python-format
-msgid ""
-"To view your payment information, log in to see your Order History, under "
-"Account Settings at %(order_history_url)s."
-msgstr "Чтобы просмотреть информацию о платежах, войдите в систему, чтобы просмотреть историю заказов, в разделе Настройки счета на %(order_history_url)s."
-
-#: ecommerce/templates/customer/emails/commtype_order_with_csv_body.txt:14
-msgid "For more information and assistance, contact info@edx.org."
-msgstr "За дополнительной информацией и помощью обращайтесь по адресу info@edx.org."
-
-#: ecommerce/templates/customer/emails/commtype_order_with_csv_subject.txt:2
-#, python-format
-msgid "%(partner_name)s: Order Confirmation: [%(order_number)s]"
-msgstr "%(partner_name)s:Заказ Подтверждение: [%(order_number)s]"
 
 #: ecommerce/templates/edx/base_menu.html:7
 msgid "Sign Out"
@@ -2777,6 +2554,292 @@ msgid ""
 "information about options for clearing a match. Your account will be "
 "suspended until this matter is resolved satisfactorily."
 msgstr ""
+
+#: ecommerce/templates/oscar/customer/email_base.html:189
+#, python-format
+msgid "Copyright © %(year)s %(platform_name)s. All rights reserved."
+msgstr "Все права защищены, © %(platform_name)s, %(year)s."
+
+#: ecommerce/templates/oscar/customer/emails/commtype_course_purchased_body.html:9
+#: ecommerce/templates/oscar/customer/emails/commtype_course_purchased_body.txt:4
+#, python-format
+msgid "Hi %(full_name)s,"
+msgstr "Здравствуйте, %(full_name)s,"
+
+#: ecommerce/templates/oscar/customer/emails/commtype_course_purchased_body.html:11
+#: ecommerce/templates/oscar/customer/emails/commtype_course_purchased_body.txt:6
+#, python-format
+msgid ""
+"Thank you for purchasing %(course_title)s. A charge will appear on your "
+"credit or debit card statement with a company name of \"%(platform_name)s\"."
+msgstr ""
+
+#: ecommerce/templates/oscar/customer/emails/commtype_course_purchased_body.html:13
+#: ecommerce/templates/oscar/customer/emails/commtype_course_purchased_body.txt:8
+#, python-format
+msgid ""
+"You can access your course and complete your verification (if required) on "
+"your %(platform_name)s dashboard. "
+msgstr "Вы можете получить доступ к вашему курсу и завершить процесс верификации личности (если требуется) в панели управления %(platform_name)s. "
+
+#: ecommerce/templates/oscar/customer/emails/commtype_course_purchased_body.html:14
+#: ecommerce/templates/oscar/customer/emails/commtype_course_purchased_body.txt:9
+#, python-format
+msgid ""
+"To explore other great courses, visit the %(platform_name)s website. More "
+"courses are added every day!"
+msgstr "Чтобы посмотреть список всех доступных курсов, посетите %(platform_name)s. Новые курсы добавляются еженедельно!"
+
+#: ecommerce/templates/oscar/customer/emails/commtype_course_purchased_body.html:17
+#: ecommerce/templates/oscar/customer/emails/commtype_credit_receipt_body.html:43
+msgid "View Payment Information"
+msgstr "Просмотреть информацию об оплате"
+
+#: ecommerce/templates/oscar/customer/emails/commtype_course_purchased_body.html:20
+#: ecommerce/templates/oscar/customer/emails/commtype_course_purchased_body.txt:14
+msgid "Thank you. We hope you enjoy the course!"
+msgstr "Спасибо! Мы надеемся, курс вам понравится!"
+
+#: ecommerce/templates/oscar/customer/emails/commtype_course_purchased_body.html:21
+#, python-format
+msgid "%(platform_name)s team "
+msgstr "Команда %(platform_name)s"
+
+#: ecommerce/templates/oscar/customer/emails/commtype_course_purchased_body.html:31
+#, python-format
+msgid ""
+"You are receiving this email because you purchased a seat in the "
+"%(platform_name)s course %(course_title)s."
+msgstr "Вы получили это письмо, поскольку вы приобрели доступ %(platform_name)s к курсу %(course_title)s."
+
+#: ecommerce/templates/oscar/customer/emails/commtype_course_purchased_body.txt:2
+msgid "Receipt Confirmation for: "
+msgstr "Уведомление о получении:"
+
+#: ecommerce/templates/oscar/customer/emails/commtype_course_purchased_body.txt:11
+#: ecommerce/templates/oscar/customer/emails/commtype_credit_receipt_body.txt:12
+msgid "To view your payment information, visit the following website."
+msgstr "Чтобы просмотреть платежную информацию, зайдите на этот сайт."
+
+#: ecommerce/templates/oscar/customer/emails/commtype_course_purchased_body.txt:16
+#, python-format
+msgid "%(platform_name)s team"
+msgstr "Команда %(platform_name)s"
+
+#: ecommerce/templates/oscar/customer/emails/commtype_course_purchased_body.txt:18
+msgid "The edX team"
+msgstr "Команда edX"
+
+#: ecommerce/templates/oscar/customer/emails/commtype_course_purchased_subject.txt:2
+msgid "Order Placed"
+msgstr "Заказ размещен"
+
+#: ecommerce/templates/oscar/customer/emails/commtype_credit_receipt_body.html:13
+msgid "Payment Confirmation"
+msgstr "Подтверждение оплаты"
+
+#: ecommerce/templates/oscar/customer/emails/commtype_credit_receipt_body.html:27
+msgid "Payment confirmation for:"
+msgstr "Подтверждение оплаты для:"
+
+#: ecommerce/templates/oscar/customer/emails/commtype_credit_receipt_body.html:55
+#: ecommerce/templates/oscar/customer/emails/commtype_credit_receipt_body.txt:4
+#: ecommerce/templates/oscar/customer/emails/commtype_order_with_csv_body.html:25
+#: ecommerce/templates/oscar/customer/emails/commtype_order_with_csv_body.txt:5
+#, python-format
+msgid "Dear %(full_name)s,"
+msgstr "Здравствуйте, %(full_name)s!"
+
+#: ecommerce/templates/oscar/customer/emails/commtype_credit_receipt_body.html:60
+#, python-format
+msgid ""
+"\n"
+"                            Thank you for purchasing %(credit_hours)s credit hours from %(credit_provider)s for %(course_title)s. A charge will appear on your credit or debit card statement with a company name of \"%(platform_name)s\".\n"
+"                        "
+msgstr "\n                            Спасибо за покупку %(credit_hours)s зачётных единиц %(credit_provider)s за курс %(course_title)s. Оплаченная сумма будет отображена в выписке вашей кредитной или дебетовой карты; название компании -  \"%(platform_name)s\".\n                        "
+
+#: ecommerce/templates/oscar/customer/emails/commtype_credit_receipt_body.html:67
+#: ecommerce/templates/oscar/customer/emails/commtype_credit_receipt_body.txt:8
+#, python-format
+msgid ""
+"To receive your course credit, you must also request credit at the "
+"%(credit_provider)s website. For a link to request credit from "
+"%(credit_provider)s, or to see the status of your credit request, go to your"
+" %(platform_name)s dashboard."
+msgstr "Чтобы получить зачётные единицы курса, вам необходимо запросить их на этом %(credit_provider)s сайте. Чтобы получить ссылку для запроса зачётных единиц у %(credit_provider)s, или для проверки статуса вашего запроса, зайдите на вашу панель управления %(platform_name)s."
+
+#: ecommerce/templates/oscar/customer/emails/commtype_credit_receipt_body.html:71
+#: ecommerce/templates/oscar/customer/emails/commtype_credit_receipt_body.txt:10
+#, python-format
+msgid ""
+"To explore other credit-eligible courses, visit the %(platform_name)s "
+"website. We add new courses frequently!"
+msgstr "Чтобы просмотреть другие курсы, для которых доступны зачётные единицы, зайдите на сайт %(platform_name)s. Мы добавляем новые курсы регулярно!"
+
+#: ecommerce/templates/oscar/customer/emails/commtype_credit_receipt_body.html:74
+#: ecommerce/templates/oscar/customer/emails/commtype_credit_receipt_body.txt:15
+msgid "Thank you. We hope you enjoyed your course!"
+msgstr "Спасибо! Мы надеемся, вам понравился курс."
+
+#: ecommerce/templates/oscar/customer/emails/commtype_credit_receipt_body.html:75
+#: ecommerce/templates/oscar/customer/emails/commtype_credit_receipt_body.txt:16
+#, python-format
+msgid "The %(platform_name)s team"
+msgstr "Команда %(platform_name)s"
+
+#: ecommerce/templates/oscar/customer/emails/commtype_credit_receipt_body.html:88
+#, python-format
+msgid ""
+"\n"
+"                            You received this message because you purchased credit hours for %(course_title)s, an %(platform_name)s course.\n"
+"                        "
+msgstr "\n                            Данным сообщением уведомляем, что вы купили зачётные единицы за курс %(course_title)s на %(platform_name)s.\n                        "
+
+#: ecommerce/templates/oscar/customer/emails/commtype_credit_receipt_body.txt:2
+msgid "Payment confirmation for: "
+msgstr "Подтверждение оплаты для:"
+
+#: ecommerce/templates/oscar/customer/emails/commtype_credit_receipt_body.txt:6
+#, python-format
+msgid ""
+"Thank you for purchasing %(credit_hours)s credit hours from "
+"%(credit_provider)s for %(course_title)s. A charge will appear on your "
+"credit or debit card statement with a company name of \"%(platform_name)s\"."
+msgstr "Спасибо за покупку %(credit_hours)s зачётных единиц от %(credit_provider)s для %(course_title)s. Сумма будет отображена в выписке вашей кредитной или дебетовой карты рядом с именем компании «%(platform_name)s»."
+
+#: ecommerce/templates/oscar/customer/emails/commtype_credit_receipt_body.txt:18
+#, python-format
+msgid ""
+"You received this message because you purchased credit hours for "
+"%(course_title)s, an %(platform_name)s course."
+msgstr "Вы получили это сообщение потому что купили зачётные единицы для %(course_title)s, %(platform_name)s курса."
+
+#: ecommerce/templates/oscar/customer/emails/commtype_credit_receipt_subject.txt:2
+msgid "Order Receipt"
+msgstr "Заказать счёт"
+
+#: ecommerce/templates/oscar/customer/emails/commtype_order_with_csv_body.html:14
+msgid "For Business"
+msgstr "Для бизнеса"
+
+#: ecommerce/templates/oscar/customer/emails/commtype_order_with_csv_body.html:26
+#: ecommerce/templates/oscar/customer/emails/commtype_order_with_csv_body.txt:6
+#, python-format
+msgid ""
+"Thank you for purchasing access to %(course_name)s. Let's get your group "
+"ready to learn with edX:"
+msgstr "Спасибо за покупку доступа к %(course_name)s. Давайте подготовим вашу группу к обучению с помощью EdX:"
+
+#: ecommerce/templates/oscar/customer/emails/commtype_order_with_csv_body.html:29
+#, python-brace-format
+msgid ""
+"\n"
+"                                Download and save the {link_start}{download_csv_link}{link_middle} enrollment code file.{link_end}\n"
+"                            "
+msgstr ""
+
+#: ecommerce/templates/oscar/customer/emails/commtype_order_with_csv_body.html:34
+#: ecommerce/templates/oscar/customer/emails/commtype_order_with_csv_body.txt:9
+msgid "Distribute one code per learner before the expiration date."
+msgstr "Распространяйте по одному коду на каждого учащегося до истечения срока годности."
+
+#: ecommerce/templates/oscar/customer/emails/commtype_order_with_csv_body.html:35
+#: ecommerce/templates/oscar/customer/emails/commtype_order_with_csv_body.txt:10
+msgid "Pro tip: Track which code is associated with which person."
+msgstr "Подсказка: Отслеживайте код, связанный с конкретным человеком."
+
+#: ecommerce/templates/oscar/customer/emails/commtype_order_with_csv_body.html:36
+#: ecommerce/templates/oscar/customer/emails/commtype_order_with_csv_body.txt:11
+msgid "Learners sign-in/register with edX and enroll for the course."
+msgstr "Студенты регистрируются в системе EdX и записываются на курс."
+
+#: ecommerce/templates/oscar/customer/emails/commtype_order_with_csv_body.html:39
+#, python-brace-format
+msgid ""
+"\n"
+"                            To view your payment information, log in to see your Order History, under {link_start}{order_history_url}{link_middle}Account Settings{link_end}.\n"
+"                        "
+msgstr ""
+
+#: ecommerce/templates/oscar/customer/emails/commtype_order_with_csv_body.html:45
+#, python-brace-format
+msgid ""
+"\n"
+"                            For more information and assistance, check our {link_start}Help Center{link_end}\n"
+"                        "
+msgstr ""
+
+#: ecommerce/templates/oscar/customer/emails/commtype_order_with_csv_body.html:50
+#: ecommerce/templates/oscar/customer/emails/commtype_order_with_csv_body.txt:16
+msgid "Thank You"
+msgstr "Спасибо"
+
+#: ecommerce/templates/oscar/customer/emails/commtype_order_with_csv_body.html:61
+#: ecommerce/templates/oscar/customer/emails/commtype_order_with_csv_body.txt:18
+msgid "By purchasing, you and your organization agree to the following terms:"
+msgstr "Осуществляя покупку, вы и ваша организация соглашаетесь со следующими условиями:"
+
+#: ecommerce/templates/oscar/customer/emails/commtype_order_with_csv_body.html:63
+#: ecommerce/templates/oscar/customer/emails/commtype_order_with_csv_body.txt:20
+msgid ""
+"Each code is valid for the one course covered and can be used only one time."
+msgstr "Каждый код действителен для одного курса и может быть использован только один раз."
+
+#: ecommerce/templates/oscar/customer/emails/commtype_order_with_csv_body.html:64
+#: ecommerce/templates/oscar/customer/emails/commtype_order_with_csv_body.txt:21
+msgid "You are responsible for distributing codes to your learners."
+msgstr "Вы несете ответственность за распространение кодексов среди учащихся."
+
+#: ecommerce/templates/oscar/customer/emails/commtype_order_with_csv_body.html:65
+#: ecommerce/templates/oscar/customer/emails/commtype_order_with_csv_body.txt:22
+msgid ""
+"Each code will expire in one year from date of purchase or, if earlier, once"
+" the course is closed."
+msgstr "Срок действия каждого кода истекает через год с даты покупки или, если раньше, с момента закрытия курса."
+
+#: ecommerce/templates/oscar/customer/emails/commtype_order_with_csv_body.html:66
+#: ecommerce/templates/oscar/customer/emails/commtype_order_with_csv_body.txt:23
+msgid ""
+"If a course is not designated as self-paced, you should confirm that a "
+"course run is available before expiration."
+msgstr "Если курс не обозначен как самостоятельный, вы должны подтвердить, что он доступен до истечения срока его действия."
+
+#: ecommerce/templates/oscar/customer/emails/commtype_order_with_csv_body.html:67
+#: ecommerce/templates/oscar/customer/emails/commtype_order_with_csv_body.txt:24
+msgid "You may not resell codes to third parties."
+msgstr "Запрещается перепродавать коды третьим лицам."
+
+#: ecommerce/templates/oscar/customer/emails/commtype_order_with_csv_body.html:68
+#: ecommerce/templates/oscar/customer/emails/commtype_order_with_csv_body.txt:25
+msgid "All sales final. No refunds."
+msgstr "Все продажи завершены. Возврат денег не производится."
+
+#: ecommerce/templates/oscar/customer/emails/commtype_order_with_csv_body.txt:2
+msgid "Order confirmation for: "
+msgstr "Подтверждение заказа для: "
+
+#: ecommerce/templates/oscar/customer/emails/commtype_order_with_csv_body.txt:8
+#, python-format
+msgid ""
+"Please visit %(download_csv_link)s to download and save the enrollment code "
+"file."
+msgstr "Посетите наш сайт %(download_csv_link)s чтобы скачать и сохранить файл с регистрационным кодом."
+
+#: ecommerce/templates/oscar/customer/emails/commtype_order_with_csv_body.txt:13
+#, python-format
+msgid ""
+"To view your payment information, log in to see your Order History, under "
+"Account Settings at %(order_history_url)s."
+msgstr "Чтобы просмотреть информацию о платежах, войдите в систему, чтобы просмотреть историю заказов, в разделе Настройки счета на %(order_history_url)s."
+
+#: ecommerce/templates/oscar/customer/emails/commtype_order_with_csv_body.txt:14
+msgid "For more information and assistance, contact info@edx.org."
+msgstr "За дополнительной информацией и помощью обращайтесь по адресу info@edx.org."
+
+#: ecommerce/templates/oscar/customer/emails/commtype_order_with_csv_subject.txt:2
+#, python-format
+msgid "%(partner_name)s: Order Confirmation: [%(order_number)s]"
+msgstr "%(partner_name)s:Заказ Подтверждение: [%(order_number)s]"
 
 #: ecommerce/templates/oscar/dashboard/catalogue/category_row_actions.html:6
 #: ecommerce/templates/oscar/dashboard/catalogue/product_row_actions.html:6
