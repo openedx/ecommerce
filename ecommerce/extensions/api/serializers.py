@@ -898,12 +898,17 @@ class OfferAssignmentEmailTemplatesSerializer(serializers.ModelSerializer):
         email_greeting = bleach.clean(validated_data.get('email_greeting', ''))
         email_closing = bleach.clean(validated_data.get('email_closing', ''))
 
-        instance = OfferAssignmentEmailTemplates.objects.create(
+        create_data = dict(
             enterprise_customer=enterprise_customer,
             email_type=email_type,
             email_greeting=email_greeting,
             email_closing=email_closing,
         )
+
+        if 'name' in validated_data:
+            create_data['name'] = validated_data.get('name')
+
+        instance = OfferAssignmentEmailTemplates.objects.create(**create_data)
 
         # deactivate old templates for enterprise for this specific email type
         OfferAssignmentEmailTemplates.objects.filter(

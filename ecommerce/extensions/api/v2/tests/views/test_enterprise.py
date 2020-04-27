@@ -2872,9 +2872,9 @@ class OfferAssignmentEmailTemplatesViewSetTests(JwtMixin, TestCase):
             system_wide_role=SYSTEM_ENTERPRISE_ADMIN_ROLE, context=self.enterprise_customer['id']
         )
 
-    def create_template_data(self, email_type, greeting=None, closing=None, status_code=status.HTTP_201_CREATED):
+    def create_template_data(self, email_type, name, greeting=None, closing=None, status_code=status.HTTP_201_CREATED):
 
-        data = {'email_type': email_type}
+        data = {'email_type': email_type, 'name': name}
         if greeting:
             data['email_greeting'] = greeting
         if closing:
@@ -2887,16 +2887,18 @@ class OfferAssignmentEmailTemplatesViewSetTests(JwtMixin, TestCase):
 
     def create_multiple_templates_data(self):
         types = ['assign', 'assign', 'remind', 'remind', 'revoke', 'revoke']
+        names = ['Template 1', 'Template 2', 'Template 3', 'Template 4', 'Template 5', 'Template 6']
         greetings = ['GREETING 1', 'GREETING 2', 'GREETING 3', 'GREETING 4', 'GREETING 5', 'GREETING 6']
         closings = ['CLOSING 1', 'CLOSING 2', 'CLOSING 3', 'CLOSING 4', 'CLOSING 5', 'CLOSING 6']
 
         # create multiple templates of each email type for an enterprise
-        for email_type, email_greeting, email_closing in zip(types, greetings, closings):
-            self.create_template_data(email_type, email_greeting, email_closing)
+        for email_type, template_name, email_greeting, email_closing in zip(types, names, greetings, closings):
+            self.create_template_data(email_type, template_name, email_greeting, email_closing)
 
-    def verify_template_data(self, template, email_type, email_greeting, email_closing, active):
+    def verify_template_data(self, template, email_type, email_greeting, email_closing, active, name):
         assert template['enterprise_customer'] == self.enterprise
         assert template['email_type'] == email_type
+        assert template['name'] == name
         assert template['email_body'] == settings.OFFER_ASSIGNMEN_EMAIL_TEMPLATE_BODY_MAP[email_type]
         assert template['email_greeting'] == email_greeting
         assert template['email_closing'] == email_closing
@@ -2909,36 +2911,42 @@ class OfferAssignmentEmailTemplatesViewSetTests(JwtMixin, TestCase):
         expected_template_data = [
             {
                 'email_type': 'assign',
+                'name': 'Template 2',
                 'email_greeting': 'GREETING 2',
                 'email_closing': 'CLOSING 2',
                 'active': True
             },
             {
                 'email_type': 'remind',
+                'name': 'Template 4',
                 'email_greeting': 'GREETING 4',
                 'email_closing': 'CLOSING 4',
                 'active': True
             },
             {
                 'email_type': 'revoke',
+                'name': 'Template 6',
                 'email_greeting': 'GREETING 6',
                 'email_closing': 'CLOSING 6',
                 'active': True
             },
             {
                 'email_type': 'assign',
+                'name': 'Template 1',
                 'email_greeting': 'GREETING 1',
                 'email_closing': 'CLOSING 1',
                 'active': False
             },
             {
                 'email_type': 'remind',
+                'name': 'Template 3',
                 'email_greeting': 'GREETING 3',
                 'email_closing': 'CLOSING 3',
                 'active': False
             },
             {
                 'email_type': 'revoke',
+                'name': 'Template 5',
                 'email_greeting': 'GREETING 5',
                 'email_closing': 'CLOSING 5',
                 'active': False
@@ -2961,18 +2969,21 @@ class OfferAssignmentEmailTemplatesViewSetTests(JwtMixin, TestCase):
                 expected_template['email_greeting'],
                 expected_template['email_closing'],
                 expected_template['active'],
+                expected_template['name'],
             )
 
     @ddt.data(
         [
             {
                 'email_type': 'assign',
+                'name': 'Template 2',
                 'email_greeting': 'GREETING 2',
                 'email_closing': 'CLOSING 2',
                 'active': True
             },
             {
                 'email_type': 'assign',
+                'name': 'Template 1',
                 'email_greeting': 'GREETING 1',
                 'email_closing': 'CLOSING 1',
                 'active': False
@@ -2981,12 +2992,14 @@ class OfferAssignmentEmailTemplatesViewSetTests(JwtMixin, TestCase):
         [
             {
                 'email_type': 'remind',
+                'name': 'Template 4',
                 'email_greeting': 'GREETING 4',
                 'email_closing': 'CLOSING 4',
                 'active': True
             },
             {
                 'email_type': 'remind',
+                'name': 'Template 3',
                 'email_greeting': 'GREETING 3',
                 'email_closing': 'CLOSING 3',
                 'active': False
@@ -2995,12 +3008,14 @@ class OfferAssignmentEmailTemplatesViewSetTests(JwtMixin, TestCase):
         [
             {
                 'email_type': 'revoke',
+                'name': 'Template 6',
                 'email_greeting': 'GREETING 6',
                 'email_closing': 'CLOSING 6',
                 'active': True
             },
             {
                 'email_type': 'revoke',
+                'name': 'Template 5',
                 'email_greeting': 'GREETING 5',
                 'email_closing': 'CLOSING 5',
                 'active': False
@@ -3026,27 +3041,33 @@ class OfferAssignmentEmailTemplatesViewSetTests(JwtMixin, TestCase):
                 expected_template['email_greeting'],
                 expected_template['email_closing'],
                 expected_template['active'],
+                expected_template['name'],
             )
 
     @ddt.data(
         {
             'email_type': 'assign',
+            'expected_template_name': 'Template 2',
             'expected_email_greeting': 'GREETING 2',
             'expected_email_closing': 'CLOSING 2',
         },
         {
             'email_type': 'remind',
+            'expected_template_name': 'Template 4',
             'expected_email_greeting': 'GREETING 4',
             'expected_email_closing': 'CLOSING 4',
         },
         {
             'email_type': 'revoke',
+            'expected_template_name': 'Template 6',
             'expected_email_greeting': 'GREETING 6',
             'expected_email_closing': 'CLOSING 6',
         },
     )
     @ddt.unpack
-    def test_return_active_template_for_enterprise(self, email_type, expected_email_greeting, expected_email_closing):
+    def test_return_active_template_for_enterprise(
+            self, email_type, expected_template_name, expected_email_greeting, expected_email_closing
+    ):
         """
         Verify that view returns only a single active template for an enterprise for a specific email type.
         """
@@ -3057,26 +3078,34 @@ class OfferAssignmentEmailTemplatesViewSetTests(JwtMixin, TestCase):
 
         templates = response.json()['results']
         assert len(templates) == 1
-        self.verify_template_data(templates[0], email_type, expected_email_greeting, expected_email_closing, True)
+        self.verify_template_data(
+            templates[0], email_type, expected_email_greeting, expected_email_closing, True, expected_template_name
+        )
 
     def test_retrieve_template_for_enterprise(self):
         """
         Verify that view's retreive action work as expected.
         """
         email_type = 'assign'
+        name = 'My Template'
         email_greeting = 'greeting'
         email_closing = 'closing'
 
-        created_template = self.create_template_data(email_type, email_greeting, email_closing)
+        created_template = self.create_template_data(email_type, name, email_greeting, email_closing)
 
         response = self.client.get('{}{}/'.format(self.url, created_template['id']))
         assert response.status_code == status.HTTP_200_OK
 
         received_template = response.json()
-        self.verify_template_data(received_template, email_type, email_greeting, email_closing, True)
+        self.verify_template_data(received_template, email_type, email_greeting, email_closing, True, name)
 
-    @ddt.data('assign', 'remind', 'revoke')
-    def test_post(self, email_type):
+    @ddt.data(
+        ('assign', 'A'),
+        ('remind', 'B'),
+        ('revoke', 'C')
+    )
+    @ddt.unpack
+    def test_post(self, email_type, template_name):
         """
         Verify that view correctly performs HTTP POST.
         """
@@ -3087,8 +3116,8 @@ class OfferAssignmentEmailTemplatesViewSetTests(JwtMixin, TestCase):
             email_greeting = 'GREETING {}'.format(uuid4().hex.upper()[0:6])
             email_closing = 'CLOSING {}'.format(uuid4().hex.upper()[0:6])
 
-            template = self.create_template_data(email_type, email_greeting, email_closing)
-            self.verify_template_data(template, email_type, email_greeting, email_closing, True)
+            template = self.create_template_data(email_type, template_name, email_greeting, email_closing)
+            self.verify_template_data(template, email_type, email_greeting, email_closing, True, template_name)
 
             templates.append(template)
 
@@ -3100,10 +3129,11 @@ class OfferAssignmentEmailTemplatesViewSetTests(JwtMixin, TestCase):
         """
         Verify that view correctly performs HTTP POST on unsafe data.
         """
+        template_name = 'E Learning'
         email_greeting = '<script>document.getElementById("greeting").innerHTML = "GREETING!";</script>'
         email_closing = '<script>document.getElementById("closing").innerHTML = "CLOSING!";</script>'
 
-        template = self.create_template_data(email_type, email_greeting, email_closing)
+        template = self.create_template_data(email_type, template_name, email_greeting, email_closing)
         assert template['email_greeting'] == bleach.clean(email_greeting)
         assert template['email_closing'] == bleach.clean(email_closing)
 
@@ -3112,30 +3142,35 @@ class OfferAssignmentEmailTemplatesViewSetTests(JwtMixin, TestCase):
         """
         Verify that view correctly performs HTTP POST with empty template values.
         """
+        template_name = 'E Learning'
         email_greeting = ''
         email_closing = ''
 
-        template = self.create_template_data(email_type, email_greeting, email_closing)
-        self.verify_template_data(template, email_type, email_greeting, email_closing, True)
+        template = self.create_template_data(email_type, template_name, email_greeting, email_closing)
+        self.verify_template_data(template, email_type, email_greeting, email_closing, True, template_name)
 
     @ddt.data('assign', 'remind', 'revoke')
     def test_post_with_optional_fields(self, email_type):
         """
         Verify that view correctly performs HTTP POST with optional fields.
         """
-        template = self.create_template_data(email_type, None, None)
-        self.verify_template_data(template, email_type, '', '', True)
+        template_name = 'E Learning'
+        template = self.create_template_data(email_type, template_name, None, None)
+        self.verify_template_data(template, email_type, '', '', True, template_name)
 
     @ddt.data('assign', 'remind', 'revoke')
     def test_post_with_max_length_field_validation(self, email_type):
         """
         Verify that view HTTP POST return error email closing/greeting exceeds field max length.
         """
+        template_name = 'E Learning'
         max_limit = OFFER_ASSIGNMENT_EMAIL_TEMPLATE_FIELD_LIMIT
         email_greeting = 'G' * (max_limit + 1)
         email_closing = 'C' * (max_limit + 1)
 
-        response = self.create_template_data(email_type, email_greeting, email_closing, status.HTTP_400_BAD_REQUEST)
+        response = self.create_template_data(
+            email_type, template_name, email_greeting, email_closing, status.HTTP_400_BAD_REQUEST
+        )
         assert response == {
             'email_greeting': [
                 'Email greeting must be {} characters or less'.format(max_limit)
