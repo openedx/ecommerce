@@ -25,6 +25,12 @@ COMPRESS_OFFLINE = False
 COMPRESS_ENABLED = False
 
 JWT_AUTH.update({
+    'JWT_ISSUER': 'http://localhost:18000/oauth2',
+    'JWT_ISSUERS': [{
+        'AUDIENCE': 'lms-key',
+        'ISSUER': 'http://localhost:18000/oauth2',
+        'SECRET_KEY': 'lms-secret',
+    }],
     # Must match public signing key used in LMS.
     'JWT_PUBLIC_SIGNING_JWK_SET': (
         '{"keys": [{"kid": "devstack_key", "e": "AQAB", "kty": "RSA", "n": "smKFSYowG6nNUAdeqH1jQQnH1PmIHphzBmwJ5vRf1vu'
