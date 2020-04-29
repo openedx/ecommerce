@@ -8,9 +8,9 @@ from django.conf import settings
 from oscar.core.loading import get_model
 
 from ecommerce.core.constants import COUPON_PRODUCT_CLASS_NAME
+from ecommerce.extensions.catalogue.tasks import create_vouchers_and_attach_to_product
 from ecommerce.extensions.payment.models import EnterpriseContractMetadata
 from ecommerce.extensions.voucher.models import CouponVouchers
-from ecommerce.extensions.catalogue.tasks import create_vouchers_and_attach_to_product
 
 Catalog = get_model('catalogue', 'Catalog')
 logger = logging.getLogger(__name__)
@@ -91,7 +91,7 @@ def create_coupon_product(
         catalog=catalog,
         catalog_query=catalog_query,
         code=code or None,
-        coupon=coupon_product,
+        coupon_product=coupon_product,
         course_catalog=course_catalog,
         course_seat_types=course_seat_types,
         email_domains=email_domains,
@@ -99,7 +99,8 @@ def create_coupon_product(
         enterprise_customer=enterprise_customer,
         enterprise_customer_catalog=enterprise_customer_catalog,
         max_uses=max_uses,
-        name=title,
+        note=note,
+        title=title,
         quantity=int(quantity),
         start_datetime=start_datetime,
         voucher_type=voucher_type,

@@ -1,8 +1,9 @@
 
 import logging
-from django.db.utils import IntegrityError
 
 from celery import shared_task
+from django.db.utils import IntegrityError
+
 from ecommerce.extensions.voucher.utils import create_vouchers
 
 logger = logging.getLogger(__name__)
@@ -24,9 +25,9 @@ def create_vouchers_and_attach_to_product(
         enterprise_customer_catalog,
         max_uses,
         note,
+        title,
         quantity,
         start_datetime,
-        title,
         voucher_type,
         program_uuid,
         site,
