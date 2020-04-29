@@ -49,6 +49,7 @@ from ecommerce.extensions.basket import message_utils
 from ecommerce.extensions.basket.constants import EMAIL_OPT_IN_ATTRIBUTE
 from ecommerce.extensions.basket.exceptions import BadRequestException, RedirectException, VoucherException
 from ecommerce.extensions.basket.utils import (
+    add_invalid_code_message_to_url,
     add_utm_params_to_url,
     apply_offers_on_basket,
     apply_voucher_on_basket_and_check_discount,
@@ -425,7 +426,14 @@ class BasketAddItemsView(BasketLogicMixin, APIView):
         try:
             skus = self._get_skus(request)
             products = self._get_products(request, skus)
-            voucher = self._get_voucher(request)
+            voucher = None
+            invalid_code = None
+            code = request.GET.get('code', None)
+            try:
+                voucher = self._get_voucher(request)
+            except Voucher.DoesNotExist as e:  # pragma: nocover
+                # Display an error message when an invalid code is passed as a parameter
+                invalid_code = code
 
             logger.info('Starting payment flow for user [%s] for products [%s].', request.user.username, skus)
 
@@ -441,7 +449,11 @@ class BasketAddItemsView(BasketLogicMixin, APIView):
             # Used basket object from request to allow enterprise offers
             # being applied on basket via BasketMiddleware
             self.verify_enterprise_needs(request.basket)
-            return self._redirect_response_to_basket_or_payment(request, skus)
+            if code and not request.basket.vouchers.exists():
+                if not (len(available_products) == 1 and available_products[0].is_enrollment_code_product):
+                    # Display an error message when an invalid code is passed as a parameter
+                    invalid_code = code
+            return self._redirect_response_to_basket_or_payment(request, skus, invalid_code)
 
         except BadRequestException as e:
             return HttpResponseBadRequest(six.text_type(e))
@@ -489,14 +501,16 @@ class BasketAddItemsView(BasketLogicMixin, APIView):
             defaults={'value_text': request.GET.get('email_opt_in') == 'true'},
         )
 
-    def _redirect_response_to_basket_or_payment(self, request, skus):
+    def _redirect_response_to_basket_or_payment(self, request, skus, invalid_code=None):
         redirect_url = get_payment_microfrontend_or_basket_url(request)
         # If a user is eligible and bucketed, REV1074 experiment information will be added to their url
-        if waffle.flag_is_active(self.request, 'REV1074.enable_experiment') and skus:  # pragma: no cover
+        REV1074_is_active = waffle.flag_is_active(self.request, 'REV1074.enable_experiment')
+        if REV1074_is_active and skus and not invalid_code:  # pragma: no cover
             redirect_url = add_REV1074_information_to_url_if_eligible(redirect_url, request, skus[0])
             redirect_url += '?basket_id=' + str(request.basket.id)
         else:  # pragma: no cover
             redirect_url = add_utm_params_to_url(redirect_url, list(self.request.GET.items()))
+        redirect_url = add_invalid_code_message_to_url(redirect_url, invalid_code)
 
         return HttpResponseRedirect(redirect_url, status=303)
 
