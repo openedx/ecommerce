@@ -5,13 +5,12 @@ from hashlib import md5
 
 import six
 from django.conf import settings
-from django.db.utils import IntegrityError
 from oscar.core.loading import get_model
 
 from ecommerce.core.constants import COUPON_PRODUCT_CLASS_NAME
 from ecommerce.extensions.payment.models import EnterpriseContractMetadata
 from ecommerce.extensions.voucher.models import CouponVouchers
-from ecommerce.extensions.voucher.utils import create_vouchers
+from ecommerce.extensions.catalogue.tasks import create_vouchers_and_attach_to_product
 
 Catalog = get_model('catalogue', 'Catalog')
 logger = logging.getLogger(__name__)
@@ -86,34 +85,28 @@ def create_coupon_product(
     # Vouchers are created during order and not fulfillment like usual
     # because we want vouchers to be part of the line in the order.
 
-    try:
-        vouchers = create_vouchers(
-            benefit_type=benefit_type,
-            benefit_value=benefit_value,
-            catalog=catalog,
-            catalog_query=catalog_query,
-            code=code or None,
-            coupon=coupon_product,
-            course_catalog=course_catalog,
-            course_seat_types=course_seat_types,
-            email_domains=email_domains,
-            end_datetime=end_datetime,
-            enterprise_customer=enterprise_customer,
-            enterprise_customer_catalog=enterprise_customer_catalog,
-            max_uses=max_uses,
-            name=title,
-            quantity=int(quantity),
-            start_datetime=start_datetime,
-            voucher_type=voucher_type,
-            program_uuid=program_uuid,
-            site=site
-        )
-    except IntegrityError:
-        logger.exception('Failed to create vouchers for [%s] coupon.', coupon_product.title)
-        raise
-
-    attach_vouchers_to_coupon_product(coupon_product, vouchers, note, enterprise_id=enterprise_customer,
-                                      sales_force_id=sales_force_id)
+    create_vouchers_and_attach_to_product.delay(
+        benefit_type=benefit_type,
+        benefit_value=benefit_value,
+        catalog=catalog,
+        catalog_query=catalog_query,
+        code=code or None,
+        coupon=coupon_product,
+        course_catalog=course_catalog,
+        course_seat_types=course_seat_types,
+        email_domains=email_domains,
+        end_datetime=end_datetime,
+        enterprise_customer=enterprise_customer,
+        enterprise_customer_catalog=enterprise_customer_catalog,
+        max_uses=max_uses,
+        name=title,
+        quantity=int(quantity),
+        start_datetime=start_datetime,
+        voucher_type=voucher_type,
+        program_uuid=program_uuid,
+        site=site,
+        sales_force_id=sales_force_id,
+    )
 
     return coupon_product
 
