@@ -145,6 +145,16 @@ class BasketAddItemsViewTests(CouponMixin, DiscoveryTestMixin, DiscoveryMockMixi
         expected_url += '?utm_source=test'
         self.assertRedirects(response, expected_url, status_code=303, fetch_redirect_response=False)
 
+    def test_add_invalid_code_to_basket(self):
+        """
+        When the BasketAddItemsView receives an invalid code as a parameter, add a message to the url.
+        This message will be displayed on the payment page.
+        """
+        microfrontend_url = self.configure_redirect_to_microfrontend(True, True)
+        response = self._get_response(self.stock_record.partner_sku, code='invalidcode')
+        expected_url = microfrontend_url + '?message=Code%20invalidcode%20is%20invalid.'
+        self.assertRedirects(response, expected_url, status_code=303, fetch_redirect_response=False)
+
     def test_microfrontend_for_enrollment_code_seat(self):
         microfrontend_url = self.configure_redirect_to_microfrontend()
 
