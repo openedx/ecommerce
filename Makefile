@@ -43,6 +43,7 @@ requirements: requirements.js
 	pip install -r requirements/dev.txt --exists-action w
 
 requirements.tox:
+	pip install -U pip
 	pip install -r requirements/tox.txt --exists-action w
 
 production-requirements: requirements.js
