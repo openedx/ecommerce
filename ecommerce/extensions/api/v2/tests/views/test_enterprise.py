@@ -3189,14 +3189,29 @@ class OfferAssignmentEmailTemplatesViewSetTests(JwtMixin, TestCase):
         }
 
     @ddt.data('assign', 'remind', 'revoke')
+    def test_delete(self, email_type):
+        """
+        Verify that view correctly performs HTTP DELETE.
+        """
+        create_response = self.create_template_data(email_type, 'A NAME', 'A GREETING', 'A CLOSING')
+        self.verify_template_data(create_response, email_type, 'A GREETING', 'A CLOSING', True, 'A NAME')
+
+        api_delete_url = '{}{}/'.format(self.url, create_response['id'])
+        delete_response = self.client.delete(api_delete_url)
+        self.assertEqual(delete_response.status_code, 204)
+
+        with self.assertRaises(OfferAssignmentEmailTemplates.DoesNotExist):
+            OfferAssignmentEmailTemplates.objects.get(id=create_response['id'])
+
+    @ddt.data('assign', 'remind', 'revoke')
     def test_put(self, email_type):
         """
         Verify that view correctly performs HTTP PUT.
         """
-        post_reponse = self.create_template_data(email_type, 'Awsome tmplate', 'GREETING 100', 'CLOSING 100')
+        post_response = self.create_template_data(email_type, 'Great template', 'GREETING 100', 'CLOSING 100')
 
         # prepare http put url and data
-        api_put_url = '{}{}/'.format(self.url, post_reponse['id'])
+        api_put_url = '{}{}/'.format(self.url, post_response['id'])
         updated_name = 'Awesome Template'
         updated_greeting = 'I AM A GREETING'
         updated_closing = 'I AM A CLOSING'
