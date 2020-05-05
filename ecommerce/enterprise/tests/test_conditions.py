@@ -183,6 +183,7 @@ class EnterpriseCustomerConditionTests(EnterpriseServiceMockMixin, DiscoveryTest
     @httpretty.activate
     def test_is_satisfied_false_for_voucher_offer_enterprise_mismatch(self):
         """ Ensure the condition returns false for a enterprise coupon where the user has a different enterprise. """
+        self.mock_enterprise_learner_post_api()
         offer, basket = self.setup_enterprise_coupon_data(use_new_enterprise=True)
         self.assertFalse(self.condition.is_satisfied(offer, basket))
 

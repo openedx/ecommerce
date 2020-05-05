@@ -12,7 +12,7 @@ from requests.exceptions import Timeout
 from slumber.exceptions import SlumberHttpBaseException
 
 from ecommerce.enterprise.api import catalog_contains_course_runs
-from ecommerce.enterprise.utils import get_enterprise_id_for_user
+from ecommerce.enterprise.utils import get_enterprise_id_for_user, get_or_create_enterprise_customer_user
 from ecommerce.extensions.basket.utils import ENTERPRISE_CATALOG_ATTRIBUTE_TYPE
 from ecommerce.extensions.offer.constants import OFFER_ASSIGNMENT_REVOKED, OFFER_REDEEMED
 from ecommerce.extensions.offer.mixins import ConditionWithoutRangeMixin, SingleItemConsumptionConditionMixin
@@ -95,8 +95,9 @@ class EnterpriseCustomerCondition(ConditionWithoutRangeMixin, SingleItemConsumpt
             # An anonymous user is never linked to any EnterpriseCustomer.
             return False
 
-        enterprise_customer = str(self.enterprise_customer_uuid)
+        enterprise_in_condition = str(self.enterprise_customer_uuid)
         enterprise_catalog = str(self.enterprise_customer_catalog_uuid)
+        enterprise_name_in_condition = str(self.enterprise_customer_name)
         username = basket.owner.username
         course_run_ids = []
         for line in basket.all_lines():
@@ -111,27 +112,46 @@ class EnterpriseCustomerCondition(ConditionWithoutRangeMixin, SingleItemConsumpt
                                    username,
                                    offer.id,
                                    line.product.id,
-                                   enterprise_customer,
+                                   enterprise_in_condition,
                                    enterprise_catalog)
                 return False
 
             course_run_ids.append(course.id)
 
         courses_in_basket = ','.join(course_run_ids)
-        enterprise_id = get_enterprise_id_for_user(basket.site, basket.owner)
-        if enterprise_id and enterprise_customer != enterprise_id:
+        user_enterprise = get_enterprise_id_for_user(basket.site, basket.owner)
+        if user_enterprise and enterprise_in_condition != user_enterprise:
             # Learner is not linked to the EnterpriseCustomer associated with this condition.
             if offer.offer_type == ConditionalOffer.VOUCHER:
                 logger.warning('[Code Redemption Failure] Unable to apply enterprise offer because Learner\'s '
                                'enterprise (%s) does not match this conditions\'s enterprise (%s). '
                                'User: %s, Offer: %s, Enterprise: %s, Catalog: %s, Courses: %s',
-                               enterprise_id,
-                               enterprise_customer,
+                               user_enterprise,
+                               enterprise_in_condition,
                                username,
                                offer.id,
-                               enterprise_customer,
+                               enterprise_in_condition,
                                enterprise_catalog,
                                courses_in_basket)
+
+                logger.info(
+                    '[Code Redemption Issue] Linking learner with the enterprise in Condition. '
+                    'User [%s], Enterprise [%s]',
+                    username,
+                    enterprise_in_condition
+                )
+                get_or_create_enterprise_customer_user(
+                    basket.site,
+                    enterprise_in_condition,
+                    username,
+                    False
+                )
+                msg = _('This coupon has been made available through {new_enterprise}. '
+                        'To redeem this coupon, you must first logout. When you log back in, '
+                        'please select {new_enterprise} as your enterprise '
+                        'and try again.').format(new_enterprise=enterprise_name_in_condition)
+                messages.warning(crum.get_current_request(), msg,)
+
             return False
 
         # Verify that the current conditional offer is related to the provided
@@ -148,7 +168,8 @@ class EnterpriseCustomerCondition(ConditionWithoutRangeMixin, SingleItemConsumpt
 
         try:
             catalog_contains_course = catalog_contains_course_runs(
-                basket.site, course_run_ids, enterprise_customer, enterprise_customer_catalog_uuid=enterprise_catalog,
+                basket.site, course_run_ids, enterprise_in_condition,
+                enterprise_customer_catalog_uuid=enterprise_catalog,
                 request=basket.strategy.request
             )
         except (ReqConnectionError, KeyError, SlumberHttpBaseException, Timeout) as exc:
@@ -158,7 +179,7 @@ class EnterpriseCustomerCondition(ConditionWithoutRangeMixin, SingleItemConsumpt
                              username,
                              offer.id,
                              exc,
-                             enterprise_customer,
+                             enterprise_in_condition,
                              enterprise_catalog,
                              courses_in_basket)
             return False
@@ -171,7 +192,7 @@ class EnterpriseCustomerCondition(ConditionWithoutRangeMixin, SingleItemConsumpt
                            'User: %s, Offer: %s, Enterprise: %s, Catalog: %s, Courses: %s',
                            username,
                            offer.id,
-                           enterprise_customer,
+                           enterprise_in_condition,
                            enterprise_catalog,
                            courses_in_basket)
             return False
@@ -182,7 +203,7 @@ class EnterpriseCustomerCondition(ConditionWithoutRangeMixin, SingleItemConsumpt
                 'User: %s, Offer: %s, Enterprise: %s, Catalog: %s, Courses: %s, BookingsLimit: %s, TotalDiscount: %s',
                 username,
                 offer.id,
-                enterprise_customer,
+                enterprise_in_condition,
                 enterprise_catalog,
                 courses_in_basket,
                 offer.max_discount,

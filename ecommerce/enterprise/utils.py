@@ -266,7 +266,7 @@ def get_enterprise_customer_consent_failed_context_data(request, voucher):
     }
 
 
-def get_or_create_enterprise_customer_user(site, enterprise_customer_uuid, username):
+def get_or_create_enterprise_customer_user(site, enterprise_customer_uuid, username, active=True):
     """
     Create a new EnterpriseCustomerUser on the enterprise service if one doesn't already exist.
     Return the EnterpriseCustomerUser data.
@@ -274,6 +274,7 @@ def get_or_create_enterprise_customer_user(site, enterprise_customer_uuid, usern
     data = {
         'enterprise_customer': str(enterprise_customer_uuid),
         'username': username,
+        'active': active,
     }
     api_resource_name = 'enterprise-learner'
     api = site.siteconfiguration.enterprise_api_client
