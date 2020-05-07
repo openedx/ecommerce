@@ -359,7 +359,7 @@ define([
                             'select[name=country]'
                         ];
 
-                        // DO NOT USE: This sdnCheck code will be deprecated in an upcoming release
+                        // DO NOT USE: This sdnCheck code will be deprecated in an upcoming release.
                         spyOn(BasketPage, 'sdnCheck');
                         _.each(requiredFields, function(field) {
                             $(field).val('');
