@@ -1,4 +1,4 @@
-"""API endpoint for performing an SDN check on users."""
+"""ATTN: this code will be deprecated in an upcoming release (moved to Cybersource.py). API endpoint for performing an SDN check on users."""
 from __future__ import absolute_import
 
 import logging
