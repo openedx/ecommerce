@@ -359,7 +359,7 @@ define([
                             'select[name=country]'
                         ];
 
-                        // DO NOT USE: This sdnCheck code will be deprecated in an upcoming release.
+                        // DO NOT USE: This sdnCheck code will be deprecated in an upcoming release (see DEPR-90)
                         spyOn(BasketPage, 'sdnCheck');
                         _.each(requiredFields, function(field) {
                             $(field).val('');
@@ -384,7 +384,7 @@ define([
                         ).toEqual('This field is required');
                     });
 
-                    // DO NOT USE: This sdnCheck code will be deprecated in an upcoming release
+                    // DO NOT USE: This sdnCheck code will be deprecated in an upcoming release (see DEPR-90)
                     it('should perform the SDN check', function() {
                         var firstName = 'Darth',
                             lastName = 'Vader',

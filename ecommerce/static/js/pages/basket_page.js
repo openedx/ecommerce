@@ -205,7 +205,7 @@ define([
                 }
             },
 
-            // DO NOT USE: This sdnCheck code will be deprecated in an upcoming release
+            // DO NOT USE: This sdnCheck code will be deprecated in an upcoming release (see DEPR-90)
             sdnCheck: function(event) {
                 var firstName = $('input[name=first_name]').val(),
                     lastName = $('input[name=last_name]').val(),
