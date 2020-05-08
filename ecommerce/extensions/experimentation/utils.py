@@ -7,6 +7,7 @@ import logging
 import re
 
 from ecommerce.enterprise.utils import get_enterprise_id_for_user
+from ecommerce.extensions.analytics.utils import track_segment_event
 
 logger = logging.getLogger(__name__)
 
@@ -61,13 +62,23 @@ def add_REV1074_information_to_url_if_eligible(redirect_url, request, sku):
     route = bucket
     username = request.user.username
     basket = request.basket
+    properties = {
+        'experiment': 'static_checkout_page',
+        'cart_id': basket.id
+    }
     if not is_eligible_for_experiment:
         route = 0
         logger.info('REV1074: Should be omitted from experiment results: user [%s] with basket [%s].', username, basket)
+        properties['bucket'] = 'not_in_experiment'
     elif is_eligible_for_experiment and bucket:
         logger.info('REV1074: Bucketed into treatment variation: user [%s] with basket [%s].', username, basket)
+        properties['bucket'] = 'treatment'
     else:
         logger.info('REV1074: Bucketed into control variation: user [%s] with basket [%s].', username, basket)
+        properties['bucket'] = 'control'
+
+    track_segment_event(request.site, request.user, 'edx.bi.experiment.user.bucketed', properties)
+
     if route:
         redirect_url += sku + '.html'
     return redirect_url
