@@ -566,7 +566,9 @@ define([
                 var maxUsesFieldSelector = '[name=max_uses]',
                     maxUsesModelValue = this.model.get('max_uses'),
                     multiUseMaxUsesValue = this.editing ? maxUsesModelValue : null,
+                    numUsesModelValue = this.model.get('num_uses'),
                     voucherType = this.model.get('voucher_type');
+
                 if (!this.editing) {
                     this.emptyCodeField();
                 }
@@ -589,12 +591,14 @@ define([
                     if (voucherType === 'Multi-use') {
                         this.model.set('max_uses', multiUseMaxUsesValue);
                         if (this.editing) {
-                            this.setLimitToElement(this.$(maxUsesFieldSelector), '', multiUseMaxUsesValue);
+                            // Putting number of uses (num_uses) of model as min value of max usage (max_uses) field.
+                            this.setLimitToElement(this.$(maxUsesFieldSelector), '', numUsesModelValue);
                         } else {
                             this.setLimitToElement(this.$(maxUsesFieldSelector), '', 2);
                         }
                     } else if (this.editing) {
-                        this.setLimitToElement(this.$(maxUsesFieldSelector), '', maxUsesModelValue);
+                        // Putting number of uses (num_uses) of model as min value of max usage (max_uses) field.
+                        this.setLimitToElement(this.$(maxUsesFieldSelector), '', numUsesModelValue);
                     } else {
                         this.model.set('max_uses', 1);
                         this.setLimitToElement(this.$(maxUsesFieldSelector), '', 1);

@@ -32,7 +32,7 @@
                         <div class="col-md-5 col-sm-12">
                             <p class="product-title">{{ line_data.product_title }} {% if line_data.course_key %}- {{ line_data.course_key.org }}
                                 ({{ line_data.course_key.run }}) {% endif %}</p>
-                            <p class="product-description">{{ line_data.product_description }}</p>
+                            <p class="product-description">{{ line_data.product_description|default_if_none:'' }}</p>
                         </div>
                         {% if line_data.enrollment_code %}
                             <div class="col-md-1 col-xs-12">

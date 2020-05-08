@@ -754,7 +754,7 @@ class OfferAssignmentEmailTemplatesViewSet(PermissionRequiredMixin, ModelViewSet
     filter_backends = (django_filters.rest_framework.DjangoFilterBackend,)
     filter_fields = ('email_type', 'active')
 
-    http_method_names = ['get', 'head', 'options', 'post']
+    http_method_names = ['get', 'head', 'options', 'post', 'put', 'delete']
 
     def get_permission_object(self):
         return self.kwargs.get('enterprise_customer')
