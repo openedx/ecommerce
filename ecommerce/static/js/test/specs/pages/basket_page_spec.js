@@ -380,7 +380,6 @@ define([
                             ).find('~.help-block span').text()
                         ).toEqual('This field is required');
                     });
-
                 });
 
                 describe('cardInfoValidation', function() {
