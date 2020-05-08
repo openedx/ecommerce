@@ -1,4 +1,4 @@
-"""API endpoint for performing an SDN check on users."""
+"""DO NOT USE THIS CODE: WILL DEPRECATED IN UPCOMING RELEASE (DEPR-90). API endpoint for performing user SDN check."""
 from __future__ import absolute_import
 
 import logging
