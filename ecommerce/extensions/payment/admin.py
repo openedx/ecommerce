@@ -36,8 +36,6 @@ class PaymentProcessorResponseAdmin(admin.ModelAdmin):
         # Use format_html() to escape user-provided inputs, avoiding an XSS vulnerability.
         return format_html('<br><br><pre>{}</pre>', pretty_response)
 
-    formatted_response.allow_tags = True
-
 
 @admin.register(SDNCheckFailure)
 class SDNCheckFailureAdmin(admin.ModelAdmin):
