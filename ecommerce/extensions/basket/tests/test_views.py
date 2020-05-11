@@ -152,7 +152,7 @@ class BasketAddItemsViewTests(CouponMixin, DiscoveryTestMixin, DiscoveryMockMixi
         """
         microfrontend_url = self.configure_redirect_to_microfrontend(True, True)
         response = self._get_response(self.stock_record.partner_sku, code='invalidcode')
-        expected_url = microfrontend_url + '?message=Code%20invalidcode%20is%20invalid.'
+        expected_url = microfrontend_url + '?error_message=Code%20invalidcode%20is%20invalid.'
         self.assertRedirects(response, expected_url, status_code=303, fetch_redirect_response=False)
 
     def test_microfrontend_for_enrollment_code_seat(self):

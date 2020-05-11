@@ -80,7 +80,7 @@ def add_utm_params_to_url(url, params):
 @newrelic.agent.function_trace()
 def add_invalid_code_message_to_url(url, code):
     if code:
-        message = 'message=Code {code} is invalid.'.format(code=str(code))
+        message = 'error_message=Code {code} is invalid.'.format(code=str(code))
         url += '&' + message if '?' in url else '?' + message
     return url
 
