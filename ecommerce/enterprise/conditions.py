@@ -1,6 +1,7 @@
 from __future__ import absolute_import, unicode_literals
 
 import logging
+from decimal import Decimal
 from uuid import UUID
 
 import crum
@@ -43,9 +44,10 @@ def is_offer_max_discount_available(basket, offer):
 
     # calculate discount value that will be covered by the offer
     benefit_type = get_benefit_type(offer.benefit)
-    benefit_value = float(offer.benefit.value)
+    benefit_value = offer.benefit.value
     if benefit_type == Benefit.PERCENTAGE:
-        discount_value = get_discount_value(benefit_value, float(course_price))
+        discount_value = get_discount_value(float(offer.benefit.value), float(course_price))
+        discount_value = Decimal(discount_value)
     else:  # Benefit.FIXED
         # There is a possibility that the discount value could be greater than the course price
         # ie, discount value is $100, course price is $75, in this case the full price of the course will be covered

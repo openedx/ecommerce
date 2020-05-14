@@ -313,32 +313,32 @@ class EnterpriseCustomerConditionTests(EnterpriseServiceMockMixin, DiscoveryTest
     @ddt.data(
         {
             'discount_type': Benefit.PERCENTAGE,
-            'total_discount': 4900,
+            'total_discount': Decimal(4900),
             'is_satisfied': True
         },
         {
             'discount_type': Benefit.PERCENTAGE,
-            'total_discount': 4950,
+            'total_discount': Decimal(4950),
             'is_satisfied': True
         },
         {
             'discount_type': Benefit.PERCENTAGE,
-            'total_discount': 4980,
+            'total_discount': Decimal(4980),
             'is_satisfied': False
         },
         {
             'discount_type': Benefit.FIXED,
-            'total_discount': 4900,
+            'total_discount': Decimal(4900),
             'is_satisfied': True
         },
         {
             'discount_type': Benefit.FIXED,
-            'total_discount': 4930,
+            'total_discount': Decimal(4930),
             'is_satisfied': True
         },
         {
             'discount_type': Benefit.FIXED,
-            'total_discount': 4980,
+            'total_discount': Decimal(4980),
             'is_satisfied': False
         },
     )
@@ -357,7 +357,7 @@ class EnterpriseCustomerConditionTests(EnterpriseServiceMockMixin, DiscoveryTest
         offer = factories.EnterpriseOfferFactory(
             partner=self.partner,
             benefit=benefits[discount_type],
-            max_discount=5000,
+            max_discount=Decimal(5000),
             total_discount=total_discount
         )
         basket = BasketFactory(site=self.site, owner=self.user)
@@ -379,8 +379,8 @@ class EnterpriseCustomerConditionTests(EnterpriseServiceMockMixin, DiscoveryTest
         offer = factories.EnterpriseOfferFactory(
             partner=self.partner,
             benefit=factories.EnterpriseAbsoluteDiscountBenefitFactory(value=150),
-            max_discount=300,
-            total_discount=200
+            max_discount=Decimal(300),
+            total_discount=Decimal(200)
         )
         basket = BasketFactory(site=self.site, owner=self.user)
         basket.add_product(self.course_run.seat_products[0])
