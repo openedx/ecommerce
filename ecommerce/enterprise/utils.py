@@ -569,7 +569,7 @@ def get_enterprise_id_for_current_request_user_from_jwt():
 
 
 def get_enterprise_id_for_user(site, user):
-    from ecommerce.enterprise.api import fetch_enterprise_learner_data
+    from ecommerce.enterprise.api import fetch_enterprise_learner_data  # pylint: disable=import-outside-toplevel
 
     enterprise_from_jwt = get_enterprise_id_for_current_request_user_from_jwt()
     if enterprise_from_jwt:
@@ -645,5 +645,5 @@ def can_use_enterprise_catalog(request, enterprise_uuid):
         boolean: True if sample is active and enterprise is not excluded
                  False if sample not active or enterprise is excluded
     """
-    return (waffle.sample_is_active(request, USE_ENTERPRISE_CATALOG) and
+    return (waffle.flag_is_active(request, USE_ENTERPRISE_CATALOG) and
             enterprise_uuid not in getattr(settings, 'ENTERPRISE_CUSTOMERS_EXCLUDED_FROM_CATALOG', []))
