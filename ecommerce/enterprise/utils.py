@@ -27,7 +27,6 @@ from slumber.exceptions import SlumberHttpBaseException
 
 from ecommerce.core.constants import SYSTEM_ENTERPRISE_LEARNER_ROLE
 from ecommerce.core.url_utils import absolute_url, get_lms_dashboard_url
-from ecommerce.enterprise.api import fetch_enterprise_learner_data
 from ecommerce.enterprise.constants import USE_ENTERPRISE_CATALOG
 from ecommerce.enterprise.exceptions import EnterpriseDoesNotExist
 from ecommerce.extensions.offer.models import OFFER_PRIORITY_ENTERPRISE
@@ -570,6 +569,8 @@ def get_enterprise_id_for_current_request_user_from_jwt():
 
 
 def get_enterprise_id_for_user(site, user):
+    from ecommerce.enterprise.api import fetch_enterprise_learner_data
+    
     enterprise_from_jwt = get_enterprise_id_for_current_request_user_from_jwt()
     if enterprise_from_jwt:
         return enterprise_from_jwt
