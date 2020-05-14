@@ -570,7 +570,7 @@ def get_enterprise_id_for_current_request_user_from_jwt():
 
 def get_enterprise_id_for_user(site, user):
     from ecommerce.enterprise.api import fetch_enterprise_learner_data
-    
+
     enterprise_from_jwt = get_enterprise_id_for_current_request_user_from_jwt()
     if enterprise_from_jwt:
         return enterprise_from_jwt
