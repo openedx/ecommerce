@@ -8,7 +8,7 @@ import ddt
 import httpretty
 import mock
 from oscar.core.loading import get_model
-from oscar.test.factories import BasketFactory
+from oscar.test.factories import BasketFactory, OrderDiscountFactory, OrderFactory
 from six.moves import range, zip
 
 from ecommerce.coupons.tests.mixins import CouponMixin
@@ -18,6 +18,7 @@ from ecommerce.enterprise.tests.mixins import EnterpriseServiceMockMixin
 from ecommerce.extensions.api.serializers import CouponCodeAssignmentSerializer
 from ecommerce.extensions.basket.utils import basket_add_enterprise_catalog_attribute
 from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
+from ecommerce.extensions.fulfillment.status import ORDER
 from ecommerce.extensions.offer.constants import (
     OFFER_ASSIGNMENT_EMAIL_PENDING,
     OFFER_ASSIGNMENT_REVOKED,
@@ -369,6 +370,91 @@ class EnterpriseCustomerConditionTests(EnterpriseServiceMockMixin, DiscoveryTest
             enterprise_customer_catalog_uuid=self.condition.enterprise_customer_catalog_uuid,
         )
         self.assertEqual(self.condition.is_satisfied(offer, basket), is_satisfied)
+
+    @ddt.data(
+        {
+            'discount_type': Benefit.PERCENTAGE,
+            'num_prev_orders': 6,
+            'is_satisfied': False
+        },
+        {
+            'discount_type': Benefit.PERCENTAGE,
+            'num_prev_orders': 5,
+            'is_satisfied': True
+        },
+        {
+            'discount_type': Benefit.PERCENTAGE,
+            'num_prev_orders': 0,
+            'is_satisfied': True
+        },
+        {
+            'discount_type': Benefit.FIXED,
+            'num_prev_orders': 6,
+            'is_satisfied': False
+        },
+        {
+            'discount_type': Benefit.FIXED,
+            'num_prev_orders': 5,
+            'is_satisfied': True
+        },
+        {
+            'discount_type': Benefit.FIXED,
+            'num_prev_orders': 0,
+            'is_satisfied': True
+        },
+    )
+    @ddt.unpack
+    @httpretty.activate
+    def test_offer_availability_with_max_user_discount(self, discount_type, num_prev_orders, is_satisfied):
+        """
+        Verify that enterprise offer with discount type percentage and absolute, condition returns correct result
+        based on user limits in the offer.
+        """
+        benefits = {
+            Benefit.PERCENTAGE: factories.EnterprisePercentageDiscountBenefitFactory(value=50),
+            Benefit.FIXED: factories.EnterpriseAbsoluteDiscountBenefitFactory(value=50),
+        }
+        offer = factories.EnterpriseOfferFactory(
+            partner=self.partner,
+            benefit=benefits[discount_type],
+            max_user_discount=100
+        )
+        for _ in range(num_prev_orders):
+            order = OrderFactory(user=self.user, status=ORDER.COMPLETE)
+            OrderDiscountFactory(order=order, offer_id=offer.id, amount=10)
+        basket = BasketFactory(site=self.site, owner=self.user)
+        basket.add_product(self.course_run.seat_products[0])
+        self.mock_catalog_contains_course_runs(
+            [self.course_run.id],
+            self.condition.enterprise_customer_uuid,
+            self.site.siteconfiguration.enterprise_api_url,
+            enterprise_customer_catalog_uuid=self.condition.enterprise_customer_catalog_uuid,
+        )
+        self.assertEqual(self.condition.is_satisfied(offer, basket), is_satisfied)
+
+    @httpretty.activate
+    def test_absolute_benefit_offer_availability_with_max_user_discount(self):
+        """
+        Verify that enterprise offer condition returns correct result for an absolute benefit with
+        discount value greater than course price.
+        """
+        offer = factories.EnterpriseOfferFactory(
+            partner=self.partner,
+            benefit=factories.EnterpriseAbsoluteDiscountBenefitFactory(value=150),
+            max_user_discount=150
+        )
+        for _ in range(5):
+            order = OrderFactory(user=self.user, status=ORDER.COMPLETE)
+            OrderDiscountFactory(order=order, offer_id=offer.id, amount=10)
+        basket = BasketFactory(site=self.site, owner=self.user)
+        basket.add_product(self.course_run.seat_products[0])
+        self.mock_catalog_contains_course_runs(
+            [self.course_run.id],
+            self.condition.enterprise_customer_uuid,
+            self.site.siteconfiguration.enterprise_api_url,
+            enterprise_customer_catalog_uuid=self.condition.enterprise_customer_catalog_uuid,
+        )
+        self.assertTrue(self.condition.is_satisfied(offer, basket))
 
     @httpretty.activate
     def test_absolute_benefit_offer_availability(self):

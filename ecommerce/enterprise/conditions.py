@@ -6,6 +6,7 @@ from uuid import UUID
 
 import crum
 from django.contrib import messages
+from django.db.models import Sum
 from django.utils.translation import ugettext as _
 from oscar.core.loading import get_model
 from requests.exceptions import ConnectionError as ReqConnectionError
@@ -15,6 +16,7 @@ from slumber.exceptions import SlumberHttpBaseException
 from ecommerce.enterprise.api import catalog_contains_course_runs, get_enterprise_id_for_user
 from ecommerce.enterprise.utils import get_or_create_enterprise_customer_user
 from ecommerce.extensions.basket.utils import ENTERPRISE_CATALOG_ATTRIBUTE_TYPE
+from ecommerce.extensions.fulfillment.status import ORDER
 from ecommerce.extensions.offer.constants import OFFER_ASSIGNMENT_REVOKED, OFFER_REDEEMED
 from ecommerce.extensions.offer.mixins import ConditionWithoutRangeMixin, SingleItemConsumptionConditionMixin
 from ecommerce.extensions.offer.models import OFFER_PRIORITY_ENTERPRISE
@@ -26,17 +28,46 @@ Benefit = get_model('offer', 'Benefit')
 Condition = get_model('offer', 'Condition')
 ConditionalOffer = get_model('offer', 'ConditionalOffer')
 OfferAssignment = get_model('offer', 'OfferAssignment')
+Order = get_model('order', 'Order')
+OrderDiscount = get_model('order', 'OrderDiscount')
 StockRecord = get_model('partner', 'StockRecord')
 Voucher = get_model('voucher', 'Voucher')
 logger = logging.getLogger(__name__)
 
 
+def is_offer_max_user_discount_available(basket, offer):
+    """Calculate if the user has the per user discount amount available"""
+    # no need to do anything if this is not an enterprise offer or `user_max_discount` is not set
+    if offer.priority != OFFER_PRIORITY_ENTERPRISE or offer.max_user_discount is None:
+        return True
+    discount_value = _get_course_discount_value(basket, offer)
+    # check if offer has discount available for user
+    sum_user_discounts_for_this_offer = OrderDiscount.objects.filter(
+        offer_id=offer.id, order__user_id=basket.owner.id, order__status=ORDER.COMPLETE
+    ).aggregate(Sum('amount'))['amount__sum'] or Decimal(0.00)
+    new_total_discount = discount_value + sum_user_discounts_for_this_offer
+    if new_total_discount <= offer.max_user_discount:
+        return True
+
+    return False
+
+
 def is_offer_max_discount_available(basket, offer):
+    """Calculate if the offer has available discount"""
     # no need to do anything if this is not an enterprise offer or `max_discount` is not set
     if offer.priority != OFFER_PRIORITY_ENTERPRISE or offer.max_discount is None:
         return True
+    discount_value = _get_course_discount_value(basket, offer)
+    # check if offer has discount available
+    new_total_discount = discount_value + offer.total_discount
+    if new_total_discount <= offer.max_discount:
+        return True
 
-    # get course price
+    return False
+
+
+def _get_course_discount_value(basket, offer):
+    """Calculate the discount value based on benefit type and value"""
     product = basket.lines.first().product
     seat = product.course.seat_products.get(id=product.id)
     stock_record = StockRecord.objects.get(product=seat, partner=product.course.partner)
@@ -56,13 +87,7 @@ def is_offer_max_discount_available(basket, offer):
             discount_value = course_price
         else:
             discount_value = benefit_value
-
-    # check if offer has discount available
-    new_total_discount = discount_value + offer.total_discount
-    if new_total_discount <= offer.max_discount:
-        return True
-
-    return False
+    return discount_value
 
 
 class EnterpriseCustomerCondition(ConditionWithoutRangeMixin, SingleItemConsumptionConditionMixin, Condition):
@@ -210,6 +235,19 @@ class EnterpriseCustomerCondition(ConditionWithoutRangeMixin, SingleItemConsumpt
                 courses_in_basket,
                 offer.max_discount,
                 offer.total_discount,
+            )
+            return False
+
+        if not is_offer_max_user_discount_available(basket, offer):
+            logger.warning(
+                '[Enterprise Offer Failure] Unable to apply enterprise offer because user bookings limit is consumed.'
+                'User: %s, Offer: %s, Enterprise: %s, Catalog: %s, Courses: %s, UserBookingsLimit: %s',
+                username,
+                offer.id,
+                enterprise_in_condition,
+                enterprise_catalog,
+                courses_in_basket,
+                offer.max_user_discount
             )
             return False
 
