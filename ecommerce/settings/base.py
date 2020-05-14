@@ -658,6 +658,9 @@ ENTERPRISE_CUSTOMER_COOKIE_NAME = 'enterprise_customer_uuid'
 
 ENTERPRISE_DATA_API_GROUP = 'enterprise_data_api_access'
 
+# List of enterprise customer uuids to exclude from transition to use of enterprise-catalog
+ENTERPRISE_CUSTOMERS_EXCLUDED_FROM_CATALOG = []
+
 SYSTEM_TO_FEATURE_ROLE_MAPPING = {
     SYSTEM_ENTERPRISE_ADMIN_ROLE: [ENTERPRISE_COUPON_ADMIN_ROLE],
     SYSTEM_ENTERPRISE_OPERATOR_ROLE: [ENTERPRISE_COUPON_ADMIN_ROLE],

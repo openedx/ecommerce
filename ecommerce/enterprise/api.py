@@ -5,13 +5,12 @@ from __future__ import absolute_import
 
 import logging
 
-import waffle
 from django.conf import settings
 from edx_django_utils.cache import TieredCache
 from six.moves.urllib.parse import urlencode
 
 from ecommerce.core.utils import get_cache_key
-from ecommerce.enterprise.constants import USE_ENTERPRISE_CATALOG
+from ecommerce.enterprise.utils import can_use_enterprise_catalog
 
 logger = logging.getLogger(__name__)
 
@@ -125,7 +124,7 @@ def catalog_contains_course_runs(site, course_run_ids, enterprise_customer_uuid,
 
     api = site.siteconfiguration.enterprise_api_client
     # Temporarily gate enterprise catalog api usage behind waffle flag
-    if request and waffle.flag_is_active(request, USE_ENTERPRISE_CATALOG):
+    if request and can_use_enterprise_catalog(request, enterprise_customer_uuid):
         api = site.siteconfiguration.enterprise_catalog_api_client
         if enterprise_customer_catalog_uuid:
             api_resource_name = 'enterprise-catalogs'

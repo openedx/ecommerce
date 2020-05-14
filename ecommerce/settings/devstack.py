@@ -51,6 +51,9 @@ CORS_ALLOW_HEADERS = corsheaders_default_headers + (
 )
 CORS_ALLOW_CREDENTIALS = True
 
+# List of enterprise customer uuids to exclude from transition to use of enterprise-catalog
+ENTERPRISE_CUSTOMERS_EXCLUDED_FROM_CATALOG = ()
+
 # PAYMENT PROCESSING
 PAYMENT_PROCESSOR_CONFIG = {
     'edx': {
