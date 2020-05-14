@@ -5,6 +5,7 @@ from __future__ import absolute_import
 import decimal
 
 from django import forms
+from django.db.models import Count, Max, Sum
 from django.forms.utils import ErrorList
 from django.utils.translation import ugettext_lazy as _
 from oscar.core.loading import get_model
@@ -12,12 +13,15 @@ from oscar.core.loading import get_model
 from ecommerce.enterprise.benefits import BENEFIT_MAP, BENEFIT_TYPE_CHOICES
 from ecommerce.enterprise.conditions import EnterpriseCustomerCondition
 from ecommerce.enterprise.utils import get_enterprise_customer
+from ecommerce.extensions.fulfillment.status import ORDER
 from ecommerce.extensions.offer.models import OFFER_PRIORITY_ENTERPRISE
 from ecommerce.extensions.payment.models import EnterpriseContractMetadata
 from ecommerce.programs.custom import class_path, create_condition
 
 Benefit = get_model('offer', 'Benefit')
 ConditionalOffer = get_model('offer', 'ConditionalOffer')
+Order = get_model('order', 'Order')
+OrderDiscount = get_model('order', 'OrderDiscount')
 Range = get_model('offer', 'Range')
 
 
@@ -45,18 +49,22 @@ class EnterpriseOfferForm(forms.ModelForm):
             'enterprise_customer_uuid', 'enterprise_customer_catalog_uuid', 'start_datetime',
             'end_datetime', 'benefit_type', 'benefit_value', 'contract_discount_type',
             'contract_discount_value', 'prepaid_invoice_amount', 'sales_force_id',
-            'max_global_applications', 'max_discount'
+            'max_global_applications', 'max_discount', 'max_user_applications', 'max_user_discount'
         ]
         help_texts = {
             'end_datetime': '',
             'max_global_applications': _('The maximum number of enrollments that can redeem this offer.'),
             'max_discount': _('The maximum USD dollar amount that can be redeemed by this offer.'),
+            'max_user_applications': _('The maximum number of enrollments, by a user, that can redeem this offer.'),
+            'max_user_discount': _('The maximum USD dollar amount that can be redeemed using this offer by a user.'),
         }
         labels = {
             'start_datetime': _('Start Date'),
             'end_datetime': _('End Date'),
             'max_global_applications': _('Enrollment Limit'),
             'max_discount': _('Bookings Limit'),
+            'max_user_applications': _('Per User Enrollment Limit'),
+            'max_user_discount': _('Per User Bookings Limit'),
         }
 
     def _prep_contract_metadata(self, enterprise_contract_metadata):
@@ -108,6 +116,7 @@ class EnterpriseOfferForm(forms.ModelForm):
         self.fields['end_datetime'].widget.attrs.update(date_ui_class)
         # set the min attribute on input widget to enforce minimum value validation at frontend
         self.fields['max_discount'].widget.attrs.update({'min': 0})
+        self.fields['max_user_discount'].widget.attrs.update({'min': 0})
 
     def clean_max_global_applications(self):
         # validate against when decreasing the existing value
@@ -143,6 +152,50 @@ class EnterpriseOfferForm(forms.ModelForm):
                 )
 
         return max_discount
+
+    def clean_max_user_applications(self):
+        # validate against when decreasing the existing value
+        if self.instance.pk and self.instance.max_user_applications:
+            new_max_user_applications = self.cleaned_data.get('max_user_applications') or 0
+            max_order_count_any_user = OrderDiscount.objects.filter(
+                offer_id=self.instance.id).select_related('order').filter(
+                    order__status=ORDER.COMPLETE).values('order__user_id').order_by(
+                        'order__user_id').annotate(count=Count('order__id')).aggregate(Max('count'))['count__max'] or 0
+            if new_max_user_applications < max_order_count_any_user:
+                self.add_error(
+                    'max_user_applications',
+                    _(
+                        'Ensure new value must be greater than or equal to consumed({offer_enrollments}) value.'
+                    ).format(
+                        offer_enrollments=max_order_count_any_user
+                    )
+                )
+
+        return self.cleaned_data.get('max_user_applications')
+
+    def clean_max_user_discount(self):
+        max_user_discount = self.cleaned_data.get('max_user_discount')
+        # validate against non-decimal and negative values
+        if max_user_discount is not None and (isinstance(max_user_discount, decimal.Decimal) and max_user_discount < 0):
+            self.add_error('max_user_discount', _('Ensure this value is greater than or equal to 0.'))
+        elif self.instance.pk and self.instance.max_user_discount:  # validate against when decrease the existing value
+            new_max_user_discount = max_user_discount or 0
+            max_discount_used_any_user = OrderDiscount.objects.filter(
+                offer_id=self.instance.id).select_related('order').filter(
+                    order__status=ORDER.COMPLETE).values('order__user_id').order_by(
+                        'order__user_id').annotate(user_discount_sum=Sum('amount')).aggregate(
+                            Max('user_discount_sum'))['user_discount_sum__max'] or 0
+            if new_max_user_discount < max_discount_used_any_user:
+                self.add_error(
+                    'max_user_discount',
+                    _(
+                        'Ensure new value must be greater than or equal to consumed({consumed_discount}) value.'
+                    ).format(
+                        consumed_discount=max_discount_used_any_user
+                    )
+                )
+
+        return max_user_discount
 
     def clean(self):
         cleaned_data = super(EnterpriseOfferForm, self).clean()
@@ -226,6 +279,8 @@ class EnterpriseOfferForm(forms.ModelForm):
 
         self.instance.max_global_applications = self.cleaned_data.get('max_global_applications')
         self.instance.max_discount = self.cleaned_data.get('max_discount')
+        self.instance.max_user_applications = self.cleaned_data.get('max_user_applications')
+        self.instance.max_user_discount = self.cleaned_data.get('max_user_discount')
 
         if commit:
             ecm = self.instance.enterprise_contract_metadata
