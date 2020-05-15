@@ -100,10 +100,11 @@ class CouponCodeSerializerTests(CouponMixin, TestCase):
                 self.LOGGER_NAME,
                 'ERROR',
                 '[Offer Assignment] Email for offer_assignment_id: {} with greeting \'{}\' and closing \'{}\' raised '
-                'exception: Exception(\'Ignore me - assignment\',)'.format(
+                'exception: {}'.format(
                     self.offer_assignment.id,
                     self.GREETING,
                     self.CLOSING,
+                    repr(Exception('Ignore me - assignment'))
                 )
             ),
         ]
@@ -127,10 +128,11 @@ class CouponCodeSerializerTests(CouponMixin, TestCase):
                 self.LOGGER_NAME,
                 'ERROR',
                 '[Offer Reminder] Email for offer_assignment_id: {} with greeting \'{}\' and closing \'{}\' raised '
-                'exception: Exception(\'Ignore me - reminder\',)'.format(
+                'exception: {}'.format(
                     self.offer_assignment.id,
                     self.GREETING,
                     self.CLOSING,
+                    repr(Exception('Ignore me - reminder'))
                 )
             ),
         ]
