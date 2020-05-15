@@ -51,7 +51,10 @@ logger = logging.getLogger(__name__)
 
 Applicator = get_class('offer.applicator', 'Applicator')
 Basket = get_model('basket', 'Basket')
+BasketAttribute = get_model('basket', 'BasketAttribute')
+BasketAttributeType = get_model('basket', 'BasketAttributeType')
 BillingAddress = get_model('order', 'BillingAddress')
+BUNDLE = 'bundle_identifier'
 Country = get_model('address', 'Country')
 NoShippingRequired = get_class('shipping.methods', 'NoShippingRequired')
 Order = get_model('order', 'Order')
@@ -458,20 +461,7 @@ class CybersourceInterstitialView(CyberSourceProcessorMixin, EdxOrderPlacementMi
             # processing and tend to be easy to correct (e.g., an incorrect CVV may have
             # been provided). The recovery path is not as clear for other exceptions,
             # so we let those drop through to the payment error page.
-            order_number = request.POST.get('req_reference_number')
-            old_basket_id = OrderNumberGenerator().basket_id(order_number)
-            old_basket = Basket.objects.get(id=old_basket_id)
-
-            new_basket = Basket.objects.create(owner=old_basket.owner, site=request.site)
-
-            # We intentionally avoid thawing the old basket here to prevent order
-            # numbers from being reused. For more, refer to commit a1efc68.
-            new_basket.merge(old_basket, add_quantities=False)
-            logger.info(
-                'Created new basket [%d] from old basket [%d] for declined transaction.',
-                new_basket.id,
-                old_basket_id,
-            )
+            self._merge_old_basket_into_new(request)
 
             messages.error(self.request, _('transaction declined'), extra_tags='transaction-declined-message')
 
@@ -501,6 +491,40 @@ class CybersourceInterstitialView(CyberSourceProcessorMixin, EdxOrderPlacementMi
                 basket_id
             )
             return absolute_redirect(request, 'payment_error')
+
+    def _merge_old_basket_into_new(self, request):
+        """
+        Upon declined transaction merge old basket into new one and also copy bundle attibute
+        over to new basket if any.
+        """
+        order_number = request.POST.get('req_reference_number')
+        old_basket_id = OrderNumberGenerator().basket_id(order_number)
+        old_basket = Basket.objects.get(id=old_basket_id)
+
+        bundle_attributes = BasketAttribute.objects.filter(
+            basket=old_basket,
+            attribute_type=BasketAttributeType.objects.get(name=BUNDLE)
+        )
+        bundle = bundle_attributes.first().value_text if bundle_attributes.count() > 0 else None
+
+        new_basket = Basket.objects.create(owner=old_basket.owner, site=request.site)
+
+        # We intentionally avoid thawing the old basket here to prevent order
+        # numbers from being reused. For more, refer to commit a1efc68.
+        new_basket.merge(old_basket, add_quantities=False)
+        if bundle:
+            BasketAttribute.objects.update_or_create(
+                basket=new_basket,
+                attribute_type=BasketAttributeType.objects.get(name=BUNDLE),
+                defaults={'value_text': bundle}
+            )
+
+        logger.info(
+            'Created new basket [%d] from old basket [%d] for declined transaction with bundle [%s].',
+            new_basket.id,
+            old_basket_id,
+            bundle
+        )
 
     def redirect_to_receipt_page(self, notification):
         receipt_page_url = get_receipt_page_url(
