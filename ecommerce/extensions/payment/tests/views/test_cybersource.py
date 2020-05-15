@@ -39,6 +39,8 @@ from ecommerce.tests.testcases import TestCase
 JSON = 'application/json'
 
 Basket = get_model('basket', 'Basket')
+BasketAttribute = get_model('basket', 'BasketAttribute')
+BasketAttributeType = get_model('basket', 'BasketAttributeType')
 Order = get_model('order', 'Order')
 OrderNumberGenerator = get_class('order.utils', 'OrderNumberGenerator')
 PaymentEvent = get_model('order', 'PaymentEvent')
@@ -239,7 +241,12 @@ class CybersourceInterstitialViewTests(CybersourceNotificationTestsMixin, TestCa
     path = reverse('cybersource:redirect')
     view = CybersourceInterstitialView
 
-    def test_payment_declined(self):
+    @ddt.data(
+        ('12345678-1234-1234-1234-123456789abc', 1),
+        (None, 0)
+    )
+    @ddt.unpack
+    def test_payment_declined(self, bundle, bundle_attr_count):
         """
         Verify that the user is redirected to the basket summary page when their
         payment is declined.
@@ -247,6 +254,12 @@ class CybersourceInterstitialViewTests(CybersourceNotificationTestsMixin, TestCa
         # Basket merging clears lines on the old basket. We need to take a snapshot
         # of lines currently on this basket before it gets merged with a new basket.
         old_lines = list(self.basket.lines.all())
+        if bundle:
+            BasketAttribute.objects.update_or_create(
+                basket=self.basket,
+                attribute_type=BasketAttributeType.objects.get(name='bundle_identifier'),
+                value_text=bundle
+            )
 
         notification = self.generate_notification(
             self.basket,
@@ -267,17 +280,24 @@ class CybersourceInterstitialViewTests(CybersourceNotificationTestsMixin, TestCa
 
                 new_basket = Basket.objects.get(status='Open')
                 merged_basket_count = Basket.objects.filter(status='Merged').count()
+                new_basket_bundle_count = BasketAttribute.objects.filter(
+                    basket=new_basket,
+                    attribute_type=BasketAttributeType.objects.get(name='bundle_identifier')
+                ).count()
 
                 self.assertEqual(list(new_basket.lines.all()), old_lines)
                 self.assertEqual(merged_basket_count, 1)
+                self.assertEqual(new_basket_bundle_count, bundle_attr_count)
 
+                log_msg = 'Created new basket [{}] from old basket [{}] for declined transaction with bundle [{}].'
                 cybersource_logger.check_present(
                     (
                         logger_name,
                         'INFO',
-                        'Created new basket [{}] from old basket [{}] for declined transaction.'.format(
+                        log_msg.format(
                             new_basket.id,
                             self.basket.id,
+                            bundle
                         )
                     ),
                 )
