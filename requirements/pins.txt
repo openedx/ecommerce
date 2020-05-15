@@ -40,3 +40,6 @@ pylint==2.4.4
 # See https://openedx.atlassian.net/browse/ARCHBOM-1141 for details.
 # need an update in configuration before this can be removed.
 pip-tools<5.0.0
+
+# stay on 3.2.0, details here https://openedx.atlassian.net/browse/BOM-1629
+social-auth-core==3.2.0

@@ -52,8 +52,7 @@ stripe==1.70.0
 unicodecsv
 xss-utils
 zeep
+django-appconf
 
 # Install from github
-git+https://github.com/django-compressor/django-appconf.git@5169ce2c92d9836e0b3ab3ec645727d9d5225d1a#egg=django-appconf
-
 git+https://github.com/python-social-auth/social-app-django.git@c00d23c2b45c3317bd35b15ad1b959338689cef8#egg=social-auth-app-django
