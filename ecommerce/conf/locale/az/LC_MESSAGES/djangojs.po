@@ -4,6 +4,7 @@
 # This file is distributed under the GNU AFFERO GENERAL PUBLIC LICENSE.
 # 
 # Translators:
+# Translators:
 # Laman Mammadli <laman@edumedia.az>, 2019
 msgid ""
 msgstr ""

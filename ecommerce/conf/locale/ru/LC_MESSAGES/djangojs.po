@@ -4,6 +4,7 @@
 # This file is distributed under the GNU AFFERO GENERAL PUBLIC LICENSE.
 # 
 # Translators:
+# Translators:
 # Iaroslav V <yivasilev@fa.ru>, 2018
 # Liubov Fomicheva <liubov.nelapa@gmail.com>, 2017-2018
 # Maksimenkova Olga <omaksimenkova@hse.ru>, 2015
