@@ -4,7 +4,8 @@
 # This file is distributed under the GNU AFFERO GENERAL PUBLIC LICENSE.
 # 
 # Translators:
-# Kristoffer Grundström <hamnisdude@gmail.com>, 2015
+# Translators:
+# Kristoffer Grundström <lovaren@gmail.com>, 2015
 # Thomas Ochman <thomas@nocebo.se>, 2018
 msgid ""
 msgstr ""

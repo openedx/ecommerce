@@ -4,6 +4,7 @@
 # This file is distributed under the GNU AFFERO GENERAL PUBLIC LICENSE.
 # 
 # Translators:
+# Translators:
 # かわぐちひろふみ <h.kawaguchi@nttks.co.jp>, 2016
 # Kyoto University <edxkyotoux@gmail.com>, 2017
 # Toshiboumi Ohta <ohta@securesky-tech.com>, 2015
