@@ -416,7 +416,6 @@ def _get_or_create_offer(
                 range=product_range,
                 type=benefit_type,
                 value=Decimal(benefit_value),
-                max_affected_items=1,
             )
 
     except (TypeError, DecimalException):  # If the benefit_value parameter is not sent TypeError will be raised
@@ -471,7 +470,6 @@ def get_or_create_enterprise_offer(
     benefit, _ = Benefit.objects.get_or_create(
         proxy_class=class_path(ENTERPRISE_BENEFIT_MAP[benefit_type]),
         value=benefit_value,
-        max_affected_items=1,
     )
 
     offer_kwargs = {
