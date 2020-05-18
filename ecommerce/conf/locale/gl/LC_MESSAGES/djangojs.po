@@ -4,6 +4,7 @@
 # This file is distributed under the GNU AFFERO GENERAL PUBLIC LICENSE.
 # 
 # Translators:
+# Translators:
 # Xabier Sánchez Santos <xsantos@novaconsultores.es>, 2018
 msgid ""
 msgstr ""

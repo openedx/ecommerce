@@ -4,6 +4,7 @@
 # This file is distributed under the GNU AFFERO GENERAL PUBLIC LICENSE.
 # 
 # Translators:
+# Translators:
 # Jirayu Chamamahattana <mman2x@gmail.com>, 2015
 # Noppachai Eiamwasant <noporo@hotmail.com>, 2015
 # Pornchai TummarATTAnanonT <yantaku@gmail.com>, 2015-2016

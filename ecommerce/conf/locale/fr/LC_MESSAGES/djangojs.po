@@ -4,6 +4,7 @@
 # This file is distributed under the GNU AFFERO GENERAL PUBLIC LICENSE.
 # 
 # Translators:
+# Translators:
 # eric maginot <eric_maginot@hotmail.fr>, 2017
 # Fanny Dos Reis, 2015
 # Fanny Dos Reis, 2015

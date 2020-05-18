@@ -4,6 +4,7 @@
 # This file is distributed under the GNU AFFERO GENERAL PUBLIC LICENSE.
 # 
 # Translators:
+# Translators:
 # Ahmed Jazzar <ahmed.mojaz@gmail.com>, 2015
 # 6e68c7971a89e50e680ae9444d303c8f, 2016
 # Bushra Hashem <purple.planet1996@gmail.com>, 2015

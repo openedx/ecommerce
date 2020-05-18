@@ -4,6 +4,7 @@
 # This file is distributed under the GNU AFFERO GENERAL PUBLIC LICENSE.
 # 
 # Translators:
+# Translators:
 # Heikki Viitanen <heikki@memocate.com>, 2018
 msgid ""
 msgstr ""
