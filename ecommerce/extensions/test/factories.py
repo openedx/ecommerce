@@ -264,6 +264,7 @@ class AssignableEnterpriseCustomerConditionFactory(ConditionFactory):
 
 class ManualEnrollmentOrderDiscountConditionFactory(ConditionFactory):
     proxy_class = class_path(ManualEnrollmentOrderDiscountCondition)
+    enterprise_customer_uuid = factory.LazyFunction(uuid.uuid4)
 
     class Meta:
         model = ManualEnrollmentOrderDiscountCondition
