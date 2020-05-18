@@ -4,6 +4,7 @@
 # This file is distributed under the GNU AFFERO GENERAL PUBLIC LICENSE.
 # 
 # Translators:
+# Translators:
 # Albeiro Gonzalez <albeiro.gonzalez@edunext.co>, 2018-2019
 # AngelesAlvarez, 2019
 # Diego Rojas <diego.rojas@edunext.co>, 2017

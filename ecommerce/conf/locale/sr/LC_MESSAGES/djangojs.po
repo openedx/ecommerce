@@ -4,6 +4,7 @@
 # This file is distributed under the GNU AFFERO GENERAL PUBLIC LICENSE.
 # 
 # Translators:
+# Translators:
 # Sladjan Kantar <skantar12@gmail.com>, 2016
 msgid ""
 msgstr ""

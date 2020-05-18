@@ -4,6 +4,7 @@
 # This file is distributed under the GNU AFFERO GENERAL PUBLIC LICENSE.
 # 
 # Translators:
+# Translators:
 # Aitor Renobales Irusta <aitor.renobales@ehu.eus>, 2018
 # Beatriz González Gutiérrez <beatrizgg@gmail.com>, 2016
 # Feli555 <fmeier1998@gmail.com>, 2016

@@ -4,6 +4,7 @@
 # This file is distributed under the GNU AFFERO GENERAL PUBLIC LICENSE.
 # 
 # Translators:
+# Translators:
 # JEN-HAO HSIEH <orienthauz@gmail.com>, 2015
 # Julia Oppenheimer <juliaoppenheimer2017@gmail.com>, 2019
 # Mushiyo, 2015
