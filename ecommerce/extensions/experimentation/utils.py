@@ -6,7 +6,7 @@ import hashlib
 import logging
 import re
 
-from ecommerce.enterprise.utils import get_enterprise_id_for_user
+from ecommerce.enterprise.api import get_enterprise_id_for_user
 from ecommerce.extensions.analytics.utils import track_segment_event
 
 logger = logging.getLogger(__name__)

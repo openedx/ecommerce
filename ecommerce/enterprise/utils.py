@@ -568,27 +568,6 @@ def get_enterprise_id_for_current_request_user_from_jwt():
     return None
 
 
-def get_enterprise_id_for_user(site, user):
-    from ecommerce.enterprise.api import fetch_enterprise_learner_data  # pylint: disable=import-outside-toplevel
-
-    enterprise_from_jwt = get_enterprise_id_for_current_request_user_from_jwt()
-    if enterprise_from_jwt:
-        return enterprise_from_jwt
-
-    try:
-        enterprise_learner_response = fetch_enterprise_learner_data(site, user)
-    except (AttributeError, ReqConnectionError, KeyError, SlumberHttpBaseException, Timeout) as exc:
-        log.info('Unable to retrieve enterprise learner data for User: %s, Exception: %s', user, exc)
-        return None
-
-    try:
-        return enterprise_learner_response['results'][0]['enterprise_customer']['uuid']
-    except IndexError:
-        pass
-
-    return None
-
-
 def get_enterprise_customer_from_enterprise_offer(basket):
     """
     Return enterprise customer uuid if the basket has an Enterprise-related offer applied.

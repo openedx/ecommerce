@@ -7,10 +7,13 @@ import logging
 
 from django.conf import settings
 from edx_django_utils.cache import TieredCache
+from requests.exceptions import ConnectionError as ReqConnectionError
+from requests.exceptions import Timeout
 from six.moves.urllib.parse import urlencode
+from slumber.exceptions import SlumberHttpBaseException
 
 from ecommerce.core.utils import get_cache_key
-from ecommerce.enterprise.utils import can_use_enterprise_catalog
+from ecommerce.enterprise.utils import can_use_enterprise_catalog, get_enterprise_id_for_current_request_user_from_jwt
 
 logger = logging.getLogger(__name__)
 
@@ -147,3 +150,22 @@ def catalog_contains_course_runs(site, course_run_ids, enterprise_customer_uuid,
     TieredCache.set_all_tiers(cache_key, contains_content, settings.ENTERPRISE_API_CACHE_TIMEOUT)
 
     return contains_content
+
+
+def get_enterprise_id_for_user(site, user):
+    enterprise_from_jwt = get_enterprise_id_for_current_request_user_from_jwt()
+    if enterprise_from_jwt:
+        return enterprise_from_jwt
+
+    try:
+        enterprise_learner_response = fetch_enterprise_learner_data(site, user)
+    except (AttributeError, ReqConnectionError, KeyError, SlumberHttpBaseException, Timeout) as exc:
+        logger.info('Unable to retrieve enterprise learner data for User: %s, Exception: %s', user, exc)
+        return None
+
+    try:
+        return enterprise_learner_response['results'][0]['enterprise_customer']['uuid']
+    except IndexError:
+        pass
+
+    return None

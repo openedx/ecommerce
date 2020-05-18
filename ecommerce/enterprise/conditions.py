@@ -11,8 +11,8 @@ from requests.exceptions import ConnectionError as ReqConnectionError
 from requests.exceptions import Timeout
 from slumber.exceptions import SlumberHttpBaseException
 
-from ecommerce.enterprise.api import catalog_contains_course_runs
-from ecommerce.enterprise.utils import get_enterprise_id_for_user, get_or_create_enterprise_customer_user
+from ecommerce.enterprise.api import catalog_contains_course_runs, get_enterprise_id_for_user
+from ecommerce.enterprise.utils import get_or_create_enterprise_customer_user
 from ecommerce.extensions.basket.utils import ENTERPRISE_CATALOG_ATTRIBUTE_TYPE
 from ecommerce.extensions.offer.constants import OFFER_ASSIGNMENT_REVOKED, OFFER_REDEEMED
 from ecommerce.extensions.offer.mixins import ConditionWithoutRangeMixin, SingleItemConsumptionConditionMixin

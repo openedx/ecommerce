@@ -6,7 +6,7 @@ from itertools import chain
 from oscar.apps.offer.applicator import Applicator as OscarApplicator
 from oscar.core.loading import get_model
 
-from ecommerce.enterprise.utils import get_enterprise_id_for_user
+from ecommerce.enterprise.api import get_enterprise_id_for_user
 
 logger = logging.getLogger(__name__)
 BUNDLE = 'bundle_identifier'
