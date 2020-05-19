@@ -562,7 +562,7 @@ class OfferAssignmentEmailTemplates(TimeStampedModel):
         help_text=_('Make a particular template version active.'),
         default=True,
     )
-    name = models.CharField(max_length=255, default='Template')
+    name = models.CharField(max_length=255)
 
     class Meta:
         ordering = ('enterprise_customer', '-active',)
