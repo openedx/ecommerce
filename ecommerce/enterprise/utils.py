@@ -11,6 +11,7 @@ from functools import reduce  # pylint: disable=redefined-builtin
 
 import crum
 import six  # pylint: disable=ungrouped-imports
+import waffle
 from django.conf import settings
 from django.urls import reverse
 from django.utils.translation import ugettext as _
@@ -26,7 +27,7 @@ from slumber.exceptions import SlumberHttpBaseException
 
 from ecommerce.core.constants import SYSTEM_ENTERPRISE_LEARNER_ROLE
 from ecommerce.core.url_utils import absolute_url, get_lms_dashboard_url
-from ecommerce.enterprise.api import fetch_enterprise_learner_data
+from ecommerce.enterprise.constants import USE_ENTERPRISE_CATALOG
 from ecommerce.enterprise.exceptions import EnterpriseDoesNotExist
 from ecommerce.extensions.offer.models import OFFER_PRIORITY_ENTERPRISE
 
@@ -567,25 +568,6 @@ def get_enterprise_id_for_current_request_user_from_jwt():
     return None
 
 
-def get_enterprise_id_for_user(site, user):
-    enterprise_from_jwt = get_enterprise_id_for_current_request_user_from_jwt()
-    if enterprise_from_jwt:
-        return enterprise_from_jwt
-
-    try:
-        enterprise_learner_response = fetch_enterprise_learner_data(site, user)
-    except (AttributeError, ReqConnectionError, KeyError, SlumberHttpBaseException, Timeout) as exc:
-        log.info('Unable to retrieve enterprise learner data for User: %s, Exception: %s', user, exc)
-        return None
-
-    try:
-        return enterprise_learner_response['results'][0]['enterprise_customer']['uuid']
-    except IndexError:
-        pass
-
-    return None
-
-
 def get_enterprise_customer_from_enterprise_offer(basket):
     """
     Return enterprise customer uuid if the basket has an Enterprise-related offer applied.
@@ -626,3 +608,21 @@ def construct_enterprise_course_consent_url(request, course_id, enterprise_custo
         params=urlencode(request_params)
     )
     return redirect_url
+
+
+def can_use_enterprise_catalog(request, enterprise_uuid):
+    """
+    Function to check if enterprise-catalog endpoints should be hit given an enterprise uuid.
+
+    Checks the USE_ENTERPRISE_CATALOG waffle sample and ensures the passed
+    enterprise uuid is not in the ENTERPRISE_CUSTOMERS_EXCLUDED_FROM_CATALOG list.
+
+    Args:
+        enterprise_uuid: the unique identifier for an enterprise customer
+
+    Returns:
+        boolean: True if sample is active and enterprise is not excluded
+                 False if sample not active or enterprise is excluded
+    """
+    return (waffle.flag_is_active(request, USE_ENTERPRISE_CATALOG) and
+            enterprise_uuid not in getattr(settings, 'ENTERPRISE_CUSTOMERS_EXCLUDED_FROM_CATALOG', []))
