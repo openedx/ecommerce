@@ -3226,3 +3226,31 @@ class OfferAssignmentEmailTemplatesViewSetTests(JwtMixin, TestCase):
             status_code=status.HTTP_200_OK,
         )
         self.verify_template_data(put_response, email_type, updated_greeting, updated_closing, True, updated_name)
+
+    def test_post_required_fields(self):
+        """
+        Verify that view correct error is raised if required fields are missing for HTTP POST.
+        """
+        data = {
+            'greeting': 'GREETING 100',
+            'closing': 'CLOSING 100'
+        }
+        response = self.client.post(self.url, json.dumps(data), 'application/json')
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert response.json() == {'email_type': ['This field is required.'], 'name': ['This field is required.']}
+
+    def test_put_required_fields(self):
+        """
+        Verify that view correct error is raised if required fields are missing for HTTP PUT.
+        """
+        email_type = 'assign'
+        post_response = self.create_template_data(email_type, 'Great template', 'GREETING 100', 'CLOSING 100')
+
+        api_put_url = '{}{}/'.format(self.url, post_response['id'])
+        data = {
+            'greeting': 'I AM GREETING',
+            'closing': 'I AM CLOSING'
+        }
+        response = self.client.put(api_put_url, json.dumps(data), 'application/json')
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert response.json() == {'email_type': ['This field is required.'], 'name': ['This field is required.']}
