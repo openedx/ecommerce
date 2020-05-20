@@ -84,7 +84,6 @@ class EnterpriseAPITests(EnterpriseServiceMockMixin, DiscoveryTestMixin, TestCas
             course_run_ids,
             enterprise_customer_uuid,
             enterprise_customer_catalog_uuid=enterprise_customer_catalog_uuid,
-            request=self.request,
         )
 
         self.assertEqual(expected, actual)
