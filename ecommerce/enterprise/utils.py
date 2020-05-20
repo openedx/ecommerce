@@ -610,7 +610,7 @@ def construct_enterprise_course_consent_url(request, course_id, enterprise_custo
     return redirect_url
 
 
-def can_use_enterprise_catalog(request, enterprise_uuid):
+def can_use_enterprise_catalog(enterprise_uuid):
     """
     Function to check if enterprise-catalog endpoints should be hit given an enterprise uuid.
 
@@ -624,5 +624,13 @@ def can_use_enterprise_catalog(request, enterprise_uuid):
         boolean: True if sample is active and enterprise is not excluded
                  False if sample not active or enterprise is excluded
     """
-    return (waffle.flag_is_active(request, USE_ENTERPRISE_CATALOG) and
-            enterprise_uuid not in getattr(settings, 'ENTERPRISE_CUSTOMERS_EXCLUDED_FROM_CATALOG', []))
+    customer_uuid = str(enterprise_uuid)
+    is_flag_active = waffle.flag_is_active(crum.get_current_request(), USE_ENTERPRISE_CATALOG)
+    can_use_catalog = customer_uuid not in getattr(settings, 'ENTERPRISE_CUSTOMERS_EXCLUDED_FROM_CATALOG', [])
+    log.info(
+        'ENT-2885: USE_ENTEPRISE_CATALOG flag %s active. Enterprise %s %s use the enterprise-catalog service.',
+        'IS' if is_flag_active else 'IS NOT',
+        customer_uuid,
+        'CAN' if can_use_catalog else 'CANNOT'
+    )
+    return is_flag_active and can_use_catalog

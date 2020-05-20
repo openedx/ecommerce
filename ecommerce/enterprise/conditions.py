@@ -123,7 +123,8 @@ class EnterpriseCustomerCondition(ConditionWithoutRangeMixin, SingleItemConsumpt
             return False
 
         enterprise_in_condition = str(self.enterprise_customer_uuid)
-        enterprise_catalog = str(self.enterprise_customer_catalog_uuid)
+        enterprise_catalog = str(self.enterprise_customer_catalog_uuid) if self.enterprise_customer_catalog_uuid \
+            else None
         enterprise_name_in_condition = str(self.enterprise_customer_name)
         username = basket.owner.username
         course_run_ids = []
@@ -196,8 +197,7 @@ class EnterpriseCustomerCondition(ConditionWithoutRangeMixin, SingleItemConsumpt
         try:
             catalog_contains_course = catalog_contains_course_runs(
                 basket.site, course_run_ids, enterprise_in_condition,
-                enterprise_customer_catalog_uuid=enterprise_catalog,
-                request=basket.strategy.request
+                enterprise_customer_catalog_uuid=enterprise_catalog
             )
         except (ReqConnectionError, KeyError, SlumberHttpBaseException, Timeout) as exc:
             logger.exception('[Code Redemption Failure] Unable to apply enterprise offer because '
