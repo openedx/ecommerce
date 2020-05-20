@@ -628,7 +628,7 @@ def can_use_enterprise_catalog(enterprise_uuid):
     is_flag_active = waffle.flag_is_active(crum.get_current_request(), USE_ENTERPRISE_CATALOG)
     can_use_catalog = customer_uuid not in getattr(settings, 'ENTERPRISE_CUSTOMERS_EXCLUDED_FROM_CATALOG', [])
     log.info(
-        'ENT-2885: USE_ENTEPRISE_CATALOG flag "%s" active. Enterprise "%s" "%s" use the enterprise-catalog service.',
+        'ENT-2885: USE_ENTEPRISE_CATALOG flag %s active. Enterprise %s %s use the enterprise-catalog service.',
         'IS' if is_flag_active else 'IS NOT',
         customer_uuid,
         'CAN' if can_use_catalog else 'CANNOT'
