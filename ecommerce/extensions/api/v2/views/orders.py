@@ -436,7 +436,6 @@ class ManualCourseEnrollmentOrderViewSet(EdxOrderPlacementMixin, ViewSet):
         benefit, _ = Benefit.objects.get_or_create(
             proxy_class=class_path(ManualEnrollmentOrderDiscountBenefit),
             value=100,
-            max_affected_items=1,
         )
 
         offer_kwargs = {
