@@ -5,6 +5,7 @@
 # 
 # Translators:
 # Translators:
+# Translators:
 # Albeiro Gonzalez <albeiro.gonzalez@edunext.co>, 2018-2020
 # Anthony Mangano <amangano@edx.org>, 2017
 # Christopher Lee <clee@edx.org>, 2017
@@ -27,9 +28,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-05-17 20:11+0000\n"
-"PO-Revision-Date: 2020-05-18 09:45+0000\n"
-"Last-Translator: Waheed Ahmed <waheed@edx.org>\n"
+"POT-Creation-Date: 2020-05-24 20:11+0000\n"
+"PO-Revision-Date: 2020-05-24 20:13+0000\n"
+"Last-Translator: edx_transifex_bot <i18n-working-group+edx-transifex-bot@edx.org>\n"
 "Language-Team: Spanish (Latin America) (http://www.transifex.com/open-edx/edx-platform/language/es_419/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -165,11 +166,11 @@ msgstr "Habilitar verificación SDN en el momento del pago."
 
 #: ecommerce/core/models.py:140
 msgid "[Deprecated] US Treasury SDN API URL"
-msgstr ""
+msgstr "[Deprecated] url de la API SDN del Tesoro de los estados Unidos"
 
 #: ecommerce/core/models.py:145
 msgid "[Deprecated] US Treasury SDN API key"
-msgstr ""
+msgstr "[Deprecated] llave de la API SDN del Tesoro de los estados Unidos"
 
 #: ecommerce/core/models.py:150
 msgid "SDN lists"
@@ -286,12 +287,12 @@ msgstr "ID del usuario LMS"
 msgid "Name"
 msgstr "Nombre"
 
-#: ecommerce/core/models.py:758 ecommerce/extensions/offer/models.py:485
+#: ecommerce/core/models.py:758 ecommerce/extensions/offer/models.py:490
 msgid "EnterpriseCustomer UUID"
 msgstr "cliente empresarial UUID"
 
-#: ecommerce/core/models.py:759 ecommerce/extensions/offer/models.py:363
-#: ecommerce/extensions/offer/models.py:552
+#: ecommerce/core/models.py:759 ecommerce/extensions/offer/models.py:368
+#: ecommerce/extensions/offer/models.py:557
 msgid "UUID for an EnterpriseCustomer from the Enterprise Service."
 msgstr "UUID de un EnterpriseCustomer en el servicio de Clientes empresariales"
 
@@ -359,7 +360,7 @@ msgid ""
 "This coupon is not valid for purchasing a program. Try using this on an "
 "individual course in the program. If you need assistance, contact edX "
 "support."
-msgstr ""
+msgstr "Este cupón no es válido para comprar un programa. Intente usarlo en un curso individual en el programa. Si necesita ayuda, póngase en contacto con el soporte de edX."
 
 #: ecommerce/coupons/views.py:240
 msgid "Invalid data sharing consent token provided."
@@ -380,7 +381,7 @@ msgid "This coupon code is not valid for this course. Try a different course."
 msgstr "Este código de cupón no es valido para este curso. Intente en un curso diferente."
 
 #: ecommerce/courses/models.py:33 ecommerce/extensions/basket/models.py:20
-#: ecommerce/extensions/offer/models.py:167
+#: ecommerce/extensions/offer/models.py:172
 #: ecommerce/extensions/payment/models.py:63
 #: ecommerce/templates/oscar/dashboard/offers/offer_detail.html:63
 #: ecommerce/templates/oscar/dashboard/offers/summary.html:14
@@ -460,123 +461,142 @@ msgstr "Porcentaje"
 msgid "Absolute"
 msgstr "Absoluto"
 
-#: ecommerce/enterprise/conditions.py:151
+#: ecommerce/enterprise/conditions.py:177
 #, python-brace-format
 msgid ""
 "This coupon has been made available through {new_enterprise}. To redeem this"
 " coupon, you must first logout. When you log back in, please select "
 "{new_enterprise} as your enterprise and try again."
-msgstr ""
+msgstr "Este cupón está disponible a través de {new_enterprise}. Para redimir este cupón, debe primero cerrar sesión. Cuando inicie sesión de nuevo, por favor seleccione {new_enterprise} como su empresa e intente de nuevo."
 
-#: ecommerce/enterprise/conditions.py:293
+#: ecommerce/enterprise/conditions.py:331
 msgid ""
 "This code is not valid with your email. Please login with the correct email "
 "assigned to the code or contact your Learning Manager for additional "
 "questions."
 msgstr "Este código no es válido para su correo. Por favor inicie sesión con el correo correcto asignado al código o contacte su gerente de aprendizaje para preguntas adicionales."
 
-#: ecommerce/enterprise/forms.py:25
+#: ecommerce/enterprise/forms.py:29
 #: ecommerce/enterprise/templates/enterprise/enterpriseoffer_list.html:30
 msgid "Enterprise Customer UUID"
 msgstr "cliente empresarial UUID"
 
-#: ecommerce/enterprise/forms.py:26
+#: ecommerce/enterprise/forms.py:30
 #: ecommerce/enterprise/templates/enterprise/enterpriseoffer_list.html:31
 msgid "Enterprise Customer Catalog UUID"
 msgstr "Catálogo cliente empresarial UUID"
 
-#: ecommerce/enterprise/forms.py:27 ecommerce/programs/forms.py:22
+#: ecommerce/enterprise/forms.py:31 ecommerce/programs/forms.py:22
 msgid "Discount Type"
 msgstr "Tipo de descuento"
 
-#: ecommerce/enterprise/forms.py:29 ecommerce/programs/forms.py:24
+#: ecommerce/enterprise/forms.py:33 ecommerce/programs/forms.py:24
 msgid "Discount Value"
 msgstr "Valor del descuento"
 
-#: ecommerce/enterprise/forms.py:32
+#: ecommerce/enterprise/forms.py:36
 msgid "Contract Discount Type"
 msgstr "Tipo de descuento de contrato."
 
-#: ecommerce/enterprise/forms.py:35
+#: ecommerce/enterprise/forms.py:39
 msgid "Contract Discount"
 msgstr "Descuento de contrato"
 
-#: ecommerce/enterprise/forms.py:38
+#: ecommerce/enterprise/forms.py:42
 msgid "Prepaid Invoice Amount"
 msgstr "Monto de la comprobante prepago."
 
-#: ecommerce/enterprise/forms.py:40
+#: ecommerce/enterprise/forms.py:44
 msgid "Salesforce Opportunity ID"
-msgstr ""
+msgstr "Id de la Oportunidad en Salesforce"
 
-#: ecommerce/enterprise/forms.py:52
+#: ecommerce/enterprise/forms.py:56
 msgid "The maximum number of enrollments that can redeem this offer."
-msgstr ""
+msgstr "El número máximo de inscripciones que pueden canjear esta oferta."
 
-#: ecommerce/enterprise/forms.py:53
+#: ecommerce/enterprise/forms.py:57
 msgid "The maximum USD dollar amount that can be redeemed by this offer."
+msgstr "El monto máximo en dólares estadounidenses que puede canjearse por esta oferta."
+
+#: ecommerce/enterprise/forms.py:58
+msgid ""
+"The maximum number of enrollments, by a user, that can redeem this offer."
 msgstr ""
 
-#: ecommerce/enterprise/forms.py:56 ecommerce/programs/forms.py:34
+#: ecommerce/enterprise/forms.py:59
+msgid ""
+"The maximum USD dollar amount that can be redeemed using this offer by a "
+"user."
+msgstr ""
+
+#: ecommerce/enterprise/forms.py:62 ecommerce/programs/forms.py:34
 msgid "Start Date"
 msgstr "Fecha de inicio"
 
-#: ecommerce/enterprise/forms.py:57 ecommerce/programs/forms.py:35
+#: ecommerce/enterprise/forms.py:63 ecommerce/programs/forms.py:35
 msgid "End Date"
 msgstr "Fecha de finalización"
 
-#: ecommerce/enterprise/forms.py:58
+#: ecommerce/enterprise/forms.py:64
 msgid "Enrollment Limit"
 msgstr "Límite de inscripción"
 
-#: ecommerce/enterprise/forms.py:59
+#: ecommerce/enterprise/forms.py:65
 msgid "Bookings Limit"
 msgstr "Límite de reservas"
 
-#: ecommerce/enterprise/forms.py:120
+#: ecommerce/enterprise/forms.py:66
+msgid "Per User Enrollment Limit"
+msgstr ""
+
+#: ecommerce/enterprise/forms.py:67
+msgid "Per User Bookings Limit"
+msgstr ""
+
+#: ecommerce/enterprise/forms.py:129 ecommerce/enterprise/forms.py:168
 #, python-brace-format
 msgid ""
 "Ensure new value must be greater than or equal to "
 "consumed({offer_enrollments}) value."
-msgstr ""
+msgstr "Asegúrese de que el nuevo valor sea mayor o igual al valor consumido ({offer_enrollments})."
 
-#: ecommerce/enterprise/forms.py:132
+#: ecommerce/enterprise/forms.py:141 ecommerce/enterprise/forms.py:180
 msgid "Ensure this value is greater than or equal to 0."
 msgstr "Asegúrese de que este valor sea mayor o igual a 0."
 
-#: ecommerce/enterprise/forms.py:139
+#: ecommerce/enterprise/forms.py:148 ecommerce/enterprise/forms.py:192
 #, python-brace-format
 msgid ""
 "Ensure new value must be greater than or equal to "
 "consumed({consumed_discount}) value."
-msgstr ""
+msgstr "Asegúrese de que el nuevo valor sea mayor o igual que el valor consumido ({consume_discount})."
 
-#: ecommerce/enterprise/forms.py:167
+#: ecommerce/enterprise/forms.py:220
 msgid "An offer already exists for this Enterprise & Catalog combination."
 msgstr "Ya existe una oferta para esta combinación empresarial y catálogo."
 
-#: ecommerce/enterprise/forms.py:170 ecommerce/enterprise/forms.py:179
+#: ecommerce/enterprise/forms.py:223 ecommerce/enterprise/forms.py:232
 #: ecommerce/programs/forms.py:72
 msgid "Percentage discounts cannot be greater than 100%."
 msgstr "El porcentaje de los descuentos no puede ser mayor al 100%."
 
-#: ecommerce/enterprise/forms.py:173 ecommerce/programs/forms.py:75
+#: ecommerce/enterprise/forms.py:226 ecommerce/programs/forms.py:75
 msgid "A start date must be specified when specifying an end date."
 msgstr "Se debe especificar una fecha de inicio al especificar una fecha de finalización."
 
-#: ecommerce/enterprise/forms.py:176 ecommerce/programs/forms.py:78
+#: ecommerce/enterprise/forms.py:229 ecommerce/programs/forms.py:78
 msgid "The start date must occur before the end date."
 msgstr "La fecha de inicio debe ser anterior a la fecha de finalización."
 
-#: ecommerce/enterprise/forms.py:184
+#: ecommerce/enterprise/forms.py:237
 msgid "More than 2 digits after the decimal not allowed for absolute value."
 msgstr "No se permite más de 2 dígitos después del decimal para el valor absoluto."
 
-#: ecommerce/enterprise/forms.py:189
+#: ecommerce/enterprise/forms.py:242
 msgid "This field is required when contract discount type is absolute."
 msgstr "Este campo es requerido cuando el tipo de descuento de contrato es absoluto."
 
-#: ecommerce/enterprise/forms.py:213
+#: ecommerce/enterprise/forms.py:266
 msgid "Discount of type {} provided by {} for {}."
 msgstr "Descuento de tipo {} proporcionado por {} para {}."
 
@@ -686,31 +706,31 @@ msgid ""
 "              "
 msgstr "\n                %(platform_name)s Herramienta de administración de oferta empresarial\n              "
 
-#: ecommerce/enterprise/utils.py:237
+#: ecommerce/enterprise/utils.py:238
 #, python-brace-format
 msgid "SKU {sku} does not exist."
 msgstr "El SKU {sku} no existe."
 
-#: ecommerce/enterprise/utils.py:246
+#: ecommerce/enterprise/utils.py:247
 #, python-brace-format
 msgid "There is no Enterprise Customer associated with SKU {sku}."
 msgstr "No hay un cliente empresarial asociado con el SKU {sku}."
 
-#: ecommerce/enterprise/utils.py:254
+#: ecommerce/enterprise/utils.py:255
 #, python-brace-format
 msgid ""
 "If you have concerns about sharing your data, please contact your "
 "administrator at {enterprise}."
 msgstr "Si tienes dudas acerca de compartir tus datos, contáctate con tu administrador de {enterprise}."
 
-#: ecommerce/enterprise/utils.py:257
+#: ecommerce/enterprise/utils.py:258
 #, python-brace-format
 msgid ""
 "If you have concerns about sharing your data, please contact your "
 "administrator at {enterprise} at {contact_info}."
 msgstr "Si tienes dudas acerca de compartir tus datos, contáctate con tu administrador de {enterprise} a {contact_info}."
 
-#: ecommerce/enterprise/utils.py:263
+#: ecommerce/enterprise/utils.py:264
 #, python-brace-format
 msgid "Enrollment in {course_name} was not complete."
 msgstr "La inscripción en {course_name} no se completó."
@@ -1046,23 +1066,23 @@ msgstr "Estado"
 msgid "Failed to retrieve enrollment data."
 msgstr "No fué posible recuperar la información de inscripciones."
 
-#: ecommerce/extensions/offer/models.py:358
+#: ecommerce/extensions/offer/models.py:363
 msgid "Course Catalog ID from the Discovery Service."
 msgstr "Identificación del catálogo del curso del Servicio Discovery"
 
-#: ecommerce/extensions/offer/models.py:369
+#: ecommerce/extensions/offer/models.py:374
 msgid "UUID for an EnterpriseCustomerCatalog from the Enterprise Service."
 msgstr "Código UUID para un catálogo de cliente empresarial del servicio empresarial."
 
-#: ecommerce/extensions/offer/models.py:492
+#: ecommerce/extensions/offer/models.py:497
 msgid "EnterpriseCustomer Name"
 msgstr "Nombre de cliente empresarial"
 
-#: ecommerce/extensions/offer/models.py:497
+#: ecommerce/extensions/offer/models.py:502
 msgid "EnterpriseCustomerCatalog UUID"
 msgstr "Catálogo cliente empresarial UUID"
 
-#: ecommerce/extensions/offer/models.py:502
+#: ecommerce/extensions/offer/models.py:507
 #: ecommerce/extensions/voucher/utils.py:54
 #: ecommerce/extensions/voucher/utils.py:191
 #: ecommerce/extensions/voucher/utils.py:271
@@ -1073,39 +1093,39 @@ msgstr "Catálogo cliente empresarial UUID"
 msgid "Program UUID"
 msgstr "UUID del programa"
 
-#: ecommerce/extensions/offer/models.py:509
+#: ecommerce/extensions/offer/models.py:514
 msgid "Email to user pending."
 msgstr "Pendiente correo de usuario"
 
-#: ecommerce/extensions/offer/models.py:510
+#: ecommerce/extensions/offer/models.py:515
 msgid "Code successfully assigned to user."
 msgstr "Código asignado exitosamente al usuario."
 
-#: ecommerce/extensions/offer/models.py:511
+#: ecommerce/extensions/offer/models.py:516
 msgid "Code has been redeemed by user."
 msgstr "El código ha sido redimido por el usuario."
 
-#: ecommerce/extensions/offer/models.py:512
+#: ecommerce/extensions/offer/models.py:517
 msgid "Email to user bounced."
 msgstr "El correo al usuario rebotó."
 
-#: ecommerce/extensions/offer/models.py:513
+#: ecommerce/extensions/offer/models.py:518
 msgid "Code has been revoked for this user."
 msgstr "El código ha sido anulado por este usuario."
 
-#: ecommerce/extensions/offer/models.py:547
+#: ecommerce/extensions/offer/models.py:552
 msgid "Assign"
 msgstr "Asignar"
 
-#: ecommerce/extensions/offer/models.py:548
+#: ecommerce/extensions/offer/models.py:553
 msgid "Remind"
 msgstr "Recordar"
 
-#: ecommerce/extensions/offer/models.py:549
+#: ecommerce/extensions/offer/models.py:554
 msgid "Revoke"
 msgstr "Revocar"
 
-#: ecommerce/extensions/offer/models.py:557
+#: ecommerce/extensions/offer/models.py:562
 msgid "Make a particular template version active."
 msgstr "Active una versión de plantilla en particular."
 
@@ -1282,7 +1302,7 @@ msgstr "Porcentaje superior a 100 no permitido."
 msgid "..."
 msgstr "..."
 
-#: ecommerce/extensions/payment/views/cybersource.py:476
+#: ecommerce/extensions/payment/views/cybersource.py:466
 msgid "transaction declined"
 msgstr "Transacción rechazada"
 
@@ -1370,8 +1390,8 @@ msgstr "Este comprobante está asignado a otro usuario."
 msgid "Redeemed"
 msgstr "Redimido"
 
-#: ecommerce/extensions/voucher/tests/test_utils.py:376
-#: ecommerce/extensions/voucher/tests/test_utils.py:381
+#: ecommerce/extensions/voucher/tests/test_utils.py:377
+#: ecommerce/extensions/voucher/tests/test_utils.py:382
 #: ecommerce/extensions/voucher/utils.py:96
 #: ecommerce/extensions/voucher/utils.py:162
 #: ecommerce/templates/edx/checkout/receipt.html:120
@@ -1381,22 +1401,22 @@ msgstr "Redimido"
 msgid "Discount"
 msgstr "Descuento"
 
-#: ecommerce/extensions/voucher/tests/test_utils.py:376
-#: ecommerce/extensions/voucher/tests/test_utils.py:381
+#: ecommerce/extensions/voucher/tests/test_utils.py:377
+#: ecommerce/extensions/voucher/tests/test_utils.py:382
 #: ecommerce/extensions/voucher/utils.py:96
 #: ecommerce/extensions/voucher/utils.py:162
 msgid "Enrollment"
 msgstr "Inscripciones"
 
-#: ecommerce/extensions/voucher/tests/test_utils.py:377
-#: ecommerce/extensions/voucher/tests/test_utils.py:385
+#: ecommerce/extensions/voucher/tests/test_utils.py:378
+#: ecommerce/extensions/voucher/tests/test_utils.py:386
 #: ecommerce/extensions/voucher/utils.py:97
 #: ecommerce/extensions/voucher/utils.py:166
 #, python-brace-format
 msgid "{percentage} %"
 msgstr "{percentage} %"
 
-#: ecommerce/extensions/voucher/tests/test_utils.py:541
+#: ecommerce/extensions/voucher/tests/test_utils.py:542
 #: ecommerce/extensions/voucher/utils.py:79
 msgid "Inactive"
 msgstr "Inactivo"
@@ -1559,7 +1579,7 @@ msgstr "Número de orden"
 msgid "Redeemed By Username"
 msgstr "Redimido por el usuario"
 
-#: ecommerce/extensions/voucher/utils.py:785
+#: ecommerce/extensions/voucher/utils.py:783
 #, python-brace-format
 msgid "Range for coupon [{coupon_id}]"
 msgstr "Rango del cupón [{coupon_id}]"
@@ -2565,7 +2585,7 @@ msgid ""
 "{ofac_email_link} ofac.reconsideration@treasury.gov{end_link} for "
 "information about options for clearing a match. Your account will be "
 "suspended until this matter is resolved satisfactorily."
-msgstr ""
+msgstr "Si tiene preguntas sobre cómo borrar una coincidencia, comuníquese con {ofac_email_link} ofac.reconsideration@treasury.gov{end_link} para obtener información sobre las opciones para borrar una coincidencia. Su cuenta será suspendida hasta que este asunto se resuelva satisfactoriamente."
 
 #: ecommerce/templates/oscar/customer/email_base.html:189
 #, python-format
