@@ -233,7 +233,6 @@ class UtilTests(CouponMixin, DiscoveryMockMixin, DiscoveryTestMixin, LmsApiMockM
         coupon_voucher.vouchers.add(*vouchers)
 
         self.assertEqual(voucher_offer.benefit.type, Benefit.PERCENTAGE)
-        self.assertEqual(voucher_offer.benefit.max_affected_items, None)
         self.assertEqual(voucher_offer.benefit.value, 100.00)
         self.assertEqual(voucher_offer.benefit.range.catalog, self.catalog)
         self.assertEqual(voucher_offer.email_domains, email_domains)

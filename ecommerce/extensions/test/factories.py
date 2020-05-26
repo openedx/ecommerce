@@ -273,6 +273,7 @@ class ManualEnrollmentOrderDiscountBenefitFactory(BenefitFactory):
     range = None
     type = ''
     value = 100
+    max_affected_items = 1
     proxy_class = class_path(ManualEnrollmentOrderDiscountBenefit)
 
 
