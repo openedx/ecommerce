@@ -20,6 +20,7 @@ from rest_framework import serializers
 from rest_framework.reverse import reverse
 from rest_framework.settings import api_settings
 from six.moves import range
+from six.moves.urllib.parse import urljoin
 
 from ecommerce.core.constants import (
     COURSE_ENTITLEMENT_PRODUCT_CLASS_NAME,
@@ -1061,6 +1062,7 @@ class CouponSerializer(CouponMixin, ProductPaymentInfoMixin, serializers.ModelSe
     coupon_type = serializers.SerializerMethodField()
     course_seat_types = serializers.SerializerMethodField()
     email_domains = serializers.SerializerMethodField()
+    enterprise_catalog_content_metadata_url = serializers.SerializerMethodField()
     enterprise_customer = serializers.SerializerMethodField()
     enterprise_customer_catalog = serializers.SerializerMethodField()
     end_date = serializers.SerializerMethodField()
@@ -1146,6 +1148,11 @@ class CouponSerializer(CouponMixin, ProductPaymentInfoMixin, serializers.ModelSe
 
     def get_end_date(self, obj):
         return retrieve_end_date(obj)
+
+    def get_enterprise_catalog_content_metadata_url(self, obj):
+        uuid = self.get_enterprise_customer_catalog(obj)
+        return urljoin(settings.ENTERPRISE_CATALOG_API_URL,
+                       'enterprise-catalogs/' + str(uuid) + '/get_content_metadata') if uuid else ''
 
     def get_enterprise_customer(self, obj):
         """ Get the Enterprise Customer attached to a coupon. """
@@ -1249,8 +1256,8 @@ class CouponSerializer(CouponMixin, ProductPaymentInfoMixin, serializers.ModelSe
         model = Product
         fields = (
             'benefit_type', 'benefit_value', 'catalog_query', 'course_catalog', 'category',
-            'client', 'code', 'code_status', 'coupon_type', 'course_seat_types',
-            'email_domains', 'end_date', 'enterprise_customer', 'enterprise_customer_catalog',
+            'client', 'code', 'code_status', 'coupon_type', 'course_seat_types', 'email_domains',
+            'end_date', 'enterprise_catalog_content_metadata_url', 'enterprise_customer', 'enterprise_customer_catalog',
             'id', 'inactive', 'last_edited', 'max_uses', 'note', 'notify_email', 'num_uses', 'payment_information',
             'program_uuid', 'price', 'quantity', 'seats', 'start_date', 'title', 'voucher_type',
             'contract_discount_value', 'contract_discount_type', 'prepaid_invoice_amount', 'sales_force_id'

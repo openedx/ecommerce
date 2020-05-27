@@ -103,7 +103,7 @@ class Command(BaseCommand):
             logger.error('No catalog found for enterprise (%s)', self.enterprise_customer.get('uuid'))
             return None
 
-    def create_coupon(self, ecommerce_api_url):
+    def create_coupon(self, ecommerce_api_url, enterprise_catalog_api_url):
         """
         Creates and returns a coupon associated with the specified
         enterprise customer and catalog
@@ -111,7 +111,9 @@ class Command(BaseCommand):
         if not self.enterprise_customer or not self.enterprise_catalog:
             logger.error('An enterprise customer and/or catalog was not specified.')
             return None
-
+        catalog_uuid = self.enterprise_catalog.get('uuid', None)
+        catalog_url = enterprise_catalog_api_url + '/' + catalog_uuid + '/get_content_metadata' \
+            if catalog_uuid else None
         logger.info('\nCreating an enterprise coupon...')
         category = Category.objects.get(name='coupons')
         request_obj = {
@@ -123,8 +125,9 @@ class Command(BaseCommand):
             "id": None,
             "price": 0,
             "quantity": 1,
-            "enterprise_catalog_url": ecommerce_api_url + '/enterprise/customer_catalogs/',
+            "enterprise_catalog_content_metadata_url": catalog_url,
             "coupon_type": ENROLLMENT_CODE_PRODUCT_CLASS_NAME,
+            "contract_discount_type": Invoice.PERCENTAGE,
             "voucher_type": Voucher.MULTI_USE,
             "benefit_type": Benefit.PERCENTAGE,
             "catalog_type": "Single course",
@@ -160,6 +163,7 @@ class Command(BaseCommand):
 
         ecommerce_api_url = '{}/api/v2'.format(self.site.build_ecommerce_url())
         enterprise_api_url = self.site.enterprise_api_url
+        enterprise_catalog_api_url = self.site.enterprise_catalog_api_url + 'enterprise-catalogs'
 
         enterprise_customer_request_url = '{}enterprise-customer/'.format(enterprise_api_url)
         enterprise_catalog_request_url = '{}enterprise_catalogs/'.format(enterprise_api_url)
@@ -182,5 +186,6 @@ class Command(BaseCommand):
         if self.enterprise_catalog:
             # Create a new enterprise coupon associated with the
             # above enterprise customer/catalog
-            self.coupon = self.create_coupon(ecommerce_api_url=ecommerce_api_url)
+            self.coupon = self.create_coupon(ecommerce_api_url=ecommerce_api_url,
+                                             enterprise_catalog_api_url=enterprise_catalog_api_url)
             logger.info('\nEnterprise coupon successfully created: %s', self.coupon)
