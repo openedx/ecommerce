@@ -4,12 +4,13 @@
 # This file is distributed under the GNU AFFERO GENERAL PUBLIC LICENSE.
 #
 # Translators:
+# Translators:
 msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-05-18 10:11+0000\n"
-"PO-Revision-Date: 2020-01-19 20:13+0000\n"
+"POT-Creation-Date: 2020-05-28 08:36+0000\n"
+"PO-Revision-Date: 2020-05-11 05:54+0000\n"
 "Last-Translator: edx_transifex_bot <i18n-working-group+edx-transifex-bot@edx.org>\n"
 "Language-Team: English (http://www.transifex.com/open-edx/edx-platform/language/en/)\n"
 "Language: eo\n"
@@ -617,6 +618,21 @@ msgstr ""
 "Thé mäxïmüm ÛSD döllär ämöünt thät çän ßé rédééméd ßý thïs öffér. Ⱡ'σяєм "
 "ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя α#"
 
+#: ecommerce/enterprise/forms.py
+msgid ""
+"The maximum number of enrollments, by a user, that can redeem this offer."
+msgstr ""
+"Thé mäxïmüm nümßér öf énröllménts, ßý ä üsér, thät çän rédéém thïs öffér. "
+"Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя#"
+
+#: ecommerce/enterprise/forms.py
+msgid ""
+"The maximum USD dollar amount that can be redeemed using this offer by a "
+"user."
+msgstr ""
+"Thé mäxïmüm ÛSD döllär ämöünt thät çän ßé rédééméd üsïng thïs öffér ßý ä "
+"üsér. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєт#"
+
 #: ecommerce/enterprise/forms.py ecommerce/programs/forms.py
 msgid "Start Date"
 msgstr "Stärt Däté Ⱡ'σяєм ιρѕυм ∂σłσ#"
@@ -634,6 +650,14 @@ msgid "Bookings Limit"
 msgstr "Böökïngs Lïmït Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт#"
 
 #: ecommerce/enterprise/forms.py
+msgid "Per User Enrollment Limit"
+msgstr "Pér Ûsér Énröllmént Lïmït Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕ#"
+
+#: ecommerce/enterprise/forms.py
+msgid "Per User Bookings Limit"
+msgstr "Pér Ûsér Böökïngs Lïmït Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σ#"
+
+#: ecommerce/enterprise/forms.py ecommerce/enterprise/forms.py
 #, python-brace-format
 msgid ""
 "Ensure new value must be greater than or equal to "
@@ -643,13 +667,13 @@ msgstr ""
 "çönsüméd({offer_enrollments}) välüé. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
 "¢σηѕє¢тєтυя #"
 
-#: ecommerce/enterprise/forms.py
+#: ecommerce/enterprise/forms.py ecommerce/enterprise/forms.py
 msgid "Ensure this value is greater than or equal to 0."
 msgstr ""
 "Énsüré thïs välüé ïs gréätér thän ör éqüäl tö 0. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт "
 "αмєт, ¢σηѕє¢тєтυя α#"
 
-#: ecommerce/enterprise/forms.py
+#: ecommerce/enterprise/forms.py ecommerce/enterprise/forms.py
 #, python-brace-format
 msgid ""
 "Ensure new value must be greater than or equal to "
