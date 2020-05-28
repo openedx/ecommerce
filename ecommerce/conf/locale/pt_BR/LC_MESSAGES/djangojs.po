@@ -5,6 +5,7 @@
 # 
 # Translators:
 # Translators:
+# Translators:
 # Angela Amaro <angelasimei@gmail.com>, 2016
 # César Augusto Lemos <teco171bp@hotmail.com>, 2015
 # Cleomir Waiczyk <w.cleomir@gmail.com>, 2015
@@ -19,7 +20,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-12-03 14:18+0000\n"
+"POT-Creation-Date: 2020-05-28 07:40+0000\n"
 "PO-Revision-Date: 2019-12-04 06:55+0000\n"
 "Last-Translator: Ned Batchelder <ned@edx.org>\n"
 "Language-Team: Portuguese (Brazil) (http://www.transifex.com/open-edx/edx-platform/language/pt_BR/)\n"
@@ -212,11 +213,11 @@ msgstr ""
 msgid "Card expired"
 msgstr ""
 
-#: ecommerce/static/js/pages/basket_page.js:503
+#: ecommerce/static/js/pages/basket_page.js:474
 msgid "<Choose state/province>"
 msgstr ""
 
-#: ecommerce/static/js/pages/basket_page.js:504
+#: ecommerce/static/js/pages/basket_page.js:475
 msgid "State/Province (required)"
 msgstr ""
 
@@ -297,19 +298,19 @@ msgstr ""
 
 #: ecommerce/static/js/views/coupon_detail_view.js:108
 #: ecommerce/static/js/views/coupon_form_view.js:62
-#: ecommerce/static/js/views/enterprise_coupon_form_view.js:29
+#: ecommerce/static/js/views/enterprise_coupon_form_view.js:30
 msgid "Can be used once by one customer"
 msgstr ""
 
 #: ecommerce/static/js/views/coupon_detail_view.js:110
 #: ecommerce/static/js/views/coupon_form_view.js:70
-#: ecommerce/static/js/views/enterprise_coupon_form_view.js:37
+#: ecommerce/static/js/views/enterprise_coupon_form_view.js:38
 msgid "Can be used multiple times by multiple customers"
 msgstr ""
 
 #: ecommerce/static/js/views/coupon_detail_view.js:112
 #: ecommerce/static/js/views/coupon_form_view.js:66
-#: ecommerce/static/js/views/enterprise_coupon_form_view.js:33
+#: ecommerce/static/js/views/enterprise_coupon_form_view.js:34
 msgid "Can be used once by multiple customers"
 msgstr ""
 
@@ -321,11 +322,11 @@ msgstr "Código de Matrícula"
 msgid "Discount Code"
 msgstr ""
 
-#: ecommerce/static/js/views/coupon_form_view.js:770
+#: ecommerce/static/js/views/coupon_form_view.js:777
 msgid "Save Changes"
 msgstr "Salvar alterações"
 
-#: ecommerce/static/js/views/coupon_form_view.js:785
+#: ecommerce/static/js/views/coupon_form_view.js:792
 msgid "Create Coupon"
 msgstr ""
 
@@ -463,7 +464,7 @@ msgid "Seat type"
 msgstr ""
 
 #: ecommerce/static/js/views/enterprise_coupon_detail_view.js:28
-#: ecommerce/static/js/views/enterprise_coupon_form_view.js:41
+#: ecommerce/static/js/views/enterprise_coupon_form_view.js:42
 msgid "Can be used multiple times by one customer"
 msgstr ""
 
