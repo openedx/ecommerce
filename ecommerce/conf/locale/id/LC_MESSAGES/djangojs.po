@@ -5,6 +5,7 @@
 # 
 # Translators:
 # Translators:
+# Translators:
 # Aprisa Chrysantina <aprisa.chrysantina@gmail.com>, 2019
 # Stefania Trabucchi <stefania.trabucchi@abstract-technology.de>, 2019
 msgid ""
