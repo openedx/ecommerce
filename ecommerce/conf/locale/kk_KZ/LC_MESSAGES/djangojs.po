@@ -5,6 +5,7 @@
 # 
 # Translators:
 # Translators:
+# Translators:
 # Fatima Salmenova <fatima_dancer_94@mail.ru>, 2016
 # Sara Kopbulsynova <sara_95701@mail.ru>, 2016
 msgid ""

@@ -5,6 +5,7 @@
 # 
 # Translators:
 # Translators:
+# Translators:
 # Laman Mammadli <laman@edumedia.az>, 2019
 msgid ""
 msgstr ""

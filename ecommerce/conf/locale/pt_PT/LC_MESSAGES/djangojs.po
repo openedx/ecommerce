@@ -5,6 +5,7 @@
 # 
 # Translators:
 # Translators:
+# Translators:
 # Cátia Lopes <catia.lopes@bridgelk.com>, 2018-2019
 # Manuela Silva <manuelarodsilva@gmail.com>, 2018
 # Manuela Silva <manuelarodsilva@gmail.com>, 2016
