@@ -5,6 +5,7 @@
 # 
 # Translators:
 # Translators:
+# Translators:
 # Edukometrija <jolitad@mruni.eu>, 2015
 msgid ""
 msgstr ""

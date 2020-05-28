@@ -5,12 +5,13 @@
 # 
 # Translators:
 # Translators:
+# Translators:
 # abby li <yc.li@eliteu.cn>, 2018-2019
 # 759b81c7bb2252a11f36c89344f31007, 2016
 # hohomi <hohomi@gmail.com>, 2016
 # ifLab <webmaster@iflab.org>, 2018-2019
 # jsgang <jsgang9@gmail.com>, 2016-2018
-# wenyong hu <inactive+huwenyong@transifex.com>, 2015
+# 5ef7b1a2ab117002e524ae0090ef1620_db4d7b7 <1ee073ac29a4bc3d4b8d8a505d413023_343545>, 2015
 # Yue Fang <yfang@juilliard.edu>, 2016
 # zhaojina <zhaojianwei187@126.com>, 2015
 msgid ""
