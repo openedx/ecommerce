@@ -5,6 +5,7 @@
 # 
 # Translators:
 # Translators:
+# Translators:
 # Xabier Sánchez Santos <xsantos@novaconsultores.es>, 2018
 msgid ""
 msgstr ""
