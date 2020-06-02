@@ -395,23 +395,12 @@ class EnterpriseCouponViewSet(CouponViewSet):
         Returns a queryset containing unique code and user_email pairs from OfferAssignments.
         Only code and user_email pairs that have no corresponding VoucherApplication are returned.
         """
-        unredeemed_assignments = []
-        for voucher in vouchers:
-            users_having_usages = VoucherApplication.objects.filter(
-                voucher=voucher).values_list('user__email', flat=True)
-
-            assignments = voucher.enterprise_offer.offerassignment_set.filter(
-                code=voucher.code,
-                status__in=[OFFER_ASSIGNED, OFFER_ASSIGNMENT_EMAIL_BOUNCED, OFFER_ASSIGNMENT_EMAIL_PENDING]
-            ).exclude(user_email__in=users_having_usages)
-
-            if assignments.count() == 0:
-                continue
-
-            unredeemed_assignments.extend(assignments.values_list('id', flat=True))
-
+        users_having_usages = VoucherApplication.objects.filter(
+            voucher__in=vouchers).values_list('user__email', flat=True)
         return OfferAssignment.objects.filter(
-            id__in=unredeemed_assignments).values('code', 'user_email').order_by('user_email').distinct()
+            code__in=vouchers.values_list('code', flat=True),
+            status__in=[OFFER_ASSIGNED, OFFER_ASSIGNMENT_EMAIL_BOUNCED, OFFER_ASSIGNMENT_EMAIL_PENDING]
+        ).exclude(user_email__in=users_having_usages).values('code', 'user_email').order_by('user_email').distinct()
 
     def _get_partial_redeemed_usages(self, vouchers):
         """
