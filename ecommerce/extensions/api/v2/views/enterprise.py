@@ -6,7 +6,7 @@ import django_filters
 import six
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
-from django.db.models import Q
+from django.db.models import Q, prefetch_related_objects
 from django.http import Http404
 from django.shortcuts import get_object_or_404
 from edx_rbac.decorators import permission_required
@@ -380,6 +380,7 @@ class EnterpriseCouponViewSet(CouponViewSet):
         Returns a queryset containing Vouchers with slots that have not been assigned.
         Unique Vouchers will be included in the final queryset for all types.
         """
+        prefetch_related_objects(vouchers, 'offers', 'offers__condition', 'offers__offerassignment_set')
         vouchers_with_slots = []
         for voucher in vouchers:
             slots_available = voucher.slots_available_for_assignment
@@ -424,7 +425,6 @@ class EnterpriseCouponViewSet(CouponViewSet):
         Returns a queryset containing unique voucher.code and user.email pairs from VoucherApplications.
         Only code and email pairs that have no corresponding active OfferAssignments are returned.
         """
-
         vouchers_applications = VoucherApplication.objects.filter(voucher__in=vouchers)
         unredeemed_voucher_assignments = OfferAssignment.objects.filter(
             code__in=vouchers_applications.values_list('voucher__code', flat=True),

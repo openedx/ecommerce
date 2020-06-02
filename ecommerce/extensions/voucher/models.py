@@ -3,7 +3,7 @@ from __future__ import absolute_import
 import datetime
 import logging
 
-from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
+from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from oscar.apps.voucher.abstract_models import (  # pylint: disable=ungrouped-imports
@@ -104,13 +104,11 @@ class Voucher(AbstractVoucher):
 
     @property
     def enterprise_offer(self):
-        try:
-            return self.offers.get(condition__enterprise_customer_uuid__isnull=False)
-        except ObjectDoesNotExist:
-            return None
-        except MultipleObjectsReturned:
-            logger.exception('There is more than one enterprise offer associated with voucher %s!', self.id)
-            return self.offers.filter(condition__enterprise_customer_uuid__isnull=False)[0]
+        offers = self.offers.all()
+        for offer in offers:
+            if offer.condition.enterprise_customer_uuid:
+                return offer
+        return None
 
     @property
     def best_offer(self):
@@ -129,9 +127,11 @@ class Voucher(AbstractVoucher):
 
         # Find the number of OfferAssignments that already exist that are not redeemed or revoked.
         # Redeemed OfferAssignments are excluded in favor of using num_orders on this voucher.
-        num_assignments = enterprise_offer.offerassignment_set.filter(code=self.code).exclude(
-            status__in=[OFFER_REDEEMED, OFFER_ASSIGNMENT_REVOKED]
-        ).count()
+        assignments = enterprise_offer.offerassignment_set.all()
+        num_assignments = 0
+        for assignment in assignments:
+            if assignment.code == self.code and assignment.status not in [OFFER_REDEEMED, OFFER_ASSIGNMENT_REVOKED]:
+                num_assignments += 1
 
         return self.calculate_available_slots(enterprise_offer.max_global_applications, num_assignments)
 
