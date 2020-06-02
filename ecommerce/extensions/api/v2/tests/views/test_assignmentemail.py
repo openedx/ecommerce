@@ -13,6 +13,7 @@ from ecommerce.extensions.offer.constants import OFFER_ASSIGNED, OFFER_ASSIGNMEN
 from ecommerce.extensions.offer.models import OfferAssignment, OfferAssignmentEmailAttempt
 from ecommerce.extensions.test import factories
 from ecommerce.tests.testcases import TestCase
+from ecommerce.tests.utils import DoesNotExist
 
 
 @ddt.ddt
@@ -52,7 +53,7 @@ class AssignmentEmailStatusTests(TestCase):
                 'error': 'OfferAssignment matching query does not exist.'
             },
             ("[Offer Assignment] AssignmentEmailStatus update raised: "
-             "DoesNotExist('OfferAssignment matching query does not exist.',)"),
+             "{}".format(repr(DoesNotExist('OfferAssignment matching query does not exist.')))),
             500,
         ),
         (
@@ -85,7 +86,7 @@ class AssignmentEmailStatusTests(TestCase):
         requisite keys are not present in offer_assignment model
         """
         log_name = 'ecommerce.extensions.api.v2.views.assignmentemail'
-        with LogCapture(level=logging.INFO) as log:
+        with LogCapture(log_name, level=logging.INFO) as log:
             response = self.client.post(self.path, data=json.dumps(post_data), content_type='application/json')
         log.check_present(
             (log_name, 'ERROR', log_data),
