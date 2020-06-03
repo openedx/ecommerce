@@ -1,13 +1,11 @@
 from __future__ import absolute_import
 
-import hashlib
-
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 from edx_django_utils.cache import TieredCache
 from opaque_keys.edx.keys import CourseKey
 
-from ecommerce.core.utils import deprecated_traverse_pagination
+from ecommerce.core.utils import deprecated_traverse_pagination, get_cache_key
 
 
 def mode_for_product(product):
@@ -25,29 +23,82 @@ def mode_for_product(product):
     return mode
 
 
-def get_course_info_from_catalog(site, product):
-    """ Get course or course_run information from Discovery Service and cache """
-    if product.is_course_entitlement_product:
-        key = product.attr.UUID
-    else:
-        key = CourseKey.from_string(product.attr.course_key)
+def _get_discovery_response(site, cache_key, resource, resource_id):
+    """
+    Return the discovery endpoint result of given resource or cached response if its already been cached.
 
-    api = site.siteconfiguration.discovery_api_client
-    partner_short_code = site.siteconfiguration.partner.short_code
+    Arguments:
+        site (Site): Site object containing Site Configuration data
+        cache_key (str): Cache key for given resource
+        resource_id (int or str): Identifies a specific resource to be retrieved
 
-    cache_key = u'courses_api_detail_{}{}'.format(key, partner_short_code)
-    cache_key = hashlib.md5(cache_key.encode('utf-8')).hexdigest()
+    Returns:
+        dict: resource's information for given resource_id received from Discovery API
+    """
     course_cached_response = TieredCache.get_cached_response(cache_key)
     if course_cached_response.is_found:
         return course_cached_response.value
 
-    if product.is_course_entitlement_product:
-        course = api.courses(key).get()
-    else:
-        course = api.course_runs(key).get(partner=partner_short_code)
+    params = {}
+    api = site.siteconfiguration.discovery_api_client
+    endpoint = getattr(api, resource)
 
-    TieredCache.set_all_tiers(cache_key, course, settings.COURSES_API_CACHE_TIMEOUT)
-    return course
+    if resource == 'course_runs':
+        params['partner'] = site.siteconfiguration.partner.short_code
+    response = endpoint(resource_id).get(**params)
+
+    if resource_id is None:
+        response = deprecated_traverse_pagination(response, endpoint)
+
+    TieredCache.set_all_tiers(cache_key, response, settings.COURSES_API_CACHE_TIMEOUT)
+    return response
+
+
+def get_course_detail(site, course_resource_id):
+    """
+    Return the course information of given course's resource from Discovery Service and cache.
+
+    Arguments:
+        site (Site): Site object containing Site Configuration data
+        course_resource_id (UUID or str): It can be course UUID or course key
+
+    Returns:
+        dict: Course information received from Discovery API
+    """
+    resource = "courses"
+    cache_key = get_cache_key(
+        site_domain=site.domain,
+        resource="{}-{}".format(resource, course_resource_id)
+    )
+    return _get_discovery_response(site, cache_key, resource, course_resource_id)
+
+
+def get_course_run_detail(site, course_run_key):
+    """
+    Return the course run information of given course_run_key from Discovery Service and cache.
+
+    Arguments:
+        site (Site): Site object containing Site Configuration data
+        course_run_key (str): Course run key
+
+    Returns:
+        dict: CourseRun information received from Discovery API
+    """
+    resource = "course_runs"
+    cache_key = get_cache_key(
+        site_domain=site.domain,
+        resource="{}-{}".format(resource, course_run_key)
+    )
+    return _get_discovery_response(site, cache_key, resource, course_run_key)
+
+
+def get_course_info_from_catalog(site, product):
+    """ Get course or course_run information from Discovery Service and cache """
+    if product.is_course_entitlement_product:
+        response = get_course_detail(site, product.attr.UUID)
+    else:
+        response = get_course_run_detail(site, CourseKey.from_string(product.attr.course_key))
+    return response
 
 
 def get_course_catalogs(site, resource_id=None):
@@ -67,27 +118,12 @@ def get_course_catalogs(site, resource_id=None):
         Timeout: requests exception "Timeout"
 
     """
-    resource = 'catalogs'
-    base_cache_key = '{}.catalog.api.data'.format(site.domain)
-
-    cache_key = u'{}.{}'.format(base_cache_key, resource_id) if resource_id else base_cache_key
-    cache_key = hashlib.md5(cache_key.encode('utf-8')).hexdigest()
-
-    cached_response = TieredCache.get_cached_response(cache_key)
-    if cached_response.is_found:
-        return cached_response.value
-
-    api = site.siteconfiguration.discovery_api_client
-    endpoint = getattr(api, resource)
-    response = endpoint(resource_id).get()
-
-    if resource_id:
-        results = response
-    else:
-        results = deprecated_traverse_pagination(response, endpoint)
-
-    TieredCache.set_all_tiers(cache_key, results, settings.COURSES_API_CACHE_TIMEOUT)
-    return results
+    resource = "catalogs"
+    cache_key = get_cache_key(
+        site_domain=site.domain,
+        resource=resource if resource_id is None else "{}-{}".format(resource, resource_id)
+    )
+    return _get_discovery_response(site, cache_key, 'catalogs', resource_id)
 
 
 def get_certificate_type_display_value(certificate_type):

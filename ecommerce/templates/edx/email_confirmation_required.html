@@ -14,7 +14,9 @@
             <div class="enrollment-message-container">
                 <h2 class="enrollment-message">
                   {% trans "You are enrolling in: " as tmsg %}{{ tmsg | force_escape }}
-                  <span class="course-title">{{ course_name }}</span>
+                    {% for course in courses %}
+                      <span class="course-title">{{ course }}</span>
+                    {% endfor %}
                 </h2>
             </div>
             <div class="instruction">

@@ -1,7 +1,5 @@
 from __future__ import absolute_import
 
-import hashlib
-
 import ddt
 import httpretty
 from edx_django_utils.cache import TieredCache
@@ -9,6 +7,7 @@ from mock import patch
 from opaque_keys.edx.keys import CourseKey
 from requests.exceptions import ConnectionError as ReqConnectionError
 
+from ecommerce.core.utils import get_cache_key
 from ecommerce.coupons.tests.mixins import DiscoveryMockMixin
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.courses.utils import (
@@ -52,6 +51,7 @@ class UtilsTests(DiscoveryTestMixin, DiscoveryMockMixin, TestCase):
         """ Check to see if course info gets cached """
         self.mock_access_token_response()
         if course_run:
+            resource = "course_runs"
             course = CourseFactory(partner=self.partner)
             product = course.create_or_update_seat('verified', None, 100)
             key = CourseKey.from_string(product.attr.course_key)
@@ -59,13 +59,19 @@ class UtilsTests(DiscoveryTestMixin, DiscoveryMockMixin, TestCase):
                 course, discovery_api_url=self.site_configuration.discovery_api_url
             )
         else:
+            resource = "courses"
             product = create_or_update_course_entitlement(
                 'verified', 100, self.partner, 'foo-bar', 'Foo Bar Entitlement')
             key = product.attr.UUID
-            self.mock_course_detail_endpoint(product, discovery_api_url=self.site_configuration.discovery_api_url)
+            self.mock_course_detail_endpoint(
+                discovery_api_url=self.site_configuration.discovery_api_url,
+                course=product
+            )
 
-        cache_key = u'courses_api_detail_{}{}'.format(key, self.partner.short_code)
-        cache_key = hashlib.md5(cache_key.encode('utf-8')).hexdigest()
+        cache_key = get_cache_key(
+            site_domain=self.site.domain,
+            resource="{}-{}".format(resource, key)
+        )
         course_cached_response = TieredCache.get_cached_response(cache_key)
         self.assertFalse(course_cached_response.is_found)
 
@@ -91,7 +97,7 @@ class UtilsTests(DiscoveryTestMixin, DiscoveryMockMixin, TestCase):
         self.mock_access_token_response()
         product = create_or_update_course_entitlement(
             'verified', 100, self.partner, 'foo-bar', 'Foo Bar Entitlement')
-        self.mock_course_detail_endpoint(product, discovery_api_url=self.site_configuration.discovery_api_url)
+        self.mock_course_detail_endpoint(discovery_api_url=self.site_configuration.discovery_api_url, course=product)
 
         with patch.object(TieredCache, 'set_all_tiers', wraps=TieredCache.set_all_tiers) as mocked_set_all_tiers:
             mocked_set_all_tiers.assert_not_called()
@@ -137,8 +143,11 @@ class GetCourseCatalogUtilTests(DiscoveryMockMixin, TestCase):
         Helper method to validate the response from the method
         "get_course_catalogs".
         """
-        cache_key = u'{}.catalog.api.data'.format(self.request.site.domain)
-        cache_key = hashlib.md5(cache_key.encode('utf-8')).hexdigest()
+        resource = "catalogs"
+        cache_key = get_cache_key(
+            site_domain=self.site.domain,
+            resource=resource
+        )
         course_catalogs_cached_response = TieredCache.get_cached_response(cache_key)
         self.assertFalse(course_catalogs_cached_response.is_found)
 
@@ -160,8 +169,11 @@ class GetCourseCatalogUtilTests(DiscoveryMockMixin, TestCase):
         self.mock_catalog_detail_endpoint(self.site_configuration.discovery_api_url)
 
         catalog_id = 1
-        cache_key = u'{}.catalog.api.data.{}'.format(self.request.site.domain, catalog_id)
-        cache_key = hashlib.md5(cache_key.encode('utf-8')).hexdigest()
+        resource = "catalogs"
+        cache_key = get_cache_key(
+            site_domain=self.site.domain,
+            resource="{}-{}".format(resource, catalog_id)
+        )
         course_catalogs_cached_response = TieredCache.get_cached_response(cache_key)
         self.assertFalse(course_catalogs_cached_response.is_found)
 

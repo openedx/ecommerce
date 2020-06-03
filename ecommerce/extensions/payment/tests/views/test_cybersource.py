@@ -118,7 +118,7 @@ class CybersourceSubmitViewTests(CybersourceMixin, TestCase):
 
     def test_missing_basket(self):
         """ Verify the view returns an HTTP 400 status if the basket is missing. """
-        self.assert_basket_retrieval_error(1234)
+        self.assert_basket_retrieval_error(9999)
 
     def test_mismatched_basket_owner(self):
         """ Verify the view returns an HTTP 400 status if the posted basket does not belong to the requesting user. """

@@ -294,8 +294,8 @@ class EnterpriseCustomerConditionTests(EnterpriseServiceMockMixin, DiscoveryTest
         basket.add_product(self.entitlement)
 
         self.mock_course_detail_endpoint(
-            self.entitlement,
-            discovery_api_url=self.site_configuration.discovery_api_url
+            discovery_api_url=self.site_configuration.discovery_api_url,
+            course=self.entitlement
         )
         self.mock_enterprise_learner_api(
             learner_id=self.user.id,
