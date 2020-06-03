@@ -436,7 +436,6 @@ class EnterpriseCouponViewSet(CouponViewSet):
             user__email__in=unredeemed_voucher_assignments.values_list('user_email', flat=True)
         ).values('voucher__code', 'user__email').order_by('user__email').distinct()
 
-
     @action(detail=False, url_path=r'(?P<enterprise_id>.+)/search', permission_classes=[IsAuthenticated])
     @permission_required('enterprise.can_view_coupon', fn=lambda request, enterprise_id: enterprise_id)
     def search(self, request, enterprise_id):     # pylint: disable=unused-argument
