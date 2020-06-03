@@ -414,9 +414,9 @@ class EnterpriseCouponViewSet(CouponViewSet):
         users_having_usages = VoucherApplication.objects.filter(
             voucher__in=vouchers).values_list('user__email', flat=True)
         return OfferAssignment.objects.filter(
-                code__in=vouchers.values_list('code', flat=True),
-                status__in=[OFFER_ASSIGNED, OFFER_ASSIGNMENT_EMAIL_PENDING],
-                user_email__in=users_having_usages
+            code__in=vouchers.values_list('code', flat=True),
+            status__in=[OFFER_ASSIGNED, OFFER_ASSIGNMENT_EMAIL_PENDING],
+            user_email__in=users_having_usages
         ).values('code', 'user_email').order_by('user_email').distinct()
 
     def _get_redeemed_usages(self, vouchers):
