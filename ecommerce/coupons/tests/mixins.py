@@ -58,24 +58,38 @@ class DiscoveryMockMixin:
             content_type='application/json'
         )
 
-    def mock_course_detail_endpoint(self, course, discovery_api_url, course_info=None):
-        """ Mocks the course detail endpoint on the Discovery API. """
+    def mock_course_detail_endpoint(self, discovery_api_url, course=None, course_info=None, course_key=None):
+        """
+        Mocks the course detail endpoint on the Discovery API.
+
+        Either it will look up by course.attr.UUID or course_key.
+        """
         if not course_info:
             course_info = {
                 "course": "edX+DemoX",
                 "key": "edX+DemoX",
-                "uuid": course.attr.UUID,
-                "title": course.title,
+                "title": "edX Demo Course",
                 "short_description": 'Foo',
                 "image": {
                     "src": "/path/to/image.jpg",
                 },
             }
 
+            if course:
+                course_info.update({
+                    "uuid": course.attr.UUID,
+                    "title": course.title
+                })
+
+            if course_key:
+                course_info.update({
+                    "key": course_key
+                })
+
         course_info_json = json.dumps(course_info)
         course_url = '{}courses/{}/'.format(
             discovery_api_url,
-            course.attr.UUID,
+            course_key if course_key else course.attr.UUID,
         )
 
         httpretty.register_uri(
@@ -84,14 +98,19 @@ class DiscoveryMockMixin:
             content_type='application/json'
         )
 
-    def mock_course_detail_endpoint_error(self, course, discovery_api_url, error):
-        """ Mocks the course detail endpoint on the Discovery API to fake a request error. """
+    def mock_course_detail_endpoint_error(self, course_identifier, discovery_api_url, error):
+        """
+        Mocks the course detail endpoint on the Discovery API to fake a request error.
+
+        course_identifier can be course UUID or key.
+        """
+
         def callback(request, uri, headers):  # pylint: disable=unused-argument
             raise error
 
         course_url = '{}courses/{}/'.format(
             discovery_api_url,
-            course.attr.UUID,
+            course_identifier,
         )
 
         httpretty.register_uri(
