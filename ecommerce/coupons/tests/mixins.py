@@ -63,6 +63,7 @@ class DiscoveryMockMixin:
         if not course_info:
             course_info = {
                 "course": "edX+DemoX",
+                "key": "edX+DemoX",
                 "uuid": course.attr.UUID,
                 "title": course.title,
                 "short_description": 'Foo',
@@ -80,6 +81,22 @@ class DiscoveryMockMixin:
         httpretty.register_uri(
             httpretty.GET, course_url,
             body=course_info_json,
+            content_type='application/json'
+        )
+
+    def mock_course_detail_endpoint_error(self, course, discovery_api_url, error):
+        """ Mocks the course detail endpoint on the Discovery API to fake a request error. """
+        def callback(request, uri, headers):  # pylint: disable=unused-argument
+            raise error
+
+        course_url = '{}courses/{}/'.format(
+            discovery_api_url,
+            course.attr.UUID,
+        )
+
+        httpretty.register_uri(
+            httpretty.GET, course_url,
+            body=callback,
             content_type='application/json'
         )
 

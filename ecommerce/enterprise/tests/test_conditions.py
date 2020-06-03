@@ -9,12 +9,14 @@ import httpretty
 import mock
 from oscar.core.loading import get_model
 from oscar.test.factories import BasketFactory, OrderDiscountFactory, OrderFactory
+from requests.exceptions import ConnectionError as ReqConnectionError
 from six.moves import range, zip
 
-from ecommerce.coupons.tests.mixins import CouponMixin
+from ecommerce.coupons.tests.mixins import CouponMixin, DiscoveryMockMixin
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.enterprise.conditions import EnterpriseCustomerCondition
 from ecommerce.enterprise.tests.mixins import EnterpriseServiceMockMixin
+from ecommerce.entitlements.utils import create_or_update_course_entitlement
 from ecommerce.extensions.api.serializers import CouponCodeAssignmentSerializer
 from ecommerce.extensions.basket.utils import basket_add_enterprise_catalog_attribute
 from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
@@ -33,18 +35,29 @@ ConditionalOffer = get_model('offer', 'ConditionalOffer')
 OfferAssignment = get_model('offer', 'OfferAssignment')
 Product = get_model('catalogue', 'Product')
 Voucher = get_model('voucher', 'Voucher')
+StockRecord = get_model('partner', 'StockRecord')
+Catalog = get_model('catalogue', 'Catalog')
+
 LOGGER_NAME = 'ecommerce.programs.conditions'
 
 
 @ddt.ddt
-class EnterpriseCustomerConditionTests(EnterpriseServiceMockMixin, DiscoveryTestMixin, TestCase):
+class EnterpriseCustomerConditionTests(EnterpriseServiceMockMixin, DiscoveryTestMixin, DiscoveryMockMixin, TestCase):
     def setUp(self):
         super(EnterpriseCustomerConditionTests, self).setUp()
         self.user = UserFactory()
         self.condition = factories.EnterpriseCustomerConditionFactory()
+
         self.test_product = ProductFactory(stockrecords__price_excl_tax=10, categories=[])
         self.course_run = CourseFactory(partner=self.partner)
         self.course_run.create_or_update_seat('verified', True, Decimal(100))
+
+        self.entitlement = create_or_update_course_entitlement(
+            'verified', 100, self.partner, 'edX-DemoX', 'edX Demo Entitlement'
+        )
+        self.entitlement_stock_record = StockRecord.objects.filter(product=self.entitlement).first()
+        self.entitlement_catalog = Catalog.objects.create(partner=self.partner)
+        self.entitlement_catalog.stock_records.add(self.entitlement_stock_record)
 
     def test_name(self):
         """ The name should contain the EnterpriseCustomer's name. """
@@ -259,7 +272,10 @@ class EnterpriseCustomerConditionTests(EnterpriseServiceMockMixin, DiscoveryTest
 
     @httpretty.activate
     def test_is_satisfied_no_course_product(self):
-        """ Ensure the condition returns false if the basket contains a product not associated with a course run. """
+        """
+        Ensure the condition returns false if the basket contains a product
+        not associated with a course run or course entitlement.
+        """
         offer = factories.EnterpriseOfferFactory(partner=self.partner, condition=self.condition)
         basket = BasketFactory(site=self.site, owner=self.user)
         basket.add_product(self.test_product)
@@ -268,6 +284,57 @@ class EnterpriseCustomerConditionTests(EnterpriseServiceMockMixin, DiscoveryTest
             enterprise_customer_uuid=str(self.condition.enterprise_customer_uuid),
             course_run_id=self.course_run.id,
         )
+        self.assertFalse(self.condition.is_satisfied(offer, basket))
+
+    @httpretty.activate
+    def test_is_satisfied_with_course_entitlement(self):
+        """ Ensure the condition returns true if the basket contains a course entitlement. """
+        offer = factories.EnterpriseOfferFactory(partner=self.partner, condition=self.condition)
+        basket = BasketFactory(site=self.site, owner=self.user)
+        basket.add_product(self.entitlement)
+
+        self.mock_course_detail_endpoint(
+            self.entitlement,
+            discovery_api_url=self.site_configuration.discovery_api_url
+        )
+        self.mock_enterprise_learner_api(
+            learner_id=self.user.id,
+            enterprise_customer_uuid=str(self.condition.enterprise_customer_uuid),
+            course_run_id=self.course_run.id,
+        )
+        self.mock_catalog_contains_course_runs(
+            [self.entitlement.attr.UUID],
+            self.condition.enterprise_customer_uuid,
+            self.site.siteconfiguration.enterprise_api_url,
+            enterprise_customer_catalog_uuid=self.condition.enterprise_customer_catalog_uuid,
+        )
+
+        self.assertTrue(self.condition.is_satisfied(offer, basket))
+
+    @httpretty.activate
+    def test_is_satisfied_with_course_entitlement_request_error(self):
+        """ Ensure the condition returns False if an error occurs while fetching course details. """
+        offer = factories.EnterpriseOfferFactory(partner=self.partner, condition=self.condition)
+        basket = BasketFactory(site=self.site, owner=self.user)
+        basket.add_product(self.entitlement)
+
+        self.mock_course_detail_endpoint_error(
+            self.entitlement,
+            discovery_api_url=self.site_configuration.discovery_api_url,
+            error=ReqConnectionError
+        )
+        self.mock_enterprise_learner_api(
+            learner_id=self.user.id,
+            enterprise_customer_uuid=str(self.condition.enterprise_customer_uuid),
+            course_run_id=self.course_run.id,
+        )
+        self.mock_catalog_contains_course_runs(
+            [self.entitlement.attr.UUID],
+            self.condition.enterprise_customer_uuid,
+            self.site.siteconfiguration.enterprise_api_url,
+            enterprise_customer_catalog_uuid=self.condition.enterprise_customer_catalog_uuid,
+        )
+
         self.assertFalse(self.condition.is_satisfied(offer, basket))
 
     @httpretty.activate
