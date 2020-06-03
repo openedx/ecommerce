@@ -417,24 +417,19 @@ class EnterpriseCouponViewSet(CouponViewSet):
         if vouchers.first().usage == Voucher.SINGLE_USE:
             return OfferAssignment.objects.none()
 
-        parially_redeemed_assignments = []
-        for voucher in vouchers:
-            users_having_usages = VoucherApplication.objects.filter(
-                voucher=voucher).values_list('user__email', flat=True)
+        redeemed_voucher_user_emails = VoucherApplication.objects.select_related('user').filter(
+            voucher__in=vouchers).values_list('user__email', flat=True)
 
-            assignments = voucher.enterprise_offer.offerassignment_set.filter(
-                code=voucher.code,
-                status__in=[OFFER_ASSIGNED, OFFER_ASSIGNMENT_EMAIL_PENDING],
-                user_email__in=users_having_usages
-            )
+        partial_redeemed_vouchers_assignments = OfferAssignment.objects.filter(
+            code__in=vouchers.values('code'),
+            status__in=[OFFER_ASSIGNED, OFFER_ASSIGNMENT_EMAIL_PENDING],
+            user_email__in=redeemed_voucher_user_emails
+        )
 
-            if assignments.count() == 0:
-                continue
+        partial_redeemed_email_code_pairs = partial_redeemed_vouchers_assignments.values(
+            'code', 'user_email').order_by('user_email')
 
-            parially_redeemed_assignments.append(assignments.first().id)
-
-        return OfferAssignment.objects.filter(
-            id__in=parially_redeemed_assignments).values('code', 'user_email').order_by('user_email')
+        return partial_redeemed_email_code_pairs
 
     def _get_redeemed_usages(self, vouchers):
         """
