@@ -427,7 +427,7 @@ class EnterpriseCouponViewSet(CouponViewSet):
         )
 
         partial_redeemed_email_code_pairs = partial_redeemed_vouchers_assignments.values(
-            'code', 'user_email').order_by('user_email')
+            'code', 'user_email').order_by('user_email').distinct()
 
         return partial_redeemed_email_code_pairs
 
