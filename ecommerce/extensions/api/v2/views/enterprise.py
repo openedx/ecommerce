@@ -411,45 +411,31 @@ class EnterpriseCouponViewSet(CouponViewSet):
         if vouchers.first().usage == Voucher.SINGLE_USE:
             return OfferAssignment.objects.none()
 
-        parially_redeemed_assignments = []
-        for voucher in vouchers:
-            users_having_usages = VoucherApplication.objects.filter(
-                voucher=voucher).values_list('user__email', flat=True)
-
-            assignments = voucher.enterprise_offer.offerassignment_set.filter(
-                code=voucher.code,
+        users_having_usages = VoucherApplication.objects.filter(
+            voucher__in=vouchers).values_list('user__email', flat=True)
+        return OfferAssignment.objects.filter(
+                code__in=vouchers.values_list('code', flat=True),
                 status__in=[OFFER_ASSIGNED, OFFER_ASSIGNMENT_EMAIL_PENDING],
                 user_email__in=users_having_usages
-            )
-
-            if assignments.count() == 0:
-                continue
-
-            parially_redeemed_assignments.append(assignments.first().id)
-
-        return OfferAssignment.objects.filter(
-            id__in=parially_redeemed_assignments).values('code', 'user_email').order_by('user_email')
+        ).values('code', 'user_email').order_by('user_email').distinct()
 
     def _get_redeemed_usages(self, vouchers):
         """
         Returns a queryset containing unique voucher.code and user.email pairs from VoucherApplications.
         Only code and email pairs that have no corresponding active OfferAssignments are returned.
         """
-        voucher_applications = VoucherApplication.objects.filter(voucher__in=vouchers)
-        redeemed_voucher_application_ids = []
-        for voucher_application in voucher_applications:
-            unredeemed_voucher_assignments = OfferAssignment.objects.filter(
-                code=voucher_application.voucher.code,
-                user_email=voucher_application.user.email,
-                status__in=[OFFER_ASSIGNED, OFFER_ASSIGNMENT_EMAIL_PENDING]
-            )
 
-            if unredeemed_voucher_assignments.count() == 0:
-                redeemed_voucher_application_ids.append(voucher_application.id)
+        vouchers_applications = VoucherApplication.objects.filter(voucher__in=vouchers)
+        unredeemed_voucher_assignments = OfferAssignment.objects.filter(
+            code__in=vouchers_applications.values_list('voucher__code', flat=True),
+            user_email__in=vouchers_applications.values_list('user__email', flat=True),
+            status__in=[OFFER_ASSIGNED, OFFER_ASSIGNMENT_EMAIL_PENDING]
+        )
+        return vouchers_applications.exclude(
+            voucher__code__in=unredeemed_voucher_assignments.values_list('code', flat=True),
+            user__email__in=unredeemed_voucher_assignments.values_list('user_email', flat=True)
+        ).values('voucher__code', 'user__email').order_by('user__email').distinct()
 
-        return VoucherApplication.objects.filter(
-            id__in=redeemed_voucher_application_ids
-        ).values('voucher__code', 'user__email').distinct().order_by('user__email')
 
     @action(detail=False, url_path=r'(?P<enterprise_id>.+)/search', permission_classes=[IsAuthenticated])
     @permission_required('enterprise.can_view_coupon', fn=lambda request, enterprise_id: enterprise_id)
