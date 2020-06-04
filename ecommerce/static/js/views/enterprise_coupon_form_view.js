@@ -152,12 +152,12 @@ define([
             },
 
             updateEnterpriseCatalogDetailsLink: function() {
-                var enterpriseAPIURL = this.model.get('enterprise_catalog_url'),
+                var enterpriseAPIURL = this.model.get('enterprise_catalog_content_metadata_url'),
                     enterpriseCatalog = this.$('[name=enterprise_customer_catalog]').val();
 
                 if (enterpriseCatalog) {
                     this.$('#enterprise-catalog-details')
-                        .attr('href', enterpriseAPIURL + enterpriseCatalog)
+                        .attr('href', enterpriseAPIURL)
                         .addClass('external-link')
                         .removeClass('hidden');
                 } else {
