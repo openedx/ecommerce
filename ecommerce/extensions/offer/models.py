@@ -519,10 +519,11 @@ class OfferAssignment(TimeStampedModel):
     )
 
     offer = models.ForeignKey('offer.ConditionalOffer', on_delete=models.CASCADE)
-    code = models.CharField(max_length=128)
-    user_email = models.EmailField()
+    code = models.CharField(max_length=128, db_index=True)
+    user_email = models.EmailField(db_index=True)
     status = models.CharField(
         max_length=255,
+        db_index=True,
         choices=STATUS_CHOICES,
         default=OFFER_ASSIGNMENT_EMAIL_PENDING,
     )
@@ -532,6 +533,12 @@ class OfferAssignment(TimeStampedModel):
         blank=True, on_delete=models.CASCADE
     )
     history = HistoricalRecords()
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['code', 'user_email']),
+            models.Index(fields=['code', 'status']),
+        ]
 
     def __unicode__(self):
         return "{code}-{email}".format(code=self.code, email=self.user_email)
