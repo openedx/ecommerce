@@ -6,7 +6,7 @@ import django_filters
 import six
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
-from django.db.models import Q, prefetch_related_objects
+from django.db.models import Count, ExpressionWrapper, F, OuterRef, PositiveIntegerField, Q, Subquery
 from django.http import Http404
 from django.shortcuts import get_object_or_404
 from edx_rbac.decorators import permission_required
@@ -59,6 +59,9 @@ from ecommerce.extensions.offer.constants import (
     OFFER_ASSIGNMENT_EMAIL_BOUNCED,
     OFFER_ASSIGNMENT_EMAIL_PENDING,
     OFFER_ASSIGNMENT_EMAIL_TEMPLATE_FIELD_LIMIT,
+    OFFER_ASSIGNMENT_REVOKED,
+    OFFER_MAX_USES_DEFAULT,
+    OFFER_REDEEMED,
     VOUCHER_NOT_ASSIGNED,
     VOUCHER_NOT_REDEEMED,
     VOUCHER_PARTIAL_REDEEMED,
@@ -380,16 +383,47 @@ class EnterpriseCouponViewSet(CouponViewSet):
         Returns a queryset containing Vouchers with slots that have not been assigned.
         Unique Vouchers will be included in the final queryset for all types.
         """
-        prefetch_related_objects(vouchers, 'offers', 'offers__condition', 'offers__offerassignment_set')
-        vouchers_with_slots = []
-        for voucher in vouchers:
-            slots_available = voucher.slots_available_for_assignment
-            if slots_available == 0:
-                continue
 
-            vouchers_with_slots.append(voucher.id)
+        # filter out all vouchers that never been assigned to anyone
+        voucher_offer_assignments = OfferAssignment.objects.filter(
+            code__in=vouchers.values_list('code', flat=True)
+        ).exclude(
+            status=OFFER_ASSIGNMENT_REVOKED
+        )
+        applications = VoucherApplication.objects.filter(voucher__in=vouchers)
+        vouchers_never_assigned = vouchers.exclude(
+            code__in=voucher_offer_assignments.values_list('code', flat=True)
+        ).exclude(
+            code__in=applications.values_list('voucher__code', flat=True)
+        )
 
-        return Voucher.objects.filter(id__in=vouchers_with_slots).values('code').order_by('code')
+        # Now filter out vouchers that can be assign to multiple customers but not fully assigned
+        offer_max_uses = vouchers.first().enterprise_offer.max_global_applications or OFFER_MAX_USES_DEFAULT
+        offer_assignments_subquery = OfferAssignment.objects.filter(
+            code=OuterRef('code')
+        ).exclude(
+            status__in=[OFFER_REDEEMED, OFFER_ASSIGNMENT_REVOKED]
+        ).order_by().values('code').annotate(
+            count=Count('*')
+        ).values('count')
+
+        partially_assigned_multi_customer_vouchers = vouchers.filter(
+            usage__in=[Voucher.MULTI_USE, Voucher.ONCE_PER_CUSTOMER]
+        ).annotate(
+            num_assignments=Subquery(
+                queryset=offer_assignments_subquery,
+                output_field=PositiveIntegerField()
+            )
+        ).annotate(
+            usage_count=ExpressionWrapper(
+                F('num_orders') + F('num_assignments'),
+                output_field=PositiveIntegerField()
+            )
+        ).filter(usage_count__lt=offer_max_uses)
+
+        # take union of never assigned and partially assigned
+        assignable_vouchers = partially_assigned_multi_customer_vouchers.union(vouchers_never_assigned)
+        return assignable_vouchers.values('code').order_by('code')
 
     def _get_not_redeemed_usages(self, vouchers):
         """
