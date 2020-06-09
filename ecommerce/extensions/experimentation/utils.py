@@ -19,8 +19,10 @@ def stable_bucketing_hash_group(group_name, group_count, username):
 
     Return the bucket that a user should be in for a given stable bucketing assignment.
 
-    This function has been verified to return the same values as the stable bucketing
-    functions in javascript and the master experiments table.
+    This is duplicated from edx-platform as we frequently base experiments on this
+    mechanism but don't want to create a formal dependency nor create a separate package
+    for one small function. Original is here:
+        https://github.com/edx/edx-platform/blob/master/lms/djangoapps/experiments/stable_bucketing.py
 
     Arguments:
         group_name: The name of the grouping/experiment.
