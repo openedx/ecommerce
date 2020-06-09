@@ -5,6 +5,7 @@ from __future__ import absolute_import, unicode_literals
 
 import csv
 import logging
+from collections import Counter, defaultdict
 from time import sleep
 from uuid import UUID
 
@@ -33,6 +34,16 @@ class Command(BaseCommand):
             dest='data_csv',
             default=None,
             help='Path of csv to read enterprise uuids and opportunity ids.',
+            type=str,
+        )
+
+        parser.add_argument(
+            '--contract-type',
+            action='store',
+            dest='contract_type',
+            default='single',
+            choices=['single', 'multi'],
+            help='Specify type of backfilling',
             type=str,
         )
 
@@ -72,20 +83,41 @@ class Command(BaseCommand):
 
         return data
 
-    def get_enterprise_coupons_batch(self, enterprise_uuids, start, end):
-        logger.info('Fetching new batch of enterprise coupons from indexes: %s to %s', start, end)
-
-        filter_kwargs = {
-            'product_class__name': COUPON_PRODUCT_CLASS_NAME,
-            'attributes__code': 'enterprise_customer_uuid',
-            'attribute_values__value_text__in': enterprise_uuids
+    def read_multi_contracts_csv(self, csv_path):
+        data = {
+            'coupons': defaultdict(list),
+            'offers': defaultdict(list),
+            'ec_uuids': defaultdict(list),
         }
-        return Product.objects.filter(**filter_kwargs)[start:end]
+        with open(csv_path) as csv_file:
+            reader = csv.DictReader(csv_file)
+            for row in reader:
+                if row['ORDER_LINE_OFFER_TYPE'] == 'Voucher':
+                    data['coupons'][row['ORDER_LINE_COUPON_ID']].append(row['OPP_ID'])
+                elif row['ORDER_LINE_OFFER_TYPE'] in ('Site', 'User'):
+                    data['offers'][row['ORDER_LINE_OFFER_ID']].append(row['OPP_ID'])
+                else:
+                    data['ec_uuids'][UUID(row['ENTERPRISE_CUSTOMER_UUID'])].append(row['OPP_ID'])
+
+        # condition the data so that at the end we have only one opportunity id for each coupon/offer
+        for __, category_data in data.items():
+            for category_object_id, opportunity_ids in category_data.items():
+                if len(opportunity_ids) > 1:
+                    most_common_opportunity_id, __ = Counter(opportunity_ids).most_common(1)[0]
+                    category_data[category_object_id] = most_common_opportunity_id
+                else:
+                    category_data[category_object_id] = opportunity_ids[0]
+
+        return data
+
+    def get_enterprise_coupons_batch(self, coupon_filter, start, end):
+        logger.info('Fetching new batch of enterprise coupons from indexes: %s to %s', start, end)
+        return Product.objects.filter(**coupon_filter)[start:end]
 
     def get_enterprise_offers_batch(self, offer_filter, start, end):
         return ConditionalOffer.objects.filter(**offer_filter)[start:end]
 
-    def _backfill_enterprise_coupons(self, data, options):
+    def _backfill_enterprise_coupons(self, data, options, coupon_filter):
         batch_limit = options['batch_limit']
         batch_sleep = options['batch_sleep']
         batch_offset = options['batch_offset']
@@ -93,11 +125,10 @@ class Command(BaseCommand):
 
         logger.info('Started Backfilling Enterprise Coupons...')
 
-        enterprise_uuids = data.keys()
-        coupons = self.get_enterprise_coupons_batch(enterprise_uuids, batch_offset, batch_offset + batch_limit)
+        coupons = self.get_enterprise_coupons_batch(coupon_filter, batch_offset, batch_offset + batch_limit)
         while coupons:
             for coupon in coupons:
-                opportunity_id = data.get(UUID(coupon.attr.enterprise_customer_uuid))
+                opportunity_id = data.get(str(coupon.id)) or data.get(UUID(coupon.attr.enterprise_customer_uuid))
                 if getattr(coupon.attr, 'sales_force_id', None) is None and opportunity_id:
                     logger.info(
                         'Enterprise Coupon updated. CouponID: [%s], OpportunityID: [%s]',
@@ -111,7 +142,7 @@ class Command(BaseCommand):
 
             current_batch_index += len(coupons)
             coupons = self.get_enterprise_coupons_batch(
-                enterprise_uuids, current_batch_index, current_batch_index + batch_limit
+                coupon_filter, current_batch_index, current_batch_index + batch_limit
             )
 
         logger.info('Backfilling for Enterprise Coupons finished.')
@@ -127,13 +158,13 @@ class Command(BaseCommand):
         ent_offers = self.get_enterprise_offers_batch(offer_filter, batch_offset, batch_offset + batch_limit)
         while ent_offers:
             for ent_offer in ent_offers:
-                opportunity_id = data.get(ent_offer.condition.enterprise_customer_uuid)
-                if ent_offer.sales_force_id is None and opportunity_id:
+                opportunity_id = data.get(str(ent_offer.id)) or data.get(ent_offer.condition.enterprise_customer_uuid)
+                if bool(ent_offer.sales_force_id) is False and opportunity_id:
                     logger.info(
                         '[%s] Offer updated. OfferID: [%s], OpportunityID: [%s]',
+                        log_prefix,
                         ent_offer.id,
                         opportunity_id,
-                        log_prefix
                     )
                     ent_offer.sales_force_id = opportunity_id
                     ent_offer.save()
@@ -148,9 +179,21 @@ class Command(BaseCommand):
         logger.info('[%s] Backfilling for Offers finished.', log_prefix)
 
     def handle(self, *args, **options):
+        if options['contract_type'] == 'single':
+            logger.info('Backfilling for single contracts.')
+            self.backfill_single_contracts(options)
+        elif options['contract_type'] == 'multi':
+            logger.info('Backfilling for multi contracts.')
+            self.backfill_multi_contracts(options)
+
+    def backfill_single_contracts(self, options):
         data = self.read_csv(options['data_csv'])
 
-        self._backfill_enterprise_coupons(data, options)
+        self._backfill_enterprise_coupons(data, options, {
+            'product_class__name': COUPON_PRODUCT_CLASS_NAME,
+            'attributes__code': 'enterprise_customer_uuid',
+            'attribute_values__value_text__in': data.keys()
+        })
         self._backfill_offers(data, options, {
             'offer_type': ConditionalOffer.SITE,
             'priority': OFFER_PRIORITY_ENTERPRISE,
@@ -160,4 +203,38 @@ class Command(BaseCommand):
             'offer_type': ConditionalOffer.USER,
             'priority': OFFER_PRIORITY_MANUAL_ORDER,
             'condition__enterprise_customer_uuid__in': data.keys(),
+        }, 'ENTERPRISE MANUAL ORDER OFFER')
+
+    def backfill_multi_contracts(self, options):
+        data = self.read_multi_contracts_csv(options['data_csv'])
+
+        coupons_data = data['coupons']
+        self._backfill_enterprise_coupons(coupons_data, options, {
+            'product_class__name': COUPON_PRODUCT_CLASS_NAME,
+            'id__in': coupons_data.keys()
+        })
+
+        offers_data = data['offers']
+        self._backfill_offers(offers_data, options, {
+            'offer_type__in': (ConditionalOffer.SITE, ConditionalOffer.USER),
+            'priority__in': (OFFER_PRIORITY_ENTERPRISE, OFFER_PRIORITY_MANUAL_ORDER),
+            'id__in': offers_data.keys(),
+        }, 'ALL ENTERPRISE OFFERS')
+
+        # backfill coupons and offers missing both coupon id and offer id
+        ec_uuids = data['ec_uuids']
+        self._backfill_enterprise_coupons(ec_uuids, options, {
+            'product_class__name': COUPON_PRODUCT_CLASS_NAME,
+            'attributes__code': 'enterprise_customer_uuid',
+            'attribute_values__value_text__in': ec_uuids.keys()
+        })
+        self._backfill_offers(ec_uuids, options, {
+            'offer_type': ConditionalOffer.SITE,
+            'priority': OFFER_PRIORITY_ENTERPRISE,
+            'condition__enterprise_customer_uuid__in': ec_uuids.keys(),
+        }, 'ENTERPRISE OFFER')
+        self._backfill_offers(ec_uuids, options, {
+            'offer_type': ConditionalOffer.USER,
+            'priority': OFFER_PRIORITY_MANUAL_ORDER,
+            'condition__enterprise_customer_uuid__in': ec_uuids.keys(),
         }, 'ENTERPRISE MANUAL ORDER OFFER')
