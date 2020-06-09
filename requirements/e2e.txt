@@ -5,11 +5,11 @@
 #    make upgrade
 #
 attrs==19.3.0             # via pytest
-certifi==2020.4.5.1       # via requests
+certifi==2020.4.5.2       # via requests
 chardet==3.0.4            # via requests
 edx-rest-api-client==1.9.2  # via -c requirements/pins.txt, -r requirements/e2e.in
 idna==2.9                 # via requests
-importlib-metadata==1.6.0  # via pluggy, pytest, pytest-randomly
+importlib-metadata==1.6.1  # via pluggy, pytest, pytest-randomly
 more-itertools==8.3.0     # via pytest
 packaging==20.4           # via pytest
 pathlib2==2.3.5           # via pytest
@@ -31,5 +31,5 @@ selenium==3.141.0         # via -r requirements/e2e.in, pytest-selenium
 six==1.15.0               # via packaging, pathlib2
 slumber==0.7.1            # via edx-rest-api-client
 urllib3==1.25.9           # via -c requirements/pins.txt, requests, selenium
-wcwidth==0.2.3            # via pytest
+wcwidth==0.2.4            # via pytest
 zipp==1.2.0               # via importlib-metadata

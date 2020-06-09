@@ -17,7 +17,7 @@ bleach==3.1.5             # via -r requirements/base.txt
 bok-choy==1.1.1           # via -r requirements/test.in
 cached-property==1.5.1    # via -r requirements/base.txt, zeep
 celery==3.1.26.post2      # via -r requirements/base.txt, edx-ecommerce-worker
-certifi==2020.4.5.1       # via -r requirements/base.txt, -r requirements/e2e.txt, requests
+certifi==2020.4.5.2       # via -r requirements/base.txt, -r requirements/e2e.txt, requests
 cffi==1.14.0              # via -r requirements/base.txt, cryptography
 chardet==3.0.4            # via -r requirements/base.txt, -r requirements/e2e.txt, requests
 coreapi==2.3.3            # via -r requirements/base.txt, django-rest-swagger, openapi-codec
@@ -28,7 +28,7 @@ cssselect==1.1.0          # via -r requirements/base.txt, premailer
 cssutils==1.0.2           # via -r requirements/base.txt, premailer
 ddt==1.4.1                # via -r requirements/test.in
 defusedxml==0.6.0         # via -r requirements/base.txt, python3-openid, social-auth-core, zeep
-diff-cover==3.0.0         # via -r requirements/test.in
+diff-cover==3.0.1         # via -r requirements/test.in
 django-appconf==1.0.4     # via -r requirements/base.txt, django-compressor
 django-compressor==2.4    # via -r requirements/base.txt, django-libsass
 django-cors-headers==3.3.0  # via -r requirements/base.txt
@@ -36,7 +36,7 @@ django-crispy-forms==1.8.1  # via -r requirements/base.txt
 django-crum==0.7.6        # via -r requirements/base.txt, edx-rbac
 django-extensions==2.2.9  # via -r requirements/base.txt
 django-extra-views==0.11.0  # via -r requirements/base.txt, django-oscar
-django-filter==2.2.0      # via -r requirements/base.txt
+django-filter==2.3.0      # via -r requirements/base.txt
 django-haystack==2.8.1    # via -r requirements/base.txt, django-oscar
 django-libsass==0.8       # via -r requirements/base.txt
 django-model-utils==4.0.0  # via -r requirements/base.txt, edx-rbac
@@ -59,7 +59,7 @@ drf-jwt==1.14.0           # via -c requirements/pins.txt, -r requirements/base.t
 edx-auth-backends==3.1.0  # via -r requirements/base.txt
 edx-django-release-util==0.4.4  # via -r requirements/base.txt
 edx-django-sites-extensions==2.5.1  # via -r requirements/base.txt
-edx-django-utils==3.2.2   # via -r requirements/base.txt, edx-drf-extensions
+edx-django-utils==3.2.3   # via -r requirements/base.txt, edx-drf-extensions
 edx-drf-extensions==6.0.0  # via -r requirements/base.txt, edx-rbac
 edx-ecommerce-worker==0.7.2  # via -r requirements/base.txt
 edx-i18n-tools==0.5.3     # via -r requirements/test.in
@@ -73,7 +73,7 @@ freezegun==0.3.15         # via -r requirements/test.in
 future==0.18.2            # via -r requirements/base.txt, pyjwkest
 httpretty==0.9.7          # via -c requirements/pins.txt, -r requirements/test.in
 idna==2.9                 # via -r requirements/base.txt, -r requirements/e2e.txt, requests
-importlib-metadata==1.6.0  # via -r requirements/e2e.txt, -r requirements/tox.txt, inflect, pluggy, pytest, pytest-randomly, tox
+importlib-metadata==1.6.1  # via -r requirements/e2e.txt, -r requirements/tox.txt, inflect, pluggy, pytest, pytest-randomly, tox
 inflect==3.0.2            # via jinja2-pluralize
 isodate==0.6.0            # via -r requirements/base.txt, zeep
 isort==4.3.21             # via -r requirements/test.in, pylint
@@ -102,7 +102,7 @@ path.py==7.2              # via -r requirements/base.txt, edx-i18n-tools
 pathlib2==2.3.5           # via -r requirements/e2e.txt, pytest
 paypalrestsdk==1.13.1     # via -r requirements/base.txt
 pbr==5.4.5                # via -r requirements/base.txt, stevedore
-phonenumbers==8.12.4      # via -r requirements/base.txt, django-oscar, django-phonenumber-field
+phonenumbers==8.12.5      # via -r requirements/base.txt, django-oscar, django-phonenumber-field
 pillow==7.1.2             # via -r requirements/base.txt, django-oscar
 pluggy==0.13.1            # via -r requirements/e2e.txt, -r requirements/tox.txt, diff-cover, pytest, tox
 polib==1.1.0              # via edx-i18n-tools
@@ -171,7 +171,7 @@ uritemplate==3.0.1        # via -r requirements/base.txt, coreapi
 urllib3==1.25.9           # via -c requirements/pins.txt, -r requirements/base.txt, -r requirements/e2e.txt, requests, selenium
 virtualenv==16.7.9        # via -c requirements/pins.txt, -r requirements/tox.txt, tox
 waitress==1.4.4           # via webtest
-wcwidth==0.2.3            # via -r requirements/e2e.txt, pytest
+wcwidth==0.2.4            # via -r requirements/e2e.txt, pytest
 webencodings==0.5.1       # via -r requirements/base.txt, bleach
 webob==1.8.6              # via webtest
 webtest==2.0.35           # via django-webtest
