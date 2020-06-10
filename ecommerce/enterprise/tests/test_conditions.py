@@ -381,45 +381,57 @@ class EnterpriseCustomerConditionTests(EnterpriseServiceMockMixin, DiscoveryTest
     @ddt.data(
         {
             'discount_type': Benefit.PERCENTAGE,
+            'total_discount': Decimal(4800),
+            'benefit_value': 100,
+            'is_satisfied': True
+        },
+        {
+            'discount_type': Benefit.PERCENTAGE,
             'total_discount': Decimal(4900),
+            'benefit_value': 50,
             'is_satisfied': True
         },
         {
             'discount_type': Benefit.PERCENTAGE,
-            'total_discount': Decimal(4950),
-            'is_satisfied': True
-        },
-        {
-            'discount_type': Benefit.PERCENTAGE,
-            'total_discount': Decimal(4980),
+            'total_discount': Decimal(4910),
+            'benefit_value': 50,
             'is_satisfied': False
         },
         {
             'discount_type': Benefit.FIXED,
-            'total_discount': Decimal(4900),
+            'total_discount': Decimal(4800),
+            'benefit_value': 300,
             'is_satisfied': True
         },
         {
             'discount_type': Benefit.FIXED,
+            'total_discount': Decimal(4810),
+            'benefit_value': 300,
+            'is_satisfied': False
+        },
+        {
+            'discount_type': Benefit.FIXED,
             'total_discount': Decimal(4930),
+            'benefit_value': 70,
             'is_satisfied': True
         },
         {
             'discount_type': Benefit.FIXED,
             'total_discount': Decimal(4980),
+            'benefit_value': 70,
             'is_satisfied': False
         },
     )
     @ddt.unpack
     @httpretty.activate
-    def test_offer_availability_with_max_discount(self, discount_type, total_discount, is_satisfied):
+    def test_offer_availability_with_max_discount(self, discount_type, total_discount, benefit_value, is_satisfied):
         """
         Verify that enterprise offer with discount type percentage and absolute, condition returns correct result
         based on total_discount(consumed discount so far) and discount on course price covered by the offer.
         """
         benefits = {
-            Benefit.PERCENTAGE: factories.EnterprisePercentageDiscountBenefitFactory(value=50),
-            Benefit.FIXED: factories.EnterpriseAbsoluteDiscountBenefitFactory(value=70),
+            Benefit.PERCENTAGE: factories.EnterprisePercentageDiscountBenefitFactory(value=benefit_value),
+            Benefit.FIXED: factories.EnterpriseAbsoluteDiscountBenefitFactory(value=benefit_value),
         }
 
         offer = factories.EnterpriseOfferFactory(
@@ -430,6 +442,11 @@ class EnterpriseCustomerConditionTests(EnterpriseServiceMockMixin, DiscoveryTest
         )
         basket = BasketFactory(site=self.site, owner=self.user)
         basket.add_product(self.course_run.seat_products[0])
+        basket.add_product(self.entitlement)
+        self.mock_course_detail_endpoint(
+            discovery_api_url=self.site_configuration.discovery_api_url,
+            course=self.entitlement
+        )
         self.mock_catalog_contains_course_runs(
             [self.course_run.id],
             self.condition.enterprise_customer_uuid,
@@ -442,55 +459,73 @@ class EnterpriseCustomerConditionTests(EnterpriseServiceMockMixin, DiscoveryTest
         {
             'discount_type': Benefit.PERCENTAGE,
             'num_prev_orders': 6,
+            'benefit_value': 50,
             'is_satisfied': False
         },
         {
             'discount_type': Benefit.PERCENTAGE,
             'num_prev_orders': 5,
+            'benefit_value': 50,
             'is_satisfied': True
         },
         {
             'discount_type': Benefit.PERCENTAGE,
             'num_prev_orders': 0,
+            'benefit_value': 50,
             'is_satisfied': True
         },
         {
             'discount_type': Benefit.FIXED,
             'num_prev_orders': 6,
+            'benefit_value': 100,
             'is_satisfied': False
         },
         {
             'discount_type': Benefit.FIXED,
             'num_prev_orders': 5,
+            'benefit_value': 300,
+            'is_satisfied': False
+        },
+        {
+            'discount_type': Benefit.FIXED,
+            'num_prev_orders': 5,
+            'benefit_value': 100,
             'is_satisfied': True
         },
         {
             'discount_type': Benefit.FIXED,
             'num_prev_orders': 0,
+            'benefit_value': 150,
             'is_satisfied': True
         },
     )
     @ddt.unpack
     @httpretty.activate
-    def test_offer_availability_with_max_user_discount(self, discount_type, num_prev_orders, is_satisfied):
+    def test_offer_availability_with_max_user_discount(
+            self, discount_type, num_prev_orders, benefit_value, is_satisfied):
         """
         Verify that enterprise offer with discount type percentage and absolute, condition returns correct result
         based on user limits in the offer.
         """
         benefits = {
-            Benefit.PERCENTAGE: factories.EnterprisePercentageDiscountBenefitFactory(value=50),
-            Benefit.FIXED: factories.EnterpriseAbsoluteDiscountBenefitFactory(value=50),
+            Benefit.PERCENTAGE: factories.EnterprisePercentageDiscountBenefitFactory(value=benefit_value),
+            Benefit.FIXED: factories.EnterpriseAbsoluteDiscountBenefitFactory(value=benefit_value),
         }
         offer = factories.EnterpriseOfferFactory(
             partner=self.partner,
             benefit=benefits[discount_type],
-            max_user_discount=100
+            max_user_discount=150
         )
         for _ in range(num_prev_orders):
             order = OrderFactory(user=self.user, status=ORDER.COMPLETE)
             OrderDiscountFactory(order=order, offer_id=offer.id, amount=10)
         basket = BasketFactory(site=self.site, owner=self.user)
         basket.add_product(self.course_run.seat_products[0])
+        basket.add_product(self.entitlement)
+        self.mock_course_detail_endpoint(
+            discovery_api_url=self.site_configuration.discovery_api_url,
+            course=self.entitlement
+        )
         self.mock_catalog_contains_course_runs(
             [self.course_run.id],
             self.condition.enterprise_customer_uuid,

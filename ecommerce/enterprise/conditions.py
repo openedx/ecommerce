@@ -41,7 +41,7 @@ def is_offer_max_user_discount_available(basket, offer):
     # no need to do anything if this is not an enterprise offer or `user_max_discount` is not set
     if offer.priority != OFFER_PRIORITY_ENTERPRISE or offer.max_user_discount is None:
         return True
-    discount_value = _get_course_discount_value(basket, offer)
+    discount_value = _get_basket_discount_value(basket, offer)
     # check if offer has discount available for user
     sum_user_discounts_for_this_offer = OrderDiscount.objects.filter(
         offer_id=offer.id, order__user_id=basket.owner.id, order__status=ORDER.COMPLETE
@@ -58,7 +58,7 @@ def is_offer_max_discount_available(basket, offer):
     # no need to do anything if this is not an enterprise offer or `max_discount` is not set
     if offer.priority != OFFER_PRIORITY_ENTERPRISE or offer.max_discount is None:
         return True
-    discount_value = _get_course_discount_value(basket, offer)
+    discount_value = _get_basket_discount_value(basket, offer)
     # check if offer has discount available
     new_total_discount = discount_value + offer.total_discount
     if new_total_discount <= offer.max_discount:
@@ -67,25 +67,21 @@ def is_offer_max_discount_available(basket, offer):
     return False
 
 
-def _get_course_discount_value(basket, offer):
+def _get_basket_discount_value(basket, offer):
     """Calculate the discount value based on benefit type and value"""
-    product = basket.lines.first().product
-    seat = product.course.seat_products.get(id=product.id)
-    stock_record = StockRecord.objects.get(product=seat, partner=product.course.partner)
-    course_price = stock_record.price_excl_tax
-
+    sum_basket_lines = basket.all_lines().aggregate(total=Sum('stockrecord__price_excl_tax'))['total'] or Decimal(0.0)
     # calculate discount value that will be covered by the offer
     benefit_type = get_benefit_type(offer.benefit)
     benefit_value = offer.benefit.value
     if benefit_type == Benefit.PERCENTAGE:
-        discount_value = get_discount_value(float(offer.benefit.value), float(course_price))
+        discount_value = get_discount_value(float(offer.benefit.value), float(sum_basket_lines))
         discount_value = Decimal(discount_value)
     else:  # Benefit.FIXED
-        # There is a possibility that the discount value could be greater than the course price
-        # ie, discount value is $100, course price is $75, in this case the full price of the course will be covered
-        # and learner will owe $0 to checkout.
-        if benefit_value > course_price:
-            discount_value = course_price
+        # There is a possibility that the discount value could be greater than the sum of basket lines
+        # ie, discount value is $100, basket lines are $75, in this case the full price of the basket lines
+        # will be covered and learner will owe $0 to checkout.
+        if benefit_value > sum_basket_lines:
+            discount_value = sum_basket_lines
         else:
             discount_value = benefit_value
     return discount_value
