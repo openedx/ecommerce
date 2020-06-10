@@ -452,7 +452,7 @@ class BasketAddItemsView(BasketLogicMixin, APIView):
                 if not (len(available_products) == 1 and available_products[0].is_enrollment_code_product):
                     # Display an error message when an invalid code is passed as a parameter
                     invalid_code = code
-            return self._redirect_response_to_basket_or_payment(request, skus, invalid_code)
+            return self._redirect_response_to_basket_or_payment(request, invalid_code)
 
         except BadRequestException as e:
             return HttpResponseBadRequest(six.text_type(e))
@@ -500,7 +500,7 @@ class BasketAddItemsView(BasketLogicMixin, APIView):
             defaults={'value_text': request.GET.get('email_opt_in') == 'true'},
         )
 
-    def _redirect_response_to_basket_or_payment(self, request, skus, invalid_code=None):
+    def _redirect_response_to_basket_or_payment(self, request, invalid_code=None):
         redirect_url = get_payment_microfrontend_or_basket_url(request)
         redirect_url = add_utm_params_to_url(redirect_url, list(self.request.GET.items()))
         redirect_url = add_invalid_code_message_to_url(redirect_url, invalid_code)
