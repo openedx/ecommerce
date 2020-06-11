@@ -6,14 +6,21 @@ from uuid import uuid4
 import httpretty
 import requests
 from django.conf import settings
+from oscar.core.loading import get_model
+from oscar.test import factories
 from six.moves.urllib.parse import urlencode  # pylint: disable=import-error
 
+from ecommerce.core.constants import COUPON_PRODUCT_CLASS_NAME
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.extensions.test.factories import (
+    ConditionalOfferFactory,
     EnterpriseCustomerConditionFactory,
     EnterpriseOfferFactory,
     EnterprisePercentageDiscountBenefitFactory
 )
+from ecommerce.extensions.voucher.models import CouponVouchers
+
+ProductClass = get_model('catalogue', 'ProductClass')
 
 
 def raise_timeout(request, uri, headers):  # pylint: disable=unused-argument
@@ -584,3 +591,71 @@ class EnterpriseServiceMockMixin:
             body=body,
             content_type='application/json'
         )
+
+
+class EnterpriseDiscountTestMixin:
+    """
+    Test mixin for EnterpriseDiscountMixin.
+    """
+
+    def setUp(self):
+        super(EnterpriseDiscountTestMixin, self).setUp()
+        self.discount_offer = self._create_enterprise_offer()
+
+    @staticmethod
+    def create_coupon_product():
+        """
+        Create the product of coupon type and return it.
+        """
+        coupon_product_class, _ = ProductClass.objects.get_or_create(name=COUPON_PRODUCT_CLASS_NAME)
+        return factories.create_product(
+            product_class=coupon_product_class,
+            title='Test product'
+        )
+
+    @staticmethod
+    def _create_enterprise_offer():
+        """
+        Return the enterprise offer.
+        """
+        return ConditionalOfferFactory.create(
+            benefit_id=EnterprisePercentageDiscountBenefitFactory.create().id,
+            condition_id=EnterpriseCustomerConditionFactory.create().id,
+        )
+
+    def _create_coupon_and_voucher(self, enterprise_contract_metadata=None):
+        """
+        Create and link the coupon product and voucher, and return the coupon_code and voucher.
+        """
+        coupon = self.create_coupon_product()
+        voucher = factories.VoucherFactory()
+        voucher.offers.add(self.discount_offer)
+        coupon_vouchers = CouponVouchers.objects.create(coupon=coupon)
+        coupon_vouchers.vouchers.add(voucher)
+
+        coupon.attr.enterprise_contract_metadata = enterprise_contract_metadata
+        coupon.attr.coupon_vouchers = coupon_vouchers
+        coupon.save()
+        return coupon.attr.coupon_vouchers.vouchers.first().code, voucher
+
+    def create_order_offer_discount(self, order, enterprise_contract_metadata=None):
+        """
+        Create the offer discount for order.
+        """
+        self.discount_offer.enterprise_contract_metadata = enterprise_contract_metadata
+        self.discount_offer.save()
+        discount = order.discounts.create()
+        discount.offer_id = self.discount_offer.id
+        discount.save()
+
+    def create_order_voucher_discount(self, order, enterprise_contract_metadata=None):
+        """
+        Create the voucher discount for order.
+        """
+        code, voucher = self._create_coupon_and_voucher(
+            enterprise_contract_metadata=enterprise_contract_metadata
+        )
+        discount = order.discounts.create()
+        discount.voucher_id = voucher.id
+        discount.voucher_code = code
+        discount.save()
