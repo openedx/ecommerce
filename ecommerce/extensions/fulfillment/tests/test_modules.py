@@ -21,7 +21,6 @@ from testfixtures import LogCapture
 from waffle.testutils import override_switch
 
 from ecommerce.core.constants import (
-    COUPON_PRODUCT_CLASS_NAME,
     COURSE_ENTITLEMENT_PRODUCT_CLASS_NAME,
     DONATIONS_FROM_CHECKOUT_TESTS_PRODUCT_TYPE_NAME,
     ENROLLMENT_CODE_PRODUCT_CLASS_NAME,
@@ -35,6 +34,7 @@ from ecommerce.courses.models import Course
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.courses.utils import mode_for_product
 from ecommerce.enterprise.conditions import EnterpriseCustomerCondition
+from ecommerce.enterprise.tests.mixins import EnterpriseDiscountTestMixin
 from ecommerce.entitlements.utils import create_or_update_course_entitlement
 from ecommerce.extensions.basket.constants import PURCHASER_BEHALF_ATTRIBUTE
 from ecommerce.extensions.basket.utils import basket_add_organization_attribute
@@ -49,12 +49,7 @@ from ecommerce.extensions.fulfillment.modules import (
 from ecommerce.extensions.fulfillment.status import LINE
 from ecommerce.extensions.fulfillment.tests.mixins import FulfillmentTestMixin
 from ecommerce.extensions.payment.models import EnterpriseContractMetadata
-from ecommerce.extensions.test.factories import (
-    ConditionalOfferFactory,
-    EnterpriseCustomerConditionFactory,
-    EnterprisePercentageDiscountBenefitFactory,
-    create_order
-)
+from ecommerce.extensions.test.factories import create_order
 from ecommerce.extensions.voucher.models import OrderLineVouchers
 from ecommerce.extensions.voucher.utils import create_vouchers
 from ecommerce.programs.tests.mixins import ProgramTestMixin
@@ -80,7 +75,13 @@ Voucher = get_model('voucher', 'Voucher')
 
 @ddt.ddt
 @override_settings(EDX_API_KEY='foo')
-class EnrollmentFulfillmentModuleTests(ProgramTestMixin, DiscoveryTestMixin, FulfillmentTestMixin, TestCase):
+class EnrollmentFulfillmentModuleTests(
+        EnterpriseDiscountTestMixin,
+        ProgramTestMixin,
+        DiscoveryTestMixin,
+        FulfillmentTestMixin,
+        TestCase
+):
     """Test course seat fulfillment."""
 
     course_id = 'edX/DemoX/Demo_Course'
@@ -123,13 +124,7 @@ class EnrollmentFulfillmentModuleTests(ProgramTestMixin, DiscoveryTestMixin, Ful
 
     def prepare_basket_with_voucher(self, program_uuid=None):
         catalog = Catalog.objects.create(partner=self.partner)
-
-        coupon_product_class, _ = ProductClass.objects.get_or_create(name=COUPON_PRODUCT_CLASS_NAME)
-        coupon = factories.create_product(
-            product_class=coupon_product_class,
-            title='Test product'
-        )
-
+        coupon = self.create_coupon_product()
         stock_record = StockRecord.objects.filter(product=self.seat).first()
         catalog.stock_records.add(stock_record)
 
@@ -239,23 +234,15 @@ class EnrollmentFulfillmentModuleTests(ProgramTestMixin, DiscoveryTestMixin, Ful
         """
         httpretty.register_uri(httpretty.POST, get_lms_enrollment_api_url(), status=200, body='{}', content_type=JSON)
         self.create_seat_and_order(certificate_type='credit', provider='MIT')
-        discount = self.order.discounts.create()
 
-        benefit = EnterprisePercentageDiscountBenefitFactory.create()
-        condition = EnterpriseCustomerConditionFactory.create()
-        offer = ConditionalOfferFactory.create(
-            benefit_id=benefit.id,
-            condition_id=condition.id,
+        self.create_order_offer_discount(
+            self.order,
+            enterprise_contract_metadata=EnterpriseContractMetadata.objects.create(
+                discount_type=EnterpriseContractMetadata.FIXED,
+                discount_value=Decimal('200.00'),
+                amount_paid=Decimal('500.00')
+            )
         )
-        ecm = EnterpriseContractMetadata.objects.create(
-            discount_type=EnterpriseContractMetadata.FIXED,
-            discount_value=Decimal('200.00'),
-            amount_paid=Decimal('500.00')
-        )
-        offer.enterprise_contract_metadata = ecm
-        offer.save()
-        discount.offer_id = offer.id
-        discount.save()
         basket_strategy = self.order.basket.strategy
         self.order.refresh_from_db()
         # restore lost basket strategy after call to refresh_from_db
@@ -265,8 +252,12 @@ class EnrollmentFulfillmentModuleTests(ProgramTestMixin, DiscoveryTestMixin, Ful
             mock_contains.return_value = True
             with mock.patch.object(EnterpriseCustomerCondition, 'is_satisfied') as mock_satisfied:
                 mock_satisfied.return_value = True
-                Applicator().apply_offers(self.order.basket, [offer])
-            __, lines = EnrollmentFulfillmentModule().fulfill_product(self.order, list(self.order.lines.all()))
+                with mock.patch(
+                        "ecommerce.extensions.fulfillment.modules.get_or_create_enterprise_customer_user"
+                ) as mock_get_or_create_enterprise_customer_user:
+                    mock_get_or_create_enterprise_customer_user.return_value = mock.Mock()
+                    Applicator().apply_offers(self.order.basket, [self.discount_offer])
+                    __, lines = EnrollmentFulfillmentModule().fulfill_product(self.order, list(self.order.lines.all()))
 
         # No exceptions should be raised and the order should be fulfilled
         self.assertEqual(lines[0].status, 'Complete')
@@ -283,16 +274,10 @@ class EnrollmentFulfillmentModuleTests(ProgramTestMixin, DiscoveryTestMixin, Ful
         """
         httpretty.register_uri(httpretty.POST, get_lms_enrollment_api_url(), status=200, body='{}', content_type=JSON)
         self.create_seat_and_order(certificate_type='credit', provider='MIT')
-        discount = self.order.discounts.create()
 
-        benefit = EnterprisePercentageDiscountBenefitFactory.create()
-        condition = EnterpriseCustomerConditionFactory.create()
-        offer = ConditionalOfferFactory.create(
-            benefit_id=benefit.id,
-            condition_id=condition.id,
-        )
-        discount.offer_id = offer.id
-        discount.save()
+        # Creating order discount without EnterpriseContractMetadata object.
+        self.create_order_offer_discount(self.order)
+
         basket_strategy = self.order.basket.strategy
         self.order.refresh_from_db()
         # restore lost basket strategy after call to refresh_from_db
@@ -302,7 +287,7 @@ class EnrollmentFulfillmentModuleTests(ProgramTestMixin, DiscoveryTestMixin, Ful
             mock_contains.return_value = True
             with mock.patch.object(EnterpriseCustomerCondition, 'is_satisfied') as mock_satisfied:
                 mock_satisfied.return_value = True
-                Applicator().apply_offers(self.order.basket, [offer])
+                Applicator().apply_offers(self.order.basket, [self.discount_offer])
             __, lines = EnrollmentFulfillmentModule().fulfill_product(self.order, list(self.order.lines.all()))
 
         # No exceptions should be raised and the order should be fulfilled
@@ -554,38 +539,6 @@ class EnrollmentFulfillmentModuleTests(ProgramTestMixin, DiscoveryTestMixin, Ful
         __, lines = EnrollmentFulfillmentModule().fulfill_product(self.order, list(self.order.lines.all()))
         # No exceptions should be raised and the order should be fulfilled
         self.assertEqual(lines[0].status, 'Complete')
-
-    def test_calculate_effective_discount_percentage_percentage(self):
-        """
-        Test correct values for discount percentage are evaluated when discount
-        type is PERCENTAGE.
-        """
-        module = EnrollmentFulfillmentModule()
-        ecm = EnterpriseContractMetadata(
-            discount_type=EnterpriseContractMetadata.PERCENTAGE,
-            discount_value=Decimal('12.3456'),
-            amount_paid=Decimal('12000.00')
-        )
-        # pylint: disable=protected-access
-        actual = module._calculate_effective_discount_percentage(ecm)
-        expected = Decimal('.123456')
-        self.assertEqual(actual, expected)
-
-    def test_calculate_effective_discount_percentage_fixed(self):
-        """
-        Test correct values for discount percentage are evaluated when discount
-        type is FIXED.
-        """
-        module = EnrollmentFulfillmentModule()
-        ecm = EnterpriseContractMetadata(
-            discount_type=EnterpriseContractMetadata.FIXED,
-            discount_value=Decimal('12.3456'),
-            amount_paid=Decimal('12000.00')
-        )
-        # pylint: disable=protected-access
-        actual = module._calculate_effective_discount_percentage(ecm)
-        expected = Decimal('12.3456') / (Decimal('12.3456') + Decimal('12000.00'))
-        self.assertEqual(actual, expected)
 
 
 class CouponFulfillmentModuleTest(CouponMixin, FulfillmentTestMixin, TestCase):
@@ -962,7 +915,8 @@ class EnrollmentCodeFulfillmentModuleTests(DiscoveryTestMixin, TestCase):
             )
 
 
-class EntitlementFulfillmentModuleTests(FulfillmentTestMixin, TestCase):
+@ddt.ddt
+class EntitlementFulfillmentModuleTests(FulfillmentTestMixin, EnterpriseDiscountTestMixin, TestCase):
     """ Test Course Entitlement Fulfillment """
 
     def setUp(self):
@@ -1001,38 +955,89 @@ class EntitlementFulfillmentModuleTests(FulfillmentTestMixin, TestCase):
         self.assertListEqual(supported_lines, list(lines))
 
     @httpretty.activate
-    def test_entitlement_module_fulfill(self):
-        """ Test to ensure we can properly fulfill course entitlements. """
-
+    @ddt.unpack
+    @ddt.data(
+        # Test with voucher order discount
+        {
+            'amount_paid': Decimal('40'),
+            'discount_value': Decimal('30'),
+            'discount_type': EnterpriseContractMetadata.PERCENTAGE,
+            'create_order_discount_callback': 'create_order_voucher_discount',
+            'expected_effective_contract_discount_percentage': Decimal('0.3'),
+            'expected_effective_contract_discounted_price': Decimal('70.0000'),
+        },
+        # Test with offer order discount
+        {
+            'amount_paid': Decimal('100'),
+            'discount_value': Decimal('100'),
+            'discount_type': EnterpriseContractMetadata.FIXED,
+            'create_order_discount_callback': 'create_order_offer_discount',
+            'expected_effective_contract_discount_percentage': Decimal('0.5'),
+            'expected_effective_contract_discounted_price': Decimal('50.0000'),
+        }
+    )
+    def test_entitlement_module_fulfill(
+            self,
+            amount_paid,
+            discount_value,
+            discount_type,
+            create_order_discount_callback,
+            expected_effective_contract_discount_percentage,
+            expected_effective_contract_discounted_price
+    ):
+        """ Test to ensure we can properly fulfill course entitlements with order's voucher discount """
         self.mock_access_token_response()
-        httpretty.register_uri(httpretty.POST, get_lms_entitlement_api_url() +
-                               'entitlements/', status=200, body=json.dumps(self.return_data),
-                               content_type='application/json')
-
+        httpretty.register_uri(
+            httpretty.POST,
+            get_lms_entitlement_api_url() + 'entitlements/',
+            status=200, body=json.dumps(self.return_data),
+            content_type='application/json'
+        )
+        getattr(self, create_order_discount_callback)(
+            self.order,
+            enterprise_contract_metadata=EnterpriseContractMetadata.objects.create(
+                discount_type=discount_type,
+                discount_value=discount_value,
+                amount_paid=amount_paid
+            )
+        )
         # Attempt to fulfill entitlement.
         with LogCapture(LOGGER_NAME) as logger:
-            CourseEntitlementFulfillmentModule().fulfill_product(self.order, list(self.order.lines.all()))
+            with mock.patch(
+                    "ecommerce.extensions.fulfillment.modules.get_or_create_enterprise_customer_user"
+            ) as mock_get_or_create_enterprise_customer_user:
+                mock_get_or_create_enterprise_customer_user.return_value = mock.Mock()
+                CourseEntitlementFulfillmentModule().fulfill_product(self.order, list(self.order.lines.all()))
 
-            line = self.order.lines.get()
-            logger.check_present(
-                (
-                    LOGGER_NAME,
-                    'INFO',
-                    'line_fulfilled: UUID="{}", mode="{}", order_line_id="{}", '
-                    'order_number="{}", product_class="{}", user_id="{}"'.format(
-                        line.product.attr.UUID,
-                        mode_for_product(line.product),
-                        line.id,
-                        line.order.number,
-                        line.product.get_product_class().name,
-                        line.order.user.id,
+                line = self.order.lines.get()
+                logger.check_present(
+                    (
+                        LOGGER_NAME,
+                        'INFO',
+                        'line_fulfilled: UUID="{}", mode="{}", order_line_id="{}", '
+                        'order_number="{}", product_class="{}", user_id="{}"'.format(
+                            line.product.attr.UUID,
+                            mode_for_product(line.product),
+                            line.id,
+                            line.order.number,
+                            line.product.get_product_class().name,
+                            line.order.user.id,
+                        )
                     )
                 )
-            )
 
-            course_entitlement_uuid = line.attributes.get(option=self.entitlement_option).value
-            self.assertEqual(course_entitlement_uuid, '111-222-333')
-            self.assertEqual(LINE.COMPLETE, line.status)
+                course_entitlement_uuid = line.attributes.get(option=self.entitlement_option).value
+                self.assertEqual(course_entitlement_uuid, '111-222-333')
+                self.assertEqual(LINE.COMPLETE, line.status)
+                # after updating the fields, they have expected values.
+                self.assertEqual(
+                    line.effective_contract_discount_percentage,
+                    expected_effective_contract_discount_percentage
+                )
+                self.assertEqual(
+                    line.effective_contract_discounted_price,
+                    expected_effective_contract_discounted_price
+                )
 
     @httpretty.activate
     def test_entitlement_module_revoke(self):

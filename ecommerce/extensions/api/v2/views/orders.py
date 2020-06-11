@@ -20,6 +20,7 @@ from rest_framework.response import Response
 from rest_framework.viewsets import ViewSet
 
 from ecommerce.courses.models import Course
+from ecommerce.enterprise.mixins import EnterpriseDiscountMixin
 from ecommerce.extensions.analytics.utils import audit_log
 from ecommerce.extensions.api import serializers
 from ecommerce.extensions.api.filters import OrderFilter
@@ -27,7 +28,6 @@ from ecommerce.extensions.api.permissions import IsStaffOrOwner
 from ecommerce.extensions.api.throttles import ServiceUserThrottle
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
 from ecommerce.extensions.fulfillment.status import LINE, ORDER
-from ecommerce.extensions.fulfillment.utils import get_enterprise_customer_cost_for_line
 from ecommerce.extensions.offer.models import OFFER_PRIORITY_MANUAL_ORDER
 from ecommerce.extensions.order.benefits import ManualEnrollmentOrderDiscountBenefit
 from ecommerce.extensions.order.conditions import ManualEnrollmentOrderDiscountCondition
@@ -98,7 +98,7 @@ class OrderViewSet(viewsets.ReadOnlyModelViewSet):
         return Response(serializer.data)
 
 
-class ManualCourseEnrollmentOrderViewSet(EdxOrderPlacementMixin, ViewSet):
+class ManualCourseEnrollmentOrderViewSet(EdxOrderPlacementMixin, EnterpriseDiscountMixin, ViewSet):
     """
         **Use Cases**
 
@@ -262,7 +262,7 @@ class ManualCourseEnrollmentOrderViewSet(EdxOrderPlacementMixin, ViewSet):
         order_line = OrderLine.objects.filter(product=seat_product, order__user=learner_user, status=LINE.COMPLETE)
         if order_line.exists():
             order = Order.objects.get(id=order_line.first().order_id)
-            self._update_orderline_with_enterprise_discount(order, discount_percentage)
+            self._update_all_orderline_with_enterprise_discount(order, discount_percentage)
             return dict(
                 enrollment,
                 status=self.SUCCESS,
@@ -284,7 +284,7 @@ class ManualCourseEnrollmentOrderViewSet(EdxOrderPlacementMixin, ViewSet):
         try:
             order = self.place_free_order(basket)
             self._update_order_according_to_date_place(order, enrollment.get('date_placed'))
-            self._update_orderline_with_enterprise_discount(order, discount_percentage)
+            self._update_all_orderline_with_enterprise_discount(order, discount_percentage)
         except:  # pylint: disable=bare-except
             logger.exception(
                 '[Manual Order Creation Failure] Failed to place the order. User: %s, Course: %s, Basket: %s, '
@@ -306,33 +306,22 @@ class ManualCourseEnrollmentOrderViewSet(EdxOrderPlacementMixin, ViewSet):
         )
         return dict(enrollment, status=self.SUCCESS, detail=order.number, new_order_created=True)
 
-    def _update_orderline_with_enterprise_discount(self, order, discount_percentage):
+    def _update_all_orderline_with_enterprise_discount(self, order, discount_percentage):
         """
-        Updates an orderline with calculated discount metrics if applicable
-
-        Args:
-            order: An Order object
-            discount_percentage: Discounted percentage for manual order.
-
-        Returns:
-            Nothing
-
-        Side effect:
-            Saves a line object if discount_percentage is not zero.
+        Updates all order's lines with calculated discount metrics if applicable
         """
         if discount_percentage is None:
             return
 
-        # we need to represent discount_percentage as a decimaled percent (.23 instead of 23)
-        discount = Decimal(discount_percentage)
-        effective_discount_percentage = discount * Decimal('.01')
+        # update_orderline_with_enterprise_discount function expects Decimal object
+        discount_percentage = Decimal(discount_percentage)
         for line in order.lines.all():
-            line.effective_contract_discount_percentage = effective_discount_percentage
-            line.effective_contract_discounted_price = get_enterprise_customer_cost_for_line(
-                line.unit_price_excl_tax,
-                effective_discount_percentage
+            self.update_orderline_with_enterprise_discount_metadata(
+                order,
+                line,
+                discount_percentage=discount_percentage,
+                is_manual_order=True
             )
-            line.save()
 
     def _update_order_according_to_date_place(self, order, date_placed):
         """
