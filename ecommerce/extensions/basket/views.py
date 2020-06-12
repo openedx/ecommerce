@@ -59,7 +59,6 @@ from ecommerce.extensions.basket.utils import (
     prepare_basket,
     validate_voucher
 )
-from ecommerce.extensions.experimentation.utils import add_REV1074_information_to_url_if_eligible
 from ecommerce.extensions.offer.constants import DYNAMIC_DISCOUNT_FLAG
 from ecommerce.extensions.offer.dynamic_conditional_offer import get_percentage_from_request
 from ecommerce.extensions.offer.utils import (
@@ -453,7 +452,7 @@ class BasketAddItemsView(BasketLogicMixin, APIView):
                 if not (len(available_products) == 1 and available_products[0].is_enrollment_code_product):
                     # Display an error message when an invalid code is passed as a parameter
                     invalid_code = code
-            return self._redirect_response_to_basket_or_payment(request, skus, invalid_code)
+            return self._redirect_response_to_basket_or_payment(request, invalid_code)
 
         except BadRequestException as e:
             return HttpResponseBadRequest(six.text_type(e))
@@ -501,15 +500,9 @@ class BasketAddItemsView(BasketLogicMixin, APIView):
             defaults={'value_text': request.GET.get('email_opt_in') == 'true'},
         )
 
-    def _redirect_response_to_basket_or_payment(self, request, skus, invalid_code=None):
+    def _redirect_response_to_basket_or_payment(self, request, invalid_code=None):
         redirect_url = get_payment_microfrontend_or_basket_url(request)
-        # If a user is eligible and bucketed, REV1074 experiment information will be added to their url
-        REV1074_is_active = waffle.flag_is_active(self.request, 'REV1074.enable_experiment')
-        if REV1074_is_active and skus and not invalid_code:  # pragma: no cover
-            redirect_url = add_REV1074_information_to_url_if_eligible(redirect_url, request, skus[0])
-            redirect_url += '?basket_id=' + str(request.basket.id)
-        else:  # pragma: no cover
-            redirect_url = add_utm_params_to_url(redirect_url, list(self.request.GET.items()))
+        redirect_url = add_utm_params_to_url(redirect_url, list(self.request.GET.items()))
         redirect_url = add_invalid_code_message_to_url(redirect_url, invalid_code)
 
         return HttpResponseRedirect(redirect_url, status=303)
