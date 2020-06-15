@@ -386,7 +386,6 @@ def _get_or_create_offer(
     Returns:
         Offer
     """
-
     if program_uuid:
         try:
             offer_condition = ProgramCourseRunSeatsCondition.objects.get(program_uuid=program_uuid)
@@ -418,6 +417,9 @@ def _get_or_create_offer(
                 value=Decimal(benefit_value),
                 max_affected_items=1,
             )
+
+        logger.info('Debugging bundle #9 (vouchers): offer_benefit [%s] max_affected_items [%s] value [%s]',
+                        str(offer_benefit), str(offer_benefit.max_affected_items), str(offer_benefit.value))
 
     except (TypeError, DecimalException):  # If the benefit_value parameter is not sent TypeError will be raised
         log_message_and_raise_validation_error(
