@@ -323,6 +323,22 @@ define([
                     });
                 });
 
+                describe('when honor_mode is true and honor seat already exists', function() {
+                    it('removes the audit seat and does not add a new honor seat', function() {
+                        var seats;
+
+                        model.set('products', []);
+                        model.get('products').push(new AuditSeat({}));
+                        model.get('products').push(new HonorSeat({}));
+                        model.set('honor_mode', true);
+                        model.save();
+
+                        seats = model.seats();
+                        expect(seats.length).toEqual(1);
+                        expect(seats[0].attributes.certificate_type).toEqual('honor');
+                    });
+                });
+
                 describe('when honor_mode false', function() {
                     it('does not add an honor seat and leaves the audit seat', function() {
                         var seats;

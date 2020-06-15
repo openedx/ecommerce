@@ -101,7 +101,7 @@ class Course(models.Model):
             return 'professional'
         # This is checking for the Verified and Audit case, but Audit has no certificate type
         # so it is returned as the empty string.
-        if 'verified' in seat_types and '' in seat_types:
+        if 'verified' in seat_types and ('' in seat_types or 'honor' in seat_types):
             return 'verified'
         if 'verified' in seat_types:
             return 'verified-only'

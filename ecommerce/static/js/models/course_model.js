@@ -267,7 +267,7 @@ define([
              * @returns {boolean}
              */
             includeHonorMode: function() {
-                return this.get('type') && this.get('type') !== 'professional';
+                return _.contains(this.validSeatTypes(), 'honor');
             },
 
             /**
@@ -324,18 +324,21 @@ define([
 
                 if (this.includeHonorMode()) {
                     honorMode = this.get('honor_mode');
-
                     if (honorMode) {
-                        honorSeatClass = CourseUtils.getCourseSeatModel('honor');
-                        /* jshint newcap: false */
-                        honorSeat = new honorSeatClass({course: this});
-                        /* jshint newcap: true */
-
                         products = this.get('products');
                         auditSeat = products.where({certificate_type: null});
-
                         products.remove(auditSeat);
-                        products.add(honorSeat);
+
+                        // Check to see if an honor seat already exists. If it
+                        // does, we don't need to add another
+                        honorSeat = products.where({certificate_type: 'honor'});
+                        if (honorSeat.length === 0) {
+                            honorSeatClass = CourseUtils.getCourseSeatModel('honor');
+                            /* jshint newcap: false */
+                            honorSeat = new honorSeatClass({course: this});
+                            /* jshint newcap: true */
+                            products.add(honorSeat);
+                        }
                     }
                 }
 
