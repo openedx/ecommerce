@@ -462,6 +462,8 @@ def apply_offers_on_basket(request, basket):
         basket (Basket): basket object on which the offers will be applied
     """
     if not basket.is_empty:
+        logger.info('Debugging bundle #1: request [%s] basket [%s] user [%s]',
+                        str(request), str(basket), str(request.user))
         Applicator().apply(basket, request.user, request)
 
 

@@ -38,6 +38,24 @@ class Applicator(OscarApplicator):
                 we get an error when trying to create the bundle_id BasketAttribute.
         """
         offers = self.get_offers(basket, user, request, bundle_id)
+
+        try:
+            logger.info('Debugging bundle #2: request [%s] bundle_id [%s] basket [%s] user [%s]',
+                        str(request), str(bundle_id), str(basket), str(user))
+            for o in offers:
+                logger.info(
+                    'Debugging bundle #3: request [%s] bundle_id [%s] basket [%s] id [%s] name [%s] exclusive [%s]'
+                    'priority [%s] offertype [%s] status [%s] num_applications [%s] max_global_applications [%s]'
+                    'total_discount [%s] max_d [%s] is_available [%s] is_condition_partially_satisfied [%s]'
+                    'is_condition_satisfied [%s] ',
+                    str(request), str(bundle_id), str(basket), str(o.id), str(o.name), str(o.exclusive),
+                    str(o.priority), str(o.offer_type), str(o.status), str(o.num_applications),
+                    str(o.max_global_applications), str(o.total_discount), str(o.max_discount), str(o.is_available()),
+                    str(o.is_condition_partially_satisfied(basket)), str(o. is_condition_satisfied(basket))
+                )
+        except:  # pylint: disable=bare-except
+            pass
+
         self.apply_offers(basket, offers)
 
     def get_offers(self, basket, user=None, request=None, bundle_id=None):  # pylint: disable=arguments-differ
@@ -121,10 +139,16 @@ class Applicator(OscarApplicator):
             attribute_type=BasketAttributeType.objects.get(name=BUNDLE)
         )
         program_uuid = bundle_id if bundle_attributes.count() == 0 else bundle_attributes.first().value_text
+
+        logger.info('Debugging bundle #4: basket [%s] bundle_id [%s] bundle_attributes [%s] program_uuid [%s]',
+                    str(basket), str(bundle_id), str(bundle_attributes), str(program_uuid))
+
         if program_uuid:
             offers = ConditionalOffer.active.filter(
                 offer_type=ConditionalOffer.SITE, condition__program_uuid=program_uuid
             )
+            logger.info('Debugging bundle #5: offers [%s] total_discount [%s] benefit_id [%s] offer_type [%s] name [%s] id [%s]',
+                    str(offers[0]), str(offers[0].total_discount), str(offers[0].benefit_id), str(offers[0].offer_type), str(offers[0].name), str(offers[0].id))
             return offers.select_related('condition', 'benefit')
 
         return []

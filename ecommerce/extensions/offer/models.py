@@ -317,6 +317,8 @@ class ConditionalOffer(AbstractConditionalOffer):
                                username, self.id, basket.id, code)
 
             return is_satisfied
+        logger.info('Debugging bundle #8 (models.py): total_discount [%s] benefit_id [%s] id [%s] name [%s]',
+                    str(self.total_discount), str(self.benefit_id), str(self.id), str(self.name))
 
         return super(ConditionalOffer, self).is_condition_satisfied(basket)  # pylint: disable=bad-super-call
 
