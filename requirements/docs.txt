@@ -6,7 +6,7 @@
 #
 alabaster==0.7.12         # via sphinx
 babel==2.8.0              # via sphinx
-certifi==2020.4.5.1       # via requests
+certifi==2020.4.5.2       # via requests
 chardet==3.0.4            # via requests
 docutils==0.16            # via sphinx
 edx-sphinx-theme==1.0.2   # via -r requirements/docs.in
