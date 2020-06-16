@@ -1,6 +1,3 @@
-
-from __future__ import absolute_import
-
 from django.core.management import call_command
 from oscar.core.loading import get_model
 from oscar.test.factories import OrderFactory

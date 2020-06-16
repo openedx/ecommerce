@@ -1,4 +1,4 @@
-from __future__ import absolute_import
+
 
 import stripe
 from django.conf import settings

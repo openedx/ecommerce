@@ -5,9 +5,6 @@ overridden to use our custom fulfillment API.  Orders will either be fulfilled, 
 errors explaining why fulfillment may fail.
 
 """
-
-from __future__ import absolute_import
-
 from oscar.apps.order import exceptions, processing
 from six.moves import zip
 

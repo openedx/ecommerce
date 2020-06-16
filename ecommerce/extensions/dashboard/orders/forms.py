@@ -1,4 +1,4 @@
-from __future__ import absolute_import
+
 
 from oscar.apps.dashboard.orders.forms import OrderSearchForm as CoreOrderSearchForm
 

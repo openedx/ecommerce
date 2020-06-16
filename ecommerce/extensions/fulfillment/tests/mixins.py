@@ -1,4 +1,4 @@
-from __future__ import absolute_import
+
 
 from ecommerce.extensions.fulfillment.status import LINE, ORDER
 from ecommerce.extensions.test.factories import create_order

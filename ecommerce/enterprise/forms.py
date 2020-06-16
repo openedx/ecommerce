@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # TODO: Refactor this to consolidate it with `ecommerce.programs.forms`.
-from __future__ import absolute_import
+
 
 import decimal
 

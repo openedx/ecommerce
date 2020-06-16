@@ -1,7 +1,7 @@
 """
 Django management command to Sync Product, Orders and Lines to Hubspot server.
 """
-from __future__ import absolute_import
+
 
 import json
 import logging

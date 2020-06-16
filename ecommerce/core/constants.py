@@ -1,5 +1,5 @@
 """Constants core to the ecommerce app."""
-from __future__ import unicode_literals
+
 
 ISO_8601_FORMAT = '%Y-%m-%dT%H:%M:%SZ'
 

@@ -1,7 +1,7 @@
 """
 This file contains django compressor related functions.
 """
-from __future__ import absolute_import
+
 
 from ecommerce.theming.helpers import get_themes
 from ecommerce.theming.storage import ThemeStorage

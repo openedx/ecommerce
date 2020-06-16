@@ -1,4 +1,4 @@
-from __future__ import absolute_import, unicode_literals
+
 
 from ddt import data, ddt
 from django.contrib.sites.models import Site

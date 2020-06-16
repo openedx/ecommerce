@@ -47,7 +47,7 @@ Here is the template that django-oscar provides to display the flash messages:
   /src/oscar/templates/oscar/partials/alert_messages.html
 
 """
-from __future__ import absolute_import
+
 
 import logging
 

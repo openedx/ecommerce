@@ -1,7 +1,7 @@
 """
 Tests for management command for creating Sites, SiteThemes, SiteConfigurations and Partners.
 """
-from __future__ import absolute_import
+
 
 import logging
 import os

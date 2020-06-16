@@ -1,5 +1,5 @@
 """Helper functions for working with payment processor classes."""
-from __future__ import absolute_import
+
 
 import base64
 import hashlib

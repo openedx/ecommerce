@@ -1,7 +1,7 @@
 """
 Test the sync_hubspot management command
 """
-from __future__ import absolute_import
+
 
 from datetime import datetime, timedelta
 

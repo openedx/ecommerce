@@ -1,4 +1,4 @@
-from __future__ import absolute_import
+
 
 from ecommerce.extensions.analytics.utils import prepare_analytics_data
 

@@ -1,7 +1,7 @@
 """
 Decorators related to enterprise functionality.
 """
-from __future__ import absolute_import
+
 
 from functools import wraps
 

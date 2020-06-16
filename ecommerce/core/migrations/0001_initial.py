@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
-from __future__ import absolute_import, unicode_literals
 
-import django.core.validators
 import django.utils.timezone
 import jsonfield.fields
 from django.db import migrations, models

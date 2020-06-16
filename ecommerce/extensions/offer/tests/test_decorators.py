@@ -1,4 +1,4 @@
-from __future__ import absolute_import
+
 
 from mock import patch
 from oscar.test.factories import ConditionalOfferFactory, ConditionFactory

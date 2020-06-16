@@ -5,7 +5,7 @@ Adds a new couple category that will be used to track rewards given
 to members of the community who make security disclosures.
 """
 
-from __future__ import absolute_import, unicode_literals
+
 
 from django.db import migrations
 from oscar.apps.catalogue.categories import create_from_breadcrumbs

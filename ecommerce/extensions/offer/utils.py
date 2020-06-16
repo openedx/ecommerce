@@ -1,5 +1,5 @@
 """Offer Utility Methods. """
-from __future__ import absolute_import
+
 
 import logging
 import string  # pylint: disable=W0402

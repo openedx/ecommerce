@@ -1,4 +1,4 @@
-from __future__ import absolute_import
+
 
 from ecommerce.extensions.test import factories, mixins
 from ecommerce.tests.testcases import TestCase

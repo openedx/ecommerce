@@ -1,4 +1,4 @@
-from __future__ import absolute_import
+
 
 from edx_rest_framework_extensions.paginators import DefaultPagination
 from rest_framework_datatables.pagination import DatatablesPageNumberPagination

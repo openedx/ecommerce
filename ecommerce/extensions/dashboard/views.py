@@ -1,4 +1,4 @@
-from __future__ import absolute_import
+
 
 import six
 from oscar.apps.dashboard.views import *  # pylint: disable=wildcard-import, unused-wildcard-import

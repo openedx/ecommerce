@@ -1,7 +1,7 @@
 """
 Management command for assigning enterprise roles to existing enterprise users.
 """
-from __future__ import absolute_import, unicode_literals
+
 
 import datetime
 import logging

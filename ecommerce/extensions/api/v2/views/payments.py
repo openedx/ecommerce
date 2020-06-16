@@ -1,5 +1,5 @@
 """HTTP endpoints for interacting with payments."""
-from __future__ import absolute_import
+
 
 import logging
 

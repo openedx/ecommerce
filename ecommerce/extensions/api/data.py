@@ -1,5 +1,5 @@
 """Functions used for data retrieval and manipulation by the API."""
-from __future__ import absolute_import
+
 
 import logging
 

@@ -1,4 +1,4 @@
-from __future__ import absolute_import
+
 
 from django.test import override_settings
 from oscar.core.loading import get_class

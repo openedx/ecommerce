@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """Unit tests for the analytics app."""
-from __future__ import absolute_import
+
 
 from django.apps import apps
 from django.test import override_settings

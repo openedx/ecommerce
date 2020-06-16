@@ -1,5 +1,5 @@
 """Production settings and globals."""
-from __future__ import absolute_import
+
 
 import codecs
 from os import environ

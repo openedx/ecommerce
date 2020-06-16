@@ -1,7 +1,7 @@
 """
 Django management command to load the lms_user_id column from historical data.
 """
-from __future__ import absolute_import
+
 
 import logging
 
