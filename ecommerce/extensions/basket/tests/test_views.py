@@ -393,6 +393,7 @@ class PaymentApiResponseTestMixin(BasketLogicTestMixin):
             order_total=0,
             show_coupon_form=False,
             summary_price=0,
+            expected_basket_products_count=0,
         )
 
     def assert_expected_response(
@@ -414,6 +415,7 @@ class PaymentApiResponseTestMixin(BasketLogicTestMixin):
             title=None,
             messages=None,
             summary_discounts=None,
+            expected_basket_products_count=1,
             **kwargs
     ):
         if response is None:
@@ -446,6 +448,8 @@ class PaymentApiResponseTestMixin(BasketLogicTestMixin):
             }]
         else:
             offers = []
+
+        self.assertEqual(len(response.json()['products']), expected_basket_products_count)
 
         expected_response = {
             u'basket_id': basket.id,
@@ -1200,7 +1204,8 @@ class VoucherAddMixin(LmsApiMockMixin, DiscoveryMockMixin):
             'user_message': u"Coupon code '{code}' is not valid for this "
                             u"basket for a bundled purchase.".format(code=voucher.code),
         }]
-        self.assert_response(product=product, status_code=400, messages=messages, summary_price=19.98)
+        self.assert_response(product=product, status_code=400, messages=messages, summary_price=19.98,
+                             expected_basket_products_count=2)
 
     def test_multi_use_voucher_valid_for_bundle(self):
         """ Verify multi use coupon works when voucher is used against a bundle. """
@@ -1223,6 +1228,7 @@ class VoucherAddMixin(LmsApiMockMixin, DiscoveryMockMixin):
             summary_discounts=0.99,
             discount_value=10,
             voucher=voucher,
+            expected_basket_products_count=2,
         )
 
     def test_inactive_voucher(self):
@@ -1257,8 +1263,8 @@ class VoucherAddMixin(LmsApiMockMixin, DiscoveryMockMixin):
 
         stock_record = Selector().strategy().fetch_for_product(product).stockrecord
         expected_redirect_url = (
-            u'{coupons_redeem_base_url}?code=COUPONTEST&sku={sku}&'
-            u'failure_url=http%3A%2F%2F{domain}%2Fbasket%2F%3Fconsent_failed%3D{code}'
+            u'{coupons_redeem_base_url}?code=COUPONTEST&'
+            u'failure_url=http%3A%2F%2F{domain}%2Fbasket%2F%3Fconsent_failed%3D{code}&sku={sku}'
         ).format(
             coupons_redeem_base_url=absolute_url(self.request, 'coupons:redeem'),
             sku=stock_record.partner_sku,

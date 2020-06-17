@@ -23,6 +23,7 @@ from ecommerce.core.url_utils import absolute_redirect, get_ecommerce_url
 from ecommerce.core.views import StaffOnlyMixin
 from ecommerce.coupons.decorators import login_required_for_credit
 from ecommerce.coupons.utils import is_voucher_applied
+from ecommerce.courses.utils import get_products_course_ids
 from ecommerce.enterprise.decorators import set_enterprise_cookie
 from ecommerce.enterprise.exceptions import EnterpriseDoesNotExist
 from ecommerce.enterprise.utils import (
@@ -146,6 +147,33 @@ class CouponOfferView(TemplateView):
 class CouponRedeemView(EdxOrderPlacementMixin, APIView):
     permission_classes = (LoginRedirectIfUnauthenticated,)
 
+    def _is_valid_consent_token(self, received_consent_token, access_token, enterprise_customer_id, course_ids):
+        """Iterate over all the course_id and check if received_consent_token in valid for any of the course."""
+        for course_id in course_ids:
+            consent_token = get_enterprise_customer_data_sharing_consent_token(
+                access_token,
+                course_id,
+                enterprise_customer_id
+            )
+            if received_consent_token == consent_token:
+                return True
+        return False
+
+    def _get_sku_to_course_id_map(self, skus, products, site):
+        """Returns tuples containing sku and relevant course_id"""
+        sku_to_course_id_map = []
+        for sku in skus:
+            product = products.filter(stockrecords__partner_sku=sku).first()
+            try:
+                course_id = get_products_course_ids(site, [product])[0]
+            except (TypeError, AttributeError):
+                logger.exception(
+                    "[Code Redemption Failure] could not find course id. Product: %s, sku: %s", product, sku
+                )
+                return None
+            sku_to_course_id_map.append((sku, course_id))
+        return sku_to_course_id_map
+
     @method_decorator(set_enterprise_cookie)
     def get(self, request):  # pylint: disable=too-many-statements
         """
@@ -155,13 +183,14 @@ class CouponRedeemView(EdxOrderPlacementMixin, APIView):
         """
         template_name = 'coupons/_offer_error.html'
         code = request.GET.get('code')
-        sku = request.GET.get('sku')
+        skus = request.GET.getlist('sku')
         failure_url = request.GET.get('failure_url')
+        received_consent_token = request.GET.get('consent_token')
         site_configuration = request.site.siteconfiguration
 
         if not code:
             return render(request, template_name, {'error': _('Code not provided.')})
-        if not sku:
+        if not skus:
             return render(request, template_name, {'error': _('SKU not provided.')})
 
         try:
@@ -170,16 +199,18 @@ class CouponRedeemView(EdxOrderPlacementMixin, APIView):
             msg = 'No voucher found with code {code}'.format(code=code)
             return render(request, template_name, {'error': _(msg)})
 
-        try:
-            product = StockRecord.objects.get(partner_sku=sku).product
-        except StockRecord.DoesNotExist:
-            return render(request, template_name, {'error': _('The product does not exist.')})
+        products = Product.objects.filter(
+            stockrecords__partner_sku__in=skus,
+            stockrecords__partner=site_configuration.partner
+        )
+        if products.count() != len(skus):
+            return render(request, template_name, {'error': _('These products do not exist.')})
 
-        valid_voucher, msg = voucher_is_valid(voucher, [product], request)
+        valid_voucher, msg = voucher_is_valid(voucher, products, request)
         if not valid_voucher:
-            logger.warning('[Code Redemption Failure] The voucher is not valid for this product. '
-                           'User: %s, Product: %s, Code: %s, Message: %s',
-                           request.user.username, product.id, voucher.code, msg)
+            logger.warning('[Code Redemption Failure] The voucher is not valid for these products. '
+                           'User: %s, Products: %s, Code: %s, Message: %s',
+                           request.user.username, products, voucher.code, msg)
             return render(request, template_name, {'error': msg})
 
         offer = voucher.best_offer
@@ -189,7 +220,7 @@ class CouponRedeemView(EdxOrderPlacementMixin, APIView):
                            'User: %s, Offer: %s, Code: %s', request.user.username, offer.id, voucher.code)
             return render(request, template_name, {'error': _('You are not eligible to use this coupon.')})
 
-        email_confirmation_response = get_redirect_to_email_confirmation_if_required(request, offer, product)
+        email_confirmation_response = get_redirect_to_email_confirmation_if_required(request, offer, products)
         if email_confirmation_response:
             return email_confirmation_response
 
@@ -205,58 +236,71 @@ class CouponRedeemView(EdxOrderPlacementMixin, APIView):
                 {'error': _('Couldn\'t find a matching Enterprise Customer for this coupon.')}
             )
 
-        if enterprise_customer and product.is_course_entitlement_product:
-            return render(
-                request,
-                template_name,
-                {
-                    'error': _('This coupon is not valid for purchasing a program. Try using this on an individual '
-                               'course in the program. If you need assistance, contact edX support.')
-                }
-            )
-
-        if enterprise_customer is not None and enterprise_customer_user_needs_consent(
-                request.site,
-                enterprise_customer['id'],
-                product.course.id,
-                request.user.username,
-        ):
-            consent_token = get_enterprise_customer_data_sharing_consent_token(
-                request.user.access_token,
-                product.course.id,
-                enterprise_customer['id']
-            )
-            received_consent_token = request.GET.get('consent_token')
-            if received_consent_token:
-                # If the consent token is set, then the user is returning from the consent view. Render out an error
-                # if the computed token doesn't match the one received from the redirect URL.
-                if received_consent_token != consent_token:
-                    logger.warning('[Code Redemption Failure] Unable to complete code redemption because of '
-                                   'invalid consent. User: %s, Offer: %s, Code: %s',
-                                   request.user.username, offer.id, voucher.code)
-                    return render(
-                        request,
-                        template_name,
-                        {'error': _('Invalid data sharing consent token provided.')}
-                    )
-            else:
-                # The user hasn't been redirected to the interstitial consent view to collect consent, so
-                # redirect them now.
-                redirect_url = get_enterprise_course_consent_url(
-                    request.site,
-                    code,
-                    sku,
-                    consent_token,
-                    product.course.id,
-                    enterprise_customer['id'],
-                    failure_url=failure_url
+        if enterprise_customer:
+            sku_to_course_id_map = self._get_sku_to_course_id_map(skus, products, request.site)
+            if not sku_to_course_id_map:
+                return render(
+                    request,
+                    template_name,
+                    {'error': _('Could not find course_ids for few of the products.')}
                 )
-                return HttpResponseRedirect(redirect_url)
+
+            for sku, course_id in sku_to_course_id_map:
+                if enterprise_customer_user_needs_consent(
+                        request.site,
+                        enterprise_customer['id'],
+                        course_id,
+                        request.user.username,
+                ):
+                    if received_consent_token:
+                        # If the consent token is set, then the user is returning from the consent view. Render out
+                        # an error if the computed token doesn't match the one received from the redirect URL.
+                        is_valid_consent_token = self._is_valid_consent_token(
+                            received_consent_token,
+                            request.user.access_token,
+                            enterprise_customer['id'],
+                            course_ids=dict(sku_to_course_id_map).values(),
+                        )
+
+                        if not is_valid_consent_token:
+                            logger.warning('[Code Redemption Failure] Unable to complete code redemption because of '
+                                           'invalid consent. User: %s, Offer: %s, Code: %s',
+                                           request.user.username, offer.id, voucher.code)
+                            return render(
+                                request,
+                                template_name,
+                                {'error': _('Invalid data sharing consent token provided.')}
+                            )
+
+                        # As the user has accepted consent sharing, we do not need check and ask for data sharing
+                        # consent for remaining course_ids. As we are not creating consent records in this view
+                        # (as we are sending `defer_creation=True` while calling enterprise_grant_data_sharing view)
+                        # These records are expected to be created later on Fulfilment of the order.
+                        break
+
+                    # The user hasn't been redirected to the interstitial consent view to collect consent, so
+                    # redirect them now.
+                    consent_token = get_enterprise_customer_data_sharing_consent_token(
+                        request.user.access_token,
+                        course_id,
+                        enterprise_customer['id']
+                    )
+                    redirect_url = get_enterprise_course_consent_url(
+                        request.site,
+                        code,
+                        sku,
+                        skus,
+                        consent_token,
+                        course_id,
+                        enterprise_customer['id'],
+                        failure_url=failure_url
+                    )
+                    return HttpResponseRedirect(redirect_url)
 
         try:
-            basket = prepare_basket(request, [product], voucher)
+            basket = prepare_basket(request, products, voucher)
         except AlreadyPlacedOrderException:
-            msg = _('You have already purchased {course} seat.').format(course=product.course.name)
+            msg = _('You have already purchased these courses.')
             return render(request, template_name, {'error': msg})
 
         if basket.total_excl_tax == 0:

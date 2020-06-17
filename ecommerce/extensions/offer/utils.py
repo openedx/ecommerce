@@ -13,6 +13,7 @@ from oscar.core.loading import get_model
 from six.moves.urllib.parse import urlencode
 
 from ecommerce.core.url_utils import absolute_redirect
+from ecommerce.courses.utils import get_products_course_ids
 from ecommerce.extensions.checkout.utils import add_currency
 from ecommerce.extensions.offer.constants import OFFER_ASSIGNED
 
@@ -97,7 +98,7 @@ def format_benefit_value(benefit):
     return benefit_value
 
 
-def get_redirect_to_email_confirmation_if_required(request, offer, product):
+def get_redirect_to_email_confirmation_if_required(request, offer, products):
     """
     Render the email confirmation template if email confirmation is
     required to redeem the offer.
@@ -113,7 +114,7 @@ def get_redirect_to_email_confirmation_if_required(request, offer, product):
     Arguments:
         request (HttpRequest): The current HttpRequest.
         offer (ConditionalOffer): The offer to be redeemed.
-        product (Product): The
+        products (Product): list of products
 
     Returns:
         HttpResponse or None: An HttpResponse that redirects to the email confirmation view if required.
@@ -121,9 +122,9 @@ def get_redirect_to_email_confirmation_if_required(request, offer, product):
     require_account_activation = request.site.siteconfiguration.require_account_activation or offer.email_domains
     if require_account_activation and not request.user.account_details(request).get('is_active'):
         response = absolute_redirect(request, 'offers:email_confirmation')
-        course_id = product.course and product.course.id
-        if course_id:
-            response['Location'] += '?{params}'.format(params=urlencode({'course_id': course_id}))
+        keys = get_products_course_ids(request.site, products)
+        if keys:
+            response['Location'] += '?{params}'.format(params=urlencode([('course_id', key) for key in keys]))
         return response
     return None
 

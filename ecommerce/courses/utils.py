@@ -1,11 +1,18 @@
 from __future__ import absolute_import
 
+import logging
+
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 from edx_django_utils.cache import TieredCache
 from opaque_keys.edx.keys import CourseKey
+from requests.exceptions import ConnectionError as ReqConnectionError
+from requests.exceptions import Timeout
+from slumber.exceptions import SlumberHttpBaseException
 
 from ecommerce.core.utils import deprecated_traverse_pagination, get_cache_key
+
+logger = logging.getLogger(__name__)
 
 
 def mode_for_product(product):
@@ -21,6 +28,44 @@ def mode_for_product(product):
     if mode == 'professional' and not getattr(product.attr, 'id_verification_required', False):
         return 'no-id-professional'
     return mode
+
+
+def get_products_course_ids(site, products):
+    """ Extracts course identifiers (course_run_id or course_key) from the products list"""
+    course_ids = []
+    for product in products:
+        if product.is_seat_product:
+            try:
+                course_key = product.course.id
+            except AttributeError as exc:
+                logger.exception(
+                    'Supported Seat Product does not have required attributes.'
+                    'Site: %s, Product: %s, Message: %s',
+                    site,
+                    product,
+                    exc
+                )
+                return None
+            else:
+                course_ids.append(course_key)
+        elif product.is_course_entitlement_product:
+            try:
+                response = get_course_info_from_catalog(site, product)
+            except (ReqConnectionError, AttributeError, SlumberHttpBaseException, Timeout) as exc:
+                logger.exception(
+                    'Unable fetch course ids because products contains a course entitlement product but we failed to'
+                    ' get course info from  course entitlement product.'
+                    'Site: %s, Product: %s, Message: %s',
+                    site,
+                    product,
+                    exc
+                )
+                return None
+            else:
+                course_ids.append(response['key'])
+        else:
+            return None
+    return course_ids
 
 
 def _get_discovery_response(site, cache_key, resource, resource_id):

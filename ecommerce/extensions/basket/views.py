@@ -3,7 +3,6 @@ from __future__ import absolute_import, unicode_literals
 
 import logging
 import time
-from collections import OrderedDict
 from datetime import datetime
 from decimal import Decimal
 
@@ -857,12 +856,12 @@ class VoucherAddLogicMixin:
         """
         self._verify_basket_not_empty(code)
         self._verify_voucher_not_already_applied(code)
-
-        stock_record = self._get_stock_record()
+        stock_records = self._get_stock_records()
+        products = Product.objects.filter(pk__in=stock_records.values('product_id'))
         voucher = self._get_voucher(code)
 
-        self._verify_email_confirmation(voucher, stock_record.product)
-        self._verify_enterprise_needs(voucher, code, stock_record)
+        self._verify_email_confirmation(voucher, products)
+        self._verify_enterprise_needs(voucher, code, stock_records)
 
         self.request.basket.clear_vouchers()
         self._validate_voucher(voucher)
@@ -892,35 +891,36 @@ class VoucherAddLogicMixin:
             )
             raise VoucherException()
 
-    def _verify_email_confirmation(self, voucher, product):
+    def _verify_email_confirmation(self, voucher, products):
         offer = voucher.best_offer
-        redirect_response = get_redirect_to_email_confirmation_if_required(self.request, offer, product)
+        redirect_response = get_redirect_to_email_confirmation_if_required(self.request, offer, products)
         if redirect_response:
             raise RedirectException(response=redirect_response)
 
-    def _verify_enterprise_needs(self, voucher, code, stock_record):
+    def _verify_enterprise_needs(self, voucher, code, stock_records):
         if get_enterprise_customer_from_voucher(self.request.site, voucher) is not None:
             # The below lines only apply if the voucher that was entered is attached
             # to an EnterpriseCustomer. If that's the case, then rather than following
             # the standard redemption flow, we kick the user out to the `redeem` flow.
             # This flow will handle any additional information that needs to be gathered
             # due to the fact that the voucher is attached to an Enterprise Customer.
-            params = six.moves.urllib.parse.urlencode(
-                OrderedDict([
-                    ('code', code),
-                    ('sku', stock_record.partner_sku),
-                    ('failure_url', self.request.build_absolute_uri(
-                        '{path}?{params}'.format(
-                            path=reverse('basket:summary'),
-                            params=six.moves.urllib.parse.urlencode(
-                                {
-                                    CONSENT_FAILED_PARAM: code
-                                }
-                            )
+            params = [
+                ('code', code),
+                ('failure_url', self.request.build_absolute_uri(
+                    '{path}?{params}'.format(
+                        path=reverse('basket:summary'),
+                        params=six.moves.urllib.parse.urlencode(
+                            {
+                                CONSENT_FAILED_PARAM: code
+                            }
                         )
-                    ))
-                ])
+                    )
+                ))
+            ]
+            params.extend(
+                [('sku', sku) for sku in stock_records.values_list('partner_sku', flat=True)]
             )
+            params = six.moves.urllib.parse.urlencode(params)
             redirect_response = HttpResponseRedirect(
                 self.request.build_absolute_uri(
                     '{path}?{params}'.format(
@@ -954,11 +954,10 @@ class VoucherAddLogicMixin:
         else:
             messages.info(self.request, message)
 
-    def _get_stock_record(self):
-        # TODO: for multiline baskets, select the StockRecord for the product associated
-        # specifically with the code that was submitted.
+    def _get_stock_records(self):
+        """Get all stock records from the basket lines"""
         basket_lines = self.request.basket.all_lines()
-        return basket_lines[0].stockrecord
+        return StockRecord.objects.filter(pk__in=basket_lines.values('stockrecord_id'))
 
     def _get_voucher(self, code):
         try:

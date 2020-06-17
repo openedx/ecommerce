@@ -381,6 +381,7 @@ def get_enterprise_course_consent_url(
         site,
         code,
         sku,
+        callback_skus,
         consent_token,
         course_id,
         enterprise_customer_uuid,
@@ -395,14 +396,18 @@ def get_enterprise_course_consent_url(
         protocol=settings.PROTOCOL,
         domain=site.domain,
     )
+
+    callback_params = [
+        ('code', code),
+        ('consent_token', consent_token),
+    ]
+    callback_params.extend([
+        ('sku', sku) for sku in callback_skus
+    ])
     callback_url = '{base}{resource}?{params}'.format(
         base=base_url,
         resource=reverse('coupons:redeem'),
-        params=urlencode({
-            'code': code,
-            'sku': sku,
-            'consent_token': consent_token,
-        })
+        params=urlencode(callback_params),
     )
     failure_url = failure_url or '{base}{resource}?{params}'.format(
         base=base_url,
