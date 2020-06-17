@@ -487,7 +487,8 @@ class Condition(AbstractCondition):
     enterprise_customer_uuid = models.UUIDField(
         null=True,
         blank=True,
-        verbose_name=_('EnterpriseCustomer UUID')
+        verbose_name=_('EnterpriseCustomer UUID'),
+        db_index=True
     )
     # De-normalizing the EnterpriseCustomer name for optimization purposes.
     enterprise_customer_name = models.CharField(
@@ -504,9 +505,15 @@ class Condition(AbstractCondition):
     program_uuid = models.UUIDField(
         null=True,
         blank=True,
-        verbose_name=_('Program UUID')
+        verbose_name=_('Program UUID'),
+        db_index=True
     )
     history = HistoricalRecords()
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['enterprise_customer_uuid', 'program_uuid'])
+        ]
 
 
 class OfferAssignment(TimeStampedModel):
