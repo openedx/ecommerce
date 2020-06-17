@@ -22,7 +22,7 @@ coreschema==0.0.4         # via coreapi
 cryptography==3.0         # via pyjwt, pyopenssl
 cssselect==1.1.0          # via premailer
 cssutils==1.0.2           # via premailer
-defusedxml==0.6.0         # via python3-openid, social-auth-core, zeep
+defusedxml==0.7.0rc1      # via python3-openid, social-auth-core, zeep
 django-appconf==1.0.4     # via django-compressor
 django-compressor==2.4    # via -r requirements/base.in, django-libsass
 django-cors-headers==3.4.0  # via -r requirements/base.in
@@ -110,7 +110,7 @@ rules==2.2                # via -r requirements/base.in
 sailthru-client==2.2.3    # via -r requirements/base.in
 semantic-version==2.8.5   # via edx-drf-extensions
 simplejson==3.17.2        # via django-rest-swagger, sailthru-client
-six==1.15.0               # via -r requirements/base.in, analytics-python, bleach, cryptography, django-compressor, django-extensions, django-extra-views, django-simple-history, djangorestframework-csv, edx-auth-backends, edx-django-release-util, edx-drf-extensions, edx-opaque-keys, edx-rbac, isodate, libsass, packaging, paypalrestsdk, purl, pyjwkest, pyopenssl, python-dateutil, social-auth-app-django, social-auth-core, stevedore, zeep
+six==1.15.0               # via analytics-python, bleach, cryptography, django-compressor, django-extensions, django-extra-views, django-simple-history, django-waffle, djangorestframework-csv, edx-auth-backends, edx-django-release-util, edx-drf-extensions, edx-opaque-keys, edx-rbac, isodate, libsass, packaging, paypalrestsdk, purl, pyjwkest, pyopenssl, python-dateutil, social-auth-app-django, social-auth-core, stevedore, zeep
 slumber==0.7.1            # via edx-rest-api-client
 git+https://github.com/python-social-auth/social-app-django.git@c00d23c2b45c3317bd35b15ad1b959338689cef8#egg=social-auth-app-django  # via -r requirements/base.in, edx-auth-backends
 social-auth-core==3.2.0   # via -c requirements/pins.txt, edx-auth-backends, social-auth-app-django

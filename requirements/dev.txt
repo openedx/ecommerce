@@ -28,7 +28,7 @@ cryptography==3.0         # via -r requirements/test.txt, pyjwt, pyopenssl
 cssselect==1.1.0          # via -r requirements/test.txt, premailer
 cssutils==1.0.2           # via -r requirements/test.txt, premailer
 ddt==1.4.1                # via -r requirements/test.txt
-defusedxml==0.6.0         # via -r requirements/test.txt, python3-openid, social-auth-core, zeep
+defusedxml==0.7.0rc1      # via -r requirements/test.txt, python3-openid, social-auth-core, zeep
 diff-cover==3.0.1         # via -r requirements/test.txt
 django-appconf==1.0.4     # via -r requirements/test.txt, django-compressor
 django-compressor==2.4    # via -r requirements/test.txt, django-libsass

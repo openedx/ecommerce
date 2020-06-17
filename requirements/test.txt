@@ -27,7 +27,7 @@ cryptography==3.0         # via -r requirements/base.txt, pyjwt, pyopenssl
 cssselect==1.1.0          # via -r requirements/base.txt, premailer
 cssutils==1.0.2           # via -r requirements/base.txt, premailer
 ddt==1.4.1                # via -r requirements/test.in
-defusedxml==0.6.0         # via -r requirements/base.txt, python3-openid, social-auth-core, zeep
+defusedxml==0.7.0rc1      # via -r requirements/base.txt, python3-openid, social-auth-core, zeep
 diff-cover==3.0.1         # via -r requirements/test.in
 django-appconf==1.0.4     # via -r requirements/base.txt, django-compressor
 django-compressor==2.4    # via -r requirements/base.txt, django-libsass
@@ -102,7 +102,7 @@ path.py==7.2              # via -r requirements/base.txt, edx-i18n-tools
 pathlib2==2.3.5           # via -r requirements/e2e.txt, pytest
 paypalrestsdk==1.13.1     # via -r requirements/base.txt
 pbr==5.4.5                # via -r requirements/base.txt, stevedore
-phonenumbers==8.12.6      # via -r requirements/base.txt, django-oscar, django-phonenumber-field
+phonenumbers==8.12.4      # via -r requirements/base.txt, django-oscar, django-phonenumber-field
 pillow==7.2.0             # via -r requirements/base.txt, django-oscar
 pluggy==0.13.1            # via -r requirements/e2e.txt, -r requirements/tox.txt, diff-cover, pytest, tox
 polib==1.1.0              # via edx-i18n-tools

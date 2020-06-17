@@ -3,13 +3,13 @@
 
 import logging
 import time
+import urllib
 from collections import OrderedDict
 from datetime import datetime
 from decimal import Decimal
 
 import dateutil.parser
 import newrelic.agent
-import six
 import waffle
 from django.http import HttpResponseBadRequest, HttpResponseRedirect
 from django.shortcuts import render
@@ -455,7 +455,7 @@ class BasketAddItemsView(BasketLogicMixin, APIView):
             return self._redirect_response_to_basket_or_payment(request, invalid_code)
 
         except BadRequestException as e:
-            return HttpResponseBadRequest(six.text_type(e))
+            return HttpResponseBadRequest(str(e))
         except RedirectException as e:
             return e.response
 
@@ -570,7 +570,7 @@ class BasketSummaryView(BasketLogicMixin, BasketView):
             context.update(payment_processors_data)
 
         context.update({
-            'formset_lines_data': list(six.moves.zip(formset, lines_data)),
+            'formset_lines_data': list(zip(formset, lines_data)),
             'homepage_url': get_lms_url(''),
             'min_seat_quantity': 1,
             'max_seat_quantity': 100,
@@ -599,7 +599,7 @@ class BasketSummaryView(BasketLogicMixin, BasketView):
             return {
                 'client_side_payment_processor': payment_processor,
                 'enable_client_side_checkout': True,
-                'months': list(six.moves.range(1, 13)),
+                'months': list(range(1, 13)),
                 'payment_form': PaymentForm(
                     user=self.request.user,
                     request=self.request,
@@ -608,7 +608,7 @@ class BasketSummaryView(BasketLogicMixin, BasketView):
                 ),
                 'paypal_enabled': 'paypal' in (p.NAME for p in payment_processors),
                 # Assumption is that the credit card duration is 15 years
-                'years': list(six.moves.range(current_year, current_year + 16)),
+                'years': list(range(current_year, current_year + 16)),
             }
         else:
             msg = 'Unable to load client-side payment processor [{processor}] for ' \
@@ -898,14 +898,14 @@ class VoucherAddLogicMixin:
             # the standard redemption flow, we kick the user out to the `redeem` flow.
             # This flow will handle any additional information that needs to be gathered
             # due to the fact that the voucher is attached to an Enterprise Customer.
-            params = six.moves.urllib.parse.urlencode(
+            params = urllib.parse.urlencode(
                 OrderedDict([
                     ('code', code),
                     ('sku', stock_record.partner_sku),
                     ('failure_url', self.request.build_absolute_uri(
                         '{path}?{params}'.format(
                             path=reverse('basket:summary'),
-                            params=six.moves.urllib.parse.urlencode(
+                            params=urllib.parse.urlencode(
                                 {
                                     CONSENT_FAILED_PARAM: code
                                 }

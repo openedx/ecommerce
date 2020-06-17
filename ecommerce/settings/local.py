@@ -1,8 +1,9 @@
 """Development settings and globals."""
 
 
+from urllib.parse import urljoin
+
 from corsheaders.defaults import default_headers as corsheaders_default_headers
-from six.moves.urllib.parse import urljoin
 
 from ecommerce.settings.base import *
 

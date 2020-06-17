@@ -8,9 +8,9 @@ import hmac
 import logging
 from collections import OrderedDict
 from functools import reduce  # pylint: disable=redefined-builtin
+from urllib.parse import urlencode, urlparse  # pylint: disable=import-error
 
 import crum
-import six  # pylint: disable=ungrouped-imports
 import waffle
 from django.conf import settings
 from django.urls import reverse
@@ -21,8 +21,6 @@ from edx_rest_framework_extensions.auth.jwt.cookies import get_decoded_jwt
 from oscar.core.loading import get_model
 from requests.exceptions import ConnectionError as ReqConnectionError
 from requests.exceptions import Timeout
-from six.moves.urllib.parse import urlparse  # pylint: disable=import-error
-from six.moves.urllib.parse import urlencode
 from slumber.exceptions import SlumberHttpBaseException
 
 from ecommerce.core.constants import SYSTEM_ENTERPRISE_LEARNER_ROLE
@@ -432,7 +430,7 @@ def get_enterprise_customer_data_sharing_consent_token(access_token, course_id, 
     Enterprise Customer combination.
     """
     consent_token_hmac = hmac.new(
-        six.text_type(access_token).encode('utf-8'),
+        str(access_token).encode('utf-8'),
         u'{course_id}_{enterprise_customer_uuid}'.format(
             course_id=course_id,
             enterprise_customer_uuid=enterprise_customer_uuid,

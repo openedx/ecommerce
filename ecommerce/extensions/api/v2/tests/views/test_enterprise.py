@@ -11,7 +11,6 @@ import ddt
 import httpretty
 import mock
 import rules
-import six  # pylint: disable=ungrouped-imports
 from django.conf import settings
 from django.test import override_settings
 from django.urls import reverse
@@ -21,7 +20,6 @@ from django.utils.timezone import now
 from oscar.core.loading import get_model
 from oscar.test import factories
 from rest_framework import status
-from six.moves import range
 from slumber.exceptions import SlumberHttpBaseException
 
 from ecommerce.core.constants import (
@@ -301,8 +299,8 @@ class EnterpriseCouponViewSetRbacTests(
             'start_datetime': str(now() - datetime.timedelta(days=10)),
             'title': 'Tešt Enterprise čoupon',
             'voucher_type': Voucher.SINGLE_USE,
-            'enterprise_customer': {'name': 'test enterprise', 'id': six.text_type(uuid4())},
-            'enterprise_customer_catalog': six.text_type(uuid4()),
+            'enterprise_customer': {'name': 'test enterprise', 'id': str(uuid4())},
+            'enterprise_customer_catalog': str(uuid4()),
             'notify_email': 'batman@gotham.comics',
             'contract_discount_type': EnterpriseContractMetadata.PERCENTAGE,
             'contract_discount_value': '12.35',
@@ -770,15 +768,15 @@ class EnterpriseCouponViewSetRbacTests(
         vouchers = Product.objects.get(id=coupon_id).attr.coupon_vouchers.vouchers.all()
         codes = [voucher.code for voucher in vouchers]
 
-        for email, code_index in six.iteritems(code_assignments):
+        for email, code_index in code_assignments.items():
             self.assign_user_to_code(coupon_id, [email], [codes[code_index]])
 
-        for email, data in six.iteritems(code_redemptions):
+        for email, data in code_redemptions.items():
             redeeming_user = self.create_user(email=email)
             for _ in range(0, data['num']):
                 self.use_voucher(Voucher.objects.get(code=codes[data['code']]), redeeming_user)
 
-        for code_filter, expected_response in six.iteritems(expected_responses):
+        for code_filter, expected_response in expected_responses.items():
             response = self.get_response(
                 'GET',
                 '/api/v2/enterprise/coupons/{}/codes/?code_filter={}'.format(coupon_id, code_filter)
@@ -1755,7 +1753,7 @@ class EnterpriseCouponViewSetRbacTests(
         )
 
         # Verify that we get correct results.
-        for field, value in six.iteritems(expected_response):
+        for field, value in expected_response.items():
             if assignment_has_error and field == 'errors':
                 assignment_with_errors = OfferAssignment.objects.filter(status=OFFER_ASSIGNMENT_EMAIL_BOUNCED)
                 value = [
@@ -2774,7 +2772,7 @@ class OfferAssignmentSummaryViewSetTests(
         self.user = self.create_user(is_staff=True, email='test@example.com')
         self.client.login(username=self.user.username, password=self.password)
 
-        self.enterprise_customer = {'name': 'test enterprise', 'id': six.text_type(uuid4())}
+        self.enterprise_customer = {'name': 'test enterprise', 'id': str(uuid4())}
 
         self.course = CourseFactory(id='course-v1:test-org+course+run', partner=self.partner)
         self.verified_seat = self.course.create_or_update_seat('verified', False, 100)

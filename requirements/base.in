@@ -46,7 +46,6 @@ pytz
 requests
 rules
 sailthru-client==2.2.3
-six
 sorl-thumbnail
 stripe==1.70.0
 unicodecsv

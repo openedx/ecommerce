@@ -2,6 +2,8 @@
 
 import datetime
 import itertools
+import urllib.error
+import urllib.parse
 from contextlib import contextmanager
 from decimal import Decimal
 
@@ -9,9 +11,6 @@ import ddt
 import httpretty
 import mock
 import pytz
-import six.moves.urllib.error  # pylint: disable=import-error
-import six.moves.urllib.parse  # pylint: disable=import-error
-import six.moves.urllib.request  # pylint: disable=import-error
 from django.conf import settings
 from django.contrib.messages import get_messages
 from django.http import HttpResponseRedirect
@@ -91,7 +90,7 @@ class BasketAddItemsViewTests(CouponMixin, DiscoveryTestMixin, DiscoveryMockMixi
         self.catalog.stock_records.add(self.stock_record)
 
     def _get_response(self, product_skus, **url_params):
-        qs = six.moves.urllib.parse.urlencode({'sku': product_skus}, True)
+        qs = urllib.parse.urlencode({'sku': product_skus}, True)
         url = '{root}?{qs}'.format(root=self.path, qs=qs)
         for name, value in url_params.items():
             url += '&{}={}'.format(name, value)
@@ -966,7 +965,7 @@ class BasketSummaryViewTests(EnterpriseServiceMockMixin, DiscoveryTestMixin, Dis
         self.client.logout()
         response = self.client.get(self.path)
         expected_url = '{path}?next={next}'.format(path=reverse(settings.LOGIN_URL),
-                                                   next=six.moves.urllib.parse.quote(self.path))
+                                                   next=urllib.parse.quote(self.path))
         self.assertRedirects(response, expected_url, target_status_code=302)
 
     @ddt.data(
@@ -1309,7 +1308,7 @@ class VoucherAddMixin(LmsApiMockMixin, DiscoveryMockMixin):
     def _get_account_activation_view_response(self, keys, template_name):
         url = '{url}?{params}'.format(
             url=reverse('offers:email_confirmation'),
-            params=six.moves.urllib.parse.urlencode([('course_id', key) for key in keys])
+            params=urllib.parse.urlencode([('course_id', key) for key in keys])
         )
         with self.assertTemplateUsed(template_name):
             return self.client.get(url)

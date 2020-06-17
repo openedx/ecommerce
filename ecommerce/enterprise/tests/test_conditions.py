@@ -10,7 +10,6 @@ import mock
 from oscar.core.loading import get_model
 from oscar.test.factories import BasketFactory, OrderDiscountFactory, OrderFactory
 from requests.exceptions import ConnectionError as ReqConnectionError
-from six.moves import range, zip
 
 from ecommerce.coupons.tests.mixins import CouponMixin, DiscoveryMockMixin
 from ecommerce.courses.tests.factories import CourseFactory

@@ -1,7 +1,6 @@
 
 
 import ddt
-import six
 from django.core.management import call_command
 from django.core.management.base import CommandError
 from mock import patch
@@ -24,15 +23,12 @@ class UpdateOrderLinePartnerTests(TestCase):
 
     def assert_error_log(self, error_msg, *args):
         """Helper to call command and assert error log."""
-        with six.assertRaisesRegex(self, CommandError, error_msg):
+        with self.assertRaisesRegex(CommandError, error_msg):
             call_command('update_order_lines_partner', *args)
 
     def test_partner_required(self):
         """Test that command raises partner required error."""
-        if six.PY3:
-            err_msg = 'Error: the following arguments are required: --partner'
-        else:
-            err_msg = 'Error: argument --partner is required'
+        err_msg = 'Error: the following arguments are required: --partner'
         self.assert_error_log(
             err_msg,
             'sku12345'

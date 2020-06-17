@@ -4,7 +4,6 @@
 from hashlib import md5
 
 import ddt
-import six
 from django.db.utils import IntegrityError
 from oscar.core.loading import get_model
 
@@ -98,7 +97,7 @@ class CouponUtilsTests(CouponMixin, DiscoveryTestMixin, TestCase):
         """Verify the method generates a SKU for a coupon."""
         coupon = self.create_coupon(partner=self.partner, catalog=self.catalog)
         _hash = ' '.join((
-            six.text_type(coupon.id),
+            str(coupon.id),
             str(self.partner.id)
         )).encode('utf-8')
 

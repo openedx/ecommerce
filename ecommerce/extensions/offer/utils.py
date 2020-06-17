@@ -4,13 +4,13 @@
 import logging
 import string  # pylint: disable=W0402
 from decimal import Decimal
+from urllib.parse import urlencode
 
 import bleach
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 from ecommerce_worker.sailthru.v1.tasks import send_offer_assignment_email, send_offer_update_email
 from oscar.core.loading import get_model
-from six.moves.urllib.parse import urlencode
 
 from ecommerce.core.url_utils import absolute_redirect
 from ecommerce.extensions.checkout.utils import add_currency

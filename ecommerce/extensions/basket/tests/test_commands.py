@@ -1,11 +1,11 @@
 
 
+from io import StringIO
+
 from django.contrib.sites.models import Site
 from django.core.management import CommandError, call_command
-from django.utils.six import StringIO
 from oscar.core.loading import get_model
 from oscar.test import factories
-from six.moves import range
 
 from ecommerce.extensions.test.factories import create_order
 from ecommerce.invoice.models import Invoice

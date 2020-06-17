@@ -7,7 +7,6 @@ import datetime
 
 import ddt
 import pytz
-import six
 from django.core.management import call_command
 from django.core.management.base import CommandError
 from oscar.core.loading import get_class, get_model
@@ -45,7 +44,7 @@ class VerifyTransactionsTest(TestCase):
         """ Test verify_transactions only examines the correct time window """
         with self.assertRaises(CommandError) as cm:
             call_command('verify_transactions')
-        exception = six.text_type(cm.exception)
+        exception = str(cm.exception)
         self.assertIn("The following orders are without payments", exception)
         self.assertIn(str(self.order.id), exception)
 
@@ -78,7 +77,7 @@ class VerifyTransactionsTest(TestCase):
         # self.order fixture should still have no payment
         with self.assertRaises(CommandError) as cm:
             call_command('verify_transactions')
-        exception = six.text_type(cm.exception)
+        exception = str(cm.exception)
         self.assertIn("The following orders are without payments", exception)
         self.assertIn(str(self.order.id), exception)
 
@@ -94,7 +93,7 @@ class VerifyTransactionsTest(TestCase):
 
         with self.assertRaises(CommandError) as cm:
             call_command('verify_transactions', '--threshold=0.2')
-        exception = six.text_type(cm.exception)
+        exception = str(cm.exception)
         self.assertIn("The following orders are without payments", exception)
         self.assertIn(str(self.order.id), exception)
 
@@ -132,7 +131,7 @@ class VerifyTransactionsTest(TestCase):
         """ Verify errors are thrown when there are valid product orders without payments """
         with self.assertRaises(CommandError) as cm:
             call_command('verify_transactions')
-        exception = six.text_type(cm.exception)
+        exception = str(cm.exception)
         self.assertIn("The following orders are without payments", exception)
         self.assertIn(str(self.order.id), exception)
 
@@ -164,7 +163,7 @@ class VerifyTransactionsTest(TestCase):
         payment2.save()
         with self.assertRaises(CommandError) as cm:
             call_command('verify_transactions')
-        exception = six.text_type(cm.exception)
+        exception = str(cm.exception)
         self.assertIn("The following orders had multiple payments", exception)
         self.assertIn(str(self.order.id), exception)
         self.assertIn(str(payment1.id), exception)
@@ -189,7 +188,7 @@ class VerifyTransactionsTest(TestCase):
         payment3.save()
         with self.assertRaises(CommandError) as cm:
             call_command('verify_transactions')
-        exception = six.text_type(cm.exception)
+        exception = str(cm.exception)
         self.assertIn("The following orders had multiple payments", exception)
         self.assertIn(str(self.order.id), exception)
         self.assertIn(str(payment1.id), exception)
@@ -206,7 +205,7 @@ class VerifyTransactionsTest(TestCase):
         payment.save()
         with self.assertRaises(CommandError) as cm:
             call_command('verify_transactions')
-        exception = six.text_type(cm.exception)
+        exception = str(cm.exception)
         self.assertIn("The following order totals mismatch payments received", exception)
         self.assertIn(str(self.order.id), exception)
         self.assertIn(str(payment.id), exception)
@@ -223,7 +222,7 @@ class VerifyTransactionsTest(TestCase):
         payment.save()
         with self.assertRaises(CommandError) as cm:
             call_command('verify_transactions', '--support')
-        exception = six.text_type(cm.exception)
+        exception = str(cm.exception)
         self.assertTrue(payment.amount != self.order.total_incl_tax)
         self.assertIn("There was a mismatch in the totals in the following order that require a refund", exception)
         self.assertIn("orders_mismatched_totals_support", exception)
@@ -247,7 +246,7 @@ class VerifyTransactionsTest(TestCase):
         refund.save()
         with self.assertRaises(CommandError) as cm:
             call_command('verify_transactions')
-        exception = six.text_type(cm.exception)
+        exception = str(cm.exception)
         self.assertIn("The following orders had excessive refunds", exception)
         self.assertIn(str(self.order.id), exception)
         self.assertIn(str(refund.id), exception)

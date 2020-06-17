@@ -1,7 +1,8 @@
 
 
+from urllib.parse import urljoin
+
 from path import Path
-from six.moves.urllib.parse import urljoin
 
 from ecommerce.settings.base import *
 

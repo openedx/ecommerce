@@ -9,9 +9,9 @@ import abc
 import datetime
 import json
 import logging
+from urllib.parse import urlencode
 
 import requests
-import six
 import waffle
 from django.conf import settings
 from django.urls import reverse
@@ -20,7 +20,6 @@ from oscar.core.loading import get_model
 from requests.exceptions import ConnectionError as ReqConnectionError  # pylint: disable=ungrouped-imports
 from requests.exceptions import Timeout
 from rest_framework import status
-from six.moves.urllib.parse import urlencode
 
 from ecommerce.core.constants import (
     DONATIONS_FROM_CHECKOUT_TESTS_PRODUCT_TYPE_NAME,
@@ -57,7 +56,7 @@ StockRecord = get_model('partner', 'StockRecord')
 logger = logging.getLogger(__name__)
 
 
-class BaseFulfillmentModule(six.with_metaclass(abc.ABCMeta, object)):  # pragma: no cover
+class BaseFulfillmentModule(metaclass=abc.ABCMeta):  # pragma: no cover
     """
     Base FulfillmentModule class for containing Product specific fulfillment logic.
 
@@ -544,7 +543,7 @@ class EnrollmentCodeFulfillmentModule(BaseFulfillmentModule):
             _range.save()
 
             vouchers = create_vouchers(
-                name=six.text_type('Enrollment code voucher [{}]').format(line.product.title),
+                name=str('Enrollment code voucher [{}]').format(line.product.title),
                 benefit_type=Benefit.PERCENTAGE,
                 benefit_value=100,
                 catalog=coupon_catalog,

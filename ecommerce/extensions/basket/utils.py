@@ -3,6 +3,7 @@
 import datetime
 import json
 import logging
+from urllib.parse import unquote, urlencode
 
 import newrelic.agent
 import pytz
@@ -13,7 +14,6 @@ from django.db import transaction
 from django.utils.translation import ugettext_lazy as _
 from oscar.apps.basket.signals import voucher_addition
 from oscar.core.loading import get_class, get_model
-from six.moves.urllib.parse import unquote, urlencode
 
 from ecommerce.core.url_utils import absolute_url
 from ecommerce.courses.utils import mode_for_product
