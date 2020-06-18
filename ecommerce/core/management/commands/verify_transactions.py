@@ -26,9 +26,6 @@ Example output:
     [('Order: 72 Amount: 100.00', 'Payment: 67 Amount: 10000.00'),
     ('Order: 71 Amount: 100.00', 'Payment: 65 Amount: 10.00')]"}
 """
-
-from __future__ import absolute_import
-
 import datetime
 import json
 import logging
@@ -80,9 +77,8 @@ class Command(BaseCommand):
             action='store',
             type=float,
             default=0,
-            help='Anomoly threshold to trigger failure.  If N is between 0 and 1, this will be the ' +
-            'fraction of total orders; N >= 1 will be an integer number of errors'
-        )
+            help='Anomoly threshold to trigger failure.  If N is between 0 and 1, this will be the fraction of total '
+                 'orders; N >= 1 will be an integer number of errors')
         parser.add_argument(
             '--support',
             action='store_true',
@@ -105,11 +101,9 @@ class Command(BaseCommand):
         end = datetime.datetime.now(pytz.utc) - datetime.timedelta(minutes=end_delta)
         logger.info("Start time: %s  --  End time: %s", start, end)
 
-        orders = use_read_replica_if_available(
-            Order.objects.all()
-            .filter(date_placed__gte=start, date_placed__lt=end)
-            .prefetch_related('payment_events__event_type')
-        )
+        orders = use_read_replica_if_available(Order.objects.all()
+                                               .filter(date_placed__gte=start, date_placed__lt=end)
+                                               .prefetch_related('payment_events__event_type'))
         logger.info("Number of orders to verify: %s", orders.count())
         if orders.count() == 0:
             logger.info("No orders, DONE")

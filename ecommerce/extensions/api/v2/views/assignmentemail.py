@@ -1,5 +1,5 @@
 """API endpoint for sending assignment emails to Learners"""
-from __future__ import absolute_import
+
 
 import logging
 

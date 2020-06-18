@@ -5,7 +5,7 @@ This command generates refunds for orders.
 ./manage.py create_refund_for_orders --order-numbers-file=order_numbers_file.txt --refund-duplicate-only  --no-commit
 ./manage.py create_refund_for_orders --order-numbers-file=order_numbers_file.txt --refund-duplicate-only  --sleep-time=1
 """
-from __future__ import absolute_import, unicode_literals
+
 
 import logging
 import os

@@ -3,7 +3,7 @@
 Fulfillment Modules are designed to allow specific fulfillment logic based on the type (or types) of products
 in an Order.
 """
-from __future__ import absolute_import
+
 
 import abc
 import datetime

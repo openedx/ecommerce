@@ -1,9 +1,6 @@
 """
 Endpoints to facilitate retirement actions
 """
-
-from __future__ import absolute_import
-
 from edx_rest_framework_extensions.auth.jwt.authentication import JwtAuthentication
 from rest_framework import permissions, status
 from rest_framework.response import Response
@@ -23,7 +20,7 @@ class EcommerceIdView(APIView):
         If the given user does not have an LMS user id, tries to find it. If found, adds the id to the user and
         saves the user. If the id cannot be found, writes custom metrics to record this fact.
     """
-    authentication_classes = (JwtAuthentication, )
+    authentication_classes = (JwtAuthentication,)
     permission_classes = (permissions.IsAuthenticated, permissions.IsAdminUser)
 
     def get(self, _, username):

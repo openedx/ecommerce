@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """Unit tests of Paypal payment processor implementation."""
-from __future__ import absolute_import, unicode_literals
+
 
 import json
 import logging

@@ -1,5 +1,5 @@
 """HTTP endpoints for interacting with refunds."""
-from __future__ import absolute_import
+
 
 import logging
 

@@ -1,7 +1,4 @@
 # coding=utf-8
-
-from __future__ import absolute_import
-
 import mock
 from django.conf import settings
 from django.test import override_settings

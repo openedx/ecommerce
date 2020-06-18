@@ -1,5 +1,5 @@
 """HTTP endpoints for interacting with partners."""
-from __future__ import absolute_import
+
 
 from oscar.core.loading import get_model
 from rest_framework import viewsets

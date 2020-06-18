@@ -1,5 +1,5 @@
 """ Adds a Site to Referrals where site is set to null. """
-from __future__ import absolute_import, unicode_literals
+
 
 from django.contrib.sites.models import Site
 from django.core.management import BaseCommand, CommandError

@@ -1,4 +1,4 @@
-from __future__ import absolute_import, unicode_literals
+
 
 from django.contrib.sites.models import Site
 from django.core.management import call_command

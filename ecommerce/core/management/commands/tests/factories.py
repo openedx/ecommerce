@@ -1,4 +1,4 @@
-from __future__ import absolute_import
+
 
 import factory
 from factory.fuzzy import FuzzyInteger

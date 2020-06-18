@@ -1,4 +1,4 @@
-from __future__ import absolute_import
+
 
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models

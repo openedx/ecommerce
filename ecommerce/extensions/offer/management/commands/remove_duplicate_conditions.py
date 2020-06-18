@@ -1,7 +1,7 @@
 """
 This command removes the duplicate conditions.
 """
-from __future__ import absolute_import, unicode_literals
+
 
 import logging
 

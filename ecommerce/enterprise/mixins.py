@@ -1,9 +1,6 @@
 """
 Mixin for adding the enterprise discount in order line.
 """
-
-from __future__ import absolute_import
-
 import logging
 from decimal import Decimal
 

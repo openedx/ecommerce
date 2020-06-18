@@ -1,7 +1,7 @@
 """
 Comprehensive Theming tests for core functionality.
 """
-from __future__ import absolute_import
+
 
 import six
 from django.conf import settings

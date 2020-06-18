@@ -1,7 +1,7 @@
 """
     Helpers for accessing comprehensive theming related variables.
 """
-from __future__ import absolute_import
+
 
 import logging
 import os

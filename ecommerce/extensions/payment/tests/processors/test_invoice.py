@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """Unit tests of Invoice payment processor implementation."""
-from __future__ import absolute_import, unicode_literals
+
 
 import datetime
 

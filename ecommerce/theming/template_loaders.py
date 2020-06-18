@@ -1,7 +1,7 @@
 """
 Theming aware template loaders.
 """
-from __future__ import absolute_import
+
 
 from django.template.loaders.filesystem import Loader
 from threadlocals.threadlocals import get_current_request

@@ -1,7 +1,7 @@
 """
 Django rules for Refund
 """
-from __future__ import absolute_import
+
 
 import rules
 from edx_rbac.utils import user_has_access_via_database

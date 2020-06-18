@@ -1,7 +1,7 @@
 """
 Django management command to unset superusers in ecommerce.
 """
-from __future__ import absolute_import
+
 
 import logging
 

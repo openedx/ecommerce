@@ -1,5 +1,5 @@
 """HTTP endpoints for interacting with courses."""
-from __future__ import absolute_import
+
 
 import waffle
 from django.db.models import Prefetch

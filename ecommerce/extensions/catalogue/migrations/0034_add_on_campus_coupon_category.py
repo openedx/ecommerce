@@ -1,6 +1,6 @@
 """ Add 'On-Campus Learners' to the list of default coupon categories"""
 
-from __future__ import absolute_import
+
 
 from django.db import migrations
 from oscar.apps.catalogue.categories import create_from_breadcrumbs

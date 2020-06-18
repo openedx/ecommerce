@@ -1,7 +1,7 @@
 """
 Tests for the ecommerce.enterprise.mixins module.
 """
-from __future__ import absolute_import
+
 
 from decimal import Decimal
 

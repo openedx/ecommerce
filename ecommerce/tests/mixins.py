@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """Broadly-useful mixins for use in automated tests."""
-from __future__ import absolute_import
+
 
 import datetime
 import json

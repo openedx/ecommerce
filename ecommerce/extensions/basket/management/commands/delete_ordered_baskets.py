@@ -3,7 +3,7 @@ Management command that deletes baskets associated with orders.
 
 These baskets don't have much value once the order is placed, and unnecessarily take up space.
 """
-from __future__ import absolute_import, unicode_literals
+
 
 import time
 

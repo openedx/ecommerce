@@ -1,7 +1,7 @@
 """
 Tests for Management commands of comprehensive theming.
 """
-from __future__ import absolute_import
+
 
 import six
 from django.conf import settings

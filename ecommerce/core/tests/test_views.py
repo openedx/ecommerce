@@ -1,5 +1,5 @@
 """Tests of the service health endpoint."""
-from __future__ import absolute_import
+
 
 import mock
 from django.conf import settings

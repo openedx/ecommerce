@@ -2,9 +2,6 @@
 """
 Contains the tests for creating an coupon associated with enterprise customer and catalog.
 """
-
-from __future__ import absolute_import, unicode_literals
-
 from uuid import uuid4
 
 from django.core.management import call_command

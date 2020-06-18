@@ -1,5 +1,5 @@
 """Exceptions and error messages used by the ecommerce API."""
-from __future__ import absolute_import
+
 
 from django.utils.translation import ugettext_lazy as _
 from rest_framework import status

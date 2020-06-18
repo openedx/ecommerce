@@ -1,7 +1,7 @@
 """
 Comprehensive Theming tests for Theme App Config.
 """
-from __future__ import absolute_import
+
 
 import mock
 from django.conf import settings

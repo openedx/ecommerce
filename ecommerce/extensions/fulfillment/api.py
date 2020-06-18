@@ -5,7 +5,7 @@ Calls down to a common interface for fulfillment of each line of an order based 
 can successfully fulfill the product. Success can be reported back based on each line item in the order.
 
 """
-from __future__ import absolute_import
+
 
 import logging
 from importlib import import_module
