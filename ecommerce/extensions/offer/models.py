@@ -528,6 +528,9 @@ class OfferAssignment(TimeStampedModel):
     offer = models.ForeignKey('offer.ConditionalOffer', on_delete=models.CASCADE)
     code = models.CharField(max_length=128, db_index=True)
     user_email = models.EmailField(db_index=True)
+    assignment_date = models.DateTimeField(blank=True, verbose_name='Offer Assignment Date', null=True)
+    last_reminder_date = models.DateTimeField(blank=True, verbose_name='Last Reminder Date', null=True)
+    revocation_date = models.DateTimeField(blank=True, verbose_name='Offer Revocation Date', null=True)
     status = models.CharField(
         max_length=255,
         db_index=True,

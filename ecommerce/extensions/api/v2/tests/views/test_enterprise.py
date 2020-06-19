@@ -15,6 +15,7 @@ import six  # pylint: disable=ungrouped-imports
 from django.conf import settings
 from django.test import override_settings
 from django.urls import reverse
+from django.utils import timezone
 from django.utils.http import urlencode
 from django.utils.timezone import now
 from oscar.core.loading import get_model
@@ -516,8 +517,8 @@ class EnterpriseCouponViewSetRbacTests(
         all_coupon_codes = coupon.attr.coupon_vouchers.vouchers.values_list('code', flat=True)
         if is_csv:
             total_result_count = len(response)
-            all_received_codes = [result.split(',')[1] for result in response if result]
-            all_received_code_max_uses = [int(result.split(',')[3]) for result in response if result]
+            all_received_codes = [result.split(',')[2] for result in response if result]
+            all_received_code_max_uses = [int(result.split(',')[5]) for result in response if result]
         else:
             total_result_count = len(response['results'])
             all_received_codes = [result['code'] for result in response['results']]
@@ -526,7 +527,6 @@ class EnterpriseCouponViewSetRbacTests(
         # `max_uses` should be same for all codes
         max_uses = max_uses or 1
         self.assertEqual(set(all_received_code_max_uses), set([max_uses]))
-
         # total count of results returned is correct
         self.assertEqual(total_result_count, results_count)
 
@@ -607,6 +607,11 @@ class EnterpriseCouponViewSetRbacTests(
                 url=get_ecommerce_url('/coupons/offer/'),
                 code=expected_result['code']
             )
+            assignment = OfferAssignment.objects.filter(
+                code=expected_result['code'], user_email=expected_result['assigned_to']
+            ).first()
+            if assignment:
+                expected_result['assignment_date'] = assignment.assignment_date.strftime("%B %d, %Y %H:%M")
             expected_response.append(expected_result)
 
         response = sorted(response, key=lambda k: (k['code'], k['assigned_to']))
@@ -636,14 +641,17 @@ class EnterpriseCouponViewSetRbacTests(
             'code_redemptions': {'user2@example.com': {'code': 2, 'num': 1}},
             'expected_responses': {
                 VOUCHER_NOT_ASSIGNED: [
-                    {'code': 0, 'assigned_to': '', 'redemptions': {'used': 0, 'total': 1, 'num_assignments': 0}}
+                    {'code': 0, 'assigned_to': '', 'redemptions': {'used': 0, 'total': 1, 'num_assignments': 0},
+                     'assignment_date': '', 'last_reminder_date': '', 'revocation_date': ''}
                 ],
                 VOUCHER_NOT_REDEEMED: [
-                    {'code': 1, 'assigned_to': 'user1@example.com', 'redemptions': {'used': 0, 'total': 1}}
+                    {'code': 1, 'assigned_to': 'user1@example.com', 'redemptions': {'used': 0, 'total': 1},
+                     'assignment_date': '', 'last_reminder_date': '', 'revocation_date': ''}
                 ],
                 VOUCHER_PARTIAL_REDEEMED: [],
                 VOUCHER_REDEEMED: [
-                    {'code': 2, 'assigned_to': 'user2@example.com', 'redemptions': {'used': 1, 'total': 1}}
+                    {'code': 2, 'assigned_to': 'user2@example.com', 'redemptions': {'used': 1, 'total': 1},
+                     'assignment_date': '', 'last_reminder_date': '', 'revocation_date': ''}
                 ]
             }
         },
@@ -658,16 +666,20 @@ class EnterpriseCouponViewSetRbacTests(
             },
             'expected_responses': {
                 VOUCHER_NOT_ASSIGNED: [
-                    {'code': 0, 'assigned_to': '', 'redemptions': {'used': 0, 'total': 2, 'num_assignments': 0}}
+                    {'code': 0, 'assigned_to': '', 'redemptions': {'used': 0, 'total': 2, 'num_assignments': 0},
+                     'assignment_date': '', 'last_reminder_date': '', 'revocation_date': ''}
                 ],
                 VOUCHER_NOT_REDEEMED: [
-                    {'code': 1, 'assigned_to': 'user1@example.com', 'redemptions': {'used': 0, 'total': 2}}
+                    {'code': 1, 'assigned_to': 'user1@example.com', 'redemptions': {'used': 0, 'total': 2},
+                     'assignment_date': '', 'last_reminder_date': '', 'revocation_date': ''}
                 ],
                 VOUCHER_PARTIAL_REDEEMED: [
-                    {'code': 2, 'assigned_to': 'user2@example.com', 'redemptions': {'used': 1, 'total': 2}}
+                    {'code': 2, 'assigned_to': 'user2@example.com', 'redemptions': {'used': 1, 'total': 2},
+                     'assignment_date': '', 'last_reminder_date': '', 'revocation_date': ''}
                 ],
                 VOUCHER_REDEEMED: [
-                    {'code': 3, 'assigned_to': 'user3@example.com', 'redemptions': {'used': 2, 'total': 2}}
+                    {'code': 3, 'assigned_to': 'user3@example.com', 'redemptions': {'used': 2, 'total': 2},
+                     'assignment_date': '', 'last_reminder_date': '', 'revocation_date': ''}
                 ]
             }
         },
@@ -683,18 +695,24 @@ class EnterpriseCouponViewSetRbacTests(
             },
             'expected_responses': {
                 VOUCHER_NOT_ASSIGNED: [
-                    {'code': 0, 'assigned_to': '', 'redemptions': {'used': 0, 'total': 4, 'num_assignments': 0}},
-                    {'code': 1, 'assigned_to': '', 'redemptions': {'used': 1, 'total': 4, 'num_assignments': 2}}
+                    {'code': 0, 'assigned_to': '', 'redemptions': {'used': 0, 'total': 4, 'num_assignments': 0},
+                     'assignment_date': '', 'last_reminder_date': '', 'revocation_date': ''},
+                    {'code': 1, 'assigned_to': '', 'redemptions': {'used': 1, 'total': 4, 'num_assignments': 2},
+                     'assignment_date': '', 'last_reminder_date': '', 'revocation_date': ''}
                 ],
                 VOUCHER_NOT_REDEEMED: [
-                    {'code': 1, 'assigned_to': 'user1@example.com', 'redemptions': {'used': 0, 'total': 1}}
+                    {'code': 1, 'assigned_to': 'user1@example.com', 'redemptions': {'used': 0, 'total': 1},
+                     'assignment_date': '', 'last_reminder_date': '', 'revocation_date': ''}
                 ],
                 VOUCHER_PARTIAL_REDEEMED: [
-                    {'code': 1, 'assigned_to': 'user2@example.com', 'redemptions': {'used': 1, 'total': 2}}
+                    {'code': 1, 'assigned_to': 'user2@example.com', 'redemptions': {'used': 1, 'total': 2},
+                     'assignment_date': '', 'last_reminder_date': '', 'revocation_date': ''}
                 ],
                 VOUCHER_REDEEMED: [
-                    {'code': 2, 'assigned_to': 'user3@example.com', 'redemptions': {'used': 2, 'total': 2}},
-                    {'code': 2, 'assigned_to': 'user4@example.com', 'redemptions': {'used': 2, 'total': 2}}
+                    {'code': 2, 'assigned_to': 'user3@example.com', 'redemptions': {'used': 2, 'total': 2},
+                     'assignment_date': '', 'last_reminder_date': '', 'revocation_date': ''},
+                    {'code': 2, 'assigned_to': 'user4@example.com', 'redemptions': {'used': 2, 'total': 2},
+                     'assignment_date': '', 'last_reminder_date': '', 'revocation_date': ''}
                 ]
             }
         },
@@ -706,15 +724,19 @@ class EnterpriseCouponViewSetRbacTests(
             'code_redemptions': {'user2@example.com': {'code': 1, 'num': 1}},
             'expected_responses': {
                 VOUCHER_NOT_ASSIGNED: [
-                    {'code': 0, 'assigned_to': '', 'redemptions': {'used': 0, 'total': 3, 'num_assignments': 0}},
-                    {'code': 1, 'assigned_to': '', 'redemptions': {'used': 1, 'total': 3, 'num_assignments': 1}}
+                    {'code': 0, 'assigned_to': '', 'redemptions': {'used': 0, 'total': 3, 'num_assignments': 0},
+                     'assignment_date': '', 'last_reminder_date': '', 'revocation_date': ''},
+                    {'code': 1, 'assigned_to': '', 'redemptions': {'used': 1, 'total': 3, 'num_assignments': 1},
+                     'assignment_date': '', 'last_reminder_date': '', 'revocation_date': ''}
                 ],
                 VOUCHER_NOT_REDEEMED: [
-                    {'code': 1, 'assigned_to': 'user1@example.com', 'redemptions': {'used': 0, 'total': 1}}
+                    {'code': 1, 'assigned_to': 'user1@example.com', 'redemptions': {'used': 0, 'total': 1},
+                     'assignment_date': '', 'last_reminder_date': '', 'revocation_date': ''}
                 ],
                 VOUCHER_PARTIAL_REDEEMED: [],
                 VOUCHER_REDEEMED: [
-                    {'code': 1, 'assigned_to': 'user2@example.com', 'redemptions': {'used': 1, 'total': 1}}
+                    {'code': 1, 'assigned_to': 'user2@example.com', 'redemptions': {'used': 1, 'total': 1},
+                     'assignment_date': '', 'last_reminder_date': '', 'revocation_date': ''}
                 ]
             }
         },
@@ -820,9 +842,9 @@ class EnterpriseCouponViewSetRbacTests(
         csv_header = csv_content[0]
         # Strip out first row (headers) and last row (extra csv line)
         csv_data = csv_content[1:-1]
-
         # Verify headers.
-        self.assertEqual(csv_header, 'assigned_to,code,redeem_url,redemptions.total,redemptions.used')
+        self.assertEqual(csv_header, 'assigned_to,assignment_date,code,last_reminder_date,redeem_url,'
+                                     'redemptions.total,redemptions.used,revocation_date')
 
         # Verify csv data.
         self.assert_coupon_codes_response(
@@ -930,7 +952,8 @@ class EnterpriseCouponViewSetRbacTests(
         # Verify that code appears in unredeemed filter.
         self.assert_code_detail_response(
             response['results'],
-            [{'code': 0, 'assigned_to': 'user1@example.com', 'redemptions': {'used': 0, 'total': 1}}],
+            [{'code': 0, 'assigned_to': 'user1@example.com', 'redemptions': {'used': 0, 'total': 1},
+              'assignment_date': '', 'last_reminder_date': '', 'revocation_date': ''}],
             codes
         )
 
@@ -945,7 +968,8 @@ class EnterpriseCouponViewSetRbacTests(
         # Now verify that code still appears in unredeemed filter.
         self.assert_code_detail_response(
             response['results'],
-            [{'code': 0, 'assigned_to': 'user1@example.com', 'redemptions': {'used': 0, 'total': 1}}],
+            [{'code': 0, 'assigned_to': 'user1@example.com', 'redemptions': {'used': 0, 'total': 1},
+              'assignment_date': '', 'last_reminder_date': '', 'revocation_date': ''}],
             codes
         )
 
@@ -1344,6 +1368,40 @@ class EnterpriseCouponViewSetRbacTests(
             )
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_reminder_revocation_dates(self):
+        """
+        Test that the reminder and revocation dates appear correctly.
+        """
+        coupon_response = self.get_response('POST', ENTERPRISE_COUPONS_LINK, self.data)
+        coupon = coupon_response.json()
+        coupon_id = coupon['coupon_id']
+        vouchers = Product.objects.get(id=coupon_id).attr.coupon_vouchers.vouchers.all()
+        codes = [voucher.code for voucher in vouchers]
+        updated_date = timezone.now()
+        serialized_date = updated_date.strftime("%B %d, %Y %H:%M")
+
+        # Code assignments.
+        self.assign_user_to_code(coupon_id, ['user1@example.com'], [codes[0]])
+
+        # Update the dates
+        OfferAssignment.objects.filter(code=vouchers[0].code).update(
+            assignment_date=updated_date, last_reminder_date=updated_date, revocation_date=updated_date
+        )
+
+        response = self.get_response(
+            'GET',
+            '/api/v2/enterprise/coupons/{}/codes/?code_filter={}'.format(coupon_id, VOUCHER_NOT_REDEEMED)
+        ).json()
+
+        # Now verify that the dates appear correctly.
+        self.assert_code_detail_response(
+            response['results'],
+            [{'code': 0, 'assigned_to': 'user1@example.com', 'redemptions': {'used': 0, 'total': 1},
+              'assignment_date': serialized_date, 'last_reminder_date': serialized_date,
+              'revocation_date': serialized_date}],
+            codes
+        )
 
     @ddt.data(
         (
@@ -2026,6 +2084,7 @@ class EnterpriseCouponViewSetRbacTests(
         assert mock_send_email.call_count == (1 if send_email else 0)
         for offer_assignment in OfferAssignment.objects.filter(user_email=email):
             assert offer_assignment.status == OFFER_ASSIGNMENT_REVOKED
+            self.assertIsNotNone(offer_assignment.revocation_date)
 
     def test_coupon_codes_revoke_success_with_bounced_email(self):
         """Test revoking codes from users when the offer assignment has bounced email status."""
@@ -2067,6 +2126,7 @@ class EnterpriseCouponViewSetRbacTests(
         assert response == [{'code': offer_assignment.code, 'email': email, 'detail': 'success'}]
         for offer_assignment in OfferAssignment.objects.filter(user_email=email):
             assert offer_assignment.status == OFFER_ASSIGNMENT_REVOKED
+            self.assertIsNotNone(offer_assignment.revocation_date)
 
     def test_coupon_codes_revoke_invalid_request(self):
         """Test that revoke fails when the request format is incorrect."""
@@ -2188,6 +2248,7 @@ class EnterpriseCouponViewSetRbacTests(
         assert mock_send_email.call_count == 1
         for offer_assignment in OfferAssignment.objects.filter(user_email=email):
             assert offer_assignment.status == OFFER_ASSIGNMENT_REVOKED
+            self.assertIsNotNone(offer_assignment.revocation_date)
 
     def test_coupon_codes_revoke_bulk(self):
         """Test sending multiple revoke requests (bulk use case)."""
@@ -2237,6 +2298,7 @@ class EnterpriseCouponViewSetRbacTests(
         assert mock_send_email.call_count == 1
         for offer_assignment in OfferAssignment.objects.filter(user_email=offer_assignment.user_email):
             assert offer_assignment.status == OFFER_ASSIGNMENT_REVOKED
+            self.assertIsNotNone(offer_assignment.revocation_date)
 
     @ddt.data(
         (Voucher.SINGLE_USE, 2, None),
@@ -2264,6 +2326,7 @@ class EnterpriseCouponViewSetRbacTests(
                 }
             )
         offer_assignment = OfferAssignment.objects.filter(user_email=email).first()
+        self.assertIsNone(offer_assignment.last_reminder_date)
         payload = {'assignments': [{'email': email, 'code': offer_assignment.code}]}
         payload['template'] = 'Test template'
         with mock.patch('ecommerce.extensions.offer.utils.send_offer_update_email.delay') as mock_send_email:
@@ -2275,6 +2338,8 @@ class EnterpriseCouponViewSetRbacTests(
         response = response.json()
         assert response == [{'code': offer_assignment.code, 'email': email, 'detail': 'success'}]
         assert mock_send_email.call_count == 1
+        offer_assignment = OfferAssignment.objects.filter(user_email=email).first()
+        self.assertIsNotNone(offer_assignment.last_reminder_date)
 
     def test_coupon_codes_remind_code_not_in_coupon(self):
         """Test that remind fails when the specified code is not associated with the Coupon."""
@@ -2368,6 +2433,7 @@ class EnterpriseCouponViewSetRbacTests(
         response = response.json()
         assert response == [{'email': email, 'code': offer_assignment.code, 'detail': 'email_dispatch_failed'}]
         assert mock_send_email.call_count == 1
+        self.assertIsNone(offer_assignment.last_reminder_date)
 
     def test_coupon_codes_remind_bulk(self):
         """Test sending multiple remind requests (bulk use case)."""
@@ -2388,6 +2454,7 @@ class EnterpriseCouponViewSetRbacTests(
                 }
             )
         offer_assignment = OfferAssignment.objects.filter(user_email__in=emails).first()
+        self.assertIsNone(offer_assignment.last_reminder_date)
         with mock.patch('ecommerce.extensions.offer.utils.send_offer_update_email.delay') as mock_send_email:
             response = self.get_response(
                 'POST',
@@ -2414,6 +2481,8 @@ class EnterpriseCouponViewSetRbacTests(
             },
         ]
         assert mock_send_email.call_count == 1
+        offer_assignment = OfferAssignment.objects.filter(user_email__in=emails).first()
+        self.assertIsNotNone(offer_assignment.last_reminder_date)
 
     def test_coupon_codes_remind_all_not_redeemed(self):
         """Test sending multiple remind requests (remind all not redeemed assignments use case for)."""
@@ -2446,6 +2515,8 @@ class EnterpriseCouponViewSetRbacTests(
             for offer_assignment in offer_assignments
         ]
         assert mock_send_email.call_count == 2
+        for offer_assignment in offer_assignments:
+            self.assertIsNotNone(offer_assignment.last_reminder_date)
 
     def test_coupon_codes_remind_all_partial_redeemed(self):
         """Test sending multiple remind requests (remind all partial redeemed assignments use case)."""
@@ -2483,6 +2554,8 @@ class EnterpriseCouponViewSetRbacTests(
             for offer_assignment in offer_assignments
         ]
         assert mock_send_email.call_count == 1
+        for offer_assignment in offer_assignments:
+            self.assertIsNotNone(offer_assignment.last_reminder_date)
 
     def test_coupon_codes_remind_all_with_no_code_filter(self):
         """Test sending multiple remind requests (remind all use case with no code filter supplied)."""

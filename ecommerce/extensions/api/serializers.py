@@ -725,6 +725,31 @@ class CodeUsageSerializer(serializers.Serializer):  # pylint: disable=abstract-m
     assigned_to = serializers.SerializerMethodField()
     redeem_url = serializers.SerializerMethodField()
     redemptions = serializers.SerializerMethodField()
+    assignment_date = serializers.SerializerMethodField()
+    last_reminder_date = serializers.SerializerMethodField()
+    revocation_date = serializers.SerializerMethodField()
+
+    def _get_assignment(self, obj):
+        assigned_to = self.get_assigned_to(obj)
+        code = self.get_code(obj)
+        if assigned_to and code:
+            return OfferAssignment.objects.filter(code=code, user_email=assigned_to).first()
+        return None
+
+    def get_assignment_date(self, obj):
+        assignment = self._get_assignment(obj)
+        if assignment:
+            return assignment.assignment_date.strftime("%B %d, %Y %H:%M")\
+                if assignment.assignment_date else assignment.created.strftime("%B %d, %Y %H:%M")
+        return ''
+
+    def get_last_reminder_date(self, obj):
+        last_reminder_date = getattr(self._get_assignment(obj), 'last_reminder_date', None)
+        return last_reminder_date.strftime("%B %d, %Y %H:%M") if last_reminder_date else ''
+
+    def get_revocation_date(self, obj):
+        revocation_date = getattr(self._get_assignment(obj), 'revocation_date', None)
+        return revocation_date.strftime("%B %d, %Y %H:%M") if revocation_date else ''
 
     def get_code(self, obj):
         return obj.get('code')
@@ -1317,6 +1342,7 @@ class CouponCodeAssignmentSerializer(serializers.Serializer):  # pylint: disable
         email_iterator = iter(emails)
         offer_assignments = []
         emails_already_sent = set()
+        current_date_time = timezone.now()
 
         for code in available_assignments:
             offer = available_assignments[code]['offer']
@@ -1326,6 +1352,7 @@ class CouponCodeAssignmentSerializer(serializers.Serializer):  # pylint: disable
                     offer=offer,
                     code=code,
                     user_email=email or next(email_iterator),
+                    assignment_date=current_date_time,
                 )
                 offer_assignments.append(new_offer_assignment)
                 # Start async email task. For MULTI_USE_PER_CUSTOMER, a single email is sent
@@ -1558,10 +1585,12 @@ class CouponCodeRevokeSerializer(CouponCodeMixin, serializers.Serializer):  # py
         greeting = self.context.get('greeting')
         closing = self.context.get('closing')
         detail = 'success'
+        current_date_time = timezone.now()
 
         try:
             for offer_assignment in offer_assignments:
                 offer_assignment.status = OFFER_ASSIGNMENT_REVOKED
+                offer_assignment.revocation_date = current_date_time
                 offer_assignment.save()
 
             send_revoked_offer_email(
@@ -1614,6 +1643,7 @@ class CouponCodeRemindSerializer(CouponCodeMixin, serializers.Serializer):  # py
         greeting = self.context.get('greeting')
         closing = self.context.get('closing')
         detail = 'success'
+        current_date_time = timezone.now()
 
         try:
             self._trigger_email_sending_task(
@@ -1623,6 +1653,9 @@ class CouponCodeRemindSerializer(CouponCodeMixin, serializers.Serializer):  # py
                 redeemed_offer_count,
                 total_offer_count
             )
+            for offer_assignment in offer_assignments:
+                offer_assignment.last_reminder_date = current_date_time
+                offer_assignment.save()
         except Exception as exc:  # pylint: disable=broad-except
             logger.exception('Encountered error during reminder email for code %s of user %s', code, email)
             detail = six.text_type(exc)
