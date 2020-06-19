@@ -43,9 +43,6 @@ define([
                     pattern: 'email',
                     required: false
                 },
-                sales_force_id: {
-                    required: false
-                },
                 contract_discount_value: {
                     required: function() {
                         return !this.attributes.editing;

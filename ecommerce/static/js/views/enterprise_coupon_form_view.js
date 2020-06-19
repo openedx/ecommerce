@@ -128,12 +128,6 @@ define([
                         }
                         return val;
                     }
-                },
-                'input[name=sales_force_id]': {
-                    observe: 'sales_force_id',
-                    onSet: function(val) {
-                        return val === '' ? null : val;
-                    }
                 }
             },
 
