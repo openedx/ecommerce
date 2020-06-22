@@ -9,6 +9,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.http import Http404, HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
+from django.template.defaultfilters import pluralize
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.decorators import method_decorator
@@ -203,14 +204,16 @@ class CouponRedeemView(EdxOrderPlacementMixin, APIView):
             stockrecords__partner_sku__in=skus,
             stockrecords__partner=site_configuration.partner
         )
+        pluralized = pluralize(len(skus))
         if products.count() != len(skus):
-            return render(request, template_name, {'error': _('These products do not exist.')})
+            msg = _('The course{0} in which you are trying to enroll, not found.'.format(pluralized))
+            return render(request, template_name, {'error': msg})
 
         valid_voucher, msg = voucher_is_valid(voucher, products, request)
         if not valid_voucher:
-            logger.warning('[Code Redemption Failure] The voucher is not valid for these products. '
+            logger.warning('[Code Redemption Failure] The voucher is not valid for product%s.'
                            'User: %s, Products: %s, Code: %s, Message: %s',
-                           request.user.username, products, voucher.code, msg)
+                           pluralized, request.user.username, products, voucher.code, msg)
             return render(request, template_name, {'error': msg})
 
         offer = voucher.best_offer
@@ -242,7 +245,7 @@ class CouponRedeemView(EdxOrderPlacementMixin, APIView):
                 return render(
                     request,
                     template_name,
-                    {'error': _('Could not find course_ids for few of the products.')}
+                    {'error': _('There is some internal error. please contact your admin.')}
                 )
 
             for sku, course_id in sku_to_course_id_map:
@@ -300,7 +303,7 @@ class CouponRedeemView(EdxOrderPlacementMixin, APIView):
         try:
             basket = prepare_basket(request, products, voucher)
         except AlreadyPlacedOrderException:
-            msg = _('You have already purchased these courses.')
+            msg = _('You have already purchased selected course{0}.'.format(pluralized))
             return render(request, template_name, {'error': msg})
 
         if basket.total_excl_tax == 0:
@@ -329,7 +332,9 @@ class CouponRedeemView(EdxOrderPlacementMixin, APIView):
                 if not messages.get_messages(self.request):
                     messages.warning(
                         self.request,
-                        _('This coupon code is not valid for this course. Try a different course.'))
+                        'This coupon code is not valid for selected course{0}. '
+                        'Try a different course.'.format(pluralized),
+                    )
                 self.request.basket.vouchers.remove(voucher)
 
         # The coupon_redeem_redirect query param is used to communicate to the Payment MFE that it may redirect

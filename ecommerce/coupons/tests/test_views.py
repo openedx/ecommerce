@@ -437,7 +437,7 @@ class CouponRedeemViewTests(CouponMixin, DiscoveryTestMixin, LmsApiMockMixin, En
         self.create_coupon_and_get_code(catalog=self.catalog)
         url = format_url(base=self.redeem_url, params={'code': COUPON_CODE, 'sku': 'INVALID'})
         response = self.client.get(url)
-        self.assertEqual(response.context['error'], 'These products do not exist.')
+        self.assertEqual(response.context['error'], 'The course in which you are trying to enroll, not found.')
 
     def test_expired_voucher(self):
         """ Verify an error is returned for expired coupon. """
@@ -581,7 +581,7 @@ class CouponRedeemViewTests(CouponMixin, DiscoveryTestMixin, LmsApiMockMixin, En
             error=ReqConnectionError,
         )
         response = self.redeem_coupon(code=code, consent_token=None, stock_records=[self.entitlement_stock_record])
-        self.assertEqual(response.context['error'], 'Could not find course_ids for few of the products.')
+        self.assertEqual(response.context['error'], 'There is some internal error. please contact your admin.')
 
     @httpretty.activate
     def test_with_with_invalid_product(self):
@@ -590,7 +590,7 @@ class CouponRedeemViewTests(CouponMixin, DiscoveryTestMixin, LmsApiMockMixin, En
         self.seat.course = None
         self.seat.save()
         response = self.redeem_coupon(code=code, consent_token=None)
-        self.assertEqual(response.context['error'], 'Could not find course_ids for few of the products.')
+        self.assertEqual(response.context['error'], 'There is some internal error. please contact your admin.')
 
     @httpretty.activate
     def test_enterprise_contract_metadata_create_on_coupon_redemption(self):
@@ -708,7 +708,7 @@ class CouponRedeemViewTests(CouponMixin, DiscoveryTestMixin, LmsApiMockMixin, En
     @httpretty.activate
     def test_enterprise_customer_coupon_redemption_for_invalid_course(self):
         """ Verify the warning message appears on redemption if coupon does not belong to course. """
-        expected_message = 'This coupon code is not valid for this course. Try a different course.'
+        expected_message = 'This coupon code is not valid for selected course. Try a different course.'
 
         course, seat = self.create_course_and_seat(partner=self.partner)
         stock_record = StockRecord.objects.get(product=seat)
@@ -787,7 +787,7 @@ class CouponRedeemViewTests(CouponMixin, DiscoveryTestMixin, LmsApiMockMixin, En
         self.create_coupon_and_get_code(catalog=self.catalog)
         with mock.patch.object(UserAlreadyPlacedOrder, 'user_already_placed_order', return_value=True):
             response = self.client.get(self.redeem_url_with_params())
-            msg = 'You have already purchased these courses.'
+            msg = 'You have already purchased selected course.'
             self.assertEqual(response.context['error'], msg)
 
     @httpretty.activate

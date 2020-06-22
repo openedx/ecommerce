@@ -53,8 +53,7 @@ def get_products_course_ids(site, products):
                 response = get_course_info_from_catalog(site, product)
             except (ReqConnectionError, AttributeError, SlumberHttpBaseException, Timeout) as exc:
                 logger.exception(
-                    'Unable fetch course ids because products contains a course entitlement product but we failed to'
-                    ' get course info from  course entitlement product.'
+                    'Supported Entitlement Product could not be fetched from the discovery catalog.'
                     'Site: %s, Product: %s, Message: %s',
                     site,
                     product,
