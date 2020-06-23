@@ -149,7 +149,7 @@ class CouponRedeemView(EdxOrderPlacementMixin, APIView):
     permission_classes = (LoginRedirectIfUnauthenticated,)
 
     def _is_valid_consent_token(self, received_consent_token, access_token, enterprise_customer_id, course_ids):
-        """Iterate over all the course_id and check if received_consent_token in valid for any of the course."""
+        """Iterate over all the `course_id`s and check if `received_consent_token` is valid for any of the courses."""
         for course_id in course_ids:
             consent_token = get_enterprise_customer_data_sharing_consent_token(
                 access_token,
@@ -162,7 +162,7 @@ class CouponRedeemView(EdxOrderPlacementMixin, APIView):
 
     def _get_sku_to_course_id_map(self, skus, products, site):
         """Returns tuples containing sku and relevant course_id"""
-        sku_to_course_id_map = []
+        sku_to_course_id_map = {}
         for sku in skus:
             product = products.filter(stockrecords__partner_sku=sku).first()
             try:
@@ -172,7 +172,7 @@ class CouponRedeemView(EdxOrderPlacementMixin, APIView):
                     "[Code Redemption Failure] could not find course id. Product: %s, sku: %s", product, sku
                 )
                 return None
-            sku_to_course_id_map.append((sku, course_id))
+            sku_to_course_id_map[sku] = course_id
         return sku_to_course_id_map
 
     @method_decorator(set_enterprise_cookie)
@@ -248,7 +248,7 @@ class CouponRedeemView(EdxOrderPlacementMixin, APIView):
                     {'error': _('There is some internal error. please contact your admin.')}
                 )
 
-            for sku, course_id in sku_to_course_id_map:
+            for sku, course_id in sku_to_course_id_map.items():
                 if enterprise_customer_user_needs_consent(
                         request.site,
                         enterprise_customer['id'],
@@ -262,7 +262,7 @@ class CouponRedeemView(EdxOrderPlacementMixin, APIView):
                             received_consent_token,
                             request.user.access_token,
                             enterprise_customer['id'],
-                            course_ids=dict(sku_to_course_id_map).values(),
+                            course_ids=sku_to_course_id_map.values(),
                         )
 
                         if not is_valid_consent_token:
