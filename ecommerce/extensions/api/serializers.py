@@ -12,7 +12,7 @@ from dateutil.parser import parse
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.db import transaction
-from django.db.models import Count, Q, Sum
+from django.db.models import Count, Q, Sum, prefetch_related_objects
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 from oscar.core.loading import get_class, get_model
@@ -1322,7 +1322,7 @@ class CouponCodeAssignmentSerializer(serializers.Serializer):  # pylint: disable
             offer = available_assignments[code]['offer']
             email = next(email_iterator) if voucher_usage_type == Voucher.MULTI_USE_PER_CUSTOMER else None
             for _ in range(available_assignments[code]['num_slots']):
-                new_offer_assignment = OfferAssignment.objects.create(
+                new_offer_assignment = OfferAssignment(
                     offer=offer,
                     code=code,
                     user_email=email or next(email_iterator),
@@ -1333,7 +1333,7 @@ class CouponCodeAssignmentSerializer(serializers.Serializer):  # pylint: disable
                 if email_code_pair not in emails_already_sent:
                     self._trigger_email_sending_task(greeting, closing, new_offer_assignment, voucher_usage_type)
                     emails_already_sent.add(email_code_pair)
-
+        OfferAssignment.objects.bulk_create(offer_assignments)
         validated_data['offer_assignments'] = offer_assignments
         return validated_data
 
@@ -1361,7 +1361,9 @@ class CouponCodeAssignmentSerializer(serializers.Serializer):  # pylint: disable
             existing_assignments_for_users = OfferAssignment.objects.filter(user_email__in=emails).exclude(
                 status__in=[OFFER_ASSIGNMENT_REVOKED]
             )
-            existing_applications_for_users = VoucherApplication.objects.filter(user__email__in=emails)
+            existing_applications_for_users = VoucherApplication.objects.select_related('user').filter(
+                user__email__in=emails
+            )
             codes_to_exclude = (
                 [assignment.code for assignment in existing_assignments_for_users] +
                 [application.voucher.code for application in existing_applications_for_users]
@@ -1377,9 +1379,10 @@ class CouponCodeAssignmentSerializer(serializers.Serializer):  # pylint: disable
                 set(codes_to_exclude), set(emails_requiring_exclusions), coupon.id
             )
             vouchers = vouchers.exclude(code__in=codes_to_exclude)
-
+        vouchers = vouchers.all()
+        prefetch_related_objects(vouchers, 'offers', 'offers__condition', 'offers__offerassignment_set')
         total_slots = 0
-        for voucher in vouchers.all():
+        for voucher in vouchers:
             available_slots = voucher.slots_available_for_assignment
             # If there are no available slots for this voucher, skip it.
             if available_slots < 1:
