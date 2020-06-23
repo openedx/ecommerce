@@ -5,10 +5,10 @@
 #    make upgrade
 #
 filelock==3.0.12          # via tox
-importlib-metadata==1.6.0  # via pluggy, tox
+importlib-metadata==1.6.1  # via pluggy, tox
 packaging==20.4           # via tox
 pluggy==0.13.1            # via tox
-py==1.8.1                 # via tox
+py==1.8.2                 # via tox
 pyparsing==2.4.7          # via packaging
 six==1.15.0               # via packaging, tox
 toml==0.10.1              # via tox
