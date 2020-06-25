@@ -1,6 +1,7 @@
 
 
 import datetime
+from decimal import Decimal
 from uuid import uuid4
 
 import ddt
@@ -255,13 +256,45 @@ class VoucherViewSetTests(DiscoveryMockMixin, DiscoveryTestMixin, LmsApiMockMixi
             }
         ]
 
-        products, _, __ = VoucherViewSet().retrieve_course_objects(course_discovery_results, 'professional')
+        products, _, _, _ = VoucherViewSet().retrieve_course_objects(course_discovery_results, 'professional')
         self.assertIn(no_enrollment_end_seat, products)
         self.assertIn(no_enrollment_start_seat, products)
         self.assertIn(valid_seat, products)
         self.assertNotIn(expired_enrollment_seat, products)
         self.assertNotIn(expired_seat, products)
         self.assertNotIn(future_enrollment_seat, products)
+
+    def test_omitting_inactive_programs(self):
+        """
+        Verify programs which are inactive or unable to purchase are omitted.
+        """
+        active_uuid = uuid4()
+        inactive_uuid = uuid4()
+        unable_to_purchase_uuid = uuid4()
+
+        course_discovery_results = [
+            {
+                'uuid': active_uuid,
+                'status': 'active',
+                'is_program_eligible_for_one_click_purchase': True,
+                'content_type': 'program',
+            },
+            {
+                'uuid': inactive_uuid,
+                'status': 'pending',
+                'is_program_eligible_for_one_click_purchase': True,
+                'content_type': 'program',
+            },
+            {
+                'uuid': unable_to_purchase_uuid,
+                'status': 'active',
+                'is_program_eligible_for_one_click_purchase': False,
+                'content_type': 'program',
+            }
+        ]
+        _, _, _, program_metadata = VoucherViewSet().retrieve_course_objects(course_discovery_results, '')
+        self.assertEqual(len(program_metadata.keys()), 1)
+        self.assertIn(active_uuid, program_metadata.keys())
 
 
 @ddt.ddt
@@ -417,6 +450,7 @@ class VoucherViewOffersEndpointTests(DiscoveryMockMixin, CouponMixin, DiscoveryT
         )
         offers = VoucherViewSet().get_offers(request=request, voucher=voucher)['results']
         first_offer = offers[0]
+        stock_record_data = serializers.StockRecordSerializer(seat.stockrecords.first()).data
 
         self.assertEqual(len(offers), 1)
         self.assertDictEqual(first_offer, {
@@ -425,14 +459,17 @@ class VoucherViewOffersEndpointTests(DiscoveryMockMixin, CouponMixin, DiscoveryT
                 'value': benefit.value
             },
             'contains_verified': True,
+            'content_type': 'Course',
             'course_start_date': '2013-02-05T05:00:00Z',
             'id': course.id,
             'image_url': '/path/to/image.jpg',
             'multiple_credit_providers': False,
             'organization': CourseKey.from_string(course.id).org,
             'credit_provider_price': None,
+            'query_params': VoucherViewSet.get_query_params(voucher.code, [stock_record_data.get('partner_sku')]),
             'seat_type': seat.attr.certificate_type,
-            'stockrecords': serializers.StockRecordSerializer(seat.stockrecords.first()).data,
+            'price': stock_record_data.get('price_excl_tax'),
+            'stockrecords': stock_record_data,
             'title': course.name,
             'voucher_end_date': voucher.end_datetime,
         })
@@ -451,6 +488,8 @@ class VoucherViewOffersEndpointTests(DiscoveryMockMixin, CouponMixin, DiscoveryT
         request = self.prepare_offers_listing_request(voucher.code)
         offers = VoucherViewSet().get_offers(request=request, voucher=voucher)['results']
         first_offer = offers[0]
+        stock_record_data = serializers.StockRecordSerializer(seat.stockrecords.first()).data
+
         self.assertEqual(len(offers), 1)
         self.assertDictEqual(first_offer, {
             'benefit': {
@@ -458,13 +497,16 @@ class VoucherViewOffersEndpointTests(DiscoveryMockMixin, CouponMixin, DiscoveryT
                 'value': benefit.value
             },
             'contains_verified': True,
+            'content_type': 'Course',
             'course_start_date': '2016-05-01T00:00:00Z',
             'id': course.id,
             'image_url': 'path/to/the/course/image',
             'multiple_credit_providers': False,
             'organization': CourseKey.from_string(course.id).org,
             'credit_provider_price': None,
+            'query_params': VoucherViewSet.get_query_params(voucher.code, [stock_record_data.get('partner_sku')]),
             'seat_type': seat.attr.certificate_type,
+            'price': stock_record_data.get('price_excl_tax'),
             'stockrecords': serializers.StockRecordSerializer(seat.stockrecords.first()).data,
             'title': course.name,
             'voucher_end_date': voucher.end_datetime,
@@ -490,6 +532,8 @@ class VoucherViewOffersEndpointTests(DiscoveryMockMixin, CouponMixin, DiscoveryT
         request = self.prepare_offers_listing_request(voucher.code)
         offers = VoucherViewSet().get_offers(request=request, voucher=voucher)['results']
         first_offer = offers[0]
+        stock_record_data = serializers.StockRecordSerializer(seat.stockrecords.first()).data
+
         self.assertEqual(len(offers), 1)
         self.assertDictEqual(first_offer, {
             'benefit': {
@@ -497,15 +541,69 @@ class VoucherViewOffersEndpointTests(DiscoveryMockMixin, CouponMixin, DiscoveryT
                 'value': benefit.value
             },
             'contains_verified': True,
+            'content_type': 'Course',
             'course_start_date': '2016-05-01T00:00:00Z',
             'id': course.id,
             'image_url': 'path/to/the/course/image',
             'multiple_credit_providers': False,
             'organization': CourseKey.from_string(course.id).org,
             'credit_provider_price': None,
+            'query_params': VoucherViewSet.get_query_params(voucher.code, [stock_record_data.get('partner_sku')]),
             'seat_type': seat.attr.certificate_type,
+            'price': stock_record_data.get('price_excl_tax'),
             'stockrecords': serializers.StockRecordSerializer(seat.stockrecords.first()).data,
             'title': course.name,
+            'voucher_end_date': voucher.end_datetime,
+        })
+
+    def test_get_offers_for_enterprise_catalog_voucher_with_program(self):
+        """ Verify that the course offers data is returned for an enterprise catalog voucher. """
+        self.mock_access_token_response()
+        _, seat_product = self.create_course_and_seat()
+        entitlement_product = self.create_entitlement_product()
+        enterprise_catalog_id = str(uuid4())
+        program_uuid = str(uuid4())
+        self.mock_enterprise_catalog_programs_endpoint(
+            enterprise_api_url=self.site_configuration.enterprise_api_url,
+            enterprise_catalog_id=enterprise_catalog_id,
+            program_uuid=program_uuid,
+            entitlement_product=entitlement_product,
+            seat_product=seat_product
+        )
+        new_range, __ = Range.objects.get_or_create(
+            catalog_query='*:*',
+            course_seat_types='verified',
+            enterprise_customer=str(uuid4()),
+            enterprise_customer_catalog=enterprise_catalog_id,
+        )
+        new_range.add_product(seat_product)
+        new_range.add_product(entitlement_product)
+        voucher, __ = prepare_voucher(_range=new_range, benefit_value=10)
+        benefit = voucher.offers.first().benefit
+        request = self.prepare_offers_listing_request(voucher.code)
+        offers = VoucherViewSet().get_offers(request=request, voucher=voucher)['results']
+        offer = offers[0]
+        seat_stock_record = serializers.StockRecordSerializer(seat_product.stockrecords.first()).data
+        entitlement_stock_record = serializers.StockRecordSerializer(entitlement_product.stockrecords.first()).data
+        expected_price = Decimal(seat_stock_record.get('price_excl_tax')) + \
+            Decimal(entitlement_stock_record.get('price_excl_tax'))
+
+        self.assertEqual(len(offers), 1)
+        self.assertDictEqual(offer, {
+            'benefit': {
+                'type': get_benefit_type(benefit),
+                'value': benefit.value
+            },
+            'contains_verified': True,
+            'content_type': 'Micromaster Program',
+            'image_url': 'path/to/the/program/image',
+            'organization': 'dummy',
+            'query_params': VoucherViewSet.get_query_params(
+                voucher.code,
+                [seat_stock_record.get('partner_sku'), entitlement_stock_record.get('partner_sku')]
+            ),
+            'price': expected_price,
+            'title': "Dummy Program title",
             'voucher_end_date': voucher.end_datetime,
         })
 
@@ -527,6 +625,8 @@ class VoucherViewOffersEndpointTests(DiscoveryMockMixin, CouponMixin, DiscoveryT
         request = self.prepare_offers_listing_request(voucher.code)
         offers = VoucherViewSet().get_offers(request=request, voucher=voucher)['results']
         first_offer = offers[0]
+        stock_record_data = serializers.StockRecordSerializer(seat.stockrecords.first()).data
+
         self.assertEqual(len(offers), 1)
         self.assertDictEqual(first_offer, {
             'benefit': {
@@ -534,14 +634,17 @@ class VoucherViewOffersEndpointTests(DiscoveryMockMixin, CouponMixin, DiscoveryT
                 'value': benefit.value
             },
             'contains_verified': True,
+            'content_type': 'Course',
             'course_start_date': '2016-05-01T00:00:00Z',
             'id': course.id,
             'image_url': 'path/to/the/course/image',
             'multiple_credit_providers': False,
             'organization': CourseKey.from_string(course.id).org,
             'credit_provider_price': None,
+            'query_params': VoucherViewSet.get_query_params(voucher.code, [stock_record_data.get('partner_sku')]),
             'seat_type': seat.attr.certificate_type,
-            'stockrecords': serializers.StockRecordSerializer(seat.stockrecords.first()).data,
+            'price': stock_record_data.get('price_excl_tax'),
+            'stockrecords': stock_record_data,
             'title': course.name,
             'voucher_end_date': voucher.end_datetime,
         })
@@ -583,6 +686,7 @@ class VoucherViewOffersEndpointTests(DiscoveryMockMixin, CouponMixin, DiscoveryT
         request = self.prepare_offers_listing_request(voucher.code)
         offers = VoucherViewSet().get_offers(request=request, voucher=voucher)['results']
         first_offer = offers[0]
+        stock_record_data = serializers.StockRecordSerializer(seat.stockrecords.first()).data
 
         # Verify that offers are returned when voucher is created using course catalog
         self.assertEqual(len(offers), 1)
@@ -592,14 +696,17 @@ class VoucherViewOffersEndpointTests(DiscoveryMockMixin, CouponMixin, DiscoveryT
                 'value': benefit.value
             },
             'contains_verified': True,
+            'content_type': 'Course',
             'course_start_date': '2016-05-01T00:00:00Z',
             'id': course.id,
             'image_url': 'path/to/the/course/image',
             'multiple_credit_providers': False,
             'organization': CourseKey.from_string(course.id).org,
             'credit_provider_price': None,
+            'query_params': VoucherViewSet.get_query_params(voucher.code, [stock_record_data.get('partner_sku')]),
             'seat_type': seat.attr.certificate_type,
-            'stockrecords': serializers.StockRecordSerializer(seat.stockrecords.first()).data,
+            'price': stock_record_data.get('price_excl_tax'),
+            'stockrecords': stock_record_data,
             'title': course.name,
             'voucher_end_date': voucher.end_datetime,
         })
@@ -629,6 +736,7 @@ class VoucherViewOffersEndpointTests(DiscoveryMockMixin, CouponMixin, DiscoveryT
             voucher=voucher
         )
 
+        stock_record_data = serializers.StockRecordSerializer(stock_record).data
         self.assertDictEqual(offer, {
             'benefit': {
                 'type': get_benefit_type(benefit),
@@ -636,12 +744,15 @@ class VoucherViewOffersEndpointTests(DiscoveryMockMixin, CouponMixin, DiscoveryT
             },
             'contains_verified': True,
             'course_start_date': course_info['start'],
+            'content_type': 'Course',
             'id': course.id,
             'image_url': course_info['image']['src'],
             'multiple_credit_providers': False,
             'organization': CourseKey.from_string(course.id).org,
             'credit_provider_price': None,
+            'query_params': VoucherViewSet.get_query_params(voucher.code, [stock_record_data.get('partner_sku')]),
             'seat_type': seat.attr.certificate_type,
+            'price': stock_record_data.get('price_excl_tax'),
             'stockrecords': serializers.StockRecordSerializer(stock_record).data,
             'title': course.name,
             'voucher_end_date': voucher.end_datetime,
@@ -696,6 +807,7 @@ class VoucherViewOffersEndpointTests(DiscoveryMockMixin, CouponMixin, DiscoveryT
         )
 
         benefit = voucher.offers.first().benefit
+        stock_record_data = serializers.StockRecordSerializer(seat.stockrecords.first()).data
         request = self.prepare_offers_listing_request(voucher.code)
 
         response = self.endpointView(request)
@@ -709,14 +821,17 @@ class VoucherViewOffersEndpointTests(DiscoveryMockMixin, CouponMixin, DiscoveryT
                     'value': benefit.value
                 },
                 'contains_verified': True,
+                'content_type': 'Course',
                 'course_start_date': '2016-05-01T00:00:00Z',
                 'id': course.id,
                 'image_url': 'path/to/the/course/image',
                 'multiple_credit_providers': False,
                 'organization': CourseKey.from_string(course.id).org,
                 'credit_provider_price': None,
+                'query_params': VoucherViewSet.get_query_params(voucher.code, [stock_record_data.get('partner_sku')]),
                 'seat_type': seat.attr.certificate_type,
-                'stockrecords': serializers.StockRecordSerializer(seat.stockrecords.first()).data,
+                'price': stock_record_data.get('price_excl_tax'),
+                'stockrecords': stock_record_data,
                 'title': course.name,
                 'voucher_end_date': voucher.end_datetime,
             }],

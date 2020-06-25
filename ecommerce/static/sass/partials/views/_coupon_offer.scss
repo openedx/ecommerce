@@ -149,7 +149,7 @@
                     }
                 }
                 .course-name {
-                    min-height: 50px;
+                    min-height: 60px;
 
                     p {
                         margin: 0 0 5px 0;
@@ -165,7 +165,7 @@
                 }
                 .voucher-valid-until {
                     font-size: 12px;
-                    position: absolute;
+                    position: relative;
                     bottom: 0;
                     background-color: $gray-transparent;
                     text-align: center;
@@ -175,6 +175,13 @@
                         margin: 0;
                         padding: 7px 0;
                     }
+                }
+                .content_type {
+                    position: relative;
+                    color: $offer-page-price-blue;;
+                    font-size: 14px;
+                    margin-top: 8px;
+                    bottom: -4px;
                 }
                 .course-price {
                     text-align: center;
@@ -208,6 +215,7 @@
                 }
                 .image-container {
                     position: relative;
+                    line-height: 0;
                 }
             }
         }

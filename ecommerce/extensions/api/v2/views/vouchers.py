@@ -5,6 +5,7 @@ import logging
 
 import django_filters
 import pytz
+import six
 from dateutil.parser import parse
 from dateutil.utils import default_tzinfo
 from django.shortcuts import get_object_or_404
@@ -113,6 +114,7 @@ class VoucherViewSet(NonDestroyableModelViewSet):
             Querysets of products and stock records retrieved from results.
         """
         course_run_metadata = {}
+        program_metadata = {}
 
         def is_course_run_enrollable(course_run):
             # Checks if a course run is available for enrollment by checking the following conditions:
@@ -132,6 +134,15 @@ class VoucherViewSet(NonDestroyableModelViewSet):
                 (not enrollment_end or enrollment_end > current_time)
             )
 
+        def is_program_enrollable(program):
+            """
+            Checks if program is available for enrollment by checking the following conditions:
+
+                1. Program has active status
+                2. Program is eligible for one click purchase.
+            """
+            return program['status'] == 'active' and program['is_program_eligible_for_one_click_purchase']
+
         for result in results:
             if 'content_type' in result and result['content_type'] == 'course':
                 for course_run in result['course_runs']:
@@ -141,18 +152,16 @@ class VoucherViewSet(NonDestroyableModelViewSet):
                         # which get used to display the offer.
                         course_run_metadata[course_run['key']]['title'] = result['title']
                         course_run_metadata[course_run['key']]['card_image_url'] = result['card_image_url']
-            elif is_course_run_enrollable(result):
-                course_run_metadata[result['key']] = result
+            elif 'content_type' in result and result['content_type'] == 'program':
+                if is_program_enrollable(result):
+                    program_metadata[result['uuid']] = result
+            else:
+                if is_course_run_enrollable(result):
+                    course_run_metadata[result['key']] = result
 
-        products = []
-        for seat_type in course_seat_types.split(','):
-            products.extend(Product.objects.filter(
-                course_id__in=list(course_run_metadata.keys()),
-                attributes__name='certificate_type',
-                attribute_values__value_text=seat_type
-            ))
+        products = self.get_seat_type_products(course_run_metadata.keys(), course_seat_types)
         stock_records = StockRecord.objects.filter(product__in=products)
-        return products, stock_records, course_run_metadata
+        return products, stock_records, course_run_metadata, program_metadata
 
     def convert_catalog_response_to_offers(self, request, voucher, response):
         offers = []
@@ -164,7 +173,7 @@ class VoucherViewSet(NonDestroyableModelViewSet):
         multiple_credit_providers = False
         credit_provider_price = None
 
-        products, stock_records, course_run_metadata = self.retrieve_course_objects(
+        products, stock_records, course_run_metadata, program_metadata = self.retrieve_course_objects(
             response['results'], course_seat_types
         )
         contains_verified_course = ('verified' in course_seat_types)
@@ -216,8 +225,103 @@ class VoucherViewSet(NonDestroyableModelViewSet):
                     stock_record=stock_record,
                     voucher=voucher
                 ))
-
+        offers.extend(
+            self.get_program_offer_data(
+                benefit=benefit,
+                program_metadata=program_metadata,
+                voucher=voucher
+            )
+        )
         return offers
+
+    @staticmethod
+    def get_seat_type_products(course_keys, course_seat_types):
+        """
+        Return the seat product list of given course_keys and course_seat_types.
+        """
+        products = []
+        if not course_keys:
+            return products
+
+        for seat_type in course_seat_types.split(','):
+            products.extend(
+                Product.objects.filter(
+                    course_id__in=list(course_keys),
+                    attributes__name='certificate_type',
+                    attribute_values__value_text=seat_type
+                )
+            )
+        return products
+
+    @staticmethod
+    def get_entitlement_type_products(entitlement_product_uuids):
+        """
+        Return the entitlement product list of given UUIDs.
+        """
+        products = []
+        if not entitlement_product_uuids:
+            return products
+
+        for uuid in entitlement_product_uuids:
+            products.extend(
+                Product.objects.filter(
+                    attributes__code='UUID',
+                    attribute_values__value_text=uuid
+                )
+            )
+        return products
+
+    @staticmethod
+    def get_program_stock_records_data(products):
+        """
+        Return the accumulative price and list of skus of the given products.
+        """
+        stock_records = StockRecord.objects.filter(product__in=products)
+        program_price = sum([stock_record.price_excl_tax for stock_record in stock_records])
+        return program_price, stock_records.values_list('partner_sku', flat=True)
+
+    @staticmethod
+    def get_program_organization(program_info):
+        """
+        Return the organization name of the given program.
+        """
+        organization = None
+        for authoring_organization in program_info.get('authoring_organizations', []):
+            organization = authoring_organization['name']
+            break
+        return organization
+
+    @staticmethod
+    def get_query_params(code, sku_list):
+        """
+        Return the query param with code and sku_list
+
+        Returns:
+            str: code={code}&sku={sku1}&sku={sku2}
+        """
+        return "code={code}&{sku_list}".format(
+            code=code,
+            sku_list=six.moves.urllib.parse.urlencode([('sku', key) for key in sku_list])
+        )
+
+    def get_program_products(self, program_info):
+        """
+        Return the products of a program.
+        """
+        products = []
+        seat_product_keys = []
+        entitlement_product_uuids = []
+        for course in program_info['courses']:
+            if course['entitlements']:
+                entitlement_product_uuids.append(course['uuid'])
+            else:
+                seat_product_keys = [course_run['key'] for course_run in course['course_runs']]
+
+        products.extend(
+            self.get_seat_type_products(seat_product_keys, ','.join(program_info['applicable_seat_types']))
+        )
+        products.extend(self.get_entitlement_type_products(entitlement_product_uuids))
+        return products
 
     def get_offers_from_catalog(self, request, voucher):
         """ Helper method for collecting offers from catalog query or enterprise catalog.
@@ -330,6 +434,8 @@ class VoucherViewSet(NonDestroyableModelViewSet):
         Returns:
             dict: Course offer data
         """
+        stock_record_data = serializers.StockRecordSerializer(stock_record).data
+
         if course_info.get('image') and 'src' in course_info['image']:
             image = course_info['image']['src']
         elif 'card_image_url' in course_info:
@@ -340,13 +446,45 @@ class VoucherViewSet(NonDestroyableModelViewSet):
             'benefit': serializers.BenefitSerializer(benefit).data,
             'contains_verified': is_verified,
             'course_start_date': course_info.get('start', ''),
+            'content_type': 'Course',
             'id': course.id,
             'image_url': image,
             'multiple_credit_providers': multiple_credit_providers,
             'organization': CourseKey.from_string(course.id).org,
             'credit_provider_price': credit_provider_price,
+            'query_params': self.get_query_params(voucher.code, [stock_record_data.get('partner_sku')]),
             'seat_type': product.attr.certificate_type,
-            'stockrecords': serializers.StockRecordSerializer(stock_record).data,
+            'price': stock_record_data.get('price_excl_tax'),
+            'stockrecords': stock_record_data,
             'title': course_info.get('title', course.name),
             'voucher_end_date': voucher.end_datetime
         }
+
+    def get_program_offer_data(self, benefit, program_metadata, voucher):
+        """
+        Gets program offer data.
+        Arguments:
+            benefit (Benefit): Benefit associated with a voucher
+            program_metadata (dict): Program meta data fetched from an API (Discovery)
+            voucher (Voucher): Voucher for which the course offer data is being fetched
+        Returns:
+            list: Program offer data
+        """
+        program_offers = []
+        for program_info in program_metadata.values():
+            program_products = self.get_program_products(program_info)
+            program_price, sku_list = self.get_program_stock_records_data(program_products)
+            program_offers.append(
+                {
+                    'benefit': serializers.BenefitSerializer(benefit).data,
+                    'contains_verified': program_info.get('is_program_eligible_for_one_click_purchase', False),
+                    'content_type': '{program_type} Program'.format(program_type=program_info.get('type')),
+                    'image_url': program_info['card_image_url'],
+                    'organization': self.get_program_organization(program_info),
+                    'price': program_price,
+                    'query_params': self.get_query_params(voucher.code, sku_list),
+                    'title': program_info.get('title'),
+                    'voucher_end_date': voucher.end_datetime
+                }
+            )
+        return program_offers

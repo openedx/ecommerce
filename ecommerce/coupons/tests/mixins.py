@@ -2,6 +2,7 @@
 
 import datetime
 import json
+import uuid
 
 import httpretty
 import mock
@@ -203,11 +204,120 @@ class DiscoveryMockMixin:
             content_type='application/json'
         )
 
+    def mock_enterprise_catalog_programs_endpoint(
+            self,
+            enterprise_api_url,
+            enterprise_catalog_id,
+            program_uuid,
+            entitlement_product=None,
+            seat_product=None
+    ):
+        """
+        Helper function to register the enterprise API endpoint for getting program information.
+        """
+        courses = [
+            {
+                "uuid": str(entitlement_product.attr.UUID) if entitlement_product else str(uuid.uuid4()),
+                "key": "edX+Demo",
+                "title": "Demo Course",
+                "entitlements": [{
+                    "mode": "verified",
+                    "price": "23.80",
+                    "currency": "USD",
+                    "sku": "8743959",
+                    "expires": None
+                }],
+                "course_runs": [
+                    {
+                        "key": "course-v1:edX+Dummy+Dummy_Course",
+                        "uuid": "d7ad896c-298d-401f-8d58-47b90c5f474e",
+                        "title": "Dummy Course",
+                        "seats": [
+                            {
+                                "type": "verified",
+                                "price": "149.00",
+                                "currency": "USD",
+                                "upgrade_deadline": "2020-12-15T11:37:45.419698Z",
+                                "credit_provider": None,
+                                "credit_hours": None,
+                                "sku": "8CF08E5",
+                                "bulk_sku": "A5B6DBE"
+                            }
+                        ],
+                    },
+                ],
+                "authoring_organizations": [
+                    {
+                        "uuid": "dc0aa562-0de4-44f2-b97b-f9e354a1db2f",
+                        "key": "edX",
+                        "name": "edX",
+                    }
+                ],
+            },
+            {
+                "uuid": "d7ad896c-298d-401f-8d58-47b90c5f474e",
+                "key": "edX+DemoX",
+                "title": "Demonstration Course",
+                "entitlements": [],
+                "course_runs": [
+                    {
+                        "key": seat_product.course_id if seat_product else "course-v1:edX+DemoX+Demo_Course",
+                        "uuid": "d7ad896c-298d-401f-8d58-47b90c5f474e",
+                        "title": "Demonstration Course",
+                        "seats": [
+                            {
+                                "type": "verified",
+                                "price": "149.00",
+                                "currency": "USD",
+                                "upgrade_deadline": "2020-12-15T11:37:45.419698Z",
+                                "credit_provider": None,
+                                "credit_hours": None,
+                                "sku": "8CF08E5",
+                                "bulk_sku": "A5B6DBE"
+                            }
+                        ],
+                    }
+                ],
+            }
+        ]
+
+        program_info = {
+            'count': 1,
+            'next': None,
+            'previous': None,
+            'results': [{
+                "uuid": program_uuid if program_uuid else str(uuid.uuid4()),
+                "title": "Dummy Program title",
+                "status": "active",
+                "is_program_eligible_for_one_click_purchase": True,
+                "courses": courses,
+                "content_type": "program",
+                "type": "Micromaster",
+                'card_image_url': 'path/to/the/program/image',
+                "applicable_seat_types": [
+                    "verified",
+                    "professional",
+                    "credit"
+                ],
+                "authoring_organizations": [
+                    {
+                        "name": "dummy",
+                        "slug": "dummy",
+                    }
+                ],
+            }]
+        }
+        self.register_catalog_endpoint(
+            body=program_info,
+            enterprise_api_url=enterprise_api_url,
+            enterprise_catalog_id=enterprise_catalog_id
+        )
+
     def mock_enterprise_catalog_course_endpoint(
             self, enterprise_api_url, enterprise_catalog_id, course_run=None, course_info=None
     ):
         """
-        Helper function to register a enterprise API endpoint for getting course information.
+        Helper function to register the enterprise API endpoint for getting course information.
         """
         if not course_info:
             course_info = {
@@ -234,7 +344,18 @@ class DiscoveryMockMixin:
                     'course_runs': [],
                 }],
             }
-        course_info_json = json.dumps(course_info)
+        self.register_catalog_endpoint(
+            body=course_info,
+            enterprise_api_url=enterprise_api_url,
+            enterprise_catalog_id=enterprise_catalog_id
+        )
+
+    @staticmethod
+    def register_catalog_endpoint(body, enterprise_api_url, enterprise_catalog_id):
+        """
+        Register the catalog endpoint with the given information.
+        """
+        catalog_endpoint_body_json = json.dumps(body)
         enterprise_catalog_url = '{}enterprise_catalogs/{}/'.format(
             enterprise_api_url,
             enterprise_catalog_id
@@ -242,7 +363,7 @@ class DiscoveryMockMixin:
         httpretty.register_uri(
             httpretty.GET,
             enterprise_catalog_url,
-            body=course_info_json,
+            body=catalog_endpoint_body_json,
             content_type='application/json'
         )
 
