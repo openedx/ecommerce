@@ -210,7 +210,10 @@ define([
                     }
                 },
                 'input[name=sales_force_id]': {
-                    observe: 'sales_force_id'
+                    observe: 'sales_force_id',
+                    onSet: function(val) {
+                        return val === '' ? null : val;
+                    }
                 }
             },
 
@@ -309,7 +312,8 @@ define([
                     'start_date',
                     'tax_deducted_source',
                     'title',
-                    'email_domains'
+                    'email_domains',
+                    'sales_force_id'
                 ];
             },
 

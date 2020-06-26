@@ -51,7 +51,8 @@ define([
                 quantity: 1,
                 seats: [],
                 stock_record_ids: [],
-                total_value: 0
+                total_value: 0,
+                sales_force_id: null
             },
 
             catalogTypes: CATALOG_TYPES,
@@ -81,6 +82,9 @@ define([
                         }
                     }
                     return undefined;
+                },
+                sales_force_id: {
+                    required: false
                 },
                 end_date: function(val) {
                     var startDate,
