@@ -6,7 +6,16 @@ import django_filters
 import six
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
-from django.db.models import Count, ExpressionWrapper, F, OuterRef, PositiveIntegerField, Q, Subquery
+from django.db.models import (
+    Count,
+    ExpressionWrapper,
+    F,
+    OuterRef,
+    PositiveIntegerField,
+    Q,
+    Subquery,
+    prefetch_related_objects
+)
 from django.http import Http404
 from django.shortcuts import get_object_or_404
 from edx_rbac.decorators import permission_required
@@ -579,34 +588,38 @@ class EnterpriseCouponViewSet(CouponViewSet):
             redemptions_and_assignments.append(redemption_data)
 
         redemptions_and_assignments = []
+        prefetch_related_objects(vouchers, 'applications', 'coupon_vouchers', 'coupon_vouchers__coupon',
+                                 'offers', 'offers__condition', 'offers__offerassignment_set')
         for voucher in vouchers:
+            coupon_vouchers = voucher.coupon_vouchers.all()
+            coupon_voucher = coupon_vouchers[0]
             coupon_data = {
-                'coupon_id': voucher.coupon_vouchers.first().coupon.id,
-                'coupon_name': voucher.coupon_vouchers.first().coupon.title,
+                'coupon_id': coupon_voucher.coupon.id,
+                'coupon_name': coupon_voucher.coupon.title,
                 'code': voucher.code,
                 'voucher_id': voucher.id,
             }
             if user is not None:
-                for application in voucher.applications.filter(user_id=user.id):
+                for application in voucher.applications.all():
+                    line = application.order.lines.first()
                     redemption_data = dict(coupon_data)
-                    redemption_data['course_title'] = application.order.lines.first().product.course.name
-                    redemption_data['course_key'] = application.order.lines.first().product.course.id
+                    redemption_data['course_title'] = line.product.course.name
+                    redemption_data['course_key'] = line.product.course.id
                     redemption_data['redeemed_date'] = application.date_created
                     redemptions_and_assignments.append(redemption_data)
 
-            no_voucher_application = Q(voucher_application__isnull=True)
-            filter_kwargs = {
-                'code': voucher.code,
-                'status__in': [OFFER_ASSIGNED, OFFER_ASSIGNMENT_EMAIL_PENDING],
-            }
-            if user_email:
-                filter_kwargs['user_email'] = user_email
-            offer_assignments = OfferAssignment.objects.filter(
-                no_voucher_application,
-                **filter_kwargs).distinct()
-            coupon_data['is_assigned'] = offer_assignments.count()
+            offer = voucher and voucher.enterprise_offer
+            all_offer_assignments = offer.offerassignment_set.all()
+            offer_assignments = []
+            for assignment in all_offer_assignments:
+                if (assignment.voucher_application is None and
+                        assignment.status in [OFFER_ASSIGNED, OFFER_ASSIGNMENT_EMAIL_PENDING] and
+                        assignment.code == voucher.code and
+                        (assignment.user_email == user_email if user_email else True)):
+                    offer_assignments.append(assignment)
+            coupon_data['is_assigned'] = len(offer_assignments)
             # For the case when an unassigned voucher code is searched
-            if offer_assignments.count() == 0:
+            if len(offer_assignments) == 0:
                 if not user_email:
                     _prepare_redemption_data(coupon_data)
             else:
