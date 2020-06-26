@@ -601,12 +601,13 @@ class EnterpriseCouponViewSet(CouponViewSet):
             }
             if user is not None:
                 for application in voucher.applications.all():
-                    line = application.order.lines.first()
-                    redemption_data = dict(coupon_data)
-                    redemption_data['course_title'] = line.product.course.name
-                    redemption_data['course_key'] = line.product.course.id
-                    redemption_data['redeemed_date'] = application.date_created
-                    redemptions_and_assignments.append(redemption_data)
+                    if application.user.id == user.id:
+                        line = application.order.lines.first()
+                        redemption_data = dict(coupon_data)
+                        redemption_data['course_title'] = line.product.course.name
+                        redemption_data['course_key'] = line.product.course.id
+                        redemption_data['redeemed_date'] = application.date_created
+                        redemptions_and_assignments.append(redemption_data)
 
             offer = voucher and voucher.enterprise_offer
             all_offer_assignments = offer.offerassignment_set.all()
