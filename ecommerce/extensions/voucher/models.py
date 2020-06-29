@@ -136,7 +136,7 @@ class Voucher(AbstractVoucher):
         return self.calculate_available_slots(enterprise_offer.max_global_applications, num_assignments)
 
     @property
-    def get_not_redeemed_assignment_ids(self):
+    def not_redeemed_assignment_ids(self):
         """Returns offer assignments ids for the voucher that are available for redemption."""
         enterprise_offer = self.enterprise_offer
         # Assignment is only valid for Vouchers linked to an enterprise offer.

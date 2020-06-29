@@ -441,7 +441,7 @@ class EnterpriseCouponViewSet(CouponViewSet):
         prefetch_related_objects(vouchers, 'applications', 'offers', 'offers__condition', 'offers__offerassignment_set')
         not_redeemed_assignments = []
         for voucher in vouchers:
-            assignments = voucher.get_not_redeemed_assignment_ids
+            assignments = voucher.not_redeemed_assignment_ids
             if assignments:
                 not_redeemed_assignments.extend(assignments)
 
