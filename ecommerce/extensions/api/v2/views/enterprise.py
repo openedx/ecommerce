@@ -65,7 +65,6 @@ from ecommerce.extensions.catalogue.utils import (
 )
 from ecommerce.extensions.offer.constants import (
     OFFER_ASSIGNED,
-    OFFER_ASSIGNMENT_EMAIL_BOUNCED,
     OFFER_ASSIGNMENT_EMAIL_PENDING,
     OFFER_ASSIGNMENT_EMAIL_TEMPLATE_FIELD_LIMIT,
     OFFER_ASSIGNMENT_REVOKED,
@@ -439,12 +438,16 @@ class EnterpriseCouponViewSet(CouponViewSet):
         Returns a queryset containing unique code and user_email pairs from OfferAssignments.
         Only code and user_email pairs that have no corresponding VoucherApplication are returned.
         """
-        users_having_usages = VoucherApplication.objects.filter(
-            voucher__in=vouchers).values_list('user__email', flat=True)
+        prefetch_related_objects(vouchers, 'applications', 'offers', 'offers__condition', 'offers__offerassignment_set')
+        not_redeemed_assignments = []
+        for voucher in vouchers:
+            assignments = voucher.get_not_redeemed_assignment_ids
+            if assignments:
+                not_redeemed_assignments.extend(assignments)
+
         return OfferAssignment.objects.filter(
-            code__in=vouchers.values_list('code', flat=True),
-            status__in=[OFFER_ASSIGNED, OFFER_ASSIGNMENT_EMAIL_BOUNCED, OFFER_ASSIGNMENT_EMAIL_PENDING]
-        ).exclude(user_email__in=users_having_usages).values('code', 'user_email').order_by('user_email').distinct()
+            id__in=not_redeemed_assignments
+        ).values('code', 'user_email').order_by('user_email').distinct()
 
     def _get_partial_redeemed_usages(self, vouchers):
         """
