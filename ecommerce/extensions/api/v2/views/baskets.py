@@ -399,8 +399,8 @@ class BasketCalculateView(generics.GenericAPIView):
                     discounts.extend(basket.voucher_discounts)
 
                 response = {
-                    'total_incl_tax_excl_discounts': basket.total_incl_tax_excl_discounts,
-                    'total_incl_tax': basket.total_incl_tax,
+                    'total_incl_tax_excl_discounts': round(basket.total_incl_tax_excl_discounts, 2),
+                    'total_incl_tax': round(basket.total_incl_tax, 2),
                     'currency': basket.currency
                 }
                 raise api_exceptions.TemporaryBasketException
