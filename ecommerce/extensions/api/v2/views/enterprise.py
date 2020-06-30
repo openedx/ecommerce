@@ -589,7 +589,8 @@ class EnterpriseCouponViewSet(CouponViewSet):
 
         redemptions_and_assignments = []
         prefetch_related_objects(vouchers, 'applications', 'coupon_vouchers', 'coupon_vouchers__coupon',
-                                 'offers', 'offers__condition', 'offers__offerassignment_set')
+                                 'offers', 'offers__condition', 'offers__conditional_offer',
+                                 'offers__offerassignment_set')
         for voucher in vouchers:
             coupon_vouchers = voucher.coupon_vouchers.all()
             coupon_voucher = coupon_vouchers[0]
