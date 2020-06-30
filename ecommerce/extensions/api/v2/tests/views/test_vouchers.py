@@ -256,7 +256,10 @@ class VoucherViewSetTests(DiscoveryMockMixin, DiscoveryTestMixin, LmsApiMockMixi
             }
         ]
 
-        products, _, _, _ = VoucherViewSet().retrieve_course_objects(course_discovery_results, 'professional')
+        products, _, _, _ = VoucherViewSet().retrieve_course_and_program_objects(
+            course_discovery_results,
+            'professional'
+        )
         self.assertIn(no_enrollment_end_seat, products)
         self.assertIn(no_enrollment_start_seat, products)
         self.assertIn(valid_seat, products)
@@ -292,7 +295,7 @@ class VoucherViewSetTests(DiscoveryMockMixin, DiscoveryTestMixin, LmsApiMockMixi
                 'content_type': 'program',
             }
         ]
-        _, _, _, program_metadata = VoucherViewSet().retrieve_course_objects(course_discovery_results, '')
+        _, _, _, program_metadata = VoucherViewSet().retrieve_course_and_program_objects(course_discovery_results, '')
         self.assertEqual(len(program_metadata.keys()), 1)
         self.assertIn(active_uuid, program_metadata.keys())
 

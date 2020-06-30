@@ -101,17 +101,19 @@ class VoucherViewSet(NonDestroyableModelViewSet):
             )
         return Response(data=offers_data)
 
-    def retrieve_course_objects(self, results, course_seat_types):
-        """ Helper method to retrieve all the courses, products and stock records
-        from course IDs in course catalog response results. Professional courses
-        which have a set enrollment end date and which has passed are omitted.
+    def retrieve_course_and_program_objects(self, results, course_seat_types):
+        """
+        Helper method to retrieve all the courses, associated products, stock records
+        and programs from course catalog response results. Professional courses which
+        have a set enrollment end date and which has passed are omitted. Programs which
+        are inactive and not eligible for single click purchase also omitted.
 
         Args:
             results(dict): Course catalog response results.
             course_seat_types(str): Comma-separated list of accepted seat types.
 
         Returns:
-            Querysets of products and stock records retrieved from results.
+            Queryset of products, stock records, course's and program's metadata.
         """
         course_run_metadata = {}
         program_metadata = {}
@@ -173,7 +175,7 @@ class VoucherViewSet(NonDestroyableModelViewSet):
         multiple_credit_providers = False
         credit_provider_price = None
 
-        products, stock_records, course_run_metadata, program_metadata = self.retrieve_course_objects(
+        products, stock_records, course_run_metadata, program_metadata = self.retrieve_course_and_program_objects(
             response['results'], course_seat_types
         )
         contains_verified_course = ('verified' in course_seat_types)
@@ -239,46 +241,36 @@ class VoucherViewSet(NonDestroyableModelViewSet):
         """
         Return the seat product list of given course_keys and course_seat_types.
         """
-        products = []
-        if not course_keys:
-            return products
+        # course_seat_types can be a list or comma separated string,
+        # if its string then convert it to the list.
+        if isinstance(course_seat_types, str):
+            course_seat_types = course_seat_types.split(',')
 
-        for seat_type in course_seat_types.split(','):
-            products.extend(
-                Product.objects.filter(
-                    course_id__in=list(course_keys),
-                    attributes__name='certificate_type',
-                    attribute_values__value_text=seat_type
-                )
-            )
-        return products
+        return Product.objects.filter(
+            course_id__in=list(course_keys),
+            attributes__name='certificate_type',
+            attribute_values__value_text__in=course_seat_types
+        )
 
     @staticmethod
     def get_entitlement_type_products(entitlement_product_uuids):
         """
         Return the entitlement product list of given UUIDs.
         """
-        products = []
-        if not entitlement_product_uuids:
-            return products
-
-        for uuid in entitlement_product_uuids:
-            products.extend(
-                Product.objects.filter(
-                    attributes__code='UUID',
-                    attribute_values__value_text=uuid
-                )
-            )
-        return products
+        return Product.objects.filter(
+            attributes__code='UUID',
+            attribute_values__value_text__in=entitlement_product_uuids
+        )
 
     @staticmethod
     def get_program_stock_records_data(products):
         """
-        Return the accumulative price and list of skus of the given products.
+        Return the accumulative price and list of sku of the given products.
         """
         stock_records = StockRecord.objects.filter(product__in=products)
-        program_price = sum([stock_record.price_excl_tax for stock_record in stock_records])
-        return program_price, stock_records.values_list('partner_sku', flat=True)
+        program_price = sum(stock_record.price_excl_tax for stock_record in stock_records)
+        sku_list = stock_records.values_list('partner_sku', flat=True)
+        return program_price, sku_list
 
     @staticmethod
     def get_program_organization(program_info):
@@ -317,9 +309,7 @@ class VoucherViewSet(NonDestroyableModelViewSet):
             else:
                 seat_product_keys = [course_run['key'] for course_run in course['course_runs']]
 
-        products.extend(
-            self.get_seat_type_products(seat_product_keys, ','.join(program_info['applicable_seat_types']))
-        )
+        products.extend(self.get_seat_type_products(seat_product_keys, program_info['applicable_seat_types']))
         products.extend(self.get_entitlement_type_products(entitlement_product_uuids))
         return products
 
