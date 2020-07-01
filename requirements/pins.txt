@@ -8,9 +8,6 @@
 # pin when possible.  Writing an issue against the offending project and
 # linking to it here is good.
 
-# BOM-1410 : drf-jwt 1.15.0 introduces migration issues.
-drf-jwt<1.15.0
-
 # Because of django incompatibility
 edx-rest-api-client<2.0.0
 
