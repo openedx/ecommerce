@@ -131,6 +131,11 @@ class VoucherTests(TestCase):
         voucher = Voucher.objects.create(**self.data)
         assert not voucher.slots_available_for_assignment
 
+    def test_not_redeemed_assignment_ids_with_non_enterprise_offer(self):
+        """ Verify that a voucher with no enterprise offer returns none for not_redeemed_assignment_ids. """
+        voucher = Voucher.objects.create(**self.data)
+        assert not voucher.not_redeemed_assignment_ids
+
     @ddt.data(
         (Voucher.SINGLE_USE, 0, None, [], 1),
         (Voucher.MULTI_USE_PER_CUSTOMER, 0, 10, [], 10),

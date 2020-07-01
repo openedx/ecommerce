@@ -635,9 +635,9 @@ class EnterpriseCouponViewSetRbacTests(
     @ddt.data(
         {
             'voucher_type': Voucher.SINGLE_USE,
-            'quantity': 3,
+            'quantity': 4,
             'max_uses': None,
-            'code_assignments': {'user1@example.com': 1},
+            'code_assignments': {'user1@example.com': 1, 'user2@example.com': 3},
             'code_redemptions': {'user2@example.com': {'code': 2, 'num': 1}},
             'expected_responses': {
                 VOUCHER_NOT_ASSIGNED: [
@@ -646,6 +646,8 @@ class EnterpriseCouponViewSetRbacTests(
                 ],
                 VOUCHER_NOT_REDEEMED: [
                     {'code': 1, 'assigned_to': 'user1@example.com', 'redemptions': {'used': 0, 'total': 1},
+                     'assignment_date': '', 'last_reminder_date': '', 'revocation_date': ''},
+                    {'code': 3, 'assigned_to': 'user2@example.com', 'redemptions': {'used': 0, 'total': 1},
                      'assignment_date': '', 'last_reminder_date': '', 'revocation_date': ''}
                 ],
                 VOUCHER_PARTIAL_REDEEMED: [],

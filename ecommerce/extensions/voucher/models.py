@@ -135,6 +135,24 @@ class Voucher(AbstractVoucher):
 
         return self.calculate_available_slots(enterprise_offer.max_global_applications, num_assignments)
 
+    @property
+    def not_redeemed_assignment_ids(self):
+        """Returns offer assignments ids for the voucher that are available for redemption."""
+        enterprise_offer = self.enterprise_offer
+        # Assignment is only valid for Vouchers linked to an enterprise offer.
+        if not enterprise_offer:
+            return None
+        users_having_usages = self.applications.values_list('user__email', flat=True)
+
+        not_redeemed_assignments = []
+        for assignment in enterprise_offer.offerassignment_set.all():
+            if assignment.code == self.code \
+                    and assignment.status not in [OFFER_REDEEMED, OFFER_ASSIGNMENT_REVOKED] \
+                    and assignment.user_email not in users_having_usages:
+                not_redeemed_assignments.append(assignment.id)
+
+        return not_redeemed_assignments
+
     def calculate_available_slots(self, max_global_applications, num_assignments):
         """
         Calculate the number of available slots left for this voucher.
