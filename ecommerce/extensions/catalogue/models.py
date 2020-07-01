@@ -144,6 +144,11 @@ def update_enrollment_code(sender, **kwargs):  # pylint: disable=unused-argument
 class ProductAttributeValue(AbstractProductAttributeValue):
     history = CreateSafeHistoricalRecords()
 
+    class Meta(AbstractProductAttributeValue.Meta):
+        indexes = [
+            models.Index(fields=['value_text', 'attribute', 'product'])
+        ]
+
 
 class Catalog(models.Model):
     name = models.CharField(max_length=255)
