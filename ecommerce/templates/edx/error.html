@@ -13,7 +13,9 @@
         <div class="container">
             <div class="depth depth-2 message-error-content">
                 <h3>{{ error }}</h3>
-                {% trans "If you need assistance, contact edX support." as tmsg %}{{ tmsg | force_escape }}
+                {% if not hide_error_message %}
+                    {% trans "If you need assistance, contact edX support." as tmsg %}{{ tmsg | force_escape }}
+                {% endif %}
             </div>
         </div>
     </div>

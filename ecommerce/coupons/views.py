@@ -65,36 +65,37 @@ def voucher_is_valid(voucher, products, request):
     Returns:
         bool (bool): True if the voucher is valid, False otherwise.
         msg (str): Message in case the voucher is invalid.
+        hide_error_message (bool): True if a support message should be hidden on the error page, False/None if not.
     """
 
     if voucher is None:
-        return False, _('Coupon does not exist.')
+        return False, _('Coupon does not exist.'), False
 
     if not voucher.is_active():
         now = timezone.now()
         if voucher.start_datetime > now:
-            return False, _('This coupon code is not yet valid.')
+            return False, _('This coupon code is not yet valid.'), False
         if voucher.end_datetime < now:  # pragma: no cover
-            return False, _('This coupon code has expired.')
+            return False, _('This coupon code has expired.'), True
 
     # We want to display the offer page to all users, including anonymous.
     if request.user.is_authenticated:
         avail, msg = voucher.is_available_to_user(request.user)
         if not avail:
             voucher_msg = msg.replace('voucher', 'coupon')
-            return False, voucher_msg
+            return False, voucher_msg, False
 
     if len(products) == 1:
         purchase_info = request.strategy.fetch_for_product(products[0])
         if not purchase_info.availability.is_available_to_buy:
-            return False, _('Product [{product}] not available for purchase.'.format(product=products[0]))
+            return False, _('Product [{product}] not available for purchase.'.format(product=products[0])), False
 
     # If the voucher's number of applications exceeds it's limit.
     offer = voucher.best_offer
     if offer.get_max_applications(request.user) == 0:
-        return False, _('This coupon code is no longer available.')
+        return False, _('This coupon code is no longer available.'), False
 
-    return True, ''
+    return True, '', None
 
 
 class CouponAppView(StaffOnlyMixin, TemplateView):
@@ -120,9 +121,9 @@ class CouponOfferView(TemplateView):
             return {'error': _('Coupon does not exist.')}
         except exceptions.ProductNotFoundError:
             return {'error': _('The voucher is not applicable to your current basket.')}
-        valid_voucher, msg = voucher_is_valid(voucher, products, self.request)
+        valid_voucher, msg, hide_error_message = voucher_is_valid(voucher, products, self.request)
         if not valid_voucher:
-            return {'error': msg}
+            return {'error': msg, 'hide_error_message': hide_error_message}
 
         context_data = super(CouponOfferView, self).get_context_data(**kwargs)
         context_data.update(get_enterprise_customer_consent_failed_context_data(self.request, voucher))
@@ -175,12 +176,12 @@ class CouponRedeemView(EdxOrderPlacementMixin, APIView):
         except StockRecord.DoesNotExist:
             return render(request, template_name, {'error': _('The product does not exist.')})
 
-        valid_voucher, msg = voucher_is_valid(voucher, [product], request)
+        valid_voucher, msg, hide_error_message = voucher_is_valid(voucher, [product], request)
         if not valid_voucher:
             logger.warning('[Code Redemption Failure] The voucher is not valid for this product. '
                            'User: %s, Product: %s, Code: %s, Message: %s',
                            request.user.username, product.id, voucher.code, msg)
-            return render(request, template_name, {'error': msg})
+            return render(request, template_name, {'error': msg, 'hide_error_message': hide_error_message})
 
         offer = voucher.best_offer
         if not offer.is_email_valid(request.user.email):
