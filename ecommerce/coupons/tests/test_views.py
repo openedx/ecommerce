@@ -89,64 +89,74 @@ class VoucherIsValidTests(DiscoveryTestMixin, TestCase):
     def test_valid_voucher(self):
         """ Verify voucher_is_valid() assess that the voucher is valid. """
         voucher, product = prepare_voucher()
-        valid, msg = voucher_is_valid(voucher=voucher, products=[product], request=self.request)
+        valid, msg, hide_error_message = voucher_is_valid(voucher=voucher, products=[product], request=self.request)
 
         self.assertTrue(valid)
         self.assertEqual(msg, '')
+        self.assertEqual(hide_error_message, None)
 
     def test_no_voucher(self):
         """ Verify voucher_is_valid() assess that the voucher is invalid. """
-        valid, msg = voucher_is_valid(voucher=None, products=None, request=None)
+        valid, msg, hide_error_message = voucher_is_valid(voucher=None, products=None, request=None)
         self.assertFalse(valid)
         self.assertEqual(msg, 'Coupon does not exist.')
+        self.assertFalse(hide_error_message)
 
     def test_expired_voucher(self):
         """ Verify voucher_is_valid() assess that the voucher has expired. """
         start_datetime = now() - datetime.timedelta(days=20)
         end_datetime = now() - datetime.timedelta(days=10)
         voucher, product = prepare_voucher(start_datetime=start_datetime, end_datetime=end_datetime)
-        valid, msg = voucher_is_valid(voucher=voucher, products=[product], request=None)
+        valid, msg, hide_error_message = voucher_is_valid(voucher=voucher, products=[product], request=None)
         self.assertFalse(valid)
         self.assertEqual(msg, 'This coupon code has expired.')
+        self.assertTrue(hide_error_message)
 
     def test_future_voucher(self):
         """ Verify voucher_is_valid() assess that the voucher has not started yet. """
         start_datetime = now() + datetime.timedelta(days=10)
         end_datetime = now() + datetime.timedelta(days=20)
         voucher, product = prepare_voucher(start_datetime=start_datetime, end_datetime=end_datetime)
-        valid, msg = voucher_is_valid(voucher=voucher, products=[product], request=None)
+        valid, msg, hide_error_message = voucher_is_valid(voucher=voucher, products=[product], request=None)
         self.assertFalse(valid)
         self.assertEqual(msg, 'This coupon code is not yet valid.')
+        self.assertFalse(hide_error_message)
 
     def test_voucher_unavailable_to_buy(self):
         """ Verify that False is returned for unavailable products. """
         voucher, product = prepare_voucher()
         product.expires = pytz.utc.localize(datetime.datetime.min)
-        valid, __ = voucher_is_valid(voucher=voucher, products=[product], request=self.request)
+        valid, __, hide_error_message = voucher_is_valid(voucher=voucher, products=[product], request=self.request)
         self.assertFalse(valid)
+        self.assertFalse(hide_error_message)
 
     def test_omitting_unavailable_voucher(self):
         """ Verify if there are more than one product, that availability check is omitted. """
         voucher, product = prepare_voucher()
         product.expires = pytz.utc.localize(datetime.datetime.min)
         __, seat = self.create_course_and_seat()
-        valid, __ = voucher_is_valid(voucher=voucher, products=[product, seat], request=self.request)
+        valid, __, hide_error_message = voucher_is_valid(
+            voucher=voucher, products=[product, seat], request=self.request
+        )
         self.assertTrue(valid)
+        self.assertFalse(hide_error_message)
 
     def test_once_per_customer_voucher(self):
         """ Verify the coupon is valid for anonymous users. """
         voucher, product = prepare_voucher(usage=Voucher.ONCE_PER_CUSTOMER)
-        valid, msg = voucher_is_valid(voucher=voucher, products=[product], request=self.request)
+        valid, msg, hide_error_message = voucher_is_valid(voucher=voucher, products=[product], request=self.request)
         self.assertTrue(valid)
         self.assertEqual(msg, '')
+        self.assertFalse(hide_error_message)
 
     def assert_error_messages(self, voucher, product, user, error_msg):
         """ Assert the proper error message is returned. """
         voucher.offers.first().record_usage(discount={'freq': 1, 'discount': 1})
         self.request.user = user
-        valid, msg = voucher_is_valid(voucher=voucher, products=[product], request=self.request)
+        valid, msg, hide_error_message = voucher_is_valid(voucher=voucher, products=[product], request=self.request)
         self.assertFalse(valid)
         self.assertEqual(msg, error_msg)
+        self.assertFalse(hide_error_message)
 
     def test_usage_exceeded_coupon(self):
         """ Verify voucher_is_valid() assess that the voucher exceeded it's usage limit. """
