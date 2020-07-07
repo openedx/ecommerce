@@ -33,7 +33,8 @@ define([
                 contract_discount_type: 'Percentage',
                 contract_discount_value: null,
                 prepaid_invoice_amount: null,
-                sales_force_id: null
+                sales_force_id: null,
+                emails_for_offer_usage_alert: null
             },
 
             couponValidation: {

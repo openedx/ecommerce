@@ -168,6 +168,10 @@ class ConditionalOffer(AbstractConditionalOffer):
                                                                  'threshold to orders of a user, then the offer '
                                                                  'becomes unavailable for that user', blank=True
                                             )
+    emails_for_offer_usage_alert = models.TextField(verbose_name='Emails to receive offer usage alert', blank=True,
+                                                    null=True, help_text='Comma separated emails which will receive '
+                                                                         'the offer usage alerts'
+                                                    )
     site = models.ForeignKey(
         'sites.Site', verbose_name=_('Site'), null=True, blank=True, default=None, on_delete=models.CASCADE
     )

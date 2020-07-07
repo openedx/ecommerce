@@ -214,6 +214,12 @@ define([
                     onSet: function(val) {
                         return val === '' ? null : val;
                     }
+                },
+                'input[name=emails_for_offer_usage_alert]': {
+                    observe: 'emails_for_offer_usage_alert',
+                    onSet: function(val) {
+                        return val === '' ? null : val;
+                    }
                 }
             },
 
@@ -313,7 +319,8 @@ define([
                     'tax_deducted_source',
                     'title',
                     'email_domains',
-                    'sales_force_id'
+                    'sales_force_id',
+                    'emails_for_offer_usage_alert'
                 ];
             },
 
