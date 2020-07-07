@@ -634,3 +634,10 @@ def can_use_enterprise_catalog(enterprise_uuid):
         'CAN' if can_use_catalog else 'CANNOT'
     )
     return is_flag_active and can_use_catalog
+
+
+def convert_comma_separated_string_to_list(comma_separated_string):
+    """
+    Convert the comma separated string to a valid list.
+    """
+    return list(set(item.strip() for item in comma_separated_string.split(",") if item.strip()))

@@ -160,14 +160,36 @@ class Benefit(AbstractBenefit):
 
 
 class ConditionalOffer(AbstractConditionalOffer):
+    DAILY = 'DAILY'
+    WEEKLY = 'WEEKLY'
+    MONTHLY = 'MONTHLY'
+    USAGE_EMAIL_FREQUENCY_CHOICES = [
+        (DAILY, 'Daily'),
+        (WEEKLY, 'Weekly'),
+        (MONTHLY, 'Monthly'),
+    ]
     UPDATABLE_OFFER_FIELDS = ['email_domains', 'max_uses']
     email_domains = models.CharField(max_length=255, blank=True, null=True)
     sales_force_id = models.CharField(max_length=30, blank=True, null=True)
-    max_user_discount = models.DecimalField(verbose_name='Max user discount', max_digits=12, decimal_places=2,
-                                            null=True, help_text='When an offer has given more discount than this '
-                                                                 'threshold to orders of a user, then the offer '
-                                                                 'becomes unavailable for that user', blank=True
-                                            )
+    max_user_discount = models.DecimalField(
+        verbose_name='Max user discount',
+        max_digits=12,
+        decimal_places=2,
+        null=True,
+        help_text='When an offer has given more discount than this threshold to orders of a user, then the offer '
+                  'becomes unavailable for that user',
+        blank=True
+    )
+    emails_for_usage_alert = models.TextField(
+        verbose_name='Emails to receive offer usage alert',
+        blank=True,
+        help_text='Comma separated emails which will receive the offer usage alerts'
+    )
+    usage_email_frequency = models.CharField(
+        max_length=8,
+        choices=USAGE_EMAIL_FREQUENCY_CHOICES,
+        default=DAILY,
+    )
     site = models.ForeignKey(
         'sites.Site', verbose_name=_('Site'), null=True, blank=True, default=None, on_delete=models.CASCADE
     )

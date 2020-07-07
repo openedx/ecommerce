@@ -111,6 +111,7 @@ class EnterpriseOfferUpdateViewTests(EnterpriseServiceMockMixin, ViewTestMixin, 
             'contract_discount_type': 'Absolute',
             'contract_discount_value': 200,
             'prepaid_invoice_amount': 2000,
+            'usage_email_frequency': ConditionalOffer.DAILY
         }
         response = self.client.post(self.path, data, follow=False)
         self.assertRedirects(response, self.path)
@@ -140,6 +141,7 @@ class EnterpriseOfferCreateViewTests(EnterpriseServiceMockMixin, ViewTestMixin, 
             'contract_discount_type': expected_discount_type,
             'prepaid_invoice_amount': expected_prepaid_invoice_amount,
             'sales_force_id': sales_force_id,
+            'usage_email_frequency': ConditionalOffer.DAILY
         }
 
         existing_offer_ids = list(ConditionalOffer.objects.all().values_list('id', flat=True))
