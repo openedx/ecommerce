@@ -16,7 +16,6 @@ from rest_framework.response import Response
 
 from ecommerce.core.constants import COUPON_PRODUCT_CLASS_NAME
 from ecommerce.core.models import BusinessClient
-from ecommerce.core.utils import log_message_and_raise_validation_error
 from ecommerce.coupons.utils import prepare_course_seat_types
 from ecommerce.extensions.api import data as data_api
 from ecommerce.extensions.api.filters import ProductFilter
@@ -346,7 +345,7 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
         try:
             super(CouponViewSet, self).update(request, *args, **kwargs)
             coupon = self.get_object()
-            vouchers = coupon.attr.coupon_vouchers.vouchers
+            vouchers = coupon.attr.coupon_vouchers.vouchers.all()
             self.update_voucher_data(request.data, vouchers)
             self.update_range_data(request.data, vouchers)
             self.update_offer_data(request.data, vouchers, self.request.site)
@@ -365,7 +364,7 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
     def update_voucher_data(self, request_data, vouchers):
         data = self.create_update_data_dict(data=request_data, fields=CouponVouchers.UPDATEABLE_VOUCHER_FIELDS)
         if data:
-            vouchers.all().update(**data)
+            vouchers.update(**data)
 
     def create_update_data_dict(self, data, fields):
         """
@@ -507,22 +506,7 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
         max_uses = request_data.get('max_uses')
         email_domains = request_data.get('email_domains')
 
-        # Validate max_uses
-        if max_uses is not None:
-            if vouchers.first().usage == Voucher.SINGLE_USE:
-                log_message_and_raise_validation_error(
-                    'Failed to update Coupon. '
-                    'max_global_applications field cannot be set for voucher type [{voucher_type}].'.format(
-                        voucher_type=Voucher.SINGLE_USE
-                    ))
-            try:
-                max_uses = int(max_uses)
-                if max_uses < 1:
-                    raise ValueError
-            except ValueError:
-                raise ValidationError('max_global_applications field must be a positive number.')
-
-        for voucher in vouchers.all():
+        for voucher in vouchers:
             updated_original_offer = update_voucher_offer(
                 offer=voucher.original_offer,
                 benefit_value=benefit_value,
