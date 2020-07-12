@@ -6,6 +6,7 @@
 # Translators:
 # Translators:
 # Translators:
+# Translators:
 # abby li <yc.li@eliteu.cn>, 2018-2019
 # 759b81c7bb2252a11f36c89344f31007, 2016
 # hohomi <hohomi@gmail.com>, 2016
@@ -18,7 +19,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-12-03 14:18+0000\n"
+"POT-Creation-Date: 2020-07-12 20:12+0000\n"
 "PO-Revision-Date: 2019-12-04 06:55+0000\n"
 "Last-Translator: Ned Batchelder <ned@edx.org>\n"
 "Language-Team: Chinese (China) (http://www.transifex.com/open-edx/edx-platform/language/zh_CN/)\n"
@@ -47,32 +48,32 @@ msgstr "此值必须是日期。"
 msgid "At least one seat type must be selected."
 msgstr "至少必须选择一种坐席类型。"
 
-#: ecommerce/static/js/models/coupon_model.js:71
+#: ecommerce/static/js/models/coupon_model.js:72
 msgid "This field must be empty or contain 1-16 alphanumeric characters."
 msgstr "此字段必须为空或介于1-16 个字母数字字符之间。"
 
-#: ecommerce/static/js/models/coupon_model.js:80
+#: ecommerce/static/js/models/coupon_model.js:81
 #, javascript-format
 msgid "Email domain {%s} is invalid."
 msgstr "邮箱域名 {%s}无效。"
 
-#: ecommerce/static/js/models/coupon_model.js:97
+#: ecommerce/static/js/models/coupon_model.js:101
 msgid "Must occur after start date"
 msgstr "应在开始日期之后"
 
-#: ecommerce/static/js/models/coupon_model.js:127
+#: ecommerce/static/js/models/coupon_model.js:131
 msgid "Max uses for multi-use coupons must be higher than 2."
 msgstr "可重复使用的优惠券的最大使用量必须大于2。"
 
-#: ecommerce/static/js/models/coupon_model.js:151
+#: ecommerce/static/js/models/coupon_model.js:155
 msgid "Must occur before end date"
 msgstr "应在结束日期之前"
 
-#: ecommerce/static/js/models/coupon_model.js:173
+#: ecommerce/static/js/models/coupon_model.js:177
 msgid "A valid course ID is required"
 msgstr "需要一个有效的课程编号"
 
-#: ecommerce/static/js/models/coupon_model.js:187
+#: ecommerce/static/js/models/coupon_model.js:191
 msgid "A valid Program UUID is required."
 msgstr "需要一个有效的专业课程编号。"
 
@@ -211,11 +212,11 @@ msgstr "年份无效"
 msgid "Card expired"
 msgstr "卡已过期"
 
-#: ecommerce/static/js/pages/basket_page.js:503
+#: ecommerce/static/js/pages/basket_page.js:474
 msgid "<Choose state/province>"
 msgstr "<Choose state/province>"
 
-#: ecommerce/static/js/pages/basket_page.js:504
+#: ecommerce/static/js/pages/basket_page.js:475
 msgid "State/Province (required)"
 msgstr "州/省（必需）"
 
@@ -296,19 +297,19 @@ msgstr "不允许加逗号。"
 
 #: ecommerce/static/js/views/coupon_detail_view.js:108
 #: ecommerce/static/js/views/coupon_form_view.js:62
-#: ecommerce/static/js/views/enterprise_coupon_form_view.js:29
+#: ecommerce/static/js/views/enterprise_coupon_form_view.js:30
 msgid "Can be used once by one customer"
 msgstr "能被1位顾客使用1次"
 
 #: ecommerce/static/js/views/coupon_detail_view.js:110
 #: ecommerce/static/js/views/coupon_form_view.js:70
-#: ecommerce/static/js/views/enterprise_coupon_form_view.js:37
+#: ecommerce/static/js/views/enterprise_coupon_form_view.js:38
 msgid "Can be used multiple times by multiple customers"
 msgstr "能被多位顾客使用多次"
 
 #: ecommerce/static/js/views/coupon_detail_view.js:112
 #: ecommerce/static/js/views/coupon_form_view.js:66
-#: ecommerce/static/js/views/enterprise_coupon_form_view.js:33
+#: ecommerce/static/js/views/enterprise_coupon_form_view.js:34
 msgid "Can be used once by multiple customers"
 msgstr "能被多位顾客使用一次"
 
@@ -320,11 +321,11 @@ msgstr "选课码"
 msgid "Discount Code"
 msgstr "折扣码"
 
-#: ecommerce/static/js/views/coupon_form_view.js:770
+#: ecommerce/static/js/views/coupon_form_view.js:781
 msgid "Save Changes"
 msgstr "保存更改"
 
-#: ecommerce/static/js/views/coupon_form_view.js:785
+#: ecommerce/static/js/views/coupon_form_view.js:796
 msgid "Create Coupon"
 msgstr "创建优惠券"
 
@@ -462,7 +463,7 @@ msgid "Seat type"
 msgstr "坐席类型"
 
 #: ecommerce/static/js/views/enterprise_coupon_detail_view.js:28
-#: ecommerce/static/js/views/enterprise_coupon_form_view.js:41
+#: ecommerce/static/js/views/enterprise_coupon_form_view.js:42
 msgid "Can be used multiple times by one customer"
 msgstr "能被一位顾客使用多次"
 

@@ -6,6 +6,7 @@
 # Translators:
 # Translators:
 # Translators:
+# Translators:
 # Fabian Hamza <translations_2@camara.ie>, 2017
 # Innocent Masue <translations_7@camara.ie>, 2017
 # Isihaka Issa <translations_8@camara.ie>, 2017
@@ -19,7 +20,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-12-03 14:18+0000\n"
+"POT-Creation-Date: 2020-07-12 20:12+0000\n"
 "PO-Revision-Date: 2019-12-04 06:55+0000\n"
 "Last-Translator: Ned Batchelder <ned@edx.org>\n"
 "Language-Team: Swahili (Kenya) (http://www.transifex.com/open-edx/edx-platform/language/sw_KE/)\n"
@@ -48,32 +49,32 @@ msgstr "Hii sehemu inatakiwa kujazwa tarehe."
 msgid "At least one seat type must be selected."
 msgstr "Angalau aina moja ya kikalio lazima ichaguliwe."
 
-#: ecommerce/static/js/models/coupon_model.js:71
+#: ecommerce/static/js/models/coupon_model.js:72
 msgid "This field must be empty or contain 1-16 alphanumeric characters."
 msgstr "Hii sehemu inatakiwa ibaki wazi au ijazwe maneno 1-16 yenye mchanganyiko wa tarakimu na herufi."
 
-#: ecommerce/static/js/models/coupon_model.js:80
+#: ecommerce/static/js/models/coupon_model.js:81
 #, javascript-format
 msgid "Email domain {%s} is invalid."
 msgstr "Miliki ya barua pepe {%s} siyo sahihi."
 
-#: ecommerce/static/js/models/coupon_model.js:97
+#: ecommerce/static/js/models/coupon_model.js:101
 msgid "Must occur after start date"
 msgstr "Lazima itokee baada ya tarehe ya kuanza"
 
-#: ecommerce/static/js/models/coupon_model.js:127
+#: ecommerce/static/js/models/coupon_model.js:131
 msgid "Max uses for multi-use coupons must be higher than 2."
 msgstr "                                                                                                                                                      Kiwango cha juu kwa watumiaji wenye kuponi kiwe zaidi ya 2."
 
-#: ecommerce/static/js/models/coupon_model.js:151
+#: ecommerce/static/js/models/coupon_model.js:155
 msgid "Must occur before end date"
 msgstr "Lazima itokee kabla ya tarehe ya kumalizia"
 
-#: ecommerce/static/js/models/coupon_model.js:173
+#: ecommerce/static/js/models/coupon_model.js:177
 msgid "A valid course ID is required"
 msgstr "Kitambulisho cha kozi sahihi kinahitajika. "
 
-#: ecommerce/static/js/models/coupon_model.js:187
+#: ecommerce/static/js/models/coupon_model.js:191
 msgid "A valid Program UUID is required."
 msgstr "Programu Halali za UUID zinahitajika."
 
@@ -212,11 +213,11 @@ msgstr "Mwaka batili"
 msgid "Card expired"
 msgstr "Kadi imeisha muda wake"
 
-#: ecommerce/static/js/pages/basket_page.js:503
+#: ecommerce/static/js/pages/basket_page.js:474
 msgid "<Choose state/province>"
 msgstr "<Choose state/province>"
 
-#: ecommerce/static/js/pages/basket_page.js:504
+#: ecommerce/static/js/pages/basket_page.js:475
 msgid "State/Province (required)"
 msgstr "Jimbo/Nchi (zinahitajika)"
 
@@ -297,19 +298,19 @@ msgstr "Alama ya mkato hairuhusiwi."
 
 #: ecommerce/static/js/views/coupon_detail_view.js:108
 #: ecommerce/static/js/views/coupon_form_view.js:62
-#: ecommerce/static/js/views/enterprise_coupon_form_view.js:29
+#: ecommerce/static/js/views/enterprise_coupon_form_view.js:30
 msgid "Can be used once by one customer"
 msgstr "Inaweza kutumika mara moja kwa mteja mmoja"
 
 #: ecommerce/static/js/views/coupon_detail_view.js:110
 #: ecommerce/static/js/views/coupon_form_view.js:70
-#: ecommerce/static/js/views/enterprise_coupon_form_view.js:37
+#: ecommerce/static/js/views/enterprise_coupon_form_view.js:38
 msgid "Can be used multiple times by multiple customers"
 msgstr "Inaweza kutumiwa mara nyingi na wateja wengi"
 
 #: ecommerce/static/js/views/coupon_detail_view.js:112
 #: ecommerce/static/js/views/coupon_form_view.js:66
-#: ecommerce/static/js/views/enterprise_coupon_form_view.js:33
+#: ecommerce/static/js/views/enterprise_coupon_form_view.js:34
 msgid "Can be used once by multiple customers"
 msgstr "Inaweza kutumika mara moja kwa wateja wengi"
 
@@ -321,11 +322,11 @@ msgstr "Msimbo wa kujiandikisha"
 msgid "Discount Code"
 msgstr "Msimbo uliopunguzwa"
 
-#: ecommerce/static/js/views/coupon_form_view.js:770
+#: ecommerce/static/js/views/coupon_form_view.js:781
 msgid "Save Changes"
 msgstr "Hifadhi Mabadiliko"
 
-#: ecommerce/static/js/views/coupon_form_view.js:785
+#: ecommerce/static/js/views/coupon_form_view.js:796
 msgid "Create Coupon"
 msgstr "Buni Kuponi"
 
@@ -463,7 +464,7 @@ msgid "Seat type"
 msgstr "Aina ya Idhini"
 
 #: ecommerce/static/js/views/enterprise_coupon_detail_view.js:28
-#: ecommerce/static/js/views/enterprise_coupon_form_view.js:41
+#: ecommerce/static/js/views/enterprise_coupon_form_view.js:42
 msgid "Can be used multiple times by one customer"
 msgstr ""
 
