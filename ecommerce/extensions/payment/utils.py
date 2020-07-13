@@ -1,10 +1,14 @@
-
-
+# Changes part of REV-1209 - see https://github.com/edx/ecommerce/pull/3020
+import copy
 import logging
 import re
 
+# Changes part of REV-1209 - see https://github.com/edx/ecommerce/pull/3020
+import crum
 import requests
 import six  # pylint: disable=ungrouped-imports
+# Changes part of REV-1209 - see https://github.com/edx/ecommerce/pull/3020
+import waffle
 from django.conf import settings
 from django.contrib.auth import logout
 from django.utils.translation import ugettext_lazy as _
@@ -184,6 +188,55 @@ class SDNClient:
         self.api_key = api_key
         self.sdn_list = sdn_list
 
+    # Changes part of REV-1209 - see https://github.com/edx/ecommerce/pull/3020
+    def make_testing_sdn_call(self, auth_header, first_check_response, params_dict):  # pragma: no cover
+        """
+        This is temporary code added as part of REV-1209.
+        The intent of this code is to compare the results of the SDN check
+        with fuzzy matching turned on and off.
+        Logs are included to help inform whether a threshold should be set
+        for the score that is included with the fuzzy match query results.
+        """
+        try:
+            if waffle.flag_is_active(crum.get_current_request(), 'make_second_sdn_check'):
+                second_check_dict = copy.deepcopy(params_dict)
+                first_check_results = first_check_response.json().get("results", [])
+                second_check_dict['fuzzy_name'] = 'true'
+                second_check_params = urlencode(second_check_dict)
+                sdn_check_url = '{api_url}?{params}'.format(
+                    api_url=self.api_url,
+                    params=second_check_params
+                )
+                second_check_response = requests.get(
+                    sdn_check_url,
+                    headers=auth_header,
+                    timeout=settings.SDN_CHECK_REQUEST_TIMEOUT
+                )
+                if second_check_response.status_code != 200:
+                    logger.warning(
+                        'Fuzzy SDN check error: status code [%d] message: [%s]',
+                        second_check_response.status_code, second_check_response.content
+                    )
+                second_check_results = second_check_response.json().get("results", [])
+                if second_check_results:
+                    top_score = max(r.get("score", -1) for r in second_check_results)
+                    if first_check_results:
+                        logger.info(
+                            'Regular SDN check: match. Fuzzy SDN check: match. Fuzzy match top score: [%s]',
+                            top_score
+                        )
+                    else:
+                        logger.info(
+                            'Regular SDN check: no match. Fuzzy SDN check: match. Fuzzy match top score: [%s]',
+                            top_score
+                        )
+                elif first_check_results:
+                    logger.info('Regular SDN check: match. Fuzzy SDN check: no match.')
+        except Exception as e:  # pylint:disable=broad-except
+            # Since this code is purely for testing purposes,
+            # we ensure any error would not interfere with the actual transaction.
+            logger.warning("Fuzzy SDN check error [%s]", str(e))
+
     def search(self, name, city, country):
         """
         Searches the OFAC list for an individual with the specified details.
@@ -199,7 +252,8 @@ class SDNClient:
         Returns:
             dict: SDN API response.
         """
-        params = urlencode({
+        # Changes part of REV-1209 - see https://github.com/edx/ecommerce/pull/3020
+        params_dict = {
             'sources': self.sdn_list,
             'type': 'individual',
             'name': six.text_type(name).encode('utf-8'),
@@ -207,7 +261,8 @@ class SDNClient:
             # http://developer.trade.gov/consolidated-screening-list.html
             'address': six.text_type(city).encode('utf-8'),
             'countries': country
-        })
+        }
+        params = urlencode(params_dict)
         sdn_check_url = '{api_url}?{params}'.format(
             api_url=self.api_url,
             params=params
@@ -223,6 +278,9 @@ class SDNClient:
         except requests.exceptions.Timeout:
             logger.warning('Connection to US Treasury SDN API timed out for [%s].', name)
             raise
+
+        # Changes part of REV-1209 - see https://github.com/edx/ecommerce/pull/3020
+        self.make_testing_sdn_call(auth_header, response, params_dict)  # pragma: no cover
 
         if response.status_code != 200:
             logger.warning(
