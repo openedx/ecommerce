@@ -9,6 +9,7 @@ from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from django_extensions.db.models import TimeStampedModel
 from edx_django_utils.cache import TieredCache
+from jsonfield.fields import JSONField
 from oscar.apps.offer.abstract_models import (
     AbstractBenefit,
     AbstractCondition,
@@ -616,6 +617,22 @@ class OfferAssignmentEmailTemplates(TimeStampedModel):
             email_type=self.email_type,
             active=self.active
         )
+
+
+class OfferUsageEmail(TimeStampedModel):
+    offer = models.ForeignKey('offer.ConditionalOffer', on_delete=models.CASCADE)
+    offer_email_metadata = JSONField(default={})
+
+    @classmethod
+    def create_record(cls, offer, meta_data=None):
+        """
+        Create object by given data.
+        """
+        record = cls(offer=offer)
+        if meta_data:
+            record.offer_email_metadata = meta_data
+        record.save()
+        return record
 
 
 from oscar.apps.offer.models import *  # noqa isort:skip pylint: disable=wildcard-import,unused-wildcard-import,wrong-import-position,wrong-import-order,ungrouped-imports
