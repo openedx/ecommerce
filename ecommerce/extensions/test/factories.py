@@ -294,6 +294,7 @@ class EnterpriseOfferFactory(ConditionalOfferFactory):
     offer_type = ConditionalOffer.SITE
     priority = OFFER_PRIORITY_ENTERPRISE
     status = ConditionalOffer.OPEN
+    emails_for_usage_alert = 'example_1@example.com, example_2@example.com'
 
 
 class OfferAssignmentFactory(factory.DjangoModelFactory):
