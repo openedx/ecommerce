@@ -270,19 +270,20 @@ class EnterpriseCouponViewSet(CouponViewSet):
         pass
 
     def is_offer_data_updated(self, benefit_value, enterprise_customer, enterprise_catalog, max_uses, email_domains):
-        """ Compares request data with the old coupon data to that there is any change related to offers."""
-        old_data = self.get_serializer(self.get_object()).data
-        old_benefit_value = old_data.get('benefit_value')
-        old_enterprise_customer = old_data.get('enterprise_customer', {}).get('id')
-        old_enterprise_catalog = old_data.get('enterprise_customer_catalog')
-        old_max_uses = old_data.get('max_uses')
-        old_email_domains = old_data.get('email_domains')
+        """ Compares request data with the existing coupon data to determine if the offer in voucher needs to be
+         updated."""
+        existing_data = self.get_serializer(self.get_object()).data
+        existing_benefit_value = existing_data.get('benefit_value')
+        existing_enterprise_customer = existing_data.get('enterprise_customer', {}).get('id')
+        existing_enterprise_catalog = existing_data.get('enterprise_customer_catalog')
+        existing_max_uses = existing_data.get('max_uses')
+        existing_email_domains = existing_data.get('email_domains')
 
-        if benefit_value == old_benefit_value \
-                and enterprise_customer == str(old_enterprise_customer) \
-                and enterprise_catalog == str(old_enterprise_catalog) \
-                and max_uses == old_max_uses \
-                and email_domains == old_email_domains:
+        if benefit_value == existing_benefit_value \
+                and enterprise_customer == str(existing_enterprise_customer) \
+                and enterprise_catalog == str(existing_enterprise_catalog) \
+                and max_uses == existing_max_uses \
+                and email_domains == existing_email_domains:
             # nothing changed related to the offers.
             return False
         return True
@@ -304,6 +305,7 @@ class EnterpriseCouponViewSet(CouponViewSet):
         if not self.is_offer_data_updated(
                 benefit_value, enterprise_customer, enterprise_catalog, max_uses, email_domains
         ):
+            # Offer data does not need to be updated for current request
             return
 
         coupon_was_migrated = False
