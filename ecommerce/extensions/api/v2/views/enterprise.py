@@ -5,7 +5,7 @@ import logging
 import django_filters
 import six
 from django.contrib.auth import get_user_model
-from django.core.exceptions import ObjectDoesNotExist, ValidationError
+from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import (
     Count,
     ExpressionWrapper,
@@ -33,7 +33,6 @@ from six.moves.urllib.parse import urlparse  # pylint: disable=import-error, ung
 from slumber.exceptions import SlumberHttpBaseException
 
 from ecommerce.core.constants import COUPON_PRODUCT_CLASS_NAME, DEFAULT_CATALOG_PAGE_SIZE
-from ecommerce.core.utils import log_message_and_raise_validation_error
 from ecommerce.coupons.utils import is_coupon_available
 from ecommerce.enterprise.utils import (
     get_enterprise_catalog,
@@ -270,6 +269,25 @@ class EnterpriseCouponViewSet(CouponViewSet):
         # Since enterprise coupons do not have ranges, we bypass the range update logic entirely.
         pass
 
+    def is_offer_data_updated(self, benefit_value, enterprise_customer, enterprise_catalog, max_uses, email_domains):
+        """ Compares request data with the existing coupon data to determine if the offer in voucher needs to be
+         updated."""
+        existing_data = self.get_serializer(self.get_object()).data
+        existing_benefit_value = existing_data.get('benefit_value')
+        existing_enterprise_customer = existing_data.get('enterprise_customer', {}).get('id')
+        existing_enterprise_catalog = existing_data.get('enterprise_customer_catalog')
+        existing_max_uses = existing_data.get('max_uses')
+        existing_email_domains = existing_data.get('email_domains')
+
+        if benefit_value == existing_benefit_value \
+                and enterprise_customer == str(existing_enterprise_customer) \
+                and enterprise_catalog == str(existing_enterprise_catalog) \
+                and max_uses == existing_max_uses \
+                and email_domains == existing_email_domains:
+            # nothing changed related to the offers.
+            return False
+        return True
+
     def update_offer_data(self, request_data, vouchers, site):
         """
         Remove all offers from the vouchers and add a new offer
@@ -284,23 +302,14 @@ class EnterpriseCouponViewSet(CouponViewSet):
         max_uses = request_data.get('max_uses')
         email_domains = request_data.get('email_domains')
 
-        # Validate max_uses
-        if max_uses is not None:
-            if vouchers.first().usage == Voucher.SINGLE_USE:
-                log_message_and_raise_validation_error(
-                    'Failed to update Coupon. '
-                    'max_global_applications field cannot be set for voucher type [{voucher_type}].'.format(
-                        voucher_type=Voucher.SINGLE_USE
-                    ))
-            try:
-                max_uses = int(max_uses)
-                if max_uses < 1:
-                    raise ValueError
-            except ValueError:
-                raise ValidationError('max_global_applications field must be a positive number.')
+        if not self.is_offer_data_updated(
+                benefit_value, enterprise_customer, enterprise_catalog, max_uses, email_domains
+        ):
+            # Offer data does not need to be updated for current request
+            return
 
         coupon_was_migrated = False
-        for voucher in vouchers.all():
+        for voucher in vouchers:
             updated_enterprise_offer = update_voucher_with_enterprise_offer(
                 offer=voucher.enterprise_offer,
                 benefit_value=benefit_value,

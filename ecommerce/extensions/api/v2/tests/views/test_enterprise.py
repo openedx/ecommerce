@@ -460,14 +460,15 @@ class EnterpriseCouponViewSetRbacTests(
         self.get_response('POST', ENTERPRISE_COUPONS_LINK, self.data)
         coupon = Product.objects.get(title=self.data['title'])
 
-        self.get_response(
+        new_title = 'Updated Enterprise Coupon'
+        self.data.update({'title': new_title})
+        response = self.get_response(
             'PUT',
             reverse('api:v2:enterprise-coupons-detail', kwargs={'pk': coupon.id}),
-            data={
-                'title': 'Updated Enterprise Coupon',
-            }
+            data=self.data
         )
-        updated_coupon = Product.objects.get(title='Updated Enterprise Coupon')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        updated_coupon = Product.objects.get(title=new_title)
         self.assertEqual(coupon.id, updated_coupon.id)
 
     def test_update_non_ent_coupon(self):

@@ -11,6 +11,7 @@ import waffle
 from dateutil.parser import parse
 from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.db.models import Count, Q, Sum, prefetch_related_objects
 from django.utils import timezone
@@ -29,6 +30,7 @@ from ecommerce.core.constants import (
     SEAT_PRODUCT_CLASS_NAME
 )
 from ecommerce.core.url_utils import get_ecommerce_url
+from ecommerce.core.utils import log_message_and_raise_validation_error
 from ecommerce.coupons.utils import is_coupon_available
 from ecommerce.courses.models import Course
 from ecommerce.entitlements.utils import create_or_update_course_entitlement
@@ -1276,6 +1278,27 @@ class CouponSerializer(CouponMixin, ProductPaymentInfoMixin, serializers.ModelSe
 
     def get_voucher_type(self, obj):
         return retrieve_voucher_usage(obj)
+
+    def validate(self, attrs):
+        validated_data = super(CouponSerializer, self).validate(attrs)
+
+        # Validate max_uses
+        max_uses = self.initial_data.get('max_uses')
+        if max_uses is not None:
+            if self.get_voucher_type(self.instance) == Voucher.SINGLE_USE:
+                log_message_and_raise_validation_error(
+                    'Failed to update Coupon. '
+                    'max_global_applications field cannot be set for voucher type [{voucher_type}].'.format(
+                        voucher_type=Voucher.SINGLE_USE
+                    ))
+            try:
+                max_uses = int(max_uses)
+                if max_uses < 1:
+                    raise ValueError
+            except ValueError:
+                raise ValidationError('max_global_applications field must be a positive number.')
+
+        return validated_data
 
     class Meta:
         model = Product
