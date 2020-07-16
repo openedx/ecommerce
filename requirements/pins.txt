@@ -8,8 +8,8 @@
 # pin when possible.  Writing an issue against the offending project and
 # linking to it here is good.
 
-# BOM-1410 : drf-jwt 1.15.0 introduces migration issues.
-drf-jwt<1.15.0
+# Newer version introduces `No installed app with label 'communication'.`
+django-oscar<2.1
 
 # Because of django incompatibility
 edx-rest-api-client<2.0.0
@@ -49,3 +49,5 @@ social-auth-core==3.2.0
 # greater versions failing with extract-tranlsations step.
 tox==3.14.6
 tox-battery==0.5.2
+
+#
