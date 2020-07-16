@@ -79,7 +79,7 @@ class SendEnterpriseOfferLimitEmailsTests(TestCase):
             (
                 LOGGER_NAME,
                 'INFO',
-                '[Offer Usage Alert] {total_enterprise_offers_count} of {send_enterprise_offer_count} added to the' 
+                '[Offer Usage Alert] {total_enterprise_offers_count} of {send_enterprise_offer_count} added to the'
                 ' email sending queue.'.format(
                     total_enterprise_offers_count=7,
                     send_enterprise_offer_count=5
