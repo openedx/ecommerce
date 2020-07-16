@@ -139,7 +139,7 @@ pytest-html==1.22.1       # via -r requirements/test.txt, pytest-selenium
 pytest-metadata==1.8.0    # via -r requirements/test.txt, pytest-html
 pytest-randomly==3.4.1    # via -r requirements/test.txt
 pytest-selenium==1.17.0   # via -r requirements/test.txt
-pytest-timeout==1.4.1     # via -r requirements/test.txt
+pytest-timeout==1.4.2     # via -r requirements/test.txt
 pytest-variables==1.9.0   # via -r requirements/test.txt, pytest-selenium
 pytest==5.3.5             # via -r requirements/test.txt, pytest-base-url, pytest-cov, pytest-django, pytest-django-ordering, pytest-html, pytest-metadata, pytest-randomly, pytest-selenium, pytest-timeout, pytest-variables
 python-dateutil==2.8.1    # via -r requirements/test.txt, analytics-python, edx-drf-extensions, faker, freezegun
