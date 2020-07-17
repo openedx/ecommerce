@@ -30,18 +30,18 @@ django-cors-headers==3.4.0  # via -r requirements/base.in
 django-crispy-forms==1.8.1  # via -r requirements/base.in
 django-crum==0.7.6        # via edx-rbac
 django-extensions==3.0.3  # via -r requirements/base.in
-django-extra-views==0.13.0  # via django-oscar
+django-extra-views==0.11.0  # via django-oscar
 django-filter==2.3.0      # via -r requirements/base.in
-django-haystack==3.0b2    # via django-oscar
+django-haystack==2.8.1    # via django-oscar
 django-libsass==0.8       # via -r requirements/base.in
 django-model-utils==4.0.0  # via edx-rbac
-django-oscar==2.1         # via -r requirements/base.in
-django-phonenumber-field==3.0.1  # via django-oscar
+django-oscar==2.0.4       # via -c requirements/pins.txt, -r requirements/base.in
+django-phonenumber-field==2.0.1  # via django-oscar
 django-rest-swagger==2.2.0  # via -r requirements/base.in
 django-ses==0.8.2         # via -r requirements/production.in
 django-simple-history==2.11.0  # via -r requirements/base.in
 django-solo==1.1.3        # via -r requirements/base.in
-django-tables2==2.2.1     # via django-oscar
+django-tables2==1.21.2    # via django-oscar
 django-threadlocals==0.10  # via -r requirements/base.in
 django-treebeard==4.3.1   # via django-oscar
 django-waffle==1.0.0      # via -r requirements/base.in, edx-django-utils, edx-drf-extensions
@@ -55,7 +55,7 @@ drf-jwt==1.14.0           # via -c requirements/pins.txt, edx-drf-extensions
 edx-auth-backends==3.1.0  # via -r requirements/base.in
 edx-django-release-util==0.4.4  # via -r requirements/base.in
 edx-django-sites-extensions==2.5.1  # via -r requirements/base.in
-edx-django-utils==3.2.3   # via -r requirements/base.in, edx-drf-extensions
+edx-django-utils==3.3.0   # via -r requirements/base.in, edx-drf-extensions
 edx-drf-extensions==6.1.0  # via -r requirements/base.in, edx-rbac
 edx-ecommerce-worker==0.7.2  # via -r requirements/base.in
 edx-opaque-keys==2.1.1    # via -r requirements/base.in, edx-drf-extensions
@@ -85,7 +85,7 @@ packaging==20.4           # via bleach
 path.py==7.2              # via -r requirements/base.in
 paypalrestsdk==1.13.1     # via -r requirements/base.in
 pbr==5.4.5                # via stevedore
-phonenumbers==8.12.6      # via django-oscar
+phonenumbers==8.12.6      # via django-oscar, django-phonenumber-field
 pillow==7.2.0             # via django-oscar
 premailer==2.9.2          # via -r requirements/base.in
 psutil==1.2.1             # via edx-django-utils
@@ -115,7 +115,7 @@ rjsmin==1.1.0             # via django-compressor
 rules==2.2                # via -r requirements/base.in
 sailthru-client==2.2.3    # via -r requirements/base.in
 semantic-version==2.8.5   # via edx-drf-extensions
-simplejson==3.17.0        # via django-rest-swagger, sailthru-client
+simplejson==3.17.2        # via django-rest-swagger, sailthru-client
 six==1.15.0               # via -r requirements/base.in, analytics-python, bleach, cryptography, django-compressor, django-extensions, django-extra-views, django-simple-history, djangorestframework-csv, edx-auth-backends, edx-django-release-util, edx-drf-extensions, edx-opaque-keys, edx-rbac, isodate, libsass, packaging, paypalrestsdk, purl, pyjwkest, pyopenssl, python-dateutil, python-memcached, social-auth-app-django, social-auth-core, stevedore, zeep
 slumber==0.7.1            # via edx-rest-api-client
 git+https://github.com/python-social-auth/social-app-django.git@c00d23c2b45c3317bd35b15ad1b959338689cef8#egg=social-auth-app-django  # via -r requirements/base.in, edx-auth-backends
