@@ -24,7 +24,7 @@ chardet==3.0.4            # via -r requirements/docs.txt, -r requirements/test.t
 coreapi==2.3.3            # via -r requirements/test.txt, django-rest-swagger, openapi-codec
 coreschema==0.0.4         # via -r requirements/test.txt, coreapi
 coverage==5.2             # via -r requirements/test.txt, pytest-cov
-cryptography==2.9.2       # via -r requirements/test.txt, pyopenssl
+cryptography==2.9.2       # via -r requirements/test.txt, pyjwt, pyopenssl
 cssselect==1.1.0          # via -r requirements/test.txt, premailer
 cssutils==1.0.2           # via -r requirements/test.txt, premailer
 ddt==1.4.1                # via -r requirements/test.txt
@@ -59,12 +59,12 @@ djangorestframework-datatables==0.5.2  # via -r requirements/test.txt
 djangorestframework==3.11.0  # via -r requirements/test.txt, django-rest-swagger, djangorestframework-csv, djangorestframework-datatables, drf-extensions, drf-jwt, edx-drf-extensions, rest-condition
 docutils==0.16            # via -r requirements/docs.txt, sphinx
 drf-extensions==0.6.0     # via -r requirements/test.txt
-drf-jwt==1.14.0           # via -r requirements/test.txt, edx-drf-extensions
+drf-jwt==1.16.2           # via -r requirements/test.txt, edx-drf-extensions
 edx-auth-backends==3.1.0  # via -r requirements/test.txt
 edx-django-release-util==0.4.4  # via -r requirements/test.txt
 edx-django-sites-extensions==2.5.1  # via -r requirements/test.txt
 edx-django-utils==3.3.0   # via -r requirements/test.txt, edx-drf-extensions
-edx-drf-extensions==6.1.0  # via -r requirements/test.txt, edx-rbac
+edx-drf-extensions==6.1.1  # via -r requirements/test.txt, edx-rbac
 edx-ecommerce-worker==0.7.2  # via -r requirements/test.txt
 edx-i18n-tools==0.5.3     # via -r requirements/test.txt
 edx-opaque-keys==2.1.1    # via -r requirements/test.txt, edx-drf-extensions
@@ -126,7 +126,7 @@ pycparser==2.20           # via -r requirements/test.txt, cffi
 pycryptodomex==3.9.8      # via -r requirements/test.txt, pyjwkest
 pygments==2.6.1           # via -r requirements/docs.txt, -r requirements/test.txt, diff-cover, sphinx
 pyjwkest==1.4.2           # via -r requirements/test.txt, edx-drf-extensions
-pyjwt==1.7.1              # via -r requirements/test.txt, drf-jwt, edx-auth-backends, edx-rest-api-client, social-auth-core
+pyjwt[crypto]==1.7.1      # via -r requirements/test.txt, drf-jwt, edx-auth-backends, edx-rest-api-client, social-auth-core
 pylint==2.4.4             # via -r requirements/test.txt
 pymongo==3.10.1           # via -r requirements/test.txt, edx-opaque-keys
 pyopenssl==19.1.0         # via -r requirements/test.txt, ndg-httpsclient, paypalrestsdk

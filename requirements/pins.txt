@@ -11,9 +11,6 @@
 # Newer version introduces `No installed app with label 'communication'.`
 django-oscar<2.1
 
-# BOM-1410 : drf-jwt 1.15.0 introduces migration issues.
-drf-jwt<1.15.0
-
 # Because of django incompatibility
 edx-rest-api-client<2.0.0
 
