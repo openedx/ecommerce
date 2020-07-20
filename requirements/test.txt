@@ -31,6 +31,7 @@ defusedxml==0.6.0         # via -r requirements/base.txt, python3-openid, social
 diff-cover==3.0.1         # via -r requirements/test.in
 django-appconf==1.0.4     # via -r requirements/base.txt, django-compressor
 django-compressor==2.4    # via -r requirements/base.txt, django-libsass
+django-config-models==2.0.2  # via -r requirements/base.txt
 django-cors-headers==3.4.0  # via -r requirements/base.txt
 django-crispy-forms==1.8.1  # via -r requirements/base.txt
 django-crum==0.7.6        # via -r requirements/base.txt, edx-rbac
@@ -53,13 +54,13 @@ django-webtest==1.9.7     # via -r requirements/test.in
 django-widget-tweaks==1.4.8  # via -r requirements/base.txt, django-oscar
 djangorestframework-csv==2.1.0  # via -r requirements/base.txt
 djangorestframework-datatables==0.5.2  # via -r requirements/base.txt
-djangorestframework==3.11.0  # via -r requirements/base.txt, django-rest-swagger, djangorestframework-csv, djangorestframework-datatables, drf-extensions, drf-jwt, edx-drf-extensions, rest-condition
+djangorestframework==3.11.0  # via -r requirements/base.txt, django-config-models, django-rest-swagger, djangorestframework-csv, djangorestframework-datatables, drf-extensions, drf-jwt, edx-drf-extensions, rest-condition
 drf-extensions==0.6.0     # via -r requirements/base.txt
 drf-jwt==1.16.2           # via -r requirements/base.txt, edx-drf-extensions
 edx-auth-backends==3.1.0  # via -r requirements/base.txt
 edx-django-release-util==0.4.4  # via -r requirements/base.txt
 edx-django-sites-extensions==2.5.1  # via -r requirements/base.txt
-edx-django-utils==3.3.0   # via -r requirements/base.txt, edx-drf-extensions
+edx-django-utils==3.3.0   # via -r requirements/base.txt, django-config-models, edx-drf-extensions
 edx-drf-extensions==6.1.1  # via -r requirements/base.txt, edx-rbac
 edx-ecommerce-worker==0.7.2  # via -r requirements/base.txt
 edx-i18n-tools==0.5.3     # via -r requirements/test.in

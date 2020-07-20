@@ -1,6 +1,9 @@
 
 
+from config_models.models import ConfigurationModel
+from django.core.validators import FileExtensionValidator
 from django.db import models
+from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
 from oscar.apps.order.abstract_models import AbstractLine, AbstractOrder, AbstractOrderDiscount, AbstractPaymentEvent
 from simple_history.models import HistoricalRecords
@@ -35,6 +38,22 @@ class Line(AbstractLine):
 
 class PaymentEvent(AbstractPaymentEvent):
     processor_name = models.CharField(_('Payment Processor'), max_length=32, blank=True, null=True)
+
+
+@python_2_unicode_compatible
+class MarkOrdersStatusCompleteConfig(ConfigurationModel):
+    """
+    Configuration model for `mark_orders_status_complete` management command.
+
+    .. no_pii:
+    """
+    txt_file = models.FileField(
+        validators=[FileExtensionValidator(allowed_extensions=[u'txt'])],
+        help_text=_(
+            u"It expect that the order numbers stuck in fulfillment error state will be \
+            provided in a txt file format one per line."
+        )
+    )
 
 
 # If two models with the same name are declared within an app, Django will only use the first one.
