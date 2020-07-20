@@ -19,7 +19,7 @@ cffi==1.14.0              # via cryptography
 chardet==3.0.4            # via requests
 coreapi==2.3.3            # via -r requirements/base.in, django-rest-swagger, openapi-codec
 coreschema==0.0.4         # via coreapi
-cryptography==2.9.2       # via pyopenssl
+cryptography==2.9.2       # via pyjwt, pyopenssl
 cssselect==1.1.0          # via premailer
 cssutils==1.0.2           # via premailer
 defusedxml==0.6.0         # via python3-openid, social-auth-core, zeep
@@ -49,12 +49,12 @@ djangorestframework-csv==2.1.0  # via -r requirements/base.in
 djangorestframework-datatables==0.5.2  # via -r requirements/base.in
 djangorestframework==3.11.0  # via -r requirements/base.in, django-rest-swagger, djangorestframework-csv, djangorestframework-datatables, drf-extensions, drf-jwt, edx-drf-extensions, rest-condition
 drf-extensions==0.6.0     # via -r requirements/base.in
-drf-jwt==1.14.0           # via -c requirements/pins.txt, edx-drf-extensions
+drf-jwt==1.16.2           # via edx-drf-extensions
 edx-auth-backends==3.1.0  # via -r requirements/base.in
 edx-django-release-util==0.4.4  # via -r requirements/base.in
 edx-django-sites-extensions==2.5.1  # via -r requirements/base.in
 edx-django-utils==3.3.0   # via -r requirements/base.in, edx-drf-extensions
-edx-drf-extensions==6.1.0  # via -r requirements/base.in, edx-rbac
+edx-drf-extensions==6.1.1  # via -r requirements/base.in, edx-rbac
 edx-ecommerce-worker==0.7.2  # via -r requirements/base.in
 edx-opaque-keys==2.1.1    # via -r requirements/base.in, edx-drf-extensions
 edx-rbac==1.3.1           # via -r requirements/base.in
@@ -92,7 +92,7 @@ pycparser==2.20           # via cffi
 pycryptodomex==3.9.8      # via pyjwkest
 pygments==2.6.1           # via -r requirements/base.in
 pyjwkest==1.4.2           # via edx-drf-extensions
-pyjwt==1.7.1              # via drf-jwt, edx-auth-backends, edx-rest-api-client, social-auth-core
+pyjwt[crypto]==1.7.1      # via drf-jwt, edx-auth-backends, edx-rest-api-client, social-auth-core
 pymongo==3.10.1           # via edx-opaque-keys
 pyopenssl==19.1.0         # via ndg-httpsclient, paypalrestsdk
 pyparsing==2.4.7          # via packaging
