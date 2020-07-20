@@ -15,6 +15,7 @@ from ecommerce.extensions.fulfillment.status import LINE, ORDER
 
 logger = logging.getLogger(__name__)
 
+MarkOrdersStatusCompleteConfig = get_model('order', 'MarkOrdersStatusCompleteConfig')
 Order = get_model('order', 'Order')
 OrderLine = get_model('order', 'Line')
 Product = get_model('catalogue', 'Product')
@@ -42,6 +43,11 @@ class Command(BaseCommand):
             type=str,
         )
         parser.add_argument(
+            '--file-from-database',
+            action='store_true',
+            help='Use file from the MarkOrdersStatusCompleteConfig model instead of the command line.',
+        )
+        parser.add_argument(
             '--no-commit',
             action='store_true',
             dest='no_commit',
@@ -57,20 +63,36 @@ class Command(BaseCommand):
             help='Sleep time in seconds after executing each order from file.'
         )
 
+    def get_file_from_database(self):
+        """ Get file from the current MarkOrdersStatusCompleteConfig model. """
+        config = MarkOrdersStatusCompleteConfig.current()
+        if not config.enabled:
+            raise CommandError('MarkOrdersStatusCompleteConfig is disabled, but --file-from-database was requested.')
+
+        return config.txt_file
+
     def handle(self, *args, **options):
-        order_numbers_file = options[str('order_numbers_file')]
         should_commit = not options['no_commit']
         sleep_time = options['sleep_time']
+        if options['file_from_database']:
+            order_numbers_file = self.get_file_from_database()
+        else:
+            order_numbers_file = options[str('order_numbers_file')]
+            if not order_numbers_file or not os.path.exists(order_numbers_file):
+                raise CommandError(
+                    'Pass the correct absolute path to order numbers file as --order-numbers-file argument.'
+                )
 
-        if not order_numbers_file or not os.path.exists(order_numbers_file):
-            raise CommandError(
-                'Pass the correct absolute path to order numbers file as --order-numbers-file argument.'
-            )
+            order_numbers_file = open(order_numbers_file, 'rb')
+
+        order_numbers = order_numbers_file.readlines()
         total_orders, failed_orders, skipped_orders = self._mark_orders_status_complete_from_file(
-            order_numbers_file,
+            order_numbers,
             should_commit,
             sleep_time,
         )
+
+        order_numbers_file.close()
 
         logger.info(
             u'[Mark Orders Status Complete] Execution of command mark orders status complete is successful.\n'
@@ -84,12 +106,12 @@ class Command(BaseCommand):
             ', '.join(skipped_orders),
         )
 
-    def _mark_orders_status_complete_from_file(self, order_numbers_file, should_commit, sleep_time):
+    def _mark_orders_status_complete_from_file(self, order_numbers, should_commit, sleep_time):
         """
         Mark orders status complete for the orders provided in the order numbers file.
 
         Arguments:
-            order_numbers_file (str): Path of the file containing order numbers
+            order_numbers (list): List containing order numbers
             should_commit (bool): If true commit changes into database
             sleep_time (int): Sleep time in seconds after executing each order
 
@@ -100,38 +122,36 @@ class Command(BaseCommand):
         failed_orders = []
         skipped_orders = []
 
-        with open(order_numbers_file, 'r') as file_handler:
-            order_numbers = file_handler.readlines()
-            total_orders = len(order_numbers)
-            logger.info(
-                u'[Mark Orders Status Complete] '
-                u'Starting mark order status as complete process for %d orders.', total_orders
-            )
-            for index, order_number in enumerate(order_numbers, start=1):
-                try:
-                    order_number = order_number.strip()
-                    order = Order.objects.get(number=order_number)
+        total_orders = len(order_numbers)
+        logger.info(
+            u'[Mark Orders Status Complete] '
+            u'Starting mark order status as complete process for %d orders.', total_orders
+        )
+        for index, order_number in enumerate(order_numbers, start=1):
+            try:
+                order_number = order_number.decode('utf-8').strip()
+                order = Order.objects.get(number=order_number)
 
-                    if order.status != ORDER.FULFILLMENT_ERROR:
-                        skipped_orders.append(order_number)
-                        continue
+                if order.status != ORDER.FULFILLMENT_ERROR:
+                    skipped_orders.append(order_number)
+                    continue
 
-                    if should_commit:
-                        self._change_order_status_to_complete(order)
+                if should_commit:
+                    self._change_order_status_to_complete(order)
 
-                except Exception as e:  # pylint: disable=broad-except
-                    failed_orders.append(order_number)
-                    logger.exception(
-                        u'[Mark Orders Status Complete] %d/%d '
-                        u'Failed to change status for order %s. %s', index, total_orders, order_number, str(e)
-                    )
+            except Exception as e:  # pylint: disable=broad-except
+                failed_orders.append(order_number)
+                logger.exception(
+                    u'[Mark Orders Status Complete] %d/%d '
+                    u'Failed to change status for order %s. %s', index, total_orders, order_number, str(e)
+                )
 
-                if sleep_time:
-                    logger.info(
-                        u'[Mark Orders Status Complete] '
-                        u'Sleeping for %s seconds', sleep_time
-                    )
-                    time.sleep(sleep_time)
+            if sleep_time:
+                logger.info(
+                    u'[Mark Orders Status Complete] '
+                    u'Sleeping for %s seconds', sleep_time
+                )
+                time.sleep(sleep_time)
 
         return total_orders, failed_orders, skipped_orders
 

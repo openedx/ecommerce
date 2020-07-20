@@ -4,8 +4,11 @@ import waffle
 from django.contrib import messages
 from django.utils.translation import ugettext_lazy as _
 from oscar.apps.order.admin import *  # noqa pylint: disable=wildcard-import,unused-wildcard-import
+from oscar.core.loading import get_model
 
 from ecommerce.extensions.order.constants import ORDER_LIST_VIEW_SWITCH
+
+MarkOrdersStatusCompleteConfig = get_model('order', 'MarkOrdersStatusCompleteConfig')
 
 admin.site.unregister((Order, Line, LinePrice, PaymentEvent, OrderDiscount,))
 
@@ -59,3 +62,6 @@ class PaymentEventAdminExtended(PaymentEventAdmin):
 @admin.register(OrderDiscount)
 class OrderDiscountAdminExtended(OrderDiscountAdmin):
     show_full_result_count = False
+
+
+admin.site.register(MarkOrdersStatusCompleteConfig)
