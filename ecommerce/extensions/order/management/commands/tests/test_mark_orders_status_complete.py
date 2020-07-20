@@ -72,10 +72,10 @@ class MarkOrdersStatusCompleteTests(TestCase):
         Verify that command raises the CommandError for invalid file path.
         """
         with self.assertRaises(CommandError):
-            call_command('create_refund_for_orders', '--order-numbers-file={}'.format("invalid/order_id/file/path"))
+            call_command('mark_orders_status_complete', '--order-numbers-file={}'.format("invalid/order_id/file/path"))
 
         with self.assertRaises(CommandError):
-            call_command('create_refund_for_orders')
+            call_command('mark_orders_status_complete')
 
     def test_sleep_time(self):
         """
