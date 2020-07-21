@@ -9,15 +9,12 @@ from django.core.management import CommandError, call_command
 from django.urls import reverse
 from faker import Factory as FakerFactory
 from oscar.core.loading import get_model
-from oscar.test import factories
 from rest_framework import status
 from testfixtures import LogCapture
 
 from ecommerce.coupons.tests.mixins import DiscoveryMockMixin
 from ecommerce.courses.tests.factories import CourseFactory
-from ecommerce.entitlements.utils import create_or_update_course_entitlement
 from ecommerce.extensions.refund.status import REFUND, REFUND_LINE
-from ecommerce.extensions.test.factories import create_order
 from ecommerce.tests.testcases import TestCase
 
 Order = get_model('order', 'Order')
@@ -147,31 +144,23 @@ class CreateRefundForOrdersTests(DiscoveryMockMixin, TestCase):
         Test that refund is generated for manual enrollment orders only if having some duplicate enrollments.
         """
 
-        orders = self.create_manual_order()
+        self.create_manual_order()  # will create 2 orders
+        self.assertEqual(Order.objects.count(), 2)
+
+        # now assume someone added 1 more seat type in the existing course.
+        self.course.create_or_update_seat("credit", False, 0)
+
+        # ideally calling manual api with same data should not create new orders, but as there is a bug in the
+        # manual API, duplicate orders will be introduced.
+        # TODO: remove this test along with fixing the API.
+        duplicate_orders = self.create_manual_order()
+        self.assertEqual(Order.objects.count(), 4)
+
+        # now try to refund duplicate records
         filename = 'orders_file.txt'
-        self.create_orders_file(orders, filename)
+        self.create_orders_file(duplicate_orders, filename)
 
-        # create duplicate order having course_entitlement product
-        order_with_duplicate = orders[0]
-        order_without_duplicate = orders[1]
-
-        course_uuid = FAKER.uuid4()  # pylint: disable=no-member
-        order = Order.objects.get(number=order_with_duplicate['detail'])
-        course_entitlement = create_or_update_course_entitlement(
-            'verified', 100, order.partner, course_uuid, 'Course Entitlement'
-        )
-        basket = factories.BasketFactory(owner=order.user, site=order.site)
-        basket.add_product(course_entitlement, 1)
-        create_order(basket=basket, user=order.user)
-        self.mock_access_token_response()
-        self.mock_course_run_detail_endpoint(
-            self.course,
-            discovery_api_url=order.site.siteconfiguration.discovery_api_url,
-            course_run_info={
-                'course_uuid': course_uuid
-            }
-        )
-
+        duplicate_orders = [order['detail'] for order in duplicate_orders]
         self.assertFalse(Refund.objects.exists())
         with LogCapture(LOGGER_NAME) as log_capture:
             params = ['create_refund_for_orders', '--order-numbers-file={}'.format(filename), '--refund-duplicate-only',
@@ -183,21 +172,21 @@ class CreateRefundForOrdersTests(DiscoveryMockMixin, TestCase):
                 (LOGGER_NAME, 'INFO', 'Sleeping for 0.5 second/seconds'),
             )
             log_capture.check_present(
+                (LOGGER_NAME, 'INFO', '[Ecommerce Order Refund] Success Orders: {}'.format(duplicate_orders)),
+            )
+            log_capture.check_present(
                 (
                     LOGGER_NAME,
-                    'ERROR',
-                    '[Ecommerce Order Refund]: Completed refund generation. 0 of 2 failed and 1 skipped.\n'
-                    'Failed orders: \n'
-                    'Skipped orders: {}\n'.format(order_without_duplicate['detail']),
-                ),
+                    'INFO',
+                    '[Ecommerce Order Refund] Generated refunds for the batch of 2 orders.'
+                )
             )
         if commit:
-            self.assertEqual(Refund.objects.count(), 1)
-
-            refund = Refund.objects.get(order=order)
-            self.assert_refund_matches_order(refund, order)
-            order = Order.objects.get(number=order_without_duplicate['detail'])
-            self.assertFalse(order.refunds.exists())
+            self.assertEqual(Refund.objects.count(), 2)
+            for order_detail in duplicate_orders:
+                order = Order.objects.get(number=order_detail)
+                refund = Refund.objects.get(order=order)
+                self.assert_refund_matches_order(refund, order)
         else:
             self.assertEqual(Refund.objects.count(), 0)
 

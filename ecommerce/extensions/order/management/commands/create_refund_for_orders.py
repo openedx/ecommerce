@@ -17,7 +17,7 @@ from oscar.core.loading import get_model
 from requests import Timeout
 from slumber.exceptions import HttpServerError, SlumberBaseException
 
-from ecommerce.courses.utils import get_course_info_from_catalog
+from ecommerce.extensions.fulfillment.status import LINE
 
 logger = logging.getLogger(__name__)
 
@@ -54,7 +54,7 @@ class Command(BaseCommand):
             action='store_true',
             dest='refund_duplicate_only',
             default=False,
-            help='Refund duplicate orders bought by the user via course entitlement form.',
+            help='Refund duplicate orders bought by the user with multiple enrollment mode (except audit).',
         )
         parser.add_argument(
             '--no-commit',
@@ -82,12 +82,13 @@ class Command(BaseCommand):
             raise CommandError(
                 'Pass the correct absolute path to order numbers file as --order-numbers-file argument.'
             )
-        total_orders, failed_orders, skipped_orders = self._create_refunds_from_file(
+        total_orders, failed_orders, skipped_orders, success_orders = self._create_refunds_from_file(
             order_numbers_file,
             remove_duplicate_only,
             should_commit,
             sleep_time,
         )
+        logger.info(u'[Ecommerce Order Refund] Success Orders: %s', success_orders)
         if failed_orders or skipped_orders:
             logger.error(
                 u'[Ecommerce Order Refund]: Completed refund generation. %d of %d failed and %d skipped.\n'
@@ -102,20 +103,24 @@ class Command(BaseCommand):
         else:
             logger.info(u'[Ecommerce Order Refund] Generated refunds for the batch of %d orders.', total_orders)
 
-    def _already_enrolled_in_course_entitlement(self, seat_product, user, site):
+    def _already_enrolled_in_another_seat_of_same_course(self, product_seat, user):
         """
-        Check if the user is enrolled in course entitlement for given seat product.
+        Check if the user was also enrolled in a another seat of the same course (having different course_mode).
         :return: True if enrolled
         """
-        course_uuid = get_course_info_from_catalog(site, seat_product)['course_uuid']
-        user_bought_product_ids = OrderLine.objects.filter(
-            order__in=user.orders.all()
-        ).values_list('product', flat=True)
-        return Product.objects.filter(
-            pk__in=user_bought_product_ids,
-            attributes__code='UUID',
-            attribute_values__value_text=course_uuid,
-        ).exists()
+        course = product_seat.course
+
+        seat_products = course.seat_products.filter(
+            attributes__name='certificate_type'
+        ).exclude(
+            attribute_values__value_text='audit'
+        ).exclude(
+            pk=product_seat.pk   # removing current manual order product seat
+        )
+
+        # check if an order already exists
+        order_line = OrderLine.objects.filter(product__in=seat_products, order__user=user, status=LINE.COMPLETE)
+        return order_line.exists()
 
     def _create_refunds_from_file(self, order_numbers_file, refund_duplicate_only, should_commit, sleep_time):
         """
@@ -130,6 +135,7 @@ class Command(BaseCommand):
         """
         failed_orders = []
         skipped_orders = []
+        success_orders = []
 
         with open(order_numbers_file, 'r') as file_handler:
             order_numbers = file_handler.readlines()
@@ -142,13 +148,15 @@ class Command(BaseCommand):
 
                     if refund_duplicate_only:
                         seat_product = order.lines.first().product
-                        if not self._already_enrolled_in_course_entitlement(seat_product, order.user, order.site):
+                        if not self._already_enrolled_in_another_seat_of_same_course(seat_product, order.user):
                             skipped_orders.append(order_number)
                             continue
+
                     if should_commit:
                         refund = Refund.create_with_lines(order, list(order.lines.all()))
                         if refund is None:
                             raise RefundError
+                    success_orders.append(order_number)
                 except (Order.DoesNotExist, RefundError, IntegrityError, SlumberBaseException, ConnectionError,
                         Timeout, HttpServerError) as e:
                     failed_orders.append(order_number)
@@ -159,4 +167,4 @@ class Command(BaseCommand):
                 if sleep_time:
                     logger.info(u'Sleeping for %s second/seconds', sleep_time)
                     time.sleep(sleep_time)
-        return total_orders, failed_orders, skipped_orders
+        return total_orders, failed_orders, skipped_orders, success_orders
