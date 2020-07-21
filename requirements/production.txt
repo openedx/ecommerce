@@ -20,7 +20,7 @@ cffi==1.14.0              # via cryptography
 chardet==3.0.4            # via requests
 coreapi==2.3.3            # via -r requirements/base.in, django-rest-swagger, openapi-codec
 coreschema==0.0.4         # via coreapi
-cryptography==2.9.2       # via pyjwt, pyopenssl
+cryptography==3.0         # via pyjwt, pyopenssl
 cssselect==1.1.0          # via premailer
 cssutils==1.0.2           # via premailer
 defusedxml==0.6.0         # via python3-openid, social-auth-core, zeep
