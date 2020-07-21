@@ -23,7 +23,7 @@ chardet==3.0.4            # via -r requirements/base.txt, -r requirements/e2e.tx
 coreapi==2.3.3            # via -r requirements/base.txt, django-rest-swagger, openapi-codec
 coreschema==0.0.4         # via -r requirements/base.txt, coreapi
 coverage==5.2             # via -r requirements/test.in, pytest-cov
-cryptography==2.9.2       # via -r requirements/base.txt, pyjwt, pyopenssl
+cryptography==3.0         # via -r requirements/base.txt, pyjwt, pyopenssl
 cssselect==1.1.0          # via -r requirements/base.txt, premailer
 cssutils==1.0.2           # via -r requirements/base.txt, premailer
 ddt==1.4.1                # via -r requirements/test.in
