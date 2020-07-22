@@ -65,7 +65,7 @@ class CouponCodeSerializerTests(CouponMixin, TestCase):
             learner_email=self.offer_assignment.user_email,
             code=self.offer_assignment.code,
             redemptions_remaining=mock.ANY,
-            code_expiration_date=expected_expiration_date.strftime('%d %B, %Y')
+            code_expiration_date=expected_expiration_date.strftime('%d %B, %Y %H:%M %Z')
         )
 
     @mock.patch('ecommerce.extensions.api.serializers.send_assigned_offer_reminder_email')
@@ -87,7 +87,7 @@ class CouponCodeSerializerTests(CouponMixin, TestCase):
             code=self.offer_assignment.code,
             redeemed_offer_count=mock.ANY,
             total_offer_count=mock.ANY,
-            code_expiration_date=expected_expiration_date.strftime('%d %B, %Y')
+            code_expiration_date=expected_expiration_date.strftime('%d %B, %Y %H:%M %Z')
         )
 
     @mock.patch('ecommerce.extensions.api.serializers.send_assigned_offer_email')
