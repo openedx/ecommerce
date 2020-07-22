@@ -1483,7 +1483,7 @@ class CouponCodeAssignmentSerializer(serializers.Serializer):  # pylint: disable
                 learner_email=assigned_offer.user_email,
                 code=assigned_offer.code,
                 redemptions_remaining=redemptions_remaining,
-                code_expiration_date=code_expiration_date.strftime('%d %B, %Y')
+                code_expiration_date=code_expiration_date.strftime('%d %B, %Y %H:%M %Z')
             )
         except Exception as exc:  # pylint: disable=broad-except
             logger.exception(
@@ -1720,7 +1720,7 @@ class CouponCodeRemindSerializer(CouponCodeMixin, serializers.Serializer):  # py
                 code=assigned_offer.code,
                 redeemed_offer_count=redeemed_offer_count,
                 total_offer_count=total_offer_count,
-                code_expiration_date=code_expiration_date.strftime('%d %B, %Y')
+                code_expiration_date=code_expiration_date.strftime('%d %B, %Y %H:%M %Z')
             )
         except Exception as exc:  # pylint: disable=broad-except
             # Log the exception here to help diagnose any template issues, then raise it for backwards compatibility
