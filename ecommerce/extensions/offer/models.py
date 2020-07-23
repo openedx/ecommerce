@@ -597,6 +597,7 @@ class OfferAssignmentEmailTemplates(TimeStampedModel):
     email_type = models.CharField(max_length=32, choices=EMAIL_TEMPLATE_TYPES)
     email_greeting = models.TextField(blank=True, null=True)
     email_closing = models.TextField(blank=True, null=True)
+    email_subject = models.TextField(blank=True, null=True)
     active = models.BooleanField(
         help_text=_('Make a particular template version active.'),
         default=True,
