@@ -38,6 +38,7 @@ from ecommerce.extensions.offer.constants import (
     OFFER_ASSIGNED,
     OFFER_ASSIGNMENT_EMAIL_BOUNCED,
     OFFER_ASSIGNMENT_EMAIL_PENDING,
+    OFFER_ASSIGNMENT_EMAIL_SUBJECT_LIMIT,
     OFFER_ASSIGNMENT_EMAIL_TEMPLATE_FIELD_LIMIT,
     OFFER_ASSIGNMENT_REVOKED,
     OFFER_MAX_USES_DEFAULT,
@@ -920,17 +921,26 @@ class OfferAssignmentEmailTemplatesSerializer(serializers.ModelSerializer):
             )
         return value
 
+    def validate_email_subject(self, value):
+        if len(value) > OFFER_ASSIGNMENT_EMAIL_SUBJECT_LIMIT:
+            raise serializers.ValidationError(
+                'Email subject must be {} characters or less'.format(OFFER_ASSIGNMENT_EMAIL_SUBJECT_LIMIT)
+            )
+        return value
+
     def create(self, validated_data):
         enterprise_customer = self.context['view'].kwargs.get('enterprise_customer')
         email_type = validated_data['email_type']
         email_greeting = bleach.clean(validated_data.get('email_greeting', ''))
         email_closing = bleach.clean(validated_data.get('email_closing', ''))
+        email_subject = bleach.clean(validated_data.get('email_subject', ''))
 
         create_data = dict(
             enterprise_customer=enterprise_customer,
             email_type=email_type,
             email_greeting=email_greeting,
             email_closing=email_closing,
+            email_subject=email_subject,
         )
 
         if 'name' in validated_data:

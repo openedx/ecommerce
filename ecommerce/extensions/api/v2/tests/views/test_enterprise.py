@@ -42,6 +42,7 @@ from ecommerce.enterprise.tests.mixins import EnterpriseServiceMockMixin
 from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
 from ecommerce.extensions.offer.constants import (
     OFFER_ASSIGNMENT_EMAIL_BOUNCED,
+    OFFER_ASSIGNMENT_EMAIL_SUBJECT_LIMIT,
     OFFER_ASSIGNMENT_EMAIL_TEMPLATE_FIELD_LIMIT,
     OFFER_ASSIGNMENT_REVOKED,
     VOUCHER_NOT_ASSIGNED,
@@ -2949,7 +2950,7 @@ class OfferAssignmentEmailTemplatesViewSetTests(JwtMixin, TestCase):
         )
 
     def create_template_data(
-            self, email_type, name, greeting=None, closing=None, status_code=None, method='POST', url=None
+            self, email_type, name, greeting=None, closing=None, subject=None, status_code=None, method='POST', url=None
     ):
         status_code = status_code or status.HTTP_201_CREATED
         api_endpoint = url or self.url
@@ -2959,6 +2960,8 @@ class OfferAssignmentEmailTemplatesViewSetTests(JwtMixin, TestCase):
             data['email_greeting'] = greeting
         if closing:
             data['email_closing'] = closing
+        if subject:
+            data['email_subject'] = subject
 
         if method == 'POST':
             response = self.client.post(api_endpoint, json.dumps(data), 'application/json')
@@ -2974,18 +2977,22 @@ class OfferAssignmentEmailTemplatesViewSetTests(JwtMixin, TestCase):
         names = ['Template 1', 'Template 2', 'Template 3', 'Template 4', 'Template 5', 'Template 6']
         greetings = ['GREETING 1', 'GREETING 2', 'GREETING 3', 'GREETING 4', 'GREETING 5', 'GREETING 6']
         closings = ['CLOSING 1', 'CLOSING 2', 'CLOSING 3', 'CLOSING 4', 'CLOSING 5', 'CLOSING 6']
+        subjects = ['SUBJECT 1', 'SUBJECT 2', 'SUBJECT 3', 'SUBJECT 4', 'SUBJECT 5', 'SUBJECT 6']
 
         # create multiple templates of each email type for an enterprise
-        for email_type, template_name, email_greeting, email_closing in zip(types, names, greetings, closings):
-            self.create_template_data(email_type, template_name, email_greeting, email_closing)
+        for email_type, template_name, email_greeting, email_closing, email_subject in zip(
+                types, names, greetings, closings, subjects
+        ):
+            self.create_template_data(email_type, template_name, email_greeting, email_closing, email_subject)
 
-    def verify_template_data(self, template, email_type, email_greeting, email_closing, active, name):
+    def verify_template_data(self, template, email_type, email_greeting, email_closing, email_subject, active, name):
         assert template['enterprise_customer'] == self.enterprise
         assert template['email_type'] == email_type
         assert template['name'] == name
         assert template['email_body'] == settings.OFFER_ASSIGNMEN_EMAIL_TEMPLATE_BODY_MAP[email_type]
         assert template['email_greeting'] == email_greeting
         assert template['email_closing'] == email_closing
+        assert template['email_subject'] == email_subject
         assert template['active'] == active
 
     def test_return_all_templates_for_enterprise(self):
@@ -2998,6 +3005,7 @@ class OfferAssignmentEmailTemplatesViewSetTests(JwtMixin, TestCase):
                 'name': 'Template 2',
                 'email_greeting': 'GREETING 2',
                 'email_closing': 'CLOSING 2',
+                'email_subject': 'SUBJECT 2',
                 'active': True
             },
             {
@@ -3005,6 +3013,7 @@ class OfferAssignmentEmailTemplatesViewSetTests(JwtMixin, TestCase):
                 'name': 'Template 4',
                 'email_greeting': 'GREETING 4',
                 'email_closing': 'CLOSING 4',
+                'email_subject': 'SUBJECT 4',
                 'active': True
             },
             {
@@ -3012,6 +3021,7 @@ class OfferAssignmentEmailTemplatesViewSetTests(JwtMixin, TestCase):
                 'name': 'Template 6',
                 'email_greeting': 'GREETING 6',
                 'email_closing': 'CLOSING 6',
+                'email_subject': 'SUBJECT 6',
                 'active': True
             },
             {
@@ -3019,6 +3029,7 @@ class OfferAssignmentEmailTemplatesViewSetTests(JwtMixin, TestCase):
                 'name': 'Template 1',
                 'email_greeting': 'GREETING 1',
                 'email_closing': 'CLOSING 1',
+                'email_subject': 'SUBJECT 1',
                 'active': False
             },
             {
@@ -3026,6 +3037,7 @@ class OfferAssignmentEmailTemplatesViewSetTests(JwtMixin, TestCase):
                 'name': 'Template 3',
                 'email_greeting': 'GREETING 3',
                 'email_closing': 'CLOSING 3',
+                'email_subject': 'SUBJECT 3',
                 'active': False
             },
             {
@@ -3033,6 +3045,7 @@ class OfferAssignmentEmailTemplatesViewSetTests(JwtMixin, TestCase):
                 'name': 'Template 5',
                 'email_greeting': 'GREETING 5',
                 'email_closing': 'CLOSING 5',
+                'email_subject': 'SUBJECT 5',
                 'active': False
             },
         ]
@@ -3052,6 +3065,7 @@ class OfferAssignmentEmailTemplatesViewSetTests(JwtMixin, TestCase):
                 expected_template['email_type'],
                 expected_template['email_greeting'],
                 expected_template['email_closing'],
+                expected_template['email_subject'],
                 expected_template['active'],
                 expected_template['name'],
             )
@@ -3063,6 +3077,7 @@ class OfferAssignmentEmailTemplatesViewSetTests(JwtMixin, TestCase):
                 'name': 'Template 2',
                 'email_greeting': 'GREETING 2',
                 'email_closing': 'CLOSING 2',
+                'email_subject': 'SUBJECT 2',
                 'active': True
             },
             {
@@ -3070,6 +3085,7 @@ class OfferAssignmentEmailTemplatesViewSetTests(JwtMixin, TestCase):
                 'name': 'Template 1',
                 'email_greeting': 'GREETING 1',
                 'email_closing': 'CLOSING 1',
+                'email_subject': 'SUBJECT 1',
                 'active': False
             },
         ],
@@ -3079,6 +3095,7 @@ class OfferAssignmentEmailTemplatesViewSetTests(JwtMixin, TestCase):
                 'name': 'Template 4',
                 'email_greeting': 'GREETING 4',
                 'email_closing': 'CLOSING 4',
+                'email_subject': 'SUBJECT 4',
                 'active': True
             },
             {
@@ -3086,6 +3103,7 @@ class OfferAssignmentEmailTemplatesViewSetTests(JwtMixin, TestCase):
                 'name': 'Template 3',
                 'email_greeting': 'GREETING 3',
                 'email_closing': 'CLOSING 3',
+                'email_subject': 'SUBJECT 3',
                 'active': False
             },
         ],
@@ -3095,6 +3113,7 @@ class OfferAssignmentEmailTemplatesViewSetTests(JwtMixin, TestCase):
                 'name': 'Template 6',
                 'email_greeting': 'GREETING 6',
                 'email_closing': 'CLOSING 6',
+                'email_subject': 'SUBJECT 6',
                 'active': True
             },
             {
@@ -3102,6 +3121,7 @@ class OfferAssignmentEmailTemplatesViewSetTests(JwtMixin, TestCase):
                 'name': 'Template 5',
                 'email_greeting': 'GREETING 5',
                 'email_closing': 'CLOSING 5',
+                'email_subject': 'SUBJECT 5',
                 'active': False
             },
         ],
@@ -3124,6 +3144,7 @@ class OfferAssignmentEmailTemplatesViewSetTests(JwtMixin, TestCase):
                 expected_template['email_type'],
                 expected_template['email_greeting'],
                 expected_template['email_closing'],
+                expected_template['email_subject'],
                 expected_template['active'],
                 expected_template['name'],
             )
@@ -3134,23 +3155,27 @@ class OfferAssignmentEmailTemplatesViewSetTests(JwtMixin, TestCase):
             'expected_template_name': 'Template 2',
             'expected_email_greeting': 'GREETING 2',
             'expected_email_closing': 'CLOSING 2',
+            'expected_email_subject': 'SUBJECT 2',
         },
         {
             'email_type': 'remind',
             'expected_template_name': 'Template 4',
             'expected_email_greeting': 'GREETING 4',
             'expected_email_closing': 'CLOSING 4',
+            'expected_email_subject': 'SUBJECT 4',
         },
         {
             'email_type': 'revoke',
             'expected_template_name': 'Template 6',
             'expected_email_greeting': 'GREETING 6',
             'expected_email_closing': 'CLOSING 6',
+            'expected_email_subject': 'SUBJECT 6',
         },
     )
     @ddt.unpack
     def test_return_active_template_for_enterprise(
-            self, email_type, expected_template_name, expected_email_greeting, expected_email_closing
+            self, email_type, expected_template_name, expected_email_greeting, expected_email_closing,
+            expected_email_subject
     ):
         """
         Verify that view returns only a single active template for an enterprise for a specific email type.
@@ -3163,7 +3188,8 @@ class OfferAssignmentEmailTemplatesViewSetTests(JwtMixin, TestCase):
         templates = response.json()['results']
         assert len(templates) == 1
         self.verify_template_data(
-            templates[0], email_type, expected_email_greeting, expected_email_closing, True, expected_template_name
+            templates[0], email_type, expected_email_greeting, expected_email_closing, expected_email_subject,
+            True, expected_template_name
         )
 
     def test_retrieve_template_for_enterprise(self):
@@ -3174,14 +3200,17 @@ class OfferAssignmentEmailTemplatesViewSetTests(JwtMixin, TestCase):
         name = 'My Template'
         email_greeting = 'greeting'
         email_closing = 'closing'
+        email_subject = 'subject'
 
-        created_template = self.create_template_data(email_type, name, email_greeting, email_closing)
+        created_template = self.create_template_data(email_type, name, email_greeting, email_closing, email_subject)
 
         response = self.client.get('{}{}/'.format(self.url, created_template['id']))
         assert response.status_code == status.HTTP_200_OK
 
         received_template = response.json()
-        self.verify_template_data(received_template, email_type, email_greeting, email_closing, True, name)
+        self.verify_template_data(
+            received_template, email_type, email_greeting, email_closing, email_subject, True, name
+        )
 
     @ddt.data(
         ('assign', 'A'),
@@ -3199,9 +3228,14 @@ class OfferAssignmentEmailTemplatesViewSetTests(JwtMixin, TestCase):
         for __ in range(2):
             email_greeting = 'GREETING {}'.format(uuid4().hex.upper()[0:6])
             email_closing = 'CLOSING {}'.format(uuid4().hex.upper()[0:6])
+            email_subject = 'SUBJECT {}'.format(uuid4().hex.upper()[0:6])
 
-            template = self.create_template_data(email_type, template_name, email_greeting, email_closing)
-            self.verify_template_data(template, email_type, email_greeting, email_closing, True, template_name)
+            template = self.create_template_data(
+                email_type, template_name, email_greeting, email_closing, email_subject
+            )
+            self.verify_template_data(
+                template, email_type, email_greeting, email_closing, email_subject, True, template_name
+            )
 
             templates.append(template)
 
@@ -3216,10 +3250,12 @@ class OfferAssignmentEmailTemplatesViewSetTests(JwtMixin, TestCase):
         template_name = 'E Learning'
         email_greeting = '<script>document.getElementById("greeting").innerHTML = "GREETING!";</script>'
         email_closing = '<script>document.getElementById("closing").innerHTML = "CLOSING!";</script>'
+        email_subject = '<script>document.getElementById("closing").innerHTML = "SUBJECT!";</script>'
 
-        template = self.create_template_data(email_type, template_name, email_greeting, email_closing)
+        template = self.create_template_data(email_type, template_name, email_greeting, email_closing, email_subject)
         assert template['email_greeting'] == bleach.clean(email_greeting)
         assert template['email_closing'] == bleach.clean(email_closing)
+        assert template['email_subject'] == bleach.clean(email_subject)
 
     @ddt.data('assign', 'remind', 'revoke')
     def test_post_with_empty_template_values(self, email_type):
@@ -3229,9 +3265,12 @@ class OfferAssignmentEmailTemplatesViewSetTests(JwtMixin, TestCase):
         template_name = 'E Learning'
         email_greeting = ''
         email_closing = ''
+        email_subject = ''
 
-        template = self.create_template_data(email_type, template_name, email_greeting, email_closing)
-        self.verify_template_data(template, email_type, email_greeting, email_closing, True, template_name)
+        template = self.create_template_data(email_type, template_name, email_greeting, email_closing, email_subject)
+        self.verify_template_data(
+            template, email_type, email_greeting, email_closing, email_subject, True, template_name
+        )
 
     @ddt.data('assign', 'remind', 'revoke')
     def test_post_with_optional_fields(self, email_type):
@@ -3239,8 +3278,8 @@ class OfferAssignmentEmailTemplatesViewSetTests(JwtMixin, TestCase):
         Verify that view correctly performs HTTP POST with optional fields.
         """
         template_name = 'E Learning'
-        template = self.create_template_data(email_type, template_name, None, None)
-        self.verify_template_data(template, email_type, '', '', True, template_name)
+        template = self.create_template_data(email_type, template_name, None, None, None)
+        self.verify_template_data(template, email_type, '', '', '', True, template_name)
 
     @ddt.data('assign', 'remind', 'revoke')
     def test_post_with_max_length_field_validation(self, email_type):
@@ -3251,9 +3290,10 @@ class OfferAssignmentEmailTemplatesViewSetTests(JwtMixin, TestCase):
         max_limit = OFFER_ASSIGNMENT_EMAIL_TEMPLATE_FIELD_LIMIT
         email_greeting = 'G' * (max_limit + 1)
         email_closing = 'C' * (max_limit + 1)
+        email_subject = 'C' * (OFFER_ASSIGNMENT_EMAIL_SUBJECT_LIMIT + 1)
 
         response = self.create_template_data(
-            email_type, template_name, email_greeting, email_closing, status.HTTP_400_BAD_REQUEST
+            email_type, template_name, email_greeting, email_closing, email_subject, status.HTTP_400_BAD_REQUEST
         )
         assert response == {
             'email_greeting': [
@@ -3261,6 +3301,9 @@ class OfferAssignmentEmailTemplatesViewSetTests(JwtMixin, TestCase):
             ],
             'email_closing': [
                 'Email closing must be {} characters or less'.format(max_limit)
+            ],
+            'email_subject': [
+                'Email subject must be {} characters or less'.format(OFFER_ASSIGNMENT_EMAIL_SUBJECT_LIMIT)
             ]
         }
 
@@ -3269,8 +3312,8 @@ class OfferAssignmentEmailTemplatesViewSetTests(JwtMixin, TestCase):
         """
         Verify that view correctly performs HTTP DELETE.
         """
-        create_response = self.create_template_data(email_type, 'A NAME', 'A GREETING', 'A CLOSING')
-        self.verify_template_data(create_response, email_type, 'A GREETING', 'A CLOSING', True, 'A NAME')
+        create_response = self.create_template_data(email_type, 'A NAME', 'A GREETING', 'A CLOSING', 'A SUBJECT')
+        self.verify_template_data(create_response, email_type, 'A GREETING', 'A CLOSING', 'A SUBJECT', True, 'A NAME')
 
         api_delete_url = '{}{}/'.format(self.url, create_response['id'])
         delete_response = self.client.delete(api_delete_url)
@@ -3284,24 +3327,30 @@ class OfferAssignmentEmailTemplatesViewSetTests(JwtMixin, TestCase):
         """
         Verify that view correctly performs HTTP PUT.
         """
-        post_response = self.create_template_data(email_type, 'Great template', 'GREETING 100', 'CLOSING 100')
+        post_response = self.create_template_data(
+            email_type, 'Great template', 'GREETING 100', 'CLOSING 100', 'SUBJECT 100'
+        )
 
         # prepare http put url and data
         api_put_url = '{}{}/'.format(self.url, post_response['id'])
         updated_name = 'Awesome Template'
         updated_greeting = 'I AM A GREETING'
         updated_closing = 'I AM A CLOSING'
+        updated_subject = 'I AM A SUBJECT'
 
         put_response = self.create_template_data(
             email_type,
             updated_name,
             greeting=updated_greeting,
             closing=updated_closing,
+            subject=updated_subject,
             method='PUT',
             url=api_put_url,
             status_code=status.HTTP_200_OK,
         )
-        self.verify_template_data(put_response, email_type, updated_greeting, updated_closing, True, updated_name)
+        self.verify_template_data(
+            put_response, email_type, updated_greeting, updated_closing, updated_subject, True, updated_name
+        )
 
     def test_post_required_fields(self):
         """
@@ -3320,12 +3369,15 @@ class OfferAssignmentEmailTemplatesViewSetTests(JwtMixin, TestCase):
         Verify that view correct error is raised if required fields are missing for HTTP PUT.
         """
         email_type = 'assign'
-        post_response = self.create_template_data(email_type, 'Great template', 'GREETING 100', 'CLOSING 100')
+        post_response = self.create_template_data(
+            email_type, 'Great template', 'GREETING 100', 'CLOSING 100', 'SUBJECT 100'
+        )
 
         api_put_url = '{}{}/'.format(self.url, post_response['id'])
         data = {
             'greeting': 'I AM GREETING',
-            'closing': 'I AM CLOSING'
+            'closing': 'I AM CLOSING',
+            'subject': 'I AM SUBJECT',
         }
         response = self.client.put(api_put_url, json.dumps(data), 'application/json')
         assert response.status_code == status.HTTP_400_BAD_REQUEST
