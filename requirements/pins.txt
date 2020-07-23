@@ -8,9 +8,6 @@
 # pin when possible.  Writing an issue against the offending project and
 # linking to it here is good.
 
-# Newer version introduces `No installed app with label 'communication'.`
-django-oscar<2.1
-
 # Because of django incompatibility
 edx-rest-api-client<2.0.0
 

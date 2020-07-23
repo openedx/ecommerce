@@ -3,6 +3,10 @@
 from django.conf import settings
 from django.core.mail import EmailMessage, EmailMultiAlternatives
 from oscar.apps.customer.utils import *  # pylint: disable=wildcard-import, unused-wildcard-import
+from oscar.core.loading import get_model
+
+Email = get_model('communication', 'Email')
+CommunicationEvent = get_model('order', 'CommunicationEvent')
 
 
 # pylint: disable=abstract-method, function-redefined
