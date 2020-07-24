@@ -2,9 +2,6 @@
 
 from django.db import migrations
 from oscar.apps.catalogue.categories import create_from_breadcrumbs
-from oscar.core.loading import get_model
-
-Category = get_model('catalogue', 'Category')
 
 COUPON_CATEGORY_NAME = 'Coupons'
 
@@ -14,6 +11,8 @@ NEW_CATEGORIES = [
 
 def create_new_categories(apps, schema_editor):
     """ Create new coupon categories """
+    Category = apps.get_model("catalogue", "Category")
+
     Category.skip_history_when_saving = True
     for category in NEW_CATEGORIES:
         create_from_breadcrumbs('{} > {}'.format(COUPON_CATEGORY_NAME, category))
@@ -21,6 +20,8 @@ def create_new_categories(apps, schema_editor):
 
 def remove_new_categories(apps, schema_editor):
     """ Remove new coupon categories """
+    Category = apps.get_model("catalogue", "Category")
+
     Category.skip_history_when_saving = True
     Category.objects.get(name=COUPON_CATEGORY_NAME).get_children().filter(
         name__in=NEW_CATEGORIES
