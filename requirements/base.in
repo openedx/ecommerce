@@ -3,6 +3,7 @@
 analytics-python
 bleach
 coreapi
+cybersource-rest-client-python
 django<3.0
 django-compressor
 django-cors-headers                 #  Used to allow to configure CORS headers for cross-domain requests

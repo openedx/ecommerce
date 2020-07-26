@@ -9,6 +9,7 @@ import uuid
 from decimal import Decimal
 
 import six
+from CyberSource import GeneratePublicKeyRequest, KeyGenerationApi
 from django.conf import settings
 from django.urls import reverse
 from oscar.apps.payment.exceptions import GatewayError, TransactionDeclined, UserCancelled
@@ -108,6 +109,37 @@ class Cybersource(ApplePayMixin, BaseClientSidePaymentProcessor):
     @property
     def client_side_payment_url(self):
         return self.sop_payment_page_url
+    
+    def get_capture_context(self):
+        # To delete None values in Input Request Json body
+        def del_none(d):
+            for key, value in list(d.items()):
+                if value is None:
+                    del d[key]
+                elif isinstance(value, dict):
+                    del_none(value)
+            return d
+
+        requestObj = GeneratePublicKeyRequest(
+            encryption_type='RsaOaep256',
+            target_origin='http://localhost:1998',
+        )
+        requestObj = del_none(requestObj.__dict__)
+        requestObj = json.dumps(requestObj)
+        try:
+            api_instance = KeyGenerationApi({
+                'authentication_type': 'http_signature',
+                'run_environment': 'cybersource.environment.SANDBOX',
+                #'merchantid': self.configuration['merchant_id'],
+                'merchantid': 'testrest',
+                'merchant_keyid': '08c94330-f618-42a3-b09d-e1e43be5efda',
+                'merchant_secretkey': 'yBJxy6LjM2TmcPGu+GaJrHtkke25fPpUX+UY6/L/1tE=',
+            })
+            return_data, status, body = api_instance.generate_public_key(requestObj, format='JWT')
+
+            return {'key_id': return_data.key_id}
+        except Exception:
+            logger.exception("Exception when calling KeyGenerationApi->generate_public_key")
 
     def get_transaction_parameters(self, basket, request=None, use_client_side_checkout=False, **kwargs):
         """
