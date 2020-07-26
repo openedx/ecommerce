@@ -768,7 +768,9 @@ ECOMMERCE_PAYMENT_PROCESSOR_CONFIG = {
             'sop_payment_page_url': 'https://testsecureacceptance.cybersource.com/silent/pay',
             'sop_profile_id': 'SET-ME-PLEASE',
             'sop_secret_key': 'SET-ME-PLEASE',
-            'transaction_key': 'SET-ME-PLEASE'
+            'transaction_key': 'SET-ME-PLEASE',
+            'flex_shared_secret_key_id': 'SET-ME-PLEASE',
+            'flex_shared_secret_key': 'SET-ME-PLEASE',
         },
         'paypal': {
             'cancel_checkout_path': '/checkout/cancel-checkout/',

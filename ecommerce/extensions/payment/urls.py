@@ -13,6 +13,7 @@ CYBERSOURCE_URLS = [
     url(r'^redirect/$', cybersource.CybersourceInterstitialView.as_view(), name='redirect'),
     url(r'^submit/$', cybersource.CybersourceSubmitView.as_view(), name='submit'),
     url(r'^api-submit/$', cybersource.CybersourceSubmitAPIView.as_view(), name='api_submit'),
+    url(r'^authorize/$', cybersource.CybersourceAuthorizeAPIView.as_view(), name='authorize'),
 ]
 
 PAYPAL_URLS = [

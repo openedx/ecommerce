@@ -669,6 +669,7 @@ class PaymentApiLogicMixin(BasketLogicMixin):
         self._add_total_summary(response, context)
         self._add_offers(response)
         self._add_coupons(response, context)
+        self._add_capture_context(response)
         return response
 
     def _add_products(self, response, lines_data):
@@ -724,6 +725,19 @@ class PaymentApiLogicMixin(BasketLogicMixin):
 
     def _add_messages(self, response):
         response['messages'] = message_utils.serialize(self.request)
+    
+    def _add_capture_context(self, response):
+        response['flex_microform_enabled'] = waffle.flag_is_active(self.request, 'payment.cybersource.flex_microform_enabled')
+        if not response['flex_microform_enabled']:
+            return
+        payment_processor_class = self.request.site.siteconfiguration.get_client_side_payment_processor_class()
+        if not payment_processor_class:
+            return
+        payment_processor = payment_processor_class(self.request.site)
+        if not hasattr(payment_processor, 'get_capture_context'):
+            return
+        response['capture_context'] = payment_processor.get_capture_context()
+        self.request.session['capture_context'] = response['capture_context']
 
     def _get_response_status(self, response):
         return message_utils.get_response_status(response['messages'])
