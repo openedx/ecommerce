@@ -170,6 +170,88 @@ class CybersourceSubmitAPIView(APIView, CybersourceSubmitView):
         return super(CybersourceSubmitAPIView, self).post(request)
 
 
+class CybersourceAuthorizeAPIView(APIView, BasePaymentSubmitView, CyberSourceProcessorMixin, EdxOrderPlacementMixin):
+    # DRF APIView wrapper which allows clients to use
+    # JWT authentication when making Cybersource submit
+    # requests.
+    permission_classes = (permissions.IsAuthenticated,)
+
+    def post(self, request):
+        logger.info(
+            '%s called for basket [%d]. It is in the [%s] state.',
+            self.__class__.__name__,
+            request.basket.id,
+            request.basket.status
+        )
+        return super(CybersourceAuthorizeAPIView, self).post(request)
+
+    def form_valid(self, form):
+        data = form.cleaned_data
+        basket = data['basket']
+        request = self.request
+        user = request.user
+
+        hit_count = checkSDN(
+            request,
+            data['first_name'] + ' ' + data['last_name'],
+            data['city'],
+            data['country'])
+
+        if hit_count > 0:
+            logger.info(
+                'SDNCheck function called for basket [%d]. It received %d hit(s).',
+                request.basket.id,
+                hit_count,
+            )
+            response_to_return = {
+                'error': 'There was an error submitting the basket',
+                'sdn_check_failure': {'hit_count': hit_count}}
+
+            return JsonResponse(response_to_return, status=403)
+
+        logger.info(
+            'SDNCheck function called for basket [%d]. It did not receive a hit.',
+            request.basket.id,
+        )
+
+        try:
+            handled_processor_response = self.payment_processor.authorize_payment(basket, request, data)
+        except GatewayError:
+            return JsonResponse({}, status=400)
+        except TransactionDeclined:
+            return JsonResponse({
+                'errors': [
+                    {'error_code': 'transaction-declined-message'}
+                ]
+            }, status=400)
+
+        billing_address = BillingAddress(
+            first_name=data['first_name'],
+            last_name=data['last_name'],
+            line1=data['address_line1'],
+            line2=data['address_line2'],
+            line4=data['city'],
+            postcode=data['postal_code'],
+            state=data['state'],
+            country=Country.objects.get(iso_3166_1_a2=data['country'])
+        )
+
+        with transaction.atomic():
+            basket.freeze()
+            self.record_payment(basket, handled_processor_response)
+            order = self.create_order(request, basket, billing_address)
+            self.handle_post_order(order)
+
+        receipt_page_url = get_receipt_page_url(
+            request.site.siteconfiguration,
+            order_number=basket.order_number,
+            disable_back_button=True,
+        )
+        return JsonResponse({
+            'receipt_page_url': receipt_page_url,
+        }, status=201)
+
+
 class CybersourceInterstitialView(CyberSourceProcessorMixin, EdxOrderPlacementMixin, View):
     """
     Interstitial view for Cybersource Payments.
