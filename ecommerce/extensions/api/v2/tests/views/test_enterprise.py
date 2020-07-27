@@ -66,6 +66,7 @@ VoucherApplication = get_model('voucher', 'VoucherApplication')
 
 ENTERPRISE_COUPONS_LINK = reverse('api:v2:enterprise-coupons-list')
 OFFER_ASSIGNMENT_SUMMARY_LINK = reverse('api:v2:enterprise-offer-assignment-summary-list')
+TEMPLATE_SUBJECT = 'Test Subject '
 TEMPLATE_GREETING = 'hello there '
 TEMPLATE_CLOSING = ' kind regards'
 
@@ -566,6 +567,7 @@ class EnterpriseCouponViewSetRbacTests(
                     'emails': emails,
                     'codes': [voucher.code],
                     'template': 'Test template',
+                    'template_subject': TEMPLATE_SUBJECT,
                     'template_greeting': TEMPLATE_GREETING,
                     'template_closing': TEMPLATE_CLOSING
                 }
@@ -627,6 +629,7 @@ class EnterpriseCouponViewSetRbacTests(
                 '/api/v2/enterprise/coupons/{}/assign/'.format(coupon_id),
                 {
                     'template': 'Test template',
+                    'template_subject': TEMPLATE_SUBJECT,
                     'template_greeting': TEMPLATE_GREETING,
                     'template_closing': TEMPLATE_CLOSING,
                     'emails': emails,
@@ -1789,6 +1792,7 @@ class EnterpriseCouponViewSetRbacTests(
                 '/api/v2/enterprise/coupons/{}/assign/'.format(coupon_id),
                 {
                     'template': 'Test template',
+                    'template_subject': TEMPLATE_SUBJECT,
                     'template_greeting': TEMPLATE_GREETING,
                     'template_closing': TEMPLATE_CLOSING,
                     'emails': emails
@@ -1828,6 +1832,7 @@ class EnterpriseCouponViewSetRbacTests(
                 '/api/v2/enterprise/coupons/{}/assign/'.format(coupon_id),
                 {
                     'template': 'Test template',
+                    'template_subject': TEMPLATE_SUBJECT,
                     'template_greeting': TEMPLATE_GREETING,
                     'template_closing': TEMPLATE_CLOSING,
                     'emails': emails,
@@ -1866,6 +1871,7 @@ class EnterpriseCouponViewSetRbacTests(
                 '/api/v2/enterprise/coupons/{}/assign/'.format(coupon_id),
                 {
                     'template': 'Test template',
+                    'template_subject': TEMPLATE_SUBJECT,
                     'template_greeting': TEMPLATE_GREETING,
                     'template_closing': TEMPLATE_CLOSING,
                     'emails': emails
@@ -1907,6 +1913,7 @@ class EnterpriseCouponViewSetRbacTests(
                 '/api/v2/enterprise/coupons/{}/assign/'.format(coupon_id),
                 {
                     'template': 'Test template',
+                    'template_subject': TEMPLATE_SUBJECT,
                     'template_greeting': TEMPLATE_GREETING,
                     'template_closing': TEMPLATE_CLOSING,
                     'emails': emails
@@ -1938,6 +1945,7 @@ class EnterpriseCouponViewSetRbacTests(
                 '/api/v2/enterprise/coupons/{}/assign/'.format(coupon_id),
                 {
                     'template': 'Test template',
+                    'template_subject': TEMPLATE_SUBJECT,
                     'template_greeting': TEMPLATE_GREETING,
                     'template_closing': TEMPLATE_CLOSING,
                     'emails': [email]
@@ -1966,6 +1974,7 @@ class EnterpriseCouponViewSetRbacTests(
                 '/api/v2/enterprise/coupons/{}/assign/'.format(coupon_id),
                 {
                     'template': 'Test template',
+                    'template_subject': TEMPLATE_SUBJECT,
                     'template_greeting': TEMPLATE_GREETING,
                     'template_closing': TEMPLATE_CLOSING,
                     'emails': [email]
@@ -1993,6 +2002,7 @@ class EnterpriseCouponViewSetRbacTests(
                 '/api/v2/enterprise/coupons/{}/assign/'.format(coupon_id),
                 {
                     'template': 'Test template',
+                    'template_subject': TEMPLATE_SUBJECT,
                     'template_greeting': TEMPLATE_GREETING,
                     'template_closing': TEMPLATE_CLOSING,
                     'emails': emails
@@ -2024,6 +2034,7 @@ class EnterpriseCouponViewSetRbacTests(
                 '/api/v2/enterprise/coupons/{}/assign/'.format(coupon_id),
                 {
                     'template': 'Test template',
+                    'template_subject': TEMPLATE_SUBJECT,
                     'template_greeting': TEMPLATE_GREETING,
                     'template_closing': TEMPLATE_CLOSING,
                     'emails': emails
@@ -2066,6 +2077,7 @@ class EnterpriseCouponViewSetRbacTests(
                 '/api/v2/enterprise/coupons/{}/assign/'.format(coupon_id),
                 {
                     'template': 'Test template',
+                    'template_subject': TEMPLATE_SUBJECT,
                     'template_greeting': TEMPLATE_GREETING,
                     'template_closing': TEMPLATE_CLOSING,
                     'emails': [email]
@@ -2108,6 +2120,7 @@ class EnterpriseCouponViewSetRbacTests(
                 '/api/v2/enterprise/coupons/{}/assign/'.format(coupon_id),
                 {
                     'template': 'Test template',
+                    'template_subject': TEMPLATE_SUBJECT,
                     'template_greeting': TEMPLATE_GREETING,
                     'template_closing': TEMPLATE_CLOSING,
                     'emails': [email]
@@ -2145,6 +2158,7 @@ class EnterpriseCouponViewSetRbacTests(
             '/api/v2/enterprise/coupons/{}/revoke/'.format(coupon_id),
             {
                 'template': 'Test template',
+                'template_subject': TEMPLATE_SUBJECT,
                 'template_greeting': TEMPLATE_GREETING,
                 'template_closing': TEMPLATE_CLOSING,
                 'assignments': {'email': email, 'code': 'RANDOMCODE'}
@@ -2167,6 +2181,7 @@ class EnterpriseCouponViewSetRbacTests(
             '/api/v2/enterprise/coupons/{}/revoke/'.format(coupon_id),
             {
                 'template': 'Test template',
+                'template_subject': TEMPLATE_SUBJECT,
                 'template_greeting': TEMPLATE_GREETING,
                 'template_closing': TEMPLATE_CLOSING,
                 'assignments': [{'email': email, 'code': 'RANDOMCODE'}]
@@ -2197,6 +2212,7 @@ class EnterpriseCouponViewSetRbacTests(
             '/api/v2/enterprise/coupons/{}/revoke/'.format(coupon_id),
             {
                 'template': 'Test template',
+                'template_subject': TEMPLATE_SUBJECT,
                 'template_greeting': TEMPLATE_GREETING,
                 'template_closing': TEMPLATE_CLOSING,
                 'assignments': [{'email': email, 'code': voucher.code}]
@@ -2226,6 +2242,7 @@ class EnterpriseCouponViewSetRbacTests(
                 '/api/v2/enterprise/coupons/{}/assign/'.format(coupon_id),
                 {
                     'template': 'Test template',
+                    'template_subject': TEMPLATE_SUBJECT,
                     'template_greeting': TEMPLATE_GREETING,
                     'template_closing': TEMPLATE_CLOSING,
                     'emails': [email]
@@ -2241,6 +2258,7 @@ class EnterpriseCouponViewSetRbacTests(
                 '/api/v2/enterprise/coupons/{}/revoke/'.format(coupon_id),
                 {
                     'template': 'Test template',
+                    'template_subject': TEMPLATE_SUBJECT,
                     'template_greeting': TEMPLATE_GREETING,
                     'template_closing': TEMPLATE_CLOSING,
                     'assignments': [{'email': email, 'code': offer_assignment.code}]
@@ -2267,6 +2285,7 @@ class EnterpriseCouponViewSetRbacTests(
                 '/api/v2/enterprise/coupons/{}/assign/'.format(coupon_id),
                 {
                     'template': 'Test template',
+                    'template_subject': TEMPLATE_SUBJECT,
                     'template_greeting': TEMPLATE_GREETING,
                     'template_closing': TEMPLATE_CLOSING,
                     'emails': emails
@@ -2280,6 +2299,7 @@ class EnterpriseCouponViewSetRbacTests(
                 '/api/v2/enterprise/coupons/{}/revoke/'.format(coupon_id),
                 {
                     'template': 'Test template',
+                    'template_subject': TEMPLATE_SUBJECT,
                     'template_greeting': TEMPLATE_GREETING,
                     'template_closing': TEMPLATE_CLOSING,
                     'assignments': [
@@ -2324,6 +2344,7 @@ class EnterpriseCouponViewSetRbacTests(
                 '/api/v2/enterprise/coupons/{}/assign/'.format(coupon_id),
                 {
                     'template': 'Test template',
+                    'template_subject': TEMPLATE_SUBJECT,
                     'template_greeting': TEMPLATE_GREETING,
                     'template_closing': TEMPLATE_CLOSING,
                     'emails': [email]
@@ -2357,6 +2378,7 @@ class EnterpriseCouponViewSetRbacTests(
             '/api/v2/enterprise/coupons/{}/remind/'.format(coupon_id),
             {
                 'template': 'Test template',
+                'template_subject': TEMPLATE_SUBJECT,
                 'template_greeting': TEMPLATE_GREETING,
                 'template_closing': TEMPLATE_CLOSING,
                 'assignments': [{'email': email, 'code': 'RANDOMCODE'}]
@@ -2386,6 +2408,7 @@ class EnterpriseCouponViewSetRbacTests(
             '/api/v2/enterprise/coupons/{}/remind/'.format(coupon_id),
             {
                 'template': 'Test template',
+                'template_subject': TEMPLATE_SUBJECT,
                 'template_greeting': TEMPLATE_GREETING,
                 'template_closing': TEMPLATE_CLOSING,
                 'assignments': [{'email': email, 'code': voucher.code}]
@@ -2415,6 +2438,7 @@ class EnterpriseCouponViewSetRbacTests(
                 '/api/v2/enterprise/coupons/{}/assign/'.format(coupon_id),
                 {
                     'template': 'Test template',
+                    'template_subject': TEMPLATE_SUBJECT,
                     'template_greeting': TEMPLATE_GREETING,
                     'template_closing': TEMPLATE_CLOSING,
                     'emails': [email]
@@ -2429,6 +2453,7 @@ class EnterpriseCouponViewSetRbacTests(
                 '/api/v2/enterprise/coupons/{}/remind/'.format(coupon_id),
                 {
                     'template': 'Test template',
+                    'template_subject': TEMPLATE_SUBJECT,
                     'template_greeting': TEMPLATE_GREETING,
                     'template_closing': TEMPLATE_CLOSING,
                     'assignments': [{'email': email, 'code': offer_assignment.code}]
@@ -2452,6 +2477,7 @@ class EnterpriseCouponViewSetRbacTests(
                 '/api/v2/enterprise/coupons/{}/assign/'.format(coupon_id),
                 {
                     'template': 'Test template',
+                    'template_subject': TEMPLATE_SUBJECT,
                     'template_greeting': TEMPLATE_GREETING,
                     'template_closing': TEMPLATE_CLOSING,
                     'emails': emails
@@ -2465,6 +2491,7 @@ class EnterpriseCouponViewSetRbacTests(
                 '/api/v2/enterprise/coupons/{}/remind/'.format(coupon_id),
                 {
                     'template': 'Test template',
+                    'template_subject': TEMPLATE_SUBJECT,
                     'template_greeting': TEMPLATE_GREETING,
                     'template_closing': TEMPLATE_CLOSING,
                     'assignments': [
@@ -2508,6 +2535,7 @@ class EnterpriseCouponViewSetRbacTests(
                 '/api/v2/enterprise/coupons/{}/remind/'.format(coupon_id),
                 {
                     'template': 'Test template',
+                    'template_subject': TEMPLATE_SUBJECT,
                     'template_greeting': TEMPLATE_GREETING,
                     'template_closing': TEMPLATE_CLOSING,
                     'code_filter': VOUCHER_NOT_REDEEMED
@@ -2547,6 +2575,7 @@ class EnterpriseCouponViewSetRbacTests(
                 '/api/v2/enterprise/coupons/{}/remind/'.format(coupon_id),
                 {
                     'template': 'Test template',
+                    'template_subject': TEMPLATE_SUBJECT,
                     'template_greeting': TEMPLATE_GREETING,
                     'template_closing': TEMPLATE_CLOSING,
                     'code_filter': VOUCHER_PARTIAL_REDEEMED
@@ -2573,6 +2602,7 @@ class EnterpriseCouponViewSetRbacTests(
             '/api/v2/enterprise/coupons/{}/remind/'.format(coupon_id),
             {
                 'template': 'Test template',
+                'template_subject': TEMPLATE_SUBJECT,
                 'template_greeting': TEMPLATE_GREETING,
                 'template_closing': TEMPLATE_CLOSING,
             }
@@ -2593,6 +2623,7 @@ class EnterpriseCouponViewSetRbacTests(
             '/api/v2/enterprise/coupons/{}/remind/'.format(coupon_id),
             {
                 'template': 'Test template',
+                'template_subject': TEMPLATE_SUBJECT,
                 'template_greeting': TEMPLATE_GREETING,
                 'template_closing': TEMPLATE_CLOSING,
                 'code_filter': 'invalid-filter'
@@ -2632,6 +2663,7 @@ class EnterpriseCouponViewSetRbacTests(
             '/api/v2/enterprise/coupons/{}/{action}/'.format(coupon_id, action=action),
             {
                 'template': 'Test template',
+                'template_subject': TEMPLATE_SUBJECT,
                 'template_greeting': TEMPLATE_GREETING,
                 'template_closing': TEMPLATE_CLOSING,
                 'emails': ['test@edx.org']
@@ -2741,11 +2773,13 @@ class EnterpriseCouponViewSetRbacTests(
         coupon_id = coupon.json()['coupon_id']
 
         max_limit = OFFER_ASSIGNMENT_EMAIL_TEMPLATE_FIELD_LIMIT
+        email_subject_max_limit = OFFER_ASSIGNMENT_EMAIL_SUBJECT_LIMIT
         response = self.get_response(
             'POST',
             '/api/v2/enterprise/coupons/{}/{action}/'.format(coupon_id, action=action),
             {
                 'template': 'Test template',
+                'template_subject': 'S' * (email_subject_max_limit + 1),
                 'template_greeting': 'G' * (max_limit + 1),
                 'template_closing': 'C' * (max_limit + 1),
                 'emails': ['test@edx.org']
@@ -2754,6 +2788,7 @@ class EnterpriseCouponViewSetRbacTests(
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert response.json() == {
             'error': {
+                'email_subject': 'Email subject must be {} characters or less'.format(email_subject_max_limit),
                 'email_greeting': 'Email greeting must be {} characters or less'.format(max_limit),
                 'email_closing': 'Email closing must be {} characters or less'.format(max_limit),
             }
@@ -2864,6 +2899,7 @@ class OfferAssignmentSummaryViewSetTests(
                 '/api/v2/enterprise/coupons/{}/assign/'.format(coupon_id),
                 {
                     'template': 'Test template',
+                    'template_subject': TEMPLATE_SUBJECT,
                     'template_greeting': TEMPLATE_GREETING,
                     'template_closing': TEMPLATE_CLOSING,
                     'emails': emails,
