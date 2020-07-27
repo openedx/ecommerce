@@ -3,33 +3,6 @@
 
 
 from django.db import migrations
-from oscar.apps.catalogue.categories import create_from_breadcrumbs
-from oscar.core.loading import get_model
-
-Category = get_model('catalogue', 'Category')
-
-COUPON_CATEGORY_NAME = 'Coupons'
-
-EDX_EMPLOYEE_COUPON_CATEGORY = 'edX Employee Request'
-
-def create_edx_employee_category(apps, schema_editor):
-    """Create edX employee coupon category."""
-    Category.skip_history_when_saving = True
-    create_from_breadcrumbs(
-        '{} > {}'.format(
-            COUPON_CATEGORY_NAME, EDX_EMPLOYEE_COUPON_CATEGORY
-        )
-    )
-
-
-def remove_edx_employee_category(apps, schema_editor):
-    """Remove edX employee coupon category."""
-    Category.skip_history_when_saving = True
-    Category.objects.get(
-        name=COUPON_CATEGORY_NAME
-    ).get_children().filter(
-        name=EDX_EMPLOYEE_COUPON_CATEGORY
-    ).delete()
 
 
 class Migration(migrations.Migration):
@@ -38,5 +11,4 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(create_edx_employee_category, remove_edx_employee_category)
     ]
