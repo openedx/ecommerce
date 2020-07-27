@@ -65,6 +65,7 @@ from ecommerce.extensions.catalogue.utils import (
 from ecommerce.extensions.offer.constants import (
     OFFER_ASSIGNED,
     OFFER_ASSIGNMENT_EMAIL_PENDING,
+    OFFER_ASSIGNMENT_EMAIL_SUBJECT_LIMIT,
     OFFER_ASSIGNMENT_EMAIL_TEMPLATE_FIELD_LIMIT,
     OFFER_ASSIGNMENT_REVOKED,
     OFFER_MAX_USES_DEFAULT,
@@ -672,12 +673,17 @@ class EnterpriseCouponViewSet(CouponViewSet):
         if not is_coupon_available(coupon):
             raise DRFValidationError({'error': message})
 
-    def _validate_email_fields(self, greeting, closing):
+    def _validate_email_fields(self, subject, greeting, closing):
         """
-        Raise ValidationError if greeting and/or closing is above the allowed limit.
+        Raise ValidationError if subject, greeting and/or closing is above the allowed limit.
         """
         errors = {}
         max_field_limit = OFFER_ASSIGNMENT_EMAIL_TEMPLATE_FIELD_LIMIT
+
+        if len(subject) > OFFER_ASSIGNMENT_EMAIL_SUBJECT_LIMIT:
+            errors['email_subject'] = 'Email subject must be {} characters or less'.format(
+                OFFER_ASSIGNMENT_EMAIL_SUBJECT_LIMIT
+            )
 
         if len(greeting) > max_field_limit:
             errors['email_greeting'] = 'Email greeting must be {} characters or less'.format(max_field_limit)
@@ -696,12 +702,13 @@ class EnterpriseCouponViewSet(CouponViewSet):
         """
         coupon = self.get_object()
         self._validate_coupon_availablity(coupon, 'Coupon is not available for code assignment')
+        subject = request.data.pop('template_subject', '')
         greeting = request.data.pop('template_greeting', '')
         closing = request.data.pop('template_closing', '')
-        self._validate_email_fields(greeting, closing)
+        self._validate_email_fields(subject, greeting, closing)
         serializer = CouponCodeAssignmentSerializer(
             data=request.data,
-            context={'coupon': coupon, 'greeting': greeting, 'closing': closing}
+            context={'coupon': coupon, 'subject': subject, 'greeting': greeting, 'closing': closing}
         )
         if serializer.is_valid():
             serializer.save()
@@ -716,13 +723,14 @@ class EnterpriseCouponViewSet(CouponViewSet):
         """
         coupon = self.get_object()
         self._validate_coupon_availablity(coupon, 'Coupon is not available for code revoke')
+        subject = request.data.pop('template_subject', '')
         greeting = request.data.pop('template_greeting', '')
         closing = request.data.pop('template_closing', '')
-        self._validate_email_fields(greeting, closing)
+        self._validate_email_fields(subject, greeting, closing)
         serializer = CouponCodeRevokeSerializer(
             data=request.data.get('assignments'),
             many=True,
-            context={'coupon': coupon, 'greeting': greeting, 'closing': closing}
+            context={'coupon': coupon, 'subject': subject, 'greeting': greeting, 'closing': closing}
         )
         if serializer.is_valid():
             serializer.save()
@@ -738,9 +746,10 @@ class EnterpriseCouponViewSet(CouponViewSet):
         """
         coupon = self.get_object()
         self._validate_coupon_availablity(coupon, 'Coupon is not available for code remind')
+        subject = request.data.pop('template_subject', '')
         greeting = request.data.pop('template_greeting', '')
         closing = request.data.pop('template_closing', '')
-        self._validate_email_fields(greeting, closing)
+        self._validate_email_fields(subject, greeting, closing)
         if request.data.get('assignments'):
             assignments = request.data.get('assignments')
         else:
@@ -769,7 +778,7 @@ class EnterpriseCouponViewSet(CouponViewSet):
         serializer = CouponCodeRemindSerializer(
             data=assignments,
             many=True,
-            context={'coupon': coupon, 'greeting': greeting, 'closing': closing}
+            context={'coupon': coupon, 'subject': subject, 'greeting': greeting, 'closing': closing}
         )
         if serializer.is_valid():
             serializer.save()

@@ -92,6 +92,7 @@ class UtilTests(DiscoveryTestMixin, TestCase):
     @mock.patch('ecommerce.extensions.offer.utils.send_offer_assignment_email')
     @ddt.data(
         (
+            'subject',
             'hi',
             'bye',
             {
@@ -107,6 +108,7 @@ class UtilTests(DiscoveryTestMixin, TestCase):
     @ddt.unpack
     def test_send_assigned_offer_email(
             self,
+            subject,
             greeting,
             closing,
             tokens,
@@ -114,9 +116,9 @@ class UtilTests(DiscoveryTestMixin, TestCase):
             mock_sailthru_task,
     ):
         """ Test that the offer assignment email message is sent to async task. """
-        email_subject = settings.OFFER_ASSIGNMENT_EMAIL_SUBJECT
         mock_sailthru_task.delay.side_effect = side_effect
         send_assigned_offer_email(
+            subject,
             greeting,
             closing,
             tokens.get('offer_assignment_id'),
@@ -128,13 +130,14 @@ class UtilTests(DiscoveryTestMixin, TestCase):
         mock_sailthru_task.delay.assert_called_once_with(
             tokens.get('learner_email'),
             tokens.get('offer_assignment_id'),
-            email_subject,
+            subject,
             mock.ANY
         )
 
     @mock.patch('ecommerce.extensions.offer.utils.send_offer_update_email')
     @ddt.data(
         (
+            'subject',
             'hi',
             'bye',
             {
@@ -150,6 +153,7 @@ class UtilTests(DiscoveryTestMixin, TestCase):
     @ddt.unpack
     def test_send_assigned_offer_reminder_email(
             self,
+            subject,
             greeting,
             closing,
             tokens,
@@ -159,9 +163,9 @@ class UtilTests(DiscoveryTestMixin, TestCase):
         """
         Test that the offer assignment reminder email message is sent to the async task in ecommerce-worker.
         """
-        email_subject = settings.OFFER_REMINDER_EMAIL_SUBJECT
         mock_sailthru_task.delay.side_effect = side_effect
         send_assigned_offer_reminder_email(
+            subject,
             greeting,
             closing,
             tokens.get('learner_email'),
@@ -172,13 +176,14 @@ class UtilTests(DiscoveryTestMixin, TestCase):
         )
         mock_sailthru_task.delay.assert_called_once_with(
             tokens.get('learner_email'),
-            email_subject,
+            subject,
             mock.ANY
         )
 
     @mock.patch('ecommerce.extensions.offer.utils.send_offer_update_email')
     @ddt.data(
         (
+            'subject',
             'hi',
             'bye',
             {
@@ -191,6 +196,7 @@ class UtilTests(DiscoveryTestMixin, TestCase):
     @ddt.unpack
     def test_send_offer_revoked_email(
             self,
+            subject,
             greeting,
             closing,
             tokens,
@@ -200,9 +206,9 @@ class UtilTests(DiscoveryTestMixin, TestCase):
         """
         Test that the offer revocation email message is sent to the async task in ecommerce-worker.
         """
-        email_subject = settings.OFFER_REVOKE_EMAIL_SUBJECT
         mock_sailthru_task.delay.side_effect = side_effect
         send_revoked_offer_email(
+            subject,
             greeting,
             closing,
             tokens.get('learner_email'),
@@ -210,7 +216,7 @@ class UtilTests(DiscoveryTestMixin, TestCase):
         )
         mock_sailthru_task.delay.assert_called_once_with(
             tokens.get('learner_email'),
-            email_subject,
+            subject,
             mock.ANY
         )
 
