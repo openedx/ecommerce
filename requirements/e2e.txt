@@ -20,16 +20,16 @@ pyparsing==2.4.7          # via packaging
 pytest-base-url==1.4.2    # via pytest-selenium
 pytest-html==1.22.1       # via pytest-selenium
 pytest-metadata==1.8.0    # via pytest-html
-pytest-randomly==3.4.0    # via -r requirements/e2e.in
+pytest-randomly==3.4.1    # via -r requirements/e2e.in
 pytest-selenium==1.17.0   # via -r requirements/e2e.in
-pytest-timeout==1.4.1     # via -r requirements/e2e.in
+pytest-timeout==1.4.2     # via -r requirements/e2e.in
 pytest-variables==1.9.0   # via pytest-selenium
 pytest==5.3.5             # via -c requirements/pins.txt, -r requirements/e2e.in, pytest-base-url, pytest-html, pytest-metadata, pytest-randomly, pytest-selenium, pytest-timeout, pytest-variables
-python-dotenv==0.13.0     # via -r requirements/e2e.in
+python-dotenv==0.14.0     # via -r requirements/e2e.in
 requests==2.24.0          # via edx-rest-api-client, pytest-base-url, pytest-selenium, slumber
 selenium==3.141.0         # via -r requirements/e2e.in, pytest-selenium
 six==1.15.0               # via packaging, pathlib2
 slumber==0.7.1            # via edx-rest-api-client
-urllib3==1.25.9           # via -c requirements/pins.txt, requests, selenium
+urllib3==1.25.10          # via -c requirements/pins.txt, requests, selenium
 wcwidth==0.2.5            # via pytest
 zipp==1.2.0               # via importlib-metadata
