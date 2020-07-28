@@ -5,14 +5,14 @@
 #    make upgrade
 #
 filelock==3.0.12          # via tox
-importlib-metadata==1.6.0  # via pluggy, tox
-packaging==20.3           # via tox
+importlib-metadata==1.7.0  # via pluggy, tox
+packaging==20.4           # via tox
 pluggy==0.13.1            # via tox
-py==1.8.1                 # via tox
+py==1.9.0                 # via tox
 pyparsing==2.4.7          # via packaging
-six==1.14.0               # via packaging, tox
+six==1.15.0               # via packaging, tox
 toml==0.10.1              # via tox
-tox-battery==0.5.2        # via -r requirements/tox.in
-tox==3.15.0               # via -r requirements/tox.in, tox-battery
+tox-battery==0.6.1        # via -r requirements/tox.in
+tox==3.18.0               # via -r requirements/tox.in, tox-battery
 virtualenv==16.7.9        # via -c requirements/pins.txt, tox
 zipp==1.2.0               # via importlib-metadata
