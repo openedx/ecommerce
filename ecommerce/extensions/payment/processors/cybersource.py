@@ -107,6 +107,13 @@ class Cybersource(ApplePayMixin, BaseClientSidePaymentProcessor):
         self.flex_shared_secret_key_id = configuration.get('flex_shared_secret_key_id')
         self.flex_shared_secret_key = configuration.get('flex_shared_secret_key')
         self.flex_target_origin = self.site.siteconfiguration.payment_microfrontend_url
+        self.cybersource_api_config = {
+            'authentication_type': 'http_signature',
+            'run_environment': self.flex_run_environment,
+            'merchantid': self.merchant_id,
+            'merchant_keyid': self.flex_shared_secret_key_id,
+            'merchant_secretkey': self.flex_shared_secret_key,
+        }
 
     @property
     def cancel_page_url(self):
@@ -115,34 +122,130 @@ class Cybersource(ApplePayMixin, BaseClientSidePaymentProcessor):
     @property
     def client_side_payment_url(self):
         return self.sop_payment_page_url
+
+    def del_none(self, d):
+        for key, value in list(d.items()):
+            if value is None:
+                del d[key]
+            elif isinstance(value, dict):
+                self.del_none(value)
+        return d
     
     def get_capture_context(self):
         # To delete None values in Input Request Json body
-        def del_none(d):
-            for key, value in list(d.items()):
-                if value is None:
-                    del d[key]
-                elif isinstance(value, dict):
-                    del_none(value)
-            return d
 
         requestObj = GeneratePublicKeyRequest(
             encryption_type='RsaOaep256',
             target_origin=self.flex_target_origin,
         )
-        requestObj = del_none(requestObj.__dict__)
+        requestObj = self.del_none(requestObj.__dict__)
         requestObj = json.dumps(requestObj)
 
-        api_instance = KeyGenerationApi({
-            'authentication_type': 'http_signature',
-            'run_environment': self.flex_run_environment,
-            'merchantid': self.merchant_id,
-            'merchant_keyid': self.flex_shared_secret_key_id,
-            'merchant_secretkey': self.flex_shared_secret_key,
-        })
+        api_instance = KeyGenerationApi(self.cybersource_api_config)
         return_data, status, body = api_instance.generate_public_key(requestObj, format='JWT')
 
         return {'key_id': return_data.key_id}
+    
+    def authorize_payment(self, basket, request, form_data):
+        from CyberSource import (
+            Ptsv2paymentsClientReferenceInformation, Ptsv2paymentsProcessingInformation, Ptsv2paymentsTokenInformation,
+            Ptsv2paymentsOrderInformationAmountDetails, Ptsv2paymentsOrderInformationBillTo, Ptsv2paymentsOrderInformationLineItems,
+            Ptsv2paymentsOrderInformationInvoiceDetails, Ptsv2paymentsOrderInformation, PaymentsApi, Ptsv2paymentsMerchantDefinedInformation,
+            CreatePaymentRequest
+        )
+        # [GM] TODO: validate payment token prior to authorizing
+        transient_token_jwt = request.POST['payment_token']
+
+        clientReferenceInformation = Ptsv2paymentsClientReferenceInformation(
+            code=basket.order_number,
+        )
+        processingInformation = Ptsv2paymentsProcessingInformation(
+            capture=True,
+            purchase_level="3",
+        )
+        tokenInformation = Ptsv2paymentsTokenInformation(
+            transient_token_jwt=transient_token_jwt,
+        )
+        orderInformationAmountDetails = Ptsv2paymentsOrderInformationAmountDetails(
+            total_amount=str(basket.total_incl_tax),
+            currency=basket.currency,
+        )
+
+        orderInformationBillTo = Ptsv2paymentsOrderInformationBillTo(
+            first_name=form_data['first_name'],
+            last_name=form_data['last_name'],
+            address1=form_data['address_line1'],
+            address2=form_data['address_line2'],
+            locality=form_data['city'],
+            administrative_area=form_data['state'],
+            postal_code=form_data['postal_code'],
+            country=form_data['country'],
+            email=request.user.email,
+        )
+
+        merchantDefinedInformation = []
+        program_uuid = get_basket_program_uuid(basket)
+        if program_uuid:
+            programInfo = Ptsv2paymentsMerchantDefinedInformation(
+                key="1",
+                value="program,{program_uuid}".format(program_uuid=program_uuid)
+            )
+            merchantDefinedInformation.append(programInfo.__dict__)
+
+        merchantDataIndex = 2
+        orderInformationLineItems = []
+        for line in basket.all_lines():
+            orderInformationLineItem = Ptsv2paymentsOrderInformationLineItems(
+                product_name=clean_field_value(line.product.title),
+                product_code=line.product.get_product_class().slug,
+                product_sku=line.stockrecord.partner_sku,
+                quantity=line.quantity,
+                unit_price=str(line.unit_price_incl_tax),
+                total_amount=str(line.line_price_incl_tax_incl_discounts),
+                unit_of_measure='ITM',
+                discount_amount=str(line.discount_value),
+                discount_applied=True,
+                amount_includes_tax=True,
+                tax_amount=str(line.line_tax),
+                tax_rate='0',
+            )
+            orderInformationLineItems.append(orderInformationLineItem.__dict__)
+            line_course = line.product.course
+            if line_course:
+                courseInfo = Ptsv2paymentsMerchantDefinedInformation(
+                    key=str(merchantDataIndex),
+                    value="course,{course_id},{course_type}".format(
+                        course_id=line_course.id if line_course else None,
+                        course_type=line_course.type if line_course else None
+                    )
+                )
+                merchantDefinedInformation.append(courseInfo.__dict__)
+                merchantDataIndex += 1
+
+        orderInformationInvoiceDetails = Ptsv2paymentsOrderInformationInvoiceDetails(
+            purchase_order_number='BLANK'
+        )
+
+        orderInformation = Ptsv2paymentsOrderInformation(
+            amount_details=orderInformationAmountDetails.__dict__,
+            bill_to=orderInformationBillTo.__dict__,
+            line_items=orderInformationLineItems,
+            invoice_details=orderInformationInvoiceDetails.__dict__
+        )
+
+        requestObj = CreatePaymentRequest(
+            client_reference_information=clientReferenceInformation.__dict__,
+            processing_information=processingInformation.__dict__,
+            token_information=tokenInformation.__dict__,
+            order_information=orderInformation.__dict__,
+            merchant_defined_information = merchantDefinedInformation
+        )
+
+        requestObj = self.del_none(requestObj.__dict__)
+        requestObj = json.dumps(requestObj)
+
+        api_instance = PaymentsApi(self.cybersource_api_config)
+        return api_instance.create_payment(requestObj)
 
     def get_transaction_parameters(self, basket, request=None, use_client_side_checkout=False, **kwargs):
         """

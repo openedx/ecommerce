@@ -734,6 +734,7 @@ class PaymentApiLogicMixin(BasketLogicMixin):
         if not hasattr(payment_processor, 'get_capture_context'):
             return
         response['capture_context'] = payment_processor.get_capture_context()
+        self.request.session['capture_context'] = response['capture_context']
 
     def _get_response_status(self, response):
         return message_utils.get_response_status(response['messages'])

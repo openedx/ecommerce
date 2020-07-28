@@ -69,7 +69,7 @@ class CyberSourceProcessorMixin:
         return Cybersource(self.request.site)
 
 
-class CybersourceSubmitView(BasePaymentSubmitView):
+class CybersourceSubmitView(BasePaymentSubmitView, EdxOrderPlacementMixin):
     """ Starts CyberSource payment process.
 
     This view is intended to be called asynchronously by the payment form. The view expects POST data containing a
@@ -115,45 +115,41 @@ class CybersourceSubmitView(BasePaymentSubmitView):
             request.basket.id,
         )
 
-        # Add extra parameters for Silent Order POST
-        extra_parameters = {
-            'payment_method': 'card',
-            'unsigned_field_names': 'card_expiry_date',
-            'bill_to_email': user.email,
-            'payment_token': request.POST['payment_token'],
-            # Fall back to order number when there is no session key (JWT auth)
-            'device_fingerprint_id': request.session.session_key or basket.order_number,
-        }
+        try:
+            return_data, status, body = Cybersource(self.request.site).authorize_payment(basket, request, data)
+            logger.info("API RESPONSE CODE : %d", status)
+            logger.info("API RESPONSE BODY : %s", body)
+            logger.info("API RESPONSE DATA : %s", return_data)
+        except Exception:
+            logger.exception('Payment failed')
+            return JsonResponse({
+                'error': 'Payment failed',
+                'success': False
+            }, status=400)
 
-        for source, destination in six.iteritems(self.FIELD_MAPPINGS):
-            extra_parameters[destination] = clean_field_value(data[source])
-
-        parameters = Cybersource(self.request.site).get_transaction_parameters(
-            basket,
-            use_client_side_checkout=True,
-            extra_parameters=extra_parameters
+        billing_address = BillingAddress(
+            first_name=data['first_name'],
+            last_name=data['last_name'],
+            line1=data['address_line1'],
+            line2=data['address_line2'],
+            line4=data['city'],
+            postcode=data['postal_code'],
+            state=data['state'],
+            country=Country.objects.get(iso_3166_1_a2=data['country'])
         )
-
-        logger.info(
-            'Parameters signed for CyberSource transaction [%s], associated with basket [%d].',
-            # TODO: transaction_id is None in logs. This should be fixed.
-            parameters.get('transaction_id'),
-            basket.id
-        )
-
-        # This parameter is only used by the Web/Mobile flow. It is not needed for for Silent Order POST.
-        parameters.pop('payment_page_url', None)
-
-        # Ensure that the response can be properly rendered so that we
-        # don't have to deal with thawing the basket in the event of an error.
-        response = JsonResponse({'form_fields': parameters})
-
-        basket_add_organization_attribute(basket, data)
-
-        # Freeze the basket since the user is paying for it now.
         basket.freeze()
+        order = self.create_order(request, basket, billing_address)
+        self.handle_post_order(order)
 
-        return response
+        receipt_page_url = get_receipt_page_url(
+            request.site.siteconfiguration,
+            order_number=basket.order_number,
+            disable_back_button=True,
+        )
+        return JsonResponse({
+            'success': True,
+            'receipt_page_url': receipt_page_url,
+        }, status=status)
 
 
 class CybersourceSubmitAPIView(APIView, CybersourceSubmitView):
