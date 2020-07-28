@@ -30,6 +30,6 @@ requests==2.24.0          # via edx-rest-api-client, pytest-base-url, pytest-sel
 selenium==3.141.0         # via -r requirements/e2e.in, pytest-selenium
 six==1.15.0               # via packaging, pathlib2
 slumber==0.7.1            # via edx-rest-api-client
-urllib3==1.25.9           # via -c requirements/pins.txt, requests, selenium
+urllib3==1.25.10          # via -c requirements/pins.txt, requests, selenium
 wcwidth==0.2.5            # via pytest
 zipp==1.2.0               # via importlib-metadata
