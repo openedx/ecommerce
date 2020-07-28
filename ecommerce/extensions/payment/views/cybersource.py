@@ -118,8 +118,9 @@ class CybersourceSubmitView(BasePaymentSubmitView):
         # Add extra parameters for Silent Order POST
         extra_parameters = {
             'payment_method': 'card',
-            'unsigned_field_names': ','.join(Cybersource.PCI_FIELDS),
+            'unsigned_field_names': 'card_expiry_date',
             'bill_to_email': user.email,
+            'payment_token': request.POST['payment_token'],
             # Fall back to order number when there is no session key (JWT auth)
             'device_fingerprint_id': request.session.session_key or basket.order_number,
         }

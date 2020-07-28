@@ -102,6 +102,12 @@ class Cybersource(ApplePayMixin, BaseClientSidePaymentProcessor):
         self.apple_pay_merchant_id_certificate_path = configuration.get('apple_pay_merchant_id_certificate_path', '')
         self.apple_pay_country_code = configuration.get('apple_pay_country_code', '')
 
+        # Flex Microform configuration
+        self.flex_run_environment = configuration.get('flex_run_environment', 'cybersource.environment.SANDBOX')
+        self.flex_shared_secret_key_id = configuration.get('flex_shared_secret_key_id')
+        self.flex_shared_secret_key = configuration.get('flex_shared_secret_key')
+        self.flex_target_origin = self.site.siteconfiguration.payment_microfrontend_url
+
     @property
     def cancel_page_url(self):
         return get_ecommerce_url(self.configuration['cancel_checkout_path'])
@@ -122,24 +128,21 @@ class Cybersource(ApplePayMixin, BaseClientSidePaymentProcessor):
 
         requestObj = GeneratePublicKeyRequest(
             encryption_type='RsaOaep256',
-            target_origin='http://localhost:1998',
+            target_origin=self.flex_target_origin,
         )
         requestObj = del_none(requestObj.__dict__)
         requestObj = json.dumps(requestObj)
-        try:
-            api_instance = KeyGenerationApi({
-                'authentication_type': 'http_signature',
-                'run_environment': 'cybersource.environment.SANDBOX',
-                #'merchantid': self.configuration['merchant_id'],
-                'merchantid': 'testrest',
-                'merchant_keyid': '08c94330-f618-42a3-b09d-e1e43be5efda',
-                'merchant_secretkey': 'yBJxy6LjM2TmcPGu+GaJrHtkke25fPpUX+UY6/L/1tE=',
-            })
-            return_data, status, body = api_instance.generate_public_key(requestObj, format='JWT')
 
-            return {'key_id': return_data.key_id}
-        except Exception:
-            logger.exception("Exception when calling KeyGenerationApi->generate_public_key")
+        api_instance = KeyGenerationApi({
+            'authentication_type': 'http_signature',
+            'run_environment': self.flex_run_environment,
+            'merchantid': self.merchant_id,
+            'merchant_keyid': self.flex_shared_secret_key_id,
+            'merchant_secretkey': self.flex_shared_secret_key,
+        })
+        return_data, status, body = api_instance.generate_public_key(requestObj, format='JWT')
+
+        return {'key_id': return_data.key_id}
 
     def get_transaction_parameters(self, basket, request=None, use_client_side_checkout=False, **kwargs):
         """
