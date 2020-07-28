@@ -19,12 +19,12 @@ bok-choy==1.1.1           # via -r requirements/test.txt
 cached-property==1.5.1    # via -r requirements/test.txt, zeep
 celery==3.1.26.post2      # via -r requirements/test.txt, edx-ecommerce-worker
 certifi==2020.6.20        # via -r requirements/docs.txt, -r requirements/test.txt, requests
-cffi==1.14.0              # via -r requirements/test.txt, cryptography
+cffi==1.14.1              # via -r requirements/test.txt, cryptography
 chardet==3.0.4            # via -r requirements/docs.txt, -r requirements/test.txt, requests
 coreapi==2.3.3            # via -r requirements/test.txt, django-rest-swagger, openapi-codec
 coreschema==0.0.4         # via -r requirements/test.txt, coreapi
-coverage==5.2             # via -r requirements/test.txt, pytest-cov
-cryptography==2.9.2       # via -r requirements/test.txt, pyjwt, pyopenssl
+coverage==5.2.1           # via -r requirements/test.txt, pytest-cov
+cryptography==3.0         # via -r requirements/test.txt, pyjwt, pyopenssl
 cssselect==1.1.0          # via -r requirements/test.txt, premailer
 cssutils==1.0.2           # via -r requirements/test.txt, premailer
 ddt==1.4.1                # via -r requirements/test.txt
@@ -63,7 +63,7 @@ drf-jwt==1.16.2           # via -r requirements/test.txt, edx-drf-extensions
 edx-auth-backends==3.1.0  # via -r requirements/test.txt
 edx-django-release-util==0.4.4  # via -r requirements/test.txt
 edx-django-sites-extensions==2.5.1  # via -r requirements/test.txt
-edx-django-utils==3.3.0   # via -r requirements/test.txt, edx-drf-extensions
+edx-django-utils==3.5.0   # via -r requirements/test.txt, edx-drf-extensions
 edx-drf-extensions==6.1.1  # via -r requirements/test.txt, edx-rbac
 edx-ecommerce-worker==0.7.2  # via -r requirements/test.txt
 edx-i18n-tools==0.5.3     # via -r requirements/test.txt
@@ -110,7 +110,7 @@ path.py==7.2              # via -r requirements/test.txt, edx-i18n-tools
 pathlib2==2.3.5           # via -r requirements/test.txt, pytest
 paypalrestsdk==1.13.1     # via -r requirements/test.txt
 pbr==5.4.5                # via -r requirements/test.txt, stevedore
-phonenumbers==8.12.6      # via -r requirements/test.txt, django-oscar, django-phonenumber-field
+phonenumbers==8.12.7      # via -r requirements/test.txt, django-oscar, django-phonenumber-field
 pillow==7.2.0             # via -r requirements/test.txt, django-oscar
 pluggy==0.13.1            # via -r requirements/test.txt, diff-cover, pytest, tox
 polib==1.1.0              # via -r requirements/test.txt, edx-i18n-tools
@@ -183,7 +183,7 @@ transifex-client==0.13.11  # via -r requirements/dev.in
 typed-ast==1.4.1          # via -r requirements/test.txt, astroid
 unicodecsv==0.14.1        # via -r requirements/test.txt, djangorestframework-csv
 uritemplate==3.0.1        # via -r requirements/test.txt, coreapi
-urllib3==1.25.9           # via -r requirements/docs.txt, -r requirements/test.txt, requests, selenium, transifex-client
+urllib3==1.25.10          # via -r requirements/docs.txt, -r requirements/test.txt, requests, selenium, transifex-client
 virtualenv==16.7.9        # via -r requirements/test.txt, tox
 waitress==1.4.4           # via -r requirements/test.txt, webtest
 wcwidth==0.2.5            # via -r requirements/test.txt, pytest
