@@ -15,7 +15,7 @@ bleach==3.1.5             # via -r requirements/base.in
 cached-property==1.5.1    # via zeep
 celery==3.1.26.post2      # via edx-ecommerce-worker
 certifi==2020.6.20        # via requests
-cffi==1.14.0              # via cryptography
+cffi==1.14.1              # via cryptography
 chardet==3.0.4            # via requests
 coreapi==2.3.3            # via -r requirements/base.in, django-rest-swagger, openapi-codec
 coreschema==0.0.4         # via coreapi
@@ -81,7 +81,7 @@ packaging==20.4           # via bleach
 path.py==7.2              # via -r requirements/base.in
 paypalrestsdk==1.13.1     # via -r requirements/base.in
 pbr==5.4.5                # via stevedore
-phonenumbers==8.12.6      # via django-oscar
+phonenumbers==8.12.7      # via django-oscar
 pillow==7.2.0             # via django-oscar
 premailer==2.9.2          # via -r requirements/base.in
 psutil==1.2.1             # via edx-django-utils
