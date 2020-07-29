@@ -115,16 +115,44 @@ class CybersourceSubmitView(BasePaymentSubmitView, EdxOrderPlacementMixin):
             request.basket.id,
         )
 
+        # [GM] TODO: Record payment processor response in database in all cases (authorized, decline, or error)
+        caught_exception = False
+        payment_processor = Cybersource(self.request.site)
+        from CyberSource.rest import ApiException
         try:
-            return_data, status, body = Cybersource(self.request.site).authorize_payment(basket, request, data)
-            logger.info("API RESPONSE CODE : %d", status)
-            logger.info("API RESPONSE BODY : %s", body)
-            logger.info("API RESPONSE DATA : %s", return_data)
-        except Exception:
+            return_data, status, body = payment_processor.authorize_payment(basket, request, data)
+            payment_processor.record_processor_response(return_data.to_dict(), transaction_id=return_data.id, basket=basket)
+        except ApiException as e:
+            payment_processor.record_processor_response({
+                'status': e.status,
+                'reason': e.reason,
+                'body': e.body,
+                'headers': dict(e.headers),
+            }, transaction_id=e.headers['v-c-correlation-id'], basket=basket)
             logger.exception('Payment failed')
+            caught_exception = True
+        
+        if caught_exception or return_data.status == 'ERROR':
             return JsonResponse({
-                'error': 'Payment failed',
-                'success': False
+                'errors': [
+                    {'error_code': 'payment-failed'}
+                ]
+            }, status=400)
+
+        if return_data.status == 'DECLINE':
+            return JsonResponse({
+                'errors': [
+                    {'error_code': 'transaction-declined-message'}
+                ]
+            }, status=400)
+        
+        if return_data.status != 'AUTHORIZED':
+            # [GM] TODO: This should never happen!
+            logger.critical('Unexpected payment response status: %s', return_data.status)
+            return JsonResponse({
+                'errors': [
+                    {'error_code': 'payment-failed'}
+                ]
             }, status=400)
 
         billing_address = BillingAddress(
@@ -137,9 +165,10 @@ class CybersourceSubmitView(BasePaymentSubmitView, EdxOrderPlacementMixin):
             state=data['state'],
             country=Country.objects.get(iso_3166_1_a2=data['country'])
         )
-        basket.freeze()
-        order = self.create_order(request, basket, billing_address)
-        self.handle_post_order(order)
+        with transaction.atomic():
+            basket.freeze()
+            order = self.create_order(request, basket, billing_address)
+            self.handle_post_order(order)
 
         receipt_page_url = get_receipt_page_url(
             request.site.siteconfiguration,
@@ -147,7 +176,6 @@ class CybersourceSubmitView(BasePaymentSubmitView, EdxOrderPlacementMixin):
             disable_back_button=True,
         )
         return JsonResponse({
-            'success': True,
             'receipt_page_url': receipt_page_url,
         }, status=status)
 
