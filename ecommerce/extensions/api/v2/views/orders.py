@@ -9,17 +9,21 @@ import django_filters
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.db import transaction
+from django.db.models import Q
 from django.utils.decorators import method_decorator
 from edx_rest_framework_extensions.auth.jwt.authentication import JwtAuthentication
 from oscar.core.loading import get_class, get_model
+from requests.exceptions import ConnectionError, Timeout  # pylint: disable=redefined-builtin
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.permissions import DjangoModelPermissions, IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import ViewSet
+from slumber.exceptions import HttpServerError, SlumberBaseException
 
 from ecommerce.courses.models import Course
+from ecommerce.courses.utils import get_course_run_detail
 from ecommerce.enterprise.mixins import EnterpriseDiscountMixin
 from ecommerce.extensions.analytics.utils import audit_log
 from ecommerce.extensions.api import serializers
@@ -37,6 +41,7 @@ logger = logging.getLogger(__name__)
 
 Order = get_model('order', 'Order')
 OrderLine = get_model('order', 'Line')
+Product = get_model('catalogue', 'Product')
 post_checkout = get_class('checkout.signals', 'post_checkout')
 Basket = get_model('basket', 'Basket')
 Applicator = get_class('offer.applicator', 'Applicator')
@@ -172,6 +177,16 @@ class ManualCourseEnrollmentOrderViewSet(EdxOrderPlacementMixin, EnterpriseDisco
 
     SUCCESS, FAILURE = "success", "failure"
 
+    @staticmethod
+    def existing_purchased_line(seat_product, user, site):
+        """ Returns existing OrderLine object purchased by user whether in the form of course entitlement
+        or course enrollment."""
+        course_uuid = get_course_run_detail(site, seat_product.course.id)['course_uuid']
+        products = Product.objects.filter(
+            Q(pk=seat_product.pk) | Q(attributes__code='UUID', attribute_values__value_text=course_uuid)
+        )
+        return OrderLine.objects.filter(product__in=products, order__user=user, status=LINE.COMPLETE).first()
+
     def create(self, request):
         """
         Will recieve enrollments in the format specified in the class definition.
@@ -259,9 +274,19 @@ class ManualCourseEnrollmentOrderViewSet(EdxOrderPlacementMixin, EnterpriseDisco
         ).first()
 
         # check if an order already exists with the requested data
-        order_line = OrderLine.objects.filter(product=seat_product, order__user=learner_user, status=LINE.COMPLETE)
-        if order_line.exists():
-            order = Order.objects.get(id=order_line.first().order_id)
+        try:
+            order_line = self.existing_purchased_line(seat_product, learner_user, request_site)
+        except (SlumberBaseException, ConnectionError, Timeout, HttpServerError, AttributeError) as ex:
+            logger.exception(
+                "Could not access existing purchased line. User: %s, Site: %s, course_run_key: %s, message: %s",
+                learner_user,
+                request_site,
+                course_run_key,
+                ex,
+            )
+            return dict(enrollment, status=self.FAILURE, detail="Failed to create free order", new_order_created=None)
+        if order_line:
+            order = order_line.order
             self._update_all_orderline_with_enterprise_discount(order, discount_percentage)
             return dict(
                 enrollment,
