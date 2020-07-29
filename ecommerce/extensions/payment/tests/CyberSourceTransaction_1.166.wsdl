@@ -32,7 +32,7 @@
    <wsdl:service name="TransactionProcessor">
       <wsdl:documentation>CyberSource Web Service</wsdl:documentation>
       <wsdl:port name="portXML" binding="tns:ITransactionProcessor">
-         <soap:address location="https://ics2ws.ic3.com:443/commerce/1.x/transactionProcessor"/>
+         <soap:address location="https://ics2wstest.ic3.com/commerce/1.x/transactionProcessor"/>
       </wsdl:port>
    </wsdl:service>
 </wsdl:definitions>
