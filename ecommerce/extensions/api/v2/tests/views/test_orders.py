@@ -14,9 +14,12 @@ from django.contrib.auth.models import Permission
 from django.test import RequestFactory, override_settings
 from django.urls import reverse
 from oscar.core.loading import get_class, get_model
+from oscar.test import factories
 from rest_framework import status
 
+from ecommerce.coupons.tests.mixins import DiscoveryMockMixin
 from ecommerce.courses.tests.factories import CourseFactory
+from ecommerce.entitlements.utils import create_or_update_course_entitlement
 from ecommerce.extensions.api.serializers import OrderSerializer
 from ecommerce.extensions.api.tests.test_authentication import AccessTokenMixin
 from ecommerce.extensions.api.v2.tests.views import OrderDetailViewTestMixin
@@ -357,7 +360,8 @@ class OrderDetailViewTests(OrderDetailViewTestMixin, TestCase):
 
 
 @ddt.ddt
-class ManualCourseEnrollmentOrderViewSetTests(TestCase):
+@httpretty.activate
+class ManualCourseEnrollmentOrderViewSetTests(TestCase, DiscoveryMockMixin):
     """
     Test the `ManualCourseEnrollmentOrderViewSet` functionality.
     """
@@ -367,6 +371,7 @@ class ManualCourseEnrollmentOrderViewSetTests(TestCase):
         self.user = self.create_user(is_staff=True)
         self.client.login(username=self.user.username, password=self.password)
         self.course = CourseFactory(id='course-v1:MAX+CX+Course', partner=self.partner)
+        self.course_uuid = '620a5ce5-6ff4-4b2b-bea1-a273c6920ae5'
         self.course_price = 50
         self.course.create_or_update_seat(
             certificate_type='verified',
@@ -377,6 +382,17 @@ class ManualCourseEnrollmentOrderViewSetTests(TestCase):
             certificate_type='audit',
             id_verification_required=False,
             price=0
+        )
+        self.course_entitlement = create_or_update_course_entitlement(
+            'verified', 100, self.partner, self.course_uuid, 'Course Entitlement'
+        )
+        self.mock_access_token_response()
+        self.mock_course_run_detail_endpoint(
+            self.course,
+            discovery_api_url=self.site.siteconfiguration.discovery_api_url,
+            course_run_info={
+                'course_uuid': self.course_uuid
+            }
         )
 
     def build_jwt_header(self, user):
@@ -680,6 +696,70 @@ class ManualCourseEnrollmentOrderViewSetTests(TestCase):
             self.assertEqual(line.line_price_before_discounts_excl_tax, expected_course_price)
             self.assertEqual(line.line_price_incl_tax, 0)
             self.assertEqual(line.line_price_excl_tax, 0)
+
+    def test_create_manual_order_with_existing_entitlement(self):
+        """"
+        Test when user had already purchased the course entitlement.
+        """
+        # purchasing self.course's course_entitlement for self.user
+        basket = factories.BasketFactory(owner=self.user, site=self.site)
+        basket.add_product(self.course_entitlement, 1)
+        order = create_order(basket=basket, user=self.user)
+        order.lines.update(status=LINE.COMPLETE)
+
+        course_without_discovery_data = CourseFactory(id='course-v1:Demo+Demox+Course', partner=self.partner)
+
+        pre_request_order_count = Order.objects.count()
+
+        post_data = {
+            "enrollments": [
+                # test when user have existing course entitlement purchased.
+                {
+                    "lms_user_id": self.user.lms_user_id,
+                    "username": self.user.username,
+                    "email": self.user.email,
+                    "course_run_key": self.course.id,
+                    "enterprise_customer_name": "an-enterprise-customer",
+                    "enterprise_customer_uuid": "394a5ce5-6ff4-4b2b-bea1-a273c6920ae1",
+                },
+                # test when user have NOT purchased course entitlement.
+                {
+                    "lms_user_id": 12,
+                    "username": "ma2",
+                    "email": "ma2@example.com",
+                    "course_run_key": self.course.id,
+                    "enterprise_customer_name": "an-enterprise-customer",
+                    "enterprise_customer_uuid": "394a5ce5-6ff4-4b2b-bea1-a273c6920ae1",
+                },
+                # test if there is not any record against a course in the discovery.
+                {
+                    "lms_user_id": 13,
+                    "username": "ma3",
+                    "email": "ma3@example.com",
+                    "course_run_key": course_without_discovery_data.id,
+                    "enterprise_customer_name": "an-enterprise-customer",
+                    "enterprise_customer_uuid": "394a5ce5-6ff4-4b2b-bea1-a273c6920ae1",
+                }
+            ]
+        }
+
+        response_status, response_data = self.post_order(post_data, self.user)
+        expected_enrollments = post_data["enrollments"]
+        self.assertEqual(response_status, status.HTTP_200_OK)
+        self.assertEqual(pre_request_order_count + 1, Order.objects.count())
+        orders = response_data.get("orders")
+        self.assertEqual(len(orders), len(expected_enrollments))
+
+        self.assertEqual(orders[0]['status'], 'success')
+        self.assertEqual(orders[0]['lms_user_id'], self.user.lms_user_id)
+        self.assertEqual(orders[0]['new_order_created'], False)
+
+        self.assertEqual(orders[1]['status'], 'success')
+        self.assertEqual(orders[1]['lms_user_id'], 12)
+        self.assertEqual(orders[1]['new_order_created'], True)
+
+        self.assertEqual(orders[2]['status'], 'failure')
+        self.assertEqual(orders[2]['detail'], 'Failed to create free order')
 
     def test_create_manual_order_with_incorrect_course(self):
         """"

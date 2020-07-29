@@ -49,6 +49,14 @@ class CreateRefundForOrdersTests(DiscoveryMockMixin, TestCase):
             id_verification_required=False,
             price=0
         )
+        self.mock_access_token_response()
+        self.mock_course_run_detail_endpoint(
+            self.course,
+            discovery_api_url=self.site.siteconfiguration.discovery_api_url,
+            course_run_info={
+                'course_uuid': '620a5ce5-6ff4-4b2b-bea1-a273c6920ae5'
+            }
+        )
 
     def build_jwt_header(self, user):
         """
