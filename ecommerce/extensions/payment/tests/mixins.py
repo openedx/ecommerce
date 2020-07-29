@@ -199,7 +199,7 @@ class CybersourceMixin(PaymentEventsMixin):
         return notification
 
     def mock_cybersource_wsdl(self):
-        files = ('CyberSourceTransaction_1.115.wsdl', 'CyberSourceTransaction_1.115.xsd')
+        files = ('CyberSourceTransaction_1.166.wsdl', 'CyberSourceTransaction_1.166.xsd')
 
         for filename in files:
             path = os.path.join(os.path.dirname(__file__), filename)
@@ -223,7 +223,7 @@ class CybersourceMixin(PaymentEventsMixin):
         </wsse:Security>
     </soap:Header>
     <soap:Body>
-        <c:replyMessage xmlns:c="urn:schemas-cybersource-com:transaction-data-1.115">
+        <c:replyMessage xmlns:c="urn:schemas-cybersource-com:transaction-data-1.166">
             <c:merchantReferenceCode>{merchant_reference_code}</c:merchantReferenceCode>
             <c:requestID>{request_id}</c:requestID>
             <c:decision>{decision}</c:decision>
@@ -239,6 +239,9 @@ class CybersourceMixin(PaymentEventsMixin):
                 <c:requestDateTime>2017-06-12T23:40:14Z</c:requestDateTime>
                 <c:amount>{amount}</c:amount>
                 <c:reconciliationID>10595141283</c:reconciliationID>
+                <c:authorizationCode>831000</c:authorizationCode>
+                <c:processorResponse>000</c:processorResponse>
+                <c:paymentNetworkTransactionID>558196000003814</c:paymentNetworkTransactionID>
             </c:ccCreditReply>
         </c:replyMessage>
     </soap:Body>
@@ -335,7 +338,7 @@ class CybersourceMixin(PaymentEventsMixin):
                 </wsse:Security>
             </soap:Header>
             <soap:Body>
-                <c:replyMessage xmlns:c="urn:schemas-cybersource-com:transaction-data-1.115">
+                <c:replyMessage xmlns:c="urn:schemas-cybersource-com:transaction-data-1.166">
                     <c:merchantReferenceCode>EDX-100045</c:merchantReferenceCode>
                     <c:requestID>4996329373316728804010</c:requestID>
                     <c:decision>{decision}</c:decision>

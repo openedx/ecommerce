@@ -170,8 +170,8 @@ environment in which you are operating.
                 # Generate this at EBC: Account Management > Transaction Security Keys > SOAP Toolkit API
                 'transaction_key': '',
 
-                # Production: https://ics2wsa.ic3.com/commerce/1.x/transactionProcessor/CyberSourceTransaction_1.115.wsdl
-                'soap_api_url': 'https://ics2wstest.ic3.com/commerce/1.x/transactionProcessor/CyberSourceTransaction_1.115.wsdl',
+                # Production: https://ics2wsa.ic3.com/commerce/1.x/transactionProcessor/CyberSourceTransaction_1.166.wsdl
+                'soap_api_url': 'https://ics2wstest.ic3.com/commerce/1.x/transactionProcessor/CyberSourceTransaction_1.166.wsdl',
 
                 # Use the default value in settings/base.py or Ansible
                 'cancel_checkout_path': PAYMENT_PROCESSOR_CANCEL_PATH,
