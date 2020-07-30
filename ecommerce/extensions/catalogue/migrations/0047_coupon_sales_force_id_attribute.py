@@ -2,15 +2,16 @@
 
 
 from django.db import migrations
+from oscar.core.loading import get_model
 
 from ecommerce.core.constants import COUPON_PRODUCT_CLASS_NAME
+
+ProductAttribute = get_model("catalogue", "ProductAttribute")
+ProductClass = get_model("catalogue", "ProductClass")
 
 
 def create_sales_force_id_attribute(apps, schema_editor):
     """Create coupon sales_force_id attribute."""
-    ProductAttribute = apps.get_model("catalogue", "ProductAttribute")
-    ProductClass = apps.get_model("catalogue", "ProductClass")
-
     ProductAttribute.skip_history_when_saving = True
 
     coupon = ProductClass.objects.get(name=COUPON_PRODUCT_CLASS_NAME)
@@ -26,9 +27,6 @@ def create_sales_force_id_attribute(apps, schema_editor):
 
 def remove_sales_force_id_attribute(apps, schema_editor):
     """Remove coupon sales_force_id attribute."""
-    ProductAttribute = apps.get_model("catalogue", "ProductAttribute")
-    ProductClass = apps.get_model("catalogue", "ProductClass")
-
     coupon = ProductClass.objects.get(name=COUPON_PRODUCT_CLASS_NAME)
 
     ProductAttribute.skip_history_when_saving = True
