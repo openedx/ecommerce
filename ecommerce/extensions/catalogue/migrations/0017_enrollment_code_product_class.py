@@ -2,18 +2,17 @@
 
 
 from django.db import migrations
-from oscar.core.loading import get_model
 from oscar.core.utils import slugify
 
 from ecommerce.core.constants import ENROLLMENT_CODE_PRODUCT_CLASS_NAME
 
-Category = get_model('catalogue', 'Category')
-ProductAttribute = get_model('catalogue', 'ProductAttribute')
-ProductClass = get_model('catalogue', 'ProductClass')
-
 
 def create_enrollment_code_product_class(apps, schema_editor):
     """Create an Enrollment code product class and switch to turn automatic creation on."""
+    Category = apps.get_model('catalogue', 'Category')
+    ProductAttribute = apps.get_model('catalogue', 'ProductAttribute')
+    ProductClass = apps.get_model('catalogue', 'ProductClass')
+
     for klass in (Category, ProductAttribute, ProductClass):
         klass.skip_history_when_saving = True
 
@@ -46,6 +45,10 @@ def create_enrollment_code_product_class(apps, schema_editor):
 
 def remove_enrollment_code_product_class(apps, schema_editor):
     """Remove the Enrollment code product class and the waffle switch."""
+    Category = apps.get_model('catalogue', 'Category')
+    ProductAttribute = apps.get_model('catalogue', 'ProductAttribute')
+    ProductClass = apps.get_model('catalogue', 'ProductClass')
+
     ProductClass.skip_history_when_saving = True
     ProductClass.objects.filter(name=ENROLLMENT_CODE_PRODUCT_CLASS_NAME).delete()
 

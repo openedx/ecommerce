@@ -1,31 +1,31 @@
 """ Add 'B2B Affiliate Promotion' category to the list of coupon categories"""
 
 from django.db import migrations
-from oscar.apps.catalogue.categories import create_from_breadcrumbs
+# from oscar.apps.catalogue.categories import create_from_breadcrumbs
 
-COUPON_CATEGORY_NAME = 'Coupons'
+# COUPON_CATEGORY_NAME = 'Coupons'
 
-NEW_CATEGORIES = [
-    'B2B Affiliate Promotion',
-]
+# NEW_CATEGORIES = [
+#     'B2B Affiliate Promotion',
+# ]
 
-def create_new_categories(apps, schema_editor):
-    """ Create new coupon categories """
-    Category = apps.get_model("catalogue", "Category")
+# def create_new_categories(apps, schema_editor):
+#     """ Create new coupon categories """
+#     Category = apps.get_model("catalogue", "Category")
+#
+#     Category.skip_history_when_saving = True
+#     for category in NEW_CATEGORIES:
+#         create_from_breadcrumbs('{} > {}'.format(COUPON_CATEGORY_NAME, category))
 
-    Category.skip_history_when_saving = True
-    for category in NEW_CATEGORIES:
-        create_from_breadcrumbs('{} > {}'.format(COUPON_CATEGORY_NAME, category))
 
-
-def remove_new_categories(apps, schema_editor):
-    """ Remove new coupon categories """
-    Category = apps.get_model("catalogue", "Category")
-
-    Category.skip_history_when_saving = True
-    Category.objects.get(name=COUPON_CATEGORY_NAME).get_children().filter(
-        name__in=NEW_CATEGORIES
-    ).delete()
+# def remove_new_categories(apps, schema_editor):
+#     """ Remove new coupon categories """
+#     Category = apps.get_model("catalogue", "Category")
+#
+#     Category.skip_history_when_saving = True
+#     Category.objects.get(name=COUPON_CATEGORY_NAME).get_children().filter(
+#         name__in=NEW_CATEGORIES
+#     ).delete()
 
 
 class Migration(migrations.Migration):
@@ -34,5 +34,5 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(create_new_categories, remove_new_categories)
+        # migrations.RunPython(create_new_categories, remove_new_categories)
     ]

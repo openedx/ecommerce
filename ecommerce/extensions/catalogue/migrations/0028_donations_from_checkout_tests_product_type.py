@@ -2,19 +2,17 @@
 
 
 from django.db import migrations
-from oscar.core.loading import get_model
 from oscar.core.utils import slugify
 
 from ecommerce.core.constants import DONATIONS_FROM_CHECKOUT_TESTS_PRODUCT_TYPE_NAME
 
-Category = get_model("catalogue", "Category")
-Product = get_model('catalogue', 'Product')
-ProductAttribute = get_model("catalogue", "ProductAttribute")
-ProductClass = get_model("catalogue", "ProductClass")
-
 
 def create_product_class(apps, schema_editor):  # pylint: disable=unused-argument
     """ Create a donation product class for donations from checkout tests """
+    Category = apps.get_model("catalogue", "Category")
+    Product = apps.get_model('catalogue', 'Product')
+    ProductAttribute = apps.get_model("catalogue", "ProductAttribute")
+    ProductClass = apps.get_model("catalogue", "ProductClass")
 
     ProductClass.skip_history_when_saving = True
     Category.skip_history_when_saving = True
@@ -37,6 +35,11 @@ def create_product_class(apps, schema_editor):  # pylint: disable=unused-argumen
 
 def remove_product_class(apps, schema_editor):  # pylint: disable=unused-argument
     """ Reverse function. """
+    Category = apps.get_model("catalogue", "Category")
+    Product = apps.get_model('catalogue', 'Product')
+    ProductAttribute = apps.get_model("catalogue", "ProductAttribute")
+    ProductClass = apps.get_model("catalogue", "ProductClass")
+
     ProductClass.skip_history_when_saving = True
     Product.skip_history_when_saving = True
     Category.skip_history_when_saving = True

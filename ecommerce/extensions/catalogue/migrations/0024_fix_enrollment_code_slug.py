@@ -2,9 +2,6 @@
 
 
 from django.db import migrations
-from oscar.core.loading import get_model
-
-ProductClass = get_model("catalogue", "ProductClass")
 
 WRONG_SLUG = 'enrollment-code'
 RIGHT_SLUG = 'enrollment_code'
@@ -12,6 +9,8 @@ RIGHT_SLUG = 'enrollment_code'
 
 def fix_enrollment_code_slug(apps, schema_editor):
     """Update the faulty product class."""
+    ProductClass = apps.get_model("catalogue", "ProductClass")
+
     ProductClass.skip_history_when_saving = True
     try:
         product_class = ProductClass.objects.get(slug=WRONG_SLUG)
@@ -22,6 +21,8 @@ def fix_enrollment_code_slug(apps, schema_editor):
 
 
 def revert_migration(apps, schema_editor):
+    ProductClass = apps.get_model("catalogue", "ProductClass")
+
     ProductClass.skip_history_when_saving = True
     try:
         product_class = ProductClass.objects.get(slug=RIGHT_SLUG)

@@ -2,16 +2,15 @@
 
 
 from django.db import migrations
-from oscar.core.loading import get_model
 
 from ecommerce.core.constants import ENROLLMENT_CODE_PRODUCT_CLASS_NAME
-
-ProductAttribute = get_model("catalogue", "ProductAttribute")
-ProductClass = get_model("catalogue", "ProductClass")
 
 
 def create_idverifyreq_attribute(apps, schema_editor):
     """Create enrollment code 'id_verification_required' attribute."""
+    ProductAttribute = apps.get_model("catalogue", "ProductAttribute")
+    ProductClass = apps.get_model("catalogue", "ProductClass")
+
     ProductAttribute.skip_history_when_saving = True
     enrollment_code_class = ProductClass.objects.get(name=ENROLLMENT_CODE_PRODUCT_CLASS_NAME)
     pa = ProductAttribute(
@@ -26,6 +25,9 @@ def create_idverifyreq_attribute(apps, schema_editor):
 
 def remove_idverifyreq_attribute(apps, schema_editor):
     """Remove enrollment code 'id_verification_required' attribute."""
+    ProductAttribute = apps.get_model("catalogue", "ProductAttribute")
+    ProductClass = apps.get_model("catalogue", "ProductClass")
+
     ProductAttribute.skip_history_when_saving = True
     enrollment_code_class = ProductClass.objects.get(name=ENROLLMENT_CODE_PRODUCT_CLASS_NAME)
     ProductAttribute.objects.get(product_class=enrollment_code_class, name='id_verification_required').delete()
