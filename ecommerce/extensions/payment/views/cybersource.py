@@ -132,11 +132,8 @@ class CybersourceSubmitView(BasePaymentSubmitView, CyberSourceProcessorMixin, Ed
                 'headers': dict(e.headers),
             }, transaction_id=e.headers['v-c-correlation-id'], basket=basket)
             logger.exception('Payment failed')
-            return JsonResponse({
-                'errors': [
-                    {'error_code': 'payment-failed'}
-                ]
-            }, status=400)
+            # This will display the generic error on the frontend
+            return JsonResponse({}, status=400)
         
         # Valid response codes - https://developer.cybersource.com/content/dam/cybsdeveloper2019/responsecode.json
         if return_data.status in ('DECLINE', 'AUTHORIZED_PENDING_REVIEW', 'AUTHORIZED_RISK_DECLINED', 'PENDING_AUTHENTICATION'):
@@ -149,11 +146,8 @@ class CybersourceSubmitView(BasePaymentSubmitView, CyberSourceProcessorMixin, Ed
         if return_data.status not in ('AUTHORIZED', 'PENDING'):
             # [GM] TODO: This should never happen!
             logger.critical('Unexpected payment response status: %s', return_data.status)
-            return JsonResponse({
-                'errors': [
-                    {'error_code': 'payment-failed'}
-                ]
-            }, status=400)
+            # This will display the generic error on the frontend
+            return JsonResponse({}, status=400)
 
         billing_address = BillingAddress(
             first_name=data['first_name'],
