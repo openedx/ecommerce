@@ -605,7 +605,7 @@ class User(AbstractUser):
                         user_id=self.id, called_from=called_from)
                     log.error(error_msg, exc_info=True)
 
-                    #raise MissingLmsUserIdException(error_msg)
+                    raise MissingLmsUserIdException(error_msg)
 
     def _get_lms_user_id_from_social_auth(self):
         """
