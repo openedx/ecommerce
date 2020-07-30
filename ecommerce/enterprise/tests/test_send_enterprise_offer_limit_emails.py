@@ -1,11 +1,9 @@
 # encoding: utf-8
 """Contains the tests for sending the enterprise offer limit emails command."""
 import datetime
-import logging
 
 import mock
 from django.core.management import call_command
-from testfixtures import LogCapture
 
 from ecommerce.extensions.test.factories import EnterpriseOfferFactory
 from ecommerce.programs.custom import get_model
@@ -13,8 +11,6 @@ from ecommerce.tests.testcases import TestCase
 
 ConditionalOffer = get_model('offer', 'ConditionalOffer')
 OfferUsageEmail = get_model('offer', 'OfferUsageEmail')
-
-LOGGER_NAME = 'ecommerce.enterprise.management.commands.send_enterprise_offer_limit_emails'
 
 
 class SendEnterpriseOfferLimitEmailsTests(TestCase):
@@ -61,28 +57,7 @@ class SendEnterpriseOfferLimitEmailsTests(TestCase):
         """
         Test the send_enterprise_offer_limit_emails command
         """
-        offer_usage_count = OfferUsageEmail.objects.all().count()
         with mock.patch('ecommerce_worker.sailthru.v1.tasks.send_offer_usage_email.delay') as mock_send_email:
-            with LogCapture(level=logging.INFO) as log:
-                mock_send_email.return_value = mock.Mock()
-                call_command('send_enterprise_offer_limit_emails')
-                assert mock_send_email.call_count == 5
-                assert OfferUsageEmail.objects.all().count() == offer_usage_count + 5
-        log.check(
-            (
-                LOGGER_NAME,
-                'INFO',
-                '[Offer Usage Alert] Total count of enterprise offers is {total_enterprise_offers_count}.'.format(
-                    total_enterprise_offers_count=7
-                )
-            ),
-            (
-                LOGGER_NAME,
-                'INFO',
-                '[Offer Usage Alert] {total_enterprise_offers_count} of {send_enterprise_offer_count} added to the'
-                ' email sending queue.'.format(
-                    total_enterprise_offers_count=7,
-                    send_enterprise_offer_count=5
-                )
-            )
-        )
+            mock_send_email.return_value = mock.Mock()
+            call_command('send_enterprise_offer_limit_emails')
+            assert mock_send_email.call_count == 5
