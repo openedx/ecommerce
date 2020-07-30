@@ -44,7 +44,7 @@ class Command(BaseCommand):
         elif not offer_usage:
             is_eligible = True
         elif enterprise_offer.usage_email_frequency == ConditionalOffer.DAILY:
-            is_eligible = diff_of_days >= 1
+            is_eligible = True # diff_of_days >= 1
         elif enterprise_offer.usage_email_frequency == ConditionalOffer.WEEKLY:
             is_eligible = diff_of_days >= 7
         else:
@@ -104,13 +104,11 @@ class Command(BaseCommand):
         logger.info('[Offer Usage Alert] Total count of enterprise offers is %s.', total_enterprise_offers_count)
         for enterprise_offer in enterprise_offers:
             if self.is_eligible_for_alert(enterprise_offer):
+                logger.info(
+                    '[Offer Usage Alert] Sending email for offer {offer_name}'.format(offer_name=enterprise_offer.name)
+                )
                 send_enterprise_offer_count += 1
                 email_body, email_subject = self.get_email_content(enterprise_offer)
-                OfferUsageEmail.create_record(enterprise_offer, meta_data={
-                    'email_body': email_body,
-                    'email_subject': email_subject,
-                    'email_addresses': enterprise_offer.emails_for_usage_alert
-                })
                 send_offer_usage_email.delay(enterprise_offer.emails_for_usage_alert, email_subject, email_body)
         logger.info(
             '[Offer Usage Alert] %s of %s added to the email sending queue.',
