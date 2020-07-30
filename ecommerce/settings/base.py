@@ -706,10 +706,12 @@ edX Login: {USER_EMAIL}
 Access Code: {CODE}
 Expiration Date: {EXPIRATION_DATE}
 '''
+OFFER_ASSIGNMENT_EMAIL_SUBJECT = 'New edX course assignment'
 
 OFFER_REVOKE_EMAIL_TEMPLATE = '''
 Your Learning Manager has revoked access code {CODE} and it is no longer assigned to your edX account {USER_EMAIL}.
 '''
+OFFER_REVOKE_EMAIL_SUBJECT = 'edX Course Assignment Revoked'
 
 OFFER_REMINDER_EMAIL_TEMPLATE = '''
 You have redeemed this code {REDEEMED_OFFER_COUNT} time(s) out of {TOTAL_OFFER_COUNT} available course redemptions.
@@ -718,6 +720,7 @@ edX Login: {USER_EMAIL}
 Access Code: {CODE}
 Expiration Date: {EXPIRATION_DATE}
 '''
+OFFER_REMINDER_EMAIL_SUBJECT = 'Reminder on edX course assignment'
 
 OFFER_ASSIGNMEN_EMAIL_TEMPLATE_BODY_MAP = {
     'assign': OFFER_ASSIGNMENT_EMAIL_TEMPLATE,

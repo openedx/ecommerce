@@ -23,7 +23,6 @@ class CouponCodeSerializerTests(CouponMixin, TestCase):
     """ Test for coupon code serializers. """
     LOGGER_NAME = 'ecommerce.extensions.api.serializers'
     TEMPLATE = 'Text {PARAM} is fun'
-    SUBJECT = 'Subject '
     GREETING = 'Hello '
     CLOSING = ' Bye'
 
@@ -53,7 +52,6 @@ class CouponCodeSerializerTests(CouponMixin, TestCase):
         """ Test that the code_expiration_date passed is equal to coupon batch end date """
         serializer = CouponCodeAssignmentSerializer(data=self.data, context={'coupon': self.coupon})
         serializer._trigger_email_sending_task(  # pylint: disable=protected-access
-            subject=self.SUBJECT,
             greeting=self.GREETING,
             closing=self.CLOSING,
             assigned_offer=self.offer_assignment,
@@ -61,7 +59,6 @@ class CouponCodeSerializerTests(CouponMixin, TestCase):
         )
         expected_expiration_date = self.coupon.attr.coupon_vouchers.vouchers.first().end_datetime
         mock_assign_email.assert_called_with(
-            subject=self.SUBJECT,
             greeting=self.GREETING,
             closing=self.CLOSING,
             offer_assignment_id=self.offer_assignment.id,
@@ -76,7 +73,6 @@ class CouponCodeSerializerTests(CouponMixin, TestCase):
         """ Test that the code_expiration_date passed is equal to coupon batch end date """
         serializer = CouponCodeRemindSerializer(data=self.data, context={'coupon': self.coupon})
         serializer._trigger_email_sending_task(  # pylint: disable=protected-access
-            subject=self.SUBJECT,
             greeting=self.GREETING,
             closing=self.CLOSING,
             assigned_offer=self.offer_assignment,
@@ -85,7 +81,6 @@ class CouponCodeSerializerTests(CouponMixin, TestCase):
         )
         expected_expiration_date = self.coupon.attr.coupon_vouchers.vouchers.first().end_datetime
         mock_remind_email.assert_called_with(
-            subject=self.SUBJECT,
             greeting=self.GREETING,
             closing=self.CLOSING,
             learner_email=self.offer_assignment.user_email,
@@ -104,10 +99,9 @@ class CouponCodeSerializerTests(CouponMixin, TestCase):
             (
                 self.LOGGER_NAME,
                 'ERROR',
-                '[Offer Assignment] Email for offer_assignment_id: {} with subject \'{}\', greeting \'{}\' and closing '
-                '\'{}\' raised exception: {}'.format(
+                '[Offer Assignment] Email for offer_assignment_id: {} with greeting \'{}\' and closing \'{}\' raised '
+                'exception: {}'.format(
                     self.offer_assignment.id,
-                    self.SUBJECT,
                     self.GREETING,
                     self.CLOSING,
                     repr(Exception('Ignore me - assignment'))
@@ -117,7 +111,6 @@ class CouponCodeSerializerTests(CouponMixin, TestCase):
 
         with LogCapture(self.LOGGER_NAME) as log:
             serializer._trigger_email_sending_task(  # pylint: disable=protected-access
-                subject=self.SUBJECT,
                 greeting=self.GREETING,
                 closing=self.CLOSING,
                 assigned_offer=self.offer_assignment,
@@ -134,10 +127,9 @@ class CouponCodeSerializerTests(CouponMixin, TestCase):
             (
                 self.LOGGER_NAME,
                 'ERROR',
-                '[Offer Reminder] Email for offer_assignment_id: {} with subject \'{}\', greeting \'{}\' '
-                'and closing \'{}\' raised exception: {}'.format(
+                '[Offer Reminder] Email for offer_assignment_id: {} with greeting \'{}\' and closing \'{}\' raised '
+                'exception: {}'.format(
                     self.offer_assignment.id,
-                    self.SUBJECT,
                     self.GREETING,
                     self.CLOSING,
                     repr(Exception('Ignore me - reminder'))
@@ -148,7 +140,6 @@ class CouponCodeSerializerTests(CouponMixin, TestCase):
         with self.assertRaises(Exception):
             with LogCapture(self.LOGGER_NAME) as log:
                 serializer._trigger_email_sending_task(  # pylint: disable=protected-access
-                    subject=self.SUBJECT,
                     greeting=self.GREETING,
                     closing=self.CLOSING,
                     assigned_offer=self.offer_assignment,
@@ -165,9 +156,8 @@ class CouponCodeSerializerTests(CouponMixin, TestCase):
             (
                 self.LOGGER_NAME,
                 'ERROR',
-                '[Offer Revocation] Encountered error when revoking code {} for user {} with subject {}, '
-                'greeting {} and closing {}'.format(
-                    None,
+                '[Offer Revocation] Encountered error when revoking code {} for user {} with greeting {} and '
+                'closing {}'.format(
                     None,
                     None,
                     None,
@@ -190,7 +180,6 @@ class CouponCodeSerializerTests(CouponMixin, TestCase):
         }
         context = {
             'coupon': self.coupon,
-            'subject': self.SUBJECT,
             'greeting': self.GREETING,
             'closing': self.CLOSING,
         }
@@ -200,11 +189,10 @@ class CouponCodeSerializerTests(CouponMixin, TestCase):
             (
                 self.LOGGER_NAME,
                 'ERROR',
-                '[Offer Revocation] Encountered error when revoking code {} for user {} with subject \'{}\', '
-                'greeting \'{}\' and closing \'{}\''.format(
+                '[Offer Revocation] Encountered error when revoking code {} for user {} with greeting \'{}\' and '
+                'closing \'{}\''.format(
                     self.code,
                     self.email,
-                    self.SUBJECT,
                     self.GREETING,
                     self.CLOSING,
                 )
