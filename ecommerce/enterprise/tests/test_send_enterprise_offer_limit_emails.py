@@ -68,21 +68,3 @@ class SendEnterpriseOfferLimitEmailsTests(TestCase):
                 call_command('send_enterprise_offer_limit_emails')
                 assert mock_send_email.call_count == 5
                 assert OfferUsageEmail.objects.all().count() == offer_usage_count + 5
-        log.check(
-            (
-                LOGGER_NAME,
-                'INFO',
-                '[Offer Usage Alert] Total count of enterprise offers is {total_enterprise_offers_count}.'.format(
-                    total_enterprise_offers_count=7
-                )
-            ),
-            (
-                LOGGER_NAME,
-                'INFO',
-                '[Offer Usage Alert] {total_enterprise_offers_count} of {send_enterprise_offer_count} added to the'
-                ' email sending queue.'.format(
-                    total_enterprise_offers_count=7,
-                    send_enterprise_offer_count=5
-                )
-            )
-        )
