@@ -153,8 +153,10 @@ class Cybersource(ApplePayMixin, BaseClientSidePaymentProcessor):
             Ptsv2paymentsOrderInformationInvoiceDetails, Ptsv2paymentsOrderInformation, PaymentsApi, Ptsv2paymentsMerchantDefinedInformation,
             CreatePaymentRequest
         )
-        # [GM] TODO: validate payment token prior to authorizing
+        # [GM] TODO: validate payment token prior to authorizing using the key in the capture context
         transient_token_jwt = request.POST['payment_token']
+        # We save the capture context in the backend and recall it here so that we don't have to trust any input from the front-end
+        capture_context = request.session['capture_context']
 
         clientReferenceInformation = Ptsv2paymentsClientReferenceInformation(
             code=basket.order_number,

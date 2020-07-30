@@ -5,6 +5,8 @@ import logging
 import requests
 import six
 import waffle
+from CyberSource.rest import ApiException
+from decimal import Decimal
 from django.contrib import messages
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
@@ -35,6 +37,7 @@ from ecommerce.extensions.basket.utils import (
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
 from ecommerce.extensions.checkout.utils import get_receipt_page_url
 from ecommerce.extensions.offer.constants import DYNAMIC_DISCOUNT_FLAG
+from ecommerce.extensions.payment.constants import CYBERSOURCE_CARD_TYPE_MAP
 from ecommerce.extensions.payment.exceptions import (
     AuthorizationError,
     DuplicateReferenceNumber,
@@ -43,6 +46,7 @@ from ecommerce.extensions.payment.exceptions import (
     InvalidSignatureError,
     RedundantPaymentNotificationError
 )
+from ecommerce.extensions.payment.processors import HandledProcessorResponse
 from ecommerce.extensions.payment.processors.cybersource import Cybersource
 from ecommerce.extensions.payment.utils import checkSDN, clean_field_value
 from ecommerce.extensions.payment.views import BasePaymentSubmitView
@@ -69,7 +73,7 @@ class CyberSourceProcessorMixin:
         return Cybersource(self.request.site)
 
 
-class CybersourceSubmitView(BasePaymentSubmitView, EdxOrderPlacementMixin):
+class CybersourceSubmitView(BasePaymentSubmitView, CyberSourceProcessorMixin, EdxOrderPlacementMixin):
     """ Starts CyberSource payment process.
 
     This view is intended to be called asynchronously by the payment form. The view expects POST data containing a
@@ -115,15 +119,13 @@ class CybersourceSubmitView(BasePaymentSubmitView, EdxOrderPlacementMixin):
             request.basket.id,
         )
 
-        # [GM] TODO: Record payment processor response in database in all cases (authorized, decline, or error)
         caught_exception = False
-        payment_processor = Cybersource(self.request.site)
-        from CyberSource.rest import ApiException
         try:
-            return_data, status, body = payment_processor.authorize_payment(basket, request, data)
-            payment_processor.record_processor_response(return_data.to_dict(), transaction_id=return_data.id, basket=basket)
+            return_data, status, body = self.payment_processor.authorize_payment(basket, request, data)
+            transaction_id = return_data.processor_information.transaction_id
+            self.payment_processor.record_processor_response(return_data.to_dict(), transaction_id=transaction_id, basket=basket)
         except ApiException as e:
-            payment_processor.record_processor_response({
+            self.payment_processor.record_processor_response({
                 'status': e.status,
                 'reason': e.reason,
                 'body': e.body,
@@ -132,6 +134,7 @@ class CybersourceSubmitView(BasePaymentSubmitView, EdxOrderPlacementMixin):
             logger.exception('Payment failed')
             caught_exception = True
         
+        # Valid response codes - https://developer.cybersource.com/content/dam/cybsdeveloper2019/responsecode.json
         if caught_exception or return_data.status == 'ERROR':
             return JsonResponse({
                 'errors': [
@@ -139,14 +142,14 @@ class CybersourceSubmitView(BasePaymentSubmitView, EdxOrderPlacementMixin):
                 ]
             }, status=400)
 
-        if return_data.status == 'DECLINE':
+        if return_data.status in ('DECLINE', 'AUTHORIZED_PENDING_REVIEW', 'AUTHORIZED_RISK_DECLINED', 'PENDING_AUTHENTICATION'):
             return JsonResponse({
                 'errors': [
                     {'error_code': 'transaction-declined-message'}
                 ]
             }, status=400)
         
-        if return_data.status != 'AUTHORIZED':
+        if return_data.status not in ('AUTHORIZED', 'PENDING'):
             # [GM] TODO: This should never happen!
             logger.critical('Unexpected payment response status: %s', return_data.status)
             return JsonResponse({
@@ -165,8 +168,16 @@ class CybersourceSubmitView(BasePaymentSubmitView, EdxOrderPlacementMixin):
             state=data['state'],
             country=Country.objects.get(iso_3166_1_a2=data['country'])
         )
+        handled_processor_response = HandledProcessorResponse(
+            transaction_id=transaction_id,
+            total=Decimal(return_data.order_information.amount_details.total_amount),
+            currency=return_data.order_information.amount_details.currency,
+            card_number='Cybersource Payment Token',
+            card_type=CYBERSOURCE_CARD_TYPE_MAP.get(return_data.payment_information.tokenized_card.type)
+        )
         with transaction.atomic():
             basket.freeze()
+            self.record_payment(basket, handled_processor_response)
             order = self.create_order(request, basket, billing_address)
             self.handle_post_order(order)
 
