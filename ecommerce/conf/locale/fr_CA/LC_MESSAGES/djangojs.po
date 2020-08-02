@@ -6,12 +6,13 @@
 # Translators:
 # Translators:
 # Translators:
+# Translators:
 # Pierre Mailhot <pierre.mailhot@gmail.com>, 2016-2019
 msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-12-03 14:18+0000\n"
+"POT-Creation-Date: 2020-08-02 20:12+0000\n"
 "PO-Revision-Date: 2019-12-18 16:18+0000\n"
 "Last-Translator: Pierre Mailhot <pierre.mailhot@gmail.com>\n"
 "Language-Team: French (Canada) (http://www.transifex.com/open-edx/edx-platform/language/fr_CA/)\n"
@@ -40,32 +41,32 @@ msgstr "Cette valeur doit être une date."
 msgid "At least one seat type must be selected."
 msgstr "Au moins un type de place doit être sélectionné"
 
-#: ecommerce/static/js/models/coupon_model.js:71
+#: ecommerce/static/js/models/coupon_model.js:72
 msgid "This field must be empty or contain 1-16 alphanumeric characters."
 msgstr "Ce champ doit être vide ou contenir 1-16 caractères alphanumériques."
 
-#: ecommerce/static/js/models/coupon_model.js:80
+#: ecommerce/static/js/models/coupon_model.js:81
 #, javascript-format
 msgid "Email domain {%s} is invalid."
 msgstr "Domain de courriel {%s} est invalide."
 
-#: ecommerce/static/js/models/coupon_model.js:97
+#: ecommerce/static/js/models/coupon_model.js:101
 msgid "Must occur after start date"
 msgstr "Doit se produire après la date de début"
 
-#: ecommerce/static/js/models/coupon_model.js:127
+#: ecommerce/static/js/models/coupon_model.js:131
 msgid "Max uses for multi-use coupons must be higher than 2."
 msgstr "Le nombre d'utilisation maximale pour un coupon multi-usage doit être supérieur à 2."
 
-#: ecommerce/static/js/models/coupon_model.js:151
+#: ecommerce/static/js/models/coupon_model.js:155
 msgid "Must occur before end date"
 msgstr "Doit se produire avant la date de fin"
 
-#: ecommerce/static/js/models/coupon_model.js:173
+#: ecommerce/static/js/models/coupon_model.js:177
 msgid "A valid course ID is required"
 msgstr "Un ID de cours valide est nécessaire"
 
-#: ecommerce/static/js/models/coupon_model.js:187
+#: ecommerce/static/js/models/coupon_model.js:191
 msgid "A valid Program UUID is required."
 msgstr "Un UUID de Programme valide est requis."
 
@@ -204,11 +205,11 @@ msgstr "Année invalide"
 msgid "Card expired"
 msgstr "Carte expirée"
 
-#: ecommerce/static/js/pages/basket_page.js:503
+#: ecommerce/static/js/pages/basket_page.js:474
 msgid "<Choose state/province>"
 msgstr "<Choose state/province>"
 
-#: ecommerce/static/js/pages/basket_page.js:504
+#: ecommerce/static/js/pages/basket_page.js:475
 msgid "State/Province (required)"
 msgstr "État/Province (obligatoire)"
 
@@ -289,19 +290,19 @@ msgstr "La virgule traînante n'est pas autorisée."
 
 #: ecommerce/static/js/views/coupon_detail_view.js:108
 #: ecommerce/static/js/views/coupon_form_view.js:62
-#: ecommerce/static/js/views/enterprise_coupon_form_view.js:29
+#: ecommerce/static/js/views/enterprise_coupon_form_view.js:30
 msgid "Can be used once by one customer"
 msgstr "Peut être utilisé une seule fois par un client"
 
 #: ecommerce/static/js/views/coupon_detail_view.js:110
 #: ecommerce/static/js/views/coupon_form_view.js:70
-#: ecommerce/static/js/views/enterprise_coupon_form_view.js:37
+#: ecommerce/static/js/views/enterprise_coupon_form_view.js:38
 msgid "Can be used multiple times by multiple customers"
 msgstr "Peut être utilisé à plusieurs reprises par de multiples clients"
 
 #: ecommerce/static/js/views/coupon_detail_view.js:112
 #: ecommerce/static/js/views/coupon_form_view.js:66
-#: ecommerce/static/js/views/enterprise_coupon_form_view.js:33
+#: ecommerce/static/js/views/enterprise_coupon_form_view.js:34
 msgid "Can be used once by multiple customers"
 msgstr "Peut être utilisé une fois par plusieurs clients"
 
@@ -313,11 +314,11 @@ msgstr "Code d'inscription"
 msgid "Discount Code"
 msgstr "Code de réduction"
 
-#: ecommerce/static/js/views/coupon_form_view.js:770
+#: ecommerce/static/js/views/coupon_form_view.js:781
 msgid "Save Changes"
 msgstr "Enregistrer les modifications"
 
-#: ecommerce/static/js/views/coupon_form_view.js:785
+#: ecommerce/static/js/views/coupon_form_view.js:796
 msgid "Create Coupon"
 msgstr "Créer un coupon"
 
@@ -455,7 +456,7 @@ msgid "Seat type"
 msgstr "Type de place"
 
 #: ecommerce/static/js/views/enterprise_coupon_detail_view.js:28
-#: ecommerce/static/js/views/enterprise_coupon_form_view.js:41
+#: ecommerce/static/js/views/enterprise_coupon_form_view.js:42
 msgid "Can be used multiple times by one customer"
 msgstr "Peut être utilisé plusieurs fois par un client"
 
