@@ -5,8 +5,6 @@ import logging
 import requests
 import six
 import waffle
-from CyberSource.rest import ApiException
-from decimal import Decimal
 from django.contrib import messages
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
@@ -37,7 +35,6 @@ from ecommerce.extensions.basket.utils import (
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
 from ecommerce.extensions.checkout.utils import get_receipt_page_url
 from ecommerce.extensions.offer.constants import DYNAMIC_DISCOUNT_FLAG
-from ecommerce.extensions.payment.constants import CYBERSOURCE_CARD_TYPE_MAP
 from ecommerce.extensions.payment.exceptions import (
     AuthorizationError,
     DuplicateReferenceNumber,
@@ -46,7 +43,6 @@ from ecommerce.extensions.payment.exceptions import (
     InvalidSignatureError,
     RedundantPaymentNotificationError
 )
-from ecommerce.extensions.payment.processors import HandledProcessorResponse
 from ecommerce.extensions.payment.processors.cybersource import Cybersource
 from ecommerce.extensions.payment.utils import checkSDN, clean_field_value
 from ecommerce.extensions.payment.views import BasePaymentSubmitView
@@ -73,7 +69,7 @@ class CyberSourceProcessorMixin:
         return Cybersource(self.request.site)
 
 
-class CybersourceSubmitView(BasePaymentSubmitView, CyberSourceProcessorMixin, EdxOrderPlacementMixin):
+class CybersourceSubmitView(BasePaymentSubmitView):
     """ Starts CyberSource payment process.
 
     This view is intended to be called asynchronously by the payment form. The view expects POST data containing a
@@ -119,67 +115,44 @@ class CybersourceSubmitView(BasePaymentSubmitView, CyberSourceProcessorMixin, Ed
             request.basket.id,
         )
 
-        caught_exception = False
-        try:
-            return_data, status, body = self.payment_processor.authorize_payment(basket, request, data)
-            transaction_id = return_data.processor_information.transaction_id
-            self.payment_processor.record_processor_response(return_data.to_dict(), transaction_id=transaction_id, basket=basket)
-        except ApiException as e:
-            self.payment_processor.record_processor_response({
-                'status': e.status,
-                'reason': e.reason,
-                'body': e.body,
-                'headers': dict(e.headers),
-            }, transaction_id=e.headers['v-c-correlation-id'], basket=basket)
-            logger.exception('Payment failed')
-            # This will display the generic error on the frontend
-            return JsonResponse({}, status=400)
-        
-        # Valid response codes - https://developer.cybersource.com/content/dam/cybsdeveloper2019/responsecode.json
-        if return_data.status in ('DECLINE', 'AUTHORIZED_PENDING_REVIEW', 'AUTHORIZED_RISK_DECLINED', 'PENDING_AUTHENTICATION'):
-            return JsonResponse({
-                'errors': [
-                    {'error_code': 'transaction-declined-message'}
-                ]
-            }, status=400)
+        # Add extra parameters for Silent Order POST
+        extra_parameters = {
+            'payment_method': 'card',
+            'unsigned_field_names': ','.join(Cybersource.PCI_FIELDS),
+            'bill_to_email': user.email,
+            # Fall back to order number when there is no session key (JWT auth)
+            'device_fingerprint_id': request.session.session_key or basket.order_number,
+        }
 
-        if return_data.status not in ('AUTHORIZED', 'PENDING'):
-            # [GM] TODO: This should never happen!
-            logger.critical('Unexpected payment response status: %s', return_data.status)
-            # This will display the generic error on the frontend
-            return JsonResponse({}, status=400)
+        for source, destination in six.iteritems(self.FIELD_MAPPINGS):
+            extra_parameters[destination] = clean_field_value(data[source])
 
-        billing_address = BillingAddress(
-            first_name=data['first_name'],
-            last_name=data['last_name'],
-            line1=data['address_line1'],
-            line2=data['address_line2'],
-            line4=data['city'],
-            postcode=data['postal_code'],
-            state=data['state'],
-            country=Country.objects.get(iso_3166_1_a2=data['country'])
+        parameters = Cybersource(self.request.site).get_transaction_parameters(
+            basket,
+            use_client_side_checkout=True,
+            extra_parameters=extra_parameters
         )
-        handled_processor_response = HandledProcessorResponse(
-            transaction_id=transaction_id,
-            total=Decimal(return_data.order_information.amount_details.total_amount),
-            currency=return_data.order_information.amount_details.currency,
-            card_number='Cybersource Payment Token',
-            card_type=CYBERSOURCE_CARD_TYPE_MAP.get(return_data.payment_information.tokenized_card.type)
-        )
-        with transaction.atomic():
-            basket.freeze()
-            self.record_payment(basket, handled_processor_response)
-            order = self.create_order(request, basket, billing_address)
-            self.handle_post_order(order)
 
-        receipt_page_url = get_receipt_page_url(
-            request.site.siteconfiguration,
-            order_number=basket.order_number,
-            disable_back_button=True,
+        logger.info(
+            'Parameters signed for CyberSource transaction [%s], associated with basket [%d].',
+            # TODO: transaction_id is None in logs. This should be fixed.
+            parameters.get('transaction_id'),
+            basket.id
         )
-        return JsonResponse({
-            'receipt_page_url': receipt_page_url,
-        }, status=status)
+
+        # This parameter is only used by the Web/Mobile flow. It is not needed for for Silent Order POST.
+        parameters.pop('payment_page_url', None)
+
+        # Ensure that the response can be properly rendered so that we
+        # don't have to deal with thawing the basket in the event of an error.
+        response = JsonResponse({'form_fields': parameters})
+
+        basket_add_organization_attribute(basket, data)
+
+        # Freeze the basket since the user is paying for it now.
+        basket.freeze()
+
+        return response
 
 
 class CybersourceSubmitAPIView(APIView, CybersourceSubmitView):
@@ -196,6 +169,88 @@ class CybersourceSubmitAPIView(APIView, CybersourceSubmitView):
             request.basket.status
         )
         return super(CybersourceSubmitAPIView, self).post(request)
+
+
+class CybersourceAuthorizeAPIView(APIView, BasePaymentSubmitView, CyberSourceProcessorMixin, EdxOrderPlacementMixin):
+    # DRF APIView wrapper which allows clients to use
+    # JWT authentication when making Cybersource submit
+    # requests.
+    permission_classes = (permissions.IsAuthenticated,)
+
+    def post(self, request):
+        logger.info(
+            '%s called for basket [%d]. It is in the [%s] state.',
+            self.__class__.__name__,
+            request.basket.id,
+            request.basket.status
+        )
+        return super(CybersourceAuthorizeAPIView, self).post(request)
+
+    def form_valid(self, form):
+        data = form.cleaned_data
+        basket = data['basket']
+        request = self.request
+        user = request.user
+
+        hit_count = checkSDN(
+            request,
+            data['first_name'] + ' ' + data['last_name'],
+            data['city'],
+            data['country'])
+
+        if hit_count > 0:
+            logger.info(
+                'SDNCheck function called for basket [%d]. It received %d hit(s).',
+                request.basket.id,
+                hit_count,
+            )
+            response_to_return = {
+                'error': 'There was an error submitting the basket',
+                'sdn_check_failure': {'hit_count': hit_count}}
+
+            return JsonResponse(response_to_return, status=403)
+
+        logger.info(
+            'SDNCheck function called for basket [%d]. It did not receive a hit.',
+            request.basket.id,
+        )
+
+        try:
+            handled_processor_response = self.payment_processor.authorize_payment(basket, request, data)
+        except GatewayError:
+            return JsonResponse({}, status=400)
+        except TransactionDeclined:
+            return JsonResponse({
+                'errors': [
+                    {'error_code': 'transaction-declined-message'}
+                ]
+            }, status=400)
+
+        billing_address = BillingAddress(
+            first_name=data['first_name'],
+            last_name=data['last_name'],
+            line1=data['address_line1'],
+            line2=data['address_line2'],
+            line4=data['city'],
+            postcode=data['postal_code'],
+            state=data['state'],
+            country=Country.objects.get(iso_3166_1_a2=data['country'])
+        )
+
+        with transaction.atomic():
+            basket.freeze()
+            self.record_payment(basket, handled_processor_response)
+            order = self.create_order(request, basket, billing_address)
+            self.handle_post_order(order)
+
+        receipt_page_url = get_receipt_page_url(
+            request.site.siteconfiguration,
+            order_number=basket.order_number,
+            disable_back_button=True,
+        )
+        return JsonResponse({
+            'receipt_page_url': receipt_page_url,
+        }, status=201)
 
 
 class CybersourceInterstitialView(CyberSourceProcessorMixin, EdxOrderPlacementMixin, View):

@@ -9,9 +9,16 @@ import uuid
 from decimal import Decimal
 
 import six
-from CyberSource import GeneratePublicKeyRequest, KeyGenerationApi
+from CyberSource import (
+    GeneratePublicKeyRequest, KeyGenerationApi, Ptsv2paymentsClientReferenceInformation, Ptsv2paymentsProcessingInformation, Ptsv2paymentsTokenInformation,
+    Ptsv2paymentsOrderInformationAmountDetails, Ptsv2paymentsOrderInformationBillTo, Ptsv2paymentsOrderInformationLineItems,
+    Ptsv2paymentsOrderInformationInvoiceDetails, Ptsv2paymentsOrderInformation, PaymentsApi, Ptsv2paymentsMerchantDefinedInformation,
+    CreatePaymentRequest
+)
+from CyberSource.rest import ApiException
 from django.conf import settings
 from django.urls import reverse
+import jwt
 from oscar.apps.payment.exceptions import GatewayError, TransactionDeclined, UserCancelled
 from oscar.core.loading import get_class, get_model
 from zeep import Client
@@ -147,17 +154,54 @@ class Cybersource(ApplePayMixin, BaseClientSidePaymentProcessor):
         return {'key_id': return_data.key_id}
     
     def authorize_payment(self, basket, request, form_data):
-        from CyberSource import (
-            Ptsv2paymentsClientReferenceInformation, Ptsv2paymentsProcessingInformation, Ptsv2paymentsTokenInformation,
-            Ptsv2paymentsOrderInformationAmountDetails, Ptsv2paymentsOrderInformationBillTo, Ptsv2paymentsOrderInformationLineItems,
-            Ptsv2paymentsOrderInformationInvoiceDetails, Ptsv2paymentsOrderInformation, PaymentsApi, Ptsv2paymentsMerchantDefinedInformation,
-            CreatePaymentRequest
-        )
         # [GM] TODO: validate payment token prior to authorizing using the key in the capture context
         transient_token_jwt = request.POST['payment_token']
         # We save the capture context in the backend and recall it here so that we don't have to trust any input from the front-end
         capture_context = request.session['capture_context']
+        logger.info("%s", str(capture_context))
+        decoded_payment_token = jwt.decode(transient_token_jwt, verify=False)
 
+        caught_exception = False
+        try:
+            return_data, status, body = self.authorize_payment_api(transient_token_jwt, basket, request, form_data)
+            transaction_id = return_data.processor_information.transaction_id
+            self.record_processor_response(return_data.to_dict(), transaction_id=transaction_id, basket=basket)
+        except ApiException as e:
+            self.record_processor_response({
+                'status': e.status,
+                'reason': e.reason,
+                'body': e.body,
+                'headers': dict(e.headers),
+            }, transaction_id=e.headers['v-c-correlation-id'], basket=basket)
+            logger.exception('Payment failed')
+            # This will display the generic error on the frontend
+            raise GatewayError()
+
+        # Valid response codes:
+        # AUTHORIZED
+        # PARTIAL_AUTHORIZED
+        # AUTHORIZED_PENDING_REVIEW
+        # AUTHORIZED_RISK_DECLINED
+        # PENDING_AUTHENTICATION
+        # PENDING_REVIEW
+        # DECLINED
+        # INVALID_REQUEST
+        if return_data.status in ('DECLINED', 'AUTHORIZED_PENDING_REVIEW', 'AUTHORIZED_RISK_DECLINED', 'PENDING_AUTHENTICATION', 'PENDING_REVIEW'):
+            raise TransactionDeclined()
+        elif return_data.status == 'INVALID_REQUEST':
+            raise GatewayError()
+        elif return_data.status != 'AUTHORIZED':
+            raise GatewayError()
+
+        return HandledProcessorResponse(
+            transaction_id=transaction_id,
+            total=Decimal(return_data.order_information.amount_details.total_amount),
+            currency=return_data.order_information.amount_details.currency,
+            card_number=decoded_payment_token['data']['number'],
+            card_type=CYBERSOURCE_CARD_TYPE_MAP.get(return_data.payment_information.tokenized_card.type)
+        )
+    
+    def authorize_payment_api(self, transient_token_jwt, basket, request, form_data):
         clientReferenceInformation = Ptsv2paymentsClientReferenceInformation(
             code=basket.order_number,
         )
