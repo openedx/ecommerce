@@ -95,7 +95,7 @@ class Command(BaseCommand):
         return ConditionalOffer.objects.filter(
             emails_for_usage_alert__isnull=False,
             condition__enterprise_customer_uuid__isnull=False
-        )
+        ).exclude(emails_for_usage_alert='')
 
     def handle(self, *args, **options):
         send_enterprise_offer_count = 0
