@@ -17,7 +17,6 @@ from edx_django_utils.cache import TieredCache
 from opaque_keys.edx.keys import CourseKey
 from oscar.core.loading import get_model
 from oscar.templatetags.currency_filters import currency
-from six.moves import range
 
 from ecommerce.core.url_utils import get_ecommerce_url
 from ecommerce.core.utils import log_message_and_raise_validation_error
