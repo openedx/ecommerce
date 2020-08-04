@@ -1,7 +1,8 @@
 
 
+from urllib.parse import urlencode
+
 import requests
-from six.moves.urllib.parse import urlencode
 
 from e2e.config import HUBSPOT_FORMS_API_URI, HUBSPOT_PORTAL_ID, HUBSPOT_SALES_LEAD_FORM_GUID
 
