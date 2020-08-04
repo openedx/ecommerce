@@ -1,7 +1,6 @@
 
 
 import ddt
-import six
 from django.core.management import call_command
 from django.core.management.base import CommandError
 from mock import patch
@@ -27,11 +26,8 @@ class RemovePartnerOffersTests(TestCase):
 
     def test_partner_required(self):
         """Test that command raises partner required error."""
-        if six.PY3:
-            err_msg = 'Error: the following arguments are required: --partner'
-        else:
-            err_msg = 'Error: argument --partner is required'
-        with six.assertRaisesRegex(self, CommandError, err_msg):
+        err_msg = 'Error: the following arguments are required: --partner'
+        with self.assertRaisesRegex(CommandError, err_msg):
             call_command('remove_partner_offers')
 
     def test_no_offer_found(self):

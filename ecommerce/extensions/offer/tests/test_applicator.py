@@ -6,7 +6,6 @@ import ddt
 import mock
 from oscar.core.loading import get_model
 from oscar.test import factories
-from six.moves import range
 
 from ecommerce.core.constants import SYSTEM_ENTERPRISE_LEARNER_ROLE
 from ecommerce.extensions.offer.applicator import Applicator

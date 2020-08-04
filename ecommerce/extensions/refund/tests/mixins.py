@@ -5,7 +5,6 @@ from django.test import override_settings
 from mock_django import mock_signal_receiver
 from oscar.core.loading import get_class, get_model
 from oscar.test.factories import BasketFactory
-from six.moves import zip
 
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.entitlements.utils import create_or_update_course_entitlement
