@@ -2,11 +2,11 @@
 
 
 import json
+from urllib.parse import urljoin
 
 import httpretty
 import mock
 from django.test import RequestFactory
-from six.moves.urllib.parse import urljoin  # pylint: disable=import-error
 
 from ecommerce.extensions.api.authentication import BearerAuthentication
 from ecommerce.tests.testcases import TestCase

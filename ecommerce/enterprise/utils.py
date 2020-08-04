@@ -8,7 +8,7 @@ import hmac
 import logging
 from collections import OrderedDict
 from functools import reduce  # pylint: disable=redefined-builtin
-from urllib.parse import urlencode, urlparse  # pylint: disable=import-error
+from urllib.parse import urlencode, urlparse
 
 import crum
 import waffle

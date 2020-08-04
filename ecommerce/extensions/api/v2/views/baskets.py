@@ -4,7 +4,6 @@
 import logging
 import warnings
 
-import six
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.db import transaction
@@ -169,7 +168,7 @@ class BasketCreateView(EdxOrderPlacementMixin, generics.CreateAPIView):
                             product = data_api.get_product(sku)
                         except api_exceptions.ProductNotFoundError as error:
                             return self._report_bad_request(
-                                six.text_type(error),
+                                str(error),
                                 api_exceptions.PRODUCT_NOT_FOUND_USER_MESSAGE
                             )
                     else:
@@ -211,7 +210,7 @@ class BasketCreateView(EdxOrderPlacementMixin, generics.CreateAPIView):
                     payment_processor = get_processor_class_by_name(payment_processor_name)
                 except payment_exceptions.ProcessorNotFoundError as error:
                     return self._report_bad_request(
-                        six.text_type(error),
+                        str(error),
                         payment_exceptions.PROCESSOR_NOT_FOUND_USER_MESSAGE
                     )
             else:
@@ -222,7 +221,7 @@ class BasketCreateView(EdxOrderPlacementMixin, generics.CreateAPIView):
             except Exception as ex:  # pylint: disable=broad-except
                 basket.delete()
                 logger.exception('Failed to initiate checkout for Basket [%d]. The basket has been deleted.', basket_id)
-                return Response({'developer_message': six.text_type(ex)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                return Response({'developer_message': str(ex)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         else:
             # Return a serialized basket, if checkout was not requested.
             response_data = self._generate_basic_response(basket)
