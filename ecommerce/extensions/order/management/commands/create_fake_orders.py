@@ -5,7 +5,6 @@ import logging
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 from oscar.core.loading import get_class, get_model
-from six.moves import range
 
 from ecommerce.tests.factories import UserFactory
 
