@@ -5,7 +5,6 @@ from django.core.management import call_command
 from mock import patch
 from oscar.core.loading import get_model
 from oscar.test import factories
-from six.moves import range
 from testfixtures import LogCapture
 
 from ecommerce.tests.testcases import TestCase

@@ -2,7 +2,6 @@
 
 import logging
 
-import six
 from django.conf import settings
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
@@ -61,7 +60,7 @@ class StatusMixin:
         self.save()
 
     def __str__(self):
-        return six.text_type(self.id)
+        return str(self.id)
 
 
 class Refund(StatusMixin, TimeStampedModel):
