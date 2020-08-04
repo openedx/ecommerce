@@ -2,15 +2,13 @@
 
 
 import datetime
+import urllib
 from decimal import Decimal
 
 import ddt
 import httpretty
 import mock
 import pytz
-import six.moves.urllib.error  # pylint: disable=import-error
-import six.moves.urllib.parse  # pylint: disable=import-error
-import six.moves.urllib.request  # pylint: disable=import-error
 from django.conf import settings
 from django.http import HttpResponseRedirect
 from django.urls import reverse
@@ -58,7 +56,7 @@ ENTERPRISE_CUSTOMER_CATALOG = 'abc18838-adcb-41d5-abec-b28be5bfcc13'
 
 def format_url(base='', path='', params=None):
     if params:
-        return '{base}{path}?{params}'.format(base=base, path=path, params=six.moves.urllib.parse.urlencode(params))
+        return '{base}{path}?{params}'.format(base=base, path=path, params=urllib.parse.urlencode(params))
     return '{base}{path}'.format(base=base, path=path)
 
 
@@ -246,7 +244,7 @@ class CouponOfferViewTests(ApiMockMixin, CouponMixin, DiscoveryTestMixin, Enterp
         self.client.logout()
         url = self.prepare_url_for_credit_seat()
         response = self.client.get(url)
-        expected_url = '{path}?next={next}'.format(path=reverse('login'), next=six.moves.urllib.parse.quote(url))
+        expected_url = '{path}?next={next}'.format(path=reverse('login'), next=urllib.parse.quote(url))
         self.assertRedirects(response, expected_url, target_status_code=302)
 
     def test_credit_seat_response(self):
@@ -790,7 +788,7 @@ class CouponRedeemViewTests(CouponMixin, DiscoveryTestMixin, LmsApiMockMixin, En
 
     def assert_redirected_to_email_confirmation(self, response):
         expected_redirect_url = '/offers/email_confirmation/?{}'.format(
-            six.moves.urllib.parse.urlencode({'course_id': self.course.id})
+            urllib.parse.urlencode({'course_id': self.course.id})
         )
         self.assertIsInstance(response, HttpResponseRedirect)
         self.assertIn(expected_redirect_url, response.url)

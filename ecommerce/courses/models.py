@@ -2,7 +2,6 @@
 
 import logging
 
-import six
 from django.conf import settings
 from django.db import models, transaction
 from django.db.models import Count, Q
@@ -45,7 +44,7 @@ class Course(models.Model):
     history = HistoricalRecords()
 
     def __unicode__(self):
-        return six.text_type(self.id)
+        return str(self.id)
 
     def _create_parent_seat(self):
         """ Create the parent seat product if it does not already exist. """
@@ -175,7 +174,7 @@ class Course(models.Model):
             Product:  The seat that has been created or updated.
         """
         certificate_type = certificate_type.lower()
-        course_id = six.text_type(self.id)
+        course_id = str(self.id)
 
         try:
             product_id = StockRecord.objects.get(partner_sku=sku, partner=self.partner).product_id

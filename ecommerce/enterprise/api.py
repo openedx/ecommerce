@@ -4,12 +4,12 @@ Methods for fetching enterprise API data.
 
 
 import logging
+from urllib.parse import urlencode
 
 from django.conf import settings
 from edx_django_utils.cache import TieredCache
 from requests.exceptions import ConnectionError as ReqConnectionError
 from requests.exceptions import Timeout
-from six.moves.urllib.parse import urlencode
 from slumber.exceptions import SlumberHttpBaseException
 
 from ecommerce.core.utils import get_cache_key

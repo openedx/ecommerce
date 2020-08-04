@@ -2,7 +2,6 @@
 
 import ddt
 import mock
-import six
 from django.conf import settings
 from django.utils.timezone import now, timedelta
 from freezegun import freeze_time
@@ -28,7 +27,7 @@ class CourseTests(DiscoveryTestMixin, TestCase):
         """Verify the __unicode__ method returns the Course ID."""
         course_id = u'edx/Demo_Course/DemoX'
         course = CourseFactory(id=course_id, partner=self.partner)
-        self.assertEqual(six.text_type(course.id), course_id)
+        self.assertEqual(str(course.id), course_id)
 
     def test_seat_products(self):
         """
@@ -169,7 +168,7 @@ class CourseTests(DiscoveryTestMixin, TestCase):
         price = 10
 
         # Verify that the course can have multiple credit seats added to it
-        for credit_provider, credit_hours in six.iteritems(credit_data):
+        for credit_provider, credit_hours in credit_data.items():
             credit_seat = course.create_or_update_seat(
                 certificate_type,
                 id_verification_required,

@@ -11,7 +11,6 @@ from oscar.test.factories import (
     RangeFactory,
     VoucherFactory
 )
-from six.moves import range
 
 from ecommerce.enterprise.management.commands.migrate_enterprise_conditional_offers import Command
 from ecommerce.programs.custom import get_model
