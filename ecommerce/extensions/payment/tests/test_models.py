@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 
-import six
 from django.core.exceptions import ValidationError
 
 from ecommerce.extensions.payment.models import EnterpriseContractMetadata, SDNCheckFailure
@@ -29,7 +28,7 @@ class SDNCheckFailureTests(TestCase):
             username=self.username
         )
 
-        self.assertEqual(six.text_type(basket), expected)
+        self.assertEqual(str(basket), expected)
 
 
 class EnterpriseContractMetadataTests(TestCase):

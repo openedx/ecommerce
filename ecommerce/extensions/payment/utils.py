@@ -2,11 +2,11 @@
 import copy
 import logging
 import re
+from urllib.parse import urlencode
 
 # Changes part of REV-1209 - see https://github.com/edx/ecommerce/pull/3020
 import crum
 import requests
-import six  # pylint: disable=ungrouped-imports
 # Changes part of REV-1209 - see https://github.com/edx/ecommerce/pull/3020
 import waffle
 from django.conf import settings
@@ -14,7 +14,6 @@ from django.contrib.auth import logout
 from django.utils.translation import ugettext_lazy as _
 from oscar.core.loading import get_model
 from requests.exceptions import HTTPError, Timeout
-from six.moves.urllib.parse import urlencode
 
 from ecommerce.core.constants import SEAT_PRODUCT_CLASS_NAME
 from ecommerce.extensions.analytics.utils import parse_tracking_context
@@ -256,10 +255,10 @@ class SDNClient:
         params_dict = {
             'sources': self.sdn_list,
             'type': 'individual',
-            'name': six.text_type(name).encode('utf-8'),
+            'name': str(name).encode('utf-8'),
             # We are using the city as the address parameter value as indicated in the documentation:
             # http://developer.trade.gov/consolidated-screening-list.html
-            'address': six.text_type(city).encode('utf-8'),
+            'address': str(city).encode('utf-8'),
             'countries': country
         }
         params = urlencode(params_dict)

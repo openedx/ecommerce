@@ -4,7 +4,6 @@ import ddt
 import pycountry
 from oscar.core.loading import get_model
 from oscar.test import factories
-from six.moves import range
 from waffle.models import Switch
 
 from ecommerce.core.constants import ENROLLMENT_CODE_PRODUCT_CLASS_NAME, ENROLLMENT_CODE_SWITCH

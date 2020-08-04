@@ -3,7 +3,6 @@
 import abc
 from collections import namedtuple
 
-import six
 import waffle
 from django.conf import settings
 from django.utils.functional import cached_property
@@ -15,7 +14,7 @@ HandledProcessorResponse = namedtuple('HandledProcessorResponse',
                                       ['transaction_id', 'total', 'currency', 'card_number', 'card_type'])
 
 
-class BasePaymentProcessor(six.with_metaclass(abc.ABCMeta, object)):  # pragma: no cover
+class BasePaymentProcessor(metaclass=abc.ABCMeta):  # pragma: no cover
     """Base payment processor class."""
 
     # NOTE: Ensure that, if passed to a Django template, Django does not attempt to instantiate this class
@@ -136,7 +135,7 @@ class BasePaymentProcessor(six.with_metaclass(abc.ABCMeta, object)):  # pragma: 
         return waffle.switch_is_active(settings.PAYMENT_PROCESSOR_SWITCH_PREFIX + cls.NAME)
 
 
-class BaseClientSidePaymentProcessor(six.with_metaclass(abc.ABCMeta, BasePaymentProcessor)):  # pylint: disable=abstract-method
+class BaseClientSidePaymentProcessor(BasePaymentProcessor, metaclass=abc.ABCMeta):  # pylint: disable=abstract-method
     """ Base class for client-side payment processors. """
 
     def get_template_name(self):
