@@ -19,6 +19,7 @@ from CyberSource.rest import ApiException
 from django.conf import settings
 from django.urls import reverse
 import jwt
+from jwt.algorithms import RSAAlgorithm
 from oscar.apps.payment.exceptions import GatewayError, TransactionDeclined, UserCancelled
 from oscar.core.loading import get_class, get_model
 from zeep import Client
@@ -154,12 +155,12 @@ class Cybersource(ApplePayMixin, BaseClientSidePaymentProcessor):
         return {'key_id': return_data.key_id}
     
     def authorize_payment(self, basket, request, form_data):
-        # [GM] TODO: validate payment token prior to authorizing using the key in the capture context
         transient_token_jwt = request.POST['payment_token']
-        # We save the capture context in the backend and recall it here so that we don't have to trust any input from the front-end
+        # We save the capture context in the session and recall it here since we can't trust the front-end
         capture_context = request.session['capture_context']
-        logger.info("%s", str(capture_context))
-        decoded_payment_token = jwt.decode(transient_token_jwt, verify=False)
+        decoded_capture_context = jwt.decode(capture_context['key_id'], verify=False)
+        jwk = RSAAlgorithm.from_jwk(json.dumps(decoded_capture_context['flx']['jwk']))
+        decoded_payment_token = jwt.decode(transient_token_jwt, key=jwk, algorithms=['RS256'])
 
         caught_exception = False
         try:
