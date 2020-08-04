@@ -3,8 +3,8 @@
 import datetime
 import hashlib
 import logging
+from urllib.parse import urljoin, urlsplit
 
-import six  # pylint: disable=ungrouped-imports
 import waffle
 from analytics import Client as SegmentClient
 from dateutil.parser import parse
@@ -24,7 +24,6 @@ from jsonfield.fields import JSONField
 from requests.exceptions import ConnectionError as ReqConnectionError
 from requests.exceptions import Timeout
 from simple_history.models import HistoricalRecords
-from six.moves.urllib.parse import urljoin, urlsplit
 from slumber.exceptions import HttpNotFoundError, SlumberBaseException
 
 from ecommerce.core.constants import ALL_ACCESS_CONTEXT, ALLOW_MISSING_LMS_USER_ID
@@ -245,7 +244,7 @@ class SiteConfiguration(models.Model):
                     self.site.id,
                     name
                 )
-                raise ValidationError(six.text_type(exc))
+                raise ValidationError(str(exc))
 
     def _clean_client_side_payment_processor(self):
         """
