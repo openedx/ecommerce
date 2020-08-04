@@ -11,7 +11,6 @@ from functools import reduce  # pylint: disable=redefined-builtin
 
 import crum
 import six  # pylint: disable=ungrouped-imports
-import waffle
 from django.conf import settings
 from django.urls import reverse
 from django.utils.translation import ugettext as _
@@ -27,7 +26,6 @@ from slumber.exceptions import SlumberHttpBaseException
 
 from ecommerce.core.constants import SYSTEM_ENTERPRISE_LEARNER_ROLE
 from ecommerce.core.url_utils import absolute_url, get_lms_dashboard_url
-from ecommerce.enterprise.constants import USE_ENTERPRISE_CATALOG
 from ecommerce.enterprise.exceptions import EnterpriseDoesNotExist
 from ecommerce.extensions.offer.models import OFFER_PRIORITY_ENTERPRISE
 
@@ -608,32 +606,6 @@ def construct_enterprise_course_consent_url(request, course_id, enterprise_custo
         params=urlencode(request_params)
     )
     return redirect_url
-
-
-def can_use_enterprise_catalog(enterprise_uuid):
-    """
-    Function to check if enterprise-catalog endpoints should be hit given an enterprise uuid.
-
-    Checks the USE_ENTERPRISE_CATALOG waffle sample and ensures the passed
-    enterprise uuid is not in the ENTERPRISE_CUSTOMERS_EXCLUDED_FROM_CATALOG list.
-
-    Args:
-        enterprise_uuid: the unique identifier for an enterprise customer
-
-    Returns:
-        boolean: True if sample is active and enterprise is not excluded
-                 False if sample not active or enterprise is excluded
-    """
-    customer_uuid = str(enterprise_uuid)
-    is_flag_active = waffle.flag_is_active(crum.get_current_request(), USE_ENTERPRISE_CATALOG)
-    can_use_catalog = customer_uuid not in getattr(settings, 'ENTERPRISE_CUSTOMERS_EXCLUDED_FROM_CATALOG', [])
-    log.info(
-        'ENT-2885: USE_ENTEPRISE_CATALOG flag %s active. Enterprise %s %s use the enterprise-catalog service.',
-        'IS' if is_flag_active else 'IS NOT',
-        customer_uuid,
-        'CAN' if can_use_catalog else 'CANNOT'
-    )
-    return is_flag_active and can_use_catalog
 
 
 def convert_comma_separated_string_to_list(comma_separated_string):

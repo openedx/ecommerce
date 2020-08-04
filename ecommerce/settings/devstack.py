@@ -51,8 +51,6 @@ CORS_ALLOW_HEADERS = corsheaders_default_headers + (
 )
 CORS_ALLOW_CREDENTIALS = True
 
-# List of enterprise customer uuids to exclude from transition to use of enterprise-catalog
-ENTERPRISE_CUSTOMERS_EXCLUDED_FROM_CATALOG = ()
 ENTERPRISE_CATALOG_API_URL = urljoin(ENTERPRISE_CATALOG_SERVICE_URL, 'api/v1/')
 
 # PAYMENT PROCESSING

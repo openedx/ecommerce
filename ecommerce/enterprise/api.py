@@ -13,7 +13,7 @@ from six.moves.urllib.parse import urlencode
 from slumber.exceptions import SlumberHttpBaseException
 
 from ecommerce.core.utils import get_cache_key
-from ecommerce.enterprise.utils import can_use_enterprise_catalog, get_enterprise_id_for_current_request_user_from_jwt
+from ecommerce.enterprise.utils import get_enterprise_id_for_current_request_user_from_jwt
 
 logger = logging.getLogger(__name__)
 
@@ -121,15 +121,10 @@ def catalog_contains_course_runs(site, course_run_ids, enterprise_customer_uuid,
     api_resource_name = 'enterprise-customer'
     api_resource_id = enterprise_customer_uuid
     if enterprise_customer_catalog_uuid:
-        api_resource_name = 'enterprise_catalogs'
+        api_resource_name = 'enterprise-catalogs'
         api_resource_id = enterprise_customer_catalog_uuid
 
-    api = site.siteconfiguration.enterprise_api_client
-    # Temporarily gate enterprise catalog api usage behind waffle flag
-    if can_use_enterprise_catalog(enterprise_customer_uuid):
-        api = site.siteconfiguration.enterprise_catalog_api_client
-        if enterprise_customer_catalog_uuid:
-            api_resource_name = 'enterprise-catalogs'
+    api = site.siteconfiguration.enterprise_catalog_api_client
 
     cache_key = get_cache_key(
         site_domain=site.domain,
