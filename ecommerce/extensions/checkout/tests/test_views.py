@@ -1,12 +1,10 @@
 
 
 from decimal import Decimal
+from urllib import parse
 
 import ddt
 import httpretty
-import six.moves.urllib.error  # pylint: disable=import-error
-import six.moves.urllib.parse  # pylint: disable=import-error
-import six.moves.urllib.request  # pylint: disable=import-error
 from django.conf import settings
 from django.urls import reverse
 from mock import patch
@@ -266,7 +264,7 @@ class ReceiptResponseViewTests(DiscoveryMockMixin, LmsApiMockMixin, RefundTestMi
         self.client.logout()
         response = self.client.get(self.path)
         expected_url = '{path}?next={next}'.format(path=reverse(settings.LOGIN_URL),
-                                                   next=six.moves.urllib.parse.quote(self.path))
+                                                   next=parse.quote(self.path))
         self.assertRedirects(response, expected_url, target_status_code=302)
 
     @patch('ecommerce.extensions.checkout.views.fetch_enterprise_learner_data')
