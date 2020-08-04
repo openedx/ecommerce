@@ -2,7 +2,6 @@
 
 import logging
 
-import six
 import unicodecsv as csv
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -199,7 +198,7 @@ class CouponRedeemView(EdxOrderPlacementMixin, APIView):
         except EnterpriseDoesNotExist as e:
             # If an EnterpriseException is caught while pulling the EnterpriseCustomer, that means there's no
             # corresponding EnterpriseCustomer in the Enterprise service (which should never happen).
-            logger.exception(six.text_type(e))
+            logger.exception(str(e))
             return render(
                 request,
                 template_name,
