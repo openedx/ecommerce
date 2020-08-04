@@ -5,15 +5,14 @@ import datetime
 import json
 import logging
 from decimal import Decimal
+from urllib.parse import urlparse
 
 import httpretty
 import mock
 import pytz
-import six  # pylint: disable=ungrouped-imports
 from django.core.management import call_command
 from django.test import override_settings
 from oscar.core.loading import get_model
-from six.moves.urllib.parse import urlparse
 from testfixtures import LogCapture
 
 from ecommerce.core.constants import ISO_8601_FORMAT
@@ -81,7 +80,7 @@ class CourseMigrationTestMixin(DiscoveryTestMixin):
         body = {
             'course_id': self.course_id,
             'course_modes': [{'slug': mode, 'min_price': price, 'expiration_datetime': EXPIRES_STRING} for
-                             mode, price in six.iteritems(self.prices)]
+                             mode, price in self.prices.items()]
         }
         httpretty.register_uri(httpretty.GET, self.enrollment_api_url, body=json.dumps(body), content_type=JSON)
 
@@ -187,7 +186,7 @@ class MigratedCourseTests(CourseMigrationTestMixin, TestCase):
             migrated_course = MigratedCourse(self.course_id, self.site.domain)
             migrated_course.load_from_lms()
         except Exception as ex:  # pylint: disable=broad-except
-            self.assertEqual(six.text_type(ex),
+            self.assertEqual(str(ex),
                              'Aborting migration. No name is available for {}.'.format(self.course_id))
 
         # Verify the Course Structure API was called.

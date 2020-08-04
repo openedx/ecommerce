@@ -3,7 +3,6 @@
 import logging
 
 import requests
-import six
 import waffle
 from dateutil.parser import parse
 from django.conf import settings
@@ -113,7 +112,7 @@ class MigratedCourse:
         except Exception as e:  # pylint: disable=broad-except
             logger.warning(
                 'Calling Commerce API failed with: [%s]. Falling back to Course Structure API.',
-                six.text_type(e)
+                str(e)
             )
             course_name, course_verification_deadline = self._query_course_structure_api()
 
@@ -177,7 +176,7 @@ class Command(BaseCommand):
             return
 
         for course_id in course_ids:
-            course_id = six.text_type(course_id)
+            course_id = str(course_id)
             try:
                 with transaction.atomic():
                     migrated_course = MigratedCourse(course_id, site_domain)
