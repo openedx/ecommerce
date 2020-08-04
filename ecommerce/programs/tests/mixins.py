@@ -4,7 +4,6 @@ import json
 from decimal import Decimal
 
 import httpretty
-from six.moves import range
 
 from ecommerce.core.url_utils import get_lms_enrollment_api_url, get_lms_entitlement_api_url
 from ecommerce.courses.tests.factories import CourseFactory
