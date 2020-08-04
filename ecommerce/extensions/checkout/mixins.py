@@ -4,15 +4,11 @@
 import abc
 import logging
 
-import six
 import waffle
 from django.db import transaction
 from ecommerce_worker.fulfillment.v1.tasks import fulfill_order
 from oscar.apps.checkout.mixins import OrderPlacementMixin
 from oscar.core.loading import get_class, get_model
-# Pylint will stop complaining about this when https://github.com/PyCQA/pylint/pull/2824
-# is released
-from six.moves import range  # pylint: disable=ungrouped-imports
 
 from ecommerce.core.models import BusinessClient
 from ecommerce.extensions.analytics.utils import audit_log, track_segment_event
@@ -42,7 +38,7 @@ Source = get_model('payment', 'Source')
 SourceType = get_model('payment', 'SourceType')
 
 
-class EdxOrderPlacementMixin(six.with_metaclass(abc.ABCMeta, OrderPlacementMixin)):
+class EdxOrderPlacementMixin(OrderPlacementMixin, metaclass=abc.ABCMeta):
     """ Mixin for edX-specific order placement. """
 
     # Instance of a payment processor with which to handle payment. Subclasses should set this value.

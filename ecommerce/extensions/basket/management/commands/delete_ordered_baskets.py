@@ -10,7 +10,6 @@ import time
 from django.core.management import BaseCommand
 from django.db import transaction
 from oscar.core.loading import get_model
-from six.moves import range
 
 Basket = get_model('basket', 'Basket')
 

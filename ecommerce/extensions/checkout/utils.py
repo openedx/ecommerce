@@ -1,10 +1,8 @@
 
 
 import logging
+from urllib import parse
 
-import six.moves.urllib.error  # pylint: disable=import-error
-import six.moves.urllib.parse  # pylint: disable=import-error
-import six.moves.urllib.request  # pylint: disable=import-error
 from babel.numbers import format_currency as default_format_currency
 from django.conf import settings
 from django.urls import reverse
@@ -55,7 +53,7 @@ def get_receipt_page_url(site_configuration, order_number=None, override_url=Non
     if disable_back_button:
         url_params['disable_back_button'] = int(disable_back_button)
     base_url = site_configuration.build_ecommerce_url(reverse('checkout:receipt'))
-    params = six.moves.urllib.parse.urlencode(url_params)
+    params = parse.urlencode(url_params)
 
     return '{base_url}{params}'.format(
         base_url=base_url,
