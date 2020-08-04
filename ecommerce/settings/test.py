@@ -66,7 +66,7 @@ EDX_API_KEY = 'replace-me'
 PAYMENT_PROCESSOR_CONFIG = {
     'edx': {
         'cybersource': {
-            'soap_api_url': 'https://ics2wstest.ic3.com/commerce/1.x/transactionProcessor/CyberSourceTransaction_1.115.wsdl',
+            'soap_api_url': 'https://ics2wstest.ic3.com/commerce/1.x/transactionProcessor/CyberSourceTransaction_1.166.wsdl',
             'merchant_id': 'fake-merchant-id',
             'transaction_key': 'fake-transaction-key',
             'profile_id': 'fake-profile-id',
@@ -101,7 +101,7 @@ PAYMENT_PROCESSOR_CONFIG = {
     },
     'other': {
         'cybersource': {
-            'soap_api_url': 'https://ics2wstest.ic3.com/commerce/1.x/transactionProcessor/CyberSourceTransaction_1.115.wsdl',
+            'soap_api_url': 'https://ics2wstest.ic3.com/commerce/1.x/transactionProcessor/CyberSourceTransaction_1.166.wsdl',
             'merchant_id': 'other-fake-merchant-id',
             'transaction_key': 'other-fake-transaction-key',
             'profile_id': 'other-fake-profile-id',

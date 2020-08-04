@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" name="CyberSourceTransactionWS" targetNamespace="urn:schemas-cybersource-com:transaction-data:TransactionProcessor" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:tns="urn:schemas-cybersource-com:transaction-data:TransactionProcessor" xmlns:data="urn:schemas-cybersource-com:transaction-data-1.115">
+<wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" name="CyberSourceTransactionWS" targetNamespace="urn:schemas-cybersource-com:transaction-data:TransactionProcessor" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:tns="urn:schemas-cybersource-com:transaction-data:TransactionProcessor" xmlns:data="urn:schemas-cybersource-com:transaction-data-1.166">
    <wsdl:types>
       <xsd:schema>
-         <xsd:import namespace="urn:schemas-cybersource-com:transaction-data-1.115" schemaLocation="CyberSourceTransaction_1.115.xsd"/>
+         <xsd:import namespace="urn:schemas-cybersource-com:transaction-data-1.166" schemaLocation="CyberSourceTransaction_1.166.xsd"/>
       </xsd:schema>
    </wsdl:types>
    <wsdl:message name="messageIn">
