@@ -1,6 +1,7 @@
 
 
-import six
+from io import StringIO
+
 from django.core.management import CommandError, call_command
 
 from ecommerce.referrals.models import Referral
@@ -21,7 +22,7 @@ class AddSiteToReferralsCommandTests(TestCase):
         expected = queryset.count()
 
         # Call the command with dry-run flag
-        out = six.StringIO()
+        out = StringIO()
         call_command(self.command, site_id=self.site.id, commit=False, stdout=out)
 
         # Verify no referrals affected
@@ -46,7 +47,7 @@ class AddSiteToReferralsCommandTests(TestCase):
         self.assertEqual(queryset.count(), 0)
 
         # Call the command
-        out = six.StringIO()
+        out = StringIO()
         call_command(self.command, site_id=self.site.id, commit=True, stdout=out)
 
         # The referrals should be associated with the site
