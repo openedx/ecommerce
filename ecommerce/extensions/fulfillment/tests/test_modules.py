@@ -745,8 +745,6 @@ class EnrollmentCodeFulfillmentModuleTests(DiscoveryTestMixin, TestCase):
         generated_request_body = EnrollmentCodeFulfillmentModule().get_order_fulfillment_data_for_hubspot(order)
         self.assertCountEqual(expected_request_entries, generated_request_body.split('&'))
 
-        # assertCountEqual(self, expected_request_entries, generated_request_body.split('&'))
-
     def test_determine_if_enterprise_purchase_expect_true(self):
         """ Test for being able to retrieve 'purchased_behalf_of' attribute from Basket and the checkbox is checked. """
         self.add_required_attributes_to_basket(self.order, True)
