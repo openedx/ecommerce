@@ -4,9 +4,9 @@
 import logging
 from collections import OrderedDict
 from decimal import Decimal
+from urllib.parse import urljoin
 
 import bleach
-import six  # pylint: disable=ungrouped-imports
 import waffle
 from dateutil.parser import parse
 from django.conf import settings
@@ -20,8 +20,6 @@ from oscar.core.loading import get_class, get_model
 from rest_framework import serializers
 from rest_framework.reverse import reverse
 from rest_framework.settings import api_settings
-from six.moves import range
-from six.moves.urllib.parse import urljoin
 
 from ecommerce.core.constants import (
     COURSE_ENTITLEMENT_PRODUCT_CLASS_NAME,
@@ -642,8 +640,8 @@ class AtomicPublicationSerializer(serializers.Serializer):  # pylint: disable=ab
                 raise Exception(resp_message)
 
         except Exception as e:  # pylint: disable=broad-except
-            logger.exception(u'Failed to save and publish [%s]: [%s]', course_id, six.text_type(e))
-            return False, e, six.text_type(e)
+            logger.exception(u'Failed to save and publish [%s]: [%s]', course_id, str(e))
+            return False, e, str(e)
 
 
 class PartnerSerializer(serializers.ModelSerializer):
@@ -1643,7 +1641,7 @@ class CouponCodeRevokeSerializer(CouponCodeMixin, serializers.Serializer):  # py
         except Exception as exc:  # pylint: disable=broad-except
             logger.exception('[Offer Revocation] Encountered error when revoking code %s for user %s with '
                              'subject %r, greeting %r and closing %r', code, email, subject, greeting, closing)
-            detail = six.text_type(exc)
+            detail = str(exc)
 
         validated_data['detail'] = detail
         return validated_data
@@ -1701,7 +1699,7 @@ class CouponCodeRemindSerializer(CouponCodeMixin, serializers.Serializer):  # py
                 offer_assignment.save()
         except Exception as exc:  # pylint: disable=broad-except
             logger.exception('Encountered error during reminder email for code %s of user %s', code, email)
-            detail = six.text_type(exc)
+            detail = str(exc)
 
         validated_data['detail'] = detail
         return validated_data

@@ -3,13 +3,13 @@
 
 import datetime
 import json
+import urllib
 from collections import namedtuple
 from decimal import Decimal
 
 import ddt
 import httpretty
 import mock
-import six  # pylint: disable=ungrouped-imports
 from django.contrib.auth import get_user_model
 from django.test import override_settings
 from django.urls import reverse
@@ -18,7 +18,6 @@ from oscar.core.loading import get_model
 from oscar.test import factories
 from oscar.test.factories import BasketFactory
 from rest_framework.throttling import UserRateThrottle
-from six.moves import range
 from waffle.testutils import override_switch
 
 from ecommerce.core.constants import ALLOW_MISSING_LMS_USER_ID
@@ -974,7 +973,7 @@ class BasketCalculateViewTests(ProgramTestMixin, ThrottlingMixin, TestCase):
 
         """
         sku_list = [product.stockrecords.first().partner_sku for product in products]
-        qs = six.moves.urllib.parse.urlencode(
+        qs = urllib.parse.urlencode(
             {'sku': sku_list},
             True
         )

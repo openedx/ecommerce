@@ -2,6 +2,7 @@
 
 
 import logging
+from urllib.parse import urlparse
 
 import django_filters
 import pytz
@@ -16,7 +17,6 @@ from requests.exceptions import Timeout
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from six.moves.urllib.parse import urlparse
 from slumber.exceptions import SlumberBaseException
 
 from ecommerce.core.constants import DEFAULT_CATALOG_PAGE_SIZE

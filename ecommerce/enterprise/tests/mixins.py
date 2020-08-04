@@ -1,7 +1,7 @@
 
 
 import json
-from urllib.parse import urlencode  # pylint: disable=import-error
+from urllib.parse import urlencode
 from uuid import uuid4
 
 import httpretty

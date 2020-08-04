@@ -5,7 +5,6 @@ import json
 import ddt
 import mock
 from django.urls import reverse
-from six.moves import range
 
 from ecommerce.tests.factories import UserFactory
 from ecommerce.tests.testcases import TestCase
