@@ -3,7 +3,6 @@
 import logging
 
 import requests
-import six
 import waffle
 from django.contrib import messages
 from django.core.exceptions import ObjectDoesNotExist
@@ -124,7 +123,7 @@ class CybersourceSubmitView(BasePaymentSubmitView):
             'device_fingerprint_id': request.session.session_key or basket.order_number,
         }
 
-        for source, destination in six.iteritems(self.FIELD_MAPPINGS):
+        for source, destination in self.FIELD_MAPPINGS.items():
             extra_parameters[destination] = clean_field_value(data[source])
 
         parameters = Cybersource(self.request.site).get_transaction_parameters(

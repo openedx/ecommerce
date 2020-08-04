@@ -1,7 +1,6 @@
 """Payment processor constants."""
 
 
-import six
 from django.utils.translation import ugettext_lazy as _
 
 CARD_TYPES = {
@@ -31,14 +30,14 @@ CARD_TYPES = {
     },
 }
 
-CARD_TYPE_CHOICES = ((key, value['display_name']) for key, value in six.iteritems(CARD_TYPES))
+CARD_TYPE_CHOICES = ((key, value['display_name']) for key, value in CARD_TYPES.items())
 
 # In Python 3.5 dicts aren't ordered so having this unsorted causes new migrations to happen on almost every
 # run of makemigrations. Sorting fixes that. This can be removed in Python 3.6+.
 CARD_TYPE_CHOICES = sorted(CARD_TYPE_CHOICES, key=lambda tup: tup[0])
 
 CYBERSOURCE_CARD_TYPE_MAP = {
-    value['cybersource_code']: key for key, value in six.iteritems(CARD_TYPES) if 'cybersource_code' in value
+    value['cybersource_code']: key for key, value in CARD_TYPES.items() if 'cybersource_code' in value
 }
 
 CLIENT_SIDE_CHECKOUT_FLAG_NAME = 'enable_client_side_checkout'
@@ -65,10 +64,10 @@ PAYPAL_LOCALES = {
 }
 
 APPLE_PAY_CYBERSOURCE_CARD_TYPE_MAP = {
-    value['apple_pay_network']: value['cybersource_code'] for value in six.itervalues(CARD_TYPES) if
+    value['apple_pay_network']: value['cybersource_code'] for value in CARD_TYPES.values() if
     'cybersource_code' in value
 }
 
 STRIPE_CARD_TYPE_MAP = {
-    value['stripe_brand']: key for key, value in six.iteritems(CARD_TYPES) if 'stripe_brand' in value
+    value['stripe_brand']: key for key, value in CARD_TYPES.items() if 'stripe_brand' in value
 }

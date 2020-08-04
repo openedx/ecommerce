@@ -8,7 +8,6 @@ import logging
 import uuid
 from decimal import Decimal
 
-import six
 from django.conf import settings
 from django.urls import reverse
 from oscar.apps.payment.exceptions import GatewayError, TransactionDeclined, UserCancelled
@@ -399,7 +398,7 @@ class Cybersource(ApplePayMixin, BaseClientSidePaymentProcessor):
             }
             purchase_totals = {
                 'currency': currency,
-                'grandTotalAmount': six.text_type(amount),
+                'grandTotalAmount': str(amount),
             }
 
             response = client.service.runTransaction(
