@@ -488,18 +488,24 @@ class EnterpriseServiceMockMixin:
             required=False,
         )
 
-    def mock_catalog_contains_course_runs(self, course_run_ids, enterprise_customer_uuid, api_url,
-                                          enterprise_customer_catalog_uuid=None, contains_content=True,
-                                          raise_exception=False, catalog_resource='enterprise_catalogs'):
+    def mock_catalog_contains_course_runs(
+            self,
+            course_run_ids,
+            enterprise_customer_uuid,
+            catalog_api_url,
+            enterprise_customer_catalog_uuid=None,
+            contains_content=True,
+            raise_exception=False
+    ):
         self.mock_access_token_response()
         query_params = urlencode({'course_run_ids': course_run_ids}, True)
         body = raise_timeout if raise_exception else json.dumps({'contains_content_items': contains_content})
         httpretty.register_uri(
             method=httpretty.GET,
-            uri='{}enterprise-customer/{}/contains_content_items/?{}'.format(
-                api_url,
-                enterprise_customer_uuid,
-                query_params
+            uri='{api_url}enterprise-customer/{enterprise_customer_uuid}/contains_content_items/?{query_params}'.format(
+                api_url=catalog_api_url,
+                enterprise_customer_uuid=enterprise_customer_uuid,
+                query_params=query_params
             ),
             body=body,
             content_type='application/json'
@@ -507,11 +513,11 @@ class EnterpriseServiceMockMixin:
         if enterprise_customer_catalog_uuid:
             httpretty.register_uri(
                 method=httpretty.GET,
-                uri='{}{}/{}/contains_content_items/?{}'.format(
-                    api_url,
-                    catalog_resource,
-                    enterprise_customer_catalog_uuid,
-                    query_params
+                uri='{api_url}{catalog_resource}/{customer_catalog_uuid}/contains_content_items/?{query_params}'.format(
+                    api_url=catalog_api_url,
+                    catalog_resource='enterprise-catalogs',
+                    customer_catalog_uuid=enterprise_customer_catalog_uuid,
+                    query_params=query_params
                 ),
                 body=body,
                 content_type='application/json'

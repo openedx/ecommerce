@@ -79,7 +79,7 @@ class EnterpriseCustomerConditionTests(EnterpriseServiceMockMixin, DiscoveryTest
         self.mock_catalog_contains_course_runs(
             [self.course_run.id],
             self.condition.enterprise_customer_uuid,
-            self.site.siteconfiguration.enterprise_api_url,
+            self.site.siteconfiguration.enterprise_catalog_api_url,
             enterprise_customer_catalog_uuid=self.condition.enterprise_customer_catalog_uuid,
         )
         self.assertTrue(self.condition.is_satisfied(offer, basket))
@@ -97,7 +97,7 @@ class EnterpriseCustomerConditionTests(EnterpriseServiceMockMixin, DiscoveryTest
         self.mock_catalog_contains_course_runs(
             [self.course_run.id],
             self.condition.enterprise_customer_uuid,
-            self.site.siteconfiguration.enterprise_api_url,
+            self.site.siteconfiguration.enterprise_catalog_api_url,
             enterprise_customer_catalog_uuid=self.condition.enterprise_customer_catalog_uuid,
             contains_content=is_satisfied,
         )
@@ -155,7 +155,7 @@ class EnterpriseCustomerConditionTests(EnterpriseServiceMockMixin, DiscoveryTest
         self.mock_catalog_contains_course_runs(
             [self.course_run.id],
             self.condition.enterprise_customer_uuid,
-            self.site.siteconfiguration.enterprise_api_url,
+            self.site.siteconfiguration.enterprise_catalog_api_url,
             enterprise_customer_catalog_uuid=self.condition.enterprise_customer_catalog_uuid,
         )
         self.assertFalse(self.condition.is_satisfied(offer, basket))
@@ -183,7 +183,7 @@ class EnterpriseCustomerConditionTests(EnterpriseServiceMockMixin, DiscoveryTest
         self.mock_catalog_contains_course_runs(
             [self.course_run.id],
             enterprise_id,
-            self.site.siteconfiguration.enterprise_api_url,
+            self.site.siteconfiguration.enterprise_catalog_api_url,
             enterprise_customer_catalog_uuid=self.condition.enterprise_customer_catalog_uuid,
         )
         return offer, basket
@@ -305,7 +305,7 @@ class EnterpriseCustomerConditionTests(EnterpriseServiceMockMixin, DiscoveryTest
         self.mock_catalog_contains_course_runs(
             [self.entitlement.attr.UUID],
             self.condition.enterprise_customer_uuid,
-            self.site.siteconfiguration.enterprise_api_url,
+            self.site.siteconfiguration.enterprise_catalog_api_url,
             enterprise_customer_catalog_uuid=self.condition.enterprise_customer_catalog_uuid,
         )
 
@@ -331,10 +331,9 @@ class EnterpriseCustomerConditionTests(EnterpriseServiceMockMixin, DiscoveryTest
         self.mock_catalog_contains_course_runs(
             [self.entitlement.attr.UUID],
             self.condition.enterprise_customer_uuid,
-            self.site.siteconfiguration.enterprise_api_url,
+            self.site.siteconfiguration.enterprise_catalog_api_url,
             enterprise_customer_catalog_uuid=self.condition.enterprise_customer_catalog_uuid,
         )
-
         self.assertFalse(self.condition.is_satisfied(offer, basket))
 
     @httpretty.activate
@@ -351,7 +350,7 @@ class EnterpriseCustomerConditionTests(EnterpriseServiceMockMixin, DiscoveryTest
         self.mock_catalog_contains_course_runs(
             [self.course_run.id],
             self.condition.enterprise_customer_uuid,
-            self.site.siteconfiguration.enterprise_api_url,
+            self.site.siteconfiguration.enterprise_catalog_api_url,
             enterprise_customer_catalog_uuid=self.condition.enterprise_customer_catalog_uuid,
             contains_content=False
         )
@@ -371,7 +370,7 @@ class EnterpriseCustomerConditionTests(EnterpriseServiceMockMixin, DiscoveryTest
         self.mock_catalog_contains_course_runs(
             [self.course_run.id],
             self.condition.enterprise_customer_uuid,
-            self.site.siteconfiguration.enterprise_api_url,
+            self.site.siteconfiguration.enterprise_catalog_api_url,
             enterprise_customer_catalog_uuid=self.condition.enterprise_customer_catalog_uuid,
             contains_content=False,
             raise_exception=True
@@ -450,7 +449,7 @@ class EnterpriseCustomerConditionTests(EnterpriseServiceMockMixin, DiscoveryTest
         self.mock_catalog_contains_course_runs(
             [self.course_run.id],
             self.condition.enterprise_customer_uuid,
-            self.site.siteconfiguration.enterprise_api_url,
+            self.site.siteconfiguration.enterprise_catalog_api_url,
             enterprise_customer_catalog_uuid=self.condition.enterprise_customer_catalog_uuid,
         )
         self.assertEqual(self.condition.is_satisfied(offer, basket), is_satisfied)
@@ -529,7 +528,7 @@ class EnterpriseCustomerConditionTests(EnterpriseServiceMockMixin, DiscoveryTest
         self.mock_catalog_contains_course_runs(
             [self.course_run.id],
             self.condition.enterprise_customer_uuid,
-            self.site.siteconfiguration.enterprise_api_url,
+            self.site.siteconfiguration.enterprise_catalog_api_url,
             enterprise_customer_catalog_uuid=self.condition.enterprise_customer_catalog_uuid,
         )
         self.assertEqual(self.condition.is_satisfied(offer, basket), is_satisfied)
@@ -553,7 +552,7 @@ class EnterpriseCustomerConditionTests(EnterpriseServiceMockMixin, DiscoveryTest
         self.mock_catalog_contains_course_runs(
             [self.course_run.id],
             self.condition.enterprise_customer_uuid,
-            self.site.siteconfiguration.enterprise_api_url,
+            self.site.siteconfiguration.enterprise_catalog_api_url,
             enterprise_customer_catalog_uuid=self.condition.enterprise_customer_catalog_uuid,
         )
         self.assertTrue(self.condition.is_satisfied(offer, basket))
@@ -575,7 +574,7 @@ class EnterpriseCustomerConditionTests(EnterpriseServiceMockMixin, DiscoveryTest
         self.mock_catalog_contains_course_runs(
             [self.course_run.id],
             self.condition.enterprise_customer_uuid,
-            self.site.siteconfiguration.enterprise_api_url,
+            self.site.siteconfiguration.enterprise_catalog_api_url,
             enterprise_customer_catalog_uuid=self.condition.enterprise_customer_catalog_uuid,
         )
         self.assertTrue(self.condition.is_satisfied(offer, basket))
