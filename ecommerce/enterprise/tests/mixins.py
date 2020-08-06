@@ -595,7 +595,7 @@ class EnterpriseServiceMockMixin:
         body = raise_timeout if raise_exception else json.dumps(enterprise_catalog_api_response)
         httpretty.register_uri(
             method=httpretty.GET,
-            uri='{}'.format(self.ENTERPRISE_CATALOG_URL),
+            uri='{}'.format(self.LEGACY_ENTERPRISE_CATALOG_URL),
             body=body,
             content_type='application/json'
         )
