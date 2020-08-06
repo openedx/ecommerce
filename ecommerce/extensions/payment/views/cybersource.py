@@ -1,5 +1,6 @@
 
 
+from contextlib import contextmanager
 import logging
 
 import requests
@@ -194,7 +195,81 @@ class CybersourceOrderCompletionView(CyberSourceProcessorMixin, EdxOrderPlacemen
     A baseclass that includes error handling and financial reporting for orders placed via
     CyberSource.
     """
-    pass
+
+    def _log_cybersource_payment_failure(
+            self, exception, basket, order_number, transaction_id, notification, ppr,
+            message_prefix=None, logger_function=None
+    ):
+        """ Logs standard payment response as exception log unless logger_function supplied. """
+        message_prefix = message_prefix + ' ' if message_prefix else ''
+        logger_function = logger_function if logger_function else logger.exception
+        # pylint: disable=logging-not-lazy
+        logger_function(
+            message_prefix +
+            'CyberSource payment failed due to [%s] for transaction [%s], order [%s], and basket [%d]. '
+            'The complete payment response [%s] was recorded in entry [%d].',
+            exception.__class__.__name__,
+            transaction_id,
+            order_number,
+            basket.id,
+            notification.get("message", "Unknown Error"),
+            ppr.id
+        )
+
+    @contextmanager
+    def handle_payment_exceptions(self, basket, order_number, transaction_id, notification, ppr):
+        # Explicitly delimit operations which will be rolled back if an exception occurs.
+        with transaction.atomic():
+            try:
+                yield
+            except (UserCancelled, TransactionDeclined, AuthorizationError) as exception:
+                self._log_cybersource_payment_failure(
+                    exception, basket, order_number, transaction_id, notification, ppr,
+                    logger_function=logger.info,
+                )
+                exception.unlogged = False
+                raise
+            except DuplicateReferenceNumber as exception:
+                logger.info(
+                    'Received CyberSource payment notification for basket [%d] which is associated '
+                    'with existing order [%s]. No payment was collected, and no new order will be created.',
+                    basket.id,
+                    order_number
+                )
+                exception.unlogged = False
+                raise
+            except RedundantPaymentNotificationError as exception:
+                logger.info(
+                    'Received redundant CyberSource payment notification with same transaction ID for basket [%d] '
+                    'which is associated with an existing order [%s]. No payment was collected.',
+                    basket.id,
+                    order_number
+                )
+                exception.unlogged = False
+                raise
+            except ExcessivePaymentForOrderError as exception:
+                logger.info(
+                    'Received duplicate CyberSource payment notification with different transaction ID for basket '
+                    '[%d] which is associated with an existing order [%s]. Payment collected twice, request a '
+                    'refund.',
+                    basket.id,
+                    order_number
+                )
+                exception.unlogged = False
+                raise
+            except InvalidSignatureError as exception:
+                self._log_cybersource_payment_failure(
+                    exception, basket, order_number, transaction_id, notification, ppr,
+                    message_prefix='CyberSource response was invalid.',
+                )
+                exception.unlogged = False
+                raise
+            except (PaymentError, Exception) as exception:
+                self._log_cybersource_payment_failure(
+                    exception, basket, order_number, transaction_id, notification, ppr,
+                )
+                exception.unlogged = False
+                raise
 
 
 class CybersourceAuthorizeAPIView(APIView, BasePaymentSubmitView, CybersourceOrderCompletionView, CybersourceOrderInitiationView):
@@ -385,57 +460,8 @@ class CybersourceInterstitialView(CybersourceOrderCompletionView, View):
                 self._set_payment_response_custom_metrics(basket, notification, order_number, ppr, transaction_id)
 
             # Explicitly delimit operations which will be rolled back if an exception occurs.
-            with transaction.atomic():
-                try:
-                    self.handle_payment(notification, basket)
-                except (UserCancelled, TransactionDeclined, AuthorizationError) as exception:
-                    self._log_cybersource_payment_failure(
-                        exception, basket, order_number, transaction_id, notification, ppr,
-                        logger_function=logger.info,
-                    )
-                    exception.unlogged = False
-                    raise
-                except DuplicateReferenceNumber as exception:
-                    logger.info(
-                        'Received CyberSource payment notification for basket [%d] which is associated '
-                        'with existing order [%s]. No payment was collected, and no new order will be created.',
-                        basket.id,
-                        order_number
-                    )
-                    exception.unlogged = False
-                    raise
-                except RedundantPaymentNotificationError as exception:
-                    logger.info(
-                        'Received redundant CyberSource payment notification with same transaction ID for basket [%d] '
-                        'which is associated with an existing order [%s]. No payment was collected.',
-                        basket.id,
-                        order_number
-                    )
-                    exception.unlogged = False
-                    raise
-                except ExcessivePaymentForOrderError as exception:
-                    logger.info(
-                        'Received duplicate CyberSource payment notification with different transaction ID for basket '
-                        '[%d] which is associated with an existing order [%s]. Payment collected twice, request a '
-                        'refund.',
-                        basket.id,
-                        order_number
-                    )
-                    exception.unlogged = False
-                    raise
-                except InvalidSignatureError as exception:
-                    self._log_cybersource_payment_failure(
-                        exception, basket, order_number, transaction_id, notification, ppr,
-                        message_prefix='CyberSource response was invalid.',
-                    )
-                    exception.unlogged = False
-                    raise
-                except (PaymentError, Exception) as exception:
-                    self._log_cybersource_payment_failure(
-                        exception, basket, order_number, transaction_id, notification, ppr,
-                    )
-                    exception.unlogged = False
-                    raise
+            with self.handle_payment_exceptions(basket, order_number, transaction_id, notification, ppr):
+                self.handle_payment(notification, basket)
 
         except Exception as exception:  # pylint: disable=bare-except
             if getattr(exception, 'unlogged', True):
@@ -463,26 +489,6 @@ class CybersourceInterstitialView(CybersourceOrderCompletionView, View):
         monitoring_utils.set_custom_metric('payment_response_reason_code', reason_code)
         payment_response_message = notification.get("message", 'Unknown Error')
         monitoring_utils.set_custom_metric('payment_response_message', payment_response_message)
-
-    def _log_cybersource_payment_failure(
-            self, exception, basket, order_number, transaction_id, notification, ppr,
-            message_prefix=None, logger_function=None
-    ):
-        """ Logs standard payment response as exception log unless logger_function supplied. """
-        message_prefix = message_prefix + ' ' if message_prefix else ''
-        logger_function = logger_function if logger_function else logger.exception
-        # pylint: disable=logging-not-lazy
-        logger_function(
-            message_prefix +
-            'CyberSource payment failed due to [%s] for transaction [%s], order [%s], and basket [%d]. '
-            'The complete payment response [%s] was recorded in entry [%d].',
-            exception.__class__.__name__,
-            transaction_id,
-            order_number,
-            basket.id,
-            notification.get("message", "Unknown Error"),
-            ppr.id
-        )
 
     def post(self, request, *args, **kwargs):  # pylint: disable=unused-argument
         """Process a CyberSource merchant notification and place an order for paid products as appropriate."""
