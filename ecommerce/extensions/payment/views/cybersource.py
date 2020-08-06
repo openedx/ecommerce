@@ -69,7 +69,15 @@ class CyberSourceProcessorMixin:
         return Cybersource(self.request.site)
 
 
-class CybersourceSubmitView(BasePaymentSubmitView):
+class CybersourceOrderInitiationView:
+    """
+    A baseclass that includes pre-work before submitting an order to cybersource for
+    payment validation.
+    """
+    pass
+
+
+class CybersourceSubmitView(BasePaymentSubmitView, CybersourceOrderInitiationView):
     """ Starts CyberSource payment process.
 
     This view is intended to be called asynchronously by the payment form. The view expects POST data containing a
@@ -179,7 +187,7 @@ class CybersourceOrderCompletionView(CyberSourceProcessorMixin, EdxOrderPlacemen
     pass
 
 
-class CybersourceAuthorizeAPIView(APIView, BasePaymentSubmitView, CybersourceOrderCompletionView):
+class CybersourceAuthorizeAPIView(APIView, BasePaymentSubmitView, CybersourceOrderCompletionView, CybersourceOrderInitiationView):
     # DRF APIView wrapper which allows clients to use
     # JWT authentication when making Cybersource submit
     # requests.
