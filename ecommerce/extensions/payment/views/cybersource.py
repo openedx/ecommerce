@@ -217,59 +217,57 @@ class CybersourceOrderCompletionView(CyberSourceProcessorMixin, EdxOrderPlacemen
         )
 
     @contextmanager
-    def handle_payment_exceptions(self, basket, order_number, transaction_id, notification, ppr):
-        # Explicitly delimit operations which will be rolled back if an exception occurs.
-        with transaction.atomic():
-            try:
-                yield
-            except (UserCancelled, TransactionDeclined, AuthorizationError) as exception:
-                self._log_cybersource_payment_failure(
-                    exception, basket, order_number, transaction_id, notification, ppr,
-                    logger_function=logger.info,
-                )
-                exception.unlogged = False
-                raise
-            except DuplicateReferenceNumber as exception:
-                logger.info(
-                    'Received CyberSource payment notification for basket [%d] which is associated '
-                    'with existing order [%s]. No payment was collected, and no new order will be created.',
-                    basket.id,
-                    order_number
-                )
-                exception.unlogged = False
-                raise
-            except RedundantPaymentNotificationError as exception:
-                logger.info(
-                    'Received redundant CyberSource payment notification with same transaction ID for basket [%d] '
-                    'which is associated with an existing order [%s]. No payment was collected.',
-                    basket.id,
-                    order_number
-                )
-                exception.unlogged = False
-                raise
-            except ExcessivePaymentForOrderError as exception:
-                logger.info(
-                    'Received duplicate CyberSource payment notification with different transaction ID for basket '
-                    '[%d] which is associated with an existing order [%s]. Payment collected twice, request a '
-                    'refund.',
-                    basket.id,
-                    order_number
-                )
-                exception.unlogged = False
-                raise
-            except InvalidSignatureError as exception:
-                self._log_cybersource_payment_failure(
-                    exception, basket, order_number, transaction_id, notification, ppr,
-                    message_prefix='CyberSource response was invalid.',
-                )
-                exception.unlogged = False
-                raise
-            except (PaymentError, Exception) as exception:
-                self._log_cybersource_payment_failure(
-                    exception, basket, order_number, transaction_id, notification, ppr,
-                )
-                exception.unlogged = False
-                raise
+    def log_payment_exceptions(self, basket, order_number, transaction_id, notification, ppr):
+        try:
+            yield
+        except (UserCancelled, TransactionDeclined, AuthorizationError) as exception:
+            self._log_cybersource_payment_failure(
+                exception, basket, order_number, transaction_id, notification, ppr,
+                logger_function=logger.info,
+            )
+            exception.unlogged = False
+            raise
+        except DuplicateReferenceNumber as exception:
+            logger.info(
+                'Received CyberSource payment notification for basket [%d] which is associated '
+                'with existing order [%s]. No payment was collected, and no new order will be created.',
+                basket.id,
+                order_number
+            )
+            exception.unlogged = False
+            raise
+        except RedundantPaymentNotificationError as exception:
+            logger.info(
+                'Received redundant CyberSource payment notification with same transaction ID for basket [%d] '
+                'which is associated with an existing order [%s]. No payment was collected.',
+                basket.id,
+                order_number
+            )
+            exception.unlogged = False
+            raise
+        except ExcessivePaymentForOrderError as exception:
+            logger.info(
+                'Received duplicate CyberSource payment notification with different transaction ID for basket '
+                '[%d] which is associated with an existing order [%s]. Payment collected twice, request a '
+                'refund.',
+                basket.id,
+                order_number
+            )
+            exception.unlogged = False
+            raise
+        except InvalidSignatureError as exception:
+            self._log_cybersource_payment_failure(
+                exception, basket, order_number, transaction_id, notification, ppr,
+                message_prefix='CyberSource response was invalid.',
+            )
+            exception.unlogged = False
+            raise
+        except (PaymentError, Exception) as exception:
+            self._log_cybersource_payment_failure(
+                exception, basket, order_number, transaction_id, notification, ppr,
+            )
+            exception.unlogged = False
+            raise
 
 
 class CybersourceAuthorizeAPIView(APIView, BasePaymentSubmitView, CybersourceOrderCompletionView, CybersourceOrderInitiationView):
@@ -460,8 +458,9 @@ class CybersourceInterstitialView(CybersourceOrderCompletionView, View):
                 self._set_payment_response_custom_metrics(basket, notification, order_number, ppr, transaction_id)
 
             # Explicitly delimit operations which will be rolled back if an exception occurs.
-            with self.handle_payment_exceptions(basket, order_number, transaction_id, notification, ppr):
-                self.handle_payment(notification, basket)
+            with transaction.atomic():
+                with self.log_payment_exceptions(basket, order_number, transaction_id, notification, ppr):
+                    self.handle_payment(notification, basket)
 
         except Exception as exception:  # pylint: disable=bare-except
             if getattr(exception, 'unlogged', True):
