@@ -343,7 +343,6 @@ class CybersourceInterstitialView(CybersourceOrderCompletionView, View):
         basket = None
         transaction_id = None
         notification = notification or {}
-        unhandled_exception_logging = True
 
         try:
 
@@ -365,8 +364,9 @@ class CybersourceInterstitialView(CybersourceOrderCompletionView, View):
                         'Received CyberSource payment notification for non-existent basket [%s].' % basket_id
                     )
                     logger.error(error_message)
-                    unhandled_exception_logging = False
-                    raise InvalidBasketError(error_message)
+                    exception = InvalidBasketError(error_message)
+                    exception.unlogged = False
+                    raise exception
 
                 if basket.status != Basket.FROZEN:
                     # We don't know how serious this situation is at this point, hence
@@ -393,27 +393,27 @@ class CybersourceInterstitialView(CybersourceOrderCompletionView, View):
                         exception, basket, order_number, transaction_id, notification, ppr,
                         logger_function=logger.info,
                     )
-                    unhandled_exception_logging = False
+                    exception.unlogged = False
                     raise
-                except DuplicateReferenceNumber:
+                except DuplicateReferenceNumber as exception:
                     logger.info(
                         'Received CyberSource payment notification for basket [%d] which is associated '
                         'with existing order [%s]. No payment was collected, and no new order will be created.',
                         basket.id,
                         order_number
                     )
-                    unhandled_exception_logging = False
+                    exception.unlogged = False
                     raise
-                except RedundantPaymentNotificationError:
+                except RedundantPaymentNotificationError as exception:
                     logger.info(
                         'Received redundant CyberSource payment notification with same transaction ID for basket [%d] '
                         'which is associated with an existing order [%s]. No payment was collected.',
                         basket.id,
                         order_number
                     )
-                    unhandled_exception_logging = False
+                    exception.unlogged = False
                     raise
-                except ExcessivePaymentForOrderError:
+                except ExcessivePaymentForOrderError as exception:
                     logger.info(
                         'Received duplicate CyberSource payment notification with different transaction ID for basket '
                         '[%d] which is associated with an existing order [%s]. Payment collected twice, request a '
@@ -421,24 +421,24 @@ class CybersourceInterstitialView(CybersourceOrderCompletionView, View):
                         basket.id,
                         order_number
                     )
-                    unhandled_exception_logging = False
+                    exception.unlogged = False
                     raise
                 except InvalidSignatureError as exception:
                     self._log_cybersource_payment_failure(
                         exception, basket, order_number, transaction_id, notification, ppr,
                         message_prefix='CyberSource response was invalid.',
                     )
-                    unhandled_exception_logging = False
+                    exception.unlogged = False
                     raise
                 except (PaymentError, Exception) as exception:
                     self._log_cybersource_payment_failure(
                         exception, basket, order_number, transaction_id, notification, ppr,
                     )
-                    unhandled_exception_logging = False
+                    exception.unlogged = False
                     raise
 
-        except:  # pylint: disable=bare-except
-            if unhandled_exception_logging:
+        except Exception as exception:  # pylint: disable=bare-except
+            if getattr(exception, 'unlogged', True):
                 logger.exception(
                     'Unhandled exception processing CyberSource payment notification for transaction [%s], order [%s], '
                     'and basket [%d].',
