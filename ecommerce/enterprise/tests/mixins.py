@@ -43,9 +43,11 @@ class EnterpriseServiceMockMixin:
     ENTERPRISE_COURSE_ENROLLMENT_URL = '{}enterprise-course-enrollment/'.format(
         settings.ENTERPRISE_API_URL,
     )
-
-    ENTERPRISE_CATALOG_URL = '{}enterprise_catalogs/'.format(
-        settings.ENTERPRISE_API_URL
+    ENTERPRISE_CATALOG_URL = '{}enterprise-catalogs/'.format(
+        settings.ENTERPRISE_CATALOG_API_URL
+    )
+    ENTERPRISE_CATALOG_URL_CUSTOMER_RESOURCE = '{}enterprise-customer/'.format(
+        settings.ENTERPRISE_CATALOG_API_URL
     )
 
     def setUp(self):
@@ -492,7 +494,6 @@ class EnterpriseServiceMockMixin:
             self,
             course_run_ids,
             enterprise_customer_uuid,
-            catalog_api_url,
             enterprise_customer_catalog_uuid=None,
             contains_content=True,
             raise_exception=False
@@ -502,8 +503,8 @@ class EnterpriseServiceMockMixin:
         body = raise_timeout if raise_exception else json.dumps({'contains_content_items': contains_content})
         httpretty.register_uri(
             method=httpretty.GET,
-            uri='{api_url}enterprise-customer/{enterprise_customer_uuid}/contains_content_items/?{query_params}'.format(
-                api_url=catalog_api_url,
+            uri='{api_url}{enterprise_customer_uuid}/contains_content_items/?{query_params}'.format(
+                api_url=self.ENTERPRISE_CATALOG_URL_CUSTOMER_RESOURCE,
                 enterprise_customer_uuid=enterprise_customer_uuid,
                 query_params=query_params
             ),
@@ -513,9 +514,8 @@ class EnterpriseServiceMockMixin:
         if enterprise_customer_catalog_uuid:
             httpretty.register_uri(
                 method=httpretty.GET,
-                uri='{api_url}{catalog_resource}/{customer_catalog_uuid}/contains_content_items/?{query_params}'.format(
-                    api_url=catalog_api_url,
-                    catalog_resource='enterprise-catalogs',
+                uri='{api_url}{customer_catalog_uuid}/contains_content_items/?{query_params}'.format(
+                    api_url=self.ENTERPRISE_CATALOG_URL,
                     customer_catalog_uuid=enterprise_customer_catalog_uuid,
                     query_params=query_params
                 ),
@@ -523,7 +523,7 @@ class EnterpriseServiceMockMixin:
                 content_type='application/json'
             )
 
-    def prepare_enterprise_offer(self, api_url, percentage_discount_value=100, enterprise_customer_name=None):
+    def prepare_enterprise_offer(self, percentage_discount_value=100, enterprise_customer_name=None):
         benefit = EnterprisePercentageDiscountBenefitFactory(value=percentage_discount_value)
         if enterprise_customer_name is not None:
             condition = EnterpriseCustomerConditionFactory(enterprise_customer_name=enterprise_customer_name)
@@ -538,7 +538,6 @@ class EnterpriseServiceMockMixin:
         self.mock_catalog_contains_course_runs(
             [self.course_run.id],
             condition.enterprise_customer_uuid,
-            api_url,
             enterprise_customer_catalog_uuid=condition.enterprise_customer_catalog_uuid,
         )
         return enterprise_offer

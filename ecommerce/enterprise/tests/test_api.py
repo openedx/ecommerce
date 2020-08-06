@@ -120,7 +120,6 @@ class EnterpriseAPITests(EnterpriseServiceMockMixin, DiscoveryTestMixin, TestCas
         self.mock_catalog_contains_course_runs(
             [self.course_run.id],
             'fake-uuid',
-            self.site.siteconfiguration.enterprise_catalog_api_url,
             enterprise_customer_catalog_uuid=enterprise_customer_catalog_uuid,
             contains_content=expected,
         )
@@ -134,7 +133,6 @@ class EnterpriseAPITests(EnterpriseServiceMockMixin, DiscoveryTestMixin, TestCas
         self.mock_catalog_contains_course_runs(
             [self.course_run.id],
             'fake-uuid',
-            self.site.siteconfiguration.enterprise_catalog_api_url,
             enterprise_customer_catalog_uuid=None,
             contains_content=True,
         )
@@ -156,7 +154,6 @@ class EnterpriseAPITests(EnterpriseServiceMockMixin, DiscoveryTestMixin, TestCas
         self.mock_catalog_contains_course_runs(
             [self.course_run.id],
             'fake-uuid',
-            self.site.siteconfiguration.enterprise_catalog_api_url,
             enterprise_customer_catalog_uuid='fake-uuid',
             contains_content=False,
             raise_exception=True,
