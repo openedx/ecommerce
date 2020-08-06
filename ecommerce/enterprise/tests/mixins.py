@@ -49,6 +49,9 @@ class EnterpriseServiceMockMixin:
     ENTERPRISE_CATALOG_URL_CUSTOMER_RESOURCE = '{}enterprise-customer/'.format(
         settings.ENTERPRISE_CATALOG_API_URL
     )
+    LEGACY_ENTERPRISE_CATALOG_URL = '{}enterprise_catalogs/'.format(
+        settings.ENTERPRISE_API_URL
+    )
 
     def setUp(self):
         super(EnterpriseServiceMockMixin, self).setUp()
@@ -84,7 +87,7 @@ class EnterpriseServiceMockMixin:
         """
         enterprise_catalog_api_response = {
             "count": 60,
-            "next": "{}{}/?page=2".format(self.ENTERPRISE_CATALOG_URL, enterprise_catalog_uuid),
+            "next": "{}{}/?page=2".format(self.LEGACY_ENTERPRISE_CATALOG_URL, enterprise_catalog_uuid),
             "previous": None,
             "results": [
                 {
@@ -148,7 +151,7 @@ class EnterpriseServiceMockMixin:
         self.mock_access_token_response()
         httpretty.register_uri(
             method=httpretty.GET,
-            uri='{}{}/'.format(self.ENTERPRISE_CATALOG_URL, enterprise_catalog_uuid),
+            uri='{}{}/'.format(self.LEGACY_ENTERPRISE_CATALOG_URL, enterprise_catalog_uuid),
             body=enterprise_catalog_api_body,
             content_type='application/json'
         )
