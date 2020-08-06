@@ -74,7 +74,37 @@ class CybersourceOrderInitiationView:
     A baseclass that includes pre-work before submitting an order to cybersource for
     payment validation.
     """
-    pass
+
+    def check_sdn(self, request, data):
+        """
+        Check that the supplied request and form data passes SDN checks.
+
+        Returns:
+            JsonResponse with an error if the SDN check fails, or None if it succeeds.
+        """
+        hit_count = checkSDN(
+            request,
+            data['first_name'] + ' ' + data['last_name'],
+            data['city'],
+            data['country'])
+
+        if hit_count > 0:
+            logger.info(
+                'SDNCheck function called for basket [%d]. It received %d hit(s).',
+                request.basket.id,
+                hit_count,
+            )
+            response_to_return = {
+                'error': 'There was an error submitting the basket',
+                'sdn_check_failure': {'hit_count': hit_count}}
+
+            return JsonResponse(response_to_return, status=403)
+
+        logger.info(
+            'SDNCheck function called for basket [%d]. It did not receive a hit.',
+            request.basket.id,
+        )
+
 
 
 class CybersourceSubmitView(BasePaymentSubmitView, CybersourceOrderInitiationView):
@@ -100,28 +130,9 @@ class CybersourceSubmitView(BasePaymentSubmitView, CybersourceOrderInitiationVie
         request = self.request
         user = request.user
 
-        hit_count = checkSDN(
-            request,
-            data['first_name'] + ' ' + data['last_name'],
-            data['city'],
-            data['country'])
-
-        if hit_count > 0:
-            logger.info(
-                'SDNCheck function called for basket [%d]. It received %d hit(s).',
-                request.basket.id,
-                hit_count,
-            )
-            response_to_return = {
-                'error': 'There was an error submitting the basket',
-                'sdn_check_failure': {'hit_count': hit_count}}
-
-            return JsonResponse(response_to_return, status=403)
-
-        logger.info(
-            'SDNCheck function called for basket [%d]. It did not receive a hit.',
-            request.basket.id,
-        )
+        sdn_check_failure = self.check_sdn(request, data)
+        if sdn_check_failure is not None:
+            return sdn_check_failure
 
         # Add extra parameters for Silent Order POST
         extra_parameters = {
@@ -208,28 +219,9 @@ class CybersourceAuthorizeAPIView(APIView, BasePaymentSubmitView, CybersourceOrd
         request = self.request
         user = request.user
 
-        hit_count = checkSDN(
-            request,
-            data['first_name'] + ' ' + data['last_name'],
-            data['city'],
-            data['country'])
-
-        if hit_count > 0:
-            logger.info(
-                'SDNCheck function called for basket [%d]. It received %d hit(s).',
-                request.basket.id,
-                hit_count,
-            )
-            response_to_return = {
-                'error': 'There was an error submitting the basket',
-                'sdn_check_failure': {'hit_count': hit_count}}
-
-            return JsonResponse(response_to_return, status=403)
-
-        logger.info(
-            'SDNCheck function called for basket [%d]. It did not receive a hit.',
-            request.basket.id,
-        )
+        sdn_check_failure = self.check_sdn(request, data)
+        if sdn_check_failure is not None:
+            return sdn_check_failure
 
         try:
             handled_processor_response = self.payment_processor.authorize_payment(basket, request, data)
