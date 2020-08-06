@@ -379,56 +379,6 @@ class PaypalPaymentExecutionViewTests(PaypalMixin, PaymentEventsMixin, TestCase)
             fetch_redirect_response=False
         )
 
-    # TODO: Remove as a part of REVMI-124 as this tests a hacky solution
-    # The problem is that orders are being created after payment processing, and the discount is not
-    # saved in the database, so it needs to be calculated again in order to save the correct info to the
-    # order. REVMI-124 will create the order before payment processing, when we have the discount context.
-    @override_flag(DYNAMIC_DISCOUNT_FLAG, active=True)
-    @httpretty.activate
-    @responses.activate
-    @mock.patch.object(PaymentProcessorResponse.objects, 'get')
-    @mock.patch('ecommerce.extensions.payment.views.paypal.EdxRestApiClient')
-    @mock.patch.object(PaypalPaymentExecutionView, 'handle_payment')
-    def test_add_dynamic_discount_to_request_error(self, fake_handle_payment, mocked_client, basket_object):
-        """
-        Verify that we log a warning when the lms doesn't return a discount jwt
-        """
-        error_response = '<Response [401]>'
-        mocked_client.return_value.user.return_value.course.return_value.get.side_effect = SlumberHttpBaseException(
-            response=error_response)
-
-        basket_object.return_value.basket = self.basket
-
-        # login the user
-        self.client.login(username=self.user.username, password=self.password)
-
-        self.mock_oauth2_response()
-        self.mock_payment_creation_response(self.basket)
-        self.processor.get_transaction_parameters(self.basket, request=self.request)
-
-        logger_name = 'ecommerce.extensions.payment.views.paypal'
-        with LogCapture(logger_name) as logger:
-            with mock.patch.object(SiteConfiguration, 'access_token', return_value=self.mock_access_token_response()):
-                self.client.get(reverse('paypal:execute'), self.RETURN_DATA)
-
-            self.assertTrue(fake_handle_payment.called)
-            logger.check_present(
-                (
-                    logger_name,
-                    'INFO',
-                    'Payment [{payment_id}] approved by payer [{payer_id}]'.format(
-                        payment_id=self.PAYMENT_ID,
-                        payer_id=self.PAYER_ID
-                    )
-                ),
-                (
-                    logger_name,
-                    'WARNING',
-                    ('Failed to get discount jwt from LMS. '
-                     '[http://lms.testserver.fake/api/discounts/] returned [{error}]').format(error=error_response)
-                ),
-            )
-
     @override_flag(DYNAMIC_DISCOUNT_FLAG, active=True)
     @httpretty.activate
     @responses.activate
