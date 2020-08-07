@@ -325,29 +325,7 @@ class Cybersource(ApplePayMixin, BaseClientSidePaymentProcessor):
 
         return parameters
 
-    def handle_processor_response(self, response, basket=None):
-        """
-        Handle a response (i.e., "merchant notification") from CyberSource.
-
-        Arguments:
-            response (dict): Dictionary of parameters received from the payment processor.
-
-        Keyword Arguments:
-            basket (Basket): Basket being purchased via the payment processor.
-
-        Raises:
-            AuthorizationError: Authorization was declined.
-            UserCancelled: Indicates the user cancelled payment.
-            TransactionDeclined: Indicates the payment was declined by the processor.
-            GatewayError: Indicates a general error on the part of the processor.
-            InvalidCyberSourceDecision: Indicates an unknown decision value.
-                Known values are ACCEPT, CANCEL, DECLINE, ERROR, REVIEW.
-            PartialAuthorizationError: Indicates only a portion of the requested amount was authorized.
-
-        Returns:
-            HandledProcessorResponse
-        """
-
+    def _normalize_processor_response(self, response):
         # Validate the signature
         if not self.is_signature_valid(response):
             raise InvalidSignatureError
@@ -376,6 +354,31 @@ class Cybersource(ApplePayMixin, BaseClientSidePaymentProcessor):
             transaction_id=response.get('transaction_id', ''),   # Error Notifications do not include a transaction id.
             order_id=response['req_reference_number'],
         )
+        return _response
+
+    def handle_processor_response(self, response, basket=None):
+        """
+        Handle a response (i.e., "merchant notification") from CyberSource.
+
+        Arguments:
+            response (dict): Dictionary of parameters received from the payment processor.
+
+        Keyword Arguments:
+            basket (Basket): Basket being purchased via the payment processor.
+
+        Raises:
+            AuthorizationError: Authorization was declined.
+            UserCancelled: Indicates the user cancelled payment.
+            TransactionDeclined: Indicates the payment was declined by the processor.
+            GatewayError: Indicates a general error on the part of the processor.
+            InvalidCyberSourceDecision: Indicates an unknown decision value.
+                Known values are ACCEPT, CANCEL, DECLINE, ERROR, REVIEW.
+            PartialAuthorizationError: Indicates only a portion of the requested amount was authorized.
+
+        Returns:
+            HandledProcessorResponse
+        """
+        _response = self._normalize_processor_response(response)
 
         if _response.decision != Decision.accept:
             if _response.duplicate_payment:
