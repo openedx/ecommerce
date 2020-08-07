@@ -3,6 +3,7 @@
 
 import base64
 import datetime
+from enum import Enum
 import json
 import logging
 import uuid
@@ -63,6 +64,15 @@ def del_none(d):
         elif isinstance(value, dict):
             del_none(value)
     return d
+
+
+class Decision(Enum):
+    accept = 'accept'
+    cancel = 'cancel'
+    decline = 'decline'
+    error = 'error'
+    review = 'review'
+    invalid = 'invalid'  # Used when the Cybersource decision doesn't match a known decision type
 
 
 class Cybersource(ApplePayMixin, BaseClientSidePaymentProcessor):
@@ -330,11 +340,15 @@ class Cybersource(ApplePayMixin, BaseClientSidePaymentProcessor):
 
         # Raise an exception for payments that were not accepted. Consuming code should be responsible for handling
         # and logging the exception.
-        decision = response['decision'].lower()
-        if decision != 'accept':
+        try:
+            decision = Decision(response['decision'].lower())
+        except ValueError:
+            decision = Decision.invalid
+
+        if decision != Decision.accept:
             reason_code = int(response['reason_code'])
 
-            if decision == 'error' and reason_code == 104:
+            if decision == Decision.error and reason_code == 104:
                 # This means user submitted payment request twice within 15 min.
                 # We need to check if user first payment notification was handled successfuly and user has an order
                 # if user has an order we can raise DuplicateReferenceNumber exception else we need to continue
@@ -348,14 +362,14 @@ class Cybersource(ApplePayMixin, BaseClientSidePaymentProcessor):
                 )
             else:
                 raise {
-                    'cancel': UserCancelled,
-                    'decline': TransactionDeclined,
-                    'error': GatewayError,
-                    'review': AuthorizationError,
+                    Decision.cancel: UserCancelled,
+                    Decision.decline: TransactionDeclined,
+                    Decision.error: GatewayError,
+                    Decision.review: AuthorizationError,
                 }.get(decision, InvalidCybersourceDecision)
 
         transaction_id = response.get('transaction_id', '')  # Error Notifications do not include a transaction id.
-        if transaction_id and decision == 'accept':
+        if transaction_id and decision == Decision.accept:
             if Order.objects.filter(number=response['req_reference_number']).exists():
                 if PaymentProcessorResponse.objects.filter(transaction_id=transaction_id).exists():
                     raise RedundantPaymentNotificationError
