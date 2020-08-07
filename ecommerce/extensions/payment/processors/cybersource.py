@@ -154,164 +154,6 @@ class Cybersource(ApplePayMixin, BaseClientSidePaymentProcessor):
 
         return {'key_id': return_data.key_id}
 
-    def initiate_payment(self, basket, request, form_data):
-        """
-        Initiate payment using the Cybersource REST payment api.
-
-        Returns:
-            (payment_processor_response, transaction_id)
-
-        Raises:
-            GatewayError: when the REST api call fails
-        """
-        transient_token_jwt = request.POST['payment_token']
-
-        try:
-            payment_processor_response, _, _ = self.authorize_payment_api(transient_token_jwt, basket, request, form_data)
-            transaction_id = payment_processor_response.processor_information.transaction_id
-            return payment_processor_response, transaction_id
-        except ApiException as e:
-            self.record_processor_response({
-                'status': e.status,
-                'reason': e.reason,
-                'body': e.body,
-                'headers': dict(e.headers),
-            }, transaction_id=e.headers['v-c-correlation-id'], basket=basket)
-            logger.exception('Payment failed')
-            # This will display the generic error on the frontend
-            raise GatewayError()
-
-    def handle_payment_response(self, request, basket, payment_processor_response, transaction_id):
-        """
-        Handle the response for a completed Cybersource REST payment request.
-
-        N.B. The payment may not have been successful, but the API returned a response,
-        which indicates that Cybersource attempted to capture the payment.
-        """
-        self.record_processor_response(payment_processor_response.to_dict(), transaction_id=transaction_id, basket=basket)
-        # Valid response codes:
-        # AUTHORIZED
-        # PARTIAL_AUTHORIZED
-        # AUTHORIZED_PENDING_REVIEW
-        # AUTHORIZED_RISK_DECLINED
-        # PENDING_AUTHENTICATION
-        # PENDING_REVIEW
-        # DECLINED
-        # INVALID_REQUEST
-        if payment_processor_response.status in ('DECLINED', 'AUTHORIZED_PENDING_REVIEW', 'AUTHORIZED_RISK_DECLINED', 'PENDING_AUTHENTICATION', 'PENDING_REVIEW'):
-            raise TransactionDeclined()
-        elif payment_processor_response.status == 'INVALID_REQUEST':
-            raise GatewayError()
-        elif payment_processor_response.status != 'AUTHORIZED':
-            raise GatewayError()
-
-        transient_token_jwt = request.POST['payment_token']
-        # We save the capture context in the session and recall it here since we can't trust the front-end
-        capture_context = request.session['capture_context']
-        decoded_capture_context = jwt.decode(capture_context['key_id'], verify=False)
-        jwk = RSAAlgorithm.from_jwk(json.dumps(decoded_capture_context['flx']['jwk']))
-        decoded_payment_token = jwt.decode(transient_token_jwt, key=jwk, algorithms=['RS256'])
-
-        return HandledProcessorResponse(
-            transaction_id=transaction_id,
-            total=Decimal(payment_processor_response.order_information.amount_details.total_amount),
-            currency=payment_processor_response.order_information.amount_details.currency,
-            card_number=decoded_payment_token['data']['number'],
-            card_type=CYBERSOURCE_CARD_TYPE_MAP.get(payment_processor_response.payment_information.tokenized_card.type)
-        )
-
-    def authorize_payment_api(self, transient_token_jwt, basket, request, form_data):
-        clientReferenceInformation = Ptsv2paymentsClientReferenceInformation(
-            code=basket.order_number,
-        )
-        processingInformation = Ptsv2paymentsProcessingInformation(
-            capture=True,
-            purchase_level="3",
-        )
-        tokenInformation = Ptsv2paymentsTokenInformation(
-            transient_token_jwt=transient_token_jwt,
-        )
-        orderInformationAmountDetails = Ptsv2paymentsOrderInformationAmountDetails(
-            total_amount=str(basket.total_incl_tax),
-            currency=basket.currency,
-        )
-
-        orderInformationBillTo = Ptsv2paymentsOrderInformationBillTo(
-            first_name=form_data['first_name'],
-            last_name=form_data['last_name'],
-            address1=form_data['address_line1'],
-            address2=form_data['address_line2'],
-            locality=form_data['city'],
-            administrative_area=form_data['state'],
-            postal_code=form_data['postal_code'],
-            country=form_data['country'],
-            email=request.user.email,
-        )
-
-        merchantDefinedInformation = []
-        program_uuid = get_basket_program_uuid(basket)
-        if program_uuid:
-            programInfo = Ptsv2paymentsMerchantDefinedInformation(
-                key="1",
-                value="program,{program_uuid}".format(program_uuid=program_uuid)
-            )
-            merchantDefinedInformation.append(programInfo.__dict__)
-
-        merchantDataIndex = 2
-        orderInformationLineItems = []
-        for line in basket.all_lines():
-            orderInformationLineItem = Ptsv2paymentsOrderInformationLineItems(
-                product_name=clean_field_value(line.product.title),
-                product_code=line.product.get_product_class().slug,
-                product_sku=line.stockrecord.partner_sku,
-                quantity=line.quantity,
-                unit_price=str(line.unit_price_incl_tax),
-                total_amount=str(line.line_price_incl_tax_incl_discounts),
-                unit_of_measure='ITM',
-                discount_amount=str(line.discount_value),
-                discount_applied=True,
-                amount_includes_tax=True,
-                tax_amount=str(line.line_tax),
-                tax_rate='0',
-            )
-            orderInformationLineItems.append(orderInformationLineItem.__dict__)
-            line_course = line.product.course
-            if line_course:
-                courseInfo = Ptsv2paymentsMerchantDefinedInformation(
-                    key=str(merchantDataIndex),
-                    value="course,{course_id},{course_type}".format(
-                        course_id=line_course.id if line_course else None,
-                        course_type=line_course.type if line_course else None
-                    )
-                )
-                merchantDefinedInformation.append(courseInfo.__dict__)
-                merchantDataIndex += 1
-
-        orderInformationInvoiceDetails = Ptsv2paymentsOrderInformationInvoiceDetails(
-            purchase_order_number='BLANK'
-        )
-
-        orderInformation = Ptsv2paymentsOrderInformation(
-            amount_details=orderInformationAmountDetails.__dict__,
-            bill_to=orderInformationBillTo.__dict__,
-            line_items=orderInformationLineItems,
-            invoice_details=orderInformationInvoiceDetails.__dict__
-        )
-
-        requestObj = CreatePaymentRequest(
-            client_reference_information=clientReferenceInformation.__dict__,
-            processing_information=processingInformation.__dict__,
-            token_information=tokenInformation.__dict__,
-            order_information=orderInformation.__dict__,
-            merchant_defined_information = merchantDefinedInformation
-        )
-
-        requestObj = self.del_none(requestObj.__dict__)
-        requestObj = json.dumps(requestObj)
-
-        api_instance = PaymentsApi(self.cybersource_api_config)
-        return api_instance.create_payment(requestObj)
-
     def get_transaction_parameters(self, basket, request=None, use_client_side_checkout=False, **kwargs):
         """
         Generate a dictionary of signed parameters CyberSource requires to complete a transaction.
@@ -733,3 +575,167 @@ class Cybersource(ApplePayMixin, BaseClientSidePaymentProcessor):
         msg = msg.format(basket_id=basket.id, response_id=ppr.id)
         logger.warning(msg)
         raise GatewayError(msg)
+
+
+class CybersourceREST(Cybersource):
+    """
+    A temporary PaymentProcessor dedicated to carefully switching to the Cybersource REST payment api
+    """
+
+    def initiate_payment(self, basket, request, form_data):
+        """
+        Initiate payment using the Cybersource REST payment api.
+
+        Returns:
+            (payment_processor_response, transaction_id)
+
+        Raises:
+            GatewayError: when the REST api call fails
+        """
+        transient_token_jwt = request.POST['payment_token']
+
+        try:
+            payment_processor_response, _, _ = self.authorize_payment_api(transient_token_jwt, basket, request, form_data)
+            transaction_id = payment_processor_response.processor_information.transaction_id
+            return payment_processor_response, transaction_id
+        except ApiException as e:
+            self.record_processor_response({
+                'status': e.status,
+                'reason': e.reason,
+                'body': e.body,
+                'headers': dict(e.headers),
+            }, transaction_id=e.headers['v-c-correlation-id'], basket=basket)
+            logger.exception('Payment failed')
+            # This will display the generic error on the frontend
+            raise GatewayError()
+
+    def handle_payment_response(self, request, basket, payment_processor_response, transaction_id):
+        """
+        Handle the response for a completed Cybersource REST payment request.
+
+        N.B. The payment may not have been successful, but the API returned a response,
+        which indicates that Cybersource attempted to capture the payment.
+        """
+        self.record_processor_response(payment_processor_response.to_dict(), transaction_id=transaction_id, basket=basket)
+        # Valid response codes:
+        # AUTHORIZED
+        # PARTIAL_AUTHORIZED
+        # AUTHORIZED_PENDING_REVIEW
+        # AUTHORIZED_RISK_DECLINED
+        # PENDING_AUTHENTICATION
+        # PENDING_REVIEW
+        # DECLINED
+        # INVALID_REQUEST
+        if payment_processor_response.status in ('DECLINED', 'AUTHORIZED_PENDING_REVIEW', 'AUTHORIZED_RISK_DECLINED', 'PENDING_AUTHENTICATION', 'PENDING_REVIEW'):
+            raise TransactionDeclined()
+        elif payment_processor_response.status == 'INVALID_REQUEST':
+            raise GatewayError()
+        elif payment_processor_response.status != 'AUTHORIZED':
+            raise GatewayError()
+
+        transient_token_jwt = request.POST['payment_token']
+        # We save the capture context in the session and recall it here since we can't trust the front-end
+        capture_context = request.session['capture_context']
+        decoded_capture_context = jwt.decode(capture_context['key_id'], verify=False)
+        jwk = RSAAlgorithm.from_jwk(json.dumps(decoded_capture_context['flx']['jwk']))
+        decoded_payment_token = jwt.decode(transient_token_jwt, key=jwk, algorithms=['RS256'])
+
+        return HandledProcessorResponse(
+            transaction_id=transaction_id,
+            total=Decimal(payment_processor_response.order_information.amount_details.total_amount),
+            currency=payment_processor_response.order_information.amount_details.currency,
+            card_number=decoded_payment_token['data']['number'],
+            card_type=CYBERSOURCE_CARD_TYPE_MAP.get(payment_processor_response.payment_information.tokenized_card.type)
+        )
+
+    def authorize_payment_api(self, transient_token_jwt, basket, request, form_data):
+        clientReferenceInformation = Ptsv2paymentsClientReferenceInformation(
+            code=basket.order_number,
+        )
+        processingInformation = Ptsv2paymentsProcessingInformation(
+            capture=True,
+            purchase_level="3",
+        )
+        tokenInformation = Ptsv2paymentsTokenInformation(
+            transient_token_jwt=transient_token_jwt,
+        )
+        orderInformationAmountDetails = Ptsv2paymentsOrderInformationAmountDetails(
+            total_amount=str(basket.total_incl_tax),
+            currency=basket.currency,
+        )
+
+        orderInformationBillTo = Ptsv2paymentsOrderInformationBillTo(
+            first_name=form_data['first_name'],
+            last_name=form_data['last_name'],
+            address1=form_data['address_line1'],
+            address2=form_data['address_line2'],
+            locality=form_data['city'],
+            administrative_area=form_data['state'],
+            postal_code=form_data['postal_code'],
+            country=form_data['country'],
+            email=request.user.email,
+        )
+
+        merchantDefinedInformation = []
+        program_uuid = get_basket_program_uuid(basket)
+        if program_uuid:
+            programInfo = Ptsv2paymentsMerchantDefinedInformation(
+                key="1",
+                value="program,{program_uuid}".format(program_uuid=program_uuid)
+            )
+            merchantDefinedInformation.append(programInfo.__dict__)
+
+        merchantDataIndex = 2
+        orderInformationLineItems = []
+        for line in basket.all_lines():
+            orderInformationLineItem = Ptsv2paymentsOrderInformationLineItems(
+                product_name=clean_field_value(line.product.title),
+                product_code=line.product.get_product_class().slug,
+                product_sku=line.stockrecord.partner_sku,
+                quantity=line.quantity,
+                unit_price=str(line.unit_price_incl_tax),
+                total_amount=str(line.line_price_incl_tax_incl_discounts),
+                unit_of_measure='ITM',
+                discount_amount=str(line.discount_value),
+                discount_applied=True,
+                amount_includes_tax=True,
+                tax_amount=str(line.line_tax),
+                tax_rate='0',
+            )
+            orderInformationLineItems.append(orderInformationLineItem.__dict__)
+            line_course = line.product.course
+            if line_course:
+                courseInfo = Ptsv2paymentsMerchantDefinedInformation(
+                    key=str(merchantDataIndex),
+                    value="course,{course_id},{course_type}".format(
+                        course_id=line_course.id if line_course else None,
+                        course_type=line_course.type if line_course else None
+                    )
+                )
+                merchantDefinedInformation.append(courseInfo.__dict__)
+                merchantDataIndex += 1
+
+        orderInformationInvoiceDetails = Ptsv2paymentsOrderInformationInvoiceDetails(
+            purchase_order_number='BLANK'
+        )
+
+        orderInformation = Ptsv2paymentsOrderInformation(
+            amount_details=orderInformationAmountDetails.__dict__,
+            bill_to=orderInformationBillTo.__dict__,
+            line_items=orderInformationLineItems,
+            invoice_details=orderInformationInvoiceDetails.__dict__
+        )
+
+        requestObj = CreatePaymentRequest(
+            client_reference_information=clientReferenceInformation.__dict__,
+            processing_information=processingInformation.__dict__,
+            token_information=tokenInformation.__dict__,
+            order_information=orderInformation.__dict__,
+            merchant_defined_information = merchantDefinedInformation
+        )
+
+        requestObj = self.del_none(requestObj.__dict__)
+        requestObj = json.dumps(requestObj)
+
+        api_instance = PaymentsApi(self.cybersource_api_config)
+        return api_instance.create_payment(requestObj)
