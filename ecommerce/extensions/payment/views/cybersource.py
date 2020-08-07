@@ -316,6 +316,7 @@ class CybersourceAuthorizeAPIView(APIView, BasePaymentSubmitView, CyberSourceRES
 
         try:
             payment_processor_response, transaction_id = self.payment_processor.initiate_payment(basket, request, data)
+            self.record_processor_response(payment_processor_response.to_dict(), transaction_id=transaction_id, basket=basket)
             handled_processor_response = self.payment_processor.handle_payment_response(request, basket, payment_processor_response, transaction_id)
         except GatewayError:
             return JsonResponse({}, status=400)
