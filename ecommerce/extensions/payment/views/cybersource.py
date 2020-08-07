@@ -68,8 +68,10 @@ class CyberSourceProcessorMixin:
     def payment_processor(self):
         return Cybersource(self.request.site)
 
+
+class CyberSourceRESTProcessorMixin:
     @cached_property
-    def rest_payment_processor(self):
+    def payment_processor(self):
         return CybersourceREST(self.request.site)
 
 
@@ -287,7 +289,7 @@ class CybersourceOrderCompletionView(EdxOrderPlacementMixin):
         monitoring_utils.set_custom_metric('payment_response_message', payment_response_message)
 
 
-class CybersourceAuthorizeAPIView(APIView, BasePaymentSubmitView, CyberSourceProcessorMixin, CybersourceOrderCompletionView, CybersourceOrderInitiationView):
+class CybersourceAuthorizeAPIView(APIView, BasePaymentSubmitView, CyberSourceRESTProcessorMixin, CybersourceOrderCompletionView, CybersourceOrderInitiationView):
     # DRF APIView wrapper which allows clients to use
     # JWT authentication when making Cybersource submit
     # requests.
@@ -313,8 +315,8 @@ class CybersourceAuthorizeAPIView(APIView, BasePaymentSubmitView, CyberSourcePro
             return sdn_check_failure
 
         try:
-            payment_processor_response, transaction_id = self.rest_payment_processor.initiate_payment(basket, request, data)
-            handled_processor_response = self.rest_payment_processor.handle_payment_response(request, basket, payment_processor_response, transaction_id)
+            payment_processor_response, transaction_id = self.payment_processor.initiate_payment(basket, request, data)
+            handled_processor_response = self.payment_processor.handle_payment_response(request, basket, payment_processor_response, transaction_id)
         except GatewayError:
             return JsonResponse({}, status=400)
         except TransactionDeclined:
