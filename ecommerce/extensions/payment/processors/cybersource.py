@@ -219,10 +219,6 @@ class Cybersource(ApplePayMixin, BaseClientSidePaymentProcessor):
             card_type=CYBERSOURCE_CARD_TYPE_MAP.get(payment_processor_response.payment_information.tokenized_card.type)
         )
 
-    def authorize_payment(self, basket, request, form_data):
-        payment_processor_response, transaction_id = self.initiate_payment(basket, request, form_data)
-        return self.handle_payment_response(request, basket, payment_processor_response, transaction_id)
-
     def authorize_payment_api(self, transient_token_jwt, basket, request, form_data):
         clientReferenceInformation = Ptsv2paymentsClientReferenceInformation(
             code=basket.order_number,

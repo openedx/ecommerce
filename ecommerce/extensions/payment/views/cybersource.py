@@ -310,7 +310,8 @@ class CybersourceAuthorizeAPIView(APIView, BasePaymentSubmitView, CybersourceOrd
             return sdn_check_failure
 
         try:
-            handled_processor_response = self.payment_processor.authorize_payment(basket, request, data)
+            payment_processor_response, transaction_id = self.payment_processor.initiate_payment(basket, request, data)
+            handled_processor_response = self.payment_processor.handle_payment_response(request, basket, payment_processor_response, transaction_id)
         except GatewayError:
             return JsonResponse({}, status=400)
         except TransactionDeclined:
