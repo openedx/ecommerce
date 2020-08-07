@@ -653,7 +653,7 @@ class CybersourceREST(Cybersource):
             # This will display the generic error on the frontend
             raise GatewayError()
 
-    def handle_payment_response(self, request, basket, payment_processor_response, transaction_id):
+    def handle_payment_response(self, request, payment_processor_response, transaction_id):
         """
         Handle the response for a completed Cybersource REST payment request.
 
