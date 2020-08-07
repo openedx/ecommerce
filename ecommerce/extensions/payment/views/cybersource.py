@@ -43,7 +43,7 @@ from ecommerce.extensions.payment.exceptions import (
     InvalidSignatureError,
     RedundantPaymentNotificationError
 )
-from ecommerce.extensions.payment.processors.cybersource import Cybersource
+from ecommerce.extensions.payment.processors.cybersource import Cybersource, CybersourceREST
 from ecommerce.extensions.payment.utils import checkSDN, clean_field_value
 from ecommerce.extensions.payment.views import BasePaymentSubmitView
 
@@ -67,6 +67,10 @@ class CyberSourceProcessorMixin:
     @cached_property
     def payment_processor(self):
         return Cybersource(self.request.site)
+
+    @cached_property
+    def rest_payment_processor(self):
+        return CybersourceREST(self.request.site)
 
 
 class CybersourceOrderInitiationView:
@@ -310,8 +314,8 @@ class CybersourceAuthorizeAPIView(APIView, BasePaymentSubmitView, CybersourceOrd
             return sdn_check_failure
 
         try:
-            payment_processor_response, transaction_id = self.payment_processor.initiate_payment(basket, request, data)
-            handled_processor_response = self.payment_processor.handle_payment_response(request, basket, payment_processor_response, transaction_id)
+            payment_processor_response, transaction_id = self.rest_payment_processor.initiate_payment(basket, request, data)
+            handled_processor_response = self.rest_payment_processor.handle_payment_response(request, basket, payment_processor_response, transaction_id)
         except GatewayError:
             return JsonResponse({}, status=400)
         except TransactionDeclined:
