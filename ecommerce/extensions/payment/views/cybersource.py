@@ -407,6 +407,8 @@ class CybersourceInterstitialView(CybersourceOrderCompletionView, View):
                 transaction_id,
                 order_number,
             )
+            # TODO: If we ever actually hit this code path, the next line would throw
+            # an error because basket_id wouldn't be defined.
         return (transaction_id, order_number, basket_id)
 
     # Note: method has too-many-statements, but it enables tracking that all exception handling gets logged
