@@ -68,11 +68,11 @@ def del_none(d):
 
 
 class Decision(Enum):
-    accept = 'accept'
-    cancel = 'cancel'
-    decline = 'decline'
-    error = 'error'
-    review = 'review'
+    accept = 'ACCEPT'
+    cancel = 'CANCEL'
+    decline = 'DECLINE'
+    error = 'ERROR'
+    review = 'REVIEW'
     invalid = 'invalid'  # Used when the Cybersource decision doesn't match a known decision type
 
 
@@ -342,7 +342,7 @@ class Cybersource(ApplePayMixin, BaseClientSidePaymentProcessor):
         # Raise an exception for payments that were not accepted. Consuming code should be responsible for handling
         # and logging the exception.
         try:
-            decision = Decision(response['decision'].lower())
+            decision = Decision(response['decision'].upper())
         except ValueError:
             decision = Decision.invalid
 
