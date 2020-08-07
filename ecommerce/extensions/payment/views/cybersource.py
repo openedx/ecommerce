@@ -197,7 +197,7 @@ class CybersourceOrderCompletionView(CyberSourceProcessorMixin, EdxOrderPlacemen
     """
 
     def _log_cybersource_payment_failure(
-            self, exception, basket, order_number, transaction_id, ppr, notification_msg,
+            self, exception, basket, order_number, transaction_id, ppr, notification_msg=None,
             message_prefix=None, logger_function=None
     ):
         """ Logs standard payment response as exception log unless logger_function supplied. """
@@ -212,12 +212,12 @@ class CybersourceOrderCompletionView(CyberSourceProcessorMixin, EdxOrderPlacemen
             transaction_id,
             order_number,
             basket.id,
-            notification_msg,
+            notification_msg or "Unknown Error",
             ppr.id
         )
 
     @contextmanager
-    def log_payment_exceptions(self, basket, order_number, transaction_id, ppr, notification_msg):
+    def log_payment_exceptions(self, basket, order_number, transaction_id, ppr, notification_msg=None):
         try:
             yield
         except (UserCancelled, TransactionDeclined, AuthorizationError) as exception:
@@ -459,7 +459,7 @@ class CybersourceInterstitialView(CybersourceOrderCompletionView, View):
 
             # Explicitly delimit operations which will be rolled back if an exception occurs.
             with transaction.atomic():
-                with self.log_payment_exceptions(basket, order_number, transaction_id, ppr, notification.get("message", "Unknown Error")):
+                with self.log_payment_exceptions(basket, order_number, transaction_id, ppr, notification.get("message")):
                     self.handle_payment(notification, basket)
 
         except Exception as exception:  # pylint: disable=bare-except
