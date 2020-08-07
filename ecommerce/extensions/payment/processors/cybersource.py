@@ -378,15 +378,13 @@ class Cybersource(ApplePayMixin, BaseClientSidePaymentProcessor):
             order_id=response['req_reference_number'],
         )
 
-        if decision != Decision.accept:
-            reason_code = int(response['reason_code'])
-
-            if decision == Decision.error and reason_code == 104:
+        if _response.decision != Decision.accept:
+            if _response.duplicate_payment:
                 # This means user submitted payment request twice within 15 min.
                 # We need to check if user first payment notification was handled successfuly and user has an order
                 # if user has an order we can raise DuplicateReferenceNumber exception else we need to continue
                 # the order creation process. to upgrade user in correct course mode.
-                if Order.objects.filter(number=response['req_reference_number']).exists():
+                if Order.objects.filter(number=_response.order_id).exists():
                     raise DuplicateReferenceNumber
                 logger.info(
                     'Received duplicate CyberSource payment notification for basket [%d] which is not associated '
@@ -399,33 +397,28 @@ class Cybersource(ApplePayMixin, BaseClientSidePaymentProcessor):
                     Decision.decline: TransactionDeclined,
                     Decision.error: GatewayError,
                     Decision.review: AuthorizationError,
-                }.get(decision, InvalidCybersourceDecision)
+                }.get(_response.decision, InvalidCybersourceDecision)
 
-        transaction_id = response.get('transaction_id', '')  # Error Notifications do not include a transaction id.
-        if transaction_id and decision == Decision.accept:
-            if Order.objects.filter(number=response['req_reference_number']).exists():
+        transaction_id = _response.transaction_id
+        if transaction_id and _response.decision == Decision.accept:
+            if Order.objects.filter(number=_response.order_id).exists():
                 if PaymentProcessorResponse.objects.filter(transaction_id=transaction_id).exists():
                     raise RedundantPaymentNotificationError
                 raise ExcessivePaymentForOrderError
 
-        if 'auth_amount' in response and response['auth_amount'] and response['auth_amount'] != response['req_amount']:
+        if _response.partial_authorization:
             # Raise an exception if the authorized amount differs from the requested amount.
             # Note (CCB): We should never reach this point in production since partial authorization is disabled
             # for our account, and should remain that way until we have a proper solution to allowing users to
             # complete authorization for the entire order
             raise PartialAuthorizationError
 
-        currency = response['req_currency']
-        total = Decimal(response['req_amount'])
-        card_number = response['req_card_number']
-        card_type = CYBERSOURCE_CARD_TYPE_MAP.get(response['req_card_type'])
-
         return HandledProcessorResponse(
-            transaction_id=transaction_id,
-            total=total,
-            currency=currency,
-            card_number=card_number,
-            card_type=card_type
+            transaction_id=_response.transaction_id,
+            total=_response.total,
+            currency=_response.currency,
+            card_number=_response.card_number,
+            card_type=_response.card_type
         )
 
     def _generate_signature(self, parameters, use_sop_profile):
