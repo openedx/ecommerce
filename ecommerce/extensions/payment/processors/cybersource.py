@@ -159,7 +159,7 @@ class Cybersource(ApplePayMixin, BaseClientSidePaymentProcessor):
         Initiate payment using the Cybersource REST payment api.
 
         Returns:
-            (return_data, transaction_id)
+            (payment_processor_response, transaction_id)
 
         Raises:
             GatewayError: when the REST api call fails
@@ -167,9 +167,9 @@ class Cybersource(ApplePayMixin, BaseClientSidePaymentProcessor):
         transient_token_jwt = request.POST['payment_token']
 
         try:
-            return_data, _, _ = self.authorize_payment_api(transient_token_jwt, basket, request, form_data)
-            transaction_id = return_data.processor_information.transaction_id
-            return return_data, transaction_id
+            payment_processor_response, _, _ = self.authorize_payment_api(transient_token_jwt, basket, request, form_data)
+            transaction_id = payment_processor_response.processor_information.transaction_id
+            return payment_processor_response, transaction_id
         except ApiException as e:
             self.record_processor_response({
                 'status': e.status,
@@ -181,14 +181,14 @@ class Cybersource(ApplePayMixin, BaseClientSidePaymentProcessor):
             # This will display the generic error on the frontend
             raise GatewayError()
 
-    def handle_payment_response(self, request, basket, return_data, transaction_id):
+    def handle_payment_response(self, request, basket, payment_processor_response, transaction_id):
         """
         Handle the response for a completed Cybersource REST payment request.
 
         N.B. The payment may not have been successful, but the API returned a response,
         which indicates that Cybersource attempted to capture the payment.
         """
-        self.record_processor_response(return_data.to_dict(), transaction_id=transaction_id, basket=basket)
+        self.record_processor_response(payment_processor_response.to_dict(), transaction_id=transaction_id, basket=basket)
         # Valid response codes:
         # AUTHORIZED
         # PARTIAL_AUTHORIZED
@@ -198,11 +198,11 @@ class Cybersource(ApplePayMixin, BaseClientSidePaymentProcessor):
         # PENDING_REVIEW
         # DECLINED
         # INVALID_REQUEST
-        if return_data.status in ('DECLINED', 'AUTHORIZED_PENDING_REVIEW', 'AUTHORIZED_RISK_DECLINED', 'PENDING_AUTHENTICATION', 'PENDING_REVIEW'):
+        if payment_processor_response.status in ('DECLINED', 'AUTHORIZED_PENDING_REVIEW', 'AUTHORIZED_RISK_DECLINED', 'PENDING_AUTHENTICATION', 'PENDING_REVIEW'):
             raise TransactionDeclined()
-        elif return_data.status == 'INVALID_REQUEST':
+        elif payment_processor_response.status == 'INVALID_REQUEST':
             raise GatewayError()
-        elif return_data.status != 'AUTHORIZED':
+        elif payment_processor_response.status != 'AUTHORIZED':
             raise GatewayError()
 
         transient_token_jwt = request.POST['payment_token']
@@ -214,15 +214,15 @@ class Cybersource(ApplePayMixin, BaseClientSidePaymentProcessor):
 
         return HandledProcessorResponse(
             transaction_id=transaction_id,
-            total=Decimal(return_data.order_information.amount_details.total_amount),
-            currency=return_data.order_information.amount_details.currency,
+            total=Decimal(payment_processor_response.order_information.amount_details.total_amount),
+            currency=payment_processor_response.order_information.amount_details.currency,
             card_number=decoded_payment_token['data']['number'],
-            card_type=CYBERSOURCE_CARD_TYPE_MAP.get(return_data.payment_information.tokenized_card.type)
+            card_type=CYBERSOURCE_CARD_TYPE_MAP.get(payment_processor_response.payment_information.tokenized_card.type)
         )
 
     def authorize_payment(self, basket, request, form_data):
-        return_data, transaction_id = self.initiate_payment(basket, request, form_data)
-        return self.handle_payment_response(request, basket, return_data, transaction_id)
+        payment_processor_response, transaction_id = self.initiate_payment(basket, request, form_data)
+        return self.handle_payment_response(request, basket, payment_processor_response, transaction_id)
 
     def authorize_payment_api(self, transient_token_jwt, basket, request, form_data):
         clientReferenceInformation = Ptsv2paymentsClientReferenceInformation(
