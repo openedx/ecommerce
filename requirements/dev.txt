@@ -35,9 +35,9 @@ django-compressor==2.4    # via -r requirements/test.txt, django-libsass
 django-config-models==2.0.2  # via -r requirements/test.txt
 django-cors-headers==3.4.0  # via -r requirements/test.txt
 django-crispy-forms==1.8.1  # via -r requirements/test.txt
-django-crum==0.7.6        # via -r requirements/test.txt, edx-rbac
+django-crum==0.7.7        # via -r requirements/test.txt, edx-rbac
 django-debug-toolbar==2.2  # via -r requirements/dev.in
-django-extensions==3.0.3  # via -r requirements/test.txt
+django-extensions==3.0.4  # via -r requirements/test.txt
 django-extra-views==0.11.0  # via -r requirements/test.txt, django-oscar
 django-filter==2.3.0      # via -r requirements/test.txt
 django-haystack==2.8.1    # via -r requirements/test.txt, django-oscar
@@ -57,16 +57,16 @@ django-widget-tweaks==1.4.8  # via -r requirements/test.txt, django-oscar
 django==2.2.15            # via -r requirements/test.txt, django-appconf, django-config-models, django-cors-headers, django-crum, django-debug-toolbar, django-extra-views, django-filter, django-haystack, django-model-utils, django-oscar, django-phonenumber-field, django-tables2, django-treebeard, djangorestframework, drf-jwt, edx-auth-backends, edx-django-release-util, edx-django-sites-extensions, edx-django-utils, edx-drf-extensions, edx-i18n-tools, edx-rbac, jsonfield2, mock-django, pytest-django-ordering, rest-condition, xss-utils
 djangorestframework-csv==2.1.0  # via -r requirements/test.txt
 djangorestframework-datatables==0.5.2  # via -r requirements/test.txt
-djangorestframework==3.11.0  # via -r requirements/test.txt, django-config-models, django-rest-swagger, djangorestframework-csv, djangorestframework-datatables, drf-extensions, drf-jwt, edx-drf-extensions, rest-condition
+djangorestframework==3.11.1  # via -r requirements/test.txt, django-config-models, django-rest-swagger, djangorestframework-csv, djangorestframework-datatables, drf-extensions, drf-jwt, edx-drf-extensions, rest-condition
 docutils==0.16            # via -r requirements/docs.txt, sphinx
 drf-extensions==0.6.0     # via -r requirements/test.txt
 drf-jwt==1.16.2           # via -r requirements/test.txt, edx-drf-extensions
 edx-auth-backends==3.1.0  # via -r requirements/test.txt
 edx-django-release-util==0.4.4  # via -r requirements/test.txt
 edx-django-sites-extensions==2.5.1  # via -r requirements/test.txt
-edx-django-utils==3.5.0   # via -r requirements/test.txt, django-config-models, edx-drf-extensions
+edx-django-utils==3.6.0   # via -r requirements/test.txt, django-config-models, edx-drf-extensions
 edx-drf-extensions==6.1.1  # via -r requirements/test.txt, edx-rbac
-edx-ecommerce-worker==0.7.4  # via -r requirements/test.txt
+edx-ecommerce-worker==0.7.5  # via -r requirements/test.txt
 edx-i18n-tools==0.5.3     # via -r requirements/test.txt
 edx-opaque-keys==2.1.1    # via -r requirements/test.txt, edx-drf-extensions
 edx-rbac==1.3.2           # via -r requirements/test.txt
@@ -163,7 +163,7 @@ sailthru-client==2.2.3    # via -r requirements/test.txt
 selenium==3.141.0         # via -r requirements/test.txt, bok-choy, pytest-selenium
 semantic-version==2.8.5   # via -r requirements/test.txt, edx-drf-extensions
 simplejson==3.17.2        # via -r requirements/test.txt, django-rest-swagger, sailthru-client
-six==1.15.0               # via -r requirements/docs.txt, -r requirements/test.txt, analytics-python, astroid, bleach, bok-choy, cryptography, diff-cover, django-compressor, django-extensions, django-extra-views, django-simple-history, djangorestframework-csv, edx-auth-backends, edx-django-release-util, edx-drf-extensions, edx-i18n-tools, edx-opaque-keys, edx-rbac, edx-sphinx-theme, freezegun, httpretty, isodate, libsass, mock, packaging, pathlib2, paypalrestsdk, purl, pyjwkest, pyopenssl, python-dateutil, python-memcached, responses, social-auth-app-django, social-auth-core, sphinx, stevedore, tox, transifex-client, webtest, zeep
+six==1.15.0               # via -r requirements/docs.txt, -r requirements/test.txt, analytics-python, astroid, bleach, bok-choy, cryptography, diff-cover, django-compressor, django-extra-views, django-simple-history, djangorestframework-csv, edx-auth-backends, edx-django-release-util, edx-drf-extensions, edx-i18n-tools, edx-opaque-keys, edx-rbac, edx-sphinx-theme, freezegun, httpretty, isodate, libsass, mock, packaging, pathlib2, paypalrestsdk, purl, pyjwkest, pyopenssl, python-dateutil, python-memcached, responses, social-auth-app-django, social-auth-core, sphinx, stevedore, tox, transifex-client, webtest, zeep
 slumber==0.7.1            # via -r requirements/test.txt, edx-rest-api-client
 smmap==3.0.4              # via gitdb
 snowballstemmer==2.0.0    # via -r requirements/docs.txt, sphinx
