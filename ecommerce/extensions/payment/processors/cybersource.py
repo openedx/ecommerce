@@ -659,7 +659,6 @@ class CybersourceREST(Cybersource):
         N.B. The payment may not have been successful, but the API returned a response,
         which indicates that Cybersource attempted to capture the payment.
         """
-        self.record_processor_response(payment_processor_response.to_dict(), transaction_id=transaction_id, basket=basket)
         # Valid response codes:
         # AUTHORIZED
         # PARTIAL_AUTHORIZED
