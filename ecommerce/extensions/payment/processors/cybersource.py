@@ -156,13 +156,7 @@ class Cybersource(ApplePayMixin, BaseClientSidePaymentProcessor):
     
     def authorize_payment(self, basket, request, form_data):
         transient_token_jwt = request.POST['payment_token']
-        # We save the capture context in the session and recall it here since we can't trust the front-end
-        capture_context = request.session['capture_context']
-        decoded_capture_context = jwt.decode(capture_context['key_id'], verify=False)
-        jwk = RSAAlgorithm.from_jwk(json.dumps(decoded_capture_context['flx']['jwk']))
-        decoded_payment_token = jwt.decode(transient_token_jwt, key=jwk, algorithms=['RS256'])
 
-        caught_exception = False
         try:
             return_data, status, body = self.authorize_payment_api(transient_token_jwt, basket, request, form_data)
             transaction_id = return_data.processor_information.transaction_id
@@ -193,6 +187,12 @@ class Cybersource(ApplePayMixin, BaseClientSidePaymentProcessor):
             raise GatewayError()
         elif return_data.status != 'AUTHORIZED':
             raise GatewayError()
+
+        # We save the capture context in the session and recall it here since we can't trust the front-end
+        capture_context = request.session['capture_context']
+        decoded_capture_context = jwt.decode(capture_context['key_id'], verify=False)
+        jwk = RSAAlgorithm.from_jwk(json.dumps(decoded_capture_context['flx']['jwk']))
+        decoded_payment_token = jwt.decode(transient_token_jwt, key=jwk, algorithms=['RS256'])
 
         return HandledProcessorResponse(
             transaction_id=transaction_id,
