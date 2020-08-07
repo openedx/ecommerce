@@ -269,6 +269,20 @@ class CybersourceOrderCompletionView(CyberSourceProcessorMixin, EdxOrderPlacemen
             exception.unlogged = False
             raise
 
+    def set_payment_response_custom_metrics(self, basket, notification, order_number, ppr, transaction_id):
+        # IMPORTANT: Do not set metric for the entire `notification`, because it includes PII.
+        #   It is accessible using the `payment_response_record_id` if needed.
+        monitoring_utils.set_custom_metric('payment_response_processor_name', 'cybersource')
+        monitoring_utils.set_custom_metric('payment_response_basket_id', basket.id)
+        monitoring_utils.set_custom_metric('payment_response_order_number', order_number)
+        monitoring_utils.set_custom_metric('payment_response_transaction_id', transaction_id)
+        monitoring_utils.set_custom_metric('payment_response_record_id', ppr.id)
+        # For reason_code, see https://support.cybersource.com/s/article/What-does-this-response-code-mean#code_table
+        reason_code = notification.get("reason_code", "not-found")
+        monitoring_utils.set_custom_metric('payment_response_reason_code', reason_code)
+        payment_response_message = notification.get("message", 'Unknown Error')
+        monitoring_utils.set_custom_metric('payment_response_message', payment_response_message)
+
 
 class CybersourceAuthorizeAPIView(APIView, BasePaymentSubmitView, CybersourceOrderCompletionView, CybersourceOrderInitiationView):
     # DRF APIView wrapper which allows clients to use
@@ -457,7 +471,7 @@ class CybersourceInterstitialView(CybersourceOrderCompletionView, View):
                 ppr = self.payment_processor.record_processor_response(
                     notification, transaction_id=transaction_id, basket=basket
                 )
-                self._set_payment_response_custom_metrics(basket, notification, order_number, ppr, transaction_id)
+                self.set_payment_response_custom_metrics(basket, notification, order_number, ppr, transaction_id)
 
             # Explicitly delimit operations which will be rolled back if an exception occurs.
             with transaction.atomic():
@@ -476,20 +490,6 @@ class CybersourceInterstitialView(CybersourceOrderCompletionView, View):
             raise
 
         return basket
-
-    def _set_payment_response_custom_metrics(self, basket, notification, order_number, ppr, transaction_id):
-        # IMPORTANT: Do not set metric for the entire `notification`, because it includes PII.
-        #   It is accessible using the `payment_response_record_id` if needed.
-        monitoring_utils.set_custom_metric('payment_response_processor_name', 'cybersource')
-        monitoring_utils.set_custom_metric('payment_response_basket_id', basket.id)
-        monitoring_utils.set_custom_metric('payment_response_order_number', order_number)
-        monitoring_utils.set_custom_metric('payment_response_transaction_id', transaction_id)
-        monitoring_utils.set_custom_metric('payment_response_record_id', ppr.id)
-        # For reason_code, see https://support.cybersource.com/s/article/What-does-this-response-code-mean#code_table
-        reason_code = notification.get("reason_code", "not-found")
-        monitoring_utils.set_custom_metric('payment_response_reason_code', reason_code)
-        payment_response_message = notification.get("message", 'Unknown Error')
-        monitoring_utils.set_custom_metric('payment_response_message', payment_response_message)
 
     def post(self, request, *args, **kwargs):  # pylint: disable=unused-argument
         """Process a CyberSource merchant notification and place an order for paid products as appropriate."""
