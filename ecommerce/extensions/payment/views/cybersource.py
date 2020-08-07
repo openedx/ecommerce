@@ -198,7 +198,7 @@ class CybersourceOrderCompletionView(CyberSourceProcessorMixin, EdxOrderPlacemen
     """
 
     def _log_cybersource_payment_failure(
-            self, exception, basket, order_number, transaction_id, ppr, notification,
+            self, exception, basket, order_number, transaction_id, ppr, notification_msg,
             message_prefix=None, logger_function=None
     ):
         """ Logs standard payment response as exception log unless logger_function supplied. """
@@ -213,17 +213,17 @@ class CybersourceOrderCompletionView(CyberSourceProcessorMixin, EdxOrderPlacemen
             transaction_id,
             order_number,
             basket.id,
-            notification.get("message", "Unknown Error"),
+            notification_msg,
             ppr.id
         )
 
     @contextmanager
-    def log_payment_exceptions(self, basket, order_number, transaction_id, ppr, notification):
+    def log_payment_exceptions(self, basket, order_number, transaction_id, ppr, notification_msg):
         try:
             yield
         except (UserCancelled, TransactionDeclined, AuthorizationError) as exception:
             self._log_cybersource_payment_failure(
-                exception, basket, order_number, transaction_id, ppr, notification,
+                exception, basket, order_number, transaction_id, ppr, notification_msg,
                 logger_function=logger.info,
             )
             exception.unlogged = False
@@ -258,14 +258,14 @@ class CybersourceOrderCompletionView(CyberSourceProcessorMixin, EdxOrderPlacemen
             raise
         except InvalidSignatureError as exception:
             self._log_cybersource_payment_failure(
-                exception, basket, order_number, transaction_id, ppr, notification,
+                exception, basket, order_number, transaction_id, ppr, notification_msg,
                 message_prefix='CyberSource response was invalid.',
             )
             exception.unlogged = False
             raise
         except (PaymentError, Exception) as exception:
             self._log_cybersource_payment_failure(
-                exception, basket, order_number, transaction_id, ppr, notification,
+                exception, basket, order_number, transaction_id, ppr, notification_msg,
             )
             exception.unlogged = False
             raise
@@ -460,7 +460,7 @@ class CybersourceInterstitialView(CybersourceOrderCompletionView, View):
 
             # Explicitly delimit operations which will be rolled back if an exception occurs.
             with transaction.atomic():
-                with self.log_payment_exceptions(basket, order_number, transaction_id, ppr, notification):
+                with self.log_payment_exceptions(basket, order_number, transaction_id, ppr, notification.get("message", "Unknown Error")):
                     self.handle_payment(notification, basket)
 
         except Exception as exception:  # pylint: disable=bare-except
