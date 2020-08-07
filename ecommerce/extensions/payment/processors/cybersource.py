@@ -2,6 +2,7 @@
 
 
 import base64
+from dataclasses import dataclass
 import datetime
 from enum import Enum
 import json
@@ -74,6 +75,19 @@ class Decision(Enum):
     error = 'ERROR'
     review = 'REVIEW'
     invalid = 'invalid'  # Used when the Cybersource decision doesn't match a known decision type
+
+
+@dataclass
+class UnhandledCybersourceResponse:
+    decision: Decision
+    duplicate_payment: bool
+    partial_authorization: bool
+    currency: str
+    total: Decimal
+    card_number: str
+    card_type: str
+    transaction_id: str
+    order_id: str
 
 
 class Cybersource(ApplePayMixin, BaseClientSidePaymentProcessor):
@@ -345,6 +359,24 @@ class Cybersource(ApplePayMixin, BaseClientSidePaymentProcessor):
             decision = Decision(response['decision'].upper())
         except ValueError:
             decision = Decision.invalid
+
+        _response = UnhandledCybersourceResponse(
+            decision=decision,
+            duplicate_payment=(
+                decision == Decision.error and int(response['reason_code']) == 104
+            ),
+            partial_authorization=(
+                'auth_amount' in response and
+                response['auth_amount'] and
+                response['auth_amount'] != response['req_amount']
+            ),
+            currency=response['req_currency'],
+            total=Decimal(response['req_amount']),
+            card_number=response['req_card_number'],
+            card_type=CYBERSOURCE_CARD_TYPE_MAP.get(response['req_card_type']),
+            transaction_id=response.get('transaction_id', ''),   # Error Notifications do not include a transaction id.
+            order_id=response['req_reference_number'],
+        )
 
         if decision != Decision.accept:
             reason_code = int(response['reason_code'])
