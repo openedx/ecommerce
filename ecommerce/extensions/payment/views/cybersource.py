@@ -111,7 +111,6 @@ class CybersourceOrderInitiationView:
         )
 
 
-
 class CybersourceSubmitView(BasePaymentSubmitView, CybersourceOrderInitiationView):
     """ Starts CyberSource payment process.
 
@@ -195,7 +194,7 @@ class CybersourceSubmitAPIView(APIView, CybersourceSubmitView):
         return super(CybersourceSubmitAPIView, self).post(request)
 
 
-class CybersourceOrderCompletionView(CyberSourceProcessorMixin, EdxOrderPlacementMixin):
+class CybersourceOrderCompletionView(EdxOrderPlacementMixin):
     """
     A baseclass that includes error handling and financial reporting for orders placed via
     CyberSource.
@@ -289,7 +288,7 @@ class CybersourceOrderCompletionView(CyberSourceProcessorMixin, EdxOrderPlacemen
         monitoring_utils.set_custom_metric('payment_response_message', payment_response_message)
 
 
-class CybersourceAuthorizeAPIView(APIView, BasePaymentSubmitView, CybersourceOrderCompletionView, CybersourceOrderInitiationView):
+class CybersourceAuthorizeAPIView(APIView, BasePaymentSubmitView, CyberSourceProcessorMixin, CybersourceOrderCompletionView, CybersourceOrderInitiationView):
     # DRF APIView wrapper which allows clients to use
     # JWT authentication when making Cybersource submit
     # requests.
@@ -353,7 +352,7 @@ class CybersourceAuthorizeAPIView(APIView, BasePaymentSubmitView, CybersourceOrd
         }, status=201)
 
 
-class CybersourceInterstitialView(CybersourceOrderCompletionView, View):
+class CybersourceInterstitialView(CyberSourceProcessorMixin, CybersourceOrderCompletionView, View):
     """
     Interstitial view for Cybersource Payments.
 
