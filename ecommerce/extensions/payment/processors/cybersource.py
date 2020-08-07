@@ -55,6 +55,16 @@ OrderNumberGenerator = get_class('order.utils', 'OrderNumberGenerator')
 PaymentProcessorResponse = get_model('payment', 'PaymentProcessorResponse')
 
 
+
+def del_none(d):
+    for key, value in list(d.items()):
+        if value is None:
+            del d[key]
+        elif isinstance(value, dict):
+            del_none(value)
+    return d
+
+
 class Cybersource(ApplePayMixin, BaseClientSidePaymentProcessor):
     """
     CyberSource Secure Acceptance Web/Mobile (February 2015)
@@ -129,14 +139,6 @@ class Cybersource(ApplePayMixin, BaseClientSidePaymentProcessor):
     @property
     def client_side_payment_url(self):
         return self.sop_payment_page_url
-
-    def del_none(self, d):
-        for key, value in list(d.items()):
-            if value is None:
-                del d[key]
-            elif isinstance(value, dict):
-                self.del_none(value)
-        return d
     
     def get_capture_context(self):
         # To delete None values in Input Request Json body
@@ -145,7 +147,7 @@ class Cybersource(ApplePayMixin, BaseClientSidePaymentProcessor):
             encryption_type='RsaOaep256',
             target_origin=self.flex_target_origin,
         )
-        requestObj = self.del_none(requestObj.__dict__)
+        requestObj = del_none(requestObj.__dict__)
         requestObj = json.dumps(requestObj)
 
         api_instance = KeyGenerationApi(self.cybersource_api_config)
@@ -733,7 +735,7 @@ class CybersourceREST(Cybersource):
             merchant_defined_information = merchantDefinedInformation
         )
 
-        requestObj = self.del_none(requestObj.__dict__)
+        requestObj = del_none(requestObj.__dict__)
         requestObj = json.dumps(requestObj)
 
         api_instance = PaymentsApi(self.cybersource_api_config)
