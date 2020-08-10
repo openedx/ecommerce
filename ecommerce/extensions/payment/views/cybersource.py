@@ -291,14 +291,11 @@ class CybersourceOrderCompletionView(EdxOrderPlacementMixin):
         # This validation is performed in the handle_payment method. After that method succeeds, the response can be
         # safely assumed to have originated from CyberSource.
         basket = None
-        transaction_id = None
         order_completion_message = order_completion_message or {}
 
         try:
 
             try:
-                transaction_id, order_number, basket_id = self.get_ids_from_order_completion(order_completion_message)
-
                 logger.info(
                     'Received CyberSource payment notification for transaction [%s], associated with order [%s]'
                     ' and basket [%d].',
@@ -307,11 +304,11 @@ class CybersourceOrderCompletionView(EdxOrderPlacementMixin):
                     self.basket_id
                 )
 
-                basket = self._get_basket(basket_id)
+                basket = self._get_basket(self.basket_id)
 
                 if not basket:
                     error_message = (
-                        'Received CyberSource payment notification for non-existent basket [%s].' % basket_id
+                        'Received CyberSource payment notification for non-existent basket [%s].' % self.basket_id
                     )
                     logger.error(error_message)
                     exception = InvalidBasketError(error_message)
@@ -330,16 +327,16 @@ class CybersourceOrderCompletionView(EdxOrderPlacementMixin):
             finally:
                 # Store the response in the database regardless of its authenticity.
                 ppr = self.payment_processor.record_processor_response(
-                    order_completion_message, transaction_id=transaction_id, basket=basket
+                    order_completion_message, transaction_id=self.transaction_id, basket=basket
                 )
-                self.set_payment_response_custom_metrics(basket, order_completion_message, order_number, ppr, transaction_id)
+                self.set_payment_response_custom_metrics(basket, order_completion_message, self.order_number, ppr, self.transaction_id)
 
             # Explicitly delimit operations which will be rolled back if an exception occurs.
             with transaction.atomic():
                 with self.log_payment_exceptions(
                         basket,
-                        order_number,
-                        transaction_id,
+                        self.order_number,
+                        self.transaction_id,
                         ppr,
                         order_completion_message.get("message")
                 ):
@@ -350,9 +347,9 @@ class CybersourceOrderCompletionView(EdxOrderPlacementMixin):
                 logger.exception(
                     'Unhandled exception processing CyberSource payment notification for transaction [%s], order [%s], '
                     'and basket [%d].',
-                    transaction_id,
-                    order_number,
-                    basket_id
+                    self.transaction_id,
+                    self.order_number,
+                    self.basket_id
                 )
             raise
 
@@ -576,12 +573,11 @@ class CybersourceInterstitialView(CyberSourceProcessorMixin, CybersourceOrderCom
             self.handle_post_order(order)
             return self.redirect_to_receipt_page(notification)
         except:  # pylint: disable=bare-except
-            transaction_id, order_number, basket_id = self.get_ids_from_order_completion(notification)
             logger.exception(
                 'Error processing order for transaction [%s], with order [%s] and basket [%d].',
-                transaction_id,
-                order_number,
-                basket_id
+                self.transaction_id,
+                self.order_number,
+                self.basket_id
             )
             return absolute_redirect(request, 'payment_error')
 
