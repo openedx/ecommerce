@@ -355,7 +355,7 @@ class CybersourceOrderCompletionView(EdxOrderPlacementMixin):
 
         return basket
 
-    def _merge_old_basket_into_new(self, request):
+    def _merge_old_basket_into_new(self):
         """
         Upon declined transaction merge old basket into new one and also copy bundle attibute
         over to new basket if any.
@@ -369,7 +369,7 @@ class CybersourceOrderCompletionView(EdxOrderPlacementMixin):
         )
         bundle = bundle_attributes.first().value_text if bundle_attributes.count() > 0 else None
 
-        new_basket = Basket.objects.create(owner=old_basket.owner, site=request.site)
+        new_basket = Basket.objects.create(owner=old_basket.owner, site=self.request.site)
 
         # We intentionally avoid thawing the old basket here to prevent order
         # numbers from being reused. For more, refer to commit a1efc68.
@@ -574,7 +574,7 @@ class CybersourceInterstitialView(CyberSourceProcessorMixin, CybersourceOrderCom
             # processing and tend to be easy to correct (e.g., an incorrect CVV may have
             # been provided). The recovery path is not as clear for other exceptions,
             # so we let those drop through to the payment error page.
-            self._merge_old_basket_into_new(request)
+            self._merge_old_basket_into_new()
 
             messages.error(self.request, _('transaction declined'), extra_tags='transaction-declined-message')
 
