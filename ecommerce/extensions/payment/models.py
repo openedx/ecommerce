@@ -3,6 +3,7 @@
 from decimal import Decimal
 
 from django.core.exceptions import ValidationError
+from django.core.validators import MinLengthValidator
 from django.db import models
 from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
@@ -120,6 +121,27 @@ class EnterpriseContractMetadata(TimeStampedModel):
             raise ValidationError(_(
                 "Percentage greater than 100 not allowed."
             ))
+
+
+class SDNFallbackMetadata(models.Model):
+    """ Record metadata about the SDN fallback CSV file download """
+    file_checksum = models.CharField(max_length=255, validators=[MinLengthValidator(1)])
+    download_timestamp = models.DateTimeField(auto_now_add=True)
+    import_timestamp = models.DateTimeField(null=True, blank=True)
+
+    IMPORT_STATES = [
+        ('New', 'New'),
+        ('Current', 'Current'),
+        ('Discard', 'Discard'),
+    ]
+
+    import_state = models.CharField(
+        max_length=255,
+        validators=[MinLengthValidator(1)],
+        unique=True,
+        choices=IMPORT_STATES,
+        default='New',
+    )
 
 
 # noinspection PyUnresolvedReferences
