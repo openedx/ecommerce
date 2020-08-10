@@ -414,7 +414,7 @@ class CybersourceOrderCompletionView(EdxOrderPlacementMixin):
             # 2. We could have similar handling of other exceptions like UserCancelled and AuthorizationError
 
             redirect_url = get_payment_microfrontend_or_basket_url(self.request)
-            return None, HttpResponseRedirect(redirect_url)
+            return None, self.redirect_to_url(redirect_url)
 
         except:  # pylint: disable=bare-except
             # logging handled by validate_order_completion, because not all exceptions are problematic
@@ -609,6 +609,9 @@ class CybersourceInterstitialView(CyberSourceProcessorMixin, CybersourceOrderCom
                 self.basket_id
             )
             return self.redirect_to_absolute_url('payment_error')
+
+    def redirect_to_url(self, url):
+        return HttpResponseRedirect(url)
 
     def redirect_to_absolute_url(self, reverse_string):
         return absolute_redirect(self.request, reverse_string)
