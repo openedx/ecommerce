@@ -267,7 +267,7 @@ class CybersourceInterstitialViewTests(CybersourceNotificationTestsMixin, TestCa
         )
 
         logger_name = self.CYBERSOURCE_VIEW_LOGGER_NAME
-        with mock.patch.object(self.view, 'validate_notification', side_effect=TransactionDeclined):
+        with mock.patch.object(self.view, 'validate_order_completion', side_effect=TransactionDeclined):
             with LogCapture(logger_name) as cybersource_logger:
                 response = self.client.post(self.path, notification)
 
@@ -312,7 +312,7 @@ class CybersourceInterstitialViewTests(CybersourceNotificationTestsMixin, TestCa
             self.basket,
             billing_address=self.billing_address,
         )
-        with mock.patch.object(self.view, 'validate_notification', side_effect=error_class):
+        with mock.patch.object(self.view, 'validate_order_completion', side_effect=error_class):
             response = self.client.post(self.path, notification)
             self.assertRedirects(response, self.get_full_url(reverse('payment_error')))
 
