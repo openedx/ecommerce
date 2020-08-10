@@ -279,6 +279,79 @@ class CybersourceOrderCompletionView(EdxOrderPlacementMixin):
         payment_response_message = notification.get("message", 'Unknown Error')
         monitoring_utils.set_custom_metric('payment_response_message', payment_response_message)
 
+    # Note: method has too-many-statements, but it enables tracking that all exception handling gets logged
+    def validate_notification(self, notification):  # pylint: disable=too-many-statements
+        # Note (CCB): Orders should not be created until the payment processor has validated the response's signature.
+        # This validation is performed in the handle_payment method. After that method succeeds, the response can be
+        # safely assumed to have originated from CyberSource.
+        basket = None
+        transaction_id = None
+        notification = notification or {}
+
+        try:
+
+            try:
+                transaction_id, order_number, basket_id = self.get_ids_from_notification(notification)
+
+                logger.info(
+                    'Received CyberSource payment notification for transaction [%s], associated with order [%s]'
+                    ' and basket [%d].',
+                    transaction_id,
+                    order_number,
+                    basket_id
+                )
+
+                basket = self._get_basket(basket_id)
+
+                if not basket:
+                    error_message = (
+                        'Received CyberSource payment notification for non-existent basket [%s].' % basket_id
+                    )
+                    logger.error(error_message)
+                    exception = InvalidBasketError(error_message)
+                    exception.unlogged = False
+                    raise exception
+
+                if basket.status != Basket.FROZEN:
+                    # We don't know how serious this situation is at this point, hence
+                    # the INFO level logging. This notification is most likely CyberSource
+                    # telling us that they've declined an attempt to pay for an existing order.
+                    logger.info(
+                        'Received CyberSource payment notification for basket [%d] which is in a non-frozen state,'
+                        ' [%s]',
+                        basket.id, basket.status
+                    )
+            finally:
+                # Store the response in the database regardless of its authenticity.
+                ppr = self.payment_processor.record_processor_response(
+                    notification, transaction_id=transaction_id, basket=basket
+                )
+                self.set_payment_response_custom_metrics(basket, notification, order_number, ppr, transaction_id)
+
+            # Explicitly delimit operations which will be rolled back if an exception occurs.
+            with transaction.atomic():
+                with self.log_payment_exceptions(
+                        basket,
+                        order_number,
+                        transaction_id,
+                        ppr,
+                        notification.get("message")
+                ):
+                    self.handle_payment(notification, basket)
+
+        except Exception as exception:  # pylint: disable=bare-except
+            if getattr(exception, 'unlogged', True):
+                logger.exception(
+                    'Unhandled exception processing CyberSource payment notification for transaction [%s], order [%s], '
+                    'and basket [%d].',
+                    transaction_id,
+                    order_number,
+                    basket_id
+                )
+            raise
+
+        return basket
+
 
 class CyberSourceRESTProcessorMixin:
     @cached_property
@@ -444,79 +517,6 @@ class CybersourceInterstitialView(CyberSourceProcessorMixin, CybersourceOrderCom
             # TODO: If we ever actually hit this code path, the next line would throw
             # an error because basket_id wouldn't be defined.
         return (transaction_id, order_number, basket_id)
-
-    # Note: method has too-many-statements, but it enables tracking that all exception handling gets logged
-    def validate_notification(self, notification):  # pylint: disable=too-many-statements
-        # Note (CCB): Orders should not be created until the payment processor has validated the response's signature.
-        # This validation is performed in the handle_payment method. After that method succeeds, the response can be
-        # safely assumed to have originated from CyberSource.
-        basket = None
-        transaction_id = None
-        notification = notification or {}
-
-        try:
-
-            try:
-                transaction_id, order_number, basket_id = self.get_ids_from_notification(notification)
-
-                logger.info(
-                    'Received CyberSource payment notification for transaction [%s], associated with order [%s]'
-                    ' and basket [%d].',
-                    transaction_id,
-                    order_number,
-                    basket_id
-                )
-
-                basket = self._get_basket(basket_id)
-
-                if not basket:
-                    error_message = (
-                        'Received CyberSource payment notification for non-existent basket [%s].' % basket_id
-                    )
-                    logger.error(error_message)
-                    exception = InvalidBasketError(error_message)
-                    exception.unlogged = False
-                    raise exception
-
-                if basket.status != Basket.FROZEN:
-                    # We don't know how serious this situation is at this point, hence
-                    # the INFO level logging. This notification is most likely CyberSource
-                    # telling us that they've declined an attempt to pay for an existing order.
-                    logger.info(
-                        'Received CyberSource payment notification for basket [%d] which is in a non-frozen state,'
-                        ' [%s]',
-                        basket.id, basket.status
-                    )
-            finally:
-                # Store the response in the database regardless of its authenticity.
-                ppr = self.payment_processor.record_processor_response(
-                    notification, transaction_id=transaction_id, basket=basket
-                )
-                self.set_payment_response_custom_metrics(basket, notification, order_number, ppr, transaction_id)
-
-            # Explicitly delimit operations which will be rolled back if an exception occurs.
-            with transaction.atomic():
-                with self.log_payment_exceptions(
-                        basket,
-                        order_number,
-                        transaction_id,
-                        ppr,
-                        notification.get("message")
-                ):
-                    self.handle_payment(notification, basket)
-
-        except Exception as exception:  # pylint: disable=bare-except
-            if getattr(exception, 'unlogged', True):
-                logger.exception(
-                    'Unhandled exception processing CyberSource payment notification for transaction [%s], order [%s], '
-                    'and basket [%d].',
-                    transaction_id,
-                    order_number,
-                    basket_id
-                )
-            raise
-
-        return basket
 
     def post(self, request, *args, **kwargs):  # pylint: disable=unused-argument
         """Process a CyberSource merchant notification and place an order for paid products as appropriate."""
