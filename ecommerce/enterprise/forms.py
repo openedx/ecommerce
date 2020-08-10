@@ -44,8 +44,16 @@ class EnterpriseOfferForm(forms.ModelForm):
         required=False, decimal_places=5, max_digits=15, min_value=0, label=_('Prepaid Invoice Amount')
     )
     sales_force_id = forms.CharField(max_length=30, required=False, label=_('Salesforce Opportunity ID'))
-    emails_for_usage_alert = forms.CharField(required=False)
-    usage_email_frequency = forms.ChoiceField(required=True, choices=ConditionalOffer.USAGE_EMAIL_FREQUENCY_CHOICES)
+    emails_for_usage_alert = forms.CharField(
+        required=False,
+        label=_("Emails Addresses"),
+        help_text=_("Comma separated emails which will receive the offer usage alerts")
+    )
+    usage_email_frequency = forms.ChoiceField(
+        required=True,
+        choices=ConditionalOffer.USAGE_EMAIL_FREQUENCY_CHOICES,
+        label=_("Frequency for offer usage emails")
+    )
 
     class Meta:
         model = ConditionalOffer
@@ -62,7 +70,6 @@ class EnterpriseOfferForm(forms.ModelForm):
             'max_discount': _('The maximum USD dollar amount that can be redeemed by this offer.'),
             'max_user_applications': _('The maximum number of enrollments, by a user, that can redeem this offer.'),
             'max_user_discount': _('The maximum USD dollar amount that can be redeemed using this offer by a user.'),
-            'emails_for_usage_alert': _('Comma separated emails which will receive the offer usage alerts'),
         }
         labels = {
             'start_datetime': _('Start Date'),
@@ -71,8 +78,6 @@ class EnterpriseOfferForm(forms.ModelForm):
             'max_discount': _('Bookings Limit'),
             'max_user_applications': _('Per User Enrollment Limit'),
             'max_user_discount': _('Per User Bookings Limit'),
-            'emails_for_usage_alert': _('Emails to receive offer usage alert'),
-            'usage_email_frequency': _('Frequency for offer usage emails'),
         }
 
     def _prep_contract_metadata(self, enterprise_contract_metadata):
