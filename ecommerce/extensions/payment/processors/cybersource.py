@@ -625,6 +625,11 @@ class CybersourceREST(Cybersource):
     A temporary PaymentProcessor dedicated to carefully switching to the Cybersource REST payment api
     """
 
+    def __init__(self, site, transient_token_jwt, capture_context):
+        super(CybersourceREST, self).__init__(site)
+        self.transient_token_jwt = transient_token_jwt
+        self.capture_context = capture_context
+
     def initiate_payment(self, basket, request, form_data):
         """
         Initiate payment using the Cybersource REST payment api.
