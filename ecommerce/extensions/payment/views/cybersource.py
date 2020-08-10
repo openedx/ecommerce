@@ -388,11 +388,10 @@ class CybersourceOrderCompletionView(EdxOrderPlacementMixin):
             bundle
         )
 
-    def validate_order_completion_or_redirect(self, notification):
+    def complete_order(self, notification):
         try:
             basket = self.validate_order_completion(notification)
             monitoring_utils.set_custom_metric('payment_response_validation', 'success')
-            return basket, None
         except DuplicateReferenceNumber:
             # CyberSource has told us that they've declined an attempt to pay
             # for an existing order. If this happens, we can redirect the browser
@@ -414,12 +413,25 @@ class CybersourceOrderCompletionView(EdxOrderPlacementMixin):
             # 2. We could have similar handling of other exceptions like UserCancelled and AuthorizationError
 
             redirect_url = get_payment_microfrontend_or_basket_url(self.request)
-            return None, self.redirect_to_url(redirect_url)
+            return self.redirect_to_url(redirect_url)
 
         except:  # pylint: disable=bare-except
             # logging handled by validate_order_completion, because not all exceptions are problematic
             monitoring_utils.set_custom_metric('payment_response_validation', 'redirect-to-error-page')
-            return None, self.redirect_to_absolute_url('payment_error')
+            return self.redirect_to_absolute_url('payment_error')
+
+        try:
+            order = self.create_order(self.request, basket, self._get_billing_address(notification))
+            self.handle_post_order(order)
+            return self.redirect_to_receipt_page()
+        except:  # pylint: disable=bare-except
+            logger.exception(
+                'Error processing order for transaction [%s], with order [%s] and basket [%d].',
+                self.transaction_id,
+                self.order_number,
+                self.basket_id
+            )
+            return self.redirect_to_absolute_url('payment_error')
 
 
 class CyberSourceRESTProcessorMixin:
@@ -593,22 +605,7 @@ class CybersourceInterstitialView(CyberSourceProcessorMixin, CybersourceOrderCom
             )
             return self.redirect_to_payment_error()
 
-        basket, _redirect = self.validate_order_completion_or_redirect(notification)
-        if _redirect is not None:
-            return _redirect
-
-        try:
-            order = self.create_order(request, basket, self._get_billing_address(notification))
-            self.handle_post_order(order)
-            return self.redirect_to_receipt_page()
-        except:  # pylint: disable=bare-except
-            logger.exception(
-                'Error processing order for transaction [%s], with order [%s] and basket [%d].',
-                self.transaction_id,
-                self.order_number,
-                self.basket_id
-            )
-            return self.redirect_to_absolute_url('payment_error')
+        return self.complete_order(notification)
 
     def redirect_to_url(self, url):
         return HttpResponseRedirect(url)
