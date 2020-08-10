@@ -692,44 +692,6 @@ class CybersourceREST(Cybersource):
         )
         return _response
 
-    def handle_payment_response(self, request, payment_processor_response, transaction_id):
-        """
-        Handle the response for a completed Cybersource REST payment request.
-
-        N.B. The payment may not have been successful, but the API returned a response,
-        which indicates that Cybersource attempted to capture the payment.
-        """
-        # Valid response codes:
-        # AUTHORIZED
-        # PARTIAL_AUTHORIZED
-        # AUTHORIZED_PENDING_REVIEW
-        # AUTHORIZED_RISK_DECLINED
-        # PENDING_AUTHENTICATION
-        # PENDING_REVIEW
-        # DECLINED
-        # INVALID_REQUEST
-        if payment_processor_response.status in ('DECLINED', 'AUTHORIZED_PENDING_REVIEW', 'AUTHORIZED_RISK_DECLINED', 'PENDING_AUTHENTICATION', 'PENDING_REVIEW'):
-            raise TransactionDeclined()
-        elif payment_processor_response.status == 'INVALID_REQUEST':
-            raise GatewayError()
-        elif payment_processor_response.status != 'AUTHORIZED':
-            raise GatewayError()
-
-        transient_token_jwt = request.POST['payment_token']
-        # We save the capture context in the session and recall it here since we can't trust the front-end
-        capture_context = request.session['capture_context']
-        decoded_capture_context = jwt.decode(capture_context['key_id'], verify=False)
-        jwk = RSAAlgorithm.from_jwk(json.dumps(decoded_capture_context['flx']['jwk']))
-        decoded_payment_token = jwt.decode(transient_token_jwt, key=jwk, algorithms=['RS256'])
-
-        return HandledProcessorResponse(
-            transaction_id=transaction_id,
-            total=Decimal(payment_processor_response.order_information.amount_details.total_amount),
-            currency=payment_processor_response.order_information.amount_details.currency,
-            card_number=decoded_payment_token['data']['number'],
-            card_type=CYBERSOURCE_CARD_TYPE_MAP.get(payment_processor_response.payment_information.tokenized_card.type)
-        )
-
     def authorize_payment_api(self, transient_token_jwt, basket, request, form_data):
         clientReferenceInformation = Ptsv2paymentsClientReferenceInformation(
             code=basket.order_number,
