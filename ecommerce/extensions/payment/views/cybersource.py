@@ -589,7 +589,7 @@ class CybersourceInterstitialView(CyberSourceProcessorMixin, CybersourceOrderCom
         except:  # pylint: disable=bare-except
             # logging handled by validate_order_completion, because not all exceptions are problematic
             monitoring_utils.set_custom_metric('payment_response_validation', 'redirect-to-error-page')
-            return absolute_redirect(request, 'payment_error')
+            return self.redirect_to_absolute_url('payment_error')
 
         try:
             order = self.create_order(request, basket, self._get_billing_address(notification))
@@ -602,7 +602,10 @@ class CybersourceInterstitialView(CyberSourceProcessorMixin, CybersourceOrderCom
                 self.order_number,
                 self.basket_id
             )
-            return absolute_redirect(request, 'payment_error')
+            return self.redirect_to_absolute_url('payment_error')
+
+    def redirect_to_absolute_url(self, reverse_string):
+        return absolute_redirect(self.request, reverse_string)
 
     def redirect_to_receipt_page(self):
         receipt_page_url = get_receipt_page_url(
