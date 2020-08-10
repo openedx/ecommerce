@@ -292,7 +292,7 @@ class CybersourceOrderCompletionView(EdxOrderPlacementMixin):
         try:
 
             try:
-                transaction_id, order_number, basket_id = self.get_ids_from_notification(order_completion_message)
+                transaction_id, order_number, basket_id = self.get_ids_from_order_completion(order_completion_message)
 
                 logger.info(
                     'Received CyberSource payment notification for transaction [%s], associated with order [%s]'
@@ -504,7 +504,7 @@ class CybersourceInterstitialView(CyberSourceProcessorMixin, CybersourceOrderCom
                 str(error))
             return None
 
-    def get_ids_from_notification(self, notification):
+    def get_ids_from_order_completion(self, notification):
         transaction_id = notification.get('transaction_id')
         order_number = notification.get('req_reference_number')
         try:
@@ -558,7 +558,7 @@ class CybersourceInterstitialView(CyberSourceProcessorMixin, CybersourceOrderCom
             self.handle_post_order(order)
             return self.redirect_to_receipt_page(notification)
         except:  # pylint: disable=bare-except
-            transaction_id, order_number, basket_id = self.get_ids_from_notification(notification)
+            transaction_id, order_number, basket_id = self.get_ids_from_order_completion(notification)
             logger.exception(
                 'Error processing order for transaction [%s], with order [%s] and basket [%d].',
                 transaction_id,
