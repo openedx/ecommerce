@@ -584,7 +584,7 @@ class CybersourceNotificationTestsMixin(CybersourceMixin):
                 ),
             )
 
-    def test_unexpected_validate_notification_error(self):
+    def test_unexpected_validate_order_completion_error(self):
         """ Verify the view logs and redirects to the error page when the payment unexpectedly fails. """
         notification = self.generate_notification(self.basket)
 
