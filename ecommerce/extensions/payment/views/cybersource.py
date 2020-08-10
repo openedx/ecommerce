@@ -576,8 +576,7 @@ class CybersourceInterstitialView(CyberSourceProcessorMixin, CybersourceOrderCom
         Upon declined transaction merge old basket into new one and also copy bundle attibute
         over to new basket if any.
         """
-        order_number = request.POST.get('req_reference_number')
-        old_basket_id = OrderNumberGenerator().basket_id(order_number)
+        old_basket_id = OrderNumberGenerator().basket_id(self.order_number)
         old_basket = Basket.objects.get(id=old_basket_id)
 
         bundle_attributes = BasketAttribute.objects.filter(
@@ -608,7 +607,7 @@ class CybersourceInterstitialView(CyberSourceProcessorMixin, CybersourceOrderCom
     def redirect_to_receipt_page(self, notification):
         receipt_page_url = get_receipt_page_url(
             self.request.site.siteconfiguration,
-            order_number=notification.get('req_reference_number'),
+            order_number=self.order_number,
             disable_back_button=True,
         )
 
