@@ -280,18 +280,18 @@ class CybersourceOrderCompletionView(EdxOrderPlacementMixin):
         monitoring_utils.set_custom_metric('payment_response_message', payment_response_message)
 
     # Note: method has too-many-statements, but it enables tracking that all exception handling gets logged
-    def validate_order_completion(self, notification):  # pylint: disable=too-many-statements
+    def validate_order_completion(self, order_completion_message):  # pylint: disable=too-many-statements
         # Note (CCB): Orders should not be created until the payment processor has validated the response's signature.
         # This validation is performed in the handle_payment method. After that method succeeds, the response can be
         # safely assumed to have originated from CyberSource.
         basket = None
         transaction_id = None
-        notification = notification or {}
+        order_completion_message = order_completion_message or {}
 
         try:
 
             try:
-                transaction_id, order_number, basket_id = self.get_ids_from_notification(notification)
+                transaction_id, order_number, basket_id = self.get_ids_from_notification(order_completion_message)
 
                 logger.info(
                     'Received CyberSource payment notification for transaction [%s], associated with order [%s]'
@@ -324,9 +324,9 @@ class CybersourceOrderCompletionView(EdxOrderPlacementMixin):
             finally:
                 # Store the response in the database regardless of its authenticity.
                 ppr = self.payment_processor.record_processor_response(
-                    notification, transaction_id=transaction_id, basket=basket
+                    order_completion_message, transaction_id=transaction_id, basket=basket
                 )
-                self.set_payment_response_custom_metrics(basket, notification, order_number, ppr, transaction_id)
+                self.set_payment_response_custom_metrics(basket, order_completion_message, order_number, ppr, transaction_id)
 
             # Explicitly delimit operations which will be rolled back if an exception occurs.
             with transaction.atomic():
@@ -335,9 +335,9 @@ class CybersourceOrderCompletionView(EdxOrderPlacementMixin):
                         order_number,
                         transaction_id,
                         ppr,
-                        notification.get("message")
+                        order_completion_message.get("message")
                 ):
-                    self.handle_payment(notification, basket)
+                    self.handle_payment(order_completion_message, basket)
 
         except Exception as exception:  # pylint: disable=bare-except
             if getattr(exception, 'unlogged', True):
