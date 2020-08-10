@@ -18,10 +18,13 @@ OrderDiscount = get_model('order', 'OrderDiscount')
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
-EMAIL_BODY = 'You have used {percentage_usage}% of the {offer_type} Limit associated with the entitlement offer ' \
-             'called "{offer_name}"\n{offer_type}s Redeemed: {current_usage}\n{offer_type}s Limit: {total_limit}\n'\
-             'Please reach out to customersuccess@edx.org, or to your Account Manager or Customer Success ' \
-             'representative, if you have any questions.'
+# pylint: disable=line-too-long
+EMAIL_BODY = """
+You have used {percentage_usage}% of the {offer_type} Limit associated with the entitlement offer called "{offer_name}"
+{offer_type}s Redeemed: {current_usage}
+{offer_type}s Limit: {total_limit}
+Please reach out to customersuccess@edx.org, or to your Account Manager or Customer Success representative, if you have any questions.
+"""
 EMAIL_SUBJECT = 'Offer Usage Notification'
 
 
