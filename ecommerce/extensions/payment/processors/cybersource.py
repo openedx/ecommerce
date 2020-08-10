@@ -12,9 +12,18 @@ from decimal import Decimal
 
 import six
 from CyberSource import (
-    GeneratePublicKeyRequest, KeyGenerationApi, Ptsv2paymentsClientReferenceInformation, Ptsv2paymentsProcessingInformation, Ptsv2paymentsTokenInformation,
-    Ptsv2paymentsOrderInformationAmountDetails, Ptsv2paymentsOrderInformationBillTo, Ptsv2paymentsOrderInformationLineItems,
-    Ptsv2paymentsOrderInformationInvoiceDetails, Ptsv2paymentsOrderInformation, PaymentsApi, Ptsv2paymentsMerchantDefinedInformation,
+    GeneratePublicKeyRequest,
+    KeyGenerationApi,
+    Ptsv2paymentsClientReferenceInformation,
+    Ptsv2paymentsProcessingInformation,
+    Ptsv2paymentsTokenInformation,
+    Ptsv2paymentsOrderInformationAmountDetails,
+    Ptsv2paymentsOrderInformationBillTo,
+    Ptsv2paymentsOrderInformationLineItems,
+    Ptsv2paymentsOrderInformationInvoiceDetails,
+    Ptsv2paymentsOrderInformation,
+    PaymentsApi,
+    Ptsv2paymentsMerchantDefinedInformation,
     CreatePaymentRequest
 )
 from CyberSource.rest import ApiException
@@ -56,7 +65,6 @@ logger = logging.getLogger(__name__)
 Order = get_model('order', 'Order')
 OrderNumberGenerator = get_class('order.utils', 'OrderNumberGenerator')
 PaymentProcessorResponse = get_model('payment', 'PaymentProcessorResponse')
-
 
 
 def del_none(d):
@@ -164,7 +172,7 @@ class Cybersource(ApplePayMixin, BaseClientSidePaymentProcessor):
     @property
     def client_side_payment_url(self):
         return self.sop_payment_page_url
-    
+
     def get_capture_context(self):
         # To delete None values in Input Request Json body
 
@@ -176,7 +184,7 @@ class Cybersource(ApplePayMixin, BaseClientSidePaymentProcessor):
         requestObj = json.dumps(requestObj)
 
         api_instance = KeyGenerationApi(self.cybersource_api_config)
-        return_data, status, body = api_instance.generate_public_key(requestObj, format='JWT')
+        return_data, _, _ = api_instance.generate_public_key(generate_public_key_request=requestObj, format='JWT')
 
         return {'key_id': return_data.key_id}
 
@@ -644,7 +652,12 @@ class CybersourceREST(Cybersource):
         transient_token_jwt = request.POST['payment_token']
 
         try:
-            payment_processor_response, _, _ = self.authorize_payment_api(transient_token_jwt, basket, request, form_data)
+            payment_processor_response, _, _ = self.authorize_payment_api(
+                transient_token_jwt,
+                basket,
+                request,
+                form_data,
+            )
             transaction_id = payment_processor_response.processor_information.transaction_id
             return payment_processor_response, transaction_id
         except ApiException as e:
@@ -776,7 +789,7 @@ class CybersourceREST(Cybersource):
             processing_information=processingInformation.__dict__,
             token_information=tokenInformation.__dict__,
             order_information=orderInformation.__dict__,
-            merchant_defined_information = merchantDefinedInformation
+            merchant_defined_information=merchantDefinedInformation
         )
 
         requestObj = del_none(requestObj.__dict__)
