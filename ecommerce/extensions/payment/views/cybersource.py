@@ -506,21 +506,6 @@ class CybersourceInterstitialView(CyberSourceProcessorMixin, CybersourceOrderCom
                 str(error))
             return None
 
-    def get_ids_from_order_completion(self, notification):
-        transaction_id = notification.get('transaction_id')
-        order_number = notification.get('req_reference_number')
-        try:
-            basket_id = OrderNumberGenerator().basket_id(order_number)
-        except:  # pylint: disable=bare-except
-            logger.exception(
-                'Error generating basket_id from CyberSource notification with transaction [%s] and order [%s].',
-                transaction_id,
-                order_number,
-            )
-            # TODO: If we ever actually hit this code path, the next line would throw
-            # an error because basket_id wouldn't be defined.
-        return (transaction_id, order_number, basket_id)
-
     def post(self, request, *args, **kwargs):  # pylint: disable=unused-argument
         """Process a CyberSource merchant notification and place an order for paid products as appropriate."""
         notification = request.POST.dict()
