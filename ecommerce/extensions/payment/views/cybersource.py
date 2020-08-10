@@ -70,12 +70,6 @@ class CyberSourceProcessorMixin:
         return Cybersource(self.request.site)
 
 
-class CyberSourceRESTProcessorMixin:
-    @cached_property
-    def payment_processor(self):
-        return CybersourceREST(self.request.site)
-
-
 class CybersourceOrderInitiationView:
     """
     A baseclass that includes pre-work before submitting an order to cybersource for
@@ -288,6 +282,12 @@ class CybersourceOrderCompletionView(EdxOrderPlacementMixin):
         monitoring_utils.set_custom_metric('payment_response_reason_code', reason_code)
         payment_response_message = notification.get("message", 'Unknown Error')
         monitoring_utils.set_custom_metric('payment_response_message', payment_response_message)
+
+
+class CyberSourceRESTProcessorMixin:
+    @cached_property
+    def payment_processor(self):
+        return CybersourceREST(self.request.site)
 
 
 class CybersourceAuthorizeAPIView(APIView, BasePaymentSubmitView, CyberSourceRESTProcessorMixin, CybersourceOrderCompletionView, CybersourceOrderInitiationView):
