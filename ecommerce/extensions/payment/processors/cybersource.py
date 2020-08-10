@@ -657,6 +657,41 @@ class CybersourceREST(Cybersource):
             # This will display the generic error on the frontend
             raise GatewayError()
 
+    def _normalize_processor_response(self, response):
+        decoded_capture_context = jwt.decode(self.capture_context['key_id'], verify=False)
+        jwk = RSAAlgorithm.from_jwk(json.dumps(decoded_capture_context['flx']['jwk']))
+        decoded_payment_token = jwt.decode(self.transient_token_jwt, key=jwk, algorithms=['RS256'])
+
+        decision = {
+            'AUTHORIZED': Decision.accept,
+            'PARTIAL_AUTHORIZED': Decision.decline,
+            'AUTHORIZED_PENDING_REVIEW': Decision.review,
+            'AUTHORIZED_RISK_DECLINED': Decision.decline,
+            'PENDING_AUTHENTICATION': Decision.decline,
+            'PENDING_REVIEW': Decision.review,
+            'DECLINED': Decision.decline,
+            'INVALID_REQUEST': Decision.error,
+        }.get(response.status, Decision.invalid)
+
+        _response = UnhandledCybersourceResponse(
+            decision=decision,
+            duplicate_payment=(
+                decision == Decision.error and
+                response.reason == 'DUPLICATE_REQUEST'
+            ),
+            partial_authorization=(
+                response.amount_details.authorized_amount and
+                response.amount_details.authorized_amount != response.amount_details.total_amount
+            ),
+            currency=response.order_information.amount_details.currency,
+            total=Decimal(response.order_information.amount_details.total_amount),
+            card_number=decoded_payment_token['data']['number'],
+            card_type=CYBERSOURCE_CARD_TYPE_MAP.get(response.payment_information.tokenized_card.type),
+            transaction_id=response.processor_information.transaction_id,
+            order_id=response.client_reference_information.code,
+        )
+        return _response
+
     def handle_payment_response(self, request, payment_processor_response, transaction_id):
         """
         Handle the response for a completed Cybersource REST payment request.
