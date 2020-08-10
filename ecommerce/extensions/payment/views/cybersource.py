@@ -280,7 +280,7 @@ class CybersourceOrderCompletionView(EdxOrderPlacementMixin):
         monitoring_utils.set_custom_metric('payment_response_message', payment_response_message)
 
     # Note: method has too-many-statements, but it enables tracking that all exception handling gets logged
-    def validate_notification(self, notification):  # pylint: disable=too-many-statements
+    def validate_order_completion(self, notification):  # pylint: disable=too-many-statements
         # Note (CCB): Orders should not be created until the payment processor has validated the response's signature.
         # This validation is performed in the handle_payment method. After that method succeeds, the response can be
         # safely assumed to have originated from CyberSource.
@@ -522,7 +522,7 @@ class CybersourceInterstitialView(CyberSourceProcessorMixin, CybersourceOrderCom
         """Process a CyberSource merchant notification and place an order for paid products as appropriate."""
         notification = request.POST.dict()
         try:
-            basket = self.validate_notification(notification)
+            basket = self.validate_order_completion(notification)
             monitoring_utils.set_custom_metric('payment_response_validation', 'success')
         except DuplicateReferenceNumber:
             # CyberSource has told us that they've declined an attempt to pay
@@ -548,7 +548,7 @@ class CybersourceInterstitialView(CyberSourceProcessorMixin, CybersourceOrderCom
             return HttpResponseRedirect(redirect_url)
 
         except:  # pylint: disable=bare-except
-            # logging handled by validate_notification, because not all exceptions are problematic
+            # logging handled by validate_order_completion, because not all exceptions are problematic
             monitoring_utils.set_custom_metric('payment_response_validation', 'redirect-to-error-page')
             return absolute_redirect(request, 'payment_error')
 
