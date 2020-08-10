@@ -397,8 +397,13 @@ class CybersourceAuthorizeAPIView(
         if sdn_check_failure is not None:
             return sdn_check_failure
 
+        self.basket_id = basket.id
+        self.order_number = basket.order_number
+
         try:
             payment_processor_response, transaction_id = self.payment_processor.initiate_payment(basket, request, data)
+            self.transaction_id = transaction_id
+
             self.record_processor_response(
                 payment_processor_response.to_dict(),
                 transaction_id=transaction_id,
