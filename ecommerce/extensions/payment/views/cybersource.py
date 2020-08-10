@@ -388,6 +388,39 @@ class CybersourceOrderCompletionView(EdxOrderPlacementMixin):
             bundle
         )
 
+    def validate_order_completion_or_redirect(self, notification):
+        try:
+            basket = self.validate_order_completion(notification)
+            monitoring_utils.set_custom_metric('payment_response_validation', 'success')
+            return basket, None
+        except DuplicateReferenceNumber:
+            # CyberSource has told us that they've declined an attempt to pay
+            # for an existing order. If this happens, we can redirect the browser
+            # to the receipt page for the existing order.
+            monitoring_utils.set_custom_metric('payment_response_validation', 'redirect-to-receipt')
+            return self.redirect_to_receipt_page()
+        except TransactionDeclined:
+            # Declined transactions are the most common cause of errors during payment
+            # processing and tend to be easy to correct (e.g., an incorrect CVV may have
+            # been provided). The recovery path is not as clear for other exceptions,
+            # so we let those drop through to the payment error page.
+            self._merge_old_basket_into_new()
+
+            messages.error(self.request, _('transaction declined'), extra_tags='transaction-declined-message')
+
+            monitoring_utils.set_custom_metric('payment_response_validation', 'redirect-to-payment-page')
+            # TODO:
+            # 1. There are sometimes messages from CyberSource that would make a more helpful message for users.
+            # 2. We could have similar handling of other exceptions like UserCancelled and AuthorizationError
+
+            redirect_url = get_payment_microfrontend_or_basket_url(self.request)
+            return None, HttpResponseRedirect(redirect_url)
+
+        except:  # pylint: disable=bare-except
+            # logging handled by validate_order_completion, because not all exceptions are problematic
+            monitoring_utils.set_custom_metric('payment_response_validation', 'redirect-to-error-page')
+            return None, self.redirect_to_absolute_url('payment_error')
+
 
 class CyberSourceRESTProcessorMixin:
     @cached_property
@@ -560,36 +593,9 @@ class CybersourceInterstitialView(CyberSourceProcessorMixin, CybersourceOrderCom
             )
             return self.redirect_to_payment_error()
 
-        try:
-            basket = self.validate_order_completion(notification)
-            monitoring_utils.set_custom_metric('payment_response_validation', 'success')
-        except DuplicateReferenceNumber:
-            # CyberSource has told us that they've declined an attempt to pay
-            # for an existing order. If this happens, we can redirect the browser
-            # to the receipt page for the existing order.
-            monitoring_utils.set_custom_metric('payment_response_validation', 'redirect-to-receipt')
-            return self.redirect_to_receipt_page()
-        except TransactionDeclined:
-            # Declined transactions are the most common cause of errors during payment
-            # processing and tend to be easy to correct (e.g., an incorrect CVV may have
-            # been provided). The recovery path is not as clear for other exceptions,
-            # so we let those drop through to the payment error page.
-            self._merge_old_basket_into_new()
-
-            messages.error(self.request, _('transaction declined'), extra_tags='transaction-declined-message')
-
-            monitoring_utils.set_custom_metric('payment_response_validation', 'redirect-to-payment-page')
-            # TODO:
-            # 1. There are sometimes messages from CyberSource that would make a more helpful message for users.
-            # 2. We could have similar handling of other exceptions like UserCancelled and AuthorizationError
-
-            redirect_url = get_payment_microfrontend_or_basket_url(self.request)
-            return HttpResponseRedirect(redirect_url)
-
-        except:  # pylint: disable=bare-except
-            # logging handled by validate_order_completion, because not all exceptions are problematic
-            monitoring_utils.set_custom_metric('payment_response_validation', 'redirect-to-error-page')
-            return self.redirect_to_absolute_url('payment_error')
+        basket, _redirect = self.validate_order_completion_or_redirect(notification)
+        if _redirect is not None:
+            return _redirect
 
         try:
             order = self.create_order(request, basket, self._get_billing_address(notification))
