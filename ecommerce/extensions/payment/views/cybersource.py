@@ -568,7 +568,7 @@ class CybersourceInterstitialView(CyberSourceProcessorMixin, CybersourceOrderCom
             # for an existing order. If this happens, we can redirect the browser
             # to the receipt page for the existing order.
             monitoring_utils.set_custom_metric('payment_response_validation', 'redirect-to-receipt')
-            return self.redirect_to_receipt_page(notification)
+            return self.redirect_to_receipt_page()
         except TransactionDeclined:
             # Declined transactions are the most common cause of errors during payment
             # processing and tend to be easy to correct (e.g., an incorrect CVV may have
@@ -594,7 +594,7 @@ class CybersourceInterstitialView(CyberSourceProcessorMixin, CybersourceOrderCom
         try:
             order = self.create_order(request, basket, self._get_billing_address(notification))
             self.handle_post_order(order)
-            return self.redirect_to_receipt_page(notification)
+            return self.redirect_to_receipt_page()
         except:  # pylint: disable=bare-except
             logger.exception(
                 'Error processing order for transaction [%s], with order [%s] and basket [%d].',
@@ -604,7 +604,7 @@ class CybersourceInterstitialView(CyberSourceProcessorMixin, CybersourceOrderCom
             )
             return absolute_redirect(request, 'payment_error')
 
-    def redirect_to_receipt_page(self, notification):
+    def redirect_to_receipt_page(self):
         receipt_page_url = get_receipt_page_url(
             self.request.site.siteconfiguration,
             order_number=self.order_number,
