@@ -16,8 +16,6 @@ from django.utils.translation import ugettext as _
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import View
 from edx_django_utils import monitoring as monitoring_utils
-from edx_rest_api_client.client import EdxRestApiClient
-from edx_rest_api_client.exceptions import SlumberHttpBaseException
 from oscar.apps.partner import strategy
 from oscar.apps.payment.exceptions import GatewayError, PaymentError, TransactionDeclined, UserCancelled
 from oscar.core.loading import get_class, get_model
@@ -26,7 +24,7 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from ecommerce.core.url_utils import absolute_redirect, get_lms_url
+from ecommerce.core.url_utils import absolute_redirect
 from ecommerce.extensions.api.serializers import OrderSerializer
 from ecommerce.extensions.basket.utils import (
     basket_add_organization_attribute,
@@ -34,7 +32,6 @@ from ecommerce.extensions.basket.utils import (
 )
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
 from ecommerce.extensions.checkout.utils import get_receipt_page_url
-from ecommerce.extensions.offer.constants import DYNAMIC_DISCOUNT_FLAG
 from ecommerce.extensions.payment.exceptions import (
     AuthorizationError,
     DuplicateReferenceNumber,
@@ -294,7 +291,13 @@ class CyberSourceRESTProcessorMixin:
         )
 
 
-class CybersourceAuthorizeAPIView(APIView, BasePaymentSubmitView, CyberSourceRESTProcessorMixin, CybersourceOrderCompletionView, CybersourceOrderInitiationView):
+class CybersourceAuthorizeAPIView(
+        APIView,
+        BasePaymentSubmitView,
+        CyberSourceRESTProcessorMixin,
+        CybersourceOrderCompletionView,
+        CybersourceOrderInitiationView
+):
     # DRF APIView wrapper which allows clients to use
     # JWT authentication when making Cybersource submit
     # requests.
@@ -313,7 +316,6 @@ class CybersourceAuthorizeAPIView(APIView, BasePaymentSubmitView, CyberSourceRES
         data = form.cleaned_data
         basket = data['basket']
         request = self.request
-        user = request.user
 
         sdn_check_failure = self.check_sdn(request, data)
         if sdn_check_failure is not None:
@@ -321,8 +323,15 @@ class CybersourceAuthorizeAPIView(APIView, BasePaymentSubmitView, CyberSourceRES
 
         try:
             payment_processor_response, transaction_id = self.payment_processor.initiate_payment(basket, request, data)
-            self.record_processor_response(payment_processor_response.to_dict(), transaction_id=transaction_id, basket=basket)
-            handled_processor_response = self.payment_processor.handle_processor_response(payment_processor_response, basket)
+            self.record_processor_response(
+                payment_processor_response.to_dict(),
+                transaction_id=transaction_id,
+                basket=basket
+            )
+            handled_processor_response = self.payment_processor.handle_processor_response(
+                payment_processor_response,
+                basket
+            )
         except GatewayError:
             return JsonResponse({}, status=400)
         except TransactionDeclined:
@@ -487,7 +496,13 @@ class CybersourceInterstitialView(CyberSourceProcessorMixin, CybersourceOrderCom
 
             # Explicitly delimit operations which will be rolled back if an exception occurs.
             with transaction.atomic():
-                with self.log_payment_exceptions(basket, order_number, transaction_id, ppr, notification.get("message")):
+                with self.log_payment_exceptions(
+                        basket,
+                        order_number,
+                        transaction_id,
+                        ppr,
+                        notification.get("message")
+                ):
                     self.handle_payment(notification, basket)
 
         except Exception as exception:  # pylint: disable=bare-except
