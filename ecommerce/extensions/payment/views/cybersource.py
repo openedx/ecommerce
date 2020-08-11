@@ -493,13 +493,9 @@ class CybersourceAuthorizeAPIView(
                 basket
             )
         except GatewayError:
-            return JsonResponse({}, status=400)
+            return self.redirect_to_payment_error()
         except TransactionDeclined:
-            return JsonResponse({
-                'errors': [
-                    {'error_code': 'transaction-declined-message'}
-                ]
-            }, status=400)
+            return self.redirect_on_transaction_declined()
 
         billing_address = self._get_billing_address(payment_processor_response)
 
@@ -509,14 +505,7 @@ class CybersourceAuthorizeAPIView(
             order = self.create_order(request, basket, billing_address)
             self.handle_post_order(order)
 
-        receipt_page_url = get_receipt_page_url(
-            request.site.siteconfiguration,
-            order_number=basket.order_number,
-            disable_back_button=True,
-        )
-        return JsonResponse({
-            'receipt_page_url': receipt_page_url,
-        }, status=201)
+        return self.redirect_to_receipt_page()
 
     def _get_billing_address(self, order_completion_message):
         return BillingAddress(
