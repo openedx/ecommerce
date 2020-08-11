@@ -388,9 +388,9 @@ class CybersourceOrderCompletionView(EdxOrderPlacementMixin):
             bundle
         )
 
-    def complete_order(self, notification):
+    def complete_order(self, order_completion_message):
         try:
-            basket = self.validate_order_completion(notification)
+            basket = self.validate_order_completion(order_completion_message)
             monitoring_utils.set_custom_metric('payment_response_validation', 'success')
         except DuplicateReferenceNumber:
             # CyberSource has told us that they've declined an attempt to pay
@@ -421,7 +421,7 @@ class CybersourceOrderCompletionView(EdxOrderPlacementMixin):
             return self.redirect_to_absolute_url('payment_error')
 
         try:
-            order = self.create_order(self.request, basket, self._get_billing_address(notification))
+            order = self.create_order(self.request, basket, self._get_billing_address(order_completion_message))
             self.handle_post_order(order)
             return self.redirect_to_receipt_page()
         except:  # pylint: disable=bare-except
