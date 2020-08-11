@@ -457,6 +457,8 @@ class CybersourceAuthorizeAPIView(
     # requests.
     permission_classes = (permissions.IsAuthenticated,)
 
+    data: dict
+
     def post(self, request):
         logger.info(
             '%s called for basket [%d]. It is in the [%s] state.',
@@ -467,11 +469,11 @@ class CybersourceAuthorizeAPIView(
         return super(CybersourceAuthorizeAPIView, self).post(request)
 
     def form_valid(self, form):
-        data = form.cleaned_data
-        basket = data['basket']
+        self.data = form.cleaned_data
+        basket = self.data['basket']
         request = self.request
 
-        sdn_check_failure = self.check_sdn(request, data)
+        sdn_check_failure = self.check_sdn(request, self.data)
         if sdn_check_failure is not None:
             return sdn_check_failure
 
@@ -479,7 +481,7 @@ class CybersourceAuthorizeAPIView(
         self.order_number = basket.order_number
 
         try:
-            payment_processor_response, transaction_id = self.payment_processor.initiate_payment(basket, request, data)
+            payment_processor_response, transaction_id = self.payment_processor.initiate_payment(basket, request, self.data)
             self.transaction_id = transaction_id
 
             self.record_processor_response(
@@ -500,16 +502,7 @@ class CybersourceAuthorizeAPIView(
                 ]
             }, status=400)
 
-        billing_address = BillingAddress(
-            first_name=data['first_name'],
-            last_name=data['last_name'],
-            line1=data['address_line1'],
-            line2=data['address_line2'],
-            line4=data['city'],
-            postcode=data['postal_code'],
-            state=data['state'],
-            country=Country.objects.get(iso_3166_1_a2=data['country'])
-        )
+        billing_address = self._get_billing_address(payment_processor_response)
 
         with transaction.atomic():
             basket.freeze()
@@ -525,6 +518,18 @@ class CybersourceAuthorizeAPIView(
         return JsonResponse({
             'receipt_page_url': receipt_page_url,
         }, status=201)
+
+    def _get_billing_address(self, order_completion_message):
+        return BillingAddress(
+            first_name=self.data['first_name'],
+            last_name=self.data['last_name'],
+            line1=self.data['address_line1'],
+            line2=self.data['address_line2'],
+            line4=self.data['city'],
+            postcode=self.data['postal_code'],
+            state=self.data['state'],
+            country=Country.objects.get(iso_3166_1_a2=self.data['country'])
+        )
 
 
 class CybersourceInterstitialView(CyberSourceProcessorMixin, CybersourceOrderCompletionView, View):
