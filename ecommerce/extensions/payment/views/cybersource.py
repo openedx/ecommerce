@@ -482,30 +482,10 @@ class CybersourceAuthorizeAPIView(
         try:
             payment_processor_response, transaction_id = self.payment_processor.initiate_payment(basket, request, self.data)
             self.transaction_id = transaction_id
-
-            self.record_processor_response(
-                payment_processor_response.to_dict(),
-                transaction_id=transaction_id,
-                basket=basket
-            )
-            handled_processor_response = self.payment_processor.handle_processor_response(
-                payment_processor_response,
-                basket
-            )
         except GatewayError:
             return self.redirect_to_payment_error()
-        except TransactionDeclined:
-            return self.redirect_on_transaction_declined()
-
-        billing_address = self._get_billing_address(payment_processor_response)
-
-        with transaction.atomic():
-            basket.freeze()
-            self.record_payment(basket, handled_processor_response)
-            order = self.create_order(request, basket, billing_address)
-            self.handle_post_order(order)
-
-        return self.redirect_to_receipt_page()
+        else:
+            return self.complete_order(payment_processor_response)
 
     def _get_billing_address(self, order_completion_message):
         return BillingAddress(
