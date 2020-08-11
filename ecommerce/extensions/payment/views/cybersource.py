@@ -529,6 +529,26 @@ class CybersourceAuthorizeAPIView(
             country=Country.objects.get(iso_3166_1_a2=self.data['country'])
         )
 
+    def redirect_to_payment_error(self):
+        return JsonResponse({}, status=400)
+
+    def redirect_to_receipt_page(self):
+        receipt_page_url = get_receipt_page_url(
+            self.request.site.siteconfiguration,
+            order_number=self.order_number,
+            disable_back_button=True,
+        )
+        return JsonResponse({
+            'receipt_page_url': receipt_page_url,
+        }, status=201)
+
+    def redirect_on_transaction_declined(self):
+        return JsonResponse({
+            'errors': [
+                {'error_code': 'transaction-declined-message'}
+            ]
+        }, status=400)
+
 
 class CybersourceInterstitialView(CyberSourceProcessorMixin, CybersourceOrderCompletionView, View):
     """
