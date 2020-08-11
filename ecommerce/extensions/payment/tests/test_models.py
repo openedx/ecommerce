@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 
+from datetime import datetime, timedelta
 
 import six
 from django.core.exceptions import ValidationError
 
-from ecommerce.extensions.payment.models import EnterpriseContractMetadata, SDNCheckFailure
+from ecommerce.extensions.payment.models import EnterpriseContractMetadata, SDNCheckFailure, SDNFallbackMetadata
 from ecommerce.tests.testcases import TestCase
 
 
@@ -98,3 +99,27 @@ class EnterpriseContractMetadataTests(TestCase):
             self.ecm.discount_value = value
             with self.assertRaises(ValidationError):
                 self.ecm.clean()
+
+
+class SDNFallbackMetadataTests(TestCase):
+    def setUp(self):
+        super(SDNFallbackMetadataTests, self).setUp()
+        self.file_checksum = 'foobar'
+        self.import_timestamp = datetime.now() + timedelta(days=1)
+
+    def test_minimum_requirements(self):
+        """Make sure the row is created correctly with the minimum dataset + defaults."""
+        new_metadata = SDNFallbackMetadata(
+            file_checksum=self.file_checksum,
+        )
+        new_metadata.full_clean()
+        new_metadata.save()
+
+        self.assertEqual(len(SDNFallbackMetadata.objects.all()), 1)
+
+        actual_metadata = SDNFallbackMetadata.objects.all()[0]
+        self.assertEqual(actual_metadata.file_checksum, self.file_checksum)
+        self.assertIsInstance(actual_metadata.download_timestamp, datetime)
+        self.assertEqual(actual_metadata.import_timestamp, None)
+        self.assertEqual(actual_metadata.import_state, 'New')
+
