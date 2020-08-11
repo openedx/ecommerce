@@ -412,8 +412,7 @@ class CybersourceOrderCompletionView(EdxOrderPlacementMixin):
             # 1. There are sometimes messages from CyberSource that would make a more helpful message for users.
             # 2. We could have similar handling of other exceptions like UserCancelled and AuthorizationError
 
-            redirect_url = get_payment_microfrontend_or_basket_url(self.request)
-            return self.redirect_to_url(redirect_url)
+            return self.redirect_on_transaction_declined()
 
         except:  # pylint: disable=bare-except
             # logging handled by validate_order_completion, because not all exceptions are problematic
@@ -612,9 +611,6 @@ class CybersourceInterstitialView(CyberSourceProcessorMixin, CybersourceOrderCom
 
         return self.complete_order(notification)
 
-    def redirect_to_url(self, url):
-        return HttpResponseRedirect(url)
-
     def redirect_to_payment_error(self):
         return absolute_redirect(self.request, 'payment_error')
 
@@ -626,6 +622,10 @@ class CybersourceInterstitialView(CyberSourceProcessorMixin, CybersourceOrderCom
         )
 
         return redirect(receipt_page_url)
+
+    def redirect_on_transaction_declined(self):
+        redirect_url = get_payment_microfrontend_or_basket_url(self.request)
+        return HttpResponseRedirect(redirect_url)
 
 
 class ApplePayStartSessionView(CyberSourceProcessorMixin, APIView):
