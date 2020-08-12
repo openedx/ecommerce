@@ -27,7 +27,8 @@ from ecommerce.extensions.basket.utils import (
     attribute_cookie_data,
     get_basket_switch_data,
     get_payment_microfrontend_url_if_configured,
-    prepare_basket
+    prepare_basket, 
+    check_product_in_basket
 )
 from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
 from ecommerce.extensions.order.constants import DISABLE_REPEAT_ORDER_CHECK_SWITCH_NAME
@@ -670,6 +671,15 @@ class BasketUtilsTests(DiscoveryTestMixin, BasketMixin, TestCase):
             self.site_configuration.payment_microfrontend_url = payment_microfrontend_url
             self.assertEqual(get_payment_microfrontend_url_if_configured(self.request), expected_result)
 
+    def test_check_product_in_basket(self):
+        """ Verify we get a correct response for product in basket or not. """
+        product1 = ProductFactory(stockrecords__partner__short_code='test1')
+        product2 = ProductFactory(stockrecords__partner__short_code='test2')
+        basket = prepare_basket(self.request, [product1])
+        result_product1 = check_product_in_basket(basket, product1)
+        result_product2 = check_product_in_basket(basket, product2)
+        self.assertTrue(result_product1)
+        self.assertFalse(result_product2)
 
 class BasketUtilsTransactionTests(TransactionTestCase):
     def setUp(self):
