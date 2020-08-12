@@ -233,7 +233,7 @@
 .. _Communications API: http://django-oscar.readthedocs.org/en/latest/howto/how_to_customise_oscar_communications.html#communications-api
 .. _django-compressor: http://django-compressor.readthedocs.org/
 .. _RequireJS: http://requirejs.org/
-.. _devstack: https://github.com/edx/configuration/wiki/edX-Developer-Stack
+.. _devstack: https://github.com/edx/devstack
 .. _Testing in Django: https://docs.djangoproject.com/en/1.8/topics/testing/
 .. _Django sites framework: https://docs.djangoproject.com/en/1.8/ref/contrib/sites
 .. _Jasmine: http://jasmine.github.io/2.3/introduction.html
