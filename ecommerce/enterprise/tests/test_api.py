@@ -3,19 +3,16 @@
 import ddt
 import httpretty
 from django.conf import settings
-from django.test import override_settings
 from edx_django_utils.cache import TieredCache
 from mock import patch
 from oscar.core.loading import get_model
 from oscar.test.factories import BasketFactory
 from requests.exceptions import ConnectionError as ReqConnectionError
-from waffle.testutils import override_flag
 
 from ecommerce.core.tests import toggle_switch
 from ecommerce.core.utils import get_cache_key
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.enterprise import api as enterprise_api
-from ecommerce.enterprise.constants import USE_ENTERPRISE_CATALOG
 from ecommerce.enterprise.tests.mixins import EnterpriseServiceMockMixin
 from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
 from ecommerce.extensions.partner.strategy import DefaultStrategy
@@ -123,62 +120,11 @@ class EnterpriseAPITests(EnterpriseServiceMockMixin, DiscoveryTestMixin, TestCas
         self.mock_catalog_contains_course_runs(
             [self.course_run.id],
             'fake-uuid',
-            self.site.siteconfiguration.enterprise_api_url,
             enterprise_customer_catalog_uuid=enterprise_customer_catalog_uuid,
             contains_content=expected,
         )
 
         self._assert_contains_course_runs(expected, [self.course_run.id], 'fake-uuid', enterprise_customer_catalog_uuid)
-
-    @ddt.data(
-        (True, None),
-        (True, 'fake-uuid'),
-        (False, None),
-        (False, 'fake-uuid'),
-    )
-    @ddt.unpack
-    def test_catalog_contains_course_runs_enterprise_catalog_service(self, expected, enterprise_customer_catalog_uuid):
-        """
-        Verify that `catalog_contains_course_runs` returns the appropriate
-        response when the  Enterprise Catalog service is hit instead of the base
-        Enterprise API.
-        """
-        with override_flag(USE_ENTERPRISE_CATALOG, active=True):
-            self.mock_catalog_contains_course_runs(
-                [self.course_run.id],
-                'fake-uuid',
-                self.site.siteconfiguration.enterprise_catalog_api_url,
-                enterprise_customer_catalog_uuid=enterprise_customer_catalog_uuid,
-                contains_content=expected,
-                catalog_resource='enterprise-catalogs',
-            )
-
-            self._assert_contains_course_runs(expected, [self.course_run.id], 'fake-uuid',
-                                              enterprise_customer_catalog_uuid)
-
-    @ddt.data(
-        (True, [], 'enterprise-catalogs', settings.ENTERPRISE_CATALOG_API_URL),
-        (True, ['fake_enterprise_uuid'], 'enterprise_catalogs', settings.ENTERPRISE_API_URL),
-        (False, [], 'enterprise_catalogs', settings.ENTERPRISE_API_URL),
-    )
-    @ddt.unpack
-    def test_catalog_contains_course_runs_enterprise_exclusion(self, flag_is_active, exclusion_list, resource, api_url):
-        """
-        Verify that `catalog_contains_course_runs` hits the correct API endpoint when waffle flag
-        active (or not) and enterprise uuid in the ENTERPRISE_CUSTOMERS_EXCLUDED_FROM_CATALOG list (or not)
-        """
-        catalog_uuid = 'fake_catalog_uuid'
-        with override_flag(USE_ENTERPRISE_CATALOG, active=flag_is_active):
-            with override_settings(ENTERPRISE_CUSTOMERS_EXCLUDED_FROM_CATALOG=exclusion_list):
-                self.mock_catalog_contains_course_runs(
-                    [self.course_run.id],
-                    'fake_enterprise_uuid',
-                    api_url,
-                    enterprise_customer_catalog_uuid=catalog_uuid,
-                    contains_content=True,
-                    catalog_resource=resource,
-                )
-                self._assert_contains_course_runs(True, [self.course_run.id], 'fake_enterprise_uuid', catalog_uuid)
 
     def test_catalog_contains_course_runs_cache_hit(self):
         """
@@ -187,7 +133,6 @@ class EnterpriseAPITests(EnterpriseServiceMockMixin, DiscoveryTestMixin, TestCas
         self.mock_catalog_contains_course_runs(
             [self.course_run.id],
             'fake-uuid',
-            self.site.siteconfiguration.enterprise_api_url,
             enterprise_customer_catalog_uuid=None,
             contains_content=True,
         )
@@ -209,7 +154,6 @@ class EnterpriseAPITests(EnterpriseServiceMockMixin, DiscoveryTestMixin, TestCas
         self.mock_catalog_contains_course_runs(
             [self.course_run.id],
             'fake-uuid',
-            self.site.siteconfiguration.enterprise_api_url,
             enterprise_customer_catalog_uuid='fake-uuid',
             contains_content=False,
             raise_exception=True,
