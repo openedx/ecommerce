@@ -240,11 +240,11 @@ class Theme:
     def __hash__(self):
         return hash((self.theme_dir_name, self.path))
 
-    def __unicode__(self):
+    def __str__(self):
         return u"<Theme: {name} at '{path}'>".format(name=self.name, path=self.path)
 
     def __repr__(self):
-        return self.__unicode__()
+        return self.__str__()
 
     @property
     def path(self):

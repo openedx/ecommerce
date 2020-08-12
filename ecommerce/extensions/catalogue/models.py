@@ -150,7 +150,7 @@ class Catalog(models.Model):
     partner = models.ForeignKey('partner.Partner', related_name='catalogs', on_delete=models.CASCADE)
     stock_records = models.ManyToManyField('partner.StockRecord', blank=True, related_name='catalogs')
 
-    def __unicode__(self):
+    def __str__(self):
         return u'{id}: {partner_code}-{catalog_name}'.format(
             id=self.id,
             partner_code=self.partner.short_code,

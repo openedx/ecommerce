@@ -108,7 +108,7 @@ class BasketAttributeType(models.Model):
     """
     name = models.CharField(_("Name"), max_length=128, unique=True)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 
 
