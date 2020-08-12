@@ -11,7 +11,6 @@ from functools import reduce  # pylint: disable=redefined-builtin
 from urllib.parse import urlencode, urlparse
 
 import crum
-
 from django.conf import settings
 from django.urls import reverse
 from django.utils.translation import ugettext as _
