@@ -4,6 +4,10 @@
 Install and Start the E-Commerce Service
 ########################################
 
+.. warning::
+ This document is out of date regarding virtual environment configuration.
+ E-Commerce should be properly provisioned for you as part of Dockerized `devstack`_.
+
 To install and start the edX E-Commerce service, you must complete the
 following steps.
 
@@ -282,7 +286,7 @@ instead of ShoppingCart, follow these steps.
 #. Sign in to the Django administration console for your base URL. For example,
    ``http://{your_URL}/admin``.
 
-#. In the **Commerce** section, next to **Commerce configuration**, select **Add**. 
+#. In the **Commerce** section, next to **Commerce configuration**, select **Add**.
 
 #. Select **Enabled**.
 
