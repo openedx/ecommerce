@@ -59,7 +59,7 @@ class Command(BaseCommand):
         Return the total limit, percentage usage and current usage of enrollment limit.
         """
         percentage_usage = int((offer.num_orders / offer.max_global_applications) * 100)
-        return offer.max_global_applications, percentage_usage, offer.num_orders
+        return int(offer.max_global_applications), percentage_usage, int(offer.num_orders)
 
     @staticmethod
     def get_booking_limits(offer):
@@ -73,7 +73,7 @@ class Command(BaseCommand):
         total_used_discount_amount = total_used_discount_amount if total_used_discount_amount else 0
 
         percentage_usage = int((total_used_discount_amount / offer.max_discount) * 100)
-        return "{}$".format(offer.max_discount), percentage_usage, "{}$".format(total_used_discount_amount)
+        return int(offer.max_discount), percentage_usage, int(total_used_discount_amount)
 
     def get_email_content(self, offer):
         """
@@ -85,10 +85,10 @@ class Command(BaseCommand):
 
         email_body = EMAIL_BODY.format(
             percentage_usage=percentage_usage,
-            total_limit=total_limit,
+            total_limit=total_limit if is_enrollment_limit_offer else "{}$".format(total_limit),
             offer_type='Enrollment' if is_enrollment_limit_offer else 'Booking',
             offer_name=offer.name,
-            current_usage=current_usage
+            current_usage=current_usage if is_enrollment_limit_offer else "{}$".format(current_usage),
         )
         return email_body, EMAIL_SUBJECT
 
