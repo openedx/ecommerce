@@ -83,7 +83,7 @@ class EnterpriseServiceMockMixin:
 
     def mock_enterprise_catalog_api_get(self, enterprise_catalog_uuid, custom_response=None):
         """
-        Helper function to register the enterprise catalog API endpoint.
+        Helper function to register the legacy enterprise catalog API endpoint using httpretty.
         """
         enterprise_catalog_api_response = {
             "count": 60,
