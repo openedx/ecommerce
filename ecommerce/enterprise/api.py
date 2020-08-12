@@ -121,12 +121,11 @@ def catalog_contains_course_runs(site, course_run_ids, enterprise_customer_uuid,
     api = site.siteconfiguration.enterprise_catalog_api_client
 
     # Determine API resource to use
+    api_resource_name = 'enterprise-customer'
+    api_resource_id = enterprise_customer_uuid
     if enterprise_customer_catalog_uuid:
         api_resource_name = 'enterprise-catalogs'
         api_resource_id = enterprise_customer_catalog_uuid
-    else:
-        api_resource_name = 'enterprise-customer'
-        api_resource_id = enterprise_customer_uuid
 
     cache_key = get_cache_key(
         site_domain=site.domain,
