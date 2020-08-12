@@ -6,7 +6,6 @@ This command generates enrollment codes for courses.
 import logging
 import os
 
-import six
 from django.core.management import BaseCommand, CommandError
 
 from ecommerce.core.constants import ENROLLMENT_CODE_SEAT_TYPES
@@ -90,7 +89,7 @@ class Command(BaseCommand):
                     logger.error(
                         'Enrollment code generation failed for "%s" course. Because %s',
                         course.id,
-                        six.text_type(error),
+                        str(error),
                     )
                     failed_courses.append(course.id)
 
@@ -131,7 +130,7 @@ class Command(BaseCommand):
                     logger.error(
                         'Enrollment code generation failed for "%s" course. Because %s',
                         course.id,
-                        six.text_type(error),
+                        str(error),
                     )
                     failed_courses.append(course.id)
         return total_courses, failed_courses

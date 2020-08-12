@@ -1,9 +1,9 @@
 
 
 import logging
+from urllib.parse import urlparse
 
 import django_filters
-import six
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import (
@@ -29,7 +29,6 @@ from rest_framework.exceptions import ValidationError as DRFValidationError
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet, ViewSet
-from six.moves.urllib.parse import urlparse  # pylint: disable=import-error, ungrouped-imports
 from slumber.exceptions import SlumberHttpBaseException
 
 from ecommerce.core.constants import COUPON_PRODUCT_CLASS_NAME, DEFAULT_CATALOG_PAGE_SIZE
@@ -136,7 +135,7 @@ class EnterpriseCustomerCatalogsViewSet(ViewSet):
                 exc
             )
             return Response(
-                {'error': 'Unable to retrieve enterprise catalog. Exception: {}'.format(six.text_type(exc))},
+                {'error': 'Unable to retrieve enterprise catalog. Exception: {}'.format(str(exc))},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
@@ -170,6 +169,8 @@ class OfferAssignmentSummaryViewSet(ModelViewSet):
             'offer__condition',
         )
         offer_assignments_with_counts = {}
+        if self.request.query_params.get('full_discount_only'):
+            queryset = queryset.filter(offer__benefit__value=100.0)
         for offer_assignment in queryset:
             if offer_assignment.code not in offer_assignments_with_counts:
                 # Note that we can get away with just dropping in the first

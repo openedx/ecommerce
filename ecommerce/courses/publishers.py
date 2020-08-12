@@ -3,7 +3,6 @@
 import json
 import logging
 
-import six
 from django.utils.translation import ugettext_lazy as _
 from edx_rest_api_client.exceptions import SlumberHttpBaseException
 from oscar.core.loading import get_model
@@ -131,7 +130,7 @@ class LMSPublisher:
         message = None
         try:
             data = json.loads(response)
-            if isinstance(data, six.string_types):
+            if isinstance(data, str):
                 message = data
             elif isinstance(data, dict) and data:
                 message = list(data.values())[0]

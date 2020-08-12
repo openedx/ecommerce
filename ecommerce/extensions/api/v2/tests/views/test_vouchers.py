@@ -17,7 +17,6 @@ from requests.exceptions import ConnectionError as ReqConnectionError
 from requests.exceptions import Timeout
 from rest_framework import status
 from rest_framework.test import APIRequestFactory
-from six.moves import range
 from slumber.exceptions import SlumberBaseException
 
 from ecommerce.coupons.tests.mixins import CouponMixin, DiscoveryMockMixin

@@ -2,7 +2,6 @@
 
 import logging
 
-import six
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
@@ -204,7 +203,7 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
             try:
                 course_seat_types = prepare_course_seat_types(course_seat_types)
             except (AttributeError, TypeError) as exception:
-                validation_message = 'Invalid course seat types data: {}'.format(six.text_type(exception))
+                validation_message = 'Invalid course seat types data: {}'.format(str(exception))
                 raise ValidationError(validation_message)
 
         try:
@@ -431,7 +430,7 @@ class CouponViewSet(EdxOrderPlacementMixin, viewsets.ModelViewSet):
         if 'enterprise_customer_catalog' in request_data:
             range_data['enterprise_customer_catalog'] = request_data.get('enterprise_customer_catalog') or None
 
-        for attr, value in six.iteritems(range_data):
+        for attr, value in range_data.items():
             setattr(voucher_range, attr, value)
 
         voucher_range.save()

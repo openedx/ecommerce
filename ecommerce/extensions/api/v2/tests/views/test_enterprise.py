@@ -11,7 +11,6 @@ import ddt
 import httpretty
 import mock
 import rules
-import six  # pylint: disable=ungrouped-imports
 from django.conf import settings
 from django.test import override_settings
 from django.urls import reverse
@@ -21,7 +20,6 @@ from django.utils.timezone import now
 from oscar.core.loading import get_model
 from oscar.test import factories
 from rest_framework import status
-from six.moves import range
 from slumber.exceptions import SlumberHttpBaseException
 
 from ecommerce.core.constants import (
@@ -303,8 +301,8 @@ class EnterpriseCouponViewSetRbacTests(
             'start_datetime': str(now() - datetime.timedelta(days=10)),
             'title': 'Tešt Enterprise čoupon',
             'voucher_type': Voucher.SINGLE_USE,
-            'enterprise_customer': {'name': 'test enterprise', 'id': six.text_type(uuid4())},
-            'enterprise_customer_catalog': six.text_type(uuid4()),
+            'enterprise_customer': {'name': 'test enterprise', 'id': str(uuid4())},
+            'enterprise_customer_catalog': str(uuid4()),
             'notify_email': 'batman@gotham.comics',
             'contract_discount_type': EnterpriseContractMetadata.PERCENTAGE,
             'contract_discount_value': '12.35',
@@ -774,15 +772,15 @@ class EnterpriseCouponViewSetRbacTests(
         vouchers = Product.objects.get(id=coupon_id).attr.coupon_vouchers.vouchers.all()
         codes = [voucher.code for voucher in vouchers]
 
-        for email, code_index in six.iteritems(code_assignments):
+        for email, code_index in code_assignments.items():
             self.assign_user_to_code(coupon_id, [email], [codes[code_index]])
 
-        for email, data in six.iteritems(code_redemptions):
+        for email, data in code_redemptions.items():
             redeeming_user = self.create_user(email=email)
             for _ in range(0, data['num']):
                 self.use_voucher(Voucher.objects.get(code=codes[data['code']]), redeeming_user)
 
-        for code_filter, expected_response in six.iteritems(expected_responses):
+        for code_filter, expected_response in expected_responses.items():
             response = self.get_response(
                 'GET',
                 '/api/v2/enterprise/coupons/{}/codes/?code_filter={}'.format(coupon_id, code_filter)
@@ -1759,7 +1757,7 @@ class EnterpriseCouponViewSetRbacTests(
         )
 
         # Verify that we get correct results.
-        for field, value in six.iteritems(expected_response):
+        for field, value in expected_response.items():
             if assignment_has_error and field == 'errors':
                 assignment_with_errors = OfferAssignment.objects.filter(status=OFFER_ASSIGNMENT_EMAIL_BOUNCED)
                 value = [
@@ -2810,7 +2808,7 @@ class OfferAssignmentSummaryViewSetTests(
         self.user = self.create_user(is_staff=True, email='test@example.com')
         self.client.login(username=self.user.username, password=self.password)
 
-        self.enterprise_customer = {'name': 'test enterprise', 'id': six.text_type(uuid4())}
+        self.enterprise_customer = {'name': 'test enterprise', 'id': str(uuid4())}
 
         self.course = CourseFactory(id='course-v1:test-org+course+run', partner=self.partner)
         self.verified_seat = self.course.create_or_update_seat('verified', False, 100)
@@ -2953,6 +2951,41 @@ class OfferAssignmentSummaryViewSetTests(
                 assert result['usage_type'] == 'Absolute'
                 assert result['redemptions_remaining'] == 7
                 assert result['catalog'] == 'cccccccc-2c44-487b-9b6a-24eee973f9a4'
+            else:  # To test if response has something in it it shouldn't
+                assert False
+
+    def test_view_returns_appropriate_data_for_full_discount(self):
+        """
+        View should return the full discount data only for given user_email.
+        """
+        coupon4 = self.create_coupon(
+            max_uses=1,
+            quantity=1,
+            voucher_type=Voucher.MULTI_USE_PER_CUSTOMER,
+            benefit_type=Benefit.PERCENTAGE,
+            benefit_value=100.0,
+            enterprise_customer=self.enterprise_customer['id'],
+            enterprise_customer_catalog='dddddddd-2c44-487b-9b6a-24eee973f9a4',
+        )
+        self.assign_user_to_code(coupon4.id, [self.user.email], [])
+
+        oa_code = OfferAssignment.objects.get(
+            user_email=self.user.email,
+            offer__vouchers__coupon_vouchers__coupon__id=coupon4.id
+        ).code
+
+        response = self.client.get(OFFER_ASSIGNMENT_SUMMARY_LINK + "?full_discount_only=True").json()
+
+        # there are several coupons already assigned to this user, but only the one above is 100% off
+        assert response['count'] == 1
+        # To get the code to verify our response, filter using the coupon
+        # id these offerAssignments were created for
+        for result in response['results']:
+            if result['code'] == oa_code:
+                assert result['benefit_value'] == 100.0
+                assert result['usage_type'] == 'Percentage'
+                assert result['redemptions_remaining'] == 1
+                assert result['catalog'] == 'dddddddd-2c44-487b-9b6a-24eee973f9a4'
             else:  # To test if response has something in it it shouldn't
                 assert False
 
