@@ -169,6 +169,8 @@ class OfferAssignmentSummaryViewSet(ModelViewSet):
             'offer__condition',
         )
         offer_assignments_with_counts = {}
+        if self.request.query_params.get('full_discount_only'):
+            queryset = queryset.filter(offer__benefit__value=100.0)
         for offer_assignment in queryset:
             if offer_assignment.code not in offer_assignments_with_counts:
                 # Note that we can get away with just dropping in the first
