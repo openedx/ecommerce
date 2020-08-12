@@ -11,7 +11,7 @@ def create_flag(apps, schema_editor):
     Flag = apps.get_model('waffle', 'Flag')
     Flag.objects.get_or_create(
         name=USE_ENTERPRISE_CATALOG,
-        defaults={'everyone': None, 'superusers': False},
+        defaults={'everyone': True, 'superusers': False},
     )
 
 
