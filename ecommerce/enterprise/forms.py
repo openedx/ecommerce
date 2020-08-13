@@ -153,7 +153,7 @@ class EnterpriseOfferForm(forms.ModelForm):
                 self.add_error(
                     'max_discount',
                     _(
-                        'Ensure new value must be greater than or equal to consumed({consumed_discount}) value.'
+                        'Ensure new value must be greater than or equal to consumed({consumed_discount:.2f}) value.'
                     ).format(
                         consumed_discount=self.instance.total_discount
                     )
@@ -197,7 +197,7 @@ class EnterpriseOfferForm(forms.ModelForm):
                 self.add_error(
                     'max_user_discount',
                     _(
-                        'Ensure new value must be greater than or equal to consumed({consumed_discount}) value.'
+                        'Ensure new value must be greater than or equal to consumed({consumed_discount:.2f}) value.'
                     ).format(
                         consumed_discount=max_discount_used_any_user
                     )
