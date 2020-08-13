@@ -34,7 +34,7 @@ class Command(BaseCommand):
             'enterprise_customer_uuid',
             'enterprise_customer_name',
             'enterprise_customer_catalog_uuid'
-        ).annotate(id_count=Count(id)).order_by().filter(
+        ).annotate(id_count=Count('id')).order_by().filter(
             id_count__gt=1,
             value__isnull=False,
             proxy_class__isnull=False,
