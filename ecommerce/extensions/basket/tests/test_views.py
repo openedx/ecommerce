@@ -466,7 +466,8 @@ class PaymentApiResponseTestMixin(BasketLogicTestMixin):
                     u'course_key': getattr(line.product.attr, 'course_key', None),
                     u'title': title,
                 } for line in basket.lines.all()
-            ]
+            ],
+            'flex_microform_enabled': False,
         }
         if kwargs:
             expected_response.update(**kwargs)
