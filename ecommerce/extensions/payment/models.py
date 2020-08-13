@@ -125,7 +125,11 @@ class EnterpriseContractMetadata(TimeStampedModel):
 
 
 class SDNFallbackMetadata(models.Model):
-    """ Record metadata about the SDN fallback CSV file download """
+    """
+    Record metadata about the SDN fallback CSV file download, as detailed in docs/decisions/0007-sdn-fallback.rst
+    and JIRA ticket REV-1278. This table is used to track the state of the SDN csv file data that are currently
+    being used or about to be updated/deprecated. This table does not keep track of the SDN files over time.
+    """
     file_checksum = models.CharField(max_length=255, validators=[MinLengthValidator(1)])
     download_timestamp = models.DateTimeField(auto_now_add=True)
     import_timestamp = models.DateTimeField(null=True, blank=True)
@@ -147,6 +151,11 @@ class SDNFallbackMetadata(models.Model):
     @classmethod
     @atomic
     def swap_states(cls):
+        """
+        Update the newly downloaded + imported SDN file data to be used and prepare the previously used
+        SDN file data to be removed. This is done in a transaction to gurantee that existing files are
+        shifted into the correct next states in sync.
+        """
         existing_current_imports = SDNFallbackMetadata.objects.filter(import_state='Current')
         if existing_current_imports.exists():
             existing_current = existing_current_imports[0]
