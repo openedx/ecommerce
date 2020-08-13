@@ -673,24 +673,18 @@ class BasketUtilsTests(DiscoveryTestMixin, BasketMixin, TestCase):
 
     def test_prepare_basket_with_duplicate_seat(self):
         """ Verify a basket fixes the case where flush doesn't work and we attempt adding duplicate seat. """
-        # NOT DOING MUCH YET, WILL NEED TO FIGURE OUT HOW TO GET MULTIPLE ATTEMPTS GOING
-        product1 = ProductFactory(stockrecords__partner__short_code='test1')
-        prepare_basket(self.request, [product1])
-        basket = prepare_basket(self.request, [product1])
-        basket = prepare_basket(self.request, [product1])
-        basket = prepare_basket(self.request, [product1])
-        self.assertIsNotNone(basket)
-        self.assertEqual(basket.status, Basket.OPEN)
-        self.assertEqual(basket.lines.count(), 1)
-        self.assertEqual(basket.lines.first().product, product1)
-        self.assertEqual(basket.product_quantity(product1), 1)
+        with mock.patch('ecommerce.extensions.basket.utils.Basket.flush'):
+            product_type_seat = ProductClass.objects.create(name='Seat')
+            product1 = ProductFactory(stockrecords__partner__short_code='test1', product_class=product_type_seat)
+            prepare_basket(self.request, [product1])
+            basket = prepare_basket(self.request, [product1])  # try to add a duplicate seat
+            self.assertEqual(basket.product_quantity(product1), 1)
 
     def test_check_duplicate_seat_attempt__seats(self):
         """ Verify we get a correct response for duplicate seat check (seats) """
         product_type_seat = ProductClass.objects.create(name='Seat')
         product1 = ProductFactory(stockrecords__partner__short_code='test1', product_class=product_type_seat)
         product2 = ProductFactory(stockrecords__partner__short_code='test2', product_class=product_type_seat)
-
         seat_basket = prepare_basket(self.request, [product1])
         result_product1 = check_duplicate_seat_attempt(seat_basket, product1)
         result_product2 = check_duplicate_seat_attempt(seat_basket, product2)
@@ -700,10 +694,10 @@ class BasketUtilsTests(DiscoveryTestMixin, BasketMixin, TestCase):
 
     def test_check_duplicate_seat_attempt__enrollment_code(self):
         """ Verify we get a correct response for duplicate seat check (false for Enrollment code)"""
-        enrollment_code_class = ProductClass.objects.create(name='Enrollment Code')
-        enrollment_code_product = ProductFactory(stockrecords__partner__short_code='test3', product_class=enrollment_code_class)
-        basket_with_enrollment_code = prepare_basket(self.request, [enrollment_code_product])
-        result_product3 = check_duplicate_seat_attempt(basket_with_enrollment_code, enrollment_code_product)
+        enrollment_class = ProductClass.objects.create(name='Enrollment Code')
+        enrollment_product = ProductFactory(stockrecords__partner__short_code='test3', product_class=enrollment_class)
+        basket_with_enrollment_code = prepare_basket(self.request, [enrollment_product])
+        result_product3 = check_duplicate_seat_attempt(basket_with_enrollment_code, enrollment_product)
 
         self.assertFalse(result_product3)
 

@@ -127,7 +127,7 @@ def prepare_basket(request, products, voucher=None):
 
     is_multi_product_basket = len(products) > 1
     for product in products:
-        # Multiple clicks can try adding twice, return if already in basket
+        # Multiple clicks can try adding twice, return if product is seat already in basket
         if check_duplicate_seat_attempt(basket, product):
             logger.info(
                 'User [%s] repeated request to add [%s] seat of course [%s], will ignore',
@@ -521,16 +521,11 @@ def check_duplicate_seat_attempt(basket, product):
     Checks basket for duplicate seat product
 
     Args:
-        basket (Basket): basket object onto which we'll (potentially) add the new product, in prepare_basket
-        product (Product): product to search for in the basket (if it's a seat and it's already there, we don't want dupe)
+        basket (Basket): basket object onto which we'll (potentially) add the new product
+        product (Product): product to search for in the basket
     """
-    # This was added as a workaround for prepare_basket issue: for concurrent calls, basket.flush() only works the first time
-    # Subsequent calls were re-adding the product to the basket, incrementing the quantity, reflected in the total price
 
     product_type = product.get_product_class().name
-    found_product_quantity = basket.product_quantity(product)  
+    found_product_quantity = basket.product_quantity(product)
 
-    if product_type == 'Seat' and found_product_quantity:
-        return True
-    else:
-        return False
+    return bool(product_type == 'Seat' and found_product_quantity)
