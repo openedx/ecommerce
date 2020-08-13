@@ -5,6 +5,7 @@ from decimal import Decimal
 from django.core.exceptions import ValidationError
 from django.core.validators import MinLengthValidator
 from django.db import models
+from django.db.transaction import atomic
 from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
 from django_extensions.db.models import TimeStampedModel
@@ -142,6 +143,23 @@ class SDNFallbackMetadata(models.Model):
         choices=IMPORT_STATES,
         default='New',
     )
+
+    @classmethod
+    @atomic
+    def swap_states(cls):
+        existing_current_imports = SDNFallbackMetadata.objects.filter(import_state='Current')
+        if existing_current_imports.exists():
+            existing_current = existing_current_imports[0]
+            existing_current.import_state = 'Discard'
+            existing_current.full_clean()
+            existing_current.save()
+
+        existing_new_imports = SDNFallbackMetadata.objects.filter(import_state='New')
+        if existing_new_imports.exists():
+            existing_new = existing_new_imports[0]
+            existing_new.import_state = 'Current'
+            existing_new.full_clean()
+            existing_new.save()
 
 
 # noinspection PyUnresolvedReferences

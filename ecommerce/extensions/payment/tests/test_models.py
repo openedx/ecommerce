@@ -123,3 +123,51 @@ class SDNFallbackMetadataTests(TestCase):
         self.assertEqual(actual_metadata.import_timestamp, None)
         self.assertEqual(actual_metadata.import_state, 'New')
 
+    def test_swap_non_existent_rows(self):
+        """The swap function shouldn't break / do anything if there are no existing rows"""
+
+        SDNFallbackMetadata.swap_states()
+        self.assertEqual(len(SDNFallbackMetadata.objects.all()), 0)
+
+    def test_swap_two_existing_rows(self):
+        """Swap the rows if they already exist"""
+        SDNFallbackMetadata.objects.create(
+            file_checksum="A",
+            import_state="New"
+        )
+        SDNFallbackMetadata.objects.create(
+            file_checksum="B",
+            import_state="Current"
+        )
+
+        SDNFallbackMetadata.swap_states()
+
+        existing_a_metadata = SDNFallbackMetadata.objects.filter(file_checksum="A")[0]
+        self.assertEqual(existing_a_metadata.import_state, 'Current')
+        existing_b_metadata = SDNFallbackMetadata.objects.filter(file_checksum="B")[0]
+        self.assertEqual(existing_b_metadata.import_state, 'Discard')
+
+    def test_swap_all_rows_exist(self):
+        """The swap function should break & no changes should be made if there is an existing Discard row"""
+        SDNFallbackMetadata.objects.create(
+            file_checksum="A",
+            import_state="New"
+        )
+        SDNFallbackMetadata.objects.create(
+            file_checksum="B",
+            import_state="Current"
+        )
+        SDNFallbackMetadata.objects.create(
+            file_checksum="C",
+            import_state="Discard"
+        )
+
+        with self.assertRaises(ValidationError):
+            SDNFallbackMetadata.swap_states()
+
+        existing_a_metadata = SDNFallbackMetadata.objects.filter(file_checksum="A")[0]
+        self.assertEqual(existing_a_metadata.import_state, 'New')
+        existing_b_metadata = SDNFallbackMetadata.objects.filter(file_checksum="B")[0]
+        self.assertEqual(existing_b_metadata.import_state, 'Current')
+        existing_c_metadata = SDNFallbackMetadata.objects.filter(file_checksum="C")[0]
+        self.assertEqual(existing_c_metadata.import_state, 'Discard')
