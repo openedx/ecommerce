@@ -53,6 +53,22 @@ class PaypalProcessorConfiguration(SingletonModel):
         verbose_name = "Paypal Processor Configuration"
 
 
+class SDNIndividual(models.Model):
+    """ Record of an individual in the SDN list. """
+    # A space separated list of all lowercased names with punctuation also replaced by spaces.
+    names = models.TextField(null=False, blank=False)
+    # Lowercased addresses combined into one string (space separated).
+    # We will simply check whether the passed in city exists in this field.
+    # There are records that don't have an address, but because city is a required field,
+    # we would not match those records in the API, so we can filter them out and make this field required.
+    addresses = models.TextField(null=False, blank=False)
+    # There are records that don't have an address, but because country is a required field
+    # we would not match those records in the API, so we can filter them out and make this field required.
+    # Countries are extracted from the addresses field and the ids field.
+    countries = models.CharField(max_length=255, choices=COUNTRY_CHOICES, null=False, blank=False)
+    csv_import_id = models.ForeignKey('payment.SDNFallbackMetadata', null=False, blank=False, on_delete=models.SET_NULL)
+
+
 @python_2_unicode_compatible
 class SDNCheckFailure(TimeStampedModel):
     """ Record of SDN check failure. """
