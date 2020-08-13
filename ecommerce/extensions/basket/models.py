@@ -1,11 +1,14 @@
 
 
-from django.db import models
+import logging
+log = logging.getLogger(__name__)
+
+from django.db import models, transaction
 from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
 from edx_django_utils.cache import DEFAULT_REQUEST_CACHE
 from oscar.apps.basket.abstract_models import AbstractBasket
-from oscar.core.loading import get_class
+from oscar.core.loading import get_class, get_model
 
 from ecommerce.extensions.analytics.utils import track_segment_event, translate_basket_line_for_segment
 from ecommerce.extensions.basket.constants import TEMPORARY_BASKET_CACHE_KEY
@@ -67,7 +70,25 @@ class Basket(AbstractBasket):
                 track_segment_event(self.site, self.owner, 'Product Removed', properties)
 
         # Call flush after we fetch all_lines() which is cleared during flush()
-        super(Basket, self).flush()  # pylint: disable=bad-super-call
+        import random
+        this_one = str(random.randint(0, 999999))
+        log.info('id:' + this_one + ' ' + str(self.lines.all()))
+        # super(Basket, self).flush()  # pylint: disable=bad-super-call
+        # BasketLine = get_model('basket', 'Line')
+        # my_id = self.id
+        # with transaction.atomic():
+        #     BasketLine.objects.select_for_update().filter(basket_id=my_id).delete()
+        # lines.all().delete()
+        self.__class__.delete_all_children(self.id)
+        self._lines = None
+        log.info('id:' + this_one + ' ' + str(self.lines.all()))
+    
+    @classmethod
+    def delete_all_children(cls, basket_id):
+        BasketLine = get_model('basket', 'Line')
+        with transaction.atomic():
+            BasketLine.objects.select_for_update().filter(basket_id=basket_id).delete()
+
 
     def add_product(self, product, quantity=1, options=None):
         """
@@ -75,7 +96,15 @@ class Basket(AbstractBasket):
 
         Performs AbstractBasket add_product method and fires Google Analytics 'Product Added' event.
         """
-        line, created = super(Basket, self).add_product(product, quantity, options)  # pylint: disable=bad-super-call
+        import random
+        this_one = str(random.randint(0, 999999))
+        log.info('id:' + this_one + ' lines: ' + str(self.lines.all()))
+        if self.lines.exists():
+            q_emma = 0
+        else:
+            q_emma = 1
+        line, created = super(Basket, self).add_product(product, q_emma, options)  # pylint: disable=bad-super-call
+        log.info('id:' + this_one + ' quantity: ' + str(line.quantity) + ' lines: ' + str(self.lines.all()))
         cached_response = DEFAULT_REQUEST_CACHE.get_cached_response(TEMPORARY_BASKET_CACHE_KEY)
         if cached_response.is_found:
             # Do not track anything. This is a temporary basket calculation.
