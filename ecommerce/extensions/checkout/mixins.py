@@ -101,8 +101,20 @@ class EdxOrderPlacementMixin(OrderPlacementMixin, metaclass=abc.ABCMeta):
         events (using add_payment_event) so they can be
         linked to the order when it is saved later on.
         """
-        handled_processor_response = self.payment_processor.handle_processor_response(response, basket=basket)
-        self.record_payment(basket, handled_processor_response)
+        properties = {'basket_id': basket.id, 'processor_name': self.payment_processor.NAME, }
+        # If payment didn't go through, the handle_processor_response function will raise an error. We want to
+        # send the event regardless of if the payment didn't go through.
+        try:
+            handled_processor_response = self.payment_processor.handle_processor_response(response, basket=basket)
+        except Exception as ex:
+            properties.update({'success': False, 'payment_error': type(ex).__name__, })
+            raise
+        else:
+            # We only record successful payments in the database.
+            self.record_payment(basket, handled_processor_response)
+            properties.update({'total': handled_processor_response.total, 'success': True, })
+        finally:
+            track_segment_event(basket.site, basket.owner, 'Payment Processor Response', properties)
 
     def emit_checkout_step_events(self, basket, handled_processor_response, payment_processor):
         """ Emit events necessary to track the user in the checkout funnel. """
