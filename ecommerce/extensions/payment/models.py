@@ -156,19 +156,21 @@ class SDNFallbackMetadata(models.Model):
         SDN file data to be removed. This is done in a transaction to gurantee that existing files are
         shifted into the correct next states in sync.
         """
-        existing_current_imports = SDNFallbackMetadata.objects.filter(import_state='Current')
-        if existing_current_imports.exists():
-            existing_current = existing_current_imports[0]
+        try:
+            existing_current = SDNFallbackMetadata.objects.get(import_state='Current')
             existing_current.import_state = 'Discard'
             existing_current.full_clean()
             existing_current.save()
+        except SDNFallbackMetadata.DoesNotExist:
+            pass
 
-        existing_new_imports = SDNFallbackMetadata.objects.filter(import_state='New')
-        if existing_new_imports.exists():
-            existing_new = existing_new_imports[0]
+        try:
+            existing_new = SDNFallbackMetadata.objects.get(import_state='New')
             existing_new.import_state = 'Current'
             existing_new.full_clean()
             existing_new.save()
+        except SDNFallbackMetadata.DoesNotExist:
+            pass
 
 
 # noinspection PyUnresolvedReferences
