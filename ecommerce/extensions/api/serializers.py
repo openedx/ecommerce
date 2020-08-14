@@ -479,16 +479,21 @@ class EntitlementProductHelper:
         if not uuid:
             raise Exception(_(u"You need to provide a course UUID to create Course Entitlements."))
 
-        # Extract arguments required for Seat creation, deserializing as necessary.
+        # Extract arguments required for Entitlement creation, deserializing as necessary.
         certificate_type = attrs.get('certificate_type')
         price = Decimal(product['price'])
+
+        # DISCO-1540 Temporarily force a default of id_verified=True for Professional entitlements
+        id_verified_default = certificate_type == 'professional'
+        id_verification_required = attrs.get('id_verification_required', id_verified_default)
 
         entitlement = create_or_update_course_entitlement(
             certificate_type,
             price,
             partner,
             uuid,
-            course.name
+            course.name,
+            id_verification_required=id_verification_required
         )
 
         # As a convenience to our caller, provide the SKU in the returned product serialization.
