@@ -25,7 +25,7 @@ from ecommerce.extensions.basket.utils import (
     add_utm_params_to_url,
     apply_voucher_on_basket_and_check_discount,
     attribute_cookie_data,
-    check_duplicate_seat_attempt,
+    is_duplicate_seat_attempt,
     get_basket_switch_data,
     get_payment_microfrontend_url_if_configured,
     prepare_basket
@@ -680,24 +680,24 @@ class BasketUtilsTests(DiscoveryTestMixin, BasketMixin, TestCase):
             basket = prepare_basket(self.request, [product1])  # try to add a duplicate seat
             self.assertEqual(basket.product_quantity(product1), 1)
 
-    def test_check_duplicate_seat_attempt__seats(self):
+    def test_is_duplicate_seat_attempt__seats(self):
         """ Verify we get a correct response for duplicate seat check (seats) """
         product_type_seat = ProductClass.objects.create(name='Seat')
         product1 = ProductFactory(stockrecords__partner__short_code='test1', product_class=product_type_seat)
         product2 = ProductFactory(stockrecords__partner__short_code='test2', product_class=product_type_seat)
         seat_basket = prepare_basket(self.request, [product1])
-        result_product1 = check_duplicate_seat_attempt(seat_basket, product1)
-        result_product2 = check_duplicate_seat_attempt(seat_basket, product2)
+        result_product1 = is_duplicate_seat_attempt(seat_basket, product1)
+        result_product2 = is_duplicate_seat_attempt(seat_basket, product2)
 
         self.assertTrue(result_product1)
         self.assertFalse(result_product2)
 
-    def test_check_duplicate_seat_attempt__enrollment_code(self):
+    def test_is_duplicate_seat_attempt__enrollment_code(self):
         """ Verify we get a correct response for duplicate seat check (false for Enrollment code)"""
         enrollment_class = ProductClass.objects.create(name='Enrollment Code')
         enrollment_product = ProductFactory(stockrecords__partner__short_code='test3', product_class=enrollment_class)
         basket_with_enrollment_code = prepare_basket(self.request, [enrollment_product])
-        result_product3 = check_duplicate_seat_attempt(basket_with_enrollment_code, enrollment_product)
+        result_product3 = is_duplicate_seat_attempt(basket_with_enrollment_code, enrollment_product)
 
         self.assertFalse(result_product3)
 

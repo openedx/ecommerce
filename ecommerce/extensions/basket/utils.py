@@ -128,7 +128,7 @@ def prepare_basket(request, products, voucher=None):
     is_multi_product_basket = len(products) > 1
     for product in products:
         # Multiple clicks can try adding twice, return if product is seat already in basket
-        if check_duplicate_seat_attempt(basket, product):
+        if is_duplicate_seat_attempt(basket, product):
             logger.info(
                 'User [%s] repeated request to add [%s] seat of course [%s], will ignore',
                 request.user.username,
@@ -516,7 +516,7 @@ def apply_voucher_on_basket_and_check_discount(voucher, request, basket):
     return False, msg
 
 
-def check_duplicate_seat_attempt(basket, product):
+def is_duplicate_seat_attempt(basket, product):
     """
     Checks basket for duplicate seat product
 
