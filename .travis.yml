@@ -4,6 +4,7 @@ dist: latest
 branches:
   only:
     - master
+    - mulby/flex-microform-spike
 
 sudo: required
 services:
