@@ -579,6 +579,12 @@ CELERYD_HIJACK_ROOT_LOGGER = False
 # Execute tasks locally (synchronously) instead of sending them to the queue.
 # See http://celery.readthedocs.io/en/latest/userguide/configuration.html#task-always-eager.
 CELERY_ALWAYS_EAGER = False
+
+# Specify allowed serializers that are consistent with Celery 3 defaults
+CELERY_TASK_SERIALIZER = 'pickle'
+CELERY_RESULT_SERIALIZER = 'pickle'
+CELERY_EVENT_SERIALIZER = 'json'
+CELERY_ACCEPT_CONTENT = ['json', 'pickle', 'yaml']
 # END CELERY
 
 
