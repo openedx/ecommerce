@@ -105,12 +105,13 @@ class SDNFallbackMetadataTests(TestCase):
     def setUp(self):
         super(SDNFallbackMetadataTests, self).setUp()
         self.file_checksum = 'foobar'
-        self.import_timestamp = datetime.now() + timedelta(days=1)
+        self.download_timestamp = datetime.now() - timedelta(days=1)
 
     def test_minimum_requirements(self):
         """Make sure the row is created correctly with the minimum dataset + defaults."""
         new_metadata = SDNFallbackMetadata(
             file_checksum=self.file_checksum,
+            download_timestamp=self.download_timestamp,
         )
         new_metadata.full_clean()
         new_metadata.save()
@@ -122,52 +123,115 @@ class SDNFallbackMetadataTests(TestCase):
         self.assertIsInstance(actual_metadata.download_timestamp, datetime)
         self.assertEqual(actual_metadata.import_timestamp, None)
         self.assertEqual(actual_metadata.import_state, 'New')
+        self.assertIsInstance(actual_metadata.created, datetime)
+        self.assertIsInstance(actual_metadata.modified, datetime)
 
-    def test_swap_non_existent_rows(self):
-        """The swap function shouldn't break / do anything if there are no existing rows"""
-
-        SDNFallbackMetadata.swap_states()
-        self.assertEqual(len(SDNFallbackMetadata.objects.all()), 0)
-
-    def test_swap_two_existing_rows(self):
-        """Swap the rows if they already exist"""
+    def test_swap_new_row(self):
+        """Swap New row to Current row."""
         SDNFallbackMetadata.objects.create(
             file_checksum="A",
-            import_state="New"
+            import_state="New",
+            download_timestamp=self.download_timestamp,
+        )
+
+        SDNFallbackMetadata.swap_all_states()
+
+        actual_rows = SDNFallbackMetadata.objects.all()
+        self.assertEqual(len(actual_rows), 1)
+        self.assertEqual(actual_rows[0].import_state, 'Current')
+
+    def test_swap_current_row(self):
+        """Swap Current row to Discard row."""
+        SDNFallbackMetadata.objects.create(
+            file_checksum="A",
+            import_state="Current",
+            download_timestamp=self.download_timestamp,
+        )
+
+        SDNFallbackMetadata.swap_all_states()
+
+        actual_rows = SDNFallbackMetadata.objects.all()
+        self.assertEqual(len(actual_rows), 1)
+        self.assertEqual(actual_rows[0].import_state, 'Discard')
+
+    def test_swap_discard_row(self):
+        """Discard row gets deleted when swapping rows."""
+        SDNFallbackMetadata.objects.create(
+            file_checksum="A",
+            import_state="Discard",
+            download_timestamp=self.download_timestamp,
+        )
+
+        SDNFallbackMetadata.swap_all_states()
+
+        actual_rows = SDNFallbackMetadata.objects.all()
+        self.assertEqual(len(actual_rows), 0)
+
+    def test_swap_all_non_existent_rows(self):
+        """Swapping all shouldn't break / do anything if there are no existing rows."""
+
+        SDNFallbackMetadata.swap_all_states()
+        self.assertEqual(len(SDNFallbackMetadata.objects.all()), 0)
+
+    def test_swap_all_to_use_new_metadata_row(self):
+        """
+        Test what happens when we want to set the 'New' row to the 'Current' row in a
+        normal scenario (e.g. when rows exist in all three import_states).
+        """
+        SDNFallbackMetadata.objects.create(
+            file_checksum="A",
+            import_state="New",
+            download_timestamp=self.download_timestamp,
         )
         SDNFallbackMetadata.objects.create(
             file_checksum="B",
-            import_state="Current"
+            import_state="Current",
+            download_timestamp=self.download_timestamp,
+        )
+        SDNFallbackMetadata.objects.create(
+            file_checksum="C",
+            import_state="Discard",
+            download_timestamp=self.download_timestamp,
         )
 
-        SDNFallbackMetadata.swap_states()
+        SDNFallbackMetadata.swap_all_states()
 
+        self.assertEqual(len(SDNFallbackMetadata.objects.all()), 2)
         existing_a_metadata = SDNFallbackMetadata.objects.filter(file_checksum="A")[0]
         self.assertEqual(existing_a_metadata.import_state, 'Current')
         existing_b_metadata = SDNFallbackMetadata.objects.filter(file_checksum="B")[0]
         self.assertEqual(existing_b_metadata.import_state, 'Discard')
+        existing_c_metadata = SDNFallbackMetadata.objects.filter(file_checksum="C")
+        self.assertEqual(len(existing_c_metadata), 0)
 
-    def test_swap_all_rows_exist(self):
-        """The swap function should break & no changes should be made if there is an existing Discard row"""
+    def test_swap_all_rollback(self):
+        """
+        Make sure that the rollback works if there are issues in when swapping all of the rows.
+        """
         SDNFallbackMetadata.objects.create(
             file_checksum="A",
-            import_state="New"
+            import_state="Current",
+            download_timestamp=self.download_timestamp,
         )
         SDNFallbackMetadata.objects.create(
             file_checksum="B",
-            import_state="Current"
+            import_state="Discard",
+            download_timestamp=self.download_timestamp,
         )
+        # manual changes in the DB leads to bad things
         SDNFallbackMetadata.objects.create(
             file_checksum="C",
-            import_state="Discard"
+            import_state="discard",
+            download_timestamp=self.download_timestamp,
         )
 
-        with self.assertRaises(ValidationError):
-            SDNFallbackMetadata.swap_states()
+        with self.assertRaises(SDNFallbackMetadata.DoesNotExist):
+            SDNFallbackMetadata.swap_all_states()
 
+        self.assertEqual(len(SDNFallbackMetadata.objects.all()), 3)
         existing_a_metadata = SDNFallbackMetadata.objects.filter(file_checksum="A")[0]
-        self.assertEqual(existing_a_metadata.import_state, 'New')
+        self.assertEqual(existing_a_metadata.import_state, 'Current')
         existing_b_metadata = SDNFallbackMetadata.objects.filter(file_checksum="B")[0]
-        self.assertEqual(existing_b_metadata.import_state, 'Current')
+        self.assertEqual(existing_b_metadata.import_state, 'Discard')
         existing_c_metadata = SDNFallbackMetadata.objects.filter(file_checksum="C")[0]
-        self.assertEqual(existing_c_metadata.import_state, 'Discard')
+        self.assertEqual(existing_c_metadata.import_state, 'discard')
