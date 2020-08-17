@@ -127,6 +127,16 @@ def prepare_basket(request, products, voucher=None):
 
     is_multi_product_basket = len(products) > 1
     for product in products:
+        # Multiple clicks can try adding twice, return if product is seat already in basket
+        if is_duplicate_seat_attempt(basket, product):
+            logger.info(
+                'User [%s] repeated request to add [%s] seat of course [%s], will ignore',
+                request.user.username,
+                mode_for_product(product),
+                product.course_id
+            )
+            return basket
+
         if product.is_enrollment_code_product or \
                 not UserAlreadyPlacedOrder.user_already_placed_order(user=request.user,
                                                                      product=product, site=request.site):
@@ -504,3 +514,18 @@ def apply_voucher_on_basket_and_check_discount(voucher, request, basket):
     logger.info('Coupon Code [%s] is not valid for basket [%s]', voucher.code, basket.id)
     basket.clear_vouchers()
     return False, msg
+
+
+def is_duplicate_seat_attempt(basket, product):
+    """
+    Checks basket for duplicate seat product
+
+    Args:
+        basket (Basket): basket object onto which we'll (potentially) add the new product
+        product (Product): product to search for in the basket
+    """
+
+    product_type = product.get_product_class().name
+    found_product_quantity = basket.product_quantity(product)
+
+    return bool(product_type == 'Seat' and found_product_quantity)
