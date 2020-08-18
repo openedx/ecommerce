@@ -7,4 +7,4 @@ newrelic<5
 python-memcached==1.58
 PyYAML
 nodeenv==1.1.1
-redis==2.10.6
+redis
