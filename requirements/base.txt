@@ -75,7 +75,7 @@ markdown==2.6.9           # via -r requirements/base.in
 markupsafe==1.1.1         # via jinja2
 mysqlclient==1.4.6        # via -r requirements/base.in
 ndg-httpsclient==0.5.1    # via -r requirements/base.in
-newrelic==5.16.0.145      # via -r requirements/base.in, edx-django-utils
+newrelic==5.16.1.146      # via -r requirements/base.in, edx-django-utils
 oauthlib==3.1.0           # via requests-oauthlib, social-auth-core
 openapi-codec==1.3.2      # via django-rest-swagger
 packaging==20.4           # via bleach
