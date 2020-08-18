@@ -16,6 +16,8 @@ from solo.models import SingletonModel
 
 from ecommerce.extensions.payment.constants import CARD_TYPE_CHOICES
 
+logger = logging.getLogger(__name__)
+
 
 class PaymentProcessorResponse(models.Model):
     """ Auditing model used to save all responses received from payment processors. """
@@ -131,8 +133,6 @@ class SDNFallbackMetadata(TimeStampedModel):
     and JIRA ticket REV-1278. This table is used to track the state of the SDN csv file data that are currently
     being used or about to be updated/deprecated. This table does not keep track of the SDN files over time.
     """
-    logger = logging.getLogger("SDNFallbackMetadataLogger")
-
     file_checksum = models.CharField(max_length=255, validators=[MinLengthValidator(1)])
     download_timestamp = models.DateTimeField()
     import_timestamp = models.DateTimeField(null=True, blank=True)
@@ -168,12 +168,19 @@ class SDNFallbackMetadata(TimeStampedModel):
         SDNFallbackMetadata._swap_state('Discard')
         SDNFallbackMetadata._swap_state('Current')
         SDNFallbackMetadata._swap_state('New')
-        if len(SDNFallbackMetadata.objects.all()) > 1:
+
+        # After the above swaps happen:
+        # If there are 0 rows in the table, there cannot be a row in the 'Current' status.
+        # If there is 1 row in the table, it is expected to be in the 'Current' status
+        # (e.g. when the first file is added + just swapped).
+        # If there are 2 rows in the table, after the swaps, we expect to have one row in
+        # the 'Current' status and one row in the 'Discard' status.
+        if len(SDNFallbackMetadata.objects.all()) >= 1:
             try:
                 SDNFallbackMetadata.objects.get(import_state='Current')
             except SDNFallbackMetadata.DoesNotExist:
-                SDNFallbackMetadata.logger.info(
-                    "Expected a row in the 'Current' import_state after swapping, but there are none",
+                logger.warning(
+                    "Expected a row in the 'Current' import_state after swapping, but there are none.",
                 )
                 raise
 
@@ -196,7 +203,7 @@ class SDNFallbackMetadata(TimeStampedModel):
                 existing_metadata.full_clean()
                 existing_metadata.save()
         except SDNFallbackMetadata.DoesNotExist:
-            SDNFallbackMetadata.logger.info(
+            logger.info(
                 "Cannot update import_state of %s row if there is no row in this state.",
                 import_state
             )
