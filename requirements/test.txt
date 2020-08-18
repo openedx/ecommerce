@@ -4,21 +4,20 @@
 #
 #    make upgrade
 #
-amqp==1.4.9               # via -r requirements/base.txt, kombu
+amqp==2.6.1               # via -r requirements/base.txt, kombu
 analytics-python==1.2.9   # via -r requirements/base.txt
-anyjson==0.3.3            # via -r requirements/base.txt, kombu
 appdirs==1.4.4            # via -r requirements/base.txt, zeep
 astroid==2.3.3            # via pylint
 attrs==19.3.0             # via -r requirements/base.txt, -r requirements/e2e.txt, pytest, zeep
 babel==2.8.0              # via -r requirements/base.txt, django-oscar, django-phonenumber-field
 beautifulsoup4==4.9.1     # via webtest
-billiard==3.3.0.23        # via -r requirements/base.txt, celery
+billiard==3.6.3.0         # via -r requirements/base.txt, celery
 bleach==3.1.5             # via -r requirements/base.txt
 bok-choy==1.1.1           # via -r requirements/test.in
 cached-property==1.5.1    # via -r requirements/base.txt, zeep
-celery==3.1.26.post2      # via -r requirements/base.txt, edx-ecommerce-worker
+celery==4.4.7             # via -r requirements/base.txt, edx-ecommerce-worker
 certifi==2020.6.20        # via -r requirements/base.txt, -r requirements/e2e.txt, requests
-cffi==1.14.1              # via -r requirements/base.txt, cryptography
+cffi==1.14.2              # via -r requirements/base.txt, cryptography
 chardet==3.0.4            # via -r requirements/base.txt, -r requirements/e2e.txt, requests
 coreapi==2.3.3            # via -r requirements/base.txt, django-rest-swagger, openapi-codec
 coreschema==0.0.4         # via -r requirements/base.txt, coreapi
@@ -56,25 +55,25 @@ djangorestframework-csv==2.1.0  # via -r requirements/base.txt
 djangorestframework-datatables==0.5.2  # via -r requirements/base.txt
 djangorestframework==3.11.1  # via -r requirements/base.txt, django-config-models, django-rest-swagger, djangorestframework-csv, djangorestframework-datatables, drf-extensions, drf-jwt, edx-drf-extensions, rest-condition
 drf-extensions==0.6.0     # via -r requirements/base.txt
-drf-jwt==1.16.2           # via -r requirements/base.txt, edx-drf-extensions
+drf-jwt==1.17.0           # via -r requirements/base.txt, edx-drf-extensions
 edx-auth-backends==3.1.0  # via -r requirements/base.txt
 edx-django-release-util==0.4.4  # via -r requirements/base.txt
 edx-django-sites-extensions==2.5.1  # via -r requirements/base.txt
 edx-django-utils==3.7.3   # via -r requirements/base.txt, django-config-models, edx-drf-extensions
 edx-drf-extensions==6.1.1  # via -r requirements/base.txt, edx-rbac
-edx-ecommerce-worker==0.7.5  # via -r requirements/base.txt
+edx-ecommerce-worker==0.8.1  # via -r requirements/base.txt
 edx-i18n-tools==0.5.3     # via -r requirements/test.in
 edx-opaque-keys==2.1.1    # via -r requirements/base.txt, edx-drf-extensions
 edx-rbac==1.3.2           # via -r requirements/base.txt
 edx-rest-api-client==1.9.2  # via -c requirements/pins.txt, -r requirements/base.txt, -r requirements/e2e.txt, edx-ecommerce-worker
 factory-boy==2.12.0       # via -r requirements/base.txt, -r requirements/test.in, django-oscar
-faker==4.1.1              # via -r requirements/base.txt, factory-boy
+faker==4.1.2              # via -r requirements/base.txt, factory-boy
 filelock==3.0.12          # via -r requirements/tox.txt, tox
 freezegun==0.3.15         # via -r requirements/test.in
 future==0.18.2            # via -r requirements/base.txt, pyjwkest
 httpretty==0.9.7          # via -c requirements/pins.txt, -r requirements/test.in
 idna==2.10                # via -r requirements/base.txt, -r requirements/e2e.txt, requests
-importlib-metadata==1.7.0  # via -r requirements/e2e.txt, -r requirements/tox.txt, inflect, pluggy, pytest, pytest-randomly, tox
+importlib-metadata==1.7.0  # via -r requirements/base.txt, -r requirements/e2e.txt, -r requirements/tox.txt, inflect, kombu, pluggy, pytest, pytest-randomly, tox
 inflect==3.0.2            # via jinja2-pluralize
 isodate==0.6.0            # via -r requirements/base.txt, zeep
 isort==4.3.21             # via -r requirements/test.in, pylint
@@ -82,7 +81,7 @@ itypes==1.2.0             # via -r requirements/base.txt, coreapi
 jinja2-pluralize==0.3.0   # via diff-cover
 jinja2==2.11.2            # via -r requirements/base.txt, coreschema, diff-cover, jinja2-pluralize
 jsonfield2==3.0.3         # via -c requirements/pins.txt, -r requirements/base.txt
-kombu==3.0.37             # via -r requirements/base.txt, celery
+kombu==4.6.11             # via -r requirements/base.txt, celery
 lazy-object-proxy==1.4.3  # via astroid
 lazy==1.4                 # via bok-choy
 libsass==0.9.2            # via -r requirements/base.txt, django-libsass
@@ -95,7 +94,7 @@ mock==3.0.5               # via -r requirements/test.in, mock-django
 more-itertools==8.4.0     # via -r requirements/e2e.txt, pytest
 mysqlclient==1.4.6        # via -r requirements/base.txt
 ndg-httpsclient==0.5.1    # via -r requirements/base.txt
-newrelic==5.16.0.145      # via -r requirements/base.txt, edx-django-utils
+newrelic==5.16.1.146      # via -r requirements/base.txt, edx-django-utils
 oauthlib==3.1.0           # via -r requirements/base.txt, requests-oauthlib, social-auth-core
 openapi-codec==1.3.2      # via -r requirements/base.txt, django-rest-swagger
 packaging==20.4           # via -r requirements/base.txt, -r requirements/e2e.txt, -r requirements/tox.txt, bleach, pytest, tox
@@ -103,7 +102,7 @@ path.py==7.2              # via -r requirements/base.txt, edx-i18n-tools
 pathlib2==2.3.5           # via -r requirements/e2e.txt, pytest
 paypalrestsdk==1.13.1     # via -r requirements/base.txt
 pbr==5.4.5                # via -r requirements/base.txt, stevedore
-phonenumbers==8.12.7      # via -r requirements/base.txt, django-oscar, django-phonenumber-field
+phonenumbers==8.12.8      # via -r requirements/base.txt, django-oscar, django-phonenumber-field
 pillow==7.2.0             # via -r requirements/base.txt, django-oscar
 pluggy==0.13.1            # via -r requirements/e2e.txt, -r requirements/tox.txt, diff-cover, pytest, tox
 polib==1.1.0              # via edx-i18n-tools
@@ -124,7 +123,7 @@ pymongo==3.11.0           # via -r requirements/base.txt, edx-opaque-keys
 pyopenssl==19.1.0         # via -r requirements/base.txt, ndg-httpsclient, paypalrestsdk
 pyparsing==2.4.7          # via -r requirements/base.txt, -r requirements/e2e.txt, -r requirements/tox.txt, packaging
 pytest-base-url==1.4.2    # via -r requirements/e2e.txt, pytest-selenium
-pytest-cov==2.10.0        # via -r requirements/test.in
+pytest-cov==2.10.1        # via -r requirements/test.in
 pytest-django-ordering==1.2.0  # via -r requirements/test.in
 pytest-django==3.9.0      # via -r requirements/test.in, pytest-django-ordering
 pytest-html==1.22.1       # via -r requirements/e2e.txt, pytest-selenium
@@ -141,6 +140,7 @@ python3-openid==3.2.0     # via -r requirements/base.txt, social-auth-core
 pytz==2016.10             # via -c requirements/pins.txt, -r requirements/base.txt, babel, celery, django, zeep
 pyyaml==5.3.1             # via -r requirements/base.txt, edx-django-release-util, edx-i18n-tools
 rcssmin==1.0.6            # via -r requirements/base.txt, django-compressor
+redis==3.5.3              # via -r requirements/base.txt, edx-ecommerce-worker
 requests-oauthlib==1.3.0  # via -r requirements/base.txt, social-auth-core
 requests-toolbelt==0.9.1  # via -r requirements/base.txt, zeep
 requests==2.24.0          # via -r requirements/base.txt, -r requirements/e2e.txt, analytics-python, coreapi, edx-drf-extensions, edx-rest-api-client, paypalrestsdk, pyjwkest, pytest-base-url, pytest-selenium, requests-oauthlib, requests-toolbelt, responses, sailthru-client, slumber, social-auth-core, stripe, zeep
@@ -148,7 +148,7 @@ responses==0.10.16        # via -r requirements/test.in
 rest-condition==1.0.3     # via -r requirements/base.txt, edx-drf-extensions
 rjsmin==1.1.0             # via -r requirements/base.txt, django-compressor
 rules==2.2                # via -r requirements/base.txt
-sailthru-client==2.2.3    # via -r requirements/base.txt
+sailthru-client==2.2.3    # via -r requirements/base.txt, edx-ecommerce-worker
 selenium==3.141.0         # via -r requirements/e2e.txt, -r requirements/test.in, bok-choy, pytest-selenium
 semantic-version==2.8.5   # via -r requirements/base.txt, edx-drf-extensions
 simplejson==3.17.2        # via -r requirements/base.txt, django-rest-swagger, sailthru-client
@@ -170,6 +170,7 @@ typed-ast==1.4.1          # via astroid
 unicodecsv==0.14.1        # via -r requirements/base.txt, djangorestframework-csv
 uritemplate==3.0.1        # via -r requirements/base.txt, coreapi
 urllib3==1.25.10          # via -c requirements/pins.txt, -r requirements/base.txt, -r requirements/e2e.txt, requests, responses, selenium
+vine==1.3.0               # via -r requirements/base.txt, amqp, celery
 virtualenv==16.7.9        # via -c requirements/pins.txt, -r requirements/tox.txt, tox
 waitress==1.4.4           # via webtest
 wcwidth==0.2.5            # via -r requirements/e2e.txt, pytest
@@ -179,4 +180,4 @@ webtest==2.0.35           # via django-webtest
 wrapt==1.11.2             # via astroid
 xss-utils==0.1.3          # via -r requirements/base.txt
 zeep==3.4.0               # via -r requirements/base.txt
-zipp==1.2.0               # via -r requirements/e2e.txt, -r requirements/tox.txt, importlib-metadata
+zipp==1.2.0               # via -r requirements/base.txt, -r requirements/e2e.txt, -r requirements/tox.txt, importlib-metadata
