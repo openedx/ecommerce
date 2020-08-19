@@ -1,9 +1,12 @@
 
 
+import logging
 from decimal import Decimal
 
 from django.core.exceptions import ValidationError
+from django.core.validators import MinLengthValidator
 from django.db import models
+from django.db.transaction import atomic
 from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
 from django_extensions.db.models import TimeStampedModel
@@ -12,6 +15,8 @@ from oscar.apps.payment.abstract_models import AbstractSource
 from solo.models import SingletonModel
 
 from ecommerce.extensions.payment.constants import CARD_TYPE_CHOICES
+
+logger = logging.getLogger(__name__)
 
 
 class PaymentProcessorResponse(models.Model):
@@ -120,6 +125,88 @@ class EnterpriseContractMetadata(TimeStampedModel):
             raise ValidationError(_(
                 "Percentage greater than 100 not allowed."
             ))
+
+
+class SDNFallbackMetadata(TimeStampedModel):
+    """
+    Record metadata about the SDN fallback CSV file download, as detailed in docs/decisions/0007-sdn-fallback.rst
+    and JIRA ticket REV-1278. This table is used to track the state of the SDN csv file data that are currently
+    being used or about to be updated/deprecated. This table does not keep track of the SDN files over time.
+    """
+    file_checksum = models.CharField(max_length=255, validators=[MinLengthValidator(1)])
+    download_timestamp = models.DateTimeField()
+    import_timestamp = models.DateTimeField(null=True, blank=True)
+
+    IMPORT_STATES = [
+        ('New', 'New'),
+        ('Current', 'Current'),
+        ('Discard', 'Discard'),
+    ]
+
+    import_state = models.CharField(
+        max_length=255,
+        validators=[MinLengthValidator(1)],
+        unique=True,
+        choices=IMPORT_STATES,
+        default='New',
+    )
+
+    @classmethod
+    @atomic
+    def swap_all_states(cls):
+        """
+        Shifts all of the existing metadata table rows to the next import_state
+        in the row's lifecycle (see _swap_state).
+
+        This method is done in a transaction to gurantee that existing metadata rows are
+        shifted into their next states in sync and tries to ensure that there is always a row
+        in the 'Current' state. Rollbacks of all row's import_state changes will happen if:
+        1) There are multiple rows & none of them are 'Current', or
+        2) There are any issues with the existing rows + updating them (e.g. a row with a
+        duplicate import_state is manually inserted into the table during the transaction)
+        """
+        SDNFallbackMetadata._swap_state('Discard')
+        SDNFallbackMetadata._swap_state('Current')
+        SDNFallbackMetadata._swap_state('New')
+
+        # After the above swaps happen:
+        # If there are 0 rows in the table, there cannot be a row in the 'Current' status.
+        # If there is 1 row in the table, it is expected to be in the 'Current' status
+        # (e.g. when the first file is added + just swapped).
+        # If there are 2 rows in the table, after the swaps, we expect to have one row in
+        # the 'Current' status and one row in the 'Discard' status.
+        if len(SDNFallbackMetadata.objects.all()) >= 1:
+            try:
+                SDNFallbackMetadata.objects.get(import_state='Current')
+            except SDNFallbackMetadata.DoesNotExist:
+                logger.warning(
+                    "Expected a row in the 'Current' import_state after swapping, but there are none.",
+                )
+                raise
+
+    @classmethod
+    def _swap_state(cls, import_state):
+        """
+        Update the row in the given import_state parameter to the next import_state.
+        Rows in this table should progress from New -> Current -> Discard -> (row deleted).
+        There can be at most one row in each import_state at a given time.
+        """
+        try:
+            existing_metadata = SDNFallbackMetadata.objects.get(import_state=import_state)
+            if import_state == 'Discard':
+                existing_metadata.delete()
+            else:
+                if import_state == 'New':
+                    existing_metadata.import_state = 'Current'
+                elif import_state == 'Current':
+                    existing_metadata.import_state = 'Discard'
+                existing_metadata.full_clean()
+                existing_metadata.save()
+        except SDNFallbackMetadata.DoesNotExist:
+            logger.info(
+                "Cannot update import_state of %s row if there is no row in this state.",
+                import_state
+            )
 
 
 # noinspection PyUnresolvedReferences
