@@ -162,7 +162,6 @@ def track_segment_event(site, user, event, properties):
     path = '/'
     parts = ("https", hostname, path, "", "")
     page = urlunsplit(parts)
-
     context = {
         'ip': lms_ip,
         'Google Analytics': {
@@ -172,9 +171,19 @@ def track_segment_event(site, user, event, properties):
             'url': page,
         }
     }
-    return transaction.on_commit(
-        lambda: site.siteconfiguration.segment_client.track(user_tracking_id, event, properties,
-                                                            context=context))
+
+    # Temporarily breaking out to add try/except for REV-1312 investigation in Stage
+    def oncommit_temp(user_tracking_id, event, properties,context=context):
+        try:
+            site.siteconfiguration.segment_client.track(user_tracking_id, event, properties, context=context)
+            return True
+        except:
+            logger.info("Exception occurred trying to log segment event for properties: #%s ", properties)
+        return False
+
+    logger.info("JUST ABOUT TO RETURN")
+    return transaction.on_commit(lambda: oncommit_temp(user_tracking_id, event, properties, context=context))
+
 
 
 def translate_basket_line_for_segment(line):
