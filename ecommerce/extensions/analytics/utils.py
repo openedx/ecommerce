@@ -183,7 +183,8 @@ def track_segment_event(site, user, event, properties):
         return False
 
     logger.info("JUST ABOUT TO RETURN")
-    return transaction.on_commit(lambda: oncommit_temp(user_tracking_id, event, properties, context=context))
+    return transaction.on_commit(
+        lambda: oncommit_temp(user_tracking_id, event, properties, context=context))
 
 
 
