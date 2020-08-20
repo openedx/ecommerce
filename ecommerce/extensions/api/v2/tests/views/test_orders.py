@@ -448,10 +448,11 @@ class ManualCourseEnrollmentOrderViewSetTests(TestCase, DiscoveryMockMixin):
         post_data = {"enrollments": [{}]}
         _, response_data = self.post_order(post_data, self.user)
 
+        error_detail = "Missing required enrollment data: 'lms_user_id', 'username', 'email', 'course_run_key', 'mode'"
         self.assertEqual(response_data, {
             "orders": [{
                 "status": "failure",
-                "detail": "Missing required enrollment data: 'lms_user_id', 'username', 'email', 'course_run_key'",
+                "detail": error_detail,
                 "new_order_created": None
             }]
         })
@@ -493,6 +494,7 @@ class ManualCourseEnrollmentOrderViewSetTests(TestCase, DiscoveryMockMixin):
                     "username": "ma",
                     "email": "ma@example.com",
                     "course_run_key": self.course.id,
+                    "mode": "verified",
                     "discount_percentage": 50.0,
                     "sales_force_id": "dummy-sales_force_id",
                 },
@@ -503,6 +505,7 @@ class ManualCourseEnrollmentOrderViewSetTests(TestCase, DiscoveryMockMixin):
                     "discount_percentage": 0.0,
                     "sales_force_id": "",
                     "course_run_key": self.course.id,
+                    "mode": "verified",
                     "enterprise_customer_name": "an-enterprise-customer",
                     "enterprise_customer_uuid": "394a5ce5-6ff4-4b2b-bea1-a273c6920ae1",
                 },
@@ -511,6 +514,7 @@ class ManualCourseEnrollmentOrderViewSetTests(TestCase, DiscoveryMockMixin):
                     "username": "ma3",
                     "email": "ma3@example.com",
                     "course_run_key": self.course.id,
+                    "mode": "verified",
                     "discount_percentage": 100.0,
                     "sales_force_id": None,
                     "enterprise_customer_name": "an-enterprise-customer",
@@ -521,6 +525,7 @@ class ManualCourseEnrollmentOrderViewSetTests(TestCase, DiscoveryMockMixin):
                     "username": "ma4",
                     "email": "ma4@example.com",
                     "course_run_key": self.course.id,
+                    "mode": "verified",
                     "discount_percentage": 100.0,
                     "enterprise_customer_name": "another-enterprise-customer",
                     "enterprise_customer_uuid": "394a5ce5-6ff4-4b2b-bea1-a273c6920ae2",
@@ -531,6 +536,7 @@ class ManualCourseEnrollmentOrderViewSetTests(TestCase, DiscoveryMockMixin):
                     "username": "ma5",
                     "email": "ma5@example.com",
                     "course_run_key": self.course.id,
+                    "mode": "verified",
                     "discount_percentage": 100.0,
                     "enterprise_customer_name": "another-enterprise-customer_with_new_name",
                     "enterprise_customer_uuid": "394a5ce5-6ff4-4b2b-bea1-a273c6920ae2",
@@ -541,6 +547,7 @@ class ManualCourseEnrollmentOrderViewSetTests(TestCase, DiscoveryMockMixin):
                     "username": "ma6",
                     "email": "ma6@example.com",
                     "course_run_key": self.course.id,
+                    "mode": "verified",
                     "enterprise_customer_name": "another-enterprise-customer_with_new_name",
                     "enterprise_customer_uuid": "394a5ce5-6ff4-4b2b-bea1-a273c6920ae2",
                 }
@@ -645,6 +652,7 @@ class ManualCourseEnrollmentOrderViewSetTests(TestCase, DiscoveryMockMixin):
                     "email": "ma`@example.com",
                     "date_placed": time_at_initial_price,
                     "course_run_key": self.course.id,
+                    "mode": "verified",
                     "enterprise_customer_name": "an-enterprise-customer",
                     "enterprise_customer_uuid": "394a5ce5-6ff4-4b2b-bea1-a273c6920ae1",
                 },
@@ -654,6 +662,7 @@ class ManualCourseEnrollmentOrderViewSetTests(TestCase, DiscoveryMockMixin):
                     "email": "ma2@example.com",
                     "date_placed": time_at_price_2,
                     "course_run_key": self.course.id,
+                    "mode": "verified",
                     "enterprise_customer_name": "an-enterprise-customer",
                     "enterprise_customer_uuid": "394a5ce5-6ff4-4b2b-bea1-a273c6920ae1",
                 },
@@ -663,6 +672,7 @@ class ManualCourseEnrollmentOrderViewSetTests(TestCase, DiscoveryMockMixin):
                     "email": "ma3@example.com",
                     "date_placed": time_at_final_price,
                     "course_run_key": self.course.id,
+                    "mode": "verified",
                     "enterprise_customer_name": "an-enterprise-customer",
                     "enterprise_customer_uuid": "394a5ce5-6ff4-4b2b-bea1-a273c6920ae1",
                 },
@@ -718,6 +728,7 @@ class ManualCourseEnrollmentOrderViewSetTests(TestCase, DiscoveryMockMixin):
                     "username": self.user.username,
                     "email": self.user.email,
                     "course_run_key": self.course.id,
+                    "mode": "verified",
                     "enterprise_customer_name": "an-enterprise-customer",
                     "enterprise_customer_uuid": "394a5ce5-6ff4-4b2b-bea1-a273c6920ae1",
                 },
@@ -727,6 +738,7 @@ class ManualCourseEnrollmentOrderViewSetTests(TestCase, DiscoveryMockMixin):
                     "username": "ma2",
                     "email": "ma2@example.com",
                     "course_run_key": self.course.id,
+                    "mode": "verified",
                     "enterprise_customer_name": "an-enterprise-customer",
                     "enterprise_customer_uuid": "394a5ce5-6ff4-4b2b-bea1-a273c6920ae1",
                 },
@@ -736,6 +748,7 @@ class ManualCourseEnrollmentOrderViewSetTests(TestCase, DiscoveryMockMixin):
                     "username": "ma3",
                     "email": "ma3@example.com",
                     "course_run_key": course_without_discovery_data.id,
+                    "mode": "verified",
                     "enterprise_customer_name": "an-enterprise-customer",
                     "enterprise_customer_uuid": "394a5ce5-6ff4-4b2b-bea1-a273c6920ae1",
                 }
@@ -864,6 +877,7 @@ class ManualCourseEnrollmentOrderViewSetTests(TestCase, DiscoveryMockMixin):
                     "username": "ma{}".format(count),
                     "email": "ma{}@example.com".format(count),
                     "course_run_key": self.course.id,
+                    "mode": "verified",
                     "discount_percentage": discount_percentage,
                     "enterprise_customer_name": "customer_name",
                     "enterprise_customer_uuid": "394a5ce5-6ff4-4b2b-bea1-a273c6920ae1",

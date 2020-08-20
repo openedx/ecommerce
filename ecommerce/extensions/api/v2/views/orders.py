@@ -125,6 +125,7 @@ class ManualCourseEnrollmentOrderViewSet(EdxOrderPlacementMixin, EnterpriseDisco
             >>>             "discount_percentage": 75.0,
             >>>             "date_placed": '2020-02-11T09:38:47.634561+00:00',  # optional param, only for old records.
             >>>             "sales_force_id": '252F0060L00000ppWfu',
+            >>>             "mode": 'verified',
             >>>             "enterprise_customer_name": "an-enterprise-customer",
             >>>             "enterprise_customer_uuid": "394a5ce5-6ff4-4b2b-bea1-a273c6920ae1",
             >>>         },
@@ -133,6 +134,7 @@ class ManualCourseEnrollmentOrderViewSet(EdxOrderPlacementMixin, EnterpriseDisco
             >>>             "username": "metoo",
             >>>             "email": "metoo@example.com",
             >>>             "course_run_key": "",
+            >>>             "mode": 'professional',
             >>>             "enterprise_customer_name": "an-enterprise-customer",
             >>>             "enterprise_customer_uuid": "394a5ce5-6ff4-4b2b-bea1-a273c6920ae1",
             >>>         },
@@ -150,6 +152,7 @@ class ManualCourseEnrollmentOrderViewSet(EdxOrderPlacementMixin, EnterpriseDisco
             >>>             "discount_percentage": 75.0,
             >>>             "date_placed": '2020-02-11T09:38:47.634561+00:00',
             >>>             "sales_force_id": '252F0060L00000ppWfu',
+            >>>             "mode": 'verified',
             >>>             "enterprise_customer_name": "an-enterprise-customer",
             >>>             "enterprise_customer_uuid": "394a5ce5-6ff4-4b2b-bea1-a273c6920ae1",
             >>>             "status": "success",
@@ -161,6 +164,7 @@ class ManualCourseEnrollmentOrderViewSet(EdxOrderPlacementMixin, EnterpriseDisco
             >>>             "username": "metoo",
             >>>             "email": "metoo@example.com",
             >>>             "course_run_key": "",
+            >>>             "mode": 'professional',
             >>>             "enterprise_customer_name": "an-enterprise-customer",
             >>>             "enterprise_customer_uuid": "394a5ce5-6ff4-4b2b-bea1-a273c6920ae1",
             >>>             "status": "failure",
@@ -225,9 +229,10 @@ class ManualCourseEnrollmentOrderViewSet(EdxOrderPlacementMixin, EnterpriseDisco
                     "lms_user_id": <int>,
                     "username": <string>,
                     "email": <string>,
-                    "course_run_key": <string>
-                    "discount_percentage": <float>
-                    "sales_force_id": <string>
+                    "course_run_key": <string>,
+                    "discount_percentage": <float>,
+                    "sales_force_id": <string>,
+                    "mode": <string>,
                     "enterprise_customer_name": <string>,
                     "enterprise_customer_uuid": <string>,
                 `request_user`: <User>
@@ -243,6 +248,7 @@ class ManualCourseEnrollmentOrderViewSet(EdxOrderPlacementMixin, EnterpriseDisco
                 learner_username,
                 learner_email,
                 course_run_key,
+                mode,
                 discount_percentage,
                 sales_force_id,
             ) = self._get_enrollment_data(enrollment)
@@ -268,9 +274,8 @@ class ManualCourseEnrollmentOrderViewSet(EdxOrderPlacementMixin, EnterpriseDisco
             return dict(enrollment, status=self.FAILURE, detail="Course not found", new_order_created=None)
 
         seat_product = course.seat_products.filter(
-            attributes__name='certificate_type'
-        ).exclude(
-            attribute_values__value_text='audit'
+            attributes__name='certificate_type',
+            attribute_values__value_text=mode
         ).first()
 
         # check if an order already exists with the requested data
@@ -389,6 +394,7 @@ class ManualCourseEnrollmentOrderViewSet(EdxOrderPlacementMixin, EnterpriseDisco
             learner_username:  User's username.
             learner_email:  User's email.
             course_run_key:  Course key.
+            mode: Course mode.
 
         Optional Parameters:
             discount_percentage: Discounted percentage for manual enrollment.
@@ -403,12 +409,14 @@ class ManualCourseEnrollmentOrderViewSet(EdxOrderPlacementMixin, EnterpriseDisco
         course_run_key = enrollment.get('course_run_key')
         discount_percentage = enrollment.get('discount_percentage')
         sales_force_id = enrollment.get('sales_force_id')
-        if not (lms_user_id and learner_username and learner_email and course_run_key):
+        mode = enrollment.get('mode')
+        if not (lms_user_id and learner_username and learner_email and course_run_key and mode):
             enrollment_parameters_state = [
                 ("'lms_user_id'", bool(lms_user_id)),
                 ("'username'", bool(learner_username)),
                 ("'email'", bool(learner_email)),
                 ("'course_run_key'", bool(course_run_key)),
+                ("'mode'", bool(mode)),
             ]
             missing_params = ', '.join(name for name, present in enrollment_parameters_state if not present)
             logger.error(
@@ -418,7 +426,7 @@ class ManualCourseEnrollmentOrderViewSet(EdxOrderPlacementMixin, EnterpriseDisco
         if discount_percentage is not None:
             if not isinstance(discount_percentage, float) or (discount_percentage < 0.0 or discount_percentage > 100.0):
                 raise ValidationError('Discount percentage should be a float from 0 to 100.')
-        return lms_user_id, learner_username, learner_email, course_run_key, discount_percentage, sales_force_id
+        return lms_user_id, learner_username, learner_email, course_run_key, mode, discount_percentage, sales_force_id
 
     def _get_learner_user(self, lms_user_id, learner_username, learner_email):
         """
