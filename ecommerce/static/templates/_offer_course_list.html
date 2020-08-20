@@ -31,6 +31,10 @@
                             <div class="voucher-valid-until">
                                 <p><%= course.attributes.voucher_end_date_text %></p>
                             </div>
+
+                            <div class="content_type">
+                                <p> <%= course.attributes.content_type %></p>
+                            </div>
                         </div>
                     </div>
                     <div class="col-sm-7 col-xs-12">
@@ -52,7 +56,7 @@
                             <% } else { %>
                             <div class="pull-left">
                                 <p class="course-price">
-                                    <span>$<%= course.attributes.stockrecords.price_excl_tax %></span>
+                                    <span>$<%= course.attributes.price %></span>
                                 </p>
                             </div>
                             <div class="pull-left">
@@ -74,11 +78,11 @@
                                         </a>
                                     <% } else { %>
                                         <% if (isEnrollmentCode) { %>
-                                        <a href="/coupons/redeem/?code=<%= code %>&sku=<%= course.attributes.stockrecords.partner_sku %>"
+                                        <a href="/coupons/redeem/?<%= course.attributes.query_params %>"
                                            id="RedeemEnrollment"
                                            class="btn btn-success"><%- gettext('Enroll Now') %></a>
                                         <% } else { %>
-                                            <a href="/coupons/redeem/?code=<%= code %>&sku=<%= course.attributes.stockrecords.partner_sku %>"
+                                            <a href="/coupons/redeem/?<%= course.attributes.query_params %>"
                                                id="PurchaseCertificate"
                                                class="btn btn-success btn-purchase"
                                                data-track-type="click"

@@ -102,8 +102,8 @@ define([
             },
 
             formatDate: function(course) {
-                var courseStartDateText = gettext(_s.sprintf('Course starts: %s',
-                        moment(course.get('course_start_date')).format('MMM DD, YYYY'))),
+                var courseStartDateText = course.has('course_start_date') ? gettext(_s.sprintf('Course starts: %s',
+                        moment(course.get('course_start_date')).format('MMM DD, YYYY'))) : 'Coming Soon',
                     voucherEndDateText = gettext(_s.sprintf('Discount valid until %s',
                         moment(course.get('voucher_end_date')).format('MMM DD, YYYY')));
 
@@ -127,7 +127,7 @@ define([
                 if (course.get('seat_type') === 'credit' && !course.multiple_credit_providers) {
                     price = parseFloat(course.get('credit_provider_price')).toFixed(2);
                 } else {
-                    price = parseFloat(course.get('stockrecords').price_excl_tax).toFixed(2);
+                    price = parseFloat(course.get('price')).toFixed(2);
                 }
 
                 if (benefit.type === 'Percentage') {
@@ -139,8 +139,7 @@ define([
                     }
                 }
 
-                // eslint-disable-next-line no-param-reassign
-                course.get('stockrecords').price_excl_tax = price;
+                course.set({price: price});
                 course.set({new_price: newPrice.toFixed(2)});
             },
 

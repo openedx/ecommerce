@@ -35,6 +35,7 @@ define([
                     title: 'edX Demonstration Course',
                     course_start_date: '2013-02-05T05:00:00Z',
                     id: 'course-v1:edX+DemoX+Demo_Course',
+                    price: '100.00',
                     voucher_end_date: '2016-07-29T00:00:00Z',
                     contains_verified: true
                 }),
@@ -57,15 +58,30 @@ define([
                     title: 'edX Demonstration Course',
                     course_start_date: '2013-02-05T05:00:00Z',
                     id: 'course-v1:edX+DemoX+Demo_Courseewewe',
+                    price: '100.00',
                     voucher_end_date: '2016-07-29T00:00:00Z',
                     contains_verified: true
+                }),
+                program = new OfferModel({
+                    benefit: {
+                        type: 'Percentage',
+                        value: 50
+                    },
+                    contains_verified: true,
+                    content_type: 'Micromaster Program',
+                    image_url: 'img/src/url3',
+                    organization: 'edX',
+                    price: '80',
+                    query_params: 'code=121212&sku=8CF08E5',
+                    title: 'Demo Program',
+                    voucher_end_date: '2016-07-29T00:00:00Z'
                 });
 
             beforeEach(function() {
                 $('body').append('<div class="verified-info"></div>');
                 code = 'ABCDE';
                 collection = new OfferCollection(null, {code: code});
-                collection.add([course, course2]);
+                collection.add([course, course2, program]);
                 view = new OfferView({code: code, collection: collection}).render();
             });
 
@@ -102,11 +118,20 @@ define([
                 ).toBe('Discount valid until Jul 29, 2016');
             });
 
+            it('should format course start date if available else set Coming Soon when formatDate called ', function() {
+                view.formatDate(view.collection.models[1]);
+                expect(view.collection.models[1].get('course_start_date_text')).toBe('Course starts: Feb 05, 2013');
+                view.formatDate(view.collection.models[2]);
+                expect(view.collection.models[2].get('course_start_date_text')).toBe('Coming Soon');
+            });
+
             it('should set new price when setNewPrice called', function() {
                 view.setNewPrice(view.collection.models[0]);
                 expect(view.collection.models[0].get('new_price')).toBe('0.00');
                 view.setNewPrice(view.collection.models[1]);
                 expect(view.collection.models[1].get('new_price')).toBe('80.00');
+                view.setNewPrice(view.collection.models[2]);
+                expect(view.collection.models[2].get('new_price')).toBe('40.00');
             });
 
             it('should set benefit value when formatBenefitValue called', function() {
@@ -114,6 +139,8 @@ define([
                 expect(view.collection.models[0].get('benefit_value')).toBe('100%');
                 view.formatBenefitValue(view.collection.models[1]);
                 expect(view.collection.models[1].get('benefit_value')).toBe('$20');
+                view.formatBenefitValue(view.collection.models[2]);
+                expect(view.collection.models[2].get('benefit_value')).toBe('50%');
             });
 
             it('should return is seat type verified when checkVerified called', function() {
