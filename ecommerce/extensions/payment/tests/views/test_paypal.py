@@ -17,7 +17,6 @@ from ecommerce.core.constants import (
     ENROLLMENT_CODE_SWITCH,
     SEAT_PRODUCT_CLASS_NAME
 )
-
 from ecommerce.core.models import BusinessClient
 from ecommerce.core.tests import toggle_switch
 from ecommerce.courses.tests.factories import CourseFactory
