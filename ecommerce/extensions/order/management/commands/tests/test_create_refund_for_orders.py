@@ -1,16 +1,13 @@
-
+from __future__ import absolute_import
 
 import json
 
-import ddt
 import httpretty
 from django.contrib.auth import get_user_model
 from django.core.management import CommandError, call_command
 from django.urls import reverse
-from faker import Factory as FakerFactory
 from oscar.core.loading import get_model
 from rest_framework import status
-from testfixtures import LogCapture
 
 from ecommerce.coupons.tests.mixins import DiscoveryMockMixin
 from ecommerce.courses.tests.factories import CourseFactory
@@ -22,12 +19,8 @@ OrderLine = get_model('order', 'Line')
 Refund = get_model('refund', 'Refund')
 User = get_user_model()
 
-FAKER = FakerFactory.create()
-LOGGER_NAME = 'ecommerce.extensions.order.management.commands.create_refund_for_orders'
-
 
 @httpretty.activate
-@ddt.ddt
 class CreateRefundForOrdersTests(DiscoveryMockMixin, TestCase):
     """
     Test the `create_refund_for_orders` command.
@@ -94,6 +87,7 @@ class CreateRefundForOrdersTests(DiscoveryMockMixin, TestCase):
                 {
                     "lms_user_id": 10 + count,
                     "username": "ma{}".format(count),
+                    "mode": "verified",
                     "email": "ma{}@example.com".format(count),
                     "course_run_key": self.course.id,
                     "discount_percentage": discount_percentage
@@ -146,58 +140,6 @@ class CreateRefundForOrdersTests(DiscoveryMockMixin, TestCase):
             refund = Refund.objects.get(order=order)
             self.assert_refund_matches_order(refund, order)
 
-    @ddt.data(True, False)
-    def test_create_refund_for_duplicate_orders_only(self, commit):
-        """
-        Test that refund is generated for manual enrollment orders only if having some duplicate enrollments.
-        """
-
-        self.create_manual_order()  # will create 2 orders
-        self.assertEqual(Order.objects.count(), 2)
-
-        # now assume someone added 1 more seat type in the existing course.
-        self.course.create_or_update_seat("credit", False, 0)
-
-        # ideally calling manual api with same data should not create new orders, but as there is a bug in the
-        # manual API, duplicate orders will be introduced.
-        # TODO: remove this test along with fixing the API.
-        duplicate_orders = self.create_manual_order()
-        self.assertEqual(Order.objects.count(), 4)
-
-        # now try to refund duplicate records
-        filename = 'orders_file.txt'
-        self.create_orders_file(duplicate_orders, filename)
-
-        duplicate_orders = [order['detail'] for order in duplicate_orders]
-        self.assertFalse(Refund.objects.exists())
-        with LogCapture(LOGGER_NAME) as log_capture:
-            params = ['create_refund_for_orders', '--order-numbers-file={}'.format(filename), '--refund-duplicate-only',
-                      '--sleep-time=0.5']
-            if not commit:
-                params.append('--no-commit')
-            call_command(*params)
-            log_capture.check_present(
-                (LOGGER_NAME, 'INFO', 'Sleeping for 0.5 second/seconds'),
-            )
-            log_capture.check_present(
-                (LOGGER_NAME, 'INFO', '[Ecommerce Order Refund] Success Orders: {}'.format(duplicate_orders)),
-            )
-            log_capture.check_present(
-                (
-                    LOGGER_NAME,
-                    'INFO',
-                    '[Ecommerce Order Refund] Generated refunds for the batch of 2 orders.'
-                )
-            )
-        if commit:
-            self.assertEqual(Refund.objects.count(), 2)
-            for order_detail in duplicate_orders:
-                order = Order.objects.get(number=order_detail)
-                refund = Refund.objects.get(order=order)
-                self.assert_refund_matches_order(refund, order)
-        else:
-            self.assertEqual(Refund.objects.count(), 0)
-
     def test_invalid_file_path(self):
         """
         Verify command raises the CommandError for invalid file path.
@@ -205,8 +147,13 @@ class CreateRefundForOrdersTests(DiscoveryMockMixin, TestCase):
         with self.assertRaises(CommandError):
             call_command('create_refund_for_orders', '--order-numbers-file={}'.format("invalid/order_id/file/path"))
 
-        with self.assertRaises(CommandError):
-            call_command('create_refund_for_orders')
+    def test_no_file_path(self):
+        """
+        Verify command does not change the Refund state without a file.
+        """
+        self.assertFalse(Refund.objects.exists())
+        call_command('create_refund_for_orders')
+        self.assertFalse(Refund.objects.exists())
 
     def test_create_refund_order_does_not_exist(self):
         """
