@@ -162,6 +162,7 @@ def track_segment_event(site, user, event, properties):
     path = '/'
     parts = ("https", hostname, path, "", "")
     page = urlunsplit(parts)
+    
     context = {
         'ip': lms_ip,
         'Google Analytics': {
