@@ -1,7 +1,6 @@
-
-
-from contextlib import contextmanager
 import logging
+from contextlib import contextmanager
+from typing import Optional
 
 import requests
 from typing import Optional
@@ -102,6 +101,7 @@ class CybersourceOrderInitiationView:
             'SDNCheck function called for basket [%d]. It did not receive a hit.',
             request.basket.id,
         )
+        return None
 
 
 class CybersourceSubmitView(BasePaymentSubmitView, CybersourceOrderInitiationView):
@@ -328,7 +328,13 @@ class CybersourceOrderCompletionView(EdxOrderPlacementMixin):
                 ppr = self.payment_processor.record_processor_response(
                     order_completion_message, transaction_id=self.transaction_id, basket=basket
                 )
-                self.set_payment_response_custom_metrics(basket, order_completion_message, self.order_number, ppr, self.transaction_id)
+                self.set_payment_response_custom_metrics(
+                    basket,
+                    order_completion_message,
+                    self.order_number,
+                    ppr,
+                    self.transaction_id,
+                )
 
             # Explicitly delimit operations which will be rolled back if an exception occurs.
             with transaction.atomic():
@@ -431,6 +437,9 @@ class CybersourceOrderCompletionView(EdxOrderPlacementMixin):
             )
             return self.redirect_to_payment_error()
 
+    def _get_billing_address(self, order_completion_message):
+        raise NotImplementedError
+
 
 class CyberSourceRESTProcessorMixin:
     @cached_property
@@ -479,7 +488,11 @@ class CybersourceAuthorizeAPIView(
         self.order_number = basket.order_number
 
         try:
-            payment_processor_response, transaction_id = self.payment_processor.initiate_payment(basket, request, self.data)
+            payment_processor_response, transaction_id = self.payment_processor.initiate_payment(
+                basket,
+                request,
+                self.data,
+            )
             self.transaction_id = transaction_id
         except GatewayError:
             return self.redirect_to_payment_error()
@@ -538,28 +551,28 @@ class CybersourceInterstitialView(CyberSourceProcessorMixin, CybersourceOrderCom
     def dispatch(self, request, *args, **kwargs):
         return super(CybersourceInterstitialView, self).dispatch(request, *args, **kwargs)
 
-    def _get_billing_address(self, cybersource_response):
+    def _get_billing_address(self, order_completion_message):
         field = 'req_bill_to_address_line1'
         # Address line 1 is optional if flag is enabled
-        line1 = (cybersource_response.get(field, '')
+        line1 = (order_completion_message.get(field, '')
                  if waffle.switch_is_active('optional_location_fields')
-                 else cybersource_response[field])
+                 else order_completion_message[field])
         return BillingAddress(
-            first_name=cybersource_response['req_bill_to_forename'],
-            last_name=cybersource_response['req_bill_to_surname'],
+            first_name=order_completion_message['req_bill_to_forename'],
+            last_name=order_completion_message['req_bill_to_surname'],
             line1=line1,
 
             # Address line 2 is optional
-            line2=cybersource_response.get('req_bill_to_address_line2', ''),
+            line2=order_completion_message.get('req_bill_to_address_line2', ''),
 
             # Oscar uses line4 for city
-            line4=cybersource_response['req_bill_to_address_city'],
+            line4=order_completion_message['req_bill_to_address_city'],
             # Postal code is optional
-            postcode=cybersource_response.get('req_bill_to_address_postal_code', ''),
+            postcode=order_completion_message.get('req_bill_to_address_postal_code', ''),
             # State is optional
-            state=cybersource_response.get('req_bill_to_address_state', ''),
+            state=order_completion_message.get('req_bill_to_address_state', ''),
             country=Country.objects.get(
-                iso_3166_1_a2=cybersource_response['req_bill_to_address_country']))
+                iso_3166_1_a2=order_completion_message['req_bill_to_address_country']))
 
     def _get_basket(self, basket_id):
         if not basket_id:
@@ -655,14 +668,14 @@ class ApplePayStartSessionView(CyberSourceProcessorMixin, APIView):
 class CybersourceApplePayAuthorizationView(CyberSourceProcessorMixin, EdxOrderPlacementMixin, APIView):
     permission_classes = (permissions.IsAuthenticated,)
 
-    def _get_billing_address(self, apple_pay_payment_contact):
+    def _get_billing_address(self, order_completion_message):
         """ Converts ApplePayPaymentContact object to BillingAddress.
 
         See https://developer.apple.com/documentation/applepayjs/applepaypaymentcontact.
         """
-        address_lines = apple_pay_payment_contact['addressLines']
+        address_lines = order_completion_message['addressLines']
         address_line_2 = address_lines[1] if len(address_lines) > 1 else ''
-        country_code = apple_pay_payment_contact.get('countryCode')
+        country_code = order_completion_message.get('countryCode')
 
         try:
             country = Country.objects.get(iso_3166_1_a2__iexact=country_code)
@@ -671,19 +684,19 @@ class CybersourceApplePayAuthorizationView(CyberSourceProcessorMixin, EdxOrderPl
             raise
 
         return BillingAddress(
-            first_name=apple_pay_payment_contact['givenName'],
-            last_name=apple_pay_payment_contact['familyName'],
+            first_name=order_completion_message['givenName'],
+            last_name=order_completion_message['familyName'],
             line1=address_lines[0],
 
             # Address line 2 is optional
             line2=address_line_2,
 
             # Oscar uses line4 for city
-            line4=apple_pay_payment_contact['locality'],
+            line4=order_completion_message['locality'],
             # Postal code is optional
-            postcode=apple_pay_payment_contact.get('postalCode', ''),
+            postcode=order_completion_message.get('postalCode', ''),
             # State is optional
-            state=apple_pay_payment_contact.get('administrativeArea', ''),
+            state=order_completion_message.get('administrativeArea', ''),
             country=country)
 
     def post(self, request):
