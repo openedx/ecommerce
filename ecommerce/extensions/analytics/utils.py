@@ -173,7 +173,7 @@ def track_segment_event(site, user, event, properties):
     }
 
     # Temporarily breaking out to add try/except for REV-1312 investigation in Stage
-    def oncommit_temp(user_tracking_id, event, properties,context=context):
+    def oncommit_temp(user_tracking_id, event, properties, context=context):
         try:
             site.siteconfiguration.segment_client.track(user_tracking_id, event, properties, context=context)
             return True
