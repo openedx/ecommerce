@@ -1,6 +1,6 @@
 NODE_BIN=./node_modules/.bin
 DIFF_COVER_BASE_BRANCH=master
-PYTHON_ENV=py35
+PYTHON_ENV=py38
 DJANGO_ENV_VAR=$(if $(DJANGO_ENV),$(DJANGO_ENV),django22)
 
 help:
