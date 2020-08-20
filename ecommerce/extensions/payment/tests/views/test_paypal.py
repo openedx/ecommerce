@@ -6,7 +6,6 @@ import mock
 import responses
 from django.test.client import RequestFactory
 from django.urls import reverse
-from edx_rest_api_client.exceptions import SlumberHttpBaseException
 from oscar.apps.order.exceptions import UnableToPlaceOrder
 from oscar.apps.payment.exceptions import PaymentError
 from oscar.core.loading import get_class, get_model

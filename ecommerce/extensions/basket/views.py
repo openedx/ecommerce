@@ -725,9 +725,12 @@ class PaymentApiLogicMixin(BasketLogicMixin):
 
     def _add_messages(self, response):
         response['messages'] = message_utils.serialize(self.request)
-    
+
     def _add_capture_context(self, response):
-        response['flex_microform_enabled'] = waffle.flag_is_active(self.request, 'payment.cybersource.flex_microform_enabled')
+        response['flex_microform_enabled'] = waffle.flag_is_active(
+            self.request,
+            'payment.cybersource.flex_microform_enabled'
+        )
         if not response['flex_microform_enabled']:
             return
         payment_processor_class = self.request.site.siteconfiguration.get_client_side_payment_processor_class()
