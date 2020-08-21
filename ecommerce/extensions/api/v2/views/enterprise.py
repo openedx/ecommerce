@@ -449,7 +449,8 @@ class EnterpriseCouponViewSet(CouponViewSet):
         Returns a queryset containing unique code and user_email pairs from OfferAssignments.
         Only code and user_email pairs that have no corresponding VoucherApplication are returned.
         """
-        prefetch_related_objects(vouchers, 'applications', 'offers', 'offers__condition', 'offers__offerassignment_set')
+        prefetch_related_objects(vouchers, 'applications', 'applications__user', 'offers', 'offers__condition',
+                                 'offers__offerassignment_set')
         not_redeemed_assignments = []
         for voucher in vouchers:
             assignments = voucher.not_redeemed_assignment_ids

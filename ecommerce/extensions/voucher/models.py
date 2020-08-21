@@ -142,7 +142,12 @@ class Voucher(AbstractVoucher):
         # Assignment is only valid for Vouchers linked to an enterprise offer.
         if not enterprise_offer:
             return None
-        users_having_usages = self.applications.values_list('user__email', flat=True)
+
+        # To filter out redeemed assignments of the given voucher
+        users_having_usages = []
+        for application in self.applications.all():
+            user_email = application.user.email
+            users_having_usages.append(user_email)
 
         not_redeemed_assignments = []
         for assignment in enterprise_offer.offerassignment_set.all():
