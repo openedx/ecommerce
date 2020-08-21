@@ -483,6 +483,28 @@ class ManualCourseEnrollmentOrderViewSetTests(TestCase, DiscoveryMockMixin):
                 "Discount percentage should be a float from 0 to 100."
             )
 
+    @ddt.unpack
+    @ddt.data(
+        ("verified", True),
+        ("honor", False),
+        ("audit", False),
+    )
+    def test_create_manual_order_with_mode(self, course_mode, is_paid):
+        """"
+        Test that orders with valid and invalid course modes.
+        """
+        post_data = self.generate_post_data(1, mode=course_mode)
+        _, response_data = self.post_order(post_data, self.user)
+        if is_paid:
+            self.assertEqual(len(response_data.get("orders")), 1)
+            self.assertEqual(response_data.get('orders')[0]['status'], "success")
+        else:
+            self.assertEqual(response_data.get('orders')[0]['status'], "failure")
+            self.assertEqual(
+                response_data.get('orders')[0]['detail'],
+                "Course mode should be paid"
+            )
+
     def test_create_manual_order(self):
         """"
         Test that manual enrollment order can be created with expected data.
@@ -869,7 +891,7 @@ class ManualCourseEnrollmentOrderViewSetTests(TestCase, DiscoveryMockMixin):
         self.assertEqual(order["status"], "failure")
         self.assertEqual(order["detail"], "Failed to create free order")
 
-    def generate_post_data(self, enrollment_count, discount_percentage=0.0):
+    def generate_post_data(self, enrollment_count, discount_percentage=0.0, mode="verified"):
         return {
             "enrollments": [
                 {
@@ -877,7 +899,7 @@ class ManualCourseEnrollmentOrderViewSetTests(TestCase, DiscoveryMockMixin):
                     "username": "ma{}".format(count),
                     "email": "ma{}@example.com".format(count),
                     "course_run_key": self.course.id,
-                    "mode": "verified",
+                    "mode": mode,
                     "discount_percentage": discount_percentage,
                     "enterprise_customer_name": "customer_name",
                     "enterprise_customer_uuid": "394a5ce5-6ff4-4b2b-bea1-a273c6920ae1",
