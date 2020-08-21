@@ -66,7 +66,7 @@ OrderNumberGenerator = get_class('order.utils', 'OrderNumberGenerator')
 PaymentProcessorResponse = get_model('payment', 'PaymentProcessorResponse')
 
 
-def del_none(d):
+def del_none(d):  # pragma: no cover
     for key, value in list(d.items()):
         if value is None:
             del d[key]
@@ -172,7 +172,7 @@ class Cybersource(ApplePayMixin, BaseClientSidePaymentProcessor):
     def client_side_payment_url(self):
         return self.sop_payment_page_url
 
-    def get_capture_context(self):
+    def get_capture_context(self):  # pragma: no cover
         # To delete None values in Input Request Json body
 
         requestObj = GeneratePublicKeyRequest(
@@ -628,7 +628,7 @@ class Cybersource(ApplePayMixin, BaseClientSidePaymentProcessor):
         raise GatewayError(msg)
 
 
-class CybersourceREST(Cybersource):
+class CybersourceREST(Cybersource):  # pragma: no cover
     """
     A temporary PaymentProcessor dedicated to carefully switching to the Cybersource REST payment api
     """
