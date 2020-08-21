@@ -389,7 +389,7 @@ class CybersourceInterstitialView(CyberSourceProcessorMixin, EdxOrderPlacementMi
                     )
                     unhandled_exception_logging = False
                     raise
-                except (PaymentError, Exception) as exception:
+                except (PaymentError, Exception) as exception:  # WE GET INTO HERE
                     self._log_cybersource_payment_failure(
                         exception, basket, order_number, transaction_id, notification, ppr,
                     )
@@ -398,6 +398,7 @@ class CybersourceInterstitialView(CyberSourceProcessorMixin, EdxOrderPlacementMi
 
         except:  # pylint: disable=bare-except
             if unhandled_exception_logging:
+                logger.info("HERE")
                 logger.exception(
                     'Unhandled exception processing CyberSource payment notification for transaction [%s], order [%s], '
                     'and basket [%d].',
@@ -447,7 +448,7 @@ class CybersourceInterstitialView(CyberSourceProcessorMixin, EdxOrderPlacementMi
         """Process a CyberSource merchant notification and place an order for paid products as appropriate."""
         notification = request.POST.dict()
         try:
-            basket = self.validate_notification(notification)
+            basket = self.validate_notification(notification)  # This line does the validation and leads to the exception, handled down in 476
             monitoring_utils.set_custom_metric('payment_response_validation', 'success')
         except DuplicateReferenceNumber:
             # CyberSource has told us that they've declined an attempt to pay
@@ -468,13 +469,13 @@ class CybersourceInterstitialView(CyberSourceProcessorMixin, EdxOrderPlacementMi
             # TODO:
             # 1. There are sometimes messages from CyberSource that would make a more helpful message for users.
             # 2. We could have similar handling of other exceptions like UserCancelled and AuthorizationError
-
             redirect_url = get_payment_microfrontend_or_basket_url(self.request)
             return HttpResponseRedirect(redirect_url)
 
         except:  # pylint: disable=bare-except
             # logging handled by validate_notification, because not all exceptions are problematic
             monitoring_utils.set_custom_metric('payment_response_validation', 'redirect-to-error-page')
+            logger.info("HERE")  # We end up here when Cybersource has GatewayError, from line 450
             return absolute_redirect(request, 'payment_error')
 
         try:
@@ -627,11 +628,13 @@ class CybersourceApplePayAuthorizationView(CyberSourceProcessorMixin, EdxOrderPl
         return Response(OrderSerializer(order, context={'request': request}).data, status=status.HTTP_201_CREATED)
 
     def handle_payment(self, response, basket):
+        logger.info("HERE")
         request = self.request
         basket = request.basket
         billing_address = self._get_billing_address(request.data.get('billingContact'))
         token = request.data['token']
-
+        logger.info("HERE")
         handled_processor_response = self.payment_processor.request_apple_pay_authorization(
             basket, billing_address, token)
+        logger.info("HERE")
         self.record_payment(basket, handled_processor_response)
