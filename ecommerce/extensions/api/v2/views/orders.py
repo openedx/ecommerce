@@ -403,6 +403,7 @@ class ManualCourseEnrollmentOrderViewSet(EdxOrderPlacementMixin, EnterpriseDisco
         Raises:
             ValidationError: If any required parameter is not present in enrollment.
         """
+        paid_modes = ['verified', 'professional']
         lms_user_id = enrollment.get('lms_user_id')
         learner_username = enrollment.get('username')
         learner_email = enrollment.get('email')
@@ -423,6 +424,10 @@ class ManualCourseEnrollmentOrderViewSet(EdxOrderPlacementMixin, EnterpriseDisco
                 '[Manual Order Creation Failure] Missing required enrollment data. Message: %s', missing_params
             )
             raise ValidationError('Missing required enrollment data: {}'.format(missing_params))
+
+        if mode not in paid_modes:
+            raise ValidationError('Course mode should be paid')
+
         if discount_percentage is not None:
             if not isinstance(discount_percentage, float) or (discount_percentage < 0.0 or discount_percentage > 100.0):
                 raise ValidationError('Discount percentage should be a float from 0 to 100.')
