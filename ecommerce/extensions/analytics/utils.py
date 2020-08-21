@@ -182,7 +182,7 @@ def track_segment_event(site, user, event, properties):
 
     logger.info("JUST ABOUT TO RETURN")
     return transaction.on_commit(
-        oncommit_temp(user_tracking_id, event, properties, context=context))
+        lambda: oncommit_temp(user_tracking_id, event, properties, context=context))
 
 
 def translate_basket_line_for_segment(line):
