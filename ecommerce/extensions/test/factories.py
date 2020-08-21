@@ -1,10 +1,11 @@
 
 
 import uuid
-from datetime import timedelta
+from datetime import datetime, timedelta
 
 import factory
 from django.utils.timezone import now
+from faker import Faker
 from oscar.test.factories import Basket, BenefitFactory
 from oscar.test.factories import ConditionalOfferFactory as BaseConditionalOfferFactory
 from oscar.test.factories import (
@@ -31,6 +32,7 @@ from ecommerce.extensions.offer.models import (
 )
 from ecommerce.extensions.order.benefits import ManualEnrollmentOrderDiscountBenefit
 from ecommerce.extensions.order.conditions import ManualEnrollmentOrderDiscountCondition
+from ecommerce.extensions.payment.models import SDNFallbackMetadata
 from ecommerce.programs.benefits import AbsoluteDiscountBenefitWithoutRange, PercentageDiscountBenefitWithoutRange
 from ecommerce.programs.conditions import ProgramCourseRunSeatsCondition
 from ecommerce.programs.custom import class_path
@@ -311,3 +313,12 @@ class DynamicPercentageDiscountBenefitFactory(BenefitFactory):
     type = ''
     value = 1
     proxy_class = class_path(DynamicPercentageDiscountBenefit)
+
+
+class SDNFallbackMetadataFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = SDNFallbackMetadata
+
+    file_checksum = factory.Sequence(lambda n: Faker().md5())
+    import_state = 'New'
+    download_timestamp = datetime.now() - timedelta(days=10)
