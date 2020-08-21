@@ -177,10 +177,8 @@ def track_segment_event(site, user, event, properties):
     def oncommit_temp(user_tracking_id, event, properties, context=context):
         try:
             site.siteconfiguration.segment_client.track(user_tracking_id, event, properties, context=context)
-            return True
         except:
             logger.info("Exception occurred trying to log segment event for properties: #%s ", properties)
-        return False
 
     logger.info("JUST ABOUT TO RETURN")
     return transaction.on_commit(
