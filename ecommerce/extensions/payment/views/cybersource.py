@@ -3,7 +3,6 @@ from contextlib import contextmanager
 from typing import Optional
 
 import requests
-from typing import Optional
 import waffle
 from django.contrib import messages
 from django.core.exceptions import ObjectDoesNotExist
