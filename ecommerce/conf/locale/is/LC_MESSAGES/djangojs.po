@@ -6,6 +6,7 @@
 # Translators:
 # Translators:
 # Translators:
+# Translators:
 # Davíð Elvar Másson <davidelvar@gmail.com>, 2016
 msgid ""
 msgstr ""

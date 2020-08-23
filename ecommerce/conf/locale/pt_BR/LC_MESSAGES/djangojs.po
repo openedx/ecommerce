@@ -6,6 +6,7 @@
 # Translators:
 # Translators:
 # Translators:
+# Translators:
 # Angela Amaro <angelasimei@gmail.com>, 2016
 # César Augusto Lemos <teco171bp@hotmail.com>, 2015
 # Cleomir Waiczyk <w.cleomir@gmail.com>, 2015
