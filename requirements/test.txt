@@ -68,7 +68,7 @@ edx-django-release-util==0.4.4  # via -r requirements/base.txt
 edx-django-sites-extensions==2.5.1  # via -r requirements/base.txt
 edx-django-utils==3.7.3   # via -r requirements/base.txt, django-config-models, edx-drf-extensions
 edx-drf-extensions==6.1.1  # via -r requirements/base.txt, edx-rbac
-edx-ecommerce-worker==0.8.1  # via -r requirements/base.txt
+edx-ecommerce-worker==0.8.2  # via -r requirements/base.txt
 edx-i18n-tools==0.5.3     # via -r requirements/test.in
 edx-opaque-keys==2.1.1    # via -r requirements/base.txt, edx-drf-extensions
 edx-rbac==1.3.2           # via -r requirements/base.txt
