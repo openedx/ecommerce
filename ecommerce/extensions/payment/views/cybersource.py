@@ -336,15 +336,15 @@ class CybersourceOrderCompletionView(EdxOrderPlacementMixin):
                 )
 
             # Explicitly delimit operations which will be rolled back if an exception occurs.
-            with transaction.atomic():
-                with self.log_payment_exceptions(
-                        basket,
-                        self.order_number,
+            # with transaction.atomic():
+            with self.log_payment_exceptions(
+                    basket,
+                    self.order_number,
                         self.transaction_id,
-                        ppr,
-                        order_completion_message.get("message")
-                ):
-                    self.handle_payment(order_completion_message, basket)
+                    ppr,
+                    order_completion_message.get("message")
+            ):
+                self.handle_payment(order_completion_message, basket)
 
         except Exception as exception:  # pylint: disable=bare-except
             if getattr(exception, 'unlogged', True):
