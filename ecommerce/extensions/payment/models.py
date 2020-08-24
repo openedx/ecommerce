@@ -215,20 +215,32 @@ class SDNFallbackData(models.Model):
 
     Fields:
         csv_import_id (ForeignKey): Foreign Key field with the CSV import Primary Key referenced in SDNFallbackMetadata.
-        sdn_id (CharField): ID from the consolidated list that is unique to an individual/entity but not to a row, since we are denormalizing this data one individual/entity can have more than one row in the database.
-        source (CharField): Origin of where the data comes from, since the CSV consolidates export screening lists of the Departments of Commerce, State and the Treasury. We want only individuals with source Specially Designated Nationals (SDN) - Treasury Department.
-        sdn_type (CharField): For a person with source Specially Designated Nationals (SDN) - Treasury Department, the type we're looking for is 'Individual'.
+        sdn_id (CharField): ID from the consolidated list that is unique to an individual/entity.
+        source (CharField): Origin of where the data comes from, since the CSV consolidates export screening lists of the Departments of Commerce, State and the Treasury.
+        sdn_type (CharField): For a person with source Specially Designated Nationals (SDN) - Treasury Department, the type is 'Individual'. Other options include 'Entity' and 'Vessel'. Other lists do not have a type. 
         names (TextField): A space separated list of all lowercased names and alt names with punctuation also replaced by spaces.
-        addresses (TextField): A space separated list of all lowercased addresses combined into one string. There are records that don't have an address, but because city is a required field, we would not match those records in the API. We will filter them out and make this field required.
-        countries (CharField): Countries are extracted from the addresses field and the csv_import_id field. There are records that don't have an address, but because country is a required field, we would not match those records in the API. We will filter them out and make this field required.
+        addresses (TextField): A space separated list of all lowercased addresses combined into one string. There are records that don't have an address, but because city is a required field in the Payment MFE, we would not match those records in the API. We will filter them out and make this field required.
+        countries (CharField): Countries are extracted from the addresses field and in some instances the ID field in their 2 letter abbreviation. There are records that don't have an address, but because country is a required field in the Payment MFE, we would not match those records in the API. We will filter them out and make this field required.
     """
-    csv_import_id = models.ForeignKey('payment.SDNFallbackMetadata', on_delete=models.CASCADE, null=False)
+    csv_import_id = models.ForeignKey('payment.SDNFallbackMetadata', on_delete=models.CASCADE)
     sdn_id = models.CharField(max_length=255)
     source = models.CharField(max_length=255)
-    sdn_type = models.CharField(max_length=255)
+    sdn_type = models.CharField(max_length=255, null=True)
     names = models.TextField()
     addresses = models.TextField(null=True, blank=False)
-    countries = models.CharField(max_length=255, null=True, blank=False)
+    countries = models.CharField(max_length=2, null=True, blank=False)
+
+    SDN_SOURCE = "Specially Designated Nationals (SDN) - Treasury Department"
+    SDN_TYPE = "Individual"
+
+    @classmethod
+    def filter_records(cls, list_id, country):
+        """
+        Filter records by list ID, source, type, and country.
+        """
+    
+        return SDNFallbackData.objects.filter(source=cls.SDN_SOURCE, sdn_type=cls.SDN_TYPE, csv_import_id=list_id, countries__contains=country)
+
 
 # noinspection PyUnresolvedReferences
 from oscar.apps.payment.models import *  # noqa isort:skip pylint: disable=ungrouped-imports, wildcard-import,unused-wildcard-import,wrong-import-position,wrong-import-order

@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from django.core.exceptions import ValidationError
 from testfixtures import LogCapture
 
-from ecommerce.extensions.payment.models import EnterpriseContractMetadata, SDNCheckFailure, SDNFallbackMetadata
+from ecommerce.extensions.payment.models import EnterpriseContractMetadata, SDNCheckFailure, SDNFallbackMetadata, SDNFallbackData
 from ecommerce.extensions.test import factories
 from ecommerce.tests.testcases import TestCase
 
@@ -231,3 +231,79 @@ class SDNFallbackMetadataTests(TestCase):
         former_discard_metadata = SDNFallbackMetadata.objects.filter(
             file_checksum=original_discard.file_checksum)[0]
         self.assertEqual(former_discard_metadata.import_state, 'Discard')
+
+
+class SDNFallbackDataTests(TestCase):
+    LOGGER_NAME = 'ecommerce.extensions.payment.models'
+
+    def setUp(self):
+        super(SDNFallbackDataTests, self).setUp()
+        self.sdn_id = "123abc"
+        self.source = "SDN"
+        self.sdn_type = "Individual"
+        self.names = "maria giuseppe"
+        self.addresses = "123 main street"
+        self.countries = "US"
+
+        self.sdn_metadata = SDNFallbackMetadata.objects.create(
+            file_checksum="foobar",
+            download_timestamp=datetime.now(),
+            import_state="Current",
+        )
+
+        self.sdn_metadata_2 = SDNFallbackMetadata.objects.create(
+            file_checksum="foobaz",
+            download_timestamp=datetime.now() - timedelta(days=2),
+            import_state="Discard",
+        )
+
+    def test_fields(self):
+        "Verify all fields are correctly populated"
+        new_data = SDNFallbackData(
+            csv_import = self.sdn_metadata,
+            sdn_id=self.sdn_id,
+            source = self.source,
+            sdn_type = self.sdn_type,
+            names = self.names,
+            addresses = self.addresses,
+            countries=self.countries,
+        )
+        new_data.full_clean()
+        new_data.save()
+
+        self.assertEqual(len(SDNFallbackData.objects.all()), 1)
+
+        actual_data = SDNFallbackData.objects.all()[0]
+        self.assertEqual(actual_data.csv_import, self.sdn_metadata)
+        self.assertEqual(actual_data.sdn_id, self.sdn_id)
+        self.assertEqual(actual_data.source, self.source)
+        self.assertEqual(actual_data.sdn_type, self.sdn_type)
+        self.assertEqual(actual_data.names, self.names)
+        self.assertEqual(actual_data.addresses, self.addresses)
+        self.assertEqual(actual_data.countries, self.countries)
+
+    def test_filter_records(self):
+        rows = [
+            [SDNFallbackData.SDN_SOURCE, SDNFallbackData.SDN_TYPE, self.sdn_metadata, 'US'],
+            ['SDN2', SDNFallbackData.SDN_TYPE, self.sdn_metadata, 'US'],
+            [SDNFallbackData.SDN_SOURCE, 'Individual2', self.sdn_metadata, 'US'],
+            [SDNFallbackData.SDN_SOURCE, SDNFallbackData.SDN_TYPE, self.sdn_metadata_2, 'US'],
+            [SDNFallbackData.SDN_SOURCE, SDNFallbackData.SDN_TYPE, self.sdn_metadata, 'MX'],
+        ]
+
+        for index, row in enumerate(rows):
+            source, sdn_type, csv_import, country = row
+            SDNFallbackData.objects.create(
+                csv_import=csv_import,
+                sdn_id=index,
+                source=source,
+                sdn_type=sdn_type,
+                names=self.names,
+                addresses=self.addresses,
+                countries=country,
+            )
+
+        filtered_records = SDNFallbackData.filter_records(self.sdn_metadata, 'US')
+        self.assertEqual(len(filtered_records), 1)
+        self.assertEqual(filtered_records[0].csv_import, self.sdn_metadata)
+        self.assertEqual(filtered_records[0].countries, 'US')
