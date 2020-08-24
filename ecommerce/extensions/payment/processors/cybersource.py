@@ -162,6 +162,7 @@ class Cybersource(ApplePayMixin, BaseClientSidePaymentProcessor):
             'merchantid': self.merchant_id,
             'merchant_keyid': self.flex_shared_secret_key_id,
             'merchant_secretkey': self.flex_shared_secret_key,
+            'enable_log': False,
         }
 
     @property
