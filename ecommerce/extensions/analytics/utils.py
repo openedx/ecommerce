@@ -172,10 +172,18 @@ def track_segment_event(site, user, event, properties):
             'url': page,
         }
     }
-    return transaction.on_commit(
-        lambda: site.siteconfiguration.segment_client.track(user_tracking_id, event, properties,
-                                                            context=context))
 
+    # Temporarily breaking out to add try/except for REV-1312 investigation in Stage
+    def oncommit_temp(user_tracking_id, event, properties, context=context):
+        try:
+            site.siteconfiguration.segment_client.track(user_tracking_id, event, properties, context=context)
+        except:
+            logger.info("Exception occurred trying to log segment event for properties: #%s ", properties)
+
+    logger.info("IN track_segment_event, about to return")
+
+    return transaction.on_commit(
+        lambda: oncommit_temp(user_tracking_id, event, properties, context=context))
 
 def translate_basket_line_for_segment(line):
     """ Translates a BasketLine to Segment's expected format for cart events.
