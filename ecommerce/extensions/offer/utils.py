@@ -164,6 +164,7 @@ def send_assigned_offer_email(
         EXPIRATION_DATE=code_expiration_date
     )
     email_body = format_email(email_template, placeholder_dict, greeting, closing)
+    email_body = add_nbsp_with_newline(email_body)
     send_offer_assignment_email.delay(learner_email, offer_assignment_id, subject, email_body)
 
 
@@ -259,6 +260,17 @@ def format_email(template, placeholder_dict, greeting, closing):
     closing = bleach.clean(closing)
     email_body = string.Formatter().vformat(template, SafeTuple(), placeholder_dict)
     return greeting + email_body + closing
+
+
+def add_nbsp_with_newline(email_body):
+    """
+    Arguments:
+        email_body (String): Email template body
+
+    \n\n is being treated as single line except of two lines in HTML template,
+     so separating them with &nbsp; tag to render them as expected.
+    """
+    return email_body.replace('\n', '\n&nbsp;')
 
 
 class SafeDict(dict):
