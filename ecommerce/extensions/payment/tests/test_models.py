@@ -105,9 +105,6 @@ class EnterpriseContractMetadataTests(TestCase):
 class SDNFallbackMetadataTests(TestCase):
     LOGGER_NAME = 'ecommerce.extensions.payment.models'
 
-    def setUp(self):
-        super(SDNFallbackMetadataTests, self).setUp()
-
     def test_minimum_requirements(self):
         """Make sure the row is created correctly with the minimum dataset + defaults."""
         new_metadata = SDNFallbackMetadata(
