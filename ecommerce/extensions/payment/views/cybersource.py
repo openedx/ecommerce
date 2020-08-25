@@ -186,7 +186,6 @@ class CybersourceSubmitAPIView(APIView, CybersourceSubmitView):
         return super(CybersourceSubmitAPIView, self).post(request)
 
 
-
 class CybersourceOrderCompletionView(EdxOrderPlacementMixin):
     """
     A baseclass that includes error handling and financial reporting for orders placed via
@@ -341,7 +340,7 @@ class CybersourceOrderCompletionView(EdxOrderPlacementMixin):
             with self.log_payment_exceptions(
                     basket,
                     self.order_number,
-                        self.transaction_id,
+                    self.transaction_id,
                     ppr,
                     order_completion_message.get("message")
             ):
