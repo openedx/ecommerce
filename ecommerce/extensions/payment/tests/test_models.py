@@ -239,8 +239,8 @@ class SDNFallbackDataTests(TestCase):
     def setUp(self):
         super(SDNFallbackDataTests, self).setUp()
         self.sdn_id = "123abc"
-        self.source = "SDN"
-        self.sdn_type = "Individual"
+        self.source = SDNFallbackData.SDN_SOURCE
+        self.sdn_type = SDNFallbackData.SDN_TYPE
         self.names = "maria giuseppe"
         self.addresses = "123 main street"
         self.countries = "US"
@@ -260,7 +260,7 @@ class SDNFallbackDataTests(TestCase):
     def test_fields(self):
         "Verify all fields are correctly populated"
         new_data = SDNFallbackData(
-            csv_import = self.sdn_metadata,
+            sdn_fallback_metadata = self.sdn_metadata,
             sdn_id=self.sdn_id,
             source = self.source,
             sdn_type = self.sdn_type,
@@ -274,7 +274,7 @@ class SDNFallbackDataTests(TestCase):
         self.assertEqual(len(SDNFallbackData.objects.all()), 1)
 
         actual_data = SDNFallbackData.objects.all()[0]
-        self.assertEqual(actual_data.csv_import, self.sdn_metadata)
+        self.assertEqual(actual_data.sdn_fallback_metadata, self.sdn_metadata)
         self.assertEqual(actual_data.sdn_id, self.sdn_id)
         self.assertEqual(actual_data.source, self.source)
         self.assertEqual(actual_data.sdn_type, self.sdn_type)
@@ -292,9 +292,9 @@ class SDNFallbackDataTests(TestCase):
         ]
 
         for index, row in enumerate(rows):
-            source, sdn_type, csv_import, country = row
+            source, sdn_type, sdn_fallback_metadata, country = row
             SDNFallbackData.objects.create(
-                csv_import=csv_import,
+                sdn_fallback_metadata=sdn_fallback_metadata,
                 sdn_id=index,
                 source=source,
                 sdn_type=sdn_type,
@@ -305,5 +305,5 @@ class SDNFallbackDataTests(TestCase):
 
         filtered_records = SDNFallbackData.filter_records(self.sdn_metadata, 'US')
         self.assertEqual(len(filtered_records), 1)
-        self.assertEqual(filtered_records[0].csv_import, self.sdn_metadata)
+        self.assertEqual(filtered_records[0].sdn_fallback_metadata, self.sdn_metadata)
         self.assertEqual(filtered_records[0].countries, 'US')
