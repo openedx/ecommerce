@@ -13,7 +13,7 @@ asn1crypto==1.4.0         # via -r requirements/test.txt, cybersource-rest-clien
 astroid==2.3.3            # via -r requirements/test.txt, pylint
 attrs==20.1.0             # via -r requirements/test.txt, jsonschema, pytest, zeep
 babel==2.8.0              # via -r requirements/docs.txt, -r requirements/test.txt, django-oscar, django-phonenumber-field, sphinx
-bcrypt==3.2.0             # via -r requirements/test.txt, cybersource-rest-client-python, paramiko
+bcrypt==3.1.7             # via -r requirements/test.txt, cybersource-rest-client-python, paramiko
 beautifulsoup4==4.9.1     # via -r requirements/test.txt, webtest
 billiard==3.6.3.0         # via -r requirements/test.txt, celery
 bleach==3.1.5             # via -r requirements/test.txt
@@ -23,7 +23,7 @@ celery==4.4.7             # via -r requirements/test.txt, edx-ecommerce-worker
 certifi==2020.6.20        # via -r requirements/docs.txt, -r requirements/test.txt, cybersource-rest-client-python, requests
 cffi==1.14.2              # via -r requirements/test.txt, bcrypt, cryptography, cybersource-rest-client-python, pynacl
 chardet==3.0.4            # via -r requirements/docs.txt, -r requirements/test.txt, cybersource-rest-client-python, requests
-configparser==5.0.0       # via -r requirements/test.txt, cybersource-rest-client-python
+configparser==4.0.2       # via -r requirements/test.txt, cybersource-rest-client-python
 coreapi==2.3.3            # via -r requirements/test.txt, django-rest-swagger, openapi-codec
 coreschema==0.0.4         # via -r requirements/test.txt, coreapi
 coverage==5.2.1           # via -r requirements/test.txt, cybersource-rest-client-python, pytest-cov
@@ -92,7 +92,8 @@ gitpython==3.1.7          # via transifex-client
 httpretty==0.9.7          # via -r requirements/test.txt
 idna==2.7                 # via -r requirements/docs.txt, -r requirements/test.txt, cybersource-rest-client-python, requests
 imagesize==1.2.0          # via -r requirements/docs.txt, sphinx
-inflect==4.1.0            # via -r requirements/test.txt, jinja2-pluralize
+importlib-metadata==1.7.0  # via -r requirements/test.txt, inflect, jsonschema, kombu, pluggy, pytest, pytest-randomly, tox
+inflect==3.0.2            # via -r requirements/test.txt, jinja2-pluralize
 ipaddress==1.0.23         # via -r requirements/test.txt, cybersource-rest-client-python
 isodate==0.6.0            # via -r requirements/test.txt, zeep
 isort==4.3.21             # via -r requirements/test.txt, pylint
@@ -112,18 +113,19 @@ markdown==2.6.9           # via -r requirements/test.txt
 markupsafe==1.1.1         # via -r requirements/docs.txt, -r requirements/test.txt, jinja2
 mccabe==0.6.1             # via -r requirements/test.txt, pylint
 mock-django==0.6.10       # via -r requirements/test.txt
-mock==4.0.2               # via -r requirements/test.txt, mock-django
+mock==3.0.5               # via -r requirements/test.txt, mock-django
 more-itertools==8.4.0     # via -r requirements/test.txt, pytest
 mysqlclient==1.4.6        # via -r requirements/test.txt
 naked==0.1.31             # via -r requirements/test.txt, crypto, cybersource-rest-client-python
 ndg-httpsclient==0.5.1    # via -r requirements/test.txt
-newrelic==5.16.1.146      # via -r requirements/test.txt, edx-django-utils
+newrelic==5.16.2.147      # via -r requirements/test.txt, edx-django-utils
 nose==1.3.7               # via -r requirements/test.txt, cybersource-rest-client-python
 oauthlib==3.1.0           # via -r requirements/test.txt, requests-oauthlib, social-auth-core
 openapi-codec==1.3.2      # via -r requirements/test.txt, django-rest-swagger
 packaging==20.4           # via -r requirements/test.txt, bleach, pytest, tox
 paramiko==2.7.1           # via -r requirements/test.txt, cybersource-rest-client-python
 path.py==7.2              # via -r requirements/test.txt, edx-i18n-tools
+pathlib2==2.3.5           # via -r requirements/test.txt, pytest
 paypalrestsdk==1.13.1     # via -r requirements/test.txt
 pbr==5.4.5                # via -r requirements/test.txt, cybersource-rest-client-python, fixtures, stevedore, testtools
 phonenumbers==8.12.8      # via -r requirements/test.txt, django-oscar, django-phonenumber-field
@@ -155,10 +157,10 @@ pytest-base-url==1.4.2    # via -r requirements/test.txt, pytest-selenium
 pytest-cov==2.10.1        # via -r requirements/test.txt
 pytest-django-ordering==1.2.0  # via -r requirements/test.txt
 pytest-django==3.9.0      # via -r requirements/test.txt, pytest-django-ordering
-pytest-html==2.1.1        # via -r requirements/test.txt, pytest-selenium
-pytest-metadata==1.10.0   # via -r requirements/test.txt, pytest-html
+pytest-html==1.22.1       # via -r requirements/test.txt, pytest-selenium
+pytest-metadata==1.8.0    # via -r requirements/test.txt, pytest-html
 pytest-randomly==3.4.1    # via -r requirements/test.txt
-pytest-selenium==2.0.0    # via -r requirements/test.txt
+pytest-selenium==1.17.0   # via -r requirements/test.txt
 pytest-timeout==1.4.2     # via -r requirements/test.txt
 pytest-variables==1.9.0   # via -r requirements/test.txt, pytest-selenium
 pytest==5.3.5             # via -r requirements/test.txt, pytest-base-url, pytest-cov, pytest-django, pytest-django-ordering, pytest-html, pytest-metadata, pytest-randomly, pytest-selenium, pytest-timeout, pytest-variables
@@ -178,7 +180,7 @@ redis==3.5.3              # via -r requirements/test.txt, edx-ecommerce-worker
 requests-oauthlib==1.3.0  # via -r requirements/test.txt, social-auth-core
 requests-toolbelt==0.9.1  # via -r requirements/test.txt, zeep
 requests==2.24.0          # via -r requirements/docs.txt, -r requirements/test.txt, analytics-python, coreapi, cybersource-rest-client-python, edx-drf-extensions, edx-rest-api-client, naked, paypalrestsdk, pyjwkest, pytest-base-url, pytest-selenium, requests-oauthlib, requests-toolbelt, responses, sailthru-client, slumber, social-auth-core, sphinx, stripe, transifex-client, zeep
-responses==0.10.16        # via -r requirements/test.txt
+responses==0.11.0         # via -r requirements/test.txt
 rest-condition==1.0.3     # via -r requirements/test.txt, edx-drf-extensions
 rjsmin==1.1.0             # via -r requirements/test.txt, django-compressor
 rsa==4.6                  # via -r requirements/test.txt, cybersource-rest-client-python
@@ -188,7 +190,7 @@ selenium==3.141.0         # via -r requirements/test.txt, bok-choy, pytest-selen
 semantic-version==2.8.5   # via -r requirements/test.txt, edx-drf-extensions
 shellescape==3.8.1        # via -r requirements/test.txt, crypto, cybersource-rest-client-python
 simplejson==3.17.2        # via -r requirements/test.txt, django-rest-swagger, sailthru-client
-six==1.15.0               # via -r requirements/docs.txt, -r requirements/test.txt, analytics-python, astroid, bcrypt, bleach, bok-choy, cryptography, cybersource-rest-client-python, diff-cover, django-compressor, django-extra-views, django-simple-history, djangorestframework-csv, edx-auth-backends, edx-django-release-util, edx-drf-extensions, edx-i18n-tools, edx-opaque-keys, edx-rbac, edx-sphinx-theme, fixtures, freezegun, httpretty, isodate, jsonschema, libsass, packaging, paypalrestsdk, purl, pyjwkest, pynacl, pyopenssl, pyrsistent, python-dateutil, python-memcached, responses, social-auth-app-django, social-auth-core, sphinx, tenacity, testtools, tox, transifex-client, unittest2, webtest, zeep
+six==1.15.0               # via -r requirements/docs.txt, -r requirements/test.txt, analytics-python, astroid, bcrypt, bleach, bok-choy, cryptography, cybersource-rest-client-python, diff-cover, django-compressor, django-extra-views, django-simple-history, djangorestframework-csv, edx-auth-backends, edx-django-release-util, edx-drf-extensions, edx-i18n-tools, edx-opaque-keys, edx-rbac, edx-sphinx-theme, fixtures, freezegun, httpretty, isodate, jsonschema, libsass, mock, packaging, pathlib2, paypalrestsdk, purl, pyjwkest, pynacl, pyopenssl, pyrsistent, python-dateutil, python-memcached, responses, social-auth-app-django, social-auth-core, sphinx, stevedore, testtools, tox, transifex-client, unittest2, webtest, zeep
 slumber==0.7.1            # via -r requirements/test.txt, edx-rest-api-client
 smmap==3.0.4              # via gitdb
 snowballstemmer==2.0.0    # via -r requirements/docs.txt, sphinx
@@ -198,9 +200,8 @@ sorl-thumbnail==12.6.3    # via -r requirements/test.txt
 soupsieve==2.0.1          # via -r requirements/test.txt, beautifulsoup4
 sphinx==1.5.3             # via -r requirements/docs.txt, edx-sphinx-theme
 sqlparse==0.3.1           # via -r requirements/test.txt, django, django-debug-toolbar
-stevedore==3.2.0          # via -r requirements/test.txt, edx-django-utils, edx-opaque-keys
+stevedore==1.32.0         # via -r requirements/test.txt, edx-django-utils, edx-opaque-keys
 stripe==1.70.0            # via -r requirements/test.txt
-tenacity==6.2.0           # via -r requirements/test.txt, pytest-selenium
 testfixtures==6.14.1      # via -r requirements/test.txt
 testtools==2.4.0          # via -r requirements/test.txt, cybersource-rest-client-python, fixtures, python-subunit
 text-unidecode==1.3       # via -r requirements/test.txt, faker, python-slugify
@@ -209,6 +210,7 @@ tox-battery==0.5.2        # via -r requirements/test.txt
 tox==3.14.6               # via -r requirements/test.txt, tox-battery
 traceback2==1.4.0         # via -r requirements/test.txt, cybersource-rest-client-python, testtools, unittest2
 transifex-client==0.13.11  # via -r requirements/dev.in
+typed-ast==1.4.1          # via -r requirements/test.txt, astroid
 typing==3.7.4.3           # via -r requirements/test.txt, cybersource-rest-client-python
 unicodecsv==0.14.1        # via -r requirements/test.txt, djangorestframework-csv
 unittest2==1.1.0          # via -r requirements/test.txt, testtools
@@ -226,6 +228,7 @@ wrapt==1.11.2             # via -r requirements/test.txt, astroid
 x509==0.1                 # via -r requirements/test.txt, cybersource-rest-client-python
 xss-utils==0.1.3          # via -r requirements/test.txt
 zeep==3.4.0               # via -r requirements/test.txt
+zipp==1.2.0               # via -r requirements/test.txt, importlib-metadata
 zope.interface==5.1.0     # via -r requirements/test.txt, cybersource-rest-client-python, datetime
 
 # The following packages are considered to be unsafe in a requirements file:

@@ -11,7 +11,7 @@ argparse==1.4.0           # via unittest2
 asn1crypto==1.4.0         # via cybersource-rest-client-python
 attrs==20.1.0             # via jsonschema, zeep
 babel==2.8.0              # via django-oscar, django-phonenumber-field
-bcrypt==3.2.0             # via cybersource-rest-client-python, paramiko
+bcrypt==3.1.7             # via cybersource-rest-client-python, paramiko
 billiard==3.6.3.0         # via celery
 bleach==3.1.5             # via -r requirements/base.in
 boto==2.49.0              # via django-ses
@@ -20,7 +20,7 @@ celery==4.4.7             # via edx-ecommerce-worker
 certifi==2020.6.20        # via cybersource-rest-client-python, requests
 cffi==1.14.2              # via bcrypt, cryptography, cybersource-rest-client-python, pynacl
 chardet==3.0.4            # via cybersource-rest-client-python, requests
-configparser==5.0.0       # via cybersource-rest-client-python
+configparser==4.0.2       # via cybersource-rest-client-python
 coreapi==2.3.3            # via -r requirements/base.in, django-rest-swagger, openapi-codec
 coreschema==0.0.4         # via coreapi
 coverage==5.2.1           # via cybersource-rest-client-python
@@ -78,6 +78,7 @@ funcsigs==1.0.2           # via cybersource-rest-client-python
 future==0.18.2            # via pyjwkest
 gunicorn==19.7.1          # via -r requirements/production.in
 idna==2.7                 # via -c requirements/pins.txt, cybersource-rest-client-python, requests
+importlib-metadata==1.7.0  # via jsonschema, kombu
 ipaddress==1.0.23         # via cybersource-rest-client-python
 isodate==0.6.0            # via zeep
 itypes==1.2.0             # via coreapi
@@ -144,13 +145,13 @@ sailthru-client==2.2.3    # via -r requirements/base.in, edx-ecommerce-worker
 semantic-version==2.8.5   # via edx-drf-extensions
 shellescape==3.8.1        # via crypto, cybersource-rest-client-python
 simplejson==3.17.2        # via django-rest-swagger, sailthru-client
-six==1.15.0               # via analytics-python, bcrypt, bleach, cryptography, cybersource-rest-client-python, django-compressor, django-extra-views, django-simple-history, djangorestframework-csv, edx-auth-backends, edx-django-release-util, edx-drf-extensions, edx-opaque-keys, edx-rbac, fixtures, isodate, jsonschema, libsass, packaging, paypalrestsdk, purl, pyjwkest, pynacl, pyopenssl, pyrsistent, python-dateutil, python-memcached, social-auth-app-django, social-auth-core, testtools, unittest2, zeep
+six==1.15.0               # via analytics-python, bcrypt, bleach, cryptography, cybersource-rest-client-python, django-compressor, django-extra-views, django-simple-history, djangorestframework-csv, edx-auth-backends, edx-django-release-util, edx-drf-extensions, edx-opaque-keys, edx-rbac, fixtures, isodate, jsonschema, libsass, packaging, paypalrestsdk, purl, pyjwkest, pynacl, pyopenssl, pyrsistent, python-dateutil, python-memcached, social-auth-app-django, social-auth-core, stevedore, testtools, unittest2, zeep
 slumber==0.7.1            # via edx-rest-api-client
 git+https://github.com/python-social-auth/social-app-django.git@c00d23c2b45c3317bd35b15ad1b959338689cef8#egg=social-auth-app-django  # via -r requirements/base.in, edx-auth-backends
 social-auth-core==3.2.0   # via -c requirements/pins.txt, edx-auth-backends, social-auth-app-django
 sorl-thumbnail==12.6.3    # via -r requirements/base.in
 sqlparse==0.3.1           # via django
-stevedore==3.2.0          # via edx-django-utils, edx-opaque-keys
+stevedore==1.32.0         # via edx-django-utils, edx-opaque-keys
 stripe==1.70.0            # via -r requirements/base.in
 testtools==2.4.0          # via cybersource-rest-client-python, fixtures, python-subunit
 text-unidecode==1.3       # via faker
@@ -166,6 +167,7 @@ wheel==0.35.1             # via cybersource-rest-client-python
 x509==0.1                 # via cybersource-rest-client-python
 xss-utils==0.1.3          # via -r requirements/base.in
 zeep==3.4.0               # via -r requirements/base.in
+zipp==1.2.0               # via importlib-metadata
 zope.interface==5.1.0     # via cybersource-rest-client-python, datetime
 
 # The following packages are considered to be unsafe in a requirements file:
