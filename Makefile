@@ -107,7 +107,7 @@ fast_diff_coverage: requirements.tox
 	tox -e $(PYTHON_ENV)-fast_diff_coverage
 
 e2e: requirements.tox
-	tox -e $(PYTHON_ENV)-e2e
+	tox -e py35-e2e
 
 extract_translations: requirements.tox
 	tox -e $(PYTHON_ENV)-${DJANGO_ENV_VAR}-extract_translations
