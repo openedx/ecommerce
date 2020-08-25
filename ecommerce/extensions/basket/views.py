@@ -739,8 +739,13 @@ class PaymentApiLogicMixin(BasketLogicMixin):
         payment_processor = payment_processor_class(self.request.site)
         if not hasattr(payment_processor, 'get_capture_context'):
             return
-        response['capture_context'] = payment_processor.get_capture_context()
-        self.request.session['capture_context'] = response['capture_context']
+
+        try:
+            response['capture_context'] = payment_processor.get_capture_context()
+            self.request.session['capture_context'] = response['capture_context']
+        except Exception:  # pylint: disable=broad-except
+            logger.exception("Error generating capture_context")
+            return
 
     def _get_response_status(self, response):
         return message_utils.get_response_status(response['messages'])
