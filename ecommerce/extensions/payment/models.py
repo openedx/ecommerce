@@ -1,6 +1,5 @@
-
-
 import logging
+from datetime import datetime
 from decimal import Decimal
 
 from django.core.exceptions import ValidationError
@@ -152,6 +151,36 @@ class SDNFallbackMetadata(TimeStampedModel):
     )
 
     @classmethod
+    def insert_new_sdn_fallback_metadata_entry(cls, file_checksum):
+        """
+        Insert a new SDNFallbackMetadata entry if the new csv differs from the current one
+        If there is no current metadata entry, create a new one and log a warning
+
+        Args:
+            file_checksum (str): Hash of the csv content
+
+        Returns:
+            sdn_fallback_metadata_entry (SDNFallbackMetadata): Instance of the current SDNFallbackMetadata class
+            or None if none exists
+        """
+        now = datetime.utcnow()
+        try:
+            if file_checksum == SDNFallbackMetadata.objects.get(import_state='Current').file_checksum:
+                logger.info("The SDN CSV file has not changed, so skipping import. The file_checksum was %s",
+                            file_checksum)
+                # Update download timestamp even though we're not importing this list
+                SDNFallbackMetadata.objects.filter(import_state="New").update(download_timestamp=now)
+                return None
+        except SDNFallbackMetadata.DoesNotExist:
+            logger.warning("SDNFallbackMetadata has no record with import_state Current")
+
+        sdn_fallback_metadata_entry = SDNFallbackMetadata.objects.create(
+            file_checksum=file_checksum,
+            download_timestamp=now,
+        )
+        return sdn_fallback_metadata_entry
+
+    @classmethod
     @atomic
     def swap_all_states(cls):
         """
@@ -216,7 +245,6 @@ class SDNFallbackData(models.Model):
     Fields:
     sdn_fallback_metadata (ForeignKey): Foreign Key field with the CSV import Primary Key
     referenced in SDNFallbackMetadata.
-    sdn_id (CharField): Primary Key ID from the consolidated list that is unique to a record.
     source (CharField): Origin of where the data comes from, since the CSV consolidates
     export screening lists of the Departments of Commerce, State and the Treasury.
     sdn_type (CharField): For a person with source 'Specially Designated Nationals (SDN)
@@ -227,18 +255,17 @@ class SDNFallbackData(models.Model):
     addresses (TextField): A space separated list of all lowercased addresses combined into one
     string. There are records that don't have an address, but because city is a required field
     in the Payment MFE, those records would not be matched in the API/fallback.
-    countries (CharField): A space separated list of all lowercased countries combined into one string.
+    countries (CharField): A space separated list of all countries combined into one string.
     Countries are extracted from the addresses field and in some instances the ID field in their 2 letter
     abbreviation. There are records that don't have a country, but because country is a required field in
     the Payment MFE, those records would not be matched in the API/fallback.
     """
     sdn_fallback_metadata = models.ForeignKey('payment.SDNFallbackMetadata', on_delete=models.CASCADE)
-    sdn_id = models.CharField(primary_key=True, max_length=255)
-    source = models.CharField(max_length=255, db_index=True)
-    sdn_type = models.CharField(max_length=255, db_index=True)
-    names = models.TextField()
-    addresses = models.TextField()
-    countries = models.CharField(max_length=255)
+    source = models.CharField(default='', max_length=255, db_index=True)
+    sdn_type = models.CharField(default='', max_length=255, db_index=True)
+    names = models.TextField(default='')
+    addresses = models.TextField(default='')
+    countries = models.CharField(default='', max_length=255)
 
     @classmethod
     def get_current_records_and_filter_by_source_and_type(cls, source, sdn_type):

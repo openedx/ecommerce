@@ -333,7 +333,6 @@ class SDNFallbackDataFactory(factory.DjangoModelFactory):
         model = SDNFallbackData
 
     sdn_fallback_metadata = factory.SubFactory(SDNFallbackMetadataFactory)
-    sdn_id = factory.Sequence(lambda n: n)
     source = "Specially Designated Nationals (SDN) - Treasury Department"
     sdn_type = "Individual"
     names = factory.Faker('name')

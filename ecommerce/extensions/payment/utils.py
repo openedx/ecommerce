@@ -1,11 +1,17 @@
 # Changes part of REV-1209 - see https://github.com/edx/ecommerce/pull/3020
 import copy
+import csv
+import hashlib
+import io
 import logging
 import re
+import string
+from datetime import datetime, timezone
 from urllib.parse import urlencode
 
 # Changes part of REV-1209 - see https://github.com/edx/ecommerce/pull/3020
 import crum
+import pycountry
 import requests
 # Changes part of REV-1209 - see https://github.com/edx/ecommerce/pull/3020
 import waffle
@@ -17,12 +23,14 @@ from requests.exceptions import HTTPError, Timeout
 
 from ecommerce.core.constants import SEAT_PRODUCT_CLASS_NAME
 from ecommerce.extensions.analytics.utils import parse_tracking_context
-from ecommerce.extensions.payment.models import SDNCheckFailure
+from ecommerce.extensions.payment.models import SDNCheckFailure, SDNFallbackData, SDNFallbackMetadata
 
 logger = logging.getLogger(__name__)
 Basket = get_model('basket', 'Basket')
 BasketAttribute = get_model('basket', 'BasketAttribute')
 BasketAttributeType = get_model('basket', 'BasketAttributeType')
+
+COUNTRY_CODES = {country.alpha_2 for country in pycountry.countries}
 
 
 def get_basket_program_uuid(basket):
@@ -58,14 +66,14 @@ def get_program_uuid(order):
     return get_basket_program_uuid(order.basket)
 
 
-def middle_truncate(string, chars):
+def middle_truncate(provided_string, chars):
     """Truncate the provided string, if necessary.
 
     Cuts excess characters from the middle of the string and replaces
     them with a string indicating that truncation has occurred.
 
     Arguments:
-        string (unicode or str): The string to be truncated.
+        provided_string (unicode or str): The string to be truncated.
         chars (int): The character limit for the truncated string.
 
     Returns:
@@ -76,8 +84,8 @@ def middle_truncate(string, chars):
         ValueError: If the provided character limit is less than the length of
             the truncation indicator.
     """
-    if len(string) <= chars:
-        return string
+    if len(provided_string) <= chars:
+        return provided_string
 
     # Translators: This is a string placed in the middle of a truncated string
     # to indicate that truncation has occurred. For example, if a title may only
@@ -90,7 +98,7 @@ def middle_truncate(string, chars):
         raise ValueError
 
     slice_size = (chars - indicator_length) // 2
-    start, end = string[:slice_size], string[-slice_size:]
+    start, end = provided_string[:slice_size], provided_string[-slice_size:]
     truncated = u'{start}{indicator}{end}'.format(start=start, indicator=indicator, end=end)
 
     return truncated
@@ -315,3 +323,118 @@ class SDNClient:
 
         logger.warning('SDN check failed for user [%s] on site [%s]', name, site.name)
         basket.owner.deactivate_account(site.siteconfiguration)
+
+
+def process_text(text):
+    """ Lowercase, remove non-alphanumeric characters, and ignore order and word frequency
+
+    Args:
+        text (str): names or addresses from the sdn list to be processed
+
+    Returns:
+        text (set): processed text
+    """
+    if len(text) == 0:
+        return ''
+    text = text.lower()
+    # Strip non-alphanumeric characters from each word
+    # Ignore order and word frequency
+    text = set(filter(None, {word.strip(string.punctuation) for word in text.split()}))
+    return text
+
+
+def extract_country_information(addresses, ids):
+    """ Extract any country codes that are present, if any, in the addresses and ids fields
+
+    Args:
+        addresses (str): addresses from the csv addresses field
+        ids (str): ids from the csv ids field
+
+    Returns:
+        countries (str): Space separated list of alpha_2 country codes present in the addresses and ids fields
+    """
+    country_matches = []
+    if addresses:
+        # Addresses are stored in a '; ' separated format with the country at the end of each address
+        # We check for two uppercase letters followed by '; ' or at the end of the string
+        addresses_regex = r'([A-Z]{2})$|([A-Z]{2});'
+        country_matches += re.findall(addresses_regex, addresses)
+    if ids:
+        # Ids are stored in a '; ' separated format with the country at the beginning of each id
+        # Countries within the id are followed by a comma
+        # We check for two uppercase letters prefaced by '; ' or at the beginning of a string
+        # Notes are also stored in this field in sentence case, so checking for two uppercase letters handles this
+        ids_regex = r'^([A-Z]{2}),|; ([A-Z]{2}),'
+        country_matches += re.findall(ids_regex, ids)
+    # country_matches is returned in the following format [('', 'IQ'), ('', 'JO'), ('', 'IQ'), ('', 'TR')]
+    # We filter out regex groups with no match, deduplicate countries, and convert them to a space separated string
+    # with the following format 'IQ JO TR'
+    country_codes = {' '.join(tuple(filter(None, x))) for x in country_matches}
+    valid_country_codes = COUNTRY_CODES.intersection(country_codes)
+    formatted_countries = ' '.join(valid_country_codes)
+    return formatted_countries
+
+
+def populate_sdn_fallback_metadata(sdn_csv_string):
+    """
+    Insert a new SDNFallbackMetadata entry if the new csv differs from the current one
+
+    Args:
+        sdn_csv_string (bytes): Bytes of the sdn csv
+
+    Returns:
+        sdn_fallback_metadata_entry (SDNFallbackMetadata): Instance of the current SDNFallbackMetadata class
+        or None if none exists
+    """
+    file_checksum = hashlib.sha256(sdn_csv_string.encode('utf-8')).hexdigest()
+    metadata_entry = SDNFallbackMetadata.insert_new_sdn_fallback_metadata_entry(file_checksum)
+    return metadata_entry
+
+
+def populate_sdn_fallback_data(sdn_csv_string, metadata_entry):
+    """
+    Process CSV data and create SDNFallbackData records
+
+    Args:
+        sdn_csv_string (str): String of the sdn csv
+        metadata_entry (SDNFallbackMetadata): Instance of the current SDNFallbackMetadata class
+    """
+    sdn_csv_reader = csv.DictReader(io.StringIO(sdn_csv_string))
+    processed_records = []
+    for row in sdn_csv_reader:
+        sdn_source, sdn_type, names, addresses, alt_names, ids = (
+            row['source'] or '', row['type'] or '', row['name'] or '',
+            row['addresses'] or '', row['alt_names'] or '', row['ids'] or ''
+        )
+        processed_names = ' '.join(process_text(' '.join(filter(None, [names, alt_names]))))
+        processed_addresses = ' '.join(process_text(addresses))
+        countries = extract_country_information(addresses, ids)
+        processed_records.append(SDNFallbackData(
+            sdn_fallback_metadata=metadata_entry,
+            source=sdn_source,
+            sdn_type=sdn_type,
+            names=processed_names,
+            addresses=processed_addresses,
+            countries=countries
+        ))
+    # Bulk create should be more efficient for a few thousand records without needing to use SQL directly.
+    SDNFallbackData.objects.bulk_create(processed_records)
+
+
+def populate_sdn_fallback_data_and_metadata(sdn_csv_string):
+    """
+    1. Create the SDNFallbackMetadata entry
+    2. Populate the SDNFallbackData from the csv
+
+    Args:
+        sdn_csv_string (str): String of the sdn csv
+    """
+    metadata_entry = populate_sdn_fallback_metadata(sdn_csv_string)
+    if metadata_entry:
+        populate_sdn_fallback_data(sdn_csv_string, metadata_entry)
+        # Once data is successfully imported, update the metadata import timestamp and state
+        now = datetime.now(timezone.utc)
+        metadata_entry.import_timestamp = now
+        metadata_entry.save()
+        metadata_entry.swap_all_states()
+    return metadata_entry
