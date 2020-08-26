@@ -66,6 +66,31 @@ def checkSDN(request, name, city, country):
     return hit_count
 
 
+def checkSDNFallback(name, city, country):
+    """
+    Performs an SDN check against the SDNFallbackData
+
+    First, filter the SDNFallbackData records by source, type and country.
+    Then, compare the provided name/city against each record and return whether we find a match.
+    The check uses the following properties:
+        1. Order of words doesn’t matter
+        2. Number of times that a given word appears doesn’t matter
+        3. Punctuation between words or at the beginning/end of a given word doesn’t matter
+        4. If a subset of words match, it still counts as a match
+        5. Capitalization doesn’t matter
+    """
+    records = SDNFallbackData.get_current_records_and_filter_by_source_and_type(
+        'Specially Designated Nationals (SDN) - Treasury Department', 'Individual'
+    )
+    records = records.filter(countries__contains=country)
+    processed_name, processed_city = process_text(name), process_text(city)
+    for record in records:
+        record_names, record_addresses = set(record.names.split()), set(record.addresses.split())
+        if (processed_name.issubset(record_names) and processed_city.issubset(record_addresses)):
+            return True
+    return False
+
+
 class SDNClient:
     """A utility class that handles SDN related operations."""
     def __init__(self, api_url, api_key, sdn_list):
@@ -224,7 +249,7 @@ def process_text(text):
 
     # Strip non-alphanumeric characters from each word
     # Ignore order and word frequency
-    text = set(filter(None, {word.strip(string.punctuation) for word in text.split()}))
+    text = set(filter(None, set(re.split('[^a-zA-Z0-9]', text))))
 
     return text
 

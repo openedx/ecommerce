@@ -16,6 +16,7 @@ from requests.exceptions import HTTPError, Timeout
 from ecommerce.core.models import User
 from ecommerce.extensions.payment.core.sdn import (
     SDNClient,
+    checkSDNFallback,
     extract_country_information,
     populate_sdn_fallback_data,
     populate_sdn_fallback_data_and_metadata,
@@ -299,8 +300,7 @@ Joshuafort, MD 72104, TH",,,,,,,,,,,,,,https://banks-bender.com/,Michael Anderso
         ('BAR foo', {'foo', 'bar'}),
         ('foo BAR !!!', {'foo', 'bar'}),
         ('!foo! !BAR!', {'foo', 'bar'}),
-        ('!f!o!o! !B!A!R!', {'f!o!o', 'b!a!r'}),
-        ('!f!o!o! !B!A!R!', {'f!o!o', 'b!a!r'}),
+        ('!f!o!o! !B!A!R!', {'f', 'o', 'o', 'b', 'a', 'r'}),
         ('!foo! !BAR! !BAR! !foo!', {'foo', 'bar'}),
         ('Renée Noël François Ruairí Jokūbas KŠthe Nuñez',
             {'nunez', 'renee', 'noel', 'francois', 'ruairi', 'jokubas', 'ksthe'}),
@@ -332,3 +332,85 @@ Joshuafort, MD 72104, TH",,,,,,,,,,,,,,https://banks-bender.com/,Michael Anderso
         """ Verify that characters with accents are transliterated correctly."""
         output = process_text(text)
         self.assertEqual(output, expected_output)
+
+    @ddt.data(
+        # check order properties
+        ('Juan M. de la Cruz', True),
+        ('Cruz la de M. Juan', True),
+        ('nuaJ', False),
+        # check subset properties
+        ('Juan', True),
+        ('Cruz', True),
+        ('de', True),
+        ('la', True),
+        ('M.', True),
+        ('M', True),
+        ('Juan de', True),
+        ('Juande', False),
+        # check punctuation properties
+        ('la.', True),
+        ('la-', True),
+        ('la}', True),
+        ('Juan-de-la-Cruz,', True),
+        ('Ju-an-de-la-Cruz', False),
+        ('-de-Juan-Cruz-la-', True),
+        ('.dE@jUaN.....CRUZ----!??!?!la.', True),
+        ('Cruz,,,,', True),
+        # check capitalizaiton properties
+        ('jUan dE LA CruZ', True),
+        # check frequency properties
+        ('Juan de la Cruz Juan de la Cruz', True),
+        ('Juan Juan M. M. de de la la Cruz Cruz', True),
+        # other examples
+        ('Juanito', False),
+        ('John de la Cruz', False),
+    )
+    @ddt.unpack
+    def test_check_sdn_fallback_names(self, name, match):
+        """
+        Verify that the following properties are true for names:
+        1. Order of words doesn’t matter
+        2. Number of times that a given word appears doesn’t matter
+        3. Punctuation between words or at the beginning/end of a given word doesn’t matter
+        4. If a subset of words match, it still counts as a match
+        5. Capitalization doesn’t matter
+        """
+        # pylint: disable=line-too-long
+        csv_string = """_id,source,entity_number,type,programs,name,title,addresses,federal_register_notice,start_date,end_date,standard_order,license_requirement,license_policy,call_sign,vessel_type,gross_tonnage,gross_registered_tonnage,vessel_flag,vessel_owner,remarks,source_list_url,alt_names,citizenships,dates_of_birth,nationalities,places_of_birth,source_information_url,ids
+94734218,Specially Designated Nationals (SDN) - Treasury Department,96663868,Individual,material,Juan M. de la Cruz,Dr.,"17472 Christie Stream Apt. 976 North Kristinaport, HI 91033, SN",,,,,,,,,,,,,,https://www.juarez-collier.org/,Wendy Brock,DJ,1944-03-05,Faroe Islands,PK,http://richardson-richardson.org/,CI"""
+        # pylint: enable=line-too-long
+        metadata_entry = populate_sdn_fallback_data_and_metadata(csv_string)
+        self.assertEqual(checkSDNFallback(name, 'North Kristinaport', 'SN'), match)
+
+    @ddt.data(
+        # check order properties
+        ('17472 Christie Stream Apt. 976 North Kristinaport, HI 91033, SN', True),
+        ('SN 91033, HI Kristinaport, North 976 Apt. Stream Christie 17472', True),
+        # check subset properties
+        ('North', True),
+        ('Kristinaport,', True),
+        # check punctuation properties
+        ('Kristinaport', True),
+        ('Kristinaport,,!@#$%^&*()', True),
+        ('Krist%^&*()inaport', False),
+        # check capitalizaiton properties
+        ('KRISTINAPORT', True),
+        # check frequency properties
+        ('Kristinaport Kristinaport', True),
+    )
+    @ddt.unpack
+    def test_check_sdn_fallback_address(self, address, match):
+        """
+        Verify that the following properties are true for addresses:
+        1. Order of words doesn’t matter
+        2. Number of times that a given word appears doesn’t matter
+        3. Punctuation between words or at the beginning/end of a given word doesn’t matter
+        4. If a subset of words match, it still counts as a match
+        5. Capitalization doesn’t matter
+        """
+        # pylint: disable=line-too-long
+        csv_string = """_id,source,entity_number,type,programs,name,title,addresses,federal_register_notice,start_date,end_date,standard_order,license_requirement,license_policy,call_sign,vessel_type,gross_tonnage,gross_registered_tonnage,vessel_flag,vessel_owner,remarks,source_list_url,alt_names,citizenships,dates_of_birth,nationalities,places_of_birth,source_information_url,ids
+94734218,Specially Designated Nationals (SDN) - Treasury Department,96663868,Individual,material,Juan M. de la Cruz,Dr.,"17472 Christie Stream Apt. 976 North Kristinaport, HI 91033, SN",,,,,,,,,,,,,,https://www.juarez-collier.org/,Wendy Brock,DJ,1944-03-05,Faroe Islands,PK,http://richardson-richardson.org/,CI"""
+        # pylint: enable=line-too-long
+        metadata_entry = populate_sdn_fallback_data_and_metadata(csv_string)
+        self.assertEqual(checkSDNFallback("Juan", address, 'SN'), match)
