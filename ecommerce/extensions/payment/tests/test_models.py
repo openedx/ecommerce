@@ -248,7 +248,6 @@ class SDNFallbackDataTests(TestCase):
         "Verify all fields are correctly populated"
         new_data = SDNFallbackData(
             sdn_fallback_metadata=self.sdn_metadata,
-            sdn_id="123abc",
             source="Specially Designated Nationals (SDN) - Treasury Department",
             sdn_type="Individual",
             names="maria giuseppe",
@@ -262,7 +261,6 @@ class SDNFallbackDataTests(TestCase):
 
         actual_data = SDNFallbackData.objects.all()[0]
         self.assertEqual(actual_data.sdn_fallback_metadata, self.sdn_metadata)
-        self.assertEqual(actual_data.sdn_id, "123abc")
         self.assertEqual(actual_data.source, "Specially Designated Nationals (SDN) - Treasury Department")
         self.assertEqual(actual_data.sdn_type, "Individual")
         self.assertEqual(actual_data.names, "maria giuseppe")
@@ -294,11 +292,10 @@ class SDNFallbackDataTests(TestCase):
             [sdn_source, sdn_type, sdn_metadata_discard],
         ]
 
-        for index, row in enumerate(rows):
+        for row in rows:
             source, sdn_type, sdn_fallback_metadata = row
             factories.SDNFallbackDataFactory.create(
                 sdn_fallback_metadata=sdn_fallback_metadata,
-                sdn_id=index,
                 source=source,
                 sdn_type=sdn_type,
             )

@@ -9,7 +9,10 @@ import tempfile
 import requests
 from django.conf import settings
 from django.core.management.base import BaseCommand
+from django.db import transaction
 from requests.exceptions import Timeout
+
+from ecommerce.extensions.payment.utils import populate_sdn_fallback_data_and_metadata
 
 logger = logging.getLogger(__name__)
 
@@ -54,8 +57,16 @@ class Command(BaseCommand):
                 file_size_in_MB = file_size_in_bytes / 10**6
 
                 if file_size_in_MB > threshold:
-                    print("[TEMP]: CSV has eligible size, okay to import")
-                    # ^ when import is ready (REV-1310), replace print statement with call to import with our csv
+                    sdn_file_string = download.content.decode('utf-8')
+                    with transaction.atomic():
+                        metadata_entry = populate_sdn_fallback_data_and_metadata(sdn_file_string)
+                    logger.info('Imported SDN CSV into SDNFallbackMetadata and SDNFallbackData models. Metadata id %s',
+                                metadata_entry.id)
+                    self.stdout.write(
+                        self.style.SUCCESS(
+                            'Imported SDN CSV into the SDNFallbackMetadata and SDNFallbackData models.'
+                        )
+                    )
                 else:
                     logger.warning("SDN DOWNLOAD FAILURE: file too small! (%f MB vs threshold of %s MB)", file_size_in_MB, threshold)   # pylint: disable=line-too-long
                     raise Exception("CSV file download did not meet threshold given")
