@@ -35,7 +35,7 @@ script:
       DJANGO_ENV=$DJANGO_ENV make $TARGETS
     "
 
-matrix:
+jobs:
   include:
     - python: 3.8
       env:
@@ -51,3 +51,15 @@ matrix:
         - pip install -U codecov
         - docker exec ecommerce_testing /edx/app/ecommerce/ecommerce/.travis/run_coverage.sh
         - codecov
+    - stage: devstack_docker_push
+      name: Build and push devstack docker image
+      script: bash .travis/docker_devstack_push.sh
+      env:
+        - APP_NAME=ecommerce
+        - OPENEDX_RELEASE=master
+        - TAG_NAME=latest
+
+stages:
+  - name: test
+  - name: devstack_docker_push
+#    if: (NOT type IN (pull_request)) AND (branch = master)
