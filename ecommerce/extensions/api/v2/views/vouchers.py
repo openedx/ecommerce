@@ -164,11 +164,14 @@ class VoucherViewSet(NonDestroyableModelViewSet):
         multiple_credit_providers = False
         credit_provider_price = None
 
+        logger.info('[Voucher Offers] CourseSeatTypes: [%s], Voucher: [%s]', course_seat_types, voucher.id)
+
         products, stock_records, course_run_metadata = self.retrieve_course_objects(
             response['results'], course_seat_types
         )
         contains_verified_course = ('verified' in course_seat_types)
         for product in products:
+            logger.info('[Voucher Offers] Constructing offer data. Product: [%s]', product.id)
             # Omit unavailable seats from the offer results so that one seat does not cause an
             # error message for every seat in the query result.
             if not request.strategy.fetch_for_product(product).availability.is_available_to_buy:
