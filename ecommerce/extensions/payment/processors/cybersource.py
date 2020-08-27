@@ -95,6 +95,7 @@ class UnhandledCybersourceResponse:
     card_type: str
     transaction_id: str
     order_id: str
+    raw_json: dict
 
 
 class Cybersource(ApplePayMixin, BaseClientSidePaymentProcessor):
@@ -362,6 +363,7 @@ class Cybersource(ApplePayMixin, BaseClientSidePaymentProcessor):
             card_type=CYBERSOURCE_CARD_TYPE_MAP.get(response['req_card_type']),
             transaction_id=response.get('transaction_id', ''),   # Error Notifications do not include a transaction id.
             order_id=response['req_reference_number'],
+            raw_json=response,
         )
         return _response
 
@@ -626,6 +628,12 @@ class Cybersource(ApplePayMixin, BaseClientSidePaymentProcessor):
         logger.warning(msg)
         raise GatewayError(msg)
 
+    def record_processor_response(self, response, transaction_id=None, basket=None):
+        if isinstance(response, UnhandledCybersourceResponse):
+            response = response.raw_json
+
+        return super().record_processor_response(response, transaction_id=transaction_id, basket=basket)
+
 
 class CybersourceREST(Cybersource):  # pragma: no cover
     """
@@ -659,15 +667,16 @@ class CybersourceREST(Cybersource):  # pragma: no cover
             transaction_id = payment_processor_response.processor_information.transaction_id
             return payment_processor_response, transaction_id
         except ApiException as e:
-            self.record_processor_response({
-                'status': e.status,
-                'reason': e.reason,
-                'body': e.body,
-                'headers': dict(e.headers),
-            }, transaction_id=e.headers['v-c-correlation-id'], basket=basket)
-            logger.exception('Payment failed')
-            # This will display the generic error on the frontend
-            raise GatewayError()
+            if e.body is None:
+                self.record_processor_response({
+                    'status': e.status,
+                    'reason': e.reason,
+                }, transaction_id=None, basket=basket)
+                logger.exception('Payment failed')
+                # This will display the generic error on the frontend
+                raise GatewayError()
+            else:
+                return e, e.headers['v-c-correlation-id']
 
     def _normalize_processor_response(self, response):
         decision_map = {
@@ -697,6 +706,7 @@ class CybersourceREST(Cybersource):  # pragma: no cover
                 card_type=None,
                 transaction_id=None,
                 order_id=None,
+                raw_json=response_json,
             )
         else:
             decoded_capture_context = jwt.decode(self.capture_context['key_id'], verify=False)
@@ -717,6 +727,7 @@ class CybersourceREST(Cybersource):  # pragma: no cover
                 card_type=CYBERSOURCE_CARD_TYPE_MAP.get(response.payment_information.tokenized_card.type),
                 transaction_id=response.processor_information.transaction_id,
                 order_id=response.client_reference_information.code,
+                raw_json=response.to_dict(),
             )
 
     def authorize_payment_api(self, transient_token_jwt, basket, request, form_data):
