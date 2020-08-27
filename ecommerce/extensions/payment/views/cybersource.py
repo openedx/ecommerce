@@ -269,18 +269,15 @@ class CybersourceOrderCompletionView(EdxOrderPlacementMixin):
             exception.unlogged = False
             raise
 
-    def set_payment_response_custom_metrics(self, basket, notification, order_number, ppr, transaction_id):
-        # IMPORTANT: Do not set metric for the entire `notification`, because it includes PII.
+    def set_payment_response_custom_metrics(self, basket, order_number, ppr, transaction_id, reason_code="not-found", payment_response_message="Unknown Error"):
+        # IMPORTANT: Does not set metric for the entire `order_completion_message`, because it includes PII.
         #   It is accessible using the `payment_response_record_id` if needed.
         monitoring_utils.set_custom_metric('payment_response_processor_name', 'cybersource')
         monitoring_utils.set_custom_metric('payment_response_basket_id', basket.id)
         monitoring_utils.set_custom_metric('payment_response_order_number', order_number)
         monitoring_utils.set_custom_metric('payment_response_transaction_id', transaction_id)
         monitoring_utils.set_custom_metric('payment_response_record_id', ppr.id)
-        # For reason_code, see https://support.cybersource.com/s/article/What-does-this-response-code-mean#code_table
-        reason_code = notification.get("reason_code", "not-found")
         monitoring_utils.set_custom_metric('payment_response_reason_code', reason_code)
-        payment_response_message = notification.get("message", 'Unknown Error')
         monitoring_utils.set_custom_metric('payment_response_message', payment_response_message)
 
     # Note: method has too-many-statements, but it enables tracking that all exception handling gets logged
@@ -327,12 +324,17 @@ class CybersourceOrderCompletionView(EdxOrderPlacementMixin):
                 ppr = self.payment_processor.record_processor_response(
                     order_completion_message, transaction_id=self.transaction_id, basket=basket
                 )
+
+                # For reason_code, see https://support.cybersource.com/s/article/What-does-this-response-code-mean#code_table
+                reason_code = order_completion_message.get("reason_code", "not-found")
+                payment_response_message = order_completion_message.get("message", 'Unknown Error')
                 self.set_payment_response_custom_metrics(
                     basket,
-                    order_completion_message,
                     self.order_number,
                     ppr,
                     self.transaction_id,
+                    reason_code,
+                    payment_response_message,
                 )
 
             # Don't make this an atomic transaction; rolled back transactions prevent track_segment_event from firing.
