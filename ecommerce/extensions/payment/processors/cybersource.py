@@ -81,7 +81,6 @@ class Decision(Enum):
     decline = 'DECLINE'
     error = 'ERROR'
     review = 'REVIEW'
-    invalid = 'invalid'  # Used when the Cybersource decision doesn't match a known decision type
 
 
 @dataclass
@@ -96,6 +95,8 @@ class UnhandledCybersourceResponse:
     transaction_id: str
     order_id: str
     raw_json: dict
+    reason_code: str
+    payment_response_message: str
 
 
 class Cybersource(ApplePayMixin, BaseClientSidePaymentProcessor):
@@ -345,7 +346,7 @@ class Cybersource(ApplePayMixin, BaseClientSidePaymentProcessor):
         try:
             decision = Decision(response['decision'].upper())
         except ValueError:
-            decision = Decision.invalid
+            decision = response['decision']
 
         _response = UnhandledCybersourceResponse(
             decision=decision,
@@ -364,6 +365,9 @@ class Cybersource(ApplePayMixin, BaseClientSidePaymentProcessor):
             transaction_id=response.get('transaction_id', ''),   # Error Notifications do not include a transaction id.
             order_id=response['req_reference_number'],
             raw_json=response,
+            # For reason_code, see https://support.cybersource.com/s/article/What-does-this-response-code-mean#code_table
+            reason_code=response.get("reason_code", "not-found"),
+            payment_response_message=response.get("message", 'Unknown Error'),
         )
         return _response
 
@@ -408,7 +412,7 @@ class Cybersource(ApplePayMixin, BaseClientSidePaymentProcessor):
                     Decision.decline: TransactionDeclined,
                     Decision.error: GatewayError,
                     Decision.review: AuthorizationError,
-                }.get(response.decision, InvalidCybersourceDecision)
+                }.get(response.decision, InvalidCybersourceDecision(response.decision))
 
         transaction_id = response.transaction_id
         if transaction_id and response.decision == Decision.accept:
@@ -690,14 +694,18 @@ class CybersourceREST(Cybersource):  # pragma: no cover
             'INVALID_REQUEST': Decision.error,
         }
         if isinstance(response, ApiException):
-            response_json = json.loads(response.body)
-            decision = decision_map.get(response_json['status'], Decision.invalid)
+            try:
+                response_json = json.loads(response.body)
+            except:  # pylint: disable=bare-except
+                response_json = {}
+
+            decision = decision_map.get(response_json.get('status'), response_json.get('status'))
 
             return UnhandledCybersourceResponse(
                 decision=decision,
                 duplicate_payment=(
                     decision == Decision.error and
-                    response_json['reason'] == 'DUPLICATE_REQUEST'
+                    response_json.get('reason') == 'DUPLICATE_REQUEST'
                 ),
                 partial_authorization=False,
                 currency=None,
@@ -707,12 +715,16 @@ class CybersourceREST(Cybersource):  # pragma: no cover
                 transaction_id=None,
                 order_id=None,
                 raw_json=response_json,
+                # For reason_code, see
+                # https://support.cybersource.com/s/article/What-does-this-response-code-mean#code_table
+                reason_code=response.reason,
+                payment_response_message=response_json.get('message', 'Unknown Error'),
             )
         else:
             decoded_capture_context = jwt.decode(self.capture_context['key_id'], verify=False)
             jwk = RSAAlgorithm.from_jwk(json.dumps(decoded_capture_context['flx']['jwk']))
             decoded_payment_token = jwt.decode(self.transient_token_jwt, key=jwk, algorithms=['RS256'])
-            decision = decision_map.get(response.status, Decision.invalid)
+            decision = decision_map.get(response.status, response.status)
 
             return UnhandledCybersourceResponse(
                 decision=decision,
@@ -728,6 +740,8 @@ class CybersourceREST(Cybersource):  # pragma: no cover
                 transaction_id=response.processor_information.transaction_id,
                 order_id=response.client_reference_information.code,
                 raw_json=response.to_dict(),
+                reason_code=response.error_information and response.error_information.reason,
+                payment_response_message=response.error_information and response.error_information.message
             )
 
     def authorize_payment_api(self, transient_token_jwt, basket, request, form_data):

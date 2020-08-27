@@ -269,7 +269,17 @@ class CybersourceOrderCompletionView(EdxOrderPlacementMixin):
             exception.unlogged = False
             raise
 
-    def set_payment_response_custom_metrics(self, basket, order_number, ppr, transaction_id, reason_code="not-found", payment_response_message="Unknown Error"):
+    def set_payment_response_custom_metrics(
+            self,
+            basket,
+            order_number,
+            ppr,
+            transaction_id,
+            reason_code=None,
+            payment_response_message=None
+    ):
+        reason_code = 'not-found' if reason_code is None else reason_code
+        payment_response_message = 'Unknown Error' if payment_response_message is None else payment_response_message
         # IMPORTANT: Does not set metric for the entire `order_completion_message`, because it includes PII.
         #   It is accessible using the `payment_response_record_id` if needed.
         monitoring_utils.set_custom_metric('payment_response_processor_name', 'cybersource')
@@ -325,16 +335,13 @@ class CybersourceOrderCompletionView(EdxOrderPlacementMixin):
                     order_completion_message, transaction_id=self.transaction_id, basket=basket
                 )
 
-                # For reason_code, see https://support.cybersource.com/s/article/What-does-this-response-code-mean#code_table
-                reason_code = order_completion_message.get("reason_code", "not-found")
-                payment_response_message = order_completion_message.get("message", 'Unknown Error')
                 self.set_payment_response_custom_metrics(
                     basket,
                     self.order_number,
                     ppr,
                     self.transaction_id,
-                    reason_code,
-                    payment_response_message,
+                    order_completion_message.reason_code,
+                    order_completion_message.payment_response_message,
                 )
 
             # Don't make this an atomic transaction; rolled back transactions prevent track_segment_event from firing.
@@ -343,7 +350,7 @@ class CybersourceOrderCompletionView(EdxOrderPlacementMixin):
                     self.order_number,
                     self.transaction_id,
                     ppr,
-                    payment_response_message
+                    order_completion_message.payment_response_message
             ):
                 self.handle_payment(order_completion_message, basket)
 
