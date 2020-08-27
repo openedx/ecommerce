@@ -387,15 +387,13 @@ class Cybersource(ApplePayMixin, BaseClientSidePaymentProcessor):
         Returns:
             HandledProcessorResponse
         """
-        _response = self._normalize_processor_response(response)
-
-        if _response.decision != Decision.accept:
-            if _response.duplicate_payment:
+        if response.decision != Decision.accept:
+            if response.duplicate_payment:
                 # This means user submitted payment request twice within 15 min.
                 # We need to check if user first payment notification was handled successfuly and user has an order
                 # if user has an order we can raise DuplicateReferenceNumber exception else we need to continue
                 # the order creation process. to upgrade user in correct course mode.
-                if Order.objects.filter(number=_response.order_id).exists():
+                if Order.objects.filter(number=response.order_id).exists():
                     raise DuplicateReferenceNumber
                 logger.info(
                     'Received duplicate CyberSource payment notification for basket [%d] which is not associated '
@@ -408,16 +406,16 @@ class Cybersource(ApplePayMixin, BaseClientSidePaymentProcessor):
                     Decision.decline: TransactionDeclined,
                     Decision.error: GatewayError,
                     Decision.review: AuthorizationError,
-                }.get(_response.decision, InvalidCybersourceDecision)
+                }.get(response.decision, InvalidCybersourceDecision)
 
-        transaction_id = _response.transaction_id
-        if transaction_id and _response.decision == Decision.accept:
-            if Order.objects.filter(number=_response.order_id).exists():
+        transaction_id = response.transaction_id
+        if transaction_id and response.decision == Decision.accept:
+            if Order.objects.filter(number=response.order_id).exists():
                 if PaymentProcessorResponse.objects.filter(transaction_id=transaction_id).exists():
                     raise RedundantPaymentNotificationError
                 raise ExcessivePaymentForOrderError
 
-        if _response.partial_authorization:
+        if response.partial_authorization:
             # Raise an exception if the authorized amount differs from the requested amount.
             # Note (CCB): We should never reach this point in production since partial authorization is disabled
             # for our account, and should remain that way until we have a proper solution to allowing users to
@@ -425,11 +423,11 @@ class Cybersource(ApplePayMixin, BaseClientSidePaymentProcessor):
             raise PartialAuthorizationError
 
         return HandledProcessorResponse(
-            transaction_id=_response.transaction_id,
-            total=_response.total,
-            currency=_response.currency,
-            card_number=_response.card_number,
-            card_type=_response.card_type
+            transaction_id=response.transaction_id,
+            total=response.total,
+            currency=response.currency,
+            card_number=response.card_number,
+            card_type=response.card_type
         )
 
     def _generate_signature(self, parameters, use_sop_profile):
@@ -672,11 +670,7 @@ class CybersourceREST(Cybersource):  # pragma: no cover
             raise GatewayError()
 
     def _normalize_processor_response(self, response):
-        decoded_capture_context = jwt.decode(self.capture_context['key_id'], verify=False)
-        jwk = RSAAlgorithm.from_jwk(json.dumps(decoded_capture_context['flx']['jwk']))
-        decoded_payment_token = jwt.decode(self.transient_token_jwt, key=jwk, algorithms=['RS256'])
-
-        decision = {
+        decision_map = {
             'AUTHORIZED': Decision.accept,
             'PARTIAL_AUTHORIZED': Decision.decline,
             'AUTHORIZED_PENDING_REVIEW': Decision.review,
@@ -685,26 +679,45 @@ class CybersourceREST(Cybersource):  # pragma: no cover
             'PENDING_REVIEW': Decision.review,
             'DECLINED': Decision.decline,
             'INVALID_REQUEST': Decision.error,
-        }.get(response.status, Decision.invalid)
+        }
+        if isinstance(response, ApiException):
+            response_json = json.loads(response.body)
+            decision = decision_map.get(response_json['status'], Decision.invalid)
 
-        _response = UnhandledCybersourceResponse(
-            decision=decision,
-            duplicate_payment=(
-                decision == Decision.error and
-                response.reason == 'DUPLICATE_REQUEST'
-            ),
-            partial_authorization=(
-                response.amount_details.authorized_amount and
-                response.amount_details.authorized_amount != response.amount_details.total_amount
-            ),
-            currency=response.order_information.amount_details.currency,
-            total=Decimal(response.order_information.amount_details.total_amount),
-            card_number=decoded_payment_token['data']['number'],
-            card_type=CYBERSOURCE_CARD_TYPE_MAP.get(response.payment_information.tokenized_card.type),
-            transaction_id=response.processor_information.transaction_id,
-            order_id=response.client_reference_information.code,
-        )
-        return _response
+            return UnhandledCybersourceResponse(
+                decision=decision,
+                duplicate_payment=(
+                    decision == Decision.error and
+                    response_json['reason'] == 'DUPLICATE_REQUEST'
+                ),
+                partial_authorization=False,
+                currency=None,
+                total=None,
+                card_number=None,
+                card_type=None,
+                transaction_id=None,
+                order_id=None,
+            )
+        else:
+            decoded_capture_context = jwt.decode(self.capture_context['key_id'], verify=False)
+            jwk = RSAAlgorithm.from_jwk(json.dumps(decoded_capture_context['flx']['jwk']))
+            decoded_payment_token = jwt.decode(self.transient_token_jwt, key=jwk, algorithms=['RS256'])
+            decision = decision_map.get(response.status, Decision.invalid)
+
+            return UnhandledCybersourceResponse(
+                decision=decision,
+                duplicate_payment=(
+                    decision == Decision.error and
+                    response.reason == 'DUPLICATE_REQUEST'
+                ),
+                partial_authorization=response.status == 'PARTIAL_AUTHORIZED',
+                currency=response.order_information.amount_details.currency,
+                total=Decimal(response.order_information.amount_details.total_amount),
+                card_number=decoded_payment_token['data']['number'],
+                card_type=CYBERSOURCE_CARD_TYPE_MAP.get(response.payment_information.tokenized_card.type),
+                transaction_id=response.processor_information.transaction_id,
+                order_id=response.client_reference_information.code,
+            )
 
     def authorize_payment_api(self, transient_token_jwt, basket, request, form_data):
         clientReferenceInformation = Ptsv2paymentsClientReferenceInformation(

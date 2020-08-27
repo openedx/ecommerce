@@ -213,7 +213,10 @@ class CybersourceTests(CybersourceMixin, PaymentProcessorTestCaseMixin, TestCase
         """ Verify the processor creates the appropriate PaymentEvent and Source objects. """
 
         response = self.generate_notification(self.basket)
-        handled_response = self.processor.handle_processor_response(response, basket=self.basket)
+        handled_response = self.processor.handle_processor_response(
+            self.processor._normalize_processor_response(response),
+            basket=self.basket
+        )
         self.assertEqual(handled_response.currency, self.basket.currency)
         self.assertEqual(handled_response.total, self.basket.total_incl_tax)
         self.assertEqual(handled_response.transaction_id, response['transaction_id'])
@@ -227,7 +230,12 @@ class CybersourceTests(CybersourceMixin, PaymentProcessorTestCaseMixin, TestCase
         """
         response = self.generate_notification(self.basket)
         response['signature'] = 'Tampered.'
-        self.assertRaises(InvalidSignatureError, self.processor.handle_processor_response, response, basket=self.basket)
+        self.assertRaises(
+            InvalidSignatureError,
+            self.processor.handle_processor_response,
+            self.processor._normalize_processor_response(response),
+            basket=self.basket
+        )
 
     @ddt.data(
         ('CANCEL', UserCancelled),
@@ -239,7 +247,13 @@ class CybersourceTests(CybersourceMixin, PaymentProcessorTestCaseMixin, TestCase
         """ The handle_processor_response method should raise an exception if payment was not accepted. """
 
         response = self.generate_notification(self.basket, decision=decision)
-        self.assertRaises(exception, self.processor.handle_processor_response, response, basket=self.basket)
+
+        self.assertRaises(
+            exception,
+            self.processor.handle_processor_response,
+            self.processor._normalize_processor_response(response),
+            basket=self.basket
+        )
 
     def test_handle_processor_response_invalid_auth_amount(self):
         """
@@ -247,8 +261,12 @@ class CybersourceTests(CybersourceMixin, PaymentProcessorTestCaseMixin, TestCase
         differs from the requested amount.
         """
         response = self.generate_notification(self.basket, auth_amount='0.00')
-        self.assertRaises(PartialAuthorizationError, self.processor.handle_processor_response, response,
-                          basket=self.basket)
+        self.assertRaises(
+            PartialAuthorizationError,
+            self.processor.handle_processor_response,
+            self.processor._normalize_processor_response(response),
+            basket=self.basket
+        )
 
     def test_handle_processor_response_duplicate_notification(self):
         """
@@ -262,14 +280,22 @@ class CybersourceTests(CybersourceMixin, PaymentProcessorTestCaseMixin, TestCase
         self.assertTrue(Order.objects.filter(basket=self.basket).exists())
 
         # handle_processor_response should raise RedundantPaymentNotificationError for same transaction ID
-        self.assertRaises(RedundantPaymentNotificationError, self.processor.handle_processor_response, notification,
-                          basket=self.basket)
+        self.assertRaises(
+            RedundantPaymentNotificationError,
+            self.processor.handle_processor_response,
+            self.processor._normalize_processor_response(notification),
+            basket=self.basket
+        )
 
         notification['transaction_id'] = '394934470384'
         notification['signature'] = self.generate_signature(self.processor.secret_key, notification)
         # handle_processor_response should raise ExcessivePaymentForOrderError for different transaction ID
-        self.assertRaises(ExcessivePaymentForOrderError, self.processor.handle_processor_response, notification,
-                          basket=self.basket)
+        self.assertRaises(
+            ExcessivePaymentForOrderError,
+            self.processor.handle_processor_response,
+            self.processor._normalize_processor_response(notification),
+            basket=self.basket
+        )
 
     @responses.activate
     def test_issue_credit(self):
