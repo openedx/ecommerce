@@ -211,35 +211,43 @@ class SDNFallbackMetadata(TimeStampedModel):
 
 class SDNFallbackData(models.Model):
     """
-        Model used to record and process one row received from SDNFallbackMetadata.
+    Model used to record and process one row received from SDNFallbackMetadata.
 
     Fields:
-        sdn_fallback_metadata (ForeignKey): Foreign Key field with the CSV import Primary Key referenced in SDNFallbackMetadata.
-        sdn_id (CharField): Primary Key ID from the consolidated list that is unique to a record.
-        source (CharField): Origin of where the data comes from, since the CSV consolidates export screening lists of the Departments of Commerce, State and the Treasury.
-        sdn_type (CharField): For a person with source Specially Designated Nationals (SDN) - Treasury Department, the type is 'Individual'. Other options include 'Entity' and 'Vessel'. Other lists do not have a type. 
-        names (TextField): A space separated list of all lowercased names and alt names with punctuation also replaced by spaces.
-        addresses (TextField): A space separated list of all lowercased addresses combined into one string. There are records that don't have an address, but because city is a required field in the Payment MFE, those records would not be matched in the API/fallback.
-        countries (CharField): A space separated list of all lowercased countries combined into one string. Countries are extracted from the addresses field and in some instances the ID field in their 2 letter abbreviation. There are records that don't have a country, but because country is a required field in the Payment MFE, those records would not be matched in the API/fallback.
+    sdn_fallback_metadata (ForeignKey): Foreign Key field with the CSV import Primary Key
+    referenced in SDNFallbackMetadata.
+    sdn_id (CharField): Primary Key ID from the consolidated list that is unique to a record.
+    source (CharField): Origin of where the data comes from, since the CSV consolidates
+    export screening lists of the Departments of Commerce, State and the Treasury.
+    sdn_type (CharField): For a person with source 'Specially Designated Nationals (SDN)
+    - Treasury Department', the type is 'Individual'. Other options include 'Entity' and 'Vessel'.
+    Other lists do not have a type.
+    names (TextField): A space separated list of all lowercased names and alt names with punctuation
+    also replaced by spaces.
+    addresses (TextField): A space separated list of all lowercased addresses combined into one
+    string. There are records that don't have an address, but because city is a required field
+    in the Payment MFE, those records would not be matched in the API/fallback.
+    countries (CharField): A space separated list of all lowercased countries combined into one string.
+    Countries are extracted from the addresses field and in some instances the ID field in their 2 letter
+    abbreviation. There are records that don't have a country, but because country is a required field in
+    the Payment MFE, those records would not be matched in the API/fallback.
     """
     sdn_fallback_metadata = models.ForeignKey('payment.SDNFallbackMetadata', on_delete=models.CASCADE)
     sdn_id = models.CharField(primary_key=True, max_length=255)
-    source = models.CharField(max_length=255, null=True)
-    sdn_type = models.CharField(max_length=255, null=True)
-    names = models.TextField(null=True)
-    addresses = models.TextField(null=True)
-    countries = models.CharField(max_length=255, null=True)
-
-    SDN_SOURCE = "Specially Designated Nationals (SDN) - Treasury Department"
-    SDN_TYPE = "Individual"
+    source = models.CharField(max_length=255, db_index=True)
+    sdn_type = models.CharField(max_length=255, db_index=True)
+    names = models.TextField()
+    addresses = models.TextField()
+    countries = models.CharField(max_length=255)
 
     @classmethod
-    def filter_records(cls, sdn_fallback_metadata, country):
+    def get_current_records_and_filter_by_source_and_type(cls, source, sdn_type):
         """
-        Filter records by the CSV import (SDNFallbackMetadata), source, type, and country.
+        Query the records that have 'Current' import state, and filter by source and sdn_type.
         """
-    
-        return SDNFallbackData.objects.filter(source=cls.SDN_SOURCE, sdn_type=cls.SDN_TYPE, sdn_fallback_metadata=sdn_fallback_metadata, countries__contains=country)
+        current_metadata = SDNFallbackMetadata.objects.get(import_state='Current')
+        query_params = {'source': source, 'sdn_fallback_metadata': current_metadata, 'sdn_type': sdn_type}
+        return SDNFallbackData.objects.filter(**query_params)
 
 
 # noinspection PyUnresolvedReferences

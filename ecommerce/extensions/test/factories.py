@@ -1,5 +1,6 @@
 
 
+import logging
 import uuid
 from datetime import datetime, timedelta
 
@@ -32,11 +33,14 @@ from ecommerce.extensions.offer.models import (
 )
 from ecommerce.extensions.order.benefits import ManualEnrollmentOrderDiscountBenefit
 from ecommerce.extensions.order.conditions import ManualEnrollmentOrderDiscountCondition
-from ecommerce.extensions.payment.models import SDNFallbackMetadata
+from ecommerce.extensions.payment.models import SDNFallbackData, SDNFallbackMetadata
 from ecommerce.programs.benefits import AbsoluteDiscountBenefitWithoutRange, PercentageDiscountBenefitWithoutRange
 from ecommerce.programs.conditions import ProgramCourseRunSeatsCondition
 from ecommerce.programs.custom import class_path
 from ecommerce.tests.factories import SiteConfigurationFactory, UserFactory
+
+logger = logging.getLogger('faker')
+logger.setLevel(logging.INFO)  # Quiet down faker locale messages in tests.
 
 Benefit = get_model('offer', 'Benefit')
 Catalog = get_model('catalogue', 'Catalog')
@@ -322,3 +326,16 @@ class SDNFallbackMetadataFactory(factory.DjangoModelFactory):
     file_checksum = factory.Sequence(lambda n: Faker().md5())
     import_state = 'New'
     download_timestamp = datetime.now() - timedelta(days=10)
+
+
+class SDNFallbackDataFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = SDNFallbackData
+
+    sdn_fallback_metadata = factory.SubFactory(SDNFallbackMetadataFactory)
+    sdn_id = factory.Sequence(lambda n: n)
+    source = "Specially Designated Nationals (SDN) - Treasury Department"
+    sdn_type = "Individual"
+    names = factory.Faker('name')
+    addresses = factory.Faker('address')
+    countries = factory.Faker('country_code')
