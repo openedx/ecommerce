@@ -360,6 +360,26 @@ class CybersourceOrderCompletionView(EdxOrderPlacementMixin):
 
         return basket
 
+    def _get_basket(self, basket_id):
+        if not basket_id:
+            return None
+
+        try:
+            basket_id = int(basket_id)
+            basket = Basket.objects.get(id=basket_id)
+            basket.strategy = strategy.Default()
+
+            Applicator().apply(basket, basket.owner, self.request)
+            logger.info(
+                'Applicator applied, basket id: [%s]',
+                basket.id)
+            return basket
+        except (ValueError, ObjectDoesNotExist) as error:
+            logger.warning(
+                'Could not get basket--error: [%s]',
+                str(error))
+            return None
+
     def _merge_old_basket_into_new(self):
         """
         Upon declined transaction merge old basket into new one and also copy bundle attibute
@@ -573,26 +593,6 @@ class CybersourceInterstitialView(CyberSourceProcessorMixin, CybersourceOrderCom
             state=order_completion_message.get('req_bill_to_address_state', ''),
             country=Country.objects.get(
                 iso_3166_1_a2=order_completion_message['req_bill_to_address_country']))
-
-    def _get_basket(self, basket_id):
-        if not basket_id:
-            return None
-
-        try:
-            basket_id = int(basket_id)
-            basket = Basket.objects.get(id=basket_id)
-            basket.strategy = strategy.Default()
-
-            Applicator().apply(basket, basket.owner, self.request)
-            logger.info(
-                'Applicator applied, basket id: [%s]',
-                basket.id)
-            return basket
-        except (ValueError, ObjectDoesNotExist) as error:
-            logger.warning(
-                'Could not get basket--error: [%s]',
-                str(error))
-            return None
 
     def post(self, request, *args, **kwargs):  # pylint: disable=unused-argument
         """Process a CyberSource merchant notification and place an order for paid products as appropriate."""
