@@ -343,7 +343,7 @@ class CybersourceOrderCompletionView(EdxOrderPlacementMixin):
                     self.order_number,
                     self.transaction_id,
                     ppr,
-                    order_completion_message.get("message")
+                    payment_response_message
             ):
                 self.handle_payment(order_completion_message, basket)
 
