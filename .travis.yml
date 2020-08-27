@@ -38,11 +38,17 @@ script:
 jobs:
   include:
     - python: 3.8
+      # Speed up jobs to test docker build, DO NOT MERGE'
+      install: skip
+      script: skip
       env:
         DJANGO_ENV=django22
         TESTNAME=quality-and-js
         TARGETS="PYTHON_ENV=py38 requirements.js check_translations_up_to_date validate_translations clean_static static quality validate_js check_keywords"
     - python: 3.8
+      # Speed up jobs to test docker build, DO NOT MERGE'
+      install: skip
+      script: skip
       env:
         DJANGO_ENV=django22
         TESTNAME=test-python
