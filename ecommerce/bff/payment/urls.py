@@ -3,7 +3,14 @@
 from django.conf.urls import include, url
 from rest_framework.urlpatterns import format_suffix_patterns
 
-from ecommerce.extensions.basket.views import CaptureContextApiView, PaymentApiView, QuantityAPIView, VoucherAddApiView, VoucherRemoveApiView
+from ecommerce.extensions.basket.views import (
+    CaptureContextApiView,
+    PaymentApiView,
+    QuantityAPIView,
+    VoucherAddApiView,
+    VoucherRemoveApiView
+)
+
 
 PAYMENT_URLS = [
     url(r'^capture-context/$', CaptureContextApiView.as_view(), name='capture_context'),
