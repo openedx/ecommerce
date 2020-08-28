@@ -9,8 +9,10 @@ import uuid
 from dataclasses import dataclass
 from decimal import Decimal
 from enum import Enum
+from typing import Optional
 
 import jwt
+import waffle
 from CyberSource import (
     CreatePaymentRequest,
     GeneratePublicKeyRequest,
@@ -61,6 +63,9 @@ from ecommerce.extensions.payment.utils import clean_field_value, get_basket_pro
 
 logger = logging.getLogger(__name__)
 
+
+BillingAddress = get_model('order', 'BillingAddress')
+Country = get_model('address', 'Country')
 Order = get_model('order', 'Order')
 OrderNumberGenerator = get_class('order.utils', 'OrderNumberGenerator')
 PaymentProcessorResponse = get_model('payment', 'PaymentProcessorResponse')
@@ -95,8 +100,9 @@ class UnhandledCybersourceResponse:
     transaction_id: str
     order_id: str
     raw_json: dict
-    reason_code: str
-    payment_response_message: str
+    reason_code: Optional[str]
+    payment_response_message: Optional[str]
+    billing_address: Optional[BillingAddress]
 
 
 class Cybersource(ApplePayMixin, BaseClientSidePaymentProcessor):
@@ -365,11 +371,41 @@ class Cybersource(ApplePayMixin, BaseClientSidePaymentProcessor):
             transaction_id=response.get('transaction_id', ''),   # Error Notifications do not include a transaction id.
             order_id=response['req_reference_number'],
             raw_json=response,
-            # For reason_code, see https://support.cybersource.com/s/article/What-does-this-response-code-mean#code_table
-            reason_code=response.get("reason_code", "not-found"),
-            payment_response_message=response.get("message", 'Unknown Error'),
+            # For reason_code, see
+            # https://support.cybersource.com/s/article/What-does-this-response-code-mean#code_table
+            reason_code=response.get("reason_code"),
+            payment_response_message=response.get("message"),
+            billing_address=self._get_billing_address(response)
         )
         return _response
+
+    def _get_billing_address(self, order_completion_message):
+        try:
+            field = 'req_bill_to_address_line1'
+            # Address line 1 is optional if flag is enabled
+            line1 = (
+                order_completion_message.get(field, '')
+                if waffle.switch_is_active('optional_location_fields')
+                else order_completion_message[field]
+            )
+            return BillingAddress(
+                first_name=order_completion_message['req_bill_to_forename'],
+                last_name=order_completion_message['req_bill_to_surname'],
+                line1=line1,
+
+                # Address line 2 is optional
+                line2=order_completion_message.get('req_bill_to_address_line2', ''),
+
+                # Oscar uses line4 for city
+                line4=order_completion_message['req_bill_to_address_city'],
+                # Postal code is optional
+                postcode=order_completion_message.get('req_bill_to_address_postal_code', ''),
+                # State is optional
+                state=order_completion_message.get('req_bill_to_address_state', ''),
+                country=Country.objects.get(
+                    iso_3166_1_a2=order_completion_message['req_bill_to_address_country']))
+        except KeyError:
+            return None
 
     def handle_processor_response(self, response, basket=None):
         """
@@ -726,6 +762,7 @@ class CybersourceREST(Cybersource):  # pragma: no cover
                 # https://support.cybersource.com/s/article/What-does-this-response-code-mean#code_table
                 reason_code=response.reason,
                 payment_response_message=response_json.get('message', 'Unknown Error'),
+                billing_address=None,
             )
         else:
             decoded_capture_context = jwt.decode(self.capture_context['key_id'], verify=False)
@@ -748,8 +785,14 @@ class CybersourceREST(Cybersource):  # pragma: no cover
                 order_id=response.client_reference_information.code,
                 raw_json=response.to_dict(),
                 reason_code=response.error_information and response.error_information.reason,
-                payment_response_message=response.error_information and response.error_information.message
+                payment_response_message=response.error_information and response.error_information.message,
+                billing_address=response.billing_address,
             )
+
+    def is_signature_valid(self, response):
+        """Returns a boolean indicating if the response's signature (indicating potential tampering) is valid."""
+        # TODO: We need to validate a signature here
+        return True
 
     def authorize_payment_api(self, transient_token_jwt, basket, request, form_data):
         clientReferenceInformation = Ptsv2paymentsClientReferenceInformation(
@@ -841,4 +884,17 @@ class CybersourceREST(Cybersource):  # pragma: no cover
         requestObj = json.dumps(requestObj)
 
         api_instance = PaymentsApi(self.cybersource_api_config)
-        return api_instance.create_payment(requestObj)
+        payment_processor_response, _, _ = api_instance.create_payment(requestObj)
+
+        # Add the billing address to the response so it's available for the rest of the order completion process
+        payment_processor_response.billing_address = BillingAddress(
+            first_name=form_data['first_name'],
+            last_name=form_data['last_name'],
+            line1=form_data['address_line1'],
+            line2=form_data['address_line2'],
+            line4=form_data['city'],
+            postcode=form_data['postal_code'],
+            state=form_data['state'],
+            country=Country.objects.get(iso_3166_1_a2=form_data['country'])
+        )
+        return response

@@ -3,7 +3,6 @@ from contextlib import contextmanager
 from typing import Optional
 
 import requests
-import waffle
 from django.contrib import messages
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
@@ -453,7 +452,7 @@ class CybersourceOrderCompletionView(EdxOrderPlacementMixin):
             return self.redirect_to_payment_error()
 
         try:
-            order = self.create_order(self.request, basket, self._get_billing_address(normalized_order_completion_message))
+            order = self.create_order(self.request, basket, normalized_order_completion_message.billing_address)
             self.handle_post_order(order)
             return self.redirect_to_receipt_page()
         except:  # pylint: disable=bare-except
@@ -464,9 +463,6 @@ class CybersourceOrderCompletionView(EdxOrderPlacementMixin):
                 self.basket_id
             )
             return self.redirect_to_payment_error()
-
-    def _get_billing_address(self, order_completion_message):  # pragma: no cover
-        raise NotImplementedError
 
 
 class CyberSourceRESTProcessorMixin:  # pragma: no cover
@@ -527,18 +523,6 @@ class CybersourceAuthorizeAPIView(
         else:
             return self.complete_order(payment_processor_response)
 
-    def _get_billing_address(self, order_completion_message):
-        return BillingAddress(
-            first_name=self.data['first_name'],
-            last_name=self.data['last_name'],
-            line1=self.data['address_line1'],
-            line2=self.data['address_line2'],
-            line4=self.data['city'],
-            postcode=self.data['postal_code'],
-            state=self.data['state'],
-            country=Country.objects.get(iso_3166_1_a2=self.data['country'])
-        )
-
     def redirect_to_payment_error(self):
         return JsonResponse({}, status=400)
 
@@ -578,29 +562,6 @@ class CybersourceInterstitialView(CyberSourceProcessorMixin, CybersourceOrderCom
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
         return super(CybersourceInterstitialView, self).dispatch(request, *args, **kwargs)
-
-    def _get_billing_address(self, order_completion_message):
-        field = 'req_bill_to_address_line1'
-        # Address line 1 is optional if flag is enabled
-        line1 = (order_completion_message.get(field, '')
-                 if waffle.switch_is_active('optional_location_fields')
-                 else order_completion_message[field])
-        return BillingAddress(
-            first_name=order_completion_message['req_bill_to_forename'],
-            last_name=order_completion_message['req_bill_to_surname'],
-            line1=line1,
-
-            # Address line 2 is optional
-            line2=order_completion_message.get('req_bill_to_address_line2', ''),
-
-            # Oscar uses line4 for city
-            line4=order_completion_message['req_bill_to_address_city'],
-            # Postal code is optional
-            postcode=order_completion_message.get('req_bill_to_address_postal_code', ''),
-            # State is optional
-            state=order_completion_message.get('req_bill_to_address_state', ''),
-            country=Country.objects.get(
-                iso_3166_1_a2=order_completion_message['req_bill_to_address_country']))
 
     def post(self, request, *args, **kwargs):  # pylint: disable=unused-argument
         """Process a CyberSource merchant notification and place an order for paid products as appropriate."""
