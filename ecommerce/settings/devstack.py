@@ -12,6 +12,9 @@ DEBUG = True
 INTERNAL_IPS = ['127.0.0.1']
 ENABLE_AUTO_AUTH = True
 
+# The django server cannot handle https calls
+PROTOCOL = 'http'
+
 # Docker does not support the syslog socket at /dev/log. Rely on the console.
 LOGGING['handlers']['local'] = {
     'class': 'logging.NullHandler',
