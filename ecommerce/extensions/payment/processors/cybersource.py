@@ -343,10 +343,6 @@ class Cybersource(ApplePayMixin, BaseClientSidePaymentProcessor):
         return parameters
 
     def _normalize_processor_response(self, response):
-        # Validate the signature
-        if not self.is_signature_valid(response):
-            raise InvalidSignatureError
-
         # Raise an exception for payments that were not accepted. Consuming code should be responsible for handling
         # and logging the exception.
         try:
@@ -429,6 +425,10 @@ class Cybersource(ApplePayMixin, BaseClientSidePaymentProcessor):
         Returns:
             HandledProcessorResponse
         """
+        # Validate the signature
+        if not self.is_signature_valid(response.raw_json):
+            raise InvalidSignatureError
+
         if response.decision != Decision.accept:
             if response.duplicate_payment:
                 # This means user submitted payment request twice within 15 min.
