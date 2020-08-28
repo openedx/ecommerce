@@ -4,7 +4,7 @@
 Status
 ------
 
-Accepted (August 2020)
+Accepted (September 2020)
 
 Context
 -------
@@ -21,6 +21,14 @@ Decision
 1. **Using the CSV as a fallback vs as a primary solution**
 
 We are only going to use the CSV when the API is down, not replace the API calls with the CSV. The reason is that the API is up the vast majority of the time and during that time we know the data is the most up to date, so the CSV makes more sense as a fallback rather than primary solution.
+
+1a. **Selection of which worker will run the task to download the CSV**
+
+As per OEP-0003, we generally use celery to run asynchronous tasks, with some scheduler (Jenkins, Kubernetes) if task runs periodically. 
+Ecommerce is an exception/antipattern to this general approach; it doesn't use Celery directly. Instead, we have a separate service called ecommerce-worker that has a Celery integration. 
+Ecommerce-worker doesn't have access to the ecommerce database, so any database interaction with ecommerce needs to happen on the main ecommerce server machine. 
+
+Our workaround for cases like this is to do the work on a Jenkins machine (so Jenkins is both the scheduler and the worker). The download task is fairly lightweight, and impact is small if a run failed to complete. 
 
 2. **Storing the data**
 
