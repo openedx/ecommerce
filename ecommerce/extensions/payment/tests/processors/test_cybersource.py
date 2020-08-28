@@ -214,7 +214,7 @@ class CybersourceTests(CybersourceMixin, PaymentProcessorTestCaseMixin, TestCase
 
         response = self.generate_notification(self.basket)
         handled_response = self.processor.handle_processor_response(
-            self.processor._normalize_processor_response(response),
+            self.processor.normalize_processor_response(response),
             basket=self.basket
         )
         self.assertEqual(handled_response.currency, self.basket.currency)
@@ -233,7 +233,7 @@ class CybersourceTests(CybersourceMixin, PaymentProcessorTestCaseMixin, TestCase
         self.assertRaises(
             InvalidSignatureError,
             self.processor.handle_processor_response,
-            self.processor._normalize_processor_response(response),
+            self.processor.normalize_processor_response(response),
             basket=self.basket
         )
 
@@ -251,7 +251,7 @@ class CybersourceTests(CybersourceMixin, PaymentProcessorTestCaseMixin, TestCase
         self.assertRaises(
             exception,
             self.processor.handle_processor_response,
-            self.processor._normalize_processor_response(response),
+            self.processor.normalize_processor_response(response),
             basket=self.basket
         )
 
@@ -264,7 +264,7 @@ class CybersourceTests(CybersourceMixin, PaymentProcessorTestCaseMixin, TestCase
         self.assertRaises(
             PartialAuthorizationError,
             self.processor.handle_processor_response,
-            self.processor._normalize_processor_response(response),
+            self.processor.normalize_processor_response(response),
             basket=self.basket
         )
 
@@ -283,7 +283,7 @@ class CybersourceTests(CybersourceMixin, PaymentProcessorTestCaseMixin, TestCase
         self.assertRaises(
             RedundantPaymentNotificationError,
             self.processor.handle_processor_response,
-            self.processor._normalize_processor_response(notification),
+            self.processor.normalize_processor_response(notification),
             basket=self.basket
         )
 
@@ -293,7 +293,7 @@ class CybersourceTests(CybersourceMixin, PaymentProcessorTestCaseMixin, TestCase
         self.assertRaises(
             ExcessivePaymentForOrderError,
             self.processor.handle_processor_response,
-            self.processor._normalize_processor_response(notification),
+            self.processor.normalize_processor_response(notification),
             basket=self.basket
         )
 

@@ -342,7 +342,7 @@ class Cybersource(ApplePayMixin, BaseClientSidePaymentProcessor):
 
         return parameters
 
-    def _normalize_processor_response(self, response):
+    def normalize_processor_response(self, response):
         # Raise an exception for payments that were not accepted. Consuming code should be responsible for handling
         # and logging the exception.
         try:
@@ -725,7 +725,7 @@ class CybersourceREST(Cybersource):  # pragma: no cover
             else:
                 return e, e.headers['v-c-correlation-id']
 
-    def _normalize_processor_response(self, response):
+    def normalize_processor_response(self, response):
         decision_map = {
             'AUTHORIZED': Decision.accept,
             'PARTIAL_AUTHORIZED': Decision.decline,
