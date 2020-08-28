@@ -454,7 +454,11 @@ class CybersourceOrderCompletionView(EdxOrderPlacementMixin):
             return self.redirect_to_payment_error()
 
         try:
-            order = self.create_order(self.request, basket, normalized_order_completion_message.billing_address)
+            order = self.create_order(
+                self.request,
+                basket,
+                self.payment_processor.get_billing_address(order_completion_message)
+            )
             self.handle_post_order(order)
             return self.redirect_to_receipt_page()
         except:  # pylint: disable=bare-except
