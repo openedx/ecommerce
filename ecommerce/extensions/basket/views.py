@@ -751,6 +751,27 @@ class PaymentApiLogicMixin(BasketLogicMixin):
         return message_utils.get_response_status(response['messages'])
 
 
+class CaptureContextApiView(PaymentApiLogicMixin, APIView):
+    """
+    Api for retrieving capture context / public key for the Cybersource flex-form.
+
+    GET:
+        Retrieves a capture context / public key for the Cybersource flex-form.
+    """
+    # HACK: for now just duplicating the PaymentApiView, will refactor
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request):  # pylint: disable=unused-argument
+        basket = request.basket
+
+        try:
+            self.fire_segment_events(request, basket)
+            self.verify_enterprise_needs(basket)
+            return self.get_payment_api_response()
+        except RedirectException as e:
+            return Response({'redirect': e.response.url})
+
+
 class PaymentApiView(PaymentApiLogicMixin, APIView):
     """
     Api for retrieving basket contents and checkout/payment options.
