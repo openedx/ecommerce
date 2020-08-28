@@ -401,6 +401,13 @@ class Cybersource(ApplePayMixin, BaseClientSidePaymentProcessor):
                 # the order creation process. to upgrade user in correct course mode.
                 if Order.objects.filter(number=response.order_id).exists():
                     raise DuplicateReferenceNumber
+
+                # If we failed to capture a successful payment, and then the user submits payment again within a 15
+                # minute window, then we get a duplicate payment message with no amount attached. We can't create an
+                # order in that case.
+                if response.total is None:
+                    raise DuplicateReferenceNumber
+
                 logger.info(
                     'Received duplicate CyberSource payment notification for basket [%d] which is not associated '
                     'with any existing order. Continuing to validation and order creation processes.',
