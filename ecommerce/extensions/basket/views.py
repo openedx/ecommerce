@@ -617,7 +617,45 @@ class BasketSummaryView(BasketLogicMixin, BasketView):
             raise SiteConfigurationError(msg)
 
 
-class PaymentApiLogicMixin(BasketLogicMixin):
+class CaptureContextApiLogicMixin:
+    """
+    Business logic for the capture context API.
+    """
+    def get_capture_context_api_response(self, status=None):
+        """
+        Serializes the capture context api response.
+        """
+        data = {}
+        self._add_capture_context(data)
+        response_status = status if status else self._get_response_status(data)
+        return Response(data, status=response_status)
+
+    def _add_capture_context(self, response):  # pragma: no cover
+        response['flex_microform_enabled'] = waffle.flag_is_active(
+            self.request,
+            'payment.cybersource.flex_microform_enabled'
+        )
+        if not response['flex_microform_enabled']:
+            return
+        payment_processor_class = self.request.site.siteconfiguration.get_client_side_payment_processor_class()
+        if not payment_processor_class:
+            return
+        payment_processor = payment_processor_class(self.request.site)
+        if not hasattr(payment_processor, 'get_capture_context'):
+            return
+
+        try:
+            response['capture_context'] = payment_processor.get_capture_context()
+            self.request.session['capture_context'] = response['capture_context']
+        except Exception:  # pylint: disable=broad-except
+            logger.exception("Error generating capture_context")
+            return
+
+    def _get_response_status(self, response):
+        return message_utils.get_response_status(response['messages'])
+
+
+class PaymentApiLogicMixin(BasketLogicMixin, CaptureContextApiLogicMixin):
     """
     Business logic for the various Payment APIs.
     """
@@ -669,7 +707,7 @@ class PaymentApiLogicMixin(BasketLogicMixin):
         self._add_total_summary(response, context)
         self._add_offers(response)
         self._add_coupons(response, context)
-        self._add_capture_context(response)
+        self._add_capture_context(response)  # TODO: this is moving to its own endpoint
         return response
 
     def _add_products(self, response, lines_data):
@@ -726,48 +764,23 @@ class PaymentApiLogicMixin(BasketLogicMixin):
     def _add_messages(self, response):
         response['messages'] = message_utils.serialize(self.request)
 
-    def _add_capture_context(self, response):  # pragma: no cover
-        response['flex_microform_enabled'] = waffle.flag_is_active(
-            self.request,
-            'payment.cybersource.flex_microform_enabled'
-        )
-        if not response['flex_microform_enabled']:
-            return
-        payment_processor_class = self.request.site.siteconfiguration.get_client_side_payment_processor_class()
-        if not payment_processor_class:
-            return
-        payment_processor = payment_processor_class(self.request.site)
-        if not hasattr(payment_processor, 'get_capture_context'):
-            return
-
-        try:
-            response['capture_context'] = payment_processor.get_capture_context()
-            self.request.session['capture_context'] = response['capture_context']
-        except Exception:  # pylint: disable=broad-except
-            logger.exception("Error generating capture_context")
-            return
-
     def _get_response_status(self, response):
         return message_utils.get_response_status(response['messages'])
 
 
-class CaptureContextApiView(PaymentApiLogicMixin, APIView):
+class CaptureContextApiView(CaptureContextApiLogicMixin, APIView):
     """
     Api for retrieving capture context / public key for the Cybersource flex-form.
 
     GET:
         Retrieves a capture context / public key for the Cybersource flex-form.
     """
-    # HACK: for now just duplicating the PaymentApiView, will refactor
     permission_classes = (IsAuthenticated,)
 
     def get(self, request):  # pylint: disable=unused-argument
-        basket = request.basket
 
         try:
-            self.fire_segment_events(request, basket)
-            self.verify_enterprise_needs(basket)
-            return self.get_payment_api_response()
+            return self.get_capture_context_api_response()
         except RedirectException as e:
             return Response({'redirect': e.response.url})
 
