@@ -420,7 +420,9 @@ class CybersourceOrderCompletionView(EdxOrderPlacementMixin):
         )
 
     def complete_order(self, order_completion_message):
-        normalized_order_completion_message = self.payment_processor._normalize_processor_response(order_completion_message)
+        normalized_order_completion_message = self.payment_processor.normalize_processor_response(
+            order_completion_message
+        )
         try:
             basket = self.validate_order_completion(normalized_order_completion_message)
             monitoring_utils.set_custom_metric('payment_response_validation', 'success')
