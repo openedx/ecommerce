@@ -333,7 +333,9 @@ class CybersourceOrderCompletionView(EdxOrderPlacementMixin):
             finally:
                 # Store the response in the database regardless of its authenticity.
                 ppr = self.payment_processor.record_processor_response(
-                    normalized_order_completion_message, transaction_id=self.transaction_id, basket=basket
+                    self.payment_processor.serialize_order_completion(order_completion_message),
+                    transaction_id=self.transaction_id,
+                    basket=basket,
                 )
 
                 self.set_payment_response_custom_metrics(
