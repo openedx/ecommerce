@@ -295,7 +295,9 @@ class CybersourceOrderCompletionView(EdxOrderPlacementMixin):
         # This validation is performed in the handle_payment method. After that method succeeds, the response can be
         # safely assumed to have originated from CyberSource.
         basket = None
-        order_completion_message = order_completion_message or {}
+        order_completion_message = self.payment_processor.normalize_processor_response(
+            order_completion_message
+        )
 
         try:
 
@@ -420,11 +422,8 @@ class CybersourceOrderCompletionView(EdxOrderPlacementMixin):
         )
 
     def complete_order(self, order_completion_message):
-        normalized_order_completion_message = self.payment_processor.normalize_processor_response(
-            order_completion_message
-        )
         try:
-            basket = self.validate_order_completion(normalized_order_completion_message)
+            basket = self.validate_order_completion(order_completion_message)
             monitoring_utils.set_custom_metric('payment_response_validation', 'success')
         except DuplicateReferenceNumber:
             # CyberSource has told us that they've declined an attempt to pay
