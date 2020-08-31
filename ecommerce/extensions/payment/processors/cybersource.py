@@ -365,13 +365,16 @@ class Cybersource(ApplePayMixin, BaseClientSidePaymentProcessor):
             card_type=CYBERSOURCE_CARD_TYPE_MAP.get(response['req_card_type']),
             transaction_id=response.get('transaction_id', ''),   # Error Notifications do not include a transaction id.
             order_id=response['req_reference_number'],
-            raw_json=response,
+            raw_json=self.serialize_order_completion(response),
             # For reason_code, see
             # https://support.cybersource.com/s/article/What-does-this-response-code-mean#code_table
             reason_code=response.get("reason_code"),
             payment_response_message=response.get("message"),
         )
         return _response
+
+    def serialize_order_completion(self, order_completion_message):
+        return serialize_object(order_completion_message)
 
     def get_billing_address(self, order_completion_message):
 
@@ -732,11 +735,6 @@ class CybersourceREST(Cybersource):  # pragma: no cover
             'INVALID_REQUEST': Decision.error,
         }
         if isinstance(response, ApiException):
-            try:
-                response_json = json.loads(response.body)
-            except:  # pylint: disable=bare-except
-                response_json = {}
-
             decision = decision_map.get(response_json.get('status'), response_json.get('status'))
 
             return UnhandledCybersourceResponse(
@@ -777,10 +775,19 @@ class CybersourceREST(Cybersource):  # pragma: no cover
             card_type=CYBERSOURCE_CARD_TYPE_MAP.get(response.payment_information.tokenized_card.type),
             transaction_id=response.processor_information.transaction_id,
             order_id=response.client_reference_information.code,
-            raw_json=response.to_dict(),
+            raw_json=response_json,
             reason_code=response.error_information and response.error_information.reason,
             payment_response_message=response.error_information and response.error_information.message,
         )
+
+    def serialize_order_completion(self, order_completion_message):
+        if isinstance(order_completion_message, ApiException):
+            try:
+                return json.loads(order_completion_message.body)
+            except:  # pylint: disable=bare-except
+                return {}
+
+        return order_completion_message.to_dict()
 
     def is_signature_valid(self, response):
         """Returns a boolean indicating if the response's signature (indicating potential tampering) is valid."""
