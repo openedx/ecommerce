@@ -11,7 +11,6 @@ from ecommerce.extensions.basket.views import (
     VoucherRemoveApiView
 )
 
-
 PAYMENT_URLS = [
     url(r'^capture-context/$', CaptureContextApiView.as_view(), name='capture_context'),
     url(r'^payment/$', PaymentApiView.as_view(), name='payment'),

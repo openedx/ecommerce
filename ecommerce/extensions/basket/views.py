@@ -617,7 +617,7 @@ class BasketSummaryView(BasketLogicMixin, BasketView):
             raise SiteConfigurationError(msg)
 
 
-class CaptureContextApiLogicMixin:
+class CaptureContextApiLogicMixin:  # pragma: no cover
     """
     Business logic for the capture context API.
     """
@@ -630,7 +630,7 @@ class CaptureContextApiLogicMixin:
         response_status = status if status else self._get_response_status(data)
         return Response(data, status=response_status)
 
-    def _add_capture_context(self, response):  # pragma: no cover
+    def _add_capture_context(self, response):
         response['flex_microform_enabled'] = waffle.flag_is_active(
             self.request,
             'payment.cybersource.flex_microform_enabled'
@@ -768,7 +768,7 @@ class PaymentApiLogicMixin(BasketLogicMixin, CaptureContextApiLogicMixin):
         return message_utils.get_response_status(response['messages'])
 
 
-class CaptureContextApiView(CaptureContextApiLogicMixin, APIView):
+class CaptureContextApiView(CaptureContextApiLogicMixin, APIView):  # pragma: no cover
     """
     Api for retrieving capture context / public key for the Cybersource flex-form.
 
@@ -778,7 +778,6 @@ class CaptureContextApiView(CaptureContextApiLogicMixin, APIView):
     permission_classes = (IsAuthenticated,)
 
     def get(self, request):  # pylint: disable=unused-argument
-
         try:
             return self.get_capture_context_api_response()
         except RedirectException as e:
