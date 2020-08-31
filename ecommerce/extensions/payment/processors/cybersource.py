@@ -365,7 +365,7 @@ class Cybersource(ApplePayMixin, BaseClientSidePaymentProcessor):
             transaction_id=response.get('transaction_id', ''),   # Error Notifications do not include a transaction id.
             order_id=response['req_reference_number'],
             raw_json=self.serialize_order_completion(response),
-            payment_response_message=response.get("message"),
+            payment_response_message=self.extract_payment_response_message(response),
         )
         return _response
 
@@ -374,6 +374,9 @@ class Cybersource(ApplePayMixin, BaseClientSidePaymentProcessor):
 
     def extract_reason_code(self, order_completion_message):
         return order_completion_message.get('reason_code')
+
+    def extract_payment_response_message(self, order_completion_message):
+        return order_completion_message.get('message')
 
     def get_billing_address(self, order_completion_message):
 
@@ -734,6 +737,7 @@ class CybersourceREST(Cybersource):  # pragma: no cover
             'INVALID_REQUEST': Decision.error,
         }
         response_json = self.serialize_order_completion(response)
+        payment_response = self.extract_payment_response_message(response)
 
         if isinstance(response, ApiException):
             decision = decision_map.get(response_json.get('status'), response_json.get('status'))
@@ -752,7 +756,7 @@ class CybersourceREST(Cybersource):  # pragma: no cover
                 transaction_id=None,
                 order_id=None,
                 raw_json=response_json,
-                payment_response_message=response_json.get('message', 'Unknown Error'),
+                payment_response_message=payment_response,
             )
 
         decoded_capture_context = jwt.decode(self.capture_context['key_id'], verify=False)
@@ -774,7 +778,7 @@ class CybersourceREST(Cybersource):  # pragma: no cover
             transaction_id=response.processor_information.transaction_id,
             order_id=response.client_reference_information.code,
             raw_json=response_json,
-            payment_response_message=response.error_information and response.error_information.message,
+            payment_response_message=payment_response,
         )
 
     def serialize_order_completion(self, order_completion_message):
@@ -790,6 +794,12 @@ class CybersourceREST(Cybersource):  # pragma: no cover
         if isinstance(order_completion_message, ApiException):
             return self.serialize_order_completion(order_completion_message).get('reason')
         return order_completion_message.error_information and order_completion_message.error_information.reason
+
+    def extract_payment_response_message(self, order_completion_message):
+        if isinstance(order_completion_message, ApiException):
+            return self.serialize_order_completion(order_completion_message).get('message')
+
+        return order_completion_message.error_information and order_completion_message.error_information.message
 
     def is_signature_valid(self, response):
         """Returns a boolean indicating if the response's signature (indicating potential tampering) is valid."""
