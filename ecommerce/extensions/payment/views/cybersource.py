@@ -295,13 +295,13 @@ class CybersourceOrderCompletionView(EdxOrderPlacementMixin):
         # This validation is performed in the handle_payment method. After that method succeeds, the response can be
         # safely assumed to have originated from CyberSource.
         basket = None
-        normalized_order_completion_message = self.payment_processor.normalize_processor_response(
-            order_completion_message
-        )
 
         try:
 
             try:
+                normalized_order_completion_message = self.payment_processor.normalize_processor_response(
+                    order_completion_message
+                )
                 logger.info(
                     'Received CyberSource payment notification for transaction [%s], associated with order [%s]'
                     ' and basket [%d].',
