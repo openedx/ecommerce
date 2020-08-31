@@ -343,8 +343,8 @@ class CybersourceOrderCompletionView(EdxOrderPlacementMixin):
                     self.order_number,
                     ppr,
                     self.transaction_id,
-                    self.extract_reason_code(order_completion_message),
-                    normalized_order_completion_message.payment_response_message,
+                    self.payment_processor.extract_reason_code(order_completion_message),
+                    self.payment_processor.extract_payment_response_message(order_completion_message),
                 )
 
             # Don't make this an atomic transaction; rolled back transactions prevent track_segment_event from firing.
@@ -353,7 +353,7 @@ class CybersourceOrderCompletionView(EdxOrderPlacementMixin):
                     self.order_number,
                     self.transaction_id,
                     ppr,
-                    normalized_order_completion_message.payment_response_message
+                    self.payment_processor.extract_payment_response_message(order_completion_message)
             ):
                 self.handle_payment(normalized_order_completion_message, basket)
 

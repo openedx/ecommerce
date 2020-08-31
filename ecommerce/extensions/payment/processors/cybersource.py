@@ -9,7 +9,6 @@ import uuid
 from dataclasses import dataclass
 from decimal import Decimal
 from enum import Enum
-from typing import Optional
 
 import jwt
 import waffle
@@ -100,7 +99,6 @@ class UnhandledCybersourceResponse:
     transaction_id: str
     order_id: str
     raw_json: dict
-    payment_response_message: Optional[str]
 
 
 class Cybersource(ApplePayMixin, BaseClientSidePaymentProcessor):
@@ -365,7 +363,6 @@ class Cybersource(ApplePayMixin, BaseClientSidePaymentProcessor):
             transaction_id=response.get('transaction_id', ''),   # Error Notifications do not include a transaction id.
             order_id=response['req_reference_number'],
             raw_json=self.serialize_order_completion(response),
-            payment_response_message=self.extract_payment_response_message(response),
         )
         return _response
 
@@ -737,7 +734,6 @@ class CybersourceREST(Cybersource):  # pragma: no cover
             'INVALID_REQUEST': Decision.error,
         }
         response_json = self.serialize_order_completion(response)
-        payment_response = self.extract_payment_response_message(response)
 
         if isinstance(response, ApiException):
             decision = decision_map.get(response_json.get('status'), response_json.get('status'))
@@ -756,7 +752,6 @@ class CybersourceREST(Cybersource):  # pragma: no cover
                 transaction_id=None,
                 order_id=None,
                 raw_json=response_json,
-                payment_response_message=payment_response,
             )
 
         decoded_capture_context = jwt.decode(self.capture_context['key_id'], verify=False)
@@ -778,7 +773,6 @@ class CybersourceREST(Cybersource):  # pragma: no cover
             transaction_id=response.processor_information.transaction_id,
             order_id=response.client_reference_information.code,
             raw_json=response_json,
-            payment_response_message=payment_response,
         )
 
     def serialize_order_completion(self, order_completion_message):
