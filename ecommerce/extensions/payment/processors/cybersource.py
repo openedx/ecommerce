@@ -100,7 +100,6 @@ class UnhandledCybersourceResponse:
     transaction_id: str
     order_id: str
     raw_json: dict
-    reason_code: Optional[str]
     payment_response_message: Optional[str]
 
 
@@ -366,9 +365,6 @@ class Cybersource(ApplePayMixin, BaseClientSidePaymentProcessor):
             transaction_id=response.get('transaction_id', ''),   # Error Notifications do not include a transaction id.
             order_id=response['req_reference_number'],
             raw_json=self.serialize_order_completion(response),
-            # For reason_code, see
-            # https://support.cybersource.com/s/article/What-does-this-response-code-mean#code_table
-            reason_code=self.extract_reason_code(response),
             payment_response_message=response.get("message"),
         )
         return _response
@@ -738,7 +734,6 @@ class CybersourceREST(Cybersource):  # pragma: no cover
             'INVALID_REQUEST': Decision.error,
         }
         response_json = self.serialize_order_completion(response)
-        reason_code = self.extract_reason_code(response)
 
         if isinstance(response, ApiException):
             decision = decision_map.get(response_json.get('status'), response_json.get('status'))
@@ -757,9 +752,6 @@ class CybersourceREST(Cybersource):  # pragma: no cover
                 transaction_id=None,
                 order_id=None,
                 raw_json=response_json,
-                # For reason_code, see
-                # https://support.cybersource.com/s/article/What-does-this-response-code-mean#code_table
-                reason_code=reason_code,
                 payment_response_message=response_json.get('message', 'Unknown Error'),
             )
 
@@ -782,7 +774,6 @@ class CybersourceREST(Cybersource):  # pragma: no cover
             transaction_id=response.processor_information.transaction_id,
             order_id=response.client_reference_information.code,
             raw_json=response_json,
-            reason_code=reason_code,
             payment_response_message=response.error_information and response.error_information.message,
         )
 
