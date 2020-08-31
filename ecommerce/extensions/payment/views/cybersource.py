@@ -295,7 +295,7 @@ class CybersourceOrderCompletionView(EdxOrderPlacementMixin):
         # This validation is performed in the handle_payment method. After that method succeeds, the response can be
         # safely assumed to have originated from CyberSource.
         basket = None
-        order_completion_message = self.payment_processor.normalize_processor_response(
+        normalized_order_completion_message = self.payment_processor.normalize_processor_response(
             order_completion_message
         )
 
@@ -333,7 +333,7 @@ class CybersourceOrderCompletionView(EdxOrderPlacementMixin):
             finally:
                 # Store the response in the database regardless of its authenticity.
                 ppr = self.payment_processor.record_processor_response(
-                    order_completion_message, transaction_id=self.transaction_id, basket=basket
+                    normalized_order_completion_message, transaction_id=self.transaction_id, basket=basket
                 )
 
                 self.set_payment_response_custom_metrics(
@@ -341,8 +341,8 @@ class CybersourceOrderCompletionView(EdxOrderPlacementMixin):
                     self.order_number,
                     ppr,
                     self.transaction_id,
-                    order_completion_message.reason_code,
-                    order_completion_message.payment_response_message,
+                    normalized_order_completion_message.reason_code,
+                    normalized_order_completion_message.payment_response_message,
                 )
 
             # Don't make this an atomic transaction; rolled back transactions prevent track_segment_event from firing.
@@ -351,9 +351,9 @@ class CybersourceOrderCompletionView(EdxOrderPlacementMixin):
                     self.order_number,
                     self.transaction_id,
                     ppr,
-                    order_completion_message.payment_response_message
+                    normalized_order_completion_message.payment_response_message
             ):
-                self.handle_payment(order_completion_message, basket)
+                self.handle_payment(normalized_order_completion_message, basket)
 
         except Exception as exception:  # pylint: disable=bare-except
             if getattr(exception, 'unlogged', True):
