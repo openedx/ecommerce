@@ -343,7 +343,7 @@ class CybersourceOrderCompletionView(EdxOrderPlacementMixin):
                     self.order_number,
                     ppr,
                     self.transaction_id,
-                    normalized_order_completion_message.reason_code,
+                    self.extract_reason_code(order_completion_message),
                     normalized_order_completion_message.payment_response_message,
                 )
 
