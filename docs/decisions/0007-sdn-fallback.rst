@@ -29,15 +29,21 @@ One reason is that the fallback wouldn't work reliably if the CSV has periods of
 A second reason is that by having the processed data stored in a database, debugging of any production issues with the related code should be simpler.
 This approach would have a more expensive engineering implementation cost, but we are willing to make that trade off.
 
-3. **Allowing transactions**
+3. **Denormalizing the data*
+
+One option is to denormalize the data, where each row would be a unique combination of person, country, and type. The benefit would be having better performance in the query to filter the data, for example when filtering by country. However, more space would be used in the database since one record could have multiple rows.
+The second option would be to keep the data normalized, where we would have one row in the database per record in the CSV. This would more closely match the API and more closely match the data from the imported CSV. The database would also require less space.
+We decided to go with keeping the data normalized because the performance gains of denormalizing would not be substantial enough to outweigh the costs to complexity and space.
+
+4. **Allowing transactions**
 
 If we are unable to check a transaction against the list we currently allow the transaction to succeed. The hope is that with the fallback in place, fewer transactions will fall through without being checked, and therefore allowing them will be less of a liability.
 
-4. **Algorithm**
+5. **Algorithm**
 
 For the algorithm in the fallback to match name/address pairs to entries in the list we chose to attempt to replicate the algorithm used by the API as much as possible. Although we don't know what the exact algorithm is, we used some test queries to identify key properties of the algorithm and will implement the simplest algorithm that retains the same properties.
 
-5. **Location of the code**
+6. **Location of the code**
 
 We will implement the fallback in ecommerce because the primary SDN check is in ecommerce so it will live close to existing relevant code.
 

@@ -5,7 +5,12 @@ from datetime import datetime
 from django.core.exceptions import ValidationError
 from testfixtures import LogCapture
 
-from ecommerce.extensions.payment.models import EnterpriseContractMetadata, SDNCheckFailure, SDNFallbackMetadata
+from ecommerce.extensions.payment.models import (
+    EnterpriseContractMetadata,
+    SDNCheckFailure,
+    SDNFallbackData,
+    SDNFallbackMetadata
+)
 from ecommerce.extensions.test import factories
 from ecommerce.tests.testcases import TestCase
 
@@ -231,3 +236,80 @@ class SDNFallbackMetadataTests(TestCase):
         former_discard_metadata = SDNFallbackMetadata.objects.filter(
             file_checksum=original_discard.file_checksum)[0]
         self.assertEqual(former_discard_metadata.import_state, 'Discard')
+
+
+class SDNFallbackDataTests(TestCase):
+
+    def setUp(self):
+        super(SDNFallbackDataTests, self).setUp()
+        self.sdn_metadata = factories.SDNFallbackMetadataFactory.create(import_state="New")
+
+    def test_fields(self):
+        "Verify all fields are correctly populated"
+        new_data = SDNFallbackData(
+            sdn_fallback_metadata=self.sdn_metadata,
+            sdn_id="123abc",
+            source="Specially Designated Nationals (SDN) - Treasury Department",
+            sdn_type="Individual",
+            names="maria giuseppe",
+            addresses="123 main street",
+            countries="US",
+        )
+        new_data.full_clean()
+        new_data.save()
+
+        self.assertEqual(len(SDNFallbackData.objects.all()), 1)
+
+        actual_data = SDNFallbackData.objects.all()[0]
+        self.assertEqual(actual_data.sdn_fallback_metadata, self.sdn_metadata)
+        self.assertEqual(actual_data.sdn_id, "123abc")
+        self.assertEqual(actual_data.source, "Specially Designated Nationals (SDN) - Treasury Department")
+        self.assertEqual(actual_data.sdn_type, "Individual")
+        self.assertEqual(actual_data.names, "maria giuseppe")
+        self.assertEqual(actual_data.addresses, "123 main street")
+        self.assertEqual(actual_data.countries, "US")
+
+    def test_data_is_deleted_on_delete_of_metadata(self):
+        "Verify SDNFallbackData object is deleted if SDNFallbackMetadata object is removed"
+        factories.SDNFallbackDataFactory.create(
+            sdn_fallback_metadata=self.sdn_metadata,
+        )
+
+        self.assertEqual(len(SDNFallbackData.objects.all()), 1)
+        self.sdn_metadata.delete()
+        self.assertEqual(len(SDNFallbackData.objects.all()), 0)
+
+    def test_get_current_records_and_filter_by_source_and_type(self):
+        "Verify the query is done for current records by source and by optional sdn_type"
+        sdn_metadata_current = factories.SDNFallbackMetadataFactory.create(import_state="Current")
+        sdn_metadata_discard = factories.SDNFallbackMetadataFactory.create(import_state="Discard")
+        sdn_source = "Specially Designated Nationals (SDN) - Treasury Department"
+        isn_source = "Nonproliferation Sanctions (ISN) - State Department"
+        sdn_type = "Individual"
+
+        rows = [
+            [sdn_source, sdn_type, sdn_metadata_current],
+            [sdn_source, "Entity", sdn_metadata_current],
+            [isn_source, "", sdn_metadata_current],
+            [sdn_source, sdn_type, sdn_metadata_discard],
+        ]
+
+        for index, row in enumerate(rows):
+            source, sdn_type, sdn_fallback_metadata = row
+            factories.SDNFallbackDataFactory.create(
+                sdn_fallback_metadata=sdn_fallback_metadata,
+                sdn_id=index,
+                source=source,
+                sdn_type=sdn_type,
+            )
+
+        filtered_records_sdn_individual = SDNFallbackData.get_current_records_and_filter_by_source_and_type(
+            sdn_source, sdn_type)
+        self.assertEqual(len(filtered_records_sdn_individual), 1)
+        self.assertEqual(filtered_records_sdn_individual[0].sdn_fallback_metadata, sdn_metadata_current)
+        filtered_records_sdn_entity = SDNFallbackData.get_current_records_and_filter_by_source_and_type(
+            sdn_source, "Entity")
+        self.assertEqual(len(filtered_records_sdn_entity), 1)
+        filtered_records_isn = SDNFallbackData.get_current_records_and_filter_by_source_and_type(
+            isn_source, "")
+        self.assertEqual(len(filtered_records_isn), 1)
