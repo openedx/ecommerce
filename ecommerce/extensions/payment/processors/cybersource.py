@@ -718,8 +718,7 @@ class CybersourceREST(Cybersource):  # pragma: no cover
                 logger.exception('Payment failed')
                 # This will display the generic error on the frontend
                 raise GatewayError()
-            else:
-                return e, e.headers['v-c-correlation-id']
+            return e, e.headers['v-c-correlation-id']
 
     def normalize_processor_response(self, response):
         decision_map = {
@@ -759,29 +758,29 @@ class CybersourceREST(Cybersource):  # pragma: no cover
                 reason_code=response.reason,
                 payment_response_message=response_json.get('message', 'Unknown Error'),
             )
-        else:
-            decoded_capture_context = jwt.decode(self.capture_context['key_id'], verify=False)
-            jwk = RSAAlgorithm.from_jwk(json.dumps(decoded_capture_context['flx']['jwk']))
-            decoded_payment_token = jwt.decode(self.transient_token_jwt, key=jwk, algorithms=['RS256'])
-            decision = decision_map.get(response.status, response.status)
 
-            return UnhandledCybersourceResponse(
-                decision=decision,
-                duplicate_payment=(
-                    decision == Decision.error and
-                    response.reason == 'DUPLICATE_REQUEST'
-                ),
-                partial_authorization=response.status == 'PARTIAL_AUTHORIZED',
-                currency=response.order_information.amount_details.currency,
-                total=Decimal(response.order_information.amount_details.total_amount),
-                card_number=decoded_payment_token['data']['number'],
-                card_type=CYBERSOURCE_CARD_TYPE_MAP.get(response.payment_information.tokenized_card.type),
-                transaction_id=response.processor_information.transaction_id,
-                order_id=response.client_reference_information.code,
-                raw_json=response.to_dict(),
-                reason_code=response.error_information and response.error_information.reason,
-                payment_response_message=response.error_information and response.error_information.message,
-            )
+        decoded_capture_context = jwt.decode(self.capture_context['key_id'], verify=False)
+        jwk = RSAAlgorithm.from_jwk(json.dumps(decoded_capture_context['flx']['jwk']))
+        decoded_payment_token = jwt.decode(self.transient_token_jwt, key=jwk, algorithms=['RS256'])
+        decision = decision_map.get(response.status, response.status)
+
+        return UnhandledCybersourceResponse(
+            decision=decision,
+            duplicate_payment=(
+                decision == Decision.error and
+                response.reason == 'DUPLICATE_REQUEST'
+            ),
+            partial_authorization=response.status == 'PARTIAL_AUTHORIZED',
+            currency=response.order_information.amount_details.currency,
+            total=Decimal(response.order_information.amount_details.total_amount),
+            card_number=decoded_payment_token['data']['number'],
+            card_type=CYBERSOURCE_CARD_TYPE_MAP.get(response.payment_information.tokenized_card.type),
+            transaction_id=response.processor_information.transaction_id,
+            order_id=response.client_reference_information.code,
+            raw_json=response.to_dict(),
+            reason_code=response.error_information and response.error_information.reason,
+            payment_response_message=response.error_information and response.error_information.message,
+        )
 
     def is_signature_valid(self, response):
         """Returns a boolean indicating if the response's signature (indicating potential tampering) is valid."""
