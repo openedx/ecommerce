@@ -6,7 +6,7 @@
 edx-rest-api-client
 pytest
 pytest-randomly
-pytest-selenium < 2
+pytest-selenium
 pytest-timeout
 python-dotenv
 selenium
