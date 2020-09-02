@@ -159,7 +159,11 @@ class Cybersource(ApplePayMixin, BaseClientSidePaymentProcessor):
         self.flex_run_environment = configuration.get('flex_run_environment', 'cybersource.environment.SANDBOX')
         self.flex_shared_secret_key_id = configuration.get('flex_shared_secret_key_id')
         self.flex_shared_secret_key = configuration.get('flex_shared_secret_key')
-        self.flex_target_origin = self.site.siteconfiguration.payment_microfrontend_url
+        if self.site.siteconfiguration.payment_microfrontend_url:
+            self.flex_target_origin = self.site.siteconfiguration.payment_microfrontend_url.rstrip('/')
+        else:
+            self.flex_target_origin = None
+
         self.cybersource_api_config = {
             'authentication_type': 'http_signature',
             'run_environment': self.flex_run_environment,
