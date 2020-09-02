@@ -180,7 +180,8 @@ class VoucherViewSet(NonDestroyableModelViewSet):
 
             course_id = product.course_id
             course_catalog_data = course_run_metadata[course_id]
-            if course_seat_types == 'credit':
+            if course_seat_types == 'credit' or product.attr.certificate_type == 'credit':
+                logger.info('[Voucher Offers] Constructing offer data for credit.')
                 # Omit credit seats for which the user is not eligible or which the user already bought.
                 if not request.user.is_eligible_for_credit(product.course_id, request.site.siteconfiguration):
                     continue
