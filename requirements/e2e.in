@@ -1,6 +1,4 @@
-# This list doesn't use pins.txt so that it can be made python 3.5
-# compatible without forcing the rest of the app to use python 3.5
-# compatible packages.
+-c pins.txt
 
 # Packages required to run e2e tests
 edx-rest-api-client

@@ -1,5 +1,6 @@
 -c pins.txt
 -r base.txt
+-r e2e.txt                  # required for quality
 -r tox.txt
 
 bok_choy

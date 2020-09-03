@@ -52,3 +52,5 @@ tox-battery==0.5.2
 
 # cybersource-rest-client-python requires 2.7, but requests gives 2.10 by default
 idna==2.7
+
+django < 3
