@@ -801,7 +801,8 @@ class CybersourceREST(Cybersource):  # pragma: no cover
 
     def is_signature_valid(self, response):
         """Returns a boolean indicating if the response's signature (indicating potential tampering) is valid."""
-        # TODO: We need to validate a signature here
+        # There is no need to validate the payment processor response, because
+        # it is coming in response to an API call we initiated
         return True
 
     def authorize_payment_api(self, transient_token_jwt, basket, request, form_data):
