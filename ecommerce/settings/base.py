@@ -269,6 +269,12 @@ ANONYMOUS_BASKET_CALCULATE_CACHE_TIMEOUT = 3600  # Value is in seconds.
 
 # LMS API settings used for fetching information from LMS
 LMS_API_CACHE_TIMEOUT = 30  # Value is in seconds.
+
+# Add here custom payment processor urls. For instance:
+# EXTRA_PAYMENT_PROCESSOR_URLS = {
+#   "mycustompaymentprocessor": "ecommerce.payment.processors.mycustompaymentprocessor.urls"
+# }
+EXTRA_PAYMENT_PROCESSOR_URLS = {}
 # END URL CONFIGURATION
 
 VOUCHER_CACHE_TIMEOUT = 10  # Value is in seconds.
