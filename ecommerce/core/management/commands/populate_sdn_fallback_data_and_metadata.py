@@ -35,6 +35,6 @@ class Command(BaseCommand):
             print("[TEMP]: csv has eligible size, okay to import")
             # ^ when import is ready (REV-1310), replace print statement with call to import with our csv
         else:
-            logger.warning("CSV file download did not meet threshold")
+            logger.warning("CSV file download did not meet threshold given: [%f]", threshold)
             raise CommandError("CSV file download did not meet threshold")
         os.remove(csv_file_name)

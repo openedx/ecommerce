@@ -183,6 +183,9 @@ def checkSDN(request, name, city, country):
 
 def download_SDN_fallback_csv():
     """ Downloads csv for use as fallback for SDN check.'
+
+    Returns:
+        the csv created locally, its size in MB, and its local filename
     """
     url = 'http://api.trade.gov/static/consolidated_screening_list/consolidated.csv'
     csv_file_name = 'temp_sdn_fallback.csv'
