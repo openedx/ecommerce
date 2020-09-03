@@ -24,7 +24,7 @@ coreapi==2.3.3            # via -r requirements/base.in, django-rest-swagger, op
 coreschema==0.0.4         # via coreapi
 coverage==5.2.1           # via cybersource-rest-client-python
 crypto==1.4.1             # via cybersource-rest-client-python
-cryptography==3.0         # via cybersource-rest-client-python, paramiko, pyjwt, pyopenssl
+cryptography==3.1         # via cybersource-rest-client-python, paramiko, pyjwt, pyopenssl
 cssselect==1.1.0          # via premailer
 cssutils==1.0.2           # via premailer
 cybersource-rest-client-python==0.0.19  # via -r requirements/base.in
@@ -33,10 +33,10 @@ defusedxml==0.6.0         # via python3-openid, social-auth-core, zeep
 django-appconf==1.0.4     # via django-compressor
 django-compressor==2.4    # via -r requirements/base.in, django-libsass
 django-config-models==2.0.2  # via -r requirements/base.in
-django-cors-headers==3.4.0  # via -r requirements/base.in
+django-cors-headers==3.5.0  # via -r requirements/base.in
 django-crispy-forms==1.8.1  # via -r requirements/base.in
 django-crum==0.7.7        # via edx-rbac
-django-extensions==3.0.5  # via -r requirements/base.in
+django-extensions==3.0.7  # via -r requirements/base.in
 django-extra-views==0.11.0  # via django-oscar
 django-filter==2.3.0      # via -r requirements/base.in
 django-haystack==2.8.1    # via django-oscar
@@ -50,19 +50,19 @@ django-solo==1.1.3        # via -r requirements/base.in
 django-tables2==1.21.2    # via django-oscar
 django-threadlocals==0.10  # via -r requirements/base.in
 django-treebeard==4.3.1   # via django-oscar
-django-waffle==1.0.0      # via -r requirements/base.in, edx-django-utils, edx-drf-extensions
+django-waffle==2.0.0      # via -r requirements/base.in, edx-django-utils, edx-drf-extensions
 django-widget-tweaks==1.4.8  # via django-oscar
-django==2.2.15            # via -r requirements/base.in, django-appconf, django-config-models, django-cors-headers, django-crum, django-extra-views, django-filter, django-haystack, django-model-utils, django-oscar, django-phonenumber-field, django-tables2, django-treebeard, djangorestframework, drf-jwt, edx-auth-backends, edx-django-release-util, edx-django-sites-extensions, edx-django-utils, edx-drf-extensions, edx-rbac, jsonfield2, rest-condition, xss-utils
+django==2.2.16            # via -r requirements/base.in, django-appconf, django-config-models, django-cors-headers, django-crum, django-extra-views, django-filter, django-haystack, django-model-utils, django-oscar, django-phonenumber-field, django-tables2, django-treebeard, djangorestframework, drf-jwt, edx-auth-backends, edx-django-release-util, edx-django-sites-extensions, edx-django-utils, edx-drf-extensions, edx-rbac, jsonfield2, rest-condition, xss-utils
 djangorestframework-csv==2.1.0  # via -r requirements/base.in
 djangorestframework-datatables==0.5.2  # via -r requirements/base.in
 djangorestframework==3.11.1  # via -r requirements/base.in, django-config-models, django-rest-swagger, djangorestframework-csv, djangorestframework-datatables, drf-extensions, drf-jwt, edx-drf-extensions, rest-condition
 drf-extensions==0.6.0     # via -r requirements/base.in
-drf-jwt==1.17.0           # via edx-drf-extensions
+drf-jwt==1.17.1           # via edx-drf-extensions
 edx-auth-backends==3.1.0  # via -r requirements/base.in
 edx-django-release-util==0.4.4  # via -r requirements/base.in
 edx-django-sites-extensions==2.5.1  # via -r requirements/base.in
-edx-django-utils==3.7.3   # via -r requirements/base.in, django-config-models, edx-drf-extensions
-edx-drf-extensions==6.1.1  # via -r requirements/base.in, edx-rbac
+edx-django-utils==3.8.0   # via -r requirements/base.in, django-config-models, edx-drf-extensions
+edx-drf-extensions==6.1.2  # via -r requirements/base.in, edx-rbac
 edx-ecommerce-worker==0.8.2  # via -r requirements/base.in
 edx-opaque-keys==2.1.1    # via -r requirements/base.in, edx-drf-extensions
 edx-rbac==1.3.2           # via -r requirements/base.in
@@ -91,16 +91,16 @@ markupsafe==1.1.1         # via jinja2
 mysqlclient==1.4.6        # via -r requirements/base.in
 naked==0.1.31             # via crypto, cybersource-rest-client-python
 ndg-httpsclient==0.5.1    # via -r requirements/base.in
-newrelic==5.16.1.146      # via -r requirements/base.in, edx-django-utils
+newrelic==5.18.0.148      # via -r requirements/base.in, edx-django-utils
 nose==1.3.7               # via cybersource-rest-client-python
 oauthlib==3.1.0           # via requests-oauthlib, social-auth-core
 openapi-codec==1.3.2      # via django-rest-swagger
 packaging==20.4           # via bleach
-paramiko==2.7.1           # via cybersource-rest-client-python
+paramiko==2.7.2           # via cybersource-rest-client-python
 path.py==7.2              # via -r requirements/base.in
 paypalrestsdk==1.13.1     # via -r requirements/base.in
-pbr==5.4.5                # via cybersource-rest-client-python, fixtures, stevedore, testtools
-phonenumbers==8.12.8      # via django-oscar, django-phonenumber-field
+pbr==5.5.0                # via cybersource-rest-client-python, fixtures, stevedore, testtools
+phonenumbers==8.12.9      # via django-oscar, django-phonenumber-field
 pillow==7.2.0             # via django-oscar
 premailer==2.9.2          # via -r requirements/base.in
 psutil==5.7.2             # via edx-django-utils
@@ -145,7 +145,7 @@ git+https://github.com/python-social-auth/social-app-django.git@c00d23c2b45c3317
 social-auth-core==3.2.0   # via -c requirements/pins.txt, edx-auth-backends, social-auth-app-django
 sorl-thumbnail==12.6.3    # via -r requirements/base.in
 sqlparse==0.3.1           # via django
-stevedore==3.2.0          # via edx-django-utils, edx-opaque-keys
+stevedore==3.2.1          # via edx-django-utils, edx-opaque-keys
 stripe==1.70.0            # via -r requirements/base.in
 testtools==2.4.0          # via cybersource-rest-client-python, fixtures, python-subunit
 text-unidecode==1.3       # via faker

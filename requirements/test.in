@@ -1,6 +1,5 @@
 -c pins.txt
 -r base.txt
--r e2e.txt                  # required for quality
 -r tox.txt
 
 bok_choy
@@ -9,6 +8,7 @@ ddt
 diff-cover
 django-webtest
 edx-i18n-tools              # required for quality
+edx-lint                    # Provide consistent linting with other repos
 factory-boy
 freezegun
 httpretty
