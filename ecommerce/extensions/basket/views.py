@@ -49,6 +49,7 @@ from ecommerce.extensions.basket import message_utils
 from ecommerce.extensions.basket.constants import EMAIL_OPT_IN_ATTRIBUTE
 from ecommerce.extensions.basket.exceptions import BadRequestException, RedirectException, VoucherException
 from ecommerce.extensions.basket.utils import (
+    add_flex_microform_flag_to_url,
     add_invalid_code_message_to_url,
     add_utm_params_to_url,
     apply_offers_on_basket,
@@ -504,6 +505,8 @@ class BasketAddItemsView(BasketLogicMixin, APIView):
         redirect_url = get_payment_microfrontend_or_basket_url(request)
         redirect_url = add_utm_params_to_url(redirect_url, list(self.request.GET.items()))
         redirect_url = add_invalid_code_message_to_url(redirect_url, invalid_code)
+        # TODO: Remove as part of PCI-81
+        redirect_url = add_flex_microform_flag_to_url(redirect_url, request)
 
         return HttpResponseRedirect(redirect_url, status=303)
 
