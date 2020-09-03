@@ -57,6 +57,6 @@ class Command(BaseCommand):
                 # ^ when import is ready (REV-1310), replace print statement with call to import with our csv
             else:
                 logger.warning("CSV file download did not meet threshold given: [%f]", threshold)
+                logger.warning("Response content was: [%s]", download.content)
                 raise CommandError("CSV file download did not meet threshold")
             os.remove(csv_file_name)
-
