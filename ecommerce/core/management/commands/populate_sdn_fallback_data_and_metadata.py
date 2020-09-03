@@ -1,5 +1,6 @@
 """
 Django management command to download SDN csv for use as fallback if the trade.gov API is down.
+See docs/decisions/0007-sdn-fallback.rst for more details.
 
 """
 import logging
@@ -13,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 
 class Command(BaseCommand):
-    help = 'Management command to download csv for use as fallback for SDN check.'
+    help = 'Download the SDN csv from trade.gov, for use as fallback for when their SDN API is down.'
 
     def add_arguments(self, parser):
         parser.add_argument(
