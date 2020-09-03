@@ -26,11 +26,7 @@ class TestDownloadSndFallbackCommand(TestCase):
         """ Test using mock response from setup, using threshold it will clear"""
 
         mock_response.return_value = self.test_response
-
-        try:
-            call_command('populate_sdn_fallback_data_and_metadata', '--threshold=0.0001')
-        except CommandError as e:
-            self.fail("We expected to pass, but failed download csv. {}".format(e))
+        call_command('populate_sdn_fallback_data_and_metadata', '--threshold=0.0001')
 
     @patch('requests.Session.get')
     def test_with_mock_fail(self, mock_response):
