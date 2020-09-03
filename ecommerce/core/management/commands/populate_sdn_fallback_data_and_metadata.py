@@ -31,11 +31,9 @@ class Command(BaseCommand):
 
         csv, csv_file_size_in_MB, csv_file_name = download_SDN_fallback_csv()
 
-        file_has_eligible_size = csv_file_size_in_MB > threshold
-
-        if file_has_eligible_size:
-            print("[TEMP]: okay to import")
-            # [placeholder] call the import for the csv here (REV-1310)
+        if csv_file_size_in_MB > threshold:
+            print("[TEMP]: csv has eligible size, okay to import")
+            # ^ when import is ready (REV-1310), replace print statement with call to import with our csv
         else:
             logger.warning("CSV file download did not meet threshold")
             raise CommandError("CSV file download did not meet threshold")
