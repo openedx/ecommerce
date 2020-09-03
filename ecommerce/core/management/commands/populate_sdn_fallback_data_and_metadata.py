@@ -53,7 +53,7 @@ class Command(BaseCommand):
             file_size_in_MB = file_size_in_bytes / 10**6
 
             if file_size_in_MB > threshold:
-                print("[TEMP]: csv has eligible size, okay to import")
+                print("[TEMP]: CSV has eligible size, okay to import")
                 # ^ when import is ready (REV-1310), replace print statement with call to import with our csv
             else:
                 logger.warning("CSV file download did not meet threshold given: [%f]", threshold)
