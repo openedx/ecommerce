@@ -5,8 +5,8 @@ See docs/decisions/0007-sdn-fallback.rst for more details.
 """
 import logging
 import os
-import requests
 
+import requests
 from django.core.management.base import BaseCommand, CommandError
 
 logger = logging.getLogger(__name__)
