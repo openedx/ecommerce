@@ -24,7 +24,7 @@ We are only going to use the CSV when the API is down, not replace the API calls
 
 1a. **Selection of which worker will run the task to download the CSV**
 
-As per OEP-0003, we generally use celery to run asynchronous tasks, with some scheduler (Jenkins, Kubernetes) if task runs periodically. 
+As per OEP-0003, we generally use Celery to run asynchronous tasks, with some scheduler (Jenkins, Kubernetes) if task runs periodically. 
 Ecommerce is an exception/antipattern to this general approach; it doesn't use Celery directly. Instead, we have a separate service called ecommerce-worker that has a Celery integration. 
 Ecommerce-worker doesn't have access to the ecommerce database, so any database interaction with ecommerce needs to happen on the main ecommerce server machine. 
 
