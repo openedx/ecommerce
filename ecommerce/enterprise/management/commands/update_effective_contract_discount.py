@@ -4,6 +4,7 @@ Manual Order Offers via the Enrollment API by a given Enterprise Customer UUID
 """
 
 
+import datetime
 import logging
 from decimal import Decimal
 
@@ -51,9 +52,19 @@ class Command(BaseCommand, EnterpriseDiscountMixin):
             type=float,
         )
 
+        parser.add_argument(
+            '--start-date',
+            action='store',
+            dest='start_date',
+            default=None,
+            help='The starting date to change all orders forward from this point.',
+            type=datetime.datetime.fromisoformat,
+        )
+
     def handle(self, *args, **options):
         enterprise_customer = options['enterprise_customer']
         discount_percentage = options['discount_percentage']
+        start_date = options['start_date']
         logger.info(
             'Updating all Manual Orders for Enterprise [%s] to have a discount of [%f].',
             enterprise_customer,
@@ -68,7 +79,10 @@ class Command(BaseCommand, EnterpriseDiscountMixin):
                 enterprise_customer_uuid=enterprise_customer
             )
         except Condition.DoesNotExist:
-            logger.exception('Unable to find ManualEnrollmentOrderDiscountCondition for enterprise [%s]', enterprise_customer)
+            logger.exception(
+                'Unable to find ManualEnrollmentOrderDiscountCondition for enterprise [%s]',
+                enterprise_customer
+            )
             return
 
         # Using the ConditionalOffer we can then get back to a list of OrderDiscounts and Orders
@@ -79,6 +93,9 @@ class Command(BaseCommand, EnterpriseDiscountMixin):
             return
 
         discounts = OrderDiscount.objects.filter(offer_id=offer.id).select_related('order')
+        if start_date:
+            discounts = discounts.filter(order__date_placed__gte=start_date)
+
         for discount in discounts:
             order = discount.order
             # ManualEnrollment orders only have one order_line per order, so no need to loop over lines here
