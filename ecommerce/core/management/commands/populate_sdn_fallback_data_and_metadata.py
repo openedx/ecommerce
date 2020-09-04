@@ -4,10 +4,12 @@ See docs/decisions/0007-sdn-fallback.rst for more details.
 
 """
 import logging
-import os
+import tempfile
 
 import requests
-from django.core.management.base import BaseCommand, CommandError
+from django.conf import settings
+from django.core.management.base import BaseCommand
+from requests.exceptions import Timeout
 
 logger = logging.getLogger(__name__)
 
@@ -21,42 +23,38 @@ class Command(BaseCommand):
             metavar='N',
             action='store',
             type=float,
-            default=3,
+            default=3,  # typical size is > 4 MB; 3 MB would be unexpectedly low
             help='File size MB threshold, under which we will not import it. Use default if argument not specified'
-        )
-        parser.add_argument(
-            '--url',
-            metavar='N',
-            action='store',
-            type=str,
-            default='http://api.trade.gov/static/consolidated_screening_list/consolidated.csv',
-            help='Url to call for SDN csv, default to trade.gov'
         )
 
     def handle(self, *args, **options):
         # download the csv locally, to check size and pass along to import
         threshold = options['threshold']
-        url = options['url']
-        csv_file_name = 'temp_sdn_fallback.csv'
+        url = 'http://api.trade.gov/static/consolidated_screening_list/consolidated.csv'
 
         with requests.Session() as s:
             try:
-                download = s.get(url)
-            except Exception as e:   # pylint: disable=broad-except
-                logger.warning("Exception occurred: [%s]", e)
-                raise CommandError("Exception occurred")
+                download = s.get(url, timeout=settings.SDN_CHECK_REQUEST_TIMEOUT)
+                status_code = download.status_code
+            except Timeout as e:
+                logger.warning("SDN DOWNLOAD FAILURE: Timeout occurred trying to download SDN csv")
+                raise
+            except Exception as e:  # pylint: disable=broad-except
+                logger.warning("SDN DOWNLOAD FAILURE: Exception occurred: [%s]", e)
+                raise
 
-            csv = open(csv_file_name, 'wb')
-            csv.write(download.content)
-            csv.close()
-            file_size_in_bytes = os.path.getsize(csv_file_name)
-            file_size_in_MB = file_size_in_bytes / 10**6
+            if download.status_code != 200:
+                logger.warning("SDN DOWNLOAD FAILURE: Status code was: [%s]", status_code)
+                raise Exception("CSV download url got an unsuccessful response code: ", status_code)
 
-            if file_size_in_MB > threshold:
-                print("[TEMP]: CSV has eligible size, okay to import")
-                # ^ when import is ready (REV-1310), replace print statement with call to import with our csv
-            else:
-                logger.warning("CSV file download did not meet threshold given: [%f]", threshold)
-                logger.warning("Response content was: [%s]", download.content)
-                raise CommandError("CSV file download did not meet threshold")
-            os.remove(csv_file_name)
+            with tempfile.TemporaryFile() as temp_csv:
+                temp_csv.write(download.content)
+                file_size_in_bytes = temp_csv.tell()  # get current position in the file (number of bytes)
+                file_size_in_MB = file_size_in_bytes / 10**6
+
+                if file_size_in_MB > threshold:
+                    print("[TEMP]: CSV has eligible size, okay to import")
+                    # ^ when import is ready (REV-1310), replace print statement with call to import with our csv
+                else:
+                    logger.warning("SDN DOWNLOAD FAILURE: file too small! (%f MB vs threshold of %s MB)", file_size_in_MB, threshold)   # pylint: disable=line-too-long
+                    raise Exception("CSV file download did not meet threshold given")
