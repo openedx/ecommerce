@@ -62,13 +62,22 @@ class Command(BaseCommand, EnterpriseDiscountMixin):
 
         # An enterprise should only have a single ManualEnrollmentOrderDiscountCondition used for
         # API enrollment orders
-        condition = Condition.objects.get(
-            proxy_class=class_path(ManualEnrollmentOrderDiscountCondition),
-            enterprise_customer_uuid=enterprise_customer
-        )
+        try:
+            condition = Condition.objects.get(
+                proxy_class=class_path(ManualEnrollmentOrderDiscountCondition),
+                enterprise_customer_uuid=enterprise_customer
+            )
+        except Condition.DoesNotExist:
+            logger.exception('Unable to find ManualEnrollmentOrderDiscountCondition for enterprise [%s]', enterprise_customer)
+            return
 
         # Using the ConditionalOffer we can then get back to a list of OrderDiscounts and Orders
-        offer = ConditionalOffer.objects.get(condition=condition)
+        try:
+            offer = ConditionalOffer.objects.get(condition=condition)
+        except ConditionalOffer.DoesNotExist:
+            logger.exception('Unable to find ConditionalOffer for [%s]', condition)
+            return
+
         discounts = OrderDiscount.objects.filter(offer_id=offer.id).select_related('order')
         for discount in discounts:
             order = discount.order
