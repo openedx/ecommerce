@@ -689,6 +689,8 @@ class CybersourceREST(Cybersource):  # pragma: no cover
     A temporary PaymentProcessor dedicated to carefully switching to the Cybersource REST payment api
     """
 
+    NAME = "cybersource-rest"
+
     def __init__(self, site, transient_token_jwt, capture_context):
         super(CybersourceREST, self).__init__(site)
         self.transient_token_jwt = transient_token_jwt
