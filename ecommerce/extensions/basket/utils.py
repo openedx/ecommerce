@@ -48,7 +48,7 @@ def add_flex_microform_flag_to_url(url, request):
     ):
         return url
     flag = 'dwft_{}=1'.format(microform_flag_name)
-    join = '&' if '?' in url else '&'
+    join = '&' if '?' in url else '?'
     return '{url}{join}{flag}'.format(
         url=url,
         join=join,
