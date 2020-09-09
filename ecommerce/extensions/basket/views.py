@@ -624,15 +624,6 @@ class CaptureContextApiLogicMixin:  # pragma: no cover
     """
     Business logic for the capture context API.
     """
-    def get_capture_context_api_response(self, status=None):
-        """
-        Serializes the capture context api response.
-        """
-        data = {}
-        self._add_capture_context(data)
-        response_status = status if status else self._get_response_status(data)
-        return Response(data, status=response_status)
-
     def _add_capture_context(self, response):
         response['flex_microform_enabled'] = waffle.flag_is_active(
             self.request,
@@ -653,9 +644,6 @@ class CaptureContextApiLogicMixin:  # pragma: no cover
         except:  # pylint: disable=bare-except
             logger.exception("Error generating capture_context")
             return
-
-    def _get_response_status(self, response):
-        return message_utils.get_response_status(response['messages'])
 
 
 class PaymentApiLogicMixin(BasketLogicMixin, CaptureContextApiLogicMixin):
@@ -785,6 +773,14 @@ class CaptureContextApiView(CaptureContextApiLogicMixin, APIView):  # pragma: no
             return self.get_capture_context_api_response()
         except RedirectException as e:
             return Response({'redirect': e.response.url})
+
+    def get_capture_context_api_response(self, status=None):
+        """
+        Serializes the capture context api response.
+        """
+        data = {}
+        self._add_capture_context(data)
+        return Response(data, status=status)
 
 
 class PaymentApiView(PaymentApiLogicMixin, APIView):
