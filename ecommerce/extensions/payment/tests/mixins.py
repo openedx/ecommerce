@@ -469,7 +469,7 @@ class CybersourceNotificationTestsMixin(CybersourceMixin):
         error_message = (
             'CyberSource payment failed due to [{error_class}] for transaction [{transaction_id}], order '
             '[{order_number}], and basket [{basket_id}]. The complete payment response [Unknown Error] was recorded '
-            'in entry [{response_id}].'
+            'in entry [{response_id}]. Processed by [cybersource].'
         )
         self._test_payment_handling_errors(error_class, log_level, message_prefix + error_message, error_class_name)
 
@@ -477,10 +477,11 @@ class CybersourceNotificationTestsMixin(CybersourceMixin):
         (ExcessivePaymentForOrderError, 'INFO', 'Received duplicate CyberSource payment notification with different '
                                                 'transaction ID for basket [{basket_id}] which is associated with an '
                                                 'existing order [{order_number}]. Payment collected twice, '
-                                                'request a refund.'),
+                                                'request a refund. Processed by [cybersource].'),
         (RedundantPaymentNotificationError, 'INFO', 'Received redundant CyberSource payment notification with same '
                                                     'transaction ID for basket [{basket_id}] which is associated with '
-                                                    'an existing order [{order_number}]. No payment was collected.')
+                                                    'an existing order [{order_number}]. No payment was collected. '
+                                                    'Processed by [cybersource].')
     )
     @ddt.unpack
     def test_payment_handling_unique_errors(self, error_class, log_level, error_message):
@@ -552,7 +553,7 @@ class CybersourceNotificationTestsMixin(CybersourceMixin):
         notification = self.generate_notification(self.basket, billing_address=self.billing_address)
         msg = (
             'Received CyberSource payment notification for basket [{id}] '
-            'which is in a non-frozen state, [{status}]'
+            'which is in a non-frozen state, [{status}]. Processed by [cybersource].'
         ).format(
             id=self.basket.id,
             status=status
@@ -603,7 +604,7 @@ class CybersourceNotificationTestsMixin(CybersourceMixin):
                         'ERROR',
                         (
                             'Unhandled exception processing CyberSource payment notification for transaction [{}], '
-                            'order [{}], and basket [{}].'.format(
+                            'order [{}], and basket [{}]. Processed by [cybersource].'.format(
                                 notification.get('transaction_id'),
                                 self.basket.order_number,
                                 self.basket.id,
@@ -626,7 +627,8 @@ class CybersourceNotificationTestsMixin(CybersourceMixin):
                     logger_name,
                     'ERROR',
                     (
-                        'Error processing order for transaction [{}], with order [{}] and basket [{}].'.format(
+                        'Error processing order for transaction [{}], with order [{}] and basket [{}]. '
+                        'Processed by [cybersource].'.format(
                             notification.get('transaction_id'),
                             self.basket.order_number,
                             self.basket.id,
@@ -743,7 +745,8 @@ class CybersourceNotificationTestsMixin(CybersourceMixin):
         if mock_value:
             duplicate_reference_message = (
                 'Received CyberSource payment notification for basket [{}] which is associated '
-                'with existing order [{}]. No payment was collected, and no new order will be created.'
+                'with existing order [{}]. No payment was collected, and no new order will be created. '
+                'Processed by [cybersource].'
             ).format(self.basket.id, self.basket.order_number)
         else:
             duplicate_reference_message = ''
@@ -775,7 +778,7 @@ class CybersourceNotificationTestsMixin(CybersourceMixin):
     def _get_payment_notification_message(self, notification):
         return (
             'Received CyberSource payment notification for transaction [{}], associated with order [{}] and basket '
-            '[{}].'
+            '[{}]. Processed by [cybersource].'
         ).format(
             notification.get('transaction_id'),
             self.basket.order_number,

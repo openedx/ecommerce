@@ -206,13 +206,14 @@ class CybersourceOrderCompletionView(EdxOrderPlacementMixin):
         logger_function(
             message_prefix +
             'CyberSource payment failed due to [%s] for transaction [%s], order [%s], and basket [%d]. '
-            'The complete payment response [%s] was recorded in entry [%d].',
+            'The complete payment response [%s] was recorded in entry [%d]. Processed by [%s].',
             exception.__class__.__name__,
             transaction_id,
             order_number,
             basket.id,
             notification_msg or "Unknown Error",
-            ppr.id
+            ppr.id,
+            self.payment_processor.NAME,
         )
 
     @contextmanager
@@ -229,18 +230,21 @@ class CybersourceOrderCompletionView(EdxOrderPlacementMixin):
         except DuplicateReferenceNumber as exception:
             logger.info(
                 'Received CyberSource payment notification for basket [%d] which is associated '
-                'with existing order [%s]. No payment was collected, and no new order will be created.',
+                'with existing order [%s]. No payment was collected, and no new order will be created. '
+                'Processed by [%s].',
                 basket.id,
-                order_number
+                order_number,
+                self.payment_processor.NAME,
             )
             exception.unlogged = False
             raise
         except RedundantPaymentNotificationError as exception:
             logger.info(
                 'Received redundant CyberSource payment notification with same transaction ID for basket [%d] '
-                'which is associated with an existing order [%s]. No payment was collected.',
+                'which is associated with an existing order [%s]. No payment was collected. Processed by [%s].',
                 basket.id,
-                order_number
+                order_number,
+                self.payment_processor.NAME,
             )
             exception.unlogged = False
             raise
@@ -248,9 +252,10 @@ class CybersourceOrderCompletionView(EdxOrderPlacementMixin):
             logger.info(
                 'Received duplicate CyberSource payment notification with different transaction ID for basket '
                 '[%d] which is associated with an existing order [%s]. Payment collected twice, request a '
-                'refund.',
+                'refund. Processed by [%s].',
                 basket.id,
-                order_number
+                order_number,
+                self.payment_processor.NAME,
             )
             exception.unlogged = False
             raise
@@ -305,17 +310,22 @@ class CybersourceOrderCompletionView(EdxOrderPlacementMixin):
                 )
                 logger.info(
                     'Received CyberSource payment notification for transaction [%s], associated with order [%s]'
-                    ' and basket [%d].',
+                    ' and basket [%d]. Processed by [%s].',
                     self.transaction_id,
                     self.order_number,
-                    self.basket_id
+                    self.basket_id,
+                    self.payment_processor.NAME,
                 )
 
                 basket = self._get_basket(self.basket_id)
 
                 if not basket:
                     error_message = (
-                        'Received CyberSource payment notification for non-existent basket [%s].' % self.basket_id
+                        'Received CyberSource payment notification for non-existent '
+                        'basket [%s]. Processed by [%s].' % (
+                            self.basket_id,
+                            self.payment_processor.NAME
+                        )
                     )
                     logger.error(error_message)
                     exception = InvalidBasketError(error_message)
@@ -328,8 +338,8 @@ class CybersourceOrderCompletionView(EdxOrderPlacementMixin):
                     # telling us that they've declined an attempt to pay for an existing order.
                     logger.info(
                         'Received CyberSource payment notification for basket [%d] which is in a non-frozen state,'
-                        ' [%s]',
-                        basket.id, basket.status
+                        ' [%s]. Processed by [%s].',
+                        basket.id, basket.status, self.payment_processor.NAME,
                     )
             finally:
                 # Store the response in the database regardless of its authenticity.
@@ -362,10 +372,11 @@ class CybersourceOrderCompletionView(EdxOrderPlacementMixin):
             if getattr(exception, 'unlogged', True):
                 logger.exception(
                     'Unhandled exception processing CyberSource payment notification for transaction [%s], order [%s], '
-                    'and basket [%d].',
+                    'and basket [%d]. Processed by [%s].',
                     self.transaction_id,
                     self.order_number,
-                    self.basket_id
+                    self.basket_id,
+                    self.payment_processor.NAME,
                 )
             raise
 
@@ -382,13 +393,13 @@ class CybersourceOrderCompletionView(EdxOrderPlacementMixin):
 
             Applicator().apply(basket, basket.owner, self.request)
             logger.info(
-                'Applicator applied, basket id: [%s]',
-                basket.id)
+                'Applicator applied, basket id: [%s]. Processed by [%s].',
+                basket.id, self.payment_processor.NAME)
             return basket
         except (ValueError, ObjectDoesNotExist) as error:
             logger.warning(
-                'Could not get basket--error: [%s]',
-                str(error))
+                'Could not get basket--error: [%s]. Processed by [%s].',
+                str(error), self.payment_processor.NAME)
             return None
 
     def _merge_old_basket_into_new(self):
@@ -465,10 +476,11 @@ class CybersourceOrderCompletionView(EdxOrderPlacementMixin):
             return self.redirect_to_receipt_page()
         except:  # pylint: disable=bare-except
             logger.exception(
-                'Error processing order for transaction [%s], with order [%s] and basket [%d].',
+                'Error processing order for transaction [%s], with order [%s] and basket [%d]. Processed by [%s].',
                 self.transaction_id,
                 self.order_number,
-                self.basket_id
+                self.basket_id,
+                self.payment_processor.NAME,
             )
             return self.redirect_to_payment_error()
 
