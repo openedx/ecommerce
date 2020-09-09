@@ -288,6 +288,7 @@ class CybersourceOrderCompletionView(EdxOrderPlacementMixin):
         monitoring_utils.set_custom_metric('payment_response_record_id', ppr.id)
         monitoring_utils.set_custom_metric('payment_response_reason_code', reason_code)
         monitoring_utils.set_custom_metric('payment_response_message', payment_response_message)
+        monitoring_utils.set_custom_metric('payment_response_processor', self.payment_processor.NAME)
 
     # Note: method has too-many-statements, but it enables tracking that all exception handling gets logged
     def validate_order_completion(self, order_completion_message):  # pylint: disable=too-many-statements
