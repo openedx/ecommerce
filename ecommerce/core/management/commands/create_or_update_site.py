@@ -145,7 +145,7 @@ class Command(BaseCommand):
                             required=True,
                             help='URL for Discovery service API calls.')
 
-    def handle(self, *args, **options):  # pylint: disable=too-many-statements
+    def handle(self, *args, **options):
         site_id = options.get('site_id')
         site_domain = options.get('site_domain')
         site_name = options.get('site_name')

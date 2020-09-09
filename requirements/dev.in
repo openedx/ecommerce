@@ -1,8 +1,6 @@
 -r test.txt
 -r docs.txt
 
-django-debug-toolbar
-
 # i18n
 transifex-client
 

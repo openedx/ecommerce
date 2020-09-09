@@ -96,7 +96,7 @@ class EnterpriseCustomerCondition(ConditionWithoutRangeMixin, SingleItemConsumpt
     def name(self):
         return "Basket contains a seat from {}'s catalog".format(self.enterprise_customer_name)
 
-    def is_satisfied(self, offer, basket):  # pylint: disable=unused-argument
+    def is_satisfied(self, offer, basket):
         """
         Determines if a user is eligible for an enterprise customer offer
         based on their association with the enterprise customer.
@@ -316,7 +316,7 @@ class AssignableEnterpriseCustomerCondition(EnterpriseCustomerCondition):
         app_label = 'enterprise'
         proxy = True
 
-    def is_satisfied(self, offer, basket):  # pylint: disable=unused-argument
+    def is_satisfied(self, offer, basket):
         """
         Determines that if user has assigned a voucher and is eligible for redeem it.
 

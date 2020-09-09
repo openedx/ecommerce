@@ -2,7 +2,7 @@
 
 
 from django.utils.translation import ugettext_lazy as _
-from oscar.defaults import *
+from oscar.defaults import *  # pylint: disable=wildcard-import
 
 from ecommerce.extensions.fulfillment.status import LINE, ORDER
 from ecommerce.extensions.refund.status import REFUND, REFUND_LINE
@@ -125,6 +125,7 @@ OSCAR_DEFAULT_CURRENCY = 'USD'
 
 
 # PAYMENT PROCESSING
+# pylint: disable=line-too-long
 PAYMENT_PROCESSORS = (
     'ecommerce.extensions.payment.processors.cybersource.Cybersource',
     'ecommerce.extensions.payment.processors.paypal.Paypal',
@@ -167,6 +168,7 @@ PAYMENT_PROCESSOR_CONFIG = {
 }
 
 PAYMENT_PROCESSOR_SWITCH_PREFIX = 'payment_processor_active_'
+# pylint: enable=line-too-long
 # END PAYMENT PROCESSING
 
 

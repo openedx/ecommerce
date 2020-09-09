@@ -105,7 +105,7 @@ class DiscoveryMockMixin:
         course_identifier can be course UUID or key.
         """
 
-        def callback(request, uri, headers):  # pylint: disable=unused-argument
+        def callback(request, uri, headers):
             raise error
 
         course_url = '{}courses/{}/'.format(
@@ -271,7 +271,7 @@ class DiscoveryMockMixin:
         Helper function to register a discovery API endpoint with failure
         for getting course runs information.
         """
-        def callback(request, uri, headers):  # pylint: disable=unused-argument
+        def callback(request, uri, headers):
             raise error
 
         catalog_contains_course_run_url = '{}catalogs/{}/contains/?course_run_id={}'.format(
@@ -415,7 +415,7 @@ class DiscoveryMockMixin:
         Helper function to register discovery API endpoint for catalogs
         with failure.
         """
-        def callback(request, uri, headers):  # pylint: disable=unused-argument
+        def callback(request, uri, headers):
             raise error
 
         httpretty.register_uri(

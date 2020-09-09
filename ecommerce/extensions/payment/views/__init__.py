@@ -60,7 +60,7 @@ class BasePaymentSubmitView(View):
         )
         return super(BasePaymentSubmitView, self).dispatch(request, *args, **kwargs)
 
-    def post(self, request):  # pylint: disable=unused-argument
+    def post(self, request):
         # NOTE (CCB): Ideally, we'd inherit FormView; however, doing so causes issues for children
         # of this class that want to inherit mixins (e.g. EdxOrderPlacementMixin).
         form_kwargs = self.get_form_kwargs()

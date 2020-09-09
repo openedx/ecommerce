@@ -101,7 +101,7 @@ class LMSPublisher:
             commerce_api_client.courses(course_id).put(data=data)
             logger.info('Successfully published commerce data for [%s].', course_id)
             return None
-        except SlumberHttpBaseException as e:  # pylint: disable=bare-except
+        except SlumberHttpBaseException as e:
             logger.exception(
                 'Failed to publish commerce data for [%s] to LMS. Status was [%d]. Body was [%s].',
                 course_id,

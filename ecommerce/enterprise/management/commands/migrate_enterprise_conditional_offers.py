@@ -134,7 +134,7 @@ class Command(BaseCommand):
                 sleep(batch_sleep)
                 current_batch_index += len(vouchers)
                 vouchers = self._get_voucher_batch(current_batch_index, current_batch_index + batch_limit)
-        except Exception:  # pylint: disable=broad-except
+        except Exception:
             logger.exception('Script execution failed!')
             raise
 

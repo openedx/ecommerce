@@ -47,7 +47,7 @@ class Command(BaseCommand):
         )
 
     def chunks(self, ids, chunk_size):
-        for i in xrange(0, len(ids), chunk_size):
+        for i in range(0, len(ids), chunk_size):
             yield ids[i:i + chunk_size]
 
     def handle(self, *args, **options):
@@ -82,7 +82,6 @@ class Command(BaseCommand):
         for chunk in self.chunks(ids_without_history, batch_size):
             with transaction.atomic():
                 with connection.cursor() as cursor:
-                    # pylint: disable=all
                     query = u"""
                         INSERT INTO courses_historicalcourse(
                             {insert_columns},history_date,history_change_reason,history_type,history_user_id

@@ -668,7 +668,8 @@ class CouponRedeemViewTests(CouponMixin, DiscoveryTestMixin, LmsApiMockMixin, En
             consent_token=consent_token
         )
         last_request = httpretty.last_request()
-        self.assertEqual(last_request.path, '/api/enrollment/v1/enrollment')
+        self.assertIsInstance(last_request, httpretty.core.HTTPrettyRequest)
+        self.assertEqual(last_request.path, '/api/enrollment/v1/enrollment')  # pylint: disable=no-member
         self.assertEqual(last_request.method, 'POST')
 
     @httpretty.activate

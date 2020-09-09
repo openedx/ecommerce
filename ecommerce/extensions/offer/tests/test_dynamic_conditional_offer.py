@@ -27,7 +27,7 @@ def _mock_jwt_decode_handler(jwt):
     return jwt
 
 
-def _mock_get_decoded_jwt(request):     # pylint: disable=unused-argument
+def _mock_get_decoded_jwt(request):
     return {
         'roles': ['{}:{}'.format(SYSTEM_ENTERPRISE_LEARNER_ROLE, uuid4())]
     }
@@ -57,7 +57,7 @@ class DynamicPercentageDiscountBenefitTests(BenefitTestMixin, TestCase):
         ('POST', 20),
         ('POST', None)
     )
-    def test_apply(self, discount_param, get_decoded_jwt, jwt_decode_handler, request):  # pylint: disable=unused-argument
+    def test_apply(self, discount_param, get_decoded_jwt, jwt_decode_handler, request):
         request_type = discount_param[0]
         discount_percent = discount_param[1]
         discount_jwt = {'discount_applicable': True, 'discount_percent': discount_percent}
@@ -100,7 +100,7 @@ class DynamicConditionTests(TestCase):
         self.seat_product_class, __ = ProductClass.objects.get_or_create(name=SEAT_PRODUCT_CLASS_NAME)
 
     def test_name(self):
-        self.assertTrue(self.condition.name == 'dynamic_discount_condition')
+        self.assertEqual(self.condition.name, 'dynamic_discount_condition')
 
     @override_flag(DYNAMIC_DISCOUNT_FLAG, active=True)
     @patch('crum.get_current_request')
@@ -110,7 +110,7 @@ class DynamicConditionTests(TestCase):
         {'discount_applicable': True, 'discount_percent': 15},
         {'discount_applicable': False, 'discount_percent': 15},
         None,)
-    def test_is_satisfied_true(self, discount_jwt, jwt_decode_handler, request):   # pylint: disable=unused-argument
+    def test_is_satisfied_true(self, discount_jwt, jwt_decode_handler, request):
         product = ProductFactory(product_class=self.seat_product_class, stockrecords__price_excl_tax=10, categories=[])
         self.basket.add_product(product)
 
@@ -122,7 +122,7 @@ class DynamicConditionTests(TestCase):
 
     @override_flag(DYNAMIC_DISCOUNT_FLAG, active=True)
     @patch('crum.get_current_request')
-    def test_is_satisfied_quantity_more_than_1(self, request):   # pylint: disable=unused-argument
+    def test_is_satisfied_quantity_more_than_1(self, request):
         """
         This discount should not apply if are buying more than one of the same course.
         """
@@ -132,7 +132,7 @@ class DynamicConditionTests(TestCase):
 
     @override_flag(DYNAMIC_DISCOUNT_FLAG, active=True)
     @patch('crum.get_current_request')
-    def test_is_satisfied_not_seat_product(self, request):   # pylint: disable=unused-argument
+    def test_is_satisfied_not_seat_product(self, request):
         """
         This discount should not apply if are not purchasing a seat product.
         """

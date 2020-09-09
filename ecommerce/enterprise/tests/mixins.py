@@ -23,7 +23,7 @@ from ecommerce.extensions.voucher.models import CouponVouchers
 ProductClass = get_model('catalogue', 'ProductClass')
 
 
-def raise_timeout(request, uri, headers):  # pylint: disable=unused-argument
+def raise_timeout(request, uri, headers):
     raise requests.Timeout('Connection timed out.')
 
 

@@ -777,7 +777,7 @@ class CaptureContextApiView(CaptureContextApiLogicMixin, APIView):  # pragma: no
     """
     permission_classes = (IsAuthenticated,)
 
-    def get(self, request):  # pylint: disable=unused-argument
+    def get(self, request):
         try:
             return self.get_capture_context_api_response()
         except RedirectException as e:
@@ -793,7 +793,7 @@ class PaymentApiView(PaymentApiLogicMixin, APIView):
     """
     permission_classes = (IsAuthenticated,)
 
-    def get(self, request):  # pylint: disable=unused-argument
+    def get(self, request):
         basket = request.basket
 
         try:
@@ -871,8 +871,10 @@ class QuantityAPIView(APIView, View, PaymentApiLogicMixin):
         msgs = []
         for error in errors:
             msgs.append(error.as_text())
+        # pylint: disable=line-too-long
         # The removal of '*' may not be needed. It was copied from a different view (BasketAddView) in django-oscar.
-        # See https://github.com/django-oscar/django-oscar/blob/3ee66877a2dbd49b2a0838c369205f4ffbc2a391/src/oscar/apps/basket/views.py#L261-L265  pylint: disable=line-too-long
+        # See https://github.com/django-oscar/django-oscar/blob/3ee66877a2dbd49b2a0838c369205f4ffbc2a391/src/oscar/apps/basket/views.py#L261-L265
+        # pylint: enable=line-too-long
         clean_msgs = [m.replace('* ', '') for m in msgs if m.startswith('* ')]
         return ",".join(clean_msgs)
 
@@ -1082,14 +1084,16 @@ class VoucherRemoveApiView(PaymentApiLogicMixin, APIView):
     voucher_model = get_model('voucher', 'voucher')
     remove_signal = voucher_removal
 
-    def delete(self, request, voucherid):  # pylint: disable=unused-argument
+    def delete(self, request, voucherid):
         """
         If successful, removes voucher and returns 200 and the same response as the payment api.
         If unsuccessful, returns 400 with relevant errors and the same response as the payment api.
         """
 
+        # pylint: disable=line-too-long
         # Implementation is a copy of django-oscar's VoucherRemoveView without redirect, and other minor changes.
-        # See: https://github.com/django-oscar/django-oscar/blob/3ee66877a2dbd49b2a0838c369205f4ffbc2a391/src/oscar/apps/basket/views.py#L389-L414  pylint: disable=line-too-long
+        # See: https://github.com/django-oscar/django-oscar/blob/3ee66877a2dbd49b2a0838c369205f4ffbc2a391/src/oscar/apps/basket/views.py#L389-L414
+        # pylint: enable=line-too-long
 
         # Note: This comment is from original django-oscar code.
         # Hacking attempt - the basket must be saved for it to have a voucher in it.

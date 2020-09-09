@@ -4,7 +4,7 @@ from urllib.parse import urljoin
 
 from path import Path
 
-from ecommerce.settings.base import *
+from ecommerce.settings.base import *  # pylint: disable=wildcard-import
 
 SITE_ID = 1
 PROTOCOL = 'http'
@@ -64,6 +64,7 @@ EDX_API_KEY = 'replace-me'
 
 
 # PAYMENT PROCESSING
+# pylint: disable=line-too-long
 PAYMENT_PROCESSOR_CONFIG = {
     'edx': {
         'cybersource': {
@@ -131,6 +132,7 @@ PAYMENT_PROCESSOR_CONFIG = {
     }
 }
 
+# pylint: enable=line-too-long
 # END PAYMENT PROCESSING
 
 
@@ -165,6 +167,6 @@ TEMPLATE_DEBUG = False
 CELERY_EAGER_PROPAGATES_EXCEPTIONS = True
 BROKER_BACKEND = 'memory'
 
-#SAILTHRU settings
+# SAILTHRU settings
 SAILTHRU_KEY = 'abc123'
 SAILTHRU_SECRET = 'top_secret'

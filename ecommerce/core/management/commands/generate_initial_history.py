@@ -70,7 +70,6 @@ class Command(BaseCommand):
             exclude_column = table_info['exclude_column']
 
             with connection.cursor() as cursor:
-                # pylint: disable=all
                 query = """
                     SELECT
                         MIN(t.id),

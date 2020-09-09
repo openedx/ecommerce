@@ -85,13 +85,13 @@ class ProgramOfferForm(forms.ModelForm):
 
         client = ProgramsApiClient(site.siteconfiguration.discovery_api_client, site.domain)
         program = client.get_program(program_uuid)
-        offer_name = _(u'Discount for the {program_title} {program_type} Program'.format(
+        offer_name = _(u'Discount for the {program_title} {program_type} Program').format(
             program_title=program['title'],
             program_type=program['type']
-        ))
+        )
 
         # Truncate offer_names down to 128 characters, as Oscar's AbstractConditionalOffer name is max_length 128
-        offer_name = (offer_name[:125] + '...') if len(offer_name) > 128 else offer_name  # pylint: disable=unsubscriptable-object
+        offer_name = (offer_name[:125] + '...') if len(offer_name) > 128 else offer_name
 
         self.instance.name = offer_name
         self.instance.status = ConditionalOffer.OPEN

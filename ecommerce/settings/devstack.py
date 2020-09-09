@@ -3,10 +3,10 @@
 
 from corsheaders.defaults import default_headers as corsheaders_default_headers
 
-from ecommerce.settings.production import *
+from ecommerce.settings.production import *  # pylint: disable=wildcard-import
 
 # noinspection PyUnresolvedReferences
-from ecommerce.settings._debug_toolbar import *  # isort:skip
+from ecommerce.settings._debug_toolbar import *  # isort:skip # pylint: disable=wildcard-import
 
 DEBUG = True
 INTERNAL_IPS = ['127.0.0.1']
@@ -54,6 +54,7 @@ CORS_ALLOW_CREDENTIALS = True
 ENTERPRISE_CATALOG_API_URL = urljoin(ENTERPRISE_CATALOG_SERVICE_URL, 'api/v1/')
 
 # PAYMENT PROCESSING
+# pylint: disable=line-too-long
 PAYMENT_PROCESSOR_CONFIG = {
     'edx': {
         'cybersource': {
@@ -84,6 +85,7 @@ PAYMENT_PROCESSOR_CONFIG = {
         },
     },
 }
+# pylint: enable=line-too-long
 # END PAYMENT PROCESSING
 
 # Language cookie
@@ -91,14 +93,14 @@ LANGUAGE_COOKIE_NAME = 'openedx-language-preference'
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
-#SAILTHRU settings
+# SAILTHRU settings
 SAILTHRU_KEY = 'abc123'
 SAILTHRU_SECRET = 'top_secret'
 
-REST_FRAMEWORK['DEFAULT_RENDERER_CLASSES'] = REST_FRAMEWORK['DEFAULT_RENDERER_CLASSES'] + ('rest_framework.renderers.BrowsableAPIRenderer',)
+REST_FRAMEWORK['DEFAULT_RENDERER_CLASSES'] += ('rest_framework.renderers.BrowsableAPIRenderer',)
 
 #####################################################################
 # Lastly, see if the developer has any local overrides.
 if os.path.isfile(join(dirname(abspath(__file__)), 'private.py')):
     # noinspection PyUnresolvedReferences
-    from .private import *  # pylint: disable=import-error
+    from .private import *  # pylint: disable=import-error, wildcard-import

@@ -1,6 +1,6 @@
 
 
-from oscar.apps.basket.admin import *  # noqa pylint: disable=wildcard-import,unused-wildcard-import
+from oscar.apps.basket.admin import *  # noqa pylint: disable=wildcard-import
 
 from ecommerce.extensions.basket.models import BasketAttribute, BasketAttributeType
 
@@ -16,8 +16,7 @@ class PaymentProcessorResponseInline(admin.TabularInline):
     can_delete = False
     readonly_fields = ('id', 'processor_name', 'transaction_id', 'created', 'response')
 
-    # TODO: Remove pylint disable after Django 2.2 upgrade
-    def has_add_permission(self, request, obj=None):  # pylint: disable=arguments-differ,unused-argument
+    def has_add_permission(self, request, obj=None):
         # Users are not allowed to add PaymentProcessorResponse objects
         return False
 
@@ -27,8 +26,7 @@ class BasketAttributeInLine(admin.TabularInline):
     readonly_fields = ('id', 'attribute_type', 'value_text',)
     extra = 0
 
-    # TODO: Remove pylint disable after Django 2.2 upgrade
-    def has_add_permission(self, request, obj=None):  # pylint: disable=arguments-differ,unused-argument
+    def has_add_permission(self, request, obj=None):
         # Users are not allowed to add BasketAttribute objects
         return False
 

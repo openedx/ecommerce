@@ -10,7 +10,7 @@ from edx_rest_api_client.client import EdxRestApiClient
 from edx_rest_api_client.exceptions import HttpNotFoundError
 from oscar.apps.order.utils import OrderCreator as OscarOrderCreator
 from oscar.core.loading import get_model
-from requests.exceptions import ConnectionError as ReqConnectionError  # pylint: disable=ungrouped-imports
+from requests.exceptions import ConnectionError as ReqConnectionError
 from requests.exceptions import ConnectTimeout
 from threadlocals.threadlocals import get_current_request
 

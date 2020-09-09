@@ -53,9 +53,9 @@ def silence_exceptions(msg):
         msg (str): A message to be logged when an exception is raised.
     """
 
-    def decorator(func):  # pylint: disable=missing-docstring
+    def decorator(func):
         @wraps(func)
-        def wrapper(*args, **kwargs):  # pylint: disable=missing-docstring
+        def wrapper(*args, **kwargs):
             try:
                 return func(*args, **kwargs)
             except:  # pylint: disable=bare-except

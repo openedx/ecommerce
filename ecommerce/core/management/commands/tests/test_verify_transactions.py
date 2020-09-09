@@ -26,6 +26,7 @@ ProductClass = get_model('catalogue', 'ProductClass')
 class VerifyTransactionsTest(TestCase):
 
     def setUp(self):
+        super().setUp()
         # Timestamp in the middle of the time window
         time_delta = (DEFAULT_START_DELTA_TIME + DEFAULT_END_DELTA_TIME) / 2
         self.timestamp = datetime.datetime.now(pytz.utc) - datetime.timedelta(minutes=time_delta)
@@ -223,7 +224,7 @@ class VerifyTransactionsTest(TestCase):
         with self.assertRaises(CommandError) as cm:
             call_command('verify_transactions', '--support')
         exception = str(cm.exception)
-        self.assertTrue(payment.amount != self.order.total_incl_tax)
+        self.assertNotEqual(payment.amount, self.order.total_incl_tax)
         self.assertIn("There was a mismatch in the totals in the following order that require a refund", exception)
         self.assertIn("orders_mismatched_totals_support", exception)
         self.assertIn(str(self.order.id), exception)

@@ -41,6 +41,7 @@ class EnterpriseAPITests(EnterpriseServiceMockMixin, DiscoveryTestMixin, TestCas
         self.basket = BasketFactory(site=self.site, owner=self.learner, strategy=self.request.strategy)
 
     def tearDown(self):
+        super().tearDown()
         # Reset HTTPretty state (clean up registered urls and request history)
         httpretty.reset()
 

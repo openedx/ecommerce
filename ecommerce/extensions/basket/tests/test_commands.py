@@ -21,11 +21,11 @@ class DeleteOrderedBasketsCommandTests(TestCase):
         super(DeleteOrderedBasketsCommandTests, self).setUp()
 
         # Create baskets with and without orders
-        self.orders = [create_order() for __ in range(0, 2)]
-        self.unordered_baskets = [factories.BasketFactory() for __ in range(0, 3)]
+        self.orders = [create_order() for __ in range(2)]
+        self.unordered_baskets = [factories.BasketFactory() for __ in range(3)]
 
         # Create invoiced baskets.
-        self.invoiced_orders = [create_order() for __ in range(0, 2)]
+        self.invoiced_orders = [create_order() for __ in range(2)]
         self.invoiced_baskets = [order.basket for order in self.invoiced_orders]
         for order in self.invoiced_orders:
             Invoice.objects.create(basket=order.basket, order=order)
@@ -85,8 +85,8 @@ class AddSiteToBasketsBasketsCommandTests(TestCase):
         super(AddSiteToBasketsBasketsCommandTests, self).setUp()
         self.site = Site.objects.create(domain='acme.fake')
         site = Site.objects.create(domain='test.fake')
-        self.associated_baskets = [factories.BasketFactory(site=site) for __ in range(0, 2)]
-        self.unassociated_baskets = [factories.BasketFactory() for __ in range(0, 3)]
+        self.associated_baskets = [factories.BasketFactory(site=site) for __ in range(2)]
+        self.unassociated_baskets = [factories.BasketFactory() for __ in range(3)]
 
     def test_without_commit(self):
         """ Verify the command does not modify any baskets, if the commit flag is not specified. """

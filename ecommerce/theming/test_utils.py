@@ -20,9 +20,9 @@ def with_comprehensive_theme(theme_dir_name):
         theme_dir_name (str): directory name of the site for which we want comprehensive theming enabled.
     """
     # This decorator creates Site and SiteTheme models for given domain
-    def _decorator(func):  # pylint: disable=missing-docstring
+    def _decorator(func):
         @wraps(func)
-        def _decorated(*args, **kwargs):  # pylint: disable=missing-docstring
+        def _decorated(*args, **kwargs):
             # make a domain name out of directory name
             domain = "{theme_dir_name}.org".format(theme_dir_name=re.sub(r"\.org$", "", theme_dir_name))
             site, __ = Site.objects.get_or_create(domain=domain, name=domain)

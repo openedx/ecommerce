@@ -52,7 +52,7 @@ Voucher = get_model('voucher', 'Voucher')
 OrderNumberGenerator = get_class('order.utils', 'OrderNumberGenerator')
 
 
-def create_basket(owner=None, site=None, empty=False, price='10.00', product_class=None):  # pylint:disable=function-redefined
+def create_basket(owner=None, site=None, empty=False, price='10.00', product_class=None):
     if site is None:
         site = SiteConfigurationFactory().site
     if owner is None:
@@ -70,7 +70,7 @@ def create_basket(owner=None, site=None, empty=False, price='10.00', product_cla
     return basket
 
 
-def create_order(number=None, basket=None, user=None, shipping_address=None,  # pylint:disable=function-redefined
+def create_order(number=None, basket=None, user=None, shipping_address=None,
                  shipping_method=None, billing_address=None, total=None, site=None, product_class=None, **kwargs):
     """
     Helper function for creating an order for testing
@@ -192,12 +192,12 @@ def prepare_enterprise_voucher(code='COUPONTEST', start_datetime=None, end_datet
     return voucher
 
 
-class VoucherFactory(BaseVoucherFactory):  # pylint: disable=function-redefined
+class VoucherFactory(BaseVoucherFactory):
     name = factory.Faker('word')
     code = factory.Sequence(lambda n: 'VOUCHERCODE{number}'.format(number=n))
 
 
-class ConditionalOfferFactory(BaseConditionalOfferFactory):  # pylint: disable=function-redefined
+class ConditionalOfferFactory(BaseConditionalOfferFactory):
     name = factory.Sequence(lambda n: 'ConditionalOffer {number}'.format(number=n))
 
 

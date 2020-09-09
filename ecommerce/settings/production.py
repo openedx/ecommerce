@@ -11,7 +11,7 @@ from corsheaders.defaults import default_headers as corsheaders_default_headers
 # into your settings, but ImproperlyConfigured is an exception.
 from django.core.exceptions import ImproperlyConfigured
 
-from ecommerce.settings.base import *
+from ecommerce.settings.base import *  # pylint: disable=wildcard-import
 
 # Protocol used for construcing absolute callback URLs
 PROTOCOL = 'https'
@@ -55,7 +55,7 @@ LOGGING_SUBSECTION_OVERRIDES = {}
 
 CONFIG_FILE = get_env_setting('ECOMMERCE_CFG')
 with codecs.open(CONFIG_FILE, encoding='utf-8') as f:
-    config_from_yaml = yaml.load(f)
+    config_from_yaml = yaml.safe_load(f)
 
     # Remove the items that should be used to update dicts, and apply them separately rather
     # than pumping them into the local vars.
@@ -94,7 +94,6 @@ for section, overrides in LOGGING_SUBSECTION_OVERRIDES.items():
                 del LOGGING[section][key]
             else:
                 LOGGING[section][key] = value
-
 
 
 # PAYMENT PROCESSOR OVERRIDES

@@ -290,7 +290,7 @@ class CybersourceOrderCompletionView(EdxOrderPlacementMixin):
         monitoring_utils.set_custom_metric('payment_response_message', payment_response_message)
 
     # Note: method has too-many-statements, but it enables tracking that all exception handling gets logged
-    def validate_order_completion(self, order_completion_message):  # pylint: disable=too-many-statements
+    def validate_order_completion(self, order_completion_message):
         # Note (CCB): Orders should not be created until the payment processor has validated the response's signature.
         # This validation is performed in the handle_payment method. After that method succeeds, the response can be
         # safely assumed to have originated from CyberSource.
@@ -357,7 +357,7 @@ class CybersourceOrderCompletionView(EdxOrderPlacementMixin):
             ):
                 self.handle_payment(normalized_order_completion_message, basket)
 
-        except Exception as exception:  # pylint: disable=bare-except
+        except Exception as exception:
             if getattr(exception, 'unlogged', True):
                 logger.exception(
                     'Unhandled exception processing CyberSource payment notification for transaction [%s], order [%s], '
@@ -570,7 +570,7 @@ class CybersourceInterstitialView(CyberSourceProcessorMixin, CybersourceOrderCom
     def dispatch(self, request, *args, **kwargs):
         return super(CybersourceInterstitialView, self).dispatch(request, *args, **kwargs)
 
-    def post(self, request, *args, **kwargs):  # pylint: disable=unused-argument
+    def post(self, request, *args, **kwargs):
         """Process a CyberSource merchant notification and place an order for paid products as appropriate."""
         notification = request.POST.dict()
         self.transaction_id = notification.get('transaction_id')

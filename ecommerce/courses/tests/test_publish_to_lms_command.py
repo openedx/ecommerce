@@ -32,6 +32,7 @@ class PublishCoursesToLMSTests(DiscoveryTestMixin, TransactionTestCase):
 
     @classmethod
     def tearDownClass(cls):
+        super().tearDownClass()
         if os.path.exists(cls.tmp_file_path):
             os.remove(cls.tmp_file_path)
 

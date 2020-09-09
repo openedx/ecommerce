@@ -103,7 +103,7 @@ class TestSyncHubspotCommand(TestCase):
         SiteConfiguration.objects.update(hubspot_secret_key='')
 
         # making sure there are still SiteConfigurations exists
-        self.assertTrue(SiteConfiguration.objects.count() > 0)
+        self.assertGreater(SiteConfiguration.objects.count(), 0)
         output = self._get_command_output()
         self.assertIn('No Hubspot enabled SiteConfiguration Found.', output)
         self.assertEqual(mocked_hubspot.call_count, 0)

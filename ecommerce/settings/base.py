@@ -17,7 +17,7 @@ from ecommerce.core.constants import (
     SYSTEM_ENTERPRISE_ADMIN_ROLE,
     SYSTEM_ENTERPRISE_OPERATOR_ROLE
 )
-from ecommerce.settings._oscar import *
+from ecommerce.settings._oscar import *  # pylint:disable=wildcard-import
 
 # PATH CONFIGURATION
 # Absolute filesystem path to the Django project directory
@@ -760,7 +760,7 @@ ECOMMERCE_PAYMENT_PROCESSOR_CONFIG = {
             'payment_page_url': 'https://testsecureacceptance.cybersource.com/pay',
             'profile_id': 'SET-ME-PLEASE',
             'receipt_page_url': '/checkout/receipt/',
-            'secret_key':  'SET-ME-PLEASE',
+            'secret_key': 'SET-ME-PLEASE',
             'send_level_2_3_details': True,
             'soap_api_url': 'https://ics2wstest.ic3.com/commerce/1.x/transactionProcessor/'
                             'CyberSourceTransaction_1.140.wsdl',
@@ -807,5 +807,5 @@ HUBSPOT_PORTAL_ID = "SET-ME-PLEASE"
 HUBSPOT_SALES_LEAD_FORM_GUID = "SET-ME-PLEASE"
 
 # To check government purchase restriction lists
-SDN_CHECK_API_URL ="https://api.trade.gov/gateway/v1/consolidated_screening_list/search"
+SDN_CHECK_API_URL = "https://api.trade.gov/gateway/v1/consolidated_screening_list/search"
 SDN_CHECK_API_KEY = "sdn search key here"

@@ -5,7 +5,7 @@ from urllib.parse import urljoin
 
 from corsheaders.defaults import default_headers as corsheaders_default_headers
 
-from ecommerce.settings.base import *
+from ecommerce.settings.base import *  # pylint: disable=wildcard-import
 
 # DEBUG CONFIGURATION
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#debug and
@@ -96,6 +96,7 @@ EDX_API_KEY = 'replace-me'
 
 
 # PAYMENT PROCESSING
+# pylint: disable=line-too-long
 PAYMENT_PROCESSOR_CONFIG = {
     'edx': {
         # NOTE: The same profile information is used here to appease the payment processor class.
@@ -136,6 +137,7 @@ PAYMENT_PROCESSOR_CONFIG = {
         },
     },
 }
+# pylint: enable=line-too-long
 # END PAYMENT PROCESSING
 
 
@@ -149,16 +151,16 @@ BROKER_URL = 'amqp://'
 
 ENABLE_AUTO_AUTH = True
 
-#SAILTHRU settings
+# SAILTHRU settings
 SAILTHRU_KEY = 'abc123'
 SAILTHRU_SECRET = 'top_secret'
 
-REST_FRAMEWORK['DEFAULT_RENDERER_CLASSES'] = REST_FRAMEWORK['DEFAULT_RENDERER_CLASSES'] + ('rest_framework.renderers.BrowsableAPIRenderer',)
+REST_FRAMEWORK['DEFAULT_RENDERER_CLASSES'] += ('rest_framework.renderers.BrowsableAPIRenderer',)
 
 #####################################################################
 # Lastly, see if the developer has any local overrides.
 if os.path.isfile(join(dirname(abspath(__file__)), 'private.py')):
-    from .private import *  # pylint: disable=import-error
+    from .private import *  # pylint: disable=import-error, wildcard-import
 
 ENTERPRISE_API_URL = urljoin(ENTERPRISE_SERVICE_URL, 'api/v1/')
 

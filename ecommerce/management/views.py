@@ -27,7 +27,7 @@ class ManagementView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
 
         return basket_ids
 
-    def post(self, request, *args, **kwargs):  # pylint: disable=unused-argument
+    def post(self, request, *args, **kwargs):
         action = request.POST.get('action')
 
         if action:

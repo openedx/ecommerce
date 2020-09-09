@@ -200,10 +200,10 @@ class EnterpriseUtilsTests(EnterpriseServiceMockMixin, TestCase):
         self.mock_access_token_response()
         self.mock_enterprise_catalog_api_get(enterprise_catalog_uuid)
         response = get_enterprise_catalog(self.site, enterprise_catalog_uuid, 50, 1)
-        self.assertTrue(enterprise_catalog_uuid in response['next'])
-        self.assertTrue(len(response['results']) == 3)
+        self.assertIn(enterprise_catalog_uuid, response['next'])
+        self.assertEqual(len(response['results']), 3)
         for result in response['results']:
-            self.assertTrue('course_runs' in result)
+            self.assertIn('course_runs', result)
 
         cached_response = get_enterprise_catalog(self.site, enterprise_catalog_uuid, 50, 1)
         self.assertEqual(response, cached_response)

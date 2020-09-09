@@ -374,7 +374,7 @@ class ApiMockMixin:
     """ Common Mocks for the API responses. """
 
     def mock_api_error(self, error, url):
-        def callback(request, uri, headers):  # pylint: disable=unused-argument
+        def callback(request, uri, headers):
             raise error
 
         httpretty.register_uri(httpretty.GET, url, body=callback, content_type=CONTENT_TYPE)

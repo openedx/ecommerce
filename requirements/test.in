@@ -7,6 +7,7 @@ bok_choy
 coverage
 ddt
 diff-cover
+django-debug-toolbar        # required for quality
 django-webtest
 edx-i18n-tools              # required for quality
 edx-lint                    # Provide consistent linting with other repos

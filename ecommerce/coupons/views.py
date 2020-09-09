@@ -87,7 +87,7 @@ def voucher_is_valid(voucher, products, request):
     if len(products) == 1:
         purchase_info = request.strategy.fetch_for_product(products[0])
         if not purchase_info.availability.is_available_to_buy:
-            return False, _('Product [{product}] not available for purchase.'.format(product=products[0])), False
+            return False, _('Product [{product}] not available for purchase.').format(product=products[0]), False
 
     # If the voucher's number of applications exceeds it's limit.
     offer = voucher.best_offer
@@ -167,8 +167,11 @@ class CouponRedeemView(EdxOrderPlacementMixin, APIView):
         try:
             voucher = Voucher.objects.get(code=code)
         except Voucher.DoesNotExist:
-            msg = 'No voucher found with code {code}'.format(code=code)
-            return render(request, template_name, {'error': _(msg)})
+            return render(
+                request,
+                template_name,
+                {'error': _('No voucher found with code {code}').format(code=code)}
+            )
 
         try:
             product = StockRecord.objects.get(partner_sku=sku).product

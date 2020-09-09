@@ -21,8 +21,8 @@ SAILTHRU_CAMPAIGN = 'sailthru_bid'
 
 @receiver(post_checkout)
 @silence_exceptions("Failed to call Sailthru upon order completion.")
-def process_checkout_complete(sender, order=None, user=None, request=None,  # pylint: disable=unused-argument
-                              response=None, **kwargs):  # pylint: disable=unused-argument
+def process_checkout_complete(sender, order=None, user=None, request=None,
+                              response=None, **kwargs):
     """Tell Sailthru when payment done.
 
     Arguments:
@@ -79,7 +79,7 @@ def process_checkout_complete(sender, order=None, user=None, request=None,  # py
 @receiver(basket_addition)
 @silence_exceptions("Failed to call Sailthru upon basket addition.")
 def process_basket_addition(sender, product=None, user=None, request=None, basket=None, is_multi_product_basket=None,
-                            **kwargs):  # pylint: disable=unused-argument
+                            **kwargs):
     """Tell Sailthru when payment started.
 
     Arguments:

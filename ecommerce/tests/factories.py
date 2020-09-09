@@ -2,7 +2,7 @@
 
 import factory
 from django.contrib.sites.models import Site
-from factory.fuzzy import FuzzyText  # pylint: disable=ungrouped-imports
+from factory.fuzzy import FuzzyText
 from faker import Faker
 from oscar.core.loading import get_model
 from oscar.test.factories import ProductFactory

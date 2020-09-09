@@ -18,7 +18,6 @@ OrderDiscount = get_model('order', 'OrderDiscount')
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
-# pylint: disable=line-too-long
 EMAIL_BODY = """
 You have used {percentage_usage}% of the {offer_type} Limit associated with the entitlement offer called "{offer_name}"
 {offer_type}s Redeemed: {current_usage}

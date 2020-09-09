@@ -129,6 +129,7 @@ class UtilsTests(DiscoveryTestMixin, DiscoveryMockMixin, TestCase):
 class GetCourseCatalogUtilTests(DiscoveryMockMixin, TestCase):
 
     def tearDown(self):
+        super().tearDown()
         # Reset HTTPretty state (clean up registered urls and request history)
         httpretty.reset()
 

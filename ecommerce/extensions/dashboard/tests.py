@@ -8,7 +8,7 @@ from ecommerce.tests.testcases import TestCase
 
 
 class DashboardViewTestMixin:
-    def assert_message_equals(self, response, msg, level):  # pylint: disable=unused-argument
+    def assert_message_equals(self, response, msg, level):
         """ Verify the latest message matches the expected value. """
         messages = []
         for context in response.context:

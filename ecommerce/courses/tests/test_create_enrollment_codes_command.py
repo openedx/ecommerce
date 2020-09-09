@@ -56,6 +56,7 @@ class CreateEnrollmentCodesTests(DiscoveryTestMixin, TransactionTestCase):
         """
         Remove temporary file.
         """
+        super().tearDownClass()
         if os.path.exists(cls.tmp_file_path):
             os.remove(cls.tmp_file_path)
 

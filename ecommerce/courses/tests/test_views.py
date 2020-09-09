@@ -86,7 +86,7 @@ class CourseAppViewTests(TestCase):
     def mock_credit_api_error(self):
         """ Mock an error response when calling the Credit API providers endpoint. """
 
-        def callback(request, uri, headers):  # pylint: disable=unused-argument
+        def callback(request, uri, headers):
             return 500, headers, 'Failure!'
 
         url = get_lms_url('/api/credit/v1/providers/')

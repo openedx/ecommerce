@@ -40,7 +40,7 @@ class UtilTests(ProgramTestMixin, TestCase):
 
     @httpretty.activate
     @ddt.data(ReqConnectionError, SlumberBaseException, Timeout)
-    def test_get_program_failure(self, exc):  # pylint: disable=unused-argument
+    def test_get_program_failure(self, exc):
         """
         The method should log errors in retrieving program data
         """
@@ -53,7 +53,7 @@ class UtilTests(ProgramTestMixin, TestCase):
                 logger.check((LOGGER_NAME, 'DEBUG', msg))
 
     @httpretty.activate
-    def test_get_program_not_found(self):  # pylint: disable=unused-argument
+    def test_get_program_not_found(self):
         """
         The method should log not found errors for program data
         """

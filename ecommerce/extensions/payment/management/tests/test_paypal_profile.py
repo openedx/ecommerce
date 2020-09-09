@@ -21,6 +21,7 @@ class TestPaypalProfileCommand(TestCase):
     PAYMENT_PROCESSOR_CONFIG_KEY = 'edX'
 
     def setUp(self):
+        super().setUp()
         self.stdout = StringIO()
         self.assertEqual(PaypalWebProfile.objects.count(), 0)
 
@@ -115,8 +116,6 @@ class TestPaypalProfileCommand(TestCase):
         """
         Tests that command raises Command Error if required parameters are missing
         """
-        # pylint: disable=protected-access
-
         with self.assertRaises(CommandError) as context:
             call_command('paypal_profile', stdout=self.stdout)  # no config and action
         self.assertEqual('Required arguments `partner` and `action` are missing', str(context.exception))

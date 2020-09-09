@@ -62,7 +62,7 @@ class UpdateSiteOauthSettingsCommandTests(TestCase):
         )
         return site_configuration
 
-    def test_update_site(self):  # pylint: disable=too-many-statements
+    def test_update_site(self):
         """
         Verify the command updates SiteConfiguration along with new OAuth2
         items without altering anything else.

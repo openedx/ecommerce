@@ -7,7 +7,7 @@ import hashlib
 import hmac
 import logging
 from collections import OrderedDict
-from functools import reduce  # pylint: disable=redefined-builtin
+from functools import reduce
 from urllib.parse import urlencode, urlparse
 
 import crum
