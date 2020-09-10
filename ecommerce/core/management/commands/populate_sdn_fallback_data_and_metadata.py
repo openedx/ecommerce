@@ -1,6 +1,7 @@
 """
-Django management command to download and import the SDN CSV for use as fallback if the trade.gov API is down.
+Django management command to download SDN csv for use as fallback if the trade.gov API is down.
 See docs/decisions/0007-sdn-fallback.rst for more details.
+
 """
 import logging
 import tempfile
@@ -11,14 +12,13 @@ from django.core.management.base import BaseCommand
 from django.db import transaction
 from requests.exceptions import Timeout
 
-from ecommerce.extensions.payment.utils import populate_sdn_fallback_data_and_metadata
+from ecommerce.extensions.payment.core.sdn import populate_sdn_fallback_data_and_metadata
 
 logger = logging.getLogger(__name__)
 
 
 class Command(BaseCommand):
-    help = """Download the SDN csv from trade.gov, for use as fallback for when their SDN API is down.
-    Then import the SDN (Consolidated Screening List) CSV into the SDNFallbackMetadata and SDNFallbackData models."""
+    help = 'Download the SDN csv from trade.gov, for use as fallback for when their SDN API is down.'
 
     def add_arguments(self, parser):
         parser.add_argument(

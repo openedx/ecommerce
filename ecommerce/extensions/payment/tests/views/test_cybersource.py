@@ -27,10 +27,10 @@ from ecommerce.extensions.basket.constants import PURCHASER_BEHALF_ATTRIBUTE
 from ecommerce.extensions.basket.utils import basket_add_organization_attribute
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
 from ecommerce.extensions.order.constants import PaymentEventTypeName
+from ecommerce.extensions.payment.core.sdn import SDNClient
 from ecommerce.extensions.payment.exceptions import InvalidBasketError, InvalidSignatureError
 from ecommerce.extensions.payment.processors.cybersource import Cybersource
 from ecommerce.extensions.payment.tests.mixins import CybersourceMixin, CybersourceNotificationTestsMixin
-from ecommerce.extensions.payment.utils import SDNClient
 from ecommerce.extensions.payment.views.cybersource import CybersourceInterstitialView
 from ecommerce.extensions.test.factories import create_basket, create_order
 from ecommerce.invoice.models import Invoice
