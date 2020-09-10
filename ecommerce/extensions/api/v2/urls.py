@@ -24,6 +24,7 @@ from ecommerce.extensions.api.v2.views import stockrecords as stockrecords_views
 from ecommerce.extensions.api.v2.views import user_management as user_management_views
 from ecommerce.extensions.api.v2.views import vouchers as voucher_views
 from ecommerce.extensions.voucher.views import CouponReportCSVView
+from ecommerce.extensions.api.v2.views import stripecheckout as stripecheckout_views
 
 ORDER_NUMBER_PATTERN = r'(?P<number>[-\w]+)'
 BASKET_ID_PATTERN = r'(?P<basket_id>[\d]+)'
@@ -45,6 +46,11 @@ BASKET_URLS = [
         name='retrieve_order'
     ),
     url(r'^calculate/$', basket_views.BasketCalculateView.as_view(), name='calculate'),
+    
+]
+
+STRIPE_URLS = [
+    url(r'^$', stripecheckout_views.CreateCheckoutSession.as_view(), name='stripe'),
 ]
 
 PAYMENT_URLS = [
@@ -117,6 +123,7 @@ urlpatterns = [
     url(r'^retirement/', include((RETIREMENT_URLS, 'retirement'))),
     url(r'^user_management/', include((USER_MANAGEMENT_URLS, 'user_management'))),
     url(r'^assignment-email/', include((ASSIGNMENT_EMAIL_URLS, 'assignment-email'))),
+    url(r'^create-checkout-session/', include((STRIPE_URLS, 'create-checkout-session'))),
 ]
 
 router = SimpleRouter()

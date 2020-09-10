@@ -7,6 +7,7 @@ import urllib
 from collections import OrderedDict
 from datetime import datetime
 from decimal import Decimal
+import stripe
 
 import dateutil.parser
 import newrelic.agent
@@ -16,7 +17,7 @@ from django.shortcuts import render
 from django.urls import reverse
 from django.utils.html import escape
 from django.utils.translation import ugettext as _
-from edx_rest_framework_extensions.permissions import LoginRedirectIfUnauthenticated
+from edx_rest_framework_extensions.permissions import JwtRestrictedApplication, LoginRedirectIfUnauthenticated
 from opaque_keys.edx.keys import CourseKey
 from oscar.apps.basket.signals import voucher_removal
 from oscar.apps.basket.views import VoucherAddView as BaseVoucherAddView
@@ -84,6 +85,9 @@ StockRecord = get_model('partner', 'StockRecord')
 Voucher = get_model('voucher', 'Voucher')
 Selector = get_class('partner.strategy', 'Selector')
 
+# Set your secret key. Remember to switch to your live secret key in production!
+# See your keys here: https://dashboard.stripe.com/account/apikeys
+stripe.api_key = 'sk_test_51HPALSI4kCTHgejljk0osx7grTZxQiktpe21VT9O0KKMKgWsXp0ryENYieyJOlYOqmYV6fMRxnimavl71IjSwYR10083p7dskF'
 
 class BasketLogicMixin:
     """
@@ -418,41 +422,45 @@ class BasketAddItemsView(BasketLogicMixin, APIView):
     """
     permission_classes = (LoginRedirectIfUnauthenticated,)
 
+    def create_basket_and_add_skus(self, request):
+        skus = self._get_skus(request)
+        products = self._get_products(request, skus)
+        voucher = None
+        invalid_code = None
+        code = request.GET.get('code', None)
+        try:
+            voucher = self._get_voucher(request)
+        except Voucher.DoesNotExist as e:  # pragma: nocover
+            # Display an error message when an invalid code is passed as a parameter
+            invalid_code = code
+
+        logger.info('Starting payment flow for user [%s] for products [%s].', request.user.username, skus)
+
+        available_products = self._get_available_products(request, products)
+
+        try:
+            basket = prepare_basket(request, available_products, voucher)
+        except AlreadyPlacedOrderException:
+            return render(request, 'edx/error.html', {'error': _('You have already purchased these products')})
+
+        self._set_email_preference_on_basket(request, basket)
+
+        # Used basket object from request to allow enterprise offers
+        # being applied on basket via BasketMiddleware
+        self.verify_enterprise_needs(request.basket)
+        if code and not request.basket.vouchers.exists():
+            if not (len(available_products) == 1 and available_products[0].is_enrollment_code_product):
+                # Display an error message when an invalid code is passed as a parameter
+                invalid_code = code
+        return invalid_code
+
     def get(self, request):
         # Send time when this view is called - https://openedx.atlassian.net/browse/REV-984
         properties = {'emitted_at': time.time()}
         track_segment_event(request.site, request.user, 'Basket Add Items View Called', properties)
 
         try:
-            skus = self._get_skus(request)
-            products = self._get_products(request, skus)
-            voucher = None
-            invalid_code = None
-            code = request.GET.get('code', None)
-            try:
-                voucher = self._get_voucher(request)
-            except Voucher.DoesNotExist as e:  # pragma: nocover
-                # Display an error message when an invalid code is passed as a parameter
-                invalid_code = code
-
-            logger.info('Starting payment flow for user [%s] for products [%s].', request.user.username, skus)
-
-            available_products = self._get_available_products(request, products)
-
-            try:
-                basket = prepare_basket(request, available_products, voucher)
-            except AlreadyPlacedOrderException:
-                return render(request, 'edx/error.html', {'error': _('You have already purchased these products')})
-
-            self._set_email_preference_on_basket(request, basket)
-
-            # Used basket object from request to allow enterprise offers
-            # being applied on basket via BasketMiddleware
-            self.verify_enterprise_needs(request.basket)
-            if code and not request.basket.vouchers.exists():
-                if not (len(available_products) == 1 and available_products[0].is_enrollment_code_product):
-                    # Display an error message when an invalid code is passed as a parameter
-                    invalid_code = code
+            invalid_code = self.create_basket_and_add_skus(request)
             return self._redirect_response_to_basket_or_payment(request, invalid_code)
 
         except BadRequestException as e:
