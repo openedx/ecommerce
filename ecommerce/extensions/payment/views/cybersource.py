@@ -30,6 +30,7 @@ from ecommerce.extensions.basket.utils import (
 )
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
 from ecommerce.extensions.checkout.utils import get_receipt_page_url
+from ecommerce.extensions.payment.core.sdn import checkSDN
 from ecommerce.extensions.payment.exceptions import (
     AuthorizationError,
     DuplicateReferenceNumber,
@@ -39,7 +40,7 @@ from ecommerce.extensions.payment.exceptions import (
     RedundantPaymentNotificationError
 )
 from ecommerce.extensions.payment.processors.cybersource import Cybersource, CybersourceREST
-from ecommerce.extensions.payment.utils import checkSDN, clean_field_value
+from ecommerce.extensions.payment.utils import clean_field_value
 from ecommerce.extensions.payment.views import BasePaymentSubmitView
 
 logger = logging.getLogger(__name__)

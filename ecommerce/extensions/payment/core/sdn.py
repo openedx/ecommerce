@@ -6,7 +6,7 @@ import io
 import logging
 import re
 import string
-from datetime import datetime
+from datetime import datetime, timezone
 from urllib.parse import urlencode
 
 # Changes part of REV-1209 - see https://github.com/edx/ecommerce/pull/3020
@@ -63,20 +63,6 @@ def checkSDN(request, name, city, country):
             pass
 
     return hit_count
-
-def checkSDNFallback(name, city, country):
-    """
-    Performs an SDN check against the SDNFallbackData
-    """
-    records = get_current_records_and_filter_by_source_and_type(
-        'Specially Designated Nationals (SDN) - Treasury Department', 'individual'
-    )
-    records = records.filter(country__contains=country)
-    processed_name, processed_city = process_text(name), process_text(address)
-    for record in records:
-        if processed_name.subset(record.names) and processed_city.subset(record.addresses):
-            return True
-    return False
 
 
 class SDNClient:
@@ -215,6 +201,7 @@ class SDNClient:
         logger.warning('SDN check failed for user [%s] on site [%s]', name, site.name)
         basket.owner.deactivate_account(site.siteconfiguration)
 
+
 def process_text(text):
     """ Lowercase, remove non-alphanumeric characters, and ignore order and word frequency
 
@@ -231,6 +218,7 @@ def process_text(text):
     # Ignore order and word frequency
     text = set(filter(None, {word.strip(string.punctuation) for word in text.split()}))
     return text
+
 
 def extract_country_information(addresses, ids):
     """ Extract any country codes that are present, if any, in the addresses and ids fields
@@ -263,6 +251,7 @@ def extract_country_information(addresses, ids):
     formatted_countries = ' '.join(valid_country_codes)
     return formatted_countries
 
+
 def populate_sdn_fallback_metadata(sdn_csv_string):
     """
     Insert a new SDNFallbackMetadata entry if the new csv differs from the current one
@@ -277,6 +266,7 @@ def populate_sdn_fallback_metadata(sdn_csv_string):
     file_checksum = hashlib.sha256(sdn_csv_string.encode('utf-8')).hexdigest()
     metadata_entry = SDNFallbackMetadata.insert_new_sdn_fallback_metadata_entry(file_checksum)
     return metadata_entry
+
 
 def populate_sdn_fallback_data(sdn_csv_string, metadata_entry):
     """
@@ -293,8 +283,8 @@ def populate_sdn_fallback_data(sdn_csv_string, metadata_entry):
             row['source'] or '', row['type'] or '', row['name'] or '',
             row['addresses'] or '', row['alt_names'] or '', row['ids'] or ''
         )
-        processed_names = process_text(' '.join(filter(None, [names, alt_names])))
-        processed_addresses = process_text(addresses)
+        processed_names = ' '.join(process_text(' '.join(filter(None, [names, alt_names]))))
+        processed_addresses = ' '.join(process_text(addresses))
         countries = extract_country_information(addresses, ids)
         processed_records.append(SDNFallbackData(
             sdn_fallback_metadata=metadata_entry,
@@ -306,6 +296,7 @@ def populate_sdn_fallback_data(sdn_csv_string, metadata_entry):
         ))
     # Bulk create should be more efficient for a few thousand records without needing to use SQL directly.
     SDNFallbackData.objects.bulk_create(processed_records)
+
 
 def populate_sdn_fallback_data_and_metadata(sdn_csv_string):
     """
