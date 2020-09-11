@@ -33,8 +33,13 @@ class TestSeatPayment:
             'unit': address['line2'],
             'city': address['city'],
             'postalCode': address['postal_code'],
-            'cardNumber': '4111111111111111',
-            'securityCode': '123'
+            # 'cardNumber': '4111111111111111',
+            # 'securityCode': '123'
+        }
+
+        flex_microform_information = {
+            'number': '4111111111111111',
+            'securityCode': '123',
         }
 
         country = address['country']
@@ -70,6 +75,13 @@ class TestSeatPayment:
         # Fill in the text fields
         for field, value in billing_information.items():
             selenium.find_element_by_id(field).send_keys(value)
+
+        for field, value in flex_microform_information.items():
+            selenium.switch_to(
+                selenium.find_element_by_id('{}-container'.format(field)).find_element_by_tag_name('iframe')[0]
+            )
+            selenium.find_element_by_name(field).send_keys(value)
+            selenium.switch_to('main')
 
         # Click the payment button
         selenium.find_element_by_id('placeOrderButton').click()
