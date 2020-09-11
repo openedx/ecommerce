@@ -1,6 +1,7 @@
 
 
 import logging
+import requests
 
 import django_filters
 import six
@@ -103,6 +104,22 @@ class EnterpriseCustomerViewSet(generics.GenericAPIView):
 
     def get(self, request):
         return Response(get_enterprise_customers(request))
+
+
+class TableauAuthViewSet(generics.GenericAPIView):
+
+    permission_classes = (IsAuthenticated,)
+    queryset = ''
+
+    def get(self, request):
+        url = "http://moconnell1453.sandbox.edx.org:8000/trusted"
+        payload = {'username': 'edx'}
+        files = []
+        headers = {
+            'Content-Type': 'application/x-www-form-urlencoded'
+        }
+        response = requests.request("POST", url, headers=headers, data=payload, files=files)
+        return Response(data=response.text)
 
 
 class EnterpriseCustomerCatalogsViewSet(ViewSet):

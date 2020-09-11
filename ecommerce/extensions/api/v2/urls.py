@@ -84,6 +84,7 @@ PROVIDER_URLS = [
 
 ENTERPRISE_URLS = [
     url(r'^customers$', enterprise_views.EnterpriseCustomerViewSet.as_view(), name='enterprise_customers'),
+    url(r'^tableau_token$', enterprise_views.TableauAuthViewSet.as_view(), name='tableau_token'),
     url(
         r'^customer_catalogs$',
         enterprise_views.EnterpriseCustomerCatalogsViewSet.as_view({'get': 'get'}),
