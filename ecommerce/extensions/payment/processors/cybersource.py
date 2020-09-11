@@ -774,7 +774,7 @@ class CybersourceREST(Cybersource):  # pragma: no cover
             total=Decimal(response.order_information.amount_details.total_amount),
             card_number=decoded_payment_token['data']['number'],
             card_type=CYBERSOURCE_CARD_TYPE_MAP.get(response.payment_information.tokenized_card.type),
-            transaction_id=response.processor_information.transaction_id,
+            transaction_id=response.id,
             order_id=response.client_reference_information.code,
             raw_json=response_json,
         )
