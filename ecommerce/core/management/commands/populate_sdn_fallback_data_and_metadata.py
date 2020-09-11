@@ -38,7 +38,7 @@ class Command(BaseCommand):
                 download = s.get(url, timeout=timeout)
                 status_code = download.status_code
             except Timeout as e:
-                logger.warning("SDN DOWNLOAD FAILURE: Timeout occurred trying to download SDN csv. Timeout threshold (in seconds): %s", timeout)
+                logger.warning("SDN DOWNLOAD FAILURE: Timeout occurred trying to download SDN csv. Timeout threshold (in seconds): %s", timeout)  # pylint: disable=line-too-long
                 raise
             except Exception as e:  # pylint: disable=broad-except
                 logger.warning("SDN DOWNLOAD FAILURE: Exception occurred: [%s]", e)
