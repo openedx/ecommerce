@@ -24,6 +24,9 @@ logger = logging.getLogger(__name__)
 # commit 8
 # commit 9
 # commit 10
+# commit 12
+# commit 13
+# commit 14
 
 class Command(BaseCommand):
     help = 'Download the SDN csv from trade.gov, for use as fallback for when their SDN API is down.'
