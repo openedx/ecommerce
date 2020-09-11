@@ -28,7 +28,7 @@ As per OEP-0003, we generally use Celery to run asynchronous tasks, with some sc
 Ecommerce is an exception/antipattern to this general approach; it doesn't use Celery directly. Instead, we have a separate service called ecommerce-worker that has a Celery integration. 
 Ecommerce-worker doesn't have access to the ecommerce database, so any database interaction with ecommerce needs to happen on the main ecommerce server machine. 
 
-Our workaround for cases like this is to do the work on a Jenkins machine (so Jenkins is both the scheduler and the worker). The download task is fairly lightweight, and impact is small if a run failed to complete. 
+Our workaround for cases like this is to do the work on a Jenkins machine (so Jenkins is both the scheduler and the worker). The download task is fairly lightweight, and impact is small if a run fails to complete. 
 (Other options would be adding a Celery integration to ecommerce so it could follow the pattern above, OR running the code in ecommerce-worker and calling ecommerce APIs to create/delete records, OR running the task on the ecommerce machine using an API call. Given the low complexity and low criticality of the download task, those options were less suitable than our typical workaround.)
 
 2. **Storing the data**
