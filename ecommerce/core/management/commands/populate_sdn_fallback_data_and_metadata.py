@@ -35,7 +35,7 @@ class Command(BaseCommand):
 
         with requests.Session() as s:
             try:
-                download = s.get(url, timeout = timeout)
+                download = s.get(url, timeout=timeout)
                 status_code = download.status_code
             except Timeout as e:
                 logger.warning("SDN DOWNLOAD FAILURE: Timeout occurred trying to download SDN csv. Timeout threshold (in seconds): %s", timeout)
