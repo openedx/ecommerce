@@ -1,8 +1,6 @@
 """
 Tests for Django management command to download csv for SDN fallback.
 """
-# import os
-# import tempfile
 import requests
 import responses
 from django.core.management import call_command
