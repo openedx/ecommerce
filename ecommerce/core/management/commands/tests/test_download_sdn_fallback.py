@@ -107,7 +107,7 @@ class TestDownloadSndFallbackCommandExceptions(TestCase):
                 (
                     self.LOGGER_NAME,
                     'WARNING',
-                    "SDN DOWNLOAD FAILURE: Timeout occurred trying to download SDN csv"
+                    "SDN DOWNLOAD FAILURE: Timeout occurred trying to download SDN csv. Timeout threshold (in seconds): 5"
                 )
             )
 

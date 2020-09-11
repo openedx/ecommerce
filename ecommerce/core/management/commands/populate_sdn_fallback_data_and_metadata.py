@@ -31,13 +31,14 @@ class Command(BaseCommand):
         # download the csv locally, to check size and pass along to import
         threshold = options['threshold']
         url = 'http://api.trade.gov/static/consolidated_screening_list/consolidated.csv'
+        timeout = settings.SDN_CHECK_REQUEST_TIMEOUT
 
         with requests.Session() as s:
             try:
-                download = s.get(url, timeout=settings.SDN_CHECK_REQUEST_TIMEOUT)
+                download = s.get(url, timeout = timeout)
                 status_code = download.status_code
             except Timeout as e:
-                logger.warning("SDN DOWNLOAD FAILURE: Timeout occurred trying to download SDN csv")
+                logger.warning("SDN DOWNLOAD FAILURE: Timeout occurred trying to download SDN csv. Timeout threshold (in seconds): %s", timeout)
                 raise
             except Exception as e:  # pylint: disable=broad-except
                 logger.warning("SDN DOWNLOAD FAILURE: Exception occurred: [%s]", e)
