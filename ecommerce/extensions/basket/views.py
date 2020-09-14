@@ -646,7 +646,7 @@ class CaptureContextApiLogicMixin:  # pragma: no cover
             return
 
 
-class PaymentApiLogicMixin(BasketLogicMixin, CaptureContextApiLogicMixin):
+class PaymentApiLogicMixin(BasketLogicMixin):
     """
     Business logic for the various Payment APIs.
     """
@@ -698,7 +698,6 @@ class PaymentApiLogicMixin(BasketLogicMixin, CaptureContextApiLogicMixin):
         self._add_total_summary(response, context)
         self._add_offers(response)
         self._add_coupons(response, context)
-        self._add_capture_context(response)  # TODO: this is moving to its own endpoint
         return response
 
     def _add_products(self, response, lines_data):
