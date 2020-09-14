@@ -208,7 +208,10 @@ class SDNClient:
 
 
 def process_text(text):
-    """ Lowercase, remove non-alphanumeric characters, and ignore order and word frequency
+    """
+    Lowercase, remove non-alphanumeric characters, and ignore order and word frequency.
+    Attempts to transliterate unicode characters into ascii (such as accented characters into
+    non-accented characters).
 
     Args:
         text (str): names or addresses from the sdn list to be processed
