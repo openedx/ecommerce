@@ -6,7 +6,12 @@ import io
 import logging
 import re
 import string
+<<<<<<< HEAD
 from datetime import datetime, timezone
+=======
+import unicodedata
+from datetime import datetime
+>>>>>>> b6bdc83fa4... transliterate characters with accents
 from urllib.parse import urlencode
 
 # Changes part of REV-1209 - see https://github.com/edx/ecommerce/pull/3020
@@ -213,10 +218,13 @@ def process_text(text):
     """
     if len(text) == 0:
         return ''
-    text = text.lower()
     # Strip non-alphanumeric characters from each word
     # Ignore order and word frequency
     text = set(filter(None, {word.strip(string.punctuation) for word in text.split()}))
+
+    text = unicodedata.normalize('NFKD', text).encode('ascii', 'ignore').decode('ascii')
+    text = text.lower()
+
     return text
 
 

@@ -302,9 +302,37 @@ Joshuafort, MD 72104, TH",,,,,,,,,,,,,,https://banks-bender.com/,Michael Anderso
         ('!f!o!o! !B!A!R!', {'f!o!o', 'b!a!r'}),
         ('!f!o!o! !B!A!R!', {'f!o!o', 'b!a!r'}),
         ('!foo! !BAR! !BAR! !foo!', {'foo', 'bar'}),
+        ('Renée Noël Sørina François Ruairí Jokūbas KŠthe Øyvind Asbjørn Nuñez',
+            'nunez renee noel sorina francois ruairi jokubas ksthe oyvind asbjorn')
     )
     @ddt.unpack
     def test_process_text(self, text, expected_output):
         """ Verify that processing text works as expected (this function is used for names and addresses) """
+        output = process_text(text)
+        self.assertEqual(set(output), set(expected_output))
+
+    @ddt.data(
+        ('À Á Â Ã Ä Å', 'a a a a a a'),
+        ('à á â ã ä å', 'a a a a a a'),
+        ('È É Ê Ë', 'e e e e'),
+        ('è é ê ë ', 'e e e e'),
+        ('Ì Í Î Ï', 'i i i i'),
+        ('ì í î ï', 'i i i i'),
+        ('Ò Ó Ô Õ Ö', 'o o o o o'),
+        ('ò ó ô ö õ', 'o o o o o'),
+        ('ð ø', ' '),
+        ('Ù Ú Û Ü', 'u u u u'),
+        ('ù ú û ü', 'u u u u'),
+        ('Ý ý ÿ', 'y y y'),
+        ('Ç ç', 'c c'),
+        ('Ñ ñ', 'n n'),
+        # these cases are here to explicitly note that they are not  transliterated,
+        # not to exclude them from transliteration in the future
+        ('Ð Æ æ Ø Þ ß þ', '      '),
+        ('÷ § § ×   ¶ ¯ ¬', '        '),
+    )
+    @ddt.unpack
+    def test_process_text_unicode(self, text, expected_output):
+        """ Verify that characters with accents are transliterated correctly."""
         output = process_text(text)
         self.assertEqual(output, expected_output)
