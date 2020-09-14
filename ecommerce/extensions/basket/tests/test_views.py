@@ -467,7 +467,6 @@ class PaymentApiResponseTestMixin(BasketLogicTestMixin):
                     u'title': title,
                 } for line in basket.lines.all()
             ],
-            'flex_microform_enabled': False,
         }
         if kwargs:
             expected_response.update(**kwargs)
