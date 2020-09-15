@@ -77,11 +77,11 @@ class TestSeatPayment:
             selenium.find_element_by_id(field).send_keys(value)
 
         for field, value in flex_microform_information.items():
-            selenium.switch_to(
-                selenium.find_element_by_id('{}-container'.format(field)).find_element_by_tag_name('iframe')[0]
+            selenium.switch_to.frame(
+                selenium.find_element_by_id('{}-container'.format(field)).find_element_by_tag_name('iframe')
             )
             selenium.find_element_by_name(field).send_keys(value)
-            selenium.switch_to('main')
+            selenium.switch_to.parent_frame()
 
         # Click the payment button
         selenium.find_element_by_id('placeOrderButton').click()
