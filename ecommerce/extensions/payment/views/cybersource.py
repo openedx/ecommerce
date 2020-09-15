@@ -488,12 +488,7 @@ class CybersourceOrderCompletionView(EdxOrderPlacementMixin):
 class CyberSourceRESTProcessorMixin:  # pragma: no cover
     @cached_property
     def payment_processor(self):
-        return CybersourceREST(
-            self.request.site,
-            self.request.POST['payment_token'],
-            # We save the capture context in the session and recall it here since we can't trust the front-end
-            self.request.session['capture_context']
-        )
+        return CybersourceREST(self.request.site)
 
 
 class CybersourceAuthorizeAPIView(

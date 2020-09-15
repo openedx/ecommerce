@@ -691,11 +691,6 @@ class CybersourceREST(Cybersource):  # pragma: no cover
 
     NAME = "cybersource-rest"
 
-    def __init__(self, site, transient_token_jwt, capture_context):
-        super(CybersourceREST, self).__init__(site)
-        self.transient_token_jwt = transient_token_jwt
-        self.capture_context = capture_context
-
     def initiate_payment(self, basket, request, form_data):
         """
         Initiate payment using the Cybersource REST payment api.
@@ -760,9 +755,9 @@ class CybersourceREST(Cybersource):  # pragma: no cover
                 raw_json=response_json,
             )
 
-        decoded_capture_context = jwt.decode(self.capture_context['key_id'], verify=False)
+        decoded_capture_context = jwt.decode(response.capture_context['key_id'], verify=False)
         jwk = RSAAlgorithm.from_jwk(json.dumps(decoded_capture_context['flx']['jwk']))
-        decoded_payment_token = jwt.decode(self.transient_token_jwt, key=jwk, algorithms=['RS256'])
+        decoded_payment_token = jwt.decode(response.transient_token_jwt, key=jwk, algorithms=['RS256'])
         decision = decision_map.get(response.status, response.status)
 
         return UnhandledCybersourceResponse(
@@ -910,6 +905,8 @@ class CybersourceREST(Cybersource):  # pragma: no cover
             state=form_data['state'],
             country=Country.objects.get(iso_3166_1_a2=form_data['country'])
         )
+        payment_processor_response.transient_token_jwt = transient_token_jwt
+        payment_processor_response.capture_context = request.session['capture_context']
         return payment_processor_response
 
     def get_billing_address(self, order_completion_message):
