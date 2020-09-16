@@ -49,7 +49,7 @@ class TestDownloadSndFallbackCommand(TestCase):
                 (
                     self.LOGGER_NAME,
                     'WARNING',
-                    "SDN DOWNLOAD FAILURE: file too small! (0.000642 MB vs threshold of 1.0 MB)"
+                    "SDNFallback: DOWNLOAD FAILURE: file too small! (0.000642 MB vs threshold of 1.0 MB)"
                 )
             )
         self.assertEqual('CSV file download did not meet threshold given', str(e.exception))
@@ -66,7 +66,7 @@ class TestDownloadSndFallbackCommand(TestCase):
                 (
                     self.LOGGER_NAME,
                     'WARNING',
-                    "SDN DOWNLOAD FAILURE: Status code was: [500]"
+                    "SDNFallback: DOWNLOAD FAILURE: Status code was: [500]"
                 )
             )
         self.assertEqual("('CSV download url got an unsuccessful response code: ', 500)", str(e.exception))
@@ -89,7 +89,7 @@ class TestDownloadSndFallbackCommandExceptions(TestCase):
                 (
                     self.LOGGER_NAME,
                     'WARNING',
-                    "SDN DOWNLOAD FAILURE: Exception occurred: [%s]" % self.ERROR_MESSAGE
+                    "SDNFallback: DOWNLOAD FAILURE: Exception occurred: [%s]" % self.ERROR_MESSAGE
                 )
             )
 
@@ -107,7 +107,7 @@ class TestDownloadSndFallbackCommandExceptions(TestCase):
                 (
                     self.LOGGER_NAME,
                     'WARNING',
-                    "SDN DOWNLOAD FAILURE: Timeout occurred trying to download SDN csv. Timeout threshold (in seconds): 5"  # pylint: disable=line-too-long
+                    "SDNFallback: DOWNLOAD FAILURE: Timeout occurred trying to download SDN csv. Timeout threshold (in seconds): 5"  # pylint: disable=line-too-long
                 )
             )
 

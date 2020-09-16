@@ -166,13 +166,13 @@ class SDNFallbackMetadata(TimeStampedModel):
         now = datetime.utcnow()
         try:
             if file_checksum == SDNFallbackMetadata.objects.get(import_state='Current').file_checksum:
-                logger.info("The SDN CSV file has not changed, so skipping import. The file_checksum was %s",
+                logger.info("SDNFallback: The CSV file has not changed, so skipping import. The file_checksum was %s",
                             file_checksum)
                 # Update download timestamp even though we're not importing this list
                 SDNFallbackMetadata.objects.filter(import_state="New").update(download_timestamp=now)
                 return None
         except SDNFallbackMetadata.DoesNotExist:
-            logger.warning("SDNFallbackMetadata has no record with import_state Current")
+            logger.warning("SDNFallback: SDNFallbackMetadata has no record with import_state Current")
 
         sdn_fallback_metadata_entry = SDNFallbackMetadata.objects.create(
             file_checksum=file_checksum,
@@ -209,7 +209,7 @@ class SDNFallbackMetadata(TimeStampedModel):
                 SDNFallbackMetadata.objects.get(import_state='Current')
             except SDNFallbackMetadata.DoesNotExist:
                 logger.warning(
-                    "Expected a row in the 'Current' import_state after swapping, but there are none.",
+                    "SDNFallback: Expected a row in the 'Current' import_state after swapping, but there are none.",
                 )
                 raise
 
@@ -233,7 +233,7 @@ class SDNFallbackMetadata(TimeStampedModel):
                 existing_metadata.save()
         except SDNFallbackMetadata.DoesNotExist:
             logger.info(
-                "Cannot update import_state of %s row if there is no row in this state.",
+                "SDNFallback: Cannot update import_state of %s row if there is no row in this state.",
                 import_state
             )
 

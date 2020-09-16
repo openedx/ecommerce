@@ -41,14 +41,14 @@ class Command(BaseCommand):
                 download = s.get(url, timeout=timeout)
                 status_code = download.status_code
             except Timeout as e:
-                logger.warning("SDN DOWNLOAD FAILURE: Timeout occurred trying to download SDN csv. Timeout threshold (in seconds): %s", timeout)  # pylint: disable=line-too-long
+                logger.warning("SDNFallback: DOWNLOAD FAILURE: Timeout occurred trying to download SDN csv. Timeout threshold (in seconds): %s", timeout)  # pylint: disable=line-too-long
                 raise
             except Exception as e:  # pylint: disable=broad-except
-                logger.warning("SDN DOWNLOAD FAILURE: Exception occurred: [%s]", e)
+                logger.warning("SDNFallback: DOWNLOAD FAILURE: Exception occurred: [%s]", e)
                 raise
 
             if download.status_code != 200:
-                logger.warning("SDN DOWNLOAD FAILURE: Status code was: [%s]", status_code)
+                logger.warning("SDNFallback: DOWNLOAD FAILURE: Status code was: [%s]", status_code)
                 raise Exception("CSV download url got an unsuccessful response code: ", status_code)
 
             with tempfile.TemporaryFile() as temp_csv:
@@ -60,13 +60,14 @@ class Command(BaseCommand):
                     sdn_file_string = download.content.decode('utf-8')
                     with transaction.atomic():
                         metadata_entry = populate_sdn_fallback_data_and_metadata(sdn_file_string)
-                    logger.info('Imported SDN CSV into SDNFallbackMetadata and SDNFallbackData models. Metadata id %s',
-                                metadata_entry.id)
-                    self.stdout.write(
-                        self.style.SUCCESS(
-                            'Imported SDN CSV into the SDNFallbackMetadata and SDNFallbackData models.'
+                        if metadata_entry:
+                            logger.info('SDNFallback: IMPORT SUCCESS: Imported SDN CSV. Metadata id %s',
+                                        metadata_entry.id)
+                        self.stdout.write(
+                            self.style.SUCCESS(
+                                'SDNFallback: Imported SDN CSV into the SDNFallbackMetadata and SDNFallbackData models.'
+                            )
                         )
-                    )
                 else:
-                    logger.warning("SDN DOWNLOAD FAILURE: file too small! (%f MB vs threshold of %s MB)", file_size_in_MB, threshold)   # pylint: disable=line-too-long
+                    logger.warning("SDNFallback: DOWNLOAD FAILURE: file too small! (%f MB vs threshold of %s MB)", file_size_in_MB, threshold)   # pylint: disable=line-too-long
                     raise Exception("CSV file download did not meet threshold given")
