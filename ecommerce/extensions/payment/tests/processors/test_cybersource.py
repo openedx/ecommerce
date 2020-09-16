@@ -300,7 +300,7 @@ class CybersourceTests(CybersourceMixin, PaymentProcessorTestCaseMixin, TestCase
     @responses.activate
     def test_issue_credit(self):
         """
-        Tests issue_credit operation
+        Tests issue_credit operation for refunds.
         """
         transaction_id = 'request-1234'
         refund = self.create_refund(self.processor_name)

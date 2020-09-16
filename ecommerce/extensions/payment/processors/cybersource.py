@@ -536,6 +536,10 @@ class Cybersource(ApplePayMixin, BaseClientSidePaymentProcessor):
         return response and (self._generate_signature(response, use_sop_profile) == response.get('signature'))
 
     def issue_credit(self, order_number, basket, reference_number, amount, currency):
+        """
+        Verify the payment processor used for the original order responds as expected to the refund request,
+        and the response is saved in the database, with error handling.
+        """
         try:
             client = Client(self.soap_api_url, wsse=UsernameToken(self.merchant_id, self.transaction_key))
 

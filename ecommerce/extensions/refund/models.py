@@ -162,7 +162,7 @@ class Refund(StatusMixin, TimeStampedModel):
         return self.status == settings.OSCAR_INITIAL_REFUND_STATUS
 
     def _issue_credit(self):
-        """Issue a credit to the purchaser via the payment processor used for the original order."""
+        """Issue a credit/refund to the purchaser via the payment processor used for the original order."""
         try:
             # NOTE: Update this if we ever support multiple payment sources for a single order.
             source = self.order.sources.first()

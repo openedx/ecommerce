@@ -112,7 +112,7 @@ class BasePaymentProcessor(metaclass=abc.ABCMeta):  # pragma: no cover
     @abc.abstractmethod
     def issue_credit(self, order_number, basket, reference_number, amount, currency):
         """
-        Issue a credit for the specified transaction.
+        Issue a credit/refund for the specified transaction.
 
         Arguments:
             order_number (str): Order number of the order being refunded.
