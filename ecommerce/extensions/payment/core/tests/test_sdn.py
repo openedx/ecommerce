@@ -302,8 +302,11 @@ Joshuafort, MD 72104, TH",,,,,,,,,,,,,,https://banks-bender.com/,Michael Anderso
         ('!f!o!o! !B!A!R!', {'f!o!o', 'b!a!r'}),
         ('!f!o!o! !B!A!R!', {'f!o!o', 'b!a!r'}),
         ('!foo! !BAR! !BAR! !foo!', {'foo', 'bar'}),
-        ('Renée Noël Sørina François Ruairí Jokūbas KŠthe Øyvind Asbjørn Nuñez',
-            'nunez renee noel sorina francois ruairi jokubas ksthe oyvind asbjorn')
+        ('Renée Noël François Ruairí Jokūbas KŠthe Nuñez',
+            {'nunez', 'renee', 'noel', 'francois', 'ruairi', 'jokubas', 'ksthe'}
+        ),
+        ('Carl Patiño Jr.', {'carl', 'patino', 'jr'}),
+        ('Avenida João XVII Santa Fé New Mexico', {'avenida', 'joao', 'xvii', 'santa', 'fe', 'new', 'mexico'})
     )
     @ddt.unpack
     def test_process_text(self, text, expected_output):
@@ -312,24 +315,18 @@ Joshuafort, MD 72104, TH",,,,,,,,,,,,,,https://banks-bender.com/,Michael Anderso
         self.assertEqual(set(output), set(expected_output))
 
     @ddt.data(
-        ('À Á Â Ã Ä Å', 'a a a a a a'),
-        ('à á â ã ä å', 'a a a a a a'),
-        ('È É Ê Ë', 'e e e e'),
-        ('è é ê ë ', 'e e e e'),
-        ('Ì Í Î Ï', 'i i i i'),
-        ('ì í î ï', 'i i i i'),
-        ('Ò Ó Ô Õ Ö', 'o o o o o'),
-        ('ò ó ô ö õ', 'o o o o o'),
-        ('ð ø', ' '),
-        ('Ù Ú Û Ü', 'u u u u'),
-        ('ù ú û ü', 'u u u u'),
-        ('Ý ý ÿ', 'y y y'),
-        ('Ç ç', 'c c'),
-        ('Ñ ñ', 'n n'),
+        ('À Á Â Ã Ä Å à á â ã ä å', {'a'}),
+        ('È É Ê Ë è é ê ë', {'e'}),
+        ('Ì Í Î Ï ì í î ï', {'i'}),
+        ('Ò Ó Ô Õ Ö  ó ô ö õ', {'o'}),
+        ('Ù Ú Û Ü ù ú û ü', {'u'}),
+        ('Ý ý ÿ', {'y'}),
+        ('Ç ç', {'c'}),
+        ('Ñ ñ', {'n'}),
         # these cases are here to explicitly note that they are not  transliterated,
         # not to exclude them from transliteration in the future
-        ('Ð Æ æ Ø Þ ß þ', '      '),
-        ('÷ § § ×   ¶ ¯ ¬', '        '),
+        ('Ð Æ æ Ø Þ ß þ ð ø', set()),
+        ('÷ § § ×   ¶ ¯ ¬', set()),
     )
     @ddt.unpack
     def test_process_text_unicode(self, text, expected_output):
