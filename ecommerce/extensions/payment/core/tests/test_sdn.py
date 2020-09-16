@@ -303,8 +303,7 @@ Joshuafort, MD 72104, TH",,,,,,,,,,,,,,https://banks-bender.com/,Michael Anderso
         ('!f!o!o! !B!A!R!', {'f!o!o', 'b!a!r'}),
         ('!foo! !BAR! !BAR! !foo!', {'foo', 'bar'}),
         ('Renée Noël François Ruairí Jokūbas KŠthe Nuñez',
-            {'nunez', 'renee', 'noel', 'francois', 'ruairi', 'jokubas', 'ksthe'}
-        ),
+            {'nunez', 'renee', 'noel', 'francois', 'ruairi', 'jokubas', 'ksthe'}),
         ('Carl Patiño Jr.', {'carl', 'patino', 'jr'}),
         ('Avenida João XVII Santa Fé New Mexico', {'avenida', 'joao', 'xvii', 'santa', 'fe', 'new', 'mexico'})
     )
