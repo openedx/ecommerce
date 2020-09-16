@@ -43,7 +43,8 @@ from ecommerce.extensions.api.serializers import (
     OfferAssignmentEmailTemplatesSerializer,
     OfferAssignmentSummarySerializer,
     PartialRedeemedCodeUsageSerializer,
-    RedeemedCodeUsageSerializer
+    RedeemedCodeUsageSerializer,
+    RefundedOrderCreateVoucherSerializer
 )
 from ecommerce.extensions.api.v2.utils import get_enterprise_from_product, send_new_codes_notification_email
 from ecommerce.extensions.api.v2.views.coupons import CouponViewSet
@@ -670,6 +671,44 @@ class EnterpriseCouponViewSet(CouponViewSet):
             data=request.data,
             context={'coupon': coupon, 'subject': subject, 'greeting': greeting, 'closing': closing}
         )
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=False, methods=['post'], permission_classes=[IsAdminUser])
+    def create_refunded_voucher(self, request):  # pylint: disable=unused-argument
+        """
+        Creates new voucher in existing coupon for requested order number if possible.
+
+        example Request:
+        POST "http://localhost:18130/api/v2/enterprise/coupons/create_refunded_voucher/"
+        {
+            "order": "EDX-100038"
+        }
+
+        Example Responses
+        >>
+        {
+            "order": "#EDX-100033",
+            "code": "U6GN2OMLCLOCBL7V"
+        }
+
+        >>
+        {
+            "non_field_errors": [
+                "Your order #EDX-100005 can not be refunded as 'Multi-use' coupon are not supported to refund."
+            ]
+        }
+
+        >>
+        {
+            "order": [
+                "Invalid order number or order #EDX-100005 does not exists."
+            ]
+        }
+        """
+        serializer = RefundedOrderCreateVoucherSerializer(data=request.data, context={'request': request})
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)

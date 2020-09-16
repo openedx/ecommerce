@@ -575,11 +575,13 @@ class EnterpriseCouponViewSetRbacTests(
         """
         Mark voucher as used by provided user
         """
-        order = factories.OrderFactory()
+        order = factories.OrderFactory(user=user)
         order_line = factories.OrderLineFactory(product=self.verified_seat, partner_sku='test_sku')
         order.lines.add(order_line)
+        factories.OrderDiscountFactory(order=order, offer_id=voucher.best_offer.id, voucher_id=voucher.id)
         voucher.record_usage(order, user)
         voucher.offers.first().record_usage(discount={'freq': 1, 'discount': 1})
+        return order
 
     def create_coupon_with_applications(self, coupon_data, voucher_type, quantity, max_uses):
         """
@@ -2054,6 +2056,99 @@ class EnterpriseCouponViewSetRbacTests(
 
         for code in assigned_codes:
             assert OfferAssignment.objects.filter(code=code).count() in assignments_per_code
+
+    @ddt.data(
+        (Voucher.SINGLE_USE, 2, None, status.HTTP_200_OK),
+        (Voucher.MULTI_USE_PER_CUSTOMER, 2, 3, status.HTTP_400_BAD_REQUEST),
+        (Voucher.MULTI_USE, 2, 3, status.HTTP_400_BAD_REQUEST),
+        (Voucher.ONCE_PER_CUSTOMER, 2, 2, status.HTTP_400_BAD_REQUEST)
+    )
+    @ddt.unpack
+    def test_create_refunded_voucher(self, voucher_type, quantity, max_uses, response_status):
+        """ Test create refunded voucher with different type of vouchers."""
+        coupon_post_data = dict(self.data, voucher_type=voucher_type, quantity=quantity, max_uses=max_uses)
+        coupon = self.get_response('POST', ENTERPRISE_COUPONS_LINK, coupon_post_data)
+        coupon = coupon.json()
+        coupon_id = coupon['coupon_id']
+        vouchers = Product.objects.get(id=coupon_id).attr.coupon_vouchers.vouchers.all()
+        voucher = vouchers.first()
+        order = self.use_voucher(voucher, self.user)
+
+        existing_offer_assignment_count = OfferAssignment.objects.count()
+        existing_vouchers_count = vouchers.count()
+
+        with mock.patch(
+                'ecommerce.extensions.offer.utils.send_offer_assignment_email.delay',
+                side_effect=Exception()) as mock_send_email:
+            response = self.get_response(
+                'POST',
+                '/api/v2/enterprise/coupons/create_refunded_voucher/',
+                {
+                    "order": order.number
+                }
+            )
+
+        if response_status == status.HTTP_200_OK:
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+            response = response.json()
+            self.assertDictContainsSubset({"order": str(order)}, response)
+            self.assertEqual(vouchers.count(), existing_vouchers_count + 1)
+            self.assertEqual(OfferAssignment.objects.count(), existing_offer_assignment_count + 1)
+            self.assertEqual(mock_send_email.call_count, 1)
+        else:
+            self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+            response = response.json()
+            self.assertIn(
+                "'{}' coupon are not supported to refund.".format(voucher_type),
+                response['non_field_errors'][0]
+            )
+            self.assertEqual(vouchers.count(), existing_vouchers_count)
+            self.assertEqual(OfferAssignment.objects.count(), existing_offer_assignment_count)
+            self.assertEqual(mock_send_email.call_count, 0)
+
+    def test_create_refunded_voucher_failure(self):
+        """ Test different cased in which create refund API could fail."""
+        coupon_post_data = dict(self.data, voucher_type=Voucher.SINGLE_USE, quantity=10, max_uses=None)
+        coupon = self.get_response('POST', ENTERPRISE_COUPONS_LINK, coupon_post_data)
+        coupon = coupon.json()
+        coupon_id = coupon['coupon_id']
+        voucher = Product.objects.get(id=coupon_id).attr.coupon_vouchers.vouchers.first()
+        order = self.use_voucher(voucher, self.user)
+
+        # test failure with order not having any discount.
+        order.discounts.all().delete()
+        response = self.get_response(
+            'POST',
+            '/api/v2/enterprise/coupons/create_refunded_voucher/',
+            {
+                "order": order.number
+            }
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        response = response.json()
+        self.assertEqual(
+            "Could note create new voucher for the order: {}".format(order),
+            response['non_field_errors'][0]
+        )
+
+    def test_create_refunded_voucher_invalid_order(self):
+        """Test Create refunded order with invalud order number"""
+        order_number = '123456'
+        response = self.get_response(
+            'POST',
+            '/api/v2/enterprise/coupons/create_refunded_voucher/',
+            {
+                "order": order_number
+            }
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        response = response.json()
+        self.assertIn(
+            "Invalid order number or order {} does not exists.".format(order_number),
+            response['order'][0]
+        )
 
     @ddt.data(
         (Voucher.SINGLE_USE, 2, None, True),
