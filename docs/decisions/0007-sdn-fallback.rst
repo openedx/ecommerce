@@ -87,6 +87,11 @@ We intentionally tried to import all the rows from the csv regardless of whether
 For example, many rows do not have an address and our matching algorithm will never match records with no address. However, we chose to import those rows anyway and not run any input validation.
 The reasoning was that this would keep things clear and simple and decouple the import logic from the matching logic (in case the matching logic changed down the line). 
 
+10. **Transliterating unicode characters**
+We decided to transliterate unicode characters where possible for both addresses and names.
+Rationale:
+    - Names: Found an example where stripping an accents was necessary to get a match for a name
+    - Addresses: We did not see such an example for addresses because they are stored with the accented characters. However, we decided to strip the accents for both the input addresses and stored addresses, which will also work and would then behave more similarly to the names.
 
 Consequences
 ------------
