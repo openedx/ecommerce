@@ -311,7 +311,7 @@ Joshuafort, MD 72104, TH",,,,,,,,,,,,,,https://banks-bender.com/,Michael Anderso
     def test_process_text(self, text, expected_output):
         """ Verify that processing text works as expected (this function is used for names and addresses) """
         output = process_text(text)
-        self.assertEqual(set(output), set(expected_output))
+        self.assertEqual(output, expected_output)
 
     @ddt.data(
         ('À Á Â Ã Ä Å à á â ã ä å', {'a'}),
