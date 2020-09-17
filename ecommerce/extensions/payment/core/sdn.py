@@ -6,6 +6,7 @@ import io
 import logging
 import re
 import string
+import unicodedata
 from datetime import datetime, timezone
 from urllib.parse import urlencode
 
@@ -203,7 +204,10 @@ class SDNClient:
 
 
 def process_text(text):
-    """ Lowercase, remove non-alphanumeric characters, and ignore order and word frequency
+    """
+    Lowercase, remove non-alphanumeric characters, and ignore order and word frequency.
+    Attempts to transliterate unicode characters into ascii (such as accented characters into
+    non-accented characters).
 
     Args:
         text (str): names or addresses from the sdn list to be processed
@@ -213,10 +217,15 @@ def process_text(text):
     """
     if len(text) == 0:
         return ''
+
+    # transliterate unicode characters into ascii
+    text = unicodedata.normalize('NFKD', text).encode('ascii', 'ignore').decode('ascii')
     text = text.lower()
+
     # Strip non-alphanumeric characters from each word
     # Ignore order and word frequency
     text = set(filter(None, {word.strip(string.punctuation) for word in text.split()}))
+
     return text
 
 
