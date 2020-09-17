@@ -245,7 +245,7 @@ class SDNFallbackDataTests(TestCase):
         self.sdn_metadata = factories.SDNFallbackMetadataFactory.create(import_state="New")
 
     def test_fields(self):
-        "Verify all fields are correctly populated"
+        """ Verify all fields are correctly populated. """
         new_data = SDNFallbackData(
             sdn_fallback_metadata=self.sdn_metadata,
             source="Specially Designated Nationals (SDN) - Treasury Department",
@@ -268,7 +268,7 @@ class SDNFallbackDataTests(TestCase):
         self.assertEqual(actual_data.countries, "US")
 
     def test_data_is_deleted_on_delete_of_metadata(self):
-        "Verify SDNFallbackData object is deleted if SDNFallbackMetadata object is removed"
+        """ Verify SDNFallbackData object is deleted if SDNFallbackMetadata object is removed. """
         factories.SDNFallbackDataFactory.create(
             sdn_fallback_metadata=self.sdn_metadata,
         )
@@ -278,7 +278,7 @@ class SDNFallbackDataTests(TestCase):
         self.assertEqual(len(SDNFallbackData.objects.all()), 0)
 
     def test_get_current_records_and_filter_by_source_and_type(self):
-        "Verify the query is done for current records by source and by optional sdn_type"
+        """ Verify the query is done for current records by source and by optional sdn_type. """
         sdn_metadata_current = factories.SDNFallbackMetadataFactory.create(import_state="Current")
         sdn_metadata_discard = factories.SDNFallbackMetadataFactory.create(import_state="Discard")
         sdn_source = "Specially Designated Nationals (SDN) - Treasury Department"
