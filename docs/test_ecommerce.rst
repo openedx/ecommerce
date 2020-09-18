@@ -150,7 +150,7 @@ To configure the LMS, follow these steps.
       "JWT_ISSUER": "http://127.0.0.1:8000/oauth2" // Must match the E-Commerce JWT_ISSUER setting
       "OAUTH_ENFORCE_SECURE": false
 
-#. Verify that the following settings in ``lms.auth.json`` are correct.
+#. Verify that the following settings in ``lms.yml`` are correct.
 
    .. code-block:: bash
 

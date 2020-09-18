@@ -26,7 +26,7 @@ Before you create a product, complete the following steps to start the
 E-Commerce service on your site.
 
 #. In the ecommerce and LMS configuration files (``/edx/etc/ecommerce.yml`` and
-   ``/edx/app/edxapp/lms.auth.json``, respectively), verify the following
+   ``/edx/etc/lms.yml``, respectively), verify the following
    settings.
 
    .. note::
