@@ -5,7 +5,7 @@ import requests
 import responses
 from django.core.management import call_command
 from mock import patch
-from testfixtures import LogCapture
+from testfixtures import LogCapture, StringComparison
 
 from ecommerce.tests.testcases import TestCase
 
@@ -33,7 +33,23 @@ class TestDownloadSndFallbackCommand(TestCase):
         """ Test using mock response from setup, using threshold it will clear"""
 
         mock_response.return_value = self.test_response
-        call_command('populate_sdn_fallback_data_and_metadata', '--threshold=0.0001')
+
+        with LogCapture(self.LOGGER_NAME) as log:
+            call_command('populate_sdn_fallback_data_and_metadata', '--threshold=0.0001')
+
+            log.check(
+                (
+                    self.LOGGER_NAME,
+                    'INFO',
+                    StringComparison(
+                        r'(?s)SDNFallback: IMPORT SUCCESS: Imported SDN CSV\. Metadata id.*')
+                ),
+                (
+                    self.LOGGER_NAME,
+                    'INFO',
+                    "SDNFallback: DOWNLOAD SUCCESS: Successfully downloaded the SDN CSV."
+                )
+            )
 
     @patch('requests.Session.get')
     def test_handle_fail_size(self, mock_response):

@@ -63,6 +63,8 @@ class Command(BaseCommand):
                         if metadata_entry:
                             logger.info('SDNFallback: IMPORT SUCCESS: Imported SDN CSV. Metadata id %s',
                                         metadata_entry.id)
+
+                        logger.info('SDNFallback: DOWNLOAD SUCCESS: Successfully downloaded the SDN CSV.')
                         self.stdout.write(
                             self.style.SUCCESS(
                                 'SDNFallback: Imported SDN CSV into the SDNFallbackMetadata and SDNFallbackData models.'
