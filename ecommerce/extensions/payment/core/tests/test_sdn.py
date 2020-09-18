@@ -356,6 +356,7 @@ Joshuafort, MD 72104, TH",,,,,,,,,,,,,,https://banks-bender.com/,Michael Anderso
         ('-de-Juan-Cruz-la-', True),
         ('.dE@jUaN.....CRUZ----!??!?!la.', True),
         ('Cruz,,,,', True),
+        ('João', True),
         # check capitalizaiton properties
         ('jUan dE LA CruZ', True),
         # check frequency properties
@@ -364,6 +365,7 @@ Joshuafort, MD 72104, TH",,,,,,,,,,,,,,https://banks-bender.com/,Michael Anderso
         # other examples
         ('Juanito', False),
         ('John de la Cruz', False),
+        ('Wendy', True),
     )
     @ddt.unpack
     def test_check_sdn_fallback_names(self, name, match):
@@ -377,7 +379,7 @@ Joshuafort, MD 72104, TH",,,,,,,,,,,,,,https://banks-bender.com/,Michael Anderso
         """
         # pylint: disable=line-too-long
         csv_string = """_id,source,entity_number,type,programs,name,title,addresses,federal_register_notice,start_date,end_date,standard_order,license_requirement,license_policy,call_sign,vessel_type,gross_tonnage,gross_registered_tonnage,vessel_flag,vessel_owner,remarks,source_list_url,alt_names,citizenships,dates_of_birth,nationalities,places_of_birth,source_information_url,ids
-94734218,Specially Designated Nationals (SDN) - Treasury Department,96663868,Individual,material,Juan M. de la Cruz,Dr.,"17472 Christie Stream Apt. 976 North Kristinaport, HI 91033, SN",,,,,,,,,,,,,,https://www.juarez-collier.org/,Wendy Brock,DJ,1944-03-05,Faroe Islands,PK,http://richardson-richardson.org/,CI"""
+94734218,Specially Designated Nationals (SDN) - Treasury Department,96663868,Individual,material,Juan M. de la Cruz,Dr.,"17472 Christie Stream Apt. 976 North Kristinaport, HI 91033, SN",,,,,,,,,,,,,,https://www.juarez-collier.org/,Wendy João Brock,DJ,1944-03-05,Faroe Islands,PK,http://richardson-richardson.org/,CI"""
         # pylint: enable=line-too-long
         metadata_entry = populate_sdn_fallback_data_and_metadata(csv_string)
         self.assertEqual(checkSDNFallback(name, 'North Kristinaport', 'SN'), match)
@@ -393,6 +395,7 @@ Joshuafort, MD 72104, TH",,,,,,,,,,,,,,https://banks-bender.com/,Michael Anderso
         ('Kristinaport', True),
         ('Kristinaport,,!@#$%^&*()', True),
         ('Krist%^&*()inaport', False),
+        ('João', True),
         # check capitalizaiton properties
         ('KRISTINAPORT', True),
         # check frequency properties
@@ -410,7 +413,35 @@ Joshuafort, MD 72104, TH",,,,,,,,,,,,,,https://banks-bender.com/,Michael Anderso
         """
         # pylint: disable=line-too-long
         csv_string = """_id,source,entity_number,type,programs,name,title,addresses,federal_register_notice,start_date,end_date,standard_order,license_requirement,license_policy,call_sign,vessel_type,gross_tonnage,gross_registered_tonnage,vessel_flag,vessel_owner,remarks,source_list_url,alt_names,citizenships,dates_of_birth,nationalities,places_of_birth,source_information_url,ids
-94734218,Specially Designated Nationals (SDN) - Treasury Department,96663868,Individual,material,Juan M. de la Cruz,Dr.,"17472 Christie Stream Apt. 976 North Kristinaport, HI 91033, SN",,,,,,,,,,,,,,https://www.juarez-collier.org/,Wendy Brock,DJ,1944-03-05,Faroe Islands,PK,http://richardson-richardson.org/,CI"""
+94734218,Specially Designated Nationals (SDN) - Treasury Department,96663868,Individual,material,Juan M. de la Cruz,Dr.,"17472 Christie Stream Apt. 976 North Kristinaport João, HI 91033, SN",,,,,,,,,,,,,,https://www.juarez-collier.org/,Wendy Brock,DJ,1944-03-05,Faroe Islands,PK,http://richardson-richardson.org/,CI"""
         # pylint: enable=line-too-long
         metadata_entry = populate_sdn_fallback_data_and_metadata(csv_string)
         self.assertEqual(checkSDNFallback("Juan", address, 'SN'), match)
+
+    def test_check_sdn_fallback_other_fields(self):
+        """
+        Verify that country, type and source need to match for checkSDNFallback to return True
+        """
+        # wrong country
+        # pylint: disable=line-too-long
+        csv_string = """_id,source,entity_number,type,programs,name,title,addresses,federal_register_notice,start_date,end_date,standard_order,license_requirement,license_policy,call_sign,vessel_type,gross_tonnage,gross_registered_tonnage,vessel_flag,vessel_owner,remarks,source_list_url,alt_names,citizenships,dates_of_birth,nationalities,places_of_birth,source_information_url,ids
+94734218,Specially Designated Nationals (SDN) - Treasury Department,96663868,Individual,material,Juan M. de la Cruz,Dr.,"17472 Christie Stream Apt. 976 North Kristinaport, HI 91033, SN",,,,,,,,,,,,,,https://www.juarez-collier.org/,Wendy Brock,DJ,1944-03-05,Faroe Islands,PK,http://richardson-richardson.org/,CI"""
+        # pylint: enable=line-too-long
+        metadata_entry = populate_sdn_fallback_data_and_metadata(csv_string)
+        self.assertEqual(checkSDNFallback("Juan", "Kristinaport", 'AB'), False)
+
+        # wrong type
+        # pylint: disable=line-too-long
+        csv_string = """_id,source,entity_number,type,programs,name,title,addresses,federal_register_notice,start_date,end_date,standard_order,license_requirement,license_policy,call_sign,vessel_type,gross_tonnage,gross_registered_tonnage,vessel_flag,vessel_owner,remarks,source_list_url,alt_names,citizenships,dates_of_birth,nationalities,places_of_birth,source_information_url,ids
+94734218,Specially Designated Nationals (SDN) - Treasury Department,96663868,foo,material,Juan M. de la Cruz,Dr.,"17472 Christie Stream Apt. 976 North Kristinaport, HI 91033, SN",,,,,,,,,,,,,,https://www.juarez-collier.org/,Wendy Brock,DJ,1944-03-05,Faroe Islands,PK,http://richardson-richardson.org/,CI"""
+        # pylint: enable=line-too-long
+        metadata_entry = populate_sdn_fallback_data_and_metadata(csv_string)
+        self.assertEqual(checkSDNFallback("Juan", "Kristinaport", 'SN'), False)
+
+        # wrong source
+        # pylint: disable=line-too-long
+        csv_string = """_id,source,entity_number,type,programs,name,title,addresses,federal_register_notice,start_date,end_date,standard_order,license_requirement,license_policy,call_sign,vessel_type,gross_tonnage,gross_registered_tonnage,vessel_flag,vessel_owner,remarks,source_list_url,alt_names,citizenships,dates_of_birth,nationalities,places_of_birth,source_information_url,ids
+94734218,bar,96663868,Individual,material,Juan M. de la Cruz,Dr.,"17472 Christie Stream Apt. 976 North Kristinaport, HI 91033, SN",,,,,,,,,,,,,,https://www.juarez-collier.org/,Wendy Brock,DJ,1944-03-05,Faroe Islands,PK,http://richardson-richardson.org/,CI"""
+        # pylint: enable=line-too-long
+        metadata_entry = populate_sdn_fallback_data_and_metadata(csv_string)
+        self.assertEqual(checkSDNFallback("Juan", "Kristinaport", 'SN'), False)
