@@ -164,6 +164,9 @@ class Cybersource(ApplePayMixin, BaseClientSidePaymentProcessor):
         else:
             self.flex_target_origin = None
 
+        self.connect_timeout = configuration.get('api_connect_timeout', 0.5)
+        self.read_timeout = configuration.get('api_read_timeout', 1.5)
+
         self.cybersource_api_config = {
             'authentication_type': 'http_signature',
             'run_environment': self.flex_run_environment,
@@ -192,7 +195,11 @@ class Cybersource(ApplePayMixin, BaseClientSidePaymentProcessor):
         requestObj = json.dumps(requestObj)
 
         api_instance = KeyGenerationApi(self.cybersource_api_config)
-        return_data, _, _ = api_instance.generate_public_key(generate_public_key_request=requestObj, format='JWT')
+        return_data, _, _ = api_instance.generate_public_key(
+            generate_public_key_request=requestObj,
+            format='JWT',
+            _request_timeout=(self.connect_timeout, self.read_timeout),
+        )
 
         return {'key_id': return_data.key_id}
 
@@ -896,7 +903,10 @@ class CybersourceREST(Cybersource):  # pragma: no cover
         requestObj = json.dumps(requestObj)
 
         api_instance = PaymentsApi(self.cybersource_api_config)
-        payment_processor_response, _, _ = api_instance.create_payment(requestObj)
+        payment_processor_response, _, _ = api_instance.create_payment(
+            requestObj,
+            _request_timeout=(self.connect_timeout, self.read_timeout)
+        )
 
         # Add the billing address to the response so it's available for the rest of the order completion process
         payment_processor_response.billing_address = BillingAddress(
