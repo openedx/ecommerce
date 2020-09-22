@@ -38,8 +38,8 @@ class TestSeatPayment:
         }
 
         flex_microform_information = {
-            'number': '4111111111111111',
-            'securityCode': '123',
+            'cardNumber': ('number', '4111111111111111'),
+            'securityCode': ('securityCode', '123'),
         }
 
         country = address['country']
@@ -76,11 +76,11 @@ class TestSeatPayment:
         for field, value in billing_information.items():
             selenium.find_element_by_id(field).send_keys(value)
 
-        for field, value in flex_microform_information.items():
+        for field, (microform_field_name, value) in flex_microform_information.items():
             selenium.switch_to.frame(
-                selenium.find_element_by_id('{}-container'.format(field)).find_element_by_tag_name('iframe')
+                selenium.find_element_by_id(field).find_element_by_tag_name('iframe')
             )
-            selenium.find_element_by_name(field).send_keys(value)
+            selenium.find_element_by_name(microform_field_name).send_keys(value)
             selenium.switch_to.parent_frame()
 
         # Click the payment button
