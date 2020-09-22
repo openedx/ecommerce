@@ -2106,6 +2106,39 @@ class EnterpriseCouponViewSetRbacTests(
             self.assertEqual(OfferAssignment.objects.count(), existing_offer_assignment_count)
             self.assertEqual(mock_send_email.call_count, 0)
 
+    def test_create_refunded_voucher_with_coupon_could_not_assign(self):
+        """ Test create refunded voucher when created successfully but failed at assign serializer."""
+        coupon_post_data = dict(self.data, voucher_type=Voucher.SINGLE_USE, quantity=1, max_uses=None)
+        coupon = self.get_response('POST', ENTERPRISE_COUPONS_LINK, coupon_post_data)
+        coupon = coupon.json()
+        coupon_id = coupon['coupon_id']
+        vouchers = Product.objects.get(id=coupon_id).attr.coupon_vouchers.vouchers.all()
+        voucher = vouchers.first()
+        order = self.use_voucher(voucher, self.user)
+
+        existing_offer_assignment_count = OfferAssignment.objects.count()
+        existing_vouchers_count = vouchers.count()
+
+        with mock.patch('ecommerce.extensions.api.serializers.CouponCodeAssignmentSerializer') as serializer_class:
+            serializer = serializer_class.return_value
+            serializer.is_valid.return_value = False
+            response = self.get_response(
+                'POST',
+                '/api/v2/enterprise/coupons/create_refunded_voucher/',
+                {
+                    "order": order.number
+                }
+            )
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        response = response.json()
+        self.assertEqual(vouchers.count(), existing_vouchers_count)
+        self.assertEqual(OfferAssignment.objects.count(), existing_offer_assignment_count)
+        self.assertIn(
+            "New coupon voucher assignment Failure.",
+            response[0]
+        )
+
     def test_create_refunded_voucher_failure(self):
         """ Test different cased in which create refund API could fail."""
         coupon_post_data = dict(self.data, voucher_type=Voucher.SINGLE_USE, quantity=10, max_uses=None)

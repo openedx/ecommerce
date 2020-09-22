@@ -33,6 +33,11 @@ from ecommerce.coupons.utils import is_coupon_available
 from ecommerce.courses.models import Course
 from ecommerce.enterprise.benefits import BENEFIT_MAP as ENTERPRISE_BENEFIT_MAP
 from ecommerce.entitlements.utils import create_or_update_course_entitlement
+from ecommerce.extensions.api.v2.constants import (
+    REFUND_ORDER_EMAIL_CLOSING,
+    REFUND_ORDER_EMAIL_GREETING,
+    REFUND_ORDER_EMAIL_SUBJECT
+)
 from ecommerce.extensions.catalogue.utils import attach_vouchers_to_coupon_product
 from ecommerce.extensions.offer.constants import (
     OFFER_ASSIGNED,
@@ -1522,13 +1527,13 @@ class CouponCodeAssignmentSerializer(serializers.Serializer):  # pylint: disable
 
 class RefundedOrderCreateVoucherSerializer(serializers.Serializer):  # pylint: disable=abstract-method
     """
-        Creates and assigns new coupon voucher to the requested order user.
+        Creates and assigns new coupon voucher to the user associated with the order.
     """
     order = serializers.CharField(required=True)
     code = serializers.CharField(read_only=True)
 
     def validate_order(self, order):
-        """ Verify order number and returns order obj """
+        """Verify the order number and return the order object."""
         try:
             order = Order.objects.get(number=order)
         except Order.DoesNotExist:
@@ -1572,19 +1577,22 @@ class RefundedOrderCreateVoucherSerializer(serializers.Serializer):  # pylint: d
             note,
         )
 
-        subject = 'Your New edX Access Code'
-        greeting = 'Hello! We see you unenrolled from a course provided by your organization within edX’s refund ' \
-                   'window. As part of our policy, we are giving you a new code to use. You can use this to enroll ' \
-                   'in any course that was available for you to enroll in with the original code.'
-        closing = 'We hope you find a course that meets your learning needs! For any questions, reach out to your ' \
-                  'Learning Manager at your organization.'
         new_code = vouchers[0].code
         serializer = CouponCodeAssignmentSerializer(
             data={'codes': [new_code], 'emails': user_emails},
-            context={'coupon': coupon_product, 'subject': subject, 'greeting': greeting, 'closing': closing}
+            context={
+                'coupon': coupon_product,
+                'subject': REFUND_ORDER_EMAIL_SUBJECT,
+                'greeting': REFUND_ORDER_EMAIL_GREETING,
+                'closing': REFUND_ORDER_EMAIL_CLOSING,
+            }
         )
         if serializer.is_valid():
             serializer.save()
+        else:
+            raise serializers.ValidationError(
+                _("New coupon voucher assignment Failure. Error: {}").format(serializer.errors)
+            )
 
         validated_data['code'] = new_code
         return validated_data
