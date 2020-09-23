@@ -31,7 +31,14 @@ from ecommerce.core.url_utils import get_ecommerce_url
 from ecommerce.core.utils import log_message_and_raise_validation_error
 from ecommerce.coupons.utils import is_coupon_available
 from ecommerce.courses.models import Course
+from ecommerce.enterprise.benefits import BENEFIT_MAP as ENTERPRISE_BENEFIT_MAP
 from ecommerce.entitlements.utils import create_or_update_course_entitlement
+from ecommerce.extensions.api.v2.constants import (
+    REFUND_ORDER_EMAIL_CLOSING,
+    REFUND_ORDER_EMAIL_GREETING,
+    REFUND_ORDER_EMAIL_SUBJECT
+)
+from ecommerce.extensions.catalogue.utils import attach_vouchers_to_coupon_product
 from ecommerce.extensions.offer.constants import (
     OFFER_ASSIGNED,
     OFFER_ASSIGNMENT_EMAIL_BOUNCED,
@@ -48,7 +55,9 @@ from ecommerce.extensions.offer.utils import (
     send_assigned_offer_reminder_email,
     send_revoked_offer_email
 )
+from ecommerce.extensions.voucher.utils import create_enterprise_vouchers
 from ecommerce.invoice.models import Invoice
+from ecommerce.programs.custom import class_path
 
 logger = logging.getLogger(__name__)
 
@@ -1514,6 +1523,121 @@ class CouponCodeAssignmentSerializer(serializers.Serializer):  # pylint: disable
                 closing,
                 exc
             )
+
+
+class RefundedOrderCreateVoucherSerializer(serializers.Serializer):  # pylint: disable=abstract-method
+    """
+        Creates and assigns new coupon voucher to the user associated with the order.
+    """
+    order = serializers.CharField(required=True)
+    code = serializers.CharField(read_only=True)
+
+    def validate_order(self, order):
+        """Verify the order number and return the order object."""
+        try:
+            order = Order.objects.get(number=order)
+        except Order.DoesNotExist:
+            raise serializers.ValidationError(_('Invalid order number or order {} does not exists.').format(order))
+        return order
+
+    def create(self, validated_data):
+        """Create new voucher in existing coupon and assign it to the given user_emails"""
+        coupon_product = validated_data.get('coupon_product')
+        benefit_type = validated_data.get('benefit_type')
+        benefit_value = validated_data.get('benefit_value')
+        enterprise_customer_uuid = validated_data.get('enterprise_customer_uuid')
+        enterprise_customer_catalog_uuid = validated_data.get('enterprise_customer_catalog_uuid')
+        email_domains = validated_data.get('email_domains')
+        start_datetime = validated_data.get('start_datetime')
+        end_datetime = validated_data.get('end_datetime')
+        site = validated_data.get('site')
+        note = validated_data.get('note')
+        user_emails = validated_data.get('user_emails')
+
+        vouchers = create_enterprise_vouchers(
+            voucher_type=Voucher.SINGLE_USE,
+            quantity=1,
+            coupon_id=coupon_product.id,
+            benefit_type=benefit_type,
+            benefit_value=benefit_value,
+            enterprise_customer=enterprise_customer_uuid,
+            enterprise_customer_catalog=enterprise_customer_catalog_uuid,
+            max_uses=None,
+            email_domains=email_domains,
+            site=site,
+            end_datetime=end_datetime,
+            start_datetime=start_datetime,
+            code=None,
+            name=coupon_product.title
+        )
+
+        attach_vouchers_to_coupon_product(
+            coupon_product,
+            vouchers,
+            note,
+        )
+
+        new_code = vouchers[0].code
+        serializer = CouponCodeAssignmentSerializer(
+            data={'codes': [new_code], 'emails': user_emails},
+            context={
+                'coupon': coupon_product,
+                'subject': REFUND_ORDER_EMAIL_SUBJECT,
+                'greeting': REFUND_ORDER_EMAIL_GREETING,
+                'closing': REFUND_ORDER_EMAIL_CLOSING,
+            }
+        )
+        if serializer.is_valid():
+            serializer.save()
+        else:
+            raise serializers.ValidationError(
+                _("New coupon voucher assignment Failure. Error: {}").format(serializer.errors)
+            )
+
+        validated_data['code'] = new_code
+        return validated_data
+
+    def validate(self, attrs):
+        """
+        Extract and validates all data required data.
+        """
+        order = attrs.get('order')
+
+        try:
+            discount = order.discounts.first()
+            offer = discount.offer
+            existing_voucher = offer.vouchers.first()
+            if not existing_voucher.usage == Voucher.SINGLE_USE:
+                raise serializers.ValidationError(
+                    _("Your order {} can not be refunded as '{}' coupon are not supported to refund.".format(
+                        order, existing_voucher.usage
+                    ))
+                )
+            benefit = offer.benefit
+            condition = offer.condition
+            coupon_product = existing_voucher.coupon_vouchers.first().coupon
+            benefit_type = next(k for k, v in ENTERPRISE_BENEFIT_MAP.items() if class_path(v) == benefit.proxy_class)
+            try:
+                note = coupon_product.attr.note
+            except AttributeError:
+                note = None
+
+            attrs['coupon_product'] = coupon_product
+            attrs['benefit_type'] = benefit_type
+            attrs['benefit_value'] = benefit.value
+            attrs['enterprise_customer_uuid'] = condition.enterprise_customer_uuid
+            attrs['enterprise_customer_catalog_uuid'] = condition.enterprise_customer_catalog_uuid
+            attrs['email_domains'] = offer.email_domains
+            attrs['start_datetime'] = existing_voucher.start_datetime
+            attrs['end_datetime'] = existing_voucher.end_datetime
+            attrs['site'] = self.context['request'].site
+            attrs['user_emails'] = [order.user.email]
+            attrs['note'] = note
+        except AttributeError:
+            error_message = _("Could note create new voucher for the order: {}").format(order)
+            logger.exception(error_message)
+            raise serializers.ValidationError(error_message)
+        return attrs
 
 
 class CouponCodeRevokeRemindBulkSerializer(serializers.ListSerializer):  # pylint: disable=abstract-method
