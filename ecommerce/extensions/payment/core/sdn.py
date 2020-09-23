@@ -79,17 +79,24 @@ def checkSDNFallback(name, city, country):
         4. If a subset of words match, it still counts as a match
         5. Capitalization doesn’t matter
     """
-    records = SDNFallbackData.get_current_records_and_filter_by_source_and_type(
-        'Specially Designated Nationals (SDN) - Treasury Department', 'Individual'
-    )
-    records = records.filter(countries__contains=country)
-    processed_name, processed_city = process_text(name), process_text(city)
-    for record in records:
-        record_names, record_addresses = set(record.names.split()), set(record.addresses.split())
+    try:
+        records = SDNFallbackData.get_current_records_and_filter_by_source_and_type(
+            'Specially Designated Nationals (SDN) - Treasury Department', 'Individual'
+        )
+        records = records.filter(countries__contains=country)
+        processed_name, processed_city = process_text(name), process_text(city)
+        for record in records:
+            record_names, record_addresses = set(record.names.split()), set(record.addresses.split())
         if (processed_name.issubset(record_names) and processed_city.issubset(record_addresses)):
             return True
-    return False
+        return False
 
+    except Exception as e: # pylint: disable=broad-except
+        error_string = str(e)
+        logger.warning("SDNFallback Exception occurred: [%s]. ", e)
+        if error_string == "SDNFallbackMetadata matching query does not exist.":
+            logger.warning("SDNFallbackMetadata was empty, you probably need to run the populate_sdn_fallback_data_and_metadata.py management command")  # pylint: disable=line-too-long
+        return False
 
 class SDNClient:
     """A utility class that handles SDN related operations."""
