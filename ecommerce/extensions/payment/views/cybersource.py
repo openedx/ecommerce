@@ -30,7 +30,7 @@ from ecommerce.extensions.basket.utils import (
 )
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
 from ecommerce.extensions.checkout.utils import get_receipt_page_url
-from ecommerce.extensions.payment.core.sdn import checkSDN
+from ecommerce.extensions.payment.core.sdn import checkSDN, compare_SDNCheck_vs_fallback
 from ecommerce.extensions.payment.exceptions import (
     AuthorizationError,
     DuplicateReferenceNumber,
@@ -83,6 +83,8 @@ class CybersourceOrderInitiationView:
             data['first_name'] + ' ' + data['last_name'],
             data['city'],
             data['country'])
+
+        compare_SDNCheck_vs_fallback(request.basket.id, data, hit_count)
 
         if hit_count > 0:
             logger.info(

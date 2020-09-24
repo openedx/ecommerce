@@ -14,6 +14,7 @@ from oscar.apps.payment.abstract_models import AbstractSource
 from solo.models import SingletonModel
 
 from ecommerce.extensions.payment.constants import CARD_TYPE_CHOICES
+from ecommerce.extensions.payment.exceptions import SDNFallbackDataEmptyError
 
 logger = logging.getLogger(__name__)
 
@@ -274,7 +275,14 @@ class SDNFallbackData(models.Model):
         """
         Query the records that have 'Current' import state, and filter by source and sdn_type.
         """
-        current_metadata = SDNFallbackMetadata.objects.get(import_state='Current')
+        try:
+            current_metadata = SDNFallbackMetadata.objects.get(import_state='Current')
+        # The 'get' relies on the manage command having been run. If it fails, tell engineer what's needed
+        except SDNFallbackMetadata.DoesNotExist:
+            logger.warning(
+                "SDNFallbackMetadata is empty! Run this: ./manage.py populate_sdn_fallback_data_and_metadata"
+            )
+            raise SDNFallbackDataEmptyError
         query_params = {'source': source, 'sdn_fallback_metadata': current_metadata, 'sdn_type': sdn_type}
         return SDNFallbackData.objects.filter(**query_params)
 

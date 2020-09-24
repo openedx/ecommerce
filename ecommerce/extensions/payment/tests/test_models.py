@@ -5,6 +5,7 @@ from datetime import datetime
 from django.core.exceptions import ValidationError
 from testfixtures import LogCapture
 
+from ecommerce.extensions.payment.exceptions import SDNFallbackDataEmptyError
 from ecommerce.extensions.payment.models import (
     EnterpriseContractMetadata,
     SDNCheckFailure,
@@ -310,3 +311,11 @@ class SDNFallbackDataTests(TestCase):
         filtered_records_isn = SDNFallbackData.get_current_records_and_filter_by_source_and_type(
             isn_source, "")
         self.assertEqual(len(filtered_records_isn), 1)
+
+    def test_get_current_records_and_filter_by_source_and_type_empty_data(self):
+        """ Verify that we raise the expected Exception if this is called before data is populated"""
+        sdn_source = "Specially Designated Nationals (SDN) - Treasury Department"
+        sdn_type = "Individual"
+
+        with self.assertRaises(SDNFallbackDataEmptyError):
+            SDNFallbackData.get_current_records_and_filter_by_source_and_type(sdn_source, sdn_type)

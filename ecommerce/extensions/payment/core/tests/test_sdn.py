@@ -12,17 +12,20 @@ from django.conf import settings
 from django.test import override_settings
 from oscar.test import factories
 from requests.exceptions import HTTPError, Timeout
+from testfixtures import LogCapture
 
 from ecommerce.core.models import User
 from ecommerce.extensions.payment.core.sdn import (
     SDNClient,
     checkSDNFallback,
+    compare_SDNCheck_vs_fallback,
     extract_country_information,
     populate_sdn_fallback_data,
     populate_sdn_fallback_data_and_metadata,
     populate_sdn_fallback_metadata,
     process_text
 )
+from ecommerce.extensions.payment.exceptions import SDNFallbackDataEmptyError
 from ecommerce.extensions.payment.models import SDNCheckFailure, SDNFallbackData, SDNFallbackMetadata
 from ecommerce.extensions.test import factories as extensions_factories
 from ecommerce.tests.testcases import TestCase
@@ -146,6 +149,9 @@ class SDNCheckTests(TestCase):
 
 @ddt.ddt
 class SDNFallbackTests(TestCase):
+
+    LOGGER_NAME = 'ecommerce.extensions.payment.core.sdn'
+
     def setUp(self):
         super(SDNFallbackTests, self).setUp()
         extensions_factories.SDNFallbackMetadataFactory.create(import_state='Current')
@@ -445,3 +451,63 @@ Joshuafort, MD 72104, TH",,,,,,,,,,,,,,https://banks-bender.com/,Michael Anderso
         # pylint: enable=line-too-long
         metadata_entry = populate_sdn_fallback_data_and_metadata(csv_string)
         self.assertEqual(checkSDNFallback("Juan", "Kristinaport", 'SN'), False)
+
+    def test_compare_SDNCheck_vs_fallback_match_no_hit(self):
+        """Log correct results from fallback and API calls: matching, no hit
+        We'll use form data not matching fallback csv data, and pass 0 hits from the SDN API"""
+
+        form_data = {
+            'basket': 999,
+            'first_name': 'Test',
+            'last_name': 'User',
+            'city': 'Cambridge',
+            'country': 'US',
+        }
+
+        with LogCapture(self.LOGGER_NAME) as log_miss:
+            compare_SDNCheck_vs_fallback(form_data['basket'], form_data, 0)
+            log_miss.check(
+                (
+                    self.LOGGER_NAME,
+                    'INFO',
+                    "SDNFallback compare: MATCH. Results - SDN API: 0 hit(s); SDN Fallback match: False. Basket: " +
+                    str(form_data['basket'])
+                )
+            )
+
+    def test_compare_SDNCheck_vs_fallback_mismatch(self):
+        """Log correct results from fallback and API calls: mismatch where API hit is missed in fallback
+        We'll use form data not matching fallback csv data, and pass 1 hit from the SDN API"""
+
+        form_data = {
+            'basket': 999,
+            'first_name': 'Test',
+            'last_name': 'User',
+            'city': 'Cambridge',
+            'country': 'US',
+        }
+
+        with LogCapture(self.LOGGER_NAME) as log_mismatch:
+            compare_SDNCheck_vs_fallback(form_data['basket'], form_data, 1)
+            log_mismatch.check(
+                (
+                    self.LOGGER_NAME,
+                    'INFO',
+                    "SDNFallback compare: MISMATCH. Results - SDN API: 1 hit(s); SDN Fallback match: False. Basket: " +
+                    str(form_data['basket'])
+                ),
+                (
+                    self.LOGGER_NAME,
+                    'INFO',
+                    "Failed SDN match for first name: Test, last name: User, city: Cambridge, country: US "
+                )
+            )
+
+
+class SDNFallbackTestsWithoutSetup(TestCase):
+    def test_SDNFallback_empty_data(self):
+        """
+        when checkSDNFallback is called and data isn't populated, we throw the expected Exception
+        """
+        with self.assertRaises(SDNFallbackDataEmptyError):
+            checkSDNFallback('Juan', 'North Kristinaport', 'SN')

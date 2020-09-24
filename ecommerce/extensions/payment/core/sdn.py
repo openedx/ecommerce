@@ -21,6 +21,7 @@ from django.contrib.auth import logout
 from oscar.core.loading import get_model
 from requests.exceptions import HTTPError, Timeout
 
+from ecommerce.extensions.payment.exceptions import SDNFallbackDataEmptyError
 from ecommerce.extensions.payment.models import SDNCheckFailure, SDNFallbackData, SDNFallbackMetadata
 
 logger = logging.getLogger(__name__)
@@ -79,24 +80,17 @@ def checkSDNFallback(name, city, country):
         4. If a subset of words match, it still counts as a match
         5. Capitalization doesn’t matter
     """
-    try:
-        records = SDNFallbackData.get_current_records_and_filter_by_source_and_type(
-            'Specially Designated Nationals (SDN) - Treasury Department', 'Individual'
-        )
-        records = records.filter(countries__contains=country)
-        processed_name, processed_city = process_text(name), process_text(city)
-        for record in records:
-            record_names, record_addresses = set(record.names.split()), set(record.addresses.split())
+    records = SDNFallbackData.get_current_records_and_filter_by_source_and_type(
+        'Specially Designated Nationals (SDN) - Treasury Department', 'Individual'
+    )
+    records = records.filter(countries__contains=country)
+    processed_name, processed_city = process_text(name), process_text(city)
+    for record in records:
+        record_names, record_addresses = set(record.names.split()), set(record.addresses.split())
         if (processed_name.issubset(record_names) and processed_city.issubset(record_addresses)):
             return True
-        return False
+    return False
 
-    except Exception as e: # pylint: disable=broad-except
-        error_string = str(e)
-        logger.warning("SDNFallback Exception occurred: [%s]. ", e)
-        if error_string == "SDNFallbackMetadata matching query does not exist.":
-            logger.warning("SDNFallbackMetadata was empty, you probably need to run the populate_sdn_fallback_data_and_metadata.py management command")  # pylint: disable=line-too-long
-        return False
 
 class SDNClient:
     """A utility class that handles SDN related operations."""
@@ -356,3 +350,48 @@ def populate_sdn_fallback_data_and_metadata(sdn_csv_string):
         metadata_entry.save()
         metadata_entry.swap_all_states()
     return metadata_entry
+
+
+def compare_SDNCheck_vs_fallback(basket_id, data, hit_count):
+    """ Temporary checkSDNFallback comparison call (REV-1338)
+
+    Args:
+        basket ID (int): ID of the current basket
+        form data (dictionary): data inputted on checkout form
+        hit_count from checkSDN (int): result this basket got during SDN API call
+
+    Returns:
+        No return values. Print results comparison, and additional info for problem case (API hit but fallback miss)
+
+    """
+    try:
+        SDNFallback_hit = checkSDNFallback(
+            data.get('first_name') + ' ' + data.get('last_name'),
+            data.get('city'),
+            data.get('country')
+        )
+
+    except (SDNFallbackDataEmptyError, Exception) as e:  # pylint: disable=broad-except
+        # We're making this shadow call to gather comparison info for the csv sdn fallback vs SDN API.
+        # We don't want to prevent learners from purchasing if there's an error in the csv sdn fallback.
+        logger.warning("Skip SDN API vs fallback comparison; exception calling checkSDNFallback")
+        logger.exception(e)
+    else:
+        # If shadow fallback call ran, log comparison of results vs those from the SDN API
+        # A match is where both found a hit or neither found a hit
+        SDN_calls_matched = (hit_count > 0 and SDNFallback_hit) or (hit_count == 0 and not SDNFallback_hit)
+        result_string = "SDNFallback compare: MATCH" if SDN_calls_matched else "SDNFallback compare: MISMATCH"
+        logger.info(
+            '%s. Results - SDN API: %d hit(s); SDN Fallback match: %s. Basket: %d',
+            result_string,
+            hit_count,
+            SDNFallback_hit,
+            basket_id,
+        )
+
+        if hit_count > 0 and not SDN_calls_matched:
+            logger.info('Failed SDN match for first name: %s, last name: %s, city: %s, country: %s ',
+                        data.get('first_name'),
+                        data.get('last_name'),
+                        data.get('city'),
+                        data.get('country'))
