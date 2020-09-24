@@ -63,7 +63,7 @@ edx-django-release-util==0.4.4  # via -r requirements/base.in
 edx-django-sites-extensions==2.5.1  # via -r requirements/base.in
 edx-django-utils==3.8.0   # via -r requirements/base.in, django-config-models, edx-drf-extensions
 edx-drf-extensions==6.1.2  # via -r requirements/base.in, edx-rbac
-edx-ecommerce-worker==0.8.4  # via -r requirements/base.in
+edx-ecommerce-worker==0.8.5  # via -r requirements/base.in
 edx-opaque-keys==2.1.1    # via -r requirements/base.in, edx-drf-extensions
 edx-rbac==1.3.2           # via -r requirements/base.in
 edx-rest-api-client==1.9.2  # via -c requirements/pins.txt, -r requirements/base.in, edx-ecommerce-worker
