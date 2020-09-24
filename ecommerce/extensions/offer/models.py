@@ -572,7 +572,7 @@ class OfferAssignment(TimeStampedModel):
             models.Index(fields=['code', 'status']),
         ]
 
-    def __unicode__(self):
+    def __str__(self):
         return "{code}-{email}".format(code=self.code, email=self.user_email)
 
 
@@ -610,7 +610,7 @@ class OfferAssignmentEmailTemplates(TimeStampedModel):
             models.Index(fields=['enterprise_customer', 'email_type'])
         ]
 
-    def __unicode__(self):
+    def __str__(self):
         return "{ec}-{email_type}-{active}".format(
             ec=self.enterprise_customer,
             email_type=self.email_type,

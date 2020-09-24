@@ -43,7 +43,7 @@ class Course(models.Model):
     thumbnail_url = models.URLField(null=True, blank=True)
     history = HistoricalRecords()
 
-    def __unicode__(self):
+    def __str__(self):
         return str(self.id)
 
     def _create_parent_seat(self):
