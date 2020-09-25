@@ -52,3 +52,6 @@ tox-battery==0.5.2
 
 # cybersource-rest-client-python requires 2.7, but requests gives 2.10 by default
 idna==2.7
+
+# TODO : Pinning this until we are sure there aren't any breaking changes, then we'll upgrade.
+celery<5.0.0

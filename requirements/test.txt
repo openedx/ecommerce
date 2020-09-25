@@ -18,7 +18,7 @@ billiard==3.6.3.0         # via -r requirements/base.txt, celery
 bleach==3.2.1             # via -r requirements/base.txt
 bok-choy==1.1.1           # via -r requirements/test.in
 cached-property==1.5.2    # via -r requirements/base.txt, zeep
-celery==4.4.7             # via -r requirements/base.txt, edx-ecommerce-worker
+celery==4.4.7             # via -c requirements/pins.txt, -r requirements/base.txt, edx-ecommerce-worker
 certifi==2020.6.20        # via -r requirements/base.txt, -r requirements/e2e.txt, cybersource-rest-client-python, requests
 cffi==1.14.3              # via -r requirements/base.txt, -r requirements/e2e.txt, bcrypt, cryptography, cybersource-rest-client-python, pynacl
 chardet==3.0.4            # via -r requirements/base.txt, -r requirements/e2e.txt, cybersource-rest-client-python, requests
@@ -67,8 +67,8 @@ edx-auth-backends==3.1.0  # via -r requirements/base.txt
 edx-django-release-util==0.4.4  # via -r requirements/base.txt
 edx-django-sites-extensions==2.5.1  # via -r requirements/base.txt
 edx-django-utils==3.8.0   # via -r requirements/base.txt, django-config-models, edx-drf-extensions
-edx-drf-extensions==6.1.2  # via -r requirements/base.txt, edx-rbac
-edx-ecommerce-worker==0.8.5  # via -r requirements/base.txt
+edx-drf-extensions==6.2.0  # via -r requirements/base.txt, edx-rbac
+edx-ecommerce-worker==0.8.6  # via -r requirements/base.txt
 edx-i18n-tools==0.5.3     # via -r requirements/test.in
 edx-opaque-keys==2.1.1    # via -r requirements/base.txt, edx-drf-extensions
 edx-rbac==1.3.2           # via -r requirements/base.txt
@@ -177,7 +177,7 @@ selenium==3.141.0         # via -r requirements/e2e.txt, -r requirements/test.in
 semantic-version==2.8.5   # via -r requirements/base.txt, edx-drf-extensions
 shellescape==3.8.1        # via -r requirements/base.txt, crypto, cybersource-rest-client-python
 simplejson==3.17.2        # via -r requirements/base.txt, django-rest-swagger, sailthru-client
-six==1.15.0               # via -r requirements/base.txt, -r requirements/e2e.txt, -r requirements/tox.txt, analytics-python, astroid, bcrypt, bleach, bok-choy, cryptography, cybersource-rest-client-python, django-compressor, django-extra-views, django-simple-history, djangorestframework-csv, edx-auth-backends, edx-django-release-util, edx-drf-extensions, edx-i18n-tools, edx-opaque-keys, edx-rbac, fixtures, httpretty, isodate, jsonschema, libsass, packaging, paypalrestsdk, purl, pyjwkest, pynacl, pyopenssl, python-dateutil, python-memcached, responses, social-auth-app-django, social-auth-core, tenacity, testtools, tox, unittest2, webtest, zeep
+six==1.15.0               # via -r requirements/base.txt, -r requirements/e2e.txt, -r requirements/tox.txt, analytics-python, astroid, bcrypt, bleach, bok-choy, cryptography, cybersource-rest-client-python, django-compressor, django-extra-views, django-simple-history, djangorestframework-csv, edx-auth-backends, edx-django-release-util, edx-drf-extensions, edx-ecommerce-worker, edx-i18n-tools, edx-opaque-keys, edx-rbac, fixtures, httpretty, isodate, jsonschema, libsass, packaging, paypalrestsdk, purl, pyjwkest, pynacl, pyopenssl, python-dateutil, python-memcached, responses, social-auth-app-django, social-auth-core, tenacity, testtools, tox, unittest2, webtest, zeep
 slumber==0.7.1            # via -r requirements/base.txt, -r requirements/e2e.txt, edx-rest-api-client
 git+https://github.com/python-social-auth/social-app-django.git@c00d23c2b45c3317bd35b15ad1b959338689cef8#egg=social-auth-app-django  # via -r requirements/base.txt, edx-auth-backends
 social-auth-core==3.2.0   # via -c requirements/pins.txt, -r requirements/base.txt, edx-auth-backends, social-auth-app-django
