@@ -666,10 +666,17 @@ class EnterpriseCouponViewSet(CouponViewSet):
         subject = request.data.pop('template_subject', '')
         greeting = request.data.pop('template_greeting', '')
         closing = request.data.pop('template_closing', '')
+
         self._validate_email_fields(subject, greeting, closing)
+
         serializer = CouponCodeAssignmentSerializer(
             data=request.data,
-            context={'coupon': coupon, 'subject': subject, 'greeting': greeting, 'closing': closing}
+            context={
+                'coupon': coupon,
+                'subject': subject,
+                'greeting': greeting,
+                'closing': closing,
+            }
         )
         if serializer.is_valid():
             serializer.save()

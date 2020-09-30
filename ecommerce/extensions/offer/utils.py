@@ -136,7 +136,8 @@ def send_assigned_offer_email(
         learner_email,
         code,
         redemptions_remaining,
-        code_expiration_date):
+        code_expiration_date,
+        base_enterprise_url=''):
     """
     Arguments:
         *subject*
@@ -164,7 +165,8 @@ def send_assigned_offer_email(
         EXPIRATION_DATE=code_expiration_date
     )
     email_body = format_email(email_template, placeholder_dict, greeting, closing)
-    send_offer_assignment_email.delay(learner_email, offer_assignment_id, subject, email_body)
+
+    send_offer_assignment_email.delay(learner_email, offer_assignment_id, subject, email_body, base_enterprise_url)
 
 
 def send_revoked_offer_email(

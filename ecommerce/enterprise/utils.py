@@ -599,6 +599,7 @@ def construct_enterprise_course_consent_url(request, course_id, enterprise_custo
         'next': absolute_url(request, 'checkout:free-checkout'),
         'failure_url': failure_url,
     }
+
     redirect_url = '{base}?{params}'.format(
         base=site.siteconfiguration.enterprise_grant_data_sharing_url,
         params=urlencode(request_params)
