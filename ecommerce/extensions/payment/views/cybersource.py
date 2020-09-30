@@ -276,7 +276,7 @@ class CybersourceOrderCompletionView(EdxOrderPlacementMixin):
 
     def set_payment_response_custom_metrics(
             self,
-            basket,
+            basket_id,
             order_number,
             ppr,
             transaction_id,
@@ -288,7 +288,7 @@ class CybersourceOrderCompletionView(EdxOrderPlacementMixin):
         # IMPORTANT: Does not set metric for the entire `order_completion_message`, because it includes PII.
         #   It is accessible using the `payment_response_record_id` if needed.
         monitoring_utils.set_custom_metric('payment_response_processor_name', 'cybersource')
-        monitoring_utils.set_custom_metric('payment_response_basket_id', basket.id)
+        monitoring_utils.set_custom_metric('payment_response_basket_id', basket_id)
         monitoring_utils.set_custom_metric('payment_response_order_number', order_number)
         monitoring_utils.set_custom_metric('payment_response_transaction_id', transaction_id)
         monitoring_utils.set_custom_metric('payment_response_record_id', ppr.id)
@@ -351,7 +351,7 @@ class CybersourceOrderCompletionView(EdxOrderPlacementMixin):
                 )
 
                 self.set_payment_response_custom_metrics(
-                    basket,
+                    self.basket_id,
                     self.order_number,
                     ppr,
                     self.transaction_id,
