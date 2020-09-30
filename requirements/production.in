@@ -1,7 +1,7 @@
 # Packages required in a production environment
 -r base.in
 
-django-ses==0.8.2
+django-ses
 gunicorn==19.7.1
 newrelic<5
 python-memcached==1.58
