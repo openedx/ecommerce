@@ -203,6 +203,13 @@ class ConditionalOffer(AbstractConditionalOffer):
         on_delete=models.CASCADE,
         null=True,
     )
+    # overriding name field to make it non-unique, since that constraint causes pointless integrity errors
+    name = models.CharField(
+        verbose_name="Name",
+        max_length=128,
+        unique=False,
+        help_text="This is displayed within the customer's basket"
+    )
 
     def save(self, *args, **kwargs):
         self.clean()
