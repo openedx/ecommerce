@@ -771,6 +771,13 @@ class CybersourceREST(Cybersource):  # pragma: no cover
         decoded_payment_token = jwt.decode(response.transient_token_jwt, key=jwk, algorithms=['RS256'])
         decision = decision_map.get(response.status, response.status)
 
+        total = (
+            response.order_information.amount_details.total_amount or
+            response.order_information.amount_details.authorized_amount
+        )
+        if total:
+            total = Decimal(total)
+
         return UnhandledCybersourceResponse(
             decision=decision,
             duplicate_payment=(
@@ -779,7 +786,7 @@ class CybersourceREST(Cybersource):  # pragma: no cover
             ),
             partial_authorization=response.status == 'PARTIAL_AUTHORIZED',
             currency=response.order_information.amount_details.currency,
-            total=Decimal(response.order_information.amount_details.total_amount),
+            total=total,
             card_number=decoded_payment_token['data']['number'],
             card_type=CYBERSOURCE_CARD_TYPE_MAP.get(response.payment_information.tokenized_card.type),
             transaction_id=response.id,
