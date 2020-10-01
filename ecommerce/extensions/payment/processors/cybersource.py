@@ -783,6 +783,10 @@ class CybersourceREST(Cybersource):  # pragma: no cover
         if total:
             total = Decimal(total)
 
+        card_type = response.payment_information and response.payment_information.tokenized_card.type
+        if card_type:
+            card_type = CYBERSOURCE_CARD_TYPE_MAP.get(card_type)
+
         return UnhandledCybersourceResponse(
             decision=decision,
             duplicate_payment=(
@@ -793,7 +797,7 @@ class CybersourceREST(Cybersource):  # pragma: no cover
             currency=currency,
             total=total,
             card_number=decoded_payment_token['data']['number'],
-            card_type=CYBERSOURCE_CARD_TYPE_MAP.get(response.payment_information.tokenized_card.type),
+            card_type=card_type,
             transaction_id=response.id,
             order_id=response.client_reference_information.code,
             raw_json=response_json,
