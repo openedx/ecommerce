@@ -483,6 +483,20 @@ class CybersourceRESTTests(CybersourceMixin, PaymentProcessorTestCaseMixin, Test
                 order_id="EDX-43442011",
                 raw_json=None,
             )
+        ), (
+            """{"links":{"_self":{"href":"/pts/v2/payments/6015729214586539504002","method":"GET"},"reversal":null,"capture":null,"customer":null,"payment_instrument":null,"shipping_address":null,"instrument_identifier":null},"id":"6015729214586539504002","submit_time_utc":"2020-10-01T17:22:02Z","status":"AUTHORIZED","reconciliation_id":null,"error_information":null,"client_reference_information":{"code":"EDX-248767","submit_local_date_time":null,"owner_merchant_id":null},"processing_information":null,"processor_information":{"auth_indicator":null,"approval_code":"831000","transaction_id":"558196000003814","network_transaction_id":"558196000003814","provider_transaction_id":null,"response_code":"000","response_code_source":null,"response_details":null,"response_category_code":null,"forwarded_acquirer_code":null,"avs":{"code":"Y","code_raw":"Y"},"card_verification":{"result_code":"3","result_code_raw":null},"merchant_advice":null,"electronic_verification_results":null,"ach_verification":null,"customer":null,"consumer_authentication_response":null,"system_trace_audit_number":null,"payment_account_reference_number":null,"transaction_integrity_code":null,"amex_verbal_auth_reference_number":null,"master_card_service_code":null,"master_card_service_reply_code":null,"master_card_authentication_type":null,"name":null,"routing":null,"merchant_number":null},"issuer_information":null,"payment_information":{"card":null,"tokenized_card":{"prefix":null,"suffix":null,"type":"001","assurance_level":null,"expiration_month":null,"expiration_year":null,"requestor_id":null},"account_features":{"account_type":null,"account_status":null,"balances":null,"balance_amount":null,"balance_amount_type":null,"currency":null,"balance_sign":null,"affluence_indicator":null,"category":"A","commercial":null,"group":null,"health_care":null,"payroll":null,"level3_eligible":null,"pinless_debit":null,"signature_debit":null,"prepaid":null,"regulated":null},"bank":null,"customer":null,"payment_instrument":null,"instrument_identifier":null,"shipping_address":null},"order_information":{"amount_details":{"total_amount":"900.00","authorized_amount":"900.00","currency":"USD"},"invoice_details":null},"point_of_sale_information":null,"installment_information":null,"token_information":null,"risk_information":null,"consumer_authentication_information":{"acs_rendering_type":null,"acs_transaction_id":null,"acs_url":null,"authentication_path":null,"authorization_payload":null,"authentication_transaction_id":null,"cardholder_message":null,"cavv":null,"cavv_algorithm":null,"challenge_cancel_code":null,"challenge_required":null,"decoupled_authentication_indicator":null,"directory_server_error_code":null,"directory_server_error_description":null,"ecommerce_indicator":null,"eci":null,"eci_raw":null,"effective_authentication_type":null,"ivr":null,"network_score":null,"pareq":null,"pares_status":null,"proof_xml":null,"proxy_pan":null,"sdk_transaction_id":null,"signed_pares_status_reason":null,"specification_version":null,"step_up_url":null,"three_ds_server_transaction_id":null,"ucaf_authentication_data":null,"ucaf_collection_indicator":null,"veres_enrolled":null,"white_list_status_source":null,"xid":null,"directory_server_transaction_id":null,"authentication_result":null,"authentication_status_msg":null,"indicator":null,"interaction_counter":null,"white_list_status":null}}""",
+            UnhandledCybersourceResponse(
+                decision=Decision.accept,
+                duplicate_payment=False,
+                partial_authorization=False,
+                currency="USD",
+                total=Decimal(900),
+                card_number='xxxx xxxx xxxx 1111',
+                card_type="visa",
+                transaction_id="6015729214586539504002",
+                order_id="EDX-248767",
+                raw_json=None,
+            )
         )
     )
     # pylint: enable=line-too-long
