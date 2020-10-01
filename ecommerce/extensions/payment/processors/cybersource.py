@@ -9,6 +9,7 @@ import uuid
 from dataclasses import dataclass
 from decimal import Decimal
 from enum import Enum
+from typing import Optional
 
 import jwt
 import waffle
@@ -92,12 +93,12 @@ class UnhandledCybersourceResponse:
     decision: Decision
     duplicate_payment: bool
     partial_authorization: bool
-    currency: str
-    total: Decimal
-    card_number: str
-    card_type: str
+    currency: Optional[str]
+    total: Optional[Decimal]
+    card_number: Optional[str]
+    card_type: Optional[str]
     transaction_id: str
-    order_id: str
+    order_id: Optional[str]
     raw_json: dict
 
 
@@ -766,9 +767,6 @@ class CybersourceREST(Cybersource):  # pragma: no cover
                 raw_json=response_json,
             )
 
-        decoded_capture_context = jwt.decode(response.capture_context['key_id'], verify=False)
-        jwk = RSAAlgorithm.from_jwk(json.dumps(decoded_capture_context['flx']['jwk']))
-        decoded_payment_token = jwt.decode(response.transient_token_jwt, key=jwk, algorithms=['RS256'])
         decision = decision_map.get(response.status, response.status)
 
         currency = None
@@ -795,7 +793,7 @@ class CybersourceREST(Cybersource):  # pragma: no cover
             partial_authorization=response.status == 'PARTIAL_AUTHORIZED',
             currency=currency,
             total=total,
-            card_number=decoded_payment_token['data']['number'],
+            card_number=response.decoded_payment_token['data']['number'],
             card_type=card_type,
             transaction_id=response.id,
             order_id=response.client_reference_information.code,
@@ -934,8 +932,11 @@ class CybersourceREST(Cybersource):  # pragma: no cover
             state=form_data['state'],
             country=Country.objects.get(iso_3166_1_a2=form_data['country'])
         )
-        payment_processor_response.transient_token_jwt = transient_token_jwt
-        payment_processor_response.capture_context = request.session['capture_context']
+        decoded_capture_context = jwt.decode(request.session['capture_context']['key_id'], verify=False)
+        jwk = RSAAlgorithm.from_jwk(json.dumps(decoded_capture_context['flx']['jwk']))
+        decoded_payment_token = jwt.decode(transient_token_jwt, key=jwk, algorithms=['RS256'])
+
+        payment_processor_response.decoded_payment_token = decoded_payment_token
         return payment_processor_response
 
     def get_billing_address(self, order_completion_message):

@@ -132,6 +132,18 @@ PAYMENT_PROCESSOR_CONFIG = {
             'cancel_checkout_path': PAYMENT_PROCESSOR_CANCEL_PATH,
             'send_level_2_3_details': True,
         },
+        'cybersource-rest': {
+            'soap_api_url': 'https://ics2wstest.ic3.com/commerce/1.x/transactionProcessor/CyberSourceTransaction_1.166.wsdl',
+            'merchant_id': 'other-fake-merchant-id',
+            'transaction_key': 'other-fake-transaction-key',
+            'profile_id': 'other-fake-profile-id',
+            'access_key': 'other-fake-access-key',
+            'secret_key': 'other-fake-secret-key',
+            'payment_page_url': 'https://replace-me/',
+            'receipt_path': PAYMENT_PROCESSOR_RECEIPT_PATH,
+            'cancel_checkout_path': PAYMENT_PROCESSOR_CANCEL_PATH,
+            'send_level_2_3_details': True,
+        },
         'paypal': {
             'mode': 'sandbox',
             'client_id': 'other-fake-client-id',
