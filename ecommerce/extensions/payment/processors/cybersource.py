@@ -721,8 +721,7 @@ class CybersourceREST(Cybersource):  # pragma: no cover
                 request,
                 form_data,
             )
-            transaction_id = payment_processor_response.processor_information.transaction_id
-            return payment_processor_response, transaction_id
+            return payment_processor_response, payment_processor_response.id
         except ApiException as e:
             if e.body is None:
                 self.record_processor_response({
