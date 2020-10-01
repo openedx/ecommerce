@@ -738,7 +738,7 @@ class CybersourceREST(Cybersource):  # pragma: no cover
         decision_map = {
             'AUTHORIZED': Decision.accept,
             'PARTIAL_AUTHORIZED': Decision.decline,
-            'AUTHORIZED_PENDING_REVIEW': Decision.review,
+            'AUTHORIZED_PENDING_REVIEW': Decision.decline,
             'AUTHORIZED_RISK_DECLINED': Decision.decline,
             'PENDING_AUTHENTICATION': Decision.decline,
             'PENDING_REVIEW': Decision.review,
