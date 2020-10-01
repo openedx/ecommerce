@@ -783,9 +783,8 @@ class CybersourceREST(Cybersource):  # pragma: no cover
         if total:
             total = Decimal(total)
 
-        card_type = response.payment_information and response.payment_information.tokenized_card.type
-        if card_type:
-            card_type = CYBERSOURCE_CARD_TYPE_MAP.get(card_type)
+        card = response.payment_information and response.payment_information.tokenized_card
+        card_type = card and CYBERSOURCE_CARD_TYPE_MAP.get(card.type)
 
         return UnhandledCybersourceResponse(
             decision=decision,
