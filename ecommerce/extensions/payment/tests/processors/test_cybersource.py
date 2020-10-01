@@ -5,6 +5,7 @@
 import copy
 import json
 import re
+from decimal import Decimal
 from unittest import SkipTest
 from uuid import UUID
 
@@ -466,6 +467,20 @@ class CybersourceRESTTests(CybersourceMixin, PaymentProcessorTestCaseMixin, Test
                 card_type=None,
                 transaction_id="6014090257646975704001",
                 order_id="EDX-248645",
+                raw_json=None,
+            )
+        ), (
+            """{"links":{"_self":{"href":"/pts/v2/payments/6014073435566389304232","method":"GET"},"reversal":null,"capture":null,"customer":null,"payment_instrument":null,"shipping_address":null,"instrument_identifier":null},"id":"6014073435566389304232","submit_time_utc":"2020-09-29T19:22:24Z","status":"AUTHORIZED_PENDING_REVIEW","reconciliation_id":null,"error_information":{"reason":"CV_FAILED","message":"Soft Decline - The authorization request was approved by the issuing bank but declined by CyberSource because it did not pass the card verification number (CVN) check.","details":null},"client_reference_information":{"code":"EDX-43442011","submit_local_date_time":null,"owner_merchant_id":null},"processing_information":null,"processor_information":{"auth_indicator":null,"approval_code":"08369P","transaction_id":"MWEZQL3LE","network_transaction_id":"MWEZQL3LE","provider_transaction_id":null,"response_code":"000","response_code_source":null,"response_details":null,"response_category_code":null,"forwarded_acquirer_code":null,"avs":{"code":"Y","code_raw":"Y"},"card_verification":{"result_code":"N","result_code_raw":"N"},"merchant_advice":null,"electronic_verification_results":null,"ach_verification":null,"customer":null,"consumer_authentication_response":null,"system_trace_audit_number":null,"payment_account_reference_number":null,"transaction_integrity_code":null,"amex_verbal_auth_reference_number":null,"master_card_service_code":null,"master_card_service_reply_code":null,"master_card_authentication_type":null,"name":null,"routing":null,"merchant_number":null},"issuer_information":null,"payment_information":{"card":null,"tokenized_card":null,"account_features":{"account_type":null,"account_status":null,"balances":null,"balance_amount":null,"balance_amount_type":null,"currency":null,"balance_sign":null,"affluence_indicator":null,"category":"MWE","commercial":null,"group":null,"health_care":null,"payroll":null,"level3_eligible":null,"pinless_debit":null,"signature_debit":null,"prepaid":null,"regulated":null},"bank":null,"customer":null,"payment_instrument":null,"instrument_identifier":null,"shipping_address":null},"order_information":{"amount_details":{"total_amount":null,"authorized_amount":"50.00","currency":"USD"},"invoice_details":null},"point_of_sale_information":null,"installment_information":null,"token_information":null,"risk_information":null,"consumer_authentication_information":null}""",
+            UnhandledCybersourceResponse(
+                decision=Decision.decline,
+                duplicate_payment=False,
+                partial_authorization=False,
+                currency="USD",
+                total=Decimal(50),
+                card_number='xxxx xxxx xxxx 1111',
+                card_type=None,
+                transaction_id="6014073435566389304232",
+                order_id="EDX-43442011",
                 raw_json=None,
             )
         )
