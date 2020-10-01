@@ -55,7 +55,7 @@ TEST_CATEGORIES = ['Financial Assistance', 'Partner No Rev - RAP', 'Geography Pr
                    'ConnectEd', 'Marketing-Other', 'Affiliate Promotion', 'Retention Promotion',
                    'Partner No Rev - Prepay', 'Paid Cohort', 'Bulk Enrollment - Integration', 'On-Campus Learners',
                    'Security Disclosure Reward', 'Other', 'Customer Service', 'Bulk Enrollment - Upon Redemption',
-                   'B2B Affiliate Promotion']
+                   'B2B Affiliate Promotion', 'Scholarship']
 
 
 @httpretty.activate
@@ -1306,7 +1306,7 @@ class CouponCategoriesListViewTests(TestCase):
         """ Verify the endpoint returns successfully. """
         response = self.client.get(self.path + '?page_size=200')
         response_data = response.json()
-        self.assertEqual(response_data['count'], 25)
+        self.assertEqual(response_data['count'], 26)
         received_coupon_categories = {category['name'] for category in response_data['results']}
         for category in TEST_CATEGORIES:
             self.assertTrue(category in received_coupon_categories)
