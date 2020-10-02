@@ -731,7 +731,8 @@ class VoucherSerializer(serializers.ModelSerializer):
         model = Voucher
         fields = (
             'id', 'name', 'code', 'redeem_url', 'usage', 'start_datetime', 'end_datetime', 'num_basket_additions',
-            'num_orders', 'total_discount', 'date_created', 'offers', 'is_available_to_user', 'benefit'
+            'num_orders', 'total_discount', 'date_created', 'offers', 'is_available_to_user', 'benefit',
+            'is_public',
         )
 
 
@@ -743,6 +744,7 @@ class CodeUsageSerializer(serializers.Serializer):  # pylint: disable=abstract-m
     assignment_date = serializers.SerializerMethodField()
     last_reminder_date = serializers.SerializerMethodField()
     revocation_date = serializers.SerializerMethodField()
+    is_public = serializers.SerializerMethodField()
 
     def _get_assignment(self, obj):
         assigned_to = self.get_assigned_to(obj)
@@ -792,6 +794,10 @@ class CodeUsageSerializer(serializers.Serializer):  # pylint: disable=abstract-m
             'used': redemption_count,
             'total': max_coupon_usage,
         }
+
+    def get_is_public(self, obj):
+        voucher = Voucher.objects.get(code=self.get_code(obj))
+        return voucher.is_public
 
     def num_assignments(self, code, user_email=None):
         offer_assignments = OfferAssignment.objects.filter(
@@ -1330,7 +1336,7 @@ class CouponSerializer(CouponMixin, ProductPaymentInfoMixin, serializers.ModelSe
             'end_date', 'enterprise_catalog_content_metadata_url', 'enterprise_customer', 'enterprise_customer_catalog',
             'id', 'inactive', 'last_edited', 'max_uses', 'note', 'notify_email', 'num_uses', 'payment_information',
             'program_uuid', 'price', 'quantity', 'seats', 'start_date', 'title', 'voucher_type',
-            'contract_discount_value', 'contract_discount_type', 'prepaid_invoice_amount', 'sales_force_id'
+            'contract_discount_value', 'contract_discount_type', 'prepaid_invoice_amount', 'sales_force_id',
         )
 
 

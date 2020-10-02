@@ -519,7 +519,7 @@ class EnterpriseCouponViewSetRbacTests(
         if is_csv:
             total_result_count = len(response)
             all_received_codes = [result.split(',')[2] for result in response if result]
-            all_received_code_max_uses = [int(result.split(',')[5]) for result in response if result]
+            all_received_code_max_uses = [int(result.split(',')[6]) for result in response if result]
         else:
             total_result_count = len(response['results'])
             all_received_codes = [result['code'] for result in response['results']]
@@ -647,18 +647,18 @@ class EnterpriseCouponViewSetRbacTests(
             'expected_responses': {
                 VOUCHER_NOT_ASSIGNED: [
                     {'code': 0, 'assigned_to': '', 'redemptions': {'used': 0, 'total': 1, 'num_assignments': 0},
-                     'assignment_date': '', 'last_reminder_date': '', 'revocation_date': ''}
+                     'assignment_date': '', 'last_reminder_date': '', 'revocation_date': '', 'is_public': False}
                 ],
                 VOUCHER_NOT_REDEEMED: [
                     {'code': 1, 'assigned_to': 'user1@example.com', 'redemptions': {'used': 0, 'total': 1},
-                     'assignment_date': '', 'last_reminder_date': '', 'revocation_date': ''},
+                     'assignment_date': '', 'last_reminder_date': '', 'revocation_date': '', 'is_public': False},
                     {'code': 3, 'assigned_to': 'user2@example.com', 'redemptions': {'used': 0, 'total': 1},
-                     'assignment_date': '', 'last_reminder_date': '', 'revocation_date': ''}
+                     'assignment_date': '', 'last_reminder_date': '', 'revocation_date': '', 'is_public': False}
                 ],
                 VOUCHER_PARTIAL_REDEEMED: [],
                 VOUCHER_REDEEMED: [
                     {'code': 2, 'assigned_to': 'user2@example.com', 'redemptions': {'used': 1, 'total': 1},
-                     'assignment_date': '', 'last_reminder_date': '', 'revocation_date': ''}
+                     'assignment_date': '', 'last_reminder_date': '', 'revocation_date': '', 'is_public': False}
                 ]
             }
         },
@@ -674,19 +674,19 @@ class EnterpriseCouponViewSetRbacTests(
             'expected_responses': {
                 VOUCHER_NOT_ASSIGNED: [
                     {'code': 0, 'assigned_to': '', 'redemptions': {'used': 0, 'total': 2, 'num_assignments': 0},
-                     'assignment_date': '', 'last_reminder_date': '', 'revocation_date': ''}
+                     'assignment_date': '', 'last_reminder_date': '', 'revocation_date': '', 'is_public': False}
                 ],
                 VOUCHER_NOT_REDEEMED: [
                     {'code': 1, 'assigned_to': 'user1@example.com', 'redemptions': {'used': 0, 'total': 2},
-                     'assignment_date': '', 'last_reminder_date': '', 'revocation_date': ''}
+                     'assignment_date': '', 'last_reminder_date': '', 'revocation_date': '', 'is_public': False}
                 ],
                 VOUCHER_PARTIAL_REDEEMED: [
                     {'code': 2, 'assigned_to': 'user2@example.com', 'redemptions': {'used': 1, 'total': 2},
-                     'assignment_date': '', 'last_reminder_date': '', 'revocation_date': ''}
+                     'assignment_date': '', 'last_reminder_date': '', 'revocation_date': '', 'is_public': False}
                 ],
                 VOUCHER_REDEEMED: [
                     {'code': 3, 'assigned_to': 'user3@example.com', 'redemptions': {'used': 2, 'total': 2},
-                     'assignment_date': '', 'last_reminder_date': '', 'revocation_date': ''}
+                     'assignment_date': '', 'last_reminder_date': '', 'revocation_date': '', 'is_public': False}
                 ]
             }
         },
@@ -703,23 +703,23 @@ class EnterpriseCouponViewSetRbacTests(
             'expected_responses': {
                 VOUCHER_NOT_ASSIGNED: [
                     {'code': 0, 'assigned_to': '', 'redemptions': {'used': 0, 'total': 4, 'num_assignments': 0},
-                     'assignment_date': '', 'last_reminder_date': '', 'revocation_date': ''},
+                     'assignment_date': '', 'last_reminder_date': '', 'revocation_date': '', 'is_public': False},
                     {'code': 1, 'assigned_to': '', 'redemptions': {'used': 1, 'total': 4, 'num_assignments': 2},
-                     'assignment_date': '', 'last_reminder_date': '', 'revocation_date': ''}
+                     'assignment_date': '', 'last_reminder_date': '', 'revocation_date': '', 'is_public': False}
                 ],
                 VOUCHER_NOT_REDEEMED: [
                     {'code': 1, 'assigned_to': 'user1@example.com', 'redemptions': {'used': 0, 'total': 1},
-                     'assignment_date': '', 'last_reminder_date': '', 'revocation_date': ''}
+                     'assignment_date': '', 'last_reminder_date': '', 'revocation_date': '', 'is_public': False}
                 ],
                 VOUCHER_PARTIAL_REDEEMED: [
                     {'code': 1, 'assigned_to': 'user2@example.com', 'redemptions': {'used': 1, 'total': 2},
-                     'assignment_date': '', 'last_reminder_date': '', 'revocation_date': ''}
+                     'assignment_date': '', 'last_reminder_date': '', 'revocation_date': '', 'is_public': False}
                 ],
                 VOUCHER_REDEEMED: [
                     {'code': 2, 'assigned_to': 'user3@example.com', 'redemptions': {'used': 2, 'total': 2},
-                     'assignment_date': '', 'last_reminder_date': '', 'revocation_date': ''},
+                     'assignment_date': '', 'last_reminder_date': '', 'revocation_date': '', 'is_public': False},
                     {'code': 2, 'assigned_to': 'user4@example.com', 'redemptions': {'used': 2, 'total': 2},
-                     'assignment_date': '', 'last_reminder_date': '', 'revocation_date': ''}
+                     'assignment_date': '', 'last_reminder_date': '', 'revocation_date': '', 'is_public': False}
                 ]
             }
         },
@@ -732,18 +732,18 @@ class EnterpriseCouponViewSetRbacTests(
             'expected_responses': {
                 VOUCHER_NOT_ASSIGNED: [
                     {'code': 0, 'assigned_to': '', 'redemptions': {'used': 0, 'total': 3, 'num_assignments': 0},
-                     'assignment_date': '', 'last_reminder_date': '', 'revocation_date': ''},
+                     'assignment_date': '', 'last_reminder_date': '', 'revocation_date': '', 'is_public': False},
                     {'code': 1, 'assigned_to': '', 'redemptions': {'used': 1, 'total': 3, 'num_assignments': 1},
-                     'assignment_date': '', 'last_reminder_date': '', 'revocation_date': ''}
+                     'assignment_date': '', 'last_reminder_date': '', 'revocation_date': '', 'is_public': False}
                 ],
                 VOUCHER_NOT_REDEEMED: [
                     {'code': 1, 'assigned_to': 'user1@example.com', 'redemptions': {'used': 0, 'total': 1},
-                     'assignment_date': '', 'last_reminder_date': '', 'revocation_date': ''}
+                     'assignment_date': '', 'last_reminder_date': '', 'revocation_date': '', 'is_public': False}
                 ],
                 VOUCHER_PARTIAL_REDEEMED: [],
                 VOUCHER_REDEEMED: [
                     {'code': 1, 'assigned_to': 'user2@example.com', 'redemptions': {'used': 1, 'total': 1},
-                     'assignment_date': '', 'last_reminder_date': '', 'revocation_date': ''}
+                     'assignment_date': '', 'last_reminder_date': '', 'revocation_date': '', 'is_public': False}
                 ]
             }
         },
@@ -850,7 +850,7 @@ class EnterpriseCouponViewSetRbacTests(
         # Strip out first row (headers) and last row (extra csv line)
         csv_data = csv_content[1:-1]
         # Verify headers.
-        self.assertEqual(csv_header, 'assigned_to,assignment_date,code,last_reminder_date,redeem_url,'
+        self.assertEqual(csv_header, 'assigned_to,assignment_date,code,is_public,last_reminder_date,redeem_url,'
                                      'redemptions.total,redemptions.used,revocation_date')
 
         # Verify csv data.
@@ -960,7 +960,7 @@ class EnterpriseCouponViewSetRbacTests(
         self.assert_code_detail_response(
             response['results'],
             [{'code': 0, 'assigned_to': 'user1@example.com', 'redemptions': {'used': 0, 'total': 1},
-              'assignment_date': '', 'last_reminder_date': '', 'revocation_date': ''}],
+              'assignment_date': '', 'last_reminder_date': '', 'revocation_date': '', 'is_public': False}],
             codes
         )
 
@@ -976,7 +976,7 @@ class EnterpriseCouponViewSetRbacTests(
         self.assert_code_detail_response(
             response['results'],
             [{'code': 0, 'assigned_to': 'user1@example.com', 'redemptions': {'used': 0, 'total': 1},
-              'assignment_date': '', 'last_reminder_date': '', 'revocation_date': ''}],
+              'assignment_date': '', 'last_reminder_date': '', 'revocation_date': '', 'is_public': False}],
             codes
         )
 
@@ -1405,7 +1405,7 @@ class EnterpriseCouponViewSetRbacTests(
         self.assert_code_detail_response(
             response['results'],
             [{'code': 0, 'assigned_to': 'user1@example.com', 'redemptions': {'used': 0, 'total': 1},
-              'assignment_date': serialized_date, 'last_reminder_date': serialized_date,
+              'is_public': False, 'assignment_date': serialized_date, 'last_reminder_date': serialized_date,
               'revocation_date': serialized_date}],
             codes
         )
@@ -1887,6 +1887,36 @@ class EnterpriseCouponViewSetRbacTests(
             assert OfferAssignment.objects.filter(code=code).count() == 0
         for code in unused_codes:
             assert OfferAssignment.objects.filter(code=code).count() == 1
+
+    def test_code_visibility(self):
+        coupon_post_data = dict(self.data, voucher_type=Voucher.SINGLE_USE, quantity=5)
+        coupon = self.get_response('POST', ENTERPRISE_COUPONS_LINK, coupon_post_data)
+        coupon = coupon.json()
+        coupon_id = coupon['coupon_id']
+        vouchers = Product.objects.get(id=coupon_id).attr.coupon_vouchers.vouchers.all()
+        code_ids = []
+        for voucher in vouchers:
+            assert not voucher.is_public  # Defaults to False for
+            code_ids.append(voucher.code)
+
+        response = self.get_response(
+            'POST',
+            '/api/v2/enterprise/coupons/{}/visibility/'.format(coupon_id),
+            {}
+        )
+        assert response.status_code == 400
+
+        response = self.get_response(
+            'POST',
+            '/api/v2/enterprise/coupons/{}/visibility/'.format(coupon_id),
+            {
+                'code_ids': code_ids,
+                'is_public': True,
+            }
+        )
+        assert response.status_code == 200
+        for voucher in Product.objects.get(id=coupon_id).attr.coupon_vouchers.vouchers.all():
+            assert voucher.is_public
 
     def test_coupon_codes_assign_once_per_customer_with_used_codes(self):
         coupon_post_data = dict(self.data, voucher_type=Voucher.ONCE_PER_CUSTOMER, quantity=3)
