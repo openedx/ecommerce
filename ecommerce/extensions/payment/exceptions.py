@@ -58,3 +58,9 @@ class RedundantPaymentNotificationError(PaymentError):
 
 class ExcessivePaymentForOrderError(PaymentError):
     """ Raised when duplicate payment notification is detected with different transaction ID. """
+
+
+class SDNFallbackDataEmptyError(Exception):
+    """ Error for when we call checkSDNFallback and the data is not yet populated.
+    This data is populated by running: ./manage.py populate_sdn_fallback_data_and_metadata
+    See ecommerce ADR 0007-sdn-fallback for more info """
