@@ -317,7 +317,6 @@ LOCAL_APPS = [
     'ecommerce.sailthru',
     'ecommerce.enterprise',
     'ecommerce.management',
-    'ecommerce.journals',  # TODO: journals dependency
 ]
 
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
