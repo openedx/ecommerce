@@ -389,7 +389,7 @@ def compare_SDNCheck_vs_fallback(basket_id, data, hit_count):
             basket_id,
         )
 
-        if hit_count > 0 and not SDN_calls_matched:
+        if not SDN_calls_matched:
             logger.info('Failed SDN match for first name: %s, last name: %s, city: %s, country: %s ',
                         data.get('first_name'),
                         data.get('last_name'),
