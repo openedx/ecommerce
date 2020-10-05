@@ -11,7 +11,7 @@ Context
 
 As part of the re-platforming effort to rewrite our server-side templates as microfrontends (MFEs), the ecommerce basket page was targeted for rewrite.
 
-Detailing the general decision around moving to MFEs is out fo scope of this ADR.
+Detailing the general decision around moving to MFEs is out of scope of this ADR.
 
 Decision
 --------
