@@ -165,7 +165,7 @@ class Cybersource(ApplePayMixin, BaseClientSidePaymentProcessor):
             self.flex_target_origin = None
 
         self.connect_timeout = configuration.get('api_connect_timeout', 0.5)
-        self.read_timeout = configuration.get('api_read_timeout', 1.5)
+        self.read_timeout = configuration.get('api_read_timeout', 5.0)
 
         self.cybersource_api_config = {
             'authentication_type': 'http_signature',
