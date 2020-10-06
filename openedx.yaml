@@ -3,16 +3,10 @@
 
 nick: ecom
 oeps:
-  oep-2: true
-  oep-7: false
-  oep-18: true
+    oep-2: true
+    oep-7: false
+    oep-18: true
 openedx-release: {ref: master}
-owner: cpennington
-supporting_teams:
-  - edx/rev-team
-  - edx/rev-mint
-  - edx/rev-emerald
-  - edx/ecommerce
 tags:
-  - ecom
-  - webservice
+    - ecom
+    - webservice
