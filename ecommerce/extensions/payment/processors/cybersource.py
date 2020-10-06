@@ -914,11 +914,13 @@ class CybersourceREST(Cybersource):  # pragma: no cover
         )
 
         requestObj = del_none(requestObj.__dict__)
-        requestObj = json.dumps(requestObj)
+
+        # HACK: log the processor request into the processor response model for analyzing declines
+        self.record_processor_response(requestObj, transaction_id='[REQUEST]', basket=basket)
 
         api_instance = PaymentsApi(self.cybersource_api_config)
         payment_processor_response, _, _ = api_instance.create_payment(
-            requestObj,
+            json.dumps(requestObj),
             _request_timeout=(self.connect_timeout, self.read_timeout)
         )
 
