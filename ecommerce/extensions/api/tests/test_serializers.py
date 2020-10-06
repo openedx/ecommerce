@@ -1,8 +1,6 @@
-
-
 import datetime
+from unittest import mock
 
-import mock
 from oscar.core.loading import get_model
 from testfixtures import LogCapture
 
@@ -26,6 +24,7 @@ class CouponCodeSerializerTests(CouponMixin, TestCase):
     SUBJECT = 'Subject '
     GREETING = 'Hello '
     CLOSING = ' Bye'
+    BASE_ENTERPRISE_URL = 'https://bears.party'
 
     def setUp(self):
         super(CouponCodeSerializerTests, self).setUp()
@@ -60,16 +59,42 @@ class CouponCodeSerializerTests(CouponMixin, TestCase):
             voucher_usage_type=Voucher.MULTI_USE_PER_CUSTOMER
         )
         expected_expiration_date = self.coupon.attr.coupon_vouchers.vouchers.first().end_datetime
-        mock_assign_email.assert_called_with(
+
+        assert mock_assign_email.call_count == 1
+        assign_email_args = mock_assign_email.call_args[1]
+        assert assign_email_args['subject'] == self.SUBJECT
+        assert assign_email_args['greeting'] == self.GREETING
+        assert assign_email_args['closing'] == self.CLOSING
+        assert assign_email_args['learner_email'] == self.offer_assignment.user_email
+        assert assign_email_args['offer_assignment_id'] == self.offer_assignment.id
+        assert assign_email_args['code'] == self.offer_assignment.code
+        assert assign_email_args['code_expiration_date'] == expected_expiration_date.strftime('%d %B, %Y %H:%M %Z')
+        assert assign_email_args['base_enterprise_url'] == ''
+
+    @mock.patch('ecommerce.extensions.api.serializers.send_assigned_offer_email')
+    def test_send_assigned_offer_email_args_with_enterprise_url(self, mock_assign_email):
+        """ Test that the code_expiration_date passed is equal to coupon batch end date """
+        serializer = CouponCodeAssignmentSerializer(data=self.data, context={'coupon': self.coupon})
+        serializer._trigger_email_sending_task(  # pylint: disable=protected-access
             subject=self.SUBJECT,
             greeting=self.GREETING,
             closing=self.CLOSING,
-            offer_assignment_id=self.offer_assignment.id,
-            learner_email=self.offer_assignment.user_email,
-            code=self.offer_assignment.code,
-            redemptions_remaining=mock.ANY,
-            code_expiration_date=expected_expiration_date.strftime('%d %B, %Y %H:%M %Z')
+            assigned_offer=self.offer_assignment,
+            voucher_usage_type=Voucher.MULTI_USE_PER_CUSTOMER,
+            base_enterprise_url=self.BASE_ENTERPRISE_URL,
         )
+        expected_expiration_date = self.coupon.attr.coupon_vouchers.vouchers.first().end_datetime
+
+        assert mock_assign_email.call_count == 1
+        assign_email_args = mock_assign_email.call_args[1]
+        assert assign_email_args['subject'] == self.SUBJECT
+        assert assign_email_args['greeting'] == self.GREETING
+        assert assign_email_args['closing'] == self.CLOSING
+        assert assign_email_args['learner_email'] == self.offer_assignment.user_email
+        assert assign_email_args['offer_assignment_id'] == self.offer_assignment.id
+        assert assign_email_args['code'] == self.offer_assignment.code
+        assert assign_email_args['code_expiration_date'] == expected_expiration_date.strftime('%d %B, %Y %H:%M %Z')
+        assert assign_email_args['base_enterprise_url'] == self.BASE_ENTERPRISE_URL
 
     @mock.patch('ecommerce.extensions.api.serializers.send_assigned_offer_reminder_email')
     def test_send_assigned_offer_reminder_email_args(self, mock_remind_email):

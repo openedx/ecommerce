@@ -1376,6 +1376,7 @@ class CouponCodeAssignmentSerializer(serializers.Serializer):  # pylint: disable
     offer_assignments = serializers.ListField(
         child=OfferAssignmentSerializer(), read_only=True
     )
+    base_enterprise_url = serializers.URLField(required=False, write_only=True)
 
     def create(self, validated_data):
         """Create OfferAssignment objects for each email and the available_assignments determined from validation."""
@@ -1389,6 +1390,7 @@ class CouponCodeAssignmentSerializer(serializers.Serializer):  # pylint: disable
         offer_assignments = []
         emails_already_sent = set()
         current_date_time = timezone.now()
+        base_enterprise_url = validated_data.pop('base_enterprise_url', '')
 
         for code in available_assignments:
             offer = available_assignments[code]['offer']
@@ -1405,7 +1407,7 @@ class CouponCodeAssignmentSerializer(serializers.Serializer):  # pylint: disable
                 email_code_pair = frozenset((new_offer_assignment.user_email, new_offer_assignment.code))
                 if email_code_pair not in emails_already_sent:
                     self._trigger_email_sending_task(
-                        subject, greeting, closing, new_offer_assignment, voucher_usage_type
+                        subject, greeting, closing, new_offer_assignment, voucher_usage_type, base_enterprise_url,
                     )
                     emails_already_sent.add(email_code_pair)
         validated_data['offer_assignments'] = offer_assignments
@@ -1454,6 +1456,7 @@ class CouponCodeAssignmentSerializer(serializers.Serializer):  # pylint: disable
                 set(codes_to_exclude), set(emails_requiring_exclusions), coupon.id
             )
             vouchers = vouchers.exclude(code__in=codes_to_exclude)
+
         vouchers = vouchers.all()
         prefetch_related_objects(vouchers, 'offers', 'offers__condition', 'offers__offerassignment_set')
         total_slots = 0
@@ -1493,7 +1496,8 @@ class CouponCodeAssignmentSerializer(serializers.Serializer):  # pylint: disable
         attrs['closing'] = closing
         return attrs
 
-    def _trigger_email_sending_task(self, subject, greeting, closing, assigned_offer, voucher_usage_type):
+    def _trigger_email_sending_task(self, subject, greeting, closing, assigned_offer, voucher_usage_type,
+                                    base_enterprise_url=''):
         """
         Schedule async task to send email to the learner who has been assigned the code.
         """
@@ -1511,7 +1515,8 @@ class CouponCodeAssignmentSerializer(serializers.Serializer):  # pylint: disable
                 learner_email=assigned_offer.user_email,
                 code=assigned_offer.code,
                 redemptions_remaining=redemptions_remaining,
-                code_expiration_date=code_expiration_date.strftime('%d %B, %Y %H:%M %Z')
+                code_expiration_date=code_expiration_date.strftime('%d %B, %Y %H:%M %Z'),
+                base_enterprise_url=base_enterprise_url,
             )
         except Exception as exc:  # pylint: disable=broad-except
             logger.exception(

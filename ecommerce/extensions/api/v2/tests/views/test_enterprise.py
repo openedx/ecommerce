@@ -789,6 +789,31 @@ class EnterpriseCouponViewSetRbacTests(
             ).json()
             self.assert_code_detail_response(response['results'], expected_response, codes)
 
+    def test_coupon_code_creation_with_enterprise_url(self):
+        with mock.patch('ecommerce.extensions.offer.utils.send_offer_assignment_email.delay'):
+            coupon = self.create_coupon(
+                benefit_type=Benefit.PERCENTAGE,
+                benefit_value=40,
+                enterprise_customer=self.data['enterprise_customer']['id'],
+                enterprise_customer_catalog='aaaaaaaa-2c44-487b-9b6a-24eee973f9a4',
+            )
+            vouchers = Product.objects.get(id=coupon.id).attr.coupon_vouchers.vouchers.all()
+            codes = [voucher.code for voucher in vouchers]
+            response = self.get_response(
+                'POST',
+                '/api/v2/enterprise/coupons/{}/assign/'.format(coupon.id),
+                {
+                    'template': 'Test template',
+                    'template_subject': TEMPLATE_SUBJECT,
+                    'template_greeting': TEMPLATE_GREETING,
+                    'template_closing': TEMPLATE_CLOSING,
+                    'emails': ['user1@example.com'],
+                    'codes': codes,
+                    'base_enterprise_url': 'https://bears.party'
+                }
+            )
+            assert response.status_code == 200
+
     def test_coupon_codes_detail_with_invalid_coupon_id(self):
         """
         Verify that `/api/v2/enterprise/coupons/{coupon_id}/codes/` endpoint returns 400 on invalid coupon id

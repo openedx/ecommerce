@@ -103,6 +103,21 @@ class UtilTests(DiscoveryTestMixin, TestCase):
                 'code_expiration_date': '2018-12-19'
             },
             None,
+            ''
+        ),
+        (
+            'subject',
+            'hi',
+            'bye',
+            {
+                'offer_assignment_id': 555,
+                'learner_email': 'johndoe@unknown.com',
+                'code': 'GIL7RUEOU7VHBH7Q',
+                'redemptions_remaining': 10,
+                'code_expiration_date': '2018-12-19'
+            },
+            None,
+            'https://bears.party'
         ),
     )
     @ddt.unpack
@@ -113,6 +128,7 @@ class UtilTests(DiscoveryTestMixin, TestCase):
             closing,
             tokens,
             side_effect,
+            base_enterprise_url,
             mock_sailthru_task,
     ):
         """ Test that the offer assignment email message is sent to async task. """
@@ -126,12 +142,35 @@ class UtilTests(DiscoveryTestMixin, TestCase):
             tokens.get('code'),
             tokens.get('redemptions_remaining'),
             tokens.get('code_expiration_date'),
+            base_enterprise_url,
         )
         mock_sailthru_task.delay.assert_called_once_with(
             tokens.get('learner_email'),
             tokens.get('offer_assignment_id'),
             subject,
-            mock.ANY
+            mock.ANY,
+            base_enterprise_url,
+        )
+
+    @mock.patch('ecommerce.extensions.offer.utils.send_offer_assignment_email')
+    def test_send_assigned_offer_email_without_base_ent_url(self, mock_sailthru_task):
+        send_assigned_offer_email(
+            "You have mail",
+            "you",
+            "KTHXBAI",
+            42,
+            "bears@bearparty.com",
+            'BearsOnly',
+            1,
+            '2020-12-19',
+        )
+
+        mock_sailthru_task.delay.assert_called_once_with(
+            "bears@bearparty.com",
+            42,
+            "You have mail",
+            mock.ANY,
+            '',
         )
 
     @mock.patch('ecommerce.extensions.offer.utils.send_offer_update_email')
