@@ -44,6 +44,12 @@ class Voucher(AbstractVoucher):
     )
     usage = models.CharField(_("Usage"), max_length=128,
                              choices=USAGE_CHOICES, default=MULTI_USE)
+    is_public = models.BooleanField(
+        verbose_name=_('Is Public Code Batch'),
+        help_text=_('Should this code batch be public or private for assignment.'),
+        blank=True,
+        default=False
+    )
 
     def is_available_to_user(self, user=None):
         is_available, message = super(Voucher, self).is_available_to_user(user)  # pylint: disable=bad-super-call

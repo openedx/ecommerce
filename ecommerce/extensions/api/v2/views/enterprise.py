@@ -58,6 +58,8 @@ from ecommerce.extensions.offer.constants import (
     OFFER_ASSIGNMENT_EMAIL_PENDING,
     OFFER_ASSIGNMENT_EMAIL_SUBJECT_LIMIT,
     OFFER_ASSIGNMENT_EMAIL_TEMPLATE_FIELD_LIMIT,
+    VOUCHER_IS_PRIVATE,
+    VOUCHER_IS_PUBLIC,
     VOUCHER_NOT_ASSIGNED,
     VOUCHER_NOT_REDEEMED,
     VOUCHER_PARTIAL_REDEEMED,
@@ -356,9 +358,9 @@ class EnterpriseCouponViewSet(CouponViewSet):
         coupon_vouchers = coupon.attr.coupon_vouchers.vouchers.all()
         usage_type = coupon_vouchers.first().usage
         code_filter = request.query_params.get('code_filter')
+        visibility_filter = request.query_params.get('visibility_filter')
         queryset = None
         serializer_class = None
-
         if not code_filter:
             raise serializers.ValidationError('code_filter must be specified')
 
@@ -377,6 +379,14 @@ class EnterpriseCouponViewSet(CouponViewSet):
 
         if not serializer_class:
             raise serializers.ValidationError('Invalid code_filter specified: {}'.format(code_filter))
+
+        if visibility_filter == VOUCHER_IS_PUBLIC:
+            queryset = queryset.filter(is_public=True)
+        elif visibility_filter == VOUCHER_IS_PRIVATE:
+            queryset = queryset.filter(is_public=False)
+        elif visibility_filter is not None:
+            raise serializers.ValidationError(
+                "visibility_filter must be specified as 'public' or 'private' received: {}".format(visibility_filter))
 
         if format is None:
             page = self.paginate_queryset(queryset)
@@ -682,6 +692,23 @@ class EnterpriseCouponViewSet(CouponViewSet):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
+    @permission_required('enterprise.can_assign_coupon', fn=lambda request, pk: get_enterprise_from_product(pk))
+    def visibility(self, request, pk):  # pylint: disable=unused-argument
+        """
+        Assign users by email to codes within the Coupon.
+        """
+        coupon = self.get_object()
+        codes = request.data.get('code_ids')
+        is_public = request.data.get('is_public')
+        if codes and is_public is not None:
+            coupon.attr.coupon_vouchers.vouchers.filter(code__in=codes).update(is_public=is_public)
+            return Response(status=status.HTTP_200_OK)
+        return Response(
+            'Must specify both a list of code_ids and an is_public boolean',
+            status=status.HTTP_400_BAD_REQUEST
+        )
 
     @action(detail=False, methods=['post'], permission_classes=[IsAdminUser])
     def create_refunded_voucher(self, request):  # pylint: disable=unused-argument
