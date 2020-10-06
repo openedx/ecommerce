@@ -560,7 +560,7 @@ class CybersourceAuthorizeAPIView(
         redirect_url = get_payment_microfrontend_or_basket_url(self.request)
         redirect_url = add_utm_params_to_url(redirect_url, list(self.request.GET.items()))
         # TODO: Remove as part of PCI-81
-        redirect_url = add_flex_microform_flag_to_url(redirect_url, self.request)
+        redirect_url = add_flex_microform_flag_to_url(redirect_url, self.request, force_flag=False)
         return JsonResponse({
             'redirectTo': redirect_url,
         }, status=400)
