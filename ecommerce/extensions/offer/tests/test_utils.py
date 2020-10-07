@@ -149,6 +149,7 @@ class UtilTests(DiscoveryTestMixin, TestCase):
             tokens.get('offer_assignment_id'),
             subject,
             mock.ANY,
+            None,
             base_enterprise_url,
         )
 
@@ -170,6 +171,7 @@ class UtilTests(DiscoveryTestMixin, TestCase):
             42,
             "You have mail",
             mock.ANY,
+            None,
             '',
         )
 
