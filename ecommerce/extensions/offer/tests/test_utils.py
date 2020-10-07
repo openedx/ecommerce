@@ -149,7 +149,7 @@ class UtilTests(DiscoveryTestMixin, TestCase):
             tokens.get('offer_assignment_id'),
             subject,
             mock.ANY,
-            base_enterprise_url=base_enterprise_url,
+            base_enterprise_url,
         )
 
     @mock.patch('ecommerce.extensions.offer.utils.send_offer_assignment_email')
@@ -170,7 +170,7 @@ class UtilTests(DiscoveryTestMixin, TestCase):
             42,
             "You have mail",
             mock.ANY,
-            base_enterprise_url='',
+            '',
         )
 
     @mock.patch('ecommerce.extensions.offer.utils.send_offer_update_email')
