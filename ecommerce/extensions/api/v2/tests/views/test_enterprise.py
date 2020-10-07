@@ -62,6 +62,7 @@ Basket = get_model('basket', 'Basket')
 Benefit = get_model('offer', 'Benefit')
 CodeAssignmentNudgeEmails = get_model('offer', 'CodeAssignmentNudgeEmails')
 OfferAssignment = get_model('offer', 'OfferAssignment')
+OfferAssignmentEmailSentRecord = get_model('offer', 'OfferAssignmentEmailSentRecord')
 OfferAssignmentEmailTemplates = get_model('offer', 'OfferAssignmentEmailTemplates')
 Product = get_model('catalogue', 'Product')
 Voucher = get_model('voucher', 'Voucher')
@@ -3017,6 +3018,147 @@ class EnterpriseCouponViewSetRbacTests(
                 'email_closing': 'Email closing must be {} characters or less'.format(max_limit),
             }
         }
+
+    def _make_request(self, coupon_id, email_type, mock_path, request_data):
+        with mock.patch(mock_path):
+            response = self.get_response(
+                'POST',
+                '/api/v2/enterprise/coupons/{}/{action}/'.format(coupon_id, action=email_type),
+                request_data
+            )
+        return response
+
+    def _create_template(self, email_type):
+        """Helper method to create OfferAssignmentEmailTemplates instance with the given email type."""
+        return OfferAssignmentEmailTemplates.objects.create(
+            enterprise_customer=self.data['enterprise_customer']['id'],
+            email_type=email_type,
+            email_greeting=TEMPLATE_GREETING,
+            email_closing=TEMPLATE_CLOSING,
+            email_subject=TEMPLATE_SUBJECT,
+            active=True,
+            name='Test Template'
+        )
+
+    @ddt.data(
+        ('assign', 'ecommerce.extensions.offer.utils.send_offer_assignment_email.delay'),
+        ('remind', 'ecommerce.extensions.offer.utils.send_offer_update_email.delay'),
+        ('revoke', 'ecommerce.extensions.offer.utils.send_offer_update_email.delay'),
+    )
+    @ddt.unpack
+    def test_email_sent_record_created(self, email_type, mock_path):
+        """
+        Test that Assign/Remind/Revoke endpoints create an instance of OfferAssignmentEmailSentRecord with given data.
+        """
+        self.get_response('POST', ENTERPRISE_COUPONS_LINK, dict(self.data))
+        coupon = Product.objects.get(title=self.data['title'])
+        coupon_id = coupon.id
+        code = self.get_coupon_voucher(coupon).code
+        template = self._create_template(email_type)
+        template_id = template.id
+        request_data = {
+            'template': 'Test template',
+            'template_id': template_id,
+            'template_subject': TEMPLATE_SUBJECT,
+            'template_greeting': TEMPLATE_GREETING,
+            'template_closing': TEMPLATE_CLOSING,
+            'emails': ['test@edx.org'],
+            'codes': [code],
+            'assignments': [{'email': 'test@edx.org', 'code': code}]
+        }
+
+        # Verify that no record have been created yet
+        assert OfferAssignmentEmailSentRecord.objects.count() == 0
+
+        # call endpoint
+        resp = self._make_request(coupon_id, email_type, mock_path, request_data)
+        assert resp.status_code == status.HTTP_200_OK
+        # verify that record has been created
+        assert OfferAssignmentEmailSentRecord.objects.filter(email_type=email_type).count() == 1
+
+    def test_bulk_email_sent_record(self):
+        """
+        Test that in case of bulk Assign/Remind/Revoke, only one instance of OfferAssignmentEmailSentRecord is created.
+        """
+        emails = ['test1@example.com', 'test2@example.com']
+        coupon_post_data = dict(self.data, voucher_type=Voucher.SINGLE_USE, quantity=2)
+        coupon = self.get_response('POST', ENTERPRISE_COUPONS_LINK, coupon_post_data)
+        coupon = coupon.json()
+        coupon_id = coupon['coupon_id']
+
+        # bulk assign
+        template = self._create_template('assign')
+        template_id = template.id
+
+        # Verify that no record have been created yet
+        assert OfferAssignmentEmailSentRecord.objects.count() == 0
+
+        with mock.patch('ecommerce.extensions.offer.utils.send_offer_update_email.delay'):
+            self.get_response(
+                'POST',
+                '/api/v2/enterprise/coupons/{}/assign/'.format(coupon_id),
+                {
+                    'template': 'Test template',
+                    'template_id': template_id,
+                    'template_subject': TEMPLATE_SUBJECT,
+                    'template_greeting': TEMPLATE_GREETING,
+                    'template_closing': TEMPLATE_CLOSING,
+                    'emails': emails
+                }
+            )
+
+        # verify that only one record has been created with 'assign' email type
+        assert OfferAssignmentEmailSentRecord.objects.filter(email_type='assign').count() == 1
+
+        # bulk remind
+        offer_assignments = OfferAssignment.objects.filter(user_email__in=emails)
+        assignments = [{'code': offer_assignment.code, 'email': offer_assignment.user_email}
+                       for offer_assignment in offer_assignments]
+        template = self._create_template('remind')
+        template_id = template.id
+
+        # verify that no record has been created with 'remind' email type
+        assert OfferAssignmentEmailSentRecord.objects.filter(email_type='remind').count() == 0
+
+        with mock.patch('ecommerce.extensions.offer.utils.send_offer_update_email.delay'):
+            self.get_response(
+                'POST',
+                '/api/v2/enterprise/coupons/{}/remind/'.format(coupon_id),
+                {
+                    'template': 'Test template',
+                    'template_id': template_id,
+                    'template_subject': TEMPLATE_SUBJECT,
+                    'template_greeting': TEMPLATE_GREETING,
+                    'template_closing': TEMPLATE_CLOSING,
+                    'assignments': assignments
+                }
+            )
+
+        # verify that only one record has been created with 'remind' email type
+        assert OfferAssignmentEmailSentRecord.objects.filter(email_type='remind').count() == 1
+
+        # bulk revoke
+        template = self._create_template('revoke')
+        template_id = template.id
+
+        # verify that no record has been created with 'revoke' email type
+        assert OfferAssignmentEmailSentRecord.objects.filter(email_type='revoke').count() == 0
+
+        with mock.patch('ecommerce.extensions.offer.utils.send_offer_update_email.delay'):
+            self.get_response(
+                'POST',
+                '/api/v2/enterprise/coupons/{}/revoke/'.format(coupon_id),
+                {
+                    'template': 'Test template',
+                    'template_id': template_id,
+                    'template_subject': TEMPLATE_SUBJECT,
+                    'template_greeting': TEMPLATE_GREETING,
+                    'template_closing': TEMPLATE_CLOSING,
+                    'assignments': assignments
+                }
+            )
+        # verify that only one record has been created with 'revoke' email type
+        assert OfferAssignmentEmailSentRecord.objects.filter(email_type='revoke').count() == 1
 
 
 class OfferAssignmentSummaryViewSetTests(

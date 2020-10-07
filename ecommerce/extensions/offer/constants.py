@@ -33,3 +33,11 @@ NUDGE_EMAIL_TEMPLATE_TYPES = (
     (DAY10, _('Day 10')),
     (DAY19, _('Day 19')),
 )
+
+# Email Template Types
+ASSIGN, REMIND, REVOKE = ('assign', 'remind', 'revoke')
+EMAIL_TEMPLATE_TYPES = (
+    (ASSIGN, _('Assign')),
+    (REMIND, _('Remind')),
+    (REVOKE, _('Revoke')),
+)

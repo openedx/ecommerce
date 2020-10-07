@@ -16,11 +16,14 @@ from slumber.exceptions import SlumberBaseException
 
 from ecommerce.coupons.tests.mixins import CouponMixin, DiscoveryMockMixin
 from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
+from ecommerce.extensions.offer.constants import ASSIGN, REMIND, REVOKE
 from ecommerce.tests.factories import UserFactory
 from ecommerce.tests.testcases import TestCase
 
 Catalog = get_model('catalogue', 'Catalog')
 ConditionalOffer = get_model('offer', 'ConditionalOffer')
+OfferAssignmentEmailTemplates = get_model('offer', 'OfferAssignmentEmailTemplates')
+OfferAssignmentEmailSentRecord = get_model('offer', 'OfferAssignmentEmailSentRecord')
 Range = get_model('offer', 'Range')
 
 
@@ -577,3 +580,62 @@ class BenefitTests(DiscoveryTestMixin, DiscoveryMockMixin, TestCase):
         # Verify that the API return value is cached
         httpretty.disable()
         self.assertEqual(self.benefit.get_applicable_lines(self.offer, basket), applicable_lines)
+
+
+@ddt.ddt
+class TestOfferAssignmentEmailSentRecord(TestCase):
+    """Tests for the TestOfferAssignmentEmailSentRecord model."""
+
+    def _create_template(self, enterprise_customer, email_type):
+        """Helper method to create OfferAssignmentEmailTemplates instance with the given email type."""
+        return OfferAssignmentEmailTemplates.objects.create(
+            enterprise_customer=enterprise_customer,
+            email_type=email_type,
+            email_greeting='test greeting',
+            email_closing='test closing',
+            email_subject='template subject',
+            active=True,
+            name='test template'
+        )
+
+    def _create_email_sent_record(self, enterprise_customer, email_type, template):
+        """Helper method to create instance of OfferAssignmentEmailSentRecord."""
+        return OfferAssignmentEmailSentRecord.create_email_record(enterprise_customer, email_type, template)
+
+    @ddt.data(
+        (str(uuid4()), ASSIGN),
+        (str(uuid4()), REMIND),
+        (str(uuid4()), REVOKE),
+    )
+    @ddt.unpack
+    def test_string_representation(self, enterprise_customer, email_type):
+        """
+        Test the string representation of the TestOfferAssignmentEmailSentRecord model.
+        """
+        template = self._create_template(enterprise_customer, email_type)
+        email_record = self._create_email_sent_record(enterprise_customer, email_type, template)
+        expected_str = '{ec}-{email_type}'.format(ec=enterprise_customer, email_type=email_type)
+        assert expected_str == email_record.__str__()
+
+    @ddt.data(
+        (str(uuid4()), ASSIGN),
+        (str(uuid4()), REMIND),
+        (str(uuid4()), REVOKE),
+    )
+    @ddt.unpack
+    def test_create_email_record(self, enterprise_customer, email_type):
+        """
+        OfferAssignmentEmailSentRecord.create_email_record should create email record with given enterprise_customer,
+        email_type, and template.
+        """
+        # Verify that no record has been created yet
+        assert OfferAssignmentEmailSentRecord.objects.count() == 0
+        template = self._create_template(enterprise_customer, email_type)
+        email_record = OfferAssignmentEmailSentRecord.create_email_record(enterprise_customer, email_type, template)
+        # Verify that the class method created a record
+        assert OfferAssignmentEmailSentRecord.objects.count() == 1
+
+        # Verify that record was created with the provided values
+        assert email_record.enterprise_customer == enterprise_customer
+        assert email_record.email_type == email_type
+        assert email_record.template_id == template.id
