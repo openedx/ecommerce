@@ -62,6 +62,7 @@ def checkSDN(request, name, city, country):
         except (HTTPError, Timeout):
             # If the SDN API endpoint is down or times out
             # the user is allowed to make the purchase.
+            # test
             pass
 
     return hit_count
