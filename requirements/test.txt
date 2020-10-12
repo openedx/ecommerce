@@ -13,7 +13,7 @@ astroid==2.3.3            # via pylint
 attrs==20.2.0             # via -r requirements/base.txt, -r requirements/e2e.txt, jsonschema, pytest, zeep
 babel==2.8.0              # via -r requirements/base.txt, django-oscar, django-phonenumber-field
 bcrypt==3.2.0             # via -r requirements/base.txt, cybersource-rest-client-python, paramiko
-beautifulsoup4==4.9.1     # via webtest
+beautifulsoup4==4.9.3     # via webtest
 billiard==3.6.3.0         # via -r requirements/base.txt, celery
 bleach==3.2.1             # via -r requirements/base.txt
 bok-choy==1.1.1           # via -r requirements/test.in
@@ -22,7 +22,7 @@ celery==4.4.7             # via -c requirements/pins.txt, -r requirements/base.t
 certifi==2020.6.20        # via -r requirements/base.txt, -r requirements/e2e.txt, cybersource-rest-client-python, requests
 cffi==1.14.3              # via -r requirements/base.txt, -r requirements/e2e.txt, bcrypt, cryptography, cybersource-rest-client-python, pynacl
 chardet==3.0.4            # via -r requirements/base.txt, -r requirements/e2e.txt, cybersource-rest-client-python, requests
-configparser==5.0.0       # via -r requirements/base.txt, cybersource-rest-client-python
+configparser==5.0.1       # via -r requirements/base.txt, cybersource-rest-client-python
 coreapi==2.3.3            # via -r requirements/base.txt, django-rest-swagger, openapi-codec
 coreschema==0.0.4         # via -r requirements/base.txt, coreapi
 coverage==5.3             # via -r requirements/base.txt, -r requirements/test.in, cybersource-rest-client-python, pytest-cov
@@ -43,7 +43,7 @@ django-crispy-forms==1.8.1  # via -r requirements/base.txt
 django-crum==0.7.7        # via -r requirements/base.txt, edx-rbac
 django-extensions==3.0.9  # via -r requirements/base.txt
 django-extra-views==0.11.0  # via -r requirements/base.txt, django-oscar
-django-filter==2.3.0      # via -r requirements/base.txt
+django-filter==2.4.0      # via -r requirements/base.txt
 django-haystack==2.8.1    # via -r requirements/base.txt, django-oscar
 django-libsass==0.8       # via -r requirements/base.txt
 django-model-utils==4.0.0  # via -r requirements/base.txt, edx-rbac
@@ -60,7 +60,7 @@ django-webtest==1.9.7     # via -r requirements/test.in
 django-widget-tweaks==1.4.8  # via -r requirements/base.txt, django-oscar
 djangorestframework-csv==2.1.0  # via -r requirements/base.txt
 djangorestframework-datatables==0.5.2  # via -r requirements/base.txt
-djangorestframework==3.11.1  # via -r requirements/base.txt, django-config-models, django-rest-swagger, djangorestframework-csv, djangorestframework-datatables, drf-extensions, drf-jwt, edx-drf-extensions, rest-condition
+djangorestframework==3.12.1  # via -r requirements/base.txt, django-config-models, django-rest-swagger, djangorestframework-csv, djangorestframework-datatables, drf-extensions, drf-jwt, edx-drf-extensions, rest-condition
 drf-extensions==0.6.0     # via -r requirements/base.txt
 drf-jwt==1.17.2           # via -r requirements/base.txt, edx-drf-extensions
 edx-auth-backends==3.1.0  # via -r requirements/base.txt
@@ -71,12 +71,12 @@ edx-drf-extensions==6.2.0  # via -r requirements/base.txt, edx-rbac
 edx-ecommerce-worker==0.8.7  # via -r requirements/base.txt
 edx-i18n-tools==0.5.3     # via -r requirements/test.in
 edx-opaque-keys==2.1.1    # via -r requirements/base.txt, edx-drf-extensions
-edx-rbac==1.3.2           # via -r requirements/base.txt
+edx-rbac==1.3.3           # via -r requirements/base.txt
 edx-rest-api-client==1.9.2  # via -c requirements/pins.txt, -r requirements/base.txt, -r requirements/e2e.txt, edx-ecommerce-worker
 enum34==1.1.10            # via -r requirements/base.txt, cybersource-rest-client-python
 extras==1.0.0             # via -r requirements/base.txt, cybersource-rest-client-python, python-subunit, testtools
 factory-boy==2.12.0       # via -r requirements/base.txt, -r requirements/test.in, django-oscar
-faker==4.1.3              # via -r requirements/base.txt, factory-boy
+faker==4.9.0              # via -r requirements/base.txt, factory-boy
 filelock==3.0.12          # via -r requirements/tox.txt, tox
 fixtures==3.0.0           # via -r requirements/base.txt, cybersource-rest-client-python, testtools
 freezegun==1.0.0          # via -r requirements/test.in
@@ -109,7 +109,7 @@ more-itertools==8.5.0     # via -r requirements/e2e.txt, pytest
 mysqlclient==1.4.6        # via -r requirements/base.txt
 naked==0.1.31             # via -r requirements/base.txt, crypto, cybersource-rest-client-python
 ndg-httpsclient==0.5.1    # via -r requirements/base.txt
-newrelic==5.20.0.149      # via -r requirements/base.txt, edx-django-utils
+newrelic==5.20.1.150      # via -r requirements/base.txt, edx-django-utils
 nose==1.3.7               # via -r requirements/base.txt, cybersource-rest-client-python
 oauthlib==3.1.0           # via -r requirements/base.txt, requests-oauthlib, social-auth-core
 openapi-codec==1.3.2      # via -r requirements/base.txt, django-rest-swagger
@@ -118,7 +118,7 @@ paramiko==2.7.2           # via -r requirements/base.txt, cybersource-rest-clien
 path.py==7.2              # via -r requirements/base.txt, edx-i18n-tools
 paypalrestsdk==1.13.1     # via -r requirements/base.txt
 pbr==5.5.0                # via -r requirements/base.txt, cybersource-rest-client-python, fixtures, stevedore, testtools
-phonenumbers==8.12.9      # via -r requirements/base.txt, django-oscar, django-phonenumber-field
+phonenumbers==8.12.11     # via -r requirements/base.txt, django-oscar, django-phonenumber-field
 pillow==7.2.0             # via -r requirements/base.txt, django-oscar
 pluggy==0.13.1            # via -r requirements/e2e.txt, -r requirements/tox.txt, diff-cover, pytest, tox
 polib==1.1.0              # via edx-i18n-tools
@@ -164,9 +164,10 @@ pytz==2016.10             # via -c requirements/pins.txt, -r requirements/base.t
 pyyaml==5.3.1             # via -r requirements/base.txt, cybersource-rest-client-python, edx-django-release-util, edx-i18n-tools, naked
 rcssmin==1.0.6            # via -r requirements/base.txt, django-compressor
 redis==3.5.3              # via -r requirements/base.txt, edx-ecommerce-worker
+requests-file==1.5.1      # via -r requirements/base.txt, zeep
 requests-oauthlib==1.3.0  # via -r requirements/base.txt, social-auth-core
 requests-toolbelt==0.9.1  # via -r requirements/base.txt, zeep
-requests==2.24.0          # via -r requirements/base.txt, -r requirements/e2e.txt, analytics-python, coreapi, cybersource-rest-client-python, edx-drf-extensions, edx-rest-api-client, naked, paypalrestsdk, pyjwkest, pytest-base-url, pytest-selenium, requests-oauthlib, requests-toolbelt, responses, sailthru-client, slumber, social-auth-core, stripe, zeep
+requests==2.24.0          # via -r requirements/base.txt, -r requirements/e2e.txt, analytics-python, coreapi, cybersource-rest-client-python, edx-drf-extensions, edx-rest-api-client, naked, paypalrestsdk, pyjwkest, pytest-base-url, pytest-selenium, requests-file, requests-oauthlib, requests-toolbelt, responses, sailthru-client, slumber, social-auth-core, stripe, zeep
 responses==0.12.0         # via -r requirements/test.in
 rest-condition==1.0.3     # via -r requirements/base.txt, edx-drf-extensions
 rjsmin==1.1.0             # via -r requirements/base.txt, django-compressor
@@ -177,17 +178,17 @@ selenium==3.141.0         # via -r requirements/e2e.txt, -r requirements/test.in
 semantic-version==2.8.5   # via -r requirements/base.txt, edx-drf-extensions
 shellescape==3.8.1        # via -r requirements/base.txt, crypto, cybersource-rest-client-python
 simplejson==3.17.2        # via -r requirements/base.txt, django-rest-swagger, sailthru-client
-six==1.15.0               # via -r requirements/base.txt, -r requirements/e2e.txt, -r requirements/tox.txt, analytics-python, astroid, bcrypt, bleach, bok-choy, cryptography, cybersource-rest-client-python, django-compressor, django-extra-views, django-simple-history, djangorestframework-csv, edx-auth-backends, edx-django-release-util, edx-drf-extensions, edx-ecommerce-worker, edx-i18n-tools, edx-opaque-keys, edx-rbac, fixtures, httpretty, isodate, jsonschema, libsass, packaging, paypalrestsdk, purl, pyjwkest, pynacl, pyopenssl, python-dateutil, python-memcached, responses, social-auth-app-django, social-auth-core, tenacity, testtools, tox, unittest2, webtest, zeep
+six==1.15.0               # via -r requirements/base.txt, -r requirements/e2e.txt, -r requirements/tox.txt, analytics-python, astroid, bcrypt, bleach, bok-choy, cryptography, cybersource-rest-client-python, django-compressor, django-extra-views, django-simple-history, djangorestframework-csv, edx-auth-backends, edx-django-release-util, edx-drf-extensions, edx-ecommerce-worker, edx-i18n-tools, edx-opaque-keys, edx-rbac, fixtures, httpretty, isodate, jsonschema, libsass, packaging, paypalrestsdk, purl, pyjwkest, pynacl, pyopenssl, python-dateutil, python-memcached, requests-file, responses, social-auth-app-django, social-auth-core, tenacity, testtools, tox, unittest2, webtest
 slumber==0.7.1            # via -r requirements/base.txt, -r requirements/e2e.txt, edx-rest-api-client
 git+https://github.com/python-social-auth/social-app-django.git@c00d23c2b45c3317bd35b15ad1b959338689cef8#egg=social-auth-app-django  # via -r requirements/base.txt, edx-auth-backends
 social-auth-core==3.2.0   # via -c requirements/pins.txt, -r requirements/base.txt, edx-auth-backends, social-auth-app-django
 sorl-thumbnail==12.6.3    # via -r requirements/base.txt
 soupsieve==2.0.1          # via beautifulsoup4
-sqlparse==0.3.1           # via -r requirements/base.txt, django
+sqlparse==0.4.1           # via -r requirements/base.txt, django
 stevedore==3.2.2          # via -r requirements/base.txt, edx-django-utils, edx-opaque-keys
 stripe==1.70.0            # via -r requirements/base.txt
 tenacity==6.2.0           # via -r requirements/e2e.txt, pytest-selenium
-testfixtures==6.14.2      # via -r requirements/test.in
+testfixtures==6.15.0      # via -r requirements/test.in
 testtools==2.4.0          # via -r requirements/base.txt, cybersource-rest-client-python, fixtures, python-subunit
 text-unidecode==1.3       # via -r requirements/base.txt, faker
 toml==0.10.1              # via -r requirements/tox.txt, tox
@@ -210,8 +211,8 @@ wheel==0.35.1             # via -r requirements/base.txt, cybersource-rest-clien
 wrapt==1.11.2             # via astroid
 x509==0.1                 # via -r requirements/base.txt, cybersource-rest-client-python
 xss-utils==0.1.3          # via -r requirements/base.txt
-zeep==3.4.0               # via -r requirements/base.txt
-zope.interface==5.1.0     # via -r requirements/base.txt, cybersource-rest-client-python, datetime
+zeep==4.0.0               # via -r requirements/base.txt
+zope.interface==5.1.2     # via -r requirements/base.txt, cybersource-rest-client-python, datetime
 
 # The following packages are considered to be unsafe in a requirements file:
 # pip
