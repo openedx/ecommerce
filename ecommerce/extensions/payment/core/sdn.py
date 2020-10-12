@@ -61,9 +61,23 @@ def checkSDN(request, name, city, country):
                 logout(request)
         except (HTTPError, Timeout):
             # If the SDN API endpoint is down or times out
-            # the user is allowed to make the purchase.
-            # test
-            pass
+            # checkSDNFallback will be called. If it finds a match
+            # the user will be blocked from making a purchase.
+            SDNFallback_hit = checkSDNFallback(
+                name,
+                city,
+                country
+            )
+            if SDNFallback_hit > 0:
+                logger.info('SDNFallback match found for name: %s, city: %s, country: %s ', name, city, country)
+                sdn_check.deactivate_user(
+                    basket,
+                    name,
+                    city,
+                    country,
+                    response
+                )
+                logout(request)
 
     return hit_count
 
