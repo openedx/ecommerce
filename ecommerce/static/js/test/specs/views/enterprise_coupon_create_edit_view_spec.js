@@ -60,6 +60,10 @@ define([
                 expect(model.save).toHaveBeenCalled();
             });
 
+            it('should exist the save and add more button in create view', function() {
+                expect(view.$('.submit-add-more').html()).toEqual('Create and Add More');
+            });
+
             it('should disable catalog field when no customer is selected', function() {
                 view.$('[name=enterprise_customer]').val(null).trigger('change');
                 expect(view.$('select[name=enterprise_customer_catalog]').prop('disabled')).toBe(true);
@@ -112,6 +116,11 @@ define([
                         model.get('prepaid_invoice_amount').toString()
                     );
                 });
+
+                it('should not exist the save and add more button in edit view', function() {
+                    expect(view.$('.submit-add-more').html()).toEqual('');
+                });
+
 
                 it('should disable catalog field when no customer is selected', function() {
                     view.$('[name=enterprise_customer]').val(null).trigger('change');

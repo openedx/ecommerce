@@ -142,6 +142,7 @@ define([
                 'change [name=tax_deduction]': 'toggleTaxDeductedSourceField',
                 'click .external-link': 'routeToLink',
                 'click #cancel-button': 'cancelButtonClicked',
+                'click .submit-add-more': 'submitAndAddMore',
                 'change select[name=enterprise_customer_catalog]': 'updateEnterpriseCatalogDetailsLink'
             },
 
@@ -160,6 +161,11 @@ define([
                         .removeClass('external-link')
                         .addClass('hidden');
                 }
+            },
+
+            submitAndAddMore: function() {
+                this.$('.submit-add-more').attr('data-url', 'new');
+                $('form.coupon-form-view').submit();
             },
 
             enterpriseCustomerAutocomplete: function() {
@@ -267,7 +273,27 @@ define([
                     this.setLimitToElement(this.$('[name=contract_discount_value]'), 100, 0);
                 }
                 this._super();
+                if (this.editing) {
+                    this.$('.submit-add-more').hide();
+                } else {
+                    this.$('.submit-add-more').html(gettext('Create and Add More'));
+                }
                 return this;
+            },
+            /**
+             * Override default saveSuccess.
+             */
+            saveSuccess: function(model, response) {
+                var nextUrl = $('.submit-add-more').attr('data-url');
+                if (this.editing || _.isUndefined(nextUrl)) {
+                    nextUrl = response.coupon_id ? response.coupon_id.toString() : response.id.toString();
+                    this.goTo(nextUrl);
+                } else {
+                    $('.submit-add-more').removeAttr('data-url');
+                    // Backbone's history/router will do nothing when trying to load the same URL
+                    // in case of create and add more that's why force the route instead.
+                    Backbone.history.loadUrl(nextUrl);
+                }
             }
         });
     }
