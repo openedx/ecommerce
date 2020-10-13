@@ -211,7 +211,7 @@ class Cybersource(ApplePayMixin, BaseClientSidePaymentProcessor):
             for (capture_context, _)
             in self._unexpired_capture_contexts(session)
         ]
-        capture_contexts.push(new_capture_context, 0)
+        capture_contexts.insert(0, new_capture_context)
         # Prevent session size explosion by limiting the number of recorded capture contexts
         session['capture_contexts'] = capture_contexts[:20]
         return new_capture_context
