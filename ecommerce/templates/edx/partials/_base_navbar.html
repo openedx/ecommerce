@@ -19,7 +19,7 @@
       <ul class="nav navbar-nav navbar-right">
         {% if user.is_authenticated %}
           <li class="btn-group user-menu">
-            <button type="button" class="btn btn-default hidden-xs main-btn nav-button"
+            <button data-hj-suppress type="button" class="btn btn-default hidden-xs main-btn nav-button"
                     onclick="window.open('{{ lms_dashboard_url }}');">
               <i class="icon fa fa-home" aria-hidden="true"></i>
               <span class="sr-only">{% trans "Dashboard for:" as tmsg %}{{ tmsg | force_escape }}</span>
