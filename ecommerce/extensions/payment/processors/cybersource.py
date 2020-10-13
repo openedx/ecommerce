@@ -12,7 +12,6 @@ from enum import Enum
 from typing import Optional
 
 import jwt
-import jwt.exceptions
 import waffle
 from CyberSource import (
     CreatePaymentRequest,
@@ -35,7 +34,6 @@ from django.urls import reverse
 from jwt.algorithms import RSAAlgorithm
 from oscar.apps.payment.exceptions import GatewayError, TransactionDeclined, UserCancelled
 from oscar.core.loading import get_class, get_model
-from pytz import UTC
 from zeep import Client
 from zeep.helpers import serialize_object
 from zeep.wsse import UsernameToken
@@ -187,7 +185,7 @@ class Cybersource(ApplePayMixin, BaseClientSidePaymentProcessor):
     def client_side_payment_url(self):
         return self.sop_payment_page_url
 
-    def get_capture_context(self, session):  # pragma: no cover
+    def get_capture_context(self):  # pragma: no cover
         # To delete None values in Input Request Json body
 
         requestObj = GeneratePublicKeyRequest(
@@ -204,39 +202,7 @@ class Cybersource(ApplePayMixin, BaseClientSidePaymentProcessor):
             _request_timeout=(self.connect_timeout, self.read_timeout),
         )
 
-        new_capture_context = {'key_id': return_data.key_id}
-
-        capture_contexts = [
-            capture_context
-            for (capture_context, _)
-            in self._unexpired_capture_contexts(session)
-        ]
-        capture_contexts.push(new_capture_context, 0)
-        # Prevent session size explosion by limiting the number of recorded capture contexts
-        session['capture_contexts'] = capture_contexts[:20]
-        return new_capture_context
-
-    def _unexpired_capture_contexts(self, session):
-        """
-        Return all unexpired capture contexts in the supplied session.
-
-        Arguments:
-            session (Session): the current user session
-
-        Returns: [(capture_context, decoded_capture_context)]
-            The list of all still-valid capture contexts, both encoded and decoded
-        """
-        now = datetime.datetime.now(UTC)
-        return [
-            (capture_context, decoded_capture_context)
-            for (capture_context, decoded_capture_context)
-            in (
-                (capture_context, jwt.decode(capture_context['key_id'], verify=False))
-                for capture_context
-                in session.get('capture_contexts', [])
-            )
-            if not datetime.datetime.fromtimestamp(decoded_capture_context['exp'], tz=UTC) < now
-        ]
+        return {'key_id': return_data.key_id}
 
     def get_transaction_parameters(self, basket, request=None, use_client_side_checkout=False, **kwargs):
         """
@@ -471,7 +437,7 @@ class Cybersource(ApplePayMixin, BaseClientSidePaymentProcessor):
         """
         # Validate the signature
         if not self.is_signature_valid(response.raw_json):
-            raise InvalidSignatureError()
+            raise InvalidSignatureError
 
         if response.decision != Decision.accept:
             if response.duplicate_payment:
@@ -967,20 +933,9 @@ class CybersourceREST(Cybersource):  # pragma: no cover
             state=form_data['state'],
             country=Country.objects.get(iso_3166_1_a2=form_data['country'])
         )
-        decoded_payment_token = None
-        for _, decoded_capture_context in self._unexpired_capture_contexts(request.session):
-            jwk = RSAAlgorithm.from_jwk(json.dumps(decoded_capture_context['flx']['jwk']))
-            # We don't know which capture context was used for this payment token, so just try all unexpired ones
-            try:
-                decoded_payment_token = jwt.decode(transient_token_jwt, key=jwk, algorithms=['RS256'])
-            except jwt.exceptions.InvalidSignatureError:
-                continue
-            else:
-                break
-
-        if decoded_payment_token is None:
-            # Couldn't find a capture context that is valid for this payment token
-            raise InvalidSignatureError()
+        decoded_capture_context = jwt.decode(request.session['capture_context']['key_id'], verify=False)
+        jwk = RSAAlgorithm.from_jwk(json.dumps(decoded_capture_context['flx']['jwk']))
+        decoded_payment_token = jwt.decode(transient_token_jwt, key=jwk, algorithms=['RS256'])
 
         payment_processor_response.decoded_payment_token = decoded_payment_token
         return payment_processor_response
