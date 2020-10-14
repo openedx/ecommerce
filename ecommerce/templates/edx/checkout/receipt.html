@@ -40,7 +40,7 @@
           <div class="copy col-md-8">
             <div class="confirm-message">
               {% captureas link_start %}
-                <a href="mailto:{{ order.user.email }}">
+                <a data-hj-suppress href="mailto:{{ order.user.email }}">
               {% endcaptureas %}
               {% if has_enrollment_code_product %}
                   {% blocktrans trimmed asvar tmsg %}
@@ -59,7 +59,7 @@
             </div>
 
             {% if order.billing_address %}
-              <address class="billing-address">
+              <address data-hj-suppress class="billing-address">
                 {% for field in order.billing_address.active_address_fields %}
                   {{ field }}<br/>
                 {% endfor %}
@@ -73,7 +73,7 @@
               <dd>{{ order.number }}</dd>
               {% if payment_method %}
                 <dt>{% trans "Payment Method:" as tmsg %}{{ tmsg | force_escape }}</dt>
-                <dd>{{ payment_method }}</dd>
+                <dd data-hj-suppress>{{ payment_method }}</dd>
               {% endif %}
               <dt>{% trans "Order Date:" as tmsg %}{{ tmsg | force_escape }}</dt>
               <dd>{{ order.date_placed|date:"E d, Y" }}</dd>
@@ -121,7 +121,7 @@
 
                     {% if discount.voucher_code %}
                       {% with voucher=discount.voucher %}
-                        <span class="discount">{{ voucher.code }}</span>
+                        <span data-hj-suppress class="discount">{{ voucher.code }}</span>
                         <span class="discount">
                           {% filter force_escape %}
                             {% blocktrans trimmed with voucher_code=voucher.code voucher_discount_amount=voucher.benefit|benefit_discount %}
