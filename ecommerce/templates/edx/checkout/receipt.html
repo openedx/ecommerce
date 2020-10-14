@@ -73,7 +73,7 @@
               <dd>{{ order.number }}</dd>
               {% if payment_method %}
                 <dt>{% trans "Payment Method:" as tmsg %}{{ tmsg | force_escape }}</dt>
-                <dd data-hj-suppress>{{ payment_method }}</dd>
+                <dd>{{ payment_method }}</dd>
               {% endif %}
               <dt>{% trans "Order Date:" as tmsg %}{{ tmsg | force_escape }}</dt>
               <dd>{{ order.date_placed|date:"E d, Y" }}</dd>
