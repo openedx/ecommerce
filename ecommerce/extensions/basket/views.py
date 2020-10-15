@@ -422,93 +422,24 @@ class BasketAddItemsView(BasketLogicMixin, APIView):
     """
     permission_classes = (LoginRedirectIfUnauthenticated,)
 
-    def create_basket_and_add_skus(self, request):
-        skus = self._get_skus(request)
-        products = self._get_products(request, skus)
-        voucher = None
-        invalid_code = None
-        code = request.GET.get('code', None)
-        try:
-            voucher = self._get_voucher(request)
-        except Voucher.DoesNotExist as e:  # pragma: nocover
-            # Display an error message when an invalid code is passed as a parameter
-            invalid_code = code
-
-        logger.info('Starting payment flow for user [%s] for products [%s].', request.user.username, skus)
-
-        available_products = self._get_available_products(request, products)
-
-        try:
-            basket = prepare_basket(request, available_products, voucher)
-        except AlreadyPlacedOrderException:
-            return render(request, 'edx/error.html', {'error': _('You have already purchased these products')})
-
-        self._set_email_preference_on_basket(request, basket)
-
-        # Used basket object from request to allow enterprise offers
-        # being applied on basket via BasketMiddleware
-        self.verify_enterprise_needs(request.basket)
-        if code and not request.basket.vouchers.exists():
-            if not (len(available_products) == 1 and available_products[0].is_enrollment_code_product):
-                # Display an error message when an invalid code is passed as a parameter
-                invalid_code = code
-        return invalid_code
-
     def get(self, request):
         # Send time when this view is called - https://openedx.atlassian.net/browse/REV-984
         properties = {'emitted_at': time.time()}
         track_segment_event(request.site, request.user, 'Basket Add Items View Called', properties)
 
         try:
-            invalid_code = self.create_basket_and_add_skus(request)
+            invalid_code = create_basket_and_add_skus(request)
+            
+            # Used basket object from request to allow enterprise offers
+            # being applied on basket via BasketMiddleware
+            self.verify_enterprise_needs(request.basket)
             return self._redirect_response_to_basket_or_payment(request, invalid_code)
 
         except BadRequestException as e:
             return HttpResponseBadRequest(str(e))
         except RedirectException as e:
             return e.response
-
-    def _get_skus(self, request):
-        skus = [escape(sku) for sku in request.GET.getlist('sku')]
-        if not skus:
-            raise BadRequestException(_('No SKUs provided.'))
-        return skus
-
-    def _get_products(self, request, skus):
-        partner = get_partner_for_site(request)
-        products = Product.objects.filter(stockrecords__partner=partner, stockrecords__partner_sku__in=skus)
-        if not products:
-            raise BadRequestException(_('Products with SKU(s) [{skus}] do not exist.').format(skus=', '.join(skus)))
-        return products
-
-    def _get_voucher(self, request):
-        code = request.GET.get('code', None)
-        return Voucher.objects.get(code=code) if code else None
-
-    def _get_available_products(self, request, products):
-        unavailable_product_ids = []
-        for product in products:
-            purchase_info = request.strategy.fetch_for_product(product)
-            if not purchase_info.availability.is_available_to_buy:
-                logger.warning('Product [%s] is not available to buy.', product.title)
-                unavailable_product_ids.append(product.id)
-
-        available_products = products.exclude(id__in=unavailable_product_ids)
-        if not available_products:
-            raise BadRequestException(_('No product is available to buy.'))
-        return available_products
-
-    def _set_email_preference_on_basket(self, request, basket):
-        """
-        Associate the user's email opt in preferences with the basket in
-        order to opt them in later as part of fulfillment
-        """
-        BasketAttribute.objects.update_or_create(
-            basket=basket,
-            attribute_type=BasketAttributeType.objects.get(name=EMAIL_OPT_IN_ATTRIBUTE),
-            defaults={'value_text': request.GET.get('email_opt_in') == 'true'},
-        )
-
+    
     def _redirect_response_to_basket_or_payment(self, request, invalid_code=None):
         redirect_url = get_payment_microfrontend_or_basket_url(request)
         redirect_url = add_utm_params_to_url(redirect_url, list(self.request.GET.items()))
@@ -517,6 +448,78 @@ class BasketAddItemsView(BasketLogicMixin, APIView):
         redirect_url = add_flex_microform_flag_to_url(redirect_url, request)
 
         return HttpResponseRedirect(redirect_url, status=303)
+
+
+def create_basket_and_add_skus(request):
+    skus = _get_skus(request)
+    products = _get_products(request, skus)
+    voucher = None
+    invalid_code = None
+    code = request.GET.get('code', None)
+    try:
+        voucher = _get_voucher(request)
+    except Voucher.DoesNotExist as e:  # pragma: nocover
+        # Display an error message when an invalid code is passed as a parameter
+        invalid_code = code
+
+    logger.info('Starting payment flow for user [%s] for products [%s].', request.user.username or '', skus)
+
+    available_products = _get_available_products(request, products)
+
+    try:
+        basket = prepare_basket(request, available_products, voucher)
+    except AlreadyPlacedOrderException:
+        return render(request, 'edx/error.html', {'error': _('You have already purchased these products')})
+
+    _set_email_preference_on_basket(request, basket)
+
+    if code and not request.basket.vouchers.exists():
+        if not (len(available_products) == 1 and available_products[0].is_enrollment_code_product):
+            # Display an error message when an invalid code is passed as a parameter
+            invalid_code = code
+    return invalid_code
+
+def _get_skus(request):
+    skus = [escape(sku) for sku in request.GET.getlist('sku')]
+    if not skus:
+        raise BadRequestException(_('No SKUs provided.'))
+    return skus
+
+def _get_products(request, skus):
+    partner = get_partner_for_site(request)
+    products = Product.objects.filter(stockrecords__partner=partner, stockrecords__partner_sku__in=skus)
+    if not products:
+        raise BadRequestException(_('Products with SKU(s) [{skus}] do not exist.').format(skus=', '.join(skus)))
+    return products
+
+def _get_voucher(request):
+    code = request.GET.get('code', None)
+    return Voucher.objects.get(code=code) if code else None
+
+def _get_available_products(request, products):
+    unavailable_product_ids = []
+    for product in products:
+        purchase_info = request.strategy.fetch_for_product(product)
+        if not purchase_info.availability.is_available_to_buy:
+            logger.warning('Product [%s] is not available to buy.', product.title)
+            unavailable_product_ids.append(product.id)
+
+    available_products = products.exclude(id__in=unavailable_product_ids)
+    if not available_products:
+        raise BadRequestException(_('No product is available to buy.'))
+    return available_products
+
+def _set_email_preference_on_basket(request, basket):
+    """
+    Associate the user's email opt in preferences with the basket in
+    order to opt them in later as part of fulfillment
+    """
+    BasketAttribute.objects.update_or_create(
+        basket=basket,
+        attribute_type=BasketAttributeType.objects.get(name=EMAIL_OPT_IN_ATTRIBUTE),
+        defaults={'value_text': request.GET.get('email_opt_in') == 'true'},
+    )
+
 
 
 class BasketSummaryView(BasketLogicMixin, BasketView):

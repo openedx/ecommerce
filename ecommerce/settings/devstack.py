@@ -41,6 +41,7 @@ JWT_AUTH.update({
 })
 
 CORS_ORIGIN_WHITELIST = (
+    'http://localhost:18000',
     'http://localhost:1991',
     'http://localhost:1996',
     'http://localhost:1998',
