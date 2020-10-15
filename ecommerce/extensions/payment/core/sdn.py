@@ -68,7 +68,7 @@ def checkSDN(request, name, city, country):
                 city,
                 country
             )
-            if SDNFallback_hit > 0:
+            if SDNFallback_hit:
                 logger.info('SDNFallback match found for name: %s, city: %s, country: %s ', name, city, country)
                 sdn_check.deactivate_user(
                     basket,

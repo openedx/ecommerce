@@ -9,7 +9,7 @@ import ddt
 import httpretty
 import mock
 from django.conf import settings
-from django.test import override_settings
+from django.test import RequestFactory, override_settings
 from oscar.test import factories
 from requests.exceptions import HTTPError, Timeout
 from testfixtures import LogCapture
@@ -17,6 +17,7 @@ from testfixtures import LogCapture
 from ecommerce.core.models import User
 from ecommerce.extensions.payment.core.sdn import (
     SDNClient,
+    checkSDN,
     checkSDNFallback,
     compare_SDNCheck_vs_fallback,
     extract_country_information,
@@ -28,6 +29,7 @@ from ecommerce.extensions.payment.core.sdn import (
 from ecommerce.extensions.payment.exceptions import SDNFallbackDataEmptyError
 from ecommerce.extensions.payment.models import SDNCheckFailure, SDNFallbackData, SDNFallbackMetadata
 from ecommerce.extensions.test import factories as extensions_factories
+from ecommerce.tests.factories import SiteConfigurationFactory
 from ecommerce.tests.testcases import TestCase
 
 
@@ -451,6 +453,69 @@ Joshuafort, MD 72104, TH",,,,,,,,,,,,,,https://banks-bender.com/,Michael Anderso
         # pylint: enable=line-too-long
         metadata_entry = populate_sdn_fallback_data_and_metadata(csv_string)
         self.assertEqual(checkSDNFallback("Juan", "Kristinaport", 'SN'), False)
+
+    @mock.patch('ecommerce.extensions.payment.core.sdn.checkSDNFallback')
+    def test_sdn_api_is_down_call_fallback(self, sdn_fallback_mock):
+        """
+        Verify SDNFallback is called if SDN API returns an errror/timeout.
+        """
+        with mock.patch.object(SDNClient, 'search', side_effect=Timeout):
+            request = RequestFactory().post('/payment/cybersource/submit/')
+            site_configuration = SiteConfigurationFactory()
+            site_configuration.enable_sdn_check = True
+            request.site = site_configuration.site
+            request.user = self.create_user(full_name='Juan M. de la Cruz')
+            sdn_fallback_mock.return_value = False
+
+            self.assertEqual(checkSDN(request, 'Juan M. de la Cruz', 'North Kristinaport', 'AB'), 0)
+            self.assertTrue(sdn_fallback_mock.called)
+
+    @mock.patch('ecommerce.extensions.payment.core.sdn.checkSDNFallback')
+    def test_sdn_api_is_down_fallback_match(self, sdn_fallback_mock):
+        """
+        Verify when the SDN API is down and the SDNFallback is used, if there is a match it will log the match and deactivate the user.
+        """
+        with mock.patch.object(SDNClient, 'search', side_effect=Timeout):
+            request = RequestFactory().post('/payment/cybersource/submit/')
+            site_configuration = SiteConfigurationFactory()
+            site_configuration.enable_sdn_check = True
+            request.site = site_configuration.site
+            request.user = self.create_user(full_name='Juan M. de la Cruz')
+            sdn_fallback_mock.return_value = True
+
+            with mock.patch.object(User, 'deactivate_account') as deactivate_account:
+                response = {'total': 1}
+                basket = factories.BasketFactory(owner=request.user, site=site_configuration.site)
+                sdn_validator = SDNClient(
+                    'http://sdn-test.fake/',
+                    'fake-key',
+                    'SDN,TEST'
+                )
+                deactivate_account.return_value = True
+                sdn_validator.deactivate_user(
+                    basket,
+                    'Juan M. de la Cruz',
+                    'North Kristinaport',
+                    'SN',
+                    response
+                )
+                self.assertTrue(deactivate_account.called)
+
+    @mock.patch('ecommerce.extensions.payment.core.sdn.checkSDNFallback')
+    def test_sdn_api_is_down_fallback_no_match(self, sdn_fallback_mock):
+        """
+        Verify when the SDN API is down and the SDNFallback is used, if there no match it will not deactivate the user.
+        """
+        with mock.patch.object(SDNClient, 'search', side_effect=Timeout):
+            request = RequestFactory().post('/payment/cybersource/submit/')
+            site_configuration = SiteConfigurationFactory()
+            site_configuration.enable_sdn_check = True
+            request.site = site_configuration.site
+            request.user = self.create_user(full_name='Juan M. de la Cruz')
+            sdn_fallback_mock.return_value = False
+
+            with mock.patch.object(User, 'deactivate_account') as deactivate_account:
+                self.assertFalse(deactivate_account.called)
 
     def test_compare_SDNCheck_vs_fallback_match_no_hit(self):
         """Log correct results from fallback and API calls: matching, no hit
