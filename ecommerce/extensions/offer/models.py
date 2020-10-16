@@ -585,7 +585,21 @@ class OfferAssignmentEmailAttempt(models.Model):
     send_id = models.CharField(max_length=255, unique=True)
 
 
-class OfferAssignmentEmailTemplates(TimeStampedModel):
+class AbstractBaseEmailTemplate(TimeStampedModel):
+    email_greeting = models.TextField(blank=True, null=True)
+    email_closing = models.TextField(blank=True, null=True)
+    email_subject = models.TextField(blank=True, null=True)
+    active = models.BooleanField(
+        help_text=_('Make a particular template version active.'),
+        default=True,
+    )
+    name = models.CharField(max_length=255)
+
+    class Meta:
+        abstract = True
+
+
+class OfferAssignmentEmailTemplates(AbstractBaseEmailTemplate):
     ASSIGN, REMIND, REVOKE = ('assign', 'remind', 'revoke')
     EMAIL_TEMPLATE_TYPES = (
         (ASSIGN, _('Assign')),
@@ -595,14 +609,6 @@ class OfferAssignmentEmailTemplates(TimeStampedModel):
 
     enterprise_customer = models.UUIDField(help_text=_('UUID for an EnterpriseCustomer from the Enterprise Service.'))
     email_type = models.CharField(max_length=32, choices=EMAIL_TEMPLATE_TYPES)
-    email_greeting = models.TextField(blank=True, null=True)
-    email_closing = models.TextField(blank=True, null=True)
-    email_subject = models.TextField(blank=True, null=True)
-    active = models.BooleanField(
-        help_text=_('Make a particular template version active.'),
-        default=True,
-    )
-    name = models.CharField(max_length=255)
 
     class Meta:
         ordering = ('enterprise_customer', '-active',)
@@ -632,6 +638,17 @@ class OfferUsageEmail(TimeStampedModel):
             record.offer_email_metadata = meta_data
         record.save()
         return record
+
+
+class CodeAssignmentNudgeEmailTemplates(AbstractBaseEmailTemplate):
+    DAY3, DAY10, DAY19 = ('Day3', 'Day10', 'Day19')
+    EMAIL_TEMPLATE_TYPES = (
+        (DAY3, _('Day 3')),
+        (DAY10, _('Day 10')),
+        (DAY19, _('Day 19')),
+    )
+
+    email_type = models.CharField(max_length=32, choices=EMAIL_TEMPLATE_TYPES)
 
 
 from oscar.apps.offer.models import *  # noqa isort:skip pylint: disable=wildcard-import,unused-wildcard-import,wrong-import-position,wrong-import-order,ungrouped-imports
