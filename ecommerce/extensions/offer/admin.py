@@ -9,6 +9,7 @@ admin.site.unregister(Range)
 
 OfferAssignment = get_model('offer', 'OfferAssignment')
 OfferAssignmentEmailAttempt = get_model('offer', 'OfferAssignmentEmailAttempt')
+CodeAssignmentNudgeEmailTemplates = get_model('offer', 'CodeAssignmentNudgeEmailTemplates')
 
 
 @admin.register(Range)
@@ -62,3 +63,14 @@ class OfferAssignmentEmailAttemptAdmin(admin.ModelAdmin):
     list_display = ('send_id', 'offer_assignment')
     search_fields = ('send_id',)
     fields = ('send_id', 'offer_assignment')
+
+
+@admin.register(CodeAssignmentNudgeEmailTemplates)
+class CodeAssignmentNudgeEmailTemplatesAdmin(admin.ModelAdmin):
+    """
+    Django admin model for `CodeAssignmentNudgeEmailTemplates`
+    """
+    class Meta:
+        model = CodeAssignmentNudgeEmailTemplates
+
+    list_display = ('email_type', 'active')
