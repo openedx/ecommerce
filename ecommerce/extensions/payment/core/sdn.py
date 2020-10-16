@@ -57,11 +57,12 @@ def checkSDN(request, name, city, country):
                 'SDNCheck: SDN API call received an error/timeout. SDNFallback function called for basket [%d].',
                 basket.id
             )
-            response = checkSDNFallback(
+            sdn_fallback_hit_count = checkSDNFallback(
                 name,
                 city,
                 country
             )
+            response = {'total': sdn_fallback_hit_count}
         hit_count = response['total']
         if hit_count > 0:
             logger.info(
@@ -93,7 +94,7 @@ def checkSDNFallback(name, city, country):
         4. If a subset of words match, it still counts as a match
         5. Capitalization doesn’t matter
     """
-    response = {'total': 0}
+    hit_count = 0
     records = SDNFallbackData.get_current_records_and_filter_by_source_and_type(
         'Specially Designated Nationals (SDN) - Treasury Department', 'Individual'
     )
@@ -102,9 +103,8 @@ def checkSDNFallback(name, city, country):
     for record in records:
         record_names, record_addresses = set(record.names.split()), set(record.addresses.split())
         if (processed_name.issubset(record_names) and processed_city.issubset(record_addresses)):
-            response['total'] = response['total'] + 1
-            return response
-    return response
+            hit_count = hit_count + 1
+    return hit_count
 
 
 class SDNClient:
@@ -384,7 +384,7 @@ def compare_SDNCheck_vs_fallback(basket_id, data, hit_count):
             data.get('first_name') + ' ' + data.get('last_name'),
             data.get('city'),
             data.get('country')
-        )['total']
+        )
 
     except (SDNFallbackDataEmptyError, Exception) as e:  # pylint: disable=broad-except
         # We're making this shadow call to gather comparison info for the csv sdn fallback vs SDN API.

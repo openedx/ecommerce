@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import json
+import logging
 import random
 import string
 import time
@@ -9,6 +10,7 @@ import ddt
 import httpretty
 import mock
 from django.conf import settings
+from django.contrib.sessions.middleware import SessionMiddleware
 from django.test import RequestFactory, override_settings
 from oscar.test import factories
 from requests.exceptions import HTTPError, Timeout
@@ -29,7 +31,6 @@ from ecommerce.extensions.payment.core.sdn import (
 from ecommerce.extensions.payment.exceptions import SDNFallbackDataEmptyError
 from ecommerce.extensions.payment.models import SDNCheckFailure, SDNFallbackData, SDNFallbackMetadata
 from ecommerce.extensions.test import factories as extensions_factories
-from ecommerce.tests.factories import SiteConfigurationFactory
 from ecommerce.tests.testcases import TestCase
 
 
@@ -343,37 +344,37 @@ Joshuafort, MD 72104, TH",,,,,,,,,,,,,,https://banks-bender.com/,Michael Anderso
 
     @ddt.data(
         # check order properties
-        ('Juan M. de la Cruz', True),
-        ('Cruz la de M. Juan', True),
-        ('nuaJ', False),
+        ('Juan M. de la Cruz', 1),
+        ('Cruz la de M. Juan', 1),
+        ('nuaJ', 0),
         # check subset properties
-        ('Juan', True),
-        ('Cruz', True),
-        ('de', True),
-        ('la', True),
-        ('M.', True),
-        ('M', True),
-        ('Juan de', True),
-        ('Juande', False),
+        ('Juan', 1),
+        ('Cruz', 1),
+        ('de', 1),
+        ('la', 1),
+        ('M.', 1),
+        ('M', 1),
+        ('Juan de', 1),
+        ('Juande', 0),
         # check punctuation properties
-        ('la.', True),
-        ('la-', True),
-        ('la}', True),
-        ('Juan-de-la-Cruz,', True),
-        ('Ju-an-de-la-Cruz', False),
-        ('-de-Juan-Cruz-la-', True),
-        ('.dE@jUaN.....CRUZ----!??!?!la.', True),
-        ('Cruz,,,,', True),
-        ('João', True),
+        ('la.', 1),
+        ('la-', 1),
+        ('la}', 1),
+        ('Juan-de-la-Cruz,', 1),
+        ('Ju-an-de-la-Cruz', 0),
+        ('-de-Juan-Cruz-la-', 1),
+        ('.dE@jUaN.....CRUZ----!??!?!la.', 1),
+        ('Cruz,,,,', 1),
+        ('João', 1),
         # check capitalizaiton properties
-        ('jUan dE LA CruZ', True),
+        ('jUan dE LA CruZ', 1),
         # check frequency properties
-        ('Juan de la Cruz Juan de la Cruz', True),
-        ('Juan Juan M. M. de de la la Cruz Cruz', True),
+        ('Juan de la Cruz Juan de la Cruz', 1),
+        ('Juan Juan M. M. de de la la Cruz Cruz', 1),
         # other examples
-        ('Juanito', False),
-        ('John de la Cruz', False),
-        ('Wendy', True),
+        ('Juanito', 0),
+        ('John de la Cruz', 0),
+        ('Wendy', 1),
     )
     @ddt.unpack
     def test_check_sdn_fallback_names(self, name, match):
@@ -394,20 +395,20 @@ Joshuafort, MD 72104, TH",,,,,,,,,,,,,,https://banks-bender.com/,Michael Anderso
 
     @ddt.data(
         # check order properties
-        ('17472 Christie Stream Apt. 976 North Kristinaport, HI 91033, SN', True),
-        ('SN 91033, HI Kristinaport, North 976 Apt. Stream Christie 17472', True),
+        ('17472 Christie Stream Apt. 976 North Kristinaport, HI 91033, SN', 1),
+        ('SN 91033, HI Kristinaport, North 976 Apt. Stream Christie 17472', 1),
         # check subset properties
-        ('North', True),
-        ('Kristinaport,', True),
+        ('North', 1),
+        ('Kristinaport,', 1),
         # check punctuation properties
-        ('Kristinaport', True),
-        ('Kristinaport,,!@#$%^&*()', True),
+        ('Kristinaport', 1),
+        ('Kristinaport,,!@#$%^&*()', 1),
         ('Krist%^&*()inaport', False),
-        ('João', True),
+        ('João', 1),
         # check capitalizaiton properties
-        ('KRISTINAPORT', True),
+        ('KRISTINAPORT', 1),
         # check frequency properties
-        ('Kristinaport Kristinaport', True),
+        ('Kristinaport Kristinaport', 1),
     )
     @ddt.unpack
     def test_check_sdn_fallback_address(self, address, match):
@@ -436,7 +437,7 @@ Joshuafort, MD 72104, TH",,,,,,,,,,,,,,https://banks-bender.com/,Michael Anderso
 94734218,Specially Designated Nationals (SDN) - Treasury Department,96663868,Individual,material,Juan M. de la Cruz,Dr.,"17472 Christie Stream Apt. 976 North Kristinaport, HI 91033, SN",,,,,,,,,,,,,,https://www.juarez-collier.org/,Wendy Brock,DJ,1944-03-05,Faroe Islands,PK,http://richardson-richardson.org/,CI"""
         # pylint: enable=line-too-long
         metadata_entry = populate_sdn_fallback_data_and_metadata(csv_string)
-        self.assertEqual(checkSDNFallback("Juan", "Kristinaport", 'AB'), False)
+        self.assertEqual(checkSDNFallback("Juan", "Kristinaport", 'AB'), 0)
 
         # wrong type
         # pylint: disable=line-too-long
@@ -444,7 +445,7 @@ Joshuafort, MD 72104, TH",,,,,,,,,,,,,,https://banks-bender.com/,Michael Anderso
 94734218,Specially Designated Nationals (SDN) - Treasury Department,96663868,foo,material,Juan M. de la Cruz,Dr.,"17472 Christie Stream Apt. 976 North Kristinaport, HI 91033, SN",,,,,,,,,,,,,,https://www.juarez-collier.org/,Wendy Brock,DJ,1944-03-05,Faroe Islands,PK,http://richardson-richardson.org/,CI"""
         # pylint: enable=line-too-long
         metadata_entry = populate_sdn_fallback_data_and_metadata(csv_string)
-        self.assertEqual(checkSDNFallback("Juan", "Kristinaport", 'SN'), False)
+        self.assertEqual(checkSDNFallback("Juan", "Kristinaport", 'SN'), 0)
 
         # wrong source
         # pylint: disable=line-too-long
@@ -452,70 +453,49 @@ Joshuafort, MD 72104, TH",,,,,,,,,,,,,,https://banks-bender.com/,Michael Anderso
 94734218,bar,96663868,Individual,material,Juan M. de la Cruz,Dr.,"17472 Christie Stream Apt. 976 North Kristinaport, HI 91033, SN",,,,,,,,,,,,,,https://www.juarez-collier.org/,Wendy Brock,DJ,1944-03-05,Faroe Islands,PK,http://richardson-richardson.org/,CI"""
         # pylint: enable=line-too-long
         metadata_entry = populate_sdn_fallback_data_and_metadata(csv_string)
-        self.assertEqual(checkSDNFallback("Juan", "Kristinaport", 'SN'), False)
+        self.assertEqual(checkSDNFallback("Juan", "Kristinaport", 'SN'), 0)
 
+    @ddt.data(0, 1)
+    @mock.patch.object(User, 'deactivate_account')
     @mock.patch('ecommerce.extensions.payment.core.sdn.checkSDNFallback')
-    def test_sdn_api_is_down_call_fallback(self, sdn_fallback_mock):
+    def test_sdn_is_down_sdn_fallback_called(
+        self,
+        total_hit_count,
+        sdn_fallback_mock,
+        deactivate_account_mock
+    ):
         """
-        Verify SDNFallback is called if SDN API returns an errror/timeout.
+        Verify SDNFallback is called if SDN API returns an error/timeout.
+        If hits(s) is >=1, log hit(s) and block the user from making a purchase by deactivating and logging out.
+        If there is no hit, allow purchase.
         """
         with mock.patch.object(SDNClient, 'search', side_effect=Timeout):
             request = RequestFactory().post('/payment/cybersource/submit/')
-            site_configuration = SiteConfigurationFactory()
+            middleware = SessionMiddleware()
+            middleware.process_request(request)
+            request.session.save()
+            site_configuration = self.site.siteconfiguration
+            site_configuration.save()
             site_configuration.enable_sdn_check = True
             request.site = site_configuration.site
             request.user = self.create_user(full_name='Juan M. de la Cruz')
-            sdn_fallback_mock.return_value = False
+            basket = factories.BasketFactory(owner=request.user, site=request.site)
+            logger_name = 'ecommerce.extensions.payment.utils.logger.exception'
+            fallback_log = 'SDNCheck: SDN API call received an error/timeout.' \
+                'SDNFallback function called for basket ' + str(basket.id) + '.'
 
-            self.assertEqual(checkSDN(request, 'Juan M. de la Cruz', 'North Kristinaport', 'AB'), 0)
-            self.assertTrue(sdn_fallback_mock.called)
-
-    @mock.patch('ecommerce.extensions.payment.core.sdn.checkSDNFallback')
-    def test_sdn_api_is_down_fallback_match(self, sdn_fallback_mock):
-        """
-        Verify when the SDN API is down and the SDNFallback is used, if there is a match it will log the match and deactivate the user.
-        """
-        with mock.patch.object(SDNClient, 'search', side_effect=Timeout):
-            request = RequestFactory().post('/payment/cybersource/submit/')
-            site_configuration = SiteConfigurationFactory()
-            site_configuration.enable_sdn_check = True
-            request.site = site_configuration.site
-            request.user = self.create_user(full_name='Juan M. de la Cruz')
-            sdn_fallback_mock.return_value = True
-
-            with mock.patch.object(User, 'deactivate_account') as deactivate_account:
-                response = {'total': 1}
-                basket = factories.BasketFactory(owner=request.user, site=site_configuration.site)
-                sdn_validator = SDNClient(
-                    'http://sdn-test.fake/',
-                    'fake-key',
-                    'SDN,TEST'
-                )
-                deactivate_account.return_value = True
-                sdn_validator.deactivate_user(
-                    basket,
-                    'Juan M. de la Cruz',
-                    'North Kristinaport',
-                    'SN',
-                    response
-                )
-                self.assertTrue(deactivate_account.called)
-
-    @mock.patch('ecommerce.extensions.payment.core.sdn.checkSDNFallback')
-    def test_sdn_api_is_down_fallback_no_match(self, sdn_fallback_mock):
-        """
-        Verify when the SDN API is down and the SDNFallback is used, if there no match it will not deactivate the user.
-        """
-        with mock.patch.object(SDNClient, 'search', side_effect=Timeout):
-            request = RequestFactory().post('/payment/cybersource/submit/')
-            site_configuration = SiteConfigurationFactory()
-            site_configuration.enable_sdn_check = True
-            request.site = site_configuration.site
-            request.user = self.create_user(full_name='Juan M. de la Cruz')
-            sdn_fallback_mock.return_value = False
-
-            with mock.patch.object(User, 'deactivate_account') as deactivate_account:
-                self.assertFalse(deactivate_account.called)
+            with self.assertLogs(logger=logger_name, level='INFO') as cm:
+                sdn_fallback_mock.return_value = total_hit_count
+                self.assertEqual(checkSDN(request, 'Juan M. de la Cruz', 'North Kristinaport', 'SN'), total_hit_count)
+                self.assertTrue(sdn_fallback_mock.called)
+                if total_hit_count == 0:
+                    self.assertFalse(deactivate_account_mock.called)
+                    self.assertTrue(request.user.is_authenticated)
+                else:
+                    self.assertTrue(deactivate_account_mock.called)
+                    self.assertFalse(request.user.is_authenticated)
+                logging.getLogger(logger_name).info(fallback_log)
+                self.assertEqual(cm.output, ['INFO:' + logger_name + ':' + fallback_log])
 
     def test_compare_SDNCheck_vs_fallback_match_no_hit(self):
         """Log correct results from fallback and API calls: matching, no hit
@@ -535,7 +515,7 @@ Joshuafort, MD 72104, TH",,,,,,,,,,,,,,https://banks-bender.com/,Michael Anderso
                 (
                     self.LOGGER_NAME,
                     'INFO',
-                    "SDNFallback compare: MATCH. Results - SDN API: 0 hit(s); SDN Fallback match: False. Basket: " +
+                    "SDNFallback compare: MATCH. Results - SDN API: 0 hit(s); SDN Fallback: 0 hit(s). Basket: " +
                     str(form_data['basket'])
                 )
             )
@@ -558,7 +538,7 @@ Joshuafort, MD 72104, TH",,,,,,,,,,,,,,https://banks-bender.com/,Michael Anderso
                 (
                     self.LOGGER_NAME,
                     'INFO',
-                    "SDNFallback compare: MISMATCH. Results - SDN API: 1 hit(s); SDN Fallback match: False. Basket: " +
+                    "SDNFallback compare: MISMATCH. Results - SDN API: 1 hit(s); SDN Fallback: 0 hit(s). Basket: " +
                     str(form_data['basket'])
                 ),
                 (
