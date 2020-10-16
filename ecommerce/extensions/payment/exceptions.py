@@ -64,3 +64,10 @@ class SDNFallbackDataEmptyError(Exception):
     """ Error for when we call checkSDNFallback and the data is not yet populated.
     This data is populated by running: ./manage.py populate_sdn_fallback_data_and_metadata
     See ecommerce ADR 0007-sdn-fallback for more info """
+
+
+class PaymentFieldError(PaymentError):
+    """ Raised when there are errors related to specific fields """
+    def __init__(self, field_messages):
+        super().__init__(field_messages)
+        self.field_messages = field_messages

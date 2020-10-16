@@ -466,10 +466,10 @@ class CybersourceOrderCompletionView(EdxOrderPlacementMixin):
 
             return self.redirect_on_transaction_declined()
 
-        except:  # pylint: disable=bare-except
+        except Exception as exc:  # pylint: disable=broad-except
             # logging handled by validate_order_completion, because not all exceptions are problematic
             monitoring_utils.set_custom_metric('payment_response_validation', 'redirect-to-error-page')
-            return self.redirect_to_payment_error()
+            return self.redirect_to_payment_error(exc)
 
         try:
             order = self.create_order(
@@ -479,7 +479,7 @@ class CybersourceOrderCompletionView(EdxOrderPlacementMixin):
             )
             self.handle_post_order(order)
             return self.redirect_to_receipt_page()
-        except:  # pylint: disable=bare-except
+        except Exception as exc:  # pylint: disable=broad-except
             logger.exception(
                 'Error processing order for transaction [%s], with order [%s] and basket [%d]. Processed by [%s].',
                 self.transaction_id,
@@ -487,7 +487,7 @@ class CybersourceOrderCompletionView(EdxOrderPlacementMixin):
                 self.basket_id,
                 self.payment_processor.NAME,
             )
-            return self.redirect_to_payment_error()
+            return self.redirect_to_payment_error(exc)
 
 
 class CyberSourceRESTProcessorMixin:
@@ -541,12 +541,13 @@ class CybersourceAuthorizeAPIView(
                 self.data,
             )
             self.transaction_id = transaction_id
-        except GatewayError:
-            return self.redirect_to_payment_error()
+        except GatewayError as exc:
+            return self.redirect_to_payment_error(exc)
         else:
             return self.complete_order(payment_processor_response)
 
-    def redirect_to_payment_error(self):
+    def redirect_to_payment_error(self, exc):
+        logger.warning("Exc args: %s", exc.args)
         return JsonResponse({}, status=400)
 
     def redirect_to_receipt_page(self):
@@ -596,17 +597,17 @@ class CybersourceInterstitialView(CyberSourceProcessorMixin, CybersourceOrderCom
 
         try:
             self.basket_id = OrderNumberGenerator().basket_id(self.order_number)
-        except:  # pylint: disable=bare-except
+        except Exception as exc:  # pylint: disable=broad-except
             logger.exception(
                 'Error generating basket_id from CyberSource notification with transaction [%s] and order [%s].',
                 self.transaction_id,
                 self.order_number,
             )
-            return self.redirect_to_payment_error()
+            return self.redirect_to_payment_error(exc)
 
         return self.complete_order(notification)
 
-    def redirect_to_payment_error(self):
+    def redirect_to_payment_error(self, exc):
         return absolute_redirect(self.request, 'payment_error')
 
     def redirect_to_receipt_page(self):

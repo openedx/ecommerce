@@ -9,7 +9,7 @@ import uuid
 from dataclasses import dataclass
 from decimal import Decimal
 from enum import Enum
-from typing import Optional
+from typing import List, Optional, Tuple
 
 import jwt
 import jwt.exceptions
@@ -56,6 +56,7 @@ from ecommerce.extensions.payment.exceptions import (
     InvalidCybersourceDecision,
     InvalidSignatureError,
     PartialAuthorizationError,
+    PaymentFieldError,
     PCIViolation,
     ProcessorMisconfiguredError,
     RedundantPaymentNotificationError
@@ -96,9 +97,25 @@ class Decision(Enum):
     authorized_pending_review = 'AUTHORIZED_PENDING_REVIEW'
 
 
+class Reason(Enum):
+    missing_field = "MISSING_FIELD"
+    invalid_data = "INVALID_DATA"
+    duplicate_request = "DUPLICATE_REQUEST"
+    invalid_card = "INVALID_CARD"
+    card_type_not_accepted = "CARD_TYPE_NOT_ACCEPTED"
+    invalid_merchant_configuration = "INVALID_MERCHANT_CONFIGURATION"
+    processor_unavailable = "PROCESSOR_UNAVAILABLE"
+    invalid_amount = "INVALID_AMOUNT"
+    invalid_card_type = "INVALID_CARD_TYPE"
+    invalid_payment_id = "INVALID_PAYMENT_ID"
+    debit_card_useage_exceedd_limit = "DEBIT_CARD_USEAGE_EXCEEDD_LIMIT"
+
+
 @dataclass
 class UnhandledCybersourceResponse:
     decision: Decision
+    reason: Optional[Reason]
+    details: Optional[List[Tuple[str, str]]]
     duplicate_payment: bool
     partial_authorization: bool
     currency: Optional[str]
@@ -398,10 +415,17 @@ class Cybersource(ApplePayMixin, BaseClientSidePaymentProcessor):
         except ValueError:
             decision = response['decision']
 
+        reason_map = {
+            104: Reason.duplicate_payment,
+        }
+        reason = reason_map.get(response["reason_code"])
+
         _response = UnhandledCybersourceResponse(
             decision=decision,
+            reason=reason,
+            details=None,
             duplicate_payment=(
-                decision == Decision.error and int(response['reason_code']) == 104
+                decision == Decision.error and reason == Reason.duplicate_payment
             ),
             partial_authorization=(
                 'auth_amount' in response and
@@ -503,13 +527,32 @@ class Cybersource(ApplePayMixin, BaseClientSidePaymentProcessor):
                 if response.decision == Decision.authorized_pending_review:
                     self.reverse_payment_api(response, "Automatic reversal of AUTHORIZED_PENDING_REVIEW", basket)
 
-                raise {
+                exc_class = {
                     Decision.cancel: UserCancelled,
                     Decision.decline: TransactionDeclined,
                     Decision.error: GatewayError,
                     Decision.review: AuthorizationError,
                     Decision.authorized_pending_review: TransactionDeclined,
-                }.get(response.decision, InvalidCybersourceDecision(response.decision))
+                }.get(response.decision)
+
+                if exc_class is None:
+                    raise InvalidCybersourceDecision(
+                        response.decision,
+                        transaction_id=response.transaction_id
+                    )
+
+                if response.decision == Decision.error:
+                    if response.reason == Reason.missing_field:
+                        raise PaymentFieldError({})
+                    elif response.reason == Reason.invalid_data:
+                        raise PaymentFieldError({})
+                    elif response.reason == Reason.invalid_card:
+                        raise PaymentFieldError({'cardNumber': 'payment.form.errors.invalid.card.number'})
+                    elif response.reason == Reason.card_type_not_accepted:
+                        raise PaymentFieldError({'cardNumber': 'payment.form.errors.unsupported.card'})
+                    elif response.reason == Reason.invalid_card_type:
+                        raise PaymentFieldError({'cardNumber': 'payment.form.errors.unsupported.card'})
+                raise exc_class()
 
         transaction_id = response.transaction_id
         if transaction_id and response.decision == Decision.accept:
@@ -619,14 +662,19 @@ class Cybersource(ApplePayMixin, BaseClientSidePaymentProcessor):
             msg = 'An error occurred while attempting to issue a credit (via CyberSource) for order [{}].'.format(
                 order_number)
             logger.exception(msg)
-            raise GatewayError(msg)
+            raise GatewayError(message=msg, order_number=order_number)
 
         if response.decision == 'ACCEPT':
             return request_id
         raise GatewayError(
-            'Failed to issue CyberSource credit for order [{order_number}]. '
-            'Complete response has been recorded in entry [{response_id}]'.format(
-                order_number=order_number, response_id=ppr.id))
+            message=(
+                'Failed to issue CyberSource credit for order [{order_number}]. '
+                'Complete response has been recorded in entry [{response_id}]'.format(
+                    order_number=order_number, response_id=ppr.id)
+            ),
+            order_number=order_number,
+            response_id=ppr.id,
+        )
 
     def request_apple_pay_authorization(self, basket, billing_address, payment_token):
         """
@@ -710,7 +758,7 @@ class Cybersource(ApplePayMixin, BaseClientSidePaymentProcessor):
         except:
             msg = 'An error occurred while authorizing an Apple Pay (via CyberSource) for basket [{}]'.format(basket.id)
             logger.exception(msg)
-            raise GatewayError(msg)
+            raise GatewayError(message=msg, basket_id=basket.id)
 
         request_id = response.requestID
         ppr = self.record_processor_response(serialize_object(response), transaction_id=request_id, basket=basket)
@@ -731,7 +779,7 @@ class Cybersource(ApplePayMixin, BaseClientSidePaymentProcessor):
                'Complete response has been recorded in entry [{response_id}]')
         msg = msg.format(basket_id=basket.id, response_id=ppr.id)
         logger.warning(msg)
-        raise GatewayError(msg)
+        raise GatewayError(message=msg, basket_id=basket.id, response_id=ppr.id)
 
     def record_processor_response(self, response, transaction_id=None, basket=None):
         if isinstance(response, UnhandledCybersourceResponse):
@@ -775,7 +823,11 @@ class CybersourceREST(Cybersource):
                 }, transaction_id=None, basket=basket)
                 logger.exception('Payment failed')
                 # This will display the generic error on the frontend
-                raise GatewayError()
+                raise GatewayError(
+                    basket_id=basket.id,
+                    status=e.status,
+                    reason=e.reason,
+                )
             return e, e.headers['v-c-correlation-id']
 
     def normalize_processor_response(self, response) -> UnhandledCybersourceResponse:
@@ -790,15 +842,26 @@ class CybersourceREST(Cybersource):
             'INVALID_REQUEST': Decision.error,
         }
         response_json = self.serialize_order_completion(response)
+        reason = self.extract_reason_code(response)
+        if reason is not None:
+            try:
+                reason = Reason(reason.upper())
+            except ValueError:
+                # Leave the reason as the raw string
+                pass
 
         if isinstance(response, ApiException):
-            decision = decision_map.get(response_json.get('status'), response_json.get('status'))
+
+            decision = decision_map.get(
+                response_json.get("status"), response_json.get("status")
+            )
 
             return UnhandledCybersourceResponse(
                 decision=decision,
+                reason=reason,
+                details=response_json.get("details"),
                 duplicate_payment=(
-                    decision == Decision.error and
-                    response_json.get('reason') == 'DUPLICATE_REQUEST'
+                    decision == Decision.error and reason == Reason.duplicate_payment
                 ),
                 partial_authorization=False,
                 currency=None,
@@ -829,9 +892,10 @@ class CybersourceREST(Cybersource):
 
         return UnhandledCybersourceResponse(
             decision=decision,
+            reason=reason,
+            details=None,
             duplicate_payment=(
-                decision == Decision.error and
-                response.reason == 'DUPLICATE_REQUEST'
+                decision == Decision.error and reason == Reason.duplicate_payment
             ),
             partial_authorization=response.status == 'PARTIAL_AUTHORIZED',
             currency=currency,
