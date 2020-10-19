@@ -490,7 +490,7 @@ class CybersourceOrderCompletionView(EdxOrderPlacementMixin):
             return self.redirect_to_payment_error()
 
 
-class CyberSourceRESTProcessorMixin:  # pragma: no cover
+class CyberSourceRESTProcessorMixin:
     @cached_property
     def payment_processor(self):
         return CybersourceREST(self.request.site)
@@ -502,7 +502,7 @@ class CybersourceAuthorizeAPIView(
         CyberSourceRESTProcessorMixin,
         CybersourceOrderCompletionView,
         CybersourceOrderInitiationView
-):  # pragma: no cover
+):
     # DRF APIView wrapper which allows clients to use
     # JWT authentication when making Cybersource submit
     # requests.

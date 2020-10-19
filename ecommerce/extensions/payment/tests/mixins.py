@@ -2,6 +2,7 @@
 
 import datetime
 import os
+import re
 from decimal import Decimal
 from urllib.parse import urljoin
 
@@ -1047,3 +1048,14 @@ class PaypalMixin:
         root = 'https://api.sandbox.paypal.com' if mode == 'sandbox' else 'https://api.paypal.com'
 
         return urljoin(root, path)
+
+
+class CyberSourceRESTAPIMixin:
+    def convertToCybersourceWireFormat(self, processor_json):
+        # `deserialize` maps keys used by the REST api into a python-friendly convention.
+        # This undoes that mapping to make it easier to add recorded responses to tests.
+        return re.sub(
+            r'([a-z])_([a-z])',
+            lambda x: x.group(1) + x.group(2).upper(),
+            processor_json
+        ).replace('links', '_links').replace('_self', 'self')

@@ -4,7 +4,6 @@
 
 import copy
 import json
-import re
 from decimal import Decimal
 from unittest import SkipTest
 from uuid import UUID
@@ -41,7 +40,7 @@ from ecommerce.extensions.payment.processors.cybersource import (
     Decision,
     UnhandledCybersourceResponse
 )
-from ecommerce.extensions.payment.tests.mixins import CybersourceMixin
+from ecommerce.extensions.payment.tests.mixins import CybersourceMixin, CyberSourceRESTAPIMixin
 from ecommerce.extensions.payment.tests.processors.mixins import PaymentProcessorTestCaseMixin
 from ecommerce.extensions.test.factories import create_basket
 from ecommerce.tests.factories import UserFactory
@@ -447,7 +446,7 @@ class CybersourceTests(CybersourceMixin, PaymentProcessorTestCaseMixin, TestCase
 
 
 @ddt.ddt
-class CybersourceRESTTests(CybersourceMixin, PaymentProcessorTestCaseMixin, TestCase):
+class CybersourceRESTTests(CybersourceMixin, PaymentProcessorTestCaseMixin, CyberSourceRESTAPIMixin, TestCase):
     """ Tests for CyberSource payment processor. """
 
     processor_class = CybersourceREST
@@ -511,13 +510,7 @@ class CybersourceRESTTests(CybersourceMixin, PaymentProcessorTestCaseMixin, Test
         # loaded by the test.
         normalized_response.raw_json = json.loads(processor_json)
 
-        # `deserialize` maps keys used by the REST api into a python-friendly convention.
-        # This undoes that mapping to make it easier to add recorded responses to tests.
-        processor_json = re.sub(
-            r'([a-z])_([a-z])',
-            lambda x: x.group(1) + x.group(2).upper(),
-            processor_json
-        ).replace('links', '_links').replace('_self', 'self')
+        processor_json = self.convertToCybersourceWireFormat(processor_json)
         processor_response = ApiClient().deserialize(
             mock.Mock(data=processor_json), 'PtsV2PaymentsPost201Response'
         )
