@@ -69,6 +69,7 @@ class BasketCreateViewTests(BasketCreationMixin, ThrottlingMixin, TransactionTes
     UNAVAILABLE = False
     UNAVAILABLE_MESSAGE = 'Unavailable'
     FAKE_PROCESSOR_NAME = 'awesome-processor'
+    MOCK_ACCESS_TOKEN = False
 
     def setUp(self):
         super(BasketCreateViewTests, self).setUp()

@@ -94,6 +94,8 @@ PAYMENT_PROCESSOR_CONFIG = {
             'apple_pay_merchant_id_domain_association': 'fake-merchant-id-domain-association',
             'apple_pay_merchant_id_certificate_path': '',
             'apple_pay_country_code': 'US',
+            'flex_shared_secret_key_id': 'd2df1f49-dffa-4814-8da2-2751a62b79a6',
+            'flex_shared_secret_key': 'c9QEORcKDT7u27zLtuy2S0T/HfKo8gl+JnCy6OHtm9Q=',
         },
         'paypal': {
             'mode': 'sandbox',

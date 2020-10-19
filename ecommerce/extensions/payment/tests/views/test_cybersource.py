@@ -7,6 +7,7 @@ import json
 import ddt
 import mock
 import responses
+from CyberSource.rest import RESTResponse
 from django.conf import settings
 from django.contrib.auth import get_user
 from django.test.client import RequestFactory
@@ -26,11 +27,16 @@ from ecommerce.extensions.api.serializers import OrderSerializer
 from ecommerce.extensions.basket.constants import PURCHASER_BEHALF_ATTRIBUTE
 from ecommerce.extensions.basket.utils import basket_add_organization_attribute
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
+from ecommerce.extensions.checkout.utils import get_receipt_page_url
 from ecommerce.extensions.order.constants import PaymentEventTypeName
 from ecommerce.extensions.payment.core.sdn import SDNClient
 from ecommerce.extensions.payment.exceptions import InvalidBasketError, InvalidSignatureError
 from ecommerce.extensions.payment.processors.cybersource import Cybersource
-from ecommerce.extensions.payment.tests.mixins import CybersourceMixin, CybersourceNotificationTestsMixin
+from ecommerce.extensions.payment.tests.mixins import (
+    CybersourceMixin,
+    CybersourceNotificationTestsMixin,
+    CyberSourceRESTAPIMixin
+)
 from ecommerce.extensions.payment.views.cybersource import CybersourceInterstitialView
 from ecommerce.extensions.test.factories import create_basket, create_order
 from ecommerce.invoice.models import Invoice
@@ -60,6 +66,213 @@ class LoginMixin:
 
 
 @ddt.ddt
+class CybersourceAuthorizeViewTests(CyberSourceRESTAPIMixin, TestCase):
+    path = reverse('cybersource:authorize')
+    CYBERSOURCE_VIEW_LOGGER_NAME = 'ecommerce.extensions.payment.views.cybersource'
+
+    def setUp(self):
+        super().setUp()
+        self.user = self.create_user()
+        self.client.login(username=self.user.username, password=self.password)
+
+        request_patcher = mock.patch(
+            'CyberSource.api_client.ApiClient.request',
+            side_effect=Exception("Forgot to initialize mock_cybersource_request")
+        )
+        self.mock_cybersource_request = request_patcher.start()
+        self.addCleanup(request_patcher.stop)
+
+        jwt_patcher = mock.patch('ecommerce.extensions.payment.processors.cybersource.jwt', name="jwt")
+        self.mock_jwt = jwt_patcher.start()
+        self.mock_jwt.decode.return_value = {
+            'data': {'number': 'xxxx xxxx xxxx 1111'}
+        }
+        self.addCleanup(jwt_patcher.stop)
+
+        capture_context_patcher = mock.patch(
+            'ecommerce.extensions.payment.processors.cybersource.CybersourceREST._unexpired_capture_contexts',
+            # pylint: disable=line-too-long
+            return_value=[
+                (
+                    {
+                        "keyId": "eyJraWQiOiIzZyIsImFsZyI6IlJTMjU2In0.eyJmbHgiOnsicGF0aCI6Ii9mbGV4L3YyL3Rva2VucyIsImRhdGEiOiJENU9tMHhEUmNVL2x4RS9HdVdJYm9oQUFFR0VZdnNVcGY1Q0FST1lFcXcwSGp4L056NWkxZTV1Z2hCNklHV3hUdFAvNXBWQUdNSzQ5VFJyRkh4RGZBZjVwN29Ga2tWcTVEeUV5YVgzOXhuUThrejRcdTAwM2QiLCJvcmlnaW4iOiJodHRwczovL3Rlc3RmbGV4LmN5YmVyc291cmNlLmNvbSIsImp3ayI6eyJrdHkiOiJSU0EiLCJlIjoiQVFBQiIsInVzZSI6ImVuYyIsIm4iOiJsMjVlMmNGVERPVVRJc28zbHg2ai1nUWRlekg3TWhpWC01SHM5TmhtS1NpVnNqanRXQmFtMGh5WlUzbVpRUTMwb2FVUE1GalIyOUtPSW43S2MzM2RxeWc2M3NEV29hd0VWTTNGamcwVVVBYnp4dXk0T1gtaGxOQVRUd25UVkR3Z2xwa2g4N0x0V0h4Z28telU2Qjd6Zno4d0xVZDA0d3VYb05oTHZKNENLVlJvTG53UG9hMnlxWkhFMi11Sks0UXNVNGtsV05VY25fNjRWNy1QTE9YeTBxWjd6a1ppb1ZWaDVDQWRlTTdFYm5lOG9FY0RfQlJ2OW9uWlhYUllSUWt0OV9VMGpKWlVVVV9ieEtKS20weHRKRlFzUW4tOWp6b1cyMVJtUWhFN19XT3hWNUc4b28wNU56MnJubGx0NFRaaWJhMWhWc2xmaVY3cUZGbkt6aXFxaXciLCJraWQiOiIwN2d1WEp1R1Y5NWxsdWdTZUJ0alZoWjkwMnVQY3c0cyJ9fSwiY3R4IjpbeyJkYXRhIjp7InRhcmdldE9yaWdpbnMiOlsiaHR0cHM6Ly93d3cubWVyY2hhbnQuY29tIiwiaHR0cHM6Ly9zb21lLm90aGVyLnBhcmVudC5jb20iXSwibWZPcmlnaW4iOiJodHRwczovL3Rlc3RmbGV4LmN5YmVyc291cmNlLmNvbSJ9LCJ0eXBlIjoibWYtMC4xMS4wIn1dLCJpc3MiOiJGbGV4IEFQSSIsImV4cCI6MTU4NTE0OTA4MywiaWF0IjoxNTg1MTQ4MTgzLCJqdGkiOiJHTnBJNzU2a2JTd1FZTm9zIn0.QJHfV4BsXmAs4YcPMibVxsrmMPdlyNkpdPvID_7qhoYcPBjXI5Yu_Ghj7OWWaH2vYr4JseJvFlhfs9WQndcFD9lEO9qEX3f0ZdxENmwSPAwvqGJ2m5_Dgln29qd0-0jp_bCLbFWL8v_ftSu6IiIsTBghYt_zI8QE0Uw_lmMP7Uo7BcfHXELY8UhCyJa1MOytSdtVIdqHPH4yX_VLT2DtFLynQEIFRmNnd_WRhuAzZIS9Gp41Zc_Fb9T6R6j8d77atKI1KY6sdNA5OSksfr2Qboi3-AjM7BRUQUprB_HzMcbTinmbYCgPo3POUeB1dqcLvpGAelj1Ooc5i5U9Q-AG4Q",
+                        "der": None,
+                        "jwk": None
+                    }, {
+                        "flx": {
+                            "path": "/flex/v2/tokens",
+                            "data": "D5Om0xDRcU/lxE/GuWIbohAAEGEYvsUpf5CAROYEqw0Hjx/Nz5i1e5ughB6IGWxTtP/5pVAGMK49TRrFHxDfAf5p7oFkkVq5DyEyaX39xnQ8kz4=",
+                            "origin": "https://testflex.cybersource.com",
+                            "jwk": {
+                                "kty": "RSA",
+                                "e": "AQAB",
+                                "use": "enc",
+                                "n": "l25e2cFTDOUTIso3lx6j-gQdezH7MhiX-5Hs9NhmKSiVsjjtWBam0hyZU3mZQQ30oaUPMFjR29KOIn7Kc33dqyg63sDWoawEVM3Fjg0UUAbzxuy4OX-hlNATTwnTVDwglpkh87LtWHxgo-zU6B7zfz8wLUd04wuXoNhLvJ4CKVRoLnwPoa2yqZHE2-uJK4QsU4klWNUcn_64V7-PLOXy0qZ7zkZioVVh5CAdeM7Ebne8oEcD_BRv9onZXXRYRQkt9_U0jJZUUU_bxKJKm0xtJFQsQn-9jzoW21RmQhE7_WOxV5G8oo05Nz2rnllt4TZiba1hVslfiV7qFFnKziqqiw",
+                                "kid": "07guXJuGV95llugSeBtjVhZ902uPcw4s"
+                            }
+                        },
+                        "ctx": [
+                            {
+                                "data": {
+                                    "targetOrigins": [
+                                        "https://www.merchant.com",
+                                        "https://some.other.parent.com"
+                                    ],
+                                    "mfOrigin": "https://testflex.cybersource.com"
+                                },
+                                "type": "mf-0.11.0"
+                            }
+                        ],
+                        "iss": "Flex API",
+                        "exp": 1568983443,
+                        "iat": 1568982543,
+                        "jti": "GNpI756kbSwQYNos"
+                    }
+                )
+            ]
+            # pylint: enable=line-too-long
+        )
+        self.mock_unexpired_capture_contexts = capture_context_patcher.start()
+        self.addCleanup(capture_context_patcher.stop)
+
+    def _create_valid_basket(self):
+        """ Creates a Basket ready for checkout. """
+        basket = create_basket(owner=self.user, site=self.site)
+        basket.strategy = Selector().strategy()
+        basket.thaw()
+        return basket
+
+    def _assert_basket_error(self, basket_id, error_msg):
+        response = self.client.post(self.path, self._generate_data(basket_id))
+        self.assertEqual(response.status_code, 400)
+        expected = {
+            'error': error_msg,
+            'field_errors': {'basket': error_msg}
+        }
+        self.assertDictEqual(response.json(), expected)
+
+    def _generate_data(self, basket_id):
+        country = factories.CountryFactory(iso_3166_1_a2='US', printable_name="United States")
+        return {
+            'basket': basket_id,
+            'first_name': 'Test',
+            'last_name': 'User',
+            'address_line1': '141 Portland Ave.',
+            'address_line2': 'Floor 9',
+            'city': 'Cambridge',
+            'state': 'MA',
+            'postal_code': '02139',
+            'country': country.iso_3166_1_a2,
+            'payment_token': 'eyJraWQiOiIwOFJxdVc1MjVMdnNhb2g2ck41aE1saExUQ1NKaE1iNyIsImFsZyI6IlJTMjU2In0.eyJkYXRhIjp7ImV4cGlyYXRpb25ZZWFyIjoiMjAyMiIsIm51bWJlciI6IjQxMTExMVhYWFhYWDExMTEiLCJleHBpcmF0aW9uTW9udGgiOiIwMSIsInR5cGUiOiIwMDEifSwiaXNzIjoiRmxleC8wOCIsImV4cCI6MTYwMjg2NDQyMiwidHlwZSI6Im1mLTAuMTEuMCIsImlhdCI6MTYwMjg2MzUyMiwianRpIjoiMUUzUUlKSFBDMEI0R0JWM0hSVkFBVDdMTlc3WlhIQU9QUE5ZTk44UEpYQVIxT0g4TlNIVDVGODlDNTI2MTA2NSJ9.VYO3omXc1kyg7LejBYgxYCvkseDc3CVR-vuN65Tr_GNeUo9nJwmaGMC0OgJevecRxdCVkma-S1pNGL1USKPnuuKoM0FYpasfbGXKoR6o1KscB65Cbr_1D4UiRe2j1EhNsYsm8xI_mRHtTVhseT0hY0f8y-90gnRcCN7JUCHzdb4ArS4imMccF9nJ3NHd-24FGeB7qjp_w4UPSO53g7eLVHqaT09n4rmJUaIYFyfXed48rIcKf1XbMF-jVnPsCaD3iLxPY-I27PAyErkZbMOdENqXkPthgQ0pHGpu97v0FjipCOSK2C3dk-PrB1ZQBLtcHiVSJcQvNxLhdOa8-QvRKg',  # pylint: disable=line-too-long
+        }
+
+    def assert_basket_retrieval_error(self, basket_id):
+        error_msg = 'There was a problem retrieving your basket. Refresh the page to try again.'
+        return self._assert_basket_error(basket_id, error_msg)
+
+    def test_login_required(self):
+        """ Verify the view returns a 401 for unauthorized users. """
+        self.client.logout()
+        response = self.client.post(self.path)
+        assert response.status_code == 401
+
+    @ddt.data('get', 'put', 'patch', 'head')
+    def test_invalid_methods(self, method):
+        """ Verify the view only supports the POST and OPTION HTTP methods."""
+        response = getattr(self.client, method)(self.path)
+        assert response.status_code == 405
+
+    def test_missing_basket(self):
+        """ Verify the view returns an HTTP 400 status if the basket is missing. """
+        self.assert_basket_retrieval_error(9999)
+
+    def test_mismatched_basket_owner(self):
+        """ Verify the view returns an HTTP 400 status if the posted basket does not belong to the requesting user. """
+        basket = factories.BasketFactory()
+        self.assert_basket_retrieval_error(basket.id)
+
+        basket = factories.BasketFactory(owner=self.create_user())
+        self.assert_basket_retrieval_error(basket.id)
+
+    @ddt.data(Basket.MERGED, Basket.SAVED, Basket.FROZEN, Basket.SUBMITTED)
+    def test_invalid_basket_status(self, status):
+        """ Verify the view returns an HTTP 400 status if the basket is in an invalid state. """
+        basket = factories.BasketFactory(owner=self.user, status=status)
+        error_msg = 'There was a problem retrieving your basket. Refresh the page to try again.'
+        self._assert_basket_error(basket.id, error_msg)
+
+    def test_sdn_check_match(self):
+        """Verify the endpoint returns an sdn check failure if the sdn check finds a hit."""
+        self.site.siteconfiguration.enable_sdn_check = True
+        self.site.siteconfiguration.save()
+
+        basket_id = self._create_valid_basket().id
+        data = self._generate_data(basket_id)
+        expected_response = {'error': 'There was an error submitting the basket', 'sdn_check_failure': {'hit_count': 1}}
+        logger_name = self.CYBERSOURCE_VIEW_LOGGER_NAME
+
+        with mock.patch.object(SDNClient, 'search', return_value={'total': 1}) as sdn_validator_mock:
+            with mock.patch.object(User, 'deactivate_account', return_value=True):
+                with LogCapture(logger_name) as cybersource_logger:
+                    response = self.client.post(self.path, data)
+                    self.assertTrue(sdn_validator_mock.called)
+                    self.assertEqual(response.json(), expected_response)
+                    self.assertEqual(response.status_code, 403)
+                    cybersource_logger.check_present(
+                        (
+                            logger_name,
+                            'INFO',
+                            'SDNCheck function called for basket [{}]. It received 1 hit(s).'.format(basket_id)
+                        ),
+                    )
+                    # Make sure user is logged out
+                    self.assertEqual(get_user(self.client).is_authenticated, False)
+
+    @freeze_time('2016-01-01')
+    def test_valid_request(self):
+        """ Verify the view completes the transaction if the request is valid. """
+        basket = self._create_valid_basket()
+        data = self._generate_data(basket.id)
+        self.mock_cybersource_request.side_effect = None
+        self.mock_cybersource_request.return_value = mock.Mock(
+            spec=RESTResponse,
+            resp=None,
+            status=200,
+            reason='OK',
+            # This response has been pruned to only the needed data.
+            data=self.convertToCybersourceWireFormat("""{"id":"6028635251536131304003","status":"AUTHORIZED","client_reference_information":{"code":"EDX-100001"},"processor_information":{"approval_code":"831000","transaction_id":"558196000003814","network_transaction_id":"558196000003814","card_verification":{"result_code":"3"}},"payment_information":{"tokenized_card":{"type":"001"},"account_features":{"category":"A"}},"order_information":{"amount_details":{"total_amount":"99.00","authorized_amount":"99.00","currency":"USD"}}}""")
+        )
+        response = self.client.post(self.path, data)
+
+        assert response.status_code == 201
+        assert response['content-type'] == JSON
+        assert json.loads(response.content)['receipt_page_url'] == get_receipt_page_url(
+            self.site.siteconfiguration,
+            order_number="EDX-100001",
+            disable_back_button=True,
+        )
+
+        # Ensure the basket is Submitted
+        basket = Basket.objects.get(pk=basket.pk)
+        self.assertEqual(basket.status, Basket.SUBMITTED)
+
+    def test_field_error(self):
+        """ Verify the view responds with a JSON object containing fields with errors, when input is invalid. """
+        basket = self._create_valid_basket()
+        data = self._generate_data(basket.id)
+        field = 'first_name'
+        del data[field]
+
+        response = self.client.post(self.path, data)
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response['content-type'], JSON)
+
+        errors = response.json()['field_errors']
+        self.assertIn(field, errors)
+
+
+@ddt.ddt
 class CybersourceSubmitViewTests(CybersourceMixin, TestCase):
     path = reverse('cybersource:submit')
     CYBERSOURCE_VIEW_LOGGER_NAME = 'ecommerce.extensions.payment.views.cybersource'
@@ -70,6 +283,7 @@ class CybersourceSubmitViewTests(CybersourceMixin, TestCase):
         self.client.login(username=self.user.username, password=self.password)
 
     def _generate_data(self, basket_id):
+        country = factories.CountryFactory(iso_3166_1_a2='US', printable_name="United States")
         return {
             'basket': basket_id,
             'first_name': 'Test',
@@ -79,7 +293,7 @@ class CybersourceSubmitViewTests(CybersourceMixin, TestCase):
             'city': 'Cambridge',
             'state': 'MA',
             'postal_code': '02139',
-            'country': 'US',
+            'country': country.iso_3166_1_a2,
         }
 
     def _create_valid_basket(self):
