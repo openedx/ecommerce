@@ -73,4 +73,4 @@ class CodeAssignmentNudgeEmailTemplatesAdmin(admin.ModelAdmin):
     class Meta:
         model = CodeAssignmentNudgeEmailTemplates
 
-    list_display = ('email_type', 'active')
+    list_display = ('id', 'email_type', 'created', 'modified', 'active')
