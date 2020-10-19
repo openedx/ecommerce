@@ -3,14 +3,11 @@ version: "2"
 
 services:
   db:
-    image: mysql:5.6.45
+    image: mysql:5.7
     container_name: db
     command: mysqld --character-set-server=utf8 --collation-server=utf8_general_ci
     environment:
-      MYSQL_ROOT_PASSWORD: ""
-      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
-      MYSQL_USER: "ecomm001"
-      MYSQL_PASSWORD: "password"
+      MYSQL_ROOT_PASSWORD: "password"
       MYSQL_DATABASE: "ecommerce"
   ecommerce:
     image: edxops/ecommerce:latest
@@ -33,7 +30,7 @@ services:
       DB_NAME: "ecommerce"
       DB_PASSWORD: "password"
       DB_PORT: "3306"
-      DB_USER: "ecomm001"
+      DB_USER: "root"
       DJANGO_SETTINGS_MODULE: "ecommerce.settings.test"
       JASMINE_HOSTNAME: "localhost"
       JASMINE_WEB_DRIVER: "FirefoxHeadless"
