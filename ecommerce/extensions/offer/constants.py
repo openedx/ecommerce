@@ -1,3 +1,5 @@
+from django.utils.translation import ugettext_lazy as _
+
 DYNAMIC_DISCOUNT_FLAG = 'offer.dynamic_discount'
 
 # OfferAssignment status constants defined here to avoid circular dependency.
@@ -21,3 +23,12 @@ VOUCHER_IS_PRIVATE = 'private'
 
 OFFER_ASSIGNMENT_EMAIL_TEMPLATE_FIELD_LIMIT = 50000
 OFFER_ASSIGNMENT_EMAIL_SUBJECT_LIMIT = 1000
+
+
+# Code Assignment Nudge email templates.
+DAY3, DAY10, DAY19 = ('Day3', 'Day10', 'Day19')
+NUDGE_EMAIL_TEMPLATE_TYPES = (
+    (DAY3, _('Day 3')),
+    (DAY10, _('Day 10')),
+    (DAY19, _('Day 19')),
+)

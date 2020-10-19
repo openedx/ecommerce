@@ -25,6 +25,7 @@ from threadlocals.threadlocals import get_current_request
 
 from ecommerce.core.utils import get_cache_key, log_message_and_raise_validation_error
 from ecommerce.extensions.offer.constants import (
+    NUDGE_EMAIL_TEMPLATE_TYPES,
     OFFER_ASSIGNED,
     OFFER_ASSIGNMENT_EMAIL_BOUNCED,
     OFFER_ASSIGNMENT_EMAIL_PENDING,
@@ -641,14 +642,7 @@ class OfferUsageEmail(TimeStampedModel):
 
 
 class CodeAssignmentNudgeEmailTemplates(AbstractBaseEmailTemplate):
-    DAY3, DAY10, DAY19 = ('Day3', 'Day10', 'Day19')
-    EMAIL_TEMPLATE_TYPES = (
-        (DAY3, _('Day 3')),
-        (DAY10, _('Day 10')),
-        (DAY19, _('Day 19')),
-    )
-
-    email_type = models.CharField(max_length=32, choices=EMAIL_TEMPLATE_TYPES)
+    email_type = models.CharField(max_length=32, choices=NUDGE_EMAIL_TEMPLATE_TYPES)
 
 
 from oscar.apps.offer.models import *  # noqa isort:skip pylint: disable=wildcard-import,unused-wildcard-import,wrong-import-position,wrong-import-order,ungrouped-imports
