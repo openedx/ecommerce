@@ -177,6 +177,31 @@ class CybersourceAuthorizeViewTests(CyberSourceRESTAPIMixin, TestCase):
             'payment_token': 'eyJraWQiOiIwOFJxdVc1MjVMdnNhb2g2ck41aE1saExUQ1NKaE1iNyIsImFsZyI6IlJTMjU2In0.eyJkYXRhIjp7ImV4cGlyYXRpb25ZZWFyIjoiMjAyMiIsIm51bWJlciI6IjQxMTExMVhYWFhYWDExMTEiLCJleHBpcmF0aW9uTW9udGgiOiIwMSIsInR5cGUiOiIwMDEifSwiaXNzIjoiRmxleC8wOCIsImV4cCI6MTYwMjg2NDQyMiwidHlwZSI6Im1mLTAuMTEuMCIsImlhdCI6MTYwMjg2MzUyMiwianRpIjoiMUUzUUlKSFBDMEI0R0JWM0hSVkFBVDdMTlc3WlhIQU9QUE5ZTk44UEpYQVIxT0g4TlNIVDVGODlDNTI2MTA2NSJ9.VYO3omXc1kyg7LejBYgxYCvkseDc3CVR-vuN65Tr_GNeUo9nJwmaGMC0OgJevecRxdCVkma-S1pNGL1USKPnuuKoM0FYpasfbGXKoR6o1KscB65Cbr_1D4UiRe2j1EhNsYsm8xI_mRHtTVhseT0hY0f8y-90gnRcCN7JUCHzdb4ArS4imMccF9nJ3NHd-24FGeB7qjp_w4UPSO53g7eLVHqaT09n4rmJUaIYFyfXed48rIcKf1XbMF-jVnPsCaD3iLxPY-I27PAyErkZbMOdENqXkPthgQ0pHGpu97v0FjipCOSK2C3dk-PrB1ZQBLtcHiVSJcQvNxLhdOa8-QvRKg',  # pylint: disable=line-too-long
         }
 
+    def _prep_request_success(self, data, status=200, reason='OK'):
+        self.mock_cybersource_request.side_effect = None
+        self.mock_cybersource_request.return_value = mock.Mock(
+            spec=RESTResponse,
+            resp=None,
+            status=status,
+            reason=reason,
+            # This response has been pruned to only the needed data.
+            data=self.convertToCybersourceWireFormat(data)
+        )
+
+    def _prep_request_invalid(self, data, request_id, status=400, reason='BAD REQUEST'):
+
+        self.mock_cybersource_request.side_effect = ApiException(
+            http_resp=mock.Mock(
+                spec=RESTResponse,
+                resp=None,
+                status=status,
+                reason=reason,
+                getheaders=mock.Mock(return_value={'v-c-correlation-id': request_id}),
+                # This response has been pruned to only the needed data.
+                data=self.convertToCybersourceWireFormat(data)
+            )
+        )
+
     def assert_basket_retrieval_error(self, basket_id):
         error_msg = 'There was a problem retrieving your basket. Refresh the page to try again.'
         return self._assert_basket_error(basket_id, error_msg)
@@ -244,14 +269,9 @@ class CybersourceAuthorizeViewTests(CyberSourceRESTAPIMixin, TestCase):
         """ Verify the view completes the transaction if the request is valid. """
         basket = self._create_valid_basket()
         data = self._generate_data(basket.id)
-        self.mock_cybersource_request.side_effect = None
-        self.mock_cybersource_request.return_value = mock.Mock(
-            spec=RESTResponse,
-            resp=None,
-            status=200,
-            reason='OK',
-            # This response has been pruned to only the needed data.
-            data=self.convertToCybersourceWireFormat("""{"id":"6028635251536131304003","status":"AUTHORIZED","client_reference_information":{"code":"EDX-100001"},"processor_information":{"approval_code":"831000","transaction_id":"558196000003814","network_transaction_id":"558196000003814","card_verification":{"result_code":"3"}},"payment_information":{"tokenized_card":{"type":"001"},"account_features":{"category":"A"}},"order_information":{"amount_details":{"total_amount":"99.00","authorized_amount":"99.00","currency":"USD"}}}""")
+        # This response has been pruned to only the needed data.
+        self._prep_request_success(
+            """{"id":"6028635251536131304003","status":"AUTHORIZED","client_reference_information":{"code":"EDX-100001"},"processor_information":{"approval_code":"831000","transaction_id":"558196000003814","network_transaction_id":"558196000003814","card_verification":{"result_code":"3"}},"payment_information":{"tokenized_card":{"type":"001"},"account_features":{"category":"A"}},"order_information":{"amount_details":{"total_amount":"99.00","authorized_amount":"99.00","currency":"USD"}}}"""  # pylint: disable=line-too-long
         )
         response = self.client.post(self.path, data)
 
@@ -274,16 +294,9 @@ class CybersourceAuthorizeViewTests(CyberSourceRESTAPIMixin, TestCase):
 
         basket = self._create_valid_basket()
         data = self._generate_data(basket.id)
-        self.mock_cybersource_request.side_effect = ApiException(
-            http_resp=mock.Mock(
-                spec=RESTResponse,
-                resp=None,
-                status=400,
-                reason='BAD REQUEST',
-                getheaders=mock.Mock(return_value={'v-c-correlation-id': '6028635251536131304003'}),
-                # This response has been pruned to only the needed data.
-                data=self.convertToCybersourceWireFormat("""{"submitTimeUtc":"2020-09-30T18:53:23Z","status":"INVALID_REQUEST","reason":"DUPLICATE_REQUEST","message":"Declined - The\u00a0merchantReferenceCode\u00a0sent with this authorization request matches the merchantReferenceCode of another authorization request that you sent in the last 15 minutes."}""")
-            )
+        # This response has been pruned to only the needed data.
+        self._prep_request_success(
+            """{"id":"6028635251536131304003","status":"AUTHORIZED","client_reference_information":{"code":"EDX-100001"},"processor_information":{"approval_code":"831000","transaction_id":"558196000003814","network_transaction_id":"558196000003814","card_verification":{"result_code":"3"}},"payment_information":{"tokenized_card":{"type":"001"},"account_features":{"category":"A"}},"order_information":{"amount_details":{"total_amount":"99.00","authorized_amount":"99.00","currency":"USD"}}}"""  # pylint: disable=line-too-long
         )
         response = self.client.post(self.path, data)
 
@@ -306,14 +319,9 @@ class CybersourceAuthorizeViewTests(CyberSourceRESTAPIMixin, TestCase):
         """ Verify the view reports an error if the transaction is only authorized pending review. """
         basket = self._create_valid_basket()
         data = self._generate_data(basket.id)
-        self.mock_cybersource_request.side_effect = None
-        self.mock_cybersource_request.return_value = mock.Mock(
-            spec=RESTResponse,
-            resp=None,
-            status=200,
-            reason='OK',
-            # This response has been pruned to only the needed data.
-            data=self.convertToCybersourceWireFormat("""{"links":{"_self":{"href":"/pts/v2/payments/6031321796646037504006","method":"GET"}},"id":"6031321796646037504006","submit_time_utc":"2020-10-19T18:29:40Z","status":"AUTHORIZED_PENDING_REVIEW","error_information":{"reason":"CONTACT_PROCESSOR","message":"Decline - The issuing bank has questions about the request. You do not receive an authorization code programmatically, but you might receive one verbally by calling the processor."},"client_reference_information":{"code":"EDX-248939"},"processor_information":{"transaction_id":"558196000003814","network_transaction_id":"558196000003814","response_code":"001","avs":{"code":"Y","code_raw":"Y"},"card_verification":{"result_code":"2"}},"payment_information":{"account_features":{"category":"A"}}}""")
+        # This response has been pruned to only the needed data.
+        self._prep_request_success(
+            """{"links":{"_self":{"href":"/pts/v2/payments/6031321796646037504006","method":"GET"}},"id":"6031321796646037504006","submit_time_utc":"2020-10-19T18:29:40Z","status":"AUTHORIZED_PENDING_REVIEW","error_information":{"reason":"CONTACT_PROCESSOR","message":"Decline - The issuing bank has questions about the request. You do not receive an authorization code programmatically, but you might receive one verbally by calling the processor."},"client_reference_information":{"code":"EDX-248939"},"processor_information":{"transaction_id":"558196000003814","network_transaction_id":"558196000003814","response_code":"001","avs":{"code":"Y","code_raw":"Y"},"card_verification":{"result_code":"2"}},"payment_information":{"account_features":{"category":"A"}}}"""  # pylint: disable=line-too-long
         )
         response = self.client.post(self.path, data)
 
