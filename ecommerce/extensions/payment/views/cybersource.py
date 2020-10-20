@@ -531,6 +531,9 @@ class CybersourceAuthorizeAPIView(
         self.basket_id = basket.id
         self.order_number = basket.order_number
 
+        # Freeze the basket since the user is paying for it now.
+        basket.freeze()
+
         try:
             payment_processor_response, transaction_id = self.payment_processor.initiate_payment(
                 basket,
