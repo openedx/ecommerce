@@ -5,6 +5,7 @@ import itertools
 import json
 
 import ddt
+import httpretty
 import mock
 import responses
 from CyberSource.rest import RESTResponse
@@ -66,6 +67,7 @@ class LoginMixin:
 
 
 @ddt.ddt
+@httpretty.activate
 class CybersourceAuthorizeViewTests(CyberSourceRESTAPIMixin, TestCase):
     path = reverse('cybersource:authorize')
     CYBERSOURCE_VIEW_LOGGER_NAME = 'ecommerce.extensions.payment.views.cybersource'
@@ -134,6 +136,12 @@ class CybersourceAuthorizeViewTests(CyberSourceRESTAPIMixin, TestCase):
         )
         self.mock_unexpired_capture_contexts = capture_context_patcher.start()
         self.addCleanup(capture_context_patcher.stop)
+
+        sdn_patcher = mock.patch.object(SDNClient, 'search', return_value={'total': 0})
+        sdn_patcher.start()
+        self.addCleanup(sdn_patcher.stop)
+
+        self.mock_access_token_response()
 
     def _create_valid_basket(self):
         """ Creates a Basket ready for checkout. """
