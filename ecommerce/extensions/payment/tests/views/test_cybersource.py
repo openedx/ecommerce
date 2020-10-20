@@ -356,6 +356,25 @@ class CybersourceAuthorizeViewTests(CyberSourceRESTAPIMixin, TestCase):
         self.assertEqual(basket.status, Basket.MERGED)
         assert Basket.objects.count() == 2
 
+    def test_invalid_card_type(self):
+        """ Verify the view redirects to the receipt page if the payment is made with an invalid card type. """
+        basket = self._create_valid_basket()
+        data = self._generate_data(basket.id)
+        # This response has been pruned to only the needed data.
+        self._prep_request_invalid(
+            """{"submitTimeUtc":"2020-10-20T15:44:23Z","status":"INVALID_REQUEST","reason":"CARD_TYPE_NOT_ACCEPTED","message":"Decline - The card type is not accepted by the payment processor."}""",  # pylint: disable=line-too-long
+            '6028635251536131304003'
+        )
+        response = self.client.post(self.path, data)
+
+        assert response.status_code == 400
+        assert response['content-type'] == JSON
+        assert json.loads(response.content) == {}
+
+        # Ensure the basket is frozen
+        basket = Basket.objects.get(pk=basket.pk)
+        self.assertEqual(basket.status, Basket.FROZEN)
+
     def test_field_error(self):
         """ Verify the view responds with a JSON object containing fields with errors, when input is invalid. """
         basket = self._create_valid_basket()
