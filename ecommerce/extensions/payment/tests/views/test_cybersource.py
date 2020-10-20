@@ -26,7 +26,10 @@ from ecommerce.core.url_utils import get_lms_url
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.extensions.api.serializers import OrderSerializer
 from ecommerce.extensions.basket.constants import PURCHASER_BEHALF_ATTRIBUTE
-from ecommerce.extensions.basket.utils import basket_add_organization_attribute
+from ecommerce.extensions.basket.utils import (
+    basket_add_organization_attribute,
+    get_payment_microfrontend_or_basket_url
+)
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
 from ecommerce.extensions.checkout.utils import get_receipt_page_url
 from ecommerce.extensions.order.constants import PaymentEventTypeName
@@ -297,6 +300,34 @@ class CybersourceAuthorizeViewTests(CyberSourceRESTAPIMixin, TestCase):
         # The basket stays open, because on a DUPLICATE_REQUEST, we don't modify the basket,
         # and instead just redirect to the reciept page.
         self.assertEqual(basket.status, Basket.OPEN)
+
+    @freeze_time('2016-01-01')
+    def test_authorized_pending_review_request(self):
+        """ Verify the view reports an error if the transaction is only authorized pending review. """
+        basket = self._create_valid_basket()
+        data = self._generate_data(basket.id)
+        self.mock_cybersource_request.side_effect = None
+        self.mock_cybersource_request.return_value = mock.Mock(
+            spec=RESTResponse,
+            resp=None,
+            status=200,
+            reason='OK',
+            # This response has been pruned to only the needed data.
+            data=self.convertToCybersourceWireFormat("""{"links":{"_self":{"href":"/pts/v2/payments/6031321796646037504006","method":"GET"}},"id":"6031321796646037504006","submit_time_utc":"2020-10-19T18:29:40Z","status":"AUTHORIZED_PENDING_REVIEW","error_information":{"reason":"CONTACT_PROCESSOR","message":"Decline - The issuing bank has questions about the request. You do not receive an authorization code programmatically, but you might receive one verbally by calling the processor."},"client_reference_information":{"code":"EDX-248939"},"processor_information":{"transaction_id":"558196000003814","network_transaction_id":"558196000003814","response_code":"001","avs":{"code":"Y","code_raw":"Y"},"card_verification":{"result_code":"2"}},"payment_information":{"account_features":{"category":"A"}}}""")
+        )
+        response = self.client.post(self.path, data)
+
+        assert response.status_code == 400
+        assert response['content-type'] == JSON
+
+        request = RequestFactory(SERVER_NAME='testserver.fake').post(self.path, data)
+        request.site = self.site
+        assert json.loads(response.content)['redirectTo'] == get_payment_microfrontend_or_basket_url(request)
+
+        # Ensure the basket is frozen
+        basket = Basket.objects.get(pk=basket.pk)
+        self.assertEqual(basket.status, Basket.MERGED)
+        assert Basket.objects.count() == 2
 
     def test_field_error(self):
         """ Verify the view responds with a JSON object containing fields with errors, when input is invalid. """
