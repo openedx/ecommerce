@@ -66,6 +66,7 @@ BasketLine = get_model('basket', 'Line')
 Benefit = get_model('offer', 'Benefit')
 BillingAddress = get_model('order', 'BillingAddress')
 Catalog = get_model('catalogue', 'Catalog')
+CodeAssignmentNudgeEmails = get_model('offer', 'CodeAssignmentNudgeEmails')
 Category = get_model('catalogue', 'Category')
 Line = get_model('order', 'Line')
 OfferAssignment = get_model('offer', 'OfferAssignment')
@@ -1391,6 +1392,7 @@ class CouponCodeAssignmentSerializer(serializers.Serializer):  # pylint: disable
         subject = validated_data.pop('subject')
         greeting = validated_data.pop('greeting')
         closing = validated_data.pop('closing')
+        email_auto_reminder = validated_data.pop('email_auto_reminder')
         available_assignments = validated_data.pop('available_assignments')
         email_iterator = iter(emails)
         offer_assignments = []
@@ -1408,6 +1410,12 @@ class CouponCodeAssignmentSerializer(serializers.Serializer):  # pylint: disable
                     user_email=email or next(email_iterator),
                     assignment_date=current_date_time,
                 )
+                # subscribe the user for nudge email if email_auto_reminder flag is on.
+                if email_auto_reminder:
+                    CodeAssignmentNudgeEmails.subscribe_nudge_email_cycle(
+                        user_email=email or next(email_iterator),
+                        code=code
+                    )
                 offer_assignments.append(new_offer_assignment)
                 # Start async email task. For MULTI_USE_PER_CUSTOMER, a single email is sent
                 email_code_pair = frozenset((new_offer_assignment.user_email, new_offer_assignment.code))
