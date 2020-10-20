@@ -310,8 +310,27 @@ class CybersourceAuthorizeViewTests(CyberSourceRESTAPIMixin, TestCase):
 
         # Ensure the basket is Submitted
         basket = Basket.objects.get(pk=basket.pk)
-        # The basket stays open, because on a DUPLICATE_REQUEST, we don't modify the basket,
-        # and instead just redirect to the reciept page.
+        self.assertEqual(basket.status, Basket.SUBMITTED)
+
+        # This response has been pruned to only the needed data.
+        self._prep_request_invalid(
+            """{"submitTimeUtc":"2020-09-30T18:53:23Z","status":"INVALID_REQUEST","reason":"DUPLICATE_REQUEST","message":"Declined - The\u00a0merchantReferenceCode\u00a0sent with this authorization request matches the merchantReferenceCode of another authorization request that you sent in the last 15 minutes."}""",  # pylint: disable=line-too-long
+            '6028635251536131304003'
+        )
+        response = self.client.post(self.path, data)
+
+        # The original basket is frozen, and the new basket is empty, so currentyl this triggers an error response
+        assert response.status_code == 400
+        assert response['content-type'] == JSON
+        assert json.loads(response.content) == {
+            'error': 'There was a problem retrieving your basket. Refresh the page to try again.',
+            'field_errors': {
+                'basket': 'There was a problem retrieving your basket. Refresh the page to try again.'
+            }
+        }
+
+        # Ensure the basket is frozen
+        basket = Basket.objects.get(pk=basket.pk + 1)
         self.assertEqual(basket.status, Basket.OPEN)
 
     @freeze_time('2016-01-01')
