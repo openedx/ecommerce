@@ -480,10 +480,10 @@ Joshuafort, MD 72104, TH",,,,,,,,,,,,,,https://banks-bender.com/,Michael Anderso
             request.site = site_configuration.site
             request.user = self.create_user(full_name='Juan M. de la Cruz')
             basket = factories.BasketFactory(owner=request.user, site=request.site)
+
             logger_name = 'ecommerce.extensions.payment.utils.logger.exception'
             fallback_log = 'SDNCheck: SDN API call received an error/timeout.' \
                 'SDNFallback function called for basket ' + str(basket.id) + '.'
-
             with self.assertLogs(logger=logger_name, level='INFO') as cm:
                 sdn_fallback_mock.return_value = total_hit_count
                 self.assertEqual(checkSDN(request, 'Juan M. de la Cruz', 'North Kristinaport', 'SN'), total_hit_count)
@@ -496,6 +496,21 @@ Joshuafort, MD 72104, TH",,,,,,,,,,,,,,https://banks-bender.com/,Michael Anderso
                     self.assertFalse(request.user.is_authenticated)
                 logging.getLogger(logger_name).info(fallback_log)
                 self.assertEqual(cm.output, ['INFO:' + logger_name + ':' + fallback_log])
+
+    def test_sdn_fallback_multiple_hits(self):
+        """
+        Verify SDNFallback can handle returning multiple hits if it finds a hit more than once.
+        """
+        csv_string = """_id,source,entity_number,type,programs,name,title,addresses,federal_register_notice,start_date,end_date,standard_order,license_requirement,license_policy,call_sign,vessel_type,gross_tonnage,gross_registered_tonnage,vessel_flag,vessel_owner,remarks,source_list_url,alt_names,citizenships,dates_of_birth,nationalities,places_of_birth,source_information_url,ids
+94734218,Specially Designated Nationals (SDN) - Treasury Department,96663868,Individual,material,Juan M. de la Cruz,Dr.,"17472 Christie Stream Apt. 976
+North Kristinaport, HI 91033, SN",,,,,,,,,,,,,,https://www.cruz.org/,Wendy Brock,DJ,1944-03-05,Faroe Islands,PK,http://juan.org/,CI
+94734219,Specially Designated Nationals (SDN) - Treasury Department,96663869,Individual,material,Juan Cruz,Dr.,"123 Main Street
+North Kristinaport, HI 91033, SN",,,,,,,,,,,,,,https://www.juarez-collier.org/,Wendy Brock,DJ,1944-03-05,Faroe Islands,PK,http://richardson-richardson.org/,CI
+37539856,Specially Designated Nationals (SDN) - Treasury Department,55159852,Individual,hotel,Sarah Jones,Mrs.,"3699 Daniel Highway
+Port Andrewport, OR 39456, EE",,,,,,,,,,,,,,http://douglas.com/,Misty Johnson,CV,1998-02-15,Ukraine,BO,https://townsend.com/,TM"""
+        populate_sdn_fallback_data_and_metadata(csv_string)
+        sdn_fallback_hit_count = checkSDNFallback('Juan Cruz', 'North Kristinaport', 'SN')
+        self.assertEqual(sdn_fallback_hit_count, 2)
 
     def test_compare_SDNCheck_vs_fallback_match_no_hit(self):
         """Log correct results from fallback and API calls: matching, no hit
