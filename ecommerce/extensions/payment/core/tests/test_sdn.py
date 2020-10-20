@@ -31,6 +31,7 @@ from ecommerce.extensions.test import factories as extensions_factories
 from ecommerce.tests.testcases import TestCase
 
 
+@ddt.ddt
 class SDNCheckTests(TestCase):
     """ Tests for the SDN check function. """
 
@@ -99,10 +100,11 @@ class SDNCheckTests(TestCase):
                 self.sdn_validator.search(self.name, self.city, self.country)
                 self.assertTrue(mock_logger.called)
 
+    @ddt.data(0, 1)
     @httpretty.activate
-    def test_sdn_check_match(self):
+    def test_sdn_check_match(self, hits):
         """ Verify the SDN check returns the number of matches and records the match. """
-        sdn_response = {'total': 1}
+        sdn_response = {'total': hits}
         self.mock_sdn_response(json.dumps(sdn_response))
         response = self.sdn_validator.search(self.name, self.city, self.country)
         self.assertEqual(response, sdn_response)
