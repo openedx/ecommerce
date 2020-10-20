@@ -8,7 +8,7 @@ import ddt
 import httpretty
 import mock
 import responses
-from CyberSource.rest import RESTResponse
+from CyberSource.rest import ApiException, RESTResponse
 from django.conf import settings
 from django.contrib.auth import get_user
 from django.test.client import RequestFactory
@@ -263,6 +263,40 @@ class CybersourceAuthorizeViewTests(CyberSourceRESTAPIMixin, TestCase):
         # Ensure the basket is Submitted
         basket = Basket.objects.get(pk=basket.pk)
         self.assertEqual(basket.status, Basket.SUBMITTED)
+
+    def test_duplicate_payment(self):
+        """ Verify the view errors as expected if there is a duplicate payment attempt after a successful payment. """
+        # This unit test describes the current state of the code, but I'm not sure if there are other
+        # situations that would result in a duplicate payment that we should handle differently.
+
+        basket = self._create_valid_basket()
+        data = self._generate_data(basket.id)
+        self.mock_cybersource_request.side_effect = ApiException(
+            http_resp=mock.Mock(
+                spec=RESTResponse,
+                resp=None,
+                status=400,
+                reason='BAD REQUEST',
+                getheaders=mock.Mock(return_value={'v-c-correlation-id': '6028635251536131304003'}),
+                # This response has been pruned to only the needed data.
+                data=self.convertToCybersourceWireFormat("""{"submitTimeUtc":"2020-09-30T18:53:23Z","status":"INVALID_REQUEST","reason":"DUPLICATE_REQUEST","message":"Declined - The\u00a0merchantReferenceCode\u00a0sent with this authorization request matches the merchantReferenceCode of another authorization request that you sent in the last 15 minutes."}""")
+            )
+        )
+        response = self.client.post(self.path, data)
+
+        assert response.status_code == 201
+        assert response['content-type'] == JSON
+        assert json.loads(response.content)['receipt_page_url'] == get_receipt_page_url(
+            self.site.siteconfiguration,
+            order_number="EDX-100001",
+            disable_back_button=True,
+        )
+
+        # Ensure the basket is Submitted
+        basket = Basket.objects.get(pk=basket.pk)
+        # The basket stays open, because on a DUPLICATE_REQUEST, we don't modify the basket,
+        # and instead just redirect to the reciept page.
+        self.assertEqual(basket.status, Basket.OPEN)
 
     def test_field_error(self):
         """ Verify the view responds with a JSON object containing fields with errors, when input is invalid. """
