@@ -674,7 +674,7 @@ class BasketUtilsTests(DiscoveryTestMixin, BasketMixin, TestCase):
     def test_prepare_basket_with_duplicate_seat(self):
         """ Verify a basket fixes the case where flush doesn't work and we attempt adding duplicate seat. """
         with mock.patch('ecommerce.extensions.basket.utils.Basket.flush'):
-            product_type_seat = ProductClass.objects.create(name='Seat')
+            product_type_seat, _ = ProductClass.objects.get_or_create(name='Seat')
             product1 = ProductFactory(stockrecords__partner__short_code='test1', product_class=product_type_seat)
             prepare_basket(self.request, [product1])
             basket = prepare_basket(self.request, [product1])  # try to add a duplicate seat
@@ -682,7 +682,7 @@ class BasketUtilsTests(DiscoveryTestMixin, BasketMixin, TestCase):
 
     def test_is_duplicate_seat_attempt__seats(self):
         """ Verify we get a correct response for duplicate seat check (seats) """
-        product_type_seat = ProductClass.objects.create(name='Seat')
+        product_type_seat, _ = ProductClass.objects.get_or_create(name='Seat')
         product1 = ProductFactory(stockrecords__partner__short_code='test1', product_class=product_type_seat)
         product2 = ProductFactory(stockrecords__partner__short_code='test2', product_class=product_type_seat)
         seat_basket = prepare_basket(self.request, [product1])
@@ -694,7 +694,7 @@ class BasketUtilsTests(DiscoveryTestMixin, BasketMixin, TestCase):
 
     def test_is_duplicate_seat_attempt__enrollment_code(self):
         """ Verify we get a correct response for duplicate seat check (false for Enrollment code)"""
-        enrollment_class = ProductClass.objects.create(name='Enrollment Code')
+        enrollment_class, _ = ProductClass.objects.get_or_create(name='Enrollment Code')
         enrollment_product = ProductFactory(stockrecords__partner__short_code='test3', product_class=enrollment_class)
         basket_with_enrollment_code = prepare_basket(self.request, [enrollment_product])
         result_product3 = is_duplicate_seat_attempt(basket_with_enrollment_code, enrollment_product)

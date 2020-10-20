@@ -97,7 +97,7 @@ these models, which are used for multi-tenancy.
 
   .. code-block:: bash
 
-      $ tox -e py38-tests -- ecommerce.courses.tests.test_utils:UtilsTests.test_get_course_info_from_catalog_cached
+      $ pytest ecommerce/courses/tests/test_utils.py::UtilsTests::test_get_course_info_from_catalog_cached
 
 To debug when running tests using ``manage.py``, you may need to use the
 following instead of ``pdb`` directly, or nosetests may hang while creating

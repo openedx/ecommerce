@@ -434,7 +434,7 @@ class CouponMixin(SiteMixin):
 
     def setUp(self):
         super(CouponMixin, self).setUp()
-        self.category = factories.CategoryFactory(path='1000')
+        self.category = factories.CategoryFactory()
 
         # Force the creation of a coupon ProductClass
         self.coupon_product_class  # pylint: disable=pointless-statement
