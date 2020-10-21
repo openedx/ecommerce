@@ -81,6 +81,7 @@ Order = get_model('order', 'Order')
 Line = get_model('basket', 'Line')
 OfferAssignment = get_model('offer', 'OfferAssignment')
 OfferAssignmentEmailTemplates = get_model('offer', 'OfferAssignmentEmailTemplates')
+CodeAssignmentNudgeEmails = get_model('offer', 'CodeAssignmentNudgeEmails')
 Product = get_model('catalogue', 'Product')
 ProductClass = get_model('catalogue', 'ProductClass')
 Voucher = get_model('voucher', 'Voucher')
@@ -775,8 +776,9 @@ class EnterpriseCouponViewSet(CouponViewSet):
         template = OfferAssignmentEmailTemplates.get_template(template_id)
         enterprise_customer = coupon.attr.enterprise_customer_uuid
         self._validate_email_fields(subject, greeting, closing)
+        assignments = request.data.get('assignments')
         serializer = CouponCodeRevokeSerializer(
-            data=request.data.get('assignments'),
+            data=assignments,
             many=True,
             context={
                 'coupon': coupon,
@@ -789,6 +791,13 @@ class EnterpriseCouponViewSet(CouponViewSet):
             serializer.save()
             # Create a record of the email sent
             self._create_offer_assignment_email_sent_record(enterprise_customer, REVOKE, template)
+
+            # unsubscribe user from receiving nudge emails
+            CodeAssignmentNudgeEmails.unsubscribe_from_nudging(
+                map(lambda assignment: assignment['code'], assignments),
+                map(lambda assignment: assignment['email'], assignments)
+            )
+
             return Response(serializer.data, status=status.HTTP_200_OK)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

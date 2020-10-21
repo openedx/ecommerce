@@ -52,7 +52,10 @@ from ecommerce.extensions.offer.constants import (
     VOUCHER_REDEEMED
 )
 from ecommerce.extensions.payment.models import EnterpriseContractMetadata
-from ecommerce.extensions.test.factories import CodeAssignmentNudgeEmailTemplatesFactory
+from ecommerce.extensions.test.factories import (
+    CodeAssignmentNudgeEmailsFactory,
+    CodeAssignmentNudgeEmailTemplatesFactory
+)
 from ecommerce.invoice.models import Invoice
 from ecommerce.programs.custom import class_path
 from ecommerce.tests.mixins import JwtMixin, ThrottlingMixin
@@ -64,6 +67,7 @@ CodeAssignmentNudgeEmails = get_model('offer', 'CodeAssignmentNudgeEmails')
 OfferAssignment = get_model('offer', 'OfferAssignment')
 OfferAssignmentEmailSentRecord = get_model('offer', 'OfferAssignmentEmailSentRecord')
 OfferAssignmentEmailTemplates = get_model('offer', 'OfferAssignmentEmailTemplates')
+CodeAssignmentNudgeEmails = get_model('offer', 'CodeAssignmentNudgeEmails')
 Product = get_model('catalogue', 'Product')
 Voucher = get_model('voucher', 'Voucher')
 VoucherApplication = get_model('voucher', 'VoucherApplication')
@@ -2310,6 +2314,19 @@ class EnterpriseCouponViewSetRbacTests(
             )
 
         offer_assignment = OfferAssignment.objects.filter(user_email=email).first()
+
+        # create nudge email templates and subscription records
+        for email_type in (DAY3, DAY10, DAY19):
+            nudge_email_template = CodeAssignmentNudgeEmailTemplatesFactory(email_type=email_type)
+            nudge_email = CodeAssignmentNudgeEmailsFactory(
+                email_template=nudge_email_template,
+                user_email=email,
+                code=offer_assignment.code
+            )
+
+            # verify subscription is active
+            assert nudge_email.is_subscribed
+
         payload = {'assignments': [{'email': email, 'code': offer_assignment.code}]}
         if send_email:
             payload['template'] = 'Test template'
@@ -2326,6 +2343,14 @@ class EnterpriseCouponViewSetRbacTests(
         for offer_assignment in OfferAssignment.objects.filter(user_email=email):
             assert offer_assignment.status == OFFER_ASSIGNMENT_REVOKED
             self.assertIsNotNone(offer_assignment.revocation_date)
+
+        # verify that nudge emails subscriptions are inactive
+        assert CodeAssignmentNudgeEmails.objects.filter(is_subscribed=True).count() == 0
+        assert CodeAssignmentNudgeEmails.objects.filter(
+            code__in=[offer_assignment.code],
+            user_email__in=[email],
+            is_subscribed=False
+        ).count() == 3
 
     def test_coupon_codes_revoke_success_with_bounced_email(self):
         """Test revoking codes from users when the offer assignment has bounced email status."""

@@ -28,6 +28,7 @@ BasketAttribute = get_model('basket', 'BasketAttribute')
 BasketAttributeType = get_model('basket', 'BasketAttributeType')
 NoShippingRequired = get_class('shipping.methods', 'NoShippingRequired')
 OfferAssignment = get_model('offer', 'OfferAssignment')
+CodeAssignmentNudgeEmails = get_model('offer', 'CodeAssignmentNudgeEmails')
 Order = get_model('order', 'Order')
 OrderNumberGenerator = get_class('order.utils', 'OrderNumberGenerator')
 OrderTotalCalculator = get_class('checkout.calculators', 'OrderTotalCalculator')
@@ -364,6 +365,9 @@ class EdxOrderPlacementMixin(OrderPlacementMixin, metaclass=abc.ABCMeta):
             ).order_by('-date_created').first()
             assignment.status = OFFER_REDEEMED
             assignment.save()
+
+            # unsubscribe user from receiving nudge emails
+            CodeAssignmentNudgeEmails.unsubscribe_from_nudging(codes=[voucher.code], user_emails=[basket.owner.email])
 
     def create_assignments_for_multi_use_per_customer(self, order):
         """
