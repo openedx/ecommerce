@@ -730,7 +730,7 @@ class Cybersource(ApplePayMixin, BaseClientSidePaymentProcessor):
         return super().record_processor_response(response, transaction_id=transaction_id, basket=basket)
 
 
-class CybersourceREST(Cybersource):  # pragma: no cover
+class CybersourceREST(Cybersource):
     """
     A temporary PaymentProcessor dedicated to carefully switching to the Cybersource REST payment api
     """
