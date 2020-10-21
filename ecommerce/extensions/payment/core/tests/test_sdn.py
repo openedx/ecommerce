@@ -469,24 +469,24 @@ Joshuafort, MD 72104, TH",,,,,,,,,,,,,,https://banks-bender.com/,Michael Anderso
         If hits(s) is >=1, log hit(s) and block the user from making a purchase by deactivating and logging out.
         If there is no hit, allow purchase.
         """
+        request = RequestFactory().post('/payment/cybersource/submit/')
+        middleware = SessionMiddleware()
+        middleware.process_request(request)
+        request.session.save()
+        site_configuration = self.site.siteconfiguration
+        site_configuration.save()
+        site_configuration.enable_sdn_check = True
+        request.site = site_configuration.site
+        request.user = self.create_user(full_name='Juan M. de la Cruz')
+        basket = factories.BasketFactory(owner=request.user, site=request.site)
         with mock.patch.object(SDNClient, 'search', side_effect=Timeout):
-            request = RequestFactory().post('/payment/cybersource/submit/')
-            middleware = SessionMiddleware()
-            middleware.process_request(request)
-            request.session.save()
-            site_configuration = self.site.siteconfiguration
-            site_configuration.save()
-            site_configuration.enable_sdn_check = True
-            request.site = site_configuration.site
-            request.user = self.create_user(full_name='Juan M. de la Cruz')
-            basket = factories.BasketFactory(owner=request.user, site=request.site)
-
             logger_name = 'ecommerce.extensions.payment.utils.logger.exception'
-            fallback_log = 'SDNCheck: SDN API call received an error/timeout.' \
-                'SDNFallback function called for basket ' + str(basket.id) + '.'
-            with self.assertLogs(logger=logger_name, level='INFO') as cm:
+            log_message = 'SDNCheck: SDN API call received an error: %s. SDNFallback function called for basket %d' % (str(Timeout), basket.id)
+            with self.assertLogs(logger_name, level='INFO') as log:
                 sdn_fallback_mock.return_value = total_hit_count
                 self.assertEqual(checkSDN(request, 'Juan M. de la Cruz', 'North Kristinaport', 'SN'), total_hit_count)
+                logging.getLogger(logger_name).info(log_message)
+                assert log_message in log.output[0]
                 self.assertTrue(sdn_fallback_mock.called)
                 if total_hit_count == 0:
                     self.assertFalse(deactivate_account_mock.called)
@@ -494,8 +494,6 @@ Joshuafort, MD 72104, TH",,,,,,,,,,,,,,https://banks-bender.com/,Michael Anderso
                 else:
                     self.assertTrue(deactivate_account_mock.called)
                     self.assertFalse(request.user.is_authenticated)
-                logging.getLogger(logger_name).info(fallback_log)
-                self.assertEqual(cm.output, ['INFO:' + logger_name + ':' + fallback_log])
 
     def test_sdn_fallback_multiple_hits(self):
         """

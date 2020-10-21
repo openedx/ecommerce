@@ -49,12 +49,13 @@ def checkSDN(request, name, city, country):
         )
         try:
             response = sdn_check.search(name, city, country)
-        except (HTTPError, Timeout):
+        except (HTTPError, Timeout) as e:
             # If the SDN API endpoint is down or times out
-            # checkSDNFallback will be called. If it finds a match
+            # checkSDNFallback will be called. If it finds a hit
             # the user will be blocked from making a purchase.
             logger.info(
-                'SDNCheck: SDN API call received an error/timeout. SDNFallback function called for basket [%d].',
+                'SDNCheck: SDN API call received an error: %s. SDNFallback function called for basket %d.',
+                str(e),
                 basket.id
             )
             sdn_fallback_hit_count = checkSDNFallback(
