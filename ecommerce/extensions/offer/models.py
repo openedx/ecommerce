@@ -773,5 +773,16 @@ class CodeAssignmentNudgeEmails(TimeStampedModel):
                     user_email, code, email_type
                 )
 
+    @classmethod
+    def unsubscribe_from_nudging(cls, codes, user_emails):
+        """
+        Unsubscribe users from receiving nudge emails.
+
+        Args:
+            codes (list): list of voucher codes
+            user_emails (listt): list of user emails
+        """
+        cls.objects.filter(code__in=codes, user_email__in=user_emails, already_sent=False).update(is_subscribed=False)
+
 
 from oscar.apps.offer.models import *  # noqa isort:skip pylint: disable=wildcard-import,unused-wildcard-import,wrong-import-position,wrong-import-order,ungrouped-imports

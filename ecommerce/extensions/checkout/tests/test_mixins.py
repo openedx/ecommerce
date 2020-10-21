@@ -26,10 +26,13 @@ from ecommerce.extensions.basket.utils import basket_add_organization_attribute
 from ecommerce.extensions.checkout.exceptions import BasketNotFreeError
 from ecommerce.extensions.checkout.mixins import OFFER_ASSIGNED, OFFER_REDEEMED, EdxOrderPlacementMixin
 from ecommerce.extensions.fulfillment.status import ORDER
+from ecommerce.extensions.offer.constants import DAY3, DAY10, DAY19
 from ecommerce.extensions.payment.tests.mixins import PaymentEventsMixin
 from ecommerce.extensions.payment.tests.processors import DummyProcessor
 from ecommerce.extensions.refund.tests.mixins import RefundTestMixin
 from ecommerce.extensions.test.factories import (
+    CodeAssignmentNudgeEmailsFactory,
+    CodeAssignmentNudgeEmailTemplatesFactory,
     EnterpriseOfferFactory,
     OfferAssignmentFactory,
     VoucherFactory,
@@ -47,6 +50,7 @@ BasketAttribute = get_model('basket', 'BasketAttribute')
 BasketAttributeType = get_model('basket', 'BasketAttributeType')
 NoShippingRequired = get_class('shipping.methods', 'NoShippingRequired')
 OfferAssignment = get_model('offer', 'OfferAssignment')
+CodeAssignmentNudgeEmails = get_model('offer', 'CodeAssignmentNudgeEmails')
 OrderTotalCalculator = get_class('checkout.calculators', 'OrderTotalCalculator')
 PaymentEventType = get_model('order', 'PaymentEventType')
 SourceType = get_model('payment', 'SourceType')
@@ -528,11 +532,31 @@ class EdxOrderPlacementMixinTests(BusinessIntelligenceMixin, PaymentEventsMixin,
         voucher_application = VoucherApplication.objects.create(voucher=voucher, user=self.user, order=order)
         offer_assignment = OfferAssignmentFactory(offer=enterprise_offer, code=voucher.code, user_email=self.user.email)
 
+        # create nudge email templates and subscription records
+        for email_type in (DAY3, DAY10, DAY19):
+            nudge_email_template = CodeAssignmentNudgeEmailTemplatesFactory(email_type=email_type)
+            nudge_email = CodeAssignmentNudgeEmailsFactory(
+                email_template=nudge_email_template,
+                user_email=self.user.email,
+                code=voucher.code
+            )
+
+            # verify subscription is active
+            assert nudge_email.is_subscribed
+
         EdxOrderPlacementMixin().update_assigned_voucher_offer_assignment(order)
 
         offer_assignment = OfferAssignment.objects.get(id=offer_assignment.id)
         assert offer_assignment.status == OFFER_REDEEMED
         assert offer_assignment.voucher_application == voucher_application
+
+        # verify that nudge emails subscriptions are inactive
+        assert CodeAssignmentNudgeEmails.objects.filter(is_subscribed=True).count() == 0
+        assert CodeAssignmentNudgeEmails.objects.filter(
+            code__in=[voucher.code],
+            user_email__in=[self.user.email],
+            is_subscribed=False
+        ).count() == 3
 
     def test_create_assignments_for_multi_use_per_customer(self, __):
         """
