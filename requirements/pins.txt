@@ -11,9 +11,6 @@
 # Newer version introduces `No installed app with label 'communication'.`
 django-oscar<2.1
 
-# Because of django incompatibility
-edx-rest-api-client<2.0.0
-
 # causing tests failures
 httpretty==0.9.7
 
@@ -22,6 +19,7 @@ jsonfield2<=3.0.3
 
 # 5.4 introduces test order problems that need to be resolved.
 pytest<5.4.0
+pytest-django<4.0 # Newer versions require pytest >= 5.4.0
 
 # Pinned to preserve the status quo
 pytz==2016.10
