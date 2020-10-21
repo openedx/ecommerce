@@ -17,6 +17,7 @@ from testfixtures import LogCapture
 from ecommerce.core.models import User
 from ecommerce.extensions.payment.core.sdn import (
     SDNClient,
+    checkSDN,
     checkSDNFallback,
     compare_SDNCheck_vs_fallback,
     extract_country_information,
@@ -34,6 +35,8 @@ from ecommerce.tests.testcases import TestCase
 @ddt.ddt
 class SDNCheckTests(TestCase):
     """ Tests for the SDN check function. """
+
+    LOGGER_NAME = 'ecommerce.extensions.payment.core.sdn'
 
     def setUp(self):
         super(SDNCheckTests, self).setUp()
@@ -108,6 +111,70 @@ class SDNCheckTests(TestCase):
         self.mock_sdn_response(json.dumps(sdn_response))
         response = self.sdn_validator.search(self.name, self.city, self.country)
         self.assertEqual(response, sdn_response)
+
+    @ddt.data(0, 1)
+    @httpretty.activate
+    def test_search_isn_match(self, hits):
+        """ Verify the ISN check returns the number of matches and records the match. """
+        sdn_response = {'total': hits}
+
+        # Mock the SDN check API endpoint response.
+        params = urlencode({
+            'api_key': self.sdn_api_key,
+            'sources': 'ISN',
+            'name': str(self.name).encode('utf-8'),
+            'address': str(self.city).encode('utf-8'),
+            'countries': self.country
+        })
+        sdn_check_url = '{api_url}?{params}'.format(
+            api_url=self.sdn_api_url,
+            params=params
+        )
+
+        httpretty.register_uri(
+            httpretty.GET,
+            sdn_check_url,
+            status=200,
+            body=json.dumps(sdn_response),
+            content_type='application/json'
+        )
+
+        response = self.sdn_validator.search(self.name, self.city, self.country, search_just_isn_list=True)
+        self.assertEqual(response, sdn_response)
+
+    @mock.patch.object(SDNClient, 'deactivate_user')
+    @mock.patch('ecommerce.extensions.payment.core.sdn.logout')
+    @mock.patch('ecommerce.extensions.payment.core.sdn.Basket.get_basket', mock.MagicMock())
+    @ddt.data(0, 1)
+    def test_checkSDN(self, isn_hits_returned, logout_mock, deactivate_user_mock):
+        """" Verify that isn is correctly being called and returning hits """
+        request = mock.MagicMock()
+        # Return 0 the first time search is called, and the number of isn_hits to mock the second time
+        with mock.patch.object(SDNClient,
+                               'search',
+                               side_effect=[{'total': 0}, {'total': isn_hits_returned}]) as search_mock:
+            with LogCapture(self.LOGGER_NAME) as log_isn_called:
+                hit_count = checkSDN(request, self.name, self.city, self.country)
+
+                self.assertEqual(hit_count, isn_hits_returned)
+                log_isn_called.check(
+                    (
+                        self.LOGGER_NAME,
+                        'INFO',
+                        'SDN API called with ISN. ISN Hits: [%s]' % hit_count
+                    )
+                )
+                # We should have searched twice -- once for sdn, and once for isn
+                calls = [mock.call(self.name, self.city, self.country),
+                         mock.call(self.name, self.city, self.country, search_just_isn_list=True)]
+                search_mock.assert_has_calls(calls)
+
+                if hit_count > 0:
+                    logout_mock.assert_called()
+                    deactivate_user_mock.assert_called()
+                else:
+                    logout_mock.assert_not_called()
+                    deactivate_user_mock.assert_not_called()
 
     @httpretty.activate
     def test_sdn_check_unicode_match(self):

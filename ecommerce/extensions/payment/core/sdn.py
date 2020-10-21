@@ -50,6 +50,16 @@ def checkSDN(request, name, city, country):
         try:
             response = sdn_check.search(name, city, country)
             hit_count = response['total']
+
+            # Quick change to make sure we call the isn list without fields that don't exist
+            if hit_count == 0:
+                response = sdn_check.search(name, city, country, search_just_isn_list=True)
+                hit_count = response['total']
+                logger.info(
+                    'SDN API called with ISN. ISN Hits: [%s]',
+                    hit_count
+                )
+
             if hit_count > 0:
                 sdn_check.deactivate_user(
                     basket,
@@ -148,7 +158,7 @@ class SDNClient:
             # we ensure any error would not interfere with the actual transaction.
             logger.warning("Fuzzy SDN check error [%s]", str(e))
 
-    def search(self, name, city, country):
+    def search(self, name, city, country, search_just_isn_list=False):
         """
         Searches the OFAC list for an individual with the specified details.
         The check returns zero hits if:
@@ -163,16 +173,24 @@ class SDNClient:
         Returns:
             dict: SDN API response.
         """
-        # Changes part of REV-1209 - see https://github.com/edx/ecommerce/pull/3020
-        params_dict = {
-            'sources': self.sdn_list,
-            'type': 'individual',
-            'name': str(name).encode('utf-8'),
-            # We are using the city as the address parameter value as indicated in the documentation:
-            # http://developer.trade.gov/consolidated-screening-list.html
-            'address': str(city).encode('utf-8'),
-            'countries': country
-        }
+        # Quick change to have a way to search the isn list
+        if search_just_isn_list:
+            params_dict = {
+                'sources': 'ISN',
+                'name': str(name).encode('utf-8'),
+                'countries': country
+            }
+        else:
+            # Changes part of REV-1209 - see https://github.com/edx/ecommerce/pull/3020
+            params_dict = {
+                'sources': self.sdn_list,
+                'type': 'individual',
+                'name': str(name).encode('utf-8'),
+                # We are using the city as the address parameter value as indicated in the documentation:
+                # http://developer.trade.gov/consolidated-screening-list.html
+                'address': str(city).encode('utf-8'),
+                'countries': country
+            }
         params = urlencode(params_dict)
         sdn_check_url = '{api_url}?{params}'.format(
             api_url=self.api_url,
