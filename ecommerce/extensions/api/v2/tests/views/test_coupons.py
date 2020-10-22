@@ -1306,10 +1306,9 @@ class CouponCategoriesListViewTests(TestCase):
         """ Verify the endpoint returns successfully. """
         response = self.client.get(self.path + '?page_size=200')
         response_data = response.json()
-        self.assertEqual(response_data['count'], 26)
         received_coupon_categories = {category['name'] for category in response_data['results']}
-        for category in TEST_CATEGORIES:
-            self.assertTrue(category in received_coupon_categories)
+        self.assertCountEqual(TEST_CATEGORIES, received_coupon_categories)
+        self.assertEqual(response_data['count'], 26)
 
     def test_deprecated_category_filtering(self):
         """ Verify the endpoint doesn't return deprecated coupon categories. """
