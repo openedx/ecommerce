@@ -656,7 +656,7 @@ class CodeAssignmentNudgeEmailTemplates(AbstractBaseEmailTemplate):
         """
         nudge_email_template = None
         try:
-            nudge_email_template = cls.objects.get(email_type=email_type, is_active=True)
+            nudge_email_template = cls.objects.get(email_type=email_type, active=True)
         except (cls.DoesNotExist, cls.MultipleObjectsReturned) as exe:
             logger.error(
                 'CodeAssignmentNudgeEmailTemplates raised an error while getting the object for email_type %s,'
@@ -671,7 +671,7 @@ class CodeAssignmentNudgeEmailTemplates(AbstractBaseEmailTemplate):
         Return the formatted email body and subject.
         """
         email_body = None
-        if Voucher.objects.filter(code=code).exits():
+        if Voucher.objects.filter(code=code).exists():
             voucher = Voucher.objects.get(code=code)
             offer = voucher.best_offer
             max_usage_limit = offer.max_global_applications or OFFER_MAX_USES_DEFAULT
@@ -683,7 +683,7 @@ class CodeAssignmentNudgeEmailTemplates(AbstractBaseEmailTemplate):
                 user_email,
                 code,
                 max_usage_limit,
-                voucher.expiry_date
+                voucher.end_datetime
             )
         else:
             logger.warning(
@@ -709,7 +709,7 @@ class CodeAssignmentNudgeEmails(TimeStampedModel):
         Subscribe the nudge email cycle for given user email and code.
         """
         now_datetime = datetime.datetime.now()
-        for days, email_type in enumerate(NUDGE_EMAIL_CYCLE):
+        for days, email_type in NUDGE_EMAIL_CYCLE.items():
             email_template = CodeAssignmentNudgeEmailTemplates.get_nudge_email_template(email_type=email_type)
             if email_template:
                 data = {'code': code, 'user_email': user_email, 'email_template': email_template}

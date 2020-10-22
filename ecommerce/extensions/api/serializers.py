@@ -1404,10 +1404,11 @@ class CouponCodeAssignmentSerializer(serializers.Serializer):  # pylint: disable
             offer = available_assignments[code]['offer']
             email = next(email_iterator) if voucher_usage_type == Voucher.MULTI_USE_PER_CUSTOMER else None
             for _ in range(available_assignments[code]['num_slots']):
+                user_email = email or next(email_iterator)
                 new_offer_assignment = OfferAssignment.objects.create(
                     offer=offer,
                     code=code,
-                    user_email=email or next(email_iterator),
+                    user_email=user_email,
                     assignment_date=current_date_time,
                 )
                 # subscribe the user for nudge email if email_auto_reminder flag is on.
