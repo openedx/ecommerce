@@ -32,8 +32,10 @@ from ecommerce.extensions.offer.constants import (
     OFFER_ASSIGNMENT_EMAIL_BOUNCED,
     OFFER_ASSIGNMENT_EMAIL_PENDING,
     OFFER_ASSIGNMENT_REVOKED,
+    OFFER_MAX_USES_DEFAULT,
     OFFER_REDEEMED
 )
+from ecommerce.extensions.offer.utils import format_assigned_offer_email
 
 OFFER_PRIORITY_ENTERPRISE = 10
 OFFER_PRIORITY_VOUCHER = 20
@@ -664,11 +666,32 @@ class CodeAssignmentNudgeEmailTemplates(AbstractBaseEmailTemplate):
             )
         return nudge_email_template
 
-    def get_email_content(self):
+    def get_email_content(self, user_email, code):
         """
-        Return the formatted email body and email subject.
+        Return the formatted email body and subject.
         """
-        email_body, email_subject = None, None
+        email_body = None
+        if Voucher.objects.filter(code=code).exits():
+            voucher = Voucher.objects.get(code=code)
+            offer = voucher.best_offer
+            max_usage_limit = offer.max_global_applications or OFFER_MAX_USES_DEFAULT
+            max_usage_limit = max_usage_limit if offer.max_global_applications == Voucher.MULTI_USE_PER_CUSTOMER else 1
+
+            email_body = format_assigned_offer_email(
+                self.email_greeting,
+                self.email_closing,
+                user_email,
+                code,
+                max_usage_limit,
+                voucher.expiry_date
+            )
+        else:
+            logger.warning(
+                '[Code Assignment Nudge Email] Unable to send the email for user_email: %s, code: %s because code does '
+                'not have associated voucher.',
+                user_email,
+                code
+            )
         return email_body, self.email_subject
 
 

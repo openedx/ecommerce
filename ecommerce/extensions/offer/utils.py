@@ -128,6 +128,29 @@ def get_redirect_to_email_confirmation_if_required(request, offer, product):
     return None
 
 
+def format_assigned_offer_email(greeting, closing, learner_email, code, redemptions_remaining, code_expiration_date):
+    """
+    Arguments:
+        greeting (String): Email greeting (prefix)
+        closing (String): Email closing (suffix)
+        learner_email (String): Email of the customer who will receive the code.
+        code (String): Code for the user.
+        redemptions_remaining (Integer): Number of times the code can be redeemed.
+        code_expiration_date(Datetime): Date till code is valid.
+
+
+    Return the formatted email body for offer assignment.
+    """
+    email_template = settings.OFFER_ASSIGNMENT_EMAIL_TEMPLATE
+    placeholder_dict = SafeDict(
+        REDEMPTIONS_REMAINING=redemptions_remaining,
+        USER_EMAIL=learner_email,
+        CODE=code,
+        EXPIRATION_DATE=code_expiration_date
+    )
+    return format_email(email_template, placeholder_dict, greeting, closing)
+
+
 def send_assigned_offer_email(
         subject,
         greeting,
@@ -157,15 +180,14 @@ def send_assigned_offer_email(
         *code_expiration_date*
             Date till code is valid.
     """
-    email_template = settings.OFFER_ASSIGNMENT_EMAIL_TEMPLATE
-    placeholder_dict = SafeDict(
-        REDEMPTIONS_REMAINING=redemptions_remaining,
-        USER_EMAIL=learner_email,
-        CODE=code,
-        EXPIRATION_DATE=code_expiration_date
+    email_body = format_assigned_offer_email(
+        greeting,
+        closing,
+        learner_email,
+        code,
+        redemptions_remaining,
+        code_expiration_date
     )
-    email_body = format_email(email_template, placeholder_dict, greeting, closing)
-
     send_offer_assignment_email.delay(learner_email, offer_assignment_id, subject, email_body, None,
                                       base_enterprise_url)
 

@@ -40,11 +40,16 @@ class Command(BaseCommand):
             total_nudge_emails_count
         )
         for nudge_email in nudge_emails:
-            email_body, email_subject = nudge_email.email_template.get_email_content()
-            nudge_email.already_sent = True
-            nudge_email.save()
-            send_nudge_email_count += 1
-            send_offer_usage_email.delay(nudge_email.user_email, email_subject, email_body)
+            # Get the formatted email body and subject on the bases of given code.
+            email_body, email_subject = nudge_email.email_template.get_email_content(
+                nudge_email.user_email,
+                nudge_email.code
+            )
+            if email_body:
+                nudge_email.already_sent = True
+                nudge_email.save()
+                send_nudge_email_count += 1
+                send_offer_usage_email.delay(nudge_email.user_email, email_subject, email_body)
         logger.info(
             '[Code Assignment Nudge Email] %s of %s added to the email sending queue.',
             total_nudge_emails_count,
