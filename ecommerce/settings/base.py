@@ -569,6 +569,7 @@ CELERY_ROUTES = {
     'ecommerce_worker.sailthru.v1.tasks.send_offer_assignment_email': {'queue': 'ecommerce.email_marketing'},
     'ecommerce_worker.sailthru.v1.tasks.send_offer_update_email': {'queue': 'ecommerce.email_marketing'},
     'ecommerce_worker.sailthru.v1.tasks.send_offer_usage_email': {'queue': 'ecommerce.email_marketing'},
+    'ecommerce_worker.sailthru.v1.tasks.send_code_assignment_nudge_email': {'queue': 'ecommerce.email_marketing'},
 }
 
 # Prevent Celery from removing handlers on the root logger. Allows setting custom logging handlers.
