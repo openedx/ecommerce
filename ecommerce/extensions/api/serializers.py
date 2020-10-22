@@ -1411,16 +1411,16 @@ class CouponCodeAssignmentSerializer(serializers.Serializer):  # pylint: disable
                     user_email=user_email,
                     assignment_date=current_date_time,
                 )
-                # subscribe the user for nudge email if email_auto_reminder flag is on.
-                if email_auto_reminder:
-                    CodeAssignmentNudgeEmails.subscribe_nudge_email_cycle(
-                        user_email=email or next(email_iterator),
-                        code=code
-                    )
                 offer_assignments.append(new_offer_assignment)
                 # Start async email task. For MULTI_USE_PER_CUSTOMER, a single email is sent
                 email_code_pair = frozenset((new_offer_assignment.user_email, new_offer_assignment.code))
                 if email_code_pair not in emails_already_sent:
+                    # subscribe the user for nudge email if email_auto_reminder flag is on.
+                    if email_auto_reminder:
+                        CodeAssignmentNudgeEmails.subscribe_nudge_email_cycle(
+                            user_email=user_email,
+                            code=code
+                        )
                     self._trigger_email_sending_task(
                         subject, greeting, closing, new_offer_assignment, voucher_usage_type, base_enterprise_url,
                     )

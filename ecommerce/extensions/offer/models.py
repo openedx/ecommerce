@@ -675,14 +675,13 @@ class CodeAssignmentNudgeEmailTemplates(AbstractBaseEmailTemplate):
             voucher = Voucher.objects.get(code=code)
             offer = voucher.best_offer
             max_usage_limit = offer.max_global_applications or OFFER_MAX_USES_DEFAULT
-            max_usage_limit = max_usage_limit if offer.max_global_applications == Voucher.MULTI_USE_PER_CUSTOMER else 1
 
             email_body = format_assigned_offer_email(
                 self.email_greeting,
                 self.email_closing,
                 user_email,
                 code,
-                max_usage_limit,
+                max_usage_limit if offer.max_global_applications == Voucher.MULTI_USE_PER_CUSTOMER else 1,
                 voucher.end_datetime
             )
         else:
@@ -716,10 +715,10 @@ class CodeAssignmentNudgeEmails(TimeStampedModel):
                 if not cls.objects.filter(**data).exists():
                     data['email_date'] = now_datetime + relativedelta(days=int(days))
                     cls.objects.create(**data)
-                logger.info(
-                    'Created a nudge email for user_email: %s, code: %s, email_type: %s',
-                    user_email, code, email_type
-                )
+                    logger.info(
+                        'Created a nudge email for user_email: %s, code: %s, email_type: %s',
+                        user_email, code, email_type
+                    )
             else:
                 logger.warning(
                     'Unable to create a nudge email for user_email: %s, code: %s, email_type: %s',
