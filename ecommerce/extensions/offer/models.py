@@ -703,7 +703,7 @@ class CodeAssignmentNudgeEmails(TimeStampedModel):
     is_subscribed = models.BooleanField(help_text=_('This user should receive email'), default=True)
 
     @classmethod
-    def subscribe_nudge_email_cycle(cls, user_email, code):
+    def subscribe_nudge_emails(cls, user_email, code):
         """
         Subscribe the nudge email cycle for given user email and code.
         """
@@ -711,7 +711,11 @@ class CodeAssignmentNudgeEmails(TimeStampedModel):
         for days, email_type in NUDGE_EMAIL_CYCLE.items():
             email_template = CodeAssignmentNudgeEmailTemplates.get_nudge_email_template(email_type=email_type)
             if email_template:
-                data = {'code': code, 'user_email': user_email, 'email_template': email_template}
+                data = {
+                    'code': code,
+                    'user_email': user_email,
+                    'email_template': email_template
+                }
                 if not cls.objects.filter(**data).exists():
                     data['email_date'] = now_datetime + relativedelta(days=int(days))
                     cls.objects.create(**data)

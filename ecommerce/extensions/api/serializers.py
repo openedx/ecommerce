@@ -1417,7 +1417,7 @@ class CouponCodeAssignmentSerializer(serializers.Serializer):  # pylint: disable
                 if email_code_pair not in emails_already_sent:
                     # subscribe the user for nudge email if email_auto_reminder flag is on.
                     if email_auto_reminder:
-                        CodeAssignmentNudgeEmails.subscribe_nudge_email_cycle(
+                        CodeAssignmentNudgeEmails.subscribe_nudge_emails(
                             user_email=user_email,
                             code=code
                         )

@@ -5,7 +5,7 @@ import logging
 from datetime import datetime
 
 from django.core.management import BaseCommand
-from ecommerce_worker.sailthru.v1.tasks import send_offer_usage_email
+from ecommerce_worker.sailthru.v1.tasks import send_code_assignment_nudge_email
 
 from ecommerce.programs.custom import get_model
 
@@ -50,10 +50,9 @@ class Command(BaseCommand):
                 nudge_email.already_sent = True
                 nudge_email.save()
                 send_nudge_email_count += 1
-                # TODO: Need to add new task in ecommerce-worker or maybe refactored the existing task.
-                send_offer_usage_email.delay(nudge_email.user_email, email_subject, email_body)
+                send_code_assignment_nudge_email.delay(nudge_email.user_email, email_subject, email_body)
         logger.info(
-            '[Code Assignment Nudge Email] %s of %s added to the email sending queue.',
-            total_nudge_emails_count,
-            send_nudge_email_count
+            '[Code Assignment Nudge Email] %s out of %s added to the email sending queue.',
+            send_nudge_email_count,
+            total_nudge_emails_count
         )
