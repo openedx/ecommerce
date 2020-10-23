@@ -31,6 +31,7 @@ class RefundAcceptanceTestMixin(RefundTestMixin):
             raise SkipTest
 
         cls.selenium = browser()
+        cls.selenium.set_page_load_timeout(30)
         super(RefundAcceptanceTestMixin, cls).setUpClass()
 
     @classmethod
