@@ -1392,7 +1392,7 @@ class CouponCodeAssignmentSerializer(serializers.Serializer):  # pylint: disable
         subject = validated_data.pop('subject')
         greeting = validated_data.pop('greeting')
         closing = validated_data.pop('closing')
-        email_auto_reminder = validated_data.pop('email_auto_reminder')
+        email_auto_reminder = validated_data.pop('email_auto_reminder', None)
         available_assignments = validated_data.pop('available_assignments')
         email_iterator = iter(emails)
         offer_assignments = []

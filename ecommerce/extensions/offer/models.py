@@ -1,9 +1,9 @@
 
 import datetime
-from dateutil.relativedelta import relativedelta
 import logging
 import re
 
+from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.db import models
 from django.utils.translation import ugettext_lazy as _

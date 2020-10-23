@@ -5,12 +5,16 @@ Contains the tests for sending the enterprise code assignment nudge emails comma
 import datetime
 import logging
 
-from dateutil.relativedelta import relativedelta
 import mock
+from dateutil.relativedelta import relativedelta
 from django.core.management import call_command
 from testfixtures import LogCapture
 
-from ecommerce.extensions.test.factories import CodeAssignmentNudgeEmailsFactory, EnterpriseOfferFactory, VoucherFactory
+from ecommerce.extensions.test.factories import (
+    CodeAssignmentNudgeEmailsFactory,
+    EnterpriseOfferFactory,
+    VoucherFactory
+)
 from ecommerce.programs.custom import get_model
 from ecommerce.tests.testcases import TestCase
 
