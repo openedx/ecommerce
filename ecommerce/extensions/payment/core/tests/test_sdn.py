@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import json
+import logging
 import random
 import string
 import time
@@ -9,7 +10,8 @@ import ddt
 import httpretty
 import mock
 from django.conf import settings
-from django.test import override_settings
+from django.contrib.sessions.middleware import SessionMiddleware
+from django.test import RequestFactory, override_settings
 from oscar.test import factories
 from requests.exceptions import HTTPError, Timeout
 from testfixtures import LogCapture
@@ -17,6 +19,7 @@ from testfixtures import LogCapture
 from ecommerce.core.models import User
 from ecommerce.extensions.payment.core.sdn import (
     SDNClient,
+    checkSDN,
     checkSDNFallback,
     compare_SDNCheck_vs_fallback,
     extract_country_information,
@@ -341,37 +344,37 @@ Joshuafort, MD 72104, TH",,,,,,,,,,,,,,https://banks-bender.com/,Michael Anderso
 
     @ddt.data(
         # check order properties
-        ('Juan M. de la Cruz', True),
-        ('Cruz la de M. Juan', True),
-        ('nuaJ', False),
+        ('Juan M. de la Cruz', 1),
+        ('Cruz la de M. Juan', 1),
+        ('nuaJ', 0),
         # check subset properties
-        ('Juan', True),
-        ('Cruz', True),
-        ('de', True),
-        ('la', True),
-        ('M.', True),
-        ('M', True),
-        ('Juan de', True),
-        ('Juande', False),
+        ('Juan', 1),
+        ('Cruz', 1),
+        ('de', 1),
+        ('la', 1),
+        ('M.', 1),
+        ('M', 1),
+        ('Juan de', 1),
+        ('Juande', 0),
         # check punctuation properties
-        ('la.', True),
-        ('la-', True),
-        ('la}', True),
-        ('Juan-de-la-Cruz,', True),
-        ('Ju-an-de-la-Cruz', False),
-        ('-de-Juan-Cruz-la-', True),
-        ('.dE@jUaN.....CRUZ----!??!?!la.', True),
-        ('Cruz,,,,', True),
-        ('João', True),
+        ('la.', 1),
+        ('la-', 1),
+        ('la}', 1),
+        ('Juan-de-la-Cruz,', 1),
+        ('Ju-an-de-la-Cruz', 0),
+        ('-de-Juan-Cruz-la-', 1),
+        ('.dE@jUaN.....CRUZ----!??!?!la.', 1),
+        ('Cruz,,,,', 1),
+        ('João', 1),
         # check capitalizaiton properties
-        ('jUan dE LA CruZ', True),
+        ('jUan dE LA CruZ', 1),
         # check frequency properties
-        ('Juan de la Cruz Juan de la Cruz', True),
-        ('Juan Juan M. M. de de la la Cruz Cruz', True),
+        ('Juan de la Cruz Juan de la Cruz', 1),
+        ('Juan Juan M. M. de de la la Cruz Cruz', 1),
         # other examples
-        ('Juanito', False),
-        ('John de la Cruz', False),
-        ('Wendy', True),
+        ('Juanito', 0),
+        ('John de la Cruz', 0),
+        ('Wendy', 1),
     )
     @ddt.unpack
     def test_check_sdn_fallback_names(self, name, match):
@@ -392,20 +395,20 @@ Joshuafort, MD 72104, TH",,,,,,,,,,,,,,https://banks-bender.com/,Michael Anderso
 
     @ddt.data(
         # check order properties
-        ('17472 Christie Stream Apt. 976 North Kristinaport, HI 91033, SN', True),
-        ('SN 91033, HI Kristinaport, North 976 Apt. Stream Christie 17472', True),
+        ('17472 Christie Stream Apt. 976 North Kristinaport, HI 91033, SN', 1),
+        ('SN 91033, HI Kristinaport, North 976 Apt. Stream Christie 17472', 1),
         # check subset properties
-        ('North', True),
-        ('Kristinaport,', True),
+        ('North', 1),
+        ('Kristinaport,', 1),
         # check punctuation properties
-        ('Kristinaport', True),
-        ('Kristinaport,,!@#$%^&*()', True),
+        ('Kristinaport', 1),
+        ('Kristinaport,,!@#$%^&*()', 1),
         ('Krist%^&*()inaport', False),
-        ('João', True),
+        ('João', 1),
         # check capitalizaiton properties
-        ('KRISTINAPORT', True),
+        ('KRISTINAPORT', 1),
         # check frequency properties
-        ('Kristinaport Kristinaport', True),
+        ('Kristinaport Kristinaport', 1),
     )
     @ddt.unpack
     def test_check_sdn_fallback_address(self, address, match):
@@ -434,7 +437,7 @@ Joshuafort, MD 72104, TH",,,,,,,,,,,,,,https://banks-bender.com/,Michael Anderso
 94734218,Specially Designated Nationals (SDN) - Treasury Department,96663868,Individual,material,Juan M. de la Cruz,Dr.,"17472 Christie Stream Apt. 976 North Kristinaport, HI 91033, SN",,,,,,,,,,,,,,https://www.juarez-collier.org/,Wendy Brock,DJ,1944-03-05,Faroe Islands,PK,http://richardson-richardson.org/,CI"""
         # pylint: enable=line-too-long
         metadata_entry = populate_sdn_fallback_data_and_metadata(csv_string)
-        self.assertEqual(checkSDNFallback("Juan", "Kristinaport", 'AB'), False)
+        self.assertEqual(checkSDNFallback("Juan", "Kristinaport", 'AB'), 0)
 
         # wrong type
         # pylint: disable=line-too-long
@@ -442,7 +445,7 @@ Joshuafort, MD 72104, TH",,,,,,,,,,,,,,https://banks-bender.com/,Michael Anderso
 94734218,Specially Designated Nationals (SDN) - Treasury Department,96663868,foo,material,Juan M. de la Cruz,Dr.,"17472 Christie Stream Apt. 976 North Kristinaport, HI 91033, SN",,,,,,,,,,,,,,https://www.juarez-collier.org/,Wendy Brock,DJ,1944-03-05,Faroe Islands,PK,http://richardson-richardson.org/,CI"""
         # pylint: enable=line-too-long
         metadata_entry = populate_sdn_fallback_data_and_metadata(csv_string)
-        self.assertEqual(checkSDNFallback("Juan", "Kristinaport", 'SN'), False)
+        self.assertEqual(checkSDNFallback("Juan", "Kristinaport", 'SN'), 0)
 
         # wrong source
         # pylint: disable=line-too-long
@@ -450,7 +453,62 @@ Joshuafort, MD 72104, TH",,,,,,,,,,,,,,https://banks-bender.com/,Michael Anderso
 94734218,bar,96663868,Individual,material,Juan M. de la Cruz,Dr.,"17472 Christie Stream Apt. 976 North Kristinaport, HI 91033, SN",,,,,,,,,,,,,,https://www.juarez-collier.org/,Wendy Brock,DJ,1944-03-05,Faroe Islands,PK,http://richardson-richardson.org/,CI"""
         # pylint: enable=line-too-long
         metadata_entry = populate_sdn_fallback_data_and_metadata(csv_string)
-        self.assertEqual(checkSDNFallback("Juan", "Kristinaport", 'SN'), False)
+        self.assertEqual(checkSDNFallback("Juan", "Kristinaport", 'SN'), 0)
+
+    @ddt.data(0, 1)
+    @mock.patch.object(User, 'deactivate_account')
+    @mock.patch('ecommerce.extensions.payment.core.sdn.checkSDNFallback')
+    def test_sdn_is_down_sdn_fallback_called(
+        self,
+        total_hit_count,
+        sdn_fallback_mock,
+        deactivate_account_mock
+    ):
+        """
+        Verify SDNFallback is called if SDN API returns an error/timeout.
+        If hits(s) is >=1, log hit(s) and block the user from making a purchase by deactivating and logging out.
+        If there is no hit, allow purchase.
+        """
+        request = RequestFactory().post('/payment/cybersource/submit/')
+        middleware = SessionMiddleware()
+        middleware.process_request(request)
+        request.session.save()
+        site_configuration = self.site.siteconfiguration
+        site_configuration.save()
+        site_configuration.enable_sdn_check = True
+        request.site = site_configuration.site
+        request.user = self.create_user(full_name='Juan M. de la Cruz')
+        basket = factories.BasketFactory(owner=request.user, site=request.site)
+        with mock.patch.object(SDNClient, 'search', side_effect=Timeout):
+            logger_name = 'ecommerce.extensions.payment.utils.logger.exception'
+            log_message = 'SDNCheck: SDN API call received an error: %s. SDNFallback function called for basket %d' % (str(Timeout), basket.id)
+            with self.assertLogs(logger_name, level='INFO') as log:
+                sdn_fallback_mock.return_value = total_hit_count
+                self.assertEqual(checkSDN(request, 'Juan M. de la Cruz', 'North Kristinaport', 'SN'), total_hit_count)
+                logging.getLogger(logger_name).info(log_message)
+                assert log_message in log.output[0]
+                self.assertTrue(sdn_fallback_mock.called)
+                if total_hit_count == 0:
+                    self.assertFalse(deactivate_account_mock.called)
+                    self.assertTrue(request.user.is_authenticated)
+                else:
+                    self.assertTrue(deactivate_account_mock.called)
+                    self.assertFalse(request.user.is_authenticated)
+
+    def test_sdn_fallback_multiple_hits(self):
+        """
+        Verify SDNFallback can handle returning multiple hits if it finds a hit more than once.
+        """
+        csv_string = """_id,source,entity_number,type,programs,name,title,addresses,federal_register_notice,start_date,end_date,standard_order,license_requirement,license_policy,call_sign,vessel_type,gross_tonnage,gross_registered_tonnage,vessel_flag,vessel_owner,remarks,source_list_url,alt_names,citizenships,dates_of_birth,nationalities,places_of_birth,source_information_url,ids
+94734218,Specially Designated Nationals (SDN) - Treasury Department,96663868,Individual,material,Juan M. de la Cruz,Dr.,"17472 Christie Stream Apt. 976
+North Kristinaport, HI 91033, SN",,,,,,,,,,,,,,https://www.cruz.org/,Wendy Brock,DJ,1944-03-05,Faroe Islands,PK,http://juan.org/,CI
+94734219,Specially Designated Nationals (SDN) - Treasury Department,96663869,Individual,material,Juan Cruz,Dr.,"123 Main Street
+North Kristinaport, HI 91033, SN",,,,,,,,,,,,,,https://www.juarez-collier.org/,Wendy Brock,DJ,1944-03-05,Faroe Islands,PK,http://richardson-richardson.org/,CI
+37539856,Specially Designated Nationals (SDN) - Treasury Department,55159852,Individual,hotel,Sarah Jones,Mrs.,"3699 Daniel Highway
+Port Andrewport, OR 39456, EE",,,,,,,,,,,,,,http://douglas.com/,Misty Johnson,CV,1998-02-15,Ukraine,BO,https://townsend.com/,TM"""
+        populate_sdn_fallback_data_and_metadata(csv_string)
+        sdn_fallback_hit_count = checkSDNFallback('Juan Cruz', 'North Kristinaport', 'SN')
+        self.assertEqual(sdn_fallback_hit_count, 2)
 
     def test_compare_SDNCheck_vs_fallback_match_no_hit(self):
         """Log correct results from fallback and API calls: matching, no hit
@@ -470,7 +528,7 @@ Joshuafort, MD 72104, TH",,,,,,,,,,,,,,https://banks-bender.com/,Michael Anderso
                 (
                     self.LOGGER_NAME,
                     'INFO',
-                    "SDNFallback compare: MATCH. Results - SDN API: 0 hit(s); SDN Fallback match: False. Basket: " +
+                    "SDNFallback compare: MATCH. Results - SDN API: 0 hit(s); SDN Fallback: 0 hit(s). Basket: " +
                     str(form_data['basket'])
                 )
             )
@@ -493,7 +551,7 @@ Joshuafort, MD 72104, TH",,,,,,,,,,,,,,https://banks-bender.com/,Michael Anderso
                 (
                     self.LOGGER_NAME,
                     'INFO',
-                    "SDNFallback compare: MISMATCH. Results - SDN API: 1 hit(s); SDN Fallback match: False. Basket: " +
+                    "SDNFallback compare: MISMATCH. Results - SDN API: 1 hit(s); SDN Fallback: 0 hit(s). Basket: " +
                     str(form_data['basket'])
                 ),
                 (

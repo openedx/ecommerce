@@ -49,20 +49,35 @@ def checkSDN(request, name, city, country):
         )
         try:
             response = sdn_check.search(name, city, country)
-            hit_count = response['total']
-            if hit_count > 0:
-                sdn_check.deactivate_user(
-                    basket,
-                    name,
-                    city,
-                    country,
-                    response
-                )
-                logout(request)
-        except (HTTPError, Timeout):
+        except (HTTPError, Timeout) as e:
             # If the SDN API endpoint is down or times out
-            # the user is allowed to make the purchase.
-            pass
+            # checkSDNFallback will be called. If it finds a hit
+            # the user will be blocked from making a purchase.
+            logger.info(
+                'SDNCheck: SDN API call received an error: %s. SDNFallback function called for basket %d.',
+                str(e),
+                basket.id
+            )
+            sdn_fallback_hit_count = checkSDNFallback(
+                name,
+                city,
+                country
+            )
+            response = {'total': sdn_fallback_hit_count}
+        hit_count = response['total']
+        if hit_count > 0:
+            logger.info(
+                'SDNCheck received %d hit(s).',
+                hit_count
+            )
+            sdn_check.deactivate_user(
+                basket,
+                name,
+                city,
+                country,
+                response
+            )
+            logout(request)
 
     return hit_count
 
@@ -80,6 +95,7 @@ def checkSDNFallback(name, city, country):
         4. If a subset of words match, it still counts as a match
         5. Capitalization doesn’t matter
     """
+    hit_count = 0
     records = SDNFallbackData.get_current_records_and_filter_by_source_and_type(
         'Specially Designated Nationals (SDN) - Treasury Department', 'Individual'
     )
@@ -88,8 +104,8 @@ def checkSDNFallback(name, city, country):
     for record in records:
         record_names, record_addresses = set(record.names.split()), set(record.addresses.split())
         if (processed_name.issubset(record_names) and processed_city.issubset(record_addresses)):
-            return True
-    return False
+            hit_count = hit_count + 1
+    return hit_count
 
 
 class SDNClient:
@@ -382,7 +398,7 @@ def compare_SDNCheck_vs_fallback(basket_id, data, hit_count):
         SDN_calls_matched = (hit_count > 0 and SDNFallback_hit) or (hit_count == 0 and not SDNFallback_hit)
         result_string = "SDNFallback compare: MATCH" if SDN_calls_matched else "SDNFallback compare: MISMATCH"
         logger.info(
-            '%s. Results - SDN API: %d hit(s); SDN Fallback match: %s. Basket: %d',
+            '%s. Results - SDN API: %d hit(s); SDN Fallback: %s hit(s). Basket: %d',
             result_string,
             hit_count,
             SDNFallback_hit,
