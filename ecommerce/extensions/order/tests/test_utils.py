@@ -182,12 +182,10 @@ class OrderCreatorTests(TestCase):
         basket = self.create_basket(site)
 
         with LogCapture(LOGGER_NAME, level=logging.ERROR) as logger:
-            Referral.objects.get = mock.Mock()
-            Referral.objects.get.side_effect = Exception
-
-            order = self.create_order_model(basket)
-            message = 'Referral for Order [{order_id}] failed to save.'.format(order_id=order.id)
-            logger.check((LOGGER_NAME, 'ERROR', message))
+            with mock.patch.object(Referral.objects, 'get', side_effect=Exception):
+                order = self.create_order_model(basket)
+                message = 'Referral for Order [{order_id}] failed to save.'.format(order_id=order.id)
+                logger.check((LOGGER_NAME, 'ERROR', message))
 
 
 @ddt.ddt
