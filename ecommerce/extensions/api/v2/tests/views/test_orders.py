@@ -324,15 +324,15 @@ class OrderFulfillViewTests(TestCase):
         """
         Verify that email_opt_in defaults to false if not given.
         """
-        post_checkout.send = mock.MagicMock(side_effect=post_checkout.send)
-        self._assert_fulfillment_success()
-        send_arguments = {
-            'sender': post_checkout,
-            'order': self.order,
-            'request': mock.ANY,
-            'email_opt_in': False,
-        }
-        post_checkout.send.assert_called_once_with(**send_arguments)
+        with mock.patch.object(post_checkout, 'send', side_effect=post_checkout.send):
+            self._assert_fulfillment_success()
+            send_arguments = {
+                'sender': post_checkout,
+                'order': self.order,
+                'request': mock.ANY,
+                'email_opt_in': False,
+            }
+            post_checkout.send.assert_called_once_with(**send_arguments)
 
     @ddt.data(True, False)
     def test_email_opt_in(self, expected_opt_in):
@@ -341,15 +341,15 @@ class OrderFulfillViewTests(TestCase):
         """
         # Add email_opt_in to url
         self.url += '?email_opt_in={expected_opt_in}'.format(expected_opt_in=expected_opt_in)
-        post_checkout.send = mock.MagicMock(side_effect=post_checkout.send)
-        self._assert_fulfillment_success()
-        send_arguments = {
-            'sender': post_checkout,
-            'order': self.order,
-            'request': mock.ANY,
-            'email_opt_in': expected_opt_in,
-        }
-        post_checkout.send.assert_called_once_with(**send_arguments)
+        with mock.patch.object(post_checkout, 'send', side_effect=post_checkout.send):
+            self._assert_fulfillment_success()
+            send_arguments = {
+                'sender': post_checkout,
+                'order': self.order,
+                'request': mock.ANY,
+                'email_opt_in': expected_opt_in,
+            }
+            post_checkout.send.assert_called_once_with(**send_arguments)
 
 
 class OrderDetailViewTests(OrderDetailViewTestMixin, TestCase):
