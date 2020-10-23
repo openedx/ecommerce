@@ -86,6 +86,9 @@ validate_js:
 validate_python: clean requirements.tox
 	tox -e $(PYTHON_ENV)-${DJANGO_ENV_VAR}-tests
 
+acceptance: clean requirements.tox
+	tox -e $(PYTHON_ENV)-${DJANGO_ENV_VAR}-acceptance
+
 fast_validate_python: clean requirements.tox
 	DISABLE_ACCEPTANCE_TESTS=True tox -e $(PYTHON_ENV)-${DJANGO_ENV_VAR}-tests
 
