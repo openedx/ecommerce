@@ -16,15 +16,6 @@ LOGGING['handlers']['local'] = {'class': 'logging.NullHandler'}
 # Disable console logging to cut down on log size. Nose will capture the logs for us.
 LOGGING['handlers']['console'] = {'class': 'logging.NullHandler'}
 
-if os.getenv('DISABLE_MIGRATIONS'):
-    MIGRATION_MODULES = {
-        'default': None,
-        'sessions': None,
-        'profiles': None,
-        'snippets': None,
-        'scaffold_templates': None,
-    }
-
 # END TEST SETTINGS
 
 DATABASES = {

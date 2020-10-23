@@ -51,3 +51,8 @@ matrix:
         - pip install -U codecov
         - docker exec ecommerce_testing /edx/app/ecommerce/ecommerce/.travis/run_coverage.sh
         - codecov
+    - python: 3.8
+      env:
+        DJANGO_ENV=django22
+        TESTNAME=test-python
+        TARGETS="PYTHON_ENV=py38 requirements.js clean_static static acceptance"
