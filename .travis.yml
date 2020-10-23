@@ -1,5 +1,5 @@
 language: python
-dist: latest
+dist: focal
 
 branches:
   only:
