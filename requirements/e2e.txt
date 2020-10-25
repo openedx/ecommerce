@@ -15,11 +15,11 @@ edx-django-utils==3.9.0   # via -c requirements/base.txt, edx-rest-api-client
 edx-rest-api-client==5.2.1  # via -c requirements/base.txt, -r requirements/e2e.in
 idna==2.7                 # via -c requirements/base.txt, -c requirements/pins.txt, requests
 more-itertools==8.5.0     # via pytest
-newrelic==5.20.1.150      # via -c requirements/base.txt, edx-django-utils
+newrelic==5.22.0.151      # via -c requirements/base.txt, edx-django-utils
 packaging==20.4           # via -c requirements/base.txt, pytest
 pbr==5.5.1                # via -c requirements/base.txt, stevedore
 pluggy==0.13.1            # via pytest
-psutil==5.7.2             # via -c requirements/base.txt, edx-django-utils
+psutil==5.7.3             # via -c requirements/base.txt, edx-django-utils
 py==1.9.0                 # via pytest
 pycparser==2.20           # via -c requirements/base.txt, cffi
 pyjwt[crypto]==1.7.1      # via -c requirements/base.txt, edx-rest-api-client
