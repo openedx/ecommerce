@@ -30,8 +30,10 @@ from ecommerce.extensions.offer.constants import (
     OFFER_ASSIGNMENT_EMAIL_BOUNCED,
     OFFER_ASSIGNMENT_EMAIL_PENDING,
     OFFER_ASSIGNMENT_REVOKED,
+    OFFER_MAX_USES_DEFAULT,
     OFFER_REDEEMED
 )
+from ecommerce.extensions.offer.utils import format_assigned_offer_email
 
 OFFER_PRIORITY_ENTERPRISE = 10
 OFFER_PRIORITY_VOUCHER = 20
@@ -643,6 +645,46 @@ class OfferUsageEmail(TimeStampedModel):
 
 class CodeAssignmentNudgeEmailTemplates(AbstractBaseEmailTemplate):
     email_type = models.CharField(max_length=32, choices=NUDGE_EMAIL_TEMPLATE_TYPES)
+
+    def get_email_content(self, user_email, code):
+        """
+        Return the formatted email body and subject.
+        """
+        email_body = None
+        voucher_qs = Voucher.objects.filter(code=code)
+        if voucher_qs.exists():
+            voucher = voucher_qs.first()
+            offer = voucher.best_offer
+            max_usage_limit = offer.max_global_applications or OFFER_MAX_USES_DEFAULT
+
+            email_body = format_assigned_offer_email(
+                self.email_greeting,
+                self.email_closing,
+                user_email,
+                code,
+                max_usage_limit if offer.max_global_applications == Voucher.MULTI_USE_PER_CUSTOMER else 1,
+                voucher.end_datetime
+            )
+        else:
+            logger.warning(
+                '[Code Assignment Nudge Email] Unable to send the email for user_email: %s, code: %s because code does '
+                'not have associated voucher.',
+                user_email,
+                code
+            )
+        return email_body, self.email_subject
+
+
+class CodeAssignmentNudgeEmails(TimeStampedModel):
+    email_template = models.ForeignKey('offer.CodeAssignmentNudgeEmailTemplates', on_delete=models.CASCADE)
+    code = models.CharField(max_length=128, db_index=True)
+    user_email = models.EmailField(db_index=True)
+    email_date = models.DateTimeField()
+    already_sent = models.BooleanField(help_text=_('Email has been sent.'), default=False)
+    is_subscribed = models.BooleanField(help_text=_('This user should receive email'), default=True)
+
+    class Meta:
+        unique_together = (('email_template', 'code', 'user_email'),)
 
 
 from oscar.apps.offer.models import *  # noqa isort:skip pylint: disable=wildcard-import,unused-wildcard-import,wrong-import-position,wrong-import-order,ungrouped-imports
