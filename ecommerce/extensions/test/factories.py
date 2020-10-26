@@ -24,11 +24,14 @@ from oscar.test.factories import create_product, create_stockrecord, get_class, 
 from ecommerce.enterprise.benefits import BENEFIT_MAP as ENTERPRISE_BENEFIT_MAP
 from ecommerce.enterprise.benefits import EnterpriseAbsoluteDiscountBenefit, EnterprisePercentageDiscountBenefit
 from ecommerce.enterprise.conditions import AssignableEnterpriseCustomerCondition, EnterpriseCustomerCondition
+from ecommerce.extensions.offer.constants import DAY3, DAY10, DAY19
 from ecommerce.extensions.offer.dynamic_conditional_offer import DynamicPercentageDiscountBenefit
 from ecommerce.extensions.offer.models import (
     OFFER_PRIORITY_ENTERPRISE,
     OFFER_PRIORITY_MANUAL_ORDER,
     OFFER_PRIORITY_VOUCHER,
+    CodeAssignmentNudgeEmails,
+    CodeAssignmentNudgeEmailTemplates,
     OfferAssignment
 )
 from ecommerce.extensions.order.benefits import ManualEnrollmentOrderDiscountBenefit
@@ -317,6 +320,26 @@ class DynamicPercentageDiscountBenefitFactory(BenefitFactory):
     type = ''
     value = 1
     proxy_class = class_path(DynamicPercentageDiscountBenefit)
+
+
+class CodeAssignmentNudgeEmailTemplatesFactory(factory.DjangoModelFactory):
+    email_greeting = factory.Faker('sentence')
+    email_closing = factory.Faker('sentence')
+    email_subject = factory.Faker('sentence')
+    name = factory.Faker('name')
+    email_type = factory.fuzzy.FuzzyChoice((DAY3, DAY10, DAY19))
+
+    class Meta:
+        model = CodeAssignmentNudgeEmailTemplates
+
+
+class CodeAssignmentNudgeEmailsFactory(factory.DjangoModelFactory):
+    email_template = factory.SubFactory(CodeAssignmentNudgeEmailTemplatesFactory)
+    user_email = factory.Sequence(lambda n: 'learner_%s@example.com' % n)
+    email_date = datetime.now()
+
+    class Meta:
+        model = CodeAssignmentNudgeEmails
 
 
 class SDNFallbackMetadataFactory(factory.DjangoModelFactory):
