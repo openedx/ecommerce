@@ -8,7 +8,7 @@ attrs==20.2.0             # via -c requirements/base.txt, pytest
 certifi==2020.6.20        # via -c requirements/base.txt, requests
 cffi==1.14.3              # via -c requirements/base.txt, cryptography
 chardet==3.0.4            # via -c requirements/base.txt, requests
-cryptography==3.1.1       # via -c requirements/base.txt, pyjwt
+cryptography==3.2         # via -c requirements/base.txt, pyjwt
 django-waffle==2.0.0      # via -c requirements/base.txt, edx-django-utils
 django==2.2.16            # via -c requirements/base.txt, edx-django-utils
 edx-django-utils==3.9.0   # via -c requirements/base.txt, edx-rest-api-client

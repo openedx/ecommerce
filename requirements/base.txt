@@ -24,7 +24,7 @@ coreapi==2.3.3            # via -r requirements/base.in, django-rest-swagger, op
 coreschema==0.0.4         # via coreapi
 coverage==5.3             # via cybersource-rest-client-python
 crypto==1.4.1             # via cybersource-rest-client-python
-cryptography==3.1.1       # via cybersource-rest-client-python, paramiko, pyjwt, pyopenssl
+cryptography==3.2         # via cybersource-rest-client-python, paramiko, pyjwt, pyopenssl
 cssselect==1.1.0          # via premailer
 cssutils==1.0.2           # via premailer
 cybersource-rest-client-python==0.0.21  # via -r requirements/base.in
