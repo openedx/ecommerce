@@ -66,6 +66,7 @@ BasketLine = get_model('basket', 'Line')
 Benefit = get_model('offer', 'Benefit')
 BillingAddress = get_model('order', 'BillingAddress')
 Catalog = get_model('catalogue', 'Catalog')
+CodeAssignmentNudgeEmails = get_model('offer', 'CodeAssignmentNudgeEmails')
 Category = get_model('catalogue', 'Category')
 Line = get_model('order', 'Line')
 OfferAssignment = get_model('offer', 'OfferAssignment')
@@ -1383,6 +1384,7 @@ class CouponCodeAssignmentSerializer(serializers.Serializer):  # pylint: disable
         child=OfferAssignmentSerializer(), read_only=True
     )
     base_enterprise_url = serializers.URLField(required=False, write_only=True)
+    enable_nudge_emails = serializers.BooleanField(default=False)
 
     def create(self, validated_data):
         """Create OfferAssignment objects for each email and the available_assignments determined from validation."""
@@ -1391,6 +1393,7 @@ class CouponCodeAssignmentSerializer(serializers.Serializer):  # pylint: disable
         subject = validated_data.pop('subject')
         greeting = validated_data.pop('greeting')
         closing = validated_data.pop('closing')
+        enable_nudge_emails = validated_data.pop('enable_nudge_emails')
         available_assignments = validated_data.pop('available_assignments')
         email_iterator = iter(emails)
         offer_assignments = []
@@ -1402,16 +1405,23 @@ class CouponCodeAssignmentSerializer(serializers.Serializer):  # pylint: disable
             offer = available_assignments[code]['offer']
             email = next(email_iterator) if voucher_usage_type == Voucher.MULTI_USE_PER_CUSTOMER else None
             for _ in range(available_assignments[code]['num_slots']):
+                user_email = email or next(email_iterator)
                 new_offer_assignment = OfferAssignment.objects.create(
                     offer=offer,
                     code=code,
-                    user_email=email or next(email_iterator),
+                    user_email=user_email,
                     assignment_date=current_date_time,
                 )
                 offer_assignments.append(new_offer_assignment)
                 # Start async email task. For MULTI_USE_PER_CUSTOMER, a single email is sent
                 email_code_pair = frozenset((new_offer_assignment.user_email, new_offer_assignment.code))
                 if email_code_pair not in emails_already_sent:
+                    # subscribe the user for nudge email if enable_nudge_emails flag is on.
+                    if enable_nudge_emails:
+                        CodeAssignmentNudgeEmails.subscribe_nudge_emails(
+                            user_email=user_email,
+                            code=code
+                        )
                     self._trigger_email_sending_task(
                         subject, greeting, closing, new_offer_assignment, voucher_usage_type, base_enterprise_url,
                     )

@@ -27,6 +27,7 @@ OFFER_ASSIGNMENT_EMAIL_SUBJECT_LIMIT = 1000
 
 # Code Assignment Nudge email templates.
 DAY3, DAY10, DAY19 = ('Day3', 'Day10', 'Day19')
+NUDGE_EMAIL_CYCLE = {'3': DAY3, '10': DAY10, '19': DAY19}
 NUDGE_EMAIL_TEMPLATE_TYPES = (
     (DAY3, _('Day 3')),
     (DAY10, _('Day 10')),

@@ -2,11 +2,9 @@
 """
 Contains the tests for sending the enterprise code assignment nudge emails command.
 """
-import datetime
 import logging
 
 import mock
-from dateutil.relativedelta import relativedelta
 from django.core.management import call_command
 from testfixtures import LogCapture
 
@@ -40,12 +38,6 @@ class SendCodeAssignmentNudgeEmailsTests(TestCase):
 
         self.total_nudge_emails_for_today = 5
         CodeAssignmentNudgeEmailsFactory.create_batch(self.total_nudge_emails_for_today, code=voucher.code)
-        CodeAssignmentNudgeEmailsFactory(
-            email_date=datetime.datetime.now() + relativedelta(days=1)
-        )
-        CodeAssignmentNudgeEmailsFactory(
-            email_date=datetime.datetime.now() + relativedelta(days=2)
-        )
 
     def _assert_sent_count(self):
         nudge_email = CodeAssignmentNudgeEmails.objects.all()
