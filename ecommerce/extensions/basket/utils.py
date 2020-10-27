@@ -39,29 +39,6 @@ Voucher = get_model('voucher', 'Voucher')
 logger = logging.getLogger(__name__)
 
 
-# TODO: Remove this as part of PCI-81
-def add_flex_microform_flag_to_url(url, request, force_flag=None):
-    microform_flag_name = 'payment.cybersource.flex_microform_enabled'
-    flag_is_active = waffle.flag_is_active(
-        request,
-        microform_flag_name
-    )
-
-    if not flag_is_active and force_flag is None:
-        return url
-
-    if force_flag is not None:
-        flag_is_active = force_flag
-
-    flag = 'dwft_{}={}'.format(microform_flag_name, 1 if flag_is_active else 0)
-    join = '&' if '?' in url else '?'
-    return '{url}{join}{flag}'.format(
-        url=url,
-        join=join,
-        flag=flag,
-    )
-
-
 def get_payment_microfrontend_or_basket_url(request):
     url = get_payment_microfrontend_url_if_configured(request)
     if not url:
