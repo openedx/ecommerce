@@ -39,6 +39,9 @@ from ecommerce.enterprise.rules import request_user_has_explicit_access, request
 from ecommerce.enterprise.tests.mixins import EnterpriseServiceMockMixin
 from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
 from ecommerce.extensions.offer.constants import (
+    DAY3,
+    DAY10,
+    DAY19,
     OFFER_ASSIGNMENT_EMAIL_BOUNCED,
     OFFER_ASSIGNMENT_EMAIL_SUBJECT_LIMIT,
     OFFER_ASSIGNMENT_EMAIL_TEMPLATE_FIELD_LIMIT,
@@ -49,6 +52,7 @@ from ecommerce.extensions.offer.constants import (
     VOUCHER_REDEEMED
 )
 from ecommerce.extensions.payment.models import EnterpriseContractMetadata
+from ecommerce.extensions.test.factories import CodeAssignmentNudgeEmailTemplatesFactory
 from ecommerce.invoice.models import Invoice
 from ecommerce.programs.custom import class_path
 from ecommerce.tests.mixins import JwtMixin, ThrottlingMixin
@@ -56,6 +60,7 @@ from ecommerce.tests.testcases import TestCase
 
 Basket = get_model('basket', 'Basket')
 Benefit = get_model('offer', 'Benefit')
+CodeAssignmentNudgeEmails = get_model('offer', 'CodeAssignmentNudgeEmails')
 OfferAssignment = get_model('offer', 'OfferAssignment')
 OfferAssignmentEmailTemplates = get_model('offer', 'OfferAssignmentEmailTemplates')
 Product = get_model('catalogue', 'Product')
@@ -1797,18 +1802,49 @@ class EnterpriseCouponViewSetRbacTests(
                 ]
             self.assertEqual(coupon_overview_response['results'][0][field], value)
 
+    @staticmethod
+    def _create_nudge_email_templates():
+        """
+        Create the CodeAssignmentNudgeEmailTemplates objects for test purposes.
+        """
+        for email_type in (DAY3, DAY10, DAY19):
+            CodeAssignmentNudgeEmailTemplatesFactory(email_type=email_type)
+
+    @staticmethod
+    def _assert_nudge_email_data(code, user_email, enable_nudge_emails, create_nudge_email_templates):
+        """
+        Assert that valid CodeAssignmentNudgeEmails objects have
+        been created if nudge email flag is enabled
+        """
+        if enable_nudge_emails and create_nudge_email_templates:
+            assert CodeAssignmentNudgeEmails.objects.filter(code=code, user_email=user_email).count() == 3
+        else:
+            assert CodeAssignmentNudgeEmails.objects.filter(code=code, user_email=user_email).count() == 0
+
     @ddt.data(
-        (Voucher.SINGLE_USE, 2, None, ['test1@example.com', 'test2@example.com'], [1]),
-        (Voucher.MULTI_USE_PER_CUSTOMER, 2, 3, ['test1@example.com', 'test2@example.com'], [3]),
-        (Voucher.MULTI_USE, 1, None, ['test1@example.com', 'test2@example.com'], [2]),
-        (Voucher.MULTI_USE, 2, 3, ['t1@example.com', 't2@example.com', 't3@example.com', 't4@example.com'], [3, 1]),
-        (Voucher.ONCE_PER_CUSTOMER, 2, 2, ['test1@example.com', 'test2@example.com'], [2]),
+        (Voucher.SINGLE_USE, 2, None, ['test1@example.com', 'test2@example.com'], [1], True, True),
+        (Voucher.SINGLE_USE, 2, None, ['test1@example.com', 'test2@example.com'], [1], False, False),
+        (Voucher.MULTI_USE_PER_CUSTOMER, 2, 3, ['test1@example.com', 'test2@example.com'], [3], False, True),
+        (Voucher.MULTI_USE, 1, None, ['test1@example.com', 'test2@example.com'], [2], True, True),
+        (Voucher.MULTI_USE, 2, 3, ['t1@exam.com', 't2@exam.com', 't3@exam.com', 't4@exam.com'], [3, 1], True, True),
+        (Voucher.ONCE_PER_CUSTOMER, 2, 2, ['test1@example.com', 'test2@example.com'], [2], False, False),
     )
     @ddt.unpack
-    def test_coupon_codes_assign_success(self, voucher_type, quantity, max_uses, emails, assignments_per_code):
+    def test_coupon_codes_assign_success1(
+            self,
+            voucher_type,
+            quantity,
+            max_uses,
+            emails,
+            assignments_per_code,
+            create_nudge_email_templates,
+            enable_nudge_emails
+    ):
         """Test assigning codes to users."""
         coupon_post_data = dict(self.data, voucher_type=voucher_type, quantity=quantity, max_uses=max_uses)
         coupon = self.get_response('POST', ENTERPRISE_COUPONS_LINK, coupon_post_data)
+        if create_nudge_email_templates:
+            self._create_nudge_email_templates()
         coupon = coupon.json()
         coupon_id = coupon['coupon_id']
         with mock.patch('ecommerce.extensions.offer.utils.send_offer_assignment_email.delay') as mock_send_email:
@@ -1820,7 +1856,8 @@ class EnterpriseCouponViewSetRbacTests(
                     'template_subject': TEMPLATE_SUBJECT,
                     'template_greeting': TEMPLATE_GREETING,
                     'template_closing': TEMPLATE_CLOSING,
-                    'emails': emails
+                    'emails': emails,
+                    'enable_nudge_emails': enable_nudge_emails
                 }
             )
         response = response.json()
@@ -1836,6 +1873,12 @@ class EnterpriseCouponViewSetRbacTests(
         for assignment in response['offer_assignments']:
             if assignment['code'] not in assigned_codes:
                 assigned_codes.append(assignment['code'])
+                self._assert_nudge_email_data(
+                    assignment['code'],
+                    assignment['user_email'],
+                    enable_nudge_emails,
+                    create_nudge_email_templates
+                )
 
         for code in assigned_codes:
             assert OfferAssignment.objects.filter(code=code).count() in assignments_per_code

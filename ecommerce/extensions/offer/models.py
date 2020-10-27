@@ -1,8 +1,9 @@
 
-
+import datetime
 import logging
 import re
 
+from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
@@ -25,6 +26,7 @@ from threadlocals.threadlocals import get_current_request
 
 from ecommerce.core.utils import get_cache_key, log_message_and_raise_validation_error
 from ecommerce.extensions.offer.constants import (
+    NUDGE_EMAIL_CYCLE,
     NUDGE_EMAIL_TEMPLATE_TYPES,
     OFFER_ASSIGNED,
     OFFER_ASSIGNMENT_EMAIL_BOUNCED,
@@ -646,6 +648,24 @@ class OfferUsageEmail(TimeStampedModel):
 class CodeAssignmentNudgeEmailTemplates(AbstractBaseEmailTemplate):
     email_type = models.CharField(max_length=32, choices=NUDGE_EMAIL_TEMPLATE_TYPES)
 
+    @classmethod
+    def get_nudge_email_template(cls, email_type):
+        """
+        Return the 'CodeAssignmentNudgeEmailTemplates' object of the
+        given email_type or None in case of model exceptions.
+        """
+        nudge_email_template = None
+        try:
+            nudge_email_template = cls.objects.get(email_type=email_type, active=True)
+        except (cls.DoesNotExist, cls.MultipleObjectsReturned) as exe:
+            logger.error(
+                '[CodeAssignmentNudgeEmailTemplates] Raised an error while getting the object for email_type %s,'
+                'Message: %s',
+                email_type,
+                exe
+            )
+        return nudge_email_template
+
     def get_email_content(self, user_email, code):
         """
         Return the formatted email body and subject.
@@ -685,6 +705,33 @@ class CodeAssignmentNudgeEmails(TimeStampedModel):
 
     class Meta:
         unique_together = (('email_template', 'code', 'user_email'),)
+
+    @classmethod
+    def subscribe_nudge_emails(cls, user_email, code):
+        """
+        Subscribe the nudge email cycle for given user email and code.
+        """
+        now_datetime = datetime.datetime.now()
+        for days, email_type in NUDGE_EMAIL_CYCLE.items():
+            email_template = CodeAssignmentNudgeEmailTemplates.get_nudge_email_template(email_type=email_type)
+            if email_template:
+                data = {
+                    'code': code,
+                    'user_email': user_email,
+                    'email_template': email_template
+                }
+                if not cls.objects.filter(**data).exists():
+                    data['email_date'] = now_datetime + relativedelta(days=int(days))
+                    cls.objects.create(**data)
+                    logger.info(
+                        'Created a nudge email for user_email: %s, code: %s, email_type: %s',
+                        user_email, code, email_type
+                    )
+            else:
+                logger.warning(
+                    'Unable to create a nudge email for user_email: %s, code: %s, email_type: %s',
+                    user_email, code, email_type
+                )
 
 
 from oscar.apps.offer.models import *  # noqa isort:skip pylint: disable=wildcard-import,unused-wildcard-import,wrong-import-position,wrong-import-order,ungrouped-imports
