@@ -27,7 +27,7 @@ coreapi==2.3.3            # via -r requirements/base.txt, django-rest-swagger, o
 coreschema==0.0.4         # via -r requirements/base.txt, coreapi
 coverage==5.3             # via -r requirements/base.txt, -r requirements/test.in, cybersource-rest-client-python, pytest-cov
 crypto==1.4.1             # via -r requirements/base.txt, cybersource-rest-client-python
-cryptography==3.1.1       # via -r requirements/base.txt, -r requirements/e2e.txt, cybersource-rest-client-python, paramiko, pyjwt, pyopenssl
+cryptography==3.2         # via -r requirements/base.txt, -r requirements/e2e.txt, cybersource-rest-client-python, paramiko, pyjwt, pyopenssl
 cssselect==1.1.0          # via -r requirements/base.txt, premailer
 cssutils==1.0.2           # via -r requirements/base.txt, premailer
 cybersource-rest-client-python==0.0.21  # via -r requirements/base.txt
