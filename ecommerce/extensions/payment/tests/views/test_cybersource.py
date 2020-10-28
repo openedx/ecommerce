@@ -80,9 +80,17 @@ class CybersourceAuthorizeViewTests(CyberSourceRESTAPIMixin, TestCase):
         self.user = self.create_user()
         self.client.login(username=self.user.username, password=self.password)
 
+        self.pending_responses = []
+
+        def next_response(*args, **kwargs):  # pylint: disable=unused-argument
+            response = self.pending_responses.pop(0)
+            if isinstance(response, Exception):
+                raise response
+            return response
+
         request_patcher = mock.patch(
             'CyberSource.api_client.ApiClient.request',
-            side_effect=Exception("Forgot to initialize mock_cybersource_request")
+            side_effect=next_response
         )
         self.mock_cybersource_request = request_patcher.start()
         self.addCleanup(request_patcher.stop)
@@ -178,27 +186,30 @@ class CybersourceAuthorizeViewTests(CyberSourceRESTAPIMixin, TestCase):
         }
 
     def _prep_request_success(self, data, status=200, reason='OK'):
-        self.mock_cybersource_request.side_effect = None
-        self.mock_cybersource_request.return_value = mock.Mock(
-            spec=RESTResponse,
-            resp=None,
-            status=status,
-            reason=reason,
-            # This response has been pruned to only the needed data.
-            data=self.convertToCybersourceWireFormat(data)
-        )
-
-    def _prep_request_invalid(self, data, request_id, status=400, reason='BAD REQUEST'):
-
-        self.mock_cybersource_request.side_effect = ApiException(
-            http_resp=mock.Mock(
+        self.pending_responses.append(
+            mock.Mock(
                 spec=RESTResponse,
                 resp=None,
                 status=status,
                 reason=reason,
-                getheaders=mock.Mock(return_value={'v-c-correlation-id': request_id}),
                 # This response has been pruned to only the needed data.
                 data=self.convertToCybersourceWireFormat(data)
+            )
+        )
+
+    def _prep_request_invalid(self, data, request_id, status=400, reason='BAD REQUEST'):
+
+        self.pending_responses.append(
+            ApiException(
+                http_resp=mock.Mock(
+                    spec=RESTResponse,
+                    resp=None,
+                    status=status,
+                    reason=reason,
+                    getheaders=mock.Mock(return_value={'v-c-correlation-id': request_id}),
+                    # This response has been pruned to only the needed data.
+                    data=self.convertToCybersourceWireFormat(data)
+                )
             )
         )
 
@@ -275,7 +286,7 @@ class CybersourceAuthorizeViewTests(CyberSourceRESTAPIMixin, TestCase):
         )
         # This response has been pruned to only the needed data.
         self._prep_request_success(
-            """{"id":"6028635251536131304003","status":"AUTHORIZED","client_reference_information":{"code":"%s"},"processor_information":{"approval_code":"831000","transaction_id":"558196000003814","network_transaction_id":"558196000003814","card_verification":{"result_code":"3"}},"payment_information":{"tokenized_card":{"type":"001"},"account_features":{"category":"A"}},"order_information":{"amount_details":{"total_amount":"99.00","authorized_amount":"99.00","currency":"USD"}}}""" % order_number  # pylint: disable=line-too-long
+            """{"links":{"_self":{"href":"/pts/v2/payments/6031827608526961004260","method":"GET"}},"id":"6031827608526961004260","submit_time_utc":"2020-10-20T08:32:44Z","status":"AUTHORIZED","client_reference_information":{"code":"%s"},"processor_information":{"approval_code":"307640","transaction_id":"380294307616695","network_transaction_id":"380294307616695","response_code":"000","avs":{"code":"G","code_raw":"G"},"card_verification":{"result_code":"M","result_code_raw":"M"},"consumer_authentication_response":{"code":"99"}},"payment_information":{"tokenized_card":{"type":"001"},"account_features":{"category":"F"}},"order_information":{"amount_details":{"total_amount":"5.00","authorized_amount":"5.00","currency":"USD"}}}""" % order_number  # pylint: disable=line-too-long
         )
         response = self.client.post(self.path, data)
 
@@ -342,7 +353,7 @@ class CybersourceAuthorizeViewTests(CyberSourceRESTAPIMixin, TestCase):
         self.assertEqual(basket.status, Basket.OPEN)
 
     @freeze_time('2016-01-01')
-    def test_authorized_pending_review_request(self):
+    def test_decline(self):
         """ Verify the view reports an error if the transaction is only authorized pending review. """
         basket = self._create_valid_basket()
         data = self._generate_data(basket.id)
@@ -352,7 +363,7 @@ class CybersourceAuthorizeViewTests(CyberSourceRESTAPIMixin, TestCase):
         )
         # This response has been pruned to only the needed data.
         self._prep_request_success(
-            """{"links":{"_self":{"href":"/pts/v2/payments/6031321796646037504006","method":"GET"}},"id":"6031321796646037504006","submit_time_utc":"2020-10-19T18:29:40Z","status":"AUTHORIZED_PENDING_REVIEW","error_information":{"reason":"CONTACT_PROCESSOR","message":"Decline - The issuing bank has questions about the request. You do not receive an authorization code programmatically, but you might receive one verbally by calling the processor."},"client_reference_information":{"code":"%s"},"processor_information":{"transaction_id":"558196000003814","network_transaction_id":"558196000003814","response_code":"001","avs":{"code":"Y","code_raw":"Y"},"card_verification":{"result_code":"2"}},"payment_information":{"account_features":{"category":"A"}}}""" % order_number  # pylint: disable=line-too-long
+            """{"links":{"_self":{"href":"/pts/v2/payments/6021683934456376603262","method":"GET"}},"id":"6021683934456376603262","status":"DECLINED","error_information":{"reason":"PROCESSOR_DECLINED","message":"Decline - General decline of the card. No other information provided by the issuing bank."},"client_reference_information":{"code":"%s"},"processor_information":{"transaction_id":"460282531937765","network_transaction_id":"460282531937765","response_code":"005","avs":{"code":"D","code_raw":"D"},"card_verification":{"result_code":"M","result_code_raw":"M"}},"payment_information":{"account_features":{"category":"F"}}}""" % order_number  # pylint: disable=line-too-long
         )
         response = self.client.post(self.path, data)
 
@@ -367,6 +378,80 @@ class CybersourceAuthorizeViewTests(CyberSourceRESTAPIMixin, TestCase):
         basket = Basket.objects.get(pk=basket.pk)
         self.assertEqual(basket.status, Basket.MERGED)
         assert Basket.objects.count() == 2
+
+    @freeze_time('2016-01-01')
+    def test_authorized_pending_review_request(self):
+        """ Verify the view reports an error if the transaction is only authorized pending review. """
+        basket = self._create_valid_basket()
+        data = self._generate_data(basket.id)
+        order_number = OrderNumberGenerator().order_number_from_basket_id(
+            self.site.siteconfiguration.partner,
+            basket.id,
+        )
+        # This response has been pruned to only the needed data.
+        self._prep_request_success(
+            """{"links":{"_self":{"href":"/pts/v2/payments/6038898237296087603031","method":"GET"}},"id":"6038898237296087603031","submit_time_utc":"2020-10-28T12:57:04Z","status":"AUTHORIZED_PENDING_REVIEW","error_information":{"reason":"AVS_FAILED","message":"Soft Decline - The authorization request was approved by the issuing bank but declined by CyberSource because it did not pass the Address Verification Service (AVS) check."},"client_reference_information":{"code":"%s"},"processor_information":{"approval_code":"028252","transaction_id":"580302466249046","network_transaction_id":"580302466249046","response_code":"000","avs":{"code":"N","code_raw":"N"},"card_verification":{"result_code":"M","result_code_raw":"M"}},"payment_information":{"account_features":{"category":"C"}},"order_information":{"amount_details":{"authorized_amount":"25.00","currency":"USD"}}}""" % order_number  # pylint: disable=line-too-long
+        )
+        self._prep_request_success(
+            """{"links":{"_self":{"href":"/pts/v2/payments/6038898237296087603031/reversals","method":"GET"}},"id":"6038898237296087603031","submit_time_utc":"2020-10-28T12:57:04Z","status":"REVERSED","reversal_amount_details":{"original_transaction_amount":"25.00", "reversed_amount":"25.00","currency":"USD"}}"""  # pylint: disable=line-too-long
+        )
+        response = self.client.post(self.path, data)
+
+        assert response.status_code == 400
+        assert response['content-type'] == JSON
+
+        request = RequestFactory(SERVER_NAME='testserver.fake').post(self.path, data)
+        request.site = self.site
+        assert json.loads(response.content)['redirectTo'] == get_payment_microfrontend_or_basket_url(request)
+
+        # Ensure the basket is frozen
+        basket = Basket.objects.get(pk=basket.pk)
+        self.assertEqual(basket.status, Basket.MERGED)
+        assert Basket.objects.count() == 2
+
+        # Ensure that 2 requests were sent to cybersource
+        assert self.mock_cybersource_request.call_count == 2
+
+        # Ensure that 2 requests and 2 responses were recorded as PaymentProcessorResponses
+        assert PaymentProcessorResponse.objects.all().count() == 4
+
+    @freeze_time('2016-01-01')
+    def test_authorized_pending_review_request_reversal_failed(self):
+        """ Verify the view reports an error if the transaction is only authorized pending review. """
+        basket = self._create_valid_basket()
+        data = self._generate_data(basket.id)
+        order_number = OrderNumberGenerator().order_number_from_basket_id(
+            self.site.siteconfiguration.partner,
+            basket.id,
+        )
+        # This response has been pruned to only the needed data.
+        self._prep_request_success(
+            """{"links":{"_self":{"href":"/pts/v2/payments/6038898237296087603031","method":"GET"}},"id":"6038898237296087603031","submit_time_utc":"2020-10-28T12:57:04Z","status":"AUTHORIZED_PENDING_REVIEW","error_information":{"reason":"AVS_FAILED","message":"Soft Decline - The authorization request was approved by the issuing bank but declined by CyberSource because it did not pass the Address Verification Service (AVS) check."},"client_reference_information":{"code":"%s"},"processor_information":{"approval_code":"028252","transaction_id":"580302466249046","network_transaction_id":"580302466249046","response_code":"000","avs":{"code":"N","code_raw":"N"},"card_verification":{"result_code":"M","result_code_raw":"M"}},"payment_information":{"account_features":{"category":"C"}},"order_information":{"amount_details":{"authorized_amount":"25.00","currency":"USD"}}}""" % order_number  # pylint: disable=line-too-long
+        )
+        self._prep_request_invalid(
+            """{"submitTimeUtc":"2020-09-30T18:53:23Z","status":"INVALID_REQUEST","reason":"DUPLICATE_REQUEST","message":"Declined - The\u00a0merchantReferenceCode\u00a0sent with this authorization request matches the merchantReferenceCode of another authorization request that you sent in the last 15 minutes."}""",  # pylint: disable=line-too-long
+            '6038898237296087603031'
+        )
+
+        response = self.client.post(self.path, data)
+
+        assert response.status_code == 400
+        assert response['content-type'] == JSON
+
+        request = RequestFactory(SERVER_NAME='testserver.fake').post(self.path, data)
+        request.site = self.site
+        assert json.loads(response.content)['redirectTo'] == get_payment_microfrontend_or_basket_url(request)
+
+        # Ensure the basket is frozen
+        basket = Basket.objects.get(pk=basket.pk)
+        self.assertEqual(basket.status, Basket.MERGED)
+        assert Basket.objects.count() == 2
+
+        # Ensure that 2 requests were sent to cybersource
+        assert self.mock_cybersource_request.call_count == 2
+
+        # Ensure that 2 requests and 2 responses were recorded as PaymentProcessorResponses
+        assert PaymentProcessorResponse.objects.all().count() == 4
 
     def test_invalid_card_type(self):
         """ Verify the view redirects to the receipt page if the payment is made with an invalid card type. """

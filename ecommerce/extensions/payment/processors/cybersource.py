@@ -15,11 +15,15 @@ import jwt
 import jwt.exceptions
 import waffle
 from CyberSource import (
+    AuthReversalRequest,
     CreatePaymentRequest,
     GeneratePublicKeyRequest,
     KeyGenerationApi,
     PaymentsApi,
     Ptsv2paymentsClientReferenceInformation,
+    Ptsv2paymentsidreversalsClientReferenceInformation,
+    Ptsv2paymentsidreversalsReversalInformation,
+    Ptsv2paymentsidreversalsReversalInformationAmountDetails,
     Ptsv2paymentsMerchantDefinedInformation,
     Ptsv2paymentsOrderInformation,
     Ptsv2paymentsOrderInformationAmountDetails,
@@ -27,7 +31,8 @@ from CyberSource import (
     Ptsv2paymentsOrderInformationInvoiceDetails,
     Ptsv2paymentsOrderInformationLineItems,
     Ptsv2paymentsProcessingInformation,
-    Ptsv2paymentsTokenInformation
+    Ptsv2paymentsTokenInformation,
+    ReversalApi
 )
 from CyberSource.rest import ApiException
 from django.conf import settings
@@ -88,6 +93,7 @@ class Decision(Enum):
     decline = 'DECLINE'
     error = 'ERROR'
     review = 'REVIEW'
+    authorized_pending_review = 'AUTHORIZED_PENDING_REVIEW'
 
 
 @dataclass
@@ -384,7 +390,7 @@ class Cybersource(ApplePayMixin, BaseClientSidePaymentProcessor):
 
         return parameters
 
-    def normalize_processor_response(self, response):
+    def normalize_processor_response(self, response: dict) -> UnhandledCybersourceResponse:
         # Raise an exception for payments that were not accepted. Consuming code should be responsible for handling
         # and logging the exception.
         try:
@@ -447,7 +453,7 @@ class Cybersource(ApplePayMixin, BaseClientSidePaymentProcessor):
             country=Country.objects.get(
                 iso_3166_1_a2=order_completion_message['req_bill_to_address_country']))
 
-    def handle_processor_response(self, response, basket=None):
+    def handle_processor_response(self, response: UnhandledCybersourceResponse, basket=None):
         """
         Handle a response (i.e., "merchant notification") from CyberSource.
 
@@ -494,11 +500,15 @@ class Cybersource(ApplePayMixin, BaseClientSidePaymentProcessor):
                     basket.id,
                 )
             else:
+                if response.decision == Decision.authorized_pending_review:
+                    self.reverse_payment_api(response, "Automatic reversal of AUTHORIZED_PENDING_REVIEW", basket)
+
                 raise {
                     Decision.cancel: UserCancelled,
                     Decision.decline: TransactionDeclined,
                     Decision.error: GatewayError,
                     Decision.review: AuthorizationError,
+                    Decision.authorized_pending_review: TransactionDeclined,
                 }.get(response.decision, InvalidCybersourceDecision(response.decision))
 
         transaction_id = response.transaction_id
@@ -768,11 +778,11 @@ class CybersourceREST(Cybersource):
                 raise GatewayError()
             return e, e.headers['v-c-correlation-id']
 
-    def normalize_processor_response(self, response):
+    def normalize_processor_response(self, response) -> UnhandledCybersourceResponse:
         decision_map = {
             'AUTHORIZED': Decision.accept,
             'PARTIAL_AUTHORIZED': Decision.decline,
-            'AUTHORIZED_PENDING_REVIEW': Decision.decline,
+            'AUTHORIZED_PENDING_REVIEW': Decision.authorized_pending_review,
             'AUTHORIZED_RISK_DECLINED': Decision.decline,
             'PENDING_AUTHENTICATION': Decision.decline,
             'PENDING_REVIEW': Decision.review,
@@ -858,6 +868,54 @@ class CybersourceREST(Cybersource):
         # There is no need to validate the payment processor response, because
         # it is coming in response to an API call we initiated
         return True
+
+    def reverse_payment_api(self, payment_processor_response: UnhandledCybersourceResponse, reason: str, basket=None):
+
+        clientReferenceInformation = Ptsv2paymentsidreversalsClientReferenceInformation(
+            code=payment_processor_response.order_id
+        )
+
+        reversalInformationAmountDetails = Ptsv2paymentsidreversalsReversalInformationAmountDetails(
+            total_amount=str(payment_processor_response.total)
+        )
+
+        reversalInformation = Ptsv2paymentsidreversalsReversalInformation(
+            amount_details=reversalInformationAmountDetails.__dict__,
+            reason=reason,
+        )
+
+        requestObj = AuthReversalRequest(
+            client_reference_information=clientReferenceInformation.__dict__,
+            reversal_information=reversalInformation.__dict__
+        )
+
+        requestObj = del_none(requestObj.__dict__)
+
+        # HACK: log the processor request into the processor response model for analyzing declines
+        self.record_processor_response(requestObj, transaction_id='[REVERSAL REQUEST]', basket=basket)
+
+        api_instance = ReversalApi(self.cybersource_api_config)
+
+        try:
+            reversal_response, _, _ = api_instance.auth_reversal(
+                payment_processor_response.transaction_id,
+                json.dumps(requestObj),
+                _request_timeout=(self.connect_timeout, self.read_timeout)
+            )
+        except ApiException as e:
+            reversal_response = e
+
+        if isinstance(reversal_response, ApiException):
+            reversal_transaction_id = None
+        else:
+            reversal_transaction_id = reversal_response.id
+
+        self.record_processor_response(
+            self.serialize_order_completion(reversal_response),
+            transaction_id=reversal_transaction_id,
+            basket=basket,
+        )
+        return reversal_response
 
     def authorize_payment_api(self, transient_token_jwt, basket, request, form_data):
         clientReferenceInformation = Ptsv2paymentsClientReferenceInformation(
