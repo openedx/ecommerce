@@ -8,14 +8,15 @@ attrs==20.2.0             # via -c requirements/base.txt, pytest
 certifi==2020.6.20        # via -c requirements/base.txt, requests
 cffi==1.14.3              # via -c requirements/base.txt, cryptography
 chardet==3.0.4            # via -c requirements/base.txt, requests
-cryptography==3.2         # via -c requirements/base.txt, pyjwt
+cryptography==3.2.1       # via -c requirements/base.txt, pyjwt
+django-crum==0.7.7        # via -c requirements/base.txt, edx-django-utils
 django-waffle==2.0.0      # via -c requirements/base.txt, edx-django-utils
-django==2.2.16            # via -c requirements/base.txt, edx-django-utils
-edx-django-utils==3.9.0   # via -c requirements/base.txt, edx-rest-api-client
+django==2.2.16            # via -c requirements/base.txt, django-crum, edx-django-utils
+edx-django-utils==3.10.0  # via -c requirements/base.txt, edx-rest-api-client
 edx-rest-api-client==5.2.1  # via -c requirements/base.txt, -r requirements/e2e.in
 idna==2.7                 # via -c requirements/base.txt, -c requirements/pins.txt, requests
 more-itertools==8.5.0     # via pytest
-newrelic==5.22.0.151      # via -c requirements/base.txt, edx-django-utils
+newrelic==5.22.1.152      # via -c requirements/base.txt, edx-django-utils
 packaging==20.4           # via -c requirements/base.txt, pytest
 pbr==5.5.1                # via -c requirements/base.txt, stevedore
 pluggy==0.13.1            # via pytest
@@ -32,7 +33,7 @@ pytest-selenium==2.0.1    # via -r requirements/e2e.in
 pytest-timeout==1.4.2     # via -r requirements/e2e.in
 pytest-variables==1.9.0   # via pytest-selenium
 pytest==5.3.5             # via -c requirements/pins.txt, -r requirements/e2e.in, pytest-base-url, pytest-html, pytest-metadata, pytest-randomly, pytest-selenium, pytest-timeout, pytest-variables
-python-dotenv==0.14.0     # via -r requirements/e2e.in
+python-dotenv==0.15.0     # via -r requirements/e2e.in
 pytz==2016.10             # via -c requirements/base.txt, -c requirements/pins.txt, django
 requests==2.24.0          # via -c requirements/base.txt, edx-rest-api-client, pytest-base-url, pytest-selenium, slumber
 selenium==3.141.0         # via -r requirements/e2e.in, pytest-selenium
