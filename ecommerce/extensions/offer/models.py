@@ -5,6 +5,9 @@ import re
 
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
+from django.contrib.contenttypes.fields import GenericForeignKey
+from django.contrib.contenttypes.models import ContentType
+from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from django_extensions.db.models import TimeStampedModel
@@ -26,6 +29,7 @@ from threadlocals.threadlocals import get_current_request
 
 from ecommerce.core.utils import get_cache_key, log_message_and_raise_validation_error
 from ecommerce.extensions.offer.constants import (
+    EMAIL_TEMPLATE_TYPES,
     NUDGE_EMAIL_CYCLE,
     NUDGE_EMAIL_TEMPLATE_TYPES,
     OFFER_ASSIGNED,
@@ -605,13 +609,6 @@ class AbstractBaseEmailTemplate(TimeStampedModel):
 
 
 class OfferAssignmentEmailTemplates(AbstractBaseEmailTemplate):
-    ASSIGN, REMIND, REVOKE = ('assign', 'remind', 'revoke')
-    EMAIL_TEMPLATE_TYPES = (
-        (ASSIGN, _('Assign')),
-        (REMIND, _('Remind')),
-        (REVOKE, _('Revoke')),
-    )
-
     enterprise_customer = models.UUIDField(help_text=_('UUID for an EnterpriseCustomer from the Enterprise Service.'))
     email_type = models.CharField(max_length=32, choices=EMAIL_TEMPLATE_TYPES)
 
@@ -621,11 +618,54 @@ class OfferAssignmentEmailTemplates(AbstractBaseEmailTemplate):
             models.Index(fields=['enterprise_customer', 'email_type'])
         ]
 
+    @classmethod
+    def get_template(cls, template_id=None):
+        try:
+            template = cls.objects.get(id=template_id)
+        except ObjectDoesNotExist:
+            template = None
+        return template
+
     def __str__(self):
         return "{ec}-{email_type}-{active}".format(
             ec=self.enterprise_customer,
             email_type=self.email_type,
             active=self.active
+        )
+
+
+class OfferAssignmentEmailSentRecord(TimeStampedModel):
+    enterprise_customer = models.UUIDField(help_text=_('UUID for an EnterpriseCustomer from the Enterprise Service.'))
+    email_type = models.CharField(max_length=32, choices=EMAIL_TEMPLATE_TYPES)
+    template_content_type = models.ForeignKey(
+        ContentType,
+        null=True,
+        on_delete=models.CASCADE,
+    )
+    template_id = models.PositiveIntegerField(null=True)
+    template_content_object = GenericForeignKey('template_content_type', 'template_id')
+
+    @classmethod
+    def create_email_record(cls, enterprise_customer_uuid, email_type, template):
+        """
+        Create an instance of OfferAssignmentEmailSentRecord.
+        Arguments:
+            enterprise_customer_uuid (str): The uuid of the enterprise that sent the email
+            email_type (str): The type of the email sent e:g Assign, Remind or Revoke
+            template (obj): The instance of the template used to send email e:g OfferAssignmentEmailTemplates
+        """
+        template_record = OfferAssignmentEmailSentRecord(
+            template_content_object=template,
+            enterprise_customer=enterprise_customer_uuid,
+            email_type=email_type
+        )
+        template_record.save()
+        return template_record
+
+    def __str__(self):
+        return "{ec}-{email_type}".format(
+            ec=self.enterprise_customer,
+            email_type=self.email_type,
         )
 
 

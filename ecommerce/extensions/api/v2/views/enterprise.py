@@ -54,10 +54,13 @@ from ecommerce.extensions.catalogue.utils import (
     create_coupon_product_and_stockrecord
 )
 from ecommerce.extensions.offer.constants import (
+    ASSIGN,
     OFFER_ASSIGNED,
     OFFER_ASSIGNMENT_EMAIL_PENDING,
     OFFER_ASSIGNMENT_EMAIL_SUBJECT_LIMIT,
     OFFER_ASSIGNMENT_EMAIL_TEMPLATE_FIELD_LIMIT,
+    REMIND,
+    REVOKE,
     VOUCHER_IS_PRIVATE,
     VOUCHER_IS_PUBLIC,
     VOUCHER_NOT_ASSIGNED,
@@ -65,6 +68,7 @@ from ecommerce.extensions.offer.constants import (
     VOUCHER_PARTIAL_REDEEMED,
     VOUCHER_REDEEMED
 )
+from ecommerce.extensions.offer.models import OfferAssignmentEmailSentRecord
 from ecommerce.extensions.offer.utils import update_assignments_for_multi_use_per_customer
 from ecommerce.extensions.voucher.utils import (
     create_enterprise_vouchers,
@@ -665,6 +669,9 @@ class EnterpriseCouponViewSet(CouponViewSet):
         if errors:
             raise DRFValidationError({'error': errors})
 
+    def _create_offer_assignment_email_sent_record(self, enterprise_customer, email_type, template=None):
+        OfferAssignmentEmailSentRecord.create_email_record(enterprise_customer, email_type, template)
+
     @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
     @permission_required('enterprise.can_assign_coupon', fn=lambda request, pk: get_enterprise_from_product(pk))
     def assign(self, request, pk):  # pylint: disable=unused-argument
@@ -676,6 +683,9 @@ class EnterpriseCouponViewSet(CouponViewSet):
         subject = request.data.pop('template_subject', '')
         greeting = request.data.pop('template_greeting', '')
         closing = request.data.pop('template_closing', '')
+        template_id = request.data.pop('template_id', None)
+        template = OfferAssignmentEmailTemplates.get_template(template_id)
+        enterprise_customer = coupon.attr.enterprise_customer_uuid
 
         self._validate_email_fields(subject, greeting, closing)
 
@@ -690,6 +700,8 @@ class EnterpriseCouponViewSet(CouponViewSet):
         )
         if serializer.is_valid():
             serializer.save()
+            # Create a record of the email sent
+            self._create_offer_assignment_email_sent_record(enterprise_customer, ASSIGN, template)
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -759,14 +771,24 @@ class EnterpriseCouponViewSet(CouponViewSet):
         subject = request.data.pop('template_subject', '')
         greeting = request.data.pop('template_greeting', '')
         closing = request.data.pop('template_closing', '')
+        template_id = request.data.pop('template_id', None)
+        template = OfferAssignmentEmailTemplates.get_template(template_id)
+        enterprise_customer = coupon.attr.enterprise_customer_uuid
         self._validate_email_fields(subject, greeting, closing)
         serializer = CouponCodeRevokeSerializer(
             data=request.data.get('assignments'),
             many=True,
-            context={'coupon': coupon, 'subject': subject, 'greeting': greeting, 'closing': closing}
+            context={
+                'coupon': coupon,
+                'subject': subject,
+                'greeting': greeting,
+                'closing': closing,
+            }
         )
         if serializer.is_valid():
             serializer.save()
+            # Create a record of the email sent
+            self._create_offer_assignment_email_sent_record(enterprise_customer, REVOKE, template)
             return Response(serializer.data, status=status.HTTP_200_OK)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -782,6 +804,9 @@ class EnterpriseCouponViewSet(CouponViewSet):
         subject = request.data.pop('template_subject', '')
         greeting = request.data.pop('template_greeting', '')
         closing = request.data.pop('template_closing', '')
+        template_id = request.data.pop('template_id', None)
+        template = OfferAssignmentEmailTemplates.get_template(template_id)
+        enterprise_customer = coupon.attr.enterprise_customer_uuid
         self._validate_email_fields(subject, greeting, closing)
         if request.data.get('assignments'):
             assignments = request.data.get('assignments')
@@ -811,10 +836,17 @@ class EnterpriseCouponViewSet(CouponViewSet):
         serializer = CouponCodeRemindSerializer(
             data=assignments,
             many=True,
-            context={'coupon': coupon, 'subject': subject, 'greeting': greeting, 'closing': closing}
+            context={
+                'coupon': coupon,
+                'subject': subject,
+                'greeting': greeting,
+                'closing': closing,
+            }
         )
         if serializer.is_valid():
             serializer.save()
+            # Create a record of the email sent
+            self._create_offer_assignment_email_sent_record(enterprise_customer, REMIND, template)
             return Response(serializer.data, status=status.HTTP_200_OK)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
