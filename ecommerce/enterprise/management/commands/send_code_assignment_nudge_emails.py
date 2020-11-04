@@ -2,6 +2,7 @@
 Send the enterprise code assignment nudge emails.
 """
 import logging
+from datetime import datetime
 
 from django.core.management import BaseCommand
 from ecommerce_worker.sailthru.v1.tasks import send_code_assignment_nudge_email
@@ -27,6 +28,7 @@ class Command(BaseCommand):
         """
         # TODO: Removing this filter for testing purpose "email_date__date=datetime.now().date()"
         return CodeAssignmentNudgeEmails.objects.filter(
+            email_date__date=datetime.now().date(),
             already_sent=False,
             is_subscribed=True
         )
