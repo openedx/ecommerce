@@ -5,14 +5,9 @@ from typing import Optional
 import requests
 from django.contrib import messages
 from django.core.exceptions import ObjectDoesNotExist
-from django.db import transaction
-from django.http import HttpResponseRedirect, JsonResponse
-from django.shortcuts import redirect
-from django.utils.decorators import method_decorator
+from django.http import JsonResponse
 from django.utils.functional import cached_property
 from django.utils.translation import ugettext as _
-from django.views.decorators.csrf import csrf_exempt
-from django.views.generic import View
 from edx_django_utils import monitoring as monitoring_utils
 from oscar.apps.partner import strategy
 from oscar.apps.payment.exceptions import GatewayError, PaymentError, TransactionDeclined, UserCancelled
@@ -22,13 +17,8 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from ecommerce.core.url_utils import absolute_redirect
 from ecommerce.extensions.api.serializers import OrderSerializer
-from ecommerce.extensions.basket.utils import (
-    add_utm_params_to_url,
-    basket_add_organization_attribute,
-    get_payment_microfrontend_or_basket_url
-)
+from ecommerce.extensions.basket.utils import add_utm_params_to_url, get_payment_microfrontend_or_basket_url
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
 from ecommerce.extensions.checkout.utils import get_receipt_page_url
 from ecommerce.extensions.payment.core.sdn import checkSDN, compare_SDNCheck_vs_fallback
@@ -41,7 +31,6 @@ from ecommerce.extensions.payment.exceptions import (
     RedundantPaymentNotificationError
 )
 from ecommerce.extensions.payment.processors.cybersource import Cybersource, CybersourceREST
-from ecommerce.extensions.payment.utils import clean_field_value
 from ecommerce.extensions.payment.views import BasePaymentSubmitView
 
 logger = logging.getLogger(__name__)
@@ -104,89 +93,6 @@ class CybersourceOrderInitiationView:
             request.basket.id,
         )
         return None
-
-
-class CybersourceSubmitView(BasePaymentSubmitView, CybersourceOrderInitiationView):
-    """ Starts CyberSource payment process.
-
-    This view is intended to be called asynchronously by the payment form. The view expects POST data containing a
-    `Basket` ID. The specified basket is frozen, and CyberSource parameters are returned as a JSON object.
-    """
-    FIELD_MAPPINGS = {
-        'city': 'bill_to_address_city',
-        'country': 'bill_to_address_country',
-        'address_line1': 'bill_to_address_line1',
-        'address_line2': 'bill_to_address_line2',
-        'postal_code': 'bill_to_address_postal_code',
-        'state': 'bill_to_address_state',
-        'first_name': 'bill_to_forename',
-        'last_name': 'bill_to_surname',
-    }
-
-    def form_valid(self, form):
-        data = form.cleaned_data
-        basket = data['basket']
-        request = self.request
-        user = request.user
-
-        sdn_check_failure = self.check_sdn(request, data)
-        if sdn_check_failure is not None:
-            return sdn_check_failure
-
-        # Add extra parameters for Silent Order POST
-        extra_parameters = {
-            'payment_method': 'card',
-            'unsigned_field_names': ','.join(Cybersource.PCI_FIELDS),
-            'bill_to_email': user.email,
-            # Fall back to order number when there is no session key (JWT auth)
-            'device_fingerprint_id': request.session.session_key or basket.order_number,
-        }
-
-        for source, destination in self.FIELD_MAPPINGS.items():
-            extra_parameters[destination] = clean_field_value(data[source])
-
-        parameters = Cybersource(self.request.site).get_transaction_parameters(
-            basket,
-            use_client_side_checkout=True,
-            extra_parameters=extra_parameters
-        )
-
-        logger.info(
-            'Parameters signed for CyberSource transaction [%s], associated with basket [%d].',
-            # TODO: transaction_id is None in logs. This should be fixed.
-            parameters.get('transaction_id'),
-            basket.id
-        )
-
-        # This parameter is only used by the Web/Mobile flow. It is not needed for for Silent Order POST.
-        parameters.pop('payment_page_url', None)
-
-        # Ensure that the response can be properly rendered so that we
-        # don't have to deal with thawing the basket in the event of an error.
-        response = JsonResponse({'form_fields': parameters})
-
-        basket_add_organization_attribute(basket, data)
-
-        # Freeze the basket since the user is paying for it now.
-        basket.freeze()
-
-        return response
-
-
-class CybersourceSubmitAPIView(APIView, CybersourceSubmitView):
-    # DRF APIView wrapper which allows clients to use
-    # JWT authentication when making Cybersource submit
-    # requests.
-    permission_classes = (permissions.IsAuthenticated,)
-
-    def post(self, request):
-        logger.info(
-            '%s called for basket [%d]. It is in the [%s] state.',
-            self.__class__.__name__,
-            request.basket.id,
-            request.basket.status
-        )
-        return super(CybersourceSubmitAPIView, self).post(request)
 
 
 class CybersourceOrderCompletionView(EdxOrderPlacementMixin):
@@ -564,61 +470,6 @@ class CybersourceAuthorizeAPIView(
         return JsonResponse({
             'redirectTo': redirect_url,
         }, status=400)
-
-
-class CybersourceInterstitialView(CyberSourceProcessorMixin, CybersourceOrderCompletionView, View):
-    """
-    Interstitial view for Cybersource Payments.
-
-    Side effect:
-        Sets the custom metric ``payment_response_validation`` to one of the following:
-            'success', 'redirect-to-receipt', 'redirect-to-payment-page', 'redirect-to-error-page'
-
-    """
-
-    # Disable atomicity for the view. Otherwise, we'd be unable to commit to the database
-    # until the request had concluded; Django will refuse to commit when an atomic() block
-    # is active, since that would break atomicity. Without an order present in the database
-    # at the time fulfillment is attempted, asynchronous order fulfillment tasks will fail.
-    @method_decorator(transaction.non_atomic_requests)
-    @method_decorator(csrf_exempt)
-    def dispatch(self, request, *args, **kwargs):
-        return super(CybersourceInterstitialView, self).dispatch(request, *args, **kwargs)
-
-    def post(self, request, *args, **kwargs):  # pylint: disable=unused-argument
-        """Process a CyberSource merchant notification and place an order for paid products as appropriate."""
-        notification = request.POST.dict()
-        self.transaction_id = notification.get('transaction_id')
-        self.order_number = notification.get('req_reference_number')
-
-        try:
-            self.basket_id = OrderNumberGenerator().basket_id(self.order_number)
-        except:  # pylint: disable=bare-except
-            logger.exception(
-                'Error generating basket_id from CyberSource notification with transaction [%s] and order [%s].',
-                self.transaction_id,
-                self.order_number,
-            )
-            return self.redirect_to_payment_error()
-
-        return self.complete_order(notification)
-
-    def redirect_to_payment_error(self):
-        return absolute_redirect(self.request, 'payment_error')
-
-    def redirect_to_receipt_page(self):
-        receipt_page_url = get_receipt_page_url(
-            self.request.site.siteconfiguration,
-            order_number=self.order_number,
-            disable_back_button=True,
-        )
-
-        return redirect(receipt_page_url)
-
-    def redirect_on_transaction_declined(self):
-        redirect_url = get_payment_microfrontend_or_basket_url(self.request)
-        redirect_url = add_utm_params_to_url(redirect_url, list(self.request.GET.items()))
-        return HttpResponseRedirect(redirect_url)
 
 
 class ApplePayStartSessionView(CyberSourceProcessorMixin, APIView):
