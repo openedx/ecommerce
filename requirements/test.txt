@@ -40,7 +40,7 @@ django-compressor==2.4    # via -r requirements/base.txt, django-libsass
 django-config-models==2.0.3  # via -r requirements/base.txt
 django-cors-headers==3.5.0  # via -r requirements/base.txt
 django-crispy-forms==1.8.1  # via -r requirements/base.txt
-django-crum==0.7.7        # via -r requirements/base.txt, -r requirements/e2e.txt, edx-django-utils, edx-rbac
+django-crum==0.7.8        # via -r requirements/base.txt, -r requirements/e2e.txt, edx-django-utils, edx-rbac
 django-extensions==3.0.9  # via -r requirements/base.txt
 django-extra-views==0.11.0  # via -r requirements/base.txt, django-oscar
 django-filter==2.4.0      # via -r requirements/base.txt
@@ -66,9 +66,9 @@ drf-jwt==1.17.2           # via -r requirements/base.txt, edx-drf-extensions
 edx-auth-backends==3.1.0  # via -r requirements/base.txt
 edx-django-release-util==0.4.4  # via -r requirements/base.txt
 edx-django-sites-extensions==2.5.1  # via -r requirements/base.txt
-edx-django-utils==3.10.0  # via -r requirements/base.txt, -r requirements/e2e.txt, django-config-models, edx-drf-extensions, edx-rest-api-client
+edx-django-utils==3.11.0  # via -r requirements/base.txt, -r requirements/e2e.txt, django-config-models, edx-drf-extensions, edx-rest-api-client
 edx-drf-extensions==6.2.0  # via -r requirements/base.txt, edx-rbac
-edx-ecommerce-worker==1.1.2  # via -r requirements/base.txt
+edx-ecommerce-worker==1.1.3  # via -r requirements/base.txt
 edx-i18n-tools==0.5.3     # via -r requirements/test.in
 edx-opaque-keys==2.1.1    # via -r requirements/base.txt, edx-drf-extensions
 edx-rbac==1.3.3           # via -r requirements/base.txt
@@ -76,7 +76,7 @@ edx-rest-api-client==5.2.1  # via -r requirements/base.txt, -r requirements/e2e.
 enum34==1.1.10            # via -r requirements/base.txt, cybersource-rest-client-python
 extras==1.0.0             # via -r requirements/base.txt, cybersource-rest-client-python, python-subunit, testtools
 factory-boy==2.12.0       # via -r requirements/base.txt, -r requirements/test.in, django-oscar
-faker==4.14.0             # via -r requirements/base.txt, factory-boy
+faker==4.14.1             # via -r requirements/base.txt, factory-boy
 filelock==3.0.12          # via -r requirements/tox.txt, tox
 fixtures==3.0.0           # via -r requirements/base.txt, cybersource-rest-client-python, testtools
 freezegun==1.0.0          # via -r requirements/test.in
@@ -105,7 +105,7 @@ markupsafe==1.1.1         # via -r requirements/base.txt, jinja2
 mccabe==0.6.1             # via pylint
 mock-django==0.6.10       # via -r requirements/test.in
 mock==4.0.2               # via -r requirements/test.in, mock-django
-more-itertools==8.5.0     # via -r requirements/e2e.txt, pytest
+more-itertools==8.6.0     # via -r requirements/e2e.txt, pytest
 mysqlclient==1.4.6        # via -r requirements/base.txt
 naked==0.1.31             # via -r requirements/base.txt, crypto, cybersource-rest-client-python
 ndg-httpsclient==0.5.1    # via -r requirements/base.txt
@@ -118,7 +118,7 @@ paramiko==2.7.2           # via -r requirements/base.txt, cybersource-rest-clien
 path.py==7.2              # via -r requirements/base.txt, edx-i18n-tools
 paypalrestsdk==1.13.1     # via -r requirements/base.txt
 pbr==5.5.1                # via -r requirements/base.txt, -r requirements/e2e.txt, cybersource-rest-client-python, fixtures, stevedore, testtools
-phonenumbers==8.12.11     # via -r requirements/base.txt, django-oscar, django-phonenumber-field
+phonenumbers==8.12.12     # via -r requirements/base.txt, django-oscar, django-phonenumber-field
 pillow==8.0.1             # via -r requirements/base.txt, django-oscar
 pluggy==0.13.1            # via -r requirements/e2e.txt, -r requirements/tox.txt, diff-cover, pytest, tox
 polib==1.1.0              # via edx-i18n-tools
@@ -130,8 +130,8 @@ pyasn1==0.4.8             # via -r requirements/base.txt, cybersource-rest-clien
 pycodestyle==2.6.0        # via -r requirements/test.in
 pycountry==17.1.8         # via -r requirements/base.txt
 pycparser==2.20           # via -r requirements/base.txt, -r requirements/e2e.txt, cffi, cybersource-rest-client-python
-pycryptodome==3.9.8       # via -r requirements/base.txt, cybersource-rest-client-python
-pycryptodomex==3.9.8      # via -r requirements/base.txt, cybersource-rest-client-python, pyjwkest
+pycryptodome==3.9.9       # via -r requirements/base.txt, cybersource-rest-client-python
+pycryptodomex==3.9.9      # via -r requirements/base.txt, cybersource-rest-client-python, pyjwkest
 pygments==2.7.2           # via -r requirements/base.txt, diff-cover
 pyjwkest==1.4.2           # via -r requirements/base.txt, edx-drf-extensions
 pyjwt[crypto]==1.7.1      # via -r requirements/base.txt, -r requirements/e2e.txt, cybersource-rest-client-python, drf-jwt, edx-auth-backends, edx-rest-api-client, social-auth-core
@@ -191,7 +191,7 @@ tenacity==6.2.0           # via -r requirements/e2e.txt, pytest-selenium
 testfixtures==6.15.0      # via -r requirements/test.in
 testtools==2.4.0          # via -r requirements/base.txt, cybersource-rest-client-python, fixtures, python-subunit
 text-unidecode==1.3       # via -r requirements/base.txt, faker
-toml==0.10.1              # via -r requirements/tox.txt, tox
+toml==0.10.2              # via -r requirements/tox.txt, tox
 tox-battery==0.5.2        # via -c requirements/pins.txt, -r requirements/tox.txt
 tox==3.14.6               # via -c requirements/pins.txt, -r requirements/tox.txt, tox-battery
 traceback2==1.4.0         # via -r requirements/base.txt, cybersource-rest-client-python, testtools, unittest2
