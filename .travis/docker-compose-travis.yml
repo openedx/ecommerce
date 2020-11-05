@@ -10,7 +10,7 @@ services:
       MYSQL_ROOT_PASSWORD: "password"
       MYSQL_DATABASE: "ecommerce"
   ecommerce:
-    image: edxops/ecommerce:latest
+    image: edxops/ecommerce:koa.beta1
     container_name: ecommerce_testing
     volumes:
       - ..:/edx/app/ecommerce/ecommerce
