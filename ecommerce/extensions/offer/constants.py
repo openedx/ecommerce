@@ -41,3 +41,32 @@ EMAIL_TEMPLATE_TYPES = (
     (REMIND, _('Remind')),
     (REVOKE, _('Revoke')),
 )
+
+# Don't change it, These is being used in data migration '0047_codeassignmentnudgeemailtemplates'
+TEMPLATES_NAME = ['Day 3 Nudge Email', 'Day 10 Nudge Email', 'Day 19 Nudge Email']
+NUDGE_EMAIL_TEMPLATES = [
+    {
+        'email_type': DAY3,
+        'email_greeting': 'Remember when your organization gave you a code to learn on edX? We do, and we\'re glad to '
+                          'have you! Come see what you can learn.',
+        'email_closing': 'Redeem your edX code and start learning today.',
+        'email_subject': 'Start learning on edX!',
+        'name': TEMPLATES_NAME[0],
+    },
+    {
+        'email_type': DAY10,
+        'email_greeting': 'Many learners from your organization are completing more problems every week, and are '
+                          'learning new skills. What do you want to start learning?',
+        'email_closing': 'Join your peers, and start learning today.',
+        'email_subject': 'Join the learning on edX!',
+        'name': TEMPLATES_NAME[1],
+    },
+    {
+        'email_type': DAY19,
+        'email_greeting': 'Learners like you are earning certificates from some of the top universities and companies '
+                          'in the world. Will you join them?',
+        'email_closing': 'Learn from the best, and redeem your code today.',
+        'email_subject': 'It\'s not to late redeem your edX code!',
+        'name': TEMPLATES_NAME[2],
+    },
+]
