@@ -31,6 +31,7 @@ from ecommerce.core.url_utils import get_lms_url
 from ecommerce.courses.models import Course
 from ecommerce.courses.utils import mode_for_product
 from ecommerce.extensions.fulfillment.signals import SHIPPING_EVENT_NAME
+from ecommerce.extensions.payment.helpers import get_default_processor_class, get_processor_class_by_name
 from ecommerce.tests.factories import SiteConfigurationFactory, UserFactory
 
 Applicator = get_class('offer.applicator', 'Applicator')
@@ -230,7 +231,14 @@ class BasketCreationMixin(UserMixin, JwtMixin):
                     self.assertIsNone(response.data['order'])
                     self.assertIsNotNone(response.data['payment_data']['payment_processor_name'])
                     self.assertIsNotNone(response.data['payment_data']['payment_form_data'])
-                    self.assertIsNotNone(response.data['payment_data']['payment_page_url'])
+                    if payment_processor_name is None:
+                        processor_class = get_default_processor_class()
+                    else:
+                        processor_class = get_processor_class_by_name(payment_processor_name)
+                    assert (
+                        response.data['payment_data']['payment_page_url'] ==
+                        processor_class(Site.objects.all()[0]).client_side_payment_url
+                    )
                 else:
                     self.assertEqual(response.data['order']['number'], Order.objects.get().number)
                     self.assertIsNone(response.data['payment_data'])
