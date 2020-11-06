@@ -5,12 +5,14 @@ import logging
 from datetime import datetime
 
 from django.core.management import BaseCommand
+from django.utils import timezone
 from ecommerce_worker.sailthru.v1.tasks import send_code_assignment_nudge_email
 
 from ecommerce.programs.custom import get_model
 
 CodeAssignmentNudgeEmails = get_model('offer', 'CodeAssignmentNudgeEmails')
 CodeAssignmentNudgeEmailTemplates = get_model('offer', 'CodeAssignmentNudgeEmailTemplates')
+OfferAssignment = get_model('offer', 'OfferAssignment')
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -52,8 +54,17 @@ class Command(BaseCommand):
                 nudge_email.save()
                 send_nudge_email_count += 1
                 send_code_assignment_nudge_email.delay(nudge_email.user_email, email_subject, email_body)
+                self.set_last_reminder_date(nudge_email.user_email, nudge_email.code)
         logger.info(
             '[Code Assignment Nudge Email] %s out of %s added to the email sending queue.',
             send_nudge_email_count,
             total_nudge_emails_count
         )
+
+    @staticmethod
+    def set_last_reminder_date(email, code):
+        """
+        Set reminder date for offer assignments with `email` and `code`.
+        """
+        current_date_time = timezone.now()
+        OfferAssignment.objects.filter(code=code, user_email=email).update(last_reminder_date=current_date_time)
