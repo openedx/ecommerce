@@ -12,7 +12,6 @@ from typing import Optional
 
 import jwt
 import jwt.exceptions
-import waffle
 from CyberSource import (
     AuthReversalRequest,
     CreatePaymentRequest,
@@ -43,7 +42,6 @@ from zeep import Client
 from zeep.helpers import serialize_object
 from zeep.wsse import UsernameToken
 
-from ecommerce.core.url_utils import get_ecommerce_url
 from ecommerce.extensions.payment.constants import APPLE_PAY_CYBERSOURCE_CARD_TYPE_MAP, CYBERSOURCE_CARD_TYPE_MAP
 from ecommerce.extensions.payment.exceptions import (
     AuthorizationError,
@@ -52,10 +50,8 @@ from ecommerce.extensions.payment.exceptions import (
     InvalidCybersourceDecision,
     InvalidSignatureError,
     PartialAuthorizationError,
-    ProcessorMisconfiguredError,
     RedundantPaymentNotificationError
 )
-from ecommerce.extensions.payment.helpers import sign
 from ecommerce.extensions.payment.processors import (
     ApplePayMixin,
     BaseClientSidePaymentProcessor,
@@ -83,6 +79,13 @@ def del_none(d):  # pragma: no cover
 
 
 class Decision(Enum):
+    """
+    An enumeration of expected CyberSource decisions that we have specific
+    handling for.
+
+    This list was based on the values from Silent Order POST workflow, and hasn't been
+    expanded to include all the decision values from the CyberSource REST API
+    """
     accept = 'ACCEPT'
     cancel = 'CANCEL'
     decline = 'DECLINE'
@@ -93,6 +96,15 @@ class Decision(Enum):
 
 @dataclass
 class UnhandledCybersourceResponse:
+    """
+    The normalized format of a CyberSource payment authorization response.
+
+    This includes all of the fields that we need for further processing, without
+    any additional data from the response.
+
+    This was created to standardize the processing interface between the Silent Order POST workflow
+    responses and CyberSource REST API responses.
+    """
     decision: Decision
     duplicate_payment: bool
     partial_authorization: bool
@@ -105,7 +117,7 @@ class UnhandledCybersourceResponse:
     raw_json: dict
 
 
-class Cybersource(ApplePayMixin, BaseClientSidePaymentProcessor):
+class CybersourceREST(ApplePayMixin, BaseClientSidePaymentProcessor):
     """
     CyberSource Secure Acceptance Web/Mobile (February 2015)
 
@@ -113,8 +125,7 @@ class Cybersource(ApplePayMixin, BaseClientSidePaymentProcessor):
     http://apps.cybersource.com/library/documentation/dev_guides/Secure_Acceptance_WM/Secure_Acceptance_WM.pdf.
     """
 
-    NAME = 'cybersource'
-    PCI_FIELDS = ('card_cvn', 'card_expiry_date', 'card_number', 'card_type',)
+    NAME = "cybersource-rest"
 
     def __init__(self, site):
         """
@@ -125,33 +136,13 @@ class Cybersource(ApplePayMixin, BaseClientSidePaymentProcessor):
             AttributeError: If LANGUAGE_CODE setting is not set.
         """
 
-        super(Cybersource, self).__init__(site)
+        super(CybersourceREST, self).__init__(site)
         configuration = self.configuration
         self.soap_api_url = configuration['soap_api_url']
         self.merchant_id = configuration['merchant_id']
         self.transaction_key = configuration['transaction_key']
         self.send_level_2_3_details = configuration.get('send_level_2_3_details', True)
         self.language_code = settings.LANGUAGE_CODE
-
-        # Secure Acceptance parameters
-        # NOTE: Silent Order POST is the preferred method of checkout as it allows us to completely control
-        # the checkout UX. Secure Acceptance, on the other hand, redirects the purchaser to a page controlled
-        # by CyberSource.
-        self.profile_id = configuration.get('profile_id')
-        self.access_key = configuration.get('access_key')
-        self.secret_key = configuration.get('secret_key')
-        self.payment_page_url = configuration.get('payment_page_url')
-
-        # Silent Order POST parameters
-        self.sop_profile_id = configuration.get('sop_profile_id')
-        self.sop_access_key = configuration.get('sop_access_key')
-        self.sop_secret_key = configuration.get('sop_secret_key')
-        self.sop_payment_page_url = configuration.get('sop_payment_page_url')
-
-        sa_configured = all((self.access_key, self.payment_page_url, self.profile_id, self.secret_key))
-        sop_configured = all([self.sop_access_key, self.sop_payment_page_url, self.sop_profile_id, self.sop_secret_key])
-        assert sop_configured or sa_configured, \
-            'CyberSource processor must be configured for Silent Order POST and/or Secure Acceptance'
 
         # Apple Pay configuration
         self.apple_pay_enabled = self.site.siteconfiguration.enable_apple_pay
@@ -181,12 +172,8 @@ class Cybersource(ApplePayMixin, BaseClientSidePaymentProcessor):
         }
 
     @property
-    def cancel_page_url(self):
-        return get_ecommerce_url(self.configuration['cancel_checkout_path'])
-
-    @property
     def client_side_payment_url(self):
-        return self.sop_payment_page_url
+        return None
 
     def get_capture_context(self, session):  # pragma: no cover
         # To delete None values in Input Request Json body
@@ -258,86 +245,7 @@ class Cybersource(ApplePayMixin, BaseClientSidePaymentProcessor):
         Returns:
             dict: CyberSource-specific parameters required to complete a transaction, including a signature.
         """
-        sop_config_values = (self.sop_access_key, self.sop_payment_page_url, self.sop_profile_id, self.sop_secret_key,)
-        if use_client_side_checkout and not all(sop_config_values):
-            raise ProcessorMisconfiguredError(
-                'CyberSource Silent Order POST cannot be used unless a profile ID, access key, '
-                'secret key, and payment page URL are ALL configured in settings.'
-            )
-
-        parameters = {}
-
-        # Sign all fields
-        parameters['signed_field_names'] = ','.join(sorted(parameters.keys()))
-        parameters['signature'] = self._generate_signature(parameters, use_client_side_checkout)
-
-        payment_page_url = self.sop_payment_page_url if use_client_side_checkout else self.payment_page_url
-        parameters['payment_page_url'] = payment_page_url
-
-        return parameters
-
-    def normalize_processor_response(self, response: dict) -> UnhandledCybersourceResponse:
-        # Raise an exception for payments that were not accepted. Consuming code should be responsible for handling
-        # and logging the exception.
-        try:
-            decision = Decision(response['decision'].upper())
-        except ValueError:
-            decision = response['decision']
-
-        _response = UnhandledCybersourceResponse(
-            decision=decision,
-            duplicate_payment=(
-                decision == Decision.error and int(response['reason_code']) == 104
-            ),
-            partial_authorization=(
-                'auth_amount' in response and
-                response['auth_amount'] and
-                response['auth_amount'] != response['req_amount']
-            ),
-            currency=response['req_currency'],
-            total=Decimal(response['req_amount']),
-            card_number=response['req_card_number'],
-            card_type=CYBERSOURCE_CARD_TYPE_MAP.get(response['req_card_type']),
-            transaction_id=response.get('transaction_id', ''),   # Error Notifications do not include a transaction id.
-            order_id=response['req_reference_number'],
-            raw_json=self.serialize_order_completion(response),
-        )
-        return _response
-
-    def serialize_order_completion(self, order_completion_message):
-        return serialize_object(order_completion_message)
-
-    def extract_reason_code(self, order_completion_message):
-        return order_completion_message.get('reason_code')
-
-    def extract_payment_response_message(self, order_completion_message):
-        return order_completion_message.get('message')
-
-    def get_billing_address(self, order_completion_message):
-
-        field = 'req_bill_to_address_line1'
-        # Address line 1 is optional if flag is enabled
-        line1 = (
-            order_completion_message.get(field, '')
-            if waffle.switch_is_active('optional_location_fields')
-            else order_completion_message[field]
-        )
-        return BillingAddress(
-            first_name=order_completion_message['req_bill_to_forename'],
-            last_name=order_completion_message['req_bill_to_surname'],
-            line1=line1,
-
-            # Address line 2 is optional
-            line2=order_completion_message.get('req_bill_to_address_line2', ''),
-
-            # Oscar uses line4 for city
-            line4=order_completion_message['req_bill_to_address_city'],
-            # Postal code is optional
-            postcode=order_completion_message.get('req_bill_to_address_postal_code', ''),
-            # State is optional
-            state=order_completion_message.get('req_bill_to_address_state', ''),
-            country=Country.objects.get(
-                iso_3166_1_a2=order_completion_message['req_bill_to_address_country']))
+        return {'payment_page_url': self.client_side_payment_url}
 
     def handle_processor_response(self, response: UnhandledCybersourceResponse, basket=None):
         """
@@ -361,10 +269,6 @@ class Cybersource(ApplePayMixin, BaseClientSidePaymentProcessor):
         Returns:
             HandledProcessorResponse
         """
-        # Validate the signature
-        if not self.is_signature_valid(response.raw_json):
-            raise InvalidSignatureError()
-
         if response.decision != Decision.accept:
             if response.duplicate_payment:
                 # This means user submitted payment request twice within 15 min.
@@ -418,60 +322,6 @@ class Cybersource(ApplePayMixin, BaseClientSidePaymentProcessor):
             card_number=response.card_number,
             card_type=response.card_type
         )
-
-    def _generate_signature(self, parameters, use_sop_profile):
-        """
-        Sign the contents of the provided transaction parameters dictionary.
-
-        This allows CyberSource to verify that the transaction parameters have not been tampered with
-        during transit. The parameters dictionary should contain a key 'signed_field_names' which CyberSource
-        uses to validate the signature. The message to be signed must contain parameter keys and values ordered
-        in the same way they appear in 'signed_field_names'.
-
-        We also use this signature to verify that the signature we get back from Cybersource is valid for
-        the parameters that they are giving to us.
-
-        Arguments:
-            parameters (dict): A dictionary of transaction parameters.
-            use_sop_profile (bool): Indicates if the Silent Order POST profile should be used.
-
-        Returns:
-            unicode: the signature for the given parameters
-        """
-        order_number = None
-        basket_id = None
-
-        if 'reference_number' in parameters:
-            order_number = parameters['reference_number']
-        elif 'req_reference_number' in parameters:
-            order_number = parameters['req_reference_number']
-
-        if order_number:
-            basket_id = str(OrderNumberGenerator().basket_id(order_number))
-
-        logger.info(
-            'Signing CyberSource payment data for basket [%s], to become order [%s].',
-            basket_id,
-            order_number
-        )
-
-        keys = parameters['signed_field_names'].split(',')
-        secret_key = self.sop_secret_key if use_sop_profile else self.secret_key
-
-        # Generate a comma-separated list of keys and values to be signed. CyberSource refers to this
-        # as a 'Version 1' signature in their documentation.
-        message = ','.join(['{key}={value}'.format(key=key, value=parameters.get(key)) for key in keys])
-
-        return sign(message, secret_key)
-
-    def is_signature_valid(self, response):
-        """Returns a boolean indicating if the response's signature (indicating potential tampering) is valid."""
-        req_profile_id = response.get('req_profile_id')
-        if not req_profile_id:
-            return False
-
-        use_sop_profile = req_profile_id == self.sop_profile_id
-        return response and (self._generate_signature(response, use_sop_profile) == response.get('signature'))
 
     def issue_credit(self, order_number, basket, reference_number, amount, currency):
         """
@@ -625,14 +475,6 @@ class Cybersource(ApplePayMixin, BaseClientSidePaymentProcessor):
 
         return super().record_processor_response(response, transaction_id=transaction_id, basket=basket)
 
-
-class CybersourceREST(Cybersource):
-    """
-    A temporary PaymentProcessor dedicated to carefully switching to the Cybersource REST payment api
-    """
-
-    NAME = "cybersource-rest"
-
     def initiate_payment(self, basket, request, form_data):
         """
         Initiate payment using the Cybersource REST payment api.
@@ -665,6 +507,14 @@ class CybersourceREST(Cybersource):
             return e, e.headers['v-c-correlation-id']
 
     def normalize_processor_response(self, response) -> UnhandledCybersourceResponse:
+        """
+        Convert the response from the payment processor into a standardized format for
+        consumption by the rest of the processing code.
+
+        This was introduced during the conversion from the Silent Order POST API to the
+        REST API for payment processing in order to re-use the majority of the payment
+        pathway.
+        """
         decision_map = {
             'AUTHORIZED': Decision.accept,
             'PARTIAL_AUTHORIZED': Decision.decline,
@@ -730,6 +580,10 @@ class CybersourceREST(Cybersource):
         )
 
     def serialize_order_completion(self, order_completion_message):
+        """
+        Convert an order_completion_message (of the correct type for this payment processor)
+        into a plain old json-serializable object.
+        """
         if isinstance(order_completion_message, ApiException):
             try:
                 return json.loads(order_completion_message.body)
@@ -739,24 +593,38 @@ class CybersourceREST(Cybersource):
         return order_completion_message.to_dict()
 
     def extract_reason_code(self, order_completion_message):
+        """
+        Extract the CyberSource reason code from the order_completion_message.
+
+        This is used for cases where normal processing can't complete, but we are still looking
+        to log useful information about the order completion.
+        """
         if isinstance(order_completion_message, ApiException):
             return self.serialize_order_completion(order_completion_message).get('reason')
         return order_completion_message.error_information and order_completion_message.error_information.reason
 
     def extract_payment_response_message(self, order_completion_message):
+        """
+        Extract the CyberSource reason code from the order_completion_message.
+
+        This is used for cases where normal processing can't complete, but we are still looking
+        to log useful information about the order completion.
+        """
         if isinstance(order_completion_message, ApiException):
             return self.serialize_order_completion(order_completion_message).get('message')
 
         return order_completion_message.error_information and order_completion_message.error_information.message
 
-    def is_signature_valid(self, response):
-        """Returns a boolean indicating if the response's signature (indicating potential tampering) is valid."""
-        # There is no need to validate the payment processor response, because
-        # it is coming in response to an API call we initiated
-        return True
-
     def reverse_payment_api(self, payment_processor_response: UnhandledCybersourceResponse, reason: str, basket=None):
+        """
+        Reverse a previous payment. The Silent Order POST API used to reverse certain failed payments automatically.
+        The REST API doesn't, so we use this api to perform those reversals.
 
+        Arguments:
+            payment_processor_response: The response from CyberSource declining the payment.
+            reason: The reason for reversing the payment.
+            basket: The basket the payment was made against.
+        """
         clientReferenceInformation = Ptsv2paymentsidreversalsClientReferenceInformation(
             code=payment_processor_response.order_id
         )
@@ -804,6 +672,17 @@ class CybersourceREST(Cybersource):
         return reversal_response
 
     def authorize_payment_api(self, transient_token_jwt, basket, request, form_data):
+        """
+        Authorize and Capture a payment for a specific basket.
+
+        Arguments:
+            transient_token_jwt: The transient payment token generated by the Flex Microform
+                API on the frontend. This allows the user to pay for the basket.
+            basket: The basket to purchase
+            request: The incoming request, used to retrieve the users email and session. (The session
+                stores the capture contexts that correspond to the transient_token_jwt).
+            form_data: The payment details captured on the frontend.
+        """
         clientReferenceInformation = Ptsv2paymentsClientReferenceInformation(
             code=basket.order_number,
         )
@@ -929,5 +808,13 @@ class CybersourceREST(Cybersource):
         payment_processor_response.decoded_payment_token = decoded_payment_token
         return payment_processor_response
 
-    def get_billing_address(self, order_completion_message):
-        return order_completion_message.billing_address
+
+class Cybersource(CybersourceREST):
+    """
+    CyberSource Secure Acceptance Web/Mobile (February 2015)
+
+    For reference, see
+    http://apps.cybersource.com/library/documentation/dev_guides/Secure_Acceptance_WM/Secure_Acceptance_WM.pdf.
+    """
+
+    NAME = 'cybersource'
