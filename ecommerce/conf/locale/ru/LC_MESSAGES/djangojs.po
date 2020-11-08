@@ -6,6 +6,7 @@
 # Translators:
 # Translators:
 # Translators:
+# Translators:
 # Iaroslav V <yivasilev@fa.ru>, 2018
 # Liubov Fomicheva <liubov.nelapa@gmail.com>, 2017-2018
 # Maksimenkova Olga <omaksimenkova@hse.ru>, 2015
@@ -17,9 +18,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-12-03 14:18+0000\n"
-"PO-Revision-Date: 2019-12-04 06:55+0000\n"
-"Last-Translator: Ned Batchelder <ned@edx.org>\n"
+"POT-Creation-Date: 2020-11-08 20:12+0000\n"
+"PO-Revision-Date: 2020-11-08 20:12+0000\n"
+"Last-Translator: edx_transifex_bot <i18n-working-group+edx-transifex-bot@edx.org>\n"
 "Language-Team: Russian (http://www.transifex.com/open-edx/edx-platform/language/ru/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -46,32 +47,32 @@ msgstr "Это значение должно быть датой"
 msgid "At least one seat type must be selected."
 msgstr "Должно быть выбрано не менее одного типа сиденья."
 
-#: ecommerce/static/js/models/coupon_model.js:71
+#: ecommerce/static/js/models/coupon_model.js:72
 msgid "This field must be empty or contain 1-16 alphanumeric characters."
 msgstr "Это поле должно быть пустым или содержать 1-16 буквенно-цифровых символов."
 
-#: ecommerce/static/js/models/coupon_model.js:80
+#: ecommerce/static/js/models/coupon_model.js:81
 #, javascript-format
 msgid "Email domain {%s} is invalid."
 msgstr "Домен электронной почты {%s} неправильный"
 
-#: ecommerce/static/js/models/coupon_model.js:97
+#: ecommerce/static/js/models/coupon_model.js:101
 msgid "Must occur after start date"
 msgstr "Должна быть после даты начала"
 
-#: ecommerce/static/js/models/coupon_model.js:127
+#: ecommerce/static/js/models/coupon_model.js:131
 msgid "Max uses for multi-use coupons must be higher than 2."
 msgstr "Максимальное использование многоразовых купонов не должно превышать 2."
 
-#: ecommerce/static/js/models/coupon_model.js:151
+#: ecommerce/static/js/models/coupon_model.js:155
 msgid "Must occur before end date"
 msgstr "Должна быть раньше даты окончания"
 
-#: ecommerce/static/js/models/coupon_model.js:173
+#: ecommerce/static/js/models/coupon_model.js:177
 msgid "A valid course ID is required"
 msgstr "Укажите действительный ID курса"
 
-#: ecommerce/static/js/models/coupon_model.js:187
+#: ecommerce/static/js/models/coupon_model.js:191
 msgid "A valid Program UUID is required."
 msgstr "Требуется действительная программа UUID."
 
@@ -210,11 +211,11 @@ msgstr "Недействительный год"
 msgid "Card expired"
 msgstr "Срок действия карты истек"
 
-#: ecommerce/static/js/pages/basket_page.js:503
+#: ecommerce/static/js/pages/basket_page.js:474
 msgid "<Choose state/province>"
 msgstr "<Choose state/province>"
 
-#: ecommerce/static/js/pages/basket_page.js:504
+#: ecommerce/static/js/pages/basket_page.js:475
 msgid "State/Province (required)"
 msgstr "Регион/область (обязательно) "
 
@@ -295,19 +296,19 @@ msgstr "Запятая трейлинга запрещена."
 
 #: ecommerce/static/js/views/coupon_detail_view.js:108
 #: ecommerce/static/js/views/coupon_form_view.js:62
-#: ecommerce/static/js/views/enterprise_coupon_form_view.js:29
+#: ecommerce/static/js/views/enterprise_coupon_form_view.js:30
 msgid "Can be used once by one customer"
 msgstr "Может быть использован один раз одним клиентом"
 
 #: ecommerce/static/js/views/coupon_detail_view.js:110
 #: ecommerce/static/js/views/coupon_form_view.js:70
-#: ecommerce/static/js/views/enterprise_coupon_form_view.js:37
+#: ecommerce/static/js/views/enterprise_coupon_form_view.js:38
 msgid "Can be used multiple times by multiple customers"
 msgstr "Может быть использован много раз многими клиентами"
 
 #: ecommerce/static/js/views/coupon_detail_view.js:112
 #: ecommerce/static/js/views/coupon_form_view.js:66
-#: ecommerce/static/js/views/enterprise_coupon_form_view.js:33
+#: ecommerce/static/js/views/enterprise_coupon_form_view.js:34
 msgid "Can be used once by multiple customers"
 msgstr "Может быть использован один раз многими клиентами"
 
@@ -319,11 +320,11 @@ msgstr "Регистрационный код"
 msgid "Discount Code"
 msgstr "Скидочный код"
 
-#: ecommerce/static/js/views/coupon_form_view.js:770
+#: ecommerce/static/js/views/coupon_form_view.js:781
 msgid "Save Changes"
 msgstr "Сохранить изменения"
 
-#: ecommerce/static/js/views/coupon_form_view.js:785
+#: ecommerce/static/js/views/coupon_form_view.js:796
 msgid "Create Coupon"
 msgstr "Создать купон"
 
@@ -461,9 +462,13 @@ msgid "Seat type"
 msgstr "Тип места"
 
 #: ecommerce/static/js/views/enterprise_coupon_detail_view.js:28
-#: ecommerce/static/js/views/enterprise_coupon_form_view.js:41
+#: ecommerce/static/js/views/enterprise_coupon_form_view.js:42
 msgid "Can be used multiple times by one customer"
 msgstr "Может использоваться несколько раз одним клиентом"
+
+#: ecommerce/static/js/views/enterprise_coupon_form_view.js:279
+msgid "Create and Add More"
+msgstr ""
 
 #: ecommerce/static/js/views/enterprise_coupon_list_view.js:38
 msgid "Status"
