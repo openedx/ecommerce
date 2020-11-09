@@ -40,14 +40,14 @@ requirements.js:
 	$(NODE_BIN)/bower install --allow-root
 
 requirements: requirements.js
-	pip install -r requirements/dev.txt --exists-action w
+	pip3 install -r requirements/dev.txt --exists-action w
 
 requirements.tox:
-	pip install -U pip==20.0.2
-	pip install -r requirements/tox.txt --exists-action w
+	pip3 install -U pip==20.0.2
+	pip3 install -r requirements/tox.txt --exists-action w
 
 production-requirements: requirements.js
-	pip install -r requirements.txt --exists-action w
+	pip3 install -r requirements.txt --exists-action w
 
 migrate: requirements.tox
 	tox -e $(PYTHON_ENV)-${DJANGO_ENV_VAR}-migrate
