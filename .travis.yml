@@ -26,7 +26,7 @@ before_install:
 install:
   - docker exec -t ecommerce_testing bash -c "
       cd /edx/app/ecommerce/ecommerce/ &&
-      pip3 install tox
+      python3 -m pip install tox
     "
 script:
   - docker exec -t -e TRAVIS=1 ecommerce_testing bash -c "
