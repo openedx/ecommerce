@@ -4,8 +4,8 @@
 #
 #    make upgrade
 #
-attrs==20.2.0             # via -c requirements/base.txt, pytest
-certifi==2020.6.20        # via -c requirements/base.txt, requests
+attrs==20.3.0             # via -c requirements/base.txt, pytest
+certifi==2020.11.8        # via -c requirements/base.txt, requests
 cffi==1.14.3              # via -c requirements/base.txt, cryptography
 chardet==3.0.4            # via -c requirements/base.txt, requests
 cryptography==3.2.1       # via -c requirements/base.txt, pyjwt
