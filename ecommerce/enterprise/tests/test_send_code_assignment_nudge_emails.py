@@ -8,17 +8,20 @@ import logging
 import mock
 from dateutil.relativedelta import relativedelta
 from django.core.management import call_command
+from django.utils import timezone
 from testfixtures import LogCapture
 
 from ecommerce.extensions.test.factories import (
     CodeAssignmentNudgeEmailsFactory,
     EnterpriseOfferFactory,
+    OfferAssignmentFactory,
     VoucherFactory
 )
 from ecommerce.programs.custom import get_model
 from ecommerce.tests.testcases import TestCase
 
 CodeAssignmentNudgeEmails = get_model('offer', 'CodeAssignmentNudgeEmails')
+OfferAssignment = get_model('offer', 'OfferAssignment')
 
 LOGGER_NAME = 'ecommerce.enterprise.management.commands.send_code_assignment_nudge_emails'
 MODEL_LOGGER_NAME = 'ecommerce.extensions.offer.models'
@@ -39,13 +42,23 @@ class SendCodeAssignmentNudgeEmailsTests(TestCase):
         voucher.offers.add(EnterpriseOfferFactory(max_global_applications=98))
 
         self.total_nudge_emails_for_today = 5
-        CodeAssignmentNudgeEmailsFactory.create_batch(self.total_nudge_emails_for_today, code=voucher.code)
+        self.nudge_emails = CodeAssignmentNudgeEmailsFactory.create_batch(
+            self.total_nudge_emails_for_today, code=voucher.code
+        )
         CodeAssignmentNudgeEmailsFactory(
             email_date=datetime.datetime.now() + relativedelta(days=1)
         )
         CodeAssignmentNudgeEmailsFactory(
             email_date=datetime.datetime.now() + relativedelta(days=2)
         )
+
+        for nudge_email in self.nudge_emails:
+            OfferAssignmentFactory(code=nudge_email.code, user_email=nudge_email.user_email)
+
+    def assert_last_reminder_date(self):
+        current_date_time = timezone.now()
+        for offer_assignment in OfferAssignment.objects.all():
+            assert offer_assignment.last_reminder_date.date() == current_date_time.date()
 
     def _assert_sent_count(self):
         nudge_email = CodeAssignmentNudgeEmails.objects.all()
@@ -63,6 +76,7 @@ class SendCodeAssignmentNudgeEmailsTests(TestCase):
         Test the send_enterprise_offer_limit_emails command
         """
         log = self._assert_sent_count()
+        self.assert_last_reminder_date()
         log.check_present(
             (
                 LOGGER_NAME,
