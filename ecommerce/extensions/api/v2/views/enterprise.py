@@ -68,7 +68,6 @@ from ecommerce.extensions.offer.constants import (
     VOUCHER_PARTIAL_REDEEMED,
     VOUCHER_REDEEMED
 )
-from ecommerce.extensions.offer.models import OfferAssignmentEmailSentRecord
 from ecommerce.extensions.offer.utils import update_assignments_for_multi_use_per_customer
 from ecommerce.extensions.voucher.utils import (
     create_enterprise_vouchers,
@@ -81,6 +80,7 @@ Order = get_model('order', 'Order')
 Line = get_model('basket', 'Line')
 OfferAssignment = get_model('offer', 'OfferAssignment')
 OfferAssignmentEmailTemplates = get_model('offer', 'OfferAssignmentEmailTemplates')
+OfferAssignmentEmailSentRecord = get_model('offer', 'OfferAssignmentEmailSentRecord')
 CodeAssignmentNudgeEmails = get_model('offer', 'CodeAssignmentNudgeEmails')
 Product = get_model('catalogue', 'Product')
 ProductClass = get_model('catalogue', 'ProductClass')
@@ -671,6 +671,7 @@ class EnterpriseCouponViewSet(CouponViewSet):
             raise DRFValidationError({'error': errors})
 
     def _create_offer_assignment_email_sent_record(self, enterprise_customer, email_type, template=None):
+        """Saves the all email info to OfferAssignmentEmailSentRecord."""
         OfferAssignmentEmailSentRecord.create_email_record(enterprise_customer, email_type, template)
 
     @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
