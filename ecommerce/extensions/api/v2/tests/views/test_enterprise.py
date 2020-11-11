@@ -71,6 +71,7 @@ OfferAssignment = get_model('offer', 'OfferAssignment')
 OfferAssignmentEmailSentRecord = get_model('offer', 'OfferAssignmentEmailSentRecord')
 OfferAssignmentEmailTemplates = get_model('offer', 'OfferAssignmentEmailTemplates')
 CodeAssignmentNudgeEmails = get_model('offer', 'CodeAssignmentNudgeEmails')
+CodeAssignmentNudgeEmailTemplates = get_model('offer', 'CodeAssignmentNudgeEmailTemplates')
 Product = get_model('catalogue', 'Product')
 Voucher = get_model('voucher', 'Voucher')
 VoucherApplication = get_model('voucher', 'VoucherApplication')
@@ -3130,6 +3131,9 @@ class EnterpriseCouponViewSetRbacTests(
         # Verify that no record have been created yet
         assert OfferAssignmentEmailSentRecord.objects.count() == 0
 
+        if email_type in (REMIND, REVOKE):
+            # Assign the voucher first in order to make remind or revoke request
+            self._make_request(coupon_id, ASSIGN, mock_path, request_data)
         # call endpoint
         resp = self._make_request(coupon_id, email_type, mock_path, request_data)
         assert resp.status_code == status.HTTP_200_OK
@@ -3138,7 +3142,7 @@ class EnterpriseCouponViewSetRbacTests(
 
     def test_bulk_email_sent_record(self):
         """
-        Test that in case of bulk Assign/Remind/Revoke, only one instance of OfferAssignmentEmailSentRecord is created.
+        Test that bulk Assign/Remind/Revoke saved an instance of OfferAssignmentEmailSentRecord.
         """
         emails = ['test1@example.com', 'test2@example.com']
         coupon_post_data = dict(self.data, voucher_type=Voucher.SINGLE_USE, quantity=2)
@@ -3158,7 +3162,6 @@ class EnterpriseCouponViewSetRbacTests(
                 'POST',
                 '/api/v2/enterprise/coupons/{}/assign/'.format(coupon_id),
                 {
-                    'template': 'Test template',
                     'template_id': template_id,
                     'template_subject': TEMPLATE_SUBJECT,
                     'template_greeting': TEMPLATE_GREETING,
@@ -3167,8 +3170,8 @@ class EnterpriseCouponViewSetRbacTests(
                 }
             )
 
-        # verify that only one record has been created with 'assign' email type
-        assert OfferAssignmentEmailSentRecord.objects.filter(email_type=ASSIGN).count() == 1
+        # verify that records have been created with 'assign' email type equal to the bulk count
+        assert OfferAssignmentEmailSentRecord.objects.filter(email_type=ASSIGN).count() == len(emails)
 
         # bulk remind
         offer_assignments = OfferAssignment.objects.filter(user_email__in=emails)
@@ -3185,7 +3188,6 @@ class EnterpriseCouponViewSetRbacTests(
                 'POST',
                 '/api/v2/enterprise/coupons/{}/remind/'.format(coupon_id),
                 {
-                    'template': 'Test template',
                     'template_id': template_id,
                     'template_subject': TEMPLATE_SUBJECT,
                     'template_greeting': TEMPLATE_GREETING,
@@ -3194,8 +3196,8 @@ class EnterpriseCouponViewSetRbacTests(
                 }
             )
 
-        # verify that only one record has been created with 'remind' email type
-        assert OfferAssignmentEmailSentRecord.objects.filter(email_type=REMIND).count() == 1
+        # verify that records have been created with 'remind' email type equal to the bulk count
+        assert OfferAssignmentEmailSentRecord.objects.filter(email_type=REMIND).count() == offer_assignments.count()
 
         # bulk revoke
         template = self._create_template(REVOKE)
@@ -3209,7 +3211,6 @@ class EnterpriseCouponViewSetRbacTests(
                 'POST',
                 '/api/v2/enterprise/coupons/{}/revoke/'.format(coupon_id),
                 {
-                    'template': 'Test template',
                     'template_id': template_id,
                     'template_subject': TEMPLATE_SUBJECT,
                     'template_greeting': TEMPLATE_GREETING,
@@ -3217,8 +3218,8 @@ class EnterpriseCouponViewSetRbacTests(
                     'assignments': assignments
                 }
             )
-        # verify that only one record has been created with 'revoke' email type
-        assert OfferAssignmentEmailSentRecord.objects.filter(email_type=REVOKE).count() == 1
+        # verify that records have been created with 'revoke' email type equal to the bulk count
+        assert OfferAssignmentEmailSentRecord.objects.filter(email_type=REVOKE).count() == offer_assignments.count()
 
 
 class OfferAssignmentSummaryViewSetTests(
