@@ -504,6 +504,54 @@ class EnrollmentCodeFulfillmentModule(BaseFulfillmentModule):
         """
         return [line for line in lines if self.supports_line(line)]
 
+    def _fulfill_enterprise_coupon(self, order, lines, email_opt_in=False):
+        from ecommerce.extensions.catalogue.utils import create_coupon_product_and_stockrecord
+        from ecommerce.extensions.voucher.utils import create_enterprise_vouchers
+        from oscar.core.loading import get_model
+        Category = get_model('catalogue', 'Category')
+
+        for line in lines:
+            import pdb; pdb.set_trace()
+            # create a seat/product and stock record
+            category = Category.objects.filter(slug='bulk-enrollment-prepay').first()
+            coupon_product = create_coupon_product_and_stockrecord(
+                'Enterprise coupon from {}'.format(line.title),
+                category,
+                line.partner,
+                order.total_excl_tax
+            )
+            enterprise_customer_uuid = '378d5bf0-f67d-4bf7-8b2a-cbbc53d0f772'
+            enterprise_customer_catalog_uuid = '7467c9d2-433c-4f7e-ba2e-c5c7798527b2'
+
+            vouchers = create_enterprise_vouchers(
+                voucher_type=Voucher.SINGLE_USE,
+                quantity=line.quantity,
+                coupon_id=coupon_product.id,
+                benefit_type=Benefit.PERCENTAGE,
+                benefit_value=100,
+                enterprise_customer=enterprise_customer_uuid,
+                enterprise_customer_catalog=enterprise_customer_catalog_uuid,
+                name=str('Enterprise Coupon voucher [{}]').format(coupon_product.title),                
+                end_datetime=settings.ENROLLMENT_CODE_EXIPRATION_DATE,
+                start_datetime=datetime.datetime.now(),
+                max_uses=1,
+                email_domains='',
+                site='', # TODO,
+                code='', # TODO
+            )
+            attach_vouchers_to_coupon_product(
+                coupon_product,
+                vouchers,
+                None,
+                None,
+                enterprise_customer_uuid,
+                None # TODO: salesforce ID?
+            )
+            attach_or_update_contract_metadata_on_coupon(
+                coupon_product,
+            )
+            # TODO: add in amount_paid above?
+
     def fulfill_product(self, order, lines, email_opt_in=False):
         """ Fulfills the purchase of an Enrollment code product.
         For each line creates number of vouchers equal to that line's quantity. Creates a new OrderLineVouchers
@@ -524,44 +572,46 @@ class EnrollmentCodeFulfillmentModule(BaseFulfillmentModule):
         )
         logger.info(msg)
 
-        for line in lines:
-            name = 'Enrollment Code Range for {}'.format(line.product.attr.course_key)
-            seat = Product.objects.filter(
-                attributes__name='course_key',
-                attribute_values__value_text=line.product.attr.course_key
-            ).get(
-                attributes__name='certificate_type',
-                attribute_values__value_text=line.product.attr.seat_type
-            )
-            _range, created = Range.objects.get_or_create(name=name)
-            if created:
-                _range.add_product(seat)
+        self._fulfill_enterprise_coupon(order, lines, email_opt_in)
 
-            stock_record = StockRecord.objects.get(product=seat, partner=seat.course.partner)
-            coupon_catalog = CouponViewSet.get_coupon_catalog([stock_record.id], seat.course.partner)
-            _range.catalog = coupon_catalog
-            _range.save()
+        # for line in lines:
+        #     name = 'Enrollment Code Range for {}'.format(line.product.attr.course_key)
+        #     seat = Product.objects.filter(
+        #         attributes__name='course_key',
+        #         attribute_values__value_text=line.product.attr.course_key
+        #     ).get(
+        #         attributes__name='certificate_type',
+        #         attribute_values__value_text=line.product.attr.seat_type
+        #     )
+        #     _range, created = Range.objects.get_or_create(name=name)
+        #     if created:
+        #         _range.add_product(seat)
 
-            vouchers = create_vouchers(
-                name=str('Enrollment code voucher [{}]').format(line.product.title),
-                benefit_type=Benefit.PERCENTAGE,
-                benefit_value=100,
-                catalog=coupon_catalog,
-                coupon=seat,
-                end_datetime=settings.ENROLLMENT_CODE_EXIPRATION_DATE,
-                enterprise_customer=None,
-                enterprise_customer_catalog=None,
-                quantity=line.quantity,
-                start_datetime=datetime.datetime.now(),
-                voucher_type=Voucher.SINGLE_USE,
-                _range=_range
-            )
+        #     stock_record = StockRecord.objects.get(product=seat, partner=seat.course.partner)
+        #     coupon_catalog = CouponViewSet.get_coupon_catalog([stock_record.id], seat.course.partner)
+        #     _range.catalog = coupon_catalog
+        #     _range.save()
 
-            line_vouchers = OrderLineVouchers.objects.create(line=line)
-            for voucher in vouchers:
-                line_vouchers.vouchers.add(voucher)
+        #     vouchers = create_vouchers(
+        #         name=str('Enrollment code voucher [{}]').format(line.product.title),
+        #         benefit_type=Benefit.PERCENTAGE,
+        #         benefit_value=100,
+        #         catalog=coupon_catalog,
+        #         coupon=seat,
+        #         end_datetime=settings.ENROLLMENT_CODE_EXIPRATION_DATE,
+        #         enterprise_customer=None,
+        #         enterprise_customer_catalog=None,
+        #         quantity=line.quantity,
+        #         start_datetime=datetime.datetime.now(),
+        #         voucher_type=Voucher.SINGLE_USE,
+        #         _range=_range
+        #     )
 
-            line.set_status(LINE.COMPLETE)
+        #     line_vouchers = OrderLineVouchers.objects.create(line=line)
+        #     for voucher in vouchers:
+        #         line_vouchers.vouchers.add(voucher)
+
+        #     line.set_status(LINE.COMPLETE)
 
         # if the HubSpot integration is enabled and this is an Enterprise purchase then transmit information about the
         # order over to HubSpot
