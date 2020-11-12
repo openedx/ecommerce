@@ -505,15 +505,19 @@ class EnrollmentCodeFulfillmentModule(BaseFulfillmentModule):
         return [line for line in lines if self.supports_line(line)]
 
     def _fulfill_enterprise_coupon(self, order, lines, email_opt_in=False):
-        from ecommerce.extensions.catalogue.utils import create_coupon_product_and_stockrecord
+        from ecommerce.extensions.catalogue.utils import (
+            attach_or_update_contract_metadata_on_coupon,
+            attach_vouchers_to_coupon_product,
+            create_coupon_product_and_stockrecord
+        )
         from ecommerce.extensions.voucher.utils import create_enterprise_vouchers
         from oscar.core.loading import get_model
         Category = get_model('catalogue', 'Category')
 
         for line in lines:
-            import pdb; pdb.set_trace()
             # create a seat/product and stock record
             category = Category.objects.filter(slug='bulk-enrollment-prepay').first()
+            title = 'Enterprise coupon from {}'.format(line.title)
             coupon_product = create_coupon_product_and_stockrecord(
                 'Enterprise coupon from {}'.format(line.title),
                 category,
@@ -524,7 +528,7 @@ class EnrollmentCodeFulfillmentModule(BaseFulfillmentModule):
             enterprise_customer_catalog_uuid = '7467c9d2-433c-4f7e-ba2e-c5c7798527b2'
 
             vouchers = create_enterprise_vouchers(
-                voucher_type=Voucher.SINGLE_USE,
+                voucher_type=Voucher.ONCE_PER_CUSTOMER,
                 quantity=line.quantity,
                 coupon_id=coupon_product.id,
                 benefit_type=Benefit.PERCENTAGE,
@@ -534,23 +538,33 @@ class EnrollmentCodeFulfillmentModule(BaseFulfillmentModule):
                 name=str('Enterprise Coupon voucher [{}]').format(coupon_product.title),                
                 end_datetime=settings.ENROLLMENT_CODE_EXIPRATION_DATE,
                 start_datetime=datetime.datetime.now(),
-                max_uses=1,
                 email_domains='',
-                site='', # TODO,
-                code='', # TODO
+                site=order.site,
+                code=None,
+                max_uses=1,
             )
+
             attach_vouchers_to_coupon_product(
                 coupon_product,
                 vouchers,
-                None,
-                None,
+                '', # note
+                None, # notify_email
                 enterprise_customer_uuid,
-                None # TODO: salesforce ID?
+                None # salesforce ID
             )
             attach_or_update_contract_metadata_on_coupon(
                 coupon_product,
-            )
-            # TODO: add in amount_paid above?
+            )  # TODO: add in amount_paid here?
+
+            line_vouchers = OrderLineVouchers.objects.create(line=line)
+            for voucher in vouchers:
+                line_vouchers.vouchers.add(voucher)
+
+            line.set_status(LINE.COMPLETE)
+            line.product = coupon_product
+            line.title = title
+            line.partner_sku = coupon_product.stockrecords.first().partner_sku
+            line.save()
 
     def fulfill_product(self, order, lines, email_opt_in=False):
         """ Fulfills the purchase of an Enrollment code product.
