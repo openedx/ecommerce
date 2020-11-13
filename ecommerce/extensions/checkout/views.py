@@ -244,11 +244,12 @@ class ReceiptResponseView(ThankYouView):
 
         for line in order.lines.all():
             product = line.product
-
-            if (getattr(product.attr, 'id_verification_required', False) and
-                    (getattr(product.attr, 'course_key', False) or getattr(product.attr, 'UUID', False))):
+            id_verification_required = getattr(product.attr, 'id_verification_required', False)
+            course_key = getattr(product.attr, 'course_key', '')
+            product_uuid = getattr(product.attr, 'UUID', False)
+            if (id_verification_required and (course_key or product_uuid)):
                 context.update({
-                    'verification_url': site.siteconfiguration.build_lms_url('verify_student/reverify'),
+                    'verification_url': site.siteconfiguration.IDVerification_workflow_url(course_key),
                     'user_verified': request.user.is_verified(site),
                 })
                 return context

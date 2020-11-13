@@ -212,6 +212,13 @@ class SiteConfiguration(models.Model):
         blank=True
     )
 
+    account_microfrontend_url = models.URLField(
+        verbose_name=_('Account Microfrontend URL'),
+        help_text=_('URL for the Account Microfrontend (used to lead learners to ID verification workflow)'),
+        null=True,
+        blank=True
+    )
+
     @property
     def payment_processors_set(self):
         """
@@ -351,6 +358,23 @@ class SiteConfiguration(models.Model):
     def build_program_dashboard_url(self, uuid):
         """ Returns a URL to a specific student program dashboard (hosted by LMS). """
         return self.build_lms_url('/dashboard/programs/{}'.format(uuid))
+
+    def IDVerification_workflow_url(self, course_id):
+        """
+        Returns the URL of the ID Verification workflow based on the course_id
+
+        returns:
+            str
+        """
+        path = 'id-verification'
+        if course_id:
+            path += '?course_id={}'.format(course_id)
+
+        if self.account_microfrontend_url:
+            return urljoin(self.account_microfrontend_url, path)
+        if settings.ACCOUNT_MICROFRONTEND_URL:
+            return urljoin(settings.ACCOUNT_MICROFRONTEND_URL, path)
+        return self.build_lms_url('verify_student/reverify')
 
     @property
     def student_dashboard_url(self):
