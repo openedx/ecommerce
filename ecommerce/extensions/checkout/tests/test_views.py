@@ -311,7 +311,7 @@ class ReceiptResponseViewTests(DiscoveryMockMixin, LmsApiMockMixin, RefundTestMi
         context_data = {
             'payment_method': None,
             'display_credit_messaging': False,
-            'verification_url': self.site.siteconfiguration.build_lms_url('verify_student/reverify'),
+            'verification_url': self.site.siteconfiguration.IDVerification_workflow_url(self.course.id),
         }
 
         self.assertEqual(response.status_code, 200)
@@ -328,7 +328,7 @@ class ReceiptResponseViewTests(DiscoveryMockMixin, LmsApiMockMixin, RefundTestMi
         context_data = {
             'payment_method': None,
             'display_credit_messaging': False,
-            'verification_url': self.site.siteconfiguration.build_lms_url('verify_student/reverify'),
+            'verification_url': self.site.siteconfiguration.IDVerification_workflow_url(self.course.id),
         }
 
         self.assertEqual(response.status_code, 200)

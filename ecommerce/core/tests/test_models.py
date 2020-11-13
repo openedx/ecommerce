@@ -438,6 +438,46 @@ class SiteConfigurationTests(TestCase):
         self.assertIsInstance(client_auth, SuppliedJwtAuth)
         self.assertEqual(client_auth.token, token)
 
+    @ddt.data(None, 'test_course_id')
+    def test_IDVerification_workflow_url_not_configured(self, course_id):
+        self.assertEqual(self.site.siteconfiguration.account_microfrontend_url, None)
+        expected = self.site.siteconfiguration.build_lms_url('verify_student/reverify')
+        self.assertEqual(
+            self.site.siteconfiguration.IDVerification_workflow_url(course_id),
+            expected
+        )
+
+    def _validate_IDVerification_workflow_url(self, site_config, account_url, course_id):
+        expected = None
+        if course_id:
+            expected = account_url + '/id-verification?course_id={}'.format(course_id)
+        else:
+            expected = account_url + '/id-verification'
+        self.assertEqual(
+            site_config.IDVerification_workflow_url(course_id),
+            expected
+        )
+
+    @ddt.data(None, 'test_course_id')
+    def test_IDVerification_workflow_url_configured(self, course_id):
+        account_url = 'https://account.edx.org'
+        site_config = SiteConfigurationFactory(
+            account_microfrontend_url=account_url
+        )
+        self.assertEqual(site_config.account_microfrontend_url, account_url)
+        self._validate_IDVerification_workflow_url(site_config, account_url, course_id)
+
+    @ddt.data(None, 'test_course_id')
+    @override_settings(ACCOUNT_MICROFRONTEND_URL='https://test.edx.org')
+    def test_IDVerification_workflow_url_settings_configured(self, course_id):
+        account_url = 'https://test.edx.org'
+        self.assertEqual(self.site.siteconfiguration.account_microfrontend_url, None)
+        self._validate_IDVerification_workflow_url(
+            self.site.siteconfiguration,
+            account_url,
+            course_id
+        )
+
 
 class EcommerceFeatureRoleTests(TestCase):
     def test_str(self):
