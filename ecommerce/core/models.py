@@ -401,8 +401,8 @@ class SiteConfiguration(models.Model):
         """
         key = 'siteconfiguration_access_token_{}'.format(self.id)
         access_token_cached_response = TieredCache.get_cached_response(key)
-        if access_token_cached_response.is_found:
-            return access_token_cached_response.value
+        # if access_token_cached_response.is_found:
+        #     return access_token_cached_response.value
 
         url = '{root}/access_token'.format(root=self.oauth2_provider_url)
         access_token, expiration_datetime = EdxRestApiClient.get_oauth_access_token(

@@ -654,7 +654,7 @@ ENTERPRISE_SERVICE_URL = 'http://localhost:8000/enterprise/'
 # Cache enterprise response from Enterprise API.
 ENTERPRISE_API_CACHE_TIMEOUT = 300  # Value is in seconds
 
-ENTERPRISE_CATALOG_SERVICE_URL = 'http://localhost:18160/'
+ENTERPRISE_CATALOG_SERVICE_URL = 'http://enterprise.catalog.app:18160/'
 
 ENTERPRISE_LEARNER_PORTAL_HOSTNAME = os.environ.get('ENTERPRISE_LEARNER_PORTAL_HOSTNAME', 'localhost:8734')
 

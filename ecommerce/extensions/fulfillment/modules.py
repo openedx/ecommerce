@@ -504,6 +504,50 @@ class EnrollmentCodeFulfillmentModule(BaseFulfillmentModule):
         """
         return [line for line in lines if self.supports_line(line)]
 
+    def _create_enterprise_customer(self, order):
+        from oscar.core.utils import slugify
+        from ecommerce.enterprise.utils import get_enterprise_api_client
+        organization = self._get_organization(order)
+
+        if not organization:
+            raise Exception("Gotta have an org")
+
+        customer_slug = slugify(organization)
+
+        api = get_enterprise_api_client(order.site)
+        endpoint = getattr(api, 'enterprise-customer')
+
+        import pdb; pdb.set_trace()
+        existing_customer_response = endpoint().get(slug=customer_slug)
+        if existing_customer_response['results']:
+            return existing_customer_response['results'][0]
+
+        payload = {
+            "name": organization,
+            "slug": customer_slug,
+            "active": True,
+            "enable_data_sharing_consent": True,
+            "enable_audit_enrollment": False,
+            "replace_sensitive_sso_username": False,
+            "enable_portal_code_management_screen": True,
+            "enable_audit_data_reporting": True,
+            "enable_learner_portal": True,
+            "enable_portal_reporting_config_screen": True,
+            "enable_portal_saml_configuration_screen": False,
+            "contact_email": order.email,
+            "enable_portal_subscription_management_screen": False,
+            "hide_course_original_price": False,
+            "enable_analytics_screen": True,
+            "enable_integrated_customer_learner_portal_search": True,
+        }
+
+        try:
+            response = endpoint().post(data=payload)
+            return response
+        except Exception as exc:
+            print(exc)
+            import pdb; pdb.set_trace()
+
     def _fulfill_enterprise_coupon(self, order, lines, email_opt_in=False):
         from ecommerce.extensions.catalogue.utils import (
             attach_or_update_contract_metadata_on_coupon,
@@ -514,17 +558,24 @@ class EnrollmentCodeFulfillmentModule(BaseFulfillmentModule):
         from oscar.core.loading import get_model
         Category = get_model('catalogue', 'Category')
 
+        customer = self._create_enterprise_customer(order)
+
         for line in lines:
             # create a seat/product and stock record
             category = Category.objects.filter(slug='bulk-enrollment-prepay').first()
             title = 'Enterprise coupon from {}'.format(line.title)
+            course_key = line.product.attr.course_key
             coupon_product = create_coupon_product_and_stockrecord(
                 'Enterprise coupon from {}'.format(line.title),
                 category,
                 line.partner,
                 order.total_excl_tax
             )
-            enterprise_customer_uuid = '378d5bf0-f67d-4bf7-8b2a-cbbc53d0f772'
+            coupon_product.course_id = course_key
+            coupon_product.save()
+
+            enterprise_customer_uuid = customer['uuid']
+            # TODO: Make a catalog for the customer.
             enterprise_customer_catalog_uuid = '7467c9d2-433c-4f7e-ba2e-c5c7798527b2'
 
             vouchers = create_enterprise_vouchers(
@@ -690,6 +741,19 @@ class EnrollmentCodeFulfillmentModule(BaseFulfillmentModule):
 
         return response
 
+    def _get_organization(self, order):
+        # need to do this to be able to grab the organization/company name, this isn't available in the order/lines
+        organization = ""
+        try:
+            organization = BasketAttribute.objects.get(
+                basket=order.basket,
+                attribute_type=BasketAttributeType.objects.get(name="organization"))
+            return organization.value_text
+        except (BasketAttribute.DoesNotExist, BasketAttributeType.DoesNotExist):
+            logger.exception("Error occurred attempting to retrieve Basket Attribute 'organization' from basket for "
+                             "order [%s]", order.number)
+        return organization
+
     def get_order_fulfillment_data_for_hubspot(self, order):
         """ Added as part of ENT-2317. Retrieves any data needed to build the URL Encoded request body for the HubSpot
         API Forms request we will be submitting. Information we will be sending to HubSpot includes:
@@ -710,16 +774,7 @@ class EnrollmentCodeFulfillmentModule(BaseFulfillmentModule):
         """
         logger.info("Gathering fulfillment data for submission to HubSpot for order [%s]", order.number)
 
-        # need to do this to be able to grab the organization/company name, this isn't available in the order/lines
-        organization = ""
-        try:
-            organization = BasketAttribute.objects.get(
-                basket=order.basket,
-                attribute_type=BasketAttributeType.objects.get(name="organization"))
-        except (BasketAttribute.DoesNotExist, BasketAttributeType.DoesNotExist):
-            logger.exception("Error occurred attempting to retrieve Basket Attribute 'organization' from basket for "
-                             "order [%s]", order.number)
-
+        organization = self._get_organization(order)
         # need to build out the address accordingly
         street_address = order.billing_address.line1
         # check if 'line2' is empty, if not then make sure we include that in the address info
@@ -750,7 +805,7 @@ class EnrollmentCodeFulfillmentModule(BaseFulfillmentModule):
             'city': order.billing_address.line4,
             'state': order.billing_address.state,
             'country': country_name,
-            'company': organization.value_text,
+            'company': organization,
             'deal_value': order.total_incl_tax,
             'ecommerce_course_name': course.name,
             'ecommerce_course_id': course.id,
