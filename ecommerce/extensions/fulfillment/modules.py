@@ -517,7 +517,6 @@ class EnrollmentCodeFulfillmentModule(BaseFulfillmentModule):
         api = get_enterprise_api_client(order.site)
         endpoint = getattr(api, 'enterprise-customer')
 
-        import pdb; pdb.set_trace()
         existing_customer_response = endpoint().get(slug=customer_slug)
         if existing_customer_response['results']:
             return existing_customer_response['results'][0]
@@ -571,6 +570,7 @@ class EnrollmentCodeFulfillmentModule(BaseFulfillmentModule):
                 line.partner,
                 order.total_excl_tax
             )
+            # TODO: Contract Discount Value - need this to not be null during code redemption.
             coupon_product.course_id = course_key
             coupon_product.save()
 
