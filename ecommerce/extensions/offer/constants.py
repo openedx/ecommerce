@@ -70,10 +70,3 @@ NUDGE_EMAIL_TEMPLATES = [
         'name': TEMPLATES_NAME[2],
     },
 ]
-
-# Email Sender Category Types
-AUTOMATIC_EMAIL, MANUAL_EMAIL = ('automatic', 'manual')
-SENDER_CATEGORY_TYPES = (
-    (AUTOMATIC_EMAIL, _('Automatic')),
-    (MANUAL_EMAIL, _('Manual')),
-)

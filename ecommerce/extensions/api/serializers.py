@@ -40,8 +40,6 @@ from ecommerce.extensions.api.v2.constants import (
 )
 from ecommerce.extensions.catalogue.utils import attach_vouchers_to_coupon_product
 from ecommerce.extensions.offer.constants import (
-    ASSIGN,
-    AUTOMATIC_EMAIL,
     OFFER_ASSIGNED,
     OFFER_ASSIGNMENT_EMAIL_BOUNCED,
     OFFER_ASSIGNMENT_EMAIL_PENDING,
@@ -73,7 +71,6 @@ Category = get_model('catalogue', 'Category')
 Line = get_model('order', 'Line')
 OfferAssignment = get_model('offer', 'OfferAssignment')
 OfferAssignmentEmailTemplates = get_model('offer', 'OfferAssignmentEmailTemplates')
-OfferAssignmentEmailSentRecord = get_model('offer', 'OfferAssignmentEmailSentRecord')
 Order = get_model('order', 'Order')
 Partner = get_model('partner', 'Partner')
 Product = get_model('catalogue', 'Product')
@@ -1564,18 +1561,6 @@ class RefundedOrderCreateVoucherSerializer(serializers.Serializer):  # pylint: d
             raise serializers.ValidationError(_('Invalid order number or order {} does not exists.').format(order))
         return order
 
-    def _create_offer_assignment_email_sent_record(self, enterprise_customer_uuid, email_type, code, user_email):
-        """Records the new automated assignment email info sent after a successful refund."""
-        receiver_id = User.get_lms_user_id_from_email(user_email)
-        OfferAssignmentEmailSentRecord.create_email_record(
-            enterprise_customer_uuid=enterprise_customer_uuid,
-            email_type=email_type,
-            sender_category=AUTOMATIC_EMAIL,
-            code=code,
-            user_email=user_email,
-            receiver_id=receiver_id
-        )
-
     def create(self, validated_data):
         """Create new voucher in existing coupon and assign it to the given user_emails"""
         coupon_product = validated_data.get('coupon_product')
@@ -1625,7 +1610,6 @@ class RefundedOrderCreateVoucherSerializer(serializers.Serializer):  # pylint: d
         )
         if serializer.is_valid():
             serializer.save()
-            self._create_offer_assignment_email_sent_record(enterprise_customer_uuid, ASSIGN, new_code, user_emails[0])
         else:
             raise serializers.ValidationError(
                 _("New coupon voucher assignment Failure. Error: {}").format(serializer.errors)
