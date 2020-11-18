@@ -54,13 +54,10 @@ from ecommerce.extensions.catalogue.utils import (
     create_coupon_product_and_stockrecord
 )
 from ecommerce.extensions.offer.constants import (
-    ASSIGN,
     OFFER_ASSIGNED,
     OFFER_ASSIGNMENT_EMAIL_PENDING,
     OFFER_ASSIGNMENT_EMAIL_SUBJECT_LIMIT,
     OFFER_ASSIGNMENT_EMAIL_TEMPLATE_FIELD_LIMIT,
-    REMIND,
-    REVOKE,
     VOUCHER_IS_PRIVATE,
     VOUCHER_IS_PUBLIC,
     VOUCHER_NOT_ASSIGNED,
@@ -670,10 +667,6 @@ class EnterpriseCouponViewSet(CouponViewSet):
         if errors:
             raise DRFValidationError({'error': errors})
 
-    def _create_offer_assignment_email_sent_record(self, enterprise_customer, email_type, template=None):
-        """Saves the all email info to OfferAssignmentEmailSentRecord."""
-        OfferAssignmentEmailSentRecord.create_email_record(enterprise_customer, email_type, template)
-
     @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
     @permission_required('enterprise.can_assign_coupon', fn=lambda request, pk: get_enterprise_from_product(pk))
     def assign(self, request, pk):  # pylint: disable=unused-argument
@@ -686,8 +679,7 @@ class EnterpriseCouponViewSet(CouponViewSet):
         greeting = request.data.pop('template_greeting', '')
         closing = request.data.pop('template_closing', '')
         template_id = request.data.pop('template_id', None)
-        template = OfferAssignmentEmailTemplates.get_template(template_id)
-        enterprise_customer = coupon.attr.enterprise_customer_uuid
+        sender_id = request.user.lms_user_id
 
         self._validate_email_fields(subject, greeting, closing)
 
@@ -698,12 +690,12 @@ class EnterpriseCouponViewSet(CouponViewSet):
                 'subject': subject,
                 'greeting': greeting,
                 'closing': closing,
+                'template_id': template_id,
+                'sender_id': sender_id,
             }
         )
         if serializer.is_valid():
             serializer.save()
-            # Create a record of the email sent
-            self._create_offer_assignment_email_sent_record(enterprise_customer, ASSIGN, template)
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -774,8 +766,7 @@ class EnterpriseCouponViewSet(CouponViewSet):
         greeting = request.data.pop('template_greeting', '')
         closing = request.data.pop('template_closing', '')
         template_id = request.data.pop('template_id', None)
-        template = OfferAssignmentEmailTemplates.get_template(template_id)
-        enterprise_customer = coupon.attr.enterprise_customer_uuid
+        sender_id = request.user.lms_user_id
         self._validate_email_fields(subject, greeting, closing)
         assignments = request.data.get('assignments')
         serializer = CouponCodeRevokeSerializer(
@@ -786,19 +777,17 @@ class EnterpriseCouponViewSet(CouponViewSet):
                 'subject': subject,
                 'greeting': greeting,
                 'closing': closing,
+                'template_id': template_id,
+                'sender_id': sender_id,
             }
         )
         if serializer.is_valid():
             serializer.save()
-            # Create a record of the email sent
-            self._create_offer_assignment_email_sent_record(enterprise_customer, REVOKE, template)
-
             # unsubscribe user from receiving nudge emails
             CodeAssignmentNudgeEmails.unsubscribe_from_nudging(
                 map(lambda assignment: assignment['code'], assignments),
                 map(lambda assignment: assignment['email'], assignments)
             )
-
             return Response(serializer.data, status=status.HTTP_200_OK)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -815,8 +804,7 @@ class EnterpriseCouponViewSet(CouponViewSet):
         greeting = request.data.pop('template_greeting', '')
         closing = request.data.pop('template_closing', '')
         template_id = request.data.pop('template_id', None)
-        template = OfferAssignmentEmailTemplates.get_template(template_id)
-        enterprise_customer = coupon.attr.enterprise_customer_uuid
+        sender_id = request.user.lms_user_id
         self._validate_email_fields(subject, greeting, closing)
         if request.data.get('assignments'):
             assignments = request.data.get('assignments')
@@ -851,12 +839,12 @@ class EnterpriseCouponViewSet(CouponViewSet):
                 'subject': subject,
                 'greeting': greeting,
                 'closing': closing,
+                'template_id': template_id,
+                'sender_id': sender_id,
             }
         )
         if serializer.is_valid():
             serializer.save()
-            # Create a record of the email sent
-            self._create_offer_assignment_email_sent_record(enterprise_customer, REMIND, template)
             return Response(serializer.data, status=status.HTTP_200_OK)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
