@@ -1,6 +1,5 @@
 import datetime
 from unittest import mock
-from uuid import uuid4
 
 from oscar.core.loading import get_model
 from testfixtures import LogCapture
@@ -202,13 +201,7 @@ class CouponCodeSerializerTests(CouponMixin, TestCase):
             ),
         ]
         with LogCapture(self.LOGGER_NAME) as log:
-            serializer.create(
-                validated_data={
-                    'sender_id': None,
-                    'template': None,
-                    'enterprise_customer_uuid': uuid4()
-                }
-            )
+            serializer.create(validated_data={})
             log.check_present(*expected)
 
     @mock.patch('ecommerce.extensions.api.serializers.send_revoked_offer_email')
@@ -219,9 +212,6 @@ class CouponCodeSerializerTests(CouponMixin, TestCase):
             'code': self.code,
             'email': self.email,
             'offer_assignments': self.offer_assignments,
-            'sender_id': None,
-            'template': None,
-            'enterprise_customer_uuid': uuid4()
         }
         context = {
             'coupon': self.coupon,

@@ -873,7 +873,6 @@ class AssignableEnterpriseCustomerConditionTests(EnterpriseServiceMockMixin, Cou
         assert self.condition.is_satisfied(enterprise_offer, basket) is True
 
     @mock.patch('ecommerce.enterprise.conditions.crum.get_current_request')
-    @mock.patch('ecommerce.extensions.offer.utils.send_offer_assignment_email', mock.Mock())
     @mock.patch.object(EnterpriseCustomerCondition, 'is_satisfied', mock.Mock(return_value=True))
     def test_is_satisfied_when_user_has_no_assignment(self, mock_request):
         """
