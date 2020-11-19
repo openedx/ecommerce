@@ -3382,6 +3382,48 @@ class OfferAssignmentSummaryViewSetTests(
             else:  # To test if response has something in it it shouldn't
                 assert False
 
+    def test_view_returns_only_coupons_for_enterprise(self):
+        enterprise_customer_2 = {'name': 'BearsRus', 'id': str(uuid4())}
+        EcommerceFeatureRoleAssignment.objects.get_or_create(
+            role=self.role,
+            user=self.user,
+            enterprise_id=enterprise_customer_2['id']
+        )
+        self.set_jwt_cookie(
+            system_wide_role=SYSTEM_ENTERPRISE_ADMIN_ROLE, context=enterprise_customer_2['id']
+        )
+
+        coupon4 = self.create_coupon(
+            max_uses=1,
+            quantity=1,
+            voucher_type=Voucher.MULTI_USE_PER_CUSTOMER,
+            benefit_type=Benefit.PERCENTAGE,
+            benefit_value=100.0,
+            enterprise_customer=enterprise_customer_2['id'],
+            enterprise_customer_catalog='dddddddd-2c44-487b-9b6a-24eee973f9a4',
+        )
+        self.assign_user_to_code(coupon4.id, [self.user.email], [])
+
+        oa_code = OfferAssignment.objects.get(
+            user_email=self.user.email,
+            offer__vouchers__coupon_vouchers__coupon__id=coupon4.id
+        ).code
+
+        response = self.client.get(
+            OFFER_ASSIGNMENT_SUMMARY_LINK + "?enterprise_uuid={}".format(enterprise_customer_2['id'])
+        ).json()
+
+        assert response['count'] == 1
+        # To get the code to verify our response, filter using the coupon id these offerAssignments were created for
+        for result in response['results']:
+            if result['code'] == oa_code:
+                assert result['benefit_value'] == 100.0
+                assert result['usage_type'] == 'Percentage'
+                assert result['redemptions_remaining'] == 1
+                assert result['catalog'] == 'dddddddd-2c44-487b-9b6a-24eee973f9a4'
+            else:  # To test if response has something in it it shouldn't
+                assert False
+
 
 @ddt.ddt
 class OfferAssignmentEmailTemplatesViewSetTests(JwtMixin, TestCase):
