@@ -655,6 +655,13 @@ class EnterpriseCouponViewSet(CouponViewSet):
         if not is_coupon_available(coupon):
             raise DRFValidationError({'error': message})
 
+    def _validate_assignments_data(self, assignments):
+        """
+        Raise ValidationError with specified message if `assignments` is not a list of dicts.
+        """
+        if not all(isinstance(item, dict) for item in assignments):
+            raise DRFValidationError({'non_field_errors': ['Expected a list of items but got type "dict".']})
+
     def _validate_email_fields(self, subject, greeting, closing):
         """
         Raise ValidationError if subject, greeting and/or closing is above the allowed limit.
@@ -782,7 +789,13 @@ class EnterpriseCouponViewSet(CouponViewSet):
         template = OfferAssignmentEmailTemplates.get_template(template_id)
         enterprise_customer = coupon.attr.enterprise_customer_uuid
         self._validate_email_fields(subject, greeting, closing)
-        assignments = request.data.get('assignments')
+        self._validate_assignments_data(request.data.get('assignments'))
+
+        do_not_email = request.data.get('do_not_email')
+        assignments = [
+            dict(**assignment, do_not_email=do_not_email) for assignment in request.data.get('assignments')
+        ]
+
         serializer = CouponCodeRevokeSerializer(
             data=assignments,
             many=True,
@@ -795,8 +808,9 @@ class EnterpriseCouponViewSet(CouponViewSet):
         )
         if serializer.is_valid():
             serializer.save()
-            # Create a record of the email sent
-            self._create_offer_assignment_email_sent_record(enterprise_customer, REVOKE, template)
+            if not do_not_email:
+                # Create a record of the email sent
+                self._create_offer_assignment_email_sent_record(enterprise_customer, REVOKE, template)
 
             # unsubscribe user from receiving nudge emails
             CodeAssignmentNudgeEmails.unsubscribe_from_nudging(
