@@ -1761,6 +1761,7 @@ class CouponCodeRevokeSerializer(CouponCodeMixin, serializers.Serializer):  # py
     code = serializers.CharField(required=True)
     email = serializers.EmailField(required=True)
     detail = serializers.CharField(read_only=True)
+    do_not_email = serializers.BooleanField(default=False)
 
     def create(self, validated_data):
         """
@@ -1769,6 +1770,11 @@ class CouponCodeRevokeSerializer(CouponCodeMixin, serializers.Serializer):  # py
         offer_assignments = validated_data.get('offer_assignments')
         email = validated_data.get('email')
         code = validated_data.get('code')
+
+        # `not` is used here to avoid double negative in the if condition in the code ahead.
+        # `should_send_revoke_email` shows whether a new email will be sent or not.
+        should_send_revoke_email = not validated_data.get('do_not_email')
+
         subject = self.context.get('subject')
         greeting = self.context.get('greeting')
         closing = self.context.get('closing')
@@ -1781,13 +1787,14 @@ class CouponCodeRevokeSerializer(CouponCodeMixin, serializers.Serializer):  # py
                 offer_assignment.revocation_date = current_date_time
                 offer_assignment.save()
 
-            send_revoked_offer_email(
-                subject=subject,
-                greeting=greeting,
-                closing=closing,
-                learner_email=email,
-                code=code
-            )
+            if should_send_revoke_email:
+                send_revoked_offer_email(
+                    subject=subject,
+                    greeting=greeting,
+                    closing=closing,
+                    learner_email=email,
+                    code=code
+                )
         except Exception as exc:  # pylint: disable=broad-except
             logger.exception('[Offer Revocation] Encountered error when revoking code %s for user %s with '
                              'subject %r, greeting %r and closing %r', code, email, subject, greeting, closing)

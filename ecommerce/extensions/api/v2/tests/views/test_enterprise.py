@@ -2064,11 +2064,11 @@ class EnterpriseCouponViewSetRbacTests(
             response = self.get_response(
                 'POST',
                 '/api/v2/enterprise/coupons/{}/revoke/'.format(coupon_id),
-                {'assignments': [{'email': email, 'code': voucher.code}]}
+                {'assignments': [{'email': email, 'code': voucher.code}], 'do_not_email': False}
             )
 
         response = response.json()
-        assert response == [{'code': voucher.code, 'email': email, 'detail': 'success'}]
+        assert response == [{'code': voucher.code, 'email': email, 'detail': 'success', 'do_not_email': False}]
 
         # Assign the same code to the user again.
         with mock.patch('ecommerce.extensions.offer.utils.send_offer_assignment_email.delay') as mock_send_email:
@@ -2327,7 +2327,7 @@ class EnterpriseCouponViewSetRbacTests(
             # verify subscription is active
             assert nudge_email.is_subscribed
 
-        payload = {'assignments': [{'email': email, 'code': offer_assignment.code}]}
+        payload = {'assignments': [{'email': email, 'code': offer_assignment.code}], 'do_not_email': False}
         if send_email:
             payload['template'] = 'Test template'
         with mock.patch('ecommerce.extensions.offer.utils.send_offer_update_email.delay') as mock_send_email:
@@ -2338,7 +2338,7 @@ class EnterpriseCouponViewSetRbacTests(
             )
 
         response = response.json()
-        assert response == [{'code': offer_assignment.code, 'email': email, 'detail': 'success'}]
+        assert response == [{'code': offer_assignment.code, 'email': email, 'detail': 'success', 'do_not_email': False}]
         assert mock_send_email.call_count == (1 if send_email else 0)
         for offer_assignment in OfferAssignment.objects.filter(user_email=email):
             assert offer_assignment.status == OFFER_ASSIGNMENT_REVOKED
@@ -2381,7 +2381,7 @@ class EnterpriseCouponViewSetRbacTests(
         offer_assignment.status = OFFER_ASSIGNMENT_EMAIL_BOUNCED
         offer_assignment.save()
 
-        payload = {'assignments': [{'email': email, 'code': offer_assignment.code}]}
+        payload = {'assignments': [{'email': email, 'code': offer_assignment.code}], 'do_not_email': False}
         with mock.patch('ecommerce.extensions.offer.utils.send_offer_update_email.delay'):
             response = self.get_response(
                 'POST',
@@ -2390,7 +2390,7 @@ class EnterpriseCouponViewSetRbacTests(
             )
 
         response = response.json()
-        assert response == [{'code': offer_assignment.code, 'email': email, 'detail': 'success'}]
+        assert response == [{'code': offer_assignment.code, 'email': email, 'detail': 'success', 'do_not_email': False}]
         for offer_assignment in OfferAssignment.objects.filter(user_email=email):
             assert offer_assignment.status == OFFER_ASSIGNMENT_REVOKED
             self.assertIsNotNone(offer_assignment.revocation_date)
@@ -2411,7 +2411,8 @@ class EnterpriseCouponViewSetRbacTests(
                 'template_subject': TEMPLATE_SUBJECT,
                 'template_greeting': TEMPLATE_GREETING,
                 'template_closing': TEMPLATE_CLOSING,
-                'assignments': {'email': email, 'code': 'RANDOMCODE'}
+                'assignments': {'email': email, 'code': 'RANDOMCODE'},
+                'do_not_email': False
             }
         )
 
@@ -2434,7 +2435,8 @@ class EnterpriseCouponViewSetRbacTests(
                 'template_subject': TEMPLATE_SUBJECT,
                 'template_greeting': TEMPLATE_GREETING,
                 'template_closing': TEMPLATE_CLOSING,
-                'assignments': [{'email': email, 'code': 'RANDOMCODE'}]
+                'assignments': [{'email': email, 'code': 'RANDOMCODE'}],
+                'do_not_email': False
             }
         )
 
@@ -2465,7 +2467,8 @@ class EnterpriseCouponViewSetRbacTests(
                 'template_subject': TEMPLATE_SUBJECT,
                 'template_greeting': TEMPLATE_GREETING,
                 'template_closing': TEMPLATE_CLOSING,
-                'assignments': [{'email': email, 'code': voucher.code}]
+                'assignments': [{'email': email, 'code': voucher.code}],
+                'do_not_email': False
             }
         )
 
@@ -2511,12 +2514,15 @@ class EnterpriseCouponViewSetRbacTests(
                     'template_subject': TEMPLATE_SUBJECT,
                     'template_greeting': TEMPLATE_GREETING,
                     'template_closing': TEMPLATE_CLOSING,
-                    'assignments': [{'email': email, 'code': offer_assignment.code}]
+                    'assignments': [{'email': email, 'code': offer_assignment.code}],
+                    'do_not_email': False,
                 }
             )
 
         response = response.json()
-        assert response == [{'email': email, 'code': offer_assignment.code, 'detail': 'email_dispatch_failed'}]
+        assert response == [
+            {'email': email, 'code': offer_assignment.code, 'detail': 'email_dispatch_failed', 'do_not_email': False},
+        ]
         assert mock_send_email.call_count == 1
         for offer_assignment in OfferAssignment.objects.filter(user_email=email):
             assert offer_assignment.status == OFFER_ASSIGNMENT_REVOKED
@@ -2555,13 +2561,19 @@ class EnterpriseCouponViewSetRbacTests(
                     'assignments': [
                         {'email': offer_assignment.user_email, 'code': offer_assignment.code},
                         {'email': 'test3@example.com', 'code': 'RANDOMCODE'},
-                    ]
+                    ],
+                    'do_not_email': False
                 }
             )
 
         response = response.json()
         assert response == [
-            {'email': offer_assignment.user_email, 'code': offer_assignment.code, 'detail': 'success'},
+            {
+                'email': offer_assignment.user_email,
+                'code': offer_assignment.code,
+                'detail': 'success',
+                'do_not_email': False,
+            },
             {
                 'code': 'RANDOMCODE',
                 'email': 'test3@example.com',
@@ -3089,7 +3101,8 @@ class EnterpriseCouponViewSetRbacTests(
             'template_closing': TEMPLATE_CLOSING,
             'emails': ['test@edx.org'],
             'codes': [code],
-            'assignments': [{'email': 'test@edx.org', 'code': code}]
+            'assignments': [{'email': 'test@edx.org', 'code': code}],
+            'do_not_email': False,
         }
 
         # Verify that no record have been created yet
@@ -3179,7 +3192,8 @@ class EnterpriseCouponViewSetRbacTests(
                     'template_subject': TEMPLATE_SUBJECT,
                     'template_greeting': TEMPLATE_GREETING,
                     'template_closing': TEMPLATE_CLOSING,
-                    'assignments': assignments
+                    'assignments': assignments,
+                    'do_not_email': False
                 }
             )
         # verify that only one record has been created with 'revoke' email type
@@ -3303,7 +3317,7 @@ class OfferAssignmentSummaryViewSetTests(
             self.get_response(
                 'POST',
                 '/api/v2/enterprise/coupons/{}/revoke/'.format(coupon_id),
-                {'assignments': [{'email': email, 'code': code}]}
+                {'assignments': [{'email': email, 'code': code}], 'do_not_email': False}
             )
 
     def test_view_returns_appropriate_data(self):
