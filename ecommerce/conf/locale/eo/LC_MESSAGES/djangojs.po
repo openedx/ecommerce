@@ -5,11 +5,12 @@
 #
 # Translators:
 # Translators:
+# Translators:
 msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-05-28 08:36+0000\n"
+"POT-Creation-Date: 2020-11-23 13:56+0000\n"
 "PO-Revision-Date: 2019-12-04 06:55+0000\n"
 "Last-Translator: Ned Batchelder <ned@edx.org>\n"
 "Language-Team: English (http://www.transifex.com/open-edx/edx-platform/language/en/)\n"
@@ -518,6 +519,10 @@ msgid "Can be used multiple times by one customer"
 msgstr ""
 "Çän ßé üséd mültïplé tïmés ßý öné çüstömér Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
 "¢σηѕє¢тєтυя #"
+
+#: ecommerce/static/js/views/enterprise_coupon_form_view.js
+msgid "Create and Add More"
+msgstr "Çréäté änd Àdd Möré Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт,#"
 
 #: ecommerce/static/js/views/enterprise_coupon_list_view.js
 msgid "Status"

@@ -5,12 +5,13 @@
 #
 # Translators:
 # Translators:
+# Translators:
 msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-05-28 08:36+0000\n"
-"PO-Revision-Date: 2020-05-11 05:54+0000\n"
+"POT-Creation-Date: 2020-11-23 13:56+0000\n"
+"PO-Revision-Date: 2020-05-24 20:13+0000\n"
 "Last-Translator: edx_transifex_bot <i18n-working-group+edx-transifex-bot@edx.org>\n"
 "Language-Team: English (http://www.transifex.com/open-edx/edx-platform/language/en/)\n"
 "Language: eo\n"
@@ -302,6 +303,18 @@ msgstr ""
 "Pägé ïs sét) Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє#"
 
 #: ecommerce/core/models.py
+msgid "Account Microfrontend URL"
+msgstr "Àççöünt Mïçröfrönténd ÛRL Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕ#"
+
+#: ecommerce/core/models.py
+msgid ""
+"URL for the Account Microfrontend (used to lead learners to ID verification "
+"workflow)"
+msgstr ""
+"ÛRL för thé Àççöünt Mïçröfrönténd (üséd tö léäd léärnérs tö ÌD vérïfïçätïön "
+"wörkflöw) Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢#"
+
+#: ecommerce/core/models.py
 msgid "last name"
 msgstr "läst nämé Ⱡ'σяєм ιρѕυм ∂σł#"
 
@@ -324,7 +337,7 @@ msgid "EnterpriseCustomer UUID"
 msgstr "ÉntérprïséÇüstömér ÛÛÌD Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σ#"
 
 #: ecommerce/core/models.py ecommerce/extensions/offer/models.py
-#: ecommerce/extensions/offer/models.py
+#: ecommerce/extensions/offer/models.py ecommerce/extensions/offer/models.py
 msgid "UUID for an EnterpriseCustomer from the Enterprise Service."
 msgstr ""
 "ÛÛÌD för än ÉntérprïséÇüstömér fröm thé Éntérprïsé Sérvïçé. Ⱡ'σяєм ιρѕυм "
@@ -484,6 +497,10 @@ msgstr "Pröféssïönäl Ⱡ'σяєм ιρѕυм ∂σłσя ѕ#"
 msgid "Verified"
 msgstr "Vérïfïéd Ⱡ'σяєм ιρѕυм ∂#"
 
+#: ecommerce/courses/utils.py
+msgid "Executive Education"
+msgstr "Éxéçütïvé Édüçätïön Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт,#"
+
 #: ecommerce/credit/views.py
 msgid ""
 "An error has occurred. We could not confirm that you are eligible for course"
@@ -607,6 +624,21 @@ msgid "Salesforce Opportunity ID"
 msgstr "Sälésförçé Öppörtünïtý ÌD Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕ#"
 
 #: ecommerce/enterprise/forms.py
+msgid "Emails Addresses"
+msgstr "Émäïls Àddréssés Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αм#"
+
+#: ecommerce/enterprise/forms.py
+msgid "Comma separated emails which will receive the offer usage alerts"
+msgstr ""
+"Çömmä sépärätéd émäïls whïçh wïll réçéïvé thé öffér üsägé älérts Ⱡ'σяєм "
+"ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя α#"
+
+#: ecommerce/enterprise/forms.py
+msgid "Frequency for offer usage emails"
+msgstr ""
+"Fréqüénçý för öffér üsägé émäïls Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тє#"
+
+#: ecommerce/enterprise/forms.py
 msgid "The maximum number of enrollments that can redeem this offer."
 msgstr ""
 "Thé mäxïmüm nümßér öf énröllménts thät çän rédéém thïs öffér. Ⱡ'σяєм ιρѕυм "
@@ -677,11 +709,18 @@ msgstr ""
 #, python-brace-format
 msgid ""
 "Ensure new value must be greater than or equal to "
-"consumed({consumed_discount}) value."
+"consumed({consumed_discount:.2f}) value."
 msgstr ""
 "Énsüré néw välüé müst ßé gréätér thän ör éqüäl tö "
-"çönsüméd({consumed_discount}) välüé. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
+"çönsüméd({consumed_discount:.2f}) välüé. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
 "¢σηѕє¢тєтυя #"
+
+#: ecommerce/enterprise/forms.py
+#, python-brace-format
+msgid "Given email address {email} is not a valid email."
+msgstr ""
+"Gïvén émäïl äddréss {email} ïs nöt ä välïd émäïl. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт "
+"αмєт, ¢σηѕє¢тєтυя #"
 
 #: ecommerce/enterprise/forms.py
 msgid "An offer already exists for this Enterprise & Catalog combination."
@@ -984,6 +1023,32 @@ msgstr "Énröllmént çödé Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт α#"
 #: ecommerce/extensions/api/serializers.py
 msgid "Discount code"
 msgstr "Dïsçöünt çödé Ⱡ'σяєм ιρѕυм ∂σłσя ѕι#"
+
+#: ecommerce/extensions/api/serializers.py
+msgid "Invalid order number or order {} does not exists."
+msgstr ""
+"Ìnvälïd ördér nümßér ör ördér {} döés nöt éxïsts. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт "
+"αмєт, ¢σηѕє¢тєтυя α#"
+
+#: ecommerce/extensions/api/serializers.py
+msgid "New coupon voucher assignment Failure. Error: {}"
+msgstr ""
+"Néw çöüpön vöüçhér ässïgnmént Fäïlüré. Érrör: {} Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт "
+"αмєт, ¢σηѕє¢тєтυя α#"
+
+#: ecommerce/extensions/api/serializers.py
+msgid ""
+"Your order {} can not be refunded as '{}' coupon are not supported to "
+"refund."
+msgstr ""
+"Ýöür ördér {} çän nöt ßé réfündéd äs '{}' çöüpön äré nöt süppörtéd tö "
+"réfünd. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєт#"
+
+#: ecommerce/extensions/api/serializers.py
+msgid "Could note create new voucher for the order: {}"
+msgstr ""
+"Çöüld nöté çréäté néw vöüçhér för thé ördér: {} Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт,"
+" ¢σηѕє¢тєтυя α#"
 
 #: ecommerce/extensions/api/v2/views/baskets.py
 #: ecommerce/extensions/basket/views.py
@@ -1308,6 +1373,30 @@ msgid "Failed to retrieve enrollment data."
 msgstr ""
 "Fäïléd tö rétrïévé énröllmént dätä. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢тєт#"
 
+#: ecommerce/extensions/offer/constants.py
+msgid "Day 3"
+msgstr "Däý 3 Ⱡ'σяєм ιρѕ#"
+
+#: ecommerce/extensions/offer/constants.py
+msgid "Day 10"
+msgstr "Däý 10 Ⱡ'σяєм ιρѕυ#"
+
+#: ecommerce/extensions/offer/constants.py
+msgid "Day 19"
+msgstr "Däý 19 Ⱡ'σяєм ιρѕυ#"
+
+#: ecommerce/extensions/offer/constants.py
+msgid "Assign"
+msgstr "Àssïgn Ⱡ'σяєм ιρѕυ#"
+
+#: ecommerce/extensions/offer/constants.py
+msgid "Remind"
+msgstr "Rémïnd Ⱡ'σяєм ιρѕυ#"
+
+#: ecommerce/extensions/offer/constants.py
+msgid "Revoke"
+msgstr "Révöké Ⱡ'σяєм ιρѕυ#"
+
 #: ecommerce/extensions/offer/models.py
 msgid "Course Catalog ID from the Discovery Service."
 msgstr ""
@@ -1360,22 +1449,18 @@ msgstr ""
 "¢σηѕє¢тєтυ#"
 
 #: ecommerce/extensions/offer/models.py
-msgid "Assign"
-msgstr "Àssïgn Ⱡ'σяєм ιρѕυ#"
-
-#: ecommerce/extensions/offer/models.py
-msgid "Remind"
-msgstr "Rémïnd Ⱡ'σяєм ιρѕυ#"
-
-#: ecommerce/extensions/offer/models.py
-msgid "Revoke"
-msgstr "Révöké Ⱡ'σяєм ιρѕυ#"
-
-#: ecommerce/extensions/offer/models.py
 msgid "Make a particular template version active."
 msgstr ""
 "Mäké ä pärtïçülär témpläté vérsïön äçtïvé. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, "
 "¢σηѕє¢тєтυя #"
+
+#: ecommerce/extensions/offer/models.py
+msgid "Email has been sent."
+msgstr "Émäïl häs ßéén sént. Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, #"
+
+#: ecommerce/extensions/offer/models.py
+msgid "This user should receive email"
+msgstr "Thïs üsér shöüld réçéïvé émäïl Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σηѕє¢т#"
 
 #: ecommerce/extensions/offer/utils.py
 #, python-brace-format
@@ -1415,6 +1500,14 @@ msgstr ""
 #: ecommerce/extensions/order/models.py ecommerce/extensions/payment/models.py
 msgid "Payment Processor"
 msgstr "Päýmént Pröçéssör Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмє#"
+
+#: ecommerce/extensions/order/models.py
+msgid ""
+"It expect that the order numbers stuck in fulfillment error state will be"
+"             provided in a txt file format one per line."
+msgstr ""
+"Ìt éxpéçt thät thé ördér nümßérs stüçk ïn fülfïllmént érrör stäté wïll ßé"
+"             prövïdéd ïn ä txt fïlé förmät öné pér lïné. Ⱡ'σ#"
 
 #: ecommerce/extensions/partner/admin.py
 msgid "Click 'Save and Continue Editing' to add stock records"
@@ -1666,6 +1759,16 @@ msgstr ""
 #: ecommerce/extensions/voucher/models.py
 msgid "Usage"
 msgstr "Ûsägé Ⱡ'σяєм ιρѕ#"
+
+#: ecommerce/extensions/voucher/models.py
+msgid "Is Public Code Batch"
+msgstr "Ìs Püßlïç Çödé Bätçh Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, #"
+
+#: ecommerce/extensions/voucher/models.py
+msgid "Should this code batch be public or private for assignment."
+msgstr ""
+"Shöüld thïs çödé ßätçh ßé püßlïç ör prïväté för ässïgnmént. Ⱡ'σяєм ιρѕυм "
+"∂σłσя ѕιт αмєт, ¢σηѕє¢тєтυя α#"
 
 #: ecommerce/extensions/voucher/models.py
 msgid "This voucher is assigned to another user."
