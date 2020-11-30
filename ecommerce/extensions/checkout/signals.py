@@ -35,12 +35,12 @@ def track_completed_order(sender, order=None, **kwargs):  # pylint: disable=unus
 
     properties = {
         'orderId': order.number,
-        'total': str(order.total_excl_tax),
+        'total': float(order.total_excl_tax),
         # For Rockerbox integration, we need a field named revenue since they cannot parse a field named total.
         # TODO: DE-1188: Remove / move Rockerbox integration code.
-        'revenue': str(order.total_excl_tax),
+        'revenue': float(order.total_excl_tax),
         'currency': order.currency,
-        'discount': str(order.total_discount_incl_tax),
+        'discount': float(order.total_discount_incl_tax),
         'products': [
             {
                 # For backwards-compatibility with older events the `sku` field is (ab)used to
@@ -50,8 +50,8 @@ def track_completed_order(sender, order=None, **kwargs):  # pylint: disable=unus
                 'id': line.partner_sku,
                 'sku': mode_for_product(line.product),
                 'name': line.product.course.id if line.product.course else line.product.title,
-                'price': str(line.line_price_excl_tax),
-                'quantity': line.quantity,
+                'price': float(line.line_price_excl_tax),
+                'quantity': int(line.quantity),
                 'category': line.product.get_product_class().name,
             } for line in order.lines.all()
         ],
@@ -81,8 +81,8 @@ def track_completed_order(sender, order=None, **kwargs):  # pylint: disable=unus
             variant = 'full'
         bundle_product = {
             'id': bundle_id,
-            'price': '0',
-            'quantity': str(len(order.lines.all())),
+            'price': 0,
+            'quantity': len(order.lines.all()),
             'category': 'bundle',
             'variant': variant,
             'name': program.get('title')

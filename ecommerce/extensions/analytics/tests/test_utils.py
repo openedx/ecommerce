@@ -134,7 +134,7 @@ class UtilsTest(DiscoveryTestMixin, BasketMixin, TransactionTestCase):
             'product_id': seat.stockrecords.first().partner_sku,
             'sku': 'verified',
             'name': course.id,
-            'price': '100.00',
+            'price': 100,
             'quantity': 1,
             'category': 'Seat',
         }
