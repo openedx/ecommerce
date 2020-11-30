@@ -818,3 +818,6 @@ SDN_CHECK_API_KEY = "sdn search key here"
 
 # Need to link to the account micro-frontend
 ACCOUNT_MICROFRONTEND_URL = None
+
+# Awin advertiser id
+AWIN_ADVERTISER_ID = None

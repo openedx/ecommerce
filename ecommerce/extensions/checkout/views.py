@@ -194,7 +194,27 @@ class ReceiptResponseView(ThankYouView):
             'has_enrollment_code_product': has_enrollment_code_product,
             'disable_back_button': self.request.GET.get('disable_back_button', 0),
         })
+        if settings.AWIN_ADVERTISER_ID:
+            context.update({
+                'product_tracking': self.add_product_tracking(order),
+            })
         return context
+
+    def add_product_tracking(self, order):
+        products_for_tracking = []
+        for line in order.lines.all():
+            if line.product.is_course_entitlement_product:
+                product_id = line.product.attr.UUID
+            else:
+                product_id = line.product.course.id
+            products_for_tracking.append("AW:P|{id}|{order_number}|{course_id}|{title}|{price}|"
+                                         "{quantity}|{partner_sku}|DEFAULT\r\n"
+                                         .format(id=settings.AWIN_ADVERTISER_ID, order_number=order.number,
+                                                 course_id=product_id, title=line.title,
+                                                 price=line.unit_price_incl_tax, quantity=line.quantity,
+                                                 partner_sku=line.partner_sku)
+                                         )
+        return "".join(products_for_tracking)
 
     def get_object(self):
         kwargs = {
