@@ -225,17 +225,17 @@ class SignalTests(ProgramTestMixin, CouponMixin, TestCase):
         coupon = voucher.code if voucher else None
         properties = {
             'orderId': order.number,
-            'total': str(order.total_excl_tax),
-            'revenue': str(order.total_excl_tax),
+            'total': float(order.total_excl_tax),
+            'revenue': float(order.total_excl_tax),
             'currency': order.currency,
             'coupon': coupon,
-            'discount': str(order.total_discount_incl_tax),
+            'discount': float(order.total_discount_incl_tax),
             'products': [
                 {
                     'id': line.partner_sku,
                     'sku': mode_for_product(line.product),
                     'name': line.product.course.id if line.product.course else line.product.title,
-                    'price': str(line.line_price_excl_tax),
+                    'price': float(line.line_price_excl_tax),
                     'quantity': line.quantity,
                     'category': line.product.get_product_class().name,
                 } for line in order.lines.all()
@@ -252,8 +252,8 @@ class SignalTests(ProgramTestMixin, CouponMixin, TestCase):
 
             bundle_product = {
                 'id': bundle_id,
-                'price': '0',
-                'quantity': str(len(order.lines.all())),
+                'price': 0,
+                'quantity': len(order.lines.all()),
                 'category': 'bundle',
                 'variant': variant,
                 'name': program['title']

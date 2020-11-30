@@ -252,7 +252,7 @@ class BusinessIntelligenceMixin:
 
     def assert_correct_event(
             self, mock_track, instance, expected_user_id, expected_client_id, expected_ip, order_number, currency,
-            email, total, revenue, coupon=None, discount='0.00'
+            email, total, revenue, coupon=None, discount=Decimal('0.00')
     ):
         """Check that the tracking context was correctly reflected in the emitted event."""
         (event_user_id, event_name, event_payload), kwargs = mock_track.call_args
@@ -293,16 +293,16 @@ class BusinessIntelligenceMixin:
         tracked_products_dict = {product['id']: product for product in event_payload['products']}
 
         if model_name == 'Order':
-            self.assertEqual(event_payload['total'], str(total))
-            self.assertEqual(event_payload['revenue'], str(revenue))
+            self.assertEqual(event_payload['total'], float(total))
+            self.assertEqual(event_payload['revenue'], float(revenue))
             # value of revenue field should be the same as total.
-            self.assertEqual(event_payload['revenue'], str(total))
+            self.assertEqual(event_payload['revenue'], float(total))
 
             for line in lines:
                 tracked_product = tracked_products_dict.get(line.partner_sku)
                 self.assertIsNotNone(tracked_product)
                 self.assertEqual(line.product.course.id, tracked_product['name'])
-                self.assertEqual(str(line.line_price_excl_tax), tracked_product['price'])
+                self.assertEqual(float(line.line_price_excl_tax), tracked_product['price'])
                 self.assertEqual(line.quantity, tracked_product['quantity'])
                 self.assertEqual(mode_for_product(line.product), tracked_product['sku'])
                 self.assertEqual(line.product.get_product_class().name, tracked_product['category'])

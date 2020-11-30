@@ -195,8 +195,8 @@ def translate_basket_line_for_segment(line):
         'product_id': line.stockrecord.partner_sku,
         'sku': mode_for_product(line.product),
         'name': course.id if course else line.product.title,
-        'price': str(line.line_price_excl_tax),
-        'quantity': line.quantity,
+        'price': float(line.line_price_excl_tax),
+        'quantity': int(line.quantity),
         'category': line.product.get_product_class().name,
     }
 
