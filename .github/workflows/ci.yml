@@ -26,7 +26,7 @@ jobs:
       - uses: actions/checkout@v2
       - name: Start container
         run: |
-          docker-compose -f ./.travis/docker-compose-travis.yml up -d
+          docker-compose -f ./.ci/docker-compose-ci.yml up -d
       - name: Install dependencies
         run: |
           docker exec -t ecommerce_testing bash -c "
@@ -35,7 +35,7 @@ jobs:
           "
       - name: Run tests
         run: |
-          docker exec -t -e TRAVIS=1 ecommerce_testing bash -c "
+          docker exec -t -e CI=1 ecommerce_testing bash -c "
             cd /edx/app/ecommerce/ecommerce/ &&
             PATH=\$PATH:/edx/app/ecommerce/nodeenvs/ecommerce/bin:/snap/bin
             DJANGO_ENV=${{ matrix.django-env }} make ${{ matrix.targets }}
@@ -43,7 +43,7 @@ jobs:
       - name: Run coverage
         if: matrix.testname == 'test-python'
         run: |
-          docker exec ecommerce_testing /edx/app/ecommerce/ecommerce/.travis/run_coverage.sh
+          docker exec ecommerce_testing /edx/app/ecommerce/ecommerce/.ci/run_coverage.sh
       - name: Setup Python
         if: matrix.testname == 'test-python'
         uses: actions/setup-python@v2
