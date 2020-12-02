@@ -1,7 +1,7 @@
-edX E-Commerce Service  |Travis|_ |Codecov|_
+edX E-Commerce Service  |CI|_ |Codecov|_
 ============================================
-.. |Travis| image:: https://travis-ci.com/edx/ecommerce.svg?branch=master
-.. _Travis: https://travis-ci.com/edx/ecommerce
+.. |CI| image:: https://github.com/edx/ecommerce/workflows/CI/badge.svg
+.. _CI: https://github.com/edx/ecommerce/actions?query=workflow%3ACI
 
 .. |Codecov| image:: http://codecov.io/github/edx/ecommerce/coverage.svg?branch=master
 .. _Codecov: http://codecov.io/github/edx/ecommerce?branch=master

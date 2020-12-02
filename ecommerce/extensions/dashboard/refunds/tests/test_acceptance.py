@@ -123,7 +123,7 @@ class RefundAcceptanceTestMixin(RefundTestMixin):
         # Verify that an alert is displayed.
         self.assert_alert_displayed('alert-success', 'Refund {} has been processed.'.format(self.refund.id))
 
-    @skip("This test is flaky in Travis.  Move to e2e and re-enable under ticket XCOM-342.")
+    @skip("This test is flaky in CI.  Move to e2e and re-enable under ticket XCOM-342.")
     @ddt.data(True, False)
     def test_processing_failure(self, approve):
         """
