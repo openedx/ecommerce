@@ -66,7 +66,7 @@ NUDGE_EMAIL_TEMPLATES = [
         'email_greeting': 'Learners like you are earning certificates from some of the top universities and companies '
                           'in the world. Will you join them?',
         'email_closing': 'Learn from the best, and redeem your code today.',
-        'email_subject': 'It\'s not to late redeem your edX code!',
+        'email_subject': 'It\'s not too late to redeem your edX code!',
         'name': TEMPLATES_NAME[2],
     },
 ]
