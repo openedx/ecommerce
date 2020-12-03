@@ -538,7 +538,7 @@ SESSION_COOKIE_SECURE = False
 # Default broker URL. See http://celery.readthedocs.io/en/latest/userguide/configuration.html#broker-url.
 # In order for tasks to be visible to the ecommerce worker, this must match the value of BROKER_URL
 # configured for the ecommerce worker!
-BROKER_URL = 'amqp://celery:celery@127.0.0.1:5672'
+BROKER_URL = 'redis://:celery@127.0.0.1:6379'
 
 # Disable connection pooling. Connections may be severed by load balancers.
 # This forces the application to connect explicitly to the broker each time
