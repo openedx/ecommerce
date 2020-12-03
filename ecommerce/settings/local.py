@@ -144,7 +144,7 @@ PAYMENT_PROCESSOR_CONFIG = {
 
 
 # CELERY
-BROKER_URL = 'amqp://'
+BROKER_URL = 'redis://'
 
 # Uncomment this to run tasks in-process (i.e., synchronously).
 # CELERY_ALWAYS_EAGER = True
