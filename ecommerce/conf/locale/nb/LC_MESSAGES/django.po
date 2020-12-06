@@ -7,6 +7,7 @@
 # Translators:
 # Translators:
 # Translators:
+# Translators:
 # 26f686a0847859ed6c17964d35a1c6a9_e899e7c, 2015
 # Frode Arntsen <frode.arntsen@unit.no>, 2016-2017
 # Joakim S. Johnson, 2016
@@ -15,7 +16,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-11-22 20:12+0000\n"
+"POT-Creation-Date: 2020-12-06 20:12+0000\n"
 "PO-Revision-Date: 2020-11-22 20:12+0000\n"
 "Last-Translator: edx_transifex_bot <i18n-working-group+edx-transifex-bot@edx.org>\n"
 "Language-Team: Norwegian Bokmål (http://www.transifex.com/open-edx/edx-platform/language/nb/)\n"

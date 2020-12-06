@@ -7,6 +7,7 @@
 # Translators:
 # Translators:
 # Translators:
+# Translators:
 # Alexandre de Campos <alexcampos@deloitte.com>, 2019
 # Anderson Franca <anderson.frca@gmail.com>, 2016
 # Angela Amaro <angelasimei@gmail.com>, 2016
@@ -33,7 +34,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-11-22 20:12+0000\n"
+"POT-Creation-Date: 2020-12-06 20:12+0000\n"
 "PO-Revision-Date: 2020-11-23 21:53+0000\n"
 "Last-Translator: Emmanuel Halbout <emmanuelhalbout@neojiba.org>\n"
 "Language-Team: Portuguese (Brazil) (http://www.transifex.com/open-edx/edx-platform/language/pt_BR/)\n"

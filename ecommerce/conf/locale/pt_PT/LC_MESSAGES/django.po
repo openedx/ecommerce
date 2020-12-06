@@ -7,6 +7,7 @@
 # Translators:
 # Translators:
 # Translators:
+# Translators:
 # Beatriz Sousa <beatriz.sousa@bridgelk.com>, 2018
 # Cátia Lopes <catia.lopes@bridgelk.com>, 2018-2020
 # Waldo Luis Ribeiro, 2016
@@ -22,7 +23,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-11-22 20:12+0000\n"
+"POT-Creation-Date: 2020-12-06 20:12+0000\n"
 "PO-Revision-Date: 2020-11-22 20:12+0000\n"
 "Last-Translator: edx_transifex_bot <i18n-working-group+edx-transifex-bot@edx.org>\n"
 "Language-Team: Portuguese (Portugal) (http://www.transifex.com/open-edx/edx-platform/language/pt_PT/)\n"

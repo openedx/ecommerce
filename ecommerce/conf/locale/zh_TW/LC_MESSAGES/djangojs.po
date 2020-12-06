@@ -7,6 +7,7 @@
 # Translators:
 # Translators:
 # Translators:
+# Translators:
 # JEN-HAO HSIEH <orienthauz@gmail.com>, 2015
 # Julia Oppenheimer <juliaoppenheimer2017@gmail.com>, 2019
 # Mushiyo, 2015
@@ -19,7 +20,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-11-23 13:56+0000\n"
+"POT-Creation-Date: 2020-12-06 20:12+0000\n"
 "PO-Revision-Date: 2020-11-24 09:15+0000\n"
 "Last-Translator: Transifex Bot <>\n"
 "Language-Team: Chinese (Taiwan) (http://www.transifex.com/open-edx/edx-platform/language/zh_TW/)\n"

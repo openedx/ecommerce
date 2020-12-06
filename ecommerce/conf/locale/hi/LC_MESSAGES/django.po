@@ -7,12 +7,13 @@
 # Translators:
 # Translators:
 # Translators:
+# Translators:
 # Akshay Garg <64akshay@gmail.com>, 2015
 msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-11-22 20:12+0000\n"
+"POT-Creation-Date: 2020-12-06 20:12+0000\n"
 "PO-Revision-Date: 2020-11-22 20:12+0000\n"
 "Last-Translator: edx_transifex_bot <i18n-working-group+edx-transifex-bot@edx.org>\n"
 "Language-Team: Hindi (http://www.transifex.com/open-edx/edx-platform/language/hi/)\n"
