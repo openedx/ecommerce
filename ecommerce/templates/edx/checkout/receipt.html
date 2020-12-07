@@ -20,6 +20,12 @@
   <script src="{% static 'js/apps/order_receipt_app.js' %}"></script>
 {% endblock javascript %}
 
+{% block post_js %}
+ <script type="text/javascript">
+   var  awinProductTrackingData = `{{ product_tracking }}`;
+  </script>
+{% endblock post_js %}
+
 {% block navbar %}
   {% include 'edx/partials/_student_navbar.html' %}
 {% endblock navbar %}

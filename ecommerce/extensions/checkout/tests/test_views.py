@@ -319,6 +319,23 @@ class ReceiptResponseViewTests(DiscoveryMockMixin, LmsApiMockMixin, RefundTestMi
 
     @patch('ecommerce.extensions.checkout.views.fetch_enterprise_learner_data')
     @httpretty.activate
+    def test_awin_product_tracking_for_order(self, mock_learner_data):
+        """ Receipt Page should have context for awin product tracking"""
+        mock_learner_data.return_value = self.non_enterprise_learner_data
+        order = self._create_order_for_receipt(self.user)
+        response = self._get_receipt_response(order.number)
+        products = []
+        for line in order.lines.all():
+            products.append("AW:P|{id}|{order_number}|{course_id}|{title}|{price}|{quantity}|{partner_sku}|DEFAULT\r\n".
+                            format(id=settings.AWIN_ADVERTISER_ID, order_number=order.number,
+                                   course_id=line.product.course.id, title=line.title, price=line.unit_price_incl_tax,
+                                   quantity=line.quantity, partner_sku=line.partner_sku))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context_data['product_tracking'], "".join(products))
+
+    @patch('ecommerce.extensions.checkout.views.fetch_enterprise_learner_data')
+    @httpretty.activate
     def test_get_receipt_for_existing_entitlement_order(self, mock_learner_data):
         """ Order owner should be able to see the Receipt Page."""
 

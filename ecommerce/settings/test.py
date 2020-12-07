@@ -168,3 +168,6 @@ BROKER_BACKEND = 'memory'
 #SAILTHRU settings
 SAILTHRU_KEY = 'abc123'
 SAILTHRU_SECRET = 'top_secret'
+
+# Awin advertiser id
+AWIN_ADVERTISER_ID = 1234
