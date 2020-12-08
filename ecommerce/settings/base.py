@@ -821,3 +821,7 @@ ACCOUNT_MICROFRONTEND_URL = None
 
 # Awin advertiser id
 AWIN_ADVERTISER_ID = None
+
+################# Settings for brand logos. #################
+LOGO_URL = None
+FAVICON_URL = None
