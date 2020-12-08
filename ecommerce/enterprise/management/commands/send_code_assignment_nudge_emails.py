@@ -41,16 +41,20 @@ class Command(BaseCommand):
 
     @staticmethod
     def _create_email_sent_record(nudge_email):
-        """Creates an instance of OfferAssignmentEmailSentRecord with the given data."""
-        code = nudge_email.code
-        user_email = nudge_email.user_email
-        enterprise_customer_uuid = get_enterprise_customer_uuid(code)
-        email_template = nudge_email.email_template
-        email_type = email_template.email_type
-        receiver_id = User.get_lms_user_id_from_email(user_email)
-        sender_category = AUTOMATIC_EMAIL
-        OfferAssignmentEmailSentRecord.create_email_record(enterprise_customer_uuid, email_type, email_template,
-                                                           sender_category, code, user_email, receiver_id)
+        """
+        Creates an instance of OfferAssignmentEmailSentRecord with the given data.
+        Arguments:
+            nudge_email (CodeAssignmentNudgeEmails): The nudge email that was sent to the learner.
+        """
+        OfferAssignmentEmailSentRecord.create_email_record(
+            enterprise_customer_uuid=get_enterprise_customer_uuid(nudge_email.code),
+            email_type=nudge_email.email_template.email_type,
+            template=nudge_email.email_template,
+            sender_category=AUTOMATIC_EMAIL,
+            code=nudge_email.code,
+            user_email=nudge_email.user_email,
+            receiver_id=User.get_lms_user_id_from_email(nudge_email.user_email)
+        )
 
     def handle(self, *args, **options):
         send_nudge_email_count = 0
