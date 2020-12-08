@@ -2,6 +2,8 @@
 
 import warnings
 
+from django.conf import settings
+from django.contrib.staticfiles.storage import staticfiles_storage
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 from threadlocals.threadlocals import get_current_request
@@ -117,3 +119,39 @@ def absolute_url(request, reverse_string):
 
 def absolute_redirect(request, reverse_string):
     return HttpResponseRedirect(absolute_url(request, reverse_string))
+
+
+def get_logo_url():
+    """
+    Return the url for the branded logo image to be used.
+
+    Preference of the logo should be,
+        Absolute url of brand Logo if defined in django settings
+        Relative default local image path
+
+    """
+    brand_logo_url = settings.LOGO_URL
+    default_local_path = 'images/default-logo.png'
+
+    if brand_logo_url:
+        return brand_logo_url
+
+    return staticfiles_storage.url(default_local_path)
+
+
+def get_favicon_url():
+    """
+    Return the url for the branded favicon image to be used.
+
+    Preference of the favicon should be,
+        Absolute url of brand favicon if defined in django settings
+        Relative default local image path
+
+    """
+    brand_favicon_url = settings.FAVICON_URL
+    default_local_path = 'images/favicon.ico'
+
+    if brand_favicon_url:
+        return brand_favicon_url
+
+    return staticfiles_storage.url(default_local_path)
