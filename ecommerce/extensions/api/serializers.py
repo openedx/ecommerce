@@ -185,7 +185,18 @@ def create_offer_assignment_email_sent_record(
         receiver_id=None,
         sender_id=None,
 ):
-    """Helper method to save an entry in OfferAssignmentEmailSentRecord when an email is sent."""
+    """
+    Helper method to save an entry in OfferAssignmentEmailSentRecord when an email is sent.
+    Arguments:
+        enterprise_customer_uuid (str): UUID of enterprise customer
+        email_type (str): the type of email sent e:g ASSIGN, REMIND, REVOKE
+        template (OfferAssignmentEmailTemplates): The template used to send the email
+        code (str): The voucher code used in the email
+        user_email (str): The email of the learner to whom the email was sent
+        receiver_id (str): lms_user_id of the receiver, None if pending user
+        sender_id (str): lms_user_id of the admin who sent the email
+
+    """
     receiver_id = receiver_id or User.get_lms_user_id_from_email(user_email)
     sender_category = MANUAL_EMAIL if sender_id else AUTOMATIC_EMAIL
 
