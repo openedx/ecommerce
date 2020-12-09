@@ -9,7 +9,7 @@ from dateutil.parser import parse
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.contrib.sites.models import Site
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.db import models
 from django.utils.functional import cached_property
 from django.utils.timezone import now
@@ -552,6 +552,15 @@ class User(AbstractUser):
             return self.social_auth.order_by('-id').first().extra_data[u'access_token']  # pylint: disable=no-member
         except Exception:  # pylint: disable=broad-except
             return None
+
+    @classmethod
+    def get_lms_user_id_from_email(cls, user_email):
+        """Returns the lms_user_id of the user if the account exists, otherwise returns None."""
+        try:
+            lms_user_id = cls.objects.get(email=user_email).lms_user_id
+        except ObjectDoesNotExist:
+            lms_user_id = None
+        return lms_user_id
 
     def lms_user_id_with_metric(self, usage=None, allow_missing=False):
         """
