@@ -22,7 +22,6 @@ from ecommerce.tests.testcases import TestCase
 
 CodeAssignmentNudgeEmails = get_model('offer', 'CodeAssignmentNudgeEmails')
 OfferAssignment = get_model('offer', 'OfferAssignment')
-OfferAssignmentEmailSentRecord = get_model('offer', 'OfferAssignmentEmailSentRecord')
 
 LOGGER_NAME = 'ecommerce.enterprise.management.commands.send_code_assignment_nudge_emails'
 MODEL_LOGGER_NAME = 'ecommerce.extensions.offer.models'
@@ -133,13 +132,3 @@ class SendCodeAssignmentNudgeEmailsTests(TestCase):
                 )
             )
         )
-
-    def test_nudge_email_sent_record_created(self):
-        """
-        Test that an instance of OfferAssignmentEmailSentRecord is created when a nudge email is sent.
-        """
-        # Check that no email record exists yet
-        assert OfferAssignmentEmailSentRecord.objects.count() == 0
-        self._assert_sent_count()
-        # Check that a new email record for every email has been created now that the nudge emails are sent
-        assert OfferAssignmentEmailSentRecord.objects.count() == self.total_nudge_emails_for_today

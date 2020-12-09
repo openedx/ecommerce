@@ -8,15 +8,11 @@ from django.core.management import BaseCommand
 from django.utils import timezone
 from ecommerce_worker.sailthru.v1.tasks import send_code_assignment_nudge_email
 
-from ecommerce.core.models import User
-from ecommerce.enterprise.utils import get_enterprise_customer_uuid
-from ecommerce.extensions.offer.constants import AUTOMATIC_EMAIL
 from ecommerce.programs.custom import get_model
 
 CodeAssignmentNudgeEmails = get_model('offer', 'CodeAssignmentNudgeEmails')
 CodeAssignmentNudgeEmailTemplates = get_model('offer', 'CodeAssignmentNudgeEmailTemplates')
 OfferAssignment = get_model('offer', 'OfferAssignment')
-OfferAssignmentEmailSentRecord = get_model('offer', 'OfferAssignmentEmailSentRecord')
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -39,23 +35,6 @@ class Command(BaseCommand):
             is_subscribed=True
         )
 
-    @staticmethod
-    def _create_email_sent_record(nudge_email):
-        """
-        Creates an instance of OfferAssignmentEmailSentRecord with the given data.
-        Arguments:
-            nudge_email (CodeAssignmentNudgeEmails): A nudge email sent to the learner.
-        """
-        OfferAssignmentEmailSentRecord.create_email_record(
-            enterprise_customer_uuid=get_enterprise_customer_uuid(nudge_email.code),
-            email_type=nudge_email.email_template.email_type,
-            template=nudge_email.email_template,
-            sender_category=AUTOMATIC_EMAIL,
-            code=nudge_email.code,
-            user_email=nudge_email.user_email,
-            receiver_id=User.get_lms_user_id_from_email(nudge_email.user_email)
-        )
-
     def handle(self, *args, **options):
         send_nudge_email_count = 0
         nudge_emails = self._get_nudge_emails()
@@ -76,7 +55,6 @@ class Command(BaseCommand):
                 send_nudge_email_count += 1
                 send_code_assignment_nudge_email.delay(nudge_email.user_email, email_subject, email_body)
                 self.set_last_reminder_date(nudge_email.user_email, nudge_email.code)
-                self._create_email_sent_record(nudge_email)
         logger.info(
             '[Code Assignment Nudge Email] %s out of %s added to the email sending queue.',
             send_nudge_email_count,
