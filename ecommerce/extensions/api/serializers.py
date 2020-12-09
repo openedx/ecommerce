@@ -1565,15 +1565,21 @@ class RefundedOrderCreateVoucherSerializer(serializers.Serializer):  # pylint: d
         return order
 
     def _create_offer_assignment_email_sent_record(self, enterprise_customer_uuid, email_type, code, user_email):
-        """Records the new automated assignment email info sent after a successful refund."""
-        receiver_id = User.get_lms_user_id_from_email(user_email)
+        """
+        Records the new automated assignment email info sent after a successful refund.
+        Arguments:
+            enterprise_customer_uuid (str): The UUID of the enterprise customer.
+            email_type (str): The type of email sent, ASSIGN in this case.
+            code (str): Voucher code that was sent to the learner.
+            user_email (str): The email of the learner.
+        """
         OfferAssignmentEmailSentRecord.create_email_record(
             enterprise_customer_uuid=enterprise_customer_uuid,
             email_type=email_type,
             sender_category=AUTOMATIC_EMAIL,
             code=code,
             user_email=user_email,
-            receiver_id=receiver_id
+            receiver_id=User.get_lms_user_id_from_email(user_email)
         )
 
     def create(self, validated_data):
