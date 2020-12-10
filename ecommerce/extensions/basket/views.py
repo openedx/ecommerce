@@ -209,7 +209,14 @@ class BasketLogicMixin:
                 )
             )
 
-        if has_enterprise_offer(basket) and basket.total_incl_tax == Decimal(0):
+        basket_has_enterprise_offer = has_enterprise_offer(basket)
+        logger.info(
+            'Determinig if checkout is free. User: [%s], HasEnterpriseOffer: [%s], BasketTotal: [%s]',
+            basket.owner.username,
+            basket_has_enterprise_offer,
+            basket.total_incl_tax
+        )
+        if basket_has_enterprise_offer and basket.total_incl_tax == Decimal(0):
             self._redirect_for_enterprise_data_sharing_consent(basket)
 
             raise RedirectException(
@@ -787,7 +794,9 @@ class PaymentApiView(PaymentApiLogicMixin, APIView):
         try:
             self.fire_segment_events(request, basket)
             self.verify_enterprise_needs(basket)
-            return self.get_payment_api_response()
+            response = self.get_payment_api_response()
+            logger.info('Payment API Response. User: [%s], ResponseData: [%s]', basket.owner.username, response.data)
+            return response
         except RedirectException as e:
             return Response({'redirect': e.response.url})
 
