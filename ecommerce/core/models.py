@@ -1,7 +1,7 @@
 import datetime
 import hashlib
 import logging
-from urllib.parse import urljoin, urlsplit
+from urllib.parse import quote, urljoin, urlsplit
 
 import waffle
 from analytics import Client as SegmentClient
@@ -368,7 +368,7 @@ class SiteConfiguration(models.Model):
         """
         path = 'id-verification'
         if course_id:
-            path += '?course_id={}'.format(course_id)
+            path += '?course_id={}'.format(quote(str(course_id)))
 
         if self.account_microfrontend_url:
             return urljoin(self.account_microfrontend_url, path)
