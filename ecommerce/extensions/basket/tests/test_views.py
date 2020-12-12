@@ -366,7 +366,7 @@ class BasketLogicTestMixin:
                 response = self.client.get(self.path)
                 self.assertEqual(response.status_code, 200)
 
-                logger.check_present((
+                logger.check((
                     logger_name, 'ERROR',
                     u'Failed to fire Cart Viewed event for basket [{}]'.format(basket.id)
                 ))
@@ -679,7 +679,7 @@ class BasketSummaryViewTests(EnterpriseServiceMockMixin, DiscoveryTestMixin, Dis
         with LogCapture(logger_name) as logger:
             response = self.client.get(self.path)
             self.assertEqual(response.status_code, 200)
-            logger.check_present(
+            logger.check(
                 (
                     logger_name, 'ERROR',
                     u'Failed to retrieve data from Discovery Service for course [{}].'.format(self.course.id)
@@ -788,7 +788,7 @@ class BasketSummaryViewTests(EnterpriseServiceMockMixin, DiscoveryTestMixin, Dis
                 response = self.client.get(self.path)
                 self.assertEqual(response.status_code, 200)
 
-                logger.check_present((
+                logger.check((
                     logger_name, 'ERROR',
                     u'Failed to fire Cart Viewed event for basket [{}]'.format(basket.id)
                 ))
