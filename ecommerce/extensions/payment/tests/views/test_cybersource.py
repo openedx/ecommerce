@@ -23,8 +23,10 @@ from ecommerce.extensions.basket.utils import get_payment_microfrontend_or_baske
 from ecommerce.extensions.checkout.utils import get_receipt_page_url
 from ecommerce.extensions.order.constants import PaymentEventTypeName
 from ecommerce.extensions.payment.core.sdn import SDNClient
+from ecommerce.extensions.payment.exceptions import DuplicateReferenceNumber
 from ecommerce.extensions.payment.processors.cybersource import Cybersource
 from ecommerce.extensions.payment.tests.mixins import CybersourceMixin, CyberSourceRESTAPIMixin
+from ecommerce.extensions.payment.views.cybersource import CybersourceAuthorizeAPIView
 from ecommerce.extensions.test.factories import create_basket
 from ecommerce.tests.testcases import TestCase
 
@@ -453,6 +455,21 @@ class CybersourceAuthorizeViewTests(CyberSourceRESTAPIMixin, TestCase):
         # Ensure the basket is frozen
         basket = Basket.objects.get(pk=basket.pk)
         self.assertEqual(basket.status, Basket.FROZEN)
+
+    @mock.patch('ecommerce.extensions.payment.views.cybersource.monitoring_utils.set_custom_attribute')
+    @mock.patch.object(CybersourceAuthorizeAPIView, "validate_order_completion")
+    def test_duplicate_reference_number(self, mock_method, mock_monitoring):
+        mock_method.side_effect = DuplicateReferenceNumber
+        basket = self._create_valid_basket()
+        data = self._generate_data(basket.id)
+
+        self._prep_request_invalid(
+            """{"submitTimeUtc":"2020-10-20T15:44:23Z","status":"INVALID_REQUEST","reason":"CARD_TYPE_NOT_ACCEPTED","message":"Decline - The card type is not accepted by the payment processor."}""",  # pylint: disable=line-too-long
+            '6028635251536131304003'
+        )
+
+        self.client.post(self.path, data)
+        mock_monitoring.assert_any_call('payment_response_validation', 'redirect-to-receipt')
 
     def test_field_error(self):
         """ Verify the view responds with a JSON object containing fields with errors, when input is invalid. """
