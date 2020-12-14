@@ -1,6 +1,7 @@
 
 
 import json
+from urllib.parse import quote
 
 import ddt
 import httpretty
@@ -450,7 +451,7 @@ class SiteConfigurationTests(TestCase):
     def _validate_IDVerification_workflow_url(self, site_config, account_url, course_id):
         expected = None
         if course_id:
-            expected = account_url + '/id-verification?course_id={}'.format(course_id)
+            expected = account_url + '/id-verification?course_id={}'.format(quote(str(course_id)))
         else:
             expected = account_url + '/id-verification'
         self.assertEqual(
@@ -458,7 +459,7 @@ class SiteConfigurationTests(TestCase):
             expected
         )
 
-    @ddt.data(None, 'test_course_id')
+    @ddt.data(None, 'course-v1:edX+DemoX+Demo_Course')
     def test_IDVerification_workflow_url_configured(self, course_id):
         account_url = 'https://account.edx.org'
         site_config = SiteConfigurationFactory(
@@ -467,7 +468,7 @@ class SiteConfigurationTests(TestCase):
         self.assertEqual(site_config.account_microfrontend_url, account_url)
         self._validate_IDVerification_workflow_url(site_config, account_url, course_id)
 
-    @ddt.data(None, 'test_course_id')
+    @ddt.data(None, 'course-v1:edX+DemoX+Demo_Course')
     @override_settings(ACCOUNT_MICROFRONTEND_URL='https://test.edx.org')
     def test_IDVerification_workflow_url_settings_configured(self, course_id):
         account_url = 'https://test.edx.org'
