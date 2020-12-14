@@ -6,6 +6,7 @@ import json
 import httpretty
 import mock
 from django.test import RequestFactory
+from django.utils import timezone
 from edx_django_utils.cache import TieredCache
 from oscar.core.utils import slugify
 from oscar.test import factories
@@ -531,7 +532,7 @@ class CouponMixin(SiteMixin):
                 course_catalog=course_catalog,
                 course_seat_types=course_seat_types,
                 email_domains=email_domains,
-                end_datetime=end_datetime or (datetime.datetime.now() + datetime.timedelta(days=500)),
+                end_datetime=end_datetime or (timezone.now() + timezone.timedelta(days=500)),
                 enterprise_customer=enterprise_customer,
                 enterprise_customer_catalog=enterprise_customer_catalog,
                 max_uses=max_uses,
@@ -539,7 +540,7 @@ class CouponMixin(SiteMixin):
                 partner=partner,
                 price=price,
                 quantity=quantity,
-                start_datetime=start_datetime or datetime.datetime(2015, 1, 1),
+                start_datetime=start_datetime or timezone.make_aware(datetime.datetime(2015, 1, 1)),
                 title=title,
                 voucher_type=voucher_type,
                 program_uuid=program_uuid,

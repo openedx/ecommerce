@@ -6,6 +6,7 @@ from django.core.exceptions import ValidationError
 from django.core.validators import MinLengthValidator
 from django.db import models
 from django.db.transaction import atomic
+from django.utils import timezone
 from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
 from django_extensions.db.models import TimeStampedModel
@@ -166,7 +167,7 @@ class SDNFallbackMetadata(TimeStampedModel):
             sdn_fallback_metadata_entry (SDNFallbackMetadata): Instance of the current SDNFallbackMetadata class
             or None if none exists
         """
-        now = datetime.utcnow()
+        now = datetime.now(timezone.utc)
         try:
             if file_checksum == SDNFallbackMetadata.objects.get(import_state='Current').file_checksum:
                 logger.info("SDNFallback: The CSV file has not changed, so skipping import. The file_checksum was %s",

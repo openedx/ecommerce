@@ -3,6 +3,7 @@
 from datetime import datetime
 
 from django.core.exceptions import ValidationError
+from django.utils import timezone
 from testfixtures import LogCapture
 
 from ecommerce.extensions.payment.exceptions import SDNFallbackDataEmptyError
@@ -115,7 +116,7 @@ class SDNFallbackMetadataTests(TestCase):
         """Make sure the row is created correctly with the minimum dataset + defaults."""
         new_metadata = SDNFallbackMetadata(
             file_checksum="foobar",
-            download_timestamp=datetime.now(),
+            download_timestamp=timezone.now(),
         )
         new_metadata.full_clean()
         new_metadata.save()

@@ -12,6 +12,7 @@ import httpretty
 import mock
 from django.conf import settings
 from django.test import override_settings
+from django.utils import timezone
 from oscar.core.loading import get_class, get_model
 from oscar.test import factories
 from requests.exceptions import ConnectionError as ReqConnectionError
@@ -132,12 +133,12 @@ class EnrollmentFulfillmentModuleTests(
             benefit_value=100.00,
             catalog=catalog,
             coupon=coupon,
-            end_datetime=datetime.datetime.now() + datetime.timedelta(days=30),
+            end_datetime=timezone.now() + datetime.timedelta(days=30),
             enterprise_customer=None,
             enterprise_customer_catalog=None,
             name="Test Voucher",
             quantity=10,
-            start_datetime=datetime.datetime.now(),
+            start_datetime=timezone.now(),
             voucher_type=Voucher.SINGLE_USE,
             program_uuid=program_uuid,
         )

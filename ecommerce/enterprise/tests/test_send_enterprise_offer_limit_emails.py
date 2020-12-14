@@ -7,6 +7,7 @@ import logging
 
 import mock
 from django.core.management import call_command
+from django.utils import timezone
 from testfixtures import LogCapture
 
 from ecommerce.extensions.test.factories import EnterpriseOfferFactory
@@ -38,7 +39,7 @@ class SendEnterpriseOfferLimitEmailsTests(TestCase):
         # Creating conditionaloffer with daily frequency and adding corresponding offer_usage object.
         offer_with_daily_frequency = EnterpriseOfferFactory(max_global_applications=10)
         offer_usage = OfferUsageEmail.create_record(offer_with_daily_frequency)
-        offer_usage.created = datetime.datetime.fromordinal(datetime.datetime.now().toordinal() - 2)
+        offer_usage.created = timezone.make_aware(datetime.datetime.fromordinal(timezone.now().toordinal() - 2))
         offer_usage.save()
 
         # Creating conditionaloffer with weekly frequency and adding corresponding offer_usage object.
@@ -47,7 +48,7 @@ class SendEnterpriseOfferLimitEmailsTests(TestCase):
             usage_email_frequency=ConditionalOffer.WEEKLY
         )
         offer_usage = OfferUsageEmail.create_record(offer_with_weekly_frequency)
-        offer_usage.created = datetime.datetime.fromordinal(datetime.datetime.now().toordinal() - 8)
+        offer_usage.created = timezone.make_aware(datetime.datetime.fromordinal(timezone.now().toordinal() - 8))
         offer_usage.save()
 
         # Creating conditionaloffer with monthly frequency and adding corresponding offer_usage object.
@@ -56,7 +57,7 @@ class SendEnterpriseOfferLimitEmailsTests(TestCase):
             usage_email_frequency=ConditionalOffer.MONTHLY
         )
         offer_usage = OfferUsageEmail.create_record(offer_with_monthly_frequency)
-        offer_usage.created = datetime.datetime.fromordinal(datetime.datetime.now().toordinal() - 31)
+        offer_usage.created = timezone.make_aware(datetime.datetime.fromordinal(timezone.now().toordinal() - 31))
         offer_usage.save()
 
     def test_command(self):

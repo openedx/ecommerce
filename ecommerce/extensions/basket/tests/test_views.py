@@ -16,6 +16,7 @@ from django.contrib.messages import get_messages
 from django.http import HttpResponseRedirect
 from django.test import override_settings
 from django.urls import reverse
+from django.utils import timezone
 from edx_django_utils.cache import RequestCache, TieredCache
 from oscar.apps.basket.forms import BasketVoucherForm
 from oscar.core.loading import get_class, get_model
@@ -1124,8 +1125,8 @@ class VoucherAddMixin(LmsApiMockMixin, DiscoveryMockMixin):
     def test_voucher_expired_error_msg(self):
         self.mock_access_token_response()
         self.mock_account_api(self.request, self.user.username, data={'is_active': True})
-        end_datetime = datetime.datetime.now() - datetime.timedelta(days=1)
-        start_datetime = datetime.datetime.now() - datetime.timedelta(days=2)
+        end_datetime = timezone.now() - timezone.timedelta(days=1)
+        start_datetime = timezone.now() - timezone.timedelta(days=2)
         __, product = prepare_voucher(code=COUPON_CODE, start_datetime=start_datetime, end_datetime=end_datetime)
         self.basket.add_product(product)
 
@@ -1227,8 +1228,8 @@ class VoucherAddMixin(LmsApiMockMixin, DiscoveryMockMixin):
         """ Verify the view alerts the user if the voucher is inactive. """
         self.mock_access_token_response()
         self.mock_account_api(self.request, self.user.username, data={'is_active': True})
-        start_datetime = datetime.datetime.now() + datetime.timedelta(days=1)
-        end_datetime = start_datetime + datetime.timedelta(days=2)
+        start_datetime = timezone.now() + timezone.timedelta(days=1)
+        end_datetime = start_datetime + timezone.timedelta(days=2)
         voucher, product = prepare_voucher(code=COUPON_CODE, start_datetime=start_datetime, end_datetime=end_datetime)
         self.basket.add_product(product)
         messages = [{

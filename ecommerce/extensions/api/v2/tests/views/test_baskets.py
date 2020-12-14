@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 
-import datetime
 import json
 import urllib
 from collections import namedtuple
@@ -13,6 +12,7 @@ import mock
 from django.contrib.auth import get_user_model
 from django.test import override_settings
 from django.urls import reverse
+from django.utils import timezone
 from edx_rest_framework_extensions.auth.jwt.cookies import jwt_cookie_name
 from oscar.core.loading import get_model
 from oscar.test import factories
@@ -445,8 +445,8 @@ class BasketCalculateViewTests(ProgramTestMixin, ThrottlingMixin, TestCase):
         condition = factories.ConditionFactory(value=3, range=self.range, type=Condition.COVERAGE)
         factories.ConditionalOfferFactory(name=u'Test Offer', benefit=benefit, condition=condition,
                                           offer_type=ConditionalOffer.SITE,
-                                          start_datetime=datetime.datetime.now() - datetime.timedelta(days=1),
-                                          end_datetime=datetime.datetime.now() + datetime.timedelta(days=2))
+                                          start_datetime=timezone.now() - timezone.timedelta(days=1),
+                                          end_datetime=timezone.now() + timezone.timedelta(days=2))
 
         response = self.client.get(self.url)
 

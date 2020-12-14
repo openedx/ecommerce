@@ -8,6 +8,7 @@ import httpretty
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError
 from django.test import override_settings
+from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 from factory.fuzzy import FuzzyText
 from oscar.templatetags.currency_filters import currency
@@ -18,7 +19,6 @@ from oscar.test.factories import (
     OrderLineFactory,
     RangeFactory,
     VoucherFactory,
-    datetime,
     get_model
 )
 
@@ -114,12 +114,12 @@ class UtilTests(CouponMixin, DiscoveryMockMixin, DiscoveryTestMixin, LmsApiMockM
             'benefit_value': 100.00,
             'catalog': self.catalog,
             'coupon': self.coupon,
-            'end_datetime': datetime.datetime.now() + datetime.timedelta(days=1),
+            'end_datetime': timezone.now() + timezone.timedelta(days=1),
             'enterprise_customer': None,
             'enterprise_customer_catalog': None,
             'name': "Test voucher",
             'quantity': 10,
-            'start_datetime': datetime.datetime.now() - datetime.timedelta(days=1),
+            'start_datetime': timezone.now() - timezone.timedelta(days=1),
             'voucher_type': Voucher.SINGLE_USE
         }
 
@@ -525,7 +525,7 @@ class UtilTests(CouponMixin, DiscoveryMockMixin, DiscoveryTestMixin, LmsApiMockM
         """ Verify the coupon report show correct status for inactive coupons. """
         self.data.update({
             'name': self.coupon.title,
-            'end_datetime': datetime.datetime.now() - datetime.timedelta(days=1)
+            'end_datetime': timezone.now() - timezone.timedelta(days=1)
         })
         vouchers = create_vouchers(**self.data)
         self.coupon_vouchers.first().vouchers.add(*vouchers)

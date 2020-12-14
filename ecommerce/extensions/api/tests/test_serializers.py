@@ -1,6 +1,6 @@
-import datetime
 from unittest import mock
 
+from django.utils import timezone
 from oscar.core.loading import get_model
 from testfixtures import LogCapture
 
@@ -35,7 +35,7 @@ class CouponCodeSerializerTests(CouponMixin, TestCase):
             enterprise_customer='af4b351f-5f1c-4fc3-af41-48bb38fcb161',
             catalog=None,
             enterprise_customer_catalog='8212a8d8-c6b1-4023-8754-4d687c43d72f',
-            end_datetime=(datetime.datetime.now() + datetime.timedelta(days=10))
+            end_datetime=(timezone.now() + timezone.timedelta(days=10))
         )
         self.code = self.coupon.attr.coupon_vouchers.vouchers.first().code
         self.email = 'serializeCoupon@test.org'

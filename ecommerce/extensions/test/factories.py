@@ -2,7 +2,7 @@
 
 import logging
 import uuid
-from datetime import datetime, timedelta
+from datetime import timedelta
 
 import factory
 from django.utils.timezone import now
@@ -336,7 +336,7 @@ class CodeAssignmentNudgeEmailTemplatesFactory(factory.DjangoModelFactory):
 class CodeAssignmentNudgeEmailsFactory(factory.DjangoModelFactory):
     email_template = factory.SubFactory(CodeAssignmentNudgeEmailTemplatesFactory)
     user_email = factory.Sequence(lambda n: 'learner_%s@example.com' % n)
-    email_date = datetime.now()
+    email_date = now()
 
     class Meta:
         model = CodeAssignmentNudgeEmails
@@ -348,7 +348,7 @@ class SDNFallbackMetadataFactory(factory.DjangoModelFactory):
 
     file_checksum = factory.Sequence(lambda n: Faker().md5())
     import_state = 'New'
-    download_timestamp = datetime.now() - timedelta(days=10)
+    download_timestamp = now() - timedelta(days=10)
 
 
 class SDNFallbackDataFactory(factory.DjangoModelFactory):
