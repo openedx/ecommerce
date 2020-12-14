@@ -569,16 +569,16 @@ class User(AbstractUser):
         # Read the lms_user_id from the ecommerce_user.
         lms_user_id = self.lms_user_id
         if lms_user_id:
-            monitoring_utils.set_custom_metric('ecommerce_found_lms_user_id', lms_user_id)
+            monitoring_utils.set_custom_attribute('ecommerce_found_lms_user_id', lms_user_id)
             return lms_user_id
 
         # Could not find the lms_user_id
         if allow_missing:
-            monitoring_utils.set_custom_metric('ecommerce_missing_lms_user_id_allowed', self.id)
+            monitoring_utils.set_custom_attribute('ecommerce_missing_lms_user_id_allowed', self.id)
             log.info(u'Could not find lms_user_id with metric for user %s for %s. Missing lms_user_id is allowed.',
                      self.id, usage, exc_info=True)
         else:
-            monitoring_utils.set_custom_metric('ecommerce_missing_lms_user_id', self.id)
+            monitoring_utils.set_custom_attribute('ecommerce_missing_lms_user_id', self.id)
             log.warning(u'Could not find lms_user_id with metric for user %s for %s.', self.id, usage, exc_info=True)
 
         return None
@@ -612,15 +612,15 @@ class User(AbstractUser):
             else:
                 # Could not find the LMS user id
                 if allow_missing or waffle.switch_is_active(ALLOW_MISSING_LMS_USER_ID):
-                    monitoring_utils.set_custom_metric('ecommerce_missing_lms_user_id_allowed', self.id)
-                    monitoring_utils.set_custom_metric(missing_metric_key + '_allowed', self.id)
+                    monitoring_utils.set_custom_attribute('ecommerce_missing_lms_user_id_allowed', self.id)
+                    monitoring_utils.set_custom_attribute(missing_metric_key + '_allowed', self.id)
 
                     error_msg = (u'Could not find lms_user_id for user {user_id}. Missing lms_user_id is allowed. '
                                  u'Called from {called_from}'.format(user_id=self.id, called_from=called_from))
                     log.info(error_msg, exc_info=True)
                 else:
-                    monitoring_utils.set_custom_metric('ecommerce_missing_lms_user_id', self.id)
-                    monitoring_utils.set_custom_metric(missing_metric_key, self.id)
+                    monitoring_utils.set_custom_attribute('ecommerce_missing_lms_user_id', self.id)
+                    monitoring_utils.set_custom_attribute(missing_metric_key, self.id)
 
                     error_msg = u'Could not find lms_user_id for user {user_id}. Called from {called_from}'.format(
                         user_id=self.id, called_from=called_from)

@@ -36,7 +36,7 @@ class BasketMiddleware(OscarBasketMiddleware):
         """ Return the open basket for this request """
         # pylint: disable=protected-access
         if request._basket_cache is not None:
-            monitoring_utils.set_custom_metric('basket_id', request._basket_cache.id)
+            monitoring_utils.set_custom_attribute('basket_id', request._basket_cache.id)
             return request._basket_cache
 
         manager = Basket.open
@@ -75,7 +75,7 @@ class BasketMiddleware(OscarBasketMiddleware):
         # Cache basket instance for the duration of this request
         request._basket_cache = basket
         if request._basket_cache is not None:
-            monitoring_utils.set_custom_metric('basket_id', request._basket_cache.id)
+            monitoring_utils.set_custom_attribute('basket_id', request._basket_cache.id)
         else:  # pragma: no cover
             pass
 

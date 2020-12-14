@@ -196,14 +196,14 @@ class CybersourceOrderCompletionView(EdxOrderPlacementMixin):
         payment_response_message = 'Unknown Error' if payment_response_message is None else payment_response_message
         # IMPORTANT: Does not set metric for the entire `order_completion_message`, because it includes PII.
         #   It is accessible using the `payment_response_record_id` if needed.
-        monitoring_utils.set_custom_metric('payment_response_processor_name', 'cybersource')
-        monitoring_utils.set_custom_metric('payment_response_basket_id', basket_id)
-        monitoring_utils.set_custom_metric('payment_response_order_number', order_number)
-        monitoring_utils.set_custom_metric('payment_response_transaction_id', transaction_id)
-        monitoring_utils.set_custom_metric('payment_response_record_id', ppr.id)
-        monitoring_utils.set_custom_metric('payment_response_reason_code', reason_code)
-        monitoring_utils.set_custom_metric('payment_response_message', payment_response_message)
-        monitoring_utils.set_custom_metric('payment_response_processor', self.payment_processor.NAME)
+        monitoring_utils.set_custom_attribute('payment_response_processor_name', 'cybersource')
+        monitoring_utils.set_custom_attribute('payment_response_basket_id', basket_id)
+        monitoring_utils.set_custom_attribute('payment_response_order_number', order_number)
+        monitoring_utils.set_custom_attribute('payment_response_transaction_id', transaction_id)
+        monitoring_utils.set_custom_attribute('payment_response_record_id', ppr.id)
+        monitoring_utils.set_custom_attribute('payment_response_reason_code', reason_code)
+        monitoring_utils.set_custom_attribute('payment_response_message', payment_response_message)
+        monitoring_utils.set_custom_attribute('payment_response_processor', self.payment_processor.NAME)
 
     # Note: method has too-many-statements, but it enables tracking that all exception handling gets logged
     def validate_order_completion(self, order_completion_message):  # pylint: disable=too-many-statements
@@ -348,12 +348,12 @@ class CybersourceOrderCompletionView(EdxOrderPlacementMixin):
     def complete_order(self, order_completion_message):
         try:
             basket = self.validate_order_completion(order_completion_message)
-            monitoring_utils.set_custom_metric('payment_response_validation', 'success')
+            monitoring_utils.set_custom_attribute('payment_response_validation', 'success')
         except DuplicateReferenceNumber:
             # CyberSource has told us that they've declined an attempt to pay
             # for an existing order. If this happens, we can redirect the browser
             # to the receipt page for the existing order.
-            monitoring_utils.set_custom_metric('payment_response_validation', 'redirect-to-receipt')
+            monitoring_utils.set_custom_attribute('payment_response_validation', 'redirect-to-receipt')
             return self.redirect_to_receipt_page()
         except TransactionDeclined:
             # Declined transactions are the most common cause of errors during payment
@@ -364,7 +364,7 @@ class CybersourceOrderCompletionView(EdxOrderPlacementMixin):
 
             messages.error(self.request, _('transaction declined'), extra_tags='transaction-declined-message')
 
-            monitoring_utils.set_custom_metric('payment_response_validation', 'redirect-to-payment-page')
+            monitoring_utils.set_custom_attribute('payment_response_validation', 'redirect-to-payment-page')
             # TODO:
             # 1. There are sometimes messages from CyberSource that would make a more helpful message for users.
             # 2. We could have similar handling of other exceptions like UserCancelled and AuthorizationError
@@ -373,7 +373,7 @@ class CybersourceOrderCompletionView(EdxOrderPlacementMixin):
 
         except:  # pylint: disable=bare-except
             # logging handled by validate_order_completion, because not all exceptions are problematic
-            monitoring_utils.set_custom_metric('payment_response_validation', 'redirect-to-error-page')
+            monitoring_utils.set_custom_attribute('payment_response_validation', 'redirect-to-error-page')
             return self.redirect_to_payment_error()
 
         try:

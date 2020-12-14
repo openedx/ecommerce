@@ -99,7 +99,7 @@ def jwt_decode_handler(token):
     # custom jwt_decode_handler.
     try:
         jwt_payload = _ecommerce_jwt_decode_handler_multiple_issuers(token)
-        monitoring_utils.set_custom_metric(JWT_DECODE_HANDLER_METRIC_KEY, 'ecommerce-multiple-issuers')
+        monitoring_utils.set_custom_attribute(JWT_DECODE_HANDLER_METRIC_KEY, 'ecommerce-multiple-issuers')
         return jwt_payload
     except Exception:  # pylint: disable=broad-except
         if waffle.switch_is_active('jwt_decode_handler.log_exception.ecommerce-multiple-issuers'):
@@ -110,7 +110,7 @@ def jwt_decode_handler(token):
     #   single issuer. Therefore, the LMS must be the first configured issuer.
     try:
         jwt_payload = edx_drf_extensions_jwt_decode_handler(token)
-        monitoring_utils.set_custom_metric(JWT_DECODE_HANDLER_METRIC_KEY, 'edx-drf-extensions')
+        monitoring_utils.set_custom_attribute(JWT_DECODE_HANDLER_METRIC_KEY, 'edx-drf-extensions')
         return jwt_payload
     except Exception:  # pylint: disable=broad-except
         # continue and try again
