@@ -24,8 +24,9 @@ pytest-django<4.0 # Newer versions require pytest >= 5.4.0
 # Pinned to preserve the status quo
 pytz==2016.10
 
-# Pinned because transifex-client==0.13.6 pins it
-urllib3>=1.24.2,<2.0.0
+# transifex-client==0.14.1 specifies urllib to be within this range urllib3>=1.24.2,<2.0.0
+# but cybersource-rest-client-python==0.0.23 explicitly pins this to 1.25.11
+urllib3==1.25.11
 
 # Was causing some tox issues locally.
 virtualenv==16.7.9
