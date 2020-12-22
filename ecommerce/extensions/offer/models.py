@@ -37,13 +37,16 @@ from ecommerce.extensions.offer.constants import (
     OFFER_ASSIGNMENT_EMAIL_PENDING,
     OFFER_ASSIGNMENT_REVOKED,
     OFFER_MAX_USES_DEFAULT,
-    OFFER_REDEEMED
+    OFFER_REDEEMED,
+    SENDER_CATEGORY_TYPES
 )
 from ecommerce.extensions.offer.utils import format_assigned_offer_email
 
 OFFER_PRIORITY_ENTERPRISE = 10
 OFFER_PRIORITY_VOUCHER = 20
 OFFER_PRIORITY_MANUAL_ORDER = 100
+LIMIT = models.Q(app_label='offer', model='offerassignmentemailtemplates') | \
+    models.Q(app_label='offer', model='codeassignmentnudgeemailtemplates')
 
 logger = logging.getLogger(__name__)
 
@@ -609,6 +612,9 @@ class AbstractBaseEmailTemplate(TimeStampedModel):
 
 
 class OfferAssignmentEmailTemplates(AbstractBaseEmailTemplate):
+    """
+    This model keeps track of the Assign/Remind/Revoke templates saved via frontend portal.
+    """
     enterprise_customer = models.UUIDField(help_text=_('UUID for an EnterpriseCustomer from the Enterprise Service.'))
     email_type = models.CharField(max_length=32, choices=EMAIL_TEMPLATE_TYPES)
 
@@ -635,10 +641,19 @@ class OfferAssignmentEmailTemplates(AbstractBaseEmailTemplate):
 
 
 class OfferAssignmentEmailSentRecord(TimeStampedModel):
+    """
+    This model keeps a record of all the emails sent to learners. Emails can be automatic or manual.
+    """
     enterprise_customer = models.UUIDField(help_text=_('UUID for an EnterpriseCustomer from the Enterprise Service.'))
-    email_type = models.CharField(max_length=32, choices=EMAIL_TEMPLATE_TYPES)
+    email_type = models.CharField(max_length=32, choices=EMAIL_TEMPLATE_TYPES + NUDGE_EMAIL_TEMPLATE_TYPES)
+    sender_category = models.CharField(max_length=32, choices=SENDER_CATEGORY_TYPES, null=True)
+    user_email = models.EmailField(null=True)
+    code = models.CharField(max_length=128, null=True)
+    sender_id = models.PositiveIntegerField(null=True)
+    receiver_id = models.PositiveIntegerField(null=True)
     template_content_type = models.ForeignKey(
         ContentType,
+        limit_choices_to=LIMIT,
         null=True,
         on_delete=models.CASCADE,
     )
@@ -646,15 +661,26 @@ class OfferAssignmentEmailSentRecord(TimeStampedModel):
     template_content_object = GenericForeignKey('template_content_type', 'template_id')
 
     @classmethod
-    def create_email_record(cls, enterprise_customer_uuid, email_type, template):
+    def create_email_record(cls, enterprise_customer_uuid, email_type, template=None, sender_category=None, code=None,
+                            user_email=None, receiver_id=None, sender_id=None):
         """
-        Create an instance of OfferAssignmentEmailSentRecord.
+        Creates an instance of OfferAssignmentEmailSentRecord with the values passed.
         Arguments:
             enterprise_customer_uuid (str): The uuid of the enterprise that sent the email
             email_type (str): The type of the email sent e:g Assign, Remind or Revoke
             template (obj): The instance of the template used to send email e:g OfferAssignmentEmailTemplates
+            sender_category (str): Category could be 'automatic' or 'manual'
+            code (str): The coupon voucher code being assigned/reminded/revoked
+            user_email (email): The email of the learner
+            receiver_id (int): The lms_user_id of the receiver, NULL if the user hasn't created the account yet
+            sender_id (int): The lms_user_id of the admin who sends the email
         """
         template_record = OfferAssignmentEmailSentRecord(
+            user_email=user_email,
+            code=code,
+            receiver_id=receiver_id,
+            sender_id=sender_id,
+            sender_category=sender_category,
             template_content_object=template,
             enterprise_customer=enterprise_customer_uuid,
             email_type=email_type
@@ -686,6 +712,9 @@ class OfferUsageEmail(TimeStampedModel):
 
 
 class CodeAssignmentNudgeEmailTemplates(AbstractBaseEmailTemplate):
+    """
+    This model keeps track of all the saved templates for nudge emails.
+    """
     email_type = models.CharField(max_length=32, choices=NUDGE_EMAIL_TEMPLATE_TYPES)
 
     @classmethod
@@ -736,6 +765,10 @@ class CodeAssignmentNudgeEmailTemplates(AbstractBaseEmailTemplate):
 
 
 class CodeAssignmentNudgeEmails(TimeStampedModel):
+    """
+    This model keeps track of all the nudge emails that are to be sent on a specific date. This information is based on
+    the user's email subscription preferences.
+    """
     email_template = models.ForeignKey('offer.CodeAssignmentNudgeEmailTemplates', on_delete=models.CASCADE)
     code = models.CharField(max_length=128, db_index=True)
     user_email = models.EmailField(db_index=True)
