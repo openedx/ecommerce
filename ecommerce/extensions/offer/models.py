@@ -613,7 +613,7 @@ class AbstractBaseEmailTemplate(TimeStampedModel):
 
 class OfferAssignmentEmailTemplates(AbstractBaseEmailTemplate):
     """
-    This model keeps track of all the Assign/Remind/Revoke template saved via frontend portal.
+    This model keeps track of the Assign/Remind/Revoke templates saved via frontend portal.
     """
     enterprise_customer = models.UUIDField(help_text=_('UUID for an EnterpriseCustomer from the Enterprise Service.'))
     email_type = models.CharField(max_length=32, choices=EMAIL_TEMPLATE_TYPES)
@@ -713,7 +713,7 @@ class OfferUsageEmail(TimeStampedModel):
 
 class CodeAssignmentNudgeEmailTemplates(AbstractBaseEmailTemplate):
     """
-    This models keeps track of all the saved templates for nudge emails.
+    This model keeps track of all the saved templates for nudge emails.
     """
     email_type = models.CharField(max_length=32, choices=NUDGE_EMAIL_TEMPLATE_TYPES)
 
@@ -766,9 +766,8 @@ class CodeAssignmentNudgeEmailTemplates(AbstractBaseEmailTemplate):
 
 class CodeAssignmentNudgeEmails(TimeStampedModel):
     """
-    This model keeps track of all the nudge emails that are to be sent on a specific date based on the info if the
-    user is subscribed to receive emails or not. Once the email is sent, the 'already_sent' flag to set
-    to true.
+    This model keeps track of all the nudge emails that are to be sent on a specific date. This information is based on
+    the user's email subscription preferences.
     """
     email_template = models.ForeignKey('offer.CodeAssignmentNudgeEmailTemplates', on_delete=models.CASCADE)
     code = models.CharField(max_length=128, db_index=True)
