@@ -285,7 +285,7 @@ def format_email(template, placeholder_dict, greeting, closing):
     email_body = string.Formatter().vformat(template, SafeTuple(), placeholder_dict)
     # \n\n is being treated as single line except of two lines in HTML template,
     #  so separating them with &nbsp; tag to render them as expected.
-    return (greeting + email_body + closing).replace('\n', '\n&nbsp;')
+    return (greeting + email_body + closing).replace('\n', '\t\t\n&nbsp;')
 
 
 class SafeDict(dict):

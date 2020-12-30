@@ -318,13 +318,13 @@ class UtilTests(DiscoveryTestMixin, TestCase):
 
         # Compare strings, ignoring whitespace differences
         expected_email = """
-            hi {CODE} &lt;h1&gt;there&lt;/h1&gt;\n&nbsp;\n&nbsp;
-            Text\n&nbsp;
-            {DOES_NOT_EXIST} johndoe@unknown.com\n&nbsp;
-            code: GIL7RUEOU7VHBH7Q GIL7RUEOU7VHBH7Q\n&nbsp;
-            {}\n&nbsp;
-            { abc d }\n&nbsp;
-            More text.\n&nbsp;\n&nbsp;bye {CODE}, &lt;h3&gt;come back soon!&lt;/h3&gt;
+            hi {CODE} &lt;h1&gt;there&lt;/h1&gt;\t\t\n&nbsp;\t\t\n&nbsp;
+            Text\t\t\n&nbsp;
+            {DOES_NOT_EXIST} johndoe@unknown.com\t\t\n&nbsp;
+            code: GIL7RUEOU7VHBH7Q GIL7RUEOU7VHBH7Q\t\t\n&nbsp;
+            {}\t\t\n&nbsp;
+            { abc d }\t\t\n&nbsp;
+            More text.\t\t\n&nbsp;\t\t\n&nbsp;bye {CODE}, &lt;h3&gt;come back soon!&lt;/h3&gt;
             """
         self.assertEqual(email.split(), expected_email.split())
 
@@ -345,11 +345,11 @@ class UtilTests(DiscoveryTestMixin, TestCase):
 
         # Compare strings, ignoring whitespace differences
         expected_email = """
-            \n&nbsp; Text\n&nbsp;
-            {DOES_NOT_EXIST} johndoe2@unknown.com\n&nbsp;
-            code: ABC7RUEOU7VHBH7Q ABC7RUEOU7VHBH7Q\n&nbsp;
-            {}\n&nbsp;
-            { abc d }\n&nbsp;
-            More text.\n&nbsp;
+            \t\t\n&nbsp; Text\t\t\n&nbsp;
+            {DOES_NOT_EXIST} johndoe2@unknown.com\t\t\n&nbsp;
+            code: ABC7RUEOU7VHBH7Q ABC7RUEOU7VHBH7Q\t\t\n&nbsp;
+            {}\t\t\n&nbsp;
+            { abc d }\t\t\n&nbsp;
+            More text.\t\t\n&nbsp;
             """
         self.assertEqual(email.split(), expected_email.split())
