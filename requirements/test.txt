@@ -181,7 +181,7 @@ simplejson==3.17.2        # via -r requirements/base.txt, django-rest-swagger, s
 six==1.15.0               # via -r requirements/base.txt, -r requirements/e2e.txt, -r requirements/tox.txt, analytics-python, astroid, bcrypt, bleach, bok-choy, cryptography, cybersource-rest-client-python, django-compressor, django-extra-views, django-simple-history, djangorestframework-csv, edx-auth-backends, edx-django-release-util, edx-drf-extensions, edx-ecommerce-worker, edx-i18n-tools, edx-opaque-keys, edx-rbac, fixtures, httpretty, isodate, jsonschema, libsass, packaging, paypalrestsdk, purl, pyjwkest, pynacl, pyopenssl, python-dateutil, python-memcached, requests-file, responses, social-auth-app-django, social-auth-core, tenacity, testtools, tox, unittest2, webtest
 slumber==0.7.1            # via -r requirements/base.txt, -r requirements/e2e.txt, edx-rest-api-client
 git+https://github.com/python-social-auth/social-app-django.git@c00d23c2b45c3317bd35b15ad1b959338689cef8#egg=social-auth-app-django  # via -r requirements/base.txt, edx-auth-backends
-social-auth-core==3.2.0   # via -c requirements/pins.txt, -r requirements/base.txt, edx-auth-backends, social-auth-app-django
+social-auth-core==3.3.3   # via -c requirements/pins.txt, -r requirements/base.txt, edx-auth-backends, social-auth-app-django
 sorl-thumbnail==12.6.3    # via -r requirements/base.txt
 soupsieve==2.0.1          # via beautifulsoup4
 sqlparse==0.4.1           # via -r requirements/base.txt, -r requirements/e2e.txt, django

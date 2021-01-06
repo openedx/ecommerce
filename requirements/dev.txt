@@ -194,7 +194,7 @@ slumber==0.7.1            # via -r requirements/test.txt, edx-rest-api-client
 smmap==3.0.4              # via gitdb
 snowballstemmer==2.0.0    # via -r requirements/docs.txt, sphinx
 git+https://github.com/python-social-auth/social-app-django.git@c00d23c2b45c3317bd35b15ad1b959338689cef8#egg=social-auth-app-django  # via -r requirements/test.txt, edx-auth-backends
-social-auth-core==3.2.0   # via -r requirements/test.txt, edx-auth-backends, social-auth-app-django
+social-auth-core==3.3.3   # via -r requirements/test.txt, edx-auth-backends, social-auth-app-django
 sorl-thumbnail==12.6.3    # via -r requirements/test.txt
 soupsieve==2.0.1          # via -r requirements/test.txt, beautifulsoup4
 sphinx==1.5.3             # via -r requirements/docs.txt, edx-sphinx-theme

@@ -151,7 +151,7 @@ simplejson==3.17.2        # via django-rest-swagger, sailthru-client
 six==1.15.0               # via analytics-python, bcrypt, bleach, cryptography, cybersource-rest-client-python, django-compressor, django-extra-views, django-simple-history, djangorestframework-csv, edx-auth-backends, edx-django-release-util, edx-drf-extensions, edx-ecommerce-worker, edx-opaque-keys, edx-rbac, fixtures, isodate, jsonschema, libsass, packaging, paypalrestsdk, purl, pyjwkest, pynacl, pyopenssl, python-dateutil, python-memcached, requests-file, social-auth-app-django, social-auth-core, testtools, unittest2
 slumber==0.7.1            # via edx-rest-api-client
 git+https://github.com/python-social-auth/social-app-django.git@c00d23c2b45c3317bd35b15ad1b959338689cef8#egg=social-auth-app-django  # via -r requirements/base.in, edx-auth-backends
-social-auth-core==3.2.0   # via -c requirements/pins.txt, edx-auth-backends, social-auth-app-django
+social-auth-core==3.3.3   # via -c requirements/pins.txt, edx-auth-backends, social-auth-app-django
 sorl-thumbnail==12.6.3    # via -r requirements/base.in
 sqlparse==0.4.1           # via django
 stevedore==3.2.2          # via edx-django-utils, edx-opaque-keys
