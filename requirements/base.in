@@ -48,10 +48,10 @@ pytz
 requests
 rules
 sailthru-client==2.2.3
+social-auth-app-django
 sorl-thumbnail
 stripe==1.70.0
 unicodecsv
 xss-utils
 zeep
 
-git+https://github.com/python-social-auth/social-app-django.git@c00d23c2b45c3317bd35b15ad1b959338689cef8#egg=social-auth-app-django
