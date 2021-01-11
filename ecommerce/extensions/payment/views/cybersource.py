@@ -18,7 +18,11 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from ecommerce.extensions.api.serializers import OrderSerializer
-from ecommerce.extensions.basket.utils import add_utm_params_to_url, get_payment_microfrontend_or_basket_url
+from ecommerce.extensions.basket.utils import (
+    add_utm_params_to_url,
+    basket_add_organization_attribute,
+    get_payment_microfrontend_or_basket_url
+)
 from ecommerce.extensions.checkout.mixins import EdxOrderPlacementMixin
 from ecommerce.extensions.checkout.utils import get_receipt_page_url
 from ecommerce.extensions.payment.core.sdn import checkSDN, compare_SDNCheck_vs_fallback
@@ -435,6 +439,8 @@ class CybersourceAuthorizeAPIView(
 
         self.basket_id = basket.id
         self.order_number = basket.order_number
+
+        basket_add_organization_attribute(basket, self.data)
 
         # Freeze the basket since the user is paying for it now.
         basket.freeze()
