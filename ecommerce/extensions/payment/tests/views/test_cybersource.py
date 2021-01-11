@@ -266,23 +266,31 @@ class CybersourceAuthorizeViewTests(CyberSourceRESTAPIMixin, TestCase):
             self.site.siteconfiguration.partner,
             basket.id,
         )
-        # This response has been pruned to only the needed data.
-        self._prep_request_success(
-            """{"links":{"_self":{"href":"/pts/v2/payments/6031827608526961004260","method":"GET"}},"id":"6031827608526961004260","submit_time_utc":"2020-10-20T08:32:44Z","status":"AUTHORIZED","client_reference_information":{"code":"%s"},"processor_information":{"approval_code":"307640","transaction_id":"380294307616695","network_transaction_id":"380294307616695","response_code":"000","avs":{"code":"G","code_raw":"G"},"card_verification":{"result_code":"M","result_code_raw":"M"},"consumer_authentication_response":{"code":"99"}},"payment_information":{"tokenized_card":{"type":"001"},"account_features":{"category":"F"}},"order_information":{"amount_details":{"total_amount":"5.00","authorized_amount":"5.00","currency":"USD"}}}""" % order_number  # pylint: disable=line-too-long
-        )
-        response = self.client.post(self.path, data)
+        # The view has already been created, so patch and assert that its reference to basket_add_organization_attribute
+        # has been called
+        with mock.patch(
+                "ecommerce.extensions.payment.views.cybersource.basket_add_organization_attribute"
+        ) as mock_basket_add_org:
 
-        assert response.status_code == 201
-        assert response['content-type'] == JSON
-        assert json.loads(response.content)['receipt_page_url'] == get_receipt_page_url(
-            self.site.siteconfiguration,
-            order_number=order_number,
-            disable_back_button=True,
-        )
+            # This response has been pruned to only the needed data.
+            self._prep_request_success(
+                """{"links":{"_self":{"href":"/pts/v2/payments/6031827608526961004260","method":"GET"}},"id":"6031827608526961004260","submit_time_utc":"2020-10-20T08:32:44Z","status":"AUTHORIZED","client_reference_information":{"code":"%s"},"processor_information":{"approval_code":"307640","transaction_id":"380294307616695","network_transaction_id":"380294307616695","response_code":"000","avs":{"code":"G","code_raw":"G"},"card_verification":{"result_code":"M","result_code_raw":"M"},"consumer_authentication_response":{"code":"99"}},"payment_information":{"tokenized_card":{"type":"001"},"account_features":{"category":"F"}},"order_information":{"amount_details":{"total_amount":"5.00","authorized_amount":"5.00","currency":"USD"}}}""" % order_number  # pylint: disable=line-too-long
+            )
+            response = self.client.post(self.path, data)
 
-        # Ensure the basket is Submitted
-        basket = Basket.objects.get(pk=basket.pk)
-        self.assertEqual(basket.status, Basket.SUBMITTED)
+            assert response.status_code == 201
+            assert response['content-type'] == JSON
+            assert json.loads(response.content)['receipt_page_url'] == get_receipt_page_url(
+                self.site.siteconfiguration,
+                order_number=order_number,
+                disable_back_button=True,
+            )
+
+            # Ensure the basket is Submitted
+            basket = Basket.objects.get(pk=basket.pk)
+            self.assertEqual(basket.status, Basket.SUBMITTED)
+
+        mock_basket_add_org.assert_called_once()
 
     def test_duplicate_payment(self):
         """ Verify the view errors as expected if there is a duplicate payment attempt after a successful payment. """
