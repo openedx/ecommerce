@@ -85,7 +85,8 @@ def get_enterprise_customer(site, uuid):
         'enable_data_sharing_consent': response['enable_data_sharing_consent'],
         'enforce_data_sharing_consent': response['enforce_data_sharing_consent'],
         'contact_email': response.get('contact_email', ''),
-        'slug': response.get('slug')
+        'slug': response.get('slug'),
+        'sender_alias': response.get('sender_alias', ''),
     }
 
     TieredCache.set_all_tiers(
