@@ -191,7 +191,7 @@ def send_assigned_offer_email(
 
     if settings.DEBUG:
         # Avoid breaking devstack when no such service is available.
-        logger.warning("settings.DEBUG is TRUE. Returning since in devstack no celery task is available for 'send_offer_assignment_email'. Skipping Sailthru email task.")
+        logger.warning("Skipping Sailthru task for 'send_offer_assignment_email' because DEBUG=true.")
         return
 
     send_offer_assignment_email.delay(learner_email, offer_assignment_id, subject, email_body, None,
