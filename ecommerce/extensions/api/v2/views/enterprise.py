@@ -705,6 +705,7 @@ class EnterpriseCouponViewSet(CouponViewSet):
                 'closing': closing,
                 'template_id': template_id,
                 'sender_id': sender_id,
+                'site': request.site
             }
         )
         if serializer.is_valid():
@@ -798,6 +799,7 @@ class EnterpriseCouponViewSet(CouponViewSet):
                 'closing': closing,
                 'template_id': template_id,
                 'sender_id': sender_id,
+                'site': request.site
             }
         )
         if serializer.is_valid():
@@ -861,6 +863,7 @@ class EnterpriseCouponViewSet(CouponViewSet):
                 'closing': closing,
                 'template_id': template_id,
                 'sender_id': sender_id,
+                'site': request.site,
             }
         )
         if serializer.is_valid():

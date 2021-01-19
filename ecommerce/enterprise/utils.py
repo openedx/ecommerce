@@ -24,6 +24,7 @@ from slumber.exceptions import SlumberHttpBaseException
 
 from ecommerce.core.constants import SYSTEM_ENTERPRISE_LEARNER_ROLE
 from ecommerce.core.url_utils import absolute_url, get_lms_dashboard_url
+from ecommerce.enterprise.constants import SENDER_ALIAS
 from ecommerce.enterprise.exceptions import EnterpriseDoesNotExist
 from ecommerce.extensions.offer.models import OFFER_PRIORITY_ENTERPRISE
 
@@ -613,3 +614,31 @@ def convert_comma_separated_string_to_list(comma_separated_string):
     Convert the comma separated string to a valid list.
     """
     return list(set(item.strip() for item in comma_separated_string.split(",") if item.strip()))
+
+
+def get_enterprise_customer_sender_alias(site, enterprise_customer_uuid):
+    """
+    Return enterprise customer sender alias if the enterprise customer has sender alias otherwise send default alias.
+
+    Arguments:
+        site (Site): The site object.
+        enterprise_customer_uuid (Enterprise_customer): The enterprise_customer uuid.
+
+    Returns:
+        sender_alias: name if the enterprise_customer has a sender_alias, default otherwise.
+    """
+    sender_alias = ''
+    try:
+        enterprise_customer = get_enterprise_customer(site, enterprise_customer_uuid)
+        sender_alias = enterprise_customer['sender_alias']
+    except Exception as exc:  # pylint: disable=broad-except
+        logging.exception(
+            '[Enterprise Sender Alias Fetch Failure]. Customer: %s, Site: %s, Exception: %s',
+            enterprise_customer_uuid,
+            site,
+            exc
+        )
+
+    if not sender_alias:
+        sender_alias = SENDER_ALIAS
+    return sender_alias
