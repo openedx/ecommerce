@@ -191,7 +191,7 @@ def send_assigned_offer_email(
 
     if settings.DEBUG:  # pragma: no cover
         # Avoid breaking devstack when no such service is available.
-        logger.warning("Skipping Sailthru task for 'send_offer_assignment_email' because DEBUG=true.")  # pragma: no cover
+        logger.warning("Skipping Sailthru task 'send_offer_assignment_email' because DEBUG=true.")  # pragma: no cover
         return  # pragma: no cover
 
     send_offer_assignment_email.delay(learner_email, offer_assignment_id, subject, email_body, None,
