@@ -13,9 +13,9 @@ attrs==20.3.0             # via jsonschema, zeep
 babel==2.9.0              # via django-oscar, django-phonenumber-field
 bcrypt==3.2.0             # via cybersource-rest-client-python, paramiko
 billiard==3.6.3.0         # via celery
-bleach==3.2.1             # via -r requirements/base.in
-boto3==1.16.52            # via django-ses
-botocore==1.19.52         # via boto3, s3transfer
+bleach==3.2.2             # via -r requirements/base.in
+boto3==1.16.57            # via django-ses
+botocore==1.19.57         # via boto3, s3transfer
 cached-property==1.5.2    # via zeep
 celery==4.4.7             # via -c requirements/pins.txt, edx-ecommerce-worker
 certifi==2020.12.5        # via cybersource-rest-client-python, requests
@@ -34,7 +34,7 @@ datetime==4.3             # via cybersource-rest-client-python
 defusedxml==0.6.0         # via python3-openid, social-auth-core, zeep
 django-appconf==1.0.4     # via django-compressor
 django-compressor==2.4    # via -r requirements/base.in, django-libsass
-django-config-models==2.0.4  # via -r requirements/base.in
+django-config-models==2.1.0  # via -r requirements/base.in
 django-cors-headers==3.6.0  # via -r requirements/base.in
 django-crispy-forms==1.8.1  # via -r requirements/base.in
 django-crum==0.7.9        # via edx-django-utils, edx-rbac
@@ -52,7 +52,7 @@ django-simple-history==2.12.0  # via -r requirements/base.in
 django-solo==1.1.5        # via -r requirements/base.in
 django-tables2==1.21.2    # via django-oscar
 django-threadlocals==0.10  # via -r requirements/base.in
-django-treebeard==4.3.1   # via django-oscar
+django-treebeard==4.4     # via django-oscar
 django-waffle==2.0.0      # via -r requirements/base.in, edx-django-utils, edx-drf-extensions
 django-widget-tweaks==1.4.8  # via django-oscar
 django==2.2.17            # via -r requirements/base.in, django-appconf, django-config-models, django-cors-headers, django-crum, django-extra-views, django-filter, django-haystack, django-model-utils, django-oscar, django-phonenumber-field, django-ses, django-tables2, django-treebeard, djangorestframework, drf-jwt, edx-auth-backends, edx-django-release-util, edx-django-sites-extensions, edx-django-utils, edx-drf-extensions, edx-rbac, jsonfield2, rest-condition, xss-utils
@@ -62,10 +62,10 @@ djangorestframework==3.12.2  # via -r requirements/base.in, django-config-models
 drf-extensions==0.6.0     # via -r requirements/base.in
 drf-jwt==1.17.3           # via edx-drf-extensions
 edx-auth-backends==3.3.0  # via -r requirements/base.in
-edx-django-release-util==0.4.4  # via -r requirements/base.in
-edx-django-sites-extensions==2.5.1  # via -r requirements/base.in
+edx-django-release-util==1.0.0  # via -r requirements/base.in
+edx-django-sites-extensions==3.0.0  # via -r requirements/base.in
 edx-django-utils==3.13.0  # via -r requirements/base.in, django-config-models, edx-drf-extensions, edx-rest-api-client
-edx-drf-extensions==6.2.0  # via -r requirements/base.in, edx-rbac
+edx-drf-extensions==6.4.0  # via -r requirements/base.in, edx-rbac
 edx-ecommerce-worker==1.1.3  # via -r requirements/base.in
 edx-opaque-keys==2.1.1    # via -r requirements/base.in, edx-drf-extensions
 edx-rbac==1.3.4           # via -r requirements/base.in
@@ -73,7 +73,7 @@ edx-rest-api-client==5.2.1  # via -r requirements/base.in, edx-ecommerce-worker
 enum34==1.1.10            # via cybersource-rest-client-python
 extras==1.0.0             # via cybersource-rest-client-python, python-subunit, testtools
 factory-boy==2.12.0       # via django-oscar
-faker==5.5.0              # via factory-boy
+faker==5.6.5              # via factory-boy
 fixtures==3.0.0           # via cybersource-rest-client-python, testtools
 funcsigs==1.0.2           # via cybersource-rest-client-python
 future==0.18.2            # via django-ses, pyjwkest
@@ -106,7 +106,7 @@ paramiko==2.7.2           # via cybersource-rest-client-python
 path.py==7.2              # via -r requirements/base.in
 paypalrestsdk==1.13.1     # via -r requirements/base.in
 pbr==5.5.1                # via cybersource-rest-client-python, fixtures, stevedore, testtools
-phonenumbers==8.12.15     # via django-oscar, django-phonenumber-field
+phonenumbers==8.12.16     # via django-oscar, django-phonenumber-field
 pillow==8.1.0             # via django-oscar
 premailer==2.9.2          # via -r requirements/base.in
 psutil==5.8.0             # via edx-django-utils
@@ -116,7 +116,7 @@ pycountry==17.1.8         # via -r requirements/base.in
 pycparser==2.20           # via cffi, cybersource-rest-client-python
 pycryptodome==3.9.9       # via cybersource-rest-client-python
 pycryptodomex==3.9.9      # via cybersource-rest-client-python, pyjwkest
-pygments==2.7.3           # via -r requirements/base.in
+pygments==2.7.4           # via -r requirements/base.in
 pyjwkest==1.4.2           # via edx-drf-extensions
 pyjwt[crypto]==1.7.1      # via cybersource-rest-client-python, drf-jwt, edx-auth-backends, edx-rest-api-client, social-auth-core
 pymongo==3.11.2           # via edx-opaque-keys
@@ -132,7 +132,7 @@ python-subunit==1.4.0     # via cybersource-rest-client-python
 python-toolbox==1.0.11    # via cybersource-rest-client-python
 python3-openid==3.2.0     # via -r requirements/base.in, social-auth-core
 pytz==2016.10             # via -c requirements/pins.txt, -r requirements/base.in, babel, celery, cybersource-rest-client-python, datetime, django, django-ses, zeep
-pyyaml==5.3.1             # via -r requirements/production.in, cybersource-rest-client-python, edx-django-release-util, naked
+pyyaml==5.4.1             # via -r requirements/production.in, cybersource-rest-client-python, edx-django-release-util, naked
 rcssmin==1.0.6            # via django-compressor
 redis==3.5.3              # via -r requirements/production.in, edx-ecommerce-worker
 requests-file==1.5.1      # via zeep
@@ -151,7 +151,7 @@ simplejson==3.17.2        # via django-rest-swagger, sailthru-client
 six==1.15.0               # via analytics-python, bcrypt, bleach, cryptography, cybersource-rest-client-python, django-compressor, django-extra-views, django-simple-history, djangorestframework-csv, edx-auth-backends, edx-django-release-util, edx-drf-extensions, edx-ecommerce-worker, edx-opaque-keys, edx-rbac, fixtures, isodate, jsonschema, libsass, paypalrestsdk, purl, pyjwkest, pynacl, pyopenssl, python-dateutil, python-memcached, requests-file, social-auth-app-django, social-auth-core, testtools, unittest2
 slumber==0.7.1            # via edx-rest-api-client
 social-auth-app-django==4.0.0  # via -r requirements/base.in, edx-auth-backends
-social-auth-core==4.0.2   # via edx-auth-backends, social-auth-app-django
+social-auth-core==4.0.2   # via -c requirements/pins.txt, edx-auth-backends, social-auth-app-django
 sorl-thumbnail==12.7.0    # via -r requirements/base.in
 sqlparse==0.4.1           # via django
 stevedore==3.3.0          # via edx-django-utils, edx-opaque-keys
@@ -168,7 +168,7 @@ vine==1.3.0               # via amqp, celery
 webencodings==0.5.1       # via bleach
 wheel==0.36.2             # via cybersource-rest-client-python
 x509==0.1                 # via cybersource-rest-client-python
-xss-utils==0.1.4          # via -r requirements/base.in
+xss-utils==0.2.0          # via -r requirements/base.in
 zeep==4.0.0               # via -r requirements/base.in
 zope.interface==5.2.0     # via cybersource-rest-client-python, datetime
 

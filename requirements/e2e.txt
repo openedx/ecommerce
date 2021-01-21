@@ -16,7 +16,7 @@ edx-django-utils==3.13.0  # via -c requirements/base.txt, edx-rest-api-client
 edx-rest-api-client==5.2.1  # via -c requirements/base.txt, -r requirements/e2e.in
 idna==2.7                 # via -c requirements/base.txt, -c requirements/pins.txt, requests
 more-itertools==8.6.0     # via pytest
-newrelic==5.24.0.153      # via -c requirements/base.txt, edx-django-utils
+newrelic==6.0.0.154       # via -c requirements/base.txt, edx-django-utils
 packaging==20.8           # via -c requirements/base.txt, pytest
 pbr==5.5.1                # via -c requirements/base.txt, stevedore
 pluggy==0.13.1            # via pytest
