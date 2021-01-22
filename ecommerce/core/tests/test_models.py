@@ -15,7 +15,7 @@ from requests.exceptions import ConnectionError as ReqConnectionError
 from social_django.models import UserSocialAuth
 from testfixtures import LogCapture
 
-# from ecommerce.core.exceptions import UserVerificationExpirationIssueException
+from ecommerce.core.exceptions import UserVerificationExpirationIssueException
 from ecommerce.core.models import (
     BusinessClient,
     EcommerceFeatureRole,
@@ -239,11 +239,11 @@ class UserTests(DiscoveryTestMixin, LmsApiMockMixin, TestCase):
         httpretty.disable()
         self.assertFalse(user.is_verified(self.site))
 
-    # def test_user_verification_expiration_date_issue(self):
-    #     """ Raise UserVerificationExpirationIssueException when no verification expiration date. """
-    #     user = self.create_user()
-    #     self.mock_verification_status_api(self.site, user, status=status_code, is_verified=is_verified)
-    #     self.assertEqual(user.is_verified(self.site), is_verified)
+    def test_user_verification_expiration_date_issue(self):
+        """ Raise UserVerificationExpirationIssueException when no verification expiration date. """
+        with self.assertRaises(UserVerificationExpirationIssueException):
+            user = self.create_user()
+            self.mock_verification_status_api_no_expiration(self.site, user)
 
     def test_deactivation(self):
         """Verify the deactivation endpoint is called for the user."""

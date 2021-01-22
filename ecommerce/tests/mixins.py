@@ -27,6 +27,7 @@ from threadlocals.threadlocals import set_thread_variable
 from waffle.models import Flag
 
 from ecommerce.core.constants import ALL_ACCESS_CONTEXT, SYSTEM_ENTERPRISE_ADMIN_ROLE, SYSTEM_ENTERPRISE_OPERATOR_ROLE
+from ecommerce.core.exceptions import UserVerificationExpirationIssueException
 from ecommerce.core.url_utils import get_lms_url
 from ecommerce.courses.models import Course
 from ecommerce.courses.utils import mode_for_product
@@ -458,6 +459,10 @@ class LmsApiMockMixin:
             body=json.dumps(verification_data),
             content_type=CONTENT_TYPE
         )
+
+    def mock_verification_status_api_no_expiration(self, site, user, status=200, is_verified=True):
+        """ Mock verification API endpoint. Raise exception if can't parse verification expiration date. """
+        raise UserVerificationExpirationIssueException
 
     def mock_deactivation_api(self, request, username, response):
         """ Mock deactivation API endpoint. """
