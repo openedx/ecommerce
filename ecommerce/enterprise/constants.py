@@ -9,3 +9,7 @@ USE_ROLE_BASED_ACCESS_CONTROL = 'use_role_based_access_control'
 
 # Waffle flag used to switch over ecommerce's usage of the enterprise catalog service
 USE_ENTERPRISE_CATALOG = 'use_enterprise_catalog'
+
+# Default Sender Alias used in Enterprise Customer Code Assign,Remind and Revoke Emails.
+
+SENDER_ALIAS = 'edX Support Team'

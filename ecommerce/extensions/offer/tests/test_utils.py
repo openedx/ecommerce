@@ -103,6 +103,7 @@ class UtilTests(DiscoveryTestMixin, TestCase):
                 'code_expiration_date': '2018-12-19'
             },
             None,
+            'sender alias',
             ''
         ),
         (
@@ -117,6 +118,7 @@ class UtilTests(DiscoveryTestMixin, TestCase):
                 'code_expiration_date': '2018-12-19'
             },
             None,
+            'sender alias',
             'https://bears.party'
         ),
     )
@@ -128,6 +130,7 @@ class UtilTests(DiscoveryTestMixin, TestCase):
             closing,
             tokens,
             side_effect,
+            sender_alias,
             base_enterprise_url,
             mock_sailthru_task,
     ):
@@ -142,6 +145,7 @@ class UtilTests(DiscoveryTestMixin, TestCase):
             tokens.get('code'),
             tokens.get('redemptions_remaining'),
             tokens.get('code_expiration_date'),
+            sender_alias,
             base_enterprise_url,
         )
         mock_sailthru_task.delay.assert_called_once_with(
@@ -149,6 +153,7 @@ class UtilTests(DiscoveryTestMixin, TestCase):
             tokens.get('offer_assignment_id'),
             subject,
             mock.ANY,
+            sender_alias,
             None,
             base_enterprise_url,
         )
@@ -164,6 +169,7 @@ class UtilTests(DiscoveryTestMixin, TestCase):
             'BearsOnly',
             1,
             '2020-12-19',
+            'sender alias'
         )
 
         mock_sailthru_task.delay.assert_called_once_with(
@@ -171,6 +177,7 @@ class UtilTests(DiscoveryTestMixin, TestCase):
             42,
             "You have mail",
             mock.ANY,
+            'sender alias',
             None,
             '',
         )
@@ -181,6 +188,7 @@ class UtilTests(DiscoveryTestMixin, TestCase):
             'subject',
             'hi',
             'bye',
+            'sender_alias',
             {
                 'learner_email': 'johndoe@unknown.com',
                 'code': 'GIL7RUEOU7VHBH7Q',
@@ -197,6 +205,7 @@ class UtilTests(DiscoveryTestMixin, TestCase):
             subject,
             greeting,
             closing,
+            sender_alias,
             tokens,
             side_effect,
             mock_sailthru_task,
@@ -214,11 +223,13 @@ class UtilTests(DiscoveryTestMixin, TestCase):
             tokens.get('redeemed_offer_count'),
             tokens.get('total_offer_count'),
             tokens.get('code_expiration_date'),
+            sender_alias,
         )
         mock_sailthru_task.delay.assert_called_once_with(
             tokens.get('learner_email'),
             subject,
-            mock.ANY
+            mock.ANY,
+            sender_alias
         )
 
     @mock.patch('ecommerce.extensions.offer.utils.send_offer_update_email')
@@ -227,6 +238,7 @@ class UtilTests(DiscoveryTestMixin, TestCase):
             'subject',
             'hi',
             'bye',
+            'sender_alias',
             {
                 'learner_email': 'johndoe@unknown.com',
                 'code': 'GIL7RUEOU7VHBH7Q',
@@ -240,6 +252,7 @@ class UtilTests(DiscoveryTestMixin, TestCase):
             subject,
             greeting,
             closing,
+            sender_alias,
             tokens,
             side_effect,
             mock_sailthru_task,
@@ -254,11 +267,13 @@ class UtilTests(DiscoveryTestMixin, TestCase):
             closing,
             tokens.get('learner_email'),
             tokens.get('code'),
+            sender_alias,
         )
         mock_sailthru_task.delay.assert_called_once_with(
             tokens.get('learner_email'),
             subject,
-            mock.ANY
+            mock.ANY,
+            sender_alias
         )
 
     @ddt.data(

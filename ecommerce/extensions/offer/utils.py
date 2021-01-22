@@ -160,6 +160,7 @@ def send_assigned_offer_email(
         code,
         redemptions_remaining,
         code_expiration_date,
+        sender_alias,
         base_enterprise_url=''):
     """
     Arguments:
@@ -194,7 +195,7 @@ def send_assigned_offer_email(
         logger.warning("Skipping Sailthru task 'send_offer_assignment_email' because DEBUG=true.")  # pragma: no cover
         return  # pragma: no cover
 
-    send_offer_assignment_email.delay(learner_email, offer_assignment_id, subject, email_body, None,
+    send_offer_assignment_email.delay(learner_email, offer_assignment_id, subject, email_body, sender_alias, None,
                                       base_enterprise_url)
 
 
@@ -203,7 +204,8 @@ def send_revoked_offer_email(
         greeting,
         closing,
         learner_email,
-        code
+        code,
+        sender_alias
 ):
     """
     Arguments:
@@ -224,7 +226,7 @@ def send_revoked_offer_email(
         CODE=code,
     )
     email_body = format_email(email_template, placeholder_dict, greeting, closing)
-    send_offer_update_email.delay(learner_email, subject, email_body)
+    send_offer_update_email.delay(learner_email, subject, email_body, sender_alias)
 
 
 def send_assigned_offer_reminder_email(
@@ -235,7 +237,8 @@ def send_assigned_offer_reminder_email(
         code,
         redeemed_offer_count,
         total_offer_count,
-        code_expiration_date):
+        code_expiration_date,
+        sender_alias):
     """
     Arguments:
         *subject*
@@ -254,6 +257,8 @@ def send_assigned_offer_reminder_email(
            Total number of offer assignments for this (code,email) pair
        *code_expiration_date*
            Date till code is valid.
+       *sender_alias*
+           Enterprise customer sender alias.
     """
     email_template = settings.OFFER_REMINDER_EMAIL_TEMPLATE
     placeholder_dict = SafeDict(
@@ -264,7 +269,7 @@ def send_assigned_offer_reminder_email(
         EXPIRATION_DATE=code_expiration_date
     )
     email_body = format_email(email_template, placeholder_dict, greeting, closing)
-    send_offer_update_email.delay(learner_email, subject, email_body)
+    send_offer_update_email.delay(learner_email, subject, email_body, sender_alias)
 
 
 def format_email(template, placeholder_dict, greeting, closing):
