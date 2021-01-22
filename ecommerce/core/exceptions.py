@@ -8,3 +8,7 @@ class SiteConfigurationError(Exception):
 
 class MissingLmsUserIdException(Exception):
     """Exception indicating the user is missing an LMS user id. """
+
+
+class UserVerificationExpirationIssueException(Exception):
+    """Exception indicating the user's verification has no expiration date. """

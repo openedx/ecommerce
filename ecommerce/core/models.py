@@ -25,7 +25,7 @@ from simple_history.models import HistoricalRecords
 from slumber.exceptions import HttpNotFoundError, SlumberBaseException
 
 from ecommerce.core.constants import ALL_ACCESS_CONTEXT, ALLOW_MISSING_LMS_USER_ID
-from ecommerce.core.exceptions import MissingLmsUserIdException
+from ecommerce.core.exceptions import MissingLmsUserIdException, UserVerificationExpirationIssueException
 from ecommerce.core.utils import log_message_and_raise_validation_error
 from ecommerce.extensions.payment.exceptions import ProcessorNotFoundError
 from ecommerce.extensions.payment.helpers import get_processor_class, get_processor_class_by_name
@@ -747,7 +747,7 @@ class User(AbstractUser):
                 expiration_datetime = response.get('expiration_datetime')
                 try:
                     cache_timeout = int((parse(expiration_datetime) - now()).total_seconds())
-                except Exception:   # pylint: disable=broad-except
+                except UserVerificationExpirationIssueException:
                     # There's a parser error exception happening, and we want to get info
                     log.exception(
                         'Checking verification failed when getting the cache timeout. Username: [%s] Expiration: [%s]',

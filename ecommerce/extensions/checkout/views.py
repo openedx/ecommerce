@@ -18,6 +18,7 @@ from requests.exceptions import ConnectionError as ReqConnectionError
 from requests.exceptions import Timeout
 from slumber.exceptions import SlumberHttpBaseException
 
+from ecommerce.core.exceptions import UserVerificationExpirationIssueException
 from ecommerce.core.url_utils import (
     get_lms_courseware_url,
     get_lms_dashboard_url,
@@ -268,12 +269,15 @@ class ReceiptResponseView(ThankYouView):
             course_key = getattr(product.attr, 'course_key', '')
             product_uuid = getattr(product.attr, 'UUID', False)
             if (id_verification_required and (course_key or product_uuid)):
-                context.update({
-                    'verification_url': site.siteconfiguration.IDVerification_workflow_url(course_key),
-                    'user_verified': request.user.is_verified(site),
-                })
+                # if is_verified cannot parse the verification expiration date, it raises exception (and doesn't return)
+                try:
+                    user_verified_value = request.user.is_verified(site)
+                except UserVerificationExpirationIssueException:
+                    print("an exception occurred getting cache timeout")
+                else:
+                    context.update({'user_verified': user_verified_value})
+                context.update({'verification_url': site.siteconfiguration.IDVerification_workflow_url(course_key)})
                 return context
-
         return context
 
     def get_show_verification_banner_context(self, original_context):
