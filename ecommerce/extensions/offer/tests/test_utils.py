@@ -103,6 +103,7 @@ class UtilTests(DiscoveryTestMixin, TestCase):
                 'code_expiration_date': '2018-12-19'
             },
             None,
+            'sender alias',
             ''
         ),
         (
@@ -117,6 +118,7 @@ class UtilTests(DiscoveryTestMixin, TestCase):
                 'code_expiration_date': '2018-12-19'
             },
             None,
+            'sender alias',
             'https://bears.party'
         ),
     )
@@ -128,6 +130,7 @@ class UtilTests(DiscoveryTestMixin, TestCase):
             closing,
             tokens,
             side_effect,
+            sender_alias,
             base_enterprise_url,
             mock_sailthru_task,
     ):
@@ -142,6 +145,7 @@ class UtilTests(DiscoveryTestMixin, TestCase):
             tokens.get('code'),
             tokens.get('redemptions_remaining'),
             tokens.get('code_expiration_date'),
+            sender_alias,
             base_enterprise_url,
         )
         mock_sailthru_task.delay.assert_called_once_with(
@@ -149,6 +153,7 @@ class UtilTests(DiscoveryTestMixin, TestCase):
             tokens.get('offer_assignment_id'),
             subject,
             mock.ANY,
+            sender_alias,
             None,
             base_enterprise_url,
         )
@@ -164,6 +169,7 @@ class UtilTests(DiscoveryTestMixin, TestCase):
             'BearsOnly',
             1,
             '2020-12-19',
+            'sender alias'
         )
 
         mock_sailthru_task.delay.assert_called_once_with(
@@ -171,6 +177,7 @@ class UtilTests(DiscoveryTestMixin, TestCase):
             42,
             "You have mail",
             mock.ANY,
+            'sender alias',
             None,
             '',
         )
@@ -181,6 +188,7 @@ class UtilTests(DiscoveryTestMixin, TestCase):
             'subject',
             'hi',
             'bye',
+            'sender_alias',
             {
                 'learner_email': 'johndoe@unknown.com',
                 'code': 'GIL7RUEOU7VHBH7Q',
@@ -197,6 +205,7 @@ class UtilTests(DiscoveryTestMixin, TestCase):
             subject,
             greeting,
             closing,
+            sender_alias,
             tokens,
             side_effect,
             mock_sailthru_task,
@@ -214,11 +223,13 @@ class UtilTests(DiscoveryTestMixin, TestCase):
             tokens.get('redeemed_offer_count'),
             tokens.get('total_offer_count'),
             tokens.get('code_expiration_date'),
+            sender_alias,
         )
         mock_sailthru_task.delay.assert_called_once_with(
             tokens.get('learner_email'),
             subject,
-            mock.ANY
+            mock.ANY,
+            sender_alias
         )
 
     @mock.patch('ecommerce.extensions.offer.utils.send_offer_update_email')
@@ -227,6 +238,7 @@ class UtilTests(DiscoveryTestMixin, TestCase):
             'subject',
             'hi',
             'bye',
+            'sender_alias',
             {
                 'learner_email': 'johndoe@unknown.com',
                 'code': 'GIL7RUEOU7VHBH7Q',
@@ -240,6 +252,7 @@ class UtilTests(DiscoveryTestMixin, TestCase):
             subject,
             greeting,
             closing,
+            sender_alias,
             tokens,
             side_effect,
             mock_sailthru_task,
@@ -254,11 +267,13 @@ class UtilTests(DiscoveryTestMixin, TestCase):
             closing,
             tokens.get('learner_email'),
             tokens.get('code'),
+            sender_alias,
         )
         mock_sailthru_task.delay.assert_called_once_with(
             tokens.get('learner_email'),
             subject,
-            mock.ANY
+            mock.ANY,
+            sender_alias
         )
 
     @ddt.data(
@@ -318,13 +333,13 @@ class UtilTests(DiscoveryTestMixin, TestCase):
 
         # Compare strings, ignoring whitespace differences
         expected_email = """
-            hi {CODE} &lt;h1&gt;there&lt;/h1&gt;\t\t\n&nbsp;\t\t\n&nbsp;
-            Text\t\t\n&nbsp;
-            {DOES_NOT_EXIST} johndoe@unknown.com\t\t\n&nbsp;
-            code: GIL7RUEOU7VHBH7Q GIL7RUEOU7VHBH7Q\t\t\n&nbsp;
-            {}\t\t\n&nbsp;
-            { abc d }\t\t\n&nbsp;
-            More text.\t\t\n&nbsp;\t\t\n&nbsp;bye {CODE}, &lt;h3&gt;come back soon!&lt;/h3&gt;
+            hi {CODE} &lt;h1&gt;there&lt;/h1&gt;<br/><br/>
+            Text<br/>
+            {DOES_NOT_EXIST} johndoe@unknown.com<br/>
+            code: GIL7RUEOU7VHBH7Q GIL7RUEOU7VHBH7Q<br/>
+            {}<br/>
+            { abc d }<br/>
+            More text.<br/> <br/>bye {CODE}, &lt;h3&gt;come back soon!&lt;/h3&gt;
             """
         self.assertEqual(email.split(), expected_email.split())
 
@@ -345,11 +360,11 @@ class UtilTests(DiscoveryTestMixin, TestCase):
 
         # Compare strings, ignoring whitespace differences
         expected_email = """
-            \t\t\n&nbsp; Text\t\t\n&nbsp;
-            {DOES_NOT_EXIST} johndoe2@unknown.com\t\t\n&nbsp;
-            code: ABC7RUEOU7VHBH7Q ABC7RUEOU7VHBH7Q\t\t\n&nbsp;
-            {}\t\t\n&nbsp;
-            { abc d }\t\t\n&nbsp;
-            More text.\t\t\n&nbsp;
+            <br/> Text<br/>
+            {DOES_NOT_EXIST} johndoe2@unknown.com<br/>
+            code: ABC7RUEOU7VHBH7Q ABC7RUEOU7VHBH7Q<br/>
+            {}<br/>
+            { abc d }<br/>
+            More text.<br/>
             """
         self.assertEqual(email.split(), expected_email.split())

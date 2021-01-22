@@ -22,6 +22,7 @@ from ecommerce.enterprise.utils import (
     get_enterprise_customer,
     get_enterprise_customer_catalogs,
     get_enterprise_customer_from_enterprise_offer,
+    get_enterprise_customer_sender_alias,
     get_enterprise_customer_uuid,
     get_enterprise_customers,
     get_enterprise_id_for_current_request_user_from_jwt,
@@ -370,3 +371,17 @@ class EnterpriseUtilsTests(EnterpriseServiceMockMixin, TestCase):
         Applicator().apply_offers(basket, [offer])
 
         self.assertIsNone(get_enterprise_customer_from_enterprise_offer(basket))
+
+    @patch('ecommerce.enterprise.utils.get_enterprise_customer')
+    @ddt.data(
+        ('edx', 'edx'),
+        ('', 'edX Support Team'),
+    )
+    @ddt.unpack
+    def test_get_enterprise_customer_sender_alias(self, sender_alias, expected_sender_alias, enterprise_customer):
+        """
+        Verify get_enterprise_customer_sender_alias returns enterprise sender alias if exists otherwise return default.
+        """
+        enterprise_customer.return_value = {'sender_alias': sender_alias}
+        sender_alias = get_enterprise_customer_sender_alias('some-site', 'uuid')
+        assert sender_alias == expected_sender_alias
