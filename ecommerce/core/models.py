@@ -754,7 +754,6 @@ class User(AbstractUser):
                         str(self.username),
                         str(expiration_datetime),
                     )
-                    raise
 
                 TieredCache.set_all_tiers(cache_key, verification, cache_timeout)
             return verification
