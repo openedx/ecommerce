@@ -441,11 +441,17 @@ class LmsApiMockMixin:
         )
         httpretty.register_uri(httpretty.GET, url, body=json.dumps(eligibility_data), content_type=CONTENT_TYPE)
 
-    def mock_verification_status_api(self, site, user, status=200, is_verified=True):
+    def mock_verification_status_api(self, site, user, status=200, is_verified=True, has_expiration=True):
         """ Mock verification API endpoint. Returns verification status data. """
+
+        if has_expiration:
+            expiration_value = (now() + datetime.timedelta(days=1)).isoformat()
+        else:
+            expiration_value = None
+
         verification_data = {
             'status': 'approved',
-            'expiration_datetime': (now() + datetime.timedelta(days=1)).isoformat(),
+            'expiration_datetime': expiration_value,
             'is_verified': is_verified
         }
         url = '{host}/accounts/{username}/verification_status/'.format(
