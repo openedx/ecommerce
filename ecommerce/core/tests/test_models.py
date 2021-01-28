@@ -204,17 +204,20 @@ class UserTests(DiscoveryTestMixin, LmsApiMockMixin, TestCase):
         self.assertFalse(user.is_eligible_for_credit(course_key, site_config))
 
     @ddt.data(
-        (200, True, True),
-        (200, True, False),
-        (200, False, False),
-        (404, False, False)
+        (200, True),
+        (200, True, None),
+        (200, False),
+        (404, False)
     )
     @ddt.unpack
-    def test_user_verification_status(self, status_code, is_verified, has_expiration):
+    def test_user_verification_status(self, status_code, is_verified,
+                                      expiration=LmsApiMockMixin.get_default_expiration):
         """ Verify the method returns correct response. """
+        if callable(expiration):
+            expiration = expiration()
         user = self.create_user()
         self.mock_verification_status_api(self.site, user, status=status_code, is_verified=is_verified,
-                                          has_expiration=has_expiration)
+                                          expiration=expiration)
         self.assertEqual(user.is_verified(self.site), is_verified)
 
     def test_user_verification_connection_error(self):
