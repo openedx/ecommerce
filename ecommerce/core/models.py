@@ -743,19 +743,9 @@ class User(AbstractUser):
             response = api.accounts(self.username).verification_status().get()
 
             verification = response.get('is_verified', False)
-            if verification:
-                expiration_datetime = response.get('expiration_datetime')
-                try:
-                    cache_timeout = int((parse(expiration_datetime) - now()).total_seconds())
-                except Exception:   # pylint: disable=broad-except
-                    # There's a parser error exception happening, and we want to get info
-                    log.exception(
-                        'Checking verification failed when getting the cache timeout. Username: [%s] Expiration: [%s]',
-                        str(self.username),
-                        str(expiration_datetime),
-                    )
-                    raise
-
+            expiration_datetime = response.get('expiration_datetime', False)
+            if verification and expiration_datetime:
+                cache_timeout = int((parse(expiration_datetime) - now()).total_seconds())
                 TieredCache.set_all_tiers(cache_key, verification, cache_timeout)
             return verification
         except HttpNotFoundError:
