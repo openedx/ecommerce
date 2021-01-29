@@ -21,7 +21,6 @@ from ecommerce.extensions.payment.core.sdn import (
     SDNClient,
     checkSDN,
     checkSDNFallback,
-    compare_SDNCheck_vs_fallback,
     extract_country_information,
     populate_sdn_fallback_data,
     populate_sdn_fallback_data_and_metadata,
@@ -509,57 +508,6 @@ Port Andrewport, OR 39456, EE",,,,,,,,,,,,,,http://douglas.com/,Misty Johnson,CV
         populate_sdn_fallback_data_and_metadata(csv_string)
         sdn_fallback_hit_count = checkSDNFallback('Juan Cruz', 'North Kristinaport', 'SN')
         self.assertEqual(sdn_fallback_hit_count, 2)
-
-    def test_compare_SDNCheck_vs_fallback_match_no_hit(self):
-        """Log correct results from fallback and API calls: matching, no hit
-        We'll use form data not matching fallback csv data, and pass 0 hits from the SDN API"""
-
-        form_data = {
-            'basket': 999,
-            'first_name': 'Test',
-            'last_name': 'User',
-            'city': 'Cambridge',
-            'country': 'US',
-        }
-
-        with LogCapture(self.LOGGER_NAME) as log_miss:
-            compare_SDNCheck_vs_fallback(form_data['basket'], form_data, 0)
-            log_miss.check(
-                (
-                    self.LOGGER_NAME,
-                    'INFO',
-                    "SDNFallback compare: MATCH. Results - SDN API: 0 hit(s); SDN Fallback: 0 hit(s). Basket: " +
-                    str(form_data['basket'])
-                )
-            )
-
-    def test_compare_SDNCheck_vs_fallback_mismatch(self):
-        """Log correct results from fallback and API calls: mismatch where API hit is missed in fallback
-        We'll use form data not matching fallback csv data, and pass 1 hit from the SDN API"""
-
-        form_data = {
-            'basket': 999,
-            'first_name': 'Test',
-            'last_name': 'User',
-            'city': 'Cambridge',
-            'country': 'US',
-        }
-
-        with LogCapture(self.LOGGER_NAME) as log_mismatch:
-            compare_SDNCheck_vs_fallback(form_data['basket'], form_data, 1)
-            log_mismatch.check(
-                (
-                    self.LOGGER_NAME,
-                    'INFO',
-                    "SDNFallback compare: MISMATCH. Results - SDN API: 1 hit(s); SDN Fallback: 0 hit(s). Basket: " +
-                    str(form_data['basket'])
-                ),
-                (
-                    self.LOGGER_NAME,
-                    'INFO',
-                    "Failed SDN match for first name: Test, last name: User, city: Cambridge, country: US "
-                )
-            )
 
 
 class SDNFallbackTestsWithoutSetup(TestCase):
