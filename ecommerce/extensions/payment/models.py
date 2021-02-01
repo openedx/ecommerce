@@ -169,8 +169,9 @@ class SDNFallbackMetadata(TimeStampedModel):
         now = datetime.utcnow()
         try:
             if file_checksum == SDNFallbackMetadata.objects.get(import_state='Current').file_checksum:
-                logger.info("SDNFallback: The CSV file has not changed, so skipping import. The file_checksum was %s",
-                            file_checksum)
+                logger.info(
+                    "SDNFallback: The CSV file has not changed, so skipping import. The file_checksum was %s",
+                    file_checksum)
                 # Update download timestamp even though we're not importing this list
                 SDNFallbackMetadata.objects.filter(import_state="New").update(download_timestamp=now)
                 return None
@@ -246,22 +247,22 @@ class SDNFallbackData(models.Model):
     Model used to record and process one row received from SDNFallbackMetadata.
 
     Fields:
-    sdn_fallback_metadata (ForeignKey): Foreign Key field with the CSV import Primary Key
-    referenced in SDNFallbackMetadata.
-    source (CharField): Origin of where the data comes from, since the CSV consolidates
-    export screening lists of the Departments of Commerce, State and the Treasury.
-    sdn_type (CharField): For a person with source 'Specially Designated Nationals (SDN)
-    - Treasury Department', the type is 'Individual'. Other options include 'Entity' and 'Vessel'.
-    Other lists do not have a type.
-    names (TextField): A space separated list of all lowercased names and alt names with punctuation
-    also replaced by spaces.
-    addresses (TextField): A space separated list of all lowercased addresses combined into one
-    string. There are records that don't have an address, but because city is a required field
-    in the Payment MFE, those records would not be matched in the API/fallback.
-    countries (CharField): A space separated list of all countries combined into one string.
-    Countries are extracted from the addresses field and in some instances the ID field in their 2 letter
-    abbreviation. There are records that don't have a country, but because country is a required field in
-    the Payment MFE, those records would not be matched in the API/fallback.
+        sdn_fallback_metadata (ForeignKey): Foreign Key field with the CSV import Primary Key
+            referenced in SDNFallbackMetadata.
+        source (CharField): Origin of where the data comes from, since the CSV consolidates
+            export screening lists of the Departments of Commerce, State and the Treasury.
+        sdn_type (CharField): For a person with source 'Specially Designated Nationals (SDN)
+            - Treasury Department', the type is 'Individual'. Other options include 'Entity' and
+            'Vessel'. Other lists do not have a type.
+        names (TextField): A space separated list of all lowercased names and alt names with
+            punctuation also replaced by spaces.
+        addresses (TextField): A space separated list of all lowercased addresses combined into one
+            string. There are records that don't have an address, but because city is a required field
+            in the Payment MFE, those records would not be matched in the API/fallback.
+        countries (CharField): A space separated list of all countries combined into one string.
+            Countries are extracted from the addresses field and in some instances the ID field in their
+            2 letter abbreviation. There are records that don't have a country, but because country is a
+            required field in the Payment MFE, those records would not be matched in the API/fallback.
     """
     sdn_fallback_metadata = models.ForeignKey('payment.SDNFallbackMetadata', on_delete=models.CASCADE)
     source = models.CharField(default='', max_length=255, db_index=True)
@@ -280,7 +281,8 @@ class SDNFallbackData(models.Model):
         # The 'get' relies on the manage command having been run. If it fails, tell engineer what's needed
         except SDNFallbackMetadata.DoesNotExist:
             logger.warning(
-                "SDNFallbackMetadata is empty! Run this: ./manage.py populate_sdn_fallback_data_and_metadata"
+                "SDNFallback: SDNFallbackMetadata is empty! Run this: "
+                "./manage.py populate_sdn_fallback_data_and_metadata"
             )
             raise SDNFallbackDataEmptyError
         query_params = {'source': source, 'sdn_fallback_metadata': current_metadata, 'sdn_type': sdn_type}

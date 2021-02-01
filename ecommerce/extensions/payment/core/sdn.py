@@ -110,6 +110,7 @@ def checkSDNFallback(name, city, country):
 
 class SDNClient:
     """A utility class that handles SDN related operations."""
+
     def __init__(self, api_url, api_key, sdn_list):
         self.api_url = api_url
         self.api_key = api_key
@@ -219,7 +220,8 @@ class SDNClient:
         return response.json()
 
     def deactivate_user(self, basket, name, city, country, search_results):
-        """ Deactivates a user account.
+        """
+        Deactivates a user account.
 
         Args:
             basket (Basket): The user's basket.
@@ -272,7 +274,8 @@ def process_text(text):
 
 
 def extract_country_information(addresses, ids):
-    """ Extract any country codes that are present, if any, in the addresses and ids fields
+    """
+    Extract any country codes that are present, if any, in the addresses and ids fields
 
     Args:
         addresses (str): addresses from the csv addresses field

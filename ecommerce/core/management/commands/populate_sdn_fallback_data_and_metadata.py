@@ -41,7 +41,9 @@ class Command(BaseCommand):
                 download = s.get(url, timeout=timeout)
                 status_code = download.status_code
             except Timeout as e:
-                logger.warning("SDNFallback: DOWNLOAD FAILURE: Timeout occurred trying to download SDN csv. Timeout threshold (in seconds): %s", timeout)  # pylint: disable=line-too-long
+                logger.warning(
+                    "SDNFallback: DOWNLOAD FAILURE: Timeout occurred trying to download SDN csv. "
+                    "Timeout threshold (in seconds): %s", timeout)
                 raise
             except Exception as e:  # pylint: disable=broad-except
                 logger.warning("SDNFallback: DOWNLOAD FAILURE: Exception occurred: [%s]", e)
@@ -61,8 +63,9 @@ class Command(BaseCommand):
                     with transaction.atomic():
                         metadata_entry = populate_sdn_fallback_data_and_metadata(sdn_file_string)
                         if metadata_entry:
-                            logger.info('SDNFallback: IMPORT SUCCESS: Imported SDN CSV. Metadata id %s',
-                                        metadata_entry.id)
+                            logger.info(
+                                'SDNFallback: IMPORT SUCCESS: Imported SDN CSV. Metadata id %s',
+                                metadata_entry.id)
 
                         logger.info('SDNFallback: DOWNLOAD SUCCESS: Successfully downloaded the SDN CSV.')
                         self.stdout.write(
@@ -71,5 +74,7 @@ class Command(BaseCommand):
                             )
                         )
                 else:
-                    logger.warning("SDNFallback: DOWNLOAD FAILURE: file too small! (%f MB vs threshold of %s MB)", file_size_in_MB, threshold)   # pylint: disable=line-too-long
+                    logger.warning(
+                        "SDNFallback: DOWNLOAD FAILURE: file too small! "
+                        "(%f MB vs threshold of %s MB)", file_size_in_MB, threshold)
                     raise Exception("CSV file download did not meet threshold given")
