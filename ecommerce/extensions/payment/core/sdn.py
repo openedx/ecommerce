@@ -12,10 +12,11 @@ import pycountry
 import requests
 from django.conf import settings
 from django.contrib.auth import logout
-from ecommerce.extensions.payment.exceptions import SDNFallbackDataEmptyError
-from ecommerce.extensions.payment.models import SDNCheckFailure, SDNFallbackData, SDNFallbackMetadata
 from oscar.core.loading import get_model
 from requests.exceptions import HTTPError, Timeout
+
+from ecommerce.extensions.payment.exceptions import SDNFallbackDataEmptyError
+from ecommerce.extensions.payment.models import SDNCheckFailure, SDNFallbackData, SDNFallbackMetadata
 
 logger = logging.getLogger(__name__)
 Basket = get_model('basket', 'Basket')
