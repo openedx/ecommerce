@@ -38,7 +38,7 @@ class LMSPublisher:
         return {
             'name': mode_for_product(seat),
             'currency': stock_record.price_currency,
-            'price': int(stock_record.price_excl_tax),
+            'price': float(stock_record.price_excl_tax),
             'sku': stock_record.partner_sku,
             'bulk_sku': bulk_sku,
             'expires': self.get_seat_expiration(seat),
