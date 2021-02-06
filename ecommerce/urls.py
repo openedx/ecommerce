@@ -12,6 +12,7 @@ from django.utils.translation import ugettext_lazy as _
 from django.views.defaults import page_not_found, server_error
 from django.views.generic import TemplateView
 from django.views.i18n import JavaScriptCatalog
+from edx_django_utils.plugins import get_plugin_url_patterns
 from rest_framework_swagger.views import get_swagger_view
 
 from ecommerce.core import views as core_views
@@ -72,6 +73,9 @@ urlpatterns = AUTH_URLS + WELL_KNOWN_URLS + [
 
 # Install Oscar extension URLs
 urlpatterns += extensions_patterns
+
+# Install plugin URLs
+urlpatterns.extend(get_plugin_url_patterns('ecommerce'))
 
 robots = TemplateView.as_view(template_name='robots.txt', content_type='text/plain')
 urlpatterns += [
