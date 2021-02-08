@@ -131,6 +131,7 @@ PAYMENT_PROCESSORS = (
     'ecommerce.extensions.payment.processors.paypal.Paypal',
     'ecommerce.extensions.payment.processors.stripe.Stripe',
 )
+ADDL_PAYMENT_PROCESSORS = []
 
 PAYMENT_PROCESSOR_RECEIPT_PATH = '/checkout/receipt/'
 PAYMENT_PROCESSOR_CANCEL_PATH = '/checkout/cancel-checkout/'
