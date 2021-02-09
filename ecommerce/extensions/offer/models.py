@@ -124,7 +124,9 @@ class Benefit(AbstractBenefit):
         Returns the basket lines for which the benefit is applicable.
         """
         applicable_range = range if range else self.range
+
         if applicable_range and applicable_range.catalog_query is not None:
+
             query = applicable_range.catalog_query
             applicable_lines = self._filter_for_paid_course_products(basket.all_lines(), applicable_range)
 
@@ -168,6 +170,7 @@ class Benefit(AbstractBenefit):
                     if not in_range:
                         logger.info("(REV-2078) Removing line from range: %s", str(metadata))
                         applicable_lines.remove(metadata['line'])
+
             logger.info("(REV-2078) Before returning, applicable_lines has: %s", str(applicable_lines))
             return [(line.product.stockrecords.first().price_excl_tax, line) for line in applicable_lines]
         return super(Benefit, self).get_applicable_lines(offer, basket, range=range)  # pylint: disable=bad-super-call
