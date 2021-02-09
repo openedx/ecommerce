@@ -8,16 +8,16 @@ attrs==20.3.0             # via -c requirements/base.txt, pytest
 certifi==2020.12.5        # via -c requirements/base.txt, requests
 cffi==1.14.4              # via -c requirements/base.txt, cryptography
 chardet==4.0.0            # via -c requirements/base.txt, requests
-cryptography==3.3.1       # via -c requirements/base.txt, pyjwt
+cryptography==3.4.3       # via -c requirements/base.txt, pyjwt
 django-crum==0.7.9        # via -c requirements/base.txt, edx-django-utils
-django-waffle==2.0.0      # via -c requirements/base.txt, edx-django-utils
-django==2.2.17            # via -c requirements/base.txt, django-crum, edx-django-utils
+django-waffle==2.1.0      # via -c requirements/base.txt, edx-django-utils
+django==2.2.18            # via -c https://raw.githubusercontent.com/edx/edx-lint/master/edx_lint/files/common_constraints.txt, -c requirements/base.txt, django-crum, edx-django-utils
 edx-django-utils==3.13.0  # via -c requirements/base.txt, edx-rest-api-client
-edx-rest-api-client==5.2.1  # via -c requirements/base.txt, -r requirements/e2e.in
+edx-rest-api-client==5.3.0  # via -c requirements/base.txt, -r requirements/e2e.in
 idna==2.7                 # via -c requirements/base.txt, -c requirements/pins.txt, requests
-more-itertools==8.6.0     # via pytest
-newrelic==6.0.0.154       # via -c requirements/base.txt, edx-django-utils
-packaging==20.8           # via -c requirements/base.txt, pytest
+more-itertools==8.7.0     # via pytest
+newrelic==6.0.1.155       # via -c requirements/base.txt, edx-django-utils
+packaging==20.9           # via -c requirements/base.txt, pytest
 pbr==5.5.1                # via -c requirements/base.txt, stevedore
 pluggy==0.13.1            # via pytest
 psutil==5.8.0             # via -c requirements/base.txt, edx-django-utils
@@ -37,10 +37,10 @@ python-dotenv==0.15.0     # via -r requirements/e2e.in
 pytz==2016.10             # via -c requirements/base.txt, -c requirements/pins.txt, django
 requests==2.25.1          # via -c requirements/base.txt, edx-rest-api-client, pytest-base-url, pytest-selenium, slumber
 selenium==3.141.0         # via -r requirements/e2e.in, pytest-selenium
-six==1.15.0               # via -c requirements/base.txt, cryptography, tenacity
+six==1.15.0               # via -c requirements/base.txt, tenacity
 slumber==0.7.1            # via -c requirements/base.txt, edx-rest-api-client
 sqlparse==0.4.1           # via -c requirements/base.txt, django
 stevedore==3.3.0          # via -c requirements/base.txt, edx-django-utils
 tenacity==6.3.1           # via pytest-selenium
-urllib3==1.26.2           # via -c requirements/base.txt, -c requirements/pins.txt, requests, selenium
+urllib3==1.26.3           # via -c requirements/base.txt, -c requirements/pins.txt, requests, selenium
 wcwidth==0.2.5            # via pytest
