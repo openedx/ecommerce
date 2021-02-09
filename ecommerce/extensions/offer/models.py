@@ -124,9 +124,7 @@ class Benefit(AbstractBenefit):
         Returns the basket lines for which the benefit is applicable.
         """
         applicable_range = range if range else self.range
-
         if applicable_range and applicable_range.catalog_query is not None:
-
             query = applicable_range.catalog_query
             applicable_lines = self._filter_for_paid_course_products(basket.all_lines(), applicable_range)
 
@@ -136,6 +134,8 @@ class Benefit(AbstractBenefit):
                 applicable_lines, site.domain, partner_code, query
             )
 
+            logger.info("(REV-2078) uncached_course_run_ids: %s,  uncached_course_uuids: %s,  \
+                applicable_lines: %s", str(course_run_ids), str(course_uuids), str(applicable_lines))
             if course_run_ids or course_uuids:
                 # Hit Discovery Service to determine if remaining courses and runs are in the range.
                 try:
@@ -157,6 +157,7 @@ class Benefit(AbstractBenefit):
                 # Cache range-state individually for each course or run identifier and remove lines not in the range.
                 for metadata in course_run_ids + course_uuids:
                     in_range = response[str(metadata['id'])]
+                    logger.info("(REV-2078) discovery response for id %s: %s", str(metadata['id']), str(in_range))
 
                     # Convert to int, because this is what memcached will return, and the request cache should return
                     # the same value.
@@ -165,8 +166,9 @@ class Benefit(AbstractBenefit):
                     TieredCache.set_all_tiers(metadata['cache_key'], in_range, settings.COURSES_API_CACHE_TIMEOUT)
 
                     if not in_range:
+                        logger.info("(REV-2078) Removing line from range: %s", str(metadata))
                         applicable_lines.remove(metadata['line'])
-
+            logger.info("(REV-2078) Before returning, applicable_lines has: %s", str(applicable_lines))
             return [(line.product.stockrecords.first().price_excl_tax, line) for line in applicable_lines]
         return super(Benefit, self).get_applicable_lines(offer, basket, range=range)  # pylint: disable=bad-super-call
 
