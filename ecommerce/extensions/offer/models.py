@@ -137,8 +137,8 @@ class Benefit(AbstractBenefit):
             )
 
             #  REV-2078 logging for financial assistance coupons
-            coupon_ids_to_log = [53050]  # Stage coupon id to test with
-            if offer.id in coupon_ids_to_log:
+            offer_ids_to_log = [70649]  # Stage coupon id to test with
+            if offer.id in offer_ids_to_log:
                 logger.info('(REV-2078) checked _identify_uncached_product_identifiers for '
                             'Basket: [%s], Offer: [%s], User: [%s], course_run_ids: [%s], course_uuids: [%s],'
                             'applicable_lines: [%s]',
@@ -167,7 +167,7 @@ class Benefit(AbstractBenefit):
                     )
                     raise Exception('Failed to contact Discovery Service to retrieve offer catalog_range data.')
 
-                if offer.id in coupon_ids_to_log:
+                if offer.id in offer_ids_to_log:
                     logger.info('(REV-2078) Called Discovery Service for Basket: [%s], Offer: [%s], User: [%s],'
                                 'course_run_ids: [%s] or course_uuids: [%s], response: [%s]',
                                 basket.id,
