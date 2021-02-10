@@ -136,6 +136,16 @@ class Benefit(AbstractBenefit):
                 applicable_lines, site.domain, partner_code, query
             )
 
+            logger.info('(REV-2078) checked _identify_uncached_product_identifiers for '
+                        'Basket: [%s], Offer: [%s], User: [%s], course_run_ids: [%s], course_uuids: [%s],'
+                        'applicable_lines: [%s]',
+                        basket.id,
+                        offer.id,
+                        basket.owner.id,
+                        str(course_run_ids),
+                        str(course_uuids),
+                        str(applicable_lines))
+
             if course_run_ids or course_uuids:
                 # Hit Discovery Service to determine if remaining courses and runs are in the range.
                 try:
@@ -153,6 +163,15 @@ class Benefit(AbstractBenefit):
                         basket.owner.username, offer.id, basket.id, err
                     )
                     raise Exception('Failed to contact Discovery Service to retrieve offer catalog_range data.')
+
+                logger.info('(REV-2078) Called Discovery Service for Basket: [%s], Offer: [%s], User: [%s],'
+                            'course_run_ids: [%s] or course_uuids: [%s], response: [%s]',
+                            basket.id,
+                            offer.id,
+                            basket.owner.id,
+                            str(course_run_ids),
+                            str(course_uuids),
+                            str(response))
 
                 # Cache range-state individually for each course or run identifier and remove lines not in the range.
                 for metadata in course_run_ids + course_uuids:
