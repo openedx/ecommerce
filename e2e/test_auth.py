@@ -45,9 +45,12 @@ def test_provider_logout(selenium):
 def test_login_redirection(selenium):
     """ If the login process is initiated at the E-Commerce Service, a successful login should return the user to
     the service. """
-    # Visit LMS once to perform basic authentication
-    selenium.get(LmsHelpers.build_url(''))
+    # Visit LMS login with next query param once to perform basic authentication
+    selenium.get(
+        LmsHelpers.build_url(
+            'login?next={}&skip_authn_mfe=true'.format(EcommerceHelpers.build_url('dashboard'))
+        )
+    )
 
-    selenium.get(EcommerceHelpers.build_url('dashboard'))
     LmsHelpers.submit_login_form(selenium)
     EcommerceHelpers.assert_on_dashboard(selenium)
