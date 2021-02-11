@@ -23,7 +23,7 @@ class LmsHelpers:
     @staticmethod
     def login(selenium):
         """ Login to LMS. """
-        url = LmsHelpers.build_url('login')
+        url = LmsHelpers.build_url('login?skip_authn_mfe=true')
         selenium.get(url)
         LmsHelpers.submit_login_form(selenium)
 
