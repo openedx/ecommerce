@@ -136,23 +136,6 @@ class Benefit(AbstractBenefit):
                 applicable_lines, site.domain, partner_code, query
             )
 
-            #  REV-2078 logging for financial assistance coupons: recent 90% off coupons
-            offer_ids_to_log = [55365, 55366, 55367, 55573, 55574, 55575, 55647, 55648, 55649, 55710,
-                                55711, 55765, 55766, 55767, 55869, 55870, 55871, 56030, 56031, 56032,
-                                56033, 56486, 56487, 56488, 56712, 56713, 56714, 61496, 61497, 61498,
-                                62547, 63228, 63229, 63230, 63464, 63465, 63466, 65820, 65821, 65822,
-                                66114, 66115, 66116, 66879, 66881, 66976, 67176, 67177, 67178]
-            if offer.id in offer_ids_to_log:
-                logger.info('(REV-2078) checked _identify_uncached_product_identifiers for '
-                            'Basket: [%s], Offer: [%s], User: [%s], course_run_ids: [%s], course_uuids: [%s],'
-                            'applicable_lines: [%s]',
-                            basket.id,
-                            offer.id,
-                            basket.owner.id,
-                            str(course_run_ids),
-                            str(course_uuids),
-                            str(applicable_lines))
-
             if course_run_ids or course_uuids:
                 # Hit Discovery Service to determine if remaining courses and runs are in the range.
                 try:
@@ -170,16 +153,6 @@ class Benefit(AbstractBenefit):
                         basket.owner.username, offer.id, basket.id, err
                     )
                     raise Exception('Failed to contact Discovery Service to retrieve offer catalog_range data.')
-
-                if offer.id in offer_ids_to_log:
-                    logger.info('(REV-2078) Called Discovery Service for Basket: [%s], Offer: [%s], User: [%s],'
-                                'course_run_ids: [%s] or course_uuids: [%s], response: [%s]',
-                                basket.id,
-                                offer.id,
-                                basket.owner.id,
-                                str(course_run_ids),
-                                str(course_uuids),
-                                str(response))
 
                 # Cache range-state individually for each course or run identifier and remove lines not in the range.
                 for metadata in course_run_ids + course_uuids:
