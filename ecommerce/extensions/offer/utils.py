@@ -8,7 +8,7 @@ from urllib.parse import urlencode
 
 import bleach
 from django.conf import settings
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import ugettext as _
 from ecommerce_worker.sailthru.v1.tasks import send_offer_assignment_email, send_offer_update_email
 from oscar.core.loading import get_model
 
@@ -90,10 +90,10 @@ def format_benefit_value(benefit):
     benefit_type = get_benefit_type(benefit)
 
     if benefit_type == Benefit.PERCENTAGE:
-        benefit_value = _('{benefit_value}%'.format(benefit_value=benefit_value))
+        benefit_value = _('{benefit_value}%').format(benefit_value=benefit_value)
     else:
         converted_benefit = add_currency(Decimal(benefit.value))
-        benefit_value = _('${benefit_value}'.format(benefit_value=converted_benefit))
+        benefit_value = _('${benefit_value}').format(benefit_value=converted_benefit)
     return benefit_value
 
 
