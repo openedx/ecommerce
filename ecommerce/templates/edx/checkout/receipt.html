@@ -37,7 +37,7 @@
        data-order-id="{{ order.number }}"
        data-total-amount="{{ order.total_incl_tax | unlocalize }}"
        data-back-button="{{ disable_back_button | default:0 }}"
-       data-product-ids="{% for line in order.lines %}
+       data-product-ids="{% for line in order.lines.all %}
                   line.sku  // TODO, concatenate into one string.
                 {% endfor %}"
   >
