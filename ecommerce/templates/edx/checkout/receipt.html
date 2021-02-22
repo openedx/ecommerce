@@ -36,6 +36,9 @@
        data-currency="{{ order.currency }}"
        data-order-id="{{ order.number }}"
        data-total-amount="{{ order.total_incl_tax | unlocalize }}"
+       data-product-ids="{% for line in order.lines.all %}
+                product-ids += line.sku + ','
+            {% endfor %}"
        data-back-button="{{ disable_back_button | default:0 }}">
        {% include 'oscar/partials/alert_messages.html' %}
 
