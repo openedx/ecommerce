@@ -160,11 +160,10 @@
                                 data-track-checkout-type="hosted"
                                 class="btn payment-button"
                                 id="{{ processor.NAME|lower }}">
-                            {% if processor.NAME == 'cybersource' %}
+                            {% if processor.TITLE %}
+                                {% blocktrans with title=processor.TITLE %}Checkout with {{ title }}{% endblocktrans %}
+                            {% else %}
                                 {% trans "Checkout" as tmsg %}{{ tmsg | force_escape }}
-                            {% elif processor.NAME == 'paypal' %}
-                                {# Translators: Do NOT translate the name PayPal. #}
-                                {% trans "Checkout with PayPal" as tmsg %}{{ tmsg | force_escape }}
                             {% endif %}
                         </button>
                     {% endfor %}

@@ -333,7 +333,7 @@ class SiteConfiguration(models.Model):
         Returns:
             str
         """
-        scheme = 'http' if settings.DEBUG else 'https'
+        scheme = settings.PROTOCOL
         ecommerce_url_root = "{scheme}://{domain}".format(scheme=scheme, domain=self.site.domain)
         return urljoin(ecommerce_url_root, path)
 

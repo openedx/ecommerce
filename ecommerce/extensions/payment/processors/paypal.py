@@ -32,6 +32,7 @@ class Paypal(BasePaymentProcessor):
     """
 
     NAME = 'paypal'
+    TITLE = 'PayPal'
     DEFAULT_PROFILE_NAME = 'default'
 
     def __init__(self, site):
