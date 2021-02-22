@@ -6,12 +6,13 @@
 # Translators:
 # Translators:
 # Translators:
+# Translators:
 msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-11-23 13:56+0000\n"
-"PO-Revision-Date: 2020-05-24 20:13+0000\n"
+"POT-Creation-Date: 2021-02-22 14:50+0000\n"
+"PO-Revision-Date: 2020-11-22 20:12+0000\n"
 "Last-Translator: edx_transifex_bot <i18n-working-group+edx-transifex-bot@edx.org>\n"
 "Language-Team: English (http://www.transifex.com/open-edx/edx-platform/language/en/)\n"
 "Language: eo\n"
@@ -1396,6 +1397,14 @@ msgstr "Rémïnd Ⱡ'σяєм ιρѕυ#"
 #: ecommerce/extensions/offer/constants.py
 msgid "Revoke"
 msgstr "Révöké Ⱡ'σяєм ιρѕυ#"
+
+#: ecommerce/extensions/offer/constants.py
+msgid "Automatic"
+msgstr "Àütömätïç Ⱡ'σяєм ιρѕυм ∂σł#"
+
+#: ecommerce/extensions/offer/constants.py
+msgid "Manual"
+msgstr "Mänüäl Ⱡ'σяєм ιρѕυ#"
 
 #: ecommerce/extensions/offer/models.py
 msgid "Course Catalog ID from the Discovery Service."
@@ -2940,13 +2949,13 @@ msgid "Apply a coupon code"
 msgstr "Àpplý ä çöüpön çödé Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт,#"
 
 #: ecommerce/templates/oscar/basket/partials/hosted_checkout_basket.html
+#, python-format
+msgid "Checkout with %(title)s"
+msgstr "Çhéçköüt wïth %(title)s Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмє#"
+
+#: ecommerce/templates/oscar/basket/partials/hosted_checkout_basket.html
 msgid "Checkout"
 msgstr "Çhéçköüt Ⱡ'σяєм ιρѕυм ∂#"
-
-#. Translators: Do NOT translate the name PayPal.
-#: ecommerce/templates/oscar/basket/partials/hosted_checkout_basket.html
-msgid "Checkout with PayPal"
-msgstr "Çhéçköüt wïth PäýPäl Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, #"
 
 #: ecommerce/templates/oscar/basket/partials/hosted_checkout_basket.html
 #, python-brace-format
