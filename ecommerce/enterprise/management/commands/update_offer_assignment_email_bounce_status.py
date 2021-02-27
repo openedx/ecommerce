@@ -16,8 +16,6 @@ OfferAssignmentEmailSentRecord = get_model('offer', 'OfferAssignmentEmailSentRec
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
-EMAIL_BOUNCE_ENDPOINT = '/email/hard_bounces'
-
 
 class Command(BaseCommand):
     """
@@ -77,7 +75,7 @@ class Command(BaseCommand):
         """
         time_period = options['time_period']
         site_code = options['site_code']
-        client = get_braze_client(site_code=site_code, endpoint=EMAIL_BOUNCE_ENDPOINT)
+        client = get_braze_client(site_code=site_code)
 
         offer_assignments = self._get_offer_assignments_in_period(time_period)
         for assignment in offer_assignments:
