@@ -167,7 +167,8 @@ class EdxOrderPlacementMixinTests(BusinessIntelligenceMixin, PaymentEventsMixin,
                 self.order.currency,
                 self.order.user.email,
                 self.order.total_excl_tax,
-                self.order.total_excl_tax        # value for revenue field is same as total.
+                self.order.total_excl_tax,        # value for revenue field is same as total.
+                check_traits=True,
             )
             logger.check_present(
                 (
@@ -258,7 +259,8 @@ class EdxOrderPlacementMixinTests(BusinessIntelligenceMixin, PaymentEventsMixin,
             self.order.currency,
             self.order.user.email,
             self.order.total_excl_tax,
-            self.order.total_excl_tax            # value for revenue field is same as total.
+            self.order.total_excl_tax,            # value for revenue field is same as total.
+            check_traits=True,
         )
 
     def test_order_no_lms_user_id(self, mock_track):
@@ -285,7 +287,8 @@ class EdxOrderPlacementMixinTests(BusinessIntelligenceMixin, PaymentEventsMixin,
             self.order.currency,
             self.order.user.email,
             self.order.total_excl_tax,
-            self.order.total_excl_tax  # value for revenue field is same as total.
+            self.order.total_excl_tax,  # value for revenue field is same as total.
+            check_traits=True,
         )
 
     def test_handle_successful_order_no_segment_key(self, mock_track):

@@ -252,7 +252,7 @@ class BusinessIntelligenceMixin:
 
     def assert_correct_event(
             self, mock_track, instance, expected_user_id, expected_client_id, expected_ip, order_number, currency,
-            email, total, revenue, coupon=None, discount=Decimal('0.00')
+            email, total, revenue, coupon=None, discount=Decimal('0.00'), check_traits=None
     ):
         """Check that the tracking context was correctly reflected in the emitted event."""
         (event_user_id, event_name, event_payload), kwargs = mock_track.call_args
@@ -263,7 +263,21 @@ class BusinessIntelligenceMixin:
             'Google Analytics': {'clientId': expected_client_id},
             'page': {'url': 'https://testserver.fake/'},
         }
-        self.assertEqual(kwargs['context'], expected_context)
+        # TODO: This bit of testing is required only as long as we are routing
+        # Order Completed events to Hubspot and should be removed/cleaned up as part of
+        # DENG-797
+        if check_traits:
+            context_without_traits = {k: v for k, v in kwargs['context'].items() if k != 'traits'}
+            self.assertEqual(context_without_traits, expected_context)
+            # Verify that the event payload is duplicated in the `traits` subsection of
+            # the event `context`.
+            traits = kwargs['context']['traits']
+            self.assert_correct_event_payload(
+                instance, traits, order_number, currency, email, total, revenue,
+                coupon, discount
+            )
+        else:
+            self.assertEqual(kwargs['context'], expected_context)
         self.assert_correct_event_payload(
             instance, event_payload, order_number, currency, email, total, revenue, coupon, discount
         )

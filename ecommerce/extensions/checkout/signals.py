@@ -91,7 +91,11 @@ def track_completed_order(sender, order=None, **kwargs):  # pylint: disable=unus
     except BasketAttribute.DoesNotExist:
         logger.info('There is no program or bundle associated with order number %s', order.number)
 
-    track_segment_event(order.site, order.user, 'Order Completed', properties)
+    # DENG-784: For segment events forwarded along to Hubspot, duplicate the `properties` section of
+    # the event payload into the `traits` section so that they can be received. This is a temporary
+    # fix until we implement this behavior outside of the ecommerce application.
+    # TODO: DENG-797: remove the properties duplication in the event traits.
+    track_segment_event(order.site, order.user, 'Order Completed', properties, traits=properties)
 
 
 @receiver(post_checkout, dispatch_uid='send_completed_order_email')
