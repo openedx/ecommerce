@@ -4,12 +4,13 @@ Send the enterprise code assignment nudge emails.
 import logging
 from datetime import datetime
 
+from django.contrib.sites.models import Site
 from django.core.management import BaseCommand
 from django.utils import timezone
 from ecommerce_worker.sailthru.v1.tasks import send_code_assignment_nudge_email
 
 from ecommerce.core.models import User
-from ecommerce.enterprise.utils import get_enterprise_customer_uuid
+from ecommerce.enterprise.utils import get_enterprise_customer_sender_alias, get_enterprise_customer_uuid
 from ecommerce.extensions.offer.constants import AUTOMATIC_EMAIL
 from ecommerce.programs.custom import get_model
 
@@ -56,6 +57,18 @@ class Command(BaseCommand):
             receiver_id=User.get_lms_user_id_from_email(nudge_email.user_email)
         )
 
+    @staticmethod
+    def _get_sender_alias(nudge_email):
+        """
+        Returns the sender alias of an Enterprise Customer.
+
+        Arguments:
+            nudge_email (CodeAssignmentNudgeEmails): A nudge email sent to the learner.
+        """
+        site = Site.objects.get_current()
+        enterprise_customer_uuid = get_enterprise_customer_uuid(nudge_email.code)
+        return get_enterprise_customer_sender_alias(site, enterprise_customer_uuid)
+
     def handle(self, *args, **options):
         send_nudge_email_count = 0
         nudge_emails = self._get_nudge_emails()
@@ -74,7 +87,8 @@ class Command(BaseCommand):
                 nudge_email.already_sent = True
                 nudge_email.save()
                 send_nudge_email_count += 1
-                send_code_assignment_nudge_email.delay(nudge_email.user_email, email_subject, email_body)
+                sender_alias = self._get_sender_alias(nudge_email)
+                send_code_assignment_nudge_email.delay(nudge_email.user_email, email_subject, email_body, sender_alias)
                 self.set_last_reminder_date(nudge_email.user_email, nudge_email.code)
                 self._create_email_sent_record(nudge_email)
         logger.info(
