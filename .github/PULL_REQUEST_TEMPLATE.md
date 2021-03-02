@@ -3,7 +3,7 @@ Please give the pull request a short but descriptive title.
 
 Use this template as a guide. Omit sections that don't apply. You may link to information rather than copy it.
 
-edX Internal Developers: Please also follow these steps to integrate your changes https://openedx.atlassian.net/wiki/spaces/RS/pages/1835106870/How+to+contribute+to+our+repositories
+**edX Internal Developers:** Please also follow these steps to integrate your changes https://openedx.atlassian.net/wiki/spaces/RS/pages/1835106870/How+to+contribute+to+our+repositories
 -->
 
 ## Description
@@ -34,3 +34,5 @@ Please provide detailed step-by-step instructions for testing this change.
 Include anything else that will help reviewers and consumers understand the change.
 - Does this change depend on other changes elsewhere?
 - Any special concerns or limitations? For example: deprecations, migrations, security, or accessibility.
+
+## edX Internal Developers are expected to [release and monitor their changes](https://openedx.atlassian.net/wiki/spaces/RS/pages/1835106870/How+to+contribute+to+our+repositories)
