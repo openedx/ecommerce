@@ -128,7 +128,7 @@ def prepare_analytics_data(user, segment_key):
     return json.dumps(data)
 
 
-def track_segment_event(site, user, event, properties):
+def track_segment_event(site, user, event, properties, traits=None):
     """ Fire a tracking event via Segment.
 
     Args:
@@ -136,6 +136,8 @@ def track_segment_event(site, user, event, properties):
         user (User): User to which the event should be associated.
         event (str): Event name.
         properties (dict): Event properties.
+        traits (dict): Event traits, which will be included in the
+            `context` section of the event payload.
 
     Returns:
         (success, msg): Tuple indicating the success of enqueuing the event on the message queue.
@@ -172,6 +174,10 @@ def track_segment_event(site, user, event, properties):
             'url': page,
         }
     }
+
+    if traits:
+        context['traits'] = traits
+
     return transaction.on_commit(
         lambda: site.siteconfiguration.segment_client.track(user_tracking_id, event, properties,
                                                             context=context))
