@@ -40,6 +40,7 @@ requirements.js:
 	$(NODE_BIN)/bower install --allow-root
 
 requirements: requirements.js
+	pip3 install -r requirements/pip_tools.txt
 	pip3 install -r requirements/dev.txt --exists-action w
 
 requirements.tox:
