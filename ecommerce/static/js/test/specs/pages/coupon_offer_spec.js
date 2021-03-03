@@ -35,6 +35,9 @@ define([
                         return true;
                     });
                     spyOn(window.analytics, 'track');
+                    window.analytics.user = function() {
+                        return {id: function() { return null; }};
+                    };
                     AnalyticsUtils.analyticsSetUp();
                     new CouponOfferPage();
                 });

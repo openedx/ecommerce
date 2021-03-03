@@ -69,21 +69,53 @@ define([
              */
             logUser: function() {
                 var userModel = this.options.userModel;
-                analytics.identify(
-                    userModel.get('user_tracking_id'),
-                    {
-                        name: userModel.get('name'),
-                        email: userModel.get('email')
-                    },
-                    {
-                        integrations: {
-                            // Disable MailChimp because we don't want to update the user's email
-                            // and username in MailChimp based on this request. We only need to capture
-                            // this data in MailChimp on registration/activation.
-                            MailChimp: false
-                        }
+                // We want to reset the segment user tracking information if we notice a logged out user
+                // (no user_tracking_id), but the analytics service still believes there is a user id.
+                // This has to be wrapped in the document.readyState logic because the analytics.user()
+                // function isn't available until the analytics.js package has finished initializing.
+                if (document.readyState === 'complete') {
+                    if (!userModel.get('user_tracking_id') && analytics.user().id()) {
+                        analytics.reset();
                     }
-                );
+                    analytics.identify(
+                        userModel.get('user_tracking_id'),
+                        {
+                            name: userModel.get('name'),
+                            email: userModel.get('email')
+                        },
+                        {
+                            integrations: {
+                                // Disable MailChimp because we don't want to update the user's email
+                                // and username in MailChimp based on this request. We only need to capture
+                                // this data in MailChimp on registration/activation.
+                                MailChimp: false
+                            }
+                        }
+                    );
+                } else {
+                    document.addEventListener('readystatechange', function(event) {
+                        if (event.target.readyState === 'complete') {
+                            if (!userModel.get('user_tracking_id') && analytics.user().id()) {
+                                analytics.reset();
+                            }
+                            analytics.identify(
+                                userModel.get('user_tracking_id'),
+                                {
+                                    name: userModel.get('name'),
+                                    email: userModel.get('email')
+                                },
+                                {
+                                    integrations: {
+                                        // Disable MailChimp because we don't want to update the user's email
+                                        // and username in MailChimp based on this request. We only need to capture
+                                        // this data in MailChimp on registration/activation.
+                                        MailChimp: false
+                                    }
+                                }
+                            );
+                        }
+                    });
+                }
             },
 
           /**
