@@ -7,13 +7,16 @@ import mock
 from django.conf import settings
 from oscar.core.loading import get_model
 from oscar.test.factories import StockRecord
+from waffle.models import Switch
 
+from ecommerce.core.constants import ENABLE_BRAZE
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
 from ecommerce.extensions.checkout.utils import add_currency
 from ecommerce.extensions.offer.utils import (
     SafeDict,
     _remove_exponent_and_trailing_zeros,
+    format_assigned_offer_email,
     format_benefit_value,
     format_email,
     send_assigned_offer_email,
@@ -153,6 +156,86 @@ class UtilTests(DiscoveryTestMixin, TestCase):
             tokens.get('offer_assignment_id'),
             subject,
             mock.ANY,
+            sender_alias,
+            None,
+            base_enterprise_url,
+        )
+
+    @mock.patch('ecommerce.extensions.offer.utils.send_offer_assignment_email')
+    @ddt.data(
+        (
+            'subject',
+            'hi',
+            'bye',
+            {
+                'offer_assignment_id': 555,
+                'learner_email': 'johndoe@unknown.com',
+                'code': 'GIL7RUEOU7VHBH7Q',
+                'redemptions_remaining': 10,
+                'code_expiration_date': '2018-12-19'
+            },
+            None,
+            'sender alias',
+            ''
+        ),
+        (
+            'subject',
+            'hi',
+            'bye',
+            {
+                'offer_assignment_id': 555,
+                'learner_email': 'johndoe@unknown.com',
+                'code': 'GIL7RUEOU7VHBH7Q',
+                'redemptions_remaining': 10,
+                'code_expiration_date': '2018-12-19'
+            },
+            None,
+            'sender alias',
+            'https://bears.party'
+        ),
+    )
+    @ddt.unpack
+    def test_send_assigned_offer_email_via_braze(
+            self,
+            subject,
+            greeting,
+            closing,
+            tokens,
+            side_effect,
+            sender_alias,
+            base_enterprise_url,
+            mock_sailthru_task,
+    ):
+        """ Test that the offer assignment email message is sent to async task. """
+        switch, __ = Switch.objects.get_or_create(name=ENABLE_BRAZE)
+        switch.active = True
+        switch.save()
+        mock_sailthru_task.delay.side_effect = side_effect
+        send_assigned_offer_email(
+            subject,
+            greeting,
+            closing,
+            tokens.get('offer_assignment_id'),
+            tokens.get('learner_email'),
+            tokens.get('code'),
+            tokens.get('redemptions_remaining'),
+            tokens.get('code_expiration_date'),
+            sender_alias,
+            base_enterprise_url,
+        )
+        email_body = format_assigned_offer_email(
+            greeting,
+            closing,
+            tokens.get('learner_email'),
+            tokens.get('code'),
+            tokens.get('redemptions_remaining'),
+            tokens.get('code_expiration_date')
+        )
+        mock_sailthru_task.delay.assert_called_once_with(
+            tokens.get('learner_email'),
+            tokens.get('offer_assignment_id'),
+            subject,
+            email_body,
             sender_alias,
             None,
             base_enterprise_url,
