@@ -175,8 +175,9 @@ class OfferAssignmentSummaryViewSet(ModelViewSet):
             attribute_values__value_boolean=False
         )
         active_product_ids = [product.get('id') for product in Product.objects.filter(active_coupon).values('id')]
-        CouponVoucher.object.filter(coupon__id__in=active_product_ids).select_related('vouchers').values('voucher__code')
-        queryset = queryset.filter()
+        voucher_codes = CouponVoucher.object.filter(coupon__id__in=active_product_ids).select_related('vouchers').values('voucher__code')
+        queryset = queryset.filter(code__in=voucher_codes)
+        import pdb; pdb.set_trace()
         if enterprise_uuid:
             queryset = queryset.filter(offer__condition__enterprise_customer_uuid=enterprise_uuid)
             codes = [code.get('code') for code in queryset.values('code')]
