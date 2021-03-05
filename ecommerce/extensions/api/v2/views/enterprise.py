@@ -73,6 +73,7 @@ from ecommerce.extensions.voucher.utils import (
 )
 
 logger = logging.getLogger(__name__)
+CouponVoucher = get_model('voucher', 'CouponVoucher')
 Order = get_model('order', 'Order')
 Line = get_model('basket', 'Line')
 OfferAssignment = get_model('offer', 'OfferAssignment')
@@ -161,15 +162,61 @@ class OfferAssignmentSummaryViewSet(ModelViewSet):
             'offer__benefit',
             'offer__condition',
         )
+
         offer_assignments_with_counts = {}
         if self.request.query_params.get('full_discount_only'):
             queryset = queryset.filter(offer__benefit__value=100.0)
 
         enterprise_uuid = self.request.query_params.get('enterprise_uuid')
 
+        codes = []
+        active_coupon = ~Q(attributes__code='inactive') | Q(
+            attributes__code='inactive',
+            attribute_values__value_boolean=False
+        )
+        active_product_ids = [product.get('id') for product in Product.objects.filter(active_coupon).values('id')]
+        CouponVoucher.object.filter(coupon__id__in=active_product_ids).select_related('vouchers').values('voucher__code')
+        queryset = queryset.filter()
         if enterprise_uuid:
             queryset = queryset.filter(offer__condition__enterprise_customer_uuid=enterprise_uuid)
+            codes = [code.get('code') for code in queryset.values('code')]
 
+
+        # Product.objects.filter(coupon_vouchers__vouchers__code=queryset[0].code)
+        inactive_coupons = Product.objects.exclude(active_coupon)
+
+        # SELECT
+        # distinct(voucher_couponvouchers.coupon_id)
+        # FROM
+        # voucher_voucher
+        # INNER
+        # JOIN
+        # voucher_couponvouchers_vouchers
+        # ON
+        # voucher_couponvouchers_vouchers.voucher_id = voucher_voucher.id
+        # INNER
+        # JOIN
+        # voucher_couponvouchers
+        # ON
+        # voucher_couponvouchers_vouchers.couponvouchers_id = voucher_couponvouchers.id
+        # WHERE
+        # voucher_voucher.code = 'FG2D6S3JFMRER3UN'
+        # AND
+        # voucher_couponvouchers.coupon_id
+        # IN(
+        #     SELECT
+        # distinct(catalogue_productattributevalue.product_id)
+        # FROM
+        # catalogue_productattributevalue
+        # WHERE
+        # attribute_id = (
+        #     SELECT id
+        # FROM catalogue_productattribute
+        # WHERE code='inactive'
+        # )
+        # AND
+        # value_boolean = False
+        # );
         for offer_assignment in queryset:
             if offer_assignment.code not in offer_assignments_with_counts:
                 # Note that we can get away with just dropping in the first
@@ -182,6 +229,9 @@ class OfferAssignmentSummaryViewSet(ModelViewSet):
                 }
             else:
                 offer_assignments_with_counts[offer_assignment.code]['count'] += 1
+
+
+
         return list(offer_assignments_with_counts.values())
 
 
