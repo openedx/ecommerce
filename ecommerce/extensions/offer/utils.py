@@ -7,11 +7,14 @@ from decimal import Decimal
 from urllib.parse import urlencode
 
 import bleach
+import waffle
 from django.conf import settings
+from django.template.loader import render_to_string
 from django.utils.translation import ugettext as _
 from ecommerce_worker.sailthru.v1.tasks import send_offer_assignment_email, send_offer_update_email
 from oscar.core.loading import get_model
 
+from ecommerce.core.constants import ENABLE_BRAZE
 from ecommerce.core.url_utils import absolute_redirect
 from ecommerce.extensions.checkout.utils import add_currency
 from ecommerce.extensions.offer.constants import OFFER_ASSIGNED
@@ -294,6 +297,10 @@ def format_email(template, placeholder_dict, greeting, closing):
     greeting = bleach.clean(greeting)
     closing = bleach.clean(closing)
     email_body = string.Formatter().vformat(template, SafeTuple(), placeholder_dict)
+    if waffle.switch_is_active(ENABLE_BRAZE):
+        email_body = (greeting + email_body + closing).replace('\"', '\'')
+        return render_to_string('coupons/offer_email.html', {'body': email_body})
+
     # \n\n is being treated as single line except of two lines in HTML template,
     #  so separating them with &nbsp; tag to render them as expected.
     return (greeting + email_body + closing).replace('\n', '<br/>')
