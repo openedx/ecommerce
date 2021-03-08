@@ -3258,13 +3258,19 @@ class OfferAssignmentSummaryViewSetTests(
         self.enterprise_slug = 'batman'
 
         # Create coupons
+        self.oa_code1 = 'AAAAA'
         self.coupon1 = self.create_coupon(
             benefit_type=Benefit.PERCENTAGE,
             benefit_value=40,
             enterprise_customer=self.enterprise_customer['id'],
             enterprise_customer_catalog='aaaaaaaa-2c44-487b-9b6a-24eee973f9a4',
-            code='AAAAA',
+            code=self.oa_code1,
         )
+        # create an inactive coupon for testing the is_active filter
+        inactive_coupon = Product.objects.get(coupon_vouchers__vouchers__code=self.oa_code1)
+        inactive_coupon.attr.inactive = True
+        inactive_coupon.save()
+
         self.coupon2 = self.create_coupon(
             max_uses=2,
             voucher_type=Voucher.MULTI_USE,
@@ -3296,7 +3302,7 @@ class OfferAssignmentSummaryViewSetTests(
         self.addCleanup(patcher.stop)
 
         # Assign codes using the assignment endpoint
-        self.assign_user_to_code(self.coupon1.id, [self.user.email], ['AAAAA'])
+        self.assign_user_to_code(self.coupon1.id, [self.user.email], [self.oa_code1])
         self.assign_user_to_code(self.coupon2.id, [self.user.email], [])
         self.assign_user_to_code(self.coupon3.id, [self.user.email], [])
         self.assign_user_to_code(self.coupon3.id, [self.user.email], [])
@@ -3360,10 +3366,7 @@ class OfferAssignmentSummaryViewSetTests(
         """
         View should return the appropriate data for given user_email.
         """
-        oa_code1 = OfferAssignment.objects.get(
-            user_email=self.user.email,
-            offer__vouchers__coupon_vouchers__coupon__id=self.coupon1.id
-        ).code
+        oa_code1 = self.oa_code1
         oa_code2 = OfferAssignment.objects.get(
             user_email=self.user.email,
             offer__vouchers__coupon_vouchers__coupon__id=self.coupon2.id
@@ -3396,6 +3399,25 @@ class OfferAssignmentSummaryViewSetTests(
                 assert result['catalog'] == 'cccccccc-2c44-487b-9b6a-24eee973f9a4'
             else:  # To test if response has something in it it shouldn't
                 assert False
+
+    def test_view_returns_appropriate_data_for_is_active(self):
+        """
+        View should return only offer assignemnts with valid vouchers
+        """
+        oa_code2 = OfferAssignment.objects.get(
+            user_email=self.user.email,
+            offer__vouchers__coupon_vouchers__coupon__id=self.coupon2.id
+        ).code
+        oa_code3 = OfferAssignment.objects.filter(
+            user_email=self.user.email,
+            offer__vouchers__coupon_vouchers__coupon__id=self.coupon3.id
+        ).last().code
+        response = self.client.get(OFFER_ASSIGNMENT_SUMMARY_LINK + "?is_active=True").json()
+        assert response['count'] == 2
+        results_codes = [result['code'] for result in response['results']]
+        assert self.oa_code1 not in results_codes
+        assert oa_code2 in results_codes
+        assert oa_code3 in results_codes
 
     def test_view_returns_appropriate_data_for_full_discount(self):
         """

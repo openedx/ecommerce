@@ -73,6 +73,7 @@ from ecommerce.extensions.voucher.utils import (
 )
 
 logger = logging.getLogger(__name__)
+CouponVouchers = get_model('voucher', 'CouponVouchers')
 Order = get_model('order', 'Order')
 Line = get_model('basket', 'Line')
 OfferAssignment = get_model('offer', 'OfferAssignment')
@@ -161,12 +162,28 @@ class OfferAssignmentSummaryViewSet(ModelViewSet):
             'offer__benefit',
             'offer__condition',
         )
+
         offer_assignments_with_counts = {}
+
         if self.request.query_params.get('full_discount_only'):
             queryset = queryset.filter(offer__benefit__value=100.0)
 
-        enterprise_uuid = self.request.query_params.get('enterprise_uuid')
+        if self.request.query_params.get('is_active'):
+            active_coupon = ~Q(attributes__code='inactive') | Q(
+                attributes__code='inactive',
+                attribute_values__value_boolean=False
+            )
 
+            voucher_codes = [
+                voucher.get('coupon_vouchers__vouchers__code') for voucher
+                in Product.objects.filter(active_coupon).distinct()
+                .select_related('coupon_vouchers__vouchers')
+                .values('coupon_vouchers__vouchers__code')
+            ]
+
+            queryset = queryset.filter(code__in=voucher_codes)
+
+        enterprise_uuid = self.request.query_params.get('enterprise_uuid')
         if enterprise_uuid:
             queryset = queryset.filter(offer__condition__enterprise_customer_uuid=enterprise_uuid)
 
@@ -182,6 +199,7 @@ class OfferAssignmentSummaryViewSet(ModelViewSet):
                 }
             else:
                 offer_assignments_with_counts[offer_assignment.code]['count'] += 1
+
         return list(offer_assignments_with_counts.values())
 
 
