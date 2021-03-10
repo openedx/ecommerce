@@ -38,9 +38,9 @@ virtualenv==16.7.9
 # removing this pin, then this pin can be removed.
 pylint==2.4.4
 
-# See https://openedx.atlassian.net/browse/ARCHBOM-1141 for details.
+# See https://openedx.atlassian.net/browse/BOM-2247 for details.
 # need an update in configuration before this can be removed.
-pip-tools<5.0.0
+pip-tools==5.3.0
 
 # greater versions failing with extract-tranlsations step.
 tox==3.14.6
