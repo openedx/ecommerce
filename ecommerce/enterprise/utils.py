@@ -8,8 +8,7 @@ import hmac
 import logging
 from collections import OrderedDict
 from functools import reduce  # pylint: disable=redefined-builtin
-from urllib.parse import urlencode, urlparse
-
+from urllib.parse import parse_qsl, urlencode, urlparse
 import crum
 from django.conf import settings
 from django.urls import reverse
@@ -382,7 +381,8 @@ def get_enterprise_course_consent_url(
         consent_token,
         course_id,
         enterprise_customer_uuid,
-        failure_url=None
+        failure_url=None,
+        consent_url_param_dict=None,
 ):
     """
     Construct the URL that should be used for redirecting the user to the Enterprise service for
@@ -417,6 +417,12 @@ def get_enterprise_course_consent_url(
         'next': callback_url,
         'failure_url': failure_url,
     }
+
+    # Forward any needed params from the original request:
+    if consent_url_param_dict:
+        for k in consent_url_param_dict.keys():
+            request_params[k] = consent_url_param_dict[k]
+
     redirect_url = '{base}?{params}'.format(
         base=site.siteconfiguration.enterprise_grant_data_sharing_url,
         params=urlencode(request_params)
@@ -582,7 +588,30 @@ def get_enterprise_customer_from_enterprise_offer(basket):
     return None
 
 
-def construct_enterprise_course_consent_url(request, course_id, enterprise_customer_uuid):
+def parse_consent_params(request):
+    """
+    Parse out parameters from an ecommerce request that will need to be forwarded back to the consent page in a redirect.
+
+    Returns:
+        a dictionary of parsed parameters or None
+    """
+    consent_params = None
+    if request.GET.get('consent_url_param_string'):
+        try:
+            consent_params = dict(parse_qsl(request.GET.get('consent_url_param_string'),
+                                  keep_blank_values=True,
+                                  strict_parsing=True))
+        except ValueError:
+            log.error('[DSC Redirect URL parse error] consent_url_param_string '
+                      'could not be parsed as params: %s',
+                      request.GET.get('consent_url_param_string'))
+    return consent_params
+
+
+def construct_enterprise_course_consent_url(request,
+                                            course_id,
+                                            enterprise_customer_uuid,
+                                            consent_url_param_dict=None):
     """
     Construct the URL that should be used for redirecting the user to the Enterprise service for
     collecting consent.
@@ -601,6 +630,11 @@ def construct_enterprise_course_consent_url(request, course_id, enterprise_custo
         'next': absolute_url(request, 'checkout:free-checkout'),
         'failure_url': failure_url,
     }
+
+    # Forward any needed params from the original request:
+    if consent_url_param_dict:
+        for k in consent_url_param_dict.keys():
+            request_params[k] = consent_url_param_dict[k]
 
     redirect_url = '{base}?{params}'.format(
         base=site.siteconfiguration.enterprise_grant_data_sharing_url,

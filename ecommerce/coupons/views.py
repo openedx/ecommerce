@@ -29,7 +29,8 @@ from ecommerce.enterprise.utils import (
     get_enterprise_course_consent_url,
     get_enterprise_customer_consent_failed_context_data,
     get_enterprise_customer_data_sharing_consent_token,
-    get_enterprise_customer_from_voucher
+    get_enterprise_customer_from_voucher,
+    parse_consent_params
 )
 from ecommerce.extensions.api import exceptions
 from ecommerce.extensions.basket.utils import get_payment_microfrontend_or_basket_url, prepare_basket
@@ -249,7 +250,8 @@ class CouponRedeemView(EdxOrderPlacementMixin, APIView):
                     consent_token,
                     product.course.id,
                     enterprise_customer['id'],
-                    failure_url=failure_url
+                    failure_url=failure_url,
+                    consent_url_param_dict=parse_consent_params(request),
                 )
                 return HttpResponseRedirect(redirect_url)
 
