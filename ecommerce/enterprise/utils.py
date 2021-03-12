@@ -9,6 +9,7 @@ import logging
 from collections import OrderedDict
 from functools import reduce  # pylint: disable=redefined-builtin
 from urllib.parse import parse_qsl, urlencode, urlparse
+
 import crum
 from django.conf import settings
 from django.urls import reverse
@@ -418,10 +419,8 @@ def get_enterprise_course_consent_url(
         'failure_url': failure_url,
     }
 
-    # Forward any needed params from the original request:
-    if consent_url_param_dict:
-        for k in consent_url_param_dict.keys():
-            request_params[k] = consent_url_param_dict[k]
+    # Insert any extra params from the original request:
+    request_params.update(consent_url_param_dict or {})
 
     redirect_url = '{base}?{params}'.format(
         base=site.siteconfiguration.enterprise_grant_data_sharing_url,
@@ -590,22 +589,23 @@ def get_enterprise_customer_from_enterprise_offer(basket):
 
 def parse_consent_params(request):
     """
-    Parse out parameters from an ecommerce request that will need to be forwarded back to the consent page in a redirect.
+    Parse out parameters from an ecommerce request that 
+    need to be forwarded back to the consent page in a redirect.
 
     Returns:
         a dictionary of parsed parameters or None
     """
-    consent_params = None
-    if request.GET.get('consent_url_param_string'):
+    request_consent_params = request.GET.get('consent_url_param_string')
+    if request_consent_params:
         try:
-            consent_params = dict(parse_qsl(request.GET.get('consent_url_param_string'),
+            return dict(parse_qsl(request_consent_params,
                                   keep_blank_values=True,
                                   strict_parsing=True))
         except ValueError:
             log.error('[DSC Redirect URL parse error] consent_url_param_string '
                       'could not be parsed as params: %s',
-                      request.GET.get('consent_url_param_string'))
-    return consent_params
+                      request_consent_params)
+    return None
 
 
 def construct_enterprise_course_consent_url(request,
@@ -631,10 +631,8 @@ def construct_enterprise_course_consent_url(request,
         'failure_url': failure_url,
     }
 
-    # Forward any needed params from the original request:
-    if consent_url_param_dict:
-        for k in consent_url_param_dict.keys():
-            request_params[k] = consent_url_param_dict[k]
+    # Insert any extra forwarded params from the original request:
+    request_params.update(consent_url_param_dict or {})
 
     redirect_url = '{base}?{params}'.format(
         base=site.siteconfiguration.enterprise_grant_data_sharing_url,
