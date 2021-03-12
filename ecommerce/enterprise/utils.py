@@ -589,7 +589,7 @@ def get_enterprise_customer_from_enterprise_offer(basket):
 
 def parse_consent_params(request):
     """
-    Parse out parameters from an ecommerce request that 
+    Parse out parameters from an ecommerce request that
     need to be forwarded back to the consent page in a redirect.
 
     Returns:
