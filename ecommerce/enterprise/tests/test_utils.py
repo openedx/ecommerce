@@ -6,6 +6,7 @@ import ddt
 import httpretty
 from django.conf import settings
 from django.http.response import HttpResponse
+from django.test import RequestFactory
 from edx_django_utils.cache import TieredCache
 from mock import patch
 from oscar.core.loading import get_class
@@ -27,6 +28,7 @@ from ecommerce.enterprise.utils import (
     get_enterprise_customers,
     get_enterprise_id_for_current_request_user_from_jwt,
     get_or_create_enterprise_customer_user,
+    parse_consent_params,
     set_enterprise_customer_cookie,
     update_paginated_response
 )
@@ -385,3 +387,17 @@ class EnterpriseUtilsTests(EnterpriseServiceMockMixin, TestCase):
         enterprise_customer.return_value = {'sender_alias': sender_alias}
         sender_alias = get_enterprise_customer_sender_alias('some-site', 'uuid')
         assert sender_alias == expected_sender_alias
+
+    def test_parse_consent_params(self):
+        """
+        Verify that "parse_consent_params" util works as expected.
+        """
+
+        mock_request = RequestFactory().get(
+            '/any?consent_url_param_string=left_sidebar_text_override%3D')
+        parsed = parse_consent_params(mock_request)
+        self.assertDictEqual(parsed, {'left_sidebar_text_override': ''})
+
+        mock_request2 = RequestFactory().get('/any')
+        parsed = parse_consent_params(mock_request2)
+        assert parsed is None

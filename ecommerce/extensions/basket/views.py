@@ -38,7 +38,8 @@ from ecommerce.enterprise.utils import (
     enterprise_customer_user_needs_consent,
     get_enterprise_customer_from_enterprise_offer,
     get_enterprise_customer_from_voucher,
-    has_enterprise_offer
+    has_enterprise_offer,
+    parse_consent_params
 )
 from ecommerce.extensions.analytics.utils import (
     prepare_analytics_data,
@@ -234,7 +235,8 @@ class BasketLogicMixin:
                 redirect_url = construct_enterprise_course_consent_url(
                     self.request,
                     product.course.id,
-                    enterprise_custmer_uuid
+                    enterprise_custmer_uuid,
+                    consent_url_param_dict=parse_consent_params(self.request)
                 )
                 raise RedirectException(
                     response=HttpResponseRedirect(redirect_url)
