@@ -125,7 +125,36 @@ class CouponCodeSerializerTests(CouponMixin, TestCase):
             redeemed_offer_count=mock.ANY,
             total_offer_count=mock.ANY,
             code_expiration_date=expected_expiration_date.strftime('%d %B, %Y %H:%M %Z'),
-            sender_alias=self.SENDER_ALIAS
+            sender_alias=self.SENDER_ALIAS,
+            base_enterprise_url=''
+        )
+
+    @mock.patch('ecommerce.extensions.api.serializers.send_assigned_offer_reminder_email')
+    def test_send_assigned_offer_reminder_email_args_with_base_url(self, mock_remind_email):
+        """ Test that the code_expiration_date passed is equal to coupon batch end date """
+        serializer = CouponCodeRemindSerializer(data=self.data, context={'coupon': self.coupon})
+        serializer._trigger_email_sending_task(  # pylint: disable=protected-access
+            subject=self.SUBJECT,
+            greeting=self.GREETING,
+            closing=self.CLOSING,
+            assigned_offer=self.offer_assignment,
+            redeemed_offer_count=3,
+            total_offer_count=5,
+            sender_alias=self.SENDER_ALIAS,
+            base_enterprise_url=self.BASE_ENTERPRISE_URL
+        )
+        expected_expiration_date = self.coupon.attr.coupon_vouchers.vouchers.first().end_datetime
+        mock_remind_email.assert_called_with(
+            subject=self.SUBJECT,
+            greeting=self.GREETING,
+            closing=self.CLOSING,
+            learner_email=self.offer_assignment.user_email,
+            code=self.offer_assignment.code,
+            redeemed_offer_count=mock.ANY,
+            total_offer_count=mock.ANY,
+            code_expiration_date=expected_expiration_date.strftime('%d %B, %Y %H:%M %Z'),
+            sender_alias=self.SENDER_ALIAS,
+            base_enterprise_url=self.BASE_ENTERPRISE_URL,
         )
 
     @mock.patch('ecommerce.extensions.api.serializers.send_assigned_offer_email')
@@ -169,11 +198,12 @@ class CouponCodeSerializerTests(CouponMixin, TestCase):
                 self.LOGGER_NAME,
                 'ERROR',
                 '[Offer Reminder] Email for offer_assignment_id: {} with subject \'{}\', greeting \'{}\' '
-                'and closing \'{}\' raised exception: {}'.format(
+                'and closing \'{}\' and base_enterprise_url \'{}\' raised exception: {}'.format(
                     self.offer_assignment.id,
                     self.SUBJECT,
                     self.GREETING,
                     self.CLOSING,
+                    self.BASE_ENTERPRISE_URL,
                     repr(Exception('Ignore me - reminder'))
                 )
             ),
@@ -188,7 +218,8 @@ class CouponCodeSerializerTests(CouponMixin, TestCase):
                     assigned_offer=self.offer_assignment,
                     redeemed_offer_count=3,
                     total_offer_count=5,
-                    sender_alias=self.SENDER_ALIAS
+                    sender_alias=self.SENDER_ALIAS,
+                    base_enterprise_url=self.BASE_ENTERPRISE_URL,
                 )
         log.check_present(*expected)
 

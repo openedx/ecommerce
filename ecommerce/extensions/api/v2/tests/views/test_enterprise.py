@@ -3433,8 +3433,7 @@ class OfferAssignmentSummaryViewSetTests(
             enterprise_customer_catalog='dddddddd-2c44-487b-9b6a-24eee973f9a4',
         )
         self.assign_user_to_code(coupon4.id, [self.user.email], [])
-
-        oa_code = OfferAssignment.objects.get(
+        oa_code4 = OfferAssignment.objects.get(
             user_email=self.user.email,
             offer__vouchers__coupon_vouchers__coupon__id=coupon4.id
         ).code
@@ -3446,13 +3445,56 @@ class OfferAssignmentSummaryViewSetTests(
         # To get the code to verify our response, filter using the coupon
         # id these offerAssignments were created for
         for result in response['results']:
-            if result['code'] == oa_code:
+            if result['code'] == oa_code4:
                 assert result['benefit_value'] == 100.0
                 assert result['usage_type'] == 'Percentage'
                 assert result['redemptions_remaining'] == 1
                 assert result['catalog'] == 'dddddddd-2c44-487b-9b6a-24eee973f9a4'
             else:  # To test if response has something in it it shouldn't
                 assert False
+
+    def test_view_returns_appropriate_data_for_is_active_and_full_discount(self):
+        coupon4 = self.create_coupon(
+            max_uses=1,
+            quantity=1,
+            voucher_type=Voucher.MULTI_USE_PER_CUSTOMER,
+            benefit_type=Benefit.PERCENTAGE,
+            benefit_value=100.0,
+            enterprise_customer=self.enterprise_customer['id'],
+            enterprise_customer_catalog='dddddddd-2c44-487b-9b6a-24eee973f9a4',
+        )
+        self.assign_user_to_code(coupon4.id, [self.user.email], [])
+
+        oa_code4 = OfferAssignment.objects.get(
+            user_email=self.user.email,
+            offer__vouchers__coupon_vouchers__coupon__id=coupon4.id
+        ).code
+
+        coupon5 = self.create_coupon(
+            max_uses=1,
+            quantity=1,
+            voucher_type=Voucher.MULTI_USE_PER_CUSTOMER,
+            benefit_type=Benefit.PERCENTAGE,
+            benefit_value=100.0,
+            enterprise_customer=self.enterprise_customer['id'],
+            enterprise_customer_catalog='dddddddd-2c44-487b-9b6a-24eee973f9a4',
+        )
+        self.assign_user_to_code(coupon5.id, [self.user.email], [])
+
+        oa_code5 = OfferAssignment.objects.get(
+            user_email=self.user.email,
+            offer__vouchers__coupon_vouchers__coupon__id=coupon5.id
+        ).code
+
+        inactive_coupon = Product.objects.get(coupon_vouchers__vouchers__code=oa_code5)
+        inactive_coupon.attr.inactive = True
+        inactive_coupon.save()
+
+        response = self.client.get(OFFER_ASSIGNMENT_SUMMARY_LINK + "?is_active=True&full_discount_only=True").json()
+        assert response['count'] == 1
+        results_codes = [result['code'] for result in response['results']]
+        assert oa_code4 in results_codes
+        assert oa_code5 not in results_codes
 
     def test_view_returns_only_coupons_for_enterprise(self):
         enterprise_customer_2 = {'name': 'BearsRus', 'id': str(uuid4())}
@@ -3495,7 +3537,6 @@ class OfferAssignmentSummaryViewSetTests(
                 assert result['catalog'] == 'dddddddd-2c44-487b-9b6a-24eee973f9a4'
             else:  # To test if response has something in it it shouldn't
                 assert False
-
 
 @ddt.ddt
 class OfferAssignmentEmailTemplatesViewSetTests(JwtMixin, TestCase):

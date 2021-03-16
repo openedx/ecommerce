@@ -769,18 +769,23 @@ class CodeAssignmentNudgeEmails(TimeStampedModel):
     This model keeps track of all the nudge emails that are to be sent on a specific date. This information is based on
     the user's email subscription preferences.
     """
+
+    def options_default():
+        return {"base_enterprise_url": ''}
+
     email_template = models.ForeignKey('offer.CodeAssignmentNudgeEmailTemplates', on_delete=models.CASCADE)
     code = models.CharField(max_length=128, db_index=True)
     user_email = models.EmailField(db_index=True)
     email_date = models.DateTimeField()
     already_sent = models.BooleanField(help_text=_('Email has been sent.'), default=False)
     is_subscribed = models.BooleanField(help_text=_('This user should receive email'), default=True)
+    options = JSONField(default=options_default)
 
     class Meta:
         unique_together = (('email_template', 'code', 'user_email'),)
 
     @classmethod
-    def subscribe_nudge_emails(cls, user_email, code):
+    def subscribe_nudge_emails(cls, user_email, code, base_enterprise_url=''):
         """
         Subscribe the nudge email cycle for given user email and code.
         """
@@ -791,19 +796,20 @@ class CodeAssignmentNudgeEmails(TimeStampedModel):
                 data = {
                     'code': code,
                     'user_email': user_email,
-                    'email_template': email_template
+                    'email_template': email_template,
+                    'options': {'base_enterprise_url': base_enterprise_url},
                 }
                 if not cls.objects.filter(**data).exists():
                     data['email_date'] = now_datetime + relativedelta(days=int(days))
                     cls.objects.create(**data)
                     logger.info(
-                        'Created a nudge email for user_email: %s, code: %s, email_type: %s',
-                        user_email, code, email_type
+                        'Created a nudge email for user_email: %s, code: %s, email_type: %s, base_enterprise_url: %s',
+                        user_email, code, email_type, base_enterprise_url,
                     )
             else:
                 logger.warning(
-                    'Unable to create a nudge email for user_email: %s, code: %s, email_type: %s',
-                    user_email, code, email_type
+                    'Unable to create a nudge email for user_email: %s, code: %s, email_type: %s, base_enterprise_url: %s',
+                    user_email, code, email_type, base_enterprise_url,
                 )
 
     @classmethod
