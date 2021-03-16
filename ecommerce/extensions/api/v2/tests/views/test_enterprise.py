@@ -3538,6 +3538,7 @@ class OfferAssignmentSummaryViewSetTests(
             else:  # To test if response has something in it it shouldn't
                 assert False
 
+
 @ddt.ddt
 class OfferAssignmentEmailTemplatesViewSetTests(JwtMixin, TestCase):
     """

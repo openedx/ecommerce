@@ -1919,7 +1919,6 @@ class CouponCodeRemindSerializer(CouponCodeMixin, serializers.Serializer):  # py
     code = serializers.CharField(required=True)
     email = serializers.EmailField(required=True)
     detail = serializers.CharField(read_only=True)
-    # base_enterprise_url = serializers.URLField(required=False)
 
     def create(self, validated_data):
         """
@@ -2002,7 +2001,8 @@ class CouponCodeRemindSerializer(CouponCodeMixin, serializers.Serializer):  # py
         return attrs
 
     def _trigger_email_sending_task(
-            self, subject, greeting, closing, assigned_offer, redeemed_offer_count, total_offer_count, sender_alias, base_enterprise_url='',
+            self, subject, greeting, closing, assigned_offer, redeemed_offer_count, total_offer_count, sender_alias,
+            base_enterprise_url='',
     ):
         """
         Schedule async task to send email to the learner who has been assigned the code.

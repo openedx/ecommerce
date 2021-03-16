@@ -770,7 +770,7 @@ class CodeAssignmentNudgeEmails(TimeStampedModel):
     the user's email subscription preferences.
     """
 
-    def options_default():
+    def options_default(self):
         return {"base_enterprise_url": ''}
 
     email_template = models.ForeignKey('offer.CodeAssignmentNudgeEmailTemplates', on_delete=models.CASCADE)
@@ -808,7 +808,8 @@ class CodeAssignmentNudgeEmails(TimeStampedModel):
                     )
             else:
                 logger.warning(
-                    'Unable to create a nudge email for user_email: %s, code: %s, email_type: %s, base_enterprise_url: %s',
+                    'Unable to create a nudge email for user_email: %s, code: %s, email_type: %s, \
+                    base_enterprise_url: %s',
                     user_email, code, email_type, base_enterprise_url,
                 )
 

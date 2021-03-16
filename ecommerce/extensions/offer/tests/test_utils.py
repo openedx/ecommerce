@@ -330,7 +330,7 @@ class UtilTests(DiscoveryTestMixin, TestCase):
                 'redeemed_offer_count': 0,
                 'total_offer_count': 1,
                 'code_expiration_date': '2018-12-19',
-                'base_enterprise_url': 'foo@bar.com'
+                'base_enterprise_url': 'http://mylearnerportal.com'
             },
             None,
         ),
@@ -369,6 +369,7 @@ class UtilTests(DiscoveryTestMixin, TestCase):
             sender_alias,
             tokens.get('base_enterprise_url'),
         )
+
     @mock.patch('ecommerce.extensions.offer.utils.send_offer_update_email')
     @ddt.data(
         (
