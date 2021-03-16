@@ -714,7 +714,7 @@ You may redeem this code for {REDEMPTIONS_REMAINING} course(s).
 
 edX Login: {USER_EMAIL}
 Access Code: {CODE}
-Expiration Date: {EXPIRATION_DATE}
+Code Expiration Date: {EXPIRATION_DATE}
 '''
 
 OFFER_REVOKE_EMAIL_TEMPLATE = '''
@@ -726,7 +726,7 @@ You have redeemed this code {REDEEMED_OFFER_COUNT} time(s) out of {TOTAL_OFFER_C
 
 edX Login: {USER_EMAIL}
 Access Code: {CODE}
-Expiration Date: {EXPIRATION_DATE}
+Code Expiration Date: {EXPIRATION_DATE}
 '''
 
 OFFER_ASSIGNMEN_EMAIL_TEMPLATE_BODY_MAP = {
