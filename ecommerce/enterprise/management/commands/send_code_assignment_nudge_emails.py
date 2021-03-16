@@ -88,7 +88,13 @@ class Command(BaseCommand):
                 nudge_email.save()
                 send_nudge_email_count += 1
                 sender_alias = self._get_sender_alias(nudge_email)
-                send_code_assignment_nudge_email.delay(nudge_email.user_email, email_subject, email_body, sender_alias)
+                send_code_assignment_nudge_email.delay(
+                    nudge_email.user_email,
+                    email_subject,
+                    email_body,
+                    sender_alias,
+                    base_enterprise_url=nudge_email.options.get('base_enterprise_url', '')
+                )
                 self.set_last_reminder_date(nudge_email.user_email, nudge_email.code)
                 self._create_email_sent_record(nudge_email)
         logger.info(

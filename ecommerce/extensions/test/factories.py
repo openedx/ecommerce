@@ -337,6 +337,7 @@ class CodeAssignmentNudgeEmailsFactory(factory.DjangoModelFactory):
     email_template = factory.SubFactory(CodeAssignmentNudgeEmailTemplatesFactory)
     user_email = factory.Sequence(lambda n: 'learner_%s@example.com' % n)
     email_date = datetime.now()
+    options = {'base_enterprise_url': 'foo@bar.com'}
 
     class Meta:
         model = CodeAssignmentNudgeEmails

@@ -205,7 +205,7 @@ def send_revoked_offer_email(
         closing,
         learner_email,
         code,
-        sender_alias
+        sender_alias,
 ):
     """
     Arguments:
@@ -238,7 +238,8 @@ def send_assigned_offer_reminder_email(
         redeemed_offer_count,
         total_offer_count,
         code_expiration_date,
-        sender_alias):
+        sender_alias,
+        base_enterprise_url=''):
     """
     Arguments:
         *subject*
@@ -259,6 +260,8 @@ def send_assigned_offer_reminder_email(
            Date till code is valid.
        *sender_alias*
            Enterprise customer sender alias.
+       *base_enterprise_url*
+           Url for the enterprise's learner portal
     """
     email_template = settings.OFFER_REMINDER_EMAIL_TEMPLATE
     placeholder_dict = SafeDict(
@@ -269,7 +272,7 @@ def send_assigned_offer_reminder_email(
         EXPIRATION_DATE=code_expiration_date
     )
     email_body = format_email(email_template, placeholder_dict, greeting, closing)
-    send_offer_update_email.delay(learner_email, subject, email_body, sender_alias)
+    send_offer_update_email.delay(learner_email, subject, email_body, sender_alias, base_enterprise_url)
 
 
 def format_email(template, placeholder_dict, greeting, closing):
