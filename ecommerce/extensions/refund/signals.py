@@ -22,7 +22,7 @@ def track_completed_refund(sender, refund=None, **kwargs):  # pylint: disable=un
                 'id': line.order_line.partner_sku,
                 'quantity': line.quantity,
                 'price': str(line.order_line.line_price_incl_tax),
-                'title': line.order_line.product.title,
+                'course_id': line.order_line.product.course_id,
             } for line in refund.lines.all()
         ],
     }

@@ -54,7 +54,7 @@ class RefundTrackingTests(RefundTestMixin, TransactionTestCase):
                 'id': line.order_line.partner_sku,
                 'quantity': line.quantity,
                 'price': str(line.order_line.line_price_incl_tax),
-                'title': line.order_line.product.title,
+                'course_id': line.order_line.product.course_id,
             } for line in refund.lines.all()
         ]
         self.assertEqual(event_payload['products'], expected_products)
