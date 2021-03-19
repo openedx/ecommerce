@@ -3,10 +3,10 @@
 
 from uuid import uuid4
 
-from django.utils.timezone import now
 import ddt
 import httpretty
 from django.core.exceptions import ValidationError
+from django.utils.timezone import now
 from edx_django_utils.cache import TieredCache
 from mock import patch
 from oscar.core.loading import get_model
@@ -17,12 +17,10 @@ from slumber.exceptions import SlumberBaseException
 
 from ecommerce.coupons.tests.mixins import CouponMixin, DiscoveryMockMixin
 from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
-from ecommerce.extensions.offer.constants import ASSIGN, REMIND, REVOKE, DAY3, DAY10, DAY19
+from ecommerce.extensions.offer.constants import ASSIGN, DAY3, DAY10, DAY19, REMIND, REVOKE
+from ecommerce.extensions.test.factories import CodeAssignmentNudgeEmailTemplatesFactory
 from ecommerce.tests.factories import UserFactory
 from ecommerce.tests.testcases import TestCase
-from ecommerce.extensions.test.factories import (
-    CodeAssignmentNudgeEmailTemplatesFactory
-)
 
 Catalog = get_model('catalogue', 'Catalog')
 ConditionalOffer = get_model('offer', 'ConditionalOffer')
