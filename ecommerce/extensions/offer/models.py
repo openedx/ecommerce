@@ -770,7 +770,7 @@ class CodeAssignmentNudgeEmails(TimeStampedModel):
     the user's email subscription preferences.
     """
 
-    def options_default(self):
+    def options_default():  # pylint: disable=no-method-argument
         return {"base_enterprise_url": ''}
 
     email_template = models.ForeignKey('offer.CodeAssignmentNudgeEmailTemplates', on_delete=models.CASCADE)
