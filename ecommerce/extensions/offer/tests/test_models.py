@@ -3,6 +3,7 @@
 
 from uuid import uuid4
 
+from django.utils.timezone import now
 import ddt
 import httpretty
 from django.core.exceptions import ValidationError
@@ -16,15 +17,20 @@ from slumber.exceptions import SlumberBaseException
 
 from ecommerce.coupons.tests.mixins import CouponMixin, DiscoveryMockMixin
 from ecommerce.extensions.catalogue.tests.mixins import DiscoveryTestMixin
-from ecommerce.extensions.offer.constants import ASSIGN, REMIND, REVOKE
+from ecommerce.extensions.offer.constants import ASSIGN, REMIND, REVOKE, DAY3, DAY10, DAY19
 from ecommerce.tests.factories import UserFactory
 from ecommerce.tests.testcases import TestCase
+from ecommerce.extensions.test.factories import (
+    CodeAssignmentNudgeEmailTemplatesFactory
+)
 
 Catalog = get_model('catalogue', 'Catalog')
 ConditionalOffer = get_model('offer', 'ConditionalOffer')
 OfferAssignmentEmailTemplates = get_model('offer', 'OfferAssignmentEmailTemplates')
 OfferAssignmentEmailSentRecord = get_model('offer', 'OfferAssignmentEmailSentRecord')
 Range = get_model('offer', 'Range')
+CodeAssignmentNudgeEmails = get_model('offer', 'CodeAssignmentNudgeEmails')
+CodeAssignmentNudgeEmailTemplates = get_model('offer', 'CodeAssignmentNudgeEmailTemplates')
 
 
 @ddt.ddt
@@ -639,3 +645,21 @@ class TestOfferAssignmentEmailSentRecord(TestCase):
         assert email_record.enterprise_customer == enterprise_customer
         assert email_record.email_type == email_type
         assert email_record.template_id == template.id
+
+
+class TestCodeAssignmentNudgeEmails(TestCase):
+    def setUp(self):
+        for email_type in (DAY3, DAY10, DAY19):
+            CodeAssignmentNudgeEmailTemplatesFactory(email_type=email_type)
+
+    def test_model_is_created_with_correct_defaults(self):
+        template = CodeAssignmentNudgeEmailTemplates.get_nudge_email_template(DAY3)
+        nudge_email = CodeAssignmentNudgeEmails.objects.create(
+            email_template=template,
+            code='foo',
+            user_email='foo@bar.com',
+            email_date=now()
+        )
+        assert not nudge_email.already_sent
+        assert nudge_email.is_subscribed
+        assert nudge_email.options['base_enterprise_url'] == ''
