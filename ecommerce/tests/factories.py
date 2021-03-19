@@ -23,6 +23,7 @@ class PartnerFactory(factory.DjangoModelFactory):
 class SiteFactory(factory.DjangoModelFactory):
     class Meta:
         model = Site
+        django_get_or_create = ('domain',)
 
     domain = FuzzyText(suffix='.fake')
     name = FuzzyText()
@@ -31,6 +32,7 @@ class SiteFactory(factory.DjangoModelFactory):
 class SiteConfigurationFactory(factory.DjangoModelFactory):
     class Meta:
         model = SiteConfiguration
+        django_get_or_create = ('site',)
 
     lms_url_root = factory.LazyAttribute(lambda obj: "http://lms.testserver.fake")
     site = factory.SubFactory(SiteFactory)

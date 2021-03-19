@@ -1,0 +1,32 @@
+sites:
+  - domain: localhost:1813
+    
+site_configurations:
+  - lms_root_url: http://edx.devstack.lms:18000
+    lms_public_root_url: http://localhost:18000
+    sso_client_id: ecommerce-sso-key
+    sso_client_secret: ecommerce-sso-secret
+    backend_client_id: ecommerce-backend-service-key
+    backend_client_secret: ecommerce-backend-service-secret
+    from_email: staff@example.com
+    discovery_api_url: http://edx.devstack.discovery:18381/api/v1/
+    enable_microfrontend_for_basket_page: true
+    payment_microfrontend_url: http://localhost:1998
+    payment_processors: cybersource,paypal
+    client_side_payment_processor: cybersource
+    partner: edX
+    site: localhost:1813
+
+partners:
+  - code: edX
+    name: Open edX
+
+courses:
+  - course_key: course-v1:edX+DemoX+Demo_Course
+    name: edX Demonstration Course
+    price: 149
+    partner: edX
+    site: localhost:1813
+    seats:
+      - type: audit
+        type: verified

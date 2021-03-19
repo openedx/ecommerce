@@ -9,6 +9,7 @@ from ecommerce.courses.models import Course
 class CourseFactory(factory.DjangoModelFactory):
     class Meta:
         model = Course
+        django_get_or_create = ('id',)
 
     id = FuzzyText(prefix='course-v1:test-org+course+')
     name = FuzzyText(prefix='course-name-')
