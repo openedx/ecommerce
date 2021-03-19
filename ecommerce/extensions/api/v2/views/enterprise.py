@@ -837,13 +837,16 @@ class EnterpriseCouponViewSet(CouponViewSet):
     def remind(self, request, pk):  # pylint: disable=unused-argument
         """
         Remind users of pending offer assignments by email.
+        coupons/<id>/remind
         """
+
         coupon = self.get_object()
         self._validate_coupon_availablity(coupon, 'Coupon is not available for code remind')
         subject = request.data.pop('template_subject', '')
         greeting = request.data.pop('template_greeting', '')
         closing = request.data.pop('template_closing', '')
         template_id = request.data.pop('template_id', None)
+        base_enterprise_url = request.data.pop('base_enterprise_url', '')
         sender_id = request.user.lms_user_id
         self._validate_email_fields(subject, greeting, closing)
         if request.data.get('assignments'):
@@ -882,6 +885,7 @@ class EnterpriseCouponViewSet(CouponViewSet):
                 'template_id': template_id,
                 'sender_id': sender_id,
                 'site': request.site,
+                'base_enterprise_url': base_enterprise_url,
             }
         )
         if serializer.is_valid():

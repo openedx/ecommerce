@@ -1467,7 +1467,8 @@ class CouponCodeAssignmentSerializer(serializers.Serializer):  # pylint: disable
                     if enable_nudge_emails:
                         CodeAssignmentNudgeEmails.subscribe_nudge_emails(
                             user_email=user_email,
-                            code=code
+                            code=code,
+                            base_enterprise_url=base_enterprise_url,
                         )
                     sender_alias = get_enterprise_customer_sender_alias(site, enterprise_customer_uuid)
                     self._trigger_email_sending_task(
@@ -1923,6 +1924,7 @@ class CouponCodeRemindSerializer(CouponCodeMixin, serializers.Serializer):  # py
         """
         Send remind email(s) for pending OfferAssignments.
         """
+
         offer_assignments = validated_data.get('offer_assignments')
         email = validated_data.get('email')
         code = validated_data.get('code')
@@ -1934,6 +1936,7 @@ class CouponCodeRemindSerializer(CouponCodeMixin, serializers.Serializer):  # py
         subject = self.context.get('subject')
         greeting = self.context.get('greeting')
         closing = self.context.get('closing')
+        base_enterprise_url = self.context.get('base_enterprise_url', '')
         detail = 'success'
         current_date_time = timezone.now()
         site = self.context.get('site')
@@ -1947,7 +1950,8 @@ class CouponCodeRemindSerializer(CouponCodeMixin, serializers.Serializer):  # py
                 offer_assignments.first(),
                 redeemed_offer_count,
                 total_offer_count,
-                sender_alias
+                sender_alias,
+                base_enterprise_url,
             )
             # Create a record of the email sent
             create_offer_assignment_email_sent_record(
@@ -1997,7 +2001,8 @@ class CouponCodeRemindSerializer(CouponCodeMixin, serializers.Serializer):  # py
         return attrs
 
     def _trigger_email_sending_task(
-            self, subject, greeting, closing, assigned_offer, redeemed_offer_count, total_offer_count, sender_alias
+            self, subject, greeting, closing, assigned_offer, redeemed_offer_count, total_offer_count, sender_alias,
+            base_enterprise_url='',
     ):
         """
         Schedule async task to send email to the learner who has been assigned the code.
@@ -2014,17 +2019,19 @@ class CouponCodeRemindSerializer(CouponCodeMixin, serializers.Serializer):  # py
                 redeemed_offer_count=redeemed_offer_count,
                 total_offer_count=total_offer_count,
                 code_expiration_date=code_expiration_date.strftime('%d %B, %Y %H:%M %Z'),
-                sender_alias=sender_alias
+                sender_alias=sender_alias,
+                base_enterprise_url=base_enterprise_url,
             )
         except Exception as exc:  # pylint: disable=broad-except
             # Log the exception here to help diagnose any template issues, then raise it for backwards compatibility
             logger.exception(
                 '[Offer Reminder] Email for offer_assignment_id: %d with subject %r, '
-                'greeting %r and closing %r raised exception: %r',
+                'greeting %r and closing %r and base_enterprise_url %r raised exception: %r',
                 assigned_offer.id,
                 subject,
                 greeting,
                 closing,
+                base_enterprise_url,
                 exc
             )
             raise

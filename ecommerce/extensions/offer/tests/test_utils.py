@@ -312,7 +312,62 @@ class UtilTests(DiscoveryTestMixin, TestCase):
             tokens.get('learner_email'),
             subject,
             mock.ANY,
-            sender_alias
+            sender_alias,
+            # base_enterprise_url should be blank as it was not passed in
+            ''
+        )
+
+    @mock.patch('ecommerce.extensions.offer.utils.send_offer_update_email')
+    @ddt.data(
+        (
+            'subject',
+            'hi',
+            'bye',
+            'sender_alias',
+            {
+                'learner_email': 'johndoe@unknown.com',
+                'code': 'GIL7RUEOU7VHBH7Q',
+                'redeemed_offer_count': 0,
+                'total_offer_count': 1,
+                'code_expiration_date': '2018-12-19',
+                'base_enterprise_url': 'http://mylearnerportal.com'
+            },
+            None,
+        ),
+    )
+    @ddt.unpack
+    def test_send_assigned_offer_reminder_email_with_base_url(
+            self,
+            subject,
+            greeting,
+            closing,
+            sender_alias,
+            tokens,
+            side_effect,
+            mock_sailthru_task,
+    ):
+        """
+        Test that the offer assignment reminder email message is sent to the async task in ecommerce-worker.
+        """
+        mock_sailthru_task.delay.side_effect = side_effect
+        send_assigned_offer_reminder_email(
+            subject,
+            greeting,
+            closing,
+            tokens.get('learner_email'),
+            tokens.get('code'),
+            tokens.get('redeemed_offer_count'),
+            tokens.get('total_offer_count'),
+            tokens.get('code_expiration_date'),
+            sender_alias,
+            tokens.get('base_enterprise_url'),
+        )
+        mock_sailthru_task.delay.assert_called_once_with(
+            tokens.get('learner_email'),
+            subject,
+            mock.ANY,
+            sender_alias,
+            tokens.get('base_enterprise_url'),
         )
 
     @mock.patch('ecommerce.extensions.offer.utils.send_offer_update_email')
