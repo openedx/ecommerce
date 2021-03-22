@@ -174,14 +174,10 @@ class OfferAssignmentSummaryViewSet(ModelViewSet):
                 attribute_values__value_boolean=False
             )
 
-            voucher_codes = [
-                voucher.get('coupon_vouchers__vouchers__code') for voucher
-                in Product.objects.filter(active_coupon).distinct()
-                .select_related('coupon_vouchers__vouchers')
-                .values('coupon_vouchers__vouchers__code')
-            ]
-
-            queryset = queryset.filter(code__in=voucher_codes)
+            queryset = queryset.filter(code__in=Product.objects
+                                       .filter(product_class__name=COUPON_PRODUCT_CLASS_NAME)
+                                       .filter(active_coupon).distinct()
+                                       .values_list('coupon_vouchers__vouchers__code', flat=True))
 
         enterprise_uuid = self.request.query_params.get('enterprise_uuid')
         if enterprise_uuid:
