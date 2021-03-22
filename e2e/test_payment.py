@@ -148,8 +148,7 @@ class TestSeatPayment:
             try:
                 api.process_refund(refund_id, 'approve')
             except Exception as e:  # pylint: disable=broad-except
-                log.warning('Exception while processing refund [%s]: [%r]',
-            refund_id, e)
+                log.warning('Exception while processing refund [%s]: [%r]', refund_id, e)
 
         return True
 
