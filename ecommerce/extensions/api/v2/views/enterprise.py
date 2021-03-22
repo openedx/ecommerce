@@ -177,7 +177,6 @@ class OfferAssignmentSummaryViewSet(ModelViewSet):
             queryset = queryset.filter(code__in=Product.objects
                                        .filter(product_class__name=COUPON_PRODUCT_CLASS_NAME)
                                        .filter(active_coupon).distinct()
-                                       .select_related('coupon_vouchers__vouchers', 'product_class')
                                        .values_list('coupon_vouchers__vouchers__code', flat=True))
 
         enterprise_uuid = self.request.query_params.get('enterprise_uuid')
