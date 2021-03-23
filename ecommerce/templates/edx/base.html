@@ -29,6 +29,9 @@
         {% block stylesheets %}
         {% endblock %}
     {% endcompress %}
+    <script type="text/javascript">
+        var initModelData = {{ analytics_data|safe }};
+    </script>
 </head>
 <body>
 {% block skip_link %}
@@ -52,9 +55,6 @@
 {# Translation support for JavaScript strings. #}
 <script type="text/javascript" src="{% url 'javascript-catalog' %}"></script>
 
-<script type="text/javascript">
-    var initModelData = {{ analytics_data|safe }};
-</script>
 
 {% compress js %}
     <script src="{% static 'bower_components/requirejs/require.js' %}"></script>
