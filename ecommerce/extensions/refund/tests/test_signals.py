@@ -2,6 +2,7 @@
 
 from mock import patch
 
+from ecommerce.core.constants import SEAT_PRODUCT_CLASS_NAME
 from ecommerce.core.models import SegmentClient
 from ecommerce.extensions.analytics.utils import ECOM_TRACKING_ID_FMT
 from ecommerce.extensions.refund.api import create_refunds
@@ -53,11 +54,19 @@ class RefundTrackingTests(RefundTestMixin, TransactionTestCase):
             {
                 'id': line.order_line.partner_sku,
                 'quantity': line.quantity,
-                'price': str(line.order_line.line_price_incl_tax),
-                'course_id': line.order_line.product.course_id,
             } for line in refund.lines.all()
         ]
+
+        total = refund.total_credit_excl_tax
+        first_product = refund.lines.first().order_line.product
+        product_class = first_product.get_product_class().name
+        if product_class == SEAT_PRODUCT_CLASS_NAME:
+            title = first_product.course.name
+        else:
+            title = first_product.title
         self.assertEqual(event_payload['products'], expected_products)
+        self.assertEqual(event_payload['total'], total)
+        self.assertEqual(event_payload['title'], title)
 
     def test_successful_refund_tracking(self, mock_track):
         """Verify that a successfully placed refund is tracked when Segment is enabled."""
