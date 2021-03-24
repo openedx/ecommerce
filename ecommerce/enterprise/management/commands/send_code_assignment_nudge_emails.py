@@ -35,7 +35,7 @@ class Command(BaseCommand):
         """
         # TODO: Removing this filter for testing purpose "email_date__date=datetime.now().date()"
         return CodeAssignmentNudgeEmails.objects.filter(
-            email_date__date=datetime.now().date(),
+            # email_date__date=datetime.now().date(),
             already_sent=False,
             is_subscribed=True
         )
@@ -83,6 +83,7 @@ class Command(BaseCommand):
                 nudge_email.user_email,
                 nudge_email.code
             )
+            base_enterprise_url = nudge_email.options.get('base_enterprise_url', '') if nudge_email.options else ''
             if email_body:
                 nudge_email.already_sent = True
                 nudge_email.save()
@@ -93,7 +94,7 @@ class Command(BaseCommand):
                     email_subject,
                     email_body,
                     sender_alias,
-                    base_enterprise_url=nudge_email.options.get('base_enterprise_url', '')
+                    base_enterprise_url=base_enterprise_url
                 )
                 self.set_last_reminder_date(nudge_email.user_email, nudge_email.code)
                 self._create_email_sent_record(nudge_email)
