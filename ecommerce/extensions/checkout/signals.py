@@ -53,9 +53,6 @@ def track_completed_order(sender, order=None, **kwargs):  # pylint: disable=unus
                 'price': float(line.line_price_excl_tax),
                 'quantity': int(line.quantity),
                 'category': line.product.get_product_class().name,
-                # TODO: DENG-797: remove the the `title` once we are no longer forwarding
-                # these events to Hubspot.
-                'title': line.product.title,
             } for line in order.lines.all()
         ],
     }
