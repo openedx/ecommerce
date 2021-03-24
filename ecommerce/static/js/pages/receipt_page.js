@@ -37,12 +37,11 @@ define([
             };
         }
 
-        function trackPurchase(orderId, totalAmount, currency, productIds) {
+        function trackPurchase(orderId, totalAmount, currency) {
             window.analytics.track('Completed Purchase', {
                 orderId: orderId,
                 total: totalAmount,
-                currency: currency,
-                productIds: productIds
+                currency: currency
             });
         }
 
@@ -50,15 +49,14 @@ define([
             var $el = $('#receipt-container'),
                 currency = $el.data('currency'),
                 orderId = $el.data('order-id'),
-                totalAmount = $el.data('total-amount'),
-                productIds = $el.data('product-ids');
+                totalAmount = $el.data('total-amount');
 
             if ($el.data('back-button')) {
                 disableBackButton();
             }
 
             if (orderId) {
-                trackPurchase(orderId, totalAmount, currency, productIds);
+                trackPurchase(orderId, totalAmount, currency);
             }
         }
 
