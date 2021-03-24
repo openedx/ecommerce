@@ -238,6 +238,7 @@ class SignalTests(ProgramTestMixin, CouponMixin, TestCase):
                     'price': float(line.line_price_excl_tax),
                     'quantity': line.quantity,
                     'category': line.product.get_product_class().name,
+                    'title': line.product.title,
                 } for line in order.lines.all()
             ],
         }
