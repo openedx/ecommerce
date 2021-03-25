@@ -1,7 +1,3 @@
-
-
-from decimal import Decimal
-
 import ddt
 import httpretty
 import mock
@@ -10,18 +6,13 @@ from oscar.apps.payment.exceptions import PaymentError
 from oscar.core.loading import get_class, get_model
 from testfixtures import LogCapture
 
-from ecommerce.core.constants import SEAT_PRODUCT_CLASS_NAME
 from ecommerce.core.url_utils import get_lms_enrollment_api_url
-from ecommerce.courses.tests.factories import CourseFactory
-from ecommerce.entitlements.utils import create_or_update_course_entitlement
-from ecommerce.extensions.checkout.utils import format_currency, get_receipt_page_url
 from ecommerce.extensions.payment.tests.processors import DummyProcessor
 from ecommerce.extensions.refund import models
 from ecommerce.extensions.refund.exceptions import InvalidStatus
 from ecommerce.extensions.refund.status import REFUND, REFUND_LINE
 from ecommerce.extensions.refund.tests.factories import RefundFactory, RefundLineFactory
 from ecommerce.extensions.refund.tests.mixins import RefundTestMixin
-from ecommerce.extensions.test.factories import create_basket, create_order
 from ecommerce.tests.factories import UserFactory
 from ecommerce.tests.testcases import TestCase
 
@@ -169,8 +160,7 @@ class RefundTests(RefundTestMixin, StatusTestsMixin, TestCase):
         # Verify that the order totals $0.
         self.assertEqual(order.total_excl_tax, 0)
 
-        with mock.patch.object(Refund, '_notify_purchaser') as mock_notify:
-            refund = Refund.create_with_lines(order, list(order.lines.all()))
+        refund = Refund.create_with_lines(order, list(order.lines.all()))
 
         # Verify that refund lines are not revoked.
         self.assertFalse(mock_revoke_line.called)
@@ -178,9 +168,6 @@ class RefundTests(RefundTestMixin, StatusTestsMixin, TestCase):
         # Verify that the refund has been successfully approved.
         self.assertEqual(refund.status, REFUND.COMPLETE)
         self.assertEqual({line.status for line in refund.lines.all()}, {REFUND_LINE.COMPLETE})
-
-        # Verify no notification is sent to the purchaser
-        self.assertFalse(mock_notify.called)
 
     @ddt.unpack
     @ddt.data(
@@ -230,8 +217,7 @@ class RefundTests(RefundTestMixin, StatusTestsMixin, TestCase):
         source = refund.order.sources.first()
 
         with LogCapture(LOGGER_NAME) as logger:
-            with mock.patch.object(Refund, '_notify_purchaser', return_value=None) as mock_notify:
-                self.approve(refund)
+            self.approve(refund)
 
             logger.check_present(
                 (
@@ -257,9 +243,6 @@ class RefundTests(RefundTestMixin, StatusTestsMixin, TestCase):
         payment_event = refund.order.payment_events.first()
         self.assert_valid_payment_event_fields(payment_event, refund.total_credit_excl_tax, paid_type,
                                                DummyProcessor.NAME, DummyProcessor.REFUND_TRANSACTION_ID)
-
-        # Verify an attempt is made to send a notification
-        mock_notify.assert_called_once_with()
 
         # Verify subsequent calls to approve an approved refund do not change the state
         refund.refresh_from_db()
@@ -352,113 +335,6 @@ class RefundTests(RefundTestMixin, StatusTestsMixin, TestCase):
         self.assertFalse(refund.deny())
         self.assertEqual(refund.status, status)
         self.assert_line_status(refund, REFUND_LINE.OPEN)
-
-    @mock.patch('ecommerce_worker.sailthru.v1.tasks.send_course_refund_email.delay')
-    def test_notify_purchaser(self, mock_task):
-        """ Verify the notification is scheduled if the site has notifications enabled
-        and the refund is for a course seat.
-        """
-        site_configuration = self.site.siteconfiguration
-        site_configuration.send_refund_notifications = True
-
-        user = UserFactory()
-
-        course = CourseFactory(partner=self.partner)
-        price = Decimal(100.00)
-        product = course.create_or_update_seat('verified', True, price)
-
-        basket = create_basket(site=self.site, owner=user, empty=True)
-        basket.add_product(product)
-
-        order = create_order(basket=basket, user=user)
-        order_url = get_receipt_page_url(site_configuration, order.number)
-
-        refund = Refund.create_with_lines(order, order.lines.all())
-
-        with LogCapture(REFUND_MODEL_LOGGER_NAME) as logger:
-            refund._notify_purchaser()  # pylint: disable=protected-access
-
-        msg = 'Course refund notification scheduled for Refund [{}].'.format(refund.id)
-        logger.check_present(
-            (REFUND_MODEL_LOGGER_NAME, 'INFO', msg)
-        )
-
-        amount = format_currency(order.currency, price)
-        mock_task.assert_called_once_with(
-            user.email, refund.id, amount, course.name, order.number, order_url, site_code=self.partner.short_code
-        )
-
-    @mock.patch('ecommerce_worker.sailthru.v1.tasks.send_course_refund_email.delay')
-    def test_notify_purchaser_course_entielement(self, mock_task):
-        """ Verify the notification is scheduled if the site has notifications enabled
-        and the refund is for a course entitlement.
-        """
-        site_configuration = self.site.siteconfiguration
-        site_configuration.send_refund_notifications = True
-
-        user = UserFactory()
-
-        course_entitlement = create_or_update_course_entitlement(
-            'verified', 100, self.partner, '111-222-333-444', 'Course Entitlement')
-        basket = create_basket(site=self.site, owner=user, empty=True)
-        basket.add_product(course_entitlement, 1)
-
-        order = create_order(number=1, basket=basket, user=user)
-        order_url = get_receipt_page_url(site_configuration, order.number)
-
-        refund = Refund.create_with_lines(order, order.lines.all())
-
-        with LogCapture(REFUND_MODEL_LOGGER_NAME) as logger:
-            refund._notify_purchaser()  # pylint: disable=protected-access
-
-        msg = 'Course refund notification scheduled for Refund [{}].'.format(refund.id)
-        logger.check_present(
-            (REFUND_MODEL_LOGGER_NAME, 'INFO', msg)
-        )
-
-        amount = format_currency(order.currency, 100)
-        mock_task.assert_called_once_with(
-            user.email, refund.id, amount, course_entitlement.title, order.number,
-            order_url, site_code=self.partner.short_code
-        )
-
-    @mock.patch('ecommerce_worker.sailthru.v1.tasks.send_course_refund_email.delay')
-    def test_notify_purchaser_with_notifications_disabled(self, mock_task):
-        """ Verify no notification is sent if the functionality is disabled for the site. """
-        self.site.siteconfiguration.send_refund_notifications = False
-        order = create_order(site=self.site)
-        refund = self.create_refund(order=order)
-
-        with LogCapture(REFUND_MODEL_LOGGER_NAME) as logger:
-            refund._notify_purchaser()  # pylint: disable=protected-access
-
-        msg = 'Refund notifications are disabled for Partner [{code}]. ' \
-              'No notification will be sent for Refund [{id}]'.format(code=self.partner.short_code, id=refund.id)
-        logger.check_present(
-            (REFUND_MODEL_LOGGER_NAME, 'INFO', msg)
-        )
-        self.assertFalse(mock_task.called)
-
-    @mock.patch('ecommerce_worker.sailthru.v1.tasks.send_course_refund_email.delay')
-    def test_notify_purchaser_without_course_product_class(self, mock_task):
-        """ Verify a notification is not sent if the refunded item is not a course seat. """
-        self.site.siteconfiguration.send_refund_notifications = True
-
-        order = create_order(site=self.site)
-        product_class = order.lines.first().product.get_product_class().name
-        self.assertNotEqual(product_class, SEAT_PRODUCT_CLASS_NAME)
-
-        refund = self.create_refund(order=order)
-
-        with LogCapture(REFUND_MODEL_LOGGER_NAME) as logger:
-            refund._notify_purchaser()  # pylint: disable=protected-access
-
-        msg = ('No refund notification will be sent for Refund [{id}]. The notification supports product '
-               'lines of type Course, not [{product_class}].').format(product_class=product_class, id=refund.id)
-        logger.check_present(
-            (REFUND_MODEL_LOGGER_NAME, 'WARNING', msg)
-        )
-        self.assertFalse(mock_task.called)
 
 
 class RefundLineTests(StatusTestsMixin, TestCase):
