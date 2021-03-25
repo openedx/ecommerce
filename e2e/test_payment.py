@@ -143,13 +143,7 @@ class TestSeatPayment:
         assert refund_ids != []
 
         for refund_id in refund_ids:
-            # [REV-2156] Cybersource refund errors are breaking e2e tests, quiet them for now while we investigate
-            # This try-except should be removed once the issue is resolved
-            try:
-                api.process_refund(refund_id, 'approve')
-            except Exception as e:  # pylint: disable=broad-except
-                log.warning('Exception while processing refund [%s]: [%r]', refund_id, e)
-
+            api.process_refund(refund_id, 'approve')
         return True
 
     def get_verified_seat(self, course_run):
