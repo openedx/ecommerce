@@ -7,6 +7,7 @@
 # Translators:
 # Translators:
 # Translators:
+# Translators:
 # Aitor Renobales Irusta <aitor.renobales@ehu.eus>, 2018
 # Beatriz González Gutiérrez <beatrizgg@gmail.com>, 2016
 # Feli555 <fmeier1998@gmail.com>, 2016
@@ -19,7 +20,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-11-23 13:56+0000\n"
+"POT-Creation-Date: 2021-03-28 20:13+0000\n"
 "PO-Revision-Date: 2020-11-24 09:15+0000\n"
 "Last-Translator: Transifex Bot <>\n"
 "Language-Team: Spanish (Spain) (http://www.transifex.com/open-edx/edx-platform/language/es_ES/)\n"
