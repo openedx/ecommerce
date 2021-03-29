@@ -6,15 +6,12 @@ from django.conf import settings
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from django_extensions.db.models import TimeStampedModel
-from ecommerce_worker.sailthru.v1.tasks import send_course_refund_email
 from oscar.apps.payment.exceptions import PaymentError
 from oscar.core.loading import get_class, get_model
 from oscar.core.utils import get_default_currency
 from simple_history.models import HistoricalRecords
 
-from ecommerce.core.constants import COURSE_ENTITLEMENT_PRODUCT_CLASS_NAME, SEAT_PRODUCT_CLASS_NAME
 from ecommerce.extensions.analytics.utils import audit_log
-from ecommerce.extensions.checkout.utils import format_currency, get_receipt_page_url
 from ecommerce.extensions.fulfillment.api import revoke_fulfillment_for_refund
 from ecommerce.extensions.order.constants import PaymentEventTypeName
 from ecommerce.extensions.payment.helpers import get_processor_class_by_name
@@ -139,7 +136,7 @@ class Refund(StatusMixin, TimeStampedModel):
             )
 
         if total_credit_excl_tax == 0:
-            refund.approve(notify_purchaser=False)
+            refund.approve()
 
         return refund
 
@@ -194,42 +191,6 @@ class Refund(StatusMixin, TimeStampedModel):
             # This occurs when attempting to refund free orders.
             logger.info("No payments to credit for Refund [%d]", self.id)
 
-    def _notify_purchaser(self):
-        """ Notify the purchaser that the refund has been processed. """
-        site_configuration = self.order.site.siteconfiguration
-        site_code = site_configuration.partner.short_code
-
-        if not site_configuration.send_refund_notifications:
-            logger.info(
-                'Refund notifications are disabled for Partner [%s]. No notification will be sent for Refund [%d]',
-                site_code, self.id
-            )
-            return
-
-        # NOTE (CCB): The initial version of the refund email only supports refunding a single course.
-        product = self.lines.first().order_line.product
-        product_class = product.get_product_class().name
-
-        if product_class not in [SEAT_PRODUCT_CLASS_NAME, COURSE_ENTITLEMENT_PRODUCT_CLASS_NAME]:
-            logger.warning(
-                ('No refund notification will be sent for Refund [%d]. The notification supports product lines '
-                 'of type Course, not [%s].'),
-                self.id, product_class
-            )
-            return
-
-        if product_class == SEAT_PRODUCT_CLASS_NAME:
-            course_name = self.lines.first().order_line.product.course.name
-        else:
-            course_name = self.lines.first().order_line.product.title
-        order_number = self.order.number
-        order_url = get_receipt_page_url(site_configuration, order_number)
-        amount = format_currency(self.currency, self.total_credit_excl_tax)
-
-        send_course_refund_email.delay(self.user.email, self.id, amount, course_name, order_number,
-                                       order_url, site_code=site_code)
-        logger.info('Course refund notification scheduled for Refund [%d].', self.id)
-
     def _revoke_lines(self):
         """Revoke fulfillment for the lines in this Refund."""
         if revoke_fulfillment_for_refund(self):
@@ -238,7 +199,7 @@ class Refund(StatusMixin, TimeStampedModel):
             logger.error('Unable to revoke fulfillment of all lines of Refund [%d].', self.id)
             self.set_status(REFUND.REVOCATION_ERROR)
 
-    def approve(self, revoke_fulfillment=True, notify_purchaser=True):
+    def approve(self, revoke_fulfillment=True):
         if self.status == REFUND.COMPLETE:
             logger.info('Refund [%d] has already been completed. No additional action is required to approve.', self.id)
             return True
@@ -249,8 +210,6 @@ class Refund(StatusMixin, TimeStampedModel):
             try:
                 self._issue_credit()
                 self.set_status(REFUND.PAYMENT_REFUNDED)
-                if notify_purchaser:
-                    self._notify_purchaser()
             except PaymentError:
                 logger.exception('Failed to issue credit for refund [%d].', self.id)
                 self.set_status(REFUND.PAYMENT_REFUND_ERROR)
