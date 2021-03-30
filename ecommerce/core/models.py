@@ -9,7 +9,7 @@ from dateutil.parser import parse
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.contrib.sites.models import Site
-from django.core.exceptions import ObjectDoesNotExist, ValidationError
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.functional import cached_property
 from django.utils.timezone import now
@@ -574,7 +574,7 @@ class User(AbstractUser):
                 )
                 response = api.accounts.get(email=user_email)
                 return response[0][attribute]
-            except Exception:  # pylint: disable=bare-except
+            except Exception:  # pylint: disable=broad-except
                 log.exception('Failed to get lms_user_id for email: [%s]', user_email)
         return None
 
