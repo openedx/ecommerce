@@ -61,7 +61,7 @@ from ecommerce.extensions.test.factories import (
 )
 from ecommerce.invoice.models import Invoice
 from ecommerce.programs.custom import class_path
-from ecommerce.tests.mixins import JwtMixin, ThrottlingMixin
+from ecommerce.tests.mixins import JwtMixin, LmsApiMockMixin, ThrottlingMixin
 from ecommerce.tests.testcases import TestCase
 
 Basket = get_model('basket', 'Basket')
@@ -293,6 +293,7 @@ class EnterpriseCouponViewSetRbacTests(
         CouponMixin,
         DiscoveryTestMixin,
         DiscoveryMockMixin,
+        LmsApiMockMixin,
         JwtMixin,
         ThrottlingMixin,
         TestCase):
@@ -1198,6 +1199,7 @@ class EnterpriseCouponViewSetRbacTests(
         assert results[0]['code'] == voucher1.code
         assert results[0]['course_key'] is None
 
+    @httpretty.activate
     def test_permission_search_200(self):
         """
         Test that we get implicit access via role assignment
@@ -1243,6 +1245,8 @@ class EnterpriseCouponViewSetRbacTests(
         # Redeem a voucher without using the assignment endpoint
         self.use_voucher(coupon3.coupon_vouchers.first().vouchers.first(), self.user)
 
+        self.mock_accounts_api_using_email(self.request, self.user)
+        self.mock_access_token_response()
         response = self.get_response(
             'GET',
             reverse(
