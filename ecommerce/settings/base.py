@@ -570,8 +570,6 @@ CELERY_DEFAULT_ROUTING_KEY = 'ecommerce'
 CELERY_DEFAULT_QUEUE = DEFAULT_PRIORITY_QUEUE
 CELERY_ROUTES = {
     'ecommerce_worker.fulfillment.v1.tasks.fulfill_order': {'queue': 'ecommerce.fulfillment'},
-    'ecommerce_worker.sailthru.v1.tasks.update_course_enrollment': {'queue': 'ecommerce.email_marketing'},
-    'ecommerce_worker.sailthru.v1.tasks.send_course_refund_email': {'queue': 'ecommerce.email_marketing'},
     'ecommerce_worker.sailthru.v1.tasks.send_offer_assignment_email': {'queue': 'ecommerce.email_marketing'},
     'ecommerce_worker.sailthru.v1.tasks.send_offer_update_email': {'queue': 'ecommerce.email_marketing'},
     'ecommerce_worker.sailthru.v1.tasks.send_offer_usage_email': {'queue': 'ecommerce.email_marketing'},

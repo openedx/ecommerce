@@ -11,7 +11,6 @@ from ecommerce.core.constants import (
 )
 from ecommerce.extensions.basket.constants import EMAIL_OPT_IN_ATTRIBUTE, PURCHASER_BEHALF_ATTRIBUTE
 from ecommerce.extensions.checkout.signals import BUNDLE
-from ecommerce.sailthru.signals import SAILTHRU_CAMPAIGN
 from ecommerce.core.constants import ORDER_MANAGER_ROLE
 from ecommerce.core.constants import DONATIONS_FROM_CHECKOUT_TESTS_PRODUCT_TYPE_NAME
 from ecommerce.core.constants import ENTERPRISE_COUPON_ADMIN_ROLE
@@ -59,7 +58,6 @@ def django_db_setup(django_db_setup, django_db_blocker, django_db_use_migrations
         BasketAttributeType.objects.get_or_create(name=EMAIL_OPT_IN_ATTRIBUTE)
         BasketAttributeType.objects.get_or_create(name=PURCHASER_BEHALF_ATTRIBUTE)
         BasketAttributeType.objects.get_or_create(name=BUNDLE)
-        BasketAttributeType.objects.get_or_create(name=SAILTHRU_CAMPAIGN)
 
         for klass in (Category, ProductAttribute, ProductClass, Option):
             klass.skip_history_when_saving = True
