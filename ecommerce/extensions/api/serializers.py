@@ -177,6 +177,7 @@ def _flatten(attrs):
 
 
 def create_offer_assignment_email_sent_record(
+        site,
         enterprise_customer_uuid,
         email_type,
         template=None,
@@ -197,7 +198,7 @@ def create_offer_assignment_email_sent_record(
         sender_id (str): lms_user_id of the admin who sent the email
 
     """
-    receiver_id = receiver_id or User.get_lms_user_id_from_email(user_email)
+    receiver_id = receiver_id or User.get_lms_user_attribute_using_email(site, user_email)
     sender_category = MANUAL_EMAIL if sender_id else AUTOMATIC_EMAIL
 
     OfferAssignmentEmailSentRecord.create_email_record(
@@ -1477,6 +1478,7 @@ class CouponCodeAssignmentSerializer(serializers.Serializer):  # pylint: disable
                     )
                     # Create a record of the email sent
                     create_offer_assignment_email_sent_record(
+                        site,
                         enterprise_customer_uuid,
                         ASSIGN,
                         template,
@@ -1874,6 +1876,7 @@ class CouponCodeRevokeSerializer(CouponCodeMixin, serializers.Serializer):  # py
                 )
                 # Create a record of the email sent
                 create_offer_assignment_email_sent_record(
+                    site,
                     enterprise_customer_uuid,
                     REVOKE,
                     template,
@@ -1955,6 +1958,7 @@ class CouponCodeRemindSerializer(CouponCodeMixin, serializers.Serializer):  # py
             )
             # Create a record of the email sent
             create_offer_assignment_email_sent_record(
+                site,
                 enterprise_customer_uuid,
                 REMIND,
                 template,

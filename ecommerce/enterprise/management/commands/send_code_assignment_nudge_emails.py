@@ -41,7 +41,7 @@ class Command(BaseCommand):
         )
 
     @staticmethod
-    def _create_email_sent_record(nudge_email):
+    def _create_email_sent_record(site, nudge_email):
         """
         Creates an instance of OfferAssignmentEmailSentRecord with the given data.
         Arguments:
@@ -54,23 +54,23 @@ class Command(BaseCommand):
             sender_category=AUTOMATIC_EMAIL,
             code=nudge_email.code,
             user_email=nudge_email.user_email,
-            receiver_id=User.get_lms_user_id_from_email(nudge_email.user_email)
+            receiver_id=User.get_lms_user_attribute_using_email(site, nudge_email.user_email)
         )
 
     @staticmethod
-    def _get_sender_alias(nudge_email):
+    def _get_sender_alias(site, nudge_email):
         """
         Returns the sender alias of an Enterprise Customer.
 
         Arguments:
             nudge_email (CodeAssignmentNudgeEmails): A nudge email sent to the learner.
         """
-        site = Site.objects.get_current()
         enterprise_customer_uuid = get_enterprise_customer_uuid(nudge_email.code)
         return get_enterprise_customer_sender_alias(site, enterprise_customer_uuid)
 
     def handle(self, *args, **options):
         send_nudge_email_count = 0
+        site = Site.objects.get_current()
         nudge_emails = self._get_nudge_emails()
         total_nudge_emails_count = nudge_emails.count()
         logger.info(
@@ -87,7 +87,7 @@ class Command(BaseCommand):
                 nudge_email.already_sent = True
                 nudge_email.save()
                 send_nudge_email_count += 1
-                sender_alias = self._get_sender_alias(nudge_email)
+                sender_alias = self._get_sender_alias(site, nudge_email)
                 send_code_assignment_nudge_email.delay(
                     nudge_email.user_email,
                     email_subject,
@@ -96,7 +96,7 @@ class Command(BaseCommand):
                     base_enterprise_url=nudge_email.options.get('base_enterprise_url', '')
                 )
                 self.set_last_reminder_date(nudge_email.user_email, nudge_email.code)
-                self._create_email_sent_record(nudge_email)
+                self._create_email_sent_record(site, nudge_email)
         logger.info(
             '[Code Assignment Nudge Email] %s out of %s added to the email sending queue.',
             send_nudge_email_count,
