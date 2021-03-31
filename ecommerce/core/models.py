@@ -9,7 +9,7 @@ from dateutil.parser import parse
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.contrib.sites.models import Site
-from django.core.exceptions import ObjectDoesNotExist, ValidationError
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.functional import cached_property
 from django.utils.timezone import now
@@ -553,14 +553,30 @@ class User(AbstractUser):
         except Exception:  # pylint: disable=broad-except
             return None
 
-    @classmethod
-    def get_lms_user_id_from_email(cls, user_email):
-        """Returns the lms_user_id of the user if the account exists, otherwise returns None."""
-        try:
-            lms_user_id = cls.objects.get(email=user_email).lms_user_id
-        except ObjectDoesNotExist:
-            lms_user_id = None
-        return lms_user_id
+    @staticmethod
+    def get_lms_user_attribute_using_email(site, user_email, attribute='id'):
+        """Returns a lms_user attribute by query LMS using email address.
+
+        Args:
+            site (Site): The site from which the LMS account API endpoint is created.
+            user_email(str): Email address to search from LMS.
+            attribute(str): LMS user attribute to get from LMS User. default is id (lms_user_id)
+
+        Returns (str):
+            Required LMS User attribute or None if not found.
+        """
+        if user_email:
+            try:
+                api = EdxRestApiClient(
+                    site.siteconfiguration.build_lms_url('/api/user/v1'),
+                    append_slash=False,
+                    jwt=site.siteconfiguration.access_token
+                )
+                response = api.accounts.get(email=user_email)
+                return response[0][attribute]
+            except Exception:  # pylint: disable=broad-except
+                log.exception('Failed to get lms_user_id for email: [%s]', user_email)
+        return None
 
     def lms_user_id_with_metric(self, usage=None, allow_missing=False):
         """

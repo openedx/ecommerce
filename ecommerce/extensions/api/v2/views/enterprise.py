@@ -495,8 +495,9 @@ class EnterpriseCouponViewSet(CouponViewSet):
         voucher_code = self.request.query_params.get('voucher_code', None)
         if not (user_email or voucher_code):
             raise Http404("No search query parameter provided.")
+        username = User.get_lms_user_attribute_using_email(request.site, user_email, attribute='username')
         try:
-            user = User.objects.get(email=user_email)
+            user = User.objects.get(username=username)
         except ObjectDoesNotExist:
             user = None
 
