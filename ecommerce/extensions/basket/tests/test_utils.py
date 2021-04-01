@@ -386,13 +386,28 @@ class BasketUtilsTests(DiscoveryTestMixin, BasketMixin, TestCase):
         """
         product = ProductFactory()
         request = self.request
-        basket = prepare_basket(request, [product])
-        with self.assertRaises(BasketAttribute.DoesNotExist):
-            BasketAttribute.objects.get(basket=basket, attribute_type__name=BUNDLE)
-        request.GET = {'bundle': TEST_BUNDLE_ID}
-        basket = prepare_basket(request, [product])
-        bundle_id = BasketAttribute.objects.get(basket=basket, attribute_type__name=BUNDLE).value_text
-        self.assertEqual(bundle_id, TEST_BUNDLE_ID)
+        program_data = {'marketing_slug': 'program-slug', 'title': 'program title', 'type': 'MicroMasters'}
+        with mock.patch('ecommerce.extensions.basket.utils.track_segment_event') as mock_track:
+            basket = prepare_basket(request, [product])
+            with self.assertRaises(BasketAttribute.DoesNotExist):
+                BasketAttribute.objects.get(basket=basket, attribute_type__name=BUNDLE)
+            mock_track.assert_not_called()
+            request.GET = {'bundle': TEST_BUNDLE_ID}
+            with mock.patch('ecommerce.extensions.basket.utils.get_program', return_value=program_data):
+                basket = prepare_basket(request, [product])
+            bundle_id = BasketAttribute.objects.get(basket=basket, attribute_type__name=BUNDLE).value_text
+            self.assertEqual(bundle_id, TEST_BUNDLE_ID)
+            properties = {
+                'bundle_id': TEST_BUNDLE_ID,
+                'cart_id': basket.id,
+                'marketing_slug': program_data['type'].lower() + '/' + program_data['marketing_slug'],
+                'title': program_data['title'],
+                'total_price': basket.total_excl_tax,
+                'quantity': basket.lines.count(),
+            }
+            mock_track.assert_called_once_with(
+                request.site, request.user, 'edx.bi.ecommerce.basket.bundle_added', properties
+            )
 
     def test_prepare_basket_with_bundle_voucher(self):
         """
@@ -406,7 +421,9 @@ class BasketUtilsTests(DiscoveryTestMixin, BasketMixin, TestCase):
         basket = prepare_basket(request, [product], voucher)
         self.assertTrue(basket.vouchers.all())
         request.GET = {'bundle': TEST_BUNDLE_ID}
-        basket = prepare_basket(request, [product])
+        program_data = {'marketing_slug': 'program-slug', 'title': 'program title', 'type': 'micromasters'}
+        with mock.patch('ecommerce.extensions.basket.utils.get_program', return_value=program_data):
+            basket = prepare_basket(request, [product])
         self.assertFalse(basket.vouchers.all())
 
     def test_prepare_basket_attribute_delete(self):
@@ -416,7 +433,9 @@ class BasketUtilsTests(DiscoveryTestMixin, BasketMixin, TestCase):
         product = ProductFactory(categories=[], stockrecords__partner__short_code='second')
         request = self.request
         request.GET = {'bundle': TEST_BUNDLE_ID}
-        basket = prepare_basket(request, [product])
+        program_data = {'marketing_slug': 'program-slug', 'title': 'program title', 'type': 'micromasters'}
+        with mock.patch('ecommerce.extensions.basket.utils.get_program', return_value=program_data):
+            basket = prepare_basket(request, [product])
 
         # Verify that the bundle attribute exists for the basket when bundle is added to basket
         bundle_id = BasketAttribute.objects.get(basket=basket, attribute_type__name=BUNDLE).value_text
@@ -424,7 +443,19 @@ class BasketUtilsTests(DiscoveryTestMixin, BasketMixin, TestCase):
 
         # Verify that the attribute is deleted when a non-bundle product is added to the basket
         request.GET = {}
-        prepare_basket(request, [product])
+        with mock.patch('ecommerce.extensions.basket.models.track_segment_event') as mock_track:
+            with mock.patch('ecommerce.extensions.basket.models.get_program', return_value=program_data):
+                prepare_basket(request, [product])
+            properties = {
+                'bundle_id': TEST_BUNDLE_ID,
+                'marketing_slug': program_data['type'].lower() + '/' + program_data['marketing_slug'],
+                'title': program_data['title'],
+                'total_price': basket.total_excl_tax,
+                'quantity': basket.lines.count(),
+            }
+            mock_track.assert_any_call(
+                request.site, request.user, 'edx.bi.ecommerce.basket.bundle_removed', properties
+            )
         with self.assertRaises(BasketAttribute.DoesNotExist):
             BasketAttribute.objects.get(basket=basket, attribute_type__name=BUNDLE)
 

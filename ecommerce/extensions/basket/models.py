@@ -9,7 +9,9 @@ from oscar.core.loading import get_class
 
 from ecommerce.extensions.analytics.utils import track_segment_event, translate_basket_line_for_segment
 from ecommerce.extensions.basket.constants import TEMPORARY_BASKET_CACHE_KEY
+from ecommerce.programs.utils import get_program
 
+BUNDLE = 'bundle_identifier'
 OrderNumberGenerator = get_class('order.utils', 'OrderNumberGenerator')
 Selector = get_class('partner.strategy', 'Selector')
 
@@ -59,12 +61,33 @@ class Basket(AbstractBasket):
         if cached_response.is_found:
             # Do not track anything. This is a temporary basket calculation.
             return
+        product_removed_event_fired = False
         for line in self.all_lines():
             # Do not fire events for free items. The volume we see for edX.org leads to a dramatic increase in CPU
             # usage. Given that orders for free items are ignored, there is no need for these events.
             if line.stockrecord.price_excl_tax > 0:
                 properties = translate_basket_line_for_segment(line)
                 track_segment_event(self.site, self.owner, 'Product Removed', properties)
+                product_removed_event_fired = True
+
+        # Validate we sent an event for > 0 products to check if the bundle event is even necessary
+        if product_removed_event_fired:
+            try:
+                bundle_id = BasketAttribute.objects.get(basket=self, attribute_type__name=BUNDLE).value_text
+                program = get_program(bundle_id, self.site.siteconfiguration)
+                bundle_properties = {
+                    'bundle_id': bundle_id,
+                    'title': program.get('title'),
+                    'total_price': self.total_excl_tax,
+                    'quantity': self.lines.count(),
+                }
+                if program.get('type') and program.get('marketing_slug'):
+                    bundle_properties['marketing_slug'] = (program.get('type').lower() + '/' +
+                                                           program.get('marketing_slug'))
+                track_segment_event(self.site, self.owner, 'edx.bi.ecommerce.basket.bundle_removed', bundle_properties)
+            except BasketAttribute.DoesNotExist:
+                # Nothing to do here. It's not a bundle ¯\_(ツ)_/¯
+                pass
 
         # Call flush after we fetch all_lines() which is cleared during flush()
         super(Basket, self).flush()  # pylint: disable=bad-super-call
