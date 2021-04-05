@@ -18,6 +18,7 @@ from ecommerce.enterprise.utils import convert_comma_separated_string_to_list, g
 from ecommerce.extensions.fulfillment.status import ORDER
 from ecommerce.extensions.offer.models import OFFER_PRIORITY_ENTERPRISE
 from ecommerce.extensions.payment.models import EnterpriseContractMetadata
+from ecommerce.extensions.refund.status import REFUND
 from ecommerce.programs.custom import class_path, create_condition
 
 Benefit = get_model('offer', 'Benefit')
@@ -25,6 +26,7 @@ ConditionalOffer = get_model('offer', 'ConditionalOffer')
 Order = get_model('order', 'Order')
 OrderDiscount = get_model('order', 'OrderDiscount')
 Range = get_model('offer', 'Range')
+Refund = get_model('refund', 'Refund')
 
 
 class EnterpriseOfferForm(forms.ModelForm):
@@ -166,14 +168,20 @@ class EnterpriseOfferForm(forms.ModelForm):
 
         return max_discount
 
+    def _get_refunded_order_ids(self):
+        # Get all refund records with status = 'COMPLETE'
+        return list(Refund.objects.filter(status=REFUND.COMPLETE).values_list('order_id', flat=True))
+
     def clean_max_user_applications(self):
         # validate against when decreasing the existing value
         if self.instance.pk and self.instance.max_user_applications:
             new_max_user_applications = self.cleaned_data.get('max_user_applications') or 0
+            refunded_order_ids = self._get_refunded_order_ids()
             max_order_count_any_user = OrderDiscount.objects.filter(
                 offer_id=self.instance.id).select_related('order').filter(
-                    order__status=ORDER.COMPLETE).values('order__user_id').order_by(
-                        'order__user_id').annotate(count=Count('order__id')).aggregate(Max('count'))['count__max'] or 0
+                    order__status=ORDER.COMPLETE).exclude(order_id__in=refunded_order_ids).values(
+                        'order__user_id').order_by('order__user_id').annotate(
+                            count=Count('order__id')).aggregate(Max('count'))['count__max'] or 0
             if new_max_user_applications < max_order_count_any_user:
                 self.add_error(
                     'max_user_applications',
@@ -193,10 +201,12 @@ class EnterpriseOfferForm(forms.ModelForm):
             self.add_error('max_user_discount', _('Ensure this value is greater than or equal to 0.'))
         elif self.instance.pk and self.instance.max_user_discount:  # validate against when decrease the existing value
             new_max_user_discount = max_user_discount or 0
-            max_discount_used_any_user = OrderDiscount.objects.filter(
-                offer_id=self.instance.id).select_related('order').filter(
-                    order__status=ORDER.COMPLETE).values('order__user_id').order_by(
-                        'order__user_id').annotate(user_discount_sum=Sum('amount')).aggregate(
+            # calculates the maximum user discount consumed by any user out of the user bookings limit
+            refunded_order_ids = self._get_refunded_order_ids()
+            max_discount_used_any_user = OrderDiscount.objects.filter(offer_id=self.instance.id).select_related(
+                'order').filter(order__status=ORDER.COMPLETE).exclude(
+                    order_id__in=refunded_order_ids).values('order__user_id').order_by('order__user_id').annotate(
+                        user_discount_sum=Sum('amount')).aggregate(
                             Max('user_discount_sum'))['user_discount_sum__max'] or 0
             if new_max_user_discount < max_discount_used_any_user:
                 self.add_error(

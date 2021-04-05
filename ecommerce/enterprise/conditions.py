@@ -22,6 +22,7 @@ from ecommerce.extensions.offer.constants import OFFER_ASSIGNMENT_REVOKED, OFFER
 from ecommerce.extensions.offer.mixins import ConditionWithoutRangeMixin, SingleItemConsumptionConditionMixin
 from ecommerce.extensions.offer.models import OFFER_PRIORITY_ENTERPRISE
 from ecommerce.extensions.offer.utils import get_benefit_type, get_discount_value
+from ecommerce.extensions.refund.status import REFUND
 
 BasketAttribute = get_model('basket', 'BasketAttribute')
 BasketAttributeType = get_model('basket', 'BasketAttributeType')
@@ -31,6 +32,7 @@ ConditionalOffer = get_model('offer', 'ConditionalOffer')
 OfferAssignment = get_model('offer', 'OfferAssignment')
 Order = get_model('order', 'Order')
 OrderDiscount = get_model('order', 'OrderDiscount')
+Refund = get_model('refund', 'Refund')
 StockRecord = get_model('partner', 'StockRecord')
 Voucher = get_model('voucher', 'Voucher')
 logger = logging.getLogger(__name__)
@@ -42,10 +44,17 @@ def is_offer_max_user_discount_available(basket, offer):
     if offer.priority != OFFER_PRIORITY_ENTERPRISE or offer.max_user_discount is None:
         return True
     discount_value = _get_basket_discount_value(basket, offer)
+
+    # discard all refunded orders so they are not counted in per user booking limit
+    refunded_order_ids = list(Refund.objects.filter(
+        user_id=basket.owner.id, status=REFUND.COMPLETE
+    ).values_list('order_id', flat=True))
+
     # check if offer has discount available for user
     sum_user_discounts_for_this_offer = OrderDiscount.objects.filter(
         offer_id=offer.id, order__user_id=basket.owner.id, order__status=ORDER.COMPLETE
-    ).aggregate(Sum('amount'))['amount__sum'] or Decimal(0.00)
+    ).exclude(order_id__in=refunded_order_ids).aggregate(Sum('amount'))['amount__sum'] or Decimal(0.00)
+
     new_total_discount = discount_value + sum_user_discounts_for_this_offer
     if new_total_discount <= offer.max_user_discount:
         return True

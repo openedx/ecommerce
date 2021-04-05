@@ -25,6 +25,8 @@ from ecommerce.extensions.offer.constants import (
     OFFER_ASSIGNMENT_REVOKED,
     OFFER_REDEEMED
 )
+from ecommerce.extensions.refund.status import REFUND
+from ecommerce.extensions.refund.tests.factories import RefundFactory
 from ecommerce.extensions.test import factories
 from ecommerce.tests.factories import ProductFactory, SiteConfigurationFactory, UserFactory
 from ecommerce.tests.testcases import TestCase
@@ -508,6 +510,89 @@ class EnterpriseCustomerConditionTests(EnterpriseServiceMockMixin, DiscoveryTest
         for _ in range(num_prev_orders):
             order = OrderFactory(user=self.user, status=ORDER.COMPLETE)
             OrderDiscountFactory(order=order, offer_id=offer.id, amount=10)
+        basket = BasketFactory(site=self.site, owner=self.user)
+        basket.add_product(self.course_run.seat_products[0])
+        basket.add_product(self.entitlement)
+        self.mock_course_detail_endpoint(
+            discovery_api_url=self.site_configuration.discovery_api_url,
+            course=self.entitlement
+        )
+        self.mock_catalog_contains_course_runs(
+            [self.course_run.id],
+            self.condition.enterprise_customer_uuid,
+            enterprise_customer_catalog_uuid=self.condition.enterprise_customer_catalog_uuid,
+        )
+        self.assertEqual(self.condition.is_satisfied(offer, basket), is_satisfied)
+
+    @ddt.data(
+        {
+            'discount_type': Benefit.PERCENTAGE,
+            'num_prev_orders': 0,
+            'benefit_value': 50,
+            'refund_count': 0,
+            'is_satisfied': True
+        },
+        {
+            'discount_type': Benefit.PERCENTAGE,
+            'num_prev_orders': 6,
+            'benefit_value': 50,
+            'refund_count': 3,
+            'is_satisfied': True
+        },
+        {
+            'discount_type': Benefit.PERCENTAGE,
+            'num_prev_orders': 6,
+            'benefit_value': 50,
+            'refund_count': 1,
+            'is_satisfied': True
+        },
+        {
+            'discount_type': Benefit.FIXED,
+            'num_prev_orders': 6,
+            'benefit_value': 100,
+            'refund_count': 0,
+            'is_satisfied': False
+        },
+        {
+            'discount_type': Benefit.FIXED,
+            'num_prev_orders': 6,
+            'benefit_value': 100,
+            'refund_count': 1,
+            'is_satisfied': True
+        },
+        {
+            'discount_type': Benefit.FIXED,
+            'num_prev_orders': 5,
+            'benefit_value': 300,
+            'refund_count': 4,
+            'is_satisfied': False
+        },
+    )
+    @ddt.unpack
+    @httpretty.activate
+    def test_offer_availability_with_max_user_discount_including_refunds(
+            self, discount_type, num_prev_orders, benefit_value, refund_count, is_satisfied):
+        """
+        Verify that enterprise offer with discount type percentage and absolute, condition returns correct result
+        based on user limits in the offer, even when user has refund history.
+        """
+        current_refund_count = 0
+        benefits = {
+            Benefit.PERCENTAGE: factories.EnterprisePercentageDiscountBenefitFactory(value=benefit_value),
+            Benefit.FIXED: factories.EnterpriseAbsoluteDiscountBenefitFactory(value=benefit_value),
+        }
+        offer = factories.EnterpriseOfferFactory(
+            partner=self.partner,
+            benefit=benefits[discount_type],
+            max_user_discount=150
+        )
+        for _ in range(num_prev_orders):
+            order = OrderFactory(user=self.user, status=ORDER.COMPLETE)
+            OrderDiscountFactory(order=order, offer_id=offer.id, amount=10)
+            if current_refund_count < refund_count:
+                RefundFactory(order=order, user=self.user, status=REFUND.COMPLETE)
+                current_refund_count += 1
+
         basket = BasketFactory(site=self.site, owner=self.user)
         basket.add_product(self.course_run.seat_products[0])
         basket.add_product(self.entitlement)
