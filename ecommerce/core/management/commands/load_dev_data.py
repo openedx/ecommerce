@@ -17,10 +17,10 @@ class Command(BaseCommand):
     help = 'Create data for the ecommerce environment'
 
     def add_arguments(self, parser):
-        parser.add_argument('--data-file-path', type=str, required=True, help="Path to file where your data is specified.")
+        parser.add_argument('--path', type=str, required=True, help="Path to file where your data is specified.")
 
     def handle(self, *args, **options):
-        with open(options["data_file_path"], 'r') as f:
+        with open(options["path"], 'r') as f:
             data_spec = yaml.safe_load(f)
 
         # Enable client-side checkout
@@ -108,11 +108,13 @@ class Command(BaseCommand):
         course.create_or_update_seat(
             'verified', True, course_spec['price'], expires=expires, create_enrollment_code=True, sku=verified_sku
         )
-
-        # Publish the data to the LMS
-        if course.publish_to_lms():
-            msg = 'An error occurred while attempting to publish [{course_id}] to LMS'.format(course_id=course_id)
-            self.stderr.write(self.style.ERROR(msg))
-        else:
-            msg = 'Published course modes for [{course_id}] to LMS'.format(course_id=course_id)
-            self.stdout.write(self.style.SUCCESS(msg))
+        # TODO(OEP-37 V0 implementors): during prototype, we used the publish_to_lms function to create corresponding ata
+        # in lms. After review, we decided we did not want to intangle the IDAs in this way. If you decide the data created
+        # by publish_to_lms is necessary for v0, please try to create it using just the yamls.
+        # # Publish the data to the LMS
+        # if course.publish_to_lms():
+        #    msg = 'An error occurred while attempting to publish [{course_id}] to LMS'.format(course_id=course_id)
+        #    self.stderr.write(self.style.ERROR(msg))
+        # else:
+        #     msg = 'Published course modes for [{course_id}] to LMS'.format(course_id=course_id)
+        #     self.stdout.write(self.style.SUCCESS(msg))
