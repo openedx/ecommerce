@@ -14,6 +14,8 @@ from ecommerce.enterprise.tests.mixins import EnterpriseServiceMockMixin
 from ecommerce.extensions.fulfillment.status import ORDER
 from ecommerce.extensions.offer.models import OFFER_PRIORITY_ENTERPRISE
 from ecommerce.extensions.payment.models import EnterpriseContractMetadata
+from ecommerce.extensions.refund.status import REFUND
+from ecommerce.extensions.refund.tests.factories import RefundFactory
 from ecommerce.extensions.test import factories
 from ecommerce.programs.custom import class_path
 from ecommerce.tests.factories import UserFactory
@@ -568,6 +570,33 @@ class EnterpriseOfferFormTests(EnterpriseServiceMockMixin, TestCase):
         self.assert_form_errors(data, expected_errors, instance=offer)
 
     @httpretty.activate
+    def test_max_user_discount_clean_with_refunded_enrollments(self):
+        """
+        Verify that `clean` for `max_user_discount` and `max_user_applications` does not raise error when total consumed
+         discount and total max user applications after refund is still less than the value, and the existing offer
+         updates with new per user limit and max user application values.
+        """
+        current_refund_count = 0
+        data = self.generate_data(max_user_applications=3, max_user_discount=300)
+        self.mock_specific_enterprise_customer_api(data['enterprise_customer_uuid'])
+        # create an enterprise offer that can provide max $500 discount and consume $400
+        offer = factories.EnterpriseOfferFactory(max_user_applications=5, max_user_discount=500)
+        for _ in range(4):
+            order = OrderFactory(user=self.user, status=ORDER.COMPLETE)
+            OrderDiscountFactory(order=order, offer_id=offer.id, amount=100)
+            # create a refund of $200 so the total consumed discount becomes $200
+            if current_refund_count < 2:
+                RefundFactory(order=order, user=self.user, status=REFUND.COMPLETE)
+                current_refund_count += 1
+        # now try to update the offer with max_user_discount set to $300
+        # which is still greater than the consumed discount after refund $200
+        form = EnterpriseOfferForm(request=self.request, data=data, instance=offer)
+        self.assertTrue(form.is_valid())
+        offer = form.save()
+        self.assertEqual(offer.max_user_applications, data['max_user_applications'])
+        self.assertEqual(offer.max_user_discount, data['max_user_discount'])
+
+    @httpretty.activate
     def test_offer_form_with_per_user_increased_limits(self):
         """
         Verify that an existing enterprise offer can be updated with per user increased limits.
@@ -576,12 +605,12 @@ class EnterpriseOfferFormTests(EnterpriseServiceMockMixin, TestCase):
         self.mock_specific_enterprise_customer_api(data['enterprise_customer_uuid'])
 
         # create an enterprise offer with both max_global_applications and max_discount
-        factories.EnterpriseOfferFactory(
+        offer = factories.EnterpriseOfferFactory(
             max_user_applications=30,
             max_user_discount=5000
         )
         # now try to update the offer with increased values
-        form = EnterpriseOfferForm(request=self.request, data=data)
+        form = EnterpriseOfferForm(request=self.request, data=data, instance=offer)
         self.assertTrue(form.is_valid())
         offer = form.save()
         self.assertEqual(offer.max_user_applications, data['max_user_applications'])
