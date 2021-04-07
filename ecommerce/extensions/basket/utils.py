@@ -17,11 +17,13 @@ from oscar.core.loading import get_class, get_model
 
 from ecommerce.core.url_utils import absolute_url
 from ecommerce.courses.utils import mode_for_product
+from ecommerce.extensions.analytics.utils import track_segment_event
 from ecommerce.extensions.basket.constants import PURCHASER_BEHALF_ATTRIBUTE
 from ecommerce.extensions.order.exceptions import AlreadyPlacedOrderException
 from ecommerce.extensions.order.utils import UserAlreadyPlacedOrder
 from ecommerce.extensions.payment.constants import DISABLE_MICROFRONTEND_FOR_BASKET_PAGE_FLAG_NAME
 from ecommerce.extensions.payment.utils import embargo_check
+from ecommerce.programs.utils import get_program
 from ecommerce.referrals.models import Referral
 
 Applicator = get_class('offer.applicator', 'Applicator')
@@ -177,6 +179,21 @@ def prepare_basket(request, products, voucher=None):
             )
     if already_purchased_products and basket.is_empty:
         raise AlreadyPlacedOrderException
+
+    # Waiting to check and send segment event until after products are added into the basket
+    # just in case the AlreadyPlacedOrderException is raised
+    if bundle:
+        program = get_program(bundle, request.site.siteconfiguration)
+        bundle_properties = {
+            'bundle_id': bundle,
+            'cart_id': basket.id,
+            'title': program.get('title'),
+            'total_price': basket.total_excl_tax,
+            'quantity': basket.lines.count(),
+        }
+        if program.get('type') and program.get('marketing_slug'):
+            bundle_properties['marketing_slug'] = program.get('type').lower() + '/' + program.get('marketing_slug')
+        track_segment_event(request.site, request.user, 'edx.bi.ecommerce.basket.bundle_added', bundle_properties)
 
     if len(products) == 1 and products[0].is_enrollment_code_product:
         basket.clear_vouchers()
