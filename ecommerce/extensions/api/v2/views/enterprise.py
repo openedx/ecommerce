@@ -542,32 +542,46 @@ class EnterpriseCouponViewSet(CouponViewSet):
         # that do not have a voucher_application (aka they have been assigned
         # but not redeemed)
         no_voucher_application = Q(voucher_application__isnull=True)
-        offer_assignments = OfferAssignment.objects.filter(
+
+        # Parameter type cleanup to handle if email passed in as a set:
+        if user_email and isinstance(user_email, tuple):
+            user_email = user_email[0]
+
+        # Optimization added here:
+        # Cardinality of offer assignments per user email is very small (~10-100).
+        # If we don't use that small value to help filter relevant vouchers first (order ~10000)
+        # we end up with a single 60s query for all the vouchers with 6 massive cross joins.
+        # Instead, we grab the related ids we want from OfferAssignments and VoucherApplications,
+        # then filter the enterprise vouchers against that set.
+        # While this is not efficient on a small scall, it scales with
+        #   "offer assignment for 1 user x voucher per offer",
+        # as opposed to
+        #   "vouchers per enterprise x linked offers x offer assignments",
+        # and so will support much larger total data sets.
+        # We also end up with a final query that uses the indexed 'id' value
+        # for fast lookup instead of any other values.
+        voucher_ids_from_offer_assignments = [id for id in OfferAssignment.objects.filter(
             no_voucher_application,
             user_email=user_email,
-            status__in=[OFFER_ASSIGNED, OFFER_ASSIGNMENT_EMAIL_PENDING],
-        )
-        vouchers_from_offer_assignments = Q(
-            offers__offerassignment__in=offer_assignments
-        )
+            status__in=[OFFER_ASSIGNED, OFFER_ASSIGNMENT_EMAIL_PENDING],).distinct()
+            .prefetch_related('offer', 'offer__vouchers',)
+            .values_list('offer__vouchers__id', flat=True)]
         # We also want vouchers with VoucherApplications related to the user
         # but only if the user exists (there is a chance it does not, as code
         # assignment only requires an email, and not an account on the system)
         if user is not None:
-            voucher_applications = VoucherApplication.objects.filter(
+            voucher_ids_from_voucher_applications = [id for id in VoucherApplication.objects.filter(
                 user=user
-            )
-            vouchers_from_voucher_applications = Q(
-                applications__in=voucher_applications
-            )
-            enterprise_vouchers = enterprise_vouchers.filter(
-                vouchers_from_offer_assignments | vouchers_from_voucher_applications
-            )
+            ).values_list('voucher_id', flat=True)]
         else:
-            enterprise_vouchers = enterprise_vouchers.filter(
-                vouchers_from_offer_assignments
-            )
+            voucher_ids_from_voucher_applications = []
 
+        # Still filter based on original enterprise_vouchers because you don't
+        # want to show a user's other coupons if that user
+        # is associated with more than 1 enterprise.
+        enterprise_vouchers = enterprise_vouchers.filter(
+            Q(id__in=voucher_ids_from_offer_assignments)|
+            Q(id__in=voucher_ids_from_voucher_applications))
         return enterprise_vouchers.distinct().prefetch_related(
             'coupon_vouchers__coupon',
             'applications',
