@@ -236,7 +236,9 @@ class ReceiptResponseViewTests(DiscoveryMockMixin, LmsApiMockMixin, RefundTestMi
         self.client.login(username=user.username, password=self.password)
         return self._get_receipt_response(order.number)
 
-    def _create_order_for_receipt(self, user, credit=False, entitlement=False, id_verification_required=False):
+    def _create_order_for_receipt(
+            self, user, credit=False, entitlement=False, id_verification_required=False, multiple_lines=False
+    ):
         """
         Helper function for creating an order and mocking verification status API response.
 
@@ -256,7 +258,8 @@ class ReceiptResponseViewTests(DiscoveryMockMixin, LmsApiMockMixin, RefundTestMi
         return self.create_order(
             credit=credit,
             entitlement=entitlement,
-            id_verification_required=id_verification_required
+            id_verification_required=id_verification_required,
+            multiple_lines=multiple_lines,
         )
 
     def test_login_required_get_request(self):
@@ -428,6 +431,18 @@ class ReceiptResponseViewTests(DiscoveryMockMixin, LmsApiMockMixin, RefundTestMi
         self.assertEqual(response.status_code, 200)
         order_value_string = 'data-total-amount="{}"'.format(order.total_incl_tax)
         self.assertContains(response, order_value_string)
+
+    @patch('ecommerce.extensions.checkout.views.fetch_enterprise_learner_data')
+    @httpretty.activate
+    def test_order_product_ids_available_for_tracking(self, mock_learner_data):
+        mock_learner_data.return_value = self.non_enterprise_learner_data
+        order = self._create_order_for_receipt(self.user, multiple_lines=True)
+        response = self._get_receipt_response(order.number)
+
+        self.assertEqual(response.status_code, 200)
+        expected_order_product_ids = ','.join(map(str, order.lines.values_list('product_id', flat=True)))
+        expected_order_product_ids_string = 'data-product-ids="{}"'.format(expected_order_product_ids)
+        self.assertContains(response, expected_order_product_ids_string)
 
     @patch('ecommerce.extensions.checkout.views.fetch_enterprise_learner_data')
     @httpretty.activate
