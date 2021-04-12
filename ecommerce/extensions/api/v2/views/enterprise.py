@@ -563,7 +563,8 @@ class EnterpriseCouponViewSet(CouponViewSet):
         voucher_ids_from_offer_assignments = [id for id in OfferAssignment.objects.filter(
             no_voucher_application,
             user_email=user_email,
-            status__in=[OFFER_ASSIGNED, OFFER_ASSIGNMENT_EMAIL_PENDING],).distinct()
+            status__in=[OFFER_ASSIGNED, OFFER_ASSIGNMENT_EMAIL_PENDING],)
+            .distinct()
             .prefetch_related('offer', 'offer__vouchers',)
             .values_list('offer__vouchers__id', flat=True)]
         # We also want vouchers with VoucherApplications related to the user
@@ -580,7 +581,7 @@ class EnterpriseCouponViewSet(CouponViewSet):
         # want to show a user's other coupons if that user
         # is associated with more than 1 enterprise.
         enterprise_vouchers = enterprise_vouchers.filter(
-            Q(id__in=voucher_ids_from_offer_assignments)|
+            Q(id__in=voucher_ids_from_offer_assignments) |
             Q(id__in=voucher_ids_from_voucher_applications))
         return enterprise_vouchers.distinct().prefetch_related(
             'coupon_vouchers__coupon',
