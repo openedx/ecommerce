@@ -553,7 +553,7 @@ class EnterpriseCouponViewSet(CouponViewSet):
         # we end up with a single 60s query for all the vouchers with 6 massive cross joins.
         # Instead, we grab the related ids we want from OfferAssignments and VoucherApplications,
         # then filter the enterprise vouchers against that set.
-        # While this is not efficient on a small scall, it scales with
+        # While this is not efficient on a small scale, it scales with
         #   "offer assignment for 1 user x voucher per offer",
         # as opposed to
         #   "vouchers per enterprise x linked offers x offer assignments",
