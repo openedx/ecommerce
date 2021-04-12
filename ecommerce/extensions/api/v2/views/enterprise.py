@@ -560,18 +560,18 @@ class EnterpriseCouponViewSet(CouponViewSet):
         # and so will support much larger total data sets.
         # We also end up with a final query that uses the indexed 'id' value
         # for fast lookup instead of any other values.
-        voucher_ids_from_offer_assignments = [id for id in OfferAssignment.objects.filter(
+        voucher_ids_from_offer_assignments = [id for id in OfferAssignment.objects.filter( # pylint: disable=unnecessary-comprehension
             no_voucher_application,
             user_email=user_email,
             status__in=[OFFER_ASSIGNED, OFFER_ASSIGNMENT_EMAIL_PENDING],)
-            .distinct()
-            .prefetch_related('offer', 'offer__vouchers',)
-            .values_list('offer__vouchers__id', flat=True)]
+                                              .distinct()
+                                              .prefetch_related('offer', 'offer__vouchers',)
+                                              .values_list('offer__vouchers__id', flat=True)]
         # We also want vouchers with VoucherApplications related to the user
         # but only if the user exists (there is a chance it does not, as code
         # assignment only requires an email, and not an account on the system)
         if user is not None:
-            voucher_ids_from_voucher_applications = [id for id in VoucherApplication.objects.filter(
+            voucher_ids_from_voucher_applications = [id for id in VoucherApplication.objects.filter( # pylint: disable=unnecessary-comprehension
                 user=user
             ).values_list('voucher_id', flat=True)]
         else:
