@@ -229,6 +229,12 @@ def send_revoked_offer_email(
         CODE=code,
     )
     email_body = format_email(email_template, placeholder_dict, greeting, closing)
+
+    if settings.DEBUG:  # pragma: no cover
+        # Avoid breaking devstack when no such service is available.
+        logger.warning("Skipping Sailthru task 'send_revoked_offer_email' because DEBUG=true.")  # pragma: no cover
+        return  # pragma: no cover
+
     send_offer_update_email.delay(learner_email, subject, email_body, sender_alias)
 
 
