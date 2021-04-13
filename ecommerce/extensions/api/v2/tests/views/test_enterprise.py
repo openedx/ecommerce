@@ -1079,21 +1079,6 @@ class EnterpriseCouponViewSetRbacTests(
         )
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
-    def test_search_user_does_not_exist_passed_in_as_tuple(self):
-        """
-        Test that 200 with empty results is returned if we ask for user email as a tuple.
-        """
-        response = self.get_response(
-            'GET',
-            reverse(
-                'api:v2:enterprise-coupons-search',
-                kwargs={'enterprise_id': self.data['enterprise_customer']['id']}
-            ),
-            data={'user_email': ('iamsofake@notreal.com',)}
-        )
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        assert response.json()['results'] == []
-
     def test_search_user_does_not_exist(self):
         """
         Test that 200 with empty results is returned if we cant find the user

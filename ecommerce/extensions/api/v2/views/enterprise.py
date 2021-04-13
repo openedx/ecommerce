@@ -543,10 +543,6 @@ class EnterpriseCouponViewSet(CouponViewSet):
         # but not redeemed)
         no_voucher_application = Q(voucher_application__isnull=True)
 
-        # Parameter type cleanup to handle if email passed in as a set:
-        if user_email and isinstance(user_email, tuple):
-            user_email = user_email[0]
-
         # Optimization added here:
         # Cardinality of offer assignments per user email is very small (~10-100).
         # If we don't use that small value to help filter relevant vouchers first (order ~10000)
