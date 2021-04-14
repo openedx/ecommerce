@@ -176,7 +176,8 @@ class UtilTests(DiscoveryTestMixin, TestCase):
             },
             None,
             'sender alias',
-            ''
+            '',
+            'https://www.edx.org'
         ),
         (
             'subject',
@@ -191,6 +192,7 @@ class UtilTests(DiscoveryTestMixin, TestCase):
             },
             None,
             'sender alias',
+            'https://bears.party',
             'https://bears.party'
         ),
     )
@@ -204,6 +206,7 @@ class UtilTests(DiscoveryTestMixin, TestCase):
             side_effect,
             sender_alias,
             base_enterprise_url,
+            search_url,
             mock_sailthru_task,
     ):
         """ Test that the offer assignment email message is sent to async task. """
@@ -229,7 +232,8 @@ class UtilTests(DiscoveryTestMixin, TestCase):
             tokens.get('learner_email'),
             tokens.get('code'),
             tokens.get('redemptions_remaining'),
-            tokens.get('code_expiration_date')
+            tokens.get('code_expiration_date'),
+            search_url
         )
         mock_sailthru_task.delay.assert_called_once_with(
             tokens.get('learner_email'),
