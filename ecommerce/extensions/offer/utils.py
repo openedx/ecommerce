@@ -131,9 +131,7 @@ def get_redirect_to_email_confirmation_if_required(request, offer, product):
     return None
 
 
-def format_assigned_offer_email(
-        greeting, closing, learner_email, code, redemptions_remaining, code_expiration_date, base_enterprise_url=''
-):
+def format_assigned_offer_email(greeting, closing, learner_email, code, redemptions_remaining, code_expiration_date):
     """
     Arguments:
         greeting (String): Email greeting (prefix)
@@ -142,7 +140,6 @@ def format_assigned_offer_email(
         code (String): Code for the user.
         redemptions_remaining (Integer): Number of times the code can be redeemed.
         code_expiration_date(Datetime): Date till code is valid.
-        base_enterprise_url (String): Url for the enterprise's learner portal
 
 
     Return the formatted email body for offer assignment.
@@ -154,7 +151,7 @@ def format_assigned_offer_email(
         CODE=code,
         EXPIRATION_DATE=code_expiration_date
     )
-    return format_email(email_template, placeholder_dict, greeting, closing, base_enterprise_url)
+    return format_email(email_template, placeholder_dict, greeting, closing)
 
 
 def send_assigned_offer_email(
@@ -193,8 +190,7 @@ def send_assigned_offer_email(
         learner_email,
         code,
         redemptions_remaining,
-        code_expiration_date,
-        base_enterprise_url
+        code_expiration_date
     )
 
     if settings.DEBUG:  # pragma: no cover
@@ -284,24 +280,17 @@ def send_assigned_offer_reminder_email(
         CODE=code,
         EXPIRATION_DATE=code_expiration_date
     )
-    email_body = format_email(
-        template=email_template,
-        placeholder_dict=placeholder_dict,
-        greeting=greeting,
-        closing=closing,
-        base_enterprise_url=base_enterprise_url
-    )
+    email_body = format_email(email_template, placeholder_dict, greeting, closing)
     send_offer_update_email.delay(learner_email, subject, email_body, sender_alias, base_enterprise_url)
 
 
-def format_email(template, placeholder_dict, greeting, closing, base_enterprise_url=''):
+def format_email(template, placeholder_dict, greeting, closing):
     """
     Arguments:
         template (String): Email template body
         placeholder_dict (SafeDict): Safe dictionary of placeholders and their values
         greeting (String): Email greeting (prefix)
         closing (String): Email closing (suffix)
-        base_enterprise_url (String): Url for the enterprise's learner portal
 
     Apply placeholders to the email template.
 
@@ -318,10 +307,8 @@ def format_email(template, placeholder_dict, greeting, closing, base_enterprise_
     closing = bleach.clean(closing)
     email_body = string.Formatter().vformat(template, SafeTuple(), placeholder_dict)
     if waffle.switch_is_active(ENABLE_BRAZE):
-        search_url = base_enterprise_url + "/search" if base_enterprise_url else "https://www.edx.org/search"
-        search_url = search_url.replace('\"', '\'')
         email_body = (greeting + email_body + closing).replace('\"', '\'')
-        return render_to_string('coupons/offer_email.html', {'body': email_body, 'search_url': search_url})
+        return render_to_string('coupons/offer_email.html', {'body': email_body})
 
     # \n\n is being treated as single line except of two lines in HTML template,
     #  so separating them with &nbsp; tag to render them as expected.
