@@ -2,6 +2,7 @@
 
 import datetime
 import itertools
+import json
 import urllib.error
 import urllib.parse
 from contextlib import contextmanager
@@ -34,6 +35,7 @@ from ecommerce.coupons.tests.mixins import CouponMixin, DiscoveryMockMixin
 from ecommerce.courses.tests.factories import CourseFactory
 from ecommerce.enterprise.tests.mixins import EnterpriseServiceMockMixin
 from ecommerce.enterprise.utils import construct_enterprise_course_consent_url
+from ecommerce.entitlements.utils import create_or_update_course_entitlement
 from ecommerce.extensions.analytics.utils import translate_basket_line_for_segment
 from ecommerce.extensions.basket.constants import EMAIL_OPT_IN_ATTRIBUTE
 from ecommerce.extensions.basket.tests.mixins import BasketMixin
@@ -411,6 +413,7 @@ class PaymentApiResponseTestMixin(BasketLogicTestMixin):
             show_coupon_form=True,
             image_url=None,
             title=None,
+            subject=None,
             messages=None,
             summary_discounts=None,
             **kwargs
@@ -447,24 +450,25 @@ class PaymentApiResponseTestMixin(BasketLogicTestMixin):
             offers = []
 
         expected_response = {
-            u'basket_id': basket.id,
-            u'currency': currency,
-            u'offers': offers,
-            u'coupons': coupons,
-            u'messages': messages if messages else [],
-            u'is_free_basket': order_total == 0,
-            u'show_coupon_form': show_coupon_form,
-            u'summary_discounts': summary_discounts,
-            u'summary_price': summary_price,
-            u'order_total': order_total,
-            u'products': [
+            'basket_id': basket.id,
+            'currency': currency,
+            'offers': offers,
+            'coupons': coupons,
+            'messages': messages if messages else [],
+            'is_free_basket': order_total == 0,
+            'show_coupon_form': show_coupon_form,
+            'summary_discounts': summary_discounts,
+            'summary_price': summary_price,
+            'order_total': order_total,
+            'products': [
                 {
-                    u'product_type': product_type,
-                    u'certificate_type': certificate_type,
-                    u'image_url': image_url,
-                    u'sku': line.product.stockrecords.first().partner_sku,
-                    u'course_key': getattr(line.product.attr, 'course_key', None),
-                    u'title': title,
+                    'product_type': product_type,
+                    'certificate_type': certificate_type,
+                    'image_url': image_url,
+                    'sku': line.product.stockrecords.first().partner_sku,
+                    'course_key': getattr(line.product.attr, 'course_key', None),
+                    'title': title,
+                    'subject': subject,
                 } for line in basket.lines.all()
             ],
         }
@@ -515,6 +519,137 @@ class PaymentApiViewTests(PaymentApiResponseTestMixin, BasketMixin, DiscoveryMoc
                 image_url=u'/path/to/image.jpg',
                 title=u'PaymentApiViewTests',
             )
+
+    @override_settings(
+        BRAZE_EVENT_REST_ENDPOINT='rest.braze.com',
+        BRAZE_API_KEY='test-api-key',
+    )
+    def test_basket_added_event(self):
+        """ Tests the basket added event is properly fired for a single seat """
+        seat = self.create_seat(self.course)
+        basket = self.create_basket_and_add_product(seat)
+        self.mock_access_token_response()
+        self.mock_course_run_detail_endpoint(self.course, discovery_api_url=self.site_configuration.discovery_api_url)
+        braze_url = 'https://{url}/users/track'.format(url=getattr(settings, 'BRAZE_EVENT_REST_ENDPOINT'))
+        httpretty.register_uri(
+            httpretty.POST, braze_url,
+            body=json.dumps({'events_processed': 1, 'message': 'success'}),
+            content_type='application/json'
+        )
+        with mock.patch('ecommerce.extensions.basket.views.track_braze_event') as mock_track:
+            self.assert_expected_response(
+                basket,
+                image_url='/path/to/image.jpg',
+                title='PaymentApiViewTests',
+            )
+            mock_track.assert_called_with(self.user, 'edx.bi.ecommerce.cart.viewed', {
+                'basket_discount': 0, 'basket_original_price': 100, 'basket_total': 100,
+                'bundle_variant': None, 'currency': basket.currency, 'products': [
+                    {'title': 'PaymentApiViewTests', 'image': '/path/to/image.jpg'}
+                ], 'product_title': 'PaymentApiViewTests', 'product_subject': None
+            })
+
+    @override_settings(
+        BRAZE_EVENT_REST_ENDPOINT='rest.braze.com',
+        BRAZE_API_KEY='test-api-key',
+    )
+    @ddt.data(50, 100)
+    def test_basket_added_event_with_discount(self, discount_value):
+        """ Tests the basket added event correctly takes discounts into account """
+        seat = self.create_seat(self.course)
+        basket = self.create_basket_and_add_product(seat)
+        voucher = self.create_and_apply_benefit_to_basket(basket, seat, Benefit.PERCENTAGE, discount_value)
+        self.mock_access_token_response()
+        self.mock_course_run_detail_endpoint(self.course, discovery_api_url=self.site_configuration.discovery_api_url)
+        braze_url = 'https://{url}/users/track'.format(url=getattr(settings, 'BRAZE_EVENT_REST_ENDPOINT'))
+        httpretty.register_uri(
+            httpretty.POST, braze_url,
+            body=json.dumps({'events_processed': 1, 'message': 'success'}),
+            content_type='application/json'
+        )
+
+        with mock.patch('ecommerce.extensions.basket.views.track_braze_event') as mock_track:
+            self.assert_expected_response(
+                basket,
+                discount_value=discount_value,
+                discount_type=Benefit.PERCENTAGE,
+                image_url='/path/to/image.jpg',
+                title='PaymentApiViewTests',
+                voucher=voucher,
+            )
+            mock_track.assert_called_with(self.user, 'edx.bi.ecommerce.cart.viewed', {
+                'basket_discount': discount_value, 'basket_original_price': 100, 'basket_total': 100 - discount_value,
+                'bundle_variant': None, 'currency': basket.currency, 'products': [
+                    {'title': 'PaymentApiViewTests', 'image': '/path/to/image.jpg'},
+                ], 'product_title': 'PaymentApiViewTests', 'product_subject': None
+            })
+
+    @override_settings(
+        BRAZE_EVENT_REST_ENDPOINT='rest.braze.com',
+        BRAZE_API_KEY='test-api-key',
+    )
+    @ddt.data(([1, 2], 'full_bundle'), ([1, 2, 3], 'partial_bundle'))
+    @ddt.unpack
+    def test_basket_added_event_with_bundle(self, program_courses, bundle_variant):
+        """ Tests the basket added event is properly fired for a bundle """
+        entitlement_1 = create_or_update_course_entitlement(
+            'verified', 200, self.partner, 'fake-uuid-1', 'Entitlement 1')
+        entitlement_2 = create_or_update_course_entitlement(
+            'verified', 200, self.partner, 'fake-uuid-2', 'Entitlement 2')
+        basket = self.create_basket_and_add_product(entitlement_1)
+        basket.add_product(entitlement_2)
+        summary_price = 400  # two entitlements * $200/entitlement
+        # Setting bundle status. Would usually be handled by the added
+        basket_attr_type, __ = BasketAttributeType.objects.get_or_create(name=BUNDLE)
+        BasketAttribute.objects.update_or_create(
+            basket=basket,
+            attribute_type=basket_attr_type,
+            value_text=TEST_BUNDLE_ID
+        )
+        # Copying code from create_and_apply_benefit_to_basket so it can take in multiple products
+        discount_value = 10
+        _range = factories.RangeFactory(products=[entitlement_1, entitlement_2])
+        voucher, __ = prepare_voucher(_range=_range, benefit_type=Benefit.PERCENTAGE, benefit_value=discount_value)
+        basket.vouchers.add(voucher)
+        Applicator().apply(basket)
+        basket_discount = float(basket.total_incl_tax_excl_discounts) * (float(discount_value) / 100)
+
+        self.mock_access_token_response()
+        self.mock_course_detail_endpoint(self.site_configuration.discovery_api_url, course_key='fake-uuid-1')
+        self.mock_course_detail_endpoint(self.site_configuration.discovery_api_url, course_key='fake-uuid-2')
+        braze_url = 'https://{url}/users/track'.format(url=getattr(settings, 'BRAZE_EVENT_REST_ENDPOINT'))
+        httpretty.register_uri(
+            httpretty.POST, braze_url,
+            body=json.dumps({'events_processed': 1, 'message': 'success'}),
+            content_type='application/json'
+        )
+        program_data = {
+            # I know these aren't courses, but for the purposes of the test, we only check the length of
+            # the list of courses so this is simpler
+            'courses': program_courses,
+            'title': 'Program Title',
+            'subjects': [{'slug': 'computer-science'}]
+        }
+        with mock.patch('ecommerce.extensions.basket.views.track_braze_event') as mock_track:
+            with mock.patch('ecommerce.extensions.basket.views.get_program', return_value=program_data):
+                self.assert_expected_response(
+                    basket,
+                    discount_value=discount_value,
+                    discount_type=Benefit.PERCENTAGE,
+                    image_url='/path/to/image.jpg',
+                    title='edX Demo Course',
+                    product_type='Course Entitlement',
+                    summary_price=summary_price,
+                    voucher=voucher,
+                )
+                mock_track.assert_called_with(self.user, 'edx.bi.ecommerce.cart.viewed', {
+                    'basket_discount': basket_discount, 'basket_original_price': summary_price,
+                    'basket_total': summary_price - basket_discount, 'bundle_variant': bundle_variant,
+                    'currency': basket.currency, 'products': [
+                        {'title': 'edX Demo Course', 'image': '/path/to/image.jpg'},
+                        {'title': 'edX Demo Course', 'image': '/path/to/image.jpg'},
+                    ], 'product_title': program_data['title'], 'product_subject': program_data['subjects'][0]['slug']
+                })
 
     def test_enrollment_code_type(self):
         course, __, enrollment_code = self.prepare_course_seat_and_enrollment_code(seat_price=100)

@@ -3,9 +3,12 @@
 import json
 
 import ddt
+import httpretty
 import mock
 from analytics import Client
+from django.conf import settings
 from django.contrib.auth.models import AnonymousUser
+from django.test import override_settings
 from django.test.client import RequestFactory
 
 from ecommerce.core.models import User  # pylint: disable=unused-import
@@ -15,6 +18,7 @@ from ecommerce.extensions.analytics.utils import (
     get_google_analytics_client_id,
     parse_tracking_context,
     prepare_analytics_data,
+    track_braze_event,
     track_segment_event,
     translate_basket_line_for_segment
 )
@@ -183,3 +187,48 @@ class UtilsTest(DiscoveryTestMixin, BasketMixin, TransactionTestCase):
         )
         event = 'foo'
         return user, event, properties
+
+    def test_track_braze_event_without_braze_settings(self):
+        """ If the braze settings aren't set, the function should log a debug message and NOT send an event."""
+        with mock.patch('ecommerce.extensions.analytics.utils.logger.debug') as mock_debug:
+            user = self.create_user()
+            self.assertIsNone(track_braze_event(user, 'edx.bi.ecommerce.cart.viewed', {}))
+            mock_debug.assert_called_with('Failed to send event to Braze: Missing required settings.')
+
+    @override_settings(
+        BRAZE_EVENT_REST_ENDPOINT='rest.braze.com',
+        BRAZE_API_KEY='test-api-key',
+    )
+    @httpretty.activate
+    def test_track_braze_event_with_response_error(self):
+        """ If the response receives an error, the function should log a debug message and NOT send an event."""
+        braze_url = 'https://{url}/users/track'.format(url=getattr(settings, 'BRAZE_EVENT_REST_ENDPOINT'))
+        httpretty.register_uri(
+            httpretty.POST, braze_url,
+            body=json.dumps({'events_processed': 0, 'message': 'Braze encountered an error.'}),
+            content_type='application/json',
+            status=500,
+        )
+        with mock.patch('ecommerce.extensions.analytics.utils.logger.debug') as mock_debug:
+            user = self.create_user()
+            track_braze_event(user, 'edx.bi.ecommerce.cart.viewed', {})
+            mock_debug.assert_called_with('Failed to send event [%s] to Braze: %s',
+                                          'edx.bi.ecommerce.cart.viewed', 'Braze encountered an error.')
+
+    @override_settings(
+        BRAZE_EVENT_REST_ENDPOINT='rest.braze.com',
+        BRAZE_API_KEY='test-api-key',
+    )
+    @httpretty.activate
+    def test_track_braze_event_success(self):
+        """ If the braze settings aren't set, the function should log a debug message and NOT send an event."""
+        braze_url = 'https://{url}/users/track'.format(url=getattr(settings, 'BRAZE_EVENT_REST_ENDPOINT'))
+        httpretty.register_uri(
+            httpretty.POST, braze_url,
+            body=json.dumps({'events_processed': 1, 'message': 'success'}),
+            content_type='application/json',
+        )
+        with mock.patch('ecommerce.extensions.analytics.utils.logger.debug') as mock_debug:
+            user = self.create_user()
+            self.assertIsNone(track_braze_event(user, 'edx.bi.ecommerce.cart.viewed', {'prop': 123}))
+            mock_debug.assert_not_called()
