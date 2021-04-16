@@ -25,6 +25,8 @@ How To Contribute
 
 Contributions are welcome. Please read `How To Contribute <https://github.com/edx/edx-platform/blob/master/CONTRIBUTING.rst>`_ for details. Even though it was written with ``edx-platform`` in mind, these guidelines should be followed for Open edX code in general.
 
+Developers internal to edX should follow the guidance on `this page <https://openedx.atlassian.net/wiki/spaces/RS/pages/1835106870/How+to+contribute+to+our+repositories>`_ when working on ecommerce related projects, including this one.
+
 Reporting Security Issues
 -------------------------
 
@@ -34,3 +36,5 @@ Get Help
 --------
 
 Ask questions and discuss this project on `Slack <https://openedx.slack.com/messages/ecommerce/>`_ or in the `edx-code Google Group <https://groups.google.com/forum/#!forum/edx-code>`_.
+
+For troubleshooting the ecommerce e2e tests in edX's deployment process, `see this page <https://openedx.atlassian.net/wiki/spaces/RS/pages/2638381505/Ecommerce+e2e+Tests>`_
