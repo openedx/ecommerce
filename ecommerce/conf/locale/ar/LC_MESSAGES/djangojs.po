@@ -7,6 +7,7 @@
 # Translators:
 # Translators:
 # Translators:
+# Translators:
 # Ahmed Jazzar <ahmed.mojaz@gmail.com>, 2015
 # 6e68c7971a89e50e680ae9444d303c8f, 2016
 # Bushra Hashem <purple.planet1996@gmail.com>, 2015
@@ -16,6 +17,7 @@
 # I. Hathout <beckshathout@gmail.com>, 2016
 # may <may@qordoba.com>, 2015
 # Nabeel El-Dughailib <nabeel@qordoba.com>, 2015
+# NELC Open edX Translation <openedx@elc.edu.sa>, 2020
 # Sahbi BG <sahbi.g@gmail.com>, 2017
 # shefaa abu jabel <shefaa.aj@gmail.com>, 2016-2017
 # Soha Assali <soha+transifex@qordoba.com>, 2015-2016
@@ -24,9 +26,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-11-23 13:56+0000\n"
-"PO-Revision-Date: 2020-11-24 09:15+0000\n"
-"Last-Translator: Transifex Bot <>\n"
+"POT-Creation-Date: 2021-04-18 20:12+0000\n"
+"PO-Revision-Date: 2020-12-25 13:53+0000\n"
+"Last-Translator: NELC Open edX Translation <openedx@elc.edu.sa>\n"
 "Language-Team: Arabic (http://www.transifex.com/open-edx/edx-platform/language/ar/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -80,7 +82,7 @@ msgstr "الرقم التعريفي الصحيح للمساق مطلوب"
 
 #: ecommerce/static/js/models/coupon_model.js:191
 msgid "A valid Program UUID is required."
-msgstr ""
+msgstr "مطلوب معرف برنامج UUID صحيح."
 
 #: ecommerce/static/js/models/course_model.js:54
 msgid "You must select a course type."
@@ -126,7 +128,7 @@ msgstr "يجب أن يكون لجميع مقاعد المساق سعر."
 
 #: ecommerce/static/js/models/course_seats/course_seat.js:45
 msgid "Verified seats must have an upgrade deadline."
-msgstr ""
+msgstr "يجب أن يكون للمقاعد التي تم التحقق منها موعدا نهائيا للترقية."
 
 #: ecommerce/static/js/models/course_seats/course_seat.js:53
 msgid "The upgrade deadline must occur BEFORE the verification deadline."
@@ -183,47 +185,47 @@ msgstr "يجب أن يُحدّد لجميع مقاعد حضور المادّة �
 
 #: ecommerce/static/js/models/enterprise_coupon_model.js:18
 msgid "This value must be a valid email."
-msgstr ""
+msgstr "يجب أن تكون هذه القيمة بريدًا إلكترونيًا صحيحًا"
 
 #: ecommerce/static/js/pages/basket_page.js:27
 msgid "Problem occurred during checkout. Please contact support."
-msgstr ""
+msgstr "حدثت مشكلة أثناء الدفع. يُرجى الاتصال بالدعم."
 
 #: ecommerce/static/js/pages/basket_page.js:101
 msgid "This field is required"
-msgstr ""
+msgstr "هذا الحقل مطلوب"
 
 #: ecommerce/static/js/pages/basket_page.js:145
 msgid "Invalid card number"
-msgstr ""
+msgstr "رقم بطاقة غير صحيح"
 
 #: ecommerce/static/js/pages/basket_page.js:147
 msgid "Unsupported card type"
-msgstr ""
+msgstr "نوع بطاقة غير مدعوم"
 
 #: ecommerce/static/js/pages/basket_page.js:149
 msgid "Invalid security number"
-msgstr ""
+msgstr "رقم أمان غير صحيح"
 
 #: ecommerce/static/js/pages/basket_page.js:154
 msgid "Invalid month"
-msgstr ""
+msgstr "شهر غير صحيح"
 
 #: ecommerce/static/js/pages/basket_page.js:156
 msgid "Invalid year"
-msgstr ""
+msgstr "عام غير صحيح"
 
 #: ecommerce/static/js/pages/basket_page.js:158
 msgid "Card expired"
-msgstr ""
+msgstr "البطاقة منتهية الصلاحية"
 
 #: ecommerce/static/js/pages/basket_page.js:474
 msgid "<Choose state/province>"
-msgstr ""
+msgstr "<Choose state/province>"
 
 #: ecommerce/static/js/pages/basket_page.js:475
 msgid "State/Province (required)"
-msgstr ""
+msgstr "الولاية/المقاطعة (مطلوبة)"
 
 #: ecommerce/static/js/pages/coupon_create_page.js:12
 #: ecommerce/static/js/pages/enterprise_coupon_create_page.js:12
@@ -262,7 +264,7 @@ msgstr "المساقات"
 
 #: ecommerce/static/js/pages/enterprise_coupon_list_page.js:10
 msgid "Enterprise Coupon Codes"
-msgstr ""
+msgstr "رموز قسائم المجموعات"
 
 #: ecommerce/static/js/pages/offer_page.js:14
 msgid "Redeem"
@@ -272,29 +274,29 @@ msgstr "استرداد الخصم"
 msgid ""
 "Caution! Using the back button on this page may cause you to be charged "
 "again."
-msgstr ""
+msgstr "إنتبه! قد يؤدي استخدام زر الرجوع في هذه الصفحة إلى تحصيل الرسوم منك مرة أخرى."
 
 #. Translators: Do not translate "Apple Pay".
 #: ecommerce/static/js/payment_processors/cybersource.js:225
 msgid ""
 "Apple Pay is not available at this time. Please try another payment method."
-msgstr ""
+msgstr "Apple Pay غير متوفر في هذا الوقت. الرجاء تجربة طريقة دفع أخرى."
 
 #: ecommerce/static/js/payment_processors/cybersource.js:255
 msgid ""
 "An error occurred while processing your payment. You have NOT been charged. "
 "Please try again, or select another payment method."
-msgstr ""
+msgstr "حدث خطأ أثناء معالجة عملية الدفع. لم يتم تحصيل رسوم منك. الرجاء إعادة المحاولة، أو اختيار طريقة أخرى للدفع."
 
 #: ecommerce/static/js/payment_processors/stripe.js:71
 msgid ""
 "An error occurred while attempting to process your payment. You have not "
 "been charged. Please check your payment details, and try again."
-msgstr ""
+msgstr "حدث خطأ أثناء معالجة عملية الدفع. لم يتم تحصيل رسوم منك. الرجاء إعادة المحاولة، أو اختيار طريقة أخرى للدفع."
 
 #: ecommerce/static/js/payment_processors/stripe.js:110
 msgid "An error occurred while processing your payment. Please try again."
-msgstr ""
+msgstr "حدث خطأ أثناء معالجة عملية الدفع، يرجى المحاولة مرة أخرى."
 
 #: ecommerce/static/js/utils/utils.js:184
 msgid "Trailing comma not allowed."
@@ -342,7 +344,7 @@ msgstr "الاسم"
 #: ecommerce/static/js/views/coupon_list_view.js:42
 #: ecommerce/static/js/views/enterprise_coupon_list_view.js:31
 msgid "Created"
-msgstr ""
+msgstr "تمّ الإنشاء"
 
 #: ecommerce/static/js/views/coupon_list_view.js:49
 msgid "Custom Code"
@@ -403,21 +405,21 @@ msgstr "مساق استماع مجاني. لا تُمنح شهادة."
 
 #: ecommerce/static/js/views/course_form_view.js:60
 msgid "Verified and Audit"
-msgstr ""
+msgstr "متحقق منه ومراجع"
 
 #: ecommerce/static/js/views/course_form_view.js:61
 #: ecommerce/static/js/views/course_form_view.js:67
 msgid ""
 "Paid certificate track with initial verification and Verified Certificate."
-msgstr ""
+msgstr "مسار نيل شهادة مدفوع ذا مصادقة مبدئيّة وشهادة موثّقة"
 
 #: ecommerce/static/js/views/course_form_view.js:62
 msgid "Also includes the free audit track."
-msgstr ""
+msgstr "يشتمل علئ مسار المراجعة المجاني أيضًا "
 
 #: ecommerce/static/js/views/course_form_view.js:66
 msgid "Verified Only"
-msgstr ""
+msgstr "موثق فقط"
 
 #: ecommerce/static/js/views/course_form_view.js:71
 msgid "Professional Education"
@@ -427,13 +429,13 @@ msgstr "تعليم مهني"
 msgid ""
 "Paid certificate track with initial verification and Professional Education "
 "Certificate"
-msgstr ""
+msgstr "مسار نيل شهادة مدفوع ذو مصادقة مبدئية وشهادة تعليم مهني"
 
 #: ecommerce/static/js/views/course_form_view.js:78
 msgid ""
 "Paid certificate track with initial verification and Verified Certificate, "
 "and option to purchase credit"
-msgstr ""
+msgstr "مسار نيل شهادة مقابل دفع ذو مصادقة مبدئية وشهادة موثّقة بالإضافة إلى خيار شراء نقاط"
 
 #. Translators: _START_, _END_, and _TOTAL_ are placeholders. Do NOT translate
 #. them.
@@ -470,23 +472,23 @@ msgstr "نوع المقعد"
 #: ecommerce/static/js/views/enterprise_coupon_detail_view.js:28
 #: ecommerce/static/js/views/enterprise_coupon_form_view.js:42
 msgid "Can be used multiple times by one customer"
-msgstr ""
+msgstr "يمكن استخدامه عدة مرات لنفس العميل"
 
 #: ecommerce/static/js/views/enterprise_coupon_form_view.js:279
 msgid "Create and Add More"
-msgstr ""
+msgstr "إنشاء وإضافة المزيد"
 
 #: ecommerce/static/js/views/enterprise_coupon_list_view.js:38
 msgid "Status"
-msgstr ""
+msgstr "الحالة"
 
 #: ecommerce/static/js/views/enterprise_coupon_list_view.js:50
 msgid "Enterprise Customer"
-msgstr ""
+msgstr "عميل المجموعات"
 
 #: ecommerce/static/js/views/enterprise_coupon_list_view.js:56
 msgid "Enterprise Customer Catalog"
-msgstr ""
+msgstr "دليل عميل المجموعات"
 
 #: ecommerce/static/js/views/form_view.js:71
 msgid "A course with the specified ID already exists."
