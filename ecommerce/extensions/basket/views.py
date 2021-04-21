@@ -43,6 +43,7 @@ from ecommerce.enterprise.utils import (
 )
 from ecommerce.extensions.analytics.utils import (
     prepare_analytics_data,
+    track_braze_event,
     track_segment_event,
     translate_basket_line_for_segment
 )
@@ -72,10 +73,12 @@ from ecommerce.extensions.order.exceptions import AlreadyPlacedOrderException
 from ecommerce.extensions.partner.shortcuts import get_partner_for_site
 from ecommerce.extensions.payment.constants import CLIENT_SIDE_CHECKOUT_FLAG_NAME
 from ecommerce.extensions.payment.forms import PaymentForm
+from ecommerce.programs.utils import get_program
 
 Basket = get_model('basket', 'basket')
 BasketAttribute = get_model('basket', 'BasketAttribute')
 BasketAttributeType = get_model('basket', 'BasketAttributeType')
+BUNDLE = 'bundle_identifier'
 ConditionalOffer = get_model('offer', 'ConditionalOffer')
 Benefit = get_model('offer', 'Benefit')
 logger = logging.getLogger(__name__)
@@ -136,7 +139,8 @@ class BasketLogicMixin:
                     'product_title': product.title,
                     'image_url': None,
                     'course_key': None,
-                    'product_description': product.description
+                    'product_description': product.description,
+                    'product_subject': None,
                 }
 
             context_updates['order_details_msg'] = self._get_order_details_message(product)
@@ -258,6 +262,7 @@ class BasketLogicMixin:
             'course_key': None,
             'image_url': None,
             'product_description': None,
+            'product_subject': None,
             'course_start': None,
             'course_end': None,
         }
@@ -275,6 +280,7 @@ class BasketLogicMixin:
 
             course_data['product_description'] = course.get('short_description', '')
             course_data['product_title'] = course.get('title', '')
+            course_data['product_subject'] = course.get('subjects') and course.get('subjects')[0].get('slug')
 
             # The course start/end dates are not currently used
             # in the default basket templates, but we are adding
@@ -701,6 +707,7 @@ class PaymentApiLogicMixin(BasketLogicMixin):
                 'product_type': line_data['line'].product.get_product_class().name,
                 'image_url': line_data['image_url'],
                 'certificate_type': self._get_certificate_type(line_data['line'].product),
+                'subject': line_data['product_subject'],
             }
             for line_data in lines_data
         ]
@@ -789,9 +796,55 @@ class PaymentApiView(PaymentApiLogicMixin, APIView):
         try:
             self.fire_segment_events(request, basket)
             self.verify_enterprise_needs(basket)
-            return self.get_payment_api_response()
+            response = self.get_payment_api_response()
+            # If there are no products in the basket, no need to send the event
+            if len(response.data['products']) != 0:
+                properties = self._get_cart_viewed_event_properties(basket, response.data)
+                track_braze_event(request.user, 'edx.bi.ecommerce.cart.viewed', properties)
+            return response
         except RedirectException as e:
             return Response({'redirect': e.response.url})
+
+    def _get_cart_viewed_event_properties(self, basket, data):
+        """
+        Gets the event properties for the cart viewed event.
+        """
+        # First we need to check if the basket is a bundle
+        try:
+            bundle_id = BasketAttribute.objects.get(basket=basket, attribute_type__name=BUNDLE).value_text
+        except BasketAttribute.DoesNotExist:
+            # No reason to raise an error. Just means it's a single product and not a bundle
+            bundle_id = None
+        # Now we can set fields based on if our basket contains a bundle or not
+        if bundle_id:
+            program = get_program(bundle_id, basket.site.siteconfiguration)
+            if len(basket.all_lines()) < len(program.get('courses')):
+                bundle_variant = 'partial_bundle'
+            else:
+                bundle_variant = 'full_bundle'
+            product_title = program.get('title')
+            product_subject = program.get('subjects') and program.get('subjects')[0].get('slug')
+        else:
+            bundle_variant = None
+            product_title = data['products'][0]['title']
+            product_subject = data['products'][0]['subject']
+
+        return {
+            'basket_discount': data['summary_discounts'],
+            'basket_original_price': data['summary_price'],
+            'basket_total': data['order_total'],
+            'bundle_variant': bundle_variant,
+            'currency': basket.currency,
+            'products': [
+                {
+                    'title': product['title'],
+                    'image': product['image_url']
+                }
+                for product in data['products']
+            ],
+            'product_title': product_title,
+            'product_subject': product_subject,
+        }
 
 
 class QuantityAPIView(APIView, View, PaymentApiLogicMixin):

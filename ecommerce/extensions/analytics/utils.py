@@ -2,9 +2,12 @@
 
 import json
 import logging
+from datetime import datetime, timezone
 from functools import wraps
 from urllib.parse import urlunsplit
 
+import requests
+from django.conf import settings
 from django.db import transaction
 
 from ecommerce.courses.utils import mode_for_product
@@ -219,3 +222,42 @@ def get_google_analytics_client_id(request):
         return '.'.join(google_analytics_cookie.split('.')[2:])
 
     return None
+
+
+def track_braze_event(user, event, properties):
+    """
+    Sends an event directly to Braze.
+
+    Args:
+        user (User): User to which the event should be associated.
+        event (str): Event name.
+        properties (dict): Event properties.
+    """
+    if not (getattr(settings, 'BRAZE_EVENT_REST_ENDPOINT', None) or getattr(settings, 'BRAZE_API_KEY', None)):
+        logger.debug('Failed to send event to Braze: Missing required settings.')
+        return
+
+    event_url = 'https://{url}/users/track'.format(url=getattr(settings, 'BRAZE_EVENT_REST_ENDPOINT'))
+    headers = {'Authorization': 'Bearer ' + getattr(settings, 'BRAZE_API_KEY')}
+    response = requests.post(
+        event_url,
+        headers=headers,
+        json={
+            'events': [
+                {
+                    'external_id': user.lms_user_id_with_metric(usage='Braze event: ' + event),
+                    'name': event,
+                    'time': datetime.now(timezone.utc).isoformat(),
+                    'properties': properties
+                }
+            ]
+        }
+    )
+
+    try:
+        response.raise_for_status()
+    # Just going to log it out. If we miss the event, it's unfortunate, but not worth raising an error
+    except requests.exceptions.HTTPError:
+        # https://www.braze.com/docs/api/errors/
+        message = response.json().get('message', 'Unknown error')
+        logger.debug('Failed to send event [%s] to Braze: %s', event, message)
