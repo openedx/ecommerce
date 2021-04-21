@@ -1,0 +1,6 @@
+# This is a comment.
+# Each line is a file pattern followed by one or more owners.
+
+# During merge-freeze a REV review will be required; otherwise this should
+# be commented out.
+*       @edx/revenue-squad
