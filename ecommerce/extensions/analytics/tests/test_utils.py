@@ -10,6 +10,7 @@ from django.conf import settings
 from django.contrib.auth.models import AnonymousUser
 from django.test import override_settings
 from django.test.client import RequestFactory
+from requests.exceptions import RequestException
 
 from ecommerce.core.models import User  # pylint: disable=unused-import
 from ecommerce.courses.tests.factories import CourseFactory
@@ -214,6 +215,19 @@ class UtilsTest(DiscoveryTestMixin, BasketMixin, TransactionTestCase):
             track_braze_event(user, 'edx.bi.ecommerce.cart.viewed', {})
             mock_debug.assert_called_with('Failed to send event [%s] to Braze: %s',
                                           'edx.bi.ecommerce.cart.viewed', 'Braze encountered an error.')
+
+    @override_settings(
+        BRAZE_EVENT_REST_ENDPOINT='rest.braze.com',
+        BRAZE_API_KEY='test-api-key',
+    )
+    @httpretty.activate
+    def test_track_braze_event_with_request_error(self):
+        """ If the request receives an error, the function should log an exception message and NOT send an event."""
+        with mock.patch('ecommerce.extensions.analytics.utils.requests.post', side_effect=RequestException):
+            with mock.patch('ecommerce.extensions.analytics.utils.logger.exception') as mock_exception:
+                user = self.create_user()
+                track_braze_event(user, 'edx.bi.ecommerce.cart.viewed', {})
+                mock_exception.assert_called_with('Failed to send event to Braze due to request exception.')
 
     @override_settings(
         BRAZE_EVENT_REST_ENDPOINT='rest.braze.com',

@@ -524,7 +524,7 @@ class PaymentApiViewTests(PaymentApiResponseTestMixin, BasketMixin, DiscoveryMoc
         BRAZE_EVENT_REST_ENDPOINT='rest.braze.com',
         BRAZE_API_KEY='test-api-key',
     )
-    def test_basket_added_event(self):
+    def test_cart_viewed_event(self):
         """ Tests the basket added event is properly fired for a single seat """
         seat = self.create_seat(self.course)
         basket = self.create_basket_and_add_product(seat)
@@ -546,7 +546,7 @@ class PaymentApiViewTests(PaymentApiResponseTestMixin, BasketMixin, DiscoveryMoc
                 'basket_discount': 0, 'basket_original_price': 100, 'basket_total': 100,
                 'bundle_variant': None, 'currency': basket.currency, 'products': [
                     {'title': 'PaymentApiViewTests', 'image': '/path/to/image.jpg'}
-                ], 'product_title': 'PaymentApiViewTests', 'product_subject': None
+                ], 'product_slug': None, 'product_subject': None, 'product_title': 'PaymentApiViewTests',
             })
 
     @override_settings(
@@ -554,7 +554,7 @@ class PaymentApiViewTests(PaymentApiResponseTestMixin, BasketMixin, DiscoveryMoc
         BRAZE_API_KEY='test-api-key',
     )
     @ddt.data(50, 100)
-    def test_basket_added_event_with_discount(self, discount_value):
+    def test_cart_viewed_event_with_discount(self, discount_value):
         """ Tests the basket added event correctly takes discounts into account """
         seat = self.create_seat(self.course)
         basket = self.create_basket_and_add_product(seat)
@@ -581,7 +581,7 @@ class PaymentApiViewTests(PaymentApiResponseTestMixin, BasketMixin, DiscoveryMoc
                 'basket_discount': discount_value, 'basket_original_price': 100, 'basket_total': 100 - discount_value,
                 'bundle_variant': None, 'currency': basket.currency, 'products': [
                     {'title': 'PaymentApiViewTests', 'image': '/path/to/image.jpg'},
-                ], 'product_title': 'PaymentApiViewTests', 'product_subject': None
+                ], 'product_slug': None, 'product_subject': None, 'product_title': 'PaymentApiViewTests',
             })
 
     @override_settings(
@@ -590,7 +590,7 @@ class PaymentApiViewTests(PaymentApiResponseTestMixin, BasketMixin, DiscoveryMoc
     )
     @ddt.data(([1, 2], 'full_bundle'), ([1, 2, 3], 'partial_bundle'))
     @ddt.unpack
-    def test_basket_added_event_with_bundle(self, program_courses, bundle_variant):
+    def test_cart_viewed_event_with_bundle(self, program_courses, bundle_variant):
         """ Tests the basket added event is properly fired for a bundle """
         entitlement_1 = create_or_update_course_entitlement(
             'verified', 200, self.partner, 'fake-uuid-1', 'Entitlement 1')
@@ -627,8 +627,10 @@ class PaymentApiViewTests(PaymentApiResponseTestMixin, BasketMixin, DiscoveryMoc
             # I know these aren't courses, but for the purposes of the test, we only check the length of
             # the list of courses so this is simpler
             'courses': program_courses,
+            'marketing_slug': 'program-slug',
+            'subjects': [{'slug': 'computer-science'}],
             'title': 'Program Title',
-            'subjects': [{'slug': 'computer-science'}]
+            'type_attrs': {'slug': 'professional-certificate'},
         }
         with mock.patch('ecommerce.extensions.basket.views.track_braze_event') as mock_track:
             with mock.patch('ecommerce.extensions.basket.views.get_program', return_value=program_data):
@@ -648,7 +650,8 @@ class PaymentApiViewTests(PaymentApiResponseTestMixin, BasketMixin, DiscoveryMoc
                     'currency': basket.currency, 'products': [
                         {'title': 'edX Demo Course', 'image': '/path/to/image.jpg'},
                         {'title': 'edX Demo Course', 'image': '/path/to/image.jpg'},
-                    ], 'product_title': program_data['title'], 'product_subject': program_data['subjects'][0]['slug']
+                    ], 'product_slug': program_data['type_attrs']['slug'] + '/' + program_data['marketing_slug'],
+                    'product_subject': program_data['subjects'][0]['slug'], 'product_title': program_data['title']
                 })
 
     def test_enrollment_code_type(self):

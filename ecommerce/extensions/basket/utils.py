@@ -191,8 +191,8 @@ def prepare_basket(request, products, voucher=None):
             'total_price': basket.total_excl_tax,
             'quantity': basket.lines.count(),
         }
-        if program.get('type') and program.get('marketing_slug'):
-            bundle_properties['marketing_slug'] = program.get('type').lower() + '/' + program.get('marketing_slug')
+        if program.get('type_attrs', {}).get('slug') and program.get('marketing_slug'):
+            bundle_properties['marketing_slug'] = program['type_attrs']['slug'] + '/' + program.get('marketing_slug')
         track_segment_event(request.site, request.user, 'edx.bi.ecommerce.basket.bundle_added', bundle_properties)
 
     if len(products) == 1 and products[0].is_enrollment_code_product:

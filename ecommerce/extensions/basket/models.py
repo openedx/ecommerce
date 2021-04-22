@@ -81,8 +81,8 @@ class Basket(AbstractBasket):
                     'total_price': self.total_excl_tax,
                     'quantity': self.lines.count(),
                 }
-                if program.get('type') and program.get('marketing_slug'):
-                    bundle_properties['marketing_slug'] = (program.get('type').lower() + '/' +
+                if program.get('type_attrs', {}).get('slug') and program.get('marketing_slug'):
+                    bundle_properties['marketing_slug'] = (program['type_attrs']['slug'] + '/' +
                                                            program.get('marketing_slug'))
                 track_segment_event(self.site, self.owner, 'edx.bi.ecommerce.basket.bundle_removed', bundle_properties)
             except BasketAttribute.DoesNotExist:
