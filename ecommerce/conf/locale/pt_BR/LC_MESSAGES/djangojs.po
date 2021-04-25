@@ -7,6 +7,7 @@
 # Translators:
 # Translators:
 # Translators:
+# Translators:
 # Angela Amaro <angelasimei@gmail.com>, 2016
 # César Augusto Lemos <teco171bp@hotmail.com>, 2015
 # Cleomir Waiczyk <w.cleomir@gmail.com>, 2015
@@ -21,7 +22,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-11-23 13:56+0000\n"
+"POT-Creation-Date: 2021-04-25 20:12+0000\n"
 "PO-Revision-Date: 2020-11-24 09:15+0000\n"
 "Last-Translator: Transifex Bot <>\n"
 "Language-Team: Portuguese (Brazil) (http://www.transifex.com/open-edx/edx-platform/language/pt_BR/)\n"

@@ -7,13 +7,14 @@
 # Translators:
 # Translators:
 # Translators:
+# Translators:
 # Abel Camacho <abelcama@gmail.com>, 2015-2016
 # Abel Camacho <abelcama@gmail.com>, 2017,2019
 msgid ""
 msgstr ""
 "Project-Id-Version: edx-platform\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-11-23 13:56+0000\n"
+"POT-Creation-Date: 2021-04-25 20:12+0000\n"
 "PO-Revision-Date: 2020-11-24 09:15+0000\n"
 "Last-Translator: Transifex Bot <>\n"
 "Language-Team: Basque (Spain) (http://www.transifex.com/open-edx/edx-platform/language/eu_ES/)\n"
