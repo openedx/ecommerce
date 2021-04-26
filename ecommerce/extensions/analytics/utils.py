@@ -239,20 +239,25 @@ def track_braze_event(user, event, properties):
 
     event_url = 'https://{url}/users/track'.format(url=getattr(settings, 'BRAZE_EVENT_REST_ENDPOINT'))
     headers = {'Authorization': 'Bearer ' + getattr(settings, 'BRAZE_API_KEY')}
-    response = requests.post(
-        event_url,
-        headers=headers,
-        json={
-            'events': [
-                {
-                    'external_id': user.lms_user_id_with_metric(usage='Braze event: ' + event),
-                    'name': event,
-                    'time': datetime.now(timezone.utc).isoformat(),
-                    'properties': properties
-                }
-            ]
-        }
-    )
+    try:
+        response = requests.post(
+            event_url,
+            headers=headers,
+            json={
+                'events': [
+                    {
+                        'external_id': user.lms_user_id_with_metric(usage='Braze event: ' + event),
+                        'name': event,
+                        'time': datetime.now(timezone.utc).isoformat(),
+                        'properties': properties
+                    }
+                ]
+            }
+        )
+    # Log out the exception since it could be a symptom we might want to look into.
+    except requests.exceptions.RequestException:
+        logger.exception('Failed to send event to Braze due to request exception.')
+        return
 
     try:
         response.raise_for_status()

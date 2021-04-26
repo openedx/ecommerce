@@ -815,6 +815,8 @@ class PaymentApiView(PaymentApiLogicMixin, APIView):
         except BasketAttribute.DoesNotExist:
             # No reason to raise an error. Just means it's a single product and not a bundle
             bundle_id = None
+
+        product_slug = None
         # Now we can set fields based on if our basket contains a bundle or not
         if bundle_id:
             program = get_program(bundle_id, basket.site.siteconfiguration)
@@ -822,12 +824,14 @@ class PaymentApiView(PaymentApiLogicMixin, APIView):
                 bundle_variant = 'partial_bundle'
             else:
                 bundle_variant = 'full_bundle'
-            product_title = program.get('title')
             product_subject = program.get('subjects') and program.get('subjects')[0].get('slug')
+            if program.get('type_attrs', {}).get('slug') and program.get('marketing_slug'):
+                product_slug = program['type_attrs']['slug'] + '/' + program.get('marketing_slug')
+            product_title = program.get('title')
         else:
             bundle_variant = None
-            product_title = data['products'][0]['title']
             product_subject = data['products'][0]['subject']
+            product_title = data['products'][0]['title']
 
         return {
             'basket_discount': data['summary_discounts'],
@@ -842,8 +846,9 @@ class PaymentApiView(PaymentApiLogicMixin, APIView):
                 }
                 for product in data['products']
             ],
-            'product_title': product_title,
+            'product_slug': product_slug,
             'product_subject': product_subject,
+            'product_title': product_title,
         }
 
 

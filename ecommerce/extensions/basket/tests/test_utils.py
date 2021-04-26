@@ -386,7 +386,9 @@ class BasketUtilsTests(DiscoveryTestMixin, BasketMixin, TestCase):
         """
         product = ProductFactory()
         request = self.request
-        program_data = {'marketing_slug': 'program-slug', 'title': 'program title', 'type': 'MicroMasters'}
+        program_data = {
+            'marketing_slug': 'program-slug', 'title': 'program title', 'type_attrs': {'slug': 'micromasters'}
+        }
         with mock.patch('ecommerce.extensions.basket.utils.track_segment_event') as mock_track:
             basket = prepare_basket(request, [product])
             with self.assertRaises(BasketAttribute.DoesNotExist):
@@ -400,7 +402,7 @@ class BasketUtilsTests(DiscoveryTestMixin, BasketMixin, TestCase):
             properties = {
                 'bundle_id': TEST_BUNDLE_ID,
                 'cart_id': basket.id,
-                'marketing_slug': program_data['type'].lower() + '/' + program_data['marketing_slug'],
+                'marketing_slug': program_data['type_attrs']['slug'] + '/' + program_data['marketing_slug'],
                 'title': program_data['title'],
                 'total_price': basket.total_excl_tax,
                 'quantity': basket.lines.count(),
@@ -421,7 +423,9 @@ class BasketUtilsTests(DiscoveryTestMixin, BasketMixin, TestCase):
         basket = prepare_basket(request, [product], voucher)
         self.assertTrue(basket.vouchers.all())
         request.GET = {'bundle': TEST_BUNDLE_ID}
-        program_data = {'marketing_slug': 'program-slug', 'title': 'program title', 'type': 'micromasters'}
+        program_data = {
+            'marketing_slug': 'program-slug', 'title': 'program title', 'type_attrs': {'slug': 'micromasters'}
+        }
         with mock.patch('ecommerce.extensions.basket.utils.get_program', return_value=program_data):
             basket = prepare_basket(request, [product])
         self.assertFalse(basket.vouchers.all())
@@ -433,7 +437,9 @@ class BasketUtilsTests(DiscoveryTestMixin, BasketMixin, TestCase):
         product = ProductFactory(categories=[], stockrecords__partner__short_code='second')
         request = self.request
         request.GET = {'bundle': TEST_BUNDLE_ID}
-        program_data = {'marketing_slug': 'program-slug', 'title': 'program title', 'type': 'micromasters'}
+        program_data = {
+            'marketing_slug': 'program-slug', 'title': 'program title', 'type_attrs': {'slug': 'micromasters'}
+        }
         with mock.patch('ecommerce.extensions.basket.utils.get_program', return_value=program_data):
             basket = prepare_basket(request, [product])
 
@@ -448,7 +454,7 @@ class BasketUtilsTests(DiscoveryTestMixin, BasketMixin, TestCase):
                 prepare_basket(request, [product])
             properties = {
                 'bundle_id': TEST_BUNDLE_ID,
-                'marketing_slug': program_data['type'].lower() + '/' + program_data['marketing_slug'],
+                'marketing_slug': program_data['type_attrs']['slug'] + '/' + program_data['marketing_slug'],
                 'title': program_data['title'],
                 'total_price': basket.total_excl_tax,
                 'quantity': basket.lines.count(),
