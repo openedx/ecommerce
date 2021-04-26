@@ -6,7 +6,6 @@ Use this template as a guide. Omit sections that don't apply. You may link to in
 
 ## edX Internal Developers are expected to [release and monitor their changes](https://openedx.atlassian.net/wiki/spaces/RS/pages/1835106870/How+to+contribute+to+our+repositories)
 
-# This project is under merge-freeze until 26 April 2021, review by @revenue-team will be required until then.
 ## Description
 
 Describe what this pull request changes, and why these changes were made. How will these changes affect other people, installations of edx, etc.?
