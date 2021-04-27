@@ -756,7 +756,7 @@ class CouponRedeemViewTests(CouponMixin, DiscoveryTestMixin, LmsApiMockMixin, En
         self.mock_enterprise_learner_post_api()
         self.mock_course_run_detail_endpoint(self.course, discovery_api_url=self.site_configuration.discovery_api_url)
 
-        data = {'codes': [code], 'emails': ['foo@bar.org']}
+        data = {'codes': [code], 'users': [{'email': 'foo@bar.org'}]}
         serializer = CouponCodeAssignmentSerializer(data=data, context={'coupon': coupon})
         if serializer.is_valid():
             serializer.save()
