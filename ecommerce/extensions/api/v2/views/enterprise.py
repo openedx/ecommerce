@@ -187,7 +187,6 @@ class OfferAssignmentSummaryViewSet(ModelViewSet):
 
         for offer_assignment in queryset:
             if offer_assignment.code not in offer_assignments_with_counts:
-                breakpoint()
                 # Note that we can get away with just dropping in the first
                 # offerAssignment object of particular code that we see
                 # because most of the data we are returning lives on related
