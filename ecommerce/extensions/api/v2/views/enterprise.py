@@ -169,8 +169,7 @@ class OfferAssignmentSummaryViewSet(ModelViewSet):
         if self.request.query_params.get('full_discount_only'):
             queryset = queryset.filter(offer__benefit__value=100.0)
 
-        only_active_offers = self.request.query_params.get('is_active')
-        if only_active_offers:
+        if self.request.query_params.get('is_active'):
             active_coupon = ~Q(attributes__code='inactive') | Q(
                 attributes__code='inactive',
                 attribute_values__value_boolean=False
@@ -178,7 +177,9 @@ class OfferAssignmentSummaryViewSet(ModelViewSet):
 
             queryset = queryset.filter(code__in=Product.objects
                                        .filter(product_class__name=COUPON_PRODUCT_CLASS_NAME)
-                                       .filter(active_coupon).distinct()
+                                       .filter(active_coupon)
+                                       .filter(coupon_vouchers__vouchers__end_datetime__gte=now())
+                                       .distinct()
                                        .values_list('coupon_vouchers__vouchers__code', flat=True))
 
         enterprise_uuid = self.request.query_params.get('enterprise_uuid')
@@ -192,10 +193,6 @@ class OfferAssignmentSummaryViewSet(ModelViewSet):
                 # because most of the data we are returning lives on related
                 # objects that each of these offerAssignments share (e.g. the benefit)
                 # is_active flag should cause a filtering out of codes for expired vouchers
-                if only_active_offers:
-                    voucher = Voucher.objects.get(code=offer_assignment.code)
-                    if voucher.is_expired:
-                        continue
                 offer_assignments_with_counts[offer_assignment.code] = {
                     'count': 1,
                     'obj': offer_assignment,
