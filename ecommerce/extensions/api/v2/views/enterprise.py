@@ -7,6 +7,7 @@ import django_filters
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Q, prefetch_related_objects
+from django.utils.timezone import now
 from django.http import Http404
 from django.shortcuts import get_object_or_404
 from edx_rbac.decorators import permission_required
@@ -168,7 +169,8 @@ class OfferAssignmentSummaryViewSet(ModelViewSet):
         if self.request.query_params.get('full_discount_only'):
             queryset = queryset.filter(offer__benefit__value=100.0)
 
-        if self.request.query_params.get('is_active'):
+        only_active_offers = self.request.query_params.get('is_active')
+        if only_active_offers:
             active_coupon = ~Q(attributes__code='inactive') | Q(
                 attributes__code='inactive',
                 attribute_values__value_boolean=False
@@ -185,10 +187,16 @@ class OfferAssignmentSummaryViewSet(ModelViewSet):
 
         for offer_assignment in queryset:
             if offer_assignment.code not in offer_assignments_with_counts:
+                breakpoint()
                 # Note that we can get away with just dropping in the first
                 # offerAssignment object of particular code that we see
                 # because most of the data we are returning lives on related
                 # objects that each of these offerAssignments share (e.g. the benefit)
+                # is_active flag should cause a filtering out of codes for expired vouchers
+                if only_active_offers:
+                    voucher = Voucher.objects.get(code=offer_assignment.code)
+                    if voucher.is_expired:
+                        continue
                 offer_assignments_with_counts[offer_assignment.code] = {
                     'count': 1,
                     'obj': offer_assignment,
@@ -882,6 +890,7 @@ class EnterpriseCouponViewSet(CouponViewSet):
                 for assignment in assignment_usages
             ]
 
+        logger.info("Base enterprise url for coupon reminder: %s", base_enterprise_url)
         serializer = CouponCodeRemindSerializer(
             data=assignments,
             many=True,
