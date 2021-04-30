@@ -17,6 +17,7 @@ from django.urls import reverse
 from django.utils import timezone
 from django.utils.http import urlencode
 from django.utils.timezone import now
+from freezegun import freeze_time
 from oscar.core.loading import get_model
 from oscar.test import factories
 from rest_framework import status
@@ -3514,7 +3515,7 @@ class OfferAssignmentSummaryViewSetTests(
             enterprise_customer_catalog='dddddddd-2c44-487b-9b6a-24eee973f9a4',
         )
         expired_coupon = self.create_coupon(
-            end_datetime=datetime.datetime.now() - datetime.timedelta(days=5),
+            end_datetime=datetime.datetime.now() + datetime.timedelta(seconds=100),
             max_uses=1,
             quantity=1,
             voucher_type=Voucher.MULTI_USE_PER_CUSTOMER,
@@ -3536,11 +3537,12 @@ class OfferAssignmentSummaryViewSetTests(
             offer__vouchers__coupon_vouchers__coupon__id=non_expired_coupon.id
         ).code
 
-        response = self.client.get(OFFER_ASSIGNMENT_SUMMARY_LINK + "?is_active=True&full_discount_only=True").json()
-        assert response['count'] == 1
-        results_codes = [result['code'] for result in response['results']]
-        assert oa_non_expired_code in results_codes
-        assert oa_expired_code not in results_codes
+        with freeze_time(datetime.datetime.now() + datetime.timedelta(seconds=110)):
+            response = self.client.get(OFFER_ASSIGNMENT_SUMMARY_LINK + "?is_active=True&full_discount_only=True").json()
+            assert response['count'] == 1
+            results_codes = [result['code'] for result in response['results']]
+            assert oa_non_expired_code in results_codes
+            assert oa_expired_code not in results_codes
 
     def test_view_returns_only_coupons_for_enterprise(self):
         enterprise_customer_2 = {'name': 'BearsRus', 'id': str(uuid4())}
