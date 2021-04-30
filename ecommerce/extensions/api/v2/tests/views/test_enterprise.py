@@ -3523,6 +3523,8 @@ class OfferAssignmentSummaryViewSetTests(
             enterprise_customer=self.enterprise_customer['id'],
             enterprise_customer_catalog='dddddddd-2c44-487b-9b6a-24eee973f9a4',
         )
+        self.assign_user_to_code(expired_coupon.id, [self.user.email], [])
+        self.assign_user_to_code(non_expired_coupon.id, [self.user.email], [])
 
         oa_expired_code = OfferAssignment.objects.get(
             user_email=self.user.email,
@@ -3533,9 +3535,6 @@ class OfferAssignmentSummaryViewSetTests(
             user_email=self.user.email,
             offer__vouchers__coupon_vouchers__coupon__id=non_expired_coupon.id
         ).code
-
-        self.assign_user_to_code(expired_coupon.id, [self.user.email], [])
-        self.assign_user_to_code(non_expired_coupon.id, [self.user.email], [])
 
         response = self.client.get(OFFER_ASSIGNMENT_SUMMARY_LINK + "?is_active=True&full_discount_only=True").json()
         assert response['count'] == 1
