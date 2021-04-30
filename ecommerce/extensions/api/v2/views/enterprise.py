@@ -7,9 +7,9 @@ import django_filters
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Q, prefetch_related_objects
-from django.utils.timezone import now
 from django.http import Http404
 from django.shortcuts import get_object_or_404
+from django.utils.timezone import now
 from edx_rbac.decorators import permission_required
 from edx_rbac.mixins import PermissionRequiredMixin
 from oscar.core.loading import get_model
@@ -155,6 +155,10 @@ class OfferAssignmentSummaryViewSet(ModelViewSet):
         Each dictionary contains one offerAssignment object, and the count of
         how many total offerAssignment objects the DB returned with the same
         code, as a way of "rolling up" offerAssignments a user has.
+
+        If `is_active` is in the request parameters, does not include codes that are:
+         - set to inactive state via attributes.code
+         - whose voucher expiration date has passed (compared to now())
         """
         queryset = OfferAssignment.objects.filter(
             user_email=self.request.user.email,
@@ -192,7 +196,6 @@ class OfferAssignmentSummaryViewSet(ModelViewSet):
                 # offerAssignment object of particular code that we see
                 # because most of the data we are returning lives on related
                 # objects that each of these offerAssignments share (e.g. the benefit)
-                # is_active flag should cause a filtering out of codes for expired vouchers
                 offer_assignments_with_counts[offer_assignment.code] = {
                     'count': 1,
                     'obj': offer_assignment,
