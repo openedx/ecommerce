@@ -300,6 +300,7 @@ class EnterpriseCouponViewSetRbacTests(
     """
     Test the enterprise coupon order functionality with role based access control.
     """
+
     def setUp(self):
         super(EnterpriseCouponViewSetRbacTests, self).setUp()
         self.user = self.create_user(is_staff=True)
@@ -3250,6 +3251,7 @@ class OfferAssignmentSummaryViewSetTests(
     """
     Test the enterprise coupon order functionality with role based access control.
     """
+
     def setUp(self):
         super(OfferAssignmentSummaryViewSetTests, self).setUp()
         self.user = self.create_user(is_staff=True, email='test@example.com')
@@ -3500,6 +3502,47 @@ class OfferAssignmentSummaryViewSetTests(
         assert oa_code4 in results_codes
         assert oa_code5 not in results_codes
 
+    def test_view_excludes_expired_codes_for_is_active(self):
+        # create an expired voucher
+        non_expired_coupon = self.create_coupon(
+            max_uses=1,
+            quantity=1,
+            voucher_type=Voucher.MULTI_USE_PER_CUSTOMER,
+            benefit_type=Benefit.PERCENTAGE,
+            benefit_value=100.0,
+            enterprise_customer=self.enterprise_customer['id'],
+            enterprise_customer_catalog='dddddddd-2c44-487b-9b6a-24eee973f9a4',
+        )
+        expired_coupon = self.create_coupon(
+            end_datetime=datetime.datetime.now() - datetime.timedelta(days=5),
+            max_uses=1,
+            quantity=1,
+            voucher_type=Voucher.MULTI_USE_PER_CUSTOMER,
+            benefit_type=Benefit.PERCENTAGE,
+            benefit_value=100.0,
+            enterprise_customer=self.enterprise_customer['id'],
+            enterprise_customer_catalog='dddddddd-2c44-487b-9b6a-24eee973f9a4',
+        )
+
+        oa_expired_code = OfferAssignment.objects.get(
+            user_email=self.user.email,
+            offer__vouchers__coupon_vouchers__coupon__id=expired_coupon.id
+        ).code
+
+        oa_non_expired_code = OfferAssignment.objects.get(
+            user_email=self.user.email,
+            offer__vouchers__coupon_vouchers__coupon__id=non_expired_coupon.id
+        ).code
+
+        self.assign_user_to_code(expired_coupon.id, [self.user.email], [])
+        self.assign_user_to_code(non_expired_coupon.id, [self.user.email], [])
+
+        response = self.client.get(OFFER_ASSIGNMENT_SUMMARY_LINK + "?is_active=True&full_discount_only=True").json()
+        assert response['count'] == 1
+        results_codes = [result['code'] for result in response['results']]
+        assert oa_non_expired_code in results_codes
+        assert oa_expired_code not in results_codes
+
     def test_view_returns_only_coupons_for_enterprise(self):
         enterprise_customer_2 = {'name': 'BearsRus', 'id': str(uuid4())}
         EcommerceFeatureRoleAssignment.objects.get_or_create(
@@ -3548,6 +3591,7 @@ class OfferAssignmentEmailTemplatesViewSetTests(JwtMixin, TestCase):
     """
     Test the enterprise offer assignment templates functionality with role based access control.
     """
+
     def setUp(self):
         super(OfferAssignmentEmailTemplatesViewSetTests, self).setUp()
         self.user = self.create_user(is_staff=True, email='test@example.com')
