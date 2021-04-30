@@ -886,7 +886,6 @@ class EnterpriseCouponViewSet(CouponViewSet):
                 for assignment in assignment_usages
             ]
 
-        logger.info("Base enterprise url for coupon reminder: %s", base_enterprise_url)
         serializer = CouponCodeRemindSerializer(
             data=assignments,
             many=True,
