@@ -216,6 +216,7 @@ django-widget-tweaks==1.4.8
     #   django-oscar
 django==2.2.17
     # via
+    #   -r test.txt
     #   django-appconf
     #   django-config-models
     #   django-cors-headers
@@ -496,7 +497,7 @@ phonenumbers==8.12.16
     #   -r test.txt
     #   django-oscar
     #   django-phonenumber-field
-pillow==8.1.0
+pillow==8.1.1
     # via
     #   -r test.txt
     #   django-oscar
