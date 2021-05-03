@@ -216,6 +216,7 @@ django-widget-tweaks==1.4.8
     #   django-oscar
 django==2.2.17
     # via
+    #   -r test.txt
     #   django-appconf
     #   django-config-models
     #   django-cors-headers
@@ -377,7 +378,7 @@ jinja2-pluralize==0.3.0
     # via
     #   -r test.txt
     #   diff-cover
-jinja2==2.11.2
+jinja2==2.11.3
     # via
     #   -r docs.txt
     #   -r test.txt
