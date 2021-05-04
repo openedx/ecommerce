@@ -60,7 +60,7 @@ django-treebeard==4.4     # via -r requirements/test.txt, django-oscar
 django-waffle==2.0.0      # via -r requirements/test.txt, edx-django-utils, edx-drf-extensions
 django-webtest==1.9.7     # via -r requirements/test.txt
 django-widget-tweaks==1.4.8  # via -r requirements/test.txt, django-oscar
-django==2.2.20            # via -r requirements/test.txt, django-appconf, django-config-models, django-cors-headers, django-crum, django-debug-toolbar, django-extra-views, django-filter, django-haystack, django-model-utils, django-oscar, django-phonenumber-field, django-tables2, django-treebeard, djangorestframework, drf-jwt, edx-auth-backends, edx-django-release-util, edx-django-sites-extensions, edx-django-utils, edx-drf-extensions, edx-i18n-tools, edx-rbac, jsonfield2, mock-django, pytest-django-ordering, rest-condition, xss-utils
+django==2.2.21            # via -r requirements/test.txt, django-appconf, django-config-models, django-cors-headers, django-crum, django-debug-toolbar, django-extra-views, django-filter, django-haystack, django-model-utils, django-oscar, django-phonenumber-field, django-tables2, django-treebeard, djangorestframework, drf-jwt, edx-auth-backends, edx-django-release-util, edx-django-sites-extensions, edx-django-utils, edx-drf-extensions, edx-i18n-tools, edx-rbac, jsonfield2, mock-django, pytest-django-ordering, rest-condition, xss-utils
 djangorestframework-csv==2.1.0  # via -r requirements/test.txt
 djangorestframework-datatables==0.5.2  # via -r requirements/test.txt
 djangorestframework==3.12.2  # via -r requirements/test.txt, django-config-models, django-rest-swagger, djangorestframework-csv, djangorestframework-datatables, drf-extensions, drf-jwt, edx-drf-extensions, rest-condition

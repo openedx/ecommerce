@@ -11,7 +11,7 @@ chardet==4.0.0            # via -c requirements/base.txt, requests
 cryptography==3.3.1       # via -c requirements/base.txt, pyjwt
 django-crum==0.7.9        # via -c requirements/base.txt, edx-django-utils
 django-waffle==2.0.0      # via -c requirements/base.txt, edx-django-utils
-django==2.2.20            # via -c requirements/base.txt, django-crum, edx-django-utils
+django==2.2.21            # via -c requirements/base.txt, django-crum, edx-django-utils
 edx-django-utils==3.13.0  # via -c requirements/base.txt, edx-rest-api-client
 edx-rest-api-client==5.2.1  # via -c requirements/base.txt, -r requirements/e2e.in
 idna==2.7                 # via -c requirements/base.txt, -c requirements/pins.txt, requests
