@@ -41,7 +41,22 @@ class CouponCodeSerializerTests(CouponMixin, TestCase):
         )
         self.code = self.coupon.attr.coupon_vouchers.vouchers.first().code
         self.email = 'serializeCoupon@test.org'
-        self.data = {'codes': [self.code], 'emails': [self.email]}
+        self.data = {'code': self.code, 'user': {'email': self.email}}
+        self.code_assignment_serializer_data = {
+            'codes': [self.code],
+            'users': [
+                {
+                    'email': self.email,
+                    'lms_user_id': 1,
+                    'username': 'username1',
+                },
+                {
+                    'email': 'serializeCoupon2@test.org',
+                    'lms_user_id': 2,
+                    'username': 'username2',
+                },
+            ]
+        }
         self.offer_assignments = factories.EnterpriseOfferFactory.create_batch(1)
         self.offer_assignment = OfferAssignment.objects.create(
             offer=self.offer_assignments[0],
@@ -52,7 +67,8 @@ class CouponCodeSerializerTests(CouponMixin, TestCase):
     @mock.patch('ecommerce.extensions.api.serializers.send_assigned_offer_email')
     def test_send_assigned_offer_email_args(self, mock_assign_email):
         """ Test that the code_expiration_date passed is equal to coupon batch end date """
-        serializer = CouponCodeAssignmentSerializer(data=self.data, context={'coupon': self.coupon})
+        serializer = CouponCodeAssignmentSerializer(data=self.code_assignment_serializer_data,
+                                                    context={'coupon': self.coupon})
         serializer._trigger_email_sending_task(  # pylint: disable=protected-access
             subject=self.SUBJECT,
             greeting=self.GREETING,
@@ -78,7 +94,8 @@ class CouponCodeSerializerTests(CouponMixin, TestCase):
     @mock.patch('ecommerce.extensions.api.serializers.send_assigned_offer_email')
     def test_send_assigned_offer_email_args_with_enterprise_url(self, mock_assign_email):
         """ Test that the code_expiration_date passed is equal to coupon batch end date """
-        serializer = CouponCodeAssignmentSerializer(data=self.data, context={'coupon': self.coupon})
+        serializer = CouponCodeAssignmentSerializer(data=self.code_assignment_serializer_data,
+                                                    context={'coupon': self.coupon})
         serializer._trigger_email_sending_task(  # pylint: disable=protected-access
             subject=self.SUBJECT,
             greeting=self.GREETING,
@@ -161,7 +178,8 @@ class CouponCodeSerializerTests(CouponMixin, TestCase):
     def test_send_assignment_email_error(self, mock_email):
         """ Test that we log an appropriate message if the code assignment email cannot be sent. """
         mock_email.side_effect = Exception('Ignore me - assignment')
-        serializer = CouponCodeAssignmentSerializer(data=self.data, context={'coupon': self.coupon})
+        serializer = CouponCodeAssignmentSerializer(data=self.code_assignment_serializer_data,
+                                                    context={'coupon': self.coupon})
         expected = [
             (
                 self.LOGGER_NAME,
@@ -246,6 +264,7 @@ class CouponCodeSerializerTests(CouponMixin, TestCase):
                 validated_data={
                     'sender_id': None,
                     'template': None,
+                    'user': {'email': None},
                     'enterprise_customer_uuid': uuid4()
                 }
             )
@@ -257,7 +276,7 @@ class CouponCodeSerializerTests(CouponMixin, TestCase):
         mock_email.side_effect = Exception('Ignore me - revocation')
         validated_data = {
             'code': self.code,
-            'email': self.email,
+            'user': {'email': self.email},
             'offer_assignments': self.offer_assignments,
             'sender_id': None,
             'template': None,

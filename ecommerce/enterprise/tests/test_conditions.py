@@ -680,7 +680,7 @@ class AssignableEnterpriseCustomerConditionTests(EnterpriseServiceMockMixin, Cou
             voucher.offers.add(offers[index] if len(offers) > 1 else offers[0])
             voucher.save()
 
-        data = {'codes': codes, 'emails': emails}
+        data = {'codes': codes, 'users': [{'email': email} for email in emails]}
         serializer = CouponCodeAssignmentSerializer(
             data=data,
             context={'coupon': coupon, 'template': 'An Email Template'}

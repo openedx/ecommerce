@@ -841,7 +841,7 @@ class EnterpriseCouponViewSet(CouponViewSet):
             # unsubscribe user from receiving nudge emails
             CodeAssignmentNudgeEmails.unsubscribe_from_nudging(
                 map(lambda assignment: assignment['code'], assignments),
-                map(lambda assignment: assignment['email'], assignments)
+                map(lambda assignment: assignment['user']['email'], assignments)
             )
             return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -881,13 +881,23 @@ class EnterpriseCouponViewSet(CouponViewSet):
             else:
                 raise serializers.ValidationError('Invalid code_filter specified: {}'.format(code_filter))
 
-            assignments = [
-                {
-                    'code': assignment['code'],
-                    'email': assignment['user_email']
-                }
-                for assignment in assignment_usages
-            ]
+            emails = [assignment['user_email'] for assignment in assignment_usages]
+            emails = list(set(emails))
+            lms_users = User.get_bulk_lms_users_using_emails(request.site, emails)
+            assignments = []
+            for assignment_usage in assignment_usages:
+                email = assignment_usage['user_email']
+                user = {'email': email}
+                lms_user = next((user for user in lms_users if user['email'] == email), None)
+                if lms_user:
+                    user['lms_user_id'] = lms_user['id']
+                    user['username'] = lms_user['username']
+                assignments.append(
+                    {
+                        'user': user,
+                        'code': assignment_usage['code'],
+                    }
+                )
 
         serializer = CouponCodeRemindSerializer(
             data=assignments,

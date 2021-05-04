@@ -563,7 +563,7 @@ class User(AbstractUser):
             attribute(str): LMS user attribute to get from LMS User. default is id (lms_user_id)
 
         Returns (str):
-            Required LMS User attribute or None if not found.
+            Requested LMS User attribute or None if not found.
         """
         if user_email:
             try:
@@ -575,8 +575,32 @@ class User(AbstractUser):
                 response = api.accounts.get(email=user_email)
                 return response[0][attribute]
             except Exception:  # pylint: disable=broad-except
-                log.exception('Failed to get lms_user_id for email: [%s]', user_email)
+                log.exception('Failed to get attribute [%s] for email: [%s]', attribute, user_email)
         return None
+
+    @staticmethod
+    def get_bulk_lms_users_using_emails(site, user_emails):
+        """Returns a lms_users by query LMS using email address.
+
+        Args:
+            site (Site): The site from which the LMS account API endpoint is created.
+            user_emails(list): Email address to search from LMS.
+
+        Returns (list):
+            LMS User objects or empty list if not found.
+        """
+        if user_emails:
+            try:
+                api = EdxRestApiClient(
+                    site.siteconfiguration.build_lms_url('/api/user/v1/accounts'),
+                    append_slash=False,
+                    jwt=site.siteconfiguration.access_token
+                )
+                response = api.search_emails.post({'emails': user_emails})
+                return response
+            except Exception as error:  # pylint: disable=broad-except
+                log.exception('Failed to get users for emails: [%s], error: [%s]', user_emails, error)
+        return []
 
     def lms_user_id_with_metric(self, usage=None, allow_missing=False):
         """

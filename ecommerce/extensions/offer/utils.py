@@ -291,6 +291,10 @@ def send_assigned_offer_reminder_email(
         closing=closing,
         base_enterprise_url=base_enterprise_url
     )
+    if settings.DEBUG:  # pragma: no cover
+        # Avoid breaking devstack when no such service is available.
+        logger.warning("Skipping Sailthru task 'send_offer_assignment_email' because DEBUG=true.")  # pragma: no cover
+        return  # pragma: no cover
     send_offer_update_email.delay(learner_email, subject, email_body, sender_alias, base_enterprise_url)
 
 
