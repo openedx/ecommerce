@@ -3559,8 +3559,8 @@ class OfferAssignmentSummaryViewSetTests(
             enterprise_customer=self.enterprise_customer['id'],
             enterprise_customer_catalog='dddddddd-2c44-487b-9b6a-24eee973f9a4',
         )
-        self.assign_user_to_code(expired_coupon.id, [self.user.email], [])
-        self.assign_user_to_code(non_expired_coupon.id, [self.user.email], [])
+        self.assign_user_to_code(expired_coupon.id, [{'email': self.user.email}], [])
+        self.assign_user_to_code(non_expired_coupon.id, [{'email': self.user.email}], [])
 
         oa_expired_code = OfferAssignment.objects.get(
             user_email=self.user.email,
